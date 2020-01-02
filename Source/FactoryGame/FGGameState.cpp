@@ -41,4 +41,6 @@ FColor AFGGameState::GetBuildingColorPrimary( uint8 slot){ return FColor(); }
 FColor AFGGameState::GetBuildingColorSecondary( uint8 slot){ return FColor(); }
 void AFGGameState::OnRep_BuildingColorSlot(){ }
 void AFGGameState::SetNumberOfAdditionalInventorySlots( int32 numberOfSlots){ }
+void AFGGameState::ClaimPlayerColor( AFGPlayerState* playerState){ }
+void AFGGameState::ReleasePlayerColor( AFGPlayerState* playerState){ }
 void AFGGameState::OnSchematicPurchased( TSubclassOf<  UFGSchematic > newSchematic){ }

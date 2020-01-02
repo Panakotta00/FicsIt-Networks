@@ -37,6 +37,11 @@ struct FSlotData
 	/** The color of the players nametag above their head, and in the UI */
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Color")
 	FLinearColor NametagColor;
+
+	FORCEINLINE bool operator==( const FSlotData& other ) const{
+		return other.PingColor == PingColor && other.NametagColor == NametagColor;
+	}
+
 };
 
 /**
@@ -109,13 +114,15 @@ public:
 	/** Get the slot the player has claimed */
 	UFUNCTION(BlueprintPure, Category = "Slots" )
 	FORCEINLINE int32 GetSlotNum() const{ return mSlotNum; }
-	
-	/** Get different colors for different players over the network, index by slot number */
-	UFUNCTION(BlueprintPure, Category="Slots|Colors")
-	FORCEINLINE TArray< FSlotData > GetSlotData() const{ return mSlotData; }
 
 	/** Set the slot number of this player */
 	FORCEINLINE void SetSlotNum( int32 slotNr ){ mSlotNum = slotNr; }
+	
+	/** Set the color data for this player */
+	void SetSlotData( FSlotData slotData );
+
+	/** get the color data for this player */
+	FORCEINLINE FSlotData GetSlotData() const { return mSlotData; }
 
 	/** Get the unique ID of the user from the online subsystem */
 	UFUNCTION( BlueprintPure, Category="Networking" )
@@ -250,6 +257,14 @@ public:
 	UFUNCTION( Server, Reliable, WithValidation, Category = "Representation" )
 	void Server_SetCompassFilter( ERepresentationType representationType, bool visible );
 
+	UFUNCTION( BlueprintPure, Category = "Color" )
+	FORCEINLINE FLinearColor GetPingColor() const { return mSlotData.PingColor; }
+	
+	UFUNCTION( BlueprintPure, Category = "Color" )
+	FORCEINLINE FLinearColor GetNametagColor() const { return mSlotData.NametagColor; }
+
+	void UpdateOwningPawnActorRepresentation() const;
+
 protected:
 	// Client get notified that the hotbar has changed
 	UFUNCTION()
@@ -278,9 +293,9 @@ protected:
 	UPROPERTY( Replicated )
 	int32 mSlotNum;
 
-	/** The different colors to represent players over the network, @todo: Make this a config variables so that server admins can add to this array if they have lots of players */
-	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Slots|Colors" )
-	TArray< FSlotData > mSlotData;
+	/** This players color container */
+	UPROPERTY( Replicated )
+	FSlotData mSlotData;
 
 	/** Pawn we should take control of when rejoining game/loading game */
 	UPROPERTY( SaveGame )

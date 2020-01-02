@@ -175,7 +175,7 @@ public: //@todotrains private
 	//@todotrains Rename m
 
 	/** The name of this train. */
-	UPROPERTY( Replicated )
+	UPROPERTY( SaveGame, Replicated )
 	FText mTrainName;
 
 	/** The track this train is on. */

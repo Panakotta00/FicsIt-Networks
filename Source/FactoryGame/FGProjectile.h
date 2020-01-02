@@ -17,7 +17,8 @@ public:
 	virtual void GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps ) const override;
 
 	/** initial setup */
-	virtual void PostInitializeComponents() override;
+	//MODDING EDIT PostInitialize crashed  when creating a blueprint child
+	//virtual void PostInitializeComponents() override;
 
 	//** Save Game Interface. Default is to not save, but the save interface is implemented here to allow for enabling in children (eg. FGNobeliskExplosive) */
 	virtual bool ShouldSave_Implementation() const override;

@@ -51,7 +51,8 @@ public:
 	AFGDestructiveProjectile();
 
 	// Actor initialization
-	virtual void PostInitializeComponents() override;
+	//MODDING EDIT PostInitialize crashed  when creating a blueprint child
+	//virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	// End Actor Initialization
 

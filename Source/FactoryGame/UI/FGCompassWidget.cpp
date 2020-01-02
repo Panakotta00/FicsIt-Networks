@@ -22,5 +22,6 @@ void UFGCompassWidget::OnActorRepresentationAdded(  UFGActorRepresentation* acto
 void UFGCompassWidget::OnActorRepresentationRemoved(  UFGActorRepresentation* actorRepresentation){ }
 void UFGCompassWidget::OnActorRepresentationUpdated(  UFGActorRepresentation* actorRepresentation){ }
 void UFGCompassWidget::OnActorRepresentationFiltered( ERepresentationType type, bool visible){ }
+bool UFGCompassWidget::IsPawnLocalPlayerControlled( APawn* pawn){ return bool(); }
 void UFGCompassWidget::CalculateCenteredResourceObjects(){ }
 void UFGCompassWidget::CalculateCenteredObject(){ }

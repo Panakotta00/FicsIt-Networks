@@ -12,5 +12,4 @@ void AFGBuildableSplitterSmart::SetSortRuleAt( int32 index, FSplitterSortRule ru
 bool AFGBuildableSplitterSmart::Factory_GrabOutput_Implementation(  UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf< UFGItemDescriptor > type){ return bool(); }
 void AFGBuildableSplitterSmart::FillDistributionTable(){ }
 void AFGBuildableSplitterSmart::OnRep_SortRules(){ }
-UFGFactoryConnectionComponent* AFGBuildableSplitterSmart::GetOutputConnectionForItem( const FInventoryItem& item) const{ return nullptr; }
 TArray<UFGFactoryConnectionComponent*> AFGBuildableSplitterSmart::GetAllOutputConnectionsForItem( const FInventoryItem& item) const{ return TArray<UFGFactoryConnectionComponent*>(); }

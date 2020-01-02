@@ -104,4 +104,7 @@ protected:
 	/** Cached output connections for faster lookup. */
 	TArray< UFGFactoryConnectionComponent* > mOutputs;
 
+	/** Cached linear size of the inventory component*/
+	int32 mCachedInventorySize;
+
 };

@@ -99,7 +99,8 @@ public:
 
 	// Begin AActor Interface
 	virtual void PostActorCreated() override;
-	virtual void PostInitializeComponents() override;
+	//MODDING EDIT PostInitialize crashed  when creating a blueprint child
+	//virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay( const EEndPlayReason::Type endPlayReason ) override;
 	virtual void Tick( float deltaTime ) override;
@@ -424,6 +425,10 @@ public:
 	virtual void CheatCrouch();
 	virtual void StopCheatCrouch();
 	virtual void CheatToggleGhostFly();
+	virtual void CheatToggleGhostFly( bool ghostModeActive );
+	virtual bool CheatToggleGhostFlyIsActive();
+	virtual bool CheatToggleFlyModeIsActive();
+	virtual void CheatToggleFlyMode();
 	virtual void CheatTeleport();
 	//End cheats
 

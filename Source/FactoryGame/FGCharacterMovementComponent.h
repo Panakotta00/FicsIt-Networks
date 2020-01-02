@@ -87,6 +87,10 @@ protected:
 
 	void SetOnLadder( class UFGLadderComponent* ladder );
 
+
+
+	virtual void PhysFlying( float deltaTime, int32 Iterations ) override;
+
 private:
 	/** Apply ladder climb physics */
 	void PhysLadder( float deltaTime, int32 iterations );
@@ -181,9 +185,11 @@ private:
 
 	//Cheat
 	public:
-	bool mCheatIsPressingJump;
-	bool mCheatIsPressingCrouch;
+	bool mCheatIsPressingJump: 1;
+	bool mCheatIsPressingCrouch : 1;
+	bool mCheatGhost : 1;
 	float CheatFlySpeedVertical;
+	void ZeroOutFallVelocity();
 	//end Cheat
 };
 

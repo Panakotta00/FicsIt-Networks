@@ -58,6 +58,11 @@ public:
 	virtual void PlayerFly( bool flyModeEnabled );
 	UFUNCTION( exec, Category = "Player/Camera" )
 	virtual bool PlayerFly_Get();
+
+	UFUNCTION( exec, Category = "Player/Camera" )
+	virtual void PlayerNoClipModeOnFly( bool gohstMode );
+	UFUNCTION( exec, Category = "Player/Camera" )
+	virtual bool PlayerNoClipModeOnFly_Get();
 	
 
 	UFUNCTION( exec )
@@ -238,6 +243,9 @@ public:
 
 	UFUNCTION( exec, category = "Log" )
 	void DumpActorRepresentations();
+
+	UFUNCTION( exec, category = "Log" )
+	void DumpSignificanceManagedObjects();
 
 	UFUNCTION( exec, category = "Save/Load" )
 	void PurgeInactiveClientsFromSave( bool fetchInventories );

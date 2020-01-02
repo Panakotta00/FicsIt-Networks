@@ -50,6 +50,8 @@ public:
 
 	FGainSignificanceData GetClosestGainSignificanceData( UObject* inObject, float desiredDistance );
 
+	void DumpSignificanceManagedObjects();
+
 	/** Is the manager enabled */
 	UPROPERTY( EditAnywhere, Category = "SignificanceManager" )
 	bool mIsEnabled;
@@ -113,7 +115,7 @@ private:
 	static void SetObjectTickRate( UObject* obj, float newTickRate );
 	FORCEINLINE static void SetObjectTicks( FManagedObjectInfo* objInfo, bool newTicks ){ SetObjectTicks( objInfo->GetObject(), newTicks ); }
 	static void SetObjectTicks( UObject* obj, bool newTicks );
-
+	static void SetObjectLOD(FManagedObjectInfo* objInfo, int32 newLod);
 	/* Data about the different distance levels */
 	TArray< FGainSignificanceData > mGainSignificanceData;
 

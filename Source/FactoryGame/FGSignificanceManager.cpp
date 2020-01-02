@@ -6,6 +6,7 @@ UFGSignificanceManager::UFGSignificanceManager(){ }
 void UFGSignificanceManager::RegisterSignificanceObject( UObject* Object, EFGSignificanceType SignificanceType){ }
 void UFGSignificanceManager::Update( TArrayView<const FTransform> Viewpoints){ }
 FGainSignificanceData UFGSignificanceManager::GetClosestGainSignificanceData( UObject* inObject, float desiredDistance){ return FGainSignificanceData(); }
+void UFGSignificanceManager::DumpSignificanceManagedObjects(){ }
 void UFGSignificanceManager::UpdateConveyorBelts(){ }
 void UFGSignificanceManager::UpdateFactories(){ }
 FName UFGSignificanceManager::GetTagFromTagEnum( EFGSignificanceType InType){ return FName(); }
@@ -30,3 +31,4 @@ void UFGSignificanceManager::AmbientSoundSplinePostSignificance( FManagedObjectI
 FVector UFGSignificanceManager::GetObjectLocation( UObject* obj){ return FVector(); }
 void UFGSignificanceManager::SetObjectTickRate( UObject* obj, float newTickRate){ }
 void UFGSignificanceManager::SetObjectTicks( UObject* obj, bool newTicks){ }
+void UFGSignificanceManager::SetObjectLOD(FManagedObjectInfo* objInfo, int32 newLod){ }

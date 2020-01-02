@@ -21,24 +21,24 @@ public:
 
 	void GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps ) const override;
 
-	/** Set the slot idx for the player that spawned this actor */
-	void SetPlayerSlotIdx( int32 slotIdx );
+	/** Set the player state of the player that spawned this actor */
+	void SetOwningPlayerState( class AFGPlayerState* playerState );
 
-	/** Slot index of the player that spawned this actor */
+	/** player state of the player that spawned this actor */
 	UFUNCTION( BlueprintPure, Category = "Attention Ping" )
-	FORCEINLINE int32 GetPlayerSlotIdx() const { return mPlayerSlotIdx; }
+	FORCEINLINE AFGPlayerState* GetOwningPlayerState() const { return mOwningPlayerState; }
 
 	UFUNCTION()
-	void OnRep_PlayerSlotIdx();
+	void OnRep_OwningPlayerState();
 
-	/** Called when we have the slot idx replicated so now we can spawn the effects */
+	/** Called when we have the player state replicated so now we can spawn the effects */
 	UFUNCTION( BlueprintImplementableEvent, Category = "Attention Ping" )
 	void SpawnAttentionPingEffects();
 
 protected:
 
-	/** Who spawned this ping? */
-	UPROPERTY( ReplicatedUsing = OnRep_PlayerSlotIdx )
-	int32 mPlayerSlotIdx;	
+	/** The player state of the pawn that spawned this actor */
+	UPROPERTY( ReplicatedUsing = OnRep_OwningPlayerState )
+	class AFGPlayerState* mOwningPlayerState;
 	
 };

@@ -254,6 +254,10 @@ public:
 	/** SERVER ONLY: Set the amount of additional inventory slots */
 	void SetNumberOfAdditionalInventorySlots( int32 numberOfSlots );
 
+	void ClaimPlayerColor( AFGPlayerState* playerState );
+	
+	void ReleasePlayerColor( AFGPlayerState* playerState );
+
 protected:
 	/** Function that will be fired from the PurchasedSchematicDelegate in FGSchematicManager */
 	UFUNCTION()
@@ -428,4 +432,11 @@ private:
 	/** How many additional arm equipment slots have been unlocked for the players */
 	UPROPERTY( SaveGame, Replicated )
 	int32 mNumAdditionalArmEquipmentSlots;
+
+	/** The different colors to represent players over the network. We keep this if we need to loop back over the colors again*/
+	TArray< FSlotData > mPlayerColors;
+
+	/** The remaining colors to represent players over the network */
+	TArray< FSlotData > mAvailablePlayerColors;
+
 };

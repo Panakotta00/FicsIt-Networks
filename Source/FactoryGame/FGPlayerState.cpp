@@ -15,6 +15,7 @@ void AFGPlayerState::PostLoadGame_Implementation( int32 saveVersion, int32 gameV
 void AFGPlayerState::GatherDependencies_Implementation( TArray< UObject* >& out_dependentObjects){ }
 bool AFGPlayerState::NeedTransform_Implementation(){ return bool(); }
 bool AFGPlayerState::ShouldSave_Implementation() const{ return bool(); }
+void AFGPlayerState::SetSlotData( FSlotData slotData){ }
 FString AFGPlayerState::GetUserName(){ return FString(); }
 FString AFGPlayerState::GetUserID(){ return FString(); }
 FUniqueNetIdRepl AFGPlayerState::GetUniqeNetId(){ return FUniqueNetIdRepl(); }
@@ -45,4 +46,5 @@ bool AFGPlayerState::Server_SetMapFilter_Validate( ERepresentationType represent
 void AFGPlayerState::SetCompassFilter( ERepresentationType representationType, bool visible){ }
 void AFGPlayerState::Server_SetCompassFilter_Implementation( ERepresentationType representationType, bool visible){ }
 bool AFGPlayerState::Server_SetCompassFilter_Validate( ERepresentationType representationType, bool visible){ return bool(); }
+void AFGPlayerState::UpdateOwningPawnActorRepresentation() const{ }
 void AFGPlayerState::OnRep_HotbarShortcuts(){ }

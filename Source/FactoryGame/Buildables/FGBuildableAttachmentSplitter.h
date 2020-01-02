@@ -47,6 +47,9 @@ protected:
 	UPROPERTY( SaveGame, Meta = (NoAutoJson) )
 	int32 mCurrentOutputIndex;
 
+	UPROPERTY( SaveGame, Meta = ( NoAutoJson ) )
+	int32 mCurrentInventoryIndex;
+
 	UPROPERTY()
 	TArray< FConnectionItemStruct > mDistributionTable;
 

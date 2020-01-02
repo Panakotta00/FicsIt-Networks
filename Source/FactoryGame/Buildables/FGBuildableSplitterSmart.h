@@ -93,9 +93,6 @@ private:
 	UFUNCTION()
 	void OnRep_SortRules();
 
-	/** Returns a correct output depending on the passed item's ItemDescriptor */
-	UFGFactoryConnectionComponent* GetOutputConnectionForItem( const FInventoryItem& item ) const;
-
 	/** Returns all connections that this item could be placed onto. It excludes wildcard outputs if there is a rule specifically set for this item type */
 	TArray<UFGFactoryConnectionComponent*> GetAllOutputConnectionsForItem( const FInventoryItem& item ) const;
 

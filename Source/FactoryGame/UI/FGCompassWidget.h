@@ -90,6 +90,7 @@ protected:
 	FORCEINLINE float GetCompassPanelHalfWidth() { return mCompassPanel ? mCompassPanel->GetDesiredSize().X / 2.f : 0.f; };
 
 private:
+	bool IsPawnLocalPlayerControlled( APawn* pawn );
 	void CalculateCenteredResourceObjects();
 	void CalculateCenteredObject();
 

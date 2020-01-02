@@ -6,7 +6,7 @@
 void AFGHUD::PonderOpeningCheatBoard(){ }
 #endif 
 AFGHUD::AFGHUD(){ }
-void AFGHUD::PostInitializeComponents(){ }
+//void AFGHUD::PostInitializeComponents(){ }
 void AFGHUD::BeginPlay(){ }
 void AFGHUD::EndPlay( const EEndPlayReason::Type endPlayReason){ }
 void AFGHUD::DrawHUD(){ }

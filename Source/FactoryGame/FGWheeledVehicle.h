@@ -150,7 +150,8 @@ public:
 	AFGWheeledVehicle();
 
 	// Begin AActor interface
-	virtual void PostInitializeComponents() override;
+	//MODDING EDIT PostInitialize crashed  when creating a blueprint child
+	//virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
 	virtual void Tick( float dt ) override;

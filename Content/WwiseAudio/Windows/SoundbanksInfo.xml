@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SoundBanksInfo Platform="Windows" BasePlatform="Windows" SchemaVersion="11" SoundbankVersion="134">
+	<RootPaths>
+		<ProjectRoot>G:\Projects\Satisfactory\Mods\SatisfyingComputers\SatisfyingComputers_WwiseProject\</ProjectRoot>
+		<SourceFilesRoot>G:\Projects\Satisfactory\Mods\SatisfyingComputers\SatisfyingComputers_WwiseProject\.cache\Windows\</SourceFilesRoot>
+		<SoundBanksRoot>G:\Projects\Satisfactory\Mods\SatisfyingComputers\Content\WwiseAudio\Windows\</SoundBanksRoot>
+		<ExternalSourcesInputFile></ExternalSourcesInputFile>
+		<ExternalSourcesOutputRoot>G:\Projects\Satisfactory\Mods\SatisfyingComputers\SatisfyingComputers_WwiseProject\GeneratedSoundBanks\Windows</ExternalSourcesOutputRoot>
+	</RootPaths>
+	<DialogueEvents/>
+	<StreamedFiles/>
+	<MediaFilesNotInAnyBank/>
+	<SoundBanks>
+		<SoundBank Id="9440141" Language="SFX">
+			<ObjectPath>\SoundBanks\Default Work Unit\Hellobank</ObjectPath>
+			<ShortName>Hellobank</ShortName>
+			<Path>Hellobank.bnk</Path>
+		</SoundBank>
+		<SoundBank Id="1355168291" Language="SFX">
+			<ObjectPath>Init</ObjectPath>
+			<ShortName>Init</ShortName>
+			<Path>Init.bnk</Path>
+		</SoundBank>
+		<SoundBank Id="1874996933" Language="SFX">
+			<ObjectPath>\SoundBanks\Default Work Unit\HelloBank2</ObjectPath>
+			<ShortName>HelloBank2</ShortName>
+			<Path>HelloBank2.bnk</Path>
+			<IncludedEvents>
+				<Event Id="520822757" Name="HelloEvent" ObjectPath="\Events\Default Work Unit\HelloEvent"/>
+			</IncludedEvents>
+			<IncludedMemoryFiles>
+				<File Id="850654115" Language="SFX">
+					<ShortName>test.wav</ShortName>
+					<Path>SFX\test_10C4C929.wem</Path>
+				</File>
+			</IncludedMemoryFiles>
+		</SoundBank>
+	</SoundBanks>
+</SoundBanksInfo>

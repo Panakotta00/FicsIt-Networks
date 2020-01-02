@@ -55,7 +55,8 @@ public:
 
 	//@TODO:[DavalliusA:Tue/05-03-2019] only used for transferring mesh data from old to new instance system. Remove later.
 	virtual void PostLoad() override;
-	virtual void PostInitializeComponents() override;
+	//MODDING EDIT PostInitialize crashed  when creating a blueprint child
+	//virtual void PostInitializeComponents() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PowerPole")

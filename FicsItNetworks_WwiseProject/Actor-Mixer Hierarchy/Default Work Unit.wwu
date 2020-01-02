@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{9201C0C2-91F5-4B3B-99F9-AE7E7648455F}" SchemaVersion="94">
+	<AudioObjects>
+		<WorkUnit Name="Default Work Unit" ID="{9201C0C2-91F5-4B3B-99F9-AE7E7648455F}" PersistMode="Standalone">
+			<ChildrenList>
+				<Sound Name="test" ID="{5799BF6D-8F4E-4F3C-859B-D5B7394D8DED}" ShortID="238380566">
+					<ReferenceList>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{C5FE1C45-DD57-4B6C-A274-A65F8B196800}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{D74E77C5-CA89-46FB-87EA-4046429AD8CA}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<AudioFileSource Name="test" ID="{EC4226FF-E8B3-4373-BD83-7D571F7A0693}" ShortID="850654115">
+							<Language>SFX</Language>
+							<AudioFile>test.wav</AudioFile>
+						</AudioFileSource>
+					</ChildrenList>
+					<ActiveSourceList>
+						<ActiveSource Name="test" ID="{EC4226FF-E8B3-4373-BD83-7D571F7A0693}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+			</ChildrenList>
+		</WorkUnit>
+	</AudioObjects>
+</WwiseDocument>

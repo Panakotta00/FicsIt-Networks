@@ -15,6 +15,8 @@ void UFGCheatManager::GiveItemStacks( TSubclassOf<  UFGItemDescriptor > resource
 void UFGCheatManager::GiveItemsSingle( TSubclassOf<  UFGItemDescriptor > resource, int32 NumberOfItems){ }
 void UFGCheatManager::PlayerFly( bool flyModeEnabled){ }
 bool UFGCheatManager::PlayerFly_Get(){ return bool(); }
+void UFGCheatManager::PlayerNoClipModeOnFly( bool gohstMode){ }
+bool UFGCheatManager::PlayerNoClipModeOnFly_Get(){ return bool(); }
 void UFGCheatManager::ClearGiveItemPopularList(){ }
 void UFGCheatManager::GiefALLSchematics(){ }
 void UFGCheatManager::GiefAllSchematicsAndPhases(){ }
@@ -72,6 +74,7 @@ void UFGCheatManager::SetAITickDistance( float distance){ }
 void UFGCheatManager::DumpPlayerStates(){ }
 void UFGCheatManager::EnableInstancingOnFactory( bool enabled){ }
 void UFGCheatManager::DumpActorRepresentations(){ }
+void UFGCheatManager::DumpSignificanceManagedObjects(){ }
 void UFGCheatManager::PurgeInactiveClientsFromSave( bool fetchInventories){ }
 void UFGCheatManager::PurgeAllBeaconsFromSave(){ }
 void UFGCheatManager::ListItemPickups(){ }

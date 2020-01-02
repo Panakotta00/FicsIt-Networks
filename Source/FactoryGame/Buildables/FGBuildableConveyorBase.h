@@ -536,8 +536,8 @@ private:
 		}
 		DeltaLogStruct::Delta * GetDeltaClosestTo( FG_ConveyorVersionType baseReplicationKey )
 		{
-			Delta* bestDelta = nullptr;
-			int32 bestDeltaDiff = 1000;
+			Delta* bestDelta = &Deltas[0]; //[DavalliusA:Wed/07-08-2019] make sure we at least have something to return here
+			int32 bestDeltaDiff = 6000;
 			for( auto & d : Deltas )
 			{
 				if( d.ReplicationKey == INDEX_NONE )

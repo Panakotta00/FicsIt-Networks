@@ -5,5 +5,5 @@
 AFGAttentionPingActor::AFGAttentionPingActor(){ }
 void AFGAttentionPingActor::BeginPlay(){ }
 void AFGAttentionPingActor::GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps) const{ }
-void AFGAttentionPingActor::SetPlayerSlotIdx( int32 slotIdx){ }
-void AFGAttentionPingActor::OnRep_PlayerSlotIdx(){ }
+void AFGAttentionPingActor::SetOwningPlayerState(  AFGPlayerState* playerState){ }
+void AFGAttentionPingActor::OnRep_OwningPlayerState(){ }

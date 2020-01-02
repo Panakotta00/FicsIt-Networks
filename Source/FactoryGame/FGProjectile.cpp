@@ -4,7 +4,7 @@
 
 AFGProjectile::AFGProjectile(){ }
 void AFGProjectile::GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps) const{ }
-void AFGProjectile::PostInitializeComponents(){ }
+//void AFGProjectile::PostInitializeComponents(){ }
 bool AFGProjectile::ShouldSave_Implementation() const{ return bool(); }
 bool AFGProjectile::NeedTransform_Implementation(){ return bool(); }
 float AFGProjectile::TakeDamage( float DamageAmount,  FDamageEvent const& DamageEvent,  AController* EventInstigator, AActor* DamageCauser){ return float(); }

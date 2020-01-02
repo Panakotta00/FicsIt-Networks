@@ -1,0 +1,3 @@
+[submodule "ModLoader/SatisfactoryModLoader"]
+	path = ModLoader/SatisfactoryModLoader
+	url = https://github.com/Panakotta00/SatisfactoryModLoader.git
