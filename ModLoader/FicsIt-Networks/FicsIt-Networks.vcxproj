@@ -60,9 +60,6 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>lua53.lib;Detours.lib;xinput1_3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>copy "$(OutputPath)SatisfyingComputers.dll" "G:\Programs\Epic Games\SatisfactoryEarlyAccess\FactoryGame\Binaries\Win64\mods"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ComponentUtility.h" />

@@ -84,3 +84,6 @@ Plugins/Wwise/*
 # ModLoader
 ModLoader/x64
 ModLoader/FicsIt-Networks/x64
+
+# Cook output
+Mods

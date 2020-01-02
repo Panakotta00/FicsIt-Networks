@@ -3,7 +3,7 @@ FicsIt-Networks
 FicsIt-Networks is a mod for Satisfactory written in >= SML 1.1 which allows you to control, mointor, manage and automate each process of your factory by providing a network system and programmable computers and other I/O.
 
 **If you want to learn more:**
-[please visit the Documentation](https://coderde.github.io/ficsit-networks)
+[please visit the Documentation](https://docs.ficsit.app/ficsit-networks/0.0.1)
 
 Features
 ========
@@ -28,3 +28,11 @@ Features
   The Power Controller Pole is basically a smart power switch allowing you to connect and disconnect two different power networks.
 - Network Adapter
   The network adapter allows you to connect any satisfactory machine to the network and allow some basic and some more complex interactions like reading inventories.
+
+Dependencies
+============
+For using the mod there are no dependencies except [Satisfactory Modloader v1.1](https://github.com/satisfactorymodding/SatisfactoryModLoader)
+
+For cooking the unreal content we use a copy of Alpakit provided in the [Satisfactory Modding Unreal Project](https://github.com/satisfactorymodding/SatisfactoryUnrealProject)
+
+As general project build dependency we have Lua 5.3 to run Lua code.
