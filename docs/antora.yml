@@ -1,0 +1,5 @@
+name: ficsit-networks
+version: '0.0.1'
+title: FicsIt-Networks
+nav:
+- modules/ROOT/nav.adoc
