@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{9A228E85-7864-43DC-9A88-015FECD30485}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>BaseMod</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <ProjectName>FicsIt-Networks</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)ThirdParty\include;$(SolutionDir)\SatisfactoryModLoader\Detours\src;$(IncludePath);$(SolutionDir)SatisfactoryModLoader\SatisfactorySDK</IncludePath>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <LibraryPath>$(ProjectDir)ThirdParty\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)x64\Release</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;BASEMOD_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)\SatisfactoryModLoader\Detours\src;$(SolutionDir)SatisfactoryModLoader\SatisfactoryModLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ExceptionHandling>Async</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalDependencies>lua53.lib;Detours.lib;xinput1_3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(OutputPath)SatisfyingComputers.dll" "G:\Programs\Epic Games\SatisfactoryEarlyAccess\FactoryGame\Binaries\Win64\mods"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="ComponentUtility.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="Equip_FileSystem.h" />
+    <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="LuaContext.h" />
+    <ClInclude Include="LuaException.h" />
+    <ClInclude Include="LuaLib.h" />
+    <ClInclude Include="LuaImplementation.h" />
+    <ClInclude Include="ModuleSystemHolo.h" />
+    <ClInclude Include="ModuleSystemModule.h" />
+    <ClInclude Include="ModuleSystemPanel.h" />
+    <ClInclude Include="NetworkAdapter.h" />
+    <ClInclude Include="NetworkCable_Holo.h" />
+    <ClInclude Include="NetworkConnector.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="NetworkComponent.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\SatisfactoryModLoader\SatisfactorySDK\SDK\FG_Basic.cpp" />
+    <ClCompile Include="..\SatisfactoryModLoader\SatisfactorySDK\SDK\FG_CoreUObject_functions.cpp" />
+    <ClCompile Include="..\SatisfactoryModLoader\SatisfactorySDK\SDK\FG_Engine_functions.cpp" />
+    <ClCompile Include="..\SatisfactoryModLoader\SatisfactorySDK\SDK\FG_FactoryGame_functions.cpp" />
+    <ClCompile Include="ComponentUtility.cpp" />
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Equip_FileSystem.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="LuaContext.cpp" />
+    <ClCompile Include="LuaException.cpp" />
+    <ClCompile Include="LuaImplementation.cpp" />
+    <ClCompile Include="LuaLib.cpp" />
+    <ClCompile Include="ModuleSystemHolo.cpp" />
+    <ClCompile Include="ModuleSystemModule.cpp" />
+    <ClCompile Include="ModuleSystemPanel.cpp" />
+    <ClCompile Include="NetworkAdapter.cpp" />
+    <ClCompile Include="NetworkCable_Holo.cpp" />
+    <ClCompile Include="NetworkComponent.cpp" />
+    <ClCompile Include="NetworkConnector.cpp" />
+    <ClCompile Include="FicsItNetworks.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SatisfactoryModLoader\Detours.vcxproj" />
+    <ProjectReference Include="..\SatisfactoryModLoader\Detours\Detours.vcxproj">
+      <Project>{160cf85a-4f6c-4dda-83bf-2a7a00ee55bc}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\SatisfactoryModLoader\SatisfactoryModLoader\SatisfactoryModLoader.vcxproj">
+      <Project>{40237398-4b3f-4f7a-9a60-78683ea1693a}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

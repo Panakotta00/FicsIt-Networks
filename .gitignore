@@ -42,6 +42,7 @@
 *.sdf
 *.VC.db
 *.VC.opendb
+*.vcxproj.user
 
 # Precompiled Assets
 SourceArt/**/*.png
@@ -77,8 +78,9 @@ DerivedDataCache/*
 
 # Wwise
 FactoryGame_WwiseProject/*
+FicsItNetworks_WwiseProject
 Plugins/Wwise/*
 
-# MopLoader
+# ModLoader
 ModLoader/x64
-ModLoader/SatisfyingComputers/x64
+ModLoader/FicsIt-Networks/x64
