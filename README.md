@@ -5,6 +5,12 @@ FicsIt-Networks is a mod for Satisfactory written in >= SML 1.1 which allows you
 **If you want to learn more:**
 [please visit the Documentation](https://docs.ficsit.app/ficsit-networks/0.0.1)
 
+Work In Progress
+================
+This project is in no finished state!
+We are constantly working on features to get the mod to release soon.
+This doesn't mean you can't build the mod your self to test it though.
+
 Features
 ========
 - Networks
@@ -36,3 +42,23 @@ For using the mod there are no dependencies except [Satisfactory Modloader v1.1]
 For cooking the unreal content we use a copy of Alpakit provided in the [Satisfactory Modding Unreal Project](https://github.com/satisfactorymodding/SatisfactoryUnrealProject)
 
 As general project build dependency we have Lua 5.3 to run Lua code.
+
+Roadmap
+=======
+Until first release:
+- Transportable File System (items holding file systems like hard drives)
+- Documentation
+- fixing some bugs
+- make component representation invalid when component gets disconnected
+- add signals and function to check if power circuite fused and when component network updates
+- reimplement module system
+- add more functions to make component lookup/search easier
+- add component nick system
+- add new sensors (like truck or player sensors)
+- add new I/O modules for the modular control panels (like Text-Display)
+- add modular computer modules (f.e. CPUs, memory sticks)
+- add eeprom (and eeprom holder for computer)
+After release:
+- tune and make improvements to general concepts and performance
+- adding support for a visual scripting language
+- port the mod to official mod kit (when released)
