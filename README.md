@@ -45,6 +45,8 @@ As general project build dependency we have Lua 5.3 to run Lua code.
 
 Roadmap
 =======
+You can find the detailed progress in the [project board](https://github.com/CoderDE/FicsIt-Networks/projects/1).
+
 Until first release:
 - Transportable File System (items holding file systems like hard drives)
 - Documentation
@@ -58,6 +60,7 @@ Until first release:
 - add new I/O modules for the modular control panels (like Text-Display)
 - add modular computer modules (f.e. CPUs, memory sticks)
 - add eeprom (and eeprom holder for computer)
+
 After release:
 - tune and make improvements to general concepts and performance
 - adding support for a visual scripting language
