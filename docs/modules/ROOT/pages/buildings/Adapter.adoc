@@ -12,7 +12,7 @@
 |xref:lua/api/Adapter.adoc[Adapter API]
 
 |Ingame
-|image::buildings/adapter_ig.jpg[150,150,role="left"]
+|image::buildings/Adapter_ig.jpg[150,150,role="left"]
 |===
 
 The adapter is a special type of building you can not directly place as buildable, but you can place one by using the network cable. If you try to connect a existing building to the cable, it will use the building even if it has no network connector if it's special registerd or it has a power connector. Then when you place the cable, the adapter will automatically created. You can see the adapter only if the building has no power connector, in every case else there will be the adapter somewere visible.
