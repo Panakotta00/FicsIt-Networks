@@ -1,0 +1,9 @@
+= Basic Types
+
+Here are all basic types used by all kinds of apis and components listed.
+
+== WeakObjPtr
+
+**Lua-Type: `userdata`**
+
+This userdata is used when the system needs a soft reference to a memory object. It allows for validation checks so internal code doesn't crash through accessing invalid pointers.

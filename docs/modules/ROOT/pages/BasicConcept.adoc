@@ -1,0 +1,72 @@
+= Basic Concept
+
+== Network Component
+
+A Network Component is anything that is connected to the network and can provide a interface for interactions to the network.
+
+Network Components can be identified indifidually by their ID which is a guid (a implementation of UUID)
+
+Example:
+```
+0123456789abcdef0123456789abcdef
+```
+
+=== Lua
+
+Every network component can be representated in lua as a table, the Lua-Component-Structure.
+This Table contains some variables for identification of the structure itself and also the component.
+But most important of all is, this table contains all functions provided by the component.
+
+If the component disconnects from the network while the runtime contains a function value of this component the internal component pointer goes invalid, that means if you then try to execute the function, the Lua runtime will crash. If the component reconnects to the network, so does also the internal pointer get back valid so you can call it safely.
+
+To get the Lua-Component-Structure you can use the `Component component.proxy(string)` function.
+
+To learn more, visit the xref:lua/api/Component.adoc[Component API page].
+
+=== Functions
+
+Most network components provide simple functions for interacting with them via the network.
+Each of these functions can have multiple input parameters which are all required. That also means that there is no function overloading or default values.
+Also, quite interessting is, a function can have multiple output values which all will exist.
+
+In this documentation we use **most of the time (not always)** this declaration scheme:
+```Lua
+outType [outName], ... funcName([inType] inName, ...)
+```
+Examples:
+```Lua
+int, string name test(rly, num howOften)
+int getCount(string id)
+string getName(id)
+-- exceptions:
+count getAmount(string)
+```
+
+==== Lua
+
+To call such a function in Lua you simply need to get the Lua-Component-Structure and call the function in that table.
+
+[IMPORTANT]
+=====
+The function it self is bound to the component. That means you can take the function and store it in any variable and it still refers to the same component. This allows you to minimize the memory usage, if that's important.
+=====
+
+
+
+=== Signals
+
+Signals are quite important because they allow us to listen for events happening in a network. That means we get notified when something happens and don't need to ask if there happend anything every tick.
+
+When a signal occurs the signal gets added to the signalqueue of every computer subscribed to the network component.
+The signalqueue size depends on the configuration of the host.
+If the queue is full, every further signal gets dropped until the queue is empty.
+
+If a computer wants to get the signals of a component, he needs to subsribe to the component (listen to the component). A computer can just subscribe once at a time to the same network component, but it can subscribe to multiple different ones at the same time.
+
+==== Lua
+
+If you want to listen to a component you need to get the Lua-Component-Structure and pass it to the `component.listen(Component)` function.
+
+To learn more, visit the xref:lua/api/Component.adoc#_component_proxyid[Component API page].
+
+For declarations in this documentation we use the same scheme as for functions.

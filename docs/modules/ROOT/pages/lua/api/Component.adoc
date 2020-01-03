@@ -1,0 +1,74 @@
+= Component API
+
+**Lua Lib: `component`**
+
+The Component API provides structures, functions and signals for interacting with the network itself like returning network component representation structures.
+
+== Structures
+
+=== Component
+This structure represents a network component containing bound lua functions and identification variables.
+
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|__object
+|WeakObjPtr
+|A soft reference to to the network component
+
+|*componentFunctionName
+|function
+|Multiple Lua functions bound to the component used to call the component function with the same name on the bound component.
+|===
+
+== Functions
+
+=== `Component proxy(id)`
+
+Parameter::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|id
+|string
+|The UUID of the network component.
+
+|===
+
+Return 	Value::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|Component
+|Component
+|The lua table representation of the network component.
+
+Nil if the network component with the given ID was not found.
+|===
+
+=== `listen(Component)`
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|Component
+|Component
+|The network component lua representation the computer should now listen to.
+|===
+
+== Examples
+
+Gets a network component representation and listens to it::
++
+```lua
+c = component.proxy("0123456789abcdef0123456789abcdef")
+component.listen(c)
+```

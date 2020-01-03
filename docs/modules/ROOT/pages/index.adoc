@@ -1,4 +1,7 @@
-== FicsIt-Networks
+= FicsIt-Networks
 
 FicsIt-Networks is a mod for Satisfactory written in >= SML 1.1 which allows you to control, mointor, manage and automate each process of your factory by providing a network system and programmable computers and other I/O.
 
+== Source Code
+
+You can visit our https://github.com/CoderDE/FicsIt-Networks[GitHub-Repository] to view the source code.

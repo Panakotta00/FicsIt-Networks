@@ -1,0 +1,15 @@
+= Lua
+
+The first and most powerful coding language implement into FicsIt-Networks is Lua. The reasons for using Lua instead of f.e. Python is simple. Lua is made for it. The whole Lua architecture is made with use in other programs in mind, that's like the whole purpose of Lua. So it is fast and easy to implement and also has a decent runtime speed. The simple syntax also makes it a great choice for beginners.
+
+Visit the https://lua.org/[Lua Website] to learn more.
+
+== External Libraries
+
+The following list contains all available standard Lua libraries, non-standard libraries if they are reimplemented you can see the changes.
+
+- math
+- table
+- string
+- IO (only the File-Table)
+- Serialization
