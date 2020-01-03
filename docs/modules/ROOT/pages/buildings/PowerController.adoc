@@ -1,4 +1,5 @@
 = Power Controller
+
 :description: The power controller allows to control the flow of energy between two power circuits.
 
 [cols="1,3a"]

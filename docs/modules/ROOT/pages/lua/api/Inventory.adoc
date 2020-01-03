@@ -1,7 +1,4 @@
 = Inventory API
-:description: The Inventory API allows you to interact with ingame inventories.
-
-:description: The Inventory API allows you to interact with ingame inventories.
 
 :description: The Inventory API allows you to interact with ingame inventories.
 

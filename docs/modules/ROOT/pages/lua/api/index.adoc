@@ -1,5 +1,4 @@
 = APIs
-:description: APIs provide a interface for interacting with components and systems through Lua.
 
 The different APIs provide interfaces for interacting with components and systems through Lua. Most Components have their own API.
 

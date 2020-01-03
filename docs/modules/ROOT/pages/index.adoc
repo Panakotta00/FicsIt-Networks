@@ -1,7 +1,4 @@
 = FicsIt-Networks
-:description: FicsIt-Networks allows you to control, monitor, manage and automate each process of you Satisfactory-Factory.
-
-:description: FicsIt-Networks allows you to control, monitor, manage and automate each process of you Satisfactory-Factory.
 
 :description: FicsIt-Networks allows you to control, monitor, manage and automate each process of you Satisfactory-Factory.
 

@@ -1,7 +1,4 @@
 = Component API
-:description: The Component API helps to interact with the computer network itself.
-
-:description: The Component API helps to interact with the computer network itself.
 
 :description: The Component API helps to interact with the computer network itself.
 

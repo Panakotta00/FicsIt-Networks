@@ -1,7 +1,4 @@
 = Basic Types
-:description: All basic Lua data types all kind of apis and components use.
-
-:description: All basic Lua data types all kind of apis and components use.
 
 :description: All basic Lua data types all kind of apis and components use.
 

@@ -1,4 +1,5 @@
 = Splitter API
+
 :description: The Splitter API allows you to control the codeable splitter.
 
 The speaker api contains structures, functions and variables related to coding the codeable splitter.
