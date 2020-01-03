@@ -1,0 +1,43 @@
+= PowerController API
+
+The power api contains structures, functions and variables related to the ingame power network.
+
+== PowerController
+
+A power controler is a power pole with two power connectors which allows you to connect and disconnect two power circuits.
+
+=== Functions
+
+==== `setConnected(bool connected)`
+
+Sets if the power controller should connect both circuits.
+
+Parameters::
++
+[cols="1,1,~a"]
+|===
+|Name |Type |Description
+
+|connected
+|bool
+|true when the circuits should be connected
+|===
+
+==== `bool isConnected()`
+
+Checks if both circuits are connected with each other.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if both circuites are connected with each other
+|===
+
+
+
+include::partial$api_footer.adoc[]

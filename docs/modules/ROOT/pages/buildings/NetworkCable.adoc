@@ -1,0 +1,24 @@
+= Network Cable
+
+[cols="1,~a"]
+|===
+|Building Type
+|Buildable
+
+|Build Gun
+|image::buildings/NetworkCable_bg.png[150,150,role="left"]
+
+|In Game
+|image::buildings/NetworkCable_ig.png[300,300,role="left"]
+|===
+
+The network cable is one of the most important buildings.
+It allows you to connect two network connectors with each other and so, connect components to the network.
+
+To place one you simply look at the first building with a connector, left click.
+Then you look at the seccond building with a connector, left click.
+Done!
+
+
+
+include::partial$building_footer.adoc[]

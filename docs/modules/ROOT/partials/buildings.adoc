@@ -1,0 +1,15 @@
+Buildings::
++
+====
+xref:buildings/Adapter.adoc[Adapter]
+-
+xref:buildings/NetworkCable.adoc[Network Cable]
+-
+xref:buildings/NetworkPole.adoc[Network Pole]
+-
+xref:buildings/PowerController.adoc[Power Controller]
+-
+xref:buildings/Speakers.adoc[Speakers]
+-
+xref:buildings/Splitter.adoc[Splitter]
+====

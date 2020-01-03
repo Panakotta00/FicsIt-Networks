@@ -1,0 +1,36 @@
+= Codeable Splitter
+
+[cols="1,~a"]
+|===
+|Buildingtype
+|buildable network component
+
+|Factory Connectors
+| 1x Conveyor Input & 3x Conveyor Output
+
+|Max Network Connections
+|1
+
+|APIs
+|xref:lua/api/Splitter.adoc[Splitter API]
+
+|Build Gun
+|image::buildings/splitter_bg.png[150,150,role="left"]
+
+|Ingame
+|image::buildings/splitter_ig.jpg[150,150,role="left"]
+|===
+
+The splitter allows you to control the flow of items.
+
+It has one conveyor input and three outputs.
+
+It has a input inventory, when its empty one item autmatically gets transferd from the input to the inventory.
+
+Each output also has its own output inventory, were the code can move items from the input inventory into it.
+If the inventory is full, the code can't move any further item into the output inventory.
+As long as the output inventory contains a item the corresponding conveyor output can grab these items.
+
+
+
+include::partial$building_footer.adoc[]

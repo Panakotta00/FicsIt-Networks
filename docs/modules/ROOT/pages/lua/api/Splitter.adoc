@@ -1,0 +1,56 @@
+= Splitter API
+
+The speaker api contains structures, functions and variables related to coding the codeable splitter.
+
+== Splitter
+
+The codeable splitter allows you to control the flow of items through conveyors.
+
+=== Functions
+
+==== `bool doItem(int slot)`
+
+Transfers the input item to the output inventory of the given slot. Returns if it was able to transfer the item. (not possible if f.e. output inventory at slot is full)
+
+Parameters::
++
+[cols="1,1,~a"]
+|===
+|Name |Type |Description
+
+|slot
+|int
+|The slot number to wich the item should get transferd to.
+
+The number will get clamped to the allowed range (0-2)
+|===
+
+Return Values::
++
+[cols="1,1,~a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if it was able to transfer the item
+|===
+
+==== `Item getItem()`
+
+Returns the ingput item.
+
+Return Values::
++
+[cols="1,1,~a"]
+|===
+|Name |Type |Description
+
+|Item
+|Item
+|The current input item
+|===
+
+
+
+include::partial$api_footer.adoc[]

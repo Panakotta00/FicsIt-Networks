@@ -1,0 +1,32 @@
+= Speaker API
+
+The speaker api contains structures, functions and variables related to playing sound ingame.
+
+== Speaker
+
+A Speaker allows you to play sound files ingame.
+
+=== Functions
+
+==== `playSound(string name)`
+
+Stops the current playing sound and plays the sound defined by the given name.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|name
+|string
+|path to the sound file without the `.ogg` file ending
+|===
+
+==== `stopSound()`
+
+Stops the current playing sound
+
+
+
+include::partial$api_footer.adoc[]

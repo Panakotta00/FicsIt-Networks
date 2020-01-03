@@ -1,0 +1,24 @@
+= Network Pole
+
+[cols="1,~a"]
+|===
+|Building Type
+|Buildable
+
+|Max Network Connections
+|4
+
+|Build Gun
+|image::buildings/NetworkPole_bg.png[150,150,role="left"]
+
+|In Game
+|image::buildings/NetworkPole_ig.jpg[300,300,role="left"]
+|===
+
+The network pole is also one of the more important buildings.
+The network pole simply allows to connect more distant network connectors with each other and so to spread out the network.
+Also interesting is, this pole allows to connect multiple cables at the same time.
+
+
+
+include::partial$building_footer.adoc[]

@@ -10,44 +10,9 @@ You can't access files outside the virtual filesystem. If you try to do so, the 
 
 Openes a file-stream and returns it as File-table.
 
-Modes::
-+
-[cols="1,1,~"]
-|===
-|Mode |Name |Description
-
-|`r`
-|read only
-|file stream can just read from file
-
-if file doesn't exist, open will return nil
-
-|`w`
-|write
-|file stream can read and write
-
-creates the file if it doesn't exist
-
-|`a`
-|end of file
-|file stream can read and write
-
-cursor is set to the end of file
-
-|`w+`
-|truncate
-|file stream can read and write
-
-all previous data in file gets dropped
-
-|`a+`
-|append
-|file stream can read the full file but can only write to the end of the existing file
-|===
-
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,~a"]
 |===
 |Name |Type |Description
 
@@ -58,6 +23,32 @@ Parameters::
 |mode
 |string
 |The mode for the file stream
+
+- `r` read only
++
+file stream can just read from file.
++
+If file doesn't exist, open will return nil
+- `w` write
++
+file stream can read and write
++
+creates the file if it doesn't exist
+
+- `a` end of file
++
+file stream can read and write
++
+cursor is set to the end of file
+- `w+` truncate
++
+file stream can read and write
++
+all previous data in file gets dropped
+
+- `a+` append
++
+file stream can read the full file but can only write to the end of the existing file
 |===
 
 Return Values::

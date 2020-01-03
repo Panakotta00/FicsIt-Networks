@@ -1,0 +1,2 @@
+include::partial$buildings.adoc[]
+include::partial$apis.adoc[]

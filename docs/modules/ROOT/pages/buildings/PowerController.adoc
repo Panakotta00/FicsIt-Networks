@@ -1,0 +1,29 @@
+= Power Controller
+
+[cols="1,~a"]
+|===
+|Building Type
+|Buildable Network Component
+
+|Max Power Connections (each)
+|1
+
+|Max Network Connections
+|1
+
+|APIs
+|xref:lua/api/PowerController.adoc[PowerController API]
+
+|Build Gun
+|image::buildings/PowerController_bg.png[150,150,role="left"]
+
+|In Game
+|image::buildings/PowerController_ig.jpg[300,300,role="left"]
+|===
+
+The power controler allows you to connect and disconnect two power circuits.
+For that the pole has a network connector so you can contol it and two power connectors next to eachother.
+
+
+
+include::partial$building_footer.adoc[]
