@@ -5,5 +5,6 @@
 ** xref:lua/api/index.adoc[APIs]
 *** xref:lua/api/Adapter.adoc[Adapter API]
 *** xref:lua/api/Component.adoc[Component API]
+*** xref:lua/api/FileSystem.adoc[FileSystem API]
 *** xref:lua/api/Inventory.adoc[Inventory API]
 *** xref:lua/api/Power.adoc[Power API]

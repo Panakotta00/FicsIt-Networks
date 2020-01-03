@@ -233,3 +233,7 @@ Parameters::
 |Recipe
 |the new selected recipe.
 |===
+
+
+
+include::partial$api_footer.adoc[]

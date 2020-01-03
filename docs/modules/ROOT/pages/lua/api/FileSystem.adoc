@@ -1,0 +1,273 @@
+= FileSystem API
+
+The filesystem api provides structures, functions and variables for interacting with the virtual file systems.
+
+You can't access files outside the virtual filesystem. If you try to do so, the Lua runtime crashes.
+
+== Functions
+
+=== `File open(string path, string mode)`
+
+Openes a file-stream and returns it as File-table.
+
+Modes::
++
+[cols="1,1,~"]
+|===
+|Mode |Name |Description
+
+|`r`
+|read only
+|file stream can just read from file
+
+if file doesn't exist, open will return nil
+
+|`w`
+|write
+|file stream can read and write
+
+creates the file if it doesn't exist
+
+|`a`
+|end of file
+|file stream can read and write
+
+cursor is set to the end of file
+
+|`w+`
+|truncate
+|file stream can read and write
+
+all previous data in file gets dropped
+
+|`a+`
+|append
+|file stream can read the full file but can only write to the end of the existing file
+|===
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|the path to the file you want to open a file-stream for
+
+|mode
+|string
+|The mode for the file stream
+|===
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|File
+|File
+|The File table of the file stream
+
+Nil if not able to open file in read only
+|===
+
+=== `createDir(string path, [bool full])`
+
+Creates the folder path.
+
+If full is set creates the full path, if not, only tries to create the last folder.
+
+If the function is not able to create the last folder, f.e. when it already exists, the function will fail.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|folder path the function should create
+
+|full
+|bool
+|true if the function should create the full tree
+|===
+
+=== `remove(string path, [bool recursive])`
+
+Removes the filesystem object at the given path.
+
+If recursive is set, also removes all child entries in folder.
+The function fails if recursive is not set and you try to remove a folder with child entries.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path to the filesystem object
+
+|recursive
+|bool
+|if object should get removed recursively
+|===
+
+=== `move(string from, string to)`
+
+Moves the filesystem object from the given path to the other given path.
+
+Function fails if it is not able to move the object.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|from
+|string
+|path to the filesystem object you want to move
+
+|to
+|string
+|path to the folder the filesystem object should get moved to
+|===
+
+=== `bool exists(string path)`
+
+Checks if the given path exists.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path you want to check if it exists
+|===
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if given path exists
+|===
+
+=== `bool isFile(string path)`
+
+Checks if path refers to a file.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path you want to check if it refers to a file
+|===
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if path refers to a file
+|===
+
+=== `bool isDir(string path)`
+
+Checks if given path refers to a directory.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path you want to check if it refers to a directory
+|===
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns true if path refers to a directory
+|===
+
+=== `doFile(string path)`
+
+Executes Lua code in the file referd by the given path.
+
+Function fails if path doesn't exist or path doesn't refer to a file.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path to file you want to execute as Lua code
+|===
+
+=== `function loadFile(string path)`
+
+Loads the file refered by the given path as a Lua function and returns it.
+
+Functions fails if path doesn't exist or path doesn't reger to a file.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path to the file you want to load as Lua function
+|===
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|function
+|function
+|the file compiled as Lua function
+|===
+
+== File
+
+Represents a filestream for reading and writing from and to a file in the virtual filesystem.
+
+Reimplemented from the Lua standard library. https://www.lua.org/pil/21.1.html[Here you can find more].
+
+
+
+include::partial$api_footer.adoc[]

@@ -1098,7 +1098,7 @@ static const luaL_Reg luaFileLib[] = {
 };
 
 static const luaL_Reg luaFactoryHookLib[] = {
-	{"getIperM", luaFactoryHookGetIperM},
+	{"getIlastM", luaFactoryHookGetIperM},
 	{"listen", luaFactoryHookListen},
 	{"__gc", luaFactoryHookGC},
 	{NULL, NULL}

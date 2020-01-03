@@ -171,3 +171,148 @@ Return Values::
 |FactoryHook
 |a factory hook attached to the connector
 |===
+
+== Recipe
+
+A recipe for a manufacturer with multiple inputs and outputs as well as other information like process time.
+
+=== Functions
+
+==== `string getName()`
+
+Returns the name of the recipe
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|string
+|string
+|name of the recipe
+|===
+
+==== `ItemCount[] getProducts()`
+
+Returns the products of the recipe.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|ItemCount[]
+|ItemCount[]
+|A array of tables containing `int count` for the count of items and `ItemType item` for the type of item
+|===
+
+==== `ItemCount[] getIngredients()``
+
+Returns the ingredients needed for the recipe.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|ItemCount[]
+|ItemCount[]
+|A array of tables containing `int count` for the count of items and `ItemType item` for the type of item
+|===
+
+==== `num getDuration()`
+
+Returns the amount of time needed to process the recipe with a potential of 100%.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|amount of time in seconds
+|===
+
+== ItemStack
+
+Combines a Item and a count to a stack of items.
+
+=== Variables
+
+==== `int count`
+
+The count of items the stack contains.
+
+==== `Item item`
+
+They item information of the stack.
+
+== Item
+
+One Item or basically a structure defining item information like the type and the item state.
+
+=== Variables
+
+==== `ItemType type`
+
+Defines the type of the item.
+
+== ItemType
+
+The type of a item. Used f.e. in Item to define the type.
+
+=== Functions
+
+==== `string getName()`
+
+Returns the name of the item.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|string
+|string
+|the name of the item
+|===
+
+== FactoryHook
+
+The factory hook is a special table used to hook a factory connector. This hook allows you to get signals when the connector transfers a item and to get some stats about the runtime pehavior of the the factory connector.
+
+This system uses a reference counter to determine if the hook should exist.
+That means as long as you have at least one reference to the same factoryhook representation table or multiple different tables but refering to the same hook, the hook exists. If the Lua garbage collector frees such a table, and there is no other table refering to the same hook, the hook will get destroyed.
+
+Because the FactoryHook is no component, you can't use the component api to listen to the signals provided by the hook. To do that the hook table provides its own function.
+
+=== Functions
+
+==== `int getIlastM()`
+
+Returns the count of items transfered in the last minute.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|count of items transfered in the last minute
+|===
+
+==== `listen()`
+
+Subscribes the executing computer to the signals of the hook.
+
+
+
+include::partial$api_footer.adoc[]

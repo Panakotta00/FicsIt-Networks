@@ -72,3 +72,7 @@ Gets a network component representation and listens to it::
 c = component.proxy("0123456789abcdef0123456789abcdef")
 component.listen(c)
 ```
+
+
+
+include::partial$api_footer.adoc[]

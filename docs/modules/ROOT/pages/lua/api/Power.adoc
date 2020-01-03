@@ -233,3 +233,7 @@ Return Values::
 |num
 |amount of available power
 |===
+
+
+
+include::partial$api_footer.adoc[]
