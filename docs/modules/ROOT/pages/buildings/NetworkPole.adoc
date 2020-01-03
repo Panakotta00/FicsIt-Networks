@@ -1,5 +1,4 @@
 = Network Pole
-
 :description: The network pole allows you to further distribute your computer networks.
 
 [cols="1,3"]

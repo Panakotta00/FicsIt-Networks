@@ -1,5 +1,4 @@
 = Buildings
-
 :description: Buildings added by FicsIt-Networks.
 
 Buildings are objects in the world itself.

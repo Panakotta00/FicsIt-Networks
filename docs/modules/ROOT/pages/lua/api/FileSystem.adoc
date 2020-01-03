@@ -1,5 +1,4 @@
 = FileSystem API
-
 :description: The FileSystem API allows you to manage a virtual file system.
 
 The filesystem api provides structures, functions and variables for interacting with the virtual file systems.

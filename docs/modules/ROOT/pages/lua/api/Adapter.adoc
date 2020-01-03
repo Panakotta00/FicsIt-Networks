@@ -1,5 +1,4 @@
 = Adapter API
-
 :description: The Adapter API allows you to interact with any kind of already existing buildings.
 
 The network adapter interface is very special, because the availaible functions depend on the type of the connected building of the adapter. Also, a type can extend a other type f.e. a Smelter extends from Manufacturer and Manufacturer extends from Factory and Factory extends from Buildable.

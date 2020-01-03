@@ -1,5 +1,4 @@
 = Codeable Splitter
-
 :description: The codeable splitter allows for custom item flow control.
 
 [cols="1,3a"]

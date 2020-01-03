@@ -1,5 +1,4 @@
 = Adapter
-
 :description: The Adapter allows to connect existing buildings from CSS and other mods to the computer network.
 
 [cols="1,3"]
