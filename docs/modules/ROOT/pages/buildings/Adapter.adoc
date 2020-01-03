@@ -1,6 +1,8 @@
 = Adapter
 
-[cols="1,~a"]
+:description: The Adapter allows to connect existing buildings from CSS and other mods to the computer network.
+
+[cols="1,3"]
 |===
 |Buildingtype
 |network component
@@ -10,13 +12,19 @@
 
 |APIs
 |xref:lua/api/Adapter.adoc[Adapter API]
+|===
 
+[cols="a"]
+|===
 |Ingame
-|image::buildings/Adapter_ig.jpg[150,150,role="left"]
+
+|image::buildings/Adapter_ig.jpg[300,300,role="left"]
 |===
 
 The adapter is a special type of building you can not directly place as buildable, but you can place one by using the network cable. If you try to connect a existing building to the cable, it will use the building even if it has no network connector if it's special registerd or it has a power connector. Then when you place the cable, the adapter will automatically created. You can see the adapter only if the building has no power connector, in every case else there will be the adapter somewere visible.
 
 If you want to get rid of a adapter, you will need to destruct the whole building.
+
+
 
 include::partial$building_footer.adoc[]

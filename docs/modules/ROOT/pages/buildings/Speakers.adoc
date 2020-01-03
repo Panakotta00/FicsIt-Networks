@@ -1,6 +1,8 @@
 = Speakers
 
-[cols="1,~a"]
+:description: The speakers pole allows you to play custom sounds.
+
+[cols="1,3a"]
 |===
 |Buildingtype
 |buildable network component
@@ -10,12 +12,14 @@
 
 |APIs
 |xref:lua/api/Speaker.adoc[Speaker API]
+|===
 
-|Build Gun
-|image::buildings/speakers_bg.png[150,150,role="left"]
+[cols="a,a"]
+|===
+|Build Gun |Ingame
 
-|Ingame
-|image::buildings/speakers_ig.jpg[150,150,role="left"]
+|image::buildings/speakers_bg.png[300,300,role="left"]
+|image::buildings/speakers_ig.jpg[300,300,role="left"]
 |===
 
 The Speaker Pole is a network component buildable wich provides the functionallity to play custom sound files ingame.

@@ -1,5 +1,7 @@
 = Speaker API
 
+:description: The Speaker API allows you to play custom sounds ingame.
+
 The speaker api contains structures, functions and variables related to playing sound ingame.
 
 == Speaker
@@ -14,7 +16,7 @@ Stops the current playing sound and plays the sound defined by the given name.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 

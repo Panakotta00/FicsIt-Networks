@@ -1,5 +1,7 @@
 = PowerController API
 
+:description: The PowerController API is used to control the energy flow over a power controller pole.
+
 The power api contains structures, functions and variables related to the ingame power network.
 
 == PowerController
@@ -14,7 +16,7 @@ Sets if the power controller should connect both circuits.
 
 Parameters::
 +
-[cols="1,1,~a"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -29,7 +31,7 @@ Checks if both circuits are connected with each other.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 

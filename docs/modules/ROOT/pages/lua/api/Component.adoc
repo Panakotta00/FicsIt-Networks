@@ -1,5 +1,7 @@
 = Component API
 
+:description: The Component API helps to interact with the computer network itself.
+
 **Lua Lib: `component`**
 
 The Component API provides structures, functions and signals for interacting with the network itself like returning network component representation structures.
@@ -9,7 +11,7 @@ The Component API provides structures, functions and signals for interacting wit
 === Component
 This structure represents a network component containing bound lua functions and identification variables.
 
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -28,7 +30,7 @@ This structure represents a network component containing bound lua functions and
 
 Parameter::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -40,7 +42,7 @@ Parameter::
 
 Return 	Value::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -55,7 +57,7 @@ Nil if the network component with the given ID was not found.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 

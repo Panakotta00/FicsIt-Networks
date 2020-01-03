@@ -1,5 +1,7 @@
 = Inventory API
 
+:description: The Inventory API allows you to interact with ingame inventories.
+
 The inventory api contains structures, functions and variables related to ingame inventorys, items and more.
 
 == Inventory
@@ -14,7 +16,7 @@ Returns the item stacks at the given indexes.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -25,7 +27,7 @@ Parameters::
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -40,7 +42,7 @@ Returns the amount of items of the stack at the given index.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -51,7 +53,7 @@ Parameters::
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -66,7 +68,7 @@ Returns the count of slots in the inventory
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -91,11 +93,11 @@ Returns the type of connector.
 
 - 0: Conveyor
 - 1: Pipe
-[]
 
+[]
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -112,11 +114,11 @@ Returns the direction of the connector.
 - 1: Output
 - 2: Any
 - 4: Snap only (like conveyor poles)
-[]
 
+[]
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -131,7 +133,7 @@ Checks if the connector is connected.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -146,7 +148,7 @@ Returns the internal inventory of the connector
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -163,7 +165,7 @@ If a hook is already attached, returns the hook.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -184,7 +186,7 @@ Returns the name of the recipe
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -199,7 +201,7 @@ Returns the products of the recipe.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -214,7 +216,7 @@ Returns the ingredients needed for the recipe.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -229,7 +231,7 @@ Returns the amount of time needed to process the recipe with a potential of 100%
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -274,7 +276,7 @@ Returns the name of the item.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -300,7 +302,7 @@ Returns the count of items transfered in the last minute.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 

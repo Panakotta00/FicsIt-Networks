@@ -1,5 +1,7 @@
 = Splitter API
 
+:description: The Splitter API allows you to control the codeable splitter.
+
 The speaker api contains structures, functions and variables related to coding the codeable splitter.
 
 == Splitter
@@ -14,7 +16,7 @@ Transfers the input item to the output inventory of the given slot. Returns if i
 
 Parameters::
 +
-[cols="1,1,~a"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -27,7 +29,7 @@ The number will get clamped to the allowed range (0-2)
 
 Return Values::
 +
-[cols="1,1,~a"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -42,7 +44,7 @@ Returns the ingput item.
 
 Return Values::
 +
-[cols="1,1,~a"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 

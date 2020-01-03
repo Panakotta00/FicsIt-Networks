@@ -1,5 +1,7 @@
 = Adapter API
 
+:description: The Adapter API allows you to interact with any kind of already existing buildings.
+
 The network adapter interface is very special, because the availaible functions depend on the type of the connected building of the adapter. Also, a type can extend a other type f.e. a Smelter extends from Manufacturer and Manufacturer extends from Factory and Factory extends from Buildable.
 
 == Actor
@@ -14,7 +16,7 @@ Returns all power connectors of the actor.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -29,7 +31,7 @@ Returns all factory connectors of the actor.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -44,7 +46,7 @@ Returns all inventories of the actor.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -65,7 +67,7 @@ Returns the progress of the running process
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -80,7 +82,7 @@ Returns the amount of energy consumption when producing
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -95,7 +97,7 @@ Returns the amount of productivity
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -110,7 +112,7 @@ Returns the amount of seconds needed to go through one cycle.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -125,7 +127,7 @@ Returns the potential
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -142,7 +144,7 @@ Clamps to available/allowed values.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -157,7 +159,7 @@ Returns the maximum potential value.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -172,7 +174,7 @@ Returns the minimal potential value.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -181,7 +183,7 @@ Return Values::
 |potential in percent (0.0 = 0% & 1.0 = 100%)
 |===
 
-== `Manufacturer (extends Factory)`
+== Manufacturer (extends Factory)
 
 A manufacturer is not only the manufacturer but also everything that processes items and uses selectable recipes like smelter, constructor etc.
 
@@ -193,7 +195,7 @@ Returns teh current selected recipe.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -208,7 +210,7 @@ Returns all currently available recipes.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -225,7 +227,7 @@ Doesn't get executed when the recipe is not allowed. (= no crash or return value
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 

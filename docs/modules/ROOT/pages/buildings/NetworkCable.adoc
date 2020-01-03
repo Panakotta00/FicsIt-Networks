@@ -1,14 +1,18 @@
 = Network Cable
 
-[cols="1,~a"]
+:description: The network cable allows you to connect two network connectors with eachother.
+
+[cols="1,3"]
 |===
 |Building Type
 |Buildable
+|===
 
-|Build Gun
-|image::buildings/NetworkCable_bg.png[150,150,role="left"]
+[cols="a,a"]
+|===
+|Build Gun |In Game
 
-|In Game
+|image::buildings/NetworkCable_bg.png[300,300,role="left"]
 |image::buildings/NetworkCable_ig.png[300,300,role="left"]
 |===
 

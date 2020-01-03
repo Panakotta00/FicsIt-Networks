@@ -1,5 +1,7 @@
 = Power API
 
+:description: The Power API helps with interacting with the ingame power network.
+
 The power api contains structures, functions and variables related to the ingame power network.
 
 == PowerConnector
@@ -14,7 +16,7 @@ Returns all connected power connectors.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -29,7 +31,7 @@ Returns the maximum count of connections this power connector can handle
 
 ReturnValues::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -44,7 +46,7 @@ Returns the attached power information
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -59,7 +61,7 @@ Returns the attached power circuit
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -82,7 +84,7 @@ Returns the dynamic production of the last tick.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -97,7 +99,7 @@ Returns the base production of the last tick.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -112,7 +114,7 @@ Returns the max amount of dynamic production of the last tick.
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -127,7 +129,7 @@ Returns the target consumption
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -142,7 +144,7 @@ returns the amount of actual consumption
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -157,7 +159,7 @@ Returns the used power circuit
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -172,7 +174,7 @@ checks if the connector has power
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -195,7 +197,7 @@ Returns the amount of power production in the last tick
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -210,7 +212,7 @@ Returns the amount of power consumption in the last tick
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -225,7 +227,7 @@ Returns the amount of available power in the last tick
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 

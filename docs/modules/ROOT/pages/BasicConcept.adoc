@@ -1,5 +1,13 @@
 = Basic Concept
 
+:description: The basic concepts of FicsIt-Networks like network setup and interaction.
+
+== Network Connector
+
+A Network Connector is simply a point of a building were you can connect a network cable to and so, connect multiple different network components with eachother.
+
+The Network Connector is also a Network Component itself.
+
 == Network Component
 
 A Network Component is anything that is connected to the network and can provide a interface for interactions to the network.

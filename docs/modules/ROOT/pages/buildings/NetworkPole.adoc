@@ -1,17 +1,21 @@
 = Network Pole
 
-[cols="1,~a"]
+:description: The network pole allows you to further distribute your computer networks.
+
+[cols="1,3"]
 |===
 |Building Type
 |Buildable
 
 |Max Network Connections
 |4
+|===
 
-|Build Gun
-|image::buildings/NetworkPole_bg.png[150,150,role="left"]
+[cols="a,a"]
+|===
+|Build Gun |In Game
 
-|In Game
+|image::buildings/NetworkPole_bg.png[300,300,role="left"]
 |image::buildings/NetworkPole_ig.jpg[300,300,role="left"]
 |===
 

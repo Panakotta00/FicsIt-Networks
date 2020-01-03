@@ -1,6 +1,8 @@
 = Codeable Splitter
 
-[cols="1,~a"]
+:description: The codeable splitter allows for custom item flow control.
+
+[cols="1,3a"]
 |===
 |Buildingtype
 |buildable network component
@@ -13,12 +15,14 @@
 
 |APIs
 |xref:lua/api/Splitter.adoc[Splitter API]
+|===
 
-|Build Gun
-|image::buildings/splitter_bg.png[150,150,role="left"]
+[cols="a,a"]
+|===
+|Build Gun |Ingame
 
-|Ingame
-|image::buildings/splitter_ig.jpg[150,150,role="left"]
+|image::buildings/splitter_bg.png[300,300,role="left"]
+|image::buildings/splitter_ig.jpg[300,300,role="left"]
 |===
 
 The splitter allows you to control the flow of items.

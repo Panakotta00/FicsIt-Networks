@@ -1,5 +1,7 @@
 = FileSystem API
 
+:description: The FileSystem API allows you to manage a virtual file system.
+
 The filesystem api provides structures, functions and variables for interacting with the virtual file systems.
 
 You can't access files outside the virtual filesystem. If you try to do so, the Lua runtime crashes.
@@ -12,7 +14,7 @@ Openes a file-stream and returns it as File-table.
 
 Parameters::
 +
-[cols="1,1,~a"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -53,7 +55,7 @@ file stream can read the full file but can only write to the end of the existing
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -74,7 +76,7 @@ If the function is not able to create the last folder, f.e. when it already exis
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -96,7 +98,7 @@ The function fails if recursive is not set and you try to remove a folder with c
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -117,7 +119,7 @@ Function fails if it is not able to move the object.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -136,7 +138,7 @@ Checks if the given path exists.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -147,7 +149,7 @@ Parameters::
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -162,7 +164,7 @@ Checks if path refers to a file.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -173,7 +175,7 @@ Parameters::
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -188,7 +190,7 @@ Checks if given path refers to a directory.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -199,7 +201,7 @@ Parameters::
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -216,7 +218,7 @@ Function fails if path doesn't exist or path doesn't refer to a file.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -233,7 +235,7 @@ Functions fails if path doesn't exist or path doesn't reger to a file.
 
 Parameters::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 
@@ -244,7 +246,7 @@ Parameters::
 
 Return Values::
 +
-[cols="1,1,~"]
+[cols="1,1,4a"]
 |===
 |Name |Type |Description
 

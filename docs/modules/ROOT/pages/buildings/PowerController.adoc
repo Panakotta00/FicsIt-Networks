@@ -1,6 +1,8 @@
 = Power Controller
 
-[cols="1,~a"]
+:description: The power controller allows to control the flow of energy between two power circuits.
+
+[cols="1,3a"]
 |===
 |Building Type
 |Buildable Network Component
@@ -13,11 +15,13 @@
 
 |APIs
 |xref:lua/api/PowerController.adoc[PowerController API]
+|===
 
-|Build Gun
-|image::buildings/PowerController_bg.png[150,150,role="left"]
+[cols="a,a"]
+|===
+|Build Gun |In Game
 
-|In Game
+|image::buildings/PowerController_bg.png[300,300,role="left"]
 |image::buildings/PowerController_ig.jpg[300,300,role="left"]
 |===
 
