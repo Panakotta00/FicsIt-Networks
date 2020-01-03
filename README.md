@@ -62,3 +62,8 @@ After release:
 - tune and make improvements to general concepts and performance
 - adding support for a visual scripting language
 - port the mod to official mod kit (when released)
+
+Contributors
+============
+- Panakotta00
+- RosszEmber
