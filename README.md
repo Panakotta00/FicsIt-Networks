@@ -11,6 +11,10 @@ This project is in no finished state!
 We are constantly working on features to get the mod to release soon.
 This doesn't mean you can't build the mod your self to test it though.
 
+Streams
+=======
+The biggest part of making this mod does get stream at [CoderDE](https://twitch.tv/coderde).
+
 Features
 ========
 - Networks
