@@ -1,4 +1,7 @@
 = FileSystem API
+:description: The FileSystem API allows you to manage a virtual file system.
+
+:description: The FileSystem API allows you to manage a virtual file system.
 
 :description: The FileSystem API allows you to manage a virtual file system.
 

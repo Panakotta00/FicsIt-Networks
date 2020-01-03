@@ -1,5 +1,4 @@
 = Speaker API
-
 :description: The Speaker API allows you to play custom sounds ingame.
 
 The speaker api contains structures, functions and variables related to playing sound ingame.

@@ -1,6 +1,5 @@
-= Buildings
-
 :description: Buildings added by FicsIt-Networks.
+= Buildings
 
 Buildings are objects in the world itself.
 Buildables are buildings you can place ingame via the buildgun.

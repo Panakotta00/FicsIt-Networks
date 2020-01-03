@@ -1,4 +1,7 @@
 = Power API
+:description: The Power API helps with interacting with the ingame power network.
+
+:description: The Power API helps with interacting with the ingame power network.
 
 :description: The Power API helps with interacting with the ingame power network.
 

@@ -1,4 +1,7 @@
 = Lua
+:description: Lua is a very nice simple and easy to learn language and is just made for use in other programs as scripting interface. This is the most powerful tool you have in FicsIt-Networks.
+
+:description: Lua is a very nice simple and easy to learn language and is just made for use in other programs as scripting interface. This is the most powerful tool you have in FicsIt-Networks.
 
 :description: Lua is a very nice simple and easy to learn language and is just made for use in other programs as scripting interface. This is the most powerful tool you have in FicsIt-Networks.
 

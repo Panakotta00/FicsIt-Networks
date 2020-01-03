@@ -1,4 +1,7 @@
 = Adapter API
+:description: The Adapter API allows you to interact with any kind of already existing buildings.
+
+:description: The Adapter API allows you to interact with any kind of already existing buildings.
 
 :description: The Adapter API allows you to interact with any kind of already existing buildings.
 

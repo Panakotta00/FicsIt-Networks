@@ -1,5 +1,4 @@
 = Speakers
-
 :description: The speakers pole allows you to play custom sounds.
 
 [cols="1,3a"]
