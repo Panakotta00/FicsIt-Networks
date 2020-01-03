@@ -1,0 +1,235 @@
+= Power API
+
+The power api contains structures, functions and variables related to the ingame power network.
+
+== PowerConnector
+
+A so called actor component which is basically the point of a building where you can connect a power cable to.
+
+=== Functions
+
+==== `PowerConnecor[] getConnections()`
+
+Returns all connected power connectors.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|PowerConnector[]
+|PowerConnector[]
+|Array of power connectors connected to the power connector
+|===
+
+==== `int getMaxConnections()`
+
+Returns the maximum count of connections this power connector can handle
+
+ReturnValues::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|max count of connections
+|===
+
+==== `PowerInfo getPower()`
+
+Returns the attached power information
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|PowerInfo
+|PowerInfo
+|The attached power information
+|===
+
+==== `PowerCircuit getCircuit()`
+
+Returns the attached power circuit
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|PowerCircuit
+|PowerCircuit
+|The attached power circuit
+|===
+
+== PowerInfo
+
+The power information contains information about the power state of one or multiple connectors like stats about production and consumption.
+
+=== Functions
+
+All power related values are in KW.
+
+==== `num getDynProduction()`
+
+Returns the dynamic production of the last tick.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|the value of dynamic production
+|===
+
+==== `num getBaseProduction()`
+
+Returns the base production of the last tick.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|the value of base production
+|===
+
+==== `num getMaxDynProduction()`
+
+Returns the max amount of dynamic production of the last tick.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|amount of max production
+|===
+
+==== `num getTargetConsumption()`
+
+Returns the target consumption
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|amount of target consumption
+|===
+
+==== `num getConsumption()`
+
+returns the amount of actual consumption
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|amount of consumption
+|===
+
+==== `PowerCircuit getCircuit()`
+
+Returns the used power circuit
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|PowerCircuit
+|PowerCircuit
+|the used power circuit
+|===
+
+==== `bool hasPower()`
+
+checks if the connector has power
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if the connector has power
+|===
+
+== Power Circuit
+
+A power circuit itself. Used to get stats about the power production, consumption etc. of the power network.
+
+=== Functions
+
+All power related values in KW.
+
+==== `num getProduction()`
+
+Returns the amount of power production in the last tick
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|amount of production
+|===
+
+==== `num getConsumption()`
+
+Returns the amount of power consumption in the last tick
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|amount of power consumption
+|===
+
+==== `num getProductionConsumption()`
+
+Returns the amount of available power in the last tick
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|amount of available power
+|===

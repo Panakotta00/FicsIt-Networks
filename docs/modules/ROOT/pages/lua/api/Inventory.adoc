@@ -1,0 +1,173 @@
+= Inventory API
+
+The inventory api contains structures, functions and variables related to ingame inventorys, items and more.
+
+== Inventory
+
+A lua table representation of a ingame inventory containing stacks of items.
+
+=== Functions
+
+==== `ItemStack... getStack(int index...)`
+
+Returns the item stacks at the given indexes.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|index...
+|int
+|indexes of slots in the inventory
+|===
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|ItemStack...
+|ItemStack
+|ItemStacks at the given slots in the inventory
+|===
+
+==== `int getItemCount(int index)`
+
+Returns the amount of items of the stack at the given index.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|index
+|int
+|the slot index you want to know the amount of items from
+|===
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|the count of items in the given slot
+|===
+
+==== `int getSize()`
+
+Returns the count of slots in the inventory
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|Count of slots in the inventory
+|===
+
+==== `sort()`
+
+Sorts the inventory
+
+== FactoryConnector
+
+A FactoryConnector is a connection point of a actor for a conveyor or pipe.
+
+=== Functions
+
+==== `int getType()`
+
+Returns the type of connector.
+
+- 0: Conveyor
+- 1: Pipe
+[]
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|type of connector
+|===
+
+==== `int getDirection()`
+
+Returns the direction of the connector.
+
+- 0: Input
+- 1: Output
+- 2: Any
+- 4: Snap only (like conveyor poles)
+[]
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|direction of the connector
+|===
+
+==== `bool isConnected()`
+
+Checks if the connector is connected.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if connector is connected
+|===
+
+==== `Inventory getInventory()`
+
+Returns the internal inventory of the connector
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|Inventory
+|Inventory
+|the internal inventory
+|===
+
+==== `FactoryHook hook()`
+
+Attachs and returns a factory hook for the connector.
+
+If a hook is already attached, returns the hook.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|FactoryHook
+|FactoryHook
+|a factory hook attached to the connector
+|===

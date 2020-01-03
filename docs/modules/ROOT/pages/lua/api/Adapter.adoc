@@ -1,0 +1,235 @@
+= Adapter API
+
+The network adapter interface is very special, because the availaible functions depend on the type of the connected building of the adapter. Also, a type can extend a other type f.e. a Smelter extends from Manufacturer and Manufacturer extends from Factory and Factory extends from Buildable.
+
+== Actor
+
+Everything existing in the world.
+
+=== Functions
+
+==== `connectors getPowerConnectors()`
+
+Returns all power connectors of the actor.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|connectors
+|PowerConnector[]
+|Array of power connector representations containing a entry for each connector
+|===
+
+==== `connectors getFactoryConnectors()`
+
+Returns all factory connectors of the actor.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|connectors
+|FactoryConnector[]
+|Array of factory connector representations containing a entry for each connector
+|===
+
+==== `inventories getInventories()`
+
+Returns all inventories of the actor.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|inventories
+|Inventory[]
+|Array of inventory representations containing a entry for each inventory
+|===
+
+== Factory (extends Actor)
+
+A factory is a buildable able of processing stuff like items and energy.
+
+=== Functions
+
+==== `num getProgress()`
+
+Returns the progress of the running process
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|progress in percent (0.0 to 1.0)
+|===
+
+==== `num getPowerConsumProducing()`
+
+Returns the amount of energy consumption when producing
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|power consumption when producing in KW
+|===
+
+==== `num getProductivity()`
+
+Returns the amount of productivity
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|productivity in percent (0.0 = 0% & 1.0 = 100%)
+|===
+
+==== `num getCycleTime()`
+
+Returns the amount of seconds needed to go through one cycle.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|time in seconds
+|===
+
+==== `num getPotential()`
+
+Returns the potential
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|potential in percent (0.0 = 0% & 1.0 = 100%)
+|===
+
+==== `setPotential(num potential)`
+
+Sets the potential of the factory.
+
+Clamps to available/allowed values.
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|potential
+|num
+|potential in percent (0.0 = 0% & 1.0 = 100%)
+|===
+
+==== `num getMaxPotential()`
+
+Returns the maximum potential value.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|potential in percent (0.0 = 0% & 1.0 = 100%)
+|===
+
+==== `num getMinPotential()`
+
+Returns the minimal potential value.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|num
+|num
+|potential in percent (0.0 = 0% & 1.0 = 100%)
+|===
+
+== `Manufacturer (extends Factory)`
+
+A manufacturer is not only the manufacturer but also everything that processes items and uses selectable recipes like smelter, constructor etc.
+
+=== Functions
+
+==== `Recipe getRecipe()`
+
+Returns teh current selected recipe.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|Recipe
+|Recipe
+|current selected Recipe
+|===
+
+==== `Recipe[] getRecipes()`
+
+Returns all currently available recipes.
+
+Return Values::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|Recipe[]
+|Recipe[]
+|array of available recipes
+|===
+
+==== `setRecipe(Recipe)`
+
+Sets the current selected recipe.
+
+Doesn't get executed when the recipe is not allowed. (= no crash or return value though)
+
+Parameters::
++
+[cols="1,1,~"]
+|===
+|Name |Type |Description
+
+|Recipe
+|Recipe
+|the new selected recipe.
+|===
