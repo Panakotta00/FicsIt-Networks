@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "NetworkCircuit.h"
 #include "NetworkComponent.generated.h"
 
 USTRUCT()
@@ -48,4 +49,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 		UObject* findComponent(FGuid id) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		UNetworkCircuit* getCircuit() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		void setCircuit(UNetworkCircuit* circuit);
 };

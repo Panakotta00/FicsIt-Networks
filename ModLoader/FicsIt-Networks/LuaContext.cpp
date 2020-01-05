@@ -121,7 +121,7 @@ void ULuaContext::Log(const SML::Objects::FString & str) {
 	SML::Utility::warning(str.toStr());
 }
 
-SML::Objects::UObject* ULuaContext::getComponent(const std::string & addr) const {
+UNetworkConnector* ULuaContext::getConnector() const {
 	UNetworkConnector* connector = nullptr;
 	for (auto f : *this->outer->clazz) {
 		auto p = static_cast<SML::Objects::UProperty*>(f);
@@ -131,8 +131,13 @@ SML::Objects::UObject* ULuaContext::getComponent(const std::string & addr) const
 		connector = v;
 		break;
 	}
+	return connector;
+}
+
+SML::Objects::UObject* ULuaContext::getComponent(const std::string & addr) const {
+	auto connector = getConnector();
 	if (!connector) return nullptr;
-	auto found = connector->component.findComponent(addr);
+	auto found = connector->circuit->findComponent(addr);
 	if (found) return found;
 	return nullptr;
 }
@@ -178,6 +183,8 @@ void ULuaContext::execSignalSlot(ULuaContext * self, SML::Objects::FFrame & stac
 	SML::Objects::TArray<ULuaContext*> ctxs;
 	self->findFunction(L"luaGetSignalListeners")->invoke(self, &ctxs);
 	for (auto ctx : ctxs) if (ctx->signals.size() < config["SignalQueueSize"].get<int>()) {
+		auto con = self->getConnector();
+		if (!con->circuit || !con->circuit->hasNode((UObject*)ctx->getConnector())) continue;
 		ctx->signals.push(std::shared_ptr<Signal>(sig));
 	}
 

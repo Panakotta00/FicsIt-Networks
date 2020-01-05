@@ -63,13 +63,20 @@ public:
 	virtual SML::Objects::TArray<SML::Objects::UObject*> getMerged() const override;
 	virtual SML::Objects::TArray<SML::Objects::UObject*> getConnected() const override;
 	virtual SML::Objects::UObject* findComponent(SML::Objects::FGuid guid) const override;
+	virtual UNetworkCircuit* getCircuit() const override;
+	virtual void setCircuit(UNetworkCircuit * circuit) override;
 };
 
 class UNetworkConnector : public SDK::USceneComponent{
+private:
+	bool searchFor(std::set<UNetworkConnector*>& searched, UNetworkConnector* obj);
+	void removeConnector(UNetworkConnector* connector);
+
 public:
 	SML::Objects::FGuid id;
 	bool idCreated;
 	int maxCables;
+	UNetworkCircuit* circuit;
 	ISaveI saveI;
 	INetworkConnectorComponent component;
 	std::unordered_set<UNetworkConnector*> connections;
@@ -88,6 +95,7 @@ public:
 	bool addCable(SDK::AFGBuildable* cable);
 	void removeCable(SDK::AFGBuildable* cable);
 	bool isConnected(UNetworkConnector* cable);
+	bool searchFor(UNetworkConnector* conn);
 
 	static void execAddConn(UNetworkConnector* self, SML::Objects::FFrame& stack, void* params);
 	static void execRemConn(UNetworkConnector* self, SML::Objects::FFrame& stack, void* params);

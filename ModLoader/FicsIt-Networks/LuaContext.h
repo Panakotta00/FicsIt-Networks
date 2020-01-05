@@ -106,6 +106,7 @@ public:
 
 	void setException(const std::string ex);
 	void Log(const SML::Objects::FString& str);
+	UNetworkConnector* getConnector() const;
 	SML::Objects::UObject* getComponent(const std::string& addr) const;
 
 	// BPI wrappings

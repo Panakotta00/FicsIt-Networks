@@ -19,6 +19,41 @@ using namespace SML::Paks;
 
 void(UNetworkConnector::*beginPlay_f)() = nullptr;
 
+bool UNetworkConnector::searchFor(std::set<UNetworkConnector*>& searched, UNetworkConnector* connector) {
+	static UProperty* p1 = nullptr;
+	static UProperty* p2 = nullptr;
+	if (!p1 || !p2) {
+		auto c = (UClass*)Functions::loadObjectFromPak(L"/Game/FactoryGame/FicsIt-Networks/ComputerNetwork/NetworkCable/NetworkCable.NetworkCable_C");
+		p1 = c->findField<UProperty>("Connector1");
+		p2 = c->findField<UProperty>("Connector2");
+	}
+
+	if (searched.find(this) != searched.end()) return false;
+	searched.insert(this);
+
+	if (this == connector) return true;
+	
+	for (auto con : connections) {
+		if (con->searchFor(searched, connector)) return true;
+	}
+
+	for (auto cable : cables) {
+		auto c1 = *p1->getValue<UNetworkConnector*>(cable);
+		auto c2 = *p2->getValue<UNetworkConnector*>(cable);
+		if (c1->searchFor(searched, connector) || c2->searchFor(searched, connector)) return true;
+	}
+
+	return false;
+}
+
+void UNetworkConnector::removeConnector(UNetworkConnector * connector) {
+	if (!searchFor(connector)) {
+		connector->circuit = (UNetworkCircuit*)UNetworkCircuit::staticClass()->constructObject((Objects::UObject*)Functions::getWorld(), L"");
+		connector->circuit->recalculate((Objects::UObject*)connector);
+		circuit->recalculate((Objects::UObject*)this);
+	}
+}
+
 void UNetworkConnector::construct() {
 	// actor vtable hook
 	if (!beginPlay_f) {
@@ -41,6 +76,7 @@ void UNetworkConnector::construct() {
 
 	idCreated = false;
 	maxCables = -1;
+	circuit = nullptr;
 
 	merged.insert((Objects::UObject*)this->GetOwner());
 }
@@ -60,6 +96,12 @@ void UNetworkConnector::beginPlay() {
 		id = nguid();
 		idCreated = true;
 	}
+
+	// setup circuit
+	if (!circuit) {
+		circuit = (UNetworkCircuit*) UNetworkCircuit::staticClass()->constructObject((Objects::UObject*)Functions::getWorld(), L"");
+		circuit->recalculate((Objects::UObject*)this);
+	}
 }
 
 void UNetworkConnector::addConnection(UNetworkConnector* connector) {
@@ -67,13 +109,16 @@ void UNetworkConnector::addConnection(UNetworkConnector* connector) {
 
 	connections.insert(connector);
 	connector->addConnection(this);
+
+	circuit = connector->circuit = (circuit) ? *circuit + connector->circuit : connector->circuit;
 }
 
 void UNetworkConnector::removeConnection(UNetworkConnector* connector) {
 	if (connections.find(connector) == connections.end()) return;
 
 	connections.erase(connector);
-	connector->removeConnection(this);
+	connector->connections.erase(this);
+	removeConnector(connector);
 }
 
 class TestI {
@@ -86,12 +131,44 @@ class Test : public SDK::AActor, public TestI {
 
 bool UNetworkConnector::addCable(SDK::AFGBuildable * cable) {
 	if (maxCables >= 0 && maxCables <= cables.size()) return false;
+
+	static UProperty* p1 = nullptr;
+	static UProperty* p2 = nullptr;
+	if (!p1 || !p2) {
+		auto c = (UClass*)Functions::loadObjectFromPak(L"/Game/FactoryGame/FicsIt-Networks/ComputerNetwork/NetworkCable/NetworkCable.NetworkCable_C");
+		p1 = c->findField<UProperty>("Connector1");
+		p2 = c->findField<UProperty>("Connector2");
+	}
+
 	cables.insert(cable);
+
+	auto c1 = *p1->getValue<UNetworkConnector*>(cable);
+	auto c2 = *p2->getValue<UNetworkConnector*>(cable);
+
+	c1->circuit = c2->circuit = (c1->circuit) ? *c1->circuit + c2->circuit : c2->circuit;
+
 	return true;
 }
 
 void UNetworkConnector::removeCable(SDK::AFGBuildable * cable) {
+	static UProperty* p1 = nullptr;
+	static UProperty* p2 = nullptr;
+	if (!p1 || !p2) {
+		auto c = (UClass*)Functions::loadObjectFromPak(L"/Game/FactoryGame/FicsIt-Networks/ComputerNetwork/NetworkCable/NetworkCable.NetworkCable_C");
+		p1 = c->findField<UProperty>("Connector1");
+		p2 = c->findField<UProperty>("Connector2");
+	}
+	
+	if (cables.find(cable) == cables.end()) return;
+
 	cables.erase(cable);
+
+	auto c1 = *p1->getValue<UNetworkConnector*>(cable);
+	auto c2 = *p2->getValue<UNetworkConnector*>(cable);
+	auto other = (c1 == this) ? c2 : c1;
+	other->cables.erase(cable);
+
+	removeConnector(other);
 }
 
 bool UNetworkConnector::isConnected(UNetworkConnector* con) {
@@ -110,6 +187,11 @@ bool UNetworkConnector::isConnected(UNetworkConnector* con) {
 		if (c1 == con || c2 == con) return true;
 	}
 	return false;
+}
+
+bool UNetworkConnector::searchFor(UNetworkConnector * conn) {
+	std::set<UNetworkConnector*> searched;
+	return searchFor(searched, conn);
 }
 
 UNetworkConnector * INetworkConnectorComponent::self() const {
@@ -158,6 +240,14 @@ TArray<UObject*> INetworkConnectorComponent::getConnected() const {
 UObject * INetworkConnectorComponent::findComponent(FGuid guid) const {
 	std::set<UObject*> searched;
 	return INetworkComponent::findComponent(guid, searched, (UObject*)self());
+}
+
+UNetworkCircuit * INetworkConnectorComponent::getCircuit() const {
+	return self()->circuit;
+}
+
+void INetworkConnectorComponent::setCircuit(UNetworkCircuit * circuit) {
+	self()->circuit = circuit;
 }
 
 void UNetworkConnector::execAddConn(UNetworkConnector* self, FFrame& stack, void* params) {

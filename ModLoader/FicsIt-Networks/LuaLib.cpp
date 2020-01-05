@@ -28,9 +28,43 @@ void FactoryHook::update() {
 	}
 }
 
-class Test : public std::exception {
-	
-};
+
+LuaObjectPtr::LuaObjectPtr(UObject * obj) : ptr(obj) {}
+
+LuaObjectPtr::~LuaObjectPtr() {}
+
+UObject * LuaObjectPtr::getObject() const {
+	return *ptr;
+}
+
+LuaComponentPtr::LuaComponentPtr(UObject * obj, UObject * component) : LuaObjectPtr(obj), comp(component) {}
+
+LuaComponentPtr::~LuaComponentPtr() {}
+
+UObject * LuaComponentPtr::getObject() const {
+	auto o = *ptr;
+	auto c = *comp;
+	auto con = ULuaContext::ctx->getConnector();
+	if (!o, !c || !con || !con->circuit || !con->circuit->hasNode(c)) return nullptr;
+	return o;
+}
+
+LuaClass::LuaClass(SML::Objects::UObject * obj, SML::Objects::UObject * component) {
+	if (component) ptr = new LuaComponentPtr(obj, component);
+	else ptr = new LuaObjectPtr(obj);
+}
+
+LuaClass::~LuaClass() {
+	delete ptr;
+}
+
+LuaClassFunc::LuaClassFunc(SML::Objects::UObject * obj, std::uint16_t func, SML::Objects::UObject * component) : LuaClass(obj, component) {
+	this->func = func;
+}
+
+LuaClassUFunc::LuaClassUFunc(SML::Objects::UObject * obj, SML::Objects::UFunction* func, SML::Objects::UObject * component) : LuaClass(obj, component) {
+	this->func = func;
+}
 
 void luaInit() {
 	auto recipe = (SDK::UFGRecipe*) SDK::UFGRecipe::StaticClass()->CreateDefaultObject();
@@ -535,7 +569,7 @@ int componentFunc(lua_State * L) {
 
 	// get data from closure
 	auto& ud = *(LuaClassUFunc*)lua_touserdata(L, lua_upvalueindex(1));
-	UObject* comp = ud.obj.get();
+	UObject* comp = ud.ptr->getObject();
 	UFunction* func = ud.func;
 
 	// check object validity
@@ -603,7 +637,7 @@ int luaClassFunc(lua_State * L) {
 	int args = lua_gettop(L);
 
 	auto& data = *(LuaClassFunc*)lua_touserdata(L, lua_upvalueindex(1));
-	auto o = data.obj.get();
+	auto o = data.ptr->getObject();
 	auto so = (SDK::UObject*)o;
 
 	if (!o) return luaL_error(L, "component is invalid");
@@ -661,37 +695,37 @@ int luaClassClassFunc(lua_State* L) {
 	return luaL_error(L, "invalid native function ptr");
 }
 
-void addCompFuncs(lua_State * L, UObject * comp) {
+void addCompFuncs(lua_State * L, UObject * comp, UObject* boundComp) {
 	if (!comp->clazz->implements(ULuaImplementation::staticClass())) return;
 	ULuaContext* ctx = ULuaContext::ctx;
 	comp->findFunction(L"luaSetup")->invoke(comp, &ctx);
 	for (auto f : *comp->clazz) {
 		if (!(f->getName()._Starts_with("lua_") && f->getName().length() > 4)) continue;
 
-		auto& comp_ud = *(LuaClassUFunc*)lua_newuserdata(L, sizeof(LuaClassUFunc));
-		comp_ud.obj = comp;
-		comp_ud.func = (UFunction*)f;
+		auto comp_ud = (LuaClassUFunc*)lua_newuserdata(L, sizeof(LuaClassUFunc));
+		new (comp_ud) LuaClassUFunc(comp, (UFunction*)f, boundComp);
+		luaL_setmetatable(L, "ClassPtr");
 		lua_pushcclosure(L, componentFunc, 1);
 		lua_setfield(L, -2, f->getName().erase(0, 4).c_str());
 	}
 }
 
-void addPreFuncs(lua_State* L, SDK::UObject* obj) {
+void addPreFuncs(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* boundComp) {
 	int j = 0;
 	for (auto clazz : classes) {
 		if (!obj->IsA(clazz.first)) continue;
 		for (int i = 0; i < clazz.second.size(); ++i) {
 			auto f = clazz.second[i];
-			auto& comp_ud = *(LuaClassFunc*)lua_newuserdata(L, sizeof(LuaClassFunc));
-			comp_ud.obj = (UObject*)obj;
-			comp_ud.func = j++;
+			auto comp_ud = (LuaClassFunc*)lua_newuserdata(L, sizeof(LuaClassFunc));
+			new (comp_ud) LuaClassFunc((UObject*)obj, j++, boundComp);
+			luaL_setmetatable(L, "ClassPtr");
 			lua_pushcclosure(L, luaClassFunc, 1);
 			lua_setfield(L, -2, f.name.c_str());
 		}
 	}
 }
 
-bool newInstance(lua_State* L, SDK::UObject* obj) {
+bool newInstance(lua_State* L, SDK::UObject* obj, SDK::UObject* component) {
 	if (!obj) {
 		lua_pushnil(L);
 		return false;
@@ -700,14 +734,15 @@ bool newInstance(lua_State* L, SDK::UObject* obj) {
 	lua_newtable(L);
 	luaL_setmetatable(L, "Instance");
 
-	auto& ud_o = *(FWeakObjectPtr*) lua_newuserdata(L, sizeof(SML::Objects::FWeakObjectPtr));
+	auto ud_o = (LuaObjectPtr*) lua_newuserdata(L, (component) ? sizeof(LuaObjectPtr) : sizeof(LuaComponentPtr));
 	luaL_setmetatable(L, "WeakObjPtr");
-	ud_o = (UObject*)obj;
+	if (component) new (ud_o) LuaComponentPtr((UObject*)obj, (UObject*)component);
+	else new (ud_o) LuaObjectPtr((UObject*)obj);
 	lua_setfield(L, -2, "__object");
 
 	if (!obj->IsA(SDK::UClass::StaticClass())) {
-		addPreFuncs(L, obj);
-		addCompFuncs(L, (UObject*)obj);
+		addPreFuncs(L, obj, (UObject*)component);
+		addCompFuncs(L, (UObject*)obj, (UObject*)component);
 
 		if (((UObject*)obj)->clazz->implements(ULuaImplementation::staticClass())) {
 			((UObject*)obj)->findFunction(L"luaSetup")->invoke((UObject*)obj, &ULuaContext::ctx);
@@ -721,8 +756,8 @@ bool newInstance(lua_State* L, SDK::UObject* obj) {
 			((UObject*)obj)->findFunction(L"getMerged")->invoke((UObject*)obj, &p);
 			for (auto m : p.merged) {
 				if (!m) continue;
-				addPreFuncs(L, (SDK::UObject*)m);
-				addCompFuncs(L, m);
+				addPreFuncs(L, (SDK::UObject*)m, (UObject*)component);
+				addCompFuncs(L, m, (UObject*)component);
 
 				if (m->clazz->implements(ULuaImplementation::staticClass())) {
 					m->findFunction(L"luaSetup")->invoke(m, &ULuaContext::ctx);
@@ -776,7 +811,7 @@ int luaComponentProxy(lua_State * L) {
 		if (!s) return luaL_error(L, ("argument #" + std::to_string(i) + " is not a string").c_str());
 		auto comp = ULuaContext::ctx->getComponent(s);
 		if (!comp) lua_pushnil(L);
-		else newInstance(L, (SDK::UObject*)comp);
+		else newInstance(L, (SDK::UObject*)comp, (SDK::UObject*)comp);
 	}
 	return args;
 }
@@ -1046,6 +1081,12 @@ int luaItemEQ(lua_State* L) {
 	return 1;
 }
 
+int luaClassGC(lua_State* L) {
+	auto c = (LuaClass*)luaL_checkudata(L, 1, "ClassPtr");
+	c->~LuaClass();
+	return 0;
+}
+
 // constructors //
 
 void luaItemStack(lua_State * L, SDK::FInventoryStack stack) {
@@ -1114,6 +1155,11 @@ static const luaL_Reg luaItemLib[] = {
 	{NULL, NULL}
 };
 
+static const luaL_Reg luaClassLib[] = {
+	{"__gc", luaClassGC},
+	{NULL, NULL}
+};
+
 // metatables
 
 void loadLibs(lua_State* L) {
@@ -1150,5 +1196,9 @@ void loadLibs(lua_State* L) {
 
 	luaL_newmetatable(L, "Item");
 	luaL_setfuncs(L, luaItemLib, 0);
+	lua_pop(L, 1);
+
+	luaL_newmetatable(L, "ClassPtr");
+	luaL_setfuncs(L, luaClassLib, 0);
 	lua_pop(L, 1);
 }

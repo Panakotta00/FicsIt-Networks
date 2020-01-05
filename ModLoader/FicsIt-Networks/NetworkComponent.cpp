@@ -6,6 +6,11 @@
 using namespace SML;
 using namespace SML::Objects;
 
+/*void UNetworkComponent::construct() {
+	Utility::warning("niiiiiicccceee!!!!");
+	circuit = nullptr;
+}*/
+
 void UNetworkComponent::getID_exec(UNetworkComponent * c, FFrame& stack, void * params) {
 	stack.code += !!stack.code;
 
@@ -34,6 +39,21 @@ void UNetworkComponent::findComponent_exec(UNetworkComponent * c, SML::Objects::
 	stack.code += !!stack.code;
 
 	*((Objects::UObject**)params) = ((INetworkComponent*)c)->findComponent(guid);
+}
+
+void UNetworkComponent::getCircuit_exec(UNetworkComponent* c, SML::Objects::FFrame& stack, void* params) {
+	stack.code += !!stack.code;
+
+	*((UNetworkCircuit**)params) = ((INetworkComponent*)c)->getCircuit();
+}
+
+void UNetworkComponent::setCircuit_exec(UNetworkComponent* c, SML::Objects::FFrame& stack, void* params) {
+	UNetworkCircuit* circuit;
+	stack.stepCompIn(&circuit);
+
+	stack.code += !!stack.code;
+
+	((INetworkComponent*)c)->setCircuit(circuit);
 }
 
 UClass * UNetworkComponent::staticClass() {
@@ -66,3 +86,11 @@ UObject* INetworkComponent::findComponent(FGuid guid, std::set<UObject*>& search
 
 	return nullptr;
 }
+
+/*UNetworkCircuit * INetworkComponent::getCircuit() const {
+	return circuit;
+}
+
+void INetworkComponent::setCircuit(UNetworkCircuit * circuit) {
+	this->circuit = circuit;
+}*/

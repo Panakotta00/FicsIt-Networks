@@ -30,6 +30,8 @@ private:
 public:
 	virtual SML::Objects::FGuid getID() const;
 	virtual SML::Objects::UObject* findComponent(SML::Objects::FGuid guid) const;
+	virtual UNetworkCircuit* getCircuit() const override;
+	virtual void setCircuit(UNetworkCircuit * circuit) override;
 };
 
 class IFileSystemLua : public ILuaImplementation {
@@ -66,6 +68,7 @@ public:
 
 	int capacity;
 	SML::Objects::TArray<ULuaContext*> listeners;
+	UNetworkCircuit* circuit;
 	
 	std::unique_ptr<FileSystemManager> manager;
 	HANDLE watcher;

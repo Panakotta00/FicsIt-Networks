@@ -46,6 +46,7 @@
 #include "ModuleSystemPanel.h"
 #include "ModuleSystemHolo.h"
 #include "Equip_FileSystem.h"
+#include "NetworkCircuit.h"
 
 extern "C" {
 	#include <lua.h>
@@ -221,6 +222,13 @@ void loadClasses() {
 		.func(Paks::FunctionBuilder::method("GetPanelDismantleRefund").native(&UModuleSystemPanel::execGetDismantleRefund).param(Paks::PropertyBuilder::outParam(EPropertyClass::Array, "retVal").off(0)).param(Paks::PropertyBuilder::outParam(EPropertyClass::Struct, "retVal").off(0).structFunc(fistack_c)))
 		.build();
 
+	Paks::ClassBuilder<UNetworkCircuit>::Basic()
+		.extend<SML::Objects::UObject>()
+		.construct(&UNetworkCircuit::construct)
+		.destruct(&UNetworkCircuit::destruct)
+		.func(Paks::FunctionBuilder::method("getComponents").native(&UNetworkCircuit::getComponents_exec).param(Paks::PropertyBuilder::retVal(EPropertyClass::Array, "retVal")).param(Paks::PropertyBuilder::retVal(EPropertyClass::Object, "retVal").off(0)))
+		.build();
+
 	Paks::EnumBuilder<ELuaState>::get()
 		.param("HALTED", 0)
 		.param("RUNNING", 1)
@@ -229,10 +237,14 @@ void loadClasses() {
 		.build();
 
 	Paks::ClassBuilder<UNetworkComponent>::Interface()
+		//.construct(&UNetworkComponent::construct)
+		//.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "circuit").classFunc(UNetworkCircuit::staticClass))
 		.func(Paks::FunctionBuilder::method("getID").native(&UNetworkComponent::getID_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent | EFunctionFlags::FUNC_Const).param(Paks::PropertyBuilder::retVal(EPropertyClass::Struct, "retVal").off(0).structFunc(fguid_c)))
 		.func(Paks::FunctionBuilder::method("getMerged").native(&UNetworkComponent::getMerged_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent | EFunctionFlags::FUNC_Const).param(Paks::PropertyBuilder::retVal(EPropertyClass::Array, "retVal").off(0)).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "retVal").off(0)))
 		.func(Paks::FunctionBuilder::method("getConnected").native(&UNetworkComponent::getConnected_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent | EFunctionFlags::FUNC_Const).param(Paks::PropertyBuilder::retVal(EPropertyClass::Array, "retVal").off(0)).param(Paks::PropertyBuilder::retVal(EPropertyClass::Object, "retVal").off(0)))
 		.func(Paks::FunctionBuilder::method("findComponent").native(&UNetworkComponent::findComponent_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent | EFunctionFlags::FUNC_Const).param(Paks::PropertyBuilder::retVal(EPropertyClass::Object, "retVal").classFunc(UObject::staticClass)).param(Paks::PropertyBuilder::param(EPropertyClass::Struct, "id").structFunc(fguid_c)))
+		.func(Paks::FunctionBuilder::method("getCircuit").native(&UNetworkComponent::getCircuit_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent | EFunctionFlags::FUNC_Const).param(Paks::PropertyBuilder::retVal(EPropertyClass::Object, "retVal").classFunc(UNetworkCircuit::staticClass)))
+		.func(Paks::FunctionBuilder::method("setCircuit").native(&UNetworkComponent::setCircuit_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "circuit").classFunc(UNetworkCircuit::staticClass)))
 		.build();
 
 	Paks::ClassBuilder<UModuleSystemModule>::Interface()
@@ -279,6 +291,7 @@ void loadClasses() {
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Struct, "id").structFunc(fguid_c).addParamFlags(EPropertyFlags::Prop_SaveGame).remParamFlags(EPropertyFlags::Prop_SkipSerialization))
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Bool, "idCreated").addParamFlags(EPropertyFlags::Prop_SaveGame | EPropertyFlags::Prop_Net).remParamFlags(EPropertyFlags::Prop_SkipSerialization).helpBool<UNetworkConnector, &UNetworkConnector::idCreated>())
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Int, "maxCables").off((size_t)&((UNetworkConnector*)nullptr)->maxCables).addParamFlags(EPropertyFlags::Prop_BlueprintVisible | EPropertyFlags::Prop_Edit).remParamFlags(EPropertyFlags::Prop_SkipSerialization))
+		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "circuit").off(offsetof(UNetworkConnector, circuit)))
 		.func(Paks::FunctionBuilder::method("addConnection").native(&UNetworkConnector::execAddConn).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "connector").classFunc(Paks::ClassBuilder<UNetworkConnector>::staticClass)))
 		.func(Paks::FunctionBuilder::method("removeConnection").native(&UNetworkConnector::execRemConn).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "connector").classFunc(Paks::ClassBuilder<UNetworkConnector>::staticClass)))
 		.func(Paks::FunctionBuilder::method("addCable").native(&UNetworkConnector::execAddCable).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "cable").classFunc(SDK::AFGBuildable::StaticClass)).param(Paks::PropertyBuilder::retVal(EPropertyClass::Bool, "retVal").helpBool<AddCableRetVal, &AddCableRetVal::retVal>()))
@@ -321,6 +334,7 @@ void loadClasses() {
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Bool, "idCreated").helpBool<UFileSystem, &UFileSystem::idCreated>().saveGame())
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Int, "capacity"))
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Array, "listeners").off(offsetof(UFileSystem, listeners))).prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "listeners").classFunc(ULuaContext::staticClass).off(offsetof(UFileSystem, listeners)))
+		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "circuit").off(offsetof(UFileSystem, circuit)))
 		.func(Paks::FunctionBuilder::method("luaSig_FileSystemChange").native(&UFileSystem::execSigFSC).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "type")).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "oldPath")).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "newPath")))
 		.construct(&UFileSystem::constructor)
 		.destruct(&UFileSystem::destruct)

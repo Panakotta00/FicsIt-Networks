@@ -75,6 +75,7 @@
     <ClInclude Include="ModuleSystemPanel.h" />
     <ClInclude Include="NetworkAdapter.h" />
     <ClInclude Include="NetworkCable_Holo.h" />
+    <ClInclude Include="NetworkCircuit.h" />
     <ClInclude Include="NetworkConnector.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -98,6 +99,7 @@
     <ClCompile Include="ModuleSystemPanel.cpp" />
     <ClCompile Include="NetworkAdapter.cpp" />
     <ClCompile Include="NetworkCable_Holo.cpp" />
+    <ClCompile Include="NetworkCircuit.cpp" />
     <ClCompile Include="NetworkComponent.cpp" />
     <ClCompile Include="NetworkConnector.cpp" />
     <ClCompile Include="FicsItNetworks.cpp" />

@@ -42,20 +42,49 @@ struct FactoryHook {
 
 extern std::map<SML::Objects::FWeakObjectPtr, FactoryHook> hooks;
 
+struct LuaObjectPtr {
+protected:
+	SML::Objects::FWeakObjectPtr ptr;
+
+public:
+	LuaObjectPtr(SML::Objects::UObject* obj);
+	virtual ~LuaObjectPtr();
+
+	virtual SML::Objects::UObject* getObject() const;
+};
+
+struct LuaComponentPtr : public LuaObjectPtr {
+protected:
+	SML::Objects::FWeakObjectPtr comp;
+
+public:
+	LuaComponentPtr(SML::Objects::UObject* obj, SML::Objects::UObject* component);
+	virtual ~LuaComponentPtr();
+
+	virtual SML::Objects::UObject* getObject() const override;
+};
+
 struct LuaFile {
 	std::unique_ptr<FileSystemFileStream> file;
 };
 
 struct LuaClass {
-	SML::Objects::FWeakObjectPtr obj;
+	LuaObjectPtr* ptr;
+
+	LuaClass(SML::Objects::UObject* obj, SML::Objects::UObject* component = nullptr);
+	~LuaClass();
 };
 
 struct LuaClassFunc : public LuaClass {
 	std::uint16_t func;
+
+	LuaClassFunc(SML::Objects::UObject* obj, std::uint16_t func, SML::Objects::UObject* component = nullptr);
 };
 
 struct LuaClassUFunc : public LuaClass {
 	SML::Objects::UFunction* func;
+
+	LuaClassUFunc(SML::Objects::UObject* obj, SML::Objects::UFunction* func, SML::Objects::UObject* component = nullptr);
 };
 
 void luaInit();
@@ -68,7 +97,7 @@ struct LuaFunc {
 LuaDataType propertyToLua(lua_State* L, SML::Objects::UProperty* p, void* data);
 LuaDataType luaToProperty(lua_State* L, SML::Objects::UProperty* p, void* data, int i);
 void registerClass(SDK::UClass* clazz, std::vector<LuaFunc> functions);
-bool newInstance(lua_State* L, SDK::UObject* obj);
+bool newInstance(lua_State* L, SDK::UObject* obj, SDK::UObject* component = nullptr);
 inline SML::Objects::UObject* getObjInstance(lua_State* L, int index, SML::Objects::UClass* c) {
 	if (!lua_istable(L, index)) return nullptr;
 	lua_getfield(L, index, "__object");

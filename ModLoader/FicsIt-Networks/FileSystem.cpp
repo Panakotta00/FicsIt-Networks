@@ -22,6 +22,14 @@ UObject* IFileSystemComponent::findComponent(FGuid guid) const {
 	return INetworkComponent::findComponent(guid, searched, (UObject*)self());
 }
 
+UNetworkCircuit * IFileSystemComponent::getCircuit() const {
+	return self()->circuit;
+}
+
+void IFileSystemComponent::setCircuit(UNetworkCircuit * circuit) {
+	self()->circuit = circuit;
+}
+
 void(UFileSystem::*beginPlay_f)() = nullptr;
 void(UFileSystem::*tick_f)(float, ELevelTick, void*) = nullptr;
 void UFileSystem::constructor() {
