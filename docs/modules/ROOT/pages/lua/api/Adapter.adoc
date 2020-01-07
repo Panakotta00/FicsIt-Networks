@@ -54,6 +54,21 @@ Return Values::
 |Array of inventory representations containing a entry for each inventory
 |===
 
+==== `NetworkConnector[] getNetworkConnectors()`
+
+Returns all network connectors of the actor.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|NetworkConnector[]
+|NetworkConnector[]
+|Array of network connectors containing a entry for each connector
+|===
+
 == Factory (extends Actor)
 
 A factory is a buildable able of processing stuff like items and energy.
@@ -235,6 +250,35 @@ Parameters::
 |the new selected recipe.
 |===
 
+== `NetworkConnector`
+
+A network connector is basically the point were you can connect a network cable to.
+
+=== Signals
+
+==== `NetworkUpdate(int type, string component)`
+
+Signals when changes apply to the component network.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|type
+|int
+|The type allows to further distinguisch between different network events.
+
+Types::
++
+- 0 Component got added
+- 1 Component got removed
+
+|component
+|string
+|id of the component wich is the reason for the signal
+|===
 
 
 include::partial$api_footer.adoc[]
