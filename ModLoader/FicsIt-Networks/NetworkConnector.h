@@ -9,6 +9,7 @@
 #include <SDK.hpp>
 
 #include "NetworkComponent.h"
+#include "LuaImplementation.h"
 
 class UNetworkConnector;
 
@@ -65,6 +66,17 @@ public:
 	virtual SML::Objects::UObject* findComponent(SML::Objects::FGuid guid) const override;
 	virtual UNetworkCircuit* getCircuit() const override;
 	virtual void setCircuit(UNetworkCircuit * circuit) override;
+	virtual void notifyNetworkUpdate(int type, std::set<SML::Objects::FWeakObjectPtr> nodes);
+};
+
+class INetworkConnectorLua : public ILuaImplementation {
+private:
+	UNetworkConnector* self() const;
+
+public:
+	virtual void luaAddSignalListener(ULuaContext* ctx) override;
+	virtual void luaRemoveSignalListener(ULuaContext* ctx) override;
+	virtual SML::Objects::TArray<ULuaContext*> luaGetSignalListeners() override;
 };
 
 class UNetworkConnector : public SDK::USceneComponent{
@@ -79,10 +91,13 @@ public:
 	UNetworkCircuit* circuit;
 	ISaveI saveI;
 	INetworkConnectorComponent component;
+	INetworkConnectorLua luaImpl;
+
 	std::unordered_set<UNetworkConnector*> connections;
 	std::unordered_set<SDK::AFGBuildable*> cables;
 	std::unordered_set<SML::Objects::UObject*> components;
 	std::unordered_set<SML::Objects::UObject*> merged;
+	std::set<SML::Objects::FWeakObjectPtr> listeners;
 
 	void construct();
 	void destruct();
@@ -97,6 +112,7 @@ public:
 	bool isConnected(UNetworkConnector* cable);
 	bool searchFor(UNetworkConnector* conn);
 
+	void execNetworkUpdate(SML::Objects::FFrame& stack, void* params);
 	static void execAddConn(UNetworkConnector* self, SML::Objects::FFrame& stack, void* params);
 	static void execRemConn(UNetworkConnector* self, SML::Objects::FFrame& stack, void* params);
 	static void execAddCable(UNetworkConnector* self, SML::Objects::FFrame& stack, void* params);

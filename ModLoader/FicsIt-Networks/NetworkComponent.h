@@ -26,8 +26,8 @@ public:
 	virtual SML::Objects::TArray<SML::Objects::UObject*> getConnected() const;
 	virtual SML::Objects::UObject* findComponent(SML::Objects::FGuid guid) const = 0;
 	virtual UNetworkCircuit* getCircuit() const = 0;
-	virtual void setCircuit(UNetworkCircuit* circuit) = 0
-		;
+	virtual void setCircuit(UNetworkCircuit* circuit) = 0;
+	virtual void notifyNetworkUpdate(int type, std::set<SML::Objects::FWeakObjectPtr> nodes);
 
 	SML::Objects::UObject* findComponent(SML::Objects::FGuid guid, std::set<SML::Objects::UObject*>& searched, SML::Objects::UObject* self) const;
 };

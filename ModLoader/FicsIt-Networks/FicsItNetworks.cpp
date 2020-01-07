@@ -298,8 +298,10 @@ void loadClasses() {
 		.func(Paks::FunctionBuilder::method("removeCable").native(&UNetworkConnector::execRemCable).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "cable").classFunc(SDK::AFGBuildable::StaticClass)))
 		.func(Paks::FunctionBuilder::method("addMerged").native(&UNetworkConnector::execAddMerged).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "merged").classFunc(UObject::staticClass)))
 		.func(Paks::FunctionBuilder::method("addComponent").native(&UNetworkConnector::execAddMerged).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "component").classFunc(UObject::staticClass)))
+		.func(Paks::FunctionBuilder::method("luaSig_NetworkUpdate").native(&UNetworkConnector::execNetworkUpdate).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "type").off(0)).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "component").off(8)))
 		.interfaceImpl(Paks::FImplementedInterfaceParams(saveI, (size_t)&((UNetworkConnector*)nullptr)->saveI))
 		.interfaceImpl(Paks::FImplementedInterfaceParams(UNetworkComponent::staticClass, offsetof(UNetworkConnector, component)))
+		.interfaceImpl(Paks::FImplementedInterfaceParams(ULuaImplementation::staticClass, offsetof(UNetworkConnector, luaImpl)))
 		.build();
 
 	Paks::ClassBuilder<UComponentUtility>::Basic()

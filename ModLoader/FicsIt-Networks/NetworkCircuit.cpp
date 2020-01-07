@@ -51,6 +51,16 @@ UNetworkCircuit* UNetworkCircuit::operator+(UNetworkCircuit* circuit) {
 			continue;
 		}
 		comp->setCircuit(to);
+		comp->notifyNetworkUpdate(0, to->nodes);
+	}
+	for (auto& node : to->nodes) {
+		INetworkComponent* comp;
+		try {
+			comp = ((INetworkComponent*)((size_t)node.get() + node->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+		} catch (...) {
+			continue;
+		}
+		comp->notifyNetworkUpdate(0, from->nodes);
 	}
 	to->nodes.merge(from->nodes);
 

@@ -101,10 +101,11 @@ bool newInstance(lua_State* L, SDK::UObject* obj, SDK::UObject* component = null
 inline SML::Objects::UObject* getObjInstance(lua_State* L, int index, SML::Objects::UClass* c) {
 	if (!lua_istable(L, index)) return nullptr;
 	lua_getfield(L, index, "__object");
-	auto o = (SML::Objects::FWeakObjectPtr*) luaL_checkudata(L, -1, "WeakObjPtr");
+	auto ud = (LuaObjectPtr*) luaL_checkudata(L, -1, "WeakObjPtr");
+	SML::Objects::UObject* o;
 	lua_pop(L, 1);
-	if (!o || !o->isValid()) return nullptr;
-	if (o->get()->isA(c)) return o->get();
+	if (!ud || !(o = ud->getObject())) return nullptr;
+	if (o->isA(c)) return o;
 	return nullptr;
 }
 template<class T>
@@ -114,7 +115,7 @@ inline T* getObjInstance(lua_State* L, int index) {
 inline SML::Objects::UClass* getClassInstance(lua_State* L, int index, SML::Objects::UClass* c) {
 	if (!lua_istable(L, index)) return nullptr;
 	lua_getfield(L, index, "__object");
-	auto o = (SML::Objects::UClass*) ((SML::Objects::FWeakObjectPtr*) luaL_checkudata(L, -1, "WeakObjPtr"))->get();
+	auto o = (SML::Objects::UClass*) ((LuaObjectPtr*) luaL_checkudata(L, -1, "WeakObjPtr"))->getObject();
 	lua_pop(L, 1);
 	if (!o || !o->isA(SML::Objects::UClass::staticClass())) return nullptr;
 	auto c1 = o;

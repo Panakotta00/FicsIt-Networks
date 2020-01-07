@@ -172,10 +172,9 @@ void ULuaContext::execSignalSlot(ULuaContext * self, SML::Objects::FFrame & stac
 	auto sig = std::shared_ptr<SignalProperty>(new SignalProperty{stack.nativeFunc, (void*)((size_t)malloc(stack.nativeFunc->parmsSize)), self});
 	
 	memset((void*)((size_t)sig->data), 0, stack.nativeFunc->parmsSize);
-	size_t off = 0;
 	for (auto p : *stack.nativeFunc) {
-		auto dp = (void*)((size_t)sig->data + off);
-		off += ((SML::Objects::UProperty*)p)->elemSize;
+		auto dp = (void*)((size_t)sig->data + ((SML::Objects::UProperty*)p)->internalOffset);
+		((SML::Objects::UProperty*)p)->initValue(dp);
 		if (stack.code) stack.step(stack.obj, dp);
 		else stack.stepProp(dp, (SML::Objects::UProperty*)p);
 	}

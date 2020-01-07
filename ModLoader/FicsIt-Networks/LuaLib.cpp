@@ -113,6 +113,19 @@ void luaInit() {
 				lua_seti(L, -2, i++);
 			}
 			return 1;
+		}},
+		{"getNetworkConnectors", [](auto L, auto nargs, auto obj) {
+			lua_newtable(L);
+			int i = 1;
+			for (auto f : *obj->clazz) {
+				auto p = (UProperty*)f;
+				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
+				auto v = *p->getValue<UNetworkConnector*>(obj);
+				if (!v || !v->IsA((SDK::UClass*)UNetworkConnector::staticClass())) continue;
+				newInstance(L, v);
+				lua_seti(L, -2, i++);
+			}
+			return 1;
 		}}
 	};
 	classes[SDK::UFGInventoryComponent::StaticClass()] = std::vector<LuaFunc>{
@@ -855,7 +868,6 @@ void luaListen(UObject* o) {
 				o->findFunction(L"luaAddSignalListener")->invoke(o, &ctx);
 				ctx->signalSources.push_back(std::unique_ptr<SignalSource>(new SignalSourceProperty(ctx, o)));
 			}
-
 		}
 	}
 	if (o && o->clazz->implements(UNetworkComponent::staticClass())) {

@@ -6,11 +6,6 @@
 using namespace SML;
 using namespace SML::Objects;
 
-/*void UNetworkComponent::construct() {
-	Utility::warning("niiiiiicccceee!!!!");
-	circuit = nullptr;
-}*/
-
 void UNetworkComponent::getID_exec(UNetworkComponent * c, FFrame& stack, void * params) {
 	stack.code += !!stack.code;
 
@@ -71,6 +66,8 @@ TArray<UObject*> INetworkComponent::getMerged() const {
 TArray<UObject*> INetworkComponent::getConnected() const {
 	return TArray<UObject*>();
 }
+
+void INetworkComponent::notifyNetworkUpdate(int type, std::set<FWeakObjectPtr> nodes) {}
 
 UObject* INetworkComponent::findComponent(FGuid guid, std::set<UObject*>& searched, UObject* self) const {
 	if (searched.find(self) != searched.end()) return nullptr;

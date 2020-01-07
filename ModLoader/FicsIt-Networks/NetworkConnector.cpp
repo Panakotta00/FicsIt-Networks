@@ -50,7 +50,28 @@ void UNetworkConnector::removeConnector(UNetworkConnector * connector) {
 	if (!searchFor(connector)) {
 		connector->circuit = (UNetworkCircuit*)UNetworkCircuit::staticClass()->constructObject((Objects::UObject*)Functions::getWorld(), L"");
 		connector->circuit->recalculate((Objects::UObject*)connector);
+		
+		for (auto n : circuit->nodes) {
+			if (connector->circuit->nodes.find(n) != connector->circuit->nodes.end()) continue;
+			INetworkComponent* comp;
+			try {
+				comp = ((INetworkComponent*)((size_t)n.get() + n->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+			} catch (...) {
+				continue;
+			}
+			comp->notifyNetworkUpdate(1, connector->circuit->nodes);
+		}
 		circuit->recalculate((Objects::UObject*)this);
+		for (auto n : connector->circuit->nodes) {
+			if (circuit->nodes.find(n) != circuit->nodes.end()) continue;
+			INetworkComponent* comp;
+			try {
+				comp = ((INetworkComponent*)((size_t)n.get() + n->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+			} catch (...) {
+				continue;
+			}
+			comp->notifyNetworkUpdate(1, circuit->nodes);
+		}
 	}
 }
 
@@ -67,11 +88,13 @@ void UNetworkConnector::construct() {
 	saveI.Vtable = *((void**)new IFGSaveInterface());
 
 	new (&component) INetworkConnectorComponent();
+	new (&luaImpl) INetworkConnectorLua();
 
 	new (&connections) std::unordered_set<UNetworkConnector*>();
 	new (&cables) std::unordered_set<SDK::AFGBuildable*>();
 	new (&components) std::unordered_set<UObject*>();
 	new (&merged) std::unordered_set<UObject*>();
+	new(&listeners) std::set<FWeakObjectPtr>();
 	new (&id) FGuid();
 
 	idCreated = false;
@@ -86,6 +109,7 @@ void UNetworkConnector::destruct() {
 	cables.~unordered_set();
 	components.~unordered_set();
 	merged.~unordered_set();
+	listeners.~set();
 }
 
 void UNetworkConnector::beginPlay() {
@@ -195,7 +219,7 @@ bool UNetworkConnector::searchFor(UNetworkConnector * conn) {
 }
 
 UNetworkConnector * INetworkConnectorComponent::self() const {
-	return (UNetworkConnector*)((size_t)this - offsetof(UNetworkConnector, component));;
+	return (UNetworkConnector*)((size_t)this - offsetof(UNetworkConnector, component));
 }
 
 FGuid INetworkConnectorComponent::getID() const {
@@ -248,6 +272,34 @@ UNetworkCircuit * INetworkConnectorComponent::getCircuit() const {
 
 void INetworkConnectorComponent::setCircuit(UNetworkCircuit * circuit) {
 	self()->circuit = circuit;
+}
+
+void INetworkConnectorComponent::notifyNetworkUpdate(int type, std::set<SML::Objects::FWeakObjectPtr> nodes) {
+	if (self()->listeners.size() < 1) return;
+	auto func = ((UObject*)self())->findFunction(L"luaSig_NetworkUpdate");
+	for (auto node : nodes) {
+		struct {
+			std::int32_t t;
+			FString n;
+		} params;
+		params.t = type;
+		INetworkComponent* comp;
+		try {
+			comp = ((INetworkComponent*)((size_t)node.get() + node->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+		} catch (...) {
+			continue;
+		}
+		params.n = comp->getID().toStr().c_str();
+		func->invoke((UObject*)self(), &params);
+	}
+}
+
+void UNetworkConnector::execNetworkUpdate(SML::Objects::FFrame & stack, void * params) {
+	FString s1;
+	int i;
+	stack.stepCompIn(&i);
+	stack.stepCompIn(&s1);
+	stack.code += !!stack.code;
 }
 
 void UNetworkConnector::execAddConn(UNetworkConnector* self, FFrame& stack, void* params) {
@@ -309,3 +361,23 @@ SML::Objects::UClass * UNetworkConnector::staticClass() {
 	return Paks::ClassBuilder<UNetworkConnector>::staticClass();
 }
 
+UNetworkConnector * INetworkConnectorLua::self() const {
+	return (UNetworkConnector*)((size_t)this - offsetof(UNetworkConnector, luaImpl));;
+}
+
+void INetworkConnectorLua::luaAddSignalListener(ULuaContext * ctx) {
+	if (self()->listeners.find((UObject*)ctx) != self()->listeners.end()) return;
+	self()->listeners.insert((UObject*)ctx);
+}
+
+void INetworkConnectorLua::luaRemoveSignalListener(ULuaContext * ctx) {
+	self()->listeners.erase((UObject*)ctx);
+}
+
+TArray<ULuaContext*> INetworkConnectorLua::luaGetSignalListeners() {
+	TArray<ULuaContext*> listeners;
+	for (auto& listener : self()->listeners) {
+		listeners.add((ULuaContext*)*listener);
+	}
+	return listeners;
+}

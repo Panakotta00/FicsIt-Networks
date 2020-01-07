@@ -5,7 +5,11 @@
 #include <SDK.hpp>
 #include <assets/BPInterface.h>
 
+class UNetworkConnector;
+
 class UNetworkCircuit : public SML::Objects::UObject {
+	friend UNetworkConnector;
+
 private:
 	std::set<SML::Objects::FWeakObjectPtr> nodes;
 
