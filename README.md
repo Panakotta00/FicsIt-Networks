@@ -53,10 +53,8 @@ You can find the detailed progress in the [project board](https://github.com/Cod
 
 Until first release:
 - Transportable File System (items holding file systems like hard drives)
-- Documentation
 - fixing some bugs
-- make component representation invalid when component gets disconnected
-- add signals and function to check if power circuite fused and when component network updates
+- add signals and function to check if power circuit fused
 - reimplement module system
 - add more functions to make component lookup/search easier
 - add component nick system
