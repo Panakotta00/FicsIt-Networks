@@ -62,6 +62,7 @@ public:
 	virtual ~LuaComponentPtr();
 
 	virtual SML::Objects::UObject* getObject() const override;
+	virtual SML::Objects::UObject* getComponent() const;
 };
 
 struct LuaFile {
@@ -89,15 +90,26 @@ struct LuaClassUFunc : public LuaClass {
 
 void luaInit();
 
+struct LuaFuncContext {
+	SML::Objects::UObject* obj;
+	SML::Objects::UObject* compObj;
+	INetworkComponent* compImpl;
+
+	LuaFuncContext(SML::Objects::UObject* obj, SML::Objects::UObject* comp = nullptr);
+
+	SML::Objects::UObject* operator*();
+	SML::Objects::UObject* operator->();
+};
+
 struct LuaFunc {
 	std::string name;
-	std::function<int(lua_State*, long, SML::Objects::UObject*)> func;
+	std::function<int(lua_State*, long, LuaFuncContext&)> func;
 };
 
 LuaDataType propertyToLua(lua_State* L, SML::Objects::UProperty* p, void* data);
 LuaDataType luaToProperty(lua_State* L, SML::Objects::UProperty* p, void* data, int i);
 void registerClass(SDK::UClass* clazz, std::vector<LuaFunc> functions);
-bool newInstance(lua_State* L, SDK::UObject* obj, SDK::UObject* component = nullptr);
+bool newInstance(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* component = nullptr);
 inline SML::Objects::UObject* getObjInstance(lua_State* L, int index, SML::Objects::UClass* c) {
 	if (!lua_istable(L, index)) return nullptr;
 	lua_getfield(L, index, "__object");

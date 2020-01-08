@@ -49,6 +49,10 @@ UObject * LuaComponentPtr::getObject() const {
 	return o;
 }
 
+SML::Objects::UObject * LuaComponentPtr::getComponent() const {
+	return comp.get();
+}
+
 LuaClass::LuaClass(SML::Objects::UObject * obj, SML::Objects::UObject * component) {
 	if (component) ptr = new LuaComponentPtr(obj, component);
 	else ptr = new LuaObjectPtr(obj);
@@ -81,9 +85,9 @@ void luaInit() {
 			for (UField* f : *obj->clazz) {
 				auto p = (UProperty*)f;
 				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
-				auto v = *p->getValue<SDK::UFGPowerConnectionComponent*>(obj);
+				auto v = *p->getValue<SDK::UFGPowerConnectionComponent*>(*obj);
 				if (!v || !v->IsA(SDK::UFGPowerConnectionComponent::StaticClass())) continue;
-				newInstance(L, v);
+				newInstance(L, v, obj.compObj);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -94,9 +98,9 @@ void luaInit() {
 			for (auto f : *obj->clazz) {
 				auto p = (UProperty*)f;
 				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
-				auto v = *p->getValue<SDK::UFGFactoryConnectionComponent*>(obj);
+				auto v = *p->getValue<SDK::UFGFactoryConnectionComponent*>(*obj);
 				if (!v || !v->IsA(SDK::UFGFactoryConnectionComponent::StaticClass())) continue;
-				newInstance(L, v);
+				newInstance(L, v, obj.compObj);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -107,9 +111,9 @@ void luaInit() {
 			for (auto f : *obj->clazz) {
 				auto p = (UProperty*)f;
 				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
-				auto v = *p->getValue<SDK::UFGInventoryComponent*>(obj);
+				auto v = *p->getValue<SDK::UFGInventoryComponent*>(*obj);
 				if (!v || !v->IsA(SDK::UFGInventoryComponent::StaticClass())) continue;
-				newInstance(L, v);
+				newInstance(L, v, obj.compObj);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -120,9 +124,9 @@ void luaInit() {
 			for (auto f : *obj->clazz) {
 				auto p = (UProperty*)f;
 				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
-				auto v = *p->getValue<UNetworkConnector*>(obj);
+				auto v = *p->getValue<UNetworkConnector*>(*obj);
 				if (!v || !v->IsA((SDK::UClass*)UNetworkConnector::staticClass())) continue;
-				newInstance(L, v);
+				newInstance(L, v, obj.compObj);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -130,7 +134,7 @@ void luaInit() {
 	};
 	classes[SDK::UFGInventoryComponent::StaticClass()] = std::vector<LuaFunc>{
 		{"getStack", [](auto L, auto args, auto o) {
-			auto c = (SDK::UFGInventoryComponent*)(o);
+			auto c = (SDK::UFGInventoryComponent*)(*o);
 
 			SDK::FInventoryStack stack;
 			for (int i = 1; i <= args; ++i) {
@@ -141,113 +145,113 @@ void luaInit() {
 
 			return args;
 		}},
-		{"getItemCount", [](lua_State* L, long nargs, UObject* o) {
-			auto i = (SDK::UFGInventoryComponent*)(o);
+		{"getItemCount", [](auto L, auto nargs, auto o) {
+			auto i = (SDK::UFGInventoryComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushinteger(L, i->GetNumItems(nullptr));
 			return 1;
 		}},
-		{"getSize", [](lua_State* L, long nargs, UObject* o) {
-			auto i = (SDK::UFGInventoryComponent*)(o);
+		{"getSize", [](auto L, auto nargs, auto o) {
+			auto i = (SDK::UFGInventoryComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushinteger(L, i->GetSizeLinear());
 			return 1;
 		}},
-		{"sort", [](lua_State* L, long nargs, UObject* o) {
-			auto i = (SDK::UFGInventoryComponent*)(o);
+		{"sort", [](auto L, auto nargs, auto o) {
+			auto i = (SDK::UFGInventoryComponent*)(*o);
 			i->SortInventory();
 			return 0;
 		}},
 	};
 	classes[SDK::UFGPowerConnectionComponent::StaticClass()] = std::vector<LuaFunc>{
-		{"getConnections", [](lua_State* L, long nargs, UObject* o) {
-			auto c = (SDK::UFGPowerConnectionComponent*)(o);
+		{"getConnections", [](auto L, auto nargs, auto o) {
+			auto c = (SDK::UFGPowerConnectionComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushinteger(L, c->GetNumConnections());
 			return 1;
 		}},
-		{"getMaxConnections", [](lua_State* L, long nargs, UObject* o) {
-			auto c = (SDK::UFGPowerConnectionComponent*)(o);
+		{"getMaxConnections", [](auto L, auto nargs, auto o) {
+			auto c = (SDK::UFGPowerConnectionComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushinteger(L, c->GetMaxNumConnections());
 			return 1;
 		}},
-		{"getPower", [](lua_State* L, long nargs, UObject* o) {
-			auto c = (SDK::UFGPowerConnectionComponent*)(o);
+		{"getPower", [](auto L, auto nargs, auto o) {
+			auto c = (SDK::UFGPowerConnectionComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, c->GetPowerInfo());
+			newInstance(L, c->GetPowerInfo(), o.compObj);
 			return 1;
 		}},
-		{"getCircuit", [](lua_State* L, long nargs, UObject* o) {
-			auto c = (SDK::UFGPowerConnectionComponent*)(o);
+		{"getCircuit", [](auto L, auto nargs, auto o) {
+			auto c = (SDK::UFGPowerConnectionComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, c->GetPowerCircuit());
+			newInstance(L, c->GetPowerCircuit(), o.compObj);
 			return 1;
 		}},
 	};
 	classes[SDK::UFGPowerInfoComponent::StaticClass()] = std::vector<LuaFunc>{
-		{"getDynProduction", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerInfoComponent*)(o);
+		{"getDynProduction", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushnumber(L, p->GetRegulatedDynamicProduction());
 			return 1;
 		}},
-		{"getBaseProduction", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerInfoComponent*)(o);
+		{"getBaseProduction", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushnumber(L, p->GetBaseProduction());
 			return 1;
 		}},
-		{"getMaxDynProduction", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerInfoComponent*)(o);
+		{"getMaxDynProduction", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushnumber(L, p->GetDynamicProductionCapacity());
 			return 1;
 		}},
-		{"getTargetConsumption", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerInfoComponent*)(o);
+		{"getTargetConsumption", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushnumber(L, p->GetTargetConsumption());
 			return 1;
 		}},
-		{"getConsumption", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerInfoComponent*)(o);
+		{"getConsumption", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushnumber(L, p->GetBaseProduction());
 			return 1;
 		}},
-		{"getCircuit", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerInfoComponent*)(o);
+		{"getCircuit", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, p->GetPowerCircuit());
+			newInstance(L, p->GetPowerCircuit(), o.compObj);
 			return 1;
 		}},
-		{"hasPower", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerInfoComponent*)(o);
+		{"hasPower", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushboolean(L, p->HasPower());
 			return 1;
 		}}
 	};
 	classes[SDK::UFGPowerCircuit::StaticClass()] = std::vector<LuaFunc>{
-		{"getProduction", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerCircuit*)(o);
+		{"getProduction", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerCircuit*)(*o);
 			lua_pop(L, nargs);
 			SDK::FPowerCircuitStats stats;
 			p->GetStats(&stats);
 			lua_pushnumber(L, stats.PowerProduced);
 			return 1;
 		}},
-		{"getConsumption", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerCircuit*)(o);
+		{"getConsumption", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerCircuit*)(*o);
 			lua_pop(L, nargs);
 			SDK::FPowerCircuitStats stats;
 			p->GetStats(&stats);
 			lua_pushnumber(L, stats.PowerConsumed);
 			return 1;
 		}},
-		{"getProductionCapacity", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGPowerCircuit*)(o);
+		{"getProductionCapacity", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerCircuit*)(*o);
 			lua_pop(L, nargs);
 			SDK::FPowerCircuitStats stats;
 			p->GetStats(&stats);
@@ -256,33 +260,33 @@ void luaInit() {
 		}},
 	};
 	classes[SDK::UFGFactoryConnectionComponent::StaticClass()] = std::vector<LuaFunc>{
-		{"getType", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGFactoryConnectionComponent*)(o);
+		{"getType", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGFactoryConnectionComponent*)(*o);
 			lua_pop(L, nargs);
 			
 			lua_pushinteger(L, (int)p->mConnector);
 			return 1;
 		}},
-		{"getDirection", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGFactoryConnectionComponent*)(o);
+		{"getDirection", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGFactoryConnectionComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushinteger(L, (int)p->mDirection);
 			return 1;
 		}},
-		{"isConnected", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGFactoryConnectionComponent*)(o);
+		{"isConnected", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGFactoryConnectionComponent*)(*o);
 			lua_pop(L, nargs);
 			lua_pushboolean(L, p->mHasConnectedComponent);
 			return 1;
 		}},
-		{"getInventory", [](lua_State* L, long nargs, UObject* o) {
-			auto p = (SDK::UFGFactoryConnectionComponent*)(o);
+		{"getInventory", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGFactoryConnectionComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, p->mConnectionInventory);
+			newInstance(L, p->mConnectionInventory, o.compObj);
 			return 1;
 		}},
 		{"hook", [](auto L, auto args, auto o) {
-			auto p = (SDK::UFGFactoryConnectionComponent*)(o);
+			auto p = (SDK::UFGFactoryConnectionComponent*)(*o);
 			lua_pop(L, args);
 			try {
 				hooks.at((UObject*)p).refs += 1;
@@ -296,27 +300,27 @@ void luaInit() {
 	classes[SDK::AFGBuildableFactory::StaticClass()] = {
 		{"getProgress", [](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)o)->GetProductionProgress());
+			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)*o)->GetProductionProgress());
 			return 1;
 		}},
 		{"getPowerConsumProducing", [](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)o)->GetProducingPowerConsumption());
+			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)*o)->GetProducingPowerConsumption());
 			return 1;
 		}},
 		{"getProductivity", [](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)o)->GetProductivity());
+			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)*o)->GetProductivity());
 			return 1;
 		}},
 		{"getCycleTime", [](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			lua_pushnumber(L, ((SDK::AFGBuildableManufacturer*)o)->GetProductionCycleTime());
+			lua_pushnumber(L, ((SDK::AFGBuildableManufacturer*)*o)->GetProductionCycleTime());
 			return 1;
 		}},
 		{"getPotential", [](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)o)->GetPendingPotential());
+			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)*o)->GetPendingPotential());
 			return 1;
 		}},
 		{"setPotential", [](auto L, auto args, auto o) {
@@ -326,7 +330,7 @@ void luaInit() {
 			}
 			float p = lua_tonumber(L, -args);
 			lua_pop(L, args);
-			auto f = (SDK::AFGBuildableFactory*)o;
+			auto f = (SDK::AFGBuildableFactory*)*o;
 			float min = f->GetMinPotential();
 			float max = f->GetMaxPossiblePotential();
 			f->SetPendingPotential((min > p) ? min : ((max < p) ? max : p));
@@ -334,30 +338,28 @@ void luaInit() {
 		}},
 		{"getMaxPotential", [](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)o)->GetMaxPossiblePotential());
+			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)*o)->GetMaxPossiblePotential());
 			return 1;
 		}},
 		{"getMinPotential", [](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)o)->GetMinPotential());
+			lua_pushnumber(L, ((SDK::AFGBuildableFactory*)*o)->GetMinPotential());
 			return 1;
 		}},
 	};
 	classes[SDK::AFGBuildableManufacturer::StaticClass()] = {
 		{"getRecipe", [](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			newInstance(L, ((SDK::AFGBuildableManufacturer*)o)->GetCurrentRecipe());
+			newInstance(L, ((SDK::AFGBuildableManufacturer*)*o)->GetCurrentRecipe());
 			return 1;
 		}},
 		{"getRecipes", [](auto L, auto args, auto o) {
 			static void(*get)(SDK::AFGBuildableManufacturer*, TArray<UClass*>*) = nullptr;
 			if (!get) get = (void(*)(SDK::AFGBuildableManufacturer*, TArray<UClass*>*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "AFGBuildableManufacturer::GetAvailableRecipes");
 
-			bool available = true;
-			//if (args > 0) childs = lua_toboolean(L, -args);
 			lua_pop(L, args);
 			TArray<UClass*> recipes;
-			get((SDK::AFGBuildableManufacturer*)o, &recipes);
+			get((SDK::AFGBuildableManufacturer*)*o, &recipes);
 			lua_newtable(L);
 			int in = 1;
 			for (auto i : recipes) {
@@ -384,15 +386,15 @@ void luaInit() {
 			}
 			lua_pop(L, args);
 			TArray<UClass*> recipes;
-			get((SDK::AFGBuildableManufacturer*)o, &recipes);
+			get((SDK::AFGBuildableManufacturer*)*o, &recipes);
 			SDK::FText t;
 			for (auto i : recipes) {
 				if ((UClass*)r == i || (name.size() > 0 && name == getn(&t, (SDK::UFGRecipe*)i)->Get())) {
-					((SDK::AFGBuildableManufacturer*)o)->SetRecipe((SDK::UClass*)i);
+					((SDK::AFGBuildableManufacturer*)*o)->SetRecipe((SDK::UClass*)i);
 					return 0;
 				}
 			}
-			((SDK::AFGBuildableManufacturer*)o)->SetRecipe(nullptr);
+			((SDK::AFGBuildableManufacturer*)*o)->SetRecipe(nullptr);
 			return 0;
 		}},
 	};
@@ -400,44 +402,44 @@ void luaInit() {
 		{"open", [](auto L, auto args, auto o) {
 			std::string mode = "r";
 			if (lua_isstring(L, 2)) mode = lua_tostring(L, 2);
-			luaFile(L, ((UFileSystem*)o)->manager->open(luaL_checkstring(L, 1), mode));
+			luaFile(L, ((UFileSystem*)*o)->manager->open(luaL_checkstring(L, 1), mode));
 			return 1;
 		}},
 		{"createDir", [](auto L, auto args, auto o) {
 			auto path = luaL_checkstring(L, 1);
 			auto all = lua_toboolean(L, 2);
-			((UFileSystem*)o)->manager->createDir(path, all);
+			((UFileSystem*)*o)->manager->createDir(path, all);
 			return 0;
 		}},
 		{"remove", [](auto L, auto args, auto o) {
 			auto path = luaL_checkstring(L, 1);
 			bool all = lua_toboolean(L, 2);
-			((UFileSystem*)o)->manager->remove(path, all);
+			((UFileSystem*)*o)->manager->remove(path, all);
 			return 0;
 		}},
 		{"move", [](auto L, auto args, auto o) {
 			auto from = luaL_checkstring(L, 1);
 			auto to = luaL_checkstring(L, 2);
-			((UFileSystem*)o)->manager->move(from, to);
+			((UFileSystem*)*o)->manager->move(from, to);
 			return 0;
 		}},
 		{"exists", [](auto L, auto args, auto o) {
 			auto path = luaL_checkstring(L, 1);
-			lua_pushboolean(L, ((UFileSystem*)o)->manager->exists(path));
+			lua_pushboolean(L, ((UFileSystem*)*o)->manager->exists(path));
 			return 1;
 		}},
 		{"isFile", [](auto L, auto args, auto o) {
 			auto path = luaL_checkstring(L, 1);
-			lua_pushboolean(L, ((UFileSystem*)o)->manager->isFile(path));
+			lua_pushboolean(L, ((UFileSystem*)*o)->manager->isFile(path));
 			return 1;
 		}},
 		{"isDir", [](auto L, auto args, auto o) {
 			auto path = luaL_checkstring(L, 1);
-			lua_pushboolean(L, ((UFileSystem*)o)->manager->isDir(path));
+			lua_pushboolean(L, ((UFileSystem*)*o)->manager->isDir(path));
 			return 1;
 		}},
 		{"doFile", [](auto L, auto args, auto o) {
-			auto p = ((UFileSystem*)o)->manager->getPath(luaL_checkstring(L, 1), true, false, 1);
+			auto p = ((UFileSystem*)*o)->manager->getPath(luaL_checkstring(L, 1), true, false, 1);
 			if (std::filesystem::is_regular_file(p)) return luaL_argerror(L, 1, "path is no valid file");
 			int n = lua_gettop(L);
 			luaL_dofile(L, p.string().c_str());
@@ -445,25 +447,25 @@ void luaInit() {
 		}},
 		{"loadFile", [](auto L, auto args, auto o) {
 			std::filesystem::path p;
-			p = ((UFileSystem*)o)->manager->getPath(luaL_checkstring(L, 1), true, false, 1);
+			p = ((UFileSystem*)*o)->manager->getPath(luaL_checkstring(L, 1), true, false, 1);
 			if (std::filesystem::is_regular_file(p)) return luaL_argerror(L, 1, "path is no valid file");
 			luaL_loadfile(L, p.string().c_str());
 			return 1;
 		}},
 	};
 	classClasses[SDK::UFGRecipe::StaticClass()] = {
-		{"getName", [=](lua_State* L, long args, UObject* o) {
+		{"getName", [=](auto L, auto args, auto o) {
 			static SDK::FText*(*get)(SDK::FText*, SDK::UFGRecipe*) = nullptr;
 			if (!get) get = (SDK::FText*(*)(SDK::FText*, SDK::UFGRecipe*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGRecipe::GetRecipeName");
 			
 			lua_pop(L, args);
 			SDK::FText n;
-			get(&n, (SDK::UFGRecipe*)o);
+			get(&n, (SDK::UFGRecipe*)*o);
 			std::wstring name = n.Get();
 			lua_pushstring(L, std::string(name.begin(), name.end()).c_str());
 			return 1;
 		}},
-		{"getProducts", [=](lua_State* L, long args, UObject* o) {
+		{"getProducts", [=](auto L, auto args, auto o) {
 			static TArray<SDK::FItemAmount>*(*get)(TArray<SDK::FItemAmount>*, SDK::UFGRecipe*, bool) = nullptr;
 			if (!get) get = (TArray<SDK::FItemAmount>*(*)(TArray<SDK::FItemAmount>*, SDK::UFGRecipe*, bool)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGRecipe::GetProducts");
 			
@@ -471,7 +473,7 @@ void luaInit() {
 			if (args > 0) childs = lua_toboolean(L, -args);
 			lua_pop(L, args);
 			TArray<SDK::FItemAmount> products;
-			get(&products, (SDK::UFGRecipe*)o, childs);
+			get(&products, (SDK::UFGRecipe*)*o, childs);
 			lua_newtable(L);
 			int in = 1;
 			for (auto i : products) {
@@ -482,13 +484,13 @@ void luaInit() {
 			}
 			return 1;
 		}},
-		{"getIngredients", [=](lua_State* L, long args, UObject* o) {
+		{"getIngredients", [=](auto L, auto args, auto o) {
 			static TArray<SDK::FItemAmount>*(*get)(TArray<SDK::FItemAmount>*, SDK::UFGRecipe*) = nullptr;
 			if (!get) get = (TArray<SDK::FItemAmount>*(*)(TArray<SDK::FItemAmount>*, SDK::UFGRecipe*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGRecipe::GetIngredients");
 
 			lua_pop(L, args);
 			TArray<SDK::FItemAmount> ingredients;
-			get(&ingredients, (SDK::UFGRecipe*)o);
+			get(&ingredients, (SDK::UFGRecipe*)*o);
 			lua_newtable(L);
 			int in = 1;
 			for (auto i : ingredients) {
@@ -499,9 +501,9 @@ void luaInit() {
 			}
 			return 1;
 		}},
-		{"getDuration", [=](lua_State* L, long args, UObject* o) {
+		{"getDuration", [=](auto L, auto args, auto o) {
 			lua_pop(L, args);
-			lua_pushnumber(L, recipe->GetManufacturingDuration((SDK::UClass*)o));
+			lua_pushnumber(L, recipe->GetManufacturingDuration((SDK::UClass*)*o));
 			return 1;
 		}}
 	};
@@ -511,7 +513,7 @@ void luaInit() {
 			SDK::FText*(*get)(SDK::FText*, UObject*) = nullptr;
 			if (!get) get = (SDK::FText*(*)(SDK::FText*, UObject*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGItemDescriptor::GetItemName");
 			SDK::FText n;
-			get(&n, o);
+			get(&n, *o);
 			std::wstring name = n.Get();
 			lua_pushstring(L, std::string(name.begin(), name.end()).c_str());
 			return 1;
@@ -650,10 +652,10 @@ int luaClassFunc(lua_State * L) {
 	int args = lua_gettop(L);
 
 	auto& data = *(LuaClassFunc*)lua_touserdata(L, lua_upvalueindex(1));
-	auto o = data.ptr->getObject();
-	auto so = (SDK::UObject*)o;
+	auto o = LuaFuncContext(data.ptr->getObject(), (dynamic_cast<LuaComponentPtr*>(data.ptr)) ? ((LuaComponentPtr*)data.ptr)->getComponent() : nullptr);
+	auto so = (SDK::UObject*)*o;
 
-	if (!o) return luaL_error(L, "component is invalid");
+	if (!*o) return luaL_error(L, "component is invalid");
 
 	int j = 0;
 	for (auto clazz : classes) {
@@ -680,12 +682,12 @@ int luaClassClassFunc(lua_State* L) {
 	int args = lua_gettop(L);
 
 	void** data = (void**)lua_touserdata(L, lua_upvalueindex(1));
-	auto o = (UObject*)data[0];
-	auto so = (SDK::UObject*)o;
+	auto o = LuaFuncContext((UObject*)data[0]);
+	auto so = (SDK::UObject*)*o;
 	if (!o->isValid()) return 0;
 
 	int fj = 0;
-	auto super = (SDK::UClass*)((SDK::UClass*)o)->SuperField;
+	auto super = (SDK::UClass*)((SDK::UClass*)*o)->SuperField;
 	while (super) {
 		std::vector<LuaFunc>* lc = nullptr;
 		try {
@@ -738,7 +740,7 @@ void addPreFuncs(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* boundCo
 	}
 }
 
-bool newInstance(lua_State* L, SDK::UObject* obj, SDK::UObject* component) {
+bool newInstance(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* component) {
 	if (!obj) {
 		lua_pushnil(L);
 		return false;
@@ -824,7 +826,7 @@ int luaComponentProxy(lua_State * L) {
 		if (!s) return luaL_error(L, ("argument #" + std::to_string(i) + " is not a string").c_str());
 		auto comp = ULuaContext::ctx->getComponent(s);
 		if (!comp) lua_pushnil(L);
-		else newInstance(L, (SDK::UObject*)comp, (SDK::UObject*)comp);
+		else newInstance(L, (SDK::UObject*)comp, comp);
 	}
 	return args;
 }
@@ -1213,4 +1215,20 @@ void loadLibs(lua_State* L) {
 	luaL_newmetatable(L, "ClassPtr");
 	luaL_setfuncs(L, luaClassLib, 0);
 	lua_pop(L, 1);
+}
+
+LuaFuncContext::LuaFuncContext(SML::Objects::UObject * obj, SML::Objects::UObject * comp) : obj(obj), compObj(comp) {
+	try {
+		compImpl = ((INetworkComponent*)((size_t)comp + comp->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+	} catch (...) {
+		throw LuaException("Internal Error: Component Implementation not found");
+	}
+}
+
+SML::Objects::UObject* LuaFuncContext::operator*() {
+	return obj;
+}
+
+SML::Objects::UObject* LuaFuncContext::operator->() {
+	return obj;
 }
