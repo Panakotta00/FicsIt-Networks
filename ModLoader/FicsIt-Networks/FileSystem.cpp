@@ -448,3 +448,23 @@ void IFileSystemLua::luaRemoveSignalListener(ULuaContext * ctx) {
 SML::Objects::TArray<ULuaContext*> IFileSystemLua::luaGetSignalListeners() {
 	return self()->listeners;
 }
+
+bool IFileSystemSaveInterface::NeedTransform() {
+	return false;
+}
+
+bool IFileSystemSaveInterface::ShouldSave() {
+	return true;
+}
+
+void IFileSystemSaveInterface::gatherDeps(SML::Objects::TArray<SML::Objects::UObject*>*) {}
+
+void IFileSystemSaveInterface::postLoad(int, int) {}
+
+void IFileSystemSaveInterface::preLoad(int, int) {}
+
+void IFileSystemSaveInterface::postSave(int, int) {}
+
+void IFileSystemSaveInterface::preSave(int, int) {}
+
+SML::Objects::UObject * IFileSystemSaveInterface::_getUObject() const { return nullptr; }

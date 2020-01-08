@@ -237,8 +237,6 @@ void loadClasses() {
 		.build();
 
 	Paks::ClassBuilder<UNetworkComponent>::Interface()
-		//.construct(&UNetworkComponent::construct)
-		//.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "circuit").classFunc(UNetworkCircuit::staticClass))
 		.func(Paks::FunctionBuilder::method("getID").native(&UNetworkComponent::getID_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent | EFunctionFlags::FUNC_Const).param(Paks::PropertyBuilder::retVal(EPropertyClass::Struct, "retVal").off(0).structFunc(fguid_c)))
 		.func(Paks::FunctionBuilder::method("getMerged").native(&UNetworkComponent::getMerged_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent | EFunctionFlags::FUNC_Const).param(Paks::PropertyBuilder::retVal(EPropertyClass::Array, "retVal").off(0)).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "retVal").off(0)))
 		.func(Paks::FunctionBuilder::method("getConnected").native(&UNetworkComponent::getConnected_exec).addFuncFlags(EFunctionFlags::FUNC_Event | EFunctionFlags::FUNC_BlueprintEvent | EFunctionFlags::FUNC_Const).param(Paks::PropertyBuilder::retVal(EPropertyClass::Array, "retVal").off(0)).param(Paks::PropertyBuilder::retVal(EPropertyClass::Object, "retVal").off(0)))
@@ -349,7 +347,7 @@ void loadClasses() {
 		.extendSDK<SDK::AFGEquipment>()
 		.construct(&AEquip_FileSystem::construct)
 		.destruct(&AEquip_FileSystem::destruct)
-		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "FileSystem").classFunc(UFileSystem::staticClass))
+		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "FileSystem").classFunc(UFileSystem::staticClass).saveGame())
 		.func(Paks::FunctionBuilder::method("MoveSelfToItem").native(&AEquip_FileSystem::moveSelfToItem).param(Paks::PropertyBuilder::param(EPropertyClass::Struct, "retVal").structFunc(fiitem_c)))
 		.build()->debug();
 	

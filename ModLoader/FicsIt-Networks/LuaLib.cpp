@@ -753,7 +753,7 @@ bool newInstance(lua_State* L, SDK::UObject* obj, SDK::UObject* component) {
 	else new (ud_o) LuaObjectPtr((UObject*)obj);
 	lua_setfield(L, -2, "__object");
 
-	if (!obj->IsA(SDK::UClass::StaticClass())) {
+	if (!obj->IsA((SDK::UClass*)SML::Objects::UClass::staticClass())) {
 		addPreFuncs(L, obj, (UObject*)component);
 		addCompFuncs(L, (UObject*)obj, (UObject*)component);
 

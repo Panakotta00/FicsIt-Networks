@@ -45,18 +45,14 @@ public:
 };
 
 struct IFileSystemSaveInterface {
-	virtual bool NeedTransform() {
-		return false;
-	}
-	virtual bool ShouldSave() {
-		return true;
-	}
-	virtual void gatherDeps(SML::Objects::TArray<SML::Objects::UObject*>*) {}
-	virtual void postLoad(int, int) {}
-	virtual void preLoad(int, int) {}
-	virtual void postSave(int, int) {}
-	virtual void preSave(int, int) {}
-	virtual SML::Objects::UObject* _getUObject() const { return nullptr; }
+	virtual bool NeedTransform();
+	virtual bool ShouldSave();
+	virtual void gatherDeps(SML::Objects::TArray<SML::Objects::UObject*>*);
+	virtual void postLoad(int, int);
+	virtual void preLoad(int, int);
+	virtual void postSave(int, int);
+	virtual void preSave(int, int);
+	virtual SML::Objects::UObject* _getUObject() const;
 };
 
 class FileSystemManager;
