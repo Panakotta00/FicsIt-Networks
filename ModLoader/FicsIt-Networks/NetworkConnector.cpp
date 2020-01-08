@@ -168,8 +168,16 @@ bool UNetworkConnector::addCable(SDK::AFGBuildable * cable) {
 
 	auto c1 = *p1->getValue<UNetworkConnector*>(cable);
 	auto c2 = *p2->getValue<UNetworkConnector*>(cable);
+	auto c = (c1 == this) ? ((c2 == this) ? nullptr : c2) : c1;
 
-	c1->circuit = c2->circuit = (c1->circuit) ? *c1->circuit + c2->circuit : c2->circuit;
+	if (c->circuit) {
+		if (this->circuit) {
+			circuit = c->circuit = *c1->circuit + c2->circuit;
+		} else {
+			circuit = c->circuit;
+			circuit->recalculate((SML::Objects::UObject*)this);
+		}
+	}
 
 	return true;
 }
