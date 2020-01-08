@@ -258,6 +258,11 @@ void luaInit() {
 			lua_pushnumber(L, stats.PowerProductionCapacity);
 			return 1;
 		}},
+		{"isFuesed", [](auto L, auto nargs, auto o) {
+			auto p = (SDK::UFGPowerCircuit*)(*o);
+			lua_pushboolean(L, p->IsFuseTriggered());
+			return 1;
+		}},
 	};
 	classes[SDK::UFGFactoryConnectionComponent::StaticClass()] = std::vector<LuaFunc>{
 		{"getType", [](auto L, auto nargs, auto o) {
