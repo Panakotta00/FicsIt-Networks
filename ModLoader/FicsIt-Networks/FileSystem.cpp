@@ -342,7 +342,7 @@ void FileSystemFileStream::flush() {
 	stream.flush();
 }
 
-std::string FileSystemFileStream::readChars(int chars) {
+std::string FileSystemFileStream::readChars(size_t chars) {
 	checkOpen();
 	char* buf = new char[chars];
 	try {
@@ -377,14 +377,14 @@ double FileSystemFileStream::readNumber() {
 	return n;
 }
 
-int FileSystemFileStream::seek(std::string str, int off) {
+std::int64_t FileSystemFileStream::seek(std::string str, std::int64_t off) {
 	checkOpen();
 	auto w = std::fstream::cur;
 	if (str == "set") w = std::fstream::beg;
 	else if (str == "cur") w = std::fstream::cur;
 	else if (str == "end") w = std::fstream::end;
 	else throw LuaExceptionArg(2, "no valid whence");
-	return  stream.seekg(off, w).tellg();
+	return stream.seekg(off, w).tellg();
 }
 
 void FileSystemFileStream::close() {

@@ -28,55 +28,74 @@ void FactoryHook::update() {
 	}
 }
 
-
-LuaObjectPtr::LuaObjectPtr(UObject * obj) : ptr(obj) {}
+LuaObjectPtr::LuaObjectPtr(UObject * obj, LuaObjectValidation* validation) : ptr(obj), validation(validation) {}
 
 LuaObjectPtr::~LuaObjectPtr() {}
 
 UObject * LuaObjectPtr::getObject() const {
-	return *ptr;
+	auto p = *ptr;
+	if (!p || !validation.get() || !validation->isValid()) return nullptr;
+	return p;
 }
 
-LuaComponentPtr::LuaComponentPtr(UObject * obj, UObject * component) : LuaObjectPtr(obj), comp(component) {}
-
-LuaComponentPtr::~LuaComponentPtr() {}
-
-UObject * LuaComponentPtr::getObject() const {
-	auto o = *ptr;
-	auto c = *comp;
-	auto con = ULuaContext::ctx->getConnector();
-	if (!o, !c || !con || !con->circuit || !con->circuit->hasNode(c)) return nullptr;
-	return o;
+LuaObjectValidation * LuaObjectPtr::getValidation() const {
+	return validation.get();
 }
 
-SML::Objects::UObject * LuaComponentPtr::getComponent() const {
-	return comp.get();
-}
-
-LuaClass::LuaClass(SML::Objects::UObject * obj, SML::Objects::UObject * component) {
-	if (component) ptr = new LuaComponentPtr(obj, component);
-	else ptr = new LuaObjectPtr(obj);
+LuaClass::LuaClass(SML::Objects::UObject * obj, LuaObjectValidation * validation) {
+	ptr = new LuaObjectPtr(obj, validation);
 }
 
 LuaClass::~LuaClass() {
 	delete ptr;
 }
 
-LuaClassFunc::LuaClassFunc(SML::Objects::UObject * obj, std::uint16_t func, SML::Objects::UObject * component) : LuaClass(obj, component) {
+LuaClassFunc::LuaClassFunc(SML::Objects::UObject * obj, std::uint16_t func, LuaObjectValidation* validation) : LuaClass(obj, validation) {
 	this->func = func;
 }
 
-LuaClassUFunc::LuaClassUFunc(SML::Objects::UObject * obj, SML::Objects::UFunction* func, SML::Objects::UObject * component) : LuaClass(obj, component) {
+LuaClassUFunc::LuaClassUFunc(SML::Objects::UObject * obj, SML::Objects::UFunction* func, LuaObjectValidation* validation) : LuaClass(obj, validation) {
 	this->func = func;
+}
+
+LuaFuncContext::LuaFuncContext(SML::Objects::UObject * obj, LuaObjectValidation* validation) : obj(obj), validation(validation) {}
+
+SML::Objects::UObject* LuaFuncContext::operator*() {
+	return obj;
+}
+
+SML::Objects::UObject* LuaFuncContext::operator->() {
+	return obj;
+}
+
+LuaObjectValidation::LuaObjectValidation(void * obj, LuaObjectValidation * validation) : obj(obj), validation(validation) {
+
+}
+
+LuaObjectValidation::~LuaObjectValidation() {
+
+}
+
+bool LuaObjectValidation::isValid() const {
+	return ((validation) ? validation->isValid() : true) && isValidImpl();
+}
+
+LuaComponentValidation::LuaComponentValidation(SDK::UObject * obj, LuaObjectValidation * validation) : LuaObjectValidation(obj, validation) {}
+
+bool LuaComponentValidation::isValidImpl() const {
+	auto con = ULuaContext::ctx->getConnector();
+	if (!obj || !con || !con->circuit || !con->circuit->hasNode((SML::Objects::UObject*)obj)) return false;
+	return true;
+}
+
+LuaPowerCircuitValidation::LuaPowerCircuitValidation(SDK::UFGPowerCircuit* circuit, SDK::UFGPowerInfoComponent* info, LuaObjectValidation * validation) : LuaObjectValidation(circuit, validation), info(info) {}
+
+bool LuaPowerCircuitValidation::isValidImpl() const {
+	return info->GetPowerCircuit() == ((SDK::UFGPowerCircuit*)obj);
 }
 
 void luaInit() {
 	auto recipe = (SDK::UFGRecipe*) SDK::UFGRecipe::StaticClass()->CreateDefaultObject();
-	try {
-		std::cout << "bla";
-	} catch (LuaException& e) {
-
-	}
 
 	classes[SDK::AActor::StaticClass()] = {
 		{"getPowerConnectors", [](auto L, auto args,  auto obj) {
@@ -87,7 +106,7 @@ void luaInit() {
 				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
 				auto v = *p->getValue<SDK::UFGPowerConnectionComponent*>(*obj);
 				if (!v || !v->IsA(SDK::UFGPowerConnectionComponent::StaticClass())) continue;
-				newInstance(L, v, obj.compObj);
+				newInstance(L, v, obj.validation);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -100,7 +119,7 @@ void luaInit() {
 				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
 				auto v = *p->getValue<SDK::UFGFactoryConnectionComponent*>(*obj);
 				if (!v || !v->IsA(SDK::UFGFactoryConnectionComponent::StaticClass())) continue;
-				newInstance(L, v, obj.compObj);
+				newInstance(L, v, obj.validation);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -113,7 +132,7 @@ void luaInit() {
 				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
 				auto v = *p->getValue<SDK::UFGInventoryComponent*>(*obj);
 				if (!v || !v->IsA(SDK::UFGInventoryComponent::StaticClass())) continue;
-				newInstance(L, v, obj.compObj);
+				newInstance(L, v, obj.validation);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -126,7 +145,7 @@ void luaInit() {
 				if (!(p->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty)) continue;
 				auto v = *p->getValue<UNetworkConnector*>(*obj);
 				if (!v || !v->IsA((SDK::UClass*)UNetworkConnector::staticClass())) continue;
-				newInstance(L, v, obj.compObj);
+				newInstance(L, v, obj.validation);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -138,7 +157,7 @@ void luaInit() {
 
 			SDK::FInventoryStack stack;
 			for (int i = 1; i <= args; ++i) {
-				if (c->GetStackFromIndex(lua_tointeger(L, i), &stack)) {
+				if (c->GetStackFromIndex((int) lua_tointeger(L, i), &stack)) {
 					luaItemStack(L, stack);
 				} else lua_pushnil(L);
 			}
@@ -179,13 +198,13 @@ void luaInit() {
 		{"getPower", [](auto L, auto nargs, auto o) {
 			auto c = (SDK::UFGPowerConnectionComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, c->GetPowerInfo(), o.compObj);
+			newInstance(L, c->GetPowerInfo(), o.validation);
 			return 1;
 		}},
 		{"getCircuit", [](auto L, auto nargs, auto o) {
 			auto c = (SDK::UFGPowerConnectionComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, c->GetPowerCircuit(), o.compObj);
+			newInstance(L, c->GetPowerCircuit(), new LuaPowerCircuitValidation(c->GetPowerCircuit(), c->GetPowerInfo(), o.validation));
 			return 1;
 		}},
 	};
@@ -223,7 +242,7 @@ void luaInit() {
 		{"getCircuit", [](auto L, auto nargs, auto o) {
 			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, p->GetPowerCircuit(), o.compObj);
+			newInstance(L, p->GetPowerCircuit(), new LuaPowerCircuitValidation(p->GetPowerCircuit(), p, o.validation));
 			return 1;
 		}},
 		{"hasPower", [](auto L, auto nargs, auto o) {
@@ -287,7 +306,7 @@ void luaInit() {
 		{"getInventory", [](auto L, auto nargs, auto o) {
 			auto p = (SDK::UFGFactoryConnectionComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, p->mConnectionInventory, o.compObj);
+			newInstance(L, p->mConnectionInventory, o.validation);
 			return 1;
 		}},
 		{"hook", [](auto L, auto args, auto o) {
@@ -333,7 +352,7 @@ void luaInit() {
 				lua_pop(L, args);
 				return 0;
 			}
-			float p = lua_tonumber(L, -args);
+			auto p = (float) lua_tonumber(L, -args);
 			lua_pop(L, args);
 			auto f = (SDK::AFGBuildableFactory*)*o;
 			float min = f->GetMinPotential();
@@ -556,10 +575,10 @@ LuaDataType luaToProperty(lua_State* L, UProperty* p, void* data, int i) {
 		*p->getValue<bool>(data) = lua_toboolean(L, i);
 		return LuaDataType::LUA_BOOL;
 	} else if (c & EClassCastFlags::CAST_UIntProperty) {
-		*p->getValue<std::int32_t>(data) = lua_tointeger(L, i);
+		*p->getValue<std::int32_t>(data) = (std::int32_t) lua_tointeger(L, i);
 		return LuaDataType::LUA_INT;
 	} else if (c & EClassCastFlags::CAST_UFloatProperty) {
-		*p->getValue<float>(data) = lua_tonumber(L, i);
+		*p->getValue<float>(data) = (float) lua_tonumber(L, i);
 		return LuaDataType::LUA_NUM;
 	} else if (c & EClassCastFlags::CAST_UStrProperty) {
 		auto s = lua_tostring(L, i);
@@ -657,12 +676,12 @@ int luaClassFunc(lua_State * L) {
 	int args = lua_gettop(L);
 
 	auto& data = *(LuaClassFunc*)lua_touserdata(L, lua_upvalueindex(1));
-	auto o = LuaFuncContext(data.ptr->getObject(), (dynamic_cast<LuaComponentPtr*>(data.ptr)) ? ((LuaComponentPtr*)data.ptr)->getComponent() : nullptr);
+	auto o = LuaFuncContext(data.ptr->getObject(), data.ptr->getValidation());
 	auto so = (SDK::UObject*)*o;
 
 	if (!*o) return luaL_error(L, "component is invalid");
 
-	int j = 0;
+	size_t j = 0;
 	for (auto clazz : classes) {
 		if (!so->IsA(clazz.first)) continue;
 		std::vector<LuaFunc> lc = clazz.second;
@@ -687,11 +706,11 @@ int luaClassClassFunc(lua_State* L) {
 	int args = lua_gettop(L);
 
 	void** data = (void**)lua_touserdata(L, lua_upvalueindex(1));
-	auto o = LuaFuncContext((UObject*)data[0]);
+	auto o = LuaFuncContext((UObject*)data[0], nullptr);
 	auto so = (SDK::UObject*)*o;
 	if (!o->isValid()) return 0;
 
-	int fj = 0;
+	size_t fj = 0;
 	auto super = (SDK::UClass*)((SDK::UClass*)*o)->SuperField;
 	while (super) {
 		std::vector<LuaFunc>* lc = nullptr;
@@ -715,7 +734,7 @@ int luaClassClassFunc(lua_State* L) {
 	return luaL_error(L, "invalid native function ptr");
 }
 
-void addCompFuncs(lua_State * L, UObject * comp, UObject* boundComp) {
+void addCompFuncs(lua_State * L, UObject * comp, LuaObjectValidation* validation) {
 	if (!comp->clazz->implements(ULuaImplementation::staticClass())) return;
 	ULuaContext* ctx = ULuaContext::ctx;
 	comp->findFunction(L"luaSetup")->invoke(comp, &ctx);
@@ -723,21 +742,21 @@ void addCompFuncs(lua_State * L, UObject * comp, UObject* boundComp) {
 		if (!(f->getName()._Starts_with("lua_") && f->getName().length() > 4)) continue;
 
 		auto comp_ud = (LuaClassUFunc*)lua_newuserdata(L, sizeof(LuaClassUFunc));
-		new (comp_ud) LuaClassUFunc(comp, (UFunction*)f, boundComp);
+		new (comp_ud) LuaClassUFunc(comp, (UFunction*)f, validation);
 		luaL_setmetatable(L, "ClassPtr");
 		lua_pushcclosure(L, componentFunc, 1);
 		lua_setfield(L, -2, f->getName().erase(0, 4).c_str());
 	}
 }
 
-void addPreFuncs(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* boundComp) {
+void addPreFuncs(lua_State* L, SDK::UObject* obj, LuaObjectValidation* validation) {
 	int j = 0;
 	for (auto clazz : classes) {
 		if (!obj->IsA(clazz.first)) continue;
 		for (int i = 0; i < clazz.second.size(); ++i) {
 			auto f = clazz.second[i];
 			auto comp_ud = (LuaClassFunc*)lua_newuserdata(L, sizeof(LuaClassFunc));
-			new (comp_ud) LuaClassFunc((UObject*)obj, j++, boundComp);
+			new (comp_ud) LuaClassFunc((UObject*)obj, j++, validation);
 			luaL_setmetatable(L, "ClassPtr");
 			lua_pushcclosure(L, luaClassFunc, 1);
 			lua_setfield(L, -2, f.name.c_str());
@@ -745,7 +764,7 @@ void addPreFuncs(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* boundCo
 	}
 }
 
-bool newInstance(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* component) {
+bool newInstance(lua_State* L, SDK::UObject* obj, LuaObjectValidation* validation) {
 	if (!obj) {
 		lua_pushnil(L);
 		return false;
@@ -754,15 +773,14 @@ bool newInstance(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* compone
 	lua_newtable(L);
 	luaL_setmetatable(L, "Instance");
 
-	auto ud_o = (LuaObjectPtr*) lua_newuserdata(L, (component) ? sizeof(LuaObjectPtr) : sizeof(LuaComponentPtr));
+	auto ud_o = (LuaObjectPtr*) lua_newuserdata(L, sizeof(LuaObjectPtr));
 	luaL_setmetatable(L, "WeakObjPtr");
-	if (component) new (ud_o) LuaComponentPtr((UObject*)obj, (UObject*)component);
-	else new (ud_o) LuaObjectPtr((UObject*)obj);
+	new (ud_o) LuaObjectPtr((UObject*)obj, validation);
 	lua_setfield(L, -2, "__object");
 
 	if (!obj->IsA((SDK::UClass*)SML::Objects::UClass::staticClass())) {
-		addPreFuncs(L, obj, (UObject*)component);
-		addCompFuncs(L, (UObject*)obj, (UObject*)component);
+		addPreFuncs(L, obj, validation);
+		addCompFuncs(L, (UObject*)obj, validation);
 
 		if (((UObject*)obj)->clazz->implements(ULuaImplementation::staticClass())) {
 			((UObject*)obj)->findFunction(L"luaSetup")->invoke((UObject*)obj, &ULuaContext::ctx);
@@ -776,8 +794,8 @@ bool newInstance(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* compone
 			((UObject*)obj)->findFunction(L"getMerged")->invoke((UObject*)obj, &p);
 			for (auto m : p.merged) {
 				if (!m) continue;
-				addPreFuncs(L, (SDK::UObject*)m, (UObject*)component);
-				addCompFuncs(L, m, (UObject*)component);
+				addPreFuncs(L, (SDK::UObject*)m, validation);
+				addCompFuncs(L, m, validation);
 
 				if (m->clazz->implements(ULuaImplementation::staticClass())) {
 					m->findFunction(L"luaSetup")->invoke(m, &ULuaContext::ctx);
@@ -831,7 +849,7 @@ int luaComponentProxy(lua_State * L) {
 		if (!s) return luaL_error(L, ("argument #" + std::to_string(i) + " is not a string").c_str());
 		auto comp = ULuaContext::ctx->getComponent(s);
 		if (!comp) lua_pushnil(L);
-		else newInstance(L, (SDK::UObject*)comp, comp);
+		else newInstance(L, (SDK::UObject*)comp, new LuaComponentValidation((SDK::UObject*)comp));
 	}
 	return args;
 }
@@ -904,12 +922,12 @@ int luaPullContinue(lua_State* L, int status, lua_KContext ctx) {
 
 int luaPull(lua_State * L) {
 	int args = lua_gettop(L);
-	auto t = 0;
+	std::int64_t t = 0;
 	if (args > 0 && !lua_isnil(L, 1)) t = lua_tointeger(L, 1);
 
 	int a = ULuaContext::ctx->doSignal(L);
 	if (!a) {
-		ULuaContext::ctx->timeout = t;
+		ULuaContext::ctx->timeout = (int) t;
 		ULuaContext::ctx->pullStart = std::chrono::high_resolution_clock::now();
 
 		lua_yieldk(L, 0, 0, luaPullContinue);
@@ -975,7 +993,7 @@ int luaFileRead(lua_State* L) {
 		try {
 			if (lua_isnumber(L, i)) {
 				if (f->file->isEOF()) lua_pushnil(L);
-				int n = lua_tointeger(L, i);
+				auto n = lua_tointeger(L, i);
 				lua_pushstring(L, f->file->readChars(n).c_str());
 			} else {
 				char fo = 'l';
@@ -1032,7 +1050,7 @@ int luaFileLines(lua_State* L) {
 int luaFileSeek(lua_State* L) {
 	auto f = (LuaFile*) luaL_checkudata(L, 1, "File");
 	std::string w = "cur";
-	int off = 0;
+	std::int64_t off = 0;
 	if (lua_isstring(L, 2)) w = lua_tostring(L, 2);
 	if (lua_isinteger(L, 3)) off = lua_tointeger(L, 3);
 	try {
@@ -1220,20 +1238,4 @@ void loadLibs(lua_State* L) {
 	luaL_newmetatable(L, "ClassPtr");
 	luaL_setfuncs(L, luaClassLib, 0);
 	lua_pop(L, 1);
-}
-
-LuaFuncContext::LuaFuncContext(SML::Objects::UObject * obj, SML::Objects::UObject * comp) : obj(obj), compObj(comp) {
-	try {
-		compImpl = ((INetworkComponent*)((size_t)comp + comp->clazz->getImplementation(UNetworkComponent::staticClass()).off));
-	} catch (...) {
-		throw LuaException("Internal Error: Component Implementation not found");
-	}
-}
-
-SML::Objects::UObject* LuaFuncContext::operator*() {
-	return obj;
-}
-
-SML::Objects::UObject* LuaFuncContext::operator->() {
-	return obj;
 }

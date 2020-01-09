@@ -149,11 +149,11 @@ public:
 	virtual void open(std::filesystem::path path, std::string mode);
 	virtual void write(std::string str);
 	virtual void flush();
-	virtual std::string readChars(int chars);
+	virtual std::string readChars(size_t chars);
 	virtual std::string readLine();
 	virtual std::string readAll();
 	virtual double readNumber();
-	virtual int seek(std::string w, int off);
+	virtual std::int64_t seek(std::string w, std::int64_t off);
 	virtual void close();
 	virtual bool isEOF();
 };

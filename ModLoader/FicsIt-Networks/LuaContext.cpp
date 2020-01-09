@@ -57,7 +57,7 @@ void ULuaContext::reset() {
 		lua_close(L);
 	}
 
-	int s = signals.size();
+	auto s = signals.size();
 	for (int i = 0; i < s; ++i) signals.pop();
 
 	L = luaL_newstate();
@@ -96,9 +96,9 @@ void ULuaContext::execSteps(std::int32_t count) {
 
 int ULuaContext::doSignal(lua_State* L) {
 	if (signals.size() < 1) return 0;
-	auto props = 1;
+	int props = 1;
 	lua_pushstring(L, signals.front()->getName().c_str());
-	props += signals.front()->toLua(L);
+	props += (int) signals.front()->toLua(L);
 	signals.pop();
 	return props;
 }
@@ -214,7 +214,7 @@ std::string SignalProperty::getName() const {
 }
 
 int SignalProperty::toLua(lua_State * L) const {
-	size_t props = 1;
+	int props = 1;
 	newInstance(L, (SDK::UObject*)sender);
 	for (auto p : *func) {
 		propertyToLua(L, (SML::Objects::UProperty*)p, data);

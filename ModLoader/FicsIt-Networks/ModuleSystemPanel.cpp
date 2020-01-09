@@ -74,7 +74,7 @@ void UModuleSystemPanel::execAddModule(FFrame & stack, void * ret) {
 
 	FVector min, max;
 	getModuleSpace({(float)X, (float)Y}, rot, {(float)p.x, (float)p.y}, min, max);
-	for (int x = min.X; x <= max.X; ++x) for (int y = min.Y; y <= max.Y; ++y) {
+	for (int x = (int)min.X; x <= max.X; ++x) for (int y = (int)min.Y; y <= max.Y; ++y) {
 		this->grid[x][y] = (SDK::AActor*)module;
 	}
 }

@@ -42,27 +42,40 @@ struct FactoryHook {
 
 extern std::map<SML::Objects::FWeakObjectPtr, FactoryHook> hooks;
 
+struct LuaObjectValidation {
+	void* obj;
+	std::shared_ptr<LuaObjectValidation> validation;
+
+	LuaObjectValidation(void* obj, LuaObjectValidation* validation = nullptr);
+	virtual ~LuaObjectValidation();
+
+	virtual bool isValidImpl() const = 0;
+
+	bool isValid() const;
+};
+
+struct LuaComponentValidation : public LuaObjectValidation {
+	LuaComponentValidation(SDK::UObject* obj, LuaObjectValidation* validation = nullptr);
+	virtual bool isValidImpl() const override;
+};
+
+struct LuaPowerCircuitValidation : public LuaObjectValidation {
+	SDK::UFGPowerInfoComponent* info;
+	LuaPowerCircuitValidation(SDK::UFGPowerCircuit* circuit, SDK::UFGPowerInfoComponent* info, LuaObjectValidation* validation = nullptr);
+	virtual bool isValidImpl() const override;
+};
+
 struct LuaObjectPtr {
 protected:
 	SML::Objects::FWeakObjectPtr ptr;
+	std::shared_ptr<LuaObjectValidation> validation;
 
 public:
-	LuaObjectPtr(SML::Objects::UObject* obj);
-	virtual ~LuaObjectPtr();
+	LuaObjectPtr(SML::Objects::UObject* obj, LuaObjectValidation* validation);
+	~LuaObjectPtr();
 
-	virtual SML::Objects::UObject* getObject() const;
-};
-
-struct LuaComponentPtr : public LuaObjectPtr {
-protected:
-	SML::Objects::FWeakObjectPtr comp;
-
-public:
-	LuaComponentPtr(SML::Objects::UObject* obj, SML::Objects::UObject* component);
-	virtual ~LuaComponentPtr();
-
-	virtual SML::Objects::UObject* getObject() const override;
-	virtual SML::Objects::UObject* getComponent() const;
+	SML::Objects::UObject* getObject() const;
+	LuaObjectValidation* getValidation() const;
 };
 
 struct LuaFile {
@@ -72,30 +85,29 @@ struct LuaFile {
 struct LuaClass {
 	LuaObjectPtr* ptr;
 
-	LuaClass(SML::Objects::UObject* obj, SML::Objects::UObject* component = nullptr);
+	LuaClass(SML::Objects::UObject* obj, LuaObjectValidation* validation = nullptr);
 	~LuaClass();
 };
 
 struct LuaClassFunc : public LuaClass {
 	std::uint16_t func;
 
-	LuaClassFunc(SML::Objects::UObject* obj, std::uint16_t func, SML::Objects::UObject* component = nullptr);
+	LuaClassFunc(SML::Objects::UObject* obj, std::uint16_t func, LuaObjectValidation* validation = nullptr);
 };
 
 struct LuaClassUFunc : public LuaClass {
 	SML::Objects::UFunction* func;
 
-	LuaClassUFunc(SML::Objects::UObject* obj, SML::Objects::UFunction* func, SML::Objects::UObject* component = nullptr);
+	LuaClassUFunc(SML::Objects::UObject* obj, SML::Objects::UFunction* func, LuaObjectValidation* validation = nullptr);
 };
 
 void luaInit();
 
 struct LuaFuncContext {
 	SML::Objects::UObject* obj;
-	SML::Objects::UObject* compObj;
-	INetworkComponent* compImpl;
+	LuaObjectValidation* validation;
 
-	LuaFuncContext(SML::Objects::UObject* obj, SML::Objects::UObject* comp = nullptr);
+	LuaFuncContext(SML::Objects::UObject* obj, LuaObjectValidation* validation);
 
 	SML::Objects::UObject* operator*();
 	SML::Objects::UObject* operator->();
@@ -109,7 +121,7 @@ struct LuaFunc {
 LuaDataType propertyToLua(lua_State* L, SML::Objects::UProperty* p, void* data);
 LuaDataType luaToProperty(lua_State* L, SML::Objects::UProperty* p, void* data, int i);
 void registerClass(SDK::UClass* clazz, std::vector<LuaFunc> functions);
-bool newInstance(lua_State* L, SDK::UObject* obj, SML::Objects::UObject* component = nullptr);
+bool newInstance(lua_State* L, SDK::UObject* obj, LuaObjectValidation* validation = nullptr);
 inline SML::Objects::UObject* getObjInstance(lua_State* L, int index, SML::Objects::UClass* c) {
 	if (!lua_istable(L, index)) return nullptr;
 	lua_getfield(L, index, "__object");

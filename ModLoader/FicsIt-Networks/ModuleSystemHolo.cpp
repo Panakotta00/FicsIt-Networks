@@ -29,7 +29,7 @@ SDK::AActor* AModuleSystemHolo::constructFinal(SML::Objects::TArray<SDK::AActor*
 
 	auto a = (this->*parentConstructFinal)(childs);
 
-	struct Params { UModuleSystemPanel* p; int x; int y; int r; }; Params p{snapped, snappedLoc.X, snappedLoc.Y, snappedRot};
+	struct { UModuleSystemPanel* p; int x; int y; int r; } p {snapped, (int) snappedLoc.X, (int) snappedLoc.Y, (int) snappedRot};
 	((Objects::UObject*)a)->findFunction(L"setPanel")->invoke((Objects::UObject*)a, &p);
 
 	return a;
@@ -38,7 +38,7 @@ SDK::AActor* AModuleSystemHolo::constructFinal(SML::Objects::TArray<SDK::AActor*
 bool AModuleSystemHolo::checkSpace(FVector min, FVector max) {
 	if (min.X < 0 || min.X >= snapped->panelHeight || min.Y < 0 || min.Y >= snapped->panelWidth) return false;
 	if (max.X < 0 || max.X >= snapped->panelHeight || max.Y < 0 || max.Y >= snapped->panelWidth) return false;
-	for (int x = min.X; x <= max.X; x++) for (int y = min.Y; y <= max.Y; y++) {
+	for (int x = (int) min.X; x <= max.X; x++) for (int y = (int) min.Y; y <= max.Y; y++) {
 		if (snapped->grid[x][y]) return false;
 	}
 	return true;
@@ -51,7 +51,7 @@ FVector AModuleSystemHolo::getModuleSize() {
 	};
 	Params p;
 	o->findFunction(L"getModuleSize")->invoke(o, &p);
-	return FVector(p.h, p.w, 0);
+	return FVector((float) p.h, (float) p.w, 0);
 }
 
 bool AModuleSystemHolo::isValidHit(const SDK::FHitResult & hit) {
@@ -117,7 +117,7 @@ void AModuleSystemHolo::setHoloLocAndRot(SDK::FHitResult * hit) {
 	}
 	loc = loc * 10.0;
 
-	SDK::FRotator rot = {0,snappedRot * 90.0,0};
+	SDK::FRotator rot = {0,snappedRot * 90.0f,0};
 	rot = ((SDK::UKismetMathLibrary*)SDK::UKismetMathLibrary::StaticClass()->CreateDefaultObject())->TransformRotation(snapped->K2_GetComponentToWorld(), rot);
 	loc = ((SDK::UKismetMathLibrary*)SDK::UKismetMathLibrary::StaticClass()->CreateDefaultObject())->TransformLocation(snapped->K2_GetComponentToWorld(), loc);
 	this->K2_SetActorLocationAndRotation(loc, rot, false, true, nullptr);

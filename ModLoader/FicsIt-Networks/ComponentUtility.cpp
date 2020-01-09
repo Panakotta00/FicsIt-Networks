@@ -296,12 +296,12 @@ void UComponentUtility::loadSoundFromFile(SML::Objects::FFrame & stack, void * r
 	auto s = strs.str();
 	FByteBulkData* data = ((FByteBulkData*(*)(FFormatContainer*, FName))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FFormatContainer::GetFormat"))(&sw->CompressedFormatData, L"OGG");
 	((void*(*)(void*, unsigned int))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FUntypedBulkData::Lock"))(data, 0x2);
-	memcpy(((void*(*)(FByteBulkData*, int))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FUntypedBulkData::Realloc"))(data, s.size()), s.data(), s.size());
+	memcpy(((void*(*)(FByteBulkData*, int))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FUntypedBulkData::Realloc"))(data, (int)s.size()), s.data(), s.size());
 	((void(*)(void*))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FUntypedBulkData::Unlock"))(data);
 
 	FSoundQualityInfo info;
 	FVorbisAudioInfo vorbis_obj = FVorbisAudioInfo();
-	if (!(((bool(*)(void*,void*,unsigned int,void*))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FVorbisAudioInfo::ReadCompressedInfo"))(&vorbis_obj, s.data(), s.size(), &info))) {
+	if (!(((bool(*)(void*,void*,unsigned int,void*))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FVorbisAudioInfo::ReadCompressedInfo"))(&vorbis_obj, s.data(), (unsigned int)s.size(), &info))) {
 		sound = nullptr;
 		return;
 	}

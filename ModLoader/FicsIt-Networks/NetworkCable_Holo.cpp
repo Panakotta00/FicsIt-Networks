@@ -97,7 +97,7 @@ TArray<SDK::FItemAmount> ANetworkCable_Holo::getCost(bool includeChildren) {
 	if (snapped.v && from.v) {
 		SDK::FItemAmount amount;
 		auto len = (snapped.pos - from.pos).length();
-		amount.amount = ceilf(len / 100.0f);
+		amount.amount = (int) ceilf(len / 100.0f);
 		amount.ItemClass = c;
 		items.add(amount);
 	}
