@@ -205,7 +205,7 @@ A manufacturer is not only the manufacturer but also everything that processes i
 
 ==== `Recipe getRecipe()`
 
-Returns teh current selected recipe.
+Returns the current selected recipe.
 
 Return Values::
 +
