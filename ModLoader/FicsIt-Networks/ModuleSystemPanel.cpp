@@ -32,7 +32,7 @@ void UModuleSystemPanel::construct() {
 }
 
 void UModuleSystemPanel::destruct() {
-	
+	allowedModules.~TArray();
 }
 
 void UModuleSystemPanel::endPlay(SDK::EEndPlayReason reason) {

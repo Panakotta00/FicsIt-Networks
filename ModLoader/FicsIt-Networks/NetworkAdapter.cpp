@@ -49,7 +49,7 @@ void ANetworkAdapter::constructor() {
 	}
 
 	// savegame interface
-	*((void**)&saveI) = *((void**)new IFGSaveInterfaceAdapter());
+	new (&saveI) IFGSaveInterfaceAdapter();
 
 	parent = nullptr;
 	attachment = nullptr;
@@ -68,6 +68,8 @@ void ANetworkAdapter::constructor() {
 
 	connector->maxCables = 1;
 }
+
+void ANetworkAdapter::destructor() {}
 
 void ANetworkAdapter::beginPlay() {
 	static void(*regComp)(SDK::UActorComponent*);

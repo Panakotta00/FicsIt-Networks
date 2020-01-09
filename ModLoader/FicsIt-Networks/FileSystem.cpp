@@ -60,6 +60,10 @@ void UFileSystem::constructor() {
 }
 
 void UFileSystem::destruct() {
+	component.~IFileSystemComponent();
+	save.~IFileSystemSaveInterface();
+	luaImpl.~IFileSystemLua();
+	id.~FGuid();
 	manager.~unique_ptr();
 	listeners.~TArray();
 	if (watcher) FindCloseChangeNotification(watcher);

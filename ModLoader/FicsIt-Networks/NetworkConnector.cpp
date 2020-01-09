@@ -84,8 +84,7 @@ void UNetworkConnector::construct() {
 	}
 
 	// IFGSaveInterface first implementation
-	IFGSaveInterface i;
-	saveI.Vtable = *((void**)new IFGSaveInterface());
+	new (&saveI) IFGSaveInterface();
 
 	new (&component) INetworkConnectorComponent();
 	new (&luaImpl) INetworkConnectorLua();
@@ -94,7 +93,7 @@ void UNetworkConnector::construct() {
 	new (&cables) std::unordered_set<SDK::AFGBuildable*>();
 	new (&components) std::unordered_set<UObject*>();
 	new (&merged) std::unordered_set<UObject*>();
-	new(&listeners) std::set<FWeakObjectPtr>();
+	new (&listeners) std::set<FWeakObjectPtr>();
 	new (&id) FGuid();
 
 	idCreated = false;
@@ -105,11 +104,14 @@ void UNetworkConnector::construct() {
 }
 
 void UNetworkConnector::destruct() {
+	component.~INetworkConnectorComponent();
+	luaImpl.~INetworkConnectorLua();
 	connections.~unordered_set();
 	cables.~unordered_set();
 	components.~unordered_set();
 	merged.~unordered_set();
 	listeners.~set();
+	id.~FGuid();
 }
 
 void UNetworkConnector::beginPlay() {

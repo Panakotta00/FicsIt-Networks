@@ -7,26 +7,19 @@
 using namespace SML;
 using namespace SML::Objects;
 
-void(AEquip_FileSystem::* oldDestroyed)() = nullptr;
-
 void AEquip_FileSystem::construct() {
 	//static void(*setupAttach)(SDK::USceneComponent*, SDK::USceneComponent*, FName) = nullptr;
 	//if (!setupAttach) setupAttach = (void(*)(SDK::USceneComponent*, SDK::USceneComponent*, FName))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "USceneComponent::SetupAttachment");
-
 	((bool(AEquip_FileSystem::**)() const)Vtable)[0xCA] = &AEquip_FileSystem::shouldSaveState;
-	oldDestroyed = ((void(AEquip_FileSystem::**)())Vtable)[0xA1];
-	((void(AEquip_FileSystem::**)())Vtable)[0xA1] = &AEquip_FileSystem::destroyed;
 	auto self = (Objects::UObject*)this;
 
 	RootComponent = self->createDefaultSubobjectSDK<SDK::USceneComponent>(L"RootComponent");
 
 	filesystem = self->createDefaultSubobject<UFileSystem>(L"FileSystem");
-	
-	Utility::warning("construct! ", this->GetName().c_str());
 }
 
 void AEquip_FileSystem::destruct() {
-	Utility::warning("destruct! ", this->GetName().c_str());
+	
 }
 
 bool AEquip_FileSystem::shouldSaveState() const {

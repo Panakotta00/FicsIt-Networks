@@ -34,6 +34,7 @@ public:
 	ISaveI saveI;
 
 	void constructor();
+	void destructor();
 	void beginPlay();
 
 	static SML::Objects::UClass* staticClass();

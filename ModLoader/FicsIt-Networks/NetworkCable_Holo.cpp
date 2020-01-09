@@ -258,9 +258,9 @@ void ANetworkCable_Holo::construct() {
 	((TArray<SDK::FItemAmount>(ANetworkCable_Holo::**)(bool))Vtable)[0xD1] = &ANetworkCable_Holo::getCost;
 	cable = nullptr;
 	con = nullptr;
-	snapped = SnappedInfo();
-	oldSnapped = SnappedInfo();
-	from = SnappedInfo();
+	new (&snapped) SnappedInfo();
+	new (&oldSnapped) SnappedInfo();
+	new (&from) SnappedInfo();
 	this->mMaxPlacementFloorAngle = 90.0f;
 
 	auto self = (Objects::UObject*)this;
@@ -286,5 +286,5 @@ void ANetworkCable_Holo::construct() {
 }
 
 void ANetworkCable_Holo::destruct() {
-
+	
 }

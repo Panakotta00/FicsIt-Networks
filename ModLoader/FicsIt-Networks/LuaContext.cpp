@@ -10,7 +10,6 @@
 ULuaContext* ULuaContext::ctx = nullptr;
 
 void luaHook(lua_State *L, lua_Debug *ar) {
-	SML::Utility::warning(lua_gc(L, LUA_GCCOUNT, 0));
 	if (lua_gc(L, LUA_GCCOUNT, 0) > ULuaContext::ctx->memory)
 		luaL_error(L, "out of memory");
 	lua_yield(L, 0);
