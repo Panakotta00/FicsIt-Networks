@@ -14,7 +14,6 @@ public:
 	UFileSystem* filesystem;
 
 	bool shouldSaveState() const;
-	void destroyed();
 
 	void moveSelfToItem(SML::Objects::FFrame& stack, void* item);
 };

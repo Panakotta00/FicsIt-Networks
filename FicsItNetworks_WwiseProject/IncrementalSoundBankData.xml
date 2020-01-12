@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <IncrementalBankBuild Version="6" Flags="601859981">
-	<Platform GUID="{969DC448-586A-4EF2-A00E-B5EC3057CB91}">
+	<Platform GUID="{64097B14-3018-4040-81A4-338BA84E7BBE}">
 		<Banks>
 			<Language ID="393239870">
-				<File Name="Essentials_VO" Hash="1977063705" Timestamp="1572364699"/>
-				<File Name="HelloBank2" Hash="941066680" Timestamp="1572365040"/>
-				<File Name="Hellobank" Hash="2352066402" Timestamp="1572205959"/>
-				<File Name="Init" Hash="1182415902" Timestamp="1572205959"/>
+				<File Name="Bank_FicsItNetwork_Messages" Hash="3129075866" Timestamp="1578577617"/>
+				<File Name="Init" Hash="3121226777" Timestamp="1578577617"/>
 			</Language>
 		</Banks>
 		<XMLInfo>
 			<Language ID="-1">
-				<File Name="" Hash="2117578139" Timestamp="1572365040"/>
+				<File Name="" Hash="2823099848" Timestamp="1578577617"/>
+			</Language>
+		</XMLInfo>
+	</Platform>
+	<Platform GUID="{A11C5083-568C-4B4F-B7AE-84B788DBDC63}">
+		<Banks>
+			<Language ID="393239870">
+				<File Name="Bank_FicsItNetwork_Messages" Hash="3129075866" Timestamp="1578575470"/>
+				<File Name="Init" Hash="872944895" Timestamp="1578575470"/>
+			</Language>
+		</Banks>
+		<XMLInfo>
+			<Language ID="-1">
+				<File Name="" Hash="1614347213" Timestamp="1578575470"/>
 			</Language>
 		</XMLInfo>
 	</Platform>
