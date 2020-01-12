@@ -39,5 +39,8 @@
 			"Name": "Alpakit",
 			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"WindowsNoEditor"
 	]
 }

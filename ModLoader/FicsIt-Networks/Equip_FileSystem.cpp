@@ -26,26 +26,50 @@ bool AEquip_FileSystem::shouldSaveState() const {
 	return true;
 }
 
-void AEquip_FileSystem::destroyed() {
-	Utility::warning("meep!");
-	(this->*(oldDestroyed))();
-}
+struct FReferenceControllerBase {
+	void* vfptr;
+	int SharedReferenceCount;
+	int WeakReferenceCount;
+};
+
+struct FSharedReferencer {
+	FReferenceControllerBase* ReferenceController;
+};
+
+struct FSharedInventoryStatePtr {
+	SDK::AActor* ActorPtr;
+	FSharedReferencer referencer;
+};
+
+struct FInventoryItem {
+	class UClass* ItemClass;
+	struct FSharedInventoryStatePtr ItemState;
+};
 
 void AEquip_FileSystem::moveSelfToItem(SML::Objects::FFrame & stack, void * item) {
+	static void(*constructFInventoryStack)(SDK::FInventoryStack*) = nullptr;
+	if (!constructFInventoryStack) constructFInventoryStack = (void(*)(SDK::FInventoryStack*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FInventoryStack::FInventoryStack");
 	static void(*setStateOnIndex)(SDK::UFGInventoryComponent*, int, SDK::FSharedInventoryStatePtr*) = nullptr;
 	if (!setStateOnIndex) setStateOnIndex = (void(*)(SDK::UFGInventoryComponent*, int, SDK::FSharedInventoryStatePtr*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGInventoryComponent::SetStateOnIndex");
 	static void(*constructFSharedInventoryStatePtr)(SDK::FSharedInventoryStatePtr*, void*) = nullptr;
 	if (!constructFSharedInventoryStatePtr) constructFSharedInventoryStatePtr = (void(*)(SDK::FSharedInventoryStatePtr*, void*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FSharedInventoryStatePtr::FSharedInventoryStatePtr");
-	
+	static void(*getStackFromIndex)(SDK::UFGInventoryComponent*, int, SDK::FInventoryStack*) = nullptr;
+	if (!getStackFromIndex) getStackFromIndex = (void(*)(SDK::UFGInventoryComponent*, int, SDK::FInventoryStack*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGInventoryComponent::GetStackFromIndex");
+	static void(*removeFromIndex)(SDK::UFGInventoryComponent*, int, int) = nullptr;
+	if (!removeFromIndex) removeFromIndex = (void(*)(SDK::UFGInventoryComponent*, int, int)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGInventoryComponent::RemoveFromIndex");
+
 	stack.code += !!stack.code;
 	
 	auto c = Mod::Functions::getPlayerCharacter();
 	auto inv = c->GetEquipmentSlot(SDK::EEquipmentSlot::ES_ARMS);
-	auto statePtr = new SDK::FSharedInventoryStatePtr();
-	constructFSharedInventoryStatePtr(statePtr, this);
-	setStateOnIndex(inv, inv->GetActiveIndex(), statePtr);
+	auto statePtr = SDK::FSharedInventoryStatePtr();
+	constructFSharedInventoryStatePtr(&statePtr, this);
+	setStateOnIndex(inv, inv->GetActiveIndex(), &statePtr);
 	SDK::FInventoryStack s = SDK::FInventoryStack();
-	inv->GetStackFromIndex(inv->GetActiveIndex(), &s);
+	constructFInventoryStack(&s);
+	getStackFromIndex(inv, inv->GetActiveIndex(), &s);
 	*((SDK::FInventoryItem*)item) = s.Item;
-	inv->RemoveFromIndex(inv->GetActiveIndex(), 1);
+	Utility::error("LifeSpan2: ", GetLifeSpan());
+	removeFromIndex(inv, inv->GetActiveIndex(), 1);
+	Utility::error("LifeSpan3: ", GetLifeSpan());
 }

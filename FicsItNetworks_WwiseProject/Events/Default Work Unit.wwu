@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<WwiseDocument Type="WorkUnit" ID="{5F1B0AB7-0540-46A6-9003-CD760259DBB6}" SchemaVersion="94">
+<WwiseDocument Type="WorkUnit" ID="{FEAED8B1-9D01-4DF5-9388-1FE28852E714}" SchemaVersion="89">
 	<Events>
-		<WorkUnit Name="Default Work Unit" ID="{5F1B0AB7-0540-46A6-9003-CD760259DBB6}" PersistMode="Standalone">
+		<WorkUnit Name="Default Work Unit" ID="{FEAED8B1-9D01-4DF5-9388-1FE28852E714}" PersistMode="Standalone">
 			<ChildrenList>
-				<Event Name="HelloEvent" ID="{D81BD2DE-074B-4404-82FA-9390D9E9F4A1}">
+				<Event Name="Play_Test" ID="{9F306CF0-C64D-4DEF-A84E-0B071828F07E}">
 					<ChildrenList>
-						<Action Name="" ID="{310501D7-17AA-441C-8CB1-A19BCF58314C}" ShortID="83899203">
+						<Action Name="" ID="{81FEDE92-63B5-4768-9C83-229263DA2E20}" ShortID="438878522">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="1"/>
+							</PropertyList>
 							<ReferenceList>
 								<Reference Name="Target">
-									<ObjectRef Name="test" ID="{5799BF6D-8F4E-4F3C-859B-D5B7394D8DED}" WorkUnitID="{9201C0C2-91F5-4B3B-99F9-AE7E7648455F}"/>
+									<ObjectRef Name="FicsIt-Networks-Test" ID="{2A4DA093-0246-474C-B3FB-EF040BCC88BE}" WorkUnitID="{2B02FFE2-F88F-4FA1-A1D3-862605322E8D}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>
