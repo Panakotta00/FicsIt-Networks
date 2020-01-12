@@ -77,6 +77,7 @@ public:
 	virtual void luaAddSignalListener(ULuaContext* ctx) override;
 	virtual void luaRemoveSignalListener(ULuaContext* ctx) override;
 	virtual SML::Objects::TArray<ULuaContext*> luaGetSignalListeners() override;
+	virtual bool luaIsReachableFrom(SML::Objects::UObject* listener) override;
 };
 
 class UNetworkConnector : public SDK::USceneComponent{

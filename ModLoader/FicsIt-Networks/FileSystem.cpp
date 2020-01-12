@@ -18,8 +18,7 @@ FGuid IFileSystemComponent::getID() const {
 }
 
 UObject* IFileSystemComponent::findComponent(FGuid guid) const {
-	std::set<UObject*> searched;
-	return INetworkComponent::findComponent(guid, searched, (UObject*)self());
+	return INetworkComponent::findComponentFromCircuit(guid);
 }
 
 UNetworkCircuit * IFileSystemComponent::getCircuit() const {
@@ -451,6 +450,22 @@ void IFileSystemLua::luaRemoveSignalListener(ULuaContext * ctx) {
 
 SML::Objects::TArray<ULuaContext*> IFileSystemLua::luaGetSignalListeners() {
 	return self()->listeners;
+}
+
+bool IFileSystemLua::luaIsReachableFrom(SML::Objects::UObject * listener) {
+	INetworkComponent* comp;
+	try {
+		comp = ((INetworkComponent*)((size_t)self() + ((SML::Objects::UObject*)self())->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+	} catch (...) {
+		return false;
+	}
+	INetworkComponent* lcomp;
+	try {
+		lcomp = ((INetworkComponent*)((size_t)listener + (listener)->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+	} catch (...) {
+		return false;
+	}
+	return comp->findComponent(lcomp->getID());
 }
 
 bool IFileSystemSaveInterface::NeedTransform() {

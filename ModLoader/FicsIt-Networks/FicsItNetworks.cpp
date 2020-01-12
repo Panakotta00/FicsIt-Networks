@@ -196,17 +196,26 @@ UClass* saveI() {
 	return UObject::findClass("FactoryGame.FGSaveInterface");
 }
 
-struct AddCableRetVal {
+struct BoolRetVal {
 	bool retVal;
 };
 
 void loadClasses() {
 	Utility::warning("Load custom classes...");
 
+	struct Test {
+		int i;
+		~Test() {
+			Utility::warning("okay");
+		}
+	};
+
 	auto fguid_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FGuid");
 	auto fhitresult_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FHitResult");
 	auto fistack_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FInventoryStack");
 	auto fiitem_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FInventoryItem");
+
+
 
 	Paks::ClassBuilder<UModuleSystemPanel>::Basic()
 		.extendSDK<SDK::USceneComponent>()
@@ -256,6 +265,7 @@ void loadClasses() {
 		.func(Paks::FunctionBuilder::method("luaAddSignalListener").native(&ULuaImplementation::execAddSignalListener).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "ctx").classFunc(ULuaContext::staticClass)))
 		.func(Paks::FunctionBuilder::method("luaRemoveSignalListener").native(&ULuaImplementation::execRemoveSignalListener).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "ctx").classFunc(ULuaContext::staticClass)))
 		.func(Paks::FunctionBuilder::method("luaGetSignalListeners").native(&ULuaImplementation::execGetSignalListeners).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::retVal(EPropertyClass::Array, "retVal").off(0)).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "retVal").off(0).classFunc(ULuaContext::staticClass)))
+		.func(Paks::FunctionBuilder::method("luaIsReachableFrom").native(&ULuaImplementation::execIsReachableFrom).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::retVal(EPropertyClass::Bool, "retVal").helpBool<LuaIsReachableFromParams, &LuaIsReachableFromParams::is>()).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "listener").classFunc(SML::Objects::UObject::staticClass).off(offsetof(LuaIsReachableFromParams, listener))))
 		.build();
 
 	Paks::ClassBuilder<ULuaContext>::Basic()
@@ -267,7 +277,7 @@ void loadClasses() {
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Str, "log"))
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Str, "exception"))
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Byte, "state").enumFunc(Paks::EnumBuilder<ELuaState>::staticEnum))
-		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "controller").classFunc(UObject::staticClass))
+		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "component").classFunc(UObject::staticClass).off(offsetof(ULuaContext, component)))
 		.func(Paks::FunctionBuilder::method("Reset").native(&ULuaContext::execReset))
 		.func(Paks::FunctionBuilder::method("ExecSteps").native(&ULuaContext::execExecSteps).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "count")))
 		.func(Paks::FunctionBuilder::method("SetCode").native(&ULuaContext::execSetCode).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "newCode")))
@@ -292,7 +302,7 @@ void loadClasses() {
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "circuit").off(offsetof(UNetworkConnector, circuit)))
 		.func(Paks::FunctionBuilder::method("addConnection").native(&UNetworkConnector::execAddConn).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "connector").classFunc(Paks::ClassBuilder<UNetworkConnector>::staticClass)))
 		.func(Paks::FunctionBuilder::method("removeConnection").native(&UNetworkConnector::execRemConn).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "connector").classFunc(Paks::ClassBuilder<UNetworkConnector>::staticClass)))
-		.func(Paks::FunctionBuilder::method("addCable").native(&UNetworkConnector::execAddCable).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "cable").classFunc(SDK::AFGBuildable::StaticClass)).param(Paks::PropertyBuilder::retVal(EPropertyClass::Bool, "retVal").helpBool<AddCableRetVal, &AddCableRetVal::retVal>()))
+		.func(Paks::FunctionBuilder::method("addCable").native(&UNetworkConnector::execAddCable).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "cable").classFunc(SDK::AFGBuildable::StaticClass)).param(Paks::PropertyBuilder::retVal(EPropertyClass::Bool, "retVal").helpBool<BoolRetVal, &BoolRetVal::retVal>()))
 		.func(Paks::FunctionBuilder::method("removeCable").native(&UNetworkConnector::execRemCable).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "cable").classFunc(SDK::AFGBuildable::StaticClass)))
 		.func(Paks::FunctionBuilder::method("addMerged").native(&UNetworkConnector::execAddMerged).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "merged").classFunc(UObject::staticClass)))
 		.func(Paks::FunctionBuilder::method("addComponent").native(&UNetworkConnector::execAddMerged).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "component").classFunc(UObject::staticClass)))
@@ -308,7 +318,7 @@ void loadClasses() {
 		.func(Paks::FunctionBuilder::staticFunc("disconnectPower").native(UComponentUtility::disconnectPower).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "comp1").classFunc(SDK::UFGPowerConnectionComponent::StaticClass)))
 		.func(Paks::FunctionBuilder::staticFunc("getNetworkConnectorFromHit").native(UComponentUtility::getNetworkConnectorFromHit_exec).addFuncFlags(EFunctionFlags::FUNC_BlueprintPure).param(Paks::PropertyBuilder::param(EPropertyClass::Struct, "hit").structFunc(fhitresult_c)).param(Paks::PropertyBuilder::retVal(EPropertyClass::Object, "retVal").classFunc(UNetworkConnector::staticClass)))
 		.func(Paks::FunctionBuilder::staticFunc("clipboardCopy").native(UComponentUtility::clipboardCopy).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "str")))
-		.func(Paks::FunctionBuilder::staticFunc("setAllowUsing").native(UComponentUtility::setAllowUsing).param(Paks::PropertyBuilder::param(EPropertyClass::Bool, "newUsing").helpBool<AddCableRetVal, &AddCableRetVal::retVal>()))
+		.func(Paks::FunctionBuilder::staticFunc("setAllowUsing").native(UComponentUtility::setAllowUsing).param(Paks::PropertyBuilder::param(EPropertyClass::Bool, "newUsing").helpBool<BoolRetVal, &BoolRetVal::retVal>()))
 		.func(Paks::FunctionBuilder::staticFunc("loadSoundFromFile").native(&UComponentUtility::loadSoundFromFile).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "retVal").classFunc(SDK::USoundWave::StaticClass)).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "file")))
 		.build();
 

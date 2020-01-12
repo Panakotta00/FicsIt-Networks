@@ -8,6 +8,10 @@ SML::Objects::TArray<ULuaContext*> ILuaImplementation::luaGetSignalListeners() {
 	return SML::Objects::TArray<ULuaContext*>();
 }
 
+bool ILuaImplementation::luaIsReachableFrom(SML::Objects::UObject * listener) {
+	return false;
+}
+
 void ULuaImplementation::execLuaSetup(SML::Objects::FFrame & stack, void * retVals) {
 	ULuaContext* ctx = nullptr;
 	stack.stepCompIn(&ctx);
@@ -36,4 +40,13 @@ void ULuaImplementation::execGetSignalListeners(SML::Objects::FFrame & stack, vo
 	stack.code += !!stack.code;
 
 	*((SML::Objects::TArray<ULuaContext*>*)retVals) = ((ILuaImplementation*)this)->luaGetSignalListeners();
+}
+
+void ULuaImplementation::execIsReachableFrom(SML::Objects::FFrame & stack, void * retVals) {
+	SML::Objects::UObject* listener = nullptr;
+	stack.stepCompIn(&listener);
+
+	stack.code += !!stack.code;
+
+	((LuaIsReachableFromParams*)retVals)->is = ((ILuaImplementation*)this)->luaIsReachableFrom(listener);
 }

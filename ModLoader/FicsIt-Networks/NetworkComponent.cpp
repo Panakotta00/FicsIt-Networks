@@ -69,19 +69,10 @@ TArray<UObject*> INetworkComponent::getConnected() const {
 
 void INetworkComponent::notifyNetworkUpdate(int type, std::set<FWeakObjectPtr> nodes) {}
 
-UObject* INetworkComponent::findComponent(FGuid guid, std::set<UObject*>& searched, UObject* self) const {
-	if (searched.find(self) != searched.end()) return nullptr;
+UObject* INetworkComponent::findComponentFromCircuit(FGuid guid) const {
+	auto circuit = getCircuit();
 
-	if (getID() == guid) return self;
-
-	searched.insert(self);
-
-	for (auto c : getConnected()) {
-		auto f = ((INetworkComponent*)((size_t)c + c->clazz->getImplementation(UNetworkComponent::staticClass()).off))->findComponent(guid, searched, c);
-		if (f) return f;
-	}
-
-	return nullptr;
+	return circuit->findComponent(guid);
 }
 
 /*UNetworkCircuit * INetworkComponent::getCircuit() const {

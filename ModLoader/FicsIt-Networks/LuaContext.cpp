@@ -22,7 +22,7 @@ void ULuaContext::construct() {
 	new (&signals) std::queue<Signal>();
 	new (&signalSources) std::vector<std::unique_ptr<SignalSource>>();
 	state = ELuaState::HALTED;
-	controller = nullptr;
+	component = nullptr;
 	L = nullptr;
 	timeout = -1;
 	memory = 0;
@@ -179,10 +179,21 @@ void ULuaContext::execSignalSlot(ULuaContext * self, SML::Objects::FFrame & stac
 
 	SML::Objects::TArray<ULuaContext*> ctxs;
 	self->findFunction(L"luaGetSignalListeners")->invoke(self, &ctxs);
+	ILuaImplementation* comp;
+	try {
+		comp = ((ILuaImplementation*)((size_t)self + self->clazz->getImplementation(ULuaImplementation::staticClass()).off));
+	} catch (...) {
+		stack.code += !!stack.code;
+		return;
+	}
+	//SML::Objects::TArray<ULuaContext*> ctxs = comp->luaGetSignalListeners();
 	for (auto ctx : ctxs) if (ctx->signals.size() < config["SignalQueueSize"].get<int>()) {
-		auto con = self->getConnector();
-		if (!con->circuit || !con->circuit->hasNode((UObject*)ctx->getConnector())) continue;
-		ctx->signals.push(std::shared_ptr<Signal>(sig));
+		LuaIsReachableFromParams params {ctx, false};
+		self->findFunction(L"luaIsReachableFrom")->invoke(self, &params);
+		if (params.is) {
+			ctx->signals.push(std::shared_ptr<Signal>(sig));
+			break;
+		}
 	}
 
 	stack.code += !!stack.code;

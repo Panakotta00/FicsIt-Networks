@@ -87,7 +87,7 @@ public:
 	SML::Objects::FString log;
 	SML::Objects::FString exception;
 	ELuaState state;
-	SML::Objects::UObject* controller;
+	SML::Objects::UObject* component;
 	int timeout = -1;
 	std::chrono::time_point<std::chrono::high_resolution_clock> pullStart;
 

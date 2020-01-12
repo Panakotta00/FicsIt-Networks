@@ -36,4 +36,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 		TArray<ULuaContext*> luaGetSignalListeners();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+		bool luaIsReachableFrom(UObject* listener);
 };

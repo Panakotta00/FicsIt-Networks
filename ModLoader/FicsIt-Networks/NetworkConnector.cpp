@@ -172,7 +172,7 @@ bool UNetworkConnector::addCable(SDK::AFGBuildable * cable) {
 	auto c2 = *p2->getValue<UNetworkConnector*>(cable);
 	auto c = (c1 == this) ? ((c2 == this) ? nullptr : c2) : c1;
 
-	if (c->circuit) {
+	if (c && c->circuit) {
 		if (this->circuit) {
 			circuit = c->circuit = *c1->circuit + c2->circuit;
 		} else {
@@ -272,8 +272,7 @@ TArray<UObject*> INetworkConnectorComponent::getConnected() const {
 }
 
 UObject * INetworkConnectorComponent::findComponent(FGuid guid) const {
-	std::set<UObject*> searched;
-	return INetworkComponent::findComponent(guid, searched, (UObject*)self());
+	return INetworkComponent::findComponentFromCircuit(guid);
 }
 
 UNetworkCircuit * INetworkConnectorComponent::getCircuit() const {
@@ -390,4 +389,20 @@ TArray<ULuaContext*> INetworkConnectorLua::luaGetSignalListeners() {
 		listeners.add((ULuaContext*)*listener);
 	}
 	return listeners;
+}
+
+bool INetworkConnectorLua::luaIsReachableFrom(SML::Objects::UObject * listener) {
+	INetworkComponent * comp;
+	try {
+		comp = ((INetworkComponent*)((size_t)self() + ((SML::Objects::UObject*)self())->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+	} catch (...) {
+		return false;
+	}
+	INetworkComponent* lcomp;
+	try {
+		lcomp = ((INetworkComponent*)((size_t)listener + (listener)->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+	} catch (...) {
+		return false;
+	}
+	return comp->findComponent(lcomp->getID());;
 }

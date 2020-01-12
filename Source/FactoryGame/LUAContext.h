@@ -34,7 +34,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TEnumAsByte<ELuaState> state;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UObject* controller;
+		UObject* component;
 
 	UFUNCTION(BlueprintCallable)
 		void ExecSteps(int32 count);

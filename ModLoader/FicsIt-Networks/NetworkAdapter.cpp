@@ -76,8 +76,6 @@ void ANetworkAdapter::beginPlay() {
 	if (!regComp) regComp = (void(*)(SDK::UActorComponent*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UActorComponent::RegisterComponent");
 	static void(*setupAttach)(SDK::USceneComponent*, SDK::USceneComponent*, FName) = nullptr;
 	if (!setupAttach) setupAttach = (void(*)(SDK::USceneComponent*, SDK::USceneComponent*, FName))DetourFindFunction("FactoryGame-Win64-Shipping.exe", "USceneComponent::SetupAttachment");
-	
-	K2_SetActorLocationAndRotation(parent->K2_GetActorLocation(), parent->K2_GetActorRotation(), false, true, nullptr);
 
 	(this->*beginPlay_f)();
 
@@ -88,15 +86,33 @@ void ANetworkAdapter::beginPlay() {
 	attachment->ref = this;
 	regComp(attachment);
 
+	if (parent->IsA(SDK::AFGBuildableFactory::StaticClass())) {
+		TArray<SDK::UActorComponent*> cons = parent->GetComponentsByClass(SDK::UFGPowerConnectionComponent::StaticClass());
+		float dist = -1.0f;
+		SDK::USceneComponent* con = nullptr;
+		for (auto c : cons) {
+			float d = ((FVector)((SDK::USceneComponent*)c)->K2_GetComponentToWorld().Translation - (FVector)this->K2_GetActorLocation()).length();
+			if (dist < 0.0f || dist > d) {
+				con = (SDK::USceneComponent*)c;
+				dist = d;
+			}
+		}
+		if (con) {
+			K2_SetActorLocationAndRotation(con->K2_GetComponentLocation(), con->K2_GetComponentRotation(), false, true, nullptr);
+			return;
+		}
+	}
+
 	for (auto setting_entry : settings) {
 		auto clazz = setting_entry.first;
 		auto setting = setting_entry.second;
 		if (!parent->IsA(clazz)) continue;
+		K2_SetActorLocationAndRotation(parent->K2_GetActorLocation(), parent->K2_GetActorRotation(), false, true, nullptr);
 		K2_AddActorLocalOffset(setting.loc, false, true, nullptr);
 		connectorMesh->K2_AddRelativeRotation(setting.rot, false, true, nullptr);
 		connectorMesh->SetHiddenInGame(!setting.mesh, true);
 		connector->maxCables = setting.maxCables;
-		break;
+		return;
 	}
 }
 

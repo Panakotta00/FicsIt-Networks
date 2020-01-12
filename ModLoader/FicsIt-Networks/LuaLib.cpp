@@ -28,21 +28,21 @@ void FactoryHook::update() {
 	}
 }
 
-LuaObjectPtr::LuaObjectPtr(UObject * obj, LuaObjectValidation* validation) : ptr(obj), validation(validation) {}
+LuaObjectPtr::LuaObjectPtr(UObject * obj, std::shared_ptr<LuaObjectValidation> validation) : ptr(obj), validation(validation) {}
 
 LuaObjectPtr::~LuaObjectPtr() {}
 
 UObject * LuaObjectPtr::getObject() const {
 	auto p = *ptr;
-	if (!p || !validation.get() || !validation->isValid()) return nullptr;
+	if (!p || (validation.get() && !validation->isValid())) return nullptr;
 	return p;
 }
 
-LuaObjectValidation * LuaObjectPtr::getValidation() const {
-	return validation.get();
+std::shared_ptr<LuaObjectValidation> LuaObjectPtr::getValidation() const {
+	return validation;
 }
 
-LuaClass::LuaClass(SML::Objects::UObject * obj, LuaObjectValidation * validation) {
+LuaClass::LuaClass(SML::Objects::UObject * obj, std::shared_ptr<LuaObjectValidation> validation) {
 	ptr = new LuaObjectPtr(obj, validation);
 }
 
@@ -50,15 +50,15 @@ LuaClass::~LuaClass() {
 	delete ptr;
 }
 
-LuaClassFunc::LuaClassFunc(SML::Objects::UObject * obj, std::uint16_t func, LuaObjectValidation* validation) : LuaClass(obj, validation) {
+LuaClassFunc::LuaClassFunc(SML::Objects::UObject * obj, std::uint16_t func, std::shared_ptr<LuaObjectValidation> validation) : LuaClass(obj, validation) {
 	this->func = func;
 }
 
-LuaClassUFunc::LuaClassUFunc(SML::Objects::UObject * obj, SML::Objects::UFunction* func, LuaObjectValidation* validation) : LuaClass(obj, validation) {
+LuaClassUFunc::LuaClassUFunc(SML::Objects::UObject * obj, SML::Objects::UFunction* func, std::shared_ptr<LuaObjectValidation> validation) : LuaClass(obj, validation) {
 	this->func = func;
 }
 
-LuaFuncContext::LuaFuncContext(SML::Objects::UObject * obj, LuaObjectValidation* validation) : obj(obj), validation(validation) {}
+LuaFuncContext::LuaFuncContext(SML::Objects::UObject * obj, std::shared_ptr<LuaObjectValidation> validation) : obj(obj), validation(validation) {}
 
 SML::Objects::UObject* LuaFuncContext::operator*() {
 	return obj;
@@ -68,7 +68,7 @@ SML::Objects::UObject* LuaFuncContext::operator->() {
 	return obj;
 }
 
-LuaObjectValidation::LuaObjectValidation(void * obj, LuaObjectValidation * validation) : obj(obj), validation(validation) {
+LuaObjectValidation::LuaObjectValidation(void * obj, std::shared_ptr<LuaObjectValidation> validation) : obj(obj), validation(validation) {
 
 }
 
@@ -80,7 +80,7 @@ bool LuaObjectValidation::isValid() const {
 	return ((validation) ? validation->isValid() : true) && isValidImpl();
 }
 
-LuaComponentValidation::LuaComponentValidation(SDK::UObject * obj, LuaObjectValidation * validation) : LuaObjectValidation(obj, validation) {}
+LuaComponentValidation::LuaComponentValidation(SDK::UObject * obj, std::shared_ptr<LuaObjectValidation> validation) : LuaObjectValidation(obj, validation) {}
 
 bool LuaComponentValidation::isValidImpl() const {
 	auto con = ULuaContext::ctx->getConnector();
@@ -88,7 +88,7 @@ bool LuaComponentValidation::isValidImpl() const {
 	return true;
 }
 
-LuaPowerCircuitValidation::LuaPowerCircuitValidation(SDK::UFGPowerCircuit* circuit, SDK::UFGPowerInfoComponent* info, LuaObjectValidation * validation) : LuaObjectValidation(circuit, validation), info(info) {}
+LuaPowerCircuitValidation::LuaPowerCircuitValidation(SDK::UFGPowerCircuit* circuit, SDK::UFGPowerInfoComponent* info, std::shared_ptr<LuaObjectValidation> validation) : LuaObjectValidation(circuit, validation), info(info) {}
 
 bool LuaPowerCircuitValidation::isValidImpl() const {
 	return info->GetPowerCircuit() == ((SDK::UFGPowerCircuit*)obj);
@@ -204,7 +204,7 @@ void luaInit() {
 		{"getCircuit", [](auto L, auto nargs, auto o) {
 			auto c = (SDK::UFGPowerConnectionComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, c->GetPowerCircuit(), new LuaPowerCircuitValidation(c->GetPowerCircuit(), c->GetPowerInfo(), o.validation));
+			newInstance(L, c->GetPowerCircuit(), std::shared_ptr<LuaObjectValidation>(new LuaPowerCircuitValidation(c->GetPowerCircuit(), c->GetPowerInfo(), o.validation)));
 			return 1;
 		}},
 	};
@@ -242,7 +242,7 @@ void luaInit() {
 		{"getCircuit", [](auto L, auto nargs, auto o) {
 			auto p = (SDK::UFGPowerInfoComponent*)(*o);
 			lua_pop(L, nargs);
-			newInstance(L, p->GetPowerCircuit(), new LuaPowerCircuitValidation(p->GetPowerCircuit(), p, o.validation));
+			newInstance(L, p->GetPowerCircuit(), std::shared_ptr<LuaObjectValidation>(new LuaPowerCircuitValidation(p->GetPowerCircuit(), p, o.validation)));
 			return 1;
 		}},
 		{"hasPower", [](auto L, auto nargs, auto o) {
@@ -734,7 +734,7 @@ int luaClassClassFunc(lua_State* L) {
 	return luaL_error(L, "invalid native function ptr");
 }
 
-void addCompFuncs(lua_State * L, UObject * comp, LuaObjectValidation* validation) {
+void addCompFuncs(lua_State * L, UObject * comp, std::shared_ptr<LuaObjectValidation> validation) {
 	if (!comp->clazz->implements(ULuaImplementation::staticClass())) return;
 	ULuaContext* ctx = ULuaContext::ctx;
 	comp->findFunction(L"luaSetup")->invoke(comp, &ctx);
@@ -749,7 +749,7 @@ void addCompFuncs(lua_State * L, UObject * comp, LuaObjectValidation* validation
 	}
 }
 
-void addPreFuncs(lua_State* L, SDK::UObject* obj, LuaObjectValidation* validation) {
+void addPreFuncs(lua_State* L, SDK::UObject* obj, std::shared_ptr<LuaObjectValidation> validation) {
 	int j = 0;
 	for (auto clazz : classes) {
 		if (!obj->IsA(clazz.first)) continue;
@@ -764,7 +764,7 @@ void addPreFuncs(lua_State* L, SDK::UObject* obj, LuaObjectValidation* validatio
 	}
 }
 
-bool newInstance(lua_State* L, SDK::UObject* obj, LuaObjectValidation* validation) {
+bool newInstance(lua_State* L, SDK::UObject* obj, std::shared_ptr<LuaObjectValidation> validation) {
 	if (!obj) {
 		lua_pushnil(L);
 		return false;
@@ -849,7 +849,7 @@ int luaComponentProxy(lua_State * L) {
 		if (!s) return luaL_error(L, ("argument #" + std::to_string(i) + " is not a string").c_str());
 		auto comp = ULuaContext::ctx->getComponent(s);
 		if (!comp) lua_pushnil(L);
-		else newInstance(L, (SDK::UObject*)comp, new LuaComponentValidation((SDK::UObject*)comp));
+		else newInstance(L, (SDK::UObject*)comp, std::shared_ptr<LuaObjectValidation>(new LuaComponentValidation((SDK::UObject*)comp)));
 	}
 	return args;
 }
