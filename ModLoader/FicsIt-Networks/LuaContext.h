@@ -50,6 +50,11 @@ struct SignalFactoryHook : public Signal {
 	int toLua(lua_State* L) const override;
 };
 
+struct SignalPowerFused: public Signal {
+	std::string getName() const override;
+	int toLua(lua_State* L) const override;
+};
+
 struct SignalSource {
 	SML::Objects::FWeakObjectPtr ctx;
 

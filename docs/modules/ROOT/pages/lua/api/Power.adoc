@@ -248,6 +248,13 @@ Return Values::
 |bool
 |bool
 |true if the fuse is triggered
+|===
+
+=== Signals
+
+==== `PowerFuse()`
+
+This signal gets triggered when the power circuits fuse gets triggered because simon forgot to unplug the coffeemachine.
 
 
 

@@ -187,6 +187,19 @@ bool FGFactoryConnectionCompinent_Factory_GrabOutput(SDK::UFGFactoryConnectionCo
 	return r;
 }
 
+void(*FGPowerCircuit_TickCircuit_f)(SDK::UFGPowerCircuit*,float) = nullptr;
+void FGPowerCircuit_TickCircuit(SDK::UFGPowerCircuit* circuit, float dt) {
+	bool fused = circuit->mIsFuseTriggered;
+	FGPowerCircuit_TickCircuit_f(circuit, dt);
+	if (!fused && circuit->mIsFuseTriggered) try {
+		auto& listeners = powerCircuitListeners.at((SML::Objects::UObject*)circuit);
+		for (auto& listener : listeners) {
+			auto l = (ULuaContext*)*listener;
+			if (l) l->pushSignal(new SignalPowerFused());
+		}
+	} catch (...) {}
+}
+
 void(*FGCharacterPlayer_UpdateBestUsableActor_f)(SDK::AFGCharacterPlayer*) = nullptr;
 void FGCharacterPlayer_UpdateBestUsableActor(SDK::AFGCharacterPlayer* self) {
 	if (UComponentUtility::allowUsing) FGCharacterPlayer_UpdateBestUsableActor_f(self);
@@ -203,19 +216,10 @@ struct BoolRetVal {
 void loadClasses() {
 	Utility::warning("Load custom classes...");
 
-	struct Test {
-		int i;
-		~Test() {
-			Utility::warning("okay");
-		}
-	};
-
 	auto fguid_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FGuid");
 	auto fhitresult_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FHitResult");
 	auto fistack_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FInventoryStack");
 	auto fiitem_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FInventoryItem");
-
-
 
 	Paks::ClassBuilder<UModuleSystemPanel>::Basic()
 		.extendSDK<SDK::USceneComponent>()
@@ -452,11 +456,16 @@ public:
 		DetourAttach((void**)&FGCharacterPlayer_UpdateBestUsableActor_f, &FGCharacterPlayer_UpdateBestUsableActor);
 		DetourTransactionCommit();
 
+		DetourTransactionBegin();
+		FGPowerCircuit_TickCircuit_f = (void(*)(SDK::UFGPowerCircuit*,float)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGPowerCircuit::TickCircuit");
+		DetourAttach((void**)&FGPowerCircuit_TickCircuit_f, &FGPowerCircuit_TickCircuit);
+		DetourTransactionCommit();
+
 		LOG("Finished FicsIt-Networks setup!");
 	}
 
 	void postSetup() override {
-		
+		// for all men kind
 	}
 
 	~FicsItNetworks() {

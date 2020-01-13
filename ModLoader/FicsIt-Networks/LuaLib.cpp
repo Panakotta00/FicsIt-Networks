@@ -20,6 +20,7 @@ std::map<SDK::UClass*, std::vector<LuaFunc>> classes;
 std::map<SDK::UClass*, std::vector<LuaFunc>> classClasses;
 
 std::map<SML::Objects::FWeakObjectPtr, FactoryHook> hooks;
+std::map<SML::Objects::FWeakObjectPtr, std::set<SML::Objects::FWeakObjectPtr>> powerCircuitListeners;
 
 void FactoryHook::update() {
 	auto now = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
@@ -877,7 +878,7 @@ int luaFindItem(lua_State * L) {
 	return 1;
 }
 
-void luaListen(UObject* o) {
+void luaListen(lua_State* L, UObject* o) {
 	if (o && o->clazz->implements(ULuaImplementation::staticClass())) {
 		for (auto f : *o->clazz) {
 			if (!f->getName()._Starts_with("luaSig_")) continue;
@@ -899,7 +900,15 @@ void luaListen(UObject* o) {
 		TArray<UObject*> merged;
 		o->findFunction(L"getMerged")->invoke(o, &merged);
 		for (auto m : merged) {
-			luaListen((UObject*)m);
+			luaListen(L, (UObject*)m);
+		}
+	}
+
+	// PowerCircuit
+	if (o && o->isA((SML::Objects::UClass*)SDK::UFGPowerCircuit::StaticClass())) {
+		auto& listeners = powerCircuitListeners[o];
+		if (listeners.find(ULuaContext::ctx) == listeners.end()) {
+			listeners.insert(ULuaContext::ctx);
 		}
 	}
 }
@@ -909,7 +918,7 @@ int luaListen(lua_State * L) {
 
 	for (int i = 1; i <= args; ++i) {
 		auto o = (UObject*)getObjInstance<SDK::UObject>(L, i);
-		luaListen(o);
+		luaListen(L, o);
 	}
 	return 0;
 }

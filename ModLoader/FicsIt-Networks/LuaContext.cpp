@@ -269,3 +269,11 @@ SignalSourceHook::~SignalSourceHook() {
 		d.erase(d.find(c));
 	} catch (...) {}
 }
+
+std::string SignalPowerFused::getName() const {
+	return "PowerFuse";
+}
+
+int SignalPowerFused::toLua(lua_State * L) const {
+	return 0;
+}

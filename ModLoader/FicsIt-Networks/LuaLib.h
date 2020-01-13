@@ -41,6 +41,7 @@ struct FactoryHook {
 };
 
 extern std::map<SML::Objects::FWeakObjectPtr, FactoryHook> hooks;
+extern std::map<SML::Objects::FWeakObjectPtr, std::set<SML::Objects::FWeakObjectPtr>> powerCircuitListeners;
 
 struct LuaObjectValidation {
 	void* obj;
