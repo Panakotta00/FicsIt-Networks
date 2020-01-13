@@ -1206,16 +1206,32 @@ static const luaL_Reg luaClassLib[] = {
 	{NULL, NULL}
 };
 
+static const luaL_Reg luaComponentLib[] = {
+	{"proxy", luaComponentProxy},
+	{"findItem", luaFindItem},
+	{NULL,NULL}
+};
+
+static const luaL_Reg luaEventLib[] = {
+	{"listen", luaListen},
+	{"pull", luaPull},
+	{NULL,NULL}
+};
+
 // metatables
 
 void loadLibs(lua_State* L) {
 	luaL_openlibs(L);
 
-	lua_register(L, "log", luaPrint);
-	lua_register(L, "proxy", luaComponentProxy);
-	lua_register(L, "findItem", luaFindItem);
-	lua_register(L, "listen", luaListen);
-	lua_register(L, "pull", luaPull);
+	lua_register(L, "print", luaPrint);
+
+	lua_newtable(L, "component");
+	luaL_setfuncs(L, luaComponentLib, 0);
+	lua_setglobal(L, "component");
+
+	lua_newtable(L, "event");
+	luaL_setfuncs(L, luaEventLib, 0);
+	lua_setglobal(L, "event");
 
 	luaL_newmetatable(L, "WeakObjPtr");
 	lua_pop(L, 1);
