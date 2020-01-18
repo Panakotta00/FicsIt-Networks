@@ -1,4 +1,4 @@
-= Speakers
+= Speaker Pole
 :description: The speakers pole allows you to play custom sounds.
 
 [cols="1,3a"]
@@ -17,15 +17,15 @@
 |===
 |Build Gun |Ingame
 
-|image::buildings/speakers_bg.png[300,300,role="left"]
-|image::buildings/speakers_ig.jpg[300,300,role="left"]
+|image::buildings/SpeakerPole_bg.png[300,300,role="left"]
+|image::buildings/SpeakerPole_ig.jpg[300,300,role="left"]
 |===
 
 The Speaker Pole is a network component buildable wich provides the functionallity to play custom sound files ingame.
 
 With the speaker you can create f.e. a alert sound when you run low on Modular Frames.
 
-If you want to add a sound, open your saves folder, go to the `Computers\Sounds` folder and place your sound file as ogg in there. You don't even need to restart your game, you can directly use it.
+If you want to add a sound, open your saves folder, go to the `Computers\Sounds` folder and place your sound file as ogg in there. You don't even need to restart your game, you can directly use it. Subfolders are also allowed.
 
 
 

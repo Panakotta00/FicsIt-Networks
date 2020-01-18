@@ -16,6 +16,25 @@ void UNetworkComponent::getID_exec(UNetworkComponent * c, FFrame& stack, void * 
 	((Params*)params)->g = ((INetworkComponent*)c)->getID();
 }
 
+void UNetworkComponent::getNick_exec(UNetworkComponent* c, FFrame& stack, void* params) {
+	stack.code += !!stack.code;
+
+	struct Params {
+		FString nick;
+	};
+
+	((Params*)params)->nick = ((INetworkComponent*)c)->getNick();
+}
+
+void UNetworkComponent::setNick_exec(UNetworkComponent * c, SML::Objects::FFrame & stack, void * params) {
+	FString nick;
+	stack.stepCompIn(&nick);
+
+	stack.code += !!stack.code;
+
+	((INetworkComponent*)c)->setNick(nick);
+}
+
 void UNetworkComponent::getMerged_exec(UNetworkComponent* c, FFrame& stack, void* params) {
 	stack.code += !!stack.code;
 	*((Objects::TArray<Objects::UObject*>*)params) = ((INetworkComponent*)c)->getMerged();
@@ -53,10 +72,6 @@ void UNetworkComponent::setCircuit_exec(UNetworkComponent* c, SML::Objects::FFra
 
 UClass * UNetworkComponent::staticClass() {
 	return SML::Paks::ClassBuilder<UNetworkComponent>::staticClass();
-}
-
-FGuid INetworkComponent::getID() const {
-	return FGuid();
 }
 
 TArray<UObject*> INetworkComponent::getMerged() const {

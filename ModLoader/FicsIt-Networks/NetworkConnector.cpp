@@ -95,6 +95,7 @@ void UNetworkConnector::construct() {
 	new (&merged) std::unordered_set<UObject*>();
 	new (&listeners) std::set<FWeakObjectPtr>();
 	new (&id) FGuid();
+	new (&nick) FString();
 
 	idCreated = false;
 	maxCables = -1;
@@ -234,6 +235,14 @@ UNetworkConnector * INetworkConnectorComponent::self() const {
 
 FGuid INetworkConnectorComponent::getID() const {
 	return self()->id;
+}
+
+FString INetworkConnectorComponent::getNick() const {
+	return self()->nick;
+}
+
+void INetworkConnectorComponent::setNick(const FString& nick) {
+	self()->nick = nick;
 }
 
 TArray<UObject*> INetworkConnectorComponent::getMerged() const {

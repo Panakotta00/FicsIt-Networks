@@ -788,6 +788,15 @@ bool newInstance(lua_State* L, SDK::UObject* obj, std::shared_ptr<LuaObjectValid
 		}
 
 		if (((UObject*)obj)->clazz->implements(UNetworkComponent::staticClass())) {
+			FGuid guid;
+			((UObject*)obj)->findFunction(L"getID")->invoke((UObject*)obj, &guid);
+			lua_pushstring(L, guid.toStr().c_str());
+			lua_setfield(L, -2, "id");
+			FString str;
+			((UObject*)obj)->findFunction(L"getNick")->invoke((UObject*)obj, &str);
+			lua_pushstring(L, str.toStr().c_str());
+			lua_setfield(L, -2, "nick");
+
 			struct Params {
 				TArray<UObject*> merged;
 			};
@@ -851,6 +860,19 @@ int luaComponentProxy(lua_State * L) {
 		auto comp = ULuaContext::ctx->getComponent(s);
 		if (!comp) lua_pushnil(L);
 		else newInstance(L, (SDK::UObject*)comp, std::shared_ptr<LuaObjectValidation>(new LuaComponentValidation((SDK::UObject*)comp)));
+	}
+	return args;
+}
+
+int luaComponentFind(lua_State* L) {
+	int args = lua_gettop(L);
+
+	for (int i = 1; i <= args; ++i) {
+		auto s = lua_tostring(L, i);
+		if (!s) return luaL_error(L, ("argument #" + std::to_string(i) + " is not a string").c_str());
+		auto comp = ULuaContext::ctx->getComponentByNick(s);
+		if (comp == SML::Objects::FGuid()) lua_pushnil(L);
+		else lua_pushstring(L, comp.toStr().c_str());
 	}
 	return args;
 }

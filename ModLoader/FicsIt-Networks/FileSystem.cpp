@@ -17,6 +17,14 @@ FGuid IFileSystemComponent::getID() const {
 	return self()->id;
 }
 
+SML::Objects::FString IFileSystemComponent::getNick() const {
+	return self()->nick;
+}
+
+void IFileSystemComponent::setNick(const FString& nick) {
+	self()->nick = nick;
+}
+
 UObject* IFileSystemComponent::findComponent(FGuid guid) const {
 	return INetworkComponent::findComponentFromCircuit(guid);
 }

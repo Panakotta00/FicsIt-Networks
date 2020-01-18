@@ -42,6 +42,12 @@ public:
 		FGuid getID() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		FString getNick() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		void setNick(FString nick);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 		TArray<UObject*> getMerged() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
