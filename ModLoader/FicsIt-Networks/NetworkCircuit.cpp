@@ -95,6 +95,23 @@ SML::Objects::UObject* UNetworkCircuit::findComponent(SML::Objects::FGuid addr) 
 	return nullptr;
 }
 
+SML::Objects::UObject * UNetworkCircuit::findComponentByNick(SML::Objects::FString nick) {
+	for (auto node : nodes) {
+		INetworkComponent* comp;
+		try {
+			comp = ((INetworkComponent*)((size_t)node.get() + node->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+		} catch (...) {
+			continue;
+		}
+
+		if (comp->getNick().toStr() == nick.toStr()) {
+			return *node;
+		}
+	}
+
+	return nullptr;
+}
+
 void UNetworkCircuit::getComponents_exec(SML::Objects::FFrame & stack, void * retVals) {
 	stack.code += !!stack.code;
 

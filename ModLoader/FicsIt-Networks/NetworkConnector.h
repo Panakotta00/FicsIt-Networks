@@ -24,8 +24,6 @@ inline void gdeps(UNetworkConnector *self, SML::Objects::TArray<SML::Objects::UO
 }
 
 struct IFGSaveInterface {
-
-	
 	virtual void preSave(int, int) {}
 	virtual void postSave(int, int) {}
 	virtual void preLoad(int, int) {}
@@ -61,6 +59,8 @@ private:
 
 public:
 	virtual SML::Objects::FGuid getID() const override;
+	virtual SML::Objects::FString getNick() const override;
+	virtual void setNick(const SML::Objects::FString& nick) override;
 	virtual SML::Objects::TArray<SML::Objects::UObject*> getMerged() const override;
 	virtual SML::Objects::TArray<SML::Objects::UObject*> getConnected() const override;
 	virtual SML::Objects::UObject* findComponent(SML::Objects::FGuid guid) const override;
@@ -87,6 +87,7 @@ private:
 
 public:
 	SML::Objects::FGuid id;
+	SML::Objects::FString nick;
 	bool idCreated;
 	int maxCables;
 	UNetworkCircuit* circuit;

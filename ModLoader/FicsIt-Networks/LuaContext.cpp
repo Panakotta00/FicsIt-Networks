@@ -141,6 +141,19 @@ SML::Objects::UObject* ULuaContext::getComponent(const std::string & addr) const
 	return nullptr;
 }
 
+SML::Objects::FGuid ULuaContext::getComponentByNick(const std::string & nick) const {
+	auto connector = getConnector();
+	if (!connector) return SML::Objects::FGuid();
+	auto found = connector->circuit->findComponentByNick(nick.c_str());
+	if (found) {
+		try {
+			auto comp = ((INetworkComponent*)((size_t)found + found->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+			return SML::Objects::FGuid(comp->getID());
+		} catch (...) {}
+	}
+	return SML::Objects::FGuid();
+}
+
 // BPI wrappings
 
 void ULuaContext::execExecSteps(ULuaContext * self, SML::Objects::FFrame & stack, void * p) {

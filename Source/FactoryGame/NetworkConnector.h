@@ -21,6 +21,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, SaveGame)
 	FGuid id;
 
+	UPROPERTY(BlueprintReadOnly, SaveGame)
+		FString nick;
+
 	UPROPERTY(SaveGame)
 	bool idCreated;
 
@@ -48,6 +51,8 @@ public:
 	virtual bool ShouldSave_Implementation() const override;
 
 	virtual FGuid getID_Implementation() const override;
+	virtual FString getNick_Implementation() const override;
+	virtual void setNick_Implementation(FString nick) override;
 	virtual TArray<UObject*> getMerged_Implementation() const override;
 	virtual TArray<UObject*> getConnected_Implementation() const override;
 };

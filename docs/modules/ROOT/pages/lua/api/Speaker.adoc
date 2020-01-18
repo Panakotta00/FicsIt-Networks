@@ -28,6 +28,167 @@ Parameters::
 
 Stops the current playing sound
 
+==== `string[] getSounds()`
+
+Returns a array of paths to available soundfiles allowing for dynamic sound lookup.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string[]
+|string[]
+|array of paths the sound files without the `.ogg` file ending
+|===
+
+==== `setRange(number range)`
+
+Sets the range in which the speaker is hearable.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|range
+|number
+|new range of the speaker pole
+|===
+
+==== `number getRange()`
+
+Returns the range in which the speaker is hearable.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|range of the speaker pole
+|===
+
+==== `setVolume(number volume)`
+
+Sets the volume of the sound when it plays.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|volume
+|number
+|new volume of the speaker pole
+|===
+
+==== `number getVolume()`
+
+Returns the volume of the sound when it plays.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|volume of the speaker pole
+|===
+
+==== `setTrackPosition(number position)`
+
+Stops the current running sound and starts it again with the new track starting position.
+
+Doesn't cause any `SpeakerSound`-Signals to get pushed, just the `SpeakerSetting`-Signal.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|position
+|number
+|the track position where the player should restart playing the track.
+|===
+
+=== Signals
+
+==== `SpeakerSound(int type, string sound)`
+
+This Signals gets pushed when f.e. the sound playing status changes.
+
+If the state changes over two steps (sound was playing but valid playSound gets called) multiple signals will get pushed in the corresponding order (type=1 and then type=0)
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|type
+|int
+|integer allowing to further sepperate different events
+
+- `0`
++
+sound started to play
+
+- `1`
++
+sound stopped playing manually by a function call
+
+- `2`
++
+sound finished playing at the end of the sound track
+
+|sound
+|string
+|path to the sound file without the `.ogg` file ending
+|===
+
+==== `SpeakerSetting(int setting, number new, number old)`
+
+The settings of the speakers got changed. (f.e. through calling the `setRange` function)
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|setting
+|int
+|type of setting changed
+
+- `0`
++
+range of speakers got changed
+
+- `1`
++
+volume of speakers got changed
+
+- `2`
++
+play position in playing track has changed
+
+|new
+|number
+|the new value of the setting
+
+|old
+|number
+|the old value of the setting
+|===
 
 
 include::partial$api_footer.adoc[]

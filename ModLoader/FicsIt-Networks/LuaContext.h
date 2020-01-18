@@ -113,6 +113,7 @@ public:
 	void Log(const SML::Objects::FString& str);
 	UNetworkConnector* getConnector() const;
 	SML::Objects::UObject* getComponent(const std::string& addr) const;
+	SML::Objects::FGuid getComponentByNick(const std::string& nick) const;
 
 	// BPI wrappings
 	static void execExecSteps(ULuaContext* self, SML::Objects::FFrame& stack, void* p);

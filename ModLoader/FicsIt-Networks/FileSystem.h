@@ -29,6 +29,8 @@ private:
 
 public:
 	virtual SML::Objects::FGuid getID() const;
+	virtual SML::Objects::FString getNick() const;
+	virtual void setNick(const SML::Objects::FString& nick);
 	virtual SML::Objects::UObject* findComponent(SML::Objects::FGuid guid) const;
 	virtual UNetworkCircuit* getCircuit() const override;
 	virtual void setCircuit(UNetworkCircuit * circuit) override;
@@ -61,6 +63,7 @@ class FileSystemManager;
 class UFileSystem : public SDK::UActorComponent {
 public:
 	SML::Objects::FGuid id;
+	SML::Objects::FString nick;
 	bool idCreated;
 
 	int capacity;
