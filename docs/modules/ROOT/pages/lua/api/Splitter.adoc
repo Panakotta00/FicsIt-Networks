@@ -9,7 +9,7 @@ The codeable splitter allows you to control the flow of items through conveyors.
 
 === Functions
 
-==== `bool doItem(int slot)`
+==== `bool transferItem(int slot)`
 
 Transfers the input item to the output inventory of the given slot. Returns if it was able to transfer the item. (not possible if f.e. output inventory at slot is full)
 
@@ -50,6 +50,23 @@ Return Values::
 |Item
 |Item
 |The current input item
+|===
+
+=== Signals
+
+==== `ItemRequest(Item item)`
+
+The signal notifies the subscribers about a new ready item in the input queue.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|item
+|Item
+|The item waiting in the input queue for transfer
 |===
 
 
