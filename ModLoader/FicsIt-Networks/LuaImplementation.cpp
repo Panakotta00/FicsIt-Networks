@@ -48,5 +48,5 @@ void ULuaImplementation::execIsReachableFrom(SML::Objects::FFrame & stack, void 
 
 	stack.code += !!stack.code;
 
-	((LuaIsReachableFromParams*)retVals)->is = ((ILuaImplementation*)this)->luaIsReachableFrom(listener);
+	*(bool*)retVals = ((ILuaImplementation*)this)->luaIsReachableFrom(listener);
 }

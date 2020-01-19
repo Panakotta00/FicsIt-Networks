@@ -12,6 +12,8 @@
 
 #include <sstream>
 
+#include "LuaContext.h"
+
 using namespace SML;
 using namespace SML::Mod;
 using namespace SML::Objects;
@@ -407,11 +409,14 @@ bool INetworkConnectorLua::luaIsReachableFrom(SML::Objects::UObject * listener) 
 	} catch (...) {
 		return false;
 	}
+	listener = (SML::Objects::UObject*) ((ULuaContext*)listener)->component;
 	INetworkComponent* lcomp;
 	try {
 		lcomp = ((INetworkComponent*)((size_t)listener + (listener)->clazz->getImplementation(UNetworkComponent::staticClass()).off));
 	} catch (...) {
 		return false;
 	}
-	return comp->findComponent(lcomp->getID());;
+	bool reachable = comp->findComponent(lcomp->getID());
+	Utility::error("Reach: ", reachable);
+	return reachable;
 }

@@ -75,7 +75,8 @@ void UNetworkCircuit::recalculate(UObject * component) {
 }
 
 bool UNetworkCircuit::hasNode(SML::Objects::UObject* node) {
-	return nodes.find(node) != nodes.end();
+	volatile SML::Objects::FWeakObjectPtr p = node;
+	return nodes.find(*(SML::Objects::FWeakObjectPtr*) &p) != nodes.end();
 }
 
 SML::Objects::UObject* UNetworkCircuit::findComponent(SML::Objects::FGuid addr) {

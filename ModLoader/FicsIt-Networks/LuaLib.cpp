@@ -84,8 +84,14 @@ bool LuaObjectValidation::isValid() const {
 LuaComponentValidation::LuaComponentValidation(SDK::UObject * obj, std::shared_ptr<LuaObjectValidation> validation) : LuaObjectValidation(obj, validation) {}
 
 bool LuaComponentValidation::isValidImpl() const {
-	auto con = ULuaContext::ctx->getConnector();
-	if (!obj || !con || !con->circuit || !con->circuit->hasNode((SML::Objects::UObject*)obj)) return false;
+	auto comp = (SML::Objects::UObject*) ULuaContext::ctx->component;
+	UNetworkCircuit* circuit = nullptr;
+	try {
+		circuit = ((INetworkComponent*)((size_t)comp + (comp)->clazz->getImplementation(UNetworkComponent::staticClass()).off))->getCircuit();
+	} catch (...) {
+		return false;
+	}
+	if (!obj || !circuit || !circuit->hasNode((SML::Objects::UObject*)obj)) return false;
 	return true;
 }
 
