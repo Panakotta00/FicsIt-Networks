@@ -102,10 +102,15 @@ int ULuaContext::doSignal(lua_State* L) {
 	return props;
 }
 
-bool ULuaContext::pushSignal(Signal * sig) {
+bool ULuaContext::pushSignal(std::shared_ptr<Signal> sig) {
+	SML::Utility::warning("signal size: ", config["SignalQueueSize"].get<int>());
 	if (signals.size() >= config["SignalQueueSize"].get<int>()) return false;
-	signals.push(std::unique_ptr<Signal>(sig));
+	signals.push(std::shared_ptr<Signal>(sig));
 	return true;
+}
+
+bool ULuaContext::pushSignal(Signal * sig) {
+	return pushSignal(std::shared_ptr<Signal>(sig));
 }
 
 void ULuaContext::setException(const std::string ex) {
@@ -200,11 +205,11 @@ void ULuaContext::execSignalSlot(ULuaContext * self, SML::Objects::FFrame & stac
 		return;
 	}
 	//SML::Objects::TArray<ULuaContext*> ctxs = comp->luaGetSignalListeners();
-	for (auto ctx : ctxs) if (ctx->signals.size() < config["SignalQueueSize"].get<int>()) {
+	for (auto ctx : ctxs) {
 		LuaIsReachableFromParams params {ctx, false};
 		self->findFunction(L"luaIsReachableFrom")->invoke(self, &params);
 		if (params.is) {
-			ctx->signals.push(std::shared_ptr<Signal>(sig));
+			ctx->pushSignal(sig);
 			break;
 		}
 	}

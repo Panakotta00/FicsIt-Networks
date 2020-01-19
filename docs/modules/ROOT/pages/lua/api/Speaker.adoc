@@ -9,9 +9,9 @@ A Speaker allows you to play sound files ingame.
 
 === Functions
 
-==== `playSound(string name)`
+==== `playSound(string name [, number start = 0])`
 
-Stops the current playing sound and plays the sound defined by the given name.
+Stops the current playing sound and plays the sound defined by the given name at the given starting position.
 
 Parameters::
 +
@@ -22,6 +22,10 @@ Parameters::
 |name
 |string
 |path to the sound file without the `.ogg` file ending
+
+|start
+|number
+|the starting point for the player.
 |===
 
 ==== `stopSound()`
@@ -103,23 +107,6 @@ Return Values::
 |volume of the speaker pole
 |===
 
-==== `setTrackPosition(number position)`
-
-Stops the current running sound and starts it again with the new track starting position.
-
-Doesn't cause any `SpeakerSound`-Signals to get pushed, just the `SpeakerSetting`-Signal.
-
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|position
-|number
-|the track position where the player should restart playing the track.
-|===
-
 === Signals
 
 ==== `SpeakerSound(int type, string sound)`
@@ -176,10 +163,6 @@ range of speakers got changed
 - `1`
 +
 volume of speakers got changed
-
-- `2`
-+
-play position in playing track has changed
 
 |new
 |number

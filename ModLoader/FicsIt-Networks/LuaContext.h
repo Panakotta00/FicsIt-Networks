@@ -107,6 +107,7 @@ public:
 	void reset();
 	void execSteps(std::int32_t count);
 	int doSignal(lua_State* L);
+	bool pushSignal(std::shared_ptr<Signal> sig);
 	bool pushSignal(Signal* sig);
 
 	void setException(const std::string ex);
