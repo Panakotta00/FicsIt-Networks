@@ -34,4 +34,6 @@ public:
 	virtual void notifyNetworkUpdate(int type, std::set<SML::Objects::FWeakObjectPtr> nodes);
 
 	SML::Objects::UObject* findComponentFromCircuit(SML::Objects::FGuid guid) const;
+
+	bool hasNick(std::string nick);
 };

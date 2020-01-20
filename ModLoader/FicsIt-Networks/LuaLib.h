@@ -75,6 +75,8 @@ public:
 	LuaObjectPtr(SML::Objects::UObject* obj, std::shared_ptr<LuaObjectValidation> validation);
 	~LuaObjectPtr();
 
+	bool operator==(const LuaObjectPtr& other) const;
+
 	SML::Objects::UObject* getObject() const;
 	std::shared_ptr<LuaObjectValidation> getValidation() const;
 };

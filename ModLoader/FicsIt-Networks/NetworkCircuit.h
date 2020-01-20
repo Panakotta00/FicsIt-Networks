@@ -25,7 +25,7 @@ public:
 	void recalculate(SML::Objects::UObject* component);
 	bool hasNode(SML::Objects::UObject* node);
 	SML::Objects::UObject* findComponent(SML::Objects::FGuid addr);
-	SML::Objects::UObject* findComponentByNick(SML::Objects::FString nick);
+	std::set<SML::Objects::UObject*> findComponentsByNick(SML::Objects::FString nick);
 
 	void getComponents_exec(SML::Objects::FFrame& stack, void* retVals);
 

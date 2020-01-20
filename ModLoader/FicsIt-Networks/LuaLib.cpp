@@ -33,6 +33,10 @@ LuaObjectPtr::LuaObjectPtr(UObject * obj, std::shared_ptr<LuaObjectValidation> v
 
 LuaObjectPtr::~LuaObjectPtr() {}
 
+bool LuaObjectPtr::operator==(const LuaObjectPtr & other) const {
+	return ptr == ptr;
+}
+
 UObject * LuaObjectPtr::getObject() const {
 	auto p = *ptr;
 	if (!p || (validation.get() && !validation->isValid())) return nullptr;
@@ -850,10 +854,13 @@ void registerClass(SDK::UClass* clazz, std::vector<LuaFunc> functions) {
 
 int luaPrint(lua_State * L) {
 	int args = lua_gettop(L);
+	std::string log;
 	for (int i = 1; i <= args; ++i) {
-		auto str = lua_tostring(L, i);
-		if (str) ULuaContext::ctx->Log(str);
+		const char* s = luaL_tolstring(L, i, 0);
+		if (!s) luaL_argerror(L, i, "is not valid type");
+		log += s;
 	}
+	ULuaContext::ctx->Log(log.c_str());
 	return 0;
 }
 
@@ -861,24 +868,43 @@ int luaComponentProxy(lua_State * L) {
 	int args = lua_gettop(L);
 
 	for (int i = 1; i <= args; ++i) {
-		auto s = lua_tostring(L, i);
-		if (!s) return luaL_error(L, ("argument #" + std::to_string(i) + " is not a string").c_str());
-		auto comp = ULuaContext::ctx->getComponent(s);
-		if (!comp) lua_pushnil(L);
-		else newInstance(L, (SDK::UObject*)comp, std::shared_ptr<LuaObjectValidation>(new LuaComponentValidation((SDK::UObject*)comp)));
+		bool isT = lua_istable(L, i);
+		
+		std::vector<std::string> ids;
+		if (isT) {
+			auto count = lua_rawlen(L, i);
+			for (int j = 1; j <= count; ++j) {
+				lua_geti(L, i, j);
+				ids.push_back(luaL_checkstring(L, -1));
+				lua_pop(L,1);
+			}
+			lua_newtable(L);
+		} else ids.push_back(luaL_checkstring(L, i));
+
+		int j = 0;
+		for (auto& s : ids) {
+			auto comp = ULuaContext::ctx->getComponent(s);
+			if (!comp) lua_pushnil(L);
+			else newInstance(L, (SDK::UObject*)comp, std::shared_ptr<LuaObjectValidation>(new LuaComponentValidation((SDK::UObject*)comp)));
+			if (isT) lua_seti(L, -2, ++j);
+		}
 	}
 	return args;
 }
 
-int luaComponentFind(lua_State* L) {
+int luaFindComponent(lua_State* L) {
 	int args = lua_gettop(L);
 
 	for (int i = 1; i <= args; ++i) {
-		auto s = lua_tostring(L, i);
-		if (!s) return luaL_error(L, ("argument #" + std::to_string(i) + " is not a string").c_str());
-		auto comp = ULuaContext::ctx->getComponentByNick(s);
-		if (comp == SML::Objects::FGuid()) lua_pushnil(L);
-		else lua_pushstring(L, comp.toStr().c_str());
+		lua_newtable(L);
+		std::string s = luaL_checkstring(L, i);
+		auto comps = ULuaContext::ctx->getComponentsByNick(s);
+		int j = 0;
+		for (auto& comp : comps) {
+			++j;
+			lua_pushstring(L, comp.toStr().c_str());
+			lua_seti(L, -2, j);
+		}
 	}
 	return args;
 }
@@ -889,8 +915,7 @@ int luaFindItem(lua_State * L) {
 
 	int nargs = lua_gettop(L);
 	if (nargs < 1) return 0;
-	const char* str = lua_tostring(L, -1);
-	if (!str) return luaL_error(L, "argument #1 needs to be string or number");
+	const char* str = luaL_tolstring(L, -1, 0);
 
 	TArray<SDK::UClass*> items;
 	((SDK::UFGBlueprintFunctionLibrary*)SDK::UFGBlueprintFunctionLibrary::StaticClass()->CreateDefaultObject())->Cheat_GetAllDescriptors((SDK::TArray<SDK::UClass*>*)&items);
@@ -986,9 +1011,24 @@ int luaInstanceEQ(lua_State* L) {
 		return 1;
 	}
 
-	auto c1 = *(FWeakObjectPtr*)luaL_checkudata(L, -2, "WeakObjPtr");
-	auto c2 = *(FWeakObjectPtr*)luaL_checkudata(L, -1, "WeakObjPtr");
-	lua_pushboolean(L, *c1 == *c2);
+	auto c1 = *(LuaObjectPtr*)luaL_checkudata(L, -2, "WeakObjPtr");
+	auto c2 = *(LuaObjectPtr*)luaL_checkudata(L, -1, "WeakObjPtr");
+	lua_pushboolean(L, c1 == c2);
+	return 1;
+}
+
+int luaInstanceString(lua_State* L) {
+	lua_getfield(L, 1, "__object");
+	auto c1 = *(LuaObjectPtr*)luaL_checkudata(L, -1, "WeakObjPtr");
+	auto o = c1.getObject();
+	if (!o) lua_pushstring(L, "Unavailable");
+	else try {
+		auto c = (INetworkComponent*)((size_t)o + o->clazz->getImplementation(UNetworkComponent::staticClass()).off);
+		auto n = c->getNick().toStr();
+		lua_pushstring(L, (((n.length() > 0) ? std::string("\"") + n + "\" " : std::string()) + c->getID().toStr()).c_str());
+	} catch (...) {
+		lua_pushstring(L, "No Component");
+	}
 	return 1;
 }
 
@@ -1197,6 +1237,7 @@ void luaFile(lua_State * L, std::unique_ptr<FileSystemFileStream> file) {
 
 static const luaL_Reg luaInstanceLib[] = {
 	{"__eq", luaInstanceEQ},
+	{"__tostring", luaInstanceString},
 	{NULL,NULL}
 };
 
@@ -1236,6 +1277,7 @@ static const luaL_Reg luaClassLib[] = {
 
 static const luaL_Reg luaComponentLib[] = {
 	{"proxy", luaComponentProxy},
+	{"findComponent", luaFindComponent},
 	{"findItem", luaFindItem},
 	{NULL,NULL}
 };

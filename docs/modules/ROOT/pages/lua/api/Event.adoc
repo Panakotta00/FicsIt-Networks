@@ -1,0 +1,77 @@
+= Event API
+:description: The Event API helps to interact with the singal system of the connected computer network itself.
+
+**Lua Lib: `event`**
+
+The Event API provides classes, functions and variables for interacting with the component network.
+
+== Functions
+
+=== `listen(Component)`
+
+Adds the running lua context to the listen queue of the given component.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Component
+|Component
+|The network component lua representation the computer should now listen to.
+|===
+
+=== `string e, Component s, ... pull([number timeout])`
+
+Waits for a signal in the queue. Blocks the excecution until a signal got pushed to the signal queue or the timeout is reached.
+
+Returns directly if ther is already a signal in the queue (the factory tick doesn't get yieled).
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|timeout
+|number
+|The amount of time needs to pass until pull unblocks when no signal got pushed.
+ If not set, the function will block indefinetly until a signal gets pushed.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|e
+|string
+|The name of the returned signal.
+
+Nil when timout got reached.
+
+|s
+|Component
+|The component representation of the signal sender.
+
+Not set when timout got reached.
+
+|...
+|...
+|The parameters passed to the signal.
+
+Not set when timout got reached.
+|===
+
+== Examples
+
+Gets a network component representation, listens to it and waits max. 10 secconds for a signal::
++
+```lua
+c = component.proxy("0123456789abcdef0123456789abcdef")
+event.listen(c)
+
+e, s, test = event.pull(10)
+```

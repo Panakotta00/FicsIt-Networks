@@ -96,7 +96,8 @@ SML::Objects::UObject* UNetworkCircuit::findComponent(SML::Objects::FGuid addr) 
 	return nullptr;
 }
 
-SML::Objects::UObject * UNetworkCircuit::findComponentByNick(SML::Objects::FString nick) {
+std::set<SML::Objects::UObject*> UNetworkCircuit::findComponentsByNick(SML::Objects::FString nick) {
+	std::set<SML::Objects::UObject*> comps;
 	for (auto node : nodes) {
 		INetworkComponent* comp;
 		try {
@@ -105,12 +106,10 @@ SML::Objects::UObject * UNetworkCircuit::findComponentByNick(SML::Objects::FStri
 			continue;
 		}
 
-		if (comp->getNick().toStr() == nick.toStr()) {
-			return *node;
-		}
+		if (comp->hasNick(nick.toStr())) comps.insert(*node);
 	}
 
-	return nullptr;
+	return comps;
 }
 
 void UNetworkCircuit::getComponents_exec(SML::Objects::FFrame & stack, void * retVals) {

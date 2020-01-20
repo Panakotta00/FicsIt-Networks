@@ -90,6 +90,38 @@ UObject* INetworkComponent::findComponentFromCircuit(FGuid guid) const {
 	return circuit->findComponent(guid);
 }
 
+bool INetworkComponent::hasNick(std::string nick) {
+	auto has = getNick().toStr();
+	std::set<std::string> has_nicks;
+	do {
+		auto pos = has.find(" ");
+		std::string n = "";
+		if (pos >= has.length()) {
+			n = has;
+			has = "";
+		} else {
+			n = has.substr(0, pos);
+			has = has.substr(pos + 1);
+		}
+		if (n.length() > 0) has_nicks.insert(n);
+	} while (has.length() > 0);
+
+	do {
+		auto pos = nick.find(" ");
+		std::string n = "";
+		if (pos >= nick.length()) {
+			n = nick;
+			nick = "";
+		} else {
+			n = nick.substr(0, pos);
+			nick = nick.substr(pos + 1);
+		}
+		if (n.length() > 0) if (has_nicks.find(n) == has_nicks.end()) return false;
+	} while (nick.length() > 0);
+
+	return true;
+}
+
 /*UNetworkCircuit * INetworkComponent::getCircuit() const {
 	return circuit;
 }
