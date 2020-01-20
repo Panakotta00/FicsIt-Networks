@@ -38,6 +38,7 @@ Metatable::
 |__tostring
 |ToString conversion operator
 |uses the __object field to get the nick and id of the component and appends the to the returning string
+|===
 
 == Functions
 
