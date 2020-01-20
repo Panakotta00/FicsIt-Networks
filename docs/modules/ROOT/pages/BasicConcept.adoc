@@ -13,10 +13,26 @@ A Network Component is anything that is connected to the network and can provide
 
 Network Components can be identified indifidually by their ID which is a guid (a implementation of UUID)
 
-Example:
+Example::
++
 ```
 0123456789abcdef0123456789abcdef
 ```
+
+Network Components can have nick, wich is a list of custom names sepperated by spaces allowing you to group and name your network components.
+Nick filers are then used to check if a network component has specific nicknames.
+
+Example::
++
+```
+nick1 = "Test Power" // nick1 with names "Test" and "Power"
+nick2 = "Power" // nick2 with name "Power"
+
+filter1 = "Power" // nick filter maches nick1 and nick2
+filter2 = "Test" // nick filter maches only nick1
+filter3 = "Test Power" // nick filter maches only nick1
+filter4 = "Power Nice" // nick filter maches noone
+filter5 = "" // nick filter maches every component (also components with no nick)
 
 === Lua
 

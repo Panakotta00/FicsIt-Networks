@@ -16,6 +16,14 @@ Fields::
 |===
 |Name |Type |Description
 
+|id
+|string
+|the id of the component as string
+
+|nick
+|string
+|the nick of the component at the time where the instance got created
+
 |__object
 |WeakObjPtr
 |A soft reference to to the network component
@@ -79,6 +87,32 @@ Nil if the network component with the given ID was not found.
 |A array of the lua table representation of the netowork component.
 
 Entries are Nil if the network component with the given ID was not found.
+|===
+
+=== `string[]... findComponent(string nick...)`
+
+Searches the component network for components wich pass the given nick filter.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|nick
+|string...
+|nick filter as string used to get a list of component in the network.
+|===
+
+Return 	Value::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string[]...
+|string[]...
+|list of netowrk component ids wich pass the given nick filter.
 |===
 
 
