@@ -33,6 +33,7 @@ filter2 = "Test" // nick filter maches only nick1
 filter3 = "Test Power" // nick filter maches only nick1
 filter4 = "Power Nice" // nick filter maches noone
 filter5 = "" // nick filter maches every component (also components with no nick)
+```
 
 === Lua
 
@@ -53,9 +54,11 @@ Each of these functions can have multiple input parameters which are all require
 Also, quite interessting is, a function can have multiple output values which all will exist.
 
 In this documentation we use **most of the time (not always)** this declaration scheme:
+
 ```Lua
 outType [outName], ... funcName([inType] inName, ...)
 ```
+
 Examples:
 ```Lua
 int, string name test(rly, num howOften)
@@ -73,8 +76,6 @@ To call such a function in Lua you simply need to get the Lua-Component-Structur
 =====
 The function it self is bound to the component. That means you can take the function and store it in any variable and it still refers to the same component. This allows you to minimize the memory usage, if that's important.
 =====
-
-
 
 === Signals
 
