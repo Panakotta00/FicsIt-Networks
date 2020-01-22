@@ -1,6 +1,11 @@
 #include "stdafx.h"
 
+#include <mod/ModFunctions.h>
 #include <assets/AssetFunctions.h>
+#include <assets/FObjectSpawnParameters.h>
+#include <game/Global.h>
+
+#include <util/Objects/FVector.h>
 
 #include "Equip_FileSystem.h"
 
@@ -16,6 +21,12 @@ void AEquip_FileSystem::construct() {
 	RootComponent = self->createDefaultSubobjectSDK<SDK::USceneComponent>(L"RootComponent");
 
 	filesystem = self->createDefaultSubobject<UFileSystem>(L"FileSystem");
+	new (&stack) SDK::FInventoryStack();
+	new (&save) IEquipFileSystemSaveInterface();
+
+	static void(*constructFInventoryStack)(SDK::FInventoryStack*) = nullptr;
+	if (!constructFInventoryStack) constructFInventoryStack = (void(*)(SDK::FInventoryStack*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FInventoryStack::FInventoryStack");
+	constructFInventoryStack(&stack);
 }
 
 void AEquip_FileSystem::destruct() {
@@ -46,7 +57,7 @@ struct FInventoryItem {
 	struct FSharedInventoryStatePtr ItemState;
 };
 
-void AEquip_FileSystem::moveSelfToItem(SML::Objects::FFrame & stack, void * item) {
+void AEquip_FileSystem::createState(SML::Objects::FFrame & stack, void * state) {
 	static void(*constructFInventoryStack)(SDK::FInventoryStack*) = nullptr;
 	if (!constructFInventoryStack) constructFInventoryStack = (void(*)(SDK::FInventoryStack*)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "FInventoryStack::FInventoryStack");
 	static void(*setStateOnIndex)(SDK::UFGInventoryComponent*, int, SDK::FSharedInventoryStatePtr*) = nullptr;
@@ -58,18 +69,54 @@ void AEquip_FileSystem::moveSelfToItem(SML::Objects::FFrame & stack, void * item
 	static void(*removeFromIndex)(SDK::UFGInventoryComponent*, int, int) = nullptr;
 	if (!removeFromIndex) removeFromIndex = (void(*)(SDK::UFGInventoryComponent*, int, int)) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "UFGInventoryComponent::RemoveFromIndex");
 
+	int capacity = 0;
+	SDK::UFGInventoryComponent* inv = nullptr;
+	int slot = 0;
+
+	stack.stepCompIn(&capacity);
+	stack.stepCompIn(&inv);
+	stack.stepCompIn(&slot);
+
 	stack.code += !!stack.code;
-	
-	auto c = Mod::Functions::getPlayerCharacter();
-	auto inv = c->GetEquipmentSlot(SDK::EEquipmentSlot::ES_ARMS);
+
+	FActorSpawnParameters spawnParams;
+	SDK::FVector loc{0,0,0};
+	SDK::FRotator rot{0,0,0};
+	auto efs = (AEquip_FileSystem*)::call<&SML::Objects::UWorld::SpawnActor>((SML::Objects::UWorld*)*SDK::UWorld::GWorld, (SDK::UClass*)staticClass(), &loc, &rot, (FActorSpawnParameters*)&spawnParams);
+	efs->filesystem->capacity = capacity;
+
+	Utility::error("LifeSpan1: ", efs->GetLifeSpan());
 	auto statePtr = SDK::FSharedInventoryStatePtr();
-	constructFSharedInventoryStatePtr(&statePtr, this);
-	setStateOnIndex(inv, inv->GetActiveIndex(), &statePtr);
-	SDK::FInventoryStack s = SDK::FInventoryStack();
-	constructFInventoryStack(&s);
-	getStackFromIndex(inv, inv->GetActiveIndex(), &s);
-	*((SDK::FInventoryItem*)item) = s.Item;
-	Utility::error("LifeSpan2: ", GetLifeSpan());
-	removeFromIndex(inv, inv->GetActiveIndex(), 1);
-	Utility::error("LifeSpan3: ", GetLifeSpan());
+	constructFSharedInventoryStatePtr(&statePtr, efs);
+	Utility::error("LifeSpan2: ", efs->GetLifeSpan());
+	setStateOnIndex(inv, slot, &statePtr);
+	Utility::error("LifeSpan3: ", efs->GetLifeSpan());
+
+	*((AEquip_FileSystem**)state) = efs;
+}
+
+SML::Objects::UClass * AEquip_FileSystem::staticClass() {
+	return Paks::ClassBuilder<AEquip_FileSystem>::staticClass();
+}
+
+bool IEquipFileSystemSaveInterface::NeedTransform() {
+	return false;
+}
+
+bool IEquipFileSystemSaveInterface::ShouldSave() {
+	return true;
+}
+
+void IEquipFileSystemSaveInterface::gatherDeps(SML::Objects::TArray<SML::Objects::UObject*>*) {}
+
+void IEquipFileSystemSaveInterface::postLoad(int, int) {}
+
+void IEquipFileSystemSaveInterface::preLoad(int, int) {}
+
+void IEquipFileSystemSaveInterface::postSave(int, int) {}
+
+void IEquipFileSystemSaveInterface::preSave(int, int) {}
+
+SML::Objects::UObject * IEquipFileSystemSaveInterface::_getUObject() const {
+	return nullptr;
 }

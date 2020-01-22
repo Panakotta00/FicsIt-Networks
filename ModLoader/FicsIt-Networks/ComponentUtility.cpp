@@ -224,6 +224,40 @@ void UComponentUtility::setAllowUsing(void * self, SML::Objects::FFrame & stack,
 	allowUsing = newUsing;
 }
 
+void UComponentUtility::dumpObject(void * self, SML::Objects::FFrame & stack, void * ret) {
+	SML::Objects::UObject* obj = nullptr;
+	stack.stepCompIn(&obj);
+
+	stack.code += !!stack.code;
+
+	for (auto f : *obj->clazz) {
+		std::string s = f->getName() + " " + f->clazz->getName() + " ";
+		if (f->clazz->castFlags & EClassCastFlags::CAST_UProperty) {
+			if (f->clazz->castFlags & EClassCastFlags::CAST_UObjectProperty) {
+				s += ((SML::Objects::UObjectProperty*)f)->objClass->getName() + " ";
+			}
+			if (((UProperty*)f)->propFlags & EPropertyFlags::Prop_ExposeOnSpawn) s += "ExposeOnSpawn ";
+			if (((UProperty*)f)->propFlags & EPropertyFlags::Prop_Protected) s += "Protected ";
+			if (((UProperty*)f)->propFlags & EPropertyFlags::Prop_BlueprintReadOnly) s += "ReadOnly ";
+			if (((UProperty*)f)->propFlags & EPropertyFlags::Prop_Edit) s += "Edit ";
+			Utility::debug(s);
+		} else if (f->clazz->castFlags & EClassCastFlags::CAST_UFunction) {
+			s += "(";
+			SML::Objects::UField* p = ((SML::Objects::UFunction*)f)->childs;
+			bool was = p;
+			while (p) {
+				if (p->clazz->castFlags & EClassCastFlags::CAST_UProperty && ((SML::Objects::UProperty*)p)->propFlags & (EPropertyFlags::Prop_OutParm | EPropertyFlags::Prop_Parm | EPropertyFlags::Prop_ReturnParm)) {
+					s += p->getName() + " " + p->clazz->getName() + ", ";
+				}
+				p = p->next;
+			}
+			if (was) s = s.substr(0, s.length() - 2);
+			s += ") ";
+			Utility::warning(s);
+		}
+	}
+}
+
 struct FSoundQualityInfo {
 	int Quality;
 	unsigned int NumChannels;

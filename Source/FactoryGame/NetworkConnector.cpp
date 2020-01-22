@@ -27,6 +27,6 @@ void UNetworkConnector::addComponent(UObject * component) {}
 bool UNetworkConnector::ShouldSave_Implementation() const { return false; }
 FGuid UNetworkConnector::getID_Implementation() const { return FGuid(); }
 FString UNetworkConnector::getNick_Implementation() const { return ""; }
-void UNetworkConnector::setNick_Implementation(FString nick) {}
+void UNetworkConnector::setNick_Implementation(const FString& nick) {}
 TArray<UObject*> UNetworkConnector::getMerged_Implementation() const { return TArray<UObject*>();  };
 TArray<UObject*> UNetworkConnector::getConnected_Implementation() const { return TArray<UObject*>(); };

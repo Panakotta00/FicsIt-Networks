@@ -12,6 +12,6 @@ AEquip_FileSystem::AEquip_FileSystem() {
 	}
 }
 
-FInventoryItem AEquip_FileSystem::MoveSelfToItem() {
-	return FInventoryItem();
+AEquip_FileSystem* AEquip_FileSystem::createState(int capacity, UFGInventoryComponent* inventory, int slotIndex) {
+	return nullptr;
 }

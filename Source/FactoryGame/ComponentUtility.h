@@ -34,4 +34,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		static USoundWave* loadSoundFromFile(FString file);
+
+	UFUNCTION(BlueprintCallable)
+		static void dumpObject(UObject* object);
 };

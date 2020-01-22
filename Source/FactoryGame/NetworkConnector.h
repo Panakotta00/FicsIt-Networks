@@ -52,7 +52,7 @@ public:
 
 	virtual FGuid getID_Implementation() const override;
 	virtual FString getNick_Implementation() const override;
-	virtual void setNick_Implementation(FString nick) override;
+	virtual void setNick_Implementation(const FString& nick) override;
 	virtual TArray<UObject*> getMerged_Implementation() const override;
 	virtual TArray<UObject*> getConnected_Implementation() const override;
 };

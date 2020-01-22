@@ -156,21 +156,17 @@ void UFileSystem::tick(float deltaSeconds, ELevelTick tick, void* thisFunc) {
 
 void UFileSystem::signalFileSystemChange(int type, std::wstring npath, std::wstring opath) {
 	auto o = (Objects::UObject*)this;
-	struct Params {
-		FString npath;
-		FString opath;
-		int type;
-	};
-	Params params{npath.c_str(), opath.c_str(),type};
+	SigFileSystemChange_Params params{type, opath.c_str(), npath.c_str()};
 	o->findFunction(L"luaSig_FileSystemChange")->invoke(o, &params);
+	Utility::error(sizeof(params));
 }
 
 void UFileSystem::execSigFSC(FFrame & stack, void *) {
 	FString s1, s2;
 	int i;
+	stack.stepCompIn(&i);
 	stack.stepCompIn(&s1);
 	stack.stepCompIn(&s2);
-	stack.stepCompIn(&i);
 	stack.code += !!stack.code;
 }
 

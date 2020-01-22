@@ -207,9 +207,11 @@ void ULuaContext::execSignalSlot(ULuaContext * self, SML::Objects::FFrame & stac
 	}
 	//SML::Objects::TArray<ULuaContext*> ctxs = comp->luaGetSignalListeners();
 	for (auto ctx : ctxs) {
-		LuaIsReachableFromParams params {ctx, false};
-		self->findFunction(L"luaIsReachableFrom")->invoke(self, &params);
-		if (params.is) {
+		LuaIsReachableFromParams* params = new LuaIsReachableFromParams{false, ctx};
+		self->findFunction(L"luaIsReachableFrom")->invoke(self, params);
+		bool is = params->is;
+		delete params;
+		if (is) {
 			ctx->pushSignal(sig);
 			break;
 		}

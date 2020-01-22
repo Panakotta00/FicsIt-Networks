@@ -14,5 +14,6 @@ public:
 	static void getNetworkConnectorFromHit_exec(void* self, SML::Objects::FFrame& stack, void* ret);
 	static void clipboardCopy(void* self, SML::Objects::FFrame& stack, void* ret);
 	static void setAllowUsing(void* self, SML::Objects::FFrame& stack, void* ret);
+	static void dumpObject(void* self, SML::Objects::FFrame& stack, void* ret);
 	void loadSoundFromFile(SML::Objects::FFrame& stack, void* ret);
 };

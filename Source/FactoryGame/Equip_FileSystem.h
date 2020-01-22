@@ -23,6 +23,6 @@ public:
 		UFileSystem* FileSystem;
 
 	UFUNCTION(BlueprintCallable)
-		FInventoryItem MoveSelfToItem();
+		static AEquip_FileSystem* createState(int capacity, UFGInventoryComponent* inventory, int slotIndex);
 
 };

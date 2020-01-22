@@ -87,3 +87,7 @@ ModLoader/FicsIt-Networks/x64
 
 # Cook output
 Mods
+
+Content/FactoryGame/Character
+Content/FactoryGame/Buildable/Vehicle
+Content/FactoryGame/World

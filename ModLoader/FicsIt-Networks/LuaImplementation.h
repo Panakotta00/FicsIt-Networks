@@ -6,8 +6,8 @@
 class ULuaContext;
 
 struct LuaIsReachableFromParams {
-	SML::Objects::UObject* listener;
 	bool is;
+	SML::Objects::UObject* listener;
 };
 
 class ILuaImplementation {

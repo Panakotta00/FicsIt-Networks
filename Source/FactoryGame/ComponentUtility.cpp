@@ -14,3 +14,4 @@ UNetworkConnector * UComponentUtility::getNetworkConnectorFromHit(FHitResult hit
 void UComponentUtility::clipboardCopy(FString str) {}
 void UComponentUtility::setAllowUsing(bool newUsing) {}
 USoundWave* UComponentUtility::loadSoundFromFile(FString file) {return nullptr;}
+void UComponentUtility::dumpObject(UObject* object) {}

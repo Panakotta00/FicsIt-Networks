@@ -45,7 +45,7 @@ public:
 		FString getNick() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-		void setNick(FString nick);
+		void setNick(const FString& nick);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 		TArray<UObject*> getMerged() const;

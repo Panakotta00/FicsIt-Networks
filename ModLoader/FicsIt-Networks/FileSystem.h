@@ -20,6 +20,12 @@ enum ELevelTick {
 	LEVELTICK_PauseTick = 0x3,
 };
 
+struct SigFileSystemChange_Params {
+	int type;
+	SML::Objects::FString opath;
+	SML::Objects::FString npath;
+};
+
 class UFileSystem;
 struct lua_State;
 
@@ -83,7 +89,7 @@ public:
 	void destruct();
 
 	void beginPlay();
-	void tick(float deltaSeconds, ELevelTick tick, void* thisFunc);
+	void tick(float deltaSeconds, ::ELevelTick tick, void* thisFunc);
 
 	/**
 	* 0 fileCreated, 1 fileDeleted, 2 fileContentChanged, 3 fileRenamed, 4 dirCreated, 5 dirDeleted, 6 dirRenamed

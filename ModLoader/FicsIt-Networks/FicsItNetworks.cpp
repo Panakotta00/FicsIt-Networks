@@ -327,6 +327,7 @@ void loadClasses() {
 		.func(Paks::FunctionBuilder::staticFunc("clipboardCopy").native(UComponentUtility::clipboardCopy).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "str")))
 		.func(Paks::FunctionBuilder::staticFunc("setAllowUsing").native(UComponentUtility::setAllowUsing).param(Paks::PropertyBuilder::param(EPropertyClass::Bool, "newUsing").helpBool<BoolRetVal, &BoolRetVal::retVal>()))
 		.func(Paks::FunctionBuilder::staticFunc("loadSoundFromFile").native(&UComponentUtility::loadSoundFromFile).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "retVal").classFunc(SDK::USoundWave::StaticClass)).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "file")))
+		.func(Paks::FunctionBuilder::staticFunc("dumpObject").native(&UComponentUtility::dumpObject).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "object").classFunc(SML::Objects::UObject::staticClass)))
 		.build();
 
 	Paks::ClassBuilder<ANetworkAdapter>::Basic()
@@ -353,21 +354,24 @@ void loadClasses() {
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Int, "capacity"))
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Array, "listeners").off(offsetof(UFileSystem, listeners))).prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "listeners").classFunc(ULuaContext::staticClass).off(offsetof(UFileSystem, listeners)))
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "circuit").off(offsetof(UFileSystem, circuit)))
-		.func(Paks::FunctionBuilder::method("luaSig_FileSystemChange").native(&UFileSystem::execSigFSC).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "type")).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "oldPath")).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "newPath")))
+		.func(Paks::FunctionBuilder::method("luaSig_FileSystemChange").native(&UFileSystem::execSigFSC).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "type").off(offsetof(SigFileSystemChange_Params, type))).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "oldPath").off(offsetof(SigFileSystemChange_Params, opath))).param(Paks::PropertyBuilder::param(EPropertyClass::Str, "newPath").off(offsetof(SigFileSystemChange_Params, npath))))
 		.construct(&UFileSystem::constructor)
 		.destruct(&UFileSystem::destruct)
 		.interfaceImpl({saveI, offsetof(UFileSystem, save)})
 		.interfaceImpl({UNetworkComponent::staticClass, offsetof(UFileSystem, component)})
 		.interfaceImpl({ULuaImplementation::staticClass, offsetof(UFileSystem, luaImpl)})
 		.build();
+	Utility::error(sizeof(SigFileSystemChange_Params));
 
 	Paks::ClassBuilder<AEquip_FileSystem>::Basic()
 		.extendSDK<SDK::AFGEquipment>()
 		.construct(&AEquip_FileSystem::construct)
 		.destruct(&AEquip_FileSystem::destruct)
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Object, "FileSystem").classFunc(UFileSystem::staticClass).saveGame())
-		.func(Paks::FunctionBuilder::method("MoveSelfToItem").native(&AEquip_FileSystem::moveSelfToItem).param(Paks::PropertyBuilder::param(EPropertyClass::Struct, "retVal").structFunc(fiitem_c)))
-		.build()->debug();
+		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Struct, "stack").structFunc(fistack_c))
+		.func(Paks::FunctionBuilder::staticFunc("createState").native(&AEquip_FileSystem::createState).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "capacity")).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "inventory").classFunc(SDK::UFGInventoryComponent::StaticClass)).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "slotIndex")).param(Paks::PropertyBuilder::retVal(EPropertyClass::Object, "retVal").classFunc(AEquip_FileSystem::staticClass)))
+		.interfaceImpl({saveI, offsetof(AEquip_FileSystem, save)})
+		.build();
 	
 	Paks::ClassBuilder<AModuleSystemHolo>::Basic()
 		.extendSDK<SDK::AFGBuildableHologram>()

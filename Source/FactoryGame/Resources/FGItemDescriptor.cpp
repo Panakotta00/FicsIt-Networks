@@ -25,7 +25,11 @@ UFGItemDescriptor::FGenerateIconContext::FGenerateIconContext(){ }
 bool UFGItemDescriptor::FGenerateIconContext::IsValid() const{ return bool(); }
 UFGItemDescriptor::FGenerateIconContext UFGItemDescriptor::GenerateIconContext = UFGItemDescriptor::FGenerateIconContext();
 #endif 
-UFGItemDescriptor::UFGItemDescriptor(){ }
+UFGItemDescriptor::UFGItemDescriptor(){
+	this->mStackSize = EStackSize::SS_MEDIUM;
+	this->mUseDisplayNameAndDescription = true;
+	this->mCanBeDiscarded = true;
+}
 void UFGItemDescriptor::Serialize( FArchive& ar){ Super::Serialize(ar ); }
 void UFGItemDescriptor::PostLoad(){ Super::PostLoad(); }
 EResourceForm UFGItemDescriptor::GetForm( TSubclassOf< UFGItemDescriptor > inClass){ return EResourceForm(); }
