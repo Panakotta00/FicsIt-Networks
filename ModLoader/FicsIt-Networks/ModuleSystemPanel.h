@@ -2,6 +2,7 @@
 
 #include <assets/BPInterface.h>
 #include <util/Objects/FVector.h>
+#include <util/Objects/Delegate.h>
 
 #include "../SatisfactorySDK/SDK.hpp"
 
@@ -12,8 +13,9 @@ public:
 	int panelWidth;
 	int panelHeight;
 	SML::Objects::TArray<SML::Objects::UClass*> allowedModules;
-
 	SDK::AActor*** grid;
+	SML::Objects::FMulticastScriptDelegate onModuleChanged;
+	std::uint64_t something;
 
 	void construct();
 	void destruct();

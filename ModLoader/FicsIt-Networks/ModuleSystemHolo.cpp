@@ -94,8 +94,10 @@ bool AModuleSystemHolo::isValidHit(const SDK::FHitResult & hit) {
 	}
 	isValid = checkSpace(min, max);
 	if (isValid) {
-		if (!(std::find(snapped->allowedModules.begin(), snapped->allowedModules.end(), (Objects::UClass*)this->mBuildableClass) != snapped->allowedModules.end()))
-			isValid = false;
+		isValid = false;
+		for (auto& allowed : snapped->allowedModules)
+			if (((Objects::UClass*)this->mBuildableClass)->isChild(allowed)) 
+				isValid = true;
 	}
 	return true;
 }

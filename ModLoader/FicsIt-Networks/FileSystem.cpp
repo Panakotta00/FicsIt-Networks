@@ -3,7 +3,10 @@
 
 #include <sstream>
 
+#include "LuaContext.h"
+
 #include "LuaLib.h"
+//#include "FileSystem\FileSystem.h"
 
 using namespace SML;
 using namespace SML::Objects;
@@ -457,6 +460,7 @@ SML::Objects::TArray<ULuaContext*> IFileSystemLua::luaGetSignalListeners() {
 }
 
 bool IFileSystemLua::luaIsReachableFrom(SML::Objects::UObject * listener) {
+	return true;
 	INetworkComponent* comp;
 	try {
 		comp = ((INetworkComponent*)((size_t)self() + ((SML::Objects::UObject*)self())->clazz->getImplementation(UNetworkComponent::staticClass()).off));
@@ -465,11 +469,13 @@ bool IFileSystemLua::luaIsReachableFrom(SML::Objects::UObject * listener) {
 	}
 	INetworkComponent* lcomp;
 	try {
-		lcomp = ((INetworkComponent*)((size_t)listener + (listener)->clazz->getImplementation(UNetworkComponent::staticClass()).off));
+		auto c = (SML::Objects::UObject*) ((ULuaContext*)listener)->component;
+		lcomp = ((INetworkComponent*)((size_t)c + (c)->clazz->getImplementation(UNetworkComponent::staticClass()).off));
 	} catch (...) {
 		return false;
 	}
-	return comp->findComponent(lcomp->getID());
+	volatile bool found = comp->findComponent(lcomp->getID());
+	return found;
 }
 
 bool IFileSystemSaveInterface::NeedTransform() {
@@ -491,3 +497,4 @@ void IFileSystemSaveInterface::postSave(int, int) {}
 void IFileSystemSaveInterface::preSave(int, int) {}
 
 SML::Objects::UObject * IFileSystemSaveInterface::_getUObject() const { return nullptr; }
+

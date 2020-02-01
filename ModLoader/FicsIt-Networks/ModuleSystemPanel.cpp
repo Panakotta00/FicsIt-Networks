@@ -29,6 +29,8 @@ void UModuleSystemPanel::construct() {
 	}
 	panelWidth = panelHeight = 1;
 	new (&allowedModules) TArray<UClass*>();
+	new (&onModuleChanged) FMulticastScriptDelegate();
+	something = 0;
 }
 
 void UModuleSystemPanel::destruct() {
@@ -45,9 +47,9 @@ SDK::AActor * UModuleSystemPanel::getModule(int x, int y) {
 }
 
 void UModuleSystemPanel::postLoad() {
-	grid = new SDK::AActor**[panelWidth]();
-	for (int i = 0; i < panelWidth; ++i) {
-		grid[i] = new SDK::AActor*[panelHeight];
+	grid = new SDK::AActor**[panelHeight]();
+	for (int i = 0; i < panelHeight; ++i) {
+		grid[i] = new SDK::AActor*[panelWidth];
 		std::memset(grid[i], 0, panelWidth * sizeof(void*));
 	}
 }
@@ -77,6 +79,15 @@ void UModuleSystemPanel::execAddModule(FFrame & stack, void * ret) {
 	for (int x = (int)min.X; x <= max.X; ++x) for (int y = (int)min.Y; y <= max.Y; ++y) {
 		this->grid[x][y] = (SDK::AActor*)module;
 	}
+
+	struct {
+		Objects::UObject* module;
+		bool added;
+	} params {
+		module,
+		true
+	};
+	onModuleChanged.invoke(&params);
 }
 
 void UModuleSystemPanel::execRemoveModule(FFrame & stack, void * ret) {
@@ -88,6 +99,15 @@ void UModuleSystemPanel::execRemoveModule(FFrame & stack, void * ret) {
 		auto& s = this->grid[x][y];
 		if (s == (SDK::AActor*)module) s = nullptr;
 	}
+
+	struct {
+		Objects::UObject* module;
+		bool added;
+	} params{
+		module,
+		false
+	};
+	onModuleChanged.invoke(&params);
 }
 
 void UModuleSystemPanel::execGetModule(SML::Objects::FFrame & stack, void * ret) {

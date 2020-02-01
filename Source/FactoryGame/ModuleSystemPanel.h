@@ -7,6 +7,7 @@
 #include "Inventory.h"
 #include "ModuleSystemPanel.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FModuleDelegate, UObject*, module, bool, added);
 
 UCLASS(BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FACTORYGAME_API UModuleSystemPanel : public USceneComponent
@@ -18,8 +19,11 @@ public:
 		int modulePanelWidth;
 	UPROPERTY(EditDefaultsOnly)
 		int modulePanelHeight;
-	UPROPERTY(EditDefaultsOnly, meta = (MustImplement = "ModuleSystemModule"))
+	UPROPERTY(BlueprintReadWrite, meta = (MustImplement = "ModuleSystemModule"))
 		TArray<TSubclassOf<AActor>> allowedModules;
+
+	UPROPERTY(BlueprintAssignable)
+		FModuleDelegate OnModuleChanged;
 
 	UModuleSystemPanel();
 

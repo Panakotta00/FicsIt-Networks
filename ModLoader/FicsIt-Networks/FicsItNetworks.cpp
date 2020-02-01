@@ -213,6 +213,15 @@ struct BoolRetVal {
 	bool retVal;
 };
 
+struct OnModuleChangedParams {
+	UObject* obj;
+	bool added;
+};
+
+void* constructOnModuleChanged() {
+	return Paks::FunctionBuilder::method("OnModuleChanged_Sig").param(Paks::PropertyBuilder::param(EPropertyClass::Object, "module")).param(Paks::PropertyBuilder::param(EPropertyClass::Bool, "added").helpBool<OnModuleChangedParams, &OnModuleChangedParams::added>()).construct(Paks::ClassBuilder<UModuleSystemPanel>::getClass());
+}
+
 void loadClasses() {
 	Utility::warning("Load custom classes...");
 
@@ -221,13 +230,15 @@ void loadClasses() {
 	auto fistack_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FInventoryStack");
 	auto fiitem_c = (void*(*)()) DetourFindFunction("FactoryGame-Win64-Shipping.exe", "Z_Construct_UScriptStruct_FInventoryItem");
 
+
 	Paks::ClassBuilder<UModuleSystemPanel>::Basic()
 		.extendSDK<SDK::USceneComponent>()
 		.construct(&UModuleSystemPanel::construct)
 		.destruct(&UModuleSystemPanel::destruct)
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Int, "modulePanelWidth").addParamFlags(Prop_DisableEditOnInstance | Prop_Edit).remParamFlags((EPropertyFlags)(Prop_SkipSerialization | Prop_BlueprintVisible)))
 		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Int, "modulePanelHeight").addParamFlags(Prop_DisableEditOnInstance | Prop_Edit).remParamFlags((EPropertyFlags)(Prop_SkipSerialization | Prop_BlueprintVisible)))
-		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Array, "allowedModules").addParamFlags(Prop_DisableEditOnInstance | Prop_Edit).remParamFlags((EPropertyFlags)(Prop_SkipSerialization | Prop_BlueprintVisible)).off(offsetof(UModuleSystemPanel, allowedModules))).prop(Paks::PropertyBuilder::attrib(EPropertyClass::Class, "allowedModules").off(offsetof(UModuleSystemPanel, allowedModules)))
+		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::Array, "allowedModules").addParamFlags(Prop_Edit).remParamFlags((EPropertyFlags)(Prop_SkipSerialization | Prop_BlueprintVisible)).off(offsetof(UModuleSystemPanel, allowedModules))).prop(Paks::PropertyBuilder::attrib(EPropertyClass::Class, "allowedModules").off(offsetof(UModuleSystemPanel, allowedModules)))
+		.prop(Paks::PropertyBuilder::attrib(EPropertyClass::MulticastDelegate, "OnModuleChanged").addParamFlags(Prop_BlueprintAssignable).funcFunc(constructOnModuleChanged).off(offsetof(UModuleSystemPanel, onModuleChanged)))
 		.func(Paks::FunctionBuilder::method("addModule").native(&UModuleSystemPanel::execAddModule).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "module").classFunc(SDK::AActor::StaticClass)).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "x")).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "y")).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "rot")))
 		.func(Paks::FunctionBuilder::method("removeModule").native(&UModuleSystemPanel::execRemoveModule).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "module").classFunc(SDK::AActor::StaticClass)))
 		.func(Paks::FunctionBuilder::method("getModule").native(&UModuleSystemPanel::execGetModule).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "x")).param(Paks::PropertyBuilder::param(EPropertyClass::Int, "y")).param(Paks::PropertyBuilder::retVal(EPropertyClass::Object, "retVal").classFunc(SDK::AActor::StaticClass)))
@@ -271,7 +282,7 @@ void loadClasses() {
 		.func(Paks::FunctionBuilder::method("luaAddSignalListener").native(&ULuaImplementation::execAddSignalListener).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "ctx").classFunc(ULuaContext::staticClass)))
 		.func(Paks::FunctionBuilder::method("luaRemoveSignalListener").native(&ULuaImplementation::execRemoveSignalListener).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "ctx").classFunc(ULuaContext::staticClass)))
 		.func(Paks::FunctionBuilder::method("luaGetSignalListeners").native(&ULuaImplementation::execGetSignalListeners).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::retVal(EPropertyClass::Array, "retVal").off(0)).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "retVal").off(0).classFunc(ULuaContext::staticClass)))
-		.func(Paks::FunctionBuilder::method("luaIsReachableFrom").native(&ULuaImplementation::execIsReachableFrom).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::retVal(EPropertyClass::Bool, "retVal").helpBool<LuaIsReachableFromParams, &LuaIsReachableFromParams::is>()).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "listener").classFunc(SML::Objects::UObject::staticClass).off(offsetof(LuaIsReachableFromParams, listener))))
+		.func(Paks::FunctionBuilder::method("luaIsReachableFrom").native(&ULuaImplementation::execIsReachableFrom).addFuncFlags(FUNC_Event | FUNC_BlueprintEvent).param(Paks::PropertyBuilder::param(EPropertyClass::Object, "listener").classFunc(SML::Objects::UObject::staticClass).off(offsetof(LuaIsReachableFromParams, listener))).param(Paks::PropertyBuilder::retVal(EPropertyClass::Bool, "retVal").helpBool<LuaIsReachableFromParams, &LuaIsReachableFromParams::is>().off(0).boolData(16)))
 		.build();
 
 	Paks::ClassBuilder<ULuaContext>::Basic()
