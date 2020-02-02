@@ -52,6 +52,32 @@ Return Values::
 |The current input item
 |===
 
+==== `bool canOutput(int port)`
+
+Checks if a item can get transfered to the given port.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|port
+|int
+|The port you want to check
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if you can transfer a item to the port
+|===
+
 === Signals
 
 ==== `ItemRequest(Item item)`

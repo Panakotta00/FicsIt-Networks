@@ -143,7 +143,7 @@ void UModuleSystemPanel::execGetDismantleRefund(SML::Objects::FFrame& stack, voi
 
 	std::set<void*> modules;
 	for (int x = 0; x < panelWidth; ++x) for (int y = 0; y < panelHeight; ++y) {
-		auto m = (SML::Objects::UObject*) grid[x][y];
+		auto m = (SML::Objects::UObject*) getModule(x, y);
 		if (m && modules.find(m) == modules.end()) {
 			modules.insert(m);
 			if (m->clazz->implements((SML::Objects::UClass*)SDK::UFGDismantleInterface::StaticClass())) {
