@@ -1,31 +1,20 @@
 # Visual Studio 2015 user specific files
 .vs/
 
+Binaries/
+
 # Compiled Object files
 *.slo
 *.lo
 *.o
 *.obj
 
+# Don't commit PDB files for now because they take too much space
+*.pdb
+
 # Precompiled Headers
 *.gch
 *.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-# *.dll
-
-!*.pdb
-
-# Fortran module files
-*.mod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
 
 # Executables
 *.exe
@@ -42,18 +31,19 @@
 *.sdf
 *.VC.db
 *.VC.opendb
-*.vcxproj.user
 
 # Precompiled Assets
 SourceArt/**/*.png
 SourceArt/**/*.tga
 
 # Binary Files
-Binaries/*
+# Binaries/*
 Plugins/*/Binaries/*
+!Plugins/Alpakit/Binaries/*
 
 # Builds
 Build/*
+CMakeLists.txt
 
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/
@@ -77,17 +67,14 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 # Wwise
-FactoryGame_WwiseProject/*
-FicsItNetworks_WwiseProject
+*_WwiseProject/*
 Plugins/Wwise/*
 
-# ModLoader
-ModLoader/x64
-ModLoader/FicsIt-Networks/x64
+# Alpakit Mods folder
+Mods/*
+*.pak
 
-# Cook output
-Mods
-
-Content/FactoryGame/Character
-Content/FactoryGame/Buildable/Vehicle
-Content/FactoryGame/World
+# Satisfactory Mod Loader + Game Headers + Alpakit
+Source/SML
+Source/FactoryGame
+Source/Alpakit

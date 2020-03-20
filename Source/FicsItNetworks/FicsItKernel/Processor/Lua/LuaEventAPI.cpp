@@ -1,0 +1,82 @@
+#include "LuaEventAPI.h"
+
+#include "Network/Signals/FINSignalSender.h"
+#include "Network/FINNetworkComponent.h"
+#include "FicsItKernel/FicsItKernel.h"
+
+#include "FGPowerCircuit.h"
+
+#include "LuaProcessor.h"
+#include "LuaInstance.h"
+#include "LuaHooks.h"
+
+namespace FicsItKernel {
+	namespace Lua {
+		void luaListen(lua_State* L, Network::NetworkTrace o) {
+			o.checkTrace();
+			auto net = LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork();
+			if (auto sender = Cast<IFINSignalSender>(*o)) {
+				UFINSignalUtility::SetupSender(o->GetClass());
+				sender->AddListener(o.reverse());
+				// TODO: add sender as signal source to net
+			}
+			if (auto netComp = Cast<IFINNetworkComponent>(*o)) {
+				TSet<UObject*> merged = netComp->GetMerged();
+				for (auto m : merged) {
+					luaListen(L, o(m));
+				}
+			}
+
+			// PowerCircuit
+			if (auto circuit = Cast<UFGPowerCircuit>(*o)) {
+				luaListenCircuit(o);
+			}
+		}
+
+		int luaListen(lua_State* L) {
+			int args = lua_gettop(L);
+
+			for (int i = 1; i <= args; ++i) {
+				Network::NetworkTrace trace;
+				auto o = (UObject*)getObjInstance<UObject>(L, i, &trace);
+				luaListen(L, trace / o);
+			}
+			return 0;
+		}
+
+		int luaPullContinue(lua_State* L, int status, lua_KContext ctx) {
+			int a = lua_gettop(L);
+
+			return a;
+		}
+
+		int luaPull(lua_State* L) {
+			int args = lua_gettop(L);
+			std::int64_t t = 0;
+			if (args > 0 && !lua_isnil(L, 1)) t = lua_tointeger(L, 1);
+
+			auto luaProc = LuaProcessor::getCurrentProcessor();
+			int a = luaProc->doSignal(L);
+			if (!a) {
+				luaProc->timeout = (int)t;
+				luaProc->pullStart = std::chrono::high_resolution_clock::now();
+
+				lua_yieldk(L, 0, 0, luaPullContinue);
+				return 0;
+			}
+			return a;
+		}
+
+		static const luaL_Reg luaEventLib[] = {
+			{"listen", luaListen},
+			{"pull", luaPull},
+			{NULL,NULL}
+		};
+
+		void setupEventAPI(lua_State* L) {
+			lua_newtable(L);
+			luaL_setfuncs(L, luaEventLib, 0);
+			lua_setglobal(L, "event");
+		}
+	}
+}

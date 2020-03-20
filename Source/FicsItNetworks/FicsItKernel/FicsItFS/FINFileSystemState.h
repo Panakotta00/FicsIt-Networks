@@ -1,0 +1,45 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "FGInventoryComponent.h"
+#include "FicsItKernel/FicsItFS/FileSystem.h"
+#include "FINFileSystemState.generated.h"
+
+UCLASS()
+class FICSITNETWORKS_API AFINFileSystemState : public AActor, public IFGSaveInterface {
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	FGuid ID;
+
+	UPROPERTY()
+	bool IdCreated = false;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 Capacity = 0;
+
+	AFINFileSystemState();
+	~AFINFileSystemState();
+
+	// Begin AActor
+	virtual void BeginPlay() override;
+	// End AActor
+
+	// Begin IFGSaveInterface
+	virtual bool ShouldSave_Implementation() const override;
+	// End IFGSaveInterface
+	
+	// Begin AFGEquipment
+	//virtual bool ShouldSaveState() const override;
+	// End AFGEquipment
+
+	FileSystem::SRef<FileSystem::Device> createDevice() const;
+
+	/**
+	 * Creates a new item state object wich holds information and functions about a save game saved filesystem.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "FileSystem")
+	static AFINFileSystemState* CreateState(UObject* WorldContextObject, int32 inCapacity, UFGInventoryComponent* inInventory, int32 inSlot);
+};

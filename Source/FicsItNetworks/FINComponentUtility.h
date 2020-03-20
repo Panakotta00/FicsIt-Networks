@@ -1,0 +1,53 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "Sound/SoundWave.h"
+#include "Network/FINNetworkConnector.h"
+#include "FINComponentUtility.generated.h"
+
+/**
+ * Provides Utility functions for BP implemented network components
+ */
+UCLASS()
+class UFINComponentUtility : public UBlueprintFunctionLibrary {
+	GENERATED_BODY()
+
+public:
+	static bool bAllowUsing;
+
+	/**
+	 * Trys to find the nearest network connector to the hit location of the the hit actor
+	 *
+	 * @param	hit		the hit result you want to use for the search
+	 * @return	the neares network connector, nullptr if it was not able to find it
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Utility")
+	static UFINNetworkConnector* GetNetworkConnectorFromHit(FHitResult hit);
+
+	/**
+	 * Sets the clipboard to the given string
+	 *
+	 * @param	str		the string you want to put into the clipboard
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Utility")
+	static void ClipboardCopy(FString str);
+
+	/**
+	 * Enables or disables if the user can interact with anything.
+	 *
+	 * @param	WorldContextObject	the world context were you want to enable/disable interaction
+	 * @param	newUsing			true if you want to allow interaction, false if not
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "Utility")
+	static void SetAllowUsing(UObject* WorldContextObject, bool newUsing);
+
+	/**
+	 * Loads a sound wave from the sound file with the given relative file path.
+	 *
+	 * @param	file	relative path to the sound file without the file ending
+	 * @return	the generated sound wave, nullptr if it was not able to load the sound file
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SpeakerPole")
+	USoundWave* LoadSoundFromFile(FString file);
+};
