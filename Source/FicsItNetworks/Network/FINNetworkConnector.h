@@ -11,7 +11,7 @@
  * This component allows the actor to get connected to a computer network.
  * It espetially allows to connect computer network cables to it.
  */
-UCLASS()
+UCLASS(meta = (BlueprintSpawnableComponent))
 class FICSITNETWORKS_API UFINNetworkConnector : public USceneComponent, public IFINNetworkComponent, public IFINSignalSender, public IFGSaveInterface {
 	GENERATED_BODY()
 
