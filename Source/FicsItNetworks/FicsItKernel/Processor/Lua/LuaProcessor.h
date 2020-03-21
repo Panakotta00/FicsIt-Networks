@@ -54,6 +54,12 @@ namespace FicsItKernel {
 			* @param[in]	ctx		the lua context you want to setup
 			*/
 			void luaSetup(lua_State* L);
+
+			/**
+			 * Sets the code you want to execute.
+			 * Might cause just a processor reset.
+			 */
+			void setCode(const std::string& code);
 		};
 	}
 }

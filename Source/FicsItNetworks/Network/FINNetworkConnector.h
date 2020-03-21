@@ -101,7 +101,7 @@ protected:
 	virtual FFINNetworkTrace FindComponent_Implementation(FGuid id) const override;
 	virtual UFINNetworkCircuit* GetCircuit_Implementation() const override;
 	virtual void SetCircuit_Implementation(UFINNetworkCircuit* circuit) override;
-	virtual void NotifyNetworkUpdate_Implementation(int type, const TSet<FFINNetworkTrace>& nodes) override;
+	virtual void NotifyNetworkUpdate_Implementation(int type, const TSet<UObject*>& nodes) override;
 public:
 	// End NetworkComponent
 
@@ -148,8 +148,15 @@ public:
 	bool SearchFor(UFINNetworkConnector* conn) const;
 
 	/**
+	 * Add the given object to the list of merged objects.
+	 * The merge allows to add functionallity from the object to network component.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
+	void AddMerged(UObject* mergedObj);
+
+	/**
 	 * This network signals gets emit when a network change occurs.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Signals")
-	void sig_NetworkUpdate(int changeType, FString changedComponen);
+	void netSig_NetworkUpdate(int changeType, FString changedComponen);
 };

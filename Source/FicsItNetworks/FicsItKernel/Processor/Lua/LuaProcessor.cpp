@@ -135,5 +135,10 @@ namespace FicsItKernel {
 			setupComponentAPI(L);
 			setupFileSystemAPI(getKernel()->getFileSystem(), L);
 		}
+
+		void LuaProcessor::setCode(const std::string& code) {
+			this->code = code;
+			reset();
+		}
 	}
 }

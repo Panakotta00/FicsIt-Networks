@@ -48,17 +48,17 @@ public:
 	 * @return	the found component, if it cant find it nullptr.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Circuit")
-	FFINNetworkTrace FindComponent(FGuid addr);
+	UObject* FindComponent(FGuid addr);
 
 	/**
 	 * Trys to find components with the given nick in the circuit cache.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Circuit")
-	TSet<FFINNetworkTrace> FindComponentsByNick(FString nick);
+	TSet<UObject*> FindComponentsByNick(FString nick);
 
 	/**
 	 * Returns all components in the circuit cache.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Circuit")
-	void GetComponents(UPARAM(ref) TSet<FFINNetworkTrace>& out_components);
+	TSet<UObject*> GetComponents();
 };

@@ -1,6 +1,0 @@
-Event	ID	Name			Wwise Object Path	Notes
-	520822757	HelloEvent			\Default Work Unit\HelloEvent	
-
-In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
-	850654115	test	G:\Projects\Satisfactory\Mods\SatisfyingComputers\SatisfyingComputers_WwiseProject\.cache\Windows\SFX\test_10C4C929.wem		\Actor-Mixer Hierarchy\Default Work Unit\test		3469936
-

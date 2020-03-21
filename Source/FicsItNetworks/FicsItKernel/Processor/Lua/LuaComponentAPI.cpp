@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "Network/FINNetworkComponent.h"
+
 #include "FicsItKernel/FicsItKernel.h"
 #include "LuaProcessor.h"
 #include "LuaInstance.h"

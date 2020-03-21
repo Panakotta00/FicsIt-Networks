@@ -35,6 +35,10 @@ namespace FicsItKernel {
 		processor->setKernel(this);
 	}
 
+	Processor* KernelSystem::getProcessor() const {
+		return processor.get();
+	}
+
 	KernelCrash KernelSystem::getCrash() const {
 		return kernelCrash;
 	}

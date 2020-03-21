@@ -32,8 +32,8 @@ UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* circuit) {
 		to = circuit;
 	}
 
-	TSet<FFINNetworkTrace> nodes;
-	for (auto& node : to->Nodes) nodes.Add(FFINNetworkTrace(node.Get()));
+	TSet<UObject*> nodes;
+	for (auto& node : to->Nodes) nodes.Add(node.Get());
 	for (auto& node : from->Nodes) {
 		auto comp = Cast<IFINNetworkComponent>(node.Get());
 		if (!comp) continue;
@@ -42,7 +42,7 @@ UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* circuit) {
 	}
 
 	nodes.Empty();
-	for (auto& node : from->Nodes) nodes.Add(FFINNetworkTrace(node.Get()));
+	for (auto& node : from->Nodes) nodes.Add(node.Get());
 	for (auto& node : to->Nodes) {
 		auto comp = Cast<IFINNetworkComponent>(node.Get());
 		comp->NotifyNetworkUpdate(0, nodes);
@@ -64,28 +64,30 @@ bool UFINNetworkCircuit::HasNode(UObject* node) {
 	return Nodes.Find(node);
 }
 
-FFINNetworkTrace UFINNetworkCircuit::FindComponent(FGuid addr) {
+UObject* UFINNetworkCircuit::FindComponent(FGuid addr) {
 	for (auto node : Nodes) {
 		auto comp = Cast<IFINNetworkComponent>(node.Get());
 
 		if (comp->GetID() == addr) {
-			return FFINNetworkTrace(node.Get());
+			return node.Get();
 		}
 	}
 
-	return FFINNetworkTrace(nullptr);
+	return nullptr;
 }
 
-TSet<FFINNetworkTrace> UFINNetworkCircuit::FindComponentsByNick(FString nick) {
-	TSet<FFINNetworkTrace> comps;
+TSet<UObject*> UFINNetworkCircuit::FindComponentsByNick(FString nick) {
+	TSet<UObject*> comps;
 	for (auto node : Nodes) {
 		auto comp = Cast<IFINNetworkComponent>(node.Get());
-		if (comp->HasNick(nick)) comps.Add(FFINNetworkTrace(node.Get()));
+		if (comp->HasNick(nick)) comps.Add(node.Get());
 	}
 
 	return comps;
 }
 
-void UFINNetworkCircuit::GetComponents(TSet<FFINNetworkTrace>& out_components) {
-	for (auto& node : Nodes) out_components.Add(FFINNetworkTrace(node.Get()));
+TSet<UObject*> UFINNetworkCircuit::GetComponents() {
+	TSet<UObject*> out_components;
+	for (auto& node : Nodes) out_components.Add(node.Get());
+	return out_components;
 }

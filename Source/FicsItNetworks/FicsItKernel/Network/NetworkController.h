@@ -24,7 +24,7 @@ namespace FicsItKernel {
 			std::queue<std::pair<std::shared_ptr<Signal>, NetworkTrace>> signals;
 
 		public:
-			virtual ~NetworkController();
+			virtual ~NetworkController() {}
 
 			/**
 			 * Underlying Computer Network Component used for interacting with the network.

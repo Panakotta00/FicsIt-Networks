@@ -25,10 +25,8 @@ void UFINNetworkConnector::removeConnector(UFINNetworkConnector * connector) {
 		connector->Circuit = NewObject<UFINNetworkCircuit>(this);
 		connector->Circuit->recalculate(connector);
 		
-		TSet<FFINNetworkTrace> nodes1;
-		connector->Circuit->GetComponents(nodes1);
-		TSet<FFINNetworkTrace> nodes2;
-		Circuit->GetComponents(nodes2);
+		TSet<UObject*> nodes1 = connector->Circuit->GetComponents();
+		TSet<UObject*> nodes2 = Circuit->GetComponents();
 		for (auto n : Circuit->Nodes) {
 			if (connector->Circuit->Nodes.Contains(n)) continue;
 			auto comp = Cast<IFINNetworkComponent>(n.Get());
@@ -122,6 +120,10 @@ bool UFINNetworkConnector::SearchFor(UFINNetworkConnector * conn) const {
 	return searchFor(searched, conn);
 }
 
+void UFINNetworkConnector::AddMerged(UObject* mergedObj) {
+	Merged.Add(mergedObj);
+}
+
 FGuid UFINNetworkConnector::GetID_Implementation() const {
 	return ID;
 }
@@ -169,7 +171,7 @@ void UFINNetworkConnector::SetCircuit_Implementation(UFINNetworkCircuit * circui
 	Circuit = circuit;
 }
 
-void UFINNetworkConnector::NotifyNetworkUpdate_Implementation(int type, const TSet<FFINNetworkTrace>& nodes) {
+void UFINNetworkConnector::NotifyNetworkUpdate_Implementation(int type, const TSet<UObject*>& nodes) {
 	if (Listeners.Num() < 1) return;
 	auto func = FindFunction(L"luaSig_NetworkUpdate");
 	for (auto node : nodes) {
@@ -178,7 +180,7 @@ void UFINNetworkConnector::NotifyNetworkUpdate_Implementation(int type, const TS
 			FString n;
 		} params;
 		params.t = type;
-		auto comp = Cast<IFINNetworkComponent>(*node);
+		auto comp = Cast<IFINNetworkComponent>(node);
 		params.n = comp->GetID().ToString();
 		ProcessEvent(func, &params);
 	}
@@ -198,4 +200,4 @@ TSet<FFINNetworkTrace> UFINNetworkConnector::GetListeners_Implementation() {
 }
 
 
-void UFINNetworkConnector::sig_NetworkUpdate(int type, FString id) {}
+void UFINNetworkConnector::netSig_NetworkUpdate(int type, FString id) {}

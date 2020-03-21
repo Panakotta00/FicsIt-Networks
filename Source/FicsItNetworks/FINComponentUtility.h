@@ -22,7 +22,7 @@ public:
 	 * @param	hit		the hit result you want to use for the search
 	 * @return	the neares network connector, nullptr if it was not able to find it
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Utility")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utility")
 	static UFINNetworkConnector* GetNetworkConnectorFromHit(FHitResult hit);
 
 	/**
@@ -41,13 +41,4 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable,  Category = "Utility")
 	static void SetAllowUsing(UObject* WorldContextObject, bool newUsing);
-
-	/**
-	 * Loads a sound wave from the sound file with the given relative file path.
-	 *
-	 * @param	file	relative path to the sound file without the file ending
-	 * @return	the generated sound wave, nullptr if it was not able to load the sound file
-	 */
-	UFUNCTION(BlueprintCallable, Category = "SpeakerPole")
-	USoundWave* LoadSoundFromFile(FString file);
 };

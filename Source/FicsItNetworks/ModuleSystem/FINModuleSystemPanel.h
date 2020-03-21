@@ -11,7 +11,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINModuleDelegate, UObject*, modul
 /**
  * This component manages a collection of modules you can place onto it via the build gun.
  */
-UCLASS()
+UCLASS(meta = (BlueprintSpawnableComponent))
 class FICSITNETWORKS_API UFINModuleSystemPanel : public USceneComponent {
 	GENERATED_BODY()
 
@@ -66,13 +66,13 @@ public:
 	 * Returns all the modules added to the panel.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
-	void GetModules(UPARAM(ref) TArray<AActor*>& out_modules) const;
+	void GetModules(UPARAM(ref) TArray<AActor*>& out_modules);
 
 	/**
 	 * Returns the dismantle refund sum of all modules added to the panel.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
-	void GetDismantleRefund(UPARAM(ref) TArray<FInventoryStack>& out_refund) const;
+	void GetDismantleRefund(UPARAM(ref) TArray<FInventoryStack>& out_refund);
 
 	static void getModuleSpace(FVector loc, int rot, FVector msize, FVector& min, FVector& max);
 };

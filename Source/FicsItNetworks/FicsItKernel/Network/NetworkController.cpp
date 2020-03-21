@@ -50,7 +50,7 @@ namespace FicsItKernel {
 				std::set<NetworkTrace> outComps;
 				auto comps = comp->GetCircuit()->FindComponentsByNick(nick.c_str());
 				for (auto& c : comps) {
-					outComps.insert(c);
+					outComps.insert(NetworkTrace(component) / c);
 				}
 				return outComps;
 			};

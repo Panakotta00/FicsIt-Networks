@@ -1,6 +1,0 @@
-Event	ID	Name			Wwise Object Path	Notes
-	3187507146	Play_Test			\Default Work Unit\Play_Test	
-
-In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
-	779019633	FicsIt-Networks-Test	G:\Projects\Satisfactory\Mods\FicsItNetworks\FicsItNetworks_WwiseProject\.cache\Windows\SFX\FicsIt-Networks-Test_56D34C19.wem		\Actor-Mixer Hierarchy\Default Work Unit\FicsIt-Networks-Test		356544
-

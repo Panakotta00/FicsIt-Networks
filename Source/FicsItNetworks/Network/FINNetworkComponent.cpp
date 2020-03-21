@@ -3,7 +3,7 @@
 FFINNetworkTrace IFINNetworkComponent::FindComponentByCircuit(FGuid guid) const {
 	auto circuit = GetCircuit();
 
-	return circuit->FindComponent(guid);
+	return FFINNetworkTrace(circuit->FindComponent(guid));
 }
 
 bool IFINNetworkComponent::HasNickByNick(FString nick) const {

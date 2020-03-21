@@ -83,7 +83,7 @@ public:
 	 * Like adding or removing a new component.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-		void NotifyNetworkUpdate(int32 type, const TSet<FFINNetworkTrace>& nodes);
+		void NotifyNetworkUpdate(int32 type, const TSet<UObject*>& nodes);
 
 	/**
 	 * This functions uses GetCircuit to search in the circuit for the component witht he given guid

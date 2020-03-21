@@ -94,6 +94,11 @@ namespace FicsItKernel {
 		void setProcessor(Processor* processor);
 
 		/**
+		 * Returns the currently use processor
+		 */
+		Processor* getProcessor() const;
+
+		/**
 		 * Returns the current kernel crash.
 		 *
 		 * @return	current kernel crash

@@ -7,11 +7,15 @@ UFINModuleSystemPanel::UFINModuleSystemPanel() {}
 UFINModuleSystemPanel::~UFINModuleSystemPanel() {}
 
 void UFINModuleSystemPanel::EndPlay(const EEndPlayReason::Type reason) {
+	Super::EndPlay(reason);
+
 	for (int i = 0; i < PanelWidth; ++i) delete[] grid[i];
 	delete[] grid;
 }
 
 void UFINModuleSystemPanel::PostLoad() {
+	Super::PostLoad();
+	
 	grid = new AActor**[PanelHeight]();
 	for (int i = 0; i < PanelHeight; ++i) {
 		grid[i] = new AActor*[PanelWidth];
@@ -56,7 +60,7 @@ AActor* UFINModuleSystemPanel::GetModule(int x, int y) const {
 	return  (x >= 0 && x < PanelHeight && y >= 0 && y < PanelWidth) ? grid[x][y] : nullptr;;
 }
 
-void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) const {
+void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) {
 	for (int x = 0; x < PanelHeight; ++x) {
 		for (int y = 0; y < PanelWidth; ++y) {
 			auto m = GetModule(x, y);
@@ -67,7 +71,7 @@ void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) const {
 	}
 }
 
-void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) const {
+void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) {
 	TSet<AActor*> modules;
 	for (int x = 0; x < PanelWidth; ++x) for (int y = 0; y < PanelHeight; ++y) {
 		auto m = GetModule(x, y);
