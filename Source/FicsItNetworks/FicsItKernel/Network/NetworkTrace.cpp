@@ -38,19 +38,50 @@ namespace FicsItKernel {
 			return step->second.get();
 		}
 
+		NetworkTrace::NetworkTrace(const NetworkTrace& trace) {
+			prev = (trace.prev) ? new NetworkTrace(*trace.prev) : nullptr;
+			step = trace.step;
+			obj = trace.obj;
+		}
+
+		NetworkTrace::NetworkTrace(NetworkTrace&& trace) {
+			prev = trace.prev;
+			step = trace.step;
+			obj = trace.obj;
+			trace.prev = nullptr;
+		}
+
+		NetworkTrace& NetworkTrace::operator=(const NetworkTrace& trace) {
+			prev = (trace.prev) ? new NetworkTrace(*trace.prev) : nullptr;
+			step = trace.step;
+			obj = trace.obj;
+
+			return *this;
+		}
+
+		NetworkTrace& NetworkTrace::operator=(NetworkTrace&& trace) {
+			prev = trace.prev;
+			step = trace.step;
+			obj = trace.obj;
+			trace.prev = nullptr;
+
+			return *this;
+		}
+
 		NetworkTrace::NetworkTrace() : NetworkTrace(nullptr) {}
 
 		NetworkTrace::NetworkTrace(UObject* obj) : obj(obj) {}
 
 		NetworkTrace::~NetworkTrace() {
 			if (prev) delete prev;
+			prev = nullptr;
 		}
 		
 		NetworkTrace NetworkTrace::operator/(UObject* other) const {
 			NetworkTrace trace(other);
 
-			auto A = obj.Get();
-			if (!IsValid(A) || !IsValid(other)) return NetworkTrace(nullptr); // if A is not valid, the network trace will always be now invalid
+			UObject* A = obj.Get();
+			if (!IsValid(A) || !IsValid(other)) return NetworkTrace(nullptr); // if A is not valid, the network trace will always be not invalid
 			trace.prev = new NetworkTrace(*this);
 			trace.step = findTraceStep(A->GetClass(), other->GetClass());
 			return trace;
@@ -65,7 +96,7 @@ namespace FicsItKernel {
 
 		UObject* NetworkTrace::operator*() const {
 			UObject* B = obj.Get();
-			if (prev) {
+			if (prev && step) {
 				UObject* A = **prev;
 				if (!IsValid(A) || !IsValid(B)) return nullptr;
 				return (*step)(A, B) ? B : nullptr;
@@ -81,7 +112,7 @@ namespace FicsItKernel {
 		}
 
 		NetworkTrace NetworkTrace::operator()(UObject* other) const {
-			if (!IsValid(other)) return NetworkTrace(other);
+			if (!IsValid(other)) return NetworkTrace(nullptr);
 
 			NetworkTrace trace(*this);
 			trace.obj = other;

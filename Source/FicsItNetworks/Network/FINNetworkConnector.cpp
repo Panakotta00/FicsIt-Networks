@@ -29,14 +29,16 @@ void UFINNetworkConnector::removeConnector(UFINNetworkConnector * connector) {
 		TSet<UObject*> nodes2 = Circuit->GetComponents();
 		for (auto n : Circuit->Nodes) {
 			if (connector->Circuit->Nodes.Contains(n)) continue;
-			auto comp = Cast<IFINNetworkComponent>(n.Get());
-			comp->NotifyNetworkUpdate(1, nodes1);
+			UObject* obj = n.Get();
+			auto comp = Cast<IFINNetworkComponent>(obj);
+			comp->Execute_NotifyNetworkUpdate(obj, 1, nodes1);
 		}
 		Circuit->recalculate(this);
 		for (auto n : connector->Circuit->Nodes) {
 			if (Circuit->Nodes.Contains(n)) continue;
-			auto comp = Cast<IFINNetworkComponent>(n.Get());
-			comp->NotifyNetworkUpdate(1, nodes2);
+			UObject* obj = n.Get();
+			auto comp = Cast<IFINNetworkComponent>(obj);
+			comp->Execute_NotifyNetworkUpdate(obj, 1, nodes2);
 		}
 	}
 }
@@ -55,9 +57,13 @@ void UFINNetworkConnector::BeginPlay() {
 
 	// setup circuit
 	if (!Circuit) {
-		Circuit = NewObject<UFINNetworkCircuit>(this);
+		Circuit = NewObject<UFINNetworkCircuit>();
 		Circuit->recalculate(this);
 	}
+}
+
+bool UFINNetworkConnector::ShouldSave_Implementation() const {
+	return true;
 }
 
 void UFINNetworkConnector::AddConnection(UFINNetworkConnector* connector) {
@@ -137,7 +143,7 @@ void UFINNetworkConnector::SetNick_Implementation(const FString& nick) {
 }
 
 bool UFINNetworkConnector::HasNick_Implementation(const FString& nick) {
-	return HasNickByNick(nick);
+	return HasNickByNick(nick, Execute_GetNick(this));
 }
 
 TSet<UObject*> UFINNetworkConnector::GetMerged_Implementation() const {
@@ -160,7 +166,7 @@ TSet<UObject*> UFINNetworkConnector::GetConnected_Implementation() const {
 }
 
 FFINNetworkTrace UFINNetworkConnector::FindComponent_Implementation(FGuid guid) const {
-	return IFINNetworkComponent::FindComponentByCircuit(guid);
+	return IFINNetworkComponent::FindComponentByCircuit(guid, Execute_GetCircuit(this));
 }
 
 UFINNetworkCircuit * UFINNetworkConnector::GetCircuit_Implementation() const {
@@ -181,7 +187,7 @@ void UFINNetworkConnector::NotifyNetworkUpdate_Implementation(int type, const TS
 		} params;
 		params.t = type;
 		auto comp = Cast<IFINNetworkComponent>(node);
-		params.n = comp->GetID().ToString();
+		params.n = comp->Execute_GetID(node).ToString();
 		ProcessEvent(func, &params);
 	}
 }
@@ -198,6 +204,5 @@ void UFINNetworkConnector::RemoveListener_Implementation(FFINNetworkTrace listen
 TSet<FFINNetworkTrace> UFINNetworkConnector::GetListeners_Implementation() {
 	return Listeners;
 }
-
 
 void UFINNetworkConnector::netSig_NetworkUpdate(int type, FString id) {}

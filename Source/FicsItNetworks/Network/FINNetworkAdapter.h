@@ -35,7 +35,9 @@ class FICSITNETWORKS_API AFINNetworkAdapter : public AActor, public IFGSaveInter
 
 public:
 	static std::vector<std::pair<UClass*, FFINAdapterSettings>> settings;
-	// TODO: Add AddSettings() helper functions
+	static void RegistererAdapterSetting(UClass*, FFINAdapterSettings);
+	static void RegistererAdapterSetting(FString BPPath, FFINAdapterSettings);
+	static void RegisterAdapterSettings();
 
 	/** the factory this adapter is attached to */
 	UPROPERTY(SaveGame)

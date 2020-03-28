@@ -12,10 +12,10 @@ class FICSITNETWORKS_API AFINNetworkCable : public AFGBuildable {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	UFINNetworkConnector* Connector1;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	UFINNetworkConnector* Connector2;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -27,6 +27,10 @@ public:
 	// Begin AActor
 	virtual void BeginPlay() override;
 	// End AActor
+
+	// Begin IFGSaveInterface
+	virtual bool ShouldSave_Implementation() const override;
+	// End IFGSaveInterface
 
 	// Begin IFGDismantleInterface
 	virtual void Dismantle_Implementation() override;

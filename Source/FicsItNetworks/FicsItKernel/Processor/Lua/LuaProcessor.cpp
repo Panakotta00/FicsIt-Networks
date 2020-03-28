@@ -8,6 +8,8 @@
 #include "LuaComponentAPI.h"
 #include "LuaFileSystemAPI.h"
 
+#include "SML/util/Logging.h"
+
 namespace FicsItKernel {
 	namespace Lua {
 		LuaSignalReader::LuaSignalReader(lua_State* L) : L(L) {}
@@ -91,6 +93,8 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::reset() {
+			if (getKernel()->getState() != RUNNING) return;
+			
 			timeout = -1;
 
 			if (luaState) {
@@ -118,9 +122,13 @@ namespace FicsItKernel {
 			}
 
 			auto stdio = LuaProcessor::getCurrentProcessor()->getKernel()->getFileSystem()->open("/dev/stdio", FileSystem::APPEND);
-			*stdio << log.c_str();
-			stdio->close();
-			
+			if (stdio) {
+				*stdio << log.c_str();
+				stdio->close();
+			}
+
+			SML::Logging::error("LuaPrint: ", log.c_str());
+
 			return 0;
 		}
 

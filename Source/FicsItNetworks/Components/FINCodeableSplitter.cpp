@@ -1,7 +1,5 @@
 #include "FINCodeableSplitter.h"
 
-#include "Kismet/KismetMathLibrary.h"
-
 AFINCodeableSplitter::AFINCodeableSplitter() {
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
 	NetworkConnector->AddMerged(this);
@@ -73,7 +71,7 @@ bool AFINCodeableSplitter::netFunc_canOutput(int output) {
 void AFINCodeableSplitter::netSig_ItemRequest_Implementation(UClass* item) {}
 
 TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(int output) {
-	output = UKismetMathLibrary::InRange_IntInt(output, 0, 2, true, true);
+	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);
 	switch (output) {
 	case 0:
 		return OutputQueue1;

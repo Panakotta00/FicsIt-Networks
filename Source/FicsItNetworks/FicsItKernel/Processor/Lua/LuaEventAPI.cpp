@@ -15,13 +15,14 @@ namespace FicsItKernel {
 		void luaListen(lua_State* L, Network::NetworkTrace o) {
 			o.checkTrace();
 			auto net = LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork();
-			if (auto sender = Cast<IFINSignalSender>(*o)) {
-				UFINSignalUtility::SetupSender(o->GetClass());
-				sender->AddListener(o.reverse());
+			UObject* obj = *o;
+			if (auto sender = Cast<IFINSignalSender>(obj)) {
+				UFINSignalUtility::SetupSender(obj->GetClass());
+				sender->Execute_AddListener(obj, o.reverse());
 				// TODO: add sender as signal source to net
 			}
-			if (auto netComp = Cast<IFINNetworkComponent>(*o)) {
-				TSet<UObject*> merged = netComp->GetMerged();
+			if (auto netComp = Cast<IFINNetworkComponent>(obj)) {
+				TSet<UObject*> merged = netComp->Execute_GetMerged(obj);
 				for (auto m : merged) {
 					luaListen(L, o(m));
 				}

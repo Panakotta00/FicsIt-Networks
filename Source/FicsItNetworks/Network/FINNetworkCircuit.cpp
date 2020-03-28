@@ -9,8 +9,8 @@ void UFINNetworkCircuit::addNodeRecursive(TSet<UObject*>& added, UObject* add) {
 	if (!added.Contains(add)) {
 		added.Add(add);
 		Nodes.Add(add);
-		comp->SetCircuit(this);
-		auto connectors = comp->GetConnected();
+		comp->Execute_SetCircuit(add, this);
+		auto connectors = comp->Execute_GetConnected(add);
 		for (auto connector : connectors) {
 			addNodeRecursive(added, connector);
 		}
@@ -21,8 +21,9 @@ UFINNetworkCircuit::UFINNetworkCircuit() {}
 
 UFINNetworkCircuit::~UFINNetworkCircuit() {}
 
+#pragma optimize("" ,off)
 UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* circuit) {
-	if (this == circuit || !circuit) return this;
+	if (this == circuit || !IsValid(circuit)) return this;
 
 	UFINNetworkCircuit* from = circuit;
 	UFINNetworkCircuit* to = this;
@@ -32,26 +33,32 @@ UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* circuit) {
 		to = circuit;
 	}
 
+	volatile auto fromv = from;
+	volatile auto tov = to;
+
 	TSet<UObject*> nodes;
 	for (auto& node : to->Nodes) nodes.Add(node.Get());
 	for (auto& node : from->Nodes) {
-		auto comp = Cast<IFINNetworkComponent>(node.Get());
+		UObject* obj = node.Get();
+		auto comp = Cast<IFINNetworkComponent>(obj);
 		if (!comp) continue;
-		comp->SetCircuit(to);
-		comp->NotifyNetworkUpdate(0, nodes);
+		comp->Execute_SetCircuit(obj, to);
+		comp->Execute_NotifyNetworkUpdate(obj, 0, nodes);
 	}
 
 	nodes.Empty();
 	for (auto& node : from->Nodes) nodes.Add(node.Get());
 	for (auto& node : to->Nodes) {
-		auto comp = Cast<IFINNetworkComponent>(node.Get());
-		comp->NotifyNetworkUpdate(0, nodes);
+		UObject* obj = node.Get();
+		auto comp = Cast<IFINNetworkComponent>(obj);
+		comp->Execute_NotifyNetworkUpdate(obj, 0, nodes);
 	}
 
 	to->Nodes.Append(from->Nodes);
 
 	return to;
 }
+#pragma optimize("" ,on)
 
 void UFINNetworkCircuit::recalculate(UObject * component) {
 	Nodes.Empty();
@@ -66,10 +73,11 @@ bool UFINNetworkCircuit::HasNode(UObject* node) {
 
 UObject* UFINNetworkCircuit::FindComponent(FGuid addr) {
 	for (auto node : Nodes) {
-		auto comp = Cast<IFINNetworkComponent>(node.Get());
+		UObject* obj = node.Get();
+		auto comp = Cast<IFINNetworkComponent>(obj);
 
-		if (comp->GetID() == addr) {
-			return node.Get();
+		if (comp && comp->Execute_GetID(obj) == addr) {
+			return obj;
 		}
 	}
 
@@ -79,8 +87,9 @@ UObject* UFINNetworkCircuit::FindComponent(FGuid addr) {
 TSet<UObject*> UFINNetworkCircuit::FindComponentsByNick(FString nick) {
 	TSet<UObject*> comps;
 	for (auto node : Nodes) {
-		auto comp = Cast<IFINNetworkComponent>(node.Get());
-		if (comp->HasNick(nick)) comps.Add(node.Get());
+		UObject* obj = node.Get();
+		auto comp = Cast<IFINNetworkComponent>(obj);
+		if (comp->Execute_HasNick(obj, nick)) comps.Add(obj);
 	}
 
 	return comps;

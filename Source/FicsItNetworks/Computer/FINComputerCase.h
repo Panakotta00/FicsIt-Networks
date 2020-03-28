@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
 #include "Network/FINNetworkConnector.h"
+#include "ModuleSystem/FINModuleSystemPanel.h"
 
 #include "FicsItKernel/FicsItKernel.h"
 
@@ -22,6 +23,9 @@ class AFINComputerCase : public AFGBuildable {
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="ComputerCase")
 		UFINNetworkConnector* NetworkConnector;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ComputerCase")
+		UFINModuleSystemPanel* Panel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 		FString Code;
@@ -43,6 +47,9 @@ public:
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
 
+	UFUNCTION()
+	void OnModuleChanged(UObject* module, bool added);
+
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 		void Toggle();
 
@@ -51,4 +58,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 		EComputerState GetState();
+
+	void recalculateKernelResources();
 };

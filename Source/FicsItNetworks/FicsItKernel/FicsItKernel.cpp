@@ -2,6 +2,8 @@
 
 #include "Processor/Lua/LuaProcessor.h"
 
+#include "SML/util/Logging.h"
+
 namespace FicsItKernel {
 	KernelCrash::KernelCrash(std::string what) : std::exception(what.c_str()) {}
 
@@ -10,7 +12,6 @@ namespace FicsItKernel {
 	KernelSystem::KernelSystem(UWorld* world) : world(world) {}
 
 	KernelSystem::~KernelSystem() {}
-
 
 	void KernelSystem::tick(float deltaSeconds) {
 		if (getState() == RUNNING) processor->tick(deltaSeconds);
@@ -32,7 +33,7 @@ namespace FicsItKernel {
 
 	void KernelSystem::setProcessor(Processor* processor) {
 		this->processor = std::unique_ptr<Processor>(processor);
-		processor->setKernel(this);
+		if (getProcessor()) processor->setKernel(this);
 	}
 
 	Processor* KernelSystem::getProcessor() const {
@@ -78,7 +79,7 @@ namespace FicsItKernel {
 			if (reset) {
 				if (!stop()) return false;
 			} else return false;
-		} else if (!processor.get()) return false;
+		} else if (getProcessor() == nullptr) return false;
 
 		// set state and clear kernel crash
 		state = RUNNING;
@@ -134,6 +135,7 @@ namespace FicsItKernel {
 		// set state & crash
 		state = CRASHED;
 		kernelCrash = crash;
+		SML::Logging::error("LUA Crash: ", kernelCrash.what());
 	}
 
 	void KernelSystem::recalculateResources(Recalc components) {

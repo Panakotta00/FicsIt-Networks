@@ -1,13 +1,10 @@
 #include "FINNetworkComponent.h"
 
-FFINNetworkTrace IFINNetworkComponent::FindComponentByCircuit(FGuid guid) const {
-	auto circuit = GetCircuit();
-
+FFINNetworkTrace IFINNetworkComponent::FindComponentByCircuit(FGuid guid, UFINNetworkCircuit* circuit) const {
 	return FFINNetworkTrace(circuit->FindComponent(guid));
 }
 
-bool IFINNetworkComponent::HasNickByNick(FString nick) const {
-	auto has = GetNick();
+bool IFINNetworkComponent::HasNickByNick(FString nick, FString has) const {
 	TSet<FString> has_nicks;
 	do {
 		FString n = "";
@@ -20,12 +17,13 @@ bool IFINNetworkComponent::HasNickByNick(FString nick) const {
 	} while (has.Len() > 0);
 
 	do {
+		int32 pos = nick.Find(" ");
 		FString n = "";
-		if (!has.Split(" ", &n, &has)) {
-			n = has;
-			has = "";
+		if (!nick.Split(" ", &n, &nick)) {
+			n = nick;
+			nick = "";
 		}
-		if (n.Len() > 0 && has_nicks.Contains(n)) return false;
+		if (n.Len() > 0 && !has_nicks.Contains(n)) return false;
 	} while (nick.Len() > 0);
 
 	return true;

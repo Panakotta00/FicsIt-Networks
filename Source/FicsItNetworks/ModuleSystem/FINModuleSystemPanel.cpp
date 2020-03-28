@@ -11,28 +11,29 @@ void UFINModuleSystemPanel::EndPlay(const EEndPlayReason::Type reason) {
 
 	for (int i = 0; i < PanelWidth; ++i) delete[] grid[i];
 	delete[] grid;
+	grid = nullptr;
 }
 
 void UFINModuleSystemPanel::PostLoad() {
 	Super::PostLoad();
-	
-	grid = new AActor**[PanelHeight]();
-	for (int i = 0; i < PanelHeight; ++i) {
-		grid[i] = new AActor*[PanelWidth];
-		memset(grid[i], 0, PanelWidth * sizeof(void*));
-	}
+
+	SetupGrid();
 }
 
 void UFINModuleSystemPanel::BeginPlay() {
-	
+	Super::BeginPlay();
+
+	SetupGrid();
 }
 
 bool UFINModuleSystemPanel::AddModule(AActor* module, int x, int y, int rot) {
+	SetupGrid();
+
 	int w, h;
-	Cast<IFINModuleSystemModule>(module)->getModuleSize(w, h);
+	Cast<IFINModuleSystemModule>(module)->Execute_getModuleSize(module, w, h);
 
 	FVector min, max;
-	getModuleSpace({(float)y, (float)x, 0.0f}, rot, {(float)w, (float)h, 0.0f}, min, max);
+	getModuleSpace({(float)x, (float)y, 0.0f}, rot, {(float)w, (float)h, 0.0f}, min, max);
 	for (int x = (int)min.X; x <= max.X; ++x) for (int y = (int)min.Y; y <= max.Y; ++y) {
 		grid[x][y] = module;
 	}
@@ -42,12 +43,14 @@ bool UFINModuleSystemPanel::AddModule(AActor* module, int x, int y, int rot) {
 }
 
 bool UFINModuleSystemPanel::RemoveModule(AActor* module) {
+	if (!grid) return false;
+
 	bool removed = false;
 	for (int x = 0; x < PanelHeight; ++x) for (int y = 0; y < PanelWidth; ++y) {
 		auto& s = grid[x][y];
 		if (s == module) {
 			s = nullptr;
-			removed |= true;
+			removed = true;
 		}
 	}
 
@@ -57,6 +60,7 @@ bool UFINModuleSystemPanel::RemoveModule(AActor* module) {
 }
 
 AActor* UFINModuleSystemPanel::GetModule(int x, int y) const {
+	if (!grid) return nullptr;
 	return  (x >= 0 && x < PanelHeight && y >= 0 && y < PanelWidth) ? grid[x][y] : nullptr;;
 }
 
@@ -73,13 +77,23 @@ void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) {
 
 void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) {
 	TSet<AActor*> modules;
-	for (int x = 0; x < PanelWidth; ++x) for (int y = 0; y < PanelHeight; ++y) {
+	for (int x = 0; x < PanelHeight; ++x) for (int y = 0; y < PanelWidth; ++y) {
 		auto m = GetModule(x, y);
 		if (m && modules.Contains(m)) {
 			modules.Add(m);
 			if (m->Implements<UFGDismantleInterface>()) {
-				Cast<IFGDismantleInterface>(m)->GetDismantleRefund(refund);
+				Cast<IFGDismantleInterface>(m)->Execute_GetDismantleRefund(m, refund);
 			}
+		}
+	}
+}
+
+void UFINModuleSystemPanel::SetupGrid() {
+	if (grid == nullptr) {
+		grid = new AActor**[PanelHeight]();
+		for (int i = 0; i < PanelHeight; ++i) {
+			grid[i] = new AActor*[PanelWidth];
+			memset(grid[i], 0, PanelWidth * sizeof(void*));
 		}
 	}
 }

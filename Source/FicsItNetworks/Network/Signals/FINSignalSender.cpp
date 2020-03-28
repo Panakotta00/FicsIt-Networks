@@ -21,10 +21,10 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	auto sig = std::shared_ptr<FicsItKernel::Network::Signal>((FicsItKernel::Network::Signal*) new UFINSignalUtility::BPSignal{TCHAR_TO_UTF8(*signalName), Stack.CurrentNativeFunction, data});
 
 	auto sender = Cast<IFINSignalSender>(Context);
-	auto listeners = sender->GetListeners();
+	auto listeners = sender->Execute_GetListeners(Context);
 
 	for (auto listenerTrace : listeners) {
-		// TODO: Make sure this cast works
+		// TODO: Make sure this cast works and if the underlying object is the reason, remove it
 		auto listener = Cast<IFINSignalListener>(*listenerTrace);
 		listener->HandleSignal(TSharedPtr<FFINSignal>(new FFINSignal(sig)), listenerTrace / Context);
 	}

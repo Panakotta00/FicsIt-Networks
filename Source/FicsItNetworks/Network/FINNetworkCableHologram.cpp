@@ -6,8 +6,6 @@
 #include "FGPlayerController.h"
 #include "FGPowerConnectionComponent.h"
 
-#include "Kismet/KismetMathLibrary.h"
-
 bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {
 	if (From.ptr == Snapped.ptr) return false;
 	if (From.v && Snapped.v) return isValid() && isSnappedValid();
@@ -60,9 +58,11 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 	auto a = GetWorld()->SpawnActor<AFINNetworkCable>(this->mBuildClass, location, rotation, spawnParams);
 	
 	FTransform t = a->GetTransform();
-	t.SetRotation(rot);
-	t.SetScale3D(scale);
-	t.SetTranslation(location);
+
+	a->Connector1 = c1;
+	a->Connector2 = c2;
+
+	a->SetBuiltWithRecipe(GetRecipe());
 
 	((UGameplayStatics*)UGameplayStatics::StaticClass()->GetDefaultObject())->FinishSpawningActor(a, t);
 
@@ -70,19 +70,17 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 }
 
 int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {
-	return (Snapped.pos - From.pos).Size();
+	return (Snapped.pos - From.pos).Size()/100.0;
 }
 
 bool AFINNetworkCableHologram::IsValidHitResult(const FHitResult& hit) const {
 	auto actor = hit.Actor.Get();
-	if (IsValid(actor)
-		&& (
-			IsValid(actor->GetComponentByClass(UFINNetworkConnector::StaticClass()))
-			|| (
-				actor->IsA<AFGBuildableFactory>()
-				&&
-				IsValid(actor->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()))
-			)
+	if (!IsValid(actor)) return false;
+	if (IsValid(actor->GetComponentByClass(UFINNetworkConnector::StaticClass()))
+		|| (
+			actor->IsA<AFGBuildableFactory>()
+			&&
+			IsValid(actor->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()))
 		)) return true;
 	for (auto entry : AFINNetworkAdapter::settings) {
 		auto clazz = entry.first;
@@ -132,8 +130,9 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 		auto clazz = entry.first;
 
 		if (actor->IsA(clazz)) {
-			auto t = UKismetMathLibrary::TransformLocation(actor->GetTransform(), setting.loc);
-			Snapped = { true, false, actor, actor, t };
+			auto t = actor->GetTransform().TransformPosition(setting.loc);
+			auto r = actor->GetTransform().TransformRotation(setting.rot.Quaternion());
+			Snapped = { true, false,  actor, actor, t, r };
 			SetHologramLocationAndRotation(hitResult);
 			return true;
 		}
@@ -169,6 +168,10 @@ bool AFINNetworkCableHologram::IsChanged() const {
 	return OldSnapped.v;
 }
 
+USceneComponent* AFINNetworkCableHologram::SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName) {
+	return nullptr;
+}
+
 void AFINNetworkCableHologram::OnInvalidHitResult() {
 	onEndSnap(Snapped);
 	onEndSnap(OldSnapped);
@@ -195,16 +198,22 @@ void AFINNetworkCableHologram::onEndSnap(FFINSnappedInfo a) {
 
 void AFINNetworkCableHologram::updateMeshes() {
 	if (!Snapped.v || !From.v || Snapped.ptr == From.ptr) {
-		Cable->SetVisibility(false, true);
-		if (mInvalidPlacementMaterial) Con->SetMaterial(0, mInvalidPlacementMaterial);
+		Cable->SetVisibilitySML(false, true);
+		Adapter1->SetVisibilitySML(false, true);
+		Adapter2->SetVisibilitySML(false, true);
+
+		if (mInvalidPlacementMaterial) {
+			Adapter1->SetMaterial(0, mInvalidPlacementMaterial);
+			Adapter2->SetMaterial(0, mInvalidPlacementMaterial);
+		}
 		return;
 	}
-	Cable->SetVisibility(true, true);
+	Cable->SetVisibilitySML(true, true);
 
 	float offset = 250.0;
 	FVector start;
 	start.X = start.Y = start.Z = 0;
-	FVector end = UKismetMathLibrary::InverseTransformLocation(RootComponent->GetComponentToWorld(), From.pos);
+	FVector end = RootComponent->GetComponentToWorld().InverseTransformPosition(From.pos);
 	FVector start_t = end;
 	start_t.Z -= offset;
 	FVector end_t = end;
@@ -212,21 +221,35 @@ void AFINNetworkCableHologram::updateMeshes() {
 	
 	Cable->SetStartAndEnd(start, start_t, end, end_t, true);
 
+	if (!Snapped.isConnector && ((UObject*)Snapped.ptr)->IsA<AActor>()) {
+		Adapter1->SetVisibilitySML(true, true);
+		Adapter1->SetRelativeRotation(Snapped.rot);
+		Adapter1->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+	}
+	
+	if (!From.isConnector && ((UObject*)From.ptr)->IsA<AActor>()) {
+		Adapter2->SetVisibilitySML(true, true);
+		Adapter2->SetRelativeLocation(end);
+		Adapter2->SetRelativeRotation(From.rot);
+		Adapter2->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+	}
+
 	if (isValid() && isSnappedValid()) {
 		Cable->SetMaterial(0, mValidPlacementMaterial);
-		Con->SetMaterial(0, mValidPlacementMaterial);
+		Adapter1->SetMaterial(0, mValidPlacementMaterial);
+		Adapter2->SetMaterial(0, mValidPlacementMaterial);
 	} else {
 		Cable->SetMaterial(0, mInvalidPlacementMaterial);
-		Con->SetMaterial(0, mInvalidPlacementMaterial);
-	}
-}
+		Adapter1->SetMaterial(0, mInvalidPlacementMaterial);
+		Adapter2->SetMaterial(0, mInvalidPlacementMaterial);
+	}}
 
 bool AFINNetworkCableHologram::isValid() {
 	if (!From.v || !Snapped.v) return false;
 	TArray<AActor*> overlaps;
 	Cable->GetOverlappingActors(overlaps);
 	for (auto actor : overlaps) {
-		if (From.actor != actor && (!From.isConnector ||From.c()->GetOuter() != actor) && Snapped.actor != actor && (!Snapped.isConnector || Snapped.c()->GetOuter() != actor) && this != actor) {
+		if (From.actor != actor && (!From.isConnector ||From.c()->GetOuter() != actor) && Snapped.actor != actor && (!Snapped.isConnector || Snapped.c()->GetOuter() != actor) && this != actor && !actor->IsA<AFINNetworkCable>()) {
 			return false;
 		}
 	}
@@ -234,29 +257,36 @@ bool AFINNetworkCableHologram::isValid() {
 }
 
 AFINNetworkCableHologram::AFINNetworkCableHologram() {
-	//static ConstructorHelpers::FObjectFinder<UStaticMesh> cableMesh(TEXT("StaticMesh'/Game/FicsItNetworks/Network/Mesh_Cable.Mesh_Cable"));
-	//static ConstructorHelpers::FObjectFinder<UStaticMesh> adapterMesh(TEXT("StaticMesh'/Game/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
+	UStaticMesh* cableMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
+	UStaticMesh* adapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/Mesh_Adapter.Mesh_Adapter"));
 
 	this->mMaxPlacementFloorAngle = 90.0f;
 
 	Cable = CreateDefaultSubobject<USplineMeshComponent>(L"Cable");
 	Cable->SetMobility(EComponentMobility::Movable);
 	Cable->SetupAttachment(RootComponent);
-	//Cable->SetStaticMesh(cableMesh.Object);
+	Cable->SetStaticMesh(cableMesh);
 	Cable->ForwardAxis = ESplineMeshAxis::Z;
 	Cable->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	Cable->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel3);
-	Cable->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	Cable->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	Cable->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	Cable->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+	Cable->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
+	Cable->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Block);
 	Cable->SetAllUseCCD(true);
 
-	FVector loc;
-	loc.X = loc.Y = loc.Z = 0.0;
-	FVector scl;
-	scl.X = scl.Y = scl.Z = 1.0;
-	Con = CreateDefaultSubobject<USplineMeshComponent>(L"Adapter");
-	Con->SetMobility(EComponentMobility::Movable);
-	Con->SetupAttachment(RootComponent);
-	//Con->SetStaticMesh(adapterMesh.Object);
+	Adapter1 = CreateDefaultSubobject<USplineMeshComponent>(L"Adapter1");
+	Adapter1->SetMobility(EComponentMobility::Movable);
+	Adapter1->SetupAttachment(RootComponent);
+	Adapter1->SetStaticMesh(adapterMesh);
+	Adapter1->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+
+	Adapter2 = CreateDefaultSubobject<USplineMeshComponent>(L"Adapter2");
+	Adapter2->SetMobility(EComponentMobility::Movable);
+	Adapter2->SetupAttachment(RootComponent);
+	Adapter2->SetStaticMesh(adapterMesh);
+	Adapter1->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+
 	updateMeshes();
 }
 

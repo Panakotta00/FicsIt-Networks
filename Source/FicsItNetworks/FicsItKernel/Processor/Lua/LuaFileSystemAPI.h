@@ -7,7 +7,7 @@ extern "C" {
 }
 
 #include "Lua.h"
-#include "FicsItKernel/FicsItFS/Library/FileSystem.h"
+#include "FicsItKernel/FicsItFS/Library/FileSystemRoot.h"
 
 namespace FicsItKernel {
 	namespace Lua {

@@ -41,7 +41,7 @@ AFINFileSystemState* AFINFileSystemState::CreateState(UObject* WorldContextObjec
 	auto efs = WorldContextObject->GetWorld()->SpawnActor<AFINFileSystemState>(loc, rot);
 	efs->Capacity = inCapacity;
 
-	auto statePtr = FSharedInventoryStatePtr(efs);
+	auto statePtr = FSharedInventoryStatePtr::MakeShared(efs);
 	inInventory->SetStateOnIndex(inSlot, statePtr);
 	return efs;
 }

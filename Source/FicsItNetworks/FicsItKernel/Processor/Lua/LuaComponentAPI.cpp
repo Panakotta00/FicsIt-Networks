@@ -34,7 +34,7 @@ namespace FicsItKernel {
 				int j = 0;
 				for (auto& id : ids) {
 					auto comp = LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork()->getComponentByID(id);
-					newInstance(L, Network::NetworkTrace());
+					newInstance(L, comp);
 					if (isT) lua_seti(L, -2, ++j);
 				}
 			}
@@ -51,7 +51,8 @@ namespace FicsItKernel {
 				int j = 0;
 				for (auto& comp : comps) {
 					++j;
-					lua_pushstring(L, TCHAR_TO_UTF8(*Cast<IFINNetworkComponent>(*comp)->GetID().ToString()));
+					UObject* obj = *comp;
+					lua_pushstring(L, TCHAR_TO_UTF8(*Cast<IFINNetworkComponent>(obj)->Execute_GetID(obj).ToString()));
 					lua_seti(L, -2, j);
 				}
 			}

@@ -121,9 +121,10 @@ namespace FicsItKernel {
 		}
 
 		void addCompFuncs(lua_State* L, Network::NetworkTrace obj) {
-			auto comp = Cast<IFINNetworkComponent>(*obj);
+			UObject* o = *obj;
+			auto comp = Cast<IFINNetworkComponent>(o);
 			if (!comp) return;
-			for (auto func = TFieldIterator<UFunction>(obj->GetClass()); func; ++func) {
+			for (auto func = TFieldIterator<UFunction>(o->GetClass()); func; ++func) {
 				auto funcName = func->GetName();
 				if (!(funcName.RemoveFromStart("netFunc_") && funcName.Len() > 0)) continue;
 				auto comp_ud = (LuaInstanceUFunc*) lua_newuserdata(L, sizeof(LuaInstanceUFunc));
@@ -164,15 +165,16 @@ namespace FicsItKernel {
 			addPreFuncs(L, obj);
 			addCompFuncs(L, obj);
 
-			if (auto comp = Cast<IFINNetworkComponent>(*obj)) {
-				FGuid id = comp->GetID();
+			UObject* o = *obj;
+			if (auto comp = Cast<IFINNetworkComponent>(o)) {
+				FGuid id = comp->Execute_GetID(o);
 				lua_pushstring(L, TCHAR_TO_UTF8(*id.ToString()));
 				lua_setfield(L, -2, "id");
-				FString nick = comp->GetNick();
+				FString nick = comp->Execute_GetNick(o);
 				lua_pushstring(L, TCHAR_TO_UTF8(*nick));
 				lua_setfield(L, -2, "nick");
 
-				TSet<UObject*> merged = comp->GetMerged();
+				TSet<UObject*> merged = comp->Execute_GetMerged(o);
 				for (auto m : merged) {
 					if (!m) continue;
 					addPreFuncs(L, obj(m));
@@ -228,8 +230,9 @@ namespace FicsItKernel {
 			
 			if (!*obj) lua_pushstring(L, "Unavailable");
 			else {
-				auto comp = Cast<IFINNetworkComponent>(*obj);
-				auto nick = comp->GetNick();
+				UObject* o = *obj;
+				auto comp = Cast<IFINNetworkComponent>(o);
+				auto nick = comp->Execute_GetNick(o);
 				lua_pushstring(L, (((nick.Len() > 0) ? std::string("\"") + TCHAR_TO_UTF8(*nick) + "\" " : std::string()) + TCHAR_TO_UTF8(*comp->GetID().ToString())).c_str());
 			}
 			return 1;

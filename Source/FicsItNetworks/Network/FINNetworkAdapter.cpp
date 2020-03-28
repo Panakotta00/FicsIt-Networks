@@ -6,18 +6,31 @@
 
 std::vector<std::pair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = std::vector<std::pair<UClass*, FFINAdapterSettings>>();
 
-AFINNetworkAdapter::AFINNetworkAdapter() {
-	//static ConstructorHelpers::FObjectFinder<UStaticMesh> networkAdapterMesh(TEXT("StaticMesh'/Game/FicsIt-Networks/ComputerNetwork/Mesh_Adapter.Mesh_Adapter"));
+void AFINNetworkAdapter::RegistererAdapterSetting(UClass* clazz, FFINAdapterSettings settings) {
+	AFINNetworkAdapter::settings.push_back({clazz, settings});
+}
 
+void AFINNetworkAdapter::RegistererAdapterSetting(FString BPPath, FFINAdapterSettings settings) {
+	UClass* clazz = LoadObject<UClass>(nullptr, *BPPath);
+	RegistererAdapterSetting(clazz, settings);
+}
+
+void AFINNetworkAdapter::RegisterAdapterSettings() {
+	// init adapter settings
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageContainerMk1/Build_StorageContainerMk1.Build_StorageContainerMk1_C")), FFINAdapterSettings{FVector(290,0,400), FRotator(0,-90,0), true, 1});
+}
+
+AFINNetworkAdapter::AFINNetworkAdapter() {
+	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/Mesh_Adapter.Mesh_Adapter"));
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"Root");
 
 	Connector = CreateDefaultSubobject<UFINNetworkConnector>(L"Connector");
 	Connector->SetupAttachment(RootComponent);
 	
 	ConnectorMesh = CreateDefaultSubobject<UStaticMeshComponent>(L"StaticMesh");
-	ConnectorMesh->SetHiddenInGame(true, true);
+	ConnectorMesh->SetHiddenInGameSML(true, true);
 	ConnectorMesh->SetupAttachment(RootComponent, FName());
-	//ConnectorMesh->SetStaticMesh(networkAdapterMesh.Object);
+	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
 
 	Connector->MaxCables = 1;
 }
@@ -54,10 +67,11 @@ void AFINNetworkAdapter::BeginPlay() {
 		auto clazz = setting_entry.first;
 		auto setting = setting_entry.second;
 		if (!Parent->IsA(clazz)) continue;
-		SetActorLocationAndRotation(Parent->K2_GetActorLocation(), Parent->GetActorRotation());
-		AddActorLocalOffset(setting.loc);
-		ConnectorMesh->AddRelativeRotation(setting.rot);
-		ConnectorMesh->SetHiddenInGame(!setting.mesh, true);
+		FVector pos = Parent->GetActorTransform().TransformPosition(Parent->K2_GetActorLocation());
+		SetActorLocationAndRotation(pos, Parent->GetActorRotation());
+		FHitResult res;
+		ConnectorMesh->K2_AddRelativeRotation(setting.rot, false, res, true);
+		ConnectorMesh->SetHiddenInGameSML(!setting.mesh, true);
 		Connector->MaxCables = setting.maxCables;
 		return;
 	}
@@ -70,10 +84,3 @@ bool AFINNetworkAdapter::ShouldSave_Implementation() const {
 UFINNetworkAdapterReference::UFINNetworkAdapterReference() {}
 
 UFINNetworkAdapterReference::~UFINNetworkAdapterReference() {}
-
-// TODO: Add Settings
-/*
-// init adapter settings
-ANetworkAdapter::addSetting(L"Buildable/Factory/StorageContainerMk1", L"Build_StorageContainerMk1", {FVector{290,0,400}, SDK::FRotator{0,-90,0}, true, 1});
-ANetworkAdapter::settings.push_back({SDK::AFGBuildableStorage::StaticClass(), AdapterSettings{FVector{0,0,0}, SDK::FRotator{0,0,0}, true, 1}});
-*/

@@ -17,6 +17,7 @@ public:
 	void* ptr = nullptr;
 	AActor* actor = nullptr;
 	FVector pos;
+	FQuat rot;
 
 	inline UFINNetworkConnector* c() {
 		return (UFINNetworkConnector*)ptr;
@@ -36,7 +37,10 @@ public:
 	USplineMeshComponent* Cable = nullptr;
 
 	UPROPERTY()
-	UStaticMeshComponent* Con = nullptr;
+	UStaticMeshComponent* Adapter1 = nullptr;
+
+	UPROPERTY()
+	UStaticMeshComponent* Adapter2 = nullptr;
 
 	UPROPERTY()
 	FFINSnappedInfo Snapped;
@@ -56,6 +60,7 @@ public:
 	virtual void SetHologramLocationAndRotation(const FHitResult& hit) override;
 	virtual void OnInvalidHitResult() override;
 	virtual bool IsChanged() const override;
+	virtual USceneComponent* SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName) override;
 	// End FGBuildableHologram
 
 	AFINNetworkCableHologram();

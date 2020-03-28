@@ -57,7 +57,7 @@ namespace FicsItKernel {
 
 			/**
 			 * Sets the code you want to execute.
-			 * Might cause just a processor reset.
+			 * Might cause the processor to reset.
 			 */
 			void setCode(const std::string& code);
 		};

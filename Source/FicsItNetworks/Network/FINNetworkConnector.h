@@ -90,7 +90,11 @@ public:
 	virtual void BeginPlay() override;
 	// End AActor
 
-	// Begin NetworkComponent
+	// Begin IFGDismantleInterface
+	bool ShouldSave_Implementation() const override;
+	// End IFGDismantleInterface
+
+	// Begin IFINNetworkComponent
 protected:
 	virtual FGuid GetID_Implementation() const override;
 	virtual FString GetNick_Implementation() const override;
@@ -103,13 +107,13 @@ protected:
 	virtual void SetCircuit_Implementation(UFINNetworkCircuit* circuit) override;
 	virtual void NotifyNetworkUpdate_Implementation(int type, const TSet<UObject*>& nodes) override;
 public:
-	// End NetworkComponent
+	// End IFINNetworkComponent
 
-	// Begin NetworkSignalSender
+	// Begin IFINNetworkSignalSender
 	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
 	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
 	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
-	// End NetworkSignalSender
+	// End IFINNetworkSignalSender
 
 	/**
 	 * adds the given connector as connection to this connector.

@@ -28,7 +28,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "ModuleSystem|Panel")
 	FFINModuleDelegate OnModuleChanged;
 	
-	AActor*** grid;
+	AActor*** grid = nullptr;
 
 	UFINModuleSystemPanel();
 	~UFINModuleSystemPanel();
@@ -73,6 +73,11 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
 	void GetDismantleRefund(UPARAM(ref) TArray<FInventoryStack>& out_refund);
+
+	/**
+	 * Check if it should allocate the grid cache
+	 */
+	void SetupGrid();
 
 	static void getModuleSpace(FVector loc, int rot, FVector msize, FVector& min, FVector& max);
 };

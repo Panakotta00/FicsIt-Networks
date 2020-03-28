@@ -6,6 +6,7 @@
 #include "FGBuildable.h"
 #include "FGBuildableHologram.h"
 #include "FGCharacterPlayer.h"
+#include "FGInventoryLibrary.h"
 
 #include "SML/mod/hooking.h"
 #include "SML/util/Utility.h"
@@ -14,6 +15,7 @@
 #include "FINComponentUtility.h"
 #include "Network/Signals/FINSignal.h"
 #include "Network/FINNetworkConnector.h"
+#include "Network/FINNetworkAdapter.h"
 
 #include "FicsItKernel/Network/SmartSignal.h"
 #include "FicsItKernel/Processor/Lua/LuaHooks.h"
@@ -44,6 +46,30 @@ public:
 	void UpdateBestUsableActor() {}
 };
 
+void GetDismantleRefund_Decl(IFGDismantleInterface*, TArray<FInventoryStack>&);
+void GetDismantleRefund_Def(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {}
+#pragma optimize( "", off )
+void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {
+	AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);
+	if (!self->IsA<AFINNetworkCable>()) {
+		TInlineComponentArray<UFINNetworkConnector*> components;
+		self->GetComponents(components);
+		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
+		self->GetComponents(adapters);
+ 		for (auto& adapter_ref : adapters) {
+			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
+				components.Add(adapter->Connector);
+			}
+		}
+		for (auto& connector : components) {
+			for (AFINNetworkCable* cable : connector->Cables) {
+				cable->Execute_GetDismantleRefund(cable, refund);
+			}
+		}
+	}
+}
+#pragma optimize( "", on )
+
 void FFicsItNetworksModule::StartupModule(){
 	#ifndef WITH_EDITOR
 	finConfig->SetNumberField("SignalQueueSize", 32);
@@ -51,15 +77,15 @@ void FFicsItNetworksModule::StartupModule(){
 	#endif
 
 	SUBSCRIBE_METHOD("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, [](auto& scope, AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
-		static ConstructorHelpers::FObjectFinder<UStaticMesh> networkConnectorHoloMesh(TEXT("StaticMesh'/Game/FicsIt-Networks/ComputerNetwork/Mesh_NetworkConnectorHolo.Mesh_NetworkConnectorHolo"));
-
+		UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
 		if (componentTemplate->IsA<UFINNetworkConnector>()) {
 			auto comp = NewObject<UStaticMeshComponent>(attachParent);
+			comp->RegisterComponent();
 			comp->SetMobility(EComponentMobility::Movable);
-			comp->SetupAttachment(attachParent);
-			comp->SetStaticMesh(networkConnectorHoloMesh.Object);
+			comp->SetStaticMesh(networkConnectorHoloMesh);
+			comp->AttachTo(attachParent);
 			comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
-			self->FinishAndRegisterComponent(comp);
+			
 			scope.Override(comp);
 		}
 	});
@@ -93,9 +119,39 @@ void FFicsItNetworksModule::StartupModule(){
 		} catch (...) {}
 	});
 
-	SUBSCRIBE_METHOD("", AFGCharacterPlayer_Public::UpdateBestUsableActor, [](auto& scope, AFGCharacterPlayer_Public* self) {
+	SUBSCRIBE_METHOD("?UpdateBestUsableActor@AFGCharacterPlayer@@IEAAXXZ", AFGCharacterPlayer_Public::UpdateBestUsableActor, [](auto& scope, AFGCharacterPlayer_Public* self) {
 		if (!UFINComponentUtility::bAllowUsing) scope.Cancel();
 	});
+
+	SUBSCRIBE_METHOD("?Dismantle_Implementation@AFGBuildable@@UEAAXXZ", AFGBuildable::Dismantle_Implementation, [](auto& scope, AFGBuildable* self_r) {
+		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
+		AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);
+		TInlineComponentArray<UFINNetworkConnector*> connectors;
+		self->GetComponents(connectors);
+		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
+		self->GetComponents(adapters);
+		for (auto& adapter_ref : adapters) {
+			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
+				connectors.Add(adapter->Connector);
+			}
+		}
+		for (auto& connector : connectors) {
+			for (AFINNetworkCable* cable : connector->Cables) {
+				cable->Execute_Dismantle(cable);
+			}
+		}
+		for (auto& adapter_ref : adapters) {
+			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
+				adapter->Destroy();
+			}
+		}
+	});
+
+	SUBSCRIBE_METHOD("?GetDismantleRefund_Implementation@AFGBuildableFactory@@UEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund_Def);
+	SUBSCRIBE_METHOD("?GetDismantleRefund_Implementation@AFGBuildableGeneratorFuel@@UEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund_Def);
+	SUBSCRIBE_METHOD("?GetDismantleRefund_Implementation@AFGBuildable@@UEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
+
+	AFINNetworkAdapter::RegisterAdapterSettings();
 }
 void FFicsItNetworksModule::ShutdownModule(){ }
 

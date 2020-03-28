@@ -265,9 +265,11 @@ namespace FicsItKernel {
 		}
 
 		void setupFileSystemAPI(FileSystem::FileSystemRoot* filesystem, lua_State * L) {
+			luaL_newlibtable(L, luaFileSystemLib);
 			auto& fs_ud = *(FileSystem::FileSystemRoot**)lua_newuserdata(L, sizeof(void*));
 			fs_ud = filesystem;
 			luaL_setfuncs(L, luaFileSystemLib, 1);
+			lua_setglobal(L, "filesystem");
 
 			luaL_newmetatable(L, "File");
 			lua_pushvalue(L, -1);

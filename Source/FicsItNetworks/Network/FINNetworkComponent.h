@@ -88,10 +88,10 @@ public:
 	/**
 	 * This functions uses GetCircuit to search in the circuit for the component witht he given guid
 	 */
-	FFINNetworkTrace FindComponentByCircuit(FGuid guid) const;
+	FFINNetworkTrace FindComponentByCircuit(FGuid guid, UFINNetworkCircuit* circuit) const;
 
 	/**
 	 * This function uses GetNick to check if the component has the given nick
 	 */
-	bool HasNickByNick(FString nick) const;
+	bool HasNickByNick(FString nick, FString has) const;
 };
