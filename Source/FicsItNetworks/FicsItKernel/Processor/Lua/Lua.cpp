@@ -5,7 +5,7 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data) {
+		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data, Network::NetworkTrace trace) {
 			auto c = p->GetClass()->ClassCastFlags;
 			if (c & EClassCastFlags::CASTCLASS_UBoolProperty) {
 				lua_pushboolean(L, *p->ContainerPtrToValuePtr<bool>(data));
@@ -20,7 +20,7 @@ namespace FicsItKernel {
 				lua_pushstring(L, TCHAR_TO_UTF8(**p->ContainerPtrToValuePtr<FString>(data)));
 				return LuaDataType::LUA_STR;
 			} else if (c & EClassCastFlags::CASTCLASS_UObjectProperty) {
-				return newInstance(L, Network::NetworkTrace(*p->ContainerPtrToValuePtr<UObject*>(data))) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
+				return newInstance(L, trace / *p->ContainerPtrToValuePtr<UObject*>(data)) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
 			} else {
 				lua_pushnil(L);
 				return LuaDataType::LUA_NIL;
@@ -42,8 +42,7 @@ namespace FicsItKernel {
 				auto s = lua_tostring(L, i);
 				if (!s) throw std::exception("string");
 				auto o = p->ContainerPtrToValuePtr<FString>(data);
-				if (o) *o = FString(s);
-				else new (o) FString(s);
+				*o = FString(s);
 				return LuaDataType::LUA_STR;
 			} else if (c & EClassCastFlags::CASTCLASS_UObjectProperty) {
 				if (((UObjectProperty*)c)->PropertyClass->IsChildOf<UClass>()) {

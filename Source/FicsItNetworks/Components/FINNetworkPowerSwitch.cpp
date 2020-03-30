@@ -2,7 +2,9 @@
 
 AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 	PowerConnection1 = CreateDefaultSubobject<UFGPowerConnectionComponent>("PowerConnection1");
+	PowerConnection1->SetupAttachment(RootComponent);
 	PowerConnection2 = CreateDefaultSubobject<UFGPowerConnectionComponent>("PowerConnection2");
+	PowerConnection2->SetupAttachment(RootComponent);
 	PowerInfo1 = CreateDefaultSubobject<UFGPowerInfoComponent>("PowerInfo1");
 	PowerInfo2 = CreateDefaultSubobject<UFGPowerInfoComponent>("PowerInfo2");
 	PowerConnection1->SetPowerInfo(PowerInfo1);
@@ -10,6 +12,7 @@ AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
 	NetworkConnector->AddMerged(this);
+	NetworkConnector->SetupAttachment(RootComponent);
 
 	PrimaryActorTick.SetTickFunctionEnable(true);
 }

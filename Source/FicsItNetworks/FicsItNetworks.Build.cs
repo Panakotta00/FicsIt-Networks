@@ -27,7 +27,8 @@ public class FicsItNetworks : ModuleRules
             "AnimGraphRuntime",
             "Slate", "SlateCore",
             "Json",
-            "ApplicationCore"
+            "ApplicationCore",
+            "Vorbis"
             });
 
 

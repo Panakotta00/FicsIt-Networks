@@ -1,6 +1,7 @@
 #include "FINNetworkAdapter.h"
 
 #include "FGPowerConnectionComponent.h"
+#include "FGItemPickup_Spawnable.h"
 
 #include "Components/SceneComponent.h"
 
@@ -40,9 +41,20 @@ AFINNetworkAdapter::~AFINNetworkAdapter() {}
 void AFINNetworkAdapter::BeginPlay() {
 	Super::BeginPlay();
 
+	if (!IsValid(Parent)) {
+		for (AFINNetworkCable* cable : Connector->Cables) {
+			TArray<FInventoryStack> refund;
+			cable->Execute_GetDismantleRefund(cable, refund);
+			for (FInventoryStack& stack : refund) AFGItemPickup_Spawnable::AddItemToWorldStackAtLocation(GetWorld(), stack, cable->GetActorLocation(), cable->GetActorRotation());
+			cable->Destroy();
+		}
+		Destroy();
+		return;
+	}
+	
 	Connector->Merged.Add(Parent);
 
-	Attachment = NewObject<UFINNetworkAdapterReference>(Parent);
+	Attachment = NewObject<UFINNetworkAdapterReference>((Parent) ? Parent : nullptr);
 	Attachment->Ref = this;
 	Attachment->RegisterComponent();
 

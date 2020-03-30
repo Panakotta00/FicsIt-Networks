@@ -26,6 +26,7 @@ public:
 
 	// Begin AActor
 	virtual void BeginPlay() override;
+	virtual void EndPlay(EEndPlayReason::Type reason) override;
 	// End AActor
 
 	// Begin IFGSaveInterface

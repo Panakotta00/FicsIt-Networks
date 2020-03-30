@@ -3,15 +3,20 @@
 AFINCodeableSplitter::AFINCodeableSplitter() {
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
 	NetworkConnector->AddMerged(this);
+	NetworkConnector->SetupAttachment(RootComponent);
 
 	Input = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input");
 	Input->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
+	Input->SetupAttachment(RootComponent);
 	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
 	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
+	Output1->SetupAttachment(RootComponent);
 	Output2 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output2");
 	Output2->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
+	Output2->SetupAttachment(RootComponent);
 	Output3 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output3");
 	Output3->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
+	Output3->SetupAttachment(RootComponent);
 }
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {

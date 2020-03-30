@@ -29,10 +29,8 @@ class FICSITNETWORKS_API IFINSignalSender {
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Signals|Sender")
 	void AddListener(FFINNetworkTrace listener);
-
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Signals|Sender")
 	void RemoveListener(FFINNetworkTrace listener);
-
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Signals|Sender")
 	TSet<FFINNetworkTrace> GetListeners();
 };

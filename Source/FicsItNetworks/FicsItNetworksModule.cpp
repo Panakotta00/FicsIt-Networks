@@ -22,8 +22,8 @@
 
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
-TSharedPtr<FFINSignal> smartAsFINSig(FicsItKernel::Network::SmartSignal* sig) {
-	return TSharedPtr<FFINSignal>(new FFINSignal(std::shared_ptr<FicsItKernel::Network::SmartSignal>(sig)));
+FFINSignal smartAsFINSig(FicsItKernel::Network::SmartSignal* sig) {
+	return FFINSignal(std::shared_ptr<FicsItKernel::Network::SmartSignal>(sig));
 }
 
 class AFGBuildableHologram_Public : public AFGBuildableHologram {

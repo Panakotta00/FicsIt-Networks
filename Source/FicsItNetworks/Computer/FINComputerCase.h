@@ -60,4 +60,7 @@ public:
 		EComputerState GetState();
 
 	void recalculateKernelResources();
+
+	UFUNCTION()
+	void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
 };

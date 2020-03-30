@@ -118,7 +118,7 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 		}
 		if (con) {
 			// use nearest power connector as connection point by using adapter logic
-			Snapped = {true, false, con, actor, con->GetComponentToWorld().GetTranslation()};
+			Snapped = {true, false, actor, actor, con->GetComponentToWorld().GetTranslation()};
 			SetHologramLocationAndRotation(hitResult);
 			return true;
 		}
@@ -132,7 +132,7 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 		if (actor->IsA(clazz)) {
 			auto t = actor->GetTransform().TransformPosition(setting.loc);
 			auto r = actor->GetTransform().TransformRotation(setting.rot.Quaternion());
-			Snapped = { true, false,  actor, actor, t, r };
+			Snapped = { true, false, actor, actor, t, r };
 			SetHologramLocationAndRotation(hitResult);
 			return true;
 		}

@@ -38,13 +38,20 @@ void AFINNetworkCable::BeginPlay() {
 	Connector2->AddCable(this);
 }
 
+void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
+	if (IsValid(Connector1)) {
+		Connector1->RemoveCable(this);
+	}
+	if (IsValid(Connector2)) {
+		Connector2->RemoveCable(this);
+	}
+}
+
 bool AFINNetworkCable::ShouldSave_Implementation() const {
 	return true;
 }
 
 void AFINNetworkCable::Dismantle_Implementation() {
-	if (IsValid(Connector1)) Connector1->RemoveCable(this);
-	if (IsValid(Connector2)) Connector2->RemoveCable(this);
 	Super::Dismantle_Implementation();
 }
 

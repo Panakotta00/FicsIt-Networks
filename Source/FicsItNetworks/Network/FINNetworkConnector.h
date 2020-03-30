@@ -4,15 +4,18 @@
 #include "Components/SceneComponent.h"
 #include "FINNetworkComponent.h"
 #include "Signals/FINSignalSender.h"
+#include "Signals/FINSignalListener.h"
 #include "FINNetworkCable.h"
 #include "FINNetworkConnector.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINHandleSignal, FFINSignal, signal, FFINNetworkTrace, sender);
 
 /**
  * This component allows the actor to get connected to a computer network.
  * It espetially allows to connect computer network cables to it.
  */
 UCLASS(meta = (BlueprintSpawnableComponent))
-class FICSITNETWORKS_API UFINNetworkConnector : public USceneComponent, public IFINNetworkComponent, public IFINSignalSender, public IFGSaveInterface {
+class FICSITNETWORKS_API UFINNetworkConnector : public USceneComponent, public IFINNetworkComponent, public IFINSignalSender, public IFINSignalListener, public IFGSaveInterface {
 	GENERATED_BODY()
 
 protected:
@@ -83,6 +86,13 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Network|Connector")
 	TSet<UObject*> Merged;
 
+	/**
+	 * This event gets called if a signal ocures.
+	 * It basically redirects the signal from the IFINSignalListener implementation.
+	 */
+	UPROPERTY(BlueprintReadWrite, Category = "Network|Connector")
+	FFINHandleSignal OnNetworkSignal;
+
 	UFINNetworkConnector();
 	~UFINNetworkConnector();
 
@@ -109,11 +119,15 @@ protected:
 public:
 	// End IFINNetworkComponent
 
-	// Begin IFINNetworkSignalSender
+	// Begin IFINSignalSender
 	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
 	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
 	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
-	// End IFINNetworkSignalSender
+	// End IFINSignalSender
+
+	// Begin IFINSignalListener
+	virtual void HandleSignal_Implementation(FFINSignal signal, FFINNetworkTrace sender) override;
+	// End IFINSignalListener
 
 	/**
 	 * adds the given connector as connection to this connector.
@@ -161,6 +175,6 @@ public:
 	/**
 	 * This network signals gets emit when a network change occurs.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Network|Signals")
-	void netSig_NetworkUpdate(int changeType, FString changedComponen);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Signals")
+	void netSig_NetworkUpdate(int changeType, const FString& changedComponen);
 };

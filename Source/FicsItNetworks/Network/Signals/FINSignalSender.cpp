@@ -3,7 +3,7 @@
 void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	// get signal name
 	FString signalName = Stack.CurrentNativeFunction->GetName();
-	signalName.RemoveFromStart("sig_");
+	signalName.RemoveFromStart("netSig_");
 
 	// allocate signal data storage and copy data
 	auto data = malloc(Stack.CurrentNativeFunction->ParmsSize);
@@ -20,13 +20,11 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	// create signal instance
 	auto sig = std::shared_ptr<FicsItKernel::Network::Signal>((FicsItKernel::Network::Signal*) new UFINSignalUtility::BPSignal{TCHAR_TO_UTF8(*signalName), Stack.CurrentNativeFunction, data});
 
-	auto sender = Cast<IFINSignalSender>(Context);
-	auto listeners = sender->Execute_GetListeners(Context);
+	auto listeners = IFINSignalSender::Execute_GetListeners(Context);
 
 	for (auto listenerTrace : listeners) {
 		// TODO: Make sure this cast works and if the underlying object is the reason, remove it
-		auto listener = Cast<IFINSignalListener>(*listenerTrace);
-		listener->HandleSignal(TSharedPtr<FFINSignal>(new FFINSignal(sig)), listenerTrace / Context);
+		if ((*listenerTrace)->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(*listenerTrace, FFINSignal(sig), listenerTrace / Context);
 	}
 
 	P_FINISH;
@@ -35,8 +33,9 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 void UFINSignalUtility::SetupSender(UClass* signalSender) {
 	for (auto func = TFieldIterator<UFunction>(signalSender); func; ++func) {
 		auto funcName = func->GetName();
-		if (!funcName.RemoveFromStart("sig_")) continue;
+		if (!funcName.RemoveFromStart("netSig_")) continue;
 		func->SetNativeFunc(&execRecieveSignal);
+		func->FunctionFlags |= FUNC_Native;
 	}
 }
 

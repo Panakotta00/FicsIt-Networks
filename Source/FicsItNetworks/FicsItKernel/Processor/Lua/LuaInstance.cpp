@@ -4,6 +4,11 @@
 
 #include "Network/FINNetworkComponent.h"
 
+#define INSTANCE "Instance"
+#define INSTANCE_REF "InstanceRef"
+#define CLASS_INSTANCE "ClassInstance"
+#define CLASS_INSTANCE_REF "ClassInstanceRef"
+
 #define OffsetParam(type, off) (type*)((std::uint64_t)param + off)
 
 namespace FicsItKernel {
@@ -14,7 +19,7 @@ namespace FicsItKernel {
 		Network::NetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
 			if (!lua_istable(L, index)) return Network::NetworkTrace();
 			lua_getfield(L, index, "__object");
-			auto instance = (LuaInstance*)luaL_checkudata(L, -1, "InstanceObj");
+			auto instance = (LuaInstance*)luaL_checkudata(L, -1, INSTANCE_REF);
 			lua_pop(L, 1);
 			if (!instance) return Network::NetworkTrace();
 			UObject* obj = **instance;
@@ -25,7 +30,7 @@ namespace FicsItKernel {
 		UClass* getClassInstance(lua_State* L, int index, UClass* clazz) {
 			if (!lua_istable(L, index)) return nullptr;
 			lua_getfield(L, index, "__object");
-			auto o = (UClass*)luaL_checkudata(L, -1, "InstanceClass");
+			auto o = (UClass*)luaL_checkudata(L, -1, CLASS_INSTANCE_REF);
 			lua_pop(L, 1);
 			if (!o || !o->IsChildOf(clazz)) return nullptr;
 			return o;
@@ -54,50 +59,44 @@ namespace FicsItKernel {
 			int i = 1;
 			for (auto property = TFieldIterator<UProperty>(func); property; ++property) {
 				auto flags = property->GetPropertyFlags();
-				if (flags & CPF_Parm && !(flags & (CPF_OutParm | CPF_ReturnParm))) {
-					try {
-						luaToProperty(L, *property, params, i++);
-					} catch (std::exception e) {
-						error = "argument #" + std::to_string(i) + " is not of type " + e.what();
-						break;
+				if (flags & CPF_Parm) {
+					property->InitializeValue_InContainer(params);
+					if (!(flags & (CPF_OutParm | CPF_ReturnParm))) {
+						try {
+							luaToProperty(L, *property, params, i++);
+						} catch (std::exception e) {
+							error = "argument #" + std::to_string(i) + " is not of type " + e.what();
+							break;
+						}
 					}
 				}
 			}
 
 			// execute native function only if no error
-			if (error.length() <= 0) comp->ProcessEvent(func, params);
-
-			// free parameter space
+			if (error.length() <= 0) {
+				comp->ProcessEvent(func, params);
+			}
+			
+			int retargs = 0;
+			// free parameters and eventualy push return values to lua
 			for (auto property = TFieldIterator<UProperty>(func); property; ++property) {
-				auto flags = property->GetFlags();
-				if (flags & CPF_Parm && !(flags & (CPF_OutParm | CPF_ReturnParm))) {
-					if (--i > 0) break;
-					if (property->GetClass()->ClassCastFlags & CASTCLASS_UStrProperty) {
-						property->ContainerPtrToValuePtr<FString>(params)->~FString();
+				auto flags = property->GetPropertyFlags();
+				if (flags & CPF_Parm) {
+					if (error.length() <= 0 && (flags & (CPF_OutParm | CPF_ReturnParm))) {
+						propertyToLua(L, *property, params, ud.first);
+						++retargs;
 					}
+					property->DestroyValue_InContainer(params);
 				}
 			}
+
+			free(params);
+
 			if (error.length() > 0) {
-				free(params);
 				return luaL_error(L, std::string("Error at ").append(std::to_string(i).c_str()).append("# parameter: ").append(error).c_str());
 			}
 
-			// free parameter space and eventualy push return falues to lua
-			i = 0;
-			for (auto property = TFieldIterator<UProperty>(func); property; ++property) {
-				auto flags = property->GetFlags();
-				if (flags & (CPF_OutParm | CPF_ReturnParm)) {
-					propertyToLua(L, *property, params);
-					auto c = property->GetClass()->ClassCastFlags;
-					if (c & CASTCLASS_UStrProperty) {
-						property->ContainerPtrToValuePtr<FString>(params)->~FString();
-					}
-					++i;
-				}
-			}
-			free(params);
-
-			return i;
+			return retargs;
 		}
 
 		int luaInstanceFuncCall(lua_State* L) {
@@ -122,8 +121,6 @@ namespace FicsItKernel {
 
 		void addCompFuncs(lua_State* L, Network::NetworkTrace obj) {
 			UObject* o = *obj;
-			auto comp = Cast<IFINNetworkComponent>(o);
-			if (!comp) return;
 			for (auto func = TFieldIterator<UFunction>(o->GetClass()); func; ++func) {
 				auto funcName = func->GetName();
 				if (!(funcName.RemoveFromStart("netFunc_") && funcName.Len() > 0)) continue;
@@ -156,10 +153,10 @@ namespace FicsItKernel {
 			}
 
 			lua_newtable(L);
-			luaL_setmetatable(L, "Instance");
+			luaL_setmetatable(L, INSTANCE);
 
 			auto ud_o = (LuaInstance*)lua_newuserdata(L, sizeof(LuaInstance));
-			luaL_setmetatable(L, "Instance");
+			luaL_setmetatable(L, INSTANCE_REF);
 			new (ud_o) LuaInstance(obj);
 			lua_setfield(L, -2, "__object");
 			addPreFuncs(L, obj);
@@ -186,10 +183,10 @@ namespace FicsItKernel {
 
 		bool newInstance(lua_State* L, UClass* iClazz) {
 			lua_newtable(L);
-			luaL_setmetatable(L, "ClassInstance");
+			luaL_setmetatable(L, CLASS_INSTANCE);
 
 			auto ud_o = (LuaClassInstance*)lua_newuserdata(L, sizeof(LuaClassInstance));
-			luaL_setmetatable(L, "ClassInstance");
+			luaL_setmetatable(L, CLASS_INSTANCE_REF);
 			new (ud_o) LuaClassInstance(iClazz);
 			lua_setfield(L, -2, "__object");
 
@@ -210,7 +207,7 @@ namespace FicsItKernel {
 		int luaInstanceEQ(lua_State* L) {
 			bool failed = false;
 			if (lua_gettop(L) < 2 || !lua_getmetatable(L, 1) || !lua_getmetatable(L, 2)) failed = true;
-			luaL_getmetatable(L, "Instance");
+			luaL_getmetatable(L, INSTANCE);
 			if (!failed && (!lua_compare(L, 3, 5, LUA_OPEQ) || !lua_compare(L, 4, 5, LUA_OPEQ))) failed = true;
 			if (!failed && (lua_getfield(L, 1, "__object") != LUA_TUSERDATA || lua_getfield(L, 2, "__object") != LUA_TUSERDATA)) failed = true;
 			if (failed) {
@@ -218,15 +215,15 @@ namespace FicsItKernel {
 				return 1;
 			}
 
-			auto obj1 = *(LuaInstance*)luaL_checkudata(L, -2, "Instance");
-			auto obj2 = *(LuaInstance*)luaL_checkudata(L, -1, "Instance");
+			auto obj1 = *(LuaInstance*)luaL_checkudata(L, -2, INSTANCE_REF);
+			auto obj2 = *(LuaInstance*)luaL_checkudata(L, -1, INSTANCE_REF);
 			lua_pushboolean(L, obj1.isEqualObj(obj2));
 			return 1;
 		}
 
 		int luaInstanceToString(lua_State* L) {
 			lua_getfield(L, 1, "__object");
-			auto obj = *(LuaInstance*)luaL_checkudata(L, -1, "Instance");
+			auto obj = *(LuaInstance*)luaL_checkudata(L, -1, INSTANCE_REF);
 			
 			if (!*obj) lua_pushstring(L, "Unavailable");
 			else {
@@ -268,12 +265,18 @@ namespace FicsItKernel {
 
 		// metatables
 
-		void setupInstanceSystem(lua_State* L) {}
+		void setupInstanceSystem(lua_State* L) {
+			luaL_newmetatable(L, INSTANCE);
+			luaL_setfuncs(L, luaInstanceLib, 0);
+			lua_pop(L, 1);
 
-		void loadLibs(lua_State* L) {
-			luaL_openlibs(L);
+			luaL_newmetatable(L, INSTANCE_REF);
+			lua_pop(L, 1);
 
-			luaL_newmetatable(L, "Instance");
+			luaL_newmetatable(L, CLASS_INSTANCE);
+			lua_pop(L, 1);
+
+			luaL_newmetatable(L, CLASS_INSTANCE_REF);
 			lua_pop(L, 1);
 
 			luaL_newmetatable(L, "InstanceFunc");

@@ -7,7 +7,7 @@
 #include "FINSpeakerPole.generated.h"
 
 UCLASS(Blueprintable)
-class AFINSpeakerPole : public AFGBuildable {
+class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
 	GENERATED_BODY()
 
 public:
@@ -20,7 +20,16 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="SpeakerPole")
 		FString CurrentSound;
 
+	UPROPERTY(SaveGame)
+		TSet<FFINNetworkTrace> Listeners;
+
 	AFINSpeakerPole();
+
+	// Begin IFINNetworkSignalSender
+	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
+	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
+	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
+	// End IFINNetworkSignalSender
 
 	/**
 	 * Event bound to the OnAudioFinished event of the AudioComponent.
@@ -37,14 +46,14 @@ public:
 	 * If able to play the sound, emits a play sound signal.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-		void netFunc_PlaySound(const FString& sound, float startPoint);
+		void netFunc_playSound(const FString& sound, float startPoint);
 
 	/**
 	 * Stops the current playing sound.
 	 * Emits a stop sound signal if it actually was able to stop the current playing sound.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-		void netFunc_StopSound();
+		void netFunc_stopSound();
 
 	/**
 	 * Notifies when the state of the speaker pole has changed.

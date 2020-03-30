@@ -43,5 +43,6 @@ public:
 	*
 	* @param	signal	the signal you want to handle
 	*/
-	virtual void HandleSignal(TSharedPtr<FFINSignal> signal, FFINNetworkTrace sender) = 0;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Network|Signal|Listener")
+	void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
 };

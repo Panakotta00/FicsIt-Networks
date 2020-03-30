@@ -8,7 +8,7 @@
 /**
  * Holds information like the paramters of signal
  */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FICSITNETWORKS_API FFINSignal {
 	GENERATED_BODY()
 

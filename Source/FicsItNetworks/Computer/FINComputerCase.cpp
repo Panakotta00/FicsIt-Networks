@@ -9,7 +9,7 @@ AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
 	NetworkConnector->AddMerged(this);
 	NetworkConnector->SetupAttachment(RootComponent);
-
+	
 	Panel = CreateDefaultSubobject<UFINModuleSystemPanel>("Panel");
 	Panel->SetupAttachment(RootComponent);
 	Panel->OnModuleChanged.AddDynamic(this, &AFINComputerCase::OnModuleChanged);
@@ -28,6 +28,8 @@ AFINComputerCase::~AFINComputerCase() {
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
+
+	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
 
 	kernel = new FicsItKernel::KernelSystem(this->GetWorld());
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
@@ -101,4 +103,8 @@ void AFINComputerCase::recalculateKernelResources() {
 	for (AActor* module : modules) {
 		OnModuleChanged(module, true);
 	}
+}
+
+void AFINComputerCase::HandleSignal(FFINSignal signal, FFINNetworkTrace sender) {
+	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
 }

@@ -6,6 +6,7 @@
 #include "LuaStructs.h"
 #include "LuaHooks.h"
 #include "LuaComponentAPI.h"
+#include "LuaEventAPI.h"
 #include "LuaFileSystemAPI.h"
 
 #include "SML/util/Logging.h"
@@ -141,6 +142,7 @@ namespace FicsItKernel {
 			setupStructs(L);
 			setupHooks(L);
 			setupComponentAPI(L);
+			setupEventAPI(L);
 			setupFileSystemAPI(getKernel()->getFileSystem(), L);
 		}
 

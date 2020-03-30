@@ -43,13 +43,13 @@ void UFINNetworkConnector::removeConnector(UFINNetworkConnector * connector) {
 	}
 }
 
-UFINNetworkConnector::UFINNetworkConnector() {
-	Merged.Add(Cast<UObject>(GetOwner()));
-}
+UFINNetworkConnector::UFINNetworkConnector() {}
 
 UFINNetworkConnector::~UFINNetworkConnector() {}
 
 void UFINNetworkConnector::BeginPlay() {
+	Merged.Add(GetOwner());
+
 	if (!bIdCreated) {
 		ID = FGuid::NewGuid();
 		bIdCreated = true;
@@ -179,16 +179,9 @@ void UFINNetworkConnector::SetCircuit_Implementation(UFINNetworkCircuit * circui
 
 void UFINNetworkConnector::NotifyNetworkUpdate_Implementation(int type, const TSet<UObject*>& nodes) {
 	if (Listeners.Num() < 1) return;
-	auto func = FindFunction(L"luaSig_NetworkUpdate");
 	for (auto node : nodes) {
-		struct {
-			int32 t;
-			FString n;
-		} params;
-		params.t = type;
 		auto comp = Cast<IFINNetworkComponent>(node);
-		params.n = comp->Execute_GetID(node).ToString();
-		ProcessEvent(func, &params);
+		netSig_NetworkUpdate(type, comp->Execute_GetID(node).ToString());
 	}
 }
 
@@ -205,4 +198,8 @@ TSet<FFINNetworkTrace> UFINNetworkConnector::GetListeners_Implementation() {
 	return Listeners;
 }
 
-void UFINNetworkConnector::netSig_NetworkUpdate(int type, FString id) {}
+void UFINNetworkConnector::HandleSignal_Implementation(FFINSignal signal, FFINNetworkTrace sender) {
+	OnNetworkSignal.Broadcast(signal, sender);
+}
+
+void UFINNetworkConnector::netSig_NetworkUpdate_Implementation(int type, const FString& id) {}
