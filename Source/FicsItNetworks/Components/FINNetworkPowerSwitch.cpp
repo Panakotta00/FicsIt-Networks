@@ -11,18 +11,24 @@ AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 	PowerConnection2->SetPowerInfo(PowerInfo2);
 
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
-	NetworkConnector->AddMerged(this);
 	NetworkConnector->SetupAttachment(RootComponent);
 
-	PrimaryActorTick.SetTickFunctionEnable(true);
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	if (HasAuthority()) PrimaryActorTick.SetTickFunctionEnable(true);
 }
 
 void AFINNetworkPowerSwitch::BeginPlay() {
-	OnConnectedChanged();
+	Super::BeginPlay();
+
+	if (bConnected) PowerConnection1->AddHiddenConnection(PowerConnection2);
 }
 
 void AFINNetworkPowerSwitch::Tick(float dt) {
-	if (bHasChanged) OnConnectedChanged();
+	Super::Tick(dt);
+
+	if (bConnectedHasChanged) OnConnectedChanged();
 }
 
 bool AFINNetworkPowerSwitch::ShouldSave_Implementation() const {
@@ -32,17 +38,17 @@ bool AFINNetworkPowerSwitch::ShouldSave_Implementation() const {
 void AFINNetworkPowerSwitch::SetConnected(bool bNewConnected) {
 	if (bConnected != bNewConnected) {
 		bConnected = bNewConnected;
-		bHasChanged = true;
+		bConnectedHasChanged = true;
+		if (bConnected) {
+			PowerConnection1->AddHiddenConnection(PowerConnection2);
+		} else {
+			TArray<UFGCircuitConnectionComponent*> connections;
+			PowerConnection1->GetHiddenConnections(connections);
+			if (connections.Contains(PowerConnection2)) PowerConnection1->RemoveHiddenConnection(PowerConnection2);
+		}
 	}
 }
 
 void AFINNetworkPowerSwitch::OnConnectedChanged_Implementation() {
-	bHasChanged = false;
-	if (bConnected) {
-		PowerConnection1->AddHiddenConnection(PowerConnection2);
-	} else {
-		TArray<UFGCircuitConnectionComponent*> connections;
-		PowerConnection1->GetHiddenConnections(connections);
-		if (connections.Contains(PowerConnection2)) PowerConnection1->RemoveHiddenConnection(PowerConnection2);
-	}
+	bConnectedHasChanged = false;
 }

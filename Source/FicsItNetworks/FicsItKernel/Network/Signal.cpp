@@ -8,8 +8,12 @@ namespace FicsItKernel {
 			return name;
 		}
 
+		SignalReader::~SignalReader() {}
+
 		void SignalReader::operator<<(const NetworkTrace& obj) {
 			*this << *obj;
 		}
+		
+		void SignalReader::WriteAbstract(const void* obj, const std::string& id) {}
 	}
 }

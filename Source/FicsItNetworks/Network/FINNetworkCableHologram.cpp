@@ -31,7 +31,7 @@ UFINNetworkConnector* AFINNetworkCableHologram::setupSnapped(FFINSnappedInfo s) 
 	spawnParams.bDeferConstruction = true;
 	auto a = GetWorld()->SpawnActor<AFINNetworkAdapter>(location, rotation, spawnParams);
 	a->Parent = s.f();
-	UGameplayStatics::FinishSpawningActor(a, s.f()->GetTransform());
+	UGameplayStatics::FinishSpawningActor(a, a->GetTransform());
 	a->SetActorRotation(rotation);
 	a->SetActorLocation(location);
 	return a->Connector;
@@ -42,20 +42,13 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 	auto c1 = setupSnapped(Snapped);
 	auto c2 = setupSnapped(From);
 	
-	FRotator rotation = FRotator();
+	FRotator rotation = FRotator::ZeroRotator;
 	FVector location = c1->GetComponentToWorld().GetTranslation();
-	FVector scale;
-	scale.X = scale.Y = scale.Z = 1.0;
-	FQuat rot;
-	rot.W = 0;
-	rot.X = 0;
-	rot.Y = 0;
-	rot.Z = 0;
-
+	
 	FActorSpawnParameters spawnParams;
 	spawnParams.bDeferConstruction = true;
 
-	auto a = GetWorld()->SpawnActor<AFINNetworkCable>(this->mBuildClass, location, rotation, spawnParams);
+	AFINNetworkCable* a = GetWorld()->SpawnActor<AFINNetworkCable>(this->mBuildClass, location, rotation, spawnParams);
 	
 	FTransform t = a->GetTransform();
 
@@ -63,10 +56,8 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 	a->Connector2 = c2;
 
 	a->SetBuiltWithRecipe(GetRecipe());
-
-	((UGameplayStatics*)UGameplayStatics::StaticClass()->GetDefaultObject())->FinishSpawningActor(a, t);
-
-	return a;
+	
+	return UGameplayStatics::FinishSpawningActor(a, FTransform(rotation.Quaternion(), location));
 }
 
 int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {
@@ -132,7 +123,7 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 		if (actor->IsA(clazz)) {
 			auto t = actor->GetTransform().TransformPosition(setting.loc);
 			auto r = actor->GetTransform().TransformRotation(setting.rot.Quaternion());
-			Snapped = { true, false, actor, actor, t, r };
+			Snapped = { true, false, actor, actor, t, r, true };
 			SetHologramLocationAndRotation(hitResult);
 			return true;
 		}
@@ -221,17 +212,15 @@ void AFINNetworkCableHologram::updateMeshes() {
 	
 	Cable->SetStartAndEnd(start, start_t, end, end_t, true);
 
-	if (!Snapped.isConnector && ((UObject*)Snapped.ptr)->IsA<AActor>()) {
+	if (!Snapped.isConnector && ((UObject*)Snapped.ptr)->IsA<AActor>() && Snapped.setting) {
 		Adapter1->SetVisibilitySML(true, true);
 		Adapter1->SetRelativeRotation(Snapped.rot);
-		Adapter1->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 	}
 	
-	if (!From.isConnector && ((UObject*)From.ptr)->IsA<AActor>()) {
+	if (!From.isConnector && ((UObject*)From.ptr)->IsA<AActor>() && From.setting) {
 		Adapter2->SetVisibilitySML(true, true);
 		Adapter2->SetRelativeLocation(end);
 		Adapter2->SetRelativeRotation(From.rot);
-		Adapter2->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 	}
 
 	if (isValid() && isSnappedValid()) {
@@ -262,6 +251,8 @@ AFINNetworkCableHologram::AFINNetworkCableHologram() {
 
 	this->mMaxPlacementFloorAngle = 90.0f;
 
+	RootComponent->SetWorldScale3D(FVector::OneVector);
+
 	Cable = CreateDefaultSubobject<USplineMeshComponent>(L"Cable");
 	Cable->SetMobility(EComponentMobility::Movable);
 	Cable->SetupAttachment(RootComponent);
@@ -275,17 +266,15 @@ AFINNetworkCableHologram::AFINNetworkCableHologram() {
 	Cable->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Block);
 	Cable->SetAllUseCCD(true);
 
-	Adapter1 = CreateDefaultSubobject<USplineMeshComponent>(L"Adapter1");
-	Adapter1->SetMobility(EComponentMobility::Movable);
+	Adapter1 = CreateDefaultSubobject<UStaticMeshComponent>(L"Adapter1");
 	Adapter1->SetupAttachment(RootComponent);
+	Adapter1->SetMobility(EComponentMobility::Movable);
 	Adapter1->SetStaticMesh(adapterMesh);
-	Adapter1->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 
-	Adapter2 = CreateDefaultSubobject<USplineMeshComponent>(L"Adapter2");
-	Adapter2->SetMobility(EComponentMobility::Movable);
+	Adapter2 = CreateDefaultSubobject<UStaticMeshComponent>(L"Adapter2");
 	Adapter2->SetupAttachment(RootComponent);
+	Adapter2->SetMobility(EComponentMobility::Movable);
 	Adapter2->SetStaticMesh(adapterMesh);
-	Adapter1->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 
 	updateMeshes();
 }

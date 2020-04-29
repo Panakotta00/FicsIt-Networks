@@ -22,6 +22,15 @@ namespace FicsItKernel {
 				case Type::Object:
 					reader << arg.getObject();
 					break;
+				case Type::Item:
+					reader.WriteAbstract(arg.getItem(), "InventoryItem");
+					break;
+				case Type::ItemAmount:
+					reader.WriteAbstract(arg.getItemAmount(), "ItemAmount");
+					break;
+				case Type::Stack:
+					reader.WriteAbstract(arg.getStack(), "InventoryStack");
+					break;
 				}
 			}
 			return args.size();

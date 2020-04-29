@@ -18,8 +18,8 @@ namespace FicsItKernel {
 			virtual bool rename(FileSystem::Path path, const std::string& name);
 			virtual std::unordered_set<std::string> childs(FileSystem::Path path);
 
-			void addDevice(FileSystem::SRef<FileSystem::Device> device, const std::string& name);
-			void removeDevice(FileSystem::SRef<FileSystem::Device> device);
+			bool addDevice(FileSystem::SRef<FileSystem::Device> device, const std::string& name);
+			bool removeDevice(FileSystem::SRef<FileSystem::Device> device);
 		};
 	}
 }

@@ -25,6 +25,7 @@ public:
 	~AFINNetworkCable();
 
 	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type reason) override;
 	// End AActor
@@ -34,7 +35,6 @@ public:
 	// End IFGSaveInterface
 
 	// Begin IFGDismantleInterface
-	virtual void Dismantle_Implementation() override;
-	virtual void GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund) const override;
+	virtual int32 GetDismantleRefundReturnsMultiplier() const;
 	// End IFGDismantleInterface
 };

@@ -18,6 +18,7 @@ public:
 	AActor* actor = nullptr;
 	FVector pos;
 	FQuat rot;
+	bool setting = false;
 
 	inline UFINNetworkConnector* c() {
 		return (UFINNetworkConnector*)ptr;

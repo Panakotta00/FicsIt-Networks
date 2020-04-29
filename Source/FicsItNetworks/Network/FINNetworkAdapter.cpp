@@ -22,16 +22,16 @@ void AFINNetworkAdapter::RegisterAdapterSettings() {
 }
 
 AFINNetworkAdapter::AFINNetworkAdapter() {
-	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/Mesh_Adapter.Mesh_Adapter"));
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"Root");
+	RootComponent->SetMobility(EComponentMobility::Type::Static);
 
 	Connector = CreateDefaultSubobject<UFINNetworkConnector>(L"Connector");
 	Connector->SetupAttachment(RootComponent);
 	
 	ConnectorMesh = CreateDefaultSubobject<UStaticMeshComponent>(L"StaticMesh");
 	ConnectorMesh->SetHiddenInGameSML(true, true);
-	ConnectorMesh->SetupAttachment(RootComponent, FName());
-	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
+	ConnectorMesh->SetupAttachment(RootComponent);
+	ConnectorMesh->SetMobility(EComponentMobility::Type::Movable);
 
 	Connector->MaxCables = 1;
 }
@@ -40,6 +40,9 @@ AFINNetworkAdapter::~AFINNetworkAdapter() {}
 
 void AFINNetworkAdapter::BeginPlay() {
 	Super::BeginPlay();
+
+	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/Mesh_Adapter.Mesh_Adapter"));
+	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
 
 	if (!IsValid(Parent)) {
 		for (AFINNetworkCable* cable : Connector->Cables) {
@@ -58,6 +61,7 @@ void AFINNetworkAdapter::BeginPlay() {
 	Attachment->Ref = this;
 	Attachment->RegisterComponent();
 
+	bool done = false;
 	if (Parent->IsA<AFGBuildableFactory>()) {
 		auto cons = Parent->GetComponentsByClass(UFGPowerConnectionComponent::StaticClass());
 		float dist = -1.0f;
@@ -71,11 +75,11 @@ void AFINNetworkAdapter::BeginPlay() {
 		}
 		if (con) {
 			SetActorLocationAndRotation(con->GetComponentLocation(), con->GetComponentRotation());
-			return;
+			done = true;
 		}
 	}
 
-	for (auto setting_entry : settings) {
+	if (!done) for (auto setting_entry : settings) {
 		auto clazz = setting_entry.first;
 		auto setting = setting_entry.second;
 		if (!Parent->IsA(clazz)) continue;
@@ -85,11 +89,17 @@ void AFINNetworkAdapter::BeginPlay() {
 		ConnectorMesh->K2_AddRelativeRotation(setting.rot, false, res, true);
 		ConnectorMesh->SetHiddenInGameSML(!setting.mesh, true);
 		Connector->MaxCables = setting.maxCables;
-		return;
+		break;
 	}
+
+	ConnectorMesh->SetMobility(EComponentMobility::Type::Static);
 }
 
 bool AFINNetworkAdapter::ShouldSave_Implementation() const {
+	return true;
+}
+
+bool AFINNetworkAdapter::NeedTransform_Implementation() {
 	return true;
 }
 

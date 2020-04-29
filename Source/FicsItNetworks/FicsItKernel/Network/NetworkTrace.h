@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 
+#include <vector>
 #include <map>
 #include <memory>
 #include <functional>
@@ -20,19 +21,15 @@ namespace FicsItKernel {
 		 */
 		class NetworkTrace {
 		private:
-			static std::unique_ptr<TraceStep> fallbackTraceStep;
-			static std::map<std::pair<UClass*, UClass*>, std::unique_ptr<TraceStep>> traceSteps;
-
 			NetworkTrace* prev = nullptr;
 			TraceStep* step = nullptr;
 			TWeakObjectPtr<UObject> obj;
 
 		public:
-			/**
-			 * Adds a new trace step type.
-			 * !IMPORTANT! step gets fully occupied, that means you should afterwards never free the pointer to step.
-			 */
-			static void registerTraceStep(UClass* A, UClass* B, TraceStep* step);
+			static std::unique_ptr<TraceStep> fallbackTraceStep;
+			static std::vector<std::pair<std::pair<UClass*, UClass*>, TraceStep*>(*)()> toRegister;
+			static std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>> traceSteps;
+			static std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>> interfaceTraceSteps;
 
 			/**
 			 * Trys to find the most suitable trace step of for both given classes
@@ -96,6 +93,12 @@ namespace FicsItKernel {
 			 * Updates every step on the way accordingly
 			 */
 			NetworkTrace reverse() const;
+
+			/**
+			 * Executes the step function of it self and cascades the steps of the previous traces.
+			 * If no step is found just does the previous traces.
+			 */
+			bool isValid() const;
 
 			/**
 			 * Checks if the objects of both traces are the same

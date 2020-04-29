@@ -13,6 +13,8 @@ namespace FicsItKernel {
 	namespace Network {
 		class SignalReader {
 		public:
+			virtual ~SignalReader();
+
 			/** Writes a string to the signal reader */
 			virtual void operator<<(const std::string& str) = 0;
 
@@ -30,6 +32,9 @@ namespace FicsItKernel {
 
 			/** Writes a object referenced by a network trace to the signal reader */
 			virtual void operator<<(const NetworkTrace& obj);
+
+			/** Trys to write the given object identified by the given type id to the signal reader */
+			virtual void WriteAbstract(const void* obj, const std::string& id);
 		};
 
 		class Signal {

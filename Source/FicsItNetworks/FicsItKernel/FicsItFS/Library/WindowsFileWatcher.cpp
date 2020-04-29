@@ -26,7 +26,7 @@ namespace FileSystem {
 			NULL, OPEN_EXISTING,
 			FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL);
 		watcherInfo->ovl = {0};
-		watcherInfo->ovl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+		watcherInfo->ovl.hEvent = CreateEvent(NULL, true, false, NULL);
 		memset(&watcherInfo->info, 0, sizeof(watcherInfo->info));
 		ReadDirectoryChangesW(watcherInfo->watcher, &watcherInfo->info, sizeof(watcherInfo->info), true, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_LAST_WRITE, NULL, &watcherInfo->ovl, NULL);
 	}

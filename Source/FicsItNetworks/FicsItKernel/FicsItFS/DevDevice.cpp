@@ -43,15 +43,19 @@ std::unordered_set<std::string> DevDevice::childs(FileSystem::Path path) {
 	return list;
 }
 
-void DevDevice::addDevice(FileSystem::SRef<FileSystem::Device> device, const std::string & name) {
+bool DevDevice::addDevice(FileSystem::SRef<FileSystem::Device> device, const std::string & name) {
+	auto dev = devices.find(name);
+	if (dev != devices.end()) return false;
 	devices[name] = device;
+	return true;
 }
 
-void DevDevice::removeDevice(FileSystem::SRef<FileSystem::Device> device) {
+bool DevDevice::removeDevice(FileSystem::SRef<FileSystem::Device> device) {
 	for (auto d = devices.begin(); d != devices.end(); d++) {
 		if (d->second == device) {
 			devices.erase(d);
-			return;
+			return true;
 		}
 	}
+	return false;
 }

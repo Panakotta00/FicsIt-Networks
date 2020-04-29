@@ -6,14 +6,17 @@
 #include "SML/util/Logging.h"
 
 AFINNetworkCable::AFINNetworkCable() {
-	UStaticMesh* cableSplineMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
 	CableSpline = CreateDefaultSubobject<USplineMeshComponent>("CableSpline");
 	CableSpline->SetupAttachment(RootComponent);
-	CableSpline->SetStaticMesh(cableSplineMesh);
 	CableSpline->SetForwardAxis(ESplineMeshAxis::Z);
+	CableSpline->SetMobility(EComponentMobility::Type::Movable);
 }
 
 AFINNetworkCable::~AFINNetworkCable() {}
+
+void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
+
+}
 
 void AFINNetworkCable::BeginPlay() {
 	Super::BeginPlay();
@@ -32,7 +35,13 @@ void AFINNetworkCable::BeginPlay() {
 	FVector end_t = end;
 	end_t.Z += offset;
 
+	UStaticMesh* cableMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
+	CableSpline->SetStaticMesh(cableMesh);
+
 	CableSpline->SetStartAndEnd(start, start_t, end, end_t, true);
+	CableSpline->UpdateMesh();
+
+	CableSpline->SetMobility(EComponentMobility::Type::Static);
 
 	Connector1->AddCable(this);
 	Connector2->AddCable(this);
@@ -51,10 +60,9 @@ bool AFINNetworkCable::ShouldSave_Implementation() const {
 	return true;
 }
 
-void AFINNetworkCable::Dismantle_Implementation() {
-	Super::Dismantle_Implementation();
-}
-
-void AFINNetworkCable::GetDismantleRefund_Implementation(TArray<FInventoryStack>& refund) const {
-	Super::GetDismantleRefund_Implementation(refund);
+int32 AFINNetworkCable::GetDismantleRefundReturnsMultiplier() const {
+	if (!IsValid(Connector1) || !IsValid(Connector2)) return 0;
+	FVector startPos = Connector1->GetComponentLocation();
+	FVector endPos = Connector2->GetComponentLocation();
+	return (startPos - endPos).Size() / 100.0;
 }

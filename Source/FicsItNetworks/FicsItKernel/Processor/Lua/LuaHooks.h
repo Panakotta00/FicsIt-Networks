@@ -5,7 +5,7 @@
 #include "FGPowerCircuit.h"
 
 #include "LuaInstance.h"
-#include "FicsItKernel/Network/NetworkTrace.h"
+#include "Network/FINNetworkTrace.h"
 
 #include <set>
 #include <map>
@@ -20,9 +20,11 @@ namespace FicsItKernel {
 			std::set<Network::NetworkTrace> deleg;
 			void update();
 		};
-		
+
+		extern FCriticalSection MutexFactoryHooks;
+		extern FCriticalSection MutexPowerCircuitListeners;
 		extern TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, FactoryHook> factoryHooks;
-		extern TMap<TWeakObjectPtr<UFGPowerCircuit>, TSet<Network::NetworkTrace>> powerCircuitListeners;
+		extern TMap<TWeakObjectPtr<UFGPowerCircuit>, TSet<FFINNetworkTrace>> powerCircuitListeners;
 
 		void luaHook(lua_State* L, Network::NetworkTrace hook);
 		void luaListenCircuit(Network::NetworkTrace circuit);

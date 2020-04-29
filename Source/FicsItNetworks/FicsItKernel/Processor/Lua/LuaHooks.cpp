@@ -2,23 +2,28 @@
 
 #include "FicsItKernel/FicsItKernel.h"
 #include "LuaProcessor.h"
+#include "Network/FINNetworkTrace.h"
+#include "SML/util/Logging.h"
 
 #define LuaFactoryFuncName(funcName) luaFactoryHook ## funcName
 #define LuaFactoryFunc(funcName) \
 int LuaFactoryFuncName(funcName) (lua_State* L) { \
-	auto self = ((TWeakObjectPtr<UFGFactoryConnectionComponent>*)luaL_checkudata(L, 1, "FactoryHook"))->Get(); \
-	if (!self) return 0; \
-	auto hook_r = factoryHooks.Find(self); \
+	const Network::NetworkTrace& trace = *(Network::NetworkTrace*)luaL_checkudata(L, 1, "FactoryHook"); \
+	UFGFactoryConnectionComponent* self = Cast<UFGFactoryConnectionComponent>(*trace); \
+	if (!self) { SML::Logging::error("Oh noe"); return 0; } \
+	FactoryHook* hook_r = factoryHooks.Find(self); \
 	if (!hook_r) return luaL_error(L, "Invalid Hook"); \
-	auto hook = *hook_r;
+	FactoryHook& hook = *hook_r;
 #define LuaEndFunc \
 	\
 }
 
 namespace FicsItKernel {
 	namespace Lua {
+		FCriticalSection MutexFactoryHooks;
+		FCriticalSection MutexPowerCircuitListeners;
 		TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, FactoryHook> factoryHooks;
-		TMap<TWeakObjectPtr<UFGPowerCircuit>, TSet<Network::NetworkTrace>> powerCircuitListeners;
+		TMap<TWeakObjectPtr<UFGPowerCircuit>, TSet<FFINNetworkTrace>> powerCircuitListeners;
 
 		void FactoryHook::update() {
 			auto now = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
@@ -38,7 +43,7 @@ namespace FicsItKernel {
 		LuaEndFunc
 
 		LuaFactoryFunc(Listen)
-			hook.deleg.insert(Network::NetworkTrace(LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork()->component));
+			hook.deleg.insert(trace.reverse());
 			return 0;
 		LuaEndFunc
 
@@ -52,14 +57,18 @@ namespace FicsItKernel {
 		void luaHook(lua_State* L, Network::NetworkTrace con) {
 			auto connector = Cast<UFGFactoryConnectionComponent>(*con);
 			if (!connector) throw std::exception("Object is not FactoryConnector");
-			++factoryHooks[connector].refs;
+			MutexFactoryHooks.Lock();
+			++factoryHooks.FindOrAdd(connector).refs;
+			MutexFactoryHooks.Unlock();
 			auto p = (Network::NetworkTrace*)lua_newuserdata(L, sizeof(Network::NetworkTrace));
 			luaL_setmetatable(L, "FactoryHook");
-			*p = con.reverse();
+			*p = con;
 		}
 
 		void luaListenCircuit(Network::NetworkTrace circuit) {
-			powerCircuitListeners[Cast<UFGPowerCircuit>(*circuit)].Add(circuit.reverse());
+			MutexPowerCircuitListeners.Lock();
+			powerCircuitListeners.FindOrAdd(Cast<UFGPowerCircuit>(*circuit)).Add(circuit.reverse());
+			MutexPowerCircuitListeners.Unlock();
 		}
 
 		void setupHooks(lua_State* L) {

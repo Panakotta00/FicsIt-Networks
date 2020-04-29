@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.22.3-CSS",
+	"EngineAssociation": "{1A040AC1-4C66-B453-21B2-5F8D29E1F9F7}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -44,6 +44,11 @@
 		{
 			"Name": "Alpakit",
 			"Enabled": true
+		},
+		{
+			"Name": "ElectronicNodes",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/5cb2a394d0c04e73891762be4cbd7216"
 		}
 	]
 }

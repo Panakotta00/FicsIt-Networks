@@ -11,7 +11,7 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	for (auto p = TFieldIterator<UProperty>(Stack.CurrentNativeFunction); p; ++p) {
 		auto dp = p->ContainerPtrToValuePtr<void>(data);
 		if (Stack.Code) {
-			//Stack.Step(Context, dp);
+			Stack.Step(Context, dp);
 		} else {
 			Stack.StepExplicitProperty(dp, *p);
 		}
@@ -24,7 +24,8 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 
 	for (auto listenerTrace : listeners) {
 		// TODO: Make sure this cast works and if the underlying object is the reason, remove it
-		if ((*listenerTrace)->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(*listenerTrace, FFINSignal(sig), listenerTrace / Context);
+		UObject* obj = *listenerTrace;
+		if (IsValid(obj) && obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, FFINSignal(sig), listenerTrace / Context);
 	}
 
 	P_FINISH;

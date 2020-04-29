@@ -11,13 +11,13 @@ class FICSITNETWORKS_API AFINFileSystemState : public AActor, public IFGSaveInte
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	FGuid ID;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	bool IdCreated = false;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(SaveGame, EditDefaultsOnly)
 	int32 Capacity = 0;
 
 	AFINFileSystemState();
@@ -31,10 +31,6 @@ public:
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
 	
-	// Begin AFGEquipment
-	//virtual bool ShouldSaveState() const override;
-	// End AFGEquipment
-
 	FileSystem::SRef<FileSystem::Device> createDevice() const;
 
 	/**

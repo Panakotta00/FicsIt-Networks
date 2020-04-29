@@ -79,10 +79,10 @@ void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) 
 	TSet<AActor*> modules;
 	for (int x = 0; x < PanelHeight; ++x) for (int y = 0; y < PanelWidth; ++y) {
 		auto m = GetModule(x, y);
-		if (m && modules.Contains(m)) {
+		if (m && !modules.Contains(m)) {
 			modules.Add(m);
 			if (m->Implements<UFGDismantleInterface>()) {
-				Cast<IFGDismantleInterface>(m)->Execute_GetDismantleRefund(m, refund);
+				IFGDismantleInterface::Execute_GetDismantleRefund(m, refund);
 			}
 		}
 	}

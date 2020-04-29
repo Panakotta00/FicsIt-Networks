@@ -8,15 +8,15 @@
 #include "FINCodeableSplitter.generated.h"
 
 UCLASS(Blueprintable)
-class AFINCodeableSplitter : public AFGBuildableAttachmentSplitter {
+class AFINCodeableSplitter : public AFGBuildableAttachmentSplitter, public IFINSignalSender {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
 		UFINNetworkConnector* NetworkConnector;
 
-	UPROPERTY(VisibleAnywhere, BlueprintREadWrite, Category = "CodeableSplitter")
-		UFGFactoryConnectionComponent* Input;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
+		UFGFactoryConnectionComponent* InputConnector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
 		UFGFactoryConnectionComponent* Output1;
@@ -39,7 +39,16 @@ public:
 	UPROPERTY(SaveGame)
 		TArray<FInventoryItem> OutputQueue3;
 
+	UPROPERTY(SaveGame)
+		TSet<FFINNetworkTrace> SignalListeners;
+
 	AFINCodeableSplitter();
+
+	// Begin IFINSignalSender
+	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
+	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
+	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
+	// End IFINSignalSender
 
 	// Begin AFGBuildable
 	virtual void Factory_Tick(float dt) override;

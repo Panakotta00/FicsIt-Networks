@@ -17,7 +17,7 @@ namespace FicsItKernel {
 		if (getState() == RUNNING) processor->tick(deltaSeconds);
 	}
 
-	FileSystem::FileSystemRoot* KernelSystem::getFileSystem() {
+	FicsItFS::Root* KernelSystem::getFileSystem() {
 		if (getState() == RUNNING) return &filesystem;
 		return nullptr;
 	}
@@ -50,12 +50,11 @@ namespace FicsItKernel {
 
 	void KernelSystem::addDrive(AFINFileSystemState* drive) {
 		// create & assign device from drive
-		auto device = drive->createDevice();
-		drives[drive] = TCHAR_TO_UTF8(*drive->ID.ToString());
+		drives[drive] = drive->createDevice();
 
-		// check state and add device and drive to filesystem
-		if (getState() != RUNNING) {
-			devDevice->addDevice(driveToDevice[drive] = drive->createDevice(), TCHAR_TO_UTF8(*drive->ID.ToString()));
+		// add drive to devDevice
+		if (devDevice.isValid()) {
+			devDevice->addDevice(drives[drive], TCHAR_TO_UTF8(*drive->ID.ToString()));
 		}
 	}
 
@@ -64,13 +63,19 @@ namespace FicsItKernel {
 		auto s = drives.find(drive);
 		if (s == drives.end()) return;
 
-		// remove device from filesystem
-		auto device = driveToDevice.find(s->first);
-		devDevice->removeDevice(device->second);
+		// remove drive from devDevice
+		if (devDevice.isValid()) {
+			devDevice->removeDevice(s->second);
+		}
 
 		// remove drive from filesystem
-		driveToDevice.erase(device);
 		drives.erase(s);
+	}
+
+	bool KernelSystem::initFileSystem(FileSystem::Path path) {
+		if (getState() == RUNNING) {
+			return filesystem.mount(devDevice, path);
+		} else return false;
 	}
 
 	bool KernelSystem::start(bool reset) {
@@ -79,7 +84,10 @@ namespace FicsItKernel {
 			if (reset) {
 				if (!stop()) return false;
 			} else return false;
-		} else if (getProcessor() == nullptr) return false;
+		} else if (getProcessor() == nullptr) {
+			crash(KernelCrash("No processor set"));
+			return false;
+		}
 
 		// set state and clear kernel crash
 		state = RUNNING;
@@ -87,27 +95,14 @@ namespace FicsItKernel {
 
 		// reset whole system (filesystem, memory, processor, signal stuff)
 		filesystem = FicsItFS::Root();
-		devDevice = FileSystem::SRef<FicsItFS::DevDevice>(new FicsItFS::DevDevice());
 		memoryUsage = 0;
 		processor->reset();
 
-		// add drives to filesystem
-		auto drives = this->drives;
-		this->drives.clear();
+		// create & init devDevice
+		devDevice = new FicsItFS::DevDevice();
 		for (auto& drive : drives) {
-			addDrive(drive.first);
+			devDevice->addDevice(drive.second, TCHAR_TO_UTF8(*drive.first->ID.ToString()));
 		}
-
-		// create & mount root device
-		if (this->drives.size() > 0) {
-			// decide which and if a drive should get mounted
-		} else {
-			rootDevice = new FileSystem::MemDevice();
-		}
-		filesystem.mount(rootDevice, "/");
-
-		// mount devDevice
-		filesystem.mount(devDevice, "/dev");
 
 		// finish start
 		return true;
@@ -122,7 +117,6 @@ namespace FicsItKernel {
 
 		// clear filesystem
 		filesystem = FicsItFS::Root();
-		driveToDevice.clear();
 
 		// finish stop
 		return true;

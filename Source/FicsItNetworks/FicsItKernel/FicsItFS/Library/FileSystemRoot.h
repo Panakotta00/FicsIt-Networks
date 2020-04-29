@@ -15,11 +15,14 @@ namespace FileSystem {
 	class FileSystemRoot {
 	protected:
 		class RootListener : public Listener {
+			friend FileSystemRoot;
+
 		protected:
 			FileSystemRoot* root;
 
 		public:
 			RootListener(FileSystemRoot* root);
+			virtual ~RootListener();
 
 			virtual void onMounted(Path path, SRef<Device> device) override;
 			virtual void onUnmounted(Path path, SRef<Device> device) override;
@@ -47,6 +50,13 @@ namespace FileSystem {
 
 	public:
 		FileSystemRoot();
+		FileSystemRoot(const FileSystemRoot&) = delete;
+		FileSystemRoot(FileSystemRoot&& other);
+
+		virtual ~FileSystemRoot();
+
+		FileSystemRoot& operator=(const FileSystemRoot&) = delete;
+		FileSystemRoot& operator=(FileSystemRoot&& other);
 
 		/*
 		* Trys to open the node at the give path with the given mode

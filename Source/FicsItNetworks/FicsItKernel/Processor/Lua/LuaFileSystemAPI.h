@@ -7,7 +7,7 @@ extern "C" {
 }
 
 #include "Lua.h"
-#include "FicsItKernel/FicsItFS/Library/FileSystemRoot.h"
+#include "FicsItKernel/FicsItKernel.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -31,6 +31,6 @@ namespace FicsItKernel {
 		* @param[in]	filesystem	The filesystem you want to bind the api with.
 		* @param[in]	ctx			The lua state you want to add the FileSystem API to. Make sure the top stack entry is a table.
 		*/
-		void setupFileSystemAPI(FileSystem::FileSystemRoot* filesystem, lua_State* ctx);
+		void setupFileSystemAPI(KernelSystem* kernel, lua_State* ctx);
 	}
 }

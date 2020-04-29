@@ -1,10 +1,14 @@
 #include "LuaFileSystemAPI.h"
 
+#include "LuaInstance.h"
+
 #include "FicsItKernel/FicsItFS/FileSystem.h"
+#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
-	auto self = (FileSystem::FileSystemRoot*)lua_touserdata(L, lua_upvalueindex(1)); \
+	KernelSystem* kernel = *(KernelSystem**)lua_touserdata(L, lua_upvalueindex(1)); \
+	FicsItFS::Root* self = kernel->getFileSystem(); \
 	if (!self) return luaL_error(L, "component is invalid"); \
 	try {
 #define LuaEndFunc \
@@ -29,6 +33,25 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 
 namespace FicsItKernel {
 	namespace Lua {
+		LuaFunc(makeFileSystem)
+			std::string type = luaL_checkstring(L, 1);
+			std::string name = luaL_checkstring(L, 2);
+			FileSystem::SRef<FileSystem::Device> device;
+			if (type == "tmpfs") {
+				device = new FileSystem::MemDevice();
+			} else return luaL_argerror(L, 1, "No valid FileSystem Type");
+			if (!device.isValid()) luaL_argerror(L, 1, "Invalid Device");
+			FileSystem::SRef<FicsItFS::DevDevice> dev = self->getDevDevice();
+			lua_pushboolean(L, dev.isValid() ? dev->addDevice(device, name) : false);
+			return 1;
+		LuaEndFunc
+
+		LuaFunc(initFileSystem)
+			std::string path = luaL_checkstring(L, 1);
+			lua_pushboolean(L, kernel->initFileSystem(path));
+			return 1;
+		LuaEndFunc
+
 		LuaFunc(open)
 			std::string mode = "r";
 			if (lua_isstring(L, 2)) mode = lua_tostring(L, 2);
@@ -130,6 +153,8 @@ namespace FicsItKernel {
 		LuaEndFunc
 
 		static const luaL_Reg luaFileSystemLib[] = {
+			{"makeFileSystem", makeFileSystem},
+			{"initFileSystem", initFileSystem},
 			{"open", open},
 			{"createDir", createDir},
 			{"remove", remove},
@@ -264,10 +289,10 @@ namespace FicsItKernel {
 			new (f) LuaFile{std::move(file)};
 		}
 
-		void setupFileSystemAPI(FileSystem::FileSystemRoot* filesystem, lua_State * L) {
+		void setupFileSystemAPI(KernelSystem* kernel, lua_State * L) {
 			luaL_newlibtable(L, luaFileSystemLib);
-			auto& fs_ud = *(FileSystem::FileSystemRoot**)lua_newuserdata(L, sizeof(void*));
-			fs_ud = filesystem;
+			auto& fs_ud = *(KernelSystem**)lua_newuserdata(L, sizeof(void*));
+			fs_ud = kernel;
 			luaL_setfuncs(L, luaFileSystemLib, 1);
 			lua_setglobal(L, "filesystem");
 

@@ -64,6 +64,7 @@ public:
 
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
+	virtual bool NeedTransform_Implementation() override;
 	// End IFGSaveInterface
 };
 

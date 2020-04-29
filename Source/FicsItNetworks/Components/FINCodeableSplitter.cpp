@@ -1,29 +1,47 @@
 #include "FINCodeableSplitter.h"
 
 AFINCodeableSplitter::AFINCodeableSplitter() {
+	RootComponent->SetMobility(EComponentMobility::Static);
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
 	NetworkConnector->AddMerged(this);
 	NetworkConnector->SetupAttachment(RootComponent);
+	NetworkConnector->SetMobility(EComponentMobility::Static);
 
-	Input = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input");
-	Input->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
-	Input->SetupAttachment(RootComponent);
+	InputConnector = CreateDefaultSubobject<UFGFactoryConnectionComponent>("InputConnector");
+	InputConnector->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
+	InputConnector->SetupAttachment(RootComponent);
+	InputConnector->SetMobility(EComponentMobility::Static);
 	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
 	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
 	Output1->SetupAttachment(RootComponent);
+	Output1->SetMobility(EComponentMobility::Static);
 	Output2 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output2");
 	Output2->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
 	Output2->SetupAttachment(RootComponent);
+	Output2->SetMobility(EComponentMobility::Static);
 	Output3 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output3");
 	Output3->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
 	Output3->SetupAttachment(RootComponent);
+	Output3->SetMobility(EComponentMobility::Static);
+}
+
+void AFINCodeableSplitter::AddListener_Implementation(FFINNetworkTrace listener) {
+	SignalListeners.Add(listener);
+}
+
+void AFINCodeableSplitter::RemoveListener_Implementation(FFINNetworkTrace listener) {
+	SignalListeners.Remove(listener);
+}
+
+TSet<FFINNetworkTrace> AFINCodeableSplitter::GetListeners_Implementation() {
+	return SignalListeners;
 }
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {
 	if (InputQueue.Num() < 2) {
 		FInventoryItem item;
 		float offset;
-		if (Input->Factory_GrabOutput(item, offset)) {
+		if (InputConnector->Factory_GrabOutput(item, offset)) {
 			InputQueue.Add(item);
 			netSig_ItemRequest(item.ItemClass);
 		}
@@ -85,7 +103,7 @@ TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(int output) {
 		return OutputQueue2;
 		break;
 	default:
-		return OutputQueue2;
+		return OutputQueue3;
 		break;
 	}
 }
@@ -100,6 +118,6 @@ const TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(const UFGFactoryCo
 	} else if (connection == Output2) {
 		return OutputQueue2;
 	} else {
-		return OutputQueue2;
+		return OutputQueue3;
 	}
 }

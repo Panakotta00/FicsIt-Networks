@@ -31,14 +31,14 @@ void UFINNetworkConnector::removeConnector(UFINNetworkConnector * connector) {
 			if (connector->Circuit->Nodes.Contains(n)) continue;
 			UObject* obj = n.Get();
 			auto comp = Cast<IFINNetworkComponent>(obj);
-			comp->Execute_NotifyNetworkUpdate(obj, 1, nodes1);
+			if (comp) comp->Execute_NotifyNetworkUpdate(obj, 1, nodes1);
 		}
 		Circuit->recalculate(this);
 		for (auto n : connector->Circuit->Nodes) {
 			if (Circuit->Nodes.Contains(n)) continue;
 			UObject* obj = n.Get();
 			auto comp = Cast<IFINNetworkComponent>(obj);
-			comp->Execute_NotifyNetworkUpdate(obj, 1, nodes2);
+			if (comp) comp->Execute_NotifyNetworkUpdate(obj, 1, nodes2);
 		}
 	}
 }
@@ -166,7 +166,8 @@ TSet<UObject*> UFINNetworkConnector::GetConnected_Implementation() const {
 }
 
 FFINNetworkTrace UFINNetworkConnector::FindComponent_Implementation(FGuid guid) const {
-	return IFINNetworkComponent::FindComponentByCircuit(guid, Execute_GetCircuit(this));
+	UFINNetworkCircuit* circuit = Execute_GetCircuit(this);
+	return FFINNetworkTrace((UObject*)this) / circuit->FindComponent(guid);
 }
 
 UFINNetworkCircuit * UFINNetworkConnector::GetCircuit_Implementation() const {

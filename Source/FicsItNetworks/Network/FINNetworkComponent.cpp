@@ -1,9 +1,5 @@
 #include "FINNetworkComponent.h"
 
-FFINNetworkTrace IFINNetworkComponent::FindComponentByCircuit(FGuid guid, UFINNetworkCircuit* circuit) const {
-	return FFINNetworkTrace(circuit->FindComponent(guid));
-}
-
 bool IFINNetworkComponent::HasNickByNick(FString nick, FString has) const {
 	TSet<FString> has_nicks;
 	do {

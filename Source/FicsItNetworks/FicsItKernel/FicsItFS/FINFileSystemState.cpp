@@ -21,10 +21,6 @@ bool AFINFileSystemState::ShouldSave_Implementation() const {
 	return true;
 }
 
-/*bool AFINFileSystemState::ShouldSaveState() const {
-	return true;
-}*/
-
 FileSystem::SRef<FileSystem::Device> AFINFileSystemState::createDevice() const {
 	// get root fs path
 	std::filesystem::path root = std::filesystem::absolute(*UFGSaveSystem::GetSaveDirectoryPath());
@@ -36,12 +32,12 @@ FileSystem::SRef<FileSystem::Device> AFINFileSystemState::createDevice() const {
 }
 
 AFINFileSystemState* AFINFileSystemState::CreateState(UObject* WorldContextObject, int32 inCapacity, UFGInventoryComponent* inInventory, int32 inSlot) {
-	FVector loc{0,0,0};
-	FRotator rot{0,0,0};
-	auto efs = WorldContextObject->GetWorld()->SpawnActor<AFINFileSystemState>(loc, rot);
+	FVector loc = FVector::ZeroVector;
+	FRotator rot = FRotator::ZeroRotator;
+	AFINFileSystemState* efs = WorldContextObject->GetWorld()->SpawnActor<AFINFileSystemState>(loc, rot);
 	efs->Capacity = inCapacity;
 
-	auto statePtr = FSharedInventoryStatePtr::MakeShared(efs);
+	FSharedInventoryStatePtr statePtr = FSharedInventoryStatePtr::MakeShared(efs);
 	inInventory->SetStateOnIndex(inSlot, statePtr);
 	return efs;
 }

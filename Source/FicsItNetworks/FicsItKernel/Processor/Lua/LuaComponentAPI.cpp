@@ -25,12 +25,15 @@ namespace FicsItKernel {
 					auto count = lua_rawlen(L, i);
 					for (int j = 1; j <= count; ++j) {
 						lua_geti(L, i, j);
-						ids.push_back(luaL_checkstring(L, -1));
+						if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
+						ids.push_back(lua_tostring(L, -1));
 						lua_pop(L, 1);
 					}
 					lua_newtable(L);
-				} else ids.push_back(luaL_checkstring(L, i));
-
+				} else {
+					if (!lua_isstring(L, i)) return luaL_argerror(L, i, "is not string");
+					ids.push_back(lua_tostring(L, i));
+				}
 				int j = 0;
 				for (auto& id : ids) {
 					auto comp = LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork()->getComponentByID(id);
@@ -66,8 +69,8 @@ namespace FicsItKernel {
 
 			TArray<TSubclassOf<UFGItemDescriptor>> items;
 			UFGBlueprintFunctionLibrary::Cheat_GetAllDescriptors(items);
-			for (auto item : items) {
-				if (TCHAR_TO_UTF8(*UFGItemDescriptor::GetItemName(item).ToString()) == str) {
+			if (str) for (TSubclassOf<UFGItemDescriptor> item : items) {
+				if (IsValid(item) && UFGItemDescriptor::GetItemName(item).ToString() == FString(str)) {
 					newInstance(L, item);
 					return 1;
 				}

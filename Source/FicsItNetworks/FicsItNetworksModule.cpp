@@ -16,6 +16,7 @@
 #include "Network/Signals/FINSignal.h"
 #include "Network/FINNetworkConnector.h"
 #include "Network/FINNetworkAdapter.h"
+#include "ModuleSystem/FINModuleSystemPanel.h"
 
 #include "FicsItKernel/Network/SmartSignal.h"
 #include "FicsItKernel/Processor/Lua/LuaHooks.h"
@@ -47,28 +48,101 @@ public:
 };
 
 void GetDismantleRefund_Decl(IFGDismantleInterface*, TArray<FInventoryStack>&);
-void GetDismantleRefund_Def(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {}
-#pragma optimize( "", off )
 void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {
-	AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);
+	AFGBuildable* self = reinterpret_cast<AFGBuildable*>(disInt);
 	if (!self->IsA<AFINNetworkCable>()) {
 		TInlineComponentArray<UFINNetworkConnector*> components;
 		self->GetComponents(components);
 		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
 		self->GetComponents(adapters);
- 		for (auto& adapter_ref : adapters) {
+		TInlineComponentArray<UFINModuleSystemPanel*> panels;
+		self->GetComponents(panels);
+ 		for (UFINNetworkAdapterReference* adapter_ref : adapters) {
 			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
 				components.Add(adapter->Connector);
 			}
 		}
-		for (auto& connector : components) {
+		for (UFINNetworkConnector* connector : components) {
 			for (AFINNetworkCable* cable : connector->Cables) {
 				cable->Execute_GetDismantleRefund(cable, refund);
 			}
 		}
+		for (UFINModuleSystemPanel* panel : panels) {
+			panel->GetDismantleRefund(refund);
+		}
 	}
 }
-#pragma optimize( "", on )
+
+FCriticalSection MutexFactoryGrab;
+TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, int8> FactoryGrabsRunning;
+
+void LockFactoryGrab(UFGFactoryConnectionComponent* comp) {
+	MutexFactoryGrab.Lock();
+	++FactoryGrabsRunning.FindOrAdd(comp);
+	MutexFactoryGrab.Unlock();
+}
+
+bool UnlockFactoryGrab(UFGFactoryConnectionComponent* comp) {
+	MutexFactoryGrab.Lock();
+	int8* i = FactoryGrabsRunning.Find(comp);
+	bool valid = false;
+	if (i) {
+		--*i;
+		valid = (*i <= 0);
+		if (valid) FactoryGrabsRunning.Remove(comp);
+	}
+	MutexFactoryGrab.Unlock();
+	return valid;
+}
+
+void DoFactoryGrab(UFGFactoryConnectionComponent* c, FInventoryItem& item) {
+	FicsItKernel::Lua::MutexFactoryHooks.Lock();
+	FicsItKernel::Lua::FactoryHook* hook = FicsItKernel::Lua::factoryHooks.Find(c);
+
+	if (hook) {
+		hook->update();
+		hook->iperm.push(std::chrono::high_resolution_clock::now());
+		for (auto& c : hook->deleg) {
+			UObject* obj = *c;
+			if (obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, smartAsFINSig(new FicsItKernel::Network::SmartSignal("ItemTransfer", {item})), c);
+		}
+	}
+	FicsItKernel::Lua::MutexFactoryHooks.Unlock();
+}
+
+bool FactoryGrabHook_Decl(UFGFactoryConnectionComponent_Public*, FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>);
+void FactoryGrabHook(CallScope<decltype(&FactoryGrabHook_Decl)>& scope, UFGFactoryConnectionComponent_Public* c, FInventoryItem& item, float& offset, TSubclassOf<UFGItemDescriptor> type) {
+	LockFactoryGrab(c);
+	scope(c, item, offset, type);
+	if (UnlockFactoryGrab(c) && scope.getResult()) {
+		DoFactoryGrab(c, item);
+	}
+}
+
+bool FactoryGrabInternalHook_Decl(UFGFactoryConnectionComponent* c, FInventoryItem& item, TSubclassOf< UFGItemDescriptor > type);
+void FactoryGrabInternalHook(CallScope<decltype(&FactoryGrabInternalHook_Decl)>& scope, UFGFactoryConnectionComponent* c, FInventoryItem& item, TSubclassOf< UFGItemDescriptor > type) {
+	LockFactoryGrab(c);
+	scope(c, item, type);
+	if (UnlockFactoryGrab(c) && scope.getResult()) {
+		DoFactoryGrab(c, item);
+	}
+}
+
+void TickCircuitHook_Decl(UFGPowerCircuit_Public*, float);
+void TickCircuitHook(CallScope<decltype(&TickCircuitHook_Decl)>& scope, UFGPowerCircuit_Public* circuit, float dt) {
+	bool oldFused = circuit->IsFuseTriggered();
+	scope(circuit, dt);
+	bool fused = circuit->IsFuseTriggered();
+	if (oldFused != fused) try {
+		FicsItKernel::Lua::MutexPowerCircuitListeners.Lock();
+		auto listeners = FicsItKernel::Lua::powerCircuitListeners.Find(circuit);
+		if (listeners) for (auto& listener : *listeners) {
+			UObject* obj = *listener;
+			if (obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, smartAsFINSig(new FicsItKernel::Network::SmartSignal("PowerFuseChanged")), listener);
+		}
+		FicsItKernel::Lua::MutexPowerCircuitListeners.Unlock();
+	} catch (...) {}
+}
 
 void FFicsItNetworksModule::StartupModule(){
 	#ifndef WITH_EDITOR
@@ -90,34 +164,10 @@ void FFicsItNetworksModule::StartupModule(){
 		}
 	});
 
-	SUBSCRIBE_METHOD("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent_Public::Factory_GrabOutput, [](auto& scope, UFGFactoryConnectionComponent_Public* c, FInventoryItem& item, float& offset, TSubclassOf<UFGItemDescriptor> type) {
-		scope(c, item, offset, type);
-		if (scope.getResult()) {
-			auto hook = FicsItKernel::Lua::factoryHooks.Find(c);
+	SUBSCRIBE_METHOD("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent_Public::Factory_GrabOutput, &FactoryGrabHook);
+	SUBSCRIBE_METHOD("?Factory_Internal_GrabOutputInventory@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@V?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, &FactoryGrabInternalHook);
 
-			if (hook) {
-				hook->update();
-				hook->iperm.push(std::chrono::high_resolution_clock::now());
-				for (auto& c : hook->deleg) {
-					auto listener = Cast<IFINSignalListener>(*c);
-					if (listener) listener->HandleSignal(smartAsFINSig(new FicsItKernel::Network::SmartSignal("ItemTransfer", item.ItemClass)), c);
-				}
-			}
-		}
-	});
-
-	SUBSCRIBE_METHOD("?TickCircuit@UFGPowerCircuit@@MEAAXM@Z", UFGPowerCircuit_Public::TickCircuit, [](auto& scope, UFGPowerCircuit_Public* circuit, float dt) {
-		bool oldFused = circuit->IsFuseTriggered();
-		scope(circuit, dt);
-		bool fused = circuit->IsFuseTriggered();
-		if (oldFused != fused) try {
-			auto listeners = FicsItKernel::Lua::powerCircuitListeners.Find(circuit);
-			if (listeners) for (auto& listener : *listeners) {
-				auto l = Cast<IFINSignalListener>(*listener);
-				if (l) l->HandleSignal(smartAsFINSig(new FicsItKernel::Network::SmartSignal("PowerFuseChanged")), listener);
-			}
-		} catch (...) {}
-	});
+	SUBSCRIBE_METHOD("?TickCircuit@UFGPowerCircuit@@MEAAXM@Z", UFGPowerCircuit_Public::TickCircuit, TickCircuitHook);
 
 	SUBSCRIBE_METHOD("?UpdateBestUsableActor@AFGCharacterPlayer@@IEAAXXZ", AFGCharacterPlayer_Public::UpdateBestUsableActor, [](auto& scope, AFGCharacterPlayer_Public* self) {
 		if (!UFINComponentUtility::bAllowUsing) scope.Cancel();
@@ -130,26 +180,33 @@ void FFicsItNetworksModule::StartupModule(){
 		self->GetComponents(connectors);
 		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
 		self->GetComponents(adapters);
-		for (auto& adapter_ref : adapters) {
+		TInlineComponentArray<UFINModuleSystemPanel*> panels;
+		self->GetComponents(panels);
+		for (UFINNetworkAdapterReference* adapter_ref : adapters) {
 			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
 				connectors.Add(adapter->Connector);
 			}
 		}
-		for (auto& connector : connectors) {
+		for (UFINNetworkConnector* connector : connectors) {
 			for (AFINNetworkCable* cable : connector->Cables) {
 				cable->Execute_Dismantle(cable);
 			}
 		}
-		for (auto& adapter_ref : adapters) {
+		for (UFINNetworkAdapterReference* adapter_ref : adapters) {
 			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
 				adapter->Destroy();
 			}
 		}
+		for (UFINModuleSystemPanel* panel : panels) {
+			TArray<AActor*> modules;
+			panel->GetModules(modules);
+			for (AActor* module : modules) {
+				module->Destroy();
+			}
+		}
 	});
 
-	SUBSCRIBE_METHOD("?GetDismantleRefund_Implementation@AFGBuildableFactory@@UEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund_Def);
-	SUBSCRIBE_METHOD("?GetDismantleRefund_Implementation@AFGBuildableGeneratorFuel@@UEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund_Def);
-	SUBSCRIBE_METHOD("?GetDismantleRefund_Implementation@AFGBuildable@@UEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
+	SUBSCRIBE_METHOD("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
 
 	AFINNetworkAdapter::RegisterAdapterSettings();
 }

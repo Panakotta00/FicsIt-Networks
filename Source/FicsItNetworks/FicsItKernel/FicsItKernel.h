@@ -31,14 +31,12 @@ namespace FicsItKernel {
 		KernelCrash kernelCrash;
 		std::int32_t memoryCapacity = 0;
 		std::int32_t memoryUsage = 0;
-		std::unique_ptr<Processor> processor;
+		std::unique_ptr<Processor> processor = nullptr;
 		FicsItFS::Root filesystem;
-		FileSystem::SRef<FicsItFS::DevDevice> devDevice;
-		FileSystem::SRef<FileSystem::Device> rootDevice;
-		std::unordered_map<AFINFileSystemState*, std::string> drives;
-		std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> driveToDevice;
-		std::unique_ptr<Network::NetworkController> network;
-		UWorld* world;
+		FileSystem::SRef<FicsItFS::DevDevice> devDevice = nullptr;
+		std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> drives;
+		std::unique_ptr<Network::NetworkController> network = nullptr;
+		UWorld* world = nullptr;
 
 	public:
 		/**
@@ -67,7 +65,7 @@ namespace FicsItKernel {
 		 *
 		 * @return	returns the current running filesystem as pointer
 		 */
-		FileSystem::FileSystemRoot* getFileSystem();
+		FicsItFS::Root* getFileSystem();
 
 		/**
 		 * Sets the memory capacity to the given value.
@@ -127,8 +125,17 @@ namespace FicsItKernel {
 		void removeDrive(AFINFileSystemState* drive);
 
 		/**
+		 * Mounts the currently used devDevice to the given path in the currently used file system.
+		 *
+		 * @param	path	path were the DevDevice should get mounted to
+		 * @return	true if it was able to mount the DevDevice, fals if not (f.e. when the DevDevice got already mounted in this run state)
+		 */
+		bool initFileSystem(FileSystem::Path path);
+
+		/**
 		 * Starts the system.
 		 * If the system is already running, resets the system if given reset is set.
+		 * Crashes the system if no processor is set.
 		 *
 		 * @param	reset	set it to true if you want to allow a system reset
 		 * @return	returns flase if system is already running and reset is not set, else it returns true

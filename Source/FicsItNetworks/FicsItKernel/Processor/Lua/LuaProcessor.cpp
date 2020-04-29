@@ -39,6 +39,16 @@ namespace FicsItKernel {
 			newInstance(L, obj);
 		}
 
+		void LuaSignalReader::WriteAbstract(const void* obj, const std::string& id) {
+			if (id == "InventoryItem") {
+				luaStruct(L, *(const FInventoryItem*)obj);
+			} else if (id == "ItemAmount") {
+				luaStruct(L, *(const FItemAmount*)obj);
+			} else if (id == "InventoryStack") {
+				luaStruct(L, *(const FInventoryStack*)obj);
+			}
+		}
+
 		LuaProcessor* LuaProcessor::currentProcessor = nullptr;
 
 		LuaProcessor* LuaProcessor::getCurrentProcessor() {
@@ -46,6 +56,7 @@ namespace FicsItKernel {
 		}
 
 		void luaHook(lua_State *L, lua_Debug* ar) {
+			lua_gc(L, LUA_GCCOLLECT, 0);
 			auto kernel = LuaProcessor::getCurrentProcessor()->getKernel();
 			kernel->recalculateResources(KernelSystem::PROCESSOR);
 			lua_yield(L, 0);
@@ -107,6 +118,8 @@ namespace FicsItKernel {
 
 			luaL_loadstring(luaState, code.c_str());
 			lua_sethook(luaState, &luaHook, LUA_MASKCOUNT, speed);
+			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
+			// TODO: Check if we actually want to use this or the manual gc call
 		}
 
 		std::int64_t LuaProcessor::getMemoryUsage(bool recalc) {
@@ -124,7 +137,7 @@ namespace FicsItKernel {
 
 			auto stdio = LuaProcessor::getCurrentProcessor()->getKernel()->getFileSystem()->open("/dev/stdio", FileSystem::APPEND);
 			if (stdio) {
-				*stdio << log.c_str();
+				//*stdio << log.c_str();
 				stdio->close();
 			}
 
@@ -143,7 +156,7 @@ namespace FicsItKernel {
 			setupHooks(L);
 			setupComponentAPI(L);
 			setupEventAPI(L);
-			setupFileSystemAPI(getKernel()->getFileSystem(), L);
+			setupFileSystemAPI(getKernel(), L);
 		}
 
 		void LuaProcessor::setCode(const std::string& code) {

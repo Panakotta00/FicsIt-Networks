@@ -1,41 +1,104 @@
 #include "NetworkTrace.h"
 
 #include "FGPowerConnectionComponent.h"
+#include "FGPowerInfoComponent.h"
 #include "FGPowerCircuit.h"
+
+#include "Network/FINNetworkConnector.h"
+#include "Network/FINNetworkCircuit.h"
 
 #define StepFuncName(A, B) Step ## _ ## A ## _ ## B
 #define StepRegName(A, B) StepReg ## _ ## A ## _ ## B
+#define StepRegSigName(A, B) StepRegSig ## _ ## A ## _ ## B
 #define StepFuncSig(A, B) bool StepFuncName(A, B)(UObject* oA, UObject* oB)
+#define StepFuncSigReg(A, B) \
+	std::pair<std::pair<UClass*, UClass*>, TraceStep*> StepRegSigName(A, B)() { \
+		return {{A::StaticClass(), B::StaticClass()}, new TraceStep(&StepFuncName(A, B))}; \
+	}
 #define Step(CA, CB) \
 	StepFuncSig(CA, CB); \
-	TraceStepRegisterer StepRegName(CA, CB)(CA::StaticClass(), CB::StaticClass(), &StepFuncName(CA, CB)); \
+	StepFuncSigReg(CA, CB) \
+	TraceStepRegisterer StepRegName(CA, CB)(&StepRegSigName(CA, CB)); \
 	StepFuncSig(CA, CB) { \
 		CA* A = Cast<CA>(oA); \
 		CB* B = Cast<CB>(oB);
 
 namespace FicsItKernel {
 	namespace Network {
+		std::unique_ptr<TraceStep> NetworkTrace::fallbackTraceStep;
+		std::vector<std::pair<std::pair<UClass*, UClass*>, TraceStep*>(*)()> NetworkTrace::toRegister;
+		std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>> NetworkTrace::traceSteps;
+		std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>> NetworkTrace::interfaceTraceSteps;
+		
 		class TraceStepRegisterer {
 		public:
-			TraceStepRegisterer(UClass* A, UClass* B, bool(*func)(UObject*, UObject*)) {
-				NetworkTrace::registerTraceStep(A, B, new TraceStep(func));
+			TraceStepRegisterer(std::pair<std::pair<UClass*, UClass*>, TraceStep*>(*regSig)()) {
+				NetworkTrace::toRegister.push_back(regSig);
 			}
 		};
 
-		std::unique_ptr<TraceStep> NetworkTrace::fallbackTraceStep;
-		std::map<std::pair<UClass*, UClass*>, std::unique_ptr<TraceStep>> NetworkTrace::traceSteps;
-
-		void NetworkTrace::registerTraceStep(UClass* A, UClass* B, TraceStep* step) {
-			traceSteps[{A, B}] = std::unique_ptr<TraceStep>(step);
-		}
-		
-		TraceStep* NetworkTrace::findTraceStep(UClass* A, UClass* B) {
-			auto step = traceSteps.find({A, B});
-			if (step == traceSteps.end()) {
-				// no valid trace step found
-				return fallbackTraceStep.get();
+		class TraceRegisterSteps {
+		public:
+			TraceRegisterSteps() {
+				for (auto& stepSig : NetworkTrace::toRegister) {
+					auto step = stepSig();
+					TraceStep* tStep = step.second;
+					UClass* A = step.first.first;
+					UClass* B = step.first.second;
+					std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>>* AMap;
+					if (A->GetSuperClass() == UInterface::StaticClass()) AMap = &NetworkTrace::traceSteps;
+					else AMap = &NetworkTrace::interfaceTraceSteps;
+					std::map<UClass*, std::unique_ptr<TraceStep>>* BMap;
+					if (B->GetSuperClass() == UInterface::StaticClass()) BMap = &(*AMap)[A].second;
+					else BMap = &(*AMap)[A].first;
+					(*BMap)[B] = std::unique_ptr<TraceStep>(tStep);
+				}
+				NetworkTrace::toRegister.clear();
 			}
-			return step->second.get();
+		};
+		
+		TraceStep* findTraceStep2(std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>& stepList, UClass* B) {
+			UClass* Bi = B;
+			while (Bi && Bi != UObject::StaticClass()) {
+				auto stepB = stepList.first.find(Bi);
+				if (stepB != stepList.first.end()) {
+					return stepB->second.get();
+				}
+				Bi = Bi->GetSuperClass();
+			}
+
+			for (FImplementedInterface& interface : B->Interfaces) {
+				auto stepB = stepList.second.find(interface.Class);
+				if (stepB != stepList.second.end()) {
+					return stepB->second.get();
+				}
+			}
+
+			return nullptr;
+		}
+
+		TraceStep* NetworkTrace::findTraceStep(UClass* A, UClass* B) {
+			UClass* Ai = A;
+			while (Ai && Ai != UObject::StaticClass()) {
+				auto stepA = traceSteps.find(Ai);
+				if (stepA != traceSteps.end()) {
+					auto& stepAList = stepA->second;
+					TraceStep* step = findTraceStep2(stepAList, B);
+					if (step) return step;
+				}
+				Ai = Ai->GetSuperClass();
+			}
+			
+			for (FImplementedInterface& interface : A->Interfaces) {
+				auto stepA = traceSteps.find(interface.Class);
+				if (stepA != traceSteps.end()) {
+					auto& stepAList = stepA->second;
+					TraceStep* step = findTraceStep2(stepAList, B);
+					if (step) return step;
+				}
+			}
+
+			return fallbackTraceStep.get();
 		}
 
 		NetworkTrace::NetworkTrace(const NetworkTrace& trace) {
@@ -68,7 +131,9 @@ namespace FicsItKernel {
 			return *this;
 		}
 
-		NetworkTrace::NetworkTrace() : NetworkTrace(nullptr) {}
+		NetworkTrace::NetworkTrace() : NetworkTrace(nullptr) {
+			TraceRegisterSteps regSteps;
+		}
 
 		NetworkTrace::NetworkTrace(UObject* obj) : obj(obj) {}
 
@@ -96,11 +161,7 @@ namespace FicsItKernel {
 
 		UObject* NetworkTrace::operator*() const {
 			UObject* B = obj.Get();
-			if (prev && step) {
-				UObject* A = **prev;
-				if (!IsValid(A) || !IsValid(B)) return nullptr;
-				return (*step)(A, B) ? B : nullptr;
-			} else if (IsValid(B)) {
+			if (isValid() && IsValid(B)) {
 				return B;
 			} else {
 				return nullptr;
@@ -145,6 +206,19 @@ namespace FicsItKernel {
 			return trace;
 		}
 
+		bool NetworkTrace::isValid() const {
+			UObject* A = obj.Get();
+			if (!IsValid(A)) return false;
+			if (prev && step) {
+				UObject* B = prev->obj.Get();
+				if (!IsValid(B) || !(*step)(A, B)) return false;
+			}
+			if (prev) {
+				return prev->isValid();
+			}
+			return true;
+		}
+
 		bool NetworkTrace::isEqualObj(const NetworkTrace& other) const {
 			return obj == other.obj;
 		}
@@ -171,6 +245,34 @@ namespace FicsItKernel {
 		
 		Step(UFGPowerConnectionComponent, UFGPowerCircuit)
 			return A->GetCircuitID() == B->GetCircuitID();
+		}
+		Step(UFGPowerCircuit, UFGPowerConnectionComponent)
+			return A->GetCircuitID() == B->GetCircuitID();
+		}
+
+		Step(UFGPowerInfoComponent, UFGPowerCircuit)
+			return A->GetPowerCircuit()->GetCircuitID() == B->GetCircuitID();
+		}
+		Step(UFGPowerCircuit, UFGPowerInfoComponent)
+			return A->GetCircuitID() == B->GetPowerCircuit()->GetCircuitID();
+		}
+
+		Step(UFGPowerInfoComponent, UFGPowerConnectionComponent)
+			return A == B->GetPowerInfo();
+		}
+		Step(UFGPowerConnectionComponent, UFGPowerInfoComponent)
+			return A->GetPowerInfo() == B;
+		}
+
+		Step(UFINNetworkComponent, UFINNetworkComponent)
+			return IFINNetworkComponent::Execute_GetCircuit(oA)->HasNode(oB);
+		}
+
+		Step(UFINNetworkComponent, UFINNetworkCircuit)
+			return B->HasNode(oA);
+		}
+		Step(UFINNetworkCircuit, UFINNetworkComponent)
+			return A->HasNode(oB);
 		}
 	}
 }

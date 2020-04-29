@@ -12,7 +12,7 @@ class AFINNetworkPowerSwitch : public AFGBuildable {
 	GENERATED_BODY()
 
 public:
-	bool bHasChanged;
+	bool bConnectedHasChanged;
 
 	UPROPERTY(BlueprintReadOnly, SaveGame, Category="NetworkPowerSwitch")
 		bool bConnected;
@@ -29,7 +29,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "NetworkPowerSwitch")
 		UFGPowerInfoComponent* PowerInfo2;
 
-	UPROPERTY(VisibleAnywhere, Category = "NetworkPowerSwitch")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "NetworkPowerSwitch")
 		UFINNetworkConnector* NetworkConnector;
 
 	AFINNetworkPowerSwitch();

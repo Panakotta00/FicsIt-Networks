@@ -54,9 +54,11 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 			} else {
 				kernel->setProcessor(nullptr);
 			}
+			Panel->AllowedModules.Remove(AFINComputerProcessor::StaticClass());
 		} else {
 			if (kernel->getProcessor()) kernel->setProcessor(nullptr);
 			else recalculateKernelResources();
+			if (!kernel->getProcessor()) Panel->AllowedModules.Add(AFINComputerProcessor::StaticClass());
 		}
 	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
 		kernel->setCapacity(kernel->getCapacity() + (((added) ? 1 : -1) * memory->GetCapacity()));

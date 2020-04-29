@@ -119,12 +119,13 @@ namespace FicsItKernel {
 		// Begin UFGInventoryComponent
 		
 		LuaLibFunc(UFGInventoryComponent, getStack)
-			FInventoryStack stack;
+			FInventoryStack* stack = new FInventoryStack();
 			for (int i = 1; i <= args; ++i) {
-				if (self->GetStackFromIndex((int)lua_tointeger(L, i), stack)) {
-					luaStruct(L, stack);
+				if (self->GetStackFromIndex((int)lua_tointeger(L, i), *stack)) {
+					luaStruct(L, *stack);
 				} else lua_pushnil(L);
 			}
+			delete stack;
 
 			return args;
 		}

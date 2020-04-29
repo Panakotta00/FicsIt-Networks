@@ -22,6 +22,7 @@ namespace FicsItKernel {
 			virtual void operator<<(bool b) override;
 			virtual void operator<<(UObject* obj) override;
 			virtual void operator<<(const Network::NetworkTrace& obj) override;
+			virtual void WriteAbstract(const void* obj, const std::string& id) override;
 		};
 
 		class LuaProcessor : public Processor {

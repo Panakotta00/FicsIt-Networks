@@ -30,6 +30,21 @@ FileSystem::FileSystemRoot::FileSystemRoot() {
 	listener = new RootListener(this);
 }
 
+FileSystem::FileSystemRoot::FileSystemRoot(FileSystemRoot&& other) {
+	*this = std::move(other);
+}
+
+FileSystem::FileSystemRoot::~FileSystemRoot() {}
+
+FileSystemRoot& FileSystem::FileSystemRoot::operator=(FileSystemRoot&& other) {
+	mounts = other.mounts;
+	cache = other.cache;
+	listeners = other.listeners;
+	listener = other.listener;
+	listener->root = this;
+	return *this;
+}
+
 SRef<FileStream> FileSystemRoot::open(Path path, FileMode mode) {
 	Path pending = "";
 	auto device = getDevice(path, pending);
@@ -243,6 +258,7 @@ void FileSystemRoot::removeListener(WRef<Listener> listener) {
 
 FileSystemRoot::RootListener::RootListener(FileSystemRoot * root) : root(root) {}
 
+FileSystem::FileSystemRoot::RootListener::~RootListener() {}
 
 void FileSystemRoot::RootListener::onMounted(Path path, SRef<Device> device) {
 	for (auto i = root->cache.begin(); i != root->cache.end(); i++) if (i->first.startsWith(path)) root->cache.erase(i--);
