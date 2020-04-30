@@ -110,7 +110,7 @@ Parameters::
 |if object should get removed recursively
 |===
 
-=== `move(string from, string to)`
+=== `bool move(string from, string to)`
 
 Moves the filesystem object from the given path to the other given path.
 
@@ -128,7 +128,44 @@ Parameters::
 
 |to
 |string
-|path to the folder the filesystem object should get moved to
+|path to the filesystem object the target should get moved to
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns if it was able to move the node
+|===
+
+=== `array childs(string path)`
+
+Lists all children of this node. (f.e. items in a folder)
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path to the filesystem object you want to get the childs from
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|array
+|array
+|array of string which are the names of the childs
 |===
 
 === `bool exists(string path)`

@@ -21,11 +21,7 @@ namespace FicsItKernel {
 
 		Network::NetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
 			if (!lua_istable(L, index)) return Network::NetworkTrace();
-			luaL_getmetatable(L, INSTANCE);
-			bool failed = false;
-			if (!lua_compare(L, index, -1, LUA_OPEQ)) failed = true;
-			lua_pop(L, 1);
-			if (failed) return Network::NetworkTrace();
+
 			lua_getfield(L, index, "__object");
 			auto instance = (LuaInstance*)luaL_checkudata(L, -1, INSTANCE_REF);
 			lua_pop(L, 1);
@@ -37,11 +33,7 @@ namespace FicsItKernel {
 
 		UClass* getClassInstance(lua_State* L, int index, UClass* clazz) {
 			if (!lua_istable(L, index)) return nullptr;
-			luaL_getmetatable(L, CLASS_INSTANCE);
-			bool failed = false;
-			if (!lua_compare(L, index, -1, LUA_OPEQ)) failed = true;
-			lua_pop(L, 1);
-			if (failed) return nullptr;
+			
 			lua_getfield(L, index, "__object");
 			auto o = (UClass*)luaL_checkudata(L, -1, CLASS_INSTANCE_REF);
 			lua_pop(L, 1);

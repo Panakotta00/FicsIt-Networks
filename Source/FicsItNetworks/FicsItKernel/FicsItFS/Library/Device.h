@@ -107,7 +107,6 @@ namespace FileSystem {
 			virtual void onNodeRenamed(Path newPath, Path oldPath, NodeType type) override;
 		};
 
-		size_t capacity;
 		size_t used = 0;
 		bool usedValid = false;
 		SRef<ByteCountedDeviceListener> byteCountedDeviceListener;
@@ -119,6 +118,8 @@ namespace FileSystem {
 		SizeCheckFunc checkSize;
 
 	public:
+		size_t capacity;
+
 		ByteCountedDevice(size_t capacity = 0);
 
 		virtual size_t getSize() const = 0;
@@ -135,10 +136,10 @@ namespace FileSystem {
 	protected:
 		SRef<MemDirectory> root;
 
-		virtual size_t getSize() const override;
-
 	public:
 		MemDevice(size_t capcity = 0);
+
+		virtual size_t getSize() const override;
 
 		virtual SRef<FileStream> open(Path path, FileMode mode) override;
 		virtual SRef<Directory> createDir(Path path, bool createTree = false) override;

@@ -56,7 +56,7 @@ SRef<Directory> FileSystemRoot::createDir(Path path, bool createTree) {
 	Path pending = "";
 	auto device = getDevice(path.prev(), pending);
 	if (!device.isValid()) return nullptr;
-	return device->createDir(pending);
+	return device->createDir(pending, createTree);
 }
 
 bool FileSystemRoot::remove(Path path, bool recursive) {
@@ -166,7 +166,12 @@ int FileSystemRoot::move(Path from, SRef<Directory> prevFrom, Path to, bool recu
 		SRef<Directory> tDir = t;
 		if (tDir.isValid()) {
 			t = tDir->createSubdir(from.getFinal());
-			to = to / from.getFinal();
+			if (dynamic_cast<File*>(f.get())) {
+				t = tDir->createFile(pendingTo.getFinal());
+			} else if (dynamic_cast<Directory*>(f.get())) {
+				t = tDir->createSubdir(pendingTo.getFinal());
+			}
+			to = to / pendingTo.getFinal();
 		}
 	}
 	if (!t.isValid()) return 1;

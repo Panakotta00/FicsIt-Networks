@@ -18,7 +18,7 @@ namespace FileSystem {
 		FILE_NOTIFY_INFORMATION info[16];
 	};
 
-	WindowsFileWatcher::WindowsFileWatcher(const std::filesystem::path& path, std::function<void(int, NodeType, Path, Path)> event) : eventFunc(eventFunc), realPath(path) {
+	WindowsFileWatcher::WindowsFileWatcher(const std::filesystem::path& path, std::function<void(int, NodeType, Path, Path)> event) : eventFunc(event), realPath(path) {
 		watcherInfo = new DiskDeviceWatcher();
 		watcherInfo->watcher = ::CreateFile(path.wstring().c_str(),
 			FILE_LIST_DIRECTORY,

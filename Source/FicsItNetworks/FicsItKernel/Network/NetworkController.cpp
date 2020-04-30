@@ -24,7 +24,7 @@ namespace FicsItKernel {
 
 		std::shared_ptr<Signal> NetworkController::popSignal(NetworkTrace& sender) {
 			if (getSignalCount() < 1) return nullptr;
-			auto sig = signals.back();
+			auto sig = signals.front();
 			signals.pop();
 			sender = sig.second;
 			return sig.first;

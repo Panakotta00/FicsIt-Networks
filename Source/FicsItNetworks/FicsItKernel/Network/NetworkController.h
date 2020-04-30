@@ -89,8 +89,8 @@ namespace FicsItKernel {
 			 * Should only get used by the kernel modules to emit signals.
 			 */
 			template<typename... Ts>
-			void pushSignalKernel(const std::string& signalName, Ts&&... args) {
-				pushSignal(std::shared_ptr<Signal>(new SmartSignal(signalName, args...)), NetworkTrace(component));
+			void pushSignalKernel(const std::string& signalName, Ts... args) {
+				pushSignal(std::shared_ptr<Signal>(new SmartSignal(signalName, {Network::VariaDicSignalElem(args)...})), NetworkTrace(component));
 			}
 		};
 	}

@@ -13,10 +13,9 @@
 namespace FicsItKernel {
 	namespace Lua {
 		void luaListen(lua_State* L, Network::NetworkTrace o) {
-			o.checkTrace();
 			auto net = LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork();
 			UObject* obj = *o;
-			if (!IsValid(obj)) return;
+			if (!IsValid(obj)) luaL_error(L, "object is not valid");
 			if (obj->Implements<UFINSignalSender>()) {
 				IFINSignalSender::Execute_AddListener(obj, o.reverse());
 				UFINSignalUtility::SetupSender(obj->GetClass());

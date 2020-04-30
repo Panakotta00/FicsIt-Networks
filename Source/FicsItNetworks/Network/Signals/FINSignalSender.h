@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Interface.h"
+#include "Function.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "FINSignal.h"

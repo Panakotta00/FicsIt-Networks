@@ -12,10 +12,8 @@ namespace FicsItKernel {
 		 * - preventing a seccond DevDevice to get mounted
 		 */
 		class Root : public FileSystem::FileSystemRoot {
-		protected:
-			std::int64_t memoryUsage;
-
 		public:
+
 			bool mount(FileSystem::SRef<FileSystem::Device> device, FileSystem::Path path);
 			bool unmount(FileSystem::Path path);
 

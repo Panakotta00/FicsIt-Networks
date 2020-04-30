@@ -17,7 +17,7 @@ FileSystem::SRef<FileSystem::FileStream> DevDevice::open(FileSystem::Path path, 
 
 FileSystem::SRef<FileSystem::Node> DevDevice::get(FileSystem::Path path) {
 	try {
-		return devices.at(path);
+		return new FileSystem::DeviceNode(devices.at(path.str()));
 	} catch (...) {
 		return nullptr;
 	}
@@ -58,4 +58,20 @@ bool DevDevice::removeDevice(FileSystem::SRef<FileSystem::Device> device) {
 		}
 	}
 	return false;
+}
+
+void DevDevice::updateCapacity(std::int64_t capacity) {
+	for (auto& device : devices) {
+		if (FileSystem::MemDevice* memDev = dynamic_cast<FileSystem::MemDevice*>(device.second.get())) {
+			memDev->capacity = memDev->getUsed() + capacity;
+		}
+	}
+}
+
+void DevDevice::tickListeners() {
+	for (auto& device : devices) {
+		if (FileSystem::DiskDevice* diskDev = dynamic_cast<FileSystem::DiskDevice*>(device.second.get())) {
+			diskDev->tickWatcher();
+		}
+	}
 }

@@ -20,6 +20,19 @@ namespace FicsItKernel {
 
 			bool addDevice(FileSystem::SRef<FileSystem::Device> device, const std::string& name);
 			bool removeDevice(FileSystem::SRef<FileSystem::Device> device);
+
+			/**
+			 * Iterates over every MemDevice added to the Device-List.
+			 * Updates their capacity to their current memory usage + given capacity.
+			 *
+			 * @param	capacity	new capacity buffer for all MemDevices
+			 */
+			void updateCapacity(std::int64_t capacity);
+
+			/**
+			 * Ticks all disk listeners
+			 */
+			void tickListeners();
 		};
 	}
 }

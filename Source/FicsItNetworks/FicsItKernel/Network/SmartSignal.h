@@ -196,7 +196,7 @@ namespace FicsItKernel {
 			SmartSignal(std::string name, const std::vector<VariaDicSignalElem>& args) : Signal(name), args(args) {}
 			
 			template<typename... Ts>
-			SmartSignal(std::string signalName, Ts&&... args) : SmartSignal(signalName, {args}) {}
+			SmartSignal(std::string signalName, Ts&&... args) : SmartSignal(signalName, {VariaDicSignalElem(args)...}) {}
 
 			virtual int operator>>(SignalReader& reader) const override;
 		};

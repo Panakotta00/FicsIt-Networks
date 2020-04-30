@@ -8,6 +8,7 @@
 #include "LuaComponentAPI.h"
 #include "LuaEventAPI.h"
 #include "LuaFileSystemAPI.h"
+#include "LuaComputerAPI.h"
 
 #include "SML/util/Logging.h"
 
@@ -157,6 +158,7 @@ namespace FicsItKernel {
 			setupComponentAPI(L);
 			setupEventAPI(L);
 			setupFileSystemAPI(getKernel(), L);
+			setupComputerAPI(L, getKernel());
 		}
 
 		void LuaProcessor::setCode(const std::string& code) {

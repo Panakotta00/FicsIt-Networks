@@ -14,6 +14,7 @@ namespace FicsItKernel {
 		SHUTOFF,
 		RUNNING,
 		CRASHED,
+		RESET
 	};
 
 	class KernelCrash : public std::exception {
@@ -21,6 +22,22 @@ namespace FicsItKernel {
 		KernelCrash(std::string what = "");
 
 		virtual ~KernelCrash();
+	};
+
+	class KernelSystem;
+	class KernelListener : public FileSystem::Listener {
+	private:
+		KernelSystem* parent;
+	
+	public:
+		KernelListener(KernelSystem* parent);
+
+		virtual void onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) override;
+		virtual void onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) override;
+		virtual void onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) override;
+		virtual void onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) override;
+		virtual void onNodeChanged(FileSystem::Path  path, FileSystem::NodeType type) override;
+		virtual void onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) override;
 	};
 
 	class KernelSystem {
@@ -37,6 +54,7 @@ namespace FicsItKernel {
 		std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> drives;
 		std::unique_ptr<Network::NetworkController> network = nullptr;
 		UWorld* world = nullptr;
+		FileSystem::SRef<KernelListener> listener;
 
 	public:
 		/**
@@ -143,6 +161,15 @@ namespace FicsItKernel {
 		bool start(bool reset);
 
 		/**
+		 * Resets the system.
+		 * This is like start(true) but it is capable of getting called within a system tick.
+		 * It basically stops the system and changes the state to reset. In the next tick the system will then get started again.
+		 *
+		 * @return	returns false if system was not able to get stopped
+		 */
+		bool reset();
+
+		/**
 		 * Stops the system.
 		 *
 		 * @return	returns false if system is already not running, else it returns true
@@ -187,14 +214,5 @@ namespace FicsItKernel {
 		 * @param	components	the registry of system components you want to recalculate.
 		 */
 		void recalculateResources(Recalc components);
-
-		/**
-		 * Emits a file system change signal
-		 *
-		 * @param	type	defines the actual change event in the FS: 0 fileCreated, 1 fileDeleted, 2 fileContentChanged, 3 fileRenamed, 4 dirCreated, 5 dirDeleted, 6 dirRenamed
-		 * @param	npath	the new path of the node
-		 * @param	opath	the old path of the node
-		 */
-		void signalFileSystemChange(int type, std::wstring npath, std::wstring opath);
 	};
 }

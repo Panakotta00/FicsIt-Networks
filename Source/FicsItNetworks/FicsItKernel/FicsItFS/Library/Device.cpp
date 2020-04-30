@@ -188,7 +188,7 @@ namespace FileSystem {
 		if (fs::exists(realPath / path)) {
 			if (fs::is_directory(realPath / path)) return get(path);
 			else return nullptr;
-		} else if (!createTree && !fs::is_directory(realPath / path.prev())) return nullptr;
+		}
 		if (createTree) {
 			fs::create_directories(realPath / path);
 		} else if (fs::is_directory(realPath / path.prev())) {

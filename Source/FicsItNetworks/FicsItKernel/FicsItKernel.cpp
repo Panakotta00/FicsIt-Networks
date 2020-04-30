@@ -9,12 +9,16 @@ namespace FicsItKernel {
 
 	KernelCrash::~KernelCrash() {}
 
-	KernelSystem::KernelSystem(UWorld* world) : world(world) {}
+	KernelSystem::KernelSystem(UWorld* world) : world(world), listener(new KernelListener(this)) {}
 
 	KernelSystem::~KernelSystem() {}
 
 	void KernelSystem::tick(float deltaSeconds) {
-		if (getState() == RUNNING) processor->tick(deltaSeconds);
+		if (getState() == RESET) if (!start(true)) return;
+		if (getState() == RUNNING) {
+			devDevice->tickListeners();
+			processor->tick(deltaSeconds);
+		}
 	}
 
 	FicsItFS::Root* KernelSystem::getFileSystem() {
@@ -95,6 +99,7 @@ namespace FicsItKernel {
 
 		// reset whole system (filesystem, memory, processor, signal stuff)
 		filesystem = FicsItFS::Root();
+		filesystem.addListener(listener);
 		memoryUsage = 0;
 		processor->reset();
 
@@ -106,6 +111,14 @@ namespace FicsItKernel {
 
 		// finish start
 		return true;
+	}
+
+	bool KernelSystem::reset() {
+		if (stop()) {
+			state = RESET;
+			return true;
+		}
+		return false;
 	}
 
 	bool KernelSystem::stop() {
@@ -137,6 +150,8 @@ namespace FicsItKernel {
 		memoryUsage += filesystem.getMemoryUsage(components & FILESYSTEM);
 
 		if (memoryUsage > memoryCapacity) crash({"out of memory"});
+		FileSystem::SRef<FicsItFS::DevDevice> dev = filesystem.getDevDevice();
+		if (dev) dev->updateCapacity(memoryCapacity - memoryUsage);
 	}
 
 	void KernelSystem::setNetwork(Network::NetworkController* controller) {
@@ -151,7 +166,29 @@ namespace FicsItKernel {
 		return memoryUsage;
 	}
 
-	void KernelSystem::signalFileSystemChange(int type, std::wstring npath, std::wstring opath) {
-		network->pushSignalKernel("FileSystemChange", type, npath, opath);
+	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
+
+	void KernelListener::onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 4, path.str());
+	}
+
+	void KernelListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 5, path.str());
+	}
+
+	void KernelListener::onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) {
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 0, path.str(), (int)type);
+	}
+
+	void KernelListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 1, path.str(), (int)type);
+	}
+
+	void KernelListener::onNodeChanged(FileSystem::Path path, FileSystem::NodeType type) {
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 2, path.str(), (int)type);
+	}
+
+	void KernelListener::onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) {
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 3, newPath.str(), oldPath.str(), (int)type);
 	}
 }

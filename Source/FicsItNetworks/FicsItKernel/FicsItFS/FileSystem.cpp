@@ -20,11 +20,12 @@ namespace FicsItKernel {
 		}
 
 		std::int64_t Root::getMemoryUsage(bool recalc) {
-			if (recalc) {
-				memoryUsage = 0;
-				for (auto m : mounts) {
-					FileSystem::SRef<FileSystem::MemDevice> tmpDev = m.second.first;
-					if (tmpDev.isValid()) memoryUsage += tmpDev->getUsed();
+			std::int64_t memoryUsage = 0;
+			for (auto m : mounts) {
+				FileSystem::SRef<FileSystem::MemDevice> tmpDev = m.second.first;
+				if (tmpDev.isValid()) {
+					if (recalc) memoryUsage += tmpDev->getSize();
+					else memoryUsage += tmpDev->getUsed();
 				}
 			}
 			return memoryUsage;

@@ -1,5 +1,7 @@
 #include "FINSignalSender.h"
 
+#include "Stack.h"
+
 void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	// get signal name
 	FString signalName = Stack.CurrentNativeFunction->GetName();
