@@ -2,6 +2,7 @@
 
 #include "FINComputerProcessor.h"
 #include "FINComputerMemory.h"
+#include "FINComputerDriveHolder.h"
 
 #include "FicsItKernel/Processor/Lua/LuaProcessor.h"
 
@@ -62,6 +63,13 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 		}
 	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
 		kernel->setCapacity(kernel->getCapacity() + (((added) ? 1 : -1) * memory->GetCapacity()));
+	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
+		holder->OnDriveUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
+		AFINFileSystemState* state = holder->GetDrive();
+		if (IsValid(state)) {
+			if (added) kernel->addDrive(state);
+			else kernel->removeDrive(state);
+		}
 	}
 }
 
@@ -109,4 +117,12 @@ void AFINComputerCase::recalculateKernelResources() {
 
 void AFINComputerCase::HandleSignal(FFINSignal signal, FFINNetworkTrace sender) {
 	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
+}
+
+void AFINComputerCase::OnDriveUpdate(bool added, AFINFileSystemState* drive) {
+	if (IsValid(drive)) {
+		kernel->addDrive(drive);
+	} else {
+		kernel->removeDrive(drive);
+	}
 }

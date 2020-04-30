@@ -5,7 +5,7 @@
 #include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 #include "FINComputerDriveHolder.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINDriveUpdate, AFINFileSystemState*, drive);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINDriveUpdate, bool, added, AFINFileSystemState*, drive);
 
 UCLASS()
 class AFINComputerDriveHolder : public AFINComputerModule {
@@ -24,6 +24,9 @@ public:
 	AFINFileSystemState* GetDrive();
 
 private:
+	UPROPERTY()
+	AFINFileSystemState* prev;
+
 	UFUNCTION()
 	void OnDriveInventoryUpdate(TSubclassOf<UFGItemDescriptor> drive, int32 count);
 };

@@ -27,5 +27,7 @@ AFINFileSystemState* AFINComputerDriveHolder::GetDrive() {
 }
 
 void AFINComputerDriveHolder::OnDriveInventoryUpdate(TSubclassOf<UFGItemDescriptor> drive, int32 count) {
-	OnDriveUpdate.Broadcast(GetDrive());
+	AFINFileSystemState* newState = GetDrive();
+	OnDriveUpdate.Broadcast(IsValid(newState), IsValid(newState) ? newState : prev);
+	prev = newState;
 }

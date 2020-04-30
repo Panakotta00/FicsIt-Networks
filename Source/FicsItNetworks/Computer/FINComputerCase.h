@@ -63,4 +63,8 @@ public:
 
 	UFUNCTION()
 	void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
+
+private:
+	UFUNCTION()
+	void OnDriveUpdate(bool added, AFINFileSystemState* drive);
 };
