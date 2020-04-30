@@ -120,7 +120,7 @@ void AFINComputerCase::HandleSignal(FFINSignal signal, FFINNetworkTrace sender) 
 }
 
 void AFINComputerCase::OnDriveUpdate(bool added, AFINFileSystemState* drive) {
-	if (IsValid(drive)) {
+	if (added) {
 		kernel->addDrive(drive);
 	} else {
 		kernel->removeDrive(drive);

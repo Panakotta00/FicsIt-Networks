@@ -35,7 +35,26 @@ namespace FicsItKernel {
 			} else return luaL_argerror(L, 1, "No valid FileSystem Type");
 			if (!device.isValid()) luaL_argerror(L, 1, "Invalid Device");
 			FileSystem::SRef<FicsItFS::DevDevice> dev = self->getDevDevice();
-			lua_pushboolean(L, dev.isValid() ? dev->addDevice(device, name) : false);
+			try {
+				lua_pushboolean(L, dev.isValid() ? dev->addDevice(device, name) : false);
+			} CatchExceptionLua
+			return 1;
+		}
+
+		LuaFunc(removeFileSystem)
+			std::string name = luaL_checkstring(L, 1);
+			FileSystem::SRef<FicsItFS::DevDevice> dev = self->getDevDevice();
+			if (dev.isValid()) {
+				try {
+					auto devices = dev->getDevices();
+					auto device = devices.find(name);
+					if (device != devices.end() && dynamic_cast<FileSystem::MemDevice*>(device->second.get())) {
+						lua_pushboolean(L, dev->removeDevice(device->second));
+						return 1;
+					}
+				} CatchExceptionLua
+			}
+			lua_pushboolean(L, false);
 			return 1;
 		}
 
@@ -66,25 +85,34 @@ namespace FicsItKernel {
 			auto path = luaL_checkstring(L, 1);
 			auto all = lua_toboolean(L, 2);
 			try {
-				self->createDir(path, all);
+				lua_pushboolean(L, self->createDir(path, all) == 0);
 			} CatchExceptionLua
-			return 0;
+			return 1;
 		}
 
 		LuaFunc(remove)
 			auto path = luaL_checkstring(L, 1);
 			bool all = lua_toboolean(L, 2);
 			try {
-				self->remove(path, all);
+				lua_pushboolean(L, self->remove(path, all));
 			} CatchExceptionLua
-			return 0;
+			return 1;
 		}
 
 		LuaFunc(move)
 			auto from = luaL_checkstring(L, 1);
 			auto to = luaL_checkstring(L, 2);
 			try {
-				lua_pushboolean(L, (bool)self->move(from, to));
+				lua_pushboolean(L, self->move(from, to) == 0);
+			} CatchExceptionLua
+			return 1;
+		}
+
+		LuaFunc(rename)
+			auto from = luaL_checkstring(L, 1);
+			auto to = luaL_checkstring(L, 2);
+			try {
+				lua_pushboolean(L, self->rename(from, to));
 			} CatchExceptionLua
 			return 1;
 		}
@@ -99,7 +127,7 @@ namespace FicsItKernel {
 
 		LuaFunc(childs)
 			auto path = luaL_checkstring(L, 1);
-			std::unordered_set<std::string> childs;
+			std::unordered_set<FileSystem::NodeName> childs;
 			try {
 				childs = self->childs(path);
 			} CatchExceptionLua
@@ -192,11 +220,13 @@ namespace FicsItKernel {
 
 		static const luaL_Reg luaFileSystemLib[] = {
 			{"makeFileSystem", makeFileSystem},
+			{"removeFileSystem", removeFileSystem},
 			{"initFileSystem", initFileSystem},
 			{"open", open},
 			{"createDir", createDir},
 			{"remove", remove},
 			{"move", move},
+			{"rename", rename},
 			{"exists", exists},
 			{"childs", childs},
 			{"isFile", isFile},

@@ -46,7 +46,7 @@ namespace FileSystem {
 		*/
 		SRef<Device> getDevice(Path path, Path& pending);
 
-		int move(Path from, SRef<Directory> prevFrom, Path to, bool recursive);
+		int moveInternal(Path from, Path to);
 
 	public:
 		FileSystemRoot();
@@ -92,7 +92,7 @@ namespace FileSystem {
 		* @param[in]	name	the new name of the node
 		* @return	returns true if it was able to rename the node
 		*/
-		bool rename(Path path, const std::string& name);
+		bool rename(Path path, const NodeName& name);
 
 		/*
 		* copies the from node to the to node
@@ -113,7 +113,7 @@ namespace FileSystem {
 		* @param[in]	recursive	true if you want to move a folder and its content
 		* @return	0 if move worked, 1 if was filly not able to move and 2 if it was able to move partially
 		*/
-		int move(Path from, Path to, bool recursive = false);
+		int move(Path from, Path to);
 
 		/*
 		* trys to get the node at the given path
@@ -129,7 +129,7 @@ namespace FileSystem {
 		* @param[in]	path	path to the node you want to get the childs form
 		* @return	returns a list of names
 		*/
-		std::unordered_set<std::string> childs(Path path);
+		std::unordered_set<NodeName> childs(Path path);
 
 		/*
 		* trys to mount the given device at teh given path

@@ -7,6 +7,100 @@ You can't access files outside the virtual filesystem. If you try to do so, the 
 
 == Functions
 
+=== `bool initFileSystem(string path)`
+
+Trys to mount the system DevDevice to the given location.
+
+The DevDevice is special Device holding DeviceNodes for all filesystems added to the system.
+(like TmpFS and drives). It is unmountable as well as getting mounted a seccond time.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path to the mountpoint were the dev device should get mounted to
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns if it was able to mount the DevDevice
+|===
+
+=== `bool makeFileSystem(string type, string name)`
+
+Trys to create a new file system of the given type with the given name.
+
+The created filesystem will be added to the system DevDevice.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|type
+|string
+|the type of the new filesystem
+
+- `tmpfs`
++
+A temporary filesystem only existing at runtime in the memory of your computer.
+All data will be lost when the system stops.
+
+|name
+|string
+|the name of the new filesystem you want to create
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns true if it was able to create the new filesystem
+|===
+
+=== `bool removeFileSystem(string name)`
+
+Trys to remove the filesystem with the given name from the system DevDevice.
+
+All mounts of the device will run invalid.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|name
+|string
+|the name of the new filesystem you want to remove
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns true if it was able to remove the new filesystem
+|===
+
 === `File open(string path, string mode)`
 
 Openes a file-stream and returns it as File-table.
@@ -65,13 +159,9 @@ Return Values::
 Nil if not able to open file in read only
 |===
 
-=== `createDir(string path, [bool full])`
+=== `bool createDir(string path)`
 
 Creates the folder path.
-
-If full is set creates the full path, if not, only tries to create the last folder.
-
-If the function is not able to create the last folder, f.e. when it already exists, the function will fail.
 
 Parameters::
 +
@@ -82,18 +172,22 @@ Parameters::
 |path
 |string
 |folder path the function should create
-
-|full
-|bool
-|true if the function should create the full tree
 |===
 
-=== `remove(string path, [bool recursive])`
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns if it was able to create the directory
+|===
+
+=== `bool remove(string path)`
 
 Removes the filesystem object at the given path.
-
-If recursive is set, also removes all child entries in folder.
-The function fails if recursive is not set and you try to remove a folder with child entries.
 
 Parameters::
 +
@@ -104,10 +198,17 @@ Parameters::
 |path
 |string
 |path to the filesystem object
+|===
 
-|recursive
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
 |bool
-|if object should get removed recursively
+|bool
+|returns if it was able to remove the node
 |===
 
 === `bool move(string from, string to)`
@@ -139,7 +240,37 @@ Return Values::
 
 |bool
 |bool
-|returns if it was able to move the node
+|returns true if it was able to move the node
+|===
+
+=== `bool rename(string path, string name)`
+
+Renames the filesystem object at the given path to the given name.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path to the filesystem object you want to rename
+
+|name
+|string
+|the new name for your filesystem object
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns true if it was able to rename the node
 |===
 
 === `array childs(string path)`

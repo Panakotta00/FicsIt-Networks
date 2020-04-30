@@ -53,12 +53,15 @@ namespace FicsItKernel {
 	}
 
 	void KernelSystem::addDrive(AFINFileSystemState* drive) {
+		// check if drive is added & return if found
+		if (drives.find(drive) != drives.end()) return;
+
 		// create & assign device from drive
 		drives[drive] = drive->createDevice();
 
 		// add drive to devDevice
 		if (devDevice.isValid()) {
-			devDevice->addDevice(drives[drive], TCHAR_TO_UTF8(*drive->ID.ToString()));
+			if (!devDevice->addDevice(drives[drive], TCHAR_TO_UTF8(*drive->ID.ToString()))) drives.erase(drive);
 		}
 	}
 
@@ -69,7 +72,7 @@ namespace FicsItKernel {
 
 		// remove drive from devDevice
 		if (devDevice.isValid()) {
-			devDevice->removeDevice(s->second);
+			if (!devDevice->removeDevice(s->second)) return;
 		}
 
 		// remove drive from filesystem

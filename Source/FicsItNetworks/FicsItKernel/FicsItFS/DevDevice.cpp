@@ -31,19 +31,19 @@ FileSystem::SRef<FileSystem::Directory> DevDevice::createDir(FileSystem::Path, b
 	return nullptr;
 }
 
-bool DevDevice::rename(FileSystem::Path path, const std::string & name) {
+bool DevDevice::rename(FileSystem::Path path, const FileSystem::NodeName& name) {
 	return false;
 }
 
-std::unordered_set<std::string> DevDevice::childs(FileSystem::Path path) {
-	std::unordered_set<std::string> list;
+std::unordered_set<FileSystem::NodeName> DevDevice::childs(FileSystem::Path path) {
+	std::unordered_set<FileSystem::NodeName> list;
 	for (auto device : devices) {
 		list.insert(device.first);
 	}
 	return list;
 }
 
-bool DevDevice::addDevice(FileSystem::SRef<FileSystem::Device> device, const std::string & name) {
+bool DevDevice::addDevice(FileSystem::SRef<FileSystem::Device> device, const FileSystem::NodeName& name) {
 	auto dev = devices.find(name);
 	if (dev != devices.end()) return false;
 	devices[name] = device;
@@ -58,6 +58,10 @@ bool DevDevice::removeDevice(FileSystem::SRef<FileSystem::Device> device) {
 		}
 	}
 	return false;
+}
+
+std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> FicsItKernel::FicsItFS::DevDevice::getDevices() {
+	return devices;
 }
 
 void DevDevice::updateCapacity(std::int64_t capacity) {

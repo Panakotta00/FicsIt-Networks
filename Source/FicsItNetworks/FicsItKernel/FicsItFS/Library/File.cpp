@@ -5,8 +5,8 @@ using namespace FileSystem;
 
 File::File() {}
 
-unordered_set<string> File::getChilds() const {
-	return unordered_set<string>();
+unordered_set<NodeName> File::getChilds() const {
+	return unordered_set<NodeName>();
 }
 
 MemFile::MemFile(ListenerListRef listeners, SizeCheckFunc sizeCheck) : File(), listeners(listeners), sizeCheck(sizeCheck) {}

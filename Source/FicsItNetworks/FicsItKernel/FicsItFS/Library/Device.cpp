@@ -117,7 +117,7 @@ namespace FileSystem {
 		return d->remove(path.getFinal(), recursive);
 	}
 
-	bool MemDevice::rename(Path path, const std::string& name) {
+	bool MemDevice::rename(Path path, const NodeName& name) {
 		SRef<Directory> d = get(path.prev());
 		if (!d.isValid()) return false;
 		return d->rename(path.getFinal(), name);
@@ -134,7 +134,7 @@ namespace FileSystem {
 		else return nullptr;
 	}
 
-	unordered_set<string> MemDevice::childs(Path path) {
+	unordered_set<NodeName> MemDevice::childs(Path path) {
 		auto n = get(path);
 		if (n.isValid()) return n->getChilds();
 		return {};
@@ -189,6 +189,7 @@ namespace FileSystem {
 			if (fs::is_directory(realPath / path)) return get(path);
 			else return nullptr;
 		}
+		
 		if (createTree) {
 			fs::create_directories(realPath / path);
 		} else if (fs::is_directory(realPath / path.prev())) {
@@ -208,7 +209,7 @@ namespace FileSystem {
 		}
 	}
 
-	bool DiskDevice::rename(Path path, const std::string& name) {
+	bool DiskDevice::rename(Path path, const NodeName& name) {
 		if (!fs::exists(realPath / path) || fs::exists(realPath / path.prev() / name) || path.getNodeCount() < 1) return false;
 		fs::rename(realPath / path, realPath / path.prev() / name);
 		tickWatcher();
@@ -225,8 +226,8 @@ namespace FileSystem {
 		return nullptr;
 	}
 
-	unordered_set<string> DiskDevice::childs(Path path) {
-		std::unordered_set<std::string> childs;
+	unordered_set<NodeName> DiskDevice::childs(Path path) {
+		std::unordered_set<NodeName> childs;
 		for (const auto& entry : fs::directory_iterator(realPath / path))
 			childs.insert(entry.path().filename().string());
 		return childs;
@@ -242,8 +243,8 @@ namespace FileSystem {
 		return SRef<FileStream>();
 	}
 
-	unordered_set<string> DeviceNode::getChilds() const {
-		return unordered_set<string>();
+	unordered_set<NodeName> DeviceNode::getChilds() const {
+		return unordered_set<NodeName>();
 	}
 
 	bool FileSystem::DeviceNode::isValid() const {

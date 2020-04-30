@@ -3,7 +3,7 @@
 using namespace std;
 using namespace FileSystem;
 
-Path::Path(std::vector<std::string> path, bool absolute) : path(path), absolute(absolute) {}
+Path::Path(std::vector<NodeName> path, bool absolute) : path(path), absolute(absolute) {}
 
 Path::Path(std::filesystem::path path) : Path(path.string()) {}
 
@@ -64,7 +64,7 @@ Path FileSystem::Path::prev() const {
 
 std::string FileSystem::Path::str() const {
 	std::string p = (absolute) ? "/" : "";
-	for (auto& n : path) {
+	for (auto n : path) {
 		p += n + "/";
 	}
 	if (path.size() > 0) p.erase(p.end() - 1);

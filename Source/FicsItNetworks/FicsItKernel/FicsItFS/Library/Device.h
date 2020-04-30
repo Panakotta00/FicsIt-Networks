@@ -54,7 +54,7 @@ namespace FileSystem {
 		* @param[in]	name	the new name of the node
 		* @return	returns true if it was able to rename the node
 		*/
-		virtual bool rename(Path path, const std::string& name) = 0;
+		virtual bool rename(Path path, const NodeName& name) = 0;
 
 		/*
 		* trys to get the node at the given path
@@ -70,7 +70,7 @@ namespace FileSystem {
 		* @param[in]	path	path to the node you want to get the childs form
 		* @return	returns a list of names
 		*/
-		virtual std::unordered_set<std::string> childs(Path path) = 0;
+		virtual std::unordered_set<NodeName> childs(Path path) = 0;
 
 		/*
 		* Adds the given FileSystem-Listener to the listeners list.
@@ -144,9 +144,9 @@ namespace FileSystem {
 		virtual SRef<FileStream> open(Path path, FileMode mode) override;
 		virtual SRef<Directory> createDir(Path path, bool createTree = false) override;
 		virtual bool remove(Path path, bool recursive = false) override;
-		virtual bool rename(Path path, const std::string& name) override;
+		virtual bool rename(Path path, const NodeName& name) override;
 		virtual SRef<Node> get(Path path) override;
-		virtual std::unordered_set<std::string> childs(Path path) override;
+		virtual std::unordered_set<NodeName> childs(Path path) override;
 	};
 
 	struct DiskDeviceWatcher;
@@ -165,9 +165,9 @@ namespace FileSystem {
 		virtual SRef<FileStream> open(Path path, FileMode mode) override;
 		virtual SRef<Directory> createDir(Path path, bool createTree = false) override;
 		virtual bool remove(Path path, bool recursive = false) override;
-		virtual bool rename(Path path, const std::string& name) override;
+		virtual bool rename(Path path, const NodeName& name) override;
 		virtual SRef<Node> get(Path path) override;
-		virtual std::unordered_set<std::string> childs(Path path) override;
+		virtual std::unordered_set<NodeName> childs(Path path) override;
 
 		/*
 		* calls all event changes since device creation or last call
@@ -183,7 +183,7 @@ namespace FileSystem {
 		DeviceNode(SRef<Device> device);
 
 		virtual SRef<FileStream> open(FileMode mode) override;
-		virtual std::unordered_set<std::string> getChilds() const override;
+		virtual std::unordered_set<NodeName> getChilds() const override;
 		virtual bool isValid() const;
 
 		/*

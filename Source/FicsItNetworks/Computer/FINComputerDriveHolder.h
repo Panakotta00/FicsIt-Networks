@@ -24,7 +24,7 @@ public:
 	AFINFileSystemState* GetDrive();
 
 private:
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	AFINFileSystemState* prev;
 
 	UFUNCTION()

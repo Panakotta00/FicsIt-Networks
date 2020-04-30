@@ -4,14 +4,15 @@
 #include <vector>
 
 #include "FileSystem.h"
+#include "NodeName.h"
 
 namespace FileSystem {
 	class Path {
 	private:
-		std::vector<std::string> path;
+		std::vector<NodeName> path;
 
 	protected:
-		Path(std::vector<std::string> path, bool absolute);
+		Path(std::vector<NodeName> path, bool absolute);
 
 	public:
 		bool absolute;

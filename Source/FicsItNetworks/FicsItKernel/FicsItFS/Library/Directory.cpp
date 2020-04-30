@@ -14,7 +14,7 @@ MemDirectory::MemDirectory(ListenerListRef listeners, SizeCheckFunc checkSize) :
 
 MemDirectory::~MemDirectory() {}
 
-SRef<Node> FileSystem::MemDirectory::get(const std::string & name) {
+SRef<Node> FileSystem::MemDirectory::get(const NodeName& name) {
 	if (name.length() < 1) return nullptr;
 	try {
 		return entries.at(name);
@@ -23,8 +23,8 @@ SRef<Node> FileSystem::MemDirectory::get(const std::string & name) {
 	}
 }
 
-unordered_set<string> MemDirectory::getChilds() const {
-	unordered_set<string> nodes;
+unordered_set<NodeName> MemDirectory::getChilds() const {
+	unordered_set<NodeName> nodes;
 	for (auto& child : entries) nodes.insert(child.first);
 	return nodes;
 }
@@ -37,7 +37,7 @@ bool FileSystem::MemDirectory::isValid() const {
 	return true;
 }
 
-WRef<Directory> MemDirectory::createSubdir(const string& subdir) {
+WRef<Directory> MemDirectory::createSubdir(const NodeName& subdir) {
 	if (entries.find(subdir) != entries.end()) return entries[subdir];
 	if (!checkSize(subdir.length(), true)) return nullptr;
 	auto dir = new MemDirectory({listeners, subdir}, checkSize);
@@ -46,7 +46,7 @@ WRef<Directory> MemDirectory::createSubdir(const string& subdir) {
 	return dir;
 }
 
-WRef<File> MemDirectory::createFile(const std::string & name) {
+WRef<File> MemDirectory::createFile(const NodeName& name) {
 	if (entries.find(name) != entries.end()) return entries[name];
 	if (!checkSize(name.length(), true)) return nullptr;
 	auto file = new MemFile({listeners, name}, checkSize);
@@ -55,7 +55,7 @@ WRef<File> MemDirectory::createFile(const std::string & name) {
 	return file;
 }
 
-bool MemDirectory::remove(const string& entry, bool recursive) {
+bool MemDirectory::remove(const NodeName& entry, bool recursive) {
 	bool ret = true;
 	auto e_p = entries.find(entry);
 	if (e_p == entries.end()) return false;
@@ -71,7 +71,7 @@ bool MemDirectory::remove(const string& entry, bool recursive) {
 	return true;
 }
 
-bool MemDirectory::rename(const std::string & entry, const std::string & name) {
+bool MemDirectory::rename(const NodeName& entry, const NodeName& name) {
 	auto e_p = entries.find(entry);
 	if (e_p == entries.end() || entries.find(name) != entries.end()) return false;
 	if (entry.length() < name.length() && !checkSize(name.length() - entry.length(), true)) return false;
@@ -81,7 +81,7 @@ bool MemDirectory::rename(const std::string & entry, const std::string & name) {
 	return true;
 }
 
-bool MemDirectory::add(const SRef<Node>& node, const std::string& name) {
+bool MemDirectory::add(const SRef<Node>& node, const NodeName& name) {
 	if (!node.isValid()) return false;
 	if (entries.find(name) != entries.end()) return false;
 	if (!checkSize(name.length(), true)) return false;
@@ -94,8 +94,8 @@ DiskDirectory::DiskDirectory(const std::filesystem::path& realpath, SizeCheckFun
 
 DiskDirectory::~DiskDirectory() {}
 
-unordered_set<string> DiskDirectory::getChilds() const {
-	unordered_set<string> nodes;
+unordered_set<NodeName> DiskDirectory::getChilds() const {
+	unordered_set<NodeName> nodes;
 	for (auto e : filesystem::directory_iterator(realPath)) {
 		nodes.insert(e.path().filename().generic_string()); 
 	}
@@ -110,7 +110,7 @@ bool DiskDirectory::isValid() const {
 	return filesystem::is_directory(realPath);
 }
 
-WRef<Directory> DiskDirectory::createSubdir(const string & subdir) {
+WRef<Directory> DiskDirectory::createSubdir(const NodeName& subdir) {
 	bool e = filesystem::exists(realPath / subdir);
 	if (filesystem::is_directory(realPath / subdir) || !e) {
 		if (!e) filesystem::create_directory(filesystem::absolute(realPath / subdir));
@@ -119,7 +119,7 @@ WRef<Directory> DiskDirectory::createSubdir(const string & subdir) {
 	return nullptr;
 }
 
-WRef<File> DiskDirectory::createFile(const std::string & name) {
+WRef<File> DiskDirectory::createFile(const NodeName& name) {
 	if (!filesystem::is_regular_file(realPath / name) && filesystem::exists(realPath / name)) return nullptr;
 	fstream f;
 	f.open(realPath / name, fstream::out);
@@ -127,7 +127,7 @@ WRef<File> DiskDirectory::createFile(const std::string & name) {
 	return new DiskFile(realPath / name, checkSize);
 }
 
-bool DiskDirectory::remove(const string & subdir, bool recursive) {
+bool DiskDirectory::remove(const NodeName& subdir, bool recursive) {
 	bool isDir = filesystem::is_directory(realPath / subdir);
 	if (filesystem::is_regular_file(realPath / subdir) || isDir) {
 		try {
@@ -141,7 +141,7 @@ bool DiskDirectory::remove(const string & subdir, bool recursive) {
 	return false;
 }
 
-bool FileSystem::DiskDirectory::rename(const std::string & entry, const std::string & name) {
+bool FileSystem::DiskDirectory::rename(const NodeName& entry, const NodeName& name) {
 	if (!filesystem::exists(realPath / entry) || filesystem::exists(name)) return false;
 	filesystem::rename(realPath / entry, realPath / name);
 	return true;

@@ -56,7 +56,7 @@ SRef<Directory> FileSystemRoot::createDir(Path path, bool createTree) {
 	Path pending = "";
 	auto device = getDevice(path.prev(), pending);
 	if (!device.isValid()) return nullptr;
-	return device->createDir(pending, createTree);
+	return device->createDir(pending / path.getFinal(), createTree);
 }
 
 bool FileSystemRoot::remove(Path path, bool recursive) {
@@ -74,7 +74,7 @@ bool FileSystemRoot::remove(Path path, bool recursive) {
 	return true;
 }
 
-bool FileSystemRoot::rename(Path path, const std::string & name) {
+bool FileSystemRoot::rename(Path path, const NodeName& name) {
 	Path pending = "";
 	auto device = getDevice(path.prev(), pending);
 	if (!device.isValid()) return false;
@@ -141,7 +141,7 @@ int FileSystemRoot::copy(Path from, Path to, bool recursive) {
 	return 1;
 }
 
-int FileSystemRoot::move(Path from, SRef<Directory> prevFrom, Path to, bool recursive) {
+int FileSystemRoot::moveInternal(Path from, Path to) {
 	Path pendingFrom = "";
 	Path pendingTo = "";
 	auto deviceFrom = getDevice(from, pendingFrom);
@@ -151,8 +151,6 @@ int FileSystemRoot::move(Path from, SRef<Directory> prevFrom, Path to, bool recu
 
 	auto f = deviceFrom->get(pendingFrom);
 	auto t = deviceTo->get(pendingTo);
-
-	if (!recursive && dynamic_cast<Directory*>(f.get())) return 1;
 
 	if (!t.isValid()) {
 		SRef<Directory> prevT = deviceTo->get(pendingTo.prev());
@@ -165,13 +163,12 @@ int FileSystemRoot::move(Path from, SRef<Directory> prevFrom, Path to, bool recu
 	} else if (from.getFinal() != to.getFinal()) {
 		SRef<Directory> tDir = t;
 		if (tDir.isValid()) {
-			t = tDir->createSubdir(from.getFinal());
 			if (dynamic_cast<File*>(f.get())) {
-				t = tDir->createFile(pendingTo.getFinal());
+				t = tDir->createFile(from.getFinal());
 			} else if (dynamic_cast<Directory*>(f.get())) {
-				t = tDir->createSubdir(pendingTo.getFinal());
+				t = tDir->createSubdir(from.getFinal());
 			}
-			to = to / pendingTo.getFinal();
+			to = to / from.getFinal();
 		}
 	}
 	if (!t.isValid()) return 1;
@@ -183,10 +180,10 @@ int FileSystemRoot::move(Path from, SRef<Directory> prevFrom, Path to, bool recu
 		if (!fDir.isValid()) return 1;
 		bool ret = true;
 		for (auto& child : fDir->getChilds()) {
-			bool able = move(from / child, f, to / child, recursive) > 0;
-			if (able) ret = false;
-			else if (prevFrom->remove(from.getFinal(), true)) ret = false;
+			bool able = moveInternal(from / child, to / child) > 0;
+			if (!able) ret = false;
 		}
+		if (ret) remove(from, true);
 		return ret ? 0 : 2;
 	} else if (tFile.isValid()) {
 		auto ofs = tFile->open(WRITE);
@@ -194,19 +191,20 @@ int FileSystemRoot::move(Path from, SRef<Directory> prevFrom, Path to, bool recu
 		if (!ofs.isValid() || !ifs.isValid()) return 1;
 		ofs->write(ifs->readAll());
 		ofs->close();
-		return prevFrom->remove(from.getFinal(), false);
+		ifs->close();
+		return remove(from, false);
 	}
 	return 1;
 }
 
-int FileSystemRoot::move(Path from, Path to, bool recursive) {
+int FileSystemRoot::move(Path from, Path to) {
 	if (from.getNodeCount() < 1) return 1;
 	Path pendingFrom = "";
 	auto deviceFrom = getDevice(from.prev(), pendingFrom);
 	if (!deviceFrom.isValid()) return 1;
 	auto prevFrom = deviceFrom->get(pendingFrom);
 	if (!prevFrom.isValid()) return 1;
-	return move(from, prevFrom, to, recursive);
+	return moveInternal(from, to);
 }
 
 SRef<Node> FileSystemRoot::get(Path path) {
@@ -228,7 +226,7 @@ SRef<Node> FileSystemRoot::get(Path path) {
 	}
 }
 
-unordered_set<string> FileSystemRoot::childs(Path path) {
+unordered_set<NodeName> FileSystemRoot::childs(Path path) {
 	Path pending = "";
 	auto device = getDevice(path, pending);
 	if (!device.isValid()) throw FileSystemException("no device at path found");

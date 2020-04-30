@@ -6,7 +6,7 @@ namespace FicsItKernel {
 	namespace FicsItFS {
 		class DevDevice : public FileSystem::Device {
 		private:
-			std::unordered_map<std::string, FileSystem::SRef<FileSystem::Device>> devices;
+			std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> devices;
 
 		public:
 			DevDevice();
@@ -15,11 +15,18 @@ namespace FicsItKernel {
 			virtual FileSystem::SRef<FileSystem::Node> get(FileSystem::Path path);
 			virtual bool remove(FileSystem::Path path, bool recursive);
 			virtual FileSystem::SRef<FileSystem::Directory> createDir(FileSystem::Path, bool tree);
-			virtual bool rename(FileSystem::Path path, const std::string& name);
-			virtual std::unordered_set<std::string> childs(FileSystem::Path path);
+			virtual bool rename(FileSystem::Path path, const FileSystem::NodeName& name);
+			virtual std::unordered_set<FileSystem::NodeName> childs(FileSystem::Path path);
 
-			bool addDevice(FileSystem::SRef<FileSystem::Device> device, const std::string& name);
+			bool addDevice(FileSystem::SRef<FileSystem::Device> device, const FileSystem::NodeName& name);
 			bool removeDevice(FileSystem::SRef<FileSystem::Device> device);
+
+			/**
+			 * Gets a list of all devices and the corresponding names
+			 *
+			 * @return	a unordered map of devices with their names
+			 */
+			std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> getDevices();
 
 			/**
 			 * Iterates over every MemDevice added to the Device-List.
