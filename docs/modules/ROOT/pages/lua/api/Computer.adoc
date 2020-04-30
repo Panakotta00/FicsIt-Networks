@@ -1,0 +1,20 @@
+= Computer API
+:description: The Computer API allows you to manage the computer itself.
+
+The Computer API provides a interface to the computer owns functionalities.
+
+== Functions
+
+=== `beep()`
+
+Lets the computer to emit a simple beep sound.
+
+=== `stop()`
+
+Stops the current code execution.
+
+Basically kills the PC runtime immediately.
+
+=== `reset()`
+
+Sops the current code execution immediately and queues the system to restart in the next tick.
