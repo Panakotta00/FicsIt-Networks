@@ -16,8 +16,9 @@ namespace FicsItKernel {
 	void KernelSystem::tick(float deltaSeconds) {
 		if (getState() == RESET) if (!start(true)) return;
 		if (getState() == RUNNING) {
-			devDevice->tickListeners();
-			processor->tick(deltaSeconds);
+			if (devDevice) devDevice->tickListeners();
+			if (processor) processor->tick(deltaSeconds);
+			else crash(FicsItKernel::KernelCrash("Processor Unpluged"));
 		}
 	}
 
@@ -91,13 +92,15 @@ namespace FicsItKernel {
 			if (reset) {
 				if (!stop()) return false;
 			} else return false;
-		} else if (getProcessor() == nullptr) {
+		}
+
+		state = RUNNING;
+		
+		if (getProcessor() == nullptr) {
 			crash(KernelCrash("No processor set"));
 			return false;
 		}
-
-		// set state and clear kernel crash
-		state = RUNNING;
+		
 		kernelCrash = KernelCrash("");
 
 		// reset whole system (filesystem, memory, processor, signal stuff)

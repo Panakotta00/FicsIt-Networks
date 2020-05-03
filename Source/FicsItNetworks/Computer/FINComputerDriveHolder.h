@@ -23,10 +23,19 @@ public:
 
 	AFINFileSystemState* GetDrive();
 
-private:
-	UPROPERTY(SaveGame)
-	AFINFileSystemState* prev;
+	UFUNCTION(BlueprintGetter)
+		bool GetLocked() const;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintSetter)
+		bool SetLocked(bool NewLocked);
+
+protected:
+	UPROPERTY(SaveGame)
+	AFINFileSystemState* prev = nullptr;
+
+	UPROPERTY(SaveGame)
+	bool bLocked = false;
+
+	UFUNCTION(BlueprintNativeEvent, Category="Computer|Drive")
 	void OnDriveInventoryUpdate(TSubclassOf<UFGItemDescriptor> drive, int32 count);
 };

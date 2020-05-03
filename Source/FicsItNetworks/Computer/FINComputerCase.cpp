@@ -62,7 +62,7 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 			if (!kernel->getProcessor()) Panel->AllowedModules.Add(AFINComputerProcessor::StaticClass());
 		}
 	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
-		kernel->setCapacity(kernel->getCapacity() + (((added) ? 1 : -1) * memory->GetCapacity()));
+		kernel->setCapacity(kernel->getCapacity() + ((added ? 1 : -1) * memory->GetCapacity()));
 	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
 		holder->OnDriveUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
 		AFINFileSystemState* state = holder->GetDrive();

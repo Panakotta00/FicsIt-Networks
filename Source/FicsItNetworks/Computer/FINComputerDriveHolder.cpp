@@ -26,8 +26,22 @@ AFINFileSystemState* AFINComputerDriveHolder::GetDrive() {
 	return nullptr;
 }
 
-void AFINComputerDriveHolder::OnDriveInventoryUpdate(TSubclassOf<UFGItemDescriptor> drive, int32 count) {
+bool AFINComputerDriveHolder::GetLocked() const {
+	return bLocked;
+}
+
+bool AFINComputerDriveHolder::SetLocked(bool NewLocked) {
 	AFINFileSystemState* newState = GetDrive();
-	OnDriveUpdate.Broadcast(IsValid(newState), IsValid(newState) ? newState : prev);
+	if (bLocked == NewLocked || (!IsValid(newState) && NewLocked)) return false;
+
+	bLocked = NewLocked;
+	
+	OnDriveUpdate.Broadcast(bLocked, IsValid(newState) ? newState : prev);
 	prev = newState;
+
+	return true;
+}
+
+void AFINComputerDriveHolder::OnDriveInventoryUpdate_Implementation(TSubclassOf<UFGItemDescriptor> drive, int32 count) {
+	if (!IsValid(drive)) SetLocked(false);
 }

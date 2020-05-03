@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SoundBanksInfo Platform="Windows" BasePlatform="Windows" SchemaVersion="11" SoundbankVersion="132">
+	<RootPaths>
+		<ProjectRoot>G:\Projects\Satisfactory\Mods\FicsIt-Networks\FicsIt-Networks_WwiseProject\</ProjectRoot>
+		<SourceFilesRoot>G:\Projects\Satisfactory\Mods\FicsIt-Networks\FicsIt-Networks_WwiseProject\.cache\Windows\</SourceFilesRoot>
+		<SoundBanksRoot>G:\Projects\Satisfactory\Mods\FicsIt-Networks\Content\WwiseAudio\Windows\</SoundBanksRoot>
+		<ExternalSourcesInputFile></ExternalSourcesInputFile>
+		<ExternalSourcesOutputRoot>G:\Projects\Satisfactory\Mods\FicsIt-Networks\FicsIt-Networks_WwiseProject\GeneratedSoundBanks\Windows</ExternalSourcesOutputRoot>
+	</RootPaths>
+	<DialogueEvents/>
+	<StreamedFiles/>
+	<MediaFilesNotInAnyBank/>
+	<SoundBanks>
+		<SoundBank Id="807644709" Language="SFX">
+			<ObjectPath>\SoundBanks\Default Work Unit\FIN_Tutorial</ObjectPath>
+			<ShortName>FIN_Tutorial</ShortName>
+			<Path>FIN_Tutorial.bnk</Path>
+			<IncludedEvents>
+				<Event Id="3263503306" Name="Play_FINTutorial_Introduction" ObjectPath="\Events\Default Work Unit\Play_FINTutorial_Introduction"/>
+			</IncludedEvents>
+			<IncludedMemoryFiles>
+				<File Id="101779832" Language="SFX">
+					<ShortName>Introduction - Kopie.wav</ShortName>
+					<Path>SFX\Introduction - Kopie_56D34C19.wem</Path>
+				</File>
+			</IncludedMemoryFiles>
+		</SoundBank>
+		<SoundBank Id="1355168291" Language="SFX">
+			<ObjectPath>Init</ObjectPath>
+			<ShortName>Init</ShortName>
+			<Path>Init.bnk</Path>
+		</SoundBank>
+	</SoundBanks>
+</SoundBanksInfo>
