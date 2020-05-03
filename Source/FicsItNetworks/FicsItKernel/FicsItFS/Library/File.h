@@ -36,7 +36,7 @@ namespace FileSystem {
 		SizeCheckFunc sizeCheck;
 
 	public:
-		MemFile(ListenerListRef listeners, SizeCheckFunc sizeCheck);
+		MemFile(ListenerListRef listeners, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
 
 		virtual SRef<FileStream> open(FileMode m) override;
 		virtual bool isValid() const override;
@@ -56,7 +56,7 @@ namespace FileSystem {
 		SizeCheckFunc sizeCheck;
 
 	public:
-		DiskFile(const std::filesystem::path& realPath, SizeCheckFunc sizeCheck);
+		DiskFile(const std::filesystem::path& realPath, SizeCheckFunc sizeCheck = [](auto,auto) { return true; });
 
 		virtual SRef<FileStream> open(FileMode m) override;
 		virtual bool isValid() const override;
@@ -154,7 +154,7 @@ namespace FileSystem {
 		SizeCheckFunc sizeCheck;
 
 	public:
-		MemFileStream(std::string* data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck);
+		MemFileStream(std::string* data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
 		~MemFileStream();
 
 		virtual void write(std::string str);
@@ -175,7 +175,7 @@ namespace FileSystem {
 		SizeCheckFunc sizeCheck;
 
 	public:
-		DiskFileStream(std::filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck);
+		DiskFileStream(std::filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
 		~DiskFileStream();
 
 		virtual void write(std::string str);

@@ -124,7 +124,7 @@ namespace FicsItKernel {
 		}
 
 		std::int64_t LuaProcessor::getMemoryUsage(bool recalc) {
-			return lua_gc(luaState, LUA_GCCOUNT, 0);
+			return lua_gc(luaState, LUA_GCCOUNT, 0) * 1000;
 		}
 
 		int luaPrint(lua_State* L) {
@@ -135,11 +135,15 @@ namespace FicsItKernel {
 				if (!s) luaL_argerror(L, i, "is not valid type");
 				log += s;
 			}
-
-			auto stdio = LuaProcessor::getCurrentProcessor()->getKernel()->getFileSystem()->open("/dev/stdio", FileSystem::APPEND);
-			if (stdio) {
-				//*stdio << log.c_str();
-				stdio->close();
+			
+			try {
+				auto stdio = LuaProcessor::getCurrentProcessor()->getKernel()->getDevDevice()->getStdio()->open(FileSystem::APPEND);
+				if (stdio) {
+					*stdio << log.c_str() << "\n";
+					stdio->close();
+				}
+			} catch (std::exception ex) {
+				luaL_error(L, ex.what());
 			}
 
 			SML::Logging::error("LuaPrint: ", log.c_str());

@@ -80,6 +80,10 @@ namespace FicsItKernel {
 		drives.erase(s);
 	}
 
+	FileSystem::SRef<FicsItFS::DevDevice> KernelSystem::getDevDevice() {
+		return devDevice;
+	}
+
 	bool KernelSystem::initFileSystem(FileSystem::Path path) {
 		if (getState() == RUNNING) {
 			return filesystem.mount(devDevice, path);
@@ -154,6 +158,7 @@ namespace FicsItKernel {
 	void KernelSystem::recalculateResources(Recalc components) {
 		memoryUsage = processor->getMemoryUsage(components & PROCESSOR);
 		memoryUsage += filesystem.getMemoryUsage(components & FILESYSTEM);
+		memoryUsage += devDevice->getStdio()->getSize();
 
 		if (memoryUsage > memoryCapacity) crash({"out of memory"});
 		FileSystem::SRef<FicsItFS::DevDevice> dev = filesystem.getDevDevice();

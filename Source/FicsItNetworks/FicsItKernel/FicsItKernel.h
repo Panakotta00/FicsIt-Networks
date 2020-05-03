@@ -46,8 +46,8 @@ namespace FicsItKernel {
 	private:
 		KernelState state = KernelState::SHUTOFF;
 		KernelCrash kernelCrash;
-		std::int32_t memoryCapacity = 0;
-		std::int32_t memoryUsage = 0;
+		std::int64_t memoryCapacity = 0;
+		std::int64_t memoryUsage = 0;
 		std::unique_ptr<Processor> processor = nullptr;
 		FicsItFS::Root filesystem;
 		FileSystem::SRef<FicsItFS::DevDevice> devDevice = nullptr;
@@ -141,6 +141,13 @@ namespace FicsItKernel {
 		 * @param	drive	the drive you want to remove
 		 */
 		void removeDrive(AFINFileSystemState* drive);
+
+		/**
+		 * Gets the internally used DevDevice
+		 *
+		 * @return	the used DevDevice
+		 */
+		FileSystem::SRef<FicsItFS::DevDevice> getDevDevice();
 
 		/**
 		 * Mounts the currently used devDevice to the given path in the currently used file system.

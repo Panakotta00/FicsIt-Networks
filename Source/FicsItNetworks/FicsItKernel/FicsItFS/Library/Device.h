@@ -15,7 +15,6 @@ namespace FileSystem {
 	class Device : virtual public ReferenceCounted {
 	protected:
 		ListenerList listeners;
-		SRef<FileSystem::MemFile> stdio;
 
 	public:
 		virtual ~Device() {}

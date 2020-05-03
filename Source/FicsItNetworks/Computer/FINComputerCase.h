@@ -59,10 +59,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 		EComputerState GetState();
 
+	UFUNCTION(BlueprintCallable, Category="Network|Computer")
+		FString GetLog();
+
 	void recalculateKernelResources();
 
 	UFUNCTION()
-	void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
+		void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
 
 private:
 	UFUNCTION()

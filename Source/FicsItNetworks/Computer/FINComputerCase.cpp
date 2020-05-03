@@ -105,6 +105,19 @@ EComputerState AFINComputerCase::GetState() {
 	}
 }
 
+FString AFINComputerCase::GetLog() {
+	FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
+	FString text = "";
+	if (dev) {
+		FileSystem::SRef<FileSystem::FileStream> log = dev->getStdio()->open(FileSystem::READ);
+		if (log) {
+			text = log->readAll().c_str();
+			log->close();
+		}
+	}
+	return text;
+}
+
 void AFINComputerCase::recalculateKernelResources() {
 	kernel->setCapacity(0);
 	kernel->setProcessor(nullptr);

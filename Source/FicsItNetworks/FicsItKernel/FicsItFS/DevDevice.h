@@ -7,6 +7,7 @@ namespace FicsItKernel {
 		class DevDevice : public FileSystem::Device {
 		private:
 			std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> devices;
+			FileSystem::SRef<FileSystem::MemFile> stdio;
 
 		public:
 			DevDevice();
@@ -40,6 +41,11 @@ namespace FicsItKernel {
 			 * Ticks all disk listeners
 			 */
 			void tickListeners();
+
+			/**
+			 * Returns the memory file used as standard input & output
+			 */
+			FileSystem::SRef<FileSystem::MemFile> getStdio();
 		};
 	}
 }

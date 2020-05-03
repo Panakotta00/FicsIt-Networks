@@ -4,7 +4,7 @@ using namespace FicsItKernel;
 using namespace FicsItKernel::FicsItFS;
 
 DevDevice::DevDevice() {
-	stdio = new FileSystem::MemFile(FileSystem::ListenerListRef(listeners, ""), nullptr);
+	stdio = new FileSystem::MemFile(FileSystem::ListenerListRef(listeners, ""));
 }
 
 FileSystem::SRef<FileSystem::FileStream> DevDevice::open(FileSystem::Path path, FileSystem::FileMode mode) {
@@ -40,12 +40,13 @@ std::unordered_set<FileSystem::NodeName> DevDevice::childs(FileSystem::Path path
 	for (auto device : devices) {
 		list.insert(device.first);
 	}
+	list.insert("stdio");
 	return list;
 }
 
 bool DevDevice::addDevice(FileSystem::SRef<FileSystem::Device> device, const FileSystem::NodeName& name) {
 	auto dev = devices.find(name);
-	if (dev != devices.end()) return false;
+	if (dev != devices.end() || name == "stdio") return false;
 	devices[name] = device;
 	return true;
 }
@@ -78,4 +79,8 @@ void DevDevice::tickListeners() {
 			diskDev->tickWatcher();
 		}
 	}
+}
+
+FileSystem::SRef<FileSystem::MemFile> DevDevice::getStdio() {
+	return stdio;
 }
