@@ -3,6 +3,18 @@
 using namespace std;
 using namespace FileSystem;
 
+FileMode FileSystem::operator|(FileMode l, FileMode r) {
+	return (FileMode)(((unsigned char)l) | ((unsigned char)r));
+}
+
+FileMode FileSystem::operator&(FileMode l, FileMode r) {
+	return (FileMode)(((unsigned char)l) & ((unsigned char)r));
+}
+
+FileMode FileSystem::operator~(FileMode m) {
+	return (FileMode)~(unsigned char)m;
+}
+
 File::File() {}
 
 unordered_set<NodeName> File::getChilds() const {
@@ -34,26 +46,10 @@ FileStream& FileStream::operator<<(const std::string& str) {
 
 MemFileStream::MemFileStream(string * data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck) : FileStream(mode), data(data), listeners(listeners), sizeCheck(sizeCheck) {
 	ios::openmode m;
-	switch (mode) {
-	case FileSystem::READ:
-		m = ios::in;
-		break;
-	case FileSystem::WRITE:
-		m = ios::out | ios::trunc;
-		break;
-	case FileSystem::APPEND:
-		m = ios::out | ios::app;
-		break;
-	case FileSystem::UPDATE_READ:
-		m = ios::in | ios::out;
-		break;
-	case FileSystem::UPDATE_WRITE:
-		m = ios::in | ios::out | ios::trunc;
-		break;
-	case FileSystem::UPDATE_APPEND:
-		m = ios::in | ios::out | ios::app;
-		break;
-	}
+	if (mode & FileSystem::INPUT) m |= ios::in;
+	if (mode & FileSystem::OUTPUT) m |= ios::out;
+	if (mode & FileSystem::TRUNC) m |= ios::trunc;
+	if (mode & FileSystem::APPEND) m |= ios::app;
 	stream = new stringstream(*data, m);
 }
 
@@ -69,7 +65,7 @@ void MemFileStream::write(string buf) {
 
 void MemFileStream::flush() {
 	if (!isOpen()) throw std::exception("filestream not open");
-	if (mode == FileMode::READ) return;
+	if (!(mode & FileMode::OUTPUT)) return;
 	stream->flush();
 	*data = stream->str();
 	listeners.onNodeChanged("", NT_File);
@@ -152,26 +148,10 @@ bool DiskFile::isValid() const {
 
 DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck) : FileStream(mode), sizeCheck(sizeCheck) {
 	ios::openmode m;
-	switch (mode) {
-	case FileSystem::READ:
-		m = ios::in;
-		break;
-	case FileSystem::WRITE:
-		m = ios::out | ios::trunc;
-		break;
-	case FileSystem::APPEND:
-		m = ios::out | ios::app;
-		break;
-	case FileSystem::UPDATE_READ:
-		m = ios::in | ios::out;
-		break;
-	case FileSystem::UPDATE_WRITE:
-		m = ios::in | ios::out | ios::trunc;
-		break;
-	case FileSystem::UPDATE_APPEND:
-		m = ios::in | ios::out | ios::app;
-		break;
-	}
+	if (mode & FileSystem::INPUT) m |= ios::in;
+	if (mode & FileSystem::OUTPUT) m |= ios::out;
+	if (mode & FileSystem::TRUNC) m |= ios::trunc;
+	if (mode & FileSystem::APPEND) m |= ios::app;
 	stream.open(realPath, m);
 }
 

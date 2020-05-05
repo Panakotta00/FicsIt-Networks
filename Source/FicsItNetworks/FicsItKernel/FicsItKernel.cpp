@@ -158,7 +158,7 @@ namespace FicsItKernel {
 	void KernelSystem::recalculateResources(Recalc components) {
 		memoryUsage = processor->getMemoryUsage(components & PROCESSOR);
 		memoryUsage += filesystem.getMemoryUsage(components & FILESYSTEM);
-		memoryUsage += devDevice->getStdio()->getSize();
+		memoryUsage += devDevice->getSerial()->getSize();
 
 		if (memoryUsage > memoryCapacity) crash({"out of memory"});
 		FileSystem::SRef<FicsItFS::DevDevice> dev = filesystem.getDevDevice();

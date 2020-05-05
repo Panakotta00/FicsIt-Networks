@@ -105,17 +105,20 @@ EComputerState AFINComputerCase::GetState() {
 	}
 }
 
-FString AFINComputerCase::GetLog() {
+FString AFINComputerCase::GetSerialOutput() {
 	FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
-	FString text = "";
 	if (dev) {
-		FileSystem::SRef<FileSystem::FileStream> log = dev->getStdio()->open(FileSystem::READ);
-		if (log) {
-			text = log->readAll().c_str();
-			log->close();
-		}
+		SerialOutput = SerialOutput.Append(dev->getSerial()->readOutput().c_str());
+		SerialOutput = SerialOutput.Right(1000);
 	}
-	return text;
+	return SerialOutput;
+}
+
+void AFINComputerCase::WriteSerialInput(const FString& str) {
+	FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
+	if (dev) {
+		dev->getSerial()->write(TCHAR_TO_UTF8(*str));
+	}
 }
 
 void AFINComputerCase::recalculateKernelResources() {

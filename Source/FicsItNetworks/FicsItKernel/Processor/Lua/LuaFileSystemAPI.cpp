@@ -68,12 +68,12 @@ namespace FicsItKernel {
 			std::string mode = "r";
 			if (lua_isstring(L, 2)) mode = lua_tostring(L, 2);
 			FileSystem::FileMode m;
-			if (mode == "r") m = FileSystem::READ;
-			else if (mode == "w") m = FileSystem::WRITE;
-			else if (mode == "a") m = FileSystem::APPEND;
-			else if (mode == "+r") m = FileSystem::UPDATE_READ;
-			else if (mode == "+w") m = FileSystem::UPDATE_WRITE;
-			else if (mode == "+a") m = FileSystem::UPDATE_APPEND;
+			if (mode == "r") m = FileSystem::INPUT;
+			else if (mode == "w") m = FileSystem::OUTPUT | FileSystem::TRUNC;
+			else if (mode == "a") m = FileSystem::OUTPUT | FileSystem::APPEND;
+			else if (mode == "+r") m = FileSystem::INPUT | FileSystem::OUTPUT;
+			else if (mode == "+w") m = FileSystem::INPUT | FileSystem::OUTPUT | FileSystem::TRUNC;
+			else if (mode == "+a") m = FileSystem::INPUT | FileSystem::OUTPUT | FileSystem::APPEND;
 			else luaL_argerror(L, 2, "is not valid file mode");
 			try {
 				luaFile(L, self->open(luaL_checkstring(L, 1), m));
@@ -181,7 +181,7 @@ namespace FicsItKernel {
 			if (!p.isValid()) return luaL_argerror(L, 1, "path is no valid file");
 			FileSystem::SRef<FileSystem::FileStream> s;
 			try {
-				s = p->open(FileSystem::READ);
+				s = p->open(FileSystem::INPUT);
 			} CatchExceptionLua
 			if (!s.isValid()) return luaL_error(L, "not able to create filestream");
 			int n = lua_gettop(L);
@@ -204,7 +204,7 @@ namespace FicsItKernel {
 			if (!p.isValid()) return luaL_argerror(L, 1, "path is no valid file");
 			FileSystem::SRef<FileSystem::FileStream> s;
 			try {
-				s = p->open(FileSystem::READ);
+				s = p->open(FileSystem::INPUT);
 			} CatchExceptionLua
 			if (!s.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;

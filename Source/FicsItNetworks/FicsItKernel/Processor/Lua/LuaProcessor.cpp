@@ -137,9 +137,9 @@ namespace FicsItKernel {
 			}
 			
 			try {
-				auto stdio = LuaProcessor::getCurrentProcessor()->getKernel()->getDevDevice()->getStdio()->open(FileSystem::APPEND);
+				auto stdio = LuaProcessor::getCurrentProcessor()->getKernel()->getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
 				if (stdio) {
-					*stdio << log.c_str() << "\n";
+					*stdio << log << "\r\n";
 					stdio->close();
 				}
 			} catch (std::exception ex) {

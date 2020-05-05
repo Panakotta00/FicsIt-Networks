@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Library/Device.h"
+#include "Serial.h"
 
 namespace FicsItKernel {
 	namespace FicsItFS {
 		class DevDevice : public FileSystem::Device {
 		private:
 			std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> devices;
-			FileSystem::SRef<FileSystem::MemFile> stdio;
+			FileSystem::SRef<Serial> stdio;
 
 		public:
 			DevDevice();
@@ -45,7 +46,7 @@ namespace FicsItKernel {
 			/**
 			 * Returns the memory file used as standard input & output
 			 */
-			FileSystem::SRef<FileSystem::MemFile> getStdio();
+			FileSystem::SRef<Serial> getSerial();
 		};
 	}
 }

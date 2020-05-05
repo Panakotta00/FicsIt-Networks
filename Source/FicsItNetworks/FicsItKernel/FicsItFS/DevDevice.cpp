@@ -4,7 +4,7 @@ using namespace FicsItKernel;
 using namespace FicsItKernel::FicsItFS;
 
 DevDevice::DevDevice() {
-	stdio = new FileSystem::MemFile(FileSystem::ListenerListRef(listeners, ""));
+	stdio = new Serial(FileSystem::ListenerListRef(listeners, ""));
 }
 
 FileSystem::SRef<FileSystem::FileStream> DevDevice::open(FileSystem::Path path, FileSystem::FileMode mode) {
@@ -81,6 +81,6 @@ void DevDevice::tickListeners() {
 	}
 }
 
-FileSystem::SRef<FileSystem::MemFile> DevDevice::getStdio() {
+FileSystem::SRef<FicsItFS::Serial> DevDevice::getSerial() {
 	return stdio;
 }

@@ -15,7 +15,7 @@ namespace FileSystem {
 		Path(std::vector<NodeName> path, bool absolute);
 
 	public:
-		bool absolute;
+		bool absolute = false;
 
 		Path();
 		Path(const char* path);

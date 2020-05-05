@@ -60,7 +60,10 @@ public:
 		EComputerState GetState();
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-		FString GetLog();
+		FString GetSerialOutput();
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+		void WriteSerialInput(const FString& str);
 
 	void recalculateKernelResources();
 
@@ -68,6 +71,9 @@ public:
 		void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
 
 private:
+	UPROPERTY()
+		FString SerialOutput;
+
 	UFUNCTION()
-	void OnDriveUpdate(bool added, AFINFileSystemState* drive);
+		void OnDriveUpdate(bool added, AFINFileSystemState* drive);
 };

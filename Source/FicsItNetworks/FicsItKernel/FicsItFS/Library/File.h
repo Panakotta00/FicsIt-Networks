@@ -12,14 +12,16 @@ namespace FileSystem {
 
 	typedef std::function<bool(size_t, bool)> SizeCheckFunc;
 
-	enum FileMode {
-		READ,
-		WRITE,
-		APPEND,
-		UPDATE_READ,
-		UPDATE_WRITE,
-		UPDATE_APPEND,
+	enum FileMode : unsigned char {
+		INPUT	= 0b0001,
+		OUTPUT	= 0b0010,
+		APPEND	= 0b0100,
+		TRUNC	= 0b1000
 	};
+
+	FileMode operator |(FileMode l, FileMode r);
+	FileMode operator &(FileMode l, FileMode r);
+	FileMode operator ~(FileMode m);
 
 	class File : public Node {
 	public:
