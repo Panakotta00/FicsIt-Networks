@@ -82,9 +82,11 @@ void AFINComputerCase::Toggle() {
 		break;
 	case FicsItKernel::KernelState::SHUTOFF:
 		kernel->start(false);
+		SerialOutput = "";
 		break;
 	case FicsItKernel::KernelState::CRASHED:
 		kernel->start(true);
+		SerialOutput = "";
 		break;
 	}
 }

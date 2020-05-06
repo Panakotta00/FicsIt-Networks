@@ -4,13 +4,13 @@ using namespace FicsItKernel;
 using namespace FicsItKernel::FicsItFS;
 
 DevDevice::DevDevice() {
-	stdio = new Serial(FileSystem::ListenerListRef(listeners, ""));
+	serial = new Serial(FileSystem::ListenerListRef(listeners, ""));
 }
 
 FileSystem::SRef<FileSystem::FileStream> DevDevice::open(FileSystem::Path path, FileSystem::FileMode mode) {
 	path.absolute = false;
-	if (path == "stdio") {
-		return stdio->open(mode);
+	if (path == "serial") {
+		return serial->open(mode);
 	}
 	return nullptr;
 }
@@ -40,13 +40,13 @@ std::unordered_set<FileSystem::NodeName> DevDevice::childs(FileSystem::Path path
 	for (auto device : devices) {
 		list.insert(device.first);
 	}
-	list.insert("stdio");
+	list.insert("serial");
 	return list;
 }
 
 bool DevDevice::addDevice(FileSystem::SRef<FileSystem::Device> device, const FileSystem::NodeName& name) {
 	auto dev = devices.find(name);
-	if (dev != devices.end() || name == "stdio") return false;
+	if (dev != devices.end() || name == "serial") return false;
 	devices[name] = device;
 	return true;
 }
@@ -82,5 +82,5 @@ void DevDevice::tickListeners() {
 }
 
 FileSystem::SRef<FicsItFS::Serial> DevDevice::getSerial() {
-	return stdio;
+	return serial;
 }

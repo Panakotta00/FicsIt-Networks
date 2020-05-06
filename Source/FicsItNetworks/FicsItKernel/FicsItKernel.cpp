@@ -152,7 +152,16 @@ namespace FicsItKernel {
 		// set state & crash
 		state = CRASHED;
 		kernelCrash = crash;
-		SML::Logging::error("LUA Crash: ", kernelCrash.what());
+		
+		try {
+			auto serial = getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
+			if (serial) {
+				*serial << "\r\n" << kernelCrash.what() << "\r\n";
+				serial->close();
+			}
+		} catch (std::exception ex) {
+			SML::Logging::error(ex.what());
+		}
 	}
 
 	void KernelSystem::recalculateResources(Recalc components) {

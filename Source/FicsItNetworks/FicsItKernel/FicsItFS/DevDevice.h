@@ -8,7 +8,7 @@ namespace FicsItKernel {
 		class DevDevice : public FileSystem::Device {
 		private:
 			std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> devices;
-			FileSystem::SRef<Serial> stdio;
+			FileSystem::SRef<Serial> serial;
 
 		public:
 			DevDevice();

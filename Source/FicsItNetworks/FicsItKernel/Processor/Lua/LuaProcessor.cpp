@@ -137,16 +137,14 @@ namespace FicsItKernel {
 			}
 			
 			try {
-				auto stdio = LuaProcessor::getCurrentProcessor()->getKernel()->getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
-				if (stdio) {
-					*stdio << log << "\r\n";
-					stdio->close();
+				auto serial = LuaProcessor::getCurrentProcessor()->getKernel()->getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
+				if (serial) {
+					*serial << log << "\r\n";
+					serial->close();
 				}
 			} catch (std::exception ex) {
 				luaL_error(L, ex.what());
 			}
-
-			SML::Logging::error("LuaPrint: ", log.c_str());
 
 			return 0;
 		}
