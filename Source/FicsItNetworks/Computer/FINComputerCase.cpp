@@ -1,10 +1,13 @@
 #include "FINComputerCase.h"
 
+
+#include "FicsItNetworksCustomVersion.h"
 #include "FINComputerProcessor.h"
 #include "FINComputerMemory.h"
 #include "FINComputerDriveHolder.h"
 
 #include "FicsItKernel/Processor/Lua/LuaProcessor.h"
+#include "FicsItNetworks/FicsItNetworksCustomVersion.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
@@ -26,6 +29,32 @@ AFINComputerCase::AFINComputerCase() {
 AFINComputerCase::~AFINComputerCase() {
 	if (kernel) delete kernel;
 }
+
+#pragma optimize("", off)
+void AFINComputerCase::Serialize(FArchive& ar) {
+	Super::Serialize(ar);
+	ar.UsingCustomVersion(FFINCustomVersion::GUID);
+	if (ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::KernelSystemPersistency && ar.IsSaveGame()) {
+		if (ar.IsLoading()) {
+			// load kernel persistent state
+			FString state = "";
+			//ar << state;
+			if (state.Len() > 0) {
+				//TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(state);
+				//TSharedPtr<FJsonObject> json;
+				//FJsonSerializer::Deserialize(Reader, json);
+				//kernel->unpersist(json);
+			}
+		} else if (ar.IsSaving()) {
+			// save kernel persistent state
+			FString state = "";
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&state);
+			FJsonSerializer::Serialize(kernel->persist().ToSharedRef(), Writer);
+			ar << state;
+		}
+	}
+}
+#pragma optimize("", on)
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
@@ -78,7 +107,7 @@ void AFINComputerCase::Toggle() {
 	if (processor) processor->setCode(TCHAR_TO_UTF8(*Code));
 	switch (kernel->getState()) {
 	case FicsItKernel::KernelState::RUNNING:
-		kernel->stop();
+		kernel->stop();	
 		break;
 	case FicsItKernel::KernelState::SHUTOFF:
 		kernel->start(false);

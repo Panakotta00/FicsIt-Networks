@@ -32,6 +32,8 @@ namespace FicsItKernel {
 			static LuaProcessor* currentProcessor;
 
 			lua_State* luaState = nullptr;
+			lua_State* luaThread = nullptr;
+			int luaThreadIndex = 0;
 			std::string code = "";
 			int speed;
 			int timeout = -1;
@@ -44,9 +46,13 @@ namespace FicsItKernel {
 
 			int doSignal(lua_State* L);
 
+			// Begin Processor
 			virtual void tick(double delta) override;
 			virtual void reset() override;
 			virtual std::int64_t getMemoryUsage(bool recalc = false) override;
+			virtual TSharedPtr<FJsonObject> persist() override;
+			virtual void unpersist(TSharedPtr<FJsonObject> state) override;
+			// End Processor
 
 			/**
 			* Sets up the lua environment.

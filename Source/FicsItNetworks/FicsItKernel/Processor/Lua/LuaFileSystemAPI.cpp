@@ -248,9 +248,10 @@ namespace FicsItKernel {
 		LuaFileFunc(Write)
 			auto s = lua_gettop(L);
 			for (int i = 2; i <= s; ++i) {
-				std::string str = luaL_checkstring(L, i);
+				size_t str_len = 0;
+				const char* str = luaL_checklstring(L, i, &str_len);
 				try {
-					file->write(str);
+					file->write(std::string(str, str_len));
 				} CatchExceptionLua
 			}
 			return 0;
@@ -271,7 +272,8 @@ namespace FicsItKernel {
 					if (lua_isnumber(L, i)) {
 						if (file->isEOF()) lua_pushnil(L);
 						auto n = lua_tointeger(L, i);
-						lua_pushstring(L, file->readChars(n).c_str());
+						std::string s = file->readChars(n);
+						lua_pushlstring(L, s.c_str(), s.size());
 					} else {
 						char fo = 'l';
 						if (lua_isstring(L, i)) {
@@ -286,12 +288,15 @@ namespace FicsItKernel {
 							break;
 						} case 'a':
 						{
-							lua_pushstring(L, file->readAll().c_str());
+							std::string s = file->readAll();
+							lua_pushlstring(L, s.c_str(), s.size());
 							break;
 						} case 'l':
 						{
-							if (!file->isEOF()) lua_pushstring(L, file->readLine().c_str());
-							else lua_pushnil(L);
+							if (!file->isEOF()) {
+								std::string s = file->readLine();
+								lua_pushlstring(L, s.c_str(), s.size());
+							} else lua_pushnil(L);
 							break;
 						}
 						default:

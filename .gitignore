@@ -78,3 +78,7 @@ Mods/*
 Source/SML
 Source/FactoryGame
 Source/Alpakit
+
+# Rider
+.idea
+Plugins/Developer/RiderLink

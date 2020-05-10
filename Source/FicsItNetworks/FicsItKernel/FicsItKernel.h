@@ -8,6 +8,7 @@
 #include "FicsItFS/DevDevice.h"
 #include "FicsItFS/FileSystem.h"
 #include "Network/NetworkController.h"
+#include "Json.h"
 
 namespace FicsItKernel {
 	enum KernelState {
@@ -55,6 +56,7 @@ namespace FicsItKernel {
 		std::unique_ptr<Network::NetworkController> network = nullptr;
 		UWorld* world = nullptr;
 		FileSystem::SRef<KernelListener> listener;
+		TSharedPtr<FJsonObject> readyToUnpersist = nullptr;
 
 	public:
 		/**
@@ -221,5 +223,22 @@ namespace FicsItKernel {
 		 * @param	components	the registry of system components you want to recalculate.
 		 */
 		void recalculateResources(Recalc components);
+
+		/**
+		 * Persists the current system state to a json object.
+		 *
+		 * @return	the kernel state as a json object
+		 */
+		TSharedPtr<FJsonObject> persist();
+
+		/**
+		 * Unpersists the system state given as a json object.
+		 * Might cause the system to directly start.
+		 * If not processor is set, sets the processor state json object
+		 * to get automatically unpersited when a processor get set.
+		 *
+		 * @param	state	the system state as json object
+		 */
+		void unpersist(TSharedPtr<FJsonObject> state);
 	};
 }

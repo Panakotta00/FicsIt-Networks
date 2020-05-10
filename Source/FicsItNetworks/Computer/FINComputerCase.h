@@ -35,6 +35,10 @@ public:
 	AFINComputerCase();
 	~AFINComputerCase();
 
+	// Begin UObject
+	virtual void Serialize(FArchive& ar) override;
+	// End UObject
+
 	// Begin AActor
 	virtual void BeginPlay() override;
 	// End AActor

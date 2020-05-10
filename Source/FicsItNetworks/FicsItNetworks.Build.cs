@@ -43,7 +43,9 @@ public class FicsItNetworks : ModuleRules
         string fullLibPath = Path.Combine(projectRootPath, "Library", platformName);
         Console.WriteLine("Full Library Path: " + fullLibPath);
         PublicAdditionalLibraries.AddRange(new string[] {
-            Path.Combine(fullLibPath, "lua53.lib") });
+            Path.Combine(fullLibPath, "lua53.lib")
+        });
+        
         bEnableExceptions = true;
         bUseRTTI = true;
     }

@@ -4,6 +4,8 @@
 
 #include "SML/util/Logging.h"
 
+#include "Json.h"
+
 namespace FicsItKernel {
 	KernelCrash::KernelCrash(std::string what) : std::exception(what.c_str()) {}
 
@@ -38,7 +40,13 @@ namespace FicsItKernel {
 
 	void KernelSystem::setProcessor(Processor* processor) {
 		this->processor = std::unique_ptr<Processor>(processor);
-		if (getProcessor()) processor->setKernel(this);
+		if (getProcessor()) {
+			processor->setKernel(this);
+			if (readyToUnpersist.IsValid()) {
+				processor->unpersist(readyToUnpersist);
+				readyToUnpersist = nullptr;
+			}
+		}
 	}
 
 	Processor* KernelSystem::getProcessor() const {
@@ -185,6 +193,53 @@ namespace FicsItKernel {
 	std::int64_t KernelSystem::getMemoryUsage() {
 		return memoryUsage;
 	}
+
+	TSharedPtr<FJsonObject> KernelSystem::persist() {
+		TSharedPtr<FJsonObject> json = MakeShareable(new FJsonObject());
+		switch(getState()) {
+		case SHUTOFF:
+			json->SetNumberField("SystemState", 0);
+			break;
+		case RUNNING:
+			json->SetNumberField("SystemState", 1);
+			break;
+		case CRASHED:
+			json->SetNumberField("SystemState", 2);
+			break;
+		case RESET:
+			json->SetNumberField("SystemState", 3);
+			break;
+		}
+
+		if (processor) {
+			TSharedPtr<FJsonObject> processorState = processor->persist();
+			json->SetObjectField("ProcessorState", processorState);
+		}
+		
+		return json;
+    }
+
+	void KernelSystem::unpersist(TSharedPtr<FJsonObject> json) {
+		switch(json->GetIntegerField("SystemState")) {
+		case 0:
+			state = SHUTOFF;
+			break;
+		case 1:
+			state = RUNNING;
+			break;
+		case 2:
+			state = CRASHED;
+			break;
+		case 3:
+			state = RESET;
+			break;
+		}
+		if (processor) {
+			processor->unpersist(json->GetObjectField("ProcessorState"));
+		} else {
+			readyToUnpersist = json->GetObjectField("ProcessorState");
+		}
+    }
 
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
 

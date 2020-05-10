@@ -8,6 +8,7 @@ extern "C" {
 	#include "ThirdParty/lua.h"
 	#include "ThirdParty/lauxlib.h"
 	#include "ThirdParty/lualib.h"
+	#include "ThirdParty/eris.h"
 }
 
 namespace FicsItKernel {

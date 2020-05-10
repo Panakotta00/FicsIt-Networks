@@ -1,6 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Json.h"
+
+#include <string>
 
 namespace FicsItKernel {
 	enum ProcessorArchitecture {
@@ -55,5 +58,19 @@ namespace FicsItKernel {
 		* f.e. resets the code counter
 		*/
 		virtual void reset() = 0;
+
+		/**
+		* Persists the current processor state to a string.
+		*
+		* @return	the processor state as a string
+		*/
+		virtual TSharedPtr<FJsonObject> persist() = 0;
+
+		/**
+		* Unpersists the processor state given as a string.
+		*
+		* @param	state	the processor state as string
+		*/
+		virtual void unpersist(TSharedPtr<FJsonObject> state) = 0;
 	};
 }

@@ -45,7 +45,7 @@ FileStream& FileStream::operator<<(const std::string& str) {
 }
 
 MemFileStream::MemFileStream(string * data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck) : FileStream(mode), data(data), listeners(listeners), sizeCheck(sizeCheck) {
-	ios::openmode m;
+	ios::openmode m = 0x0;
 	if (mode & FileSystem::INPUT) m |= ios::in;
 	if (mode & FileSystem::OUTPUT) m |= ios::out;
 	if (mode & FileSystem::TRUNC) m |= ios::trunc;
@@ -146,14 +146,16 @@ bool DiskFile::isValid() const {
 	return filesystem::is_regular_file(realPath);
 }
 
+#pragma optimize("", off)
 DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck) : FileStream(mode), sizeCheck(sizeCheck) {
-	ios::openmode m;
+	ios::openmode m = 0x0;
 	if (mode & FileSystem::INPUT) m |= ios::in;
 	if (mode & FileSystem::OUTPUT) m |= ios::out;
 	if (mode & FileSystem::TRUNC) m |= ios::trunc;
 	if (mode & FileSystem::APPEND) m |= ios::app;
 	stream.open(realPath, m);
 }
+#pragma optimize("", on)
 
 DiskFileStream::~DiskFileStream() {}
 
