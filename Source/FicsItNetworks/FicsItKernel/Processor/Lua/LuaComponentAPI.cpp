@@ -36,7 +36,7 @@ namespace FicsItKernel {
 				}
 				int j = 0;
 				for (auto& id : ids) {
-					auto comp = LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork()->getComponentByID(id);
+					auto comp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByID(id);
 					newInstance(L, comp);
 					if (isT) lua_seti(L, -2, ++j);
 				}
@@ -50,7 +50,7 @@ namespace FicsItKernel {
 			for (int i = 1; i <= args; ++i) {
 				lua_newtable(L);
 				std::string nick = luaL_checkstring(L, i);
-				auto comps = LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork()->getComponentByNick(nick);
+				auto comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByNick(nick);
 				int j = 0;
 				for (auto& comp : comps) {
 					++j;

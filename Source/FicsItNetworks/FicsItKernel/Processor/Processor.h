@@ -44,7 +44,7 @@ namespace FicsItKernel {
 		*
 		* @param[in]	delta	the delta seconds since last tick
 		*/
-		virtual void tick(double delta) = 0;
+		virtual void tick(float delta) = 0;
 
 		/**
 		* recalculates the processor memory usage

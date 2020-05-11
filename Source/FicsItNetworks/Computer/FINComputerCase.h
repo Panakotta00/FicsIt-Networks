@@ -30,6 +30,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 		FString Code;
 
+	UPROPERTY(SaveGame)
+	FString State;
+	
 	FicsItKernel::KernelSystem* kernel = nullptr;
 
 	AFINComputerCase();

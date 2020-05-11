@@ -54,7 +54,6 @@ namespace FicsItKernel {
 		FileSystem::SRef<FicsItFS::DevDevice> devDevice = nullptr;
 		std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> drives;
 		std::unique_ptr<Network::NetworkController> network = nullptr;
-		UWorld* world = nullptr;
 		FileSystem::SRef<KernelListener> listener;
 		TSharedPtr<FJsonObject> readyToUnpersist = nullptr;
 
@@ -69,7 +68,7 @@ namespace FicsItKernel {
 			ALL = 0b11
 		};
 
-		KernelSystem(UWorld* world);
+		KernelSystem();
 		~KernelSystem();
 
 		/**

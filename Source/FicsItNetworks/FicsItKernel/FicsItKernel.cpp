@@ -11,7 +11,7 @@ namespace FicsItKernel {
 
 	KernelCrash::~KernelCrash() {}
 
-	KernelSystem::KernelSystem(UWorld* world) : world(world), listener(new KernelListener(this)) {}
+	KernelSystem::KernelSystem() : listener(new KernelListener(this)) {}
 
 	KernelSystem::~KernelSystem() {}
 
@@ -20,7 +20,7 @@ namespace FicsItKernel {
 		if (getState() == RUNNING) {
 			if (devDevice) devDevice->tickListeners();
 			if (processor) processor->tick(deltaSeconds);
-			else crash(FicsItKernel::KernelCrash("Processor Unpluged"));
+			else crash(FicsItKernel::KernelCrash("Processor Unplugged"));
 		}
 	}
 
@@ -42,10 +42,7 @@ namespace FicsItKernel {
 		this->processor = std::unique_ptr<Processor>(processor);
 		if (getProcessor()) {
 			processor->setKernel(this);
-			if (readyToUnpersist.IsValid()) {
-				processor->unpersist(readyToUnpersist);
-				readyToUnpersist = nullptr;
-			}
+			if (readyToUnpersist.IsValid()) unpersist(readyToUnpersist);
 		}
 	}
 
@@ -220,24 +217,30 @@ namespace FicsItKernel {
     }
 
 	void KernelSystem::unpersist(TSharedPtr<FJsonObject> json) {
-		switch(json->GetIntegerField("SystemState")) {
-		case 0:
-			state = SHUTOFF;
-			break;
-		case 1:
-			state = RUNNING;
-			break;
-		case 2:
-			state = CRASHED;
-			break;
-		case 3:
-			state = RESET;
-			break;
-		}
 		if (processor) {
-			processor->unpersist(json->GetObjectField("ProcessorState"));
+			switch(json->GetIntegerField("SystemState")) {
+			case 0:
+                state = SHUTOFF;
+				break;
+			case 1:
+                start(true);
+				break;
+			case 2:
+                state = CRASHED;
+				break;
+			case 3:
+                state = RESET;
+				break;
+			}
+
+			try {
+				processor->unpersist(json->GetObjectField("ProcessorState"));
+			} catch (...) {
+				stop();
+				SML::Logging::error("Unable to unpersist computer state! Network: '", TCHAR_TO_UTF8(*getNetwork()->getComponent()->GetPathName()), "'");
+			}
 		} else {
-			readyToUnpersist = json->GetObjectField("ProcessorState");
+			readyToUnpersist = json;
 		}
     }
 

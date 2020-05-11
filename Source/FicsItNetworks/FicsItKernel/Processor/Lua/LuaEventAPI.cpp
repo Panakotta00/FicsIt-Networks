@@ -13,7 +13,7 @@
 namespace FicsItKernel {
 	namespace Lua {
 		void luaListen(lua_State* L, Network::NetworkTrace o) {
-			auto net = LuaProcessor::getCurrentProcessor()->getKernel()->getNetwork();
+			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
 			UObject* obj = *o;
 			if (!IsValid(obj)) luaL_error(L, "object is not valid");
 			if (obj->Implements<UFINSignalSender>()) {
@@ -56,7 +56,7 @@ namespace FicsItKernel {
 			std::int64_t t = 0;
 			if (args > 0 && !lua_isnil(L, 1)) t = lua_tointeger(L, 1);
 
-			auto luaProc = LuaProcessor::getCurrentProcessor();
+			auto luaProc = LuaProcessor::luaGetProcessor(L);
 			int a = luaProc->doSignal(L);
 			if (!a) {
 				luaProc->timeout = (int)t;

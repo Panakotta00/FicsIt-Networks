@@ -6,6 +6,7 @@
 #include <chrono>
 
 struct lua_State;
+struct lua_Debug;
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -29,25 +30,26 @@ namespace FicsItKernel {
 			friend int luaPull(lua_State* L);
 
 		private:
-			static LuaProcessor* currentProcessor;
+			int speed = 0;
 
+			std::string code = "";
+
+			int permTableIdx = 1;
 			lua_State* luaState = nullptr;
 			lua_State* luaThread = nullptr;
 			int luaThreadIndex = 0;
-			std::string code = "";
-			int speed;
+			bool endOfTick = false;
+			
 			int timeout = -1;
 			std::chrono::time_point<std::chrono::high_resolution_clock> pullStart;
-
+			
 		public:
-			static LuaProcessor* getCurrentProcessor();
-
+			static LuaProcessor* luaGetProcessor(lua_State* L);
+			
 			LuaProcessor(int speed = 1);
 
-			int doSignal(lua_State* L);
-
 			// Begin Processor
-			virtual void tick(double delta) override;
+			virtual void tick(float delta) override;
 			virtual void reset() override;
 			virtual std::int64_t getMemoryUsage(bool recalc = false) override;
 			virtual TSharedPtr<FJsonObject> persist() override;
@@ -67,6 +69,11 @@ namespace FicsItKernel {
 			 * Might cause the processor to reset.
 			 */
 			void setCode(const std::string& code);
+
+			int doSignal(lua_State* L);
+
+			static void luaHook(lua_State* L, lua_Debug* ar);
+			static int luaAPIReturn(lua_State* L, int args);
 		};
 	}
 }

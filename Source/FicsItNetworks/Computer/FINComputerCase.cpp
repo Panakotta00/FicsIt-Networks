@@ -24,48 +24,44 @@ AFINComputerCase::AFINComputerCase() {
 	mFactoryTickFunction.bAllowTickOnDedicatedServer = true;
 
 	if (HasAuthority()) mFactoryTickFunction.SetTickFunctionEnable(true);
+
+	kernel = new FicsItKernel::KernelSystem();
 }
 
 AFINComputerCase::~AFINComputerCase() {
 	if (kernel) delete kernel;
 }
 
-#pragma optimize("", off)
 void AFINComputerCase::Serialize(FArchive& ar) {
-	Super::Serialize(ar);
 	ar.UsingCustomVersion(FFINCustomVersion::GUID);
-	if (ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::KernelSystemPersistency && ar.IsSaveGame()) {
-		if (ar.IsLoading()) {
-			// load kernel persistent state
-			FString state = "";
-			//ar << state;
-			if (state.Len() > 0) {
-				//TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(state);
-				//TSharedPtr<FJsonObject> json;
-				//FJsonSerializer::Deserialize(Reader, json);
-				//kernel->unpersist(json);
-			}
-		} else if (ar.IsSaving()) {
+	if (ar.IsSaveGame()) {
+		if (ar.IsSaving()) {
 			// save kernel persistent state
-			FString state = "";
-			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&state);
+			State = "";
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&State);
 			FJsonSerializer::Serialize(kernel->persist().ToSharedRef(), Writer);
-			ar << state;
 		}
 	}
+	Super::Serialize(ar);
 }
-#pragma optimize("", on)
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
 
 	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
-
-	kernel = new FicsItKernel::KernelSystem(this->GetWorld());
+	
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
 
 	recalculateKernelResources();
+
+	// Recover saved state
+	if (State.Len() > 0) {
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(State);
+		TSharedPtr<FJsonObject> json;
+		FJsonSerializer::Deserialize(Reader, json);
+		kernel->unpersist(json);
+	}
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
