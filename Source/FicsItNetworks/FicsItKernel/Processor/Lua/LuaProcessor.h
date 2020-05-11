@@ -34,7 +34,6 @@ namespace FicsItKernel {
 
 			std::string code = "";
 
-			int permTableIdx = 1;
 			lua_State* luaState = nullptr;
 			lua_State* luaThread = nullptr;
 			int luaThreadIndex = 0;

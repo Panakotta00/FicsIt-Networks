@@ -58,7 +58,9 @@ namespace FicsItKernel {
 
 		LuaProcessor* LuaProcessor::luaGetProcessor(lua_State* L) {
 			lua_getfield(L, LUA_REGISTRYINDEX, "LuaProcessorPtr");
-			return *(LuaProcessor**) luaL_checkudata(L, -1, "LuaProcessor");
+			LuaProcessor* p = *(LuaProcessor**) luaL_checkudata(L, -1, "LuaProcessor");
+			lua_pop(L, 1);
+			return p;
 		}
 
 		LuaProcessor::LuaProcessor(int speed) : speed(speed) {
@@ -111,13 +113,27 @@ namespace FicsItKernel {
 			}
 		}
 
+		size_t luaLen(lua_State* L, int idx) {
+			size_t len = 0;
+			idx = lua_absindex(L, idx);
+			lua_pushnil(L);
+			while (lua_next(L, idx) != 0) {
+				const char* str = lua_tostring(L, -2);
+				if (str) SML::Logging::error("   k: ", str);
+				str = lua_tostring(L, -1);
+				if (str) SML::Logging::error("   v: ", str);
+				len++;
+				lua_pop(L, 1);
+			}
+			return len;
+		}
+		
 		void LuaProcessor::reset() {
 			// can't reset running system state
 			if (getKernel()->getState() != RUNNING) return;
 
 			// reset tempdata
 			timeout = -1;
-			permTableIdx = 1;
 
 			// clear existing lua state
 			if (luaState) {
@@ -128,26 +144,28 @@ namespace FicsItKernel {
 			luaState = luaL_newstate();
 
 			// setup library and perm tables for persistency
-			// add uperm and perm tables for persistency
-			lua_newtable(luaState);
-			lua_newtable(luaState);
-			luaSetup(luaState);
+			lua_newtable(luaState); // perm
+			lua_newtable(luaState); // perm, uperm 
 
-			// register pointer to this Lua Processor in c registry
-			LuaProcessor*& luaProcessor = *(LuaProcessor**)lua_newuserdata(luaState, sizeof(LuaProcessor*));
+			// register pointer to this Lua Processor in c registry & perm table
+			luaL_newmetatable(luaState, "LuaProcessor"); // perm, uperm, mt-LuaProcessor
+			lua_pop(luaState, 1); // perm, uperm
+			LuaProcessor*& luaProcessor = *(LuaProcessor**)lua_newuserdata(luaState, sizeof(LuaProcessor*)); // perm, uperm, proc
 			luaL_setmetatable(luaState, "LuaProcessor");
 			luaProcessor = this;
-			lua_pushvalue(luaState, -1);
-			lua_setfield(luaState, LUA_REGISTRYINDEX, "LuaProcessorPtr");
-
-			lua_pushvalue(luaState, -1);
-			lua_seti(luaState, -3, permTableIdx);
-			lua_pushinteger(luaState, permTableIdx++);
-			lua_settable(luaState, -4);
+			lua_pushvalue(luaState, -1); // perm, uperm, proc, proc
+			lua_setfield(luaState, LUA_REGISTRYINDEX, "LuaProcessorPtr"); // perm, uperm, proc
+			lua_pushvalue(luaState, -1); // perm, uperm, proc, proc
+			lua_setfield(luaState, -3, "LuaProcessor"); // perm, uperm, proc
+			lua_pushstring(luaState, "LuaProcessor"); // perm, uperm, proc, "LuaProcessorPtr"
+			lua_settable(luaState, -4); // perm, uperm
+			SML::Logging::error("Pre-Setup: ", luaLen(luaState, -2), " ", luaLen(luaState, -1));
+			luaSetup(luaState); // perm, uperm
+			SML::Logging::error("Post-Setup: ", luaLen(luaState, -2), " ", luaLen(luaState, -1));
 			
 			// finish perm tables
-			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm");
-			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistPerm");
+			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
+			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); //
 			
 			// create new thread for user code chunk
 			luaThread = lua_newthread(luaState);
@@ -187,21 +205,38 @@ namespace FicsItKernel {
 		}
 		
 		TSharedPtr<FJsonObject> LuaProcessor::persist() {
-			lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
-			lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm");
+			lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); // ..., perm
+			lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., perm, global
 
-			eris_persist(luaState, -1, luaThreadIndex);
-			eris_persist(luaState, -2, -3);
+			SML::Logging::error(luaLen(luaState, -2));
+			
+			// persist globals table
+			eris_persist(luaState, -2, -1); // ..., perm, global, str-globals
 
-			size_t thread_l = 0;
-			const char* thread_r = lua_tolstring(luaState, -2, &thread_l);
-			FString thread = Base64Encode((uint8*)thread_r, thread_l);
+			// encode persisted globals
 			size_t globals_l = 0;
 			const char* globals_r = lua_tolstring(luaState, -1, &globals_l);
 			FString globals = Base64Encode((uint8*)globals_r, globals_l);
+			lua_pop(luaState, 1); // ..., perm, globals
 
-			lua_pop(luaState, 4);
+			// add global table to perm table
+			lua_pushstring(luaState, "Globals"); // ..., perm, global, "globals"
+			lua_settable(luaState, -3); // ..., perm
 			
+			// persist thread
+			eris_persist(luaState, -1, luaThreadIndex); // ..., perm, str-thread
+
+			// encode persisted thread
+			size_t thread_l = 0;
+			const char* thread_r = lua_tolstring(luaState, -2, &thread_l);
+			FString thread = Base64Encode((uint8*)thread_r, thread_l);
+
+			// cleanup
+			lua_pushnil(luaState); // ..., perm, string, nil
+			lua_setfield(luaState, -3, "Globals"); // ..., perm, string
+			lua_pop(luaState, 2); // ...
+
+			// add encoded data to json
 			TSharedPtr<FJsonObject> json = MakeShareable(new FJsonObject());
 			json->SetStringField("MainThread", thread);
 			json->SetStringField("Globals", globals);
@@ -215,8 +250,7 @@ namespace FicsItKernel {
 
 			TArray<ANSICHAR> TempDest;
 			TempDest.AddZeroed(ExpectedLength + 1);
-			if(!FBase64::Decode(*Source, Source.Len(), (uint8*)TempDest.GetData()))
-			{
+			if(!FBase64::Decode(*Source, Source.Len(), (uint8*)TempDest.GetData())) {
 				return false;
 			}
 			OutData = TempDest;
@@ -224,8 +258,22 @@ namespace FicsItKernel {
 		}
 
 		int luaUnpersist(lua_State* L) {
-			eris_unpersist(L, 3, 1);
-			eris_unpersist(L, 3, 2);
+			// str-thread, str-globals, uperm
+
+			// unpersist globals
+			eris_unpersist(L, 3, 2); // str-thread, str-globals, uperm, globals
+
+			// add globals to uperm
+			lua_pushvalue(L, -1); // str-thread, str-globals, uperm, globals, globals
+			lua_setfield(L, 3, "Globals"); // str-thread, str-globals, uperm, globals
+			
+			// unpersist thread
+			eris_unpersist(L, 3, 1); // str-thread, str-globals, uperm, globals, thread
+
+			// cleanup
+			lua_pushnil(L); // str-thread, str-globals, uperm, globals, thread, nil
+			lua_setfield(L, 3, "Globals"); // str-thread, str-globals, uperm, globals, thread
+			
 			return 2;
 		}
 
@@ -233,30 +281,32 @@ namespace FicsItKernel {
 			if (!json->HasField("MainThread") || !json->HasField("Globals")) return;
 			
 			reset();
-			
+
+			// decode & check data from json
 			FString thread_encoded = json->GetStringField("MainThread");
 			TArray<ANSICHAR> thread;
 			Base64Decode(thread_encoded, thread);
 			FString globals_encoded = json->GetStringField("Globals");
 			TArray<ANSICHAR> globals;
 			Base64Decode(globals_encoded, globals);
-
 			if (thread.Num() <= 1 && globals.Num() <= 1) return;
-			std::string str1 = std::string(thread.GetData(), thread.Num());
-			std::string str2 = std::string(globals.GetData(), globals.Num());
-
-			lua_pushcfunction(luaState, luaUnpersist);
-
-			lua_pushlstring(luaState, str1.c_str(), str1.length());
-			lua_pushlstring(luaState, str2.c_str(), str2.length());
-			lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistUperm");
 			
-			lua_call(luaState, 3, 2);
-			//int ok = lua_pcall(luaState, 3, 2, 0);
-			//if (ok != LUA_OK) throw std::exception("Unable to unpersist");
-			
-			lua_seti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
-			lua_replace(luaState, luaThreadIndex);
+			// prepare protected unpersist
+			lua_pushcfunction(luaState, luaUnpersist); // ..., unpersist
+
+			// push data for protected unpersist
+			lua_pushlstring(luaState, thread.GetData(), thread.Num()); // ..., unpersist, str-thread
+			lua_pushlstring(luaState, globals.GetData(), globals.Num()); // ..., unpersist, str-thread, str-globals
+			lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // ..., unpersist, str-thread, str-globals, uperm
+
+			// do unpersist
+			//lua_call(luaState, 3, 2);
+			int ok = lua_pcall(luaState, 3, 2, 0); // ..., globals, thread
+			if (ok != LUA_OK) throw std::exception("Unable to unpersist");
+
+			// place persisted data
+			lua_replace(luaState, luaThreadIndex); // ..., globals
+			lua_seti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ...
 			luaThread = lua_tothread(luaState, luaThreadIndex);
 		}
 #pragma optimize("", on)
@@ -330,31 +380,25 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, nargs);
 		}
 
-#define PersistGlobal(Name) \
-		lua_getglobal(L, Name); \
-		lua_pushvalue(L, -1); \
-		lua_seti(L, -3, permTableIdx); \
-		lua_pushinteger(L, permTableIdx++); \
-		lua_settable(L, -4);
-
 		void LuaProcessor::luaSetup(lua_State* L) {
-			luaL_requiref(L, "table", luaopen_table, true);
-			PersistGlobal("table")
-			luaL_requiref(L, "coroutine", luaopen_coroutine, true);
-			PersistGlobal("coroutine")
+			PersistSetup("LuaProcessor", -2);
+			
+			//luaL_requiref(L, "table", luaopen_table, true);
+			//PersistGlobal("table")
+			//luaL_requiref(L, "coroutine", luaopen_coroutine, true);
+			//PersistGlobal("coroutine")
 			luaL_requiref(L, "math", luaopen_math, true);
-			PersistGlobal("math")
-			luaL_requiref(L, "string", luaopen_string, true);
-			PersistGlobal("string")
-			luaL_requiref(L, "debug", luaopen_debug, true);
-			PersistGlobal("debug")
+			lua_pop(L, 1);
+			PersistGlobal("math");
+			//luaL_requiref(L, "string", luaopen_string, true);
+			//PersistGlobal("string")
 			
 			lua_register(L, "print", luaPrint);
-			PersistGlobal("print")
+			PersistGlobal("print");
 			lua_register(L, "resume", luaResume);
-			PersistGlobal("resume")
+			PersistGlobal("resume");
 			lua_register(L, "yield", luaYield);
-			PersistGlobal("yield")
+			PersistGlobal("yield");
 			// TODO: move resume and yield to overwrite coroutine
 			
 //			setupInstanceSystem(L);
@@ -364,10 +408,6 @@ namespace FicsItKernel {
 //			setupEventAPI(L);
 //			setupFileSystemAPI(getKernel(), L);
 //			setupComputerAPI(L, getKernel());
-
-			// LuaProcessor metatable
-			luaL_newmetatable(L, "LuaProcessor");
-			lua_pop(L, 1);
 		}
 
 		void LuaProcessor::setCode(const std::string& code) {
