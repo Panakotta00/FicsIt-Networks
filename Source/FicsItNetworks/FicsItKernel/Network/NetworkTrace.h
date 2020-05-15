@@ -7,6 +7,8 @@
 #include <memory>
 #include <functional>
 
+struct FFINNetworkTrace;
+
 namespace FicsItKernel {
 	namespace Network {
 		/**
@@ -20,6 +22,8 @@ namespace FicsItKernel {
 		 * This class allows for tracing object access over the component network.
 		 */
 		class NetworkTrace {
+			friend FFINNetworkTrace;
+			
 		private:
 			NetworkTrace* prev = nullptr;
 			TraceStep* step = nullptr;

@@ -88,8 +88,10 @@ namespace FicsItKernel {
 		};
 
 		void setupComponentAPI(lua_State* L) {
+			PersistSetup("Component", -2);
 			lua_newtable(L);
 			luaL_setfuncs(L, luaComponentLib, 0);
+			PersistTable("Lib", -1);
 			lua_setglobal(L, "component");
 		}
 	}

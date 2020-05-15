@@ -72,10 +72,12 @@ namespace FicsItKernel {
 		}
 
 		void setupHooks(lua_State* L) {
+			PersistSetup("Hook", -2);
 			luaL_newmetatable(L, "FactoryHook");
 			lua_pushvalue(L, -1);
 			lua_setfield(L, -2, "__index");
 			luaL_setfuncs(L, luaFactoryHookLib, 0);
+			PersistTable("Factory", -1);
 			lua_pop(L, 1);
 		}
 	}

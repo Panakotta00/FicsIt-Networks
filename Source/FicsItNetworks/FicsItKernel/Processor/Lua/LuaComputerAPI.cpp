@@ -38,10 +38,12 @@ namespace FicsItKernel {
 		};
 		
 		void setupComputerAPI(lua_State* L, KernelSystem* kernel) {
+			PersistSetup("Computer", -2);
 			luaL_newlibtable(L, luaComputerLib);
 			auto& fs_ud = *(KernelSystem**)lua_newuserdata(L, sizeof(void*));
 			fs_ud = kernel;
 			luaL_setfuncs(L, luaComputerLib, 1);
+			PersistTable("Lib", -1);
 			lua_setglobal(L, "computer");
 		}
 	}

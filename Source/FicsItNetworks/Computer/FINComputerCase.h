@@ -9,6 +9,10 @@
 
 #include "FINComputerCase.generated.h"
 
+class AFINComputerDriveHolder;
+class AFINComputerMemory;
+class AFINComputerProcessor;
+
 UENUM()
 enum EComputerState {
 	RUNNING,
@@ -21,19 +25,26 @@ class AFINComputerCase : public AFGBuildable {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 		UFINNetworkConnector* NetworkConnector;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category = "ComputerCase")
 		UFINModuleSystemPanel* Panel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 		FString Code;
-
-	UPROPERTY(SaveGame)
-	FString State;
 	
 	FicsItKernel::KernelSystem* kernel = nullptr;
+
+	// Cache
+	UPROPERTY()
+	TSet<AFINComputerProcessor*> Processors;
+
+	UPROPERTY()
+    TSet<AFINComputerMemory*> Memories;
+
+	UPROPERTY()
+    TSet<AFINComputerDriveHolder*> DriveHolders;
 
 	AFINComputerCase();
 	~AFINComputerCase();
@@ -52,30 +63,59 @@ public:
 
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
+	virtual void GatherDependencies_Implementation(TArray< UObject* >& out_dependentObjects) override;
 	// End IFGSaveInterface
 
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void AddProcessor(AFINComputerProcessor* processor);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void RemoveProcessor(AFINComputerProcessor* processor);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void AddMemory(AFINComputerMemory* memory);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void RemoveMemory(AFINComputerMemory* memory);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+	void RecalculateMemory();
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void AddDrive(AFINComputerDriveHolder* DriveHolder);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void RemoveDrive(AFINComputerDriveHolder* DriveHolder);
+	
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void AddModule(AActor* Module);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void RemoveModule(AActor* module);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void AddModules(const TArray<AActor*>& modules);
+	
 	UFUNCTION()
 	void OnModuleChanged(UObject* module, bool added);
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-		void Toggle();
+	void Toggle();
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-		FString GetCrash();
+	FString GetCrash();
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-		EComputerState GetState();
+	EComputerState GetState();
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-		FString GetSerialOutput();
-
-	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-		void WriteSerialInput(const FString& str);
-
-	void recalculateKernelResources();
+    void WriteSerialInput(const FString& str);
+	
+	UFUNCTION(BlueprintCallable, Category="Network|Computer")
+	FString GetSerialOutput();
 
 	UFUNCTION()
-		void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
+	void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
 
 private:
 	UPROPERTY()

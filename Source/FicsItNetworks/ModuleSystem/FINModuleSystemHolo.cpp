@@ -67,19 +67,19 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 	FVector min, max;
 	switch (GetScrollRotateValue() % 40) {
 	case 0:
-		UFINModuleSystemPanel::getModuleSpace(SnappedLoc, SnappedRot = 0, getModuleSize(), min, max);
+		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 0, getModuleSize(), min, max);
 		break;
 	case -30:
 	case 10:
-		UFINModuleSystemPanel::getModuleSpace(SnappedLoc, SnappedRot = 1, getModuleSize(), min, max);
+		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 1, getModuleSize(), min, max);
 		break;
 	case -20:
 	case 20:
-		UFINModuleSystemPanel::getModuleSpace(SnappedLoc, SnappedRot = 2, getModuleSize(), min, max);
+		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 2, getModuleSize(), min, max);
 		break;
 	case -10:
 	case 30:
-		UFINModuleSystemPanel::getModuleSpace(SnappedLoc, SnappedRot = 3, getModuleSize(), min, max);
+		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 3, getModuleSize(), min, max);
 		break;
 	}
 	bIsValid = checkSpace(min, max);

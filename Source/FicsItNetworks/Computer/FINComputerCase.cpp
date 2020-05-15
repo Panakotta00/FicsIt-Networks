@@ -1,18 +1,16 @@
 #include "FINComputerCase.h"
 
-
 #include "FicsItNetworksCustomVersion.h"
 #include "FINComputerProcessor.h"
 #include "FINComputerMemory.h"
 #include "FINComputerDriveHolder.h"
-
 #include "FicsItKernel/Processor/Lua/LuaProcessor.h"
-#include "FicsItNetworks/FicsItNetworksCustomVersion.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
 	NetworkConnector->AddMerged(this);
 	NetworkConnector->SetupAttachment(RootComponent);
+	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
 	
 	Panel = CreateDefaultSubobject<UFINModuleSystemPanel>("Panel");
 	Panel->SetupAttachment(RootComponent);
@@ -26,6 +24,8 @@ AFINComputerCase::AFINComputerCase() {
 	if (HasAuthority()) mFactoryTickFunction.SetTickFunctionEnable(true);
 
 	kernel = new FicsItKernel::KernelSystem();
+	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
+	kernel->getNetwork()->component = NetworkConnector;
 }
 
 AFINComputerCase::~AFINComputerCase() {
@@ -33,35 +33,30 @@ AFINComputerCase::~AFINComputerCase() {
 }
 
 void AFINComputerCase::Serialize(FArchive& ar) {
-	ar.UsingCustomVersion(FFINCustomVersion::GUID);
 	if (ar.IsSaveGame()) {
-		if (ar.IsSaving()) {
-			// save kernel persistent state
-			State = "";
-			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&State);
-			FJsonSerializer::Serialize(kernel->persist().ToSharedRef(), Writer);
+		ar.UsingCustomVersion(FFINCustomVersion::GUID);
+		if (ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::KernelSystemPersistency) {
+			ar << NetworkConnector;
+			ar << Panel;
+			ar << Code;
+
+			if (ar.IsLoading()) {
+				TArray<AActor*> modules;
+				Panel->GetModules(modules);
+				AddModules(modules);
+			}
+			
+			kernel->Serialize(ar);
+		} else {
+			Super::Serialize(ar);
 		}
+	} else {
+		Super::Serialize(ar);
 	}
-	Super::Serialize(ar);
 }
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
-
-	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
-	
-	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
-	kernel->getNetwork()->component = NetworkConnector;
-
-	recalculateKernelResources();
-
-	// Recover saved state
-	if (State.Len() > 0) {
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(State);
-		TSharedPtr<FJsonObject> json;
-		FJsonSerializer::Deserialize(Reader, json);
-		kernel->unpersist(json);
-	}
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
@@ -72,29 +67,100 @@ bool AFINComputerCase::ShouldSave_Implementation() const {
 	return true;
 }
 
-void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
+void AFINComputerCase::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(Panel);
+}
+
+void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
+	Processors.Add(processor);
+	if (Processors.Num() == 1) {
+		// no processor already added -> add new processor
+		kernel->setProcessor(processor->CreateProcessor());
+	} else {
+		// processor already added
+		kernel->setProcessor(nullptr);
+	}
+	if (Processors.Num() > 0) Panel->AllowedModules.Remove(AFINComputerProcessor::StaticClass());
+	else Panel->AllowedModules.Add(AFINComputerProcessor::StaticClass());
+}
+
+void AFINComputerCase::RemoveProcessor(AFINComputerProcessor* processor) {
+	Processors.Remove(processor);
+	if (Processors.Num() == 1) {
+		// two processors were added -> add leaving processor to kernel
+		kernel->setProcessor((*Processors.Find(0))->CreateProcessor());
+	} else {
+		// more than two processors were added or no processor remaining -> remove processor from kernel
+		kernel->setProcessor(nullptr);
+	}
+	
+	if (Processors.Num() > 0) Panel->AllowedModules.Remove(AFINComputerProcessor::StaticClass());
+	else Panel->AllowedModules.Add(AFINComputerProcessor::StaticClass());
+}
+
+void AFINComputerCase::AddMemory(AFINComputerMemory* memory) {
+	Memories.Add(memory);
+	RecalculateMemory();
+}
+
+void AFINComputerCase::RemoveMemory(AFINComputerMemory* memory) {
+	Memories.Remove(memory);
+	RecalculateMemory();
+}
+
+void AFINComputerCase::RecalculateMemory() {
+	int64 capacity = 0;
+	for (AFINComputerMemory* memory : Memories) {
+		capacity += memory->GetCapacity();
+	}
+	kernel->setCapacity(capacity);
+}
+
+void AFINComputerCase::AddDrive(AFINComputerDriveHolder* DriveHolder) {
+	if (DriveHolders.Contains(DriveHolder)) return;
+	DriveHolders.Add(DriveHolder);
+	DriveHolder->OnDriveUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
+	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
+	kernel->addDrive(FileSystemState);
+}
+
+void AFINComputerCase::RemoveDrive(AFINComputerDriveHolder* DriveHolder) {
+	if (DriveHolders.Remove(DriveHolder) <= 0) return;
+	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
+	kernel->removeDrive(FileSystemState);
+}
+
+void AFINComputerCase::AddModule(AActor* module) {
 	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
-		if (added) {
-			if (kernel->getProcessor() == nullptr) {
-				kernel->setProcessor(processor->CreateProcessor());
-			} else {
-				kernel->setProcessor(nullptr);
-			}
-			Panel->AllowedModules.Remove(AFINComputerProcessor::StaticClass());
-		} else {
-			if (kernel->getProcessor()) kernel->setProcessor(nullptr);
-			else recalculateKernelResources();
-			if (!kernel->getProcessor()) Panel->AllowedModules.Add(AFINComputerProcessor::StaticClass());
-		}
+		AddProcessor(processor);
 	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
-		kernel->setCapacity(kernel->getCapacity() + ((added ? 1 : -1) * memory->GetCapacity()));
+		AddMemory(memory);
 	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
-		holder->OnDriveUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
-		AFINFileSystemState* state = holder->GetDrive();
-		if (IsValid(state)) {
-			if (added) kernel->addDrive(state);
-			else kernel->removeDrive(state);
-		}
+		AddDrive(holder);
+	}
+}
+
+void AFINComputerCase::RemoveModule(AActor* module) {
+	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
+		RemoveProcessor(processor);
+	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
+		RemoveMemory(memory);
+	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
+		RemoveDrive(holder);
+	}
+}
+
+void AFINComputerCase::AddModules(const TArray<AActor*>& Modules) {
+	for (AActor* Module : Modules) {
+		AddModule(Module);
+	}
+}
+
+void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
+	if (module->Implements<UFINModuleSystemModule>()) {
+		AActor* moduleActor = Cast<AActor>(module);
+		if (added) AddModule(moduleActor);
+		else RemoveModule(moduleActor);
 	}
 }
 
@@ -145,16 +211,6 @@ void AFINComputerCase::WriteSerialInput(const FString& str) {
 	FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
 	if (dev) {
 		dev->getSerial()->write(TCHAR_TO_UTF8(*str));
-	}
-}
-
-void AFINComputerCase::recalculateKernelResources() {
-	kernel->setCapacity(0);
-	kernel->setProcessor(nullptr);
-	TArray<AActor*> modules;
-	Panel->GetModules(modules);
-	for (AActor* module : modules) {
-		OnModuleChanged(module, true);
 	}
 }
 

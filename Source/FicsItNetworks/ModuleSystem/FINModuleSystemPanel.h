@@ -12,7 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINModuleDelegate, UObject*, modul
  * This component manages a collection of modules you can place onto it via the build gun.
  */
 UCLASS(meta = (BlueprintSpawnableComponent))
-class FICSITNETWORKS_API UFINModuleSystemPanel : public USceneComponent {
+class FICSITNETWORKS_API UFINModuleSystemPanel : public USceneComponent, public IFGSaveInterface {
 	GENERATED_BODY()
 
 public:
@@ -33,18 +33,25 @@ public:
 	UFINModuleSystemPanel();
 	~UFINModuleSystemPanel();
 
+	// Begin UObject
+	void Serialize(FArchive& Ar) override;
+	// End UObject
+
 	// Begin UActorComponent
-	virtual void PostLoad() override;
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type reason) override;
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 	// End UActorComponent
+
+	// Begin IFGSaveInterface
+	bool ShouldSave_Implementation() const override;
+	virtual void GatherDependencies_Implementation(TArray< UObject* >& out_dependentObjects) override;
+	// End IFGSaveInterface
 
 	/**
 	 * Returns the module at the given position.
 	 * @return	the module or nullptr if none is set on the position
 	 */
 	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
-	AActor* GetModule(int x, int y) const;
+	AActor* GetModule(int X, int Y) const;
 
 	/**
 	 * Adds the given module to the given position and rotation.
@@ -52,32 +59,32 @@ public:
 	 * @return	true if it was able to place the module
 	 */
 	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
-	bool AddModule(AActor* module, int x, int y, int rot);
+	bool AddModule(AActor* Module, int X, int Y, int Rot);
 
 	/**
 	 * Removes the given module from the panel.
-	 * !IMPORTANT! The module actor doesnt get destroyed, just the reference in the panel gets removed.
+	 * !IMPORTANT! The module actor does not get destroyed, just the reference in the panel gets removed.
 	 * @return true if it was able to remove the module from the panel.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
-	bool RemoveModule(AActor* module);
+	bool RemoveModule(AActor* Module);
 
 	/**
 	 * Returns all the modules added to the panel.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
-	void GetModules(UPARAM(ref) TArray<AActor*>& out_modules);
+	void GetModules(UPARAM(ref) TArray<AActor*>& out_modules) const;
 
 	/**
 	 * Returns the dismantle refund sum of all modules added to the panel.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
-	void GetDismantleRefund(UPARAM(ref) TArray<FInventoryStack>& out_refund);
+	void GetDismantleRefund(UPARAM(ref) TArray<FInventoryStack>& out_refund) const;
 
 	/**
 	 * Check if it should allocate the grid cache
 	 */
 	void SetupGrid();
 
-	static void getModuleSpace(FVector loc, int rot, FVector msize, FVector& min, FVector& max);
+	static void GetModuleSpace(const FVector& Loc, int Rot, const FVector& MSize, FVector& OutMin, FVector& OutMax);
 };

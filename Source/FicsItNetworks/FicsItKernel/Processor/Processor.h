@@ -60,17 +60,10 @@ namespace FicsItKernel {
 		virtual void reset() = 0;
 
 		/**
-		* Persists the current processor state to a string.
-		*
-		* @return	the processor state as a string
-		*/
-		virtual TSharedPtr<FJsonObject> persist() = 0;
-
-		/**
-		* Unpersists the processor state given as a string.
-		*
-		* @param	state	the processor state as string
-		*/
-		virtual void unpersist(TSharedPtr<FJsonObject> state) = 0;
+		 * De/Serializes the processor state from/to a archive
+		 *
+		 * @param[in]	Ar	the archive we read/write the state to
+		 */
+		virtual void Serialize(FArchive& Ar) = 0;
 	};
 }

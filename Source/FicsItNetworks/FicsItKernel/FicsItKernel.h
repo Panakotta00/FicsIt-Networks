@@ -1,14 +1,14 @@
 #pragma once
 
 #include <memory>
-#include <queue>
 
 #include "Processor/Processor.h"
 #include "FicsItFS/FINFileSystemState.h"
 #include "FicsItFS/DevDevice.h"
 #include "FicsItFS/FileSystem.h"
 #include "Network/NetworkController.h"
-#include "Json.h"
+
+struct FKernelSystemSerializationInfo;
 
 namespace FicsItKernel {
 	enum KernelState {
@@ -203,11 +203,6 @@ namespace FicsItKernel {
 		void setNetwork(Network::NetworkController* controller);
 
 		/**
-		 * Returns the currently used unreal world.
-		 */
-		UWorld* getWorld();
-
-		/**
 		 * Get current used memory.
 		 *
 		 * @return	current memory usage
@@ -222,22 +217,13 @@ namespace FicsItKernel {
 		 * @param	components	the registry of system components you want to recalculate.
 		 */
 		void recalculateResources(Recalc components);
-
+		
 		/**
-		 * Persists the current system state to a json object.
+		 * Serializes/Deserializes the System to/from FArchive.
+		 * Dynamic data like drives & processors should be added beforehand!
 		 *
-		 * @return	the kernel state as a json object
+		 * @param[in]	Ar				The Archive were to/from un/serialize from/to.
 		 */
-		TSharedPtr<FJsonObject> persist();
-
-		/**
-		 * Unpersists the system state given as a json object.
-		 * Might cause the system to directly start.
-		 * If not processor is set, sets the processor state json object
-		 * to get automatically unpersited when a processor get set.
-		 *
-		 * @param	state	the system state as json object
-		 */
-		void unpersist(TSharedPtr<FJsonObject> state);
+		void Serialize(FArchive& Ar);
 	};
 }

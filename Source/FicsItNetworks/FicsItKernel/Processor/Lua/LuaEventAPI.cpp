@@ -75,8 +75,10 @@ namespace FicsItKernel {
 		};
 
 		void setupEventAPI(lua_State* L) {
+			PersistSetup("Event", -2);
 			lua_newtable(L);
 			luaL_setfuncs(L, luaEventLib, 0);
+			PersistTable("Lib", -1);
 			lua_setglobal(L, "event");
 		}
 	}

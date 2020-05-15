@@ -22,6 +22,8 @@ public:
 	explicit FFINNetworkTrace(UObject* obj) : trace(obj) {}
 	FFINNetworkTrace(const FicsItKernel::Network::NetworkTrace& trace) : trace(trace) {}
 
+	bool Serialize(FArchive& Ar);
+
 	operator FicsItKernel::Network::NetworkTrace() {
 		return trace;
 	}
@@ -42,6 +44,21 @@ public:
 		return trace == other.trace;
 	}
 };
+
+inline bool FFINNetworkTrace::Serialize(FArchive& Ar) {
+	if (Ar.IsSaveGame()) {
+		TWeakObjectPtr<UObject> ptr = trace.getUnderlyingPtr();
+		Ar << ptr;
+		trace.obj = ptr;
+	}
+
+	return true;
+}
+
+inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
+	trace.Serialize(Ar);
+	return Ar;
+}
 
 FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& trace) {
 	return GetTypeHash(trace.trace.getUnderlyingPtr());

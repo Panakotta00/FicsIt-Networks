@@ -61,6 +61,22 @@ extern "C" {
 	lua_getglobal(L, Name); \
 	PersistValue(Name);
 
+#define PersistTable(Name, Idx) _PersistTable(L, _persist_permTableIdx, _persist_upermTableIdx, _persist_namespace, Name, Idx)
+inline void _PersistTable(lua_State* L, int _persist_permTableIdx, int _persist_upermTableIdx, const std::string& _persist_namespace, const std::string& name, int idx) {
+	idx = lua_absindex(L, idx);
+	lua_pushnil(L);
+	while (lua_next(L, idx) != 0) {
+		const char* str = lua_tostring(L, -2);
+		if (str && (lua_iscfunction(L, -1) || lua_isuserdata(L, -1))) {
+			PersistValue(name + "-" + std::string(str));
+        } else {
+        	lua_pop(L, 1);
+        }
+	}
+	lua_pushvalue(L, idx);
+	PersistValue(name);
+}
+
 namespace FicsItKernel {
 	namespace Lua {
 		enum LuaDataType {

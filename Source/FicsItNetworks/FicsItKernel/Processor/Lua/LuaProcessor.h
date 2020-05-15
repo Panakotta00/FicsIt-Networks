@@ -10,6 +10,23 @@ struct lua_Debug;
 
 namespace FicsItKernel {
 	namespace Lua {
+		class FLuaProcessorStateStorage {
+		private:
+			TArray<FFINNetworkTrace> Traces;
+            TArray<UObject*> References;
+
+		public:
+			bool Serialize(FArchive& Ar);
+			
+			int32 Add(const FFINNetworkTrace& Trace);
+
+			int32 Add(UObject* Ref);
+
+			FFINNetworkTrace GetTrace(int32 id);
+
+			UObject* GetRef(int32 id);
+		};
+		
 		class LuaSignalReader : public Network::SignalReader {
 		private:
 			lua_State* L;
@@ -51,8 +68,7 @@ namespace FicsItKernel {
 			virtual void tick(float delta) override;
 			virtual void reset() override;
 			virtual std::int64_t getMemoryUsage(bool recalc = false) override;
-			virtual TSharedPtr<FJsonObject> persist() override;
-			virtual void unpersist(TSharedPtr<FJsonObject> state) override;
+			virtual void Serialize(FArchive& Ar) override;
 			// End Processor
 
 			/**
@@ -73,6 +89,9 @@ namespace FicsItKernel {
 
 			static void luaHook(lua_State* L, lua_Debug* ar);
 			static int luaAPIReturn(lua_State* L, int args);
+			
+			void persist(FString& Thread, FString& Globals, FLuaProcessorStateStorage& Storage);
+			void unpersist(const FString& Thread, const FString& Globals, FLuaProcessorStateStorage& Storage);
 		};
 	}
 }

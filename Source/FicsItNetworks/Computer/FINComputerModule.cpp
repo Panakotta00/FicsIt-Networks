@@ -1,10 +1,5 @@
 #include "FINComputerModule.h"
 
-void AFINComputerModule::BeginPlay() {
-	Execute_setPanel(this, ModulePanel, (int)ModulePos.X, (int)ModulePos.Y, (int)ModulePos.Z);
-	Super::BeginPlay();
-}
-
 void AFINComputerModule::EndPlay(EEndPlayReason::Type reason) {
 	if (ModulePanel) ModulePanel->RemoveModule(this);
 }
@@ -13,15 +8,15 @@ bool AFINComputerModule::ShouldSave_Implementation() const {
 	return true;
 }
 
-void AFINComputerModule::setPanel_Implementation(UFINModuleSystemPanel* panel, int x, int y, int rot) {
-	ModulePanel = panel;
-	ModulePos = FVector((float)x, (float)y, (float)rot);
-	if (IsValid(ModulePanel)) ModulePanel->AddModule(this, x, y, rot);
+void AFINComputerModule::setPanel_Implementation(UFINModuleSystemPanel* Panel, const int X, const int Y, const int Rot) {
+	ModulePanel = Panel;
+	ModulePos = FVector(static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Rot));
+	if (IsValid(ModulePanel)) ModulePanel->AddModule(this, X, Y, Rot);
 }
 
-void AFINComputerModule::getModuleSize_Implementation(int& width, int& height) const {
-	width = (int) ModuleSize.X;
-	height = (int) ModuleSize.Y;
+void AFINComputerModule::getModuleSize_Implementation(int& Width, int& Height) const {
+	Width = static_cast<int>(ModuleSize.X);
+	Height = static_cast<int>(ModuleSize.Y);
 }
 
 FName AFINComputerModule::getName_Implementation() const {

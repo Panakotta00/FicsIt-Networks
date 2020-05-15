@@ -381,16 +381,20 @@ namespace FicsItKernel {
 		}
 
 		void setupFileSystemAPI(KernelSystem* kernel, lua_State * L) {
+			PersistSetup("FileSystem", -2);
+			
 			luaL_newlibtable(L, luaFileSystemLib);
 			auto& fs_ud = *(KernelSystem**)lua_newuserdata(L, sizeof(void*));
 			fs_ud = kernel;
 			luaL_setfuncs(L, luaFileSystemLib, 1);
+			PersistTable("Lib", -1);
 			lua_setglobal(L, "filesystem");
 
 			luaL_newmetatable(L, "File");
 			lua_pushvalue(L, -1);
 			lua_setfield(L, -2, "__index");
 			luaL_setfuncs(L, luaFileLib, 0);
+			PersistTable("File", -1);
 			lua_pop(L, 1);
 		}
 	}

@@ -1,10 +1,6 @@
 #include "FicsItKernel.h"
 
-#include "Processor/Lua/LuaProcessor.h"
-
 #include "SML/util/Logging.h"
-
-#include "Json.h"
 
 namespace FicsItKernel {
 	KernelCrash::KernelCrash(std::string what) : std::exception(what.c_str()) {}
@@ -42,7 +38,6 @@ namespace FicsItKernel {
 		this->processor = std::unique_ptr<Processor>(processor);
 		if (getProcessor()) {
 			processor->setKernel(this);
-			if (readyToUnpersist.IsValid()) unpersist(readyToUnpersist);
 		}
 	}
 
@@ -105,24 +100,26 @@ namespace FicsItKernel {
 
 		state = RUNNING;
 		
-		if (getProcessor() == nullptr) {
-			crash(KernelCrash("No processor set"));
-			return false;
-		}
-		
 		kernelCrash = KernelCrash("");
 
 		// reset whole system (filesystem, memory, processor, signal stuff)
 		filesystem = FicsItFS::Root();
 		filesystem.addListener(listener);
 		memoryUsage = 0;
-		processor->reset();
 
 		// create & init devDevice
 		devDevice = new FicsItFS::DevDevice();
 		for (auto& drive : drives) {
 			devDevice->addDevice(drive.second, TCHAR_TO_UTF8(*drive.first->ID.ToString()));
 		}
+
+		// check & reset processor
+		if (getProcessor() == nullptr) {
+			crash(KernelCrash("No processor set"));
+			return false;
+		}
+		processor->reset();
+		
 
 		// finish start
 		return true;
@@ -158,7 +155,7 @@ namespace FicsItKernel {
 		state = CRASHED;
 		kernelCrash = crash;
 		
-		try {
+		if (getDevDevice()) try {
 			auto serial = getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
 			if (serial) {
 				*serial << "\r\n" << kernelCrash.what() << "\r\n";
@@ -191,58 +188,24 @@ namespace FicsItKernel {
 		return memoryUsage;
 	}
 
-	TSharedPtr<FJsonObject> KernelSystem::persist() {
-		TSharedPtr<FJsonObject> json = MakeShareable(new FJsonObject());
-		switch(getState()) {
-		case SHUTOFF:
-			json->SetNumberField("SystemState", 0);
-			break;
-		case RUNNING:
-			json->SetNumberField("SystemState", 1);
-			break;
-		case CRASHED:
-			json->SetNumberField("SystemState", 2);
-			break;
-		case RESET:
-			json->SetNumberField("SystemState", 3);
-			break;
-		}
-
-		if (processor) {
-			TSharedPtr<FJsonObject> processorState = processor->persist();
-			json->SetObjectField("ProcessorState", processorState);
-		}
+	void KernelSystem::Serialize(FArchive& Ar) {
+		int32 systemState = state;
+		Ar << systemState;
+		state = static_cast<KernelState>(state);
+		if (state == RUNNING) start(true);
 		
-		return json;
-    }
+		// TODO: Serialize System Crash
 
-	void KernelSystem::unpersist(TSharedPtr<FJsonObject> json) {
-		if (processor) {
-			switch(json->GetIntegerField("SystemState")) {
-			case 0:
-                state = SHUTOFF;
-				break;
-			case 1:
-                start(true);
-				break;
-			case 2:
-                state = CRASHED;
-				break;
-			case 3:
-                state = RESET;
-				break;
-			}
-
-			try {
-				processor->unpersist(json->GetObjectField("ProcessorState"));
-			} catch (...) {
-				stop();
-				SML::Logging::error("Unable to unpersist computer state! Network: '", TCHAR_TO_UTF8(*getNetwork()->getComponent()->GetPathName()), "'");
-			}
-		} else {
-			readyToUnpersist = json;
+		bool proc = processor.get() != nullptr;
+		Ar << proc;
+		if (proc) {
+			if (processor.get() == nullptr) throw std::exception("Wanted to deserialize a processor, but none was set");
+			processor->Serialize(Ar);
 		}
-    }
+
+		// TODO: Serialize FileSystem
+		// TODO: Serialize Network (Signals)
+	}
 
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
 

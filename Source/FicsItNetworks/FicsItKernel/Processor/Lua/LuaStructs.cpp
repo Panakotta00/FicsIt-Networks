@@ -86,16 +86,21 @@ namespace FicsItKernel {
 		// End FInventoryStack
 
 		void FicsItKernel::Lua::setupStructs(lua_State* L) {
+			PersistSetup("Structs", -2);
+			
 			luaL_newmetatable(L, "Item");
 			luaL_setfuncs(L, luaItemLib, 0);
+			PersistTable("Item", -1);
 			lua_pop(L, 1);
 
 			luaL_newmetatable(L, "ItemAmount");
 			luaL_setfuncs(L, luaItemAmountLib, 0);
+			PersistTable("ItemAmount", -1);
 			lua_pop(L, 1);
 
 			luaL_newmetatable(L, "ItemStack");
 			luaL_setfuncs(L, luaItemStackLib, 0);
+			PersistTable("ItemStack", -1);
 			lua_pop(L, 1);
 		}
 	}

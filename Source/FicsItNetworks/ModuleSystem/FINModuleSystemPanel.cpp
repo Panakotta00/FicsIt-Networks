@@ -1,29 +1,55 @@
 #include "FINModuleSystemPanel.h"
 
 #include "FGDismantleInterface.h"
+#include "FicsItNetworksCustomVersion.h"
 
-UFINModuleSystemPanel::UFINModuleSystemPanel() {}
+UFINModuleSystemPanel::UFINModuleSystemPanel() : grid(nullptr) {}
 
 UFINModuleSystemPanel::~UFINModuleSystemPanel() {}
+
+void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
+	if (Ar.IsSaveGame()) {
+		Ar.UsingCustomVersion(FFINCustomVersion::GUID);
+		if (Ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::PanelSerialization) {
+			SetupGrid();
+
+			int height = PanelHeight, width = PanelWidth;
+			Ar << height;
+			Ar << width;
+		
+			for (int x = 0; x < height; ++x) {
+				for (int y = 0; y < width; ++y) {
+					if (x < PanelHeight && y < PanelHeight) {
+						Ar << grid[x][y];
+					} else {
+						UObject* ptr = nullptr;
+						Ar << ptr;
+					}
+				}
+			}
+		} else {
+			Super::Serialize(Ar);
+		}
+	} else {
+		Super::Serialize(Ar);
+	}
+}
 
 void UFINModuleSystemPanel::EndPlay(const EEndPlayReason::Type reason) {
 	Super::EndPlay(reason);
 
+	if (grid == nullptr) return;
 	for (int i = 0; i < PanelWidth; ++i) delete[] grid[i];
 	delete[] grid;
 	grid = nullptr;
 }
 
-void UFINModuleSystemPanel::PostLoad() {
-	Super::PostLoad();
-
-	SetupGrid();
+bool UFINModuleSystemPanel::ShouldSave_Implementation() const {
+	return true;
 }
 
-void UFINModuleSystemPanel::BeginPlay() {
-	Super::BeginPlay();
-
-	SetupGrid();
+void UFINModuleSystemPanel::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	
 }
 
 bool UFINModuleSystemPanel::AddModule(AActor* module, int x, int y, int rot) {
@@ -33,28 +59,28 @@ bool UFINModuleSystemPanel::AddModule(AActor* module, int x, int y, int rot) {
 	Cast<IFINModuleSystemModule>(module)->Execute_getModuleSize(module, w, h);
 
 	FVector min, max;
-	getModuleSpace({(float)x, (float)y, 0.0f}, rot, {(float)w, (float)h, 0.0f}, min, max);
-	for (int x = (int)min.X; x <= max.X; ++x) for (int y = (int)min.Y; y <= max.Y; ++y) {
-		grid[x][y] = module;
+	GetModuleSpace({static_cast<float>(x), static_cast<float>(y), 0.0f}, rot, {static_cast<float>(w), static_cast<float>(h), 0.0f}, min, max);
+	for (int MX = static_cast<int>(min.X); MX <= max.X; ++MX) for (int MY = static_cast<int>(min.Y); MY <= max.Y; ++MY) {
+		grid[MX][MY] = module;
 	}
 
 	OnModuleChanged.Broadcast(module, true);
 	return true;
 }
 
-bool UFINModuleSystemPanel::RemoveModule(AActor* module) {
+bool UFINModuleSystemPanel::RemoveModule(AActor* Module) {
 	if (!grid) return false;
 
 	bool removed = false;
 	for (int x = 0; x < PanelHeight; ++x) for (int y = 0; y < PanelWidth; ++y) {
 		auto& s = grid[x][y];
-		if (s == module) {
+		if (s == Module) {
 			s = nullptr;
 			removed = true;
 		}
 	}
 
-	if (removed) OnModuleChanged.Broadcast(module, false);
+	if (removed) OnModuleChanged.Broadcast(Module, false);
 
 	return removed;
 }
@@ -64,7 +90,7 @@ AActor* UFINModuleSystemPanel::GetModule(int x, int y) const {
 	return  (x >= 0 && x < PanelHeight && y >= 0 && y < PanelWidth) ? grid[x][y] : nullptr;;
 }
 
-void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) {
+void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) const {
 	for (int x = 0; x < PanelHeight; ++x) {
 		for (int y = 0; y < PanelWidth; ++y) {
 			auto m = GetModule(x, y);
@@ -75,7 +101,7 @@ void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) {
 	}
 }
 
-void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) {
+void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) const {
 	TSet<AActor*> modules;
 	for (int x = 0; x < PanelHeight; ++x) for (int y = 0; y < PanelWidth; ++y) {
 		auto m = GetModule(x, y);
@@ -98,24 +124,26 @@ void UFINModuleSystemPanel::SetupGrid() {
 	}
 }
 
-void UFINModuleSystemPanel::getModuleSpace(FVector loc, int rot, FVector msize, FVector& min, FVector& max) {
-	auto s = msize - 1;
-	switch (rot) {
+void UFINModuleSystemPanel::GetModuleSpace(const FVector& Loc, const int Rot, const FVector& MSize, FVector& OutMin, FVector& OutMax) {
+	const FVector s = MSize - 1;
+	switch (Rot) {
 	case 0:
-		min = loc;
-		max = loc + s;
+		OutMin = Loc;
+		OutMax = Loc + s;
 		break;
 	case 1:
-		min = {loc.X - s.Y, loc.Y, 0.0f};
-		max = {loc.X, loc.Y + s.X, 0.0f};
+		OutMin = {Loc.X - s.Y, Loc.Y, 0.0f};
+		OutMax = {Loc.X, Loc.Y + s.X, 0.0f};
 		break;
 	case 2:
-		min = loc - s;
-		max = loc;
+		OutMin = Loc - s;
+		OutMax = Loc;
 		break;
 	case 3:
-		min = {loc.X, loc.Y - s.X, 0.0f};
-		max = {loc.X + s.Y, loc.Y, 0.0f};
+		OutMin = {Loc.X, Loc.Y - s.X, 0.0f};
+		OutMax = {Loc.X + s.Y, Loc.Y, 0.0f};
+		break;
+	default:
 		break;
 	}
 }

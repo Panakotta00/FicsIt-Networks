@@ -23,7 +23,6 @@ public:
 		UFINModuleSystemPanel* ModulePanel = nullptr;
 
 	// Begin AActor
-	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type reason) override;
 	// End AActor
 
@@ -32,8 +31,8 @@ public:
 	// End IFGSaveInterface
 
 	// Begin IFINModuleSystemModule
-	virtual void setPanel_Implementation(UFINModuleSystemPanel* panel, int x, int y, int rot) override;
-	virtual void getModuleSize_Implementation(int& width, int& height) const override;
+	virtual void setPanel_Implementation(UFINModuleSystemPanel* Panel, int X, int Y, int Rot) override;
+	virtual void getModuleSize_Implementation(int& Width, int& Height) const override;
 	virtual FName getName_Implementation() const override;
 	// End IFINModuleSystemModule
 };
