@@ -6,6 +6,7 @@
 #include "ModuleSystem/FINModuleSystemPanel.h"
 
 #include "FicsItKernel/FicsItKernel.h"
+#include "FicsItKernel/KernelSystemSerializationInfo.h"
 
 #include "FINComputerCase.generated.h"
 
@@ -33,6 +34,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 		FString Code;
+
+	UPROPERTY()
+		FKernelSystemSerializationInfo KernelState;
 	
 	FicsItKernel::KernelSystem* kernel = nullptr;
 
@@ -63,7 +67,7 @@ public:
 
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
-	virtual void GatherDependencies_Implementation(TArray< UObject* >& out_dependentObjects) override;
+	virtual void PostLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	// End IFGSaveInterface
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")

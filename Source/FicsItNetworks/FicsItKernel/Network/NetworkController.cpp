@@ -60,5 +60,52 @@ namespace FicsItKernel {
 			};
 			return std::set<NetworkTrace>();
 		}
+
+#pragma optimize("", off)
+		void NetworkController::Serialize(FArchive& Ar) {
+			// serialize signal listeners
+			TArray<FFINNetworkTrace> networkTraces;
+			if (Ar.IsSaving()) for (const Network::NetworkTrace& trace : signalListeners) {
+				networkTraces.Add(trace);
+			}
+			Ar << networkTraces;
+			if (Ar.IsLoading()) for (FFINNetworkTrace& trace : networkTraces) {
+				signalListeners.insert(trace);
+			}
+
+			// serialize signals
+			int32 signalCount = signals.size();
+			Ar << signalCount;
+			if (Ar.IsSaving()) for (int i = 0; i < signalCount; ++i) {
+				std::pair<std::shared_ptr<Signal>, NetworkTrace> signal = signals.front();
+				signals.pop();
+				bool valid = signal.first.get();
+				Ar << valid;
+				if (!valid) continue;
+					
+				signals.push(signal);
+				
+				// save signal
+				FFINNetworkTrace trace = signal.second;
+				Ar << trace;
+				FString typeName = signal.first->getTypeName().c_str();
+				Ar << typeName;
+				signal.first->Serialize(Ar);
+			}
+			if (Ar.IsLoading()) for (int i = 0; i < signalCount; ++i) {
+				bool valid = false;
+				Ar << valid;
+				if (!valid) continue;
+				
+				// load signal
+				FFINNetworkTrace trace;
+				Ar << trace;
+				FString typeName;
+				Ar << typeName;
+				std::shared_ptr<Signal> signal = Signal::deserializeSignal(TCHAR_TO_UTF8(*typeName), Ar);
+				signals.push({signal, trace});
+			}
+		}
+#pragma optimize("", on)
 	}
 }

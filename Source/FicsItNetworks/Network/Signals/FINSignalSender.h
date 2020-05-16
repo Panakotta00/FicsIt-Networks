@@ -56,7 +56,12 @@ public:
 
 	public:
 		BPSignal(std::string name, UFunction* func, void* data);
-
+		BPSignal(FArchive& Ar);
+		
 		virtual int operator>>(FicsItKernel::Network::SignalReader& reader) const override;
+
+		virtual std::string getTypeName() override;
+
+		virtual void Serialize(FArchive& Ar) override;
 	};
 };

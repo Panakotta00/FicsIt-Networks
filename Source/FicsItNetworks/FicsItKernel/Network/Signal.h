@@ -38,10 +38,33 @@ namespace FicsItKernel {
 		};
 
 		class Signal {
+		public:
+			typedef std::function<std::shared_ptr<Signal>(FArchive&)> SignalDeserializeFunc;
+			
 		private:
+			static std::map<std::string, SignalDeserializeFunc> SignalRegistry;
+
+		protected:
 			std::string name;
 
 		public:
+			/**
+			 * Adds a signal type to the signal registry
+			 *
+			 * @param[in]	name 	the signal type name of the new signal
+			 * @param[in]	func	the signal deserialization function
+			 */
+			static void registerSignalType(const std::string& name, SignalDeserializeFunc func);
+
+			/**
+			 * Serialize signal via type
+			 *
+			 * @param[in]	name	the signal type name of the signal you want to serialize
+			 * @aaram[in]	ar		the archive from where you want to read the data
+			 * @return	the created and deserialized signal
+			 */
+			static std::shared_ptr<Signal> deserializeSignal(const std::string& name, FArchive& ar);
+			
 			Signal(std::string name);
 			virtual ~Signal() {}
 
@@ -56,6 +79,26 @@ namespace FicsItKernel {
 			 * Allowing to convert the signal arguments to the values each processor supports.
 			 */
 			virtual int operator>>(SignalReader& reader) const = 0;
+
+			/**
+			 * De/Serialize the signal to an archive
+			 *
+			 * @param[in]	the archive which stores the signal information
+			 */
+			virtual void Serialize(FArchive& Ar) = 0;
+
+			/**
+			 * Returns the signal type name
+			 *
+			 * @return	the signal type name
+			 */
+			virtual std::string getTypeName() = 0;
+		};
+		
+		struct SignalTypeRegisterer {
+			SignalTypeRegisterer(const std::string& name, Signal::SignalDeserializeFunc func) {
+				Signal::registerSignalType(name, func);
+			}
 		};
 
 		class NoSignal : public Signal {
@@ -63,6 +106,10 @@ namespace FicsItKernel {
 			NoSignal() : Signal("None") {}
 
 			virtual int operator>>(SignalReader& reader) const { return 0; }
+
+			virtual std::string getTypeName() { return "NoSignal"; };
+
+			virtual void Serialize(FArchive& Ar) {};
 		};
 	}
 }

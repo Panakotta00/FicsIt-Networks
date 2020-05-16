@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include "Network/FINNetworkTrace.h"
+
 namespace FicsItKernel {
 	namespace Network {
 		struct VariaDicSignalElem {
@@ -75,6 +77,32 @@ namespace FicsItKernel {
 
 			VariaDicSignalElem(const VariaDicSignalElem& other) {
 				*this = other;
+			}
+
+			VariaDicSignalElem(FArchive& Ar) {
+				int t;
+				Ar << t;
+				type = static_cast<Type>(t);
+
+				switch (type) {
+				case String:
+                    data.STRING = new std::string();
+					break;
+				case Trace:
+                    data.TRACE = new Network::NetworkTrace();
+					break;
+				case Item:
+                    data.ITEM = new FInventoryItem();
+					break;
+				case ItemAmount:
+                    data.ITEM_AMOUNT = new FItemAmount();
+					break;
+				case Stack:
+                    data.STACK = new FInventoryStack();
+					break;
+				}
+
+				serialize(Ar);
 			}
 
 			VariaDicSignalElem(VariaDicSignalElem&& other) {
@@ -173,6 +201,52 @@ namespace FicsItKernel {
 				return data.STACK;
 			}
 
+			void serialize(FArchive& Ar) {
+				if (Ar.IsSaving()) {
+					int t = type;
+					Ar << t;
+				}
+				
+				switch (type) {
+				case Int:
+					Ar << data.INT;
+					break;
+				case Float:
+					Ar << data.FLOAT;
+					break;
+				case Bool:
+					Ar << data.BOOL;
+					break;
+				case String: {
+					FString str = FString(data.STRING->c_str(), data.STRING->length());
+					Ar << str;
+					*data.STRING = std::string(TCHAR_TO_UTF8(*str), str.Len());
+					break;
+				} case Object:
+					Ar << data.OBJECT;
+					break;
+				case Trace: {
+					FFINNetworkTrace trace = *data.TRACE;
+					Ar << trace;
+					*data.TRACE = trace;
+					break;
+				} case Class:
+					Ar << data.OBJECT;
+					break;
+				case Item:
+					data.ITEM->Serialize(Ar);
+					break;
+				case ItemAmount:
+					Ar << data.ITEM_AMOUNT->Amount;
+					Ar << data.ITEM_AMOUNT->ItemClass;
+					break;
+				case Stack:
+					data.STACK->Item.Serialize(Ar);
+					Ar << data.STACK->NumItems;
+					break;
+				}
+			}
+
 		private:
 			Type type;
 			union {
@@ -198,7 +272,13 @@ namespace FicsItKernel {
 			template<typename... Ts>
 			SmartSignal(std::string signalName, Ts&&... args) : SmartSignal(signalName, {VariaDicSignalElem(args)...}) {}
 
+			SmartSignal(FArchive& Ar);
+			
 			virtual int operator>>(SignalReader& reader) const override;
+
+			virtual void Serialize(FArchive& Ar) override;
+
+			virtual std::string getTypeName() override;
 		};
 	}
 }

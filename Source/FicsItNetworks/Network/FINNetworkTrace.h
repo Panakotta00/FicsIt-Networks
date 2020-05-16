@@ -43,11 +43,15 @@ public:
 	bool operator==(const FFINNetworkTrace& other) const {
 		return trace == other.trace;
 	}
+
+	FicsItKernel::Network::NetworkTrace& getTrace() {
+		return trace;
+	}
 };
 
 inline bool FFINNetworkTrace::Serialize(FArchive& Ar) {
 	if (Ar.IsSaveGame()) {
-		TWeakObjectPtr<UObject> ptr = trace.getUnderlyingPtr();
+		UObject* ptr = trace.getUnderlyingPtr().Get();
 		Ar << ptr;
 		trace.obj = ptr;
 	}

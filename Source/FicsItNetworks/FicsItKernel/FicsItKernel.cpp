@@ -1,5 +1,7 @@
 #include "FicsItKernel.h"
 
+#include "KernelSystemSerializationInfo.h"
+#include "Processor/Lua/LuaProcessor.h"
 #include "SML/util/Logging.h"
 
 namespace FicsItKernel {
@@ -188,23 +190,52 @@ namespace FicsItKernel {
 		return memoryUsage;
 	}
 
-	void KernelSystem::Serialize(FArchive& Ar) {
-		int32 systemState = state;
-		Ar << systemState;
-		state = static_cast<KernelState>(state);
-		if (state == RUNNING) start(true);
-		
-		// TODO: Serialize System Crash
+	void KernelSystem::Serialize(FArchive& Ar, FKernelSystemSerializationInfo& OutSystemState) {
+		// serialize system state
+		OutSystemState.systemState = state;
+		Ar << OutSystemState.systemState;
 
+		// serialize kernel crash
+		FString crashMsg = kernelCrash.what();
+		Ar << crashMsg;
+		if (crashMsg.Len() > 0) kernelCrash = KernelCrash(TCHAR_TO_UTF8(*crashMsg));
+
+		// serialize processor
 		bool proc = processor.get() != nullptr;
 		Ar << proc;
-		if (proc) {
-			if (processor.get() == nullptr) throw std::exception("Wanted to deserialize a processor, but none was set");
-			processor->Serialize(Ar);
+		if (Ar.IsSaving()) {
+			// Serialize processor
+			if (proc) {
+				UProcessorStateStorage* procState = processor->CreateSerializationStorage();
+				TSubclassOf<UProcessorStateStorage> storageClass = procState->GetClass();
+				Ar << storageClass;
+				processor->Serialize(procState);
+				procState->Serialize(Ar);
+			}
+		} else if (Ar.IsLoading()) {
+			// Deserialize processor
+			if (proc) {
+				UClass* storageClass = nullptr;
+				Ar << storageClass;
+				OutSystemState.processorState = Cast<UProcessorStateStorage>(NewObject<UProcessorStateStorage>(GetTransientPackage(), storageClass));
+				OutSystemState.processorState->Serialize(Ar);
+			}
 		}
-
+		
+		// Serialize Network
+		network->Serialize(Ar);
+		
 		// TODO: Serialize FileSystem
-		// TODO: Serialize Network (Signals)
+	}
+
+	void KernelSystem::postLoad(const FKernelSystemSerializationInfo& Data) {
+		state = static_cast<KernelState>(Data.systemState);
+		if (state == RUNNING) start(true);
+		
+		if (Data.processorState) {
+			if (processor.get() == nullptr) throw std::exception("Wanted to deserialize a processor, but none was set");
+			processor->Deserialize(Data.processorState);
+		}
 	}
 
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}

@@ -10,19 +10,21 @@
 #include <map>
 #include <functional>
 
+#include "SubclassOf.h"
+
 namespace FicsItKernel {
 	namespace Lua {
 		typedef std::function<int(lua_State*, int, const Network::NetworkTrace&)> LuaLibFunc;
 		typedef std::function<int(lua_State*, int, UClass*)> LuaLibClassFunc;
 
-		extern std::map<UClass*, std::vector<std::pair<std::string, LuaLibFunc>>> instanceClasses;
-		extern std::map<UClass*, std::vector<std::pair<std::string, LuaLibClassFunc>>> instanceSubclasses;
+		extern std::map<UClass*, std::map<std::string, LuaLibFunc>> instanceClasses;
+		extern std::map<UClass*, std::map<std::string, LuaLibClassFunc>> instanceSubclasses;
 
 		typedef Network::NetworkTrace LuaInstance;
 		typedef UClass* LuaClassInstance;
-		typedef std::pair<LuaInstance, LuaLibFunc> LuaInstanceFunc;
+		typedef std::pair<LuaInstance, std::pair<std::pair<UClass*, std::string>, LuaLibFunc>> LuaInstanceFunc;
 		typedef std::pair<LuaInstance, UFunction*> LuaInstanceUFunc;
-		typedef std::pair<LuaClassInstance, LuaLibClassFunc> LuaClassInstanceFunc;
+		typedef std::pair<LuaClassInstance, std::pair<std::string, LuaLibClassFunc>> LuaClassInstanceFunc;
 
 		bool newInstance(lua_State* L, Network::NetworkTrace obj);
 		bool newInstance(lua_State* L, UClass* clazz);

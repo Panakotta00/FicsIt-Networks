@@ -97,7 +97,7 @@ namespace FicsItKernel {
 		/**
 		 * Returns the current memory capacity.
 		 *
-		 * @return	current memory capacits
+		 * @return	current memory capacity
 		 */
 		std::int64_t getCapacity() const;
 
@@ -220,10 +220,20 @@ namespace FicsItKernel {
 		
 		/**
 		 * Serializes/Deserializes the System to/from FArchive.
-		 * Dynamic data like drives & processors should be added beforehand!
+		 * Loads most data directly.
+		 * Dynamic data like drives & processors will finish initialization with postLoad
 		 *
 		 * @param[in]	Ar				The Archive were to/from un/serialize from/to.
+		 * @parm[out]	OutSystemState	the structure which will hold the system state
 		 */
-		void Serialize(FArchive& Ar);
+		void Serialize(FArchive& Ar, FKernelSystemSerializationInfo& OutSystemState);
+
+		/**
+		 * This will cause the processor finally to load it's state.
+		 * Call this after every necessery information got serialized.
+		 *
+		 * @param[in]	Data	The kernel postload data object fully serialized.
+		 */
+		void postLoad(const FKernelSystemSerializationInfo& Data);
 	};
 }

@@ -17,14 +17,14 @@ using namespace FicsItKernel::Lua;
 class RegisterObjectFunc {
 public:
 	RegisterObjectFunc(UClass* clazz, std::string funcName, LuaLibFunc func) {
-		FicsItKernel::Lua::instanceClasses[clazz].push_back({funcName, func});
+		FicsItKernel::Lua::instanceClasses[clazz][funcName] = func;
 	}
 };
 
 class RegisterClassFunc {
 public:
 	RegisterClassFunc(UClass* clazz, std::string funcName, LuaLibClassFunc func) {
-		FicsItKernel::Lua::instanceSubclasses[clazz].push_back({funcName, func});
+		FicsItKernel::Lua::instanceSubclasses[clazz][funcName] = func;
 	}
 };
 

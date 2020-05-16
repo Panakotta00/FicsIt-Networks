@@ -1,6 +1,7 @@
 #include "LuaInstance.h"
 
 #include "LuaProcessor.h"
+#include "LuaProcessorStateStorage.h"
 
 #include "Network/FINNetworkComponent.h"
 
@@ -16,8 +17,8 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		std::map<UClass*, std::vector<std::pair<std::string, LuaLibFunc>>> instanceClasses;
-		std::map<UClass*, std::vector<std::pair<std::string, LuaLibClassFunc>>> instanceSubclasses;
+		std::map<UClass*, std::map<std::string, LuaLibFunc>> instanceClasses;
+		std::map<UClass*, std::map<std::string, LuaLibClassFunc>> instanceSubclasses;
 
 		Network::NetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
 			if (!lua_istable(L, index)) return Network::NetworkTrace();
@@ -107,7 +108,7 @@ namespace FicsItKernel {
 		int luaInstanceFuncCall(lua_State* L) {
 			auto& data = *(LuaInstanceFunc*) lua_touserdata(L, lua_upvalueindex(1));
 			auto obj = data.first;
-			auto func = data.second;
+			auto func = data.second.second;
 
 			if (!*obj) return luaL_error(L, "component is invalid");
 
@@ -120,7 +121,7 @@ namespace FicsItKernel {
 			auto& data = *(LuaClassInstanceFunc*) lua_touserdata(L, lua_upvalueindex(1));
 			auto obj = data.first;
 			auto func = data.second;
-			func(L, lua_gettop(L), obj);
+			func.second(L, lua_gettop(L), obj);
 			return luaL_error(L, "invalid native function ptr");
 		}
 
@@ -143,7 +144,7 @@ namespace FicsItKernel {
 				if (!obj->IsA(clazz.first)) continue;
 				for (auto& func : clazz.second) {
 					auto comp_ud = (LuaInstanceFunc*) lua_newuserdata(L, sizeof(LuaInstanceFunc));
-					new (comp_ud) LuaInstanceFunc(obj, func.second);
+					new (comp_ud) LuaInstanceFunc(obj, {{clazz.first, func.first}, func.second});
 					luaL_setmetatable(L, INSTANCE_FUNC);
 					lua_pushcclosure(L, luaInstanceFuncCall, 1);
 					lua_setfield(L, -2, func.first.c_str());
@@ -200,7 +201,7 @@ namespace FicsItKernel {
 				if (iClazz->IsChildOf(clazz.first))
 				for (auto func : clazz.second) {
 					auto instanceFunc = (LuaClassInstanceFunc*)lua_newuserdata(L, sizeof(LuaClassInstanceFunc));
-					new (instanceFunc) LuaClassInstanceFunc{iClazz, func.second};
+					new (instanceFunc) LuaClassInstanceFunc{iClazz, func};
 					luaL_setmetatable(L, CLASS_INSTANCE_FUNC);
 					lua_pushcclosure(L, luaClassInstanceFuncCall, 1);
 					lua_setfield(L, -2, func.first.c_str());
@@ -246,17 +247,17 @@ namespace FicsItKernel {
 		};
 
 		int luaInstanceRefUnpersist(lua_State* L) {
-			// get persist helper
+			// get persist storage
 			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			FLuaProcessorStateStorage& storage = *(FLuaProcessorStateStorage*)lua_touserdata(L, -1);
+			ULuaProcessorStateStorage* storage = (ULuaProcessorStateStorage*)lua_touserdata(L, -1);
 				
-			// read id from upvalue & get ref from helper
-			FFINNetworkTrace trace = storage.GetTrace(lua_tointeger(L, lua_upvalueindex(1)));
+			// read id from upvalue & get ref from storage
+			FFINNetworkTrace trace = storage->GetTrace(lua_tointeger(L, lua_upvalueindex(1)));
 			
 			// push data as InstanceRef
 			LuaInstance* inst = (LuaInstance*)lua_newuserdata(L, sizeof(LuaInstance));
 			luaL_setmetatable(L, INSTANCE_REF);
-			new (inst) LuaInstance(trace);
+			new (inst) LuaInstance(std::move(trace));
 			return 1;
 		}
 #pragma optimize("", off)
@@ -264,12 +265,12 @@ namespace FicsItKernel {
 			// get data
 			const LuaInstance& obj = *(LuaInstance*)luaL_checkudata(L, -1, INSTANCE_REF);
 
-			// get persist helper
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistHelper");
-			FLuaProcessorStateStorage& storage = *(FLuaProcessorStateStorage*)lua_touserdata(L, -1);
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = (ULuaProcessorStateStorage*)lua_touserdata(L, -1);
 
-			// add trace to helper & push id
-			lua_pushinteger(L, storage.Add(obj));
+			// add trace to storage & push id
+			lua_pushinteger(L, storage->Add(obj));
 
 			// create & return closure
 			lua_pushcclosure(L, &luaInstanceRefUnpersist, 1);
@@ -283,40 +284,38 @@ namespace FicsItKernel {
 		};
 
 		int luaInstanceFuncUnpersist(lua_State* L) {
-			// read data from upvalue & prepare reader
-			size_t data_len = 0;
-			const char* data_raw = lua_tolstring(L, lua_upvalueindex(1), &data_len);
-			TArray<uint8> data = TArray<uint8>((uint8*)data_raw, data_len);
-			FMemoryReader reader = FMemoryReader(data);
-
-			// read data
-			FWeakObjectPtr ptr;
-			//reader << ptr; // TODO: use network trace instead
-			// TODO: Read func ref
-
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = (ULuaProcessorStateStorage*)lua_touserdata(L, -1);
+				
+			// read ids from upvalues & get refs from storage
+			FFINNetworkTrace trace = storage->GetTrace(lua_tointeger(L, lua_upvalueindex(1)));
+			UClass* clazzOfObj = Cast<UClass>(storage->GetRef(lua_tointeger(L, lua_upvalueindex(2))));
+			std::string funcName = lua_tostring(L, lua_upvalueindex(3));
+			auto func = instanceClasses[clazzOfObj].find(funcName);
+			
 			// push data as InstanceFunc
-			lua_pushnil(L); // TODO: push InstanceFunc & set metatable
-			LuaInstanceFunc* func = (LuaInstanceFunc*)lua_newuserdata(L, sizeof(LuaInstanceFunc));
+			LuaInstanceFunc* inst = (LuaInstanceFunc*)lua_newuserdata(L, sizeof(LuaInstanceFunc));
 			luaL_setmetatable(L, INSTANCE_FUNC);
-			new (func) LuaInstanceFunc();
+			new (inst) LuaInstanceFunc(trace, {{clazzOfObj, funcName}, func->second});
 			return 1;
 		}
 
 		int luaInstanceFuncPersist(lua_State* L) {
-			const LuaInstanceFunc& func = *(LuaInstanceFunc*)luaL_checkudata(L, 1, INSTANCE_FUNC);
+			// get data
+			const LuaInstanceFunc& obj = *(LuaInstanceFunc*)luaL_checkudata(L, -1, INSTANCE_FUNC);
 
-			// prepare data storage and writer
-			TArray<uint8> data;
-			// FObjectWriter writer = FObjectWriter(data);
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = (ULuaProcessorStateStorage*)lua_touserdata(L, -1);
 
-			// serialize func
-			FWeakObjectPtr ptr = func.first.getUnderlyingPtr().GetEvenIfUnreachable();
-			//writer << ptr; // TODO: use network trace instead
-			// TODO: write func ref
-
-			// push data as string
-			lua_pushlstring(L, (const char*)data.GetData(), data.Num());
-			lua_pushcclosure(L, &luaInstanceFuncUnpersist, 1);
+			// add trace to storage & push id & push func id
+			lua_pushinteger(L, storage->Add(obj.first));
+			lua_pushinteger(L, storage->Add(obj.second.first.first));
+			lua_pushstring(L, obj.second.first.second.c_str());
+			
+			// create & return closure
+			lua_pushcclosure(L, &luaInstanceFuncUnpersist, 3);
 			return 1;
 		}
 		
@@ -333,40 +332,35 @@ namespace FicsItKernel {
 		};
 
 		int luaInstanceUFuncUnpersist(lua_State* L) {
-			// get data from stack & prepare reader
-			size_t data_len = 0;
-			const char* data_raw = lua_tolstring(L, lua_upvalueindex(1), &data_len);
-			TArray<uint8> data = TArray<uint8>((uint8*)data_raw, data_len);
-			FMemoryReader reader = FMemoryReader(data);
-
-			// read data
-			FWeakObjectPtr ptr; // TODO: use network trace instead
-			//reader << ptr;
-			UFunction* func_ptr;
-			//reader << func_ptr;
-
-			// push data as InstanceUFunc
-			LuaInstanceUFunc* func = (LuaInstanceUFunc*)lua_newuserdata(L, sizeof(LuaInstanceUFunc));
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = (ULuaProcessorStateStorage*)lua_touserdata(L, -1);
+				
+			// read ids from upvalues & get refs from storage
+			FFINNetworkTrace trace = storage->GetTrace(lua_tointeger(L, lua_upvalueindex(1)));
+			UFunction* func = Cast<UFunction>(storage->GetRef(lua_tointeger(L, lua_upvalueindex(2))));
+			
+			// push data as InstanceRef
+			LuaInstanceUFunc* inst = (LuaInstanceUFunc*)lua_newuserdata(L, sizeof(LuaInstanceUFunc));
 			luaL_setmetatable(L, INSTANCE_UFUNC);
-			new (func) LuaInstanceUFunc(Network::NetworkTrace(ptr.GetEvenIfUnreachable()), func_ptr);
+			new (inst) LuaInstanceUFunc(trace, func);
 			return 1;
 		}
 
 		int luaInstanceUFuncPersist(lua_State* L) {
-			const LuaInstanceUFunc& func = *(LuaInstanceUFunc*)luaL_checkudata(L, 1, INSTANCE_UFUNC);
+			// get data
+			const LuaInstanceUFunc& obj = *(LuaInstanceUFunc*)luaL_checkudata(L, -1, INSTANCE_UFUNC);
 
-			// prepare data storage and writer
-			TArray<uint8> data;
-			//FObjectWriter writer = FObjectWriter(data);
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = (ULuaProcessorStateStorage*)lua_touserdata(L, -1);
 
-			// serialize func
-			FWeakObjectPtr ptr = func.first.getUnderlyingPtr().GetEvenIfUnreachable();
-			//writer << ptr; // TODO: use network trace instead
-			// TODO: write func ref
-
-			// push data as string
-			lua_pushlstring(L, (const char*)data.GetData(), data.Num());
-			lua_pushcclosure(L, &luaInstanceUFuncUnpersist, 1);
+			// add trace to storage & push id & push ufunc id
+			lua_pushinteger(L, storage->Add(obj.first));
+			lua_pushinteger(L, storage->Add(obj.second));
+			
+			// create & return closure
+			lua_pushcclosure(L, &luaInstanceUFuncUnpersist, 2);
 			return 1;
 		}
 
@@ -418,6 +412,40 @@ namespace FicsItKernel {
 			{NULL, NULL}
 		};
 
+		int luaClassInstanceFuncUnpersist(lua_State* L) {
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = (ULuaProcessorStateStorage*)lua_touserdata(L, -1);
+				
+			// read ids from upvalues & get refs from storage
+			UClass* clazz = Cast<UClass>(storage->GetRef(lua_tointeger(L, lua_upvalueindex(1))));
+			std::string funcName = lua_tostring(L, lua_upvalueindex(2));
+			LuaLibClassFunc func = instanceSubclasses[clazz][funcName.c_str()];
+			
+			// push data as InstanceRef
+			LuaClassInstanceFunc* inst = (LuaClassInstanceFunc*)lua_newuserdata(L, sizeof(LuaClassInstanceFunc));
+			luaL_setmetatable(L, CLASS_INSTANCE_FUNC);
+			new (inst) LuaClassInstanceFunc(clazz, {funcName, func});
+			return 1;
+		}
+
+		int luaClassInstanceFuncPersist(lua_State* L) {
+			// get data
+			const LuaClassInstanceFunc& obj = *(LuaClassInstanceFunc*)luaL_checkudata(L, -1, CLASS_INSTANCE_FUNC);
+
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = (ULuaProcessorStateStorage*)lua_touserdata(L, -1);
+
+			// add trace to storage & push id & push func id
+			lua_pushinteger(L, storage->Add(obj.first));
+			lua_pushstring(L, obj.second.first.c_str());
+			
+			// create & return closure
+			lua_pushcclosure(L, &luaClassInstanceFuncUnpersist, 2);
+			return 1;
+		}
+
 		int luaClassInstanceFuncGC(lua_State* L) {
 			auto c = (LuaClassInstanceFunc*) luaL_checkudata(L, 1, CLASS_INSTANCE_FUNC);
 			c->~LuaClassInstanceFunc();
@@ -425,6 +453,7 @@ namespace FicsItKernel {
 		}
 
 		static const luaL_Reg luaClassInstanceFuncLib[] = {
+			{"__persist", luaClassInstanceFuncPersist},
 			{"__gc", luaClassInstanceFuncGC},
 			{NULL, NULL}
 		};

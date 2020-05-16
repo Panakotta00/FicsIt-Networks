@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include "ProcessorStateStorage.h"
+
 namespace FicsItKernel {
 	enum ProcessorArchitecture {
 		LUA
@@ -60,10 +62,24 @@ namespace FicsItKernel {
 		virtual void reset() = 0;
 
 		/**
-		 * De/Serializes the processor state from/to a archive
+		 * Serializes the processor state and stores it in the given storage object
 		 *
-		 * @param[in]	Ar	the archive we read/write the state to
+		 * @param[in]	Storage		the serialization storage object which will hold the serialized data
 		 */
-		virtual void Serialize(FArchive& Ar) = 0;
+		virtual void Serialize(UProcessorStateStorage* Storage) = 0;
+
+		/**
+		 * Deserializes a storage object to a processor state and loads it
+		 *
+		 * @param[in]	Storage 	the storage object which holds the serialized data
+		 */
+		virtual void Deserialize(UProcessorStateStorage* Storage) = 0;
+
+		/**
+		 * Creates the storage object used to store serialization data
+		 *
+		 * @return	The created storage object
+		 */
+		virtual UProcessorStateStorage* CreateSerializationStorage() = 0;
 	};
 }

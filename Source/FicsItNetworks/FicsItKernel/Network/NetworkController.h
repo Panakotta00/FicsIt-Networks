@@ -92,6 +92,13 @@ namespace FicsItKernel {
 			void pushSignalKernel(const std::string& signalName, Ts... args) {
 				pushSignal(std::shared_ptr<Signal>(new SmartSignal(signalName, {Network::VariaDicSignalElem(args)...})), NetworkTrace(component));
 			}
+
+			/**
+			 * De/Serializes the Network Controller to a archive
+			 *
+			 * @param[in]	Ar	the archive storing the infromation
+			 */
+			void Serialize(FArchive& Ar);
 		};
 	}
 }

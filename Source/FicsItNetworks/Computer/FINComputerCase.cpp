@@ -39,14 +39,7 @@ void AFINComputerCase::Serialize(FArchive& ar) {
 			ar << NetworkConnector;
 			ar << Panel;
 			ar << Code;
-
-			if (ar.IsLoading()) {
-				TArray<AActor*> modules;
-				Panel->GetModules(modules);
-				AddModules(modules);
-			}
-			
-			kernel->Serialize(ar);
+			kernel->Serialize(ar, KernelState);
 		} else {
 			Super::Serialize(ar);
 		}
@@ -67,8 +60,12 @@ bool AFINComputerCase::ShouldSave_Implementation() const {
 	return true;
 }
 
-void AFINComputerCase::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
-	out_dependentObjects.Add(Panel);
+void AFINComputerCase::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	TArray<AActor*> modules;
+	Panel->GetModules(modules);
+	AddModules(modules);
+	
+	kernel->postLoad(KernelState);
 }
 
 void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
