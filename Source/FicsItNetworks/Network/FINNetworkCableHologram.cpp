@@ -173,17 +173,16 @@ void AFINNetworkCableHologram::OnInvalidHitResult() {
 void AFINNetworkCableHologram::onBeginSnap(FFINSnappedInfo a, bool isValid) {
 	if (a.v) {
 		auto o = a.actor;
-		// TODO: Do outline
-		//if (o) Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->->ShowOutline(o, isValid ? EOutlineColor::OC_HOLOGRAM : EOutlineColor::OC_RED);
-		//this->Client_PlaySnapSound();
+		if (o) UFGOutlineComponent::Get(o->GetWorld())->ShowOutline(o, isValid ? EOutlineColor::OC_HOLOGRAM : EOutlineColor::OC_RED);
+		// TODO: Do snap sound
+		this->Client_PlaySnapSound();
 	}
 }
 
 void AFINNetworkCableHologram::onEndSnap(FFINSnappedInfo a) {
 	if (a.v) {
 		auto o = a.actor;
-		// TODO: do outline
-		//if (o) Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetOutline()->HideOutline();
+		if (o) UFGOutlineComponent::Get(o->GetWorld())->HideOutline();
 	}
 }
 

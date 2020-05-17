@@ -25,14 +25,14 @@ namespace FicsItKernel {
 		std::shared_ptr<Signal> NetworkController::popSignal(NetworkTrace& sender) {
 			if (getSignalCount() < 1) return nullptr;
 			auto sig = signals.front();
-			signals.pop();
+			signals.pop_front();
 			sender = sig.second;
 			return sig.first;
 		}
 
 		void NetworkController::pushSignal(std::shared_ptr<Signal> signal, NetworkTrace sender) {
 			if (signals.size() >= maxSignalCount) return;
-			signals.push({std::move(signal), std::move(sender)});
+			signals.push_back({std::move(signal), std::move(sender)});
 		}
 
 		size_t NetworkController::getSignalCount() {
@@ -50,18 +50,17 @@ namespace FicsItKernel {
 		}
 
 		std::set<NetworkTrace> NetworkController::getComponentByNick(const std::string& nick) {
-			if (auto comp = Cast<IFINNetworkComponent>(component)) {
+			if (component->Implements<UFINNetworkComponent>()) {
 				std::set<NetworkTrace> outComps;
-				auto comps = comp->Execute_GetCircuit(component)->FindComponentsByNick(nick.c_str());
+				auto comps = IFINNetworkComponent::Execute_GetCircuit(component)->FindComponentsByNick(nick.c_str());
 				for (auto& c : comps) {
 					outComps.insert(NetworkTrace(component) / c);
 				}
 				return outComps;
-			};
+			}
 			return std::set<NetworkTrace>();
 		}
 
-#pragma optimize("", off)
 		void NetworkController::Serialize(FArchive& Ar) {
 			// serialize signal listeners
 			TArray<FFINNetworkTrace> networkTraces;
@@ -76,15 +75,11 @@ namespace FicsItKernel {
 			// serialize signals
 			int32 signalCount = signals.size();
 			Ar << signalCount;
-			if (Ar.IsSaving()) for (int i = 0; i < signalCount; ++i) {
-				std::pair<std::shared_ptr<Signal>, NetworkTrace> signal = signals.front();
-				signals.pop();
+			if (Ar.IsSaving()) for (auto& signal : signals) {
 				bool valid = signal.first.get();
 				Ar << valid;
 				if (!valid) continue;
 					
-				signals.push(signal);
-				
 				// save signal
 				FFINNetworkTrace trace = signal.second;
 				Ar << trace;
@@ -103,9 +98,8 @@ namespace FicsItKernel {
 				FString typeName;
 				Ar << typeName;
 				std::shared_ptr<Signal> signal = Signal::deserializeSignal(TCHAR_TO_UTF8(*typeName), Ar);
-				signals.push({signal, trace});
+				signals.push_back({signal, trace});
 			}
 		}
-#pragma optimize("", on)
 	}
 }

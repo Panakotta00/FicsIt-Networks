@@ -13,6 +13,7 @@
 
 #include "FINConfig.h"
 #include "FINComponentUtility.h"
+#include "FINSubsystemHolder.h"
 #include "Network/Signals/FINSignal.h"
 #include "Network/FINNetworkConnector.h"
 #include "Network/FINNetworkAdapter.h"
@@ -96,18 +97,18 @@ bool UnlockFactoryGrab(UFGFactoryConnectionComponent* comp) {
 }
 
 void DoFactoryGrab(UFGFactoryConnectionComponent* c, FInventoryItem& item) {
-	FicsItKernel::Lua::MutexFactoryHooks.Lock();
-	FicsItKernel::Lua::FactoryHook* hook = FicsItKernel::Lua::factoryHooks.Find(c);
+	AFINComputerSubsystem* CompSS = AFINComputerSubsystem::GetComputerSubsystem(c);
+	CompSS->MutexFactoryHooks.Lock();
+	FFINFactoryHook* hook = CompSS->FactoryHooks.Find(c);
 
 	if (hook) {
-		hook->update();
-		hook->iperm.push(std::chrono::high_resolution_clock::now());
-		for (auto& c : hook->deleg) {
+		hook->CurrentSample += 1;
+		for (auto& c : hook->Listeners) {
 			UObject* obj = *c;
 			if (obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, smartAsFINSig(new FicsItKernel::Network::SmartSignal("ItemTransfer", {item})), c);
 		}
 	}
-	FicsItKernel::Lua::MutexFactoryHooks.Unlock();
+	CompSS->MutexFactoryHooks.Unlock();
 }
 
 bool FactoryGrabHook_Decl(UFGFactoryConnectionComponent_Public*, FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>);
@@ -134,17 +135,20 @@ void TickCircuitHook(CallScope<decltype(&TickCircuitHook_Decl)>& scope, UFGPower
 	scope(circuit, dt);
 	bool fused = circuit->IsFuseTriggered();
 	if (oldFused != fused) try {
-		FicsItKernel::Lua::MutexPowerCircuitListeners.Lock();
-		auto listeners = FicsItKernel::Lua::powerCircuitListeners.Find(circuit);
+		AFINComputerSubsystem* CompSS = AFINComputerSubsystem::GetComputerSubsystem(circuit);
+		CompSS->MutexPowerCircuitListeners.Lock();
+		auto listeners = CompSS->PowerCircuitListeners.Find(circuit);
 		if (listeners) for (auto& listener : *listeners) {
 			UObject* obj = *listener;
 			if (obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, smartAsFINSig(new FicsItKernel::Network::SmartSignal("PowerFuseChanged")), listener);
 		}
-		FicsItKernel::Lua::MutexPowerCircuitListeners.Unlock();
+		CompSS->MutexPowerCircuitListeners.Unlock();
 	} catch (...) {}
 }
 
 void FFicsItNetworksModule::StartupModule(){
+	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
+	
 	#ifndef WITH_EDITOR
 	finConfig->SetNumberField("SignalQueueSize", 32);
 	finConfig = SML::readModConfig(MOD_NAME, finConfig);

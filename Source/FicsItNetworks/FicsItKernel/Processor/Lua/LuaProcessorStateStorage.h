@@ -6,6 +6,7 @@
 
 #include "LuaProcessorStateStorage.generated.h"
 
+class UFGPowerCircuit;
 UCLASS()
 class ULuaProcessorStateStorage : public UProcessorStateStorage {
 	GENERATED_BODY()

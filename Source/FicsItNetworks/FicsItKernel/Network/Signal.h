@@ -42,7 +42,7 @@ namespace FicsItKernel {
 			typedef std::function<std::shared_ptr<Signal>(FArchive&)> SignalDeserializeFunc;
 			
 		private:
-			static std::map<std::string, SignalDeserializeFunc> SignalRegistry;
+			static std::map<std::string, SignalDeserializeFunc>& SignalRegistry();
 
 		protected:
 			std::string name;
@@ -96,9 +96,7 @@ namespace FicsItKernel {
 		};
 		
 		struct SignalTypeRegisterer {
-			SignalTypeRegisterer(const std::string& name, Signal::SignalDeserializeFunc func) {
-				Signal::registerSignalType(name, func);
-			}
+			SignalTypeRegisterer(const std::string& name, Signal::SignalDeserializeFunc func);
 		};
 
 		class NoSignal : public Signal {

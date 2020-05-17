@@ -46,9 +46,9 @@ namespace FicsItKernel {
 		}
 
 		int luaPullContinue(lua_State* L, int status, lua_KContext ctx) {
-			int a = lua_gettop(L);
+			int args = lua_gettop(L);
 
-			return a;
+			return args - ctx;
 		}
 
 		int luaPull(lua_State* L) {
@@ -62,7 +62,7 @@ namespace FicsItKernel {
 				luaProc->timeout = (int)t;
 				luaProc->pullStart = std::chrono::high_resolution_clock::now();
 
-				lua_yieldk(L, 0, 0, luaPullContinue);
+				lua_yieldk(L, 0, args, luaPullContinue);
 				return 0;
 			}
 			return a;

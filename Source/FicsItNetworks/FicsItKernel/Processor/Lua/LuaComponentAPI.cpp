@@ -14,6 +14,7 @@
 
 namespace FicsItKernel {
 	namespace Lua {
+//#pragma optimize("", off)
 		int luaComponentProxy(lua_State* L) {
 			int args = lua_gettop(L);
 
@@ -50,18 +51,19 @@ namespace FicsItKernel {
 			for (int i = 1; i <= args; ++i) {
 				lua_newtable(L);
 				std::string nick = luaL_checkstring(L, i);
-				auto comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByNick(nick);
+				std::set<Network::NetworkTrace> comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByNick(nick);
 				int j = 0;
-				for (auto& comp : comps) {
+				for (const Network::NetworkTrace& comp : comps) {
 					++j;
 					UObject* obj = *comp;
-					lua_pushstring(L, TCHAR_TO_UTF8(*Cast<IFINNetworkComponent>(obj)->Execute_GetID(obj).ToString()));
+					FString id = IFINNetworkComponent::Execute_GetID(obj).ToString();
+					lua_pushstring(L, TCHAR_TO_UTF8(*id));
 					lua_seti(L, -2, j);
 				}
 			}
 			return args;
 		}
-
+//#pragma optimize("", on)
 		int luaFindItem(lua_State* L) {
 			int nargs = lua_gettop(L);
 			if (nargs < 1) return 0;

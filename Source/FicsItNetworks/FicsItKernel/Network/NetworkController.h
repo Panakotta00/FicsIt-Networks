@@ -7,8 +7,7 @@
 #include "SignalListener.h"
 
 #include <string>
-#include <queue>
-#include <vector>
+#include <deque>
 #include <set>
 #include <memory>
 
@@ -21,7 +20,7 @@ namespace FicsItKernel {
 		class NetworkController : public SignalSender, public SignalListener {
 		protected:
 			std::set<NetworkTrace> signalListeners;
-			std::queue<std::pair<std::shared_ptr<Signal>, NetworkTrace>> signals;
+			std::deque<std::pair<std::shared_ptr<Signal>, NetworkTrace>> signals;
 
 		public:
 			virtual ~NetworkController() {}

@@ -156,9 +156,7 @@ namespace FicsItKernel {
 			lua_setfield(luaState, -3, "LuaProcessor"); // perm, uperm, proc
 			lua_pushstring(luaState, "LuaProcessor"); // perm, uperm, proc, "LuaProcessorPtr"
 			lua_settable(luaState, -4); // perm, uperm
-			SML::Logging::error("Pre-Setup: ", luaLen(luaState, -2), " ", luaLen(luaState, -1), "\r\n");
 			luaSetup(luaState); // perm, uperm
-			SML::Logging::error("Post-Setup: ", luaLen(luaState, -2), " ", luaLen(luaState, -1), "\r\n");
 			
 			// finish perm tables
 			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
@@ -201,7 +199,7 @@ namespace FicsItKernel {
 			if (!luaState || !luaThread) return;
 
 			ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(storage);
-			
+
 			// prepare traces list
 			lua_pushlightuserdata(luaState, storage); // ..., storage
 			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistStorage"); // ...
@@ -210,7 +208,6 @@ namespace FicsItKernel {
 			lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); // ..., perm
 			lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., perm, globals
 			
-			SML::Logging::error("persist globals: ", luaLen(luaState, -2), "\r\n");
 			// persist globals table
 			eris_persist(luaState, -2, -1); // ..., perm, globals, str-globals
 
@@ -225,7 +222,6 @@ namespace FicsItKernel {
 			lua_pushstring(luaState, "Globals"); // ..., perm, globals, globals, "globals"
 			lua_settable(luaState, -4); // ..., perm, globals
 			
-			SML::Logging::error("persist thread: ", luaLen(luaState, -2), "\r\n");
 			// persist thread
 			eris_persist(luaState, -2, luaThreadIndex); // ..., perm, globals, str-thread
 
@@ -238,7 +234,6 @@ namespace FicsItKernel {
 			lua_pop(luaState, 1); // ..., perm, globals
 			lua_pushnil(luaState); // ..., perm, globals, nil
 			lua_settable(luaState, -3); // ..., perm
-			SML::Logging::error("persist clean: ", luaLen(luaState, -1), "\r\n");
 			lua_pop(luaState, 1); // ...
 			lua_pushnil(luaState); // ..., nil
 			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ...
@@ -259,14 +254,13 @@ namespace FicsItKernel {
 
 		int luaUnpersist(lua_State* L) {
 			// str-thread, str-globals, uperm
-			SML::Logging::error("Unpersist globals: ", luaLen(L, 3), "\r\n");
 			// unpersist globals
 			eris_unpersist(L, 3, 2); // str-thread, str-globals, uperm, globals
 
 			// add globals to uperm
 			lua_pushvalue(L, -1); // str-thread, str-globals, uperm, globals, globals
 			lua_setfield(L, 3, "Globals"); // str-thread, str-globals, uperm, globals
-			SML::Logging::error("Unpersist thread: ", luaLen(L, 3), "\r\n");
+			
 			// unpersist thread
 			eris_unpersist(L, 3, 1); // str-thread, str-globals, uperm, globals, thread
 			
@@ -277,6 +271,7 @@ namespace FicsItKernel {
 			if (kernel->getState() != RUNNING) return;
 
 			ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(Storage);
+
 			reset();
 
 			// decode & check data from json
@@ -287,7 +282,7 @@ namespace FicsItKernel {
 			if (thread.Num() <= 1 && globals.Num() <= 1) return;
 
 			// prepare traces list
-			lua_pushlightuserdata(luaState, (void*)Storage); // ..., storage
+			lua_pushlightuserdata(luaState, Storage); // ..., storage
 			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistStorage"); // ...
 			
 			// get uperm table
@@ -310,7 +305,6 @@ namespace FicsItKernel {
 				// cleanup
 				lua_pushnil(luaState); // ..., uperm, err, nil
 				lua_setfield(luaState, -3, "Globals"); // ..., uperm, err
-				SML::Logging::error("Unpersist clean: ", luaLen(luaState, -2), "\r\n");
 				lua_pop(luaState, 1); // ...
 				lua_pushnil(luaState); // ..., nil
 				lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ...
@@ -320,7 +314,6 @@ namespace FicsItKernel {
 				// cleanup
 				lua_pushnil(luaState); // ..., uperm, globals, thread, nil
 				lua_setfield(luaState, -4, "Globals"); // ..., uperm, globals, thread
-				SML::Logging::error("Unpersist clean: ", luaLen(luaState, -3), "\r\n");
 				lua_pushnil(luaState); // ..., uperm, globals, thread, nil
 				lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ..., uperm, globals, thread
 				
@@ -486,3 +479,4 @@ namespace FicsItKernel {
 		}
 	}
 }
+       
