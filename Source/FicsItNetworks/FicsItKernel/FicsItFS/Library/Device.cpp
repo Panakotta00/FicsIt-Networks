@@ -41,7 +41,7 @@ namespace FileSystem {
 		listeners.erase(listener);
 	}
 
-	bool ByteCountedDevice::checkSizeFunc(size_t size, bool addIfAble) {
+	bool ByteCountedDevice::checkSizeFunc(long long size, bool addIfAble) {
 		if (capacity < 1) return true;
 		if (used + size > capacity) return false;
 		used += size;
@@ -113,13 +113,13 @@ namespace FileSystem {
 
 	bool MemDevice::remove(Path path, bool recursive) {
 		SRef<Directory> d = get(path.prev());
-		if (!d.isValid()) return false;
+		if (!d.isValid() || path.isFinal()) return false;
 		return d->remove(path.getFinal(), recursive);
 	}
 
 	bool MemDevice::rename(Path path, const NodeName& name) {
 		SRef<Directory> d = get(path.prev());
-		if (!d.isValid()) return false;
+		if (!d.isValid() || path.isFinal()) return false;
 		return d->rename(path.getFinal(), name);
 	}
 
@@ -200,6 +200,7 @@ namespace FileSystem {
 	}
 
 	bool DiskDevice::remove(Path path, bool recursive) {
+		if (path.isFinal()) return false;
 		try {
 			if (recursive) return fs::remove_all(realPath / path) > 0;
 			else return fs::remove(realPath / path);
@@ -210,6 +211,7 @@ namespace FileSystem {
 	}
 
 	bool DiskDevice::rename(Path path, const NodeName& name) {
+		if (path.isFinal()) return false;
 		if (!fs::exists(realPath / path) || fs::exists(realPath / path.prev() / name) || path.getNodeCount() < 1) return false;
 		fs::rename(realPath / path, realPath / path.prev() / name);
 		tickWatcher();

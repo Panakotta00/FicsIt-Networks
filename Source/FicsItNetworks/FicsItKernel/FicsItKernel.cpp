@@ -224,13 +224,23 @@ namespace FicsItKernel {
 		
 		// Serialize Network
 		network->Serialize(Ar);
+
+		OutSystemState.devDeviceMountPoint = UTF8_TO_TCHAR(filesystem.getMountPoint(devDevice).str().c_str());
+		Ar << OutSystemState.devDeviceMountPoint;
 		
-		// TODO: Serialize FileSystem
+		// Serialize FileSystem
+		filesystem.Serialize(Ar, OutSystemState.fileSystemState);
 	}
 
 	void KernelSystem::postLoad(const FKernelSystemSerializationInfo& Data) {
 		state = static_cast<KernelState>(Data.systemState);
-		if (state == RUNNING) start(true);
+		if (state == RUNNING) {
+			start(true);
+
+			if (Data.devDeviceMountPoint.Len() > 0) filesystem.mount(devDevice, TCHAR_TO_UTF8(*Data.devDeviceMountPoint));
+			
+			filesystem.PostLoad(Data.fileSystemState);
+		}
 		
 		if (Data.processorState) {
 			if (processor.get() == nullptr) throw std::exception("Wanted to deserialize a processor, but none was set");

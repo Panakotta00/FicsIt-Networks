@@ -4,6 +4,10 @@
 #include "FicsItKernel/Network/Signal.h"
 
 #include <chrono>
+#include <set>
+
+
+#include "FicsItKernel/FicsItFS/Library/File.h"
 
 struct lua_State;
 struct lua_Debug;
@@ -41,6 +45,7 @@ namespace FicsItKernel {
 			
 			int timeout = -1;
 			std::chrono::time_point<std::chrono::high_resolution_clock> pullStart;
+			std::set<FileSystem::WRef<FileSystem::FileStream>> fileStreams;
 			
 		public:
 			static LuaProcessor* luaGetProcessor(lua_State* L);
@@ -71,6 +76,7 @@ namespace FicsItKernel {
 			void setCode(const std::string& code);
 
 			int doSignal(lua_State* L);
+			void clearFileStreams();
 
 			static void luaHook(lua_State* L, lua_Debug* ar);
 			static int luaAPIReturn(lua_State* L, int args);

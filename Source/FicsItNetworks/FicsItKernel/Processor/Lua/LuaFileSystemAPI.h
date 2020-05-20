@@ -13,8 +13,15 @@ namespace FicsItKernel {
 	namespace Lua {
 		class LuaProcessor;
 
+		struct LuaFilePersistTransfer : FileSystem::ReferenceCounted {
+			int pos;
+			FileSystem::FileMode mode;
+		};
+		
 		struct LuaFile {
 			FileSystem::SRef<FileSystem::FileStream> file;
+			std::string path;
+			FileSystem::SRef<LuaFilePersistTransfer> transfer;
 		};
 
 		/**
@@ -22,8 +29,9 @@ namespace FicsItKernel {
 		 *
 		 * @param L		- the lua state you want to add the representation to
 		 * @param file	- the file stream you want to add to the Lua stack
+		 * @param path	- the path to the file opened by the filestream (needed for persistency)
 		 */
-		void luaFile(lua_State* L, FileSystem::SRef<FileSystem::FileStream> file);
+		void luaFile(lua_State* L, FileSystem::SRef<FileSystem::FileStream> file, const std::string& path);
 
 		/**
 		* Adds the FileSystem API to the top stack entry if it is a table in the given Lua state.
@@ -31,6 +39,6 @@ namespace FicsItKernel {
 		* @param[in]	filesystem	The filesystem you want to bind the api with.
 		* @param[in]	ctx			The lua state you want to add the FileSystem API to. Make sure the top stack entry is a table.
 		*/
-		void setupFileSystemAPI(KernelSystem* kernel, lua_State* ctx);
+		void setupFileSystemAPI(lua_State* ctx);
 	}
 }

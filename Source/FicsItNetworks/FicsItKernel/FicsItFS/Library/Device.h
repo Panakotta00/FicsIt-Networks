@@ -10,7 +10,7 @@
 namespace FileSystem {
 	class FileSystemRoot;
 
-	typedef std::function<bool(size_t, bool)> SizeCheckFunc;
+	typedef std::function<bool(long long, bool)> SizeCheckFunc;
 
 	class Device : virtual public ReferenceCounted {
 	protected:
@@ -111,7 +111,7 @@ namespace FileSystem {
 		SRef<ByteCountedDeviceListener> byteCountedDeviceListener;
 
 	protected:
-		bool checkSizeFunc(size_t size, bool addIfAble);
+		bool checkSizeFunc(long long size, bool addIfAble);
 
 		unsigned char listenerMask = 0xFF;
 		SizeCheckFunc checkSize;

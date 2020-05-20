@@ -1,10 +1,11 @@
 #include "LuaComputerAPI.h"
 
 #include "LuaInstance.h"
+#include "LuaProcessor.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
-	KernelSystem* kernel = *(KernelSystem**)lua_touserdata(L, lua_upvalueindex(1));
+	KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel();
 
 
 namespace FicsItKernel {
@@ -37,12 +38,10 @@ namespace FicsItKernel {
 			{NULL,NULL}
 		};
 		
-		void setupComputerAPI(lua_State* L, KernelSystem* kernel) {
+		void setupComputerAPI(lua_State* L) {
 			PersistSetup("Computer", -2);
 			luaL_newlibtable(L, luaComputerLib);
-			auto& fs_ud = *(KernelSystem**)lua_newuserdata(L, sizeof(void*));
-			fs_ud = kernel;
-			luaL_setfuncs(L, luaComputerLib, 1);
+			luaL_setfuncs(L, luaComputerLib, 0);
 			PersistTable("Lib", -1);
 			lua_setglobal(L, "computer");
 		}

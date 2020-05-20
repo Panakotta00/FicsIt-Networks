@@ -61,7 +61,7 @@ bool DevDevice::removeDevice(FileSystem::SRef<FileSystem::Device> device) {
 	return false;
 }
 
-std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> FicsItKernel::FicsItFS::DevDevice::getDevices() {
+std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> DevDevice::getDevices() {
 	return devices;
 }
 

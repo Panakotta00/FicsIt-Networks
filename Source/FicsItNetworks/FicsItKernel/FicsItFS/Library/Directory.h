@@ -7,7 +7,7 @@
 #include "File.h"
 
 namespace FileSystem {
-	typedef std::function<bool(size_t, bool)> SizeCheckFunc;
+	typedef std::function<bool(long long, bool)> SizeCheckFunc;
 
 	class Directory : public Node {
 	public:

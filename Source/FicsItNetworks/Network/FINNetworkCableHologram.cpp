@@ -175,7 +175,7 @@ void AFINNetworkCableHologram::onBeginSnap(FFINSnappedInfo a, bool isValid) {
 		auto o = a.actor;
 		if (o) UFGOutlineComponent::Get(o->GetWorld())->ShowOutline(o, isValid ? EOutlineColor::OC_HOLOGRAM : EOutlineColor::OC_RED);
 		// TODO: Do snap sound
-		this->Client_PlaySnapSound();
+		//this->Client_PlaySnapSound();
 	}
 }
 

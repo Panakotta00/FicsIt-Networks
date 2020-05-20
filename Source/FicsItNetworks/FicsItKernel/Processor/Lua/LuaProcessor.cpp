@@ -107,6 +107,9 @@ namespace FicsItKernel {
 				// runtimed crashed -> crash system with runtime error message
 				kernel->crash({ lua_tostring(luaThread, -1) });
 			}
+
+			// clear some data
+			clearFileStreams();
 		}
 
 		size_t luaLen(lua_State* L, int idx) {
@@ -123,6 +126,12 @@ namespace FicsItKernel {
 				lua_pop(L, 1);
 			}
 			return len;
+		}
+
+		void LuaProcessor::clearFileStreams() {
+			for (auto fs = fileStreams.begin(); fs != fileStreams.end(); ++fs) {
+				if (!fs->isValid()) fileStreams.erase(fs--);
+			}
 		}
 		
 		void LuaProcessor::reset() {
@@ -144,7 +153,7 @@ namespace FicsItKernel {
 			lua_newtable(luaState); // perm
 			lua_newtable(luaState); // perm, uperm 
 
-			// register pointer to this Lua Processor in c registry & perm table
+			// register pointer to this Lua Processor in c registry, filestream list & perm table
 			luaL_newmetatable(luaState, "LuaProcessor"); // perm, uperm, mt-LuaProcessor
 			lua_pop(luaState, 1); // perm, uperm
 			LuaProcessor*& luaProcessor = *(LuaProcessor**)lua_newuserdata(luaState, sizeof(LuaProcessor*)); // perm, uperm, proc
@@ -157,6 +166,8 @@ namespace FicsItKernel {
 			lua_pushstring(luaState, "LuaProcessor"); // perm, uperm, proc, "LuaProcessorPtr"
 			lua_settable(luaState, -4); // perm, uperm
 			luaSetup(luaState); // perm, uperm
+			lua_pushlightuserdata(luaState, &fileStreams);
+			lua_setfield(luaState, LUA_REGISTRYINDEX, "FileStreamStorage");
 			
 			// finish perm tables
 			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
@@ -237,6 +248,13 @@ namespace FicsItKernel {
 			lua_pop(luaState, 1); // ...
 			lua_pushnil(luaState); // ..., nil
 			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ...
+
+			for (FileSystem::WRef<FileSystem::FileStream> stream : fileStreams) {
+				if (stream.isValid() && stream->isOpen()) {
+					stream->flush();
+					stream->close();
+				}
+			}
 		}
 
 #pragma optimize("", off)
@@ -406,7 +424,18 @@ namespace FicsItKernel {
 
 		void LuaProcessor::luaSetup(lua_State* L) {
 			PersistSetup("LuaProcessor", -2);
-			
+
+			luaL_requiref(L, "_G", luaopen_base, true);
+			lua_pushnil(L);
+			lua_setfield(L, -2, "collectgarbage");
+			lua_pushnil(L);
+			lua_setfield(L, -2, "dofile");
+			lua_pushnil(L);
+			lua_setfield(L, -2, "loadfile");
+			lua_pushnil(L);
+			lua_setfield(L, -2, "setmetatable");
+			PersistTable("global", -1);
+			lua_pop(L, 1);
 			luaL_requiref(L, "table", luaopen_table, true);
 			PersistTable("table", -1);
 			lua_pop(L, 1);
@@ -433,8 +462,8 @@ namespace FicsItKernel {
 			setupHooks(L);
 			setupComponentAPI(L);
 			setupEventAPI(L);
-			setupFileSystemAPI(getKernel(), L);
-			setupComputerAPI(L, getKernel());
+			setupFileSystemAPI(L);
+			setupComputerAPI(L);
 		}
 
 		void LuaProcessor::setCode(const std::string& code) {

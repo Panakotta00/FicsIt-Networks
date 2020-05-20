@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FicsItFS/FileSystemSerializationInfo.h"
 #include "Processor/ProcessorStateStorage.h"
 #include "KernelSystemSerializationInfo.generated.h"
 
@@ -13,4 +14,10 @@ struct FKernelSystemSerializationInfo {
 
 	UPROPERTY()
 	UProcessorStateStorage* processorState;
+
+	UPROPERTY()
+	FFileSystemSerializationInfo fileSystemState;
+
+	UPROPERTY()
+	FString devDeviceMountPoint;
 };

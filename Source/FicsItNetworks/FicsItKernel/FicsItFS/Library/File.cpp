@@ -1,5 +1,7 @@
 #include "File.h"
 
+#include <experimental/filesystem>
+
 using namespace std;
 using namespace FileSystem;
 
@@ -37,6 +39,10 @@ size_t MemFile::getSize() const {
 }
 
 FileStream::FileStream(FileMode mode) : mode(mode) {}
+
+FileMode FileStream::getMode() const {
+	return mode;
+}
 
 FileStream& FileStream::operator<<(const std::string& str) {
 	write(str);
@@ -146,16 +152,16 @@ bool DiskFile::isValid() const {
 	return filesystem::is_regular_file(realPath);
 }
 
-#pragma optimize("", off)
 DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck) : FileStream(mode), sizeCheck(sizeCheck) {
 	ios::openmode m = 0x0;
 	if (mode & FileSystem::INPUT) m |= ios::in;
 	if (mode & FileSystem::OUTPUT) m |= ios::out;
 	if (mode & FileSystem::TRUNC) m |= ios::trunc;
 	if (mode & FileSystem::APPEND) m |= ios::app;
+	long long data = std::filesystem::exists(realPath) ? std::filesystem::file_size(realPath) : 0;
 	stream.open(realPath, m);
+	if (stream.is_open() && mode & FileSystem::TRUNC) bool b = sizeCheck(-data, true); 
 }
-#pragma optimize("", on)
 
 DiskFileStream::~DiskFileStream() {}
 

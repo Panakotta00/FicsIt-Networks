@@ -10,7 +10,7 @@
 namespace FileSystem {
 	class MemFileStream;
 
-	typedef std::function<bool(size_t, bool)> SizeCheckFunc;
+	typedef std::function<bool(long long, bool)> SizeCheckFunc;
 
 	enum FileMode : unsigned char {
 		INPUT	= 0b0001,
@@ -43,7 +43,6 @@ namespace FileSystem {
 		virtual SRef<FileStream> open(FileMode m) override;
 		virtual bool isValid() const override;
 
-
 		/*
 		* returns the size of the content of this file
 		*
@@ -70,6 +69,13 @@ namespace FileSystem {
 	
 	public:
 		FileStream(FileMode mode);
+
+		/**
+		 * Returns the open mode of the file stream
+		 *
+		 * @return	used file mode
+		 */
+		virtual FileMode getMode() const;
 
 		/*
 		* Writes the given string to the current output-stream at the output-stream pos

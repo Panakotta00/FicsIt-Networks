@@ -118,13 +118,14 @@ void AFINComputerCase::AddDrive(AFINComputerDriveHolder* DriveHolder) {
 	DriveHolders.Add(DriveHolder);
 	DriveHolder->OnDriveUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
 	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
-	kernel->addDrive(FileSystemState);
+	if (FileSystemState) kernel->addDrive(FileSystemState);
 }
 
 void AFINComputerCase::RemoveDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (DriveHolders.Remove(DriveHolder) <= 0) return;
+	DriveHolder->OnDriveUpdate.RemoveDynamic(this, &AFINComputerCase::OnDriveUpdate);
 	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
-	kernel->removeDrive(FileSystemState);
+	if (FileSystemState) kernel->removeDrive(FileSystemState);
 }
 
 void AFINComputerCase::AddModule(AActor* module) {

@@ -85,7 +85,7 @@ namespace FicsItKernel {
 				Ar << trace;
 				FString typeName = signal.first->getTypeName().c_str();
 				Ar << typeName;
-				signal.first->Serialize(Ar);
+				//signal.first->Serialize(Ar);
 			}
 			if (Ar.IsLoading()) for (int i = 0; i < signalCount; ++i) {
 				bool valid = false;
@@ -97,8 +97,8 @@ namespace FicsItKernel {
 				Ar << trace;
 				FString typeName;
 				Ar << typeName;
-				std::shared_ptr<Signal> signal = Signal::deserializeSignal(TCHAR_TO_UTF8(*typeName), Ar);
-				signals.push_back({signal, trace});
+				//std::shared_ptr<Signal> signal = Signal::deserializeSignal(TCHAR_TO_UTF8(*typeName), Ar);
+				//signals.push_back({signal, trace});
 			}
 		}
 	}
