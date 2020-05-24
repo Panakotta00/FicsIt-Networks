@@ -157,9 +157,11 @@ namespace FileSystem {
 	class MemFileStream : public FileStream {
 	protected:
 		std::string* data;
-		std::stringstream* stream;
+		int64_t pos = 0;
+		std::string buf;
 		ListenerListRef& listeners;
 		SizeCheckFunc sizeCheck;
+		bool open = false;
 
 	public:
 		MemFileStream(std::string* data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
@@ -179,8 +181,11 @@ namespace FileSystem {
 
 	class DiskFileStream : public FileStream {
 	protected:
-		std::fstream stream;
+		std::filesystem::path path;
 		SizeCheckFunc sizeCheck;
+		std::fstream stream;
+		int64_t pos = 0;
+		std::string buf;
 
 	public:
 		DiskFileStream(std::filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });

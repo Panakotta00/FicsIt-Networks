@@ -204,56 +204,70 @@ namespace FicsItKernel {
 
 			return OutBuffer;
 		}
+
+		void LuaProcessor::PreSerialize(UProcessorStateStorage* storage, bool bLoading) {
+			for (LuaFile file : fileStreams) {
+				if (file->file) {
+					file->transfer = FileSystem::SRef<LuaFilePersistTransfer>(new LuaFilePersistTransfer());
+					file->transfer->open = file->file->isOpen();
+					if (file->transfer->open) {
+						file->transfer->mode = file->file->getMode();
+						file->transfer->pos = file->file->seek("cur", 0);
+					}
+					// TODO: Check if combination of APP & TRUNC need special data transfer &
+					// TODO: like reading the file store it and then rewrite it to the file when unpersisting.
+					file->file->close();
+				} else file->transfer = nullptr;
+			}
+		}
 		
-		void LuaProcessor::Serialize(UProcessorStateStorage* storage) {
-			// check state & thread
-			if (!luaState || !luaThread) return;
+		void LuaProcessor::Serialize(UProcessorStateStorage* storage, bool bLoading) {
+			if (!bLoading) {
+				// check state & thread
+				if (!luaState || !luaThread) return;
 
-			ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(storage);
+				ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(storage);
 
-			// prepare traces list
-			lua_pushlightuserdata(luaState, storage); // ..., storage
-			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistStorage"); // ...
+				// prepare traces list
+				lua_pushlightuserdata(luaState, storage); // ..., storage
+				lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistStorage"); // ...
 			
-			// prepare state data
-			lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); // ..., perm
-			lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., perm, globals
+				// prepare state data
+				lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); // ..., perm
+				lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., perm, globals
+				lua_pushvalue(luaState, -1); // ..., perm, globals, globals
+				lua_pushnil(luaState); // ..., perm, globals, globals, nil
+				lua_settable(luaState, -4); // ..., perm, globals
 			
-			// persist globals table
-			eris_persist(luaState, -2, -1); // ..., perm, globals, str-globals
+				// persist globals table
+				eris_persist(luaState, -2, -1); // ..., perm, globals, str-globals
 
-			// encode persisted globals
-			size_t globals_l = 0;
-			const char* globals_r = lua_tolstring(luaState, -1, &globals_l);
-			Data->Globals = Base64Encode((uint8*)globals_r, globals_l);
-			lua_pop(luaState, 1); // ..., perm, globals
+				// encode persisted globals
+				size_t globals_l = 0;
+				const char* globals_r = lua_tolstring(luaState, -1, &globals_l);
+				Data->Globals = Base64Encode((uint8*)globals_r, globals_l);
+				lua_pop(luaState, 1); // ..., perm, globals
 
-			// add global table to perm table
-			lua_pushvalue(luaState, -1); // ..., perm, globals, globals
-			lua_pushstring(luaState, "Globals"); // ..., perm, globals, globals, "globals"
-			lua_settable(luaState, -4); // ..., perm, globals
+				// add global table to perm table
+				lua_pushvalue(luaState, -1); // ..., perm, globals, globals
+				lua_pushstring(luaState, "Globals"); // ..., perm, globals, globals, "globals"
+				lua_settable(luaState, -4); // ..., perm, globals
 			
-			// persist thread
-			eris_persist(luaState, -2, luaThreadIndex); // ..., perm, globals, str-thread
+				// persist thread
+				eris_persist(luaState, -2, luaThreadIndex); // ..., perm, globals, str-thread
 
-			// encode persisted thread
-			size_t thread_l = 0;
-			const char* thread_r = lua_tolstring(luaState, -1, &thread_l);
-			Data->Thread = Base64Encode((uint8*)thread_r, thread_l);
+				// encode persisted thread
+				size_t thread_l = 0;
+				const char* thread_r = lua_tolstring(luaState, -1, &thread_l);
+				Data->Thread = Base64Encode((uint8*)thread_r, thread_l);
 
-			// cleanup
-			lua_pop(luaState, 1); // ..., perm, globals
-			lua_pushnil(luaState); // ..., perm, globals, nil
-			lua_settable(luaState, -3); // ..., perm
-			lua_pop(luaState, 1); // ...
-			lua_pushnil(luaState); // ..., nil
-			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ...
-
-			for (FileSystem::WRef<FileSystem::FileStream> stream : fileStreams) {
-				if (stream.isValid() && stream->isOpen()) {
-					stream->flush();
-					stream->close();
-				}
+				// cleanup
+				lua_pop(luaState, 1); // ..., perm, globals
+				lua_pushnil(luaState); // ..., perm, globals, nil
+				lua_settable(luaState, -3); // ..., perm
+				lua_pop(luaState, 1); // ...
+				lua_pushnil(luaState); // ..., nil
+				lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ...
 			}
 		}
 
@@ -285,61 +299,63 @@ namespace FicsItKernel {
 			return 2;
 		}
 
-		void LuaProcessor::Deserialize(UProcessorStateStorage* Storage) {
-			if (kernel->getState() != RUNNING) return;
+		void LuaProcessor::PostSerialize(UProcessorStateStorage* Storage, bool bLoading) {
+			if (bLoading) {
+				if (kernel->getState() != RUNNING) return;
 
-			ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(Storage);
+				ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(Storage);
 
-			reset();
+				reset();
 
-			// decode & check data from json
-			TArray<ANSICHAR> thread;
-			Base64Decode(Data->Thread, thread);
-			TArray<ANSICHAR> globals;
-			Base64Decode(Data->Globals, globals);
-			if (thread.Num() <= 1 && globals.Num() <= 1) return;
+				// decode & check data from json
+				TArray<ANSICHAR> thread;
+				Base64Decode(Data->Thread, thread);
+				TArray<ANSICHAR> globals;
+				Base64Decode(Data->Globals, globals);
+				if (thread.Num() <= 1 && globals.Num() <= 1) return;
 
-			// prepare traces list
-			lua_pushlightuserdata(luaState, Storage); // ..., storage
-			lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistStorage"); // ...
+				// prepare traces list
+				lua_pushlightuserdata(luaState, Storage); // ..., storage
+				lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistStorage"); // ...
 			
-			// get uperm table
-			lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // ..., uperm
+				// get uperm table
+				lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // ..., uperm
 			
-			// prepare protected unpersist
-			lua_pushcfunction(luaState, luaUnpersist); // ..., uperm, unpersist
+				// prepare protected unpersist
+				lua_pushcfunction(luaState, luaUnpersist); // ..., uperm, unpersist
 
-			// push data for protected unpersist
-			lua_pushlstring(luaState, thread.GetData(), thread.Num()); // ..., uperm, unpersist, str-thread
-			lua_pushlstring(luaState, globals.GetData(), globals.Num()); // ..., uperm, unpersist, str-thread, str-globals
-			lua_pushvalue(luaState, -4); // ..., uperm, unpersist, str-thread, str-globals, uperm
+				// push data for protected unpersist
+				lua_pushlstring(luaState, thread.GetData(), thread.Num()); // ..., uperm, unpersist, str-thread
+				lua_pushlstring(luaState, globals.GetData(), globals.Num()); // ..., uperm, unpersist, str-thread, str-globals
+				lua_pushvalue(luaState, -4); // ..., uperm, unpersist, str-thread, str-globals, uperm
 			
-			// do unpersist
-			lua_call(luaState, 3, 2); int ok = LUA_OK;
-			//int ok = lua_pcall(luaState, 3, 2, 0); // ...,  uperm, globals, thread
+				// do unpersist
+				lua_call(luaState, 3, 2); int ok = LUA_OK;
+				//int ok = lua_pcall(luaState, 3, 2, 0); // ...,  uperm, globals, thread
 
-			// check unpersist
-			if (ok != LUA_OK) {
-				// cleanup
-				lua_pushnil(luaState); // ..., uperm, err, nil
-				lua_setfield(luaState, -3, "Globals"); // ..., uperm, err
-				lua_pop(luaState, 1); // ...
-				lua_pushnil(luaState); // ..., nil
-				lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ...
+				// check unpersist
+				if (ok != LUA_OK) {
+					// cleanup
+					lua_pushnil(luaState); // ..., uperm, err, nil
+					lua_setfield(luaState, -3, "Globals"); // ..., uperm, err
+					lua_pop(luaState, 1); // ...
+					lua_pushnil(luaState); // ..., nil
+					lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ...
 				
-				throw std::exception("Unable to unpersist");
-			} else {
-				// cleanup
-				lua_pushnil(luaState); // ..., uperm, globals, thread, nil
-				lua_setfield(luaState, -4, "Globals"); // ..., uperm, globals, thread
-				lua_pushnil(luaState); // ..., uperm, globals, thread, nil
-				lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ..., uperm, globals, thread
+					throw std::exception("Unable to unpersist");
+				} else {
+					// cleanup
+					lua_pushnil(luaState); // ..., uperm, globals, thread, nil
+					lua_setfield(luaState, -4, "Globals"); // ..., uperm, globals, thread
+					lua_pushnil(luaState); // ..., uperm, globals, thread, nil
+					lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ..., uperm, globals, thread
 				
-				// place persisted data
-				lua_replace(luaState, luaThreadIndex); // ..., uperm, globals
-				lua_seti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., uperm
-				luaThread = lua_tothread(luaState, luaThreadIndex);
-				lua_pop(luaState, 1); // ...
+					// place persisted data
+					lua_replace(luaState, luaThreadIndex); // ..., uperm, globals
+					lua_seti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., uperm
+					luaThread = lua_tothread(luaState, luaThreadIndex);
+					lua_pop(luaState, 1); // ...
+				}
 			}
 		}
 #pragma optimize("", on)

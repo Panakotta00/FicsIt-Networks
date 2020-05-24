@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Library/Device.h"
 #include "FileSystemSerializationInfo.generated.h"
 
 struct FFileSystemNode;
@@ -18,6 +19,8 @@ struct FFileSystemNodeIndex {
 	}
 
 	bool Serialize(FArchive& Ar);
+
+	FileSystem::SRef<FileSystem::Node> Deserialize(FString name, FileSystem::SRef<FileSystem::Directory> parent) const;
 };
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNodeIndex& Node);
@@ -48,6 +51,9 @@ struct FFileSystemNode {
 	TMap<FString, FFileSystemNodeIndex> ChildNodes;
 
 	bool Serialize(FArchive& Ar);
+
+	FFileSystemNode& Deserialize(FileSystem::SRef<FileSystem::Device> device, const std::string& deviceName);
+	FFileSystemNode& Serialize(FileSystem::SRef<FileSystem::Device> device, const FileSystem::Path& path);
 };
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNode& Node);
@@ -60,5 +66,5 @@ struct FFileSystemSerializationInfo {
 	TMap<FString, FString> Mounts;
 
 	UPROPERTY()
-	TMap<FString, FFileSystemNode> FileSystemDevices;
+	TMap<FString, FFileSystemNode> Devices;
 };

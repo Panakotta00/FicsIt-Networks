@@ -15,20 +15,28 @@ int funcName(lua_State* L) { \
 #define LuaFileFunc(funcName) \
 int LuaFileFuncName(funcName) (lua_State* L) { \
 	KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel(); \
-	LuaFile* self = (LuaFile*)luaL_checkudata(L, 1, "File"); \
-	if (!self) return luaL_error(L, "file is invalid"); \
+	LuaFile* self_r = (LuaFile*)luaL_checkudata(L, 1, "File"); \
+	if (!self_r) return luaL_error(L, "file is invalid"); \
+	LuaFile& self = *self_r; \
 	if (self->transfer) { \
-		FileSystem::FileMode mode = self->transfer->mode; \
-		mode = mode & ~FileSystem::FileMode::TRUNC; \
+		FileSystem::FileMode mode; \
+		if (self->transfer->open) { \
+			mode = self->transfer->mode; \
+			mode = mode & ~FileSystem::FileMode::TRUNC; \
+		} else mode = FileSystem::INPUT; \
 		self->file = kernel->getFileSystem()->open(kernel->getFileSystem()->unpersistPath(self->path), mode); \
-		self->file->seek("set", self->transfer->pos); \
-		self->transfer = nullptr; \
+		if (self->transfer->open) { \
+			self->file->seek("set", self->transfer->pos); \
+			self->transfer = nullptr; \
+		} else { \
+			self->file->close(); \
+		} \
 		lua_getfield(L, LUA_REGISTRYINDEX, "FileStreamStorage"); \
-        std::set<FileSystem::WRef<FileSystem::FileStream>>& streams = *static_cast<std::set<FileSystem::WRef<FileSystem::FileStream>>*>(lua_touserdata(L, -1)); \
-		streams.insert(self->file); \
+        std::set<LuaFile>& streams = *static_cast<std::set<LuaFile>*>(lua_touserdata(L, -1)); \
+		streams.insert(self); \
 	} \
-	auto file = self->file; \
-	if (!file) return luaL_error(L, "file is invalid");
+	FileSystem::SRef<FileSystem::FileStream>& file = self->file; \
+	if (!file) return luaL_error(L, "filestream not open");
 
 #define CatchExceptionLua \
 	catch (const std::exception& ex) { \
@@ -338,7 +346,7 @@ namespace FicsItKernel {
 		}
 
 		LuaFileFunc(Seek)
-			auto f = (LuaFile*)luaL_checkudata(L, 1, "File");
+			LuaFile& f = *(LuaFile*)luaL_checkudata(L, 1, "File");
 			std::string w = "cur";
 			std::int64_t off = 0;
 			if (lua_isstring(L, 2)) w = lua_tostring(L, 2);
@@ -362,45 +370,47 @@ namespace FicsItKernel {
 
 		int luaFileUnpersist(lua_State* L) {
 			KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel();
-			bool open = lua_toboolean(L, lua_upvalueindex(1));
-			std::string path = kernel->getFileSystem()->unpersistPath(lua_tostring(L, lua_upvalueindex(2)));
-			FileSystem::SRef<FileSystem::FileStream> stream;
-			if (open) {
-				FileSystem::FileMode mode = static_cast<FileSystem::FileMode>((int)lua_tonumber(L, lua_upvalueindex(3)));
-				mode = mode & ~FileSystem::FileMode::TRUNC;
-				stream = kernel->getFileSystem()->open(path, mode);
-				stream->seek("set", (int)lua_tonumber(L, lua_upvalueindex(4)));
-			} else {
-				stream = kernel->getFileSystem()->open(path, FileSystem::INPUT);
-				stream->close();
-			}
-			luaFile(L, stream, path);
+			const bool valid = lua_toboolean(L, lua_upvalueindex(1));
+			const std::string path = kernel->getFileSystem()->unpersistPath(lua_tostring(L, lua_upvalueindex(2)));
+			if (valid) {
+				const bool open = lua_toboolean(L, lua_upvalueindex(3));
+				FileSystem::SRef<FileSystem::FileStream> stream;
+				if (open) {
+					FileSystem::FileMode mode = static_cast<FileSystem::FileMode>((int)lua_tonumber(L, lua_upvalueindex(4)));
+					mode = mode & ~FileSystem::FileMode::TRUNC;
+					stream = kernel->getFileSystem()->open(path, mode);
+					stream->seek("set", static_cast<int>(lua_tonumber(L, lua_upvalueindex(5))));
+				} else {
+					stream = nullptr;
+				}
+				luaFile(L, stream, path);
+			} else luaFile(L, nullptr, path);
 			return 1;
 		}
 
 		int luaFilePersist(lua_State* L) {
-			LuaFile* f = (LuaFile*)luaL_checkudata(L, -1, "File");
-			bool open = f->file->isOpen();
-			lua_pushboolean(L, open);
-			lua_pushstring(L, f->path.c_str());
-			if (open) {
-				f->file->flush();
-				f->transfer = new LuaFilePersistTransfer();
-				lua_pushinteger(L, f->transfer->mode = f->file->getMode());
-				// TODO: Check if combination of APP & TRUNC need special data transfer &
-				// TODO: like reading the file store it and then rewrite it to the file when unpersisting.
-				lua_pushinteger(L, f->transfer->pos = f->file->seek("cur", 0));
-				lua_pushcclosure(L, luaFileUnpersist, 4);
-			} else lua_pushcclosure(L, luaFileUnpersist, 2);
+			LuaFile& f = *static_cast<LuaFile*>(luaL_checkudata(L, -1, "File"));
+			if (f->transfer) {
+				lua_pushboolean(L, true);
+				lua_pushstring(L, f->path.c_str());
+				lua_pushboolean(L, f->transfer->open);
+				lua_pushinteger(L, f->transfer->mode);
+				lua_pushinteger(L, f->transfer->pos);
+				lua_pushcclosure(L, luaFileUnpersist, 5);
+			} else {
+				lua_pushboolean(L, false);
+				lua_pushstring(L, f->path.c_str());
+				lua_pushcclosure(L, luaFileUnpersist, 2);
+			}
 			return 1;
 		}
 		
 		int luaFileGC(lua_State * L) {
-			auto f = (LuaFile*)luaL_checkudata(L, 1, "File");
+			LuaFile& f = *static_cast<LuaFile*>(luaL_checkudata(L, 1, "File"));
 			try {
-				f->file->close();
+				if (f->file) f->file->close();
 			} CatchExceptionLua
-			f->~LuaFile();
+			f.~LuaFile();
 			return 0;
 		}
 
@@ -418,16 +428,16 @@ namespace FicsItKernel {
 		};
 
 		void luaFile(lua_State* L, FileSystem::SRef<FileSystem::FileStream> file, const std::string& path) {
-			if (!file.isValid()) {
-				lua_pushnil(L);
-				return;
-			}
-			auto f = (LuaFile*)lua_newuserdata(L, sizeof(LuaFile));
+			auto f = static_cast<LuaFile*>(lua_newuserdata(L, sizeof(LuaFile)));
 			luaL_setmetatable(L, "File");
-			new (f) LuaFile{std::move(file), path};
+			new (f) LuaFile(new LuaFileContainer());
+			f->get()->file = file;
+			f->get()->path = path;
 			lua_getfield(L, LUA_REGISTRYINDEX, "FileStreamStorage");
-			std::set<FileSystem::WRef<FileSystem::FileStream>>& streams = *static_cast<std::set<FileSystem::WRef<FileSystem::FileStream>>*>(lua_touserdata(L, -1));
-			streams.insert(file);
+			if (file.isValid()) {
+				std::set<LuaFile>& streams = *static_cast<std::set<LuaFile>*>(lua_touserdata(L, -1));
+				streams.insert(*f);
+			}
 			lua_pop(L, 1);
 		}
 

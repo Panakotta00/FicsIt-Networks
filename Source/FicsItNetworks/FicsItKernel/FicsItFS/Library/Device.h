@@ -172,6 +172,13 @@ namespace FileSystem {
 		* calls all event changes since device creation or last call
 		*/
 		void tickWatcher();
+
+		/**
+		 * Gets the real path mapped to this disk device.
+		 *
+		 * @return the real path mapped
+		 */
+		std::filesystem::path getRealPath() const;
 	};
 
 	class DeviceNode : public Node {

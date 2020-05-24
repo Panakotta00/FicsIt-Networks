@@ -7,6 +7,7 @@
 #include <set>
 
 
+#include "LuaFileSystemAPI.h"
 #include "FicsItKernel/FicsItFS/Library/File.h"
 
 struct lua_State;
@@ -45,7 +46,7 @@ namespace FicsItKernel {
 			
 			int timeout = -1;
 			std::chrono::time_point<std::chrono::high_resolution_clock> pullStart;
-			std::set<FileSystem::WRef<FileSystem::FileStream>> fileStreams;
+			std::set<LuaFile> fileStreams;
 			
 		public:
 			static LuaProcessor* luaGetProcessor(lua_State* L);
@@ -56,8 +57,9 @@ namespace FicsItKernel {
 			virtual void tick(float delta) override;
 			virtual void reset() override;
 			virtual std::int64_t getMemoryUsage(bool recalc = false) override;
-			virtual void Serialize(UProcessorStateStorage* Storage) override;
-			virtual void Deserialize(UProcessorStateStorage* Storage) override;
+			virtual void PreSerialize(UProcessorStateStorage* Storage, bool bLoading) override;
+			virtual void Serialize(UProcessorStateStorage* Storage, bool bLoading) override;
+			virtual void PostSerialize(UProcessorStateStorage* Storage, bool bLoading) override;
 			virtual UProcessorStateStorage* CreateSerializationStorage() override;
 			// End Processor
 

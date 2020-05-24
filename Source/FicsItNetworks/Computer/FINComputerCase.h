@@ -67,7 +67,10 @@ public:
 
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
+	virtual void PreLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	virtual void PostLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
+	virtual void PreSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
+	virtual void PostSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	// End IFGSaveInterface
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")

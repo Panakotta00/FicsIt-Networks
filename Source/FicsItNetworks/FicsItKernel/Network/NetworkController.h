@@ -21,6 +21,7 @@ namespace FicsItKernel {
 		protected:
 			std::set<NetworkTrace> signalListeners;
 			std::deque<std::pair<std::shared_ptr<Signal>, NetworkTrace>> signals;
+			bool lockSignalRecieving = false;
 
 		public:
 			virtual ~NetworkController() {}
@@ -93,11 +94,25 @@ namespace FicsItKernel {
 			}
 
 			/**
+			 * Should get called prior to de/serialization
+			 *
+			 * @param[in]	load	true when it's deserializing
+			 */
+			void PreSerialize(bool load);
+
+			/**
 			 * De/Serializes the Network Controller to a archive
 			 *
 			 * @param[in]	Ar	the archive storing the infromation
 			 */
 			void Serialize(FArchive& Ar);
+
+			/**
+			* Should get called after de/serialization
+			*
+			* @param[in]	load	true when it's deserializing
+			*/
+			void PostSerialize(bool load);
 		};
 	}
 }

@@ -16,13 +16,16 @@ namespace FicsItKernel {
 		struct LuaFilePersistTransfer : FileSystem::ReferenceCounted {
 			int pos;
 			FileSystem::FileMode mode;
+			bool open;
 		};
 		
-		struct LuaFile {
+		struct LuaFileContainer : FileSystem::ReferenceCounted {
 			FileSystem::SRef<FileSystem::FileStream> file;
 			std::string path;
 			FileSystem::SRef<LuaFilePersistTransfer> transfer;
 		};
+
+		typedef FileSystem::SRef<LuaFileContainer> LuaFile;
 
 		/**
 		 * Creates a lua representation of the given file stream and pushes it to the given Lua stack.

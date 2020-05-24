@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "FileSystemSerializationInfo.h"
+#include "Library/NodeName.h"
+#include "util/Logging.h"
 
 namespace FicsItKernel {
 	namespace FicsItFS {
@@ -76,98 +78,50 @@ namespace FicsItKernel {
 			throw std::invalid_argument("Unable to unpersist path");
 		}
 
-		TSharedPtr<FFileSystemNode> serializeNodePath(FileSystem::SRef<FileSystem::Device> device, const FileSystem::Path& path) {
-			FileSystem::SRef<FileSystem::Node> node = device->get(path);
-			TSharedPtr<FFileSystemNode> result = MakeShareable(new FFileSystemNode());
-			if (FileSystem::SRef<FileSystem::File> file = node) {
-				result->NodeType = 0;
-				FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::INPUT);
-				result->Data = stream->readAll().c_str();
-			} else if (FileSystem::SRef<FileSystem::Directory> dir = node) {
-				result->NodeType = 1;
-				for (FileSystem::NodeName child : dir->getChilds()) {
-					result->ChildNodes[child.c_str()] = serializeNodePath(device, path / child);
-				}
-			}
-			return result;
-		} 
-
 		void Root::Serialize(FArchive& Ar, FFileSystemSerializationInfo& info) {
-			// serialize mount points
-			if (Ar.IsSaving() && getDevDevice()) for (auto mount : mounts) {
-				for (auto device : getDevDevice()->getDevices()) {
-					if (mount.second.first == device.second) {
-						info.Mounts.Add(device.first.c_str(), mount.first.str().c_str());
-						break;
+			if (Ar.IsSaving() && getDevDevice()) {
+				// serialize mount points
+				for (auto mount : mounts) {
+					for (auto device : getDevDevice()->getDevices()) {
+						if (mount.second.first == device.second) {
+							info.Mounts.Add(device.first.c_str(), mount.first.str().c_str());
+							break;
+						}
 					}
+				}
+
+				// serialize tempfs
+				for (std::pair<const FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> dev : getDevDevice()->getDevices()) {
+					if (!dynamic_cast<FileSystem::MemDevice*>(dev.second.get())) continue;
+					FFileSystemNode node = FFileSystemNode().Serialize(dev.second, "/");
+					node.NodeType = 3;
+					info.Devices.Add(dev.first.c_str(), node);
 				}
 			}
 			Ar << info.Mounts;
-
-			// serialize filesystem devices
-			if (Ar.IsSaving() && getDevDevice()) for (auto device : getDevDevice()->getDevices()) {
-				FFileSystemNode fsn;
-				if (dynamic_cast<FileSystem::MemDevice*>(device.second.get())) fsn.NodeType = 3;
-				if (dynamic_cast<FileSystem::DiskDevice*>(device.second.get())) fsn.NodeType = 2;
-				if (fsn.NodeType == 2 || fsn.NodeType == 3) {
-					std::unordered_set<FileSystem::NodeName> nodes = device.second->childs("");
-					for (FileSystem::NodeName node : nodes) {
-						fsn.ChildNodes.Add(FString(node.c_str()), serializeNodePath(device.second, node));
-					}
-					info.FileSystemDevices.Add(FString(device.first.c_str()), fsn);
-				}
-			}
-			Ar << info.FileSystemDevices;
-		}
-
-		FileSystem::SRef<FileSystem::Node> DeserializeFileSystemNode(const FFileSystemNodeIndex& node, FString name, FileSystem::SRef<FileSystem::Directory> parent) {
-			std::string nodeName = TCHAR_TO_UTF8(*name);
-			switch (node.Node->NodeType) {
-			case 0: {
-				FileSystem::SRef<FileSystem::File> file = parent->createFile(nodeName);
-				FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::OUTPUT | FileSystem::TRUNC);
-				stream->write(TCHAR_TO_UTF8(*node.Node->Data));
-				stream->flush();
-				stream->close();
-				return file;
-			} case 1: {
-				FileSystem::SRef<FileSystem::Directory> dir = parent->createSubdir(nodeName);
-				for (TPair<FString, FFileSystemNodeIndex>& child : node.Node->ChildNodes) {
-					DeserializeFileSystemNode(child.Value, child.Key, dir);
-				}
-				return dir;
-			} default: {
-				return nullptr;
-			}
-			}
+			Ar << info.Devices;
 		}
 
 		void Root::PostLoad(const FFileSystemSerializationInfo& info) {
-			// load devices
-			for (TPair<FString, FFileSystemNode> deviceInfo : info.FileSystemDevices) {
-				std::string deviceName = TCHAR_TO_UTF8(*deviceInfo.Key);
-				if (deviceInfo.Value.NodeType == 2 || deviceInfo.Value.NodeType == 3) {
-					// create tmpfs
-					if (deviceInfo.Value.NodeType == 3) if (!getDevDevice()->addDevice(new FileSystem::MemDevice(), deviceName)) throw std::exception((std::string("Unable to create persisted tmpfs '") + deviceName + "'").c_str());
-					// get the device we should deserialize
-					FileSystem::SRef<FileSystem::Device> device = getDevDevice()->getDevices()[deviceName];
-					if (!device.isValid()) throw std::exception(("unable to find device to unpersist '" + deviceName + "'").c_str());
-					// delete previously existing contents
-					if (deviceInfo.Value.NodeType == 2) {
-						for (FileSystem::NodeName child : device->childs("/")) device->remove(child, true);
+			FileSystem::SRef<DevDevice> devDev = getDevDevice();
+			if (!devDev.isValid()) return;
+			
+			// deserialize/generate tmpfs
+			for (TPair<FString, FFileSystemNode> device : info.Devices) {
+				std::string deviceName = TCHAR_TO_UTF8(*device.Key);
+				if (device.Value.NodeType == 3) {
+					FileSystem::SRef<FileSystem::Device> dev = new FileSystem::MemDevice();
+					if (!devDev->addDevice(dev, deviceName)) {
+						SML::Logging::error(("Unable to unpersist tmpfs '" + deviceName + "'").c_str());
+						continue;
 					}
-					// deserialize children
-					FileSystem::SRef<FileSystem::Directory> root = device->get("/");
-					if (!root.isValid()) throw std::exception(("root of device '" + deviceName + "' can not be found").c_str());
-					for (TPair<FString, FFileSystemNodeIndex>& child : deviceInfo.Value.ChildNodes) {
-						DeserializeFileSystemNode(child.Value, child.Key, root);
-					}
+					device.Value.Deserialize(dev, deviceName);
 				}
 			}
 			
 			// lodd mounts
 			for (TPair<FString, FString> mount : info.Mounts) {
-				for (auto device : getDevDevice()->getDevices()) {
+				for (auto device : devDev->getDevices()) {
 					if (FString(device.first.c_str()) == mount.Key) {
 						this->mount(device.second, TCHAR_TO_UTF8(*mount.Value));
 						break;

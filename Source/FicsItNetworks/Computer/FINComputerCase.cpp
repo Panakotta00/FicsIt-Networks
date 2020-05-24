@@ -60,12 +60,24 @@ bool AFINComputerCase::ShouldSave_Implementation() const {
 	return true;
 }
 
+void AFINComputerCase::PreLoadGame_Implementation(int32 gameVersion, int32 engineVersion) {
+	kernel->PreSerialize(KernelState, true);
+}
+
 void AFINComputerCase::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	TArray<AActor*> modules;
 	Panel->GetModules(modules);
 	AddModules(modules);
 	
-	kernel->postLoad(KernelState);
+	kernel->PostSerialize(KernelState, true);
+}
+
+void AFINComputerCase::PreSaveGame_Implementation(int32 gameVersion, int32 engineVersion) {
+	kernel->PreSerialize(KernelState, false);
+}
+
+void AFINComputerCase::PostSaveGame_Implementation(int32 gameVersion, int32 engineVersion) {
+	kernel->PostSerialize(KernelState, false);
 }
 
 void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {

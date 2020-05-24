@@ -62,18 +62,28 @@ namespace FicsItKernel {
 		virtual void reset() = 0;
 
 		/**
+		 * Should get called prior to serialization.
+		 *
+		 * @param[in]	Storage		the serialization storage
+		 * @param[in]	bLoading	true if it should deserialize
+		 */
+		virtual void PreSerialize(UProcessorStateStorage* Storage, bool bLoading) = 0;
+
+		/**
 		 * Serializes the processor state and stores it in the given storage object
 		 *
 		 * @param[in]	Storage		the serialization storage object which will hold the serialized data
+		 * @param[in]	bLoading	true if it should deserialize
 		 */
-		virtual void Serialize(UProcessorStateStorage* Storage) = 0;
+		virtual void Serialize(UProcessorStateStorage* Storage, bool bLoading) = 0;
 
 		/**
-		 * Deserializes a storage object to a processor state and loads it
+		 * Gets called after serialization a storage object to a processor state and loads it
 		 *
 		 * @param[in]	Storage 	the storage object which holds the serialized data
+		 * @param[in]	bLoading	true if it should deserialize
 		 */
-		virtual void Deserialize(UProcessorStateStorage* Storage) = 0;
+		virtual void PostSerialize(UProcessorStateStorage* Storage, bool bLoading) = 0;
 
 		/**
 		 * Creates the storage object used to store serialization data

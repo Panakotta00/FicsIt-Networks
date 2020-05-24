@@ -60,7 +60,7 @@ namespace FicsItKernel {
 		if (drives.find(drive) != drives.end()) return;
 
 		// create & assign device from drive
-		drives[drive] = drive->createDevice();
+		drives[drive] = drive->GetDevice();
 
 		// add drive to devDevice
 		if (devDevice.isValid()) {
@@ -190,35 +190,50 @@ namespace FicsItKernel {
 		return memoryUsage;
 	}
 
+	void KernelSystem::PreSerialize(FKernelSystemSerializationInfo& Data, bool bLoading) {
+		Data.bPreSerialized = true;
+
+		// pre serialize network
+		network->PreSerialize(bLoading);
+		
+		// pre serialize processor
+		if (processor.get() != nullptr) {
+			Data.processorState = processor->CreateSerializationStorage();
+			processor->PreSerialize(Data.processorState, bLoading);
+		}
+	}
+	
 	void KernelSystem::Serialize(FArchive& Ar, FKernelSystemSerializationInfo& OutSystemState) {
+		if (!Ar.IsSaveGame() || !OutSystemState.bPreSerialized) return;
+		
 		// serialize system state
 		OutSystemState.systemState = state;
 		Ar << OutSystemState.systemState;
 
 		// serialize kernel crash
-		FString crashMsg = kernelCrash.what();
-		Ar << crashMsg;
-		if (crashMsg.Len() > 0) kernelCrash = KernelCrash(TCHAR_TO_UTF8(*crashMsg));
+		OutSystemState.crash = kernelCrash.what();
+		Ar << OutSystemState.crash;
 
 		// serialize processor
-		bool proc = processor.get() != nullptr;
+		bool proc = (processor.get() != nullptr) && OutSystemState.processorState;
 		Ar << proc;
 		if (Ar.IsSaving()) {
 			// Serialize processor
 			if (proc) {
-				UProcessorStateStorage* procState = processor->CreateSerializationStorage();
-				TSubclassOf<UProcessorStateStorage> storageClass = procState->GetClass();
+				TSubclassOf<UProcessorStateStorage> storageClass = OutSystemState.processorState->GetClass();
 				Ar << storageClass;
-				processor->Serialize(procState);
-				procState->Serialize(Ar);
+				processor->Serialize(OutSystemState.processorState, false);
+				OutSystemState.processorState->Serialize(Ar);
 			}
 		} else if (Ar.IsLoading()) {
 			// Deserialize processor
 			if (proc) {
+				checkf(processor.get(), L"Tryed to unpersist processor state but no processor set");
 				UClass* storageClass = nullptr;
 				Ar << storageClass;
 				OutSystemState.processorState = Cast<UProcessorStateStorage>(NewObject<UProcessorStateStorage>(GetTransientPackage(), storageClass));
 				OutSystemState.processorState->Serialize(Ar);
+				if (processor.get()) processor->Serialize(OutSystemState.processorState, true);
 			}
 		}
 		
@@ -232,20 +247,25 @@ namespace FicsItKernel {
 		filesystem.Serialize(Ar, OutSystemState.fileSystemState);
 	}
 
-	void KernelSystem::postLoad(const FKernelSystemSerializationInfo& Data) {
+	void KernelSystem::PostSerialize(FKernelSystemSerializationInfo& Data, bool bLoading) {
 		state = static_cast<KernelState>(Data.systemState);
-		if (state == RUNNING) {
+		if (bLoading && (state == CRASHED || state == RUNNING)) {
 			start(true);
-
+			if (state == CRASHED) crash(KernelCrash(TCHAR_TO_UTF8(*Data.crash)));
+			
 			if (Data.devDeviceMountPoint.Len() > 0) filesystem.mount(devDevice, TCHAR_TO_UTF8(*Data.devDeviceMountPoint));
 			
 			filesystem.PostLoad(Data.fileSystemState);
 		}
 		
-		if (Data.processorState) {
-			if (processor.get() == nullptr) throw std::exception("Wanted to deserialize a processor, but none was set");
-			processor->Deserialize(Data.processorState);
+		if (Data.processorState || processor.get()) {
+			processor->PostSerialize(Data.processorState, bLoading);
 		}
+		Data.processorState = nullptr;
+
+		network->PostSerialize(bLoading);
+
+		Data.bPreSerialized = false;
 	}
 
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}

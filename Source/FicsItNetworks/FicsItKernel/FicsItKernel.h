@@ -217,6 +217,14 @@ namespace FicsItKernel {
 		 * @param	components	the registry of system components you want to recalculate.
 		 */
 		void recalculateResources(Recalc components);
+
+		/**
+		 * This should get called prior to serialization.
+		 *
+		 * @param[in]	Data		The kernel data object.
+		 * @param[in]	bLoading	true if it deserializes
+		 */
+		void PreSerialize(FKernelSystemSerializationInfo& Data, bool bLoading);
 		
 		/**
 		 * Serializes/Deserializes the System to/from FArchive.
@@ -230,10 +238,11 @@ namespace FicsItKernel {
 
 		/**
 		 * This will cause the processor finally to load it's state.
-		 * Call this after every necessery information got serialized.
+		 * Call this after every necessery information got DE7serialized.
 		 *
-		 * @param[in]	Data	The kernel postload data object fully serialized.
+		 * @param[in]	Data		The kernel data object fully de/serialized.
+		 * @param[in]	bLoading	true if it deserializes
 		 */
-		void postLoad(const FKernelSystemSerializationInfo& Data);
+		void PostSerialize(FKernelSystemSerializationInfo& Data, bool bLoading);
 	};
 }

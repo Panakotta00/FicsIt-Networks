@@ -72,13 +72,13 @@ public:
 	/**
 	 * Returns all the modules added to the panel.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "ModuleSystem|Panel")
 	void GetModules(UPARAM(ref) TArray<AActor*>& out_modules) const;
 
 	/**
 	 * Returns the dismantle refund sum of all modules added to the panel.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "ModuleSystem|Panel")
 	void GetDismantleRefund(UPARAM(ref) TArray<FInventoryStack>& out_refund) const;
 
 	/**

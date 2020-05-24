@@ -20,4 +20,9 @@ struct FKernelSystemSerializationInfo {
 
 	UPROPERTY()
 	FString devDeviceMountPoint;
+
+	UPROPERTY()
+	FString crash;
+
+	bool bPreSerialized = false;
 };

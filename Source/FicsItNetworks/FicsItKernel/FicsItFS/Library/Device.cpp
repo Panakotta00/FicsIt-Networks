@@ -113,13 +113,13 @@ namespace FileSystem {
 
 	bool MemDevice::remove(Path path, bool recursive) {
 		SRef<Directory> d = get(path.prev());
-		if (!d.isValid() || path.isFinal()) return false;
+		if (!d.isValid() || path.getNodeCount() < 1) return false;
 		return d->remove(path.getFinal(), recursive);
 	}
 
 	bool MemDevice::rename(Path path, const NodeName& name) {
 		SRef<Directory> d = get(path.prev());
-		if (!d.isValid() || path.isFinal()) return false;
+		if (!d.isValid() || path.getNodeCount() < 1) return false;
 		return d->rename(path.getFinal(), name);
 	}
 
@@ -198,9 +198,9 @@ namespace FileSystem {
 		tickWatcher();
 		return get(path);
 	}
-
+#pragma optimize("",off)
 	bool DiskDevice::remove(Path path, bool recursive) {
-		if (path.isFinal()) return false;
+		if (path.getNodeCount() < 1) return false;
 		try {
 			if (recursive) return fs::remove_all(realPath / path) > 0;
 			else return fs::remove(realPath / path);
@@ -209,9 +209,10 @@ namespace FileSystem {
 			return false;
 		}
 	}
+#pragma optimize("",on)
 
 	bool DiskDevice::rename(Path path, const NodeName& name) {
-		if (path.isFinal()) return false;
+		if (path.getNodeCount() < 1) return false;
 		if (!fs::exists(realPath / path) || fs::exists(realPath / path.prev() / name) || path.getNodeCount() < 1) return false;
 		fs::rename(realPath / path, realPath / path.prev() / name);
 		tickWatcher();
@@ -237,6 +238,10 @@ namespace FileSystem {
 
 	void DiskDevice::tickWatcher() {
 		watcher.tick();
+	}
+
+	std::filesystem::path DiskDevice::getRealPath() const {
+		return realPath;
 	}
 
 	DeviceNode::DeviceNode(SRef<Device> device) : device(device) {}
