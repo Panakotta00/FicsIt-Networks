@@ -12,22 +12,22 @@ namespace FicsItKernel {
 	namespace Lua {
 		LuaFunc(luaComputerGetInstance)
 			newInstance(L, Network::NetworkTrace(kernel->getNetwork()->component));
-			return 1;
+			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		LuaFunc(luaComputerReset)
 			kernel->reset();
-			return 0;
+			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
 		LuaFunc(luaComputerStop)
 			kernel->stop();
-			return 0;
+			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
 		LuaFunc(luaComputerBeep)
 			// TODO: do the beep
-			return 0;
+			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
 		static const luaL_Reg luaComputerLib[] = {

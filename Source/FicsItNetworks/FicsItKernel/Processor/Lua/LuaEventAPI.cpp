@@ -42,7 +42,7 @@ namespace FicsItKernel {
 				auto o = (UObject*)getObjInstance<UObject>(L, i, &trace);
 				luaListen(L, trace / o);
 			}
-			return 0;
+			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
 		int luaPullContinue(lua_State* L, int status, lua_KContext ctx) {
@@ -63,9 +63,9 @@ namespace FicsItKernel {
 				luaProc->pullStart = std::chrono::high_resolution_clock::now();
 
 				lua_yieldk(L, 0, args, luaPullContinue);
-				return 0;
+				return LuaProcessor::luaAPIReturn(L, 0);
 			}
-			return a;
+			return LuaProcessor::luaAPIReturn(L, a);
 		}
 
 		static const luaL_Reg luaEventLib[] = {

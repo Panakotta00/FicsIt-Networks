@@ -102,7 +102,7 @@ namespace FicsItKernel {
 				return luaL_error(L, std::string("Error at ").append(std::to_string(i).c_str()).append("# parameter: ").append(error).c_str());
 			}
 
-			return retargs;
+			return LuaProcessor::luaAPIReturn(L, retargs);
 		}
 
 		int luaInstanceFuncCall(lua_State* L) {
@@ -112,7 +112,7 @@ namespace FicsItKernel {
 
 			if (!*obj) return luaL_error(L, "component is invalid");
 
-			return func(L, lua_gettop(L), obj);
+			return LuaProcessor::luaAPIReturn(L, func(L, lua_gettop(L), obj));
 		}
 
 		int luaClassInstanceFuncCall(lua_State* L) {
@@ -120,9 +120,9 @@ namespace FicsItKernel {
 
 			auto& data = *(LuaClassInstanceFunc*) lua_touserdata(L, lua_upvalueindex(1));
 			auto obj = data.first;
+			if (!obj) return luaL_error(L, "invalid native function ptr");
 			auto func = data.second;
-			func.second(L, lua_gettop(L), obj);
-			return luaL_error(L, "invalid native function ptr");
+			return LuaProcessor::luaAPIReturn(L, func.second(L, lua_gettop(L), obj));
 		}
 
 		void addCompFuncs(lua_State* L, Network::NetworkTrace obj) {

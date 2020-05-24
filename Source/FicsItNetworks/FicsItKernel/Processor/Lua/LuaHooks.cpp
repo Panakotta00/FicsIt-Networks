@@ -1,5 +1,7 @@
 #include "LuaHooks.h"
 
+
+#include "LuaProcessor.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "LuaProcessorStateStorage.h"
 #include "Computer/FINComputerSubsystem.h"
@@ -24,7 +26,7 @@ namespace FicsItKernel {
 	namespace Lua {
 		LuaFactoryFunc(GC)
 			CompSS->RemoveHook(trace);
-			return 0;
+			return LuaProcessor::luaAPIReturn(L, 0);
 		LuaEndFunc
 
 		LuaFactoryFunc(GetIperM)
@@ -32,12 +34,12 @@ namespace FicsItKernel {
 			int32 Sum = hook.GetSampleSum();
 			CompSS->MutexFactoryHooks.Unlock();
 			lua_pushinteger(L, Sum);
-			return 1;
+			return LuaProcessor::luaAPIReturn(L, 1);
 		LuaEndFunc
 
 		LuaFactoryFunc(Listen)
 			hook.Listeners.Add(trace.reverse());
-			return 0;
+			return LuaProcessor::luaAPIReturn(L, 0);
 		LuaEndFunc
 
 		int luaFactoryHookUnpersist(lua_State* L) {
@@ -49,7 +51,7 @@ namespace FicsItKernel {
 			FFINNetworkTrace trace = storage->GetTrace(lua_tointeger(L, lua_upvalueindex(1)));
 			luaHook(L, trace);
 			
-			return 1;
+			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		LuaFactoryFunc(Persist)
@@ -61,7 +63,7 @@ namespace FicsItKernel {
 			lua_pushnumber(L, storage->Add(trace));
 			
 			lua_pushcclosure(L, luaFactoryHookUnpersist, 1);
-		return 1;
+			return LuaProcessor::luaAPIReturn(L, 1);
 		LuaEndFunc
 
 		static const luaL_Reg luaFactoryHookLib[] = {
