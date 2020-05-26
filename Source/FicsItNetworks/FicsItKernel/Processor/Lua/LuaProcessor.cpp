@@ -513,7 +513,8 @@ namespace FicsItKernel {
 		int luaAPIReturn_Resume(lua_State* L, int status, lua_KContext ctx) {
 			return static_cast<int>(ctx);
 		}
-		
+
+#pragma optimize("", off)
 		int LuaProcessor::luaAPIReturn(lua_State* L, int args) {
 			LuaProcessor* p = LuaProcessor::luaGetProcessor(L);
 			if (p->endOfTick) {
@@ -522,6 +523,7 @@ namespace FicsItKernel {
 				return args;
 			}
 		}
+#pragma optimize("", on)
 	}
 }
        

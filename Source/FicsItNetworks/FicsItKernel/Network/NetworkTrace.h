@@ -26,19 +26,21 @@ namespace FicsItKernel {
 			
 		private:
 			NetworkTrace* prev = nullptr;
-			TraceStep* step = nullptr;
+			std::shared_ptr<TraceStep> step = nullptr;
 			TWeakObjectPtr<UObject> obj;
 
 		public:
-			static std::unique_ptr<TraceStep> fallbackTraceStep;
-			static std::vector<std::pair<std::pair<UClass*, UClass*>, TraceStep*>(*)()> toRegister;
-			static std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>> traceSteps;
-			static std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>> interfaceTraceSteps;
+			static std::shared_ptr<TraceStep> fallbackTraceStep;
+			static std::vector<std::pair<std::pair<UClass*, UClass*>, std::pair<std::string, TraceStep*>>(*)()> toRegister;
+			static std::map<std::string, std::shared_ptr<TraceStep>> traceStepRegistry;
+			static std::map<std::shared_ptr<TraceStep>, std::string> inverseTraceStepRegistry;
+			static std::map<UClass*, std::pair<std::map<UClass*, std::shared_ptr<TraceStep>>, std::map<UClass*, std::shared_ptr<TraceStep>>>> traceStepMap;
+			static std::map<UClass*, std::pair<std::map<UClass*, std::shared_ptr<TraceStep>>, std::map<UClass*, std::shared_ptr<TraceStep>>>> interfaceTraceStepMap;
 
 			/**
 			 * Trys to find the most suitable trace step of for both given classes
 			 */
-			static TraceStep* findTraceStep(UClass* A, UClass* B);
+			static std::shared_ptr<TraceStep> findTraceStep(UClass* A, UClass* B);
 
 			NetworkTrace(const NetworkTrace& trace);
 			NetworkTrace(NetworkTrace&& trace);
@@ -61,7 +63,7 @@ namespace FicsItKernel {
 			/**
 			 * Creates a copy of this network trace appends the given object and uses the given trace step for validation.
 			 */
-			NetworkTrace operator/(std::pair<UObject*, TraceStep*> other);
+			NetworkTrace operator/(std::pair<UObject*, std::shared_ptr<TraceStep>> other);
 
 			/**
 			 * Returns the referenced object.

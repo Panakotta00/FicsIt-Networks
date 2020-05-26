@@ -49,19 +49,47 @@ public:
 	}
 };
 
-inline bool FFINNetworkTrace::Serialize(FArchive& Ar) {
-	if (Ar.IsSaveGame()) {
-		UObject* ptr = trace.getUnderlyingPtr().Get();
-		Ar << ptr;
-		trace.obj = ptr;
-	}
-
-	return true;
-}
-
 inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
 	trace.Serialize(Ar);
 	return Ar;
+}
+
+inline bool FFINNetworkTrace::Serialize(FArchive& Ar) {
+	if (Ar.IsSaveGame()) {
+		bool valid = trace.isValid();
+		Ar << valid;
+		if (valid) {
+			// obj ptr
+			UObject* ptr = trace.getUnderlyingPtr().Get();
+			Ar << ptr;
+			trace.obj = ptr;
+	
+			// prev trace
+			bool hasPrev = trace.prev;
+			Ar << hasPrev;
+			if (hasPrev) {
+				FFINNetworkTrace prev;
+				if (Ar.IsSaving()) prev = *trace.prev;
+				Ar << prev;
+				if (Ar.IsLoading()) {
+					if (trace.prev) delete trace.prev;
+					trace.prev = new FicsItKernel::Network::NetworkTrace(prev);
+				}
+			}
+
+			// step
+			bool hasStep = trace.step.get();
+			Ar << hasStep;
+			if (hasStep) {
+				FString save;
+				if (Ar.IsSaving()) save = FicsItKernel::Network::NetworkTrace::inverseTraceStepRegistry[trace.step].c_str();
+				Ar << save;
+				if (Ar.IsLoading()) trace.step = FicsItKernel::Network::NetworkTrace::traceStepRegistry[TCHAR_TO_UTF8(*save)];
+			}
+		}
+	}
+	
+	return true;
 }
 
 FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& trace) {

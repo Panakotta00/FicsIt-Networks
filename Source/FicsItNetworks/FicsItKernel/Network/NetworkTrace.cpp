@@ -6,14 +6,15 @@
 
 #include "Network/FINNetworkConnector.h"
 #include "Network/FINNetworkCircuit.h"
+#include "util/Logging.h"
 
 #define StepFuncName(A, B) Step ## _ ## A ## _ ## B
 #define StepRegName(A, B) StepReg ## _ ## A ## _ ## B
 #define StepRegSigName(A, B) StepRegSig ## _ ## A ## _ ## B
 #define StepFuncSig(A, B) bool StepFuncName(A, B)(UObject* oA, UObject* oB)
 #define StepFuncSigReg(A, B) \
-	std::pair<std::pair<UClass*, UClass*>, TraceStep*> StepRegSigName(A, B)() { \
-		return {{A::StaticClass(), B::StaticClass()}, new TraceStep(&StepFuncName(A, B))}; \
+	std::pair<std::pair<UClass*, UClass*>, std::pair<std::string, TraceStep*>> StepRegSigName(A, B)() { \
+		return {{A::StaticClass(), B::StaticClass()}, {#A "_" #B, new TraceStep(&StepFuncName(A, B))}}; \
 	}
 #define Step(CA, CB) \
 	StepFuncSig(CA, CB); \
@@ -25,44 +26,46 @@
 
 namespace FicsItKernel {
 	namespace Network {
-		std::unique_ptr<TraceStep> NetworkTrace::fallbackTraceStep;
-		std::vector<std::pair<std::pair<UClass*, UClass*>, TraceStep*>(*)()> NetworkTrace::toRegister;
-		std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>> NetworkTrace::traceSteps;
-		std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>> NetworkTrace::interfaceTraceSteps;
+		std::shared_ptr<TraceStep> NetworkTrace::fallbackTraceStep;
+		std::vector<std::pair<std::pair<UClass*, UClass*>, std::pair<std::string, TraceStep*>>(*)()> NetworkTrace::toRegister;
+		std::map<std::string, std::shared_ptr<TraceStep>> NetworkTrace::traceStepRegistry;
+		std::map<std::shared_ptr<TraceStep>, std::string> NetworkTrace::inverseTraceStepRegistry;
+		std::map<UClass*, std::pair<std::map<UClass*, std::shared_ptr<TraceStep>>, std::map<UClass*, std::shared_ptr<TraceStep>>>> NetworkTrace::traceStepMap;
+		std::map<UClass*, std::pair<std::map<UClass*, std::shared_ptr<TraceStep>>, std::map<UClass*, std::shared_ptr<TraceStep>>>> NetworkTrace::interfaceTraceStepMap;
 		
 		class TraceStepRegisterer {
 		public:
-			TraceStepRegisterer(std::pair<std::pair<UClass*, UClass*>, TraceStep*>(*regSig)()) {
+			TraceStepRegisterer(std::pair<std::pair<UClass*, UClass*>, std::pair<std::string, TraceStep*>>(*regSig)()) {
 				NetworkTrace::toRegister.push_back(regSig);
 			}
 		};
 
-		class TraceRegisterSteps {
-		public:
-			TraceRegisterSteps() {
-				for (auto& stepSig : NetworkTrace::toRegister) {
-					auto step = stepSig();
-					TraceStep* tStep = step.second;
-					UClass* A = step.first.first;
-					UClass* B = step.first.second;
-					std::map<UClass*, std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>>* AMap;
-					if (A->GetSuperClass() == UInterface::StaticClass()) AMap = &NetworkTrace::traceSteps;
-					else AMap = &NetworkTrace::interfaceTraceSteps;
-					std::map<UClass*, std::unique_ptr<TraceStep>>* BMap;
-					if (B->GetSuperClass() == UInterface::StaticClass()) BMap = &(*AMap)[A].second;
-					else BMap = &(*AMap)[A].first;
-					(*BMap)[B] = std::unique_ptr<TraceStep>(tStep);
-				}
-				NetworkTrace::toRegister.clear();
+		void traceRegisterSteps() {
+			for (auto& stepSig : NetworkTrace::toRegister) {
+				auto step = stepSig();
+				TraceStep* tStep = step.second.second;
+				UClass* A = step.first.first;
+				UClass* B = step.first.second;
+				std::map<UClass*, std::pair<std::map<UClass*, std::shared_ptr<TraceStep>>, std::map<UClass*, std::shared_ptr<TraceStep>>>>* AMap;
+				if (A->GetSuperClass() == UInterface::StaticClass()) AMap = &NetworkTrace::interfaceTraceStepMap;
+				else AMap = &NetworkTrace::traceStepMap;
+				std::map<UClass*, std::shared_ptr<TraceStep>>* BMap;
+				if (B->GetSuperClass() == UInterface::StaticClass()) BMap = &(*AMap)[A].second;
+				else BMap = &(*AMap)[A].first;
+				std::shared_ptr<TraceStep> stepPtr = std::shared_ptr<TraceStep>(tStep);
+				(*BMap)[B] = stepPtr;
+				NetworkTrace::traceStepRegistry[step.second.first] = stepPtr;
+				NetworkTrace::inverseTraceStepRegistry[stepPtr] = step.second.first;
 			}
+			NetworkTrace::toRegister.clear();
 		};
 		
-		TraceStep* findTraceStep2(std::pair<std::map<UClass*, std::unique_ptr<TraceStep>>, std::map<UClass*, std::unique_ptr<TraceStep>>>& stepList, UClass* B) {
+		std::shared_ptr<TraceStep> findTraceStep2(std::pair<std::map<UClass*, std::shared_ptr<TraceStep>>, std::map<UClass*, std::shared_ptr<TraceStep>>>& stepList, UClass* B) {
 			UClass* Bi = B;
 			while (Bi && Bi != UObject::StaticClass()) {
 				auto stepB = stepList.first.find(Bi);
 				if (stepB != stepList.first.end()) {
-					return stepB->second.get();
+					return stepB->second;
 				}
 				Bi = Bi->GetSuperClass();
 			}
@@ -70,44 +73,48 @@ namespace FicsItKernel {
 			for (FImplementedInterface& interface : B->Interfaces) {
 				auto stepB = stepList.second.find(interface.Class);
 				if (stepB != stepList.second.end()) {
-					return stepB->second.get();
+					return stepB->second;
 				}
 			}
 
 			return nullptr;
 		}
 
-		TraceStep* NetworkTrace::findTraceStep(UClass* A, UClass* B) {
+		std::shared_ptr<TraceStep> NetworkTrace::findTraceStep(UClass* A, UClass* B) {
 			UClass* Ai = A;
 			while (Ai && Ai != UObject::StaticClass()) {
-				auto stepA = traceSteps.find(Ai);
-				if (stepA != traceSteps.end()) {
+				auto stepA = traceStepMap.find(Ai);
+				if (stepA != traceStepMap.end()) {
 					auto& stepAList = stepA->second;
-					TraceStep* step = findTraceStep2(stepAList, B);
-					if (step) return step;
+					std::shared_ptr<TraceStep> step = findTraceStep2(stepAList, B);
+					if (step.get()) return step;
 				}
 				Ai = Ai->GetSuperClass();
 			}
 			
 			for (FImplementedInterface& interface : A->Interfaces) {
-				auto stepA = traceSteps.find(interface.Class);
-				if (stepA != traceSteps.end()) {
+				auto stepA = interfaceTraceStepMap.find(interface.Class);
+				if (stepA != interfaceTraceStepMap.end()) {
 					auto& stepAList = stepA->second;
-					TraceStep* step = findTraceStep2(stepAList, B);
-					if (step) return step;
+					std::shared_ptr<TraceStep> step = findTraceStep2(stepAList, B);
+					if (step.get()) return step;
 				}
 			}
 
-			return fallbackTraceStep.get();
+			return fallbackTraceStep;
 		}
 
 		NetworkTrace::NetworkTrace(const NetworkTrace& trace) {
+			traceRegisterSteps();
+			
 			prev = (trace.prev) ? new NetworkTrace(*trace.prev) : nullptr;
 			step = trace.step;
 			obj = trace.obj;
 		}
 
 		NetworkTrace::NetworkTrace(NetworkTrace&& trace) {
+			traceRegisterSteps();
+			
 			prev = trace.prev;
 			step = trace.step;
 			obj = trace.obj;
@@ -132,10 +139,12 @@ namespace FicsItKernel {
 		}
 
 		NetworkTrace::NetworkTrace() : NetworkTrace(nullptr) {
-			TraceRegisterSteps regSteps;
+			traceRegisterSteps();
 		}
 
-		NetworkTrace::NetworkTrace(UObject* obj) : obj(obj) {}
+		NetworkTrace::NetworkTrace(UObject* obj) : obj(obj) {
+			traceRegisterSteps();
+		}
 
 		NetworkTrace::~NetworkTrace() {
 			if (prev) delete prev;
@@ -152,7 +161,7 @@ namespace FicsItKernel {
 			return trace;
 		}
 
-		NetworkTrace NetworkTrace::operator/(std::pair<UObject*, TraceStep*> other) {
+		NetworkTrace NetworkTrace::operator/(std::pair<UObject*, std::shared_ptr<TraceStep>> other) {
 			NetworkTrace trace(other.first);
 			trace.prev = new NetworkTrace(*this);
 			trace.step = other.second;
