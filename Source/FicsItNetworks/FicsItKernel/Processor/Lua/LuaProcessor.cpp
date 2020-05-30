@@ -179,7 +179,10 @@ namespace FicsItKernel {
 			luaThreadIndex = lua_gettop(luaState);
 
 			// setup thread with code
-			if (!eeprom.IsValid()) kernel->crash(KernelCrash("No Valid EEPROM set"));
+			if (!eeprom.IsValid()) {
+				kernel->crash(KernelCrash("No Valid EEPROM set"));
+				return;
+			}
 			luaL_loadstring(luaThread, std::string(TCHAR_TO_UTF8(*eeprom->Code), eeprom->Code.Len()).c_str());
 			
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);

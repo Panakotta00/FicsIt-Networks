@@ -1,6 +1,5 @@
 ﻿#include "FINComputerEEPROMDesc.h"
 
-#pragma optimize("", on)
 AFINStateEEPROM* UFINComputerEEPROMDesc::GetEEPROM(UFGInventoryComponent* Inv, int SlotIdx) {
 	FInventoryStack stack;
 	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.ItemClass)) return nullptr;
@@ -21,4 +20,3 @@ AFINStateEEPROM* UFINComputerEEPROMDesc::GetEEPROM(UFGInventoryComponent* Inv, i
 		return eeprom;
 	}
 }
-#pragma optimize("", off)

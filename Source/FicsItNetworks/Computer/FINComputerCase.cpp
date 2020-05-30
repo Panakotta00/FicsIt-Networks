@@ -48,6 +48,7 @@ void AFINComputerCase::Serialize(FArchive& ar) {
 		if (ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::KernelSystemPersistency) {
 			ar << NetworkConnector;
 			ar << Panel;
+			ar << EEPROM;
 			kernel->Serialize(ar, KernelState);
 		} else {
 			Super::Serialize(ar);
