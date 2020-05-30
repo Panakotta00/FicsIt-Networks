@@ -13,8 +13,10 @@ AFINModuleSystemHolo::~AFINModuleSystemHolo() {}
 AActor* AFINModuleSystemHolo::Construct(TArray<AActor*>& childs, FNetConstructionID constructionID) {
 	FRotator rotation = GetActorRotation();
 	FVector location = GetActorLocation();
+	FVector scale = GetActorScale3D();
 
 	auto a = Super::Construct(childs, constructionID);
+	a->SetActorScale3D(scale);
 
 	Cast<IFINModuleSystemModule>(a)->Execute_setPanel(a, Snapped, (int) SnappedLoc.X, (int) SnappedLoc.Y, (int) SnappedRot);
 	
@@ -114,6 +116,7 @@ void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit)
 	FRotator rot = {0, SnappedRot * 90.0f, 0.0f};
 	rot = Snapped->GetComponentToWorld().TransformRotation(rot.Quaternion()).Rotator();
 	loc = Snapped->GetComponentToWorld().TransformPosition(loc);
+	SetActorScale3D(Snapped->GetComponentScale());
 	SetActorLocationAndRotation(loc, rot);
 }
 

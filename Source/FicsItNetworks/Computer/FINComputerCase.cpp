@@ -5,6 +5,9 @@
 #include "FINComputerMemory.h"
 #include "FINComputerDriveHolder.h"
 #include "FicsItKernel/Processor/Lua/LuaProcessor.h"
+#include "FGInventoryComponent.h"
+#include "FINComputerEEPROMDesc.h"
+#include "FicsItKernel/FicsItKernel.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
@@ -16,6 +19,13 @@ AFINComputerCase::AFINComputerCase() {
 	Panel->SetupAttachment(RootComponent);
 	Panel->OnModuleChanged.AddDynamic(this, &AFINComputerCase::OnModuleChanged);
 
+	EEPROM = CreateDefaultSubobject<UFGInventoryComponent>("EEPROM");
+	EEPROM->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
+	EEPROM->OnItemAddedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
+	EEPROM->mItemFilter.BindLambda([](TSubclassOf<UObject> item, int32 i) {
+		return i <= 1 && item->IsChildOf(UFINComputerEEPROMDesc::StaticClass());
+	});
+	
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
 	mFactoryTickFunction.bRunOnAnyThread = true;
@@ -38,7 +48,6 @@ void AFINComputerCase::Serialize(FArchive& ar) {
 		if (ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::KernelSystemPersistency) {
 			ar << NetworkConnector;
 			ar << Panel;
-			ar << Code;
 			kernel->Serialize(ar, KernelState);
 		} else {
 			Super::Serialize(ar);
@@ -174,13 +183,15 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 	}
 }
 
+void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num) {
+	FicsItKernel::Processor* processor = kernel->getProcessor();
+	if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(EEPROM, 0));
+}
+
 void AFINComputerCase::Toggle() {
-	FicsItKernel::Lua::LuaProcessor* processor = (FicsItKernel::Lua::LuaProcessor*)kernel->getProcessor();
-	if (processor) processor->setCode(TCHAR_TO_UTF8(*Code));
+	FicsItKernel::Processor* processor = kernel->getProcessor();
+	if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(EEPROM, 0));
 	switch (kernel->getState()) {
-	case FicsItKernel::KernelState::RUNNING:
-		kernel->stop();	
-		break;
 	case FicsItKernel::KernelState::SHUTOFF:
 		kernel->start(false);
 		SerialOutput = "";
@@ -188,6 +199,9 @@ void AFINComputerCase::Toggle() {
 	case FicsItKernel::KernelState::CRASHED:
 		kernel->start(true);
 		SerialOutput = "";
+		break;
+	default:
+		kernel->stop();	
 		break;
 	}
 }

@@ -17,8 +17,17 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		std::map<UClass*, std::map<std::string, LuaLibFunc>> instanceClasses;
-		std::map<UClass*, std::map<std::string, LuaLibClassFunc>> instanceSubclasses;
+		std::map<UClass*, std::map<std::string, LuaLibFunc>>& instanceClasses() {
+			static std::map<UClass*, std::map<std::string, LuaLibFunc>>* ptr = nullptr;
+			if (!ptr) ptr = new std::map<UClass*, std::map<std::string, LuaLibFunc>>();
+			return *ptr;
+		}
+		
+		std::map<UClass*, std::map<std::string, LuaLibClassFunc>>& instanceSubclasses() {
+			static std::map<UClass*, std::map<std::string, LuaLibClassFunc>>* ptr = nullptr;
+			if (!ptr) ptr = new std::map<UClass*, std::map<std::string, LuaLibClassFunc>>();
+			return *ptr;
+		}
 
 		Network::NetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
 			if (!lua_istable(L, index)) return Network::NetworkTrace();
@@ -140,7 +149,7 @@ namespace FicsItKernel {
 
 		void addPreFuncs(lua_State* L, Network::NetworkTrace obj) {
 			int j = 0;
-			for (auto clazz : instanceClasses) {
+			for (auto clazz : instanceClasses()) {
 				if (!obj->IsA(clazz.first)) continue;
 				for (auto& func : clazz.second) {
 					auto comp_ud = (LuaInstanceFunc*) lua_newuserdata(L, sizeof(LuaInstanceFunc));
@@ -197,7 +206,7 @@ namespace FicsItKernel {
 			lua_setfield(L, -2, "__object");
 
 			int j = 0;
-			for (auto clazz : instanceSubclasses) {
+			for (auto clazz : instanceSubclasses()) {
 				if (iClazz->IsChildOf(clazz.first))
 				for (auto func : clazz.second) {
 					auto instanceFunc = (LuaClassInstanceFunc*)lua_newuserdata(L, sizeof(LuaClassInstanceFunc));
@@ -292,7 +301,7 @@ namespace FicsItKernel {
 			FFINNetworkTrace trace = storage->GetTrace(lua_tointeger(L, lua_upvalueindex(1)));
 			UClass* clazzOfObj = Cast<UClass>(storage->GetRef(lua_tointeger(L, lua_upvalueindex(2))));
 			std::string funcName = lua_tostring(L, lua_upvalueindex(3));
-			auto func = instanceClasses[clazzOfObj].find(funcName);
+			auto func = instanceClasses()[clazzOfObj].find(funcName);
 			
 			// push data as InstanceFunc
 			LuaInstanceFunc* inst = (LuaInstanceFunc*)lua_newuserdata(L, sizeof(LuaInstanceFunc));
@@ -420,7 +429,7 @@ namespace FicsItKernel {
 			// read ids from upvalues & get refs from storage
 			UClass* clazz = Cast<UClass>(storage->GetRef(lua_tointeger(L, lua_upvalueindex(1))));
 			std::string funcName = lua_tostring(L, lua_upvalueindex(2));
-			LuaLibClassFunc func = instanceSubclasses[clazz][funcName.c_str()];
+			LuaLibClassFunc func = instanceSubclasses()[clazz][funcName.c_str()];
 			
 			// push data as InstanceRef
 			LuaClassInstanceFunc* inst = (LuaClassInstanceFunc*)lua_newuserdata(L, sizeof(LuaClassInstanceFunc));

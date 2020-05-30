@@ -1,15 +1,13 @@
 #pragma once
 
-#include "FicsItKernel/Processor/Processor.h"
-#include "FicsItKernel/Network/Signal.h"
-
 #include <chrono>
 #include <set>
 
-
+#include "FicsItKernel/Processor/Processor.h"
+#include "FicsItKernel/Network/Signal.h"
 #include "LuaFileSystemAPI.h"
-#include "FicsItKernel/FicsItFS/Library/File.h"
 
+class AFINStateEEPROMLua;
 struct lua_State;
 struct lua_Debug;
 
@@ -37,7 +35,7 @@ namespace FicsItKernel {
 		private:
 			int speed = 0;
 
-			std::string code = "";
+			TWeakObjectPtr<AFINStateEEPROMLua> eeprom;
 
 			lua_State* luaState = nullptr;
 			lua_State* luaThread = nullptr;
@@ -61,6 +59,7 @@ namespace FicsItKernel {
 			virtual void Serialize(UProcessorStateStorage* Storage, bool bLoading) override;
 			virtual void PostSerialize(UProcessorStateStorage* Storage, bool bLoading) override;
 			virtual UProcessorStateStorage* CreateSerializationStorage() override;
+			virtual void setEEPROM(AFINStateEEPROM* eeprom) override;
 			// End Processor
 
 			/**
@@ -70,12 +69,6 @@ namespace FicsItKernel {
 			* @param[in]	ctx		the lua context you want to setup
 			*/
 			void luaSetup(lua_State* L);
-
-			/**
-			 * Sets the code you want to execute.
-			 * Might cause the processor to reset.
-			 */
-			void setCode(const std::string& code);
 
 			int doSignal(lua_State* L);
 			void clearFileStreams();

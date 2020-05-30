@@ -17,14 +17,14 @@ using namespace FicsItKernel::Lua;
 class RegisterObjectFunc {
 public:
 	RegisterObjectFunc(UClass* clazz, std::string funcName, LuaLibFunc func) {
-		FicsItKernel::Lua::instanceClasses[clazz][funcName] = func;
+		FicsItKernel::Lua::instanceClasses()[clazz][funcName] = func;
 	}
 };
 
 class RegisterClassFunc {
 public:
 	RegisterClassFunc(UClass* clazz, std::string funcName, LuaLibClassFunc func) {
-		FicsItKernel::Lua::instanceSubclasses[clazz][funcName] = func;
+		FicsItKernel::Lua::instanceSubclasses()[clazz][funcName] = func;
 	}
 };
 
@@ -119,14 +119,12 @@ namespace FicsItKernel {
 		// Begin UFGInventoryComponent
 		
 		LuaLibFunc(UFGInventoryComponent, getStack)
-			FInventoryStack* stack = new FInventoryStack();
+			FInventoryStack stack;
 			for (int i = 1; i <= args; ++i) {
-				if (self->GetStackFromIndex((int)lua_tointeger(L, i), *stack)) {
-					luaStruct(L, *stack);
+				if (self->GetStackFromIndex((int)lua_tointeger(L, i), stack)) {
+					luaStruct(L, stack);
 				} else lua_pushnil(L);
 			}
-			delete stack;
-
 			return args;
 		}
 

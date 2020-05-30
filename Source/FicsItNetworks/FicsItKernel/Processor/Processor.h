@@ -2,10 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Json.h"
+#include "ProcessorStateStorage.h"
 
 #include <string>
 
-#include "ProcessorStateStorage.h"
+class AFINStateEEPROM;
 
 namespace FicsItKernel {
 	enum ProcessorArchitecture {
@@ -19,7 +20,7 @@ namespace FicsItKernel {
 	 */
 	class Processor {
 	protected:
-		KernelSystem* kernel;
+		KernelSystem* kernel = nullptr;
 
 	public:
 		virtual ~Processor() {}
@@ -60,6 +61,12 @@ namespace FicsItKernel {
 		* f.e. resets the code counter
 		*/
 		virtual void reset() = 0;
+
+		/**
+		 * Sets the BIOS code of the processor.
+		 * Usage and events depend on implementation (f.e. reset on set)
+		 */
+		virtual void setEEPROM(AFINStateEEPROM* eeprom) = 0;
 
 		/**
 		 * Should get called prior to serialization.

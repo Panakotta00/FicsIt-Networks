@@ -136,9 +136,6 @@ namespace FicsItKernel {
 	}
 
 	bool KernelSystem::stop() {
-		// check state
-		if (getState() != RUNNING) return false;
-
 		// set state
 		state = SHUTOFF;
 

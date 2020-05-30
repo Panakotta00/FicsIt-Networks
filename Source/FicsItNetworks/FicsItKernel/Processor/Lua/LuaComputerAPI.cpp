@@ -17,12 +17,14 @@ namespace FicsItKernel {
 
 		LuaFunc(luaComputerReset)
 			kernel->reset();
-			return LuaProcessor::luaAPIReturn(L, 0);
+			lua_yield(L, 0);
+			return 0;
 		}
 
 		LuaFunc(luaComputerStop)
 			kernel->stop();
-			return LuaProcessor::luaAPIReturn(L, 0);
+			lua_yield(L, 0);
+			return 0;
 		}
 
 		LuaFunc(luaComputerBeep)

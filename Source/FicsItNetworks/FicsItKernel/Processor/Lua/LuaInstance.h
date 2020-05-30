@@ -17,8 +17,8 @@ namespace FicsItKernel {
 		typedef std::function<int(lua_State*, int, const Network::NetworkTrace&)> LuaLibFunc;
 		typedef std::function<int(lua_State*, int, UClass*)> LuaLibClassFunc;
 
-		extern std::map<UClass*, std::map<std::string, LuaLibFunc>> instanceClasses;
-		extern std::map<UClass*, std::map<std::string, LuaLibClassFunc>> instanceSubclasses;
+		std::map<UClass*, std::map<std::string, LuaLibFunc>>& instanceClasses();
+		std::map<UClass*, std::map<std::string, LuaLibClassFunc>>& instanceSubclasses();
 
 		typedef Network::NetworkTrace LuaInstance;
 		typedef UClass* LuaClassInstance;

@@ -27,16 +27,16 @@ class AFINComputerCase : public AFGBuildable {
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
-		UFINNetworkConnector* NetworkConnector;
+	UFINNetworkConnector* NetworkConnector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category = "ComputerCase")
-		UFINModuleSystemPanel* Panel;
+	UFINModuleSystemPanel* Panel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
-		FString Code;
+	UFGInventoryComponent* EEPROM;
 
 	UPROPERTY()
-		FKernelSystemSerializationInfo KernelState;
+	FKernelSystemSerializationInfo KernelState;
 	
 	FicsItKernel::KernelSystem* kernel = nullptr;
 
@@ -105,6 +105,9 @@ public:
 	
 	UFUNCTION()
 	void OnModuleChanged(UObject* module, bool added);
+
+	UFUNCTION()
+	void OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num);
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	void Toggle();

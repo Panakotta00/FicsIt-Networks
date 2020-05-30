@@ -3,7 +3,6 @@
 #include "../../FicsItKernel.h"
 
 #include "LuaInstance.h"
-#include "LuaLib.h"
 #include "LuaStructs.h"
 #include "LuaHooks.h"
 #include "LuaComponentAPI.h"
@@ -11,6 +10,8 @@
 #include "LuaFileSystemAPI.h"
 #include "LuaComputerAPI.h"
 #include "LuaProcessorStateStorage.h"
+
+#include "FINStateEEPROMLua.h"
 
 #include "SML/util/Logging.h"
 
@@ -178,7 +179,8 @@ namespace FicsItKernel {
 			luaThreadIndex = lua_gettop(luaState);
 
 			// setup thread with code
-			luaL_loadstring(luaThread, code.c_str());
+			if (!eeprom.IsValid()) kernel->crash(KernelCrash("No Valid EEPROM set"));
+			luaL_loadstring(luaThread, std::string(TCHAR_TO_UTF8(*eeprom->Code), eeprom->Code.Len()).c_str());
 			
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
 			// TODO: Check if we actually want to use this or the manual gc call
@@ -364,6 +366,11 @@ namespace FicsItKernel {
 			return NewObject<ULuaProcessorStateStorage>();
 		}
 
+		void LuaProcessor::setEEPROM(AFINStateEEPROM* eeprom) {
+			this->eeprom = Cast<AFINStateEEPROMLua>(eeprom);
+			reset();
+		}
+
 		int luaReYield(lua_State* L) {
 			lua_yield(L,0);
 			return 0;
@@ -480,11 +487,6 @@ namespace FicsItKernel {
 			setupEventAPI(L);
 			setupFileSystemAPI(L);
 			setupComputerAPI(L);
-		}
-
-		void LuaProcessor::setCode(const std::string& code) {
-			this->code = code;
-			reset();
 		}
 
 		int LuaProcessor::doSignal(lua_State* L) {
