@@ -421,6 +421,42 @@ namespace FicsItKernel {
 			{NULL, NULL}
 		};
 
+		int luaClassInstanceRefUnpersist(lua_State* L) {
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+				
+			// read id from upvalue & get ref from storage
+			UClass* clazz = Cast<UClass>(storage->GetRef(lua_tointeger(L, lua_upvalueindex(1))));
+			
+			// push data as InstanceRef
+			LuaClassInstance* inst = static_cast<LuaClassInstance*>(lua_newuserdata(L, sizeof(LuaClassInstance)));
+			luaL_setmetatable(L, INSTANCE_REF);
+			new (inst) LuaClassInstance(clazz);
+			return 1;
+		}
+
+		int luaClassInstanceRefPersist(lua_State* L) {
+			// get data
+			const LuaClassInstance& obj = *static_cast<LuaClassInstance*>(luaL_checkudata(L, -1, CLASS_INSTANCE_REF));
+
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+
+			// add trace to storage & push id
+			lua_pushinteger(L, storage->Add(obj));
+
+			// create & return closure
+			lua_pushcclosure(L, &luaClassInstanceRefUnpersist, 1);
+			return 1;
+		}
+
+		static const luaL_Reg luaClassInstanceRefLib[] = {
+			{"__persist", luaClassInstanceRefPersist},
+			{NULL, NULL}
+		};
+
 		int luaClassInstanceFuncUnpersist(lua_State* L) {
 			// get persist storage
 			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
@@ -484,15 +520,6 @@ namespace FicsItKernel {
 			lua_pushcfunction(L, &luaInstanceRefUnpersist);
 			PersistValue("InstanceRefUnpersist");
 
-			luaL_newmetatable(L, CLASS_INSTANCE);
-			luaL_setfuncs(L, luaClassInstanceLib, 0);
-			PersistTable("ClassInstance", -1);
-			lua_pop(L, 1);
-
-			luaL_newmetatable(L, CLASS_INSTANCE_REF);
-			PersistTable("ClassInstanceRef", -1);
-			lua_pop(L, 1);
-
 			luaL_newmetatable(L, INSTANCE_FUNC);
 			luaL_setfuncs(L, luaInstanceFuncLib, 0);
 			PersistTable("InstanceFunc", -1);
@@ -500,22 +527,37 @@ namespace FicsItKernel {
 			lua_pushcfunction(L, luaInstanceFuncUnpersist);
 			PersistValue("InstanceFuncUnpersist");
 
+			lua_pushcfunction(L, luaInstanceFuncCall);
+			PersistValue("InstanceFuncCall");
+
 			luaL_newmetatable(L, INSTANCE_UFUNC);
 			luaL_setfuncs(L, luaInstanceUFuncLib, 0);
 			PersistTable("InstanceUFunc", -1);
 			lua_pop(L, 1);
 			lua_pushcfunction(L, luaInstanceUFuncUnpersist);
 			PersistValue("InstanceUFuncUnpersist");
-
-			lua_pushcfunction(L, luaInstanceFuncCall);
-			PersistValue("InstanceFuncCall");
+			
 			lua_pushcfunction(L, luaInstanceUFuncCall);
 			PersistValue("InstanceUFuncCall");
+
+			luaL_newmetatable(L, CLASS_INSTANCE);
+			luaL_setfuncs(L, luaClassInstanceLib, 0);
+			PersistTable("ClassInstance", -1);
+			lua_pop(L, 1);
+
+			luaL_newmetatable(L, CLASS_INSTANCE_REF);
+			luaL_setfuncs(L, luaClassInstanceRefLib, 0);
+			PersistTable("ClassInstanceRef", -1);
+			lua_pop(L, 1);
+			lua_pushcfunction(L, &luaClassInstanceRefUnpersist);
+			PersistValue("ClassInstanceRefUnpersist");
 
 			luaL_newmetatable(L, CLASS_INSTANCE_FUNC);
 			luaL_setfuncs(L, luaClassInstanceFuncLib, 0);
 			PersistTable("ClassInstanceFunc", -1);
 			lua_pop(L, 1);
+			lua_pushcfunction(L, &luaClassInstanceFuncUnpersist);
+			PersistValue("ClassInstanceFuncUnpersist");
 
 			lua_pushcfunction(L, luaClassInstanceFuncCall);
 			PersistValue("ClassInstanceFuncCall");
