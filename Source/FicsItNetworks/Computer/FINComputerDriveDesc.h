@@ -12,7 +12,7 @@ public:
 		int32 StorageCapacity;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		UTexture2D* DriveInventoryImage;
+		UTexture2D* DriveInventoryImage = nullptr;
 
 	UFINComputerDriveDesc();
 

@@ -3,29 +3,28 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
-#include "FGInventoryLibrary.h"
 #include "Network/FINNetworkConnector.h"
 #include "FINCodeableSplitter.generated.h"
 
-UCLASS(Blueprintable)
-class AFINCodeableSplitter : public AFGBuildableAttachmentSplitter, public IFINSignalSender {
+UCLASS()
+class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINSignalSender {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
-		UFINNetworkConnector* NetworkConnector;
+		UFINNetworkConnector* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
-		UFGFactoryConnectionComponent* InputConnector;
+		UFGFactoryConnectionComponent* InputConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
-		UFGFactoryConnectionComponent* Output1;
+		UFGFactoryConnectionComponent* Output1 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
-		UFGFactoryConnectionComponent* Output2;
+		UFGFactoryConnectionComponent* Output2 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
-		UFGFactoryConnectionComponent* Output3;
+		UFGFactoryConnectionComponent* Output3 = nullptr;
 
 	UPROPERTY(SaveGame)
 		TArray<FInventoryItem> InputQueue;
@@ -43,7 +42,12 @@ public:
 		TSet<FFINNetworkTrace> SignalListeners;
 
 	AFINCodeableSplitter();
+	~AFINCodeableSplitter();
 
+	//~ Begin IFGDismantleInterface
+	virtual void GetDismantleRefund_Implementation( TArray< FInventoryStack >& out_refund ) const override;
+	// End IFGDismantleInterface
+	
 	// Begin IFINSignalSender
 	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
 	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
@@ -54,6 +58,7 @@ public:
 	virtual void Factory_Tick(float dt) override;
 	virtual bool Factory_PeekOutput_Implementation(const class UFGFactoryConnectionComponent* connection, TArray< FInventoryItem >& out_items, TSubclassOf< UFGItemDescriptor > type) const override;
 	virtual bool Factory_GrabOutput_Implementation(class UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf< UFGItemDescriptor > type) override;
+	// TODO: Upgrade Implementation
 	// End AFGBuildable
 
 	/**

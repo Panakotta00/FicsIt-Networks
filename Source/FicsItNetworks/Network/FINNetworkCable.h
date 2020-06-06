@@ -13,13 +13,13 @@ class FICSITNETWORKS_API AFINNetworkCable : public AFGBuildable {
 
 public:
 	UPROPERTY(SaveGame)
-	UFINNetworkConnector* Connector1;
+	UFINNetworkConnector* Connector1 = nullptr;
 
 	UPROPERTY(SaveGame)
-	UFINNetworkConnector* Connector2;
+	UFINNetworkConnector* Connector2 = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
-	USplineMeshComponent* CableSpline;
+	USplineMeshComponent* CableSpline = nullptr;
 
 	AFINNetworkCable();
 	~AFINNetworkCable();

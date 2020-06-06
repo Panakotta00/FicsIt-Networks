@@ -15,7 +15,7 @@ namespace FicsItKernel {
 	namespace Lua {
 		class LuaSignalReader : public Network::SignalReader {
 		private:
-			lua_State* L;
+			lua_State* L = nullptr;
 
 		public:
 			LuaSignalReader(lua_State* L);

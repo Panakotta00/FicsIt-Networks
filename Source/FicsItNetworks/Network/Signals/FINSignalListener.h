@@ -23,7 +23,7 @@ class FICSITNETWORKS_API IFINSignalListener {
 private:
 	class SignalListenerImpl : public FicsItKernel::Network::SignalListener {
 	private:
-		IFINSignalListener* parent;
+		IFINSignalListener* parent = nullptr;
 
 	public:
 		SignalListenerImpl(IFINSignalListener* parent);

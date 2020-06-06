@@ -3,7 +3,6 @@
 AFINCodeableSplitter::AFINCodeableSplitter() {
 	RootComponent->SetMobility(EComponentMobility::Static);
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
-	NetworkConnector->AddMerged(this);
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->SetMobility(EComponentMobility::Static);
 
@@ -23,6 +22,27 @@ AFINCodeableSplitter::AFINCodeableSplitter() {
 	Output3->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
 	Output3->SetupAttachment(RootComponent);
 	Output3->SetMobility(EComponentMobility::Static);
+
+	mFactoryTickFunction.bCanEverTick = true;
+	mFactoryTickFunction.bStartWithTickEnabled = true;
+	mFactoryTickFunction.bRunOnAnyThread = true;
+	mFactoryTickFunction.bAllowTickOnDedicatedServer = true;
+
+	if (HasAuthority()) mFactoryTickFunction.SetTickFunctionEnable(true);
+}
+
+#pragma optimize("", off)
+AFINCodeableSplitter::~AFINCodeableSplitter() {}
+#pragma optimize("", on)
+
+void AFINCodeableSplitter::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund) const {
+	Super::GetDismantleRefund_Implementation(out_refund);
+
+	//TArray<FInventoryItem> items = InputQueue;
+	out_refund.Append(InputQueue);
+	out_refund.Append(OutputQueue1);
+	out_refund.Append(OutputQueue2);
+	out_refund.Append(OutputQueue3);
 }
 
 void AFINCodeableSplitter::AddListener_Implementation(FFINNetworkTrace listener) {
@@ -38,6 +58,7 @@ TSet<FFINNetworkTrace> AFINCodeableSplitter::GetListeners_Implementation() {
 }
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {
+	Super::Factory_Tick(dt);
 	if (InputQueue.Num() < 2) {
 		FInventoryItem item;
 		float offset;

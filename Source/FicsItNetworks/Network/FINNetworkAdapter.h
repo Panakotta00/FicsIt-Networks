@@ -45,7 +45,7 @@ public:
 	
 	/** the network connector of the adapter */
 	UPROPERTY()
-	UFINNetworkConnector* Connector;
+	UFINNetworkConnector* Connector = nullptr;
 	
 	/** the network adapter reference attached to the parent factory */
 	UPROPERTY()
@@ -53,7 +53,7 @@ public:
 	
 	/** the visible mesh of the adapter */
 	UPROPERTY()
-	UStaticMeshComponent* ConnectorMesh;
+	UStaticMeshComponent* ConnectorMesh = nullptr;
 
 	AFINNetworkAdapter();
 	~AFINNetworkAdapter();

@@ -18,19 +18,19 @@ public:
 		bool bConnected;
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"), Category="NetworkPowerSwitch")
-		UFGPowerConnectionComponent* PowerConnection1;
+		UFGPowerConnectionComponent* PowerConnection1 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "NetworkPowerSwitch")
-		UFGPowerConnectionComponent* PowerConnection2;
+		UFGPowerConnectionComponent* PowerConnection2 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "NetworkPowerSwitch")
-		UFGPowerInfoComponent* PowerInfo1;
+		UFGPowerInfoComponent* PowerInfo1 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "NetworkPowerSwitch")
-		UFGPowerInfoComponent* PowerInfo2;
+		UFGPowerInfoComponent* PowerInfo2 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "NetworkPowerSwitch")
-		UFINNetworkConnector* NetworkConnector;
+		UFINNetworkConnector* NetworkConnector = nullptr;
 
 	AFINNetworkPowerSwitch();
 

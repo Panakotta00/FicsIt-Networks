@@ -27,13 +27,13 @@ class AFINComputerCase : public AFGBuildable {
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
-	UFINNetworkConnector* NetworkConnector;
+	UFINNetworkConnector* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category = "ComputerCase")
-	UFINModuleSystemPanel* Panel;
+	UFINModuleSystemPanel* Panel = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
-	UFGInventoryComponent* EEPROM;
+	UFGInventoryComponent* EEPROM = nullptr;
 
 	UPROPERTY()
 	FKernelSystemSerializationInfo KernelState;

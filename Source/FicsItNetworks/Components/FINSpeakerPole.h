@@ -12,10 +12,10 @@ class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
-		UFINNetworkConnector* NetworkConnector;
+		UFINNetworkConnector* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
-		UAudioComponent* AudioComponent;
+		UAudioComponent* AudioComponent = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category="SpeakerPole")
 		FString CurrentSound;

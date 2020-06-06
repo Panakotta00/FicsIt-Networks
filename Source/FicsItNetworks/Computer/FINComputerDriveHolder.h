@@ -13,7 +13,7 @@ class AFINComputerDriveHolder : public AFINComputerModule {
 
 public:
 	UPROPERTY(SaveGame, BlueprintReadOnly)
-	UFGInventoryComponent* DriveInventory;
+	UFGInventoryComponent* DriveInventory = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, BlueprintAssignable)
 	FFINDriveUpdate OnDriveUpdate;

@@ -27,7 +27,7 @@ namespace FicsItKernel {
 		private:
 			NetworkTrace* prev = nullptr;
 			std::shared_ptr<TraceStep> step = nullptr;
-			TWeakObjectPtr<UObject> obj;
+			TWeakObjectPtr<UObject> obj = nullptr;
 
 		public:
 			static std::shared_ptr<TraceStep> fallbackTraceStep;

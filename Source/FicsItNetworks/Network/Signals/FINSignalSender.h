@@ -51,8 +51,8 @@ public:
 
 	class BPSignal : public FicsItKernel::Network::Signal {
 	private:
-		UFunction* func;
-		void* data;
+		UFunction* func = nullptr;
+		void* data = nullptr;
 
 	public:
 		BPSignal(std::string name, UFunction* func, void* data);
