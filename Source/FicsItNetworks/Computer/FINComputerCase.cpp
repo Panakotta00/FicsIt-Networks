@@ -95,6 +95,7 @@ void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
 	if (Processors.Num() == 1) {
 		// no processor already added -> add new processor
 		kernel->setProcessor(processor->CreateProcessor());
+		kernel->getProcessor()->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(EEPROM, 0));
 	} else {
 		// processor already added
 		kernel->setProcessor(nullptr);
