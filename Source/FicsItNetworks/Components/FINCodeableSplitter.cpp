@@ -31,9 +31,7 @@ AFINCodeableSplitter::AFINCodeableSplitter() {
 	if (HasAuthority()) mFactoryTickFunction.SetTickFunctionEnable(true);
 }
 
-#pragma optimize("", off)
 AFINCodeableSplitter::~AFINCodeableSplitter() {}
-#pragma optimize("", on)
 
 void AFINCodeableSplitter::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund) const {
 	Super::GetDismantleRefund_Implementation(out_refund);

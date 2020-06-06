@@ -10,6 +10,7 @@ class FICSITNETWORKS_API AFINModuleSystemHolo : public AFGBuildableHologram {
 	GENERATED_BODY()
 
 public:
+	UPROPERTY()
 	UFINModuleSystemPanel* Snapped = nullptr;
 	FVector SnappedLoc;
 	int SnappedRot;
@@ -19,12 +20,12 @@ public:
 	~AFINModuleSystemHolo();
 
 	// Begin AFGHologram
-	virtual AActor* Construct(TArray<AActor*>& out_children, FNetConstructionID constructionID);
+	virtual AActor* Construct(TArray<AActor*>& out_children, FNetConstructionID constructionID) override;
 	virtual bool IsValidHitResult(const FHitResult& hit) const override;
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;
 	virtual void SetHologramLocationAndRotation(const FHitResult& hit) override;
 	virtual void CheckValidPlacement() override;
-	// ENd AFGHologram
+	// End AFGHologram
 
 private:
 	bool checkSpace(FVector min, FVector max);

@@ -48,6 +48,21 @@ public:
 	void UpdateBestUsableActor() {}
 };
 
+USceneComponent* Holo_SetupComponentDecl(AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName);
+void Holo_SetupComponent(CallScope<decltype(&Holo_SetupComponentDecl)>& scope, AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
+	UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
+	if (componentTemplate->IsA<UFINNetworkConnector>()) {
+		auto comp = NewObject<UStaticMeshComponent>(attachParent);
+		comp->RegisterComponent();
+		comp->SetMobility(EComponentMobility::Movable);
+		comp->SetStaticMesh(networkConnectorHoloMesh);
+		comp->AttachTo(attachParent);
+		comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
+			
+		scope.Override(comp);
+	}
+}
+
 void GetDismantleRefund_Decl(IFGDismantleInterface*, TArray<FInventoryStack>&);
 void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {
 	AFGBuildable* self = reinterpret_cast<AFGBuildable*>(disInt);
@@ -154,19 +169,7 @@ void FFicsItNetworksModule::StartupModule(){
 	finConfig = SML::readModConfig(MOD_NAME, finConfig);
 	#endif
 
-	SUBSCRIBE_METHOD("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, [](auto& scope, AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
-		UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
-		if (componentTemplate->IsA<UFINNetworkConnector>()) {
-			auto comp = NewObject<UStaticMeshComponent>(attachParent);
-			comp->RegisterComponent();
-			comp->SetMobility(EComponentMobility::Movable);
-			comp->SetStaticMesh(networkConnectorHoloMesh);
-			comp->AttachTo(attachParent);
-			comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
-			
-			scope.Override(comp);
-		}
-	});
+	SUBSCRIBE_METHOD("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
 
 	SUBSCRIBE_METHOD("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent_Public::Factory_GrabOutput, &FactoryGrabHook);
 	SUBSCRIBE_METHOD("?Factory_Internal_GrabOutputInventory@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@V?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, &FactoryGrabInternalHook);
