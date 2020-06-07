@@ -11,19 +11,19 @@ class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINS
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		UFINNetworkConnector* NetworkConnector = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		UFGFactoryConnectionComponent* InputConnector = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		UFGFactoryConnectionComponent* Output1 = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		UFGFactoryConnectionComponent* Output2 = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CodeableSplitter")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		UFGFactoryConnectionComponent* Output3 = nullptr;
 
 	UPROPERTY(SaveGame)

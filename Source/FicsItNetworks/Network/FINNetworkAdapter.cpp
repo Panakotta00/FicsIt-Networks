@@ -48,7 +48,10 @@ void AFINNetworkAdapter::BeginPlay() {
 		for (AFINNetworkCable* cable : Connector->Cables) {
 			TArray<FInventoryStack> refund;
 			cable->Execute_GetDismantleRefund(cable, refund);
-			for (FInventoryStack& stack : refund) AFGItemPickup_Spawnable::AddItemToWorldStackAtLocation(GetWorld(), stack, cable->GetActorLocation(), cable->GetActorRotation());
+			float radius;
+			FVector pos = IFGDismantleInterface::Execute_GetRefundSpawnLocationAndArea(cable, cable->GetActorLocation(), radius);
+			TArray<class AFGItemPickup_Spawnable*> drops;
+			AFGItemPickup_Spawnable::CreateItemDropsInCylinder(cable->GetWorld(), refund, pos, radius, {cable}, drops);
 			cable->Destroy();
 		}
 		Destroy();
