@@ -245,8 +245,8 @@ bool AFINNetworkCableHologram::isValid() {
 }
 
 AFINNetworkCableHologram::AFINNetworkCableHologram() {
-	UStaticMesh* cableMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
-	UStaticMesh* adapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsIt-Networks/Network/Mesh_Adapter.Mesh_Adapter"));
+	UStaticMesh* cableMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
+	UStaticMesh* adapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
 
 	this->mMaxPlacementFloorAngle = 90.0f;
 
