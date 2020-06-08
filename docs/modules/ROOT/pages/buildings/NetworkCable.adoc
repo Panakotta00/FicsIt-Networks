@@ -12,7 +12,7 @@
 |Build Gun |In Game
 
 |image::buildings/NetworkCable_bg.png[300,300,role="left"]
-|image::buildings/NetworkCable_ig.png[300,300,role="left"]
+|image::buildings/NetworkCable_ig.jpg[300,300,role="left"]
 |===
 
 The network cable is one of the most important buildings.
