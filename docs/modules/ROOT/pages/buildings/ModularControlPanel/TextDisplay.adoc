@@ -1,0 +1,82 @@
+= Text Display
+:description: This IO-Module allows you to display some text.
+
+[cols="1,3"]
+|===
+|Building Type
+|IO Module
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/ModularIO_TextDisplay_bg.png[300,300,role="left"]
+|image::buildings/ModularIO_TextDisplay_ig.jpg[300,300,role="left"]
+|===
+
+This IO-Module allows you to display some text and even in different sizes.
+
+== Functions
+
+=== `setText(string)`
+
+Sets the Text displayed.
+
+Params::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string
+|string
+|The new text of the display
+|===
+
+=== `string getText()`
+
+Gets the current displayed Text.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string
+|string
+|The currently displayed text
+|===
+
+=== `setSize(int)`
+
+Sets the size of the displayed text.
+
+Params::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|the size of the text between `12` and `48`
+|===
+
+=== `int getSize()`
+
+Gets the current displayed text size.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|the current size of the displayed text
+|===
+
+include::partial$io_modules_footer.adoc[]

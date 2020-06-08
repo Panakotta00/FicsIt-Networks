@@ -1,0 +1,2 @@
+include::partial$io_modules.adoc[]
+include::partial$buildings.adoc[]
