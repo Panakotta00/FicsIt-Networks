@@ -1,0 +1,35 @@
+= Network Manager
+:description: This is a multi tool for network administation.
+
+[cols="1,3"]
+|===
+|Itemtype
+|Hand Equipment
+|===
+
+[cols="a,a"]
+|===
+|Inventory
+|In Hand
+
+|image::items/NetworkManager_inv.png[300,300,role="left"]
+|image::items/NetworkManager_InHand.jpg[300,300,role="left"]
+|===
+
+The network manager allows you to view detials of a network component.
+
+When you take it in hands and look at a network component, you can left click to open the component debug window.
+This window will show you the UUID of the component, allows you to change and view the nick,
+view the connected network name and lists all connected computer network components.
+You can also click on such a listed network component to copy the UUID of it.
+
+image::items/NetworkManager_UI.jpg[300,300]
+
+When you hold ctrl, while looking at a network component and hit the left click,
+the debug window wont appear but you will copy the ID of the component directly.
+
+When you have the Manager in hand, you wont be able to interact with anything else except
+network components, if you still want to do that,
+you can use Caps-Lock to allow interaction with other things.
+
+include::partial$item_footer.adoc[]

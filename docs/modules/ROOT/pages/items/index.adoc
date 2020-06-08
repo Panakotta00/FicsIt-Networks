@@ -1,0 +1,7 @@
+= Items
+:description: FicsIt-Networks also provides a couple of items you need to run computers or which allow you to work more smoothly.
+
+FicsIt-Networks also provides a couple of items you need to run computers
+or which allow you to work more smoothly.
+
+include::partial$items.adoc[]

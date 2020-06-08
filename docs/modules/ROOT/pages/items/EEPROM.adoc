@@ -1,0 +1,24 @@
+= EEPROM
+:description: The EEPROM holds the boot code of a computer and works like a BIOS.
+
+[cols="1,3"]
+|===
+|Itemtype
+|Item
+|===
+
+[cols="a"]
+|===
+|Inventory
+
+|image::items/EEPROM_Lua.png[300,300,role="left"]
+|===
+
+You need a EEPROM to store the boot code of a computer.
+The data type can vary between EEPROM type.
+Different Computer Processors need different types of EEPROMs.
+
+The data you write to a EEPROM is persisted so you can take the EEPROM from one computer,
+and place it into another one.
+
+include::partial$item_footer.adoc[]

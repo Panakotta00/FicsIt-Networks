@@ -7,6 +7,8 @@ FicsIt-Networks is a mod for Satisfactory, written in C++/BP using Unreal Engine
 
 You can visit our https://github.com/CoderDE/FicsIt-Networks[GitHub-Repository] to view the source code.
 
+include::partial$items.adoc[]
+
 include::partial$buildings.adoc[]
 
 include::partial$apis.adoc[]

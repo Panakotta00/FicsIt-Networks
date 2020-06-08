@@ -7,6 +7,9 @@
 |Buildable
 |===
 
+|Max Network Connections
+|1
+
 [cols="a,a"]
 |===
 |Build Gun |In Game

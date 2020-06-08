@@ -1,0 +1,30 @@
+= Drive
+:description: The Drive allows you to store and carry a filesystem.
+
+[cols="1,3"]
+|===
+|Itemtype
+|Item
+|===
+
+[cols="a"]
+|===
+|Inventory
+
+|image::items/Drive_T1.png[300,300,role="left"]
+|===
+
+The Drive is used to get pluged in into a drive holder which allows a computer to read/write
+data to the filesystem in the drive.
+
+Such a drive has a GUID to identify the filesystem and use the address in the DevDevice.
+This data is stored in the ItemState.
+
+The different types of drives have different capacities to store data.
+
+That means you can write data to the drive, unplug it, go to a different computer, plug it in
+and then read this data. So you can transfer large amounts of data from one PC to another one.
+
+Also, the data is persited over different computer sessions.
+
+include::partial$item_footer.adoc[]
