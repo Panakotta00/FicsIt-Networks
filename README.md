@@ -70,8 +70,8 @@ You can find the detailed progress in the [project board](https://github.com/Cod
 
 Contributors
 ============
-- Panakotta00
-- RosszEmber
+- [Panakotta00](https://twitch.tv/coderde)
+- [RosszEmber](https://www.deviantart.com/ronsemberg)
 - Deantendo
 - Coffeediction
 - [Raysh](https://www.artstation.com/raysh)
