@@ -1,0 +1,37 @@
+= Lua Processor
+:description: The Lua Processor is a Computer Module which adds the ability to run Lua Code in the computer case.
+
+[cols="1,3"]
+|===
+|Building Type
+|Computer Module
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/CPU_Lua_T1_bg.png[300,300,role="left"]
+|image::buildings/CPU_Lua_T1_ig.jpg[300,300,role="left"]
+|===
+
+The Lua Processor allows you to run Lua Code and requires a Lua EEPROM for boot code.
+This code is like the BIOS for your computer.
+The Lua Processor uses the xref:lua/index.adoc[Lua Interface] so you can code complex programs
+interacting with your factory.
+
+The different tiers of CPUs provide different speeds of code execution.
+Limiting the execution time of a CPU works by limiting the amount of lua code increments
+executed per factory tick. While such a tick occures it goes through two tick states.
+The first state simply runs a couple of code increments unlimited.
+After this amount of code increments it enters the second state which will cause
+the tick to end when a API call (not standard Lua function) occurs.
+But when the tick doesn't end until a specific amount of code increments occur,
+the system will crash with a out of time exception.
+That means, when you make a infinite loop without any api calls.
+The system will crash, but if you do a API call like print(), it will run as intended.
+
+Rightnow this code executions occurs in the factory tick and so synced with the game.
+And so provides thread safety.
+
+include::partial$computer_modules_footer.adoc[]

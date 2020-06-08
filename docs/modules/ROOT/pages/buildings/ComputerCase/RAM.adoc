@@ -1,0 +1,26 @@
+= RAM
+:description: This Computer Module increases the memory capacity of your computer.
+
+[cols="1,3"]
+|===
+|Building Type
+|Computer Module
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/RAM_T1_bg.png[300,300,role="left"]
+|image::buildings/RAM_T1_ig.jpg[300,300,role="left"]
+|===
+
+You can add an unlimited amount of these RAM module to your computer
+to increase the memory capacity of the computer.
+
+Memory gets consumed by the nodes you put into tmpfs, the amount of memory used by a processor.
+That means you can optimize your code to decrease the memory consumption.
+
+If you try to use more memory than available, the system will crash with a out of memory exception.
+
+include::partial$computer_modules_footer.adoc[]

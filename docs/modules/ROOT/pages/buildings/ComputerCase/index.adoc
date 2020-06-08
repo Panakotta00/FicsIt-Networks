@@ -1,0 +1,30 @@
+= Computer Case
+:description: The computer case is the core of computer technology. It allows you to build a custom PC with modules to make a computer that fits your needs.
+
+[cols="1,3"]
+|===
+|Building Type
+|Buildable
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/ComputerCase_bg.png[300,300,role="left"]
+|image::buildings/ComputerCase_ig.jpg[300,300,role="left"]
+|===
+
+The Computer Case allows you to build dynamically a computer with different modules.
+Each module provides then a functionallity you might need like a processor or RAM.
+The Computer Case is like the mother board which connects all the different modules together
+and is then capable of running programs.
+
+It also manages the EEPROM, you need at least one EEPROM which then holds the boot code of the computer.
+The type of EEPROM varies between processor types, because different processors use different types of code.
+
+You need exactly one processor for the computer case to work.
+
+include::partial$computer_modules.adoc[]
+
+include::partial$building_footer.adoc[]

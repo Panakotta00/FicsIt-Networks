@@ -1,0 +1,39 @@
+= Drive Holder
+:description: The Drive Holder allows you to plug drives into your computer.
+
+[cols="1,3"]
+|===
+|Building Type
+|Computer Module
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/DriveHolder_bg.png[300,300,role="left"]
+|image::buildings/DriveHolder_NoDrive_ig.jpg[300,300,role="left"]
+
+|
+|image::buildings/DriveHolder_T1Drive_ig.jpg[300,300,role="left"]
+|===
+
+The Drive Holder allows you to plug any kind of drive into your computer.
+The plugedin drive will then have a DeviceNode in the DevDevice of the system.
+
+This holder has two states for the drive, locked and unlocked.
+Only if a drive is locked it will be added to the DevDevice, else it is not.
+
+image:buildings/DriveHolder_UI_NoDrive.jpg[300,300]
+
+To lock it, you will need to put the drive into the UI and then move the lock handle up,
+until the Red Lock lights up.
+
+image:buildings/DriveHolder_UI_Locked.jpg[300,300]
+
+When you want to take the drive, you need slide the handle all the way to the bottom,
+so it is not anymore in the way and you will be able to take out the drive via drag'n'drop.
+
+image:buildings/DriveHolder_UI_Unlocked.jpg[300,300]
+
+include::partial$computer_modules_footer.adoc[]

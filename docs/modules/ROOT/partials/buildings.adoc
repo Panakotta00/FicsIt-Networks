@@ -3,6 +3,8 @@ Buildings::
 ====
 xref:buildings/Adapter.adoc[Adapter]
 -
+xref:buildings/ComputerCase/index.adoc[Computer Case]
+-
 xref:buildings/NetworkCable.adoc[Network Cable]
 -
 xref:buildings/NetworkPole.adoc[Network Pole]
