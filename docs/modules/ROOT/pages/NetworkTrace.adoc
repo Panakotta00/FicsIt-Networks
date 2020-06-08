@@ -1,0 +1,35 @@
+= Network Trace
+
+Network Traces are a important system of FicsIt-Networks which allows us to validate the availability
+of different kinds of objects in a computer network.
+
+== The Problem
+
+Imagine you have connected the computer to a Power Generator where you then access the
+power connector so you get the power circuit so you can finally get the power production
+of the power network in the last factory tick.
+
+Computer -> Computer Network Circuit -> Power Generator -> Power Connector -> Power Circuit
+
+That means you have now stored a direct reference of this power circuit in the runtime session so you can
+access the power circuit later more easily and faster.
+
+Computer -> Power Circuit
+
+But, what happens now is, if you remove the connection of the computer network cricuit to the power generator, then you should not be able to access the power circuit anymore.
+But with a direct reference you are able to do so.
+
+== Solution
+
+What we now do is, we dont store just the reference to the object, but all references we used
+to get to the reference we actually want.
+What we now can do is, we can check every access step (arrows) when we want to access the power circuit.
+Checking if the reference is valid is way faster than searching
+the whole path everytime you access the object, but slow as a direct reference.
+
+== Where is it used
+
+We use it nearly everywere were we need to store a reference to another component like:
+- Factory Hook
+- Signal Listeners
+- Component Instances (representations)
