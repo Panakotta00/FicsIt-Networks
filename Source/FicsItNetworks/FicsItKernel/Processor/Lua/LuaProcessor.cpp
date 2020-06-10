@@ -229,7 +229,7 @@ namespace FicsItKernel {
 		void LuaProcessor::Serialize(UProcessorStateStorage* storage, bool bLoading) {
 			if (!bLoading) {
 				// check state & thread
-				if (!luaState || !luaThread) return;
+				if (!luaState || !luaThread || lua_status(luaThread) != LUA_YIELD) return;
 
 				ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(storage);
 
