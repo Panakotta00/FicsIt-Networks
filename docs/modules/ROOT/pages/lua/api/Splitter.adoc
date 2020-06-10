@@ -21,7 +21,7 @@ Parameters::
 
 |slot
 |int
-|The slot number to wich the item should get transferd to.
+|The slot number to which the item should get transferred to.
 
 The number will get clamped to the allowed range (0-2)
 |===
@@ -39,7 +39,7 @@ Return Values::
 
 ==== `Item getItem()`
 
-Returns the ingput item.
+Returns the input item.
 
 Return Values::
 +
@@ -54,7 +54,7 @@ Return Values::
 
 ==== `bool canOutput(int port)`
 
-Checks if a item can get transfered to the given port.
+Checks if an item can get transferred to the given port.
 
 Parameters::
 +
