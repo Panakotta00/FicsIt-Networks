@@ -1,6 +1,6 @@
 #include "FINSignalSender.h"
 
-#include "Stack.h"
+#include "UObject/Stack.h"
 #include "FicsItKernel/Network/Signal.h"
 
 void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {

@@ -53,12 +53,13 @@ namespace FicsItKernel {
 
 		int luaPull(lua_State* L) {
 			int args = lua_gettop(L);
-			std::int64_t t = 0;
+			std::int64_t t = -1;
 			if (args > 0 && !lua_isnil(L, 1)) t = lua_tointeger(L, 1);
 
 			auto luaProc = LuaProcessor::luaGetProcessor(L);
+			check(luaProc);
 			int a = luaProc->doSignal(L);
-			if (!a) {
+			if (!a && t >= 0) {
 				luaProc->timeout = (int)t;
 				luaProc->pullStart = std::chrono::high_resolution_clock::now();
 

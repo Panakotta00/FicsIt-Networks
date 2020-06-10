@@ -17,6 +17,8 @@
 
 namespace FicsItKernel {
 	namespace Lua {
+		std::map<UObject*, std::mutex> objectLocks;
+		
 		std::map<UClass*, std::map<std::string, LuaLibFunc>>& instanceClasses() {
 			static std::map<UClass*, std::map<std::string, LuaLibFunc>>* ptr = nullptr;
 			if (!ptr) ptr = new std::map<UClass*, std::map<std::string, LuaLibFunc>>();
@@ -89,6 +91,7 @@ namespace FicsItKernel {
 
 			// execute native function only if no error
 			if (error.length() <= 0) {
+				std::lock_guard<std::mutex> m(objectLocks[comp]);
 				comp->ProcessEvent(func, params);
 			}
 			
@@ -116,11 +119,12 @@ namespace FicsItKernel {
 
 		int luaInstanceFuncCall(lua_State* L) {
 			auto& data = *(LuaInstanceFunc*) lua_touserdata(L, lua_upvalueindex(1));
-			auto obj = data.first;
+			Network::NetworkTrace obj = data.first;
 			auto func = data.second.second;
 
 			if (!*obj) return luaL_error(L, "component is invalid");
 
+			std::lock_guard<std::mutex> m(objectLocks[obj.getUnderlyingPtr().Get()]);
 			return LuaProcessor::luaAPIReturn(L, func(L, lua_gettop(L), obj));
 		}
 
@@ -168,7 +172,6 @@ namespace FicsItKernel {
 			}
 
 			lua_newtable(L);
-			luaL_setmetatable(L, INSTANCE);
 
 			auto ud_o = (LuaInstance*)lua_newuserdata(L, sizeof(LuaInstance));
 			luaL_setmetatable(L, INSTANCE_REF);
@@ -193,12 +196,13 @@ namespace FicsItKernel {
 					addCompFuncs(L, obj/m);
 				}
 			}
+			
+			luaL_setmetatable(L, INSTANCE);
 			return true;
 		}
 
 		bool newInstance(lua_State* L, UClass* iClazz) {
 			lua_newtable(L);
-			luaL_setmetatable(L, CLASS_INSTANCE);
 
 			auto ud_o = (LuaClassInstance*)lua_newuserdata(L, sizeof(LuaClassInstance));
 			luaL_setmetatable(L, CLASS_INSTANCE_REF);
@@ -216,24 +220,61 @@ namespace FicsItKernel {
 					lua_setfield(L, -2, func.first.c_str());
 				}
 			}
+
+			luaL_setmetatable(L, CLASS_INSTANCE);
 			return true;
 		}
 
-		int luaInstanceEQ(lua_State* L) {
+		inline bool luaInstanceGetInstances(lua_State* L, LuaInstance*& inst1, LuaInstance*& inst2) {
 			bool failed = false;
 			if (lua_gettop(L) < 2 || !lua_getmetatable(L, 1) || !lua_getmetatable(L, 2)) failed = true;
 			luaL_getmetatable(L, INSTANCE);
 			if (!failed && (!lua_compare(L, 3, 5, LUA_OPEQ) || !lua_compare(L, 4, 5, LUA_OPEQ))) failed = true;
 			if (!failed && (lua_getfield(L, 1, "__object") != LUA_TUSERDATA || lua_getfield(L, 2, "__object") != LUA_TUSERDATA)) failed = true;
-			if (failed) {
+			if (failed) return false;
+			inst1 = static_cast<LuaInstance*>(luaL_checkudata(L, -2, INSTANCE_REF));
+			inst2 = static_cast<LuaInstance*>(luaL_checkudata(L, -1, INSTANCE_REF));
+			return true;
+		}
+
+		int luaInstanceEQ(lua_State* L) {
+			LuaInstance* inst1;
+			LuaInstance* inst2;
+			if (!luaInstanceGetInstances(L, inst1, inst2)) {
 				lua_pushboolean(L, false);
 				return 1;
 			}
-
-			const LuaInstance& obj1 = *(LuaInstance*)luaL_checkudata(L, -2, INSTANCE_REF);
-			const LuaInstance& obj2 = *(LuaInstance*)luaL_checkudata(L, -1, INSTANCE_REF);
-			lua_pushboolean(L, obj1.isEqualObj(obj2));
+			
+			lua_pushboolean(L, inst1->isEqualObj(*inst2));
 			return 1;
+		}
+
+		int luaInstanceLt(lua_State* L) {
+			LuaInstance* inst1;
+			LuaInstance* inst2;
+			if (!luaInstanceGetInstances(L, inst1, inst2)) {
+				lua_pushboolean(L, false);
+				return 1;
+			}
+			
+			lua_pushboolean(L, GetTypeHash(inst1->getUnderlyingPtr()) < GetTypeHash(inst2->getUnderlyingPtr()));
+			return 1;
+		}
+
+		int luaInstanceLe(lua_State* L) {
+			LuaInstance* inst1;
+			LuaInstance* inst2;
+			if (!luaInstanceGetInstances(L, inst1, inst2)) {
+				lua_pushboolean(L, false);
+				return 1;
+			}
+			
+			lua_pushboolean(L, GetTypeHash(inst1->getUnderlyingPtr()) <= GetTypeHash(inst2->getUnderlyingPtr()));
+			return 1;
+		}
+
+		int luaInstanceNewIndex(lua_State* L) {
+			return 0;
 		}
 
 		int luaInstanceToString(lua_State* L) {
@@ -251,6 +292,9 @@ namespace FicsItKernel {
 
 		static const luaL_Reg luaInstanceLib[] = {
 			{"__eq", luaInstanceEQ},
+			{"__lt", luaInstanceLt},
+			{"__le", luaInstanceLe},
+			{"__newindex", luaInstanceNewIndex},
 			{"__tostring", luaInstanceToString},
 			{NULL, NULL}
 		};
@@ -384,25 +428,69 @@ namespace FicsItKernel {
 			{"__gc", luaInstanceUFuncGC},
 			{NULL,NULL}
 		};
-
-		int luaClassInstanceEQ(lua_State* L) {
+	
+		inline bool luaClassInstanceGetInstances(lua_State* L, LuaClassInstance*& inst1, LuaClassInstance*& inst2) {
 			bool failed = false;
 			if (lua_gettop(L) < 2 || !lua_getmetatable(L, 1) || !lua_getmetatable(L, 2)) failed = true;
 			luaL_getmetatable(L, CLASS_INSTANCE);
 			if (!failed && (!lua_compare(L, 3, 5, LUA_OPEQ) || !lua_compare(L, 4, 5, LUA_OPEQ))) failed = true;
 			if (!failed && (lua_getfield(L, 1, "__object") != LUA_TUSERDATA || lua_getfield(L, 2, "__object") != LUA_TUSERDATA)) failed = true;
-			if (failed) {
+			if (failed) return false;
+
+			inst1 = static_cast<LuaClassInstance*>(luaL_checkudata(L, -2, CLASS_INSTANCE_REF));
+			inst2 = static_cast<LuaClassInstance*>(luaL_checkudata(L, -1, CLASS_INSTANCE_REF));
+			return true;
+		}
+		
+		int luaClassInstanceEQ(lua_State* L) {
+			LuaClassInstance* inst1;
+			LuaClassInstance* inst2;
+			if (!luaClassInstanceGetInstances(L, inst1, inst2)) {
 				lua_pushboolean(L, false);
 				return 1;
 			}
-
-			const LuaClassInstance& obj1 = *(LuaClassInstance*)luaL_checkudata(L, -2, CLASS_INSTANCE_REF);
-			const LuaClassInstance& obj2 = *(LuaClassInstance*)luaL_checkudata(L, -1, CLASS_INSTANCE_REF);
-			lua_pushboolean(L, obj1 == obj2);
+			
+			lua_pushboolean(L, *inst1 == *inst2);
 			return 1;
 		}
 
+		int luaClassInstanceLt(lua_State* L) {
+			LuaClassInstance* inst1;
+			LuaClassInstance* inst2;
+			if (!luaClassInstanceGetInstances(L, inst1, inst2)) {
+				lua_pushboolean(L, false);
+				return 1;
+			}
+			
+			lua_pushboolean(L, *inst1 < *inst2);
+			return 1;
+		}
+
+		int luaClassInstanceLe(lua_State* L) {
+			LuaClassInstance* inst1;
+			LuaClassInstance* inst2;
+			if (!luaClassInstanceGetInstances(L, inst1, inst2)) {
+				lua_pushboolean(L, false);
+				return 1;
+			}
+			
+			lua_pushboolean(L, *inst1 <= *inst2);
+			return 1;
+		}
+
+		int luaClassInstanceNewIndex(lua_State* L) {
+			return 0;
+		}
+
 		int luaClassInstanceToString(lua_State* L) {
+			int toStrType = lua_getfield(L, 1, "__tostring");
+			if (toStrType == LUA_STR) {
+				return 1;
+			} else if (toStrType == LUA_TFUNCTION) {
+				lua_call(L, 0, 1);
+				return 1;
+			}
+			
 			lua_getfield(L, 1, "__object");
 			const LuaClassInstance& obj = *(LuaClassInstance*)luaL_checkudata(L, -1, CLASS_INSTANCE_REF);
 
@@ -417,6 +505,9 @@ namespace FicsItKernel {
 
 		static const luaL_Reg luaClassInstanceLib[] = {
 			{"__eq", luaClassInstanceEQ},
+			{"__lt", luaClassInstanceLt},
+			{"__le", luaClassInstanceLe},
+			{"__newindex", luaClassInstanceNewIndex},
 			{"__tostring", luaClassInstanceToString},
 			{NULL, NULL}
 		};

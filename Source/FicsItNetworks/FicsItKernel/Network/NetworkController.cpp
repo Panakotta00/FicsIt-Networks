@@ -7,10 +7,12 @@
 namespace FicsItKernel {
 	namespace Network {
 		void NetworkController::addListener(NetworkTrace listener) {
+			std::lock_guard<std::mutex> m(mutexSignalListeners);
 			signalListeners.insert(listener);
 		}
 
 		void NetworkController::removeListener(NetworkTrace listener) {
+			std::lock_guard<std::mutex> m(mutexSignalListeners);
 			signalListeners.erase(listener);
 		}
 
@@ -24,18 +26,22 @@ namespace FicsItKernel {
 
 		std::shared_ptr<Signal> NetworkController::popSignal(NetworkTrace& sender) {
 			if (getSignalCount() < 1) return nullptr;
+			mutexSignalListeners.lock();
 			auto sig = signals.front();
 			signals.pop_front();
+			mutexSignalListeners.unlock();
 			sender = sig.second;
 			return sig.first;
 		}
 
 		void NetworkController::pushSignal(std::shared_ptr<Signal> signal, NetworkTrace sender) {
+			std::lock_guard<std::mutex> m(mutexSignals);
 			if (signals.size() >= maxSignalCount || lockSignalRecieving) return;
 			signals.push_back({std::move(signal), std::move(sender)});
 		}
 
 		size_t NetworkController::getSignalCount() {
+			std::lock_guard<std::mutex> m(mutexSignals);
 			return signals.size();
 		}
 

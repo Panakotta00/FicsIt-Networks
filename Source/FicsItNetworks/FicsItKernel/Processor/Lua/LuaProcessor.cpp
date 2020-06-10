@@ -495,9 +495,10 @@ namespace FicsItKernel {
 		int LuaProcessor::doSignal(lua_State* L) {
 			auto net = getKernel()->getNetwork();
 			if (!net || net->getSignalCount() < 1) return 0;
-			int props = 2;
 			Network::NetworkTrace sender;
-			auto signal = net->popSignal(sender);
+			std::shared_ptr<Network::Signal> signal = net->popSignal(sender);
+			if (!signal.get()) return 0;
+			int props = 2;
 			lua_pushstring(L, signal->getName().c_str());
 			newInstance(L, sender);
 			LuaSignalReader reader(L);

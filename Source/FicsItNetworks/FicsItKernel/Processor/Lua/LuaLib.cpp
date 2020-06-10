@@ -335,9 +335,17 @@ namespace FicsItKernel {
 		// Begin UFGItemDescriptor
 		
 		LuaLibClassFunc(UFGItemDescriptor, getName)
-			auto name = UFGItemDescriptor::GetItemName(self);
+			FText name = UFGItemDescriptor::GetItemName(self);
 			lua_pushstring(L, TCHAR_TO_UTF8(*name.ToString()));
 			return 1;
 		}
+
+		LuaLibClassFunc(UFGItemDescriptor, __tostring)
+		    FText name = UFGItemDescriptor::GetItemName(self);
+			lua_pushstring(L, TCHAR_TO_UTF8(*name.ToString()));
+			return 1;
+		}
+
+		// End UFGItemDescriptor
 	}
 }

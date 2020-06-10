@@ -10,6 +10,7 @@
 #include <deque>
 #include <set>
 #include <memory>
+#include <mutex>
 
 namespace FicsItKernel {
 	namespace Network {
@@ -19,7 +20,9 @@ namespace FicsItKernel {
 		 */
 		class NetworkController : public SignalSender, public SignalListener {
 		protected:
+			std::mutex mutexSignalListeners;
 			std::set<NetworkTrace> signalListeners;
+			std::mutex mutexSignals;
 			std::deque<std::pair<std::shared_ptr<Signal>, NetworkTrace>> signals;
 			bool lockSignalRecieving = false;
 
