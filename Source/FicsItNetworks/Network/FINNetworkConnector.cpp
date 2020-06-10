@@ -199,6 +199,10 @@ TSet<FFINNetworkTrace> UFINNetworkConnector::GetListeners_Implementation() {
 	return Listeners;
 }
 
+UObject* UFINNetworkConnector::GetSignalSenderOverride_Implementation() {
+	return this;
+}
+
 void UFINNetworkConnector::HandleSignal_Implementation(FFINSignal signal, FFINNetworkTrace sender) {
 	OnNetworkSignal.Broadcast(signal, sender);
 }

@@ -55,6 +55,10 @@ TSet<FFINNetworkTrace> AFINCodeableSplitter::GetListeners_Implementation() {
 	return SignalListeners;
 }
 
+UObject* AFINCodeableSplitter::GetSignalSenderOverride_Implementation() {
+	return NetworkConnector;
+}
+
 void AFINCodeableSplitter::Factory_Tick(float dt) {
 	Super::Factory_Tick(dt);
 	if (InputQueue.Num() < 2) {

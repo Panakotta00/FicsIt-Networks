@@ -14,7 +14,7 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	for (auto p = TFieldIterator<UProperty>(Stack.CurrentNativeFunction); p; ++p) {
 		auto dp = p->ContainerPtrToValuePtr<void>(data);
 		if (Stack.Code) {
-			//Stack.Step(Context, dp);
+			Stack.Step(Context, dp);
 		} else {
 			Stack.StepExplicitProperty(dp, *p);
 		}
@@ -28,7 +28,7 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	for (auto listenerTrace : listeners) {
 		// TODO: Make sure this cast works and if the underlying object is the reason, remove it
 		UObject* obj = *listenerTrace;
-		if (IsValid(obj) && obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, FFINSignal(sig), listenerTrace / Context);
+		if (IsValid(obj) && obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, FFINSignal(sig), listenerTrace / IFINSignalSender::Execute_GetSignalSenderOverride(Context));
 	}
 
 	P_FINISH;
@@ -81,9 +81,9 @@ void UFINSignalUtility::BPSignal::Serialize(FArchive& Ar) {
 	name = std::string(TCHAR_TO_UTF8(*n), n.Len());
 	
 	Ar << func;
-
+	
 	if (Ar.IsLoading()) {
-		auto data = malloc(func->ParmsSize);
+		data = malloc(func->ParmsSize);
 		memset(data, 0, func->ParmsSize);
 	}
 	

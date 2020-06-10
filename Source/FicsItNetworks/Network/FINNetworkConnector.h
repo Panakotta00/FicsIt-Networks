@@ -105,7 +105,6 @@ public:
 	// End IFGDismantleInterface
 
 	// Begin IFINNetworkComponent
-protected:
 	virtual FGuid GetID_Implementation() const override;
 	virtual FString GetNick_Implementation() const override;
 	virtual void SetNick_Implementation(const FString& nick) override;
@@ -116,13 +115,13 @@ protected:
 	virtual UFINNetworkCircuit* GetCircuit_Implementation() const override;
 	virtual void SetCircuit_Implementation(UFINNetworkCircuit* circuit) override;
 	virtual void NotifyNetworkUpdate_Implementation(int type, const TSet<UObject*>& nodes) override;
-public:
 	// End IFINNetworkComponent
 
 	// Begin IFINSignalSender
 	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
 	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
 	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
+	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 
 	// Begin IFINSignalListener

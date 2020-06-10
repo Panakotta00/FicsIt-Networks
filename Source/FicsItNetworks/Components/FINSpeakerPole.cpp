@@ -31,6 +31,10 @@ TSet<FFINNetworkTrace> AFINSpeakerPole::GetListeners_Implementation() {
 	return Listeners;
 }
 
+UObject* AFINSpeakerPole::GetSignalSenderOverride_Implementation() {
+	return NetworkConnector;
+}
+
 void AFINSpeakerPole::OnSoundFinished(UAudioComponent* AudioComponent) {
 	netSig_SpeakerSound(2, CurrentSound);
 	CurrentSound = "";

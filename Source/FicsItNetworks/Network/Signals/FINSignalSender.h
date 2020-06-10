@@ -34,6 +34,8 @@ public:
 	void RemoveListener(FFINNetworkTrace listener);
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Signals|Sender")
 	TSet<FFINNetworkTrace> GetListeners();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Signals|Sender")
+	UObject* GetSignalSenderOverride();
 };
 
 UCLASS()
