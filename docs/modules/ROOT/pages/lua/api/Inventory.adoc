@@ -1,11 +1,11 @@
 = Inventory API
 :description: The Inventory API allows you to interact with ingame inventories.
 
-The inventory api contains structures, functions and variables related to ingame inventorys, items and more.
+The inventory API contains structures, functions, and variables related to ingame inventories, items, and more.
 
 == Inventory
 
-A lua table representation of a ingame inventory containing stacks of items.
+A lua table representation of an ingame inventory containing stacks of items.
 
 === Functions
 
@@ -35,20 +35,9 @@ Return Values::
 |ItemStacks at the given slots in the inventory
 |===
 
-==== `int getItemCount(int index)`
+==== `int getItemCount()`
 
-Returns the amount of items of the stack at the given index.
-
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|index
-|int
-|the slot index you want to know the amount of items from
-|===
+Returns the total count of all item amounts.
 
 Return Values::
 +
@@ -58,12 +47,12 @@ Return Values::
 
 |int
 |int
-|the count of items in the given slot
+|the total count of all item amounts
 |===
 
 ==== `int getSize()`
 
-Returns the count of slots in the inventory
+Returns the inventory slot count.
 
 Return Values::
 +
@@ -73,7 +62,7 @@ Return Values::
 
 |int
 |int
-|Count of slots in the inventory
+|the inventory slot count.
 |===
 
 ==== `sort()`
@@ -82,7 +71,7 @@ Sorts the inventory
 
 == FactoryConnector
 
-A FactoryConnector is a connection point of a actor for a conveyor or pipe.
+A FactoryConnector is a connection point of an actor for a conveyor or pipe.
 
 === Functions
 
@@ -143,7 +132,7 @@ Return Values::
 
 ==== `Inventory getInventory()`
 
-Returns the internal inventory of the connector
+Returns the internal inventory of the connector.
 
 Return Values::
 +
@@ -158,9 +147,9 @@ Return Values::
 
 ==== `FactoryHook hook()`
 
-Attachs and returns a factory hook for the connector.
+Attaches a hook for the connector then returns the hook.
 
-If a hook is already attached, returns the hook.
+If such is already attached, then just returns it.
 
 Return Values::
 +
@@ -241,7 +230,7 @@ Return Values::
 
 == ItemStack
 
-Combines a Item and a count to a stack of items.
+Combines an Item and a count to a stack of items.
 
 === Variables
 
@@ -251,7 +240,7 @@ The count of items the stack contains.
 
 ==== `Item item`
 
-They item information of the stack.
+The item information of the stack.
 
 == Item
 
@@ -265,7 +254,7 @@ Defines the type of the item.
 
 == ItemType
 
-The type of a item. Used f.e. in Item to define the type.
+The type of an item used f.e. in Item to define the type.
 
 === Functions
 
@@ -286,18 +275,25 @@ Return Values::
 
 == FactoryHook
 
-The factory hook is a special table used to hook a factory connector. This hook allows you to get signals when the connector transfers a item and to get some stats about the runtime pehavior of the the factory connector.
+The FactoryHook is a special table used to hook onto a FactoryConnector. This hook allows you to get event signals when the connector transfers an item in addition to some stats about its runtime behavior.
 
-This system uses a reference counter to determine if the hook should exist.
-That means as long as you have at least one reference to the same factoryhook representation table or multiple different tables but refering to the same hook, the hook exists. If the Lua garbage collector frees such a table, and there is no other table refering to the same hook, the hook will get destroyed.
+This system uses a reference counter to determine whether the hook should exist.
+That means, as long as you have at least one reference to the same FactoryHook representation table, or there are multiple different tables referring to the same hook, then the hook will continue to exist. The hook will only get destroyed when the Lua garbage collector determines there are no tables referring to it.
 
-Because the FactoryHook is no component, you can't use the component api to listen to the signals provided by the hook. To do that the hook table provides its own function.
+Since the FactoryHook is not a Component, one cannot use the Component API to listen to signals broadcasted by the hook. To do that, use the function provided by the hook.
 
 === Functions
 
 ==== `int getIlastM()`
 
-Returns the count of items transfered in the last minute.
+Returns the count of items transferred in the last minute.
+
+
+=== Functions
+
+==== `int getIlastM()`
+
+Returns the count of items transferred in the last minute.
 
 Return Values::
 +
