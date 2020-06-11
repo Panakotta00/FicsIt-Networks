@@ -1,5 +1,7 @@
 ﻿#include "FileSystemSerializationInfo.h"
 
+#include "util/Logging.h"
+
 bool FFileSystemNodeIndex::Serialize(FArchive& Ar) {
 	bool valid = Node.IsValid();
 	Ar << valid;
@@ -17,9 +19,13 @@ FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString nam
 	case 0: {
 		FileSystem::SRef<FileSystem::File> file = parent->createFile(nodeName);
 		FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::OUTPUT | FileSystem::TRUNC);
-		stream->write(TCHAR_TO_UTF8(*Node->Data));
-		stream->flush();
-		stream->close();
+		try {
+			stream->write(TCHAR_TO_UTF8(*Node->Data));
+			stream->flush();
+			stream->close();
+		} catch (...) {
+			SML::Logging::error("Unable to deserialize VFS-File");
+		}
 		return file;
 	}
 	case 1: {

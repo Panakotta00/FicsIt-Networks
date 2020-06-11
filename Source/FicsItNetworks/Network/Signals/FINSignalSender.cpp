@@ -1,7 +1,7 @@
 #include "FINSignalSender.h"
 
-#include "UObject/Stack.h"
 #include "FicsItKernel/Network/Signal.h"
+#include "UObject/Script.h"
 
 void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	// get signal name

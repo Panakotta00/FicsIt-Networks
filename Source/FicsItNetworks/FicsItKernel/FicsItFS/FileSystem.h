@@ -16,9 +16,17 @@ namespace FicsItKernel {
 		 */
 		class Root : public FileSystem::FileSystemRoot {
 		public:
-
+			// Begin FileSystemRoot
 			bool mount(FileSystem::SRef<FileSystem::Device> device, FileSystem::Path path);
 			bool unmount(FileSystem::Path path);
+			// End FileSystemRoot
+
+			/**
+			 * Unmounts the given device from the filesystem
+			 *
+			 * @param[in]	device	the device you want to unmounts
+			 */
+			bool unmount(FileSystem::SRef<FileSystem::Device> device);
 
 			/**
 			* Returns the memory consumption of the filesystem.
@@ -59,6 +67,14 @@ namespace FicsItKernel {
 			 * @return	the unpersisted path
 			 */
 			FileSystem::Path unpersistPath(std::string path);
+
+			/**
+			 * Checks if the given path can get unpersisted
+			 *
+			 * @param[in]	path	the path you want to check
+			 * @return	true if able to unpersist
+			 */
+			bool checkUnpersistPath(std::string path);
 
 			/**
 			 * Serializes the filesystem to an archive.

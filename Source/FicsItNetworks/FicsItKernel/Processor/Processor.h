@@ -30,7 +30,7 @@ namespace FicsItKernel {
 		*
 		* @param[in]	kernel	the new kernel the processor will use
 		*/
-		void setKernel(KernelSystem* kernel);
+		virtual void setKernel(KernelSystem* kernel);
 
 		/**
 		* Allows to access the connected kernel

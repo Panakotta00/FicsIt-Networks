@@ -148,6 +148,7 @@ bool DiskFile::isValid() const {
 }
 
 DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck) : FileStream(mode), path(realPath), sizeCheck(sizeCheck) {
+	if (mode & FileMode::OUTPUT) std::ofstream(realPath).close();
 	stream = std::fstream(realPath, std::ios::in);
 	if (!stream.is_open()) return;
 	if (!(mode & TRUNC)) {
@@ -165,7 +166,7 @@ DiskFileStream::~DiskFileStream() {}
 
 void DiskFileStream::write(string data) {
 	if (!isOpen()) throw std::exception("filestream not open");
-	if (!sizeCheck(buf.length(), true)) throw std::exception("out of memory");
+	if (!sizeCheck(data.length(), true)) throw std::exception("out of capacity");
 	buf = buf.erase(pos, data.length());
 	buf.insert(pos, data);
 	pos += data.length();

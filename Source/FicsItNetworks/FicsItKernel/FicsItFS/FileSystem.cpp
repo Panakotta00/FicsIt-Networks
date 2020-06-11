@@ -24,6 +24,20 @@ namespace FicsItKernel {
 			return FileSystemRoot::unmount(path);
 		}
 
+		bool Root::unmount(FileSystem::SRef<FileSystem::Device> device) {
+			FileSystem::Path p;
+			bool found = false;
+			for (auto m : mounts) {
+				if (m.second.first == device) {
+					p = m.first;
+					found = true;
+					break;
+				}
+			}
+			if (found) return unmount(p);
+			return false;
+		}
+
 		std::int64_t Root::getMemoryUsage(bool recalc) {
 			std::int64_t memoryUsage = 0;
 			for (auto m : mounts) {
@@ -53,29 +67,60 @@ namespace FicsItKernel {
 		std::string Root::persistPath(FileSystem::Path path) {
 			FileSystem::Path pending;
 			FileSystem::SRef<FileSystem::Device> dev = getDevice(path, pending);
-			for (auto& device : getDevDevice()->getDevices()) {
+			FileSystem::NodeName name = "";
+			FileSystem::SRef<DevDevice> devDev = getDevDevice();
+			if (dev != devDev) for (std::pair<const FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>>& device : devDev->getDevices()) {
 				if (device.second == dev) {
-					FileSystem::NodeName name = device.first;
-					return name + ":" + pending.str();
+					name = device.first;
+					break;
 				}
 			}
-			throw std::invalid_argument("Unable to persist path");
+			if (name == "" && dev != devDev) throw std::exception("Unable to persist path");
+			return name + ":" + pending.str();
 		}
 
 		FileSystem::Path Root::unpersistPath(std::string path) {
 			size_t pos = path.find(':');
 			FileSystem::NodeName name = path.substr(0, pos);
 			FileSystem::Path pending = path.substr(pos+1);
-			for (auto& device : getDevDevice()->getDevices()) {
+			FileSystem::SRef<DevDevice> devDev = getDevDevice();
+			FileSystem::SRef<FileSystem::Device> dev;
+			if (pos == 0) {
+				dev = devDev;
+            } else for (std::pair<const FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>>& device : devDev->getDevices()) {
 				if (device.first == name) {
-					for (auto& mount : mounts) {
-						if (mount.second.first == device.second) {
-							return mount.first / pending;
-						}
-					}
+					dev = device.second;
+					break;
+				}
+			}
+			if (dev.isValid()) for (auto& mount : mounts) {
+				if (mount.second.first == dev) {
+					return mount.first / pending;
 				}
 			}
 			throw std::invalid_argument("Unable to unpersist path");
+		}
+
+		bool Root::checkUnpersistPath(std::string path) {
+			size_t pos = path.find(':');
+			FileSystem::NodeName name = path.substr(0, pos);
+			FileSystem::Path pending = path.substr(pos+1);
+			FileSystem::SRef<DevDevice> devDev = getDevDevice();
+			FileSystem::SRef<FileSystem::Device> dev;
+			if (pos == 0) {
+				dev = devDev;
+			} else for (std::pair<const FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>>& device : devDev->getDevices()) {
+				if (device.first == name) {
+					dev = device.second;
+					break;
+				}
+			}
+			if (dev.isValid()) for (auto& mount : mounts) {
+				if (mount.second.first == dev) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		void Root::Serialize(FArchive& Ar, FFileSystemSerializationInfo& info) {

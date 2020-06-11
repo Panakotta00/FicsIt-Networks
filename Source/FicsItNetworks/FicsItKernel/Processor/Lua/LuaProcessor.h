@@ -29,6 +29,16 @@ namespace FicsItKernel {
 			virtual void WriteAbstract(const void* obj, const std::string& id) override;
 		};
 
+		class LuaFileSystemListener : public FileSystem::Listener {
+		private:
+			class LuaProcessor* parent = nullptr;
+		public:
+			LuaFileSystemListener(class LuaProcessor* parent) : parent(parent) {}
+			
+			virtual void onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) override;
+			virtual void onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) override;
+		};
+
 		class LuaProcessor : public Processor {
 			friend int luaPull(lua_State* L);
 
@@ -45,6 +55,7 @@ namespace FicsItKernel {
 			int timeout = -1;
 			std::chrono::time_point<std::chrono::high_resolution_clock> pullStart;
 			std::set<LuaFile> fileStreams;
+			FileSystem::SRef<LuaFileSystemListener> fileSystemListener;
 			
 		public:
 			static LuaProcessor* luaGetProcessor(lua_State* L);
@@ -52,6 +63,7 @@ namespace FicsItKernel {
 			LuaProcessor(int speed = 1);
 
 			// Begin Processor
+			virtual void setKernel(KernelSystem* kernel) override;
 			virtual void tick(float delta) override;
 			virtual void reset() override;
 			virtual std::int64_t getMemoryUsage(bool recalc = false) override;
@@ -72,6 +84,7 @@ namespace FicsItKernel {
 
 			int doSignal(lua_State* L);
 			void clearFileStreams();
+			std::set<LuaFile> getFileStreams() const;
 
 			static void luaHook(lua_State* L, lua_Debug* ar);
 			static int luaAPIReturn(lua_State* L, int args);

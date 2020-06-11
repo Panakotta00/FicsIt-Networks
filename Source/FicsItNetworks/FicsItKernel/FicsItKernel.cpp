@@ -78,8 +78,15 @@ namespace FicsItKernel {
 			if (!devDevice->removeDevice(s->second)) return;
 		}
 
+		// unmount device
+		filesystem.unmount(s->second);
+
 		// remove drive from filesystem
 		drives.erase(s);
+	}
+
+	std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> KernelSystem::getDrives() const {
+		return drives;
 	}
 
 	FileSystem::SRef<FicsItFS::DevDevice> KernelSystem::getDevDevice() {

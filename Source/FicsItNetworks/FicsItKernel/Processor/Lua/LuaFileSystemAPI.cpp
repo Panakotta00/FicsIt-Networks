@@ -96,7 +96,8 @@ namespace FicsItKernel {
 			else luaL_argerror(L, 2, "is not valid file mode");
 			try {
 				std::string path = luaL_checkstring(L, 1);
-				luaFile(L, self->open(path, m), self->persistPath(path));
+				FileSystem::SRef<FileSystem::FileStream> stream = self->open(path, m);
+				luaFile(L, stream, stream ? self->persistPath(path) : "");
 			} CatchExceptionLua
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
@@ -371,16 +372,19 @@ namespace FicsItKernel {
 		int luaFileUnpersist(lua_State* L) {
 			KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel();
 			const bool valid = lua_toboolean(L, lua_upvalueindex(1));
-			const std::string path = kernel->getFileSystem()->unpersistPath(lua_tostring(L, lua_upvalueindex(2)));
+			std::string path = "";
 			if (valid) {
+				path = lua_tostring(L, lua_upvalueindex(2));
 				const bool open = lua_toboolean(L, lua_upvalueindex(3));
 				FileSystem::SRef<FileSystem::FileStream> stream;
 				if (open) {
+					path = kernel->getFileSystem()->unpersistPath(path);
 					FileSystem::FileMode mode = static_cast<FileSystem::FileMode>((int)lua_tonumber(L, lua_upvalueindex(4)));
 					mode = mode & ~FileSystem::FileMode::TRUNC;
 					stream = kernel->getFileSystem()->open(path, mode);
 					stream->seek("set", static_cast<int>(lua_tonumber(L, lua_upvalueindex(5))));
 				} else {
+					path = "";
 					stream = nullptr;
 				}
 				luaFile(L, stream, path);

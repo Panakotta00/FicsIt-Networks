@@ -53,6 +53,22 @@ namespace FicsItKernel {
 			}
 		}
 
+		void LuaFileSystemListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
+			for (LuaFile file : parent->getFileStreams()) {
+				if (file.isValid() && !parent->getKernel()->getFileSystem()->checkUnpersistPath(file->path)) {
+					file->file->close();
+				}
+			}
+		}
+
+		void LuaFileSystemListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
+			for (LuaFile file : parent->getFileStreams()) {
+				if (file.isValid() && file->path.length() > 0 && parent->getKernel()->getFileSystem()->unpersistPath(file->path) == path) {
+					file->file->close();
+				}
+			}
+		}
+
 		LuaProcessor* LuaProcessor::luaGetProcessor(lua_State* L) {
 			lua_getfield(L, LUA_REGISTRYINDEX, "LuaProcessorPtr");
 			LuaProcessor* p = *(LuaProcessor**) luaL_checkudata(L, -1, "LuaProcessor");
@@ -60,8 +76,13 @@ namespace FicsItKernel {
 			return p;
 		}
 
-		LuaProcessor::LuaProcessor(int speed) : speed(speed) {
+		LuaProcessor::LuaProcessor(int speed) : speed(speed), fileSystemListener(new LuaFileSystemListener(this)) {
 			
+		}
+
+		void LuaProcessor::setKernel(KernelSystem* kernel) {
+			if (getKernel() && getKernel()->getFileSystem()) getKernel()->getFileSystem()->removeListener(fileSystemListener);
+			Processor::setKernel(kernel);
 		}
 
 		void LuaProcessor::tick(float delta) {
@@ -134,13 +155,18 @@ namespace FicsItKernel {
 				if (!fs->isValid()) fileStreams.erase(fs--);
 			}
 		}
-		
+
+		std::set<LuaFile> LuaProcessor::getFileStreams() const {
+			return fileStreams;
+		}
+
 		void LuaProcessor::reset() {
 			// can't reset running system state
 			if (getKernel()->getState() != RUNNING) return;
 
 			// reset tempdata
 			timeout = -1;
+			getKernel()->getFileSystem()->addListener(fileSystemListener);
 
 			// clear existing lua state
 			if (luaState) {

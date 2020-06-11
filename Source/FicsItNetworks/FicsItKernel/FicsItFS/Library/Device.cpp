@@ -43,8 +43,9 @@ namespace FileSystem {
 
 	bool ByteCountedDevice::checkSizeFunc(long long size, bool addIfAble) {
 		if (capacity < 1) return true;
+		size_t used = getUsed();
 		if (used + size > capacity) return false;
-		used += size;
+		this->used += size;
 		return true;
 	}
 

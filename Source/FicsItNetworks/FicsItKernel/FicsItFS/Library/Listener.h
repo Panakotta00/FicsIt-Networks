@@ -20,12 +20,12 @@ namespace FileSystem {
 	class Listener : virtual public ReferenceCounted {
 	public:
 		virtual ~Listener() {}
-		virtual void onMounted(Path path, SRef<Device> device) = 0;
-		virtual void onUnmounted(Path path, SRef<Device> device) = 0;
-		virtual void onNodeAdded(Path path, NodeType type) = 0;
-		virtual void onNodeRemoved(Path path, NodeType type) = 0;
-		virtual void onNodeChanged(Path  path, NodeType type) = 0;
-		virtual void onNodeRenamed(Path newPath, Path oldPath, NodeType type) = 0;
+		virtual void onMounted(Path path, SRef<Device> device) {};
+		virtual void onUnmounted(Path path, SRef<Device> device) {};
+		virtual void onNodeAdded(Path path, NodeType type) {};
+		virtual void onNodeRemoved(Path path, NodeType type) {};
+		virtual void onNodeChanged(Path  path, NodeType type) {};
+		virtual void onNodeRenamed(Path newPath, Path oldPath, NodeType type) {};
 	};
 
 	class PathBoundListener : public Listener {

@@ -144,6 +144,13 @@ namespace FicsItKernel {
 		void removeDrive(AFINFileSystemState* drive);
 
 		/**
+		 * Returns all drive added to the kernel
+		 *
+		 * @return	the drives
+		 */
+		std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> getDrives() const;
+
+		/**
 		 * Gets the internally used DevDevice
 		 *
 		 * @return	the used DevDevice
