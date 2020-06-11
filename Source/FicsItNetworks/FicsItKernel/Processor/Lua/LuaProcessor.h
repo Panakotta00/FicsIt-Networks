@@ -51,8 +51,9 @@ namespace FicsItKernel {
 			lua_State* luaThread = nullptr;
 			int luaThreadIndex = 0;
 			bool endOfTick = false;
-			
-			int timeout = -1;
+
+			int pullState = 0; // 0 = not pulling, 1 = pulling with timeout, 2 = pull indefinetly
+			double timeout = 0.0;
 			std::chrono::time_point<std::chrono::high_resolution_clock> pullStart;
 			std::set<LuaFile> fileStreams;
 			FileSystem::SRef<LuaFileSystemListener> fileSystemListener;

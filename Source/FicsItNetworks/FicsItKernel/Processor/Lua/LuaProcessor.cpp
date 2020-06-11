@@ -93,11 +93,11 @@ namespace FicsItKernel {
 			lua_sethook(luaThread, luaHook, LUA_MASKCOUNT, speed);
 			
 			int status = 0;
-			if (timeout > -1) {
+			if (pullState != 0) {
 				// Runtime is pulling a signal
 				if (getKernel()->getNetwork()->getSignalCount() > 0) {
 					// Signal available -> reset timout and pull signal from network
-					timeout = -1;
+					pullState = 0;
 					auto sigArgs = doSignal(luaThread);
 					if (sigArgs < 1) {
 						// no signals poped -> crash system
@@ -106,11 +106,12 @@ namespace FicsItKernel {
 						// signal poped -> resume yield with signal as parameters (passing signals parameters back to pull yield)
 						status = lua_resume(luaThread, nullptr, sigArgs);
 					}
-				} else if (timeout == 0 || timeout > std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - pullStart).count()) {
+				} else if (pullState == 2 || timeout > (static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - pullStart).count()) / 1000.0)) {
 					// no signal available & not timeout reached -> skip tick
 					return;
 				} else {
 					// no signal available & timout reached -> resume yield with  no parameters
+					pullState = 0;
 					status = lua_resume(luaThread, nullptr, 0);
 				}
 			} else {

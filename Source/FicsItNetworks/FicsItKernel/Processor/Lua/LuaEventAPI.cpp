@@ -53,19 +53,21 @@ namespace FicsItKernel {
 
 		int luaPull(lua_State* L) {
 			int args = lua_gettop(L);
-			std::int64_t t = -1;
-			if (args > 0 && !lua_isnil(L, 1)) t = lua_tointeger(L, 1);
+			double t = 0.0;
+			if (args > 0) t = lua_tonumber(L, 1);
 
 			auto luaProc = LuaProcessor::luaGetProcessor(L);
 			check(luaProc);
 			int a = luaProc->doSignal(L);
-			if (!a && t >= 0) {
-				luaProc->timeout = (int)t;
+			if (!a && !(args > 0 && lua_isinteger(L, 1) && lua_tointeger(L, 1) == 0)) {
+				luaProc->timeout = t;
 				luaProc->pullStart = std::chrono::high_resolution_clock::now();
-
+				luaProc->pullState = (args > 0) ? 1 : 2;
+				
 				lua_yieldk(L, 0, args, luaPullContinue);
 				return LuaProcessor::luaAPIReturn(L, 0);
 			}
+			luaProc->pullState = 0;
 			return LuaProcessor::luaAPIReturn(L, a);
 		}
 

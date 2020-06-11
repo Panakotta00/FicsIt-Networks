@@ -16,7 +16,7 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	for (auto p = TFieldIterator<UProperty>(Stack.CurrentNativeFunction); p; ++p) {
 		auto dp = p->ContainerPtrToValuePtr<void>(data);
 		if (Stack.Code) {
-			Stack.Step(Context, dp);
+			std::invoke(&FFrame::Step, Stack, Context, dp);
 		} else {
 			Stack.StepExplicitProperty(dp, *p);
 		}
