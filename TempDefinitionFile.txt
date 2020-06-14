@@ -1,1 +1,0 @@
-FIN_Tutorial	"Play_FINTutorial_Introduction"
