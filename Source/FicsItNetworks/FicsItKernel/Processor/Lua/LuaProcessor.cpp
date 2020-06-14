@@ -413,8 +413,9 @@ namespace FicsItKernel {
 				size_t s_len = 0;
 				const char* s = luaL_tolstring(L, i, &s_len);
 				if (!s) luaL_argerror(L, i, "is not valid type");
-				log += std::string(s, s_len);
+				log += std::string(s, s_len) + " ";
 			}
+			if (log.length() > 0) log = log.erase(log.length()-1);
 			
 			try {
 				auto serial = LuaProcessor::luaGetProcessor(L)->getKernel()->getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
@@ -493,7 +494,14 @@ namespace FicsItKernel {
 			PersistTable("table", -1);
 			lua_pop(L, 1);
 			luaL_requiref(L, "coroutine", luaopen_coroutine, true);
+			lua_pushcfunction(L, luaResume);
+			lua_setfield(L, -2, "resume");
+			lua_pushcfunction(L, luaYield);
+			lua_setfield(L, -2, "yield");
 			PersistTable("coroutine", -1);
+			lua_register(L, "print", luaPrint);
+			PersistGlobal("print");
+
 			lua_pop(L, 1);
 			luaL_requiref(L, "math", luaopen_math, true);
 			PersistTable("math", -1);
@@ -501,14 +509,6 @@ namespace FicsItKernel {
 			luaL_requiref(L, "string", luaopen_string, true);
 			PersistTable("string", -1);
 			lua_pop(L, 1);
-			
-			lua_register(L, "print", luaPrint);
-			PersistGlobal("print");
-			lua_register(L, "resume", luaResume);
-			PersistGlobal("resume");
-			lua_register(L, "yield", luaYield);
-			PersistGlobal("yield");
-			// TODO: move resume and yield to overwrite coroutine
 			
 			setupInstanceSystem(L);
 			setupStructs(L);
