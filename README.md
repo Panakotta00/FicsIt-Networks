@@ -1,4 +1,4 @@
-FicsIt-Networks
+FicsIt-Networks ![](https://jenkins.massivebytes.net/job/FicsIt-Networks/job/master/badge/icon)
 ===============
 FicsIt-Networks is a mod for Satisfactory, written in C++/BP using Unreal Engine and the Satisfactory Modloader, which allows you to control, mointor, manage and automate each process of your factory by providing a network system and programmable computers, aswell as other I/O.
 
