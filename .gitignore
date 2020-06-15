@@ -83,3 +83,6 @@ Plugins/Alpakit
 # Rider
 .idea
 Plugins/Developer/RiderLink
+
+# FactoryUproject for auto added plugins (f.e. Rider, Electronic Nodes)
+FactoryGame.uproject
