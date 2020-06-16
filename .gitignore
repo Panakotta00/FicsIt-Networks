@@ -79,6 +79,7 @@ Source/SML
 Source/FactoryGame
 Source/Alpakit
 Plugins/Alpakit
+Content/SML
 
 # Rider
 .idea
