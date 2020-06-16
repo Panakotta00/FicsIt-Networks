@@ -85,4 +85,4 @@ Plugins/Alpakit
 Plugins/Developer/RiderLink
 
 # FactoryUproject for auto added plugins (f.e. Rider, Electronic Nodes)
-FactoryGame.uproject
+./FactoryGame.uproject
