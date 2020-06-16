@@ -1,5 +1,8 @@
 #include "LuaProcessor.h"
 
+#include <chrono>
+
+
 #include "../../FicsItKernel.h"
 
 #include "LuaInstance.h"
@@ -167,6 +170,7 @@ namespace FicsItKernel {
 
 			// reset tempdata
 			timeout = -1;
+			pullState = 0;
 			getKernel()->getFileSystem()->addListener(fileSystemListener);
 
 			// clear existing lua state
@@ -260,6 +264,11 @@ namespace FicsItKernel {
 
 				ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(storage);
 
+				// save pull state
+				Data->PullState = pullState;
+				Data->Timeout = timeout;
+				Data->PullStart = static_cast<uint64>(std::chrono::duration_cast<std::chrono::milliseconds>(pullStart.time_since_epoch()).count());
+				
 				// prepare traces list
 				lua_pushlightuserdata(luaState, storage); // ..., storage
 				lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistStorage"); // ...
@@ -336,6 +345,11 @@ namespace FicsItKernel {
 				if (kernel->getState() != RUNNING) return;
 
 				ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(Storage);
+
+				// save pull state
+				pullState = Data->PullState;
+				timeout = Data->Timeout;
+				pullStart = std::chrono::time_point<std::chrono::high_resolution_clock>(std::chrono::milliseconds(Data->PullStart));
 
 				reset();
 

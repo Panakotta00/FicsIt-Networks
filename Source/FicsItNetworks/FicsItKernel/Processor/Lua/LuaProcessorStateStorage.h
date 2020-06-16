@@ -23,6 +23,15 @@ public:
 	
 	UPROPERTY(SaveGame)
 	FString Globals;
+
+	UPROPERTY(SaveGame)
+	int PullState = 0;
+
+	UPROPERTY(SaveGame)
+    double Timeout = 0;
+
+	UPROPERTY(SaveGame)
+    uint64 PullStart = 0;
 	
     // Begin UProcessorStateStorage
 	virtual void Serialize(FArchive& Ar) override;

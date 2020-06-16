@@ -5,6 +5,9 @@ void ULuaProcessorStateStorage::Serialize(FArchive& Ar) {
 	Ar << Globals;
 	Ar << Traces;
 	Ar << References;
+	Ar << PullState;
+	Ar << Timeout;
+	Ar << PullStart;
 }
 
 int32 ULuaProcessorStateStorage::Add(const FFINNetworkTrace& Trace) {
