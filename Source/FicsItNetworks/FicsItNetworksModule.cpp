@@ -168,19 +168,19 @@ void FFicsItNetworksModule::StartupModule(){
 	finConfig->SetNumberField("SignalQueueSize", 32);
 	finConfig = SML::readModConfig(MOD_NAME, finConfig);
 	#endif
+	
+	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
 
-	SUBSCRIBE_METHOD("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
+	SUBSCRIBE_METHOD_MANUAL("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent_Public::Factory_GrabOutput, &FactoryGrabHook);
+	SUBSCRIBE_METHOD(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, &FactoryGrabInternalHook);
 
-	SUBSCRIBE_METHOD("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent_Public::Factory_GrabOutput, &FactoryGrabHook);
-	SUBSCRIBE_METHOD("?Factory_Internal_GrabOutputInventory@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@V?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, &FactoryGrabInternalHook);
+	SUBSCRIBE_METHOD_MANUAL("?TickCircuit@UFGPowerCircuit@@MEAAXM@Z", UFGPowerCircuit_Public::TickCircuit, TickCircuitHook);
 
-	SUBSCRIBE_METHOD("?TickCircuit@UFGPowerCircuit@@MEAAXM@Z", UFGPowerCircuit_Public::TickCircuit, TickCircuitHook);
-
-	SUBSCRIBE_METHOD("?UpdateBestUsableActor@AFGCharacterPlayer@@IEAAXXZ", AFGCharacterPlayer_Public::UpdateBestUsableActor, [](auto& scope, AFGCharacterPlayer_Public* self) {
+	SUBSCRIBE_METHOD_MANUAL("?UpdateBestUsableActor@AFGCharacterPlayer@@IEAAXXZ", AFGCharacterPlayer_Public::UpdateBestUsableActor, [](auto& scope, AFGCharacterPlayer_Public* self) {
 		if (!UFINComponentUtility::bAllowUsing) scope.Cancel();
 	});
 
-	SUBSCRIBE_METHOD("?Dismantle_Implementation@AFGBuildable@@UEAAXXZ", AFGBuildable::Dismantle_Implementation, [](auto& scope, AFGBuildable* self_r) {
+	SUBSCRIBE_METHOD(AFGBuildable::Dismantle_Implementation, [](auto& scope, AFGBuildable* self_r) {
 		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
 		AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);
 		TInlineComponentArray<UFINNetworkConnector*> connectors;
@@ -213,8 +213,8 @@ void FFicsItNetworksModule::StartupModule(){
 		}
 	});
 
-	SUBSCRIBE_METHOD("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
-
+	SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
+	
 	AFINNetworkAdapter::RegisterAdapterSettings();
 }
 void FFicsItNetworksModule::ShutdownModule(){ }
