@@ -18,6 +18,8 @@ we would reccomend you to join the Satisfactory Modding Discord Server and conta
 Testing means, it would not be a good idea to use the mod in your normal game state,
 testing means testing the mod in its own world to make sure every features works as intended.
 
+You can download the latest build version [here](https://jenkins.massivebytes.net/job/FicsIt-Networks/job/master).
+
 Streams
 =======
 The biggest part of making this mod does get stream at [CoderDE](https://twitch.tv/coderde).
