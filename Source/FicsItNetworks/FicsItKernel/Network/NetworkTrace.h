@@ -19,6 +19,14 @@ namespace FicsItKernel {
 		typedef std::function<bool(UObject*, UObject*)> TraceStep;
 
 		/**
+		 * Used for the extension of a trace to also pass a custom trace step
+		 */
+		typedef std::pair<UObject*, std::shared_ptr<TraceStep>> ObjTraceStepPtr;
+		inline ObjTraceStepPtr ObjTraceStep(UObject* obj, TraceStep step) {
+			return Network::ObjTraceStepPtr(obj, std::make_shared<Network::TraceStep>(step));
+		}
+
+		/**
 		 * This class allows for tracing object access over the component network.
 		 */
 		class NetworkTrace {
@@ -63,7 +71,7 @@ namespace FicsItKernel {
 			/**
 			 * Creates a copy of this network trace appends the given object and uses the given trace step for validation.
 			 */
-			NetworkTrace operator/(std::pair<UObject*, std::shared_ptr<TraceStep>> other);
+			NetworkTrace operator/(ObjTraceStepPtr other);
 
 			/**
 			 * Returns the referenced object.

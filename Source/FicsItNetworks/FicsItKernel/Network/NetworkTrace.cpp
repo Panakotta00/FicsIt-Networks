@@ -161,7 +161,7 @@ namespace FicsItKernel {
 			return trace;
 		}
 
-		NetworkTrace NetworkTrace::operator/(std::pair<UObject*, std::shared_ptr<TraceStep>> other) {
+		NetworkTrace NetworkTrace::operator/(ObjTraceStepPtr other) {
 			NetworkTrace trace(other.first);
 			trace.prev = new NetworkTrace(*this);
 			trace.step = other.second;
