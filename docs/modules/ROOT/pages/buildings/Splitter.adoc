@@ -20,8 +20,8 @@
 |===
 |Build Gun |Ingame
 
-|image::buildings/splitter_bg.png[300,300,role="left"]
-|image::buildings/splitter_ig.jpg[300,300,role="left"]
+|image::buildings/Splitter_bg.png[300,300,role="left"]
+|image::buildings/Splitter_ig.jpg[300,300,role="left"]
 |===
 
 The splitter allows you to control the flow of items.
