@@ -387,11 +387,76 @@ namespace FicsItKernel {
 			return 1;
 		LuaLibFuncEnd
 
+		LuaLibFunc(AFGRailroadVehicle, getMovement)
+			newInstance(L, obj / self->GetRailroadVehicleMovementComponent());
+			return 1;
+		LuaLibFuncEnd
+
 		LuaLibFuncGetNum(AFGRailroadVehicle, getLength, GetLength)
 		LuaLibFuncGetBool(AFGRailroadVehicle, isDocked, IsDocked)
 		LuaLibFuncGetBool(AFGRailroadVehicle, isReversed, IsOrientationReversed)
 		
 		// End AFGRailroadVehicle
+
+		// Begin UFGRailroadVehicleMovementComponent
+		
+		LuaLibFunc(UFGRailroadVehicleMovementComponent, getVehicle)
+			newInstance(L, obj / self->GetOwningRailroadVehicle());
+			return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadVehicleMovementComponent, getWheelsetRotation)
+			FVector rot = self->GetWheelsetRotation(luaL_checkinteger(L, 1));
+			lua_pushnumber(L, rot.X);
+			lua_pushnumber(L, rot.Y);
+			lua_pushnumber(L, rot.Z);
+			return 3;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadVehicleMovementComponent, getWheelsetOffset)
+			lua_pushnumber(L, self->GetWheelsetOffset(luaL_checkinteger(L, 1)));
+			return 1;
+		LuaLibFuncEnd
+		
+		LuaLibFunc(UFGRailroadVehicleMovementComponent, getCouplerRotationAndExtention)
+			float extension;
+			FVector rotation = self->GetCouplerRotationAndExtention(luaL_checkinteger(L, 1), extension);
+			lua_pushnumber(L, rotation.X);
+			lua_pushnumber(L, rotation.Y);
+			lua_pushnumber(L, rotation.Z);
+			lua_pushnumber(L, extension);
+			return 4;
+		LuaLibFuncEnd
+		
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getOrientation, GetOrientation)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMass, GetMass)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getTareMass, GetTareMass)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getPayloadMass, GetPayloadMass)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getSpeed, GetForwardSpeed)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getRelativeSpeed, GetRelativeForwardSpeed)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMaxSpeed, GetMaxForwardSpeed)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getGravitationalForce, GetGravitationalForce)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getTractiveForce, GetTractiveForce)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getResistiveForce, GetResistiveForce)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getGradientForce, GetGradientForce)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getBrakingForce, GetBrakingForce)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getAirBrakingForce, GetAirBrakingForce)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getDynamicBrakingForce, GetDynamicBrakingForce)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMaxTractiveEffort, GetMaxTractiveEffort)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMaxDynamicBrakingEffort, GetMaxDynamicBrakingEffort)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMaxAirBrakingEffort, GetMaxAirBrakingEffort)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getTrackGrade, GetTrackGrade)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getTrackCurvature, GetTrackCurvature)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getWheelsetAngle, GetWheelsetAngle)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getRollingResistance, GetRollingResistance)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getCurvatureResistance, GetCurvatureResistance)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getAirResistance, GetAirResistance)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getGradientResistance, GetGradientResistance)
+		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getWheelRotation, GetWheelRotation)
+		LuaLibFuncGetInt(UFGRailroadVehicleMovementComponent, getNumWheelsets, GetNumWheelsets)
+		LuaLibFuncGetBool(UFGRailroadVehicleMovementComponent, isMoving, IsMoving)
+		
+		// End UFGRailroadVehicleMovementComponent
 
 		// Begin AFGTrain
 
@@ -437,6 +502,21 @@ namespace FicsItKernel {
 
 		LuaLibFunc(AFGTrain, getLast)
             newInstance(L, obj / self->GetLastVehicle());
+			return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(AFGTrain, dock)
+			self->Dock();
+			return 0;
+		LuaLibFuncEnd
+
+		LuaLibFunc(AFGTrain, getVehicles)
+			lua_newtable(L);
+			int i = 1;
+			for (AFGRailroadVehicle* vehicle : self->mSimulationData.SimulatedVehicles) {
+				newInstance(L, obj / vehicle);
+				lua_seti(L, -2, ++i);
+			}
 			return 1;
 		LuaLibFuncEnd
 

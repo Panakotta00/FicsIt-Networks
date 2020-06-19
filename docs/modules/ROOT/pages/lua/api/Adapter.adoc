@@ -564,7 +564,7 @@ Return Values::
 |True if the docked vehicle is fully unloaded.
 |===
 
-== RailroadVehicle
+== RailroadVehicle (extends Actor)
 
 This is the base type of all vehicles you can place on a train track.
 
@@ -695,6 +695,530 @@ Return Values::
 |bool
 |bool
 |True if the vehicle is placed reverse.
+|===
+
+==== `RailroadVehicleMovement getMovement()`
+
+This function allows you to access the underlying movement component which controls all the movement of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicleMovement
+|RailroadVehicleMovement
+|The movement component of the vehicle.
+|===
+
+== RailroadVehicleMovement
+
+This representates the movement component of a RailroadVehicle which manages all the movement of such a vehicle.
+
+=== Functions
+
+==== `RailroadVehicle getVehicle()`
+
+Returns the railroad vehicle owning this movement component.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle
+|RailroadVehicle
+|The vehicle owning this movement component.
+|===
+
+==== `pitch, yaw, roll getWheelsetRotation(int idx)`
+
+Returns the rotation of the wheelset with the given index.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The index of the wheelset you want to get the rotation from.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|pitch
+|number
+|The pitch value of the rotation.
+
+|yaw
+|number
+|The yaw value of the rotation.
+
+|roll
+|number
+|The roll value of the rotation.
+|===
+
+==== `number getWheelsetOffset(int idx)`
+
+This functions allows you to get the offset of a wheelset.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The index of the wheelset you want to get the rotation from.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The the offset of the wheelset.
+|===
+
+==== `x, y, z, ext getCoupler(int idx)`
+
+This function allows you to access the rotation and extension values of the coupler at the given index.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The index of the coupler you want to get the rotation and extension from.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|pitch
+|number
+|The pitch value of the rotation.
+
+|yaw
+|number
+|The yaw value of the rotation.
+
+|roll
+|number
+|The roll value of the rotation.
+
+|ext
+|number
+|The extenstion of the coupler.
+|===
+
+==== `number getOrientation()`
+
+This function returns the orientation of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The orientation of the vehicle.
+|===
+
+==== `number getMass()`
+
+This function returns the mass of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The mass of the vehicle.
+|===
+
+==== `number getTareMass()`
+
+This function returns the tare mass of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The tare mass of the vehicle.
+|===
+
+==== `number getPayloadMass()`
+
+This function returns the payload mass of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The payload mass of the vehicle.
+|===
+
+==== `number getSpeed()`
+
+This function returns the forward speed of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The forward speed of the vehicle.
+|===
+
+==== `number getRelativeSpeed()`
+
+This function returns the relative forward speed of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The relative forward speed of the vehicle.
+|===
+
+==== `number getMaxSpeed()`
+
+This function returns the max speed of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The max speed of the vehicle.
+|===
+
+==== `number getGravitationalForce()`
+
+This function returns the gravitational force acting on the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The gravitational force acting on the vehicle.
+|===
+
+==== `number getTractiveForce()`
+
+This function returns the tractive force acting on the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The tractive force acting on the vehicle.
+|===
+
+==== `number getResistiveForce()`
+
+This function returns the resistive force acting on the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The resistive force acting on the vehicle.
+|===
+
+==== `number getGradientForce()`
+
+This function returns the gradient force acting on the vehicle caused by the slope of the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The gradient force acting on the vehicle.
+|===
+
+==== `number getBrakingForce()`
+
+This function returns the braking force acting on the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The braking force acting on the vehicle.
+|===
+
+==== `number getDynamicBrakingForce()`
+
+This function returns the dynamic braking force acting on the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The dynamic braking force acting on the vehicle.
+|===
+
+==== `number getMaxTractiveEffort()`
+
+This function returns the max tractive effort of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The max tractive effort of the vehicle.
+|===
+
+==== `number getMaxDynamicBrakingEffort()`
+
+This function returns the max dynamic braking effort of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The max dynamic braking effort of the vehicle.
+|===
+
+==== `number getMaxAirBrakingEffort()`
+
+This function returns the max air brake effort of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The max air brake effort of the vehicle.
+|===
+
+==== `number getTrackGrade()`
+
+This function returns current slope of the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The slope of the track.
+|===
+
+==== `number getTrackCurvature()`
+
+This function returns the curvature of the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The curvature of the track.
+|===
+
+==== `number getWheelsetAngle()`
+
+This function returns the angle of the wheelsets.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The angle of the wheelsets.
+|===
+
+==== `number getRollingResistance()`
+
+This function returns the rolling resistance of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The rolling resistance of the vehicle.
+|===
+
+==== `number getCurvatureResistance()`
+
+This function returns the curveture resistance of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The curveture resistance of the vehicle.
+|===
+
+==== `number getAirResistance()`
+
+This function returns the air resistance of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The air resistance of the vehicle.
+|===
+
+==== `number getGradientResistance()`
+
+This function returns the gradient resistance of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The gradient resistance of the vehicle.
+|===
+
+==== `number getWheelRotation()`
+
+This function returns the wheel rotation around the axle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The wheel rotation of the vehicle in degrees.
+|===
+
+==== `int getNumWheelsets()`
+
+This function returns the number of wheelsets attached to the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The number of wheelsets.
+|===
+
+==== `bool isMoving()`
+
+This function allows you to check if the train is moving.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the train is moving.
 |===
 
 == Train
@@ -937,6 +1461,25 @@ Return Values::
 |bool
 |bool
 |True if the train is currently docked.
+|===
+
+==== `dock()`
+
+This functions docks the train to station he is located in.
+
+==== `RailroadVehicle[] getVehicles()`
+
+This function returns all vehicles which are part of this train.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle[]
+|RailroadVehicle[]
+|Array of connected vehicles.
 |===
 
 == TimeTable
