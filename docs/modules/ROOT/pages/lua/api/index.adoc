@@ -5,4 +5,6 @@ A network component can contain multiple APIs and other special variations.
 
 If you get a component representation via the `Component proxy(string)`-function. The representation contains all functions of all APIs provided by the component.
 
+
+
 include::partial$api_footer.adoc[]

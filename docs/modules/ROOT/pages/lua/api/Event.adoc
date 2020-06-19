@@ -75,3 +75,7 @@ event.listen(c)
 
 e, s, test = event.pull(10)
 ```
+
+
+
+include::partial$api_footer.adoc[]
