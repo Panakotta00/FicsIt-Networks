@@ -286,7 +286,7 @@ This is the base type of all train platform buildings like the station, cargo pl
 
 === Functions
 
-==== `TrackGraph getTrack()`
+==== `TrackGraph getTrackGraph()`
 
 This functions returns the to the platform connected track graph.
 
@@ -299,6 +299,29 @@ Return Values::
 |TrackGraph
 |TrackGraph
 |the connected track graph.
+|===
+
+==== `Track, offset, forward getTrackPos()`
+
+This functions allows you to get the position of the trainplatform on the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Track
+|RailroadTrack
+|the track build of the position.
+
+|offset
+|number
+|the offset of the position to the beginning of the track.
+
+|forward
+|number
+|the direction in which a vehicle would move forward relative to the beginning of the track.
 |===
 
 ==== `TrainPlatform getConnectedPlatform(int dir)`
@@ -637,7 +660,7 @@ Return Values::
 |The coupled vehicle in the given direction.
 |===
 
-==== `TrackGraph getTrack()`
+==== `TrackGraph getTrackGraph()`
 
 This function allows you to access the track where the vehicle is placed on.
 
@@ -650,6 +673,29 @@ Return Values::
 |TrackGraph
 |TrackGraph
 |The track the vehicle is placed on.
+|===
+
+==== `Track, offset, forward getTrackPos()`
+
+This functions allows you to get the position of the vehicle on the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Track
+|RailroadTrack
+|the track build of the position.
+
+|offset
+|number
+|the offset of the position to the beginning of the track.
+
+|forward
+|number
+|the direction in which a vehicle would move forward relative to the beginning of the track.
 |===
 
 ==== `number getLength()`
@@ -1257,7 +1303,7 @@ Return Values::
 |The new name of the train.
 |===
 
-==== `TrackGraph getTrack()`
+==== `TrackGraph getTrackGraph()`
 
 This function allows you to access the track graph on which the train moves on.
 

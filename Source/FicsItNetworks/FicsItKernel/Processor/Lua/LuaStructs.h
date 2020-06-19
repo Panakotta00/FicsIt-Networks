@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "FGBuildableRailroadTrack.h"
 #include "FicsItKernel/FicsItFS/FileSystem.h"
 #include "FGInventoryLibrary.h"
 #include "FGRailroadTimeTable.h"

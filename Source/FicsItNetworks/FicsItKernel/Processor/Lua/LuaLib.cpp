@@ -20,6 +20,8 @@
 #include "Buildables/FGBuildableManufacturer.h"
 #include "util/ReflectionHelper.h"
 #include "FGLocomotive.h"
+#include "FGBuildableRailroadSwitchControl.h"
+#include "FGBuildableRailroadSignal.h"
 
 using namespace FicsItKernel;
 using namespace FicsItKernel::Lua;
@@ -306,9 +308,18 @@ namespace FicsItKernel {
 
 		// Begin AFGBuildableTrainPlatform
 
-		LuaLibFunc(AFGBuildableTrainPlatform, getTrack)
+		LuaLibFunc(AFGBuildableTrainPlatform, getTrackGraph)
 			luaTrackGraph(L, obj, self->GetTrackGraphID());
 			return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(AFGBuildableTrainPlatform, getTrackPos)
+            FRailroadTrackPosition pos = self->GetTrackPosition();
+			if (!pos.IsValid()) return 0;
+			newInstance(L, obj(pos.Track.Get()));
+			lua_pushnumber(L, pos.Offset);
+			lua_pushnumber(L, pos.Forward);
+			return 3;
 		LuaLibFuncEnd
 
 		LuaLibFunc(AFGBuildableTrainPlatform, getConnectedPlatform)
@@ -382,9 +393,18 @@ namespace FicsItKernel {
 			return 1;
 		LuaLibFuncEnd
 
-		LuaLibFunc(AFGRailroadVehicle, getTrack)
+		LuaLibFunc(AFGRailroadVehicle, getTrackGraph)
             luaTrackGraph(L, obj, self->GetTrackGraphID());
 			return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(AFGRailroadVehicle, getTrackPos)
+			FRailroadTrackPosition pos = self->GetTrackPosition();
+			if (!pos.IsValid()) return 0;
+			newInstance(L, obj(pos.Track.Get()));
+			lua_pushnumber(L, pos.Offset);
+			lua_pushnumber(L, pos.Forward);
+			return 3;
 		LuaLibFuncEnd
 
 		LuaLibFunc(AFGRailroadVehicle, getMovement)
@@ -470,7 +490,7 @@ namespace FicsItKernel {
 			return 0;
 		LuaLibFuncEnd
 
-		LuaLibFunc(AFGTrain, getTrack)
+		LuaLibFunc(AFGTrain, getTrackGraph)
             luaTrackGraph(L, obj, self->GetTrackGraphID());
 			return 1;
 		LuaLibFuncEnd
@@ -598,6 +618,131 @@ namespace FicsItKernel {
 		LuaLibFuncGetInt(AFGRailroadTimeTable, getCurrentStop, GetCurrentStop)
 		
 		// End AFGRailroadTimeTable
+
+		// Begin AFGBuildableRailroadTrack
+
+		LuaLibFunc(AFGBuildableRailroadTrack, getClosestTrackPosition)
+			FRailroadTrackPosition pos = self->FindTrackPositionClosestToWorldLocation(FVector(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+			if (!pos.IsValid()) return 0;
+			newInstance(L, obj(pos.Track.Get()));
+			lua_pushnumber(L, pos.Offset);
+			lua_pushnumber(L, pos.Forward);
+			return 3;
+		LuaLibFuncEnd
+
+		LuaLibFunc(AFGBuildableRailroadTrack, getWorldLocAndRotArPos)
+			FRailroadTrackPosition pos(getObjInstance<AFGBuildableRailroadTrack>(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+			FVector loc;
+			FVector rot;
+			self->GetWorldLocationAndDirectionAtPosition(pos, loc, rot);
+			lua_pushnumber(L, loc.X);
+			lua_pushnumber(L, loc.Y);
+			lua_pushnumber(L, loc.Z);
+			lua_pushnumber(L, rot.X);
+			lua_pushnumber(L, rot.Y);
+			lua_pushnumber(L, rot.Z);
+			return 6;
+		LuaLibFuncEnd
+
+		LuaLibFunc(AFGBuildableRailroadTrack, getConnection)
+			newInstance(L, obj / self->GetConnection(luaL_checkinteger(L, 1)));
+			return 1;
+		LuaLibFuncEnd
+		
+		LuaLibFuncGetNum(AFGBuildableRailroadTrack, getLength, GetLength)
+		LuaLibFuncGetBool(AFGBuildableRailroadTrack, isOwnedByPlatform, GetIsOwnedByPlatform)
+		
+		// End AFGBuildableRailroadTrack
+
+		// Begin UFGRailroadTrackConnectionComponent
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getConnectorLocation)
+			FVector loc = self->GetConnectorLocation();
+			lua_pushnumber(L, loc.X);
+			lua_pushnumber(L, loc.Y);
+			lua_pushnumber(L, loc.Z);
+			return 3;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getConnectorNormal)
+            FVector loc = self->GetConnectorNormal();
+			lua_pushnumber(L, loc.X);
+			lua_pushnumber(L, loc.Y);
+			lua_pushnumber(L, loc.Z);
+			return 3;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getConnection)
+			if (lua_isinteger(L, 1)) {
+				newInstance(L, obj / self->GetConnection(lua_tointeger(L, 1)));
+			} else {
+				newInstance(L, obj / self->GetConnection());
+			}
+			return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getConnections)
+			lua_newtable(L);
+			int i = 1;
+			for (UFGRailroadTrackConnectionComponent* conn : self->GetConnections()) {
+				newInstance(L, obj / conn);
+				lua_seti(L, -2, i++);
+			}
+			return 1;
+		LuaLibFuncEnd
+		
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getTrackPosition)
+			FRailroadTrackPosition pos = self->GetTrackPosition();
+			if (!pos.IsValid()) return 0;
+			newInstance(L, obj(pos.Track.Get()));
+			lua_pushnumber(L, pos.Offset);
+			lua_pushnumber(L, pos.Forward);
+			return 3;
+		LuaLibFuncEnd
+		
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getTrack)
+			newInstance(L, obj / self->GetTrack());
+			return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getSwitchControl)
+            newInstance(L, obj / self->GetSwitchControl());
+		return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getStation)
+            newInstance(L, obj / self->GetStation());
+		return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getSignal)
+            newInstance(L, obj / self->GetSignal());
+		return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getOpposite)
+            newInstance(L, obj / self->GetOpposite());
+		return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, getNext)
+            newInstance(L, obj / self->GetNext());
+		return 1;
+		LuaLibFuncEnd
+		
+		LuaLibFunc(UFGRailroadTrackConnectionComponent, setSwitchPosition)
+			if (lua_isinteger(L, 1)) self->SetSwitchPosition(luaL_checkinteger(L, 1));
+			else self->SetSwitchPosition(getObjInstance<AFGBuildableRailroadTrack>(L, 1));
+			return 0;
+		LuaLibFuncEnd
+		
+		LuaLibFuncGetBool(UFGRailroadTrackConnectionComponent, isConnected, IsConnected)
+		LuaLibFuncGetBool(UFGRailroadTrackConnectionComponent, isFacingSwitchg, IsFacingSwitch)
+		LuaLibFuncGetBool(UFGRailroadTrackConnectionComponent, isTrailingSwitchg, IsTrailingSwitch)
+		LuaLibFuncGetInt(UFGRailroadTrackConnectionComponent, getNumSwitchPositions, GetNumSwitchPositions)
+		LuaLibFuncGetInt(UFGRailroadTrackConnectionComponent, getSwitchPosition, GetSwitchPosition)
+		
+		// End UFGRailroadTrackConnectionComponent
 
 		/* ################### */
 		/* # Class Instances # */

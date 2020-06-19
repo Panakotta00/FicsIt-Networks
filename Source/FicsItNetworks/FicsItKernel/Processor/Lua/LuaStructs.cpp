@@ -202,8 +202,8 @@ namespace FicsItKernel {
 		// Begin TimeTableStop
 
 		static const luaL_Reg luaTimeTableStopLib[] = {
+			{"__index", luaRetNull},
 			{"__newindex", luaRetNull},
-			{"__gc", luaTrackGraphGC},
 			{NULL,NULL}
 		};
 
@@ -255,7 +255,7 @@ namespace FicsItKernel {
 			PersistTable("TrackGraph", -1);
 			lua_newtable(L);
 			luaL_setfuncs(L, luaTrackGraphLib, 0);
-			PersistTable("TrackGraph", -1);
+			PersistTable("TrackGraphLib", -1);
 			lua_setfield(L, -2, "__index");
 			lua_pop(L, 1);
 
