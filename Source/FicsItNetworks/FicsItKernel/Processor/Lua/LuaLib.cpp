@@ -630,7 +630,7 @@ namespace FicsItKernel {
 			return 3;
 		LuaLibFuncEnd
 
-		LuaLibFunc(AFGBuildableRailroadTrack, getWorldLocAndRotArPos)
+		LuaLibFunc(AFGBuildableRailroadTrack, getWorldLocAndRotAtPos)
 			FRailroadTrackPosition pos(getObjInstance<AFGBuildableRailroadTrack>(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
 			FVector loc;
 			FVector rot;
@@ -646,6 +646,11 @@ namespace FicsItKernel {
 
 		LuaLibFunc(AFGBuildableRailroadTrack, getConnection)
 			newInstance(L, obj / self->GetConnection(luaL_checkinteger(L, 1)));
+			return 1;
+		LuaLibFuncEnd
+
+		LuaLibFunc(AFGBuildableRailroadTrack, getTrackGraph)
+            luaTrackGraph(L, obj, self->GetTrackGraphID());
 			return 1;
 		LuaLibFuncEnd
 		

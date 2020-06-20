@@ -1722,6 +1722,486 @@ Return Values::
 |The position of the stop the train is currently heading to.
 |===
 
+== RailroadTrack
+
+This type represents a single track you place on the ground.
+
+=== Functions
+
+==== `RailroadTrack, offset, forward getClosestTrackPosition(number x, number y, number z)`
+
+This function allow you to find the closest track position from the given world location.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|number
+|The x value of your desired search location.
+
+|y
+|number
+|The y value of your desired search location.
+
+|z
+|number
+|The z value of your desired search location.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrack
+|RailroadTrack
+|The nearest track to the location.
+
+|offset
+|number
+|The offset of the track position relative to the beginning of the track.
+
+|forward
+|number
+|The forward direction relative to the beginning of the track.
+|===
+
+==== `x, y, z, nx, ny, nz getWorldLocAndRotAtPos(RailroadTrack track, number offset, number forward)`
+
+This function allows you to get the world transformation and the normal vector of the track spline at the given track position.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrack
+|RailroadTrack
+|The track of the location.
+
+|offset
+|number
+|The offset of the track position relative to the beginning of the track.
+
+|forward
+|number
+|The forward direction relative to the beginning of the track.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|number
+|The x value of the world location at the given track position.
+
+|y
+|number
+|The y value of the world location at the given track position.
+
+|z
+|number
+|The z value of the world location at the given track position.
+
+|nx
+|number
+|The x value of the normal vector at the given track position.
+
+|ny
+|number
+|The y value of the normal vector at the given track position.
+
+|nz
+|number
+|The z value of the normal vector at the given track position.
+|===
+
+==== `RailroadTrackConnection getConnection(int idx)`
+
+The railroad track connection at the given index.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|idx
+|The index of the connection you want to get.
+
+- `0` Front connection
+- `1` Back connection
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrackConnection
+|RailroadTrackConnection
+|The connection component of the track at the given index.
+|===
+
+==== `TrackGraph getTrackGraph()`
+
+This functions returns the to the track graph the track is part of.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|TrackGraph
+|TrackGraph
+|The track graph the track is part of.
+|===
+
+==== `number getLength()`
+
+The function allows you to get information about the length of the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The length of the track.
+|===
+
+==== `bool isOwnedByPlatform()`
+
+This function allows you to check if the track is owned by a platform.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the track is owned by a platform.
+|===
+
+== RailroadTrackConnection
+
+This type represents the component that allows to connect multiple track to each other and so build a track network.
+
+=== Functions
+
+==== `x, y, z getConnectorLocation()`
+
+This function returns the world location of the track connector.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|number
+|The x value of the connectors world location.
+
+|y
+|number
+|The y value of the connectors world location.
+
+|z
+|number
+|The z value of the connectors world location.
+|===
+
+==== `nx, ny, nz getConnectorNormal()`
+
+This function returns the normal vector of the track connector.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|nx
+|number
+|The x value of the connectors normal vector.
+
+|ny
+|number
+|The y value of the connectors normal vector.
+
+|nz
+|number
+|The z value of the connectors normal vector.
+|===
+
+==== `RailroadTrackConnection getConnection([int idx])`
+
+This function allows you to access the connected connectors.
+If no idx is given, it will return the connector of the current switch state.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int (optional)
+|The index of the connection you want to get. Dont provide it if you want to get the connector of where the switch switched to.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrackConnection
+|RailroadTrackConnection
+|The connected railroad track connection you want to get. Nil if invalid index or nothing is connected.
+|===
+
+==== `trackconnections getConnections()`
+
+This functions returns a list of all connected track connectors.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|trackconnections
+|RailroadTrackConnection[]
+|A array of track connectors which are connected to this connector.
+|===
+
+==== `RailroadTrack, offset, forward getTrackPosition()`
+
+This function returns the track position of the connector.
+Returns nil if the track position is invalid.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrack
+|RailroadTrack
+|The track of the location.
+
+|offset
+|number
+|The offset of the track position relative to the beginning of the track.
+
+|forward
+|number
+|The forward direction relative to the beginning of the track.
+|===
+
+==== `RailroadTrack getTrack()`
+
+This function allows you to access the track of the railroad track connection.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrack
+|RailroadTrack
+|The track which holds this connector.
+|===
+
+==== `RailroadSwitchControl getSwitchControl()`
+
+This function returns the attached switch controller of this connection.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadSwitchControl
+|RailroadSwitchControl
+|The attached switch controller of this connection. Nil if none is attached.
+|===
+
+==== `RailroadStation getStation()`
+
+This function returns the attached station of this connection.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadStation
+|RailroadStation
+|The attached railroad station of this connection. Nil if none is attached.
+|===
+
+==== `RailroadSignal getSignal()`
+
+This function returns the attached railroad signal of this connection.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadSignal
+|RailroadSignal
+|The attached railroad signal of this connection. Nil if none is attached.
+|===
+
+==== `RailroadTrackConnection getOpposite()`
+
+This function returns the track connector of the other side of the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrackConnection
+|RailroadTrackConnection
+|The track connector of the other side of the track.
+|===
+
+==== `RailroadTrackConnection getNext()`
+
+This function returns the next track connection considering the switches position.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrackConnection
+|RailroadTrackConnection
+|The track connector of the next the following track.
+|===
+
+==== `setSwitchPosition(int idx | RailroadTrack track)`
+
+This function sets the connectors switch position to the index of connector **or** the connector connected to the given track.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The index of the track connector you want to switch to.
+
+|RailroadTrack
+|RailroadTrack
+|The track you want to switch to.
+|===
+
+==== `bool isConnected()`
+
+This function allows you to check if the connector is connected to another connector.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the connector is connector to another one.
+|===
+
+==== `bool isFacingSwitch()`
+
+This function allows you to check if the connection is facing the switch.
+If a train comes from the track this connection is part of, it can take one of multiple routes.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the connector is facing the switch.
+|===
+
+==== `bool isTrailingSwitch()`
+
+This function alllows you to check the the connection is trailing the switch.
+If a train comes from the track this connectin is part of, if moves over a switch, but multiple tracks merge here to one.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the connector is trailing the switch.
+|===
+
+==== `int getNumSwitchPosition()`
+
+This function retrieves the count of posible switch positions.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|The count of posible switch positions.
+|===
+
+==== `int getSwitchPosition()`
+
+This function returns the current selected switch position.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|True current selected switch position.
+|===
+
 == TimeTableStop
 
 This is a struct holding information about a time table stop.
