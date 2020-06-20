@@ -712,27 +712,27 @@ namespace FicsItKernel {
 
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, getSwitchControl)
             newInstance(L, obj / self->GetSwitchControl());
-		return 1;
+			return 1;
 		LuaLibFuncEnd
 
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, getStation)
             newInstance(L, obj / self->GetStation());
-		return 1;
+			return 1;
 		LuaLibFuncEnd
 
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, getSignal)
             newInstance(L, obj / self->GetSignal());
-		return 1;
+			return 1;
 		LuaLibFuncEnd
 
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, getOpposite)
             newInstance(L, obj / self->GetOpposite());
-		return 1;
+			return 1;
 		LuaLibFuncEnd
 
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, getNext)
             newInstance(L, obj / self->GetNext());
-		return 1;
+			return 1;
 		LuaLibFuncEnd
 		
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, setSwitchPosition)

@@ -1,8 +1,18 @@
 #include "NetworkTrace.h"
 
+
+#include "FGBuildableRailroadSignal.h"
+#include "FGBuildableRailroadStation.h"
+#include "FGBuildableRailroadSwitchControl.h"
+#include "FGBuildableTrainPlatform.h"
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
 #include "FGPowerCircuit.h"
+#include "FGRailroadTimeTable.h"
+#include "FGRailroadTrackConnectionComponent.h"
+#include "FGRailroadVehicle.h"
+#include "FGRailroadVehicleMovementComponent.h"
+#include "FGTrain.h"
 
 #include "Network/FINNetworkConnector.h"
 #include "Network/FINNetworkCircuit.h"
@@ -16,13 +26,15 @@
 	std::pair<std::pair<UClass*, UClass*>, std::pair<std::string, TraceStep*>> StepRegSigName(A, B)() { \
 		return {{A::StaticClass(), B::StaticClass()}, {#A "_" #B, new TraceStep(&StepFuncName(A, B))}}; \
 	}
-#define Step(CA, CB) \
+#define Step(CA, CB, Code) \
 	StepFuncSig(CA, CB); \
 	StepFuncSigReg(CA, CB) \
 	TraceStepRegisterer StepRegName(CA, CB)(&StepRegSigName(CA, CB)); \
 	StepFuncSig(CA, CB) { \
 		CA* A = Cast<CA>(oA); \
-		CB* B = Cast<CB>(oB);
+		CB* B = Cast<CB>(oB); \
+		Code \
+	}
 
 namespace FicsItKernel {
 	namespace Network {
@@ -35,9 +47,9 @@ namespace FicsItKernel {
 		
 		class TraceStepRegisterer {
 		public:
-			TraceStepRegisterer(std::pair<std::pair<UClass*, UClass*>, std::pair<std::string, TraceStep*>>(*regSig)()) {
-				NetworkTrace::toRegister.push_back(regSig);
-			}
+            TraceStepRegisterer(std::pair<std::pair<UClass*, UClass*>, std::pair<std::string, TraceStep*>>(*regSig)()) {
+            	NetworkTrace::toRegister.push_back(regSig);
+            }
 		};
 
 		void traceRegisterSteps() {
@@ -252,36 +264,104 @@ namespace FicsItKernel {
 		/* # Trace Steps # */
 		/* ############### */
 		
-		Step(UFGPowerConnectionComponent, UFGPowerCircuit)
+		Step(UFGPowerConnectionComponent, UFGPowerCircuit, {
 			return A->GetCircuitID() == B->GetCircuitID();
-		}
-		Step(UFGPowerCircuit, UFGPowerConnectionComponent)
+		})
+		Step(UFGPowerCircuit, UFGPowerConnectionComponent, {
 			return A->GetCircuitID() == B->GetCircuitID();
-		}
+		})
 
-		Step(UFGPowerInfoComponent, UFGPowerCircuit)
+		Step(UFGPowerInfoComponent, UFGPowerCircuit, {
 			return A->GetPowerCircuit()->GetCircuitID() == B->GetCircuitID();
-		}
-		Step(UFGPowerCircuit, UFGPowerInfoComponent)
+		})
+		Step(UFGPowerCircuit, UFGPowerInfoComponent, {
 			return A->GetCircuitID() == B->GetPowerCircuit()->GetCircuitID();
-		}
+		})
 
-		Step(UFGPowerInfoComponent, UFGPowerConnectionComponent)
+		Step(UFGPowerInfoComponent, UFGPowerConnectionComponent, {
 			return A == B->GetPowerInfo();
-		}
-		Step(UFGPowerConnectionComponent, UFGPowerInfoComponent)
+		})
+		Step(UFGPowerConnectionComponent, UFGPowerInfoComponent, {
 			return A->GetPowerInfo() == B;
-		}
+		})
 
-		Step(UFINNetworkComponent, UFINNetworkComponent)
+		Step(UFINNetworkComponent, UFINNetworkComponent, {
 			return IFINNetworkComponent::Execute_GetCircuit(oA)->HasNode(oB);
-		}
+		})
 
-		Step(UFINNetworkComponent, UFINNetworkCircuit)
+		Step(UFINNetworkComponent, UFINNetworkCircuit, {
 			return B->HasNode(oA);
-		}
-		Step(UFINNetworkCircuit, UFINNetworkComponent)
+		})
+		Step(UFINNetworkCircuit, UFINNetworkComponent, {
 			return A->HasNode(oB);
-		}
+		})
+
+		Step(AFGBuildableTrainPlatform, AFGBuildableTrainPlatform, {
+			return A->GetTrackGraphID() == B->GetTrackGraphID();
+		})
+
+		Step(AFGBuildableTrainPlatform, AFGRailroadVehicle, {
+			return A->GetTrackGraphID() == B->GetTrackGraphID();
+		})
+		Step(AFGRailroadVehicle, AFGBuildableTrainPlatform, {
+			return A->GetTrackGraphID() == B->GetTrackGraphID();
+		})
+
+		Step(AFGRailroadVehicle, AFGTrain, {
+			return A->GetTrackGraphID() == B->GetTrackGraphID();
+		})
+		Step(AFGTrain, AFGRailroadVehicle, {
+            return A->GetTrackGraphID() == B->GetTrackGraphID();
+        })
+
+		Step(AFGTrain, AFGRailroadTimeTable, {
+			return A->GetTimeTable() == B;
+		})
+		Step(AFGRailroadTimeTable, AFGTrain, {
+            return A == B->GetTimeTable();
+        })
+
+		Step(AFGRailroadVehicle, AFGRailroadVehicle, {
+			return A->GetTrackGraphID() == B->GetTrackGraphID();
+		})
+
+		Step(AFGRailroadVehicle, UFGRailroadVehicleMovementComponent, {
+			return A->GetRailroadVehicleMovementComponent() == B;
+		});
+		Step(UFGRailroadVehicleMovementComponent, AFGRailroadVehicle, {
+            return A == B->GetRailroadVehicleMovementComponent();
+        });
+
+		Step(AFGBuildableRailroadTrack, UFGRailroadTrackConnectionComponent, {
+			return A == B->GetTrack();
+		})
+		Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadTrack, {
+            return A->GetTrack() == B;
+        })
+
+		Step(UFGRailroadTrackConnectionComponent, UFGRailroadTrackConnectionComponent, {
+			return A->GetConnections().Contains(B) || A->GetOpposite() == B;
+		})
+
+		Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadSwitchControl, {
+			return A->GetSwitchControl() == B;
+		})
+		Step(AFGBuildableRailroadSwitchControl, UFGRailroadTrackConnectionComponent, {
+            return A = B->GetSwitchControl();
+        })
+
+		Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadSignal, {
+            return A->GetSignal() == B;
+        })
+        Step(AFGBuildableRailroadSignal, UFGRailroadTrackConnectionComponent, {
+            return A = B->GetSignal();
+        })
+
+		Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadStation, {
+            return A->GetStation() == B;
+        })
+        Step(AFGBuildableRailroadStation, UFGRailroadTrackConnectionComponent, {
+            return A = B->GetStation();
+        })
 	}
 }
