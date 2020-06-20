@@ -26,7 +26,7 @@ Parameters::
 
 Waits for a signal in the queue. Blocks the excecution until a signal got pushed to the signal queue or the timeout is reached.
 
-Returns directly if ther is already a signal in the queue (the factory tick doesn't get yieled).
+Returns directly if ther is already a signal in the queue (the tick doesn't get yieled).
 
 Parameters::
 +
@@ -38,6 +38,8 @@ Parameters::
 |number
 |The amount of time needs to pass until pull unblocks when no signal got pushed.
  If not set, the function will block indefinetly until a signal gets pushed.
+ If set to `0` (int), will not yield the tick and directly return with
+ the signal data or nil if no signal was in the queue.
 |===
 
 Return Values::
