@@ -1267,7 +1267,7 @@ Return Values::
 |True if the train is moving.
 |===
 
-== Train
+== Train (extends Actor)
 
 This is a combination of multiple vehicles which make then up a train.
 
@@ -1722,7 +1722,7 @@ Return Values::
 |The position of the stop the train is currently heading to.
 |===
 
-== RailroadTrack
+== RailroadTrack (extends Actor)
 
 This type represents a single track you place on the ground.
 
@@ -2200,6 +2200,31 @@ Return Values::
 |int
 |int
 |True current selected switch position.
+|===
+
+== RailroadSwitchControl (extends Factory)
+
+This type represents a switch controler.
+
+=== Functions
+
+==== `toggleSwitch()`
+
+This function switches once through the attached connections.
+
+==== `int getSwitchPosition()`
+
+This functions returns the current selected switch position.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|The current selected switch position.
 |===
 
 == TimeTableStop

@@ -749,6 +749,20 @@ namespace FicsItKernel {
 		
 		// End UFGRailroadTrackConnectionComponent
 
+		// Begin AFGBuildableRailroadSwitchControl
+
+		LuaLibFunc(AFGBuildableRailroadSwitchControl, toggleSwitch)
+			self->ToggleSwitchPosition();
+		LuaLibFuncEnd
+		
+		LuaLibFuncGetInt(AFGBuildableRailroadSwitchControl, getSwitchPosition, GetSwitchPosition)
+		
+		// End AFGBuildableRailroadSwitchControl
+
+		// Begin AFGBuildableRailroadSignal
+
+		// End AFGBuildableRailroadSignal
+
 		/* ################### */
 		/* # Class Instances # */
 		/* ################### */
