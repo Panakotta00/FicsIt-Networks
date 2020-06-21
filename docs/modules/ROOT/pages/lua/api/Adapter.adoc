@@ -9,6 +9,52 @@ Everything existing in the world.
 
 === Functions
 
+==== `x, y, z getLocation()`
+
+This function returns the world location of the actor.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|number
+|The x value of the actors location.
+
+|y
+|number
+|The y value of the actors location.
+
+|z
+|number
+|The z value of the actors location.
+|===
+
+==== `pitch, yaw, roll getRotation()`
+
+This function returns the world rotation of the actor.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|pitch
+|number
+|The pitch value of the actors rotation.
+
+|yaw
+|number
+|The yaw value of the actors rotation.
+
+|roll
+|number
+|The roll value of the actors rotation.
+|===
+
 ==== `connectors getPowerConnectors()`
 
 Returns all power connectors of the actor.

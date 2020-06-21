@@ -86,6 +86,22 @@ namespace FicsItKernel {
 
 		// Begin AActor
 
+		LuaLibFunc(AActor, getLocation, {
+			FVector loc = self->GetActorLocation();
+			lua_pushnumber(L, loc.X);
+			lua_pushnumber(L, loc.Y);
+			lua_pushnumber(L, loc.Z);
+			return 3;
+		})
+
+		LuaLibFunc(AActor, getRotation, {
+            FRotator rot = self->GetActorRotation();
+            lua_pushnumber(L, rot.Pitch);
+            lua_pushnumber(L, rot.Yaw);
+            lua_pushnumber(L, rot.Roll);
+            return 3;
+        })
+
 		LuaLibFunc(AActor, getPowerConnectors, {
 			lua_newtable(L);
 			int i = 1;
