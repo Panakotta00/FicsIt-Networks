@@ -6,8 +6,11 @@
 #include "FINComputerDriveHolder.h"
 #include "FicsItKernel/Processor/Lua/LuaProcessor.h"
 #include "FGInventoryComponent.h"
+#include "FINComputerDriveDesc.h"
 #include "FINComputerEEPROMDesc.h"
+#include "FINComputerFloppyDesc.h"
 #include "FicsItKernel/FicsItKernel.h"
+#include "util/Logging.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
@@ -19,12 +22,13 @@ AFINComputerCase::AFINComputerCase() {
 	Panel->SetupAttachment(RootComponent);
 	Panel->OnModuleChanged.AddDynamic(this, &AFINComputerCase::OnModuleChanged);
 
-	EEPROM = CreateDefaultSubobject<UFGInventoryComponent>("EEPROM");
-	EEPROM->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
-	EEPROM->OnItemAddedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
-	EEPROM->mItemFilter.BindLambda([](TSubclassOf<UObject> item, int32 i) {
-		return i <= 1 && item->IsChildOf(UFINComputerEEPROMDesc::StaticClass());
-	});
+	DataStorage = CreateDefaultSubobject<UFGInventoryComponent>("DataStorage");
+	DataStorage->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
+	DataStorage->OnItemAddedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
+	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> item, int32 i) {
+        SML::Logging::error("Uhm... ", TCHAR_TO_UTF8(*item->GetName()), " ", i);
+        return (i == 0 && item->IsChildOf<UFINComputerEEPROMDesc>()) || (i == 1 && item->IsChildOf<UFINComputerFloppyDesc>());
+    });
 	
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
@@ -48,7 +52,7 @@ void AFINComputerCase::Serialize(FArchive& ar) {
 		if (ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::KernelSystemPersistency) {
 			ar << NetworkConnector;
 			ar << Panel;
-			ar << EEPROM;
+			ar << DataStorage;
 			kernel->Serialize(ar, KernelState);
 		} else {
 			Super::Serialize(ar);
@@ -60,6 +64,8 @@ void AFINComputerCase::Serialize(FArchive& ar) {
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
+	
+	DataStorage->Resize(2);
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
@@ -95,7 +101,7 @@ void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
 	if (Processors.Num() == 1) {
 		// no processor already added -> add new processor
 		kernel->setProcessor(processor->CreateProcessor());
-		kernel->getProcessor()->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(EEPROM, 0));
+		kernel->getProcessor()->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
 	} else {
 		// processor already added
 		kernel->setProcessor(nullptr);
@@ -186,13 +192,35 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 }
 
 void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num) {
-	FicsItKernel::Processor* processor = kernel->getProcessor();
-	if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(EEPROM, 0));
+	if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
+		FicsItKernel::Processor* processor = kernel->getProcessor();
+		if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
+	} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
+		AFINFileSystemState* state = nullptr;
+		FInventoryStack stack;
+		if (DataStorage->GetStackFromIndex(1, stack)) {
+			TSubclassOf<UFINComputerDriveDesc> driveDesc = stack.Item.ItemClass;
+			state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+			if (IsValid(driveDesc)) {
+				if (!IsValid(state)) {
+					state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DataStorage, 1);
+				}
+			}
+		}
+		if (IsValid(Floppy)) {
+			kernel->removeDrive(Floppy);
+			Floppy = nullptr;
+		}
+		if (IsValid(state)) {
+			Floppy = state;
+			kernel->addDrive(Floppy);
+		}
+	}
 }
 
 void AFINComputerCase::Toggle() {
 	FicsItKernel::Processor* processor = kernel->getProcessor();
-	if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(EEPROM, 0));
+	if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
 	switch (kernel->getState()) {
 	case FicsItKernel::KernelState::SHUTOFF:
 		kernel->start(false);

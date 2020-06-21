@@ -33,7 +33,7 @@ public:
 	UFINModuleSystemPanel* Panel = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
-	UFGInventoryComponent* EEPROM = nullptr;
+	UFGInventoryComponent* DataStorage = nullptr;
 
 	UPROPERTY()
 	FKernelSystemSerializationInfo KernelState;
@@ -49,6 +49,9 @@ public:
 
 	UPROPERTY()
     TSet<AFINComputerDriveHolder*> DriveHolders;
+
+	UPROPERTY()
+	AFINFileSystemState* Floppy = nullptr;
 
 	AFINComputerCase();
 	~AFINComputerCase();
