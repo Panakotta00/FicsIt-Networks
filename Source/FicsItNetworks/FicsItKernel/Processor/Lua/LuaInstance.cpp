@@ -155,6 +155,32 @@ namespace FicsItKernel {
 			return types;
 		}
 
+		std::set<std::string> LuaInstanceRegistry::getFunctionNames(UClass* type) {
+			std::set<std::string> funcs;
+			while (type) {
+				std::map<std::string, LuaLibFunc>& funcMap = instanceFunctions[type];
+				for (auto& i : funcMap) {
+					funcs.insert(i.first);
+				}
+				if (type == UObject::StaticClass()) type = nullptr;
+				else type = type->GetSuperClass();
+			}
+			return funcs;
+		}
+
+		std::set<std::string> LuaInstanceRegistry::getClassFunctionNames(UClass* type) {
+			std::set<std::string> funcs;
+			while (type) {
+				std::map<std::string, LuaLibClassFunc>& funcMap = classInstanceFunctions[type];
+				for (auto& i : funcMap) {
+					funcs.insert(i.first);
+				}
+				if (type == UObject::StaticClass()) type = nullptr;
+				else type = type->GetSuperClass();
+			}
+			return funcs;
+		}
+
 		int luaInstanceTypeGC(lua_State* L) {
 			LuaInstanceType* type = static_cast<LuaInstanceType*>(luaL_checkudata(L, 1, INSTANCE_TYPE));
 			type->~LuaInstanceType();
@@ -287,23 +313,66 @@ namespace FicsItKernel {
 			return luaL_error(L, "Unable to call function");
 		}
 
+		void luaInstanceGetMembersOfClass(lua_State* L, UClass* clazz, int& i) {
+			for (TFieldIterator<UFunction> func = TFieldIterator<UFunction>(clazz); func; ++func) {
+				FString funcName = func->GetName();
+				if (!(funcName.RemoveFromStart("netFunc_") && funcName.Len() > 0)) continue;
+				lua_pushstring(L, TCHAR_TO_UTF8(*funcName));
+				lua_seti(L, -2, ++i);
+			}
+		}
+		
+		int luaInstanceGetMembers(lua_State* L) {
+            LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
+
+			// get and check instance
+			LuaInstance* instance = reg->checkAndGetInstance(L, 1);
+			UObject* self = *instance->trace;
+			if (!IsValid(self)) return luaL_argerror(L, 1, "Instance is invalid");
+			
+            lua_newtable(L);
+            int i = 0;
+			
+            lua_pushstring(L, "id");
+            lua_seti(L, -2, ++i);
+            lua_pushstring(L, "nick");
+            lua_seti(L, -2, ++i);
+			
+            UClass* type = self->GetClass();
+			
+            for (const std::string& func : reg->getFunctionNames(type)) {
+	            lua_pushstring(L, func.c_str());
+            	lua_seti(L, -2, ++i);
+            }
+            luaInstanceGetMembersOfClass(L, type, i);
+
+			if (type->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+                TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(self);
+                for (UObject* o : merged) {
+                	for (const std::string& func : reg->getFunctionNames(o->GetClass())) {
+                		lua_pushstring(L, func.c_str());
+                		lua_seti(L, -2, ++i);
+                	}
+                    luaInstanceGetMembersOfClass(L, o->GetClass(), i);
+                }
+            }
+			
+            return 1;
+        }
+
 		bool luaInstanceIndexFindUFunction(lua_State* L, UClass* type, const std::string& funcName, LuaInstanceRegistry* reg) {					// Instance, FuncName, InstanceCoche, nil
-			while (type) {
-				UFunction* func = type->FindFunctionByName(FName(("netFunc_" + funcName).c_str()));
-				if (IsValid(func)) {
-					// create function
-					lua_pushlightuserdata(L, func);																		// Instance, FuncName, InstanceCoche, nil, FuncName
-					luaInstanceType(L, LuaInstanceType{reg->findType(reg->findTypeName(type))});															// Instance, FuncName, InstanceCache, nil, FuncName, InstanceType
-					lua_pushcclosure(L, luaInstanceUFuncCall, 2);													// Instance, FuncName, InstanceCache, nil, InstanceFunc
+			UFunction* func = type->FindFunctionByName(FName(("netFunc_" + funcName).c_str()));
+			if (IsValid(func)) {
+				// create function
+				lua_pushlightuserdata(L, func);																		// Instance, FuncName, InstanceCoche, nil, FuncName
+				luaInstanceType(L, LuaInstanceType{reg->findType(reg->findTypeName(type))});															// Instance, FuncName, InstanceCache, nil, FuncName, InstanceType
+				lua_pushcclosure(L, luaInstanceUFuncCall, 2);													// Instance, FuncName, InstanceCache, nil, InstanceFunc
 
-					// cache function
-					lua_pushvalue(L, -1);																			// Instance, FuncName, InstanceCache, nil, InstanceFunc, InstanceFunc
-					lua_setfield(L, 3, funcName.c_str());														// Instance, FuncName, InstanceCache, nil, InstanceFunc
+				// cache function
+				lua_pushvalue(L, -1);																			// Instance, FuncName, InstanceCache, nil, InstanceFunc, InstanceFunc
+				lua_setfield(L, 3, funcName.c_str());														// Instance, FuncName, InstanceCache, nil, InstanceFunc
 
-					return true;
-				}
-				if (type == UObject::StaticClass()) type = nullptr;
-				else type = type->GetSuperClass();
+				return true;
 			}
 			return false;
 		}
@@ -336,6 +405,12 @@ namespace FicsItKernel {
 				}
 				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetNick(obj)));
 				return LuaProcessor::luaAPIReturn(L, 1);
+			}
+
+			// try util functions
+			if (funcName == "getMembers") {
+				lua_pushcfunction(L, luaInstanceGetMembers);
+				return 1;
 			}
 			
 			// get cache function
@@ -532,6 +607,23 @@ namespace FicsItKernel {
 			}
 			return luaL_error(L, "Unable to call function");
 		}
+
+		int luaClassInstanceGetMembers(lua_State* L) {
+			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
+            
+            // get and check class instance
+            LuaClassInstance* instance = reg->checkAndGetClassInstance(L, 1);
+            
+            lua_newtable(L);
+            int i = 0;
+            
+            for (const std::string& func : reg->getClassFunctionNames(instance->clazz)) {
+                lua_pushstring(L, func.c_str());
+                lua_seti(L, -2, ++i);
+            }
+            
+            return 1;
+		}
 		
 		int luaClassInstanceIndex(lua_State* L) {																		// ClassInstance, FuncName
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
@@ -544,6 +636,12 @@ namespace FicsItKernel {
 			// get function name
 			if (!lua_isstring(L, 2)) return 0;
 			std::string funcName = lua_tostring(L, 2);
+
+			// try util functions
+			if (funcName == "getMembers") {
+				lua_pushcfunction(L, luaClassInstanceGetMembers);
+				return 1;
+			}
 
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// ClassInstance, FuncName, InstanceCache
@@ -689,10 +787,14 @@ namespace FicsItKernel {
 				lua_pop(L, 1);															// ...
 			}
 			
-			lua_pushcfunction(L, luaInstanceFuncCall);	// ..., InstanceFuncCall
-			PersistValue("InstanceFuncCall");			// ...
-			lua_pushcfunction(L, luaInstanceUFuncCall);	// ..., InstanceUFuncCall
-			PersistValue("InstanceUFuncCall");		// ...
+			lua_pushcfunction(L, luaInstanceFuncCall);			// ..., InstanceFuncCall
+			PersistValue("InstanceFuncCall");					// ...
+			lua_pushcfunction(L, luaInstanceUFuncCall);			// ..., InstanceUFuncCall
+			PersistValue("InstanceUFuncCall");				// ...
+			lua_pushcfunction(L, luaInstanceGetMembers);			// ..., LuaInstanceGetMembers
+			PersistValue("InstnaceGetMembers");				// ...
+			lua_pushcfunction(L, luaClassInstanceGetMembers);	// ..., LuaClassInstanceGetMembers
+			PersistValue("ClassInstnaceGetMembers");			// ...
 		}
 	}
 }

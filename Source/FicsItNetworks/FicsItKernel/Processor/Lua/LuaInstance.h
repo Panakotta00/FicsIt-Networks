@@ -219,6 +219,24 @@ namespace FicsItKernel {
 			 * @return	set with all registered instance types
 			 */
 			std::set<UClass*> getInstanceTypes();
+
+			/**
+			 * Returns all registered function names of the given instance type.
+			 * Set will be empty if type is not registered.
+			 *
+			 * @param[in]	type	the type you want to get the function name list from
+			 * @return	set with all function names
+			 */
+			std::set<std::string> getFunctionNames(UClass* type);
+
+			/**
+			* Returns all registered class function names of the given class instance type.
+			 * Set will be empty if type is not registered.
+			*
+			* @param[in]	type	the type you want to get the class function name list from
+			* @return	set with all class function names
+			*/
+			std::set<std::string> getClassFunctionNames(UClass* type);
 		};
 		
 		/**
