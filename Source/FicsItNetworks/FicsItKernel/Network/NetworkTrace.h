@@ -51,9 +51,7 @@ namespace FicsItKernel {
 			static std::shared_ptr<TraceStep> findTraceStep(UClass* A, UClass* B);
 
 			NetworkTrace(const NetworkTrace& trace);
-			NetworkTrace(NetworkTrace&& trace);
 			NetworkTrace& operator=(const NetworkTrace& trace);
-			NetworkTrace& operator=(NetworkTrace&& trace);
 
 			explicit NetworkTrace();
 			explicit NetworkTrace(UObject* obj);

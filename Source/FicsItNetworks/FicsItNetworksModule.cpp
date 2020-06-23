@@ -21,6 +21,7 @@
 
 #include "FicsItKernel/Network/SmartSignal.h"
 #include "FicsItKernel/Processor/Lua/LuaHooks.h"
+#include "FicsItKernel/Processor/Lua/LuaLib.h"
 
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
@@ -211,11 +212,12 @@ void FFicsItNetworksModule::StartupModule(){
 				module->Destroy();
 			}
 		}
-	});
+	})
 
 	SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
+	FicsItKernel::Lua::LuaLib::get()->registerLib();
 }
 void FFicsItNetworksModule::ShutdownModule(){ }
 

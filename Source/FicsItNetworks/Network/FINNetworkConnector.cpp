@@ -47,8 +47,11 @@ UFINNetworkConnector::UFINNetworkConnector() {}
 
 UFINNetworkConnector::~UFINNetworkConnector() {}
 
+void UFINNetworkConnector::InitializeComponent() {
+	Merged.Add(GetOwner());	
+}
+
 void UFINNetworkConnector::BeginPlay() {
-	Merged.Add(GetOwner());
 
 	if (!bIdCreated) {
 		ID = FGuid::NewGuid();
@@ -128,6 +131,10 @@ bool UFINNetworkConnector::SearchFor(UFINNetworkConnector * conn) const {
 
 void UFINNetworkConnector::AddMerged(UObject* mergedObj) {
 	Merged.Add(mergedObj);
+}
+
+void UFINNetworkConnector::RemoveMerged(UObject* mergedObj) {
+	Merged.Remove(mergedObj);
 }
 
 FGuid UFINNetworkConnector::GetID_Implementation() const {

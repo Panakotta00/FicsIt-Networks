@@ -124,28 +124,10 @@ namespace FicsItKernel {
 			obj = trace.obj;
 		}
 
-		NetworkTrace::NetworkTrace(NetworkTrace&& trace) {
-			traceRegisterSteps();
-			
-			prev = trace.prev;
-			step = trace.step;
-			obj = trace.obj;
-			trace.prev = nullptr;
-		}
-
 		NetworkTrace& NetworkTrace::operator=(const NetworkTrace& trace) {
 			prev = (trace.prev) ? new NetworkTrace(*trace.prev) : nullptr;
 			step = trace.step;
 			obj = trace.obj;
-
-			return *this;
-		}
-
-		NetworkTrace& NetworkTrace::operator=(NetworkTrace&& trace) {
-			prev = trace.prev;
-			step = trace.step;
-			obj = trace.obj;
-			trace.prev = nullptr;
 
 			return *this;
 		}
@@ -228,11 +210,11 @@ namespace FicsItKernel {
 		}
 
 		bool NetworkTrace::isValid() const {
-			UObject* A = obj.Get();
-			if (!IsValid(A)) return false;
+			UObject* B = obj.Get();
+			if (!IsValid(B)) return false;
 			if (prev && step) {
-				UObject* B = prev->obj.Get();
-				if (!IsValid(B) || !(*step)(A, B)) return false;
+				UObject* A = prev->obj.Get();
+				if (!IsValid(A) || !(*step)(A, B)) return false;
 			}
 			if (prev) {
 				return prev->isValid();
@@ -310,10 +292,19 @@ namespace FicsItKernel {
 		Step(AFGRailroadVehicle, AFGTrain, {
 			return A->GetTrackGraphID() == B->GetTrackGraphID();
 		})
-		Step(AFGTrain, AFGRailroadVehicle, {
-            return A->GetTrackGraphID() == B->GetTrackGraphID();
-        })
-
+#pragma optimize("", off)
+		bool Step_AFGTrain_AFGRailroadVehicle(UObject* oA, UObject* oB);
+		std::pair<std::pair<UClass*, UClass*>, std::pair<std::string, TraceStep*>> StepRegSig_AFGTrain_AFGRailroadVehicle() {
+			return {{AFGTrain::StaticClass(), AFGRailroadVehicle::StaticClass()}, {"AFGTrain" "_" "AFGRailroadVehicle", new TraceStep(&Step_AFGTrain_AFGRailroadVehicle)}};
+		}
+		TraceStepRegisterer StepReg_AFGTrain_AFGRailroadVehicle(&StepRegSig_AFGTrain_AFGRailroadVehicle);
+		bool Step_AFGTrain_AFGRailroadVehicle(UObject* oA, UObject* oB) {
+			AFGTrain* A = Cast<AFGTrain>(oA);
+			AFGRailroadVehicle* B = Cast<AFGRailroadVehicle>(oB);
+			return A->GetTrackGraphID() == B->GetTrackGraphID();
+		}
+#pragma optimize("", on)
+		
 		Step(AFGTrain, AFGRailroadTimeTable, {
 			return A->GetTimeTable() == B;
 		})

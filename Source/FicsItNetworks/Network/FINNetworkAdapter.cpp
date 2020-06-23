@@ -41,6 +41,8 @@ AFINNetworkAdapter::~AFINNetworkAdapter() {}
 void AFINNetworkAdapter::BeginPlay() {
 	Super::BeginPlay();
 
+	Connector->RemoveMerged(this);
+
 	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
 	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
 

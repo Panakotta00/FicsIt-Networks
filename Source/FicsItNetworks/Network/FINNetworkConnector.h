@@ -97,6 +97,7 @@ public:
 	~UFINNetworkConnector();
 
 	// Begin AActor
+	virtual void InitializeComponent() override;
 	virtual void BeginPlay() override;
 	// End AActor
 
@@ -170,6 +171,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
 	void AddMerged(UObject* mergedObj);
+
+	/**
+	* Removes the given object from the list of merged objects.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
+    void RemoveMerged(UObject* mergedObj);
 
 	/**
 	 * This network signals gets emit when a network change occurs.
