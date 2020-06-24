@@ -7,7 +7,6 @@
 
 #include "LuaInstance.h"
 #include "LuaStructs.h"
-#include "LuaHooks.h"
 #include "LuaComponentAPI.h"
 #include "LuaEventAPI.h"
 #include "LuaFileSystemAPI.h"
@@ -376,8 +375,8 @@ namespace FicsItKernel {
 				lua_pushvalue(luaState, -4); // ..., uperm, unpersist, str-thread, str-globals, uperm
 			
 				// do unpersist
-				lua_call(luaState, 3, 2); int ok = LUA_OK;
-				//int ok = lua_pcall(luaState, 3, 2, 0); // ...,  uperm, globals, thread
+				//lua_call(luaState, 3, 2); int ok = LUA_OK;
+				int ok = lua_pcall(luaState, 3, 2, 0); // ...,  uperm, globals, thread
 
 				// check unpersist
 				if (ok != LUA_OK) {
@@ -388,7 +387,7 @@ namespace FicsItKernel {
 					lua_pushnil(luaState); // ..., nil
 					lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ...
 				
-					throw std::exception("Unable to unpersist");
+					//throw std::exception("Unable to unpersist");
 				} else {
 					// cleanup
 					lua_pushnil(luaState); // ..., uperm, globals, thread, nil
@@ -526,7 +525,6 @@ namespace FicsItKernel {
 			
 			setupInstanceSystem(L);
 			setupStructs(L);
-			setupHooks(L);
 			setupComponentAPI(L);
 			setupEventAPI(L);
 			setupFileSystemAPI(L);

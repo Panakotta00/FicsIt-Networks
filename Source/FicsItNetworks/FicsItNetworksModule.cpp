@@ -7,6 +7,7 @@
 #include "FGBuildableHologram.h"
 #include "FGCharacterPlayer.h"
 #include "FGInventoryLibrary.h"
+#include "FGPowerCircuit.h"
 
 #include "SML/mod/hooking.h"
 #include "SML/util/Utility.h"
@@ -14,20 +15,14 @@
 #include "FINConfig.h"
 #include "FINComponentUtility.h"
 #include "FINSubsystemHolder.h"
-#include "Network/Signals/FINSignal.h"
 #include "Network/FINNetworkConnector.h"
 #include "Network/FINNetworkAdapter.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 
 #include "FicsItKernel/Network/SmartSignal.h"
-#include "FicsItKernel/Processor/Lua/LuaHooks.h"
 #include "FicsItKernel/Processor/Lua/LuaLib.h"
 
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
-
-FFINSignal smartAsFINSig(FicsItKernel::Network::SmartSignal* sig) {
-	return FFINSignal(std::shared_ptr<FicsItKernel::Network::SmartSignal>(sig));
-}
 
 class AFGBuildableHologram_Public : public AFGBuildableHologram {
 public:
@@ -37,11 +32,6 @@ public:
 class UFGFactoryConnectionComponent_Public : public UFGFactoryConnectionComponent {
 public:
 	bool Factory_GrabOutput(FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>) { return false; }
-};
-
-class UFGPowerCircuit_Public : public UFGPowerCircuit {
-public:
-	void TickCircuit(float) {}
 };
 
 class AFGCharacterPlayer_Public : public AFGCharacterPlayer {
@@ -90,78 +80,6 @@ void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IF
 	}
 }
 
-FCriticalSection MutexFactoryGrab;
-TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, int8> FactoryGrabsRunning;
-
-void LockFactoryGrab(UFGFactoryConnectionComponent* comp) {
-	MutexFactoryGrab.Lock();
-	++FactoryGrabsRunning.FindOrAdd(comp);
-	MutexFactoryGrab.Unlock();
-}
-
-bool UnlockFactoryGrab(UFGFactoryConnectionComponent* comp) {
-	MutexFactoryGrab.Lock();
-	int8* i = FactoryGrabsRunning.Find(comp);
-	bool valid = false;
-	if (i) {
-		--*i;
-		valid = (*i <= 0);
-		if (valid) FactoryGrabsRunning.Remove(comp);
-	}
-	MutexFactoryGrab.Unlock();
-	return valid;
-}
-
-void DoFactoryGrab(UFGFactoryConnectionComponent* c, FInventoryItem& item) {
-	AFINComputerSubsystem* CompSS = AFINComputerSubsystem::GetComputerSubsystem(c);
-	CompSS->MutexFactoryHooks.Lock();
-	FFINFactoryHook* hook = CompSS->FactoryHooks.Find(c);
-
-	if (hook) {
-		hook->CurrentSample += 1;
-		for (auto& c : hook->Listeners) {
-			UObject* obj = *c;
-			if (obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, smartAsFINSig(new FicsItKernel::Network::SmartSignal("ItemTransfer", {item})), c);
-		}
-	}
-	CompSS->MutexFactoryHooks.Unlock();
-}
-
-bool FactoryGrabHook_Decl(UFGFactoryConnectionComponent_Public*, FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>);
-void FactoryGrabHook(CallScope<decltype(&FactoryGrabHook_Decl)>& scope, UFGFactoryConnectionComponent_Public* c, FInventoryItem& item, float& offset, TSubclassOf<UFGItemDescriptor> type) {
-	LockFactoryGrab(c);
-	scope(c, item, offset, type);
-	if (UnlockFactoryGrab(c) && scope.getResult()) {
-		DoFactoryGrab(c, item);
-	}
-}
-
-bool FactoryGrabInternalHook_Decl(UFGFactoryConnectionComponent* c, FInventoryItem& item, TSubclassOf< UFGItemDescriptor > type);
-void FactoryGrabInternalHook(CallScope<decltype(&FactoryGrabInternalHook_Decl)>& scope, UFGFactoryConnectionComponent* c, FInventoryItem& item, TSubclassOf< UFGItemDescriptor > type) {
-	LockFactoryGrab(c);
-	scope(c, item, type);
-	if (UnlockFactoryGrab(c) && scope.getResult()) {
-		DoFactoryGrab(c, item);
-	}
-}
-
-void TickCircuitHook_Decl(UFGPowerCircuit_Public*, float);
-void TickCircuitHook(CallScope<decltype(&TickCircuitHook_Decl)>& scope, UFGPowerCircuit_Public* circuit, float dt) {
-	bool oldFused = circuit->IsFuseTriggered();
-	scope(circuit, dt);
-	bool fused = circuit->IsFuseTriggered();
-	if (oldFused != fused) try {
-		AFINComputerSubsystem* CompSS = AFINComputerSubsystem::GetComputerSubsystem(circuit);
-		CompSS->MutexPowerCircuitListeners.Lock();
-		auto listeners = CompSS->PowerCircuitListeners.Find(circuit);
-		if (listeners) for (auto& listener : *listeners) {
-			UObject* obj = *listener;
-			if (obj->Implements<UFINSignalListener>()) IFINSignalListener::Execute_HandleSignal(obj, smartAsFINSig(new FicsItKernel::Network::SmartSignal("PowerFuseChanged")), listener);
-		}
-		CompSS->MutexPowerCircuitListeners.Unlock();
-	} catch (...) {}
-}
-
 void FFicsItNetworksModule::StartupModule(){
 	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
 	
@@ -171,11 +89,6 @@ void FFicsItNetworksModule::StartupModule(){
 	#endif
 	
 	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
-
-	SUBSCRIBE_METHOD_MANUAL("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent_Public::Factory_GrabOutput, &FactoryGrabHook);
-	SUBSCRIBE_METHOD(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, &FactoryGrabInternalHook);
-
-	SUBSCRIBE_METHOD_MANUAL("?TickCircuit@UFGPowerCircuit@@MEAAXM@Z", UFGPowerCircuit_Public::TickCircuit, TickCircuitHook);
 
 	SUBSCRIBE_METHOD_MANUAL("?UpdateBestUsableActor@AFGCharacterPlayer@@IEAAXXZ", AFGCharacterPlayer_Public::UpdateBestUsableActor, [](auto& scope, AFGCharacterPlayer_Public* self) {
 		if (!UFINComponentUtility::bAllowUsing) scope.Cancel();

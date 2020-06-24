@@ -1,5 +1,6 @@
 ﻿#include "FINSubsystemHolder.h"
 
 void UFINSubsystemHolder::InitSubsystems() {
-	SpawnSubsystem(ComputerSubsystem, AFINComputerSubsystem::StaticClass(), "ComputerSubsystem");
+	SpawnSubsystem(ComputerSubsystem, AFINComputerSubsystem::StaticClass(), "FINComputerSubsystem");
+	SpawnSubsystem(HookSubsystem, AFINHookSubsystem::StaticClass(), "FINHookSubsystem");
 }

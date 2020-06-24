@@ -47,11 +47,8 @@ UFINNetworkConnector::UFINNetworkConnector() {}
 
 UFINNetworkConnector::~UFINNetworkConnector() {}
 
-void UFINNetworkConnector::InitializeComponent() {
-	Merged.Add(GetOwner());	
-}
-
 void UFINNetworkConnector::BeginPlay() {
+	if (bAddOuterToMerged) AddMerged(GetOuter());
 
 	if (!bIdCreated) {
 		ID = FGuid::NewGuid();

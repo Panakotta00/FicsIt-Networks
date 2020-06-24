@@ -26,10 +26,10 @@ namespace FicsItKernel {
 
 		std::shared_ptr<Signal> NetworkController::popSignal(NetworkTrace& sender) {
 			if (getSignalCount() < 1) return nullptr;
-			mutexSignalListeners.lock();
+			mutexSignals.lock();
 			auto sig = signals.front();
 			signals.pop_front();
-			mutexSignalListeners.unlock();
+			mutexSignals.unlock();
 			sender = sig.second;
 			return sig.first;
 		}

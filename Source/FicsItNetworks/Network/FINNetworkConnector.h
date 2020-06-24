@@ -87,6 +87,11 @@ public:
 	TSet<UObject*> Merged;
 
 	/**
+	 * If set to true, connector will add it's owner as
+	 */
+	bool bAddOuterToMerged = true;
+
+	/**
 	 * This event gets called if a signal ocures.
 	 * It basically redirects the signal from the IFINSignalListener implementation.
 	 */
@@ -97,7 +102,6 @@ public:
 	~UFINNetworkConnector();
 
 	// Begin AActor
-	virtual void InitializeComponent() override;
 	virtual void BeginPlay() override;
 	// End AActor
 

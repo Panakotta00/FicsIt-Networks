@@ -27,6 +27,7 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 
 	Connector = CreateDefaultSubobject<UFINNetworkConnector>(L"Connector");
 	Connector->SetupAttachment(RootComponent);
+	Connector->bAddOuterToMerged = false;
 	
 	ConnectorMesh = CreateDefaultSubobject<UStaticMeshComponent>(L"StaticMesh");
 	ConnectorMesh->SetHiddenInGameSML(true, true);
@@ -41,7 +42,6 @@ AFINNetworkAdapter::~AFINNetworkAdapter() {}
 void AFINNetworkAdapter::BeginPlay() {
 	Super::BeginPlay();
 
-	Connector->RemoveMerged(this);
 
 	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
 	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
@@ -60,8 +60,8 @@ void AFINNetworkAdapter::BeginPlay() {
 		return;
 	}
 	
-	Connector->Merged.Add(Parent);
-
+	Connector->AddMerged(Parent);
+	
 	Attachment = NewObject<UFINNetworkAdapterReference>((Parent) ? Parent : nullptr);
 	Attachment->Ref = this;
 	Attachment->RegisterComponent();

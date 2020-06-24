@@ -8,7 +8,7 @@
 
 #include "LuaProcessor.h"
 #include "LuaInstance.h"
-#include "LuaHooks.h"
+#include "Network/FINHookSubsystem.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -28,10 +28,8 @@ namespace FicsItKernel {
 				}
 			}
 
-			// PowerCircuit
-			if (auto circuit = Cast<UFGPowerCircuit>(*o)) {
-				luaListenCircuit(o);
-			}
+			// Hooks
+			AFINHookSubsystem::GetHookSubsystem(obj)->AddListener(obj, o.reverse());
 		}
 
 		int luaListen(lua_State* L) {

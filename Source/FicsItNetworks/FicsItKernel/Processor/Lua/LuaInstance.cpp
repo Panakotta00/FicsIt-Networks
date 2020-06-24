@@ -181,6 +181,31 @@ namespace FicsItKernel {
 			return funcs;
 		}
 
+		void luaInstanceType(lua_State* L, LuaInstanceType&& instanceType);
+		int luaInstanceTypeUnpersist(lua_State* L) {
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			
+			luaInstanceType(L, LuaInstanceType{Cast<UClass>(storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(1))))});
+
+			return 1;
+		}
+
+		int luaInstanceTypePersist(lua_State* L) {
+			LuaInstanceType* type = static_cast<LuaInstanceType*>(luaL_checkudata(L, 1, INSTANCE_TYPE));
+			
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+
+			lua_pushinteger(L, storage->Add(type->type));
+			
+			// create & return closure
+			lua_pushcclosure(L, &luaInstanceTypeUnpersist, 1);
+			return 1;
+		}
+
 		int luaInstanceTypeGC(lua_State* L) {
 			LuaInstanceType* type = static_cast<LuaInstanceType*>(luaL_checkudata(L, 1, INSTANCE_TYPE));
 			type->~LuaInstanceType();
@@ -188,6 +213,7 @@ namespace FicsItKernel {
 		}
 
 		static const luaL_Reg luaInstanceTypeLib[] = {
+			{"__persist", luaInstanceTypePersist},
 			{"__gc", luaInstanceTypeGC},
 			{NULL, NULL}
 		};
@@ -545,6 +571,35 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
+		int luaInstanceUnpersist(lua_State* L) {
+			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
+
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+
+			// add trace to storage & push id
+			newInstance(L, storage->GetTrace(luaL_checkinteger(L, lua_upvalueindex(1))));
+
+			return 1;
+		}
+
+		int luaInstancePersist(lua_State* L) {
+			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
+
+			LuaInstance* instance = LuaInstanceRegistry::get()->checkAndGetInstance(L, 1);
+			// get persist storage
+	        lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+	        ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+
+	        // add trace to storage & push id
+	        lua_pushinteger(L, storage->Add(instance->trace));
+			
+			// create & return closure
+			lua_pushcclosure(L, &luaInstanceUnpersist, 1);
+			return 1;
+	}
+
 		int luaInstanceGC(lua_State* L) {
 			LuaInstance* instance = LuaInstanceRegistry::get()->checkAndGetInstance(L, 1);
 			instance->~LuaInstance();
@@ -558,6 +613,7 @@ namespace FicsItKernel {
 			{"__lt", luaInstanceLt},
 			{"__le", luaInstanceLe},
 			{"__tostring", luaInstanceToString},
+			{"__persist", luaInstancePersist},
 			{"__gc", luaInstanceGC},
 			{NULL, NULL}
 		};
@@ -725,6 +781,35 @@ namespace FicsItKernel {
 			}
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
+
+		int luaClassInstanceUnpersist(lua_State* L) {
+			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
+			std::string typeName = lua_tostring(L, lua_upvalueindex(1));
+			
+			UClass* type = reg->findType(typeName);
+			newInstance(L, type);
+			
+			return 1;
+		}
+
+		int luaClassInstancePersist(lua_State* L) {
+			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
+			
+			// get data
+			std::string typeName;
+			LuaClassInstance* instance = reg->checkAndGetClassInstance(L, 1, &typeName);
+
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+
+			// push type name to persist
+			lua_pushstring(L, typeName.c_str());
+			
+			// create & return closure
+			lua_pushcclosure(L, &luaClassInstanceUnpersist, 1);
+			return 1;
+		}
 		
 		int luaClassInstanceGC(lua_State* L) {
 			LuaClassInstance* instance = LuaInstanceRegistry::get()->checkAndGetClassInstance(L, 1);
@@ -739,6 +824,7 @@ namespace FicsItKernel {
 			{"__lt", luaClassInstanceLt},
 			{"__le", luaClassInstanceLe},
 			{"__tostring", luaClassInstanceToString},
+			{"__persist", luaClassInstancePersist},
 			{"__gc", luaClassInstanceGC},
 			{NULL, NULL}
 		};
@@ -795,6 +881,12 @@ namespace FicsItKernel {
 			PersistValue("InstnaceGetMembers");				// ...
 			lua_pushcfunction(L, luaClassInstanceGetMembers);	// ..., LuaClassInstanceGetMembers
 			PersistValue("ClassInstnaceGetMembers");			// ...
+			lua_pushcfunction(L, luaInstanceUnpersist);			// ..., LuaInstanceUnpersist
+			PersistValue("InstanceUnpersist");				// ...
+			lua_pushcfunction(L, luaClassInstanceUnpersist);		// ..., LuaClassInstanceUnpersist
+			PersistValue("ClassInstanceUnpersist");			// ...
+			lua_pushcfunction(L, luaInstanceTypeUnpersist);		// ..., LuaInstanceTypeUnpersist
+			PersistValue("InstanceTypeUnpersist");			// ...
 		}
 	}
 }

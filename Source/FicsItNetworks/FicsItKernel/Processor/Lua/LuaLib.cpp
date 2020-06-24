@@ -4,7 +4,6 @@
 #include "FGBuildableRailroadStation.h"
 #include "FGBuildableTrainPlatformCargo.h"
 #include "LuaStructs.h"
-#include "LuaHooks.h"
 
 #include "Network/FINNetworkConnector.h"
 
@@ -22,11 +21,13 @@
 #include "FGLocomotive.h"
 #include "FGBuildableRailroadSwitchControl.h"
 #include "FGBuildableRailroadSignal.h"
+#include "FicsItKernel/Network/SmartSignal.h"
 
 #define LuaLibTypeRegName(ClassName) ClassName ## _Reg
 #define LuaLibFuncName(ClassName, FuncName) ClassName ## _ ## FuncName
 #define LuaLibFuncRegName(ClassName, FuncName) ClassName ## _ ## FuncName ## _Reg
-#define LuaLibTypeBegin(ClassName, TypeName) \
+#define LuaLibHookRegName(ClassName, HookClass) ClassName ## _ ## HookName ## _Reg
+#define LuaLibTypeDecl(ClassName, TypeName) \
 	LuaLibType<ClassName, LuaLibFunc>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
 #define LuaLibFunc(ClassName, FuncName, Code) \
 	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, const Network::NetworkTrace& obj) { \
@@ -34,7 +35,11 @@
 		Code \
 	} \
 	typename LuaLibType<ClassName, LuaLibFunc>::RegisterFunc LuaLibFuncRegName(ClassName, FuncName) (#FuncName, & LuaLibFuncName(ClassName, FuncName) );
-#define LuaLibClassTypeBegin(ClassName, TypeName) \
+#define LuaLibHook(ClassName, HookName) \
+	LuaLibType<ClassName, LuaLibFunc>::RegisterHook LuaLibHookRegName(ClassName, HookName) ( [](TSubclassOf<UFINHook>& hook) { \
+		hook = HookName ::StaticClass(); \
+	});
+#define LuaLibClassTypeDecl(ClassName, TypeName) \
 	LuaLibType<ClassName, LuaLibClassFunc>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
 #define LuaLibClassFunc(ClassName, FuncName, Code) \
 	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, UClass* clazz) { \
@@ -59,6 +64,16 @@
 		return 1; \
 	})
 
+TSet<FWeakObjectPtr> UFINFactoryConnectorHook::Senders;
+bool UFINFactoryConnectorHook::registered = false;
+FCriticalSection UFINFactoryConnectorHook::MutexFactoryGrab;
+TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, int8> UFINFactoryConnectorHook::FactoryGrabsRunning;
+
+TSet<FWeakObjectPtr> UFINPowerCircuitHook::Senders;
+bool UFINPowerCircuitHook::registered = false;
+FCriticalSection UFINPowerCircuitHook::Mutex;
+TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, int8> UFINPowerCircuitHook::FactoryGrabsRunning;
+
 namespace FicsItKernel {
 	namespace Lua {
 		template<typename T, typename F>
@@ -66,12 +81,15 @@ namespace FicsItKernel {
 		private:
 			std::vector<std::pair<std::string, F>> funcs;
 			std::string name;
-			
+			std::function<void(TSubclassOf<UFINHook>&)> hook;
+
 			LuaLibType() {
-				LuaLib::get()->registerRegFunc([this](UClass*& type, std::string& name, std::vector<std::pair<std::string, F>>& funcs) {
+				this->hook = [](TSubclassOf<UFINHook>& hook){ hook = nullptr; };
+				LuaLib::get()->registerRegFunc([this](UClass*& type, std::string& name, std::vector<std::pair<std::string, F>>& funcs, TSubclassOf<UFINHook>& hook) {
 					type = T::StaticClass();
 					name = this->name;
 					funcs = this->funcs;
+					this->hook(hook);
 				});
 			}
 			
@@ -93,6 +111,12 @@ namespace FicsItKernel {
 					LuaLibType::get()->name = name;
 				}
 			};
+
+			struct RegisterHook {
+				RegisterHook(std::function<void(TSubclassOf<UFINHook>& hook)> hookFunc) {
+					LuaLibType::get()->hook = hookFunc;
+				}
+			};
 		};
 		
 		LuaLib* LuaLib::get() {
@@ -107,17 +131,20 @@ namespace FicsItKernel {
 				UClass* type;
 				std::string typeName;
 				std::vector<std::pair<std::string, LuaLibFunc>> funcs;
-				regfunc(type, typeName, funcs);
+				TSubclassOf<UFINHook> hook = nullptr;
+				regfunc(type, typeName, funcs, hook);
 				reg->registerType(type, typeName, false);
 				for (const std::pair<std::string, LuaLibFunc> func : funcs) {
 					reg->registerFunction(type, func.first, func.second);
 				}
+				if (hook) AFINHookSubsystem::RegisterHook(type, hook);
 			}
 			for (const ToRegisterClassFunc& regfunc : toRegisterClasses) {
 				UClass* type;
 				std::string typeName;
 				std::vector<std::pair<std::string, LuaLibClassFunc>> funcs;
-				regfunc(type, typeName, funcs);
+				TSubclassOf<UFINHook> hook = nullptr;
+				regfunc(type, typeName, funcs, hook);
 				reg->registerType(type, typeName, true);
 				for (const std::pair<std::string, LuaLibClassFunc> func : funcs) {
 					reg->registerClassFunction(type, func.first, func.second);
@@ -137,11 +164,11 @@ namespace FicsItKernel {
 		/* # Object Instances # */
 		/* #################### */
 
-		LuaLibTypeBegin(UObject, Object)
+		LuaLibTypeDecl(UObject, Object)
 		
 		// Begin AActor
 
-		LuaLibTypeBegin(AActor, Actor)
+		LuaLibTypeDecl(AActor, Actor)
 		
 		LuaLibFunc(AActor, getLocation, {
 			FVector loc = self->GetActorLocation();
@@ -207,7 +234,7 @@ namespace FicsItKernel {
 
 		// Begin UFGInventoryComponent
 
-		LuaLibTypeBegin(UFGInventoryComponent, Inventory)
+		LuaLibTypeDecl(UFGInventoryComponent, Inventory)
 		
 		LuaLibFunc(UFGInventoryComponent, getStack, {
 			FInventoryStack stack;
@@ -235,7 +262,7 @@ namespace FicsItKernel {
 
 		// Begin UFGPowerConnectionComponent
 
-		LuaLibTypeBegin(UFGPowerConnectionComponent, PowerConnection)
+		LuaLibTypeDecl(UFGPowerConnectionComponent, PowerConnection)
 
 		LuaLibFuncGetInt(UFGPowerConnectionComponent, getConnections, GetNumConnections)
 		LuaLibFuncGetInt(UFGPowerConnectionComponent, getMaxConnections, GetMaxNumConnections)
@@ -254,7 +281,7 @@ namespace FicsItKernel {
 
 		// Begin UFGPowerInfoComponent
 
-		LuaLibTypeBegin(UFGPowerInfoComponent, PowerInfo)
+		LuaLibTypeDecl(UFGPowerInfoComponent, PowerInfo)
 
 		LuaLibFuncGetNum(UFGPowerInfoComponent, getDynProduction,		GetRegulatedDynamicProduction)
 		LuaLibFuncGetNum(UFGPowerInfoComponent, getBaseProduction,		GetBaseProduction)
@@ -276,7 +303,9 @@ namespace FicsItKernel {
 
 		// Begin UFGPowerCircuit
 
-		LuaLibTypeBegin(UFGPowerCircuit, PowerCircuit)
+		LuaLibTypeDecl(UFGPowerCircuit, PowerCircuit)
+
+		LuaLibHook(UFGPowerCircuit, UFINPowerCircuitHook)
 
 		LuaLibFunc(UFGPowerCircuit, getProduction, {
 			FPowerCircuitStats stats;
@@ -308,7 +337,9 @@ namespace FicsItKernel {
 
 		// Begin UFGFactoryConnectionComponent
 
-		LuaLibTypeBegin(UFGFactoryConnectionComponent, FactoryConnection)
+		LuaLibTypeDecl(UFGFactoryConnectionComponent, FactoryConnection)
+
+		LuaLibHook(UFGFactoryConnectionComponent, UFINFactoryConnectorHook)
 		
 		LuaLibFuncGetInt(UFGFactoryConnectionComponent, getType,		GetConnector)
 		LuaLibFuncGetInt(UFGFactoryConnectionComponent, getDirection,	GetDirection)
@@ -319,16 +350,11 @@ namespace FicsItKernel {
 			return 1;
 		})
 
-		LuaLibFunc(UFGFactoryConnectionComponent, hook, {
-			luaHook(L, obj);
-			return 1;
-		})
-
 		// End UFGFactoryConnectionComponent
 
 		// Begin AFGBuildableFactory
 
-		LuaLibTypeBegin(AFGBuildableFactory, Factory)
+		LuaLibTypeDecl(AFGBuildableFactory, Factory)
 
 		LuaLibFuncGetNum(AFGBuildableFactory, getProgress,				GetProductionProgress)
 		LuaLibFuncGetNum(AFGBuildableFactory, getPowerConsumProducing,	GetProducingPowerConsumption)
@@ -353,7 +379,7 @@ namespace FicsItKernel {
 
 		// Begin AFGBuildableManufacturer
 
-		LuaLibTypeBegin(AFGBuildableManufacturer, Manufacturer)
+		LuaLibTypeDecl(AFGBuildableManufacturer, Manufacturer)
 
 		LuaLibFunc(AFGBuildableManufacturer, getRecipe, {
 			newInstance(L, self->GetCurrentRecipe());
@@ -398,7 +424,7 @@ namespace FicsItKernel {
 
 		// Begin AFGBuildableTrainPlatform
 
-		LuaLibTypeBegin(AFGBuildableTrainPlatform, TrainPlatform)
+		LuaLibTypeDecl(AFGBuildableTrainPlatform, TrainPlatform)
 
 		LuaLibFunc(AFGBuildableTrainPlatform, getTrackGraph, {
 			luaTrackGraph(L, obj, self->GetTrackGraphID());
@@ -437,7 +463,7 @@ namespace FicsItKernel {
 
 		// Begin AFGBuildableRailroadStation
 
-		LuaLibTypeBegin(AFGBuildableRailroadStation, RailroadStation)
+		LuaLibTypeDecl(AFGBuildableRailroadStation, RailroadStation)
 
 		LuaLibFunc(AFGBuildableRailroadStation, getName, {
 		   	lua_pushstring(L, TCHAR_TO_UTF8(*self->GetStationIdentifier()->GetStationName().ToString()));
@@ -460,7 +486,7 @@ namespace FicsItKernel {
 
 		// Begin AFGBuildableTrainPlatformCargo
 
-		LuaLibTypeBegin(AFGBuildableTrainPlatformCargo, TrainPlatformCargo)
+		LuaLibTypeDecl(AFGBuildableTrainPlatformCargo, TrainPlatformCargo)
 		
 		LuaLibFuncGetBool(AFGBuildableTrainPlatformCargo, isLoading, GetIsInLoadMode)
 		LuaLibFuncGetBool(AFGBuildableTrainPlatformCargo, isUnloading, IsLoadUnloading)
@@ -474,7 +500,7 @@ namespace FicsItKernel {
 
 		// Begin AFGRailroadVehicle
 
-		LuaLibTypeBegin(AFGRailroadVehicle, RailroadVehicle)
+		LuaLibTypeDecl(AFGRailroadVehicle, RailroadVehicle)
 
 		LuaLibFunc(AFGRailroadVehicle, getTrain, {
 			newInstance(L, obj / Cast<UObject>(self->GetTrain()));
@@ -518,7 +544,7 @@ namespace FicsItKernel {
 
 		// Begin UFGRailroadVehicleMovementComponent
 
-		LuaLibTypeBegin(UFGRailroadVehicleMovementComponent, RailroadVehicleMovement)
+		LuaLibTypeDecl(UFGRailroadVehicleMovementComponent, RailroadVehicleMovement)
 		
 		LuaLibFunc(UFGRailroadVehicleMovementComponent, getVehicle, {
 			newInstance(L, obj / self->GetOwningRailroadVehicle());
@@ -580,7 +606,9 @@ namespace FicsItKernel {
 
 		// Begin AFGTrain
 
-		LuaLibTypeBegin(AFGTrain, Train)
+		LuaLibTypeDecl(AFGTrain, Train)
+
+		LuaLibHook(AFGTrain, UFINTrainHook);
 
 		LuaLibFunc(AFGTrain, getName, {
 			lua_pushstring(L, TCHAR_TO_UTF8(*self->GetTrainName().ToString()));
@@ -653,7 +681,7 @@ namespace FicsItKernel {
 
 		// Begin AFGRailroadTimeTable
 
-		LuaLibTypeBegin(AFGRailroadTimeTable, TimeTable)
+		LuaLibTypeDecl(AFGRailroadTimeTable, TimeTable)
 
 		LuaLibFunc(AFGRailroadTimeTable, addStop, {
 			int stopIndex = luaL_checkinteger(L, 1);
@@ -724,7 +752,7 @@ namespace FicsItKernel {
 
 		// Begin AFGBuildableRailroadTrack
 
-		LuaLibTypeBegin(AFGBuildableRailroadTrack, RailroadTrack)
+		LuaLibTypeDecl(AFGBuildableRailroadTrack, RailroadTrack)
 
 		LuaLibFunc(AFGBuildableRailroadTrack, getClosestTrackPosition, {
 			FRailroadTrackPosition pos = self->FindTrackPositionClosestToWorldLocation(FVector(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
@@ -766,7 +794,7 @@ namespace FicsItKernel {
 
 		// Begin UFGRailroadTrackConnectionComponent
 
-		LuaLibTypeBegin(UFGRailroadTrackConnectionComponent, RailroadTrackConnection)
+		LuaLibTypeDecl(UFGRailroadTrackConnectionComponent, RailroadTrackConnection)
 
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, getConnectorLocation, {
 			FVector loc = self->GetConnectorLocation();
@@ -858,7 +886,7 @@ namespace FicsItKernel {
 
 		// Begin AFGBuildableRailroadSwitchControl
 
-		LuaLibTypeBegin(AFGBuildableRailroadSwitchControl, RailroadSwitchControl)
+		LuaLibTypeDecl(AFGBuildableRailroadSwitchControl, RailroadSwitchControl)
 
 		LuaLibFunc(AFGBuildableRailroadSwitchControl, toggleSwitch, {
 			self->ToggleSwitchPosition();
@@ -879,7 +907,7 @@ namespace FicsItKernel {
 
 		// Begin UFGRecipe
 
-		LuaLibClassTypeBegin(UFGRecipe, Recipe)
+		LuaLibClassTypeDecl(UFGRecipe, Recipe)
 
 		LuaLibClassFunc(UFGRecipe, getName, {
 			FText name = UFGRecipe::GetRecipeName(self);
@@ -918,7 +946,7 @@ namespace FicsItKernel {
 
 		// Begin UFGItemDescriptor
 
-		LuaLibClassTypeBegin(UFGItemDescriptor, ItemType)
+		LuaLibClassTypeDecl(UFGItemDescriptor, ItemType)
 		
 		LuaLibClassFunc(UFGItemDescriptor, getName, {
 			FText name = UFGItemDescriptor::GetItemName(self);

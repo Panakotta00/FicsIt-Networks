@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Computer/FINComputerSubsystem.h"
+#include "Network/FINHookSubsystem.h"
 #include "SML/mod/ModSubsystems.h"
 #include "FINSubsystemHolder.generated.h"
 
@@ -12,6 +13,9 @@ class UFINSubsystemHolder : public UModSubsystemHolder {
 public:
 	UPROPERTY()
 	AFINComputerSubsystem* ComputerSubsystem = nullptr;
+
+	UPROPERTY()
+	AFINHookSubsystem* HookSubsystem = nullptr;
 
 	// Begin UModSubsystemHolder
 	virtual void InitSubsystems() override;
