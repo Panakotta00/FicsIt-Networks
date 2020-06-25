@@ -273,7 +273,7 @@ namespace FicsItKernel {
 				for (UObject* o : merged) {
 					if (reg->findLibFunc(o->GetClass(), funcName, func)) {
 						lua_remove(L, 1);
-						return LuaProcessor::luaAPIReturn(L, func(L, lua_gettop(L), instance->trace(o)));
+						return LuaProcessor::luaAPIReturn(L, func(L, lua_gettop(L), instance->trace / o));
 					}
 				}
 			}
@@ -306,7 +306,7 @@ namespace FicsItKernel {
 					for (UObject* obj : merged) {
 						if (obj->GetClass()->IsChildOf(funcClass)) {
 							comp = obj;
-							trace = trace(obj);
+							trace = trace / obj;
 							break;
 						}
 					}
@@ -470,7 +470,7 @@ namespace FicsItKernel {
 					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
 					for (UObject* o : merged) {
 						if (reg->findLibProperty(o->GetClass(), memberName, libProp)) {
-							realTrace = realTrace(o);
+							realTrace = realTrace / o;
 							foundLibProp = true;
 							break;
 						}
@@ -572,7 +572,7 @@ namespace FicsItKernel {
 					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
 					for (UObject* o : merged) {
 						if (reg->findLibProperty(o->GetClass(), memberName, libProp)) {
-							realTrace = realTrace(o);
+							realTrace = realTrace/o;
 							foundLibProp = true;
 							break;
 						}

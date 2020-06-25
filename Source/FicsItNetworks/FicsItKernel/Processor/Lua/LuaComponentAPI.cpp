@@ -14,7 +14,6 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-//#pragma optimize("", off)
 		int luaComponentProxy(lua_State* L) {
 			int args = lua_gettop(L);
 
@@ -63,7 +62,7 @@ namespace FicsItKernel {
 			}
 			return LuaProcessor::luaAPIReturn(L, args);
 		}
-//#pragma optimize("", on)
+
 		int luaFindItem(lua_State* L) {
 			int nargs = lua_gettop(L);
 			if (nargs < 1) return LuaProcessor::luaAPIReturn(L, 0);

@@ -18,6 +18,7 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
+#pragma optimize("", off)
 		LuaFunc(luaComputerReset)
 			kernel->reset();
 			lua_yield(L, 0);
@@ -29,6 +30,7 @@ namespace FicsItKernel {
 			lua_yield(L, 0);
 			return 0;
 		}
+#pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
 			// TODO: do the beep
