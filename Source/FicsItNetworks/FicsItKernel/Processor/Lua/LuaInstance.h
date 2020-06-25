@@ -24,6 +24,16 @@ namespace FicsItKernel {
 		 * Used when a class instance cfunction gets called which refers to a class library function.
 		 */
 		typedef std::function<int(lua_State*, int, UClass*)> LuaLibClassFunc;
+
+		/**
+		 * Declares the functions used for setting and getting
+		 * a property value from a instance.
+		 */
+		struct LuaLibProperty {
+			std::function<int(lua_State*, const Network::NetworkTrace&)> get;
+			bool readOnly = true;
+			std::function<int(lua_State*, const Network::NetworkTrace&)> set;
+		};
 		
 		/**
 		 * Structure used in the userdata representing a instance.
@@ -56,6 +66,12 @@ namespace FicsItKernel {
 			 * Used for creating the lua cfunctions for the instances.
 			 */
 			std::map<UClass*, std::map<std::string, LuaLibFunc>> instanceFunctions;
+
+			/**
+			 * Holds LibProperties with their associated lua names and instance types.
+			 * Used for creating calling them in the __index and __newindex functions.
+			 */
+			std::map<UClass*, std::map<std::string, LuaLibProperty>> instanceProperties;
 
 			/**
 			* Holds ClassLibFunctions with their associated lua names and class instance types.
@@ -112,6 +128,15 @@ namespace FicsItKernel {
 			void registerFunction(UClass* type, std::string name, LuaLibFunc func);
 
 			/**
+			* Registers a new property for the given instance type with the given lua property name.
+			*
+			* @param[in]	type	the instance type
+			* @param[in]	name	the lua property name
+			* @param[in]	prop	the new property
+			*/
+			void registerProperty(UClass* type, std::string name, LuaLibProperty prop);
+
+			/**
 			* Registers a new function for the given class instance type with the given lua function name.
 			*
 			* @param[in]	type	the class instance type
@@ -148,6 +173,16 @@ namespace FicsItKernel {
 			 * @return	true if able to find function
 			 */
 			bool findLibFunc(UClass* instanceType, std::string name, LuaLibFunc& outFunc);
+
+			/**
+			* Searches for a instance lib property with the given lua name of the given instance name.
+			*
+			* @param[in]	instanceType	the type of the instance
+			* @param[in]	name			lua property name
+			* @param[out]	outProp			the lib property if found
+			* @return	true if able to find property
+			*/
+			bool findLibProperty(UClass* instanceType, std::string name, LuaLibProperty& outProp);
 
 			/**
 			* Searches for a class instance lib func with the given lua name of the given class instance name.
@@ -221,13 +256,13 @@ namespace FicsItKernel {
 			std::set<UClass*> getInstanceTypes();
 
 			/**
-			 * Returns all registered function names of the given instance type.
+			 * Returns all registered member names of the given instance type.
 			 * Set will be empty if type is not registered.
 			 *
-			 * @param[in]	type	the type you want to get the function name list from
-			 * @return	set with all function names
+			 * @param[in]	type	the type you want to get the member name list from
+			 * @return	set with all member names
 			 */
-			std::set<std::string> getFunctionNames(UClass* type);
+			std::set<std::string> getMemberNames(UClass* type);
 
 			/**
 			* Returns all registered class function names of the given class instance type.

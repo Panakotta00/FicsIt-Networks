@@ -38,6 +38,12 @@ namespace FicsItKernel {
 			instanceFunctions[type][name] = func;
 		}
 
+		void LuaInstanceRegistry::registerProperty(UClass* type, std::string name, LuaLibProperty prop) {
+			auto i = instanceTypes.find(type);
+			check(i != instanceTypes.end() && !i->second.second);
+			instanceProperties[type][name] = prop;
+		}
+
 		void LuaInstanceRegistry::registerClassFunction(UClass* type, std::string name, LuaLibClassFunc func) {
 			auto i = instanceTypes.find(type);
 			check(i != instanceTypes.end() && i->second.second);
@@ -70,6 +76,22 @@ namespace FicsItKernel {
 					auto j = i->second.find(name);
 					if (j != i->second.end()) {
 						outFunc = j->second;
+						return true;
+					}
+				}
+				if (instanceType == UObject::StaticClass()) instanceType = nullptr;
+				else instanceType = instanceType->GetSuperClass();
+			}
+			return false;
+		}
+
+		bool LuaInstanceRegistry::findLibProperty(UClass* instanceType, std::string name, LuaLibProperty& outProp) {
+			while (instanceType) {
+				auto i = instanceProperties.find(instanceType);
+				if (i != instanceProperties.end()) {
+					auto j = i->second.find(name);
+					if (j != i->second.end()) {
+						outProp = j->second;
 						return true;
 					}
 				}
@@ -155,17 +177,21 @@ namespace FicsItKernel {
 			return types;
 		}
 
-		std::set<std::string> LuaInstanceRegistry::getFunctionNames(UClass* type) {
-			std::set<std::string> funcs;
+		std::set<std::string> LuaInstanceRegistry::getMemberNames(UClass* type) {
+			std::set<std::string> members;
 			while (type) {
 				std::map<std::string, LuaLibFunc>& funcMap = instanceFunctions[type];
 				for (auto& i : funcMap) {
-					funcs.insert(i.first);
+					members.insert(i.first);
+				}
+				std::map<std::string, LuaLibProperty>& propMap = instanceProperties[type];
+				for (auto& i : propMap) {
+					members.insert(i.first);
 				}
 				if (type == UObject::StaticClass()) type = nullptr;
 				else type = type->GetSuperClass();
 			}
-			return funcs;
+			return members;
 		}
 
 		std::set<std::string> LuaInstanceRegistry::getClassFunctionNames(UClass* type) {
@@ -366,7 +392,7 @@ namespace FicsItKernel {
 			
             UClass* type = self->GetClass();
 			
-            for (const std::string& func : reg->getFunctionNames(type)) {
+            for (const std::string& func : reg->getMemberNames(type)) {
 	            lua_pushstring(L, func.c_str());
             	lua_seti(L, -2, ++i);
             }
@@ -375,7 +401,7 @@ namespace FicsItKernel {
 			if (type->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
                 TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(self);
                 for (UObject* o : merged) {
-                	for (const std::string& func : reg->getFunctionNames(o->GetClass())) {
+                	for (const std::string& func : reg->getMemberNames(o->GetClass())) {
                 		lua_pushstring(L, func.c_str());
                 		lua_seti(L, -2, ++i);
                 	}
@@ -413,19 +439,19 @@ namespace FicsItKernel {
 				
 			// get function name
 			if (!lua_isstring(L, 2)) return 0;
-			std::string funcName = lua_tostring(L, 2);
+			std::string memberName = lua_tostring(L, 2);
 
 			UObject* obj = *instance->trace;
 			
 			// try to get property
-			if (funcName == "id") {
+			if (memberName == "id") {
 				if (!obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					return luaL_error(L, "Instance is not a network component");
 				}
 				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetID(obj).ToString()));
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
-			if (funcName == "nick") {
+			if (memberName == "nick") {
 				if (!obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					return luaL_error(L, "Instance is not a network component");
 				}
@@ -433,28 +459,51 @@ namespace FicsItKernel {
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 
+			// try to find lib property
+			LuaLibProperty libProp;
+			Network::NetworkTrace realTrace = instance->trace;
+			bool foundLibProp = false;
+			if (reg->findLibProperty(reg->findType(typeName), memberName, libProp)) {
+				foundLibProp = true;
+			} else {
+				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
+					for (UObject* o : merged) {
+						if (reg->findLibProperty(o->GetClass(), memberName, libProp)) {
+							realTrace = realTrace(o);
+							foundLibProp = true;
+							break;
+						}
+					}
+				}
+			}
+			if (foundLibProp) {
+				lua_pop(L, 2);
+				return LuaProcessor::luaAPIReturn(L, libProp.get(L, realTrace));
+			}
+
 			// try util functions
-			if (funcName == "getMembers") {
+			if (memberName == "getMembers") {
 				lua_pushcfunction(L, luaInstanceGetMembers);
 				return 1;
 			}
 			
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// Instance, FuncName, InstanceCache
-			if (lua_getfield(L, -1, funcName.c_str()) != LUA_NIL) {												// Instance, FuncName, InstanceCache, CachedFunc
+			if (lua_getfield(L, -1, memberName.c_str()) != LUA_NIL) {												// Instance, FuncName, InstanceCache, CachedFunc
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}																											// Instance, FuncName, InstanceCache, nil
 			
 			// get lib function
 			LuaLibFunc libFunc;
 			bool foundLibFunc = false;
-			if (reg->findLibFunc(reg->findType(typeName), funcName, libFunc)) {
+			if (reg->findLibFunc(reg->findType(typeName), memberName, libFunc)) {
 				foundLibFunc = true;
 			} else {
 				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
 					for (UObject* o : merged) {
-						if (reg->findLibFunc(o->GetClass(), funcName, libFunc)) {
+						if (reg->findLibFunc(o->GetClass(), memberName, libFunc)) {
 							foundLibFunc = true;
 							break;
 						}
@@ -469,18 +518,18 @@ namespace FicsItKernel {
 
 				// cache function
 				lua_pushvalue(L, -1);																				// Instance, FuncName, InstanceCache, nil, InstanceFunc, InstanceFunc
-				lua_setfield(L, 3, funcName.c_str());															// Instance, FuncName, InstanceCache, nil, InstanceFunc
+				lua_setfield(L, 3, memberName.c_str());															// Instance, FuncName, InstanceCache, nil, InstanceFunc
 
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 
 			// get reflected function
 			UClass* instType = obj->GetClass();
-			if (luaInstanceIndexFindUFunction(L, instType, funcName, reg)) return LuaProcessor::luaAPIReturn(L, 1);
+			if (luaInstanceIndexFindUFunction(L, instType, memberName, reg)) return LuaProcessor::luaAPIReturn(L, 1);
 			if (instType->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
 				for (UObject* o : merged) {
-					if (luaInstanceIndexFindUFunction(L, o->GetClass(), funcName, reg)) return LuaProcessor::luaAPIReturn(L, 1);
+					if (luaInstanceIndexFindUFunction(L, o->GetClass(), memberName, reg)) return LuaProcessor::luaAPIReturn(L, 1);
 				}
 			}
 			
@@ -499,11 +548,11 @@ namespace FicsItKernel {
 				
 			// get function name
 			if (!lua_isstring(L, 2)) return 0;
-			std::string name = lua_tostring(L, 2);
+			std::string memberName = lua_tostring(L, 2);
 
 			UObject* obj = *instance->trace;
 			
-			if (name == "nick") {
+			if (memberName == "nick") {
 				if (!obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					return luaL_error(L, "Instance is not a network component");
 				}
@@ -511,7 +560,33 @@ namespace FicsItKernel {
 				IFINNetworkComponent::Execute_SetNick(obj, nick.c_str());
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
-			return LuaProcessor::luaAPIReturn(L, 0);
+
+			// try to find lib property
+			LuaLibProperty libProp;
+			Network::NetworkTrace realTrace = instance->trace;
+			bool foundLibProp = false;
+			if (reg->findLibProperty(reg->findType(typeName), memberName, libProp)) {
+				foundLibProp = true;
+			} else {
+				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
+					for (UObject* o : merged) {
+						if (reg->findLibProperty(o->GetClass(), memberName, libProp)) {
+							realTrace = realTrace(o);
+							foundLibProp = true;
+							break;
+						}
+					}
+				}
+			}
+			if (foundLibProp) {
+				if (libProp.readOnly) return luaL_error(L, "property is read only");
+				lua_remove(L, 1);
+				lua_remove(L, 1);
+				return LuaProcessor::luaAPIReturn(L, libProp.set(L, realTrace));
+			}
+			
+			return luaL_error(L, ("Instance doesn't have property with name " + memberName + "'").c_str());
 		}
 
 		int luaInstanceEQ(lua_State* L) {

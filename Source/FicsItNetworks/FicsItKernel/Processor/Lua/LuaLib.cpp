@@ -26,27 +26,46 @@
 #define LuaLibTypeRegName(ClassName) ClassName ## _Reg
 #define LuaLibFuncName(ClassName, FuncName) ClassName ## _ ## FuncName
 #define LuaLibFuncRegName(ClassName, FuncName) ClassName ## _ ## FuncName ## _Reg
+#define LuaLibPropSetName(ClassName, PropName) ClassName ## _ ## PropName ## _Set
+#define LuaLibPropGetName(ClassName, PropName) ClassName ## _ ## PropName ## _Get
 #define LuaLibHookRegName(ClassName, HookClass) ClassName ## _ ## HookName ## _Reg
 #define LuaLibTypeDecl(ClassName, TypeName) \
-	LuaLibType<ClassName, LuaLibFunc>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
+	LuaLibType<ClassName>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
 #define LuaLibFunc(ClassName, FuncName, Code) \
 	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, const Network::NetworkTrace& obj) { \
 		ClassName* self = Cast<ClassName>(*obj); \
 		Code \
 	} \
-	typename LuaLibType<ClassName, LuaLibFunc>::RegisterFunc LuaLibFuncRegName(ClassName, FuncName) (#FuncName, & LuaLibFuncName(ClassName, FuncName) );
+	typename LuaLibType<ClassName>::RegisterFunc LuaLibFuncRegName(ClassName, FuncName) (#FuncName, & LuaLibFuncName(ClassName, FuncName) );
+#define LuaLibProp(ClassName, PropName, Get, Set) \
+	int LuaLibPropGetName(ClassName, PropName) (lua_State* L, const Network::NetworkTrace& obj) { \
+		ClassName* self = Cast<ClassName>(*obj); \
+		Get \
+	} \
+	int LuaLibPropSetName(ClassName, PropName) (lua_State* L, const Network::NetworkTrace& obj) { \
+		ClassName* self = Cast<ClassName>(*obj); \
+		Set \
+	} \
+	typename LuaLibType<ClassName>::RegisterProperty LuaLibFuncRegName(ClassName, PropName) (#PropName, LuaLibProperty{ & LuaLibPropGetName(ClassName, PropName) , false, & LuaLibPropSetName(ClassName, PropName) } );
+#define LuaLibPropReadonly(ClassName, PropName, Get) \
+	int LuaLibPropGetName(ClassName, PropName) (lua_State* L, const Network::NetworkTrace& obj) { \
+		ClassName* self = Cast<ClassName>(*obj); \
+		Get \
+	} \
+	typename LuaLibType<ClassName>::RegisterProperty LuaLibFuncRegName(ClassName, PropName) (#PropName, LuaLibProperty{ & LuaLibPropGetName(ClassName, PropName) } );
+
 #define LuaLibHook(ClassName, HookName) \
-	LuaLibType<ClassName, LuaLibFunc>::RegisterHook LuaLibHookRegName(ClassName, HookName) ( [](TSubclassOf<UFINHook>& hook) { \
+	LuaLibType<ClassName>::RegisterHook LuaLibHookRegName(ClassName, HookName) ( [](TSubclassOf<UFINHook>& hook) { \
 		hook = HookName ::StaticClass(); \
 	});
 #define LuaLibClassTypeDecl(ClassName, TypeName) \
-	LuaLibType<ClassName, LuaLibClassFunc>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
+	LuaLibClassType<ClassName>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
 #define LuaLibClassFunc(ClassName, FuncName, Code) \
 	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, UClass* clazz) { \
 		TSubclassOf<ClassName> self = clazz; \
 		Code \
 	} \
-	typename LuaLibType<ClassName, LuaLibClassFunc>::RegisterFunc LuaLibFuncRegName(ClassName, FuncName) (#FuncName, & LuaLibFuncName(ClassName, FuncName) );
+	typename LuaLibClassType<ClassName>::RegisterFunc LuaLibFuncRegName(ClassName, FuncName) (#FuncName, & LuaLibFuncName(ClassName, FuncName) );
 
 #define LuaLibFuncGetNum(ClassName, FuncName, RealFuncName) \
 	LuaLibFunc(ClassName, FuncName, { \
@@ -76,19 +95,21 @@ TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, int8> UFINPowerCircuitHook::
 
 namespace FicsItKernel {
 	namespace Lua {
-		template<typename T, typename F>
+		template<typename T>
 		class LuaLibType {
 		private:
-			std::vector<std::pair<std::string, F>> funcs;
+			std::vector<std::pair<std::string, LuaLibFunc>> funcs;
+			std::vector<std::pair<std::string, LuaLibProperty>> props;
 			std::string name;
 			std::function<void(TSubclassOf<UFINHook>&)> hook;
 
 			LuaLibType() {
 				this->hook = [](TSubclassOf<UFINHook>& hook){ hook = nullptr; };
-				LuaLib::get()->registerRegFunc([this](UClass*& type, std::string& name, std::vector<std::pair<std::string, F>>& funcs, TSubclassOf<UFINHook>& hook) {
+				LuaLib::get()->registerRegFunc([this](UClass*& type, std::string& name, std::vector<std::pair<std::string, LuaLibFunc>>& funcs, std::vector<std::pair<std::string, LuaLibProperty>>& props, TSubclassOf<UFINHook>& hook) {
 					type = T::StaticClass();
 					name = this->name;
 					funcs = this->funcs;
+					props = this->props;
 					this->hook(hook);
 				});
 			}
@@ -101,7 +122,7 @@ namespace FicsItKernel {
 			}
 
 			struct RegisterFunc {
-				RegisterFunc(const std::string& name, const F& func) {
+				RegisterFunc(const std::string& name, const LuaLibFunc& func) {
 					LuaLibType::get()->funcs.push_back({name, func});
 				}
 			};
@@ -115,6 +136,46 @@ namespace FicsItKernel {
 			struct RegisterHook {
 				RegisterHook(std::function<void(TSubclassOf<UFINHook>& hook)> hookFunc) {
 					LuaLibType::get()->hook = hookFunc;
+				}
+			};
+
+			struct RegisterProperty {
+				RegisterProperty(const std::string& name, const LuaLibProperty& prop) {
+					LuaLibType::get()->props.push_back({name, prop});
+				}
+			};
+		};
+
+		template<typename T>
+        class LuaLibClassType {
+		private:
+            std::vector<std::pair<std::string, LuaLibClassFunc>> funcs;
+			std::string name;
+
+			LuaLibClassType() {
+				LuaLib::get()->registerRegFunc([this](UClass*& type, std::string& name, std::vector<std::pair<std::string, LuaLibClassFunc>>& funcs) {
+                    type = T::StaticClass();
+                    name = this->name;
+                    funcs = this->funcs;
+                });
+			}
+			
+		public:
+            static LuaLibClassType* get() {
+            	static LuaLibClassType* instance = nullptr;
+            	if (!instance) instance = new LuaLibClassType();
+            	return instance;
+            }
+
+			struct RegisterFunc {
+            	RegisterFunc(const std::string& name, const LuaLibClassFunc& func) {
+            		LuaLibClassType::get()->funcs.push_back({name, func});
+            	}
+            };
+
+			struct RegisterData {
+				RegisterData(const std::string& name) {
+					LuaLibClassType::get()->name = name;
 				}
 			};
 		};
@@ -131,11 +192,15 @@ namespace FicsItKernel {
 				UClass* type;
 				std::string typeName;
 				std::vector<std::pair<std::string, LuaLibFunc>> funcs;
+				std::vector<std::pair<std::string, LuaLibProperty>> props;
 				TSubclassOf<UFINHook> hook = nullptr;
-				regfunc(type, typeName, funcs, hook);
+				regfunc(type, typeName, funcs, props, hook);
 				reg->registerType(type, typeName, false);
 				for (const std::pair<std::string, LuaLibFunc> func : funcs) {
 					reg->registerFunction(type, func.first, func.second);
+				}
+				for (const std::pair<std::string, LuaLibProperty> prop : props) {
+					reg->registerProperty(type, prop.first, prop.second);
 				}
 				if (hook) AFINHookSubsystem::RegisterHook(type, hook);
 			}
@@ -143,8 +208,7 @@ namespace FicsItKernel {
 				UClass* type;
 				std::string typeName;
 				std::vector<std::pair<std::string, LuaLibClassFunc>> funcs;
-				TSubclassOf<UFINHook> hook = nullptr;
-				regfunc(type, typeName, funcs, hook);
+				regfunc(type, typeName, funcs);
 				reg->registerType(type, typeName, true);
 				for (const std::pair<std::string, LuaLibClassFunc> func : funcs) {
 					reg->registerClassFunction(type, func.first, func.second);
@@ -360,10 +424,10 @@ namespace FicsItKernel {
 		LuaLibFuncGetNum(AFGBuildableFactory, getPowerConsumProducing,	GetProducingPowerConsumption)
 		LuaLibFuncGetNum(AFGBuildableFactory, getProductivity,			GetProductivity)
 		LuaLibFuncGetNum(AFGBuildableFactory, getCycleTime,				GetProductionCycleTime)
-		LuaLibFuncGetNum(AFGBuildableFactory, getPotential,				GetPendingPotential)
 		LuaLibFuncGetNum(AFGBuildableFactory, getMaxPotential,			GetMaxPossiblePotential)
 		LuaLibFuncGetNum(AFGBuildableFactory, getMinPotential,			GetMinPotential)
 		
+		/*LuaLibFuncGetNum(AFGBuildableFactory, getPotential,				GetPendingPotential)
 		LuaLibFunc(AFGBuildableFactory, setPotential, {
 			if (args < 1) {
 				return 0;
@@ -373,6 +437,17 @@ namespace FicsItKernel {
 			float max = self->GetMaxPossiblePotential();
 			self->SetPendingPotential((min > p) ? min : ((max < p) ? max : p));
 			return 0;
+		})*/
+
+		LuaLibProp(AFGBuildableFactory, potential, {
+			lua_pushnumber(L, self->GetPendingPotential());
+			return 1;
+		}, {
+            float p = static_cast<float>(luaL_checknumber(L, 1));
+            float min = self->GetMinPotential();
+            float max = self->GetMaxPossiblePotential();
+            self->SetPendingPotential((min > p) ? min : ((max < p) ? max : p));
+            return 0;
 		})
 		
 		// End AFGBuildableFactory

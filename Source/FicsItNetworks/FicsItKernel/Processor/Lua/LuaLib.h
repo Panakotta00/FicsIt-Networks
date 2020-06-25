@@ -29,8 +29,8 @@ namespace FicsItKernel {
 			 * The arguments should output the instance type, the instance type name
 			 * and a set of LuaLibFunc/LuaLibClassFunc with name pairs.
 			 */
-			typedef std::function<void(UClass*&, std::string&, std::vector<std::pair<std::string, LuaLibFunc>>&, TSubclassOf<UFINHook>&)> ToRegisterFunc;
-			typedef std::function<void(UClass*&, std::string&, std::vector<std::pair<std::string, LuaLibClassFunc>>&, TSubclassOf<UFINHook>&)> ToRegisterClassFunc;
+			typedef std::function<void(UClass*&, std::string&, std::vector<std::pair<std::string, LuaLibFunc>>&, std::vector<std::pair<std::string, LuaLibProperty>>&, TSubclassOf<UFINHook>&)> ToRegisterFunc;
+			typedef std::function<void(UClass*&, std::string&, std::vector<std::pair<std::string, LuaLibClassFunc>>&)> ToRegisterClassFunc;
 
 		private:
 			/**
