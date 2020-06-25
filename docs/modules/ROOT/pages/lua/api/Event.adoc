@@ -38,6 +38,9 @@ Parameters::
 |The network component lua representation the computer should stop listening to.
 |===
 
+=== `clear()`
+
+Clears every signal from the signal queue.
 
 === `string e, Component s, ... pull([number timeout])`
 
