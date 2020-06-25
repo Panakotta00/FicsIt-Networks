@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "FGSaveInterface.h"
 #include "FGSubsystem.h"
 #include "FINNetworkTrace.h"
 #include "Signals/FINSignal.h"
@@ -19,21 +20,21 @@ USTRUCT()
 struct FFINHookData {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TSet<FFINNetworkTrace> Listeners;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TSet<UFINHook*> Hooks;
 };
 
 UCLASS()
-class AFINHookSubsystem : public AFGSubsystem {
+class AFINHookSubsystem : public AFGSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 private:
 	/**
 	 * Contains the hook data of all objects which have hooks attached to them.
 	 */
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TMap<UObject*, FFINHookData> Data;
 
 	/**
@@ -42,6 +43,10 @@ private:
 	static TMap<UClass*, TSet<TSubclassOf<UFINHook>>> HookRegistry;
 
 public:
+	// Begin IFGSaveInterface
+	virtual bool ShouldSave_Implementation() const override;
+	// End IFGSaveInterface
+	
 	/**
 	 * Gets the loaded hook subsystem in the given world.
 	 *

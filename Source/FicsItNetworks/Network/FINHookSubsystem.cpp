@@ -6,6 +6,10 @@
 
 TMap<UClass*, TSet<TSubclassOf<UFINHook>>> AFINHookSubsystem::HookRegistry;
 
+bool AFINHookSubsystem::ShouldSave_Implementation() const {
+	return true;
+}
+
 AFINHookSubsystem* AFINHookSubsystem::GetHookSubsystem(UObject* WorldContext) {
 	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->HookSubsystem;
 }

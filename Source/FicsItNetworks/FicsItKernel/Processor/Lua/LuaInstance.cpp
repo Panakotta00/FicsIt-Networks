@@ -578,8 +578,14 @@ namespace FicsItKernel {
 			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
 			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
 
-			// add trace to storage & push id
-			newInstance(L, storage->GetTrace(luaL_checkinteger(L, lua_upvalueindex(1))));
+			// get trace and typename
+			Network::NetworkTrace trace = storage->GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
+			std::string typeName = luaL_checkstring(L, lua_upvalueindex(2));
+
+			// create instance
+			LuaInstance* instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
+			new (instance) LuaInstance{trace};
+			luaL_setmetatable(L, typeName.c_str());
 
 			return 1;
 		}
@@ -587,13 +593,17 @@ namespace FicsItKernel {
 		int luaInstancePersist(lua_State* L) {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
-			LuaInstance* instance = LuaInstanceRegistry::get()->checkAndGetInstance(L, 1);
+			// get instance
+			std::string typeName;
+			LuaInstance* instance = LuaInstanceRegistry::get()->checkAndGetInstance(L, 1, &typeName);
+
 			// get persist storage
 	        lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
 	        ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
 
 	        // add trace to storage & push id
 	        lua_pushinteger(L, storage->Add(instance->trace));
+			lua_pushstring(L, typeName.c_str());
 			
 			// create & return closure
 			lua_pushcclosure(L, &luaInstanceUnpersist, 1);
