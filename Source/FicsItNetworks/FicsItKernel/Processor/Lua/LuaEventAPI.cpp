@@ -69,9 +69,46 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, a);
 		}
 
+		void luaIgnore(lua_State* L, Network::NetworkTrace o) {
+			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
+			UObject* obj = *o;
+			if (!IsValid(obj)) luaL_error(L, "object is not valid");
+			if (obj->Implements<UFINSignalSender>()) {
+				IFINSignalSender::Execute_RemoveListener(obj, o.reverse());
+				// TODO: remove sender as signal source from net
+			}
+			if (obj->Implements<UFINNetworkComponent>()) {
+				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
+				for (auto m : merged) {
+					luaIgnore(L, o(m));
+				}
+			}
+
+			// Hooks
+			AFINHookSubsystem::GetHookSubsystem(obj)->RemoveListener(obj, *o.reverse());
+		}
+
+		int luaIgnore(lua_State* L) {
+			int args = lua_gettop(L);
+
+			for (int i = 1; i <= args; ++i) {
+				Network::NetworkTrace trace;
+				auto o = getObjInstance<UObject>(L, i, &trace);
+				luaIgnore(L, trace / o);
+			}
+			return LuaProcessor::luaAPIReturn(L, 0);
+		}
+
+		int luaClear(lua_State* L) {
+			LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->clearSignals();
+			return 0;
+		}
+
 		static const luaL_Reg luaEventLib[] = {
 			{"listen", luaListen},
 			{"pull", luaPull},
+			{"ignore", luaIgnore},
+			{"clear", luaClear},
 			{NULL,NULL}
 		};
 

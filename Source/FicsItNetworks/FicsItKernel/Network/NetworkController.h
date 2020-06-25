@@ -68,6 +68,11 @@ namespace FicsItKernel {
 			void pushSignal(std::shared_ptr<Signal> signal, NetworkTrace sender);
 
 			/**
+			 * Removes all signals from the signal queue.
+			 */
+			void clearSignals();
+
+			/**
 			 * gets the amount of signals in the queue
 			 *
 			 * @return	amount of signals

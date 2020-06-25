@@ -22,6 +22,23 @@ Parameters::
 |The network component lua representation the computer should now listen to.
 |===
 
+=== `ignore(Component)`
+
+Removes the running lua context from the listen queue of the given component.
+Basically the opposite of listen.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Component
+|Component
+|The network component lua representation the computer should stop listening to.
+|===
+
+
 === `string e, Component s, ... pull([number timeout])`
 
 Waits for a signal in the queue. Blocks the excecution until a signal got pushed to the signal queue or the timeout is reached.

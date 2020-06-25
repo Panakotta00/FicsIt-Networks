@@ -40,6 +40,11 @@ namespace FicsItKernel {
 			signals.push_back({std::move(signal), std::move(sender)});
 		}
 
+		void NetworkController::clearSignals() {
+			std::lock_guard<std::mutex> m(mutexSignals);
+			signals.clear();
+		}
+
 		size_t NetworkController::getSignalCount() {
 			std::lock_guard<std::mutex> m(mutexSignals);
 			return signals.size();
