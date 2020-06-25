@@ -17,8 +17,52 @@ Basically kills the PC runtime immediately.
 
 === `reset()`
 
-Sops the current code execution immediately and queues the system to restart in the next tick.
+Stops the current code execution immediately and queues the system to restart in the next tick.
 
+=== `string getEEPROM()`
 
+Returns the code the current eeprom contains.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string
+|string
+|The code in the EEPROM
+|===
+
+=== `setEEPROM(string code)`
+
+Sets the code of the current eeprom. Doesn't cause a system reset.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|code
+|string
+|The code you want to place into the eeprom.
+|===
+
+=== `number time()`
+
+Returns the number of game seconds passed since the save got created.
+A game day consists of 24 game hours, a game hour consists of 60 game minutes, a game minute consists of 60 game seconds.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The number of game seconds passed since the save got created.
+|===
 
 include::partial$api_footer.adoc[]

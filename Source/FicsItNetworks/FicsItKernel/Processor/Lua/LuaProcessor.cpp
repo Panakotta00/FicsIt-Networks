@@ -531,6 +531,10 @@ namespace FicsItKernel {
 			setupComputerAPI(L);
 		}
 
+		AFINStateEEPROMLua* LuaProcessor::getEEPROM() {
+			return eeprom.Get();
+		}
+
 		int LuaProcessor::doSignal(lua_State* L) {
 			auto net = getKernel()->getNetwork();
 			if (!net || net->getSignalCount() < 1) return 0;

@@ -79,15 +79,44 @@ namespace FicsItKernel {
 			* Sets up the lua environment.
 			* Adds the Computer API in global namespace and adds the FileSystem API in global namespace.
 			*
-			* @param[in]	ctx		the lua context you want to setup
+			* @param[in]	L	the lua context you want to setup
 			*/
 			void luaSetup(lua_State* L);
 
+			/**
+			 * Allows to access the the eeprom used by the processor.
+			 * Nullptr if no eeprom is currently set.
+			 *
+			 * @return	the eeprom used by the processor.
+			 */
+			AFINStateEEPROMLua* getEEPROM();
+
+			/**
+			 * Trys to pop a signal from the signal queue in the network controller
+			 * and pushes the resulting values to the given lua stack.
+			 *
+			 * @param[in]	L	the stack were the values should get pushed to.
+			 * @return	the count of values we have pushed.
+			 */
 			int doSignal(lua_State* L);
+			
 			void clearFileStreams();
 			std::set<LuaFile> getFileStreams() const;
 
 			static void luaHook(lua_State* L, lua_Debug* ar);
+
+			/**
+			 * Access the lua processor in the given state registry and checks
+			 * if the tick process is in the second stage of execution.
+			 * If this is the case yields the runtime with a continuation function
+			 * which will return values of the count of args on top of the stack prior
+			 * to the yield.
+			 * If the tick is in the first stage, we just return.
+			 *
+			 * @param[in]	L		the lua state all of this should occur
+			 * @param[in]	args	the count of arguments we should copy and the continuation should return
+			 * @return	if it even returns, returns the same as args
+			 */
 			static int luaAPIReturn(lua_State* L, int args);
 		};
 	}
