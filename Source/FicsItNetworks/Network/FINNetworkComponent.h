@@ -23,26 +23,26 @@ public:
 	* This ID is used to uniquely identfy the component in the network.
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-		FGuid GetID() const;
+	FGuid GetID() const;
 
 	/**
 	 * Returns the nick of this component.
 	 * The nick is used to group components and to give components an alias.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-		FString GetNick() const;
+	FString GetNick() const;
 
 	/**
 	 * Sets the nick of this component.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-		void SetNick(const FString& nick);
+	void SetNick(const FString& nick);
 
 	/**
 	 * Checks if this node has the given nick.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-		bool HasNick(const FString& nick);
+	bool HasNick(const FString& nick);
 
 	/**
 	 * Returns the array of components merged into this coponent.
@@ -50,7 +50,7 @@ public:
 	 * Merged components dont need to implement signal sender or other interface for allowing them to send signals etc.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-		TSet<UObject*> GetMerged() const;
+	TSet<UObject*> GetMerged() const;
 
 	/**
 	 * Returns a array of connected components.

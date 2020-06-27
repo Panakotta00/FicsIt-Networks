@@ -56,7 +56,9 @@ namespace FicsItKernel {
 		std::unique_ptr<Network::NetworkController> network = nullptr;
 		FileSystem::SRef<KernelListener> listener;
 		TSharedPtr<FJsonObject> readyToUnpersist = nullptr;
-
+		std::set<UObject*> gpus;
+		std::set<UObject*> screens;
+		
 	public:
 		/**
 		 * defines which resource usage should get recalculated
@@ -216,6 +218,48 @@ namespace FicsItKernel {
 		 */
 		int64 getMemoryUsage();
 
+		/**
+		 * Adds the given GPU to the kernel
+		 *
+		 * @param[in]	gpu		the gpu you want to add.
+		 */
+		void addGPU(UObject* gpu);
+
+		/**
+		* Removes the given GPU from the kernel
+		*
+		* @param[in]	gpu		the gpu you want to remove.
+		*/
+		void removeGPU(UObject* gpu);
+
+		/**
+		 * Returns the list of added GPUs.
+		 *
+		 * @return list of added gpus
+		 */
+		std::set<UObject*> getGPUs();
+
+		/**
+		* Adds the given screen to the kernel
+		*
+		* @param[in]	screen		the screen you want to add.
+		*/
+		void addScreen(UObject* screen);
+
+		/**
+		* Removes the given screen from the kernel
+		*
+		* @param[in]	screen		the screen you want to remove.
+		*/
+		void removeScreen(UObject* screen);
+
+		/**
+		* Returns the list of added screens.
+		*
+		* @return list of added screen
+		*/
+		std::set<UObject*> getScreens();
+		
 		/**
 		 * Recalculates the given system components resource usage like memory.
 		 * Can cause a kernel crash to occur.

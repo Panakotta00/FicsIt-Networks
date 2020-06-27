@@ -30,13 +30,13 @@ namespace FicsItKernel {
 		LuaDataType luaToProperty(lua_State* L, UProperty* p, void* data, int i) {
 			auto c = p->GetClass()->ClassCastFlags;
 			if (c & EClassCastFlags::CASTCLASS_UBoolProperty) {
-				*p->ContainerPtrToValuePtr<bool>(data) = (bool)lua_toboolean(L, i);
+				*p->ContainerPtrToValuePtr<bool>(data) = static_cast<bool>(lua_toboolean(L, i));
 				return LuaDataType::LUA_BOOL;
 			} else if (c & EClassCastFlags::CASTCLASS_UIntProperty) {
-				*p->ContainerPtrToValuePtr<std::int32_t>(data) = (std::int32_t) lua_tointeger(L, i);
+				*p->ContainerPtrToValuePtr<std::int32_t>(data) = static_cast<std::int32_t>(lua_tointeger(L, i));
 				return LuaDataType::LUA_INT;
 			} else if (c & EClassCastFlags::CASTCLASS_UFloatProperty) {
-				*p->ContainerPtrToValuePtr<float>(data) = (float)lua_tonumber(L, i);
+				*p->ContainerPtrToValuePtr<float>(data) = static_cast<float>(lua_tonumber(L, i));
 				return LuaDataType::LUA_NUM;
 			} else if (c & EClassCastFlags::CASTCLASS_UStrProperty) {
 				auto s = lua_tostring(L, i);
@@ -45,12 +45,12 @@ namespace FicsItKernel {
 				*o = FString(s);
 				return LuaDataType::LUA_STR;
 			} else if (c & EClassCastFlags::CASTCLASS_UObjectProperty) {
-				if (((UObjectProperty*)c)->PropertyClass->IsChildOf<UClass>()) {
-					auto o = getClassInstance(L, i, ((UObjectProperty*)c)->PropertyClass);
+				if (Cast<UObjectProperty>(p)->PropertyClass->IsChildOf<UClass>()) {
+					auto o = getClassInstance(L, i, Cast<UObjectProperty>(p)->PropertyClass);
 					*p->ContainerPtrToValuePtr<UObject*>(data) = o;
 					return (o) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
 				} else {
-					auto o = getObjInstance(L, i, ((UObjectProperty*)c)->PropertyClass);
+					auto o = getObjInstance(L, i, Cast<UObjectProperty>(p)->PropertyClass);
 					*p->ContainerPtrToValuePtr<UObject*>(data) = *o;
 					return (*o) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
 				}

@@ -57,6 +57,26 @@ namespace FicsItKernel {
 			return 1;
 		}
 
+		LuaFunc(luaComputerGPUs)
+			lua_newtable(L);
+			int i = 1;
+			for (UObject* gpu : kernel->getGPUs()) {
+				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->getComponent()) / gpu);
+				lua_seti(L, -2, i++);
+			}
+			return 1;
+		}
+
+		LuaFunc(luaComputerScreens)
+		    lua_newtable(L);
+			int i = 1;
+			for (UObject* screen : kernel->getScreens()) {
+				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->getComponent()) / screen);
+				lua_seti(L, -2, i++);
+			}
+			return 1;
+		}
+
 		static const luaL_Reg luaComputerLib[] = {
 			{"getInstance", luaComputerGetInstance},
 			{"reset", luaComputerReset},
@@ -65,6 +85,8 @@ namespace FicsItKernel {
 			{"setEEPROM", luaComputerSetEEPROM},
 			{"getEEPROM", luaComputerGetEEPROM},
 			{"time", luaComputerTime},
+			{"getGPUs", luaComputerGPUs},
+			{"getScreens", luaComputerScreens},
 			{NULL,NULL}
 		};
 		

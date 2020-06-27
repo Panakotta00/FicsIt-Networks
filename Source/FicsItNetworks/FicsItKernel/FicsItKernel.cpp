@@ -1,6 +1,8 @@
 #include "FicsItKernel.h"
 
 #include "KernelSystemSerializationInfo.h"
+#include "FicsItNetworks/Graphics/FINGraphicsProcessor.h"
+#include "FicsItNetworks/Graphics/FINScreen.h"
 #include "Processor/Lua/LuaProcessor.h"
 #include "SML/util/Logging.h"
 
@@ -192,6 +194,34 @@ namespace FicsItKernel {
 
 	std::int64_t KernelSystem::getMemoryUsage() {
 		return memoryUsage;
+	}
+
+	void KernelSystem::addGPU(UObject* gpu) {
+		check(gpu->GetClass()->ImplementsInterface(UFINGraphicsProcessor::StaticClass()))
+		auto i = gpus.find(gpu);
+		if (i == gpus.end()) gpus.insert(gpu);
+	}
+
+	void KernelSystem::removeGPU(UObject* gpu) {
+		gpus.erase(gpu);
+	}
+
+	std::set<UObject*> KernelSystem::getGPUs() {
+		return gpus;
+	}
+
+	void KernelSystem::addScreen(UObject* screen) {
+		check(screen->GetClass()->ImplementsInterface(UFINScreen::StaticClass()))
+        auto i = screens.find(screen);
+		if (i == screens.end()) screens.insert(screen);
+	}
+
+	void KernelSystem::removeScreen(UObject* screen) {
+		screens.erase(screen);
+	}
+	
+	std::set<UObject*> KernelSystem::getScreens() {
+		return screens;
 	}
 
 	void KernelSystem::PreSerialize(FKernelSystemSerializationInfo& Data, bool bLoading) {

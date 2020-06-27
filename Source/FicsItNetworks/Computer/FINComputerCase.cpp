@@ -26,7 +26,6 @@ AFINComputerCase::AFINComputerCase() {
 	DataStorage->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
 	DataStorage->OnItemAddedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
 	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> item, int32 i) {
-        SML::Logging::error("Uhm... ", TCHAR_TO_UTF8(*item->GetName()), " ", i);
         return (i == 0 && item->IsChildOf<UFINComputerEEPROMDesc>()) || (i == 1 && item->IsChildOf<UFINComputerFloppyDesc>());
     });
 	
@@ -157,6 +156,24 @@ void AFINComputerCase::RemoveDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (FileSystemState) kernel->removeDrive(FileSystemState);
 }
 
+void AFINComputerCase::AddGPU(AFINComputerGraphicsProcessor* GPU) {
+	kernel->addGPU(GPU);
+}
+
+void AFINComputerCase::RemoveGPU(AFINComputerGraphicsProcessor* GPU) {
+	kernel->removeGPU(GPU);
+}
+
+void AFINComputerCase::AddScreen(AFINComputerScreen* Screen) {
+	kernel->addScreen(Screen);
+	Screens.Add(Screen);
+}
+
+void AFINComputerCase::RemoveScreen(AFINComputerScreen* Screen) {
+	kernel->removeScreen(Screen);
+	Screens.Remove(Screen);
+}
+
 void AFINComputerCase::AddModule(AActor* module) {
 	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
 		AddProcessor(processor);
@@ -164,6 +181,10 @@ void AFINComputerCase::AddModule(AActor* module) {
 		AddMemory(memory);
 	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
 		AddDrive(holder);
+	} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
+		AddScreen(screen);
+	} else if (AFINComputerGraphicsProcessor* gpu = Cast<AFINComputerGraphicsProcessor>(module)) {
+		AddGPU(gpu);
 	}
 }
 
@@ -174,6 +195,10 @@ void AFINComputerCase::RemoveModule(AActor* module) {
 		RemoveMemory(memory);
 	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
 		RemoveDrive(holder);
+	} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
+		RemoveScreen(screen);
+	} else if (AFINComputerGraphicsProcessor* gpu = Cast<AFINComputerGraphicsProcessor>(module)) {
+		RemoveGPU(gpu);
 	}
 }
 

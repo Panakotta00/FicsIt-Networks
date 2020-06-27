@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FINComputerGPU.h"
+#include "FINComputerScreen.h"
 #include "Buildables/FGBuildable.h"
 #include "Network/FINNetworkConnector.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
@@ -53,6 +55,9 @@ public:
 	UPROPERTY()
 	AFINFileSystemState* Floppy = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TSet<AFINComputerScreen*> Screens;
+
 	AFINComputerCase();
 	~AFINComputerCase();
 
@@ -96,6 +101,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void RemoveDrive(AFINComputerDriveHolder* DriveHolder);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+	void AddGPU(AFINComputerGraphicsProcessor* GPU);
+	
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+	void RemoveGPU(AFINComputerGraphicsProcessor* GPU);
+	
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+	void AddScreen(AFINComputerScreen* Screen);
+	
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+	void RemoveScreen(AFINComputerScreen* Screen);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddModule(AActor* Module);

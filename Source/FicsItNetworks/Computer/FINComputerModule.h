@@ -4,11 +4,21 @@
 #include "Buildables/FGBuildable.h"
 #include "ModuleSystem/FINModuleSystemModule.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Network/Signals/FINSignalSender.h"
+
 #include "FINComputerModule.generated.h"
 
 UCLASS()
-class AFINComputerModule : public AFGBuildable, public IFINModuleSystemModule {
+class AFINComputerModule : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender {
 	GENERATED_BODY()
+
+private:
+	/**
+    * The signal listeners listening to this component.
+    */
+    UPROPERTY()
+    TSet<FFINNetworkTrace> Listeners;
+    
 public:
 	UPROPERTY(EditDefaultsOnly, Category="ComputerModule")
 		FVector2D ModuleSize;
@@ -35,4 +45,11 @@ public:
 	virtual void getModuleSize_Implementation(int& Width, int& Height) const override;
 	virtual FName getName_Implementation() const override;
 	// End IFINModuleSystemModule
+
+	// Begin IFINSignalSender
+	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
+	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
+	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
+	virtual UObject* GetSignalSenderOverride_Implementation() override;
+	// End IFINSignalSender
 };
