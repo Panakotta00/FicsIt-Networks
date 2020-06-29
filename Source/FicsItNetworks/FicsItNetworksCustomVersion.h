@@ -8,11 +8,6 @@ struct FFINCustomVersion {
 		// Before any version changes were made
 		BeforeCustomVersionWasAdded = 0,
 
-		// FINComputerCase kernel system persistency
-		KernelSystemPersistency,
-
-		PanelSerialization,
-
         // -----<new versions can be added above this line>-------------------------------------------------
         VersionPlusOne,
         LatestVersion = VersionPlusOne - 1

@@ -37,6 +37,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 	UFGInventoryComponent* DataStorage = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
+	int LastTabIndex = 0;
+	
 	UPROPERTY()
 	FKernelSystemSerializationInfo KernelState;
 	
@@ -103,10 +106,10 @@ public:
     void RemoveDrive(AFINComputerDriveHolder* DriveHolder);
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-	void AddGPU(AFINComputerGraphicsProcessor* GPU);
+	void AddGPU(AFINComputerGPU* GPU);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-	void RemoveGPU(AFINComputerGraphicsProcessor* GPU);
+	void RemoveGPU(AFINComputerGPU* GPU);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
 	void AddScreen(AFINComputerScreen* Screen);

@@ -1,37 +1,30 @@
 #include "FINModuleSystemPanel.h"
 
 #include "FGDismantleInterface.h"
-#include "FicsItNetworksCustomVersion.h"
 
 UFINModuleSystemPanel::UFINModuleSystemPanel() : grid(nullptr) {}
 
 UFINModuleSystemPanel::~UFINModuleSystemPanel() {}
 
 void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
+	Super::Serialize(Ar);
 	if (Ar.IsSaveGame()) {
-		Ar.UsingCustomVersion(FFINCustomVersion::GUID);
-		if (Ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::PanelSerialization) {
-			SetupGrid();
+		SetupGrid();
 
-			int height = PanelHeight, width = PanelWidth;
-			Ar << height;
-			Ar << width;
-		
-			for (int x = 0; x < height; ++x) {
-				for (int y = 0; y < width; ++y) {
-					if (x < PanelHeight && y < PanelHeight) {
-						Ar << grid[x][y];
-					} else {
-						UObject* ptr = nullptr;
-						Ar << ptr;
-					}
+		int height = PanelHeight, width = PanelWidth;
+		Ar << height;
+		Ar << width;
+	
+		for (int x = 0; x < height; ++x) {
+			for (int y = 0; y < width; ++y) {
+				if (x < PanelHeight && y < PanelHeight) {
+					Ar << grid[x][y];
+				} else {
+					UObject* ptr = nullptr;
+					Ar << ptr;
 				}
 			}
-		} else {
-			Super::Serialize(Ar);
 		}
-	} else {
-		Super::Serialize(Ar);
 	}
 }
 

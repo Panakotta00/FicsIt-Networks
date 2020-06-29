@@ -46,18 +46,9 @@ AFINComputerCase::~AFINComputerCase() {
 }
 
 void AFINComputerCase::Serialize(FArchive& ar) {
+	Super::Serialize(ar);
 	if (ar.IsSaveGame()) {
-		ar.UsingCustomVersion(FFINCustomVersion::GUID);
-		if (ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::KernelSystemPersistency) {
-			ar << NetworkConnector;
-			ar << Panel;
-			ar << DataStorage;
-			kernel->Serialize(ar, KernelState);
-		} else {
-			Super::Serialize(ar);
-		}
-	} else {
-		Super::Serialize(ar);
+		kernel->Serialize(ar, KernelState);
 	}
 }
 
@@ -156,11 +147,11 @@ void AFINComputerCase::RemoveDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (FileSystemState) kernel->removeDrive(FileSystemState);
 }
 
-void AFINComputerCase::AddGPU(AFINComputerGraphicsProcessor* GPU) {
+void AFINComputerCase::AddGPU(AFINComputerGPU* GPU) {
 	kernel->addGPU(GPU);
 }
 
-void AFINComputerCase::RemoveGPU(AFINComputerGraphicsProcessor* GPU) {
+void AFINComputerCase::RemoveGPU(AFINComputerGPU* GPU) {
 	kernel->removeGPU(GPU);
 }
 
@@ -183,7 +174,7 @@ void AFINComputerCase::AddModule(AActor* module) {
 		AddDrive(holder);
 	} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
 		AddScreen(screen);
-	} else if (AFINComputerGraphicsProcessor* gpu = Cast<AFINComputerGraphicsProcessor>(module)) {
+	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
 		AddGPU(gpu);
 	}
 }
@@ -197,7 +188,7 @@ void AFINComputerCase::RemoveModule(AActor* module) {
 		RemoveDrive(holder);
 	} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
 		RemoveScreen(screen);
-	} else if (AFINComputerGraphicsProcessor* gpu = Cast<AFINComputerGraphicsProcessor>(module)) {
+	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
 		RemoveGPU(gpu);
 	}
 }
