@@ -19,10 +19,16 @@ private:
 	
 public:
 	TSharedPtr<SWidget> Widget;
-	
+
+	/**
+	 * This event gets triggered when a new widget got set by the GPU
+	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
 	FScreenWidgetUpdate OnWidgetUpdate;
 
+	/**
+	 * This event gets triggered when a new GPU got bound
+	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
     FScreenGPUUpdate OnGPUUpdate;
 
@@ -37,6 +43,10 @@ public:
 	// End IFINScreen
 };
 
+/**
+ * Used by a Screen to display the widget in a UMG environment.
+ * Updates the used Widget according to the bound screen.
+ */
 UCLASS()
 class UFINScreenWidget : public UWidget {
 	GENERATED_BODY()
@@ -48,21 +58,32 @@ private:
 	AFINComputerScreen* Screen = nullptr;
 
 	TSharedPtr<SBox> Container = nullptr;
+
+	UFUNCTION()
+    void OnNewWidget();
+
+	UFUNCTION()
+    void OnNewGPU();
+
+protected:
+	// UWidget interface
+	virtual TSharedRef<SWidget> RebuildWidget() override;
+	// End of UWidget interface
 	
 public:
+	/**
+	 * Binds the given screen with this widget which will display the screen accordingly.
+	 *
+	 * @param[in]	NewScreen	The screen you want to bind to
+	 */
 	UFUNCTION(BlueprintCallable, Category="Computer|Graphics")
 	void SetScreen(AFINComputerScreen* NewScreen);
 
+	/**
+	 * Returns the screen we are currently bound to.
+	 *
+	 * @return	the screen we are bound to
+	 */
 	UFUNCTION(BlueprintCallable, Category="Computer|Graphics")
     AFINComputerScreen* GetScreen();
-
-	UFUNCTION()
-	void OnNewWidget();
-
-	UFUNCTION()
-	void OnNewGPU();
-protected:
-    // UWidget interface
-    virtual TSharedRef<SWidget> RebuildWidget() override;
-	// End of UWidget interface
 };
