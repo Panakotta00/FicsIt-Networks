@@ -56,12 +56,11 @@ FVector2D SScreenMonitor::ComputeDesiredSize(float f) const {
 }
 
 int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
-	FSlateApplication& app = FSlateApplication::Get();
-	FSlateRenderer* renderer = app.GetRenderer();
-	TSharedRef<FSlateFontMeasure> measure = renderer->GetFontMeasureService();
-	FVector2D CharSize = measure->Measure(L" ", Font.Get());
+	FVector2D CharSize = GetCharSize();
 	FVector2D ScreenSize = this->ScreenSize.Get();
 	FSlateBrush boxBrush = FSlateBrush();
+	const TArray<FLinearColor>& ForegroundCache = this->Foreground.Get();
+	const TArray<FLinearColor>& BackgroundCache = this->Background.Get();
 	
 	const TArray<FString>& TextGrid = Text.Get();
 	for (FVector2D Pos = FVector2D::ZeroVector; Pos.Y < ScreenSize.Y && Pos.Y < TextGrid.Num(); ++Pos.Y) {
@@ -69,12 +68,12 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 		
 		for (Pos.X = 0; Pos.X < ScreenSize.X && Pos.X < Line.Len(); ++Pos.X) {
 			FLinearColor Foreground = FLinearColor(1,1,1,1);
-			if (Pos.Y * ScreenSize.X + Pos.X < this->Foreground.Get().Num()) {
-				Foreground = this->Foreground.Get()[Pos.Y * ScreenSize.X + Pos.X];
+			if (Pos.Y * ScreenSize.X + Pos.X < ForegroundCache.Num()) {
+				Foreground = ForegroundCache[Pos.Y * ScreenSize.X + Pos.X];
 			}
-			FLinearColor Background = FLinearColor(1,1,1,1);
-			if (Pos.Y * ScreenSize.X + Pos.X < this->Background.Get().Num()) {
-				Background = this->Background.Get()[Pos.Y * ScreenSize.X + Pos.X];
+			FLinearColor Background = FLinearColor(0,0,0,0);
+			if (Pos.Y * ScreenSize.X + Pos.X < BackgroundCache.Num()) {
+				Background = BackgroundCache[Pos.Y * ScreenSize.X + Pos.X];
 			}
 
 			FSlateDrawElement::MakeBox(

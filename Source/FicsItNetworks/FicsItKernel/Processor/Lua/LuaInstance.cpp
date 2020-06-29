@@ -722,6 +722,7 @@ namespace FicsItKernel {
 		}
 
 		Network::NetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
+			if (lua_isnil(L, index)) return Network::NetworkTrace(nullptr);
 			LuaInstance* instance = LuaInstanceRegistry::get()->checkAndGetInstance(L, index);
 			if (!instance->trace->GetClass()->IsChildOf(clazz)) return Network::NetworkTrace(nullptr);
 			return instance->trace;
