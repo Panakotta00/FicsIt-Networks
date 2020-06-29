@@ -1,0 +1,21 @@
+= Screen Driver
+:description: This Computer Module adds a screen to your computer UI.
+
+[cols="1,3"]
+|===
+|Building Type
+|Computer Module
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/ScreenDriver_bg.png[300,300,role="left"]
+|image::buildings/ScreenDriver_ig.jpg[300,300,role="left"]
+|===
+
+This computer module allows you to add a screen to your computer with which you can interact from
+within the UI of the computer case.
+
+include::partial$computer_modules_footer.adoc[]

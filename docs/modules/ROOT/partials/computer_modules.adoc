@@ -3,7 +3,11 @@ Computer Modules::
 ====
 xref:buildings/ComputerCase/DriveHolder.adoc[Drive Holder]
 -
+xref:buildings/ComputerCase/GPUT1.adoc[GPU T1]
+-
 xref:buildings/ComputerCase/ProcessorLua.adoc[Processor Lua]
 -
 xref:buildings/ComputerCase/RAM.adoc[RAM]
+-
+xref:buildings/ComputerCase/ScreenDriver.adoc[Screen Driver]
 ====

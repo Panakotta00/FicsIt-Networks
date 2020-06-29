@@ -1,0 +1,344 @@
+= GPU
+
+The GPU allows you to render graphics which can then be displayed by a Screen.
+For that a GPU needs to get bound to a screen and vice versa.
+You can only bind one GPU to one screen and vice versa at the same time.
+
+A screen doesn't influence the functionality of rendering but a screen
+might take effect on how it get displayed like some weird colors or
+if it gets rendered in the world or just as a UI element.
+
+Because the GPUs rendering processes might vary, they might have
+different functions and signals provided.
+But there are a couple which are implemented by every GPU.
+
+== Functions
+
+=== `bindScreen(Screen screen)`
+
+This function binds the gpu to the given screen.
+If the gpu is already bound to a screen, the old bound will get destroyed.
+If the screen is nil, the gpu will just unbind from the current bound screen.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|screen
+|Screen
+|the screen you want to bind to
+|===
+
+=== `Screen getScreen()`
+
+This function allows you to access the currently bound screen of the gpu.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Screen
+|Screen
+|the currently bound screen of the gpu. Nil if not screen is bound.
+|===
+
+== Signals
+
+=== `ScreenBound(Scrren oldScreen)`
+
+This signal gets emitted when a new screen gets bound to the gpu.
+
+Paramteres::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|oldScreen
+|Screen
+|the previously to the gpu bound screen.
+|===
+
+== T1 GPU
+
+The T1 GPU can render a char grid were each character can have a different foreground and background color.
+
+To define the color of a character, you need to set the currently used foreground and background color.
+All further character changes cause the changed character to have the currently used foreground and background colors.
+If you change the currently used foreground and background color, the color of the already drawn/changed characters
+wont change. (Until you draw them again)
+
+The GPU T1 can have a screen size (character grid size) of up to 150x50 characters.
+
+=== Functions
+
+==== `setScreenSize(int width, int height)`
+
+This function allows you to change the screen size of the monitor.
+If the screen size stays the same nothing will happen but if it does,
+the screen will get cleared and the `ScreenSizeChange` signal will get emitted.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|width
+|int
+|the new width of the character grid
+
+|height
+|int
+|the new height of the character grid
+|===
+
+==== `width, height getScreenSize()`
+
+This function allows you to get the current screen size of the monitor.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|width
+|int
+|the width of the character grid
+
+|height
+|int
+|the height of the character grid
+|===
+
+==== `setForegroundColor(float r, float g, float b, float a)`
+
+This function allows you to set the used foreground color of all following draw calls.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|r
+|float
+|the red value of the foreground color from 0 to 1
+
+|g
+|float
+|the green value of the foreground color from 0 to 1
+
+|b
+|float
+|the blue value of the foreground color from 0 to 1
+
+|a
+|float
+|the alpha/transparency value of the foreground color from 0 to 1
+|===
+
+==== `setBackgroundColor(float r, float g, float b, float a)`
+
+This function allows you to set the used background color of all following draw calls.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|r
+|float
+|the red value of the background color from 0 to 1
+
+|g
+|float
+|the green value of the background color from 0 to 1
+
+|b
+|float
+|the blue value of the background color from 0 to 1
+
+|a
+|float
+|the alpha/transparency value of the background color from 0 to 1
+|===
+
+==== `setText(int x, int y, string text)`
+
+This function allows you to set the text at the the given char grid location.
+The `\n` character causes the cursor to move to the next line directly under the latest draw.
+The `\r` character causes the cursor to move to the beginning of the line.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|int
+|the x coordinate where the given text should get drawn to
+
+|y
+|int
+|the y coordinate where the given text should get drawn to
+
+|text
+|string
+|the string you want to draw at the given coordinates
+|===
+
+==== `fill(int x, int y, int w, int h, string char)`
+
+This function fills the rectangle at the given location with the given size with the given character.
+The rectangle starts at the given coordinates and then spans out to the given lengths right and down,
+so the coordinates are not centerd in the rectangle, the coordinates are the upper left corner of the rectangle.
+
+If the character is a control key or the char string is longer than 1, ` `(space) is used instead as character.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|int
+|the x coordinate of the upper left corner of the rectangle
+
+|y
+|int
+|the y coordinate of the upper left corner of the rectangle
+
+|w
+|int
+|the width of the rectangle
+
+|h
+|int
+|the height of the rectangle
+
+|char
+|string
+|the character you want to fill the rectangle with
+|===
+
+=== Signals
+
+==== Button bit-field
+
+The mouse events allso provide a parameter allowing you to check if the event occured with what
+control keys (like ctrl, shift, alt or cmd) down and which mouse button triggered the signal.
+
+This happens by turning individual bits of the provided integer on or off. On means "key is pressed".
+The buttons are listed from least significant bit to most significant:
+- Left Mouse Button
+- Right Mouse Button
+- Ctrl Key
+- Shift Key
+- Alt Key
+- Cmd Key
+
+You can use the https://www.lua.org/manual/5.3/manual.html#3.4.2[Bitwise Or Operator] to check if a given key is pressed:
+
+[source,Lua]
+----
+bitField = 21 -- Left Mouse & Ctrl & Alt
+if bitField & 1 > 0 then
+ -- left mouse pressed
+end
+if bitField & 2 > 0 then
+ -- right mouse pressed
+end
+if bitField & 4 > 0 then
+ -- ctrl pressed
+end
+if bitField & 8 > 0 then
+ -- shift pressed
+end
+if bitField & 16 > 0 then
+ -- alt pressed
+end
+if bitField & 32 > 0 then
+ -- cmd pressed
+end
+----
+
+==== `OnMouseDown(int x, int y, int btn)`
+
+This event gets triggered when the user starts to click with the mouse or per touch on the screen.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|int
+|The x coordinate where the mouse event occured.
+
+|y
+|int
+|The y coordinate where the mouse event occured.
+
+|btn
+|int
+|The button bitfield containing information about which buttons were pressed.
+|===
+
+==== `OnMouseUp(int x, int y, int btn)`
+
+This event gets triggered when the user ends to click with the mouse or per touch on the screen.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|int
+|The x coordinate where the mouse event occured.
+
+|y
+|int
+|The y coordinate where the mouse event occured.
+
+|btn
+|int
+|The button bitfield containing information about which buttons were pressed.
+|===
+
+==== `OnMouseMove(int x, int y, int btn)`
+
+This event gets triggered when the user moves the mouse or the cross crosshair over the screen.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|int
+|The x coordinate where the mouse event occured.
+
+|y
+|int
+|The y coordinate where the mouse event occured.
+
+|btn
+|int
+|The button bitfield containing information about which buttons were pressed.
+|===
+
+
+include::partial$api_footer.adoc[]

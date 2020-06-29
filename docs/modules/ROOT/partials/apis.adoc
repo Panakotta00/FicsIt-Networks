@@ -9,6 +9,8 @@ xref:lua/api/Computer.adoc[Computer]
 -
 xref:lua/api/FileSystem.adoc[FileSystem]
 -
+xref:lua/api/GPU.adoc[GPU]
+-
 xref:lua/api/Inventory.adoc[Inventory]
 -
 xref:lua/api/Power.adoc[Power]
