@@ -273,6 +273,20 @@ Return Values::
 |the name of the item
 |===
 
+== ItemAmount
+
+Combines an Item Type and a count to represent f.e. an ingridient for recipies.
+
+=== Variables
+
+==== `int count`
+
+The count of items the item amount contains.
+
+==== `ItemType item`
+
+The item type of the item amount.
+
 == FactoryHook
 
 The FactoryHook is a special table used to hook onto a FactoryConnector. This hook allows you to get event signals when the connector transfers an item in addition to some stats about its runtime behavior.
