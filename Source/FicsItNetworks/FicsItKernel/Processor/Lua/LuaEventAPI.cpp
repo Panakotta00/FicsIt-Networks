@@ -9,6 +9,7 @@
 #include "LuaProcessor.h"
 #include "LuaInstance.h"
 #include "Network/FINHookSubsystem.h"
+#include "Network/FINNetworkTrace.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -19,7 +20,6 @@ namespace FicsItKernel {
 			if (obj->Implements<UFINSignalSender>()) {
 				IFINSignalSender::Execute_AddListener(obj, o.reverse());
 				UFINSignalUtility::SetupSender(obj->GetClass());
-				// TODO: add sender as signal source to net
 			}
 			if (obj->Implements<UFINNetworkComponent>()) {
 				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
@@ -30,6 +30,8 @@ namespace FicsItKernel {
 
 			// Hooks
 			AFINHookSubsystem::GetHookSubsystem(obj)->AddListener(obj, o.reverse());
+
+			net->signalSenders.Add(o);
 		}
 
 		int luaListen(lua_State* L) {
@@ -75,7 +77,7 @@ namespace FicsItKernel {
 			if (!IsValid(obj)) luaL_error(L, "object is not valid");
 			if (obj->Implements<UFINSignalSender>()) {
 				IFINSignalSender::Execute_RemoveListener(obj, o.reverse());
-				// TODO: remove sender as signal source from net
+				net->signalSenders.Remove(o);
 			}
 			if (obj->Implements<UFINNetworkComponent>()) {
 				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
@@ -99,6 +101,19 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
+		int luaIgnoreAll(lua_State* L) {
+			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
+			TSet<FFINNetworkTrace> senders = net->signalSenders;
+			for (FFINNetworkTrace sender : senders) {
+				UObject* s = *sender;
+				FFINNetworkTrace listener = sender.getTrace().reverse();
+				IFINSignalSender::Execute_RemoveListener(s, listener);
+				AFINHookSubsystem::GetHookSubsystem(net->getComponent())->RemoveListener(s, net->getComponent());
+				net->signalSenders.Remove(sender);
+			}
+			return 1;
+		}
+
 		int luaClear(lua_State* L) {
 			LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->clearSignals();
 			return 0;
@@ -108,6 +123,7 @@ namespace FicsItKernel {
 			{"listen", luaListen},
 			{"pull", luaPull},
 			{"ignore", luaIgnore},
+			{"ignoreAll", luaIgnoreAll},
 			{"clear", luaClear},
 			{NULL,NULL}
 		};

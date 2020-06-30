@@ -30,6 +30,12 @@ namespace FicsItKernel {
 			virtual ~NetworkController() {}
 
 			/**
+			 * A chache containing all signals senders to which this object is registered
+			 * to listen to. Is used to stop listening to all senders.
+			 */
+			TSet<FFINNetworkTrace> signalSenders;
+
+			/**
 			 * Underlying Computer Network Component used for interacting with the network.
 			 * Needs to be a Signal Sender and a Signal Listener which redirect the interaction of both to this.
 			 */

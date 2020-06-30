@@ -22,9 +22,9 @@ Parameters::
 |The network component lua representation the computer should now listen to.
 |===
 
-=== `ignore(Component)`
+=== `ignore(Component...)`
 
-Removes the running lua context from the listen queue of the given component.
+Removes the running lua context from the listen queue of the given components.
 Basically the opposite of listen.
 
 Parameters::
@@ -33,10 +33,15 @@ Parameters::
 |===
 |Name |Type |Description
 
-|Component
-|Component
-|The network component lua representation the computer should stop listening to.
+|Component...
+|Component...
+|The network component lua representations the computer should stop listening to.
 |===
+
+=== `ignoreAll()`
+
+Stops listening to any signal sender.
+If afterwards there are still coming signals in, it might be the system it self or caching bug.
 
 === `clear()`
 

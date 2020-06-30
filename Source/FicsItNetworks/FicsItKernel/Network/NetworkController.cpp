@@ -115,6 +115,9 @@ namespace FicsItKernel {
 				std::shared_ptr<Signal> signal = Signal::deserializeSignal(TCHAR_TO_UTF8(*typeName), Ar);
 				signals.push_back({signal, trace});
 			}
+
+			// serialize signal senders
+			Ar << signalSenders;
 		}
 
 		void NetworkController::PostSerialize(bool load) {
