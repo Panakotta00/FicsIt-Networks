@@ -14,3 +14,23 @@ The following list contains all available standard Lua libraries, non-standard l
 - string
 - IO (only the File-Table)
 - Serialization
+
+== Lua Instances
+
+Lua Instances are speacial data-type FicsIt-Networks provides, allowing us to map a lot more easily different functions and properties of a game object to Lua.
+These instances work through pre defined functions which are coded it the source code of the mod and through the usage of the so called refelction system of unreal.
+Thanks to this, any other mod can very easily add support for FicsIt-Networks by simply filling a couple of conditions.
+
+If you want to read the members such a instance has in runtime, you should use the `string[] getMembers()` method to get an array of member names the instance has.
+
+=== Properties
+
+The instance can have properties (aka. attributes) you can interact with just like a variable.
+For this use the `.` access operator.
+
+Some properties are read only though, and if you try to write to them, a Lua exception gets thrown.
+
+=== Functions
+
+The instance can also have function allowing you to call subroutines. These function can have multiple input and output values.
+To access such a member function you need to use the `:` member access operator or pass the instance as the first argument to the function.

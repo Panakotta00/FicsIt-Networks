@@ -24,16 +24,17 @@ Nick filers are then used to check if a network component has specific nicknames
 
 Example::
 +
-```
-nick1 = "Test Power" // nick1 with names "Test" and "Power"
-nick2 = "Power" // nick2 with name "Power"
+[source,Lua]
+----
+nick1 = "Test Power" -- nick1 with names "Test" and "Power"
+nick2 = "Power" -- nick2 with name "Power"
 
-filter1 = "Power" // nick filter maches nick1 and nick2
-filter2 = "Test" // nick filter maches only nick1
-filter3 = "Test Power" // nick filter maches only nick1
-filter4 = "Power Nice" // nick filter maches noone
-filter5 = "" // nick filter maches every component (also components with no nick)
-```
+filter1 = "Power" -- nick filter maches nick1 and nick2
+filter2 = "Test" -- nick filter maches only nick1
+filter3 = "Test Power" -- nick filter maches only nick1
+filter4 = "Power Nice" -- nick filter maches noone
+filter5 = "" -- nick filter maches every component (also components with no nick)
+----
 
 === Lua
 
@@ -43,7 +44,7 @@ But most important of all is, this table contains all functions provided by the 
 
 If the component disconnects from the network while the runtime contains a function value of this component the internal component pointer goes invalid, that means if you then try to execute the function, the Lua runtime will crash. If the component reconnects to the network, so does also the internal pointer get back valid so you can call it safely.
 
-To get the Lua-Component-Structure you can use the `Component component.proxy(string)` function.
+To get the Lua-Instance of a component you can use the `Component component.proxy(string)` function.
 
 To learn more, visit the xref:lua/api/Component.adoc[Component API page].
 
@@ -55,27 +56,26 @@ Also, quite interessting is, a function can have multiple output values which al
 
 In this documentation we use **most of the time (not always)** this declaration scheme:
 
-```Lua
+[source,Lua]
+----
 outType [outName], ... funcName([inType] inName, ...)
-```
+----
 
 Examples:
-```Lua
+[source,Lua]
+----
 int, string name test(rly, num howOften)
 int getCount(string id)
 string getName(id)
 -- exceptions:
 count getAmount(string)
-```
+----
 
 ==== Lua
 
-To call such a function in Lua you simply need to get the Lua-Component-Structure and call the function in that table.
+To call such a function in Lua you simply need to get the Lua-Component-Structure and call the member function in that table as method `:`.
 
-[IMPORTANT]
-=====
-The function it self is bound to the component. That means you can take the function and store it in any variable and it still refers to the same component. This allows you to minimize the memory usage, if that's important.
-=====
+If you want to get a list of all member of the Lua instnace's functions and attributes, you can use the `string[] getMembers()` function.
 
 === Signals
 
