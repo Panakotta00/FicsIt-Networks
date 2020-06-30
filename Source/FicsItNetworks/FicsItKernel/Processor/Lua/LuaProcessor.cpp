@@ -344,13 +344,13 @@ namespace FicsItKernel {
 				if (kernel->getState() != RUNNING) return;
 
 				ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(Storage);
-
+				
+				reset();
+				
 				// save pull state
 				pullState = Data->PullState;
 				timeout = Data->Timeout;
 				pullStart = std::chrono::time_point<std::chrono::high_resolution_clock>(std::chrono::milliseconds(Data->PullStart));
-
-				reset();
 
 				// decode & check data from json
 				TArray<ANSICHAR> thread;
@@ -380,6 +380,11 @@ namespace FicsItKernel {
 
 				// check unpersist
 				if (ok != LUA_OK) {
+					// print error
+					if (lua_isstring(luaState, -1)) {
+						SML::Logging::error("Unable to unpersit! '", lua_tostring(luaState, -1), "'");
+					}
+					
 					// cleanup
 					lua_pushnil(luaState); // ..., uperm, err, nil
 					lua_setfield(luaState, -3, "Globals"); // ..., uperm, err

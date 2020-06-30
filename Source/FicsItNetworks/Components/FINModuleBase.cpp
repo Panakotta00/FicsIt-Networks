@@ -2,8 +2,9 @@
 
 #include "ModuleSystem/FINModuleSystemHolo.h"
 
-AFINModuleBase::AFINModuleBase() {
-	mHologramClass = AFINModuleSystemHolo::StaticClass();
+void AFINModuleBase::Serialize(FArchive& Ar) {
+	Super::Serialize(Ar);
+	Ar << Listeners;
 }
 
 bool AFINModuleBase::ShouldSave_Implementation() const {

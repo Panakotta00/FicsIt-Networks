@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "FicsItKernel/Network/NetworkTrace.h"
+#include "util/Logging.h"
+
 #include "FINNetworkTrace.generated.h"
 
 /**
@@ -55,6 +57,7 @@ inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
 }
 
 inline bool FFINNetworkTrace::Serialize(FArchive& Ar) {
+	SML::Logging::error("FIN Serialize!");
 	if (Ar.IsSaveGame()) {
 		bool valid = trace.isValid();
 		Ar << valid;

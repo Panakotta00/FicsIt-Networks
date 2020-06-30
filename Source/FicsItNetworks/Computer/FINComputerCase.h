@@ -151,9 +151,9 @@ public:
 	void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
 
 private:
-	UPROPERTY()
-		FString SerialOutput;
+	UPROPERTY(SaveGame)
+	FString SerialOutput;
 
 	UFUNCTION()
-		void OnDriveUpdate(bool added, AFINFileSystemState* drive);
+	void OnDriveUpdate(bool added, AFINFileSystemState* drive);
 };

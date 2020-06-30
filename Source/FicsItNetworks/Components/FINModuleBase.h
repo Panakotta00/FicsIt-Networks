@@ -9,14 +9,13 @@
 UCLASS()
 class AFINModuleBase : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender {
 	GENERATED_BODY()
-private:
+public:
     /**
     * The signal listeners listening to this component.
     */
-    UPROPERTY(SaveGame)
+    UPROPERTY()
     TSet<FFINNetworkTrace> Listeners;
     
-public:
     UPROPERTY(EditDefaultsOnly)
     FVector2D ModuleSize;
 
@@ -29,7 +28,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, SaveGame)
     UFINModuleSystemPanel* ModulePanel = nullptr;
 
-	AFINModuleBase();
+	// Begin UObject
+	virtual void Serialize(FArchive& Ar) override;
+	// End UObject
 
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;

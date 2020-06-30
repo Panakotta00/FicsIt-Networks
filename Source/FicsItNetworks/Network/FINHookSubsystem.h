@@ -16,16 +16,23 @@ public:
 /**
  * Contains the listener list and a list of attached hook for a object.
  */
-USTRUCT()
-struct FFINHookData {
+USTRUCT(BlueprintType)
+struct FICSITNETWORKS_API FFINHookData {
 	GENERATED_BODY()
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	TSet<FFINNetworkTrace> Listeners;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	TSet<UFINHook*> Hooks;
+
+	bool Serialize(FArchive& Ar);
 };
+
+inline FArchive& operator<<(FArchive& Ar, FFINHookData& data) {
+	data.Serialize(Ar);
+	return Ar;
+}
 
 UCLASS()
 class AFINHookSubsystem : public AFGSubsystem, public IFGSaveInterface {
@@ -34,7 +41,7 @@ private:
 	/**
 	 * Contains the hook data of all objects which have hooks attached to them.
 	 */
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	TMap<UObject*, FFINHookData> Data;
 
 	/**
@@ -43,6 +50,10 @@ private:
 	static TMap<UClass*, TSet<TSubclassOf<UFINHook>>> HookRegistry;
 
 public:
+	// Begin UObject
+	virtual void Serialize(FArchive& Ar) override;
+	// End UObject
+	
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
@@ -70,7 +81,7 @@ public:
 	 * @param[in]	object	the object you want to get the listener list for.
 	 * @return	reference to the listener list
 	 */
-	TSet<FFINNetworkTrace>& GetListeners(UObject* object);
+	TSet<FFINNetworkTrace> GetListeners(UObject* object) const;
 
 	/**
 	 * Sends the given signal to all listeners of the given object.

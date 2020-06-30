@@ -3,8 +3,22 @@
 #include "FINNetworkTrace.h"
 #include "FINSubsystemHolder.h"
 #include "Signals/FINSignalListener.h"
+#include "util/Logging.h"
 
 TMap<UClass*, TSet<TSubclassOf<UFINHook>>> AFINHookSubsystem::HookRegistry;
+
+bool FFINHookData::Serialize(FArchive& Ar) {
+	Ar << Listeners;
+	return true;
+}
+
+void AFINHookSubsystem::Serialize(FArchive& Ar) {
+	Super::Serialize(Ar);
+	Ar << Data;
+	if (Ar.IsLoading()) for (const TTuple<UObject*, FFINHookData>& data : Data) {
+		AttachHooks(data.Key);
+	}
+}
 
 bool AFINHookSubsystem::ShouldSave_Implementation() const {
 	return true;
@@ -18,8 +32,12 @@ void AFINHookSubsystem::RegisterHook(UClass* clazz, TSubclassOf<UFINHook> hook) 
 	HookRegistry.FindOrAdd(clazz).Add(hook);
 }
 
-TSet<FFINNetworkTrace>& AFINHookSubsystem::GetListeners(UObject* object) {
-	return Data[object].Listeners;
+TSet<FFINNetworkTrace> AFINHookSubsystem::GetListeners(UObject* object) const {
+	TSet<FFINNetworkTrace> traces;
+	for (const FFINNetworkTrace& trace : Data[object].Listeners) {
+		traces.Add(trace);
+	}
+	return traces;
 }
 
 void AFINHookSubsystem::EmitSignal(UObject* object, FFINSignal signal) {
@@ -31,20 +49,20 @@ void AFINHookSubsystem::EmitSignal(UObject* object, FFINSignal signal) {
 
 void AFINHookSubsystem::AttachHooks(UObject* object) {
 	ClearHooks(object);
-	TSet<UFINHook*>& hooks = Data.FindOrAdd(object).Hooks;
+	FFINHookData& HookData = Data.FindOrAdd(object);
 	UClass* clazz = object->GetClass();
 	while (clazz) {
 		TSet<TSubclassOf<UFINHook>>* hookClasses = HookRegistry.Find(clazz);
 		if (hookClasses) for (TSubclassOf<UFINHook> hookClass : *hookClasses) {
 			UFINHook* hook = NewObject<UFINHook>(this, hookClass);
-			hooks.Add(hook);
+			HookData.Hooks.Add(hook);
 			hook->Register(object);
 		}
 		
 		if (clazz == UObject::StaticClass()) clazz = nullptr;
 		else clazz = clazz->GetSuperClass();
 	}
-	for (UFINHook* hook : hooks) {
+	for (UFINHook* hook : HookData.Hooks) {
 		hook->Register(object);
 	}
 }
@@ -53,7 +71,7 @@ void AFINHookSubsystem::ClearHooks(UObject* object) {
 	FFINHookData* data = Data.Find(object);
 	if (!data) return;
 	for (UFINHook* hook : data->Hooks) {
-		hook->Unregister();
+		if (hook) hook->Unregister();
 	}
 	data->Hooks.Empty();
 }
@@ -64,7 +82,7 @@ void AFINHookSubsystem::AddListener(UObject* sender, FFINNetworkTrace listener) 
 }
 
 void AFINHookSubsystem::RemoveListener(UObject* sender, UObject* listener) {
-	TSet<FFINNetworkTrace> traces = Data[sender].Listeners;
+	TSet<FFINNetworkTrace>& traces = Data[sender].Listeners;
 	traces.Remove(FFINNetworkTrace(listener));
 	if (traces.Num() < 1) ClearHooks(sender);
 }

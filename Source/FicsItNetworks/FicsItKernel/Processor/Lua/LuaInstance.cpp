@@ -13,9 +13,6 @@
 
 #define OffsetParam(type, off) (type*)((std::uint64_t)param + off)
 
-// TODO: Add nick field
-// TODO: Add id field
-
 namespace FicsItKernel {
 	namespace Lua {
 		std::map<UObject*, std::mutex> objectLocks;
@@ -537,8 +534,6 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceNewIndex(lua_State* L) {
-			// TODO: add property set
-
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// get instance
@@ -643,7 +638,7 @@ namespace FicsItKernel {
 				msg << " " << TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetID(obj).ToString());
 			}
 			lua_pushstring(L,  msg.str().c_str());
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return 1;
 		}
 
 		int luaInstanceUnpersist(lua_State* L) {
@@ -681,7 +676,7 @@ namespace FicsItKernel {
 			lua_pushstring(L, typeName.c_str());
 			
 			// create & return closure
-			lua_pushcclosure(L, &luaInstanceUnpersist, 1);
+			lua_pushcclosure(L, &luaInstanceUnpersist, 2);
 			return 1;
 	}
 
@@ -865,7 +860,7 @@ namespace FicsItKernel {
 			} else {
 				lua_pushstring(L, typeName.c_str());
 			}
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return 1;
 		}
 
 		int luaClassInstanceUnpersist(lua_State* L) {
@@ -964,7 +959,9 @@ namespace FicsItKernel {
 			lua_pushcfunction(L, luaInstanceUFuncCall);			// ..., InstanceUFuncCall
 			PersistValue("InstanceUFuncCall");				// ...
 			lua_pushcfunction(L, luaInstanceGetMembers);			// ..., LuaInstanceGetMembers
-			PersistValue("InstnaceGetMembers");				// ...
+			PersistValue("InstanceGetMembers");				// ...
+			lua_pushcfunction(L, luaClassInstanceFuncCall);		// ..., LuaClassInstanceFuncCall
+			PersistValue("ClassInstanceFuncCall");			// ...
 			lua_pushcfunction(L, luaClassInstanceGetMembers);	// ..., LuaClassInstanceGetMembers
 			PersistValue("ClassInstnaceGetMembers");			// ...
 			lua_pushcfunction(L, luaInstanceUnpersist);			// ..., LuaInstanceUnpersist

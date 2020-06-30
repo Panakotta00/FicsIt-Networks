@@ -1,5 +1,10 @@
 #include "FINComputerModule.h"
 
+void AFINComputerModule::Serialize(FArchive& Ar) {
+	Super::Serialize(Ar);
+	Ar << Listeners;
+}
+
 bool AFINComputerModule::ShouldSave_Implementation() const {
 	return true;
 }

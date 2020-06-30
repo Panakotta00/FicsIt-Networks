@@ -195,47 +195,40 @@ namespace FicsItKernel {
 		}
 
 		LuaFunc(doFile)
-			FileSystem::SRef<FileSystem::File> p;
+			FileSystem::SRef<FileSystem::FileStream> file;
 			try {
-				p = self->get(luaL_checkstring(L, 1));
+				file = self->open(luaL_checkstring(L, 1), FileSystem::INPUT);
 			} CatchExceptionLua
-			if (!p.isValid()) return luaL_argerror(L, 1, "path is no valid file");
-			FileSystem::SRef<FileSystem::FileStream> s;
-			try {
-				s = p->open(FileSystem::INPUT);
-			} CatchExceptionLua
-			if (!s.isValid()) return luaL_error(L, "not able to create filestream");
-			int n = lua_gettop(L);
+			if (!file.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;
 			try {
-				code = s->readAll();
+				code = file->readAll();
 			} CatchExceptionLua
-			luaL_dofile(L, code.c_str());
 			try {
-				s->close();
+				file->close();
 			} CatchExceptionLua
-			return LuaProcessor::luaAPIReturn(L, lua_gettop(L) - n);
+			int n = lua_gettop(L) - 1;
+			luaL_loadbuffer(L, code.c_str(), code.size(), code.c_str());
+			lua_insert(L, 2);
+			lua_call(L, n, LUA_MULTRET);
+			return LuaProcessor::luaAPIReturn(L, lua_gettop(L) - 1);
 		}
 
 		LuaFunc(loadFile)
-			FileSystem::SRef<FileSystem::File> p;
+			FileSystem::SRef<FileSystem::FileStream> file;
 			try {
-				p = self->get(luaL_checkstring(L, 1));
+				file = self->open(luaL_checkstring(L, 1), FileSystem::INPUT);
 			} CatchExceptionLua
-			if (!p.isValid()) return luaL_argerror(L, 1, "path is no valid file");
-			FileSystem::SRef<FileSystem::FileStream> s;
-			try {
-				s = p->open(FileSystem::INPUT);
-			} CatchExceptionLua
-			if (!s.isValid()) return luaL_error(L, "not able to create filestream");
+			if (!file.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;
 			try {
-				code = s->readAll();
+				code = file->readAll();
 			} CatchExceptionLua
-			luaL_loadfile(L, code.c_str());
 			try {
-				s->close();
+				file->close();
 			} CatchExceptionLua
+			int n = lua_gettop(L) - 1;
+			luaL_loadbuffer(L, code.c_str(), code.size(), code.c_str());
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
