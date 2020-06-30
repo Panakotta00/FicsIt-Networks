@@ -30,6 +30,8 @@ for controlling and monitoring what happens in the network or whatever.
 === `iomodule getModule(x, y[, z])`
 
 Returns the IOModule at the given location.
+The x and y values origin of the coordinate system is in the lower left corner of a panel.
+Where the x-Axis is the horizontal one, and the y-Axis is the vertical one.
 
 Params::
 +
