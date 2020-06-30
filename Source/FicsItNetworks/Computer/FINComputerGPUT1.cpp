@@ -131,43 +131,32 @@ AFINComputerGPUT1::AFINComputerGPUT1() {
 
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/Game/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
-	return SNew(SScaleBox)
-	.Stretch(EStretch::ScaleToFit)
-	.Content()
-	[
-		SNew(SBorder)
-		.BorderImage(&boxBrush)
-		.Padding(40)
-		.Content()
-		[
-			SNew(SScreenMonitor)
-			.ScreenSize_Lambda([this]() {
-				return ScreenSize;
-			})
-			.Text_Lambda([this]() {
-                return TextGrid;
-			})
-			.Foreground_Lambda([this]() {
-				return Foreground;
-			})
-			.Background_Lambda([this]() {
-				return Background;
-			})
-			.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/Game/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
-			.OnMouseDown_Lambda([this](int x, int y, int btn) {
-				netSig_OnMouseDown(x, y, btn);
-				return FReply::Handled();
-			})
-			.OnMouseUp_Lambda([this](int x, int y, int btn) {
-                netSig_OnMouseUp(x, y, btn);
-                return FReply::Handled();
-            })
-            .OnMouseMove_Lambda([this](int x, int y, int btn) {
-                netSig_OnMouseMove(x, y, btn);
-                return FReply::Handled();
-            })
-		]
-	];
+	return SNew(SScreenMonitor)
+		.ScreenSize_Lambda([this]() {
+			return ScreenSize;
+		})
+		.Text_Lambda([this]() {
+            return TextGrid;
+		})
+		.Foreground_Lambda([this]() {
+			return Foreground;
+		})
+		.Background_Lambda([this]() {
+			return Background;
+		})
+		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/Game/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
+		.OnMouseDown_Lambda([this](int x, int y, int btn) {
+			netSig_OnMouseDown(x, y, btn);
+			return FReply::Handled();
+		})
+		.OnMouseUp_Lambda([this](int x, int y, int btn) {
+            netSig_OnMouseUp(x, y, btn);
+            return FReply::Handled();
+        })
+        .OnMouseMove_Lambda([this](int x, int y, int btn) {
+            netSig_OnMouseMove(x, y, btn);
+            return FReply::Handled();
+        });
 }
 
 void AFINComputerGPUT1::SetScreenSize(FVector2D size) {

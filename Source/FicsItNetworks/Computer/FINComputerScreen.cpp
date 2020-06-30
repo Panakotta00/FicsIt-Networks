@@ -23,60 +23,11 @@ UObject* AFINComputerScreen::GetGPU() const {
 	return GPU;
 }
 
-AFINComputerScreen* UFINScreenWidget::GetScreen() {
-	return Screen;
-}
-
 void AFINComputerScreen::SetWidget(TSharedPtr<SWidget> widget) {
 	if (Widget != widget) Widget = widget;
 	OnWidgetUpdate.Broadcast();
 }
 
-void UFINScreenWidget::OnNewWidget() {
-	if (Container.IsValid()) {
-		if (Screen && Screen->Widget.IsValid()) {
-			Container->SetContent(Screen->Widget.ToSharedRef());
-		} else {
-			Container->SetContent(SNew(SBox));
-		}
-	}
-}
-
-void UFINScreenWidget::OnNewGPU() {
-	if (this->Screen->GetGPU()) {
-		Cast<IFINGraphicsProcessor>(this->Screen->GetGPU())->RequestNewWidget();
-	}
-}
-
-void UFINScreenWidget::SetScreen(AFINComputerScreen* Screen) {
-	if (this->Screen) {
-		this->Screen->OnWidgetUpdate.RemoveDynamic(this, &UFINScreenWidget::OnNewWidget);
-		this->Screen->OnGPUUpdate.RemoveDynamic(this, &UFINScreenWidget::OnNewGPU);
-	}
-	this->Screen = Screen;
-	if (this->Screen) {
-		this->Screen->OnWidgetUpdate.AddDynamic(this, &UFINScreenWidget::OnNewWidget);
-		this->Screen->OnGPUUpdate.AddDynamic(this, &UFINScreenWidget::OnNewGPU);
-		if (Container.IsValid() && this->Screen->GetGPU()) {
-			Cast<IFINGraphicsProcessor>(this->Screen->GetGPU())->RequestNewWidget();
-		}
-	}
-}
-
-void UFINScreenWidget::ReleaseSlateResources(bool bReleaseChildren) {
-	Super::ReleaseSlateResources(bReleaseChildren);
-
-	if (Screen) {
-		Screen->Widget.Reset();
-		IFINGraphicsProcessor* GPU = Cast<IFINGraphicsProcessor>(Screen->GetGPU());
-		if (GPU) GPU->DropWidget();
-		OnNewWidget();
-	}
-	Container.Reset();
-}
-
-TSharedRef<SWidget> UFINScreenWidget::RebuildWidget() {
-	Container = SNew(SBox);
-	OnNewWidget();
-	return Container.ToSharedRef();
+TSharedPtr<SWidget> AFINComputerScreen::GetWidget() const {
+	return Widget;
 }

@@ -46,4 +46,13 @@ public:
 	 * @param[in]	widget	the new widget which should get displayed.
 	 */
 	virtual void SetWidget(TSharedPtr<SWidget> widget) = 0;
+
+	/**
+	 * Returns the currently cached widget of the screen
+	 *
+	 * Client Only
+	 *
+	 * @return	the currently cached widget
+	 */
+	virtual TSharedPtr<SWidget> GetWidget() const = 0;
 };

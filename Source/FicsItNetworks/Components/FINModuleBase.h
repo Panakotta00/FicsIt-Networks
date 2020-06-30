@@ -1,36 +1,35 @@
-#pragma once
+﻿#pragma once
 
-#include "CoreMinimal.h"
-#include "Buildables/FGBuildable.h"
-#include "ModuleSystem/FINModuleSystemModule.h"
+#include "FGBuildable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Network/FINNetworkTrace.h"
 #include "Network/Signals/FINSignalSender.h"
-
-#include "FINComputerModule.generated.h"
+#include "FINModuleBase.generated.h"
 
 UCLASS()
-class AFINComputerModule : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender {
+class AFINModuleBase : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender {
 	GENERATED_BODY()
-
 private:
-	/**
+    /**
     * The signal listeners listening to this component.
     */
-    UPROPERTY()
+    UPROPERTY(SaveGame)
     TSet<FFINNetworkTrace> Listeners;
     
 public:
-	UPROPERTY(EditDefaultsOnly, Category="ComputerModule")
-	FVector2D ModuleSize;
+    UPROPERTY(EditDefaultsOnly)
+    FVector2D ModuleSize;
 
-	UPROPERTY(EditDefaultsOnly, Category="ComputerModule")
-	FName ModuleName;
+	UPROPERTY(EditDefaultsOnly)
+    FName ModuleName;
 
-	UPROPERTY(BlueprintReadOnly, SaveGame, Category="ComputerModule")
-	FVector ModulePos;
+	UPROPERTY(BlueprintReadOnly, SaveGame)
+    FVector ModulePos;
 
-	UPROPERTY(BlueprintReadOnly, SaveGame, Category="ComputerModule")
-	UFINModuleSystemPanel* ModulePanel = nullptr;
+	UPROPERTY(BlueprintReadOnly, SaveGame)
+    UFINModuleSystemPanel* ModulePanel = nullptr;
+
+	AFINModuleBase();
 
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;

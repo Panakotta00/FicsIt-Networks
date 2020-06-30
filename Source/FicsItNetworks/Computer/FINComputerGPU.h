@@ -12,7 +12,7 @@ protected:
     UObject* Screen = nullptr;
 
 	TSharedPtr<SWidget> Widget;
-	bool shouldCreate = false;
+	bool bShouldCreate = false;
 
 public:
 	AFINComputerGPU();
@@ -42,4 +42,49 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
     void netSig_ScreenBound(UObject* oldScreen);
+};
+
+/**
+* Used by a Screen to display the widget in a UMG environment.
+* Updates the used Widget according to the bound screen.
+*/
+UCLASS()
+class UFINScreenWidget : public UWidget {
+	GENERATED_BODY()
+
+private:
+    virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+
+	UPROPERTY()
+    UObject* Screen = nullptr;
+
+	TSharedPtr<SBox> Container = nullptr;
+
+protected:
+    // UWidget interface
+    virtual TSharedRef<SWidget> RebuildWidget() override;
+	// End of UWidget interface
+	
+public:
+	UFUNCTION(BlueprintCallable)
+    void OnNewWidget();
+
+	UFUNCTION(BlueprintCallable)
+    void OnNewGPU();
+	
+    /**
+     * Binds the given screen with this widget which will display the screen accordingly.
+     *
+     * @param[in]	NewScreen	The screen you want to bind to
+     */
+    UFUNCTION(BlueprintCallable, Category="Computer|Graphics")
+    void SetScreen(UObject* NewScreen);
+
+	/**
+	 * Returns the screen we are currently bound to.
+	 *
+	 * @return	the screen we are bound to
+	 */
+	UFUNCTION(BlueprintCallable, Category="Computer|Graphics")
+    UObject* GetScreen();
 };

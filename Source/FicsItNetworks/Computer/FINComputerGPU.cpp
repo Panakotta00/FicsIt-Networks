@@ -12,8 +12,8 @@ AFINComputerGPU::AFINComputerGPU() {
 void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
-	if (shouldCreate) {
-		shouldCreate = false;
+	if (bShouldCreate) {
+		bShouldCreate = false;
 		if (!IsValid(Screen)) return;
 		if (!Widget.IsValid()) Widget = CreateWidget();
 		Cast<IFINScreen>(Screen)->SetWidget(Widget);
@@ -41,11 +41,12 @@ UObject* AFINComputerGPU::GetScreen() const {
 }
 
 void AFINComputerGPU::RequestNewWidget() {
-	shouldCreate = true;
+	bShouldCreate = true;
 }
 
 void AFINComputerGPU::DropWidget() {
 	Widget.Reset();
+	Cast<IFINScreen>(Screen)->SetWidget(nullptr);
 }
 
 TSharedPtr<SWidget> AFINComputerGPU::CreateWidget() {
@@ -53,3 +54,50 @@ TSharedPtr<SWidget> AFINComputerGPU::CreateWidget() {
 }
 
 void AFINComputerGPU::netSig_ScreenBound_Implementation(UObject* oldScreen) {}
+
+
+void UFINScreenWidget::OnNewWidget() {
+	if (Container.IsValid()) {
+		if (Screen && Cast<IFINScreen>(Screen)->GetWidget().IsValid()) {
+			Container->SetContent(Cast<IFINScreen>(Screen)->GetWidget().ToSharedRef());
+		} else {
+			Container->SetContent(SNew(SBox));
+		}
+	}
+}
+
+void UFINScreenWidget::OnNewGPU() {
+	if (Cast<IFINScreen>(this->Screen)->GetGPU()) {
+		Cast<IFINGraphicsProcessor>(Cast<IFINScreen>(this->Screen)->GetGPU())->RequestNewWidget();
+	}
+}
+
+void UFINScreenWidget::SetScreen(UObject* Screen) {
+	this->Screen = Screen;
+	if (this->Screen) {
+		if (Container.IsValid() && Cast<IFINScreen>(this->Screen)->GetGPU()) {
+			Cast<IFINGraphicsProcessor>(Cast<IFINScreen>(this->Screen)->GetGPU())->RequestNewWidget();
+		}
+	}
+}
+
+UObject* UFINScreenWidget::GetScreen() {
+	return Screen;
+}
+
+void UFINScreenWidget::ReleaseSlateResources(bool bReleaseChildren) {
+	Super::ReleaseSlateResources(bReleaseChildren);
+
+	if (Screen) {
+		IFINGraphicsProcessor* GPU = Cast<IFINGraphicsProcessor>(Cast<IFINScreen>(Screen)->GetGPU());
+		if (GPU) GPU->DropWidget();
+		OnNewWidget();
+	}
+	Container.Reset();
+}
+
+TSharedRef<SWidget> UFINScreenWidget::RebuildWidget() {
+	Container = SNew(SBox);
+	OnNewWidget();
+	return Container.ToSharedRef();
+}
