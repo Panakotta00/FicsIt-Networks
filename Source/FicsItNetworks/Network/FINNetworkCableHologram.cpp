@@ -69,7 +69,7 @@ bool AFINNetworkCableHologram::IsValidHitResult(const FHitResult& hit) const {
 	if (!IsValid(actor)) return false;
 	if (IsValid(actor->GetComponentByClass(UFINNetworkConnector::StaticClass()))
 		|| (
-			actor->IsA<AFGBuildableFactory>()
+			actor->IsA<AFGBuildable>()
 			&&
 			IsValid(actor->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()))
 		)) return true;
@@ -96,7 +96,7 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 	}
 
 	// find the nearest power connector to hit if actor is factory
-	if (actor->IsA<AFGBuildableFactory>()) {
+	if (actor->IsA<AFGBuildable>()) {
 		auto cons = actor->GetComponentsByClass(UFGPowerConnectionComponent::StaticClass());
 		float dist = -1.0f;
 		USceneComponent* con = nullptr;

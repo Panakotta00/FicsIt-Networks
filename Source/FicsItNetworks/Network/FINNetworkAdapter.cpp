@@ -67,7 +67,7 @@ void AFINNetworkAdapter::BeginPlay() {
 	Attachment->RegisterComponent();
 
 	bool done = false;
-	if (Parent->IsA<AFGBuildableFactory>()) {
+	if (Parent->IsA<AFGBuildable>()) {
 		auto cons = Parent->GetComponentsByClass(UFGPowerConnectionComponent::StaticClass());
 		float dist = -1.0f;
 		USceneComponent* con = nullptr;
