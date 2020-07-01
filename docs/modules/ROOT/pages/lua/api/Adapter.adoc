@@ -2323,6 +2323,108 @@ Return Values::
 |A array with all the trains mocing ont the trackgraph.
 |===
 
+== DockingStation
+
+This is the docking station for vehicles like trucks. Which is then able to transfer fuel and items
+from and to the vehicle.
+
+=== Functions
+
+==== `Inventory getFuelInv()`
+
+This function returns the inventory of the docking station holding the fuel.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Inventory
+|Inventory
+|The inventory holding the fuel.
+|===
+
+==== `Inventory getInv()`
+
+This function returns the inventory of the docking station holding the items which get transfered
+from and to the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Inventory
+|Inventory
+|The inventory holding the items.
+|===
+
+==== `Actor getDocked()`
+
+This function returns the docked actor like the truck.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Actor
+|Actor
+|The Actor which is currently docked.
+|===
+
+==== `undock()`
+
+Undocks the currently docked actor from the docking station.
+
+==== `setInLoadMode(bool loadMode)`
+
+Sets if the docking station is in load mode.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|loadMode
+|bool
+|True if the dockin station should be in load mode.
+|===
+
+==== `bool isLoadMode()`
+
+Returns if the dockingstation is currently in load mode or not.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the docking station is currently in load mode.
+|===
+
+==== `bool isLoadMode()`
+
+Returns if the dockingstation is currently loading or unloading the docked actor.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the docking station is currently loading or unloading.
+|===
+
 
 
 include::partial$api_footer.adoc[]

@@ -1,6 +1,7 @@
 #include "LuaLib.h"
 
 
+#include "FGBuildableDockingStation.h"
 #include "FGBuildableRailroadStation.h"
 #include "FGBuildableTrainPlatformCargo.h"
 #include "LuaStructs.h"
@@ -975,6 +976,36 @@ namespace FicsItKernel {
 		// Begin AFGBuildableRailroadSignal
 
 		// End AFGBuildableRailroadSignal
+
+		LuaLibTypeDecl(AFGBuildableDockingStation, DockingStation)
+
+		LuaLibFunc(AFGBuildableDockingStation, getFuelInv, {
+			newInstance(L, obj / self->GetFuelInventory());
+			return 1;
+		})
+
+		LuaLibFunc(AFGBuildableDockingStation, getInv, {
+            newInstance(L, obj / self->GetInventory());
+            return 1;
+        })
+
+		LuaLibFunc(AFGBuildableDockingStation, getDocked, {
+            newInstance(L, obj / self->GetDockedActor());
+            return 1;
+        })
+
+		LuaLibFunc(AFGBuildableDockingStation, undock, {
+            self->Undock();
+            return 0;
+        })
+
+		LuaLibFunc(AFGBuildableDockingStation, setInLoadMode, {
+			self->SetIsInLoadMode(lua_toboolean(L, 1));
+			return 0;
+		})
+
+		LuaLibFuncGetBool(AFGBuildableDockingStation, isLoadMode, GetIsInLoadMode)
+		LuaLibFuncGetBool(AFGBuildableDockingStation, isLoadUnloading, IsLoadUnloading)
 
 		/* ################### */
 		/* # Class Instances # */
