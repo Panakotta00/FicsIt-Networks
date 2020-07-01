@@ -37,6 +37,14 @@ namespace FicsItKernel {
 			lua_yield(L, 0);
 			return 0;
 		}
+
+		int luaComputerSkipContinue(lua_State* L, int status, lua_KContext ctx) {
+			return 0;
+		}
+
+		LuaFunc(luaComputerSkip)
+			return LuaProcessor::luaAPIReturn(L, 0);
+		}
 #pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
@@ -89,6 +97,7 @@ namespace FicsItKernel {
 			{"reset", luaComputerReset},
 			{"stop", luaComputerStop},
 			{"panic", luaComputerPanic},
+			{"skip", luaComputerSkip},
 			{"beep", luaComputerBeep},
 			{"setEEPROM", luaComputerSetEEPROM},
 			{"getEEPROM", luaComputerGetEEPROM},

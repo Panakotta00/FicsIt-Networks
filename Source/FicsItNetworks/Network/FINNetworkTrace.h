@@ -57,7 +57,6 @@ inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
 }
 
 inline bool FFINNetworkTrace::Serialize(FArchive& Ar) {
-	SML::Logging::error("FIN Serialize!");
 	if (Ar.IsSaveGame()) {
 		bool valid = trace.isValid();
 		Ar << valid;

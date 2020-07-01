@@ -13,6 +13,9 @@ namespace FicsItKernel {
 			} else if (c & EClassCastFlags::CASTCLASS_UIntProperty) {
 				lua_pushinteger(L, *p->ContainerPtrToValuePtr<std::int32_t>(data));
 				return LuaDataType::LUA_INT;
+			} else if (c & EClassCastFlags::CASTCLASS_UInt64Property) {
+				lua_pushinteger(L, *p->ContainerPtrToValuePtr<std::int64_t>(data));
+				return LuaDataType::LUA_INT;
 			} else if (c & EClassCastFlags::CASTCLASS_UFloatProperty) {
 				lua_pushnumber(L, *p->ContainerPtrToValuePtr<float>(data));
 				return LuaDataType::LUA_NUM;
@@ -34,6 +37,9 @@ namespace FicsItKernel {
 				return LuaDataType::LUA_BOOL;
 			} else if (c & EClassCastFlags::CASTCLASS_UIntProperty) {
 				*p->ContainerPtrToValuePtr<std::int32_t>(data) = static_cast<std::int32_t>(lua_tointeger(L, i));
+				return LuaDataType::LUA_INT;
+			} else if (c & EClassCastFlags::CASTCLASS_UInt64Property) {
+				*p->ContainerPtrToValuePtr<std::int64_t>(data) = static_cast<std::int64_t>(lua_tointeger(L, i));
 				return LuaDataType::LUA_INT;
 			} else if (c & EClassCastFlags::CASTCLASS_UFloatProperty) {
 				*p->ContainerPtrToValuePtr<float>(data) = static_cast<float>(lua_tonumber(L, i));

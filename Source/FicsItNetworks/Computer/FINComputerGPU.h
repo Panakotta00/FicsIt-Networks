@@ -87,4 +87,10 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Computer|Graphics")
     UObject* GetScreen();
+
+	/**
+	 * Focuses the users input to the widget provided by the GPU
+	 */
+	UFUNCTION(BlueprintCallable, Category="Computer|Graphics")
+	void Focus();
 };

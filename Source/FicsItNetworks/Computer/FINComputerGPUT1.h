@@ -4,6 +4,7 @@
 #include "FINComputerGPUT1.generated.h"
 
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
+DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenKeyEventHandler, uint32, uint32, int);
 
 class SScreenMonitor : public SLeafWidget {
 	SLATE_BEGIN_ARGS(SScreenMonitor) : _Text(),
@@ -21,6 +22,8 @@ class SScreenMonitor : public SLeafWidget {
 		SLATE_EVENT(FScreenCursorEventHandler, OnMouseDown)
 		SLATE_EVENT(FScreenCursorEventHandler, OnMouseUp)
 		SLATE_EVENT(FScreenCursorEventHandler, OnMouseMove)
+		SLATE_EVENT(FScreenKeyEventHandler, OnKeyDown)
+		SLATE_EVENT(FScreenKeyEventHandler, OnKeyUp)
 	SLATE_END_ARGS()
 
 public:
@@ -76,6 +79,21 @@ public:
 	 * @return	the integer holding the bit field
 	 */
 	static int MouseToInt(const FPointerEvent& MouseEvent);
+
+	/**
+	* This function converts a key events button states to a int which is actually a bit field
+	* for each of the button states.
+	* The states from least significant bit to most:
+	* - 0
+	* - 0
+	* - control key down
+	* - alt key down
+	* - shift key down
+	* - command key down
+	*
+	* @return	the integer holding the bit field
+	*/
+	static int InputToInt(const FInputEvent& InputEvent);
 	
 private:
     TAttribute<TArray<FString>> Text;
@@ -86,6 +104,8 @@ private:
 	FScreenCursorEventHandler OnMouseDownEvent;
 	FScreenCursorEventHandler OnMouseUpEvent;
 	FScreenCursorEventHandler OnMouseMoveEvent;
+	FScreenKeyEventHandler OnKeyDownEvent;
+	FScreenKeyEventHandler OnKeyUpEvent;
 
 	int lastMoveX = -1;
 	int lastMoveY = -1;
@@ -99,6 +119,10 @@ public:
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual bool IsInteractable() const override;
+	virtual bool SupportsKeyboardFocus() const override;
 	// End SWidget
 };
 
@@ -147,6 +171,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void netSig_OnMouseMove(int x, int y, int btn);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void netSig_OnKeyDown(int64 c, int64 code, int btn);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void netSig_OnKeyUp(int64 c, int64 code, int btn);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void netSig_ScreenSizeChanged(int oldW, int oldH);

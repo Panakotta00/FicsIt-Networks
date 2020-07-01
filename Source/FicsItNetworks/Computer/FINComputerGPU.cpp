@@ -85,6 +85,15 @@ UObject* UFINScreenWidget::GetScreen() {
 	return Screen;
 }
 
+void UFINScreenWidget::Focus() {
+	if (this->Screen) {
+		TSharedPtr<SWidget> widget = Cast<IFINScreen>(this->Screen)->GetWidget();
+		if (widget.IsValid()) {
+			FSlateApplication::Get().SetKeyboardFocus(widget);
+		}
+	}
+}
+
 void UFINScreenWidget::ReleaseSlateResources(bool bReleaseChildren) {
 	Super::ReleaseSlateResources(bReleaseChildren);
 

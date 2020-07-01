@@ -14,6 +14,8 @@ void SScreenMonitor::Construct(const FArguments& InArgs) {
 	OnMouseDownEvent = InArgs._OnMouseDown;
 	OnMouseUpEvent = InArgs._OnMouseUp;
 	OnMouseMoveEvent = InArgs._OnMouseMove;
+	OnKeyDownEvent = InArgs._OnKeyDown;
+	OnKeyUpEvent = InArgs._OnKeyUp;
 	SetCanTick(false);
 }
 
@@ -48,6 +50,15 @@ int SScreenMonitor::MouseToInt(const FPointerEvent& MouseEvent) {
 	if (MouseEvent.IsShiftDown())								mouseEvent |= 0b0000001000;
 	if (MouseEvent.IsAltDown())									mouseEvent |= 0b0000010000;
 	if (MouseEvent.IsCommandDown())								mouseEvent |= 0b0000100000;
+	return mouseEvent;
+}
+
+int SScreenMonitor::InputToInt(const FInputEvent& KeyEvent) {
+	int mouseEvent = 0;
+	if (KeyEvent.IsControlDown())								mouseEvent |= 0b0000000100;
+	if (KeyEvent.IsShiftDown())									mouseEvent |= 0b0000001000;
+	if (KeyEvent.IsAltDown())									mouseEvent |= 0b0000010000;
+	if (KeyEvent.IsCommandDown())								mouseEvent |= 0b0000100000;
 	return mouseEvent;
 }
 
@@ -121,6 +132,24 @@ FReply SScreenMonitor::OnMouseMove(const FGeometry& MyGeometry, const FPointerEv
 	return FReply::Unhandled();
 }
 
+FReply SScreenMonitor::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
+	if (OnKeyDownEvent.IsBound()) return OnKeyDownEvent.Execute(InKeyEvent.GetCharacter(), InKeyEvent.GetKeyCode(), InputToInt(InKeyEvent));
+	return FReply::Unhandled();
+}
+
+FReply SScreenMonitor::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
+	if (OnKeyUpEvent.IsBound()) return OnKeyUpEvent.Execute(InKeyEvent.GetCharacter(), InKeyEvent.GetKeyCode(), InputToInt(InKeyEvent));
+	return FReply::Unhandled();
+}
+
+bool SScreenMonitor::IsInteractable() const {
+	return true;
+}
+
+bool SScreenMonitor::SupportsKeyboardFocus() const {
+	return true;
+}
+
 SScreenMonitor::SScreenMonitor() {
 	
 }
@@ -156,6 +185,14 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
         .OnMouseMove_Lambda([this](int x, int y, int btn) {
             netSig_OnMouseMove(x, y, btn);
             return FReply::Handled();
+        })
+		.OnKeyDown_Lambda([this](uint32 c, uint32 key, int btn) {
+			netSig_OnKeyDown(c, key, btn);
+			return FReply::Handled();
+		})
+		.OnKeyUp_Lambda([this](uint32 c, uint32 key, int btn) {
+            netSig_OnKeyUp(c, key, btn);
+			return FReply::Handled();
         });
 }
 
@@ -183,6 +220,8 @@ void AFINComputerGPUT1::netSig_OnMouseDown_Implementation(int x, int y, int btn)
 void AFINComputerGPUT1::netSig_OnMouseUp_Implementation(int x, int y, int btn) {}
 void AFINComputerGPUT1::netSig_OnMouseMove_Implementation(int x, int y, int btn) {}
 void AFINComputerGPUT1::netSig_ScreenSizeChanged_Implementation(int oldW, int oldH) {}
+void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int btn) {}
+void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
 
 void AFINComputerGPUT1::netFunc_bindScreen(UObject* Screen) {
 	if (Screen == nullptr) {

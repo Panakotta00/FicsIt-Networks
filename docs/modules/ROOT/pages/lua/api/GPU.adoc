@@ -340,5 +340,51 @@ Parameters::
 |The button bitfield containing information about which buttons were pressed.
 |===
 
+==== `OnKeyDown(int char, int code, int btn)`
+
+This event gets triggered when the user pushes a keyboard key.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|char
+|int
+|The ASCII number of the character typed in.
+
+|code
+|int
+|the number code for the key you pushed.
+
+|btn
+|int
+|The button bitfield containing information about which buttons were pressed.
+|===
+
+==== `OnKeyup(int char, int code, int btn)`
+
+This event gets triggered when the user releases a keyboard key.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|char
+|int
+|The ASCII number of the character key released.
+
+|code
+|int
+|the number code for the key you released.
+
+|btn
+|int
+|The small button bitfield containing information about which buttons were pressed.
+|===
+
 
 include::partial$api_footer.adoc[]

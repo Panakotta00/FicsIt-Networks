@@ -19,7 +19,7 @@ Basically kills the PC runtime immediately.
 
 Crashes the computer with the given error message.
 
-Return Values::
+Parameter::
 +
 [cols="1,1,4a"]
 |===
@@ -33,6 +33,13 @@ Return Values::
 === `reset()`
 
 Stops the current code execution immediately and queues the system to restart in the next tick.
+
+=== `skip()`
+
+If the tick is in the second Lua tick stage, the function will yield the runtime for the tick.
+If it is in the first Lua tick stage, the function will simply do nothing.
+
+Withit you can prevent a out of time exception to occur.
 
 === `string getEEPROM()`
 
