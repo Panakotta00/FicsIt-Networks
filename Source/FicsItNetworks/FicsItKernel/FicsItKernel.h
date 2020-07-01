@@ -7,6 +7,7 @@
 #include "FicsItFS/DevDevice.h"
 #include "FicsItFS/FileSystem.h"
 #include "Network/NetworkController.h"
+#include "Audio/AudioController.h"
 
 struct FKernelSystemSerializationInfo;
 
@@ -54,6 +55,7 @@ namespace FicsItKernel {
 		FileSystem::SRef<FicsItFS::DevDevice> devDevice = nullptr;
 		std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> drives;
 		std::unique_ptr<Network::NetworkController> network = nullptr;
+		std::unique_ptr<Audio::AudioController> audio = nullptr;
 		FileSystem::SRef<KernelListener> listener;
 		TSharedPtr<FJsonObject> readyToUnpersist = nullptr;
 		std::set<UObject*> gpus;
@@ -210,6 +212,17 @@ namespace FicsItKernel {
 		 * Completely occupys the controller, that means, it gets manged and so you should never free the controller.
 		 */
 		void setNetwork(Network::NetworkController* controller);
+
+		/**
+		 * Returns the currently used audio controller.
+		 */
+		Audio::AudioController* getAudio();
+
+		/**
+		 * Sets the currently used audio controller.
+		 * Completely occupys the controller, that means, it gets managed and so you should never free the controller.
+		 */
+		void setAudio(Audio::AudioController* controller);
 
 		/**
 		 * Get current used memory.

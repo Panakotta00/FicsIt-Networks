@@ -15,6 +15,21 @@ Stops the current code execution.
 
 Basically kills the PC runtime immediately.
 
+=== `panic(string error)`
+
+Crashes the computer with the given error message.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|error
+|string
+|The crash error message you want to use
+|===
+
 === `reset()`
 
 Stops the current code execution immediately and queues the system to restart in the next tick.

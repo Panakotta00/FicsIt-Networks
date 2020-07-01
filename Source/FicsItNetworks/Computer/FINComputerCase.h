@@ -37,6 +37,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 	UFGInventoryComponent* DataStorage = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="CumputerCase")
+	UAudioComponent* Speaker = nullptr;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 	int LastTabIndex = 0;
 	

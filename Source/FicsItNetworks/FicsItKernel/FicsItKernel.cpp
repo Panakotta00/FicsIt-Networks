@@ -188,6 +188,14 @@ namespace FicsItKernel {
 		network.reset(controller);
 	}
 
+	Audio::AudioController* KernelSystem::getAudio() {
+		return audio.get();
+	}
+
+	void KernelSystem::setAudio(Audio::AudioController* controller) {
+		audio.reset(controller);
+	}
+
 	Network::NetworkController* KernelSystem::getNetwork() {
 		return network.get();
 	}

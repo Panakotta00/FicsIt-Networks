@@ -30,10 +30,17 @@ namespace FicsItKernel {
 			lua_yield(L, 0);
 			return 0;
 		}
+
+		LuaFunc(luaComputerPanic)
+		    kernel->crash(KernelCrash(std::string("PANIC! '") + luaL_checkstring(L, 1) + "'"));
+			kernel->getAudio()->beep();
+			lua_yield(L, 0);
+			return 0;
+		}
 #pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
-			// TODO: do the beep
+			kernel->getAudio()->beep();
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
@@ -81,6 +88,7 @@ namespace FicsItKernel {
 			{"getInstance", luaComputerGetInstance},
 			{"reset", luaComputerReset},
 			{"stop", luaComputerStop},
+			{"panic", luaComputerPanic},
 			{"beep", luaComputerBeep},
 			{"setEEPROM", luaComputerSetEEPROM},
 			{"getEEPROM", luaComputerGetEEPROM},

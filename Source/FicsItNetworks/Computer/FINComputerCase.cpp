@@ -10,6 +10,7 @@
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
 #include "FicsItKernel/FicsItKernel.h"
+#include "FicsItKernel/Audio/AudioComponentController.h"
 #include "util/Logging.h"
 
 AFINComputerCase::AFINComputerCase() {
@@ -28,6 +29,9 @@ AFINComputerCase::AFINComputerCase() {
 	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> item, int32 i) {
         return (i == 0 && item->IsChildOf<UFINComputerEEPROMDesc>()) || (i == 1 && item->IsChildOf<UFINComputerFloppyDesc>());
     });
+
+	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
+	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
@@ -39,6 +43,7 @@ AFINComputerCase::AFINComputerCase() {
 	kernel = new FicsItKernel::KernelSystem();
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
+	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(Speaker));
 }
 
 AFINComputerCase::~AFINComputerCase() {
