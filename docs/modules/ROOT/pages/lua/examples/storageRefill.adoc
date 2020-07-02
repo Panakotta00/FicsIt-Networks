@@ -1,0 +1,91 @@
+= Storage Refill Example
+
+This small code snippet allows you to place a couple of codeable spliters
+which output to the right side items until the attached storage container the exact given amount of items.
+It is fully dynamic and can work with an infinite amount of "splitter-storage-pairs".
+You can define such a splitter storage pair by going to the splitter and give it the nick
+"Splitter" and any random number you not already use for an other pair.
+f.e. `Splitter 42`.
+Now add to the storage container the nicks "Storage", the number you choose and the number of items you want to have in your container. f.e. `Storage 42 100`.
+Make sure everything is in the same network.
+The splitter outputs first to its connected container, and only if that one is full, it redirects the rest to the middle output.
+
+== Setup
+
+You will need a small computer setup with a Lua CPU, a bit ram and a EEPROM filled with the code
+shown below. Also make sure it is connected with your "splitter-storage-pairs".
+
+== Code
+
+[source,Lua]
+----
+splitters = component.proxy(component.findComponent("Splitter"))
+containers = component.proxy(component.findComponent("Storage"))
+connectors = {}
+containerBuffer = {}
+containerInvs = {}
+splitterContainers = {}
+containerMax = {}
+
+function split(inputstr, sep)
+ if sep == nil then
+  sep = "%s"
+ end
+ local t={}
+  for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+   table.insert(t, str)
+  end
+ return t
+end
+
+function findSplitter(container)
+ local id = split(container.nick, " ")[2]
+ for _, splitter in pairs(splitters) do
+  if split(splitter.nick, " ")[2] == id then
+   print(splitter.nick)
+   return splitter
+  end
+ end
+ print("not found")
+end
+
+for _,container in pairs(containers) do
+ local connector = container:getFactoryConnectors()[1]
+ print(connector)
+ connectors[connector] = container
+ event.listen(connector)
+ 
+ containerBuffer[container] = 0
+ containerInvs[container] = container:getInventories()[1]
+ splitterContainers[findSplitter(container)] = container
+ containerMax[container] = tonumber(split(container.nick)[3])
+end
+
+while true do
+ e,sender = event.pull(0)
+ if e == "ItemTransfer" then
+  for connector, container in pairs(connectors) do
+   if connector == sender and containerBuffer[container] then
+    containerBuffer[connector] = containerBuffer[container] - 1
+   end
+  end
+ else
+  for _,splitter in pairs(splitters) do
+   if splitter:getInput() then
+    local container = splitterContainers[splitter]
+    if containerBuffer[container] + containerInvs[container]:getItemCount() < containerMax[container] then
+     if splitter:transferItem(0) then
+      containerBuffer[container] = containerBuffer[container] + 1
+     end
+    else
+     splitter:transferItem(1)
+    end
+   end
+  end
+ end
+end
+----
+
+
+
+include::partial$lua_examples_footer.adoc[]

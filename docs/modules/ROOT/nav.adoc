@@ -36,4 +36,7 @@
 *** xref:lua/api/PowerController.adoc[PowerController API]
 *** xref:lua/api/Speaker.adoc[Speaker API]
 *** xref:lua/api/Splitter.adoc[Splitter API]
+** xref:lua/examples/index.adoc[Examples]
+*** xref:lua/examples/paint.adoc[Paint]
+*** xref:lua/examples/storageRefill.adoc[Storage Refill]
 * xref:credits.adoc[Credits]

@@ -1,0 +1,6 @@
+= Examples
+
+Here you can find a couple of nice simple Lua scripts which you can use
+to gather some small ideas of what you can do with this mod.
+
+include::partial$lua_examples.adoc[]

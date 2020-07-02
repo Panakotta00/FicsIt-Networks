@@ -1,0 +1,7 @@
+Lua Examples::
++
+====
+xref:lua/examples/paint.adoc[Paint]
+-
+xref:lua/examples/storageRefill.adoc[Storage Refill]
+====

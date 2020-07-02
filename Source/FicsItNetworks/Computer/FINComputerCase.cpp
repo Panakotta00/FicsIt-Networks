@@ -63,9 +63,14 @@ void AFINComputerCase::BeginPlay() {
 	DataStorage->Resize(2);
 }
 
+#pragma optimize("", off)
 void AFINComputerCase::Factory_Tick(float dt) {
+	auto n = std::chrono::high_resolution_clock::now();
 	kernel->tick(dt);
+	auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
+	SML::Logging::debug("Computer tick: ", dur.count());
 }
+#pragma optimize("", on)
 
 bool AFINComputerCase::ShouldSave_Implementation() const {
 	return true;
