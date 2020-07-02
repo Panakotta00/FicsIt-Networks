@@ -48,6 +48,7 @@ void AFINHookSubsystem::EmitSignal(UObject* object, FFINSignal signal) {
 }
 
 void AFINHookSubsystem::AttachHooks(UObject* object) {
+	if (!IsValid(object)) return;
 	ClearHooks(object);
 	FFINHookData& HookData = Data.FindOrAdd(object);
 	UClass* clazz = object->GetClass();

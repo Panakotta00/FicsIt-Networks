@@ -75,9 +75,6 @@ public:
 	UFUNCTION(BlueprintCallable)
     void OnNewGPU();
 	
-	UFUNCTION()
-	void test(UWidgetComponent* WidgetComponent, UWidgetComponent* PreviousWidgetComponent);
-	
     /**
      * Binds the given screen with this widget which will display the screen accordingly.
      *

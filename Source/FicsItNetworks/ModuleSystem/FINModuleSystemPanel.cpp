@@ -18,7 +18,9 @@ void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 		for (int x = 0; x < height; ++x) {
 			for (int y = 0; y < width; ++y) {
 				if (x < PanelHeight && y < PanelHeight) {
-					Ar << grid[x][y];
+					UObject* ptr = grid[x][y].Get();
+					Ar << ptr;
+					grid[x][y] = ptr;
 				} else {
 					UObject* ptr = nullptr;
 					Ar << ptr;

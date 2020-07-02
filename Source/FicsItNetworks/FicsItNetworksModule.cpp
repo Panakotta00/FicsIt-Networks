@@ -130,11 +130,6 @@ void FFicsItNetworksModule::StartupModule(){
 	})
 
 	SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
-
-	SUBSCRIBE_METHOD_AFTER(AFGPlayerController::SetupInputComponent, [](AFGPlayerController* self) {
-		//self->PushInputComponent(AFINComputerSubsystem::GetComputerSubsystem(self)->InputComponent);
-		//SML::Logging::error("Registered!!!!!");
-	});
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
 	FicsItKernel::Lua::LuaLib::get()->registerLib();

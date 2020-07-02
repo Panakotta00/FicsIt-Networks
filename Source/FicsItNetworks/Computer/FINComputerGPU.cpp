@@ -78,11 +78,9 @@ void UFINScreenWidget::OnNewWidget() {
 void UFINScreenWidget::OnNewGPU() {
 	if (this->Screen && Cast<IFINScreen>(this->Screen)->GetGPU()) {
 		Cast<IFINGraphicsProcessor>(Cast<IFINScreen>(this->Screen)->GetGPU())->RequestNewWidget();
+	} else if (Container.IsValid()) {
+		Container->SetContent(SNew(SBox));
 	}
-}
-
-void UFINScreenWidget::test(UWidgetComponent* WidgetComponent, UWidgetComponent* PreviousWidgetComponent) {
-	SML::Logging::error("Okay!?");
 }
 
 void UFINScreenWidget::SetScreen(UObject* Screen) {
