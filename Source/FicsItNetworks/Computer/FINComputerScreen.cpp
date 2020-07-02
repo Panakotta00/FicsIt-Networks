@@ -2,6 +2,10 @@
 
 #include "FicsItNetworks/Graphics/FINGraphicsProcessor.h"
 
+void AFINComputerScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
+	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(nullptr);
+}
+
 bool AFINComputerScreen::ShouldSave_Implementation() const {
 	return true;
 }

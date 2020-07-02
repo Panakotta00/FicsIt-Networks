@@ -80,7 +80,7 @@ bool UFINModuleSystemPanel::RemoveModule(AActor* Module) {
 
 AActor* UFINModuleSystemPanel::GetModule(int x, int y) const {
 	if (!grid) return nullptr;
-	return  (x >= 0 && x < PanelHeight && y >= 0 && y < PanelWidth) ? grid[x][y] : nullptr;;
+	return  (x >= 0 && x < PanelHeight && y >= 0 && y < PanelWidth) ? Cast<AActor>(grid[x][y].Get()) : nullptr;;
 }
 
 void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) const {
@@ -97,7 +97,7 @@ void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) const {
 void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) const {
 	TSet<AActor*> modules;
 	for (int x = 0; x < PanelHeight; ++x) for (int y = 0; y < PanelWidth; ++y) {
-		auto m = GetModule(x, y);
+		AActor* m = GetModule(x, y);
 		if (m && !modules.Contains(m)) {
 			modules.Add(m);
 			if (m->Implements<UFGDismantleInterface>()) {
@@ -109,9 +109,9 @@ void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) 
 
 void UFINModuleSystemPanel::SetupGrid() {
 	if (grid == nullptr) {
-		grid = new AActor**[PanelHeight]();
+		grid = new FWeakObjectPtr*[PanelHeight]();
 		for (int i = 0; i < PanelHeight; ++i) {
-			grid[i] = new AActor*[PanelWidth];
+			grid[i] = new FWeakObjectPtr[PanelWidth];
 			memset(grid[i], 0, PanelWidth * sizeof(void*));
 		}
 	}

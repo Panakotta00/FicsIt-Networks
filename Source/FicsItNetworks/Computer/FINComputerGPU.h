@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "FINComputerModule.h"
+#include "WidgetComponent.h"
+#include "WidgetInteractionComponent.h"
 #include "FicsItNetworks/Graphics/FINGraphicsProcessor.h"
 #include "FINComputerGPU.generated.h"
 
@@ -19,8 +21,9 @@ public:
 	
 	// Begin AActor
     virtual void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
+	virtual void EndPlay(const EEndPlayReason::Type endPlayReason) override;
 	// End AActor
-	
+
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
@@ -71,6 +74,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
     void OnNewGPU();
+	
+	UFUNCTION()
+	void test(UWidgetComponent* WidgetComponent, UWidgetComponent* PreviousWidgetComponent);
 	
     /**
      * Binds the given screen with this widget which will display the screen accordingly.

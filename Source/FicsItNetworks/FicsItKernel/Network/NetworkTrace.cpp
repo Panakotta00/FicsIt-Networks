@@ -93,6 +93,7 @@ namespace FicsItKernel {
 		}
 
 		std::shared_ptr<TraceStep> NetworkTrace::findTraceStep(UClass* A, UClass* B) {
+			if (!IsValid(A) || !IsValid(B)) return fallbackTraceStep;
 			UClass* Ai = A;
 			while (Ai && Ai != UObject::StaticClass()) {
 				auto stepA = traceStepMap.find(Ai);

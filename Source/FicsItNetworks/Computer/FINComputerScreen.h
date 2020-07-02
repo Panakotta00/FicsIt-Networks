@@ -30,6 +30,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
     FScreenGPUUpdate OnGPUUpdate;
 
+	// Begin AActor
+	void EndPlay(const EEndPlayReason::Type endPlayReason);
+	// End AActor
+	
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface

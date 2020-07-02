@@ -28,7 +28,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "ModuleSystem|Panel")
 	FFINModuleDelegate OnModuleChanged;
 	
-	AActor*** grid = nullptr;
+	FWeakObjectPtr** grid = nullptr;
 
 	UFINModuleSystemPanel();
 	~UFINModuleSystemPanel();

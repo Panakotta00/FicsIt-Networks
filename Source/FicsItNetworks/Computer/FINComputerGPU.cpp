@@ -1,6 +1,9 @@
 ﻿#include "FINComputerGPU.h"
 
+
+#include "WidgetInteractionComponent.h"
 #include "Graphics/FINScreen.h"
+#include "Private/KismetTraceUtils.h"
 
 AFINComputerGPU::AFINComputerGPU() {
 	SetActorTickEnabled(true);
@@ -12,12 +15,18 @@ AFINComputerGPU::AFINComputerGPU() {
 void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
+	DrawDebugLine(this->GetWorld(), GetActorLocation(), GetActorLocation() + FVector(0,0,1000000), FColor::Red, true);
+	
 	if (bShouldCreate) {
 		bShouldCreate = false;
 		if (!IsValid(Screen)) return;
 		if (!Widget.IsValid()) Widget = CreateWidget();
 		Cast<IFINScreen>(Screen)->SetWidget(Widget);
 	}
+}
+
+void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
+	if (endPlayReason == EEndPlayReason::Destroyed) BindScreen(nullptr);
 }
 
 bool AFINComputerGPU::ShouldSave_Implementation() const {
@@ -46,7 +55,7 @@ void AFINComputerGPU::RequestNewWidget() {
 
 void AFINComputerGPU::DropWidget() {
 	Widget.Reset();
-	Cast<IFINScreen>(Screen)->SetWidget(nullptr);
+	if (Screen) Cast<IFINScreen>(Screen)->SetWidget(nullptr);
 }
 
 TSharedPtr<SWidget> AFINComputerGPU::CreateWidget() {
@@ -67,9 +76,13 @@ void UFINScreenWidget::OnNewWidget() {
 }
 
 void UFINScreenWidget::OnNewGPU() {
-	if (Cast<IFINScreen>(this->Screen)->GetGPU()) {
+	if (this->Screen && Cast<IFINScreen>(this->Screen)->GetGPU()) {
 		Cast<IFINGraphicsProcessor>(Cast<IFINScreen>(this->Screen)->GetGPU())->RequestNewWidget();
 	}
+}
+
+void UFINScreenWidget::test(UWidgetComponent* WidgetComponent, UWidgetComponent* PreviousWidgetComponent) {
+	SML::Logging::error("Okay!?");
 }
 
 void UFINScreenWidget::SetScreen(UObject* Screen) {

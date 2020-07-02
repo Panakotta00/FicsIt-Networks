@@ -76,7 +76,7 @@ The GPU T1 can have a screen size (character grid size) of up to 150x50 characte
 
 === Functions
 
-==== `setScreenSize(int width, int height)`
+==== `setSize(int width, int height)`
 
 This function allows you to change the screen size of the monitor.
 If the screen size stays the same nothing will happen but if it does,
@@ -97,7 +97,7 @@ Parameters::
 |the new height of the character grid
 |===
 
-==== `width, height getScreenSize()`
+==== `width, height getSize()`
 
 This function allows you to get the current screen size of the monitor.
 
