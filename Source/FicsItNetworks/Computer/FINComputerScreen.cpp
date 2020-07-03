@@ -1,6 +1,6 @@
 ﻿#include "FINComputerScreen.h"
 
-#include "FicsItNetworks/Graphics/FINGraphicsProcessor.h"
+#include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 void AFINComputerScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(nullptr);
@@ -11,14 +11,14 @@ bool AFINComputerScreen::ShouldSave_Implementation() const {
 }
 
 void AFINComputerScreen::BindGPU(UObject* gpu) {
-	if (gpu) check(gpu->GetClass()->ImplementsInterface(UFINGraphicsProcessor::StaticClass()))
+	if (gpu) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
 	if (GPU != gpu) {
 		if (!gpu) SetWidget(nullptr);
 		UObject* oldGPU = GPU;
 		GPU = nullptr;
-		if (oldGPU) Cast<IFINGraphicsProcessor>(oldGPU)->BindScreen(nullptr);
+		if (oldGPU) Cast<IFINGPUInterface>(oldGPU)->BindScreen(nullptr);
 		GPU = gpu;
-		if (gpu) Cast<IFINGraphicsProcessor>(gpu)->BindScreen(this);
+		if (gpu) Cast<IFINGPUInterface>(gpu)->BindScreen(this);
 	}
 	OnGPUUpdate.Broadcast();
 }

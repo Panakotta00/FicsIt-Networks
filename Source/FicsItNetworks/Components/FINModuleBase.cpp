@@ -7,6 +7,10 @@ void AFINModuleBase::Serialize(FArchive& Ar) {
 	Ar << Listeners;
 }
 
+void AFINModuleBase::EndPlay(EEndPlayReason::Type reason) {
+	if (ModulePanel) ModulePanel->RemoveModule(this);
+}
+
 bool AFINModuleBase::ShouldSave_Implementation() const {
 	return true;
 }

@@ -1,8 +1,8 @@
 #include "FicsItKernel.h"
 
 #include "KernelSystemSerializationInfo.h"
-#include "FicsItNetworks/Graphics/FINGraphicsProcessor.h"
-#include "FicsItNetworks/Graphics/FINScreen.h"
+#include "FicsItNetworks/Graphics/FINGPUInterface.h"
+#include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "Processor/Lua/LuaProcessor.h"
 #include "SML/util/Logging.h"
 
@@ -217,31 +217,34 @@ namespace FicsItKernel {
 	}
 
 	void KernelSystem::addGPU(UObject* gpu) {
-		check(gpu->GetClass()->ImplementsInterface(UFINGraphicsProcessor::StaticClass()))
-		auto i = gpus.find(gpu);
-		if (i == gpus.end()) gpus.insert(gpu);
+		check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
+		gpus.Add(gpu);
 	}
 
 	void KernelSystem::removeGPU(UObject* gpu) {
-		gpus.erase(gpu);
+		gpus.Remove(gpu);
 	}
 
 	std::set<UObject*> KernelSystem::getGPUs() {
-		return gpus;
+		std::set<UObject*> set;
+		for (const FWeakObjectPtr& ptr : gpus) set.insert(ptr.Get());
+		return set;
 	}
 
 	void KernelSystem::addScreen(UObject* screen) {
-		check(screen->GetClass()->ImplementsInterface(UFINScreen::StaticClass()))
-        auto i = screens.find(screen);
-		if (i == screens.end()) screens.insert(screen);
+		check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
+        auto i = screens.Find(screen);
+		if (!i) screens.Add(screen);
 	}
 
 	void KernelSystem::removeScreen(UObject* screen) {
-		screens.erase(screen);
+		screens.Remove(screen);
 	}
 	
 	std::set<UObject*> KernelSystem::getScreens() {
-		return screens;
+		std::set<UObject*> set;
+		for (const FWeakObjectPtr& ptr : screens) set.insert(ptr.Get());
+		return set;
 	}
 
 	void KernelSystem::PreSerialize(FKernelSystemSerializationInfo& Data, bool bLoading) {

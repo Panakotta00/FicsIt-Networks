@@ -279,11 +279,11 @@ Return Values::
 |map of available recipes with the recipe name as key
 |===
 
-==== `setRecipe(Recipe)`
+==== `Future{bool} setRecipe(Recipe)`
 
 Sets the current selected recipe.
 
-Doesn't get executed when the recipe is not allowed. (= no crash or return value though)
+Doesn't get executed when the recipe is not allowed or the input inventory contains items.
 
 Parameters::
 +
@@ -294,6 +294,47 @@ Parameters::
 |Recipe
 |Recipe
 |the new selected recipe.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if was able to set the recipe.
+|===
+
+==== `Inventory getOutputInv()`
+
+This function returns the output inventory of the manufacturer.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Inventory
+|Inventory
+|The output inventory component of the manufacturer.
+|===
+
+==== `Inventory getInputInv()`
+
+This function returns the input inventory of the manufacturer.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Inventory
+|Inventory
+|The input inventory component of the manufacturer.
 |===
 
 == `NetworkConnector`

@@ -6,7 +6,7 @@
 #include "FINModuleScreen.generated.h"
 
 UCLASS()
-class AFINModuleScreen : public AFINModuleBase, public IFINScreen {
+class AFINModuleScreen : public AFINModuleBase, public IFINScreenInterface {
 	GENERATED_BODY()
 private:
     UPROPERTY(SaveGame)
@@ -34,6 +34,7 @@ public:
 
 	// Begin AActor
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type endPlayReason) override;
 	// End AActor
 	
 	// Begin IFINScreen

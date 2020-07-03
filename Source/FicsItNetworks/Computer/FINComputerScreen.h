@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "Computer/FINComputerModule.h"
-#include "FicsItNetworks/Graphics/FINScreen.h"
+#include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "FINComputerScreen.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenWidgetUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenGPUUpdate);
 
 UCLASS()
-class AFINComputerScreen : public AFINComputerModule, public IFINScreen {
+class AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface {
 	GENERATED_BODY()
 	
 private:

@@ -69,6 +69,11 @@ Return Values::
 
 Sorts the inventory
 
+==== `flush()`
+
+Removes all items, you can discard, from the inventory without any trace.
+They will be gone forever! So be careful!
+
 == FactoryConnector
 
 A FactoryConnector is a connection point of an actor for a conveyor or pipe.
@@ -144,12 +149,6 @@ Return Values::
 |Inventory
 |the internal inventory
 |===
-
-==== `FactoryHook hook()`
-
-Attaches a hook for the connector then returns the hook.
-
-If such is already attached, then just returns it.
 
 Return Values::
 +

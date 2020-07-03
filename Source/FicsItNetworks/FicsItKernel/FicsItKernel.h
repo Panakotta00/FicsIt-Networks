@@ -61,8 +61,8 @@ namespace FicsItKernel {
 		std::unique_ptr<Audio::AudioController> audio = nullptr;
 		FileSystem::SRef<KernelListener> listener;
 		TSharedPtr<FJsonObject> readyToUnpersist = nullptr;
-		std::set<UObject*> gpus;
-		std::set<UObject*> screens;
+		TSet<FWeakObjectPtr> gpus;
+		TSet<FWeakObjectPtr> screens;
 		std::queue<TSharedPtr<FicsItFuture>> futureQueue;
 		
 	public:

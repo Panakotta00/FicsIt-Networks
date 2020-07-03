@@ -3,11 +3,11 @@
 #include "FINComputerModule.h"
 #include "WidgetComponent.h"
 #include "WidgetInteractionComponent.h"
-#include "FicsItNetworks/Graphics/FINGraphicsProcessor.h"
+#include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FINComputerGPU.generated.h"
 
 UCLASS()
-class AFINComputerGPU : public AFINComputerModule, public IFINGraphicsProcessor {
+class AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface {
 	GENERATED_BODY()
 protected:
 	UPROPERTY(SaveGame)

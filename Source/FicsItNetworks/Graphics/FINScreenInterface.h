@@ -3,15 +3,14 @@
 #include "CoreMinimal.h"
 #include "Interface.h"
 #include "SWidget.h"
-
-#include "FINScreen.generated.h"
+#include "FINScreenInterface.generated.h"
 
 UINTERFACE(Blueprintable)
-class FICSITNETWORKS_API UFINScreen : public UInterface {
+class FICSITNETWORKS_API UFINScreenInterface : public UInterface {
 	GENERATED_BODY()
 };
 
-class FICSITNETWORKS_API IFINScreen {
+class FICSITNETWORKS_API IFINScreenInterface {
 	GENERATED_IINTERFACE_BODY()
 	
 public:

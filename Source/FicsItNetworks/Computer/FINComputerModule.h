@@ -34,6 +34,10 @@ public:
 	// Begin UObject
 	virtual void Serialize(FArchive& Ar) override;
 	// End UObject
+
+	// Begin AActor
+	virtual void EndPlay(EEndPlayReason::Type reason) override;
+	// End AActor
 	
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;

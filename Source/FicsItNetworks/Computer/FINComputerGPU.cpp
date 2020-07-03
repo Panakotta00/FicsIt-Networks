@@ -2,7 +2,7 @@
 
 
 #include "WidgetInteractionComponent.h"
-#include "Graphics/FINScreen.h"
+#include "Graphics/FINScreenInterface.h"
 #include "Private/KismetTraceUtils.h"
 
 AFINComputerGPU::AFINComputerGPU() {
@@ -21,11 +21,12 @@ void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTick
 		bShouldCreate = false;
 		if (!IsValid(Screen)) return;
 		if (!Widget.IsValid()) Widget = CreateWidget();
-		Cast<IFINScreen>(Screen)->SetWidget(Widget);
+		Cast<IFINScreenInterface>(Screen)->SetWidget(Widget);
 	}
 }
 
 void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
+	Super::EndPlay(endPlayReason);
 	if (endPlayReason == EEndPlayReason::Destroyed) BindScreen(nullptr);
 }
 
@@ -34,13 +35,13 @@ bool AFINComputerGPU::ShouldSave_Implementation() const {
 }
 
 void AFINComputerGPU::BindScreen(UObject* screen) {
-	if (screen) check(screen->GetClass()->ImplementsInterface(UFINScreen::StaticClass()))
+	if (screen) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
 	if (Screen == screen) return;
 	UObject* oldScreen = Screen;
 	Screen = nullptr;
-	if (oldScreen) Cast<IFINScreen>(oldScreen)->BindGPU(nullptr);
+	if (oldScreen) Cast<IFINScreenInterface>(oldScreen)->BindGPU(nullptr);
 	Screen = screen;
-	if (screen) Cast<IFINScreen>(screen)->BindGPU(this);
+	if (screen) Cast<IFINScreenInterface>(screen)->BindGPU(this);
 	if (!screen) DropWidget();
 	netSig_ScreenBound(oldScreen);
 }
@@ -55,7 +56,7 @@ void AFINComputerGPU::RequestNewWidget() {
 
 void AFINComputerGPU::DropWidget() {
 	Widget.Reset();
-	if (Screen) Cast<IFINScreen>(Screen)->SetWidget(nullptr);
+	if (Screen) Cast<IFINScreenInterface>(Screen)->SetWidget(nullptr);
 }
 
 TSharedPtr<SWidget> AFINComputerGPU::CreateWidget() {
@@ -67,8 +68,8 @@ void AFINComputerGPU::netSig_ScreenBound_Implementation(UObject* oldScreen) {}
 
 void UFINScreenWidget::OnNewWidget() {
 	if (Container.IsValid()) {
-		if (Screen && Cast<IFINScreen>(Screen)->GetWidget().IsValid()) {
-			Container->SetContent(Cast<IFINScreen>(Screen)->GetWidget().ToSharedRef());
+		if (Screen && Cast<IFINScreenInterface>(Screen)->GetWidget().IsValid()) {
+			Container->SetContent(Cast<IFINScreenInterface>(Screen)->GetWidget().ToSharedRef());
 		} else {
 			Container->SetContent(SNew(SBox));
 		}
@@ -76,8 +77,8 @@ void UFINScreenWidget::OnNewWidget() {
 }
 
 void UFINScreenWidget::OnNewGPU() {
-	if (this->Screen && Cast<IFINScreen>(this->Screen)->GetGPU()) {
-		Cast<IFINGraphicsProcessor>(Cast<IFINScreen>(this->Screen)->GetGPU())->RequestNewWidget();
+	if (this->Screen && Cast<IFINScreenInterface>(this->Screen)->GetGPU()) {
+		Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(this->Screen)->GetGPU())->RequestNewWidget();
 	} else if (Container.IsValid()) {
 		Container->SetContent(SNew(SBox));
 	}
@@ -86,8 +87,8 @@ void UFINScreenWidget::OnNewGPU() {
 void UFINScreenWidget::SetScreen(UObject* Screen) {
 	this->Screen = Screen;
 	if (this->Screen) {
-		if (Container.IsValid() && Cast<IFINScreen>(this->Screen)->GetGPU()) {
-			Cast<IFINGraphicsProcessor>(Cast<IFINScreen>(this->Screen)->GetGPU())->RequestNewWidget();
+		if (Container.IsValid() && Cast<IFINScreenInterface>(this->Screen)->GetGPU()) {
+			Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(this->Screen)->GetGPU())->RequestNewWidget();
 		}
 	}
 }
@@ -98,7 +99,7 @@ UObject* UFINScreenWidget::GetScreen() {
 
 void UFINScreenWidget::Focus() {
 	if (this->Screen) {
-		TSharedPtr<SWidget> widget = Cast<IFINScreen>(this->Screen)->GetWidget();
+		TSharedPtr<SWidget> widget = Cast<IFINScreenInterface>(this->Screen)->GetWidget();
 		if (widget.IsValid()) {
 			FSlateApplication::Get().SetKeyboardFocus(widget);
 		}
@@ -109,7 +110,7 @@ void UFINScreenWidget::ReleaseSlateResources(bool bReleaseChildren) {
 	Super::ReleaseSlateResources(bReleaseChildren);
 
 	if (Screen) {
-		IFINGraphicsProcessor* GPU = Cast<IFINGraphicsProcessor>(Cast<IFINScreen>(Screen)->GetGPU());
+		IFINGPUInterface* GPU = Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(Screen)->GetGPU());
 		if (GPU) GPU->DropWidget();
 		OnNewWidget();
 	}

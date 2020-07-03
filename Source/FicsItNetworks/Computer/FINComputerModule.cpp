@@ -5,6 +5,10 @@ void AFINComputerModule::Serialize(FArchive& Ar) {
 	Ar << Listeners;
 }
 
+void AFINComputerModule::EndPlay(EEndPlayReason::Type reason) {
+	if (ModulePanel) ModulePanel->RemoveModule(this);
+}
+
 bool AFINComputerModule::ShouldSave_Implementation() const {
 	return true;
 }

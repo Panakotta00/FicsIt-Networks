@@ -324,6 +324,18 @@ namespace FicsItKernel {
 			return 0;
 		})
 
+		LuaLibFunc(UFGInventoryComponent, flush, {
+			TArray<FInventoryStack> stacks;
+			self->GetInventoryStacks(stacks);
+			self->Empty();
+			for (const FInventoryStack& stack : stacks) {
+				if (stack.HasItems() && stack.Item.IsValid() && !UFGItemDescriptor::CanBeDiscarded(stack.Item.ItemClass)) {
+					self->AddStack(stack);
+				}
+			}
+			return 0;
+		})
+
 		// End UFGInventoryComponent
 
 		// Begin UFGPowerConnectionComponent
@@ -496,6 +508,16 @@ namespace FicsItKernel {
 					return 1;
 				};
 			});
+			return 1;
+		})
+
+		LuaLibFunc(AFGBuildableManufacturer, getInputInv, {
+			newInstance(L, obj / self->GetInputInventory());
+			return 1;
+		})
+
+		LuaLibFunc(AFGBuildableManufacturer, getOutputInv, {
+			newInstance(L, obj / self->GetOutputInventory());
 			return 1;
 		})
 

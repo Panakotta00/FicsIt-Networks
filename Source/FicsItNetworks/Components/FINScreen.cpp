@@ -1,23 +1,30 @@
-﻿#include "FINModuleScreen.h"
+﻿#include "FINScreen.h"
 
 #include "Graphics/FINGPUInterface.h"
 
-AFINModuleScreen::AFINModuleScreen() {
+AFINScreen::AFINScreen() {
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
 	WidgetComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	Connector = CreateDefaultSubobject<UFINNetworkConnector>("Connector");
+	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
-void AFINModuleScreen::BeginPlay() {
+void AFINScreen::BeginPlay() {
 	Super::BeginPlay();
 	
 	if (IsValid(GPU)) Cast<IFINGPUInterface>(GPU)->RequestNewWidget();
 }
 
-void AFINModuleScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
+void AFINScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(nullptr);
 }
 
-void AFINModuleScreen::BindGPU(UObject* gpu) {
+bool AFINScreen::ShouldSave_Implementation() const {
+	return true;
+}
+
+void AFINScreen::BindGPU(UObject* gpu) {
 	if (gpu) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
     if (GPU != gpu) {
     	if (!gpu) SetWidget(nullptr);
@@ -33,24 +40,24 @@ void AFINModuleScreen::BindGPU(UObject* gpu) {
 	OnGPUUpdate.Broadcast();
 }
 
-UObject* AFINModuleScreen::GetGPU() const {
+UObject* AFINScreen::GetGPU() const {
 	return GPU;
 }
 
-void AFINModuleScreen::SetWidget(TSharedPtr<SWidget> widget) {
+void AFINScreen::SetWidget(TSharedPtr<SWidget> widget) {
 	if (Widget != widget) Widget = widget;
 	WidgetComponent->SetSlateWidget(
-		Widget.IsValid() ?
-			SNew(SScaleBox)
-			.Stretch(EStretch::ScaleToFit)
-			.Content()[
-				Widget.ToSharedRef()
-			]
-		:
-			TSharedPtr<SScaleBox>(nullptr));
+        Widget.IsValid() ?
+            SNew(SScaleBox)
+            .Stretch(EStretch::ScaleToFit)
+            .Content()[
+                Widget.ToSharedRef()
+            ]
+        :
+            TSharedPtr<SScaleBox>(nullptr));
 	OnWidgetUpdate.Broadcast();
 }
 
-TSharedPtr<SWidget> AFINModuleScreen::GetWidget() const {
+TSharedPtr<SWidget> AFINScreen::GetWidget() const {
 	return Widget;
 }

@@ -2,7 +2,7 @@
 
 #include "WidgetBlueprintLibrary.h"
 #include "WidgetLayoutLibrary.h"
-#include "FicsItNetworks/Graphics/FINScreen.h"
+#include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "util/Logging.h"
 
 void SScreenMonitor::Construct(const FArguments& InArgs) {
@@ -228,7 +228,7 @@ void AFINComputerGPUT1::netFunc_bindScreen(UObject* Screen) {
 		BindScreen(nullptr);
 		return;
 	}
-	if (!Screen->GetClass()->ImplementsInterface(UFINScreen::StaticClass())) return;
+	if (!Screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass())) return;
 	BindScreen(Screen);
 }
 

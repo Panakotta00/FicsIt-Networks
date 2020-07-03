@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Interface.h"
-#include "FINGraphicsProcessor.generated.h"
+#include "FINGPUInterface.generated.h"
 
 UINTERFACE(Blueprintable)
-class FICSITNETWORKS_API UFINGraphicsProcessor : public UInterface {
+class FICSITNETWORKS_API UFINGPUInterface : public UInterface {
 	GENERATED_BODY()
 };
 
-class FICSITNETWORKS_API IFINGraphicsProcessor {
+class FICSITNETWORKS_API IFINGPUInterface {
 	GENERATED_IINTERFACE_BODY()
 	
 public:
