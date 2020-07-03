@@ -44,6 +44,11 @@ AFINComputerCase::AFINComputerCase() {
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
 	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(Speaker));
+
+	SetActorTickEnabled(true);
+	PrimaryActorTick.SetTickFunctionEnable(true);
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
 AFINComputerCase::~AFINComputerCase() {
@@ -61,6 +66,10 @@ void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
 	
 	DataStorage->Resize(2);
+}
+
+void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
+	if (kernel) kernel->handleFutures();
 }
 
 #pragma optimize("", off)

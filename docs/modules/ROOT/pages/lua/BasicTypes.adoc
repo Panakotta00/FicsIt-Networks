@@ -3,8 +3,70 @@
 
 Here are all basic types used by all kinds of apis and components listed.
 
-== WeakObjPtr
+== Future
 
-**Lua-Type: `userdata`**
+This object allows for sync between the game and the Lua runtime.
+The problem is we can't run some functions of the game while beeing in a Lua tick.
+To workaround this, we introduce the Futures.
 
-This userdata is used when the system needs a soft reference to a memory object. It allows for validation checks so internal code doesn't crash through accessing invalid pointers.
+With these objects you can check if the function you called has finishes processing,
+you can get the return values if it finished and you can even wait for it to finish.
+
+With that said, some API functions return a Future wich returns the actual return values
+of the underlying function when called to.
+
+For that we use some special signatures in the declartions showed in this documentation.
+The syntax goes like `Future{[<ret type>] <ret name>, [<ret type2>] <ret name2>, ...}`.
+
+=== Functions
+
+The future sturcture provides a couple of functions allowing you to interact with the syncronization data.
+
+==== `bool canGet()`
+
+This function allows you to check if the return data of the actual function is ready
+or just simply if it got executed.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the underlying function got executed.
+|===
+
+==== `Retvals... get()`
+
+This function allows you to return all the actual return values of the function.
+You can call this even multiple times.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Retvals...
+|...
+|All the differnt return values the underlying function returned.
+|===
+
+==== `Retvals... await()`
+
+This function yields as long as the underlying function didn't get executed.
+When it finally executed the function will return all the return values
+the function returned just like `Retvals... get()`.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Retvals...
+|...
+|All the differnt return values the underlying function returned.
+|===

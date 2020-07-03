@@ -73,6 +73,7 @@ public:
 
 	// Begin AActor
 	virtual void BeginPlay() override;
+	virtual void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	// End AActor
 
 	// Begin AFGBuildable

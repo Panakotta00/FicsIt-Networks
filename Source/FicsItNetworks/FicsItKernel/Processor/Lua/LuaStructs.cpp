@@ -8,6 +8,9 @@
 #include "FGTrainStationIdentifier.h"
 #include "FGBuildableRailroadStation.h"
 #include "LuaInstance.h"
+#include "LuaProcessor.h"
+#include "FicsItKernel/FicsItKernel.h"
+#include "FicsItKernel/Processor/FicsItFuture.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -231,6 +234,87 @@ namespace FicsItKernel {
 		}
 		
 		// End TimeTableStop
+
+		// Begin LuaFuture
+
+		class LuaFutureStruct : public FicsItFuture {
+		private:
+			FutureResolveFunc ResolveFuncPtr;
+			FutureRetrieveFunc RetrieveFuncPtr;
+
+		public:
+			LuaFutureStruct(FutureResolveFunc handler) : ResolveFuncPtr(handler) {}
+			
+            // Begin FicsItFuture
+            virtual void Excecute() override {
+	            RetrieveFuncPtr = ResolveFuncPtr();
+            }
+			// End FicsItFuture
+
+			bool IsValid() {
+	            return static_cast<bool>(RetrieveFuncPtr);
+            }
+
+			int Retrieve(lua_State* L) {
+				return RetrieveFuncPtr(L);
+			}
+		};
+
+		typedef TSharedPtr<LuaFutureStruct> LuaFuture;
+
+		int luaFutureAwaitContinue(lua_State* L, int code, lua_KContext ctx) {
+			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
+			if (future->IsValid()) {
+				return future->Retrieve(L);
+			}
+			return lua_yieldk(L, LUA_MULTRET, NULL, luaFutureAwaitContinue);
+		}
+		
+		int luaFutureAwait(lua_State* L) {
+			LuaFuture* future = static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
+			return lua_yieldk(L, LUA_MULTRET, NULL, luaFutureAwaitContinue);
+		}
+
+		int luaFutureGet(lua_State* L) {
+			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
+			luaL_argcheck(L, future->IsValid(), 1, "Future is not ready");
+			return future->Retrieve(L);
+		}
+
+		int luaFutureCanGet(lua_State* L) {
+			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
+			lua_pushboolean(L, future->IsValid());
+			return 1;
+		}
+
+		int luaFutureGC(lua_State* L) {
+			LuaFuture* future = static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
+			future->~LuaFuture();
+			return 0;
+		}
+
+		static const luaL_Reg luaFutureLib[] = {
+			{"await", luaFutureAwait},
+			{"get", luaFutureGet},
+			{"canGet", luaFutureCanGet},
+			{NULL,NULL}
+		};
+
+		static const luaL_Reg luaFutureMetaLib[] = {
+			{"__newindex", luaRetNull},
+			{"__gc", luaFutureGC},
+			{NULL,NULL}
+		};
+
+		void luaFuture(lua_State* L, FutureResolveFunc futureHandler) {
+			KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel();
+			LuaFuture* future = static_cast<LuaFuture*>(lua_newuserdata(L, sizeof(LuaFuture)));
+			new (future) LuaFuture(new LuaFutureStruct(futureHandler));
+			kernel->pushFuture(*future);
+			luaL_setmetatable(L, "Future");
+		}
+
+		// End LuaFuture
 		
 		void FicsItKernel::Lua::setupStructs(lua_State* L) {
 			PersistSetup("Structs", -2);
@@ -262,6 +346,15 @@ namespace FicsItKernel {
 			luaL_newmetatable(L, "TimeTableStop");
 			luaL_setfuncs(L, luaTimeTableStopLib, 0);
 			PersistTable("TimeTableStop", -1);
+			lua_pop(L, 1);
+
+			luaL_newmetatable(L, "Future");
+			luaL_setfuncs(L, luaFutureMetaLib, 0);
+			PersistTable("Future", -1);
+			lua_newtable(L);
+			luaL_setfuncs(L, luaFutureLib, 0);
+			PersistTable("FutureLib", -1);
+			lua_setfield(L, -2, "__index");
 			lua_pop(L, 1);
 		}
 	}

@@ -87,6 +87,18 @@ namespace FicsItKernel {
 		drives.erase(s);
 	}
 
+	void KernelSystem::pushFuture(TSharedPtr<FicsItFuture> future) {
+		futureQueue.push(future);
+	}
+
+	void KernelSystem::handleFutures() {
+		while (futureQueue.size() > 0) {
+			TSharedPtr<FicsItFuture> future = futureQueue.front();
+			futureQueue.pop();
+			future->Excecute();
+		}
+	}
+
 	std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> KernelSystem::getDrives() const {
 		return drives;
 	}

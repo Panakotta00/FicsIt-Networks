@@ -149,31 +149,31 @@ namespace FicsItKernel {
 		};
 
 		template<typename T>
-        class LuaLibClassType {
+		class LuaLibClassType {
 		private:
-            std::vector<std::pair<std::string, LuaLibClassFunc>> funcs;
+			std::vector<std::pair<std::string, LuaLibClassFunc>> funcs;
 			std::string name;
 
 			LuaLibClassType() {
 				LuaLib::get()->registerRegFunc([this](UClass*& type, std::string& name, std::vector<std::pair<std::string, LuaLibClassFunc>>& funcs) {
-                    type = T::StaticClass();
-                    name = this->name;
-                    funcs = this->funcs;
-                });
+					type = T::StaticClass();
+					name = this->name;
+					funcs = this->funcs;
+				});
 			}
 			
 		public:
-            static LuaLibClassType* get() {
-            	static LuaLibClassType* instance = nullptr;
-            	if (!instance) instance = new LuaLibClassType();
-            	return instance;
-            }
+			static LuaLibClassType* get() {
+				static LuaLibClassType* instance = nullptr;
+				if (!instance) instance = new LuaLibClassType();
+				return instance;
+			}
 
 			struct RegisterFunc {
-            	RegisterFunc(const std::string& name, const LuaLibClassFunc& func) {
-            		LuaLibClassType::get()->funcs.push_back({name, func});
-            	}
-            };
+				RegisterFunc(const std::string& name, const LuaLibClassFunc& func) {
+					LuaLibClassType::get()->funcs.push_back({name, func});
+				}
+			};
 
 			struct RegisterData {
 				RegisterData(const std::string& name) {
@@ -445,11 +445,11 @@ namespace FicsItKernel {
 			lua_pushnumber(L, self->GetPendingPotential());
 			return 1;
 		}, {
-            float p = static_cast<float>(luaL_checknumber(L, 1));
-            float min = self->GetMinPotential();
-            float max = self->GetMaxPossiblePotential();
-            self->SetPendingPotential((min > p) ? min : ((max < p) ? max : p));
-            return 0;
+			float p = static_cast<float>(luaL_checknumber(L, 1));
+			float min = self->GetMinPotential();
+			float max = self->GetMaxPossiblePotential();
+			self->SetPendingPotential((min > p) ? min : ((max < p) ? max : p));
+			return 0;
 		})
 		
 		// End AFGBuildableFactory
@@ -480,17 +480,22 @@ namespace FicsItKernel {
 				return 0;
 			}
 			TSubclassOf<UFGRecipe> recipe = getClassInstance<UFGRecipe>(L, 1);
-			TArray<TSubclassOf<UFGRecipe>> recipes;
-			self->GetAvailableRecipes(recipes);
-			if (recipes.Contains(recipe)) {
-				TArray<FInventoryStack> stacks;
-				self->GetInputInventory()->GetInventoryStacks(stacks);
-				self->GetOutputInventory()->AddStacks(stacks);
-				self->SetRecipe(recipe);
-				lua_pushboolean(L, true);
-				return 1;
-			}
-			lua_pushboolean(L, false);
+			luaFuture(L, [self, recipe]() {
+				TArray<TSubclassOf<UFGRecipe>> recipes;
+				self->GetAvailableRecipes(recipes);
+				bool done = false;
+				if (recipes.Contains(recipe)) {
+					TArray<FInventoryStack> stacks;
+					self->GetInputInventory()->GetInventoryStacks(stacks);
+					self->GetOutputInventory()->AddStacks(stacks);
+					self->SetRecipe(recipe);
+					done = true;
+				}
+				return [done](lua_State* L) {
+					lua_pushboolean(L, done);
+					return 1;
+				};
+			});
 			return 1;
 		})
 
@@ -985,19 +990,19 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGBuildableDockingStation, getInv, {
-            newInstance(L, obj / self->GetInventory());
-            return 1;
-        })
+			newInstance(L, obj / self->GetInventory());
+			return 1;
+		})
 
 		LuaLibFunc(AFGBuildableDockingStation, getDocked, {
-            newInstance(L, obj / self->GetDockedActor());
-            return 1;
-        })
+			newInstance(L, obj / self->GetDockedActor());
+			return 1;
+		})
 
 		LuaLibFunc(AFGBuildableDockingStation, undock, {
-            self->Undock();
-            return 0;
-        })
+			self->Undock();
+			return 0;
+		})
 
 		LuaLibFunc(AFGBuildableDockingStation, setInLoadMode, {
 			self->SetIsInLoadMode(lua_toboolean(L, 1));

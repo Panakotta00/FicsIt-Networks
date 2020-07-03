@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <queue>
+
 
 #include "Processor/Processor.h"
 #include "FicsItFS/FINFileSystemState.h"
@@ -8,6 +10,7 @@
 #include "FicsItFS/FileSystem.h"
 #include "Network/NetworkController.h"
 #include "Audio/AudioController.h"
+#include "Processor/FicsItFuture.h"
 
 struct FKernelSystemSerializationInfo;
 
@@ -60,6 +63,7 @@ namespace FicsItKernel {
 		TSharedPtr<FJsonObject> readyToUnpersist = nullptr;
 		std::set<UObject*> gpus;
 		std::set<UObject*> screens;
+		std::queue<TSharedPtr<FicsItFuture>> futureQueue;
 		
 	public:
 		/**
@@ -146,6 +150,20 @@ namespace FicsItKernel {
 		 * @param	drive	the drive you want to remove
 		 */
 		void removeDrive(AFINFileSystemState* drive);
+
+		/**
+		 * Adds a future to resolve to the future queue.
+		 * So it gets resolved in on of the next main thread ticks.
+		 *
+		 * @param[in]	future	shared ptr to the future you want to resolve
+		 */
+		void pushFuture(TSharedPtr<FicsItFuture> future);
+
+		/**
+		 * This function should get executed every main thread tick.
+		 * @note	ONLY FROM THE MAIN THREAD!!!
+		 */
+		void handleFutures();
 
 		/**
 		 * Returns all drive added to the kernel
