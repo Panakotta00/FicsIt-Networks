@@ -8,6 +8,9 @@ void ULuaProcessorStateStorage::Serialize(FArchive& Ar) {
 	Ar << PullState;
 	Ar << Timeout;
 	Ar << PullStart;
+	for (UObject* r : References) {
+		if (r->GetClass()->IsChildOf(UClass::StaticClass())) r->AddToRoot();
+	}
 }
 
 int32 ULuaProcessorStateStorage::Add(const FFINNetworkTrace& Trace) {

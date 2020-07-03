@@ -729,10 +729,11 @@ namespace FicsItKernel {
 			// get and check class instance
 			std::string typeName;
 			LuaClassInstance* instance = reg->checkAndGetClassInstance(L, 1, &typeName);
-			LuaClassInstance* type = reg->checkAndGetClassInstance(L, lua_upvalueindex(2));
+			LuaInstanceType* type = static_cast<LuaInstanceType*>(luaL_checkudata(L, lua_upvalueindex(2), INSTANCE_TYPE));
 
 			// check type
-			if (instance->clazz != type->clazz) return luaL_argerror(L, 1, "ClassInstance is invalid");
+			//SML::Logging::error(instance, " ", type, " ", TCHAR_TO_UTF8(*instance->clazz->GetName()), " ", TCHAR_TO_UTF8(*type->type->GetName()));
+			if (!instance || !type || !instance->clazz || !type->type || !instance->clazz->IsChildOf(type->type)) return luaL_argerror(L, 1, "ClassInstance is invalid");
 
 			// get func name
 			std::string funcName = luaL_checkstring(L, lua_upvalueindex(1));
@@ -788,10 +789,10 @@ namespace FicsItKernel {
 			
 			// get class lib function
 			LuaLibClassFunc libFunc;
-			if (reg->findClassLibFunc(reg->findType(typeName), funcName, libFunc)) {
+			if (reg->findClassLibFunc(type, funcName, libFunc)) {
 				// create function
 				lua_pushvalue(L, 2);																				// ClassInstance, FuncName, InstanceCoche, nil, FuncName
-				lua_pushvalue(L, 1);																				// ClassInstance, FuncName, InstanceCache, nil, FuncName, ClassInstance
+				luaInstanceType(L, LuaInstanceType{type});																// ClassInstance, FuncName, InstanceCache, nil, FuncName, InstanceType
 				lua_pushcclosure(L, luaClassInstanceFuncCall, 2);													// ClassInstance, FuncName, InstanceCache, nil, ClassInstanceFunc
 
 				// cache function

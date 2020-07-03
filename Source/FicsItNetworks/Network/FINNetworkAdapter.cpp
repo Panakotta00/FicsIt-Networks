@@ -8,6 +8,7 @@
 std::vector<std::pair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = std::vector<std::pair<UClass*, FFINAdapterSettings>>();
 
 void AFINNetworkAdapter::RegistererAdapterSetting(UClass* clazz, FFINAdapterSettings settings) {
+	clazz->AddToRoot();
 	AFINNetworkAdapter::settings.push_back({clazz, settings});
 }
 
@@ -18,7 +19,10 @@ void AFINNetworkAdapter::RegistererAdapterSetting(FString BPPath, FFINAdapterSet
 
 void AFINNetworkAdapter::RegisterAdapterSettings() {
 	// init adapter settings
-	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageContainerMk1/Build_StorageContainerMk1.Build_StorageContainerMk1_C")), FFINAdapterSettings{FVector(290,0,400), FRotator(0,-90,0), true, 1});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageContainerMk1/Build_StorageContainerMk1.Build_StorageContainerMk1_C")), FFINAdapterSettings{FVector(290,0,400), FRotator(0,-90,0), true, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageContainerMk2/Build_StorageContainerMk2.Build_StorageContainerMk2_C")), FFINAdapterSettings{FVector(290,0,800), FRotator(0,-90,0), true, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/IndustrialFluidContainer/Build_IndustrialTank.Build_IndustrialTank_C")), FFINAdapterSettings{FVector(0,540,1250), FRotator(0,0,0), true, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageTank/Build_PipeStorageTank.Build_PipeStorageTank_C")), FFINAdapterSettings{FVector(180,180,600), FRotator(0,-45,0), true, 2});
 }
 
 AFINNetworkAdapter::AFINNetworkAdapter() {

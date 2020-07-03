@@ -276,7 +276,7 @@ Return Values::
 
 |Recipe[]
 |Recipe[]
-|array of available recipes
+|map of available recipes with the recipe name as key
 |===
 
 ==== `setRecipe(Recipe)`

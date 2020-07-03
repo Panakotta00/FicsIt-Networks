@@ -2,6 +2,7 @@
 
 
 #include "FGBuildableDockingStation.h"
+#include "FGBuildablePipeReservoir.h"
 #include "FGBuildableRailroadStation.h"
 #include "FGBuildableTrainPlatformCargo.h"
 #include "LuaStructs.h"
@@ -469,7 +470,7 @@ namespace FicsItKernel {
 			int i = 1;
 			for (auto recipe : recipes) {
 				newInstance(L, recipe);
-				lua_seti(L, -2, i++);
+				lua_setfield(L, -2, TCHAR_TO_UTF8(*UFGRecipe::GetRecipeName(recipe).ToString()));
 			}
 			return 1;
 		})
@@ -478,22 +479,19 @@ namespace FicsItKernel {
 			if (args < 1) {
 				return 0;
 			}
-			auto r = getClassInstance<UFGRecipe>(L, 1);
-			FString name;
-			if (!r && lua_isstring(L, -args)) {
-				name = lua_tostring(L, -args);
-			}
+			TSubclassOf<UFGRecipe> recipe = getClassInstance<UFGRecipe>(L, 1);
 			TArray<TSubclassOf<UFGRecipe>> recipes;
 			self->GetAvailableRecipes(recipes);
-			FText t;
-			for (auto recipe : recipes) {
-				if ((UClass*)r == recipe || (name == UFGRecipe::GetRecipeName(recipe).ToString())) {
-					self->SetRecipe(recipe);
-					return 0;
-				}
+			if (recipes.Contains(recipe)) {
+				TArray<FInventoryStack> stacks;
+				self->GetInputInventory()->GetInventoryStacks(stacks);
+				self->GetOutputInventory()->AddStacks(stacks);
+				self->SetRecipe(recipe);
+				lua_pushboolean(L, true);
+				return 1;
 			}
-			self->SetRecipe(nullptr);
-			return 0;
+			lua_pushboolean(L, false);
+			return 1;
 		})
 
 		// End AFGBuildableManufacturer
@@ -977,6 +975,8 @@ namespace FicsItKernel {
 
 		// End AFGBuildableRailroadSignal
 
+		// Begin AFGBuildableDockingStation
+
 		LuaLibTypeDecl(AFGBuildableDockingStation, DockingStation)
 
 		LuaLibFunc(AFGBuildableDockingStation, getFuelInv, {
@@ -1007,6 +1007,23 @@ namespace FicsItKernel {
 		LuaLibFuncGetBool(AFGBuildableDockingStation, isLoadMode, GetIsInLoadMode)
 		LuaLibFuncGetBool(AFGBuildableDockingStation, isLoadUnloading, IsLoadUnloading)
 
+		// End AFGBuildableDockingStation
+
+		LuaLibTypeDecl(AFGBuildablePipeReservoir, "PipeReservoir")
+
+		LuaLibFunc(AFGBuildablePipeReservoir, getFluidType, {
+			newInstance(L, obj / self->GetFluidDescriptor());
+			return 1;
+		})
+
+		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFluidContent, GetFluidContent)
+		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getMaxFluidContent, GetFluidContentMax)
+		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowFill, GetFlowFill)
+		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowDrain, GetFlowDrain)
+		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowLimit, GetFlowLimit)
+
+		// Begin AFGBuildablePipeReservoir
+		
 		/* ################### */
 		/* # Class Instances # */
 		/* ################### */
