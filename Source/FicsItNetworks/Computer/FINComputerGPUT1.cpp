@@ -75,31 +75,31 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 	const TArray<FLinearColor>& BackgroundCache = this->Background.Get();
 	
 	const TArray<FString>& TextGrid = Text.Get();
-	for (FVector2D Pos = FVector2D::ZeroVector; Pos.Y < ScreenSize.Y && Pos.Y < TextGrid.Num(); ++Pos.Y) {
-		const FString Line = TextGrid[Pos.Y];
+	for (int Y = 0; Y < ScreenSize.Y && Y < TextGrid.Num(); ++Y) {
+		const FString Line = TextGrid[Y];
 		
-		for (Pos.X = 0; Pos.X < ScreenSize.X && Pos.X < Line.Len(); ++Pos.X) {
+		for (int X = 0; X < ScreenSize.X && X < Line.Len(); ++X) {
 			FLinearColor Foreground = FLinearColor(1,1,1,1);
-			if (Pos.Y * ScreenSize.X + Pos.X < ForegroundCache.Num()) {
-				Foreground = ForegroundCache[Pos.Y * ScreenSize.X + Pos.X];
+			if (Y * ScreenSize.X + X < ForegroundCache.Num()) {
+				Foreground = ForegroundCache[Y * ScreenSize.X + X];
 			}
 			FLinearColor Background = FLinearColor(0,0,0,0);
-			if (Pos.Y * ScreenSize.X + Pos.X < BackgroundCache.Num()) {
-				Background = BackgroundCache[Pos.Y * ScreenSize.X + Pos.X];
+			if (Y * ScreenSize.X + X < BackgroundCache.Num()) {
+				Background = BackgroundCache[Y * ScreenSize.X + X];
 			}
 
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
 				LayerId,
-				AllottedGeometry.ToPaintGeometry(Pos * CharSize, CharSize, 1),
+				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1.01), 1),
 				&boxBrush,
 				ESlateDrawEffect::None,
 				InWidgetStyle.GetColorAndOpacityTint() * Background);
 			FSlateDrawElement::MakeText(
 		        OutDrawElements,
 		        LayerId,
-		        AllottedGeometry.ToOffsetPaintGeometry(Pos * CharSize),
-		        Line.Mid(Pos.X,1),
+		        AllottedGeometry.ToOffsetPaintGeometry(FVector2D(X,Y) * CharSize),
+		        Line.Mid(X,1),
 		        Font.Get(),
 		        ESlateDrawEffect::None,
 		        InWidgetStyle.GetColorAndOpacityTint() * Foreground
@@ -214,6 +214,10 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 		}
 	}
 
+	TextGridBuffer = TextGrid;
+	ForegroundBuffer = Foreground;
+	BackgroundBuffer = Background;
+
 	netSig_ScreenSizeChanged(oldScreenSize.X, oldScreenSize.Y);
 }
 
@@ -269,13 +273,13 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 					inLine.RemoveAt(0, FMath::Abs(x));
 					x = 0;
 				}
-				FString& text = TextGrid[y];
+				FString& text = TextGridBuffer[y];
 				text.RemoveAt(x, inLine.Len());
 				text.InsertAt(x, inLine);
 				text = text.Left(ScreenSize.X);
 				for (int dx = 0; dx < inLine.Len(); ++dx) {
-					Foreground[y * ScreenSize.X + x + dx] = CurrentForeground;
-					Background[y * ScreenSize.X + x + dx] = CurrentBackground;
+					ForegroundBuffer[y * ScreenSize.X + x + dx] = CurrentForeground;
+					BackgroundBuffer[y * ScreenSize.X + x + dx] = CurrentBackground;
 				}
 			}
 			x = oldX;
@@ -308,4 +312,10 @@ void AFINComputerGPUT1::netFunc_setForeground(float r, float g, float b, float a
 
 void AFINComputerGPUT1::netFunc_setBackground(float r, float g, float b, float a) {
 	CurrentBackground = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f), FMath::Clamp(a, 0.0f, 1.0f));
+}
+
+void AFINComputerGPUT1::netFunc_flush() {
+	TextGrid = TextGridBuffer;
+	Foreground = ForegroundBuffer;
+	Background = BackgroundBuffer;
 }

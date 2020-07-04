@@ -16,7 +16,7 @@ public:
 	/**
     * The signal listeners listening to this component.
     */
-    UPROPERTY(SaveGame)
+    UPROPERTY()
     TSet<FFINNetworkTrace> Listeners;
     
 	UPROPERTY(EditDefaultsOnly, Category="ComputerModule")

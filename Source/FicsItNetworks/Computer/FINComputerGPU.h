@@ -24,10 +24,6 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type endPlayReason) override;
 	// End AActor
 
-	// Begin IFGSaveInterface
-	virtual bool ShouldSave_Implementation() const override;
-	// End IFGSaveInterface
-
 	// Begin IFINGraphicsProcessor
 	virtual void BindScreen(UObject* screen) override;
 	virtual UObject* GetScreen() const override;

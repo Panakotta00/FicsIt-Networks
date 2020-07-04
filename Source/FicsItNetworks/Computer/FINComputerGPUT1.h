@@ -147,6 +147,15 @@ private:
 
 	UPROPERTY(SaveGame)
 	TArray<FLinearColor> Background;
+
+	UPROPERTY(SaveGame)
+    TArray<FString> TextGridBuffer;
+
+	UPROPERTY(SaveGame)
+    TArray<FLinearColor> ForegroundBuffer;
+
+	UPROPERTY(SaveGame)
+    TArray<FLinearColor> BackgroundBuffer;
 	
 	UPROPERTY()
 	FSlateBrush boxBrush;
@@ -204,4 +213,7 @@ public:
 
 	UFUNCTION()
 	void netFunc_setBackground(float r, float g, float b, float a);
+
+	UFUNCTION()
+	void netFunc_flush();
 };

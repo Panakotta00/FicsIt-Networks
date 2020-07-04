@@ -30,10 +30,6 @@ void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	if (endPlayReason == EEndPlayReason::Destroyed) BindScreen(nullptr);
 }
 
-bool AFINComputerGPU::ShouldSave_Implementation() const {
-	return true;
-}
-
 void AFINComputerGPU::BindScreen(UObject* screen) {
 	if (screen) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
 	if (Screen == screen) return;

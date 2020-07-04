@@ -46,20 +46,17 @@ void ULuaProcessorStateStorage::Serialize(FArchive& Ar) {
 	Ar << PullState;
 	Ar << Timeout;
 	Ar << PullStart;
-	if (Ar.IsSaving()) {
-		int StructNum = Structs.Num();
-		Ar << StructNum;
-		if (Ar.IsLoading()) Structs.Empty();
-		for (int i = 0; i < StructNum; ++i) {
-			int j = i;
-			if (Ar.IsLoading()) j = Structs.Add(MakeShared<FDynamicStructHolder>());
-			TSharedPtr<FDynamicStructHolder> holder = Structs[j];
-			SML::Logging::error(holder.IsValid(), " ", holder.Get(), (*holder.Get()).GetData());
-			if (holder.IsValid() && holder.Get()) Ar << *holder.Get();
-			else {
-				FDynamicStructHolder h;
-				Ar << h;
-			}
+	int StructNum = Structs.Num();
+	Ar << StructNum;
+	if (Ar.IsLoading()) Structs.Empty();
+	for (int i = 0; i < StructNum; ++i) {
+		int j = i;
+		if (Ar.IsLoading()) j = Structs.Add(MakeShared<FDynamicStructHolder>());
+		TSharedPtr<FDynamicStructHolder> holder = Structs[j];
+		if (holder.IsValid() && holder.Get()) Ar << *holder.Get();
+		else {
+			FDynamicStructHolder h;
+			Ar << h;
 		}
 	}
 	for (UObject* r : References) {
