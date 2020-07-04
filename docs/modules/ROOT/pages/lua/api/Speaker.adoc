@@ -9,7 +9,7 @@ A Speaker allows you to play sound files ingame.
 
 === Functions
 
-==== `playSound(string name [, number start = 0])`
+==== `Future playSound(string name [, number start = 0])`
 
 Stops the current playing sound and plays the sound defined by the given name at the given starting position.
 
@@ -28,7 +28,7 @@ Parameters::
 |the starting point for the player.
 |===
 
-==== `stopSound()`
+==== `Future stopSound()`
 
 Stops the current playing sound
 

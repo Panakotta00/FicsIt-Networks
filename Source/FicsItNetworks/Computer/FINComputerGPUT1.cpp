@@ -243,8 +243,7 @@ void AFINComputerGPUT1::netFunc_bindScreen(UObject* Screen) {
 				}
 			}
 		}
-	}
-	BindScreen(Screen);
+	} else BindScreen(Screen);
 }
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {

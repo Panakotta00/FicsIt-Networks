@@ -72,9 +72,16 @@ All further character changes cause the changed character to have the currently 
 If you change the currently used foreground and background color, the color of the already drawn/changed characters
 wont change. (Until you draw them again)
 
+When you do changes, those changes will only occur on a hidden buffer.
+That means you need to call `flush()` after you have changes something and want to display it.
+
 The GPU T1 can have a screen size (character grid size) of up to 150x50 characters.
 
 === Functions
+
+==== `flush()`
+
+Copies the hidden buffer data to the rendered one so you commit screen changes to the visible layer.
 
 ==== `setSize(int width, int height)`
 
