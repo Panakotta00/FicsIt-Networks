@@ -1,0 +1,62 @@
+= Random Plott Example
+
+This small programm uses a GPU and a Screen to make a random graph plott.
+
+== Setup
+
+You need small computer with a Lua CPU, a little bit RAM, a Screen Driver and GPU T1.
+Then just plug in a Lua EEPROM and fill it with the code below.
+Then just run it and switch to the computer screen.
+
+== Code
+
+[source,Lua]
+----
+screen = computer.getScreens()[1]
+gpu = computer.getGPUs()[1]
+gpu:bindScreen(screen)
+gpu:setBackground(0,0,0,0)
+w,h = gpu:getSize()
+gpu:fill(0,0,w,h," ")
+
+data = {0}
+
+function getData(i)
+ d = data[i]
+ if not d then
+  d = math.random(h)
+  data[i] = d
+ end
+ return d
+end
+
+p = 0
+
+function printScreen()
+ gpu:setBackground(0,0,0,0)
+ gpu:fill(0,0,w,h," ")
+ gpu:setBackground(1,1,1,1)
+ for i=0,w-1,1 do
+  x = (p + i)/5.0
+  x1 = math.floor(x)
+  x2 = x1 + 1
+  y1 = getData(math.floor(x1))
+  y2 = getData(math.floor(x2))
+  d = y1 + ((x - x1) * ((y2 - y1) / (x2 - x1)))
+  d = math.floor(d)
+  gpu:setText(i*2,d," ")
+  gpu:setText(i*2+1,d," ")
+ end
+ gpu:flush()
+end
+
+while true do
+ event.pull(0.1)
+ printScreen()
+ p = p + 1
+end
+----
+
+
+
+include::partial$lua_examples_footer.adoc[]

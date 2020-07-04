@@ -52,6 +52,7 @@ while true do
  elseif e == "OnMouseMove" and not (y == h-1 and x < #colors) and isDown then
   gpu:setText(x,y," ")
  end
+ gpu:flush()
 end
 ----
 
