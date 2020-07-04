@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
 #include "Components/AudioComponent.h"
+#include "FicsItKernel/Network/NetworkFuture.h"
 #include "Network/FINNetworkConnector.h"
 #include "FINSpeakerPole.generated.h"
 
@@ -38,7 +39,7 @@ public:
 	 * Also resets CurrentSound
 	 */
 	UFUNCTION()
-		void OnSoundFinished(UAudioComponent* Audio);
+	void OnSoundFinished(UAudioComponent* Audio);
 
 	/**
 	 * Loads and Plays the sound file in the Sounds folder appened with the given relative path without the file extension.
@@ -47,21 +48,21 @@ public:
 	 * If able to play the sound, emits a play sound signal.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-		void netFunc_playSound(const FString& sound, float startPoint);
+	FFINNetworkFuture netFunc_playSound(const FString& sound, float startPoint);
 
 	/**
 	 * Stops the current playing sound.
 	 * Emits a stop sound signal if it actually was able to stop the current playing sound.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-		void netFunc_stopSound();
+	FFINNetworkFuture netFunc_stopSound();
 
 	/**
 	 * Notifies when the state of the speaker pole has changed.
 	 * f.e. if the sound stoped/started playing
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-		void netSig_SpeakerSound(int type, const FString& sound);
+	void netSig_SpeakerSound(int type, const FString& sound);
 
 	/**
 	 * Loads the sound file referenced by the given relative path
@@ -71,3 +72,40 @@ public:
 	 */
 	USoundWave* LoadSoundFromFile(const FString& sound);
 };
+
+USTRUCT()
+struct FFINSpeakersPlaySoundInData {
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	AFINSpeakerPole* Speakers = nullptr;
+
+	FString Sound = "";
+	float Start = 0.0f;
+
+	bool Serialize(FArchive& Ar) {
+		Ar << Speakers;
+		Ar << Sound;
+		Ar << Start;
+		return true;
+	}
+};
+void inline operator<<(FArchive& Ar, FFINSpeakersPlaySoundInData& Data) {
+	Data.Serialize(Ar);
+}
+
+USTRUCT()
+struct FFINSpeakersJustSelfInData {
+	GENERATED_BODY()
+	
+	UPROPERTY()
+    AFINSpeakerPole* Speakers = nullptr;
+
+	bool Serialize(FArchive& Ar) {
+		Ar << Speakers;
+		return true;
+	}
+};
+void inline operator<<(FArchive& Ar, FFINSpeakersJustSelfInData& Data) {
+	Data.Serialize(Ar);
+}

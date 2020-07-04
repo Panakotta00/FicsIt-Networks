@@ -87,6 +87,7 @@ namespace FicsItKernel {
 			LUA_BOOL,
 			LUA_TBL,
 			LUA_OBJ,
+			LUA_FUTURE,
 		};
 
 		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data, Network::NetworkTrace trace);

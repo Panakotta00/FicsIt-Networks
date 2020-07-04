@@ -2,6 +2,9 @@
 
 #include "Engine/EngineTypes.h"
 #include "LuaInstance.h"
+#include "LuaProcessor.h"
+#include "LuaStructs.h"
+#include "FicsItKernel/Network/NetworkFuture.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -24,10 +27,16 @@ namespace FicsItKernel {
 				return LuaDataType::LUA_STR;
 			} else if (c & EClassCastFlags::CASTCLASS_UObjectProperty) {
 				return newInstance(L, trace / *p->ContainerPtrToValuePtr<UObject*>(data)) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
-			} else {
-				lua_pushnil(L);
-				return LuaDataType::LUA_NIL;
+			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
+				UStructProperty* prop = Cast<UStructProperty>(p);
+				if (prop->Struct == FFINNetworkFuture::StaticStruct()) {
+					FFINNetworkFuture Future = *p->ContainerPtrToValuePtr<FFINNetworkFuture>(data);
+					luaFuture(L, Future.Future);
+					return LuaDataType::LUA_FUTURE;
+				}
 			}
+			lua_pushnil(L);
+			return LuaDataType::LUA_NIL;
 		}
 
 		LuaDataType luaToProperty(lua_State* L, UProperty* p, void* data, int i) {

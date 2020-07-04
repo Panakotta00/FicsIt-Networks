@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FGBuildableManufacturer.h"
 #include "FGFactoryConnectionComponent.h"
 #include "FGPowerCircuit.h"
 #include "FGTrain.h"
@@ -218,3 +219,24 @@ public:
 		Mutex.Unlock();
     }
 };
+
+USTRUCT()
+struct FFINManufacturerSetRecipeInData {
+	GENERATED_BODY()
+
+	TWeakObjectPtr<AFGBuildableManufacturer> Manufacturer;
+	TSubclassOf<UFGRecipe> Recipe;
+
+	FFINManufacturerSetRecipeInData() = default;
+	FFINManufacturerSetRecipeInData(TWeakObjectPtr<AFGBuildableManufacturer> Manu, TSubclassOf<UFGRecipe> Recipe) : Manufacturer(Manu), Recipe(Recipe) {}
+
+	inline bool Serialize(FArchive& Ar) {
+		Ar << Manufacturer;
+		Ar << Recipe;
+		return true;
+	}
+};
+
+inline void operator<<(FArchive& Ar, FFINManufacturerSetRecipeInData& InData) {
+	InData.Serialize(Ar);
+}

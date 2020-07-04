@@ -9,6 +9,7 @@
 #include "FGBuildableRailroadStation.h"
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
+#include "LuaProcessorStateStorage.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Processor/FicsItFuture.h"
 
@@ -33,6 +34,27 @@ namespace FicsItKernel {
 			{"__newindex", luaRetNull},
 			{NULL, NULL}
 		};
+
+//		LuaFutureStruct::LuaFutureStruct(TSharedPtr<FDynamicStructHolder> InData, UStruct* OutDataStruct, FutureResolveFunc ResolveFunc, FutureRetrieveFunc RetrieveFunc) : InData(InData), OutData(new FDynamicStructHolder(OutDataStruct)), ResolveFunc(ResolveFunc), RetrieveFunc(RetrieveFunc) {}
+
+		LuaFutureStruct::LuaFutureStruct(TSharedPtr<FDynamicStructHolder> InData, TSharedPtr<FDynamicStructHolder> OutData, FutureResolveFunc ResolveFunc, FutureRetrieveFunc RetrieveFunc) : InData(InData), OutData(OutData), ResolveFunc(ResolveFunc), RetrieveFunc(RetrieveFunc){}
+
+		LuaFutureStruct::~LuaFutureStruct() {
+			
+		}
+
+		void LuaFutureStruct::Excecute() {
+			ResolveFunc(InData.ToSharedRef(), OutData.ToSharedRef());
+			valid = true;
+		}
+		
+		bool LuaFutureStruct::IsValid() {
+			return valid;
+		}
+
+		int LuaFutureStruct::Retrieve(lua_State* L) {
+			return RetrieveFunc(L, OutData.ToSharedRef());
+		}
 
 		void luaStruct(lua_State* L, FInventoryItem item) {
 			lua_newtable(L);
@@ -237,31 +259,6 @@ namespace FicsItKernel {
 
 		// Begin LuaFuture
 
-		class LuaFutureStruct : public FicsItFuture {
-		private:
-			FutureResolveFunc ResolveFuncPtr;
-			FutureRetrieveFunc RetrieveFuncPtr;
-
-		public:
-			LuaFutureStruct(FutureResolveFunc handler) : ResolveFuncPtr(handler) {}
-			
-            // Begin FicsItFuture
-            virtual void Excecute() override {
-	            RetrieveFuncPtr = ResolveFuncPtr();
-            }
-			// End FicsItFuture
-
-			bool IsValid() {
-	            return static_cast<bool>(RetrieveFuncPtr);
-            }
-
-			int Retrieve(lua_State* L) {
-				return RetrieveFuncPtr(L);
-			}
-		};
-
-		typedef TSharedPtr<LuaFutureStruct> LuaFuture;
-
 		int luaFutureAwaitContinue(lua_State* L, int code, lua_KContext ctx) {
 			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
 			if (future->IsValid()) {
@@ -293,6 +290,40 @@ namespace FicsItKernel {
 			return 0;
 		}
 
+		int luaFutureUnpersist(lua_State* L) {
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+
+			LuaFuture* future = static_cast<LuaFuture*>(lua_newuserdata(L, sizeof(LuaFuture)));
+			new (future) LuaFuture(new LuaFutureStruct(
+				storage->GetStruct(luaL_checkinteger(L, lua_upvalueindex(1))),
+				storage->GetStruct(luaL_checkinteger(L, lua_upvalueindex(2))),
+				static_cast<FutureResolveFunc>(FuturePersistencyHelper::Get().FindPtr(FString(luaL_checkstring(L, lua_upvalueindex(3))))),
+				static_cast<FutureRetrieveFunc>(FuturePersistencyHelper::Get().FindPtr(FString(luaL_checkstring(L, lua_upvalueindex(3)))))
+			));
+			if (!future->Get()->IsValid()) {
+				KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel();
+				kernel->pushFuture(*future);
+			}
+			return 1;
+		}
+
+		int luaFuturePersist(lua_State* L) {
+			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
+			
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			
+			lua_pushinteger(L, storage->Add(future->InData));
+			lua_pushinteger(L, storage->Add(future->OutData));
+
+			lua_pushcclosure(L, luaFutureUnpersist, 1);
+			
+			return 1;
+		}
+
 		static const luaL_Reg luaFutureLib[] = {
 			{"await", luaFutureAwait},
 			{"get", luaFutureGet},
@@ -303,13 +334,14 @@ namespace FicsItKernel {
 		static const luaL_Reg luaFutureMetaLib[] = {
 			{"__newindex", luaRetNull},
 			{"__gc", luaFutureGC},
+			{"__persist", luaFuturePersist},
 			{NULL,NULL}
 		};
 
-		void luaFuture(lua_State* L, FutureResolveFunc futureHandler) {
+		void luaFuture(lua_State* L, LuaFuture oldfuture) {
 			KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel();
 			LuaFuture* future = static_cast<LuaFuture*>(lua_newuserdata(L, sizeof(LuaFuture)));
-			new (future) LuaFuture(new LuaFutureStruct(futureHandler));
+			new (future) LuaFuture(oldfuture);
 			kernel->pushFuture(*future);
 			luaL_setmetatable(L, "Future");
 		}
@@ -356,6 +388,8 @@ namespace FicsItKernel {
 			PersistTable("FutureLib", -1);
 			lua_setfield(L, -2, "__index");
 			lua_pop(L, 1);
+			lua_pushcfunction(L, luaFutureUnpersist);
+			PersistValue("FutureUnpersist");
 		}
 	}
 }

@@ -6,6 +6,8 @@
 
 #include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
 #include "VorbisAudioInfo.h"
+#include "FicsItKernel/Processor/FicsItFuture.h"
+#include "FicsItKernel/Processor/Lua/LuaStructs.h"
 
 #include "SML/util/Logging.h"
 
@@ -40,25 +42,48 @@ void AFINSpeakerPole::OnSoundFinished(UAudioComponent* AudioComponent) {
 	CurrentSound = "";
 }
 
-void AFINSpeakerPole::netFunc_playSound(const FString& sound, float startPoint) {
-	USoundWave* wave = LoadSoundFromFile(sound);
+void playSound_Resolve(TSharedRef<FDynamicStructHolder> In, TSharedRef<FDynamicStructHolder> Out) {
+	FFINSpeakersPlaySoundInData& InData = In->Get<FFINSpeakersPlaySoundInData>();
+	AFINSpeakerPole* self = InData.Speakers;
+	USoundWave* wave = self->LoadSoundFromFile(InData.Sound);
 	if (!wave) return;
-	if (AudioComponent->IsPlaying()) netFunc_stopSound();
-	CurrentSound = sound;
-	AudioComponent->SetSound(wave);
-	AudioComponent->Play(startPoint);
-	netSig_SpeakerSound(0, CurrentSound);
+	if (self->AudioComponent->IsPlaying()) self->netFunc_stopSound();
+	self->CurrentSound = InData.Sound;
+	self->AudioComponent->SetSound(wave);
+	self->AudioComponent->Play(InData.Start);
+	self->netSig_SpeakerSound(0, self->CurrentSound);
+}
+RegisterFuturePointer(playSound_Resolve, playSound_Resolve)
+
+int playSound_Retrieve(lua_State* L, TSharedRef<FDynamicStructHolder> Out) {
+	return 0;
+}
+RegisterFuturePointer(playSound_Retrieve, playSound_Retrieve)
+
+FFINNetworkFuture AFINSpeakerPole::netFunc_playSound(const FString& sound, float startPoint) {
+	TSharedPtr<FDynamicStructHolder> In = MakeShared<FDynamicStructHolder>(FFINSpeakersPlaySoundInData::StaticStruct());
+	In->Get<FFINSpeakersPlaySoundInData>().Speakers = this;
+	In->Get<FFINSpeakersPlaySoundInData>().Sound = sound;
+	In->Get<FFINSpeakersPlaySoundInData>().Start = startPoint;
+	return FFINNetworkFuture{MakeShared<FicsItKernel::Lua::LuaFutureStruct>(In, nullptr, playSound_Resolve, playSound_Retrieve)};
 }
 
-void AFINSpeakerPole::netFunc_stopSound() {
-	AudioComponent->Stop();
-	netSig_SpeakerSound(1, CurrentSound);
-	CurrentSound = "";
+void stopSound_Resolve(TSharedRef<FDynamicStructHolder> In, TSharedRef<FDynamicStructHolder> Out) {
+	FFINSpeakersPlaySoundInData& InData = In->Get<FFINSpeakersPlaySoundInData>();
+	AFINSpeakerPole* self = InData.Speakers;
+	self->AudioComponent->Stop();
+	self->netSig_SpeakerSound(1, self->CurrentSound);
+	self->CurrentSound = "";
+}
+RegisterFuturePointer(stopSound_Resolve, stopSound_Resolve)
+
+FFINNetworkFuture AFINSpeakerPole::netFunc_stopSound() {
+	TSharedPtr<FDynamicStructHolder> In = MakeShared<FDynamicStructHolder>(FFINSpeakersJustSelfInData::StaticStruct());
+	In->Get<FFINSpeakersJustSelfInData>().Speakers = this;
+	return FFINNetworkFuture{MakeShared<FicsItKernel::Lua::LuaFutureStruct>(In, nullptr, stopSound_Resolve, playSound_Retrieve)};
 }
 
-void AFINSpeakerPole::netSig_SpeakerSound_Implementation(int type, const FString& sound) {
-	SML::Logging::error("Why??? Sig!");
-}
+void AFINSpeakerPole::netSig_SpeakerSound_Implementation(int type, const FString& sound) {}
 
 USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& sound) {
 	FString fsp = UFGSaveSystem::GetSaveDirectoryPath();

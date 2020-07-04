@@ -13,6 +13,7 @@
 
 #define OffsetParam(type, off) (type*)((std::uint64_t)param + off)
 
+#pragma optimize("", off)
 namespace FicsItKernel {
 	namespace Lua {
 		std::map<UObject*, std::mutex> objectLocks;
@@ -270,13 +271,15 @@ namespace FicsItKernel {
 				for (UObject* o : merged) {
 					if (IsValid(o) && reg->findLibFunc(o->GetClass(), funcName, func)) {
 						lua_remove(L, 1);
-						return LuaProcessor::luaAPIReturn(L, func(L, lua_gettop(L), instance->trace / o));
+						int args = func(L, lua_gettop(L), instance->trace / o);
+						return LuaProcessor::luaAPIReturn(L, args);
 					}
 				}
 			}
 			if (reg->findLibFunc(type, funcName, func)) {
 				lua_remove(L, 1);
-				return LuaProcessor::luaAPIReturn(L, func(L, lua_gettop(L), instance->trace));
+				int args = func(L, lua_gettop(L), instance->trace);
+				return LuaProcessor::luaAPIReturn(L, args);
 			}
 			return luaL_error(L, "Unable to call function");
 		}
@@ -356,7 +359,6 @@ namespace FicsItKernel {
 				if (error.length() > 0) {
 					return luaL_error(L, std::string("Error at ").append(std::to_string(i).c_str()).append("# parameter: ").append(error).c_str());
 				}
-	
 				return LuaProcessor::luaAPIReturn(L, retargs);
 			}
 			return luaL_error(L, "Unable to call function");
@@ -982,3 +984,4 @@ namespace FicsItKernel {
 		}
 	}
 }
+#pragma optimize("", on)

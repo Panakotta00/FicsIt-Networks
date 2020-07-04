@@ -486,28 +486,41 @@ namespace FicsItKernel {
 			}
 			return 1;
 		})
+
+		void ManufacturerSetRecipeResolve(TSharedRef<FDynamicStructHolder> In, TSharedRef<FDynamicStructHolder> Out) {
+			TArray<TSubclassOf<UFGRecipe>> recipes;
+			FFINManufacturerSetRecipeInData& InData = In->Get<FFINManufacturerSetRecipeInData>();
+			AFGBuildableManufacturer* self = InData.Manufacturer.Get();
+			self->GetAvailableRecipes(recipes);
+			if (recipes.Contains(InData.Recipe)) {
+				TArray<FInventoryStack> stacks;
+				self->GetInputInventory()->GetInventoryStacks(stacks);
+				self->GetOutputInventory()->AddStacks(stacks);
+				self->SetRecipe(InData.Recipe);
+				Out->Get<FFINBoolData>().Data = true;
+			} else {
+				Out->Get<FFINBoolData>().Data = false;
+			}
+		}
+
+		RegisterFuturePointer(ManufacturerSetRecipeResolve, &ManufacturerSetRecipeResolve)
+
+		int ManufacturerSetRecipeRetrieve(lua_State* L, TSharedRef<FDynamicStructHolder> In) {
+			lua_pushboolean(L, In->Get<FFINBoolData>().Data);
+			return 1;
+		}
+		RegisterFuturePointer(ManufacturerSetRecipeRetrieve, &ManufacturerSetRecipeRetrieve)
 		
 		LuaLibFunc(AFGBuildableManufacturer, setRecipe, {
 			if (args < 1) {
 				return 0;
 			}
-			TSubclassOf<UFGRecipe> recipe = getClassInstance<UFGRecipe>(L, 1);
-			luaFuture(L, [self, recipe]() {
-				TArray<TSubclassOf<UFGRecipe>> recipes;
-				self->GetAvailableRecipes(recipes);
-				bool done = false;
-				if (recipes.Contains(recipe)) {
-					TArray<FInventoryStack> stacks;
-					self->GetInputInventory()->GetInventoryStacks(stacks);
-					self->GetOutputInventory()->AddStacks(stacks);
-					self->SetRecipe(recipe);
-					done = true;
-				}
-				return [done](lua_State* L) {
-					lua_pushboolean(L, done);
-					return 1;
-				};
-			});
+			TSubclassOf<UFGRecipe> recipe = getClassInstance<UFGRecipe>(L,1);
+			TSharedPtr<FDynamicStructHolder> holder1;
+			TSharedPtr<FDynamicStructHolder> holder2;
+			luaFuture(L, MakeShared<LuaFutureStruct>(holder1 = MakeShared<FDynamicStructHolder>(FFINManufacturerSetRecipeInData::StaticStruct()), holder2 = MakeShared<FDynamicStructHolder>(FFINBoolData::StaticStruct()), ManufacturerSetRecipeResolve, ManufacturerSetRecipeRetrieve));
+			holder1->Get<FFINManufacturerSetRecipeInData>().Manufacturer = self;
+			holder1->Get<FFINManufacturerSetRecipeInData>().Recipe = recipe;
 			return 1;
 		})
 
