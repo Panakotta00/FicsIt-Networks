@@ -37,21 +37,21 @@ function printScreen()
  gpu:fill(0,0,w,h," ")
  gpu:setBackground(1,1,1,1)
  for i=0,w-1,1 do
-  x = (p + i)/5.0
+  x = (p + i)/10.0
   x1 = math.floor(x)
   x2 = x1 + 1
   y1 = getData(math.floor(x1))
   y2 = getData(math.floor(x2))
   d = y1 + ((x - x1) * ((y2 - y1) / (x2 - x1)))
   d = math.floor(d)
-  gpu:setText(i*2,d," ")
-  gpu:setText(i*2+1,d," ")
+  print(d)
+  gpu:setText(i,d," ")
  end
  gpu:flush()
 end
 
 while true do
- event.pull(0.1)
+ event.pull(0.05)
  printScreen()
  p = p + 1
 end
