@@ -269,11 +269,13 @@ AFINNetworkCableHologram::AFINNetworkCableHologram() {
 	Adapter1->SetupAttachment(RootComponent);
 	Adapter1->SetMobility(EComponentMobility::Movable);
 	Adapter1->SetStaticMesh(adapterMesh);
+	Adapter1->SetVisibilitySML(false);
 
 	Adapter2 = CreateDefaultSubobject<UStaticMeshComponent>(L"Adapter2");
 	Adapter2->SetupAttachment(RootComponent);
 	Adapter2->SetMobility(EComponentMobility::Movable);
 	Adapter2->SetStaticMesh(adapterMesh);
+	Adapter1->SetVisibilitySML(false);
 
 	updateMeshes();
 }
