@@ -3,7 +3,7 @@
 	"mod_reference": "FicsItNetworks",
 	"name": "FicsIt-Networks",
 	"version": "0.0.1",
-	"sml_version": "2.1.3",
+	"sml_version": "2.2.0",
 	"description": "Adds a computer network and programmable computers to the Game.",
 	"authors": ["Panakotta00", "Rossz", "Deantendo", "Cofeediction", "Raysh"],
 	"credits": "Special thanks to Archengius and Snutt",
