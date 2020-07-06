@@ -16,7 +16,7 @@
 ** xref:buildings/ModularControlPanel/index.adoc[Modular Control Panel]
 *** xref:buildings/ModularControlPanel/Button.adoc[Button]
 *** xref:buildings/ModularControlPanel/Lever.adoc[Lever]
-*** xref:buildings/ModularControlPanel/TextDisplay.adoc[TextDisplay]
+*** xref:buildings/ModularControlPanel/Display.adoc[Display]
 ** xref:buildings/NetworkCable.adoc[Network Cable]
 ** xref:buildings/NetworkPole.adoc[Network Pole]
 ** xref:buildings/PowerController.adoc[Power Controller]

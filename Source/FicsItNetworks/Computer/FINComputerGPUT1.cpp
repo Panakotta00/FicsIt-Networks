@@ -250,6 +250,7 @@ UObject* AFINComputerGPUT1::netFunc_getScreen() {
 	return Screen;
 }
 
+#pragma optimize("", off)
 void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 	FString toSet = str;
 	while (toSet.Len() > 0) {
@@ -273,10 +274,10 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 					x = 0;
 				}
 				FString& text = TextGridBuffer[y];
-				text.RemoveAt(x, inLine.Len());
-				text.InsertAt(x, inLine);
-				text = text.Left(ScreenSize.X);
-				for (int dx = 0; dx < inLine.Len(); ++dx) {
+				int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X));
+				text.RemoveAt(x, replace);
+				text.InsertAt(x, inLine.Left(replace));
+				for (int dx = 0; dx < replace; ++dx) {
 					ForegroundBuffer[y * ScreenSize.X + x + dx] = CurrentForeground;
 					BackgroundBuffer[y * ScreenSize.X + x + dx] = CurrentBackground;
 				}
@@ -287,6 +288,7 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 		if (newLine) ++y;
 	}
 }
+#pragma optimize("", off)
 
 void AFINComputerGPUT1::netFunc_fill(int x, int y, int dx, int dy, const FString& str) {
 	FString c = str;
