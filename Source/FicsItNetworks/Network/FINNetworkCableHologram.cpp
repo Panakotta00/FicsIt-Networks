@@ -61,6 +61,7 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 }
 
 int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {
+	if (Snapped.v) return 0.0;
 	return (Snapped.pos - From.pos).Size()/100.0;
 }
 
