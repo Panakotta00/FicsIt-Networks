@@ -4,7 +4,7 @@
 
 void AFINModuleBase::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
-	Ar << Listeners;
+	if (Ar.IsSaveGame()) Ar << Listeners;
 }
 
 void AFINModuleBase::EndPlay(EEndPlayReason::Type reason) {
