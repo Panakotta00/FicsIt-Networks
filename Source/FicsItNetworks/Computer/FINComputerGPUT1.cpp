@@ -250,7 +250,6 @@ UObject* AFINComputerGPUT1::netFunc_getScreen() {
 	return Screen;
 }
 
-#pragma optimize("", off)
 void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 	FString toSet = str;
 	while (toSet.Len() > 0) {
@@ -288,7 +287,6 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 		if (newLine) ++y;
 	}
 }
-#pragma optimize("", off)
 
 void AFINComputerGPUT1::netFunc_fill(int x, int y, int dx, int dy, const FString& str) {
 	FString c = str;
