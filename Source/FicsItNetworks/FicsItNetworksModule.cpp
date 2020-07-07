@@ -7,15 +7,12 @@
 #include "FGBuildableHologram.h"
 #include "FGCharacterPlayer.h"
 #include "FGInventoryLibrary.h"
-#include "FGPowerCircuit.h"
+#include "FGGameMode.h"
 
 #include "SML/mod/hooking.h"
-#include "SML/util/Utility.h"
 
-#include "FINConfig.h"
 #include "FINComponentUtility.h"
 #include "FINSubsystemHolder.h"
-#include "Computer/FINComputerGPU.h"
 #include "Computer/FINComputerProcessor.h"
 #include "Network/FINNetworkConnector.h"
 #include "Network/FINNetworkAdapter.h"

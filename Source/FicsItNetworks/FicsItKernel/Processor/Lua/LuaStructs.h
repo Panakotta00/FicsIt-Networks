@@ -28,7 +28,7 @@ namespace FicsItKernel {
 			~LuaFutureStruct();
 
 			// Begin FicsItFuture
-			void Excecute() override;
+			void Execute() override;
 			// Eng FicsItFuture
 
 			bool IsValid();
