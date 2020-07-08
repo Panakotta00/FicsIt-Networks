@@ -6,7 +6,7 @@
 
 #include "LuaProcessorStateStorage.generated.h"
 
-#define MakeDynamicStruct(Type, ...) MakeShared<FDynamicStructHolder>(new Type(__VA_ARGS__))
+#define MakeDynamicStruct(Type, ...) MakeShared<FDynamicStructHolder>(Type::StaticStruct(), new Type{__VA_ARGS__})
 
 USTRUCT()
 struct FDynamicStructHolder {
@@ -19,6 +19,7 @@ private:
 public:
 	FDynamicStructHolder();
 	FDynamicStructHolder(UStruct* Struct);
+	FDynamicStructHolder(UStruct* Struct, void* Data);
 	~FDynamicStructHolder();
 	
 	bool Serialize(FArchive& Ar);

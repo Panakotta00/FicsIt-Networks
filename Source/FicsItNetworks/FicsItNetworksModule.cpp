@@ -7,6 +7,7 @@
 #include "FGBuildableHologram.h"
 #include "FGCharacterPlayer.h"
 #include "FGInventoryLibrary.h"
+#include "FGFactoryConnectionComponent.h"
 #include "FGGameMode.h"
 
 #include "SML/mod/hooking.h"
@@ -46,7 +47,7 @@ void Holo_SetupComponent(CallScope<decltype(&Holo_SetupComponentDecl)>& scope, A
 		comp->RegisterComponent();
 		comp->SetMobility(EComponentMobility::Movable);
 		comp->SetStaticMesh(networkConnectorHoloMesh);
-		comp->AttachTo(attachParent);
+		comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
 		comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
 			
 		scope.Override(comp);

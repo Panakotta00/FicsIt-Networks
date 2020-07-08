@@ -57,9 +57,7 @@ namespace FicsItKernel {
 		RegisterFuturePointer(luaComputerBeepResolve, luaComputerBeepResolve)
 
 		LuaFunc(luaComputerBeep)
-			TSharedPtr<FDynamicStructHolder> InData = MakeShared<FDynamicStructHolder>(FFINKernelFutureData::StaticStruct());
-			InData->Get<FFINKernelFutureData>().kernel = kernel;
-			luaFuture(L, MakeShared<LuaFutureStruct>(InData, nullptr, luaComputerBeepResolve, nullptr));
+			luaFuture(L, MakeLuaFuture(MakeDynamicStruct(FFINKernelFutureData, kernel), nullptr, luaComputerBeepResolve, nullptr));
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
