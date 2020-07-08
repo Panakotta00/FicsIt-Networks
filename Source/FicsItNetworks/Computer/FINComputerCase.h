@@ -64,6 +64,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TSet<AFINComputerScreen*> Screens;
 
+	float KernelTickTime = 0.0;
+
 	AFINComputerCase();
 	~AFINComputerCase();
 

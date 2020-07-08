@@ -74,10 +74,19 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 
 #pragma optimize("", off)
 void AFINComputerCase::Factory_Tick(float dt) {
-	//auto n = std::chrono::high_resolution_clock::now();
-	kernel->tick(dt);
-	//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
-	//SML::Logging::debug("Computer tick: ", dur.count());
+	KernelTickTime += dt;
+	if (KernelTickTime > 10.0) KernelTickTime = 10.0;
+
+	float KernelTicksPerSec = 1.0;
+	if (Processors.Num() >= 1) KernelTicksPerSec = Processors.begin().ElementIt->Value->KernelTicksPerSecond;
+
+	if (KernelTickTime > 1.0/KernelTicksPerSec) {
+		KernelTickTime -= 1.0/KernelTicksPerSec;
+		//auto n = std::chrono::high_resolution_clock::now();
+		kernel->tick(dt);
+		//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
+		//SML::Logging::debug("Computer tick: ", dur.count());
+	}
 }
 #pragma optimize("", on)
 

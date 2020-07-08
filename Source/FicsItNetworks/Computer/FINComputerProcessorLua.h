@@ -9,7 +9,7 @@ class AFINComputerProcessorLua : public AFINComputerProcessor {
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditDefaultsOnly)
-	int speed = 1;
+	int LuaInstructionsPerTick = 1;
 	
 	// Begin AFINComputerProcessorLua
 	virtual FicsItKernel::Processor* CreateProcessor() override;

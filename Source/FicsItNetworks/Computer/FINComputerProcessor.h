@@ -9,5 +9,8 @@ UCLASS()
 class AFINComputerProcessor : public AFINComputerModule {
 	GENERATED_BODY()
 public:
+	UPROPERTY(EditDefaultsOnly)
+	float KernelTicksPerSecond = 1.0;
+	
 	virtual FicsItKernel::Processor* CreateProcessor();
 };
