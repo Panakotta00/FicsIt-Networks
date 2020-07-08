@@ -1,9 +1,11 @@
 Lua Examples::
 +
 ====
+xref:lua/examples/multiThreading.adoc[Multi Threading]
+-
 xref:lua/examples/paint.adoc[Paint]
 -
-xref:lua/examples/storageRefill.adoc[Storage Refill]
--
 xref:lua/examples/randomPlott.adoc[Random Plott]
+-
+xref:lua/examples/storageRefill.adoc[Storage Refill]
 ====

@@ -2,7 +2,6 @@
 
 #include <chrono>
 
-
 #include "../../FicsItKernel.h"
 
 #include "LuaInstance.h"
@@ -143,10 +142,7 @@ namespace FicsItKernel {
 			lua_pushnil(L);
 			while (lua_next(L, idx) != 0) {
 				const char* str = lua_tostring(L, -2);
-				//if (str) SML::Logging::error("   k: ", str);
 				str = lua_tostring(L, -1);
-				//if (str) SML::Logging::error("   v: ", str);
-				//else if (lua_isnil(L, -1)) SML::Logging::error("   v: nil");
 				len++;
 				lua_pop(L, 1);
 			}
@@ -375,7 +371,6 @@ namespace FicsItKernel {
 				lua_pushvalue(luaState, -4); // ..., uperm, unpersist, str-thread, str-globals, uperm
 			
 				// do unpersist
-				//lua_call(luaState, 3, 2); int ok = LUA_OK;
 				int ok = lua_pcall(luaState, 3, 2, 0); // ...,  uperm, globals, thread
 
 				// check unpersist
@@ -471,20 +466,28 @@ namespace FicsItKernel {
 
 		int luaResume(lua_State* L) {
 			int args = lua_gettop(L);
-			if (!lua_isthread(L, 1)) luaL_argerror(L, 1, "is no thread");
-			lua_State* thread = lua_tothread(L, 1);
+			int threadIndex = 1;
+			if (lua_isboolean(L, 1)) threadIndex = 2;
+			if (!lua_isthread(L, threadIndex)) luaL_argerror(L, threadIndex, "is no thread");
+			lua_State* thread = lua_tothread(L, threadIndex);
 
 			// copy passed arguments to coroutine so it can return these arguments from the yield function
 			// but dont move the passed coroutine and then resume the coroutine
-			lua_xmove(L, thread, args - 1);
-			int state = lua_resume(thread, L, args - 1);
+			lua_xmove(L, thread, args - threadIndex);
+			int state = lua_resume(thread, L, args - threadIndex);
 
 			int nargs = lua_gettop(thread);
 			// no args indicates return or internal yield (count hook)
 			if (nargs == 0) {
 				// yield self to cascade the yield down and so the lua execution halts
-				if (state == LUA_YIELD) return lua_yieldk(L, 0, NULL, &luaResumeResume);
-				else return LuaProcessor::luaAPIReturn(L, 0);
+				if (state == LUA_YIELD) {
+					// yield from count hook
+					if (threadIndex == 2 && lua_toboolean(L, 1)) {
+						return lua_yield(L, 0);
+					} else {
+						return lua_yieldk(L, 0, NULL, &luaResumeResume);
+					}
+				} else return LuaProcessor::luaAPIReturn(L, 0);
 			}
 			
 			if (state == LUA_YIELD) nargs -= 1; // remove bool added by overwritten yield
