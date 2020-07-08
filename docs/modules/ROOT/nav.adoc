@@ -40,4 +40,5 @@
 *** xref:lua/examples/paint.adoc[Paint]
 *** xref:lua/examples/storageRefill.adoc[Storage Refill]
 *** xref:lua/examples/randomPlott.adoc[Random Plott]
+* xref:ModIntegration.adoc[Mod Integration]
 * xref:credits.adoc[Credits]
