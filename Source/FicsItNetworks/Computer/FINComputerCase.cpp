@@ -59,6 +59,23 @@ void AFINComputerCase::Serialize(FArchive& ar) {
 	Super::Serialize(ar);
 	if (ar.IsSaveGame()) {
 		kernel->Serialize(ar, KernelState);
+		if (ar.IsLoading()) {
+			// load floppy
+			AFINFileSystemState* state = nullptr;
+			FInventoryStack stack;
+			if (DataStorage->GetStackFromIndex(1, stack)) {
+				const TSubclassOf<UFINComputerDriveDesc> driveDesc = stack.Item.ItemClass;
+				state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+				if (IsValid(driveDesc)) {
+					if (!IsValid(state)) {
+						state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DataStorage, 1);
+					}
+				}
+				if (Floppy) kernel->removeDrive(Floppy);
+				Floppy = state;
+				if (Floppy) kernel->addDrive(Floppy);
+			}
+		}
 	}
 }
 
@@ -80,7 +97,7 @@ void AFINComputerCase::Factory_Tick(float dt) {
 	float KernelTicksPerSec = 1.0;
 	if (Processors.Num() >= 1) KernelTicksPerSec = Processors.begin().ElementIt->Value->KernelTicksPerSecond;
 
-	if (KernelTickTime > 1.0/KernelTicksPerSec) {
+	while (KernelTickTime > 1.0/KernelTicksPerSec) {
 		KernelTickTime -= 1.0/KernelTicksPerSec;
 		//auto n = std::chrono::high_resolution_clock::now();
 		kernel->tick(dt);

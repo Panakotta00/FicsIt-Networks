@@ -195,9 +195,10 @@ namespace FicsItKernel {
 		}
 
 		LuaFunc(doFile)
+			FileSystem::Path path = luaL_checkstring(L, 1);
 			FileSystem::SRef<FileSystem::FileStream> file;
 			try {
-				file = self->open(luaL_checkstring(L, 1), FileSystem::INPUT);
+				file = self->open(path, FileSystem::INPUT);
 			} CatchExceptionLua
 			if (!file.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;
@@ -208,16 +209,17 @@ namespace FicsItKernel {
 				file->close();
 			} CatchExceptionLua
 			int n = lua_gettop(L) - 1;
-			luaL_loadbuffer(L, code.c_str(), code.size(), code.c_str());
+			luaL_loadbuffer(L, code.c_str(), code.size(), ("@" + path.str()).c_str());
 			lua_insert(L, 2);
 			lua_call(L, n, LUA_MULTRET);
 			return LuaProcessor::luaAPIReturn(L, lua_gettop(L) - 1);
 		}
 
 		LuaFunc(loadFile)
+			FileSystem::Path path = luaL_checkstring(L, 1);
 			FileSystem::SRef<FileSystem::FileStream> file;
 			try {
-				file = self->open(luaL_checkstring(L, 1), FileSystem::INPUT);
+				file = self->open(path, FileSystem::INPUT);
 			} CatchExceptionLua
 			if (!file.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;
@@ -228,7 +230,7 @@ namespace FicsItKernel {
 				file->close();
 			} CatchExceptionLua
 			int n = lua_gettop(L) - 1;
-			luaL_loadbuffer(L, code.c_str(), code.size(), code.c_str());
+			luaL_loadbuffer(L, code.c_str(), code.size(), ("@" + path.str()).c_str());
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 

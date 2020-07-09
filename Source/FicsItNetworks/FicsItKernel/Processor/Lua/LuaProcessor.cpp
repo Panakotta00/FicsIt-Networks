@@ -13,6 +13,7 @@
 #include "LuaProcessorStateStorage.h"
 
 #include "FINStateEEPROMLua.h"
+#include "LuaDebugAPI.h"
 
 #include "SML/util/Logging.h"
 
@@ -209,7 +210,8 @@ namespace FicsItKernel {
 				kernel->crash(KernelCrash("No Valid EEPROM set"));
 				return;
 			}
-			luaL_loadstring(luaThread, std::string(TCHAR_TO_UTF8(*eeprom->Code), eeprom->Code.Len()).c_str());
+			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->Code), eeprom->Code.Len());
+			luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
 			
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
 			// TODO: Check if we actually want to use this or the manual gc call
@@ -522,8 +524,8 @@ namespace FicsItKernel {
 			PersistTable("coroutine", -1);
 			lua_register(L, "print", luaPrint);
 			PersistGlobal("print");
-
 			lua_pop(L, 1);
+			
 			luaL_requiref(L, "math", luaopen_math, true);
 			PersistTable("math", -1);
 			lua_pop(L, 1);
@@ -537,6 +539,7 @@ namespace FicsItKernel {
 			setupEventAPI(L);
 			setupFileSystemAPI(L);
 			setupComputerAPI(L);
+			setupDebugAPI(L);
 		}
 
 		AFINStateEEPROMLua* LuaProcessor::getEEPROM() {
