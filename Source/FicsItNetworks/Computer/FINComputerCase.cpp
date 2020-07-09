@@ -59,23 +59,6 @@ void AFINComputerCase::Serialize(FArchive& ar) {
 	Super::Serialize(ar);
 	if (ar.IsSaveGame()) {
 		kernel->Serialize(ar, KernelState);
-		if (ar.IsLoading()) {
-			// load floppy
-			AFINFileSystemState* state = nullptr;
-			FInventoryStack stack;
-			if (DataStorage->GetStackFromIndex(1, stack)) {
-				const TSubclassOf<UFINComputerDriveDesc> driveDesc = stack.Item.ItemClass;
-				state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
-				if (IsValid(driveDesc)) {
-					if (!IsValid(state)) {
-						state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DataStorage, 1);
-					}
-				}
-				if (Floppy) kernel->removeDrive(Floppy);
-				Floppy = state;
-				if (Floppy) kernel->addDrive(Floppy);
-			}
-		}
 	}
 }
 
@@ -83,6 +66,22 @@ void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
 	
 	DataStorage->Resize(2);
+
+	// load floppy
+	AFINFileSystemState* state = nullptr;
+	FInventoryStack stack;
+	if (DataStorage->GetStackFromIndex(1, stack)) {
+		const TSubclassOf<UFINComputerDriveDesc> DriveDesc = stack.Item.ItemClass;
+		state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+		if (IsValid(DriveDesc)) {
+			if (!IsValid(state)) {
+				state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+			}
+		}
+		if (Floppy) kernel->removeDrive(Floppy);
+		Floppy = state;
+		if (Floppy) kernel->addDrive(Floppy);
+	}
 }
 
 void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {

@@ -123,7 +123,7 @@ Parameters::
 |the height of the character grid
 |===
 
-==== `setForegroundColor(float r, float g, float b, float a)`
+==== `setForeground(number r, number g, number b, number a)`
 
 This function allows you to set the used foreground color of all following draw calls.
 
@@ -134,23 +134,23 @@ Parameters::
 |Name |Type |Description
 
 |r
-|float
+|number
 |the red value of the foreground color from 0 to 1
 
 |g
-|float
+|number
 |the green value of the foreground color from 0 to 1
 
 |b
-|float
+|number
 |the blue value of the foreground color from 0 to 1
 
 |a
-|float
+|number
 |the alpha/transparency value of the foreground color from 0 to 1
 |===
 
-==== `setBackgroundColor(float r, float g, float b, float a)`
+==== `setBackground(number r, number g, number b, number a)`
 
 This function allows you to set the used background color of all following draw calls.
 
@@ -161,19 +161,19 @@ Parameters::
 |Name |Type |Description
 
 |r
-|float
+|number
 |the red value of the background color from 0 to 1
 
 |g
-|float
+|number
 |the green value of the background color from 0 to 1
 
 |b
-|float
+|number
 |the blue value of the background color from 0 to 1
 
 |a
-|float
+|number
 |the alpha/transparency value of the background color from 0 to 1
 |===
 

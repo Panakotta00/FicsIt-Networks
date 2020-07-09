@@ -130,7 +130,9 @@ namespace FicsItKernel {
 				kernel->stop();
 			} else {
 				// runtimed crashed -> crash system with runtime error message
-				kernel->crash({ lua_tostring(luaThread, -1) });
+				
+				luaL_traceback(luaThread, luaThread, lua_tostring(luaThread, -1), 0);
+				kernel->crash({ std::string(lua_tostring(luaThread, -1)) });
 			}
 
 			// clear some data
