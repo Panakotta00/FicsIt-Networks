@@ -10,7 +10,32 @@ AFINIndicatorPole::AFINIndicatorPole() {
 
 void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
 	Super::OnConstruction(transform);
+
+#if WITH_EDITOR
+	CreatePole();
+#endif
+}
+
+void AFINIndicatorPole::BeginPlay() {
+	Super::BeginPlay();
+
+	if (Indicator->GetMaterials().Num() > 0) {
+		IndicatorInstance = Indicator->CreateDynamicMaterialInstance(0);
+		Indicator->SetMaterial(0, IndicatorInstance);
+	}
+
+#if !WITH_EDITOR
+	CreatePole();
+#endif
 	
+	UpdateEmessive();
+}
+
+bool AFINIndicatorPole::ShouldSave_Implementation() const {
+	return true;
+}
+
+void AFINIndicatorPole::CreatePole() {
 	// Clean up
 	Poles.Empty();
 
@@ -26,17 +51,6 @@ void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
 		Pole->SetMobility(EComponentMobility::Static);
 		Poles.Add(Pole);
 	}
-}
-
-void AFINIndicatorPole::BeginPlay() {
-	Super::BeginPlay();
-
-	if (Indicator->GetMaterials().Num() > 0) {
-		IndicatorInstance = Indicator->CreateDynamicMaterialInstance(0);
-		Indicator->SetMaterial(0, IndicatorInstance);
-	}
-	
-	UpdateEmessive();
 }
 
 void AFINIndicatorPole::UpdateEmessive() {
