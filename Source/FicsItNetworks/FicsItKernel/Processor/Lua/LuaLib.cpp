@@ -23,6 +23,7 @@
 #include "FGLocomotive.h"
 #include "FGBuildableRailroadSwitchControl.h"
 #include "FGBuildableRailroadSignal.h"
+#include "FGPipeSubsystem.h"
 #include "FicsItKernel/Network/SmartSignal.h"
 
 #define LuaLibTypeRegName(ClassName) ClassName ## _Reg
@@ -1048,21 +1049,28 @@ namespace FicsItKernel {
 		LuaLibFuncGetBool(AFGBuildableDockingStation, isLoadUnloading, IsLoadUnloading)
 
 		// End AFGBuildableDockingStation
+		
+		// Begin AFGBuildablePipeReservoir
 
 		LuaLibTypeDecl(AFGBuildablePipeReservoir, "PipeReservoir")
 
 		LuaLibFunc(AFGBuildablePipeReservoir, getFluidType, {
-			newInstance(L, obj / self->GetFluidDescriptor());
+			newInstance(L, self->GetFluidDescriptor());
 			return 1;
 		})
 
+		LuaLibFunc(AFGBuildablePipeReservoir, flush, {
+			AFGPipeSubsystem::Get(self->GetWorld())->FlushIntegrant(self);
+			return 0;
+		})
+		
 		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFluidContent, GetFluidContent)
 		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getMaxFluidContent, GetFluidContentMax)
 		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowFill, GetFlowFill)
 		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowDrain, GetFlowDrain)
 		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowLimit, GetFlowLimit)
 
-		// Begin AFGBuildablePipeReservoir
+		// End AFGBuildablePipeReservoir
 		
 		/* ################### */
 		/* # Class Instances # */

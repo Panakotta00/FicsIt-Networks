@@ -95,7 +95,7 @@ namespace FicsItKernel {
 		while (futureQueue.size() > 0) {
 			TSharedPtr<FicsItFuture> future = futureQueue.front();
 			futureQueue.pop();
-			future->Excecute();
+			future->Execute();
 		}
 	}
 

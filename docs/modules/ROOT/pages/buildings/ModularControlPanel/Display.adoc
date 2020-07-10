@@ -1,0 +1,20 @@
+= Display
+:description: This IO-Module allows you to display what a GPU renders on a small screen for the modular panel.
+
+[cols="1,3"]
+|===
+|Building Type
+|IO Module
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/ModularIO_TextDisplay_bg.png[300,300,role="left"]
+|image::buildings/ModularIO_TextDisplay_ig.jpg[300,300,role="left"]
+|===
+
+This IO-Module works a small screen for the GPUs which you can place onto a modular control panel.
+
+include::partial$io_modules_footer.adoc[]

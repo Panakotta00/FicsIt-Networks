@@ -33,7 +33,9 @@ namespace FicsItKernel {
 
 		LuaFunc(luaComputerPanic)
 		    kernel->crash(KernelCrash(std::string("PANIC! '") + luaL_checkstring(L, 1) + "'"));
-			kernel->getAudio()->beep();
+			kernel->pushFuture(MakeShared<SimpleFuture>([kernel]() {
+				kernel->getAudio()->beep();
+			}));
 			lua_yield(L, 0);
 			return 0;
 		}
@@ -47,8 +49,15 @@ namespace FicsItKernel {
 		}
 #pragma optimize("", on)
 
+		void luaComputerBeepResolve(TSharedRef<FDynamicStructHolder> In, TSharedRef<FDynamicStructHolder> Out) {
+			FFINKernelFutureData& InData = In->Get<FFINKernelFutureData>();
+			InData.kernel->getAudio()->beep();
+		}
+
+		RegisterFuturePointer(luaComputerBeepResolve, luaComputerBeepResolve)
+
 		LuaFunc(luaComputerBeep)
-			kernel->getAudio()->beep();
+			luaFuture(L, MakeLuaFuture(MakeDynamicStruct(FFINKernelFutureData, kernel), nullptr, luaComputerBeepResolve, nullptr));
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 

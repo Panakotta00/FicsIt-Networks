@@ -7,6 +7,8 @@ FDynamicStructHolder::FDynamicStructHolder(UStruct* Struct) : Struct(Struct) {
 	Struct->InitializeStruct(Data);
 }
 
+FDynamicStructHolder::FDynamicStructHolder(UStruct* Struct, void* Data) : Data(Data), Struct(Struct) {}
+
 FDynamicStructHolder::~FDynamicStructHolder() {
 	if (Data) {
 		Struct->DestroyStruct(Data);

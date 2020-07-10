@@ -7,9 +7,9 @@ namespace FicsItKernel {
 		class LuaProcessor;
 
 		/**
-		* Adds the Event API to the top stack entry if it is a table in the given Lua state.
+		* Adds the Event API to the given lua state.
 		*
-		* @param[in]	L	The lua state you want to add the Event API to. Make sure the top stack entry is a table.
+		* @param[in]	L	The lua state you want to add the Event API to.
 		*/
 		void setupEventAPI(lua_State* L);
 	}

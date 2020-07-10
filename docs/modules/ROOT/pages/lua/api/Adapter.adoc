@@ -2451,7 +2451,7 @@ Return Values::
 |True if the docking station is currently in load mode.
 |===
 
-==== `bool isLoadMode()`
+==== `bool isLoadUnloading()`
 
 Returns if the dockingstation is currently loading or unloading the docked actor.
 
@@ -2464,6 +2464,102 @@ Return Values::
 |bool
 |bool
 |True if the docking station is currently loading or unloading.
+|===
+
+== PipeReservoir (extends Actor)
+
+This is any kind of fluid storage.
+
+=== Functions
+
+==== `ItemType getFluidType()`
+
+This function returns the type of the fluid the container currently stores.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|ItemType
+|ItemType
+|The type of the fluid currently stored in the storage container.
+|===
+
+==== `number getFluidContent()`
+
+This function returns the amount of fluid currently stored in the container.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The amount of fluid currently stored in the storage.
+|===
+
+==== `number getMaxFluidContent()`
+
+This function returns how much fluid this storage container can hold.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The amount of fluid the storage container can hold.
+|===
+
+==== `number getFlowFill()`
+
+This function returns the rate how fast the container gets filled with fluid.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The rate in which the container gets filled with fluid.
+|===
+
+==== `numer getFlowDrain()`
+
+This function returns the rate how fast the container gets drained.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The rate in which the container gets drained.
+|===
+
+==== `numer getFlowLimit()`
+
+This function returns the max fluid transfer rate of the container.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The max fluid transfer rate.
 |===
 
 

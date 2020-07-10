@@ -73,7 +73,7 @@ count getAmount(string)
 
 ==== Lua
 
-To call such a function in Lua you simply need to get the Lua-Component-Structure and call the member function in that table as method `:`.
+To call such a function in Lua you simply need to get the Lua-Instance and call the member function in that table as method `:`.
 
 If you want to get a list of all member of the Lua instnace's functions and attributes, you can use the `string[] getMembers()` function.
 
@@ -81,16 +81,16 @@ If you want to get a list of all member of the Lua instnace's functions and attr
 
 Signals are quite important because they allow us to listen for events happening in a network. That means we get notified when something happens and don't need to ask if there happend anything every tick.
 
-When a signal occurs the signal gets added to the signalqueue of every computer subscribed to the network component.
+When a signal occurs the signal gets added to the signalqueue of every computer subscribed to the object.
 The signalqueue size depends on the configuration of the host.
-If the queue is full, every further signal gets dropped until the queue is empty.
+If the queue is full, every further signal gets dropped until the queue has again place for new signals.
 
-If a computer wants to get the signals of a component, he needs to subsribe to the component (listen to the component). A computer can just subscribe once at a time to the same network component, but it can subscribe to multiple different ones at the same time.
+If a computer wants to recieve the signals of a object, he needs to subscribe to the instance (listen to the instance). A computer can just subscribe once at a time to the same instance, but it can subscribe to multiple different ones at the same time.
 
 ==== Lua
 
-If you want to listen to a component you need to get the Lua-Component-Structure and pass it to the `component.listen(Component)` function.
+If you want to listen to a instance you need to get the Lua-Instance and pass it to the `event.listen(Instance)` function.
 
-To learn more, visit the xref:lua/api/Component.adoc#_component_proxyid[Component API page].
+To learn more, visit the xref:lua/api/Event.adoc#_listencomponent[Event API page].
 
 For declarations in this documentation we use the same scheme as for functions.

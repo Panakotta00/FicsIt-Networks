@@ -5,6 +5,8 @@ xref:buildings/Adapter.adoc[Adapter]
 -
 xref:buildings/ComputerCase/index.adoc[Computer Case]
 -
+xref:buildings/IndicatorPole.adoc[Indicator Pole]
+-
 xref:buildings/ModularControlPanel/index.adoc[Modular Control Panel]
 -
 xref:buildings/NetworkCable.adoc[Network Cable]

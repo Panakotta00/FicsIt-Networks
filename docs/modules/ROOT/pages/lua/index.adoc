@@ -15,6 +15,25 @@ The following list contains all available standard Lua libraries, non-standard l
 - IO (only the File-Table)
 - Serialization
 
+=== Specialties
+
+==== `coroutine.resume`
+
+The `coroutine.resume` function got a small upgrad allowing for the implementation of multithreading.
+
+You can use it just as usual, but if you add a additional paramter at the beginning
+of the paramter list (before the thread) of type bool and it is set to true,
+then the resuming function will only keep executing until the end of this lua tick.
+After that lua tick, the function will return and you can do something else.
+
+Important to note is though, you dont know if the resumed function yielded it self,
+or if it was due to the end of the lua tick.
+Since the return will contain nothing if it yielded based on the end of the lua tick.
+With that said, also resuming a function that yielded that way with paramters will do nothing
+about those paramters, they will just get dropped.
+
+You should have a look at the xref:lua/examples/multiThreading.adoc[multi threading example] to find a use case for it.
+
 == Lua Instances
 
 Lua Instances are speacial data-type FicsIt-Networks provides, allowing us to map a lot more easily different functions and properties of a game object to Lua.

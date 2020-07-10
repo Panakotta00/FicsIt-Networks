@@ -43,8 +43,8 @@ namespace FicsItKernel {
 			
 		}
 
-		void LuaFutureStruct::Excecute() {
-			ResolveFunc(InData.ToSharedRef(), OutData.ToSharedRef());
+		void LuaFutureStruct::Execute() {
+			if (ResolveFunc) ResolveFunc(InData.ToSharedRef(), OutData.ToSharedRef());
 			valid = true;
 		}
 		
@@ -53,7 +53,8 @@ namespace FicsItKernel {
 		}
 
 		int LuaFutureStruct::Retrieve(lua_State* L) {
-			return RetrieveFunc(L, OutData.ToSharedRef());
+			if (RetrieveFunc) return RetrieveFunc(L, OutData.ToSharedRef());
+			return 0;
 		}
 
 		void luaStruct(lua_State* L, FInventoryItem item) {

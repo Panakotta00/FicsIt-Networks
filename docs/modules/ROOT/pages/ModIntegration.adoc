@@ -1,0 +1,51 @@
+= Mod Integration
+
+This pages describes for other mod developers how they can integrate FicsIt-Networks into their own mod.
+
+== Ability to connect network cables
+
+For you to be able to connect a network cable to your machine you need to have at least one
+power connector attached to the actor you want to be able to connect to the network directly.
+
+This power connector can also have just 0 allowed connections, we dont care about that.
+
+If you then attach a network cable to it, a adapter will automatically get created
+which also manages for you the UUID and Nicks as well as signal sending.
+
+This attached adapter will also provide a basic API (all "Actor" members of the adapter api).
+
+== Adding Functions
+
+If you want to provide your own functions for allowing the users to interact from the network
+with your machine, you just need to provide your functions by following some simple rules.
+
+1. The function name needs to start with `netFunc_` followed with your function name without any spaces.
++
+f.e. `netFunc_testFunction`. You should also follow the naming scheme of function by using lower case caml case.
+2. The function needs to be reflected (any BP function is this),
+means in C++ it needs to have a UFUNCTION macro.
+3. Only these types of input and output parameters are allowed:
+ - bool
+ - int
+ - int64
+ - float
+ - string
+ - Object (any type)
+ - Class (any type)
+
+If you follow these rules, the function will be available as member of the lua instance
+of your object.
+
+Object paramters are in Lua handled as instances, that also means when you return a object,
+a lua instance of that object will get created, and if it has any functions following these
+rules, they will also get exposed. That means to be able to provide functions,
+the object is not required to be attachable to the network.
+
+[WARNING]
+====
+Don't do things you are not allowed to do in a parallel thread!
+Only do things you can safely do in a factory tick.
+If not, create a wrapper for it.
+
+There is no future/promise ability for these kind of functions yet.
+====

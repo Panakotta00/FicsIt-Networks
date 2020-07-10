@@ -66,6 +66,22 @@ void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
 	
 	DataStorage->Resize(2);
+
+	// load floppy
+	AFINFileSystemState* state = nullptr;
+	FInventoryStack stack;
+	if (DataStorage->GetStackFromIndex(1, stack)) {
+		const TSubclassOf<UFINComputerDriveDesc> DriveDesc = stack.Item.ItemClass;
+		state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+		if (IsValid(DriveDesc)) {
+			if (!IsValid(state)) {
+				state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+			}
+		}
+		if (Floppy) kernel->removeDrive(Floppy);
+		Floppy = state;
+		if (Floppy) kernel->addDrive(Floppy);
+	}
 }
 
 void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
@@ -74,10 +90,19 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 
 #pragma optimize("", off)
 void AFINComputerCase::Factory_Tick(float dt) {
-	//auto n = std::chrono::high_resolution_clock::now();
-	kernel->tick(dt);
-	//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
-	//SML::Logging::debug("Computer tick: ", dur.count());
+	KernelTickTime += dt;
+	if (KernelTickTime > 10.0) KernelTickTime = 10.0;
+
+	float KernelTicksPerSec = 1.0;
+	if (Processors.Num() >= 1) KernelTicksPerSec = Processors.begin().ElementIt->Value->KernelTicksPerSecond;
+
+	while (KernelTickTime > 1.0/KernelTicksPerSec) {
+		KernelTickTime -= 1.0/KernelTicksPerSec;
+		//auto n = std::chrono::high_resolution_clock::now();
+		kernel->tick(dt);
+		//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
+		//SML::Logging::debug("Computer tick: ", dur.count());
+	}
 }
 #pragma optimize("", on)
 

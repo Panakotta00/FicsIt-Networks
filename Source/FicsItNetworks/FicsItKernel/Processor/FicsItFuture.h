@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <functional>
+
 #include "CoreMinimal.h"
 #include "Archive.h"
 
@@ -24,8 +26,23 @@ namespace FicsItKernel {
 		 * This function will get called from the FicsIt-Kernel in the main thread if it is added to the
 		 * future queue of the kernel.
 		 */
-		virtual void Excecute() = 0;
+		virtual void Execute() = 0;
     };
+
+	/**
+	 * A simple future implementation that just calls
+	 * the provided closure
+	 */
+	class SimpleFuture : public FicsItFuture {
+	public:
+		std::function<void()> func;
+
+		SimpleFuture(const std::function<void()> func) : func(func) {}
+
+		virtual void Execute() override {
+			func();
+		}
+	};
 
 	class FuturePersistencyHelper {
 	private:

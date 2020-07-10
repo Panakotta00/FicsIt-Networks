@@ -7,5 +7,5 @@ xref:buildings/ModularControlPanel/Lever.adoc[Lever]
 -
 xref:buildings/ModularControlPanel/Potentiometer.adoc[Potentiometer]
 -
-xref:buildings/ModularControlPanel/TextDisplay.adoc[Text Display]
+xref:buildings/ModularControlPanel/Display.adoc[Display]
 ====

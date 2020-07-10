@@ -1,0 +1,119 @@
+= Indicator Pole
+:description: The indicator pole allows you display a state of program so you can determine it from far away.
+
+[cols="1,3"]
+|===
+|Building Type
+|Buildable
+
+|Max Network Connections
+|2
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/IndicatorPole_bg.png[300,300,role="left"]
+|image::buildings/IndicatorPole_ig.jpg[300,300,role="left"]
+|===
+
+The indicator pole allows you to display a color-coded states of program
+in the world so you can see them also from far away.
+
+The indicator pole has a dynamic height and can also get stacked.
+
+You can even access the stacked pole via the API so you don't need to
+connect every pole it self to a computer network.
+
+== Functions
+
+=== `setColor(number r, number g, number b, number e)`
+
+This function allows you to set the color of the indicator pole as well as
+the intensity of the light.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|r
+|number
+|The red value of the color. (0 - 1)
+
+|g
+|number
+|The green value of the color. (0 - 1)
+
+|b
+|number
+|The blue value of the color. (0 - 1)
+
+|e
+|number
+|The emissive value of the color. (0 - 5)
+|===
+
+=== `r, g, b, e getColor()`
+
+This function allows you to get the currently used color of the indicator pole as well as
+the intensity of the light.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|r
+|number
+|The red value of the color. (0 - 1)
+
+|g
+|number
+|The green value of the color. (0 - 1)
+
+|b
+|number
+|The blue value of the color. (0 - 1)
+
+|e
+|number
+|The light intensity of the lamp. (0 - 5)
+|===
+
+=== `IndicatorPole getTopPole()`
+
+This function allows you to access the indicator pole that is stacked ontop of this pole.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|IndicatorPole
+|IndicatorPole
+|The indicator pole stacked ontop of this pole.
+|===
+
+=== `IndicatorPole getBottomPole()`
+
+This function allows you to access the indicator pole on which this indicator pole is stacked ontop of.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|IndicatorPole
+|IndicatorPole
+|The indicator pole this pole is stacked ontop of.
+|===
+
+
+
+include::partial$building_footer.adoc[]

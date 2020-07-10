@@ -1,0 +1,78 @@
+= Multi Threading Example
+
+This example shows a usage of the coroutine.resume additions.
+It is a small thread manager whith some usage of threads.
+
+== Setup
+
+You simply need a computer with a Lua Processor and some RAM as well as a EEPROM filled
+with the code listed below.
+
+== Output
+
+This code will execute "Hey" and "Ho" switching after each other indefinetly.
+
+Notice how this are actually two different coroutines running "at the same time".
+
+== Code
+
+[source,Lua]
+----
+thread = {
+ threads = {},
+ current = 1
+}
+
+function thread.create(func)
+ local t = {}
+ t.co = coroutine.create(func)
+ function t:stop()
+  for i,th in pairs(thread.threads) do
+   if th == t then
+    table.remove(thread.threads, i)
+   end
+  end
+ end
+ table.insert(thread.threads, t)
+ return t
+end
+
+function thread:run()
+ while true do
+  if #thread.threads < 1 then
+   return
+  end
+  if thread.current > #thread.threads then
+   thread.current = 1
+  end
+  coroutine.resume(true, thread.threads[thread.current].co)
+  thread.current = thread.current + 1
+ end
+end
+
+
+-- example 
+
+function sleep()
+ event.pull(0.0)
+end
+
+function foo1()
+ while true do
+  sleep()
+  print("hey")
+ end
+end
+
+function foo2()
+ while true do
+  sleep()
+  print("ho")
+ end
+end
+
+t1 = thread.create(foo1)
+t2 = thread.create(foo2)
+
+thread.run()
+----
