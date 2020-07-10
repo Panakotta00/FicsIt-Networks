@@ -127,6 +127,25 @@ Return Values::
 |returns true if it was able to remove the new filesystem
 |===
 
+=== `mount(string device, string mountPoint)`
+
+This function mounts the device referenced by the the path to a device node to the given mount point.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|device
+|string
+|the path to the device you want to mount
+
+|mountPoint
+|string
+|the path to the point were the device should get mounted to
+|===
+
 === `File open(string path, string mode)`
 
 Openes a file-stream and returns it as File-table.

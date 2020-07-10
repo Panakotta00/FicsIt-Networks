@@ -230,7 +230,12 @@ unordered_set<NodeName> FileSystemRoot::childs(Path path) {
 	Path pending = "";
 	auto device = getDevice(path, pending);
 	if (!device.isValid()) throw FileSystemException("no device at path found");
-	return device->childs(pending);
+	unordered_set<NodeName> names = device->childs(pending);
+	for (auto mount : mounts) {
+		Path mountPoint = mount.first;
+		if (mountPoint.prev() == path) names.insert(mountPoint.getFinal());
+	}
+	return names;
 }
 
 bool FileSystemRoot::mount(SRef<Device> device, Path path) {
