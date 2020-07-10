@@ -58,7 +58,7 @@ pipeline {
 				bat label: '', script: 'xcopy /Y /E /I SatisfactoryModLoader\\Source\\SML FicsIt-Networks\\Source\\SML > copy.log'
 				bat label: '', script: 'xcopy /Y /E /I SatisfactoryModLoader\\Plugins\\Alpakit FicsIt-Networks\\Plugins\\Alpakit > copy.log'
 				bat label: '', script: 'xcopy /Y /E /I SatisfactoryModLoader\\Content\\SML FicsIt-Networks\\Content\\SML > copy.log'
-				bat label: '', script: '7z x %ASSETS% -oFicsIt-Networks\\Content\\'
+				bat label: '', script: '7z x %ASSETS% -y -oFicsIt-Networks\\Content\\'
 			}
 		}
 

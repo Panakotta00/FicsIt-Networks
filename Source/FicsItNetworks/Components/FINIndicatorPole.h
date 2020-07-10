@@ -50,6 +50,15 @@ public:
 	virtual void BeginPlay() override;
 	// End AActor
 
+	// Begin IFGSaveInterface
+	virtual bool ShouldSave_Implementation() const override;
+	// End IFGSaveInterface
+
+	/**
+	 * Spawns all the pole static meshes
+	 */
+	void CreatePole();
+
 	/**
 	 * Updates the material paramteres of the dynamic material instance
 	 * to the variables.
