@@ -1055,7 +1055,7 @@ namespace FicsItKernel {
 		LuaLibTypeDecl(AFGBuildablePipeReservoir, "PipeReservoir")
 
 		LuaLibFunc(AFGBuildablePipeReservoir, getFluidType, {
-			newInstance(L, obj / self->GetFluidDescriptor());
+			newInstance(L, self->GetFluidDescriptor());
 			return 1;
 		})
 

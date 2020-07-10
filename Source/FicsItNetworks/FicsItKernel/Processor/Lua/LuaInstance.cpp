@@ -383,11 +383,13 @@ namespace FicsItKernel {
 			
 			lua_newtable(L);
 			int i = 0;
-			
-			lua_pushstring(L, "id");
-			lua_seti(L, -2, ++i);
-			lua_pushstring(L, "nick");
-			lua_seti(L, -2, ++i);
+
+			if (self->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+				lua_pushstring(L, "id");
+				lua_seti(L, -2, ++i);
+				lua_pushstring(L, "nick");
+				lua_seti(L, -2, ++i);
+			}
 			
 			UClass* type = self->GetClass();
 			
