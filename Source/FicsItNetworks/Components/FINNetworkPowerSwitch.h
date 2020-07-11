@@ -49,12 +49,18 @@ public:
 	 * Might queue a trigger of OnConnectedChanged
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Components")
-		void SetConnected(bool bNewConnected);
+	void SetConnected(bool bNewConnected);
 
 	/**
 	 * Notifies when the connection state has changed.
 	 * Gets only triggerd in actor tick.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Network|Components")
-		void OnConnectedChanged();
+	void OnConnectedChanged();
+
+	UFUNCTION(BlueprintCallable, Category="Network|Component")
+    void netFunc_setConnected(bool newConnected);
+
+	UFUNCTION(BlueprintCallable, Category="Network|Component")
+    bool netFunc_isConnected();
 };
