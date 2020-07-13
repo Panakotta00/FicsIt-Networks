@@ -255,6 +255,23 @@ namespace FicsItKernel {
 				} else file->transfer = nullptr;
 			}
 		}
+
+		int luaPersist(lua_State* L) {
+			// perm, globals, thread-index
+			
+			// persist globals table
+			eris_persist(L, 1, 2); // perm, globals, thread-index, str-globals
+
+			// add global table to perm table
+			lua_pushvalue(L, 2); // perm, globals, thread-index, str-globals, globals
+			lua_pushstring(L, "Globals"); // perm, globals, thread-index, str-globals, globals, "globals"
+			lua_settable(L, 1); // perm, globals, thread-index, str-globals
+
+			// persist thread
+			eris_persist(L, 1, lua_tointeger(L, 3)); // perm, globals, thread-index, str-globals, str-thread
+
+			return 2;
+		}
 		
 		void LuaProcessor::Serialize(UProcessorStateStorage* storage, bool bLoading) {
 			if (!bLoading) {
@@ -278,31 +295,37 @@ namespace FicsItKernel {
 				lua_pushvalue(luaState, -1); // ..., perm, globals, globals
 				lua_pushnil(luaState); // ..., perm, globals, globals, nil
 				lua_settable(luaState, -4); // ..., perm, globals
-			
-				// persist globals table
-				eris_persist(luaState, -2, -1); // ..., perm, globals, str-globals
+				lua_pushvalue(luaState, -2); // ..., perm, globals, perm
+				lua_pushvalue(luaState, -2); // ..., perm, globals, perm, globals
+				lua_pushinteger(luaState, luaThreadIndex); // ..., perm, globals, perm, globals, thread-index
 
-				// encode persisted globals
-				size_t globals_l = 0;
-				const char* globals_r = lua_tolstring(luaState, -1, &globals_l);
-				Data->Globals = Base64Encode((uint8*)globals_r, globals_l);
-				lua_pop(luaState, 1); // ..., perm, globals
+				lua_pushcfunction(luaState, luaPersist);  // ..., perm, globals, perm, globals, thread-index, persist-func
+				lua_insert(luaState, -4); // ..., perm, globals, persist-func, perm, globals, thread-index
+				int status = lua_pcall(luaState, 3, 2, 0); // ..., perm, globals, str-globals, str-thread
 
-				// add global table to perm table
-				lua_pushvalue(luaState, -1); // ..., perm, globals, globals
-				lua_pushstring(luaState, "Globals"); // ..., perm, globals, globals, "globals"
-				lua_settable(luaState, -4); // ..., perm, globals
-			
-				// persist thread
-				eris_persist(luaState, -2, luaThreadIndex); // ..., perm, globals, str-thread
+				// check unpersist
+				if (status == LUA_OK) {
+					// encode persisted globals
+					size_t globals_l = 0;
+					const char* globals_r = lua_tolstring(luaState, -2, &globals_l);
+					Data->Globals = Base64Encode((uint8*)globals_r, globals_l);
 
-				// encode persisted thread
-				size_t thread_l = 0;
-				const char* thread_r = lua_tolstring(luaState, -1, &thread_l);
-				Data->Thread = Base64Encode((uint8*)thread_r, thread_l);
+					// encode persisted thread
+					size_t thread_l = 0;
+					const char* thread_r = lua_tolstring(luaState, -1, &thread_l);
+					Data->Thread = Base64Encode((uint8*)thread_r, thread_l);
+				
+					lua_pop(luaState, 2); // ..., perm, globals
+				} else {
+					// print error
+					if (lua_isstring(luaState, -1)) {
+						SML::Logging::error("Unable to persit! '", lua_tostring(luaState, -1), "'");
+					}
+
+					lua_pop(luaState, 1); // ..., perm, globals
+				}
 
 				// cleanup
-				lua_pop(luaState, 1); // ..., perm, globals
 				lua_pushnil(luaState); // ..., perm, globals, nil
 				lua_settable(luaState, -3); // ..., perm
 				lua_pop(luaState, 1); // ...

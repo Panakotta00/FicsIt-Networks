@@ -35,6 +35,10 @@ bool AFINIndicatorPole::ShouldSave_Implementation() const {
 	return true;
 }
 
+int32 AFINIndicatorPole::GetDismantleRefundReturnsMultiplier() const {
+	return Height + 6;
+}
+
 void AFINIndicatorPole::CreatePole() {
 	// Clean up
 	Poles.Empty();

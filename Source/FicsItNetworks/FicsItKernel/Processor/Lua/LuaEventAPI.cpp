@@ -106,11 +106,13 @@ namespace FicsItKernel {
 			TSet<FFINNetworkTrace> senders = net->signalSenders;
 			for (FFINNetworkTrace sender : senders) {
 				UObject* s = *sender;
-				FFINNetworkTrace listener = sender.getTrace().reverse();
-				IFINSignalSender::Execute_RemoveListener(s, listener);
-				AFINHookSubsystem::GetHookSubsystem(net->getComponent())->RemoveListener(s, net->getComponent());
-				net->signalSenders.Remove(sender);
+				if (s) {
+					FFINNetworkTrace listener = sender.getTrace().reverse();
+					IFINSignalSender::Execute_RemoveListener(s, listener);
+					AFINHookSubsystem::GetHookSubsystem(net->getComponent())->RemoveListener(s, net->getComponent());
+				}
 			}
+			net->signalSenders.Empty();
 			return 1;
 		}
 

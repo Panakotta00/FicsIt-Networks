@@ -88,6 +88,15 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 				Background = BackgroundCache[Y * ScreenSize.X + X];
 			}
 
+			FSlateDrawElement::MakeText(
+                OutDrawElements,
+                LayerId+1,
+                AllottedGeometry.ToOffsetPaintGeometry(FVector2D(X,Y) * CharSize),
+                Line.Mid(X,1),
+                Font.Get(),
+                ESlateDrawEffect::None,
+                InWidgetStyle.GetColorAndOpacityTint() * Foreground
+            );
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
 				LayerId,
@@ -95,15 +104,6 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 				&boxBrush,
 				ESlateDrawEffect::None,
 				InWidgetStyle.GetColorAndOpacityTint() * Background);
-			FSlateDrawElement::MakeText(
-		        OutDrawElements,
-		        LayerId,
-		        AllottedGeometry.ToOffsetPaintGeometry(FVector2D(X,Y) * CharSize),
-		        Line.Mid(X,1),
-		        Font.Get(),
-		        ESlateDrawEffect::None,
-		        InWidgetStyle.GetColorAndOpacityTint() * Foreground
-            );
 		}
 	}
 	return LayerId;

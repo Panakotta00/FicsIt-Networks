@@ -110,5 +110,5 @@ bool AFINIndicatorPoleHolo::TrySnapToActor(const FHitResult& hitResult) {
 }
 
 inline int AFINIndicatorPoleHolo::GetHeight(FVector worldLoc) const {
-	return FMath::Clamp(static_cast<int>((worldLoc - SnappedLoc).Z / 100.0), 0, 20);
+	return FMath::Clamp(static_cast<int>((worldLoc - SnappedLoc).Z / 100.0), 0, 10);
 }

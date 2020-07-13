@@ -238,6 +238,7 @@ namespace FicsItKernel {
 			try {
 				file->close();
 			} CatchExceptionLua
+			
 			int n = lua_gettop(L) - 1;
 			luaL_loadbuffer(L, code.c_str(), code.size(), ("@" + path.str()).c_str());
 			return LuaProcessor::luaAPIReturn(L, 1);

@@ -54,6 +54,10 @@ public:
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
 
+	// Begin IFGDismantleInterface
+	virtual int32 GetDismantleRefundReturnsMultiplier() const override;
+	// End IFGDismantleInterface
+
 	/**
 	 * Spawns all the pole static meshes
 	 */

@@ -197,6 +197,30 @@ namespace FicsItKernel {
 			return 1;
 		}
 
+		int luaTrackGraphUnpersist(lua_State* L) {
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			
+			LuaTrackGraph* trackGrpah = static_cast<LuaTrackGraph*>(lua_newuserdata(L, sizeof(LuaTrackGraph)));
+			new (trackGrpah) LuaTrackGraph{storage->GetTrace(luaL_checkinteger(L, lua_upvalueindex(1))), static_cast<int>(luaL_checkinteger(L, lua_upvalueindex(2)))};
+			luaL_setmetatable(L, "TrackGraph");
+			return 1;
+		}
+
+		int luaTrackGraphPersist(lua_State* L) {
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+	
+			LuaTrackGraph* track = static_cast<LuaTrackGraph*>(luaL_checkudata(L, 1, "TrackGraph"));
+			
+			lua_pushinteger(L, storage->Add(track->trace));
+			lua_pushinteger(L, track->trackID);
+			lua_pushcclosure(L, luaTrackGraphUnpersist, 2);
+			return 1;
+		}
+
 		int luaTrackGraphGC(lua_State* L) {
 			LuaTrackGraph* track = static_cast<LuaTrackGraph*>(luaL_checkudata(L, 1, "TrackGraph"));
 			track->~LuaTrackGraph();
@@ -207,6 +231,7 @@ namespace FicsItKernel {
 			{"__eq", luaTrackGraphEQ},
 			{"__index", luaRetNull},
 			{"__newindex", luaRetNull},
+			{"__persist", luaTrackGraphPersist},
 			{"__gc", luaTrackGraphGC},
 			{NULL,NULL}
 		};
@@ -375,6 +400,8 @@ namespace FicsItKernel {
 			PersistTable("TrackGraphLib", -1);
 			lua_setfield(L, -2, "__index");
 			lua_pop(L, 1);
+			lua_pushcfunction(L, luaTrackGraphUnpersist);
+			PersistValue("TrackGraphUnpersist");
 
 			luaL_newmetatable(L, "TimeTableStop");
 			luaL_setfuncs(L, luaTimeTableStopLib, 0);
