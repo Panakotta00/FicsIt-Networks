@@ -24,6 +24,12 @@ Streams
 =======
 The biggest part of making this mod does get stream at [CoderDE](https://twitch.tv/coderde).
 
+You-Tube
+========
+- https://www.youtube.com/watch?v=EErI0OiWttw (Release)
+- https://www.youtube.com/watch?v=EtybEOkgJ4o (Showcase)
+- https://www.youtube.com/playlist?list=PLKTdAeAt_BilFGjKoIG9GObwjqmxdSoeE (Tutorial Series)
+
 Features
 ========
 - Networks
