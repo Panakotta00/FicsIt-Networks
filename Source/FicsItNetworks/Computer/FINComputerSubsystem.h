@@ -41,5 +41,5 @@ public:
 	static AFINComputerSubsystem* GetComputerSubsystem(UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, Category = "Computer")
-	UWidgetInteractionComponent* AttachWidgetInteractionToPlayer();
+	UWidgetInteractionComponent* AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
 };

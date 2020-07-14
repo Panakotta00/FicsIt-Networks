@@ -128,6 +128,13 @@ void FFicsItNetworksModule::StartupModule(){
 	})
 
 	SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
+
+	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::OnConstruction, [](AActor* self, const FTransform& t) {
+		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
+        if (character) {
+	        AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld())->AttachWidgetInteractionToPlayer(character);
+		}
+	})
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
 	FicsItKernel::Lua::LuaLib::get()->registerLib();

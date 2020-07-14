@@ -22,6 +22,7 @@ void AFINComputerSubsystem::BeginPlay() {
 void AFINComputerSubsystem::Tick(float dt) {
 	Super::Tick(dt);
 	this->GetWorld()->GetFirstPlayerController()->PushInputComponent(Input);
+	if (ScreenInteraction) SML::Logging::error(ScreenInteraction->IsRegistered());
 }
 
 bool AFINComputerSubsystem::ShouldSave_Implementation() const {
@@ -29,27 +30,55 @@ bool AFINComputerSubsystem::ShouldSave_Implementation() const {
 }
 
 void AFINComputerSubsystem::OnPrimaryFirePressed() {
-	ScreenInteraction->PressPointerKey(EKeys::LeftMouseButton);
+	AController* controller = GetWorld()->GetFirstPlayerController();
+	if (controller) {
+		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(controller->GetCharacter());
+		if (character) {
+			UWidgetInteractionComponent* ScreenInteraction = Cast<UWidgetInteractionComponent>(character->GetComponentByClass(UWidgetInteractionComponent::StaticClass()));
+			if (ScreenInteraction) ScreenInteraction->PressPointerKey(EKeys::LeftMouseButton);
+		}
+	}
 }
 
 void AFINComputerSubsystem::OnPrimaryFireReleased() {
-	ScreenInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
+	AController* controller = GetWorld()->GetFirstPlayerController();
+	if (controller) {
+		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(controller->GetCharacter());
+		if (character) {
+			UWidgetInteractionComponent* ScreenInteraction = Cast<UWidgetInteractionComponent>(character->GetComponentByClass(UWidgetInteractionComponent::StaticClass()));
+			if (ScreenInteraction) ScreenInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
+		}
+	}
 }
 
 void AFINComputerSubsystem::OnSecondaryFirePressed() {
-	ScreenInteraction->PressPointerKey(EKeys::RightMouseButton);
+	AController* controller = GetWorld()->GetFirstPlayerController();
+	if (controller) {
+		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(controller->GetCharacter());
+		if (character) {
+			UWidgetInteractionComponent* ScreenInteraction = Cast<UWidgetInteractionComponent>(character->GetComponentByClass(UWidgetInteractionComponent::StaticClass()));
+			if (ScreenInteraction) ScreenInteraction->PressPointerKey(EKeys::RightMouseButton);
+		}
+	}
 }
 
 void AFINComputerSubsystem::OnSecondaryFireReleased() {
-	ScreenInteraction->ReleasePointerKey(EKeys::RightMouseButton);
+	AController* controller = GetWorld()->GetFirstPlayerController();
+	if (controller) {
+		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(controller->GetCharacter());
+		if (character) {
+			UWidgetInteractionComponent* ScreenInteraction = Cast<UWidgetInteractionComponent>(character->GetComponentByClass(UWidgetInteractionComponent::StaticClass()));
+			if (ScreenInteraction) ScreenInteraction->ReleasePointerKey(EKeys::RightMouseButton);
+		}
+	}
 }
 
 AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* WorldContext) {
 	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->ComputerSubsystem;
 }
 
-UWidgetInteractionComponent* AFINComputerSubsystem::AttachWidgetInteractionToPlayer() {
-	ACharacter* character = this->GetWorld()->GetFirstPlayerController()->GetCharacter();
+UWidgetInteractionComponent* AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
+	if (ScreenInteraction) ScreenInteraction->UnregisterComponent();
 	ScreenInteraction = NewObject<UWidgetInteractionComponent>(character);
 	ScreenInteraction->InteractionSource = EWidgetInteractionSource::World;
 	UCameraComponent* cam = Cast<UCameraComponent>(character->GetComponentByClass(UCameraComponent::StaticClass()));
