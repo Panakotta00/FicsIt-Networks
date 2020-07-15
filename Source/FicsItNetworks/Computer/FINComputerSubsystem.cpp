@@ -22,7 +22,6 @@ void AFINComputerSubsystem::BeginPlay() {
 void AFINComputerSubsystem::Tick(float dt) {
 	Super::Tick(dt);
 	this->GetWorld()->GetFirstPlayerController()->PushInputComponent(Input);
-	if (ScreenInteraction) SML::Logging::error(ScreenInteraction->IsRegistered());
 }
 
 bool AFINComputerSubsystem::ShouldSave_Implementation() const {

@@ -20,6 +20,7 @@ namespace FicsItKernel {
 			if (obj->Implements<UFINSignalSender>()) {
 				IFINSignalSender::Execute_AddListener(obj, o.reverse());
 				UFINSignalUtility::SetupSender(obj->GetClass());
+				AFINHookSubsystem::GetHookSubsystem(obj)->ClassesWithSignals.Add(obj->GetClass());
 			}
 			if (obj->Implements<UFINNetworkComponent>()) {
 				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);

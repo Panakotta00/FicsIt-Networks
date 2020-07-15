@@ -1061,6 +1061,7 @@ namespace FicsItKernel {
 
 		LuaLibFunc(AFGBuildablePipeReservoir, flush, {
 			AFGPipeSubsystem::Get(self->GetWorld())->FlushIntegrant(self);
+			self->GetFluidBox()->Content;
 			return 0;
 		})
 		

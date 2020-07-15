@@ -49,7 +49,7 @@ public:
 	 * Multiple calling of this function for the same class is allowed.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Signals|Sender")
-		static void SetupSender(UClass* signalSender);
+	static void SetupSender(UClass* signalSender);
 
 	class BPSignal : public FicsItKernel::Network::Signal {
 	private:

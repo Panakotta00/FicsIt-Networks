@@ -1,7 +1,9 @@
 ﻿#include "FINIndicatorPole.h"
 
+#include "ProxyInstancedStaticMeshComponent.h"
+
 AFINIndicatorPole::AFINIndicatorPole() {
-	Indicator = CreateDefaultSubobject<UStaticMeshComponent>("Indicator");
+	Indicator = CreateDefaultSubobject<UProxyInstancedStaticMeshComponent>("Indicator");
 	Indicator->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	
 	Connector = CreateDefaultSubobject<UFINNetworkConnector>("Connector");

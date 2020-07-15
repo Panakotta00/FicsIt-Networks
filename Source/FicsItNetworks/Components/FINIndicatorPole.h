@@ -2,7 +2,6 @@
 
 #include "FGBuildable.h"
 #include "Network/FINNetworkConnector.h"
-
 #include "FINIndicatorPole.generated.h"
 
 UCLASS()
@@ -23,7 +22,7 @@ public:
 	UFINNetworkConnector* Connector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
-	UStaticMeshComponent* Indicator;
+	UProxyInstancedStaticMeshComponent* Indicator;
 
 	UPROPERTY(SaveGame)
 	FLinearColor IndicatorColor = FLinearColor::Black;

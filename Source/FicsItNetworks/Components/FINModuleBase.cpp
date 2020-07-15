@@ -44,5 +44,6 @@ TSet<FFINNetworkTrace> AFINModuleBase::GetListeners_Implementation() {
 }
 
 UObject* AFINModuleBase::GetSignalSenderOverride_Implementation() {
-	return this;
+	UObject* obj = Cast<UObject>(this);
+	return obj;
 }

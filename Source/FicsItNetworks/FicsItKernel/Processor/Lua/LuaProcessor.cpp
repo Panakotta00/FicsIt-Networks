@@ -257,18 +257,18 @@ namespace FicsItKernel {
 		}
 
 		int luaPersist(lua_State* L) {
-			// perm, globals, thread-index
+			// perm, globals, thread
 			
 			// persist globals table
-			eris_persist(L, 1, 2); // perm, globals, thread-index, str-globals
+			eris_persist(L, 1, 2); // perm, globals, thread, str-globals
 
 			// add global table to perm table
-			lua_pushvalue(L, 2); // perm, globals, thread-index, str-globals, globals
-			lua_pushstring(L, "Globals"); // perm, globals, thread-index, str-globals, globals, "globals"
-			lua_settable(L, 1); // perm, globals, thread-index, str-globals
+			lua_pushvalue(L, 2); // perm, globals, thread, str-globals, globals
+			lua_pushstring(L, "Globals"); // perm, globals, thread, str-globals, globals, "globals"
+			lua_settable(L, 1); // perm, globals, thread, str-globals
 
 			// persist thread
-			eris_persist(L, 1, lua_tointeger(L, 3)); // perm, globals, thread-index, str-globals, str-thread
+			eris_persist(L, 1, 3); // perm, globals, thread, str-globals, str-thread
 
 			return 2;
 		}
@@ -297,10 +297,10 @@ namespace FicsItKernel {
 				lua_settable(luaState, -4); // ..., perm, globals
 				lua_pushvalue(luaState, -2); // ..., perm, globals, perm
 				lua_pushvalue(luaState, -2); // ..., perm, globals, perm, globals
-				lua_pushinteger(luaState, luaThreadIndex); // ..., perm, globals, perm, globals, thread-index
+				lua_pushvalue(luaState, luaThreadIndex); // ..., perm, globals, perm, globals, thread
 
-				lua_pushcfunction(luaState, luaPersist);  // ..., perm, globals, perm, globals, thread-index, persist-func
-				lua_insert(luaState, -4); // ..., perm, globals, persist-func, perm, globals, thread-index
+				lua_pushcfunction(luaState, luaPersist);  // ..., perm, globals, perm, globals, thread, persist-func
+				lua_insert(luaState, -4); // ..., perm, globals, persist-func, perm, globals, thread
 				int status = lua_pcall(luaState, 3, 2, 0); // ..., perm, globals, str-globals, str-thread
 
 				// check unpersist

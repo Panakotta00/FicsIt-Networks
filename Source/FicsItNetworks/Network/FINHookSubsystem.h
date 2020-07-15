@@ -50,6 +50,12 @@ private:
 	static TMap<UClass*, TSet<TSubclassOf<UFINHook>>> HookRegistry;
 
 public:
+	/**
+    * Contains a list of classes that have registered a netSig
+    */
+    UPROPERTY(SaveGame)
+    TSet<UClass*> ClassesWithSignals;
+	
 	// Begin UObject
 	virtual void Serialize(FArchive& Ar) override;
 	// End UObject

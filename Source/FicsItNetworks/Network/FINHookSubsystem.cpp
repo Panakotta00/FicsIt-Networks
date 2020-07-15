@@ -3,6 +3,7 @@
 #include "FINNetworkTrace.h"
 #include "FINSubsystemHolder.h"
 #include "Signals/FINSignalListener.h"
+#include "Signals/FINSignalSender.h"
 #include "util/Logging.h"
 
 TMap<UClass*, TSet<TSubclassOf<UFINHook>>> AFINHookSubsystem::HookRegistry;
@@ -15,8 +16,13 @@ bool FFINHookData::Serialize(FArchive& Ar) {
 void AFINHookSubsystem::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
 	Ar << Data;
-	if (Ar.IsLoading()) for (const TTuple<UObject*, FFINHookData>& data : Data) {
-		AttachHooks(data.Key);
+	if (Ar.IsLoading()) {
+		for (const TTuple<UObject*, FFINHookData>& data : Data) {
+			AttachHooks(data.Key);
+		}
+		for (UClass* clazz : ClassesWithSignals) {
+			UFINSignalUtility::SetupSender(clazz);
+		}
 	}
 }
 
