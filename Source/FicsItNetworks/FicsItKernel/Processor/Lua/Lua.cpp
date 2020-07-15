@@ -25,8 +25,14 @@ namespace FicsItKernel {
 			} else if (c & EClassCastFlags::CASTCLASS_UStrProperty) {
 				lua_pushstring(L, TCHAR_TO_UTF8(**p->ContainerPtrToValuePtr<FString>(data)));
 				return LuaDataType::LUA_STR;
+			} else if (c & EClassCastFlags::CASTCLASS_UClassProperty) {
+				return newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data)) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
 			} else if (c & EClassCastFlags::CASTCLASS_UObjectProperty) {
-				return newInstance(L, trace / *p->ContainerPtrToValuePtr<UObject*>(data)) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
+				if (Cast<UObjectProperty>(p)->PropertyClass->IsChildOf<UClass>()) {
+					return newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data)) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
+				} else {
+					return newInstance(L, trace / *p->ContainerPtrToValuePtr<UObject*>(data)) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
+				}
 			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
 				if (prop->Struct == FFINNetworkFuture::StaticStruct()) {
@@ -54,14 +60,18 @@ namespace FicsItKernel {
 				*p->ContainerPtrToValuePtr<float>(data) = static_cast<float>(lua_tonumber(L, i));
 				return LuaDataType::LUA_NUM;
 			} else if (c & EClassCastFlags::CASTCLASS_UStrProperty) {
-				auto s = lua_tostring(L, i);
-				if (!s) throw std::exception("string");
-				auto o = p->ContainerPtrToValuePtr<FString>(data);
+				const char* s = lua_tostring(L, i);
+				if (!s) throw std::exception("Invalid String in string property parse");
+				FString* o = p->ContainerPtrToValuePtr<FString>(data);
 				*o = FString(s);
 				return LuaDataType::LUA_STR;
+			} else if (c & EClassCastFlags::CASTCLASS_UClassProperty) {
+				UClass* o = getClassInstance(L, i, Cast<UClassProperty>(p)->PropertyClass);
+				*p->ContainerPtrToValuePtr<UClass*>(data) = o;
+				return (o) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
 			} else if (c & EClassCastFlags::CASTCLASS_UObjectProperty) {
 				if (Cast<UObjectProperty>(p)->PropertyClass->IsChildOf<UClass>()) {
-					auto o = getClassInstance(L, i, Cast<UObjectProperty>(p)->PropertyClass);
+					UClass* o = getClassInstance(L, i, Cast<UObjectProperty>(p)->PropertyClass);
 					*p->ContainerPtrToValuePtr<UObject*>(data) = o;
 					return (o) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
 				} else {
