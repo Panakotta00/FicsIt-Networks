@@ -37,7 +37,7 @@ Return Values::
 |true if it was able to transfer the item
 |===
 
-==== `Item getItem()`
+==== `ItemType getInput()`
 
 Returns the input item.
 
@@ -48,7 +48,7 @@ Return Values::
 |Name |Type |Description
 
 |Item
-|Item
+|ItemType
 |The current input item
 |===
 
@@ -80,7 +80,7 @@ Return Values::
 
 === Signals
 
-==== `ItemRequest(Item item)`
+==== `ItemRequest(ItemType item)`
 
 The signal notifies the subscribers about a new ready item in the input queue.
 
@@ -91,7 +91,7 @@ Parameters::
 |Name |Type |Description
 
 |item
-|Item
+|ItemType
 |The item waiting in the input queue for transfer
 |===
 

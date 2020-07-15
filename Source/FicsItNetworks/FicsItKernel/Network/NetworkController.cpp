@@ -34,13 +34,11 @@ namespace FicsItKernel {
 			return sig.first;
 		}
 
-#pragma optimize("", off)
 		void NetworkController::pushSignal(std::shared_ptr<Signal> signal, NetworkTrace sender) {
 			std::lock_guard<std::mutex> m(mutexSignals);
 			if (signals.size() >= maxSignalCount || lockSignalRecieving) return;
 			signals.push_back({std::move(signal), std::move(sender)});
 		}
-#pragma optimize("", on)
 
 		void NetworkController::clearSignals() {
 			std::lock_guard<std::mutex> m(mutexSignals);
