@@ -100,7 +100,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
 				LayerId,
-				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1.01), 1),
+				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1), 1),
 				&boxBrush,
 				ESlateDrawEffect::None,
 				InWidgetStyle.GetColorAndOpacityTint() * Background);
