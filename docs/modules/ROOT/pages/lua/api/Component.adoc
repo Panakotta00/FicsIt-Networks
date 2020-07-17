@@ -5,49 +5,6 @@
 
 The Component API provides structures, functions and signals for interacting with the network itself like returning network component representation structures.
 
-== Structures
-
-=== Component
-This structure represents a network component containing bound lua functions and identification variables.
-
-Fields::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|id
-|string
-|the id of the component as string
-
-|nick
-|string
-|the nick of the component at the time where the instance got created
-
-|__object
-|WeakObjPtr
-|A soft reference to to the network component
-
-|*componentFunctionName
-|function
-|Multiple Lua functions bound to the component used to call the component function with the same name on the bound component.
-|===
-
-Metatable::
-+
-[cols="1,1,4a"]
-|===
-|Field |Name |Description
-
-|__eq
-|Equal Comparison operator
-|uses the __object field of the table to check if the representations are equal
-
-|__tostring
-|ToString conversion operator
-|uses the __object field to get the nick and id of the component and appends the to the returning string
-|===
-
 == Functions
 
 === `Component | Component[] proxy(string ids... | string[] ids...)`
