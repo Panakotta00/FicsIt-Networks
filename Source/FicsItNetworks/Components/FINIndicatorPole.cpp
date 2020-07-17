@@ -1,5 +1,7 @@
 ﻿#include "FINIndicatorPole.h"
 
+
+#include "FGColoredInstanceMeshProxy.h"
 #include "ProxyInstancedStaticMeshComponent.h"
 
 AFINIndicatorPole::AFINIndicatorPole() {
@@ -47,7 +49,7 @@ void AFINIndicatorPole::CreatePole() {
 
 	// Construction
 	for (int i = 0; i < Height; ++i) {
-		UStaticMeshComponent* Pole = NewObject<UStaticMeshComponent>(this);
+		UStaticMeshComponent* Pole = NewObject<UFGColoredInstanceMeshProxy>(this);
 		check(Pole);
 		Pole->AttachToComponent(Indicator, FAttachmentTransformRules::KeepRelativeTransform);
 		Pole->SetRelativeLocation(FVector(0,0, -(i) * 100.0));

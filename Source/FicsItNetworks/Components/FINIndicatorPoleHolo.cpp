@@ -66,7 +66,7 @@ void AFINIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& hit
 }
 
 AActor* AFINIndicatorPoleHolo::Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) {
-	FRotator rotation = FRotator::ZeroRotator;
+	FRotator rotation = GetActorRotation();
 	FVector location = GetActorLocation();
 	
 	FActorSpawnParameters spawnParams;
