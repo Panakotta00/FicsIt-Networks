@@ -56,6 +56,21 @@
 		Get \
 	} \
 	typename LuaLibType<ClassName>::RegisterProperty LuaLibFuncRegName(ClassName, PropName) (#PropName, LuaLibProperty{ & LuaLibPropGetName(ClassName, PropName) } );
+#define LuaLibPropReadonlyInt(ClassName, PropName, Get) \
+	LuaLibPropReadonly(ClassName, PropName, { \
+		lua_pushinteger(L, (lua_Integer) self-> Get); \
+		return 1; \
+	})
+#define LuaLibPropReadonlyNum(ClassName, PropName, Get) \
+	LuaLibPropReadonly(ClassName, PropName, { \
+		lua_pushnumber(L, (lua_Number) self-> Get); \
+		return 1; \
+	})
+#define LuaLibPropReadonlyBool(ClassName, PropName, Get) \
+	LuaLibPropReadonly(ClassName, PropName, { \
+		lua_pushboolean(L, (int) self-> Get); \
+		return 1; \
+	})
 
 #define LuaLibHook(ClassName, HookName) \
 	LuaLibType<ClassName>::RegisterHook LuaLibHookRegName(ClassName, HookName) ( [](TSubclassOf<UFINHook>& hook) { \
@@ -72,17 +87,17 @@
 
 #define LuaLibFuncGetNum(ClassName, FuncName, RealFuncName) \
 	LuaLibFunc(ClassName, FuncName, { \
-		lua_pushnumber(L, (lua_Number) self-> RealFuncName ()); \
+		lua_pushnumber(L, (lua_Number) self-> RealFuncName); \
 		return 1; \
 	})
 #define LuaLibFuncGetInt(ClassName, FuncName, RealFuncName) \
 	LuaLibFunc(ClassName, FuncName, { \
-		lua_pushinteger(L, (lua_Integer) self-> RealFuncName ()); \
+		lua_pushinteger(L, (lua_Integer) self-> RealFuncName); \
 		return 1; \
 	})
 #define LuaLibFuncGetBool(ClassName, FuncName, RealFuncName) \
 	LuaLibFunc(ClassName, FuncName, { \
-		lua_pushboolean(L, (int) self-> RealFuncName ()); \
+		lua_pushboolean(L, (int) self-> RealFuncName); \
 		return 1; \
 	})
 
@@ -313,12 +328,8 @@ namespace FicsItKernel {
 			return args;
 		})
 
-		LuaLibFunc(UFGInventoryComponent, getItemCount, {
-			lua_pushinteger(L, self->GetNumItems(nullptr));
-			return 1;
-		})
-
-		LuaLibFuncGetInt(UFGInventoryComponent, getSize, GetSizeLinear)
+		LuaLibPropReadonlyInt(UFGInventoryComponent, getItemCount, GetNumItems(nullptr))
+		LuaLibPropReadonlyInt(UFGInventoryComponent, size, GetSizeLinear())
 
 		LuaLibFunc(UFGInventoryComponent, sort, {
 			self->SortInventory();
@@ -343,8 +354,8 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(UFGPowerConnectionComponent, PowerConnection)
 
-		LuaLibFuncGetInt(UFGPowerConnectionComponent, getConnections, GetNumConnections)
-		LuaLibFuncGetInt(UFGPowerConnectionComponent, getMaxConnections, GetMaxNumConnections)
+		LuaLibPropReadonlyInt(UFGPowerConnectionComponent, getConnections, GetNumConnections())
+		LuaLibPropReadonlyInt(UFGPowerConnectionComponent, getMaxConnections, GetMaxNumConnections())
 
 		LuaLibFunc(UFGPowerConnectionComponent, getPower, {
 			newInstance(L, obj / self->GetPowerInfo());
@@ -362,19 +373,15 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(UFGPowerInfoComponent, PowerInfo)
 
-		LuaLibFuncGetNum(UFGPowerInfoComponent, getDynProduction,		GetRegulatedDynamicProduction)
-		LuaLibFuncGetNum(UFGPowerInfoComponent, getBaseProduction,		GetBaseProduction)
-		LuaLibFuncGetNum(UFGPowerInfoComponent, getMaxDynProduction,	GetDynamicProductionCapacity)
-		LuaLibFuncGetNum(UFGPowerInfoComponent, getTargetConsumption,	GetTargetConsumption)
-		LuaLibFuncGetNum(UFGPowerInfoComponent, getConsumption,			GetBaseProduction)
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getDynProduction,		GetRegulatedDynamicProduction())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getBaseProduction,		GetBaseProduction())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getMaxDynProduction,	GetDynamicProductionCapacity())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getTargetConsumption,	GetTargetConsumption())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getConsumption,			GetBaseProduction())
+		LuaLibPropReadonlyBool(UFGPowerInfoComponent, hasPower, HasPower())
 		
 		LuaLibFunc(UFGPowerInfoComponent, getCircuit, {
 			newInstance(L, obj / self->GetPowerCircuit());
-			return 1;
-		})
-
-		LuaLibFunc(UFGPowerInfoComponent, hasPower, {
-			lua_pushboolean(L, self->HasPower());
 			return 1;
 		})
 		
@@ -386,31 +393,28 @@ namespace FicsItKernel {
 
 		LuaLibHook(UFGPowerCircuit, UFINPowerCircuitHook)
 
-		LuaLibFunc(UFGPowerCircuit, getProduction, {
+		LuaLibPropReadonly(UFGPowerCircuit, getProduction, {
 			FPowerCircuitStats stats;
 			self->GetStats(stats);
 			lua_pushnumber(L, stats.PowerProduced);
 			return 1;
 		})
 		
-		LuaLibFunc(UFGPowerCircuit, getConsumption, {
+		LuaLibPropReadonly(UFGPowerCircuit, getConsumption, {
 			FPowerCircuitStats stats;
 			self->GetStats(stats);
 			lua_pushnumber(L, stats.PowerConsumed);
 			return 1;
 		})
 		
-		LuaLibFunc(UFGPowerCircuit, getProductionCapacity, {
+		LuaLibPropReadonly(UFGPowerCircuit, getProductionCapacity, {
 			FPowerCircuitStats stats;
 			self->GetStats(stats);
 			lua_pushnumber(L, stats.PowerProductionCapacity);
 			return 1;
 		})
 
-		LuaLibFunc(UFGPowerCircuit, isFuesed, {
-			lua_pushboolean(L, self->IsFuseTriggered());
-			return 1;
-		})
+		LuaLibPropReadonlyBool(UFGPowerCircuit, isFuesed, IsFuseTriggered())
 
 		// End UFGPowerCircuit
 
@@ -420,9 +424,9 @@ namespace FicsItKernel {
 
 		LuaLibHook(UFGFactoryConnectionComponent, UFINFactoryConnectorHook)
 		
-		LuaLibFuncGetInt(UFGFactoryConnectionComponent, getType,		GetConnector)
-		LuaLibFuncGetInt(UFGFactoryConnectionComponent, getDirection,	GetDirection)
-		LuaLibFuncGetInt(UFGFactoryConnectionComponent, isConnected,	IsConnected)
+		LuaLibPropReadonlyInt(UFGFactoryConnectionComponent, type,			GetConnector())
+		LuaLibPropReadonlyInt(UFGFactoryConnectionComponent, direction,		GetDirection())
+		LuaLibPropReadonlyInt(UFGFactoryConnectionComponent, isConnected,	IsConnected())
 
 		LuaLibFunc(UFGFactoryConnectionComponent, getInventory, {
 			newInstance(L, obj / self->GetInventory());
@@ -435,30 +439,20 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(AFGBuildableFactory, Factory)
 
-		LuaLibFuncGetNum(AFGBuildableFactory, getProgress,				GetProductionProgress)
-		LuaLibFuncGetNum(AFGBuildableFactory, getPowerConsumProducing,	GetProducingPowerConsumption)
-		LuaLibFuncGetNum(AFGBuildableFactory, getProductivity,			GetProductivity)
-		LuaLibFuncGetNum(AFGBuildableFactory, getCycleTime,				GetProductionCycleTime)
-		LuaLibFuncGetNum(AFGBuildableFactory, getMaxPotential,			GetMaxPossiblePotential)
-		LuaLibFuncGetNum(AFGBuildableFactory, getMinPotential,			GetMinPotential)
+		LuaLibPropReadonlyNum(AFGBuildableFactory, progress,				GetProductionProgress())
+		LuaLibPropReadonlyNum(AFGBuildableFactory, powerConsumProducing,	GetProducingPowerConsumption())
+		LuaLibPropReadonlyNum(AFGBuildableFactory, productivity,			GetProductivity())
+		LuaLibPropReadonlyNum(AFGBuildableFactory, cycleTime,			GetProductionCycleTime())
+		LuaLibPropReadonlyNum(AFGBuildableFactory, maxPotential,			GetMaxPossiblePotential())
+		LuaLibPropReadonlyNum(AFGBuildableFactory, minPotential,			GetMinPotential())
 
-		LuaLibFunc(AFGBuildableFactory, setStandby, {
+		LuaLibProp(AFGBuildableFactory, standby, {
+			lua_pushboolean(L, self->IsProductionPaused());
+			return 1;
+		}, {
 			self->SetIsProductionPaused(lua_toboolean(L, 1));
 			return 0;
 		})
-		LuaLibFuncGetBool(AFGBuildableFactory, getStandby, IsProductionPaused)
-		
-		/*LuaLibFuncGetNum(AFGBuildableFactory, getPotential,				GetPendingPotential)
-		LuaLibFunc(AFGBuildableFactory, setPotential, {
-			if (args < 1) {
-				return 0;
-			}
-			auto p = (float)lua_tonumber(L, -args);
-			float min = self->GetMinPotential();
-			float max = self->GetMaxPossiblePotential();
-			self->SetPendingPotential((min > p) ? min : ((max < p) ? max : p));
-			return 0;
-		})*/
 
 		LuaLibProp(AFGBuildableFactory, potential, {
 			lua_pushnumber(L, self->GetPendingPotential());
@@ -577,8 +571,13 @@ namespace FicsItKernel {
 			return 1;
 		})
 
-		LuaLibFuncGetInt(AFGBuildableTrainPlatform, getStatus, GetDockingStatus)
-		LuaLibFuncGetBool(AFGBuildableTrainPlatform, isReversed, IsOrientationReversed)
+		LuaLibFunc(AFGBuildableTrainPlatform, getDockedLocomotive, {
+            newInstance(L, obj / FReflectionHelper::GetObjectPropertyValue<UObject>(self, TEXT("mDockingLocomotive")));
+            return 1;
+        })
+
+		LuaLibPropReadonlyInt(AFGBuildableTrainPlatform, status, GetDockingStatus())
+		LuaLibPropReadonlyBool(AFGBuildableTrainPlatform, isReversed, IsOrientationReversed())
 		
 		// End AFGBuildableTrainPlatform
 
@@ -586,22 +585,15 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(AFGBuildableRailroadStation, RailroadStation)
 
-		LuaLibFunc(AFGBuildableRailroadStation, getName, {
+		LuaLibProp(AFGBuildableRailroadStation, name, {
 		   	lua_pushstring(L, TCHAR_TO_UTF8(*self->GetStationIdentifier()->GetStationName().ToString()));
 			return 1;
-		})
-
-		LuaLibFunc(AFGBuildableRailroadStation, setName, {
+		},{
 			self->GetStationIdentifier()->SetStationName(FText::FromString(luaL_checkstring(L, 1)));
 			return 0;
 		})
 
-		LuaLibFunc(AFGBuildableTrainPlatform, getDockedLocomotive, {
-			newInstance(L, obj / FReflectionHelper::GetObjectPropertyValue<UObject>(self, TEXT("mDockingLocomotive")));
-			return 1;
-		})
-
-		LuaLibFuncGetNum(AFGBuildableRailroadStation, getDockedOffset, GetDockedVehicleOffset)
+		LuaLibPropReadonlyNum(AFGBuildableRailroadStation, dockedOffset, GetDockedVehicleOffset())
 
 		// End AFGBuildableRailroadStation
 
@@ -609,13 +601,13 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(AFGBuildableTrainPlatformCargo, TrainPlatformCargo)
 		
-		LuaLibFuncGetBool(AFGBuildableTrainPlatformCargo, isLoading, GetIsInLoadMode)
-		LuaLibFuncGetBool(AFGBuildableTrainPlatformCargo, isUnloading, IsLoadUnloading)
-		LuaLibFuncGetNum(AFGBuildableTrainPlatformCargo, getDockedOffset, GetDockedVehicleOffset)
-		LuaLibFuncGetNum(AFGBuildableTrainPlatformCargo, getOutputFlow, GetOutflowRate)
-		LuaLibFuncGetNum(AFGBuildableTrainPlatformCargo, getInputFlow, GetInflowRate)
-		LuaLibFuncGetBool(AFGBuildableTrainPlatformCargo, getFullLoad, IsFullLoad)
-		LuaLibFuncGetBool(AFGBuildableTrainPlatformCargo, getFullUnload, IsFullUnload)
+		LuaLibPropReadonlyBool(AFGBuildableTrainPlatformCargo, isLoading, GetIsInLoadMode())
+		LuaLibPropReadonlyBool(AFGBuildableTrainPlatformCargo, isUnloading, IsLoadUnloading())
+		LuaLibPropReadonlyNum(AFGBuildableTrainPlatformCargo, dockedOffset, GetDockedVehicleOffset())
+		LuaLibPropReadonlyNum(AFGBuildableTrainPlatformCargo, outputFlow, GetOutflowRate())
+		LuaLibPropReadonlyNum(AFGBuildableTrainPlatformCargo, inputFlow, GetInflowRate())
+		LuaLibPropReadonlyBool(AFGBuildableTrainPlatformCargo, fullLoad, IsFullLoad())
+		LuaLibPropReadonlyBool(AFGBuildableTrainPlatformCargo, fullUnload, IsFullUnload())
 		
 		// End AFGBuildableTrainPlatformCargo
 
@@ -657,9 +649,9 @@ namespace FicsItKernel {
 			return 1;
 		})
 
-		LuaLibFuncGetNum(AFGRailroadVehicle, getLength, GetLength)
-		LuaLibFuncGetBool(AFGRailroadVehicle, isDocked, IsDocked)
-		LuaLibFuncGetBool(AFGRailroadVehicle, isReversed, IsOrientationReversed)
+		LuaLibPropReadonlyNum(AFGRailroadVehicle, length, GetLength())
+		LuaLibPropReadonlyBool(AFGRailroadVehicle, isDocked, IsDocked())
+		LuaLibPropReadonlyBool(AFGRailroadVehicle, isReversed, IsOrientationReversed())
 		
 		// End AFGRailroadVehicle
 
@@ -695,33 +687,33 @@ namespace FicsItKernel {
 			return 4;
 		})
 		
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getOrientation, GetOrientation)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMass, GetMass)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getTareMass, GetTareMass)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getPayloadMass, GetPayloadMass)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getSpeed, GetForwardSpeed)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getRelativeSpeed, GetRelativeForwardSpeed)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMaxSpeed, GetMaxForwardSpeed)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getGravitationalForce, GetGravitationalForce)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getTractiveForce, GetTractiveForce)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getResistiveForce, GetResistiveForce)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getGradientForce, GetGradientForce)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getBrakingForce, GetBrakingForce)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getAirBrakingForce, GetAirBrakingForce)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getDynamicBrakingForce, GetDynamicBrakingForce)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMaxTractiveEffort, GetMaxTractiveEffort)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMaxDynamicBrakingEffort, GetMaxDynamicBrakingEffort)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getMaxAirBrakingEffort, GetMaxAirBrakingEffort)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getTrackGrade, GetTrackGrade)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getTrackCurvature, GetTrackCurvature)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getWheelsetAngle, GetWheelsetAngle)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getRollingResistance, GetRollingResistance)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getCurvatureResistance, GetCurvatureResistance)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getAirResistance, GetAirResistance)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getGradientResistance, GetGradientResistance)
-		LuaLibFuncGetNum(UFGRailroadVehicleMovementComponent, getWheelRotation, GetWheelRotation)
-		LuaLibFuncGetInt(UFGRailroadVehicleMovementComponent, getNumWheelsets, GetNumWheelsets)
-		LuaLibFuncGetBool(UFGRailroadVehicleMovementComponent, isMoving, IsMoving)
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, orientation, GetOrientation())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, mass, GetMass())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, tareMass, GetTareMass())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, payloadMass, GetPayloadMass())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, speed, GetForwardSpeed())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, relativeSpeed, GetRelativeForwardSpeed())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, maxSpeed, GetMaxForwardSpeed())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, gravitationalForce, GetGravitationalForce())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, tractiveForce, GetTractiveForce())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, resistiveForce, GetResistiveForce())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, gradientForce, GetGradientForce())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, brakingForce, GetBrakingForce())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, airBrakingForce, GetAirBrakingForce())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, dynamicBrakingForce, GetDynamicBrakingForce())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, maxTractiveEffort, GetMaxTractiveEffort())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, maxDynamicBrakingEffort, GetMaxDynamicBrakingEffort())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, maxAirBrakingEffort, GetMaxAirBrakingEffort())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, trackGrade, GetTrackGrade())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, trackCurvature, GetTrackCurvature())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, wheelsetAngle, GetWheelsetAngle())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, rollingResistance, GetRollingResistance())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent,  curvatureResistance, GetCurvatureResistance())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, airResistance, GetAirResistance())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, gradientResistance, GetGradientResistance())
+		LuaLibPropReadonlyNum(UFGRailroadVehicleMovementComponent, wheelRotation, GetWheelRotation())
+		LuaLibPropReadonlyInt(UFGRailroadVehicleMovementComponent, numWheelsets, GetNumWheelsets())
+		LuaLibPropReadonlyBool(UFGRailroadVehicleMovementComponent, isMoving, IsMoving())
 		
 		// End UFGRailroadVehicleMovementComponent
 
@@ -791,12 +783,13 @@ namespace FicsItKernel {
 			return 1;
 		})
 
-		LuaLibFuncGetBool(AFGTrain, isPlayerDriven, IsPlayerDriven)
-		LuaLibFuncGetBool(AFGTrain, isSelfDriving, IsSelfDrivingEnabled)
-		LuaLibFuncGetInt(AFGTrain, getSelfDrivingError, GetSelfDrivingError)
-		LuaLibFuncGetBool(AFGTrain, hasTimeTable, HasTimeTable)
-		LuaLibFuncGetInt(AFGTrain, getDockState, GetDockingState)
-		LuaLibFuncGetBool(AFGTrain, isDocked, IsDocked)
+		LuaLibFuncGetBool(AFGTrain, isPlayerDriven, IsPlayerDriven())
+		LuaLibFuncGetBool(AFGTrain, isSelfDriving, IsSelfDrivingEnabled())
+		LuaLibFuncGetInt(AFGTrain, getSelfDrivingError, GetSelfDrivingError())
+		
+		LuaLibPropReadonlyBool(AFGTrain, hasTimeTable, HasTimeTable())
+		LuaLibPropReadonlyInt(AFGTrain, getDockState, GetDockingState())
+		LuaLibPropReadonlyBool(AFGTrain, isDocked, IsDocked())
 		
 		// End AFGTrain
 
@@ -865,9 +858,10 @@ namespace FicsItKernel {
 			self->IncrementCurrentStop();
 			return 0;
 		})
+		
+		LuaLibFuncGetInt(AFGRailroadTimeTable, getCurrentStop, GetCurrentStop())
 
-		LuaLibFuncGetInt(AFGRailroadTimeTable, getNumStops, GetNumStops)
-		LuaLibFuncGetInt(AFGRailroadTimeTable, getCurrentStop, GetCurrentStop)
+		LuaLibPropReadonlyInt(AFGRailroadTimeTable, numStops, GetNumStops())
 		
 		// End AFGRailroadTimeTable
 
@@ -908,8 +902,8 @@ namespace FicsItKernel {
 			return 1;
 		})
 		
-		LuaLibFuncGetNum(AFGBuildableRailroadTrack, getLength, GetLength)
-		LuaLibFuncGetBool(AFGBuildableRailroadTrack, isOwnedByPlatform, GetIsOwnedByPlatform)
+		LuaLibPropReadonlyNum(AFGBuildableRailroadTrack, length, GetLength())
+		LuaLibPropReadonlyBool(AFGBuildableRailroadTrack, isOwnedByPlatform, GetIsOwnedByPlatform())
 		
 		// End AFGBuildableRailroadTrack
 
@@ -996,12 +990,12 @@ namespace FicsItKernel {
 			else self->SetSwitchPosition(getObjInstance<AFGBuildableRailroadTrack>(L, 1));
 			return 0;
 		})
+		LuaLibFuncGetInt(UFGRailroadTrackConnectionComponent, getSwitchPosition, GetSwitchPosition())
 		
-		LuaLibFuncGetBool(UFGRailroadTrackConnectionComponent, isConnected, IsConnected)
-		LuaLibFuncGetBool(UFGRailroadTrackConnectionComponent, isFacingSwitchg, IsFacingSwitch)
-		LuaLibFuncGetBool(UFGRailroadTrackConnectionComponent, isTrailingSwitchg, IsTrailingSwitch)
-		LuaLibFuncGetInt(UFGRailroadTrackConnectionComponent, getNumSwitchPositions, GetNumSwitchPositions)
-		LuaLibFuncGetInt(UFGRailroadTrackConnectionComponent, getSwitchPosition, GetSwitchPosition)
+		LuaLibPropReadonlyBool(UFGRailroadTrackConnectionComponent, isConnected, IsConnected())
+		LuaLibPropReadonlyBool(UFGRailroadTrackConnectionComponent, isFacingSwitchg, IsFacingSwitch())
+		LuaLibPropReadonlyBool(UFGRailroadTrackConnectionComponent, isTrailingSwitchg, IsTrailingSwitch())
+		LuaLibPropReadonlyInt(UFGRailroadTrackConnectionComponent, numSwitchPositions, GetNumSwitchPositions())
 		
 		// End UFGRailroadTrackConnectionComponent
 
@@ -1014,7 +1008,7 @@ namespace FicsItKernel {
 			return 0;
 		})
 		
-		LuaLibFuncGetInt(AFGBuildableRailroadSwitchControl, getSwitchPosition, GetSwitchPosition)
+		LuaLibPropReadonlyInt(AFGBuildableRailroadSwitchControl, switchPosition, GetSwitchPosition())
 		
 		// End AFGBuildableRailroadSwitchControl
 
@@ -1046,13 +1040,15 @@ namespace FicsItKernel {
 			return 0;
 		})
 
-		LuaLibFunc(AFGBuildableDockingStation, setInLoadMode, {
+		LuaLibProp(AFGBuildableDockingStation, isLoadMode, {
+			lua_pushboolean(L, self->GetIsInLoadMode());
+			return 1;
+		}, {
 			self->SetIsInLoadMode(lua_toboolean(L, 1));
 			return 0;
 		})
-
-		LuaLibFuncGetBool(AFGBuildableDockingStation, isLoadMode, GetIsInLoadMode)
-		LuaLibFuncGetBool(AFGBuildableDockingStation, isLoadUnloading, IsLoadUnloading)
+		
+		LuaLibPropReadonlyBool(AFGBuildableDockingStation, isLoadUnloading, IsLoadUnloading())
 
 		// End AFGBuildableDockingStation
 		
@@ -1060,22 +1056,21 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(AFGBuildablePipeReservoir, "PipeReservoir")
 
+		LuaLibFunc(AFGBuildablePipeReservoir, flush, {
+			AFGPipeSubsystem::Get(self->GetWorld())->FlushIntegrant(self);
+			return 0;
+		})
+
 		LuaLibFunc(AFGBuildablePipeReservoir, getFluidType, {
 			newInstance(L, self->GetFluidDescriptor());
 			return 1;
-		})
+        })
 
-		LuaLibFunc(AFGBuildablePipeReservoir, flush, {
-			AFGPipeSubsystem::Get(self->GetWorld())->FlushIntegrant(self);
-			self->GetFluidBox()->Content;
-			return 0;
-		})
-		
-		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFluidContent, GetFluidContent)
-		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getMaxFluidContent, GetFluidContentMax)
-		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowFill, GetFlowFill)
-		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowDrain, GetFlowDrain)
-		LuaLibFuncGetNum(AFGBuildablePipeReservoir, getFlowLimit, GetFlowLimit)
+		LuaLibPropReadonlyNum(AFGBuildablePipeReservoir, fluidContent, GetFluidBox()->Content)
+		LuaLibPropReadonlyNum(AFGBuildablePipeReservoir, maxFluidContent, GetFluidBox()->MaxContent)
+		LuaLibPropReadonlyNum(AFGBuildablePipeReservoir, flowFill, GetFluidBox()->FlowFill)
+		LuaLibPropReadonlyNum(AFGBuildablePipeReservoir, flowDrain, GetFluidBox()->FlowDrain)
+		LuaLibPropReadonlyNum(AFGBuildablePipeReservoir, flowLimit, GetFluidBox()->FlowLimit)
 
 		// End AFGBuildablePipeReservoir
 		
