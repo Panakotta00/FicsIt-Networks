@@ -441,6 +441,12 @@ namespace FicsItKernel {
 		LuaLibFuncGetNum(AFGBuildableFactory, getCycleTime,				GetProductionCycleTime)
 		LuaLibFuncGetNum(AFGBuildableFactory, getMaxPotential,			GetMaxPossiblePotential)
 		LuaLibFuncGetNum(AFGBuildableFactory, getMinPotential,			GetMinPotential)
+
+		LuaLibFunc(AFGBuildableFactory, setStandby, {
+			self->SetIsProductionPaused(lua_toboolean(L, 1));
+			return 0;
+		})
+		LuaLibFuncGetBool(AFGBuildableFactory, getStandby, IsProductionPaused)
 		
 		/*LuaLibFuncGetNum(AFGBuildableFactory, getPotential,				GetPendingPotential)
 		LuaLibFunc(AFGBuildableFactory, setPotential, {
