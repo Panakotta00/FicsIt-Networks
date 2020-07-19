@@ -51,7 +51,11 @@ void AFINScreenHolo::SetHologramLocationAndRotation(const FHitResult& hitResult)
 		Normal = hitResult.ImpactNormal;
 		ScreenHeight = 1;
 		ScreenWidth = 1;
-		SetActorLocationAndRotation(hitResult.ImpactPoint, Normal.Rotation() + FRotator(0,0, GetScrollRotateValue()));
+		FRotator SnappedActorRotation = FRotator::ZeroRotator;
+		if (AActor* SnappedActor = hitResult.GetActor()) {
+			SnappedActorRotation = FRotator(0,0,SnappedActor->GetActorRotation().Roll);
+		}
+		SetActorLocationAndRotation(hitResult.ImpactPoint, Normal.Rotation() + SnappedActorRotation + FRotator(0,0, GetScrollRotateValue()));
 	}
 
 	if (OldScreenHeight != ScreenHeight || OldScreenWidth != ScreenWidth) {
