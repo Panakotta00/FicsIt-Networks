@@ -328,7 +328,7 @@ namespace FicsItKernel {
 			return args;
 		})
 
-		LuaLibPropReadonlyInt(UFGInventoryComponent, getItemCount, GetNumItems(nullptr))
+		LuaLibPropReadonlyInt(UFGInventoryComponent, itemCount, GetNumItems(nullptr))
 		LuaLibPropReadonlyInt(UFGInventoryComponent, size, GetSizeLinear())
 
 		LuaLibFunc(UFGInventoryComponent, sort, {
@@ -354,8 +354,8 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(UFGPowerConnectionComponent, PowerConnection)
 
-		LuaLibPropReadonlyInt(UFGPowerConnectionComponent, getConnections, GetNumConnections())
-		LuaLibPropReadonlyInt(UFGPowerConnectionComponent, getMaxConnections, GetMaxNumConnections())
+		LuaLibPropReadonlyInt(UFGPowerConnectionComponent, connections, GetNumConnections())
+		LuaLibPropReadonlyInt(UFGPowerConnectionComponent, maxConnections, GetMaxNumConnections())
 
 		LuaLibFunc(UFGPowerConnectionComponent, getPower, {
 			newInstance(L, obj / self->GetPowerInfo());
@@ -373,11 +373,11 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(UFGPowerInfoComponent, PowerInfo)
 
-		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getDynProduction,		GetRegulatedDynamicProduction())
-		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getBaseProduction,		GetBaseProduction())
-		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getMaxDynProduction,	GetDynamicProductionCapacity())
-		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getTargetConsumption,	GetTargetConsumption())
-		LuaLibPropReadonlyNum(UFGPowerInfoComponent, getConsumption,			GetBaseProduction())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, dynProduction,		GetRegulatedDynamicProduction())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, baseProduction,		GetBaseProduction())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, maxDynProduction,	GetDynamicProductionCapacity())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, targetConsumption,	GetTargetConsumption())
+		LuaLibPropReadonlyNum(UFGPowerInfoComponent, consumption,			GetBaseProduction())
 		LuaLibPropReadonlyBool(UFGPowerInfoComponent, hasPower, HasPower())
 		
 		LuaLibFunc(UFGPowerInfoComponent, getCircuit, {
@@ -393,21 +393,21 @@ namespace FicsItKernel {
 
 		LuaLibHook(UFGPowerCircuit, UFINPowerCircuitHook)
 
-		LuaLibPropReadonly(UFGPowerCircuit, getProduction, {
+		LuaLibPropReadonly(UFGPowerCircuit, production, {
 			FPowerCircuitStats stats;
 			self->GetStats(stats);
 			lua_pushnumber(L, stats.PowerProduced);
 			return 1;
 		})
 		
-		LuaLibPropReadonly(UFGPowerCircuit, getConsumption, {
+		LuaLibPropReadonly(UFGPowerCircuit, consumption, {
 			FPowerCircuitStats stats;
 			self->GetStats(stats);
 			lua_pushnumber(L, stats.PowerConsumed);
 			return 1;
 		})
 		
-		LuaLibPropReadonly(UFGPowerCircuit, getProductionCapacity, {
+		LuaLibPropReadonly(UFGPowerCircuit, capacity, {
 			FPowerCircuitStats stats;
 			self->GetStats(stats);
 			lua_pushnumber(L, stats.PowerProductionCapacity);
@@ -426,7 +426,7 @@ namespace FicsItKernel {
 		
 		LuaLibPropReadonlyInt(UFGFactoryConnectionComponent, type,			GetConnector())
 		LuaLibPropReadonlyInt(UFGFactoryConnectionComponent, direction,		GetDirection())
-		LuaLibPropReadonlyInt(UFGFactoryConnectionComponent, isConnected,	IsConnected())
+		LuaLibPropReadonlyBool(UFGFactoryConnectionComponent, isConnected,	IsConnected())
 
 		LuaLibFunc(UFGFactoryConnectionComponent, getInventory, {
 			newInstance(L, obj / self->GetInventory());
@@ -993,8 +993,8 @@ namespace FicsItKernel {
 		LuaLibFuncGetInt(UFGRailroadTrackConnectionComponent, getSwitchPosition, GetSwitchPosition())
 		
 		LuaLibPropReadonlyBool(UFGRailroadTrackConnectionComponent, isConnected, IsConnected())
-		LuaLibPropReadonlyBool(UFGRailroadTrackConnectionComponent, isFacingSwitchg, IsFacingSwitch())
-		LuaLibPropReadonlyBool(UFGRailroadTrackConnectionComponent, isTrailingSwitchg, IsTrailingSwitch())
+		LuaLibPropReadonlyBool(UFGRailroadTrackConnectionComponent, isFacingSwitch, IsFacingSwitch())
+		LuaLibPropReadonlyBool(UFGRailroadTrackConnectionComponent, isTrailingSwitch, IsTrailingSwitch())
 		LuaLibPropReadonlyInt(UFGRailroadTrackConnectionComponent, numSwitchPositions, GetNumSwitchPositions())
 		
 		// End UFGRailroadTrackConnectionComponent

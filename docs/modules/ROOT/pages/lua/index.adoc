@@ -49,6 +49,10 @@ For this use the `.` access operator.
 
 Some properties are read only though, and if you try to write to them, a Lua exception gets thrown.
 
+If a Instance refers to a network component, the instance will have a string property with the name "nick" which allows you to get/set
+the nick of a component programatically and it will also have a read-only string property called "id" allowing you to get
+the id of the component.
+
 === Functions
 
 The instance can also have function allowing you to call subroutines. These function can have multiple input and output values.
