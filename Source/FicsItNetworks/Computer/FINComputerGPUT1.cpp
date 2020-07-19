@@ -302,7 +302,7 @@ void AFINComputerGPUT1::netFunc_getSize(int& w, int& h) {
 }
 
 void AFINComputerGPUT1::netFunc_setSize(int w, int h) {
-	SetScreenSize(FVector2D(FMath::Clamp(w, 1, 150), FMath::Clamp(h, 1, 50)));
+	SetScreenSize(FVector2D(FMath::Clamp(w, 1, 300), FMath::Clamp(h, 1, 100)));
 }
 
 void AFINComputerGPUT1::netFunc_setForeground(float r, float g, float b, float a) {

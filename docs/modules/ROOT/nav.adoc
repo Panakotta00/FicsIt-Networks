@@ -14,6 +14,7 @@
 *** xref:buildings/ComputerCase/RAM.adoc[RAM]
 *** xref:buildings/ComputerCase/ScreenDriver.adoc[Screen Driver]
 ** xref:buildings/InidcatorPole.adoc[Indicator Pole]
+** xref:buildings/Screen.adoc[Large Screen]
 ** xref:buildings/ModularControlPanel/index.adoc[Modular Control Panel]
 *** xref:buildings/ModularControlPanel/Button.adoc[Button]
 *** xref:buildings/ModularControlPanel/Lever.adoc[Lever]

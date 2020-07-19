@@ -119,8 +119,6 @@ Return Values::
 
 A factory is a buildable able of processing stuff like items and energy.
 
-=== Functions
-
 === Properties
 
 ==== `number progress (readonly)`
@@ -401,7 +399,7 @@ Return Values::
 
 The current docking status of the platform.
 
-==== `bool isReversed()`
+==== `bool isReversed (readonly)`
 
 This function tells you if the platform is placed revesed in the train station configuration.
 
