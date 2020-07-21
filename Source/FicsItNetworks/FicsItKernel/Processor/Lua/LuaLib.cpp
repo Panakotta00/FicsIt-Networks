@@ -488,7 +488,7 @@ namespace FicsItKernel {
 			return 1;
 		})
 
-		void ManufacturerSetRecipeResolve(TSharedRef<FDynamicStructHolder> In, TSharedRef<FDynamicStructHolder> Out) {
+		void ManufacturerSetRecipeResolve(TSharedRef<FFINDynamicStructHolder> In, TSharedRef<FFINDynamicStructHolder> Out) {
 			TArray<TSubclassOf<UFGRecipe>> recipes;
 			FFINManufacturerSetRecipeInData& InData = In->Get<FFINManufacturerSetRecipeInData>();
 			AFGBuildableManufacturer* self = InData.Manufacturer.Get();
@@ -506,7 +506,7 @@ namespace FicsItKernel {
 
 		RegisterFuturePointer(ManufacturerSetRecipeResolve, &ManufacturerSetRecipeResolve)
 
-		int ManufacturerSetRecipeRetrieve(lua_State* L, TSharedRef<FDynamicStructHolder> In) {
+		int ManufacturerSetRecipeRetrieve(lua_State* L, TSharedRef<FFINDynamicStructHolder> In) {
 			lua_pushboolean(L, In->Get<FFINBoolData>().Data);
 			return 1;
 		}
@@ -517,9 +517,9 @@ namespace FicsItKernel {
 				return 0;
 			}
 			TSubclassOf<UFGRecipe> recipe = getClassInstance<UFGRecipe>(L,1);
-			TSharedPtr<FDynamicStructHolder> holder1;
-			TSharedPtr<FDynamicStructHolder> holder2;
-			luaFuture(L, MakeShared<LuaFutureStruct>(holder1 = MakeShared<FDynamicStructHolder>(FFINManufacturerSetRecipeInData::StaticStruct()), holder2 = MakeShared<FDynamicStructHolder>(FFINBoolData::StaticStruct()), ManufacturerSetRecipeResolve, ManufacturerSetRecipeRetrieve));
+			TSharedPtr<FFINDynamicStructHolder> holder1;
+			TSharedPtr<FFINDynamicStructHolder> holder2;
+			luaFuture(L, MakeShared<LuaFutureStruct>(holder1 = MakeShared<FFINDynamicStructHolder>(FFINManufacturerSetRecipeInData::StaticStruct()), holder2 = MakeShared<FFINDynamicStructHolder>(FFINBoolData::StaticStruct()), ManufacturerSetRecipeResolve, ManufacturerSetRecipeRetrieve));
 			holder1->Get<FFINManufacturerSetRecipeInData>().Manufacturer = self;
 			holder1->Get<FFINManufacturerSetRecipeInData>().Recipe = recipe;
 			return 1;

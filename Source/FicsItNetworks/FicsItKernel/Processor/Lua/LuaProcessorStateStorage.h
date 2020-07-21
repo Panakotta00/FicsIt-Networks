@@ -2,40 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "FicsItKernel/Processor/ProcessorStateStorage.h"
+#include "Network/FINDynamicStructHolder.h"
 #include "Network/FINNetworkTrace.h"
 
 #include "LuaProcessorStateStorage.generated.h"
-
-#define MakeDynamicStruct(Type, ...) MakeShared<FDynamicStructHolder>(Type::StaticStruct(), new Type{__VA_ARGS__})
-
-USTRUCT()
-struct FDynamicStructHolder {
-	GENERATED_BODY()
-	
-private:
-	void* Data = nullptr;
-	UStruct* Struct = nullptr;
-
-public:
-	FDynamicStructHolder();
-	FDynamicStructHolder(UStruct* Struct);
-	FDynamicStructHolder(UStruct* Struct, void* Data);
-	~FDynamicStructHolder();
-	
-	bool Serialize(FArchive& Ar);
-
-	UStruct* GetStruct();
-	void* GetData();
-
-	template<typename T>
-	T& Get() {
-		return *static_cast<T*>(GetData());
-	}
-};
-
-inline void operator<<(FArchive& Ar, FDynamicStructHolder& Struct) {
-	Struct.Serialize(Ar);
-}
 
 USTRUCT()
 struct FFINBoolData {
@@ -64,7 +34,7 @@ private:
 	UPROPERTY(SaveGame)
 	TArray<UObject*> References;
 
-	TArray<TSharedPtr<FDynamicStructHolder>> Structs;
+	TArray<TSharedPtr<FFINDynamicStructHolder>> Structs;
 
 public:
 	UPROPERTY(SaveGame)
@@ -90,11 +60,11 @@ public:
 
 	int32 Add(UObject* Ref);
 
-	int32 Add(TSharedPtr<FDynamicStructHolder> Struct);
+	int32 Add(TSharedPtr<FFINDynamicStructHolder> Struct);
 
 	FFINNetworkTrace GetTrace(int32 id);
 
 	UObject* GetRef(int32 id);
 
-	TSharedPtr<FDynamicStructHolder> GetStruct(int32 id);
+	TSharedPtr<FFINDynamicStructHolder> GetStruct(int32 id);
 };

@@ -10,21 +10,21 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		typedef int(*FutureRetrieveFunc)(lua_State*, TSharedRef<FDynamicStructHolder>);
-		typedef void(*FutureResolveFunc)(TSharedRef<FDynamicStructHolder>, TSharedRef<FDynamicStructHolder>);
+		typedef int(*FutureRetrieveFunc)(lua_State*, TSharedRef<FFINDynamicStructHolder>);
+		typedef void(*FutureResolveFunc)(TSharedRef<FFINDynamicStructHolder>, TSharedRef<FFINDynamicStructHolder>);
 
 #define MakeLuaFuture(...) MakeShared<LuaFutureStruct>(__VA_ARGS__)
 		
 		class LuaFutureStruct : public FicsItFuture {
 		public:
-			TSharedPtr<FDynamicStructHolder> InData;
-			TSharedPtr<FDynamicStructHolder> OutData;
+			TSharedPtr<FFINDynamicStructHolder> InData;
+			TSharedPtr<FFINDynamicStructHolder> OutData;
 			FutureResolveFunc ResolveFunc;
 			FutureRetrieveFunc RetrieveFunc;
 			bool valid = false;
 
 			//LuaFutureStruct(TSharedPtr<FDynamicStructHolder> InDat, UStruct* OutDataStruct, FutureResolveFunc ResolveFunc, FutureRetrieveFunc RetrieveFunc);
-			LuaFutureStruct(TSharedPtr<FDynamicStructHolder> InDat, TSharedPtr<FDynamicStructHolder> OutDataStruct, FutureResolveFunc ResolveFunc, FutureRetrieveFunc RetrieveFunc);
+			LuaFutureStruct(TSharedPtr<FFINDynamicStructHolder> InDat, TSharedPtr<FFINDynamicStructHolder> OutDataStruct, FutureResolveFunc ResolveFunc, FutureRetrieveFunc RetrieveFunc);
 			~LuaFutureStruct();
 
 			// Begin FicsItFuture

@@ -37,7 +37,7 @@ namespace FicsItKernel {
 
 //		LuaFutureStruct::LuaFutureStruct(TSharedPtr<FDynamicStructHolder> InData, UStruct* OutDataStruct, FutureResolveFunc ResolveFunc, FutureRetrieveFunc RetrieveFunc) : InData(InData), OutData(new FDynamicStructHolder(OutDataStruct)), ResolveFunc(ResolveFunc), RetrieveFunc(RetrieveFunc) {}
 
-		LuaFutureStruct::LuaFutureStruct(TSharedPtr<FDynamicStructHolder> InData, TSharedPtr<FDynamicStructHolder> OutData, FutureResolveFunc ResolveFunc, FutureRetrieveFunc RetrieveFunc) : InData(InData), OutData(OutData), ResolveFunc(ResolveFunc), RetrieveFunc(RetrieveFunc){}
+		LuaFutureStruct::LuaFutureStruct(TSharedPtr<FFINDynamicStructHolder> InData, TSharedPtr<FFINDynamicStructHolder> OutData, FutureResolveFunc ResolveFunc, FutureRetrieveFunc RetrieveFunc) : InData(InData), OutData(OutData), ResolveFunc(ResolveFunc), RetrieveFunc(RetrieveFunc){}
 
 		LuaFutureStruct::~LuaFutureStruct() {
 			

@@ -49,7 +49,7 @@ namespace FicsItKernel {
 		}
 #pragma optimize("", on)
 
-		void luaComputerBeepResolve(TSharedRef<FDynamicStructHolder> In, TSharedRef<FDynamicStructHolder> Out) {
+		void luaComputerBeepResolve(TSharedRef<FFINDynamicStructHolder> In, TSharedRef<FFINDynamicStructHolder> Out) {
 			FFINKernelFutureData& InData = In->Get<FFINKernelFutureData>();
 			InData.kernel->getAudio()->beep();
 		}
