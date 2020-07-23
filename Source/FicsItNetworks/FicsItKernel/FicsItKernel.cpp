@@ -328,26 +328,26 @@ namespace FicsItKernel {
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
 
 	void KernelListener::onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 4, path.str());
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 4, path.str().c_str());
 	}
 
 	void KernelListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 5, path.str());
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 5, path.str().c_str());
 	}
 
 	void KernelListener::onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 0, path.str(), (int)type);
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 0, path.str().c_str(), (int)type);
 	}
 
 	void KernelListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 1, path.str(), (int)type);
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 1, path.str().c_str(), (int)type);
 	}
 
 	void KernelListener::onNodeChanged(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 2, path.str(), (int)type);
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 2, path.str().c_str(), (int)type);
 	}
 
 	void KernelListener::onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 3, newPath.str(), oldPath.str(), (int)type);
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 3, newPath.str().c_str(), oldPath.str().c_str(), (int)type);
 	}
 }

@@ -4,27 +4,15 @@
 
 #include <map>
 
+#include "Network/FINDynamicStructHolder.h"
+
 namespace FicsItKernel {
 	namespace Network {
-		void NetworkController::addListener(NetworkTrace listener) {
-			std::lock_guard<std::mutex> m(mutexSignalListeners);
-			signalListeners.insert(listener);
-		}
-
-		void NetworkController::removeListener(NetworkTrace listener) {
-			std::lock_guard<std::mutex> m(mutexSignalListeners);
-			signalListeners.erase(listener);
-		}
-
-		UObject* NetworkController::getComponent() const {
-			return component;
-		}
-
-		void NetworkController::handleSignal(std::shared_ptr<Signal> signal, NetworkTrace sender) {
+		void NetworkController::handleSignal(TSharedPtr<FFINSignal> signal, const FFINNetworkTrace& sender) {
 			pushSignal(signal, sender);
 		}
 
-		std::shared_ptr<Signal> NetworkController::popSignal(NetworkTrace& sender) {
+		TSharedPtr<FFINSignal> NetworkController::popSignal(FFINNetworkTrace& sender) {
 			if (getSignalCount() < 1) return nullptr;
 			mutexSignals.lock();
 			auto sig = signals.front();
@@ -34,7 +22,7 @@ namespace FicsItKernel {
 			return sig.first;
 		}
 
-		void NetworkController::pushSignal(std::shared_ptr<Signal> signal, NetworkTrace sender) {
+		void NetworkController::pushSignal(TSharedPtr<FFINSignal> signal, const FFINNetworkTrace& sender) {
 			std::lock_guard<std::mutex> m(mutexSignals);
 			if (signals.size() >= maxSignalCount || lockSignalRecieving) return;
 			signals.push_back({std::move(signal), std::move(sender)});
@@ -79,7 +67,7 @@ namespace FicsItKernel {
 		void NetworkController::Serialize(FArchive& Ar) {
 			// serialize signal listeners
 			TArray<FFINNetworkTrace> networkTraces;
-			if (Ar.IsSaving()) for (const Network::NetworkTrace& trace : signalListeners) {
+			if (Ar.IsSaving()) for (const FFINNetworkTrace& trace : signalListeners) {
 				networkTraces.Add(trace);
 			}
 			Ar << networkTraces;
@@ -90,30 +78,28 @@ namespace FicsItKernel {
 			// serialize signals
 			int32 signalCount = signals.size();
 			Ar << signalCount;
-			if (Ar.IsSaving()) for (auto& signal : signals) {
-				bool valid = signal.first.get();
-				Ar << valid;
-				if (!valid) continue;
-					
-				// save signal
-				FFINNetworkTrace trace = signal.second;
-				Ar << trace;
-				FString typeName = signal.first->getTypeName().c_str();
-				Ar << typeName;
-				signal.first->Serialize(Ar);
+			if (Ar.IsLoading()) {
+				signals.clear();
 			}
-			if (Ar.IsLoading()) for (int i = 0; i < signalCount; ++i) {
-				bool valid = false;
+			for (int i = 0; i < signalCount; ++i) {
+				TFINDynamicStruct<FFINSignal> Signal;
+				FFINNetworkTrace Trace;
+				if (Ar.IsSaving()) {
+					const auto& sig = signals[i];
+					Signal = FFINDynamicStructHolder::Copy(sig.first->GetStruct(), sig.first.Get());
+					Trace = sig.second;
+				}
+				bool valid = Trace.getTrace().isValid();
 				Ar << valid;
 				if (!valid) continue;
 				
-				// load signal
-				FFINNetworkTrace trace;
-				Ar << trace;
-				FString typeName;
-				Ar << typeName;
-				std::shared_ptr<Signal> signal = Signal::deserializeSignal(TCHAR_TO_UTF8(*typeName), Ar);
-				signals.push_back({signal, trace});
+				// save/save signal
+				Signal.Serialize(Ar);
+				Trace.Serialize(Ar);
+				
+				if (Ar.IsLoading()) {
+					signals.push_back({Signal.SharedCopy(), Trace});
+				}
 			}
 
 			// serialize signal senders

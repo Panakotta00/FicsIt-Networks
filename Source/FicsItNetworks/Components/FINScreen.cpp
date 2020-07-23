@@ -45,6 +45,9 @@ void AFINScreen::BeginPlay() {
 	WidgetComponent->AddRelativeLocation(WidgetOffset);
 	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
 #endif
+	for (AFINNetworkCable* c : Connector->Cables) {
+		c->RerunConstructionScripts();
+	}
 }
 
 void AFINScreen::OnConstruction(const FTransform& transform) {

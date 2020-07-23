@@ -3,6 +3,7 @@
 
 #include "FGBuildableDockingStation.h"
 #include "FGBuildablePipeReservoir.h"
+#include "FGBuildableRailroadSignal.h"
 #include "FGBuildableRailroadStation.h"
 #include "FGBuildableTrainPlatformCargo.h"
 #include "LuaStructs.h"
@@ -22,9 +23,7 @@
 #include "util/ReflectionHelper.h"
 #include "FGLocomotive.h"
 #include "FGBuildableRailroadSwitchControl.h"
-#include "FGBuildableRailroadSignal.h"
 #include "FGPipeSubsystem.h"
-#include "FicsItKernel/Network/SmartSignal.h"
 
 #define LuaLibTypeRegName(ClassName) ClassName ## _Reg
 #define LuaLibFuncName(ClassName, FuncName) ClassName ## _ ## FuncName

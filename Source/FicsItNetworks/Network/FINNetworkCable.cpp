@@ -15,12 +15,6 @@ AFINNetworkCable::AFINNetworkCable() {
 AFINNetworkCable::~AFINNetworkCable() {}
 
 void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
-
-}
-
-void AFINNetworkCable::BeginPlay() {
-	Super::BeginPlay();
-	
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
@@ -42,6 +36,12 @@ void AFINNetworkCable::BeginPlay() {
 	CableSpline->UpdateMesh();
 
 	CableSpline->SetMobility(EComponentMobility::Type::Static);
+}
+
+void AFINNetworkCable::BeginPlay() {
+	Super::BeginPlay();
+	
+	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
 
 	Connector1->AddCable(this);
 	Connector2->AddCable(this);

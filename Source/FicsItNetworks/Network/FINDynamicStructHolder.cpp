@@ -2,12 +2,12 @@
 
 FFINDynamicStructHolder::FFINDynamicStructHolder() {}
 
-FFINDynamicStructHolder::FFINDynamicStructHolder(UStruct* Struct) : Struct(Struct) {
+FFINDynamicStructHolder::FFINDynamicStructHolder(UScriptStruct* Struct) : Struct(Struct) {
 	Data = FMemory::Malloc(Struct->GetStructureSize());
 	Struct->InitializeStruct(Data);
 }
 
-FFINDynamicStructHolder::FFINDynamicStructHolder(UStruct* Struct, void* Data) : Data(Data), Struct(Struct) {}
+FFINDynamicStructHolder::FFINDynamicStructHolder(UScriptStruct* Struct, void* Data) : Data(Data), Struct(Struct) {}
 
 FFINDynamicStructHolder::FFINDynamicStructHolder(const FFINDynamicStructHolder& Other) {
 	*this = Other;
@@ -26,6 +26,9 @@ FFINDynamicStructHolder& FFINDynamicStructHolder::operator=(const FFINDynamicStr
 		Struct->DestroyStruct(Data);
 		if (Other.Data) {
 			Data = FMemory::Realloc(Data, Other.Struct->GetStructureSize());
+		} else {
+			FMemory::Free(Data);
+			Data = nullptr;
 		}
 	} else {
 		if (Other.Data) {
@@ -33,35 +36,44 @@ FFINDynamicStructHolder& FFINDynamicStructHolder::operator=(const FFINDynamicStr
 		}
 	}
 	Struct = Other.Struct;
-	if (Other.Data) {
+	if (Data) {
 		Struct->InitializeStruct(Data);
-		for (TFieldIterator<UProperty> Prop(Struct); Prop; ++Prop) {
-			Prop->CopyCompleteValue_InContainer(Data, Other.Data);
-		}
-	} else {
-		FMemory::Free(Data);
-		Data = nullptr;
+		Struct->CopyScriptStruct(Data, Other.Data);
 	}
 	
 	return *this;
 }
 
+FFINDynamicStructHolder FFINDynamicStructHolder::Copy(UScriptStruct* Struct, void* Data) {
+	FFINDynamicStructHolder holder(Struct);
+	Struct->CopyScriptStruct(holder.Data, Data);
+	return holder;
+}
+
 bool FFINDynamicStructHolder::Serialize(FArchive& Ar) {
-	if (Ar.IsLoading() && Data && Struct) {
-		Struct->DestroyStruct(Data);
-		FMemory::Free(Data);
-		Data = nullptr;
-	}
+	UScriptStruct* OldStruct = Struct;
 	Ar << Struct;
-	if (Ar.IsLoading() && Struct) {
-		Data = FMemory::Malloc(Struct->GetStructureSize());
-		Struct->InitializeStruct(Data);
+	if (Ar.IsLoading()) {
+		if (Data) {
+			OldStruct->DestroyStruct(Data);
+			if (Struct) {
+				Data = FMemory::Realloc(Data, Struct->GetStructureSize());
+			} else {
+				FMemory::Free(Data);
+				Data = nullptr;
+			}
+		} else if (Struct) {
+			Data = FMemory::Malloc(Struct->GetStructureSize());
+		}
+		if (Struct) Struct->InitializeStruct(Data);
 	}
-	if (Data && Struct) Struct->SerializeBin(Ar, Data);
+	if (Struct) {
+		Struct->GetCppStructOps()->Serialize(Ar, Data);
+	}
 	return true;
 }
 
-UStruct* FFINDynamicStructHolder::GetStruct() const {
+UScriptStruct* FFINDynamicStructHolder::GetStruct() const {
 	return Struct;
 }
 

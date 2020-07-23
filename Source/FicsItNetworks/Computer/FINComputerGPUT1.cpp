@@ -273,7 +273,7 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 					x = 0;
 				}
 				FString& text = TextGridBuffer[y];
-				int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X));
+				int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X)-x-1);
 				text.RemoveAt(x, replace);
 				text.InsertAt(x, inLine.Left(replace));
 				for (int dx = 0; dx < replace; ++dx) {

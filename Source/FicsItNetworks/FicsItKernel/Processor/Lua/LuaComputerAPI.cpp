@@ -5,6 +5,8 @@
 #include "FINStateEEPROMLua.h"
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
+#include "LuaStructs.h"
+#include "Network/FINDynamicStructHolder.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
@@ -76,7 +78,7 @@ namespace FicsItKernel {
 		}
 
 		LuaFunc(luaComputerTime)
-			AFGTimeOfDaySubsystem* subsys = AFGTimeOfDaySubsystem::Get(kernel->getNetwork()->getComponent());
+			AFGTimeOfDaySubsystem* subsys = AFGTimeOfDaySubsystem::Get(kernel->getNetwork()->component);
 			lua_pushnumber(L, subsys->GetPassedDays() * 86400 + subsys->GetDaySeconds());
 			return 1;
 		}
@@ -85,7 +87,7 @@ namespace FicsItKernel {
 			lua_newtable(L);
 			int i = 1;
 			for (UObject* gpu : kernel->getGPUs()) {
-				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->getComponent()) / gpu);
+				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->component) / gpu);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -95,7 +97,7 @@ namespace FicsItKernel {
 		    lua_newtable(L);
 			int i = 1;
 			for (UObject* screen : kernel->getScreens()) {
-				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->getComponent()) / screen);
+				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->component) / screen);
 				lua_seti(L, -2, i++);
 			}
 			return 1;

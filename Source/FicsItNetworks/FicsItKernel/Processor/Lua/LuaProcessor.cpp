@@ -14,38 +14,39 @@
 
 #include "FINStateEEPROMLua.h"
 #include "LuaDebugAPI.h"
+#include "Network/FINNetworkTrace.h"
 
 #include "SML/util/Logging.h"
 
 namespace FicsItKernel {
 	namespace Lua {
-		LuaSignalReader::LuaSignalReader(lua_State* L) : L(L) {}
+		LuaValueReader::LuaValueReader(lua_State* L) : L(L) {}
 
-		void LuaSignalReader::operator<<(const std::string& str) {
-			lua_pushstring(L, str.c_str());
+		void LuaValueReader::operator<<(const FString& str) {
+			lua_pushlstring(L, TCHAR_TO_UTF8(*str), str.Len());
 		}
 
-		void LuaSignalReader::operator<<(double num) {
+		void LuaValueReader::operator<<(double num) {
 			lua_pushnumber(L, num);
 		}
 
-		void LuaSignalReader::operator<<(int num) {
+		void LuaValueReader::operator<<(int num) {
 			lua_pushinteger(L, num);
 		}
 
-		void LuaSignalReader::operator<<(bool b) {
+		void LuaValueReader::operator<<(bool b) {
 			lua_pushboolean(L, b);
 		}
 
-		void LuaSignalReader::operator<<(UObject* obj) {
+		void LuaValueReader::operator<<(UObject* obj) {
 			newInstance(L, Network::NetworkTrace(obj));
 		}
 
-		void LuaSignalReader::operator<<(const Network::NetworkTrace& obj) {
-			newInstance(L, obj);
+		void LuaValueReader::operator<<(const FFINNetworkTrace& obj) {
+			newInstance(L, obj.getTrace());
 		}
 
-		void LuaSignalReader::WriteAbstract(const void* obj, const std::string& id) {
+		void LuaValueReader::WriteAbstract(const void* obj, const FString& id) {
 			if (id == "InventoryItem") {
 				luaStruct(L, *(const FInventoryItem*)obj);
 			} else if (id == "ItemAmount") {
@@ -574,13 +575,13 @@ namespace FicsItKernel {
 		int LuaProcessor::doSignal(lua_State* L) {
 			auto net = getKernel()->getNetwork();
 			if (!net || net->getSignalCount() < 1) return 0;
-			Network::NetworkTrace sender;
-			std::shared_ptr<Network::Signal> signal = net->popSignal(sender);
-			if (!signal.get()) return 0;
+			FFINNetworkTrace sender;
+			TSharedPtr<FFINSignal> signal = net->popSignal(sender);
+			if (!signal.IsValid()) return 0;
 			int props = 2;
-			lua_pushstring(L, signal->getName().c_str());
+			lua_pushstring(L, TCHAR_TO_UTF8(*signal->GetName()));
 			newInstance(L, sender);
-			LuaSignalReader reader(L);
+			LuaValueReader reader(L);
 			props += *signal >> reader;
 			return props;
 		}
@@ -611,4 +612,3 @@ namespace FicsItKernel {
 #pragma optimize("", on)
 	}
 }
-       

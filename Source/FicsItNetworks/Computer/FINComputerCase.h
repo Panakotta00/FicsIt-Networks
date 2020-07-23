@@ -154,7 +154,7 @@ public:
 	FString GetSerialOutput();
 
 	UFUNCTION()
-	void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
+	void HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender);
 
 private:
 	UPROPERTY(SaveGame)

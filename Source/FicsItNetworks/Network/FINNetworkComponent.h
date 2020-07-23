@@ -89,4 +89,13 @@ public:
 	 * This function uses GetNick to check if the component has the given nick
 	 */
 	bool HasNickByNick(FString nick, FString has) const;
+
+	/**
+	 * Allows the implementer to decided if the given network component by id
+	 * has a more in-depth access to this component.
+	 * This decided f.e. if a representation instance can get created by the
+	 * given component for this component allowing to call functions and to listen.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
+	bool AccessPermited(FGuid ID) const;
 };

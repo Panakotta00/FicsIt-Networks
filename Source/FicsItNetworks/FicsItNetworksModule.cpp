@@ -19,7 +19,6 @@
 #include "Network/FINNetworkAdapter.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 
-#include "FicsItKernel/Network/SmartSignal.h"
 #include "FicsItKernel/Processor/Lua/LuaLib.h"
 
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);

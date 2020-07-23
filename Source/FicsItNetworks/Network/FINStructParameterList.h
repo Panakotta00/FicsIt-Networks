@@ -1,16 +1,28 @@
 ﻿#pragma once
 #include "FINDynamicStructHolder.h"
 #include "FINParameterList.h"
+#include "FINValueReader.h"
+#include "FINStructParameterList.generated.h"
 
-class FFINStructParameterList : public FFINParameterList {
+/**
+ * Contains a row of properties stored in a struct which are parseable to
+ * a network parameter list.
+ */
+USTRUCT()
+struct FFINStructParameterList : public FFINParameterList {
+	GENERATED_BODY()
 public:
 	FFINDynamicStructHolder Struct;
 	
 	FFINStructParameterList() {}
 	FFINStructParameterList(const FFINDynamicStructHolder& Struct);
+	FFINStructParameterList(UScriptStruct* Struct, void* Data);
 
 	// Begin FFINParameterList
-	virtual int operator>>(FFINParameterReader& reader) const override;
-	virtual bool Serialize(FArchive& Ar) override;
+	virtual int operator>>(FFINValueReader& reader) const override;
 	// End FFINParameterList
+	
+	bool Serialize(FArchive& Ar);
+
+	static int WriteToReader(UStruct* Struct, void* Data, FFINValueReader& reader);
 };

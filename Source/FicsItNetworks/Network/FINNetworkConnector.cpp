@@ -207,8 +207,9 @@ UObject* UFINNetworkConnector::GetSignalSenderOverride_Implementation() {
 	return this;
 }
 
-void UFINNetworkConnector::HandleSignal_Implementation(FFINSignal signal, FFINNetworkTrace sender) {
-	OnNetworkSignal.Broadcast(signal, sender);
+void UFINNetworkConnector::HandleSignal(TSharedPtr<FFINSignal> signal, FFINNetworkTrace sender) {
+	FFINDynamicStructHolder Holder = FFINDynamicStructHolder::Copy(signal->GetStruct(), signal.Get());
+	OnNetworkSignal.Broadcast(Holder, sender);
 }
 
 void UFINNetworkConnector::netSig_NetworkUpdate_Implementation(int type, const FString& id) {}

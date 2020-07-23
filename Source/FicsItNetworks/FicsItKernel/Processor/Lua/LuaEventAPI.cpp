@@ -110,7 +110,7 @@ namespace FicsItKernel {
 				if (s) {
 					FFINNetworkTrace listener = sender.getTrace().reverse();
 					IFINSignalSender::Execute_RemoveListener(s, listener);
-					AFINHookSubsystem::GetHookSubsystem(net->getComponent())->RemoveListener(s, net->getComponent());
+					AFINHookSubsystem::GetHookSubsystem(net->component)->RemoveListener(s, net->component);
 				}
 			}
 			net->signalSenders.Empty();

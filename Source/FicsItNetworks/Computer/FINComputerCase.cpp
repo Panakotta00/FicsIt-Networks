@@ -55,10 +55,11 @@ AFINComputerCase::~AFINComputerCase() {
 	if (kernel) delete kernel;
 }
 
-void AFINComputerCase::Serialize(FArchive& ar) {
-	Super::Serialize(ar);
-	if (ar.IsSaveGame()) {
-		kernel->Serialize(ar, KernelState);
+void AFINComputerCase::Serialize(FArchive& Ar) {
+	Super::Serialize(Ar);
+	Ar.UsingCustomVersion(FFrameworkObjectVersion::GUID);
+	if (Ar.IsSaveGame() && Ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::BeforeCustomVersionWasAdded) {
+		kernel->Serialize(Ar, KernelState);
 	}
 }
 
@@ -328,8 +329,8 @@ void AFINComputerCase::WriteSerialInput(const FString& str) {
 	}
 }
 
-void AFINComputerCase::HandleSignal(FFINSignal signal, FFINNetworkTrace sender) {
-	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
+void AFINComputerCase::HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender) {
+	if (kernel) kernel->getNetwork()->pushSignal(signal.SharedCopy<FFINSignal>(), sender);
 }
 
 void AFINComputerCase::OnDriveUpdate(bool added, AFINFileSystemState* drive) {

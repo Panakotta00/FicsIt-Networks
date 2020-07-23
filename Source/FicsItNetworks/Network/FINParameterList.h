@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "FINParameterReader.h"
+#include "FINValueReader.h"
+#include "FINParameterList.generated.h"
 
 /**
  * This structure allows you to store a parameter list
@@ -8,7 +9,9 @@
  * It is used as parameters of messages like network signals and network messages
  * which can be serialized and also converted to a network data type.
  */
-class FFINParameterList {
+USTRUCT()
+struct FFINParameterList {
+	GENERATED_BODY()
 public:
 	virtual ~FFINParameterList() {}
 	
@@ -16,14 +19,14 @@ public:
 	* Writes all parameters in order to the parameter reader.
 	* Allowing to convert the signal arguments to the values each processor supports.
 	*/
-	virtual int operator>>(FFINParameterReader& reader) const = 0;
+	virtual int operator>>(FFINValueReader& reader) const { return 0; };
 
 	/**
 	* De/Serialize the parameter list to an archive
 	*
 	* @param[in]	Ar	the archive which stores the signal information
 	*/
-	virtual bool Serialize(FArchive& Ar) = 0;
+	bool Serialize(FArchive& Ar) { return false; };
 };
 
 inline bool operator<<(FArchive& Ar, FFINParameterList& ParamList) {

@@ -8,6 +8,9 @@ struct FFINCustomVersion {
 		// Before any version changes were made
 		BeforeCustomVersionWasAdded = 0,
 
+		// Signal Storage / Trace / "Parameter List" overhaul
+		SignalStorage,
+
         // -----<new versions can be added above this line>-------------------------------------------------
         VersionPlusOne,
         LatestVersion = VersionPlusOne - 1

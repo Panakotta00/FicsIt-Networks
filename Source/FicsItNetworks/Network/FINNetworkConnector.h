@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FINDynamicStructHolder.h"
 #include "Components/SceneComponent.h"
 #include "FINNetworkComponent.h"
 #include "Signals/FINSignalSender.h"
@@ -8,7 +9,7 @@
 #include "FINNetworkCable.h"
 #include "FINNetworkConnector.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINHandleSignal, FFINSignal, signal, FFINNetworkTrace, sender);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINHandleSignal, const FFINDynamicStructHolder&, signal, const FFINNetworkTrace&, sender);
 
 /**
  * This component allows the actor to get connected to a computer network.
@@ -52,7 +53,7 @@ protected:
 	/**
 	 * The signal listeners listening to this component.
 	 */
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TSet<FFINNetworkTrace> Listeners;
 
 public:
@@ -130,9 +131,9 @@ public:
 	// End IFINSignalSender
 
 	// Begin IFINSignalListener
-	virtual void HandleSignal_Implementation(FFINSignal signal, FFINNetworkTrace sender) override;
+	virtual void HandleSignal(TSharedPtr<FFINSignal> signal, FFINNetworkTrace sender) override;
 	// End IFINSignalListener
-
+	
 	/**
 	 * adds the given connector as connection to this connector.
 	 */
