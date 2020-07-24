@@ -75,7 +75,7 @@ bool AFINNetworkCableHologram::IsValidHitResult(const FHitResult& hit) const {
 			IsValid(actor->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()))
 		)) return true;
 	for (auto entry : AFINNetworkAdapter::settings) {
-		auto clazz = entry.first;
+		auto clazz = entry.Key;
 
 		if (actor->IsA(clazz)) return true;
 	}
@@ -118,8 +118,8 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 
 	// find pre defined adapter setting
 	for (auto entry : AFINNetworkAdapter::settings) {
-		auto setting = entry.second;
-		auto clazz = entry.first;
+		auto setting = entry.Value;
+		auto clazz = entry.Key;
 
 		if (actor->IsA(clazz)) {
 			auto t = actor->GetTransform().TransformPosition(setting.loc);

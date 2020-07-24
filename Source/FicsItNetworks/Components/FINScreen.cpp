@@ -46,7 +46,7 @@ void AFINScreen::BeginPlay() {
 	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
 #endif
 	for (AFINNetworkCable* c : Connector->Cables) {
-		c->RerunConstructionScripts();
+		//c->RerunConstructionScripts();
 	}
 }
 

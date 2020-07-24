@@ -130,7 +130,7 @@ namespace FicsItKernel {
 		// Begin TrackGraph
 
 		struct LuaTrackGraph {
-			Network::NetworkTrace trace;
+			FFINNetworkTrace trace;
 			int trackID;
 
 			static int getTrackID(UObject* obj) {
@@ -153,7 +153,7 @@ namespace FicsItKernel {
 			static LuaTrackGraph& getAndCheck(lua_State* L, AFGRailroadSubsystem*& subSys) {
 				LuaTrackGraph& track = *static_cast<LuaTrackGraph*>(luaL_checkudata(L, 1, "TrackGraph"));
 				if (!track.isValid()) luaL_argerror(L, 1, "TrackGraph is invalid");
-				subSys = AFGRailroadSubsystem::Get(track.trace.getUnderlyingPtr().Get());
+				subSys = AFGRailroadSubsystem::Get(track.trace.GetUnderlyingPtr().Get());
 				return track;
 			}
 		};
@@ -166,7 +166,7 @@ namespace FicsItKernel {
 			lua_newtable(L);
 			for (int i = 0; i < stations.Num(); ++i) {
 				int trackID = graph.trackID;
-				newInstance(L, (graph.trace / Network::ObjTraceStep(Cast<UObject>(stations[i]->mStation), [trackID](UObject* o1, UObject* o2) { 
+				newInstance(L, (graph.trace / ObjTraceStep(Cast<UObject>(stations[i]->mStation), [trackID](UObject* o1, UObject* o2) { 
 					return trackID == LuaTrackGraph::getTrackID(o1) && trackID == LuaTrackGraph::getTrackID(o2);
 				})));
 				lua_seti(L, -2, i+1);
@@ -182,7 +182,7 @@ namespace FicsItKernel {
 			lua_newtable(L);
 			for (int i = 0; i < trains.Num(); ++i) {
 				int trackID = graph.trackID;
-				newInstance(L, (graph.trace / Network::ObjTraceStep(Cast<UObject>(trains[i]), [trackID](UObject* o1, UObject* o2) { 
+				newInstance(L, (graph.trace / ObjTraceStep(Cast<UObject>(trains[i]), [trackID](UObject* o1, UObject* o2) { 
                     return trackID == LuaTrackGraph::getTrackID(o1) && trackID == LuaTrackGraph::getTrackID(o2);
                 })));
 				lua_seti(L, -2, i+1);
@@ -242,7 +242,7 @@ namespace FicsItKernel {
 			{NULL, NULL}
 		};
 
-		void luaTrackGraph(lua_State* L, const Network::NetworkTrace& trace, int trackID) {
+		void luaTrackGraph(lua_State* L, const FFINNetworkTrace& trace, int trackID) {
 			LuaTrackGraph* trackGrpah = static_cast<LuaTrackGraph*>(lua_newuserdata(L, sizeof(LuaTrackGraph)));
 			new (trackGrpah) LuaTrackGraph{trace, trackID};
 			luaL_setmetatable(L, "TrackGraph");
@@ -258,7 +258,7 @@ namespace FicsItKernel {
 			{NULL,NULL}
 		};
 
-		void luaTimeTableStop(lua_State* L, const Network::NetworkTrace& station, float duration) {
+		void luaTimeTableStop(lua_State* L, const FFINNetworkTrace& station, float duration) {
 			lua_newtable(L);
 			newInstance(L, station);
 			lua_setfield(L, -2, "station");

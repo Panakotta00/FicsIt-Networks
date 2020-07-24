@@ -2,7 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "LuaException.h"
-#include "FicsItKernel/Network/NetworkTrace.h"
+
+struct FFINNetworkTrace;
 
 extern "C" {
 	#include "ThirdParty/lua.h"
@@ -90,7 +91,7 @@ namespace FicsItKernel {
 			LUA_FUTURE,
 		};
 
-		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data, Network::NetworkTrace trace);
+		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data, FFINNetworkTrace trace);
 		LuaDataType luaToProperty(lua_State* L, UProperty* p, void* data, int i);
 	}
 }

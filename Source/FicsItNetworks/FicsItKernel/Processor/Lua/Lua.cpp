@@ -8,7 +8,7 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data, Network::NetworkTrace trace) {
+		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data, FFINNetworkTrace trace) {
 			auto c = p->GetClass()->ClassCastFlags;
 			if (c & EClassCastFlags::CASTCLASS_UBoolProperty) {
 				lua_pushboolean(L, *p->ContainerPtrToValuePtr<bool>(data));

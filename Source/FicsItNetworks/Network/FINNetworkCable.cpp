@@ -45,6 +45,8 @@ void AFINNetworkCable::BeginPlay() {
 
 	Connector1->AddCable(this);
 	Connector2->AddCable(this);
+
+	RerunConstructionScripts();
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
@@ -58,6 +60,11 @@ void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
 
 bool AFINNetworkCable::ShouldSave_Implementation() const {
 	return true;
+}
+
+void AFINNetworkCable::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(Connector1);
+	out_dependentObjects.Add(Connector2);
 }
 
 int32 AFINNetworkCable::GetDismantleRefundReturnsMultiplier() const {

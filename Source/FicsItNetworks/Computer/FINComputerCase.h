@@ -84,6 +84,7 @@ public:
 
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
 	virtual void PreLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	virtual void PostLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	virtual void PreSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;

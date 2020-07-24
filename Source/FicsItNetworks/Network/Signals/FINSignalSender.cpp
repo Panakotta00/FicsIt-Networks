@@ -36,7 +36,7 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	for (auto listenerTrace : listeners) {
 		// TODO: Make sure this cast works and if the underlying object is the reason, remove it
 		IFINSignalListener* obj = Cast<IFINSignalListener>(*listenerTrace);
-		if (obj) obj->HandleSignal(sig, listenerTrace.getTrace().reverse() / IFINSignalSender::Execute_GetSignalSenderOverride(Context));
+		if (obj) obj->HandleSignal(sig, listenerTrace.Reverse() / IFINSignalSender::Execute_GetSignalSenderOverride(Context));
 	}
 
 	P_FINISH;

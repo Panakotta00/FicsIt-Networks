@@ -49,7 +49,7 @@ TSet<FFINNetworkTrace> AFINHookSubsystem::GetListeners(UObject* object) const {
 void AFINHookSubsystem::EmitSignal(UObject* object, TSharedPtr<FFINSignal> signal) {
 	for (FFINNetworkTrace trace : GetListeners(object)) {
 		IFINSignalListener* obj = Cast<IFINSignalListener>(*trace);
-		if (obj) obj->HandleSignal(signal, trace.getTrace().reverse());
+		if (obj) obj->HandleSignal(signal, trace.Reverse());
 	}
 }
 

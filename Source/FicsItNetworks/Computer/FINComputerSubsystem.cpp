@@ -17,6 +17,8 @@ AFINComputerSubsystem::AFINComputerSubsystem() {
 
 void AFINComputerSubsystem::BeginPlay() {
 	Super::BeginPlay();
+
+	Version = EFINCustomVersion::FINLatestVersion;
 }
 
 void AFINComputerSubsystem::Tick(float dt) {

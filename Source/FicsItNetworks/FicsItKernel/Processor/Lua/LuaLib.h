@@ -26,16 +26,16 @@ namespace FicsItKernel {
 			 * The arguments should output the instance type, the instance type name
 			 * and a set of LuaLibFunc/LuaLibClassFunc with name pairs.
 			 */
-			typedef std::function<void(UClass*&, std::string&, std::vector<std::pair<std::string, LuaLibFunc>>&, std::vector<std::pair<std::string, LuaLibProperty>>&, TSubclassOf<UFINHook>&)> ToRegisterFunc;
-			typedef std::function<void(UClass*&, std::string&, std::vector<std::pair<std::string, LuaLibClassFunc>>&)> ToRegisterClassFunc;
+			typedef TFunction<void(UClass*&, FString&, TArray<TPair<FString, LuaLibFunc>>&, TArray<TPair<FString, LuaLibProperty>>&, TSubclassOf<UFINHook>&)> ToRegisterFunc;
+			typedef TFunction<void(UClass*&, FString&, TArray<TPair<FString, LuaLibClassFunc>>&)> ToRegisterClassFunc;
 
 		private:
 			/**
 			 * A set with to register functions which will get used to register
 			 * when the library should get registered.
 			 */
-			std::vector<ToRegisterFunc> toRegister;
-			std::vector<ToRegisterClassFunc> toRegisterClasses;
+			TArray<ToRegisterFunc> toRegister;
+			TArray<ToRegisterClassFunc> toRegisterClasses;
 			
 			LuaLib() = default;
 		public:

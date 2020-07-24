@@ -225,9 +225,9 @@ namespace FicsItKernel {
 		gpus.Remove(gpu);
 	}
 
-	std::set<UObject*> KernelSystem::getGPUs() {
-		std::set<UObject*> set;
-		for (const FWeakObjectPtr& ptr : gpus) set.insert(ptr.Get());
+	TSet<UObject*> KernelSystem::getGPUs() {
+		TSet<UObject*> set;
+		for (const FWeakObjectPtr& ptr : gpus) set.Add(ptr.Get());
 		return set;
 	}
 
@@ -241,9 +241,9 @@ namespace FicsItKernel {
 		screens.Remove(screen);
 	}
 	
-	std::set<UObject*> KernelSystem::getScreens() {
-		std::set<UObject*> set;
-		for (const FWeakObjectPtr& ptr : screens) set.insert(ptr.Get());
+	TSet<UObject*> KernelSystem::getScreens() {
+		TSet<UObject*> set;
+		for (const FWeakObjectPtr& ptr : screens) set.Add(ptr.Get());
 		return set;
 	}
 

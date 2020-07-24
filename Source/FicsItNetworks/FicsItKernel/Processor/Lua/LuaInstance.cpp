@@ -24,35 +24,35 @@ namespace FicsItKernel {
 			return instance;
 		}
 
-		void LuaInstanceRegistry::registerType(UClass* type, std::string name, bool isClassInstance) {
-			instanceTypes[type] = {name, isClassInstance};
-			instanceTypeNames[name] = type;
+		void LuaInstanceRegistry::registerType(UClass* type, FString name, bool isClassInstance) {
+			instanceTypes.FindOrAdd(type) = TPair<FString, bool>{name, isClassInstance};
+			instanceTypeNames.FindOrAdd(name) = type;
 			type->AddToRoot();
 		}
 
-		void LuaInstanceRegistry::registerFunction(UClass* type, std::string name, LuaLibFunc func) {
-			auto i = instanceTypes.find(type);
-			check(i != instanceTypes.end() && !i->second.second);
-			instanceFunctions[type][name] = func;
+		void LuaInstanceRegistry::registerFunction(UClass* type, FString name, LuaLibFunc func) {
+			auto i = instanceTypes.Find(type);
+			check(i&& !i->Value);
+			instanceFunctions.FindOrAdd(type).FindOrAdd(name) = func;
 		}
 
-		void LuaInstanceRegistry::registerProperty(UClass* type, std::string name, LuaLibProperty prop) {
-			auto i = instanceTypes.find(type);
-			check(i != instanceTypes.end() && !i->second.second);
-			instanceProperties[type][name] = prop;
+		void LuaInstanceRegistry::registerProperty(UClass* type, FString name, LuaLibProperty prop) {
+			auto i = instanceTypes.Find(type);
+			check(i && !i->Value);
+			instanceProperties.FindOrAdd(type).FindOrAdd(name) = prop;
 		}
 
-		void LuaInstanceRegistry::registerClassFunction(UClass* type, std::string name, LuaLibClassFunc func) {
-			auto i = instanceTypes.find(type);
-			check(i != instanceTypes.end() && i->second.second);
-			classInstanceFunctions[type][name] = func;
+		void LuaInstanceRegistry::registerClassFunction(UClass* type, FString name, LuaLibClassFunc func) {
+			auto i = instanceTypes.Find(type);
+			check(i && i->Value);
+			classInstanceFunctions.FindOrAdd(type).FindOrAdd(name) = func;
 		}
 
-		std::string LuaInstanceRegistry::findTypeName(UClass* type) {
+		FString LuaInstanceRegistry::findTypeName(UClass* type) {
 			while (type) {
-				auto i = instanceTypes.find(type);
-				if (i != instanceTypes.end()) {
-					return i->second.first;
+				auto i = instanceTypes.Find(type);
+				if (i) {
+					return i->Key;
 				}
 				if (type == UObject::StaticClass()) type = nullptr;
 				else type = type->GetSuperClass();
@@ -60,20 +60,20 @@ namespace FicsItKernel {
 			return "";
 		}
 
-		UClass* LuaInstanceRegistry::findType(const std::string& typeName, bool* isClass) {
-			auto i = instanceTypeNames.find(typeName);
-			if (i == instanceTypeNames.end()) return nullptr;
-			if (isClass) *isClass = instanceTypes[i->second].second;
-			return i->second;
+		UClass* LuaInstanceRegistry::findType(const FString& typeName, bool* isClass) {
+			auto i = instanceTypeNames.Find(typeName);
+			if (!i) return nullptr;
+			if (isClass) *isClass = instanceTypes[*i].Value;
+			return *i;
 		}
 
-		bool LuaInstanceRegistry::findLibFunc(UClass* instanceType, std::string name, LuaLibFunc& outFunc) {
+		bool LuaInstanceRegistry::findLibFunc(UClass* instanceType, FString name, LuaLibFunc& outFunc) {
 			while (instanceType) {
-				auto i = instanceFunctions.find(instanceType);
-				if (i != instanceFunctions.end()) {
-					auto j = i->second.find(name);
-					if (j != i->second.end()) {
-						outFunc = j->second;
+				auto i = instanceFunctions.Find(instanceType);
+				if (i) {
+					auto j = i->Find(name);
+					if (j) {
+						outFunc = *j;
 						return true;
 					}
 				}
@@ -83,13 +83,13 @@ namespace FicsItKernel {
 			return false;
 		}
 
-		bool LuaInstanceRegistry::findLibProperty(UClass* instanceType, std::string name, LuaLibProperty& outProp) {
+		bool LuaInstanceRegistry::findLibProperty(UClass* instanceType, FString name, LuaLibProperty& outProp) {
 			while (instanceType) {
-				auto i = instanceProperties.find(instanceType);
-				if (i != instanceProperties.end()) {
-					auto j = i->second.find(name);
-					if (j != i->second.end()) {
-						outProp = j->second;
+				auto i = instanceProperties.Find(instanceType);
+				if (i) {
+					auto j = i->Find(name);
+					if (j) {
+						outProp = *j;
 						return true;
 					}
 				}
@@ -99,13 +99,13 @@ namespace FicsItKernel {
 			return false;
 		}
 
-		bool LuaInstanceRegistry::findClassLibFunc(UClass* instanceType, std::string name, LuaLibClassFunc& outFunc) {
+		bool LuaInstanceRegistry::findClassLibFunc(UClass* instanceType, FString name, LuaLibClassFunc& outFunc) {
 			while (instanceType) {
-				auto i = classInstanceFunctions.find(instanceType);
-				if (i != classInstanceFunctions.end()) {
-					auto j = i->second.find(name);
-					if (j != i->second.end()) {
-						outFunc = j->second;
+				auto i = classInstanceFunctions.Find(instanceType);
+				if (i) {
+					auto j = i->Find(name);
+					if (j) {
+						outFunc = *j;
 						return true;
 					}
 				}
@@ -117,7 +117,7 @@ namespace FicsItKernel {
 
 		LuaInstance* LuaInstanceRegistry::getInstance(lua_State* L, int index, std::string* name) {
 			index = lua_absindex(L, index);
-			std::string typeName;
+			FString typeName;
 			if (luaL_getmetafield(L, index, "__name") == LUA_TSTRING) {
 				typeName = lua_tostring(L, -1);
 				lua_pop(L, 1);
@@ -126,7 +126,7 @@ namespace FicsItKernel {
 			} else {
 				typeName = luaL_typename(L, index);
 			}
-			if (name) *name = typeName;
+			if (name) *name = TCHAR_TO_UTF8(*typeName);
 			bool isClass;
 			UClass* type = findType(typeName, &isClass);
 			if (!type || isClass) return nullptr;
@@ -143,7 +143,7 @@ namespace FicsItKernel {
 
 		LuaClassInstance* LuaInstanceRegistry::getClassInstance(lua_State* L, int index, std::string* name) {
 			index = lua_absindex(L, index);
-			std::string typeName;
+			FString typeName;
 			if (luaL_getmetafield(L, index, "__name") == LUA_TSTRING) {
 				typeName = lua_tostring(L, -1);
 				lua_pop(L, 1);
@@ -152,7 +152,7 @@ namespace FicsItKernel {
 			} else {
 				typeName = luaL_typename(L, index);
 			}
-			if (name) *name = typeName;
+			if (name) *name = TCHAR_TO_UTF8(*typeName);
 			bool isClass;
 			UClass* type = findType(typeName, &isClass);
 			if (!type || !isClass) return nullptr;
@@ -170,21 +170,21 @@ namespace FicsItKernel {
 		std::set<UClass*> LuaInstanceRegistry::getInstanceTypes() {
 			std::set<UClass*> types;
 			for (const auto& typeName : instanceTypeNames) {
-				types.insert(typeName.second);
+				types.insert(typeName.Value);
 			}
 			return types;
 		}
 
-		std::set<std::string> LuaInstanceRegistry::getMemberNames(UClass* type) {
-			std::set<std::string> members;
+		std::set<FString> LuaInstanceRegistry::getMemberNames(UClass* type) {
+			std::set<FString> members;
 			while (type) {
-				std::map<std::string, LuaLibFunc>& funcMap = instanceFunctions[type];
+				TMap<FString, LuaLibFunc>& funcMap = instanceFunctions[type];
 				for (auto& i : funcMap) {
-					members.insert(i.first);
+					members.insert(i.Key);
 				}
-				std::map<std::string, LuaLibProperty>& propMap = instanceProperties[type];
+				TMap<FString, LuaLibProperty>& propMap = instanceProperties[type];
 				for (auto& i : propMap) {
-					members.insert(i.first);
+					members.insert(i.Key);
 				}
 				if (type == UObject::StaticClass()) type = nullptr;
 				else type = type->GetSuperClass();
@@ -192,12 +192,12 @@ namespace FicsItKernel {
 			return members;
 		}
 
-		std::set<std::string> LuaInstanceRegistry::getClassFunctionNames(UClass* type) {
-			std::set<std::string> funcs;
+		std::set<FString> LuaInstanceRegistry::getClassFunctionNames(UClass* type) {
+			std::set<FString> funcs;
 			while (type) {
-				std::map<std::string, LuaLibClassFunc>& funcMap = classInstanceFunctions[type];
+				TMap<FString, LuaLibClassFunc>& funcMap = classInstanceFunctions[type];
 				for (auto& i : funcMap) {
-					funcs.insert(i.first);
+					funcs.insert(i.Key);
 				}
 				if (type == UObject::StaticClass()) type = nullptr;
 				else type = type->GetSuperClass();
@@ -254,7 +254,7 @@ namespace FicsItKernel {
 			// get and check instance
 			std::string typeName;
 			LuaInstance* instance = reg->checkAndGetInstance(L, 1, &typeName);
-			UClass* type = reg->findType(typeName);
+			UClass* type = reg->findType(typeName.c_str());
 			UObject* obj = *instance->trace;
 			if (!IsValid(obj)) return luaL_argerror(L, 1, "Instance is invalid");
 
@@ -263,7 +263,7 @@ namespace FicsItKernel {
 			if (!type->IsChildOf(instType->type)) return luaL_argerror(L, 1, "Instance type is not allowed to call this function");
 
 			// get func name
-			std::string funcName = luaL_checkstring(L, lua_upvalueindex(1));
+			FString funcName = luaL_checkstring(L, lua_upvalueindex(1));
 			
 			LuaLibFunc func;
 			if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
@@ -290,7 +290,7 @@ namespace FicsItKernel {
 			// get and check instance
 			std::string typeName;
 			LuaInstance* instance = reg->checkAndGetInstance(L, 1, &typeName);
-			UClass* type = reg->findType(typeName);
+			UClass* type = reg->findType(typeName.c_str());
 			UObject* comp = *instance->trace;
 			if (!IsValid(comp)) return luaL_argerror(L, 1, "Instance is invalid");
 
@@ -300,7 +300,7 @@ namespace FicsItKernel {
 			UFunction* func = static_cast<UFunction*>(lua_touserdata(L, lua_upvalueindex(1)));
 			if (func) {
 				UClass* funcClass = Cast<UClass>(func->GetOuter());
-				Network::NetworkTrace trace = instance->trace;
+				FFINNetworkTrace trace = instance->trace;
 				if (comp->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(comp);
 					for (UObject* obj : merged) {
@@ -393,8 +393,8 @@ namespace FicsItKernel {
 			
 			UClass* type = self->GetClass();
 			
-			for (const std::string& func : reg->getMemberNames(type)) {
-				lua_pushstring(L, func.c_str());
+			for (const FString& func : reg->getMemberNames(type)) {
+				lua_pushstring(L, TCHAR_TO_UTF8(*func));
 				lua_seti(L, -2, ++i);
 			}
 			luaInstanceGetMembersOfClass(L, type, i);
@@ -402,8 +402,8 @@ namespace FicsItKernel {
 			if (type->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(self);
 				for (UObject* o : merged) if (IsValid(o)) {
-					for (const std::string& func : reg->getMemberNames(o->GetClass())) {
-						lua_pushstring(L, func.c_str());
+					for (const FString& func : reg->getMemberNames(o->GetClass())) {
+						lua_pushstring(L, TCHAR_TO_UTF8(*func));
 						lua_seti(L, -2, ++i);
 					}
 					luaInstanceGetMembersOfClass(L, o->GetClass(), i);
@@ -413,8 +413,8 @@ namespace FicsItKernel {
 			return 1;
 		}
 
-		bool luaInstanceIndexFindUFunction(lua_State* L, UClass* type, const std::string& funcName, LuaInstanceRegistry* reg) {					// Instance, FuncName, InstanceCoche, nil
-			UFunction* func = type->FindFunctionByName(FName(("netFunc_" + funcName).c_str()));
+		bool luaInstanceIndexFindUFunction(lua_State* L, UClass* type, const FString& funcName, LuaInstanceRegistry* reg) {					// Instance, FuncName, InstanceCoche, nil
+			UFunction* func = type->FindFunctionByName(FName(*("netFunc_" + funcName)));
 			if (IsValid(func)) {
 				// create function
 				lua_pushlightuserdata(L, func);																		// Instance, FuncName, InstanceCoche, nil, FuncName
@@ -423,7 +423,7 @@ namespace FicsItKernel {
 
 				// cache function
 				lua_pushvalue(L, -1);																			// Instance, FuncName, InstanceCache, nil, InstanceFunc, InstanceFunc
-				lua_setfield(L, 3, funcName.c_str());														// Instance, FuncName, InstanceCache, nil, InstanceFunc
+				lua_setfield(L, 3, TCHAR_TO_UTF8(*funcName));														// Instance, FuncName, InstanceCache, nil, InstanceFunc
 
 				return true;
 			}
@@ -436,7 +436,7 @@ namespace FicsItKernel {
 			// get instance
 			std::string typeName;
 			LuaInstance* instance = reg->checkAndGetInstance(L, 1, &typeName);
-			UClass* type = reg->findType(typeName);
+			UClass* type = reg->findType(typeName.c_str());
 				
 			// get function name
 			if (!lua_isstring(L, 2)) return 0;
@@ -466,15 +466,15 @@ namespace FicsItKernel {
 
 			// try to find lib property
 			LuaLibProperty libProp;
-			Network::NetworkTrace realTrace = instance->trace;
+			FFINNetworkTrace realTrace = instance->trace;
 			bool foundLibProp = false;
-			if (reg->findLibProperty(reg->findType(typeName), memberName, libProp)) {
+			if (reg->findLibProperty(reg->findType(typeName.c_str()), memberName.c_str(), libProp)) {
 				foundLibProp = true;
 			} else {
 				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
 					for (UObject* o : merged) {
-						if (IsValid(o) && reg->findLibProperty(o->GetClass(), memberName, libProp)) {
+						if (IsValid(o) && reg->findLibProperty(o->GetClass(), memberName.c_str(), libProp)) {
 							realTrace = realTrace / o;
 							foundLibProp = true;
 							break;
@@ -502,13 +502,13 @@ namespace FicsItKernel {
 			// get lib function
 			LuaLibFunc libFunc;
 			bool foundLibFunc = false;
-			if (reg->findLibFunc(reg->findType(typeName), memberName, libFunc)) {
+			if (reg->findLibFunc(reg->findType(typeName.c_str()), memberName.c_str(), libFunc)) {
 				foundLibFunc = true;
 			} else {
 				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
 					for (UObject* o : merged) {
-						if (IsValid(o) && reg->findLibFunc(o->GetClass(), memberName, libFunc)) {
+						if (IsValid(o) && reg->findLibFunc(o->GetClass(), memberName.c_str(), libFunc)) {
 							foundLibFunc = true;
 							break;
 						}
@@ -530,11 +530,11 @@ namespace FicsItKernel {
 
 			// get reflected function
 			UClass* instType = obj->GetClass();
-			if (luaInstanceIndexFindUFunction(L, instType, memberName, reg)) return LuaProcessor::luaAPIReturn(L, 1);
+			if (luaInstanceIndexFindUFunction(L, instType, memberName.c_str(), reg)) return LuaProcessor::luaAPIReturn(L, 1);
 			if (instType->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
 				for (UObject* o : merged) {
-					if (IsValid(o) && luaInstanceIndexFindUFunction(L, o->GetClass(), memberName, reg)) return LuaProcessor::luaAPIReturn(L, 1);
+					if (IsValid(o) && luaInstanceIndexFindUFunction(L, o->GetClass(), memberName.c_str(), reg)) return LuaProcessor::luaAPIReturn(L, 1);
 				}
 			}
 			
@@ -547,7 +547,7 @@ namespace FicsItKernel {
 			// get instance
 			std::string typeName;
 			LuaInstance* instance = reg->checkAndGetInstance(L, 1, &typeName);
-			UClass* type = reg->findType(typeName);
+			UClass* type = reg->findType(typeName.c_str());
 				
 			// get function name
 			if (!lua_isstring(L, 2)) return 0;
@@ -563,22 +563,22 @@ namespace FicsItKernel {
 				if (!obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					return luaL_error(L, "Instance is not a network component");
 				}
-				std::string nick = luaL_checkstring(L, 3);
-				IFINNetworkComponent::Execute_SetNick(obj, nick.c_str());
+				FString nick = luaL_checkstring(L, 3);
+				IFINNetworkComponent::Execute_SetNick(obj, nick);
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 
 			// try to find lib property
 			LuaLibProperty libProp;
-			Network::NetworkTrace realTrace = instance->trace;
+			FFINNetworkTrace realTrace = instance->trace;
 			bool foundLibProp = false;
-			if (reg->findLibProperty(reg->findType(typeName), memberName, libProp)) {
+			if (reg->findLibProperty(reg->findType(typeName.c_str()), memberName.c_str(), libProp)) {
 				foundLibProp = true;
 			} else {
 				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
 					for (UObject* o : merged) {
-						if (IsValid(o) && reg->findLibProperty(o->GetClass(), memberName, libProp)) {
+						if (IsValid(o) && reg->findLibProperty(o->GetClass(), memberName.c_str(), libProp)) {
 							realTrace = realTrace/o;
 							foundLibProp = true;
 							break;
@@ -605,7 +605,7 @@ namespace FicsItKernel {
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 			
-			lua_pushboolean(L, inst1->trace.isEqualObj(inst2->trace));
+			lua_pushboolean(L, inst1->trace.IsEqualObj(inst2->trace));
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
@@ -618,7 +618,7 @@ namespace FicsItKernel {
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 			
-			lua_pushboolean(L, GetTypeHash(inst1->trace.getUnderlyingPtr()) < GetTypeHash(inst2->trace.getUnderlyingPtr()));
+			lua_pushboolean(L, GetTypeHash(inst1->trace.GetUnderlyingPtr()) < GetTypeHash(inst2->trace.GetUnderlyingPtr()));
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
@@ -631,7 +631,7 @@ namespace FicsItKernel {
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 			
-			lua_pushboolean(L, GetTypeHash(inst1->trace.getUnderlyingPtr()) <= GetTypeHash(inst2->trace.getUnderlyingPtr()));
+			lua_pushboolean(L, GetTypeHash(inst1->trace.GetUnderlyingPtr()) <= GetTypeHash(inst2->trace.GetUnderlyingPtr()));
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
@@ -661,7 +661,7 @@ namespace FicsItKernel {
 			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
 
 			// get trace and typename
-			Network::NetworkTrace trace = storage->GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
+			FFINNetworkTrace trace = storage->GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
 			std::string typeName = luaL_checkstring(L, lua_upvalueindex(2));
 
 			// create instance
@@ -710,13 +710,13 @@ namespace FicsItKernel {
 			{NULL, NULL}
 		};
 
-		bool newInstance(lua_State* L, Network::NetworkTrace trace) {
+		bool newInstance(lua_State* L, FFINNetworkTrace trace) {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// check obj and if type is registered
 			UObject* obj = *trace;
 			std::string typeName = "";
-			if (!IsValid(obj) || (typeName = reg->findTypeName(obj->GetClass())).length() < 1) {
+			if (!IsValid(obj) || (typeName = TCHAR_TO_UTF8(*reg->findTypeName(obj->GetClass()))).length() < 1) {
 				lua_pushnil(L);
 				return false;
 			}
@@ -728,10 +728,10 @@ namespace FicsItKernel {
 			return true;
 		}
 
-		Network::NetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
-			if (lua_isnil(L, index)) return Network::NetworkTrace(nullptr);
+		FFINNetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
+			if (lua_isnil(L, index)) return FFINNetworkTrace(nullptr);
 			LuaInstance* instance = LuaInstanceRegistry::get()->checkAndGetInstance(L, index);
-			if (!instance->trace->GetClass()->IsChildOf(clazz)) return Network::NetworkTrace(nullptr);
+			if (!instance->trace->GetClass()->IsChildOf(clazz)) return FFINNetworkTrace(nullptr);
 			return instance->trace;
 		}
 		
@@ -748,7 +748,7 @@ namespace FicsItKernel {
 			if (!instance || !type || !instance->clazz || !type->type || !instance->clazz->IsChildOf(type->type)) return luaL_argerror(L, 1, "ClassInstance is invalid");
 
 			// get func name
-			std::string funcName = luaL_checkstring(L, lua_upvalueindex(1));
+			FString funcName = luaL_checkstring(L, lua_upvalueindex(1));
 			
 			LuaLibClassFunc func;
 			if (reg->findClassLibFunc(instance->clazz, funcName, func)) {
@@ -767,8 +767,8 @@ namespace FicsItKernel {
 			lua_newtable(L);
 			int i = 0;
 			
-			for (const std::string& func : reg->getClassFunctionNames(instance->clazz)) {
-				lua_pushstring(L, func.c_str());
+			for (const FString& func : reg->getClassFunctionNames(instance->clazz)) {
+				lua_pushstring(L, TCHAR_TO_UTF8(*func));
 				lua_seti(L, -2, ++i);
 			}
 			
@@ -781,11 +781,11 @@ namespace FicsItKernel {
 			// get class instance
 			std::string typeName;
 			LuaClassInstance* instance = reg->checkAndGetClassInstance(L, 1, &typeName);
-			UClass* type = reg->findType(typeName);
+			UClass* type = reg->findType(typeName.c_str());
 				
 			// get function name
 			if (!lua_isstring(L, 2)) return 0;
-			std::string funcName = lua_tostring(L, 2);
+			FString funcName = lua_tostring(L, 2);
 
 			// try util functions
 			if (funcName == "getMembers") {
@@ -795,7 +795,7 @@ namespace FicsItKernel {
 
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// ClassInstance, FuncName, InstanceCache
-			if (lua_getfield(L, -1, funcName.c_str()) != LUA_NIL) {												// ClassInstance, FuncName, InstanceCache, CachedFunc
+			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*funcName)) != LUA_NIL) {												// ClassInstance, FuncName, InstanceCache, CachedFunc
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}																											// ClassInstance, FuncName, InstanceCache, nil
 			
@@ -809,7 +809,7 @@ namespace FicsItKernel {
 
 				// cache function
 				lua_pushvalue(L, -1);																				// ClassInstance, FuncName, InstanceCache, nil, ClassInstanceFunc, InstanceFunc
-				lua_setfield(L, 3, funcName.c_str());															// ClassInstance, FuncName, InstanceCache, nil, ClassInstanceFunc
+				lua_setfield(L, 3, TCHAR_TO_UTF8(*funcName));															// ClassInstance, FuncName, InstanceCache, nil, ClassInstanceFunc
 
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -878,7 +878,7 @@ namespace FicsItKernel {
 
 		int luaClassInstanceUnpersist(lua_State* L) {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
-			std::string typeName = lua_tostring(L, lua_upvalueindex(1));
+			FString typeName = lua_tostring(L, lua_upvalueindex(1));
 			
 			UClass* type = reg->findType(typeName);
 			newInstance(L, type);
@@ -927,8 +927,8 @@ namespace FicsItKernel {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			
 			// check obj and if type is registered
-			std::string typeName = "";
-			if (!IsValid(clazz) || (typeName = reg->findTypeName(clazz)).length() < 1) {
+			FString typeName = "";
+			if (!IsValid(clazz) || (typeName = reg->findTypeName(clazz)).Len() < 1) {
 				lua_pushnil(L);
 				return false;
 			}
@@ -936,7 +936,7 @@ namespace FicsItKernel {
 			// create instance
 			LuaClassInstance* instance = static_cast<LuaClassInstance*>(lua_newuserdata(L, sizeof(LuaClassInstance)));
 			new (instance) LuaClassInstance{clazz};
-			luaL_setmetatable(L, typeName.c_str());
+			luaL_setmetatable(L, TCHAR_TO_UTF8(*typeName));
 			return true;
 		}
 
@@ -956,14 +956,14 @@ namespace FicsItKernel {
 			lua_pop(L, 1);									// ...
 
 			for (UClass* type : reg->getInstanceTypes()) {
-				std::string typeName = reg->findTypeName(type);
+				FString typeName = reg->findTypeName(type);
 				bool isClass = false;
 				reg->findType(typeName, &isClass);
-				luaL_newmetatable(L, typeName.c_str());								// ..., InstanceMeta
+				luaL_newmetatable(L, TCHAR_TO_UTF8(*typeName));								// ..., InstanceMeta
 				luaL_setfuncs(L, isClass ? luaClassInstanceLib : luaInstanceLib, 0);
 				lua_newtable(L);															// ..., InstanceMeta, InstanceCache
 				lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta
-				PersistTable(typeName.c_str(), -1);
+				PersistTable(TCHAR_TO_UTF8(*typeName), -1);
 				lua_pop(L, 1);															// ...
 			}
 			

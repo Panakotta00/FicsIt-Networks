@@ -1,5 +1,7 @@
 #include "LuaLib.h"
 
+#include <vector>
+
 
 #include "FGBuildableDockingStation.h"
 #include "FGBuildablePipeReservoir.h"
@@ -34,23 +36,23 @@
 #define LuaLibTypeDecl(ClassName, TypeName) \
 	LuaLibType<ClassName>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
 #define LuaLibFunc(ClassName, FuncName, Code) \
-	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, const Network::NetworkTrace& obj) { \
+	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, const FFINNetworkTrace& obj) { \
 		ClassName* self = Cast<ClassName>(*obj); \
 		Code \
 	} \
 	typename LuaLibType<ClassName>::RegisterFunc LuaLibFuncRegName(ClassName, FuncName) (#FuncName, & LuaLibFuncName(ClassName, FuncName) );
 #define LuaLibProp(ClassName, PropName, Get, Set) \
-	int LuaLibPropGetName(ClassName, PropName) (lua_State* L, const Network::NetworkTrace& obj) { \
+	int LuaLibPropGetName(ClassName, PropName) (lua_State* L, const FFINNetworkTrace& obj) { \
 		ClassName* self = Cast<ClassName>(*obj); \
 		Get \
 	} \
-	int LuaLibPropSetName(ClassName, PropName) (lua_State* L, const Network::NetworkTrace& obj) { \
+	int LuaLibPropSetName(ClassName, PropName) (lua_State* L, const FFINNetworkTrace& obj) { \
 		ClassName* self = Cast<ClassName>(*obj); \
 		Set \
 	} \
 	typename LuaLibType<ClassName>::RegisterProperty LuaLibFuncRegName(ClassName, PropName) (#PropName, LuaLibProperty{ & LuaLibPropGetName(ClassName, PropName) , false, & LuaLibPropSetName(ClassName, PropName) } );
 #define LuaLibPropReadonly(ClassName, PropName, Get) \
-	int LuaLibPropGetName(ClassName, PropName) (lua_State* L, const Network::NetworkTrace& obj) { \
+	int LuaLibPropGetName(ClassName, PropName) (lua_State* L, const FFINNetworkTrace& obj) { \
 		ClassName* self = Cast<ClassName>(*obj); \
 		Get \
 	} \
@@ -115,14 +117,14 @@ namespace FicsItKernel {
 		template<typename T>
 		class LuaLibType {
 		private:
-			std::vector<std::pair<std::string, LuaLibFunc>> funcs;
-			std::vector<std::pair<std::string, LuaLibProperty>> props;
-			std::string name;
-			std::function<void(TSubclassOf<UFINHook>&)> hook;
+			TArray<TPair<FString, LuaLibFunc>> funcs;
+			TArray<TPair<FString, LuaLibProperty>> props;
+			FString name;
+			TFunction<void(TSubclassOf<UFINHook>&)> hook;
 
 			LuaLibType() {
 				this->hook = [](TSubclassOf<UFINHook>& hook){ hook = nullptr; };
-				LuaLib::get()->registerRegFunc([this](UClass*& type, std::string& name, std::vector<std::pair<std::string, LuaLibFunc>>& funcs, std::vector<std::pair<std::string, LuaLibProperty>>& props, TSubclassOf<UFINHook>& hook) {
+				LuaLib::get()->registerRegFunc([this](UClass*& type, FString& name, TArray<TPair<FString, LuaLibFunc>>& funcs, TArray<TPair<FString, LuaLibProperty>>& props, TSubclassOf<UFINHook>& hook) {
 					type = T::StaticClass();
 					name = this->name;
 					funcs = this->funcs;
@@ -139,13 +141,13 @@ namespace FicsItKernel {
 			}
 
 			struct RegisterFunc {
-				RegisterFunc(const std::string& name, const LuaLibFunc& func) {
-					LuaLibType::get()->funcs.push_back({name, func});
+				RegisterFunc(const FString& name, const LuaLibFunc& func) {
+					LuaLibType::get()->funcs.Add(TPair<FString, LuaLibFunc>{name, func});
 				}
 			};
 
 			struct RegisterData {
-				RegisterData(const std::string& name) {
+				RegisterData(const FString& name) {
 					LuaLibType::get()->name = name;
 				}
 			};
@@ -157,8 +159,8 @@ namespace FicsItKernel {
 			};
 
 			struct RegisterProperty {
-				RegisterProperty(const std::string& name, const LuaLibProperty& prop) {
-					LuaLibType::get()->props.push_back({name, prop});
+				RegisterProperty(const FString& name, const LuaLibProperty& prop) {
+					LuaLibType::get()->props.Add(TPair<FString, LuaLibProperty>{name, prop});
 				}
 			};
 		};
@@ -166,11 +168,11 @@ namespace FicsItKernel {
 		template<typename T>
 		class LuaLibClassType {
 		private:
-			std::vector<std::pair<std::string, LuaLibClassFunc>> funcs;
-			std::string name;
+			TArray<TPair<FString, LuaLibClassFunc>> funcs;
+			FString name;
 
 			LuaLibClassType() {
-				LuaLib::get()->registerRegFunc([this](UClass*& type, std::string& name, std::vector<std::pair<std::string, LuaLibClassFunc>>& funcs) {
+				LuaLib::get()->registerRegFunc([this](UClass*& type, FString& name, TArray<TPair<FString, LuaLibClassFunc>>& funcs) {
 					type = T::StaticClass();
 					name = this->name;
 					funcs = this->funcs;
@@ -185,13 +187,13 @@ namespace FicsItKernel {
 			}
 
 			struct RegisterFunc {
-				RegisterFunc(const std::string& name, const LuaLibClassFunc& func) {
-					LuaLibClassType::get()->funcs.push_back({name, func});
+				RegisterFunc(const FString& name, const LuaLibClassFunc& func) {
+					LuaLibClassType::get()->funcs.Add(TPair<FString, LuaLibClassFunc>{name, func});
 				}
 			};
 
 			struct RegisterData {
-				RegisterData(const std::string& name) {
+				RegisterData(const FString& name) {
 					LuaLibClassType::get()->name = name;
 				}
 			};
@@ -207,38 +209,38 @@ namespace FicsItKernel {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			for (const ToRegisterFunc& regfunc : toRegister) {
 				UClass* type;
-				std::string typeName;
-				std::vector<std::pair<std::string, LuaLibFunc>> funcs;
-				std::vector<std::pair<std::string, LuaLibProperty>> props;
+				FString typeName;
+				TArray<TPair<FString, LuaLibFunc>> funcs;
+				TArray<TPair<FString, LuaLibProperty>> props;
 				TSubclassOf<UFINHook> hook = nullptr;
 				regfunc(type, typeName, funcs, props, hook);
 				reg->registerType(type, typeName, false);
-				for (const std::pair<std::string, LuaLibFunc> func : funcs) {
-					reg->registerFunction(type, func.first, func.second);
+				for (const TPair<FString, LuaLibFunc> func : funcs) {
+					reg->registerFunction(type, func.Key, func.Value);
 				}
-				for (const std::pair<std::string, LuaLibProperty> prop : props) {
-					reg->registerProperty(type, prop.first, prop.second);
+				for (const TPair<FString, LuaLibProperty> prop : props) {
+					reg->registerProperty(type, prop.Key, prop.Value);
 				}
 				if (hook) AFINHookSubsystem::RegisterHook(type, hook);
 			}
 			for (const ToRegisterClassFunc& regfunc : toRegisterClasses) {
 				UClass* type;
-				std::string typeName;
-				std::vector<std::pair<std::string, LuaLibClassFunc>> funcs;
+				FString typeName;
+				TArray<TPair<FString, LuaLibClassFunc>> funcs;
 				regfunc(type, typeName, funcs);
 				reg->registerType(type, typeName, true);
-				for (const std::pair<std::string, LuaLibClassFunc> func : funcs) {
-					reg->registerClassFunction(type, func.first, func.second);
+				for (const TPair<FString, LuaLibClassFunc> func : funcs) {
+					reg->registerClassFunction(type, func.Key, func.Value);
 				}
 			}
 		}
 
 		void LuaLib::registerRegFunc(const ToRegisterFunc& func) {
-			toRegister.push_back(func);
+			toRegister.Add(func);
 		}
 
 		void LuaLib::registerRegFunc(const ToRegisterClassFunc& func) {
-			toRegisterClasses.push_back(func);
+			toRegisterClasses.Add(func);
 		}
 
 		/* #################### */

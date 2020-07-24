@@ -2,10 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include <string>
 #include <deque>
-#include <set>
-#include <memory>
 #include <mutex>
 
 #include "Network/FINNetworkTrace.h"
@@ -21,9 +18,9 @@ namespace FicsItKernel {
 		class NetworkController {
 		protected:
 			std::mutex mutexSignalListeners;
-			std::set<FFINNetworkTrace> signalListeners;
+			TSet<FFINNetworkTrace> signalListeners;
 			std::mutex mutexSignals;
-			std::deque<std::pair<TSharedPtr<FFINSignal>, FFINNetworkTrace>> signals;
+			std::deque<TPair<TSharedPtr<FFINSignal>, FFINNetworkTrace>> signals;
 			bool lockSignalRecieving = false;
 
 		public:
@@ -82,12 +79,12 @@ namespace FicsItKernel {
 			 *
 			 * @return	the component you searched for, nullptr if it was not able to find the component
 			 */
-			NetworkTrace getComponentByID(const std::string& id);
+			FFINNetworkTrace getComponentByID(const FString& id);
 
 			/**
 			 * returns the components in the network with the given nick.
 			 */
-			std::set<NetworkTrace> getComponentByNick(const std::string& nick);
+			TSet<FFINNetworkTrace> getComponentByNick(const FString& nick);
 
 			/**
 			 * pushes a signal to the queue.
@@ -96,7 +93,7 @@ namespace FicsItKernel {
 			 */
 			template<typename... Ts>
 			void pushSignalKernel(const FString& signalName, Ts... args) {
-				pushSignal(TSharedPtr<FFINSignal>(new FFINSmartSignal(signalName, {VariaDicSignalElem(args)...})), NetworkTrace(component));
+				pushSignal(TSharedPtr<FFINSignal>(new FFINSmartSignal(signalName, {VariaDicSignalElem(args)...})), FFINNetworkTrace(component));
 			}
 
 			/**

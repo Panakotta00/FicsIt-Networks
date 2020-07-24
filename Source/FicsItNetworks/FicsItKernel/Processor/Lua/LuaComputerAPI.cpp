@@ -16,7 +16,7 @@ int funcName(lua_State* L) { \
 namespace FicsItKernel {
 	namespace Lua {
 		LuaFunc(luaComputerGetInstance)
-			newInstance(L, Network::NetworkTrace(kernel->getNetwork()->component));
+			newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component));
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
@@ -87,7 +87,7 @@ namespace FicsItKernel {
 			lua_newtable(L);
 			int i = 1;
 			for (UObject* gpu : kernel->getGPUs()) {
-				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->component) / gpu);
+				newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component) / gpu);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -97,7 +97,7 @@ namespace FicsItKernel {
 		    lua_newtable(L);
 			int i = 1;
 			for (UObject* screen : kernel->getScreens()) {
-				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->component) / screen);
+				newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component) / screen);
 				lua_seti(L, -2, i++);
 			}
 			return 1;

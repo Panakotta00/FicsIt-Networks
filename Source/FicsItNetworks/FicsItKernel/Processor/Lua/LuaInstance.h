@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "SubclassOf.h"
 
-#include "FicsItKernel/Network/NetworkTrace.h"
 #include "Lua.h"
 
 #include <string>
@@ -11,35 +10,37 @@
 #include <set>
 #include <functional>
 
+#include "Network/FINNetworkTrace.h"
+
 namespace FicsItKernel {
 	namespace Lua {
 		/**
 		 * Declared the function type for instance library functions.
 		 * Used when a instance cfunction gets called which refers to a library function.
 		 */
-		typedef std::function<int(lua_State*, int, const Network::NetworkTrace&)> LuaLibFunc;
+		typedef TFunction<int(lua_State*, int, const FFINNetworkTrace&)> LuaLibFunc;
 
 		/**
 		 * Declares the function type for class instance library functions.
 		 * Used when a class instance cfunction gets called which refers to a class library function.
 		 */
-		typedef std::function<int(lua_State*, int, UClass*)> LuaLibClassFunc;
+		typedef TFunction<int(lua_State*, int, UClass*)> LuaLibClassFunc;
 
 		/**
 		 * Declares the functions used for setting and getting
 		 * a property value from a instance.
 		 */
 		struct LuaLibProperty {
-			std::function<int(lua_State*, const Network::NetworkTrace&)> get;
+			TFunction<int(lua_State*, const FFINNetworkTrace&)> get;
 			bool readOnly = true;
-			std::function<int(lua_State*, const Network::NetworkTrace&)> set;
+			TFunction<int(lua_State*, const FFINNetworkTrace&)> set;
 		};
 		
 		/**
 		 * Structure used in the userdata representing a instance.
 		 */
 		struct LuaInstance {
-			Network::NetworkTrace trace;
+			FFINNetworkTrace trace;
 		};
 
 		/**
@@ -65,19 +66,19 @@ namespace FicsItKernel {
 			 * Holds LibFunctions with their associated lua names and instance types.
 			 * Used for creating the lua cfunctions for the instances.
 			 */
-			std::map<UClass*, std::map<std::string, LuaLibFunc>> instanceFunctions;
+			TMap<UClass*, TMap<FString, LuaLibFunc>> instanceFunctions;
 
 			/**
 			 * Holds LibProperties with their associated lua names and instance types.
 			 * Used for creating calling them in the __index and __newindex functions.
 			 */
-			std::map<UClass*, std::map<std::string, LuaLibProperty>> instanceProperties;
+			TMap<UClass*, TMap<FString, LuaLibProperty>> instanceProperties;
 
 			/**
 			* Holds ClassLibFunctions with their associated lua names and class instance types.
 			* Used for creating the lua cfunctions for the class instances.
 			*/
-			std::map<UClass*, std::map<std::string, LuaLibClassFunc>> classInstanceFunctions;
+			TMap<UClass*, TMap<FString, LuaLibClassFunc>> classInstanceFunctions;
 
 			/**
 			* Holds the names and types of the different (class) instance types.
@@ -88,7 +89,7 @@ namespace FicsItKernel {
 			* 	first: the metatable name of the instance
 			* 	second: true if instance is a class instance
 			*/
-			std::map<UClass*, std::pair<std::string, bool>> instanceTypes;
+			TMap<UClass*, TPair<FString, bool>> instanceTypes;
 
 			/**
 			 * Map instance types names to the instance types allowing for an faster lookup
@@ -96,7 +97,7 @@ namespace FicsItKernel {
 			 * key: instance type name
 			 * value: instance type
 			 */
-			std::map<std::string, UClass*> instanceTypeNames;
+			TMap<FString, UClass*> instanceTypeNames;
 
 			LuaInstanceRegistry() = default;
 			
@@ -116,7 +117,7 @@ namespace FicsItKernel {
 			 * @param[in]	name				the name of the instance
 			 * @param[in]	isClassInstance		true if the instance is of type class instance
 			 */
-			void registerType(UClass* type, std::string name, bool isClassInstance);
+			void registerType(UClass* type, FString name, bool isClassInstance);
 
 			/**
 			 * Registers a new function for the given instance type with the given lua function name.
@@ -125,7 +126,7 @@ namespace FicsItKernel {
 			 * @param[in]	name	the lua function name
 			 * @param[in]	func	the new function
 			 */
-			void registerFunction(UClass* type, std::string name, LuaLibFunc func);
+			void registerFunction(UClass* type, FString name, LuaLibFunc func);
 
 			/**
 			* Registers a new property for the given instance type with the given lua property name.
@@ -134,7 +135,7 @@ namespace FicsItKernel {
 			* @param[in]	name	the lua property name
 			* @param[in]	prop	the new property
 			*/
-			void registerProperty(UClass* type, std::string name, LuaLibProperty prop);
+			void registerProperty(UClass* type, FString name, LuaLibProperty prop);
 
 			/**
 			* Registers a new function for the given class instance type with the given lua function name.
@@ -143,7 +144,7 @@ namespace FicsItKernel {
 			* @param[in]	name	the lua function name
 			* @param[in]	func	the new function
 			*/
-			void registerClassFunction(UClass* type, std::string name, LuaLibClassFunc func);
+			void registerClassFunction(UClass* type, FString name, LuaLibClassFunc func);
 
 			/**
 			 * Searches for the uppermost instance type name of the given class hirachy.
@@ -152,7 +153,7 @@ namespace FicsItKernel {
 			 * @param[in]	type	class type of the instance
 			 * @return	the upper most instance type name
 			 */
-			std::string findTypeName(UClass* type);
+			FString findTypeName(UClass* type);
 
 			/**
 			 * Searches for the instance type with given type name.
@@ -162,7 +163,7 @@ namespace FicsItKernel {
 			 * @param[out]	isClass		gets set to true if type of instance type is class instance
 			 * @return	the instance type
 			 */
-			UClass* findType(const std::string& typeName, bool* isClass = nullptr);
+			UClass* findType(const FString& typeName, bool* isClass = nullptr);
 
 			/**
 			 * Searches for a instance lib func with the given lua name of the given instance name.
@@ -172,7 +173,7 @@ namespace FicsItKernel {
 			 * @param[out]	outFunc			the lib function if found
 			 * @return	true if able to find function
 			 */
-			bool findLibFunc(UClass* instanceType, std::string name, LuaLibFunc& outFunc);
+			bool findLibFunc(UClass* instanceType, FString name, LuaLibFunc& outFunc);
 
 			/**
 			* Searches for a instance lib property with the given lua name of the given instance name.
@@ -182,7 +183,7 @@ namespace FicsItKernel {
 			* @param[out]	outProp			the lib property if found
 			* @return	true if able to find property
 			*/
-			bool findLibProperty(UClass* instanceType, std::string name, LuaLibProperty& outProp);
+			bool findLibProperty(UClass* instanceType, FString name, LuaLibProperty& outProp);
 
 			/**
 			* Searches for a class instance lib func with the given lua name of the given class instance name.
@@ -192,7 +193,7 @@ namespace FicsItKernel {
 			* @param[out]	outFunc			the class lib function if found
 			* @return	true if able to find function
 			*/
-			bool findClassLibFunc(UClass* instanceType, std::string name, LuaLibClassFunc& outFunc);
+			bool findClassLibFunc(UClass* instanceType, FString name, LuaLibClassFunc& outFunc);
 
 			/**
 			 * Checks if the value at the given index in the lua stack is a instance and outputs the pointer
@@ -262,7 +263,7 @@ namespace FicsItKernel {
 			 * @param[in]	type	the type you want to get the member name list from
 			 * @return	set with all member names
 			 */
-			std::set<std::string> getMemberNames(UClass* type);
+			std::set<FString> getMemberNames(UClass* type);
 
 			/**
 			* Returns all registered class function names of the given class instance type.
@@ -271,7 +272,7 @@ namespace FicsItKernel {
 			* @param[in]	type	the type you want to get the class function name list from
 			* @return	set with all class function names
 			*/
-			std::set<std::string> getClassFunctionNames(UClass* type);
+			std::set<FString> getClassFunctionNames(UClass* type);
 		};
 		
 		/**
@@ -282,7 +283,7 @@ namespace FicsItKernel {
 		 * @param[in]	obj		the obj you want to create the lua instance for.
 		 * @return	returns true if the instance got created successfully.
 		 */
-		bool newInstance(lua_State* L, Network::NetworkTrace obj);
+		bool newInstance(lua_State* L, FFINNetworkTrace obj);
 
 		/**
 		* Trys to get a Lua Instance from the given lua stack at the given index of the given type.
@@ -293,7 +294,7 @@ namespace FicsItKernel {
 		* @param[in]	clazz	the type of the instance it should be
 		* @retrun	returns a valid network trace if found, and invalid one if not
 		*/
-		Network::NetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz);
+		FFINNetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz);
 
 		/**
 		 * Trys to get a Lua Instance from the given lua stack at the given index of the given type.
@@ -306,7 +307,7 @@ namespace FicsItKernel {
 		 * @retrun	returns a pointer to the instance object, nullptr if not found
 		 */
 		template<typename T>
-		FORCEINLINE T* getObjInstance(lua_State* L, int index, Network::NetworkTrace* trace = nullptr) {
+		FORCEINLINE T* getObjInstance(lua_State* L, int index, FFINNetworkTrace* trace = nullptr) {
 			auto obj = getObjInstance(L, index, T::StaticClass());
 			if (trace) *trace = obj;
 			return Cast<T>(*obj);

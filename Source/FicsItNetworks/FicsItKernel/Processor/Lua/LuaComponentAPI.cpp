@@ -36,7 +36,7 @@ namespace FicsItKernel {
 				}
 				int j = 0;
 				for (auto& id : ids) {
-					auto comp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByID(id);
+					auto comp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByID(id.c_str());
 					newInstance(L, comp);
 					if (isT) lua_seti(L, -2, ++j);
 				}
@@ -50,9 +50,9 @@ namespace FicsItKernel {
 			for (int i = 1; i <= args; ++i) {
 				lua_newtable(L);
 				std::string nick = luaL_checkstring(L, i);
-				std::set<Network::NetworkTrace> comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByNick(nick);
+				TSet<FFINNetworkTrace> comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByNick(nick.c_str());
 				int j = 0;
-				for (const Network::NetworkTrace& comp : comps) {
+				for (const FFINNetworkTrace& comp : comps) {
 					++j;
 					UObject* obj = *comp;
 					FString id = IFINNetworkComponent::Execute_GetID(obj).ToString();

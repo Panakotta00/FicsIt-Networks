@@ -39,11 +39,11 @@ namespace FicsItKernel {
 		}
 
 		void LuaValueReader::operator<<(UObject* obj) {
-			newInstance(L, Network::NetworkTrace(obj));
+			newInstance(L, FFINNetworkTrace(obj));
 		}
 
 		void LuaValueReader::operator<<(const FFINNetworkTrace& obj) {
-			newInstance(L, obj.getTrace());
+			newInstance(L, obj);
 		}
 
 		void LuaValueReader::WriteAbstract(const void* obj, const FString& id) {

@@ -268,7 +268,7 @@ namespace FicsItKernel {
 		 *
 		 * @return list of added gpus
 		 */
-		std::set<UObject*> getGPUs();
+		TSet<UObject*> getGPUs();
 
 		/**
 		* Adds the given screen to the kernel
@@ -289,7 +289,7 @@ namespace FicsItKernel {
 		*
 		* @return list of added screen
 		*/
-		std::set<UObject*> getScreens();
+		TSet<UObject*> getScreens();
 		
 		/**
 		 * Recalculates the given system components resource usage like memory.

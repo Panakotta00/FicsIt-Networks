@@ -106,9 +106,9 @@ public:
 	virtual void BeginPlay() override;
 	// End AActor
 
-	// Begin IFGDismantleInterface
+	// Begin IFGSaveInterface
 	bool ShouldSave_Implementation() const override;
-	// End IFGDismantleInterface
+	// End IFGSaveInterface
 
 	// Begin IFINNetworkComponent
 	virtual FGuid GetID_Implementation() const override;

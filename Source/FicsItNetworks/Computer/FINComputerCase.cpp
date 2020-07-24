@@ -9,6 +9,7 @@
 #include "FINComputerDriveDesc.h"
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
+#include "FINComputerSubsystem.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Audio/AudioComponentController.h"
 #include "util/Logging.h"
@@ -57,8 +58,7 @@ AFINComputerCase::~AFINComputerCase() {
 
 void AFINComputerCase::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
-	Ar.UsingCustomVersion(FFrameworkObjectVersion::GUID);
-	if (Ar.IsSaveGame() && Ar.CustomVer(FFINCustomVersion::GUID) >= FFINCustomVersion::BeforeCustomVersionWasAdded) {
+	if (Ar.IsSaveGame() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version >= EFINCustomVersion::FINSignalStorage) {
 		kernel->Serialize(Ar, KernelState);
 	}
 }
@@ -109,6 +109,10 @@ void AFINComputerCase::Factory_Tick(float dt) {
 
 bool AFINComputerCase::ShouldSave_Implementation() const {
 	return true;
+}
+
+void AFINComputerCase::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(AFINComputerSubsystem::GetComputerSubsystem(this));
 }
 
 void AFINComputerCase::PreLoadGame_Implementation(int32 gameVersion, int32 engineVersion) {

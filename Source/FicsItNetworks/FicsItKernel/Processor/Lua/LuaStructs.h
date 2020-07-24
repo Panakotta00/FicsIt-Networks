@@ -40,8 +40,8 @@ namespace FicsItKernel {
 		void luaStruct(lua_State* L, FInventoryItem item);
 		void luaStruct(lua_State* L, FItemAmount amount);
 		void luaStruct(lua_State* L, FInventoryStack stack);
-		void luaTrackGraph(lua_State* L, const Network::NetworkTrace& trace ,int trackID);
-		void luaTimeTableStop(lua_State* L, const Network::NetworkTrace& station, float duration);
+		void luaTrackGraph(lua_State* L, const FFINNetworkTrace& trace ,int trackID);
+		void luaTimeTableStop(lua_State* L, const FFINNetworkTrace& station, float duration);
 		void luaFuture(lua_State* L, LuaFuture future);
 		
 		FTimeTableStop luaGetTimeTableStop(lua_State* L, int index);

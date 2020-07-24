@@ -5,11 +5,11 @@
 
 #include "Components/SceneComponent.h"
 
-std::vector<std::pair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = std::vector<std::pair<UClass*, FFINAdapterSettings>>();
+TArray<TPair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = TArray<TPair<UClass*, FFINAdapterSettings>>();
 
 void AFINNetworkAdapter::RegistererAdapterSetting(UClass* clazz, FFINAdapterSettings settings) {
 	clazz->AddToRoot();
-	AFINNetworkAdapter::settings.push_back({clazz, settings});
+	AFINNetworkAdapter::settings.Add(TPair<UClass*, FFINAdapterSettings>{clazz, settings});
 }
 
 void AFINNetworkAdapter::RegistererAdapterSetting(FString BPPath, FFINAdapterSettings settings) {
@@ -45,7 +45,6 @@ AFINNetworkAdapter::~AFINNetworkAdapter() {}
 
 void AFINNetworkAdapter::BeginPlay() {
 	Super::BeginPlay();
-
 
 	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
 	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
@@ -89,8 +88,8 @@ void AFINNetworkAdapter::BeginPlay() {
 	}
 
 	if (!done) for (auto setting_entry : settings) {
-		auto clazz = setting_entry.first;
-		auto setting = setting_entry.second;
+		auto clazz = setting_entry.Key;
+		auto setting = setting_entry.Value;
 		if (!Parent->IsA(clazz)) continue;
 		FVector pos = Parent->GetActorTransform().TransformPosition(Parent->K2_GetActorLocation());
 		SetActorLocationAndRotation(pos, Parent->GetActorRotation());
@@ -110,6 +109,10 @@ bool AFINNetworkAdapter::ShouldSave_Implementation() const {
 
 bool AFINNetworkAdapter::NeedTransform_Implementation() {
 	return true;
+}
+
+void AFINNetworkAdapter::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(Parent);
 }
 
 UFINNetworkAdapterReference::UFINNetworkAdapterReference() {}
