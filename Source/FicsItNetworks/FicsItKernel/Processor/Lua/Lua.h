@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "LuaException.h"
+#include "Network/FINAnyNetworkValue.h"
 
 struct FFINNetworkTrace;
 
@@ -93,5 +94,6 @@ namespace FicsItKernel {
 
 		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data, FFINNetworkTrace trace);
 		LuaDataType luaToProperty(lua_State* L, UProperty* p, void* data, int i);
+		LuaDataType luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val);
 	}
 }

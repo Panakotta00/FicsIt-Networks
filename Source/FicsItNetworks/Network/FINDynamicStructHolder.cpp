@@ -44,9 +44,9 @@ FFINDynamicStructHolder& FFINDynamicStructHolder::operator=(const FFINDynamicStr
 	return *this;
 }
 
-FFINDynamicStructHolder FFINDynamicStructHolder::Copy(UScriptStruct* Struct, void* Data) {
+FFINDynamicStructHolder FFINDynamicStructHolder::Copy(UScriptStruct* Struct, const void* Data) {
 	FFINDynamicStructHolder holder(Struct);
-	Struct->CopyScriptStruct(holder.Data, Data);
+	if (Data) Struct->CopyScriptStruct(holder.Data, Data);
 	return holder;
 }
 

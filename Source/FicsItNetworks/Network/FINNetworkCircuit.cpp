@@ -42,8 +42,8 @@ UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* circuit) {
 		UObject* obj = node.Get();
 		auto comp = Cast<IFINNetworkComponent>(obj);
 		if (!comp) continue;
-		comp->Execute_SetCircuit(obj, to);
-		comp->Execute_NotifyNetworkUpdate(obj, 0, nodes);
+		IFINNetworkComponent::Execute_SetCircuit(obj, to);
+		IFINNetworkComponent::Execute_NotifyNetworkUpdate(obj, 0, nodes);
 	}
 
 	nodes.Empty();
@@ -51,7 +51,9 @@ UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* circuit) {
 	for (auto& node : to->Nodes) {
 		UObject* obj = node.Get();
 		auto comp = Cast<IFINNetworkComponent>(obj);
-		comp->Execute_NotifyNetworkUpdate(obj, 0, nodes);
+		if (!comp) continue;
+		SML::Logging::error("Name: ", TCHAR_TO_UTF8(*obj->GetName()));
+		IFINNetworkComponent::Execute_NotifyNetworkUpdate(obj, 0, nodes);
 	}
 
 	to->Nodes.Append(from->Nodes);
@@ -99,4 +101,67 @@ TSet<UObject*> UFINNetworkCircuit::GetComponents() {
 	TSet<UObject*> out_components;
 	for (auto& node : Nodes) out_components.Add(node.Get());
 	return out_components;
+}
+
+bool UFINNetworkCircuit::IsNodeConnected(UObject* start, UObject* node) {
+	TSet<UObject*> Searched;
+	return IsNodeConnected_Internal(start, node, Searched);
+}
+
+void UFINNetworkCircuit::DisconnectNodes(UObject* A, UObject* B) {
+	if (!IsNodeConnected(A, B)) {
+		UFINNetworkCircuit* CircuitA = NewObject<UFINNetworkCircuit>();
+		IFINNetworkComponent::Execute_SetCircuit(A, CircuitA);
+		CircuitA->recalculate(A);
+
+		UFINNetworkCircuit* CircuitB = IFINNetworkComponent::Execute_GetCircuit(B);
+		
+		TSet<UObject*> NodesA = CircuitA->GetComponents();
+		TSet<UObject*> NodesB = CircuitB->GetComponents();
+
+		for (const FWeakObjectPtr& Node : CircuitB->Nodes) {
+			if (CircuitB->Nodes.Contains(Node)) continue;
+			UObject* Obj = Node.Get();
+			if (Obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) IFINNetworkComponent::Execute_NotifyNetworkUpdate(Obj, 1, NodesA);
+		}
+		CircuitB->recalculate(B);
+		for (const FWeakObjectPtr& Node : CircuitA->Nodes) {
+			if (CircuitA->Nodes.Contains(Node)) continue;
+			UObject* obj = Node.Get();
+			auto comp = Cast<IFINNetworkComponent>(obj);
+			if (comp) comp->Execute_NotifyNetworkUpdate(obj, 1, NodesB);
+		}
+	}
+}
+
+void UFINNetworkCircuit::ConnectNodes(UObject* A, UObject* B) {
+	UFINNetworkCircuit* CircuitA = IFINNetworkComponent::Execute_GetCircuit(A);
+	UFINNetworkCircuit* CircuitB = IFINNetworkComponent::Execute_GetCircuit(B);
+	if (!CircuitB) {
+		CircuitB = NewObject<UFINNetworkCircuit>();
+		IFINNetworkComponent::Execute_SetCircuit(B, CircuitB);
+		CircuitB->recalculate(B);
+	}
+	if (CircuitA) {
+		if (CircuitA != CircuitB) {
+			IFINNetworkComponent::Execute_SetCircuit(A, CircuitA = *CircuitA + CircuitB);
+			IFINNetworkComponent::Execute_SetCircuit(B, CircuitA);
+		}
+	} else {
+		IFINNetworkComponent::Execute_SetCircuit(A, CircuitB);
+		CircuitB->recalculate(A);
+	}
+}
+
+bool UFINNetworkCircuit::IsNodeConnected_Internal(UObject* self, UObject* node, TSet<UObject*>& Searched) {
+	if (Searched.Contains(self)) return false;
+	Searched.Add(self);
+
+	if (self == node) return true;
+	
+	for (UObject* con : IFINNetworkComponent::Execute_GetConnected(self)) {
+		if (IsNodeConnected_Internal(con, node, Searched)) return true;
+	}
+
+	return false;
 }

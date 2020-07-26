@@ -8,7 +8,7 @@
 /**
  * This structure allows you to store any kind of UStruct
  */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFINDynamicStructHolder {
 	GENERATED_BODY()
 	
@@ -24,11 +24,17 @@ public:
 	~FFINDynamicStructHolder();
 	FFINDynamicStructHolder& operator=(const FFINDynamicStructHolder& Other);
 
-	static FFINDynamicStructHolder Copy(UScriptStruct* Struct, void* Data);
+	static FFINDynamicStructHolder Copy(UScriptStruct* Struct, const void* Data);
 	
 	bool Serialize(FArchive& Ar);
 
+	/**
+	 * Returns the struct type stored in this holder.
+	 *
+	 * @return the stored structs type
+	 */
 	UScriptStruct* GetStruct() const;
+	
 	void* GetData() const;
 
 	template<typename T>
@@ -64,18 +70,25 @@ inline void operator<<(FArchive& Ar, FFINDynamicStructHolder& Struct) {
 template<typename T>
 class TFINDynamicStruct : public FFINDynamicStructHolder {
 public:
-	TFINDynamicStruct() {}
+	TFINDynamicStruct() : FFINDynamicStructHolder(T::StaticStruct()) {}
+	TFINDynamicStruct(void* Data) : FFINDynamicStructHolder(T::StaticStruct(), Data) {}
 	TFINDynamicStruct(UScriptStruct* Struct) : FFINDynamicStructHolder(Struct) { check(Struct->IsChildOf(T::StaticStruct())) }
 	TFINDynamicStruct(UScriptStruct* Struct, void* Data) : FFINDynamicStructHolder(Struct, Data) { check(Struct->IsChildOf(T::StaticStruct())) }
 	TFINDynamicStruct(const FFINDynamicStructHolder& Other) : FFINDynamicStructHolder(Other) { check(Other.GetStruct()->IsChildOf(T::StaticStruct())) }
+	TFINDynamicStruct(const T& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(T::StaticStruct(), &Other)) {}
+
 	TFINDynamicStruct<T>& operator=(const FFINDynamicStructHolder& Other) {
 		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));
 		FFINDynamicStructHolder::operator=(Other);
 		return *this;
 	}
 	
-	T& operator->() {
-		return *Get<T>();
+	T* operator->() const {
+		return &Get<T>();
+	}
+
+	T* operator*() const {
+		return &Get<T>();
 	}
 
     TSharedPtr<T> SharedCopy() {

@@ -57,6 +57,19 @@ namespace FicsItKernel {
 			return 0;
 		}
 
+		void luaStruct(lua_State* L, const FINStruct& Struct) {
+			UStruct* Type = Struct.GetStruct();
+			if (Type == FInventoryItem::StaticStruct()) {
+				luaStruct(L, Struct.Get<FInventoryItem>());
+			} else if (Type == FItemAmount::StaticStruct()) {
+				luaStruct(L, Struct.Get<FItemAmount>());
+			} else if (Type == FInventoryStack::StaticStruct()) {
+				luaStruct(L, Struct.Get<FInventoryStack>());
+			} else {
+				lua_pushnil(L);
+			}
+		}
+
 		void luaStruct(lua_State* L, FInventoryItem item) {
 			lua_newtable(L);
 			newInstance(L, item.ItemClass);

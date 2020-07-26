@@ -126,7 +126,7 @@ private:
 	}
 
 	static void DoFactoryGrab(UFGFactoryConnectionComponent* c, FInventoryItem& item) {
-		AFINHookSubsystem::GetHookSubsystem(c)->EmitSignal(c, MakeShared<FFINSmartSignal>("ItemTransfer", item));
+		AFINHookSubsystem::GetHookSubsystem(c)->EmitSignal(c, MakeShared<FFINSmartSignal>("ItemTransfer", TFINDynamicStruct<FInventoryItem>(item)));
 	}
 
 	static void FactoryGrabHook(CallScope<bool(*)(UFGFactoryConnectionComponent*, FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>)>& scope, UFGFactoryConnectionComponent* c, FInventoryItem& item, float& offset, TSubclassOf<UFGItemDescriptor> type) {

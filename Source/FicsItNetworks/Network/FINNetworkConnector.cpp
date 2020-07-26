@@ -1,48 +1,5 @@
 #include "FINNetworkConnector.h"
 
-bool UFINNetworkConnector::searchFor(TSet<const UFINNetworkConnector*>& searched, UFINNetworkConnector* connector) const {
-	if (searched.Contains(this)) return false;
-	searched.Add(this);
-
-	if (this == connector) return true;
-	
-	for (auto con : Connections) {
-		if (con->searchFor(searched, connector)) return true;
-	}
-
-	for (auto cable : Cables) {
-		auto c1 = cable->Connector1;
-		auto c2 = cable->Connector2;
-		if (c1->searchFor(searched, connector) || c2->searchFor(searched, connector)) return true;
-	}
-
-	return false;
-}
-
-void UFINNetworkConnector::removeConnector(UFINNetworkConnector * connector) {
-	TSet<const UFINNetworkConnector*> searched;
-	if (!searchFor(searched, connector)) {
-		connector->Circuit = NewObject<UFINNetworkCircuit>(this);
-		connector->Circuit->recalculate(connector);
-		
-		TSet<UObject*> nodes1 = connector->Circuit->GetComponents();
-		TSet<UObject*> nodes2 = Circuit->GetComponents();
-		for (auto n : Circuit->Nodes) {
-			if (connector->Circuit->Nodes.Contains(n)) continue;
-			UObject* obj = n.Get();
-			auto comp = Cast<IFINNetworkComponent>(obj);
-			if (comp) comp->Execute_NotifyNetworkUpdate(obj, 1, nodes1);
-		}
-		Circuit->recalculate(this);
-		for (auto n : connector->Circuit->Nodes) {
-			if (Circuit->Nodes.Contains(n)) continue;
-			UObject* obj = n.Get();
-			auto comp = Cast<IFINNetworkComponent>(obj);
-			if (comp) comp->Execute_NotifyNetworkUpdate(obj, 1, nodes2);
-		}
-	}
-}
-
 UFINNetworkConnector::UFINNetworkConnector() {}
 
 UFINNetworkConnector::~UFINNetworkConnector() {}
@@ -72,7 +29,7 @@ void UFINNetworkConnector::AddConnection(UFINNetworkConnector* connector) {
 	Connections.Add(connector);
 	connector->AddConnection(this);
 
-	Circuit = connector->Circuit = (Circuit) ? *Circuit + connector->Circuit : connector->Circuit;
+	UFINNetworkCircuit::ConnectNodes(this, connector);
 }
 
 void UFINNetworkConnector::RemoveConnection(UFINNetworkConnector* connector) {
@@ -80,24 +37,20 @@ void UFINNetworkConnector::RemoveConnection(UFINNetworkConnector* connector) {
 
 	Connections.Remove(connector);
 	connector->Connections.Remove(this);
-	removeConnector(connector);
+	
+	UFINNetworkCircuit::DisconnectNodes(this, connector);
 }
 
 bool UFINNetworkConnector::AddCable(AFINNetworkCable* cable) {
 	if (MaxCables >= 0 && MaxCables <= Cables.Num()) return false;
-
+	if (Cables.Contains(cable)) return true;
+	
 	Cables.Add(cable);
 
-	auto c = (cable->Connector1 == this) ? ((cable->Connector2 == this) ? nullptr : cable->Connector2) : cable->Connector1;
+	UFINNetworkConnector* OtherConnector = (cable->Connector1 == this) ? ((cable->Connector2 == this) ? nullptr : cable->Connector2) : cable->Connector1;
+	OtherConnector->AddCable(cable);
 
-	if (c && c->Circuit) {
-		if (this->Circuit) {
-			Circuit = c->Circuit = *cable->Connector1->Circuit + cable->Connector2->Circuit;
-		} else {
-			Circuit = c->Circuit;
-			Circuit->recalculate(this);
-		}
-	}
+	UFINNetworkCircuit::ConnectNodes(this, OtherConnector);
 
 	return true;
 }
@@ -105,12 +58,23 @@ bool UFINNetworkConnector::AddCable(AFINNetworkCable* cable) {
 void UFINNetworkConnector::RemoveCable(AFINNetworkCable* cable) {
 	if (!Cables.Contains(cable)) return;
 
-	Cables.Remove(cable);
+	if (Cables.Remove(cable) > 0) {
+		UFINNetworkConnector* OtherConnector = (cable->Connector1 == this) ? cable->Connector2 : cable->Connector1;
+		OtherConnector->Cables.Remove(cable);
 
-	auto other = (cable->Connector1 == this) ? cable->Connector2 : cable->Connector1;
-	other->Cables.Remove(cable);
+		UFINNetworkCircuit::DisconnectNodes(this, OtherConnector);
+	}
+}
 
-	removeConnector(other);
+void UFINNetworkConnector::AddComponent(UObject* comp) {
+	check(comp->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass()));
+	Components.Add(comp);
+	UFINNetworkCircuit::ConnectNodes(this, comp);
+}
+
+void UFINNetworkConnector::RemoveComponent(UObject* comp) {
+	if (Components.Remove(comp) <= 0) return;
+	UFINNetworkCircuit::DisconnectNodes(this, comp);
 }
 
 bool UFINNetworkConnector::IsConnected(UFINNetworkConnector* con) const {
@@ -119,11 +83,6 @@ bool UFINNetworkConnector::IsConnected(UFINNetworkConnector* con) const {
 		if (c->Connector1 == con || c->Connector2 == con) return true;
 	}
 	return false;
-}
-
-bool UFINNetworkConnector::SearchFor(UFINNetworkConnector * conn) const {
-	TSet<const UFINNetworkConnector*> searched;
-	return searchFor(searched, conn);
 }
 
 void UFINNetworkConnector::AddMerged(UObject* mergedObj) {

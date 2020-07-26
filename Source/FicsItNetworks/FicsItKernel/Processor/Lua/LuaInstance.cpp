@@ -4,6 +4,7 @@
 #include "LuaProcessorStateStorage.h"
 
 #include "Network/FINNetworkComponent.h"
+#include "Network/FINVariadicParameterList.h"
 #include "util/Logging.h"
 
 #define INSTANCE_TYPE "InstanceType"
@@ -316,27 +317,38 @@ namespace FicsItKernel {
 				// allocate parameter space
 				void* params = malloc(func->ParmsSize);
 				memset(params, 0, func->ParmsSize);
+				func->InitializeStruct(params);
 	
 				// init and set parameter values
-				std::string error = "";
 				int i = 2;
 				for (auto property = TFieldIterator<UProperty>(func); property; ++property) {
 					auto flags = property->GetPropertyFlags();
-					if (flags & CPF_Parm) {
-						property->InitializeValue_InContainer(params);
-						if (!(flags & (CPF_OutParm | CPF_ReturnParm))) {
+					if (flags & CPF_Parm && !(flags & (CPF_OutParm | CPF_ReturnParm))) {
+						UStructProperty* StructProp = Cast<UStructProperty>(*property);
+						if (StructProp && StructProp->Struct == FFINDynamicStructHolder::StaticStruct()) {
+							// Variadic Parameters now
+							TFINDynamicStruct<FFINVariadicParameterList> VariadicParams;
+							int paramCount = lua_gettop(L);
+							while (i <= paramCount) {
+								FFINAnyNetworkValue Val;
+								luaToNetworkValue(L, i++, Val);
+								VariadicParams->Add(Val);
+							}
+							FFINDynamicStructHolder& Params = *StructProp->ContainerPtrToValuePtr<FFINDynamicStructHolder>(params);
+							Params = VariadicParams;
+						} else {
 							try {
 								luaToProperty(L, *property, params, i++);
 							} catch (std::exception e) {
-								error = "argument #" + std::to_string(i) + " is not of type " + e.what();
-								break;
+								func->DestroyStruct(params);
+								return luaL_error(L, ("Argument #" + std::to_string(i) + " is not of type " + e.what()).c_str());
 							}
 						}
 					}
 				}
 	
 				// execute native function only if no error
-				if (error.length() <= 0) {
+				{
 					std::lock_guard<std::mutex> m(objectLocks[comp]);
 					comp->ProcessEvent(func, params);
 				}
@@ -345,20 +357,15 @@ namespace FicsItKernel {
 				// free parameters and eventualy push return values to lua
 				for (auto property = TFieldIterator<UProperty>(func); property; ++property) {
 					auto flags = property->GetPropertyFlags();
-					if (flags & CPF_Parm) {
-						if (error.length() <= 0 && (flags & (CPF_OutParm | CPF_ReturnParm))) {
-							propertyToLua(L, *property, params, trace);
-							++retargs;
-						}
-						property->DestroyValue_InContainer(params);
+					if (flags & CPF_Parm && flags & (CPF_OutParm | CPF_ReturnParm)) {
+						propertyToLua(L, *property, params, trace);
+						++retargs;
 					}
 				}
-	
+				
+				func->DestroyStruct(params);
 				free(params);
-	
-				if (error.length() > 0) {
-					return luaL_error(L, std::string("Error at ").append(std::to_string(i).c_str()).append("# parameter: ").append(error).c_str());
-				}
+				
 				return LuaProcessor::luaAPIReturn(L, retargs);
 			}
 			return luaL_error(L, "Unable to call function");

@@ -9,6 +9,7 @@
 #include "FINComputerDriveDesc.h"
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
+#include "FINComputerNetworkCard.h"
 #include "FINComputerSubsystem.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Audio/AudioComponentController.h"
@@ -214,6 +215,18 @@ void AFINComputerCase::RemoveScreen(AFINComputerScreen* Screen) {
 	Screens.Remove(Screen);
 }
 
+void AFINComputerCase::AddNetCard(AFINComputerNetworkCard* NetCard) {
+	NetCard->ConnectedComponent = NetworkConnector;
+	NetworkConnector->AddComponent(NetCard);
+	NetworkCards.Add(NetCard);
+}
+
+void AFINComputerCase::RemoveNetCard(AFINComputerNetworkCard* NetCard) {
+	NetCard->ConnectedComponent = nullptr;
+	NetworkConnector->RemoveComponent(NetCard);
+	NetworkCards.Remove(NetCard);
+}
+
 void AFINComputerCase::AddModule(AActor* module) {
 	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
 		AddProcessor(processor);
@@ -225,6 +238,8 @@ void AFINComputerCase::AddModule(AActor* module) {
 		AddScreen(screen);
 	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
 		AddGPU(gpu);
+	} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
+		AddNetCard(netCard);
 	}
 }
 
@@ -239,6 +254,8 @@ void AFINComputerCase::RemoveModule(AActor* module) {
 		RemoveScreen(screen);
 	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
 		RemoveGPU(gpu);
+	} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
+		RemoveNetCard(netCard);
 	}
 }
 

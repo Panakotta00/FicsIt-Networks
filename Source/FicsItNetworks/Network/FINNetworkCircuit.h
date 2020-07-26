@@ -17,8 +17,7 @@ class FICSITNETWORKS_API UFINNetworkCircuit : public UObject {
 	friend UFINNetworkConnector;
 
 protected:
-	UPROPERTY()
-	TSet<TWeakObjectPtr<UObject>> Nodes;
+	TSet<FWeakObjectPtr> Nodes;
 
 	void addNodeRecursive(TSet<UObject*>& added, UObject* add);
 
@@ -38,7 +37,7 @@ public:
 	void recalculate(UObject* component);
 
 	/**
-	 * Returns if the given node is part of the circuit
+	 * Returns if the given node is part of the circuit based on the circuit cache
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Circuit")
 	bool HasNode(UObject* node);
@@ -61,4 +60,37 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Circuit")
 	TSet<UObject*> GetComponents();
+
+	/**
+	 * Checks if the given node is part of the circuit started by the given node based on the circuit connections.
+	 * @warning	slow! You should use HasNode since it uses the cache.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Network|Circuit")
+    static bool IsNodeConnected(UObject* start, UObject* node);
+
+	/**
+	 * Updates the circuits of node A and B after node B got removed
+	 * from the circuit of node A
+	 * by creating the new circuit, recalculating the circuits etc.
+	 * Should get called after the the nodes got disconnected
+	 *
+	 * @param[in]	A	the node whichs circuit should remove node B
+	 * @param[in]	B	the node which sould get removed
+	 */
+	UFUNCTION()
+	static void DisconnectNodes(UObject* A, UObject* B);
+
+	/**
+	 * Updates the circuits of node A and B after they got connected
+	 * by merging and recalculating the circuits.
+	 * Should get called after the nodes got connected.
+	 *
+	 * @param[in]	A	the first component
+	 * @param[in]	B	the second component
+	 */
+	UFUNCTION()
+	static void ConnectNodes(UObject* A, UObject* B);
+
+private:
+	static bool IsNodeConnected_Internal(UObject* self, UObject* node, TSet<UObject*>& Searched);
 };

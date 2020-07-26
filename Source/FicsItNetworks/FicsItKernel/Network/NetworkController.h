@@ -93,7 +93,7 @@ namespace FicsItKernel {
 			 */
 			template<typename... Ts>
 			void pushSignalKernel(const FString& signalName, Ts... args) {
-				pushSignal(TSharedPtr<FFINSignal>(new FFINSmartSignal(signalName, {VariaDicSignalElem(args)...})), FFINNetworkTrace(component));
+				pushSignal(TSharedPtr<FFINSignal>(new FFINSmartSignal(signalName, {FFINAnyNetworkValue(args)...})), FFINNetworkTrace(component));
 			}
 
 			/**

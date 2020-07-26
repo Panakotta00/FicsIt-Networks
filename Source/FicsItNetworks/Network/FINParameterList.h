@@ -9,7 +9,7 @@
  * It is used as parameters of messages like network signals and network messages
  * which can be serialized and also converted to a network data type.
  */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFINParameterList {
 	GENERATED_BODY()
 public:

@@ -22,38 +22,40 @@ namespace FicsItKernel {
 	namespace Lua {
 		LuaValueReader::LuaValueReader(lua_State* L) : L(L) {}
 
+		void LuaValueReader::nil() {
+			lua_pushnil(L);
+		}
+
 		void LuaValueReader::operator<<(const FString& str) {
 			lua_pushlstring(L, TCHAR_TO_UTF8(*str), str.Len());
 		}
 
-		void LuaValueReader::operator<<(double num) {
-			lua_pushnumber(L, num);
-		}
-
-		void LuaValueReader::operator<<(int num) {
-			lua_pushinteger(L, num);
-		}
-
-		void LuaValueReader::operator<<(bool b) {
+		void LuaValueReader::operator<<(FINBool b) {
 			lua_pushboolean(L, b);
 		}
 
-		void LuaValueReader::operator<<(UObject* obj) {
-			newInstance(L, FFINNetworkTrace(obj));
+		void LuaValueReader::operator<<(FINInt num) {
+			lua_pushinteger(L, num);
+		}
+		
+		void LuaValueReader::operator<<(FINFloat num) {
+			lua_pushnumber(L, num);
 		}
 
-		void LuaValueReader::operator<<(const FFINNetworkTrace& obj) {
+		void LuaValueReader::operator<<(FINClass clazz) {
+			newInstance(L, clazz);
+		}
+
+		void LuaValueReader::operator<<(const FINObj& obj) {
+			newInstance(L, FFINNetworkTrace(obj.Get()));
+		}
+
+		void LuaValueReader::operator<<(const FINTrace& obj) {
 			newInstance(L, obj);
 		}
 
-		void LuaValueReader::WriteAbstract(const void* obj, const FString& id) {
-			if (id == "InventoryItem") {
-				luaStruct(L, *(const FInventoryItem*)obj);
-			} else if (id == "ItemAmount") {
-				luaStruct(L, *(const FItemAmount*)obj);
-			} else if (id == "InventoryStack") {
-				luaStruct(L, *(const FInventoryStack*)obj);
-			}
+		void LuaValueReader::operator<<(const FINStruct& obj) {
+			luaStruct(L, obj);
 		}
 
 		void LuaFileSystemListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {

@@ -79,9 +79,41 @@ namespace FicsItKernel {
 					*p->ContainerPtrToValuePtr<UObject*>(data) = *o;
 					return (*o) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
 				}
-			} else {
-				lua_pushnil(L);
-				return LuaDataType::LUA_NIL;
+			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
+				if (Cast<UStructProperty>(p)->Struct == FFINNetworkTrace::StaticStruct()) {
+					const FFINNetworkTrace& trace = getObjInstance(L, i);
+					*p->ContainerPtrToValuePtr<FFINNetworkTrace>(data) = trace;
+					return (trace.IsValid()) ? LuaDataType::LUA_OBJ : LuaDataType::LUA_NIL;
+				}
+			}
+			lua_pushnil(L);
+			return LuaDataType::LUA_NIL;
+		}
+
+		LuaDataType luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val) {
+			switch (lua_type(L, i)) {
+			case LUA_TNIL:
+				Val = FFINAnyNetworkValue();
+				return LUA_NIL;
+			case LUA_TBOOLEAN:
+				Val = FFINAnyNetworkValue(static_cast<FINBool>(lua_toboolean(L, i)));
+				return LUA_BOOL;
+			case LUA_TNUMBER:
+				if (lua_isinteger(L, i)) {
+					Val = FFINAnyNetworkValue(static_cast<FINInt>(lua_tointeger(L, i)));
+					return LUA_INT;
+				} else {
+					Val = FFINAnyNetworkValue(static_cast<FINFloat>(lua_tonumber(L, i)));
+					return LUA_NUM;
+				}
+			case LUA_TSTRING: {
+				size_t len;
+				Val = FFINAnyNetworkValue(FINStr(lua_tolstring(L, i, &len), len));
+				return LUA_STR;
+			}
+			default:
+				Val = FFINAnyNetworkValue();
+				return LUA_NIL;
 			}
 		}
 	}

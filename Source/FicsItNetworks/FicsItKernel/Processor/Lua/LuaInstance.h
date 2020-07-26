@@ -294,7 +294,7 @@ namespace FicsItKernel {
 		* @param[in]	clazz	the type of the instance it should be
 		* @retrun	returns a valid network trace if found, and invalid one if not
 		*/
-		FFINNetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz);
+		FFINNetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz = UObject::StaticClass());
 
 		/**
 		 * Trys to get a Lua Instance from the given lua stack at the given index of the given type.

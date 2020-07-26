@@ -12,6 +12,7 @@
 
 #include "FINComputerCase.generated.h"
 
+class AFINComputerNetworkCard;
 class AFINComputerDriveHolder;
 class AFINComputerMemory;
 class AFINComputerProcessor;
@@ -57,6 +58,9 @@ public:
 
 	UPROPERTY()
     TSet<AFINComputerDriveHolder*> DriveHolders;
+
+	UPROPERTY()
+	TSet<AFINComputerNetworkCard*> NetworkCards;
 
 	UPROPERTY()
 	AFINFileSystemState* Floppy = nullptr;
@@ -123,6 +127,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
 	void RemoveScreen(AFINComputerScreen* Screen);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void AddNetCard(AFINComputerNetworkCard* NetCard);
+	
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void RemoveNetCard(AFINComputerNetworkCard* NetCard);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddModule(AActor* Module);

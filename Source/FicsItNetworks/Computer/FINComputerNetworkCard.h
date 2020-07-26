@@ -3,12 +3,21 @@
 #include "FINComputerModule.h"
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkMessageInterface.h"
+#include "Network/Signals/FINSignal.h"
+
 #include "FINComputerNetworkCard.generated.h"
 
+class AFINComputerCase;
 UCLASS()
 class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkComponent, public IFINNetworkMessageInterface {
 	GENERATED_BODY()
 public:
+	/**
+	 * List of open ports the network card is currently listening to.
+	 */
+	UPROPERTY(SaveGame)
+	TSet<int> OpenPorts;
+	
 	/**
 	* The ID of this computer network component.
 	* Used to unqiuely identify it in the network.
@@ -31,18 +40,18 @@ public:
 	bool bIdCreated = false;
 
 	/**
+	 * The only one connected network component to this module.
+	 * Only used for building the computer network.
+	 */
+	UPROPERTY()
+	UObject* ConnectedComponent = nullptr;
+
+	/**
 	* The computer network circuit this component is connected to.
 	*/
 	UPROPERTY()
 	UFINNetworkCircuit* Circuit = nullptr;
 	
-	/**
-	 * The computer the network card attached to and so also has
-	 * access to this network component directly.
-	 */
-	UPROPERTY()
-	UObject* Computer = nullptr;
-
 	// Begin AActor
 	virtual void BeginPlay() override;
 	// End AActor
@@ -59,4 +68,44 @@ public:
 	virtual void SetCircuit_Implementation(UFINNetworkCircuit* circuit) override;
 	virtual void NotifyNetworkUpdate_Implementation(int type, const TSet<UObject*>& nodes) override;
 	// End IFINNetworkComponent
+
+	// Begin IFINNetworkMessageInterface
+	virtual bool IsPortOpen(int Port) override;
+	virtual void HandleMessage(FFINNetworkTrace Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) override;
+	// End IFINNetworkMessageInterface
+
+	UFUNCTION()
+	void netFunc_open(int port);
+
+	UFUNCTION()
+	void netFunc_close(int port);
+
+	UFUNCTION()
+	void netFunc_closeAll();
+
+	UFUNCTION()
+	void netFunc_send(FFINNetworkTrace reciever, int port, FFINDynamicStructHolder args);
+
+	UFUNCTION()
+	void netFunc_broadcast(int port, FFINDynamicStructHolder args);
 };
+
+USTRUCT()
+struct FFINNetworkMessageSignal : public FFINSignal {
+	GENERATED_BODY()
+	
+	int Port;
+	TFINDynamicStruct<FFINParameterList> Data;
+
+	FFINNetworkMessageSignal() = default;
+	FFINNetworkMessageSignal(int Port, const TFINDynamicStruct<FFINParameterList>& Data);
+
+	bool Serialize(FArchive& Ar);
+	
+	virtual int operator>>(FFINValueReader& reader) const override;
+	virtual UScriptStruct* GetStruct() const override { return StaticStruct(); };
+};
+
+inline bool operator<<(FArchive& Ar, FFINNetworkMessageSignal& Signal) {
+	return Signal.Serialize(Ar);
+}

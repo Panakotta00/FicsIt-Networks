@@ -148,6 +148,43 @@ FFINNetworkTrace::FFINNetworkTrace(UObject* Obj) : Obj(Obj) {
 
 FFINNetworkTrace::~FFINNetworkTrace() {}
 
+bool FFINNetworkTrace::Serialize(FArchive& Ar) {
+	if (Ar.IsSaveGame()) {
+		bool valid = GetUnderlyingPtr().IsValid();
+		Ar << valid;
+		if (valid) {
+			// obj ptr
+			UObject* ptr = GetUnderlyingPtr().Get();
+			Ar << ptr;
+			Obj = ptr;
+	
+			// prev trace
+			bool hasPrev = Prev.IsValid();
+			Ar << hasPrev;
+			if (hasPrev) {
+				FFINNetworkTrace prev;
+				if (Ar.IsSaving()) prev = *Prev;
+				Ar << prev;
+				if (Ar.IsLoading()) {
+					Prev = MakeShared<FFINNetworkTrace>(prev);
+				}
+			}
+
+			// step
+			bool hasStep = Step.Get();
+			Ar << hasStep;
+			if (hasStep) {
+				FString save;
+				if (Ar.IsSaving()) save = inverseTraceStepRegistry[Step];
+				Ar << save;
+				if (Ar.IsLoading()) Step = traceStepRegistry[TCHAR_TO_UTF8(*save)];
+			}
+		}
+	}
+	
+	return true;
+}
+
 FFINNetworkTrace FFINNetworkTrace::operator/(UObject* other) const {
 	FFINNetworkTrace trace(other);
 

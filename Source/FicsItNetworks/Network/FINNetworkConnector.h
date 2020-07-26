@@ -20,9 +20,6 @@ class FICSITNETWORKS_API UFINNetworkConnector : public USceneComponent, public I
 	GENERATED_BODY()
 
 protected:
-	bool searchFor(TSet<const UFINNetworkConnector*>& searched, UFINNetworkConnector* obj) const;
-	void removeConnector(UFINNetworkConnector* connector);
-
 	/**
 	 * The ID of this computer network component.
 	 * Used to unqiuely identify it in the network.
@@ -159,16 +156,22 @@ public:
 	void RemoveCable(AFINNetworkCable* cable);
 
 	/**
+	 * adds the given component to the directly connected component list.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
+    void AddComponent(UObject* comp);
+    
+	/**
+	* removes the given component from the directly connected component list.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
+    void RemoveComponent(UObject* comp);
+
+	/**
 	 * Checks if the given network cables is connected to this connector.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
 	bool IsConnected(UFINNetworkConnector* cable) const;
-
-	/**
-	 * Checks if the given network connector is connected to this connector.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
-	bool SearchFor(UFINNetworkConnector* conn) const;
 
 	/**
 	 * Add the given object to the list of merged objects.

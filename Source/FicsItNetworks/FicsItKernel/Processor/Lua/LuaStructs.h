@@ -7,6 +7,7 @@
 #include "Lua.h"
 #include "LuaProcessorStateStorage.h"
 #include "FicsItKernel/Processor/FicsItFuture.h"
+#include "Network/FINNetworkValues.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -36,7 +37,8 @@ namespace FicsItKernel {
 		};
 
 		typedef TSharedPtr<LuaFutureStruct> LuaFuture;
-		
+
+		void luaStruct(lua_State* L, const FINStruct& Struct);
 		void luaStruct(lua_State* L, FInventoryItem item);
 		void luaStruct(lua_State* L, FItemAmount amount);
 		void luaStruct(lua_State* L, FInventoryStack stack);
