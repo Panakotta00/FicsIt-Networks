@@ -4,6 +4,11 @@ FicsIt-Networks is a mod for Satisfactory, written in C++/BP using Unreal Engine
 
 **If you want to learn more:**
 [please visit the Documentation](https://docs.ficsit.app/ficsit-networks/0.0.1)
+[or the SMR Mod page](https://ficsit.app/mod/8d8gk4imvFanRs)
+
+Discord
+=======
+You can join our [discord server](https://discord.gg/3VfZ6Da) where you can get help for using the mod, where you can share your scripts or just simply discuss the mod.
 
 Work In Progress
 ================
