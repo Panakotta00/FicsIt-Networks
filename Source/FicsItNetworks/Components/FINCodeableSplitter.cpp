@@ -2,7 +2,7 @@
 
 AFINCodeableSplitter::AFINCodeableSplitter() {
 	RootComponent->SetMobility(EComponentMobility::Static);
-	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
+	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->SetMobility(EComponentMobility::Static);
 

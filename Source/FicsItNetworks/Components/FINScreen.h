@@ -4,7 +4,7 @@
 #include "WidgetComponent.h"
 #include "Computer/FINComputerScreen.h"
 #include "Graphics/FINScreenInterface.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINScreen.generated.h"
 
 UCLASS()
@@ -19,7 +19,7 @@ public:
 	TSharedPtr<SWidget> Widget;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFINNetworkConnector* Connector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UWidgetComponent* WidgetComponent = nullptr;

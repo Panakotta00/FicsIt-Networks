@@ -4,9 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "FGSaveInterface.h"
 #include "Buildables/FGBuildableFactory.h"
-#include "FINNetworkConnector.h"
-
-#include <vector>
+#include "FINAdvancedNetworkConnectionComponent.h"
 
 #include "FINNetworkAdapter.generated.h"
 
@@ -45,7 +43,7 @@ public:
 	
 	/** the network connector of the adapter */
 	UPROPERTY()
-	UFINNetworkConnector* Connector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 	
 	/** the network adapter reference attached to the parent factory */
 	UPROPERTY()

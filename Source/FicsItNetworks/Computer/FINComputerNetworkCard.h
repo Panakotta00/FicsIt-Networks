@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FINComputerModule.h"
+#include "Network/FINNetworkCircuitNode.h"
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkMessageInterface.h"
 #include "Network/Signals/FINSignal.h"
@@ -9,7 +10,7 @@
 
 class AFINComputerCase;
 UCLASS()
-class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkComponent, public IFINNetworkMessageInterface {
+class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface {
 	GENERATED_BODY()
 public:
 	/**
@@ -56,17 +57,20 @@ public:
 	virtual void BeginPlay() override;
 	// End AActor
 
+	// Begin IFINNetworkCircuitNode
+	virtual TSet<UObject*> GetConnected_Implementation() const override;
+	virtual UFINNetworkCircuit* GetCircuit_Implementation() const override;
+	virtual void SetCircuit_Implementation(UFINNetworkCircuit* Circuit) override;
+	virtual void NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) override;
+	// End IFINNetworkCircuitNodes
+	
 	// Begin IFINNetworkComponent
 	virtual FGuid GetID_Implementation() const override;
 	virtual FString GetNick_Implementation() const override;
-	virtual void SetNick_Implementation(const FString& nick) override;
-	virtual bool HasNick_Implementation(const FString& nick) override;
+	virtual void SetNick_Implementation(const FString& Nick) override;
+	virtual bool HasNick_Implementation(const FString& Nick) override;
 	virtual TSet<UObject*> GetMerged_Implementation() const override;
-	virtual TSet<UObject*> GetConnected_Implementation() const override;
-	virtual FFINNetworkTrace FindComponent_Implementation(FGuid id) const override;
-	virtual UFINNetworkCircuit* GetCircuit_Implementation() const override;
-	virtual void SetCircuit_Implementation(UFINNetworkCircuit* circuit) override;
-	virtual void NotifyNetworkUpdate_Implementation(int type, const TSet<UObject*>& nodes) override;
+	virtual bool AccessPermitted_Implementation(FGuid ID) const override;
 	// End IFINNetworkComponent
 
 	// Begin IFINNetworkMessageInterface
@@ -84,7 +88,7 @@ public:
 	void netFunc_closeAll();
 
 	UFUNCTION()
-	void netFunc_send(FFINNetworkTrace reciever, int port, FFINDynamicStructHolder args);
+	void netFunc_send(FString receiver, int port, FFINDynamicStructHolder args);
 
 	UFUNCTION()
 	void netFunc_broadcast(int port, FFINDynamicStructHolder args);

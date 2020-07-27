@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FGBuildableHologram.h"
 #include "FGBuildableFactory.h"
-#include "FINNetworkConnector.h"
+#include "FINNetworkConnectionComponent.h"
 #include "Components/SplineMeshComponent.h"
 #include "FINNetworkCableHologram.generated.h"
 
@@ -20,8 +20,8 @@ public:
 	FQuat rot;
 	bool setting = false;
 
-	inline UFINNetworkConnector* c() {
-		return (UFINNetworkConnector*)ptr;
+	inline UFINNetworkConnectionComponent* c() {
+		return (UFINNetworkConnectionComponent*)ptr;
 	}
 
 	inline AFGBuildableFactory* f() {
@@ -70,7 +70,7 @@ public:
 	void onBeginSnap(FFINSnappedInfo a, bool isValid);
 	void onEndSnap(FFINSnappedInfo a);
 	void updateMeshes();
-	UFINNetworkConnector* setupSnapped(FFINSnappedInfo s);
+	UFINNetworkConnectionComponent* setupSnapped(FFINSnappedInfo s);
 
 	bool isSnappedValid();
 	bool isValid();

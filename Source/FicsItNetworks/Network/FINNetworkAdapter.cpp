@@ -2,6 +2,7 @@
 
 #include "FGPowerConnectionComponent.h"
 #include "FGItemPickup_Spawnable.h"
+#include "FINNetworkCable.h"
 
 #include "Components/SceneComponent.h"
 
@@ -29,7 +30,7 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"Root");
 	RootComponent->SetMobility(EComponentMobility::Type::Static);
 
-	Connector = CreateDefaultSubobject<UFINNetworkConnector>(L"Connector");
+	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(L"Connector");
 	Connector->SetupAttachment(RootComponent);
 	Connector->bAddOuterToMerged = false;
 	
@@ -50,9 +51,9 @@ void AFINNetworkAdapter::BeginPlay() {
 	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
 
 	if (!IsValid(Parent)) {
-		for (AFINNetworkCable* cable : Connector->Cables) {
+		for (AFINNetworkCable* cable : Connector->ConnectedCables) {
 			TArray<FInventoryStack> refund;
-			cable->Execute_GetDismantleRefund(cable, refund);
+			IFGDismantleInterface::Execute_GetDismantleRefund(cable, refund);
 			float radius;
 			FVector pos = IFGDismantleInterface::Execute_GetRefundSpawnLocationAndArea(cable, cable->GetActorLocation(), radius);
 			TArray<class AFGItemPickup_Spawnable*> drops;

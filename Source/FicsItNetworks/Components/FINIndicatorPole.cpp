@@ -8,7 +8,7 @@ AFINIndicatorPole::AFINIndicatorPole() {
 	Indicator = CreateDefaultSubobject<UProxyInstancedStaticMeshComponent>("Indicator");
 	Indicator->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	
-	Connector = CreateDefaultSubobject<UFINNetworkConnector>("Connector");
+	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 

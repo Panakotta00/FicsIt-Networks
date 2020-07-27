@@ -4,7 +4,7 @@
 #include "FINComputerGPU.h"
 #include "FINComputerScreen.h"
 #include "Buildables/FGBuildable.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 
 #include "FicsItKernel/FicsItKernel.h"
@@ -30,7 +30,7 @@ class AFINComputerCase : public AFGBuildable {
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
-	UFINNetworkConnector* NetworkConnector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category = "ComputerCase")
 	UFINModuleSystemPanel* Panel = nullptr;

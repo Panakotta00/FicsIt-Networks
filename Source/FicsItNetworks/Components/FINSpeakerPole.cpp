@@ -12,7 +12,7 @@
 #include "SML/util/Logging.h"
 
 AFINSpeakerPole::AFINSpeakerPole() {
-	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
+	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>("AudioComponent");

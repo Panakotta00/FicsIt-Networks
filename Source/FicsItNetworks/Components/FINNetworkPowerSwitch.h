@@ -4,7 +4,7 @@
 #include "Buildables/FGBuildable.h"
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkPowerSwitch.generated.h"
 
 UCLASS()
@@ -15,22 +15,22 @@ public:
 	bool bConnectedHasChanged;
 
 	UPROPERTY(BlueprintReadOnly, SaveGame, Category="NetworkPowerSwitch")
-		bool bConnected;
+	bool bConnected;
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"), Category="NetworkPowerSwitch")
-		UFGPowerConnectionComponent* PowerConnection1 = nullptr;
+	UFGPowerConnectionComponent* PowerConnection1 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "NetworkPowerSwitch")
-		UFGPowerConnectionComponent* PowerConnection2 = nullptr;
+	UFGPowerConnectionComponent* PowerConnection2 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "NetworkPowerSwitch")
-		UFGPowerInfoComponent* PowerInfo1 = nullptr;
+	UFGPowerInfoComponent* PowerInfo1 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "NetworkPowerSwitch")
-		UFGPowerInfoComponent* PowerInfo2 = nullptr;
+	UFGPowerInfoComponent* PowerInfo2 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "NetworkPowerSwitch")
-		UFINNetworkConnector* NetworkConnector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	AFINNetworkPowerSwitch();
 

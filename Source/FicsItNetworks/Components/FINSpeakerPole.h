@@ -2,9 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
-#include "Components/AudioComponent.h"
 #include "FicsItKernel/Network/NetworkFuture.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINSpeakerPole.generated.h"
 
 UCLASS(Blueprintable)
@@ -13,16 +12,16 @@ class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
-		UFINNetworkConnector* NetworkConnector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
-		UAudioComponent* AudioComponent = nullptr;
+	UAudioComponent* AudioComponent = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category="SpeakerPole")
-		FString CurrentSound;
+	FString CurrentSound;
 
 	UPROPERTY(SaveGame)
-		TSet<FFINNetworkTrace> Listeners;
+	TSet<FFINNetworkTrace> Listeners;
 
 	AFINSpeakerPole();
 

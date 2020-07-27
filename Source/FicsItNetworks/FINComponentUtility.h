@@ -2,8 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Sound/SoundWave.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINNetworkConnectionComponent.h"
 #include "FINComponentUtility.generated.h"
 
 /**
@@ -23,7 +22,7 @@ public:
 	 * @return	the neares network connector, nullptr if it was not able to find it
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utility")
-	static UFINNetworkConnector* GetNetworkConnectorFromHit(FHitResult hit);
+	static UFINNetworkConnectionComponent* GetNetworkConnectorFromHit(FHitResult hit);
 
 	/**
 	 * Sets the clipboard to the given string

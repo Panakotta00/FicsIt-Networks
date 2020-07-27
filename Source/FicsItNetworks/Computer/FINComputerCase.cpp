@@ -16,7 +16,7 @@
 #include "util/Logging.h"
 
 AFINComputerCase::AFINComputerCase() {
-	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
+	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->AddMerged(this);
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
@@ -217,13 +217,13 @@ void AFINComputerCase::RemoveScreen(AFINComputerScreen* Screen) {
 
 void AFINComputerCase::AddNetCard(AFINComputerNetworkCard* NetCard) {
 	NetCard->ConnectedComponent = NetworkConnector;
-	NetworkConnector->AddComponent(NetCard);
+	NetworkConnector->AddConnectedNode(NetCard);
 	NetworkCards.Add(NetCard);
 }
 
 void AFINComputerCase::RemoveNetCard(AFINComputerNetworkCard* NetCard) {
 	NetCard->ConnectedComponent = nullptr;
-	NetworkConnector->RemoveComponent(NetCard);
+	NetworkConnector->RemoveConnectedNode(NetCard);
 	NetworkCards.Remove(NetCard);
 }
 

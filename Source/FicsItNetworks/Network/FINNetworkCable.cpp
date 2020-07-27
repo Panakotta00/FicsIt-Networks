@@ -1,6 +1,6 @@
 #include "FINNetworkCable.h"
 
-#include "FINNetworkConnector.h"
+#include "FINNetworkConnectionComponent.h"
 #include "FINNetworkAdapter.h"
 
 #include "SML/util/Logging.h"
@@ -43,18 +43,18 @@ void AFINNetworkCable::BeginPlay() {
 	
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
 
-	Connector1->AddCable(this);
-	Connector2->AddCable(this);
+	Connector1->AddConnectedCable(this);
+	Connector2->AddConnectedCable(this);
 
 	RerunConstructionScripts();
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
 	if (IsValid(Connector1)) {
-		Connector1->RemoveCable(this);
+		Connector1->RemoveConnectedCable(this);
 	}
 	if (IsValid(Connector2)) {
-		Connector2->RemoveCable(this);
+		Connector2->RemoveConnectedCable(this);
 	}
 }
 

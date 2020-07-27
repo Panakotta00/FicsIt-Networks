@@ -6,6 +6,8 @@
 #include "FGPlayerController.h"
 #include "FGPowerConnectionComponent.h"
 
+#include "FINNetworkCable.h"
+
 bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {
 	if (From.ptr == Snapped.ptr) return false;
 	if (From.v && Snapped.v) return isValid() && isSnappedValid();
@@ -22,7 +24,7 @@ bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {
 	return false;
 }
 
-UFINNetworkConnector* AFINNetworkCableHologram::setupSnapped(FFINSnappedInfo s) {
+UFINNetworkConnectionComponent* AFINNetworkCableHologram::setupSnapped(FFINSnappedInfo s) {
 	if (s.isConnector) return s.c();
 	
 	FRotator rotation = s.f()->GetActorRotation();
@@ -68,7 +70,7 @@ int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {
 bool AFINNetworkCableHologram::IsValidHitResult(const FHitResult& hit) const {
 	auto actor = hit.Actor.Get();
 	if (!IsValid(actor)) return false;
-	if (IsValid(actor->GetComponentByClass(UFINNetworkConnector::StaticClass()))
+	if (IsValid(actor->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()))
 		|| (
 			actor->IsA<AFGBuildable>()
 			&&
@@ -138,7 +140,7 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 }
 
 bool AFINNetworkCableHologram::isSnappedValid() {
-	return Snapped.v && (!Snapped.isConnector || (Snapped.c()->Cables.Num() < Snapped.c()->MaxCables));
+	return Snapped.v && (!Snapped.isConnector || (Snapped.c()->ConnectedCables.Num() < Snapped.c()->MaxCables));
 }
 
 void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& hit) {

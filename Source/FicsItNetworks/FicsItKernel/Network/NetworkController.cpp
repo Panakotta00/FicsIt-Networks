@@ -1,10 +1,10 @@
 #include "NetworkController.h"
 
 #include "Network/FINNetworkComponent.h"
-
-#include <map>
+#include "Network/FINNetworkCircuit.h"
 
 #include "Network/FINDynamicStructHolder.h"
+#include "Network/FINNetworkCircuitNode.h"
 
 namespace FicsItKernel {
 	namespace Network {
@@ -42,7 +42,7 @@ namespace FicsItKernel {
 			FGuid guid;
 			if (FGuid::Parse(id, guid)) {
 				if (auto comp = Cast<IFINNetworkComponent>(component)) {
-					return FFINNetworkTrace(component) / *comp->Execute_FindComponent(component, guid);
+					return FFINNetworkTrace(component) / IFINNetworkCircuitNode::Execute_GetCircuit(component)->FindComponent(guid, component).GetObject();
 				}
 			}
 			return FFINNetworkTrace(nullptr);
@@ -51,7 +51,7 @@ namespace FicsItKernel {
 		TSet<FFINNetworkTrace> NetworkController::getComponentByNick(const FString& nick) {
 			if (component->Implements<UFINNetworkComponent>()) {
 				TSet<FFINNetworkTrace> outComps;
-				auto comps = IFINNetworkComponent::Execute_GetCircuit(component)->FindComponentsByNick(nick);
+				auto comps = IFINNetworkCircuitNode::Execute_GetCircuit(component)->FindComponentsByNick(nick, component);
 				for (auto& c : comps) {
 					outComps.Add(FFINNetworkTrace(component) / c);
 				}

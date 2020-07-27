@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "FGBuildable.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINIndicatorPole.generated.h"
 
 UCLASS()
@@ -19,7 +19,7 @@ public:
 	int Height = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, SaveGame)
-	UFINNetworkConnector* Connector;
+	UFINAdvancedNetworkConnectionComponent* Connector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
 	UProxyInstancedStaticMeshComponent* Indicator;

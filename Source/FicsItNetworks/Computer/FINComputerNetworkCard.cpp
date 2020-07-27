@@ -1,6 +1,6 @@
 ﻿#include "FINComputerNetworkCard.h"
 
-
+#include "Network/FINNetworkCircuit.h"
 #include "Network/FINVariadicParameterList.h"
 #include "Network/Signals/FINSignalListener.h"
 #include "Network/Signals/FINSmartSignal.h"
@@ -14,7 +14,7 @@ void AFINComputerNetworkCard::BeginPlay() {
 	// setup circuit
 	if (!Circuit) {
 		Circuit = NewObject<UFINNetworkCircuit>();
-		Circuit->recalculate(this);
+		Circuit->Recalculate(this);
 	}
 }
 
@@ -38,28 +38,25 @@ TSet<UObject*> AFINComputerNetworkCard::GetMerged_Implementation() const {
 	return TSet<UObject*>();
 }
 
-TSet<UObject*> AFINComputerNetworkCard::GetConnected_Implementation() const {
-	TSet<UObject*> arr;
-	arr.Add(ConnectedComponent);
-	return arr;
+bool AFINComputerNetworkCard::AccessPermitted_Implementation(FGuid ID) const {
+	return ID == FGuid() || (ConnectedComponent && ID == IFINNetworkComponent::Execute_GetID(ConnectedComponent));
 }
 
-FFINNetworkTrace AFINComputerNetworkCard::FindComponent_Implementation(FGuid guid) const {
-	UFINNetworkCircuit* circuit = Execute_GetCircuit(this);
-	return FFINNetworkTrace(const_cast<AFINComputerNetworkCard*>(this)) / circuit->FindComponent(guid);
+TSet<UObject*> AFINComputerNetworkCard::GetConnected_Implementation() const {
+	TSet<UObject*> Arr;
+	Arr.Add(ConnectedComponent);
+	return Arr;
 }
 
 UFINNetworkCircuit* AFINComputerNetworkCard::GetCircuit_Implementation() const {
 	return Circuit;
 }
 
-void AFINComputerNetworkCard::SetCircuit_Implementation(UFINNetworkCircuit * circuit) {
-	Circuit = circuit;
+void AFINComputerNetworkCard::SetCircuit_Implementation(UFINNetworkCircuit * Circuit) {
+	this->Circuit = Circuit;
 }
 
-void AFINComputerNetworkCard::NotifyNetworkUpdate_Implementation(int type, const TSet<UObject*>& nodes) {
-	
-}
+void AFINComputerNetworkCard::NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) {}
 
 bool AFINComputerNetworkCard::IsPortOpen(int Port) {
 	return OpenPorts.Contains(Port);
@@ -84,13 +81,15 @@ void AFINComputerNetworkCard::netFunc_closeAll() {
 	OpenPorts.Empty();
 }
 
-void AFINComputerNetworkCard::netFunc_send(FFINNetworkTrace Reciever, int port, FFINDynamicStructHolder args) {
+void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, FFINDynamicStructHolder args) {
 	if (port < 0 || port > 1000) return;
 
-	UObject* Obj = *Reciever;
+	FGuid receiverID;
+	FGuid::Parse(receiver, receiverID);
+	UObject* Obj = Circuit->FindComponent(receiverID, nullptr).GetObject();
 	IFINNetworkMessageInterface* NetMsgI = Cast<IFINNetworkMessageInterface>(Obj);
 	if (NetMsgI) {
-		if (NetMsgI->IsPortOpen(port)) NetMsgI->HandleMessage(Reciever.Reverse(), port, args);
+		if (NetMsgI->IsPortOpen(port)) NetMsgI->HandleMessage(FFINNetworkTrace(Obj) / this, port, args);
 	}
 }
 
@@ -99,7 +98,7 @@ void AFINComputerNetworkCard::netFunc_broadcast(int port, FFINDynamicStructHolde
 	for (UObject* Component : GetCircuit_Implementation()->GetComponents()) {
 		IFINNetworkMessageInterface* NetMsgI = Cast<IFINNetworkMessageInterface>(Component);
 		if (NetMsgI && NetMsgI->IsPortOpen(port)) {
-			NetMsgI->HandleMessage(FFINNetworkTrace(this) / Component, port, args);
+			NetMsgI->HandleMessage(FFINNetworkTrace(Component) / this, port, args);
 		}
 	}
 }
@@ -116,6 +115,6 @@ bool FFINNetworkMessageSignal::Serialize(FArchive& Ar) {
 }
 
 int FFINNetworkMessageSignal::operator>>(FFINValueReader& reader) const {
-	reader << (FINInt)Port;
+	reader << static_cast<FINInt>(Port);
 	return 1 + (**Data >> reader);
 }

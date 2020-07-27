@@ -5,12 +5,12 @@
 
 #include "FGBuildableDockingStation.h"
 #include "FGBuildablePipeReservoir.h"
-#include "FGBuildableRailroadSignal.h"
 #include "FGBuildableRailroadStation.h"
 #include "FGBuildableTrainPlatformCargo.h"
+#include "FGBuildableRailroadSignal.h"
 #include "LuaStructs.h"
 
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINNetworkConnectionComponent.h"
 
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
@@ -305,7 +305,7 @@ namespace FicsItKernel {
 		LuaLibFunc(AActor, getNetworkConnectors, {
 			lua_newtable(L);
 			int i = 1;
-			auto connectors = self->GetComponentsByClass(UFINNetworkConnector::StaticClass());
+			auto connectors = self->GetComponentsByClass(UFINNetworkConnectionComponent::StaticClass());
 			for (auto connector : connectors) {
 				newInstance(L, obj / connector);
 				lua_seti(L, -2, i++);

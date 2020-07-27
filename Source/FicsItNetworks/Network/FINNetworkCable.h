@@ -5,7 +5,7 @@
 #include "Components/SplineMeshComponent.h"
 #include "FINNetworkCable.generated.h"
 
-class UFINNetworkConnector;
+class UFINNetworkConnectionComponent;
 
 UCLASS()
 class FICSITNETWORKS_API AFINNetworkCable : public AFGBuildable {
@@ -13,10 +13,10 @@ class FICSITNETWORKS_API AFINNetworkCable : public AFGBuildable {
 
 public:
 	UPROPERTY(SaveGame)
-	UFINNetworkConnector* Connector1 = nullptr;
+	UFINNetworkConnectionComponent* Connector1 = nullptr;
 
 	UPROPERTY(SaveGame)
-	UFINNetworkConnector* Connector2 = nullptr;
+	UFINNetworkConnectionComponent* Connector2 = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
 	USplineMeshComponent* CableSpline = nullptr;
