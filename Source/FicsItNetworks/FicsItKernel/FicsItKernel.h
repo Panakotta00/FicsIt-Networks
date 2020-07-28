@@ -10,7 +10,7 @@
 #include "FicsItFS/FileSystem.h"
 #include "Network/NetworkController.h"
 #include "Audio/AudioController.h"
-#include "Processor/FicsItFuture.h"
+#include "Network/FINFuture.h"
 
 struct FKernelSystemSerializationInfo;
 
@@ -63,7 +63,7 @@ namespace FicsItKernel {
 		TSharedPtr<FJsonObject> readyToUnpersist = nullptr;
 		TSet<FWeakObjectPtr> gpus;
 		TSet<FWeakObjectPtr> screens;
-		std::queue<TSharedPtr<FicsItFuture>> futureQueue;
+		std::queue<TSharedPtr<TFINDynamicStruct<FFINFuture>>> futureQueue;
 		
 	public:
 		/**
@@ -157,7 +157,7 @@ namespace FicsItKernel {
 		 *
 		 * @param[in]	future	shared ptr to the future you want to resolve
 		 */
-		void pushFuture(TSharedPtr<FicsItFuture> future);
+		void pushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> future);
 
 		/**
 		 * This function should get executed every main thread tick.

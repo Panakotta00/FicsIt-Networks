@@ -2,9 +2,46 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
-#include "FicsItKernel/Network/NetworkFuture.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Network/FINFuture.h"
+
 #include "FINSpeakerPole.generated.h"
+
+class AFINSpeakerPole;
+
+USTRUCT()
+struct FFINSpeakersPlaySoundFuture : public FFINFutureSimpleDone {
+	GENERATED_BODY()
+
+	FFINSpeakersPlaySoundFuture() = default;
+	FFINSpeakersPlaySoundFuture(AFINSpeakerPole* Speakers, const FString& Sound, float Start) : Speakers(Speakers), Sound(Sound), Start(Start) {}
+	
+	UPROPERTY(SaveGame)
+	AFINSpeakerPole* Speakers = nullptr;
+
+	UPROPERTY(SaveGame)
+	FString Sound = "";
+
+	UPROPERTY(SaveGame)
+	float Start = 0.0f;
+
+	virtual void Execute() override;
+	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
+};
+
+USTRUCT()
+struct FFINSpeakersStopSoundFuture : public FFINFutureSimpleDone {
+	GENERATED_BODY()
+
+	FFINSpeakersStopSoundFuture() = default;
+	FFINSpeakersStopSoundFuture(AFINSpeakerPole* Speakers) : Speakers(Speakers) {}
+	
+	UPROPERTY(SaveGame)
+    AFINSpeakerPole* Speakers = nullptr;
+
+	virtual void Execute() override;
+	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
+};
 
 UCLASS(Blueprintable)
 class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
@@ -47,14 +84,14 @@ public:
 	 * If able to play the sound, emits a play sound signal.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-	FFINNetworkFuture netFunc_playSound(const FString& sound, float startPoint);
+	FFINSpeakersPlaySoundFuture netFunc_playSound(const FString& sound, float startPoint);
 
 	/**
 	 * Stops the current playing sound.
 	 * Emits a stop sound signal if it actually was able to stop the current playing sound.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-	FFINNetworkFuture netFunc_stopSound();
+	FFINDynamicStructHolder netFunc_stopSound();
 
 	/**
 	 * Notifies when the state of the speaker pole has changed.
@@ -71,40 +108,3 @@ public:
 	 */
 	USoundWave* LoadSoundFromFile(const FString& sound);
 };
-
-USTRUCT()
-struct FFINSpeakersPlaySoundInData {
-	GENERATED_BODY()
-	
-	UPROPERTY()
-	AFINSpeakerPole* Speakers = nullptr;
-
-	FString Sound = "";
-	float Start = 0.0f;
-
-	bool Serialize(FArchive& Ar) {
-		Ar << Speakers;
-		Ar << Sound;
-		Ar << Start;
-		return true;
-	}
-};
-void inline operator<<(FArchive& Ar, FFINSpeakersPlaySoundInData& Data) {
-	Data.Serialize(Ar);
-}
-
-USTRUCT()
-struct FFINSpeakersJustSelfInData {
-	GENERATED_BODY()
-	
-	UPROPERTY()
-    AFINSpeakerPole* Speakers = nullptr;
-
-	bool Serialize(FArchive& Ar) {
-		Ar << Speakers;
-		return true;
-	}
-};
-void inline operator<<(FArchive& Ar, FFINSpeakersJustSelfInData& Data) {
-	Data.Serialize(Ar);
-}

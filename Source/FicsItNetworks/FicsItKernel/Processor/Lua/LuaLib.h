@@ -8,65 +8,11 @@
 #include "Network/FINHookSubsystem.h"
 #include "Delegates/DelegateSignatureImpl.inl"
 #include "mod/hooking.h"
+#include "Network/FINFuture.h"
 #include "Network/Signals/FINSmartSignal.h"
 
 
 #include "LuaLib.generated.h"
-
-namespace FicsItKernel {
-	namespace Lua {
-		/**
-		* This function is used to manage the list pre defines lua library functions
-		* which will get filled with registering closures static initialization.
-		*/
-		class LuaLib {
-		public:
-			/**
-			 * The function type getting called when the LuaLib should get registered.
-			 * The arguments should output the instance type, the instance type name
-			 * and a set of LuaLibFunc/LuaLibClassFunc with name pairs.
-			 */
-			typedef TFunction<void(UClass*&, FString&, TArray<TPair<FString, LuaLibFunc>>&, TArray<TPair<FString, LuaLibProperty>>&, TSubclassOf<UFINHook>&)> ToRegisterFunc;
-			typedef TFunction<void(UClass*&, FString&, TArray<TPair<FString, LuaLibClassFunc>>&)> ToRegisterClassFunc;
-
-		private:
-			/**
-			 * A set with to register functions which will get used to register
-			 * when the library should get registered.
-			 */
-			TArray<ToRegisterFunc> toRegister;
-			TArray<ToRegisterClassFunc> toRegisterClasses;
-			
-			LuaLib() = default;
-		public:
-			/**
-			* Returns the instance of the LuaLib singleton.
-			*
-			* @return	instance of the LuaLib singleton.
-			*/
-			static LuaLib* get();
-
-			/**
-			 * Gets called when the module gets load to register all functions needed to get registered.
-			 */
-			void registerLib();
-
-			/**
-			 * Adds a new register function to the register functions.
-			 *
-			 * @param[in]	func	the to register func
-			 */
-			void registerRegFunc(const ToRegisterFunc& func);
-
-			/**
-			 * Adds a new register function to the register class functions.
-			 *
-			 * @param[in]	func	the to register class func
-			 */
-			void registerRegFunc(const ToRegisterClassFunc& func);
-		};
-	}
-}
 
 UCLASS()
 class UFINTrainHook : public UFINHook {
@@ -215,22 +161,24 @@ public:
 };
 
 USTRUCT()
-struct FFINManufacturerSetRecipeInData {
+struct FFINManufacturerSetRecipeFuture : public FFINFutureSimpleDone {
 	GENERATED_BODY()
 
+	UPROPERTY(SaveGame)
 	TWeakObjectPtr<AFGBuildableManufacturer> Manufacturer;
+
+	UPROPERTY(SaveGame)
 	TSubclassOf<UFGRecipe> Recipe;
 
-	FFINManufacturerSetRecipeInData() = default;
-	FFINManufacturerSetRecipeInData(TWeakObjectPtr<AFGBuildableManufacturer> Manu, TSubclassOf<UFGRecipe> Recipe) : Manufacturer(Manu), Recipe(Recipe) {}
+	UPROPERTY(SaveGame)
+	bool bGotSet = false;
+	
+	FFINManufacturerSetRecipeFuture() = default;
+	FFINManufacturerSetRecipeFuture(TWeakObjectPtr<AFGBuildableManufacturer> Manu, TSubclassOf<UFGRecipe> Recipe) : Manufacturer(Manu), Recipe(Recipe) {}
 
-	inline bool Serialize(FArchive& Ar) {
-		Ar << Manufacturer;
-		Ar << Recipe;
-		return true;
+	virtual void Execute() override;
+	virtual int operator>>(FFINValueReader& Reader) const override {
+		Reader << bGotSet;
+		return 1;
 	}
 };
-
-inline void operator<<(FArchive& Ar, FFINManufacturerSetRecipeInData& InData) {
-	InData.Serialize(Ar);
-}

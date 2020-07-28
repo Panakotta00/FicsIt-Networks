@@ -24,6 +24,9 @@ public:
 	~FFINDynamicStructHolder();
 	FFINDynamicStructHolder& operator=(const FFINDynamicStructHolder& Other);
 
+	template<typename T>
+	FFINDynamicStructHolder(const T& Struct) : FFINDynamicStructHolder(Copy(T::StaticStruct(), &Struct)) {}
+
 	static FFINDynamicStructHolder Copy(UScriptStruct* Struct, const void* Data);
 	
 	bool Serialize(FArchive& Ar);

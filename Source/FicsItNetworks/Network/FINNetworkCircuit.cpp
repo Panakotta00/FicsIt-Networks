@@ -36,6 +36,7 @@ UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* Circuit) {
 	}
 	for (const TSoftObjectPtr<UObject>& Node : From->Nodes) {
 		UObject* Obj = Node.Get();
+		if (!Obj) continue;
 		IFINNetworkCircuitNode::Execute_SetCircuit(Obj, To);
 		IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Obj, 0, ToNodes);
 	}
@@ -47,7 +48,7 @@ UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* Circuit) {
 	}
 	for (const TSoftObjectPtr<UObject>& Node : To->Nodes) {
 		UObject* Obj = Node.Get();
-		IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Obj, 0, FromNodes);
+		if (Obj) IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Obj, 0, FromNodes);
 	}
 
 	To->Nodes.Append(From->Nodes);
@@ -93,7 +94,7 @@ TSet<UObject*> UFINNetworkCircuit::GetComponents() {
 	TSet<UObject*> Comps;
 	for (const TSoftObjectPtr<UObject>& Node : Nodes) {
 		UObject* Obj = Node.Get();
-		if (Obj->Implements<UFINNetworkComponent>()) Comps.Add(Obj);
+		if (Obj && Obj->Implements<UFINNetworkComponent>()) Comps.Add(Obj);
 	}
 	return Comps;
 }
@@ -105,11 +106,14 @@ bool UFINNetworkCircuit::IsNodeConnected(const TScriptInterface<IFINNetworkCircu
 
 void UFINNetworkCircuit::DisconnectNodes(const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B) {
 	if (!IsNodeConnected(A, B)) {
-		UFINNetworkCircuit* CircuitA = NewObject<UFINNetworkCircuit>();
+		UFINNetworkCircuit* CircuitA = IFINNetworkCircuitNode::Execute_GetCircuit(A.GetObject());
+		UFINNetworkCircuit* CircuitB = IFINNetworkCircuitNode::Execute_GetCircuit(B.GetObject());
+		if (CircuitA != CircuitB) return;
+		
+		CircuitA = NewObject<UFINNetworkCircuit>();
 		IFINNetworkCircuitNode::Execute_SetCircuit(A.GetObject(), CircuitA);
 		CircuitA->Recalculate(A);
 
-		UFINNetworkCircuit* CircuitB = IFINNetworkCircuitNode::Execute_GetCircuit(B.GetObject());
 		
 		TSet<UObject*> NodesA;
 		for (const TSoftObjectPtr<UObject>& Node : CircuitA->Nodes) {

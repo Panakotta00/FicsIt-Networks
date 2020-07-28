@@ -562,7 +562,7 @@ namespace FicsItKernel {
 			lua_pop(L, 1);
 			
 			setupInstanceSystem(L);
-			setupStructs(L);
+			FFINLuaStructRegistry::Get().Setup(L);
 			setupComponentAPI(L);
 			setupEventAPI(L);
 			setupFileSystemAPI(L);

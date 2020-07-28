@@ -3,6 +3,7 @@
 #include "KernelSystemSerializationInfo.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "Network/FINFuture.h"
 #include "Processor/Lua/LuaProcessor.h"
 #include "SML/util/Logging.h"
 
@@ -87,15 +88,15 @@ namespace FicsItKernel {
 		drives.erase(s);
 	}
 
-	void KernelSystem::pushFuture(TSharedPtr<FicsItFuture> future) {
+	void KernelSystem::pushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> future) {
 		futureQueue.push(future);
 	}
 
 	void KernelSystem::handleFutures() {
 		while (futureQueue.size() > 0) {
-			TSharedPtr<FicsItFuture> future = futureQueue.front();
+			TSharedPtr<TFINDynamicStruct<FFINFuture>> future = futureQueue.front();
 			futureQueue.pop();
-			future->Execute();
+			(*future)->Execute();
 		}
 	}
 

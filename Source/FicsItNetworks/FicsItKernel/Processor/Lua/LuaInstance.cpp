@@ -502,7 +502,7 @@ namespace FicsItKernel {
 			
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// Instance, FuncName, InstanceCache
-			if (lua_getfield(L, -1, memberName.c_str()) != LUA_NIL) {												// Instance, FuncName, InstanceCache, CachedFunc
+			if (lua_getfield(L, -1, memberName.c_str()) != LUA_TNIL) {												// Instance, FuncName, InstanceCache, CachedFunc
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}																											// Instance, FuncName, InstanceCache, nil
 			
@@ -802,7 +802,7 @@ namespace FicsItKernel {
 
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// ClassInstance, FuncName, InstanceCache
-			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*funcName)) != LUA_NIL) {												// ClassInstance, FuncName, InstanceCache, CachedFunc
+			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*funcName)) != LUA_TNIL) {												// ClassInstance, FuncName, InstanceCache, CachedFunc
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}																											// ClassInstance, FuncName, InstanceCache, nil
 			

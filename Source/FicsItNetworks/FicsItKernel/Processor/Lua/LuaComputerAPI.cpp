@@ -1,6 +1,5 @@
 #include "LuaComputerAPI.h"
 
-
 #include "FGTimeSubsystem.h"
 #include "FINStateEEPROMLua.h"
 #include "LuaInstance.h"
@@ -35,9 +34,9 @@ namespace FicsItKernel {
 
 		LuaFunc(luaComputerPanic)
 		    kernel->crash(KernelCrash(std::string("PANIC! '") + luaL_checkstring(L, 1) + "'"));
-			kernel->pushFuture(MakeShared<SimpleFuture>([kernel]() {
+			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
 				kernel->getAudio()->beep();
-			}));
+			})));
 			lua_yield(L, 0);
 			return 0;
 		}
@@ -49,17 +48,11 @@ namespace FicsItKernel {
 		LuaFunc(luaComputerSkip)
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
-#pragma optimize("", on)
-
-		void luaComputerBeepResolve(TSharedRef<FFINDynamicStructHolder> In, TSharedRef<FFINDynamicStructHolder> Out) {
-			FFINKernelFutureData& InData = In->Get<FFINKernelFutureData>();
-			InData.kernel->getAudio()->beep();
-		}
-
-		RegisterFuturePointer(luaComputerBeepResolve, luaComputerBeepResolve)
 
 		LuaFunc(luaComputerBeep)
-			luaFuture(L, MakeLuaFuture(MakeDynamicStruct(FFINKernelFutureData, kernel), nullptr, luaComputerBeepResolve, nullptr));
+			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
+			    kernel->getAudio()->beep();
+			})));
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 

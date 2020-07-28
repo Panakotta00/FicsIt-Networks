@@ -102,11 +102,11 @@ bool AFINCodeableSplitter::netFunc_transferItem(int output) {
 	return false;
 }
 
-UClass* AFINCodeableSplitter::netFunc_getInput() {
+FInventoryItem AFINCodeableSplitter::netFunc_getInput() {
 	if (InputQueue.Num() > 0) {
-		return InputQueue[0].ItemClass;
+		return InputQueue[0];
 	}
-	return nullptr;
+	return FInventoryItem();
 }
 
 bool AFINCodeableSplitter::netFunc_canOutput(int output) {
@@ -121,13 +121,10 @@ TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(int output) {
 	switch (output) {
 	case 0:
 		return OutputQueue1;
-		break;
 	case 1:
 		return OutputQueue2;
-		break;
 	default:
 		return OutputQueue3;
-		break;
 	}
 }
 

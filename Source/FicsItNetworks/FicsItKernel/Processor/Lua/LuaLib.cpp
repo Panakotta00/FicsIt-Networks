@@ -26,6 +26,9 @@
 #include "FGLocomotive.h"
 #include "FGBuildableRailroadSwitchControl.h"
 #include "FGPipeSubsystem.h"
+#include "FINGlobalRegisterHelper.h"
+#include "Utils/FINTimeTableStop.h"
+#include "Utils/FINTrackGraph.h"
 
 #define LuaLibTypeRegName(ClassName) ClassName ## _Reg
 #define LuaLibFuncName(ClassName, FuncName) ClassName ## _ ## FuncName
@@ -120,16 +123,20 @@ namespace FicsItKernel {
 			TArray<TPair<FString, LuaLibFunc>> funcs;
 			TArray<TPair<FString, LuaLibProperty>> props;
 			FString name;
-			TFunction<void(TSubclassOf<UFINHook>&)> hook;
+			TFunction<void(TSubclassOf<UFINHook>&)> hook = [](TSubclassOf<UFINHook>& H) { H = nullptr; };
 
 			LuaLibType() {
 				this->hook = [](TSubclassOf<UFINHook>& hook){ hook = nullptr; };
-				LuaLib::get()->registerRegFunc([this](UClass*& type, FString& name, TArray<TPair<FString, LuaLibFunc>>& funcs, TArray<TPair<FString, LuaLibProperty>>& props, TSubclassOf<UFINHook>& hook) {
-					type = T::StaticClass();
-					name = this->name;
-					funcs = this->funcs;
-					props = this->props;
-					this->hook(hook);
+				FFINGlobalRegisterHelper::Get().AddFunction([this]() {
+					LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
+					reg->registerType(T::StaticClass(), this->name, false);
+					for (const TPair<FString, LuaLibFunc>& Func : this->funcs) reg->registerFunction(T::StaticClass(), Func.Key, Func.Value);
+					for (const TPair<FString, LuaLibProperty>& Prop : this->props) reg->registerProperty(T::StaticClass(), Prop.Key, Prop.Value);
+					if (hook) {
+						TSubclassOf<UFINHook> HookType;
+						hook(HookType);
+						if (HookType) AFINHookSubsystem::RegisterHook(T::StaticClass(), HookType);
+					}
 				});
 			}
 			
@@ -172,10 +179,11 @@ namespace FicsItKernel {
 			FString name;
 
 			LuaLibClassType() {
-				LuaLib::get()->registerRegFunc([this](UClass*& type, FString& name, TArray<TPair<FString, LuaLibClassFunc>>& funcs) {
-					type = T::StaticClass();
-					name = this->name;
-					funcs = this->funcs;
+				FFINGlobalRegisterHelper::AddFunction([this]() {
+					LuaInstanceRegistry::get()->registerType(T::StaticClass(), this->name, true);
+					for (const TPair<FString, LuaLibClassFunc>& Func : funcs) {
+						LuaInstanceRegistry::get()->registerClassFunction(T::StaticClass(), Func.Key, Func.Value);
+					}
 				});
 			}
 			
@@ -198,50 +206,6 @@ namespace FicsItKernel {
 				}
 			};
 		};
-		
-		LuaLib* LuaLib::get() {
-			static LuaLib* instance = nullptr;
-			if (!instance) instance = new LuaLib();
-			return instance;
-		}
-
-		void LuaLib::registerLib() {
-			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
-			for (const ToRegisterFunc& regfunc : toRegister) {
-				UClass* type;
-				FString typeName;
-				TArray<TPair<FString, LuaLibFunc>> funcs;
-				TArray<TPair<FString, LuaLibProperty>> props;
-				TSubclassOf<UFINHook> hook = nullptr;
-				regfunc(type, typeName, funcs, props, hook);
-				reg->registerType(type, typeName, false);
-				for (const TPair<FString, LuaLibFunc> func : funcs) {
-					reg->registerFunction(type, func.Key, func.Value);
-				}
-				for (const TPair<FString, LuaLibProperty> prop : props) {
-					reg->registerProperty(type, prop.Key, prop.Value);
-				}
-				if (hook) AFINHookSubsystem::RegisterHook(type, hook);
-			}
-			for (const ToRegisterClassFunc& regfunc : toRegisterClasses) {
-				UClass* type;
-				FString typeName;
-				TArray<TPair<FString, LuaLibClassFunc>> funcs;
-				regfunc(type, typeName, funcs);
-				reg->registerType(type, typeName, true);
-				for (const TPair<FString, LuaLibClassFunc> func : funcs) {
-					reg->registerClassFunction(type, func.Key, func.Value);
-				}
-			}
-		}
-
-		void LuaLib::registerRegFunc(const ToRegisterFunc& func) {
-			toRegister.Add(func);
-		}
-
-		void LuaLib::registerRegFunc(const ToRegisterClassFunc& func) {
-			toRegisterClasses.Add(func);
-		}
 
 		/* #################### */
 		/* # Object Instances # */
@@ -272,32 +236,35 @@ namespace FicsItKernel {
 		LuaLibFunc(AActor, getPowerConnectors, {
 			lua_newtable(L);
 			int i = 1;
-			auto connectors = self->GetComponentsByClass(UFGPowerConnectionComponent::StaticClass());
-			for (auto connector : connectors) {
-				newInstance(L, obj / connector);
-				lua_seti(L, -2, i++);
-			}
+			for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+                if (!prop->PropertyClass->IsChildOf(UFGPowerConnectionComponent::StaticClass())) continue;
+                UObject* inventory = *prop->ContainerPtrToValuePtr<UObject*>(self);
+                newInstance(L, obj / inventory);
+                lua_seti(L, -2, i++);
+            }
 			return 1;
 		})
 		
 		LuaLibFunc(AActor, getFactoryConnectors, {
 			lua_newtable(L);
 			int i = 1;
-			auto connectors = self->GetComponentsByClass(UFGFactoryConnectionComponent::StaticClass());
-			for (auto connector : connectors) {
-				newInstance(L, obj / connector);
-				lua_seti(L, -2, i++);
-			}
+			for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+                if (!prop->PropertyClass->IsChildOf(UFGFactoryConnectionComponent::StaticClass())) continue;
+                UObject* inventory = *prop->ContainerPtrToValuePtr<UObject*>(self);
+                newInstance(L, obj / inventory);
+                lua_seti(L, -2, i++);
+            }
 			return 1;
 		})
 		
 		LuaLibFunc(AActor, getInventories, {
 			lua_newtable(L);
 			int i = 1;
-			auto connectors = self->GetComponentsByClass(UFGInventoryComponent::StaticClass());
-			for (auto connector : connectors) {
-				newInstance(L, obj / connector);
-				lua_seti(L, -2, i++);
+			for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+				if (!prop->PropertyClass->IsChildOf(UFGInventoryComponent::StaticClass())) continue;
+				UObject* inventory = *prop->ContainerPtrToValuePtr<UObject*>(self);
+		        newInstance(L, obj / inventory);
+		        lua_seti(L, -2, i++);
 			}
 			return 1;
 		})
@@ -305,11 +272,12 @@ namespace FicsItKernel {
 		LuaLibFunc(AActor, getNetworkConnectors, {
 			lua_newtable(L);
 			int i = 1;
-			auto connectors = self->GetComponentsByClass(UFINNetworkConnectionComponent::StaticClass());
-			for (auto connector : connectors) {
-				newInstance(L, obj / connector);
-				lua_seti(L, -2, i++);
-			}
+			for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+                if (!prop->PropertyClass->IsChildOf(UFINNetworkConnectionComponent::StaticClass())) continue;
+                UObject* connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
+                newInstance(L, obj / connector);
+                lua_seti(L, -2, i++);
+            }
 			return 1;
 		})
 
@@ -489,40 +457,12 @@ namespace FicsItKernel {
 			return 1;
 		})
 
-		void ManufacturerSetRecipeResolve(TSharedRef<FFINDynamicStructHolder> In, TSharedRef<FFINDynamicStructHolder> Out) {
-			TArray<TSubclassOf<UFGRecipe>> recipes;
-			FFINManufacturerSetRecipeInData& InData = In->Get<FFINManufacturerSetRecipeInData>();
-			AFGBuildableManufacturer* self = InData.Manufacturer.Get();
-			self->GetAvailableRecipes(recipes);
-			if (recipes.Contains(InData.Recipe)) {
-				TArray<FInventoryStack> stacks;
-				self->GetInputInventory()->GetInventoryStacks(stacks);
-				self->GetOutputInventory()->AddStacks(stacks);
-				self->SetRecipe(InData.Recipe);
-				Out->Get<FFINBoolData>().Data = true;
-			} else {
-				Out->Get<FFINBoolData>().Data = false;
-			}
-		}
-
-		RegisterFuturePointer(ManufacturerSetRecipeResolve, &ManufacturerSetRecipeResolve)
-
-		int ManufacturerSetRecipeRetrieve(lua_State* L, TSharedRef<FFINDynamicStructHolder> In) {
-			lua_pushboolean(L, In->Get<FFINBoolData>().Data);
-			return 1;
-		}
-		RegisterFuturePointer(ManufacturerSetRecipeRetrieve, &ManufacturerSetRecipeRetrieve)
-		
 		LuaLibFunc(AFGBuildableManufacturer, setRecipe, {
 			if (args < 1) {
 				return 0;
 			}
 			TSubclassOf<UFGRecipe> recipe = getClassInstance<UFGRecipe>(L,1);
-			TSharedPtr<FFINDynamicStructHolder> holder1;
-			TSharedPtr<FFINDynamicStructHolder> holder2;
-			luaFuture(L, MakeShared<LuaFutureStruct>(holder1 = MakeShared<FFINDynamicStructHolder>(FFINManufacturerSetRecipeInData::StaticStruct()), holder2 = MakeShared<FFINDynamicStructHolder>(FFINBoolData::StaticStruct()), ManufacturerSetRecipeResolve, ManufacturerSetRecipeRetrieve));
-			holder1->Get<FFINManufacturerSetRecipeInData>().Manufacturer = self;
-			holder1->Get<FFINManufacturerSetRecipeInData>().Recipe = recipe;
+			luaStruct(L, FFINManufacturerSetRecipeFuture(self, recipe));
 			return 1;
 		})
 
@@ -543,7 +483,7 @@ namespace FicsItKernel {
 		LuaLibTypeDecl(AFGBuildableTrainPlatform, TrainPlatform)
 
 		LuaLibFunc(AFGBuildableTrainPlatform, getTrackGraph, {
-			luaTrackGraph(L, obj, self->GetTrackGraphID());
+			luaStruct(L, FFINTrackGraph{obj, self->GetTrackGraphID()});
 			return 1;
 		})
 
@@ -632,7 +572,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGRailroadVehicle, getTrackGraph, {
-			luaTrackGraph(L, obj, self->GetTrackGraphID());
+			luaStruct(L, FFINTrackGraph{obj, self->GetTrackGraphID()});
 			return 1;
 		})
 
@@ -735,7 +675,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGTrain, getTrackGraph, {
-			luaTrackGraph(L, obj, self->GetTrackGraphID());
+			luaStruct(L, FFINTrackGraph{obj, self->GetTrackGraphID()});
 			return 1;
 		})
 
@@ -818,7 +758,7 @@ namespace FicsItKernel {
 			self->GetStops(stops);
 			for (int i = 0; i < stops.Num(); ++i) {
 				const FTimeTableStop& stop = stops[i];
-				luaTimeTableStop(L, obj / stop.Station->GetStation(), stop.Duration);
+				luaStruct(L, FFINTimeTableStop{obj / stop.Station->GetStation(), stop.Duration});
 			}
 			return 1;
 		})
@@ -828,7 +768,7 @@ namespace FicsItKernel {
 			TArray<FTimeTableStop> stops;
 			lua_pushnil(L);
 			while (lua_next(L, 1) != 0) {
-				stops.Add(luaGetTimeTableStop(L, -1));
+				stops.Add(luaGetStruct<FFINTimeTableStop>(L, -1));
 				lua_pop(L, 1);
 			}
 			lua_pushboolean(L, self->SetStops(stops));
@@ -843,7 +783,7 @@ namespace FicsItKernel {
 		LuaLibFunc(AFGRailroadTimeTable, getStop, {
 			FTimeTableStop stop = self->GetStop(luaL_checkinteger(L, 1));
 			if (IsValid(stop.Station)) {
-				luaTimeTableStop(L, obj / stop.Station->GetStation(), stop.Duration);
+				luaStruct(L, FFINTimeTableStop{obj / stop.Station->GetStation(), stop.Duration});
 			} else {
 				lua_pushnil(L);
 			}
@@ -899,7 +839,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGBuildableRailroadTrack, getTrackGraph, {
-			luaTrackGraph(L, obj, self->GetTrackGraphID());
+			luaStruct(L, FFINTrackGraph{obj, self->GetTrackGraphID()});
 			return 1;
 		})
 		
@@ -1137,3 +1077,25 @@ namespace FicsItKernel {
 		// End UFGItemDescriptor
 	}
 }
+
+/**
+ * Futures
+ */
+
+void FFINManufacturerSetRecipeFuture::Execute() {
+	TArray<TSubclassOf<UFGRecipe>> recipes;
+	AFGBuildableManufacturer* self = Manufacturer.Get();
+	self->GetAvailableRecipes(recipes);
+	if (recipes.Contains(Recipe)) {
+		TArray<FInventoryStack> stacks;
+		self->GetInputInventory()->GetInventoryStacks(stacks);
+		self->GetOutputInventory()->AddStacks(stacks);
+		self->SetRecipe(Recipe);
+		bGotSet = true;
+	} else {
+		bGotSet = false;
+	}
+	bDone = true;
+}
+
+

@@ -12,6 +12,7 @@
 #include "SML/mod/hooking.h"
 
 #include "FINComponentUtility.h"
+#include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
 #include "Computer/FINComputerProcessor.h"
 #include "Network/FINNetworkConnectionComponent.h"
@@ -141,7 +142,7 @@ void FFicsItNetworksModule::StartupModule(){
 	})
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
-	FicsItKernel::Lua::LuaLib::get()->registerLib();
+	FFINGlobalRegisterHelper::Register();
 }
 void FFicsItNetworksModule::ShutdownModule(){ }
 

@@ -72,7 +72,7 @@ public:
 	 * Allows to peek the next item at the input queue waiting to get transfered.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Components|CodeableSplitter")
-	UClass* netFunc_getInput();
+	FInventoryItem netFunc_getInput();
 
 	/**
 	 * Checks if the output queue witht the given index is able to contain one more item.
