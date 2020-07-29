@@ -15,18 +15,6 @@
 namespace FicsItKernel {
 	namespace Lua {
 		/**
-		 * Declared the function type for instance library functions.
-		 * Used when a instance cfunction gets called which refers to a library function.
-		 */
-		typedef TFunction<int(lua_State*, int, const FFINNetworkTrace&)> LuaLibFunc;
-
-		/**
-		 * Declares the function type for class instance library functions.
-		 * Used when a class instance cfunction gets called which refers to a class library function.
-		 */
-		typedef TFunction<int(lua_State*, int, UClass*)> LuaLibClassFunc;
-
-		/**
 		 * Declares the functions used for setting and getting
 		 * a property value from a instance.
 		 */
@@ -40,7 +28,7 @@ namespace FicsItKernel {
 		 * Structure used in the userdata representing a instance.
 		 */
 		struct LuaInstance {
-			FFINNetworkTrace trace;
+			FFINNetworkTrace Trace;
 		};
 
 		/**
@@ -56,6 +44,18 @@ namespace FicsItKernel {
 		struct LuaClassInstance {
 			UClass* clazz;
 		};
+
+		/**
+		 * Declared the function type for instance library functions.
+		 * Used when a instance cfunction gets called which refers to a library function.
+		 */
+		typedef TFunction<int(lua_State*, int, LuaInstance*)> LuaLibFunc;
+
+		/**
+		 * Declares the function type for class instance library functions.
+		 * Used when a class instance cfunction gets called which refers to a class library function.
+		 */
+		typedef TFunction<int(lua_State*, int, UClass*)> LuaLibClassFunc;
 
 		/**
 		 * Manages the registry of instance types and library functions.
@@ -263,7 +263,7 @@ namespace FicsItKernel {
 			 * @param[in]	type	the type you want to get the member name list from
 			 * @return	set with all member names
 			 */
-			std::set<FString> getMemberNames(UClass* type);
+			std::set<TTuple<FString, int>> getMembers(UClass* type);
 
 			/**
 			* Returns all registered class function names of the given class instance type.
@@ -274,13 +274,13 @@ namespace FicsItKernel {
 			*/
 			std::set<FString> getClassFunctionNames(UClass* type);
 		};
-		
+
 		/**
 		 * Creates a new Lua Instance for the given network trace and pushes it onto the given stack.
 		 * Or pushes nil if not able to create the instance.
 		 * 
-		 * @param[in]	L		the lua state where the instance should get created.
-		 * @param[in]	obj		the obj you want to create the lua instance for.
+		 * @param[in]	L					the lua state where the instance should get created.
+		 * @param[in]	obj					the obj you want to create the lua instance for.
 		 * @return	returns true if the instance got created successfully.
 		 */
 		bool newInstance(lua_State* L, FFINNetworkTrace obj);

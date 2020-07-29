@@ -163,6 +163,10 @@ private:
 public:
 	AFINComputerGPUT1();
 
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("GPUT1"); }
+	// End IFINNetworkCustomType
+
 	virtual TSharedPtr<SWidget> CreateWidget() override;
 
 	/**

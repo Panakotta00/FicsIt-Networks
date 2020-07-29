@@ -5,10 +5,12 @@
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Network/FINNetworkCustomType.h"
+
 #include "FINNetworkPowerSwitch.generated.h"
 
 UCLASS()
-class AFINNetworkPowerSwitch : public AFGBuildable {
+class AFINNetworkPowerSwitch : public AFGBuildable, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
@@ -42,6 +44,10 @@ public:
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
+
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("PowerSwitch"); }
+	// End IFINNetworkCustomType
 
 	/**
 	 * Changes the connection state of the power switch.

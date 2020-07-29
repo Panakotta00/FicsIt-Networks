@@ -3,6 +3,7 @@
 #include "FINComputerModule.h"
 #include "Network/FINNetworkCircuitNode.h"
 #include "Network/FINNetworkComponent.h"
+#include "Network/FINNetworkCustomType.h"
 #include "Network/FINNetworkMessageInterface.h"
 #include "Network/Signals/FINSignal.h"
 
@@ -10,7 +11,7 @@
 
 class AFINComputerCase;
 UCLASS()
-class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface {
+class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface, public IFINNetworkCustomType {
 	GENERATED_BODY()
 public:
 	/**
@@ -69,7 +70,7 @@ public:
 	virtual FString GetNick_Implementation() const override;
 	virtual void SetNick_Implementation(const FString& Nick) override;
 	virtual bool HasNick_Implementation(const FString& Nick) override;
-	virtual TSet<UObject*> GetMerged_Implementation() const override;
+	virtual UObject* GetInstanceRedirect_Implementation() const override;
 	virtual bool AccessPermitted_Implementation(FGuid ID) const override;
 	// End IFINNetworkComponent
 
@@ -77,6 +78,10 @@ public:
 	virtual bool IsPortOpen(int Port) override;
 	virtual void HandleMessage(FFINNetworkTrace Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) override;
 	// End IFINNetworkMessageInterface
+
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("NetworkCard"); }
+	// End IFINNetworkCustomType
 
 	UFUNCTION()
 	void netFunc_open(int port);

@@ -32,21 +32,6 @@ Parameters::
 
 Stops the current playing sound
 
-==== `string[] getSounds()`
-
-Returns a array of paths to available soundfiles allowing for dynamic sound lookup.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|string[]
-|string[]
-|array of paths the sound files without the `.ogg` file ending
-|===
-
 ==== `setRange(number range)`
 
 Sets the range in which the speaker is hearable.

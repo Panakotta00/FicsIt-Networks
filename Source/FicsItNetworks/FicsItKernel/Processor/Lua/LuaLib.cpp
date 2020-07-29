@@ -27,6 +27,8 @@
 #include "FGBuildableRailroadSwitchControl.h"
 #include "FGPipeSubsystem.h"
 #include "FINGlobalRegisterHelper.h"
+#include "Network/FINNetworkComponent.h"
+#include "Network/FINNetworkCustomType.h"
 #include "Utils/FINTimeTableStop.h"
 #include "Utils/FINTrackGraph.h"
 
@@ -39,7 +41,8 @@
 #define LuaLibTypeDecl(ClassName, TypeName) \
 	LuaLibType<ClassName>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
 #define LuaLibFunc(ClassName, FuncName, Code) \
-	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, const FFINNetworkTrace& obj) { \
+	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, LuaInstance* instance) { \
+		FFINNetworkTrace obj = instance->Trace;\
 		ClassName* self = Cast<ClassName>(*obj); \
 		Code \
 	} \
@@ -212,6 +215,66 @@ namespace FicsItKernel {
 		/* #################### */
 
 		LuaLibTypeDecl(UObject, Object)
+
+		LuaLibFunc(UObject, getMembers, {
+			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
+
+			bool withType = false;
+			if (lua_isboolean(L, 1)) withType = lua_toboolean(L, 1);
+			
+			lua_newtable(L);
+            int i = 0;
+
+            if (self->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+                lua_pushstring(L, "id");
+                lua_seti(L, -2, ++i);
+                lua_pushstring(L, "nick");
+                lua_seti(L, -2, ++i);
+            }
+			
+            UClass* type = self->GetClass();
+			
+            for (const TTuple<FString, int>& func : reg->getMembers(type)) {
+                lua_pushstring(L, TCHAR_TO_UTF8(*func.Key));
+            	if(withType) {
+            		lua_pushinteger(L, func.Value);
+					lua_settable(L, -3);
+            	} else lua_seti(L, -2, ++i);
+            }
+            for (TFieldIterator<UFunction> func = TFieldIterator<UFunction>(type); func; ++func) {
+                FString funcName = func->GetName();
+                if (!(funcName.RemoveFromStart("netFunc_") && funcName.Len() > 0)) continue;
+                lua_pushstring(L, TCHAR_TO_UTF8(*funcName));
+				if (withType) {
+					lua_pushinteger(L, 0);
+					lua_settable(L, -3);
+				} else lua_seti(L, -2, ++i);
+            }
+
+			return 1;
+		})
+
+		LuaLibFunc(UObject, getTypes, {
+			lua_newtable(L);
+			int i = 0;
+			if (self->Implements<UFINNetworkCustomType>()) {
+				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkCustomType::Execute_GetCustomTypeName(self)));
+				lua_seti(L, -2, ++i);
+			}
+			UClass* Type = self->GetClass();
+			FString lastType = "";
+			while (Type) {
+                FString typeName = LuaInstanceRegistry::get()->findTypeName(Type);
+				if (typeName.Len() > 0 && lastType != typeName) {
+					lastType = typeName;
+					lua_pushstring(L, TCHAR_TO_UTF8(*typeName));
+                	lua_seti(L, -2, ++i);
+				}
+                if (Type == UObject::StaticClass()) Type = nullptr;
+                else Type = Type->GetSuperClass();
+            }
+			return 1;
+		})
 		
 		// Begin AActor
 

@@ -47,16 +47,17 @@ protected:
 
 public:
 	/**
-	* The components merged into this network component.
-	*/
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Network|Connector")
-	TSet<UObject*> Merged;
-
+	 * The object used as redirect object for network instancing of this component.
+	 */
+	UPROPERTY()
+	UObject* RedirectionObject = nullptr;
+	
 	/**
 	 * If set to true, connector will add it's owner as
 	 */
-	bool bAddOuterToMerged = true;
-
+	UPROPERTY(EditDefaultsOnly)
+	bool bOuterAsRedirect = true;
+	
 	/**
 	 * This event gets called if a signal ocures.
 	 * It basically redirects the signal from the IFINSignalListener implementation.
@@ -85,7 +86,7 @@ public:
 	virtual FString GetNick_Implementation() const override;
 	virtual void SetNick_Implementation(const FString& Nick) override;
 	virtual bool HasNick_Implementation(const FString& Nick) override;
-	virtual TSet<UObject*> GetMerged_Implementation() const override;
+	virtual UObject* GetInstanceRedirect_Implementation() const override;
 	virtual bool AccessPermitted_Implementation(FGuid ID) const override;
 	// End IFINNetworkComponent
 
@@ -99,19 +100,6 @@ public:
 	// Begin IFINSignalListener
 	virtual void HandleSignal(TSharedPtr<FFINSignal> Signal, FFINNetworkTrace Sender) override;
 	// End IFINSignalListener
-
-	/**
-	 * Add the given object to the list of merged objects.
-	 * The merge allows to add functionallity from the object to network component.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
-	void AddMerged(UObject* MergedObj);
-
-	/**
-	* Removes the given object from the list of merged objects.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
-    void RemoveMerged(UObject* MergedObj);
 
 	/**
 	 * This network signals gets emit when a network change occurs.

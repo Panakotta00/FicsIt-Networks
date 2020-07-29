@@ -17,7 +17,6 @@
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
-	NetworkConnector->AddMerged(this);
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
 	
@@ -90,7 +89,6 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 	if (kernel) kernel->handleFutures();
 }
 
-#pragma optimize("", off)
 void AFINComputerCase::Factory_Tick(float dt) {
 	KernelTickTime += dt;
 	if (KernelTickTime > 10.0) KernelTickTime = 10.0;
@@ -106,7 +104,6 @@ void AFINComputerCase::Factory_Tick(float dt) {
 		//SML::Logging::debug("Computer tick: ", dur.count());
 	}
 }
-#pragma optimize("", on)
 
 bool AFINComputerCase::ShouldSave_Implementation() const {
 	return true;

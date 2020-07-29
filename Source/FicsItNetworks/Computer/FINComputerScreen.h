@@ -2,13 +2,15 @@
 
 #include "Computer/FINComputerModule.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "Network/FINNetworkCustomType.h"
+
 #include "FINComputerScreen.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenWidgetUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenGPUUpdate);
 
 UCLASS()
-class AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface {
+class AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface, public IFINNetworkCustomType {
 	GENERATED_BODY()
 	
 private:
@@ -44,4 +46,8 @@ public:
 	virtual void SetWidget(TSharedPtr<SWidget> widget) override;
 	virtual TSharedPtr<SWidget> GetWidget() const override;
 	// End IFINScreen
+	
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ScreenDriver"); }
+	// End IFINNetworkCustomType
 };

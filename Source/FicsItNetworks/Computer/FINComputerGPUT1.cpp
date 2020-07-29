@@ -229,21 +229,7 @@ void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int
 void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
 
 void AFINComputerGPUT1::netFunc_bindScreen(UObject* Screen) {
-	if (Screen == nullptr) {
-		BindScreen(nullptr);
-		return;
-	}
-	if (!Screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass())) {
-		if (Screen->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-			TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(Screen);
-			for (UObject* obj : merged) {
-				if (IsValid(obj) && obj->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass())) {
-					BindScreen(obj);
-					return;
-				}
-			}
-		}
-	} else BindScreen(Screen);
+	BindScreen(Screen);
 }
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {

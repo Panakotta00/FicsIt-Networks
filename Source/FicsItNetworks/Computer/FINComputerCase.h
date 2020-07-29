@@ -9,6 +9,8 @@
 
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/KernelSystemSerializationInfo.h"
+#include "Network/FINNetworkCustomType.h"
+
 
 #include "FINComputerCase.generated.h"
 
@@ -25,7 +27,7 @@ enum EComputerState {
 };
 
 UCLASS(Blueprintable)
-class AFINComputerCase : public AFGBuildable {
+class AFINComputerCase : public AFGBuildable, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
@@ -94,6 +96,10 @@ public:
 	virtual void PreSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	virtual void PostSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	// End IFGSaveInterface
+
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("Computer"); }
+	// End IFINNetworkCustomType
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddProcessor(AFINComputerProcessor* processor);

@@ -40,6 +40,7 @@ namespace FicsItKernel {
 			lua_yield(L, 0);
 			return 0;
 		}
+#pragma optimize("", on)
 
 		int luaComputerSkipContinue(lua_State* L, int status, lua_KContext ctx) {
 			return 0;

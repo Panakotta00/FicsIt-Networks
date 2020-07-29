@@ -42,5 +42,9 @@ public:
 	virtual UObject* GetGPU() const override;
 	virtual void SetWidget(TSharedPtr<SWidget> widget) override;
 	virtual TSharedPtr<SWidget> GetWidget() const override;
-	// End IFINScreen	
+	// End IFINScreen
+
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ModuleScreen"); }
+	// End IFINNetworkCustomType
 };

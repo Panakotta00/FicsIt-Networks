@@ -4,10 +4,12 @@
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Network/FINNetworkCustomType.h"
+
 #include "FINCodeableSplitter.generated.h"
 
 UCLASS()
-class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINSignalSender {
+class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINSignalSender, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
@@ -61,6 +63,10 @@ public:
 	virtual bool Factory_GrabOutput_Implementation(class UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf< UFGItemDescriptor > type) override;
 	// TODO: Upgrade Implementation
 	// End AFGBuildable
+	
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("CodeableSplitter"); }
+	// End IFINNetworkCustomType
 
 	/**
 	 * This function transfers the next item from the input queue to the output queue with the given index.

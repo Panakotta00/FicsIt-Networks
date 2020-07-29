@@ -22,12 +22,6 @@ namespace FicsItKernel {
 				UFINSignalUtility::SetupSender(obj->GetClass());
 				AFINHookSubsystem::GetHookSubsystem(obj)->ClassesWithSignals.Add(obj->GetClass());
 			}
-			if (obj->Implements<UFINNetworkComponent>()) {
-				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-				for (auto m : merged) {
-					luaListen(L, o(m));
-				}
-			}
 
 			// Hooks
 			AFINHookSubsystem::GetHookSubsystem(obj)->AddListener(obj, o.Reverse());
@@ -79,12 +73,6 @@ namespace FicsItKernel {
 			if (obj->Implements<UFINSignalSender>()) {
 				IFINSignalSender::Execute_RemoveListener(obj, o.Reverse());
 				net->signalSenders.Remove(o);
-			}
-			if (obj->Implements<UFINNetworkComponent>()) {
-				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-				for (auto m : merged) {
-					luaIgnore(L, o(m));
-				}
 			}
 
 			// Hooks

@@ -4,6 +4,8 @@
 #include "Buildables/FGBuildable.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Network/FINFuture.h"
+#include "Network/FINNetworkCustomType.h"
+
 
 #include "FINSpeakerPole.generated.h"
 
@@ -44,7 +46,7 @@ struct FFINSpeakersStopSoundFuture : public FFINFutureSimpleDone {
 };
 
 UCLASS(Blueprintable)
-class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
+class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
@@ -68,6 +70,10 @@ public:
 	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINNetworkSignalSender
+
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("SpeakerPole"); }
+	// End IFINNetworkCustomType
 
 	/**
 	 * Event bound to the OnAudioFinished event of the AudioComponent.

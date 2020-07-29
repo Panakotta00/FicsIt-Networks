@@ -4,10 +4,12 @@
 #include "WidgetComponent.h"
 #include "WidgetInteractionComponent.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
+#include "Network/FINNetworkCustomType.h"
+
 #include "FINComputerGPU.generated.h"
 
 UCLASS()
-class AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface {
+class AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface, public IFINNetworkCustomType {
 	GENERATED_BODY()
 protected:
 	UPROPERTY(SaveGame)
@@ -30,6 +32,10 @@ public:
 	virtual void RequestNewWidget() override;
 	virtual void DropWidget() override;
 	// End IFINGraphicsProcessor
+
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("GPU"); }
+	// End IFINNetworkCustomType
 	
 	/**
      * Creates a new widget for use in the screen.

@@ -32,7 +32,7 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(L"Connector");
 	Connector->SetupAttachment(RootComponent);
-	Connector->bAddOuterToMerged = false;
+	Connector->bOuterAsRedirect = false;
 	
 	ConnectorMesh = CreateDefaultSubobject<UStaticMeshComponent>(L"StaticMesh");
 	ConnectorMesh->SetHiddenInGameSML(true, true);
@@ -64,7 +64,7 @@ void AFINNetworkAdapter::BeginPlay() {
 		return;
 	}
 	
-	Connector->AddMerged(Parent);
+	Connector->RedirectionObject = Parent;
 	
 	Attachment = NewObject<UFINNetworkAdapterReference>((Parent) ? Parent : nullptr);
 	Attachment->Ref = this;

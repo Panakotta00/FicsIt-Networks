@@ -46,12 +46,15 @@ public:
 	bool HasNick(const FString& nick);
 
 	/**
-	 * Returns the array of components merged into this component.
-	 * Allowing all objects returned to load signals, functions, etc. into the representation of this component.
-	 * Merged components dont need to implement signal sender or other interface for allowing them to send signals etc.
+	 * Returns an object that is used instead of this when this gets instanced
+	 * by a network instancing function like lua's "netInstance".
+	 * This behaviour is ignored when a instance gets directly created (not over the network)
+	 * for this object.
+	 *
+	 * @return	returns the object that is alternatively used for this network component when instanced over the network
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-	TSet<UObject*> GetMerged() const;
+	UObject* GetInstanceRedirect() const;
 
 	/**
 	 * Allows the implementer to decided if the given network component by id

@@ -36,7 +36,12 @@ namespace FicsItKernel {
 				}
 				int j = 0;
 				for (auto& id : ids) {
-					auto comp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByID(id.c_str());
+					FFINNetworkTrace comp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByID(id.c_str());
+					UObject* Obj = *comp;
+					if (Obj->Implements<UFINNetworkComponent>()) {
+						UObject* Redirect = IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+						if (Redirect && Obj != Redirect) comp = comp / Redirect;
+					}
 					newInstance(L, comp);
 					if (isT) lua_seti(L, -2, ++j);
 				}

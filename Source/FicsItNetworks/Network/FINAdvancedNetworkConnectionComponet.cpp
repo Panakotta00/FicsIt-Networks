@@ -7,7 +7,7 @@ UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent()
 UFINAdvancedNetworkConnectionComponent::~UFINAdvancedNetworkConnectionComponent() {}
 
 void UFINAdvancedNetworkConnectionComponent::BeginPlay() {
-	if (bAddOuterToMerged) AddMerged(GetOuter());
+	if (bOuterAsRedirect) RedirectionObject = GetOuter();
 
 	if (!bIdCreated) {
 		ID = FGuid::NewGuid();
@@ -38,14 +38,6 @@ void UFINAdvancedNetworkConnectionComponent::NotifyNetworkUpdate_Implementation(
 	}
 }
 
-void UFINAdvancedNetworkConnectionComponent::AddMerged(UObject* MergedObj) {
-	Merged.Add(MergedObj);
-}
-
-void UFINAdvancedNetworkConnectionComponent::RemoveMerged(UObject* MergedObj) {
-	Merged.Remove(MergedObj);
-}
-
 FGuid UFINAdvancedNetworkConnectionComponent::GetID_Implementation() const {
 	return ID;
 }
@@ -62,8 +54,8 @@ bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FStrin
 	return HasNickByNick(Nick, Execute_GetNick(this));
 }
 
-TSet<UObject*> UFINAdvancedNetworkConnectionComponent::GetMerged_Implementation() const {
-	return Merged;
+UObject* UFINAdvancedNetworkConnectionComponent::GetInstanceRedirect_Implementation() const {
+	return RedirectionObject;
 }
 
 bool UFINAdvancedNetworkConnectionComponent::AccessPermitted_Implementation(FGuid ID) const {

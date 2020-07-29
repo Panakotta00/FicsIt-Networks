@@ -176,16 +176,16 @@ namespace FicsItKernel {
 			return types;
 		}
 
-		std::set<FString> LuaInstanceRegistry::getMemberNames(UClass* type) {
-			std::set<FString> members;
+		std::set<TTuple<FString, int>> LuaInstanceRegistry::getMembers(UClass* type) {
+			std::set<TTuple<FString, int>> members;
 			while (type) {
-				TMap<FString, LuaLibFunc>& funcMap = instanceFunctions[type];
-				for (auto& i : funcMap) {
-					members.insert(i.Key);
+				TMap<FString, LuaLibFunc>* funcMap = instanceFunctions.Find(type);
+				if (funcMap) for (auto& i : *funcMap) {
+					members.insert(TTuple<FString, int>(i.Key, 0));
 				}
-				TMap<FString, LuaLibProperty>& propMap = instanceProperties[type];
-				for (auto& i : propMap) {
-					members.insert(i.Key);
+				TMap<FString, LuaLibProperty>* propMap = instanceProperties.Find(type);
+				if (propMap) for (auto& i : *propMap) {
+					members.insert(TTuple<FString, int>(i.Key, 1));
 				}
 				if (type == UObject::StaticClass()) type = nullptr;
 				else type = type->GetSuperClass();
@@ -256,7 +256,7 @@ namespace FicsItKernel {
 			std::string typeName;
 			LuaInstance* instance = reg->checkAndGetInstance(L, 1, &typeName);
 			UClass* type = reg->findType(typeName.c_str());
-			UObject* obj = *instance->trace;
+			UObject* obj = *instance->Trace;
 			if (!IsValid(obj)) return luaL_argerror(L, 1, "Instance is invalid");
 
 			// check type
@@ -267,19 +267,9 @@ namespace FicsItKernel {
 			FString funcName = luaL_checkstring(L, lua_upvalueindex(1));
 			
 			LuaLibFunc func;
-			if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-				for (UObject* o : merged) {
-					if (IsValid(o) && reg->findLibFunc(o->GetClass(), funcName, func)) {
-						lua_remove(L, 1);
-						int args = func(L, lua_gettop(L), instance->trace / o);
-						return LuaProcessor::luaAPIReturn(L, args);
-					}
-				}
-			}
 			if (reg->findLibFunc(type, funcName, func)) {
 				lua_remove(L, 1);
-				int args = func(L, lua_gettop(L), instance->trace);
+				int args = func(L, lua_gettop(L), instance);
 				return LuaProcessor::luaAPIReturn(L, args);
 			}
 			return luaL_error(L, "Unable to call function");
@@ -292,7 +282,7 @@ namespace FicsItKernel {
 			std::string typeName;
 			LuaInstance* instance = reg->checkAndGetInstance(L, 1, &typeName);
 			UClass* type = reg->findType(typeName.c_str());
-			UObject* comp = *instance->trace;
+			UObject* comp = *instance->Trace;
 			if (!IsValid(comp)) return luaL_argerror(L, 1, "Instance is invalid");
 
 			// check type
@@ -301,17 +291,7 @@ namespace FicsItKernel {
 			UFunction* func = static_cast<UFunction*>(lua_touserdata(L, lua_upvalueindex(1)));
 			if (func) {
 				UClass* funcClass = Cast<UClass>(func->GetOuter());
-				FFINNetworkTrace trace = instance->trace;
-				if (comp->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(comp);
-					for (UObject* obj : merged) {
-						if (IsValid(obj) && obj->GetClass()->IsChildOf(funcClass)) {
-							comp = obj;
-							trace = trace / obj;
-							break;
-						}
-					}
-				}
+				FFINNetworkTrace trace = instance->Trace;
 				if (!comp->GetClass()->IsChildOf(funcClass)) return luaL_argerror(L, 1, "Instance type is not allowed to call this function");;
 				
 				// allocate parameter space
@@ -371,55 +351,6 @@ namespace FicsItKernel {
 			return luaL_error(L, "Unable to call function");
 		}
 
-		void luaInstanceGetMembersOfClass(lua_State* L, UClass* clazz, int& i) {
-			for (TFieldIterator<UFunction> func = TFieldIterator<UFunction>(clazz); func; ++func) {
-				FString funcName = func->GetName();
-				if (!(funcName.RemoveFromStart("netFunc_") && funcName.Len() > 0)) continue;
-				lua_pushstring(L, TCHAR_TO_UTF8(*funcName));
-				lua_seti(L, -2, ++i);
-			}
-		}
-		
-		int luaInstanceGetMembers(lua_State* L) {
-			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
-
-			// get and check instance
-			LuaInstance* instance = reg->checkAndGetInstance(L, 1);
-			UObject* self = *instance->trace;
-			if (!IsValid(self)) return luaL_argerror(L, 1, "Instance is invalid");
-			
-			lua_newtable(L);
-			int i = 0;
-
-			if (self->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-				lua_pushstring(L, "id");
-				lua_seti(L, -2, ++i);
-				lua_pushstring(L, "nick");
-				lua_seti(L, -2, ++i);
-			}
-			
-			UClass* type = self->GetClass();
-			
-			for (const FString& func : reg->getMemberNames(type)) {
-				lua_pushstring(L, TCHAR_TO_UTF8(*func));
-				lua_seti(L, -2, ++i);
-			}
-			luaInstanceGetMembersOfClass(L, type, i);
-
-			if (type->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(self);
-				for (UObject* o : merged) if (IsValid(o)) {
-					for (const FString& func : reg->getMemberNames(o->GetClass())) {
-						lua_pushstring(L, TCHAR_TO_UTF8(*func));
-						lua_seti(L, -2, ++i);
-					}
-					luaInstanceGetMembersOfClass(L, o->GetClass(), i);
-				}
-			}
-			
-			return 1;
-		}
-
 		bool luaInstanceIndexFindUFunction(lua_State* L, UClass* type, const FString& funcName, LuaInstanceRegistry* reg) {					// Instance, FuncName, InstanceCoche, nil
 			UFunction* func = type->FindFunctionByName(FName(*("netFunc_" + funcName)));
 			if (IsValid(func)) {
@@ -449,7 +380,7 @@ namespace FicsItKernel {
 			if (!lua_isstring(L, 2)) return 0;
 			std::string memberName = lua_tostring(L, 2);
 
-			UObject* obj = *instance->trace;
+			UObject* obj = *instance->Trace;
 
 			if (!IsValid(obj)) {
 				return luaL_error(L, "Instance is invalid");
@@ -473,33 +404,16 @@ namespace FicsItKernel {
 
 			// try to find lib property
 			LuaLibProperty libProp;
-			FFINNetworkTrace realTrace = instance->trace;
+			FFINNetworkTrace realTrace = instance->Trace;
 			bool foundLibProp = false;
 			if (reg->findLibProperty(reg->findType(typeName.c_str()), memberName.c_str(), libProp)) {
 				foundLibProp = true;
-			} else {
-				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-					for (UObject* o : merged) {
-						if (IsValid(o) && reg->findLibProperty(o->GetClass(), memberName.c_str(), libProp)) {
-							realTrace = realTrace / o;
-							foundLibProp = true;
-							break;
-						}
-					}
-				}
 			}
 			if (foundLibProp) {
 				lua_pop(L, 2);
 				return LuaProcessor::luaAPIReturn(L, libProp.get(L, realTrace));
 			}
 
-			// try util functions
-			if (memberName == "getMembers") {
-				lua_pushcfunction(L, luaInstanceGetMembers);
-				return 1;
-			}
-			
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// Instance, FuncName, InstanceCache
 			if (lua_getfield(L, -1, memberName.c_str()) != LUA_TNIL) {												// Instance, FuncName, InstanceCache, CachedFunc
@@ -511,16 +425,6 @@ namespace FicsItKernel {
 			bool foundLibFunc = false;
 			if (reg->findLibFunc(reg->findType(typeName.c_str()), memberName.c_str(), libFunc)) {
 				foundLibFunc = true;
-			} else {
-				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-					for (UObject* o : merged) {
-						if (IsValid(o) && reg->findLibFunc(o->GetClass(), memberName.c_str(), libFunc)) {
-							foundLibFunc = true;
-							break;
-						}
-					}
-				}
 			}
 			if (foundLibFunc) {
 				// create function
@@ -538,12 +442,6 @@ namespace FicsItKernel {
 			// get reflected function
 			UClass* instType = obj->GetClass();
 			if (luaInstanceIndexFindUFunction(L, instType, memberName.c_str(), reg)) return LuaProcessor::luaAPIReturn(L, 1);
-			if (instType->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-				for (UObject* o : merged) {
-					if (IsValid(o) && luaInstanceIndexFindUFunction(L, o->GetClass(), memberName.c_str(), reg)) return LuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
 			
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
@@ -560,7 +458,7 @@ namespace FicsItKernel {
 			if (!lua_isstring(L, 2)) return 0;
 			std::string memberName = lua_tostring(L, 2);
 
-			UObject* obj = *instance->trace;
+			UObject* obj = *instance->Trace;
 
 			if (!IsValid(obj)) {
 				return luaL_error(L, "Instance is invalid");
@@ -577,21 +475,10 @@ namespace FicsItKernel {
 
 			// try to find lib property
 			LuaLibProperty libProp;
-			FFINNetworkTrace realTrace = instance->trace;
+			FFINNetworkTrace realTrace = instance->Trace;
 			bool foundLibProp = false;
 			if (reg->findLibProperty(reg->findType(typeName.c_str()), memberName.c_str(), libProp)) {
 				foundLibProp = true;
-			} else {
-				if (obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-					TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-					for (UObject* o : merged) {
-						if (IsValid(o) && reg->findLibProperty(o->GetClass(), memberName.c_str(), libProp)) {
-							realTrace = realTrace/o;
-							foundLibProp = true;
-							break;
-						}
-					}
-				}
 			}
 			if (foundLibProp) {
 				if (libProp.readOnly) return luaL_error(L, "property is read only");
@@ -612,7 +499,7 @@ namespace FicsItKernel {
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 			
-			lua_pushboolean(L, inst1->trace.IsEqualObj(inst2->trace));
+			lua_pushboolean(L, inst1->Trace.IsEqualObj(inst2->Trace));
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
@@ -625,7 +512,7 @@ namespace FicsItKernel {
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 			
-			lua_pushboolean(L, GetTypeHash(inst1->trace.GetUnderlyingPtr()) < GetTypeHash(inst2->trace.GetUnderlyingPtr()));
+			lua_pushboolean(L, GetTypeHash(inst1->Trace.GetUnderlyingPtr()) < GetTypeHash(inst2->Trace.GetUnderlyingPtr()));
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
@@ -638,7 +525,7 @@ namespace FicsItKernel {
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 			
-			lua_pushboolean(L, GetTypeHash(inst1->trace.GetUnderlyingPtr()) <= GetTypeHash(inst2->trace.GetUnderlyingPtr()));
+			lua_pushboolean(L, GetTypeHash(inst1->Trace.GetUnderlyingPtr()) <= GetTypeHash(inst2->Trace.GetUnderlyingPtr()));
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
@@ -646,7 +533,7 @@ namespace FicsItKernel {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			std::string typeName;
 			LuaInstance* inst = reg->checkAndGetInstance(L, 1, &typeName);
-			UObject* obj = *inst->trace;
+			UObject* obj = *inst->Trace;
 			if (!IsValid(obj)) return luaL_argerror(L, 1, "Instance is invalid");
 			UClass* type = obj->GetClass();
 			std::stringstream msg;
@@ -691,7 +578,7 @@ namespace FicsItKernel {
 			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
 
 			// add trace to storage & push id
-			lua_pushinteger(L, storage->Add(instance->trace));
+			lua_pushinteger(L, storage->Add(instance->Trace));
 			lua_pushstring(L, typeName.c_str());
 			
 			// create & return closure
@@ -731,6 +618,7 @@ namespace FicsItKernel {
 			// create instance
 			LuaInstance* instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
 			new (instance) LuaInstance{trace};
+
 			luaL_setmetatable(L, typeName.c_str());
 			return true;
 		}
@@ -738,8 +626,8 @@ namespace FicsItKernel {
 		FFINNetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
 			if (lua_isnil(L, index)) return FFINNetworkTrace(nullptr);
 			LuaInstance* instance = LuaInstanceRegistry::get()->checkAndGetInstance(L, index);
-			if (!instance->trace->GetClass()->IsChildOf(clazz)) return FFINNetworkTrace(nullptr);
-			return instance->trace;
+			if (!instance->Trace->GetClass()->IsChildOf(clazz)) return FFINNetworkTrace(nullptr);
+			return instance->Trace;
 		}
 		
 		int luaClassInstanceFuncCall(lua_State* L) {	// ClassInstance, Args..., up: FuncName, up: ClassInstance
@@ -802,7 +690,7 @@ namespace FicsItKernel {
 
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// ClassInstance, FuncName, InstanceCache
-			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*funcName)) != LUA_TNIL) {												// ClassInstance, FuncName, InstanceCache, CachedFunc
+			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*funcName)) != LUA_TNIL) {									// ClassInstance, FuncName, InstanceCache, CachedFunc
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}																											// ClassInstance, FuncName, InstanceCache, nil
 			
@@ -816,7 +704,7 @@ namespace FicsItKernel {
 
 				// cache function
 				lua_pushvalue(L, -1);																				// ClassInstance, FuncName, InstanceCache, nil, ClassInstanceFunc, InstanceFunc
-				lua_setfield(L, 3, TCHAR_TO_UTF8(*funcName));															// ClassInstance, FuncName, InstanceCache, nil, ClassInstanceFunc
+				lua_setfield(L, 3, TCHAR_TO_UTF8(*funcName));													// ClassInstance, FuncName, InstanceCache, nil, ClassInstanceFunc
 
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -978,8 +866,6 @@ namespace FicsItKernel {
 			PersistValue("InstanceFuncCall");					// ...
 			lua_pushcfunction(L, luaInstanceUFuncCall);			// ..., InstanceUFuncCall
 			PersistValue("InstanceUFuncCall");				// ...
-			lua_pushcfunction(L, luaInstanceGetMembers);			// ..., LuaInstanceGetMembers
-			PersistValue("InstanceGetMembers");				// ...
 			lua_pushcfunction(L, luaClassInstanceFuncCall);		// ..., LuaClassInstanceFuncCall
 			PersistValue("ClassInstanceFuncCall");			// ...
 			lua_pushcfunction(L, luaClassInstanceGetMembers);	// ..., LuaClassInstanceGetMembers
