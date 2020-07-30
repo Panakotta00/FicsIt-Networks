@@ -299,10 +299,12 @@ namespace FicsItKernel {
 		LuaLibFunc(AActor, getPowerConnectors, {
 			lua_newtable(L);
 			int i = 1;
+			const TSet<UActorComponent*>& Components = self->GetComponents();
 			for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
                 if (!prop->PropertyClass->IsChildOf(UFGPowerConnectionComponent::StaticClass())) continue;
-                UObject* inventory = *prop->ContainerPtrToValuePtr<UObject*>(self);
-                newInstance(L, obj / inventory);
+                UObject* Connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
+				if (!Components.Contains(Cast<UActorComponent>(Connector))) continue;
+                newInstance(L, obj / Connector);
                 lua_seti(L, -2, i++);
             }
 			return 1;
@@ -311,10 +313,12 @@ namespace FicsItKernel {
 		LuaLibFunc(AActor, getFactoryConnectors, {
 			lua_newtable(L);
 			int i = 1;
+			const TSet<UActorComponent*>& Components = self->GetComponents();
 			for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
                 if (!prop->PropertyClass->IsChildOf(UFGFactoryConnectionComponent::StaticClass())) continue;
-                UObject* inventory = *prop->ContainerPtrToValuePtr<UObject*>(self);
-                newInstance(L, obj / inventory);
+                UObject* Connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
+				if (!Components.Contains(Cast<UActorComponent>(Connector))) continue;
+                newInstance(L, obj / Connector);
                 lua_seti(L, -2, i++);
             }
 			return 1;
@@ -323,9 +327,11 @@ namespace FicsItKernel {
 		LuaLibFunc(AActor, getInventories, {
 			lua_newtable(L);
 			int i = 1;
+			const TSet<UActorComponent*>& Components = self->GetComponents();
 			for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
 				if (!prop->PropertyClass->IsChildOf(UFGInventoryComponent::StaticClass())) continue;
 				UObject* inventory = *prop->ContainerPtrToValuePtr<UObject*>(self);
+				if (!Components.Contains(Cast<UActorComponent>(inventory))) continue;
 		        newInstance(L, obj / inventory);
 		        lua_seti(L, -2, i++);
 			}
@@ -335,9 +341,11 @@ namespace FicsItKernel {
 		LuaLibFunc(AActor, getNetworkConnectors, {
 			lua_newtable(L);
 			int i = 1;
+			const TSet<UActorComponent*>& Components = self->GetComponents();
 			for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
                 if (!prop->PropertyClass->IsChildOf(UFINNetworkConnectionComponent::StaticClass())) continue;
                 UObject* connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
+				if (!Components.Contains(Cast<UActorComponent>(connector))) continue;
                 newInstance(L, obj / connector);
                 lua_seti(L, -2, i++);
             }

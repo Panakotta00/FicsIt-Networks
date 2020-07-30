@@ -3,30 +3,37 @@
 #include "CoreMinimal.h"
 #include "FGBuildableHologram.h"
 #include "FGBuildableFactory.h"
+#include "FINNetworkAdapter.h"
 #include "FINNetworkConnectionComponent.h"
 #include "Components/SplineMeshComponent.h"
 #include "FINNetworkCableHologram.generated.h"
+
+UENUM()
+enum EFINNetworkCableHologramSnapType {
+	FIN_NOT_SNAPPED,
+	FIN_CONNECTOR,
+	FIN_SETTINGS,
+	FIN_POWER,
+	FIN_POLE,
+};
 
 USTRUCT()
 struct FICSITNETWORKS_API FFINSnappedInfo {
 	GENERATED_BODY()
 
 public:
-	bool v = false;
-	bool isConnector = false;
-	void* ptr = nullptr;
-	AActor* actor = nullptr;
-	FVector pos;
-	FQuat rot;
-	bool setting = false;
+	EFINNetworkCableHologramSnapType SnapType = FIN_NOT_SNAPPED;
+	UObject* SnappedObj = nullptr;
+	FVector PolePostition;
+	FFINAdapterSettings AdapterSettings;
 
-	inline UFINNetworkConnectionComponent* c() {
-		return (UFINNetworkConnectionComponent*)ptr;
-	}
+	/** Location of the connector in world space */
+	FVector GetConnectorPos() const;
 
-	inline AFGBuildableFactory* f() {
-		return (AFGBuildableFactory*)ptr;
-	}
+	/** Rotation of the connector in world space */
+	FRotator GetConnectorRot() const;
+	
+	AActor* GetActor() const;
 };
 
 UCLASS()
@@ -52,6 +59,9 @@ public:
 	UPROPERTY()
 	FFINSnappedInfo From;
 
+	UPROPERTY()
+	AFGBuildableHologram* PoleHologram = nullptr;
+	
 	// Begin FGBuildableHologram
 	virtual bool DoMultiStepPlacement(bool isInputFromARelease) override;
 	virtual AActor* Construct(TArray<AActor*>& childs, FNetConstructionID constructionID) override;
@@ -62,16 +72,19 @@ public:
 	virtual void OnInvalidHitResult() override;
 	virtual bool IsChanged() const override;
 	virtual USceneComponent* SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName) override;
+	virtual void SpawnChildren(AActor* hologramOwner, FVector spawnLocation, APawn* hologramInstigator) override;
 	// End FGBuildableHologram
 
 	AFINNetworkCableHologram();
 	~AFINNetworkCableHologram();
 
-	void onBeginSnap(FFINSnappedInfo a, bool isValid);
-	void onEndSnap(FFINSnappedInfo a);
-	void updateMeshes();
-	UFINNetworkConnectionComponent* setupSnapped(FFINSnappedInfo s);
-
-	bool isSnappedValid();
-	bool isValid();
+	void OnBeginSnap(FFINSnappedInfo a, bool isValid);
+	void OnEndSnap(FFINSnappedInfo a);
+	UFINNetworkConnectionComponent* SetupSnapped(FFINSnappedInfo s, TArray<AActor*>&  childs, FNetConstructionID id);
+	void UpdateSnapped();
+	
+	/**
+	 * Checks if the currently snapped object is valid
+	 */
+	bool IsSnappedValid();
 };
