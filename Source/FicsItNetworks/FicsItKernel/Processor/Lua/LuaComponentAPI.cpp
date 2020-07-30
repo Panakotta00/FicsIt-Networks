@@ -38,7 +38,7 @@ namespace FicsItKernel {
 				for (auto& id : ids) {
 					FFINNetworkTrace comp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByID(id.c_str());
 					UObject* Obj = *comp;
-					if (Obj->Implements<UFINNetworkComponent>()) {
+					if (Obj && Obj->Implements<UFINNetworkComponent>()) {
 						UObject* Redirect = IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
 						if (Redirect && Obj != Redirect) comp = comp / Redirect;
 					}
