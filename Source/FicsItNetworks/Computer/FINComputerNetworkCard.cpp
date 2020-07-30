@@ -64,7 +64,7 @@ bool AFINComputerNetworkCard::IsPortOpen(int Port) {
 
 void AFINComputerNetworkCard::HandleMessage(FFINNetworkTrace Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) {
 	for (const FFINNetworkTrace& Listener : Listeners) {
-		Cast<IFINSignalListener>(*Listener)->HandleSignal(MakeShared<FFINNetworkMessageSignal>(Port, Data), Sender);
+		Cast<IFINSignalListener>(*Listener)->HandleSignal(FFINNetworkMessageSignal(IFINNetworkComponent::Execute_GetID(*Sender), Port, Data), Listener.Reverse());
 	}
 }
 
@@ -82,7 +82,9 @@ void AFINComputerNetworkCard::netFunc_closeAll() {
 }
 
 void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, FFINDynamicStructHolder args) {
-	if (port < 0 || port > 1000) return;
+	FFINVoidValueReader VoidReader;
+	int argCount = args.Get<FFINParameterList>() >> VoidReader;
+	if (port < 0 || port > 10000 || argCount > 7) return;
 
 	FGuid receiverID;
 	FGuid::Parse(receiver, receiverID);
@@ -94,7 +96,9 @@ void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, FFINDynam
 }
 
 void AFINComputerNetworkCard::netFunc_broadcast(int port, FFINDynamicStructHolder args) {
-	if (port < 0 || port > 1000) return;
+	FFINVoidValueReader VoidReader;
+	int argCount = args.Get<FFINParameterList>() >> VoidReader;
+	if (port < 0 || port > 10000 || argCount > 7) return;
 	for (UObject* Component : GetCircuit_Implementation()->GetComponents()) {
 		IFINNetworkMessageInterface* NetMsgI = Cast<IFINNetworkMessageInterface>(Component);
 		if (NetMsgI && NetMsgI->IsPortOpen(port)) {
@@ -103,11 +107,12 @@ void AFINComputerNetworkCard::netFunc_broadcast(int port, FFINDynamicStructHolde
 	}
 }
 
-FFINNetworkMessageSignal::FFINNetworkMessageSignal(int Port, const TFINDynamicStruct<FFINParameterList>& Data) : FFINSignal("NetworkMessage"), Port(Port), Data(Data) {}
+FFINNetworkMessageSignal::FFINNetworkMessageSignal(FGuid Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) : FFINSignal("NetworkMessage"), Sender(Sender), Port(Port), Data(Data) {}
 
 bool FFINNetworkMessageSignal::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
 
+	Ar << Sender;
 	Ar << Port;
 	Ar << Data;
 
@@ -115,6 +120,7 @@ bool FFINNetworkMessageSignal::Serialize(FArchive& Ar) {
 }
 
 int FFINNetworkMessageSignal::operator>>(FFINValueReader& reader) const {
+	reader << Sender.ToString();
 	reader << static_cast<FINInt>(Port);
-	return 1 + (**Data >> reader);
+	return 2 + (**Data >> reader);
 }

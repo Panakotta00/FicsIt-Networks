@@ -78,7 +78,8 @@ public:
 	TFINDynamicStruct(UScriptStruct* Struct) : FFINDynamicStructHolder(Struct) { check(Struct->IsChildOf(T::StaticStruct())) }
 	TFINDynamicStruct(UScriptStruct* Struct, void* Data) : FFINDynamicStructHolder(Struct, Data) { check(Struct->IsChildOf(T::StaticStruct())) }
 	TFINDynamicStruct(const FFINDynamicStructHolder& Other) : FFINDynamicStructHolder(Other) { check(Other.GetStruct()->IsChildOf(T::StaticStruct())) }
-	TFINDynamicStruct(const T& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(T::StaticStruct(), &Other)) {}
+	template<typename K>
+	TFINDynamicStruct(const K& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(K::StaticStruct(), &Other)) {}
 
 	TFINDynamicStruct<T>& operator=(const FFINDynamicStructHolder& Other) {
 		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));

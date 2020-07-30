@@ -102,17 +102,26 @@ public:
 USTRUCT()
 struct FFINNetworkMessageSignal : public FFINSignal {
 	GENERATED_BODY()
-	
+
+	FGuid Sender;
 	int Port;
 	TFINDynamicStruct<FFINParameterList> Data;
 
 	FFINNetworkMessageSignal() = default;
-	FFINNetworkMessageSignal(int Port, const TFINDynamicStruct<FFINParameterList>& Data);
+	FFINNetworkMessageSignal(FGuid Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data);
 
 	bool Serialize(FArchive& Ar);
 	
 	virtual int operator>>(FFINValueReader& reader) const override;
-	virtual UScriptStruct* GetStruct() const override { return StaticStruct(); };
+};
+
+template<>
+struct TStructOpsTypeTraits<FFINNetworkMessageSignal> : TStructOpsTypeTraitsBase2<FFINNetworkMessageSignal>
+{
+	enum
+	{
+		WithSerializer = true,
+    };
 };
 
 inline bool operator<<(FArchive& Ar, FFINNetworkMessageSignal& Signal) {

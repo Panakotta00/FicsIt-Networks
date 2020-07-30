@@ -25,7 +25,7 @@ private:
 public:	
 	UFUNCTION()
 	void SelfDrvingUpdate(bool enabled) {
-		AFINHookSubsystem::GetHookSubsystem(this)->EmitSignal(Sender, MakeShared<FFINSmartSignal>("SelfDrvingUpdate", enabled));
+		AFINHookSubsystem::GetHookSubsystem(this)->EmitSignal(Sender, FFINSmartSignal("SelfDrvingUpdate", enabled));
 	}
 			
 	void Register(UObject* sender) override {
@@ -72,7 +72,7 @@ private:
 	}
 
 	static void DoFactoryGrab(UFGFactoryConnectionComponent* c, FInventoryItem& item) {
-		AFINHookSubsystem::GetHookSubsystem(c)->EmitSignal(c, MakeShared<FFINSmartSignal>("ItemTransfer", TFINDynamicStruct<FInventoryItem>(item)));
+		AFINHookSubsystem::GetHookSubsystem(c)->EmitSignal(c, FFINSmartSignal("ItemTransfer", TFINDynamicStruct<FInventoryItem>(item)));
 	}
 
 	static void FactoryGrabHook(CallScope<bool(*)(UFGFactoryConnectionComponent*, FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>)>& scope, UFGFactoryConnectionComponent* c, FInventoryItem& item, float& offset, TSubclassOf<UFGItemDescriptor> type) {
@@ -134,7 +134,7 @@ private:
 			FWeakObjectPtr* sender = Senders.Find(circuit);
 			if (sender) {
 				UObject* obj = sender->Get();
-				AFINHookSubsystem::GetHookSubsystem(obj)->EmitSignal(obj, MakeShared<FFINSmartSignal>("PowerFuseChanged"));
+				AFINHookSubsystem::GetHookSubsystem(obj)->EmitSignal(obj, FFINSmartSignal("PowerFuseChanged"));
 			}
 			Mutex.Unlock();
 		} catch (...) {}

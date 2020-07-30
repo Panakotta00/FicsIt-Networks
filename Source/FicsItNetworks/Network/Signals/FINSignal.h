@@ -33,8 +33,6 @@ public:
 	 */
 	virtual int operator>>(FFINValueReader& reader) const { return 0; };
 
-	virtual UScriptStruct* GetStruct() const { return StaticStruct(); };
-	
 	FString GetName() const;
 };
 

@@ -78,25 +78,31 @@ namespace FicsItKernel {
 			switch (lua_type(L, i)) {
 			case LUA_TNIL:
 				Val = FFINAnyNetworkValue();
+				break;
 			case LUA_TBOOLEAN:
 				Val = FFINAnyNetworkValue(static_cast<FINBool>(lua_toboolean(L, i)));
+				break;
 			case LUA_TNUMBER:
 				if (lua_isinteger(L, i)) {
 					Val = FFINAnyNetworkValue(static_cast<FINInt>(lua_tointeger(L, i)));
 				} else {
 					Val = FFINAnyNetworkValue(static_cast<FINFloat>(lua_tonumber(L, i)));
 				}
+				break;
 			case LUA_TSTRING: {
 				size_t len;
 				Val = FFINAnyNetworkValue(FINStr(lua_tolstring(L, i, &len), len));
+				break;
 			}
 			default:
 				FString TypeName = luaL_typename(L, i);
 				UScriptStruct* StructType = FFINLuaStructRegistry::Get().GetType(TypeName);
 				if (StructType) {
 					Val = FFINAnyNetworkValue(luaGetStruct(L, i));
+					break;
 				}
 				Val = FFINAnyNetworkValue();
+				break;
 			}
 		}
 	}

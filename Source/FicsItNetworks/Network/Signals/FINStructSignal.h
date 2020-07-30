@@ -24,7 +24,6 @@ public:
 	
 	// Begin FFINSignal
 	virtual int operator>>(FFINValueReader& reader) const override;
-	virtual UScriptStruct* GetStruct() const override;
 	// End FFINSignal
 };
 

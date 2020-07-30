@@ -40,3 +40,17 @@ public:
 	/** Writes any kind of struct to the value reader */
 	virtual void operator<<(const FINStruct& Struct) = 0;
 };
+
+class FFINVoidValueReader : public FFINValueReader {
+public:
+
+	virtual void nil() override {}
+	virtual void operator<<(FINBool B) override {}
+	virtual void operator<<(FINInt Num) override {}
+	virtual void operator<<(FINFloat Num) override {}
+	virtual void operator<<(FINClass Class) override {}
+	virtual void operator<<(const FINStr& Str) override {}
+	virtual void operator<<(const FINObj& Obj) override {}
+	virtual void operator<<(const FINTrace& Obj) override {}
+	virtual void operator<<(const FINStruct& Struct) override {}
+};
