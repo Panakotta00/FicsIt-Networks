@@ -27,7 +27,14 @@ public:
 	
 	// Begin FFINSignal
 	virtual int operator>>(FFINValueReader& reader) const override;
-	virtual UScriptStruct* GetStruct() const override;
 	// End FFINSignal
 };
 
+template<>
+struct TStructOpsTypeTraits<FFINSmartSignal> : TStructOpsTypeTraitsBase2<FFINSmartSignal>
+{
+	enum
+	{
+		WithSerializer = true,
+    };
+};

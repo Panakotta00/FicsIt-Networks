@@ -20,7 +20,7 @@ namespace FicsItKernel {
 			std::mutex mutexSignalListeners;
 			TSet<FFINNetworkTrace> signalListeners;
 			std::mutex mutexSignals;
-			std::deque<TPair<TSharedPtr<FFINSignal>, FFINNetworkTrace>> signals;
+			std::deque<TPair<TFINDynamicStruct<FFINSignal>, FFINNetworkTrace>> signals;
 			bool lockSignalRecieving = false;
 
 		public:
@@ -43,7 +43,7 @@ namespace FicsItKernel {
 			 */
 			uint32 maxSignalCount = 32;
 
-			void handleSignal(TSharedPtr<FFINSignal> signal, const FFINNetworkTrace& sender);
+			void handleSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender);
 
 			/**
 			 * pops a signal form the queue.
@@ -52,7 +52,7 @@ namespace FicsItKernel {
 			 * @param sender - out put paramter for the sender of the signal
 			 * @return	singal from the queue
 			 */
-			TSharedPtr<FFINSignal> popSignal(FFINNetworkTrace& sender);
+			TFINDynamicStruct<FFINSignal> popSignal(FFINNetworkTrace& sender);
 
 			/**
 			 * pushes a signal to the queue.
@@ -60,7 +60,7 @@ namespace FicsItKernel {
 			 *
 			 * @param	signal	the singal you want to push
 			 */
-			void pushSignal(TSharedPtr<FFINSignal> signal, const FFINNetworkTrace& sender);
+			void pushSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender);
 
 			/**
 			 * Removes all signals from the signal queue.
@@ -93,7 +93,7 @@ namespace FicsItKernel {
 			 */
 			template<typename... Ts>
 			void pushSignalKernel(const FString& signalName, Ts... args) {
-				pushSignal(TSharedPtr<FFINSignal>(new FFINSmartSignal(signalName, {FFINAnyNetworkValue(args)...})), FFINNetworkTrace(component));
+				pushSignal(FFINSmartSignal(signalName, {FFINAnyNetworkValue(args)...}), FFINNetworkTrace(component));
 			}
 
 			/**

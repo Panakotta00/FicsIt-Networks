@@ -15,6 +15,10 @@ xref:buildings/NetworkCable.adoc[Network Cable]
 -
 xref:buildings/NetworkPole.adoc[Network Pole]
 -
+xref:buildings/NetworkWallPlug.adoc[Network Wall Plug]
+-
+xref:buildings/NetworkWallPlugDouble.adoc[Network Wall Plug (Double)]
+-
 xref:buildings/PowerController.adoc[Power Controller]
 -
 xref:buildings/Speakers.adoc[Speakers]

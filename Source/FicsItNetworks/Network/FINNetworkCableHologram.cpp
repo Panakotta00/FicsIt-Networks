@@ -208,11 +208,11 @@ bool AFINNetworkCableHologram::IsSnappedValid() {
 					ret = false;
 				}
             }
-			if ((From.GetConnectorPos() - Snapped.GetConnectorPos()).Size() > 10000.0f) {
-				AddConstructDisqualifier(UFGCDWireTooLong::StaticClass());
-				ret = false;
-			}
 		}
+	}
+	if (From.SnapType != FIN_NOT_SNAPPED && Snapped.SnapType != FIN_NOT_SNAPPED && (From.GetConnectorPos() - Snapped.GetConnectorPos()).Size() > 10000.0f) {
+		AddConstructDisqualifier(UFGCDWireTooLong::StaticClass());
+		ret = false;
 	}
 	return ret;
 }

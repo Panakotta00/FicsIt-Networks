@@ -1,0 +1,27 @@
+= Network Wall Plug
+:description: The network wall plug allows you to further distribute your computer networks near buildings.
+
+[cols="1,3"]
+|===
+|Building Type
+|Buildable
+
+|Max Network Connections
+|8
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/NetworkPlug_bg.png[300,300,role="left"]
+|image::buildings/NetworkPlug_ig.jpg[300,300,role="left"]
+|===
+
+The network wall plug is also one of the more important buildings.
+The network wall plug simply allows to connect more distant network connectors with each other and so to spread out the network mainly in-doors and near buildings.
+Also interesting is, this pole allows to connect multiple cables at the same time.
+
+
+
+include::partial$building_footer.adoc[]

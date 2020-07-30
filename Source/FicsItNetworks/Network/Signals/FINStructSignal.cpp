@@ -13,7 +13,3 @@ bool FFINStructSignal::Serialize(FArchive& Ar) {
 int FFINStructSignal::operator>>(FFINValueReader& reader) const {
 	return Data.Get<FFINParameterList>() >> reader;
 }
-
-UScriptStruct* FFINStructSignal::GetStruct() const {
-	return StaticStruct();
-}

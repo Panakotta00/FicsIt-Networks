@@ -8,12 +8,12 @@
 
 namespace FicsItKernel {
 	namespace Network {
-		void NetworkController::handleSignal(TSharedPtr<FFINSignal> signal, const FFINNetworkTrace& sender) {
+		void NetworkController::handleSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender) {
 			pushSignal(signal, sender);
 		}
 
-		TSharedPtr<FFINSignal> NetworkController::popSignal(FFINNetworkTrace& sender) {
-			if (getSignalCount() < 1) return nullptr;
+		TFINDynamicStruct<FFINSignal> NetworkController::popSignal(FFINNetworkTrace& sender) {
+			if (getSignalCount() < 1) return TFINDynamicStruct<FFINSignal>(nullptr, nullptr);
 			mutexSignals.lock();
 			auto sig = signals.front();
 			signals.pop_front();
@@ -22,10 +22,10 @@ namespace FicsItKernel {
 			return sig.Key;
 		}
 
-		void NetworkController::pushSignal(TSharedPtr<FFINSignal> signal, const FFINNetworkTrace& sender) {
+		void NetworkController::pushSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender) {
 			std::lock_guard<std::mutex> m(mutexSignals);
 			if (signals.size() >= maxSignalCount || lockSignalRecieving) return;
-			signals.push_back(TPair<TSharedPtr<FFINSignal>, FFINNetworkTrace>{signal, sender});
+			signals.push_back(TPair<TFINDynamicStruct<FFINSignal>, FFINNetworkTrace>{signal, sender});
 		}
 
 		void NetworkController::clearSignals() {
@@ -86,7 +86,7 @@ namespace FicsItKernel {
 				FFINNetworkTrace Trace;
 				if (Ar.IsSaving()) {
 					const auto& sig = signals[i];
-					Signal = FFINDynamicStructHolder::Copy(sig.Key->GetStruct(), sig.Key.Get());
+					Signal = sig.Key;
 					Trace = sig.Value;
 				}
 				bool valid = Trace.IsValid();
@@ -98,7 +98,7 @@ namespace FicsItKernel {
 				Trace.Serialize(Ar);
 				
 				if (Ar.IsLoading()) {
-					signals.push_back(TPair<TSharedPtr<FFINSignal>, FFINNetworkTrace>{Signal.SharedCopy(), Trace});
+					signals.push_back(TPair<TFINDynamicStruct<FFINSignal>, FFINNetworkTrace>{Signal, Trace});
 				}
 			}
 

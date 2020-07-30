@@ -98,7 +98,7 @@ public:
 	// End IFINSignalSender
 
 	// Begin IFINSignalListener
-	virtual void HandleSignal(TSharedPtr<FFINSignal> Signal, FFINNetworkTrace Sender) override;
+	virtual void HandleSignal(const TFINDynamicStruct<FFINSignal>& Signal, const FFINNetworkTrace& Sender) override;
 	// End IFINSignalListener
 
 	/**

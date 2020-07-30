@@ -26,3 +26,12 @@ public:
 
 	static int WriteToReader(UStruct* Struct, void* Data, FFINValueReader& reader);
 };
+
+template<>
+struct TStructOpsTypeTraits<FFINStructParameterList> : TStructOpsTypeTraitsBase2<FFINStructParameterList>
+{
+	enum
+	{
+		WithSerializer = true,
+    };
+};

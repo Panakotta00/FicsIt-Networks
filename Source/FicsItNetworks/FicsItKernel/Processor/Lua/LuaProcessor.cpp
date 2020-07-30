@@ -578,13 +578,13 @@ namespace FicsItKernel {
 			auto net = getKernel()->getNetwork();
 			if (!net || net->getSignalCount() < 1) return 0;
 			FFINNetworkTrace sender;
-			TSharedPtr<FFINSignal> signal = net->popSignal(sender);
-			if (!signal.IsValid()) return 0;
+			TFINDynamicStruct<FFINSignal> signal = net->popSignal(sender);
+			if (!signal.GetData()) return 0;
 			int props = 2;
 			lua_pushstring(L, TCHAR_TO_UTF8(*signal->GetName()));
 			newInstance(L, sender);
 			LuaValueReader reader(L);
-			props += *signal >> reader;
+			props += **signal >> reader;
 			return props;
 		}
 

@@ -47,6 +47,15 @@ public:
 	int Num() const;
 };
 
+template<>
+struct TStructOpsTypeTraits<FFINVariadicParameterList> : TStructOpsTypeTraitsBase2<FFINVariadicParameterList>
+{
+	enum
+	{
+		WithSerializer = true,
+    };
+};
+
 inline bool operator<<(FArchive& Ar, FFINVariadicParameterList& List) {
 	return List.Serialize(Ar);
 }

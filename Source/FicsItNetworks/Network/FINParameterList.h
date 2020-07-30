@@ -29,6 +29,15 @@ public:
 	bool Serialize(FArchive& Ar) { return false; };
 };
 
+template<>
+struct TStructOpsTypeTraits<FFINParameterList> : TStructOpsTypeTraitsBase2<FFINParameterList>
+{
+	enum
+	{
+		WithSerializer = true,
+    };
+};
+
 inline bool operator<<(FArchive& Ar, FFINParameterList& ParamList) {
 	return ParamList.Serialize(Ar);
 }

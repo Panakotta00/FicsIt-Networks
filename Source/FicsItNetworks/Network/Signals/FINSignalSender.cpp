@@ -29,7 +29,7 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 
 	FFINDynamicStructHolder FuncData(FFINFuncParameterList::StaticStruct(), new FFINFuncParameterList(Stack.CurrentNativeFunction, data));
 	// create signal instance
-	TSharedPtr<FFINSignal> sig = MakeShared<FFINStructSignal>(signalName, FuncData);
+	TFINDynamicStruct<FFINSignal> sig = FFINStructSignal(signalName, FuncData);
 
 	TSet<FFINNetworkTrace> listeners = IFINSignalSender::Execute_GetListeners(Context);
 

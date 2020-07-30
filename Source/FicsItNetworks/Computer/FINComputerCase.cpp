@@ -348,7 +348,7 @@ void AFINComputerCase::WriteSerialInput(const FString& str) {
 }
 
 void AFINComputerCase::HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender) {
-	if (kernel) kernel->getNetwork()->pushSignal(signal.SharedCopy<FFINSignal>(), sender);
+	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
 }
 
 void AFINComputerCase::OnDriveUpdate(bool added, AFINFileSystemState* drive) {

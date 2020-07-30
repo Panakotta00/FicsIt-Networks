@@ -1,9 +1,5 @@
 #include "FINSmartSignal.h"
 
-UScriptStruct* FFINSmartSignal::GetStruct() const {
-	return StaticStruct();
-}
-
 FFINSmartSignal::FFINSmartSignal() {}
 
 bool FFINSmartSignal::Serialize(FArchive& Ar) {
