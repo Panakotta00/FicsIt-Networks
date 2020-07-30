@@ -10,7 +10,7 @@ AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 	PowerConnection1->SetPowerInfo(PowerInfo1);
 	PowerConnection2->SetPowerInfo(PowerInfo2);
 
-	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
+	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -28,7 +28,10 @@ void AFINNetworkPowerSwitch::BeginPlay() {
 void AFINNetworkPowerSwitch::Tick(float dt) {
 	Super::Tick(dt);
 
-	if (bConnectedHasChanged) OnConnectedChanged();
+	if (bConnectedHasChanged) {
+		OnConnectedChanged();
+		bConnectedHasChanged = false;
+	}
 }
 
 bool AFINNetworkPowerSwitch::ShouldSave_Implementation() const {
@@ -47,6 +50,14 @@ void AFINNetworkPowerSwitch::SetConnected(bool bNewConnected) {
 			if (connections.Contains(PowerConnection2)) PowerConnection1->RemoveHiddenConnection(PowerConnection2);
 		}
 	}
+}
+
+void AFINNetworkPowerSwitch::netFunc_setConnected(bool newConnected) {
+	SetConnected(newConnected);
+}
+
+bool AFINNetworkPowerSwitch::netFunc_isConnected() {
+	return bConnected;
 }
 
 void AFINNetworkPowerSwitch::OnConnectedChanged_Implementation() {

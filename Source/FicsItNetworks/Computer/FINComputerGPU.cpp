@@ -105,12 +105,12 @@ void UFINScreenWidget::Focus() {
 void UFINScreenWidget::ReleaseSlateResources(bool bReleaseChildren) {
 	Super::ReleaseSlateResources(bReleaseChildren);
 
-	if (Screen) {
+	/*if (Screen) {
 		IFINGPUInterface* GPU = Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(Screen)->GetGPU());
 		if (GPU) GPU->DropWidget();
 		OnNewWidget();
 	}
-	Container.Reset();
+	Container.Reset();*/
 }
 
 TSharedRef<SWidget> UFINScreenWidget::RebuildWidget() {

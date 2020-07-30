@@ -13,23 +13,18 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		void luaListen(lua_State* L, Network::NetworkTrace o) {
+		void luaListen(lua_State* L, FFINNetworkTrace o) {
 			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
 			UObject* obj = *o;
 			if (!IsValid(obj)) luaL_error(L, "object is not valid");
 			if (obj->Implements<UFINSignalSender>()) {
-				IFINSignalSender::Execute_AddListener(obj, o.reverse());
+				IFINSignalSender::Execute_AddListener(obj, o.Reverse());
 				UFINSignalUtility::SetupSender(obj->GetClass());
-			}
-			if (obj->Implements<UFINNetworkComponent>()) {
-				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-				for (auto m : merged) {
-					luaListen(L, o(m));
-				}
+				AFINHookSubsystem::GetHookSubsystem(obj)->ClassesWithSignals.Add(obj->GetClass());
 			}
 
 			// Hooks
-			AFINHookSubsystem::GetHookSubsystem(obj)->AddListener(obj, o.reverse());
+			AFINHookSubsystem::GetHookSubsystem(obj)->AddListener(obj, o.Reverse());
 
 			net->signalSenders.Add(o);
 		}
@@ -38,7 +33,7 @@ namespace FicsItKernel {
 			int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
-				Network::NetworkTrace trace;
+				FFINNetworkTrace trace;
 				auto o = (UObject*)getObjInstance<UObject>(L, i, &trace);
 				luaListen(L, trace / o);
 			}
@@ -71,30 +66,24 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, a);
 		}
 
-		void luaIgnore(lua_State* L, Network::NetworkTrace o) {
+		void luaIgnore(lua_State* L, FFINNetworkTrace o) {
 			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
 			UObject* obj = *o;
 			if (!IsValid(obj)) luaL_error(L, "object is not valid");
 			if (obj->Implements<UFINSignalSender>()) {
-				IFINSignalSender::Execute_RemoveListener(obj, o.reverse());
+				IFINSignalSender::Execute_RemoveListener(obj, o.Reverse());
 				net->signalSenders.Remove(o);
-			}
-			if (obj->Implements<UFINNetworkComponent>()) {
-				TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(obj);
-				for (auto m : merged) {
-					luaIgnore(L, o(m));
-				}
 			}
 
 			// Hooks
-			AFINHookSubsystem::GetHookSubsystem(obj)->RemoveListener(obj, *o.reverse());
+			AFINHookSubsystem::GetHookSubsystem(obj)->RemoveListener(obj, *o.Reverse());
 		}
 
 		int luaIgnore(lua_State* L) {
 			int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
-				Network::NetworkTrace trace;
+				FFINNetworkTrace trace;
 				auto o = getObjInstance<UObject>(L, i, &trace);
 				luaIgnore(L, trace / o);
 			}
@@ -106,11 +95,13 @@ namespace FicsItKernel {
 			TSet<FFINNetworkTrace> senders = net->signalSenders;
 			for (FFINNetworkTrace sender : senders) {
 				UObject* s = *sender;
-				FFINNetworkTrace listener = sender.getTrace().reverse();
-				IFINSignalSender::Execute_RemoveListener(s, listener);
-				AFINHookSubsystem::GetHookSubsystem(net->getComponent())->RemoveListener(s, net->getComponent());
-				net->signalSenders.Remove(sender);
+				if (s) {
+					FFINNetworkTrace listener = sender.Reverse();
+					IFINSignalSender::Execute_RemoveListener(s, listener);
+					AFINHookSubsystem::GetHookSubsystem(net->component)->RemoveListener(s, net->component);
+				}
 			}
+			net->signalSenders.Empty();
 			return 1;
 		}
 

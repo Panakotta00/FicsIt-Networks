@@ -199,6 +199,10 @@ namespace FicsItKernel {
 			} CatchExceptionLua
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})
+		
+		static int luaDoFileCont(lua_State *L, int d1, lua_KContext d2) {
+			return lua_gettop(L) - 1;
+		}
 
 		LuaFunc(doFile, {
 			FileSystem::Path path = luaL_checkstring(L, 1);
@@ -216,9 +220,8 @@ namespace FicsItKernel {
 			} CatchExceptionLua
 			int n = lua_gettop(L) - 1;
 			luaL_loadbuffer(L, code.c_str(), code.size(), ("@" + path.str()).c_str());
-			lua_insert(L, 2);
-			lua_call(L, n, LUA_MULTRET);
-			return LuaProcessor::luaAPIReturn(L, lua_gettop(L) - 1);
+			lua_callk(L, 0, LUA_MULTRET, 0, luaDoFileCont);
+			return luaDoFileCont(L, 0, 0);
 		})
 
 		LuaFunc(loadFile, {
@@ -235,6 +238,7 @@ namespace FicsItKernel {
 			try {
 				file->close();
 			} CatchExceptionLua
+			
 			int n = lua_gettop(L) - 1;
 			luaL_loadbuffer(L, code.c_str(), code.size(), ("@" + path.str()).c_str());
 			return LuaProcessor::luaAPIReturn(L, 1);

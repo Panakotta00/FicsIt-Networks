@@ -35,36 +35,6 @@ Return Values::
 |ItemStacks at the given slots in the inventory
 |===
 
-==== `int getItemCount()`
-
-Returns the total count of all item amounts.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|the total count of all item amounts
-|===
-
-==== `int getSize()`
-
-Returns the inventory slot count.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|the inventory slot count.
-|===
-
 ==== `sort()`
 
 Sorts the inventory
@@ -74,66 +44,22 @@ Sorts the inventory
 Removes all items, you can discard, from the inventory without any trace.
 They will be gone forever! So be careful!
 
+=== Properties
+
+==== `int itemCount (readonly)`
+
+The total count of all item amounts.
+
+==== `int size (readonly)`
+
+The inventory slot count.
+
 == FactoryConnector
 
 A FactoryConnector is a connection point of an actor for a conveyor or pipe.
 
 === Functions
 
-==== `int getType()`
-
-Returns the type of connector.
-
-- 0: Conveyor
-- 1: Pipe
-
-[]
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|type of connector
-|===
-
-==== `int getDirection()`
-
-Returns the direction of the connector.
-
-- 0: Input
-- 1: Output
-- 2: Any
-- 4: Snap only (like conveyor poles)
-
-[]
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|direction of the connector
-|===
-
-==== `bool isConnected()`
-
-Checks if the connector is connected.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|true if connector is connected
-|===
 
 ==== `Inventory getInventory()`
 
@@ -150,16 +76,27 @@ Return Values::
 |the internal inventory
 |===
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+=== Properties
 
-|FactoryHook
-|FactoryHook
-|a factory hook attached to the connector
-|===
+==== `int type (readonly)`
+
+The type of the connector.
+
+- 0: Conveyor
+- 1: Pipe
+
+==== `int direction (readonly)`
+
+The direction of the connector.
+
+- 0: Input
+- 1: Output
+- 2: Any
+- 4: Snap only (like conveyor poles)
+
+==== `bool isConnected (readonly)`
+
+True if the connector is connected.
 
 == Recipe
 

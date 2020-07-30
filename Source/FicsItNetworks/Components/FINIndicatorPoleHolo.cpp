@@ -66,7 +66,7 @@ void AFINIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& hit
 }
 
 AActor* AFINIndicatorPoleHolo::Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) {
-	FRotator rotation = FRotator::ZeroRotator;
+	FRotator rotation = GetActorRotation();
 	FVector location = GetActorLocation();
 	
 	FActorSpawnParameters spawnParams;
@@ -110,5 +110,5 @@ bool AFINIndicatorPoleHolo::TrySnapToActor(const FHitResult& hitResult) {
 }
 
 inline int AFINIndicatorPoleHolo::GetHeight(FVector worldLoc) const {
-	return FMath::Clamp(static_cast<int>((worldLoc - SnappedLoc).Z / 100.0), 0, 20);
+	return FMath::Clamp(static_cast<int>((worldLoc - SnappedLoc).Z / 100.0), 0, 10);
 }

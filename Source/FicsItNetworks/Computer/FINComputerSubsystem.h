@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "FGSaveInterface.h"
 #include "FGSubsystem.h"
+#include "FicsItNetworksCustomVersion.h"
 #include "Queue.h"
 #include "WidgetInteractionComponent.h"
 #include "Engine/Engine.h"
@@ -20,6 +21,9 @@ public:
 
 	UPROPERTY()
 	UInputComponent* Input;
+
+	UPROPERTY(SaveGame)
+	TEnumAsByte<EFINCustomVersion> Version = EFINCustomVersion::FINBeforeCustomVersionWasAdded;
 
 	AFINComputerSubsystem();
 
@@ -41,5 +45,5 @@ public:
 	static AFINComputerSubsystem* GetComputerSubsystem(UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, Category = "Computer")
-	UWidgetInteractionComponent* AttachWidgetInteractionToPlayer();
+	UWidgetInteractionComponent* AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
 };

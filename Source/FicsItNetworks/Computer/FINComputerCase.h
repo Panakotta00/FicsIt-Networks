@@ -4,14 +4,17 @@
 #include "FINComputerGPU.h"
 #include "FINComputerScreen.h"
 #include "Buildables/FGBuildable.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/KernelSystemSerializationInfo.h"
+#include "Network/FINNetworkCustomType.h"
+
 
 #include "FINComputerCase.generated.h"
 
+class AFINComputerNetworkCard;
 class AFINComputerDriveHolder;
 class AFINComputerMemory;
 class AFINComputerProcessor;
@@ -24,12 +27,12 @@ enum EComputerState {
 };
 
 UCLASS(Blueprintable)
-class AFINComputerCase : public AFGBuildable {
+class AFINComputerCase : public AFGBuildable, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
-	UFINNetworkConnector* NetworkConnector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category = "ComputerCase")
 	UFINModuleSystemPanel* Panel = nullptr;
@@ -59,6 +62,9 @@ public:
     TSet<AFINComputerDriveHolder*> DriveHolders;
 
 	UPROPERTY()
+	TSet<AFINComputerNetworkCard*> NetworkCards;
+
+	UPROPERTY()
 	AFINFileSystemState* Floppy = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -84,11 +90,16 @@ public:
 
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
 	virtual void PreLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	virtual void PostLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	virtual void PreSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	virtual void PostSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	// End IFGSaveInterface
+
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("Computer"); }
+	// End IFINNetworkCustomType
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddProcessor(AFINComputerProcessor* processor);
@@ -122,6 +133,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
 	void RemoveScreen(AFINComputerScreen* Screen);
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void AddNetCard(AFINComputerNetworkCard* NetCard);
+	
+	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
+    void RemoveNetCard(AFINComputerNetworkCard* NetCard);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddModule(AActor* Module);
@@ -154,7 +171,7 @@ public:
 	FString GetSerialOutput();
 
 	UFUNCTION()
-	void HandleSignal(FFINSignal signal, FFINNetworkTrace sender);
+	void HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender);
 
 private:
 	UPROPERTY(SaveGame)

@@ -2,14 +2,15 @@
 
 #include "FGPowerConnectionComponent.h"
 #include "FGItemPickup_Spawnable.h"
+#include "FINNetworkCable.h"
 
 #include "Components/SceneComponent.h"
 
-std::vector<std::pair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = std::vector<std::pair<UClass*, FFINAdapterSettings>>();
+TArray<TPair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = TArray<TPair<UClass*, FFINAdapterSettings>>();
 
 void AFINNetworkAdapter::RegistererAdapterSetting(UClass* clazz, FFINAdapterSettings settings) {
 	clazz->AddToRoot();
-	AFINNetworkAdapter::settings.push_back({clazz, settings});
+	AFINNetworkAdapter::settings.Add(TPair<UClass*, FFINAdapterSettings>{clazz, settings});
 }
 
 void AFINNetworkAdapter::RegistererAdapterSetting(FString BPPath, FFINAdapterSettings settings) {
@@ -29,9 +30,9 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"Root");
 	RootComponent->SetMobility(EComponentMobility::Type::Static);
 
-	Connector = CreateDefaultSubobject<UFINNetworkConnector>(L"Connector");
+	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(L"Connector");
 	Connector->SetupAttachment(RootComponent);
-	Connector->bAddOuterToMerged = false;
+	Connector->bOuterAsRedirect = false;
 	
 	ConnectorMesh = CreateDefaultSubobject<UStaticMeshComponent>(L"StaticMesh");
 	ConnectorMesh->SetHiddenInGameSML(true, true);
@@ -46,14 +47,13 @@ AFINNetworkAdapter::~AFINNetworkAdapter() {}
 void AFINNetworkAdapter::BeginPlay() {
 	Super::BeginPlay();
 
-
 	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
 	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
 
 	if (!IsValid(Parent)) {
-		for (AFINNetworkCable* cable : Connector->Cables) {
+		for (AFINNetworkCable* cable : Connector->ConnectedCables) {
 			TArray<FInventoryStack> refund;
-			cable->Execute_GetDismantleRefund(cable, refund);
+			IFGDismantleInterface::Execute_GetDismantleRefund(cable, refund);
 			float radius;
 			FVector pos = IFGDismantleInterface::Execute_GetRefundSpawnLocationAndArea(cable, cable->GetActorLocation(), radius);
 			TArray<class AFGItemPickup_Spawnable*> drops;
@@ -64,7 +64,7 @@ void AFINNetworkAdapter::BeginPlay() {
 		return;
 	}
 	
-	Connector->AddMerged(Parent);
+	Connector->RedirectionObject = Parent;
 	
 	Attachment = NewObject<UFINNetworkAdapterReference>((Parent) ? Parent : nullptr);
 	Attachment->Ref = this;
@@ -89,8 +89,8 @@ void AFINNetworkAdapter::BeginPlay() {
 	}
 
 	if (!done) for (auto setting_entry : settings) {
-		auto clazz = setting_entry.first;
-		auto setting = setting_entry.second;
+		auto clazz = setting_entry.Key;
+		auto setting = setting_entry.Value;
 		if (!Parent->IsA(clazz)) continue;
 		FVector pos = Parent->GetActorTransform().TransformPosition(Parent->K2_GetActorLocation());
 		SetActorLocationAndRotation(pos, Parent->GetActorRotation());
@@ -110,6 +110,10 @@ bool AFINNetworkAdapter::ShouldSave_Implementation() const {
 
 bool AFINNetworkAdapter::NeedTransform_Implementation() {
 	return true;
+}
+
+void AFINNetworkAdapter::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(Parent);
 }
 
 UFINNetworkAdapterReference::UFINNetworkAdapterReference() {}

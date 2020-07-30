@@ -1,25 +1,26 @@
 #include "FicsItNetworksModule.h"
 
 #include "CoreMinimal.h"
+#include "CoreRedirects.h"
 #include "Components/StaticMeshComponent.h"
 
 #include "FGBuildable.h"
 #include "FGBuildableHologram.h"
 #include "FGCharacterPlayer.h"
-#include "FGInventoryLibrary.h"
 #include "FGFactoryConnectionComponent.h"
-#include "FGGameMode.h"
 
 #include "SML/mod/hooking.h"
 
 #include "FINComponentUtility.h"
+#include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
 #include "Computer/FINComputerProcessor.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
+#include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Runtime/CoreUObject/Public/Misc/RedirectCollector.h"
 
-#include "FicsItKernel/Network/SmartSignal.h"
 #include "FicsItKernel/Processor/Lua/LuaLib.h"
 
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
@@ -42,7 +43,7 @@ public:
 USceneComponent* Holo_SetupComponentDecl(AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName);
 void Holo_SetupComponent(CallScope<decltype(&Holo_SetupComponentDecl)>& scope, AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
 	UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
-	if (componentTemplate->IsA<UFINNetworkConnector>()) {
+	if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
 		auto comp = NewObject<UStaticMeshComponent>(attachParent);
 		comp->RegisterComponent();
 		comp->SetMobility(EComponentMobility::Movable);
@@ -58,7 +59,7 @@ void GetDismantleRefund_Decl(IFGDismantleInterface*, TArray<FInventoryStack>&);
 void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {
 	AFGBuildable* self = reinterpret_cast<AFGBuildable*>(disInt);
 	if (!self->IsA<AFINNetworkCable>()) {
-		TInlineComponentArray<UFINNetworkConnector*> components;
+		TInlineComponentArray<UFINNetworkConnectionComponent*> components;
 		self->GetComponents(components);
 		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
 		self->GetComponents(adapters);
@@ -69,8 +70,8 @@ void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IF
 				components.Add(adapter->Connector);
 			}
 		}
-		for (UFINNetworkConnector* connector : components) {
-			for (AFINNetworkCable* cable : connector->Cables) {
+		for (UFINNetworkConnectionComponent* connector : components) {
+			for (AFINNetworkCable* cable : connector->ConnectedCables) {
 				cable->Execute_GetDismantleRefund(cable, refund);
 			}
 		}
@@ -82,6 +83,10 @@ void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IF
 
 void FFicsItNetworksModule::StartupModule(){
 	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
+
+	TArray<FCoreRedirect> redirects;
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
+	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
 	#ifndef WITH_EDITOR
 	finConfig->SetNumberField("SignalQueueSize", 32);
@@ -97,7 +102,7 @@ void FFicsItNetworksModule::StartupModule(){
 	SUBSCRIBE_METHOD(AFGBuildable::Dismantle_Implementation, [](auto& scope, AFGBuildable* self_r) {
 		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
 		AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);
-		TInlineComponentArray<UFINNetworkConnector*> connectors;
+		TInlineComponentArray<UFINNetworkConnectionComponent*> connectors;
 		self->GetComponents(connectors);
 		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
 		self->GetComponents(adapters);
@@ -108,8 +113,8 @@ void FFicsItNetworksModule::StartupModule(){
 				connectors.Add(adapter->Connector);
 			}
 		}
-		for (UFINNetworkConnector* connector : connectors) {
-			for (AFINNetworkCable* cable : connector->Cables) {
+		for (UFINNetworkConnectionComponent* connector : connectors) {
+			for (AFINNetworkCable* cable : connector->ConnectedCables) {
 				cable->Execute_Dismantle(cable);
 			}
 		}
@@ -128,9 +133,16 @@ void FFicsItNetworksModule::StartupModule(){
 	})
 
 	SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
+
+	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::OnConstruction, [](AActor* self, const FTransform& t) {
+		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
+        if (character) {
+	        AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld())->AttachWidgetInteractionToPlayer(character);
+		}
+	})
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
-	FicsItKernel::Lua::LuaLib::get()->registerLib();
+	FFINGlobalRegisterHelper::Register();
 }
 void FFicsItNetworksModule::ShutdownModule(){ }
 

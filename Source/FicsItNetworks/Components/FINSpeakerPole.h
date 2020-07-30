@@ -2,27 +2,65 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
-#include "Components/AudioComponent.h"
-#include "FicsItKernel/Network/NetworkFuture.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Network/FINFuture.h"
+#include "Network/FINNetworkCustomType.h"
+
+
 #include "FINSpeakerPole.generated.h"
 
+class AFINSpeakerPole;
+
+USTRUCT()
+struct FFINSpeakersPlaySoundFuture : public FFINFutureSimpleDone {
+	GENERATED_BODY()
+
+	FFINSpeakersPlaySoundFuture() = default;
+	FFINSpeakersPlaySoundFuture(AFINSpeakerPole* Speakers, const FString& Sound, float Start) : Speakers(Speakers), Sound(Sound), Start(Start) {}
+	
+	UPROPERTY(SaveGame)
+	AFINSpeakerPole* Speakers = nullptr;
+
+	UPROPERTY(SaveGame)
+	FString Sound = "";
+
+	UPROPERTY(SaveGame)
+	float Start = 0.0f;
+
+	virtual void Execute() override;
+	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
+};
+
+USTRUCT()
+struct FFINSpeakersStopSoundFuture : public FFINFutureSimpleDone {
+	GENERATED_BODY()
+
+	FFINSpeakersStopSoundFuture() = default;
+	FFINSpeakersStopSoundFuture(AFINSpeakerPole* Speakers) : Speakers(Speakers) {}
+	
+	UPROPERTY(SaveGame)
+    AFINSpeakerPole* Speakers = nullptr;
+
+	virtual void Execute() override;
+	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
+};
+
 UCLASS(Blueprintable)
-class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
+class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
-		UFINNetworkConnector* NetworkConnector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
-		UAudioComponent* AudioComponent = nullptr;
+	UAudioComponent* AudioComponent = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category="SpeakerPole")
-		FString CurrentSound;
+	FString CurrentSound;
 
 	UPROPERTY(SaveGame)
-		TSet<FFINNetworkTrace> Listeners;
+	TSet<FFINNetworkTrace> Listeners;
 
 	AFINSpeakerPole();
 
@@ -32,6 +70,10 @@ public:
 	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINNetworkSignalSender
+
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("SpeakerPole"); }
+	// End IFINNetworkCustomType
 
 	/**
 	 * Event bound to the OnAudioFinished event of the AudioComponent.
@@ -48,14 +90,14 @@ public:
 	 * If able to play the sound, emits a play sound signal.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-	FFINNetworkFuture netFunc_playSound(const FString& sound, float startPoint);
+	FFINSpeakersPlaySoundFuture netFunc_playSound(const FString& sound, float startPoint);
 
 	/**
 	 * Stops the current playing sound.
 	 * Emits a stop sound signal if it actually was able to stop the current playing sound.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-	FFINNetworkFuture netFunc_stopSound();
+	FFINDynamicStructHolder netFunc_stopSound();
 
 	/**
 	 * Notifies when the state of the speaker pole has changed.
@@ -72,40 +114,3 @@ public:
 	 */
 	USoundWave* LoadSoundFromFile(const FString& sound);
 };
-
-USTRUCT()
-struct FFINSpeakersPlaySoundInData {
-	GENERATED_BODY()
-	
-	UPROPERTY()
-	AFINSpeakerPole* Speakers = nullptr;
-
-	FString Sound = "";
-	float Start = 0.0f;
-
-	bool Serialize(FArchive& Ar) {
-		Ar << Speakers;
-		Ar << Sound;
-		Ar << Start;
-		return true;
-	}
-};
-void inline operator<<(FArchive& Ar, FFINSpeakersPlaySoundInData& Data) {
-	Data.Serialize(Ar);
-}
-
-USTRUCT()
-struct FFINSpeakersJustSelfInData {
-	GENERATED_BODY()
-	
-	UPROPERTY()
-    AFINSpeakerPole* Speakers = nullptr;
-
-	bool Serialize(FArchive& Ar) {
-		Ar << Speakers;
-		return true;
-	}
-};
-void inline operator<<(FArchive& Ar, FFINSpeakersJustSelfInData& Data) {
-	Data.Serialize(Ar);
-}

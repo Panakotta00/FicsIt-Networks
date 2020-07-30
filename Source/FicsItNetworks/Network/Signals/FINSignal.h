@@ -1,23 +1,59 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FicsItKernel/Network/Signal.h"
-#include <memory>
+#include "Network/FINValueReader.h"
 #include "FINSignal.generated.h"
 
 /**
- * Holds information like the paramters of signal
+ * Base class of all signals transferred through the network.
+ * Containing the name of the signal.
+ * Base classes will then implement support for signal parameters.
  */
 USTRUCT(BlueprintType)
 struct FICSITNETWORKS_API FFINSignal {
 	GENERATED_BODY()
-
+	
 private:
-	std::shared_ptr<FicsItKernel::Network::Signal> signal;
+	UPROPERTY()
+	FString Name;
 
 public:
-	FFINSignal();
-	FFINSignal(const std::shared_ptr<FicsItKernel::Network::Signal>& signal);
+	FFINSignal() : Name("NoSignal") {}
+	FFINSignal(FString Name);
+	virtual ~FFINSignal() {}
 
-	operator std::shared_ptr<FicsItKernel::Network::Signal>();
+	bool Serialize(FArchive& Ar);
+	
+	/**
+	 * Writes all additional signal data (excluding the Name) to the given
+	 * parameter reader.
+	 *
+	 * @param[in]	reader	the reader reading teh data.
+	 * @return	returns the count of written values
+	 */
+	virtual int operator>>(FFINValueReader& reader) const { return 0; };
+
+	virtual UScriptStruct* GetStruct() const { return StaticStruct(); };
+	
+	FString GetName() const;
+};
+
+template<>
+struct TStructOpsTypeTraits<FFINSignal> : TStructOpsTypeTraitsBase2<FFINSignal>
+{
+	enum
+	{
+        WithSerializer = true,
+    };
+};
+
+inline bool operator<<(FArchive& Ar, FFINSignal& Signal) {
+	return Signal.Serialize(Ar);
+}
+
+struct FFINNoSignal : public FFINSignal {
+public:
+	FFINNoSignal() : FFINSignal("None") {}
+
+	virtual int operator>>(FFINValueReader& reader) const override { return 0; }
 };

@@ -88,22 +88,22 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 				Background = BackgroundCache[Y * ScreenSize.X + X];
 			}
 
+			FSlateDrawElement::MakeText(
+                OutDrawElements,
+                LayerId+1,
+                AllottedGeometry.ToOffsetPaintGeometry(FVector2D(X,Y) * CharSize),
+                Line.Mid(X,1),
+                Font.Get(),
+                ESlateDrawEffect::None,
+                Foreground
+            );
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
 				LayerId,
-				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1.01), 1),
+				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1), 1),
 				&boxBrush,
 				ESlateDrawEffect::None,
-				InWidgetStyle.GetColorAndOpacityTint() * Background);
-			FSlateDrawElement::MakeText(
-		        OutDrawElements,
-		        LayerId,
-		        AllottedGeometry.ToOffsetPaintGeometry(FVector2D(X,Y) * CharSize),
-		        Line.Mid(X,1),
-		        Font.Get(),
-		        ESlateDrawEffect::None,
-		        InWidgetStyle.GetColorAndOpacityTint() * Foreground
-            );
+				Background);
 		}
 	}
 	return LayerId;
@@ -229,21 +229,7 @@ void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int
 void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
 
 void AFINComputerGPUT1::netFunc_bindScreen(UObject* Screen) {
-	if (Screen == nullptr) {
-		BindScreen(nullptr);
-		return;
-	}
-	if (!Screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass())) {
-		if (Screen->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-			TSet<UObject*> merged = IFINNetworkComponent::Execute_GetMerged(Screen);
-			for (UObject* obj : merged) {
-				if (IsValid(obj) && obj->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass())) {
-					BindScreen(obj);
-					return;
-				}
-			}
-		}
-	} else BindScreen(Screen);
+	BindScreen(Screen);
 }
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {
@@ -273,7 +259,7 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 					x = 0;
 				}
 				FString& text = TextGridBuffer[y];
-				int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X));
+				int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X)-x-1);
 				text.RemoveAt(x, replace);
 				text.InsertAt(x, inLine.Left(replace));
 				for (int dx = 0; dx < replace; ++dx) {
@@ -302,7 +288,7 @@ void AFINComputerGPUT1::netFunc_getSize(int& w, int& h) {
 }
 
 void AFINComputerGPUT1::netFunc_setSize(int w, int h) {
-	SetScreenSize(FVector2D(FMath::Clamp(w, 1, 150), FMath::Clamp(h, 1, 50)));
+	SetScreenSize(FVector2D(FMath::Clamp(w, 1, 300), FMath::Clamp(h, 1, 100)));
 }
 
 void AFINComputerGPUT1::netFunc_setForeground(float r, float g, float b, float a) {

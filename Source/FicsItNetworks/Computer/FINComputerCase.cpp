@@ -9,13 +9,14 @@
 #include "FINComputerDriveDesc.h"
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
+#include "FINComputerNetworkCard.h"
+#include "FINComputerSubsystem.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Audio/AudioComponentController.h"
 #include "util/Logging.h"
 
 AFINComputerCase::AFINComputerCase() {
-	NetworkConnector = CreateDefaultSubobject<UFINNetworkConnector>("NetworkConnector");
-	NetworkConnector->AddMerged(this);
+	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
 	
@@ -55,10 +56,10 @@ AFINComputerCase::~AFINComputerCase() {
 	if (kernel) delete kernel;
 }
 
-void AFINComputerCase::Serialize(FArchive& ar) {
-	Super::Serialize(ar);
-	if (ar.IsSaveGame()) {
-		kernel->Serialize(ar, KernelState);
+void AFINComputerCase::Serialize(FArchive& Ar) {
+	Super::Serialize(Ar);
+	if (Ar.IsSaveGame() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version >= EFINCustomVersion::FINSignalStorage) {
+		kernel->Serialize(Ar, KernelState);
 	}
 }
 
@@ -88,7 +89,6 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 	if (kernel) kernel->handleFutures();
 }
 
-#pragma optimize("", off)
 void AFINComputerCase::Factory_Tick(float dt) {
 	KernelTickTime += dt;
 	if (KernelTickTime > 10.0) KernelTickTime = 10.0;
@@ -104,10 +104,13 @@ void AFINComputerCase::Factory_Tick(float dt) {
 		//SML::Logging::debug("Computer tick: ", dur.count());
 	}
 }
-#pragma optimize("", on)
 
 bool AFINComputerCase::ShouldSave_Implementation() const {
 	return true;
+}
+
+void AFINComputerCase::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(AFINComputerSubsystem::GetComputerSubsystem(this));
 }
 
 void AFINComputerCase::PreLoadGame_Implementation(int32 gameVersion, int32 engineVersion) {
@@ -209,6 +212,18 @@ void AFINComputerCase::RemoveScreen(AFINComputerScreen* Screen) {
 	Screens.Remove(Screen);
 }
 
+void AFINComputerCase::AddNetCard(AFINComputerNetworkCard* NetCard) {
+	NetCard->ConnectedComponent = NetworkConnector;
+	NetworkConnector->AddConnectedNode(NetCard);
+	NetworkCards.Add(NetCard);
+}
+
+void AFINComputerCase::RemoveNetCard(AFINComputerNetworkCard* NetCard) {
+	NetCard->ConnectedComponent = nullptr;
+	NetworkConnector->RemoveConnectedNode(NetCard);
+	NetworkCards.Remove(NetCard);
+}
+
 void AFINComputerCase::AddModule(AActor* module) {
 	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
 		AddProcessor(processor);
@@ -220,6 +235,8 @@ void AFINComputerCase::AddModule(AActor* module) {
 		AddScreen(screen);
 	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
 		AddGPU(gpu);
+	} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
+		AddNetCard(netCard);
 	}
 }
 
@@ -234,6 +251,8 @@ void AFINComputerCase::RemoveModule(AActor* module) {
 		RemoveScreen(screen);
 	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
 		RemoveGPU(gpu);
+	} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
+		RemoveNetCard(netCard);
 	}
 }
 
@@ -328,8 +347,8 @@ void AFINComputerCase::WriteSerialInput(const FString& str) {
 	}
 }
 
-void AFINComputerCase::HandleSignal(FFINSignal signal, FFINNetworkTrace sender) {
-	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
+void AFINComputerCase::HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender) {
+	if (kernel) kernel->getNetwork()->pushSignal(signal.SharedCopy<FFINSignal>(), sender);
 }
 
 void AFINComputerCase::OnDriveUpdate(bool added, AFINFileSystemState* drive) {

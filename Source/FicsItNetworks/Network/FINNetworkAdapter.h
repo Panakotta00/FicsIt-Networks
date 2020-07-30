@@ -4,9 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "FGSaveInterface.h"
 #include "Buildables/FGBuildableFactory.h"
-#include "FINNetworkConnector.h"
-
-#include <vector>
+#include "FINAdvancedNetworkConnectionComponent.h"
 
 #include "FINNetworkAdapter.generated.h"
 
@@ -34,18 +32,18 @@ class FICSITNETWORKS_API AFINNetworkAdapter : public AActor, public IFGSaveInter
 	GENERATED_BODY()
 
 public:
-	static std::vector<std::pair<UClass*, FFINAdapterSettings>> settings;
+	static TArray<TPair<UClass*, FFINAdapterSettings>> settings;
 	static void RegistererAdapterSetting(UClass*, FFINAdapterSettings);
 	static void RegistererAdapterSetting(FString BPPath, FFINAdapterSettings);
 	static void RegisterAdapterSettings();
 
-	/** the factory this adapter is attached to */
+	/** the building this adapter is attached to */
 	UPROPERTY(SaveGame)
-	AFGBuildableFactory* Parent = nullptr;
+	AFGBuildable* Parent = nullptr;
 	
 	/** the network connector of the adapter */
 	UPROPERTY()
-	UFINNetworkConnector* Connector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 	
 	/** the network adapter reference attached to the parent factory */
 	UPROPERTY()
@@ -65,6 +63,7 @@ public:
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	virtual bool NeedTransform_Implementation() override;
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
 	// End IFGSaveInterface
 };
 

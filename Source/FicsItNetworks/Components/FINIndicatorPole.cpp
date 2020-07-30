@@ -1,31 +1,23 @@
 ﻿#include "FINIndicatorPole.h"
 
+
+#include "FGColoredInstanceMeshProxy.h"
+#include "ProxyInstancedStaticMeshComponent.h"
+
 AFINIndicatorPole::AFINIndicatorPole() {
-	Indicator = CreateDefaultSubobject<UStaticMeshComponent>("Indicator");
+	Indicator = CreateDefaultSubobject<UProxyInstancedStaticMeshComponent>("Indicator");
 	Indicator->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	
-	Connector = CreateDefaultSubobject<UFINNetworkConnector>("Connector");
+	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
 void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
 	Super::OnConstruction(transform);
-	
-	// Clean up
-	Poles.Empty();
 
-	// Construction
-	for (int i = 0; i < Height; ++i) {
-		UStaticMeshComponent* Pole = NewObject<UStaticMeshComponent>(this);
-		check(Pole);
-		Pole->AttachToComponent(Indicator, FAttachmentTransformRules::KeepRelativeTransform);
-		Pole->SetRelativeLocation(FVector(0,0, -(i) * 100.0));
-		Pole->RegisterComponent();
-		Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
-		Pole->SetStaticMesh(LongPole);
-		Pole->SetMobility(EComponentMobility::Static);
-		Poles.Add(Pole);
-	}
+#if WITH_EDITOR
+	CreatePole();
+#endif
 }
 
 void AFINIndicatorPole::BeginPlay() {
@@ -35,8 +27,38 @@ void AFINIndicatorPole::BeginPlay() {
 		IndicatorInstance = Indicator->CreateDynamicMaterialInstance(0);
 		Indicator->SetMaterial(0, IndicatorInstance);
 	}
+
+#if !WITH_EDITOR
+	CreatePole();
+#endif
 	
 	UpdateEmessive();
+}
+
+bool AFINIndicatorPole::ShouldSave_Implementation() const {
+	return true;
+}
+
+int32 AFINIndicatorPole::GetDismantleRefundReturnsMultiplier() const {
+	return Height + 6;
+}
+
+void AFINIndicatorPole::CreatePole() {
+	// Clean up
+	Poles.Empty();
+
+	// Construction
+	for (int i = 0; i < Height; ++i) {
+		UStaticMeshComponent* Pole = NewObject<UFGColoredInstanceMeshProxy>(this);
+		check(Pole);
+		Pole->AttachToComponent(Indicator, FAttachmentTransformRules::KeepRelativeTransform);
+		Pole->SetRelativeLocation(FVector(0,0, -(i) * 100.0));
+		Pole->RegisterComponent();
+		Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+		Pole->SetStaticMesh(LongPole);
+		Pole->SetMobility(EComponentMobility::Static);
+		Poles.Add(Pole);
+	}
 }
 
 void AFINIndicatorPole::UpdateEmessive() {

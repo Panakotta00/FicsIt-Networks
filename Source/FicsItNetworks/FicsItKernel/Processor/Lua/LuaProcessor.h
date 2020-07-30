@@ -4,7 +4,6 @@
 #include <set>
 
 #include "FicsItKernel/Processor/Processor.h"
-#include "FicsItKernel/Network/Signal.h"
 #include "LuaFileSystemAPI.h"
 
 class AFINStateEEPROMLua;
@@ -13,20 +12,22 @@ struct lua_Debug;
 
 namespace FicsItKernel {
 	namespace Lua {
-		class LuaSignalReader : public Network::SignalReader {
+		class LuaValueReader : public FFINValueReader {
 		private:
 			lua_State* L = nullptr;
 
 		public:
-			LuaSignalReader(lua_State* L);
+			LuaValueReader(lua_State* L);
 
-			virtual void operator<<(const std::string& str) override;
-			virtual void operator<<(double num) override;
-			virtual void operator<<(int num) override;
-			virtual void operator<<(bool b) override;
-			virtual void operator<<(UObject* obj) override;
-			virtual void operator<<(const Network::NetworkTrace& obj) override;
-			virtual void WriteAbstract(const void* obj, const std::string& id) override;
+			virtual void nil() override;
+			virtual void operator<<(FINBool b) override;
+			virtual void operator<<(FINInt num) override;
+			virtual void operator<<(FINFloat num) override;
+			virtual void operator<<(FINClass clazz) override;
+			virtual void operator<<(const FINStr& str) override;
+			virtual void operator<<(const FINObj& obj) override;
+			virtual void operator<<(const FINTrace& obj) override;
+			virtual void operator<<(const FINStruct& struc) override;
 		};
 
 		class LuaFileSystemListener : public FileSystem::Listener {

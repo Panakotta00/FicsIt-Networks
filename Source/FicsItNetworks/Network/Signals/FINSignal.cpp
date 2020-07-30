@@ -1,11 +1,12 @@
 #include "FINSignal.h"
 
-FFINSignal::FFINSignal() : signal(new FicsItKernel::Network::NoSignal()) {}
+FFINSignal::FFINSignal(FString Name) : Name(Name) {}
 
-FFINSignal::FFINSignal(const std::shared_ptr<FicsItKernel::Network::Signal>& signal) : signal(signal) {
-	
+bool FFINSignal::Serialize(FArchive& Ar) {
+	Ar << Name;
+	return true;
 }
 
-FFINSignal::operator std::shared_ptr<FicsItKernel::Network::Signal>() {
-	return signal;
+FString FFINSignal::GetName() const {
+	return Name;
 }

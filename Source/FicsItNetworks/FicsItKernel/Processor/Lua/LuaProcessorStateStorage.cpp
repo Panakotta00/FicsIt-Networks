@@ -1,44 +1,6 @@
 ﻿#include "LuaProcessorStateStorage.h"
 
-FDynamicStructHolder::FDynamicStructHolder() {}
-
-FDynamicStructHolder::FDynamicStructHolder(UStruct* Struct) : Struct(Struct) {
-	Data = FMemory::Malloc(Struct->GetStructureSize());
-	Struct->InitializeStruct(Data);
-}
-
-FDynamicStructHolder::FDynamicStructHolder(UStruct* Struct, void* Data) : Data(Data), Struct(Struct) {}
-
-FDynamicStructHolder::~FDynamicStructHolder() {
-	if (Data) {
-		Struct->DestroyStruct(Data);
-		FMemory::Free(Data);
-		Data = nullptr;
-	}
-}
-
-bool FDynamicStructHolder::Serialize(FArchive& Ar) {
-	if (Ar.IsLoading() && Data && Struct) {
-		Struct->DestroyStruct(Data);
-		FMemory::Free(Data);
-		Data = nullptr;
-	}
-	Ar << Struct;
-	if (Ar.IsLoading() && Struct) {
-		Data = FMemory::Malloc(Struct->GetStructureSize());
-		Struct->InitializeStruct(Data);
-	}
-	if (Data && Struct) Struct->SerializeBin(Ar, Data);
-	return true;
-}
-
-UStruct* FDynamicStructHolder::GetStruct() {
-	return Struct;
-}
-
-void* FDynamicStructHolder::GetData() {
-	return Data;
-}
+#include "Network/FINDynamicStructHolder.h"
 
 void ULuaProcessorStateStorage::Serialize(FArchive& Ar) {
 	Ar << Thread;
@@ -53,11 +15,11 @@ void ULuaProcessorStateStorage::Serialize(FArchive& Ar) {
 	if (Ar.IsLoading()) Structs.Empty();
 	for (int i = 0; i < StructNum; ++i) {
 		int j = i;
-		if (Ar.IsLoading()) j = Structs.Add(MakeShared<FDynamicStructHolder>());
-		TSharedPtr<FDynamicStructHolder> holder = Structs[j];
+		if (Ar.IsLoading()) j = Structs.Add(MakeShared<FFINDynamicStructHolder>());
+		TSharedPtr<FFINDynamicStructHolder> holder = Structs[j];
 		if (holder.IsValid() && holder.Get()) Ar << *holder.Get();
 		else {
-			FDynamicStructHolder h;
+			FFINDynamicStructHolder h;
 			Ar << h;
 		}
 	}
@@ -74,7 +36,7 @@ int32 ULuaProcessorStateStorage::Add(UObject* Ref) {
 	return References.AddUnique(Ref);
 }
 
-int32 ULuaProcessorStateStorage::Add(TSharedPtr<FDynamicStructHolder> Struct) {
+int32 ULuaProcessorStateStorage::Add(TSharedPtr<FFINDynamicStructHolder> Struct) {
 	return Structs.Add(Struct);
 }
 
@@ -86,6 +48,6 @@ UObject* ULuaProcessorStateStorage::GetRef(int32 id) {
 	return References[id];
 }
 
-TSharedPtr<FDynamicStructHolder> ULuaProcessorStateStorage::GetStruct(int32 id) {
+TSharedPtr<FFINDynamicStructHolder> ULuaProcessorStateStorage::GetStruct(int32 id) {
 	return Structs[id];
 }

@@ -1,17 +1,23 @@
 ﻿#pragma once
 
-#include "CoreTypes.h"
+#include "CoreMinimal.h"
 #include "Misc/Guid.h"
+#include "FicsItNetworksCustomVersion.generated.h"
+
+
+UENUM()
+enum EFINCustomVersion {
+	// Before any version changes were made
+	FINBeforeCustomVersionWasAdded = 0,
+
+    // Signal Storage / Trace / "Parameter List" overhaul
+    FINSignalStorage,
+
+    // -----<new versions can be added above this line>-------------------------------------------------
+    FINVersionPlusOne,
+    FINLatestVersion = FINVersionPlusOne - 1
+};
 
 struct FFINCustomVersion {
-	enum Type {
-		// Before any version changes were made
-		BeforeCustomVersionWasAdded = 0,
-
-        // -----<new versions can be added above this line>-------------------------------------------------
-        VersionPlusOne,
-        LatestVersion = VersionPlusOne - 1
-	};
-	
 	static const FGuid GUID;
 };

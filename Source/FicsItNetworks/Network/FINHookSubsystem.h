@@ -50,6 +50,12 @@ private:
 	static TMap<UClass*, TSet<TSubclassOf<UFINHook>>> HookRegistry;
 
 public:
+	/**
+    * Contains a list of classes that have registered a netSig
+    */
+    UPROPERTY(SaveGame)
+    TSet<UClass*> ClassesWithSignals;
+	
 	// Begin UObject
 	virtual void Serialize(FArchive& Ar) override;
 	// End UObject
@@ -89,7 +95,7 @@ public:
 	 * @param[in]	object	the object that should emit the signal
 	 * @param[in]	signal	the signal that the object shouls emit
 	 */
-	void EmitSignal(UObject* object, FFINSignal signal);
+	void EmitSignal(UObject* object, TSharedPtr<FFINSignal> signal);
 	
 	/**
 	 * Attaches all hooks to the given object there are for the type of the given object.

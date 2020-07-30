@@ -3,43 +3,45 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
-#include "Network/FINNetworkConnector.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Network/FINNetworkCustomType.h"
+
 #include "FINCodeableSplitter.generated.h"
 
 UCLASS()
-class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINSignalSender {
+class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINSignalSender, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		UFINNetworkConnector* NetworkConnector = nullptr;
+	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		UFGFactoryConnectionComponent* InputConnector = nullptr;
+	UFGFactoryConnectionComponent* InputConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		UFGFactoryConnectionComponent* Output1 = nullptr;
+	UFGFactoryConnectionComponent* Output1 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		UFGFactoryConnectionComponent* Output2 = nullptr;
+	UFGFactoryConnectionComponent* Output2 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		UFGFactoryConnectionComponent* Output3 = nullptr;
+	UFGFactoryConnectionComponent* Output3 = nullptr;
 
 	UPROPERTY(SaveGame)
-		TArray<FInventoryItem> InputQueue;
+	TArray<FInventoryItem> InputQueue;
 
 	UPROPERTY(SaveGame)
-		TArray<FInventoryItem> OutputQueue1;
+	TArray<FInventoryItem> OutputQueue1;
 
 	UPROPERTY(SaveGame)
-		TArray<FInventoryItem> OutputQueue2;
+	TArray<FInventoryItem> OutputQueue2;
 
 	UPROPERTY(SaveGame)
-		TArray<FInventoryItem> OutputQueue3;
+	TArray<FInventoryItem> OutputQueue3;
 
 	UPROPERTY(SaveGame)
-		TSet<FFINNetworkTrace> SignalListeners;
+	TSet<FFINNetworkTrace> SignalListeners;
 
 	AFINCodeableSplitter();
 	~AFINCodeableSplitter();
@@ -61,30 +63,34 @@ public:
 	virtual bool Factory_GrabOutput_Implementation(class UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf< UFGItemDescriptor > type) override;
 	// TODO: Upgrade Implementation
 	// End AFGBuildable
+	
+	// Begin IFINNetworkCustomType
+	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("CodeableSplitter"); }
+	// End IFINNetworkCustomType
 
 	/**
 	 * This function transfers the next item from the input queue to the output queue with the given index.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Components|CodeableSplitter")
-		bool netFunc_transferItem(int output);
+	bool netFunc_transferItem(int output);
 
 	/**
 	 * Allows to peek the next item at the input queue waiting to get transfered.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Components|CodeableSplitter")
-		UClass* netFunc_getInput();
+	FInventoryItem netFunc_getInput();
 
 	/**
 	 * Checks if the output queue witht the given index is able to contain one more item.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Components|CodeableSplitter")
-		bool netFunc_canOutput(int output);
+	bool netFunc_canOutput(int output);
 
 	/**
 	 * This signal gets emit when a new item got pushed to the input queue.
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
-		void netSig_ItemRequest(UClass* item);
+	void netSig_ItemRequest(UClass* item);
 
 	TArray<FInventoryItem>& GetOutput(int output);
 	TArray<FInventoryItem>& GetOutput(UFGFactoryConnectionComponent* connection);

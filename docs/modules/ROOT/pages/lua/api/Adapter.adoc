@@ -119,129 +119,40 @@ Return Values::
 
 A factory is a buildable able of processing stuff like items and energy.
 
-=== Functions
+=== Properties
 
-==== `num getProgress()`
+==== `number progress (readonly)`
 
-Returns the progress of the running process
+The progress of the running process.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number powerConsumProducing (readonly)`
 
-|num
-|num
-|progress in percent (0.0 to 1.0)
-|===
+The amount of energy consumption when producing.
 
-==== `num getPowerConsumProducing()`
+==== `number productivity (readonly)`
 
-Returns the amount of energy consumption when producing
+The amount of productivity.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number cycleTime (readonly)`
 
-|num
-|num
-|power consumption when producing in KW
-|===
+The amount of seconds needed to go through one cycle.
 
-==== `num getProductivity()`
+==== `number maxPotential (readonly)`
 
-Returns the amount of productivity
+The maximum potential value.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number minPotential (readonly)`
 
-|num
-|num
-|productivity in percent (0.0 = 0% & 1.0 = 100%)
-|===
+The minimal potential value.
 
-==== `num getCycleTime()`
+==== `number potential`
 
-Returns the amount of seconds needed to go through one cycle.
+The potential or overclocking value of the factory in percent (0.0 = 0% & 1.0 = 100%).
+If you set the value, it gets clamped to the available value.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `bool standby`
 
-|num
-|num
-|time in seconds
-|===
-
-==== `num getPotential()`
-
-Returns the potential
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|num
-|num
-|potential in percent (0.0 = 0% & 1.0 = 100%)
-|===
-
-==== `setPotential(num potential)`
-
-Sets the potential of the factory.
-
-Clamps to available/allowed values.
-
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|potential
-|num
-|potential in percent (0.0 = 0% & 1.0 = 100%)
-|===
-
-==== `num getMaxPotential()`
-
-Returns the maximum potential value.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|num
-|num
-|potential in percent (0.0 = 0% & 1.0 = 100%)
-|===
-
-==== `num getMinPotential()`
-
-Returns the minimal potential value.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|num
-|num
-|potential in percent (0.0 = 0% & 1.0 = 100%)
-|===
+True if the factory is in standby.
 
 == Manufacturer (extends Factory)
 
@@ -467,72 +378,6 @@ Return Values::
 |the master of all connected platforms.
 |===
 
-==== `int getStatus()`
-
-This functions tells you the current docking status of the platform.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|The current docking status.
-|===
-
-==== `bool isReversed()`
-
-This function tells you if the platform is placed revesed in the train station configuration.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the platform is reversed.
-|===
-
-== RailroadStation (extends TrainPlatform)
-
-This is a AFGthe master of a train station. This is p
-
-=== Functions
-
-==== `string getName()`
-
-This function returns the current name of the station.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|string
-|string
-|The name of the train station.
-|===
-
-==== `setName(string name)`
-
-This function allows you to set the current name of the station.
-
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|name
-|string
-|The new name of the train station.
-|===
-
 ==== `RailroadVehicle getDockedLocomotive()`
 
 This function returns the currently docked locomotive.
@@ -548,131 +393,63 @@ Return Values::
 |The currently docked locomotive.
 |===
 
-==== `number getDockedOffset()`
+=== Properties
 
-This function allows you to get the offset of the docked vehicle to the docking center.
+==== `int status (readonly)`
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+The current docking status of the platform.
 
-|number
-|number
-|The offset of the docked vehicle.
-|===
+==== `bool isReversed (readonly)`
+
+This function tells you if the platform is placed revesed in the train station configuration.
+
+== RailroadStation (extends TrainPlatform)
+
+This is a AFGthe master of a train station. This is p
+
+=== Properties
+
+==== `string name`
+
+The current name of the station.
+
+==== `number dockedOffset (readonly)`
+
+The offset of the docked vehicle to the docking center.
 
 == TrainPlatformCargo (extends TrainPlatform)
 
 This is the class of all cargo platforms.
 
-=== Functions
+=== Properties
 
-==== `bool isLoading()`
+==== `bool isLoading (readonly)`
 
-This function allows you to check if the platform is currently loading a train.
+True if the platform is currently loading a train.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `bool isUnloading (readonly)`
 
-|bool
-|bool
-|True if the platform currently loads a train.
-|===
+True if the platform is currently unloading a train.
 
-==== `bool isUnloading()`
+==== `number dockedOffset (readonly)`
 
-This function allows you to check if the platform is currently unloading a train.
+The relative offset of the currently docked vehicle to the docking center.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number outputFlow (readonly)`
 
-|bool
-|bool
-|True if the platform currently unloads a train.
-|===
+The current output flow.
 
-==== `number getDockedOffset()`
+==== `number inputFlow (readonly)`
 
-This function returns the relative offset of the currently docked vehicle to the docking center.
+The current input flow.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `bool fullLoad (readonly)`
 
-|number
-|number
-|The offset of the docked vehicle.
-|===
+True if the plaform has fully loaded the docked vehicle.
 
-==== `number getOutputFlow()`
+==== `bool fullUnload (readonly)`
 
-This function returns the current output flow.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The current output flow.
-|===
-
-==== `number getInputFlow()`
-
-This function returns the current input flow.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The current input flow.
-|===
-
-==== `bool getFullLoad()`
-
-This function allows you to check if the plaform has fully loaded the docked vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the docked vehicle is fully loaded.
-|===
-
-==== `bool getFullUnload()`
-
-This function allows you to check if the platform has fully unloaded the docked vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the docked vehicle is fully unloaded.
-|===
+True if the platform has fully unloaded the docked vehicle.
 
 == RailroadVehicle (extends Actor)
 
@@ -785,51 +562,6 @@ Return Values::
 |the direction in which a vehicle would move forward relative to the beginning of the track.
 |===
 
-==== `number getLength()`
-
-This functions returns the length of the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The length of the vehicle.
-|===
-
-==== `bool isDocked()`
-
-This function allows you to check if the vehicle is docked to a platform.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the vehicle is docked.
-|===
-
-==== `bool isReversed()`
-
-This function allows you to check if the vehivle is placed reverse onto the track.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the vehicle is placed reverse.
-|===
-
 ==== `RailroadVehicleMovement getMovement()`
 
 This function allows you to access the underlying movement component which controls all the movement of the vehicle.
@@ -844,6 +576,20 @@ Return Values::
 |RailroadVehicleMovement
 |The movement component of the vehicle.
 |===
+
+=== Properties
+
+==== `number length (readonly)`
+
+The length of the vehicle.
+
+==== `bool isDocked (readonly)`
+
+True if the vehicle is docked to a platform.
+
+==== `bool isReversed (readonly)`
+
+True if the vehicle is placed reverse onto the track.
 
 == RailroadVehicleMovement
 
@@ -964,395 +710,109 @@ Return Values::
 |The extenstion of the coupler.
 |===
 
-==== `number getOrientation()`
+==== `number orientation (readonly)`
 
-This function returns the orientation of the vehicle.
+The orientation of the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number mass (readonly)`
 
-|number
-|number
-|The orientation of the vehicle.
-|===
+The mass of the vehicle.
 
-==== `number getMass()`
+==== `number tareMass (readonly)`
 
-This function returns the mass of the vehicle.
+The tare mass of the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number payloadMass (readonly)`
 
-|number
-|number
-|The mass of the vehicle.
-|===
+The payload mass of the vehicle.
 
-==== `number getTareMass()`
+==== `number speed (readonly)`
 
-This function returns the tare mass of the vehicle.
+The forward speed of the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number relativeSpeed (readonly)`
 
-|number
-|number
-|The tare mass of the vehicle.
-|===
+The relative forward speed of the vehicle.
 
-==== `number getPayloadMass()`
+==== `number maxSpeed (readonly)`
 
-This function returns the payload mass of the vehicle.
+The max speed of the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number gravitationalForce (readonly)`
 
-|number
-|number
-|The payload mass of the vehicle.
-|===
+The gravitational force acting on the vehicle.
 
-==== `number getSpeed()`
+==== `number tractiveForce (readonly)`
 
-This function returns the forward speed of the vehicle.
+The tractive force acting on the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number resistiveForce (readonly)`
 
-|number
-|number
-|The forward speed of the vehicle.
-|===
+The resistive force acting on the vehicle.
 
-==== `number getRelativeSpeed()`
+==== `number gradientForce (readonly)`
 
-This function returns the relative forward speed of the vehicle.
+The gradient force acting on the vehicle caused by the slope of the track.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number brakingForce (readonly)`
 
-|number
-|number
-|The relative forward speed of the vehicle.
-|===
+The braking force acting on the vehicle.
 
-==== `number getMaxSpeed()`
+==== `number dynamicBrakingForce (readonly)`
 
-This function returns the max speed of the vehicle.
+The dynamic braking force acting on the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number maxTractiveEffort (readonly)`
 
-|number
-|number
-|The max speed of the vehicle.
-|===
+The max tractive effort of the vehicle.
 
-==== `number getGravitationalForce()`
+==== `number maxDynamicBrakingEffort (readonly)`
 
-This function returns the gravitational force acting on the vehicle.
+The max dynamic braking effort of the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number maxAirBrakingEffort (readonly)`
 
-|number
-|number
-|The gravitational force acting on the vehicle.
-|===
+The max air brake effort of the vehicle.
 
-==== `number getTractiveForce()`
+==== `number trackGrade (readonly)`
 
-This function returns the tractive force acting on the vehicle.
+The current slope of the track.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number trackCurvature (readonly)`
 
-|number
-|number
-|The tractive force acting on the vehicle.
-|===
+The curvature of the track.
 
-==== `number getResistiveForce()`
+==== `number wheelsetAngle (readonly)`
 
-This function returns the resistive force acting on the vehicle.
+The angle of the wheelsets.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number rollingResistance (readonly)`
 
-|number
-|number
-|The resistive force acting on the vehicle.
-|===
+The rolling resistance of the vehicle.
 
-==== `number getGradientForce()`
+==== `number curvatureResistance (readonly)`
 
-This function returns the gradient force acting on the vehicle caused by the slope of the track.
+The curveture resistance of the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number airResistance (readonly)`
 
-|number
-|number
-|The gradient force acting on the vehicle.
-|===
+The air resistance of the vehicle.
 
-==== `number getBrakingForce()`
+==== `number gradientResistance (readonly)`
 
-This function returns the braking force acting on the vehicle.
+The gradient resistance of the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `number wheelRotation (readonly)`
 
-|number
-|number
-|The braking force acting on the vehicle.
-|===
+The wheel rotation around the axle.
 
-==== `number getDynamicBrakingForce()`
+==== `int numWheelsets (readonly)`
 
-This function returns the dynamic braking force acting on the vehicle.
+The number of wheelsets attached to the vehicle.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+==== `bool isMoving (readonly)`
 
-|number
-|number
-|The dynamic braking force acting on the vehicle.
-|===
-
-==== `number getMaxTractiveEffort()`
-
-This function returns the max tractive effort of the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The max tractive effort of the vehicle.
-|===
-
-==== `number getMaxDynamicBrakingEffort()`
-
-This function returns the max dynamic braking effort of the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The max dynamic braking effort of the vehicle.
-|===
-
-==== `number getMaxAirBrakingEffort()`
-
-This function returns the max air brake effort of the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The max air brake effort of the vehicle.
-|===
-
-==== `number getTrackGrade()`
-
-This function returns current slope of the track.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The slope of the track.
-|===
-
-==== `number getTrackCurvature()`
-
-This function returns the curvature of the track.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The curvature of the track.
-|===
-
-==== `number getWheelsetAngle()`
-
-This function returns the angle of the wheelsets.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The angle of the wheelsets.
-|===
-
-==== `number getRollingResistance()`
-
-This function returns the rolling resistance of the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The rolling resistance of the vehicle.
-|===
-
-==== `number getCurvatureResistance()`
-
-This function returns the curveture resistance of the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The curveture resistance of the vehicle.
-|===
-
-==== `number getAirResistance()`
-
-This function returns the air resistance of the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The air resistance of the vehicle.
-|===
-
-==== `number getGradientResistance()`
-
-This function returns the gradient resistance of the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The gradient resistance of the vehicle.
-|===
-
-==== `number getWheelRotation()`
-
-This function returns the wheel rotation around the axle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The wheel rotation of the vehicle in degrees.
-|===
-
-==== `int getNumWheelsets()`
-
-This function returns the number of wheelsets attached to the vehicle.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The number of wheelsets.
-|===
-
-==== `bool isMoving()`
-
-This function allows you to check if the train is moving.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the train is moving.
-|===
+True if the vehicle is moving.
 
 == Train (extends Actor)
 
@@ -1547,55 +1007,6 @@ Return Values::
 - `5` No Path
 |===
 
-==== `bool hasTimeTable()`
-
-This function allows you to check if the train has a valid time table.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the train has a time table.
-|===
-
-==== `int getDockState()`
-
-This function allows you to return the current docking state of the train.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|The current docking state of the train.
-
-- `0` None
-- `1` Ready to dock
-- `2` Docked
-|===
-
-==== `bool isDocked()`
-
-This function allows you to check if the train is currently docked.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the train is currently docked.
-|===
-
 ==== `dock()`
 
 This functions docks the train to station he is located in.
@@ -1614,6 +1025,24 @@ Return Values::
 |RailroadVehicle[]
 |Array of connected vehicles.
 |===
+
+=== Properties
+
+==== `bool hasTimeTable (readonly)`
+
+True if the train has a valid time table.
+
+==== `int dockState (readonly)`
+
+The current docking state of the train.
+
+- `0` None
+- `1` Ready to dock
+- `2` Docked
+
+==== `bool isDocked (readonly)`
+
+True if the train is currently docked.
 
 == TimeTable
 
@@ -1712,21 +1141,6 @@ Return Values::
 |True if able to set the stops.
 |===
 
-==== `int getNumStops()`
-
-This function allows you to get the amount of stops in the time table.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|The amount of stops in the time table.
-|===
-
 ==== `bool isValidStop(int idx)`
 
 This function allows you to check if the stop at the given index is valid.
@@ -1808,6 +1222,12 @@ Return Values::
 |int
 |The position of the stop the train is currently heading to.
 |===
+
+=== Properties
+
+==== `int numStops (readonly)`
+
+The amount of stops in the time table.
 
 == RailroadTrack (extends Actor)
 
@@ -1955,35 +1375,15 @@ Return Values::
 |The track graph the track is part of.
 |===
 
-==== `number getLength()`
+=== Properties
 
-The function allows you to get information about the length of the track.
+==== `number length (readonly)`
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+The length of the track.
 
-|number
-|number
-|The length of the track.
-|===
+==== `bool isOwnedByPlatform (readonly)`
 
-==== `bool isOwnedByPlatform()`
-
-This function allows you to check if the track is owned by a platform.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the track is owned by a platform.
-|===
+True if the track is owned by a platform.
 
 == RailroadTrackConnection
 
@@ -2212,68 +1612,6 @@ Parameters::
 |The track you want to switch to.
 |===
 
-==== `bool isConnected()`
-
-This function allows you to check if the connector is connected to another connector.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the connector is connector to another one.
-|===
-
-==== `bool isFacingSwitch()`
-
-This function allows you to check if the connection is facing the switch.
-If a train comes from the track this connection is part of, it can take one of multiple routes.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the connector is facing the switch.
-|===
-
-==== `bool isTrailingSwitch()`
-
-This function alllows you to check the the connection is trailing the switch.
-If a train comes from the track this connectin is part of, if moves over a switch, but multiple tracks merge here to one.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the connector is trailing the switch.
-|===
-
-==== `int getNumSwitchPosition()`
-
-This function retrieves the count of posible switch positions.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|The count of posible switch positions.
-|===
-
 ==== `int getSwitchPosition()`
 
 This function returns the current selected switch position.
@@ -2289,6 +1627,26 @@ Return Values::
 |True current selected switch position.
 |===
 
+=== Properties
+
+==== `bool isConnected (readonly)`
+
+True if the connector is connected to another connector.
+
+==== `bool isFacingSwitch (readonly)`
+
+True if the connection is facing the switch.
+If a train comes from the track this connection is part of, it can take one of multiple routes.
+
+==== `bool isTrailingSwitch (readonly)`
+
+True if the connection is trailing the switch.
+If a train comes from the track this connectin is part of, if moves over a switch, but multiple tracks merge here to one.
+
+==== `int numSwitchPositions (readonly)`
+
+The count of posible switch positions.
+
 == RailroadSwitchControl (extends Factory)
 
 This type represents a switch controler.
@@ -2299,20 +1657,11 @@ This type represents a switch controler.
 
 This function switches once through the attached connections.
 
-==== `int getSwitchPosition()`
+=== Properties
 
-This functions returns the current selected switch position.
+==== `int switchPosition (readonly)`
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|The current selected switch position.
-|===
+The currently selected switch position.
 
 == TimeTableStop
 
@@ -2421,50 +1770,15 @@ Return Values::
 
 Undocks the currently docked actor from the docking station.
 
-==== `setInLoadMode(bool loadMode)`
+=== Properties
 
-Sets if the docking station is in load mode.
+==== `bool isLoadMode`
 
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+True if the docking station is in load mode.
 
-|loadMode
-|bool
-|True if the dockin station should be in load mode.
-|===
+==== `bool isLoadUnloading`
 
-==== `bool isLoadMode()`
-
-Returns if the dockingstation is currently in load mode or not.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the docking station is currently in load mode.
-|===
-
-==== `bool isLoadUnloading()`
-
-Returns if the dockingstation is currently loading or unloading the docked actor.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|True if the docking station is currently loading or unloading.
-|===
+True if the dockingstation is currently loading or unloading the docked actor.
 
 == PipeReservoir (extends Actor)
 
@@ -2487,80 +1801,27 @@ Return Values::
 |The type of the fluid currently stored in the storage container.
 |===
 
-==== `number getFluidContent()`
+=== Properties
 
-This function returns the amount of fluid currently stored in the container.
+==== `number fluidContent (readonly)`
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+The amount of fluid currently stored in the container.
 
-|number
-|number
-|The amount of fluid currently stored in the storage.
-|===
+==== `number maxFluidContent (readonly)`
 
-==== `number getMaxFluidContent()`
+How much fluid this storage container can hold.
 
-This function returns how much fluid this storage container can hold.
+==== `number flowFill (readonly)`
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+The rate how fast the container gets filled with fluid.
 
-|number
-|number
-|The amount of fluid the storage container can hold.
-|===
+==== `number flowDrain (readonly)`
 
-==== `number getFlowFill()`
+The rate how fast the container gets drained.
 
-This function returns the rate how fast the container gets filled with fluid.
+==== `number flowLimit (readonly)`
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The rate in which the container gets filled with fluid.
-|===
-
-==== `numer getFlowDrain()`
-
-This function returns the rate how fast the container gets drained.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The rate in which the container gets drained.
-|===
-
-==== `numer getFlowLimit()`
-
-This function returns the max fluid transfer rate of the container.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The max fluid transfer rate.
-|===
+The max fluid transfer rate of the container.
 
 
 

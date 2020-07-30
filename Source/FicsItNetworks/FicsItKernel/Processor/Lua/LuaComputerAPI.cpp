@@ -1,10 +1,11 @@
 #include "LuaComputerAPI.h"
 
-
 #include "FGTimeSubsystem.h"
 #include "FINStateEEPROMLua.h"
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
+#include "LuaStructs.h"
+#include "Network/FINDynamicStructHolder.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
@@ -14,7 +15,7 @@ int funcName(lua_State* L) { \
 namespace FicsItKernel {
 	namespace Lua {
 		LuaFunc(luaComputerGetInstance)
-			newInstance(L, Network::NetworkTrace(kernel->getNetwork()->component));
+			newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component));
 			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
@@ -33,12 +34,13 @@ namespace FicsItKernel {
 
 		LuaFunc(luaComputerPanic)
 		    kernel->crash(KernelCrash(std::string("PANIC! '") + luaL_checkstring(L, 1) + "'"));
-			kernel->pushFuture(MakeShared<SimpleFuture>([kernel]() {
+			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
 				kernel->getAudio()->beep();
-			}));
+			})));
 			lua_yield(L, 0);
 			return 0;
 		}
+#pragma optimize("", on)
 
 		int luaComputerSkipContinue(lua_State* L, int status, lua_KContext ctx) {
 			return 0;
@@ -47,17 +49,11 @@ namespace FicsItKernel {
 		LuaFunc(luaComputerSkip)
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
-#pragma optimize("", on)
-
-		void luaComputerBeepResolve(TSharedRef<FDynamicStructHolder> In, TSharedRef<FDynamicStructHolder> Out) {
-			FFINKernelFutureData& InData = In->Get<FFINKernelFutureData>();
-			InData.kernel->getAudio()->beep();
-		}
-
-		RegisterFuturePointer(luaComputerBeepResolve, luaComputerBeepResolve)
 
 		LuaFunc(luaComputerBeep)
-			luaFuture(L, MakeLuaFuture(MakeDynamicStruct(FFINKernelFutureData, kernel), nullptr, luaComputerBeepResolve, nullptr));
+			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
+			    kernel->getAudio()->beep();
+			})));
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
@@ -76,7 +72,7 @@ namespace FicsItKernel {
 		}
 
 		LuaFunc(luaComputerTime)
-			AFGTimeOfDaySubsystem* subsys = AFGTimeOfDaySubsystem::Get(kernel->getNetwork()->getComponent());
+			AFGTimeOfDaySubsystem* subsys = AFGTimeOfDaySubsystem::Get(kernel->getNetwork()->component);
 			lua_pushnumber(L, subsys->GetPassedDays() * 86400 + subsys->GetDaySeconds());
 			return 1;
 		}
@@ -85,7 +81,7 @@ namespace FicsItKernel {
 			lua_newtable(L);
 			int i = 1;
 			for (UObject* gpu : kernel->getGPUs()) {
-				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->getComponent()) / gpu);
+				newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component) / gpu);
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -95,7 +91,7 @@ namespace FicsItKernel {
 		    lua_newtable(L);
 			int i = 1;
 			for (UObject* screen : kernel->getScreens()) {
-				newInstance(L, Network::NetworkTrace(kernel->getNetwork()->getComponent()) / screen);
+				newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component) / screen);
 				lua_seti(L, -2, i++);
 			}
 			return 1;

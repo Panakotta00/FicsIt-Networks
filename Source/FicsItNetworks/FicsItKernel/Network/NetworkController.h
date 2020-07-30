@@ -2,15 +2,12 @@
 
 #include "CoreMinimal.h"
 
-#include "SmartSignal.h"
-#include "SignalSender.h"
-#include "SignalListener.h"
-
-#include <string>
 #include <deque>
-#include <set>
-#include <memory>
 #include <mutex>
+
+#include "Network/FINNetworkTrace.h"
+#include "Network/Signals/FINSignal.h"
+#include "Network/Signals/FINSmartSignal.h"
 
 namespace FicsItKernel {
 	namespace Network {
@@ -18,12 +15,12 @@ namespace FicsItKernel {
 		 * Allows to control and manage network connection of a system.
 		 * Also manages the network signals.
 		 */
-		class NetworkController : public SignalSender, public SignalListener {
+		class NetworkController {
 		protected:
 			std::mutex mutexSignalListeners;
-			std::set<NetworkTrace> signalListeners;
+			TSet<FFINNetworkTrace> signalListeners;
 			std::mutex mutexSignals;
-			std::deque<std::pair<std::shared_ptr<Signal>, NetworkTrace>> signals;
+			std::deque<TPair<TSharedPtr<FFINSignal>, FFINNetworkTrace>> signals;
 			bool lockSignalRecieving = false;
 
 		public:
@@ -46,15 +43,7 @@ namespace FicsItKernel {
 			 */
 			uint32 maxSignalCount = 32;
 
-			// Begin SignalSender
-			virtual void addListener(NetworkTrace listener) override;
-			virtual void removeListener(NetworkTrace listener) override;
-			virtual UObject* getComponent() const override;
-			// End SignalSender
-
-			// Begin SignalListener
-			virtual void handleSignal(std::shared_ptr<Signal> signal, NetworkTrace sender) override;
-			// End SignalListener
+			void handleSignal(TSharedPtr<FFINSignal> signal, const FFINNetworkTrace& sender);
 
 			/**
 			 * pops a signal form the queue.
@@ -63,7 +52,7 @@ namespace FicsItKernel {
 			 * @param sender - out put paramter for the sender of the signal
 			 * @return	singal from the queue
 			 */
-			std::shared_ptr<Signal> popSignal(NetworkTrace& sender);
+			TSharedPtr<FFINSignal> popSignal(FFINNetworkTrace& sender);
 
 			/**
 			 * pushes a signal to the queue.
@@ -71,7 +60,7 @@ namespace FicsItKernel {
 			 *
 			 * @param	signal	the singal you want to push
 			 */
-			void pushSignal(std::shared_ptr<Signal> signal, NetworkTrace sender);
+			void pushSignal(TSharedPtr<FFINSignal> signal, const FFINNetworkTrace& sender);
 
 			/**
 			 * Removes all signals from the signal queue.
@@ -90,12 +79,12 @@ namespace FicsItKernel {
 			 *
 			 * @return	the component you searched for, nullptr if it was not able to find the component
 			 */
-			NetworkTrace getComponentByID(const std::string& id);
+			FFINNetworkTrace getComponentByID(const FString& id);
 
 			/**
 			 * returns the components in the network with the given nick.
 			 */
-			std::set<NetworkTrace> getComponentByNick(const std::string& nick);
+			TSet<FFINNetworkTrace> getComponentByNick(const FString& nick);
 
 			/**
 			 * pushes a signal to the queue.
@@ -103,8 +92,8 @@ namespace FicsItKernel {
 			 * Should only get used by the kernel modules to emit signals.
 			 */
 			template<typename... Ts>
-			void pushSignalKernel(const std::string& signalName, Ts... args) {
-				pushSignal(std::shared_ptr<Signal>(new SmartSignal(signalName, {Network::VariaDicSignalElem(args)...})), NetworkTrace(component));
+			void pushSignalKernel(const FString& signalName, Ts... args) {
+				pushSignal(TSharedPtr<FFINSignal>(new FFINSmartSignal(signalName, {FFINAnyNetworkValue(args)...})), FFINNetworkTrace(component));
 			}
 
 			/**

@@ -2,7 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "LuaException.h"
-#include "FicsItKernel/Network/NetworkTrace.h"
+#include "Network/FINAnyNetworkValue.h"
+
+struct FFINNetworkTrace;
 
 extern "C" {
 	#include "ThirdParty/lua.h"
@@ -79,18 +81,22 @@ inline void _PersistTable(lua_State* L, int _persist_permTableIdx, int _persist_
 
 namespace FicsItKernel {
 	namespace Lua {
-		enum LuaDataType {
-			LUA_NIL,
-			LUA_STR,
-			LUA_INT,
-			LUA_NUM,
-			LUA_BOOL,
-			LUA_TBL,
-			LUA_OBJ,
-			LUA_FUTURE,
-		};
+		/**
+		 * Converts the given property within the given struct pointer
+		 * to a lua value and pushes it onto the stack.
+		 * The trace allows for object properties to have additionally a this trace attached.
+		 */
+		void propertyToLua(lua_State* L, UProperty* p, void* data, FFINNetworkTrace trace);
 
-		LuaDataType propertyToLua(lua_State* L, UProperty* p, void* data, Network::NetworkTrace trace);
-		LuaDataType luaToProperty(lua_State* L, UProperty* p, void* data, int i);
+		/**
+		 * Trys to convert the lua value at the given index on the given lua stack
+		 * to the given property in the given struct pointer.
+		 */
+		void luaToProperty(lua_State* L, UProperty* p, void* data, int i);
+
+		/**
+		 * Trys to convert the lua value at the given index to any kind of network value.
+		 */
+		void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val);
 	}
 }

@@ -14,45 +14,48 @@
 
 #include "FINStateEEPROMLua.h"
 #include "LuaDebugAPI.h"
+#include "Network/FINNetworkTrace.h"
 
 #include "SML/util/Logging.h"
 
 namespace FicsItKernel {
 	namespace Lua {
-		LuaSignalReader::LuaSignalReader(lua_State* L) : L(L) {}
+		LuaValueReader::LuaValueReader(lua_State* L) : L(L) {}
 
-		void LuaSignalReader::operator<<(const std::string& str) {
-			lua_pushstring(L, str.c_str());
+		void LuaValueReader::nil() {
+			lua_pushnil(L);
 		}
 
-		void LuaSignalReader::operator<<(double num) {
-			lua_pushnumber(L, num);
+		void LuaValueReader::operator<<(const FString& str) {
+			lua_pushlstring(L, TCHAR_TO_UTF8(*str), str.Len());
 		}
 
-		void LuaSignalReader::operator<<(int num) {
-			lua_pushinteger(L, num);
-		}
-
-		void LuaSignalReader::operator<<(bool b) {
+		void LuaValueReader::operator<<(FINBool b) {
 			lua_pushboolean(L, b);
 		}
 
-		void LuaSignalReader::operator<<(UObject* obj) {
-			newInstance(L, Network::NetworkTrace(obj));
+		void LuaValueReader::operator<<(FINInt num) {
+			lua_pushinteger(L, num);
+		}
+		
+		void LuaValueReader::operator<<(FINFloat num) {
+			lua_pushnumber(L, num);
 		}
 
-		void LuaSignalReader::operator<<(const Network::NetworkTrace& obj) {
+		void LuaValueReader::operator<<(FINClass clazz) {
+			newInstance(L, clazz);
+		}
+
+		void LuaValueReader::operator<<(const FINObj& obj) {
+			newInstance(L, FFINNetworkTrace(obj.Get()));
+		}
+
+		void LuaValueReader::operator<<(const FINTrace& obj) {
 			newInstance(L, obj);
 		}
 
-		void LuaSignalReader::WriteAbstract(const void* obj, const std::string& id) {
-			if (id == "InventoryItem") {
-				luaStruct(L, *(const FInventoryItem*)obj);
-			} else if (id == "ItemAmount") {
-				luaStruct(L, *(const FItemAmount*)obj);
-			} else if (id == "InventoryStack") {
-				luaStruct(L, *(const FInventoryStack*)obj);
-			}
+		void LuaValueReader::operator<<(const FINStruct& obj) {
+			luaStruct(L, obj);
 		}
 
 		void LuaFileSystemListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
@@ -255,6 +258,23 @@ namespace FicsItKernel {
 				} else file->transfer = nullptr;
 			}
 		}
+
+		int luaPersist(lua_State* L) {
+			// perm, globals, thread
+			
+			// persist globals table
+			eris_persist(L, 1, 2); // perm, globals, thread, str-globals
+
+			// add global table to perm table
+			lua_pushvalue(L, 2); // perm, globals, thread, str-globals, globals
+			lua_pushstring(L, "Globals"); // perm, globals, thread, str-globals, globals, "globals"
+			lua_settable(L, 1); // perm, globals, thread, str-globals
+
+			// persist thread
+			eris_persist(L, 1, 3); // perm, globals, thread, str-globals, str-thread
+
+			return 2;
+		}
 		
 		void LuaProcessor::Serialize(UProcessorStateStorage* storage, bool bLoading) {
 			if (!bLoading) {
@@ -278,31 +298,37 @@ namespace FicsItKernel {
 				lua_pushvalue(luaState, -1); // ..., perm, globals, globals
 				lua_pushnil(luaState); // ..., perm, globals, globals, nil
 				lua_settable(luaState, -4); // ..., perm, globals
-			
-				// persist globals table
-				eris_persist(luaState, -2, -1); // ..., perm, globals, str-globals
+				lua_pushvalue(luaState, -2); // ..., perm, globals, perm
+				lua_pushvalue(luaState, -2); // ..., perm, globals, perm, globals
+				lua_pushvalue(luaState, luaThreadIndex); // ..., perm, globals, perm, globals, thread
 
-				// encode persisted globals
-				size_t globals_l = 0;
-				const char* globals_r = lua_tolstring(luaState, -1, &globals_l);
-				Data->Globals = Base64Encode((uint8*)globals_r, globals_l);
-				lua_pop(luaState, 1); // ..., perm, globals
+				lua_pushcfunction(luaState, luaPersist);  // ..., perm, globals, perm, globals, thread, persist-func
+				lua_insert(luaState, -4); // ..., perm, globals, persist-func, perm, globals, thread
+				int status = lua_pcall(luaState, 3, 2, 0); // ..., perm, globals, str-globals, str-thread
 
-				// add global table to perm table
-				lua_pushvalue(luaState, -1); // ..., perm, globals, globals
-				lua_pushstring(luaState, "Globals"); // ..., perm, globals, globals, "globals"
-				lua_settable(luaState, -4); // ..., perm, globals
-			
-				// persist thread
-				eris_persist(luaState, -2, luaThreadIndex); // ..., perm, globals, str-thread
+				// check unpersist
+				if (status == LUA_OK) {
+					// encode persisted globals
+					size_t globals_l = 0;
+					const char* globals_r = lua_tolstring(luaState, -2, &globals_l);
+					Data->Globals = Base64Encode((uint8*)globals_r, globals_l);
 
-				// encode persisted thread
-				size_t thread_l = 0;
-				const char* thread_r = lua_tolstring(luaState, -1, &thread_l);
-				Data->Thread = Base64Encode((uint8*)thread_r, thread_l);
+					// encode persisted thread
+					size_t thread_l = 0;
+					const char* thread_r = lua_tolstring(luaState, -1, &thread_l);
+					Data->Thread = Base64Encode((uint8*)thread_r, thread_l);
+				
+					lua_pop(luaState, 2); // ..., perm, globals
+				} else {
+					// print error
+					if (lua_isstring(luaState, -1)) {
+						SML::Logging::error("Unable to persit! '", lua_tostring(luaState, -1), "'");
+					}
+
+					lua_pop(luaState, 1); // ..., perm, globals
+				}
 
 				// cleanup
-				lua_pop(luaState, 1); // ..., perm, globals
 				lua_pushnil(luaState); // ..., perm, globals, nil
 				lua_settable(luaState, -3); // ..., perm
 				lua_pop(luaState, 1); // ...
@@ -536,7 +562,7 @@ namespace FicsItKernel {
 			lua_pop(L, 1);
 			
 			setupInstanceSystem(L);
-			setupStructs(L);
+			FFINLuaStructRegistry::Get().Setup(L);
 			setupComponentAPI(L);
 			setupEventAPI(L);
 			setupFileSystemAPI(L);
@@ -551,13 +577,13 @@ namespace FicsItKernel {
 		int LuaProcessor::doSignal(lua_State* L) {
 			auto net = getKernel()->getNetwork();
 			if (!net || net->getSignalCount() < 1) return 0;
-			Network::NetworkTrace sender;
-			std::shared_ptr<Network::Signal> signal = net->popSignal(sender);
-			if (!signal.get()) return 0;
+			FFINNetworkTrace sender;
+			TSharedPtr<FFINSignal> signal = net->popSignal(sender);
+			if (!signal.IsValid()) return 0;
 			int props = 2;
-			lua_pushstring(L, signal->getName().c_str());
+			lua_pushstring(L, TCHAR_TO_UTF8(*signal->GetName()));
 			newInstance(L, sender);
-			LuaSignalReader reader(L);
+			LuaValueReader reader(L);
 			props += *signal >> reader;
 			return props;
 		}
@@ -588,4 +614,3 @@ namespace FicsItKernel {
 #pragma optimize("", on)
 	}
 }
-       

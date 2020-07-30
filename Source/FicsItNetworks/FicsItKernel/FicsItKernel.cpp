@@ -3,6 +3,7 @@
 #include "KernelSystemSerializationInfo.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "Network/FINFuture.h"
 #include "Processor/Lua/LuaProcessor.h"
 #include "SML/util/Logging.h"
 
@@ -87,15 +88,15 @@ namespace FicsItKernel {
 		drives.erase(s);
 	}
 
-	void KernelSystem::pushFuture(TSharedPtr<FicsItFuture> future) {
+	void KernelSystem::pushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> future) {
 		futureQueue.push(future);
 	}
 
 	void KernelSystem::handleFutures() {
 		while (futureQueue.size() > 0) {
-			TSharedPtr<FicsItFuture> future = futureQueue.front();
+			TSharedPtr<TFINDynamicStruct<FFINFuture>> future = futureQueue.front();
 			futureQueue.pop();
-			future->Execute();
+			(*future)->Execute();
 		}
 	}
 
@@ -225,9 +226,9 @@ namespace FicsItKernel {
 		gpus.Remove(gpu);
 	}
 
-	std::set<UObject*> KernelSystem::getGPUs() {
-		std::set<UObject*> set;
-		for (const FWeakObjectPtr& ptr : gpus) set.insert(ptr.Get());
+	TSet<UObject*> KernelSystem::getGPUs() {
+		TSet<UObject*> set;
+		for (const FWeakObjectPtr& ptr : gpus) set.Add(ptr.Get());
 		return set;
 	}
 
@@ -241,9 +242,9 @@ namespace FicsItKernel {
 		screens.Remove(screen);
 	}
 	
-	std::set<UObject*> KernelSystem::getScreens() {
-		std::set<UObject*> set;
-		for (const FWeakObjectPtr& ptr : screens) set.insert(ptr.Get());
+	TSet<UObject*> KernelSystem::getScreens() {
+		TSet<UObject*> set;
+		for (const FWeakObjectPtr& ptr : screens) set.Add(ptr.Get());
 		return set;
 	}
 
@@ -328,26 +329,26 @@ namespace FicsItKernel {
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
 
 	void KernelListener::onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 4, path.str());
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 4ll, path.str().c_str());
 	}
 
 	void KernelListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 5, path.str());
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 5ll, path.str().c_str());
 	}
 
 	void KernelListener::onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 0, path.str(), (int)type);
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 0ll, path.str().c_str(), (FINInt)type);
 	}
 
 	void KernelListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 1, path.str(), (int)type);
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 1ll, path.str().c_str(), (FINInt)type);
 	}
 
 	void KernelListener::onNodeChanged(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 2, path.str(), (int)type);
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 2ll, path.str().c_str(), (FINInt)type);
 	}
 
 	void KernelListener::onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 3, newPath.str(), oldPath.str(), (int)type);
+		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 3ll, newPath.str().c_str(), oldPath.str().c_str(), (FINInt)type);
 	}
 }

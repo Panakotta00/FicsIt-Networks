@@ -1,6 +1,6 @@
 #include "FINNetworkCable.h"
 
-#include "FINNetworkConnector.h"
+#include "FINNetworkConnectionComponent.h"
 #include "FINNetworkAdapter.h"
 
 #include "SML/util/Logging.h"
@@ -15,12 +15,6 @@ AFINNetworkCable::AFINNetworkCable() {
 AFINNetworkCable::~AFINNetworkCable() {}
 
 void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
-
-}
-
-void AFINNetworkCable::BeginPlay() {
-	Super::BeginPlay();
-	
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
@@ -42,22 +36,35 @@ void AFINNetworkCable::BeginPlay() {
 	CableSpline->UpdateMesh();
 
 	CableSpline->SetMobility(EComponentMobility::Type::Static);
+}
 
-	Connector1->AddCable(this);
-	Connector2->AddCable(this);
+void AFINNetworkCable::BeginPlay() {
+	Super::BeginPlay();
+	
+	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
+
+	Connector1->AddConnectedCable(this);
+	Connector2->AddConnectedCable(this);
+
+	RerunConstructionScripts();
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
 	if (IsValid(Connector1)) {
-		Connector1->RemoveCable(this);
+		Connector1->RemoveConnectedCable(this);
 	}
 	if (IsValid(Connector2)) {
-		Connector2->RemoveCable(this);
+		Connector2->RemoveConnectedCable(this);
 	}
 }
 
 bool AFINNetworkCable::ShouldSave_Implementation() const {
 	return true;
+}
+
+void AFINNetworkCable::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(Connector1);
+	out_dependentObjects.Add(Connector2);
 }
 
 int32 AFINNetworkCable::GetDismantleRefundReturnsMultiplier() const {
