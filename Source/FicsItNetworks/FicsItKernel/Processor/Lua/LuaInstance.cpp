@@ -4,6 +4,7 @@
 #include "LuaProcessorStateStorage.h"
 
 #include "Network/FINNetworkComponent.h"
+#include "Network/FINNetworkCustomType.h"
 #include "Network/FINVariadicParameterList.h"
 #include "util/Logging.h"
 
@@ -535,6 +536,9 @@ namespace FicsItKernel {
 			LuaInstance* inst = reg->checkAndGetInstance(L, 1, &typeName);
 			UObject* obj = *inst->Trace;
 			if (!IsValid(obj)) return luaL_argerror(L, 1, "Instance is invalid");
+			if (obj->Implements<UFINNetworkCustomType>()) {
+				typeName = TCHAR_TO_UTF8(*IFINNetworkCustomType::Execute_GetCustomTypeName(obj));
+			}
 			UClass* type = obj->GetClass();
 			std::stringstream msg;
 			msg << typeName;
