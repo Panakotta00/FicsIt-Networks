@@ -103,7 +103,7 @@ namespace FicsItKernel {
 				if (getKernel()->getNetwork()->getSignalCount() > 0) {
 					// Signal available -> reset timout and pull signal from network
 					pullState = 0;
-					auto sigArgs = doSignal(luaThread);
+					int sigArgs = doSignal(luaThread);
 					if (sigArgs < 1) {
 						// no signals poped -> crash system
 						status = LUA_ERRRUN;
@@ -584,7 +584,7 @@ namespace FicsItKernel {
 			lua_pushstring(L, TCHAR_TO_UTF8(*signal->GetName()));
 			newInstance(L, sender);
 			LuaValueReader reader(L);
-			props += **signal >> reader;
+			props += signal.Get<FFINSignal>() >> reader;
 			return props;
 		}
 
