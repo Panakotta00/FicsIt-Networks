@@ -1,5 +1,7 @@
 #include "Serial.h"
 
+#include "util/Logging.h"
+
 using namespace std;
 
 namespace FicsItKernel {
@@ -7,6 +9,7 @@ namespace FicsItKernel {
 		Serial::Serial(FileSystem::ListenerListRef listeners, FileSystem::SizeCheckFunc sizeCheck) : listeners(listeners), sizeCheck(sizeCheck) {}
 
 		FileSystem::SRef<FileSystem::FileStream> Serial::open(FileSystem::FileMode m) {
+			clearStreams();
 			FileSystem::SRef<SerialStream> stream = new SerialStream(this, m, listeners, sizeCheck);
 			inStreams.insert(stream);
 			return stream;
@@ -14,6 +17,16 @@ namespace FicsItKernel {
 
 		bool Serial::isValid() const {
 			return true;
+		}
+
+		void Serial::clearStreams() {
+			std::unordered_set<FileSystem::WRef<FileSystem::FileStream>> removeStreams;
+			for (FileSystem::WRef<FileSystem::FileStream> stream : inStreams) {
+				if (!stream) removeStreams.insert(stream);
+			}
+			for (FileSystem::WRef<FileSystem::FileStream> stream : removeStreams) {
+				inStreams.erase(stream);
+			}
 		}
 
 		size_t Serial::getSize() const {
