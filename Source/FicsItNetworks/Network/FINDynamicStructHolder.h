@@ -1,9 +1,14 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "util/Logging.h"
+
 #include "FINDynamicStructHolder.generated.h"
 
 #define MakeDynamicStruct(Type, ...) MakeShared<FFINDynamicStructHolder>(Type::StaticStruct(), new Type{__VA_ARGS__})
+
+template<typename T>
+class TFINDynamicStruct;
 
 /**
  * This structure allows you to store any kind of UStruct
@@ -55,6 +60,11 @@ public:
 		}
 		return nullptr;
 	}
+
+	template<typename T>
+	operator TFINDynamicStruct<T>() const {
+		return TFINDynamicStruct<T>(*this);
+	}
 };
 
 template<>
@@ -74,13 +84,27 @@ template<typename T>
 class TFINDynamicStruct : public FFINDynamicStructHolder {
 public:
 	TFINDynamicStruct() : FFINDynamicStructHolder(T::StaticStruct()) {}
-	TFINDynamicStruct(void* Data) : FFINDynamicStructHolder(T::StaticStruct(), Data) {}
 	TFINDynamicStruct(UScriptStruct* Struct) : FFINDynamicStructHolder(Struct) { check(Struct->IsChildOf(T::StaticStruct())) }
 	TFINDynamicStruct(UScriptStruct* Struct, void* Data) : FFINDynamicStructHolder(Struct, Data) { check(Struct->IsChildOf(T::StaticStruct())) }
-	TFINDynamicStruct(const FFINDynamicStructHolder& Other) : FFINDynamicStructHolder(Other) { check(Other.GetStruct()->IsChildOf(T::StaticStruct())) }
 	template<typename K>
-	TFINDynamicStruct(const K& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(K::StaticStruct(), &Other)) {}
+	TFINDynamicStruct(const TFINDynamicStruct<K>& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(Other.GetStruct(), Other.GetData())) {
+		check(Other->GetStruct()->IsChildOf(T::StaticStruct()));
+	}
+	TFINDynamicStruct(const FFINDynamicStructHolder& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(Other.GetStruct(), Other.GetData())) {
+		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));
+	}
+	template<typename K>
+    TFINDynamicStruct(const K& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(K::StaticStruct(), &Other)) {
+		check(K::StaticStruct()->IsChildOf(T::StaticStruct()));
+	}
 
+	template<typename K>
+	TFINDynamicStruct<T>& operator=(const TFINDynamicStruct<K>& Other) {
+		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));
+		FFINDynamicStructHolder::operator=(Other);
+		return *this;
+	}
+	
 	TFINDynamicStruct<T>& operator=(const FFINDynamicStructHolder& Other) {
 		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));
 		FFINDynamicStructHolder::operator=(Other);
@@ -98,4 +122,9 @@ public:
     TSharedPtr<T> SharedCopy() {
 		return FFINDynamicStructHolder::SharedCopy<T>();
 	}
+
+	operator FFINDynamicStructHolder() const {
+		return FFINDynamicStructHolder::Copy(Struct, Data);
+	}
 };
+

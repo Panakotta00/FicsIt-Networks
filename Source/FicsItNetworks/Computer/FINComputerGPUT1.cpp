@@ -229,7 +229,7 @@ void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int
 void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
 
 void AFINComputerGPUT1::netFunc_bindScreen(UObject* Screen) {
-	BindScreen(Screen);
+	if (Cast<IFINScreenInterface>(Screen)) BindScreen(Screen);
 }
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {
