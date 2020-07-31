@@ -2,6 +2,7 @@
 
 #include "FGBuildable.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Network/FINFuture.h"
 #include "Network/FINNetworkCustomType.h"
 
 #include "FINIndicatorPole.generated.h"
@@ -20,11 +21,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, SaveGame)
 	int Height = 0;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, SaveGame)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UFINAdvancedNetworkConnectionComponent* Connector;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
-	UProxyInstancedStaticMeshComponent* Indicator;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UStaticMeshComponent* Indicator;
 
 	UPROPERTY(SaveGame)
 	FLinearColor IndicatorColor = FLinearColor::Black;
@@ -43,12 +44,16 @@ public:
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Poles;
+
+	UPROPERTY()
+	bool bHasChanged = false;
 	
 	AFINIndicatorPole();
 
 	// Begin AActor
 	virtual void OnConstruction(const FTransform& transform) override;
 	virtual void BeginPlay() override;
+	virtual void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	// End AActor
 
 	// Begin IFGSaveInterface

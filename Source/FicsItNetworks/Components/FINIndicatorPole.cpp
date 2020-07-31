@@ -5,11 +5,16 @@
 #include "ProxyInstancedStaticMeshComponent.h"
 
 AFINIndicatorPole::AFINIndicatorPole() {
-	Indicator = CreateDefaultSubobject<UProxyInstancedStaticMeshComponent>("Indicator");
+	Indicator = CreateDefaultSubobject<UStaticMeshComponent>("Indicator");
 	Indicator->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	SetActorTickEnabled(true);
+	PrimaryActorTick.SetTickFunctionEnable(true);
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
 void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
@@ -31,8 +36,13 @@ void AFINIndicatorPole::BeginPlay() {
 #if !WITH_EDITOR
 	CreatePole();
 #endif
-	
-	UpdateEmessive();
+}
+
+void AFINIndicatorPole::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
+	if (bHasChanged) {
+		bHasChanged = false;
+		UpdateEmessive();
+	}
 }
 
 bool AFINIndicatorPole::ShouldSave_Implementation() const {
@@ -75,8 +85,8 @@ void AFINIndicatorPole::netFunc_setColor(float r, float g, float b, float e) {
 	IndicatorColor.G = FMath::Clamp(g, 0.0f, 1.0f);
 	IndicatorColor.B = FMath::Clamp(b, 0.0f, 1.0f);
 	EmessiveStrength = FMath::Clamp(e, 0.0f, 5.0f);
-	UpdateEmessive();
 	netSig_ColorChanged(oldColor.R, oldColor.G, oldColor.B, oldEmissive);
+	bHasChanged = true;
 }
 
 void AFINIndicatorPole::netFunc_getColor(float& r, float& g, float& b, float& e) {

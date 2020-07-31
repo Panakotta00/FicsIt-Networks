@@ -95,7 +95,7 @@ public:
 	}
 	template<typename K>
     TFINDynamicStruct(const K& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(K::StaticStruct(), &Other)) {
-		check(Other->GetStruct()->IsChildOf(T::StaticStruct()));
+		check(K::StaticStruct()->IsChildOf(T::StaticStruct()));
 	}
 
 	template<typename K>

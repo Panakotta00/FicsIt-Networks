@@ -24,7 +24,7 @@ void ULuaProcessorStateStorage::Serialize(FArchive& Ar) {
 		}
 	}
 	for (UObject* r : References) {
-		if (r->GetClass()->IsChildOf(UClass::StaticClass())) r->AddToRoot();
+		if (r && r->GetClass()->IsChildOf(UClass::StaticClass())) r->AddToRoot();
 	}
 }
 
