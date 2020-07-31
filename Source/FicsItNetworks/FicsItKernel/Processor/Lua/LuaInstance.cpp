@@ -296,8 +296,7 @@ namespace FicsItKernel {
 				if (!comp->GetClass()->IsChildOf(funcClass)) return luaL_argerror(L, 1, "Instance type is not allowed to call this function");;
 				
 				// allocate parameter space
-				void* params = malloc(func->ParmsSize);
-				memset(params, 0, func->ParmsSize);
+				void* params = FMemory::Malloc(func->ParmsSize);
 				func->InitializeStruct(params);
 	
 				// init and set parameter values
@@ -322,6 +321,7 @@ namespace FicsItKernel {
 								luaToProperty(L, *property, params, i++);
 							} catch (std::exception e) {
 								func->DestroyStruct(params);
+								FMemory::Free(params);
 								return luaL_error(L, ("Argument #" + std::to_string(i) + " is not of type " + e.what()).c_str());
 							}
 						}
@@ -345,7 +345,7 @@ namespace FicsItKernel {
 				}
 				
 				func->DestroyStruct(params);
-				free(params);
+				FMemory::Free(params);
 				
 				return LuaProcessor::luaAPIReturn(L, retargs);
 			}
@@ -382,6 +382,7 @@ namespace FicsItKernel {
 			std::string memberName = lua_tostring(L, 2);
 
 			UObject* obj = *instance->Trace;
+			UObject* org = instance->Orignal.Get();
 
 			if (!IsValid(obj)) {
 				return luaL_error(L, "Instance is invalid");
@@ -389,17 +390,17 @@ namespace FicsItKernel {
 			
 			// try to get property
 			if (memberName == "id") {
-				if (!obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+				if (!org || !org->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					return luaL_error(L, "Instance is not a network component");
 				}
-				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetID(obj).ToString()));
+				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetID(org).ToString()));
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 			if (memberName == "nick") {
-				if (!obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+				if (!org || !org->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					return luaL_error(L, "Instance is not a network component");
 				}
-				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetNick(obj)));
+				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetNick(org)));
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 
@@ -460,17 +461,18 @@ namespace FicsItKernel {
 			std::string memberName = lua_tostring(L, 2);
 
 			UObject* obj = *instance->Trace;
+			UObject* Org = instance->Orignal.Get();
 
 			if (!IsValid(obj)) {
 				return luaL_error(L, "Instance is invalid");
 			}
 			
 			if (memberName == "nick") {
-				if (!obj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+				if (!Org && !Org->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 					return luaL_error(L, "Instance is not a network component");
 				}
 				FString nick = luaL_checkstring(L, 3);
-				IFINNetworkComponent::Execute_SetNick(obj, nick);
+				IFINNetworkComponent::Execute_SetNick(Org, nick);
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 
@@ -561,6 +563,8 @@ namespace FicsItKernel {
 			// get trace and typename
 			FFINNetworkTrace trace = storage->GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
 			std::string typeName = luaL_checkstring(L, lua_upvalueindex(2));
+			UObject* obj = nullptr;
+			if (lua_isinteger(L, lua_upvalueindex(3))) obj = storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(3)));
 
 			// create instance
 			LuaInstance* instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
@@ -584,6 +588,7 @@ namespace FicsItKernel {
 			// add trace to storage & push id
 			lua_pushinteger(L, storage->Add(instance->Trace));
 			lua_pushstring(L, typeName.c_str());
+			lua_pushinteger(L, storage->Add(instance->Orignal.Get()));
 			
 			// create & return closure
 			lua_pushcclosure(L, &luaInstanceUnpersist, 2);
@@ -608,7 +613,7 @@ namespace FicsItKernel {
 			{NULL, NULL}
 		};
 
-		bool newInstance(lua_State* L, FFINNetworkTrace trace) {
+		bool newInstance(lua_State* L, FFINNetworkTrace trace, UObject* Original) {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// check obj and if type is registered
@@ -621,7 +626,7 @@ namespace FicsItKernel {
 
 			// create instance
 			LuaInstance* instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
-			new (instance) LuaInstance{trace};
+			new (instance) LuaInstance{trace, Original};
 
 			luaL_setmetatable(L, typeName.c_str());
 			return true;

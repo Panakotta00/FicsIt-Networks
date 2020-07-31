@@ -29,6 +29,7 @@ namespace FicsItKernel {
 		 */
 		struct LuaInstance {
 			FFINNetworkTrace Trace;
+			FWeakObjectPtr Orignal;
 		};
 
 		/**
@@ -281,9 +282,10 @@ namespace FicsItKernel {
 		 * 
 		 * @param[in]	L					the lua state where the instance should get created.
 		 * @param[in]	obj					the obj you want to create the lua instance for.
+		 * @param[in]	Original			the original object (before redirect) leave it nullptr if there is none
 		 * @return	returns true if the instance got created successfully.
 		 */
-		bool newInstance(lua_State* L, FFINNetworkTrace obj);
+		bool newInstance(lua_State* L, FFINNetworkTrace obj, UObject* Original = nullptr);
 
 		/**
 		* Trys to get a Lua Instance from the given lua stack at the given index of the given type.
