@@ -13,8 +13,7 @@ struct FFINStructSignal : public FFINSignal {
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
-	FFINDynamicStructHolder Data;
+	TFINDynamicStruct<FFINParameterList> Data;
 	
 public:
 	FFINStructSignal();

@@ -16,7 +16,7 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	signalName.RemoveFromStart("netSig_");
 
 	// allocate signal data storage and copy data
-	auto data = FMemory::Malloc(Stack.CurrentNativeFunction->ParmsSize);
+	void* data = FMemory::Malloc(Stack.CurrentNativeFunction->ParmsSize);
 	Stack.CurrentNativeFunction->InitializeStruct(data);
 	for (auto p = TFieldIterator<UProperty>(Stack.CurrentNativeFunction); p; ++p) {
 		auto dp = p->ContainerPtrToValuePtr<void>(data);
@@ -27,9 +27,8 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 		}
 	}
 
-	FFINDynamicStructHolder FuncData(FFINFuncParameterList::StaticStruct(), new FFINFuncParameterList(Stack.CurrentNativeFunction, data));
 	// create signal instance
-	TFINDynamicStruct<FFINSignal> sig = FFINStructSignal(signalName, FuncData);
+	TFINDynamicStruct<FFINSignal> sig =  FFINStructSignal(signalName, FFINFuncParameterList(Stack.CurrentNativeFunction, data));
 
 	TSet<FFINNetworkTrace> listeners = IFINSignalSender::Execute_GetListeners(Context);
 
