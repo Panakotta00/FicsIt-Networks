@@ -14,6 +14,7 @@
 
 #include "FINStateEEPROMLua.h"
 #include "LuaDebugAPI.h"
+#include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkTrace.h"
 
 #include "SML/util/Logging.h"
@@ -582,7 +583,10 @@ namespace FicsItKernel {
 			if (!signal.GetData()) return 0;
 			int props = 2;
 			lua_pushstring(L, TCHAR_TO_UTF8(*signal->GetName()));
-			newInstance(L, sender);
+			UObject* Obj = *sender;
+			if (Obj && Obj->Implements<UFINNetworkComponent>()) sender = sender / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+			else Obj = nullptr;
+			newInstance(L, sender, Obj);
 			LuaValueReader reader(L);
 			props += signal.Get<FFINSignal>() >> reader;
 			return props;

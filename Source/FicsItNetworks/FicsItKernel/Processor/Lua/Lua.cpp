@@ -3,6 +3,7 @@
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
 #include "LuaStructs.h"
+#include "Network/FINNetworkComponent.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -24,7 +25,11 @@ namespace FicsItKernel {
 				if (Cast<UObjectProperty>(p)->PropertyClass->IsChildOf<UClass>()) {
 					newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
 				} else {
-					newInstance(L, trace / *p->ContainerPtrToValuePtr<UObject*>(data));
+					UObject* Obj = *p->ContainerPtrToValuePtr<UObject*>(data);
+					UObject* Org = Obj;
+					if (Obj && Cast<UObjectProperty>(p)->PropertyClass == UObject::StaticClass() && Obj->Implements<UFINNetworkComponent>()) trace = trace / Obj / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+					else trace = trace / Obj;
+					newInstance(L, trace, Org);
 				}
 			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
