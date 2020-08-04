@@ -71,5 +71,5 @@ int32 AFINNetworkCable::GetDismantleRefundReturnsMultiplier() const {
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return 0;
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
-	return (startPos - endPos).Size() / 100.0;
+	return (startPos - endPos).Size() / 1000.0;
 }
