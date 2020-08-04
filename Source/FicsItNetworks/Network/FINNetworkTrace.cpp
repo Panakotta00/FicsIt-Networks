@@ -44,12 +44,12 @@
 		Code \
 	}
 
-TSharedPtr<FFINTraceStep> FFINNetworkTrace::fallbackTraceStep;
+TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> FFINNetworkTrace::fallbackTraceStep;
 TArray<TPair<TPair<UClass*, UClass*>, TPair<FString, FFINTraceStep*>>(*)()> FFINNetworkTrace::toRegister;
-TMap<FString, TSharedPtr<FFINTraceStep>> FFINNetworkTrace::traceStepRegistry;
-TMap<TSharedPtr<FFINTraceStep>, FString> FFINNetworkTrace::inverseTraceStepRegistry;
-TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep>>, TMap<UClass*, TSharedPtr<FFINTraceStep>>>> FFINNetworkTrace::traceStepMap;
-TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep>>, TMap<UClass*, TSharedPtr<FFINTraceStep>>>> FFINNetworkTrace::interfaceTraceStepMap;
+TMap<FString, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>> FFINNetworkTrace::traceStepRegistry;
+TMap<TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>, FString> FFINNetworkTrace::inverseTraceStepRegistry;
+TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>, TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>>> FFINNetworkTrace::traceStepMap;
+TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>, TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>>> FFINNetworkTrace::interfaceTraceStepMap;
 
 class FFINTraceStepRegisterer {
 public:
@@ -65,13 +65,13 @@ void traceRegisterSteps() {
 		FFINTraceStep* tStep = step.Value.Value;
 		UClass* A = step.Key.Key;
 		UClass* B = step.Key.Value;
-		TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep>>, TMap<UClass*, TSharedPtr<FFINTraceStep>>>>* AMap;
+		TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>, TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>>>* AMap;
 		if (A->GetSuperClass() == UInterface::StaticClass()) AMap = &FFINNetworkTrace::interfaceTraceStepMap;
 		else AMap = &FFINNetworkTrace::traceStepMap;
-		TMap<UClass*, TSharedPtr<FFINTraceStep>>* BMap;
+		TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>* BMap;
 		if (B->GetSuperClass() == UInterface::StaticClass()) BMap = &(*AMap).FindOrAdd(A).Value;
 		else BMap = &(*AMap).FindOrAdd(A).Key;
-		TSharedPtr<FFINTraceStep> stepPtr = TSharedPtr<FFINTraceStep>(tStep);
+		TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> stepPtr = TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>(tStep);
 		(*BMap).FindOrAdd(B) = stepPtr;
 		FFINNetworkTrace::traceStepRegistry.FindOrAdd(step.Value.Key) = stepPtr;
 		FFINNetworkTrace::inverseTraceStepRegistry.FindOrAdd(stepPtr) = step.Value.Key;
@@ -79,7 +79,7 @@ void traceRegisterSteps() {
 	FFINNetworkTrace::toRegister.Empty();
 };
 
-TSharedPtr<FFINTraceStep> findTraceStep2(TPair<TMap<UClass*, TSharedPtr<FFINTraceStep>>, TMap<UClass*, TSharedPtr<FFINTraceStep>>>& stepList, UClass* B) {
+TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> findTraceStep2(TPair<TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>, TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>>& stepList, UClass* B) {
 	UClass* Bi = B;
 	while (Bi && Bi != UObject::StaticClass()) {
 		auto stepB = stepList.Key.Find(Bi);
@@ -99,13 +99,13 @@ TSharedPtr<FFINTraceStep> findTraceStep2(TPair<TMap<UClass*, TSharedPtr<FFINTrac
 	return nullptr;
 }
 
-TSharedPtr<FFINTraceStep> FFINNetworkTrace::findTraceStep(UClass* A, UClass* B) {
+TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> FFINNetworkTrace::findTraceStep(UClass* A, UClass* B) {
 	if (!A || !B) return fallbackTraceStep;
 	UClass* Ai = A;
 	while (Ai && Ai != UObject::StaticClass()) {
 		auto stepA = traceStepMap.Find(Ai);
 		if (stepA) {
-			TSharedPtr<FFINTraceStep> step = findTraceStep2(*stepA, B);
+			TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> step = findTraceStep2(*stepA, B);
 			if (step.IsValid()) return step;
 		}
 		Ai = Ai->GetSuperClass();
@@ -114,7 +114,7 @@ TSharedPtr<FFINTraceStep> FFINNetworkTrace::findTraceStep(UClass* A, UClass* B) 
 	for (FImplementedInterface& interface : A->Interfaces) {
 		auto stepA = interfaceTraceStepMap.Find(interface.Class);
 		if (stepA) {
-			TSharedPtr<FFINTraceStep> step = findTraceStep2(*stepA, B);
+			TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> step = findTraceStep2(*stepA, B);
 			if (step.IsValid()) return step;
 		}
 	}
@@ -171,7 +171,7 @@ bool FFINNetworkTrace::Serialize(FArchive& Ar) {
 			}
 
 			// step
-			bool hasStep = Step.Get();
+			bool hasStep = Step.IsValid();
 			Ar << hasStep;
 			if (hasStep) {
 				FString save;
@@ -241,7 +241,7 @@ void FFINNetworkTrace::CheckTrace() const {
 FFINNetworkTrace FFINNetworkTrace::Reverse() const {
 	if (!Obj.IsValid()) return FFINNetworkTrace(nullptr);
 	FFINNetworkTrace trace(Obj.Get());
-	TSharedPtr<FFINNetworkTrace> prev = this->Prev;
+	TSharedPtr<FFINNetworkTrace> prev = MakeShared<FFINNetworkTrace>(*this->Prev);
 	while (prev) {
 		trace = trace / prev->Obj.Get();
 		prev = prev->Prev;
@@ -249,10 +249,11 @@ FFINNetworkTrace FFINNetworkTrace::Reverse() const {
 	return trace;
 }
 
+#pragma optimize("", off)
 bool FFINNetworkTrace::IsValid() const {
 	UObject* B = Obj.Get();
 	if (!B) return false;
-	if (Prev && Step) {
+	if (Prev && Step && *Step) {
 		UObject* A = Prev->Obj.Get();
 		if (!A || !(*Step)(A, B)) return false;
 	}
@@ -261,6 +262,7 @@ bool FFINNetworkTrace::IsValid() const {
 	}
 	return true;
 }
+#pragma optimize("", on)
 
 bool FFINNetworkTrace::IsEqualObj(const FFINNetworkTrace& other) const {
 	return Obj == other.Obj;
