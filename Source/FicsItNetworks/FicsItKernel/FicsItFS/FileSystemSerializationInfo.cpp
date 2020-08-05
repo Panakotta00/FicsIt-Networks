@@ -41,7 +41,9 @@ FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString nam
 	}
 }
 
+#pragma optimize("", off)
 FFileSystemNode& FFileSystemNode::Serialize(FileSystem::SRef<FileSystem::Device> device, const FileSystem::Path& path) {
+	SML::Logging::error("Path: ", path.str().c_str());
 	const FileSystem::SRef<FileSystem::Node> node = device->get(path);
 	if (FileSystem::SRef<FileSystem::File> file = node) {
 		NodeType = 0;
@@ -58,6 +60,7 @@ FFileSystemNode& FFileSystemNode::Serialize(FileSystem::SRef<FileSystem::Device>
 
 	return *this;
 }
+#pragma optimize("", on)
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNodeIndex& Node) {
 	Node.Serialize(Ar);

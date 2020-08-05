@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include "util/Logging.h"
+
 using namespace std;
 using namespace FileSystem;
 namespace filesystem = std::experimental::filesystem;
@@ -94,13 +96,16 @@ DiskDirectory::DiskDirectory(const std::filesystem::path& realpath, SizeCheckFun
 
 DiskDirectory::~DiskDirectory() {}
 
+#pragma optimize("", off)
 unordered_set<NodeName> DiskDirectory::getChilds() const {
 	unordered_set<NodeName> nodes;
 	for (auto e : filesystem::directory_iterator(realPath)) {
+		SML::Logging::error("Child: ", e.path().filename().generic_string().c_str());
 		nodes.insert(e.path().filename().generic_string()); 
 	}
 	return nodes;
 }
+#pragma optimize("", on)
 
 SRef<FileStream> DiskDirectory::open(FileMode mode) {
 	return nullptr;

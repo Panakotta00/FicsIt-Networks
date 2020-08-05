@@ -233,7 +233,7 @@ unordered_set<NodeName> FileSystemRoot::childs(Path path) {
 	unordered_set<NodeName> names = device->childs(pending);
 	for (auto mount : mounts) {
 		Path mountPoint = mount.first;
-		if (mountPoint.prev() == path) names.insert(mountPoint.getFinal());
+		if (mountPoint.getNodeCount() > 0 && mountPoint.prev() == path) names.insert(mountPoint.getFinal());
 	}
 	return names;
 }

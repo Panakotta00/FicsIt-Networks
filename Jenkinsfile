@@ -119,7 +119,7 @@ pipeline {
 	post {
 		always {
 			cleanWs()
-			withCredentials([usernameColonPassword(credentialsId: 'FINDiscordToken', variable: 'WEBHOOKURL')]) {
+			withCredentials([string(credentialsId: 'FINDiscordToken', variable: 'WEBHOOKURL')]) {
 				discordSend description: "FIN Build", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOKURL"
 			}
 		}

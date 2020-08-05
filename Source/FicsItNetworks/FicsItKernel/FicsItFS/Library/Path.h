@@ -20,6 +20,7 @@ namespace FileSystem {
 		Path();
 		Path(const char* path);
 		Path(std::string path);
+		Path(NodeName node);
 		Path(std::filesystem::path path);
 
 		std::string getRoot() const;
