@@ -13,14 +13,6 @@
 typedef TFunction<bool(UObject*, UObject*)> FFINTraceStep;
 
 /**
-* Used for the extension of a trace to also pass a custom trace step
-*/
-typedef TPair<UObject*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>> FFINObjTraceStepPtr;
-inline FFINObjTraceStepPtr ObjTraceStep(UObject* obj, FFINTraceStep step) {
-	return FFINObjTraceStepPtr(obj, MakeShared<FFINTraceStep, ESPMode::ThreadSafe>(step));
-}
-
-/**
  * Tracks the access of a object through the network.
  * Allows a later check if the object is still reachable
  */
@@ -65,11 +57,6 @@ public:
 	 * @return the copied and expanded network trace
 	 */
 	FFINNetworkTrace operator/(UObject* other) const;
-
-	/**
-	 * Creates a copy of this network trace appends the given object and uses the given trace step for validation.
-	 */
-	FFINNetworkTrace operator/(FFINObjTraceStepPtr other);
 
 	/**
 	 * Returns the referenced object.
@@ -137,3 +124,12 @@ inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
 FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& Trace) {
 	return GetTypeHash(Trace.GetUnderlyingPtr());
 }
+
+template<>
+struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace>
+{
+	enum
+	{
+		WithSerializer = true,
+    };
+};

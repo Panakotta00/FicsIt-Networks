@@ -251,9 +251,7 @@ namespace FicsItKernel {
 			lua_newtable(L);
 			for (int i = 0; i < stations.Num(); ++i) {
 				int trackID = graph.TrackID;
-				newInstance(L, (graph.Trace / ObjTraceStep(Cast<UObject>(stations[i]->mStation), [trackID](UObject* o1, UObject* o2) { 
-					return trackID == FFINTrackGraph::GetTrackID(o1) && trackID == FFINTrackGraph::GetTrackID(o2);
-				})));
+				newInstance(L, (graph.Trace / stations[i]->mStation));
 				lua_seti(L, -2, i+1);
 			}
 			return 1;
@@ -267,9 +265,7 @@ namespace FicsItKernel {
 			lua_newtable(L);
 			for (int i = 0; i < trains.Num(); ++i) {
 				int trackID = graph.TrackID;
-				newInstance(L, (graph.Trace / ObjTraceStep(Cast<UObject>(trains[i]), [trackID](UObject* o1, UObject* o2) { 
-                    return trackID == FFINTrackGraph::GetTrackID(o1) && trackID == FFINTrackGraph::GetTrackID(o2);
-                })));
+				newInstance(L, graph.Trace / trains[i]);
 				lua_seti(L, -2, i+1);
 			}
 			return 1;

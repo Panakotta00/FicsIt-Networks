@@ -1,4 +1,4 @@
-﻿#include "FINNetworkTrace.h"
+#include "FINNetworkTrace.h"
 
 #include "FGBuildableRailroadSignal.h"
 #include "FGBuildableRailroadStation.h"
@@ -177,7 +177,7 @@ bool FFINNetworkTrace::Serialize(FArchive& Ar) {
 				FString save;
 				if (Ar.IsSaving()) save = inverseTraceStepRegistry[Step];
 				Ar << save;
-				if (Ar.IsLoading()) Step = traceStepRegistry[TCHAR_TO_UTF8(*save)];
+				if (Ar.IsLoading()) Step = traceStepRegistry[*save];
 			}
 		}
 	}
@@ -192,13 +192,6 @@ FFINNetworkTrace FFINNetworkTrace::operator/(UObject* other) const {
 	if (!A || !other) return FFINNetworkTrace(nullptr); // if A is not valid, the network trace will always be not invalid
 	trace.Prev = MakeShared<FFINNetworkTrace>(*this);
 	trace.Step = findTraceStep(A->GetClass(), other->GetClass());
-	return trace;
-}
-
-FFINNetworkTrace FFINNetworkTrace::operator/(FFINObjTraceStepPtr other) {
-	FFINNetworkTrace trace(other.Key);
-	trace.Prev = MakeShared<FFINNetworkTrace>(*this);
-	trace.Step = other.Value;
 	return trace;
 }
 
