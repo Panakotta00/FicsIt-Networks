@@ -27,6 +27,7 @@
 #include "FGBuildableRailroadSwitchControl.h"
 #include "FGPipeSubsystem.h"
 #include "FINGlobalRegisterHelper.h"
+#include "FGHealthComponent.h"
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkCustomType.h"
 #include "Utils/FINTimeTableStop.h"
@@ -548,6 +549,23 @@ namespace FicsItKernel {
 		})
 
 		// End AFGBuildableManufacturer
+
+		// Begin AFGVehicle
+
+		LuaLibTypeDecl(AFGVehicle, Vehicle)
+		
+		LuaLibFunc(AFGVehicle, getController, {
+			newInstance(L, obj / self->GetController());
+			return 1;
+		})
+
+		LuaLibPropReadonlyNum(AFGVehicle, health, GetHealthComponent()->GetCurrentHealth())
+		LuaLibPropReadonlyNum(AFGVehicle, maxHealth, GetHealthComponent()->GetMaxHealth())
+		LuaLibPropReadonlyBool(AFGVehicle, isSelfDriving, IsSelfDriving())
+		
+		// End AFGVehicle
+
+		// Begin AFG
 
 		// Begin AFGBuildableTrainPlatform
 

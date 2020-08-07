@@ -1,4 +1,4 @@
-#include "FINNetworkTrace.h"
+﻿#include "FINNetworkTrace.h"
 
 #include "FGBuildableRailroadSignal.h"
 #include "FGBuildableRailroadStation.h"
@@ -12,6 +12,8 @@
 #include "FGRailroadVehicle.h"
 #include "FGRailroadVehicleMovementComponent.h"
 #include "FGTrain.h"
+
+#include "Components/FINVehicleScanner.h"
 
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkCircuit.h"
@@ -379,4 +381,15 @@ Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadStation, {
 })
 Step(AFGBuildableRailroadStation, UFGRailroadTrackConnectionComponent, {
     return A = B->GetStation();
+})
+
+Step(AFGVehicle, AFINVehicleScanner, {
+	TArray<AActor*> Actors;
+	B->VehicleCollision->GetOverlappingActors(Actors);
+	return Actors.Contains(A);
+})
+Step(AFINVehicleScanner, AFGVehicle, {
+    TArray<AActor*> Actors;
+    A->VehicleCollision->GetOverlappingActors(Actors);
+    return Actors.Contains(B);
 })
