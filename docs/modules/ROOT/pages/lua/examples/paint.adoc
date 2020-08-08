@@ -1,6 +1,6 @@
 = Paint Example
 
-This small programm uses a GPU and a Screen to make a small paint programm ingame.
+This small program uses a GPU and a Screen to make a small paint program ingame.
 
 In the lower left corner you can choose between five different colors (clear, red, green, blue and white)
 by simply clicking with your mouse onto one.
