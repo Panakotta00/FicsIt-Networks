@@ -29,8 +29,9 @@ Path::Path(string oPath) {
 			s = oPath;
 			oPath = "";
 		}
-		if (s == "..") if (path.size() > 0) path.pop_back();
-		else if (s != ".") path.push_back(s);
+		if (s == "..") {
+			if (path.size() > 0) path.pop_back();
+		} else if (s != ".") path.push_back(s);
 	} while (oPath.length() > 0);
 }
 
