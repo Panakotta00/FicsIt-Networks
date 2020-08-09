@@ -2,7 +2,7 @@
 
 #include "FINStructParameterList.h"
 
-FFINFuncParameterList::FFINFuncParameterList(UFunction* Func) {
+FFINFuncParameterList::FFINFuncParameterList(UFunction* Func) : Func(Func) {
 	Data = FMemory::Malloc(Func->GetStructureSize());
 	Func->InitializeStruct(Data);
 }
