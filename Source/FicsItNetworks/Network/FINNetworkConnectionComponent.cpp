@@ -47,16 +47,17 @@ void UFINNetworkConnectionComponent::RemoveConnectedNode(TScriptInterface<IFINNe
 }
 
 bool UFINNetworkConnectionComponent::AddConnectedCable(AFINNetworkCable* Cable) {
-	if (MaxCables >= 0 && MaxCables <= ConnectedCables.Num()) return false;
+	if (!IsValid(Cable) || (MaxCables >= 0 && MaxCables <= ConnectedCables.Num())) return false;
 	if (ConnectedCables.Contains(Cable)) return true;
 	
 	ConnectedCables.Add(Cable);
 
 	UFINNetworkConnectionComponent* OtherConnector = (Cable->Connector1 == this) ? ((Cable->Connector2 == this) ? nullptr : Cable->Connector2) : Cable->Connector1;
-	OtherConnector->AddConnectedCable(Cable);
-
-	UFINNetworkCircuit::ConnectNodes(this, OtherConnector);
-
+	if (OtherConnector) {
+		OtherConnector->AddConnectedCable(Cable);
+		UFINNetworkCircuit::ConnectNodes(this, OtherConnector);
+	}
+	
 	return true;
 }
 
@@ -65,9 +66,10 @@ void UFINNetworkConnectionComponent::RemoveConnectedCable(AFINNetworkCable* Cabl
 
 	if (ConnectedCables.Remove(Cable) > 0) {
 		UFINNetworkConnectionComponent* OtherConnector = (Cable->Connector1 == this) ? Cable->Connector2 : Cable->Connector1;
-		OtherConnector->ConnectedCables.Remove(Cable);
-
-		UFINNetworkCircuit::DisconnectNodes(this, OtherConnector);
+		if (OtherConnector) {
+			OtherConnector->ConnectedCables.Remove(Cable);
+			UFINNetworkCircuit::DisconnectNodes(this, OtherConnector);
+		}
 	}
 }
 
