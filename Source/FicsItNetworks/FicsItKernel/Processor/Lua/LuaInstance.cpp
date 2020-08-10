@@ -296,8 +296,12 @@ namespace FicsItKernel {
 				if (!comp->GetClass()->IsChildOf(funcClass)) return luaL_argerror(L, 1, "Instance type is not allowed to call this function");;
 				
 				// allocate parameter space
-				void* params = FMemory::Malloc(func->ParmsSize);
+				uint8* params = (uint8*)FMemory::Malloc(func->PropertiesSize);
+				FMemory::Memzero(params + func->ParmsSize, func->PropertiesSize - func->ParmsSize);
 				func->InitializeStruct(params);
+				for (UProperty* LocalProp = func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
+					LocalProp->InitializeValue_InContainer(params);
+				}
 	
 				// init and set parameter values
 				int i = 2;
@@ -320,7 +324,11 @@ namespace FicsItKernel {
 							try {
 								luaToProperty(L, *property, params, i++);
 							} catch (std::exception e) {
-								func->DestroyStruct(params);
+								for (UProperty* P = func->DestructorLink; P; P = P->DestructorLinkNext) {
+									if (!P->IsInContainer(func->ParmsSize)) {
+										P->DestroyValue_InContainer(params);
+									}
+								}
 								FMemory::Free(params);
 								return luaL_error(L, ("Argument #" + std::to_string(i) + " is not of type " + e.what()).c_str());
 							}
@@ -344,7 +352,11 @@ namespace FicsItKernel {
 					}
 				}
 				
-				func->DestroyStruct(params);
+				for (UProperty* P = func->DestructorLink; P; P = P->DestructorLinkNext) {
+					if (!P->IsInContainer(func->ParmsSize)) {
+						P->DestroyValue_InContainer(params);
+					}
+				}
 				FMemory::Free(params);
 				
 				return LuaProcessor::luaAPIReturn(L, retargs);

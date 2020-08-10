@@ -26,7 +26,7 @@ public:
 	TSet<FFINNetworkTrace> SignalListeners;
 	
 	UPROPERTY(BlueprintReadOnly, SaveGame)
-	FLinearColor ScanColor;
+	FLinearColor ScanColor = FLinearColor(0,0,1);
 
 	UPROPERTY(BlueprintReadOnly, SaveGame)
 	float Intensity;
