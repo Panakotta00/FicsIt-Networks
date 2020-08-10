@@ -28,6 +28,9 @@
 #include "FGPipeSubsystem.h"
 #include "FINGlobalRegisterHelper.h"
 #include "FGHealthComponent.h"
+#include "FGWheeledVehicle.h"
+#include "FGTargetPointLinkedList.h"
+#include "FGTargetPoint.h"
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkCustomType.h"
 #include "Utils/FINTimeTableStop.h"
@@ -565,8 +568,191 @@ namespace FicsItKernel {
 		
 		// End AFGVehicle
 
-		// Begin AFG
+		// Begin AFGWheeledVehicle
 
+		LuaLibTypeDecl(AFGWheeledVehicle, "WheeledVehicle")
+
+		LuaLibFunc(AFGWheeledVehicle, getFuelInv, {
+            newInstance(L, obj / self->GetFuelInventory());
+            return 1;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, getStorageInv, {
+            newInstance(L, obj / self->GetStorageInventory());
+            return 1;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, isValidFuel, {
+			TSubclassOf<UFGItemDescriptor> Fuel = getClassInstance<UFGItemDescriptor>(L, -1);
+            lua_pushboolean(L, self->IsValidFuel(Fuel));
+            return 1;
+        })
+
+		inline void TargetToLua(lua_State* L, AFGTargetPoint* Target) {
+			lua_newtable(L);
+			if (IsValid(Target)) {
+				FVector Pos = Target->GetActorLocation();
+				FRotator Rot = Target->GetActorRotation();
+				lua_pushnumber(L, Pos.X);
+				lua_setfield(L, -2, "x");
+				lua_pushnumber(L, Pos.Y);
+				lua_setfield(L, -2, "y");
+				lua_pushnumber(L, Pos.Z);
+				lua_setfield(L, -2, "z");
+				lua_pushnumber(L, Rot.Pitch);
+				lua_setfield(L, -2, "pitch");
+				lua_pushnumber(L, Rot.Yaw);
+				lua_setfield(L, -2, "yaw");
+				lua_pushnumber(L, Rot.Roll);
+				lua_setfield(L, -2, "roll");
+				lua_pushnumber(L, Target->GetTargetSpeed());
+				lua_setfield(L, -2, "speed");
+				lua_pushnumber(L, Target->GetWaitTime());
+				lua_setfield(L, -2, "wait");
+			} else {
+				lua_pushnil(L);
+			}
+		}
+
+		inline void LuaToTargetData(lua_State* L, int i, FVector& Pos, FRotator& Rot, float& speed, float& wait) {
+			i = lua_absindex(L, i);
+			if (!lua_istable(L, i)) luaL_checktype(L, i, LUA_TTABLE);
+			
+			lua_getfield(L, i, "x");
+			Pos.X = luaL_checknumber(L, -1);
+			lua_getfield(L, i, "y");
+			Pos.Y = luaL_checknumber(L, -1);
+			lua_getfield(L, i, "z");
+			Pos.Z = luaL_checknumber(L, -1);
+			lua_getfield(L, i, "pitch");
+			Rot.Pitch = luaL_checknumber(L, -1);
+			lua_getfield(L, i, "yaw");
+			Rot.Yaw = luaL_checknumber(L, -1);
+			lua_getfield(L, i, "roll");
+			Rot.Roll = luaL_checknumber(L, -1);
+			lua_getfield(L, i, "speed");
+			speed = luaL_checknumber(L, -1);
+			lua_getfield(L, i, "wait");
+			wait = luaL_checknumber(L, -1);
+		}
+
+		inline AFGTargetPoint* LuaToTarget(lua_State* L, int i, AFGWheeledVehicle* Vehicle) {
+			TSubclassOf<AFGTargetPoint> Clazz = nullptr;
+			if (!Clazz) Clazz = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Buildable/Vehicle/BP_VehicleTargetPoint.BP_VehicleTargetPoint_C"));
+			
+			FVector Pos;
+			FRotator Rot;
+			float speed;
+			float wait;
+
+			LuaToTargetData(L, i, Pos, Rot, speed, wait);
+
+			FActorSpawnParameters Params;
+			Params.bDeferConstruction = true;
+			AFGTargetPoint* Target = Vehicle->GetWorld()->SpawnActor<AFGTargetPoint>(Clazz, Pos, Rot, Params);
+			Target->SetTargetSpeed(speed);
+			Target->SetWaitTime(wait);
+			return Cast<AFGTargetPoint>(UGameplayStatics::FinishSpawningActor(Target, FTransform(Rot.Quaternion(), Pos)));
+		}
+
+		inline int TargetToIndex(AFGTargetPoint* Target, UFGTargetPointLinkedList* List) {
+			AFGTargetPoint* CurrentTarget = nullptr;
+			int i = 0;
+			do {
+				if (i) CurrentTarget = CurrentTarget->mNext;
+				else CurrentTarget = List->GetFirstTarget();
+				if (CurrentTarget == Target) return i;
+				++i;
+			} while (CurrentTarget && CurrentTarget != List->GetLastTarget());
+			return -1;
+		}
+
+		inline AFGTargetPoint* IndexToTarget(int index, UFGTargetPointLinkedList* List) {
+			if (index < 0) return nullptr;
+			AFGTargetPoint* CurrentTarget = List->GetFirstTarget();
+			for (int i = 0; i < index && CurrentTarget; ++i) {
+				CurrentTarget = CurrentTarget->mNext;
+			}
+			return CurrentTarget;
+		}
+
+		LuaLibFunc(AFGWheeledVehicle, getCurrentTarget, {
+			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
+			lua_pushinteger(L, TargetToIndex(List->GetCurrentTarget(), List));
+			return 1;
+		})
+
+		LuaLibFunc(AFGWheeledVehicle, nextTarget, {
+            self->GetTargetNodeLinkedList()->SetNextTarget();
+            return 0;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, setCurrentTarget, {
+			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
+			AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 1), List);
+			if (!Target) luaL_argerror(L, 1, "index out of range");
+            List->SetCurrentTarget(Target);
+            return 0;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, getTarget, {
+			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
+            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 1), List);
+            if (!Target) luaL_argerror(L, 1, "index out of range");
+            TargetToLua(L, Target);
+            return 1;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, removeTarget, {
+			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
+            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 1), List);
+            if (!Target) luaL_argerror(L, 1, "index out of range");
+            List->RemoveItem(Target);
+			Target->Destroy();
+            return 1;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, addTarget, {
+            AFGTargetPoint* Target = LuaToTarget(L, 1, self);
+            if (!Target) luaL_argerror(L, 1, "failed to create target");
+            self->GetTargetNodeLinkedList()->InsertItem(Target);
+            return 1;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, setTarget, {
+			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
+            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 1), List);
+            if (!Target) luaL_argerror(L, 1, "index out of range");
+
+			FVector Pos;
+            FRotator Rot;
+            float speed;
+            float wait;
+            LuaToTargetData(L, 2, Pos, Rot, speed, wait);
+
+			Target->SetActorLocation(Pos);
+			Target->SetActorRotation(Rot);
+			Target->SetTargetSpeed(speed);
+			Target->SetWaitTime(wait);
+			
+            return 1;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, clearTargets, {
+            self->GetTargetNodeLinkedList()->ClearRecording();
+            return 1;
+        })
+
+		LuaLibPropReadonlyNum(AFGWheeledVehicle, speed, GetForwardSpeed())
+		LuaLibPropReadonlyNum(AFGWheeledVehicle, burnRatio, GetFuelBurnRatio())
+		LuaLibPropReadonlyInt(AFGWheeledVehicle, wheelsOnGround, NumWheelsOnGround())
+		LuaLibPropReadonlyBool(AFGWheeledVehicle, hasFuel, HasFuel())
+		LuaLibPropReadonlyBool(AFGWheeledVehicle, isInAir, GetIsInAir())
+		LuaLibPropReadonlyBool(AFGWheeledVehicle, wantsToMove, WantsToMove())
+		LuaLibPropReadonlyBool(AFGWheeledVehicle, isDrifting, GetIsDrifting())
+		
+		// End AFGWheeledVehicle
+		
 		// Begin AFGBuildableTrainPlatform
 
 		LuaLibTypeDecl(AFGBuildableTrainPlatform, TrainPlatform)

@@ -3,8 +3,11 @@
 #include "FINStructParameterList.h"
 
 FFINFuncParameterList::FFINFuncParameterList(UFunction* Func) : Func(Func) {
-	Data = FMemory::Malloc(Func->GetStructureSize());
-	Func->InitializeStruct(Data);
+	Data = (uint8*)FMemory::Malloc(Func->PropertiesSize);
+	FMemory::Memzero(((uint8*)Data) + Func->ParmsSize, Func->PropertiesSize - Func->ParmsSize);
+	for (UProperty* LocalProp = Func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
+		LocalProp->InitializeValue_InContainer(Data);
+	}
 }
 
 FFINFuncParameterList::FFINFuncParameterList(UFunction* Func, void* Data) : Func(Func), Data(Data) {}
@@ -14,7 +17,11 @@ FFINFuncParameterList::FFINFuncParameterList(const FFINFuncParameterList& Other)
 
 FFINFuncParameterList::~FFINFuncParameterList() {
 	if (Data) {
-		Func->DestroyStruct(Data);
+		for (UProperty* P = Func->DestructorLink; P; P = P->DestructorLinkNext) {
+			if (!P->IsInContainer(Func->ParmsSize)) {
+				P->DestroyValue_InContainer(Data);
+			}
+		}
 		FMemory::Free(Data);
 		Data = nullptr;
 	}
@@ -22,19 +29,26 @@ FFINFuncParameterList::~FFINFuncParameterList() {
 
 FFINFuncParameterList& FFINFuncParameterList::operator=(const FFINFuncParameterList& Other) {
 	if (Data) {
-		Func->DestroyStruct(Data);
+		for (UProperty* P = Func->DestructorLink; P; P = P->DestructorLinkNext) {
+			if (!P->IsInContainer(Func->ParmsSize)) {
+				P->DestroyValue_InContainer(Data);
+			}
+		}
 		if (Other.Data) {
-			Data = FMemory::Realloc(Data, Other.Func->GetStructureSize());
+			Data = FMemory::Realloc(Data, Other.Func->PropertiesSize);
 		} else {
 			FMemory::Free(Data);
 			Data = nullptr;
 		}
 	} else if (Other.Data) {
-		Data = FMemory::Malloc(Other.Func->GetStructureSize());
+		Data = FMemory::Malloc(Other.Func->PropertiesSize);
 	}
 	Func = Other.Func;
 	if (Data) {
-		Func->InitializeStruct(Data);
+		FMemory::Memzero(((uint8*)Data) + Func->ParmsSize, Func->PropertiesSize - Func->ParmsSize);
+		for (UProperty* LocalProp = Func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
+			LocalProp->InitializeValue_InContainer(Data);
+		}
 		for (TFieldIterator<UProperty> It(Func); It; ++It) {
 			It->CopyCompleteValue_InContainer(Data, Other.Data);
 		}
@@ -52,21 +66,28 @@ bool FFINFuncParameterList::Serialize(FArchive& Ar) {
 	Ar << Func;
 	if (Ar.IsLoading()) {
 		if (Data) {
-			OldFunc->DestroyStruct(Data);
+			for (UProperty* P = Func->DestructorLink; P; P = P->DestructorLinkNext) {
+				if (!P->IsInContainer(Func->ParmsSize)) {
+					P->DestroyValue_InContainer(Data);
+				}
+			}
 			if (Func) {
-				Data = FMemory::Realloc(Data, Func->GetStructureSize());
+				Data = FMemory::Realloc(Data, Func->PropertiesSize);
 			} else {
 				FMemory::Free(Data);
 				Data = nullptr;
 			}
 		} else if (Func) {
-			Data = FMemory::Malloc(Func->GetStructureSize());
+			Data = FMemory::Malloc(Func->PropertiesSize);
 		}
-		if (Func) Func->InitializeStruct(Data);
+		if (Func) {
+			for (UProperty* LocalProp = Func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
+				LocalProp->InitializeValue_InContainer(Data);
+			}
+		}
 	}
 	if (Func) {
 		for (auto p = TFieldIterator<UProperty>(Func); p; ++p) {
-			if (Ar.IsLoading()) p->InitializeValue_InContainer(Data);
 			if (auto vp = Cast<UStrProperty>(*p)) Ar << *vp->GetPropertyValuePtr_InContainer(Data);
 			else if (auto vp = Cast<UIntProperty>(*p)) Ar << *vp->GetPropertyValuePtr_InContainer(Data);
 			else if (auto vp = Cast<UInt64Property>(*p)) Ar << *vp->GetPropertyValuePtr_InContainer(Data);

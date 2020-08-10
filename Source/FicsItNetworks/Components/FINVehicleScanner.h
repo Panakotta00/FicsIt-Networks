@@ -32,7 +32,7 @@ public:
 	float Intensity;
 
 	UPROPERTY(SaveGame)
-	TWeakObjectPtr<AFGVehicle> LastVehicle;
+	AFGVehicle* LastVehicle;
 	
 	UPROPERTY()
 	UMaterialInstanceDynamic* LightMaterialInstance;

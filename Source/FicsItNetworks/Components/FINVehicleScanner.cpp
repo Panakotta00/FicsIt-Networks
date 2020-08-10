@@ -38,8 +38,10 @@ void AFINVehicleScanner::BeginPlay() {
 void AFINVehicleScanner::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	AFGVehicle* Vehicle = Cast<AFGVehicle>(OtherActor);
-	if (Vehicle) netSig_OnVehicleEnter(Vehicle);
-	LastVehicle = Vehicle;
+	if (Vehicle) {
+		netSig_OnVehicleEnter(Vehicle);
+		LastVehicle = Vehicle;
+	}
 }
 
 void AFINVehicleScanner::NotifyActorEndOverlap(AActor* OtherActor) {
@@ -47,10 +49,19 @@ void AFINVehicleScanner::NotifyActorEndOverlap(AActor* OtherActor) {
 
 	TArray<AActor*> Actors;
 	GetOverlappingActors(Actors);
-	if (Actors.Num() < 1) LastVehicle = nullptr;
 	
 	AFGVehicle* Vehicle = Cast<AFGVehicle>(OtherActor);
-	if (Vehicle) netSig_OnVehicleExit(Vehicle);
+	if (Vehicle) {
+		netSig_OnVehicleExit(Vehicle);
+		bool found = false;
+		for (AActor* Actor : Actors) {
+			if (Actor->IsA<AFGVehicle>()) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) LastVehicle = nullptr;
+	}
 }
 
 void AFINVehicleScanner::AddListener_Implementation(FFINNetworkTrace listener) {
@@ -83,7 +94,7 @@ void AFINVehicleScanner::netFunc_setColor(float r, float g, float b, float e) {
 }
 
 AFGVehicle* AFINVehicleScanner::netFunc_getLastVehicle() {
-	return LastVehicle.Get();
+	return LastVehicle;
 }
 
 void AFINVehicleScanner::netSig_OnVehicleExit_Implementation(AFGVehicle* Vehicle) {}

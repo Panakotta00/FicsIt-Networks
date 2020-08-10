@@ -298,7 +298,6 @@ namespace FicsItKernel {
 				// allocate parameter space
 				uint8* params = (uint8*)FMemory::Malloc(func->PropertiesSize);
 				FMemory::Memzero(params + func->ParmsSize, func->PropertiesSize - func->ParmsSize);
-				func->InitializeStruct(params);
 				for (UProperty* LocalProp = func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 					LocalProp->InitializeValue_InContainer(params);
 				}
