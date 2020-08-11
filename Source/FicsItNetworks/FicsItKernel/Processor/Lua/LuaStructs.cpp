@@ -13,6 +13,7 @@
 #include "LuaProcessorStateStorage.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "Network/FINFuture.h"
+#include "Utils/FINTargetPoint.h"
 #include "Utils/FINTimeTableStop.h"
 #include "Utils/FINTrackGraph.h"
 
@@ -81,8 +82,8 @@ namespace FicsItKernel {
 			FFINLuaStructRegistry::StructGetterFunc Getter;
 			FString TypeName = FFINLuaStructRegistry::Get().GetName(Struct.GetStruct());
 			i = lua_absindex(L, i);
-			if (FString(luaL_typename(L, i)) != TypeName) luaL_argerror(L, i, (std::string("'") + TCHAR_TO_UTF8(*TypeName) + "'" + " expected, got '" + luaL_typename(L, i) + "'").c_str());
-			if (!FFINLuaStructRegistry::Get().FindStructType(Struct.GetStruct(), nullptr, &Getter)) return;
+			//if (FString(luaL_typename(L, i)) != TypeName) luaL_argerror(L, i, (std::string("'") + TCHAR_TO_UTF8(*TypeName) + "'" + " expected, got '" + luaL_typename(L, i) + "'").c_str());
+			if (!FFINLuaStructRegistry::Get().FindStructType(Struct.GetStruct(), nullptr, &Getter)) luaL_argerror(L, i, "Internal error \"unable to get struct-getter\"");
 			Getter(L, i, Struct);
 		}
 
@@ -494,5 +495,51 @@ namespace FicsItKernel {
         });
 		
 		// End LuaFuture
+
+		// Begin FFINTargetPoint
+
+		TFINLuaStructRegisterer<FFINTargetPoint> GLuaStructTargetPointRegisterer(TEXT("TargetPoint"), [](lua_State* L, PersistParams) {
+        }, [](lua_State* L, const FINStruct& Struct) {
+            const FFINTargetPoint& Target = Struct.Get<FFINTargetPoint>();
+            lua_newtable(L);
+            lua_pushnumber(L,Target.Pos.X);
+            lua_setfield(L, -2, "x");
+            lua_pushnumber(L, Target.Pos.Y);
+            lua_setfield(L, -2, "y");
+            lua_pushnumber(L, Target.Pos.Z);
+            lua_setfield(L, -2, "z");
+            lua_pushnumber(L, Target.Rot.Pitch);
+            lua_setfield(L, -2, "pitch");
+            lua_pushnumber(L, Target.Rot.Yaw);
+            lua_setfield(L, -2, "yaw");
+            lua_pushnumber(L, Target.Rot.Roll);
+            lua_setfield(L, -2, "roll");
+            lua_pushnumber(L, Target.Speed);
+        	lua_setfield(L, -2, "speed");
+            lua_pushnumber(L, Target.Wait);
+            lua_setfield(L, -2, "wait");
+        }, [](lua_State* L, int i, FINStruct& Struct) {
+        	FFINTargetPoint Target;
+            lua_getfield(L, i, "x");
+            Target.Pos.X = luaL_checknumber(L, -1);
+            lua_getfield(L, i, "y");
+            Target.Pos.Y = luaL_checknumber(L, -1);
+            lua_getfield(L, i, "z");
+            Target.Pos.Z = luaL_checknumber(L, -1);
+            lua_getfield(L, i, "pitch");
+            Target.Rot.Pitch = luaL_checknumber(L, -1);
+            lua_getfield(L, i, "yaw");
+            Target.Rot.Yaw = luaL_checknumber(L, -1);
+            lua_getfield(L, i, "roll");
+            Target.Rot.Roll = luaL_checknumber(L, -1);
+            lua_getfield(L, i, "speed");
+            Target.Speed = luaL_checknumber(L, -1);
+            lua_getfield(L, i, "wait");
+            Target.Wait = luaL_checknumber(L, -1);
+        	lua_pop(L, 8);
+            Struct = Target;
+        });
+
+		// End FFINTargetPoint
 	}
 }

@@ -16,8 +16,13 @@ void execRecieveSignal(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	signalName.RemoveFromStart("netSig_");
 
 	// allocate signal data storage and copy data
-	void* data = FMemory::Malloc(Stack.CurrentNativeFunction->ParmsSize);
+	void* data = FMemory::Malloc(Stack.CurrentNativeFunction->PropertiesSize);
+	FMemory::Memzero(((uint8*)data) + Stack.CurrentNativeFunction->ParmsSize, Stack.CurrentNativeFunction->PropertiesSize - Stack.CurrentNativeFunction->ParmsSize);
 	Stack.CurrentNativeFunction->InitializeStruct(data);
+	for (UProperty* LocalProp = Stack.CurrentNativeFunction->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
+		LocalProp->InitializeValue_InContainer(data);
+	}
+
 	for (auto p = TFieldIterator<UProperty>(Stack.CurrentNativeFunction); p; ++p) {
 		auto dp = p->ContainerPtrToValuePtr<void>(data);
 		if (Stack.Code) {

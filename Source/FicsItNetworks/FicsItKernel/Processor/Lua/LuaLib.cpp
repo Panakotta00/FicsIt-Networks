@@ -224,7 +224,7 @@ namespace FicsItKernel {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			bool withType = false;
-			if (lua_isboolean(L, 1)) withType = lua_toboolean(L, 1);
+			if (lua_isboolean(L, 2)) withType = lua_toboolean(L, 2);
 			
 			lua_newtable(L);
             int i = 0;
@@ -364,7 +364,7 @@ namespace FicsItKernel {
 		
 		LuaLibFunc(UFGInventoryComponent, getStack, {
 			FInventoryStack stack;
-			for (int i = 1; i <= args; ++i) {
+			for (int i = 2; i <= args; ++i) {
 				if (self->GetStackFromIndex((int)lua_tointeger(L, i), stack)) {
 					luaStruct(L, stack);
 				} else lua_pushnil(L);
@@ -494,7 +494,7 @@ namespace FicsItKernel {
 			lua_pushboolean(L, self->IsProductionPaused());
 			return 1;
 		}, {
-			self->SetIsProductionPaused(lua_toboolean(L, 1));
+			self->SetIsProductionPaused(lua_toboolean(L, 3));
 			return 0;
 		})
 
@@ -502,7 +502,7 @@ namespace FicsItKernel {
 			lua_pushnumber(L, self->GetPendingPotential());
 			return 1;
 		}, {
-			float p = static_cast<float>(luaL_checknumber(L, 1));
+			float p = static_cast<float>(luaL_checknumber(L, 3));
 			float min = self->GetMinPotential();
 			float max = self->GetMaxPossiblePotential();
 			self->SetPendingPotential((min > p) ? min : ((max < p) ? max : p));
@@ -533,10 +533,10 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGBuildableManufacturer, setRecipe, {
-			if (args < 1) {
+			if (args < 2) {
 				return 0;
 			}
-			TSubclassOf<UFGRecipe> recipe = getClassInstance<UFGRecipe>(L,1);
+			TSubclassOf<UFGRecipe> recipe = getClassInstance<UFGRecipe>(L,2);
 			luaStruct(L, FFINManufacturerSetRecipeFuture(self, recipe));
 			return 1;
 		})
@@ -564,7 +564,13 @@ namespace FicsItKernel {
 
 		LuaLibPropReadonlyNum(AFGVehicle, health, GetHealthComponent()->GetCurrentHealth())
 		LuaLibPropReadonlyNum(AFGVehicle, maxHealth, GetHealthComponent()->GetMaxHealth())
-		LuaLibPropReadonlyBool(AFGVehicle, isSelfDriving, IsSelfDriving())
+		LuaLibProp(AFGVehicle, isSelfDriving, {
+			lua_pushboolean(L, self->IsSelfDriving());
+			return 1;
+		}, {
+			FReflectionHelper::SetPropertyValue<UBoolProperty>(self, TEXT("mIsSelfDriving"), static_cast<bool>(lua_toboolean(L, 3)));
+			return 0;
+		})
 		
 		// End AFGVehicle
 
@@ -583,77 +589,10 @@ namespace FicsItKernel {
         })
 
 		LuaLibFunc(AFGWheeledVehicle, isValidFuel, {
-			TSubclassOf<UFGItemDescriptor> Fuel = getClassInstance<UFGItemDescriptor>(L, -1);
+			TSubclassOf<UFGItemDescriptor> Fuel = getClassInstance<UFGItemDescriptor>(L, 2);
             lua_pushboolean(L, self->IsValidFuel(Fuel));
             return 1;
         })
-
-		inline void TargetToLua(lua_State* L, AFGTargetPoint* Target) {
-			lua_newtable(L);
-			if (IsValid(Target)) {
-				FVector Pos = Target->GetActorLocation();
-				FRotator Rot = Target->GetActorRotation();
-				lua_pushnumber(L, Pos.X);
-				lua_setfield(L, -2, "x");
-				lua_pushnumber(L, Pos.Y);
-				lua_setfield(L, -2, "y");
-				lua_pushnumber(L, Pos.Z);
-				lua_setfield(L, -2, "z");
-				lua_pushnumber(L, Rot.Pitch);
-				lua_setfield(L, -2, "pitch");
-				lua_pushnumber(L, Rot.Yaw);
-				lua_setfield(L, -2, "yaw");
-				lua_pushnumber(L, Rot.Roll);
-				lua_setfield(L, -2, "roll");
-				lua_pushnumber(L, Target->GetTargetSpeed());
-				lua_setfield(L, -2, "speed");
-				lua_pushnumber(L, Target->GetWaitTime());
-				lua_setfield(L, -2, "wait");
-			} else {
-				lua_pushnil(L);
-			}
-		}
-
-		inline void LuaToTargetData(lua_State* L, int i, FVector& Pos, FRotator& Rot, float& speed, float& wait) {
-			i = lua_absindex(L, i);
-			if (!lua_istable(L, i)) luaL_checktype(L, i, LUA_TTABLE);
-			
-			lua_getfield(L, i, "x");
-			Pos.X = luaL_checknumber(L, -1);
-			lua_getfield(L, i, "y");
-			Pos.Y = luaL_checknumber(L, -1);
-			lua_getfield(L, i, "z");
-			Pos.Z = luaL_checknumber(L, -1);
-			lua_getfield(L, i, "pitch");
-			Rot.Pitch = luaL_checknumber(L, -1);
-			lua_getfield(L, i, "yaw");
-			Rot.Yaw = luaL_checknumber(L, -1);
-			lua_getfield(L, i, "roll");
-			Rot.Roll = luaL_checknumber(L, -1);
-			lua_getfield(L, i, "speed");
-			speed = luaL_checknumber(L, -1);
-			lua_getfield(L, i, "wait");
-			wait = luaL_checknumber(L, -1);
-		}
-
-		inline AFGTargetPoint* LuaToTarget(lua_State* L, int i, AFGWheeledVehicle* Vehicle) {
-			TSubclassOf<AFGTargetPoint> Clazz = nullptr;
-			if (!Clazz) Clazz = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Buildable/Vehicle/BP_VehicleTargetPoint.BP_VehicleTargetPoint_C"));
-			
-			FVector Pos;
-			FRotator Rot;
-			float speed;
-			float wait;
-
-			LuaToTargetData(L, i, Pos, Rot, speed, wait);
-
-			FActorSpawnParameters Params;
-			Params.bDeferConstruction = true;
-			AFGTargetPoint* Target = Vehicle->GetWorld()->SpawnActor<AFGTargetPoint>(Clazz, Pos, Rot, Params);
-			Target->SetTargetSpeed(speed);
-			Target->SetWaitTime(wait);
-			return Cast<AFGTargetPoint>(UGameplayStatics::FinishSpawningActor(Target, FTransform(Rot.Quaternion(), Pos)));
-		}
 
 		inline int TargetToIndex(AFGTargetPoint* Target, UFGTargetPointLinkedList* List) {
 			AFGTargetPoint* CurrentTarget = nullptr;
@@ -689,51 +628,47 @@ namespace FicsItKernel {
 
 		LuaLibFunc(AFGWheeledVehicle, setCurrentTarget, {
 			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-			AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 1), List);
-			if (!Target) luaL_argerror(L, 1, "index out of range");
+			AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 2), List);
+			if (!Target) luaL_argerror(L, 2, "index out of range");
             List->SetCurrentTarget(Target);
             return 0;
         })
 
 		LuaLibFunc(AFGWheeledVehicle, getTarget, {
 			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 1), List);
-            if (!Target) luaL_argerror(L, 1, "index out of range");
-            TargetToLua(L, Target);
+            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 2), List);
+            if (!Target) luaL_argerror(L, 2, "index out of range");
+            luaStruct(L, FFINTargetPoint(Target));
             return 1;
         })
 
 		LuaLibFunc(AFGWheeledVehicle, removeTarget, {
 			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 1), List);
-            if (!Target) luaL_argerror(L, 1, "index out of range");
+            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 2), List);
+            if (!Target) luaL_argerror(L, 2, "index out of range");
             List->RemoveItem(Target);
 			Target->Destroy();
             return 1;
         })
 
 		LuaLibFunc(AFGWheeledVehicle, addTarget, {
-            AFGTargetPoint* Target = LuaToTarget(L, 1, self);
-            if (!Target) luaL_argerror(L, 1, "failed to create target");
+            AFGTargetPoint* Target = luaGetStruct<FFINTargetPoint>(L, 2).ToWheeledTargetPoint(self);
+            if (!Target) luaL_argerror(L, 2, "failed to create target");
             self->GetTargetNodeLinkedList()->InsertItem(Target);
             return 1;
         })
 
 		LuaLibFunc(AFGWheeledVehicle, setTarget, {
 			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 1), List);
-            if (!Target) luaL_argerror(L, 1, "index out of range");
+            AFGTargetPoint* Target = IndexToTarget(luaL_checkinteger(L, 2), List);
+            if (!Target) luaL_argerror(L, 2, "index out of range");
 
-			FVector Pos;
-            FRotator Rot;
-            float speed;
-            float wait;
-            LuaToTargetData(L, 2, Pos, Rot, speed, wait);
+            FFINTargetPoint NewData = luaGetStruct<FFINTargetPoint>(L, 3);
 
-			Target->SetActorLocation(Pos);
-			Target->SetActorRotation(Rot);
-			Target->SetTargetSpeed(speed);
-			Target->SetWaitTime(wait);
+			Target->SetActorLocation(NewData.Pos);
+			Target->SetActorRotation(NewData.Rot);
+			Target->SetTargetSpeed(NewData.Speed);
+			Target->SetWaitTime(NewData.Wait);
 			
             return 1;
         })
@@ -741,6 +676,32 @@ namespace FicsItKernel {
 		LuaLibFunc(AFGWheeledVehicle, clearTargets, {
             self->GetTargetNodeLinkedList()->ClearRecording();
             return 1;
+        })
+
+		LuaLibFunc(AFGWheeledVehicle, getTargets, {
+			UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
+			lua_newtable(L);
+			AFGTargetPoint* CurrentTarget = nullptr;
+            int i = 0;
+            do {
+                if (i) CurrentTarget = CurrentTarget->mNext;
+                else CurrentTarget = List->GetFirstTarget();
+                luaStruct(L, FFINTargetPoint(CurrentTarget));
+            	lua_seti(L, -2, ++i);
+            } while (CurrentTarget && CurrentTarget != List->GetLastTarget());
+			return 1;
+		})
+		
+		LuaLibFunc(AFGWheeledVehicle, setTargets, {
+			TArray<FFINTargetPoint> Targets;
+			luaL_checktype(L, 2, LUA_TTABLE);
+			lua_pushnil(L);
+			while (lua_next(L, -2)) {
+			    Targets.Add(luaGetStruct<FFINTargetPoint>(L, -1));
+			    lua_pop(L, 1);
+			}
+			luaStruct(L, FFINVehicleSetTargets(self, Targets));
+			return 1;
         })
 
 		LuaLibPropReadonlyNum(AFGWheeledVehicle, speed, GetForwardSpeed())
@@ -772,7 +733,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGBuildableTrainPlatform, getConnectedPlatform, {
-			int direction = lua_tointeger(L, 1);
+			int direction = lua_tointeger(L, 2);
 			newInstance(L, obj / self->GetConnectedPlatformInDirectionOf(direction));
 			return 1;
 		})
@@ -805,7 +766,7 @@ namespace FicsItKernel {
 		   	lua_pushstring(L, TCHAR_TO_UTF8(*self->GetStationIdentifier()->GetStationName().ToString()));
 			return 1;
 		},{
-			self->GetStationIdentifier()->SetStationName(FText::FromString(luaL_checkstring(L, 1)));
+			self->GetStationIdentifier()->SetStationName(FText::FromString(luaL_checkstring(L, 3)));
 			return 0;
 		})
 
@@ -837,12 +798,12 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGRailroadVehicle, isCoupled, {
-			lua_pushboolean(L, self->IsCoupledAt(static_cast<ERailroadVehicleCoupler>(lua_tointeger(L, 1))));
+			lua_pushboolean(L, self->IsCoupledAt(static_cast<ERailroadVehicleCoupler>(lua_tointeger(L, 2))));
 			return 1;
 		})
 
 		LuaLibFunc(AFGRailroadVehicle, getCoupled, {
-			newInstance(L, obj / self->GetCoupledVehicleAt(static_cast<ERailroadVehicleCoupler>(lua_tointeger(L, 1))));
+			newInstance(L, obj / self->GetCoupledVehicleAt(static_cast<ERailroadVehicleCoupler>(lua_tointeger(L, 2))));
 			return 1;
 		})
 
@@ -881,7 +842,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(UFGRailroadVehicleMovementComponent, getWheelsetRotation, {
-			FVector rot = self->GetWheelsetRotation(luaL_checkinteger(L, 1));
+			FVector rot = self->GetWheelsetRotation(luaL_checkinteger(L, 2));
 			lua_pushnumber(L, rot.X);
 			lua_pushnumber(L, rot.Y);
 			lua_pushnumber(L, rot.Z);
@@ -889,13 +850,13 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(UFGRailroadVehicleMovementComponent, getWheelsetOffset, {
-			lua_pushnumber(L, self->GetWheelsetOffset(luaL_checkinteger(L, 1)));
+			lua_pushnumber(L, self->GetWheelsetOffset(luaL_checkinteger(L, 2)));
 			return 1;
 		})
 		
 		LuaLibFunc(UFGRailroadVehicleMovementComponent, getCouplerRotationAndExtention, {
 			float extension;
-			FVector rotation = self->GetCouplerRotationAndExtention(luaL_checkinteger(L, 1), extension);
+			FVector rotation = self->GetCouplerRotationAndExtention(luaL_checkinteger(L, 2), extension);
 			lua_pushnumber(L, rotation.X);
 			lua_pushnumber(L, rotation.Y);
 			lua_pushnumber(L, rotation.Z);
@@ -945,7 +906,7 @@ namespace FicsItKernel {
 		})
 		
 		LuaLibFunc(AFGTrain, setName, {
-			self->SetTrainName(FText::FromString(luaL_checkstring(L, 1)));
+			self->SetTrainName(FText::FromString(luaL_checkstring(L, 2)));
 			return 0;
 		})
 
@@ -955,7 +916,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGTrain, setSelfDriving, {
-			self->SetSelfDrivingEnabled(lua_toboolean(L, 1));
+			self->SetSelfDrivingEnabled(lua_toboolean(L, 2));
 			return 0;
 		})
 
@@ -1014,16 +975,16 @@ namespace FicsItKernel {
 		LuaLibTypeDecl(AFGRailroadTimeTable, TimeTable)
 
 		LuaLibFunc(AFGRailroadTimeTable, addStop, {
-			int stopIndex = luaL_checkinteger(L, 1);
+			int stopIndex = luaL_checkinteger(L, 2);
 			FTimeTableStop stop;
-			stop.Station = getObjInstance<AFGBuildableRailroadStation>(L, 2)->GetStationIdentifier();
-			stop.Duration = luaL_checknumber(L, 3);
+			stop.Station = getObjInstance<AFGBuildableRailroadStation>(L, 3)->GetStationIdentifier();
+			stop.Duration = luaL_checknumber(L, 4);
 			lua_pushboolean(L, self->AddStop(stopIndex, stop));
 			return 1;
 		})
 
 		LuaLibFunc(AFGRailroadTimeTable, removeStop, {
-			self->RemoveStop(luaL_checkinteger(L, 1));
+			self->RemoveStop(luaL_checkinteger(L, 2));
 			return 0;
 		})
 
@@ -1039,10 +1000,10 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGRailroadTimeTable, setStops, {
-			luaL_argcheck(L, lua_istable(L, 1), 1, "is not of type table");
+			luaL_argcheck(L, lua_istable(L, 2), 2, "is not of type table");
 			TArray<FTimeTableStop> stops;
 			lua_pushnil(L);
-			while (lua_next(L, 1) != 0) {
+			while (lua_next(L, 2) != 0) {
 				stops.Add(luaGetStruct<FFINTimeTableStop>(L, -1));
 				lua_pop(L, 1);
 			}
@@ -1051,12 +1012,12 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGRailroadTimeTable, isValidStop, {
-			lua_pushboolean(L, self->IsValidStop(luaL_checkinteger(L, 1)));
+			lua_pushboolean(L, self->IsValidStop(luaL_checkinteger(L, 2)));
 			return 1;
 		})
 
 		LuaLibFunc(AFGRailroadTimeTable, getStop, {
-			FTimeTableStop stop = self->GetStop(luaL_checkinteger(L, 1));
+			FTimeTableStop stop = self->GetStop(luaL_checkinteger(L, 2));
 			if (IsValid(stop.Station)) {
 				luaStruct(L, FFINTimeTableStop{obj / stop.Station->GetStation(), stop.Duration});
 			} else {
@@ -1066,7 +1027,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGRailroadTimeTable, setCurrentStop, {
-			self->SetCurrentStop(luaL_checkinteger(L, 1));
+			self->SetCurrentStop(luaL_checkinteger(L, 2));
 			return 0;
 		})
 
@@ -1086,7 +1047,7 @@ namespace FicsItKernel {
 		LuaLibTypeDecl(AFGBuildableRailroadTrack, RailroadTrack)
 
 		LuaLibFunc(AFGBuildableRailroadTrack, getClosestTrackPosition, {
-			FRailroadTrackPosition pos = self->FindTrackPositionClosestToWorldLocation(FVector(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+			FRailroadTrackPosition pos = self->FindTrackPositionClosestToWorldLocation(FVector(luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4)));
 			if (!pos.IsValid()) return 0;
 			newInstance(L, obj(pos.Track.Get()));
 			lua_pushnumber(L, pos.Offset);
@@ -1095,7 +1056,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGBuildableRailroadTrack, getWorldLocAndRotAtPos, {
-			FRailroadTrackPosition pos(getObjInstance<AFGBuildableRailroadTrack>(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+			FRailroadTrackPosition pos(getObjInstance<AFGBuildableRailroadTrack>(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
 			FVector loc;
 			FVector rot;
 			self->GetWorldLocationAndDirectionAtPosition(pos, loc, rot);
@@ -1109,7 +1070,7 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(AFGBuildableRailroadTrack, getConnection, {
-			newInstance(L, obj / self->GetConnection(luaL_checkinteger(L, 1)));
+			newInstance(L, obj / self->GetConnection(luaL_checkinteger(L, 2)));
 			return 1;
 		})
 
@@ -1145,7 +1106,7 @@ namespace FicsItKernel {
 
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, getConnection, {
 			if (lua_isinteger(L, 1)) {
-				newInstance(L, obj / self->GetConnection(lua_tointeger(L, 1)));
+				newInstance(L, obj / self->GetConnection(lua_tointeger(L, 2)));
 			} else {
 				newInstance(L, obj / self->GetConnection());
 			}
@@ -1202,8 +1163,8 @@ namespace FicsItKernel {
 		})
 		
 		LuaLibFunc(UFGRailroadTrackConnectionComponent, setSwitchPosition, {
-			if (lua_isinteger(L, 1)) self->SetSwitchPosition(luaL_checkinteger(L, 1));
-			else self->SetSwitchPosition(getObjInstance<AFGBuildableRailroadTrack>(L, 1));
+			if (lua_isinteger(L, 2)) self->SetSwitchPosition(luaL_checkinteger(L, 2));
+			else self->SetSwitchPosition(getObjInstance<AFGBuildableRailroadTrack>(L, 2));
 			return 0;
 		})
 		LuaLibFuncGetInt(UFGRailroadTrackConnectionComponent, getSwitchPosition, GetSwitchPosition())
@@ -1260,7 +1221,7 @@ namespace FicsItKernel {
 			lua_pushboolean(L, self->GetIsInLoadMode());
 			return 1;
 		}, {
-			self->SetIsInLoadMode(lua_toboolean(L, 1));
+			self->SetIsInLoadMode(lua_toboolean(L, 3));
 			return 0;
 		})
 		
@@ -1371,6 +1332,14 @@ void FFINManufacturerSetRecipeFuture::Execute() {
 		bGotSet = false;
 	}
 	bDone = true;
+}
+
+void FFINVehicleSetTargets::Execute() {
+	UFGTargetPointLinkedList* List = Vehicle->GetTargetNodeLinkedList();
+	List->ClearRecording();
+	for (const FFINTargetPoint& Data : Targets) {
+		List->InsertItem(Data.ToWheeledTargetPoint(Vehicle));
+	}
 }
 
 

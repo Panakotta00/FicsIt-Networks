@@ -269,7 +269,6 @@ namespace FicsItKernel {
 			
 			LuaLibFunc func;
 			if (reg->findLibFunc(type, funcName, func)) {
-				lua_remove(L, 1);
 				int args = func(L, lua_gettop(L), instance);
 				return LuaProcessor::luaAPIReturn(L, args);
 			}
@@ -298,6 +297,7 @@ namespace FicsItKernel {
 				// allocate parameter space
 				uint8* params = (uint8*)FMemory::Malloc(func->PropertiesSize);
 				FMemory::Memzero(params + func->ParmsSize, func->PropertiesSize - func->ParmsSize);
+				func->InitializeStruct(params);
 				for (UProperty* LocalProp = func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 					LocalProp->InitializeValue_InContainer(params);
 				}
@@ -496,8 +496,6 @@ namespace FicsItKernel {
 			}
 			if (foundLibProp) {
 				if (libProp.readOnly) return luaL_error(L, "property is read only");
-				lua_remove(L, 1);
-				lua_remove(L, 1);
 				return LuaProcessor::luaAPIReturn(L, libProp.set(L, realTrace));
 			}
 			

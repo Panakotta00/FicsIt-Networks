@@ -5,6 +5,7 @@
 FFINFuncParameterList::FFINFuncParameterList(UFunction* Func) : Func(Func) {
 	Data = (uint8*)FMemory::Malloc(Func->PropertiesSize);
 	FMemory::Memzero(((uint8*)Data) + Func->ParmsSize, Func->PropertiesSize - Func->ParmsSize);
+	Func->InitializeStruct(Data);
 	for (UProperty* LocalProp = Func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 		LocalProp->InitializeValue_InContainer(Data);
 	}
@@ -46,6 +47,7 @@ FFINFuncParameterList& FFINFuncParameterList::operator=(const FFINFuncParameterL
 	Func = Other.Func;
 	if (Data) {
 		FMemory::Memzero(((uint8*)Data) + Func->ParmsSize, Func->PropertiesSize - Func->ParmsSize);
+		Func->InitializeStruct(Data);
 		for (UProperty* LocalProp = Func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 			LocalProp->InitializeValue_InContainer(Data);
 		}
@@ -58,7 +60,22 @@ FFINFuncParameterList& FFINFuncParameterList::operator=(const FFINFuncParameterL
 }
 
 int FFINFuncParameterList::operator>>(FFINValueReader& reader) const {
-	return FFINStructParameterList::WriteToReader(Func, Data, reader);
+	int count = 0;
+	for (auto p = TFieldIterator<UProperty>(Func); p; ++p) {
+		if (p->PropertyFlags & EPropertyFlags::CPF_Parm) {
+			++count;
+			if (UStrProperty* strp = Cast<UStrProperty>(*p)) reader << TCHAR_TO_UTF8(*strp->GetPropertyValue_InContainer(Data));
+			else if (UIntProperty* intp = Cast<UIntProperty>(*p)) reader << (FINInt)intp->GetPropertyValue_InContainer(Data);
+			else if (UInt64Property* int64p = Cast<UInt64Property>(*p)) reader << (FINInt)int64p->GetPropertyValue_InContainer(Data);
+			else if (UFloatProperty* floatp = Cast<UFloatProperty>(*p)) reader << floatp->GetPropertyValue_InContainer(Data);
+			else if (UBoolProperty* boolp = Cast<UBoolProperty>(*p)) reader << boolp->GetPropertyValue_InContainer(Data);
+			else if (UObjectProperty* objp = Cast<UObjectProperty>(*p)) reader << objp->GetObjectPropertyValue_InContainer(Data);
+			//else if (auto vp = Cast<UArrayProperty>(dp)) reader << vp->GetPropertyValue_InContainer(data);
+			// TODO: Add Array support
+			else --count;
+		}
+	}
+	return count;
 }
 
 bool FFINFuncParameterList::Serialize(FArchive& Ar) {
@@ -81,6 +98,7 @@ bool FFINFuncParameterList::Serialize(FArchive& Ar) {
 			Data = FMemory::Malloc(Func->PropertiesSize);
 		}
 		if (Func) {
+			Func->InitializeStruct(Data);
 			for (UProperty* LocalProp = Func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 				LocalProp->InitializeValue_InContainer(Data);
 			}

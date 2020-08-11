@@ -22,7 +22,7 @@ int FFINStructParameterList::WriteToReader(UStruct* Struct, void* Data, FFINValu
 		else if (UInt64Property* int64p = Cast<UInt64Property>(*p)) reader << (FINInt)int64p->GetPropertyValue_InContainer(Data);
 		else if (UFloatProperty* floatp = Cast<UFloatProperty>(*p)) reader << floatp->GetPropertyValue_InContainer(Data);
 		else if (UBoolProperty* boolp = Cast<UBoolProperty>(*p)) reader << boolp->GetPropertyValue_InContainer(Data);
-		else if (UObjectProperty* objp = Cast<UObjectProperty>(*p)) reader << objp->GetPropertyValue_InContainer(Data);
+		else if (UObjectProperty* objp = Cast<UObjectProperty>(*p)) reader << objp->GetObjectPropertyValue_InContainer(Data);
 		//else if (auto vp = Cast<UArrayProperty>(dp)) reader << vp->GetPropertyValue_InContainer(data);
 		// TODO: Add Array support
 		else --count;
