@@ -11,9 +11,6 @@
 
 |Max Network Connections
 |1
-
-|APIs
-|xref:lua/api/PowerController.adoc[PowerController API]
 |===
 
 [cols="a,a"]
@@ -26,6 +23,38 @@
 
 The power controler allows you to connect and disconnect two power circuits.
 For that the pole has a network connector so you can contol it and two power connectors next to eachother.
+
+=== Functions
+
+==== `setConnected(bool connected)`
+
+Sets if the power controller should connect both circuits.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|connected
+|bool
+|true when the circuits should be connected
+|===
+
+==== `bool isConnected()`
+
+Checks if both circuits are connected with each other.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true if both circuites are connected with each other
+|===
 
 
 
