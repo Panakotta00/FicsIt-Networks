@@ -1,0 +1,1446 @@
+= Train API
+
+:description: The Vehicle API allows you to interact with trains, tracks, stations and railroad vehicles.
+
+The train api provides classes, functions, properties and structs that allow you to interact with differnt kinds of trains, tracks, stations and railroad vehicles.
+
+
+== TrainPlatform (extends Actor)
+
+This is the base type of all train platform buildings like the station, cargo platform or empty platform.
+
+=== Functions
+
+==== `TrackGraph getTrackGraph()`
+
+This functions returns the to the platform connected track graph.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|TrackGraph
+|TrackGraph
+|the connected track graph.
+|===
+
+==== `Track, offset, forward getTrackPos()`
+
+This functions allows you to get the position of the trainplatform on the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Track
+|RailroadTrack
+|the track build of the position.
+
+|offset
+|number
+|the offset of the position to the beginning of the track.
+
+|forward
+|number
+|the direction in which a vehicle would move forward relative to the beginning of the track.
+|===
+
+==== `TrainPlatform getConnectedPlatform(int dir)`
+
+This function returns the connected platform to the given direction.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|dir
+|int
+|the direction from where you want to get the connected platform.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|TrainPlatform
+|TrainPlatform
+|the connected platform in the given direction.
+|===
+
+==== `RailroadVehicle getDockedVehicle()`
+
+This functions returns the vehicle currently docked to the platform.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle
+|RailroadVehicle
+|the currently docked vehicle.
+|===
+
+==== `RailroadStation getMaster()`
+
+This function returns the master station of all connected platforms.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadStation
+|RailroadStation
+|the master of all connected platforms.
+|===
+
+==== `RailroadVehicle getDockedLocomotive()`
+
+This function returns the currently docked locomotive.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle
+|RailroadVehicle
+|The currently docked locomotive.
+|===
+
+=== Properties
+
+==== `int status (readonly)`
+
+The current docking status of the platform.
+
+==== `bool isReversed (readonly)`
+
+This function tells you if the platform is placed revesed in the train station configuration.
+
+== RailroadStation (extends TrainPlatform)
+
+This is a AFGthe master of a train station. This is p
+
+=== Properties
+
+==== `string name`
+
+The current name of the station.
+
+==== `number dockedOffset (readonly)`
+
+The offset of the docked vehicle to the docking center.
+
+== TrainPlatformCargo (extends TrainPlatform)
+
+This is the class of all cargo platforms.
+
+=== Properties
+
+==== `bool isLoading (readonly)`
+
+True if the platform is currently loading a train.
+
+==== `bool isUnloading (readonly)`
+
+True if the platform is currently unloading a train.
+
+==== `number dockedOffset (readonly)`
+
+The relative offset of the currently docked vehicle to the docking center.
+
+==== `number outputFlow (readonly)`
+
+The current output flow.
+
+==== `number inputFlow (readonly)`
+
+The current input flow.
+
+==== `bool fullLoad (readonly)`
+
+True if the plaform has fully loaded the docked vehicle.
+
+==== `bool fullUnload (readonly)`
+
+True if the platform has fully unloaded the docked vehicle.
+
+== RailroadVehicle (extends Vehicle)
+
+This is the base type of all vehicles you can place on a train track.
+
+=== Functions
+
+==== `Train getTrain()`
+
+This functions allows you to access the current train the vehicle is part of.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Train
+|Train
+|The train of the vehicle.
+|===
+
+==== `bool isCoupled(int dir)`
+
+This function allows you to check if the vehicle is coupled to another one based on the direction were you want to check.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|dir
+|int
+|The direction of the vehicle were you want to check if they are coupled.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the vehicle is docked to another one in the given direction.
+|===
+
+==== `RailroadVehicle getCoupled(int dir)`
+
+This function allows you to access the coupled vehicle in the given direction.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|dir
+|int
+|The direction in which you want to check the coupled vehicle.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle
+|RailroadVehicle
+|The coupled vehicle in the given direction.
+|===
+
+==== `TrackGraph getTrackGraph()`
+
+This function allows you to access the track where the vehicle is placed on.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|TrackGraph
+|TrackGraph
+|The track the vehicle is placed on.
+|===
+
+==== `Track, offset, forward getTrackPos()`
+
+This functions allows you to get the position of the vehicle on the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Track
+|RailroadTrack
+|the track build of the position.
+
+|offset
+|number
+|the offset of the position to the beginning of the track.
+
+|forward
+|number
+|the direction in which a vehicle would move forward relative to the beginning of the track.
+|===
+
+==== `RailroadVehicleMovement getMovement()`
+
+This function allows you to access the underlying movement component which controls all the movement of the vehicle.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicleMovement
+|RailroadVehicleMovement
+|The movement component of the vehicle.
+|===
+
+=== Properties
+
+==== `number length (readonly)`
+
+The length of the vehicle.
+
+==== `bool isDocked (readonly)`
+
+True if the vehicle is docked to a platform.
+
+==== `bool isReversed (readonly)`
+
+True if the vehicle is placed reverse onto the track.
+
+== RailroadVehicleMovement
+
+This representates the movement component of a RailroadVehicle which manages all the movement of such a vehicle.
+
+=== Functions
+
+==== `RailroadVehicle getVehicle()`
+
+Returns the railroad vehicle owning this movement component.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle
+|RailroadVehicle
+|The vehicle owning this movement component.
+|===
+
+==== `pitch, yaw, roll getWheelsetRotation(int idx)`
+
+Returns the rotation of the wheelset with the given index.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The index of the wheelset you want to get the rotation from.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|pitch
+|number
+|The pitch value of the rotation.
+
+|yaw
+|number
+|The yaw value of the rotation.
+
+|roll
+|number
+|The roll value of the rotation.
+|===
+
+==== `number getWheelsetOffset(int idx)`
+
+This functions allows you to get the offset of a wheelset.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The index of the wheelset you want to get the rotation from.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|number
+|number
+|The the offset of the wheelset.
+|===
+
+==== `x, y, z, ext getCoupler(int idx)`
+
+This function allows you to access the rotation and extension values of the coupler at the given index.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The index of the coupler you want to get the rotation and extension from.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|pitch
+|number
+|The pitch value of the rotation.
+
+|yaw
+|number
+|The yaw value of the rotation.
+
+|roll
+|number
+|The roll value of the rotation.
+
+|ext
+|number
+|The extenstion of the coupler.
+|===
+
+==== `number orientation (readonly)`
+
+The orientation of the vehicle.
+
+==== `number mass (readonly)`
+
+The mass of the vehicle.
+
+==== `number tareMass (readonly)`
+
+The tare mass of the vehicle.
+
+==== `number payloadMass (readonly)`
+
+The payload mass of the vehicle.
+
+==== `number speed (readonly)`
+
+The forward speed of the vehicle.
+
+==== `number relativeSpeed (readonly)`
+
+The relative forward speed of the vehicle.
+
+==== `number maxSpeed (readonly)`
+
+The max speed of the vehicle.
+
+==== `number gravitationalForce (readonly)`
+
+The gravitational force acting on the vehicle.
+
+==== `number tractiveForce (readonly)`
+
+The tractive force acting on the vehicle.
+
+==== `number resistiveForce (readonly)`
+
+The resistive force acting on the vehicle.
+
+==== `number gradientForce (readonly)`
+
+The gradient force acting on the vehicle caused by the slope of the track.
+
+==== `number brakingForce (readonly)`
+
+The braking force acting on the vehicle.
+
+==== `number dynamicBrakingForce (readonly)`
+
+The dynamic braking force acting on the vehicle.
+
+==== `number maxTractiveEffort (readonly)`
+
+The max tractive effort of the vehicle.
+
+==== `number maxDynamicBrakingEffort (readonly)`
+
+The max dynamic braking effort of the vehicle.
+
+==== `number maxAirBrakingEffort (readonly)`
+
+The max air brake effort of the vehicle.
+
+==== `number trackGrade (readonly)`
+
+The current slope of the track.
+
+==== `number trackCurvature (readonly)`
+
+The curvature of the track.
+
+==== `number wheelsetAngle (readonly)`
+
+The angle of the wheelsets.
+
+==== `number rollingResistance (readonly)`
+
+The rolling resistance of the vehicle.
+
+==== `number curvatureResistance (readonly)`
+
+The curveture resistance of the vehicle.
+
+==== `number airResistance (readonly)`
+
+The air resistance of the vehicle.
+
+==== `number gradientResistance (readonly)`
+
+The gradient resistance of the vehicle.
+
+==== `number wheelRotation (readonly)`
+
+The wheel rotation around the axle.
+
+==== `int numWheelsets (readonly)`
+
+The number of wheelsets attached to the vehicle.
+
+==== `bool isMoving (readonly)`
+
+True if the vehicle is moving.
+
+== Train (extends Actor)
+
+This is a combination of multiple vehicles which make then up a train.
+
+=== Functions
+
+==== `string getName()`
+
+This functions allows you to return the name of the train.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string
+|string
+|The name of the train.
+|===
+
+==== `setName(string name)`
+
+This function allows you to set the name of the train.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|name
+|string
+|The new name of the train.
+|===
+
+==== `TrackGraph getTrackGraph()`
+
+This function allows you to access the track graph on which the train moves on.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|TrackGraph
+|TrackGraph
+|The track graph on which the train moves on.
+|===
+
+==== `bool isSelfDriving()`
+
+This function allows you to check if the train is currently self driving.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the train is self driving.
+|===
+
+==== `setSelfDriving(bool selfDriving)`
+
+This function allows you to set if the train is self driving or not.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|selfDriving
+|bool
+|True if the train should be self driving.
+|===
+
+==== `RailroadVehicle getMaster()`
+
+This function returns the master vehicle of the train.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle
+|RailroadVehicle
+|The master vehivle of the train.
+|===
+
+==== `TimeTable getTimeTable()`
+
+This function return the currently used time table of the train.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|TimeTable
+|TimeTable
+|The currently used time table.
+|===
+
+==== `TimeTable newTimeTable()`
+
+This function returns the currently used time table of the train or creates a new one.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|TimeTable
+|TimeTable
+|The new time table of the train.
+|===
+
+==== `RailroadVehicle getFirst()`
+
+This function returns the vehicle at the front of the train.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle
+|RailroadVehicle
+|The vehicle at the fron of the train.
+|===
+
+==== `RailroadVehicle getLast()`
+
+This function returns the vehicle at the back of the train.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle
+|RailroadVehicle
+|This vehicle at the back of the train.
+|===
+
+==== `bool isPlayerDriven()`
+
+This function allows you to check if the train is player driven.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the train is player driven.
+|===
+
+==== `int getSelfDrivingError()`
+
+This function allows you to get what the current error of self driving is.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|The current self driving error.
+
+- `0` No Error
+- `1` No Power
+- `2` No Time Table
+- `3` Invalid Next Stop
+- `4` Invalid Locomotive Placement
+- `5` No Path
+|===
+
+==== `dock()`
+
+This functions docks the train to station he is located in.
+
+==== `RailroadVehicle[] getVehicles()`
+
+This function returns all vehicles which are part of this train.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadVehicle[]
+|RailroadVehicle[]
+|Array of connected vehicles.
+|===
+
+=== Properties
+
+==== `bool hasTimeTable (readonly)`
+
+True if the train has a valid time table.
+
+==== `int dockState (readonly)`
+
+The current docking state of the train.
+
+- `0` None
+- `1` Ready to dock
+- `2` Docked
+
+==== `bool isDocked (readonly)`
+
+True if the train is currently docked.
+
+== TimeTable
+
+This is a time table of a train.
+
+=== Functions
+
+==== `bool addStop(int idx, RailroadStation station, number duration)`
+
+This function allows you to add a stop to the time table at the given position in the time tabel
+for the given station and the given amount of time needed to pass until the train will continue to the next station.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The position in the time table were you want to insert the stop.
+
+|station
+|RailroadStation
+|The station at which the train should stop.
+
+|duration
+|number
+|The amount of time needed to pass until the train will continue.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if able to add the stop.
+|===
+
+==== `removeStop(int idx)`
+
+This function allows you to remove the stop at the given position from the time table.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The position of the stop in the timetable which you want to remove.
+|===
+
+==== `stops getStops()`
+
+This functions allows you to get all the stops of the time table at once.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|stops
+|TimeTableStop[]
+|A array of time table stops.
+|===
+
+==== `bool setStops(stops)`
+
+This function allows you to set all the stops of the time table at once.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|stops
+|TimeTableStop[]
+|A array of time table stops.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if able to set the stops.
+|===
+
+==== `bool isValidStop(int idx)`
+
+This function allows you to check if the stop at the given index is valid.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The position of the stop in the table.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if the stop is valid.
+|===
+
+==== `stop getStop(int idx)`
+
+This function allows you to access the stop at the given table position.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The position of the stop you want to get.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|stop
+|TimeTableStop
+|The time table stop at the given position.
+|===
+
+==== `setCurrentStop(int idx)`
+
+This function sets the stop which the train targets next.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The position of the stop the train should next head to.
+|===
+
+==== `int getCurrentStops()`
+
+This function allows you to access the stop the train is currently heading to.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|The position of the stop the train is currently heading to.
+|===
+
+=== Properties
+
+==== `int numStops (readonly)`
+
+The amount of stops in the time table.
+
+== RailroadTrack (extends Actor)
+
+This type represents a single track you place on the ground.
+
+=== Functions
+
+==== `RailroadTrack, offset, forward getClosestTrackPosition(number x, number y, number z)`
+
+This function allow you to find the closest track position from the given world location.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|number
+|The x value of your desired search location.
+
+|y
+|number
+|The y value of your desired search location.
+
+|z
+|number
+|The z value of your desired search location.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrack
+|RailroadTrack
+|The nearest track to the location.
+
+|offset
+|number
+|The offset of the track position relative to the beginning of the track.
+
+|forward
+|number
+|The forward direction relative to the beginning of the track.
+|===
+
+==== `x, y, z, nx, ny, nz getWorldLocAndRotAtPos(RailroadTrack track, number offset, number forward)`
+
+This function allows you to get the world transformation and the normal vector of the track spline at the given track position.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrack
+|RailroadTrack
+|The track of the location.
+
+|offset
+|number
+|The offset of the track position relative to the beginning of the track.
+
+|forward
+|number
+|The forward direction relative to the beginning of the track.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|number
+|The x value of the world location at the given track position.
+
+|y
+|number
+|The y value of the world location at the given track position.
+
+|z
+|number
+|The z value of the world location at the given track position.
+
+|nx
+|number
+|The x value of the normal vector at the given track position.
+
+|ny
+|number
+|The y value of the normal vector at the given track position.
+
+|nz
+|number
+|The z value of the normal vector at the given track position.
+|===
+
+==== `RailroadTrackConnection getConnection(int idx)`
+
+The railroad track connection at the given index.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|idx
+|The index of the connection you want to get.
+
+- `0` Front connection
+- `1` Back connection
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrackConnection
+|RailroadTrackConnection
+|The connection component of the track at the given index.
+|===
+
+==== `TrackGraph getTrackGraph()`
+
+This functions returns the to the track graph the track is part of.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|TrackGraph
+|TrackGraph
+|The track graph the track is part of.
+|===
+
+=== Properties
+
+==== `number length (readonly)`
+
+The length of the track.
+
+==== `bool isOwnedByPlatform (readonly)`
+
+True if the track is owned by a platform.
+
+== RailroadTrackConnection
+
+This type represents the component that allows to connect multiple track to each other and so build a track network.
+
+=== Functions
+
+==== `x, y, z getConnectorLocation()`
+
+This function returns the world location of the track connector.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|x
+|number
+|The x value of the connectors world location.
+
+|y
+|number
+|The y value of the connectors world location.
+
+|z
+|number
+|The z value of the connectors world location.
+|===
+
+==== `nx, ny, nz getConnectorNormal()`
+
+This function returns the normal vector of the track connector.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|nx
+|number
+|The x value of the connectors normal vector.
+
+|ny
+|number
+|The y value of the connectors normal vector.
+
+|nz
+|number
+|The z value of the connectors normal vector.
+|===
+
+==== `RailroadTrackConnection getConnection([int idx])`
+
+This function allows you to access the connected connectors.
+If no idx is given, it will return the connector of the current switch state.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int (optional)
+|The index of the connection you want to get. Dont provide it if you want to get the connector of where the switch switched to.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrackConnection
+|RailroadTrackConnection
+|The connected railroad track connection you want to get. Nil if invalid index or nothing is connected.
+|===
+
+==== `trackconnections getConnections()`
+
+This functions returns a list of all connected track connectors.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|trackconnections
+|RailroadTrackConnection[]
+|A array of track connectors which are connected to this connector.
+|===
+
+==== `RailroadTrack, offset, forward getTrackPosition()`
+
+This function returns the track position of the connector.
+Returns nil if the track position is invalid.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrack
+|RailroadTrack
+|The track of the location.
+
+|offset
+|number
+|The offset of the track position relative to the beginning of the track.
+
+|forward
+|number
+|The forward direction relative to the beginning of the track.
+|===
+
+==== `RailroadTrack getTrack()`
+
+This function allows you to access the track of the railroad track connection.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrack
+|RailroadTrack
+|The track which holds this connector.
+|===
+
+==== `RailroadSwitchControl getSwitchControl()`
+
+This function returns the attached switch controller of this connection.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadSwitchControl
+|RailroadSwitchControl
+|The attached switch controller of this connection. Nil if none is attached.
+|===
+
+==== `RailroadStation getStation()`
+
+This function returns the attached station of this connection.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadStation
+|RailroadStation
+|The attached railroad station of this connection. Nil if none is attached.
+|===
+
+==== `RailroadSignal getSignal()`
+
+This function returns the attached railroad signal of this connection.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadSignal
+|RailroadSignal
+|The attached railroad signal of this connection. Nil if none is attached.
+|===
+
+==== `RailroadTrackConnection getOpposite()`
+
+This function returns the track connector of the other side of the track.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrackConnection
+|RailroadTrackConnection
+|The track connector of the other side of the track.
+|===
+
+==== `RailroadTrackConnection getNext()`
+
+This function returns the next track connection considering the switches position.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadTrackConnection
+|RailroadTrackConnection
+|The track connector of the next the following track.
+|===
+
+==== `setSwitchPosition(int idx | RailroadTrack track)`
+
+This function sets the connectors switch position to the index of connector **or** the connector connected to the given track.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|idx
+|int
+|The index of the track connector you want to switch to.
+
+|RailroadTrack
+|RailroadTrack
+|The track you want to switch to.
+|===
+
+==== `int getSwitchPosition()`
+
+This function returns the current selected switch position.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|True current selected switch position.
+|===
+
+=== Properties
+
+==== `bool isConnected (readonly)`
+
+True if the connector is connected to another connector.
+
+==== `bool isFacingSwitch (readonly)`
+
+True if the connection is facing the switch.
+If a train comes from the track this connection is part of, it can take one of multiple routes.
+
+==== `bool isTrailingSwitch (readonly)`
+
+True if the connection is trailing the switch.
+If a train comes from the track this connectin is part of, if moves over a switch, but multiple tracks merge here to one.
+
+==== `int numSwitchPositions (readonly)`
+
+The count of posible switch positions.
+
+== RailroadSwitchControl (extends Factory)
+
+This type represents a switch controler.
+
+=== Functions
+
+==== `toggleSwitch()`
+
+This function switches once through the attached connections.
+
+=== Properties
+
+==== `int switchPosition (readonly)`
+
+The currently selected switch position.
+
+== TimeTableStop
+
+This is a **structure** holding information about a time table stop.
+
+=== Fields
+
+==== `RailroadStation station`
+
+This field holds the station where the train should stop.
+
+==== `number duration`
+
+This field holds the amount of time needed to pass until the train will head to the next stop.
+
+== TrackGraph
+
+This is a **structure** representing a collection of connected train tracks.
+
+=== Member Functions
+
+==== `RailroadStation[] getStations()`
+
+This function returns a list of all the stations connected via the track graph.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|RailroadStation[]
+|RailroadStation[]
+|A array with all the connected railroad stations.
+|===
+
+==== `Train[] getTrains()`
+
+This function returns a list of all the trains moving in the track graph.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Train[]
+|Train[]
+|A array with all the trains mocing ont the trackgraph.
+|===
+
+
+
+
+include::partial$api_footer.adoc[]

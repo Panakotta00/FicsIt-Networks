@@ -24,4 +24,6 @@ xref:buildings/PowerController.adoc[Power Controller]
 xref:buildings/Speakers.adoc[Speakers]
 -
 xref:buildings/Splitter.adoc[Splitter]
+-
+xref:buildings/VehicleScanner.adoc[Vehicle Scanner]
 ====

@@ -59,3 +59,11 @@ the id of the component.
 
 The instance can also have function allowing you to call subroutines. These function can have multiple input and output values.
 To access such a member function you need to use the `:` member access operator or pass the instance as the first argument to the function.
+
+== Lua Structs
+
+Lua Structs work like a Lua Table with a special metatable attached.
+Those Lua Structs just allow for a way simpler data management and are not required to be referenced to a object in the unreal reflection system.
+Through that we can easily create and remove Lua Structs on the fly.
+With that said, some Lua Structs can be implicitly constructed from a normal lua table which simply fullfills the criteria the struct gives
+so it can be implicitly converted to such an struct when used in function parameters or write actions on properties.
