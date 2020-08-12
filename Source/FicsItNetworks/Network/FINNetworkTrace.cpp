@@ -12,6 +12,7 @@
 #include "FGRailroadVehicle.h"
 #include "FGRailroadVehicleMovementComponent.h"
 #include "FGTrain.h"
+#include "FGBuildableDockingStation.h"
 
 #include "Components/FINVehicleScanner.h"
 
@@ -381,6 +382,13 @@ Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadStation, {
 })
 Step(AFGBuildableRailroadStation, UFGRailroadTrackConnectionComponent, {
     return A = B->GetStation();
+})
+
+Step(AFGVehicle, AFGBuildableDockingStation, {
+	return false;
+})
+Step(AFGBuildableDockingStation, AFGVehicle, {
+	return false;
 })
 
 Step(AFGVehicle, AFINVehicleScanner, {
