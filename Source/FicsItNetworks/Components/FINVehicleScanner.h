@@ -63,6 +63,9 @@ public:
 	void netFunc_setColor(float r, float g, float b, float e);
 
 	UFUNCTION()
+    void netFunc_getColor(float& r, float& g, float& b, float& e);
+
+	UFUNCTION()
 	AFGVehicle* netFunc_getLastVehicle();
 
 	UFUNCTION(BlueprintNativeEvent)

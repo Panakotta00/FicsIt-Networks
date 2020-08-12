@@ -93,6 +93,13 @@ void AFINVehicleScanner::netFunc_setColor(float r, float g, float b, float e) {
 	bColorChanged = true;
 }
 
+void AFINVehicleScanner::netFunc_getColor(float& r, float& g, float& b, float& e) {
+	r = ScanColor.R;
+	g = ScanColor.G;
+	b = ScanColor.B;
+	e = Intensity;
+}
+
 AFGVehicle* AFINVehicleScanner::netFunc_getLastVehicle() {
 	return LastVehicle;
 }

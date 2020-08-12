@@ -557,11 +557,6 @@ namespace FicsItKernel {
 
 		LuaLibTypeDecl(AFGVehicle, Vehicle)
 		
-		LuaLibFunc(AFGVehicle, getController, {
-			newInstance(L, obj / self->GetController());
-			return 1;
-		})
-
 		LuaLibPropReadonlyNum(AFGVehicle, health, GetHealthComponent()->GetCurrentHealth())
 		LuaLibPropReadonlyNum(AFGVehicle, maxHealth, GetHealthComponent()->GetMaxHealth())
 		LuaLibProp(AFGVehicle, isSelfDriving, {
@@ -648,14 +643,14 @@ namespace FicsItKernel {
             if (!Target) luaL_argerror(L, 2, "index out of range");
             List->RemoveItem(Target);
 			Target->Destroy();
-            return 1;
+            return 0;
         })
 
 		LuaLibFunc(AFGWheeledVehicle, addTarget, {
             AFGTargetPoint* Target = luaGetStruct<FFINTargetPoint>(L, 2).ToWheeledTargetPoint(self);
             if (!Target) luaL_argerror(L, 2, "failed to create target");
             self->GetTargetNodeLinkedList()->InsertItem(Target);
-            return 1;
+            return 0;
         })
 
 		LuaLibFunc(AFGWheeledVehicle, setTarget, {
@@ -670,12 +665,12 @@ namespace FicsItKernel {
 			Target->SetTargetSpeed(NewData.Speed);
 			Target->SetWaitTime(NewData.Wait);
 			
-            return 1;
+            return 0;
         })
 
 		LuaLibFunc(AFGWheeledVehicle, clearTargets, {
             self->GetTargetNodeLinkedList()->ClearRecording();
-            return 1;
+            return 0;
         })
 
 		LuaLibFunc(AFGWheeledVehicle, getTargets, {
@@ -701,7 +696,7 @@ namespace FicsItKernel {
 			    lua_pop(L, 1);
 			}
 			luaStruct(L, FFINVehicleSetTargets(self, Targets));
-			return 1;
+			return 0;
         })
 
 		LuaLibPropReadonlyNum(AFGWheeledVehicle, speed, GetForwardSpeed())
