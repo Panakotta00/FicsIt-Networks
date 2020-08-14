@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include "util/Logging.h"
+
 using namespace std;
 using namespace FileSystem;
 namespace filesystem = std::experimental::filesystem;

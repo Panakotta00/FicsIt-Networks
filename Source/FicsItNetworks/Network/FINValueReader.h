@@ -39,6 +39,10 @@ public:
 
 	/** Writes any kind of struct to the value reader */
 	virtual void operator<<(const FINStruct& Struct) = 0;
+
+	virtual void operator<<(UObject* Obj) {
+		*this << FWeakObjectPtr(Obj);
+	}
 };
 
 class FFINVoidValueReader : public FFINValueReader {

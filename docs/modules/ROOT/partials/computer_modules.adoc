@@ -3,6 +3,8 @@ Computer Modules::
 ====
 xref:buildings/ComputerCase/DriveHolder.adoc[Drive Holder]
 -
+xref:buildings/ComputerCase/GPU.adoc[GPU Base]
+-
 xref:buildings/ComputerCase/GPUT1.adoc[GPU T1]
 -
 xref:buildings/ComputerCase/NetworkCard.adoc[Network Card]

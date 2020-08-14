@@ -99,9 +99,11 @@ void AFINIndicatorPole::netFunc_getColor(float& r, float& g, float& b, float& e)
 void AFINIndicatorPole::netSig_ColorChanged(float r, float g, float b, float e) {}
 
 AFINIndicatorPole* AFINIndicatorPole::netFunc_getTopPole() {
-	return TopConnected.Get();
+	if (!IsValid(TopConnected)) TopConnected = nullptr;
+	return TopConnected;
 }
 
 AFINIndicatorPole* AFINIndicatorPole::netFunc_getBottomPole() {
-	return BottomConnected.Get();
+	if (!IsValid(BottomConnected)) BottomConnected = nullptr;
+	return BottomConnected;
 }

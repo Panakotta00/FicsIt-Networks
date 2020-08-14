@@ -9,15 +9,11 @@ xref:lua/api/Computer.adoc[Computer]
 -
 xref:lua/api/FileSystem.adoc[FileSystem]
 -
-xref:lua/api/GPU.adoc[GPU]
--
 xref:lua/api/Inventory.adoc[Inventory]
 -
 xref:lua/api/Power.adoc[Power]
 -
-xref:lua/api/PowerController.adoc[PowerController]
+xref:lua/api/Train.adoc[Train]
 -
-xref:lua/api/Speaker.adoc[Speaker]
--
-xref:lua/api/Splitter.adoc[Splitter]
+xref:lua/api/Vehicle.adoc[Vehicle]
 ====

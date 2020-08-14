@@ -29,9 +29,14 @@ Path::Path(string oPath) {
 			s = oPath;
 			oPath = "";
 		}
-		if (s == "..") path.pop_back();
-		else if (s != ".") path.push_back(s);
+		if (s == "..") {
+			if (path.size() > 0) path.pop_back();
+		} else if (s != ".") path.push_back(s);
 	} while (oPath.length() > 0);
+}
+
+Path::Path(NodeName node) {
+	path.push_back(node);
 }
 
 string Path::getRoot() const {

@@ -1,0 +1,77 @@
+= GPU Base
+:description: This computer module is the base for a GPU that allows to render things to screens.
+
+[cols="1,3"]
+|===
+|Building Type
+|Computer Module
+|===
+
+This is the base type of all GPUs.
+
+The GPU allows you to render graphics which can then be displayed by a Screen.
+For that a GPU needs to get bound to a screen and vice versa.
+You can only bind one GPU to one screen and vice versa at the same time.
+
+A screen doesn't influence the functionality of rendering but a screen
+might take effect on how it get displayed like some weird colors or
+if it gets rendered in the world or just as a UI element.
+
+Because the GPUs rendering processes might vary, they might have
+different functions and signals provided.
+But there are a couple which are implemented by every GPU.
+
+== Functions
+
+=== `bindScreen(Screen screen)`
+
+This function binds the gpu to the given screen.
+If the gpu is already bound to a screen, the old bound will get destroyed.
+If the screen is nil, the gpu will just unbind from the current bound screen.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|screen
+|Screen
+|the screen you want to bind to
+|===
+
+=== `Screen getScreen()`
+
+This function allows you to access the currently bound screen of the gpu.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Screen
+|Screen
+|the currently bound screen of the gpu. Nil if not screen is bound.
+|===
+
+== Signals
+
+=== `ScreenBound(Scrren oldScreen)`
+
+This signal gets emitted when a new screen gets bound to the gpu.
+
+Paramteres::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|oldScreen
+|Screen
+|the previously to the gpu bound screen.
+|===
+
+
+
+include::partial$computer_modules_footer.adoc[]

@@ -269,7 +269,6 @@ namespace FicsItKernel {
 			
 			LuaLibFunc func;
 			if (reg->findLibFunc(type, funcName, func)) {
-				lua_remove(L, 1);
 				int args = func(L, lua_gettop(L), instance);
 				return LuaProcessor::luaAPIReturn(L, args);
 			}
@@ -296,8 +295,12 @@ namespace FicsItKernel {
 				if (!comp->GetClass()->IsChildOf(funcClass)) return luaL_argerror(L, 1, "Instance type is not allowed to call this function");;
 				
 				// allocate parameter space
-				void* params = FMemory::Malloc(func->ParmsSize);
+				uint8* params = (uint8*)FMemory::Malloc(func->PropertiesSize);
+				FMemory::Memzero(params + func->ParmsSize, func->PropertiesSize - func->ParmsSize);
 				func->InitializeStruct(params);
+				for (UProperty* LocalProp = func->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
+					LocalProp->InitializeValue_InContainer(params);
+				}
 	
 				// init and set parameter values
 				int i = 2;
@@ -320,7 +323,11 @@ namespace FicsItKernel {
 							try {
 								luaToProperty(L, *property, params, i++);
 							} catch (std::exception e) {
-								func->DestroyStruct(params);
+								for (UProperty* P = func->DestructorLink; P; P = P->DestructorLinkNext) {
+									if (!P->IsInContainer(func->ParmsSize)) {
+										P->DestroyValue_InContainer(params);
+									}
+								}
 								FMemory::Free(params);
 								return luaL_error(L, ("Argument #" + std::to_string(i) + " is not of type " + e.what()).c_str());
 							}
@@ -344,7 +351,11 @@ namespace FicsItKernel {
 					}
 				}
 				
-				func->DestroyStruct(params);
+				for (UProperty* P = func->DestructorLink; P; P = P->DestructorLinkNext) {
+					if (!P->IsInContainer(func->ParmsSize)) {
+						P->DestroyValue_InContainer(params);
+					}
+				}
 				FMemory::Free(params);
 				
 				return LuaProcessor::luaAPIReturn(L, retargs);
@@ -418,7 +429,7 @@ namespace FicsItKernel {
 
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// Instance, FuncName, InstanceCache
-			if (lua_getfield(L, -1, memberName.c_str()) != LUA_TNIL) {												// Instance, FuncName, InstanceCache, CachedFunc
+			if (lua_getfield(L, -1, (typeName + "_" + memberName).c_str()) != LUA_TNIL) {						// Instance, FuncName, InstanceCache, CachedFunc
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}																											// Instance, FuncName, InstanceCache, nil
 			
@@ -436,7 +447,7 @@ namespace FicsItKernel {
 
 				// cache function
 				lua_pushvalue(L, -1);																				// Instance, FuncName, InstanceCache, nil, InstanceFunc, InstanceFunc
-				lua_setfield(L, 3, memberName.c_str());															// Instance, FuncName, InstanceCache, nil, InstanceFunc
+				lua_setfield(L, 3, (typeName + "_" + memberName).c_str());										// Instance, FuncName, InstanceCache, nil, InstanceFunc
 
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -485,8 +496,6 @@ namespace FicsItKernel {
 			}
 			if (foundLibProp) {
 				if (libProp.readOnly) return luaL_error(L, "property is read only");
-				lua_remove(L, 1);
-				lua_remove(L, 1);
 				return LuaProcessor::luaAPIReturn(L, libProp.set(L, realTrace));
 			}
 			

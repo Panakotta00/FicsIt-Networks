@@ -64,6 +64,7 @@ namespace FicsItKernel {
 		TSet<FWeakObjectPtr> gpus;
 		TSet<FWeakObjectPtr> screens;
 		std::queue<TSharedPtr<TFINDynamicStruct<FFINFuture>>> futureQueue;
+		std::chrono::time_point<std::chrono::high_resolution_clock> systemResetTimePoint;
 		
 	public:
 		/**
@@ -290,6 +291,13 @@ namespace FicsItKernel {
 		* @return list of added screen
 		*/
 		TSet<UObject*> getScreens();
+
+		/**
+		 * Returns the amount of milliseconds passed since the system started.
+		 *
+		 * @return	amount of milliseconds since system start
+		 */
+		int64 getTimeSinceStart() const;
 		
 		/**
 		 * Recalculates the given system components resource usage like memory.

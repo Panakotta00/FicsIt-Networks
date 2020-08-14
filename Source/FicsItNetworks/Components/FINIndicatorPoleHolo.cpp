@@ -76,7 +76,7 @@ AActor* AFINIndicatorPoleHolo::Construct(TArray<AActor*>& out_children, FNetCons
 	a->SetBuiltWithRecipe(GetRecipe());
 	a->Height = GetHeight(GetActorLocation());
 	if (SnappedPole.IsValid()) {
-		a->BottomConnected = SnappedPole;
+		a->BottomConnected = SnappedPole.Get();
 		SnappedPole->TopConnected = a;
 	}
 
@@ -99,7 +99,7 @@ void AFINIndicatorPoleHolo::CheckValidFloor() {
 bool AFINIndicatorPoleHolo::TrySnapToActor(const FHitResult& hitResult) {
 	if (!bSnapped) {
 		AFINIndicatorPole* Pole = Cast<AFINIndicatorPole>(hitResult.Actor.Get());
-		if (Pole && !Pole->TopConnected.IsValid()) {
+		if (Pole && !IsValid(Pole->TopConnected)) {
 			SnappedPole = Pole;
 			SetActorLocation(Pole->GetActorLocation() + FVector(0,0,300));
 			return true;

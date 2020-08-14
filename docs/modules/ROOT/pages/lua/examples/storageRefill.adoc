@@ -66,14 +66,14 @@ while true do
  if e == "ItemTransfer" then
   for connector, container in pairs(connectors) do
    if connector == sender and containerBuffer[container] then
-    containerBuffer[connector] = containerBuffer[container] - 1
+    containerBuffer[container] = containerBuffer[container] - 1
    end
   end
  else
   for _,splitter in pairs(splitters) do
    if splitter:getInput() then
     local container = splitterContainers[splitter]
-    if containerBuffer[container] + containerInvs[container]:getItemCount() < containerMax[container] then
+    if containerBuffer[container] + containerInvs[container].ItemCount < containerMax[container] then
      if splitter:transferItem(0) then
       containerBuffer[container] = containerBuffer[container] + 1
      end

@@ -21,6 +21,11 @@ namespace FicsItKernel {
 			virtual bool isValid() const override;
 			// End FileSystem::Node
 
+			/**
+			 * Clears the stream list from unused streams
+			 */
+			void clearStreams();
+
 			/*
 			* returns the size of the content of this file
 			*

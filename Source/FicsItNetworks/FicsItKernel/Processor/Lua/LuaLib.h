@@ -10,6 +10,7 @@
 #include "mod/hooking.h"
 #include "Network/FINFuture.h"
 #include "Network/Signals/FINSmartSignal.h"
+#include "Utils/FINTargetPoint.h"
 
 
 #include "LuaLib.generated.h"
@@ -181,4 +182,21 @@ struct FFINManufacturerSetRecipeFuture : public FFINFutureSimpleDone {
 		Reader << bGotSet;
 		return 1;
 	}
+};
+
+USTRUCT()
+struct FFINVehicleSetTargets : public FFINFutureSimpleDone {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	AFGWheeledVehicle* Vehicle;
+
+	UPROPERTY(SaveGame)
+	TArray<FFINTargetPoint> Targets;
+
+	FFINVehicleSetTargets() = default;
+	FFINVehicleSetTargets(AFGWheeledVehicle* Vehicle, const TArray<FFINTargetPoint>& Targets) : Vehicle(Vehicle), Targets(Targets) {}
+
+	virtual void Execute() override;
+	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
 };

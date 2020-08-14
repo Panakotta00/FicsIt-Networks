@@ -14,6 +14,7 @@
 
 #include "FINStateEEPROMLua.h"
 #include "LuaDebugAPI.h"
+#include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkTrace.h"
 
 #include "SML/util/Logging.h"
@@ -217,7 +218,7 @@ namespace FicsItKernel {
 			}
 			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->Code), eeprom->Code.Len());
 			luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
-			
+
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
 			// TODO: Check if we actually want to use this or the manual gc call
 		}
@@ -372,7 +373,7 @@ namespace FicsItKernel {
 				ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(Storage);
 				
 				reset();
-				
+
 				// save pull state
 				pullState = Data->PullState;
 				timeout = Data->Timeout;
@@ -582,7 +583,10 @@ namespace FicsItKernel {
 			if (!signal.GetData()) return 0;
 			int props = 2;
 			lua_pushstring(L, TCHAR_TO_UTF8(*signal->GetName()));
-			newInstance(L, sender);
+			UObject* Obj = *sender;
+			if (Obj && Obj->Implements<UFINNetworkComponent>()) sender = sender / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+			else Obj = nullptr;
+			newInstance(L, sender, Obj);
 			LuaValueReader reader(L);
 			props += signal.Get<FFINSignal>() >> reader;
 			return props;

@@ -13,14 +13,6 @@
 typedef TFunction<bool(UObject*, UObject*)> FFINTraceStep;
 
 /**
-* Used for the extension of a trace to also pass a custom trace step
-*/
-typedef TPair<UObject*, TSharedPtr<FFINTraceStep>> FFINObjTraceStepPtr;
-inline FFINObjTraceStepPtr ObjTraceStep(UObject* obj, FFINTraceStep step) {
-	return FFINObjTraceStepPtr(obj, MakeShared<FFINTraceStep>(step));
-}
-
-/**
  * Tracks the access of a object through the network.
  * Allows a later check if the object is still reachable
  */
@@ -32,21 +24,21 @@ struct FICSITNETWORKS_API FFINNetworkTrace {
 
 private:
 	TSharedPtr<FFINNetworkTrace> Prev = nullptr;
-	TSharedPtr<FFINTraceStep> Step = nullptr;
+	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
 	TWeakObjectPtr<UObject> Obj = nullptr;
 
 public:
-	static TSharedPtr<FFINTraceStep> fallbackTraceStep;
+	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> fallbackTraceStep;
 	static TArray<TPair<TPair<UClass*, UClass*>, TPair<FString, FFINTraceStep*>>(*)()> toRegister;
-	static TMap<FString, TSharedPtr<FFINTraceStep>> traceStepRegistry;
-	static TMap<TSharedPtr<FFINTraceStep>, FString> inverseTraceStepRegistry;
-	static TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep>>, TMap<UClass*, TSharedPtr<FFINTraceStep>>>> traceStepMap;
-	static TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep>>, TMap<UClass*, TSharedPtr<FFINTraceStep>>>> interfaceTraceStepMap;
+	static TMap<FString, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>> traceStepRegistry;
+	static TMap<TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>, FString> inverseTraceStepRegistry;
+	static TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>, TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>>> traceStepMap;
+	static TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>, TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>>> interfaceTraceStepMap;
 
 	/**
 	* Trys to find the most suitable trace step of for both given classes
 	*/
-	static TSharedPtr<FFINTraceStep> findTraceStep(UClass* A, UClass* B);
+	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> findTraceStep(UClass* A, UClass* B);
 	
 	FFINNetworkTrace(const FFINNetworkTrace& trace);
 	FFINNetworkTrace& operator=(const FFINNetworkTrace& trace);
@@ -65,11 +57,6 @@ public:
 	 * @return the copied and expanded network trace
 	 */
 	FFINNetworkTrace operator/(UObject* other) const;
-
-	/**
-	 * Creates a copy of this network trace appends the given object and uses the given trace step for validation.
-	 */
-	FFINNetworkTrace operator/(FFINObjTraceStepPtr other);
 
 	/**
 	 * Returns the referenced object.
@@ -137,3 +124,12 @@ inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
 FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& Trace) {
 	return GetTypeHash(Trace.GetUnderlyingPtr());
 }
+
+template<>
+struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace>
+{
+	enum
+	{
+		WithSerializer = true,
+    };
+};

@@ -204,6 +204,7 @@ namespace FicsItKernel {
 			return lua_gettop(L) - 1;
 		}
 
+#pragma optimize("", off)
 		LuaFunc(doFile, {
 			FileSystem::Path path = luaL_checkstring(L, 1);
 			FileSystem::SRef<FileSystem::FileStream> file;
@@ -219,7 +220,7 @@ namespace FicsItKernel {
 				file->close();
 			} CatchExceptionLua
 			int n = lua_gettop(L) - 1;
-			luaL_loadbuffer(L, code.c_str(), code.size(), ("@" + path.str()).c_str());
+			luaL_loadbufferx(L, code.c_str(), code.size(), ("@" + path.str()).c_str(), "t");
 			lua_callk(L, 0, LUA_MULTRET, 0, luaDoFileCont);
 			return luaDoFileCont(L, 0, 0);
 		})
@@ -240,9 +241,10 @@ namespace FicsItKernel {
 			} CatchExceptionLua
 			
 			int n = lua_gettop(L) - 1;
-			luaL_loadbuffer(L, code.c_str(), code.size(), ("@" + path.str()).c_str());
+			luaL_loadbufferx(L, code.c_str(), code.size(), ("@" + path.str()).c_str(), "t");
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})
+#pragma optimize("", on)
 
 		static const luaL_Reg luaFileSystemLib[] = {
 			{"makeFileSystem", makeFileSystem},

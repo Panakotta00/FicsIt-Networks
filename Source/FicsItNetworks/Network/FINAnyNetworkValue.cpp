@@ -47,6 +47,7 @@ FFINAnyNetworkValue::FFINAnyNetworkValue(const FFINAnyNetworkValue& other) {
 }
 
 FFINAnyNetworkValue& FFINAnyNetworkValue::operator=(const FFINAnyNetworkValue& other) {
+	this->~FFINAnyNetworkValue();
 	Type = other.Type;
 	switch (Type) {
 	case FIN_STR:

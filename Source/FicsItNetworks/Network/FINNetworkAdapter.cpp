@@ -38,6 +38,7 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	ConnectorMesh->SetHiddenInGameSML(true, true);
 	ConnectorMesh->SetupAttachment(RootComponent);
 	ConnectorMesh->SetMobility(EComponentMobility::Type::Movable);
+	ConnectorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Connector->MaxCables = 1;
 }

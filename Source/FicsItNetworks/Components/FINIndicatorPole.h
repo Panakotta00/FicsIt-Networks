@@ -13,10 +13,10 @@ class AFINIndicatorPole : public AFGBuildable, public IFINNetworkCustomType {
 	
 public:
 	UPROPERTY(SaveGame)
-	TWeakObjectPtr<AFINIndicatorPole> TopConnected = nullptr;
+	AFINIndicatorPole* TopConnected = nullptr;
 
 	UPROPERTY(SaveGame)
-	TWeakObjectPtr<AFINIndicatorPole> BottomConnected = nullptr;
+	AFINIndicatorPole* BottomConnected = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, SaveGame)
 	int Height = 0;

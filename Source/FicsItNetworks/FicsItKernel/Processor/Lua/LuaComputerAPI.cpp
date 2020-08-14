@@ -9,7 +9,8 @@
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
-	KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel();
+	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
+	KernelSystem* kernel = processor->getKernel();
 
 
 namespace FicsItKernel {
@@ -76,7 +77,12 @@ namespace FicsItKernel {
 			lua_pushnumber(L, subsys->GetPassedDays() * 86400 + subsys->GetDaySeconds());
 			return 1;
 		}
-
+		
+		LuaFunc(luaComputerMillis)
+			lua_pushinteger(L, kernel->getTimeSinceStart());
+			return 1;
+		}
+		
 		LuaFunc(luaComputerGPUs)
 			lua_newtable(L);
 			int i = 1;
@@ -107,6 +113,7 @@ namespace FicsItKernel {
 			{"setEEPROM", luaComputerSetEEPROM},
 			{"getEEPROM", luaComputerGetEEPROM},
 			{"time", luaComputerTime},
+			{"millis", luaComputerMillis},
 			{"getGPUs", luaComputerGPUs},
 			{"getScreens", luaComputerScreens},
 			{NULL,NULL}

@@ -22,7 +22,7 @@ public:
 	UPROPERTY()
 	UInputComponent* Input;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, BlueprintReadOnly)
 	TEnumAsByte<EFINCustomVersion> Version = EFINCustomVersion::FINBeforeCustomVersionWasAdded;
 
 	AFINComputerSubsystem();
