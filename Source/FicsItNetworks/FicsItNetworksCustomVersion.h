@@ -1,11 +1,11 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Misc/Guid.h"
 #include "FicsItNetworksCustomVersion.generated.h"
 
 
-UENUM()
+UENUM(BlueprintType)
 enum EFINCustomVersion {
 	// Before any version changes were made
 	FINBeforeCustomVersionWasAdded = 0,

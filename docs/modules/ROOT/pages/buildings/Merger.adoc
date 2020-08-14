@@ -1,0 +1,37 @@
+= Codeable Merger
+:description: The codeable merger allows for custom item flow control.
+
+[cols="1,3a"]
+|===
+|Buildingtype
+|buildable network component
+
+|Factory Connectors
+| 1x Conveyor Output & 3x Conveyor Input
+
+|Max Network Connections
+|2
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |Ingame
+
+|image::buildings/Merger_bg.png[300,300,role="left"]
+|image::buildings/Merger_ig.jpg[300,300,role="left"]
+|===
+
+The merger allows you to control the flow of items.
+
+It has one output queue that can be filled from the input to up to two items.
+Those get then transfered to the conveyor at the output connector.
+
+You can transfer items from on of the inputs to the output if the given input has a item and the output queue has fewer than two items.
+
+Each input queue gets automaticaly filled by the attached conveyor with up to two values.
+You can then decide for each input when the first item in the queue get transfered to the output.
+
+
+
+
+include::partial$building_footer.adoc[]

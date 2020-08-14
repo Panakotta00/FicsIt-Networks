@@ -11,9 +11,6 @@
 
 |Max Network Connections
 |2
-
-|APIs
-|xref:lua/api/Splitter.adoc[Splitter API]
 |===
 
 [cols="a,a"]

@@ -75,6 +75,9 @@ void AFINComputerSubsystem::OnSecondaryFireReleased() {
 }
 
 AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* WorldContext) {
+#if WITH_EDITOR
+	return nullptr;
+#endif
 	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->ComputerSubsystem;
 }
 

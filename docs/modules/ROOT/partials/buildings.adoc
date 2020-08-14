@@ -5,6 +5,10 @@ xref:buildings/Adapter.adoc[Adapter]
 -
 xref:buildings/ComputerCase/index.adoc[Computer Case]
 -
+xref:buildings/Merger.adoc[Codeable Merger]
+-
+xref:buildings/Splitter.adoc[Codeable Splitter]
+-
 xref:buildings/IndicatorPole.adoc[Indicator Pole]
 -
 xref:buildings/Screen.adoc[Large Screen]
@@ -22,8 +26,6 @@ xref:buildings/NetworkWallPlugDouble.adoc[Network Wall Plug (Double)]
 xref:buildings/PowerController.adoc[Power Controller]
 -
 xref:buildings/Speakers.adoc[Speakers]
--
-xref:buildings/Splitter.adoc[Splitter]
 -
 xref:buildings/VehicleScanner.adoc[Vehicle Scanner]
 ====
