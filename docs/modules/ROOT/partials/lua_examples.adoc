@@ -8,4 +8,6 @@ xref:lua/examples/paint.adoc[Paint]
 xref:lua/examples/randomPlot.adoc[Random Plot]
 -
 xref:lua/examples/storageRefill.adoc[Storage Refill]
+-
+xref:lua/examples/drive.adoc[Drive Example]
 ====

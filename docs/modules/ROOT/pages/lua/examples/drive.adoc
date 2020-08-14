@@ -1,0 +1,73 @@
+= Drive Example
+
+This example shows how to manipulating drives.
+
+== Setup
+
+All you need is a basic computer (had Lua Processor, RAM and EEPROM in it) and a Drive mounted on its Disk Holder.
+
+== Find all the Drives
+
+The code below should print all UUIDs of installed drives.
+
+=== Code
+
+[source,Lua]
+----
+-- Shorten name
+fs = filesystem
+-- Initialize /dev
+if fs.initFileSystem("/dev") == false then
+    computer.panic("Cannot initialize /dev")
+end
+-- List all the drives
+for _, drive in pairs(fs.childs("/dev")) do
+    print(drive)
+end
+----
+
+You might notice there is a "serial" beside your drives, it is the console under the code editor. We recommend you just ignoring it, or you can filtering it out as the code shown below.
+
+[source, Lua]
+----
+-- Shorten name
+fs = filesystem
+-- Initialize /dev
+if fs.initFileSystem("/dev") == false then
+    computer.panic("Cannot initialize /dev")
+end
+
+drives = fs.childs("/dev")
+
+-- Filtering out "serial"
+for idx, drive in pairs(drives) do
+    if drive == "serial" then table.remove(drives, idx) end
+end
+
+-- List all the drives
+for i = 1, #drives do
+    print(drives[i])
+end
+----
+
+== Mount a Drive
+
+This program shows how to mount your drive to the root mountpoint.
+
+[source, Lua]
+----
+-- Shorten name
+fs = filesystem
+-- Initialize /dev
+if fs.initFileSystem("/dev") == false then
+    computer.panic("Cannot initialize /dev")
+end
+-- Let say UUID of the drive is 7A4324704A53821154104A87BE5688AC
+disk_uuid = "7A4324704A53821154104A87BE5688AC"
+-- Mount our drive to root
+fs.mount("/dev/"..disk_uuid, "/")
+----
+
+== Accessing Drives with Windows Explorer
+
+All drives are located at `%LocalAppData%\FactoryGame\Saved\SaveGames\Computers`
