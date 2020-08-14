@@ -143,7 +143,8 @@ namespace FicsItKernel {
 			return false;
 		}
 		processor->reset();
-		
+
+		systemResetTimePoint = std::chrono::high_resolution_clock::now();
 
 		// finish start
 		return true;
@@ -248,8 +249,14 @@ namespace FicsItKernel {
 		return set;
 	}
 
+	int64 KernelSystem::getTimeSinceStart() const {
+		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - systemResetTimePoint).count();
+	}
+
 	void KernelSystem::PreSerialize(FKernelSystemSerializationInfo& Data, bool bLoading) {
 		Data.bPreSerialized = true;
+
+		Data.MillisSinceLastReset = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - systemResetTimePoint).count();
 
 		// pre serialize network
 		network->PreSerialize(bLoading);
@@ -303,6 +310,8 @@ namespace FicsItKernel {
 		
 		// Serialize FileSystem
 		filesystem.Serialize(Ar, OutSystemState.fileSystemState);
+
+		Ar << OutSystemState.MillisSinceLastReset;
 	}
 
 	void KernelSystem::PostSerialize(FKernelSystemSerializationInfo& Data, bool bLoading) {
@@ -324,6 +333,8 @@ namespace FicsItKernel {
 		network->PostSerialize(bLoading);
 
 		Data.bPreSerialized = false;
+
+		if (bLoading) systemResetTimePoint -= std::chrono::milliseconds(Data.MillisSinceLastReset);
 	}
 
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}

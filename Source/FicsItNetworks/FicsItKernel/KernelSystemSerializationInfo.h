@@ -24,5 +24,8 @@ struct FKernelSystemSerializationInfo {
 	UPROPERTY()
 	FString crash;
 
+	UPROPERTY()
+	int64 MillisSinceLastReset = 0;
+
 	bool bPreSerialized = false;
 };

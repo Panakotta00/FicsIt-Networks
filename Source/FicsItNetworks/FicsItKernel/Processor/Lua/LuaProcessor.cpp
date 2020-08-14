@@ -218,7 +218,7 @@ namespace FicsItKernel {
 			}
 			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->Code), eeprom->Code.Len());
 			luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
-			
+
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
 			// TODO: Check if we actually want to use this or the manual gc call
 		}
@@ -373,7 +373,7 @@ namespace FicsItKernel {
 				ULuaProcessorStateStorage* Data = Cast<ULuaProcessorStateStorage>(Storage);
 				
 				reset();
-				
+
 				// save pull state
 				pullState = Data->PullState;
 				timeout = Data->Timeout;
