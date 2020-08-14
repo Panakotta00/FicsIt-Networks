@@ -87,6 +87,21 @@ Return Values::
 |The number of game seconds passed since the save got created.
 |===
 
+=== `int millis()`
+
+Retruns the amount of milliseconds passed since the system started.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|Amount of milliseconds since system start
+|===
+
 === `GPU[] getGPUs()`
 
 This function allows you to retrieve the list of all GPUs built into the computer.
