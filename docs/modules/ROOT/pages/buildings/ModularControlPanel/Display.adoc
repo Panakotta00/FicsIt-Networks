@@ -1,4 +1,4 @@
-= Display
+= Screen
 :description: This IO-Module allows you to display what a GPU renders on a small screen for the modular panel.
 
 [cols="1,3"]

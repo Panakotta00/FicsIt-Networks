@@ -1,0 +1,118 @@
+= Text Display
+:description: This IO-Module allows you to display simple text with different sizes and fonts.
+
+[cols="1,3"]
+|===
+|Building Type
+|IO Module
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/ModularIO_TextDisplay_bg.png[300,300,role="left"]
+|image::buildings/ModularIO_TextDisplay_ig.jpg[300,300,role="left"]
+|===
+
+This IO-Module allows you to display static text.
+You can change the font size dynamically and you can even switch between a monospace font and a "normal" one.
+
+Even if you miss alot features a GPU would provide, the convience of it is, that you are not required
+to have a GPU, so it is more like a plug and play experience.
+
+== Functions
+
+=== `setText(string text)`
+
+Allows you to set the text the display shows.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|text
+|string
+|The new text the display should show.
+|===
+
+=== `string getText()`
+
+This function allows you to check what the display currently shows.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string
+|string
+|The currently displayed text.
+|===
+
+=== `setSize(int size)`
+
+This function allows you to change the font size of the displayed text.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|size
+|int
+|The new font size in which the text is shown.
+|===
+
+=== `int getSize()`
+
+This function allows you to return the current font size.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|The currently shown font size.
+|===
+
+=== `setMonospace(bool useMonospace)`
+
+This function allows you to define if a monospace font should be used to display the text.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|useMonospace
+|bool
+|True if a monospace font should be use to show the text.
+|===
+
+=== `bool getMonospace()`
+
+This function allows to check if a monospace font is currently used to display the text.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|True if a monospace font is currently used to display the text.
+|===
+
+
+
+include::partial$io_modules_footer.adoc[]
