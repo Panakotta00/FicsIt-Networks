@@ -90,7 +90,7 @@ public:
 	 * This signal gets emit when a new item got pushed to the input queue.
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
-	void netSig_ItemRequest(UClass* item);
+	void netSig_ItemRequest(const FInventoryItem& Item);
 
 	TArray<FInventoryItem>& GetOutput(int output);
 	TArray<FInventoryItem>& GetOutput(UFGFactoryConnectionComponent* connection);
