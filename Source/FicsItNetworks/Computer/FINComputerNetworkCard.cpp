@@ -69,7 +69,7 @@ void AFINComputerNetworkCard::HandleMessage(FFINNetworkTrace Sender, int Port, c
 }
 
 void AFINComputerNetworkCard::netFunc_open(int port) {
-	if (port < 0 || port > 1000) return;
+	if (port < 0 || port > 10000) return;
 	if (!OpenPorts.Contains(port)) OpenPorts.Add(port);
 }
 
@@ -82,9 +82,9 @@ void AFINComputerNetworkCard::netFunc_closeAll() {
 }
 
 void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, FFINDynamicStructHolder args) {
-	FFINVoidValueReader VoidReader;
-	int argCount = args.Get<FFINParameterList>() >> VoidReader;
-	if (port < 0 || port > 10000 || argCount > 7) return;
+	FFINNetworkCardArgChecker Reader;
+	int argCount = args.Get<FFINParameterList>() >> Reader;
+	if (Reader.Fail || port < 0 || port > 10000 || argCount > 7) return;
 
 	FGuid receiverID;
 	FGuid::Parse(receiver, receiverID);
@@ -96,15 +96,27 @@ void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, FFINDynam
 }
 
 void AFINComputerNetworkCard::netFunc_broadcast(int port, FFINDynamicStructHolder args) {
-	FFINVoidValueReader VoidReader;
-	int argCount = args.Get<FFINParameterList>() >> VoidReader;
-	if (port < 0 || port > 10000 || argCount > 7) return;
+	FFINNetworkCardArgChecker Reader;
+	int argCount = args.Get<FFINParameterList>() >> Reader;
+	if (Reader.Fail || port < 0 || port > 10000 || argCount > 7) return;
 	for (UObject* Component : GetCircuit_Implementation()->GetComponents()) {
 		IFINNetworkMessageInterface* NetMsgI = Cast<IFINNetworkMessageInterface>(Component);
 		if (NetMsgI && NetMsgI->IsPortOpen(port)) {
 			NetMsgI->HandleMessage(FFINNetworkTrace(Component) / this, port, args);
 		}
 	}
+}
+
+void FFINNetworkCardArgChecker::operator<<(const FINObj& Obj) {
+	Fail = true;
+}
+
+void FFINNetworkCardArgChecker::operator<<(const FINTrace& Obj) {
+	Fail = true;
+}
+
+void FFINNetworkCardArgChecker::operator<<(const FINStruct& Struct) {
+	Fail = true;
 }
 
 FFINNetworkMessageSignal::FFINNetworkMessageSignal(FGuid Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) : FFINSignal("NetworkMessage"), Sender(Sender), Port(Port), Data(Data) {}

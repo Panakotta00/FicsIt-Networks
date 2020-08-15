@@ -99,6 +99,20 @@ public:
 	void netFunc_broadcast(int port, FFINDynamicStructHolder args);
 };
 
+struct FFINNetworkCardArgChecker : public FFINValueReader {
+	bool Fail = false;
+	
+	virtual void nil() override {};
+	virtual void operator<<(FINBool B) override {};
+	virtual void operator<<(FINInt Num) override {};
+	virtual void operator<<(FINFloat Num) override {};
+	virtual void operator<<(FINClass Class) override {};
+	virtual void operator<<(const FINStr& Str) override {};
+	virtual void operator<<(const FINObj& Obj) override;
+	virtual void operator<<(const FINTrace& Obj) override;
+	virtual void operator<<(const FINStruct& Struct) override;
+};
+
 USTRUCT()
 struct FFINNetworkMessageSignal : public FFINSignal {
 	GENERATED_BODY()
