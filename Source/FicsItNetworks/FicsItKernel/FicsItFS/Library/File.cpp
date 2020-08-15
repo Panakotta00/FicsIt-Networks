@@ -155,11 +155,13 @@ DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeChe
 		stringstream s;
 		s << stream.rdbuf();
 		buf = s.str();
-	} else sizeCheck(-static_cast<int64_t>(std::filesystem::file_size(realPath)), true); 
-	stream.close();
-	stream = std::fstream(realPath, std::ios::out | std::ios::trunc);
-	stream << buf;
-	stream.flush();
+	} else sizeCheck(-static_cast<int64_t>(std::filesystem::file_size(realPath)), true);
+	if (mode & FileMode::OUTPUT) {
+		stream.close();
+		stream = std::fstream(realPath, std::ios::out | std::ios::trunc);
+		stream << buf;
+		stream.flush();
+	}
 }
 
 DiskFileStream::~DiskFileStream() {}
@@ -226,7 +228,7 @@ int64_t DiskFileStream::seek(string str, int64_t off) {
 
 void DiskFileStream::close() {
 	if (isOpen()) {
-		flush();
+		if (mode & OUTPUT) flush();
 		stream.close();
 	}
 }
