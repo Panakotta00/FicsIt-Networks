@@ -20,7 +20,7 @@ public:
     UPROPERTY(EditDefaultsOnly)
     FVector2D ModuleSize;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Replicated)
     FName ModuleName;
 
 	UPROPERTY(BlueprintReadOnly, SaveGame)

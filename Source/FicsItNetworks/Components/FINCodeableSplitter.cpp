@@ -36,7 +36,6 @@ AFINCodeableSplitter::~AFINCodeableSplitter() {}
 void AFINCodeableSplitter::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund) const {
 	Super::GetDismantleRefund_Implementation(out_refund);
 
-	//TArray<FInventoryItem> items = InputQueue;
 	out_refund.Append(InputQueue);
 	out_refund.Append(OutputQueue1);
 	out_refund.Append(OutputQueue2);
@@ -61,7 +60,7 @@ UObject* AFINCodeableSplitter::GetSignalSenderOverride_Implementation() {
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {
 	Super::Factory_Tick(dt);
-	if (InputQueue.Num() < 2) {
+	if (HasAuthority() && InputQueue.Num() < 2) {
 		FInventoryItem item;
 		float offset;
 		if (InputConnector->Factory_GrabOutput(item, offset)) {

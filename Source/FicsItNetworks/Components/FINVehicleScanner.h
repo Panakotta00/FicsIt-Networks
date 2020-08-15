@@ -25,10 +25,10 @@ public:
 	UPROPERTY(SaveGame)
 	TSet<FFINNetworkTrace> SignalListeners;
 	
-	UPROPERTY(BlueprintReadOnly, SaveGame)
+	UPROPERTY(BlueprintReadOnly, SaveGame, Replicated)
 	FLinearColor ScanColor = FLinearColor(0,0,1);
 
-	UPROPERTY(BlueprintReadOnly, SaveGame)
+	UPROPERTY(BlueprintReadOnly, SaveGame, Replicated)
 	float Intensity;
 
 	UPROPERTY(SaveGame)
@@ -56,7 +56,7 @@ public:
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, NetMulticast)
 	void UpdateColor();
 
 	UFUNCTION()

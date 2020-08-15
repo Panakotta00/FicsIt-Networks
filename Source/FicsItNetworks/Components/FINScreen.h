@@ -14,7 +14,7 @@ class AFINScreen : public AFGBuildable, public IFINScreenInterface, public IFINN
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	UObject* GPU = nullptr;
 	
 public:

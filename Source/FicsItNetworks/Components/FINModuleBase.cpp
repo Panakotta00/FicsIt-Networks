@@ -8,7 +8,7 @@ void AFINModuleBase::Serialize(FArchive& Ar) {
 }
 
 void AFINModuleBase::EndPlay(EEndPlayReason::Type reason) {
-	if (ModulePanel) ModulePanel->RemoveModule(this);
+	if (HasAuthority() && ModulePanel) ModulePanel->RemoveModule(this);
 }
 
 bool AFINModuleBase::ShouldSave_Implementation() const {

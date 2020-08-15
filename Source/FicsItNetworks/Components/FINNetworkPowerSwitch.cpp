@@ -49,6 +49,7 @@ void AFINNetworkPowerSwitch::SetConnected(bool bNewConnected) {
 			PowerConnection1->GetHiddenConnections(connections);
 			if (connections.Contains(PowerConnection2)) PowerConnection1->RemoveHiddenConnection(PowerConnection2);
 		}
+		ForceNetUpdate();
 	}
 }
 

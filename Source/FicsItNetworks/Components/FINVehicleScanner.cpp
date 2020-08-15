@@ -91,6 +91,7 @@ void AFINVehicleScanner::netFunc_setColor(float r, float g, float b, float e) {
 	ScanColor = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f));
 	Intensity = FMath::Clamp(e, 0.0f, 5.0f);
 	bColorChanged = true;
+	ForceNetUpdate();
 }
 
 void AFINVehicleScanner::netFunc_getColor(float& r, float& g, float& b, float& e) {

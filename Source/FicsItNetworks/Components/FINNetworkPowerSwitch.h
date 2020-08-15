@@ -16,7 +16,7 @@ class AFINNetworkPowerSwitch : public AFGBuildable, public IFINNetworkCustomType
 public:
 	bool bConnectedHasChanged;
 
-	UPROPERTY(BlueprintReadOnly, SaveGame, Category="NetworkPowerSwitch")
+	UPROPERTY(BlueprintReadOnly, SaveGame, Replicated, Category="NetworkPowerSwitch")
 	bool bConnected;
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"), Category="NetworkPowerSwitch")
@@ -61,7 +61,7 @@ public:
 	 * Notifies when the connection state has changed.
 	 * Gets only triggerd in actor tick.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Network|Components")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, NetMulticast, Category="Network|Components")
 	void OnConnectedChanged();
 
 	UFUNCTION(BlueprintCallable, Category="Network|Component")

@@ -75,6 +75,12 @@ public:
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("SpeakerPole"); }
 	// End IFINNetworkCustomType
 
+	UFUNCTION(NetMulticast)
+	void PlaySound(const FString& Sound, float StartPoint);
+
+	UFUNCTION(NetMulticast)
+	void StopSound();
+	
 	/**
 	 * Event bound to the OnAudioFinished event of the AudioComponent.
 	 * Triggers a network signal notifyng that the audio has stoped playing.

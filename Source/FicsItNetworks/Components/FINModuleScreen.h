@@ -9,7 +9,7 @@ UCLASS()
 class AFINModuleScreen : public AFINModuleBase, public IFINScreenInterface {
 	GENERATED_BODY()
 private:
-    UPROPERTY(SaveGame)
+    UPROPERTY(SaveGame, Replicated)
     UObject* GPU = nullptr;
 	
 public:
