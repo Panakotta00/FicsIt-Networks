@@ -66,7 +66,7 @@ void AFINCodeableMerger::TickInput(UFGFactoryConnectionComponent* Connector, int
 		float offset;
 		if (Connector->Factory_GrabOutput(item, offset)) {
 			InputQueue.Add(item);
-			netSig_ItemRequest(InputId, item.ItemClass);
+			netSig_ItemRequest(InputId, item);
 		}
 	}
 }
