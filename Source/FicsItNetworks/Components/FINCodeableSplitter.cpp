@@ -65,7 +65,7 @@ void AFINCodeableSplitter::Factory_Tick(float dt) {
 		float offset;
 		if (InputConnector->Factory_GrabOutput(item, offset)) {
 			InputQueue.Add(item);
-			netSig_ItemRequest(item.ItemClass);
+			netSig_ItemRequest(item);
 		}
 	}
 }
@@ -113,7 +113,7 @@ bool AFINCodeableSplitter::netFunc_canOutput(int output) {
 	return outputQueue.Num() < 2;
 }
 
-void AFINCodeableSplitter::netSig_ItemRequest_Implementation(UClass* item) {}
+void AFINCodeableSplitter::netSig_ItemRequest_Implementation(const FInventoryItem& item) {}
 
 TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(int output) {
 	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);

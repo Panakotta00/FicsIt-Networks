@@ -364,12 +364,12 @@ namespace FicsItKernel {
 		
 		LuaLibFunc(UFGInventoryComponent, getStack, {
 			FInventoryStack stack;
-			for (int i = 2; i <= args; ++i) {
+			if (args > 1) for (int i = 2; i <= args; ++i) {
 				if (self->GetStackFromIndex((int)lua_tointeger(L, i), stack)) {
 					luaStruct(L, stack);
 				} else lua_pushnil(L);
 			}
-			return args;
+			return args-1;
 		})
 
 		LuaLibPropReadonlyInt(UFGInventoryComponent, itemCount, GetNumItems(nullptr))
