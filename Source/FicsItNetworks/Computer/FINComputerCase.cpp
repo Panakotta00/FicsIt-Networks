@@ -334,7 +334,7 @@ EComputerState AFINComputerCase::GetState() {
 FString AFINComputerCase::GetSerialOutput() {
 	FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
 	if (dev) {
-		SerialOutput = SerialOutput.Append(dev->getSerial()->readOutput().c_str());
+		SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
 		SerialOutput = SerialOutput.Right(1000);
 	}
 	return SerialOutput;

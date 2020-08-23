@@ -54,10 +54,11 @@ namespace FicsItKernel {
 			} else if (c & EClassCastFlags::CASTCLASS_UFloatProperty) {
 				*p->ContainerPtrToValuePtr<float>(data) = static_cast<float>(lua_tonumber(L, i));
 			} else if (c & EClassCastFlags::CASTCLASS_UStrProperty) {
-				const char* s = lua_tostring(L, i);
+				size_t len;
+				const char* s = lua_tolstring(L, i, &len);
 				if (!s) throw std::exception("Invalid String in string property parse");
 				FString* o = p->ContainerPtrToValuePtr<FString>(data);
-				*o = FString(s);
+				*o = FString(UTF8_TO_TCHAR(s), len);
 			} else if (c & EClassCastFlags::CASTCLASS_UClassProperty) {
 				UClass* o = getClassInstance(L, i, Cast<UClassProperty>(p)->PropertyClass);
 				*p->ContainerPtrToValuePtr<UClass*>(data) = o;
