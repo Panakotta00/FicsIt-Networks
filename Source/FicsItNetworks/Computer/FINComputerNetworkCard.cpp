@@ -6,6 +6,8 @@
 #include "Network/Signals/FINSmartSignal.h"
 
 void AFINComputerNetworkCard::BeginPlay() {
+	Super::BeginPlay();
+	
 	if (!bIdCreated) {
 		ID = FGuid::NewGuid();
 		bIdCreated = true;
