@@ -38,6 +38,15 @@ namespace FicsItKernel {
 				} else {
 					luaStruct(L, FFINDynamicStructHolder::Copy(prop->Struct, p->ContainerPtrToValuePtr<void>(data)));
 				}
+			} else if (c & EClassCastFlags::CASTCLASS_UArrayProperty) {
+				UArrayProperty* prop = Cast<UArrayProperty>(p);
+				const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
+				lua_newtable(L);
+				for (int i = 0; i < arr.Num(); ++i) {
+					FScriptArrayHelper Helper(prop, data);
+					propertyToLua(L, prop->Inner, ((uint8*)Helper.GetRawPtr()) + (prop->Inner->ElementSize * i), trace);
+					lua_seti(L, -2, i+1);
+				}
 			} else {
 				lua_pushnil(L);
 			}
