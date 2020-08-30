@@ -15,15 +15,18 @@ AFINComputerSubsystem::AFINComputerSubsystem() {
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
+void AFINComputerSubsystem::OnConstruction(const FTransform& Transform) {
+	Super::OnConstruction(Transform);
+}
+
 void AFINComputerSubsystem::BeginPlay() {
 	Super::BeginPlay();
-
-	Version = EFINCustomVersion::FINLatestVersion;
 }
 
 void AFINComputerSubsystem::Tick(float dt) {
 	Super::Tick(dt);
 	this->GetWorld()->GetFirstPlayerController()->PushInputComponent(Input);
+	Version = EFINCustomVersion::FINLatestVersion;
 }
 
 bool AFINComputerSubsystem::ShouldSave_Implementation() const {

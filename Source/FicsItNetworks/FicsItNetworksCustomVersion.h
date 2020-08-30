@@ -13,6 +13,9 @@ enum EFINCustomVersion {
     // Signal Storage / Trace / "Parameter List" overhaul
     FINSignalStorage,
 
+	// Codeable Splitter Attachment Fixes
+	FINCodeableSplitterAttachmentFixes,
+
     // -----<new versions can be added above this line>-------------------------------------------------
     FINVersionPlusOne,
     FINLatestVersion = FINVersionPlusOne - 1

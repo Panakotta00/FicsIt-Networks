@@ -197,8 +197,8 @@ namespace FicsItKernel {
 		std::set<FString> LuaInstanceRegistry::getClassFunctionNames(UClass* type) {
 			std::set<FString> funcs;
 			while (type) {
-				TMap<FString, LuaLibClassFunc>& funcMap = classInstanceFunctions[type];
-				for (auto& i : funcMap) {
+				TMap<FString, LuaLibClassFunc>* funcMap = classInstanceFunctions.Find(type);
+				if (funcMap) for (auto& i : *funcMap) {
 					funcs.insert(i.Key);
 				}
 				if (type == UObject::StaticClass()) type = nullptr;

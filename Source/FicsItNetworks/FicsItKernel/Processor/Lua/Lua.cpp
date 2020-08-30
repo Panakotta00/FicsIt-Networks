@@ -38,6 +38,15 @@ namespace FicsItKernel {
 				} else {
 					luaStruct(L, FFINDynamicStructHolder::Copy(prop->Struct, p->ContainerPtrToValuePtr<void>(data)));
 				}
+			} else if (c & EClassCastFlags::CASTCLASS_UArrayProperty) {
+				UArrayProperty* prop = Cast<UArrayProperty>(p);
+				const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
+				lua_newtable(L);
+				for (int i = 0; i < arr.Num(); ++i) {
+					FScriptArrayHelper Helper(prop, data);
+					propertyToLua(L, prop->Inner, ((uint8*)Helper.GetRawPtr()) + (prop->Inner->ElementSize * i), trace);
+					lua_seti(L, -2, i+1);
+				}
 			} else {
 				lua_pushnil(L);
 			}
@@ -54,10 +63,11 @@ namespace FicsItKernel {
 			} else if (c & EClassCastFlags::CASTCLASS_UFloatProperty) {
 				*p->ContainerPtrToValuePtr<float>(data) = static_cast<float>(lua_tonumber(L, i));
 			} else if (c & EClassCastFlags::CASTCLASS_UStrProperty) {
-				const char* s = lua_tostring(L, i);
+				size_t len;
+				const char* s = lua_tolstring(L, i, &len);
 				if (!s) throw std::exception("Invalid String in string property parse");
 				FString* o = p->ContainerPtrToValuePtr<FString>(data);
-				*o = FString(s);
+				*o = FString(UTF8_TO_TCHAR(s), len);
 			} else if (c & EClassCastFlags::CASTCLASS_UClassProperty) {
 				UClass* o = getClassInstance(L, i, Cast<UClassProperty>(p)->PropertyClass);
 				*p->ContainerPtrToValuePtr<UClass*>(data) = o;

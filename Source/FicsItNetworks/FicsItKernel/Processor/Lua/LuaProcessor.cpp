@@ -216,7 +216,7 @@ namespace FicsItKernel {
 				kernel->crash(KernelCrash("No Valid EEPROM set"));
 				return;
 			}
-			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->Code), eeprom->Code.Len());
+			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->Code));
 			luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
 
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
@@ -462,7 +462,7 @@ namespace FicsItKernel {
 			if (log.length() > 0) log = log.erase(log.length()-1);
 			
 			try {
-				auto serial = LuaProcessor::luaGetProcessor(L)->getKernel()->getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
+				FileSystem::SRef<FileSystem::FileStream> serial = LuaProcessor::luaGetProcessor(L)->getKernel()->getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
 				if (serial) {
 					*serial << log << "\r\n";
 					serial->close();
