@@ -12,6 +12,7 @@
 #include "SML/mod/hooking.h"
 
 #include "FINComponentUtility.h"
+#include "FINConfig.h"
 #include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
 #include "Computer/FINComputerProcessor.h"
@@ -81,16 +82,24 @@ void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IF
 	}
 }
 
+#pragma optimize("", off)
 void FFicsItNetworksModule::StartupModule(){
 	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
 
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
+	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C.InputConnector"), TEXT("Input1")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/Game/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
+	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Script/FicsItNetworks.FINCodeableSplitter.InputConnector"), TEXT("Input1")});
+	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.InputConnector"), TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.Input1")});
+	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.InputConnector"), TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Input1")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.InputConnector"), TEXT("Input1")});
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
-	#ifndef WITH_EDITOR
+	#if !WITH_EDITOR
 	finConfig->SetNumberField("SignalQueueSize", 32);
-	finConfig = SML::readModConfig(MOD_NAME, finConfig);
+	finConfig = SML::ReadModConfig(MOD_NAME, finConfig);
 	#endif
 	
 	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
@@ -144,6 +153,8 @@ void FFicsItNetworksModule::StartupModule(){
 	AFINNetworkAdapter::RegisterAdapterSettings();
 	FFINGlobalRegisterHelper::Register();
 }
+#pragma optimize("", on)
+
 void FFicsItNetworksModule::ShutdownModule(){ }
 
 extern "C" DLLEXPORT void BootstrapModule(std::ofstream& logFile) {

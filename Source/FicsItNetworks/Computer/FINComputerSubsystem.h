@@ -28,6 +28,7 @@ public:
 	AFINComputerSubsystem();
 
 	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float dt) override;
 	// End AActor
