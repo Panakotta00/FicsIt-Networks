@@ -17,6 +17,12 @@ AFINIndicatorPole::AFINIndicatorPole() {
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
+void AFINIndicatorPole::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(AFINIndicatorPole, Height);
+	DOREPLIFETIME(AFINIndicatorPole, IndicatorColor);
+	DOREPLIFETIME(AFINIndicatorPole, EmessiveStrength);
+}
+
 void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
 	Super::OnConstruction(transform);
 

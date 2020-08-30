@@ -2,6 +2,7 @@
 
 #include "FINNetworkConnectionComponent.h"
 #include "FINNetworkAdapter.h"
+#include "UnrealNetwork.h"
 
 #include "SML/util/Logging.h"
 
@@ -13,6 +14,11 @@ AFINNetworkCable::AFINNetworkCable() {
 }
 
 AFINNetworkCable::~AFINNetworkCable() {}
+
+void AFINNetworkCable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(AFINNetworkCable, Connector1);
+	DOREPLIFETIME(AFINNetworkCable, Connector2);
+}
 
 void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
@@ -43,18 +49,22 @@ void AFINNetworkCable::BeginPlay() {
 	
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
 
-	Connector1->AddConnectedCable(this);
-	Connector2->AddConnectedCable(this);
-
+	if (HasAuthority()) {
+		Connector1->AddConnectedCable(this);
+		Connector2->AddConnectedCable(this);
+	}
+		
 	RerunConstructionScripts();
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
-	if (IsValid(Connector1)) {
-		Connector1->RemoveConnectedCable(this);
-	}
-	if (IsValid(Connector2)) {
-		Connector2->RemoveConnectedCable(this);
+	if (HasAuthority()) {
+		if (IsValid(Connector1)) {
+			Connector1->RemoveConnectedCable(this);
+		}
+		if (IsValid(Connector2)) {
+			Connector2->RemoveConnectedCable(this);
+		}
 	}
 }
 

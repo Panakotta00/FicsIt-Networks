@@ -13,6 +13,10 @@ AFINScreen::AFINScreen() {
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
+void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(AFINScreen, GPU);
+}
+
 void AFINScreen::BeginPlay() {
 	Super::BeginPlay();
 	

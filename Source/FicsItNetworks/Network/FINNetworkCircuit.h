@@ -19,6 +19,7 @@ class FICSITNETWORKS_API UFINNetworkCircuit : public UObject {
 	friend UFINAdvancedNetworkConnectionComponent;
 
 protected:
+	UPROPERTY(Replicated)
 	TSet<TSoftObjectPtr<UObject>> Nodes;
 
 	void AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add);

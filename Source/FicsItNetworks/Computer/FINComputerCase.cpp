@@ -41,11 +41,6 @@ AFINComputerCase::AFINComputerCase() {
 
 	if (HasAuthority()) mFactoryTickFunction.SetTickFunctionEnable(true);
 
-	kernel = new FicsItKernel::KernelSystem();
-	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
-	kernel->getNetwork()->component = NetworkConnector;
-	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(Speaker));
-
 	SetActorTickEnabled(true);
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;
@@ -61,6 +56,19 @@ void AFINComputerCase::Serialize(FArchive& Ar) {
 	if (Ar.IsSaveGame() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version >= EFINCustomVersion::FINSignalStorage) {
 		kernel->Serialize(Ar, KernelState);
 	}
+}
+
+void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	
+}
+
+void AFINComputerCase::OnConstruction(const FTransform& Transform) {
+	Super::OnConstruction(Transform);
+	
+	kernel = new FicsItKernel::KernelSystem();
+	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
+	kernel->getNetwork()->component = NetworkConnector;
+	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(Speaker));
 }
 
 void AFINComputerCase::BeginPlay() {

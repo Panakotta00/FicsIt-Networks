@@ -49,7 +49,7 @@ public:
 	bool bHasChanged = false;
 	
 	AFINIndicatorPole();
-
+	
 	// Begin AActor
 	virtual void OnConstruction(const FTransform& transform) override;
 	virtual void BeginPlay() override;
@@ -77,7 +77,7 @@ public:
 	 * Updates the material paramteres of the dynamic material instance
 	 * to the variables.
 	 */
-	UFUNCTION(NetMulticast)
+	UFUNCTION(NetMulticast, Reliable)
 	void UpdateEmessive();
 
 	UFUNCTION()

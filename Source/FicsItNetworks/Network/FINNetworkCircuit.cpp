@@ -1,6 +1,7 @@
 #include "FINNetworkCircuit.h"
 
 #include "FINNetworkComponent.h"
+#include "UnrealNetwork.h"
 
 void UFINNetworkCircuit::AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add) {
 	if (Add.GetObject() && !Added.Contains(Add)) {
@@ -17,6 +18,10 @@ void UFINNetworkCircuit::AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircu
 UFINNetworkCircuit::UFINNetworkCircuit() {}
 
 UFINNetworkCircuit::~UFINNetworkCircuit() {}
+
+void UFINNetworkCircuit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(UFINNetworkCircuit, Nodes);
+}
 
 UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* Circuit) {
 	if (this == Circuit || !IsValid(Circuit)) return this;

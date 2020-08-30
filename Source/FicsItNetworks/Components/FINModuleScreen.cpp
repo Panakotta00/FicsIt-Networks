@@ -1,10 +1,16 @@
 ﻿#include "FINModuleScreen.h"
 
+
+#include "UnrealNetwork.h"
 #include "Graphics/FINGPUInterface.h"
 
 AFINModuleScreen::AFINModuleScreen() {
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
 	WidgetComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+}
+
+void AFINModuleScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(AFINModuleScreen, GPU);
 }
 
 void AFINModuleScreen::BeginPlay() {

@@ -75,10 +75,10 @@ public:
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("SpeakerPole"); }
 	// End IFINNetworkCustomType
 
-	UFUNCTION(NetMulticast)
+	UFUNCTION(NetMulticast, Reliable)
 	void PlaySound(const FString& Sound, float StartPoint);
 
-	UFUNCTION(NetMulticast)
+	UFUNCTION(NetMulticast, Reliable)
 	void StopSound();
 	
 	/**

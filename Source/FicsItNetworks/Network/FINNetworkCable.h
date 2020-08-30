@@ -12,10 +12,10 @@ class FICSITNETWORKS_API AFINNetworkCable : public AFGBuildable {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	UFINNetworkConnectionComponent* Connector1 = nullptr;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	UFINNetworkConnectionComponent* Connector2 = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)

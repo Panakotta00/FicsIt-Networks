@@ -1,5 +1,7 @@
 #include "FINNetworkPowerSwitch.h"
 
+#include "UnrealNetwork.h"
+
 AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 	PowerConnection1 = CreateDefaultSubobject<UFGPowerConnectionComponent>("PowerConnection1");
 	PowerConnection1->SetupAttachment(RootComponent);
@@ -17,6 +19,11 @@ AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	if (HasAuthority()) PrimaryActorTick.SetTickFunctionEnable(true);
+}
+
+void AFINNetworkPowerSwitch::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(AFINNetworkPowerSwitch, bConnectedHasChanged);
+	DOREPLIFETIME(AFINNetworkPowerSwitch, bConnected);
 }
 
 void AFINNetworkPowerSwitch::BeginPlay() {
@@ -61,6 +68,4 @@ bool AFINNetworkPowerSwitch::netFunc_isConnected() {
 	return bConnected;
 }
 
-void AFINNetworkPowerSwitch::OnConnectedChanged_Implementation() {
-	bConnectedHasChanged = false;
-}
+void AFINNetworkPowerSwitch::OnConnectedChanged_Implementation() {}

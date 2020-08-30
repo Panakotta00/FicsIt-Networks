@@ -16,6 +16,12 @@ AFINVehicleScanner::AFINVehicleScanner() {
 	SetActorTickEnabled(true);
 }
 
+void AFINVehicleScanner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(AFINVehicleScanner, ScanColor);
+	DOREPLIFETIME(AFINVehicleScanner, Intensity);
+	DOREPLIFETIME(AFINVehicleScanner, bColorChanged);
+}
+
 void AFINVehicleScanner::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 

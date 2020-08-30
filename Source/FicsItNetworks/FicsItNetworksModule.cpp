@@ -145,7 +145,7 @@ void FFicsItNetworksModule::StartupModule(){
 
 	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::OnConstruction, [](AActor* self, const FTransform& t) {
 		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
-        if (character) {
+        if (character && character->HasAuthority()) {
 	        AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld())->AttachWidgetInteractionToPlayer(character);
 		}
 	})

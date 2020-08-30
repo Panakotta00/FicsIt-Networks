@@ -77,9 +77,11 @@ public:
 
 	// Begin UObject
 	virtual void Serialize(FArchive& ar) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// End UObject
 
 	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	virtual void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	// End AActor

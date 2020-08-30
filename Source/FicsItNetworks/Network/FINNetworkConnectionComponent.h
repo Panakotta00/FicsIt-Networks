@@ -38,7 +38,7 @@ public:
 	/**
 	 * The computer network circuit this connector is connected to.
 	 */
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	UFINNetworkCircuit* Circuit = nullptr;
 
 	// Begin IFINNetworkCircuitNode

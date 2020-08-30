@@ -1,10 +1,16 @@
 ﻿#include "FINModuleBase.h"
 
+
+#include "UnrealNetwork.h"
 #include "ModuleSystem/FINModuleSystemHolo.h"
 
 void AFINModuleBase::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
 	if (Ar.IsSaveGame()) Ar << Listeners;
+}
+
+void AFINModuleBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(AFINModuleBase, ModuleName);
 }
 
 void AFINModuleBase::EndPlay(EEndPlayReason::Type reason) {

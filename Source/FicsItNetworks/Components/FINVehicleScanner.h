@@ -37,7 +37,7 @@ public:
 	UPROPERTY()
 	UMaterialInstanceDynamic* LightMaterialInstance;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool bColorChanged = false;
 
 	AFINVehicleScanner();
@@ -56,7 +56,7 @@ public:
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 
-	UFUNCTION(BlueprintNativeEvent, NetMulticast)
+	UFUNCTION(BlueprintNativeEvent)
 	void UpdateColor();
 
 	UFUNCTION()

@@ -2,6 +2,11 @@
 
 #include "FINNetworkCable.h"
 #include "FINNetworkCircuit.h"
+#include "UnrealNetwork.h"
+
+void UFINNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	DOREPLIFETIME(UFINNetworkConnectionComponent, Circuit);
+}
 
 TSet<UObject*> UFINNetworkConnectionComponent::GetConnected_Implementation() const {
 	TSet<UObject*> Connected;
