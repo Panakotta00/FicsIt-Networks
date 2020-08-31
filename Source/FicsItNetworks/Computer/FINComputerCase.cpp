@@ -60,7 +60,7 @@ void AFINComputerCase::Serialize(FArchive& Ar) {
 }
 
 void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
-	
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 void AFINComputerCase::OnConstruction(const FTransform& Transform) {

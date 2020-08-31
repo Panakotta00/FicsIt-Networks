@@ -8,6 +8,7 @@
 #include "FGPowerConnectionComponent.h"
 
 #include "FINNetworkCable.h"
+#include "UnrealNetwork.h"
 
 FVector FFINSnappedInfo::GetConnectorPos() const {
 	switch (SnapType) {
@@ -51,6 +52,13 @@ AActor* FFINSnappedInfo::GetActor() const {
 	default:
 		return nullptr;
 	}
+}
+
+void AFINNetworkCableHologram::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINNetworkCableHologram, Snapped);
+	DOREPLIFETIME(AFINNetworkCableHologram, OldSnapped);
+	DOREPLIFETIME(AFINNetworkCableHologram, From);
 }
 
 bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {

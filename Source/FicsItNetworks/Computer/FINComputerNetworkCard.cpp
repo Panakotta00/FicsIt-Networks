@@ -1,9 +1,19 @@
 ﻿#include "FINComputerNetworkCard.h"
 
+
+#include "UnrealNetwork.h"
 #include "Network/FINNetworkCircuit.h"
 #include "Network/FINVariadicParameterList.h"
 #include "Network/Signals/FINSignalListener.h"
 #include "Network/Signals/FINSmartSignal.h"
+
+
+void AFINComputerNetworkCard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINComputerNetworkCard, ID);
+	DOREPLIFETIME(AFINComputerNetworkCard, Nick);
+}
 
 void AFINComputerNetworkCard::BeginPlay() {
 	Super::BeginPlay();
@@ -14,8 +24,8 @@ void AFINComputerNetworkCard::BeginPlay() {
 	}
 
 	// setup circuit
-	if (!Circuit) {
-		Circuit = NewObject<UFINNetworkCircuit>();
+	if (!Circuit && HasAuthority()) {
+		Circuit = GetWorld()->SpawnActor<AFINNetworkCircuit>();
 		Circuit->Recalculate(this);
 	}
 }
@@ -50,11 +60,11 @@ TSet<UObject*> AFINComputerNetworkCard::GetConnected_Implementation() const {
 	return Arr;
 }
 
-UFINNetworkCircuit* AFINComputerNetworkCard::GetCircuit_Implementation() const {
+AFINNetworkCircuit* AFINComputerNetworkCard::GetCircuit_Implementation() const {
 	return Circuit;
 }
 
-void AFINComputerNetworkCard::SetCircuit_Implementation(UFINNetworkCircuit * Circuit) {
+void AFINComputerNetworkCard::SetCircuit_Implementation(AFINNetworkCircuit * Circuit) {
 	this->Circuit = Circuit;
 }
 

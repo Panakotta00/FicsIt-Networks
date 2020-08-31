@@ -10,6 +10,8 @@ void AFINModuleBase::Serialize(FArchive& Ar) {
 }
 
 void AFINModuleBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 	DOREPLIFETIME(AFINModuleBase, ModuleName);
 }
 

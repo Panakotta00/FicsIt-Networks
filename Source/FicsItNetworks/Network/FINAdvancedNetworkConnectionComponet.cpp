@@ -1,23 +1,36 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
 
 #include "FINNetworkCircuit.h"
+#include "UnrealNetwork.h"
 
-UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent() {}
+UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent() {
+	SetIsReplicated(true);
+}
 
 UFINAdvancedNetworkConnectionComponent::~UFINAdvancedNetworkConnectionComponent() {}
 
+void UFINAdvancedNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UFINAdvancedNetworkConnectionComponent, ID);
+	DOREPLIFETIME(UFINAdvancedNetworkConnectionComponent, Nick);
+}
+
 void UFINAdvancedNetworkConnectionComponent::BeginPlay() {
+	Super::BeginPlay();
+	
 	if (bOuterAsRedirect) RedirectionObject = GetOuter();
 
-	if (!bIdCreated) {
-		ID = FGuid::NewGuid();
-		bIdCreated = true;
-	}
+	if (GetOwner()->HasAuthority()) {
+		if (!bIdCreated) {
+			ID = FGuid::NewGuid();
+			bIdCreated = true;
+		}
 
-	// setup circuit
-	if (!Circuit) {
-		Circuit = NewObject<UFINNetworkCircuit>();
-		Circuit->Recalculate(this);
+		// setup circuit
+		if (!Circuit) {
+			Circuit = GetWorld()->SpawnActor<AFINNetworkCircuit>();
+			Circuit->Recalculate(this);
+		}
 	}
 }
 

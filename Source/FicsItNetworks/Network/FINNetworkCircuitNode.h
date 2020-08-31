@@ -5,7 +5,7 @@
 
 #include "FINNetworkCircuitNode.generated.h"
 
-class UFINNetworkCircuit;
+class AFINNetworkCircuit;
 
 /**
  * Everything that can be connected to a network circuit,
@@ -32,13 +32,13 @@ public:
 	* Returns the connected network circuit of this node.
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-    UFINNetworkCircuit* GetCircuit() const;
+    AFINNetworkCircuit* GetCircuit() const;
 
 	/**
 	* Sets the connected network circuit of this node.
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-    void SetCircuit(UFINNetworkCircuit* Circuit);
+    void SetCircuit(AFINNetworkCircuit* Circuit);
 
 	/**
 	* This functions gets executed when a change in the computer network circuit occured.

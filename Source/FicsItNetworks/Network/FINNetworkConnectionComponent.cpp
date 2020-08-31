@@ -5,7 +5,16 @@
 #include "UnrealNetwork.h"
 
 void UFINNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UFINNetworkConnectionComponent, Circuit);
+}
+
+UFINNetworkConnectionComponent::UFINNetworkConnectionComponent() {
+	SetIsReplicated(true);
+}
+
+bool UFINNetworkConnectionComponent::IsSupportedForNetworking() const {
+	return true;
 }
 
 TSet<UObject*> UFINNetworkConnectionComponent::GetConnected_Implementation() const {
@@ -21,11 +30,11 @@ TSet<UObject*> UFINNetworkConnectionComponent::GetConnected_Implementation() con
 	return Connected;
 }
 
-UFINNetworkCircuit* UFINNetworkConnectionComponent::GetCircuit_Implementation() const {
+AFINNetworkCircuit* UFINNetworkConnectionComponent::GetCircuit_Implementation() const {
 	return Circuit;
 }
 
-void UFINNetworkConnectionComponent::SetCircuit_Implementation(UFINNetworkCircuit* Circuit) {
+void UFINNetworkConnectionComponent::SetCircuit_Implementation(AFINNetworkCircuit* Circuit) {
 	this->Circuit = Circuit;
 }
 
@@ -38,7 +47,7 @@ void UFINNetworkConnectionComponent::AddConnectedNode(TScriptInterface<IFINNetwo
 	UFINNetworkConnectionComponent* Obj = Cast<UFINNetworkConnectionComponent>(Node.GetObject());
 	if (Obj) Obj->AddConnectedNode(this);
 
-	UFINNetworkCircuit::ConnectNodes(this, Node);
+	AFINNetworkCircuit::ConnectNodes(this, this, Node);
 }
 
 void UFINNetworkConnectionComponent::RemoveConnectedNode(TScriptInterface<IFINNetworkCircuitNode> Node) {
@@ -48,7 +57,7 @@ void UFINNetworkConnectionComponent::RemoveConnectedNode(TScriptInterface<IFINNe
 	UFINNetworkConnectionComponent* Obj = Cast<UFINNetworkConnectionComponent>(Node.GetObject());
 	if (Obj) Obj->ConnectedNodes.Remove(this);
 	
-	UFINNetworkCircuit::DisconnectNodes(this, Node);
+	AFINNetworkCircuit::DisconnectNodes(this, this, Node);
 }
 
 bool UFINNetworkConnectionComponent::AddConnectedCable(AFINNetworkCable* Cable) {
@@ -60,7 +69,7 @@ bool UFINNetworkConnectionComponent::AddConnectedCable(AFINNetworkCable* Cable) 
 	UFINNetworkConnectionComponent* OtherConnector = (Cable->Connector1 == this) ? ((Cable->Connector2 == this) ? nullptr : Cable->Connector2) : Cable->Connector1;
 	if (OtherConnector) {
 		OtherConnector->AddConnectedCable(Cable);
-		UFINNetworkCircuit::ConnectNodes(this, OtherConnector);
+		AFINNetworkCircuit::ConnectNodes(this, this, OtherConnector);
 	}
 	
 	return true;
@@ -73,7 +82,7 @@ void UFINNetworkConnectionComponent::RemoveConnectedCable(AFINNetworkCable* Cabl
 		UFINNetworkConnectionComponent* OtherConnector = (Cable->Connector1 == this) ? Cable->Connector2 : Cable->Connector1;
 		if (OtherConnector) {
 			OtherConnector->ConnectedCables.Remove(Cable);
-			UFINNetworkCircuit::DisconnectNodes(this, OtherConnector);
+			AFINNetworkCircuit::DisconnectNodes(OtherConnector->Circuit, this, OtherConnector);
 		}
 	}
 }

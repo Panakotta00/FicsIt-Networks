@@ -88,12 +88,8 @@ void FFicsItNetworksModule::StartupModule(){
 
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
-	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C.InputConnector"), TEXT("Input1")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/Game/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
-	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Script/FicsItNetworks.FINCodeableSplitter.InputConnector"), TEXT("Input1")});
-	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.InputConnector"), TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.Input1")});
-	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.InputConnector"), TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Input1")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.InputConnector"), TEXT("Input1")});
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	

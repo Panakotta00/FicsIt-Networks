@@ -16,6 +16,7 @@ AFINNetworkCable::AFINNetworkCable() {
 AFINNetworkCable::~AFINNetworkCable() {}
 
 void AFINNetworkCable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AFINNetworkCable, Connector1);
 	DOREPLIFETIME(AFINNetworkCable, Connector2);
 }
@@ -82,4 +83,8 @@ int32 AFINNetworkCable::GetDismantleRefundReturnsMultiplier() const {
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
 	return (startPos - endPos).Size() / 1000.0;
+}
+
+void AFINNetworkCable::OnConnectorUpdate() {
+	RerunConstructionScripts();
 }

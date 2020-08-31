@@ -50,13 +50,13 @@ public:
 	UPROPERTY()
 	UStaticMeshComponent* Adapter2 = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FFINSnappedInfo Snapped;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FFINSnappedInfo OldSnapped;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FFINSnappedInfo From;
 
 	UPROPERTY()

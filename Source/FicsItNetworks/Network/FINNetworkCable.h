@@ -12,10 +12,10 @@ class FICSITNETWORKS_API AFINNetworkCable : public AFGBuildable {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY(SaveGame, Replicated, ReplicatedUsing=OnConnectorUpdate)
 	UFINNetworkConnectionComponent* Connector1 = nullptr;
 
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY(SaveGame, Replicated, ReplicatedUsing=OnConnectorUpdate)
 	UFINNetworkConnectionComponent* Connector2 = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -38,4 +38,7 @@ public:
 	// Begin IFGDismantleInterface
 	virtual int32 GetDismantleRefundReturnsMultiplier() const;
 	// End IFGDismantleInterface
+
+	UFUNCTION()
+	void OnConnectorUpdate();
 };

@@ -17,6 +17,8 @@ AFINVehicleScanner::AFINVehicleScanner() {
 }
 
 void AFINVehicleScanner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 	DOREPLIFETIME(AFINVehicleScanner, ScanColor);
 	DOREPLIFETIME(AFINVehicleScanner, Intensity);
 	DOREPLIFETIME(AFINVehicleScanner, bColorChanged);

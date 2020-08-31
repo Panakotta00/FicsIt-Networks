@@ -18,6 +18,8 @@ AFINIndicatorPole::AFINIndicatorPole() {
 }
 
 void AFINIndicatorPole::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 	DOREPLIFETIME(AFINIndicatorPole, Height);
 	DOREPLIFETIME(AFINIndicatorPole, IndicatorColor);
 	DOREPLIFETIME(AFINIndicatorPole, EmessiveStrength);

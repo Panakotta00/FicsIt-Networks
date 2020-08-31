@@ -39,12 +39,18 @@ public:
 	 * The computer network circuit this connector is connected to.
 	 */
 	UPROPERTY(Replicated)
-	UFINNetworkCircuit* Circuit = nullptr;
+	AFINNetworkCircuit* Circuit = nullptr;
 
+	UFINNetworkConnectionComponent();
+	
+	// Begin UObject
+	virtual bool IsSupportedForNetworking() const override;
+	// End UObject
+	
 	// Begin IFINNetworkCircuitNode
 	virtual TSet<UObject*> GetConnected_Implementation() const override;
-	virtual UFINNetworkCircuit* GetCircuit_Implementation() const override;
-	virtual void SetCircuit_Implementation(UFINNetworkCircuit* Circuit) override;
+	virtual AFINNetworkCircuit* GetCircuit_Implementation() const override;
+	virtual void SetCircuit_Implementation(AFINNetworkCircuit* Circuit) override;
 	virtual void NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) override;
 	// End IFINNetworkCircuitNode
 

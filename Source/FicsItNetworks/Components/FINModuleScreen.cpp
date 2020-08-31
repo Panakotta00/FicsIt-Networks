@@ -10,6 +10,8 @@ AFINModuleScreen::AFINModuleScreen() {
 }
 
 void AFINModuleScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 	DOREPLIFETIME(AFINModuleScreen, GPU);
 }
 

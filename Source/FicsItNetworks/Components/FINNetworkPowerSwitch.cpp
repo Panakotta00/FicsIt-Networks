@@ -22,6 +22,8 @@ AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 }
 
 void AFINNetworkPowerSwitch::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 	DOREPLIFETIME(AFINNetworkPowerSwitch, bConnectedHasChanged);
 	DOREPLIFETIME(AFINNetworkPowerSwitch, bConnected);
 }
