@@ -98,7 +98,7 @@ void FFicsItNetworksModule::StartupModule(){
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
 	#if !WITH_EDITOR
-	finConfig->SetNumberField("SignalQueueSize", 32);
+	finConfig->SetNumberField("SignalQueueSize", 1000);
 	finConfig = SML::ReadModConfig(MOD_NAME, finConfig);
 	#endif
 	

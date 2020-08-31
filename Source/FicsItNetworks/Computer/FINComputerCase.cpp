@@ -11,6 +11,7 @@
 #include "FINComputerFloppyDesc.h"
 #include "FINComputerNetworkCard.h"
 #include "FINComputerSubsystem.h"
+#include "FINConfig.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Audio/AudioComponentController.h"
 #include "util/Logging.h"
@@ -68,6 +69,7 @@ void AFINComputerCase::OnConstruction(const FTransform& Transform) {
 	kernel = new FicsItKernel::KernelSystem();
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
+	if (finConfig->HasField("SignalQueueSize")) kernel->getNetwork()->maxSignalCount = finConfig->GetIntegerField("SignalQueueSize");
 	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(Speaker));
 }
 
