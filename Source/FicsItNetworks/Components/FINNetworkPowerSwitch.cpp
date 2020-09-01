@@ -24,7 +24,6 @@ AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 void AFINNetworkPowerSwitch::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(AFINNetworkPowerSwitch, bConnectedHasChanged);
 	DOREPLIFETIME(AFINNetworkPowerSwitch, bConnected);
 }
 
@@ -38,7 +37,7 @@ void AFINNetworkPowerSwitch::Tick(float dt) {
 	Super::Tick(dt);
 
 	if (bConnectedHasChanged) {
-		OnConnectedChanged();
+		Client_OnConnectedChanged();
 		bConnectedHasChanged = false;
 	}
 }
@@ -60,6 +59,10 @@ void AFINNetworkPowerSwitch::SetConnected(bool bNewConnected) {
 		}
 		ForceNetUpdate();
 	}
+}
+
+void AFINNetworkPowerSwitch::Client_OnConnectedChanged_Implementation() {
+	OnConnectedChanged();
 }
 
 void AFINNetworkPowerSwitch::netFunc_setConnected(bool newConnected) {

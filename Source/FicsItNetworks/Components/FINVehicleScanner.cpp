@@ -21,7 +21,6 @@ void AFINVehicleScanner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	
 	DOREPLIFETIME(AFINVehicleScanner, ScanColor);
 	DOREPLIFETIME(AFINVehicleScanner, Intensity);
-	DOREPLIFETIME(AFINVehicleScanner, bColorChanged);
 }
 
 void AFINVehicleScanner::Tick(float DeltaSeconds) {
@@ -29,7 +28,7 @@ void AFINVehicleScanner::Tick(float DeltaSeconds) {
 
 	if (bColorChanged) {
 		bColorChanged = false;
-		UpdateColor();
+		Client_OnColorChanged();
 	}
 }
 
@@ -88,6 +87,10 @@ UObject* AFINVehicleScanner::GetSignalSenderOverride_Implementation() {
 	return this;
 }
 
+void AFINVehicleScanner::Client_OnColorChanged_Implementation() {
+	UpdateColor();
+}
+
 void AFINVehicleScanner::UpdateColor_Implementation() {
 	if (LightMaterialInstance) {
 		LightMaterialInstance->SetVectorParameterValue("Color", ScanColor);
@@ -99,7 +102,6 @@ void AFINVehicleScanner::netFunc_setColor(float r, float g, float b, float e) {
 	ScanColor = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f));
 	Intensity = FMath::Clamp(e, 0.0f, 5.0f);
 	bColorChanged = true;
-	ForceNetUpdate();
 }
 
 void AFINVehicleScanner::netFunc_getColor(float& r, float& g, float& b, float& e) {
