@@ -8,8 +8,12 @@ class AFINScreenHolo : public AFGBuildableHologram {
 	GENERATED_BODY()
 	
 public:
+	UPROPERTY(ReplicatedUsing=ConstructPanels)
 	int ScreenWidth = 1;
+
+	UPROPERTY(ReplicatedUsing=ConstructPanels)
 	int ScreenHeight = 1;
+	
 	int OldScreenHeight = 0;
 	int OldScreenWidth = 0;
 	FVector Normal;
@@ -28,4 +32,7 @@ public:
 	virtual AActor* Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) override;
 	virtual void CheckValidFloor() override;
 	// End AFGBuildableHologram
+
+	UFUNCTION()
+	void ConstructPanels();
 };

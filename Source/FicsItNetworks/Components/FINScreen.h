@@ -35,10 +35,10 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* ScreenCorner = nullptr;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	int ScreenWidth = 1;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	int ScreenHeight = 1;
 
 	UPROPERTY()

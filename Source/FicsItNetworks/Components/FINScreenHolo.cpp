@@ -3,8 +3,16 @@
 #include "FGBuildableFoundation.h"
 #include "FGBuildableWall.h"
 #include "FINScreen.h"
+#include "UnrealNetwork.h"
 
 AFINScreenHolo::AFINScreenHolo() {}
+
+void AFINScreenHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINScreenHolo, ScreenWidth);
+	DOREPLIFETIME(AFINScreenHolo, ScreenHeight);
+	DOREPLIFETIME(AFINScreenHolo, Normal);
+}
 
 bool AFINScreenHolo::DoMultiStepPlacement(bool isInputFromARelease) {
 	if (bSnapped) {
@@ -58,27 +66,7 @@ void AFINScreenHolo::SetHologramLocationAndRotation(const FHitResult& hitResult)
 		SetActorLocationAndRotation(hitResult.ImpactPoint, Normal.Rotation() + SnappedActorRotation + FRotator(0,0, GetScrollRotateValue()));
 	}
 
-	if (OldScreenHeight != ScreenHeight || OldScreenWidth != ScreenWidth) {
-		OldScreenHeight = ScreenHeight;
-		OldScreenWidth = ScreenWidth;
-		
-		// Clear Components
-		for (UStaticMeshComponent* comp : Parts) {
-			comp->UnregisterComponent();
-			comp->SetActive(false);
-			comp->DestroyComponent();
-		}
-		Parts.Empty();
-
-		// Create Components
-		UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
-		UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
-		UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
-		AFINScreen::SpawnComponents(ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
-		for (UStaticMeshComponent* Part : Parts) {
-			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-	}
+	ConstructPanels();
 }
 
 AActor* AFINScreenHolo::Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) {
@@ -107,3 +95,27 @@ AActor* AFINScreenHolo::Construct(TArray<AActor*>& out_children, FNetConstructio
 }
 
 void AFINScreenHolo::CheckValidFloor() {}
+
+void AFINScreenHolo::ConstructPanels() {
+	if (OldScreenHeight != ScreenHeight || OldScreenWidth != ScreenWidth) {
+		OldScreenHeight = ScreenHeight;
+		OldScreenWidth = ScreenWidth;
+		
+		// Clear Components
+		for (UStaticMeshComponent* comp : Parts) {
+			comp->UnregisterComponent();
+			comp->SetActive(false);
+			comp->DestroyComponent();
+		}
+		Parts.Empty();
+
+		// Create Components
+		UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
+		UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
+		UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
+		AFINScreen::SpawnComponents(ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
+		for (UStaticMeshComponent* Part : Parts) {
+			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
+}

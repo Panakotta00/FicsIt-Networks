@@ -14,7 +14,10 @@ AFINScreen::AFINScreen() {
 }
 
 void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AFINScreen, GPU);
+	DOREPLIFETIME(AFINScreen, ScreenWidth);
+	DOREPLIFETIME(AFINScreen, ScreenHeight);
 }
 
 void AFINScreen::BeginPlay() {

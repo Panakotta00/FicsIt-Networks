@@ -23,8 +23,15 @@ public:
 
 	UPROPERTY()
 	int LastHeight = 0;
+
+	UPROPERTY(Replicated)
+	int Height = 0;
 	
 	AFINIndicatorPoleHolo();
+
+	// Begin AActor
+	virtual void Tick(float DeltaSeconds) override;
+	// End AActor
 
 	// Begin AFGBuildableHologram
 	virtual bool DoMultiStepPlacement(bool isInputFromARelease) override;

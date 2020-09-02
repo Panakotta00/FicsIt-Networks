@@ -16,6 +16,7 @@ void AFINModuleBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 }
 
 void AFINModuleBase::EndPlay(EEndPlayReason::Type reason) {
+	Super::EndPlay(reason);
 	if (HasAuthority() && ModulePanel) ModulePanel->RemoveModule(this);
 }
 

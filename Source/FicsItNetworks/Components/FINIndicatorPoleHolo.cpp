@@ -1,8 +1,46 @@
 ﻿#include "FINIndicatorPoleHolo.h"
 
 #include "FINIndicatorPole.h"
+#include "UnrealNetwork.h"
 
 AFINIndicatorPoleHolo::AFINIndicatorPoleHolo() {
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
+}
+
+void AFINIndicatorPoleHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINIndicatorPoleHolo, Height);
+}
+
+void AFINIndicatorPoleHolo::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+	SML::Logging::error(LastHeight, " -> ", Height);
+	if (LastHeight != Height) {
+		for (int i = LastHeight; i > Height; --i) {
+			if (i < 0) continue;
+			UStaticMeshComponent* Pole = Poles[Poles.Num()-1];
+			Poles.Pop();
+			if (Pole) {
+				Pole->UnregisterComponent();
+				Pole->SetActive(false);
+				Pole->DestroyComponent();
+			}
+		}
+		UStaticMesh* LongPole = Cast<AFINIndicatorPole>(mBuildClass->GetDefaultObject())->LongPole;
+		for (int i = LastHeight; i < Height; ++i) {
+			if (i < 0) continue;
+			UStaticMeshComponent* Pole = NewObject<UStaticMeshComponent>(this);
+			check(Pole);
+			Pole->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			Pole->SetRelativeLocation(FVector(0,0, -(i) * 100.0));
+			Pole->RegisterComponent();
+			Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+			Pole->SetStaticMesh(LongPole);
+			Poles.Add(Pole);
+		}
+		LastHeight = Height;
+	}
 }
 
 bool AFINIndicatorPoleHolo::DoMultiStepPlacement(bool isInputFromARelease) {
@@ -33,31 +71,8 @@ void AFINIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& hit
 		float horizontalDistance = FVector::DistXY(hitResult.TraceStart, SnappedLoc);
 		float angleOfTrace = FMath::DegreesToRadians((hitResult.TraceEnd - hitResult.TraceStart).Rotation().Pitch);
 		float verticalDistance = horizontalDistance * FMath::Tan(angleOfTrace) + hitResult.TraceStart.Z - SnappedLoc.Z;
-		int Height = Height = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
+		Height = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
 		SetActorLocation(SnappedLoc + FVector(0,0,Height * 100.0));
-		for (int i = LastHeight; i > Height; --i) {
-			if (i < 0) continue;
-			UStaticMeshComponent* Pole = Poles[Poles.Num()-1];
-			Poles.Pop();
-			if (Pole) {
-				Pole->UnregisterComponent();
-				Pole->SetActive(false);
-				Pole->DestroyComponent();
-			}
-		}
-		UStaticMesh* LongPole = Cast<AFINIndicatorPole>(mBuildClass->GetDefaultObject())->LongPole;
-		for (int i = LastHeight; i < Height; ++i) {
-			if (i < 0) continue;
-			UStaticMeshComponent* Pole = NewObject<UStaticMeshComponent>(this);
-			check(Pole);
-			Pole->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-			Pole->SetRelativeLocation(FVector(0,0, -(i) * 100.0));
-			Pole->RegisterComponent();
-			Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
-			Pole->SetStaticMesh(LongPole);
-			Poles.Add(Pole);
-		}
-		LastHeight = Height;
 	} else {
 		if (SnappedPole.IsValid()) {
 			SetActorLocation(SnappedPole->GetActorLocation() + FVector(0,0,300));
