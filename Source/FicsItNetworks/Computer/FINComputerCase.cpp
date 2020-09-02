@@ -34,6 +34,9 @@ AFINComputerCase::AFINComputerCase() {
 
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	SpeakerTrampoline = CreateDefaultSubobject<UFINAudioComponentControllerTrampoline>("SpeakerTrampoline");
+	SpeakerTrampoline->Speaker = Speaker;
 	
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
@@ -70,7 +73,7 @@ void AFINComputerCase::OnConstruction(const FTransform& Transform) {
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
 	if (finConfig->HasField("SignalQueueSize")) kernel->getNetwork()->maxSignalCount = finConfig->GetIntegerField("SignalQueueSize");
-	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(Speaker));
+	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(SpeakerTrampoline));
 }
 
 void AFINComputerCase::BeginPlay() {

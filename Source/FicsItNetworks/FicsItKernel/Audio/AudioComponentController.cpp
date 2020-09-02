@@ -2,14 +2,26 @@
 
 namespace FicsItKernel {
 	namespace Audio {
-		AudioComponentController::AudioComponentController(UAudioComponent* Speaker) {
-			this->Speaker = Speaker;
+		AudioComponentController::AudioComponentController(UFINAudioComponentControllerTrampoline* Trampoline) {
+			this->Trampoline = Trampoline;
 		}
 
 		void AudioComponentController::beep() {
-			if (IsValid(Speaker)) {
-				Speaker->Play();
-			}
+			Trampoline->beep();
 		}
+	}
+}
+
+UFINAudioComponentControllerTrampoline::UFINAudioComponentControllerTrampoline() {
+	bReplicates = true;
+}
+
+bool UFINAudioComponentControllerTrampoline::IsSupportedForNetworking() const {
+	return true;
+}
+
+void UFINAudioComponentControllerTrampoline::beep_Implementation() {
+	if (IsValid(Speaker)) {
+		Speaker->Play();
 	}
 }

@@ -9,8 +9,8 @@
 
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/KernelSystemSerializationInfo.h"
+#include "FicsItKernel/Audio/AudioComponentController.h"
 #include "Network/FINNetworkCustomType.h"
-
 
 #include "FINComputerCase.generated.h"
 
@@ -40,8 +40,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 	UFGInventoryComponent* DataStorage = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="CumputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="ComputerCase")
 	UAudioComponent* Speaker = nullptr;
+
+	UPROPERTY()
+	UFINAudioComponentControllerTrampoline* SpeakerTrampoline = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
 	int LastTabIndex = 0;
