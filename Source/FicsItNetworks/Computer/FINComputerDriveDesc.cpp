@@ -3,10 +3,17 @@
 #include "HorizontalBox.h"
 #include "HorizontalBoxSlot.h"
 #include "TextBlock.h"
+#include "UnrealNetwork.h"
 #include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 
 UFINComputerDriveDesc::UFINComputerDriveDesc() {
 	mStackSize = EStackSize::SS_ONE;
+}
+
+void UFINComputerDriveDesc::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(UFINComputerDriveDesc, StorageCapacity);
 }
 
 FText UFINComputerDriveDesc::GetOverridenItemName_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
@@ -19,14 +26,9 @@ FText UFINComputerDriveDesc::GetOverridenItemDescription_Implementation(APlayerC
 
 UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
 	UClass* progressBar = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/-Shared/Widget_ProgressBar.Widget_ProgressBar_C"));
-	
-	AFINFileSystemState* state = Cast<AFINFileSystemState>(InventoryStack.Item.ItemState.Get());
-	if (!IsValid(state)) return nullptr;
 
-	FileSystem::SRef<FileSystem::ByteCountedDevice> byteCounted = state->GetDevice();
-	float usage = 0.0;
-	if (byteCounted.isValid()) usage = static_cast<float>(byteCounted->getSize()) / static_cast<float>(byteCounted->capacity);
-	
+	if (!InventoryStack.Item.ItemState.IsValid()) return nullptr;
+	float usage = Cast<AFINFileSystemState>(InventoryStack.Item.ItemState.Get())->Usage;
 	UHorizontalBox* horizontal = NewObject<UHorizontalBox>(OwningPlayer);
 	UTextBlock* prefix = NewObject<UTextBlock>(OwningPlayer);
 	prefix->Font.Size = 8;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "FGReplicationDetailInventoryComponent.h"
 #include "FINComputerGPU.h"
 #include "FINComputerScreen.h"
 #include "Buildables/FGBuildable.h"
@@ -31,22 +33,25 @@ class AFINComputerCase : public AFGBuildable, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category = "ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
 	UFINModuleSystemPanel* Panel = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	UFGInventoryComponent* DataStorage = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UAudioComponent* Speaker = nullptr;
 
 	UPROPERTY()
 	UFINAudioComponentControllerTrampoline* SpeakerTrampoline = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
+	UPROPERTY(SaveGame, Replicated)
+	FString SerialOutput = "";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	int LastTabIndex = 0;
 	
 	UPROPERTY()
@@ -177,10 +182,6 @@ public:
 
 	UFUNCTION()
 	void HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender);
-
-private:
-	UPROPERTY(SaveGame)
-	FString SerialOutput;
 
 	UFUNCTION()
 	void OnDriveUpdate(bool added, AFINFileSystemState* drive);

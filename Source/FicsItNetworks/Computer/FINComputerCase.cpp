@@ -12,6 +12,7 @@
 #include "FINComputerNetworkCard.h"
 #include "FINComputerSubsystem.h"
 #include "FINConfig.h"
+#include "UnrealNetwork.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Audio/AudioComponentController.h"
 #include "util/Logging.h"
@@ -31,6 +32,7 @@ AFINComputerCase::AFINComputerCase() {
 	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> item, int32 i) {
         return (i == 0 && item->IsChildOf<UFINComputerEEPROMDesc>()) || (i == 1 && item->IsChildOf<UFINComputerFloppyDesc>());
     });
+	DataStorage->SetIsReplicated(true);
 
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
@@ -55,15 +57,19 @@ AFINComputerCase::~AFINComputerCase() {
 	if (kernel) delete kernel;
 }
 
+void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINComputerCase, DataStorage);
+	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
+	DOREPLIFETIME(AFINComputerCase, SerialOutput);
+}
+
 void AFINComputerCase::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
 	if (Ar.IsSaveGame() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version >= EFINCustomVersion::FINSignalStorage) {
 		kernel->Serialize(Ar, KernelState);
 	}
-}
-
-void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 void AFINComputerCase::OnConstruction(const FTransform& Transform) {
@@ -78,23 +84,25 @@ void AFINComputerCase::OnConstruction(const FTransform& Transform) {
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
-	
-	DataStorage->Resize(2);
 
-	// load floppy
-	AFINFileSystemState* state = nullptr;
-	FInventoryStack stack;
-	if (DataStorage->GetStackFromIndex(1, stack)) {
-		const TSubclassOf<UFINComputerDriveDesc> DriveDesc = stack.Item.ItemClass;
-		state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
-		if (IsValid(DriveDesc)) {
-			if (!IsValid(state)) {
-				state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+	if (HasAuthority()) {
+		DataStorage->Resize(2);
+
+		// load floppy
+		AFINFileSystemState* state = nullptr;
+		FInventoryStack stack;
+		if (DataStorage->GetStackFromIndex(1, stack)) {
+			const TSubclassOf<UFINComputerDriveDesc> DriveDesc = stack.Item.ItemClass;
+			state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+			if (IsValid(DriveDesc)) {
+				if (!IsValid(state)) {
+					state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+				}
 			}
+			if (Floppy) kernel->removeDrive(Floppy);
+			Floppy = state;
+			if (Floppy) kernel->addDrive(Floppy);
 		}
-		if (Floppy) kernel->removeDrive(Floppy);
-		Floppy = state;
-		if (Floppy) kernel->addDrive(Floppy);
 	}
 }
 
@@ -115,6 +123,12 @@ void AFINComputerCase::Factory_Tick(float dt) {
 		kernel->tick(dt);
 		//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
 		//SML::Logging::debug("Computer tick: ", dur.count());
+		
+		FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
+        if (dev) {
+        	SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
+        	SerialOutput = SerialOutput.Right(1000);
+        }
 	}
 }
 
@@ -276,7 +290,7 @@ void AFINComputerCase::AddModules(const TArray<AActor*>& Modules) {
 }
 
 void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
-	if (module->Implements<UFINModuleSystemModule>()) {
+	if (HasAuthority() && module->Implements<UFINModuleSystemModule>()) {
 		AActor* moduleActor = Cast<AActor>(module);
 		if (added) AddModule(moduleActor);
 		else RemoveModule(moduleActor);
@@ -284,28 +298,30 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 }
 
 void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num) {
-	if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
-		FicsItKernel::Processor* processor = kernel->getProcessor();
-		if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
-	} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
-		AFINFileSystemState* state = nullptr;
-		FInventoryStack stack;
-		if (DataStorage->GetStackFromIndex(1, stack)) {
-			TSubclassOf<UFINComputerDriveDesc> driveDesc = stack.Item.ItemClass;
-			state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
-			if (IsValid(driveDesc)) {
-				if (!IsValid(state)) {
-					state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DataStorage, 1);
+	if (HasAuthority()) {
+		if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
+			FicsItKernel::Processor* processor = kernel->getProcessor();
+			if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
+		} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
+			AFINFileSystemState* state = nullptr;
+			FInventoryStack stack;
+			if (DataStorage->GetStackFromIndex(1, stack)) {
+				TSubclassOf<UFINComputerDriveDesc> driveDesc = stack.Item.ItemClass;
+				state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+				if (IsValid(driveDesc)) {
+					if (!IsValid(state)) {
+						state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DataStorage, 1);
+					}
 				}
 			}
-		}
-		if (IsValid(Floppy)) {
-			kernel->removeDrive(Floppy);
-			Floppy = nullptr;
-		}
-		if (IsValid(state)) {
-			Floppy = state;
-			kernel->addDrive(Floppy);
+			if (IsValid(Floppy)) {
+				kernel->removeDrive(Floppy);
+				Floppy = nullptr;
+			}
+			if (IsValid(state)) {
+				Floppy = state;
+				kernel->addDrive(Floppy);
+			}
 		}
 	}
 }
@@ -345,11 +361,6 @@ EComputerState AFINComputerCase::GetState() {
 }
 
 FString AFINComputerCase::GetSerialOutput() {
-	FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
-	if (dev) {
-		SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
-		SerialOutput = SerialOutput.Right(1000);
-	}
 	return SerialOutput;
 }
 

@@ -1,15 +1,24 @@
 #include "FINComputerDriveHolder.h"
 
 #include "FINComputerDriveDesc.h"
+#include "UnrealNetwork.h"
 
 AFINComputerDriveHolder::AFINComputerDriveHolder() {
 	DriveInventory = CreateDefaultSubobject<UFGInventoryComponent>("DriveInventory");
 	DriveInventory->Resize();
 	DriveInventory->OnItemAddedDelegate.AddDynamic(this, &AFINComputerDriveHolder::OnDriveInventoryUpdate);
 	DriveInventory->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerDriveHolder::OnDriveInventoryUpdate);
+	DriveInventory->SetIsReplicated(true);
 }
 
 AFINComputerDriveHolder::~AFINComputerDriveHolder() {}
+
+void AFINComputerDriveHolder::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINComputerDriveHolder, DriveInventory);
+	DOREPLIFETIME(AFINComputerDriveHolder, bLocked);
+}
 
 AFINFileSystemState* AFINComputerDriveHolder::GetDrive() {
 	FInventoryStack stack;
@@ -40,6 +49,10 @@ bool AFINComputerDriveHolder::SetLocked(bool NewLocked) {
 	prev = newState;
 
 	return true;
+}
+
+void AFINComputerDriveHolder::OnLockedChanged() {
+	OnLockUpdated.Broadcast();
 }
 
 void AFINComputerDriveHolder::OnDriveInventoryUpdate_Implementation(TSubclassOf<UFGItemDescriptor> drive, int32 count) {
