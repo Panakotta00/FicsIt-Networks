@@ -61,14 +61,14 @@ namespace FicsItKernel {
 		LuaFunc(luaComputerSetEEPROM)
 			AFINStateEEPROMLua* eeprom = static_cast<LuaProcessor*>(kernel->getProcessor())->getEEPROM();
 			if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
-			eeprom->Code = luaL_checkstring(L, 1);
+			eeprom->SetCode(luaL_checkstring(L, 1));
 			return 0;
 		}
 
 		LuaFunc(luaComputerGetEEPROM)
             AFINStateEEPROMLua* eeprom = static_cast<LuaProcessor*>(kernel->getProcessor())->getEEPROM();
 			if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
-			lua_pushlstring(L, TCHAR_TO_UTF8(*eeprom->Code), eeprom->Code.Len());
+			lua_pushlstring(L, TCHAR_TO_UTF8(*eeprom->GetCode()), eeprom->GetCode().Len());
 			return 1;
 		}
 

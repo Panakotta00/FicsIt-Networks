@@ -5,7 +5,15 @@
 UCLASS()
 class AFINStateEEPROMLua : public AFINStateEEPROM {
 	GENERATED_BODY()
-public:
-	UPROPERTY(BlueprintReadWrite, SaveGame)
+	
+protected:
+	UPROPERTY(BlueprintReadWrite, SaveGame, Replicated)
 	FString Code;
+
+public:
+	UFUNCTION(BlueprintCallable, Category="Computer")
+	FString GetCode() const;
+
+	UFUNCTION(BlueprintCallable, Category="Computer")
+	void SetCode(const FString& NewCode);
 };

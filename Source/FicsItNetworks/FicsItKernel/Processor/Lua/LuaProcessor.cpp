@@ -216,7 +216,7 @@ namespace FicsItKernel {
 				kernel->crash(KernelCrash("No Valid EEPROM set"));
 				return;
 			}
-			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->Code));
+			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->GetCode()));
 			luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
 
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);

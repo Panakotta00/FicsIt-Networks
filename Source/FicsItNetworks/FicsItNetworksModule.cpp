@@ -8,6 +8,7 @@
 #include "FGBuildableHologram.h"
 #include "FGCharacterPlayer.h"
 #include "FGFactoryConnectionComponent.h"
+#include "FGGameMode.h"
 
 #include "SML/mod/hooking.h"
 
@@ -16,6 +17,7 @@
 #include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
 #include "Computer/FINComputerProcessor.h"
+#include "Computer/FINComputerRCO.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
@@ -145,6 +147,12 @@ void FFicsItNetworksModule::StartupModule(){
 	        AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld())->AttachWidgetInteractionToPlayer(character);
 		}
 	})
+
+	SUBSCRIBE_METHOD(AFGGameMode::PostLogin, [](auto& scope, AFGGameMode* gm, APlayerController* pc) {
+	    if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
+	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
+	    }
+	});
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
 	FFINGlobalRegisterHelper::Register();
