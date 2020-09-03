@@ -1,6 +1,7 @@
 ﻿#include "FINComputerGPU.h"
 
 
+#include "UnrealNetwork.h"
 #include "WidgetInteractionComponent.h"
 #include "Graphics/FINScreenInterface.h"
 #include "Private/KismetTraceUtils.h"
@@ -10,6 +11,12 @@ AFINComputerGPU::AFINComputerGPU() {
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+}
+
+void AFINComputerGPU::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINComputerGPU, Screen);
 }
 
 void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {

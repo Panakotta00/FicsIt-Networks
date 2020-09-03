@@ -1,5 +1,7 @@
 ﻿#include "FINComputerGPUT1.h"
 
+
+#include "UnrealNetwork.h"
 #include "WidgetBlueprintLibrary.h"
 #include "WidgetLayoutLibrary.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
@@ -157,6 +159,15 @@ SScreenMonitor::SScreenMonitor() {
 
 AFINComputerGPUT1::AFINComputerGPUT1() {
 	SetScreenSize(FVector2D(120, 30));
+}
+
+void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINComputerGPUT1, TextGrid);
+	DOREPLIFETIME(AFINComputerGPUT1, Foreground);
+	DOREPLIFETIME(AFINComputerGPUT1, Background);
+	DOREPLIFETIME(AFINComputerGPUT1, ScreenSize);
 }
 
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {

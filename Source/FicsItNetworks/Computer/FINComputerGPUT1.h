@@ -130,10 +130,10 @@ UCLASS()
 class AFINComputerGPUT1 : public AFINComputerGPU {
 	GENERATED_BODY()
 private:
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	TArray<FString> TextGrid;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	FVector2D ScreenSize;
 
 	UPROPERTY(SaveGame)
@@ -142,10 +142,10 @@ private:
 	UPROPERTY(SaveGame)
 	FLinearColor CurrentBackground = FLinearColor(0,0,0,0);
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	TArray<FLinearColor> Foreground;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	TArray<FLinearColor> Background;
 
 	UPROPERTY(SaveGame)

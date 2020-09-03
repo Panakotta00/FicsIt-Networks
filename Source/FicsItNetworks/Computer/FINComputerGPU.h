@@ -12,7 +12,7 @@ UCLASS()
 class AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface, public IFINNetworkCustomType {
 	GENERATED_BODY()
 protected:
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
     UObject* Screen = nullptr;
 
 	TSharedPtr<SWidget> Widget;

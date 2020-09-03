@@ -8,10 +8,10 @@ class AFINScreenHolo : public AFGBuildableHologram {
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(ReplicatedUsing=ConstructPanels)
+	UPROPERTY(Replicated)
 	int ScreenWidth = 1;
 
-	UPROPERTY(ReplicatedUsing=ConstructPanels)
+	UPROPERTY(Replicated)
 	int ScreenHeight = 1;
 	
 	int OldScreenHeight = 0;
@@ -24,6 +24,10 @@ public:
 	
 	AFINScreenHolo();
 
+	// Begin AActor
+	virtual void Tick(float DeltaSeconds) override;
+	// End AActor
+
 	// Begin AFGBuildableHologram
 	virtual bool DoMultiStepPlacement(bool isInputFromARelease) override;
 	virtual int32 GetBaseCostMultiplier() const override;
@@ -32,7 +36,4 @@ public:
 	virtual AActor* Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) override;
 	virtual void CheckValidFloor() override;
 	// End AFGBuildableHologram
-
-	UFUNCTION()
-	void ConstructPanels();
 };
