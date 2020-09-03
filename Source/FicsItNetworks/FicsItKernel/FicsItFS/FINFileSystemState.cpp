@@ -1,14 +1,21 @@
 #include "FINFileSystemState.h"
 
 #include "FGSaveSystem.h"
-
+#include "TimerManager.h"
 #include "PlatformFilemanager.h"
+#include "UnrealNetwork.h"
 
 AFINFileSystemState::AFINFileSystemState() {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"RootComponent");
 }
 
 AFINFileSystemState::~AFINFileSystemState() {}
+
+void AFINFileSystemState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINFileSystemState, Usage);
+}
 
 void AFINFileSystemState::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
@@ -44,7 +51,10 @@ void AFINFileSystemState::Serialize(FArchive& Ar) {
 }
 
 void AFINFileSystemState::BeginPlay() {
+	Super::BeginPlay();
 	GetDevice();
+	
+	if (HasAuthority()) GetWorld()->GetTimerManager().SetTimer(UsageUpdateHandler, this, &AFINFileSystemState::UpdateUsage, 1.0f, true);
 }
 
 bool AFINFileSystemState::ShouldSave_Implementation() const {
@@ -52,6 +62,8 @@ bool AFINFileSystemState::ShouldSave_Implementation() const {
 }
 
 FileSystem::SRef<FileSystem::Device> AFINFileSystemState::GetDevice() {
+	if (!HasAuthority()) return nullptr;
+	
 	if (!IdCreated) {
 		IdCreated = true;
 		ID = FGuid::NewGuid();
@@ -78,4 +90,10 @@ AFINFileSystemState* AFINFileSystemState::CreateState(UObject* WorldContextObjec
 	FSharedInventoryStatePtr statePtr = FSharedInventoryStatePtr::MakeShared(efs);
 	inInventory->SetStateOnIndex(inSlot, statePtr);
 	return efs;
+}
+
+void AFINFileSystemState::UpdateUsage() {
+	FileSystem::SRef<FileSystem::ByteCountedDevice> Device = GetDevice();
+	if (Device) Usage = Device->getUsed();
+	else Usage = 0.0f;
 }
