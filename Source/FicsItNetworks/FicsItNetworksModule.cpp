@@ -150,7 +150,9 @@ void FFicsItNetworksModule::StartupModule(){
 
 	SUBSCRIBE_METHOD(AFGGameMode::PostLogin, [](auto& scope, AFGGameMode* gm, APlayerController* pc) {
 	    if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
+		    UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/Game/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
+	    	gm->RegisterRemoteCallObjectClass(ModuleRCO);
 	    }
 	});
 	
