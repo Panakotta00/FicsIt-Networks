@@ -28,6 +28,9 @@ enum EComputerState {
 	CRASHED
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINStateEEPROM*, EEPROM);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
+
 UCLASS(Blueprintable)
 class AFINComputerCase : public AFGBuildable, public IFINNetworkCustomType {
 	GENERATED_BODY()
@@ -75,8 +78,14 @@ public:
 	UPROPERTY()
 	AFINFileSystemState* Floppy = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TSet<AFINComputerScreen*> Screens;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+	TArray<AFINComputerScreen*> Screens;
+
+	UPROPERTY(BlueprintAssignable)
+	FFINCaseEEPROMUpdateDelegate OnEEPROMUpdate;
+
+	UPROPERTY(BlueprintAssignable)
+	FFINCaseFloppyUpdateDelegate OnFloppyUpdate;
 
 	float KernelTickTime = 0.0;
 
@@ -110,6 +119,12 @@ public:
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("Computer"); }
 	// End IFINNetworkCustomType
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulti_OnEEPROMChanged(AFINStateEEPROM* ChangedEEPROM);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulti_OnFloppyChanged(AFINFileSystemState* ChangedFloppy);
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddProcessor(AFINComputerProcessor* processor);
@@ -184,5 +199,5 @@ public:
 	void HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender);
 
 	UFUNCTION()
-	void OnDriveUpdate(bool added, AFINFileSystemState* drive);
+	void OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive);
 };

@@ -63,6 +63,7 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AFINComputerCase, DataStorage);
 	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
 	DOREPLIFETIME(AFINComputerCase, SerialOutput);
+	DOREPLIFETIME(AFINComputerCase, Screens);
 }
 
 void AFINComputerCase::Serialize(FArchive& Ar) {
@@ -126,8 +127,12 @@ void AFINComputerCase::Factory_Tick(float dt) {
 		
 		FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
         if (dev) {
-        	SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
-        	SerialOutput = SerialOutput.Right(1000);
+        	FString NewSerial = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
+			NewSerial = NewSerial.Right(1000);
+			if (NewSerial != SerialOutput) {
+				SerialOutput = NewSerial;
+				ForceNetUpdate();
+			}
         }
 	}
 }
@@ -158,6 +163,14 @@ void AFINComputerCase::PreSaveGame_Implementation(int32 gameVersion, int32 engin
 
 void AFINComputerCase::PostSaveGame_Implementation(int32 gameVersion, int32 engineVersion) {
 	kernel->PostSerialize(KernelState, false);
+}
+
+void AFINComputerCase::NetMulti_OnEEPROMChanged_Implementation(AFINStateEEPROM* EEPROM) {
+	OnEEPROMUpdate.Broadcast(EEPROM);
+}
+
+void AFINComputerCase::NetMulti_OnFloppyChanged_Implementation(AFINFileSystemState* Floppy) {
+	OnFloppyUpdate.Broadcast(Floppy);
 }
 
 void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
@@ -209,14 +222,14 @@ void AFINComputerCase::RecalculateMemory() {
 void AFINComputerCase::AddDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (DriveHolders.Contains(DriveHolder)) return;
 	DriveHolders.Add(DriveHolder);
-	DriveHolder->OnDriveUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
+	DriveHolder->OnLockedUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
 	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
 	if (FileSystemState) kernel->addDrive(FileSystemState);
 }
 
 void AFINComputerCase::RemoveDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (DriveHolders.Remove(DriveHolder) <= 0) return;
-	DriveHolder->OnDriveUpdate.RemoveDynamic(this, &AFINComputerCase::OnDriveUpdate);
+	DriveHolder->OnLockedUpdate.RemoveDynamic(this, &AFINComputerCase::OnDriveUpdate);
 	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
 	if (FileSystemState) kernel->removeDrive(FileSystemState);
 }
@@ -301,7 +314,9 @@ void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int3
 	if (HasAuthority()) {
 		if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
 			FicsItKernel::Processor* processor = kernel->getProcessor();
-			if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
+			AFINStateEEPROM* EEPROM = UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0);
+			if (processor) processor->setEEPROM(EEPROM);
+			NetMulti_OnEEPROMChanged(EEPROM);
 		} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
 			AFINFileSystemState* state = nullptr;
 			FInventoryStack stack;
@@ -322,25 +337,28 @@ void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int3
 				Floppy = state;
 				kernel->addDrive(Floppy);
 			}
+			NetMulti_OnFloppyChanged(Floppy);
 		}
 	}
 }
 
 void AFINComputerCase::Toggle() {
-	FicsItKernel::Processor* processor = kernel->getProcessor();
-	if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
-	switch (kernel->getState()) {
-	case FicsItKernel::KernelState::SHUTOFF:
-		kernel->start(false);
-		SerialOutput = "";
-		break;
-	case FicsItKernel::KernelState::CRASHED:
-		kernel->start(true);
-		SerialOutput = "";
-		break;
-	default:
-		kernel->stop();	
-		break;
+	if (HasAuthority()) {
+		FicsItKernel::Processor* processor = kernel->getProcessor();
+		if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
+		switch (kernel->getState()) {
+		case FicsItKernel::KernelState::SHUTOFF:
+			kernel->start(false);
+			SerialOutput = "";
+			break;
+		case FicsItKernel::KernelState::CRASHED:
+			kernel->start(true);
+			SerialOutput = "";
+			break;
+		default:
+			kernel->stop();	
+			break;
+		}
 	}
 }
 
@@ -375,10 +393,10 @@ void AFINComputerCase::HandleSignal(const FFINDynamicStructHolder& signal, const
 	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
 }
 
-void AFINComputerCase::OnDriveUpdate(bool added, AFINFileSystemState* drive) {
-	if (added) {
-		kernel->addDrive(drive);
-	} else {
+void AFINComputerCase::OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive) {
+	if (bOldLocked) {
 		kernel->removeDrive(drive);
+	} else {
+		kernel->addDrive(drive);
 	}
 }

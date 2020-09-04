@@ -45,16 +45,23 @@ bool AFINComputerDriveHolder::SetLocked(bool NewLocked) {
 
 	bLocked = NewLocked;
 	
-	OnDriveUpdate.Broadcast(bLocked, IsValid(newState) ? newState : prev);
+	NetMulti_OnLockedUpdate(!bLocked, IsValid(newState) ? newState : prev);
 	prev = newState;
 
 	return true;
 }
 
-void AFINComputerDriveHolder::OnLockedChanged() {
-	OnLockUpdated.Broadcast();
+void AFINComputerDriveHolder::NetMulti_OnDriveUpdate_Implementation(AFINFileSystemState* Drive) {
+	OnDriveUpdate.Broadcast(Drive);
+}
+
+void AFINComputerDriveHolder::NetMulti_OnLockedUpdate_Implementation(bool bOldLocked, AFINFileSystemState* NewOrOldDrive) {
+	OnLockedUpdate.Broadcast(bOldLocked, NewOrOldDrive);
 }
 
 void AFINComputerDriveHolder::OnDriveInventoryUpdate_Implementation(TSubclassOf<UFGItemDescriptor> drive, int32 count) {
-	if (!IsValid(drive)) SetLocked(false);
+	if (HasAuthority()) {
+		NetMulti_OnDriveUpdate(GetDrive());
+		if (!IsValid(drive)) SetLocked(false);
+	}
 }

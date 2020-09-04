@@ -1,12 +1,11 @@
 #pragma once
 
 #include "FINComputerModule.h"
-#include "FGInventoryLibrary.h"
 #include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 #include "FINComputerDriveHolder.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINDriveUpdate, bool, added, AFINFileSystemState*, drive);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFINDriveHolderLockUpdated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINDriveHolderDriveUpdate, AFINFileSystemState*, Drive);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINDriveHolderLockedUpdateDelegate, bool, bOldLocked, AFINFileSystemState*, NewOrOldDrive);
 
 UCLASS()
 class AFINComputerDriveHolder : public AFINComputerModule {
@@ -16,18 +15,18 @@ protected:
 	UPROPERTY(SaveGame)
 	AFINFileSystemState* prev = nullptr;
 
-	UPROPERTY(SaveGame, ReplicatedUsing=OnLockedChanged)
+	UPROPERTY(SaveGame, Replicated)
 	bool bLocked = false;
 	
 public:
-	UPROPERTY(SaveGame, BlueprintReadOnly, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	UFGInventoryComponent* DriveInventory = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, BlueprintAssignable)
-	FFINDriveUpdate OnDriveUpdate;
+	FFINDriveHolderDriveUpdate OnDriveUpdate;
 
 	UPROPERTY(BlueprintAssignable)
-	FFINDriveHolderLockUpdated OnLockUpdated;
+	FFINDriveHolderLockedUpdateDelegate OnLockedUpdate;
 
 	AFINComputerDriveHolder();
 	~AFINComputerDriveHolder();
@@ -40,8 +39,11 @@ public:
 	UFUNCTION(BlueprintSetter)
 	bool SetLocked(bool NewLocked);
 
-	UFUNCTION()
-	void OnLockedChanged();
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulti_OnDriveUpdate(AFINFileSystemState* Drive);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulti_OnLockedUpdate(bool bOldLocked, AFINFileSystemState* NewOrOldDrive);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category="Computer|Drive")
