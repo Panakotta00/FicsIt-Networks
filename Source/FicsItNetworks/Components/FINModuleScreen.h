@@ -47,4 +47,7 @@ public:
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ModuleScreen"); }
 	// End IFINNetworkCustomType
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_OnGPUUpdate();
 };

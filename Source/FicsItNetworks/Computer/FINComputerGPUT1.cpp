@@ -170,6 +170,7 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AFINComputerGPUT1, ScreenSize);
 }
 
+#pragma optimize("", off)
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/Game/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
 	return SNew(SScreenMonitor)
@@ -207,6 +208,7 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 			return FReply::Handled();
         });
 }
+#pragma optimize("", on)
 
 void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	if (ScreenSize == size) return;
@@ -230,6 +232,8 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	BackgroundBuffer = Background;
 
 	netSig_ScreenSizeChanged(oldScreenSize.X, oldScreenSize.Y);
+
+	ForceNetUpdate();
 }
 
 void AFINComputerGPUT1::netSig_OnMouseDown_Implementation(int x, int y, int btn) {}
@@ -314,4 +318,5 @@ void AFINComputerGPUT1::netFunc_flush() {
 	TextGrid = TextGridBuffer;
 	Foreground = ForegroundBuffer;
 	Background = BackgroundBuffer;
+	ForceNetUpdate();
 }

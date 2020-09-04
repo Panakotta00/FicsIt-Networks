@@ -61,6 +61,7 @@ void AFINScreen::OnConstruction(const FTransform& transform) {
 }
 
 void AFINScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
+	Super::EndPlay(endPlayReason);
 	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(nullptr);
 }
 
@@ -74,18 +75,16 @@ bool AFINScreen::ShouldSave_Implementation() const {
 
 void AFINScreen::BindGPU(UObject* gpu) {
 	if (gpu) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
-    if (GPU != gpu) {
-    	if (!gpu) SetWidget(nullptr);
-    	UObject* oldGPU = GPU;
-    	GPU = nullptr;
-    	if (oldGPU) Cast<IFINGPUInterface>(oldGPU)->BindScreen(nullptr);
-    	GPU = gpu;
-    	if (gpu) {
-    		Cast<IFINGPUInterface>(gpu)->BindScreen(this);
-    		Cast<IFINGPUInterface>(gpu)->RequestNewWidget();
-    	}
-    }
-	OnGPUUpdate.Broadcast();
+	if (GPU != gpu) {
+		UObject* oldGPU = GPU;
+		GPU = nullptr;
+		if (oldGPU) Cast<IFINGPUInterface>(oldGPU)->BindScreen(nullptr);
+		GPU = gpu;
+		if (gpu) {
+			Cast<IFINGPUInterface>(gpu)->BindScreen(this);
+		}
+	}
+	NetMulti_OnGPUUpdate();
 }
 
 UObject* AFINScreen::GetGPU() const {
@@ -95,14 +94,14 @@ UObject* AFINScreen::GetGPU() const {
 void AFINScreen::SetWidget(TSharedPtr<SWidget> widget) {
 	if (Widget != widget) Widget = widget;
 	WidgetComponent->SetSlateWidget(
-        Widget.IsValid() ?
-            SNew(SScaleBox)
-            .Stretch(EStretch::ScaleToFit)
-            .Content()[
-                Widget.ToSharedRef()
-            ]
-        :
-            TSharedPtr<SScaleBox>(nullptr));
+		Widget.IsValid() ?
+			SNew(SScaleBox)
+			.Stretch(EStretch::ScaleToFit)
+			.Content()[
+				Widget.ToSharedRef()
+			]
+		:
+			TSharedPtr<SScaleBox>(nullptr));
 	OnWidgetUpdate.Broadcast();
 }
 
@@ -113,6 +112,15 @@ TSharedPtr<SWidget> AFINScreen::GetWidget() const {
 void AFINScreen::netFunc_getSize(int& w, int& h) {
 	w = FMath::Abs(ScreenWidth);
 	h = FMath::Abs(ScreenHeight);
+}
+
+void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {
+	if (GPU) {
+		Cast<IFINGPUInterface>(GPU)->RequestNewWidget();
+	} else {
+		SetWidget(nullptr);
+	}
+	OnGPUUpdate.Broadcast();
 }
 
 void AFINScreen::SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts) {
@@ -211,10 +219,10 @@ void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPa
 	}
 	
 	int fx = ScreenWidth < 0 ? -3 : 1;
-    int fy = ScreenHeight < 0 ? -3 : 1;
+	int fy = ScreenHeight < 0 ? -3 : 1;
 	switch(r) {
 	case 0:
-        CornerPart->SetRelativeLocation(FVector(0, x * 100 - 50*fx, y * 100 - 50*fy));
+		CornerPart->SetRelativeLocation(FVector(0, x * 100 - 50*fx, y * 100 - 50*fy));
 		CornerPart->SetRelativeRotation(FRotator(0, 0, 0));
 		break;
 	case -1:
@@ -222,7 +230,7 @@ void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPa
 		CornerPart->SetRelativeRotation(FRotator(0, 0, 90));
 		break;
 	case 1:
-        CornerPart->SetRelativeLocation(FVector(0, x * 100 + 50, y * 100 - 50*fy));
+		CornerPart->SetRelativeLocation(FVector(0, x * 100 + 50, y * 100 - 50*fy));
 		CornerPart->SetRelativeRotation(FRotator(0, 0, -90));
 		break;
 	case 2:
@@ -230,7 +238,7 @@ void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPa
 		CornerPart->SetRelativeRotation(FRotator(0, 0, 180));
 		break;
 	default:
-        break;
+		break;
 	}
 	CornerPart->RegisterComponent();
 	CornerPart->CreationMethod = EComponentCreationMethod::UserConstructionScript;

@@ -85,6 +85,9 @@ public:
 
 	UFUNCTION()
 	void netFunc_getSize(int& w, int& h);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_OnGPUUpdate();
 	
 	static void SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts);
 	static void SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
