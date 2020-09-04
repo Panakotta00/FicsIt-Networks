@@ -265,34 +265,38 @@ void AFINComputerCase::RemoveNetCard(AFINComputerNetworkCard* NetCard) {
 }
 
 void AFINComputerCase::AddModule(AActor* module) {
-	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
-		AddProcessor(processor);
-	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
-		AddMemory(memory);
-	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
-		AddDrive(holder);
-	} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
-		AddScreen(screen);
-	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
-		AddGPU(gpu);
-	} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
-		AddNetCard(netCard);
+	if (HasAuthority()) {
+		if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
+			AddProcessor(processor);
+		} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
+			AddMemory(memory);
+		} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
+			AddDrive(holder);
+		} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
+			AddScreen(screen);
+		} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
+			AddGPU(gpu);
+		} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
+			AddNetCard(netCard);
+		}
 	}
 }
 
 void AFINComputerCase::RemoveModule(AActor* module) {
-	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
-		RemoveProcessor(processor);
-	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
-		RemoveMemory(memory);
-	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
-		RemoveDrive(holder);
-	} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
-		RemoveScreen(screen);
-	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
-		RemoveGPU(gpu);
-	} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
-		RemoveNetCard(netCard);
+	if (HasAuthority()) {
+		if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
+			RemoveProcessor(processor);
+		} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
+			RemoveMemory(memory);
+		} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
+			RemoveDrive(holder);
+		} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
+			RemoveScreen(screen);
+		} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
+			RemoveGPU(gpu);
+		} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
+			RemoveNetCard(netCard);
+		}
 	}
 }
 

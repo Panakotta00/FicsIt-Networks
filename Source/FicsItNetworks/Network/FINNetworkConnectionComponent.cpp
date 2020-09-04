@@ -36,6 +36,7 @@ AFINNetworkCircuit* UFINNetworkConnectionComponent::GetCircuit_Implementation() 
 
 void UFINNetworkConnectionComponent::SetCircuit_Implementation(AFINNetworkCircuit* Circuit) {
 	this->Circuit = Circuit;
+	GetOwner()->ForceNetUpdate();
 }
 
 void UFINNetworkConnectionComponent::NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) {}
@@ -48,6 +49,8 @@ void UFINNetworkConnectionComponent::AddConnectedNode(TScriptInterface<IFINNetwo
 	if (Obj) Obj->AddConnectedNode(this);
 
 	AFINNetworkCircuit::ConnectNodes(this, this, Node);
+
+	GetOwner()->ForceNetUpdate();
 }
 
 void UFINNetworkConnectionComponent::RemoveConnectedNode(TScriptInterface<IFINNetworkCircuitNode> Node) {
@@ -58,6 +61,8 @@ void UFINNetworkConnectionComponent::RemoveConnectedNode(TScriptInterface<IFINNe
 	if (Obj) Obj->ConnectedNodes.Remove(this);
 	
 	AFINNetworkCircuit::DisconnectNodes(this, this, Node);
+
+	GetOwner()->ForceNetUpdate();
 }
 
 bool UFINNetworkConnectionComponent::AddConnectedCable(AFINNetworkCable* Cable) {
@@ -71,6 +76,8 @@ bool UFINNetworkConnectionComponent::AddConnectedCable(AFINNetworkCable* Cable) 
 		OtherConnector->AddConnectedCable(Cable);
 		AFINNetworkCircuit::ConnectNodes(this, this, OtherConnector);
 	}
+
+	GetOwner()->ForceNetUpdate();
 	
 	return true;
 }
@@ -85,6 +92,8 @@ void UFINNetworkConnectionComponent::RemoveConnectedCable(AFINNetworkCable* Cabl
 			AFINNetworkCircuit::DisconnectNodes(OtherConnector->Circuit, this, OtherConnector);
 		}
 	}
+
+	GetOwner()->ForceNetUpdate();
 }
 
 bool UFINNetworkConnectionComponent::IsConnected(const TScriptInterface<IFINNetworkCircuitNode>& Node) const {

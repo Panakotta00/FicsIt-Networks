@@ -15,7 +15,6 @@ void AFINIndicatorPoleHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 void AFINIndicatorPoleHolo::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
-	SML::Logging::error(LastHeight, " -> ", Height);
 	if (LastHeight != Height) {
 		for (int i = LastHeight; i > Height; --i) {
 			if (i < 0) continue;

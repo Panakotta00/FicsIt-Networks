@@ -103,9 +103,7 @@ TSet<UObject*> AFINNetworkCircuit::FindComponentsByNick(const FString& Nick, con
 	return Comps;
 }
 
-#pragma optimize("", off)
 TSet<UObject*> AFINNetworkCircuit::GetComponents() {
-	SML::Logging::error(Nodes.Num());
 	TSet<UObject*> Comps;
 	for (const TSoftObjectPtr<UObject>& Node : Nodes) {
 		UObject* Obj = Node.Get();
@@ -113,7 +111,6 @@ TSet<UObject*> AFINNetworkCircuit::GetComponents() {
 	}
 	return Comps;
 }
-#pragma optimize("", on)
 
 bool AFINNetworkCircuit::IsNodeConnected(const TScriptInterface<IFINNetworkCircuitNode>& Start, const TScriptInterface<IFINNetworkCircuitNode>& Node) {
 	TSet<UObject*> Searched;
