@@ -61,6 +61,7 @@ FString UFINAdvancedNetworkConnectionComponent::GetNick_Implementation() const {
 
 void UFINAdvancedNetworkConnectionComponent::SetNick_Implementation(const FString& Nick) {
 	this->Nick = Nick;
+	GetOwner()->ForceNetUpdate();
 }
 
 bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FString& Nick) {

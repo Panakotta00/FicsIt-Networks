@@ -87,6 +87,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FFINCaseFloppyUpdateDelegate OnFloppyUpdate;
 
+	FString OldSerialOutput = "";
+
 	float KernelTickTime = 0.0;
 
 	AFINComputerCase();

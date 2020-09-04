@@ -109,6 +109,10 @@ void AFINComputerCase::BeginPlay() {
 
 void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
 	if (kernel) kernel->handleFutures();
+	if (OldSerialOutput != SerialOutput) {
+		OldSerialOutput = SerialOutput;
+		ForceNetUpdate();
+	}
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
@@ -127,12 +131,8 @@ void AFINComputerCase::Factory_Tick(float dt) {
 		
 		FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
         if (dev) {
-        	FString NewSerial = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
-			NewSerial = NewSerial.Right(1000);
-			if (NewSerial != SerialOutput) {
-				SerialOutput = NewSerial;
-				ForceNetUpdate();
-			}
+        	SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
+			SerialOutput = SerialOutput.Right(1000);
         }
 	}
 }
@@ -354,10 +354,12 @@ void AFINComputerCase::Toggle() {
 		case FicsItKernel::KernelState::SHUTOFF:
 			kernel->start(false);
 			SerialOutput = "";
+			ForceNetUpdate();
 			break;
 		case FicsItKernel::KernelState::CRASHED:
 			kernel->start(true);
 			SerialOutput = "";
+			ForceNetUpdate();
 			break;
 		default:
 			kernel->stop();	

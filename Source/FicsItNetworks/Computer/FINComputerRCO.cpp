@@ -18,6 +18,7 @@ bool UFINComputerRCO::SetLuaEEPROMCode_Validate(AFINStateEEPROMLua* LuaEEPROMSta
 
 void UFINComputerRCO::SetCaseLastTab_Implementation(AFINComputerCase* Case, int LastTab) {
 	Case->LastTabIndex = LastTab;
+	Case->ForceNetUpdate();
 }
 
 bool UFINComputerRCO::SetCaseLastTab_Validate(AFINComputerCase* Case, int LastTab) {
