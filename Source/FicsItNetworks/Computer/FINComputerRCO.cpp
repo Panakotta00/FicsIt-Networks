@@ -32,3 +32,11 @@ void UFINComputerRCO::SetDriveHolderLocked_Implementation(AFINComputerDriveHolde
 bool UFINComputerRCO::SetDriveHolderLocked_Validate(AFINComputerDriveHolder* Holder, bool bLocked) {
 	return true;
 }
+
+void UFINComputerRCO::ToggleCase_Implementation(AFINComputerCase* Case) {
+	Case->Toggle();
+}
+
+bool UFINComputerRCO::ToggleCase_Validate(AFINComputerCase* Case) {
+	return true;
+}

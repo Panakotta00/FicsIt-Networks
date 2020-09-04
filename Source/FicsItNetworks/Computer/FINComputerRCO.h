@@ -7,7 +7,7 @@
 #include "FicsItKernel/Processor/Lua/FINStateEEPROMLua.h"
 #include "FINComputerRCO.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class UFINComputerRCO : public UFGRemoteCallObject {
 	GENERATED_BODY()
 	
@@ -23,4 +23,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
 	void SetDriveHolderLocked(AFINComputerDriveHolder* Holder, bool bLocked);
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
+	void ToggleCase(AFINComputerCase* Case);
 };
