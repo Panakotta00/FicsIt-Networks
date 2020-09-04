@@ -149,13 +149,13 @@ private:
 	TArray<FLinearColor> Background;
 
 	UPROPERTY(SaveGame)
-    TArray<FString> TextGridBuffer;
+	TArray<FString> TextGridBuffer;
 
 	UPROPERTY(SaveGame)
-    TArray<FLinearColor> ForegroundBuffer;
+	TArray<FLinearColor> ForegroundBuffer;
 
 	UPROPERTY(SaveGame)
-    TArray<FLinearColor> BackgroundBuffer;
+	TArray<FLinearColor> BackgroundBuffer;
 	
 	UPROPERTY()
 	FSlateBrush boxBrush;
@@ -170,10 +170,10 @@ public:
 	virtual TSharedPtr<SWidget> CreateWidget() override;
 
 	/**
-	 * Reallocates the TextGrid for the new given screen size.
-	 *
-	 * @param[in]	size	the new screen size
-	 */
+	* Reallocates the TextGrid for the new given screen size.
+	*
+	* @param[in]	size	the new screen size
+	*/
 	void SetScreenSize(FVector2D size);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)

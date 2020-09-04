@@ -4,6 +4,7 @@
 #include "FGRemoteCallObject.h"
 #include "FINComputerCase.h"
 #include "FINComputerDriveHolder.h"
+#include "FINComputerGPUT1.h"
 #include "FicsItKernel/Processor/Lua/FINStateEEPROMLua.h"
 #include "FINComputerRCO.generated.h"
 
@@ -29,4 +30,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
 	void SetNick(UObject* Component, const FString& Nick);
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
+	void GPUMouseEvent(AFINComputerGPUT1* GPU, int type, int x, int y, int btn);
+	
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
+	void GPUKeyEvent(AFINComputerGPUT1* GPU, int type, int64 c, int64 code, int btn);
 };

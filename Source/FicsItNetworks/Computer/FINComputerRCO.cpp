@@ -1,5 +1,7 @@
 ﻿#include "FINComputerRCO.h"
 
+
+#include "FINComputerGPUT1.h"
 #include "UnrealNetwork.h"
 
 void UFINComputerRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -46,5 +48,38 @@ void UFINComputerRCO::SetNick_Implementation(UObject* Component, const FString& 
 }
 
 bool UFINComputerRCO::SetNick_Validate(UObject* Component, const FString& Nick) {
+	return true;
+}
+
+void UFINComputerRCO::GPUMouseEvent_Implementation(AFINComputerGPUT1* GPU, int type, int x, int y, int btn) {
+	switch (type) {
+	case 0:
+		GPU->netSig_OnMouseDown(x, y, btn);
+		break;
+	case 1:
+		GPU->netSig_OnMouseUp(x, y, btn);
+		break;
+	case 2:
+		GPU->netSig_OnMouseMove(x, y, btn);
+		break;
+	}
+}
+
+bool UFINComputerRCO::GPUMouseEvent_Validate(AFINComputerGPUT1* GPU, int type, int x, int y, int btn) {
+	return true;
+}
+
+void UFINComputerRCO::GPUKeyEvent_Implementation(AFINComputerGPUT1* GPU, int type, int64 c, int64 code, int btn) {
+	switch (type) {
+	case 0:
+		GPU->netSig_OnKeyDown(c, code, btn);
+		break;
+	case 1:
+		GPU->netSig_OnKeyUp(c, code, btn);
+		break;
+	}
+}
+
+bool UFINComputerRCO::GPUKeyEvent_Validate(AFINComputerGPUT1* GPU, int type, int64 c, int64 code, int btn) {
 	return true;
 }

@@ -1,6 +1,7 @@
 ﻿#include "FINComputerGPUT1.h"
 
 
+#include "FINComputerRCO.h"
 #include "UnrealNetwork.h"
 #include "WidgetBlueprintLibrary.h"
 #include "WidgetLayoutLibrary.h"
@@ -173,6 +174,7 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 #pragma optimize("", off)
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/Game/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
+	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SNew(SScreenMonitor)
 		.ScreenSize_Lambda([this]() {
 			return ScreenSize;
@@ -187,24 +189,28 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 			return Background;
 		})
 		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/Game/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
-		.OnMouseDown_Lambda([this](int x, int y, int btn) {
-			netSig_OnMouseDown(x, y, btn);
+		.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
+			RCO->GPUMouseEvent(this, 0, x, y, btn);
 			return FReply::Handled();
 		})
-		.OnMouseUp_Lambda([this](int x, int y, int btn) {
+		.OnMouseUp_Lambda([this, RCO](int x, int y, int btn) {
             netSig_OnMouseUp(x, y, btn);
+			RCO->GPUMouseEvent(this, 1, x, y, btn);
             return FReply::Handled();
         })
-        .OnMouseMove_Lambda([this](int x, int y, int btn) {
+        .OnMouseMove_Lambda([this, RCO](int x, int y, int btn) {
             netSig_OnMouseMove(x, y, btn);
+			RCO->GPUMouseEvent(this, 2, x, y, btn);
             return FReply::Handled();
         })
-		.OnKeyDown_Lambda([this](uint32 c, uint32 key, int btn) {
+		.OnKeyDown_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
 			netSig_OnKeyDown(c, key, btn);
+			RCO->GPUKeyEvent(this, 0,  c, key, btn);
 			return FReply::Handled();
 		})
-		.OnKeyUp_Lambda([this](uint32 c, uint32 key, int btn) {
+		.OnKeyUp_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
             netSig_OnKeyUp(c, key, btn);
+			RCO->GPUKeyEvent(this, 1,  c, key, btn);
 			return FReply::Handled();
         });
 }
