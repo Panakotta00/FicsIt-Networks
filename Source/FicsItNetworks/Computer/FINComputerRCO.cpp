@@ -10,7 +10,6 @@ void UFINComputerRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void UFINComputerRCO::SetLuaEEPROMCode_Implementation(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
 	LuaEEPROMState->SetCode(NewCode);
-	SML::Logging::error("fuck off");
 }
 
 bool UFINComputerRCO::SetLuaEEPROMCode_Validate(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
@@ -38,5 +37,13 @@ void UFINComputerRCO::ToggleCase_Implementation(AFINComputerCase* Case) {
 }
 
 bool UFINComputerRCO::ToggleCase_Validate(AFINComputerCase* Case) {
+	return true;
+}
+
+void UFINComputerRCO::SetNick_Implementation(UObject* Component, const FString& Nick) {
+	if (Component->Implements<UFINNetworkComponent>() && IsValid(Component)) IFINNetworkComponent::Execute_SetNick(Component, Nick);
+}
+
+bool UFINComputerRCO::SetNick_Validate(UObject* Component, const FString& Nick) {
 	return true;
 }

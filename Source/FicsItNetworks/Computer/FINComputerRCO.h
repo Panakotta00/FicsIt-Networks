@@ -26,4 +26,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
 	void ToggleCase(AFINComputerCase* Case);
+	
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
+	void SetNick(UObject* Component, const FString& Nick);
 };
