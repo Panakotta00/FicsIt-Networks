@@ -87,6 +87,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FFINCaseFloppyUpdateDelegate OnFloppyUpdate;
 
+	UPROPERTY(Replicated)
+	TEnumAsByte<EComputerState> InternalKernelState = EComputerState::SHUTOFF;
+
 	FString OldSerialOutput = "";
 
 	float KernelTickTime = 0.0;

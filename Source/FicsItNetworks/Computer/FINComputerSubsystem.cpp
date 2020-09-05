@@ -13,6 +13,9 @@ AFINComputerSubsystem::AFINComputerSubsystem() {
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	SetReplicates(true);
+	bAlwaysRelevant = true;
 }
 
 void AFINComputerSubsystem::OnConstruction(const FTransform& Transform) {
@@ -21,6 +24,10 @@ void AFINComputerSubsystem::OnConstruction(const FTransform& Transform) {
 
 void AFINComputerSubsystem::BeginPlay() {
 	Super::BeginPlay();
+
+	TArray<AActor*> FoundCharacters;
+	UGameplayStatics::GetAllActorsOfClass(this, AFGCharacterPlayer::StaticClass(), FoundCharacters);
+	for (AActor* Character : FoundCharacters) AttachWidgetInteractionToPlayer(Cast<AFGCharacterPlayer>(Character));
 }
 
 void AFINComputerSubsystem::Tick(float dt) {
@@ -79,19 +86,35 @@ void AFINComputerSubsystem::OnSecondaryFireReleased() {
 
 AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* WorldContext) {
 #if WITH_EDITOR
-	return nullptr;
 #endif
-	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->ComputerSubsystem;
+	UFINSubsystemHolder* Holder = GetSubsystemHolder<UFINSubsystemHolder>(WorldContext);
+	if (Holder) return Holder->ComputerSubsystem;
+	else {
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(WorldContext->GetWorld(), AFINComputerSubsystem::StaticClass(), FoundActors);
+		if (FoundActors.Num() > 0) return Cast<AFINComputerSubsystem>(FoundActors[0]);
+		else return nullptr;
+	}
 }
 
-UWidgetInteractionComponent* AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
-	if (ScreenInteraction) ScreenInteraction->UnregisterComponent();
-	ScreenInteraction = NewObject<UWidgetInteractionComponent>(character);
-	ScreenInteraction->InteractionSource = EWidgetInteractionSource::World;
+void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
+	if (!IsValid(character)) return;
+	DetachWidgetInteractionToPlayer(character);
+	UWidgetInteractionComponent* Comp = NewObject<UWidgetInteractionComponent>(character);
+	Comp->InteractionSource = EWidgetInteractionSource::World;
 	UCameraComponent* cam = Cast<UCameraComponent>(character->GetComponentByClass(UCameraComponent::StaticClass()));
-	ScreenInteraction->InteractionDistance = 10000.0;
-	ScreenInteraction->VirtualUserIndex = 1;
-	ScreenInteraction->RegisterComponent();
-	ScreenInteraction->AttachToComponent(cam, FAttachmentTransformRules::KeepRelativeTransform);
-	return ScreenInteraction;
+	Comp->InteractionDistance = 10000.0;
+	Comp->VirtualUserIndex = 1;
+	Comp->RegisterComponent();
+	Comp->AttachToComponent(cam, FAttachmentTransformRules::KeepRelativeTransform);
+	ScreenInteraction.Add(character, Comp);
+}
+
+void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
+	if (!IsValid(character)) return;
+	UWidgetInteractionComponent** Comp = ScreenInteraction.Find(character);
+	if (Comp) {
+		(*Comp)->UnregisterComponent();
+		ScreenInteraction.Remove(character);
+	}
 }

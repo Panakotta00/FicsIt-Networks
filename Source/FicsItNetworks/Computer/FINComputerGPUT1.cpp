@@ -160,6 +160,16 @@ SScreenMonitor::SScreenMonitor() {
 
 AFINComputerGPUT1::AFINComputerGPUT1() {
 	SetScreenSize(FVector2D(120, 30));
+
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
+}
+
+void AFINComputerGPUT1::Tick(float DeltaSeconds) {
+	if (HasAuthority() && bFlushed) {
+		bFlushed = false;
+		ForceNetUpdate();
+	}
 }
 
 void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -324,5 +334,5 @@ void AFINComputerGPUT1::netFunc_flush() {
 	TextGrid = TextGridBuffer;
 	Foreground = ForegroundBuffer;
 	Background = BackgroundBuffer;
-	ForceNetUpdate();
+	bFlushed = true;
 }

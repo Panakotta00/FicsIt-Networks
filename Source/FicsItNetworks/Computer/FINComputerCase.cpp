@@ -64,6 +64,7 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
 	DOREPLIFETIME(AFINComputerCase, SerialOutput);
 	DOREPLIFETIME(AFINComputerCase, Screens);
+	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
 }
 
 void AFINComputerCase::Serialize(FArchive& Ar) {
@@ -108,10 +109,35 @@ void AFINComputerCase::BeginPlay() {
 }
 
 void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
-	if (kernel) kernel->handleFutures();
-	if (OldSerialOutput != SerialOutput) {
-		OldSerialOutput = SerialOutput;
-		ForceNetUpdate();
+	if (HasAuthority()) {
+		bool bNetUpdate = false;
+		if (kernel) {
+			kernel->handleFutures();
+			EComputerState NewState;
+			using State = FicsItKernel::KernelState;
+			switch (kernel->getState()) {
+			case State::RUNNING:
+				NewState = EComputerState::RUNNING;
+				break;
+			case State::SHUTOFF:
+				NewState = EComputerState::SHUTOFF;
+				break;
+			default:
+				NewState = EComputerState::CRASHED;
+				break;
+			}
+			if (NewState != InternalKernelState) {
+				InternalKernelState = NewState;
+				bNetUpdate = true;
+			}
+		}
+		if (OldSerialOutput != SerialOutput) {
+			OldSerialOutput = SerialOutput;
+			bNetUpdate = true;
+		}
+		if (bNetUpdate) {
+			ForceNetUpdate();
+		}
 	}
 }
 
@@ -373,15 +399,7 @@ FString AFINComputerCase::GetCrash() {
 }
 
 EComputerState AFINComputerCase::GetState() {
-	using State = FicsItKernel::KernelState;
-	switch (kernel->getState()) {
-	case State::RUNNING:
-		return EComputerState::RUNNING;
-	case State::SHUTOFF:
-		return EComputerState::SHUTOFF;
-	default:
-		return EComputerState::CRASHED;
-	}
+	return InternalKernelState;
 }
 
 FString AFINComputerCase::GetSerialOutput() {

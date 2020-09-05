@@ -159,9 +159,15 @@ private:
 	
 	UPROPERTY()
 	FSlateBrush boxBrush;
+
+	bool bFlushed = false;
 	
 public:
 	AFINComputerGPUT1();
+
+	// Begin AActor
+	virtual void Tick(float DeltaSeconds) override;
+	// End AActor
 
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("GPUT1"); }

@@ -76,7 +76,8 @@ bool AFINComputerNetworkCard::IsPortOpen(int Port) {
 
 void AFINComputerNetworkCard::HandleMessage(FFINNetworkTrace Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) {
 	for (const FFINNetworkTrace& Listener : Listeners) {
-		Cast<IFINSignalListener>(*Listener)->HandleSignal(FFINNetworkMessageSignal(IFINNetworkComponent::Execute_GetID(*Sender), Port, Data), Listener.Reverse());
+		IFINSignalListener* L = Cast<IFINSignalListener>(*Listener);
+		if (L) L->HandleSignal(FFINNetworkMessageSignal(IFINNetworkComponent::Execute_GetID(*Sender), Port, Data), Listener.Reverse());
 	}
 }
 

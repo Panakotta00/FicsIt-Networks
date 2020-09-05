@@ -84,6 +84,10 @@ void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IF
 	}
 }
 
+class AActor_public : public AActor {
+	friend void FFicsItNetworksModule::StartupModule();
+};
+
 #pragma optimize("", off)
 void FFicsItNetworksModule::StartupModule(){
 	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
@@ -141,12 +145,18 @@ void FFicsItNetworksModule::StartupModule(){
 
 	SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
 
-	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::OnConstruction, [](AActor* self, const FTransform& t) {
+	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor_public::BeginPlay, [](AActor* self) {
 		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
-        if (character && character->HasAuthority()) {
-	        AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld())->AttachWidgetInteractionToPlayer(character);
+        if (character) {
+	        AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
+        	if (SubSys) SubSys->AttachWidgetInteractionToPlayer(character);
 		}
 	})
+
+	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::EndPlay, [](AActor* self, EEndPlayReason::Type Reason) {
+        AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
+        if (character) AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld())->DetachWidgetInteractionToPlayer(character);
+    })
 
 	SUBSCRIBE_METHOD(AFGGameMode::PostLogin, [](auto& scope, AFGGameMode* gm, APlayerController* pc) {
 	    if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
