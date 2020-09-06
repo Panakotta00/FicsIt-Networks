@@ -42,6 +42,14 @@ void AFINIndicatorPoleHolo::Tick(float DeltaSeconds) {
 	}
 }
 
+void AFINIndicatorPoleHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+	for (UStaticMeshComponent* Pole : Poles) {
+		Pole->UnregisterComponent();
+	}
+	Poles.Empty();
+}
+
 bool AFINIndicatorPoleHolo::DoMultiStepPlacement(bool isInputFromARelease) {
 	if (bSnapped) {
 		return true;
@@ -79,31 +87,15 @@ void AFINIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& hit
 	}
 }
 
-AActor* AFINIndicatorPoleHolo::Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) {
-	FRotator rotation = GetActorRotation();
-	FVector location = GetActorLocation();
-	
-	FActorSpawnParameters spawnParams;
-	spawnParams.bDeferConstruction = true;
+void AFINIndicatorPoleHolo::ConfigureActor(AFGBuildable* inBuildable) const {
+	Super::ConfigureActor(inBuildable);
 
-	AFINIndicatorPole* a = GetWorld()->SpawnActor<AFINIndicatorPole>(this->mBuildClass, location, rotation, spawnParams);
-	a->SetBuiltWithRecipe(GetRecipe());
-	a->Height = GetHeight(GetActorLocation());
+	AFINIndicatorPole* Pole = Cast<AFINIndicatorPole>(inBuildable);
+	Pole->Height = GetHeight(GetActorLocation());
 	if (SnappedPole.IsValid()) {
-		a->BottomConnected = SnappedPole.Get();
-		SnappedPole->TopConnected = a;
+		Pole->BottomConnected = SnappedPole.Get();
+		SnappedPole->TopConnected = Pole;
 	}
-
-	// Reset
-	bSnapped = false;
-	SnappedPole = nullptr;
-	for (UStaticMeshComponent* Pole : Poles) {
-		Pole->UnregisterComponent();
-	}
-	Poles.Empty();
-	LastHeight = 0;
-	
-	return UGameplayStatics::FinishSpawningActor(a, FTransform(rotation.Quaternion(), location));
 }
 
 void AFINIndicatorPoleHolo::CheckValidFloor() {

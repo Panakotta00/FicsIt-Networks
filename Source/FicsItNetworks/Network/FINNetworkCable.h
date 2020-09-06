@@ -41,4 +41,7 @@ public:
 
 	UFUNCTION()
 	void OnConnectorUpdate();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ConnectConnectors();
 };

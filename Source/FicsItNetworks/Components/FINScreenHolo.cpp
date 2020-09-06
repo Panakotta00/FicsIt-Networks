@@ -13,7 +13,7 @@ AFINScreenHolo::AFINScreenHolo() {
 void AFINScreenHolo::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
-	if (OldScreenHeight != ScreenHeight || OldScreenWidth != ScreenWidth) {
+	if ((OldScreenHeight != ScreenHeight || OldScreenWidth != ScreenWidth)) {
 		OldScreenHeight = ScreenHeight;
 		OldScreenWidth = ScreenWidth;
 		
@@ -34,6 +34,21 @@ void AFINScreenHolo::Tick(float DeltaSeconds) {
 			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 	}
+}
+
+void AFINScreenHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+
+	SetActorTickEnabled(false);
+	
+	for (UStaticMeshComponent* Part : Parts) {
+		Part->UnregisterComponent();
+		Part->SetActive(false);
+		Part->DestroyComponent();
+	}
+	Parts.Empty();
+	SetActorHiddenInGame(true);
+	SML::Logging::error("EndPlay");
 }
 
 void AFINScreenHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -98,26 +113,15 @@ void AFINScreenHolo::SetHologramLocationAndRotation(const FHitResult& hitResult)
 AActor* AFINScreenHolo::Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) {
 	bSnapped = false;
 
-	FRotator rotation = GetActorRotation();
-	FVector location = GetActorLocation();
-	
-	FActorSpawnParameters spawnParams;
-	spawnParams.bDeferConstruction = true;
-
-	AFINScreen* a = GetWorld()->SpawnActor<AFINScreen>(this->mBuildClass, location, rotation, spawnParams);
-	a->SetBuiltWithRecipe(GetRecipe());
-	a->ScreenHeight = ScreenHeight;
-	a->ScreenWidth = ScreenWidth;
-	
-	// Clear Components
-	for (UStaticMeshComponent* comp : Parts) {
-		comp->UnregisterComponent();
-		comp->SetActive(false);
-		comp->DestroyComponent();
-	}
-	Parts.Empty();
-	
-	return UGameplayStatics::FinishSpawningActor(a, FTransform(rotation.Quaternion(), location));
+	return Super::Construct(out_children, netConstructionID);
 }
 
 void AFINScreenHolo::CheckValidFloor() {}
+
+void AFINScreenHolo::ConfigureActor(AFGBuildable* inBuildable) const {
+	Super::ConfigureActor(inBuildable);
+	
+	AFINScreen* Screen = Cast<AFINScreen>(inBuildable);
+	Screen->ScreenHeight = ScreenHeight;
+	Screen->ScreenWidth = ScreenWidth;
+}

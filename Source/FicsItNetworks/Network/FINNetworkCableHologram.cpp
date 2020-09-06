@@ -74,7 +74,7 @@ bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {
 	return false;
 }
 
-UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINSnappedInfo s, TArray<AActor*>& childs, FNetConstructionID id) {
+UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINSnappedInfo s) {
 	switch (s.SnapType) {
 	case FIN_CONNECTOR:
 		return Cast<UFINNetworkConnectionComponent>(s.SnappedObj);
@@ -92,36 +92,37 @@ UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINSnapp
 		a->SetActorLocation(Location);
 		return a->Connector;
 	} case FIN_POLE: {
-		AActor* Constructed = PoleHologram->Construct(childs, id);
-		childs.Add(Constructed);
-		TArray<UActorComponent*> Comp = Constructed->GetComponentsByClass(UFINNetworkConnectionComponent::StaticClass());
-		check(Comp.Num() > 0);
-		return Cast<UFINNetworkConnectionComponent>(Comp[0]);
+		return nullptr;
 	} default:
 		return nullptr;
 	}
 }
 
 AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstructionID constructionID) {
-	UFINNetworkConnectionComponent* c1 = SetupSnapped(Snapped, childs, constructionID);
-	UFINNetworkConnectionComponent* c2 = SetupSnapped(From, childs, constructionID);
-	
-	FRotator rotation = FRotator::ZeroRotator;
-	FVector location = c1->GetComponentToWorld().GetTranslation();
-	
-	FActorSpawnParameters spawnParams;
-	spawnParams.bDeferConstruction = true;
+	Connector1Cache = SetupSnapped(From);
+	Connector2Cache = SetupSnapped(Snapped);
 
-	AFINNetworkCable* a = GetWorld()->SpawnActor<AFINNetworkCable>(this->mBuildClass, location, rotation, spawnParams);
+	SetActorLocation(Connector1Cache->GetComponentToWorld().GetTranslation());
+	AFINNetworkCable* Cable = Cast<AFINNetworkCable>(Super::Construct(childs, constructionID));
+	if (Snapped.SnapType == EFINNetworkCableHologramSnapType::FIN_POLE) {
+		AActor* Pole = childs[0];
+		UFINNetworkConnectionComponent* Con = Cast<UFINNetworkConnectionComponent>(Pole->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
+		Cable->Connector2 = Con;
+		Cable->ConnectConnectors();
+	}
 	
-	FTransform t = a->GetTransform();
+	Snapped = FFINSnappedInfo();
+	From = FFINSnappedInfo();
+	ForceNetUpdate();
+	return Cable;
+}
 
-	a->Connector1 = c1;
-	a->Connector2 = c2;
+void AFINNetworkCableHologram::ConfigureActor(AFGBuildable* inBuildable) const {
+	Super::ConfigureActor(inBuildable);
 
-	a->SetBuiltWithRecipe(GetRecipe());
-	
-	return UGameplayStatics::FinishSpawningActor(a, FTransform(rotation.Quaternion(), location));
+	AFINNetworkCable* Cable = Cast<AFINNetworkCable>(inBuildable);
+	Cable->Connector1 = Connector1Cache;
+	Cable->Connector2 = Connector2Cache;
 }
 
 int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {

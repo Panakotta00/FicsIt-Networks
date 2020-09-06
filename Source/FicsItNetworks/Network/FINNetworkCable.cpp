@@ -22,6 +22,7 @@ void AFINNetworkCable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 }
 
 void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
+	Super::OnConstruction(Transform);
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
@@ -48,18 +49,11 @@ void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
 void AFINNetworkCable::BeginPlay() {
 	Super::BeginPlay();
 	
-	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
-
-	if (HasAuthority()) {
-		Connector1->AddConnectedCable(this);
-		Connector2->AddConnectedCable(this);
-	}
-		
-	RerunConstructionScripts();
+	ConnectConnectors();
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
-	if (HasAuthority() && IsValid(this)) {
+	if (HasAuthority() && IsValid(this) && (reason == EEndPlayReason::Destroyed)) {
 		if (IsValid(Connector1)) {
 			Connector1->RemoveConnectedCable(this);
 		}
@@ -86,5 +80,15 @@ int32 AFINNetworkCable::GetDismantleRefundReturnsMultiplier() const {
 }
 
 void AFINNetworkCable::OnConnectorUpdate() {
+	RerunConstructionScripts();
+}
+
+void AFINNetworkCable::ConnectConnectors_Implementation() {
+	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
+	if (HasAuthority()) {
+		Connector1->AddConnectedCable(this);
+		Connector2->AddConnectedCable(this);
+	}
+		
 	RerunConstructionScripts();
 }

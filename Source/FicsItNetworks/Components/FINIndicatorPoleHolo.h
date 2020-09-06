@@ -26,11 +26,15 @@ public:
 
 	UPROPERTY(Replicated)
 	int Height = 0;
+
+	UPROPERTY(Replicated)
+	bool bFinished = false;
 	
 	AFINIndicatorPoleHolo();
 
 	// Begin AActor
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	// End AActor
 
 	// Begin AFGBuildableHologram
@@ -38,7 +42,7 @@ public:
 	virtual int32 GetBaseCostMultiplier() const override;
 	virtual bool IsValidHitResult(const FHitResult& hitResult) const override;
 	virtual void SetHologramLocationAndRotation(const FHitResult& hitResult) override;
-	virtual AActor* Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) override;
+	virtual void ConfigureActor(AFGBuildable* inBuildable) const override;
 	virtual void CheckValidFloor() override;
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;
 	// End AFGBuildableHologram

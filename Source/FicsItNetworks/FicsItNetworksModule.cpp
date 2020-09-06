@@ -155,7 +155,10 @@ void FFicsItNetworksModule::StartupModule(){
 
 	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::EndPlay, [](AActor* self, EEndPlayReason::Type Reason) {
         AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
-        if (character) AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld())->DetachWidgetInteractionToPlayer(character);
+		if (character) {
+			AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
+			if (SubSys) SubSys->DetachWidgetInteractionToPlayer(character);
+		}
     })
 
 	SUBSCRIBE_METHOD(AFGGameMode::PostLogin, [](auto& scope, AFGGameMode* gm, APlayerController* pc) {

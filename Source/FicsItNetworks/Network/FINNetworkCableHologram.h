@@ -61,10 +61,17 @@ public:
 
 	UPROPERTY()
 	AFGBuildableHologram* PoleHologram = nullptr;
-	
+
+	UPROPERTY()
+	UFINNetworkConnectionComponent* Connector1Cache = nullptr;
+
+	UPROPERTY()
+	UFINNetworkConnectionComponent* Connector2Cache = nullptr;
+
 	// Begin FGBuildableHologram
 	virtual bool DoMultiStepPlacement(bool isInputFromARelease) override;
 	virtual AActor* Construct(TArray<AActor*>& childs, FNetConstructionID constructionID) override;
+	virtual void ConfigureActor(AFGBuildable* inBuildable) const override;
 	virtual int32 GetBaseCostMultiplier() const override;
 	virtual bool IsValidHitResult(const FHitResult& hit) const override;
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;
@@ -80,7 +87,7 @@ public:
 
 	void OnBeginSnap(FFINSnappedInfo a, bool isValid);
 	void OnEndSnap(FFINSnappedInfo a);
-	UFINNetworkConnectionComponent* SetupSnapped(FFINSnappedInfo s, TArray<AActor*>&  childs, FNetConstructionID id);
+	UFINNetworkConnectionComponent* SetupSnapped(FFINSnappedInfo s);
 	void UpdateSnapped();
 	
 	/**
