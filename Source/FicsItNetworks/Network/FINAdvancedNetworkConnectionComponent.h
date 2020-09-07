@@ -23,14 +23,14 @@ protected:
 	 * Used to unqiuely identify it in the network.
 	 * Gets automatically generated on begin play if it is nor already generated/saved.
 	 */
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	FGuid ID;
 
 	/**
 	 * The nick of this computer network component.
 	 * Used to group components and give them an alias.
 	 */
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	FString Nick;
 
 	/**

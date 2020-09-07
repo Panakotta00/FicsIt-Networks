@@ -106,15 +106,15 @@ bool FFINFuncParameterList::Serialize(FArchive& Ar) {
 	}
 	if (Func) {
 		for (auto p = TFieldIterator<UProperty>(Func); p; ++p) {
-			if (auto vp = Cast<UStrProperty>(*p)) Ar << *vp->GetPropertyValuePtr_InContainer(Data);
-			else if (auto vp = Cast<UIntProperty>(*p)) Ar << *vp->GetPropertyValuePtr_InContainer(Data);
-			else if (auto vp = Cast<UInt64Property>(*p)) Ar << *vp->GetPropertyValuePtr_InContainer(Data);
-			else if (auto vp = Cast<UFloatProperty>(*p)) Ar << *vp->GetPropertyValuePtr_InContainer(Data);
-			else if (auto vp = Cast<UBoolProperty>(*p)) {
-				bool b = vp->GetPropertyValue_InContainer(Data);
+			if (auto strp = Cast<UStrProperty>(*p)) Ar << *strp->GetPropertyValuePtr_InContainer(Data);
+			else if (auto intp = Cast<UIntProperty>(*p)) Ar << *intp->GetPropertyValuePtr_InContainer(Data);
+			else if (auto int64p = Cast<UInt64Property>(*p)) Ar << *int64p->GetPropertyValuePtr_InContainer(Data);
+			else if (auto fp = Cast<UFloatProperty>(*p)) Ar << *fp->GetPropertyValuePtr_InContainer(Data);
+			else if (auto bp = Cast<UBoolProperty>(*p)) {
+				bool b = bp->GetPropertyValue_InContainer(Data);
 				Ar << b;
-				vp->SetPropertyValue_InContainer(Data, b);
-			} else if (auto vp = Cast<UObjectProperty>(*p)) Ar << *vp->GetPropertyValuePtr_InContainer(Data);
+				bp->SetPropertyValue_InContainer(Data, b);
+			} else if (auto op = Cast<UObjectProperty>(*p)) Ar << *op->GetPropertyValuePtr_InContainer(Data);
 			//else if (auto vp = Cast<UArrayProperty>(dp)) reader << vp->GetPropertyValue_InContainer(data);
 			// TODO: Add Array support
 		}

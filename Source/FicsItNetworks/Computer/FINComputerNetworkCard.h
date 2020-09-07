@@ -25,14 +25,14 @@ public:
 	* Used to unqiuely identify it in the network.
 	* Gets automatically generated on begin play if it is nor already generated/saved.
 	*/
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	FGuid ID;
 
 	/**
 	* The nick of this computer network component.
 	* Used to group components and give them an alias.
 	*/
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	FString Nick;
 
 	/**
@@ -52,7 +52,7 @@ public:
 	* The computer network circuit this component is connected to.
 	*/
 	UPROPERTY()
-	UFINNetworkCircuit* Circuit = nullptr;
+	AFINNetworkCircuit* Circuit = nullptr;
 	
 	// Begin AActor
 	virtual void BeginPlay() override;
@@ -60,8 +60,8 @@ public:
 
 	// Begin IFINNetworkCircuitNode
 	virtual TSet<UObject*> GetConnected_Implementation() const override;
-	virtual UFINNetworkCircuit* GetCircuit_Implementation() const override;
-	virtual void SetCircuit_Implementation(UFINNetworkCircuit* Circuit) override;
+	virtual AFINNetworkCircuit* GetCircuit_Implementation() const override;
+	virtual void SetCircuit_Implementation(AFINNetworkCircuit* Circuit) override;
 	virtual void NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) override;
 	// End IFINNetworkCircuitNodes
 	
@@ -97,6 +97,20 @@ public:
 
 	UFUNCTION()
 	void netFunc_broadcast(int port, FFINDynamicStructHolder args);
+};
+
+struct FFINNetworkCardArgChecker : public FFINValueReader {
+	bool Fail = false;
+	
+	virtual void nil() override {};
+	virtual void operator<<(FINBool B) override {};
+	virtual void operator<<(FINInt Num) override {};
+	virtual void operator<<(FINFloat Num) override {};
+	virtual void operator<<(FINClass Class) override {};
+	virtual void operator<<(const FINStr& Str) override {};
+	virtual void operator<<(const FINObj& Obj) override;
+	virtual void operator<<(const FINTrace& Obj) override;
+	virtual void operator<<(const FINStruct& Struct) override;
 };
 
 USTRUCT()

@@ -3,8 +3,59 @@
 #include "FGBuildableFoundation.h"
 #include "FGBuildableWall.h"
 #include "FINScreen.h"
+#include "UnrealNetwork.h"
 
-AFINScreenHolo::AFINScreenHolo() {}
+AFINScreenHolo::AFINScreenHolo() {
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
+}
+
+void AFINScreenHolo::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+
+	if ((OldScreenHeight != ScreenHeight || OldScreenWidth != ScreenWidth)) {
+		OldScreenHeight = ScreenHeight;
+		OldScreenWidth = ScreenWidth;
+		
+		// Clear Components
+		for (UStaticMeshComponent* comp : Parts) {
+			comp->UnregisterComponent();
+			comp->SetActive(false);
+			comp->DestroyComponent();
+		}
+		Parts.Empty();
+
+		// Create Components
+		UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
+		UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
+		UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
+		AFINScreen::SpawnComponents(ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
+		for (UStaticMeshComponent* Part : Parts) {
+			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
+}
+
+void AFINScreenHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+
+	SetActorTickEnabled(false);
+	
+	for (UStaticMeshComponent* Part : Parts) {
+		Part->UnregisterComponent();
+		Part->SetActive(false);
+		Part->DestroyComponent();
+	}
+	Parts.Empty();
+	SetActorHiddenInGame(true);
+	SML::Logging::error("EndPlay");
+}
+
+void AFINScreenHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINScreenHolo, ScreenWidth);
+	DOREPLIFETIME(AFINScreenHolo, ScreenHeight);
+}
 
 bool AFINScreenHolo::DoMultiStepPlacement(bool isInputFromARelease) {
 	if (bSnapped) {
@@ -57,53 +108,20 @@ void AFINScreenHolo::SetHologramLocationAndRotation(const FHitResult& hitResult)
 		}
 		SetActorLocationAndRotation(hitResult.ImpactPoint, Normal.Rotation() + SnappedActorRotation + FRotator(0,0, GetScrollRotateValue()));
 	}
-
-	if (OldScreenHeight != ScreenHeight || OldScreenWidth != ScreenWidth) {
-		OldScreenHeight = ScreenHeight;
-		OldScreenWidth = ScreenWidth;
-		
-		// Clear Components
-		for (UStaticMeshComponent* comp : Parts) {
-			comp->UnregisterComponent();
-			comp->SetActive(false);
-			comp->DestroyComponent();
-		}
-		Parts.Empty();
-
-		// Create Components
-		UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
-		UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
-		UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
-		AFINScreen::SpawnComponents(ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
-		for (UStaticMeshComponent* Part : Parts) {
-			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-	}
 }
 
 AActor* AFINScreenHolo::Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) {
 	bSnapped = false;
 
-	FRotator rotation = GetActorRotation();
-	FVector location = GetActorLocation();
-	
-	FActorSpawnParameters spawnParams;
-	spawnParams.bDeferConstruction = true;
-
-	AFINScreen* a = GetWorld()->SpawnActor<AFINScreen>(this->mBuildClass, location, rotation, spawnParams);
-	a->SetBuiltWithRecipe(GetRecipe());
-	a->ScreenHeight = ScreenHeight;
-	a->ScreenWidth = ScreenWidth;
-	
-	// Clear Components
-	for (UStaticMeshComponent* comp : Parts) {
-		comp->UnregisterComponent();
-		comp->SetActive(false);
-		comp->DestroyComponent();
-	}
-	Parts.Empty();
-	
-	return UGameplayStatics::FinishSpawningActor(a, FTransform(rotation.Quaternion(), location));
+	return Super::Construct(out_children, netConstructionID);
 }
 
 void AFINScreenHolo::CheckValidFloor() {}
+
+void AFINScreenHolo::ConfigureActor(AFGBuildable* inBuildable) const {
+	Super::ConfigureActor(inBuildable);
+	
+	AFINScreen* Screen = Cast<AFINScreen>(inBuildable);
+	Screen->ScreenHeight = ScreenHeight;
+	Screen->ScreenWidth = ScreenWidth;
+}

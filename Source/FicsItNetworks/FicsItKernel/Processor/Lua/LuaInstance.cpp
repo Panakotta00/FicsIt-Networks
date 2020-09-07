@@ -197,8 +197,8 @@ namespace FicsItKernel {
 		std::set<FString> LuaInstanceRegistry::getClassFunctionNames(UClass* type) {
 			std::set<FString> funcs;
 			while (type) {
-				TMap<FString, LuaLibClassFunc>& funcMap = classInstanceFunctions[type];
-				for (auto& i : funcMap) {
+				TMap<FString, LuaLibClassFunc>* funcMap = classInstanceFunctions.Find(type);
+				if (funcMap) for (auto& i : *funcMap) {
 					funcs.insert(i.Key);
 				}
 				if (type == UObject::StaticClass()) type = nullptr;
@@ -864,6 +864,8 @@ namespace FicsItKernel {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			luaL_newmetatable(L, INSTANCE_TYPE);			// ..., InstanceTypeMeta
+			lua_pushboolean(L, true);
+			lua_setfield(L, -2, "__metatable");
 			luaL_setfuncs(L, luaInstanceTypeLib, 0);
 			PersistTable(INSTANCE_TYPE, -1);
 			lua_pop(L, 1);									// ...
@@ -873,6 +875,8 @@ namespace FicsItKernel {
 				bool isClass = false;
 				reg->findType(typeName, &isClass);
 				luaL_newmetatable(L, TCHAR_TO_UTF8(*typeName));								// ..., InstanceMeta
+				lua_pushboolean(L, true);
+				lua_setfield(L, -2, "__metatable");
 				luaL_setfuncs(L, isClass ? luaClassInstanceLib : luaInstanceLib, 0);
 				lua_newtable(L);															// ..., InstanceMeta, InstanceCache
 				lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta

@@ -66,7 +66,7 @@ void AFINCodeableMerger::TickInput(UFGFactoryConnectionComponent* Connector, int
 		float offset;
 		if (Connector->Factory_GrabOutput(item, offset)) {
 			InputQueue.Add(item);
-			netSig_ItemRequest(InputId, item.ItemClass);
+			netSig_ItemRequest(InputId, item);
 		}
 	}
 }
@@ -74,9 +74,11 @@ void AFINCodeableMerger::TickInput(UFGFactoryConnectionComponent* Connector, int
 void AFINCodeableMerger::Factory_Tick(float dt) {
 	Super::Factory_Tick(dt);
 
-	TickInput(Input1, 1);
-	TickInput(Input2, 0);
-	TickInput(Input3, 2);
+	if (HasAuthority()) {
+		TickInput(Input1, 1);
+		TickInput(Input2, 0);
+		TickInput(Input3, 2);
+	}
 }
 
 bool AFINCodeableMerger::Factory_PeekOutput_Implementation(const UFGFactoryConnectionComponent* connection, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) const {
@@ -121,7 +123,7 @@ bool AFINCodeableMerger::netFunc_canOutput() {
 	return OutputQueue.Num() < 2;
 }
 
-void AFINCodeableMerger::netSig_ItemRequest_Implementation(int input, UClass* item) {}
+void AFINCodeableMerger::netSig_ItemRequest_Implementation(int input, const FInventoryItem& item) {}
 
 TArray<FInventoryItem>& AFINCodeableMerger::GetInput(int output) {
 	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);

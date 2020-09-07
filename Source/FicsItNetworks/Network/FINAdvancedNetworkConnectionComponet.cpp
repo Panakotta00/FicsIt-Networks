@@ -1,23 +1,36 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
 
 #include "FINNetworkCircuit.h"
+#include "UnrealNetwork.h"
 
-UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent() {}
+UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent() {
+	SetIsReplicated(true);
+}
 
 UFINAdvancedNetworkConnectionComponent::~UFINAdvancedNetworkConnectionComponent() {}
 
+void UFINAdvancedNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UFINAdvancedNetworkConnectionComponent, ID);
+	DOREPLIFETIME(UFINAdvancedNetworkConnectionComponent, Nick);
+}
+
 void UFINAdvancedNetworkConnectionComponent::BeginPlay() {
+	Super::BeginPlay();
+	
 	if (bOuterAsRedirect) RedirectionObject = GetOuter();
 
-	if (!bIdCreated) {
-		ID = FGuid::NewGuid();
-		bIdCreated = true;
-	}
+	if (GetOwner()->HasAuthority()) {
+		if (!bIdCreated) {
+			ID = FGuid::NewGuid();
+			bIdCreated = true;
+		}
 
-	// setup circuit
-	if (!Circuit) {
-		Circuit = NewObject<UFINNetworkCircuit>();
-		Circuit->Recalculate(this);
+		// setup circuit
+		if (!Circuit) {
+			Circuit = GetWorld()->SpawnActor<AFINNetworkCircuit>();
+			Circuit->Recalculate(this);
+		}
 	}
 }
 
@@ -46,19 +59,20 @@ FString UFINAdvancedNetworkConnectionComponent::GetNick_Implementation() const {
 	return Nick;
 }
 
-void UFINAdvancedNetworkConnectionComponent::SetNick_Implementation(const FString& Nick) {
-	this->Nick = Nick;
+void UFINAdvancedNetworkConnectionComponent::SetNick_Implementation(const FString& NewNick) {
+	Nick = NewNick;
+	GetOwner()->ForceNetUpdate();
 }
 
-bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FString& Nick) {
-	return HasNickByNick(Nick, Execute_GetNick(this));
+bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FString& inNick) {
+	return HasNickByNick(inNick, Execute_GetNick(this));
 }
 
 UObject* UFINAdvancedNetworkConnectionComponent::GetInstanceRedirect_Implementation() const {
 	return RedirectionObject;
 }
 
-bool UFINAdvancedNetworkConnectionComponent::AccessPermitted_Implementation(FGuid ID) const {
+bool UFINAdvancedNetworkConnectionComponent::AccessPermitted_Implementation(FGuid inID) const {
 	return true;
 }
 

@@ -10,11 +10,11 @@ class UFINComputerDriveDesc : public UFGItemDescriptor, public ISMLItemDisplayIn
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		int32 StorageCapacity;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
+	int32 StorageCapacity;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		UTexture2D* DriveInventoryImage = nullptr;
+	UTexture2D* DriveInventoryImage = nullptr;
 
 	UFINComputerDriveDesc();
 

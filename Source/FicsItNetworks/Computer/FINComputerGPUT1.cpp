@@ -1,5 +1,8 @@
-﻿#include "FINComputerGPUT1.h"
+#include "FINComputerGPUT1.h"
 
+
+#include "FINComputerRCO.h"
+#include "UnrealNetwork.h"
 #include "WidgetBlueprintLibrary.h"
 #include "WidgetLayoutLibrary.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
@@ -28,8 +31,8 @@ FVector2D SScreenMonitor::GetScreenSize() const {
 	return ScreenSize.Get();
 }
 
-void SScreenMonitor::SetScreenSize(FVector2D ScreenSize) {
-	this->ScreenSize = ScreenSize;
+void SScreenMonitor::SetScreenSize(FVector2D NewScreenSize) {
+	ScreenSize = NewScreenSize;
 }
 
 FVector2D SScreenMonitor::GetCharSize() const {
@@ -69,23 +72,23 @@ FVector2D SScreenMonitor::ComputeDesiredSize(float f) const {
 
 int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	FVector2D CharSize = GetCharSize();
-	FVector2D ScreenSize = this->ScreenSize.Get();
+	FVector2D ScreenSizeV = ScreenSize.Get();
 	FSlateBrush boxBrush = FSlateBrush();
 	const TArray<FLinearColor>& ForegroundCache = this->Foreground.Get();
 	const TArray<FLinearColor>& BackgroundCache = this->Background.Get();
 	
 	const TArray<FString>& TextGrid = Text.Get();
-	for (int Y = 0; Y < ScreenSize.Y && Y < TextGrid.Num(); ++Y) {
+	for (int Y = 0; Y < ScreenSizeV.Y && Y < TextGrid.Num(); ++Y) {
 		const FString Line = TextGrid[Y];
 		
-		for (int X = 0; X < ScreenSize.X && X < Line.Len(); ++X) {
-			FLinearColor Foreground = FLinearColor(1,1,1,1);
-			if (Y * ScreenSize.X + X < ForegroundCache.Num()) {
-				Foreground = ForegroundCache[Y * ScreenSize.X + X];
+		for (int X = 0; X < ScreenSizeV.X && X < Line.Len(); ++X) {
+			FLinearColor ForegroundV = FLinearColor(1,1,1,1);
+			if (Y * ScreenSizeV.X + X < ForegroundCache.Num()) {
+				ForegroundV = ForegroundCache[Y * ScreenSizeV.X + X];
 			}
-			FLinearColor Background = FLinearColor(0,0,0,0);
-			if (Y * ScreenSize.X + X < BackgroundCache.Num()) {
-				Background = BackgroundCache[Y * ScreenSize.X + X];
+			FLinearColor BackgroundV = FLinearColor(0,0,0,0);
+			if (Y * ScreenSizeV.X + X < BackgroundCache.Num()) {
+				BackgroundV = BackgroundCache[Y * ScreenSizeV.X + X];
 			}
 
 			FSlateDrawElement::MakeText(
@@ -95,7 +98,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
                 Line.Mid(X,1),
                 Font.Get(),
                 ESlateDrawEffect::None,
-                Foreground
+                ForegroundV
             );
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
@@ -103,7 +106,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1), 1),
 				&boxBrush,
 				ESlateDrawEffect::None,
-				Background);
+				BackgroundV);
 		}
 	}
 	return LayerId;
@@ -157,10 +160,32 @@ SScreenMonitor::SScreenMonitor() {
 
 AFINComputerGPUT1::AFINComputerGPUT1() {
 	SetScreenSize(FVector2D(120, 30));
+
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
 }
 
+void AFINComputerGPUT1::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+	if (HasAuthority() && bFlushed) {
+		bFlushed = false;
+		ForceNetUpdate();
+	}
+}
+
+void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINComputerGPUT1, TextGrid);
+	DOREPLIFETIME(AFINComputerGPUT1, Foreground);
+	DOREPLIFETIME(AFINComputerGPUT1, Background);
+	DOREPLIFETIME(AFINComputerGPUT1, ScreenSize);
+}
+
+#pragma optimize("", off)
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/Game/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
+	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SNew(SScreenMonitor)
 		.ScreenSize_Lambda([this]() {
 			return ScreenSize;
@@ -175,27 +200,28 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 			return Background;
 		})
 		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/Game/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
-		.OnMouseDown_Lambda([this](int x, int y, int btn) {
-			netSig_OnMouseDown(x, y, btn);
+		.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
+			RCO->GPUMouseEvent(this, 0, x, y, btn);
 			return FReply::Handled();
 		})
-		.OnMouseUp_Lambda([this](int x, int y, int btn) {
-            netSig_OnMouseUp(x, y, btn);
+		.OnMouseUp_Lambda([this, RCO](int x, int y, int btn) {
+			RCO->GPUMouseEvent(this, 1, x, y, btn);
             return FReply::Handled();
         })
-        .OnMouseMove_Lambda([this](int x, int y, int btn) {
-            netSig_OnMouseMove(x, y, btn);
+        .OnMouseMove_Lambda([this, RCO](int x, int y, int btn) {
+			RCO->GPUMouseEvent(this, 2, x, y, btn);
             return FReply::Handled();
         })
-		.OnKeyDown_Lambda([this](uint32 c, uint32 key, int btn) {
-			netSig_OnKeyDown(c, key, btn);
+		.OnKeyDown_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
+			RCO->GPUKeyEvent(this, 0,  c, key, btn);
 			return FReply::Handled();
 		})
-		.OnKeyUp_Lambda([this](uint32 c, uint32 key, int btn) {
-            netSig_OnKeyUp(c, key, btn);
+		.OnKeyUp_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
+			RCO->GPUKeyEvent(this, 1,  c, key, btn);
 			return FReply::Handled();
         });
 }
+#pragma optimize("", on)
 
 void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	if (ScreenSize == size) return;
@@ -219,6 +245,8 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	BackgroundBuffer = Background;
 
 	netSig_ScreenSizeChanged(oldScreenSize.X, oldScreenSize.Y);
+
+	ForceNetUpdate();
 }
 
 void AFINComputerGPUT1::netSig_OnMouseDown_Implementation(int x, int y, int btn) {}
@@ -228,8 +256,8 @@ void AFINComputerGPUT1::netSig_ScreenSizeChanged_Implementation(int oldW, int ol
 void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int btn) {}
 void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
 
-void AFINComputerGPUT1::netFunc_bindScreen(UObject* Screen) {
-	if (Cast<IFINScreenInterface>(Screen)) BindScreen(Screen);
+void AFINComputerGPUT1::netFunc_bindScreen(UObject* NewScreen) {
+	if (Cast<IFINScreenInterface>(NewScreen)) BindScreen(NewScreen);
 }
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {
@@ -303,4 +331,5 @@ void AFINComputerGPUT1::netFunc_flush() {
 	TextGrid = TextGridBuffer;
 	Foreground = ForegroundBuffer;
 	Background = BackgroundBuffer;
+	bFlushed = true;
 }

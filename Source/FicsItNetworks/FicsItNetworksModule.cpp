@@ -8,13 +8,16 @@
 #include "FGBuildableHologram.h"
 #include "FGCharacterPlayer.h"
 #include "FGFactoryConnectionComponent.h"
+#include "FGGameMode.h"
 
 #include "SML/mod/hooking.h"
 
 #include "FINComponentUtility.h"
+#include "FINConfig.h"
 #include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
 #include "Computer/FINComputerProcessor.h"
+#include "Computer/FINComputerRCO.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
@@ -81,16 +84,24 @@ void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IF
 	}
 }
 
+class AActor_public : public AActor {
+	friend void FFicsItNetworksModule::StartupModule();
+};
+
+#pragma optimize("", off)
 void FFicsItNetworksModule::StartupModule(){
 	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
 
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/Game/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.InputConnector"), TEXT("Input1")});
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
-	#ifndef WITH_EDITOR
-	finConfig->SetNumberField("SignalQueueSize", 32);
-	finConfig = SML::readModConfig(MOD_NAME, finConfig);
+	#if !WITH_EDITOR
+	finConfig->SetNumberField("SignalQueueSize", 1000);
+	finConfig = SML::ReadModConfig(MOD_NAME, finConfig);
 	#endif
 	
 	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
@@ -134,16 +145,35 @@ void FFicsItNetworksModule::StartupModule(){
 
 	SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
 
-	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::OnConstruction, [](AActor* self, const FTransform& t) {
+	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor_public::BeginPlay, [](AActor* self) {
 		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
         if (character) {
-	        AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld())->AttachWidgetInteractionToPlayer(character);
+	        AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
+        	if (SubSys) SubSys->AttachWidgetInteractionToPlayer(character);
 		}
 	})
+
+	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::EndPlay, [](AActor* self, EEndPlayReason::Type Reason) {
+        AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
+		if (character) {
+			AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
+			if (SubSys) SubSys->DetachWidgetInteractionToPlayer(character);
+		}
+    })
+
+	SUBSCRIBE_METHOD(AFGGameMode::PostLogin, [](auto& scope, AFGGameMode* gm, APlayerController* pc) {
+	    if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
+		    UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/Game/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
+	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
+	    	gm->RegisterRemoteCallObjectClass(ModuleRCO);
+	    }
+	});
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
 	FFINGlobalRegisterHelper::Register();
 }
+#pragma optimize("", on)
+
 void FFicsItNetworksModule::ShutdownModule(){ }
 
 extern "C" DLLEXPORT void BootstrapModule(std::ofstream& logFile) {

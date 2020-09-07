@@ -8,14 +8,14 @@
 
 TArray<TPair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = TArray<TPair<UClass*, FFINAdapterSettings>>();
 
-void AFINNetworkAdapter::RegistererAdapterSetting(UClass* clazz, FFINAdapterSettings settings) {
+void AFINNetworkAdapter::RegistererAdapterSetting(UClass* clazz, FFINAdapterSettings newSettings) {
 	clazz->AddToRoot();
-	AFINNetworkAdapter::settings.Add(TPair<UClass*, FFINAdapterSettings>{clazz, settings});
+	AFINNetworkAdapter::settings.Add(TPair<UClass*, FFINAdapterSettings>{clazz, newSettings});
 }
 
-void AFINNetworkAdapter::RegistererAdapterSetting(FString BPPath, FFINAdapterSettings settings) {
+void AFINNetworkAdapter::RegistererAdapterSetting(FString BPPath, FFINAdapterSettings newSettings) {
 	UClass* clazz = LoadObject<UClass>(nullptr, *BPPath);
-	RegistererAdapterSetting(clazz, settings);
+	RegistererAdapterSetting(clazz, newSettings);
 }
 
 void AFINNetworkAdapter::RegisterAdapterSettings() {

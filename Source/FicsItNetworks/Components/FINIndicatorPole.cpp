@@ -17,6 +17,14 @@ AFINIndicatorPole::AFINIndicatorPole() {
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
+void AFINIndicatorPole::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINIndicatorPole, Height);
+	DOREPLIFETIME(AFINIndicatorPole, IndicatorColor);
+	DOREPLIFETIME(AFINIndicatorPole, EmessiveStrength);
+}
+
 void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
 	Super::OnConstruction(transform);
 
@@ -42,6 +50,7 @@ void AFINIndicatorPole::TickActor(float DeltaTime, ELevelTick TickType, FActorTi
 	if (bHasChanged) {
 		bHasChanged = false;
 		UpdateEmessive();
+		ForceNetUpdate();
 	}
 }
 
@@ -71,7 +80,7 @@ void AFINIndicatorPole::CreatePole() {
 	}
 }
 
-void AFINIndicatorPole::UpdateEmessive() {
+void AFINIndicatorPole::UpdateEmessive_Implementation() {
 	if (IndicatorInstance) {
 		IndicatorInstance->SetVectorParameterValue("Emissive Color", IndicatorColor);
 		IndicatorInstance->SetScalarParameterValue("Emissive Strenght", EmessiveStrength);
@@ -87,6 +96,7 @@ void AFINIndicatorPole::netFunc_setColor(float r, float g, float b, float e) {
 	EmessiveStrength = FMath::Clamp(e, 0.0f, 5.0f);
 	netSig_ColorChanged(oldColor.R, oldColor.G, oldColor.B, oldEmissive);
 	bHasChanged = true;
+	ForceNetUpdate();
 }
 
 void AFINIndicatorPole::netFunc_getColor(float& r, float& g, float& b, float& e) {

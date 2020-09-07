@@ -14,7 +14,7 @@ class AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	UObject* GPU = nullptr;
 	
 public:
@@ -50,4 +50,7 @@ public:
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ScreenDriver"); }
 	// End IFINNetworkCustomType
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_OnGPUUpdate();
 };

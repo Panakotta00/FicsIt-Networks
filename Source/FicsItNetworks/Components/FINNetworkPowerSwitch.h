@@ -14,9 +14,10 @@ class AFINNetworkPowerSwitch : public AFGBuildable, public IFINNetworkCustomType
 	GENERATED_BODY()
 
 public:
-	bool bConnectedHasChanged;
+	UPROPERTY()
+	bool bConnectedHasChanged = true;
 
-	UPROPERTY(BlueprintReadOnly, SaveGame, Category="NetworkPowerSwitch")
+	UPROPERTY(BlueprintReadOnly, SaveGame, Replicated, Category="NetworkPowerSwitch")
 	bool bConnected;
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"), Category="NetworkPowerSwitch")
@@ -35,7 +36,7 @@ public:
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	AFINNetworkPowerSwitch();
-
+	
 	// Begin AActor
 	virtual void BeginPlay() override;
 	virtual void Tick(float dt) override;
@@ -57,6 +58,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Network|Components")
 	void SetConnected(bool bNewConnected);
 
+	/**
+	 * Triggers a connection change on client
+	 */
+	UFUNCTION(NetMulticast, Reliable)
+	void Client_OnConnectedChanged();
+	
 	/**
 	 * Notifies when the connection state has changed.
 	 * Gets only triggerd in actor tick.

@@ -18,7 +18,7 @@ public:
 	UPROPERTY(SaveGame)
 	AFINIndicatorPole* BottomConnected = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, SaveGame)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, SaveGame, Replicated)
 	int Height = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -27,10 +27,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UStaticMeshComponent* Indicator;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	FLinearColor IndicatorColor = FLinearColor::Black;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	float EmessiveStrength = 5.0;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -49,7 +49,7 @@ public:
 	bool bHasChanged = false;
 	
 	AFINIndicatorPole();
-
+	
 	// Begin AActor
 	virtual void OnConstruction(const FTransform& transform) override;
 	virtual void BeginPlay() override;
@@ -77,6 +77,7 @@ public:
 	 * Updates the material paramteres of the dynamic material instance
 	 * to the variables.
 	 */
+	UFUNCTION(NetMulticast, Reliable)
 	void UpdateEmessive();
 
 	UFUNCTION()

@@ -59,6 +59,8 @@ Features
   The network adapter allows you to connect any satisfactory machine to the network and allow some basic and some more complex interactions like reading inventories.
 - Monitors & GPUs
   Monitors and GPUs allow you to visualize data in multiple different forms. They also allow you to use montiors as user inputs like Keyboard, Mouse and Touch.
+- Vehicle Scanner
+  Allows to interact with vehicles that pass over it. It also looks nice ;-)
 
 Dependencies
 ============
@@ -71,11 +73,8 @@ Roadmap
 You can find the detailed progress in the [project board](https://github.com/CoderDE/FicsIt-Networks/projects/1).
 
 - fixing some bugs
-- truck station API
-- instance properties for Library
-- add new sensors (like truck or player sensors)
+- add new sensors (like player sensors)
 - microcontrollers
-- inter computer communication
 - computer power consumption
 - tune and make improvements to general concepts and performance
 - adding support for a visual scripting language

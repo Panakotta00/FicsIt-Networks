@@ -15,9 +15,9 @@ class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINS
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFGFactoryConnectionComponent* InputConnector = nullptr;
+	UFGFactoryConnectionComponent* Input1 = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGFactoryConnectionComponent* Output1 = nullptr;
@@ -46,16 +46,10 @@ public:
 	AFINCodeableSplitter();
 	~AFINCodeableSplitter();
 
-	//~ Begin IFGDismantleInterface
-	virtual void GetDismantleRefund_Implementation( TArray< FInventoryStack >& out_refund ) const override;
-	// End IFGDismantleInterface
-	
-	// Begin IFINSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
-	virtual UObject* GetSignalSenderOverride_Implementation() override;
-	// End IFINSignalSender
+	// Begin AActor
+	virtual void OnConstruction(const FTransform& transform) override;
+	virtual void BeginPlay() override;
+	// End AActor
 
 	// Begin AFGBuildable
 	virtual void Factory_Tick(float dt) override;
@@ -63,10 +57,26 @@ public:
 	virtual bool Factory_GrabOutput_Implementation(class UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf< UFGItemDescriptor > type) override;
 	// TODO: Upgrade Implementation
 	// End AFGBuildable
+
+	//~ Begin IFGDismantleInterface
+	virtual void GetDismantleRefund_Implementation( TArray< FInventoryStack >& out_refund ) const override;
+	// End IFGDismantleInterface
+	
+	// Begin IFGSaveGame
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
+	// End IFGSaveGame
+
+	// Begin IFINSignalSender
+	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
+	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
+	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
+	virtual UObject* GetSignalSenderOverride_Implementation() override;
+	// End IFINSignalSender
 	
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("CodeableSplitter"); }
 	// End IFINNetworkCustomType
+
 
 	/**
 	 * This function transfers the next item from the input queue to the output queue with the given index.
@@ -90,7 +100,7 @@ public:
 	 * This signal gets emit when a new item got pushed to the input queue.
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
-	void netSig_ItemRequest(UClass* item);
+	void netSig_ItemRequest(const FInventoryItem& Item);
 
 	TArray<FInventoryItem>& GetOutput(int output);
 	TArray<FInventoryItem>& GetOutput(UFGFactoryConnectionComponent* connection);

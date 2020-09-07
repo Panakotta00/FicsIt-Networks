@@ -6,7 +6,6 @@
 #include "FicsItNetworksCustomVersion.h"
 #include "Queue.h"
 #include "WidgetInteractionComponent.h"
-#include "Engine/Engine.h"
 #include "Network/FINNetworkTrace.h"
 
 #include "FINComputerSubsystem.generated.h"
@@ -17,7 +16,7 @@ class AFINComputerSubsystem : public AFGSubsystem, public IFGSaveInterface {
 	
 public:
 	UPROPERTY()
-	UWidgetInteractionComponent* ScreenInteraction;
+	TMap<AFGCharacterPlayer*, UWidgetInteractionComponent*> ScreenInteraction;
 
 	UPROPERTY()
 	UInputComponent* Input;
@@ -25,9 +24,12 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadOnly)
 	TEnumAsByte<EFINCustomVersion> Version = EFINCustomVersion::FINBeforeCustomVersionWasAdded;
 
+	int VirtualUserNum = 0;
+
 	AFINComputerSubsystem();
 
 	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float dt) override;
 	// End AActor
@@ -45,5 +47,8 @@ public:
 	static AFINComputerSubsystem* GetComputerSubsystem(UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, Category = "Computer")
-	UWidgetInteractionComponent* AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
+	void AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
+	
+	UFUNCTION(BlueprintCallable, Category = "Computer")
+	void DetachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
 };

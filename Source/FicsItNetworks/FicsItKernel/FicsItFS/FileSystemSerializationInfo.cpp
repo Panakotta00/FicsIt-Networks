@@ -20,7 +20,7 @@ FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString nam
 		FileSystem::SRef<FileSystem::File> file = parent->createFile(nodeName);
 		FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::OUTPUT | FileSystem::TRUNC);
 		try {
-			stream->write(TCHAR_TO_UTF8(*Node->Data));
+			stream->write(std::string(TCHAR_TO_UTF8(*Node->Data), Node->Data.Len()));
 			stream->flush();
 			stream->close();
 		} catch (...) {
@@ -46,7 +46,8 @@ FFileSystemNode& FFileSystemNode::Serialize(FileSystem::SRef<FileSystem::Device>
 	if (FileSystem::SRef<FileSystem::File> file = node) {
 		NodeType = 0;
 		FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::INPUT);
-		Data = stream->readAll().c_str();
+		std::string str = stream->readAll();
+		Data = FString(UTF8_TO_TCHAR(str.c_str()), str.length());
 	} else if (FileSystem::SRef<FileSystem::Directory> dir = node) {
 		NodeType = 1;
 		for (FileSystem::NodeName child : dir->getChilds()) {

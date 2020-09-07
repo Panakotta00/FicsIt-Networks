@@ -9,7 +9,7 @@ UCLASS()
 class AFINModuleScreen : public AFINModuleBase, public IFINScreenInterface {
 	GENERATED_BODY()
 private:
-    UPROPERTY(SaveGame)
+    UPROPERTY(SaveGame, Replicated)
     UObject* GPU = nullptr;
 	
 public:
@@ -47,4 +47,7 @@ public:
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ModuleScreen"); }
 	// End IFINNetworkCustomType
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_OnGPUUpdate();
 };

@@ -17,7 +17,7 @@
 *** xref:buildings/ComputerCase/ScreenDriver.adoc[Screen Driver]
 ** xref:buildings/Merger.adoc[Codeable Merger]
 ** xref:buildings/Splitter.adoc[Codeable Splitter]
-** xref:buildings/InidcatorPole.adoc[Indicator Pole]
+** xref:buildings/IndicatorPole.adoc[Indicator Pole]
 ** xref:buildings/Screen.adoc[Large Screen]
 ** xref:buildings/ModularControlPanel/index.adoc[Modular Control Panel]
 *** xref:buildings/ModularControlPanel/Button.adoc[Button]

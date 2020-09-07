@@ -99,11 +99,11 @@ namespace FileSystem {
 			if (r) r->shared_count--;
 		}
 
-		SRef& operator=(const SRef& ref) {
+		SRef& operator=(const SRef& newRef) {
 			auto r = Ref<T>::ref;
 			if (r) r->shared_count--;
-			Ref<T>::ref = ref.ref;
-			if (ref.ref) ref.ref->shared_count++;
+			Ref<T>::ref = newRef.ref;
+			if (newRef.ref) newRef.ref->shared_count++;
 			return *this;
 		}
 	};
@@ -121,11 +121,11 @@ namespace FileSystem {
 		template<class O>
 		WRef(const Ref<O>& other) : WRef(dynamic_cast<T*>(other.ref)) {}
 
-		WRef& operator=(const WRef& ref) {
+		WRef& operator=(const WRef& newRef) {
 			auto r = Ref<T>::ref;
 			if (r) r->weak_count--;
-			Ref<T>::ref = ref.ref;
-			if (ref.ref) ref.ref->weak_count++;
+			Ref<T>::ref = newRef.ref;
+			if (newRef.ref) newRef.ref->weak_count++;
 			return *this;
 		}
 

@@ -53,28 +53,28 @@ ListenerListRef::ListenerListRef(ListenerList & listeners, const Path & path) : 
 
 FileSystem::ListenerListRef::ListenerListRef(ListenerListRef & listenersRef, const Path & path) : listeners(listenersRef.listeners), path(listenersRef.path / path) {}
 
-void ListenerListRef::onMounted(Path path, SRef<Device> device) {
-	listeners.onMounted(this->path / path, device);
+void ListenerListRef::onMounted(Path newPath, SRef<Device> device) {
+	listeners.onMounted(path / newPath, device);
 }
 
-void ListenerListRef::onUnmounted(Path path, SRef<Device> device) {
-	listeners.onUnmounted(this->path / path, device);
+void ListenerListRef::onUnmounted(Path newPath, SRef<Device> device) {
+	listeners.onUnmounted(path / newPath, device);
 }
 
-void ListenerListRef::onNodeAdded(Path path, NodeType type) {
-	listeners.onNodeAdded(this->path / path, type);
+void ListenerListRef::onNodeAdded(Path newPath, NodeType type) {
+	listeners.onNodeAdded(path / newPath, type);
 }
 
-void ListenerListRef::onNodeRemoved(Path path, NodeType type) {
-	listeners.onNodeRemoved(this->path / path, type);
+void ListenerListRef::onNodeRemoved(Path newPath, NodeType type) {
+	listeners.onNodeRemoved(path / newPath, type);
 }
 
-void ListenerListRef::onNodeChanged(Path path, NodeType type) {
-	listeners.onNodeChanged(this->path / path, type);
+void ListenerListRef::onNodeChanged(Path newPath, NodeType type) {
+	listeners.onNodeChanged(path / newPath, type);
 }
 
 void FileSystem::ListenerListRef::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
-	listeners.onNodeRenamed(this->path / newPath, this->path / oldPath, type);
+	listeners.onNodeRenamed(path / newPath, path / oldPath, type);
 }
 
 PathBoundListener::PathBoundListener(WRef<Listener> listener, const Path & path) : additionalPath(path), listener(listener) {}

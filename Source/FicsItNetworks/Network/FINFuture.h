@@ -56,5 +56,5 @@ struct FFINFunctionFuture : public FFINFuture {
 
 	virtual bool IsDone() const override { return bDone; }
 
-	virtual int operator>>(FFINValueReader& Reader) { return 0; }
+	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
 };

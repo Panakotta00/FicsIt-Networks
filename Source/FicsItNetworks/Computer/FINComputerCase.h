@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "FGReplicationDetailInventoryComponent.h"
 #include "FINComputerGPU.h"
 #include "FINComputerScreen.h"
 #include "Buildables/FGBuildable.h"
@@ -9,8 +11,8 @@
 
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/KernelSystemSerializationInfo.h"
+#include "FicsItKernel/Audio/AudioComponentController.h"
 #include "Network/FINNetworkCustomType.h"
-
 
 #include "FINComputerCase.generated.h"
 
@@ -26,24 +28,33 @@ enum EComputerState {
 	CRASHED
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINStateEEPROM*, EEPROM);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
+
 UCLASS(Blueprintable)
 class AFINComputerCase : public AFGBuildable, public IFINNetworkCustomType {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category = "ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
 	UFINModuleSystemPanel* Panel = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	UFGInventoryComponent* DataStorage = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="CumputerCase")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UAudioComponent* Speaker = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category="ComputerCase")
+	UPROPERTY()
+	UFINAudioComponentControllerTrampoline* SpeakerTrampoline = nullptr;
+
+	UPROPERTY(SaveGame, Replicated)
+	FString SerialOutput = "";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	int LastTabIndex = 0;
 	
 	UPROPERTY()
@@ -67,8 +78,19 @@ public:
 	UPROPERTY()
 	AFINFileSystemState* Floppy = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TSet<AFINComputerScreen*> Screens;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+	TArray<AFINComputerScreen*> Screens;
+
+	UPROPERTY(BlueprintAssignable)
+	FFINCaseEEPROMUpdateDelegate OnEEPROMUpdate;
+
+	UPROPERTY(BlueprintAssignable)
+	FFINCaseFloppyUpdateDelegate OnFloppyUpdate;
+
+	UPROPERTY(Replicated)
+	TEnumAsByte<EComputerState> InternalKernelState = EComputerState::SHUTOFF;
+
+	FString OldSerialOutput = "";
 
 	float KernelTickTime = 0.0;
 
@@ -77,9 +99,11 @@ public:
 
 	// Begin UObject
 	virtual void Serialize(FArchive& ar) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// End UObject
 
 	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	virtual void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	// End AActor
@@ -100,6 +124,12 @@ public:
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("Computer"); }
 	// End IFINNetworkCustomType
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulti_OnEEPROMChanged(AFINStateEEPROM* ChangedEEPROM);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulti_OnFloppyChanged(AFINFileSystemState* ChangedFloppy);
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddProcessor(AFINComputerProcessor* processor);
@@ -173,10 +203,6 @@ public:
 	UFUNCTION()
 	void HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender);
 
-private:
-	UPROPERTY(SaveGame)
-	FString SerialOutput;
-
 	UFUNCTION()
-	void OnDriveUpdate(bool added, AFINFileSystemState* drive);
+	void OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive);
 };

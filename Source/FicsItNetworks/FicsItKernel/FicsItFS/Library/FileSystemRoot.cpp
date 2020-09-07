@@ -256,12 +256,12 @@ bool FileSystemRoot::unmount(Path path) {
 	return true;
 }
 
-void FileSystemRoot::addListener(WRef<Listener> listener) {
-	listeners.insert(listener);
+void FileSystemRoot::addListener(WRef<Listener> newListener) {
+	listeners.insert(newListener);
 }
 
-void FileSystemRoot::removeListener(WRef<Listener> listener) {
-	listeners.erase(listener);
+void FileSystemRoot::removeListener(WRef<Listener> newListener) {
+	listeners.erase(newListener);
 }
 
 FileSystemRoot::RootListener::RootListener(FileSystemRoot * root) : root(root) {}
