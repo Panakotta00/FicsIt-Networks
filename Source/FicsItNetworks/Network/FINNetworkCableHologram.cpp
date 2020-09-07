@@ -102,27 +102,27 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 	Connector1Cache = SetupSnapped(From);
 	Connector2Cache = SetupSnapped(Snapped);
 
-	SetActorLocation(Connector1Cache->GetComponentToWorld().GetTranslation());
-	AFINNetworkCable* Cable = Cast<AFINNetworkCable>(Super::Construct(childs, constructionID));
+	if (Connector1Cache) SetActorLocation(Connector1Cache->GetComponentToWorld().GetTranslation());
+	AFINNetworkCable* FinishedCable = Cast<AFINNetworkCable>(Super::Construct(childs, constructionID));
 	if (Snapped.SnapType == EFINNetworkCableHologramSnapType::FIN_POLE) {
 		AActor* Pole = childs[0];
 		UFINNetworkConnectionComponent* Con = Cast<UFINNetworkConnectionComponent>(Pole->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
-		Cable->Connector2 = Con;
-		Cable->ConnectConnectors();
+		FinishedCable->Connector2 = Con;
+		FinishedCable->ConnectConnectors();
 	}
 	
 	Snapped = FFINSnappedInfo();
 	From = FFINSnappedInfo();
 	ForceNetUpdate();
-	return Cable;
+	return FinishedCable;
 }
 
 void AFINNetworkCableHologram::ConfigureActor(AFGBuildable* inBuildable) const {
 	Super::ConfigureActor(inBuildable);
 
-	AFINNetworkCable* Cable = Cast<AFINNetworkCable>(inBuildable);
-	Cable->Connector1 = Connector1Cache;
-	Cable->Connector2 = Connector2Cache;
+	AFINNetworkCable* ToBuildCable = Cast<AFINNetworkCable>(inBuildable);
+	ToBuildCable->Connector1 = Connector1Cache;
+	ToBuildCable->Connector2 = Connector2Cache;
 }
 
 int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {
@@ -211,8 +211,8 @@ bool AFINNetworkCableHologram::IsSnappedValid() {
 		}
 		if (From.SnapType == FIN_CONNECTOR) {
 			UFINNetworkConnectionComponent* FromConnector = Cast<UFINNetworkConnectionComponent>(From.SnappedObj);
-			for (AFINNetworkCable* Cable : Connector->ConnectedCables) {
-				if (Cable->Connector1 == FromConnector || Cable->Connector2 == FromConnector) {
+			for (AFINNetworkCable* FCable : Connector->ConnectedCables) {
+				if (FCable->Connector1 == FromConnector || FCable->Connector2 == FromConnector) {
 					AddConstructDisqualifier(UFGCDWireSnap::StaticClass());
 					ret = false;
 				}

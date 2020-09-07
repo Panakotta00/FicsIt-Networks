@@ -94,7 +94,7 @@ void AFINComputerCase::BeginPlay() {
 		AFINFileSystemState* state = nullptr;
 		FInventoryStack stack;
 		if (DataStorage->GetStackFromIndex(1, stack)) {
-			const TSubclassOf<UFINComputerDriveDesc> DriveDesc = stack.Item.ItemClass;
+			TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
 			state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
 			if (IsValid(DriveDesc)) {
 				if (!IsValid(state)) {
@@ -195,8 +195,8 @@ void AFINComputerCase::NetMulti_OnEEPROMChanged_Implementation(AFINStateEEPROM* 
 	OnEEPROMUpdate.Broadcast(EEPROM);
 }
 
-void AFINComputerCase::NetMulti_OnFloppyChanged_Implementation(AFINFileSystemState* Floppy) {
-	OnFloppyUpdate.Broadcast(Floppy);
+void AFINComputerCase::NetMulti_OnFloppyChanged_Implementation(AFINFileSystemState* NewFloppy) {
+	OnFloppyUpdate.Broadcast(NewFloppy);
 }
 
 void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
@@ -351,7 +351,7 @@ void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int3
 			AFINFileSystemState* state = nullptr;
 			FInventoryStack stack;
 			if (DataStorage->GetStackFromIndex(1, stack)) {
-				TSubclassOf<UFINComputerDriveDesc> driveDesc = stack.Item.ItemClass;
+				TSubclassOf<UFINComputerDriveDesc> driveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
 				state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
 				if (IsValid(driveDesc)) {
 					if (!IsValid(state)) {

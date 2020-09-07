@@ -23,7 +23,7 @@ void AFINComputerDriveHolder::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 AFINFileSystemState* AFINComputerDriveHolder::GetDrive() {
 	FInventoryStack stack;
 	if (DriveInventory->GetStackFromIndex(0, stack)) {
-		TSubclassOf<UFINComputerDriveDesc> driveDesc = stack.Item.ItemClass;
+		TSubclassOf<UFINComputerDriveDesc> driveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
 		AFINFileSystemState* state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
 		if (IsValid(driveDesc)) {
 			if (!IsValid(state)) {

@@ -1,4 +1,4 @@
-﻿#include "FINComputerGPUT1.h"
+#include "FINComputerGPUT1.h"
 
 
 #include "FINComputerRCO.h"
@@ -31,8 +31,8 @@ FVector2D SScreenMonitor::GetScreenSize() const {
 	return ScreenSize.Get();
 }
 
-void SScreenMonitor::SetScreenSize(FVector2D ScreenSize) {
-	this->ScreenSize = ScreenSize;
+void SScreenMonitor::SetScreenSize(FVector2D NewScreenSize) {
+	ScreenSize = NewScreenSize;
 }
 
 FVector2D SScreenMonitor::GetCharSize() const {
@@ -72,23 +72,23 @@ FVector2D SScreenMonitor::ComputeDesiredSize(float f) const {
 
 int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	FVector2D CharSize = GetCharSize();
-	FVector2D ScreenSize = this->ScreenSize.Get();
+	FVector2D ScreenSizeV = ScreenSize.Get();
 	FSlateBrush boxBrush = FSlateBrush();
 	const TArray<FLinearColor>& ForegroundCache = this->Foreground.Get();
 	const TArray<FLinearColor>& BackgroundCache = this->Background.Get();
 	
 	const TArray<FString>& TextGrid = Text.Get();
-	for (int Y = 0; Y < ScreenSize.Y && Y < TextGrid.Num(); ++Y) {
+	for (int Y = 0; Y < ScreenSizeV.Y && Y < TextGrid.Num(); ++Y) {
 		const FString Line = TextGrid[Y];
 		
-		for (int X = 0; X < ScreenSize.X && X < Line.Len(); ++X) {
-			FLinearColor Foreground = FLinearColor(1,1,1,1);
-			if (Y * ScreenSize.X + X < ForegroundCache.Num()) {
-				Foreground = ForegroundCache[Y * ScreenSize.X + X];
+		for (int X = 0; X < ScreenSizeV.X && X < Line.Len(); ++X) {
+			FLinearColor ForegroundV = FLinearColor(1,1,1,1);
+			if (Y * ScreenSizeV.X + X < ForegroundCache.Num()) {
+				ForegroundV = ForegroundCache[Y * ScreenSizeV.X + X];
 			}
-			FLinearColor Background = FLinearColor(0,0,0,0);
-			if (Y * ScreenSize.X + X < BackgroundCache.Num()) {
-				Background = BackgroundCache[Y * ScreenSize.X + X];
+			FLinearColor BackgroundV = FLinearColor(0,0,0,0);
+			if (Y * ScreenSizeV.X + X < BackgroundCache.Num()) {
+				BackgroundV = BackgroundCache[Y * ScreenSizeV.X + X];
 			}
 
 			FSlateDrawElement::MakeText(
@@ -98,7 +98,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
                 Line.Mid(X,1),
                 Font.Get(),
                 ESlateDrawEffect::None,
-                Foreground
+                ForegroundV
             );
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
@@ -106,7 +106,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1), 1),
 				&boxBrush,
 				ESlateDrawEffect::None,
-				Background);
+				BackgroundV);
 		}
 	}
 	return LayerId;
@@ -259,8 +259,8 @@ void AFINComputerGPUT1::netSig_ScreenSizeChanged_Implementation(int oldW, int ol
 void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int btn) {}
 void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
 
-void AFINComputerGPUT1::netFunc_bindScreen(UObject* Screen) {
-	if (Cast<IFINScreenInterface>(Screen)) BindScreen(Screen);
+void AFINComputerGPUT1::netFunc_bindScreen(UObject* NewScreen) {
+	if (Cast<IFINScreenInterface>(NewScreen)) BindScreen(NewScreen);
 }
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {

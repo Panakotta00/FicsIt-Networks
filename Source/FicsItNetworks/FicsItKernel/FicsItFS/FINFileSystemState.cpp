@@ -93,7 +93,7 @@ AFINFileSystemState* AFINFileSystemState::CreateState(UObject* WorldContextObjec
 }
 
 void AFINFileSystemState::UpdateUsage() {
-	FileSystem::SRef<FileSystem::ByteCountedDevice> Device = GetDevice();
-	if (Device) Usage = Device->getUsed();
+	FileSystem::SRef<FileSystem::ByteCountedDevice> UsageDevice = GetDevice();
+	if (Device) Usage = UsageDevice->getUsed();
 	else Usage = 0.0f;
 }

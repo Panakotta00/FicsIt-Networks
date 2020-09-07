@@ -8,8 +8,8 @@ void AFINNetworkCircuit::AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircu
 		Added.Add(Add);
 		Nodes.AddUnique(Add.GetObject());
 		IFINNetworkCircuitNode::Execute_SetCircuit(Add.GetObject(), this);
-		TSet<UObject*> Nodes = IFINNetworkCircuitNode::Execute_GetConnected(Add.GetObject());
-		for (UObject* Node : Nodes) {
+		TSet<UObject*> ConNodes = IFINNetworkCircuitNode::Execute_GetConnected(Add.GetObject());
+		for (UObject* Node : ConNodes) {
 			AddNodeRecursive(Added, Node);
 		}
 	}
@@ -155,8 +155,12 @@ void AFINNetworkCircuit::ConnectNodes(UObject* WorldContext, const TScriptInterf
 	AFINNetworkCircuit* CircuitA = IFINNetworkCircuitNode::Execute_GetCircuit(A.GetObject());
 	AFINNetworkCircuit* CircuitB = IFINNetworkCircuitNode::Execute_GetCircuit(B.GetObject());
 	if (!CircuitB) {
-		CircuitB = WorldContext->GetWorld()->SpawnActor<AFINNetworkCircuit>();
+		FActorSpawnParameters Params;
+		Params.bNoFail = true;
+		CircuitB = WorldContext->GetWorld()->SpawnActor<AFINNetworkCircuit>(Params);
+		check(CircuitB);
 		IFINNetworkCircuitNode::Execute_SetCircuit(B.GetObject(), CircuitB);
+		SML::Logging::error(CircuitB, " ", B.GetObject());
 		CircuitB->Recalculate(B);
 	}
 	if (CircuitA) {

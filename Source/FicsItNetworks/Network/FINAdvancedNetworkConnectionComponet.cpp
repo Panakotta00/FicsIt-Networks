@@ -59,20 +59,20 @@ FString UFINAdvancedNetworkConnectionComponent::GetNick_Implementation() const {
 	return Nick;
 }
 
-void UFINAdvancedNetworkConnectionComponent::SetNick_Implementation(const FString& Nick) {
-	this->Nick = Nick;
+void UFINAdvancedNetworkConnectionComponent::SetNick_Implementation(const FString& NewNick) {
+	Nick = NewNick;
 	GetOwner()->ForceNetUpdate();
 }
 
-bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FString& Nick) {
-	return HasNickByNick(Nick, Execute_GetNick(this));
+bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FString& inNick) {
+	return HasNickByNick(inNick, Execute_GetNick(this));
 }
 
 UObject* UFINAdvancedNetworkConnectionComponent::GetInstanceRedirect_Implementation() const {
 	return RedirectionObject;
 }
 
-bool UFINAdvancedNetworkConnectionComponent::AccessPermitted_Implementation(FGuid ID) const {
+bool UFINAdvancedNetworkConnectionComponent::AccessPermitted_Implementation(FGuid inID) const {
 	return true;
 }
 

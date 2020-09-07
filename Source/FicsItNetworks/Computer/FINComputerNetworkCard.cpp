@@ -50,8 +50,8 @@ UObject* AFINComputerNetworkCard::GetInstanceRedirect_Implementation() const {
 	return nullptr;
 }
 
-bool AFINComputerNetworkCard::AccessPermitted_Implementation(FGuid ID) const {
-	return ID == FGuid() || (ConnectedComponent && ID == IFINNetworkComponent::Execute_GetID(ConnectedComponent));
+bool AFINComputerNetworkCard::AccessPermitted_Implementation(FGuid NewID) const {
+	return NewID == FGuid() || (ConnectedComponent && NewID == IFINNetworkComponent::Execute_GetID(ConnectedComponent));
 }
 
 TSet<UObject*> AFINComputerNetworkCard::GetConnected_Implementation() const {
@@ -64,8 +64,8 @@ AFINNetworkCircuit* AFINComputerNetworkCard::GetCircuit_Implementation() const {
 	return Circuit;
 }
 
-void AFINComputerNetworkCard::SetCircuit_Implementation(AFINNetworkCircuit * Circuit) {
-	this->Circuit = Circuit;
+void AFINComputerNetworkCard::SetCircuit_Implementation(AFINNetworkCircuit* NewCircuit) {
+	Circuit = NewCircuit;
 }
 
 void AFINComputerNetworkCard::NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) {}

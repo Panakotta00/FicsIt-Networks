@@ -12,7 +12,7 @@ FString AFINStateEEPROMLua::GetCode() const {
 	return Code;
 }
 
-void AFINStateEEPROMLua::SetCode(const FString& Code) {
-	this->Code = Code;
+void AFINStateEEPROMLua::SetCode(const FString& NewCode) {
+	Code = NewCode;
 	OnCodeUpdate();
 }

@@ -34,15 +34,18 @@ AFINNetworkCircuit* UFINNetworkConnectionComponent::GetCircuit_Implementation() 
 	return Circuit;
 }
 
-void UFINNetworkConnectionComponent::SetCircuit_Implementation(AFINNetworkCircuit* Circuit) {
-	this->Circuit = Circuit;
+void UFINNetworkConnectionComponent::SetCircuit_Implementation(AFINNetworkCircuit* NewCircuit) {
+	Circuit = NewCircuit;
 	GetOwner()->ForceNetUpdate();
 }
 
 void UFINNetworkConnectionComponent::NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) {}
 
 void UFINNetworkConnectionComponent::AddConnectedNode(TScriptInterface<IFINNetworkCircuitNode> Node) {
-	if (ConnectedNodes.Contains(Node.GetObject())) return;
+#if WITH_EDITOR
+	return;
+#endif
+	if (ConnectedNodes.Contains(Node.GetObject()) || !GetOwner()->HasAuthority()) return;
 
 	ConnectedNodes.Add(Node.GetObject());
 	UFINNetworkConnectionComponent* Obj = Cast<UFINNetworkConnectionComponent>(Node.GetObject());

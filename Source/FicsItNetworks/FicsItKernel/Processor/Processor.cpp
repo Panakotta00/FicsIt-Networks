@@ -1,8 +1,8 @@
 #include "Processor.h"
 
 namespace FicsItKernel {
-	void Processor::setKernel(KernelSystem * kernel) {
-		this->kernel = kernel;
+	void Processor::setKernel(KernelSystem* newKernel) {
+		kernel = newKernel;
 	}
 
 	KernelSystem * Processor::getKernel() {

@@ -86,9 +86,9 @@ namespace FicsItKernel {
 			
 		}
 
-		void LuaProcessor::setKernel(KernelSystem* kernel) {
+		void LuaProcessor::setKernel(KernelSystem* newKernel) {
 			if (getKernel() && getKernel()->getFileSystem()) getKernel()->getFileSystem()->removeListener(fileSystemListener);
-			Processor::setKernel(kernel);
+			Processor::setKernel(newKernel);
 		}
 
 		void LuaProcessor::tick(float delta) {
@@ -440,8 +440,8 @@ namespace FicsItKernel {
 			return NewObject<ULuaProcessorStateStorage>();
 		}
 
-		void LuaProcessor::setEEPROM(AFINStateEEPROM* eeprom) {
-			this->eeprom = Cast<AFINStateEEPROMLua>(eeprom);
+		void LuaProcessor::setEEPROM(AFINStateEEPROM* newEeprom) {
+			eeprom = Cast<AFINStateEEPROMLua>(newEeprom);
 			reset();
 		}
 

@@ -61,12 +61,12 @@ MemFileStream::~MemFileStream() {
 	close();
 }
 
-void MemFileStream::write(string data) {
+void MemFileStream::write(string newData) {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!sizeCheck(buf.length(), true)) throw std::exception("out of memory");
-	buf = buf.erase(pos, data.length());
-	buf.insert(pos, data);
-	pos += data.length();
+	buf = buf.erase(pos, newData.length());
+	buf.insert(pos, newData);
+	pos += newData.length();
 }
 
 void MemFileStream::flush() {
