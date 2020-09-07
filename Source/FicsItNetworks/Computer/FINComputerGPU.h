@@ -17,6 +17,7 @@ protected:
 
 	TSharedPtr<SWidget> Widget;
 	bool bShouldCreate = false;
+	bool bScreenChanged = false;
 
 public:
 	AFINComputerGPU();

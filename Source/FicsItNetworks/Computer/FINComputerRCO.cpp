@@ -1,6 +1,7 @@
 ﻿#include "FINComputerRCO.h"
 
 
+#include "FINComputerEEPROMDesc.h"
 #include "FINComputerGPUT1.h"
 #include "UnrealNetwork.h"
 
@@ -81,5 +82,25 @@ void UFINComputerRCO::GPUKeyEvent_Implementation(AFINComputerGPUT1* GPU, int typ
 }
 
 bool UFINComputerRCO::GPUKeyEvent_Validate(AFINComputerGPUT1* GPU, int type, int64 c, int64 code, int btn) {
+	return true;
+}
+
+void UFINComputerRCO::CreateEEPROMState_Implementation(UFGInventoryComponent* Inv, int SlotIdx) {
+	FInventoryStack stack;
+	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.ItemClass)) return;
+	UFINComputerEEPROMDesc* desc = Cast<UFINComputerEEPROMDesc>(stack.Item.ItemClass->GetDefaultObject());
+	if (!IsValid(desc)) return;
+	UClass* clazz = desc->EEPROMStateClass;
+	
+	FVector loc = FVector::ZeroVector;
+	FRotator rot = FRotator::ZeroRotator;
+	FActorSpawnParameters params;
+	params.bNoFail = true;
+	AFINStateEEPROM* eeprom = Inv->GetWorld()->SpawnActor<AFINStateEEPROM>(clazz, loc, rot, params);
+	if (!IsValid(eeprom)) return;
+	Inv->SetStateOnIndex(SlotIdx, FSharedInventoryStatePtr::MakeShared(eeprom));
+}
+
+bool UFINComputerRCO::CreateEEPROMState_Validate(UFGInventoryComponent* Inv, int SlotIdx) {
 	return true;
 }

@@ -43,6 +43,8 @@ public:
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Parts;
+
+	bool bGPUChanged = false;
 	
 	/**
 	* This event gets triggered when a new widget got set by the GPU
@@ -61,6 +63,7 @@ public:
 	// Begin AActor
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& transform) override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type endPlayReason) override;
 	// End AActor
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "FINComputerGPU.h"
 #include "FINComputerGPUT1.generated.h"

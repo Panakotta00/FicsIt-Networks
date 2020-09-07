@@ -166,6 +166,7 @@ AFINComputerGPUT1::AFINComputerGPUT1() {
 }
 
 void AFINComputerGPUT1::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
 	if (HasAuthority() && bFlushed) {
 		bFlushed = false;
 		ForceNetUpdate();
@@ -204,22 +205,18 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 			return FReply::Handled();
 		})
 		.OnMouseUp_Lambda([this, RCO](int x, int y, int btn) {
-            netSig_OnMouseUp(x, y, btn);
 			RCO->GPUMouseEvent(this, 1, x, y, btn);
             return FReply::Handled();
         })
         .OnMouseMove_Lambda([this, RCO](int x, int y, int btn) {
-            netSig_OnMouseMove(x, y, btn);
 			RCO->GPUMouseEvent(this, 2, x, y, btn);
             return FReply::Handled();
         })
 		.OnKeyDown_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
-			netSig_OnKeyDown(c, key, btn);
 			RCO->GPUKeyEvent(this, 0,  c, key, btn);
 			return FReply::Handled();
 		})
 		.OnKeyUp_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
-            netSig_OnKeyUp(c, key, btn);
 			RCO->GPUKeyEvent(this, 1,  c, key, btn);
 			return FReply::Handled();
         });

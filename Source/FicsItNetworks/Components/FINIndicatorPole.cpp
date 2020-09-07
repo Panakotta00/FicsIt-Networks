@@ -50,6 +50,7 @@ void AFINIndicatorPole::TickActor(float DeltaTime, ELevelTick TickType, FActorTi
 	if (bHasChanged) {
 		bHasChanged = false;
 		UpdateEmessive();
+		ForceNetUpdate();
 	}
 }
 

@@ -24,6 +24,8 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadOnly)
 	TEnumAsByte<EFINCustomVersion> Version = EFINCustomVersion::FINBeforeCustomVersionWasAdded;
 
+	int VirtualUserNum = 0;
+
 	AFINComputerSubsystem();
 
 	// Begin AActor
@@ -49,4 +51,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Computer")
 	void DetachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
+
+	UFUNCTION()
+	void OnWidgetChanged(UWidgetComponent* WidgetComponent, UWidgetComponent* PreviousWidgetComponent);
 };

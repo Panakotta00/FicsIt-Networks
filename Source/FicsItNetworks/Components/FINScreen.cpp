@@ -8,9 +8,12 @@
 AFINScreen::AFINScreen() {
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
 	WidgetComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-
+	
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
 }
 
 void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -60,6 +63,14 @@ void AFINScreen::OnConstruction(const FTransform& transform) {
 #endif
 }
 
+void AFINScreen::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+	if (bGPUChanged) {
+		bGPUChanged = false;
+		ForceNetUpdate();
+	}
+}
+
 void AFINScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	Super::EndPlay(endPlayReason);
 	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(nullptr);
@@ -83,6 +94,7 @@ void AFINScreen::BindGPU(UObject* gpu) {
 		if (gpu) {
 			Cast<IFINGPUInterface>(gpu)->BindScreen(this);
 		}
+		bGPUChanged = true;
 	}
 	NetMulti_OnGPUUpdate();
 }
@@ -101,7 +113,9 @@ void AFINScreen::SetWidget(TSharedPtr<SWidget> widget) {
 				Widget.ToSharedRef()
 			]
 		:
-			TSharedPtr<SScaleBox>(nullptr));
+			SNew(SScaleBox)
+		);
+	WidgetComponent->RequestRedraw();
 	OnWidgetUpdate.Broadcast();
 }
 
@@ -118,7 +132,7 @@ void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {
 	if (GPU) {
 		Cast<IFINGPUInterface>(GPU)->RequestNewWidget();
 	} else {
-		SetWidget(nullptr);
+		SetWidget(SNew(SScaleBox));
 	}
 	OnGPUUpdate.Broadcast();
 }

@@ -45,8 +45,8 @@ void AFINComputerSubsystem::OnPrimaryFirePressed() {
 	if (controller) {
 		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(controller->GetCharacter());
 		if (character) {
-			UWidgetInteractionComponent* ScreenInteraction = Cast<UWidgetInteractionComponent>(character->GetComponentByClass(UWidgetInteractionComponent::StaticClass()));
-			if (ScreenInteraction) ScreenInteraction->PressPointerKey(EKeys::LeftMouseButton);
+			UWidgetInteractionComponent** Comp = ScreenInteraction.Find(character);
+			if (Comp && IsValid(*Comp)) (*Comp)->PressPointerKey(EKeys::LeftMouseButton);
 		}
 	}
 }
@@ -56,8 +56,8 @@ void AFINComputerSubsystem::OnPrimaryFireReleased() {
 	if (controller) {
 		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(controller->GetCharacter());
 		if (character) {
-			UWidgetInteractionComponent* ScreenInteraction = Cast<UWidgetInteractionComponent>(character->GetComponentByClass(UWidgetInteractionComponent::StaticClass()));
-			if (ScreenInteraction) ScreenInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
+			UWidgetInteractionComponent** Comp = ScreenInteraction.Find(character);
+			if (Comp && IsValid(*Comp)) (*Comp)->ReleasePointerKey(EKeys::LeftMouseButton);
 		}
 	}
 }
@@ -67,8 +67,8 @@ void AFINComputerSubsystem::OnSecondaryFirePressed() {
 	if (controller) {
 		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(controller->GetCharacter());
 		if (character) {
-			UWidgetInteractionComponent* ScreenInteraction = Cast<UWidgetInteractionComponent>(character->GetComponentByClass(UWidgetInteractionComponent::StaticClass()));
-			if (ScreenInteraction) ScreenInteraction->PressPointerKey(EKeys::RightMouseButton);
+			UWidgetInteractionComponent** Comp = ScreenInteraction.Find(character);
+			if (Comp && IsValid(*Comp)) (*Comp)->PressPointerKey(EKeys::RightMouseButton);
 		}
 	}
 }
@@ -78,8 +78,8 @@ void AFINComputerSubsystem::OnSecondaryFireReleased() {
 	if (controller) {
 		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(controller->GetCharacter());
 		if (character) {
-			UWidgetInteractionComponent* ScreenInteraction = Cast<UWidgetInteractionComponent>(character->GetComponentByClass(UWidgetInteractionComponent::StaticClass()));
-			if (ScreenInteraction) ScreenInteraction->ReleasePointerKey(EKeys::RightMouseButton);
+			UWidgetInteractionComponent** Comp = ScreenInteraction.Find(character);
+			if (Comp && IsValid(*Comp)) (*Comp)->ReleasePointerKey(EKeys::RightMouseButton);
 		}
 	}
 }
@@ -96,7 +96,6 @@ AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* Worl
 		else return nullptr;
 	}
 }
-
 void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
 	if (!IsValid(character)) return;
 	DetachWidgetInteractionToPlayer(character);
@@ -104,9 +103,10 @@ void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 	Comp->InteractionSource = EWidgetInteractionSource::World;
 	UCameraComponent* cam = Cast<UCameraComponent>(character->GetComponentByClass(UCameraComponent::StaticClass()));
 	Comp->InteractionDistance = 10000.0;
-	Comp->VirtualUserIndex = 1;
+	Comp->VirtualUserIndex = VirtualUserNum++;
 	Comp->RegisterComponent();
 	Comp->AttachToComponent(cam, FAttachmentTransformRules::KeepRelativeTransform);
+	Comp->OnHoveredWidgetChanged.AddDynamic(this, &AFINComputerSubsystem::OnWidgetChanged);
 	ScreenInteraction.Add(character, Comp);
 }
 
@@ -117,4 +117,8 @@ void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 		(*Comp)->UnregisterComponent();
 		ScreenInteraction.Remove(character);
 	}
+}
+
+void AFINComputerSubsystem::OnWidgetChanged(UWidgetComponent* WidgetComponent, UWidgetComponent* PreviousWidgetComponent) {
+	SML::Logging::error(WidgetComponent, " ", PreviousWidgetComponent);
 }
