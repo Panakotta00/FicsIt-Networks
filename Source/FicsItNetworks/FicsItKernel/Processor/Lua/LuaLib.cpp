@@ -42,6 +42,9 @@
 #define LuaLibPropSetName(ClassName, PropName) ClassName ## _ ## PropName ## _Set
 #define LuaLibPropGetName(ClassName, PropName) ClassName ## _ ## PropName ## _Get
 #define LuaLibHookRegName(ClassName, HookClass) ClassName ## _ ## HookName ## _Reg
+#define LuaLibClassTypeRegName(ClassName) Class_ ## ClassName ## _Reg
+#define LuaLibClassFuncName(ClassName, FuncName) Class_ ## ClassName ## _ ## FuncName
+#define LuaLibClassFuncRegName(ClassName, FuncName) Class_ ## ClassName ## _ ## FuncName ## _Reg
 #define LuaLibTypeDecl(ClassName, TypeName) \
 	LuaLibType<ClassName>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
 #define LuaLibFunc(ClassName, FuncName, Code) \
@@ -88,13 +91,13 @@
 		hook = HookName ::StaticClass(); \
 	});
 #define LuaLibClassTypeDecl(ClassName, TypeName) \
-	LuaLibClassType<ClassName>::RegisterData LuaLibTypeRegName(ClassName) (#TypeName);
+	LuaLibClassType<ClassName>::RegisterData LuaLibClassTypeRegName(ClassName) (#TypeName);
 #define LuaLibClassFunc(ClassName, FuncName, Code) \
-	int LuaLibFuncName(ClassName, FuncName) (lua_State* L, int args, UClass* clazz) { \
+	int LuaLibClassFuncName(ClassName, FuncName) (lua_State* L, int args, UClass* clazz) { \
 		TSubclassOf<ClassName> self = clazz; \
 		Code \
 	} \
-	typename LuaLibClassType<ClassName>::RegisterFunc LuaLibFuncRegName(ClassName, FuncName) (#FuncName, & LuaLibFuncName(ClassName, FuncName) );
+	typename LuaLibClassType<ClassName>::RegisterFunc LuaLibClassFuncRegName(ClassName, FuncName) (#FuncName, & LuaLibClassFuncName(ClassName, FuncName));
 
 #define LuaLibFuncGetNum(ClassName, FuncName, RealFuncName) \
 	LuaLibFunc(ClassName, FuncName, { \
@@ -284,6 +287,11 @@ namespace FicsItKernel {
 			lua_pushinteger(L, GetTypeHash(self));
 			return 1;
 		})
+
+		LuaLibFunc(UObject, getHash, {
+            lua_pushinteger(L, GetTypeHash(self));
+            return 1;
+        })
 		
 		// Begin AActor
 
@@ -1254,6 +1262,15 @@ namespace FicsItKernel {
 		/* ################### */
 		/* # Class Instances # */
 		/* ################### */
+
+		// Begin UClass
+
+		LuaLibClassTypeDecl(UObject, ObjectClass)
+
+		LuaLibClassFunc(UObject, getHash, {
+            lua_pushinteger(L, GetTypeHash(self));
+            return 1;
+		})
 
 		// Begin UFGRecipe
 

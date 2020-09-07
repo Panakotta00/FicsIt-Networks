@@ -86,6 +86,7 @@ void AFINComputerSubsystem::OnSecondaryFireReleased() {
 
 AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* WorldContext) {
 #if WITH_EDITOR
+	return nullptr;
 #endif
 	UFINSubsystemHolder* Holder = GetSubsystemHolder<UFINSubsystemHolder>(WorldContext);
 	if (Holder) return Holder->ComputerSubsystem;
@@ -106,7 +107,6 @@ void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 	Comp->VirtualUserIndex = VirtualUserNum++;
 	Comp->RegisterComponent();
 	Comp->AttachToComponent(cam, FAttachmentTransformRules::KeepRelativeTransform);
-	Comp->OnHoveredWidgetChanged.AddDynamic(this, &AFINComputerSubsystem::OnWidgetChanged);
 	ScreenInteraction.Add(character, Comp);
 }
 
@@ -117,8 +117,4 @@ void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 		(*Comp)->UnregisterComponent();
 		ScreenInteraction.Remove(character);
 	}
-}
-
-void AFINComputerSubsystem::OnWidgetChanged(UWidgetComponent* WidgetComponent, UWidgetComponent* PreviousWidgetComponent) {
-	SML::Logging::error(WidgetComponent, " ", PreviousWidgetComponent);
 }

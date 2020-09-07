@@ -51,7 +51,4 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Computer")
 	void DetachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
-
-	UFUNCTION()
-	void OnWidgetChanged(UWidgetComponent* WidgetComponent, UWidgetComponent* PreviousWidgetComponent);
 };

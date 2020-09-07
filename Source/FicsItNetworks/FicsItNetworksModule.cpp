@@ -60,7 +60,7 @@ void Holo_SetupComponent(CallScope<decltype(&Holo_SetupComponentDecl)>& scope, A
 
 void GetDismantleRefund_Decl(IFGDismantleInterface*, TArray<FInventoryStack>&);
 void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {
-	AFGBuildable* self = Cast<AFGBuildable>(disInt);
+	AFGBuildable* self = reinterpret_cast<AFGBuildable*>(disInt);
 	if (!self->IsA<AFINNetworkCable>()) {
 		TInlineComponentArray<UFINNetworkConnectionComponent*> components;
 		self->GetComponents(components);
@@ -111,8 +111,8 @@ void FFicsItNetworksModule::StartupModule(){
 	});
 
 	SUBSCRIBE_METHOD(AFGBuildable::Dismantle_Implementation, [](auto& scope, AFGBuildable* self_r) {
-		IFGDismantleInterface* disInt = Cast<IFGDismantleInterface>(self_r);
-		AFGBuildable* self = Cast<AFGBuildable>(disInt);
+		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
+		AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);
 		TInlineComponentArray<UFINNetworkConnectionComponent*> connectors;
 		self->GetComponents(connectors);
 		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
