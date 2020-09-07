@@ -864,6 +864,8 @@ namespace FicsItKernel {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			luaL_newmetatable(L, INSTANCE_TYPE);			// ..., InstanceTypeMeta
+			lua_pushboolean(L, true);
+			lua_setfield(L, -2, "__metatable");
 			luaL_setfuncs(L, luaInstanceTypeLib, 0);
 			PersistTable(INSTANCE_TYPE, -1);
 			lua_pop(L, 1);									// ...
@@ -873,6 +875,8 @@ namespace FicsItKernel {
 				bool isClass = false;
 				reg->findType(typeName, &isClass);
 				luaL_newmetatable(L, TCHAR_TO_UTF8(*typeName));								// ..., InstanceMeta
+				lua_pushboolean(L, true);
+				lua_setfield(L, -2, "__metatable");
 				luaL_setfuncs(L, isClass ? luaClassInstanceLib : luaInstanceLib, 0);
 				lua_newtable(L);															// ..., InstanceMeta, InstanceCache
 				lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta

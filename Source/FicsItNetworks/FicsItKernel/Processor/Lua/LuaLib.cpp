@@ -279,6 +279,11 @@ namespace FicsItKernel {
             }
 			return 1;
 		})
+
+		LuaLibPropReadonly(UObject, hash, {
+			lua_pushinteger(L, GetTypeHash(self));
+			return 1;
+		})
 		
 		// Begin AActor
 

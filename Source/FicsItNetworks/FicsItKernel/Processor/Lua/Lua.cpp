@@ -84,6 +84,18 @@ namespace FicsItKernel {
 				FFINDynamicStructHolder Struct(prop->Struct);
 				luaGetStruct(L, i, Struct);
 				prop->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct.GetData());
+			} else if (c & EClassCastFlags::CASTCLASS_UArrayProperty) {
+				UArrayProperty* prop = Cast<UArrayProperty>(p);
+				const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
+				lua_pushnil(L);
+				FScriptArrayHelper Helper(prop, data);
+				while (lua_next(L, i) != 0) {
+					if (!lua_isinteger(L, -1)) break;
+					Helper.AddValue();
+					luaToProperty(L, prop->Inner, ((uint8*)Helper.GetRawPtr()) + (prop->Inner->ElementSize * (Helper.Num()-1)), -1);
+					
+					lua_pop(L, 1);
+				}
 			} else {
 				lua_pushnil(L);
 			}

@@ -538,8 +538,6 @@ namespace FicsItKernel {
 			lua_setfield(L, -2, "dofile");
 			lua_pushnil(L);
 			lua_setfield(L, -2, "loadfile");
-			lua_pushnil(L);
-			lua_setfield(L, -2, "setmetatable");
 			PersistTable("global", -1);
 			lua_pop(L, 1);
 			luaL_requiref(L, "table", luaopen_table, true);
