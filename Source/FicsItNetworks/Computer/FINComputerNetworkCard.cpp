@@ -1,9 +1,19 @@
 ﻿#include "FINComputerNetworkCard.h"
 
+
+#include "UnrealNetwork.h"
 #include "Network/FINNetworkCircuit.h"
 #include "Network/FINVariadicParameterList.h"
 #include "Network/Signals/FINSignalListener.h"
 #include "Network/Signals/FINSmartSignal.h"
+
+
+void AFINComputerNetworkCard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINComputerNetworkCard, ID);
+	DOREPLIFETIME(AFINComputerNetworkCard, Nick);
+}
 
 void AFINComputerNetworkCard::BeginPlay() {
 	Super::BeginPlay();
@@ -14,8 +24,8 @@ void AFINComputerNetworkCard::BeginPlay() {
 	}
 
 	// setup circuit
-	if (!Circuit) {
-		Circuit = NewObject<UFINNetworkCircuit>();
+	if (!Circuit && HasAuthority()) {
+		Circuit = GetWorld()->SpawnActor<AFINNetworkCircuit>();
 		Circuit->Recalculate(this);
 	}
 }
@@ -40,8 +50,8 @@ UObject* AFINComputerNetworkCard::GetInstanceRedirect_Implementation() const {
 	return nullptr;
 }
 
-bool AFINComputerNetworkCard::AccessPermitted_Implementation(FGuid ID) const {
-	return ID == FGuid() || (ConnectedComponent && ID == IFINNetworkComponent::Execute_GetID(ConnectedComponent));
+bool AFINComputerNetworkCard::AccessPermitted_Implementation(FGuid NewID) const {
+	return NewID == FGuid() || (ConnectedComponent && NewID == IFINNetworkComponent::Execute_GetID(ConnectedComponent));
 }
 
 TSet<UObject*> AFINComputerNetworkCard::GetConnected_Implementation() const {
@@ -50,12 +60,12 @@ TSet<UObject*> AFINComputerNetworkCard::GetConnected_Implementation() const {
 	return Arr;
 }
 
-UFINNetworkCircuit* AFINComputerNetworkCard::GetCircuit_Implementation() const {
+AFINNetworkCircuit* AFINComputerNetworkCard::GetCircuit_Implementation() const {
 	return Circuit;
 }
 
-void AFINComputerNetworkCard::SetCircuit_Implementation(UFINNetworkCircuit * Circuit) {
-	this->Circuit = Circuit;
+void AFINComputerNetworkCard::SetCircuit_Implementation(AFINNetworkCircuit* NewCircuit) {
+	Circuit = NewCircuit;
 }
 
 void AFINComputerNetworkCard::NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) {}
@@ -66,7 +76,8 @@ bool AFINComputerNetworkCard::IsPortOpen(int Port) {
 
 void AFINComputerNetworkCard::HandleMessage(FFINNetworkTrace Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) {
 	for (const FFINNetworkTrace& Listener : Listeners) {
-		Cast<IFINSignalListener>(*Listener)->HandleSignal(FFINNetworkMessageSignal(IFINNetworkComponent::Execute_GetID(*Sender), Port, Data), Listener.Reverse());
+		IFINSignalListener* L = Cast<IFINSignalListener>(*Listener);
+		if (L) L->HandleSignal(FFINNetworkMessageSignal(IFINNetworkComponent::Execute_GetID(*Sender), Port, Data), Listener.Reverse());
 	}
 }
 

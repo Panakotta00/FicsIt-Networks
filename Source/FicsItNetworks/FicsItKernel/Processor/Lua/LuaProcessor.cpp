@@ -86,9 +86,9 @@ namespace FicsItKernel {
 			
 		}
 
-		void LuaProcessor::setKernel(KernelSystem* kernel) {
+		void LuaProcessor::setKernel(KernelSystem* newKernel) {
 			if (getKernel() && getKernel()->getFileSystem()) getKernel()->getFileSystem()->removeListener(fileSystemListener);
-			Processor::setKernel(kernel);
+			Processor::setKernel(newKernel);
 		}
 
 		void LuaProcessor::tick(float delta) {
@@ -216,7 +216,7 @@ namespace FicsItKernel {
 				kernel->crash(KernelCrash("No Valid EEPROM set"));
 				return;
 			}
-			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->Code));
+			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->GetCode()));
 			luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
 
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
@@ -440,8 +440,8 @@ namespace FicsItKernel {
 			return NewObject<ULuaProcessorStateStorage>();
 		}
 
-		void LuaProcessor::setEEPROM(AFINStateEEPROM* eeprom) {
-			this->eeprom = Cast<AFINStateEEPROMLua>(eeprom);
+		void LuaProcessor::setEEPROM(AFINStateEEPROM* newEeprom) {
+			eeprom = Cast<AFINStateEEPROMLua>(newEeprom);
 			reset();
 		}
 
@@ -538,8 +538,6 @@ namespace FicsItKernel {
 			lua_setfield(L, -2, "dofile");
 			lua_pushnil(L);
 			lua_setfield(L, -2, "loadfile");
-			lua_pushnil(L);
-			lua_setfield(L, -2, "setmetatable");
 			PersistTable("global", -1);
 			lua_pop(L, 1);
 			luaL_requiref(L, "table", luaopen_table, true);

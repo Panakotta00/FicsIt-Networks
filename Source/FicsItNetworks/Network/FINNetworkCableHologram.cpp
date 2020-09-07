@@ -8,6 +8,7 @@
 #include "FGPowerConnectionComponent.h"
 
 #include "FINNetworkCable.h"
+#include "UnrealNetwork.h"
 
 FVector FFINSnappedInfo::GetConnectorPos() const {
 	switch (SnapType) {
@@ -53,6 +54,13 @@ AActor* FFINSnappedInfo::GetActor() const {
 	}
 }
 
+void AFINNetworkCableHologram::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINNetworkCableHologram, Snapped);
+	DOREPLIFETIME(AFINNetworkCableHologram, OldSnapped);
+	DOREPLIFETIME(AFINNetworkCableHologram, From);
+}
+
 bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {
 	if (From.SnapType != FIN_NOT_SNAPPED) return IsSnappedValid();
 	if (Snapped.SnapType == FIN_NOT_SNAPPED) {
@@ -66,7 +74,7 @@ bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {
 	return false;
 }
 
-UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINSnappedInfo s, TArray<AActor*>& childs, FNetConstructionID id) {
+UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINSnappedInfo s) {
 	switch (s.SnapType) {
 	case FIN_CONNECTOR:
 		return Cast<UFINNetworkConnectionComponent>(s.SnappedObj);
@@ -84,36 +92,37 @@ UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINSnapp
 		a->SetActorLocation(Location);
 		return a->Connector;
 	} case FIN_POLE: {
-		AActor* Constructed = PoleHologram->Construct(childs, id);
-		childs.Add(Constructed);
-		TArray<UActorComponent*> Comp = Constructed->GetComponentsByClass(UFINNetworkConnectionComponent::StaticClass());
-		check(Comp.Num() > 0);
-		return Cast<UFINNetworkConnectionComponent>(Comp[0]);
+		return nullptr;
 	} default:
 		return nullptr;
 	}
 }
 
 AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstructionID constructionID) {
-	UFINNetworkConnectionComponent* c1 = SetupSnapped(Snapped, childs, constructionID);
-	UFINNetworkConnectionComponent* c2 = SetupSnapped(From, childs, constructionID);
-	
-	FRotator rotation = FRotator::ZeroRotator;
-	FVector location = c1->GetComponentToWorld().GetTranslation();
-	
-	FActorSpawnParameters spawnParams;
-	spawnParams.bDeferConstruction = true;
+	Connector1Cache = SetupSnapped(From);
+	Connector2Cache = SetupSnapped(Snapped);
 
-	AFINNetworkCable* a = GetWorld()->SpawnActor<AFINNetworkCable>(this->mBuildClass, location, rotation, spawnParams);
+	if (Connector1Cache) SetActorLocation(Connector1Cache->GetComponentToWorld().GetTranslation());
+	AFINNetworkCable* FinishedCable = Cast<AFINNetworkCable>(Super::Construct(childs, constructionID));
+	if (Snapped.SnapType == EFINNetworkCableHologramSnapType::FIN_POLE) {
+		AActor* Pole = childs[0];
+		UFINNetworkConnectionComponent* Con = Cast<UFINNetworkConnectionComponent>(Pole->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
+		FinishedCable->Connector2 = Con;
+		FinishedCable->ConnectConnectors();
+	}
 	
-	FTransform t = a->GetTransform();
+	Snapped = FFINSnappedInfo();
+	From = FFINSnappedInfo();
+	ForceNetUpdate();
+	return FinishedCable;
+}
 
-	a->Connector1 = c1;
-	a->Connector2 = c2;
+void AFINNetworkCableHologram::ConfigureActor(AFGBuildable* inBuildable) const {
+	Super::ConfigureActor(inBuildable);
 
-	a->SetBuiltWithRecipe(GetRecipe());
-	
-	return UGameplayStatics::FinishSpawningActor(a, FTransform(rotation.Quaternion(), location));
+	AFINNetworkCable* ToBuildCable = Cast<AFINNetworkCable>(inBuildable);
+	ToBuildCable->Connector1 = Connector1Cache;
+	ToBuildCable->Connector2 = Connector2Cache;
 }
 
 int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {
@@ -202,8 +211,8 @@ bool AFINNetworkCableHologram::IsSnappedValid() {
 		}
 		if (From.SnapType == FIN_CONNECTOR) {
 			UFINNetworkConnectionComponent* FromConnector = Cast<UFINNetworkConnectionComponent>(From.SnappedObj);
-			for (AFINNetworkCable* Cable : Connector->ConnectedCables) {
-				if (Cable->Connector1 == FromConnector || Cable->Connector2 == FromConnector) {
+			for (AFINNetworkCable* FCable : Connector->ConnectedCables) {
+				if (FCable->Connector1 == FromConnector || FCable->Connector2 == FromConnector) {
 					AddConstructDisqualifier(UFGCDWireSnap::StaticClass());
 					ret = false;
 				}

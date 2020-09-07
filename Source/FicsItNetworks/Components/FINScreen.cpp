@@ -8,9 +8,19 @@
 AFINScreen::AFINScreen() {
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
 	WidgetComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-
+	
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
+}
+
+void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINScreen, GPU);
+	DOREPLIFETIME(AFINScreen, ScreenWidth);
+	DOREPLIFETIME(AFINScreen, ScreenHeight);
 }
 
 void AFINScreen::BeginPlay() {
@@ -53,7 +63,16 @@ void AFINScreen::OnConstruction(const FTransform& transform) {
 #endif
 }
 
+void AFINScreen::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+	if (bGPUChanged) {
+		bGPUChanged = false;
+		ForceNetUpdate();
+	}
+}
+
 void AFINScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
+	Super::EndPlay(endPlayReason);
 	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(nullptr);
 }
 
@@ -67,18 +86,17 @@ bool AFINScreen::ShouldSave_Implementation() const {
 
 void AFINScreen::BindGPU(UObject* gpu) {
 	if (gpu) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
-    if (GPU != gpu) {
-    	if (!gpu) SetWidget(nullptr);
-    	UObject* oldGPU = GPU;
-    	GPU = nullptr;
-    	if (oldGPU) Cast<IFINGPUInterface>(oldGPU)->BindScreen(nullptr);
-    	GPU = gpu;
-    	if (gpu) {
-    		Cast<IFINGPUInterface>(gpu)->BindScreen(this);
-    		Cast<IFINGPUInterface>(gpu)->RequestNewWidget();
-    	}
-    }
-	OnGPUUpdate.Broadcast();
+	if (GPU != gpu) {
+		UObject* oldGPU = GPU;
+		GPU = nullptr;
+		if (oldGPU) Cast<IFINGPUInterface>(oldGPU)->BindScreen(nullptr);
+		GPU = gpu;
+		if (gpu) {
+			Cast<IFINGPUInterface>(gpu)->BindScreen(this);
+		}
+		bGPUChanged = true;
+	}
+	NetMulti_OnGPUUpdate();
 }
 
 UObject* AFINScreen::GetGPU() const {
@@ -88,14 +106,16 @@ UObject* AFINScreen::GetGPU() const {
 void AFINScreen::SetWidget(TSharedPtr<SWidget> widget) {
 	if (Widget != widget) Widget = widget;
 	WidgetComponent->SetSlateWidget(
-        Widget.IsValid() ?
-            SNew(SScaleBox)
-            .Stretch(EStretch::ScaleToFit)
-            .Content()[
-                Widget.ToSharedRef()
-            ]
-        :
-            TSharedPtr<SScaleBox>(nullptr));
+		Widget.IsValid() ?
+			SNew(SScaleBox)
+			.Stretch(EStretch::ScaleToFit)
+			.Content()[
+				Widget.ToSharedRef()
+			]
+		:
+			SNew(SScaleBox)
+		);
+	WidgetComponent->RequestRedraw();
 	OnWidgetUpdate.Broadcast();
 }
 
@@ -106,6 +126,15 @@ TSharedPtr<SWidget> AFINScreen::GetWidget() const {
 void AFINScreen::netFunc_getSize(int& w, int& h) {
 	w = FMath::Abs(ScreenWidth);
 	h = FMath::Abs(ScreenHeight);
+}
+
+void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {
+	if (GPU) {
+		Cast<IFINGPUInterface>(GPU)->RequestNewWidget();
+	} else {
+		SetWidget(SNew(SScaleBox));
+	}
+	OnGPUUpdate.Broadcast();
 }
 
 void AFINScreen::SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts) {
@@ -204,10 +233,10 @@ void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPa
 	}
 	
 	int fx = ScreenWidth < 0 ? -3 : 1;
-    int fy = ScreenHeight < 0 ? -3 : 1;
+	int fy = ScreenHeight < 0 ? -3 : 1;
 	switch(r) {
 	case 0:
-        CornerPart->SetRelativeLocation(FVector(0, x * 100 - 50*fx, y * 100 - 50*fy));
+		CornerPart->SetRelativeLocation(FVector(0, x * 100 - 50*fx, y * 100 - 50*fy));
 		CornerPart->SetRelativeRotation(FRotator(0, 0, 0));
 		break;
 	case -1:
@@ -215,7 +244,7 @@ void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPa
 		CornerPart->SetRelativeRotation(FRotator(0, 0, 90));
 		break;
 	case 1:
-        CornerPart->SetRelativeLocation(FVector(0, x * 100 + 50, y * 100 - 50*fy));
+		CornerPart->SetRelativeLocation(FVector(0, x * 100 + 50, y * 100 - 50*fy));
 		CornerPart->SetRelativeRotation(FRotator(0, 0, -90));
 		break;
 	case 2:
@@ -223,7 +252,7 @@ void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPa
 		CornerPart->SetRelativeRotation(FRotator(0, 0, 180));
 		break;
 	default:
-        break;
+		break;
 	}
 	CornerPart->RegisterComponent();
 	CornerPart->CreationMethod = EComponentCreationMethod::UserConstructionScript;

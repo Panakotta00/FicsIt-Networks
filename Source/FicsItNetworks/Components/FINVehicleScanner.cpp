@@ -16,12 +16,19 @@ AFINVehicleScanner::AFINVehicleScanner() {
 	SetActorTickEnabled(true);
 }
 
+void AFINVehicleScanner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINVehicleScanner, ScanColor);
+	DOREPLIFETIME(AFINVehicleScanner, Intensity);
+}
+
 void AFINVehicleScanner::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
 	if (bColorChanged) {
 		bColorChanged = false;
-		UpdateColor();
+		Client_OnColorChanged();
 	}
 }
 
@@ -78,6 +85,10 @@ TSet<FFINNetworkTrace> AFINVehicleScanner::GetListeners_Implementation() {
 
 UObject* AFINVehicleScanner::GetSignalSenderOverride_Implementation() {
 	return this;
+}
+
+void AFINVehicleScanner::Client_OnColorChanged_Implementation() {
+	UpdateColor();
 }
 
 void AFINVehicleScanner::UpdateColor_Implementation() {

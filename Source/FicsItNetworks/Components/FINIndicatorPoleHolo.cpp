@@ -1,8 +1,53 @@
 ﻿#include "FINIndicatorPoleHolo.h"
 
 #include "FINIndicatorPole.h"
+#include "UnrealNetwork.h"
 
 AFINIndicatorPoleHolo::AFINIndicatorPoleHolo() {
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
+}
+
+void AFINIndicatorPoleHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINIndicatorPoleHolo, Height);
+}
+
+void AFINIndicatorPoleHolo::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+	if (LastHeight != Height) {
+		for (int i = LastHeight; i > Height; --i) {
+			if (i < 0) continue;
+			UStaticMeshComponent* Pole = Poles[Poles.Num()-1];
+			Poles.Pop();
+			if (Pole) {
+				Pole->UnregisterComponent();
+				Pole->SetActive(false);
+				Pole->DestroyComponent();
+			}
+		}
+		UStaticMesh* LongPole = Cast<AFINIndicatorPole>(mBuildClass->GetDefaultObject())->LongPole;
+		for (int i = LastHeight; i < Height; ++i) {
+			if (i < 0) continue;
+			UStaticMeshComponent* Pole = NewObject<UStaticMeshComponent>(this);
+			check(Pole);
+			Pole->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			Pole->SetRelativeLocation(FVector(0,0, -(i) * 100.0));
+			Pole->RegisterComponent();
+			Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+			Pole->SetStaticMesh(LongPole);
+			Poles.Add(Pole);
+		}
+		LastHeight = Height;
+	}
+}
+
+void AFINIndicatorPoleHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+	for (UStaticMeshComponent* Pole : Poles) {
+		Pole->UnregisterComponent();
+	}
+	Poles.Empty();
 }
 
 bool AFINIndicatorPoleHolo::DoMultiStepPlacement(bool isInputFromARelease) {
@@ -33,31 +78,8 @@ void AFINIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& hit
 		float horizontalDistance = FVector::DistXY(hitResult.TraceStart, SnappedLoc);
 		float angleOfTrace = FMath::DegreesToRadians((hitResult.TraceEnd - hitResult.TraceStart).Rotation().Pitch);
 		float verticalDistance = horizontalDistance * FMath::Tan(angleOfTrace) + hitResult.TraceStart.Z - SnappedLoc.Z;
-		int Height = Height = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
+		Height = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
 		SetActorLocation(SnappedLoc + FVector(0,0,Height * 100.0));
-		for (int i = LastHeight; i > Height; --i) {
-			if (i < 0) continue;
-			UStaticMeshComponent* Pole = Poles[Poles.Num()-1];
-			Poles.Pop();
-			if (Pole) {
-				Pole->UnregisterComponent();
-				Pole->SetActive(false);
-				Pole->DestroyComponent();
-			}
-		}
-		UStaticMesh* LongPole = Cast<AFINIndicatorPole>(mBuildClass->GetDefaultObject())->LongPole;
-		for (int i = LastHeight; i < Height; ++i) {
-			if (i < 0) continue;
-			UStaticMeshComponent* Pole = NewObject<UStaticMeshComponent>(this);
-			check(Pole);
-			Pole->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-			Pole->SetRelativeLocation(FVector(0,0, -(i) * 100.0));
-			Pole->RegisterComponent();
-			Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
-			Pole->SetStaticMesh(LongPole);
-			Poles.Add(Pole);
-		}
-		LastHeight = Height;
 	} else {
 		if (SnappedPole.IsValid()) {
 			SetActorLocation(SnappedPole->GetActorLocation() + FVector(0,0,300));
@@ -65,31 +87,15 @@ void AFINIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& hit
 	}
 }
 
-AActor* AFINIndicatorPoleHolo::Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) {
-	FRotator rotation = GetActorRotation();
-	FVector location = GetActorLocation();
-	
-	FActorSpawnParameters spawnParams;
-	spawnParams.bDeferConstruction = true;
+void AFINIndicatorPoleHolo::ConfigureActor(AFGBuildable* inBuildable) const {
+	Super::ConfigureActor(inBuildable);
 
-	AFINIndicatorPole* a = GetWorld()->SpawnActor<AFINIndicatorPole>(this->mBuildClass, location, rotation, spawnParams);
-	a->SetBuiltWithRecipe(GetRecipe());
-	a->Height = GetHeight(GetActorLocation());
+	AFINIndicatorPole* Pole = Cast<AFINIndicatorPole>(inBuildable);
+	Pole->Height = GetHeight(GetActorLocation());
 	if (SnappedPole.IsValid()) {
-		a->BottomConnected = SnappedPole.Get();
-		SnappedPole->TopConnected = a;
+		Pole->BottomConnected = SnappedPole.Get();
+		SnappedPole->TopConnected = Pole;
 	}
-
-	// Reset
-	bSnapped = false;
-	SnappedPole = nullptr;
-	for (UStaticMeshComponent* Pole : Poles) {
-		Pole->UnregisterComponent();
-	}
-	Poles.Empty();
-	LastHeight = 0;
-	
-	return UGameplayStatics::FinishSpawningActor(a, FTransform(rotation.Quaternion(), location));
 }
 
 void AFINIndicatorPoleHolo::CheckValidFloor() {

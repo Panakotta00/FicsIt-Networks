@@ -12,6 +12,7 @@
 #include "FINComputerNetworkCard.h"
 #include "FINComputerSubsystem.h"
 #include "FINConfig.h"
+#include "UnrealNetwork.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Audio/AudioComponentController.h"
 #include "util/Logging.h"
@@ -31,9 +32,13 @@ AFINComputerCase::AFINComputerCase() {
 	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> item, int32 i) {
         return (i == 0 && item->IsChildOf<UFINComputerEEPROMDesc>()) || (i == 1 && item->IsChildOf<UFINComputerFloppyDesc>());
     });
+	DataStorage->SetIsReplicated(true);
 
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	SpeakerTrampoline = CreateDefaultSubobject<UFINAudioComponentControllerTrampoline>("SpeakerTrampoline");
+	SpeakerTrampoline->Speaker = Speaker;
 	
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
@@ -41,11 +46,6 @@ AFINComputerCase::AFINComputerCase() {
 	mFactoryTickFunction.bAllowTickOnDedicatedServer = true;
 
 	if (HasAuthority()) mFactoryTickFunction.SetTickFunctionEnable(true);
-
-	kernel = new FicsItKernel::KernelSystem();
-	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
-	kernel->getNetwork()->component = NetworkConnector;
-	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(Speaker));
 
 	SetActorTickEnabled(true);
 	PrimaryActorTick.SetTickFunctionEnable(true);
@@ -55,6 +55,16 @@ AFINComputerCase::AFINComputerCase() {
 
 AFINComputerCase::~AFINComputerCase() {
 	if (kernel) delete kernel;
+}
+
+void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINComputerCase, DataStorage);
+	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
+	DOREPLIFETIME(AFINComputerCase, SerialOutput);
+	DOREPLIFETIME(AFINComputerCase, Screens);
+	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
 }
 
 void AFINComputerCase::Serialize(FArchive& Ar) {
@@ -71,33 +81,64 @@ void AFINComputerCase::OnConstruction(const FTransform& Transform) {
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
 	if (finConfig->HasField("SignalQueueSize")) kernel->getNetwork()->maxSignalCount = finConfig->GetIntegerField("SignalQueueSize");
-	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(Speaker));
+	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(SpeakerTrampoline));
 }
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
-	
-	DataStorage->Resize(2);
 
-	// load floppy
-	AFINFileSystemState* state = nullptr;
-	FInventoryStack stack;
-	if (DataStorage->GetStackFromIndex(1, stack)) {
-		const TSubclassOf<UFINComputerDriveDesc> DriveDesc = stack.Item.ItemClass;
-		state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
-		if (IsValid(DriveDesc)) {
-			if (!IsValid(state)) {
-				state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+	if (HasAuthority()) {
+		DataStorage->Resize(2);
+
+		// load floppy
+		AFINFileSystemState* state = nullptr;
+		FInventoryStack stack;
+		if (DataStorage->GetStackFromIndex(1, stack)) {
+			TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
+			state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+			if (IsValid(DriveDesc)) {
+				if (!IsValid(state)) {
+					state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+				}
 			}
+			if (Floppy) kernel->removeDrive(Floppy);
+			Floppy = state;
+			if (Floppy) kernel->addDrive(Floppy);
 		}
-		if (Floppy) kernel->removeDrive(Floppy);
-		Floppy = state;
-		if (Floppy) kernel->addDrive(Floppy);
 	}
 }
 
 void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
-	if (kernel) kernel->handleFutures();
+	if (HasAuthority()) {
+		bool bNetUpdate = false;
+		if (kernel) {
+			kernel->handleFutures();
+			EComputerState NewState;
+			using State = FicsItKernel::KernelState;
+			switch (kernel->getState()) {
+			case State::RUNNING:
+				NewState = EComputerState::RUNNING;
+				break;
+			case State::SHUTOFF:
+				NewState = EComputerState::SHUTOFF;
+				break;
+			default:
+				NewState = EComputerState::CRASHED;
+				break;
+			}
+			if (NewState != InternalKernelState) {
+				InternalKernelState = NewState;
+				bNetUpdate = true;
+			}
+		}
+		if (OldSerialOutput != SerialOutput) {
+			OldSerialOutput = SerialOutput;
+			bNetUpdate = true;
+		}
+		if (bNetUpdate) {
+			ForceNetUpdate();
+		}
+	}
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
@@ -113,6 +154,12 @@ void AFINComputerCase::Factory_Tick(float dt) {
 		kernel->tick(dt);
 		//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
 		//SML::Logging::debug("Computer tick: ", dur.count());
+		
+		FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
+        if (dev) {
+        	SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
+			SerialOutput = SerialOutput.Right(1000);
+        }
 	}
 }
 
@@ -142,6 +189,14 @@ void AFINComputerCase::PreSaveGame_Implementation(int32 gameVersion, int32 engin
 
 void AFINComputerCase::PostSaveGame_Implementation(int32 gameVersion, int32 engineVersion) {
 	kernel->PostSerialize(KernelState, false);
+}
+
+void AFINComputerCase::NetMulti_OnEEPROMChanged_Implementation(AFINStateEEPROM* EEPROM) {
+	OnEEPROMUpdate.Broadcast(EEPROM);
+}
+
+void AFINComputerCase::NetMulti_OnFloppyChanged_Implementation(AFINFileSystemState* NewFloppy) {
+	OnFloppyUpdate.Broadcast(NewFloppy);
 }
 
 void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
@@ -193,14 +248,14 @@ void AFINComputerCase::RecalculateMemory() {
 void AFINComputerCase::AddDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (DriveHolders.Contains(DriveHolder)) return;
 	DriveHolders.Add(DriveHolder);
-	DriveHolder->OnDriveUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
+	DriveHolder->OnLockedUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
 	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
 	if (FileSystemState) kernel->addDrive(FileSystemState);
 }
 
 void AFINComputerCase::RemoveDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (DriveHolders.Remove(DriveHolder) <= 0) return;
-	DriveHolder->OnDriveUpdate.RemoveDynamic(this, &AFINComputerCase::OnDriveUpdate);
+	DriveHolder->OnLockedUpdate.RemoveDynamic(this, &AFINComputerCase::OnDriveUpdate);
 	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
 	if (FileSystemState) kernel->removeDrive(FileSystemState);
 }
@@ -236,34 +291,38 @@ void AFINComputerCase::RemoveNetCard(AFINComputerNetworkCard* NetCard) {
 }
 
 void AFINComputerCase::AddModule(AActor* module) {
-	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
-		AddProcessor(processor);
-	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
-		AddMemory(memory);
-	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
-		AddDrive(holder);
-	} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
-		AddScreen(screen);
-	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
-		AddGPU(gpu);
-	} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
-		AddNetCard(netCard);
+	if (HasAuthority()) {
+		if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
+			AddProcessor(processor);
+		} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
+			AddMemory(memory);
+		} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
+			AddDrive(holder);
+		} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
+			AddScreen(screen);
+		} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
+			AddGPU(gpu);
+		} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
+			AddNetCard(netCard);
+		}
 	}
 }
 
 void AFINComputerCase::RemoveModule(AActor* module) {
-	if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
-		RemoveProcessor(processor);
-	} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
-		RemoveMemory(memory);
-	} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
-		RemoveDrive(holder);
-	} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
-		RemoveScreen(screen);
-	} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
-		RemoveGPU(gpu);
-	} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
-		RemoveNetCard(netCard);
+	if (HasAuthority()) {
+		if (AFINComputerProcessor* processor = Cast<AFINComputerProcessor>(module)) {
+			RemoveProcessor(processor);
+		} else if (AFINComputerMemory* memory = Cast<AFINComputerMemory>(module)) {
+			RemoveMemory(memory);
+		} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
+			RemoveDrive(holder);
+		} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
+			RemoveScreen(screen);
+		} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
+			RemoveGPU(gpu);
+		} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
+			RemoveNetCard(netCard);
+		}
 	}
 }
 
@@ -274,7 +333,7 @@ void AFINComputerCase::AddModules(const TArray<AActor*>& Modules) {
 }
 
 void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
-	if (module->Implements<UFINModuleSystemModule>()) {
+	if (HasAuthority() && module->Implements<UFINModuleSystemModule>()) {
 		AActor* moduleActor = Cast<AActor>(module);
 		if (added) AddModule(moduleActor);
 		else RemoveModule(moduleActor);
@@ -282,47 +341,56 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 }
 
 void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num) {
-	if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
-		FicsItKernel::Processor* processor = kernel->getProcessor();
-		if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
-	} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
-		AFINFileSystemState* state = nullptr;
-		FInventoryStack stack;
-		if (DataStorage->GetStackFromIndex(1, stack)) {
-			TSubclassOf<UFINComputerDriveDesc> driveDesc = stack.Item.ItemClass;
-			state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
-			if (IsValid(driveDesc)) {
-				if (!IsValid(state)) {
-					state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DataStorage, 1);
+	if (HasAuthority()) {
+		if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
+			FicsItKernel::Processor* processor = kernel->getProcessor();
+			AFINStateEEPROM* EEPROM = UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0);
+			if (processor) processor->setEEPROM(EEPROM);
+			NetMulti_OnEEPROMChanged(EEPROM);
+		} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
+			AFINFileSystemState* state = nullptr;
+			FInventoryStack stack;
+			if (DataStorage->GetStackFromIndex(1, stack)) {
+				TSubclassOf<UFINComputerDriveDesc> driveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
+				state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+				if (IsValid(driveDesc)) {
+					if (!IsValid(state)) {
+						state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DataStorage, 1);
+					}
 				}
 			}
-		}
-		if (IsValid(Floppy)) {
-			kernel->removeDrive(Floppy);
-			Floppy = nullptr;
-		}
-		if (IsValid(state)) {
-			Floppy = state;
-			kernel->addDrive(Floppy);
+			if (IsValid(Floppy)) {
+				kernel->removeDrive(Floppy);
+				Floppy = nullptr;
+			}
+			if (IsValid(state)) {
+				Floppy = state;
+				kernel->addDrive(Floppy);
+			}
+			NetMulti_OnFloppyChanged(Floppy);
 		}
 	}
 }
 
 void AFINComputerCase::Toggle() {
-	FicsItKernel::Processor* processor = kernel->getProcessor();
-	if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
-	switch (kernel->getState()) {
-	case FicsItKernel::KernelState::SHUTOFF:
-		kernel->start(false);
-		SerialOutput = "";
-		break;
-	case FicsItKernel::KernelState::CRASHED:
-		kernel->start(true);
-		SerialOutput = "";
-		break;
-	default:
-		kernel->stop();	
-		break;
+	if (HasAuthority()) {
+		FicsItKernel::Processor* processor = kernel->getProcessor();
+		if (processor) processor->setEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
+		switch (kernel->getState()) {
+		case FicsItKernel::KernelState::SHUTOFF:
+			kernel->start(false);
+			SerialOutput = "";
+			ForceNetUpdate();
+			break;
+		case FicsItKernel::KernelState::CRASHED:
+			kernel->start(true);
+			SerialOutput = "";
+			ForceNetUpdate();
+			break;
+		default:
+			kernel->stop();	
+			break;
+		}
 	}
 }
 
@@ -331,23 +399,10 @@ FString AFINComputerCase::GetCrash() {
 }
 
 EComputerState AFINComputerCase::GetState() {
-	using State = FicsItKernel::KernelState;
-	switch (kernel->getState()) {
-	case State::RUNNING:
-		return EComputerState::RUNNING;
-	case State::SHUTOFF:
-		return EComputerState::SHUTOFF;
-	default:
-		return EComputerState::CRASHED;
-	}
+	return InternalKernelState;
 }
 
 FString AFINComputerCase::GetSerialOutput() {
-	FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
-	if (dev) {
-		SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
-		SerialOutput = SerialOutput.Right(1000);
-	}
 	return SerialOutput;
 }
 
@@ -362,10 +417,10 @@ void AFINComputerCase::HandleSignal(const FFINDynamicStructHolder& signal, const
 	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
 }
 
-void AFINComputerCase::OnDriveUpdate(bool added, AFINFileSystemState* drive) {
-	if (added) {
-		kernel->addDrive(drive);
-	} else {
+void AFINComputerCase::OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive) {
+	if (bOldLocked) {
 		kernel->removeDrive(drive);
+	} else {
+		kernel->addDrive(drive);
 	}
 }

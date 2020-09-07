@@ -13,25 +13,30 @@ class UFINAdvancedNetworkConnectionComponent;
  * When changes occur in the network, also sends signals to the componentes accordingly.
  */
 UCLASS()
-class FICSITNETWORKS_API UFINNetworkCircuit : public UObject {
+class FICSITNETWORKS_API AFINNetworkCircuit : public AActor {
 	GENERATED_BODY()
 	
 	friend UFINAdvancedNetworkConnectionComponent;
 
 protected:
-	TSet<TSoftObjectPtr<UObject>> Nodes;
+	UPROPERTY(Replicated)
+	TArray<TSoftObjectPtr<UObject>> Nodes;
 
 	void AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add);
 
 public:
-	UFINNetworkCircuit();
-	~UFINNetworkCircuit();
+	AFINNetworkCircuit();
+	~AFINNetworkCircuit();
 
+	// Begin UObject
+	virtual bool IsSupportedForNetworking() const override;
+	// End UObject
+	
 	/**
 	 * Adds the given circuit to this circuit.
 	 * Causes correct update signals for the components.
 	 */
-	UFINNetworkCircuit* operator+(UFINNetworkCircuit* Circuit);
+	AFINNetworkCircuit* operator+(AFINNetworkCircuit* Circuit);
 	
 	/**
 	 * Regenerates the node cache based on the given start component
@@ -85,8 +90,8 @@ public:
 	 * @param[in]	A	the node whichs circuit should remove node B
 	 * @param[in]	B	the node which sould get removed
 	 */
-	UFUNCTION()
-	static void DisconnectNodes(const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B);
+	UFUNCTION(meta = (WorldContext = "WorldContext"))
+	static void DisconnectNodes(UObject* WorldContext, const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B);
 
 	/**
 	 * Updates the circuits of node A and B after they got connected
@@ -96,8 +101,8 @@ public:
 	 * @param[in]	A	the first component
 	 * @param[in]	B	the second component
 	 */
-	UFUNCTION()
-	static void ConnectNodes(const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B);
+	UFUNCTION(meta = (WorldContext = "WorldContext"))
+	static void ConnectNodes(UObject* WorldContext, const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B);
 
 private:
 	static bool IsNodeConnected_Internal(const TScriptInterface<IFINNetworkCircuitNode>& Self, const TScriptInterface<IFINNetworkCircuitNode>& Node, TSet<UObject*>& Searched);

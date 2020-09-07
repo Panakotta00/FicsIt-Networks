@@ -1,5 +1,7 @@
 #include "FINNetworkPowerSwitch.h"
 
+#include "UnrealNetwork.h"
+
 AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 	PowerConnection1 = CreateDefaultSubobject<UFGPowerConnectionComponent>("PowerConnection1");
 	PowerConnection1->SetupAttachment(RootComponent);
@@ -19,6 +21,12 @@ AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
 	if (HasAuthority()) PrimaryActorTick.SetTickFunctionEnable(true);
 }
 
+void AFINNetworkPowerSwitch::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINNetworkPowerSwitch, bConnected);
+}
+
 void AFINNetworkPowerSwitch::BeginPlay() {
 	Super::BeginPlay();
 
@@ -29,7 +37,7 @@ void AFINNetworkPowerSwitch::Tick(float dt) {
 	Super::Tick(dt);
 
 	if (bConnectedHasChanged) {
-		OnConnectedChanged();
+		Client_OnConnectedChanged();
 		bConnectedHasChanged = false;
 	}
 }
@@ -49,7 +57,12 @@ void AFINNetworkPowerSwitch::SetConnected(bool bNewConnected) {
 			PowerConnection1->GetHiddenConnections(connections);
 			if (connections.Contains(PowerConnection2)) PowerConnection1->RemoveHiddenConnection(PowerConnection2);
 		}
+		ForceNetUpdate();
 	}
+}
+
+void AFINNetworkPowerSwitch::Client_OnConnectedChanged_Implementation() {
+	OnConnectedChanged();
 }
 
 void AFINNetworkPowerSwitch::netFunc_setConnected(bool newConnected) {
@@ -60,6 +73,4 @@ bool AFINNetworkPowerSwitch::netFunc_isConnected() {
 	return bConnected;
 }
 
-void AFINNetworkPowerSwitch::OnConnectedChanged_Implementation() {
-	bConnectedHasChanged = false;
-}
+void AFINNetworkPowerSwitch::OnConnectedChanged_Implementation() {}

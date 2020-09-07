@@ -123,6 +123,8 @@ namespace FicsItKernel {
 
 		TFINLuaStructRegisterer<FInventoryItem> GLuaInventoryItem(TEXT("Item"), [](lua_State* L, PersistParams) {
 			luaL_newmetatable(L, "Item");
+			lua_pushboolean(L, true);
+            lua_setfield(L, -2, "__metatable");
             luaL_setfuncs(L, luaItemLib, 0);
             PersistTable("Item", -1);
             lua_pop(L, 1);
@@ -169,6 +171,8 @@ namespace FicsItKernel {
 		
 		TFINLuaStructRegisterer<FItemAmount> GLuaItemAmount(TEXT("ItemAmount"), [](lua_State* L, PersistParams) {
 			luaL_newmetatable(L, "ItemAmount");
+			lua_pushboolean(L, true);
+            lua_setfield(L, -2, "__metatable");
             luaL_setfuncs(L, luaItemAmountLib, 0);
             PersistTable("ItemAmount", -1);
             lua_pop(L, 1);
@@ -212,6 +216,8 @@ namespace FicsItKernel {
 
 		TFINLuaStructRegisterer<FInventoryStack> GLuaItemStack(TEXT("ItemStack"), [](lua_State* L, PersistParams) {
 			luaL_newmetatable(L, "ItemStack");
+			lua_pushboolean(L, true);
+            lua_setfield(L, -2, "__metatable");
             luaL_setfuncs(L, luaItemStackLib, 0);
             PersistTable("ItemStack", -1);
             lua_pop(L, 1);
@@ -325,6 +331,8 @@ namespace FicsItKernel {
 
 		TFINLuaStructRegisterer<FFINTrackGraph> GLuaTrackGraph(TEXT("TrackGraph"), [](lua_State* L, PersistParams) {
 			luaL_newmetatable(L, "TrackGraph");
+			lua_pushboolean(L, true);
+            lua_setfield(L, -2, "__metatable");
             luaL_setfuncs(L, luaTrackGraphMetaLib, 0);
             PersistTable("TrackGraph", -1);
             lua_newtable(L);
@@ -365,6 +373,8 @@ namespace FicsItKernel {
 
 		TFINLuaStructRegisterer<FFINTimeTableStop> GLuaStructTrackGraphRegisterer(TEXT("TimeTableStop"), [](lua_State* L, PersistParams) {
 			luaL_newmetatable(L, "TimeTableStop");
+			lua_pushboolean(L, true);
+            lua_setfield(L, -2, "__metatable");
             luaL_setfuncs(L, luaTimeTableStopLib, 0);
             PersistTable("TimeTableStop", -1);
             lua_pop(L, 1);
@@ -474,6 +484,8 @@ namespace FicsItKernel {
 
 		TFINLuaStructRegisterer<FFINFuture> GLuaFutureRegisterer(TEXT("Future"), [](lua_State* L, PersistParams) {
 			luaL_newmetatable(L, "Future");
+			lua_pushboolean(L, true);
+            lua_setfield(L, -2, "__metatable");
             luaL_setfuncs(L, luaFutureMetaLib, 0);
             PersistTable("Future", -1);
             lua_newtable(L);

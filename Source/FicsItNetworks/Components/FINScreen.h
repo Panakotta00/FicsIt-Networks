@@ -14,7 +14,7 @@ class AFINScreen : public AFGBuildable, public IFINScreenInterface, public IFINN
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	UObject* GPU = nullptr;
 	
 public:
@@ -35,14 +35,16 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* ScreenCorner = nullptr;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	int ScreenWidth = 1;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	int ScreenHeight = 1;
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Parts;
+
+	bool bGPUChanged = false;
 	
 	/**
 	* This event gets triggered when a new widget got set by the GPU
@@ -61,6 +63,7 @@ public:
 	// Begin AActor
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& transform) override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type endPlayReason) override;
 	// End AActor
 
@@ -85,6 +88,9 @@ public:
 
 	UFUNCTION()
 	void netFunc_getSize(int& w, int& h);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_OnGPUUpdate();
 	
 	static void SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts);
 	static void SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);

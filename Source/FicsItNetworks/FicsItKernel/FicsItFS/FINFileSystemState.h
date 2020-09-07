@@ -23,6 +23,11 @@ public:
 	UPROPERTY(SaveGame, EditDefaultsOnly)
 	int32 Capacity = 0;
 
+	UPROPERTY(Replicated)
+	float Usage = 0.0f;
+
+	FTimerHandle UsageUpdateHandler;
+	
 	AFINFileSystemState();
 	~AFINFileSystemState();
 
@@ -45,4 +50,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "FileSystem")
 	static AFINFileSystemState* CreateState(UObject* WorldContextObject, int32 inCapacity, UFGInventoryComponent* inInventory, int32 inSlot);
+
+	UFUNCTION()
+	void UpdateUsage();
 };

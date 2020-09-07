@@ -1,5 +1,7 @@
 ﻿#include "FINModuleBase.h"
 
+
+#include "UnrealNetwork.h"
 #include "ModuleSystem/FINModuleSystemHolo.h"
 
 void AFINModuleBase::Serialize(FArchive& Ar) {
@@ -7,8 +9,15 @@ void AFINModuleBase::Serialize(FArchive& Ar) {
 	if (Ar.IsSaveGame()) Ar << Listeners;
 }
 
+void AFINModuleBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINModuleBase, ModuleName);
+}
+
 void AFINModuleBase::EndPlay(EEndPlayReason::Type reason) {
-	if (ModulePanel) ModulePanel->RemoveModule(this);
+	Super::EndPlay(reason);
+	if (HasAuthority() && ModulePanel) ModulePanel->RemoveModule(this);
 }
 
 bool AFINModuleBase::ShouldSave_Implementation() const {

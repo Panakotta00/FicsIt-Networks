@@ -32,6 +32,7 @@ means in C++ it needs to have a UFUNCTION macro.
  - string
  - Object (any type)
  - Class (any type)
+ - Array (only these listed sallowed types)
 
 If you follow these rules, the function will be available as member of the lua instance
 of your object.

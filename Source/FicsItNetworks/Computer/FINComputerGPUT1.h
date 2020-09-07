@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "FINComputerGPU.h"
 #include "FINComputerGPUT1.generated.h"
@@ -130,10 +130,10 @@ UCLASS()
 class AFINComputerGPUT1 : public AFINComputerGPU {
 	GENERATED_BODY()
 private:
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	TArray<FString> TextGrid;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	FVector2D ScreenSize;
 
 	UPROPERTY(SaveGame)
@@ -142,26 +142,32 @@ private:
 	UPROPERTY(SaveGame)
 	FLinearColor CurrentBackground = FLinearColor(0,0,0,0);
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	TArray<FLinearColor> Foreground;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	TArray<FLinearColor> Background;
 
 	UPROPERTY(SaveGame)
-    TArray<FString> TextGridBuffer;
+	TArray<FString> TextGridBuffer;
 
 	UPROPERTY(SaveGame)
-    TArray<FLinearColor> ForegroundBuffer;
+	TArray<FLinearColor> ForegroundBuffer;
 
 	UPROPERTY(SaveGame)
-    TArray<FLinearColor> BackgroundBuffer;
+	TArray<FLinearColor> BackgroundBuffer;
 	
 	UPROPERTY()
 	FSlateBrush boxBrush;
+
+	bool bFlushed = false;
 	
 public:
 	AFINComputerGPUT1();
+
+	// Begin AActor
+	virtual void Tick(float DeltaSeconds) override;
+	// End AActor
 
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("GPUT1"); }
@@ -170,10 +176,10 @@ public:
 	virtual TSharedPtr<SWidget> CreateWidget() override;
 
 	/**
-	 * Reallocates the TextGrid for the new given screen size.
-	 *
-	 * @param[in]	size	the new screen size
-	 */
+	* Reallocates the TextGrid for the new given screen size.
+	*
+	* @param[in]	size	the new screen size
+	*/
 	void SetScreenSize(FVector2D size);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)

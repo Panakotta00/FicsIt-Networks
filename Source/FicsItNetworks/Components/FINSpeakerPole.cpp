@@ -36,6 +36,22 @@ UObject* AFINSpeakerPole::GetSignalSenderOverride_Implementation() {
 	return NetworkConnector;
 }
 
+void AFINSpeakerPole::PlaySound_Implementation(const FString& Sound, float StartPoint) {
+	USoundWave* wave = LoadSoundFromFile(Sound);
+	if (!wave) return;
+	if (AudioComponent->IsPlaying()) netFunc_stopSound();
+	CurrentSound = Sound;
+	AudioComponent->SetSound(wave);
+	AudioComponent->Play(StartPoint);
+	netSig_SpeakerSound(0, CurrentSound);
+}
+
+void AFINSpeakerPole::StopSound_Implementation() {
+	AudioComponent->Stop();
+	netSig_SpeakerSound(1, CurrentSound);
+	CurrentSound = "";
+}
+
 void AFINSpeakerPole::OnSoundFinished(UAudioComponent* AudioComponent) {
 	netSig_SpeakerSound(2, CurrentSound);
 	CurrentSound = "";
@@ -43,15 +59,8 @@ void AFINSpeakerPole::OnSoundFinished(UAudioComponent* AudioComponent) {
 
 void FFINSpeakersPlaySoundFuture::Execute() {
 	bDone = true;
-	USoundWave* wave = Speakers->LoadSoundFromFile(Sound);
-	if (!wave) return;
-	if (Speakers->AudioComponent->IsPlaying()) Speakers->netFunc_stopSound();
-	Speakers->CurrentSound = Sound;
-	Speakers->AudioComponent->SetSound(wave);
-	Speakers->AudioComponent->Play(Start);
-	Speakers->netSig_SpeakerSound(0, Speakers->CurrentSound);
+	Speakers->PlaySound(Sound, Start);
 }
-
 
 FFINSpeakersPlaySoundFuture AFINSpeakerPole::netFunc_playSound(const FString& sound, float startPoint) {
 	return FFINSpeakersPlaySoundFuture(this, sound, startPoint);
@@ -59,9 +68,7 @@ FFINSpeakersPlaySoundFuture AFINSpeakerPole::netFunc_playSound(const FString& so
 
 void FFINSpeakersStopSoundFuture::Execute() {
 	bDone = true;
-	Speakers->AudioComponent->Stop();
-	Speakers->netSig_SpeakerSound(1, Speakers->CurrentSound);
-	Speakers->CurrentSound = "";
+	Speakers->StopSound();
 }
 
 FFINDynamicStructHolder AFINSpeakerPole::netFunc_stopSound() {

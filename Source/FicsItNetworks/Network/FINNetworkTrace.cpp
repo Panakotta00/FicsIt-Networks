@@ -309,10 +309,10 @@ Step(UFINNetworkComponent, UFINNetworkComponent, {
 	return IFINNetworkCircuitNode::Execute_GetCircuit(oA)->HasNode(oB);
 })
 
-Step(UFINNetworkComponent, UFINNetworkCircuit, {
+Step(UFINNetworkComponent, AFINNetworkCircuit, {
 	return B->HasNode(oA);
 })
-Step(UFINNetworkCircuit, UFINNetworkComponent, {
+Step(AFINNetworkCircuit, UFINNetworkComponent, {
 	return A->HasNode(oB);
 })
 

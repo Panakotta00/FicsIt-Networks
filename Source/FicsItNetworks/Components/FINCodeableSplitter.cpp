@@ -38,7 +38,7 @@ AFINCodeableSplitter::~AFINCodeableSplitter() {}
 void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 	Super::OnConstruction(transform);
 #if !WITH_EDITOR
-	if (AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes) {
+	if (HasAuthority() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes) {
 	} else {
 		Input1->Rename(TEXT("Input1"));
 	}
@@ -47,7 +47,7 @@ void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 
 void AFINCodeableSplitter::BeginPlay() {
 	Super::BeginPlay();
-	if (AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes) {
+	if (HasAuthority() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes) {
 		RootComponent->AddRelativeRotation(FRotator(0,-90.0f,0));
 		UFGFactoryConnectionComponent* NewOutput2 = Output1->GetConnection();
 		UFGFactoryConnectionComponent* NewOutput1 = Output2->GetConnection();
@@ -60,7 +60,7 @@ void AFINCodeableSplitter::BeginPlay() {
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {
 	Super::Factory_Tick(dt);
-	if (InputQueue.Num() < 2) {
+	if (HasAuthority() && InputQueue.Num() < 2) {
 		FInventoryItem item;
 		float offset;
 		if (Input1->Factory_GrabOutput(item, offset)) {

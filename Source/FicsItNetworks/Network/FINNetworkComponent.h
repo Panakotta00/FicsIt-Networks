@@ -4,7 +4,7 @@
 #include "Interface.h"
 #include "FINNetworkComponent.generated.h"
 
-class UFINNetworkCircuit;
+class AFINNetworkCircuit;
 
 /**
  * A Network Component implements functions allowing to interact with the computer network.

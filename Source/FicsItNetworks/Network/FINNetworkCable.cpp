@@ -2,6 +2,7 @@
 
 #include "FINNetworkConnectionComponent.h"
 #include "FINNetworkAdapter.h"
+#include "UnrealNetwork.h"
 
 #include "SML/util/Logging.h"
 
@@ -14,7 +15,14 @@ AFINNetworkCable::AFINNetworkCable() {
 
 AFINNetworkCable::~AFINNetworkCable() {}
 
+void AFINNetworkCable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINNetworkCable, Connector1);
+	DOREPLIFETIME(AFINNetworkCable, Connector2);
+}
+
 void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
+	Super::OnConstruction(Transform);
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
@@ -41,20 +49,17 @@ void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
 void AFINNetworkCable::BeginPlay() {
 	Super::BeginPlay();
 	
-	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
-
-	Connector1->AddConnectedCable(this);
-	Connector2->AddConnectedCable(this);
-
-	RerunConstructionScripts();
+	ConnectConnectors();
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
-	if (IsValid(Connector1)) {
-		Connector1->RemoveConnectedCable(this);
-	}
-	if (IsValid(Connector2)) {
-		Connector2->RemoveConnectedCable(this);
+	if (HasAuthority() && IsValid(this) && (reason == EEndPlayReason::Destroyed)) {
+		if (IsValid(Connector1)) {
+			Connector1->RemoveConnectedCable(this);
+		}
+		if (IsValid(Connector2)) {
+			Connector2->RemoveConnectedCable(this);
+		}
 	}
 }
 
@@ -72,4 +77,18 @@ int32 AFINNetworkCable::GetDismantleRefundReturnsMultiplier() const {
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
 	return (startPos - endPos).Size() / 1000.0;
+}
+
+void AFINNetworkCable::OnConnectorUpdate() {
+	RerunConstructionScripts();
+}
+
+void AFINNetworkCable::ConnectConnectors_Implementation() {
+	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
+	if (HasAuthority()) {
+		Connector1->AddConnectedCable(this);
+		Connector2->AddConnectedCable(this);
+	}
+		
+	RerunConstructionScripts();
 }

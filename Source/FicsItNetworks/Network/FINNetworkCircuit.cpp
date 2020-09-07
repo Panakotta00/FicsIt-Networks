@@ -1,28 +1,41 @@
 #include "FINNetworkCircuit.h"
 
 #include "FINNetworkComponent.h"
+#include "UnrealNetwork.h"
 
-void UFINNetworkCircuit::AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add) {
+void AFINNetworkCircuit::AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add) {
 	if (Add.GetObject() && !Added.Contains(Add)) {
 		Added.Add(Add);
-		Nodes.Add(Add.GetObject());
+		Nodes.AddUnique(Add.GetObject());
 		IFINNetworkCircuitNode::Execute_SetCircuit(Add.GetObject(), this);
-		TSet<UObject*> Nodes = IFINNetworkCircuitNode::Execute_GetConnected(Add.GetObject());
-		for (UObject* Node : Nodes) {
+		TSet<UObject*> ConNodes = IFINNetworkCircuitNode::Execute_GetConnected(Add.GetObject());
+		for (UObject* Node : ConNodes) {
 			AddNodeRecursive(Added, Node);
 		}
 	}
 }
 
-UFINNetworkCircuit::UFINNetworkCircuit() {}
+AFINNetworkCircuit::AFINNetworkCircuit() {
+	bReplicates = true;
+	bAlwaysRelevant = true;
+}
 
-UFINNetworkCircuit::~UFINNetworkCircuit() {}
+AFINNetworkCircuit::~AFINNetworkCircuit() {}
 
-UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* Circuit) {
+bool AFINNetworkCircuit::IsSupportedForNetworking() const {
+	return true;
+}
+
+void AFINNetworkCircuit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINNetworkCircuit, Nodes);
+}
+
+AFINNetworkCircuit* AFINNetworkCircuit::operator+(AFINNetworkCircuit* Circuit) {
 	if (this == Circuit || !IsValid(Circuit)) return this;
 
-	UFINNetworkCircuit* From = Circuit;
-	UFINNetworkCircuit* To = this;
+	AFINNetworkCircuit* From = Circuit;
+	AFINNetworkCircuit* To = this;
 
 	if (Circuit->Nodes.Num() > Nodes.Num()) {
 		From = this;
@@ -51,23 +64,23 @@ UFINNetworkCircuit* UFINNetworkCircuit::operator+(UFINNetworkCircuit* Circuit) {
 		if (Obj) IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Obj, 0, FromNodes);
 	}
 
-	To->Nodes.Append(From->Nodes);
+	for (const TSoftObjectPtr<UObject>& Node : From->Nodes) To->Nodes.AddUnique(Node);
 
 	return To;
 }
 
-void UFINNetworkCircuit::Recalculate(const TScriptInterface<IFINNetworkCircuitNode>& Node) {
+void AFINNetworkCircuit::Recalculate(const TScriptInterface<IFINNetworkCircuitNode>& Node) {
 	Nodes.Empty();
 
 	TSet<TScriptInterface<IFINNetworkCircuitNode>> Added;
 	AddNodeRecursive(Added, Node);
 }
 
-bool UFINNetworkCircuit::HasNode(const TScriptInterface<IFINNetworkCircuitNode>& Node) {
-	return Nodes.Find(Node.GetObject());
+bool AFINNetworkCircuit::HasNode(const TScriptInterface<IFINNetworkCircuitNode>& Node) {
+	return Nodes.Find(Node.GetObject()) != INDEX_NONE;
 }
 
-TScriptInterface<IFINNetworkComponent> UFINNetworkCircuit::FindComponent(const FGuid& ID, const TScriptInterface<IFINNetworkComponent>& Requester) {
+TScriptInterface<IFINNetworkComponent> AFINNetworkCircuit::FindComponent(const FGuid& ID, const TScriptInterface<IFINNetworkComponent>& Requester) {
 	FGuid ReqID = (Requester) ? IFINNetworkComponent::Execute_GetID(Requester.GetObject()) : FGuid();
 	for (const TSoftObjectPtr<UObject>& node : Nodes) {
 		UObject* Obj = node.Get();
@@ -79,7 +92,7 @@ TScriptInterface<IFINNetworkComponent> UFINNetworkCircuit::FindComponent(const F
 	return nullptr;
 }
 
-TSet<UObject*> UFINNetworkCircuit::FindComponentsByNick(const FString& Nick, const TScriptInterface<IFINNetworkComponent>& Requester) {
+TSet<UObject*> AFINNetworkCircuit::FindComponentsByNick(const FString& Nick, const TScriptInterface<IFINNetworkComponent>& Requester) {
 	FGuid ReqID = (Requester) ? IFINNetworkComponent::Execute_GetID(Requester.GetObject()) : FGuid();
 	TSet<UObject*> Comps;
 	for (const TSoftObjectPtr<UObject>& Node : Nodes) {
@@ -90,7 +103,7 @@ TSet<UObject*> UFINNetworkCircuit::FindComponentsByNick(const FString& Nick, con
 	return Comps;
 }
 
-TSet<UObject*> UFINNetworkCircuit::GetComponents() {
+TSet<UObject*> AFINNetworkCircuit::GetComponents() {
 	TSet<UObject*> Comps;
 	for (const TSoftObjectPtr<UObject>& Node : Nodes) {
 		UObject* Obj = Node.Get();
@@ -99,18 +112,18 @@ TSet<UObject*> UFINNetworkCircuit::GetComponents() {
 	return Comps;
 }
 
-bool UFINNetworkCircuit::IsNodeConnected(const TScriptInterface<IFINNetworkCircuitNode>& Start, const TScriptInterface<IFINNetworkCircuitNode>& Node) {
+bool AFINNetworkCircuit::IsNodeConnected(const TScriptInterface<IFINNetworkCircuitNode>& Start, const TScriptInterface<IFINNetworkCircuitNode>& Node) {
 	TSet<UObject*> Searched;
 	return IsNodeConnected_Internal(Start, Node, Searched);
 }
 
-void UFINNetworkCircuit::DisconnectNodes(const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B) {
+void AFINNetworkCircuit::DisconnectNodes(UObject* WorldContext, const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B) {
 	if (!IsNodeConnected(A, B)) {
-		UFINNetworkCircuit* CircuitA = IFINNetworkCircuitNode::Execute_GetCircuit(A.GetObject());
-		UFINNetworkCircuit* CircuitB = IFINNetworkCircuitNode::Execute_GetCircuit(B.GetObject());
+		AFINNetworkCircuit* CircuitA = IFINNetworkCircuitNode::Execute_GetCircuit(A.GetObject());
+		AFINNetworkCircuit* CircuitB = IFINNetworkCircuitNode::Execute_GetCircuit(B.GetObject());
 		if (CircuitA != CircuitB) return;
 		
-		CircuitA = NewObject<UFINNetworkCircuit>();
+		CircuitA = WorldContext->GetWorld()->SpawnActor<AFINNetworkCircuit>();
 		IFINNetworkCircuitNode::Execute_SetCircuit(A.GetObject(), CircuitA);
 		CircuitA->Recalculate(A);
 
@@ -138,12 +151,16 @@ void UFINNetworkCircuit::DisconnectNodes(const TScriptInterface<IFINNetworkCircu
 	}
 }
 
-void UFINNetworkCircuit::ConnectNodes(const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B) {
-	UFINNetworkCircuit* CircuitA = IFINNetworkCircuitNode::Execute_GetCircuit(A.GetObject());
-	UFINNetworkCircuit* CircuitB = IFINNetworkCircuitNode::Execute_GetCircuit(B.GetObject());
+void AFINNetworkCircuit::ConnectNodes(UObject* WorldContext, const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B) {
+	AFINNetworkCircuit* CircuitA = IFINNetworkCircuitNode::Execute_GetCircuit(A.GetObject());
+	AFINNetworkCircuit* CircuitB = IFINNetworkCircuitNode::Execute_GetCircuit(B.GetObject());
 	if (!CircuitB) {
-		CircuitB = NewObject<UFINNetworkCircuit>();
+		FActorSpawnParameters Params;
+		Params.bNoFail = true;
+		CircuitB = WorldContext->GetWorld()->SpawnActor<AFINNetworkCircuit>(Params);
+		check(CircuitB);
 		IFINNetworkCircuitNode::Execute_SetCircuit(B.GetObject(), CircuitB);
+		SML::Logging::error(CircuitB, " ", B.GetObject());
 		CircuitB->Recalculate(B);
 	}
 	if (CircuitA) {
@@ -157,7 +174,7 @@ void UFINNetworkCircuit::ConnectNodes(const TScriptInterface<IFINNetworkCircuitN
 	}
 }
 
-bool UFINNetworkCircuit::IsNodeConnected_Internal(const TScriptInterface<IFINNetworkCircuitNode>& Self, const TScriptInterface<IFINNetworkCircuitNode>& Node, TSet<UObject*>& Searched) {
+bool AFINNetworkCircuit::IsNodeConnected_Internal(const TScriptInterface<IFINNetworkCircuitNode>& Self, const TScriptInterface<IFINNetworkCircuitNode>& Node, TSet<UObject*>& Searched) {
 	if (Searched.Contains(Self.GetObject())) return false;
 	Searched.Add(Self.GetObject());
 

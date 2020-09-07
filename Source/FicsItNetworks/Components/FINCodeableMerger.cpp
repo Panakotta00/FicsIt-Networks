@@ -74,9 +74,11 @@ void AFINCodeableMerger::TickInput(UFGFactoryConnectionComponent* Connector, int
 void AFINCodeableMerger::Factory_Tick(float dt) {
 	Super::Factory_Tick(dt);
 
-	TickInput(Input1, 1);
-	TickInput(Input2, 0);
-	TickInput(Input3, 2);
+	if (HasAuthority()) {
+		TickInput(Input1, 1);
+		TickInput(Input2, 0);
+		TickInput(Input3, 2);
+	}
 }
 
 bool AFINCodeableMerger::Factory_PeekOutput_Implementation(const UFGFactoryConnectionComponent* connection, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) const {

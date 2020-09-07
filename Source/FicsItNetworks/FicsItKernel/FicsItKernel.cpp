@@ -39,10 +39,10 @@ namespace FicsItKernel {
 		return memoryCapacity;
 	}
 
-	void KernelSystem::setProcessor(Processor* processor) {
-		this->processor = std::unique_ptr<Processor>(processor);
+	void KernelSystem::setProcessor(Processor* newProcessor) {
+		processor = std::unique_ptr<Processor>(newProcessor);
 		if (getProcessor()) {
-			processor->setKernel(this);
+			newProcessor->setKernel(this);
 		}
 	}
 

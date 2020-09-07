@@ -59,11 +59,13 @@ namespace FicsItKernel {
 				TSet<FFINNetworkTrace> comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByNick(nick.c_str());
 				int j = 0;
 				for (const FFINNetworkTrace& comp : comps) {
-					++j;
 					UObject* obj = *comp;
-					FString id = IFINNetworkComponent::Execute_GetID(obj).ToString();
-					lua_pushstring(L, TCHAR_TO_UTF8(*id));
-					lua_seti(L, -2, j);
+					if (obj) {
+						++j;
+						FString id = IFINNetworkComponent::Execute_GetID(obj).ToString();
+						lua_pushstring(L, TCHAR_TO_UTF8(*id));
+						lua_seti(L, -2, j);
+					}
 				}
 			}
 			return LuaProcessor::luaAPIReturn(L, args);
