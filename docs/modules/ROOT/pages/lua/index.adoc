@@ -44,6 +44,10 @@ If you want to read the members such a instance has in runtime, you should use t
 If you pass `true` as the first parameter to the getMembers function, you will get a map of all the members where the membername is the key as string and a integer
 is the value. `0` represents a function and `1` represents a property.
 
+Lua instances also have a read-only property called `hash`.
+This is basically the hash value of the underlying direct pointer to the referenced object.
+This allows you to use instances as keys of tables.
+
 === Properties
 
 The instance can have properties (aka. attributes) you can interact with just like a variable.
