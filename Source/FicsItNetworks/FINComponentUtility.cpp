@@ -10,9 +10,7 @@
 
 #include "Network/FINNetworkAdapter.h"
 
-#include <filesystem>
-#include <fstream>
-#include <sstream>
+#include "FicsItVisualScript/FINScriptGraphViewer.h"
 
 bool UFINComponentUtility::bAllowUsing = true;
 
@@ -64,4 +62,55 @@ void UFINComponentUtility::SetAllowUsing(UObject* WorldContextObject, bool newUs
 	}
 
 	bAllowUsing = newUsing;
+}
+
+void UFINComponentUtility::TestFicsItVisualScript(UNativeWidgetHost* Widget) {
+	UFINComponentUtility* Utility = Cast<UFINComponentUtility>(UFINComponentUtility::StaticClass()->GetDefaultObject());
+	
+	UFINScriptGraph* Graph = Utility->Graph;
+	if (Graph) {
+		TArray<UFINScriptNode*> Nodes = Graph->GetNodes();
+		for (UFINScriptNode* Node : Nodes) Graph->RemoveNode(Node);
+	} else {
+		Utility->Graph = Graph = NewObject<UFINScriptGraph>();
+	}
+	UFINScriptNode* Node = NewObject<UFINScriptNode>();
+	Node->Name = "Node1";
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_BOOL, FIVS_PIN_DATA_INPUT, "In1"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In2"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_FLOAT, FIVS_PIN_DATA_INPUT, "In3"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_INT, FIVS_PIN_DATA_INPUT, "In4"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_OBJ, FIVS_PIN_DATA_OUTPUT, "Out1"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STR, FIVS_PIN_DATA_OUTPUT, "Out2"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STRUCT, FIVS_PIN_DATA_OUTPUT, "Out3"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_TRACE, FIVS_PIN_DATA_OUTPUT, "Out4"));
+	TSharedPtr<FFINScriptPin> OPin = Node->GetPins()[1];
+	Graph->AddNode(Node);
+	Node = NewObject<UFINScriptNode>();
+	Node->Name = "Node2";
+	Node->Pos = FVector2D(50,50);
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_BOOL, FIVS_PIN_DATA_OUTPUT, "Out1"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In1"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_FLOAT, FIVS_PIN_DATA_OUTPUT, "Out2"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_INT, FIVS_PIN_DATA_INPUT, "In2"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_OBJ, FIVS_PIN_DATA_OUTPUT, "Out3"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STR, FIVS_PIN_DATA_INPUT, "In3"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STRUCT, FIVS_PIN_DATA_OUTPUT, "Out4"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_TRACE, FIVS_PIN_DATA_INPUT, "In4"));
+	TSharedPtr<FFINScriptPin> IPin = Node->GetPins()[0];
+	//IPin->AddConnection(OPin.Get());
+	Graph->AddNode(Node);
+	Node = NewObject<UFINScriptNode>();
+	Node->Name = "Node3";
+	Node->Pos = FVector2D(50,100);
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_BOOL, FIVS_PIN_DATA_OUTPUT, "Out1"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_CLASS, FIVS_PIN_DATA_OUTPUT, "Out2"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_FLOAT, FIVS_PIN_DATA_OUTPUT, "Out3"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_INT, FIVS_PIN_DATA_OUTPUT, "Out4"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_OBJ, FIVS_PIN_DATA_INPUT, "In1"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STR, FIVS_PIN_DATA_INPUT, "IN2"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STRUCT, FIVS_PIN_DATA_INPUT, "In3"));
+	Node->AddPin(MakeShared<FFINScriptPin>(FIN_TRACE, FIVS_PIN_DATA_INPUT, "In4"));
+	Graph->AddNode(Node);
+	Widget->SetContent(SNew(SFINScriptGraphViewer).Graph(Graph));
 }

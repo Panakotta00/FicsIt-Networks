@@ -1,10 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "UserWidget.h"
+#include "FicsItVisualScript/FINScriptGraph.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "FINComponentUtility.generated.h"
 
+class UNativeWidgetHost;
 /**
  * Provides Utility functions for BP implemented network components
  */
@@ -14,6 +18,9 @@ class UFINComponentUtility : public UBlueprintFunctionLibrary {
 
 public:
 	static bool bAllowUsing;
+
+	UPROPERTY()
+	UFINScriptGraph* Graph;
 
 	/**
 	 * Trys to find the nearest network connector to the hit location of the the hit actor
@@ -40,4 +47,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable,  Category = "Utility")
 	static void SetAllowUsing(UObject* WorldContextObject, bool newUsing);
+
+	UFUNCTION(BlueprintCallable)
+	static void TestFicsItVisualScript(UNativeWidgetHost* Widget);
 };

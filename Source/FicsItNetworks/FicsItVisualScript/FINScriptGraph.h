@@ -1,0 +1,47 @@
+﻿#pragma once
+
+#include "CoreMinimal.h"
+
+
+#include "FINScriptNode.h"
+#include "Network/FINDynamicStructHolder.h"
+
+#include "FINScriptGraph.generated.h"
+
+/**
+ * Notifies if the node list of the graph has changed.
+ * Param1: type of change (0 = node added, 1 = node removed)
+ * Param2: the changed node
+ */
+DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphNodeChanged, int, UFINScriptNode*);
+
+UCLASS()
+class UFINScriptGraph : public UObject {
+	GENERATED_BODY()
+private:
+	UPROPERTY()
+	TArray<UFINScriptNode*> Nodes;
+
+public:
+	FFINScriptGraphNodeChanged OnNodeChanged;
+	
+	/**
+	 * Adds a new node to the graph.
+	 *
+	 * @param[in]	Node	the new node you want to add to the graph.
+	 * @return	the index of the node, -1 if not able to add.
+	 */
+	int AddNode(UFINScriptNode* Node);
+
+	/**
+	 * Removes the given node from the graph.
+	 *
+	 * @param[in]	Node	the node you want to remove
+	 */
+	void RemoveNode(UFINScriptNode* Node);
+
+	/**
+	 * Returns all nodes of the graph.
+	 */
+	const TArray<UFINScriptNode*>& GetNodes() const;
+};
