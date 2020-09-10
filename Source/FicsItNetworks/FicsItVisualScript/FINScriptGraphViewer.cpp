@@ -34,27 +34,31 @@ int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 
 	// Draw Pin Connections
 	TMap<TSharedRef<SFINScriptPinViewer>, FVector2D> ConnectionLocations; 
-	TMap<FFINScriptPin*, TSharedRef<SFINScriptPinViewer>> PinMap;
+	TMap<TSharedPtr<FFINScriptPin>, TSharedRef<SFINScriptPinViewer>> PinMap;
 	
 	for (int i = 0; i < Children.Num(); ++i) {
 		TSharedRef<SFINScriptNodeViewer> Node = Children[i];
 		for (int j = 0; j < Node->GetPinWidgets().Num(); ++j) {
 			TSharedRef<SFINScriptPinViewer> Pin = Node->GetPinWidgets()[j];
 			ConnectionLocations.Add(Pin, Pin->GetConnectionPoint());
-			PinMap.Add(Pin->GetPin().Get(), Pin);
+			PinMap.Add(Pin->GetPin(), Pin);
 		}
 	}
 
+	TSet<TPair<TSharedPtr<FFINScriptPin>, TSharedPtr<FFINScriptPin>>> DrawnPins;
 	for (int i = 0; i < Children.Num(); ++i) {
 		TSharedRef<SFINScriptNodeViewer> Node = Children[i];
 		for (int j = 0; j < Node->GetPinWidgets().Num(); ++j) {
 			TSharedRef<SFINScriptPinViewer> Pin = Node->GetPinWidgets()[j];
-			if (Pin->GetPin()->PinType & FIVS_PIN_OUTPUT) {
+			if (Pin->GetPin()->GetPinType() & FIVS_PIN_OUTPUT) {
 				FVector2D StartLoc = GetCachedGeometry().AbsoluteToLocal(ConnectionLocations[Pin]);
-				for (FFINScriptPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
-					TSharedRef<SFINScriptPinViewer> Connection = PinMap[ConnectionPin];
-					FVector2D EndLoc = GetCachedGeometry().AbsoluteToLocal(ConnectionLocations[Connection]);
-					FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), StartLoc, FVector2D(300,0), EndLoc, FVector2D(300,0), 2, ESlateDrawEffect::None, Pin->GetPinColor().GetSpecifiedColor());
+				for (const TSharedPtr<FFINScriptPin>& ConnectionPin : Pin->GetPin()->GetConnections()) {
+					if (!DrawnPins.Contains(TPair<TSharedPtr<FFINScriptPin>, TSharedPtr<FFINScriptPin>>(Pin->GetPin(), ConnectionPin)) && !DrawnPins.Contains(TPair<TSharedPtr<FFINScriptPin>, TSharedPtr<FFINScriptPin>>(ConnectionPin, Pin->GetPin()))) {
+						TSharedRef<SFINScriptPinViewer> Connection = PinMap[ConnectionPin];
+						DrawnPins.Add(TPair<TSharedPtr<FFINScriptPin>, TSharedPtr<FFINScriptPin>>(Pin->GetPin(), ConnectionPin));
+						FVector2D EndLoc = GetCachedGeometry().AbsoluteToLocal(ConnectionLocations[Connection]);
+						FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), StartLoc, FVector2D(300,0), EndLoc, FVector2D(300,0), 2, ESlateDrawEffect::None, Pin->GetPinColor().GetSpecifiedColor());
+					}
 				}
 			}
 		}
@@ -64,7 +68,7 @@ int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 		TSharedRef<SFINScriptPinViewer> PinWidget = NodeToChild[PinDragStart->ParentNode]->GetPinWidget(PinDragStart);
 		FVector2D StartLoc = GetCachedGeometry().AbsoluteToLocal(PinWidget->GetConnectionPoint());
 		FVector2D EndLoc = PinDragEnd;
-		if (PinDragStart->PinType & FIVS_PIN_INPUT) {
+		if (PinDragStart->GetPinType() & FIVS_PIN_INPUT) {
 			EndLoc = StartLoc;
 			StartLoc = PinDragEnd;
 		}
@@ -77,7 +81,7 @@ int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 FReply SFINScriptGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	if (!MouseEvent.GetModifierKeys().IsShiftDown() && !SelectedNodes.Contains(NodeUnderMouse)) DeselectAll();
 	if (NodeUnderMouse) {
-		if (PinUnderMouse.IsValid()) {
+		if (PinUnderMouse.IsValid() && !MouseEvent.GetModifierKeys().IsControlDown()) {
 			bIsPinDrag = true;
 			PinDragStart = PinUnderMouse;
 		} else {
@@ -98,7 +102,7 @@ FReply SFINScriptGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const
 	if (bIsPinDrag) {
 		bIsPinDrag = false;
 		if (PinUnderMouse.IsValid()) {
-			PinDragStart->AddConnection(PinUnderMouse.Get());
+			PinDragStart->AddConnection(PinUnderMouse.ToSharedRef());
 		}
 	} else if (bIsNodeDrag) {
 		bIsNodeDrag = false;

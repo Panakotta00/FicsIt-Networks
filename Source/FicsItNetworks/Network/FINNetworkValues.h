@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+
 #include "FINNetworkTrace.h"
 #include "FINDynamicStructHolder.h"
 #include "FINNetworkValues.generated.h"
@@ -16,6 +17,7 @@ enum EFINNetworkValueType {
 	FIN_CLASS,
 	FIN_TRACE,
 	FIN_STRUCT,
+	FIN_ANY,
 };
 
 typedef bool FINBool;

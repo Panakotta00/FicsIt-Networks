@@ -74,7 +74,7 @@ void UFINComponentUtility::TestFicsItVisualScript(UNativeWidgetHost* Widget) {
 	} else {
 		Utility->Graph = Graph = NewObject<UFINScriptGraph>();
 	}
-	UFINScriptNode* Node = NewObject<UFINScriptNode>();
+	UFINScriptGenericFuncNode* Node = NewObject<UFINScriptGenericFuncNode>();
 	Node->Name = "Node1";
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_BOOL, FIVS_PIN_DATA_INPUT, "In1"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In2"));
@@ -84,11 +84,10 @@ void UFINComponentUtility::TestFicsItVisualScript(UNativeWidgetHost* Widget) {
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STR, FIVS_PIN_DATA_OUTPUT, "Out2"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STRUCT, FIVS_PIN_DATA_OUTPUT, "Out3"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_TRACE, FIVS_PIN_DATA_OUTPUT, "Out4"));
-	TSharedPtr<FFINScriptPin> OPin = Node->GetPins()[1];
 	Graph->AddNode(Node);
-	Node = NewObject<UFINScriptNode>();
+	Node = NewObject<UFINScriptGenericFuncNode>();
 	Node->Name = "Node2";
-	Node->Pos = FVector2D(50,50);
+	Node->Pos = FVector2D(200,0);
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_BOOL, FIVS_PIN_DATA_OUTPUT, "Out1"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In1"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_FLOAT, FIVS_PIN_DATA_OUTPUT, "Out2"));
@@ -97,12 +96,10 @@ void UFINComponentUtility::TestFicsItVisualScript(UNativeWidgetHost* Widget) {
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STR, FIVS_PIN_DATA_INPUT, "In3"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STRUCT, FIVS_PIN_DATA_OUTPUT, "Out4"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_TRACE, FIVS_PIN_DATA_INPUT, "In4"));
-	TSharedPtr<FFINScriptPin> IPin = Node->GetPins()[0];
-	//IPin->AddConnection(OPin.Get());
 	Graph->AddNode(Node);
-	Node = NewObject<UFINScriptNode>();
+	Node = NewObject<UFINScriptGenericFuncNode>();
 	Node->Name = "Node3";
-	Node->Pos = FVector2D(50,100);
+	Node->Pos = FVector2D(0,200);
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_BOOL, FIVS_PIN_DATA_OUTPUT, "Out1"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_CLASS, FIVS_PIN_DATA_OUTPUT, "Out2"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_FLOAT, FIVS_PIN_DATA_OUTPUT, "Out3"));
@@ -112,5 +109,11 @@ void UFINComponentUtility::TestFicsItVisualScript(UNativeWidgetHost* Widget) {
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_STRUCT, FIVS_PIN_DATA_INPUT, "In3"));
 	Node->AddPin(MakeShared<FFINScriptPin>(FIN_TRACE, FIVS_PIN_DATA_INPUT, "In4"));
 	Graph->AddNode(Node);
-	Widget->SetContent(SNew(SFINScriptGraphViewer).Graph(Graph));
+	UFINScriptRerouteNode* Reroute = NewObject<UFINScriptRerouteNode>();
+	Reroute->Pos = FVector2D(200, 200);
+	Graph->AddNode(Reroute);
+	Reroute = NewObject<UFINScriptRerouteNode>();
+	Reroute->Pos = FVector2D(300, 200);
+	Graph->AddNode(Reroute);
+	if (Widget) Widget->SetContent(SNew(SFINScriptGraphViewer).Graph(Graph));
 }

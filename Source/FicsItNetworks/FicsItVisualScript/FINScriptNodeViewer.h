@@ -16,7 +16,6 @@ private:
 	TSharedPtr<FFINScriptPin> Pin;
 	TSlotlessChildren<SBorder> Children;
 	TSharedPtr<SImage> PinIconWidget;
-	TSharedPtr<SHorizontalBox> PinIconContainer;
 	
 public:
 	SFINScriptPinViewer();
@@ -35,7 +34,7 @@ public:
 	 *
 	 * @param[in]	newPin	the pin we should display
 	 */
-	void SetPin(TSharedPtr<FFINScriptPin> newPin);
+	void SetPin(const TSharedPtr<FFINScriptPin>& newPin);
 
 	/**
 	 * Returns the representating pin.
