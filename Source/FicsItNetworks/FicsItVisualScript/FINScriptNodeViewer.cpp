@@ -125,10 +125,7 @@ void SFINScriptNodeViewer::Construct(const FArguments& InArgs) {
 SFINScriptNodeViewer::SFINScriptNodeViewer() : Children(this) {}
 
 FVector2D SFINScriptNodeViewer::ComputeDesiredSize(float) const {
-	FVector2D Size = Children[0]->GetDesiredSize();
-	if (Size.X < 100) Size.X = 100;
-	if (Size.Y < 100) Size.Y = 100;
-	return Size;
+	return Children[0]->GetDesiredSize();
 }
 
 FChildren* SFINScriptNodeViewer::GetChildren() {
@@ -158,7 +155,7 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
 
 	Node = newNode;
 
-	if (Node->IsA<UFINScriptFuncNode>()) {
+	if (Node && Node->IsA<UFINScriptFuncNode>()) {
 		Children.Add(
             SNew(SBorder)
             .Padding(1)
@@ -180,8 +177,7 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
                         [
                             SNew(STextBlock)
                             .Text_Lambda([this]() {
-                                if (Node) return FText::FromString(Cast<UFINScriptFuncNode>(Node)->GetNodeName());
-                                return FText::FromString("Undefined");
+                                return FText::FromString(Cast<UFINScriptFuncNode>(Node)->GetNodeName());
                             })
                         ]
                     ]

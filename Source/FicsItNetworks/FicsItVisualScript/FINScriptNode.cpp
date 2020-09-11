@@ -17,7 +17,7 @@ FFINScriptPin::~FFINScriptPin() {
 }
 
 void FFINScriptPin::AddConnection(const TSharedPtr<FFINScriptPin>& Pin) {
-	if (!CanConnect(Pin)) return;
+	if (!CanConnect(Pin) || !Pin->CanConnect(SharedThis(this))) return;
 	ConnectedPins.Add(Pin);
 	Pin->ConnectedPins.Add(AsShared());
 }
@@ -46,43 +46,10 @@ bool FFINScriptPin::CanConnect(const TSharedPtr<FFINScriptPin>& Pin) {
 	if (ThisPinType & FIVS_PIN_DATA) {
 		if (!(PinPinType & FIVS_PIN_DATA)) return false;
 		if (!((PinPinDataType == ThisPinDataType) ||
-			(PinPinDataType == FIN_ANY) ||
-			(ThisPinDataType == FIN_ANY))) return false;
-		
-		if (!(PinPinType & FIVS_PIN_INPUT)) {
-			TArray<TSharedPtr<FFINScriptPin>> Pins = GetConnections();
-			for (const TSharedPtr<FFINScriptPin>& ConPin : Pins) {
-				if (ConPin->GetPinType() & FIVS_PIN_OUTPUT) {
-					return false;
-				}
-			}
-		}
-		if (!(PinPinType & FIVS_PIN_OUTPUT)) {
-			TArray<TSharedPtr<FFINScriptPin>> Pins = Pin->GetConnections();
-			for (const TSharedPtr<FFINScriptPin>& ConPin : Pins) {
-				if (ConPin->GetPinType() & FIVS_PIN_OUTPUT) {
-					return false;
-				}
-			}
-		}
+            (PinPinDataType == FIN_ANY) ||
+            (ThisPinDataType == FIN_ANY))) return false;
 	} else if (ThisPinType & FIVS_PIN_EXEC) {
 		if (!(PinPinType & FIVS_PIN_EXEC)) return false;
-		if (PinPinType & FIVS_PIN_INPUT) {
-			TArray<TSharedPtr<FFINScriptPin>> Pins = GetConnections();
-			for (const TSharedPtr<FFINScriptPin>& ConPin : Pins) {
-				if (ConPin->GetPinType() & FIVS_PIN_INPUT) {
-					return false;
-				}
-			}
-		}
-		if (PinPinType & FIVS_PIN_OUTPUT) {
-			TArray<TSharedPtr<FFINScriptPin>> Pins = GetConnections();
-			for (const TSharedPtr<FFINScriptPin>& ConPin : Pins) {
-				if (ConPin->GetPinType() & FIVS_PIN_INPUT) {
-					return false;
-				}
-			}
-		}
 	}
 	return true;
 }
@@ -91,37 +58,38 @@ EFINNetworkValueType FFINScriptPin::GetPinDataType() {
 	return DataType;
 }
 
+void FFINScriptPin::RemoveAllConnections() {
+	TArray<TSharedPtr<FFINScriptPin>> Connections = GetConnections();
+	for (const TSharedPtr<FFINScriptPin>& Connection : Connections) {
+		RemoveConnection(Connection);
+	}
+}
+
 FFINScriptWildcardPin::FFINScriptWildcardPin() {
 	PinType = (EFINScriptPinType)(FIVS_PIN_INPUT | FIVS_PIN_OUTPUT);
 }
 
 EFINScriptPinType FFINScriptWildcardPin::GetPinType() {
-	TArray<TSharedPtr<FFINScriptPin>> Connected = GetConnections();
-	if (IgnoreNext) Connected.Remove(IgnoreNext);
-	IgnoreNext = nullptr;
-	bool hasInput = false;
-	bool hasOutput = false;
+	TArray<TSharedPtr<FFINScriptPin>> Connected;
+	GetAllConnected(Connected);
+	EFINScriptPinType Type = (EFINScriptPinType)(FIVS_PIN_EXEC | FIVS_PIN_DATA);
 	for (const TSharedPtr<FFINScriptPin>& Pin : Connected) {
-		FFINScriptWildcardPin* WPin = dynamic_cast<FFINScriptWildcardPin*>(Pin.Get());
-		if (WPin) WPin->IgnoreNext = AsShared();
-		EFINScriptPinType Type = Pin->GetPinType();
-		if (Type & FIVS_PIN_OUTPUT) hasInput = true;
-		if (Type & FIVS_PIN_INPUT) hasOutput = true;
-		if (Type & FIVS_PIN_DATA) {
-			if (hasInput) {
+		if (dynamic_cast<FFINScriptWildcardPin*>(Pin.Get())) continue;
+		EFINScriptPinType PinType = Pin->GetPinType();
+		if (PinType & FIVS_PIN_DATA) {
+			if (PinType & FIVS_PIN_OUTPUT) {
 				return (EFINScriptPinType)(FIVS_PIN_DATA | FIVS_PIN_OUTPUT);
 			}
-			return (EFINScriptPinType)(FIVS_PIN_DATA | FIVS_PIN_OUTPUT | FIVS_PIN_INPUT);
+			Type = FIVS_PIN_DATA;
 		}
-		if (Type & FIVS_PIN_EXEC) {
-			if (!hasOutput) {
-				return (EFINScriptPinType)(FIVS_PIN_EXEC | FIVS_PIN_INPUT | FIVS_PIN_OUTPUT);
+		if (PinType & FIVS_PIN_EXEC) {
+			if (PinType & FIVS_PIN_INPUT) {
+				return (EFINScriptPinType)(FIVS_PIN_EXEC | FIVS_PIN_INPUT);
 			}
-			return (EFINScriptPinType)(FIVS_PIN_EXEC | FIVS_PIN_INPUT);
+			Type = FIVS_PIN_EXEC;
 		}
-		return FIVS_PIN_NONE;
 	}
-	return (EFINScriptPinType)(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT);
+	return (EFINScriptPinType)(Type | FIVS_PIN_INPUT | FIVS_PIN_OUTPUT);
 }
 
 EFINNetworkValueType FFINScriptWildcardPin::GetPinDataType() {
@@ -137,17 +105,48 @@ EFINNetworkValueType FFINScriptWildcardPin::GetPinDataType() {
 }
 
 bool FFINScriptWildcardPin::CanConnect(const TSharedPtr<FFINScriptPin>& Pin) {
-	EFINScriptPinType PinType = GetPinType();
-	if ((PinType & FIVS_PIN_DATA) && (PinType & FIVS_PIN_EXEC)) return true;
-	const FFINScriptWildcardPin* WPin = dynamic_cast<const FFINScriptWildcardPin*>(Pin.Get());
-	if (WPin) {
-		PinType = Pin->GetPinType();
-		if ((PinType & FIVS_PIN_DATA) && (PinType & FIVS_PIN_EXEC)) return true;
+	bool bThisHasInput = false;
+	bool bPinHasInput = false;
+	bool bThisHasOutput = false;
+	bool bPinHasOutput = false;
+	TArray<TSharedPtr<FFINScriptPin>> Connections;
+	GetAllConnected(Connections);
+	for (const TSharedPtr<FFINScriptPin>& Connection : Connections) {
+		if (dynamic_cast<FFINScriptWildcardPin*>(Connection.Get())) continue;
+		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
+			bThisHasOutput = true;
+		}
+		if (Connection->GetPinType() & FIVS_PIN_OUTPUT) {
+			bThisHasInput = true;
+		}
 	}
-	if (ConnectedPins.Num() > 0) {
-		return FFINScriptPin::CanConnect(Pin);
+	Connections.Empty();
+	Pin->GetAllConnected(Connections);
+	for (const TSharedPtr<FFINScriptPin>& Connection : Connections) {
+		if (dynamic_cast<FFINScriptWildcardPin*>(Connection.Get())) continue;
+		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
+			bPinHasOutput = true;
+		}
+		if (Connection->GetPinType() & FIVS_PIN_OUTPUT) {
+			bPinHasInput = true;
+		}
 	}
-	return Pin->CanConnect(AsShared());
+
+	EFINScriptPinType ThisPinType = GetPinType();
+	EFINScriptPinType PinPinType = Pin->GetPinType();
+	
+	if (ThisPinType & FIVS_PIN_DATA) {
+		if (bThisHasInput && bPinHasInput) return false;
+	} else if (ThisPinType & FIVS_PIN_EXEC) {
+		if (bThisHasOutput && bThisHasOutput) return false;
+	}
+	return FFINScriptPin::CanConnect(Pin);
+}
+
+void UFINScriptNode::RemoveAllConnections() {
+	for (const TSharedRef<FFINScriptPin>& Pin : GetNodePins()) {
+		Pin->RemoveAllConnections();
+	}
 }
 
 UFINScriptRerouteNode::UFINScriptRerouteNode() : Pin(MakeShared<FFINScriptWildcardPin>()) {

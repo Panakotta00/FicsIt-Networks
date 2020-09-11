@@ -26,7 +26,6 @@ struct FFINScriptPin : public TSharedFromThis<FFINScriptPin> {
 protected:
 	TArray<TSharedPtr<FFINScriptPin>> ConnectedPins;
 
-	void GetAllConnected(TArray<TSharedPtr<FFINScriptPin>>& Searches);
 	
 public:
 	UFINScriptNode* ParentNode = nullptr;
@@ -54,6 +53,8 @@ public:
 	 */
 	virtual const TArray<TSharedPtr<FFINScriptPin>>& GetConnections();
 
+	void GetAllConnected(TArray<TSharedPtr<FFINScriptPin>>& Searches);
+
 	/**
 	 * Returns the pin type
 	 */
@@ -68,12 +69,15 @@ public:
 	 * Returns the pin data type
 	 */
 	virtual EFINNetworkValueType GetPinDataType();
+
+	/**
+	 * Removes all connections of this pin
+	 */
+	void RemoveAllConnections();
 };
 
 struct FFINScriptWildcardPin : public FFINScriptPin {
 	FFINScriptWildcardPin();
-
-	TSharedPtr<FFINScriptPin> IgnoreNext;
 
 	virtual EFINScriptPinType GetPinType() override;
 	virtual EFINNetworkValueType GetPinDataType() override;
@@ -101,6 +105,11 @@ public:
 	 * Returns the list of pins of this node
 	 */
 	virtual TArray<TSharedRef<FFINScriptPin>> GetNodePins() const { return TArray<TSharedRef<FFINScriptPin>>(); }
+
+	/**
+	 * Removes all connections of all pins
+	 */
+	void RemoveAllConnections();
 };
 
 UCLASS()

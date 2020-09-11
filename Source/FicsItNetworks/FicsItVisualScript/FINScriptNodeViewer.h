@@ -99,7 +99,7 @@ public:
 	 * Returns the position were this node should be located in graph.
 	 */
 	FVector2D GetPosition() const;
-
+	
 	/**
 	 * Returns the pin widget cache.
 	 */

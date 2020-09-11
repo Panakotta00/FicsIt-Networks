@@ -6,6 +6,37 @@
 #include "FINScriptNodeViewer.h"
 #include "SlateBasics.h"
 
+class SFINScriptGraphViewer;
+
+struct FFINScriptConnectionDrawer {
+public:
+	float LastConnectionDistance;
+
+public:
+	TPair<TSharedPtr<SFINScriptPinViewer>, TSharedPtr<SFINScriptPinViewer>> ConnectionUnderMouse;
+	FVector2D LastMousePosition;
+
+	/**
+	 * Resets the cache for the connection under mouse.
+	 * Should get called in the top of the graphs onpaint.
+	 */
+	void Reset();
+	
+	/**
+	* Draws a connection between two pins.
+	* Checks if the mouse hovers over it, if so, sets connection under mouse.
+	*/
+	void DrawConnection(TSharedRef<SFINScriptPinViewer> Pin1, TSharedRef<SFINScriptPinViewer> Pin2, TSharedRef<const SFINScriptGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
+
+	/**
+	* Draws a connection between two points.
+	*
+	* @param[in]	Start	the start point (outputs)
+	* @param[in]	End		the end point (inputs)
+	*/
+	void DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFINScriptGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
+};
+
 class SFINScriptGraphViewer : public SPanel {
 	SLATE_BEGIN_ARGS(SFINScriptGraphViewer) {}
 		SLATE_ATTRIBUTE(UFINScriptGraph*, Graph)
@@ -20,11 +51,16 @@ private:
 	TMap<UFINScriptNode*, TSharedRef<SFINScriptNodeViewer>> NodeToChild;
 
 	FVector2D Offset;
+	float Zoom = 1.0;
 
 	UFINScriptNode* NodeUnderMouse = nullptr;
 	TSharedPtr<FFINScriptPin> PinUnderMouse = nullptr;
 
 	bool bIsGraphDrag = false;
+
+	bool bIsSelectionDrag = false;
+	FVector2D SelectionDragStart;
+	FVector2D SelectionDragEnd;
 	
 	TArray<UFINScriptNode*> SelectedNodes;
 	
@@ -36,8 +72,11 @@ private:
 	TSharedPtr<FFINScriptPin> PinDragStart;
 	FVector2D PinDragEnd;
 
+	TSharedPtr<FFINScriptConnectionDrawer> ConnectionDrawer;
+
 	FSlateColorBrush BackgroundBrush = FSlateColorBrush(FColor::FromHex("040404"));
 	FLinearColor GridColor = FColor::FromHex("0A0A0A");
+	FSlateColorBrush SelectionBrush = FSlateColorBrush(FLinearColor(1,1,1,0.1));
 
 public:
 	SFINScriptGraphViewer();
@@ -48,7 +87,9 @@ public:
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual bool IsInteractable() const override;
@@ -90,4 +131,9 @@ public:
 	 * Deselects all nodes.
 	 */
 	void DeselectAll();
+
+	/**
+	 * Converts the given local position to the position in the graph
+	 */
+	FVector2D LocalToGraph(const FVector2D Local);
 };
