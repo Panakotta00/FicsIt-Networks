@@ -47,7 +47,8 @@ FFileSystemNode& FFileSystemNode::Serialize(FileSystem::SRef<FileSystem::Device>
 		NodeType = 0;
 		FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::INPUT);
 		std::string str = stream->readAll();
-		Data = FString(UTF8_TO_TCHAR(str.c_str()), str.length());
+		auto Convert = FUTF8ToTCHAR(str.c_str(), str.length());
+		Data = FString(Convert.Get(), Convert.Length());
 	} else if (FileSystem::SRef<FileSystem::Directory> dir = node) {
 		NodeType = 1;
 		for (FileSystem::NodeName child : dir->getChilds()) {

@@ -125,7 +125,8 @@ void SFINScriptNodeViewer::Construct(const FArguments& InArgs) {
 SFINScriptNodeViewer::SFINScriptNodeViewer() : Children(this) {}
 
 FVector2D SFINScriptNodeViewer::ComputeDesiredSize(float) const {
-	return Children[0]->GetDesiredSize();
+	if (Children.Num() > 0) return Children[0]->GetDesiredSize();
+	return FVector2D(0,0);
 }
 
 FChildren* SFINScriptNodeViewer::GetChildren() {
@@ -133,7 +134,7 @@ FChildren* SFINScriptNodeViewer::GetChildren() {
 }
 
 void SFINScriptNodeViewer::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {
-	ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Children[0], FVector2D(), Children[0]->GetDesiredSize(), 1));
+	if (Children.Num() > 0) ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Children[0], FVector2D(), Children[0]->GetDesiredSize(), 1));
 }
 
 FReply SFINScriptNodeViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
@@ -141,6 +142,7 @@ FReply SFINScriptNodeViewer::OnMouseMove(const FGeometry& MyGeometry, const FPoi
 	for (TSharedRef<SFINScriptPinViewer> Pin : PinWidgets) {
 		if (Pin->GetCachedGeometry().IsUnderLocation(MouseEvent.GetScreenSpacePosition())) {
 			PinUnderMouse = Pin->GetPin();
+			break;
 		}
 	}
 	

@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 
+
+#include "FINScriptActionSelection.h"
 #include "FINScriptGraph.h"
 #include "FINScriptNodeViewer.h"
 #include "SlateBasics.h"
@@ -50,13 +52,11 @@ private:
 	TSlotlessChildren<SFINScriptNodeViewer> Children;
 	TMap<UFINScriptNode*, TSharedRef<SFINScriptNodeViewer>> NodeToChild;
 
-	FVector2D Offset;
-	float Zoom = 1.0;
-
 	UFINScriptNode* NodeUnderMouse = nullptr;
 	TSharedPtr<FFINScriptPin> PinUnderMouse = nullptr;
 
 	bool bIsGraphDrag = false;
+	float GraphDragDelta;
 
 	bool bIsSelectionDrag = false;
 	FVector2D SelectionDragStart;
@@ -74,11 +74,16 @@ private:
 
 	TSharedPtr<FFINScriptConnectionDrawer> ConnectionDrawer;
 
+	TSharedPtr<SFINScriptActionSelection> ActiveActionSelection;
+
 	FSlateColorBrush BackgroundBrush = FSlateColorBrush(FColor::FromHex("040404"));
 	FLinearColor GridColor = FColor::FromHex("0A0A0A");
 	FSlateColorBrush SelectionBrush = FSlateColorBrush(FLinearColor(1,1,1,0.1));
 
 public:
+	FVector2D Offset = FVector2D(0,0);
+	float Zoom = 1.0;
+	
 	SFINScriptGraphViewer();
 	~SFINScriptGraphViewer();
 
@@ -100,6 +105,11 @@ public:
 
 	FDelegateHandle OnNodeChangedHandle;
 	void OnNodeChanged(int change, UFINScriptNode* Node);
+
+	/**
+	 * Creates an action selection menu with the given context
+	 */
+	TSharedPtr<IMenu> CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFINScriptActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& Context);
 	
 	/**
 	 * Sets the currently displayed Graph.

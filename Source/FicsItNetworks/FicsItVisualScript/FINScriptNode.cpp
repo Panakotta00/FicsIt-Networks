@@ -3,9 +3,9 @@
 #include "FindInBlueprintManager.h"
 
 void FFINScriptPin::GetAllConnected(TArray<TSharedPtr<FFINScriptPin>>& Searches) {
+	if (Searches.Contains(SharedThis(this))) return;
+	Searches.Add(SharedThis(this));
 	for (const TSharedPtr<FFINScriptPin>& Pin : GetConnections()) {
-		if (Searches.Contains(Pin)) continue;
-		Searches.Add(Pin);
 		Pin->GetAllConnected(Searches);
 	}
 }
@@ -50,6 +50,39 @@ bool FFINScriptPin::CanConnect(const TSharedPtr<FFINScriptPin>& Pin) {
             (ThisPinDataType == FIN_ANY))) return false;
 	} else if (ThisPinType & FIVS_PIN_EXEC) {
 		if (!(PinPinType & FIVS_PIN_EXEC)) return false;
+	}
+
+	bool bThisHasInput = false;
+	bool bPinHasInput = false;
+	bool bThisHasOutput = false;
+	bool bPinHasOutput = false;
+	TArray<TSharedPtr<FFINScriptPin>> Connections;
+	GetAllConnected(Connections);
+	for (const TSharedPtr<FFINScriptPin>& Connection : Connections) {
+		if (dynamic_cast<FFINScriptWildcardPin*>(Connection.Get())) continue;
+		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
+			bThisHasOutput = true;
+		}
+		if (Connection->GetPinType() & FIVS_PIN_OUTPUT) {
+			bThisHasInput = true;
+		}
+	}
+	Connections.Empty();
+	Pin->GetAllConnected(Connections);
+	for (const TSharedPtr<FFINScriptPin>& Connection : Connections) {
+		if (dynamic_cast<FFINScriptWildcardPin*>(Connection.Get())) continue;
+		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
+			bPinHasOutput = true;
+		}
+		if (Connection->GetPinType() & FIVS_PIN_OUTPUT) {
+			bPinHasInput = true;
+		}
+	}
+
+	if (ThisPinType & FIVS_PIN_DATA) {
+		if (bThisHasInput && bPinHasInput) return false;
+	} else if (ThisPinType & FIVS_PIN_EXEC) {
+		if (bThisHasOutput && bPinHasOutput) return false;
 	}
 	return true;
 }
@@ -105,41 +138,6 @@ EFINNetworkValueType FFINScriptWildcardPin::GetPinDataType() {
 }
 
 bool FFINScriptWildcardPin::CanConnect(const TSharedPtr<FFINScriptPin>& Pin) {
-	bool bThisHasInput = false;
-	bool bPinHasInput = false;
-	bool bThisHasOutput = false;
-	bool bPinHasOutput = false;
-	TArray<TSharedPtr<FFINScriptPin>> Connections;
-	GetAllConnected(Connections);
-	for (const TSharedPtr<FFINScriptPin>& Connection : Connections) {
-		if (dynamic_cast<FFINScriptWildcardPin*>(Connection.Get())) continue;
-		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
-			bThisHasOutput = true;
-		}
-		if (Connection->GetPinType() & FIVS_PIN_OUTPUT) {
-			bThisHasInput = true;
-		}
-	}
-	Connections.Empty();
-	Pin->GetAllConnected(Connections);
-	for (const TSharedPtr<FFINScriptPin>& Connection : Connections) {
-		if (dynamic_cast<FFINScriptWildcardPin*>(Connection.Get())) continue;
-		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
-			bPinHasOutput = true;
-		}
-		if (Connection->GetPinType() & FIVS_PIN_OUTPUT) {
-			bPinHasInput = true;
-		}
-	}
-
-	EFINScriptPinType ThisPinType = GetPinType();
-	EFINScriptPinType PinPinType = Pin->GetPinType();
-	
-	if (ThisPinType & FIVS_PIN_DATA) {
-		if (bThisHasInput && bPinHasInput) return false;
-	} else if (ThisPinType & FIVS_PIN_EXEC) {
-		if (bThisHasOutput && bThisHasOutput) return false;
-	}
 	return FFINScriptPin::CanConnect(Pin);
 }
 
