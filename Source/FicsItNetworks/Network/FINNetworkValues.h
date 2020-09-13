@@ -28,3 +28,21 @@ typedef FWeakObjectPtr FINObj;
 typedef UClass* FINClass;
 typedef FFINNetworkTrace FINTrace;
 typedef FFINDynamicStructHolder FINStruct;
+
+static inline EFINNetworkValueType GetValueTypeFromProp(UProperty* Prop) {
+	EClassCastFlags CastFlags = Prop->GetClass()->ClassCastFlags;
+	if (CastFlags & CASTCLASS_UBoolProperty) return FIN_BOOL;
+	if (CastFlags & CASTCLASS_UIntProperty) return FIN_INT;
+	if (CastFlags & CASTCLASS_UFloatProperty) return FIN_FLOAT;
+	if (CastFlags & CASTCLASS_UStrProperty) return FIN_STR;
+	if (CastFlags & CASTCLASS_UObjectProperty) return FIN_OBJ;
+	if (CastFlags & CASTCLASS_UClassProperty) return FIN_CLASS;
+	if (CastFlags & CASTCLASS_UStructProperty) {
+		UStructProperty* StructProp = Cast<UStructProperty>(Prop);
+		if (StructProp->Struct == FFINNetworkTrace::StaticStruct()) {
+			return FIN_TRACE;
+		}
+		return FIN_STRUCT;
+	}
+	return FIN_NIL;
+}
