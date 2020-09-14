@@ -48,7 +48,6 @@ void AFINScreenHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	}
 	Parts.Empty();
 	SetActorHiddenInGame(true);
-	SML::Logging::error("EndPlay");
 }
 
 void AFINScreenHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {

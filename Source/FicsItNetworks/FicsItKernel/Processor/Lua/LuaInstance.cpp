@@ -657,7 +657,6 @@ namespace FicsItKernel {
 			LuaInstanceType* type = static_cast<LuaInstanceType*>(luaL_checkudata(L, lua_upvalueindex(2), INSTANCE_TYPE));
 
 			// check type
-			//SML::Logging::error(instance, " ", type, " ", TCHAR_TO_UTF8(*instance->clazz->GetName()), " ", TCHAR_TO_UTF8(*type->type->GetName()));
 			if (!instance || !type || !instance->clazz || !type->type || !instance->clazz->IsChildOf(type->type)) return luaL_argerror(L, 1, "ClassInstance is invalid");
 
 			// get func name
