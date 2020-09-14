@@ -53,6 +53,7 @@ void Holo_SetupComponent(CallScope<decltype(&Holo_SetupComponentDecl)>& scope, A
 		comp->SetStaticMesh(networkConnectorHoloMesh);
 		comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
 		comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
+		comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			
 		scope.Override(comp);
 	}
