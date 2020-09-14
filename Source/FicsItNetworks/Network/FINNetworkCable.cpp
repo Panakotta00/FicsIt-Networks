@@ -33,6 +33,8 @@ void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
 	FVector start = FVector(0.0, 0.0, 0.0);
 	FVector end = RootComponent->GetComponentTransform().InverseTransformPosition(endPos);
 	FVector start_t = end;
+	end = end + 0.0001;
+	if ((FMath::Abs(start_t.X) < 10 || FMath::Abs(start_t.Y) < 10) && FMath::Abs(start_t.Z) <= offset) offset = 1;
 	start_t.Z -= offset;
 	FVector end_t = end;
 	end_t.Z += offset;
