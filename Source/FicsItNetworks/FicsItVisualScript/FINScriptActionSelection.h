@@ -34,10 +34,14 @@ struct FFINScriptActionSelectionFilter : TSharedFromThis<FFINScriptActionSelecti
 };
 
 struct FFINScriptActionSelectionTextFilter : FFINScriptActionSelectionFilter {
+private:
+	TArray<FString> FilterTockens;
+
+	void CallFilterValid(const TSharedPtr<FFINScriptActionSelectionEntry>& Entry, TFunction<void(FFINScriptActionSelectionFilter*, const TSharedPtr<FFINScriptActionSelectionEntry>&, bool)> OnFiltered);
+
+public:
 	TSharedPtr<FFINScriptActionSelectionEntry> BestMatch;
 	float BestMatchPercentage = 0.0f;
-
-	TArray<FString> FilterTockens;
 
 	FFINScriptActionSelectionTextFilter(const FString& FilterText);
 	

@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Network/FINNetworkValues.h"
 #include "SharedPointer.h"
+#include "Network/FINTypeManager.h"
+
 #include "FINScriptNode.generated.h"
 
 class UFINScriptNode;
@@ -25,7 +27,6 @@ struct FFINScriptPin;
 struct FFINScriptPin : public TSharedFromThis<FFINScriptPin> {
 protected:
 	TArray<TSharedPtr<FFINScriptPin>> ConnectedPins;
-
 	
 public:
 	UFINScriptNode* ParentNode = nullptr;
@@ -36,6 +37,7 @@ public:
 public:
 	FFINScriptPin() = default;
 	FFINScriptPin(EFINNetworkValueType DataType, EFINScriptPinType PinType, FString Name) : DataType(DataType), PinType(PinType), Name(Name) {}
+	FFINScriptPin(const FFINFunctionParameter& Param);
 	virtual ~FFINScriptPin();
 	
 	/**
@@ -168,9 +170,32 @@ public:
 	FString Name;
 
 	// Begin UFINScriptFuncNode
-	virtual FString GetNodeName() const { return Name; }
+	virtual FString GetNodeName() const override { return Name; }
 	// End UFINScriptFuncNode
 
 	int AddPin(const TSharedRef<FFINScriptPin>& Pin) { return AddNodePin(Pin); }
 	void RemovePin(int index) { RemoveNodePin(index); };
+};
+
+UCLASS()
+class UFINScriptReflectedFuncNode : public UFINScriptFuncNode {
+	GENERATED_BODY()
+private:
+	TSharedPtr<FFINFunction> Function;
+
+public:
+	// Begin UFINScriptFuncNode
+	virtual FString GetNodeName() const override;
+	// End UFINScriptFuncNode
+
+	/**
+	 * Sets the function this nodes uses.
+	 * Recreates all pins.
+	 */
+	void SetFunction(const TSharedPtr<FFINFunction>& Function);
+
+	/**
+	 * Returns the function
+	 */
+	TSharedPtr<FFINFunction> GetFunction() const;
 };

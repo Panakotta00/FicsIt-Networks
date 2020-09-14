@@ -10,6 +10,12 @@ void FFINScriptPin::GetAllConnected(TArray<TSharedPtr<FFINScriptPin>>& Searches)
 	}
 }
 
+FFINScriptPin::FFINScriptPin(const FFINFunctionParameter& Param) {
+	DataType = Param.Type;
+	PinType = Param.bOutputValue ? FIVS_PIN_DATA_OUTPUT : FIVS_PIN_DATA_INPUT;
+	Name = Param.Name;
+}
+
 FFINScriptPin::~FFINScriptPin() {
 	for (const TSharedPtr<FFINScriptPin>& Pin : ConnectedPins) {
 		Pin->RemoveConnection(Pin);
@@ -173,3 +179,27 @@ TArray<TSharedRef<FFINScriptPin>> UFINScriptFuncNode::GetNodePins() const {
 	return Pins;
 }
 
+FString UFINScriptReflectedFuncNode::GetNodeName() const {
+	return Function->GetName();
+}
+
+void UFINScriptReflectedFuncNode::SetFunction(const TSharedPtr<FFINFunction>& inFunction) {
+	if (Function) {
+		for (int i = 0; i < GetNodePins().Num(); ++i) {
+			RemoveNodePin(i);
+		}
+	}
+	Function = inFunction;
+	TSharedRef<FFINScriptPin> ExecIn = MakeShared<FFINScriptPin>(FIN_NIL, FIVS_PIN_EXEC_INPUT, "Exec");
+	AddNodePin(ExecIn);
+	TSharedRef<FFINScriptPin> ExecOut = MakeShared<FFINScriptPin>(FIN_NIL, FIVS_PIN_EXEC_OUTPUT, "Return");
+	AddNodePin(ExecOut);
+	for (const FFINFunctionParameter& Param : Function->GetParameters()) {
+		TSharedRef<FFINScriptPin> Pin = MakeShared<FFINScriptPin>(Param);
+		AddNodePin(Pin);
+	}
+}
+
+TSharedPtr<FFINFunction> UFINScriptReflectedFuncNode::GetFunction() const {
+	return Function;
+}

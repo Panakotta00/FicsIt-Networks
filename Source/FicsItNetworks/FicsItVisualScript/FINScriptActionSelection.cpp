@@ -3,6 +3,13 @@
 #include "SSearchBox.h"
 #include "Network/FINTypeManager.h"
 
+void FFINScriptActionSelectionTextFilter::CallFilterValid(const TSharedPtr<FFINScriptActionSelectionEntry>& Entries, TFunction<void(FFINScriptActionSelectionFilter*, const TSharedPtr<FFINScriptActionSelectionEntry>&, bool)> OnFiltered) {
+	OnFiltered(this, Entries, true);
+	for (const TSharedPtr<FFINScriptActionSelectionEntry>& Entry : Entries->GetChilds()) {
+		CallFilterValid(Entry, OnFiltered);
+	}
+}
+
 FFINScriptActionSelectionTextFilter::FFINScriptActionSelectionTextFilter(const FString& Filter) {
     SetFilterText(Filter);
 }
@@ -29,6 +36,8 @@ TArray<TSharedPtr<FFINScriptActionSelectionEntry>> FFINScriptActionSelectionText
     	if (!bIsValid) {
     		Entry->Filter(SharedThis(this), OnFiltered);
     		bIsValid = Entry->GetChilds().Num() > 0;
+    	} else {
+    		CallFilterValid(Entry, OnFiltered);
     	}
     	if (bIsValid) Filtered.Add(Entry);
     	Entry->OnFiltered(bIsValid, this);
@@ -123,16 +132,13 @@ void FFINScriptActionSelectionFuncAction::ResetFilter() {
 }
 
 void FFINScriptActionSelectionFuncAction::ExecuteAction() {
-	UFINScriptGenericFuncNode* Node = NewObject<UFINScriptGenericFuncNode>();
+	UFINScriptReflectedFuncNode* Node = NewObject<UFINScriptReflectedFuncNode>();
 	Node->Pos = Context.CreationLocation;
-	Node->Name = Func->GetName();
-	bool bConnected = false;
-	for (const FFINFunctionParameter& Pin : Func->GetParameters()) {
-		TSharedPtr<FFINScriptPin> NewPin = MakeShared<FFINScriptPin>(Pin.Type, Pin.bOutputValue ? FIVS_PIN_DATA_OUTPUT : FIVS_PIN_DATA_INPUT, Pin.Name);
-		Node->AddPin(NewPin.ToSharedRef());
-		if (!bConnected && Context.Pin.IsValid() && NewPin->CanConnect(Context.Pin)) {
-			NewPin->AddConnection(Context.Pin);
-			bConnected = true;
+	Node->SetFunction(Func);
+	for (const TSharedRef<FFINScriptPin>& Pin : Node->GetNodePins()) {
+		if (Context.Pin.IsValid() && Pin->CanConnect(Context.Pin)) {
+			Pin->AddConnection(Context.Pin);
+			break;
 		}
 	}
 	Context.Graph->AddNode(Node);
