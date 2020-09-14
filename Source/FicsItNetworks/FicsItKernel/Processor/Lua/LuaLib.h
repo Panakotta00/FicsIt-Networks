@@ -200,3 +200,17 @@ struct FFINVehicleSetTargets : public FFINFutureSimpleDone {
 	virtual void Execute() override;
 	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
 };
+
+USTRUCT()
+struct FFINInventoryFlushFuture : public FFINFutureSimpleDone {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	UFGInventoryComponent* Inventory;
+
+	FFINInventoryFlushFuture() = default;
+	FFINInventoryFlushFuture(UFGInventoryComponent* Inventory) : Inventory(Inventory) {}
+
+	virtual void Execute() override;
+	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
+};
