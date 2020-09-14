@@ -15,10 +15,14 @@ class AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface
 	
 private:
 	UPROPERTY(SaveGame, Replicated)
-	UObject* GPU = nullptr;
+	FFINNetworkTrace GPU;
+
+	bool bWasGPUValid = false;
 	
 public:
 	TSharedPtr<SWidget> Widget;
+
+	AFINComputerScreen();
 
 	/**
 	 * This event gets triggered when a new widget got set by the GPU
@@ -34,6 +38,7 @@ public:
 
 	// Begin AActor
 	void EndPlay(const EEndPlayReason::Type endPlayReason);
+	virtual void Tick(float DeltaSeconds) override;
 	// End AActor
 	
 	// Begin IFGSaveInterface
@@ -41,8 +46,8 @@ public:
 	// End IFGSaveInterface
 	
     // Begin IFINScreen
-    virtual void BindGPU(UObject* gpu) override;
-	virtual UObject* GetGPU() const override;
+    virtual void BindGPU(const FFINNetworkTrace& gpu) override;
+	virtual FFINNetworkTrace GetGPU() const override;
 	virtual void SetWidget(TSharedPtr<SWidget> widget) override;
 	virtual TSharedPtr<SWidget> GetWidget() const override;
 	// End IFINScreen
@@ -50,6 +55,9 @@ public:
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ScreenDriver"); }
 	// End IFINNetworkCustomType
+
+	UFUNCTION(NetMulticast, Reliable)
+	void OnGPUValidChanged(bool bWasGPUValid);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_OnGPUUpdate();

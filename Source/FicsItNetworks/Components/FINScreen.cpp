@@ -26,7 +26,7 @@ void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 void AFINScreen::BeginPlay() {
 	Super::BeginPlay();
 	
-	if (IsValid(GPU)) Cast<IFINGPUInterface>(GPU)->RequestNewWidget();
+	if (GPU) Cast<IFINGPUInterface>(GPU.Get())->RequestNewWidget();
 
 #if !WITH_EDITOR
 	SpawnComponents(ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
@@ -69,11 +69,15 @@ void AFINScreen::Tick(float DeltaSeconds) {
 		bGPUChanged = false;
 		ForceNetUpdate();
 	}
+	if (bWasGPUValid != GPU.IsValid()) {
+		OnGPUValidChanged(bWasGPUValid);
+		bWasGPUValid = !bWasGPUValid;
+	}
 }
 
 void AFINScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	Super::EndPlay(endPlayReason);
-	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(nullptr);
+	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(FFINNetworkTrace());
 }
 
 int32 AFINScreen::GetDismantleRefundReturnsMultiplier() const {
@@ -84,22 +88,23 @@ bool AFINScreen::ShouldSave_Implementation() const {
 	return true;
 }
 
-void AFINScreen::BindGPU(UObject* gpu) {
-	if (gpu) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
+void AFINScreen::BindGPU(const FFINNetworkTrace& gpu) {
+	if (gpu.GetUnderlyingPtr().IsValid()) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
 	if (GPU != gpu) {
-		UObject* oldGPU = GPU;
-		GPU = nullptr;
-		if (oldGPU) Cast<IFINGPUInterface>(oldGPU)->BindScreen(nullptr);
+		FFINNetworkTrace oldGPU = GPU;
+		GPU = FFINNetworkTrace();
+		if (oldGPU.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr().Get())->BindScreen(FFINNetworkTrace());
 		GPU = gpu;
-		if (gpu) {
-			Cast<IFINGPUInterface>(gpu)->BindScreen(this);
+		if (gpu.GetUnderlyingPtr().IsValid()) {
+			Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr().Get())->BindScreen(gpu / this);
 		}
 		bGPUChanged = true;
+		bWasGPUValid = GPU.IsValid();
 	}
 	NetMulti_OnGPUUpdate();
 }
 
-UObject* AFINScreen::GetGPU() const {
+FFINNetworkTrace AFINScreen::GetGPU() const {
 	return GPU;
 }
 
@@ -123,6 +128,14 @@ TSharedPtr<SWidget> AFINScreen::GetWidget() const {
 	return Widget;
 }
 
+void AFINScreen::OnGPUValidChanged_Implementation(bool bWasGPUValid) {
+	if (bWasGPUValid) {
+		if (GPU.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(GPU.GetUnderlyingPtr().Get())->DropWidget();
+	} else {
+		Cast<IFINGPUInterface>(GPU.GetUnderlyingPtr().Get())->RequestNewWidget();
+	}
+}
+
 void AFINScreen::netFunc_getSize(int& w, int& h) {
 	w = FMath::Abs(ScreenWidth);
 	h = FMath::Abs(ScreenHeight);
@@ -130,7 +143,7 @@ void AFINScreen::netFunc_getSize(int& w, int& h) {
 
 void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {
 	if (GPU) {
-		Cast<IFINGPUInterface>(GPU)->RequestNewWidget();
+		Cast<IFINGPUInterface>(GPU.Get())->RequestNewWidget();
 	} else {
 		SetWidget(SNew(SScaleBox));
 	}

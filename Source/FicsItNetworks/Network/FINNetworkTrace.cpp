@@ -207,6 +207,10 @@ UObject* FFINNetworkTrace::operator*() const {
 	}
 }
 
+UObject* FFINNetworkTrace::Get() const {
+	return **this;
+}
+
 UObject* FFINNetworkTrace::operator->() const {
 	return **this;
 }
@@ -278,6 +282,10 @@ bool FFINNetworkTrace::operator<(const FFINNetworkTrace& other) const {
 
 TWeakObjectPtr<UObject> FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
+}
+
+FFINNetworkTrace::operator bool() const {
+	return IsValid();
 }
 
 /* ############### */

@@ -24,11 +24,15 @@ void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTick
 
 	DrawDebugLine(this->GetWorld(), GetActorLocation(), GetActorLocation() + FVector(0,0,1000000), FColor::Red, true);
 	
+	if (bWasValid != Screen.IsValid()) {
+		bWasValid = !bWasValid;
+		OnValidationChanged(bWasValid);
+	}
 	if (bShouldCreate) {
 		bShouldCreate = false;
-		if (!IsValid(Screen)) return;
+		if (!Screen.IsValid()) return;
 		if (!Widget.IsValid()) Widget = CreateWidget();
-		Cast<IFINScreenInterface>(Screen)->SetWidget(Widget);
+		Cast<IFINScreenInterface>(Screen.Get())->SetWidget(Widget);
 	}
 	if (bScreenChanged) {
 		bScreenChanged = false;
@@ -38,23 +42,24 @@ void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTick
 
 void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	Super::EndPlay(endPlayReason);
-	if (endPlayReason == EEndPlayReason::Destroyed) BindScreen(nullptr);
+	if (endPlayReason == EEndPlayReason::Destroyed) BindScreen(FFINNetworkTrace());
 }
 
-void AFINComputerGPU::BindScreen(UObject* screen) {
-	if (screen) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
+void AFINComputerGPU::BindScreen(const FFINNetworkTrace& screen) {
+	if (screen.GetUnderlyingPtr().IsValid()) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
 	if (Screen == screen) return;
-	UObject* oldScreen = Screen;
-	Screen = nullptr;
-	if (oldScreen) Cast<IFINScreenInterface>(oldScreen)->BindGPU(nullptr);
-	if (!screen) DropWidget();
+	FFINNetworkTrace oldScreen = Screen;
+	Screen = FFINNetworkTrace();
+	if (oldScreen.IsValid()) Cast<IFINScreenInterface>(oldScreen.Get())->BindGPU(FFINNetworkTrace());
+	if (!screen.IsValid()) DropWidget();
 	Screen = screen;
-	if (screen) Cast<IFINScreenInterface>(screen)->BindGPU(this);
+	if (screen.IsValid()) Cast<IFINScreenInterface>(screen.Get())->BindGPU(screen / this);
+	bWasValid = screen.IsValid();
 	netSig_ScreenBound(oldScreen);
 	bScreenChanged = true;
 }
 
-UObject* AFINComputerGPU::GetScreen() const {
+FFINNetworkTrace AFINComputerGPU::GetScreen() const {
 	return Screen;
 }
 
@@ -64,14 +69,19 @@ void AFINComputerGPU::RequestNewWidget() {
 
 void AFINComputerGPU::DropWidget() {
 	Widget.Reset();
-	if (Screen) Cast<IFINScreenInterface>(Screen)->SetWidget(nullptr);
+	if (Screen.GetUnderlyingPtr().IsValid()) Cast<IFINScreenInterface>(Screen.GetUnderlyingPtr().Get())->SetWidget(nullptr);
+}
+
+void AFINComputerGPU::OnValidationChanged_Implementation(bool bNewValid) {
+	if (bWasValid) DropWidget();
+	else RequestNewWidget();
 }
 
 TSharedPtr<SWidget> AFINComputerGPU::CreateWidget() {
 	return nullptr;
 }
 
-void AFINComputerGPU::netSig_ScreenBound_Implementation(UObject* oldScreen) {}
+void AFINComputerGPU::netSig_ScreenBound_Implementation(const FFINNetworkTrace& oldScreen) {}
 
 void UFINScreenWidget::OnNewWidget() {
 	if (Container.IsValid()) {
@@ -84,8 +94,8 @@ void UFINScreenWidget::OnNewWidget() {
 }
 
 void UFINScreenWidget::OnNewGPU() {
-	if (this->Screen && Cast<IFINScreenInterface>(this->Screen)->GetGPU()) {
-		Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(this->Screen)->GetGPU())->RequestNewWidget();
+	if (Screen && Cast<IFINScreenInterface>(Screen)->GetGPU()) {
+		if (Cast<IFINScreenInterface>(Screen)->GetGPU().GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(Screen)->GetGPU().GetUnderlyingPtr().Get())->RequestNewWidget();
 	} else if (Container.IsValid()) {
 		Container->SetContent(SNew(SBox));
 	}
@@ -95,7 +105,7 @@ void UFINScreenWidget::SetScreen(UObject* NewScreen) {
 	Screen = NewScreen;
 	if (Screen) {
 		if (Container.IsValid() && Cast<IFINScreenInterface>(Screen)->GetGPU()) {
-			Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(Screen)->GetGPU())->RequestNewWidget();
+			Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(Screen)->GetGPU().GetUnderlyingPtr().Get())->RequestNewWidget();
 		}
 	}
 }

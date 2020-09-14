@@ -13,11 +13,12 @@ class AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface, publ
 	GENERATED_BODY()
 protected:
 	UPROPERTY(SaveGame, Replicated)
-    UObject* Screen = nullptr;
+    FFINNetworkTrace Screen;
 
 	TSharedPtr<SWidget> Widget;
 	bool bShouldCreate = false;
 	bool bScreenChanged = false;
+	bool bWasValid = false;
 
 public:
 	AFINComputerGPU();
@@ -28,8 +29,8 @@ public:
 	// End AActor
 
 	// Begin IFINGraphicsProcessor
-	virtual void BindScreen(UObject* screen) override;
-	virtual UObject* GetScreen() const override;
+	virtual void BindScreen(const FFINNetworkTrace& screen) override;
+	virtual FFINNetworkTrace GetScreen() const override;
 	virtual void RequestNewWidget() override;
 	virtual void DropWidget() override;
 	// End IFINGraphicsProcessor
@@ -37,6 +38,13 @@ public:
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("GPU"); }
 	// End IFINNetworkCustomType
+
+	/**
+	 * Gets called by the repeating trace validation check
+	 * to notify clients to show or hide screen
+	 */
+	UFUNCTION(NetMulticast, Reliable)
+	void OnValidationChanged(bool bNewValid);
 	
 	/**
      * Creates a new widget for use in the screen.
@@ -47,7 +55,7 @@ public:
     virtual TSharedPtr<SWidget> CreateWidget();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-    void netSig_ScreenBound(UObject* oldScreen);
+    void netSig_ScreenBound(const FFINNetworkTrace& oldScreen);
 };
 
 /**

@@ -15,7 +15,9 @@ class AFINScreen : public AFGBuildable, public IFINScreenInterface, public IFINN
 	
 private:
 	UPROPERTY(SaveGame, Replicated)
-	UObject* GPU = nullptr;
+	FFINNetworkTrace GPU;
+
+	bool bWasGPUValid = false;
 	
 public:
 	TSharedPtr<SWidget> Widget;
@@ -76,8 +78,8 @@ public:
 	// End IFGSaveInterface
 
 	// Begin IFINScreenInterface
-	void BindGPU(UObject* gpu) override;
-	UObject* GetGPU() const override;
+	void BindGPU(const FFINNetworkTrace& gpu) override;
+	FFINNetworkTrace GetGPU() const override;
 	void SetWidget(TSharedPtr<SWidget> widget) override;
 	TSharedPtr<SWidget> GetWidget() const override;
 	// End IFINScreenInterface
@@ -85,6 +87,9 @@ public:
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("Screen"); }
 	// End IFINNetworkCustomType
+
+	UFUNCTION(NetMulticast, Reliable)
+	void OnGPUValidChanged(bool bWasGPUValid);
 
 	UFUNCTION()
 	void netFunc_getSize(int& w, int& h);

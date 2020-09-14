@@ -65,6 +65,12 @@ public:
 	UObject* operator*() const;
 
 	/**
+	 * Returns the reference object.
+	 * nullptr if trace is invalid
+	 */
+	UObject* Get() const;
+
+	/**
 	 * Accesses the referenced object.
 	 * nullptr if trace is invalid
 	 */
@@ -114,6 +120,11 @@ public:
 	 * returns the underlying weak object ptr without any checks
 	 */
 	TWeakObjectPtr<UObject> GetUnderlyingPtr() const;
+
+	/**
+	 * returns if the trace is valid or not
+	 */
+	operator bool() const;
 };
 
 inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
