@@ -3,6 +3,7 @@
 #include "FGPowerConnectionComponent.h"
 #include "FGItemPickup_Spawnable.h"
 #include "FINNetworkCable.h"
+#include "UnrealNetwork.h"
 
 #include "Components/SceneComponent.h"
 
@@ -26,7 +27,16 @@ void AFINNetworkAdapter::RegisterAdapterSettings() {
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageTank/Build_PipeStorageTank.Build_PipeStorageTank_C")), FFINAdapterSettings{FVector(180,180,600), FRotator(0,-45,0), true, 2});
 }
 
+void AFINNetworkAdapter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFINNetworkAdapter, Parent);
+}
+
 AFINNetworkAdapter::AFINNetworkAdapter() {
+	bAlwaysRelevant = true;
+	SetReplicates(true);
+	
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"Root");
 	RootComponent->SetMobility(EComponentMobility::Type::Static);
 

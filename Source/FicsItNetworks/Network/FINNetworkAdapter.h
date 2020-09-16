@@ -38,7 +38,7 @@ public:
 	static void RegisterAdapterSettings();
 
 	/** the building this adapter is attached to */
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	AFGBuildable* Parent = nullptr;
 	
 	/** the network connector of the adapter */
