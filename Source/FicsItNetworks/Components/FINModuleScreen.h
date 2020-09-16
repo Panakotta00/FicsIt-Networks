@@ -12,7 +12,8 @@ private:
     UPROPERTY(SaveGame, Replicated)
     FFINNetworkTrace GPU;
 
-	bool bWasGPUValid = false;
+	UPROPERTY(Replicated)
+	UObject* GPUPtr = nullptr;
 	
 public:
     TSharedPtr<SWidget> Widget;
@@ -45,6 +46,7 @@ public:
 	virtual FFINNetworkTrace GetGPU() const override;
 	virtual void SetWidget(TSharedPtr<SWidget> widget) override;
 	virtual TSharedPtr<SWidget> GetWidget() const override;
+	virtual void RequestNewWidget() override;
 	// End IFINScreen
 
 	// Begin IFINNetworkCustomType
@@ -52,7 +54,7 @@ public:
 	// End IFINNetworkCustomType
 
 	UFUNCTION(NetMulticast, Reliable)
-	void OnGPUValidationChanged(bool bWasValid);
+	void OnGPUValidationChanged(bool bValid, UObject* newGPU);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_OnGPUUpdate();

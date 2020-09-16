@@ -17,7 +17,8 @@ private:
 	UPROPERTY(SaveGame, Replicated)
 	FFINNetworkTrace GPU;
 
-	bool bWasGPUValid = false;
+	UPROPERTY(Replicated)
+	UObject* GPUPtr = nullptr;
 	
 public:
 	TSharedPtr<SWidget> Widget;
@@ -82,6 +83,7 @@ public:
 	FFINNetworkTrace GetGPU() const override;
 	void SetWidget(TSharedPtr<SWidget> widget) override;
 	TSharedPtr<SWidget> GetWidget() const override;
+	virtual void RequestNewWidget() override;
 	// End IFINScreenInterface
 
 	// Begin IFINNetworkCustomType
@@ -89,7 +91,7 @@ public:
 	// End IFINNetworkCustomType
 
 	UFUNCTION(NetMulticast, Reliable)
-	void OnGPUValidChanged(bool bWasGPUValid);
+	void OnGPUValidChanged(bool bValid, UObject* newGPU);
 
 	UFUNCTION()
 	void netFunc_getSize(int& w, int& h);

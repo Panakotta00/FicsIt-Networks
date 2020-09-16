@@ -7,12 +7,18 @@
 void AFINComputerScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
+	DOREPLIFETIME(AFINComputerScreen, GPUPtr);
 	DOREPLIFETIME(AFINComputerScreen, GPU);
 }
 
 AFINComputerScreen::AFINComputerScreen() {
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
+}
+
+void AFINComputerScreen::BeginPlay() {
+	Super::BeginPlay();
+	if (HasAuthority()) GPUPtr = GPU.Get();
 }
 
 void AFINComputerScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
@@ -22,9 +28,11 @@ void AFINComputerScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
 
 void AFINComputerScreen::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
-	if (bWasGPUValid != GPU.IsValid()) {
-		OnGPUValidChanged(bWasGPUValid);
-		bWasGPUValid = !bWasGPUValid;
+	if (HasAuthority() && (((bool)GPUPtr) != GPU.IsValid())) {
+		if (!GPUPtr) GPUPtr = GPU.Get();
+		OnGPUValidChanged(GPU.IsValid(), GPUPtr);
+		GPUPtr = GPU.Get();
+		ForceNetUpdate();
 	}
 }
 
@@ -40,7 +48,7 @@ void AFINComputerScreen::BindGPU(const FFINNetworkTrace& gpu) {
 		if (oldGPU.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr().Get())->BindScreen(FFINNetworkTrace());
 		GPU = gpu;
 		if (gpu.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr().Get())->BindScreen(gpu / this);
-		bWasGPUValid = GPU.IsValid();
+		GPUPtr = GPU.Get();
 	}
 	NetMulti_OnGPUUpdate();
 }
@@ -58,16 +66,20 @@ TSharedPtr<SWidget> AFINComputerScreen::GetWidget() const {
 	return Widget;
 }
 
-void AFINComputerScreen::OnGPUValidChanged_Implementation(bool bWasGPUValid) {
-	if (bWasGPUValid) {
-		if (GPU.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(GPU.GetUnderlyingPtr().Get())->DropWidget();
+void AFINComputerScreen::RequestNewWidget() {
+	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
+}
+
+void AFINComputerScreen::OnGPUValidChanged_Implementation(bool bValid, UObject* newGPU) {
+	if (!bValid) {
+		Cast<IFINGPUInterface>(newGPU)->DropWidget();
 	} else {
-		Cast<IFINGPUInterface>(GPU.GetUnderlyingPtr().Get())->RequestNewWidget();
+		Cast<IFINGPUInterface>(newGPU)->RequestNewWidget();
 	}
 }
 
 void AFINComputerScreen::NetMulti_OnGPUUpdate_Implementation() {
 	OnGPUUpdate.Broadcast();
-	if (GPU) Cast<IFINGPUInterface>(GPU.Get())->RequestNewWidget();
+	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 	else SetWidget(nullptr);
 }

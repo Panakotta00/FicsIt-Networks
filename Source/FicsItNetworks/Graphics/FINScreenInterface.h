@@ -56,4 +56,9 @@ public:
 	 * @return	the currently cached widget
 	 */
 	virtual TSharedPtr<SWidget> GetWidget() const = 0;
+
+	/**
+	 * Lets the screen to request a new widget from the gpu.
+	 */
+	virtual void RequestNewWidget() = 0;
 };

@@ -15,15 +15,18 @@ protected:
 	UPROPERTY(SaveGame, Replicated)
     FFINNetworkTrace Screen;
 
+	UPROPERTY(Replicated)
+	UObject* ScreenPtr = nullptr;
+
 	TSharedPtr<SWidget> Widget;
 	bool bShouldCreate = false;
 	bool bScreenChanged = false;
-	bool bWasValid = false;
 
 public:
 	AFINComputerGPU();
-	
+
 	// Begin AActor
+	virtual void BeginPlay() override;
     virtual void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	virtual void EndPlay(const EEndPlayReason::Type endPlayReason) override;
 	// End AActor
@@ -44,7 +47,7 @@ public:
 	 * to notify clients to show or hide screen
 	 */
 	UFUNCTION(NetMulticast, Reliable)
-	void OnValidationChanged(bool bNewValid);
+	void OnValidationChanged(bool bValid, UObject* newScreen);
 	
 	/**
      * Creates a new widget for use in the screen.

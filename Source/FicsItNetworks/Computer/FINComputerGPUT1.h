@@ -132,8 +132,13 @@ UCLASS()
 class AFINComputerGPUT1 : public AFINComputerGPU {
 	GENERATED_BODY()
 private:
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY(SaveGame, ReplicatedUsing=OnTextChanged)
 	TArray<FString> TextGrid;
+
+	UFUNCTION()
+	void OnTextChanged() {
+		SML::Logging::error("Text changed!");
+	}
 
 	UPROPERTY(SaveGame, Replicated)
 	FVector2D ScreenSize;
