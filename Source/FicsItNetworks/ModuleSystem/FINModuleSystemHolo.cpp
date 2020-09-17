@@ -103,16 +103,13 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
         UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 3, getModuleSize(), min, max);
 		break;
 	}
-	//if (hitResult.GetActor()->HasAuthority()) {
-		SML::Logging::error("Has Authority!");
-		bIsValid = checkSpace(min, max);
-		if (bIsValid) {
-			bIsValid = false;
-			for (auto& allowed : Snapped->AllowedModules)
-				if (mBuildClass->IsChildOf(allowed)) 
-					bIsValid = true;
-		}
-	//}
+	bIsValid = checkSpace(min, max);
+	if (bIsValid) {
+		bIsValid = false;
+		for (auto& allowed : Snapped->AllowedModules)
+			if (mBuildClass->IsChildOf(allowed)) 
+				bIsValid = true;
+	}
 	SetHologramLocationAndRotation(hitResult);
 	return true;
 }

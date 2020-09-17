@@ -152,7 +152,6 @@ FFINNetworkTrace::FFINNetworkTrace(UObject* Obj) : Obj(Obj) {
 FFINNetworkTrace::~FFINNetworkTrace() {}
 
 bool FFINNetworkTrace::Serialize(FArchive& Ar) {
-	SML::Logging::error("Serialize!");
 	if (Ar.IsSaveGame() || Ar.IsNetArchive()) {
 		bool valid = GetUnderlyingPtr().IsValid();
 		Ar << valid;
@@ -188,11 +187,6 @@ bool FFINNetworkTrace::Serialize(FArchive& Ar) {
 	
 	return true;
 }
-
-/*bool FFINNetworkTrace::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) {
-	SML::Logging::error("Net serialize!");
-	return Serialize(Ar);
-}*/
 
 FFINNetworkTrace FFINNetworkTrace::operator/(UObject* other) const {
 	FFINNetworkTrace trace(other);

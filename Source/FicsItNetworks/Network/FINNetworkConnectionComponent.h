@@ -67,6 +67,12 @@ public:
     void RemoveConnectedNode(TScriptInterface<IFINNetworkCircuitNode> Node);
 
 	/**
+	 * returns a list of all connected cables
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
+	TSet<AFINNetworkCable*> GetConnectedCables();
+
+	/**
 	 * adds the given network cable to this connector.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Connector")

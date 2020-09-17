@@ -76,7 +76,7 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(FFINNetworkTrace Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) override;
+	virtual void HandleMessage(FGuid ID, FFINNetworkTrace Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) override;
 	// End IFINNetworkMessageInterface
 
 	// Begin IFINNetworkCustomType
