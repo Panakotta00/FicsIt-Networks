@@ -5,10 +5,29 @@
 #include "FINModuleSystemModule.h"
 #include "FINModuleSystemPanel.h"
 #include "FGConstructDisqualifier.h"
+#include "UnrealNetwork.h"
+#include "util/Logging.h"
 
-AFINModuleSystemHolo::AFINModuleSystemHolo() {}
+AFINModuleSystemHolo::AFINModuleSystemHolo() {
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
+}
 
 AFINModuleSystemHolo::~AFINModuleSystemHolo() {}
+
+void AFINModuleSystemHolo::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+	if (Snapped && Snapped->GetOwner()->HasAuthority() && bOldIsValid != bIsValid) {
+		ForceNetUpdate();
+		bOldIsValid = bIsValid;
+//		ValidChanged(bIsValid);
+	}
+}
+
+/*void AFINModuleSystemHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//DOREPLIFETIME(AFINModuleSystemHolo, bIsValid);
+}*/
 
 AActor* AFINModuleSystemHolo::Construct(TArray<AActor*>& childs, FNetConstructionID constructionID) {
 	FRotator rotation = GetActorRotation();
@@ -72,25 +91,28 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 0, getModuleSize(), min, max);
 		break;
 	case -30:
-	case 10:
-		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 1, getModuleSize(), min, max);
+    case 10:
+        UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 1, getModuleSize(), min, max);
 		break;
 	case -20:
-	case 20:
-		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 2, getModuleSize(), min, max);
+    case 20:
+        UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 2, getModuleSize(), min, max);
 		break;
 	case -10:
-	case 30:
-		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 3, getModuleSize(), min, max);
+    case 30:
+        UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 3, getModuleSize(), min, max);
 		break;
 	}
-	bIsValid = checkSpace(min, max);
-	if (bIsValid) {
-		bIsValid = false;
-		for (auto& allowed : Snapped->AllowedModules)
-			if (mBuildClass->IsChildOf(allowed)) 
-				bIsValid = true;
-	}
+	//if (hitResult.GetActor()->HasAuthority()) {
+		SML::Logging::error("Has Authority!");
+		bIsValid = checkSpace(min, max);
+		if (bIsValid) {
+			bIsValid = false;
+			for (auto& allowed : Snapped->AllowedModules)
+				if (mBuildClass->IsChildOf(allowed)) 
+					bIsValid = true;
+		}
+	//}
 	SetHologramLocationAndRotation(hitResult);
 	return true;
 }
