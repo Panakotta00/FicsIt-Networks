@@ -63,7 +63,7 @@ namespace FicsItKernel {
 
 		void LuaFileSystemListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
 			for (LuaFile file : parent->getFileStreams()) {
-				if (file.isValid() && !parent->getKernel()->getFileSystem()->checkUnpersistPath(file->path)) {
+				if (file.isValid() && (!parent->getKernel()->getFileSystem() || !parent->getKernel()->getFileSystem()->checkUnpersistPath(file->path))) {
 					file->file->close();
 				}
 			}
@@ -71,7 +71,7 @@ namespace FicsItKernel {
 
 		void LuaFileSystemListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
 			for (LuaFile file : parent->getFileStreams()) {
-				if (file.isValid() && file->path.length() > 0 && parent->getKernel()->getFileSystem()->unpersistPath(file->path) == path) {
+				if (file.isValid() && file->path.length() > 0 && (!parent->getKernel()->getFileSystem() || parent->getKernel()->getFileSystem()->unpersistPath(file->path) == path)) {
 					file->file->close();
 				}
 			}
@@ -102,10 +102,7 @@ namespace FicsItKernel {
 		}
 
 		LuaProcessor::~LuaProcessor() {
-			asyncMutex.Lock();
-			tickState = LUA_SYNC;
-			asyncMutex.Unlock();
-			if (asyncTask && !asyncTask->IsIdle()) asyncTask->EnsureCompletion();
+			StopAsyncTick();
 		}
 
 		void LuaProcessor::setKernel(KernelSystem* newKernel) {
@@ -121,9 +118,11 @@ namespace FicsItKernel {
 			if (bShouldStop) {
 				asyncMutex.Unlock();
 				kernel->stop();
+				bShouldStop = false;
 			} else if (bShouldCrash) {
 				asyncMutex.Unlock();
 				kernel->crash(ToCrash);
+				bShouldCrash = false;
 			} else if (tickState == LUA_ASYNC_BEGIN) {
 				if (asyncTask && !asyncTask->IsIdle()) asyncTask->EnsureCompletion();
 				tickState = LUA_ASYNC;
@@ -131,14 +130,14 @@ namespace FicsItKernel {
 				asyncTask = MakeShared<FAsyncTask<FLuaTickRunnable>>(this);
 				asyncTask->StartBackgroundTask();
 				asyncMutex.Unlock();
-			} else if (tickState == LUA_SYNC) {
+			} else if (tickState & LUA_SYNC) {
 				asyncMutex.Unlock();
 				if (asyncTask && !asyncTask->IsIdle()) {
 					asyncTask->EnsureCompletion();
 					asyncTask = nullptr;
 				}
 				luaTick();
-			} else if (tickState == LUA_ASYNC) {
+			} else if (tickState & LUA_ASYNC) {
 				asyncMutex.Unlock();
 				RunSyncTick();
 			} else {
@@ -348,13 +347,15 @@ namespace FicsItKernel {
 			// reset tick state
 			tickState = LUA_SYNC;
 			bWantsSync = false;
+			bShouldCrash = false;
+			bShouldStop = false;
 
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
 			// TODO: Check if we actually want to use this or the manual gc call
 		}
 
 		std::int64_t LuaProcessor::getMemoryUsage(bool recalc) {
-			return lua_gc(luaState, LUA_GCCOUNT, 0)* 1000;
+			return lua_gc(luaState, LUA_GCCOUNT, 0)* 100;
 		}
 
 		static constexpr uint32 Base64GetEncodedDataSize(uint32 NumBytes) {
