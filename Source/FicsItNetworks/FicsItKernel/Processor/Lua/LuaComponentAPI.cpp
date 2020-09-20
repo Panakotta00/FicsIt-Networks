@@ -15,6 +15,7 @@
 namespace FicsItKernel {
 	namespace Lua {
 		int luaComponentProxy(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
@@ -51,6 +52,7 @@ namespace FicsItKernel {
 		}
 
 		int luaFindComponent(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
@@ -72,6 +74,7 @@ namespace FicsItKernel {
 		}
 
 		int luaFindItem(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int nargs = lua_gettop(L);
 			if (nargs < 1) return LuaProcessor::luaAPIReturn(L, 0);
 			const char* str = luaL_tolstring(L, -1, 0);

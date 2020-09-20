@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <set>
+#include <thread>
 
 #include "FicsItKernel/Processor/Processor.h"
 #include "LuaFileSystemAPI.h"
@@ -40,22 +41,73 @@ namespace FicsItKernel {
 			virtual void onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) override;
 		};
 
+		enum LuaTickState {
+			LUA_ERROR		= 0b00100,
+			LUA_END			= 0b01000,
+			LUA_BEGIN		= 0b10000,
+			LUA_SYNC		= 0b00001,
+			LUA_ASYNC		= 0b00010,
+			LUA_SYNC_ERROR	= LUA_SYNC | LUA_ERROR,
+			LUA_SYNC_END	= LUA_SYNC | LUA_END,
+			LUA_ASYNC_BEGIN	= LUA_ASYNC | LUA_BEGIN,
+			LUA_ASYNC_ERROR	= LUA_ASYNC | LUA_ERROR,
+			LUA_ASYNC_END	= LUA_ASYNC | LUA_END,
+		};
+
+		struct FLuaTickRunnable : public FNonAbandonableTask {
+		private:
+			class LuaProcessor* Processor;
+			bool bShouldSync = false;
+			
+		public:	
+			FLuaTickRunnable(class LuaProcessor* Processor) : Processor(Processor) {}
+			
+			void DoWork();
+
+			FORCEINLINE TStatId GetStatId() const {
+				RETURN_QUICK_DECLARE_CYCLE_STAT(ExampleAsyncTask, STATGROUP_ThreadPoolAsyncTasks);
+			}
+		};
+		
 		class LuaProcessor : public Processor {
 			friend int luaPull(lua_State* L);
+			friend FLuaTickRunnable;
+			friend struct FLuaSyncCall;
 
 		private:
-			int speed = 0;
+			// Lua Tick state lua step lenghts
+			int SyncLen = 1000;
+			int SyncErrorLen = 200;
+			int SyncEndLen = 200;
+			int AsyncLen = 1000;
+			int AsyncErrorLen = 200;
+			int AsyncEndLen = 200;
 
+			// Processor cache
 			TWeakObjectPtr<AFINStateEEPROMLua> eeprom;
 
+			// Lua runtime
 			lua_State* luaState = nullptr;
 			lua_State* luaThread = nullptr;
 			int luaThreadIndex = 0;
-			bool endOfTick = false;
+			LuaTickState tickState = LUA_SYNC;
 
+			// async execution
+			TSharedPtr<FAsyncTask<FLuaTickRunnable>> asyncTask;
+			FCriticalSection asyncMutex;
+			bool bWantsSync = false;
+			TPromise<void> asyncPromiseThreadWait;
+			TPromise<void> asyncPromiseTickWait;
+			bool bShouldCrash = false;
+			KernelCrash ToCrash;
+			bool bShouldStop = false;
+
+			// signal pulling
 			int pullState = 0; // 0 = not pulling, 1 = pulling with timeout, 2 = pull indefinetly
 			double timeout = 0.0;
 			std::chrono::time_point<std::chrono::high_resolution_clock> pullStart;
+
+			// filesystem handling
 			std::set<LuaFile> fileStreams;
 			FileSystem::SRef<LuaFileSystemListener> fileSystemListener;
 			
@@ -63,10 +115,12 @@ namespace FicsItKernel {
 			static LuaProcessor* luaGetProcessor(lua_State* L);
 			
 			LuaProcessor(int speed = 1);
+			~LuaProcessor();
 
 			// Begin Processor
 			virtual void setKernel(KernelSystem* kernel) override;
 			virtual void tick(float delta) override;
+			virtual void stop(bool isCrash) override;
 			virtual void reset() override;
 			virtual std::int64_t getMemoryUsage(bool recalc = false) override;
 			virtual void PreSerialize(UProcessorStateStorage* Storage, bool bLoading) override;
@@ -75,6 +129,40 @@ namespace FicsItKernel {
 			virtual UProcessorStateStorage* CreateSerializationStorage() override;
 			virtual void setEEPROM(AFINStateEEPROM* eeprom) override;
 			// End Processor
+
+			/**
+			 * Returns the lua step count for the given lua tick state
+			 */
+			int luaStepsForTickState(LuaTickState state);
+
+			/**
+			 * Executes one lua tick sync or async.
+			 * Might set after tick cache which should get handled by tick.
+			 */
+			void luaTick();
+
+			/**
+			 * Should be called by main thread to allow async task
+			 * to finish tick execution in sync with main thread.
+			 * If async task doesn't wait, directly returns.
+			 */
+			void RunSyncTick();
+
+			/**
+			 * Forces async task to stop
+			 * and waits for it finish.
+			 */
+			void StopAsyncTick();
+
+			/**
+			 * Continuation function used by syncTick
+			 */
+			static int syncTickContinue(lua_State*, int status, lua_KContext ctx);
+
+			/**
+			 * Waits till the lua tick is synced with the kernel tick (lua thread finished)
+			 */
+			void syncTick(lua_State* L);
 
 			/**
 			* Sets up the lua environment.
@@ -120,5 +208,24 @@ namespace FicsItKernel {
 			 */
 			static int luaAPIReturn(lua_State* L, int args);
 		};
+
+		struct FLuaSyncCall {
+			LuaProcessor* Processor;
+
+			FLuaSyncCall(lua_State* L) {
+				Processor = LuaProcessor::luaGetProcessor(L);
+				Processor->syncTick(L);
+			}
+
+			~FLuaSyncCall() {
+				Processor->asyncMutex.Lock();
+				if (Processor->bWantsSync) {
+					Processor->bWantsSync = false;
+					Processor->tickState = LUA_SYNC;
+					Processor->asyncPromiseTickWait.SetValue();
+				}
+				Processor->asyncMutex.Unlock();
+			}
+        };
 	}
 }

@@ -7,7 +7,7 @@ void AFINComputerModule::Serialize(FArchive& Ar) {
 
 void AFINComputerModule::EndPlay(EEndPlayReason::Type reason) {
 	Super::EndPlay(reason);
-	if (ModulePanel) ModulePanel->RemoveModule(this);
+	if (reason == EEndPlayReason::Destroyed && ModulePanel) ModulePanel->RemoveModule(this);
 }
 
 bool AFINComputerModule::ShouldSave_Implementation() const {

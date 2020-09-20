@@ -10,7 +10,8 @@
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
 	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
-	KernelSystem* kernel = processor->getKernel();
+	KernelSystem* kernel = processor->getKernel(); \
+	FLuaSyncCall SyncCall(L);
 
 
 namespace FicsItKernel {
@@ -47,7 +48,7 @@ namespace FicsItKernel {
 			return 0;
 		}
 
-		LuaFunc(luaComputerSkip)
+		int luaComputerSkip(lua_State* L) {
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 

@@ -30,6 +30,7 @@ namespace FicsItKernel {
 		}
 
 		int luaListen(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
@@ -47,6 +48,7 @@ namespace FicsItKernel {
 		}
 
 		int luaPull(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
 			double t = 0.0;
 			if (args > 0) t = lua_tonumber(L, 1);
@@ -80,6 +82,7 @@ namespace FicsItKernel {
 		}
 
 		int luaIgnore(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
@@ -91,6 +94,7 @@ namespace FicsItKernel {
 		}
 
 		int luaIgnoreAll(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
 			TSet<FFINNetworkTrace> senders = net->signalSenders;
 			for (FFINNetworkTrace sender : senders) {
@@ -102,7 +106,7 @@ namespace FicsItKernel {
 				}
 			}
 			net->signalSenders.Empty();
-			return 1;
+			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaClear(lua_State* L) {
