@@ -42,11 +42,11 @@ namespace FicsItKernel {
 		};
 
 		enum LuaTickState {
+			LUA_SYNC		= 0b00001,
+			LUA_ASYNC		= 0b00010,
 			LUA_ERROR		= 0b00100,
 			LUA_END			= 0b01000,
 			LUA_BEGIN		= 0b10000,
-			LUA_SYNC		= 0b00001,
-			LUA_ASYNC		= 0b00010,
 			LUA_SYNC_ERROR	= LUA_SYNC | LUA_ERROR,
 			LUA_SYNC_END	= LUA_SYNC | LUA_END,
 			LUA_ASYNC_BEGIN	= LUA_ASYNC | LUA_BEGIN,
@@ -76,12 +76,12 @@ namespace FicsItKernel {
 
 		private:
 			// Lua Tick state lua step lenghts
-			int SyncLen = 1000;
-			int SyncErrorLen = 200;
-			int SyncEndLen = 200;
-			int AsyncLen = 1000;
-			int AsyncErrorLen = 200;
-			int AsyncEndLen = 200;
+			int SyncLen = 2500;
+			int SyncErrorLen = 500;
+			int SyncEndLen = 500;
+			int AsyncLen = 2500;
+			int AsyncErrorLen = 500;
+			int AsyncEndLen = 500;
 
 			// Processor cache
 			TWeakObjectPtr<AFINStateEEPROMLua> eeprom;

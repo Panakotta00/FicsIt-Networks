@@ -584,7 +584,7 @@ namespace FicsItKernel {
 
 			// create instance
 			LuaInstance* instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
-			new (instance) LuaInstance{trace};
+			new (instance) LuaInstance{trace, obj};
 			luaL_setmetatable(L, typeName.c_str());
 
 			return 1;
