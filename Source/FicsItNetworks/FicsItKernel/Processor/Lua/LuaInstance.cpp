@@ -251,6 +251,7 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceFuncCall(lua_State* L) {		// Instance, args..., up: FuncName, up: InstanceType
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// get and check instance
@@ -276,6 +277,7 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceUFuncCall(lua_State* L) {	// Instance, args..., up: UFunc, up: InstanceType
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// get and check instance
@@ -381,6 +383,7 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceIndex(lua_State* L) {																			// Instance, FuncName
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// get instance
@@ -460,6 +463,7 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceNewIndex(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// get instance
@@ -503,6 +507,7 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceEQ(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			LuaInstance* inst1 = reg->checkAndGetInstance(L, 1);
 			LuaInstance* inst2 = reg->getInstance(L, 2);
@@ -516,6 +521,7 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceLt(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			LuaInstance* inst1 = reg->checkAndGetInstance(L, 1);
 			LuaInstance* inst2 = reg->getInstance(L, 2);
@@ -529,6 +535,7 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceLe(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			LuaInstance* inst1 = reg->checkAndGetInstance(L, 1);
 			LuaInstance* inst2 = reg->getInstance(L, 2);
@@ -577,7 +584,7 @@ namespace FicsItKernel {
 
 			// create instance
 			LuaInstance* instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
-			new (instance) LuaInstance{trace};
+			new (instance) LuaInstance{trace, obj};
 			luaL_setmetatable(L, typeName.c_str());
 
 			return 1;
@@ -600,7 +607,7 @@ namespace FicsItKernel {
 			lua_pushinteger(L, storage->Add(instance->Orignal.Get()));
 			
 			// create & return closure
-			lua_pushcclosure(L, &luaInstanceUnpersist, 2);
+			lua_pushcclosure(L, &luaInstanceUnpersist, 3);
 			return 1;
 	}
 
@@ -649,6 +656,7 @@ namespace FicsItKernel {
 		}
 		
 		int luaClassInstanceFuncCall(lua_State* L) {	// ClassInstance, Args..., up: FuncName, up: ClassInstance
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// get and check class instance
@@ -657,7 +665,6 @@ namespace FicsItKernel {
 			LuaInstanceType* type = static_cast<LuaInstanceType*>(luaL_checkudata(L, lua_upvalueindex(2), INSTANCE_TYPE));
 
 			// check type
-			//SML::Logging::error(instance, " ", type, " ", TCHAR_TO_UTF8(*instance->clazz->GetName()), " ", TCHAR_TO_UTF8(*type->type->GetName()));
 			if (!instance || !type || !instance->clazz || !type->type || !instance->clazz->IsChildOf(type->type)) return luaL_argerror(L, 1, "ClassInstance is invalid");
 
 			// get func name
@@ -689,6 +696,7 @@ namespace FicsItKernel {
 		}
 		
 		int luaClassInstanceIndex(lua_State* L) {																		// ClassInstance, FuncName
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// get class instance
@@ -735,6 +743,7 @@ namespace FicsItKernel {
 		}
 
 		int luaClassInstanceEQ(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			LuaClassInstance* inst1 = reg->checkAndGetClassInstance(L, 1);
 			LuaClassInstance* inst2 = reg->getClassInstance(L, 2);
@@ -748,6 +757,7 @@ namespace FicsItKernel {
 		}
 
 		int luaClassInstanceLt(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			LuaClassInstance* inst1 = reg->checkAndGetClassInstance(L, 1);
 			LuaClassInstance* inst2 = reg->getClassInstance(L, 2);
@@ -761,6 +771,7 @@ namespace FicsItKernel {
 		}
 
 		int luaClassInstanceLe(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 			LuaClassInstance* inst1 = reg->checkAndGetClassInstance(L, 1);
 			LuaClassInstance* inst2 = reg->getClassInstance(L, 2);

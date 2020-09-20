@@ -27,6 +27,9 @@ private:
 	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
 	TWeakObjectPtr<UObject> Obj = nullptr;
 
+	UPROPERTY()
+	bool bDontAsk = false;
+
 public:
 	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> fallbackTraceStep;
 	static TArray<TPair<TPair<UClass*, UClass*>, TPair<FString, FFINTraceStep*>>(*)()> toRegister;
@@ -48,6 +51,7 @@ public:
 	~FFINNetworkTrace();
 
 	bool Serialize(FArchive& Ar);
+//	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 
 	/**
 	 * Creates a copy of this network trace and adds potentially a new optimal trace step
@@ -63,6 +67,12 @@ public:
 	 * nullptr if trace is invalid
 	 */
 	UObject* operator*() const;
+
+	/**
+	 * Returns the reference object.
+	 * nullptr if trace is invalid
+	 */
+	UObject* Get() const;
 
 	/**
 	 * Accesses the referenced object.
@@ -114,6 +124,11 @@ public:
 	 * returns the underlying weak object ptr without any checks
 	 */
 	TWeakObjectPtr<UObject> GetUnderlyingPtr() const;
+
+	/**
+	 * returns if the trace is valid or not
+	 */
+	operator bool() const;
 };
 
 inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
@@ -131,5 +146,6 @@ struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNe
 	enum
 	{
 		WithSerializer = true,
+//		WithNetSerializer = true,
     };
 };

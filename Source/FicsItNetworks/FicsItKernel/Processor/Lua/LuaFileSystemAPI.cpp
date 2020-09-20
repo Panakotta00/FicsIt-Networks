@@ -7,7 +7,9 @@
 
 #define LuaFunc(funcName, Code) \
 int funcName(lua_State* L) { \
-	KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel(); \
+	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
+	FLuaSyncCall SyncCall(L); \
+	KernelSystem* kernel = processor->getKernel(); \
 	FicsItFS::Root* self = kernel->getFileSystem(); \
 	if (!self) return luaL_error(L, "component is invalid"); \
 	Code \
@@ -16,7 +18,8 @@ int funcName(lua_State* L) { \
 #define LuaFileFuncName(funcName) luaFile ## funcName
 #define LuaFileFunc(funcName, Code) \
 int LuaFileFuncName(funcName) (lua_State* L) { \
-	KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel(); \
+	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
+	KernelSystem* kernel = processor->getKernel(); \
 	LuaFile* self_r = (LuaFile*)luaL_checkudata(L, 1, "File"); \
 	if (!self_r) return luaL_error(L, "file is invalid"); \
 	LuaFile& self = *self_r; \

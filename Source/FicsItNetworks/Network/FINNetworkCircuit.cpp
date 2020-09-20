@@ -160,7 +160,6 @@ void AFINNetworkCircuit::ConnectNodes(UObject* WorldContext, const TScriptInterf
 		CircuitB = WorldContext->GetWorld()->SpawnActor<AFINNetworkCircuit>(Params);
 		check(CircuitB);
 		IFINNetworkCircuitNode::Execute_SetCircuit(B.GetObject(), CircuitB);
-		SML::Logging::error(CircuitB, " ", B.GetObject());
 		CircuitB->Recalculate(B);
 	}
 	if (CircuitA) {

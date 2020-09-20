@@ -165,6 +165,8 @@ namespace FicsItKernel {
 		// clear filesystem
 		filesystem = FicsItFS::Root();
 
+		if (processor) processor->stop(false);
+		
 		// finish stop
 		return true;
 	}
@@ -176,6 +178,8 @@ namespace FicsItKernel {
 		// set state & crash
 		state = CRASHED;
 		kernelCrash = crash;
+
+		if (processor) processor->stop(true);
 		
 		if (getDevDevice()) try {
 			auto serial = getDevDevice()->getSerial()->open(FileSystem::OUTPUT);

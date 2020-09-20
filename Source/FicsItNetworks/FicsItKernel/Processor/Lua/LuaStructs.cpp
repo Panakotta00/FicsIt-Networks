@@ -553,5 +553,16 @@ namespace FicsItKernel {
         });
 
 		// End FFINTargetPoint
+
+		// Begin FFINNetworkTrace
+
+		TFINLuaStructRegisterer<FFINNetworkTrace> GLuaStructNetworkTraceRegisterer(TEXT("NetworkTrace"), [](lua_State* L, PersistParams) {
+        }, [](lua_State* L, const FINStruct& Struct) {
+            newInstance(L, Struct.Get<FFINNetworkTrace>());
+        }, [](lua_State* L, int i, FINStruct& Struct) {
+            Struct = getObjInstance(L, i);
+        });
+		
+		// End FFINNetworkTrace
 	}
 }

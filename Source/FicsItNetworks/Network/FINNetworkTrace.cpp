@@ -152,7 +152,7 @@ FFINNetworkTrace::FFINNetworkTrace(UObject* Obj) : Obj(Obj) {
 FFINNetworkTrace::~FFINNetworkTrace() {}
 
 bool FFINNetworkTrace::Serialize(FArchive& Ar) {
-	if (Ar.IsSaveGame()) {
+	if (Ar.IsSaveGame() || Ar.IsNetArchive()) {
 		bool valid = GetUnderlyingPtr().IsValid();
 		Ar << valid;
 		if (valid) {
@@ -205,6 +205,10 @@ UObject* FFINNetworkTrace::operator*() const {
 	} else {
 		return nullptr;
 	}
+}
+
+UObject* FFINNetworkTrace::Get() const {
+	return **this;
 }
 
 UObject* FFINNetworkTrace::operator->() const {
@@ -278,6 +282,10 @@ bool FFINNetworkTrace::operator<(const FFINNetworkTrace& other) const {
 
 TWeakObjectPtr<UObject> FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
+}
+
+FFINNetworkTrace::operator bool() const {
+	return IsValid();
 }
 
 /* ############### */

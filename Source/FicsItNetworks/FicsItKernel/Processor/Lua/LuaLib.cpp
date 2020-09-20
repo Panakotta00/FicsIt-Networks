@@ -394,15 +394,8 @@ namespace FicsItKernel {
 		})
 
 		LuaLibFunc(UFGInventoryComponent, flush, {
-			TArray<FInventoryStack> stacks;
-			self->GetInventoryStacks(stacks);
-			self->Empty();
-			for (const FInventoryStack& stack : stacks) {
-				if (stack.HasItems() && stack.Item.IsValid() && !UFGItemDescriptor::CanBeDiscarded(stack.Item.ItemClass)) {
-					self->AddStack(stack);
-				}
-			}
-			return 0;
+			luaStruct(L, FFINInventoryFlushFuture(self));
+			return 1;
 		})
 
 		// End UFGInventoryComponent
@@ -1356,6 +1349,17 @@ void FFINVehicleSetTargets::Execute() {
 	List->ClearRecording();
 	for (const FFINTargetPoint& Data : Targets) {
 		List->InsertItem(Data.ToWheeledTargetPoint(Vehicle));
+	}
+}
+
+void FFINInventoryFlushFuture::Execute() {
+	TArray<FInventoryStack> stacks;
+	Inventory->GetInventoryStacks(stacks);
+	Inventory->Empty();
+	for (const FInventoryStack& stack : stacks) {
+		if (stack.HasItems() && stack.Item.IsValid() && !UFGItemDescriptor::CanBeDiscarded(stack.Item.ItemClass)) {
+			Inventory->AddStack(stack);
+		}
 	}
 }
 

@@ -18,49 +18,59 @@ AFINScreen::AFINScreen() {
 
 void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINScreen, GPUPtr);
 	DOREPLIFETIME(AFINScreen, GPU);
 	DOREPLIFETIME(AFINScreen, ScreenWidth);
 	DOREPLIFETIME(AFINScreen, ScreenHeight);
 }
 
 void AFINScreen::BeginPlay() {
-	Super::BeginPlay();
-	
-	if (IsValid(GPU)) Cast<IFINGPUInterface>(GPU)->RequestNewWidget();
+	RerunConstructionScripts();
 
-#if !WITH_EDITOR
-	SpawnComponents(ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
-	FVector ConnectorOffset;
+	Super::BeginPlay();
+
+	if (HasAuthority()) GPUPtr = GPU.Get();
+	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
+
 	FVector WidgetOffset;
 	if (ScreenHeight < 0) {
 		if (ScreenWidth < 0) {
-			ConnectorOffset = {0, 50, 50};
 			WidgetOffset = {0,(ScreenWidth+1.f)/2.f*100.f,(ScreenHeight+1.f)/2.f*100.f};
 		} else {
-			ConnectorOffset = {0, -50, 50};
 			WidgetOffset = {0,(ScreenWidth-1.f)/2.f*100.f,(ScreenHeight+1.f)/2.f*100.f};
 		}
 	} else {
 		if (ScreenWidth < 0) {
-			ConnectorOffset = {0, 50, -50};
 			WidgetOffset = {0,(ScreenWidth+1.f)/2.f*100.f,(ScreenHeight-1.f)/2.f*100.f};
 		} else {
-			ConnectorOffset = {0, -50, -50};
 			WidgetOffset = {0,(ScreenWidth-1.f)/2.f*100.f,(ScreenHeight-1.f)/2.f*100.f};
+		}
+	}
+	WidgetComponent->AddRelativeLocation(WidgetOffset);
+	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
+}
+
+void AFINScreen::OnConstruction(const FTransform& transform) {
+	SpawnComponents(ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
+	FVector ConnectorOffset;
+	if (ScreenHeight < 0) {
+		if (ScreenWidth < 0) {
+			ConnectorOffset = {0, 50, 50};
+		} else {
+			ConnectorOffset = {0, -50, 50};
+		}
+	} else {
+		if (ScreenWidth < 0) {
+			ConnectorOffset = {0, 50, -50};
+		} else {
+			ConnectorOffset = {0, -50, -50};
 		}
 	}
 	Connector->SetMobility(EComponentMobility::Movable);
 	Connector->SetRelativeLocation(ConnectorOffset);
 	Connector->SetMobility(EComponentMobility::Static);
-	WidgetComponent->AddRelativeLocation(WidgetOffset);
-	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
-#endif
-}
 
-void AFINScreen::OnConstruction(const FTransform& transform) {
-#if WITH_EDITOR
-	SpawnComponents(ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
-#endif
+	Super::OnConstruction(transform);
 }
 
 void AFINScreen::Tick(float DeltaSeconds) {
@@ -69,11 +79,16 @@ void AFINScreen::Tick(float DeltaSeconds) {
 		bGPUChanged = false;
 		ForceNetUpdate();
 	}
+	if (HasAuthority() && (((bool)GPUPtr) != GPU.IsValid())) {
+		if (!GPUPtr) GPUPtr = GPU.Get();
+		OnGPUValidChanged(GPU.IsValid(), GPUPtr);
+		GPUPtr = GPU.Get();
+	}
 }
 
 void AFINScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	Super::EndPlay(endPlayReason);
-	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(nullptr);
+	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(FFINNetworkTrace());
 }
 
 int32 AFINScreen::GetDismantleRefundReturnsMultiplier() const {
@@ -84,22 +99,23 @@ bool AFINScreen::ShouldSave_Implementation() const {
 	return true;
 }
 
-void AFINScreen::BindGPU(UObject* gpu) {
-	if (gpu) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
+void AFINScreen::BindGPU(const FFINNetworkTrace& gpu) {
+	if (gpu.GetUnderlyingPtr().IsValid()) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
 	if (GPU != gpu) {
-		UObject* oldGPU = GPU;
-		GPU = nullptr;
-		if (oldGPU) Cast<IFINGPUInterface>(oldGPU)->BindScreen(nullptr);
+		FFINNetworkTrace oldGPU = GPU;
+		GPU = FFINNetworkTrace();
+		if (oldGPU.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr().Get())->BindScreen(FFINNetworkTrace());
 		GPU = gpu;
-		if (gpu) {
-			Cast<IFINGPUInterface>(gpu)->BindScreen(this);
+		if (gpu.GetUnderlyingPtr().IsValid()) {
+			Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr().Get())->BindScreen(gpu / this);
 		}
 		bGPUChanged = true;
+		GPUPtr = GPU.Get();
 	}
 	NetMulti_OnGPUUpdate();
 }
 
-UObject* AFINScreen::GetGPU() const {
+FFINNetworkTrace AFINScreen::GetGPU() const {
 	return GPU;
 }
 
@@ -123,14 +139,26 @@ TSharedPtr<SWidget> AFINScreen::GetWidget() const {
 	return Widget;
 }
 
+void AFINScreen::RequestNewWidget() {
+	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
+}
+
+void AFINScreen::OnGPUValidChanged_Implementation(bool bValid, UObject* newGPU) {
+	if (!bValid) {
+		if (newGPU) Cast<IFINGPUInterface>(newGPU)->DropWidget();
+	} else {
+		if (newGPU) Cast<IFINGPUInterface>(newGPU)->RequestNewWidget();
+	}
+}
+
 void AFINScreen::netFunc_getSize(int& w, int& h) {
 	w = FMath::Abs(ScreenWidth);
 	h = FMath::Abs(ScreenHeight);
 }
 
 void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {
-	if (GPU) {
-		Cast<IFINGPUInterface>(GPU)->RequestNewWidget();
+	if (GPUPtr) {
+		Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 	} else {
 		SetWidget(SNew(SScaleBox));
 	}
@@ -167,7 +195,7 @@ void AFINScreen::SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh*
 }
 
 void AFINScreen::SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts) {
-	UStaticMeshComponent* EdgePart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
+	UFGColoredInstanceMeshProxy* EdgePart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
 	EdgePart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 
 	if (ScreenWidth < 0) {
@@ -208,7 +236,7 @@ void AFINScreen::SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMe
 }
 
 void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts) {
-	UStaticMeshComponent* CornerPart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
+	UFGColoredInstanceMeshProxy* CornerPart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
 	CornerPart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 
 	if (ScreenWidth < 0) {

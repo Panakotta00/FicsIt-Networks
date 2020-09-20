@@ -74,7 +74,7 @@ bool AFINComputerNetworkCard::IsPortOpen(int Port) {
 	return OpenPorts.Contains(Port);
 }
 
-void AFINComputerNetworkCard::HandleMessage(FFINNetworkTrace Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) {
+void AFINComputerNetworkCard::HandleMessage(FGuid ID, FFINNetworkTrace Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) {
 	for (const FFINNetworkTrace& Listener : Listeners) {
 		IFINSignalListener* L = Cast<IFINSignalListener>(*Listener);
 		if (L) L->HandleSignal(FFINNetworkMessageSignal(IFINNetworkComponent::Execute_GetID(*Sender), Port, Data), Listener.Reverse());
@@ -103,8 +103,15 @@ void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, FFINDynam
 	FGuid::Parse(receiver, receiverID);
 	UObject* Obj = Circuit->FindComponent(receiverID, nullptr).GetObject();
 	IFINNetworkMessageInterface* NetMsgI = Cast<IFINNetworkMessageInterface>(Obj);
+	FGuid MsgID = FGuid::NewGuid();
 	if (NetMsgI) {
-		if (NetMsgI->IsPortOpen(port)) NetMsgI->HandleMessage(FFINNetworkTrace(Obj) / this, port, args);
+		if (NetMsgI->IsPortOpen(port)) NetMsgI->HandleMessage(MsgID, FFINNetworkTrace(Obj) / this, receiverID, port, args);
+	} else {
+		for (UObject* Router : Circuit->GetComponents()) {
+			IFINNetworkMessageInterface* MsgI = Cast<IFINNetworkMessageInterface>(Router);
+			if (!MsgI || !MsgI->IsNetworkMessageRouter() || !MsgI->IsPortOpen(port)) continue;
+			MsgI->HandleMessage(MsgID, FFINNetworkTrace(Obj) / this, receiverID, port, args);
+		}
 	}
 }
 
@@ -112,10 +119,11 @@ void AFINComputerNetworkCard::netFunc_broadcast(int port, FFINDynamicStructHolde
 	FFINNetworkCardArgChecker Reader;
 	int argCount = args.Get<FFINParameterList>() >> Reader;
 	if (Reader.Fail || port < 0 || port > 10000 || argCount > 7) return;
+	FGuid MsgID = FGuid::NewGuid();
 	for (UObject* Component : GetCircuit_Implementation()->GetComponents()) {
 		IFINNetworkMessageInterface* NetMsgI = Cast<IFINNetworkMessageInterface>(Component);
 		if (NetMsgI && NetMsgI->IsPortOpen(port)) {
-			NetMsgI->HandleMessage(FFINNetworkTrace(Component) / this, port, args);
+			NetMsgI->HandleMessage(MsgID, FFINNetworkTrace(Component) / this, FGuid(), port, args);
 		}
 	}
 }

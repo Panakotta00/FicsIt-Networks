@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Interface.h"
 #include "SWidget.h"
+#include "Network/FINNetworkTrace.h"
+
 #include "FINScreenInterface.generated.h"
 
 UINTERFACE(Blueprintable)
@@ -24,7 +26,7 @@ public:
 	 * @param[in]	gpu		the new gpu this screen should bind to.
 	 */
 	UFUNCTION()
-	virtual void BindGPU(UObject* gpu) = 0;
+	virtual void BindGPU(const FFINNetworkTrace& gpu) = 0;
 
 	/**
 	 * Returns the currently bound GPU.
@@ -35,7 +37,7 @@ public:
 	 * @return	the currently bound gpu.
 	 */
 	UFUNCTION()
-	virtual UObject* GetGPU() const = 0;
+	virtual FFINNetworkTrace GetGPU() const = 0;
 
 	/**
 	 * Gets called by the GPU and forces the Screen to now use the given widget.
@@ -54,4 +56,9 @@ public:
 	 * @return	the currently cached widget
 	 */
 	virtual TSharedPtr<SWidget> GetWidget() const = 0;
+
+	/**
+	 * Lets the screen to request a new widget from the gpu.
+	 */
+	virtual void RequestNewWidget() = 0;
 };

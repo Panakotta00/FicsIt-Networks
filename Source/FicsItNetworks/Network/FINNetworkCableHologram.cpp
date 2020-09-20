@@ -203,6 +203,10 @@ bool AFINNetworkCableHologram::IsSnappedValid() {
 		AddConstructDisqualifier(UFGCDWireSnap::StaticClass());
 		ret = false;
 	}
+	if (Snapped.SnappedObj == From.SnappedObj) {
+		AddConstructDisqualifier(UFGCDWireSnap::StaticClass());
+		ret = false;
+	}
 	if (Snapped.SnapType == FIN_CONNECTOR) {
 		UFINNetworkConnectionComponent* Connector = Cast<UFINNetworkConnectionComponent>(Snapped.SnappedObj);
 		if (Connector->ConnectedCables.Num() >= Connector->MaxCables) {
@@ -252,6 +256,8 @@ void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& 
 	start.X = start.Y = start.Z = 0;
 	FVector end = RootComponent->GetComponentToWorld().InverseTransformPosition(Snapped.GetConnectorPos());
 	FVector start_t = end;
+	end = end + 0.0001;
+	if ((FMath::Abs(start_t.X) < 10 || FMath::Abs(start_t.Y) < 10) && FMath::Abs(start_t.Z) <= offset) offset = 1;
 	start_t.Z -= offset;
 	FVector end_t = end;
 	end_t.Z += offset;

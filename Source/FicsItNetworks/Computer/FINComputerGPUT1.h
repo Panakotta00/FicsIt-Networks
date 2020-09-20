@@ -1,6 +1,8 @@
 #pragma once
 
 #include "FINComputerGPU.h"
+#include "SInvalidationPanel.h"
+
 #include "FINComputerGPUT1.generated.h"
 
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
@@ -160,6 +162,7 @@ private:
 	UPROPERTY()
 	FSlateBrush boxBrush;
 
+	TSharedPtr<SInvalidationPanel> CachedInvalidation;
 	bool bFlushed = false;
 	
 public:
@@ -168,6 +171,10 @@ public:
 	// Begin AActor
 	virtual void Tick(float DeltaSeconds) override;
 	// End AActor
+
+	// Begin IFINGraphicsPorcessingUnit
+	virtual void BindScreen(const FFINNetworkTrace& Screen) override;
+	// End IFINGraphicsProcessingUnit
 
 	// Begin IFINNetworkCustomType
 	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("GPUT1"); }
@@ -181,6 +188,12 @@ public:
 	* @param[in]	size	the new screen size
 	*/
 	void SetScreenSize(FVector2D size);
+
+	/**
+	 * Validates the screen widget on all clients and server
+	 */
+	UFUNCTION(NetMulticast, Reliable)
+	void Flush();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void netSig_OnMouseDown(int x, int y, int btn);
@@ -201,7 +214,7 @@ public:
 	void netSig_ScreenSizeChanged(int oldW, int oldH);
 	
 	UFUNCTION()
-	void netFunc_bindScreen(UObject* NewScreen);
+	void netFunc_bindScreen(FFINNetworkTrace NewScreen);
 
 	UFUNCTION()
 	UObject* netFunc_getScreen();

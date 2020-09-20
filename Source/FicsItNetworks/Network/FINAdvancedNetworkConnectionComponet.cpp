@@ -97,4 +97,22 @@ void UFINAdvancedNetworkConnectionComponent::HandleSignal(const TFINDynamicStruc
 	OnNetworkSignal.Broadcast(Signal, Sender);
 }
 
+bool UFINAdvancedNetworkConnectionComponent::IsPortOpen(int Port) {
+	if (OnIsNetworkPortOpen.IsBound()) {
+		return OnIsNetworkPortOpen.Execute(Port);
+	}
+	return false;
+}
+
+void UFINAdvancedNetworkConnectionComponent::HandleMessage(FGuid ID, FFINNetworkTrace Sender, FGuid Receiver, int Port, const ::TFINDynamicStruct<FFINParameterList>& Data) {
+	OnNetworkMessageRecieved.Broadcast(ID, Sender, Receiver, Port, Data);
+}
+
+bool UFINAdvancedNetworkConnectionComponent::IsNetworkMessageRouter() const {
+	if (OnIsNetworkRouter.IsBound()) {
+		return OnIsNetworkRouter.Execute();
+	}
+	return false;
+}
+
 void UFINAdvancedNetworkConnectionComponent::netSig_NetworkUpdate_Implementation(int type, const FString& id) {}
