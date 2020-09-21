@@ -152,6 +152,7 @@ namespace FicsItKernel {
 
 #pragma optimize("", off)
 		void LuaProcessor::luaTick() {
+			FScopeLock Lock(&luaTickMutex);
 			try {
 				// reset out of time
 				lua_sethook(luaThread, LuaProcessor::luaHook, LUA_MASKCOUNT, luaStepsForTickState(tickState));

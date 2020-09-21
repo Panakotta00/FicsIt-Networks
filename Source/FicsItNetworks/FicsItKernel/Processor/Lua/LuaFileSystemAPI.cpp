@@ -19,6 +19,7 @@ int funcName(lua_State* L) { \
 #define LuaFileFunc(funcName, Code) \
 int LuaFileFuncName(funcName) (lua_State* L) { \
 	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
+	FLuaSyncCall SyncCall(L); \
 	KernelSystem* kernel = processor->getKernel(); \
 	LuaFile* self_r = (LuaFile*)luaL_checkudata(L, 1, "File"); \
 	if (!self_r) return luaL_error(L, "file is invalid"); \
