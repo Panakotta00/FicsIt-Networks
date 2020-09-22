@@ -29,9 +29,6 @@ void AFINScreen::BeginPlay() {
 
 	Super::BeginPlay();
 
-	if (HasAuthority()) GPUPtr = GPU.Get();
-	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
-
 	FVector WidgetOffset;
 	if (ScreenHeight < 0) {
 		if (ScreenWidth < 0) {
@@ -48,6 +45,9 @@ void AFINScreen::BeginPlay() {
 	}
 	WidgetComponent->AddRelativeLocation(WidgetOffset);
 	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
+
+	if (HasAuthority()) GPUPtr = GPU.Get();
+	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 }
 
 void AFINScreen::OnConstruction(const FTransform& transform) {

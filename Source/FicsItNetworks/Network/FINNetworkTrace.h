@@ -25,6 +25,8 @@ struct FICSITNETWORKS_API FFINNetworkTrace {
 private:
 	TSharedPtr<FFINNetworkTrace> Prev = nullptr;
 	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
+
+	UPROPERTY(SaveGame)
 	TWeakObjectPtr<UObject> Obj = nullptr;
 
 	UPROPERTY()
@@ -141,10 +143,8 @@ FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& Trace) {
 }
 
 template<>
-struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace>
-{
-	enum
-	{
+struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace> {
+	enum {
 		WithSerializer = true,
 //		WithNetSerializer = true,
     };
