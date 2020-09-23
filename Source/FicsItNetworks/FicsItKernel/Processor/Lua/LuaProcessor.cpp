@@ -86,7 +86,9 @@ namespace FicsItKernel {
 				}
 				Processor->asyncMutex.Unlock();
 				Processor->luaTick();
+				Processor->asyncMutex.Lock();
 				if (bShouldSync) Processor->tickState = LUA_SYNC;
+				Processor->asyncMutex.Unlock();
 			}
 		}
 		
@@ -167,7 +169,7 @@ namespace FicsItKernel {
 				int status = 0;
 				if (pullState != 0) {
 					// Runtime is pulling a signal
-					if (getKernel()->getNetwork()->getSignalCount() > 0) {
+					if (getKernel() && getKernel()->getNetwork() && getKernel()->getNetwork()->getSignalCount() > 0) {
 						// Signal available -> reset timout and pull signal from network
 						pullState = 0;
 						int sigArgs = doSignal(luaThread);
@@ -194,7 +196,7 @@ namespace FicsItKernel {
 				if (status == LUA_YIELD) {
 					// system yielded and waits for next tick
 					lua_gc(luaState, LUA_GCCOLLECT, 0);
-					kernel->recalculateResources(KernelSystem::PROCESSOR);
+					if (getKernel()) getKernel()->recalculateResources(KernelSystem::PROCESSOR);
 				} else if (status == LUA_OK) {
 					// runtime finished execution -> stop system normally
 					asyncMutex.Lock();
@@ -244,11 +246,14 @@ namespace FicsItKernel {
 				tickState = LUA_SYNC;
 				asyncMutex.Unlock();
 				RunSyncTick();
-				if (asyncTask && !asyncTask->IsIdle()) asyncTask->EnsureCompletion();
-				asyncTask = nullptr;
 			} else {
 				asyncMutex.Unlock();
 			}
+			if (asyncTask) {
+				asyncTask->EnsureCompletion();
+				asyncTask->Cancel();
+			}
+			asyncTask = nullptr;
 		}
 
 		struct SyncTickCtx {

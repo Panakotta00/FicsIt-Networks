@@ -14,7 +14,11 @@ namespace FicsItKernel {
 
 	KernelSystem::KernelSystem() : listener(new KernelListener(this)) {}
 
-	KernelSystem::~KernelSystem() {}
+	KernelSystem::~KernelSystem() {
+		stop();
+		processor->setKernel(nullptr);
+		processor.reset();
+	}
 
 	void KernelSystem::tick(float deltaSeconds) {
 		if (getState() == RESET) if (!start(true)) return;
@@ -40,6 +44,10 @@ namespace FicsItKernel {
 	}
 
 	void KernelSystem::setProcessor(Processor* newProcessor) {
+		stop();
+		if (getProcessor()) {
+			getProcessor()->setKernel(nullptr);
+		}
 		processor = std::unique_ptr<Processor>(newProcessor);
 		if (getProcessor()) {
 			newProcessor->setKernel(this);
