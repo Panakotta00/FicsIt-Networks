@@ -180,13 +180,13 @@ creates the file if it doesn't exist
 file stream can read and write
 +
 cursor is set to the end of file
-- `w+` truncate
+- `+r` truncate
 +
 file stream can read and write
 +
 all previous data in file gets dropped
 
-- `a+` append
+- `+a` append
 +
 file stream can read the full file but can only write to the end of the existing file
 |===
