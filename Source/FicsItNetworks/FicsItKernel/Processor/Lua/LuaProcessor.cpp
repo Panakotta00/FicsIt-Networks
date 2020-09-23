@@ -127,7 +127,12 @@ namespace FicsItKernel {
 				bShouldCrash = false;
 			} else if (tickState == LUA_ASYNC_BEGIN) {
 				SML::Logging::debug("LuaProcessor: Change to Async-Tick-Thread...");
-				if (asyncTask && !asyncTask->IsIdle()) asyncTask->EnsureCompletion();
+				if (asyncTask && !asyncTask->IsIdle()) {
+					tickState = LUA_SYNC;
+					asyncMutex.Unlock();
+					asyncTask->EnsureCompletion();
+					asyncMutex.Lock();
+				}
 				tickState = LUA_ASYNC;
 				// Create Lua Run Thread
 				asyncTask = MakeShared<FAsyncTask<FLuaTickRunnable>>(this);
@@ -144,10 +149,14 @@ namespace FicsItKernel {
 			} else if (tickState & LUA_ASYNC) {
 				asyncMutex.Unlock();
 				RunSyncTick();
+				asyncMutex.Lock();
 				if (tickState & LUA_SYNC) {
+					asyncMutex.Unlock();
 					SML::Logging::debug("LuaProcessor: Run Sync Tick after async downgrade...");
 					StopAsyncTick();
 					luaTick();
+				} else {
+					asyncMutex.Unlock();
 				}
 			} else {
 				asyncMutex.Unlock();
@@ -263,7 +272,7 @@ namespace FicsItKernel {
 		
 		void LuaProcessor::syncTick(lua_State* L) {
 			asyncMutex.Lock();
-			if (tickState & LUA_ASYNC) {
+			if (tickState & LUA_ASYNC && tickState != LUA_ASYNC_BEGIN) {
 				SML::Logging::debug("LuaProcessor: Sync Async-Thread with tick...");
 				bWantsSync = true;
 				asyncPromiseThreadWait = TPromise<void>();
@@ -809,8 +818,8 @@ namespace FicsItKernel {
 				return lua_yieldk(L, 0, args, &luaAPIReturn_Resume);
 			}
 			if (p->tickState != LUA_SYNC && p->tickState != LUA_ASYNC) {
-				if (p->tickState & LUA_SYNC) p->tickState = LUA_ASYNC_BEGIN;
-				else if (p->tickState & LUA_ASYNC) p->tickState = LUA_ASYNC;
+				if (p->tickState & LUA_SYNC) p->tickState = LUA_SYNC;
+				else if (p->tickState & LUA_ASYNC && p->tickState != LUA_ASYNC_BEGIN) p->tickState = LUA_ASYNC;
 				p->asyncMutex.Unlock();
 				return lua_yieldk(L, 0, args, &luaAPIReturn_Resume);
 			}

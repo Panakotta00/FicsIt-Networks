@@ -156,7 +156,7 @@ void AFINComputerCase::Factory_Tick(float dt) {
 		//SML::Logging::debug("Computer tick: ", dur.count());
 		
 		FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
-        if (dev) {
+        if (dev && dev->getSerial()) {
         	SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
 			SerialOutput = SerialOutput.Right(1000);
         }

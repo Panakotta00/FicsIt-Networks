@@ -71,6 +71,7 @@ namespace FicsItKernel {
 		
 		class LuaProcessor : public Processor {
 			friend int luaPull(lua_State* L);
+			friend int luaComputerSkip(lua_State* L);
 			friend FLuaTickRunnable;
 			friend struct FLuaSyncCall;
 
