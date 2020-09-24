@@ -325,6 +325,8 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 void AFINComputerGPUT1::netFunc_fill(int x, int y, int dx, int dy, const FString& str) {
 	FString c = str;
 	if (FRegexMatcher(FRegexPattern("^[[:cntrl:]]?$"), c).FindNext()) c = " ";
+	if (dx < 0) dx = 0;
+	if (dy < 0) dy = 0;
 	for (int ny = y; ny < y+dy; ++ny) {
 		netFunc_setText(x, ny, FString::ChrN(dx, c[0]));
 	}

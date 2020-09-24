@@ -16,7 +16,7 @@ namespace FicsItKernel {
 
 	KernelSystem::~KernelSystem() {
 		stop();
-		processor->setKernel(nullptr);
+		if (processor) processor->setKernel(nullptr);
 		processor.reset();
 	}
 
