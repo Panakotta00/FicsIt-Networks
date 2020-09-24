@@ -71,16 +71,17 @@ namespace FicsItKernel {
 		
 		class LuaProcessor : public Processor {
 			friend int luaPull(lua_State* L);
+			friend int luaComputerSkip(lua_State* L);
 			friend FLuaTickRunnable;
 			friend struct FLuaSyncCall;
 
 		private:
 			// Lua Tick state lua step lenghts
 			int SyncLen = 2500;
-			int SyncErrorLen = 500;
+			int SyncErrorLen = 1250;
 			int SyncEndLen = 500;
 			int AsyncLen = 2500;
-			int AsyncErrorLen = 500;
+			int AsyncErrorLen = 1200;
 			int AsyncEndLen = 500;
 
 			// Processor cache
@@ -95,6 +96,7 @@ namespace FicsItKernel {
 			// async execution
 			TSharedPtr<FAsyncTask<FLuaTickRunnable>> asyncTask;
 			FCriticalSection asyncMutex;
+			FCriticalSection luaTickMutex;
 			bool bWantsSync = false;
 			TPromise<void> asyncPromiseThreadWait;
 			TPromise<void> asyncPromiseTickWait;

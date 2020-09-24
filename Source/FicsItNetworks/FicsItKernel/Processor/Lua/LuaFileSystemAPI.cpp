@@ -19,6 +19,7 @@ int funcName(lua_State* L) { \
 #define LuaFileFunc(funcName, Code) \
 int LuaFileFuncName(funcName) (lua_State* L) { \
 	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
+	FLuaSyncCall SyncCall(L); \
 	KernelSystem* kernel = processor->getKernel(); \
 	LuaFile* self_r = (LuaFile*)luaL_checkudata(L, 1, "File"); \
 	if (!self_r) return luaL_error(L, "file is invalid"); \
@@ -54,6 +55,7 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 
 namespace FicsItKernel {
 	namespace Lua {
+#pragma optimize("", off)
 		LuaFunc(makeFileSystem, {
 			std::string type = luaL_checkstring(L, 1);
 			std::string name = luaL_checkstring(L, 2);
@@ -207,7 +209,6 @@ namespace FicsItKernel {
 			return lua_gettop(L) - 1;
 		}
 
-#pragma optimize("", off)
 		LuaFunc(doFile, {
 			FileSystem::Path path = luaL_checkstring(L, 1);
 			FileSystem::SRef<FileSystem::FileStream> file;
@@ -247,7 +248,6 @@ namespace FicsItKernel {
 			luaL_loadbufferx(L, code.c_str(), code.size(), ("@" + path.str()).c_str(), "t");
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})
-#pragma optimize("", on)
 
 		static const luaL_Reg luaFileSystemLib[] = {
 			{"makeFileSystem", makeFileSystem},
@@ -472,5 +472,6 @@ namespace FicsItKernel {
 			lua_pushcfunction(L, luaFileUnpersist);
 			PersistValue("FileUnpersist");
 		}
+#pragma optimize("", on)
 	}
 }

@@ -42,15 +42,25 @@ namespace FicsItKernel {
 			lua_yield(L, 0);
 			return 0;
 		}
-#pragma optimize("", on)
 
 		int luaComputerSkipContinue(lua_State* L, int status, lua_KContext ctx) {
 			return 0;
 		}
 
 		int luaComputerSkip(lua_State* L) {
-			return LuaProcessor::luaAPIReturn(L, 0);
+			LuaProcessor* processor = LuaProcessor::luaGetProcessor(L);
+			processor->asyncMutex.Lock();
+			if (processor->tickState & (LUA_END | LUA_ERROR)) {
+				if (processor->tickState & LUA_SYNC) processor->tickState = LUA_ASYNC_BEGIN;
+				else if (processor->tickState & LUA_ASYNC && processor->tickState != LUA_ASYNC_BEGIN) processor->tickState = LUA_ASYNC;
+				processor->asyncMutex.Unlock();
+				return lua_yield(L, 0);
+			} else {
+				processor->asyncMutex.Unlock();
+				return 0;
+			}
 		}
+#pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
 			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {

@@ -32,9 +32,9 @@ void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
 }
 
 void AFINIndicatorPole::BeginPlay() {
-	RerunConstructionScripts();
-	
 	Super::BeginPlay();
+	
+	CreatePole();
 
 	if (Indicator->GetMaterials().Num() > 0) {
 		IndicatorInstance = Indicator->CreateDynamicMaterialInstance(0);

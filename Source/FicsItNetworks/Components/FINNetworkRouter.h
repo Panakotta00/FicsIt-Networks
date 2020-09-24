@@ -79,7 +79,7 @@ public:
     void OnMessageHandled(bool bCon1or2, bool bSendOrReceive);
 	
 private:
-	bool HandleMessage(AFINNetworkCircuit* SendingCircuit, FGuid ID, FFINNetworkTrace Sender, FGuid Reciever, int Port, const TFINDynamicStruct<FFINParameterList>& Data);
+	bool HandleMessage(AFINNetworkCircuit* SendingCircuit, FGuid ID, FGuid Sender, FGuid Reciever, int Port, const TFINDynamicStruct<FFINParameterList>& Data);
 
 	UFUNCTION(NetMulticast, Unreliable)
     void NetMulti_OnMessageHandled(bool bCon1or2, bool bSendOrReceive);

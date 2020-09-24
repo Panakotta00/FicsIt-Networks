@@ -53,9 +53,18 @@ public:
 	*/
 	UPROPERTY()
 	AFINNetworkCircuit* Circuit = nullptr;
+
+	/**
+	 * Set of ID of already handled network messages since last tick.
+	 */
+	UPROPERTY()
+	TSet<FGuid> HandledMessages;
+
+	AFINComputerNetworkCard();
 	
 	// Begin AActor
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	// End AActor
 
 	// Begin IFINNetworkCircuitNode
@@ -76,7 +85,7 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(FGuid ID, FFINNetworkTrace Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) override;
+	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) override;
 	// End IFINNetworkMessageInterface
 
 	// Begin IFINNetworkCustomType

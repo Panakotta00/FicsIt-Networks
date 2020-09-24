@@ -148,10 +148,10 @@ bool DiskFile::isValid() const {
 }
 
 DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck) : FileStream(mode), path(realPath), sizeCheck(sizeCheck) {
-	if (mode & FileMode::OUTPUT) std::ofstream(realPath).close();
+	if (mode & FileMode::OUTPUT && !std::filesystem::exists(realPath)) std::fstream(realPath, std::ios::out).close();
 	stream = std::fstream(realPath, std::ios::in);
 	if (!stream.is_open()) return;
-	if (!(mode & TRUNC)) {
+	if (!(mode & FileMode::TRUNC)) {
 		stringstream s;
 		s << stream.rdbuf();
 		buf = s.str();
@@ -161,6 +161,9 @@ DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeChe
 		stream = std::fstream(realPath, std::ios::out | std::ios::trunc);
 		stream << buf;
 		stream.flush();
+	}
+	if (mode & FileMode::APPEND) {
+		pos = buf.size();
 	}
 }
 

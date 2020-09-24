@@ -14,7 +14,11 @@ namespace FicsItKernel {
 
 	KernelSystem::KernelSystem() : listener(new KernelListener(this)) {}
 
-	KernelSystem::~KernelSystem() {}
+	KernelSystem::~KernelSystem() {
+		stop();
+		if (processor) processor->setKernel(nullptr);
+		processor.reset();
+	}
 
 	void KernelSystem::tick(float deltaSeconds) {
 		if (getState() == RESET) if (!start(true)) return;
@@ -40,6 +44,10 @@ namespace FicsItKernel {
 	}
 
 	void KernelSystem::setProcessor(Processor* newProcessor) {
+		stop();
+		if (getProcessor()) {
+			getProcessor()->setKernel(nullptr);
+		}
 		processor = std::unique_ptr<Processor>(newProcessor);
 		if (getProcessor()) {
 			newProcessor->setKernel(this);
@@ -193,12 +201,12 @@ namespace FicsItKernel {
 	}
 
 	void KernelSystem::recalculateResources(Recalc components) {
+		FileSystem::SRef<FicsItFS::DevDevice> dev = filesystem.getDevDevice();
+		
 		memoryUsage = processor->getMemoryUsage(components & PROCESSOR);
 		memoryUsage += filesystem.getMemoryUsage(components & FILESYSTEM);
-		memoryUsage += devDevice->getSerial()->getSize();
-
+		if (dev && dev->getSerial().isValid()) memoryUsage += devDevice->getSerial()->getSize();
 		if (memoryUsage > memoryCapacity) crash({"out of memory"});
-		FileSystem::SRef<FicsItFS::DevDevice> dev = filesystem.getDevDevice();
 		if (dev) dev->updateCapacity(memoryCapacity - memoryUsage);
 	}
 
