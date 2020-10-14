@@ -633,7 +633,7 @@ namespace FicsItKernel {
 			LuaInstanceRegistry* reg = LuaInstanceRegistry::get();
 
 			// check obj and if type is registered
-			UObject* obj = *trace;
+			UObject* obj = trace.GetUnderlyingPtr().Get();
 			std::string typeName = "";
 			if (!IsValid(obj) || (typeName = TCHAR_TO_UTF8(*reg->findTypeName(obj->GetClass()))).length() < 1) {
 				lua_pushnil(L);
