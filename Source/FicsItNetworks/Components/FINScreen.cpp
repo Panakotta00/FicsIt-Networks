@@ -25,44 +25,52 @@ void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 }
 
 void AFINScreen::BeginPlay() {
+	RerunConstructionScripts();
+
 	Super::BeginPlay();
 
-	if (HasAuthority()) GPUPtr = GPU.Get();
-	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
-
-#if !WITH_EDITOR
-	SpawnComponents(ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
-	FVector ConnectorOffset;
 	FVector WidgetOffset;
 	if (ScreenHeight < 0) {
 		if (ScreenWidth < 0) {
-			ConnectorOffset = {0, 50, 50};
 			WidgetOffset = {0,(ScreenWidth+1.f)/2.f*100.f,(ScreenHeight+1.f)/2.f*100.f};
 		} else {
-			ConnectorOffset = {0, -50, 50};
 			WidgetOffset = {0,(ScreenWidth-1.f)/2.f*100.f,(ScreenHeight+1.f)/2.f*100.f};
 		}
 	} else {
 		if (ScreenWidth < 0) {
-			ConnectorOffset = {0, 50, -50};
 			WidgetOffset = {0,(ScreenWidth+1.f)/2.f*100.f,(ScreenHeight-1.f)/2.f*100.f};
 		} else {
-			ConnectorOffset = {0, -50, -50};
 			WidgetOffset = {0,(ScreenWidth-1.f)/2.f*100.f,(ScreenHeight-1.f)/2.f*100.f};
+		}
+	}
+	WidgetComponent->AddRelativeLocation(WidgetOffset);
+	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
+
+	if (HasAuthority()) GPUPtr = GPU.Get();
+	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
+}
+
+void AFINScreen::OnConstruction(const FTransform& transform) {
+	SpawnComponents(ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
+	FVector ConnectorOffset;
+	if (ScreenHeight < 0) {
+		if (ScreenWidth < 0) {
+			ConnectorOffset = {0, 50, 50};
+		} else {
+			ConnectorOffset = {0, -50, 50};
+		}
+	} else {
+		if (ScreenWidth < 0) {
+			ConnectorOffset = {0, 50, -50};
+		} else {
+			ConnectorOffset = {0, -50, -50};
 		}
 	}
 	Connector->SetMobility(EComponentMobility::Movable);
 	Connector->SetRelativeLocation(ConnectorOffset);
 	Connector->SetMobility(EComponentMobility::Static);
-	WidgetComponent->AddRelativeLocation(WidgetOffset);
-	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
-#endif
-}
 
-void AFINScreen::OnConstruction(const FTransform& transform) {
-#if WITH_EDITOR
-	SpawnComponents(ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
-#endif
+	Super::OnConstruction(transform);
 }
 
 void AFINScreen::Tick(float DeltaSeconds) {
@@ -187,7 +195,7 @@ void AFINScreen::SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh*
 }
 
 void AFINScreen::SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts) {
-	UStaticMeshComponent* EdgePart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
+	UFGColoredInstanceMeshProxy* EdgePart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
 	EdgePart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 
 	if (ScreenWidth < 0) {
@@ -228,7 +236,7 @@ void AFINScreen::SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMe
 }
 
 void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts) {
-	UStaticMeshComponent* CornerPart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
+	UFGColoredInstanceMeshProxy* CornerPart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
 	CornerPart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 
 	if (ScreenWidth < 0) {

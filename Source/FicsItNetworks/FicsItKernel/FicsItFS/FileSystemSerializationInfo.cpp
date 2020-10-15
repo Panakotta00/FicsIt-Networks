@@ -18,18 +18,22 @@ FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString nam
 	switch (Node->NodeType) {
 	case 0: {
 		FileSystem::SRef<FileSystem::File> file = parent->createFile(nodeName);
+		if (!file) return nullptr;
 		FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::OUTPUT | FileSystem::TRUNC);
+		if (!stream) return nullptr;
 		try {
 			stream->write(std::string(TCHAR_TO_UTF8(*Node->Data), Node->Data.Len()));
 			stream->flush();
 			stream->close();
 		} catch (...) {
 			SML::Logging::error("Unable to deserialize VFS-File");
+			return nullptr;
 		}
 		return file;
 	}
 	case 1: {
 		FileSystem::SRef<FileSystem::Directory> dir = parent->createSubdir(nodeName);
+		if (!dir) return nullptr;
 		for (TPair<FString, FFileSystemNodeIndex>& child : Node->ChildNodes) {
 			FileSystem::SRef<FileSystem::Node> node = child.Value.Deserialize(child.Key, dir);
 		}

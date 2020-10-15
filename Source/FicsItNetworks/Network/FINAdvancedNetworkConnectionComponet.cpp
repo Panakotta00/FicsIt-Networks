@@ -104,7 +104,7 @@ bool UFINAdvancedNetworkConnectionComponent::IsPortOpen(int Port) {
 	return false;
 }
 
-void UFINAdvancedNetworkConnectionComponent::HandleMessage(FGuid ID, FFINNetworkTrace Sender, FGuid Receiver, int Port, const ::TFINDynamicStruct<FFINParameterList>& Data) {
+void UFINAdvancedNetworkConnectionComponent::HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const ::TFINDynamicStruct<FFINParameterList>& Data) {
 	OnNetworkMessageRecieved.Broadcast(ID, Sender, Receiver, Port, Data);
 }
 

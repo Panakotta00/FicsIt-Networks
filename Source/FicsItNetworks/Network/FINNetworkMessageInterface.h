@@ -32,12 +32,12 @@ public:
 	 * Routers should make sure to not cause a message loop.
 	 *
 	 * @param[in]	ID				A GUID generated on message send which allows routers to check if message got already sent, to prevent message loops
-	 * @param[in]	Sender			Network Trace pointing from this to the sender
+	 * @param[in]	Sender			Guid containing the address of the sender
 	 * @param[in]	Receiver		Guid containing the address of the receiver
 	 * @param[in]	Port			The port on which the message got sent
 	 * @param[in]	Data			The data frame of the message
 	 */
-	virtual void HandleMessage(FGuid ID, FFINNetworkTrace Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) {};
+	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) {};
 
 	/**
 	 * Allows to check if this network message handler is capable

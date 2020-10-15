@@ -19,6 +19,8 @@ xref:buildings/NetworkCable.adoc[Network Cable]
 -
 xref:buildings/NetworkPole.adoc[Network Pole]
 -
+xref:buildings/NetworkRouter.adoc[Network Router]
+-
 xref:buildings/NetworkWallPlug.adoc[Network Wall Plug]
 -
 xref:buildings/NetworkWallPlugDouble.adoc[Network Wall Plug (Double)]

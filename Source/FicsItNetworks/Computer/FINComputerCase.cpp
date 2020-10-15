@@ -142,24 +142,26 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
-	KernelTickTime += dt;
-	if (KernelTickTime > 10.0) KernelTickTime = 10.0;
+	if (kernel) {
+		KernelTickTime += dt;
+		if (KernelTickTime > 10.0) KernelTickTime = 10.0;
 
-	float KernelTicksPerSec = 1.0;
-	if (Processors.Num() >= 1) KernelTicksPerSec = Processors.begin().ElementIt->Value->KernelTicksPerSecond;
+		float KernelTicksPerSec = 1.0;
+		if (Processors.Num() >= 1) KernelTicksPerSec = Processors.begin().ElementIt->Value->KernelTicksPerSecond;
 
-	while (KernelTickTime > 1.0/KernelTicksPerSec) {
-		KernelTickTime -= 1.0/KernelTicksPerSec;
-		//auto n = std::chrono::high_resolution_clock::now();
-		kernel->tick(dt);
-		//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
-		//SML::Logging::debug("Computer tick: ", dur.count());
+		while (KernelTickTime > 1.0/KernelTicksPerSec) {
+			KernelTickTime -= 1.0/KernelTicksPerSec;
+			//auto n = std::chrono::high_resolution_clock::now();
+			kernel->tick(dt);
+			//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
+			//SML::Logging::debug("Computer tick: ", dur.count());
 		
-		FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
-        if (dev) {
-        	SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
-			SerialOutput = SerialOutput.Right(1000);
-        }
+			FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
+			if (dev && dev->getSerial()) {
+				SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
+				SerialOutput = SerialOutput.Right(1000);
+			}
+		}
 	}
 }
 
