@@ -25,6 +25,7 @@
 #include "Runtime/CoreUObject/Public/Misc/RedirectCollector.h"
 
 #include "FicsItKernel/Processor/Lua/LuaLib.h"
+#include "Reflection/FINReflection.h"
 
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
@@ -89,6 +90,7 @@ class AActor_public : public AActor {
 	friend void FFicsItNetworksModule::StartupModule();
 };
 
+bool FINRefLoaded = false;
 #pragma optimize("", off)
 void FFicsItNetworksModule::StartupModule(){
 	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
@@ -167,7 +169,17 @@ void FFicsItNetworksModule::StartupModule(){
 		    UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/Game/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
 	    	gm->RegisterRemoteCallObjectClass(ModuleRCO);
+
+	    	FFINReflection::Get()->PopulateSources();
+			FFINReflection::Get()->LoadAllClasses();
+			FFINReflection::Get()->PrintReflection();
 	    }
+	});
+
+	SUBSCRIBE_METHOD_AFTER(AGameMode::StartMatch, [](AGameMode* World) {
+		if (!FINRefLoaded) {
+			FINRefLoaded = true;
+		}
 	});
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
