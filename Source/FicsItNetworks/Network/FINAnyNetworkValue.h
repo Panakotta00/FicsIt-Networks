@@ -30,6 +30,8 @@ struct FFINAnyNetworkValue {
 
 	FFINAnyNetworkValue(const FINStruct& e);
 
+	FFINAnyNetworkValue(const FINArray& e);
+
 	FFINAnyNetworkValue(const FFINAnyNetworkValue& other);
 
 	FFINAnyNetworkValue& operator=(const FFINAnyNetworkValue& other);
@@ -125,6 +127,16 @@ struct FFINAnyNetworkValue {
 		return *Data.STRUCT;
 	}
 
+	/**
+	 * Returns the network value as a network array.
+	 * Asserts if the type not array.
+	 *
+	 * @return the stored array
+	 */
+	const FINArray& GetArray() const {
+		return *Data.ARRAY;
+	}
+
 	bool Serialize(FArchive& Ar);
 
 	void operator>>(FFINValueReader& Reader) const;
@@ -141,6 +153,7 @@ private:
 		FINObj*		OBJECT;
 		FINTrace*	TRACE;
 		FINStruct*	STRUCT;
+		FINArray*	ARRAY;
 	} Data;
 };
 

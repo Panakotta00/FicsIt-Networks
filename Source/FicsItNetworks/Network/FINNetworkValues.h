@@ -1,9 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+
 #include "FINNetworkTrace.h"
 #include "FINDynamicStructHolder.h"
 #include "FINNetworkValues.generated.h"
+
+struct FFINAnyNetworkValue;
 
 UENUM(BlueprintType)
 enum EFINNetworkValueType {
@@ -16,6 +19,8 @@ enum EFINNetworkValueType {
 	FIN_CLASS,
 	FIN_TRACE,
 	FIN_STRUCT,
+	FIN_ARRAY,
+	FIN_ANY,
 };
 
 typedef bool FINBool;
@@ -26,3 +31,5 @@ typedef FWeakObjectPtr FINObj;
 typedef UClass* FINClass;
 typedef FFINNetworkTrace FINTrace;
 typedef FFINDynamicStructHolder FINStruct;
+typedef FFINAnyNetworkValue FINAny;
+typedef TArray<FINAny> FINArray;

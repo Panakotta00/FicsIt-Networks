@@ -155,6 +155,10 @@ void FFINNetworkCardArgChecker::operator<<(const FINStruct& Struct) {
 	Fail = true;
 }
 
+void FFINNetworkCardArgChecker::operator<<(const FINArray& Array) {
+	Fail = true;
+}
+
 FFINNetworkMessageSignal::FFINNetworkMessageSignal(FGuid Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data) : FFINSignal("NetworkMessage"), Sender(Sender), Port(Port), Data(Data) {}
 
 bool FFINNetworkMessageSignal::Serialize(FArchive& Ar) {

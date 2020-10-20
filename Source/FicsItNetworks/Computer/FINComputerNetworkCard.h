@@ -120,6 +120,7 @@ struct FFINNetworkCardArgChecker : public FFINValueReader {
 	virtual void operator<<(const FINObj& Obj) override;
 	virtual void operator<<(const FINTrace& Obj) override;
 	virtual void operator<<(const FINStruct& Struct) override;
+	virtual void operator<<(const FINArray& Array) override;
 };
 
 USTRUCT()

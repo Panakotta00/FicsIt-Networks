@@ -40,6 +40,9 @@ public:
 	/** Writes any kind of struct to the value reader */
 	virtual void operator<<(const FINStruct& Struct) = 0;
 
+	/** Writes a array to the signal reader */
+	virtual void operator<<(const FINArray& Array) = 0;
+
 	virtual void operator<<(UObject* Obj) {
 		*this << FWeakObjectPtr(Obj);
 	}
@@ -57,4 +60,5 @@ public:
 	virtual void operator<<(const FINObj& Obj) override {}
 	virtual void operator<<(const FINTrace& Obj) override {}
 	virtual void operator<<(const FINStruct& Struct) override {}
+	virtual void operator<<(const FINArray& Array) override {}
 };

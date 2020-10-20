@@ -61,6 +61,15 @@ namespace FicsItKernel {
 			luaStruct(L, obj);
 		}
 
+		void LuaValueReader::operator<<(const FINArray& array) {
+			lua_newtable(L);
+			int i = 0;
+			for (const FINAny& Value : array) {
+				Value >> *this;
+				lua_seti(L, -2, ++i);
+			}
+		}
+
 		void LuaFileSystemListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
 			for (LuaFile file : parent->getFileStreams()) {
 				if (file.isValid() && (!parent->getKernel()->getFileSystem() || !parent->getKernel()->getFileSystem()->checkUnpersistPath(file->path))) {

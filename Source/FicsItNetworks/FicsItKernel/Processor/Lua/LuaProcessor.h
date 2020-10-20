@@ -29,6 +29,7 @@ namespace FicsItKernel {
 			virtual void operator<<(const FINObj& obj) override;
 			virtual void operator<<(const FINTrace& obj) override;
 			virtual void operator<<(const FINStruct& struc) override;
+			virtual void operator<<(const FINArray& array) override;
 		};
 
 		class LuaFileSystemListener : public FileSystem::Listener {

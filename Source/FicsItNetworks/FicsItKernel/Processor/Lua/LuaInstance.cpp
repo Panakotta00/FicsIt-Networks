@@ -344,7 +344,7 @@ namespace FicsItKernel {
 				}
 				
 				int retargs = 0;
-				// free parameters and eventualy push return values to lua
+				// push return values to lua
 				for (auto property = TFieldIterator<UProperty>(func); property; ++property) {
 					auto flags = property->GetPropertyFlags();
 					if (flags & CPF_Parm && flags & (CPF_OutParm | CPF_ReturnParm)) {
