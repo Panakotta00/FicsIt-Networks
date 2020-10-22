@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "FINProperty.h"
+#include "FINFuncProperty.h"
 #include "FINClassProperty.generated.h"
 
 UCLASS(BlueprintType)
-class UFINClassProperty : public UFINProperty {
+class UFINClassProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

@@ -285,6 +285,13 @@ TWeakObjectPtr<UObject> FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
 }
 
+TWeakObjectPtr<UObject> FFINNetworkTrace::GetStartPtr() const {
+	const FFINNetworkTrace* Trace = this;
+	while (Trace->Prev) Trace = Trace->Prev.Get();
+	if (Trace) return Trace->Obj;
+	return nullptr;
+}
+
 FFINNetworkTrace::operator bool() const {
 	return IsValid();
 }

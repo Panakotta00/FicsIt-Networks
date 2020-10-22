@@ -1,4 +1,4 @@
-﻿#include "FINReflection.h"
+#include "FINReflection.h"
 
 #include "AssetRegistryModule.h"
 #include "FINArrayProperty.h"
@@ -79,6 +79,8 @@ UFINClass* FFINReflection::FindClass(UClass* Clazz, bool bRecursive, bool bTryTo
 				}
 			}
 			if (Class) {
+				Clazz->AddToRoot();
+				Class->AddToRoot();
 				Classes.Add(Clazz, Class);
 				for (const UFINReflectionSource* Source : Sources) {
 					Source->FillData(this, Class, Clazz);
@@ -102,11 +104,20 @@ void PrintProperty(FString Prefix, UFINProperty* Property) {
 	if (Property->GetPropertyFlags() & FIN_Prop_OutParam) Log += " Out";
 	if (Property->GetPropertyFlags() & FIN_Prop_RetVal) Log += " RetVal";
 	if (Property->GetPropertyFlags() & FIN_Prop_ReadOnly) Log += " ReadOnly";
+	if (UFINFuncProperty* FINFuncProp = Cast<UFINFuncProperty>(Property)) {
+		if (FINFuncProp->GetterFunc.Function) Log += " UFuncGetter";
+		if (FINFuncProp->SetterFunc.Function) Log += " UFuncSetter";
+		if ((bool)FINFuncProp->GetterFunc.GetterFunc) Log += " FuncGetter";
+		if ((bool)FINFuncProp->SetterFunc.SetterFunc) Log += " FuncSetter";
+	}
+	if (UFINStructProperty* FINStructProp = Cast<UFINStructProperty>(Property)) {
+		if (FINStructProp->Struct) Log += " " + FINStructProp->Struct->GetName();
+	}
 	SML::Logging::error(TCHAR_TO_UTF8(*Log));
 }
 
 void PrintFunction(FString Prefix, UFINFunction* Function) {
-	SML::Logging::error("Function: ", TCHAR_TO_UTF8(*Prefix), TCHAR_TO_UTF8(*Function->GetInternalName()), " '", TCHAR_TO_UTF8(*Function->GetDisplayName().ToString()), "' Desc:'", TCHAR_TO_UTF8(*Function->GetDescription().ToString()), "'");
+	SML::Logging::error(TCHAR_TO_UTF8(*Prefix), "Function: ", TCHAR_TO_UTF8(*Function->GetInternalName()), " '", TCHAR_TO_UTF8(*Function->GetDisplayName().ToString()), "' Desc:'", TCHAR_TO_UTF8(*Function->GetDescription().ToString()), "'");
 	Prefix += " ";
 	for (UFINProperty* Param : Function->GetParameters()) {
 		PrintProperty(Prefix, Param);
@@ -118,6 +129,9 @@ void FFINReflection::PrintReflection() {
 		SML::Logging::error("Class: ", TCHAR_TO_UTF8(*Class.Value->GetInternalName()), " '", TCHAR_TO_UTF8(*Class.Value->GetDisplayName().ToString()), "' Desc:'", TCHAR_TO_UTF8(*Class.Value->GetDescription().ToString()), "'");
 		for (UFINFunction* Function : Class.Value->GetFunctions()) {
 			PrintFunction(" ", Function);
+		}
+		for (UFINProperty* Prop : Class.Value->GetProperties()) {
+			PrintProperty(" ", Prop);
 		}
 	}
 }

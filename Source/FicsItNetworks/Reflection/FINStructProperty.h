@@ -1,19 +1,17 @@
 ﻿#pragma once
 
-#include "FINProperty.h"
+#include "FINFuncProperty.h"
 #include "FINStructProperty.generated.h"
 
 UCLASS(BlueprintType)
-class UFINStructProperty : public UFINProperty {
+class UFINStructProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
 	UPROPERTY()
 	UStructProperty* Property = nullptr;
 	UPROPERTY()
-	FFINPropertyGetterFunc GetterFunc;
-	UPROPERTY()
-	FFINPropertySetterFunc SetterFunc;
-
+	UScriptStruct* Struct = nullptr;
+	
 	// Begin UFINProperty
 	virtual FINAny GetValue(void* Ctx) const override {
 		if (Property) {
@@ -32,7 +30,9 @@ public:
 			}
 			check(Property->Struct == Value.GetStruct().GetStruct());
 			Property->CopyCompleteValue(Property->ContainerPtrToValuePtr<void>(Ctx), Value.GetStruct().GetData());
-		} else Super::SetValue(Ctx, Value);
+		} else {
+			if (Value.GetType() == FIN_STRUCT && (!Struct || Value.GetStruct().GetStruct() == Struct)) Super::SetValue(Ctx, Value);
+		}
 	}
 
 	virtual TEnumAsByte<EFINNetworkValueType> GetType() const { return FIN_STRUCT; }

@@ -128,6 +128,11 @@ public:
 	TWeakObjectPtr<UObject> GetUnderlyingPtr() const;
 
 	/**
+	 * returns the starting object of the trace
+	 */
+	TWeakObjectPtr<UObject> GetStartPtr() const;
+
+	/**
 	 * returns if the trace is valid or not
 	 */
 	operator bool() const;

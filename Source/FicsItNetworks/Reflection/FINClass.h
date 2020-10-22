@@ -1,13 +1,8 @@
 ﻿#pragma once
 
-#include "CoreMinimal.h"
-
-
 #include "FINFunction.h"
 #include "FINProperty.h"
 #include "FINRefSignal.h"
-
-
 #include "FINClass.generated.h"
 
 UCLASS(BlueprintType)

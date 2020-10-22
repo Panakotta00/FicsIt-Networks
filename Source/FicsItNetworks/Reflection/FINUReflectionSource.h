@@ -25,12 +25,25 @@ protected:
 		TArray<FText> ParameterDescriptions;
 		TArray<FText> ParameterDisplayNames;
 	};
+
+	struct FFINSignalMeta {
+		FString InternalName;
+		FText DisplayName;
+		FText Description;
+		TArray<FString> ParameterInternalNames;
+		TArray<FText> ParameterDescriptions;
+		TArray<FText> ParameterDisplayNames;
+	};
 	
 	FFINTypeMeta GetClassMeta(UClass* Class) const;
 	FFINFunctionMeta GetFunctionMeta(UClass* Class, UFunction* Func) const;
+	FFINSignalMeta GetSignalMeta(UClass* Class, UFunction* Func) const;
 	FString GetFunctionNameFromUFunction(UFunction* Func) const;
 	FString GetPropertyNameFromUFunction(UFunction* Func) const;
 	FString GetPropertyNameFromUProperty(UProperty* Prop, bool& bReadOnly) const;
+	FString GetSignalNameFromUFunction(UFunction* Func) const;
+
+	static TMap<UFunction*, UFINRefSignal*> FuncSignalMap;
 	
 public:
 	// Begin UFINReflectionSource
@@ -41,4 +54,7 @@ public:
 	UFINFunction* GenerateFunction(UClass* Class, UFunction* Func) const;
 	UFINProperty* GenerateProperty(const FFINTypeMeta& Meta, UClass* Class, UProperty* Prop) const;
 	UFINProperty* GenerateProperty(const FFINTypeMeta& Meta, UClass* Class, UFunction* Get) const;
+	UFINRefSignal* GenerateSignal(UClass* Class, UFunction* Func);
+	static UFINRefSignal* GetSignalFromFunction(UFunction* Func);
+	void SetupFunctionAsSignal(UFunction* Func);
 };
