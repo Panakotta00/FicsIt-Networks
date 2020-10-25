@@ -170,9 +170,6 @@ void FFicsItNetworksModule::StartupModule(){
 	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
 	    	gm->RegisterRemoteCallObjectClass(ModuleRCO);
 
-	    	FFINReflection::Get()->PopulateSources();
-			FFINReflection::Get()->LoadAllClasses();
-			FFINReflection::Get()->PrintReflection();
 	    }
 	});
 
@@ -184,6 +181,10 @@ void FFicsItNetworksModule::StartupModule(){
 	
 	AFINNetworkAdapter::RegisterAdapterSettings();
 	FFINGlobalRegisterHelper::Register();
+	
+    FFINReflection::Get()->PopulateSources();
+	FFINReflection::Get()->LoadAllClasses();
+	FFINReflection::Get()->PrintReflection();
 }
 #pragma optimize("", on)
 

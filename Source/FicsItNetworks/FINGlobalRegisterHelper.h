@@ -28,6 +28,12 @@ public:
 	static void AddFunction(const RegisterFunction& Func);
 };
 
+struct FFINStaticGlobalRegisterFunc {
+	FFINStaticGlobalRegisterFunc(const FFINGlobalRegisterHelper::RegisterFunction& Func) {
+		FFINGlobalRegisterHelper::AddFunction(Func);
+	}
+};
+
 FORCEINLINE bool operator==(const FFINGlobalRegisterHelper::RegisterFunction& A, const FFINGlobalRegisterHelper::RegisterFunction& B) {
 	return TFunction<void()>(A) == TFunction<void()>(B);
 }

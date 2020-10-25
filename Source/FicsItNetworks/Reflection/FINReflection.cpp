@@ -8,6 +8,7 @@
 #include "FINFuncProperty.h"
 #include "FINIntProperty.h"
 #include "FINObjectProperty.h"
+#include "FINStaticReflectionSource.h"
 #include "FINStrProperty.h"
 #include "FINStructProperty.h"
 #include "FINTraceProperty.h"
@@ -25,6 +26,7 @@ FFINReflection* FFINReflection::Get() {
 
 void FFINReflection::PopulateSources() {
 	Sources.Add(GetDefault<UFINUReflectionSource>());
+	Sources.Add(GetDefault<UFINStaticReflectionSource>());
 }
 
 void FFINReflection::LoadAllClasses() {

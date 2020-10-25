@@ -5,6 +5,16 @@
 
 #include "FINFunction.generated.h"
 
+UENUM(BlueprintType)
+enum EFINFunctionFlags {
+	FIN_Func_None = 0b00000000,
+	FIN_Func_VarArgs = 0b00000001,
+};
+
+inline EFINFunctionFlags operator|(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {
+	return (EFINFunctionFlags)(((uint8)Flags1) | ((uint8)Flags2));
+}
+
 UCLASS(BlueprintType)
 class UFINFunction : public UObject {
 	GENERATED_BODY()
@@ -20,36 +30,44 @@ public:
 	UPROPERTY()
 	UFunction* RefFunction = nullptr;
 	TFunction<TArray<FFINAnyNetworkValue>(UObject*, const TArray<FFINAnyNetworkValue>&)> NativeFunction;
+	UPROPERTY()
+	TEnumAsByte<EFINFunctionFlags> FunctionFlags;
 	
 	/**
 	 * Returns the description of this function
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-    virtual FText GetDescription() { return Description; }
+    virtual FText GetDescription() const { return Description; }
 	
 	/**
 	 * Returns a more cryptic name of the function, used mainly for internal reference
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-    virtual FString GetInternalName() { return InternalName; }
+    virtual FString GetInternalName() const { return InternalName; }
 
 	/**
 	 * Returns a human readable name of the function, mainly used for UI
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-    virtual FText GetDisplayName() { return DisplayName; }
+    virtual FText GetDisplayName() const { return DisplayName; }
 	
 	/**
 	 * Returns a list of all the parameters this function has
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-    virtual TArray<UFINProperty*> GetParameters() { return Parameters; }
+    virtual TArray<UFINProperty*> GetParameters() const { return Parameters; }
+
+	/**
+	 * Returns the function flags of this function
+	 */
+	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
+	virtual TEnumAsByte<EFINFunctionFlags> GetFunctionFlags() const { return FunctionFlags; }
 
 	/**
 	 * Executes the function with the given properties and the given object context
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual TArray<FFINAnyNetworkValue> Execute(UObject* Ctx, const TArray<FFINAnyNetworkValue>& Params) {
+	virtual TArray<FFINAnyNetworkValue> Execute(UObject* Ctx, const TArray<FFINAnyNetworkValue>& Params) const {
 		if (NativeFunction) return NativeFunction(Ctx, Params);
 		if (RefFunction) {
 			TArray<FFINAnyNetworkValue> Output;
