@@ -77,6 +77,17 @@ To call such a function in Lua you simply need to get the Lua-Instance and call 
 
 If you want to get a list of all member of the Lua instnace's functions and attributes, you can use the `string[] getMembers()` function.
 
+A simple usage of getMembers()
+Example:
+[source,Lua]
+----
+pole = component.proxy("76470BC3475F1B8A308A04BC557D6009") -- set network component with ID, use the ID for the machine you want
+members = pole:getMembers() -- gets a table of usable functions and attributs for the machine
+for _,m in pairs(members) do
+ print(m) -- Prints the table
+end
+----
+
 === Signals
 
 Signals are quite important because they allow us to listen for events happening in a network. That means we get notified when something happens and don't need to ask if there happend anything every tick.
