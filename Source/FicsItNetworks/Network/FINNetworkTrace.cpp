@@ -241,7 +241,8 @@ void FFINNetworkTrace::CheckTrace() const {
 FFINNetworkTrace FFINNetworkTrace::Reverse() const {
 	if (!Obj.IsValid()) return FFINNetworkTrace(nullptr);
 	FFINNetworkTrace trace(Obj.Get());
-	TSharedPtr<FFINNetworkTrace> prev = MakeShared<FFINNetworkTrace>(*this->Prev);
+	TSharedPtr<FFINNetworkTrace> prev;
+	if (this->Prev) prev = MakeShared<FFINNetworkTrace>(*this->Prev);
 	while (prev) {
 		trace = trace / prev->Obj.Get();
 		prev = prev->Prev;

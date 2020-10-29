@@ -414,6 +414,7 @@ namespace FicsItKernel {
 			}
 		}
 
+#pragma optimize("", off)
 		int luaPersist(lua_State* L) {
 			SML::Logging::debug("Lua Processor Persist");
 			
@@ -432,6 +433,7 @@ namespace FicsItKernel {
 
 			return 2;
 		}
+#pragma optimize("", on)
 		
 		void LuaProcessor::Serialize(UProcessorStateStorage* storage, bool bLoading) {
 			SML::Logging::debug("Lua Processor", bLoading ? " Deserialize" : "Serialize");

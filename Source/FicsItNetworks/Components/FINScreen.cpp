@@ -84,6 +84,7 @@ void AFINScreen::Tick(float DeltaSeconds) {
 		OnGPUValidChanged(GPU.IsValid(), GPUPtr);
 		GPUPtr = GPU.Get();
 	}
+	if (!Widget && GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 }
 
 void AFINScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {

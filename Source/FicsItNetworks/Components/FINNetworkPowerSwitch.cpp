@@ -37,6 +37,7 @@ void AFINNetworkPowerSwitch::Tick(float dt) {
 	Super::Tick(dt);
 
 	if (bConnectedHasChanged) {
+		ForceNetUpdate();
 		Client_OnConnectedChanged();
 		bConnectedHasChanged = false;
 	}
@@ -57,7 +58,6 @@ void AFINNetworkPowerSwitch::SetConnected(bool bNewConnected) {
 			PowerConnection1->GetHiddenConnections(connections);
 			if (connections.Contains(PowerConnection2)) PowerConnection1->RemoveHiddenConnection(PowerConnection2);
 		}
-		ForceNetUpdate();
 	}
 }
 
