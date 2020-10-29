@@ -102,20 +102,21 @@ void AFINScreenHolo::SetHologramLocationAndRotation(const FHitResult& hitResult)
 		ScreenHeight = 1;
 		ScreenWidth = 1;
 		FTransform SnappedActorTransform = FTransform();
+		FVector UpVector;
 		if (AActor* SnappedActor = hitResult.GetActor()) {
 			SnappedActorTransform = SnappedActor->GetActorTransform();
+			UpVector = SnappedActor->GetActorForwardVector();
 		}
-		FVector UpVector = FVector(1,0,0);
-		FVector RotationAxis = FVector::CrossProduct(UpVector, Normal);
-		RotationAxis.Normalize();
-
-		float DotProduct = FVector::DotProduct(UpVector, Normal);
-		float RotationAngle = acosf(DotProduct);
-
-		FQuat Quat = FQuat(RotationAxis, RotationAngle);
-
+		FQuat Quat;
+		if (FVector::Coincident(UpVector * -1, Normal)) {
+			Quat = Normal.ToOrientationQuat();
+		} else {
+			FVector RotationAxis = FVector::CrossProduct(UpVector, Normal);
+			float DotProduct = FVector::DotProduct(UpVector, Normal);
+			float RotationAngle = acosf(DotProduct);
+			Quat = FQuat(RotationAxis, RotationAngle);
+		}
 		FQuat NewQuat = Quat * FRotator(0, 0, GetScrollRotateValue()).Quaternion();
-
 		SetActorLocationAndRotation(hitResult.ImpactPoint, NewQuat.Rotator());
 	}
 }
