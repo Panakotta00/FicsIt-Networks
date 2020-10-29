@@ -115,11 +115,22 @@ void PrintProperty(FString Prefix, UFINProperty* Property) {
 	if (UFINStructProperty* FINStructProp = Cast<UFINStructProperty>(Property)) {
 		if (FINStructProp->Struct) Log += " " + FINStructProp->Struct->GetName();
 	}
+	if (Property->GetPropertyFlags() | FIN_Prop_RT_Sync) Log += " Sync";
+	if (Property->GetPropertyFlags() | FIN_Prop_RT_Parallel) Log += " Parallel";
+	if (Property->GetPropertyFlags() | FIN_Prop_RT_Async) Log += " Async";
 	SML::Logging::error(TCHAR_TO_UTF8(*Log));
 }
 
 void PrintFunction(FString Prefix, UFINFunction* Function) {
-	SML::Logging::error(TCHAR_TO_UTF8(*Prefix), "Function: ", TCHAR_TO_UTF8(*Function->GetInternalName()), " '", TCHAR_TO_UTF8(*Function->GetDisplayName().ToString()), "' Desc:'", TCHAR_TO_UTF8(*Function->GetDescription().ToString()), "'");
+	FString Log = Prefix;
+	Log += "Function: " + Function->GetInternalName();
+	Log += " '" + Function->GetDisplayName().ToString() + "'";
+	Log += " Desc:'" + Function->GetDescription().ToString() + "'";
+	if (Function->GetFunctionFlags() | FIN_Func_VarArgs) Log += " Varargs";
+	if (Function->GetFunctionFlags() | FIN_Func_RT_Sync) Log += " Sync";
+	if (Function->GetFunctionFlags() | FIN_Func_RT_Parallel) Log += " Parallel";
+	if (Function->GetFunctionFlags() | FIN_Func_RT_Async) Log += " Async";
+	SML::Logging::error(TCHAR_TO_UTF8(*Log));
 	Prefix += " ";
 	for (UFINProperty* Param : Function->GetParameters()) {
 		PrintProperty(Prefix, Param);

@@ -15,6 +15,7 @@ protected:
 		TMap<FString, FString> PropertyInternalNames;
 		TMap<FString, FText> PropertyDisplayNames;
 		TMap<FString, FText> PropertyDescriptions;
+		TMap<FString, int> PropertyRuntimes;
 	};
 
 	struct FFINFunctionMeta {
@@ -24,6 +25,7 @@ protected:
 		TArray<FString> ParameterInternalNames;
 		TArray<FText> ParameterDescriptions;
 		TArray<FText> ParameterDisplayNames;
+		int Runtime = -1;
 	};
 
 	struct FFINSignalMeta {

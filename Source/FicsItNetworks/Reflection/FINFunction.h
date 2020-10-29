@@ -1,18 +1,31 @@
 ﻿#pragma once
 
 #include "FINProperty.h"
-#include "Network/FINParameterList.h"
-
 #include "FINFunction.generated.h"
 
 UENUM(BlueprintType)
 enum EFINFunctionFlags {
-	FIN_Func_None = 0b00000000,
-	FIN_Func_VarArgs = 0b00000001,
+	FIN_Func_None			= 0b00000000,
+	FIN_Func_VarArgs		= 0b00000001,
+	FIN_Func_Runtime		= 0b00001110,
+	FIN_Func_RT_Sync		= 0b00000010,
+	FIN_Func_RT_Parallel	= 0b00000100,
+	FIN_Func_RT_Async		= 0b00001000,
+	FIN_Func_Sync			= 0b00000010,
+	FIN_Func_Parallel		= 0b00000110,
+	FIN_Func_Async			= 0b00001110,
 };
 
 inline EFINFunctionFlags operator|(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {
 	return (EFINFunctionFlags)(((uint8)Flags1) | ((uint8)Flags2));
+}
+
+inline EFINFunctionFlags operator&(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {
+	return (EFINFunctionFlags)(((uint8)Flags1) & ((uint8)Flags2));
+}
+
+inline EFINFunctionFlags operator~(EFINFunctionFlags Flags) {
+	return (EFINFunctionFlags)~(uint8)Flags;
 }
 
 UCLASS(BlueprintType)
@@ -31,7 +44,7 @@ public:
 	UFunction* RefFunction = nullptr;
 	TFunction<TArray<FFINAnyNetworkValue>(UObject*, const TArray<FFINAnyNetworkValue>&)> NativeFunction;
 	UPROPERTY()
-	TEnumAsByte<EFINFunctionFlags> FunctionFlags;
+	TEnumAsByte<EFINFunctionFlags> FunctionFlags = FIN_Func_Sync;
 	
 	/**
 	 * Returns the description of this function

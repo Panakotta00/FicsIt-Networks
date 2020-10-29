@@ -107,6 +107,10 @@ UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* 
 						for (const TPair<FString, FText>& Description : *MapProp->ContainerPtrToValuePtr<TMap<FString, FText>>(Params)) {
 							Meta.PropertyDescriptions.FindOrAdd(Description.Key) = Description.Value;
 						}
+					} else if (Cast<UIntProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyRuntimes") {
+						for (const TPair<FString, int32>& Runtime : *MapProp->ContainerPtrToValuePtr<TMap<FString, int32>>(Params)) {
+							Meta.PropertyRuntimes.FindOrAdd(Runtime.Key) = Runtime.Value;
+						}
 					}
 				}
 			}
@@ -146,6 +150,7 @@ UFINUReflectionSource::FFINFunctionMeta UFINUReflectionSource::GetFunctionMeta(U
 				UTextProperty* TextProp = Cast<UTextProperty>(*Property);
 				UStrProperty* StrProp = Cast<UStrProperty>(*Property);
 				UArrayProperty* ArrayProp = Cast<UArrayProperty>(*Property);
+				UIntProperty* IntProp = Cast<UIntProperty>(*Property);
 				if (StrProp && Property->GetName() == "InternalName") Meta.InternalName = StrProp->GetPropertyValue_InContainer(Params);
 				else if (TextProp && Property->GetName() == "DisplayName") Meta.DisplayName = TextProp->GetPropertyValue_InContainer(Params);
 				else if (TextProp && Property->GetName() == "Description") Meta.Description = TextProp->GetPropertyValue_InContainer(Params);
@@ -169,7 +174,7 @@ UFINUReflectionSource::FFINFunctionMeta UFINUReflectionSource::GetFunctionMeta(U
 						else Meta.ParameterDescriptions.Add(Description);
 						++i;
 					}
-				}
+				} else if (IntProp && Property->GetName() == "Runtime") Meta.Runtime = IntProp->GetPropertyValue_InContainer(Params);
 			}
 		}
 	
@@ -280,6 +285,19 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(UClass* Class, UFunction* 
 	if (Meta.InternalName.Len()) FINFunc->InternalName = Meta.InternalName;
 	if (!Meta.DisplayName.IsEmpty()) FINFunc->DisplayName = Meta.DisplayName;
 	if (!Meta.Description.IsEmpty()) FINFunc->Description = Meta.Description;
+	switch (Meta.Runtime) {
+	case 0:
+		FINFunc->FunctionFlags = (FINFunc->FunctionFlags & ~FIN_Func_Runtime) | FIN_Func_Sync;
+		break;
+	case 1:
+		FINFunc->FunctionFlags = (FINFunc->FunctionFlags & ~FIN_Func_Runtime) | FIN_Func_Parallel;
+		break;
+	case 2:
+		FINFunc->FunctionFlags = (FINFunc->FunctionFlags & ~FIN_Func_Runtime) | FIN_Func_Async;
+		break;
+	default:
+		break;
+	}
 	for (TFieldIterator<UProperty> Param(Func); Param; ++Param) {
 		if (!(Param->PropertyFlags & CPF_Parm)) continue;
 		int i = FINFunc->Parameters.Num();
@@ -304,6 +322,21 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(const FFINTypeMeta& Meta, 
 	if (Meta.PropertyInternalNames.Contains(FINProp->GetInternalName())) FINProp->InternalName = Meta.PropertyInternalNames[FINProp->GetInternalName()];
 	if (Meta.PropertyDisplayNames.Contains(FINProp->GetInternalName())) FINProp->DisplayName = Meta.PropertyDisplayNames[FINProp->GetInternalName()];
 	if (Meta.PropertyDescriptions.Contains(FINProp->GetInternalName())) FINProp->Description = Meta.PropertyDescriptions[FINProp->GetInternalName()];
+	if (Meta.PropertyRuntimes.Contains(FINProp->GetInternalName())) {
+		switch (Meta.PropertyRuntimes[FINProp->GetInternalName()]) {
+		case 0:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Sync;
+			break;
+		case 1:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Parallel;
+			break;
+		case 2:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Async;
+			break;
+		default:
+			break;
+		}
+	}
 	return FINProp;
 }
 
@@ -344,6 +377,21 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(const FFINTypeMeta& Meta, 
 	if (Meta.PropertyInternalNames.Contains(FINProp->GetInternalName())) FINProp->InternalName = Meta.PropertyInternalNames[FINProp->GetInternalName()];
 	if (Meta.PropertyDisplayNames.Contains(FINProp->GetInternalName())) FINProp->DisplayName = Meta.PropertyDisplayNames[FINProp->GetInternalName()];
 	if (Meta.PropertyDescriptions.Contains(FINProp->GetInternalName())) FINProp->Description = Meta.PropertyDescriptions[FINProp->GetInternalName()];
+	if (Meta.PropertyRuntimes.Contains(FINProp->GetInternalName())) {
+		switch (Meta.PropertyRuntimes[FINProp->GetInternalName()]) {
+		case 0:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Sync;
+			break;
+		case 1:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Parallel;
+			break;
+		case 2:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Async;
+			break;
+		default:
+			break;
+		}
+	}
 	
 	return FINProp;
 }

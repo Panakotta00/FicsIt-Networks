@@ -8,16 +8,31 @@
 
 UENUM(BlueprintType)
 enum EFINRepPropertyFlags {
-	FIN_Prop_None		= 0b00000000,
-	FIN_Prop_Attrib		= 0b00000001,
-	FIN_Prop_ReadOnly	= 0b00000010,
-	FIN_Prop_Param		= 0b00000100,
-	FIN_Prop_OutParam	= 0b00001000,
-	FIN_Prop_RetVal		= 0b00010000,
+	FIN_Prop_None			= 0b00000000,
+	FIN_Prop_Attrib			= 0b00000001,
+	FIN_Prop_ReadOnly		= 0b00000010,
+	FIN_Prop_Param			= 0b00000100,
+	FIN_Prop_OutParam		= 0b00001000,
+	FIN_Prop_RetVal			= 0b00010000,
+	FIN_Prop_Runtime		= 0b11100000,
+	FIN_Prop_RT_Sync		= 0b00100000,
+	FIN_Prop_RT_Parallel	= 0b01000000,
+	FIN_Prop_RT_Async		= 0b10000000,
+	FIN_Prop_Sync			= 0b00100000,
+	FIN_Prop_Parallel		= 0b01100000,
+	FIN_Prop_Async			= 0b11100000,
 };
 
 inline EFINRepPropertyFlags operator|(EFINRepPropertyFlags Flags1, EFINRepPropertyFlags Flags2) {
 	return (EFINRepPropertyFlags)((uint8)Flags1 | (uint8)Flags2);
+}
+
+inline EFINRepPropertyFlags operator&(EFINRepPropertyFlags Flags1, EFINRepPropertyFlags Flags2) {
+	return (EFINRepPropertyFlags)(((uint8)Flags1) & ((uint8)Flags2));
+}
+
+inline EFINRepPropertyFlags operator~(EFINRepPropertyFlags Flags) {
+	return (EFINRepPropertyFlags)~(uint8)Flags;
 }
 
 class UFINProperty;
@@ -59,7 +74,7 @@ public:
 	UPROPERTY()
 	FText DisplayName = FText::FromString("Unknown Property");
 	UPROPERTY()
-	TEnumAsByte<EFINRepPropertyFlags> PropertyFlags;
+	TEnumAsByte<EFINRepPropertyFlags> PropertyFlags = FIN_Prop_Sync;
 	
 	/**
 	 * Returns the description of this property

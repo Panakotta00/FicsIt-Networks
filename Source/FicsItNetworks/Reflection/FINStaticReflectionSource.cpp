@@ -47,20 +47,20 @@ void UFINStaticReflectionSource::AddClass(UClass* Class, const FString& Internal
 	Reg.Description = Description;
 }
 
-void UFINStaticReflectionSource::AddFunction(UClass* Class, int FuncID, const FString& InternalName, const FText& DisplayName, const FText& Description, bool VarArgs, const TFunction<void(const FINTrace&, TArray<FINAny>&)>& Func) {
+void UFINStaticReflectionSource::AddFunction(UClass* Class, int FuncID, const FString& InternalName, const FText& DisplayName, const FText& Description, bool VarArgs, const TFunction<void(const FINTrace&, TArray<FINAny>&)>& Func, int Runtime) {
 	FFINStaticFuncReg& Reg = Classes.FindOrAdd(Class).Functions.FindOrAdd(FuncID);
 	Reg.InternalName = InternalName;
 	Reg.DisplayName = DisplayName;
 	Reg.Description = Description;
 	Reg.VarArgs = VarArgs;
 	Reg.Function = Func;
+	Reg.Runtime = Runtime;
 }
 
 bool UFINStaticReflectionSource::ProvidesRequirements(UClass* Class) const {
 	return Classes.Contains(Class);
 }
 
-#pragma optimize("", off)
 void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass, UClass* Class) const {
 	const FFINStaticClassReg* ClassReg = Classes.Find(Class);
 	if (!ClassReg) return;
@@ -75,6 +75,19 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		FINFunc->DisplayName = Func.DisplayName;
 		FINFunc->Description = Func.Description;
 		if (Func.VarArgs) FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_VarArgs;
+		switch (Func.Runtime) {
+		case 0:
+			FINFunc->FunctionFlags = (FINFunc->FunctionFlags & ~FIN_Func_Runtime) | FIN_Func_Sync;
+			break;
+		case 1:
+			FINFunc->FunctionFlags = (FINFunc->FunctionFlags & ~FIN_Func_Runtime) | FIN_Func_Parallel;
+			break;
+		case 2:
+			FINFunc->FunctionFlags = (FINFunc->FunctionFlags & ~FIN_Func_Runtime) | FIN_Func_Async;
+			break;
+		default:
+			break;
+		}
 
 		TArray<int> ParamPos;
 		Func.Parameters.GetKeys(ParamPos);
@@ -111,10 +124,22 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			if ((bool)Prop.Set) FINFuncProp->SetterFunc.SetterFunc = Prop.Set;
 			else FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ReadOnly;
 		}
+		switch (Prop.Runtime) {
+		case 0:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Sync;
+			break;
+		case 1:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Parallel;
+			break;
+		case 2:
+			FINProp->PropertyFlags = (FINProp->PropertyFlags & ~FIN_Prop_Runtime) | FIN_Prop_Async;
+			break;
+		default:
+			break;
+		}
 		ToFillClass->Properties.Add(FINProp);
 	}
 }
-#pragma optimize("", on)
 
 #define TypeClassName(Type) FIN_StaticRef_ ## Type
 #define BeginType(Type, InternalName, DisplayName, Description) \
@@ -126,30 +151,21 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 #define EndType() };
 #define GetClassFunc [](){ return T::StaticClass(); }
 #define FuncClassName(Func) FIN_StaticRefFunc_ ## Func
-#define BeginFuncVA(InternalName, DisplayName, Description) \
+#define BeginFuncRT(InternalName, DisplayName, Description, Varargs, Runtime) \
 	namespace FuncClassName(InternalName) { \
 		const int F = __COUNTER__; \
 		void Execute(const FINTrace& Ctx, TArray<FINAny>& Params); \
 		FFINStaticGlobalRegisterFunc RegClass([](){ \
-			UFINStaticReflectionSource::AddFunction(T::StaticClass(), F, #InternalName, DisplayName, Description, true, &Execute); \
-			TArray<FINAny> Params; \
-			Execute(FINTrace(nullptr), Params); \
-		}); \
-		void Execute(const FINTrace& Ctx, TArray<FINAny>& Params) { \
-			T* self = Cast<T>(*Ctx); \
-			static bool _bGotReg = false;
-#define BeginFunc(InternalName, DisplayName, Description) \
-	namespace FuncClassName(InternalName) { \
-		const int F = __COUNTER__; \
-		void Execute(const FINTrace& Ctx, TArray<FINAny>& Params); \
-		FFINStaticGlobalRegisterFunc RegClass([](){ \
-			UFINStaticReflectionSource::AddFunction(T::StaticClass(), F, #InternalName, DisplayName, Description, false, &Execute); \
+			UFINStaticReflectionSource::AddFunction(T::StaticClass(), F, #InternalName, DisplayName, Description, Varargs, &Execute, Runtime); \
 			TArray<FINAny> Params; \
 			Execute(FINTrace(nullptr), Params); \
 		}); \
 		void Execute(const FINTrace& Ctx, TArray<FINAny>& Params) { \
 		T* self = Cast<T>(*Ctx); \
 		static bool _bGotReg = false;
+#define GET_MACRO(_0, VAL,...) VAL
+#define BeginFunc(InternalName, DisplayName, Description, ...) BeginFuncRT(InternalName, DisplayName, Description, false, GET_MACRO(0 , ##__VA_ARGS__, 1) )
+#define BeginFuncVA(InternalName, DisplayName, Description, ...) BeginFuncRT(InternalName, DisplayName, Description, true, GET_MACRO(0, ##__VA_ARGS__, 1) )
 #define Body() \
 			if (self && _bGotReg) {
 #define EndFunc() \
@@ -158,16 +174,17 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		} \
 	};
 #define PropClassName(Prop) FIN_StaticRefProp_ ## Prop
-#define BeginProp(Type, InternalName, DisplayName, Description) \
+#define BeginPropRT(Type, InternalName, DisplayName, Description, Runtime) \
 	namespace PropClassName(InternalName) { \
 		const int P = __COUNTER__; \
 		using PT = Type; \
 		FINAny Get(void* Ctx); \
 		FFINStaticGlobalRegisterFunc RegProp([](){ \
-			UFINStaticReflectionSource::AddProp<Type>(T::StaticClass(), P, #InternalName, DisplayName, Description, &Get); \
+			UFINStaticReflectionSource::AddProp<Type>(T::StaticClass(), P, #InternalName, DisplayName, Description, &Get, Runtime); \
 		}); \
 		FINAny Get(void* Ctx) { \
 			T* self = Cast<T>(static_cast<UObject*>(Ctx));
+#define BeginProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Type, InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, 1) )
 #define Return \
 		return (FINAny)
 #define PropSet() \
@@ -373,11 +390,17 @@ BeginFunc(sort, TFS("Sort"), TFS("Sorts the whole inventory. (like the middle mo
 	Body()
 	self->SortInventory();
 } EndFunc()
-/*BeginFunc(flush, TFS("Flush"), TFS("Removes all discardable items from the inventory completely. They will be gone! No way to get them back!")) {
-	OutVal(0, RStruct<FFINInventoryFlushFuture>, future, TFS("Future"), TFS("A Future-Struct which will execute the Flush."))
+BeginFunc(flush, TFS("Flush"), TFS("Removes all discardable items from the inventory completely. They will be gone! No way to get them back!"), 0) {
 	Body()
-	Return FFINInventoryFlushFuture(self);
-} EndFunc() */
+	TArray<FInventoryStack> stacks;
+	self->GetInventoryStacks(stacks);
+	self->Empty();
+	for (const FInventoryStack& stack : stacks) {
+		if (stack.HasItems() && stack.Item.IsValid() && !UFGItemDescriptor::CanBeDiscarded(stack.Item.ItemClass)) {
+			self->AddStack(stack);
+		}
+	}
+} EndFunc()
 EndType()
 
 BeginType(UFGPowerConnectionComponent, "PowerConnection", TFS("Power Connection"), TFS("A actor component that allows for a connection point to the power network. Basically a point were a power cable can get attached to."))
@@ -516,11 +539,21 @@ BeginFunc(getRecipes, TFS("Get Recipes"), TFS("Returns the list of recipes this 
 	}
 	recipes = OutRecipes;
 } EndFunc()
-BeginFunc(setRecipe, TFS("Set Recipe"), TFS("Sets the currently producing recipe of this manufacturer.")) {
+BeginFunc(setRecipe, TFS("Set Recipe"), TFS("Sets the currently producing recipe of this manufacturer."), 1) {
 	InVal(0, RClass, recipe, TFS("Recipe"), TFS("The recipe this manufacturer should produce."))
-	OutVal(1, RStruct<FFINManufacturerSetRecipeFuture>, future, TFS("Future"), TFS("The future that sets the recipe."))
+	OutVal(1, RBool, gotSet, TFS("Got Set"), TFS("True if the current recipe got successfully set to the new recipe."))
 	Body()
-	future = (FINAny)FFINManufacturerSetRecipeFuture(self, (TSubclassOf<UFGRecipe>)recipe);
+	TArray<TSubclassOf<UFGRecipe>> recipes;
+	self->GetAvailableRecipes(recipes);
+	if (recipes.Contains(recipe)) {
+		TArray<FInventoryStack> stacks;
+		self->GetInputInventory()->GetInventoryStacks(stacks);
+		self->GetOutputInventory()->AddStacks(stacks);
+		self->SetRecipe(recipe);
+		gotSet = true;
+	} else {
+		gotSet = false;
+	}
 } EndFunc()
 BeginFunc(getInputInv, TFS("Get Input Inventory"), TFS("Returns the input inventory of this manufacturer.")) {
 	OutVal(0, RTrace, inventory, TFS("Inventory"), TFS("The input inventory of this manufacturer"))
