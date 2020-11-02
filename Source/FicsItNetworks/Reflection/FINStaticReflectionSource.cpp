@@ -1,6 +1,5 @@
 ﻿#include "FINStaticReflectionSource.h"
 
-
 #include "FGBuildableDockingStation.h"
 #include "FGBuildableFactory.h"
 #include "FGBuildableManufacturer.h"
@@ -47,7 +46,7 @@ void UFINStaticReflectionSource::AddClass(UClass* Class, const FString& Internal
 	Reg.Description = Description;
 }
 
-void UFINStaticReflectionSource::AddFunction(UClass* Class, int FuncID, const FString& InternalName, const FText& DisplayName, const FText& Description, bool VarArgs, const TFunction<void(const FINTrace&, TArray<FINAny>&)>& Func, int Runtime) {
+void UFINStaticReflectionSource::AddFunction(UClass* Class, int FuncID, const FString& InternalName, const FText& DisplayName, const FText& Description, bool VarArgs, const TFunction<void(const FINTrace&, TArray<FINAny>&)>& Func, int Runtime, int FuncType) {
 	FFINStaticFuncReg& Reg = Classes.FindOrAdd(Class).Functions.FindOrAdd(FuncID);
 	Reg.InternalName = InternalName;
 	Reg.DisplayName = DisplayName;
@@ -55,6 +54,7 @@ void UFINStaticReflectionSource::AddFunction(UClass* Class, int FuncID, const FS
 	Reg.VarArgs = VarArgs;
 	Reg.Function = Func;
 	Reg.Runtime = Runtime;
+	Reg.FuncType = FuncType;
 }
 
 bool UFINStaticReflectionSource::ProvidesRequirements(UClass* Class) const {
@@ -84,6 +84,16 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			break;
 		case 2:
 			FINFunc->FunctionFlags = (FINFunc->FunctionFlags & ~FIN_Func_Runtime) | FIN_Func_Async;
+			break;
+		default:
+			break;
+		}
+		switch (Func.FuncType) {
+		case 1:
+			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_ClassFunc;
+			break;
+		case 2:
+			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_StaticFunc;
 			break;
 		default:
 			break;
@@ -150,22 +160,27 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		});
 #define EndType() };
 #define GetClassFunc [](){ return T::StaticClass(); }
-#define FuncClassName(Func) FIN_StaticRefFunc_ ## Func
-#define BeginFuncRT(InternalName, DisplayName, Description, Varargs, Runtime) \
-	namespace FuncClassName(InternalName) { \
+#define FuncClassName(Prefix, Func) FIN_StaticRefFunc_ ## Prefix ## _ ## Func
+#define BeginFuncRT(Prefix, InternalName, DisplayName, Description, Varargs, FuncType, Runtime) \
+	namespace FuncClassName(Prefix, InternalName) { \
 		const int F = __COUNTER__; \
 		void Execute(const FINTrace& Ctx, TArray<FINAny>& Params); \
 		FFINStaticGlobalRegisterFunc RegClass([](){ \
-			UFINStaticReflectionSource::AddFunction(T::StaticClass(), F, #InternalName, DisplayName, Description, Varargs, &Execute, Runtime); \
+			UFINStaticReflectionSource::AddFunction(T::StaticClass(), F, #InternalName, DisplayName, Description, Varargs, &Execute, Runtime, FuncType); \
 			TArray<FINAny> Params; \
 			Execute(FINTrace(nullptr), Params); \
 		}); \
 		void Execute(const FINTrace& Ctx, TArray<FINAny>& Params) { \
-		T* self = Cast<T>(*Ctx); \
 		static bool _bGotReg = false;
 #define GET_MACRO(_0, VAL,...) VAL
-#define BeginFunc(InternalName, DisplayName, Description, ...) BeginFuncRT(InternalName, DisplayName, Description, false, GET_MACRO(0 , ##__VA_ARGS__, 1) )
-#define BeginFuncVA(InternalName, DisplayName, Description, ...) BeginFuncRT(InternalName, DisplayName, Description, true, GET_MACRO(0, ##__VA_ARGS__, 1) )
+#define BeginFunc(InternalName, DisplayName, Description, ...) BeginFuncRT(Member, InternalName, DisplayName, Description, false, 0, GET_MACRO(0 , ##__VA_ARGS__, 1) ) \
+		T* self = Cast<T>(*Ctx);
+#define BeginFuncVA(InternalName, DisplayName, Description, ...) BeginFuncRT(Member, InternalName, DisplayName, Description, true, 0, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+		T* self = Cast<T>(*Ctx);
+#define BeginClassFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Class, InternalName, DisplayName, Description, VA, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+		TSubclassOf<T> self = Cast<UClass>(*Ctx);
+#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) ) \ 
+		TSubclassOf<T> self = Cast<UClass>(*Ctx);
 #define Body() \
 			if (self && _bGotReg) {
 #define EndFunc() \
@@ -173,18 +188,21 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			} \
 		} \
 	};
-#define PropClassName(Prop) FIN_StaticRefProp_ ## Prop
-#define BeginPropRT(Type, InternalName, DisplayName, Description, Runtime) \
-	namespace PropClassName(InternalName) { \
+#define PropClassName(Prefix, Prop) FIN_StaticRefProp_ ## Prefix ## _ ## Prop
+#define BeginPropRT(Prefix, Type, InternalName, DisplayName, Description, Runtime) \
+	namespace PropClassName(Prefix, InternalName) { \
 		const int P = __COUNTER__; \
 		using PT = Type; \
 		FINAny Get(void* Ctx); \
 		FFINStaticGlobalRegisterFunc RegProp([](){ \
 			UFINStaticReflectionSource::AddProp<Type>(T::StaticClass(), P, #InternalName, DisplayName, Description, &Get, Runtime); \
 		}); \
-		FINAny Get(void* Ctx) { \
-			T* self = Cast<T>(static_cast<UObject*>(Ctx));
-#define BeginProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Type, InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, 1) )
+		FINAny Get(void* Ctx) {
+#define BeginProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Member, Type, InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+	T* self = Cast<T>(static_cast<UObject*>(Ctx));
+#define BeginClassProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+	TSubclassOf<T> self = Cast<UClass>(static_cast<UObject*>(Ctx));
+#define BeginStaticProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Static, Type, InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, 1) )
 #define Return \
 		return (FINAny)
 #define PropSet() \
@@ -299,6 +317,14 @@ BeginFunc(getHash, TFS("Get Hash"), TFS("Returns a hash of this object. This is 
 	OutVal(0, RInt, hash, TFS("Hash"), TFS("The hash of this object."));
 	Body()
 	hash = (int64)GetTypeHash(self);
+} EndFunc()
+BeginClassProp(RInt, hash, TFS("Hash"), TFS("A Hash of this object. This is a value that nearly uniquely identifies this object.")) {
+	Return (int64)GetTypeHash(self);
+} EndProp()
+BeginClassFunc(getHash, TFS("Get Hash"), TFS("Returns the hash of this class. This is a value that nearly uniquely idenfies this object."), false) {
+	OutVal(0, RInt, hash, TFS("Hash"), TFS("The hash of this class."));
+	Body()
+	hash = (int64) GetTypeHash(self);
 } EndFunc()
 EndType()
 
@@ -1333,69 +1359,35 @@ BeginProp(RFloat, flowLimit, TFS("Flow Limit"), TFS("The maximum flow rate of fl
 } EndProp()
 EndType()
 
-/*
-LuaLibClassTypeDecl(UObject, ObjectClass)
-
-LuaLibClassFunc(UObject, getHash, {
-	lua_pushinteger(L, GetTypeHash(self));
-	return 1;
-})
-
-// Begin UFGRecipe
-
-LuaLibClassTypeDecl(UFGRecipe, Recipe)
-
-LuaLibClassFunc(UFGRecipe, getName, {
-	FText name = UFGRecipe::GetRecipeName(self);
-	lua_pushstring(L, TCHAR_TO_UTF8(*name.ToString()));
-	return 1;
-})
-
-LuaLibClassFunc(UFGRecipe, getProducts, {
-	TArray<FItemAmount> products = UFGRecipe::GetProducts(self);
-	lua_newtable(L);
-	int in = 1;
-	for (auto& product : products) {
-		luaStruct(L, product);
-		lua_seti(L, -2, in++);
+BeginType(UFGRecipe, "Recipe", TFS("Recipe"), TFS("A struct that holds information about a recipe in its class. Means don't use it as object, use it as class type!"))
+BeginClassProp(RString, name, TFS("Name"), TFS("The name of this recipe.")) {
+	Return UFGRecipe::GetRecipeName(self).ToString();
+} EndProp()
+BeginClassProp(RFloat, duration, TFS("Duration"), TFS("The duration how much time it takes to cycle the recipe once.")) {
+	Return UFGRecipe::GetManufacturingDuration(self);
+} EndProp()
+BeginClassFunc(getProducts, TFS("Get Products"), TFS("Returns a array of item amounts, this recipe returns (outputs) when the recipe is processed once."), false) {
+	OutVal(0, RArray<RStruct<FItemAmount>>, products, TFS("Products"), TFS("The products of this recipe."))
+	Body()
+	TArray<FINAny> Products;
+	for (const FItemAmount& Product : UFGRecipe::GetProducts(self)) {
+		Products.Add((FINAny)Product);
 	}
-	return 1;
-})
-
-LuaLibClassFunc(UFGRecipe, getIngredients, {
-	auto ingredients = UFGRecipe::GetIngredients(self);
-	lua_newtable(L);
-	int in = 1;
-	for (auto& ingredient : ingredients) {
-		luaStruct(L, ingredient);
-		lua_seti(L, -2, in++);
+	products = Products;
+} EndFunc()
+BeginClassFunc(getIngredients, TFS("Get Ingredients"), TFS("Returns a array of item amounts, this recipe needs (input) so the recipe can be processed."), false) {
+	OutVal(0, RArray<RStruct<FItemAmount>>, ingredients, TFS("Ingredients"), TFS("The ingredients of this recipe."))
+	Body()
+	TArray<FINAny> Ingredients;
+	for (const FItemAmount& Ingredient : UFGRecipe::GetIngredients(self)) {
+		Ingredients.Add((FINAny)Ingredient);
 	}
-	return 1;
-})
+	ingredients = Ingredients;
+} EndFunc()
+EndType()
 
-LuaLibClassFunc(UFGRecipe, getDuration, {
-	lua_pushnumber(L, UFGRecipe::GetManufacturingDuration(self));
-	return 1;
-})
-
-// End UFGRecipe
-
-// Begin UFGItemDescriptor
-
-LuaLibClassTypeDecl(UFGItemDescriptor, ItemType)
-
-LuaLibClassFunc(UFGItemDescriptor, getName, {
-	FText name = UFGItemDescriptor::GetItemName(self);
-	lua_pushstring(L, TCHAR_TO_UTF8(*name.ToString()));
-	return 1;
-})
-
-LuaLibClassFunc(UFGItemDescriptor, __tostring, {
-	FText name = UFGItemDescriptor::GetItemName(self);
-	lua_pushstring(L, TCHAR_TO_UTF8(*name.ToString()));
-	return 1;
-})
-
-// End UFGItemDescriptor
-}
-}*/
+BeginType(UFGItemDescriptor, "ItemType", TFS("Item Type"), TFS("The type of an item (iron plate, iron rod, leaves)"))
+BeginClassProp(RString, name, TFS("Name"), TFS("The name of the item.")) {
+	Return UFGItemDescriptor::GetItemName(self);
+} EndProp()
+EndType()

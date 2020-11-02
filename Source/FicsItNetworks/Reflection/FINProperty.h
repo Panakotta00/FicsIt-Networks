@@ -8,31 +8,32 @@
 
 UENUM(BlueprintType)
 enum EFINRepPropertyFlags {
-	FIN_Prop_None			= 0b00000000,
-	FIN_Prop_Attrib			= 0b00000001,
-	FIN_Prop_ReadOnly		= 0b00000010,
-	FIN_Prop_Param			= 0b00000100,
-	FIN_Prop_OutParam		= 0b00001000,
-	FIN_Prop_RetVal			= 0b00010000,
-	FIN_Prop_Runtime		= 0b11100000,
-	FIN_Prop_RT_Sync		= 0b00100000,
-	FIN_Prop_RT_Parallel	= 0b01000000,
-	FIN_Prop_RT_Async		= 0b10000000,
-	FIN_Prop_Sync			= 0b00100000,
-	FIN_Prop_Parallel		= 0b01100000,
-	FIN_Prop_Async			= 0b11100000,
+	FIN_Prop_None			= 0b000000000,
+	FIN_Prop_Attrib			= 0b000000001,
+	FIN_Prop_ReadOnly		= 0b000000010,
+	FIN_Prop_Param			= 0b000000100,
+	FIN_Prop_OutParam		= 0b000001000,
+	FIN_Prop_RetVal			= 0b000010000,
+	FIN_Prop_Runtime		= 0b011100000,
+	FIN_Prop_RT_Sync		= 0b000100000,
+	FIN_Prop_RT_Parallel	= 0b001000000,
+	FIN_Prop_RT_Async		= 0b010000000,
+	FIN_Prop_Sync			= 0b000100000,
+	FIN_Prop_Parallel		= 0b001100000,
+	FIN_Prop_Async			= 0b011100000,
+	FIN_Prop_ClassProp		= 0b100000000,
 };
 
 inline EFINRepPropertyFlags operator|(EFINRepPropertyFlags Flags1, EFINRepPropertyFlags Flags2) {
-	return (EFINRepPropertyFlags)((uint8)Flags1 | (uint8)Flags2);
+	return (EFINRepPropertyFlags)((uint16)Flags1 | (uint16)Flags2);
 }
 
 inline EFINRepPropertyFlags operator&(EFINRepPropertyFlags Flags1, EFINRepPropertyFlags Flags2) {
-	return (EFINRepPropertyFlags)(((uint8)Flags1) & ((uint8)Flags2));
+	return (EFINRepPropertyFlags)(((uint16)Flags1) & ((uint16)Flags2));
 }
 
 inline EFINRepPropertyFlags operator~(EFINRepPropertyFlags Flags) {
-	return (EFINRepPropertyFlags)~(uint8)Flags;
+	return (EFINRepPropertyFlags)~(uint16)Flags;
 }
 
 class UFINProperty;

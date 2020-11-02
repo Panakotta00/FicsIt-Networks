@@ -19,6 +19,7 @@ struct FFINStaticFuncReg {
 	TFunction<void(const FINTrace&, TArray<FINAny>&)> Function;
 	TMap<int, FFINStaticFuncParamReg> Parameters;
 	int Runtime;
+	int FuncType;
 };
 
 struct FFINStaticPropReg {
@@ -47,7 +48,7 @@ class UFINStaticReflectionSource : public UFINReflectionSource {
 	
 public:
 	static void AddClass(UClass* Class, const FString& InternalName, const FText& DisplayName, const FText& Description);
-	static void AddFunction(UClass* Class, int FuncID, const FString& InternalName, const FText& DisplayName, const FText& Description, bool VarArgs,  const TFunction<void(const FINTrace&, TArray<FINAny>&)>& Func, int Runtime);
+	static void AddFunction(UClass* Class, int FuncID, const FString& InternalName, const FText& DisplayName, const FText& Description, bool VarArgs,  const TFunction<void(const FINTrace&, TArray<FINAny>&)>& Func, int Runtime, int FuncType);
 	template<typename T>
 	static void AddFuncParam(UClass* Class, int FuncID, int ParamPos, const FString& InternalName, const FText& DisplayName, const FText& Description, int ParamType) {
 		FFINStaticFuncParamReg& Reg = Classes.FindOrAdd(Class).Functions.FindOrAdd(FuncID).Parameters.FindOrAdd(ParamPos);
