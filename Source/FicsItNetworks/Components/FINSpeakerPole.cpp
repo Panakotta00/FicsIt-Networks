@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+
+#include "UnrealType.h"
 #include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
 #include "VorbisAudioInfo.h"
 #include "FicsItKernel/Processor/Lua/LuaStructs.h"
@@ -57,6 +59,12 @@ void AFINSpeakerPole::OnSoundFinished(UAudioComponent* AudioComponent) {
 	CurrentSound = "";
 }
 
+void AFINSpeakerPole::netClass_Meta(FString& InternalName, FText& DisplayName, FText& Description) {
+	InternalName = "SpeakerPole";
+	DisplayName = FText::FromString("Speaker Pole");
+	Description = FText::FromString("This speaker pole allows to play custom sound files, In-Game");
+}
+
 void FFINSpeakersPlaySoundFuture::Execute() {
 	bDone = true;
 	Speakers->PlaySound(Sound, Start);
@@ -64,6 +72,13 @@ void FFINSpeakersPlaySoundFuture::Execute() {
 
 FFINSpeakersPlaySoundFuture AFINSpeakerPole::netFunc_playSound(const FString& sound, float startPoint) {
 	return FFINSpeakersPlaySoundFuture(this, sound, startPoint);
+}
+
+void AFINSpeakerPole::netFuncMeta_playSound(FText& DisplayName, FText& Description, TArray<FText>& ParameterDescriptions) {
+	DisplayName = FText::FromString("Play Sound");
+	Description = FText::FromString("Plays a custom sound file ingame");
+	ParameterDescriptions.Add(FText::FromString("The sound file (without the file ending) you want to play"));
+	ParameterDescriptions.Add(FText::FromString("The start point in seconds at wich the system should start playing"));
 }
 
 void FFINSpeakersStopSoundFuture::Execute() {

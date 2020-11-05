@@ -64,6 +64,7 @@ void FFINReflection::LoadAllClasses() {
 }
 
 UFINClass* FFINReflection::FindClass(UClass* Clazz, bool bRecursive, bool bTryToReflect) {
+	if (!Clazz) return nullptr;
 	do {
 		// Find class in cache and retrun if found
 		{
@@ -115,9 +116,10 @@ void PrintProperty(FString Prefix, UFINProperty* Property) {
 	if (UFINStructProperty* FINStructProp = Cast<UFINStructProperty>(Property)) {
 		if (FINStructProp->Struct) Log += " " + FINStructProp->Struct->GetName();
 	}
-	if (Property->GetPropertyFlags() | FIN_Prop_RT_Sync) Log += " Sync";
-	if (Property->GetPropertyFlags() | FIN_Prop_RT_Parallel) Log += " Parallel";
-	if (Property->GetPropertyFlags() | FIN_Prop_RT_Async) Log += " Async";
+	if (Property->GetPropertyFlags() & FIN_Prop_RT_Sync) Log += " Sync";
+	if (Property->GetPropertyFlags() & FIN_Prop_RT_Parallel) Log += " Parallel";
+	if (Property->GetPropertyFlags() & FIN_Prop_RT_Async) Log += " Async";
+	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) Log += " Class";
 	SML::Logging::error(TCHAR_TO_UTF8(*Log));
 }
 
@@ -126,10 +128,12 @@ void PrintFunction(FString Prefix, UFINFunction* Function) {
 	Log += "Function: " + Function->GetInternalName();
 	Log += " '" + Function->GetDisplayName().ToString() + "'";
 	Log += " Desc:'" + Function->GetDescription().ToString() + "'";
-	if (Function->GetFunctionFlags() | FIN_Func_VarArgs) Log += " Varargs";
-	if (Function->GetFunctionFlags() | FIN_Func_RT_Sync) Log += " Sync";
-	if (Function->GetFunctionFlags() | FIN_Func_RT_Parallel) Log += " Parallel";
-	if (Function->GetFunctionFlags() | FIN_Func_RT_Async) Log += " Async";
+	if (Function->GetFunctionFlags() & FIN_Func_VarArgs) Log += " Varargs";
+	if (Function->GetFunctionFlags() & FIN_Func_RT_Sync) Log += " Sync";
+	if (Function->GetFunctionFlags() & FIN_Func_RT_Parallel) Log += " Parallel";
+	if (Function->GetFunctionFlags() & FIN_Func_RT_Async) Log += " Async";
+	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) Log += " Class";
+	if (Function->GetFunctionFlags() & FIN_Func_StaticFunc) Log += " Static";
 	SML::Logging::error(TCHAR_TO_UTF8(*Log));
 	Prefix += " ";
 	for (UFINProperty* Param : Function->GetParameters()) {

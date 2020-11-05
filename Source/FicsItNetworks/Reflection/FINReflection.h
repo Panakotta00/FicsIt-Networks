@@ -25,6 +25,7 @@ public:
 	void LoadAllClasses();
 	UFINClass* FindClass(UClass* Clazz, bool bRecursive = true, bool bTryToReflect = true);
 	void PrintReflection();
+	inline const TMap<UClass*, UFINClass*> GetClasses() { return Classes; }
 };
 
 UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* OverrideProperty);

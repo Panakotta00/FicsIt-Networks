@@ -74,8 +74,8 @@ public:
 	FString InternalName = TEXT("UnknownProperty");
 	UPROPERTY()
 	FText DisplayName = FText::FromString("Unknown Property");
-	UPROPERTY()
-	TEnumAsByte<EFINRepPropertyFlags> PropertyFlags = FIN_Prop_Sync;
+
+	EFINRepPropertyFlags PropertyFlags = FIN_Prop_Sync;
 	
 	/**
 	 * Returns the description of this property
@@ -104,8 +104,7 @@ public:
 	/**
 	 * Returns the property type
 	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual TEnumAsByte<EFINRepPropertyFlags> GetPropertyFlags() const { return PropertyFlags; }
+	virtual EFINRepPropertyFlags GetPropertyFlags() const { return PropertyFlags; }
 
 	/**
 	 * Sets the property value in the given container.

@@ -3,7 +3,6 @@
 #include "FINProperty.h"
 #include "FINFunction.generated.h"
 
-UENUM(BlueprintType)
 enum EFINFunctionFlags {
 	FIN_Func_None			= 0b00000000,
 	FIN_Func_VarArgs		= 0b00000001,
@@ -19,15 +18,15 @@ enum EFINFunctionFlags {
 };
 
 inline EFINFunctionFlags operator|(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {
-	return (EFINFunctionFlags)(((uint8)Flags1) | ((uint8)Flags2));
+	return (EFINFunctionFlags)(((uint16)Flags1) | ((uint16)Flags2));
 }
 
 inline EFINFunctionFlags operator&(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {
-	return (EFINFunctionFlags)(((uint8)Flags1) & ((uint8)Flags2));
+	return (EFINFunctionFlags)(((uint16)Flags1) & ((uint16)Flags2));
 }
 
 inline EFINFunctionFlags operator~(EFINFunctionFlags Flags) {
-	return (EFINFunctionFlags)~(uint8)Flags;
+	return (EFINFunctionFlags)~(uint16)Flags;
 }
 
 UCLASS(BlueprintType)
@@ -45,8 +44,8 @@ public:
 	UPROPERTY()
 	UFunction* RefFunction = nullptr;
 	TFunction<TArray<FFINAnyNetworkValue>(UObject*, const TArray<FFINAnyNetworkValue>&)> NativeFunction;
-	UPROPERTY()
-	TEnumAsByte<EFINFunctionFlags> FunctionFlags = FIN_Func_Sync;
+
+	EFINFunctionFlags FunctionFlags = FIN_Func_Sync;
 	
 	/**
 	 * Returns the description of this function
@@ -75,8 +74,7 @@ public:
 	/**
 	 * Returns the function flags of this function
 	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual TEnumAsByte<EFINFunctionFlags> GetFunctionFlags() const { return FunctionFlags; }
+	virtual EFINFunctionFlags GetFunctionFlags() const { return FunctionFlags; }
 
 	/**
 	 * Executes the function with the given properties and the given object context

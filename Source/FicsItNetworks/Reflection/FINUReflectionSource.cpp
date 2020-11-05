@@ -33,7 +33,7 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 
 	if (Meta.InternalName.Len()) ToFillClass->InternalName = Meta.InternalName;
 	if (!Meta.DisplayName.IsEmpty()) ToFillClass->DisplayName = Meta.DisplayName;
-	if (!Meta.Description.IsEmpty()) ToFillClass->DisplayName = Meta.Description;
+	if (!Meta.Description.IsEmpty()) ToFillClass->Description = Meta.Description;
 
 	for (TFieldIterator<UField> Field(Class); Field; ++Field) {
 		UProperty* Prop = Cast<UProperty>(*Field);
@@ -53,7 +53,8 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 		}
 	}
 
-	ToFillClass->Parent = Ref->FindClass(Class->GetOwnerClass());
+	ToFillClass->Parent = Ref->FindClass(Class->GetSuperClass());
+	if (ToFillClass->Parent == ToFillClass) ToFillClass->Parent = nullptr;
 }
 
 UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* Class) const {

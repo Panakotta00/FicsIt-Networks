@@ -29,6 +29,7 @@
 #include "FINBoolProperty.h"
 #include "FINClassProperty.h"
 #include "FINFloatProperty.h"
+#include "FINReflection.h"
 #include "FINTraceProperty.h"
 #include "FicsItKernel/Processor/Lua/LuaInstance.h"
 #include "FicsItKernel/Processor/Lua/LuaLib.h"
@@ -67,6 +68,8 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 	ToFillClass->InternalName = ClassReg->InternalName;
 	ToFillClass->DisplayName = ClassReg->DisplayName;
 	ToFillClass->Description = ClassReg->Description;
+	ToFillClass->Parent = Ref->FindClass(Class->GetSuperClass());
+	if (ToFillClass->Parent == ToFillClass) ToFillClass->Parent = nullptr;
 
 	for (const TPair<int, FFINStaticFuncReg>& KVFunc : ClassReg->Functions) {
 		const FFINStaticFuncReg& Func = KVFunc.Value;
@@ -147,6 +150,13 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		default:
 			break;
 		}
+		switch (Prop.PropType) {
+		case 1:
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ClassProp;
+			break;
+		default:
+			break;
+		}
 		ToFillClass->Properties.Add(FINProp);
 	}
 }
@@ -179,8 +189,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		T* self = Cast<T>(*Ctx);
 #define BeginClassFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Class, InternalName, DisplayName, Description, VA, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 		TSubclassOf<T> self = Cast<UClass>(*Ctx);
-#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) ) \ 
-		TSubclassOf<T> self = Cast<UClass>(*Ctx);
+#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) )
 #define Body() \
 			if (self && _bGotReg) {
 #define EndFunc() \
@@ -189,20 +198,19 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		} \
 	};
 #define PropClassName(Prefix, Prop) FIN_StaticRefProp_ ## Prefix ## _ ## Prop
-#define BeginPropRT(Prefix, Type, InternalName, DisplayName, Description, Runtime) \
+#define BeginPropRT(Prefix, Type, InternalName, DisplayName, Description, PropType, Runtime) \
 	namespace PropClassName(Prefix, InternalName) { \
 		const int P = __COUNTER__; \
 		using PT = Type; \
 		FINAny Get(void* Ctx); \
 		FFINStaticGlobalRegisterFunc RegProp([](){ \
-			UFINStaticReflectionSource::AddProp<Type>(T::StaticClass(), P, #InternalName, DisplayName, Description, &Get, Runtime); \
+			UFINStaticReflectionSource::AddProp<Type>(T::StaticClass(), P, #InternalName, DisplayName, Description, &Get, Runtime, PropType); \
 		}); \
 		FINAny Get(void* Ctx) {
-#define BeginProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Member, Type, InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+#define BeginProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Member, Type, InternalName, DisplayName, Description, 0, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 	T* self = Cast<T>(static_cast<UObject*>(Ctx));
-#define BeginClassProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+#define BeginClassProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 	TSubclassOf<T> self = Cast<UClass>(static_cast<UObject*>(Ctx));
-#define BeginStaticProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Static, Type, InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, 1) )
 #define Return \
 		return (FINAny)
 #define PropSet() \
@@ -1361,7 +1369,7 @@ EndType()
 
 BeginType(UFGRecipe, "Recipe", TFS("Recipe"), TFS("A struct that holds information about a recipe in its class. Means don't use it as object, use it as class type!"))
 BeginClassProp(RString, name, TFS("Name"), TFS("The name of this recipe.")) {
-	Return UFGRecipe::GetRecipeName(self).ToString();
+	Return (FINStr)UFGRecipe::GetRecipeName(self).ToString();
 } EndProp()
 BeginClassProp(RFloat, duration, TFS("Duration"), TFS("The duration how much time it takes to cycle the recipe once.")) {
 	Return UFGRecipe::GetManufacturingDuration(self);
@@ -1388,6 +1396,6 @@ EndType()
 
 BeginType(UFGItemDescriptor, "ItemType", TFS("Item Type"), TFS("The type of an item (iron plate, iron rod, leaves)"))
 BeginClassProp(RString, name, TFS("Name"), TFS("The name of the item.")) {
-	Return UFGItemDescriptor::GetItemName(self);
+	Return (FINStr)UFGItemDescriptor::GetItemName(self).ToString();
 } EndProp()
 EndType()

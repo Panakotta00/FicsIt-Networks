@@ -90,6 +90,12 @@ public:
 	void OnSoundFinished(UAudioComponent* Audio);
 
 	/**
+	 * Returns meta-data for this type in the FINReflection-System
+	 */
+	UFUNCTION()
+	void netClass_Meta(FString& InternalName, FText& DisplayName, FText& Description);
+
+	/**
 	 * Loads and Plays the sound file in the Sounds folder appened with the given relative path without the file extension.
 	 * Plays the sound at the given startPoint.
 	 * Might cause the current sound playing to stop even if the new sound is not found.
@@ -97,6 +103,8 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
 	FFINSpeakersPlaySoundFuture netFunc_playSound(const FString& sound, float startPoint);
+	UFUNCTION()
+	void netFuncMeta_playSound(FText& DisplayName, FText& Description, TArray<FText>& ParameterDescriptions);
 
 	/**
 	 * Stops the current playing sound.

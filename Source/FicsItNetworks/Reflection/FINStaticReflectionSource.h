@@ -30,6 +30,7 @@ struct FFINStaticPropReg {
 	TFunction<FINAny(void*)>Get;
 	TFunction<void(void*, const FINAny&)> Set;
 	int Runtime;
+	int PropType;
 };
 
 struct FFINStaticClassReg {
@@ -59,7 +60,7 @@ public:
 		Reg.PropConstructor = &T::PropConstructor;
 	}
 	template<typename T>
-	static void AddProp(UClass* Class, int PropID, const FString& InternalName, const FText& DisplayName, const FText& Description, const TFunction<FINAny(void*)>& Get, int Runtime) {
+	static void AddProp(UClass* Class, int PropID, const FString& InternalName, const FText& DisplayName, const FText& Description, const TFunction<FINAny(void*)>& Get, int Runtime, int PropType) {
 		FFINStaticPropReg& Reg = Classes.FindOrAdd(Class).Properties.FindOrAdd(PropID);
 		Reg.InternalName = InternalName;
 		Reg.DisplayName = DisplayName;
@@ -67,6 +68,7 @@ public:
 		Reg.PropConstructor = &T::PropConstructor;
 		Reg.Get = Get;
 		Reg.Runtime = Runtime;
+		Reg.PropType = PropType;
 	}
 	static void AddPropSetter(UClass* Class, int PropID, const TFunction<void(void*, const FINAny&)>& Set) {
 		FFINStaticPropReg& Reg = Classes.FindOrAdd(Class).Properties.FindOrAdd(PropID);
