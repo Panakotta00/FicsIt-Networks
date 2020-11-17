@@ -11,6 +11,7 @@
 #include "FGBuildableTrainPlatformCargo.h"
 #include "FGFactoryConnectionComponent.h"
 #include "FGHealthComponent.h"
+#include "FGLocomotive.h"
 #include "FGPipeSubsystem.h"
 #include "FGPowerCircuit.h"
 #include "FINArrayProperty.h"
@@ -271,27 +272,36 @@ struct RString {
 	}
 };
 
+template<typename T>
 struct RClass {
 	typedef FINClass CppType;
 	static FINClass Get(const FINAny& Any) { return Any.GetClass(); }
 	static UFINProperty* PropConstructor(UObject* Outer) {
-		return NewObject<UFINClassProperty>(Outer);
+		UFINClassProperty* Prop = NewObject<UFINClassProperty>(Outer);
+		Prop->Subclass = T::StaticClass();
+		return Prop;
 	}
 };
 
+template<typename T>
 struct RObject {
 	typedef FINObj CppType;
 	static FINObj Get(const FINAny& Any) { return Any.GetObject(); }
 	static UFINProperty* PropConstructor(UObject* Outer) {
-		return NewObject<UFINObjectProperty>(Outer);
+		UFINObjectProperty* Prop = NewObject<UFINObjectProperty>(Outer);
+		Prop->Subclass = T::StaticClass();
+		return Prop;
 	}
 };
 
+template<typename T>
 struct RTrace {
 	typedef FINTrace CppType;
 	static FINTrace Get(const FINAny& Any) { return Any.GetTrace(); }
 	static UFINProperty* PropConstructor(UObject* Outer) {
-		return NewObject<UFINTraceProperty>(Outer);
+		UFINTraceProperty* Prop = NewObject<UFINTraceProperty>(Outer);
+		Prop->Subclass = T::StaticClass();
+		return Prop;
 	}
 };
  
@@ -347,7 +357,7 @@ BeginProp(RStruct<FRotator>, rotation, TFS("Rotation"), TFS("The rotation of the
 	Return self->GetActorRotation();
 } EndProp()
 BeginFunc(getPowerConnectors, TFS("Get Power Connectors"), TFS("Returns a list of power connectors this actor might have.")) {
-	OutVal(0, RArray<RTrace>, connectors, TFS("Connectors"), TFS("The power connectors this actor has."));
+	OutVal(0, RArray<RTrace<UFGPowerConnectionComponent>>, connectors, TFS("Connectors"), TFS("The power connectors this actor has."));
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
@@ -360,7 +370,7 @@ BeginFunc(getPowerConnectors, TFS("Get Power Connectors"), TFS("Returns a list o
 	connectors = Output;
 } EndFunc()
 BeginFunc(getFactoryConnectors, TFS("Get Factory Connectors"), TFS("Returns a list of factory connectors this actor might have.")) {
-	OutVal(0, RArray<RTrace>, connectors, TFS("Connectors"), TFS("The factory connectors this actor has."));
+	OutVal(0, RArray<RTrace<UFGFactoryConnectionComponent>>, connectors, TFS("Connectors"), TFS("The factory connectors this actor has."));
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
@@ -373,7 +383,7 @@ BeginFunc(getFactoryConnectors, TFS("Get Factory Connectors"), TFS("Returns a li
 	connectors = Output;
 } EndFunc()
 BeginFunc(getInventories, TFS("Get Inventories"), TFS("Returns a list of inventories this actor might have.")) {
-	OutVal(0, RArray<RTrace>, inventories, TFS("Inventories"), TFS("The inventories this actor has."));
+	OutVal(0, RArray<RTrace<UFGInventoryComponent>>, inventories, TFS("Inventories"), TFS("The inventories this actor has."));
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
@@ -386,7 +396,7 @@ BeginFunc(getInventories, TFS("Get Inventories"), TFS("Returns a list of invento
 	inventories = Output;
 } EndFunc()
 BeginFunc(getNetworkConnectors, TFS("Get Network Connectors"), TFS("Returns the name of network connectors this actor might have.")) {
-	OutVal(0, RArray<RTrace>, connectors, TFS("Connectors"), TFS("The factory connectors this actor has."));
+	OutVal(0, RArray<RTrace<UFINNetworkConnectionComponent>>, connectors, TFS("Connectors"), TFS("The factory connectors this actor has."));
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
@@ -445,12 +455,12 @@ BeginProp(RInt, maxConnections, TFS("Max Connections"), TFS("The maximum amount 
 	Return (int64)self->GetMaxNumConnections();
 } EndProp()
 BeginFunc(getPower, TFS("Get Power"), TFS("Returns the power info component of this power connection.")) {
-	OutVal(0, RTrace, power, TFS("Power"), TFS("The power info compoent this power connection uses."))
+	OutVal(0, RTrace<UFGPowerInfoComponent>, power, TFS("Power"), TFS("The power info compoent this power connection uses."))
 	Body()
 	power = Ctx / self->GetPowerInfo();
 } EndFunc();
 BeginFunc(getCircuit, TFS("Get Circuit"), TFS("Returns the power circuit to which this connection component is attached to.")) {
-	OutVal(0, RTrace, circuit, TFS("Circuit"), TFS("The Power Circuit this connection component is attached to."))
+	OutVal(0, RTrace<UFGPowerCircuit>, circuit, TFS("Circuit"), TFS("The Power Circuit this connection component is attached to."))
 	Body()
 	circuit = Ctx / self->GetPowerCircuit();
 } EndFunc()
@@ -476,7 +486,7 @@ BeginProp(RBool, hasPower, TFS("Has Power"), TFS("True if the connection has sat
 	Return self->HasPower();
 } EndProp();
 BeginFunc(getCircuit, TFS("Get Circuit"), TFS("Returns the power circuit this info component is part of.")) {
-	OutVal(0, RTrace, circuit, TFS("Circuit"), TFS("The Power Circuit this info component is attached to."))
+	OutVal(0, RTrace<UFGPowerCircuit>, circuit, TFS("Circuit"), TFS("The Power Circuit this info component is attached to."))
 	Body()
 	circuit = Ctx / self->GetPowerCircuit();
 }
@@ -517,7 +527,7 @@ BeginProp(RBool, isConnected, TFS("Is Connected"), TFS("True if something is con
 	Return self->IsConnected();
 } EndProp()
 BeginFunc(getInventory, TFS("Get Inventory"), TFS("Returns the internal inventory of the connection component.")) {
-	OutVal(0, RTrace, inventory, TFS("Inventory"), TFS("The internal inventory of the connection component."))
+	OutVal(0, RTrace<UFGInventoryComponent>, inventory, TFS("Inventory"), TFS("The internal inventory of the connection component."))
 	Body()
 	inventory = Ctx / self->GetInventory();
 } EndFunc()
@@ -558,12 +568,12 @@ EndType()
 
 BeginType(AFGBuildableManufacturer, "Manufacturer", TFS("Manufacturer"), TFS("The base class of every machine that uses a recipe to produce something automatically."))
 BeginFunc(getRecipe, TFS("Get Recipe"), TFS("Returns the currently set recipe of the manufacturer.")) {
-	OutVal(0, RClass, recipe, TFS("Recipe"), TFS("The currently set recipe."))
+	OutVal(0, RClass<UFGRecipe>, recipe, TFS("Recipe"), TFS("The currently set recipe."))
 	Body()
 	recipe = (UClass*)self->GetCurrentRecipe();
 } EndFunc()
 BeginFunc(getRecipes, TFS("Get Recipes"), TFS("Returns the list of recipes this manufacturer can get set to and process.")) {
-	OutVal(0, RArray<RClass>, recipes, TFS("Recipes"), TFS("The list of avalible recipes."))
+	OutVal(0, RArray<RClass<UFGRecipe>>, recipes, TFS("Recipes"), TFS("The list of avalible recipes."))
 	Body()
 	TArray<FINAny> OutRecipes;
 	TArray<TSubclassOf<UFGRecipe>> Recipes;
@@ -574,7 +584,7 @@ BeginFunc(getRecipes, TFS("Get Recipes"), TFS("Returns the list of recipes this 
 	recipes = OutRecipes;
 } EndFunc()
 BeginFunc(setRecipe, TFS("Set Recipe"), TFS("Sets the currently producing recipe of this manufacturer."), 1) {
-	InVal(0, RClass, recipe, TFS("Recipe"), TFS("The recipe this manufacturer should produce."))
+	InVal(0, RClass<UFGRecipe>, recipe, TFS("Recipe"), TFS("The recipe this manufacturer should produce."))
 	OutVal(1, RBool, gotSet, TFS("Got Set"), TFS("True if the current recipe got successfully set to the new recipe."))
 	Body()
 	TArray<TSubclassOf<UFGRecipe>> recipes;
@@ -590,12 +600,12 @@ BeginFunc(setRecipe, TFS("Set Recipe"), TFS("Sets the currently producing recipe
 	}
 } EndFunc()
 BeginFunc(getInputInv, TFS("Get Input Inventory"), TFS("Returns the input inventory of this manufacturer.")) {
-	OutVal(0, RTrace, inventory, TFS("Inventory"), TFS("The input inventory of this manufacturer"))
+	OutVal(0, RTrace<UFGInventoryComponent>, inventory, TFS("Inventory"), TFS("The input inventory of this manufacturer"))
 	Body()
 	inventory = Ctx / self->GetInputInventory();
 } EndFunc()
 BeginFunc(getOutputInv, TFS("Get Output Inventory"), TFS("Returns the output inventory of this manufacturer.")) {
-	OutVal(0, RTrace, inventory, TFS("Inventory"), TFS("The output inventory of this manufacturer."))
+	OutVal(0, RTrace<UFGInventoryComponent>, inventory, TFS("Inventory"), TFS("The output inventory of this manufacturer."))
 	Body()
 	inventory = Ctx / self->GetOutputInventory();
 } EndFunc()
@@ -617,17 +627,17 @@ EndType()
 
 BeginType(AFGWheeledVehicle, "WheeledVehicle", TFS("Wheeled Vehicle"), TFS("The base class for all vehicles that used wheels for movement."))
 BeginFunc(getFuelInv, TFS("Get Fuel Inventory"), TFS("Returns the inventory that contains the fuel of the vehicle.")) {
-	OutVal(0, RTrace, inventory, TFS("Inventory"), TFS("The fuel inventory of the vehicle."))
+	OutVal(0, RTrace<UFGInventoryComponent>, inventory, TFS("Inventory"), TFS("The fuel inventory of the vehicle."))
 	Body()
 	inventory = Ctx / self->GetFuelInventory();
 } EndFunc()
 BeginFunc(getStorageInv, TFS("Get Storage Inventory"), TFS("Returns the inventory that contains the storage of the vehicle.")) {
-	OutVal(0, RTrace, inventory, TFS("Inventory"), TFS("The storage inventory of the vehicle."))
+	OutVal(0, RTrace<UFGInventoryComponent>, inventory, TFS("Inventory"), TFS("The storage inventory of the vehicle."))
 	Body()
 	inventory = Ctx / self->GetStorageInventory();
 } EndFunc()
 BeginFunc(isValidFuel, TFS("Is Valid Fuel"), TFS("Allows to check if the given item type is a valid fuel for this vehicle.")) {
-	InVal(0, RClass, item, TFS("Item"), TFS("The item type you want to check."))
+	InVal(0, RClass<UFGItemDescriptor>, item, TFS("Item"), TFS("The item type you want to check."))
 	OutVal(1, RBool, isValid, TFS("Is Valid"), TFS("True if the given item type is a valid fuel for this vehicle."))
 	Body()
 	isValid = self->IsValidFuel(item);
@@ -766,7 +776,7 @@ BeginFunc(getTrackGraph, TFS("Get Track Graph"), TFS("Returns the track graph of
 	graph = (FINAny)FFINTrackGraph{Ctx, self->GetTrackGraphID()};
 } EndFunc()
 BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which this train platform is placed.")) {
-	OutVal(0, RTrace, track, TFS("Track"), TFS("The track the track pos points to."))
+	OutVal(0, RTrace<AFGBuildableRailroadTrack>, track, TFS("Track"), TFS("The track the track pos points to."))
 	OutVal(1, RFloat, offset, TFS("Offset"), TFS("The offset of the track pos."))
 	OutVal(2, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
 	Body()
@@ -778,22 +788,22 @@ BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which
 } EndFunc()
 BeginFunc(getConnectedPlatform, TFS("Get Connected Platform"), TFS("Returns the connected platform in the given direction.")) {
 	InVal(0, RInt, direction, TFS("Direction"), TFS("The direction in which you want to get the connected platform."))
-	OutVal(1, RTrace, platform, TFS("Platform"), TFS("The platform connected to this platform in the given direction."))
+	OutVal(1, RTrace<AFGBuildableTrainPlatform>, platform, TFS("Platform"), TFS("The platform connected to this platform in the given direction."))
 	Body()
 	platform = Ctx / self->GetConnectedPlatformInDirectionOf(direction);
 } EndFunc()
 BeginFunc(getDockedVehicle, TFS("Get Docked Vehicle"), TFS("Returns the currently docked vehicle.")) {
-	OutVal(0, RTrace, vehicle, TFS("Vehicle"), TFS("The currently docked vehicle"))
+	OutVal(0, RTrace<AFGVehicle>, vehicle, TFS("Vehicle"), TFS("The currently docked vehicle"))
 	Body()
 	vehicle = Ctx / FReflectionHelper::GetObjectPropertyValue<UObject>(self, TEXT("mDockedRailroadVehicle"));
 } EndFunc()
 BeginFunc(getMaster, TFS("Get Master"), TFS("Returns the master platform of this train station.")) {
-	OutVal(0, RTrace, master, TFS("Master"), TFS("The master platform of this train station."))
+	OutVal(0, RTrace<AFGRailroadVehicle>, master, TFS("Master"), TFS("The master platform of this train station."))
 	Body()
 	master = Ctx / FReflectionHelper::GetObjectPropertyValue<UObject>(self, TEXT("mStationDockingMaster"));
 } EndFunc()
 BeginFunc(getDockedLocomotive, TFS("Get Docked Locomotive"), TFS("Returns the currently docked locomotive at the train station.")) {
-	OutVal(0, RTrace, locomotive, TFS("Locomotive"), TFS("The currently docked locomotive at the train station."))
+	OutVal(0, RTrace<AFGLocomotive>, locomotive, TFS("Locomotive"), TFS("The currently docked locomotive at the train station."))
 	Body()
 	locomotive = Ctx / FReflectionHelper::GetObjectPropertyValue<UObject>(self, TEXT("mDockingLocomotive"));
 } EndFunc()
@@ -842,7 +852,7 @@ EndType()
 
 BeginType(AFGRailroadVehicle, "RailroadVehicle", TFS("Railroad Vehicle"), TFS("The base class for any vehicle that drives on train tracks."))
 BeginFunc(getTrain, TFS("Get Train"), TFS("Returns the train of which this vehicle is part of.")) {
-	OutVal(0, RTrace, train, TFS("Train"), TFS("The train of which this vehicle is part of"))
+	OutVal(0, RTrace<AFGTrain>, train, TFS("Train"), TFS("The train of which this vehicle is part of"))
 	Body()
 	train = Ctx / Cast<UObject>(self->GetTrain());
 } EndFunc()
@@ -854,7 +864,7 @@ BeginFunc(isCoupled, TFS("Is Coupled"), TFS("Allows to check if the given couple
 } EndFunc()
 BeginFunc(getCoupled, TFS("Get Coupled"), TFS("Allows to get the coupled vehicle at the given coupler.")) {
 	InVal(0, RInt, coupler, TFS("Coupler"), TFS("The Coupler you want to get the car from. 0 = Front, 1 = Back"))
-	OutVal(1, RTrace, coupled, TFS("Coupled"), TFS("The coupled car of the given coupler is coupled to another car."))
+	OutVal(1, RTrace<AFGRailroadVehicle>, coupled, TFS("Coupled"), TFS("The coupled car of the given coupler is coupled to another car."))
 	Body()
 	coupled = Ctx / self->GetCoupledVehicleAt(static_cast<ERailroadVehicleCoupler>(coupler));
 } EndFunc()
@@ -864,7 +874,7 @@ BeginFunc(getTrackGraph, TFS("Get Track Graph"), TFS("Returns the track graph of
 	track = (FINAny)FFINTrackGraph{Ctx, self->GetTrackGraphID()};
 } EndFunc()
 BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which this vehicle is.")) {
-	OutVal(0, RTrace, track, TFS("Track"), TFS("The track the track pos points to."))
+	OutVal(0, RTrace<AFGBuildableRailroadTrack>, track, TFS("Track"), TFS("The track the track pos points to."))
     OutVal(1, RFloat, offset, TFS("Offset"), TFS("The offset of the track pos."))
     OutVal(2, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
     Body()
@@ -875,7 +885,7 @@ BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which
 	forward = pos.Forward;
 } EndFunc()
 BeginFunc(getMovement, TFS("Get Movement"), TFS("Returns the vehicle movement of this vehicle.")) {
-	OutVal(0, RTrace, movement, TFS("Movement"), TFS("The movement of this vehicle."))
+	OutVal(0, RTrace<UFGRailroadVehicleMovementComponent>, movement, TFS("Movement"), TFS("The movement of this vehicle."))
 	Body()
 	movement = Ctx / self->GetRailroadVehicleMovementComponent();
 } EndFunc()
@@ -892,7 +902,7 @@ EndType()
 
 BeginType(UFGRailroadVehicleMovementComponent, "RailroadVehicleMovement", TFS("Railroad Vehicle Movement"), TFS("This actor component contains all the infomation about the movement of a railroad vehicle."))
 BeginFunc(getVehicle, TFS("Get Vehicle"), TFS("Returns the vehicle this movement component holds the movement information of.")) {
-	OutVal(0, RTrace, vehicle, TFS("Vehicle"), TFS("The vehicle this movement component holds the movement information of."))
+	OutVal(0, RTrace<AFGRailroadVehicle>, vehicle, TFS("Vehicle"), TFS("The vehicle this movement component holds the movement information of."))
 	Body()
 	vehicle = Ctx / self->GetOwningRailroadVehicle();
 } EndFunc()
@@ -1034,27 +1044,27 @@ BeginFunc(setSelfDriving, TFS("Set Self Driving"), TFS("Allows to set if the tra
 	self->SetSelfDrivingEnabled(selfDriving);
 } EndFunc()
 BeginFunc(getMaster, TFS("Get Master"), TFS("Returns the master locomotive that is part of this train.")) {
-	OutVal(0, RTrace, master, TFS("Master"), TFS("The master locomotive of this train."))
+	OutVal(0, RTrace<AFGLocomotive>, master, TFS("Master"), TFS("The master locomotive of this train."))
 	Body()
-	//master = Ctx / self->GetMultipleUnitMaster();
+	master = Ctx / self->GetMultipleUnitMaster();
 } EndFunc()
 BeginFunc(getTimeTable, TFS("Get Time Table"), TFS("Returns the timetable of this train.")) {
-	OutVal(0, RTrace, timeTable, TFS("Time Table"), TFS("The timetable of this train."))
+	OutVal(0, RTrace<AFGRailroadTimeTable>, timeTable, TFS("Time Table"), TFS("The timetable of this train."))
 	Body()
 	timeTable = Ctx / self->GetTimeTable();
 } EndFunc()
 BeginFunc(newTimeTable, TFS("New Time Table"), TFS("Creates and returns a new timetable for this train.")) {
-	OutVal(0, RTrace, timeTable, TFS("Time Table"), TFS("The new timetable for this train."))
+	OutVal(0, RTrace<AFGRailroadTimeTable>, timeTable, TFS("Time Table"), TFS("The new timetable for this train."))
 	Body()
 	timeTable = Ctx / self->NewTimeTable();
 } EndFunc()
 BeginFunc(getFirst, TFS("Get First"), TFS("Returns the first railroad vehicle that is part of this train.")) {
-	OutVal(0, RTrace, first, TFS("First"), TFS("The first railroad vehicle that is part of this train."))
+	OutVal(0, RTrace<AFGRailroadVehicle>, first, TFS("First"), TFS("The first railroad vehicle that is part of this train."))
 	Body()
 	first = Ctx / self->GetFirstVehicle();
 } EndFunc()
 BeginFunc(getLast, TFS("Get Last"), TFS("Returns the last railroad vehicle that is part of this train.")) {
-	OutVal(0, RTrace, last, TFS("Last"), TFS("The last railroad vehicle that is part of this train."))
+	OutVal(0, RTrace<AFGRailroadVehicle>, last, TFS("Last"), TFS("The last railroad vehicle that is part of this train."))
 	Body()
 	last = Ctx / self->GetLastVehicle();
 } EndFunc()
@@ -1063,7 +1073,7 @@ BeginFunc(dock, TFS("Dock"), TFS("Trys to dock the train to the station it is cu
 	self->Dock();
 } EndFunc()
 BeginFunc(getVehicles, TFS("Get Vehicles"), TFS("Returns a list of all the vehicles this train has.")) {
-	OutVal(0, RArray<RTrace>, vehicles, TFS("Vehicles"), TFS("A list of all the vehicles this train has."))
+	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, TFS("Vehicles"), TFS("A list of all the vehicles this train has."))
 	Body()
 	TArray<FINAny> Vehicles;
 	for (AFGRailroadVehicle* vehicle : self->mSimulationData.SimulatedVehicles) {
@@ -1094,7 +1104,7 @@ EndType()
 BeginType(AFGRailroadTimeTable, "TimeTable", TFS("Time Table"), TFS("Contains the time table information of train."))
 BeginFunc(addStop, TFS("Add Stop"), TFS("Adds a stop to the time table.")) {
 	InVal(0, RInt, index, TFS("Index"), TFS("The index at which the stop should get added."))
-	InVal(1, RTrace, station, TFS("Station"), TFS("The railroad station at which the stop should happen."))
+	InVal(1, RTrace<AFGBuildableRailroadStation>, station, TFS("Station"), TFS("The railroad station at which the stop should happen."))
 	InVal(2, RFloat, duration, TFS("Duration"), TFS("The duration how long the train should stop at the station."))
 	OutVal(3, RBool, added, TFS("Added"), TFS("True if the stop got sucessfully added to the time table."))
 	Body()
@@ -1168,7 +1178,7 @@ EndType()
 BeginType(AFGBuildableRailroadTrack, "RailroadTrack", TFS("Railroad Track"), TFS("A peice of railroad track over which trains can drive."))
 BeginFunc(getClosestTrackPosition, TFS("Get Closeset Track Position"), TFS("Returns the closes track position from the given world position")) {
 	InVal(0, RStruct<FVector>, worldPos, TFS("World Pos"), TFS("The world position form which you want to get the closest track position."))
-	OutVal(1, RTrace, track, TFS("Track"), TFS("The track the track pos points to."))
+	OutVal(1, RTrace<AFGBuildableRailroadTrack>, track, TFS("Track"), TFS("The track the track pos points to."))
     OutVal(2, RFloat, offset, TFS("Offset"), TFS("The offset of the track pos."))
     OutVal(3, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
     Body()
@@ -1179,7 +1189,7 @@ BeginFunc(getClosestTrackPosition, TFS("Get Closeset Track Position"), TFS("Retu
 	forward = pos.Forward;
 } EndFunc()
 BeginFunc(getWorldLocAndRotAtPos, TFS("Get World Location And Rotation At Position"), TFS("Returns the world location and world rotation of the track position from the given track position.")) {
-	InVal(0, RTrace, track, TFS("Track"), TFS("The track the track pos points to."))
+	InVal(0, RTrace<AFGBuildableRailroadTrack>, track, TFS("Track"), TFS("The track the track pos points to."))
     InVal(1, RFloat, offset, TFS("Offset"), TFS("The offset of the track pos."))
     InVal(2, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
     OutVal(3, RStruct<FVector>, location, TFS("Location"), TFS("The location at the given track position"))
@@ -1194,7 +1204,7 @@ BeginFunc(getWorldLocAndRotAtPos, TFS("Get World Location And Rotation At Positi
 } EndFunc()
 BeginFunc(getConnection, TFS("Get Connection"), TFS("Returns the railroad track connection at the given direction.")) {
 	InVal(0, RInt, direction, TFS("Direction"), TFS("The direction of which you want to get the connector from. 0 = front, 1 = back"))
-	OutVal(1, RTrace, connection, TFS("Connection"), TFS("The connection component in the given direction."))
+	OutVal(1, RTrace<UFGRailroadTrackConnectionComponent>, connection, TFS("Connection"), TFS("The connection component in the given direction."))
 	Body()
 	connection = Ctx / self->GetConnection(direction);
 } EndFunc()
@@ -1220,12 +1230,12 @@ BeginProp(RStruct<FVector>, connectorNormal, TFS("Connector Normal"), TFS("The n
 } EndProp()
 BeginFunc(getConnection, TFS("Get Connection"), TFS("Returns the connected connection with the given index.")) {
 	InVal(1, RInt, index, TFS("Index"), TFS("The index of the connected connection you want to get."))
-	OutVal(0, RTrace, connection, TFS("Connection"), TFS("The connected connection at the given index."))
+	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, connection, TFS("Connection"), TFS("The connected connection at the given index."))
 	Body()
 	connection = Ctx / self->GetConnection(index);
 } EndFunc()
 BeginFunc(getConnections, TFS("Get Connections"), TFS("Returns a list of all connected connections.")) {
-	OutVal(0, RArray<RTrace>, connections, TFS("Connections"), TFS("A list of all connected connections."))
+	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, connections, TFS("Connections"), TFS("A list of all connected connections."))
 	Body()
 	TArray<FINAny> Connections;
 	for (UFGRailroadTrackConnectionComponent* conn : self->GetConnections()) {
@@ -1234,7 +1244,7 @@ BeginFunc(getConnections, TFS("Get Connections"), TFS("Returns a list of all con
 	connections = Connections;
 } EndFunc()
 BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which this connection is.")) {
-	OutVal(0, RTrace, track, TFS("Track"), TFS("The track the track pos points to."))
+	OutVal(0, RTrace<AFGBuildableRailroadTrack>, track, TFS("Track"), TFS("The track the track pos points to."))
     OutVal(1, RFloat, offset, TFS("Offset"), TFS("The offset of the track pos."))
     OutVal(2, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
     Body()
@@ -1245,32 +1255,32 @@ BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which
 	forward = pos.Forward;
 } EndFunc()
 BeginFunc(getTrack, TFS("Get Track"), TFS("Returns the track of which this connection is part of.")) {
-	OutVal(0, RTrace, track, TFS("Track"), TFS("The track of which this connection is part of."))
+	OutVal(0, RTrace<AFGBuildableRailroadTrack>, track, TFS("Track"), TFS("The track of which this connection is part of."))
 	Body()
 	track = Ctx / self->GetTrack();
 } EndFunc()
 BeginFunc(getSwitchControl, TFS("Get Switch Control"), TFS("Returns the switch control of this connection.")) {
-	OutVal(0, RTrace, switchControl, TFS("Switch"), TFS("The switch control of this connection."))
+	OutVal(0, RTrace<AFGBuildableRailroadSwitchControl>, switchControl, TFS("Switch"), TFS("The switch control of this connection."))
 	Body()
 	switchControl = Ctx / self->GetSwitchControl();
 } EndFunc()
 BeginFunc(getStation, TFS("Get Station"), TFS("Returns the station of which this connection is part of.")) {
-	OutVal(0, RTrace, station, TFS("Station"), TFS("The station of which this connection is part of."))
+	OutVal(0, RTrace<AFGBuildableRailroadStation>, station, TFS("Station"), TFS("The station of which this connection is part of."))
 	Body()
 	station = Ctx / self->GetStation();
 } EndFunc()
 BeginFunc(getSignal, TFS("Get Signal"), TFS("Returns the signal of which this connection is part of.")) {
-	OutVal(0, RTrace, signal, TFS("Signal"), TFS("The signal of which this connection is part of."))
+	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, TFS("Signal"), TFS("The signal of which this connection is part of."))
 	Body()
 	signal = Ctx / self->GetSignal();
 } EndFunc()
 BeginFunc(getOpposite, TFS("Get Opposite"), TFS("Returns the opposite connection of the track this connection is part of.")) {
-	OutVal(0, RTrace, opposite, TFS("Opposite"), TFS("The opposite connection of the track this connection is part of."))
+	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, opposite, TFS("Opposite"), TFS("The opposite connection of the track this connection is part of."))
 	Body()
 	opposite = Ctx / self->GetOpposite();
 } EndFunc()
 BeginFunc(getNext, TFS("Get Next"), TFS("Returns the next connection in the direction of the track. (used the correct path switched point to)")) {
-	OutVal(0, RTrace, next, TFS("Next"), TFS("The next connection in the direction of the track."))
+	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, next, TFS("Next"), TFS("The next connection in the direction of the track."))
 	Body()
 	next = Ctx / self->GetNext();
 } EndFunc()
@@ -1312,17 +1322,17 @@ EndType()
 
 BeginType(AFGBuildableDockingStation, "DockingStation", TFS("Docking Station"), TFS("A docking station for wheeled vehicles to transfer cargo."))
 BeginFunc(getFuelInv, TFS("Get Fueld Inventory"), TFS("Returns the fuel inventory of the docking station.")) {
-	OutVal(0, RTrace, inventory, TFS("Inventory"), TFS("The fuel inventory of the docking station."))
+	OutVal(0, RTrace<UFGInventoryComponent>, inventory, TFS("Inventory"), TFS("The fuel inventory of the docking station."))
 	Body()
 	inventory = Ctx / self->GetFuelInventory();
 } EndFunc()
 BeginFunc(getInv, TFS("Get Inventory"), TFS("Returns the cargo inventory of the docking staiton.")) {
-	OutVal(0, RTrace, inventory, TFS("Inventory"), TFS("The cargo inventory of this docking station."))
+	OutVal(0, RTrace<UFGInventoryComponent>, inventory, TFS("Inventory"), TFS("The cargo inventory of this docking station."))
 	Body()
 	inventory = Ctx / self->GetInventory();
 } EndFunc()
-BeginFunc(getDocked, TFS("Get Docked"), TFS("Returns the currently docked vehicle.")) {
-	OutVal(0, RTrace, docked, TFS("Docked"), TFS("The currently docked vehicle."))
+BeginFunc(getDocked, TFS("Get Docked"), TFS("Returns the currently docked actor.")) {
+	OutVal(0, RTrace<AActor>, docked, TFS("Docked"), TFS("The currently docked actor."))
 	Body()
 	docked = Ctx / self->GetDockedActor();
 } EndFunc()
@@ -1346,7 +1356,7 @@ BeginFunc(flush, TFS("Flush"), TFS("Emptys the whole fluid container.")) {
 	AFGPipeSubsystem::Get(self->GetWorld())->FlushIntegrant(self);
 } EndFunc()
 BeginFunc(getFluidType, TFS("Get Fluid Type"), TFS("Returns the type of the fluid.")) {
-	OutVal(0, RClass, type, TFS("Type"), TFS("The type of the fluid the tank contains."))
+	OutVal(0, RClass<UFGItemDescriptor>, type, TFS("Type"), TFS("The type of the fluid the tank contains."))
 	Body()
 	type = (UClass*)self->GetFluidDescriptor();
 } EndFunc()

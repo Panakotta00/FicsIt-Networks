@@ -9,6 +9,8 @@ class UFINClassProperty : public UFINFuncProperty {
 public:
 	UPROPERTY()
 	UClassProperty* Property = nullptr;
+	UPROPERTY()
+	UClass* Subclass = nullptr;
 
 	// Begin UFINProperty
 	virtual FINAny GetValue(void* Ctx) const override {
@@ -17,11 +19,23 @@ public:
 	}
 	
 	virtual void SetValue(void* Ctx, const FINAny& Value) const override {
+		UClass* Class = Value.GetClass();
+		if (Class && GetSubclass() && !Class->IsChildOf(GetSubclass())) return;
 		if (Property) Property->SetPropertyValue_InContainer(Ctx, Value.GetClass());
 		else Super::SetValue(Ctx, Value);
 	}
 
 	virtual TEnumAsByte<EFINNetworkValueType> GetType() const { return FIN_CLASS; }
 	// End UFINProperty
-	
+
+	/**
+	 * Returns the subclass which all values need to be child of (or equal to)
+	 * if they want to set the value.
+	 * Nullptr if any class is allows
+	 */
+	virtual UClass* GetSubclass() const {
+		if (Subclass) return Subclass;
+		if (Property) return Property->PropertyClass;
+		return nullptr;
+	}
 };

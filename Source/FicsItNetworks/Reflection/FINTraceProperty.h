@@ -10,6 +10,8 @@ public:
 	UPROPERTY()
 	UStructProperty* Property = nullptr;
 	UPROPERTY()
+	UClass* Subclass = nullptr;
+	UPROPERTY()
 	FFINPropertyGetterFunc GetterFunc;
 	UPROPERTY()
 	FFINPropertySetterFunc SetterFunc;
@@ -21,11 +23,19 @@ public:
 	}
 	
 	virtual void SetValue(void* Ctx, const FINAny& Value) const override {
+		UObject* Obj = Value.GetTrace().GetUnderlyingPtr().Get();
+		if (Obj && Subclass && !Obj->IsA(GetSubclass())) return;
 		if (Property) *Property->ContainerPtrToValuePtr<FFINNetworkTrace>(Ctx) = Value.GetTrace();
 		else Super::SetValue(Ctx, Value);
 	}
 
 	virtual TEnumAsByte<EFINNetworkValueType> GetType() const { return FIN_TRACE; }
 	// End UFINProperty
-	
+
+	/**
+	 * Returns the subclass which all values need to be child of (or equal to)
+	 * if they want to set the value.
+	 * Nullptr if any class is allows
+	 */
+	virtual UClass* GetSubclass() const { return Subclass; }
 };

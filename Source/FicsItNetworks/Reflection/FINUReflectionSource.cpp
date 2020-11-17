@@ -43,7 +43,7 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 		} else if (Func) {
 			if (Field->GetName().StartsWith("netPropGet_")) {
 			} else if (Field->GetName().StartsWith("netFunc_")) {
-				ToFillClass->Functions.Add(GenerateFunction(Class, Func));
+				ToFillClass->Functions.Add(GenerateFunction(Ref, Class, Func));
 			} else if (Field->GetName().StartsWith("netSig_")) {
 			} else if (Field->GetName() == "netDesc" && Cast<UTextProperty>(Func->GetReturnProperty()) && Func->ParmsSize == sizeof(FText)) {
 				FText Desc;
@@ -52,7 +52,7 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 			}
 		}
 	}
-
+	
 	ToFillClass->Parent = Ref->FindClass(Class->GetSuperClass());
 	if (ToFillClass->Parent == ToFillClass) ToFillClass->Parent = nullptr;
 }
@@ -275,10 +275,10 @@ FString UFINUReflectionSource::GetSignalNameFromUFunction(UFunction* Func) const
 	return Name;
 }
 
-UFINFunction* UFINUReflectionSource::GenerateFunction(UClass* Class, UFunction* Func) const {
+UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClass* Class, UFunction* Func) const {
 	FFINFunctionMeta Meta = GetFunctionMeta(Class, Func);
 	
-	UFINFunction* FINFunc = NewObject<UFINFunction>();
+	UFINFunction* FINFunc = NewObject<UFINFunction>(Ref->FindClass(Class, false, false));
 	FINFunc->RefFunction = Func;
 	FINFunc->InternalName = GetFunctionNameFromUFunction(Func);
 	FINFunc->DisplayName = FText::FromString(FINFunc->InternalName);
@@ -302,7 +302,7 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(UClass* Class, UFunction* 
 	for (TFieldIterator<UProperty> Param(Func); Param; ++Param) {
 		if (!(Param->PropertyFlags & CPF_Parm)) continue;
 		int i = FINFunc->Parameters.Num();
-		UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(*Param);
+		UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(*Param, FINFunc);
 		FINProp->InternalName = Param->GetName();
 		FINProp->DisplayName = FText::FromString(FINProp->InternalName);
 		if (Meta.ParameterInternalNames.Num() > i) FINProp->InternalName = Meta.ParameterInternalNames[i];
@@ -314,8 +314,8 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(UClass* Class, UFunction* 
 	return FINFunc;
 }
 
-UFINProperty* UFINUReflectionSource::GenerateProperty(const FFINTypeMeta& Meta, UClass* Class, UProperty* Prop) const {
-	UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(Prop);
+UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UProperty* Prop) const {
+	UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(Prop, Ref->FindClass(Class, false, false));
 	FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
 	bool bReadOnly = false;
 	FINProp->InternalName = GetPropertyNameFromUProperty(Prop, bReadOnly);
@@ -341,7 +341,7 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(const FFINTypeMeta& Meta, 
 	return FINProp;
 }
 
-UFINProperty* UFINUReflectionSource::GenerateProperty(const FFINTypeMeta& Meta, UClass* Class, UFunction* Get) const {
+UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UFunction* Get) const {
 	UProperty* GetProp = nullptr;
 	for (TFieldIterator<UProperty> Param(Get); Param; ++Param) {
 		if (Param->PropertyFlags & CPF_Parm) {
@@ -350,12 +350,12 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(const FFINTypeMeta& Meta, 
 			GetProp = *Param;
 		}
 	}
-	UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(GetProp, nullptr);
+	UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(GetProp, Ref->FindClass(Class, false, false));
 	FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
 	FINProp->InternalName = GetPropertyNameFromUFunction(Get);
 	if (UFINFuncProperty* FINSProp = Cast<UFINFuncProperty>(FINProp)) {
 		FINSProp->GetterFunc.Function = Get;
-		FINSProp->GetterFunc.Property = FINCreateFINPropertyFromUProperty(GetProp);
+		FINSProp->GetterFunc.Property = FINCreateFINPropertyFromUProperty(GetProp, FINProp);
 	}
 	UFunction* Set = Class->FindFunctionByName(*(FString("netPropSet_") + FINProp->InternalName));
 	if (Set) {
@@ -370,7 +370,7 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(const FFINTypeMeta& Meta, 
 		}
 		if (UFINFuncProperty* FINSProp = Cast<UFINFuncProperty>(FINProp)) {
 			FINSProp->SetterFunc.Function = Set;
-			FINSProp->SetterFunc.Property = FINCreateFINPropertyFromUProperty(SetProp);
+			FINSProp->SetterFunc.Property = FINCreateFINPropertyFromUProperty(SetProp, FINProp);
 		}
 	} else {
 		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ReadOnly;
@@ -397,10 +397,10 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(const FFINTypeMeta& Meta, 
 	return FINProp;
 }
 
-UFINRefSignal* UFINUReflectionSource::GenerateSignal(UClass* Class, UFunction* Func) {
+UFINRefSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) {
 	FFINSignalMeta Meta = GetSignalMeta(Class, Func);
 	
-	UFINRefSignal* FINSignal = NewObject<UFINRefSignal>();
+	UFINRefSignal* FINSignal = NewObject<UFINRefSignal>(Ref->FindClass(Class, false, false));
 	FINSignal->InternalName = GetFunctionNameFromUFunction(Func);
 	FINSignal->DisplayName = FText::FromString(FINSignal->InternalName);
 	
@@ -410,7 +410,7 @@ UFINRefSignal* UFINUReflectionSource::GenerateSignal(UClass* Class, UFunction* F
 	for (TFieldIterator<UProperty> Param(Func); Param; ++Param) {
 		if (!(Param->PropertyFlags & CPF_Parm)) continue;
 		int i = FINSignal->Parameters.Num();
-		UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(*Param);
+		UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(*Param, FINSignal);
 		FINProp->InternalName = Param->GetName();
 		FINProp->DisplayName = FText::FromString(FINProp->InternalName);
 		if (Meta.ParameterInternalNames.Num() > i) FINProp->InternalName = Meta.ParameterInternalNames[i];
@@ -420,7 +420,7 @@ UFINRefSignal* UFINUReflectionSource::GenerateSignal(UClass* Class, UFunction* F
 		FINSignal->Parameters.Add(FINProp);
 	}
 	FuncSignalMap.Add(Func, FINSignal);
-	SetupFunctionAsSignal(Func);
+	SetupFunctionAsSignal(Ref, Func);
 	return FINSignal;
 }
 
@@ -465,7 +465,7 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 }
 #pragma optimize("", on)
 
-void UFINUReflectionSource::SetupFunctionAsSignal(UFunction* Func) {
+void UFINUReflectionSource::SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func) {
 	Func->SetNativeFunc(&FINUFunctionBasedSignalExecute);
 	Func->FunctionFlags |= FUNC_Native;
 }

@@ -7,29 +7,29 @@ void SFINReflectionUI::Construct(const FArguments& InArgs) {
 	Context.Style = InArgs._Style;
 	TSharedPtr<SHorizontalBox> Box;
 	ChildSlot[
-        SAssignNew(Box, SHorizontalBox)
-        +SHorizontalBox::Slot()[
-            SNew(SVerticalBox)
-            +SVerticalBox::Slot().AutoHeight()[
-                SNew(SEditableTextBox)
-                .OnTextChanged_Lambda([this](FText Text) {
-	                FilterCache(Text.ToString());
-                })
-            ]
-            +SVerticalBox::Slot().AutoHeight()[
-	            SAssignNew(Tree, STreeView<TSharedPtr<FFINReflectionUIEntry>>)
-	            .TreeItemsSource(&Filtered)
-	            .OnGenerateRow_Lambda([](TSharedPtr<FFINReflectionUIEntry> Entry, const TSharedRef<STableViewBase>& Base) {
-	                return SNew(STableRow<TSharedPtr<FFINReflectionUIEntry>>, Base).Content()[
-	                    Entry->GetShortPreview()
-	                ];
-	            })
-	            .OnGetChildren_Lambda([](TSharedPtr<FFINReflectionUIEntry> Entry, TArray<TSharedPtr<FFINReflectionUIEntry>>& Childs) {
-	                Childs = Entry->GetChildren();
-	            })
-	            .OnSelectionChanged_Lambda([this](TSharedPtr<FFINReflectionUIEntry> Entry, ESelectInfo::Type Type) {
-	                Context.SetSelected(Entry.Get());
-	            })
+		SAssignNew(Box, SHorizontalBox)
+		+SHorizontalBox::Slot()[
+			SNew(SVerticalBox)
+			+SVerticalBox::Slot().AutoHeight()[
+				SNew(SEditableTextBox)
+				.OnTextChanged_Lambda([this](FText Text) {
+					FilterCache(Text.ToString());
+				})
+			]
+			+SVerticalBox::Slot().AutoHeight()[
+				SAssignNew(Tree, STreeView<TSharedPtr<FFINReflectionUIEntry>>)
+				.TreeItemsSource(&Filtered)
+				.OnGenerateRow_Lambda([](TSharedPtr<FFINReflectionUIEntry> Entry, const TSharedRef<STableViewBase>& Base) {
+					return SNew(STableRow<TSharedPtr<FFINReflectionUIEntry>>, Base).Content()[
+						Entry->GetShortPreview()
+					];
+				})
+				.OnGetChildren_Lambda([](TSharedPtr<FFINReflectionUIEntry> Entry, TArray<TSharedPtr<FFINReflectionUIEntry>>& Childs) {
+					Childs = Entry->GetChildren();
+				})
+				.OnSelectionChanged_Lambda([this](TSharedPtr<FFINReflectionUIEntry> Entry, ESelectInfo::Type Type) {
+					Context.SetSelected(Entry.Get());
+				})
 			]
 		]
 	];

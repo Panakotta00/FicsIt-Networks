@@ -12,26 +12,26 @@ void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const
 		SAssignNew(Tree, STreeView<TSharedPtr<FFINReflectionUIClass>>)
 		.TreeItemsSource(&ClassSource)
 		.OnGenerateRow_Lambda([](TSharedPtr<FFINReflectionUIClass> Entry, const TSharedRef<STableViewBase>& Base) {
-            return SNew(STableRow<TSharedPtr<FFINReflectionUIClass>>, Base).Content()[
-                Entry->GetShortPreview()
-            ];
-        })
+			return SNew(STableRow<TSharedPtr<FFINReflectionUIClass>>, Base).Content()[
+				Entry->GetShortPreview()
+			];
+		})
 		.OnGetChildren_Lambda([this](TSharedPtr<FFINReflectionUIClass> InEntry, TArray<TSharedPtr<FFINReflectionUIClass>>& OutArray) {
 			OutArray.Empty();
-		    TArray<UFINClass*> Children = InEntry->GetClass()->GetChildClasses();
-		    for (UFINClass* Class : Children) {
-		        TSharedPtr<FFINReflectionUIClass>* Child = Context->Classes.Find(Class);
-		        if (Child) {
-		            if (InEntry != SearchClass) {
-		                if (!SearchClass->GetClass()->IsChildOf(Child->Get()->GetClass())) continue;
-		            }
-		            OutArray.Add(*Child);
-		        }
-		    }
+			TArray<UFINClass*> Children = InEntry->GetClass()->GetChildClasses();
+			for (UFINClass* Class : Children) {
+				TSharedPtr<FFINReflectionUIClass>* Child = Context->Classes.Find(Class);
+				if (Child) {
+					if (InEntry != SearchClass) {
+						if (!SearchClass->GetClass()->IsChildOf(Child->Get()->GetClass())) continue;
+					}
+					OutArray.Add(*Child);
+				}
+			}
 		})
 		.OnMouseButtonDoubleClick_Lambda([this](TSharedPtr<FFINReflectionUIClass> Entry) {
-            Context->SetSelected(Entry.Get());
-        })
+			Context->SetSelected(Entry.Get());
+		})
 	];
 	for (const TPair<UFINClass*, TSharedPtr<FFINReflectionUIClass>>& Entry : Context->Classes) {
 		Tree->SetItemExpansion(Entry.Value, true);

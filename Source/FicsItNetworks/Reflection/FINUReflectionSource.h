@@ -53,10 +53,10 @@ public:
 	virtual void FillData(FFINReflection* Ref, UFINClass* ToFillClass, UClass* Class) const override;
 	// End UFINReflectionSource
 
-	UFINFunction* GenerateFunction(UClass* Class, UFunction* Func) const;
-	UFINProperty* GenerateProperty(const FFINTypeMeta& Meta, UClass* Class, UProperty* Prop) const;
-	UFINProperty* GenerateProperty(const FFINTypeMeta& Meta, UClass* Class, UFunction* Get) const;
-	UFINRefSignal* GenerateSignal(UClass* Class, UFunction* Func);
+	UFINFunction* GenerateFunction(FFINReflection* Ref, UClass* Class, UFunction* Func) const;
+	UFINProperty* GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UProperty* Prop) const;
+	UFINProperty* GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UFunction* Get) const;
+	UFINRefSignal* GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func);
 	static UFINRefSignal* GetSignalFromFunction(UFunction* Func);
-	void SetupFunctionAsSignal(UFunction* Func);
+	void SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func);
 };

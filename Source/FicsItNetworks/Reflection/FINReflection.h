@@ -28,7 +28,7 @@ public:
 	inline const TMap<UClass*, UFINClass*> GetClasses() { return Classes; }
 };
 
-UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* OverrideProperty);
-inline UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property) {
-	return FINCreateFINPropertyFromUProperty(Property, Property);
+UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* OverrideProperty, UObject* Outer);
+inline UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UObject* Outer) {
+	return FINCreateFINPropertyFromUProperty(Property, Property, Outer);
 }

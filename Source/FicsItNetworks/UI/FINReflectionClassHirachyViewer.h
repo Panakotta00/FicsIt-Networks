@@ -3,7 +3,6 @@
 #include "FINReflectionUIStyle.h"
 #include "SlateBasics.h"
 #include "FINReflectionUIContext.h"
-#include "FINReflectionUI.generated.h"
 
 class SFINReflectionClassHirachyViewer : public SCompoundWidget {
 	SLATE_BEGIN_ARGS(SFINReflectionClassHirachyViewer) :
