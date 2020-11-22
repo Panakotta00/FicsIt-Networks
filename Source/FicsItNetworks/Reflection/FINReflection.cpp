@@ -18,6 +18,10 @@ UFINClass* UFINReflection::FindClass(UClass* Clazz, bool bRecursive) {
 	return FFINReflection::Get()->FindClass(Clazz, bRecursive);
 }
 
+UFINStruct* UFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive) {
+	return FFINReflection::Get()->FindStruct(Struct, bRecursive);
+}
+
 FFINReflection* FFINReflection::Get() {
 	static FFINReflection* Self = nullptr;
 	if (!Self) Self = new FFINReflection();
@@ -29,7 +33,7 @@ void FFINReflection::PopulateSources() {
 	Sources.Add(GetDefault<UFINStaticReflectionSource>());
 }
 
-void FFINReflection::LoadAllClasses() {
+void FFINReflection::LoadAllTypes() {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
 	TArray<FString> PathsToScan;
@@ -59,6 +63,10 @@ void FFINReflection::LoadAllClasses() {
 
 	for (TObjectIterator<UClass> Class; Class; ++Class) {
 		if (!Class->GetName().StartsWith("SKEL_") && !Class->GetName().StartsWith("REINST_")) FindClass(*Class);
+	}
+
+	for (TObjectIterator<UScriptStruct> Struct; Struct; ++Struct) {
+		if (!Struct->GetName().StartsWith("SKEL_") && !Struct->GetName().StartsWith("REINST_")) FindStruct(*Struct);
 	}
 }
 
@@ -95,6 +103,41 @@ UFINClass* FFINReflection::FindClass(UClass* Clazz, bool bRecursive, bool bTryTo
 		if (Clazz == UObject::StaticClass()) Clazz = nullptr;
 		else Clazz = Clazz->GetSuperClass();
 	} while (Clazz && bRecursive);
+	return nullptr;
+}
+
+UFINStruct* FFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive, bool bTryToReflect) {
+	if (!Struct) return nullptr;
+	do {
+		// Find class in cache and retrun if found
+		{
+			UFINStruct** FINStruct = Structs.Find(Struct);
+			if (FINStruct) return *FINStruct;
+		}
+
+		// try to load this exact class into cache and return it
+		if (bTryToReflect) {
+			UFINStruct* FINStruct = nullptr;
+			for (const UFINReflectionSource* Source : Sources) {
+				if (Source->ProvidesRequirements(Struct)) {
+					FINStruct = NewObject<UFINStruct>();
+					break;
+				}
+			}
+			if (FINStruct) {
+				Struct->AddToRoot();
+				FINStruct->AddToRoot();
+				Structs.Add(Struct, FINStruct);
+				for (const UFINReflectionSource* Source : Sources) {
+					Source->FillData(this, FINStruct, Struct);
+				}
+				return FINStruct;
+			}
+		}
+
+		// go to the next super class
+		Struct = Cast<UScriptStruct>(Struct->GetSuperStruct());
+	} while (Struct && bRecursive);
 	return nullptr;
 }
 
@@ -149,6 +192,21 @@ void FFINReflection::PrintReflection() {
 		for (UFINProperty* Prop : Class.Value->GetProperties()) {
 			PrintProperty(" ", Prop);
 		}
+		// TODO: Add signals to reflection dump
+	}
+
+	for (TPair<UScriptStruct*, UFINStruct*> FINStruct : Structs) {
+		FString Log = "Struct:";
+		Log += " " + FINStruct.Value->GetInternalName();
+		Log += " '" + FINStruct.Value->GetDisplayName().ToString() + "'";
+		Log += " Desc:'" + FINStruct.Value->GetDescription().ToString() + "'";
+		for (UFINFunction* Function : FINStruct.Value->GetFunctions()) {
+			PrintFunction(" ", Function);
+		}
+		for (UFINProperty* Prop : FINStruct.Value->GetProperties()) {
+			PrintProperty(" ", Prop);
+		}
+		SML::Logging::error("Class: ", TCHAR_TO_UTF8(*Log));
 	}
 }
 

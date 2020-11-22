@@ -2,6 +2,8 @@
 
 #include "FINClass.h"
 #include "FINReflectionSource.h"
+#include "FINStruct.h"
+
 
 #include "FINReflection.generated.h"
 
@@ -11,21 +13,27 @@ class UFINReflection : public UObject {
 private:
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	static UFINClass* FindClass(UClass* Clazz, bool bRecursive = true);
+
+	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
+	static UFINStruct* FindStruct(UScriptStruct* Struct, bool bRecursive = true);
 };
 
 struct FFINReflection {
 private:
 	TMap<UClass*, UFINClass*> Classes;
+	TMap<UScriptStruct*, UFINStruct*> Structs;
 	TArray<const UFINReflectionSource*> Sources;
 	
 public:
 	static FFINReflection* Get();
 	
 	void PopulateSources();
-	void LoadAllClasses();
+	void LoadAllTypes();
 	UFINClass* FindClass(UClass* Clazz, bool bRecursive = true, bool bTryToReflect = true);
+	UFINStruct* FindStruct(UScriptStruct* Struct, bool bRecursive = true, bool bTryToReflect = true);
 	void PrintReflection();
 	inline const TMap<UClass*, UFINClass*> GetClasses() { return Classes; }
+	inline const TMap<UScriptStruct*, UFINStruct*> GetStructs() { return Structs; }
 };
 
 UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* OverrideProperty, UObject* Outer);

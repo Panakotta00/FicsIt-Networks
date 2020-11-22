@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-
 #include "Network/FINAnyNetworkValue.h"
 #include "Network/FINNetworkValues.h"
+#include "FINExecutionContext.h"
 #include "FINProperty.generated.h"
 
 UENUM(BlueprintType)
@@ -46,9 +46,9 @@ struct FFINPropertyGetterFunc {
 	UFunction* Function = nullptr;
 	UPROPERTY()
 	UFINProperty* Property = nullptr;
-	TFunction<FINAny(void*)> GetterFunc;
+	TFunction<FINAny(const FFINExecutionContext&)> GetterFunc;
 
-	FINAny operator()(void* Ctx, bool* Done = nullptr) const;
+	FINAny operator()(const FFINExecutionContext& Ctx, bool* Done = nullptr) const;
 };
 
 USTRUCT()
@@ -59,9 +59,9 @@ struct FFINPropertySetterFunc {
 	UFunction* Function = nullptr;
 	UPROPERTY()
 	UFINProperty* Property = nullptr;
-	TFunction<void(void*, const FINAny&)> SetterFunc;
+	TFunction<void(const FFINExecutionContext&, const FINAny&)> SetterFunc;
 
-	bool operator()(void* Ctx, const FINAny& Any) const;
+	bool operator()(const FFINExecutionContext& Ctx, const FINAny& Any) const;
 };
 
 UCLASS(BlueprintType)
@@ -128,7 +128,7 @@ public:
 };
 
 
-inline FINAny FFINPropertyGetterFunc::operator()(void* Ctx, bool* Done) const {
+inline FINAny FFINPropertyGetterFunc::operator()(const FFINExecutionContext& Ctx, bool* Done) const {
 	if (Function) {
 		if (Done) *Done = true;
 		uint8* Params = (uint8*)FMemory::Malloc(Function->PropertiesSize);
@@ -137,7 +137,7 @@ inline FINAny FFINPropertyGetterFunc::operator()(void* Ctx, bool* Done) const {
 		for (UProperty* LocalProp = Function->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 			LocalProp->InitializeValue_InContainer(Params);
 		}
-		((UObject*)Ctx)->ProcessEvent(Function, Params);
+		Ctx.GetObject()->ProcessEvent(Function, Params);
 		FINAny Return = Property->GetValue(Params);
 		for (UProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
 			if (!P->IsInContainer(Function->ParmsSize)) {
@@ -155,7 +155,7 @@ inline FINAny FFINPropertyGetterFunc::operator()(void* Ctx, bool* Done) const {
 	return FINAny();
 }
 
-inline bool FFINPropertySetterFunc::operator()(void* Ctx, const FINAny& Any) const {
+inline bool FFINPropertySetterFunc::operator()(const FFINExecutionContext& Ctx, const FINAny& Any) const {
 	if (Function) {
 		uint8* Params = (uint8*)FMemory::Malloc(Function->PropertiesSize);
 		FMemory::Memzero(Params + Function->ParmsSize, Function->PropertiesSize - Function->ParmsSize);
@@ -164,7 +164,7 @@ inline bool FFINPropertySetterFunc::operator()(void* Ctx, const FINAny& Any) con
 			LocalProp->InitializeValue_InContainer(Params);
 		}
 		Property->SetValue(Params, Any);
-		((UObject*)Ctx)->ProcessEvent(Function, Params);
+		Ctx.GetObject()->ProcessEvent(Function, Params);
 		for (UProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
 			if (!P->IsInContainer(Function->ParmsSize)) {
 				P->DestroyValue_InContainer(Params);

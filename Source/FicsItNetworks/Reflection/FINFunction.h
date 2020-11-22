@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "FINExecutionContext.h"
 #include "FINProperty.h"
 #include "FINFunction.generated.h"
 
@@ -43,7 +44,7 @@ public:
 	TArray<UFINProperty*> Parameters;
 	UPROPERTY()
 	UFunction* RefFunction = nullptr;
-	TFunction<TArray<FFINAnyNetworkValue>(UObject*, const TArray<FFINAnyNetworkValue>&)> NativeFunction;
+	TFunction<TArray<FFINAnyNetworkValue>(const FFINExecutionContext&, const TArray<FFINAnyNetworkValue>&)> NativeFunction;
 
 	EFINFunctionFlags FunctionFlags = FIN_Func_Sync;
 	
@@ -77,12 +78,14 @@ public:
 	virtual EFINFunctionFlags GetFunctionFlags() const { return FunctionFlags; }
 
 	/**
-	 * Executes the function with the given properties and the given object context
+	 * Executes the function with the given properties and the given Ctx
 	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual TArray<FFINAnyNetworkValue> Execute(UObject* Ctx, const TArray<FFINAnyNetworkValue>& Params) const {
+	virtual TArray<FFINAnyNetworkValue> Execute(const FFINExecutionContext& Ctx, const TArray<FFINAnyNetworkValue>& Params) const {
 		if (NativeFunction) return NativeFunction(Ctx, Params);
 		if (RefFunction) {
+			UObject* Obj = Ctx.GetObject();
+			if (!Obj) return {}; // TODO: Custom Exception for invalid object function execution
+			
 			TArray<FFINAnyNetworkValue> Output;
 			// allocate & initialize parameter struct
 			uint8* ParamStruct = (uint8*)FMemory::Malloc(RefFunction->PropertiesSize);
@@ -100,7 +103,7 @@ public:
 				}
 			}
 			
-			Ctx->ProcessEvent(RefFunction, ParamStruct);
+			Obj->ProcessEvent(RefFunction, ParamStruct);
 
 			// copy output parameters from paramter struct
 			for (UFINProperty* Param : GetParameters()) {
