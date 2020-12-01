@@ -18,7 +18,7 @@ void SFINReflectionSignatureViewer::Construct(const FArguments& InArgs, TArray<U
                 +SVerticalBox::Slot().AutoHeight()[
                     SNew(SHorizontalBox)
                     +SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0)[
-                        GenerateDataTypeIcon(*Entry, Context->Style.Get())
+                        GenerateDataTypeIcon(*Entry, Context)
                     ]
                     +SHorizontalBox::Slot().AutoWidth()[
                         SNew(STextBlock).Text((*Entry)->GetDisplayName())

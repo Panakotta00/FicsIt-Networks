@@ -53,13 +53,107 @@ FString GetText(UFINProperty* Prop) {
 	}
 }
 
-TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, const FFINReflectionUIStyleStruct* Style) {
+TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUIContext* Context) {
+	const FFINReflectionUIStyleStruct* Style = Context->Style.Get();
 	check(Style != nullptr);
+	switch (Prop->GetType()) {
+	case FIN_OBJ: {
+		UFINClass* Class = FFINReflection::Get()->FindClass(Cast<UFINObjectProperty>(Prop)->GetSubclass());
+		if (!Class) break;
+		return SNew(SBox).Content()[SNew(SHorizontalBox)
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString("Obj("))
+        ]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(Class->GetDisplayName())
+            .OnDoubleClicked_Lambda([Context, Class]() {
+                Context->SetSelected(Context->Structs.Find(Class)->Get());
+                return FReply::Handled();
+            })]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString(")"))
+        ]];
+	} case FIN_CLASS: {
+		UFINClass* Class = FFINReflection::Get()->FindClass(Cast<UFINClassProperty>(Prop)->GetSubclass());
+		if (!Class) break;
+		return SNew(SBox).Content()[SNew(SHorizontalBox)
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString("Class("))
+        ]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(Class->GetDisplayName())
+            .OnDoubleClicked_Lambda([Context, Class]() {
+                Context->SetSelected(Context->Structs.Find(Class)->Get());
+                return FReply::Handled();
+            })]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString(")"))
+        ]];
+	} case FIN_TRACE: {
+		UFINClass* Class = FFINReflection::Get()->FindClass(Cast<UFINTraceProperty>(Prop)->GetSubclass());
+		if (!Class) break;
+		return SNew(SBox).Content()[SNew(SHorizontalBox)
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString("Trace("))
+        ]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(Class->GetDisplayName())
+            .OnDoubleClicked_Lambda([Context, Class]() {
+                Context->SetSelected(Context->Structs.Find(Class)->Get());
+                return FReply::Handled();
+            })]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString(")"))
+        ]];
+	} case FIN_STRUCT: {
+		UFINStruct* Struct = FFINReflection::Get()->FindStruct(Cast<UFINStructProperty>(Prop)->GetInner());
+		if (!Struct) break;
+		return SNew(SBox).Content()[SNew(SHorizontalBox)
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString("Struct("))
+        ]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(Struct->GetDisplayName())
+            .OnDoubleClicked_Lambda([Context, Struct]() {
+                Context->SetSelected(Context->Structs.Find(Struct)->Get());
+                return FReply::Handled();
+            })]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString(")"))
+        ]];
+	} case FIN_ARRAY: {
+		return SNew(SBox).Content()[SNew(SHorizontalBox)
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString("Array("))
+        ]
+        +SHorizontalBox::Slot().AutoWidth()[
+			GenerateDataTypeIcon(Cast<UFINArrayProperty>(Prop)->GetInnerType(), Context)
+		]
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock)
+            .Text(FText::FromString(")"))
+        ]];
+	} default: ; }
+
 	FString Text = GetText(Prop);
 	return SNew(STextBlock).Text(FText::FromString(Text));
 }
 
-TSharedRef<SWidget> GeneratePropTypeIcon(UFINProperty* Prop, const FFINReflectionUIStyleStruct* Style) {
+TSharedRef<SWidget> GeneratePropTypeIcon(UFINProperty* Prop, FFINReflectionUIContext* Context) {
+	const FFINReflectionUIStyleStruct* Style = Context->Style.Get();
 	check(Style != nullptr);
 	TSharedRef<SImage> Image = SNew(SImage).Image(&Style->MemberAttrib);
 	if (Prop->GetPropertyFlags() & FIN_Prop_ClassProp) Image->SetImage(&Style->ClassAttrib);
@@ -68,7 +162,8 @@ TSharedRef<SWidget> GeneratePropTypeIcon(UFINProperty* Prop, const FFINReflectio
 	];
 }
 
-TSharedRef<SWidget> GenerateFuncTypeIcon(UFINFunction* Func, const FFINReflectionUIStyleStruct* Style) {
+TSharedRef<SWidget> GenerateFuncTypeIcon(UFINFunction* Func, FFINReflectionUIContext* Context) {
+	const FFINReflectionUIStyleStruct* Style = Context->Style.Get();
 	check(Style != nullptr);
 	TSharedRef<SImage> Image = SNew(SImage).Image(&Style->MemberFunc);
 	if (Func->GetFunctionFlags() & FIN_Func_ClassFunc) Image->SetImage(&Style->ClassFunc);
@@ -93,18 +188,79 @@ bool FFINReflectionUIFilter::PassesFilter(const FString& String) const {
 	return true;
 }
 
-FFINReflectionUIClass::FFINReflectionUIClass(UFINClass* Class, FFINReflectionUIContext* Context) : FFINReflectionUIEntry(Context), Class(Class) {
-	for (UFINProperty* Prop : Class->GetProperties()) {
+FFINReflectionUIStruct::FFINReflectionUIStruct(UFINStruct* Struct, FFINReflectionUIContext* Context) : FFINReflectionUIEntry(Context), Struct(Struct) {
+	for (UFINProperty* Prop : Struct->GetProperties()) {
 		Attributes.Add(MakeShared<FFINReflectionUIProperty>(Prop, Context));
 	}
-	for (UFINFunction* Func : Class->GetFunctions()) {
+	for (UFINFunction* Func : Struct->GetFunctions()) {
 		Functions.Add(MakeShared<FFINReflectionUIFunction>(Func, Context));
-	}
-	for (UFINRefSignal* Signal : Class->GetSignals()) {
-		Signals.Add(MakeShared<FFINReflectionUISignal>(Signal, Context));
 	}
 	Filtered = Attributes;
 	Filtered.Append(Functions);
+}
+
+TSharedRef<SWidget> FFINReflectionUIStruct::GetDetailsWidget() {
+	return SNew(SGridPanel)
+    .FillColumn(0, 1)
+    .FillRow(1, 1)
+    +SGridPanel::Slot(0, 0)[
+        GetPreview()
+    ]
+    +SGridPanel::Slot(0,1)[
+        SNew(SScrollBox)
+        +SScrollBox::Slot()[
+            SNew(STextBlock).Text(Struct->GetDescription())
+        ]
+        +SScrollBox::Slot()[
+            SNew(SFINReflectionEntryListViewer, &Attributes, Context)
+        ]
+        +SScrollBox::Slot()[
+            SNew(SFINReflectionEntryListViewer, &Functions, Context)
+        ]
+    ]
+    +SGridPanel::Slot(1, 1)[
+        SNew(SBox)
+        .MinDesiredWidth(200)
+        .Content()[
+            SNew(SFINReflectionClassHirachyViewer, SharedThis(this), Context)
+            .Style(Context->Style)
+        ]
+    ];
+}
+
+TSharedRef<SWidget> FFINReflectionUIStruct::GetShortPreview() {
+	return SNew(SHorizontalBox)
+        +SHorizontalBox::Slot().AutoWidth()[
+            SNew(STextBlock).Text(Struct->GetDisplayName())
+            .HighlightText_Lambda([this](){ return FText::FromString(Context->FilterString); })
+        ]
+        +SHorizontalBox::Slot().AutoWidth().Padding(5,0,0,0)[
+            SNew(STextBlock).Text( FText::FromString(Struct->GetInternalName()))
+            .HighlightText_Lambda([this](){ return FText::FromString(Context->FilterString); })
+        ];
+}
+
+TSharedRef<SWidget> FFINReflectionUIStruct::GetPreview() {
+	return GetShortPreview();
+}
+
+bool FFINReflectionUIStruct::ApplyFilter(const FFINReflectionUIFilter& Filter) {
+	Filtered.Empty();
+	TArray<TSharedPtr<FFINReflectionUIEntry>> Entries;
+	Entries.Append(Attributes);
+	Entries.Append(Functions);
+	for (const TSharedPtr<FFINReflectionUIEntry>& Entry : Entries) {
+		if (Entry->ApplyFilter(Filter)) {
+			Filtered.Add(Entry);
+		}
+	}
+	return Filtered.Num() > 0 || Filter.PassesFilter(Struct->GetDisplayName().ToString() + " " + Struct->GetInternalName());
+}
+
+FFINReflectionUIClass::FFINReflectionUIClass(UFINClass* Class, FFINReflectionUIContext* Context) : FFINReflectionUIStruct(Class, Context) {
+	for (UFINRefSignal* Signal : Class->GetSignals()) {
+		Signals.Add(MakeShared<FFINReflectionUISignal>(Signal, Context));
+	}
 	Filtered.Append(Signals);
 }
 
@@ -118,7 +274,7 @@ TSharedRef<SWidget> FFINReflectionUIClass::GetDetailsWidget() {
 	+SGridPanel::Slot(0,1)[
 		SNew(SScrollBox)
 		+SScrollBox::Slot()[
-			SNew(STextBlock).Text(Class->GetDescription())
+			SNew(STextBlock).Text(Struct->GetDescription())
 		]
 		+SScrollBox::Slot()[
 			SNew(SFINReflectionEntryListViewer, &Attributes, Context)
@@ -140,34 +296,18 @@ TSharedRef<SWidget> FFINReflectionUIClass::GetDetailsWidget() {
 	];
 }
 
-TSharedRef<SWidget> FFINReflectionUIClass::GetShortPreview() {
-	return SNew(SHorizontalBox)
-	+SHorizontalBox::Slot().AutoWidth()[
-		SNew(STextBlock).Text(Class->GetDisplayName())
-		.HighlightText_Lambda([this](){ return FText::FromString(Context->FilterString); })
-	]
-	+SHorizontalBox::Slot().AutoWidth().Padding(5,0,0,0)[
-		SNew(STextBlock).Text( FText::FromString(Class->GetInternalName()))
-		.HighlightText_Lambda([this](){ return FText::FromString(Context->FilterString); })
-	];
-}
-
-TSharedRef<SWidget> FFINReflectionUIClass::GetPreview() {
-	return GetShortPreview();
-}
-
 bool FFINReflectionUIClass::ApplyFilter(const FFINReflectionUIFilter& Filter) {
-	Filtered.Empty();
-	TArray<TSharedPtr<FFINReflectionUIEntry>> Entries;
-	Entries.Append(Attributes);
-	Entries.Append(Functions);
-	Entries.Append(Signals);
-	for (const TSharedPtr<FFINReflectionUIEntry>& Entry : Entries) {
+	bool Passed = FFINReflectionUIStruct::ApplyFilter(Filter);
+	for (const TSharedPtr<FFINReflectionUIEntry>& Entry : Signals) {
 		if (Entry->ApplyFilter(Filter)) {
 			Filtered.Add(Entry);
 		}
 	}
-	return Filtered.Num() > 0 || Filter.PassesFilter(Class->GetDisplayName().ToString() + " " + Class->GetInternalName());
+	return Passed || Filtered.Num() > 0;
+}
+
+UFINClass* FFINReflectionUIClass::GetClass() const {
+	return Cast<UFINClass>(GetStruct());
 }
 
 TSharedRef<SWidget> FFINReflectionUIProperty::GetDetailsWidget() {
@@ -188,10 +328,10 @@ TSharedRef<SWidget> FFINReflectionUIProperty::GetDetailsWidget() {
 TSharedRef<SWidget> FFINReflectionUIProperty::GetShortPreview() {
 	return SNew(SHorizontalBox)
 	+SHorizontalBox::Slot().AutoWidth()[
-		GeneratePropTypeIcon(Property, Context->Style.Get())
+		GeneratePropTypeIcon(Property, Context)
 	]
 	+SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0)[
-		GenerateDataTypeIcon(Property, Context->Style.Get())
+		GenerateDataTypeIcon(Property, Context)
 	]
 	+SHorizontalBox::Slot().AutoWidth()[
 		SNew(STextBlock).Text(Property->GetDisplayName())
@@ -227,10 +367,10 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetDetailsWidget() {
 			.Style(Context->Style)
 		]
 	];
-	TSharedPtr<FFINReflectionUIClass>* Class = Context->Classes.Find(Cast<UFINClass>(Function->GetOuter()));
+	TSharedPtr<FFINReflectionUIStruct>* Struct = Context->Structs.Find(Cast<UFINStruct>(Function->GetOuter()));
 	SGridPanel::FSlot& Slot = Panel->AddSlot(1, 0);
-	if (Class && Class->IsValid()) Slot[
-		Class->Get()->GetShortPreview()
+	if (Struct && Struct->IsValid()) Slot[
+		Struct->Get()->GetShortPreview()
 	];
 	return Panel;
 }
@@ -238,7 +378,7 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetDetailsWidget() {
 TSharedRef<SWidget> FFINReflectionUIFunction::GetShortPreview() {
 	return SNew(SHorizontalBox)
 	+SHorizontalBox::Slot().AutoWidth()[
-		GenerateFuncTypeIcon(Function, Context->Style.Get())
+		GenerateFuncTypeIcon(Function, Context)
 	]
 	+SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0)[
 		SNew(STextBlock).Text(Function->GetDisplayName())
@@ -253,7 +393,7 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetPreview() {
 	TSharedPtr<SHorizontalBox> ParamBox;
 	TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox)
 	+SHorizontalBox::Slot().AutoWidth()[
-		GenerateFuncTypeIcon(Function, Context->Style.Get())
+		GenerateFuncTypeIcon(Function, Context)
 	]
 	+SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0)[
 		SNew(STextBlock).Text(Function->GetDisplayName())
@@ -279,7 +419,7 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetPreview() {
 		ParamBox->AddSlot().AutoWidth()[
 			SNew(SHorizontalBox)
 			+SHorizontalBox::Slot().AutoWidth()[
-				GenerateDataTypeIcon(Prop, Context->Style.Get())
+				GenerateDataTypeIcon(Prop, Context)
 			]
 			+SHorizontalBox::Slot().AutoWidth().Padding(5,0,0,0)[
 				SNew(STextBlock).Text(Prop->GetDisplayName())
@@ -351,7 +491,7 @@ TSharedRef<SWidget> FFINReflectionUISignal::GetPreview() {
 		ParamBox->AddSlot().AutoWidth()[
 			SNew(SHorizontalBox)
 			+SHorizontalBox::Slot().AutoWidth()[
-				GenerateDataTypeIcon(Prop, Context->Style.Get())
+				GenerateDataTypeIcon(Prop, Context)
 			]
 			+SHorizontalBox::Slot().AutoWidth().Padding(5,0,0,0)[
 				SNew(STextBlock).Text(Prop->GetDisplayName())
@@ -367,10 +507,14 @@ bool FFINReflectionUISignal::ApplyFilter(const FFINReflectionUIFilter& Filter) {
 
 FFINReflectionUIContext::FFINReflectionUIContext() {
 	Entries.Empty();
-	Classes.Empty();
+	Structs.Empty();
 	for (const TPair<UClass*, UFINClass*>& Class : FFINReflection::Get()->GetClasses()) {
 		UE_LOG(LogTemp, Warning, TEXT("%p %s %p %s"), Class.Key, *Class.Key->GetName(), Class.Value, *Class.Value->GetInternalName());
-		Classes.Add(Class.Value, MakeShared<FFINReflectionUIClass>(Class.Value, this));
+		Structs.Add(Class.Value, MakeShared<FFINReflectionUIClass>(Class.Value, this));
 	}
-	for (const TPair<UFINClass*, TSharedPtr<FFINReflectionUIClass>>& Class : Classes) Entries.Add(Class.Value);
+	for (const TPair<UScriptStruct*, UFINStruct*>& Struct : FFINReflection::Get()->GetStructs()) {
+		UE_LOG(LogTemp, Warning, TEXT("%p %s %p %s"), Struct.Key, *Struct.Key->GetName(), Struct.Value, *Struct.Value->GetInternalName());
+		Structs.Add(Struct.Value, MakeShared<FFINReflectionUIStruct>(Struct.Value, this));
+	}
+	for (const TPair<UFINStruct*, TSharedPtr<FFINReflectionUIStruct>>& Struct : Structs) Entries.Add(Struct.Value);
 }

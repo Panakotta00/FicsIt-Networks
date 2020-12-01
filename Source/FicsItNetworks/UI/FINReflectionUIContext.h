@@ -6,12 +6,13 @@
 class FFINReflectionUIContext;
 class UFINRefSignal;
 class UFINClass;
+class UFINStruct;
 class UFINFunction;
 class UFINProperty;
 
-TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, const FFINReflectionUIStyleStruct* Style);
-TSharedRef<SWidget> GeneratePropTypeIcon(UFINProperty* Prop, const FFINReflectionUIStyleStruct* Style);
-TSharedRef<SWidget> GenerateFuncTypeIcon(UFINFunction* Func, const FFINReflectionUIStyleStruct* Style);
+TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUIContext* Context);
+TSharedRef<SWidget> GeneratePropTypeIcon(UFINProperty* Prop, FFINReflectionUIContext* Context);
+TSharedRef<SWidget> GenerateFuncTypeIcon(UFINFunction* Func, FFINReflectionUIContext* Context);
 
 class FFINReflectionUIEntry;
 
@@ -40,17 +41,16 @@ public:
 	virtual bool ApplyFilter(const FFINReflectionUIFilter& Filter) = 0;
 };
 
-class FFINReflectionUIClass : public FFINReflectionUIEntry {
-private:
-	UFINClass* Class;
+class FFINReflectionUIStruct : public FFINReflectionUIEntry {
+protected:
+	UFINStruct* Struct;
 	TArray<TSharedPtr<FFINReflectionUIEntry>> Filtered;
 
 public:
 	TArray<TSharedPtr<FFINReflectionUIEntry>> Attributes;
 	TArray<TSharedPtr<FFINReflectionUIEntry>> Functions;
-	TArray<TSharedPtr<FFINReflectionUIEntry>> Signals;
 	
-	FFINReflectionUIClass(UFINClass* Class, FFINReflectionUIContext* Context);
+	FFINReflectionUIStruct(UFINStruct* Struct, FFINReflectionUIContext* Context);
 	
 	virtual TArray<TSharedPtr<FFINReflectionUIEntry>> GetChildren() override { return Filtered; }
 	virtual TSharedRef<SWidget> GetDetailsWidget() override;
@@ -58,7 +58,19 @@ public:
 	virtual TSharedRef<SWidget> GetPreview() override;
 	virtual bool ApplyFilter(const FFINReflectionUIFilter& Filter) override;
 
-	UFINClass* GetClass() const { return Class; }
+	UFINStruct* GetStruct() const { return Struct; }
+};
+
+class FFINReflectionUIClass : public FFINReflectionUIStruct {
+public:
+	TArray<TSharedPtr<FFINReflectionUIEntry>> Signals;
+	
+	FFINReflectionUIClass(UFINClass* Class, FFINReflectionUIContext* Context);
+	
+	virtual TSharedRef<SWidget> GetDetailsWidget() override;
+	virtual bool ApplyFilter(const FFINReflectionUIFilter& Filter) override;
+
+	UFINClass* GetClass() const;
 };
 
 class FFINReflectionUIProperty : public FFINReflectionUIEntry {
@@ -107,7 +119,7 @@ private:
 public:
 	TAttribute<const FFINReflectionUIStyleStruct*> Style;
 	TArray<TSharedPtr<FFINReflectionUIEntry>> Entries;
-	TMap<UFINClass*, TSharedPtr<FFINReflectionUIClass>> Classes;
+	TMap<UFINStruct*, TSharedPtr<FFINReflectionUIStruct>> Structs;
 	FString FilterString;
 	
 	FFINReflectionUISelectionChanged OnSelectionChanged;
@@ -119,6 +131,7 @@ public:
 		SelectedEntry = Entry;
 		OnSelectionChanged.Broadcast(SelectedEntry);
 	}
+	
 	FFINReflectionUIEntry* GetSelected() const {
 		return SelectedEntry;
 	}

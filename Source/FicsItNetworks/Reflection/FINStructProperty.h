@@ -37,4 +37,9 @@ public:
 
 	virtual TEnumAsByte<EFINNetworkValueType> GetType() const { return FIN_STRUCT; }
 	// End UFINProperty
+
+	/**
+	 * Returns the filter type of this struct property
+	 */
+	virtual UScriptStruct* GetInner() const { return Struct; }
 };

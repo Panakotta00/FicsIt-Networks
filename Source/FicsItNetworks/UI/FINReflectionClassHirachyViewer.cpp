@@ -2,39 +2,47 @@
 
 #include "Reflection/FINReflection.h"
 
-void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const TSharedPtr<FFINReflectionUIClass>& InSearchClass, FFINReflectionUIContext* InContext) {
+void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const TSharedPtr<FFINReflectionUIStruct>& InSearchStruct, FFINReflectionUIContext* InContext) {
 	Style = InArgs._Style;
 	Context = InContext;
-	SearchClass = InSearchClass;
-	ClassSource.Add(*Context->Classes.Find(FFINReflection::Get()->FindClass(UObject::StaticClass())));
-	TSharedPtr<STreeView<TSharedPtr<FFINReflectionUIClass>>> Tree;
+	SearchStruct = InSearchStruct;
+	
+	UFINStruct* Outer = SearchStruct->GetStruct();
+	// Find upper most parent of struct
+	while (Outer->GetParent()) {
+		Outer = Outer->GetParent();
+	}
+	
+	StructSource.Add(*Context->Structs.Find(Outer));
+	
+	TSharedPtr<STreeView<TSharedPtr<FFINReflectionUIStruct>>> Tree;
 	ChildSlot[
-		SAssignNew(Tree, STreeView<TSharedPtr<FFINReflectionUIClass>>)
-		.TreeItemsSource(&ClassSource)
-		.OnGenerateRow_Lambda([](TSharedPtr<FFINReflectionUIClass> Entry, const TSharedRef<STableViewBase>& Base) {
-			return SNew(STableRow<TSharedPtr<FFINReflectionUIClass>>, Base).Content()[
+		SAssignNew(Tree, STreeView<TSharedPtr<FFINReflectionUIStruct>>)
+		.TreeItemsSource(&StructSource)
+		.OnGenerateRow_Lambda([](TSharedPtr<FFINReflectionUIStruct> Entry, const TSharedRef<STableViewBase>& Base) {
+			return SNew(STableRow<TSharedPtr<FFINReflectionUIStruct>>, Base).Content()[
 				Entry->GetShortPreview()
 			];
 		})
-		.OnGetChildren_Lambda([this](TSharedPtr<FFINReflectionUIClass> InEntry, TArray<TSharedPtr<FFINReflectionUIClass>>& OutArray) {
+		.OnGetChildren_Lambda([this](TSharedPtr<FFINReflectionUIStruct> InEntry, TArray<TSharedPtr<FFINReflectionUIStruct>>& OutArray) {
 			OutArray.Empty();
-			TArray<UFINClass*> Children = InEntry->GetClass()->GetChildClasses();
-			for (UFINClass* Class : Children) {
-				TSharedPtr<FFINReflectionUIClass>* Child = Context->Classes.Find(Class);
+			TArray<UFINStruct*> Children = InEntry->GetStruct()->GetChildren();
+			for (UFINStruct* Struct : Children) {
+				TSharedPtr<FFINReflectionUIStruct>* Child = Context->Structs.Find(Struct);
 				if (Child) {
-					if (InEntry != SearchClass) {
-						if (!SearchClass->GetClass()->IsChildOf(Child->Get()->GetClass())) continue;
+					if (InEntry != SearchStruct) {
+						if (!SearchStruct->GetStruct()->IsChildOf(Child->Get()->GetStruct())) continue;
 					}
 					OutArray.Add(*Child);
 				}
 			}
 		})
-		.OnMouseButtonDoubleClick_Lambda([this](TSharedPtr<FFINReflectionUIClass> Entry) {
+		.OnMouseButtonDoubleClick_Lambda([this](TSharedPtr<FFINReflectionUIStruct> Entry) {
 			Context->SetSelected(Entry.Get());
 		})
 	];
-	for (const TPair<UFINClass*, TSharedPtr<FFINReflectionUIClass>>& Entry : Context->Classes) {
+	for (const TPair<UFINStruct*, TSharedPtr<FFINReflectionUIStruct>>& Entry : Context->Structs) {
 		Tree->SetItemExpansion(Entry.Value, true);
 	}
-	Tree->SetSelection(SearchClass);
+	Tree->SetSelection(SearchStruct);
 }

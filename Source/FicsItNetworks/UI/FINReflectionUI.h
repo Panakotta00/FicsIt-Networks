@@ -42,4 +42,10 @@ public:
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;	
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	// End UWidget
+
+	/**
+	 * Sets the currently selected typer of the reflection viewer
+	 */
+	UFUNCTION(BlueprintCallable, Category="Reflection|UI")
+	void SetSelected(UFINStruct* InStruct);
 };

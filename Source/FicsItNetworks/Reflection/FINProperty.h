@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FINBase.h"
 #include "Network/FINAnyNetworkValue.h"
 #include "Network/FINNetworkValues.h"
 #include "FINExecutionContext.h"
@@ -65,35 +66,10 @@ struct FFINPropertySetterFunc {
 };
 
 UCLASS(BlueprintType)
-class UFINProperty : public UObject {
+class UFINProperty : public UFINBase {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-	FText Description;
-	UPROPERTY()
-	FString InternalName = TEXT("UnknownProperty");
-	UPROPERTY()
-	FText DisplayName = FText::FromString("Unknown Property");
-
 	EFINRepPropertyFlags PropertyFlags = FIN_Prop_Sync;
-	
-	/**
-	 * Returns the description of this property
-	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual FText GetDescription() const { return Description; }
-	
-	/**
-	 * Returns a more cryptic name of the property, used mainly for internal reference
-	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-    virtual FString GetInternalName() const { return InternalName; }
-
-	/**
-	 * Returns a human readable name of the property, mainly used for UI
-	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-    virtual FText GetDisplayName() const { return DisplayName; }
 	
 	/**
 	 * Returns the data type of the property

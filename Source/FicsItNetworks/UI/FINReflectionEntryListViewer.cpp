@@ -14,7 +14,7 @@ void SFINReflectionEntryListViewer::Construct(const FArguments& InArgs, TArray<T
 			];
 		})
 		.OnMouseButtonDoubleClick_Lambda([this](TSharedPtr<FFINReflectionUIEntry> Entry) {
-			Context->SetSelected(Entry.Get());
+			this->Context->SetSelected(Entry.Get());
 		})
 	];
 }

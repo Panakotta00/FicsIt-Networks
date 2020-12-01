@@ -1,19 +1,14 @@
 ﻿#pragma once
 
+#include "FINBase.h"
 #include "FINFunction.h"
 #include "FINStruct.generated.h"
 
 UCLASS(BlueprintType)
-class UFINStruct : public UObject {
+class UFINStruct : public UFINBase {
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY()
-	FText Description;
-	UPROPERTY()
-	FString InternalName = TEXT("UnknownStruct");
-	UPROPERTY()
-	FText DisplayName = FText::FromString(TEXT("Unknown Structure"));
 	UPROPERTY()
 	TArray<UFINProperty*> Properties;
 	UPROPERTY()
@@ -21,24 +16,6 @@ public:
 	UPROPERTY()
 	UFINStruct* Parent = nullptr;
 	
-	/**
-	 * Returns the description of this property
-	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-    virtual FText GetDescription() const { return Description; }
-	
-	/**
-	 * Returns a more cryptic name of the class, used mainly for internal reference
-	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual FString GetInternalName() const { return InternalName; }
-
-	/**
-	 * Returns a human readable name of the class, mainly used for UI
-	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual FText GetDisplayName() const { return DisplayName; }
-
 	/**
 	 * Returns a list of all available properties
 	 * @param[in]	bRecursive	true if properties of all parent classes should be included
@@ -68,7 +45,7 @@ public:
 	virtual UFINStruct* GetParent() const { return Parent; }
 
 	/**
-	 * Checks if this class extends from the given class (has the given class as an parent)
+	 * Checks if this class extends from the given class (has the given struct as an parent)
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	bool IsChildOf(const UFINStruct* Struct) const {
@@ -81,9 +58,9 @@ public:
 	}
 
 	/**
-	 * Returns a array filled with all direct child classes of this class.
+	 * Returns a array filled with all direct child classes of this strzct.
 	 */
-	TArray<UFINStruct*> GetChildClasses() const {
+	TArray<UFINStruct*> GetChildren() const {
 		TArray<UFINStruct*> Childs;
 		for(TObjectIterator<UFINStruct> It; It; ++It) {
 			if(It->GetParent() == this) {

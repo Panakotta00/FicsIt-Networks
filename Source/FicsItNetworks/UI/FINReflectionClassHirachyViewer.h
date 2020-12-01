@@ -10,10 +10,10 @@ class SFINReflectionClassHirachyViewer : public SCompoundWidget {
 		SLATE_ATTRIBUTE(const FFINReflectionUIStyleStruct*, Style)
 	SLATE_END_ARGS()
 public:
-	void Construct(const FArguments& InArgs, const TSharedPtr<FFINReflectionUIClass>& SearchClass, FFINReflectionUIContext* Context);
+	void Construct(const FArguments& InArgs, const TSharedPtr<FFINReflectionUIStruct>& SearchStruct, FFINReflectionUIContext* Context);
 private:
 	FFINReflectionUIContext* Context = nullptr;
 	TAttribute<const FFINReflectionUIStyleStruct*> Style;
-	TSharedPtr<FFINReflectionUIClass> SearchClass;
-	TArray<TSharedPtr<FFINReflectionUIClass>> ClassSource;
+	TSharedPtr<FFINReflectionUIStruct> SearchStruct;
+	TArray<TSharedPtr<FFINReflectionUIStruct>> StructSource;
 };

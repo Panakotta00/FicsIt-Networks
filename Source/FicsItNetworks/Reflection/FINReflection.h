@@ -4,7 +4,6 @@
 #include "FINReflectionSource.h"
 #include "FINStruct.h"
 
-
 #include "FINReflection.generated.h"
 
 UCLASS(BlueprintType)
