@@ -26,10 +26,9 @@ namespace FicsItKernel {
 					newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
 				} else {
 					UObject* Obj = *p->ContainerPtrToValuePtr<UObject*>(data);
-					UObject* Org = Obj;
-					if (Obj && Cast<UObjectProperty>(p)->PropertyClass == UObject::StaticClass() && Obj->Implements<UFINNetworkComponent>()) trace = trace / Obj / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
-					else trace = trace / Obj;
-					newInstance(L, trace, Org);
+					trace = trace / Obj;
+					if (Obj && Obj->Implements<UFINNetworkComponent>()) trace = trace / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+					newInstance(L, trace);
 				}
 			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
@@ -130,6 +129,52 @@ namespace FicsItKernel {
 				}
 				Val = FFINAnyNetworkValue();
 				break;
+			}
+		}
+
+		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val) {
+			switch (Val.GetType()) {
+			case FIN_NIL:
+				lua_pushnil(L);
+				break;
+			case FIN_BOOL:
+				lua_pushboolean(L, Val.GetBool());
+				break;
+			case FIN_INT:
+				lua_pushinteger(L, Val.GetInt());
+				break;
+			case FIN_FLOAT:
+				lua_pushnumber(L, Val.GetFloat());
+				break;
+			case FIN_STR:
+				lua_pushstring(L, TCHAR_TO_UTF8(*Val.GetString()));
+				break;
+			case FIN_OBJ:
+				newInstance(L, FFINNetworkTrace(Val.GetObject().Get()));
+				break;
+			case FIN_CLASS:
+				newInstance(L, Val.GetClass());
+				break;
+			case FIN_TRACE:
+				newInstance(L, Val.GetTrace());
+				break;
+			case FIN_STRUCT:
+				luaStruct(L, Val.GetStruct());
+				break;
+			case FIN_ARRAY: {
+				lua_newtable(L);
+				int i = 0;
+				for (const FFINAnyNetworkValue& Entry : Val.GetArray()) {
+					networkValueToLua(L, Entry);
+					lua_seti(L, -2, ++i);
+				}
+				break;
+			} case FIN_ANY:
+				// TODO: IDK - this shit: networkValueToLua(L, Val.GetAny());
+				lua_pushnil(L);
+				break;
+			default:
+				lua_pushnil(L);
 			}
 		}
 	}

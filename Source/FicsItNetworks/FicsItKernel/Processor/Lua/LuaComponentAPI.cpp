@@ -11,6 +11,7 @@
 
 #include "FGBlueprintFunctionLibrary.h"
 #include "FGRecipeManager.h"
+#include "Network/FINNetworkCustomType.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -38,13 +39,9 @@ namespace FicsItKernel {
 				int j = 0;
 				for (auto& id : ids) {
 					FFINNetworkTrace comp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByID(id.c_str());
-					UObject* Obj = *comp;
-					UObject* Org = Obj;
-					if (Obj && Obj->Implements<UFINNetworkComponent>()) {
-						UObject* Redirect = IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
-						if (Redirect && Obj != Redirect) comp = comp / Redirect;
-					}
-					newInstance(L, comp, Org);
+					UObject* Obj = comp.GetUnderlyingPtr().Get();
+					if (Obj && Obj->Implements<UFINNetworkComponent>()) comp = comp / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+					newInstance(L, comp);
 					if (isT) lua_seti(L, -2, ++j);
 				}
 			}
