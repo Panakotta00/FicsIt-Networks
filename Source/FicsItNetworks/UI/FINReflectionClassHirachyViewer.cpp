@@ -38,7 +38,7 @@ void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const
 			}
 		})
 		.OnMouseButtonDoubleClick_Lambda([this](TSharedPtr<FFINReflectionUIStruct> Entry) {
-			Context->SetSelected(Entry.Get());
+			this->Context->SetSelected(Entry.Get());
 		})
 	];
 	for (const TPair<UFINStruct*, TSharedPtr<FFINReflectionUIStruct>>& Entry : Context->Structs) {

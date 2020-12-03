@@ -38,7 +38,7 @@ FString GetText(UFINProperty* Prop) {
 		return "Class";
 	case FIN_STRUCT:
 		if (Cast<UFINStructProperty>(Prop)->Struct) {
-			return FString("Struct(") + Cast<UFINStructProperty>(Prop)->Struct->GetDisplayNameText().ToString() + ")";
+			return FString("Struct(") +  FFINReflection::Get()->FindStruct(Cast<UFINStructProperty>(Prop)->Struct)->GetDisplayName().ToString() + ")";
 		}
 		return "Struct";
 	case FIN_TRACE:
