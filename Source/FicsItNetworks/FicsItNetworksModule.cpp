@@ -22,9 +22,7 @@
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-#include "Runtime/CoreUObject/Public/Misc/RedirectCollector.h"
 
-#include "FicsItKernel/Processor/Lua/LuaLib.h"
 #include "Reflection/FINReflection.h"
 
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);

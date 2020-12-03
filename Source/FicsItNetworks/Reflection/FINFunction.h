@@ -14,8 +14,9 @@ enum EFINFunctionFlags {
 	FIN_Func_Sync			= 0b00000010,
 	FIN_Func_Parallel		= 0b00000110,
 	FIN_Func_Async			= 0b00001110,
-	FIN_Func_ClassFunc		= 0b00010000,
-	FIN_Func_StaticFunc		= 0b00100000,
+	FIN_Func_MemberFunc		= 0b00010000,
+	FIN_Func_ClassFunc		= 0b00100000,
+	FIN_Func_StaticFunc		= 0b01000000,
 };
 
 inline EFINFunctionFlags operator|(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {

@@ -28,17 +28,18 @@
 #include "FGRailroadVehicleMovementComponent.h"
 #include "FGTargetPointLinkedList.h"
 #include "FGTrainStationIdentifier.h"
+#include "FGWheeledVehicle.h"
+#include "FGTargetPoint.h"
 #include "FINBoolProperty.h"
 #include "FINClassProperty.h"
 #include "FINFloatProperty.h"
 #include "FINReflection.h"
 #include "FINTraceProperty.h"
-#include "FicsItKernel/Processor/Lua/LuaInstance.h"
-#include "FicsItKernel/Processor/Lua/LuaLib.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "util/ReflectionHelper.h"
 #include "Utils/FINTimeTableStop.h"
 #include "Utils/FINTrackGraph.h"
+#include "Utils/FINTargetPoint.h"
 
 TMap<UClass*, FFINStaticClassReg> UFINStaticReflectionSource::Classes;
 TMap<UScriptStruct*, FFINStaticStructReg> UFINStaticReflectionSource::Structs;
@@ -88,6 +89,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_StaticFunc;
 			break;
 		default:
+			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_MemberFunc;
 			break;
 		}
 
@@ -215,6 +217,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_StaticFunc;
 			break;
 		default:
+			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_MemberFunc;
 			break;
 		}
 

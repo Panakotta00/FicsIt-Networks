@@ -282,6 +282,7 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClas
 	FINFunc->RefFunction = Func;
 	FINFunc->InternalName = GetFunctionNameFromUFunction(Func);
 	FINFunc->DisplayName = FText::FromString(FINFunc->InternalName);
+	FINFunc->FunctionFlags = FIN_Func_MemberFunc;
 	
 	if (Meta.InternalName.Len()) FINFunc->InternalName = Meta.InternalName;
 	if (!Meta.DisplayName.IsEmpty()) FINFunc->DisplayName = Meta.DisplayName;
