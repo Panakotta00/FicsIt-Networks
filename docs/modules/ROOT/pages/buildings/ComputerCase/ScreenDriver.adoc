@@ -13,7 +13,7 @@
 
 |image::buildings/ScreenDriver_bg.png[300,300,role="left"]
 |image::buildings/ScreenDriver_ig.jpg[300,300,role="left"]
-|===a
+|===
 
 This computer module allows you to add a screen to your computer with which you can interact from
 within the UI of the computer case.
