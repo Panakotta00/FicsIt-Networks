@@ -1,5 +1,5 @@
 = Network Router
-:description: The Network Router allows you to sepereate multiple component networks from each other, but shared network messages between them.
+:description: The Network Router allows you to compartmentalize your FIC-SIT networks for easy modification.
 
 [cols="1,3a"]
 |===
@@ -18,15 +18,11 @@
 |image::buildings/NetworkRouter_ig.jpg[300,300,role="left"]
 |===
 
-The Network Router allows you to sepperate multiple component network from each other,
-but shares network messages between those networks.
+The Network Router allows you to compartmentalize your FIC-SIT networks for easy modification,
+while still allowing cross-network communication.
 
-For that it has two network connectors.
-
-You can also define filters to filter which messages are shared.
-Each filter can be in Whitelist-Mode or Blacklist-Mode,
-they are default set to Blacklist-Mode.
-There is a Filter for allowed ports and for allowed sender addresses.
+Filters can also be defined based on message port and address.
+Filters are set to Blacklist by default.
 
 === Functions
 
