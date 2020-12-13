@@ -13,15 +13,15 @@ public:
 	UClass* Subclass = nullptr;
 
 	// Begin UFINProperty
-	virtual FINAny GetValue(void* Ctx) const override {
-		if (Property) return Property->GetPropertyValue_InContainer(Ctx);
+	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
+		if (Property) return Property->GetPropertyValue_InContainer(Ctx.GetGeneric());
 		return Super::GetValue(Ctx);
 	}
 	
-	virtual void SetValue(void* Ctx, const FINAny& Value) const override {
+	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
 		UObject* Obj = Value.GetObject().Get();
 		if (Obj && GetSubclass() && !Obj->IsA(GetSubclass())) return;
-		if (Property) Property->SetPropertyValue_InContainer(Ctx, Obj);
+		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Obj);
 		else Super::SetValue(Ctx, Value);
 	}
 

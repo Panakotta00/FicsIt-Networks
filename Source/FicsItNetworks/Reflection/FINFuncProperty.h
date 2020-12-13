@@ -13,11 +13,11 @@ public:
 	FFINPropertySetterFunc SetterFunc;
 
 	// Begin UFINProperty
-	virtual FINAny GetValue(void* Ctx) const override {
+	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
 		return GetterFunc(Ctx);
 	}
 	
-	virtual void SetValue(void* Ctx, const FINAny& Value) const override {
+	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
 		SetterFunc(Ctx, Value);
 	}
 	// End UFINProperty

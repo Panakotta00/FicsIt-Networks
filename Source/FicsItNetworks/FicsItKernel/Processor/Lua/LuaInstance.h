@@ -12,6 +12,8 @@
 
 #include "Network/FINNetworkTrace.h"
 
+class UFINFunction;
+class UFINClass;
 class UFINStruct;
 
 namespace FicsItKernel {
@@ -35,6 +37,14 @@ namespace FicsItKernel {
 		 */
 		struct LuaClassInstance {
 			UClass* Class;
+		};
+
+		/**
+		 * Structure that contains all necessery infromation for a function
+		 */
+		struct LuaInstanceFunc {
+			UFINFunction* Func;
+			UFINClass* Class;
 		};
 
 		/**

@@ -115,7 +115,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		}
 
 		auto NFunc = Func.Function;
-		FINFunc->NativeFunction = [Func](const FFINExecutionContext& Ctx, const TArray<FINAny>& Params) -> TArray<FINAny> {
+		FINFunc->NativeFunction = [Func](const FFINExecutionContext& Ctx, const TArray<FINAny>& InValues) -> TArray<FINAny> {
 			TArray<FINAny> Parameters;
 			TArray<int> Pos;
 			Func.Parameters.GetKeys(Pos);
@@ -124,20 +124,23 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			if (Pos.Num() > 0) for (int i = 0; i <= Pos[Pos.Num()-1]; ++i) {
 				const FFINStaticFuncParamReg* Reg = Func.Parameters.Find(i);
 				if (Reg && Reg->ParamType == 0) {
-					Parameters.Add(Params[j++]);
+					Parameters.Add(InValues[j++]);
 				} else {
 					Parameters.Add(FINAny());
 				}
 			}
+			for (; j < InValues.Num(); j++) Parameters.Add(InValues[j]);
 			Func.Function(Ctx, Parameters);
-
+			
 			TArray<FINAny> OutValues;
 			if (Pos.Num() > 0) for (int i = 0; i <= Pos[Pos.Num()-1]; ++i) {
 				const FFINStaticFuncParamReg* Reg = Func.Parameters.Find(i);
 				if (Reg && Reg->ParamType > 0) {
 					OutValues.Add(Parameters[i]);
+					j++;
 				}
 			}
+			for (; j < Parameters.Num();) OutValues.Add(Parameters[j++]);
 			return OutValues;
 		};
 		
@@ -485,6 +488,7 @@ struct RArray {
 	}
 };
 
+#pragma optimize("", off)
 BeginClass(UObject, "Object", TFS("Object"), TFS("The base class of every object."))
 BeginProp(RInt, hash, TFS("Hash"), TFS("A Hash of this object. This is a value that nearly uniquely identifies this object.")) {
 	Return (int64)GetTypeHash(self);
@@ -503,6 +507,7 @@ BeginClassFunc(getHash, TFS("Get Hash"), TFS("Returns the hash of this class. Th
 	hash = (int64) GetTypeHash(self);
 } EndFunc()
 EndClass()
+#pragma optimize("", on)
 
 BeginClass(AActor, "Actor", TFS("Actor"), TFS("This is the base class of all things that can exist within the world by them self."))
 BeginProp(RStruct<FVector>, location, TFS("Location"), TFS("The location of the actor in the world.")) {
@@ -575,10 +580,10 @@ BeginFuncVA(getStack, TFS("Get Stack"), TFS("Returns the item stack at the given
 	for (int i = 0; i < ArgNum; ++i) {
 		const FINAny& Any = Params[i];
 		FInventoryStack Stack;
-		if (Any.GetType() != FIN_INT && !self->GetStackFromIndex(Any.GetInt(), Stack)) {
-			Params.Add(FINAny());
-		} else {
+		if (Any.GetType() == FIN_INT && self->GetStackFromIndex(Any.GetInt(), Stack)) { // GetInt realy correct?
 			Params.Add(FINAny(Stack));
+		} else {
+			Params.Add(FINAny());
 		}
 	}
 } EndFunc()

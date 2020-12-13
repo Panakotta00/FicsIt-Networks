@@ -13,23 +13,23 @@ public:
 	UScriptStruct* Struct = nullptr;
 	
 	// Begin UFINProperty
-	virtual FINAny GetValue(void* Ctx) const override {
+	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
 		if (Property) {
 			if (Property->Struct == FFINDynamicStructHolder::StaticStruct()) {
-				return *Property->ContainerPtrToValuePtr<FFINDynamicStructHolder>(Ctx);
+				return *Property->ContainerPtrToValuePtr<FFINDynamicStructHolder>(Ctx.GetGeneric());
 			}
-			return FFINDynamicStructHolder(Property->Struct, Property->ContainerPtrToValuePtr<void>(Ctx));
+			return FFINDynamicStructHolder(Property->Struct, Property->ContainerPtrToValuePtr<void>(Ctx.GetGeneric()));
 		}
 		return Super::GetValue(Ctx);
 	}
 	
-	virtual void SetValue(void* Ctx, const FINAny& Value) const override {
+	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
 		if (Property) {
 			if (Property->Struct == FFINDynamicStructHolder::StaticStruct()) {
-				*Property->ContainerPtrToValuePtr<FFINDynamicStructHolder>(Ctx) = Value.GetStruct();
+				*Property->ContainerPtrToValuePtr<FFINDynamicStructHolder>(Ctx.GetGeneric()) = Value.GetStruct();
 			}
 			check(Property->Struct == Value.GetStruct().GetStruct());
-			Property->CopyCompleteValue(Property->ContainerPtrToValuePtr<void>(Ctx), Value.GetStruct().GetData());
+			Property->CopyCompleteValue(Property->ContainerPtrToValuePtr<void>(Ctx.GetGeneric()), Value.GetStruct().GetData());
 		} else {
 			if (Value.GetType() == FIN_STRUCT && (!Struct || Value.GetStruct().GetStruct() == Struct)) Super::SetValue(Ctx, Value);
 		}

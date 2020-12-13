@@ -17,15 +17,15 @@ public:
 	FFINPropertySetterFunc SetterFunc;
 	
 	// Begin UFINProperty
-	virtual FINAny GetValue(void* Ctx) const override {
-		if (Property) return Property->ContainerPtrToValuePtr<FFINNetworkTrace>(Ctx);
+	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
+		if (Property) return Property->ContainerPtrToValuePtr<FFINNetworkTrace>(Ctx.GetGeneric());
 		return Super::GetValue(Ctx);
 	}
 	
-	virtual void SetValue(void* Ctx, const FINAny& Value) const override {
+	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
 		UObject* Obj = Value.GetTrace().GetUnderlyingPtr().Get();
 		if (Obj && Subclass && !Obj->IsA(GetSubclass())) return;
-		if (Property) *Property->ContainerPtrToValuePtr<FFINNetworkTrace>(Ctx) = Value.GetTrace();
+		if (Property) *Property->ContainerPtrToValuePtr<FFINNetworkTrace>(Ctx.GetGeneric()) = Value.GetTrace();
 		else Super::SetValue(Ctx, Value);
 	}
 

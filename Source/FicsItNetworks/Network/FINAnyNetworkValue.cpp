@@ -60,6 +60,7 @@ FFINAnyNetworkValue& FFINAnyNetworkValue::operator=(const FFINAnyNetworkValue& o
 		break;
 	case FIN_OBJ:
 		Data.OBJECT = new FINObj(*other.Data.OBJECT);
+		break;
 	case FIN_TRACE:
 		Data.TRACE = new FINTrace(*other.Data.TRACE);
 		break;
@@ -68,6 +69,7 @@ FFINAnyNetworkValue& FFINAnyNetworkValue::operator=(const FFINAnyNetworkValue& o
 		break;
 	case FIN_ARRAY:
 		Data.ARRAY = new FINArray(*other.Data.ARRAY);
+		break;
 	default:
 		Data = other.Data;
 		break;
@@ -169,6 +171,7 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 		break;
 	case FIN_ARRAY:
 		Ar << *Data.ARRAY;
+		break;
 	default:
 		break;
 	}
@@ -206,8 +209,9 @@ void FFINAnyNetworkValue::operator>>(FFINValueReader& Reader) const {
 		break;
 	case FIN_ARRAY:
 		Reader << GetArray();
-	/*case FIN_ANY:
-		Reader << GetAny();*/
 		break;
+	/*case FIN_ANY:
+		Reader << GetAny();
+		break;*/
 	}
 }

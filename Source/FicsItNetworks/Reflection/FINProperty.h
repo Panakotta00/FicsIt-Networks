@@ -86,15 +86,15 @@ public:
 	 * Sets the property value in the given container.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	void SetValue(UObject* Ctx, const FFINAnyNetworkValue& Value) const { SetValue((void*)Ctx, Value); }
-	virtual void SetValue(void* Ctx, const FINAny& Value) const {}
+	void SetValue(UObject* Ctx, const FFINAnyNetworkValue& Value) const { SetValue(FFINExecutionContext(Ctx), Value); }
+	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const {}
 
 	/**
 	 * Gets the property value in the given container.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-    FFINAnyNetworkValue GetValue(UObject* Ctx) const { return GetValue((void*)Ctx); }
-    virtual FINAny GetValue(void* Ctx) const { return FINAny(); }
+    FFINAnyNetworkValue GetValue(UObject* Ctx) const { return GetValue(FFINExecutionContext(Ctx)); }
+    virtual FINAny GetValue(const FFINExecutionContext& Ctx) const { return FINAny(); }
 
 	/**
 	 * Checks if the given value is valid for SetValue
@@ -114,7 +114,7 @@ inline FINAny FFINPropertyGetterFunc::operator()(const FFINExecutionContext& Ctx
 			LocalProp->InitializeValue_InContainer(Params);
 		}
 		Ctx.GetObject()->ProcessEvent(Function, Params);
-		FINAny Return = Property->GetValue(Params);
+		FINAny Return = Property->GetValue(FFINExecutionContext(Params));
 		for (UProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
 			if (!P->IsInContainer(Function->ParmsSize)) {
 				P->DestroyValue_InContainer(Params);
@@ -139,7 +139,7 @@ inline bool FFINPropertySetterFunc::operator()(const FFINExecutionContext& Ctx, 
 		for (UProperty* LocalProp = Function->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 			LocalProp->InitializeValue_InContainer(Params);
 		}
-		Property->SetValue(Params, Any);
+		Property->SetValue(FFINExecutionContext(Params), Any);
 		Ctx.GetObject()->ProcessEvent(Function, Params);
 		for (UProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
 			if (!P->IsInContainer(Function->ParmsSize)) {

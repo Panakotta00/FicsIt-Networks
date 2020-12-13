@@ -11,13 +11,13 @@ public:
 	UStrProperty* Property = nullptr;
 
 	// Begin UFINProperty
-	virtual FINAny GetValue(void* Ctx) const override {
-		if (Property) return Property->GetPropertyValue_InContainer(Ctx);
+	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
+		if (Property) return Property->GetPropertyValue_InContainer(Ctx.GetGeneric());
 		return Super::GetValue(Ctx);
 	}
 	
-	virtual void SetValue(void* Ctx, const FINAny& Value) const override {
-		if (Property) Property->SetPropertyValue_InContainer(Ctx, Value.GetString());
+	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
+		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Value.GetString());
 		else Super::SetValue(Ctx, Value);
 	}
 

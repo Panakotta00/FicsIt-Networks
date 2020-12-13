@@ -1,11 +1,11 @@
 ﻿#include "FINArrayProperty.h"
 
-FINAny UFINArrayProperty::GetValue(void* Ctx) const {
-	return GetArray(Ctx);
+FINAny UFINArrayProperty::GetValue(const FFINExecutionContext& Ctx) const {
+	return GetArray(Ctx.GetGeneric());
 }
 
-void UFINArrayProperty::SetValue(void* Ctx, const FINAny& Value) const {
-	SetArray(Ctx, Value.GetArray());
+void UFINArrayProperty::SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const {
+	SetArray(Ctx.GetGeneric(), Value.GetArray());
 }
 
 FINArray UFINArrayProperty::GetArray(void* Ctx) const {
