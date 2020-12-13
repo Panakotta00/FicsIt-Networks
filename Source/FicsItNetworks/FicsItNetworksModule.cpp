@@ -182,7 +182,7 @@ void FFicsItNetworksModule::StartupModule(){
 	
     FFINReflection::Get()->PopulateSources();
 	FFINReflection::Get()->LoadAllTypes();
-	FFINReflection::Get()->PrintReflection();
+	//FFINReflection::Get()->PrintReflection();
 }
 #pragma optimize("", on)
 

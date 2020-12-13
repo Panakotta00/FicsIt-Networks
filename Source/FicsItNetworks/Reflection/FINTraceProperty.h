@@ -23,6 +23,7 @@ public:
 	}
 	
 	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
+		if (Value.GetType() != FIN_TRACE) return;
 		UObject* Obj = Value.GetTrace().GetUnderlyingPtr().Get();
 		if (Obj && Subclass && !Obj->IsA(GetSubclass())) return;
 		if (Property) *Property->ContainerPtrToValuePtr<FFINNetworkTrace>(Ctx.GetGeneric()) = Value.GetTrace();

@@ -210,6 +210,11 @@ namespace FicsItKernel {
 			 * @return	if it even returns, returns the same as args
 			 */
 			static int luaAPIReturn(lua_State* L, int args);
+
+			/**
+			 * Returns the lua state
+			 */
+			lua_State* getLuaState() const;
 		};
 
 		struct FLuaSyncCall {

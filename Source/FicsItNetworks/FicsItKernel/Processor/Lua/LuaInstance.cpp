@@ -4,7 +4,6 @@
 #include "LuaProcessorStateStorage.h"
 
 #include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkCustomType.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINClass.h"
 #include "Reflection/FINFunction.h"
@@ -26,6 +25,7 @@ namespace FicsItKernel {
 		TMap<UFINClass*, FString> ClassToMetaName;
 		TMap<UFINClass*, FString> ClassToClassMetaName;
 		TMap<FString, UFINClass*> MetaNameToClass;
+		FCriticalSection ClassMetaNameLock;
 		
 		void luaInstanceType(lua_State* L, LuaInstanceType&& instanceType);
 		int luaInstanceTypeUnpersist(lua_State* L) {
@@ -81,9 +81,16 @@ namespace FicsItKernel {
 			} else {
 				TypeName = luaL_typename(L, Index);
 			}
-			UFINClass** Class = MetaNameToClass.Find(TypeName);
-			if (!Class) luaL_argerror(L, Index, "Instance is invalid type");
-			if (OutClass) *OutClass = *Class;
+			if (OutClass) {
+				ClassMetaNameLock.Lock();
+				UFINClass** Class = MetaNameToClass.Find(TypeName);
+				if (!Class) {
+					ClassMetaNameLock.Unlock();
+					luaL_argerror(L, Index, "Instance is invalid type");
+				}
+				*OutClass = *Class;
+				ClassMetaNameLock.Unlock();
+			}
 			return (LuaInstance*) lua_touserdata(L, Index);
 		}
 
@@ -98,9 +105,15 @@ namespace FicsItKernel {
 			LuaInstanceFunc* Func = (LuaInstanceFunc*) luaL_checkudata(L, lua_upvalueindex(1), INSTANCE_FUNC_DATA);
 			
 			// get and check instance
-			FString* MetaName = ClassToMetaName.Find(Func->Class);
-			if (!MetaName) return luaL_error(L, "Function name is invalid (internal error)");
-			LuaInstance* Instance = (LuaInstance*) luaL_checkudata(L, 1, TCHAR_TO_UTF8(**MetaName));
+			ClassMetaNameLock.Lock();
+			FString* MetaNamePtr = ClassToMetaName.Find(Func->Class);
+			if (!MetaNamePtr) {
+				ClassMetaNameLock.Unlock();
+				return luaL_error(L, "Function name is invalid (internal error)");
+			}
+			FString MetaName = *MetaNamePtr;
+			ClassMetaNameLock.Unlock();
+			LuaInstance* Instance = (LuaInstance*) luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName));
 			UObject* Obj = *Instance->Trace;
 			if (!Obj) return luaL_argerror(L, 1, "Instance is invalid");
 
@@ -164,9 +177,12 @@ namespace FicsItKernel {
 
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// Instance, FuncName, InstanceCache
+			ClassMetaNameLock.Lock();
 			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*(ClassToMetaName[Class] + "_" + MemberName))) != LUA_TNIL) {	// Instance, FuncName, InstanceCache, CachedFunc
+				ClassMetaNameLock.Unlock();
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}																											// Instance, FuncName, InstanceCache, nil
+			ClassMetaNameLock.Unlock();
 
 			// try to find function
 			for (UFINFunction* Function : Class->GetFunctions()) {
@@ -333,17 +349,23 @@ namespace FicsItKernel {
 				lua_pushnil(L);
 				return false;
 			}
-			FString* Name = ClassToMetaName.Find(Class);
-			if (!Name) {
+			
+			setupMetatable(LuaProcessor::luaGetProcessor(L)->getLuaState(), Class);
+			ClassMetaNameLock.Lock();
+			FString* NamePtr = ClassToMetaName.Find(Class);
+			if (!NamePtr) {
+				ClassMetaNameLock.Unlock();
 				lua_pushnil(L);
 				return false;
 			}
+			FString Name = *NamePtr;
+			ClassMetaNameLock.Unlock();
 			
 			// create instance
 			LuaInstance* Instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
 			new (Instance) LuaInstance{Trace};
 			
-			luaL_setmetatable(L, TCHAR_TO_UTF8(**Name));
+			luaL_setmetatable(L, TCHAR_TO_UTF8(*Name));
 			return true;
 		}
 
@@ -365,9 +387,16 @@ namespace FicsItKernel {
 			} else {
 				TypeName = luaL_typename(L, Index);
 			}
-			UFINClass** Class = MetaNameToClass.Find(TypeName);
-			if (!Class || !TypeName.EndsWith(CLASS_INSTANCE_META_SUFFIX)) luaL_argerror(L, Index, "ClassInstance is invalid type");
-			if (OutClass) *OutClass = *Class;
+			if (OutClass) {
+				ClassMetaNameLock.Lock();
+				UFINClass** Class = MetaNameToClass.Find(TypeName);
+				if (!Class || !TypeName.EndsWith(CLASS_INSTANCE_META_SUFFIX)) {
+					ClassMetaNameLock.Unlock();
+					luaL_argerror(L, Index, "ClassInstance is invalid type");
+				}
+				*OutClass = *Class;
+				ClassMetaNameLock.Unlock();
+			}
 			return (LuaClassInstance*) lua_touserdata(L, Index);
 		}
 
@@ -382,9 +411,15 @@ namespace FicsItKernel {
 			LuaInstanceFunc* Func = (LuaInstanceFunc*) luaL_checkudata(L, lua_upvalueindex(1), INSTANCE_FUNC_DATA);
 			
 			// get and check instance
-			FString* MetaName = ClassToClassMetaName.Find(Func->Class);
-			if (!MetaName) return luaL_argerror(L, 1, "Function name is invalid (internal error)");
-			LuaInstance* Instance = (LuaInstance*) luaL_checkudata(L, 1, TCHAR_TO_UTF8(**MetaName));
+			ClassMetaNameLock.Lock();
+			FString* MetaNamePtr = ClassToClassMetaName.Find(Func->Class);
+			if (!MetaNamePtr) {
+				ClassMetaNameLock.Unlock();
+				return luaL_argerror(L, 1, "Function name is invalid (internal error)");
+			}
+			FString MetaName = *MetaNamePtr;
+			ClassMetaNameLock.Unlock();
+			LuaInstance* Instance = (LuaInstance*) luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName));
 			UObject* Obj = *Instance->Trace;
 			if (!Obj) return luaL_argerror(L, 1, "ClassInstance is invalid");
 
@@ -436,9 +471,12 @@ namespace FicsItKernel {
 
 			// get cache function
 			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// Instance, FuncName, InstanceCache
+			ClassMetaNameLock.Lock();
 			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*(ClassToClassMetaName[Type] + "_" + MemberName))) != LUA_TNIL) {	// Instance, FuncName, InstanceCache, CachedFunc
+				ClassMetaNameLock.Unlock();
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}																											// Instance, FuncName, InstanceCache, nil
+			ClassMetaNameLock.Unlock();
 
 			// try to find function
 			for (UFINFunction* Function : Type->GetFunctions()) {
@@ -588,10 +626,9 @@ namespace FicsItKernel {
 			LuaClassInstance* instance = static_cast<LuaClassInstance*>(lua_newuserdata(L, sizeof(LuaClassInstance)));
 			new (instance) LuaClassInstance{clazz};
 
+			setupMetatable(LuaProcessor::luaGetProcessor(L)->getLuaState(), Type);
 			FString MetaName = Type->GetInternalName() + CLASS_INSTANCE_META_SUFFIX;
-			MetaNameToClass.FindOrAdd(MetaName) = Type;
-			ClassToClassMetaName.FindOrAdd(Type) = MetaName;
-
+			
 			luaL_setmetatable(L, TCHAR_TO_UTF8(*MetaName));
 			return true;
 		}
@@ -627,32 +664,6 @@ namespace FicsItKernel {
 			luaL_setfuncs(L, luaInstanceFuncDataLib, 0);
 			lua_pop(L, 1);
 			
-			for (const TPair<UClass*, UFINClass*>& Type : FFINReflection::Get()->GetClasses()) {
-				FString TypeName = Type.Value->GetInternalName();
-				luaL_newmetatable(L, TCHAR_TO_UTF8(*TypeName));								// ..., InstanceMeta
-				lua_pushboolean(L, true);
-				lua_setfield(L, -2, "__metatable");
-				luaL_setfuncs(L, luaInstanceLib, 0);
-				lua_newtable(L);															// ..., InstanceMeta, InstanceCache
-				lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta
-				PersistTable(TCHAR_TO_UTF8(*TypeName), -1);
-				lua_pop(L, 1);															// ...
-				MetaNameToClass.FindOrAdd(TypeName) = Type.Value;
-				ClassToMetaName.FindOrAdd(Type.Value) = TypeName;
-				
-				TypeName += CLASS_INSTANCE_META_SUFFIX;
-				luaL_newmetatable(L, TCHAR_TO_UTF8(*TypeName));								// ..., InstanceMeta
-				lua_pushboolean(L, true);
-				lua_setfield(L, -2, "__metatable");
-				luaL_setfuncs(L, luaClassInstanceLib, 0);
-				lua_newtable(L);															// ..., InstanceMeta, InstanceCache
-				lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta
-				PersistTable(TCHAR_TO_UTF8(*TypeName), -1);
-				lua_pop(L, 1);															// ...
-				MetaNameToClass.FindOrAdd(TypeName) = Type.Value;
-				ClassToClassMetaName.FindOrAdd(Type.Value) = TypeName;
-			}
-			
 			lua_pushcfunction(L, luaInstanceFuncCall);			// ..., InstanceFuncCall
 			PersistValue("InstanceFuncCall");					// ...
 			lua_pushcfunction(L, luaClassInstanceFuncCall);		// ..., LuaClassInstanceFuncCall
@@ -663,6 +674,43 @@ namespace FicsItKernel {
 			PersistValue("ClassInstanceUnpersist");			// ...
 			lua_pushcfunction(L, luaInstanceTypeUnpersist);		// ..., LuaInstanceTypeUnpersist
 			PersistValue("InstanceTypeUnpersist");				// ...
+		}
+
+		void setupMetatable(lua_State* L, UFINClass* Class) {
+			FScopeLock ScopeLock(&ClassMetaNameLock);
+			
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistUperm");
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistPerm");
+			PersistSetup("InstanceSystem", -2);
+
+			FString TypeName = Class->GetInternalName();
+			if (luaL_getmetatable(L, TCHAR_TO_UTF8(*TypeName)) != LUA_TNIL) {
+				lua_pop(L, 3);
+				return;
+			}
+			lua_pop(L, 1);
+			luaL_newmetatable(L, TCHAR_TO_UTF8(*TypeName));								// ..., InstanceMeta
+			lua_pushboolean(L, true);
+			lua_setfield(L, -2, "__metatable");
+			luaL_setfuncs(L, luaInstanceLib, 0);
+			lua_newtable(L);															// ..., InstanceMeta, InstanceCache
+			lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta
+			PersistTable(TCHAR_TO_UTF8(*TypeName), -1);
+			lua_pop(L, 1);															// ...
+			MetaNameToClass.FindOrAdd(TypeName) = Class;
+			ClassToMetaName.FindOrAdd(Class) = TypeName;
+				
+			TypeName += CLASS_INSTANCE_META_SUFFIX;
+			luaL_newmetatable(L, TCHAR_TO_UTF8(*TypeName));								// ..., InstanceMeta
+			lua_pushboolean(L, true);
+			lua_setfield(L, -2, "__metatable");
+			luaL_setfuncs(L, luaClassInstanceLib, 0);
+			lua_newtable(L);															// ..., InstanceMeta, InstanceCache
+			lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta
+			PersistTable(TCHAR_TO_UTF8(*TypeName), -1);
+			lua_pop(L, 3);															// ...
+			MetaNameToClass.FindOrAdd(TypeName) = Class;
+			ClassToClassMetaName.FindOrAdd(Class) = TypeName;
 		}
 	}
 }

@@ -24,6 +24,7 @@ public:
 	}
 	
 	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
+		if (Value.GetType() != FIN_STRUCT) return;
 		if (Property) {
 			if (Property->Struct == FFINDynamicStructHolder::StaticStruct()) {
 				*Property->ContainerPtrToValuePtr<FFINDynamicStructHolder>(Ctx.GetGeneric()) = Value.GetStruct();

@@ -121,10 +121,14 @@ namespace FicsItKernel {
 				break;
 			}
 			default:
-				FString TypeName = luaL_typename(L, i);
-				UScriptStruct* StructType = FFINLuaStructRegistry::Get().GetType(TypeName);
+				UFINStruct* StructType = luaGetStructType(L, i);
 				if (StructType) {
 					Val = FFINAnyNetworkValue(luaGetStruct(L, i));
+					break;
+				}
+				FFINNetworkTrace Trace = getObjInstance(L, i);
+				if (Trace.IsValid()) {
+					Val = FFINAnyNetworkValue(Trace);
 					break;
 				}
 				Val = FFINAnyNetworkValue();

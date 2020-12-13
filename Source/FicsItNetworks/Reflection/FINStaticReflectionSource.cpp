@@ -488,7 +488,6 @@ struct RArray {
 	}
 };
 
-#pragma optimize("", off)
 BeginClass(UObject, "Object", TFS("Object"), TFS("The base class of every object."))
 BeginProp(RInt, hash, TFS("Hash"), TFS("A Hash of this object. This is a value that nearly uniquely identifies this object.")) {
 	Return (int64)GetTypeHash(self);
@@ -498,6 +497,11 @@ BeginFunc(getHash, TFS("Get Hash"), TFS("Returns a hash of this object. This is 
 	Body()
 	hash = (int64)GetTypeHash(self);
 } EndFunc()
+BeginFunc(getType, TFS("Get Type"), TFS("Returns the type (aka class) of this object.")) {
+	OutVal(0, RObject<UFINClass>, type, TFS("Type"), TFS("The type of this object"));
+	Body()
+	if (self) type = (FINObj)FFINReflection::Get()->FindClass(self->GetClass());
+} EndFunc()
 BeginClassProp(RInt, hash, TFS("Hash"), TFS("A Hash of this object. This is a value that nearly uniquely identifies this object.")) {
 	Return (int64)GetTypeHash(self);
 } EndProp()
@@ -506,8 +510,29 @@ BeginClassFunc(getHash, TFS("Get Hash"), TFS("Returns the hash of this class. Th
 	Body()
 	hash = (int64) GetTypeHash(self);
 } EndFunc()
+BeginClassFunc(getType, TFS("Get Type"), TFS("Returns the type (aka class) of this class instance."), false) {
+	OutVal(0, RObject<UFINClass>, type, TFS("Type"), TFS("The type of this class instance"));
+	Body()
+    if (self) type = (FINObj)FFINReflection::Get()->FindClass(self);
+} EndFunc()
 EndClass()
-#pragma optimize("", on)
+
+BeginClass(UFINClass, "Class", TFS("Class"), TFS("Object that contains all information about a type"))
+BeginProp(RString, name, TFS("Name"), TFS("The internal name of this class")) {
+	Return self->GetInternalName();
+} EndProp()
+BeginFunc(getParent, TFS("Get Parent"), TFS("Returns the parent type of this type."), false) {
+	OutVal(0, RObject<UFINClass>, parent, TFS("Parent"), TFS("The parent type of this type"));
+	Body()
+    if (self) parent = (FINObj)self->GetParentClass();
+} EndFunc()
+BeginFunc(isChildOf, TFS("Is Child Of"), TFS("Allows to check if this class is a child class of the given class or the given class it self")) {
+	InVal(0, RObject<UFINClass>, parent, TFS("Parent"), TFS("The parent class you want to check if this class is a child of"))
+	OutVal(1, RBool, isChild, TFS("Is Child"), TFS("True if this class is a child of parent"))
+	Body()
+	if (self && parent.IsValid()) isChild = self->IsChildOf(Cast<UFINClass>(parent.Get()));
+} EndFunc()
+EndClass()
 
 BeginClass(AActor, "Actor", TFS("Actor"), TFS("This is the base class of all things that can exist within the world by them self."))
 BeginProp(RStruct<FVector>, location, TFS("Location"), TFS("The location of the actor in the world.")) {
@@ -1677,6 +1702,27 @@ BeginProp(RInt, amount, TFS("Amount"), TFS("The amount of items.")) {
 	self->Amount = Val;
 } EndProp()
 BeginProp(RClass<UFGItemDescriptor>, type, TFS("Type"), TFS("The type of the items.")) {
+	Return (UClass*)self->ItemClass;
+} PropSet() {
+	self->ItemClass = Val;
+} EndProp()
+EndStruct()
+
+BeginStruct(FInventoryStack, "ItemStack", TFS("Item Stack"), TFS("A structure that holds item information and item amount to represent an item stack."))
+BeginProp(RInt, count, TFS("Count"), TFS("The count of items.")) {
+	Return (int64) self->NumItems;
+} PropSet() {
+	self->NumItems = Val;
+} EndProp()
+BeginProp(RStruct<FInventoryItem>, item, TFS("Item"), TFS("The item information of this stack.")) {
+	Return self->Item;
+} PropSet() {
+	self->Item = Val;
+} EndProp()
+EndStruct()
+
+BeginStruct(FInventoryItem, "Item", TFS("Item"), TFS("A structure that holds item information."))
+BeginProp(RClass<UFGItemDescriptor>, type, TFS("Type"), TFS("The type of the item.")) {
 	Return (UClass*)self->ItemClass;
 } PropSet() {
 	self->ItemClass = Val;

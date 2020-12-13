@@ -17,7 +17,11 @@ public:
 	}
 	
 	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
-		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Value.GetFloat());
+		FINFloat Val = 0.0f;
+		if (Value.GetType() == FIN_FLOAT) Val = Value.GetFloat();
+		else if (Value.GetType() == FIN_INT) Val = Value.GetInt();
+		else return;
+		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Val);
 		else Super::SetValue(Ctx, Value);
 	}
 

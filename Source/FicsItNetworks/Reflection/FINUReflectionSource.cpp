@@ -10,6 +10,7 @@
 TMap<UFunction*, UFINRefSignal*> UFINUReflectionSource::FuncSignalMap;
 
 bool UFINUReflectionSource::ProvidesRequirements(UClass* Class) const {
+	if (Class->IsChildOf(AFGBuildable::StaticClass())) return true;
 	for (TFieldIterator<UField> Field(Class); Field; ++Field) {
 		UProperty* Prop = Cast<UProperty>(*Field);
 		UFunction* Func = Cast<UFunction>(*Field);

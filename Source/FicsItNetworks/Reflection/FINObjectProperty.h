@@ -19,7 +19,9 @@ public:
 	}
 	
 	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
-		UObject* Obj = Value.GetObject().Get();
+		UObject* Obj = nullptr;
+		if (Value.GetType() == FIN_OBJ) Obj = Value.GetObject().Get();
+		else if (Value.GetType() == FIN_TRACE) Obj = Value.GetTrace().Get();
 		if (Obj && GetSubclass() && !Obj->IsA(GetSubclass())) return;
 		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Obj);
 		else Super::SetValue(Ctx, Value);

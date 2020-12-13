@@ -5,6 +5,7 @@ FINAny UFINArrayProperty::GetValue(const FFINExecutionContext& Ctx) const {
 }
 
 void UFINArrayProperty::SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const {
+	if (Value.GetType() != FIN_ARRAY) return;
 	SetArray(Ctx.GetGeneric(), Value.GetArray());
 }
 

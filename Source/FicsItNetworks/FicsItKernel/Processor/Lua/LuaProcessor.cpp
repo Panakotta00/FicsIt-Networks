@@ -754,7 +754,7 @@ namespace FicsItKernel {
 			lua_pop(L, 1);
 			
 			setupInstanceSystem(L);
-			FFINLuaStructRegistry::Get().Setup(L);
+			setupStructSystem(L);
 			setupComponentAPI(L);
 			setupEventAPI(L);
 			setupFileSystemAPI(L);
@@ -837,5 +837,9 @@ namespace FicsItKernel {
 			return args;
 		}
 #pragma optimize("", on)
+
+		lua_State* LuaProcessor::getLuaState() const {
+			return luaState;
+		}
 	}
 }

@@ -127,5 +127,10 @@ namespace FicsItKernel {
 		 * @param[in]	L	the lua stack the metatables should get registered to.
 		 */
 		void setupInstanceSystem(lua_State* L);
+
+		/**
+		 * sets up the metatable for the given class in the given stack
+		 */
+		void setupMetatable(lua_State* L, UFINClass* Class);
 	}
 }
