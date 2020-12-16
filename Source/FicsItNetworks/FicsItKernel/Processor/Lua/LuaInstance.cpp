@@ -1,5 +1,7 @@
 #include "LuaInstance.h"
 
+
+#include "LuaFuture.h"
 #include "LuaProcessor.h"
 #include "LuaProcessorStateStorage.h"
 
@@ -117,10 +119,7 @@ namespace FicsItKernel {
 			UObject* Obj = *Instance->Trace;
 			if (!Obj) return luaL_argerror(L, 1, "Instance is invalid");
 
-			// sync call if necessery
-			TSharedPtr<FLuaSyncCall> SyncCall;
-			if (!(Func->Func->GetFunctionFlags() & FIN_Func_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
-
+			// get input parameters from lua stack
 			TArray<FINAny> Input;
 			int args = lua_gettop(L);
 			for (int i = 2; i <= args; ++i) {
@@ -129,10 +128,28 @@ namespace FicsItKernel {
 				Input.Add(Param);
 			}
 			args = 0;
-			TArray<FINAny> Output = Func->Func->Execute(FFINExecutionContext(Instance->Trace), Input);
-			for (const FINAny& Value : Output) {
-				networkValueToLua(L, Value);
-				++args;
+			
+			EFINFunctionFlags FuncFlags = Func->Func->GetFunctionFlags();
+			TSharedPtr<FLuaSyncCall> SyncCall;
+			bool bRunDirectly = false;
+			if (FuncFlags & FIN_Func_RT_Async) {
+				bRunDirectly = true;
+			} else if (FuncFlags & FIN_Func_RT_Parallel) {
+				SyncCall = MakeShared<FLuaSyncCall>(L);
+				bRunDirectly = true;
+			} else {
+				luaFuture(L, FFINFutureReflection(Func->Func, Instance->Trace, Input));
+				args = 1;
+			}
+
+			if (bRunDirectly) {
+				TArray<FINAny> Output = Func->Func->Execute(FFINExecutionContext(Instance->Trace), Input);
+
+				// push output onto lua stack
+				for (const FINAny& Value : Output) {
+					networkValueToLua(L, Value);
+					++args;
+				}
 			}
 			
 			return LuaProcessor::luaAPIReturn(L, args);
@@ -689,7 +706,7 @@ namespace FicsItKernel {
 				return;
 			}
 			lua_pop(L, 1);
-			luaL_newmetatable(L, TCHAR_TO_UTF8(*TypeName));								// ..., InstanceMeta
+			luaL_newmetatable(L, TCHAR_TO_UTF8(*TypeName));							// ..., InstanceMeta
 			lua_pushboolean(L, true);
 			lua_setfield(L, -2, "__metatable");
 			luaL_setfuncs(L, luaInstanceLib, 0);
@@ -701,7 +718,7 @@ namespace FicsItKernel {
 			ClassToMetaName.FindOrAdd(Class) = TypeName;
 				
 			TypeName += CLASS_INSTANCE_META_SUFFIX;
-			luaL_newmetatable(L, TCHAR_TO_UTF8(*TypeName));								// ..., InstanceMeta
+			luaL_newmetatable(L, TCHAR_TO_UTF8(*TypeName));							// ..., InstanceMeta
 			lua_pushboolean(L, true);
 			lua_setfield(L, -2, "__metatable");
 			luaL_setfuncs(L, luaClassInstanceLib, 0);

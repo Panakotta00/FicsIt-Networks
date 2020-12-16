@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "FINValueReader.h"
+#include "Reflection/FINFunction.h"
+
 
 #include "FINFuture.generated.h"
 
@@ -26,6 +28,40 @@ struct FFINFuture {
 	 * Checks if the future has finished and we can get values from it.
 	 */
 	virtual bool IsDone() const { return false; }
+};
+
+USTRUCT()
+struct FFINFutureReflection : public FFINFuture {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	bool bDone = false;
+
+	UPROPERTY(SaveGame)
+	TArray<FFINAnyNetworkValue> Input;
+
+	UPROPERTY(SaveGame)
+	TArray<FFINAnyNetworkValue> Output;
+
+	UPROPERTY(SaveGame)
+	FFINNetworkTrace Context;
+
+	UPROPERTY(SaveGame)
+	UFINFunction* Function;
+
+	FFINFutureReflection() = default;
+	FFINFutureReflection(UFINFunction* Function, const FFINNetworkTrace& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
+
+	virtual bool IsDone() const override { return bDone; }
+
+	virtual void Execute() override {
+		if (!Function) {
+			SML::Logging::error("Future unable to get executed due to invalid function pointer!");
+			return;
+		}
+		Output = Function->Execute(Context, Input);
+		bDone = true;
+	}
 };
 
 USTRUCT()

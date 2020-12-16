@@ -84,7 +84,7 @@ public:
 
 			// copy output parameters from paramter struct
 			for (UFINProperty* Param : GetParameters()) {
-				if ((Param->GetPropertyFlags() & FIN_Prop_Param) && !(Param->GetPropertyFlags() & FIN_Prop_OutParam)) {
+				if ((Param->GetPropertyFlags() & FIN_Prop_Param) && (Param->GetPropertyFlags() & FIN_Prop_OutParam)) {
 					Output.Add(Param->GetValue(ParamStruct));
 				}
 			}

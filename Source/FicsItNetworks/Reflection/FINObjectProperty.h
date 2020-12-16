@@ -14,7 +14,7 @@ public:
 
 	// Begin UFINProperty
 	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
-		if (Property) return Property->GetPropertyValue_InContainer(Ctx.GetGeneric());
+		if (Property) return static_cast<FINObj>(Property->GetPropertyValue_InContainer(Ctx.GetGeneric()));
 		return Super::GetValue(Ctx);
 	}
 	

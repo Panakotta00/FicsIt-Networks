@@ -16,6 +16,7 @@
 
 #include "FINStateEEPROMLua.h"
 #include "LuaDebugAPI.h"
+#include "LuaFuture.h"
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkTrace.h"
 
@@ -760,6 +761,7 @@ namespace FicsItKernel {
 			setupFileSystemAPI(L);
 			setupComputerAPI(L);
 			setupDebugAPI(L);
+			setupFutureAPI(L);
 		}
 
 		AFINStateEEPROMLua* LuaProcessor::getEEPROM() {

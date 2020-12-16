@@ -25,7 +25,7 @@ protected:
 		TArray<FString> ParameterInternalNames;
 		TArray<FText> ParameterDescriptions;
 		TArray<FText> ParameterDisplayNames;
-		int Runtime = -1;
+		int Runtime = 1;
 	};
 
 	struct FFINSignalMeta {
@@ -56,7 +56,7 @@ public:
 	UFINFunction* GenerateFunction(FFINReflection* Ref, UClass* Class, UFunction* Func) const;
 	UFINProperty* GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UProperty* Prop) const;
 	UFINProperty* GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UFunction* Get) const;
-	UFINRefSignal* GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func);
+	UFINRefSignal* GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) const;
 	static UFINRefSignal* GetSignalFromFunction(UFunction* Func);
-	void SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func);
+	void SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func) const;
 };

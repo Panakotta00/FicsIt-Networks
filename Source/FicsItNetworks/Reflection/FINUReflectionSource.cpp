@@ -46,6 +46,7 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 			} else if (Field->GetName().StartsWith("netFunc_")) {
 				ToFillClass->Functions.Add(GenerateFunction(Ref, Class, Func));
 			} else if (Field->GetName().StartsWith("netSig_")) {
+				ToFillClass->Signals.Add(GenerateSignal(Ref, Class, Func));
 			} else if (Field->GetName() == "netDesc" && Cast<UTextProperty>(Func->GetReturnProperty()) && Func->ParmsSize == sizeof(FText)) {
 				FText Desc;
 				Class->GetDefaultObject()->ProcessEvent(Func, &Desc);
@@ -399,7 +400,7 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 	return FINProp;
 }
 
-UFINRefSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) {
+UFINRefSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) const {
 	FFINSignalMeta Meta = GetSignalMeta(Class, Func);
 	
 	UFINRefSignal* FINSignal = NewObject<UFINRefSignal>(Ref->FindClass(Class, false, false));
@@ -436,8 +437,11 @@ UFINRefSignal* UFINUReflectionSource::GetSignalFromFunction(UFunction* Func) {
 void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	// get signal name
 	UFINRefSignal* FINSignal = UFINUReflectionSource::GetSignalFromFunction(Stack.CurrentNativeFunction);
-	if (FINSignal) {
+	if (!FINSignal || !Context) {
 		SML::Logging::error("Invalid Unreal Reflection Signal Execution '", TCHAR_TO_UTF8(*Stack.CurrentNativeFunction->GetName()), "'");
+
+		P_FINISH;
+		
 		return;
 	}
 
@@ -465,9 +469,9 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 
 	P_FINISH;
 }
-#pragma optimize("", on)
 
-void UFINUReflectionSource::SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func) {
+void UFINUReflectionSource::SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func) const {
 	Func->SetNativeFunc(&FINUFunctionBasedSignalExecute);
 	Func->FunctionFlags |= FUNC_Native;
 }
+#pragma optimize("", on)
