@@ -41,7 +41,7 @@ namespace FicsItKernel {
 		FFINNetworkTrace NetworkController::getComponentByID(const FString& id) {
 			FGuid guid;
 			if (FGuid::Parse(id, guid)) {
-				if (auto comp = Cast<IFINNetworkComponent>(component)) {
+				if (component->IsA<UFINNetworkComponent>()) {
 					return FFINNetworkTrace(component) / IFINNetworkCircuitNode::Execute_GetCircuit(component)->FindComponent(guid, component).GetObject();
 				}
 			}

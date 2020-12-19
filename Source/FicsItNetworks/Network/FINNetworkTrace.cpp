@@ -16,9 +16,7 @@
 
 #include "Components/FINVehicleScanner.h"
 
-#include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkCircuit.h"
-#include "util/Logging.h"
 
 #define StepFuncName(A, B) Step ## _ ## A ## _ ## B
 #define StepRegName(A, B) StepReg ## _ ## A ## _ ## B

@@ -41,7 +41,7 @@ namespace FicsItKernel {
 			/**
 			 * The maximum amount of signals the signal queue can hold
 			 */
-			uint32 maxSignalCount = 100;
+			uint32 maxSignalCount = 1000;
 
 			void handleSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender);
 

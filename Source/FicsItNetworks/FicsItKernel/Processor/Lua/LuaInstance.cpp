@@ -10,7 +10,6 @@
 #include "Reflection/FINClass.h"
 #include "Reflection/FINFunction.h"
 #include "Reflection/FINReflection.h"
-#include "util/Logging.h"
 
 #define INSTANCE_TYPE "InstanceType"
 #define INSTANCE_CACHE "InstanceCache"

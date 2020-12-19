@@ -3,8 +3,7 @@
 #include "CoreMinimal.h"
 #include "FINValueReader.h"
 #include "Reflection/FINFunction.h"
-
-
+#include "FicsItNetworksModule.h"
 #include "FINFuture.generated.h"
 
 USTRUCT(BlueprintType)
@@ -56,7 +55,7 @@ struct FFINFutureReflection : public FFINFuture {
 
 	virtual void Execute() override {
 		if (!Function) {
-			SML::Logging::error("Future unable to get executed due to invalid function pointer!");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Future unable to get executed due to invalid function pointer!"));
 			return;
 		}
 		Output = Function->Execute(Context, Input);

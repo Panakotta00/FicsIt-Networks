@@ -20,8 +20,6 @@
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkTrace.h"
 
-#include "SML/util/Logging.h"
-
 namespace FicsItKernel {
 	namespace Lua {
 		LuaValueReader::LuaValueReader(lua_State* L) : L(L) {}
@@ -136,7 +134,7 @@ namespace FicsItKernel {
 				kernel->crash(ToCrash);
 				bShouldCrash = false;
 			} else if (tickState == LUA_ASYNC_BEGIN) {
-				SML::Logging::debug("LuaProcessor: Change to Async-Tick-Thread...");
+				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Change to Async-Tick-Thread..."));
 				if (asyncTask && !asyncTask->IsIdle()) {
 					tickState = LUA_SYNC;
 					asyncMutex.Unlock();
@@ -149,7 +147,7 @@ namespace FicsItKernel {
 				asyncTask->StartBackgroundTask();
 				asyncMutex.Unlock();
 			} else if (tickState & LUA_SYNC) {
-				SML::Logging::debug("LuaProcessor: Run Sync Tick...");
+				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Run Sync Tick..."));
 				asyncMutex.Unlock();
 				if (asyncTask && !asyncTask->IsIdle()) {
 					asyncTask->EnsureCompletion();
@@ -162,7 +160,7 @@ namespace FicsItKernel {
 				asyncMutex.Lock();
 				if (tickState & LUA_SYNC) {
 					asyncMutex.Unlock();
-					SML::Logging::debug("LuaProcessor: Run Sync Tick after async downgrade...");
+					UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Run Sync Tick after async downgrade..."));
 					StopAsyncTick();
 					luaTick();
 				} else {
@@ -174,7 +172,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::stop(bool isCrash) {
-			SML::Logging::debug("Lua Processor stop", isCrash ? "due to crash" : "");
+			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor stop %s"), isCrash ? TEXT("due to crash") : TEXT(""));
 			StopAsyncTick();
 		}
 
@@ -248,7 +246,7 @@ namespace FicsItKernel {
 		void LuaProcessor::RunSyncTick() {
 			asyncMutex.Lock();
 			if (bWantsSync) {
-				SML::Logging::debug("LuaProcessor: Run Async-Tick in Sync with Factory tick...");
+				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Run Async-Tick in Sync with Factory tick..."));
 				TFuture<void> Future = asyncPromiseTickWait.GetFuture();
 				asyncMutex.Unlock();
 				asyncPromiseThreadWait.SetValue();
@@ -261,7 +259,7 @@ namespace FicsItKernel {
 		void LuaProcessor::StopAsyncTick() {
 			asyncMutex.Lock();
 			if (tickState & LUA_ASYNC) {
-				SML::Logging::debug("LuaProcessor: Stop Async-Thread...");
+				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Stop Async-Thread..."));
 				tickState = LUA_SYNC;
 				asyncMutex.Unlock();
 				RunSyncTick();
@@ -283,7 +281,7 @@ namespace FicsItKernel {
 		void LuaProcessor::syncTick(lua_State* L) {
 			asyncMutex.Lock();
 			if (tickState & LUA_ASYNC && tickState != LUA_ASYNC_BEGIN) {
-				SML::Logging::debug("LuaProcessor: Sync Async-Thread with tick...");
+				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Sync Async-Thread with tick..."));
 				bWantsSync = true;
 				asyncPromiseThreadWait = TPromise<void>();
 				asyncPromiseTickWait = TPromise<void>();
@@ -319,7 +317,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::reset() {
-			SML::Logging::debug("Lua Processor Reset");
+			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor Reset"));
 			StopAsyncTick();
 			
 			// can't reset running system state
@@ -406,7 +404,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::PreSerialize(UProcessorStateStorage* storage, bool bLoading) {
-			SML::Logging::debug("Lua Processor", bLoading ? " PreDeserialize" : "PreSerialize");
+			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor %s"), bLoading ? TEXT("PreDeserialize") : TEXT("PreSerialize"));
 			StopAsyncTick();
 			
 			for (LuaFile file : fileStreams) {
@@ -426,7 +424,7 @@ namespace FicsItKernel {
 
 #pragma optimize("", off)
 		int luaPersist(lua_State* L) {
-			SML::Logging::debug("Lua Processor Persist");
+			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor Persist"));
 			
 			// perm, globals, thread
 			
@@ -446,7 +444,7 @@ namespace FicsItKernel {
 #pragma optimize("", on)
 		
 		void LuaProcessor::Serialize(UProcessorStateStorage* storage, bool bLoading) {
-			SML::Logging::debug("Lua Processor", bLoading ? " Deserialize" : "Serialize");
+			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor %s"), bLoading ? TEXT("Deserialize") : TEXT("Serialize"));
 			if (!bLoading) {
 				// check state & thread
 				if (!luaState || !luaThread || lua_status(luaThread) != LUA_YIELD) return;
@@ -492,7 +490,7 @@ namespace FicsItKernel {
 				} else {
 					// print error
 					if (lua_isstring(luaState, -1)) {
-						SML::Logging::error("Unable to persit! '", lua_tostring(luaState, -1), "'");
+						UE_LOG(LogFicsItNetworks, Log, TEXT("Unable to persit! '%s'"), *FString(lua_tostring(luaState, -1)));
 					}
 
 					lua_pop(luaState, 1); // ..., perm, globals
@@ -521,7 +519,7 @@ namespace FicsItKernel {
 		}
 
 		int luaUnpersist(lua_State* L) {
-			SML::Logging::debug("Lua Processor Unpersist");
+			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor Unpersist"));
 			
 			// str-thread, str-globals, uperm
 			// unpersist globals
@@ -538,7 +536,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::PostSerialize(UProcessorStateStorage* Storage, bool bLoading) {
-			SML::Logging::debug("Lua Processor", bLoading ? " PostDeserialize" : "PostSerialize");
+			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor %s"), bLoading ? TEXT("PostDeserialize") : TEXT("PostSerialize"));
 			if (bLoading) {
 				if (kernel->getState() != RUNNING) return;
 
@@ -580,7 +578,7 @@ namespace FicsItKernel {
 				if (ok != LUA_OK) {
 					// print error
 					if (lua_isstring(luaState, -1)) {
-						SML::Logging::error("Unable to unpersit! '", lua_tostring(luaState, -1), "'");
+						UE_LOG(LogFicsItNetworks, Log, TEXT("Unable to unpersit! '%s'"), *FString(lua_tostring(luaState, -1)));
 					}
 					
 					// cleanup
@@ -826,7 +824,7 @@ namespace FicsItKernel {
 				p->tickState = LUA_SYNC;
 				p->asyncPromiseTickWait.SetValue();
 				p->asyncMutex.Unlock();
-				SML::Logging::debug("LuaProcessor: Async-Tick Finished...");
+				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Async-Tick Finished..."));
 				return lua_yieldk(L, 0, args, &luaAPIReturn_Resume);
 			}
 			if (p->tickState != LUA_SYNC && p->tickState != LUA_ASYNC) {

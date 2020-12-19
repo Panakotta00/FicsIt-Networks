@@ -4,13 +4,9 @@
 #include <fstream>
 #include <sstream>
 
-
-#include "UnrealType.h"
 #include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
 #include "VorbisAudioInfo.h"
 #include "FicsItKernel/Processor/Lua/LuaStructs.h"
-
-#include "SML/util/Logging.h"
 
 AFINSpeakerPole::AFINSpeakerPole() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");

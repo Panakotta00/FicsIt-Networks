@@ -1,6 +1,7 @@
 #include "FINReflection.h"
 
 #include "AssetRegistryModule.h"
+#include "FicsItNetworksModule.h"
 #include "FINArrayProperty.h"
 #include "FINBoolProperty.h"
 #include "FINClassProperty.h"
@@ -13,6 +14,9 @@
 #include "FINStructProperty.h"
 #include "FINTraceProperty.h"
 #include "FINUReflectionSource.h"
+#include "UObjectIterator.h"
+#include "Engine/Blueprint.h"
+#include "Engine/BlueprintGeneratedClass.h"
 
 UFINClass* UFINReflection::FindClass(UClass* Clazz, bool bRecursive) {
 	return FFINReflection::Get()->FindClass(Clazz, bRecursive);
@@ -162,7 +166,7 @@ void PrintProperty(FString Prefix, UFINProperty* Property) {
 	if (Property->GetPropertyFlags() & FIN_Prop_RT_Parallel) Log += " Parallel";
 	if (Property->GetPropertyFlags() & FIN_Prop_RT_Async) Log += " Async";
 	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) Log += " Class";
-	SML::Logging::error(TCHAR_TO_UTF8(*Log));
+	UE_LOG(LogFicsItNetworks, Log, TEXT("%s"), *Log);
 }
 
 void PrintFunction(FString Prefix, UFINFunction* Function) {
@@ -176,7 +180,7 @@ void PrintFunction(FString Prefix, UFINFunction* Function) {
 	if (Function->GetFunctionFlags() & FIN_Func_RT_Async) Log += " Async";
 	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) Log += " Class";
 	if (Function->GetFunctionFlags() & FIN_Func_StaticFunc) Log += " Static";
-	SML::Logging::error(TCHAR_TO_UTF8(*Log));
+	UE_LOG(LogFicsItNetworks, Log, TEXT("%s"), *Log);
 	Prefix += " ";
 	for (UFINProperty* Param : Function->GetParameters()) {
 		PrintProperty(Prefix, Param);
@@ -185,7 +189,7 @@ void PrintFunction(FString Prefix, UFINFunction* Function) {
 
 void FFINReflection::PrintReflection() {
 	for (TPair<UClass*, UFINClass*> Class : Classes) {
-		SML::Logging::error("Class: ", TCHAR_TO_UTF8(*Class.Value->GetInternalName()), " '", TCHAR_TO_UTF8(*Class.Value->GetDisplayName().ToString()), "' Desc:'", TCHAR_TO_UTF8(*Class.Value->GetDescription().ToString()), "'");
+		UE_LOG(LogFicsItNetworks, Log, TEXT("Class: %s '%s' Desc:'%s'"), *Class.Value->GetInternalName(), *Class.Value->GetDisplayName().ToString(), *Class.Value->GetDescription().ToString());
 		for (UFINFunction* Function : Class.Value->GetFunctions()) {
 			PrintFunction(" ", Function);
 		}
@@ -206,7 +210,7 @@ void FFINReflection::PrintReflection() {
 		for (UFINProperty* Prop : FINStruct.Value->GetProperties()) {
 			PrintProperty(" ", Prop);
 		}
-		SML::Logging::error("Class: ", TCHAR_TO_UTF8(*Log));
+		UE_LOG(LogFicsItNetworks, Log, TEXT("Class: %s"), *Log);
 	}
 }
 

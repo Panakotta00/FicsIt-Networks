@@ -1,5 +1,5 @@
 #include "FINCodeableSplitter.h"
-
+#include "FicsItNetworksModule.h"
 #include "Computer/FINComputerSubsystem.h"
 
 AFINCodeableSplitter::AFINCodeableSplitter() {
@@ -39,7 +39,7 @@ void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 	Super::OnConstruction(transform);
 #if !WITH_EDITOR
 	if (HasAuthority() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes) {
-		SML::Logging::warning("Old Splitter found. Try to apply construction update fixes... '", TCHAR_TO_UTF8(*this->GetName()), "'");
+		UE_LOG(LogFicsItNetworks, Warning, TEXT("Old Splitter found. Try to apply construction update fixes... '%s'"), *this->GetName());
 		Input1->Rename(TEXT("InputConnector"));
 	}
 #endif
@@ -48,7 +48,7 @@ void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 void AFINCodeableSplitter::BeginPlay() {
 	Super::BeginPlay();
 	if (HasAuthority() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes) {
-		SML::Logging::warning("Old Splitter found. Try to apply beginplay update fixes... '", TCHAR_TO_UTF8(*this->GetName()), "'");
+		UE_LOG(LogFicsItNetworks, Log, TEXT("Old Splitter found. Try to apply beginplay update fixes... '%s'"), *this->GetName());
 		Input1->Rename(TEXT("Input1"));
 		RootComponent->AddRelativeRotation(FRotator(0,-90.0f,0));
 		UFGFactoryConnectionComponent* NewOutput2 = Output1->GetConnection();

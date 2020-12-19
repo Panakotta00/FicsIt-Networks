@@ -103,7 +103,7 @@ struct FFINAnyNetworkValue {
 	 *
 	 * @return	the stored object
 	 */
-	const FINObj& GetObject() const {
+	const FINObj& GetObj() const {
 		return *Data.OBJECT;
 	}
 

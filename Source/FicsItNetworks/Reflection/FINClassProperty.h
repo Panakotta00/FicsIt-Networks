@@ -21,7 +21,7 @@ public:
 	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
 		UClass* Class = nullptr;
 		if (Value.GetType() == FIN_CLASS) Class = Value.GetClass();
-		else if (Value.GetType() == FIN_OBJ) Class = Cast<UClass>(Value.GetObject().Get());
+		else if (Value.GetType() == FIN_OBJ) Class = Cast<UClass>(Value.GetObj().Get());
 		else return;
 		if (Class && GetSubclass() && !Class->IsChildOf(GetSubclass())) return;
 		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Value.GetClass());

@@ -1,6 +1,7 @@
 ﻿#include "FINUReflectionSource.h"
 
 #include "FGBuildable.h"
+#include "FicsItNetworksModule.h"
 #include "FINFuncProperty.h"
 #include "FINReflection.h"
 #include "Computer/FINComputerSubsystem.h"
@@ -438,7 +439,7 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 	// get signal name
 	UFINRefSignal* FINSignal = UFINUReflectionSource::GetSignalFromFunction(Stack.CurrentNativeFunction);
 	if (!FINSignal || !Context) {
-		SML::Logging::error("Invalid Unreal Reflection Signal Execution '", TCHAR_TO_UTF8(*Stack.CurrentNativeFunction->GetName()), "'");
+		UE_LOG(LogFicsItNetworks, Log, TEXT("Invalid Unreal Reflection Signal Execution '%s'"), *Stack.CurrentNativeFunction->GetName());
 
 		P_FINISH;
 		

@@ -1,8 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "util/Logging.h"
-
 #include "FINNetworkTrace.generated.h"
 
 /**

@@ -154,7 +154,7 @@ namespace FicsItKernel {
 				lua_pushstring(L, TCHAR_TO_UTF8(*Val.GetString()));
 				break;
 			case FIN_OBJ:
-				newInstance(L, FFINNetworkTrace(Val.GetObject().Get()));
+				newInstance(L, FFINNetworkTrace(Val.GetObj().Get()));
 				break;
 			case FIN_CLASS:
 				newInstance(L, Val.GetClass());

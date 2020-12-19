@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FGBuildable.h"
+#include "ModuleSystem/FINModuleSystemModule.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Network/FINNetworkCustomType.h"
 #include "Network/FINNetworkTrace.h"

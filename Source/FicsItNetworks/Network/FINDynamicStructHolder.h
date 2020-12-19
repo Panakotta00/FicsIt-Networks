@@ -1,8 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "util/Logging.h"
-
 #include "FINDynamicStructHolder.generated.h"
 
 #define MakeDynamicStruct(Type, ...) MakeShared<FFINDynamicStructHolder>(TBaseStructure<Type>::Get(), new Type{__VA_ARGS__})

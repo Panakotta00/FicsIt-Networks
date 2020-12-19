@@ -13,18 +13,16 @@
 #include "SML/mod/hooking.h"
 
 #include "FINComponentUtility.h"
-#include "FINConfig.h"
 #include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
-#include "Computer/FINComputerProcessor.h"
 #include "Computer/FINComputerRCO.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-
 #include "Reflection/FINReflection.h"
 
+DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
 class AFGBuildableHologram_Public : public AFGBuildableHologram {
@@ -99,11 +97,6 @@ void FFicsItNetworksModule::StartupModule(){
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/Game/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.InputConnector"), TEXT("Input1")});
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
-	
-	#if !WITH_EDITOR
-	finConfig->SetNumberField("SignalQueueSize", 1000);
-	finConfig = SML::ReadModConfig(MOD_NAME, finConfig);
-	#endif
 	
 	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
 

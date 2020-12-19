@@ -196,7 +196,7 @@ void FFINAnyNetworkValue::operator>>(FFINValueReader& Reader) const {
 		Reader << GetString();
 		break;
 	case FIN_OBJ:
-		Reader << GetObject();
+		Reader << GetObj();
 		break;
 	case FIN_CLASS:
 		Reader << GetClass();

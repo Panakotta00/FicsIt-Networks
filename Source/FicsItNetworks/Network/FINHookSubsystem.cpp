@@ -4,7 +4,6 @@
 #include "FINSubsystemHolder.h"
 #include "Signals/FINSignalListener.h"
 #include "Signals/FINSignalSender.h"
-#include "util/Logging.h"
 
 TMap<UClass*, TSet<TSubclassOf<UFINHook>>> AFINHookSubsystem::HookRegistry;
 

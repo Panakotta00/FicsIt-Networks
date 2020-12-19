@@ -1,7 +1,5 @@
 #include "Serial.h"
 
-#include "util/Logging.h"
-
 using namespace std;
 
 namespace FicsItKernel {

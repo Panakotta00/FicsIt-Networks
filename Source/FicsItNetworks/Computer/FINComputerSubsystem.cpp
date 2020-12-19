@@ -1,5 +1,7 @@
 ﻿#include "FINComputerSubsystem.h"
 
+
+#include "FGCharacterPlayer.h"
 #include "FINSubsystemHolder.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
@@ -97,6 +99,7 @@ AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* Worl
 		else return nullptr;
 	}
 }
+
 void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
 	if (!IsValid(character)) return;
 	DetachWidgetInteractionToPlayer(character);

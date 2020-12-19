@@ -5,7 +5,6 @@
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "Network/FINFuture.h"
 #include "Processor/Lua/LuaProcessor.h"
-#include "SML/util/Logging.h"
 
 namespace FicsItKernel {
 	KernelCrash::KernelCrash(std::string what) : std::exception(what.c_str()) {}
@@ -196,7 +195,7 @@ namespace FicsItKernel {
 				serial->close();
 			}
 		} catch (std::exception ex) {
-			SML::Logging::error(ex.what());
+			UE_LOG(LogFicsItNetworks, Error, TEXT("%s"), *FString(ex.what()));
 		}
 	}
 
@@ -305,7 +304,6 @@ namespace FicsItKernel {
 		} else if (Ar.IsLoading()) {
 			// Deserialize processor
 			if (proc) {
-				checkf(processor.get(), L"Tryed to unpersist processor state but no processor set");
 				UClass* storageClass = nullptr;
 				Ar << storageClass;
 				OutSystemState.processorState = Cast<UProcessorStateStorage>(NewObject<UProcessorStateStorage>(GetTransientPackage(), storageClass));

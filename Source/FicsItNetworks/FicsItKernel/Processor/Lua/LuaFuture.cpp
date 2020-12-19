@@ -94,11 +94,6 @@ namespace FicsItKernel {
 			luaL_setmetatable(L, "Future");
 		}
 
-		static const luaL_Reg luaInstanceFuncDataLib[] = {
-			{"__gc", luaFutureGC},
-			{NULL, NULL}
-		};
-
 		void setupFutureAPI(lua_State* L) {
 			PersistSetup("FutureAPI", -2);
 

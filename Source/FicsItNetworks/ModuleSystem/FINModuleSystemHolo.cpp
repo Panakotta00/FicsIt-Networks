@@ -5,8 +5,6 @@
 #include "FINModuleSystemModule.h"
 #include "FINModuleSystemPanel.h"
 #include "FGConstructDisqualifier.h"
-#include "UnrealNetwork.h"
-#include "util/Logging.h"
 
 AFINModuleSystemHolo::AFINModuleSystemHolo() {
 	PrimaryActorTick.bCanEverTick = true;

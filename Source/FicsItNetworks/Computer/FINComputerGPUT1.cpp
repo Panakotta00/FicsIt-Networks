@@ -1,14 +1,13 @@
 #include "FINComputerGPUT1.h"
 
 
+#include "FGPlayerController.h"
 #include "FINComputerRCO.h"
 #include "SInvalidationPanel.h"
 #include "UnrealNetwork.h"
 #include "WidgetBlueprintLibrary.h"
 #include "WidgetLayoutLibrary.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
-#include "Network/FINNetworkComponent.h"
-#include "util/Logging.h"
 
 void SScreenMonitor::Construct(const FArguments& InArgs) {
 	Text = InArgs._Text;
@@ -160,6 +159,8 @@ SScreenMonitor::SScreenMonitor() {
 }
 
 AFINComputerGPUT1::AFINComputerGPUT1() {
+	PrimaryActorTick.bCanEverTick = false;
+	
 	SetScreenSize(FVector2D(120, 30));
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -251,7 +252,7 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	ForegroundBuffer = Foreground;
 	BackgroundBuffer = Background;
 
-	netSig_ScreenSizeChanged(oldScreenSize.X, oldScreenSize.Y);
+	if (PrimaryActorTick.bCanEverTick) netSig_ScreenSizeChanged(oldScreenSize.X, oldScreenSize.Y);
 
 	ForceNetUpdate();
 }
