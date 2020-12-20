@@ -434,7 +434,6 @@ UFINRefSignal* UFINUReflectionSource::GetSignalFromFunction(UFunction* Func) {
 	return nullptr;
 }
 
-#pragma optimize("", off)
 void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	// get signal name
 	UFINRefSignal* FINSignal = UFINUReflectionSource::GetSignalFromFunction(Stack.CurrentNativeFunction);
@@ -475,4 +474,3 @@ void UFINUReflectionSource::SetupFunctionAsSignal(FFINReflection* Ref, UFunction
 	Func->SetNativeFunc(&FINUFunctionBasedSignalExecute);
 	Func->FunctionFlags |= FUNC_Native;
 }
-#pragma optimize("", on)

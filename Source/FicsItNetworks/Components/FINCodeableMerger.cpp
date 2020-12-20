@@ -43,18 +43,6 @@ void AFINCodeableMerger::GetDismantleRefund_Implementation(TArray<FInventoryStac
 	out_refund.Append(InputQueue3);
 }
 
-void AFINCodeableMerger::AddListener_Implementation(FFINNetworkTrace listener) {
-	SignalListeners.Add(listener);
-}
-
-void AFINCodeableMerger::RemoveListener_Implementation(FFINNetworkTrace listener) {
-	SignalListeners.Remove(listener);
-}
-
-TSet<FFINNetworkTrace> AFINCodeableMerger::GetListeners_Implementation() {
-	return SignalListeners;
-}
-
 UObject* AFINCodeableMerger::GetSignalSenderOverride_Implementation() {
 	return NetworkConnector;
 }

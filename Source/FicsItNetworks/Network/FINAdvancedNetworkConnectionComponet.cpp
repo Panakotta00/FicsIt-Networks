@@ -43,7 +43,6 @@ bool UFINAdvancedNetworkConnectionComponent::ShouldSave_Implementation() const {
 }
 
 void UFINAdvancedNetworkConnectionComponent::NotifyNetworkUpdate_Implementation(int Type, const TSet<UObject*>& Nodes) {
-	if (Listeners.Num() < 1) return;
 	for (UObject* Node : Nodes) {
 		if (Node->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
 			netSig_NetworkUpdate(Type, IFINNetworkComponent::Execute_GetID(Node).ToString());
@@ -74,19 +73,6 @@ UObject* UFINAdvancedNetworkConnectionComponent::GetInstanceRedirect_Implementat
 
 bool UFINAdvancedNetworkConnectionComponent::AccessPermitted_Implementation(FGuid inID) const {
 	return true;
-}
-
-void UFINAdvancedNetworkConnectionComponent::AddListener_Implementation(FFINNetworkTrace Listener) {
-	if (Listeners.Contains(Listener)) return;
-	Listeners.Add(Listener);
-}
-
-void UFINAdvancedNetworkConnectionComponent::RemoveListener_Implementation(FFINNetworkTrace Listener) {
-	Listeners.Remove(Listener);
-}
-
-TSet<FFINNetworkTrace> UFINAdvancedNetworkConnectionComponent::GetListeners_Implementation() {
-	return Listeners;
 }
 
 UObject* UFINAdvancedNetworkConnectionComponent::GetSignalSenderOverride_Implementation() {

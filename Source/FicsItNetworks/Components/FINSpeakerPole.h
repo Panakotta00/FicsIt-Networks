@@ -9,42 +9,6 @@
 
 #include "FINSpeakerPole.generated.h"
 
-class AFINSpeakerPole;
-
-USTRUCT()
-struct FFINSpeakersPlaySoundFuture : public FFINFutureSimpleDone {
-	GENERATED_BODY()
-
-	FFINSpeakersPlaySoundFuture() = default;
-	FFINSpeakersPlaySoundFuture(AFINSpeakerPole* Speakers, const FString& Sound, float Start) : Speakers(Speakers), Sound(Sound), Start(Start) {}
-	
-	UPROPERTY(SaveGame)
-	AFINSpeakerPole* Speakers = nullptr;
-
-	UPROPERTY(SaveGame)
-	FString Sound = "";
-
-	UPROPERTY(SaveGame)
-	float Start = 0.0f;
-
-	virtual void Execute() override;
-	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
-};
-
-USTRUCT()
-struct FFINSpeakersStopSoundFuture : public FFINFutureSimpleDone {
-	GENERATED_BODY()
-
-	FFINSpeakersStopSoundFuture() = default;
-	FFINSpeakersStopSoundFuture(AFINSpeakerPole* Speakers) : Speakers(Speakers) {}
-	
-	UPROPERTY(SaveGame)
-    AFINSpeakerPole* Speakers = nullptr;
-
-	virtual void Execute() override;
-	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
-};
-
 UCLASS(Blueprintable)
 class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender, public IFINNetworkCustomType {
 	GENERATED_BODY()
@@ -59,15 +23,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="SpeakerPole")
 	FString CurrentSound;
 
-	UPROPERTY(SaveGame)
-	TSet<FFINNetworkTrace> Listeners;
-
 	AFINSpeakerPole();
 
 	// Begin IFINNetworkSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINNetworkSignalSender
 
@@ -101,8 +59,8 @@ public:
 	 * Might cause the current sound playing to stop even if the new sound is not found.
 	 * If able to play the sound, emits a play sound signal.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Component")
-	FFINSpeakersPlaySoundFuture netFunc_playSound(const FString& sound, float startPoint);
+	UFUNCTION()
+	void netFunc_playSound(const FString& sound, float startPoint); // TODO: sync runtime
 	UFUNCTION()
 	void netFuncMeta_playSound(FText& DisplayName, FText& Description, TArray<FText>& ParameterDescriptions);
 
@@ -110,8 +68,8 @@ public:
 	 * Stops the current playing sound.
 	 * Emits a stop sound signal if it actually was able to stop the current playing sound.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Component")
-	FFINDynamicStructHolder netFunc_stopSound();
+	UFUNCTION()
+	void netFunc_stopSound(); // TODO: sync runtime
 
 	/**
 	 * Notifies when the state of the speaker pole has changed.

@@ -169,13 +169,16 @@ void FFicsItNetworksModule::StartupModule(){
 			FINRefLoaded = true;
 		}
 	});
-	
-	AFINNetworkAdapter::RegisterAdapterSettings();
-	FFINGlobalRegisterHelper::Register();
-	
-    FFINReflection::Get()->PopulateSources();
-	FFINReflection::Get()->LoadAllTypes();
-	//FFINReflection::Get()->PrintReflection();
+
+
+	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGGameState, AFGGameState::Init, [](AFGGameState* state) {
+		AFINNetworkAdapter::RegisterAdapterSettings();
+		FFINGlobalRegisterHelper::Register();
+		
+	    FFINReflection::Get()->PopulateSources();
+		FFINReflection::Get()->LoadAllTypes();
+		FFINReflection::Get()->PrintReflection();
+	})
 }
 #pragma optimize("", on)
 

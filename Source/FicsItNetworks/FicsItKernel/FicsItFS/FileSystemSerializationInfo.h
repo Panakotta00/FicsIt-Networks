@@ -25,6 +25,13 @@ struct FFileSystemNodeIndex {
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNodeIndex& Node);
 
+template<>
+struct TStructOpsTypeTraits<FFileSystemNodeIndex> : TStructOpsTypeTraitsBase2<FFileSystemNodeIndex> {
+	enum {
+		WithSerializer = true,
+    };
+};
+
 USTRUCT()
 struct FFileSystemNode {
 	GENERATED_BODY()
@@ -58,6 +65,13 @@ struct FFileSystemNode {
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNode& Node);
 
+template<>
+struct TStructOpsTypeTraits<FFileSystemNode> : TStructOpsTypeTraitsBase2<FFileSystemNode> {
+	enum {
+		WithSerializer = true,
+    };
+};
+
 USTRUCT()
 struct FFileSystemSerializationInfo {
 	GENERATED_BODY()
@@ -67,4 +81,15 @@ struct FFileSystemSerializationInfo {
 
 	UPROPERTY()
 	TMap<FString, FFileSystemNode> Devices;
+
+	bool Serialize(FArchive& Ar);
+};
+
+FArchive& operator<<(FArchive& Ar, FFileSystemSerializationInfo& Info);
+
+template<>
+struct TStructOpsTypeTraits<FFileSystemSerializationInfo> : TStructOpsTypeTraitsBase2<FFileSystemSerializationInfo> {
+	enum {
+		WithSerializer = true,
+    };
 };

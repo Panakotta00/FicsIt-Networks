@@ -105,18 +105,6 @@ void AFINCodeableSplitter::GatherDependencies_Implementation(TArray<UObject*>& o
 	out_dependentObjects.Add(AFINComputerSubsystem::GetComputerSubsystem(this));
 }
 
-void AFINCodeableSplitter::AddListener_Implementation(FFINNetworkTrace listener) {
-	SignalListeners.Add(listener);
-}
-
-void AFINCodeableSplitter::RemoveListener_Implementation(FFINNetworkTrace listener) {
-	SignalListeners.Remove(listener);
-}
-
-TSet<FFINNetworkTrace> AFINCodeableSplitter::GetListeners_Implementation() {
-	return SignalListeners;
-}
-
 UObject* AFINCodeableSplitter::GetSignalSenderOverride_Implementation() {
 	return NetworkConnector;
 }

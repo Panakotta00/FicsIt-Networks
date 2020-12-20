@@ -33,23 +33,32 @@ USTRUCT()
 struct FFINFutureReflection : public FFINFuture {
 	GENERATED_BODY()
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	bool bDone = false;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	TArray<FFINAnyNetworkValue> Input;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	TArray<FFINAnyNetworkValue> Output;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	FFINNetworkTrace Context;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	UFINFunction* Function;
 
 	FFINFutureReflection() = default;
 	FFINFutureReflection(UFINFunction* Function, const FFINNetworkTrace& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
+
+	bool Serialize(FArchive& Ar) {
+		Ar << bDone;
+		Ar << Input;
+		Ar << Output;
+		Ar << Context;
+		Ar << Function;
+		return true;
+	}
 
 	virtual bool IsDone() const override { return bDone; }
 
@@ -63,33 +72,9 @@ struct FFINFutureReflection : public FFINFuture {
 	}
 };
 
-USTRUCT()
-struct FFINFutureSimpleDone : public FFINFuture {
-	GENERATED_BODY()
-
-	UPROPERTY(SaveGame)
-	bool bDone = false;
-
-	virtual bool IsDone() const override { return bDone; }
-};
-
-USTRUCT()
-struct FFINFunctionFuture : public FFINFuture {
-	GENERATED_BODY()
-
-	TFunction<void()> Func;
-
-	bool bDone = false;
-
-	FFINFunctionFuture() = default;
-	FFINFunctionFuture(TFunction<void()> Func) : Func(Func) {}
-
-	virtual void Execute() override {
-		bDone = true;
-		Func();
-	}
-
-	virtual bool IsDone() const override { return bDone; }
-
-	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
+template<>
+struct TStructOpsTypeTraits<FFINFutureReflection> : public TStructOpsTypeTraitsBase2<FFINFutureReflection> {
+	enum {
+		WithSerializer = true,
+	};
 };

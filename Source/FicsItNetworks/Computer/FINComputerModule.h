@@ -50,9 +50,6 @@ public:
 	// End IFINModuleSystemModule
 
 	// Begin IFINSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 };

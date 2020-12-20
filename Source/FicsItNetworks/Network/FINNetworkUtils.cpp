@@ -1,17 +1,16 @@
 ﻿#include "FINNetworkUtils.h"
 
-
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkComponent.h"
 #include "Components/ActorComponent.h"
+#include "GameFramework/Actor.h"
 
 UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
-	if (Obj->IsA<UFINNetworkComponent>()) return Obj;
+	if (Obj->Implements<UFINNetworkComponent>()) return Obj;
 	if (Obj->IsA<AActor>()) {
-		TArray<UActorComponent*> Connectors;
-		Cast<AActor>(Obj)->GetComponents(Connectors, UFINAdvancedNetworkConnectionComponent::StaticClass());
+		TArray<UActorComponent*> Connectors = Cast<AActor>(Obj)->GetComponentsByClass(UFINAdvancedNetworkConnectionComponent::StaticClass());
 		for (UActorComponent* Connector : Connectors) {
-			return Connector;
+			if (Connector->Implements<UFINNetworkComponent>()) return Connector;
 		}
 	}
 	return nullptr;

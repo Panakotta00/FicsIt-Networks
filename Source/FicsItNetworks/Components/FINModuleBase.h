@@ -12,12 +12,6 @@ UCLASS()
 class AFINModuleBase : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender, public IFINNetworkCustomType {
 	GENERATED_BODY()
 public:
-    /**
-    * The signal listeners listening to this component.
-    */
-    UPROPERTY()
-    TSet<FFINNetworkTrace> Listeners;
-    
     UPROPERTY(EditDefaultsOnly)
     FVector2D ModuleSize;
 
@@ -29,10 +23,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, SaveGame)
     UFINModuleSystemPanel* ModulePanel = nullptr;
-
-	// Begin UObject
-	virtual void Serialize(FArchive& Ar) override;
-	// End UObject
 
 	// Begin AActor
 	virtual void EndPlay(EEndPlayReason::Type reason) override;
@@ -49,9 +39,6 @@ public:
 	// End IFINModuleSystemModule
 
 	// Begin IFINSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 

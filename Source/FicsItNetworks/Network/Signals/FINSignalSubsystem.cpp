@@ -29,6 +29,7 @@ void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, TFINDynamicStruct<FFI
 void AFINSignalSubsystem::Listen(UObject* Sender, const FFINNetworkTrace& Receiver) {
 	TArray<FFINNetworkTrace>& ListenerList = Listeners.FindOrAdd(Sender).Listeners;
 	ListenerList.AddUnique(Receiver);
+	AFINHookSubsystem::GetHookSubsystem(Sender)->AttachHooks(Sender);
 }
 
 void AFINSignalSubsystem::Ignore(UObject* Sender, UObject* Receiver) {
@@ -40,6 +41,7 @@ void AFINSignalSubsystem::Ignore(UObject* Sender, UObject* Receiver) {
 			--i;
 		}
 	}
+	AFINHookSubsystem::GetHookSubsystem(Sender)->ClearHooks(Sender);
 }
 
 void AFINSignalSubsystem::IgnoreAll(UObject* Receiver) {

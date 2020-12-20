@@ -103,3 +103,14 @@ FArchive& operator<<(FArchive& Ar, FFileSystemNode& Node) {
 	Node.Serialize(Ar);
 	return Ar;
 }
+
+bool FFileSystemSerializationInfo::Serialize(FArchive& Ar) {
+	Ar << Mounts;
+	Ar << Devices;
+	return true;
+}
+
+FArchive& operator<<(FArchive& Ar, FFileSystemSerializationInfo& Info) {
+	Info.Serialize(Ar);
+	return Ar;
+}

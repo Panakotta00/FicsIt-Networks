@@ -113,6 +113,8 @@ namespace FicsItKernel {
 
 		LuaProcessor::~LuaProcessor() {
 			StopAsyncTick();
+			asyncPromiseThreadWait.SetValue();
+			asyncPromiseTickWait.SetValue();
 		}
 
 		void LuaProcessor::setKernel(KernelSystem* newKernel) {

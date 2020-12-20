@@ -22,9 +22,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* VehicleCollision;
 
-	UPROPERTY(SaveGame)
-	TSet<FFINNetworkTrace> SignalListeners;
-	
 	UPROPERTY(BlueprintReadOnly, SaveGame, Replicated)
 	FLinearColor ScanColor = FLinearColor(0,0,1);
 
@@ -50,9 +47,6 @@ public:
 	// End AActor
 
 	// Begin IFINSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 

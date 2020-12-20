@@ -15,6 +15,7 @@
 
 namespace FicsItKernel {
 	namespace Lua {
+		#pragma optimize("", off)
 		int luaComponentProxy(lua_State* L) {
 			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
@@ -38,7 +39,8 @@ namespace FicsItKernel {
 				}
 				int j = 0;
 				for (auto& id : ids) {
-					FFINNetworkTrace comp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByID(id.c_str());
+					LuaProcessor* Processor = LuaProcessor::luaGetProcessor(L);
+					FFINNetworkTrace comp = Processor->getKernel()->getNetwork()->getComponentByID(id.c_str());
 					UObject* Obj = comp.GetUnderlyingPtr().Get();
 					if (Obj && Obj->Implements<UFINNetworkComponent>()) comp = comp / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
 					newInstance(L, comp);
@@ -47,6 +49,7 @@ namespace FicsItKernel {
 			}
 			return LuaProcessor::luaAPIReturn(L, args);
 		}
+		#pragma optimize("", on)
 
 		int luaFindComponent(lua_State* L) {
 			FLuaSyncCall SyncCall(L);

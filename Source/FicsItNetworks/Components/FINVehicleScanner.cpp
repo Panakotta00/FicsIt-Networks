@@ -71,18 +71,6 @@ void AFINVehicleScanner::NotifyActorEndOverlap(AActor* OtherActor) {
 	}
 }
 
-void AFINVehicleScanner::AddListener_Implementation(FFINNetworkTrace listener) {
-	SignalListeners.Add(listener);
-}
-
-void AFINVehicleScanner::RemoveListener_Implementation(FFINNetworkTrace listener) {
-	SignalListeners.Remove(listener);
-}
-
-TSet<FFINNetworkTrace> AFINVehicleScanner::GetListeners_Implementation() {
-	return SignalListeners;
-}
-
 UObject* AFINVehicleScanner::GetSignalSenderOverride_Implementation() {
 	return this;
 }

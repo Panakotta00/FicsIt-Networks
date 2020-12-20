@@ -29,19 +29,6 @@ FName AFINComputerModule::getName_Implementation() const {
 	return ModuleName;
 }
 
-void AFINComputerModule::AddListener_Implementation(FFINNetworkTrace listener) {
-	if (Listeners.Contains(listener)) return;
-	Listeners.Add(listener);
-}
-
-void AFINComputerModule::RemoveListener_Implementation(FFINNetworkTrace listener) {
-	Listeners.Remove(listener);
-}
-
-TSet<FFINNetworkTrace> AFINComputerModule::GetListeners_Implementation() {
-	return Listeners;
-}
-
 UObject* AFINComputerModule::GetSignalSenderOverride_Implementation() {
 	return this;
 }

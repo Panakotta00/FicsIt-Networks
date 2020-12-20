@@ -44,12 +44,6 @@ protected:
 	UPROPERTY(SaveGame)
 	bool bIdCreated = false;
 	
-	/**
-	 * The signal listeners listening to this component.
-	 */
-	UPROPERTY(SaveGame)
-	TSet<FFINNetworkTrace> Listeners;
-
 public:
 	/**
 	 * The object used as redirect object for network instancing of this component.
@@ -100,9 +94,6 @@ public:
 	// End IFINNetworkComponent
 
 	// Begin IFINSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace Listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace Listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 

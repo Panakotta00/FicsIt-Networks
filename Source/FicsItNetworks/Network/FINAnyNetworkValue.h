@@ -160,3 +160,10 @@ private:
 inline bool operator<<(FArchive& Ar, FFINAnyNetworkValue& Val) {
 	return Val.Serialize(Ar);
 }
+
+template<>
+struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFINAnyNetworkValue> {
+	enum {
+		WithSerializer = true,
+    };
+};

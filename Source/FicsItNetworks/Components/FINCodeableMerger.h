@@ -40,9 +40,6 @@ public:
 	UPROPERTY(SaveGame)
 	TArray<FInventoryItem> InputQueue3;
 
-	UPROPERTY(SaveGame)
-	TSet<FFINNetworkTrace> SignalListeners;
-
 	AFINCodeableMerger();
 	~AFINCodeableMerger();
 
@@ -51,9 +48,6 @@ public:
 	// End IFGDismantleInterface
 	
 	// Begin IFINSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 

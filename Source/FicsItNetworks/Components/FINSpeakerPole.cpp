@@ -17,19 +17,6 @@ AFINSpeakerPole::AFINSpeakerPole() {
 	AudioComponent->OnAudioFinishedNative.AddUObject(this, &AFINSpeakerPole::OnSoundFinished);
 }
 
-void AFINSpeakerPole::AddListener_Implementation(FFINNetworkTrace listener) {
-	if (Listeners.Contains(listener)) return;
-	Listeners.Add(listener);
-}
-
-void AFINSpeakerPole::RemoveListener_Implementation(FFINNetworkTrace listener) {
-	Listeners.Remove(listener);
-}
-
-TSet<FFINNetworkTrace> AFINSpeakerPole::GetListeners_Implementation() {
-	return Listeners;
-}
-
 UObject* AFINSpeakerPole::GetSignalSenderOverride_Implementation() {
 	return NetworkConnector;
 }
@@ -61,13 +48,9 @@ void AFINSpeakerPole::netClass_Meta(FString& InternalName, FText& DisplayName, F
 	Description = FText::FromString("This speaker pole allows to play custom sound files, In-Game");
 }
 
-void FFINSpeakersPlaySoundFuture::Execute() {
-	bDone = true;
-	Speakers->PlaySound(Sound, Start);
-}
 
-FFINSpeakersPlaySoundFuture AFINSpeakerPole::netFunc_playSound(const FString& sound, float startPoint) {
-	return FFINSpeakersPlaySoundFuture(this, sound, startPoint);
+void AFINSpeakerPole::netFunc_playSound(const FString& sound, float startPoint) {
+	PlaySound(sound, startPoint);
 }
 
 void AFINSpeakerPole::netFuncMeta_playSound(FText& DisplayName, FText& Description, TArray<FText>& ParameterDescriptions) {
@@ -77,13 +60,8 @@ void AFINSpeakerPole::netFuncMeta_playSound(FText& DisplayName, FText& Descripti
 	ParameterDescriptions.Add(FText::FromString("The start point in seconds at wich the system should start playing"));
 }
 
-void FFINSpeakersStopSoundFuture::Execute() {
-	bDone = true;
-	Speakers->StopSound();
-}
-
-FFINDynamicStructHolder AFINSpeakerPole::netFunc_stopSound() {
-	return FFINSpeakersStopSoundFuture(this);
+void AFINSpeakerPole::netFunc_stopSound() {
+	StopSound();
 }
 
 void AFINSpeakerPole::netSig_SpeakerSound_Implementation(int type, const FString& sound) {}
