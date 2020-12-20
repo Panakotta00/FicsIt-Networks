@@ -11,7 +11,7 @@ The Network Connector is also a Network Component itself.
 
 A Network Component is anything that is connected to the network and can provide a interface for interactions to the network.
 
-Network Components can be identified indifidually by their ID which is a guid (a implementation of UUID)
+Network Components can be identified individually by their ID which is a guid (a implementation of UUID)
 
 Example::
 +
@@ -19,8 +19,8 @@ Example::
 0123456789abcdef0123456789abcdef
 ```
 
-Network Components can have nick, wich is a list of custom names sepperated by spaces allowing you to group and name your network components.
-Nick filers are then used to check if a network component has specific nicknames.
+Network Components can have a nick, which is a list of custom names seperated by spaces allowing you to group and name your network components.
+Nick filters are then used to check if a network component has specific nicknames.
 
 Example::
 +
@@ -42,7 +42,7 @@ Every network component can be representated in lua as a table, the Lua-Componen
 This Table contains some variables for identification of the structure itself and also the component.
 But most important of all is, this table contains all functions provided by the component.
 
-If the component disconnects from the network while the runtime contains a function value of this component the internal component pointer goes invalid, that means if you then try to execute the function, the Lua runtime will crash. If the component reconnects to the network, so does also the internal pointer get back valid so you can call it safely.
+If the component disconnects from the network while the runtime contains a function value of this component the internal component pointer goes invalid, that means if you then try to execute the function, the Lua runtime will crash. If the component reconnects to the network, so does also the internal pointer come back valid so you can call it safely.
 
 To get the Lua-Instance of a component you can use the `Component component.proxy(string)` function.
 
@@ -75,7 +75,7 @@ count getAmount(string)
 
 To call such a function in Lua you simply need to get the Lua-Instance and call the member function in that table as method `:`.
 
-If you want to get a list of all member of the Lua instnace's functions and attributes, you can use the `string[] getMembers()` function.
+If you want to get a list of all members of the Lua instnace's functions and attributes, you can use the `string[] getMembers()` function.
 
 === Signals
 
@@ -83,7 +83,7 @@ Signals are quite important because they allow us to listen for events happening
 
 When a signal occurs the signal gets added to the signalqueue of every computer subscribed to the object.
 The signalqueue size depends on the configuration of the host.
-If the queue is full, every further signal gets dropped until the queue has again place for new signals.
+If the queue is full, every further signal gets dropped until the queue has room for new signals.
 
 If a computer wants to recieve the signals of a object, he needs to subscribe to the instance (listen to the instance). A computer can just subscribe once at a time to the same instance, but it can subscribe to multiple different ones at the same time.
 
