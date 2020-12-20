@@ -1,5 +1,5 @@
 = Network Cable
-:description: The network cable allows you to connect two network connectors with eachother.
+:description: The network cable allows you to connect Network Poles and Network Systems together.
 
 [cols="1,3"]
 |===
@@ -15,13 +15,6 @@
 |image::buildings/NetworkCable_ig.JPG[300,300,role="left"]
 |===
 
-The network cable is one of the most important buildings.
-It allows you to connect two network connectors with each other and so, connect components to the network.
-
-To place one you simply look at the first building with a connector, left click.
-Then you look at the seccond building with a connector, left click.
-Done!
-
-
+Used to connect Network Poles and Network Systems together.
 
 include::partial$building_footer.adoc[]

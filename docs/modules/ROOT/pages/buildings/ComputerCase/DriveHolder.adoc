@@ -18,7 +18,7 @@
 |image::buildings/DriveHolder_T1Drive_ig.jpg[300,300,role="left"]
 |===
 
-The Drive Holder allows you to plug any kind of drive into your computer.
+The Drive Holder allows you to insert different Drives.
 The plugedin drive will then have a DeviceNode in the DevDevice of the system.
 
 This holder has two states for the drive, locked and unlocked.
