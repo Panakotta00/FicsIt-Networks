@@ -1,15 +1,12 @@
 ﻿#pragma once
 
 #include "FINComputerModule.h"
-#include "WidgetComponent.h"
 #include "WidgetInteractionComponent.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
-#include "Network/FINNetworkCustomType.h"
-
 #include "FINComputerGPU.generated.h"
 
 UCLASS()
-class AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface, public IFINNetworkCustomType {
+class AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface {
 	GENERATED_BODY()
 protected:
 	UPROPERTY(SaveGame, Replicated)
@@ -37,10 +34,6 @@ public:
 	virtual void RequestNewWidget() override;
 	virtual void DropWidget() override;
 	// End IFINGraphicsProcessor
-
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("GPU"); }
-	// End IFINNetworkCustomType
 
 	/**
 	 * Gets called by the repeating trace validation check

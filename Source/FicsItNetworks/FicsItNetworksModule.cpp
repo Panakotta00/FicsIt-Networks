@@ -100,10 +100,6 @@ void FFicsItNetworksModule::StartupModule(){
 	
 	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
 
-	SUBSCRIBE_METHOD_MANUAL("?UpdateBestUsableActor@AFGCharacterPlayer@@IEAAXXZ", AFGCharacterPlayer_Public::UpdateBestUsableActor, [](auto& scope, AFGCharacterPlayer_Public* self) {
-		if (!UFINComponentUtility::bAllowUsing) scope.Cancel();
-	});
-
 	SUBSCRIBE_METHOD(AFGBuildable::Dismantle_Implementation, [](auto& scope, AFGBuildable* self_r) {
 		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
 		AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);

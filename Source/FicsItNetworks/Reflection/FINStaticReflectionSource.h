@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "FINReflectionSource.h"
+#include "Network/FINHookSubsystem.h"
+
 #include "FINStaticReflectionSource.generated.h"
 
 struct FFINStaticFuncParamReg {
@@ -33,12 +35,27 @@ struct FFINStaticPropReg {
 	TFunction<void(const FFINExecutionContext&, const FINAny&)> Set;
 };
 
+struct FFINStaticSignalParamReg {
+	FString InternalName;
+	FText DisplayName;
+	FText Description;
+	UFINProperty*(*PropConstructor)(UObject*);
+};
+
+struct FFINStaticSignalReg {
+	FString InternalName;
+	FText DisplayName;
+	FText Description;
+	TMap<int, FFINStaticSignalParamReg> Parameters;
+};
+
 struct FFINStaticClassReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
 	TMap<int, FFINStaticFuncReg> Functions;
 	TMap<int, FFINStaticPropReg> Properties;
+	TMap<int, FFINStaticSignalReg> Signals;
 };
 
 struct FFINStaticStructReg {
@@ -88,6 +105,12 @@ public:
 	static void AddPropSetter(UScriptStruct* Struct, int PropID, const TFunction<void(const FFINExecutionContext&, const FINAny&)>& Set) {
 		FFINStaticPropReg& Reg = Structs.FindOrAdd(Struct).Properties.FindOrAdd(PropID);
 		Reg.Set = Set;
+	}
+	static void AddSignal(UClass* Class, int SignalID, const FFINStaticSignalReg& SignalReg) {
+		Classes.FindOrAdd(Class).Signals.FindOrAdd(SignalID) = SignalReg;
+	}
+	static void AddSignalParam(UClass* Class, int SignalID, int ParamPos, const FFINStaticSignalParamReg& SignalParamReg) {
+		Classes.FindOrAdd(Class).Signals.FindOrAdd(SignalID).Parameters.FindOrAdd(ParamPos) = SignalParamReg;
 	}
 
 	// Begin UFINReflectionSource

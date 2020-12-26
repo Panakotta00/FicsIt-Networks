@@ -2,13 +2,14 @@
 
 #include "FGBuildable.h"
 #include "FicsItNetworksModule.h"
+#include "FINArrayProperty.h"
 #include "FINFuncProperty.h"
 #include "FINReflection.h"
+#include "FINStructProperty.h"
+#include "FINUFunction.h"
 #include "Computer/FINComputerSubsystem.h"
-#include "Network/FINFuncParameterList.h"
-#include "Network/Signals/FINStructSignal.h"
 
-TMap<UFunction*, UFINRefSignal*> UFINUReflectionSource::FuncSignalMap;
+TMap<UFunction*, UFINSignal*> UFINUReflectionSource::FuncSignalMap;
 
 bool UFINUReflectionSource::ProvidesRequirements(UClass* Class) const {
 	if (Class->IsChildOf(AFGBuildable::StaticClass())) return true;
@@ -281,7 +282,7 @@ FString UFINUReflectionSource::GetSignalNameFromUFunction(UFunction* Func) const
 UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClass* Class, UFunction* Func) const {
 	FFINFunctionMeta Meta = GetFunctionMeta(Class, Func);
 	
-	UFINFunction* FINFunc = NewObject<UFINFunction>(Ref->FindClass(Class, false, false));
+	UFINUFunction* FINFunc = NewObject<UFINUFunction>(Ref->FindClass(Class, false, false));
 	FINFunc->RefFunction = Func;
 	FINFunc->InternalName = GetFunctionNameFromUFunction(Func);
 	FINFunc->DisplayName = FText::FromString(FINFunc->InternalName);
@@ -314,6 +315,13 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClas
 		if (Meta.ParameterDescriptions.Num() > i) FINProp->Description = Meta.ParameterDescriptions[i];
 		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param;
 		FINFunc->Parameters.Add(FINProp);
+	}
+	if (FINFunc->Parameters.Num() > 0) {
+		UFINArrayProperty* Prop = Cast<UFINArrayProperty>(FINFunc->Parameters.Last());
+		if (Prop && UFINReflectionUtils::CheckIfVarargs(Prop)) {
+			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_VarArgs;
+			FINFunc->VarArgsProperty = Prop;
+		}
 	}
 	return FINFunc;
 }
@@ -401,11 +409,11 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 	return FINProp;
 }
 
-UFINRefSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) const {
+UFINSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) const {
 	FFINSignalMeta Meta = GetSignalMeta(Class, Func);
 	
-	UFINRefSignal* FINSignal = NewObject<UFINRefSignal>(Ref->FindClass(Class, false, false));
-	FINSignal->InternalName = GetFunctionNameFromUFunction(Func);
+	UFINSignal* FINSignal = NewObject<UFINSignal>(Ref->FindClass(Class, false, false));
+	FINSignal->InternalName = GetSignalNameFromUFunction(Func);
 	FINSignal->DisplayName = FText::FromString(FINSignal->InternalName);
 	
 	if (Meta.InternalName.Len()) FINSignal->InternalName = Meta.InternalName;
@@ -423,20 +431,30 @@ UFINRefSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass
 		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param;
 		FINSignal->Parameters.Add(FINProp);
 	}
+	if (FINSignal->Parameters.Num() > 0) {
+		UFINArrayProperty* Prop = Cast<UFINArrayProperty>(FINSignal->Parameters[FINSignal->Parameters.Num()-1]);
+		if (Prop && Prop->GetInternalName() == "varargs") {
+			UFINStructProperty* Inner = Cast<UFINStructProperty>(Prop->InnerType);
+			if (FINSignal && Inner->Property && Inner->Property->Struct == FFINAnyNetworkValue::StaticStruct()) {
+				FINSignal->bIsVarArgs = true;
+				FINSignal->Parameters.Pop();
+			}
+		}
+	}
 	FuncSignalMap.Add(Func, FINSignal);
 	SetupFunctionAsSignal(Ref, Func);
 	return FINSignal;
 }
 
-UFINRefSignal* UFINUReflectionSource::GetSignalFromFunction(UFunction* Func) {
-	UFINRefSignal** Signal = FuncSignalMap.Find(Func);
+UFINSignal* UFINUReflectionSource::GetSignalFromFunction(UFunction* Func) {
+	UFINSignal** Signal = FuncSignalMap.Find(Func);
 	if (Signal) return *Signal;
 	return nullptr;
 }
 
 void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL) {
 	// get signal name
-	UFINRefSignal* FINSignal = UFINUReflectionSource::GetSignalFromFunction(Stack.CurrentNativeFunction);
+	UFINSignal* FINSignal = UFINUReflectionSource::GetSignalFromFunction(Stack.CurrentNativeFunction);
 	if (!FINSignal || !Context) {
 		UE_LOG(LogFicsItNetworks, Log, TEXT("Invalid Unreal Reflection Signal Execution '%s'"), *Stack.CurrentNativeFunction->GetName());
 
@@ -446,15 +464,15 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 	}
 
 	// allocate signal data storage and copy data
-	void* data = FMemory::Malloc(Stack.CurrentNativeFunction->PropertiesSize);
-	FMemory::Memzero(((uint8*)data) + Stack.CurrentNativeFunction->ParmsSize, Stack.CurrentNativeFunction->PropertiesSize - Stack.CurrentNativeFunction->ParmsSize);
-	Stack.CurrentNativeFunction->InitializeStruct(data);
+	void* ParamStruct = FMemory::Malloc(Stack.CurrentNativeFunction->PropertiesSize);
+	FMemory::Memzero(((uint8*)ParamStruct) + Stack.CurrentNativeFunction->ParmsSize, Stack.CurrentNativeFunction->PropertiesSize - Stack.CurrentNativeFunction->ParmsSize);
+	Stack.CurrentNativeFunction->InitializeStruct(ParamStruct);
 	for (UProperty* LocalProp = Stack.CurrentNativeFunction->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
-		LocalProp->InitializeValue_InContainer(data);
+		LocalProp->InitializeValue_InContainer(ParamStruct);
 	}
 
 	for (auto p = TFieldIterator<UProperty>(Stack.CurrentNativeFunction); p; ++p) {
-		auto dp = p->ContainerPtrToValuePtr<void>(data);
+		auto dp = p->ContainerPtrToValuePtr<void>(ParamStruct);
 		if (Stack.Code) {
 			std::invoke(&FFrame::Step, Stack, Context, dp);
 		} else {
@@ -462,10 +480,27 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 		}
 	}
 
-	// create signal instance
-	TFINDynamicStruct<FFINSignal> Signal =  FFINStructSignal(FINSignal->InternalName, FFINFuncParameterList(Stack.CurrentNativeFunction, data));
+	// copy data into parameter list
+	TArray<FFINAnyNetworkValue> Parameters;
+	TArray<UFINProperty*> ParameterList = FINSignal->GetParameters();
+	for (UFINProperty* Parameter : ParameterList) {
+		Parameters.Add(Parameter->GetValue(ParamStruct));
+	}
+	if (FINSignal->bIsVarArgs && Parameters.Num() > 0 && Parameters.Last().GetType() == FIN_ARRAY) {
+		FFINAnyNetworkValue Array = Parameters.Last();
+		Parameters.Pop();
+		Parameters.Append(Array.GetArray());
+	}
 
-	FINSignal->Trigger(Context, Signal);
+	// destroy parameter struct
+	for (UProperty* P = Stack.CurrentNativeFunction->DestructorLink; P; P = P->DestructorLinkNext) {
+		if (!P->IsInContainer(Stack.CurrentNativeFunction->ParmsSize)) {
+			P->DestroyValue_InContainer(ParamStruct);
+		}
+	}
+	FMemory::Free(ParamStruct);
+
+	FINSignal->Trigger(Context, Parameters);
 
 	P_FINISH;
 }

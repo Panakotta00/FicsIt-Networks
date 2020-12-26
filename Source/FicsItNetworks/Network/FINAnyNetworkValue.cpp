@@ -70,6 +70,9 @@ FFINAnyNetworkValue& FFINAnyNetworkValue::operator=(const FFINAnyNetworkValue& o
 	case FIN_ARRAY:
 		Data.ARRAY = new FINArray(*other.Data.ARRAY);
 		break;
+	case FIN_ANY:
+		Data.ANY = new FINAny(*other.Data.ANY);
+		break;
 	default:
 		Data = other.Data;
 		break;
@@ -94,6 +97,9 @@ FFINAnyNetworkValue::~FFINAnyNetworkValue() {
 	case FIN_ARRAY:
 		delete Data.ARRAY;
 		break;
+	case FIN_ANY:
+		delete Data.ANY;
+		break;
 	default:
 		break;
 	}
@@ -117,6 +123,9 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 		case FIN_ARRAY:
 			delete Data.ARRAY;
 			break;
+		case FIN_ANY:
+			delete Data.ANY;
+			break;
 		default:
 			break;
 		}
@@ -139,6 +148,8 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 		case FIN_ARRAY:
 			Data.ARRAY = new FINArray();
 			break;
+		case FIN_ANY:
+			Data.ANY = new FINAny();
 		default:
 			break;
 		}
@@ -172,46 +183,11 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 	case FIN_ARRAY:
 		Ar << *Data.ARRAY;
 		break;
+	case FIN_ANY:
+		Ar << *Data.ANY;
+		break;
 	default:
 		break;
 	}
 	return true;
-}
-
-void FFINAnyNetworkValue::operator>>(FFINValueReader& Reader) const {
-	switch (GetType()) {
-	case FIN_NIL:
-		Reader.nil();
-		break;
-	case FIN_INT:
-		Reader << GetInt();
-		break;
-	case FIN_FLOAT:
-		Reader << GetFloat();
-		break;
-	case FIN_BOOL:
-		Reader << GetBool();
-		break;
-	case FIN_STR:
-		Reader << GetString();
-		break;
-	case FIN_OBJ:
-		Reader << GetObj();
-		break;
-	case FIN_CLASS:
-		Reader << GetClass();
-		break;
-	case FIN_TRACE:
-		Reader << GetTrace();
-		break;
-	case FIN_STRUCT:
-		Reader << GetStruct();
-		break;
-	case FIN_ARRAY:
-		Reader << GetArray();
-		break;
-	/*case FIN_ANY:
-		Reader << GetAny();
-		break;*/
-	}
 }

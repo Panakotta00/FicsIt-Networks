@@ -1,7 +1,9 @@
 ﻿#pragma once
 
 #include "FINStruct.h"
-#include "FINRefSignal.h"
+#include "FINSignal.h"
+#include "UObjectIterator.h"
+
 #include "FINClass.generated.h"
 
 UCLASS(BlueprintType)
@@ -9,7 +11,7 @@ class UFINClass : public UFINStruct {
 	GENERATED_BODY()
 public:
 	UPROPERTY()
-	TArray<UFINRefSignal*> Signals;
+	TArray<UFINSignal*> Signals;
 
 	/**
 	 * Returns the parent class of this class
@@ -27,8 +29,8 @@ public:
 	 * @param[in]	bRecursive	true if signals of all parent classes should be included
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual TArray<UFINRefSignal*> GetSignals(bool bRecursive = true) const {
-		TArray<UFINRefSignal*> Sigs = Signals;
+	virtual TArray<UFINSignal*> GetSignals(bool bRecursive = true) const {
+		TArray<UFINSignal*> Sigs = Signals;
 		if (bRecursive && GetParentClass()) Sigs.Append(GetParentClass()->GetSignals(true));
 		return Sigs;
 	}
@@ -45,4 +47,11 @@ public:
 		}
 		return Childs;
 	}
+
+	/**
+	 * Trys to find a signal with the given name in this class
+	 * @param[in]	Name	the internal name of the signal you try to find
+	 * @return	the found signal or nullptr
+	 */
+	UFINSignal* FindFINSignal(const FString& Name);
 };

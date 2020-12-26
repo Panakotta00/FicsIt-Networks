@@ -6,8 +6,7 @@
 #include <mutex>
 
 #include "Network/FINNetworkTrace.h"
-#include "Network/Signals/FINSignal.h"
-#include "Network/Signals/FINSmartSignal.h"
+#include "Network/Signals/FINSignalData.h"
 
 namespace FicsItKernel {
 	namespace Network {
@@ -20,7 +19,7 @@ namespace FicsItKernel {
 			std::mutex mutexSignalListeners;
 			TSet<FFINNetworkTrace> signalListeners;
 			std::mutex mutexSignals;
-			std::deque<TPair<TFINDynamicStruct<FFINSignal>, FFINNetworkTrace>> signals;
+			std::deque<TPair<FFINSignalData, FFINNetworkTrace>> signals;
 			bool lockSignalRecieving = false;
 
 		public:
@@ -43,7 +42,7 @@ namespace FicsItKernel {
 			 */
 			uint32 maxSignalCount = 1000;
 
-			void handleSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender);
+			void handleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);
 
 			/**
 			 * pops a signal form the queue.
@@ -52,7 +51,7 @@ namespace FicsItKernel {
 			 * @param sender - out put paramter for the sender of the signal
 			 * @return	singal from the queue
 			 */
-			TFINDynamicStruct<FFINSignal> popSignal(FFINNetworkTrace& sender);
+			FFINSignalData popSignal(FFINNetworkTrace& sender);
 
 			/**
 			 * pushes a signal to the queue.
@@ -60,7 +59,7 @@ namespace FicsItKernel {
 			 *
 			 * @param	signal	the singal you want to push
 			 */
-			void pushSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender);
+			void pushSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);
 
 			/**
 			 * Removes all signals from the signal queue.
@@ -85,16 +84,6 @@ namespace FicsItKernel {
 			 * returns the components in the network with the given nick.
 			 */
 			TSet<FFINNetworkTrace> getComponentByNick(const FString& nick);
-
-			/**
-			 * pushes a signal to the queue.
-			 * uses the arguments to construct a signal struct.
-			 * Should only get used by the kernel modules to emit signals.
-			 */
-			template<typename... Ts>
-			void pushSignalKernel(const FString& signalName, Ts... args) {
-				pushSignal(FFINSmartSignal(signalName, {FFINAnyNetworkValue(args)...}), FFINNetworkTrace(component));
-			}
 
 			/**
 			 * Should get called prior to de/serialization

@@ -174,7 +174,7 @@ namespace FicsItKernel {
 				}
 				break;
 			} case FIN_ANY:
-				// TODO: IDK - this shit: networkValueToLua(L, Val.GetAny());
+				networkValueToLua(L, Val.GetAny());
 				lua_pushnil(L);
 				break;
 			default:

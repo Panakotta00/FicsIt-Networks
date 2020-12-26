@@ -2,7 +2,7 @@
 #include "FGSaveInterface.h"
 #include "FGSubsystem.h"
 #include "FINNetworkTrace.h"
-#include "Signals/FINSignal.h"
+#include "Signals/FINSignalData.h"
 #include "FINHookSubsystem.generated.h"
 
 UCLASS(Abstract)

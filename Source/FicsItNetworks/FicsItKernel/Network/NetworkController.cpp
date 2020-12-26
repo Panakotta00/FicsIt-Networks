@@ -8,12 +8,12 @@
 
 namespace FicsItKernel {
 	namespace Network {
-		void NetworkController::handleSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender) {
+		void NetworkController::handleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
 			pushSignal(signal, sender);
 		}
 
-		TFINDynamicStruct<FFINSignal> NetworkController::popSignal(FFINNetworkTrace& sender) {
-			if (getSignalCount() < 1) return TFINDynamicStruct<FFINSignal>(nullptr, nullptr);
+		FFINSignalData NetworkController::popSignal(FFINNetworkTrace& sender) {
+			if (getSignalCount() < 1) return FFINSignalData();
 			mutexSignals.lock();
 			auto sig = signals.front();
 			signals.pop_front();
@@ -22,10 +22,10 @@ namespace FicsItKernel {
 			return sig.Key;
 		}
 
-		void NetworkController::pushSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender) {
+		void NetworkController::pushSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
 			std::lock_guard<std::mutex> m(mutexSignals);
 			if (signals.size() >= maxSignalCount || lockSignalRecieving) return;
-			signals.push_back(TPair<TFINDynamicStruct<FFINSignal>, FFINNetworkTrace>{signal, sender});
+			signals.push_back(TPair<FFINSignalData, FFINNetworkTrace>{signal, sender});
 		}
 
 		void NetworkController::clearSignals() {
@@ -82,7 +82,7 @@ namespace FicsItKernel {
 				signals.clear();
 			}
 			for (int i = 0; i < signalCount; ++i) {
-				TFINDynamicStruct<FFINSignal> Signal;
+				FFINSignalData Signal;
 				FFINNetworkTrace Trace;
 				if (Ar.IsSaving()) {
 					const auto& sig = signals[i];
@@ -98,7 +98,7 @@ namespace FicsItKernel {
 				Trace.Serialize(Ar);
 				
 				if (Ar.IsLoading()) {
-					signals.push_back(TPair<TFINDynamicStruct<FFINSignal>, FFINNetworkTrace>{Signal, Trace});
+					signals.push_back(TPair<FFINSignalData, FFINNetworkTrace>{Signal, Trace});
 				}
 			}
 

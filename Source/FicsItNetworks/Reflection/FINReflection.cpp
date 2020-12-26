@@ -187,6 +187,18 @@ void PrintFunction(FString Prefix, UFINFunction* Function) {
 	}
 }
 
+void PrintSignal(FString Prefix, UFINSignal* Signal) {
+	FString Log = Prefix;
+	Log += "Signal: " + Signal->GetInternalName();
+	Log += " '" + Signal->GetDisplayName().ToString() + "'";
+	Log += " Desc:'" + Signal->GetDescription().ToString() + "'";
+	UE_LOG(LogFicsItNetworks, Log, TEXT("%s"), *Log);
+	Prefix += " ";
+	for (UFINProperty* Param : Signal->GetParameters()) {
+		PrintProperty(Prefix, Param);
+	}
+}
+
 void FFINReflection::PrintReflection() {
 	for (TPair<UClass*, UFINClass*> Class : Classes) {
 		UE_LOG(LogFicsItNetworks, Log, TEXT("Class: %s '%s' Desc:'%s'"), *Class.Value->GetInternalName(), *Class.Value->GetDisplayName().ToString(), *Class.Value->GetDescription().ToString());
@@ -196,7 +208,9 @@ void FFINReflection::PrintReflection() {
 		for (UFINProperty* Prop : Class.Value->GetProperties()) {
 			PrintProperty(" ", Prop);
 		}
-		// TODO: Add signals to reflection dump
+		for (UFINSignal* Signal : Class.Value->GetSignals()) {
+			PrintSignal(" ", Signal);
+		}
 	}
 
 	for (TPair<UScriptStruct*, UFINStruct*> FINStruct : Structs) {

@@ -3,13 +3,11 @@
 #include "FGBuildable.h"
 #include "ModuleSystem/FINModuleSystemModule.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-#include "Network/FINNetworkCustomType.h"
-#include "Network/FINNetworkTrace.h"
 #include "Network/Signals/FINSignalSender.h"
 #include "FINModuleBase.generated.h"
 
 UCLASS()
-class AFINModuleBase : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender, public IFINNetworkCustomType {
+class AFINModuleBase : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender {
 	GENERATED_BODY()
 public:
     UPROPERTY(EditDefaultsOnly)
@@ -41,8 +39,4 @@ public:
 	// Begin IFINSignalSender
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
-
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ModuleBase"); }
-	// End IFINNetworkCustomType
 };

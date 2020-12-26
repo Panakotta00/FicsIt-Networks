@@ -1,10 +1,5 @@
 #include "FINComputerModule.h"
 
-void AFINComputerModule::Serialize(FArchive& Ar) {
-	Super::Serialize(Ar);
-	Ar << Listeners;
-}
-
 void AFINComputerModule::EndPlay(EEndPlayReason::Type reason) {
 	Super::EndPlay(reason);
 	if (reason == EEndPlayReason::Destroyed && ModulePanel) ModulePanel->RemoveModule(this);

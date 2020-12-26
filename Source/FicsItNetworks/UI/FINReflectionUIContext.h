@@ -4,7 +4,7 @@
 #include "SlateBasics.h"
 
 class FFINReflectionUIContext;
-class UFINRefSignal;
+class UFINSignal;
 class UFINClass;
 class UFINStruct;
 class UFINFunction;
@@ -101,10 +101,10 @@ public:
 
 class FFINReflectionUISignal : public FFINReflectionUIEntry {
 private:
-	UFINRefSignal* Signal;
+	UFINSignal* Signal;
 
 public:
-	FFINReflectionUISignal(UFINRefSignal* Signal, FFINReflectionUIContext* Context) : FFINReflectionUIEntry(Context), Signal(Signal) {}
+	FFINReflectionUISignal(UFINSignal* Signal, FFINReflectionUIContext* Context) : FFINReflectionUIEntry(Context), Signal(Signal) {}
 
 	virtual TSharedRef<SWidget> GetDetailsWidget() override;
 	virtual TSharedRef<SWidget> GetShortPreview() override;

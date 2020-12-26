@@ -1,17 +1,19 @@
 #include "FicsItKernel.h"
 
 #include "KernelSystemSerializationInfo.h"
+#include "Computer/FINComputerCase.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "Network/FINFuture.h"
 #include "Processor/Lua/LuaProcessor.h"
+#include "Reflection/FINReflection.h"
 
 namespace FicsItKernel {
 	KernelCrash::KernelCrash(std::string what) : std::exception(what.c_str()) {}
 
 	KernelCrash::~KernelCrash() {}
 
-	KernelSystem::KernelSystem() : listener(new KernelListener(this)) {}
+	KernelSystem::KernelSystem(UObject* Owner) : Owner(Owner), listener(new KernelListener(this)) {}
 
 	KernelSystem::~KernelSystem() {
 		stop();
@@ -350,26 +352,38 @@ namespace FicsItKernel {
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
 
 	void KernelListener::onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 4ll, FString(path.str().c_str()));
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {4ll, FString(path.str().c_str())});
 	}
 
 	void KernelListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 5ll, FString(path.str().c_str()));
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {5ll, FString(path.str().c_str())});
 	}
 
 	void KernelListener::onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 0ll, FString(path.str().c_str()), (FINInt)type);
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {0ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 	}
 
 	void KernelListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 1ll, FString(path.str().c_str()), (FINInt)type);
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {1ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 	}
 
 	void KernelListener::onNodeChanged(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 2ll, FString(path.str().c_str()), (FINInt)type);
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {2ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 	}
 
 	void KernelListener::onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), (FINInt)type);
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FINInt>(type)});
 	}
 }

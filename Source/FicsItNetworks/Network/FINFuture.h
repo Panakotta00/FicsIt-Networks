@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINValueReader.h"
 #include "Reflection/FINFunction.h"
 #include "FicsItNetworksModule.h"
 #include "FINFuture.generated.h"
@@ -17,16 +16,16 @@ struct FFINFuture {
 	 * future queue of the kernel.
 	 */
 	virtual void Execute() {}
-
-	/**
-	 * This function write the resulting values of the future to the given reader.
-	 */
-	virtual int operator>>(FFINValueReader& Reader) const { return 0; }
-
+	
 	/**
 	 * Checks if the future has finished and we can get values from it.
 	 */
 	virtual bool IsDone() const { return false; }
+
+	/**
+	 * Returns the output data of the future
+	 */
+	virtual TArray<FFINAnyNetworkValue> GetOutput() const { return {}; }
 };
 
 USTRUCT()
@@ -70,6 +69,10 @@ struct FFINFutureReflection : public FFINFuture {
 		Output = Function->Execute(Context, Input);
 		bDone = true;
 	}
+
+	virtual TArray<FFINAnyNetworkValue> GetOutput() const override {
+		return Output;
+	}
 };
 
 template<>
@@ -77,4 +80,23 @@ struct TStructOpsTypeTraits<FFINFutureReflection> : public TStructOpsTypeTraitsB
 	enum {
 		WithSerializer = true,
 	};
+};
+
+
+USTRUCT()
+struct FFINFunctionFuture : public FFINFuture {
+	GENERATED_BODY()
+
+	TFunction<void()> Func;
+	bool bDone = false;
+
+	FFINFunctionFuture() = default;
+	FFINFunctionFuture(TFunction<void()> Func) : Func(Func) {}
+
+	virtual void Execute() override {
+		bDone = true;
+		Func();
+	}
+
+	virtual bool IsDone() const override { return bDone; }
 };

@@ -2,6 +2,7 @@
 
 #include "FINNetworkCircuit.h"
 #include "UnrealNetwork.h"
+#include "Engine/World.h"
 
 UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent() {
 	SetIsReplicated(true);
@@ -79,7 +80,7 @@ UObject* UFINAdvancedNetworkConnectionComponent::GetSignalSenderOverride_Impleme
 	return this;
 }
 
-void UFINAdvancedNetworkConnectionComponent::HandleSignal(const TFINDynamicStruct<FFINSignal>& Signal, const FFINNetworkTrace& Sender) {
+void UFINAdvancedNetworkConnectionComponent::HandleSignal(const FFINSignalData& Signal, const FFINNetworkTrace& Sender) {
 	OnNetworkSignal.Broadcast(Signal, Sender);
 }
 
@@ -90,7 +91,7 @@ bool UFINAdvancedNetworkConnectionComponent::IsPortOpen(int Port) {
 	return false;
 }
 
-void UFINAdvancedNetworkConnectionComponent::HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const ::TFINDynamicStruct<FFINParameterList>& Data) {
+void UFINAdvancedNetworkConnectionComponent::HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
 	OnNetworkMessageRecieved.Broadcast(ID, Sender, Receiver, Port, Data);
 }
 

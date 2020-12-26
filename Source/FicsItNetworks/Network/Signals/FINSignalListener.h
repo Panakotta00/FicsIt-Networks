@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Interface.h"
-#include "FINSignal.h"
+#include "FINSignalData.h"
 #include "Network/FINNetworkTrace.h"
 
 #include "FINSignalListener.generated.h"
@@ -25,5 +25,5 @@ public:
 	* @param	Signal	the signal you want to handle
 	* @param	Sender	the sender of the signal
 	*/
-	virtual void HandleSignal(const TFINDynamicStruct<FFINSignal>& Signal, const FFINNetworkTrace& Sender) = 0;
+	virtual void HandleSignal(const FFINSignalData& Signal, const FFINNetworkTrace& Sender) = 0;
 };

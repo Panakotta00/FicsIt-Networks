@@ -4,12 +4,11 @@
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINNetworkCustomType.h"
 
 #include "FINCodeableMerger.generated.h"
 
 UCLASS()
-class AFINCodeableMerger : public AFGBuildableConveyorAttachment, public IFINSignalSender, public IFINNetworkCustomType {
+class AFINCodeableMerger : public AFGBuildableConveyorAttachment, public IFINSignalSender {
 	GENERATED_BODY()
 
 public:
@@ -58,10 +57,6 @@ public:
 	// TODO: Upgrade Implementation
 	// End AFGBuildable
 	
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("CodeableMerger"); }
-	// End IFINNetworkCustomType
-
 private:
 	/**
 	 * This function is used in tick for internal handling of a input.

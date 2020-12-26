@@ -13,7 +13,7 @@ AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldConte
 	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->SignalSubsystem;
 }
 
-void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, TFINDynamicStruct<FFINSignal> Signal) {
+void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData& Signal) {
 	FFINSignalListeners* ListenerList = Listeners.Find(Sender);
 	if (!ListenerList) return;
 	for (const FFINNetworkTrace& ReceiverTrace : ListenerList->Listeners) {

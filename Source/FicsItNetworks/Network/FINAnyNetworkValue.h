@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "FINNetworkValues.h"
-#include "FINValueReader.h"
 
 #include "FINAnyNetworkValue.generated.h"
 
@@ -137,9 +136,17 @@ struct FFINAnyNetworkValue {
 		return *Data.ARRAY;
 	}
 
-	bool Serialize(FArchive& Ar);
+	/**
+	 * Returns the the network value as a any value.
+	 * Asserts if the type is not any.
+	 *
+	 * @return	the stored trace
+	 */
+	const FINAny& GetAny() const {
+		return *Data.ANY;
+	}
 
-	void operator>>(FFINValueReader& Reader) const;
+	bool Serialize(FArchive& Ar);
 
 private:
 	TEnumAsByte<EFINNetworkValueType> Type = FIN_NIL;
@@ -154,6 +161,7 @@ private:
 		FINTrace*	TRACE;
 		FINStruct*	STRUCT;
 		FINArray*	ARRAY;
+		FINAny*		ANY;
 	} Data;
 };
 

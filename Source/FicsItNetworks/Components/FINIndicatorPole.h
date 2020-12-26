@@ -2,13 +2,10 @@
 
 #include "FGBuildable.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINFuture.h"
-#include "Network/FINNetworkCustomType.h"
-
 #include "FINIndicatorPole.generated.h"
 
 UCLASS()
-class AFINIndicatorPole : public AFGBuildable, public IFINNetworkCustomType {
+class AFINIndicatorPole : public AFGBuildable {
 	GENERATED_BODY()
 	
 public:
@@ -63,10 +60,6 @@ public:
 	// Begin IFGDismantleInterface
 	virtual int32 GetDismantleRefundReturnsMultiplier() const override;
 	// End IFGDismantleInterface
-
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("IndicatorPole"); }
-	// End IFINNetworkCustomType
 
 	/**
 	 * Spawns all the pole static meshes

@@ -2,6 +2,7 @@
 
 
 #include "FGConstructDisqualifier.h"
+#include "FGOutlineComponent.h"
 #include "FINNetworkAdapter.h"
 #include "FINComponentUtility.h"
 
@@ -334,8 +335,6 @@ void AFINNetworkCableHologram::OnBeginSnap(FFINSnappedInfo a, bool isValid) {
 	if (a.SnapType != FIN_NOT_SNAPPED) {
 		AActor* o = a.GetActor();
 		if (o) UFGOutlineComponent::Get(this->GetWorld())->ShowOutline(o, isValid ? EOutlineColor::OC_HOLOGRAM : EOutlineColor::OC_RED);
-		// TODO: Do snap sound
-		//this->Client_PlaySnapSound();
 	}
 }
 

@@ -14,8 +14,6 @@
 #include <fstream>
 #include <sstream>
 
-bool UFINComponentUtility::bAllowUsing = true;
-
 UFINNetworkConnectionComponent* UFINComponentUtility::GetNetworkConnectorFromHit(FHitResult hit) {
 	if (!hit.bBlockingHit) return nullptr;
 
@@ -55,13 +53,4 @@ UFINNetworkConnectionComponent* UFINComponentUtility::GetNetworkConnectorFromHit
 
 void UFINComponentUtility::ClipboardCopy(FString str) {
 	FWindowsPlatformApplicationMisc::ClipboardCopy(*str);
-}
-
-void UFINComponentUtility::SetAllowUsing(UObject* WorldContextObject, bool newUsing) {
-	if (!newUsing) {
-		// Cast<AFGCharacterPlayer>(WorldContextObject->GetWorld()->GetFirstPlayerController()->GetCharacter())->SetBestUableActor(nullptr);
-		// TODO: Find workaround if needed
-	}
-
-	bAllowUsing = newUsing;
 }

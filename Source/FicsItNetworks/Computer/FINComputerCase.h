@@ -1,19 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "FGReplicationDetailInventoryComponent.h"
 #include "FINComputerGPU.h"
 #include "FINComputerScreen.h"
 #include "Buildables/FGBuildable.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/KernelSystemSerializationInfo.h"
 #include "FicsItKernel/Audio/AudioComponentController.h"
-#include "Network/FINNetworkCustomType.h"
-
 #include "FINComputerCase.generated.h"
 
 class AFINComputerNetworkCard;
@@ -32,7 +27,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINSt
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
 
 UCLASS(Blueprintable)
-class AFINComputerCase : public AFGBuildable, public IFINNetworkCustomType {
+class AFINComputerCase : public AFGBuildable {
 	GENERATED_BODY()
 
 public:
@@ -121,10 +116,6 @@ public:
 	virtual void PostSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	// End IFGSaveInterface
 
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("Computer"); }
-	// End IFINNetworkCustomType
-
 	UFUNCTION(NetMulticast, Unreliable)
 	void NetMulti_OnEEPROMChanged(AFINStateEEPROM* ChangedEEPROM);
 
@@ -201,8 +192,11 @@ public:
 	FString GetSerialOutput();
 
 	UFUNCTION()
-	void HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender);
+	void HandleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);
 
 	UFUNCTION()
 	void OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive);
+
+	UFUNCTION()
+    void netSig_FileSystemUpdate(int Type, const FString& From, const FString& To) {}
 };

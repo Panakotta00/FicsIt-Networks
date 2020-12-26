@@ -5,12 +5,10 @@
 #include "Computer/FINComputerScreen.h"
 #include "Graphics/FINScreenInterface.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINNetworkCustomType.h"
-
 #include "FINScreen.generated.h"
 
 UCLASS()
-class AFINScreen : public AFGBuildable, public IFINScreenInterface, public IFINNetworkCustomType {
+class AFINScreen : public AFGBuildable, public IFINScreenInterface {
 	GENERATED_BODY()
 	
 private:
@@ -85,10 +83,6 @@ public:
 	TSharedPtr<SWidget> GetWidget() const override;
 	virtual void RequestNewWidget() override;
 	// End IFINScreenInterface
-
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("Screen"); }
-	// End IFINNetworkCustomType
 
 	UFUNCTION(NetMulticast, Reliable)
 	void OnGPUValidChanged(bool bValid, UObject* newGPU);

@@ -258,7 +258,7 @@ bool FFINReflectionUIStruct::ApplyFilter(const FFINReflectionUIFilter& Filter) {
 }
 
 FFINReflectionUIClass::FFINReflectionUIClass(UFINClass* Class, FFINReflectionUIContext* Context) : FFINReflectionUIStruct(Class, Context) {
-	for (UFINRefSignal* Signal : Class->GetSignals()) {
+	for (UFINSignal* Signal : Class->GetSignals()) {
 		Signals.Add(MakeShared<FFINReflectionUISignal>(Signal, Context));
 	}
 	Filtered.Append(Signals);

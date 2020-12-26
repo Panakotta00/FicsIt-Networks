@@ -3,15 +3,14 @@
 #include "FINComputerModule.h"
 #include "Network/FINNetworkCircuitNode.h"
 #include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkCustomType.h"
 #include "Network/FINNetworkMessageInterface.h"
-#include "Network/Signals/FINSignal.h"
+#include "Network/Signals/FINSignalData.h"
 
 #include "FINComputerNetworkCard.generated.h"
 
 class AFINComputerCase;
 UCLASS()
-class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface, public IFINNetworkCustomType {
+class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface {
 	GENERATED_BODY()
 public:
 	/**
@@ -85,12 +84,10 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) override;
+	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
 	// End IFINNetworkMessageInterface
 
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("NetworkCard"); }
-	// End IFINNetworkCustomType
+	static bool CheckNetMessageData(const TArray<FFINAnyNetworkValue>& Data);
 
 	UFUNCTION()
 	void netFunc_open(int port);
@@ -102,52 +99,11 @@ public:
 	void netFunc_closeAll();
 
 	UFUNCTION()
-	void netFunc_send(FString receiver, int port, FFINDynamicStructHolder args);
+	void netFunc_send(FString receiver, int port, const TArray<FFINAnyNetworkValue>& varargs);
 
 	UFUNCTION()
-	void netFunc_broadcast(int port, FFINDynamicStructHolder args);
+	void netFunc_broadcast(int port, const TArray<FFINAnyNetworkValue>& varargs);
+
+	UFUNCTION()
+	void netSig_NetworkMessage(int port, const FString& sender, const TArray<FFINAnyNetworkValue>& varargs) {}
 };
-
-struct FFINNetworkCardArgChecker : public FFINValueReader {
-	bool Fail = false;
-	
-	virtual void nil() override {};
-	virtual void operator<<(FINBool B) override {};
-	virtual void operator<<(FINInt Num) override {};
-	virtual void operator<<(FINFloat Num) override {};
-	virtual void operator<<(FINClass Class) override {};
-	virtual void operator<<(const FINStr& Str) override {};
-	virtual void operator<<(const FINObj& Obj) override;
-	virtual void operator<<(const FINTrace& Obj) override;
-	virtual void operator<<(const FINStruct& Struct) override;
-	virtual void operator<<(const FINArray& Array) override;
-};
-
-USTRUCT()
-struct FFINNetworkMessageSignal : public FFINSignal {
-	GENERATED_BODY()
-
-	FGuid Sender;
-	int Port;
-	TFINDynamicStruct<FFINParameterList> Data;
-
-	FFINNetworkMessageSignal() = default;
-	FFINNetworkMessageSignal(FGuid Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data);
-
-	bool Serialize(FArchive& Ar);
-	
-	virtual int operator>>(FFINValueReader& reader) const override;
-};
-
-template<>
-struct TStructOpsTypeTraits<FFINNetworkMessageSignal> : TStructOpsTypeTraitsBase2<FFINNetworkMessageSignal>
-{
-	enum
-	{
-		WithSerializer = true,
-    };
-};
-
-inline bool operator<<(FArchive& Ar, FFINNetworkMessageSignal& Signal) {
-	return Signal.Serialize(Ar);
-}

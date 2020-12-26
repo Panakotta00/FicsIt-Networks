@@ -2,6 +2,10 @@
 
 #include "FINExecutionContext.h"
 #include "FINProperty.h"
+#include "FINReflectionException.h"
+#include "FINReflectionUtils.h"
+
+
 #include "FINFunction.generated.h"
 
 enum EFINFunctionFlags {
@@ -37,8 +41,7 @@ class UFINFunction : public UFINBase {
 public:
 	UPROPERTY()
 	TArray<UFINProperty*> Parameters;
-	UPROPERTY()
-	UFunction* RefFunction = nullptr;
+	
 	TFunction<TArray<FFINAnyNetworkValue>(const FFINExecutionContext&, const TArray<FFINAnyNetworkValue>&)> NativeFunction;
 
 	EFINFunctionFlags FunctionFlags = FIN_Func_Sync;
@@ -59,45 +62,6 @@ public:
 	 */
 	virtual TArray<FFINAnyNetworkValue> Execute(const FFINExecutionContext& Ctx, const TArray<FFINAnyNetworkValue>& Params) const {
 		if (NativeFunction) return NativeFunction(Ctx, Params);
-		if (RefFunction) {
-			UObject* Obj = Ctx.GetObject();
-			if (!Obj) return {}; // TODO: Custom Exception for invalid object function execution
-			
-			TArray<FFINAnyNetworkValue> Output;
-			// allocate & initialize parameter struct
-			uint8* ParamStruct = (uint8*)FMemory::Malloc(RefFunction->PropertiesSize);
-			FMemory::Memzero(ParamStruct + RefFunction->ParmsSize, RefFunction->PropertiesSize - RefFunction->ParmsSize);
-			RefFunction->InitializeStruct(ParamStruct);
-			for (UProperty* LocalProp = RefFunction->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
-				LocalProp->InitializeValue_InContainer(ParamStruct);
-			}
-
-			// copy parameters to parameter struct
-			int i = 0;
-			for (UFINProperty* Param : GetParameters()) {
-				if ((Param->GetPropertyFlags() & FIN_Prop_Param) && !(Param->GetPropertyFlags() & FIN_Prop_OutParam)) {
-					Param->SetValue(ParamStruct, Params[i++]);
-				}
-			}
-			
-			Obj->ProcessEvent(RefFunction, ParamStruct);
-
-			// copy output parameters from paramter struct
-			for (UFINProperty* Param : GetParameters()) {
-				if ((Param->GetPropertyFlags() & FIN_Prop_Param) && (Param->GetPropertyFlags() & FIN_Prop_OutParam)) {
-					Output.Add(Param->GetValue(ParamStruct));
-				}
-			}
-
-			// destroy parameter struct
-			for (UProperty* P = RefFunction->DestructorLink; P; P = P->DestructorLinkNext) {
-				if (!P->IsInContainer(RefFunction->ParmsSize)) {
-					P->DestroyValue_InContainer(ParamStruct);
-				}
-			}
-			FMemory::Free(ParamStruct);
-			return Output;
-		}
 		return TArray<FFINAnyNetworkValue>();
 	}
 };

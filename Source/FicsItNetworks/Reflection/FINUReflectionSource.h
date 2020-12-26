@@ -45,7 +45,7 @@ protected:
 	FString GetPropertyNameFromUProperty(UProperty* Prop, bool& bReadOnly) const;
 	FString GetSignalNameFromUFunction(UFunction* Func) const;
 
-	static TMap<UFunction*, UFINRefSignal*> FuncSignalMap;
+	static TMap<UFunction*, UFINSignal*> FuncSignalMap;
 	
 public:
 	// Begin UFINReflectionSource
@@ -56,7 +56,7 @@ public:
 	UFINFunction* GenerateFunction(FFINReflection* Ref, UClass* Class, UFunction* Func) const;
 	UFINProperty* GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UProperty* Prop) const;
 	UFINProperty* GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UFunction* Get) const;
-	UFINRefSignal* GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) const;
-	static UFINRefSignal* GetSignalFromFunction(UFunction* Func);
+	UFINSignal* GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) const;
+	static UFINSignal* GetSignalFromFunction(UFunction* Func);
 	void SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func) const;
 };

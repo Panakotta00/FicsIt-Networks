@@ -13,25 +13,6 @@ struct lua_Debug;
 
 namespace FicsItKernel {
 	namespace Lua {
-		class LuaValueReader : public FFINValueReader {
-		private:
-			lua_State* L = nullptr;
-
-		public:
-			LuaValueReader(lua_State* L);
-
-			virtual void nil() override;
-			virtual void operator<<(FINBool b) override;
-			virtual void operator<<(FINInt num) override;
-			virtual void operator<<(FINFloat num) override;
-			virtual void operator<<(FINClass clazz) override;
-			virtual void operator<<(const FINStr& str) override;
-			virtual void operator<<(const FINObj& obj) override;
-			virtual void operator<<(const FINTrace& obj) override;
-			virtual void operator<<(const FINStruct& struc) override;
-			virtual void operator<<(const FINArray& array) override;
-		};
-
 		class LuaFileSystemListener : public FileSystem::Listener {
 		private:
 			class LuaProcessor* parent = nullptr;

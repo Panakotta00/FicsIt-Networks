@@ -176,10 +176,6 @@ public:
 	virtual void BindScreen(const FFINNetworkTrace& Screen) override;
 	// End IFINGraphicsProcessingUnit
 
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("GPUT1"); }
-	// End IFINNetworkCustomType
-
 	virtual TSharedPtr<SWidget> CreateWidget() override;
 
 	/**

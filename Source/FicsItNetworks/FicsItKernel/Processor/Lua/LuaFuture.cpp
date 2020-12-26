@@ -10,8 +10,9 @@ namespace FicsItKernel {
 		int luaFutureAwaitContinue(lua_State* L, int code, lua_KContext ctx) {
 			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
 			if ((*future)->IsDone()) {
-				LuaValueReader reader(L);
-				return ***future >> reader;
+				TArray<FFINAnyNetworkValue> Data = future->Get<FFINFuture>().GetOutput();
+				for (const FFINAnyNetworkValue& Param : Data) networkValueToLua(L, Param);
+				return Data.Num();
 			}
 			return lua_yieldk(L, LUA_MULTRET, NULL, luaFutureAwaitContinue);
 		}
@@ -24,8 +25,9 @@ namespace FicsItKernel {
 		int luaFutureGet(lua_State* L) {
 			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
 			luaL_argcheck(L, (*future)->IsDone(), 1, "Future is not ready");
-			LuaValueReader reader(L);
-			return ***future >> reader;
+			const TArray<FFINAnyNetworkValue>& Data = future->Get<FFINFutureReflection>().Output;
+			for (const FFINAnyNetworkValue& Param : Data) networkValueToLua(L, Param);
+			return Data.Num();
 		}
 
 		int luaFutureCanGet(lua_State* L) {

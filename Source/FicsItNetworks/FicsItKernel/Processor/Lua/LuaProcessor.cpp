@@ -1,8 +1,6 @@
 #include "LuaProcessor.h"
 
 #include <chrono>
-#include <xkeycheck.h>
-
 
 #include "../../FicsItKernel.h"
 
@@ -19,56 +17,11 @@
 #include "LuaFuture.h"
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkTrace.h"
+#include "Network/FINNetworkUtils.h"
+#include "Reflection/FINSignal.h"
 
 namespace FicsItKernel {
 	namespace Lua {
-		LuaValueReader::LuaValueReader(lua_State* L) : L(L) {}
-
-		void LuaValueReader::nil() {
-			lua_pushnil(L);
-		}
-
-		void LuaValueReader::operator<<(const FString& str) {
-			lua_pushlstring(L, TCHAR_TO_UTF8(*str), str.Len());
-		}
-
-		void LuaValueReader::operator<<(FINBool b) {
-			lua_pushboolean(L, b);
-		}
-
-		void LuaValueReader::operator<<(FINInt num) {
-			lua_pushinteger(L, num);
-		}
-		
-		void LuaValueReader::operator<<(FINFloat num) {
-			lua_pushnumber(L, num);
-		}
-
-		void LuaValueReader::operator<<(FINClass clazz) {
-			newInstance(L, clazz);
-		}
-
-		void LuaValueReader::operator<<(const FINObj& obj) {
-			newInstance(L, FFINNetworkTrace(obj.Get()));
-		}
-
-		void LuaValueReader::operator<<(const FINTrace& obj) {
-			newInstance(L, obj);
-		}
-
-		void LuaValueReader::operator<<(const FINStruct& obj) {
-			luaStruct(L, obj);
-		}
-
-		void LuaValueReader::operator<<(const FINArray& array) {
-			lua_newtable(L);
-			int i = 0;
-			for (const FINAny& Value : array) {
-				Value >> *this;
-				lua_seti(L, -2, ++i);
-			}
-		}
-
 		void LuaFileSystemListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
 			for (LuaFile file : parent->getFileStreams()) {
 				if (file.isValid() && (!parent->getKernel()->getFileSystem() || !parent->getKernel()->getFileSystem()->checkUnpersistPath(file->path))) {
@@ -767,22 +720,22 @@ namespace FicsItKernel {
 		AFINStateEEPROMLua* LuaProcessor::getEEPROM() {
 			return eeprom.Get();
 		}
-
+#pragma optimize("", off)
 		int LuaProcessor::doSignal(lua_State* L) {
 			auto net = getKernel()->getNetwork();
 			if (!net || net->getSignalCount() < 1) return 0;
 			FFINNetworkTrace sender;
-			TFINDynamicStruct<FFINSignal> signal = net->popSignal(sender);
-			if (!signal.GetData()) return 0;
+			FFINSignalData signal = net->popSignal(sender);
 			int props = 2;
-			lua_pushstring(L, TCHAR_TO_UTF8(*signal->GetName()));
-			UObject* Obj = sender.GetUnderlyingPtr().Get();
-			if (Obj && Obj->Implements<UFINNetworkComponent>()) sender = sender / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
-			newInstance(L, sender);
-			LuaValueReader reader(L);
-			props += signal.Get<FFINSignal>() >> reader;
+			lua_pushstring(L, TCHAR_TO_UTF8(*signal.Signal->GetInternalName()));
+			newInstance(L, UFINNetworkUtils::RedirectIfPossible(sender));
+			for (const FFINAnyNetworkValue& Value : signal.Data) {
+				networkValueToLua(L, Value);
+				props++;
+			}
 			return props;
 		}
+#pragma optimize("", on)
 
 		void LuaProcessor::luaHook(lua_State* L, lua_Debug* ar) {
 			LuaProcessor* p = LuaProcessor::luaGetProcessor(L);

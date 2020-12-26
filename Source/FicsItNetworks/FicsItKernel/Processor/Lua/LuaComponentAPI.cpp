@@ -10,8 +10,7 @@
 #include "LuaInstance.h"
 
 #include "FGBlueprintFunctionLibrary.h"
-#include "FGRecipeManager.h"
-#include "Network/FINNetworkCustomType.h"
+#include "Network/FINNetworkUtils.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -41,9 +40,7 @@ namespace FicsItKernel {
 				for (auto& id : ids) {
 					LuaProcessor* Processor = LuaProcessor::luaGetProcessor(L);
 					FFINNetworkTrace comp = Processor->getKernel()->getNetwork()->getComponentByID(id.c_str());
-					UObject* Obj = comp.GetUnderlyingPtr().Get();
-					if (Obj && Obj->Implements<UFINNetworkComponent>()) comp = comp / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
-					newInstance(L, comp);
+					newInstance(L, UFINNetworkUtils::RedirectIfPossible(comp));
 					if (isT) lua_seti(L, -2, ++j);
 				}
 			}

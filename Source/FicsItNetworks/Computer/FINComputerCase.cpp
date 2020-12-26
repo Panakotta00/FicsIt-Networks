@@ -75,7 +75,7 @@ void AFINComputerCase::Serialize(FArchive& Ar) {
 void AFINComputerCase::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 	
-	kernel = new FicsItKernel::KernelSystem();
+	kernel = new FicsItKernel::KernelSystem(this);
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
 	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(SpeakerTrampoline));
@@ -412,7 +412,7 @@ void AFINComputerCase::WriteSerialInput(const FString& str) {
 	}
 }
 
-void AFINComputerCase::HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender) {
+void AFINComputerCase::HandleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
 	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
 }
 

@@ -3,14 +3,10 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINFuture.h"
-#include "Network/FINNetworkCustomType.h"
-
-
 #include "FINSpeakerPole.generated.h"
 
 UCLASS(Blueprintable)
-class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender, public IFINNetworkCustomType {
+class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
 	GENERATED_BODY()
 
 public:
@@ -28,10 +24,6 @@ public:
 	// Begin IFINNetworkSignalSender
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINNetworkSignalSender
-
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("SpeakerPole"); }
-	// End IFINNetworkCustomType
 
 	UFUNCTION(NetMulticast, Reliable)
 	void PlaySound(const FString& Sound, float StartPoint);

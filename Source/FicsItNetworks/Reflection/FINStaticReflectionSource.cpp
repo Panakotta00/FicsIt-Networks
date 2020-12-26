@@ -34,6 +34,7 @@
 #include "FINClassProperty.h"
 #include "FINFloatProperty.h"
 #include "FINReflection.h"
+#include "FINStaticReflectionSourceHooks.h"
 #include "FINTraceProperty.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "util/ReflectionHelper.h"
@@ -399,6 +400,23 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 	FINAny& InternalName = _bGotReg ? Params[Pos] : *(FINAny*)nullptr; \
 	if (!_bGotReg) { UFINStaticReflectionSource::AddFuncParam(GetUType(), F, Pos, FFINStaticFuncParamReg{#InternalName, DisplayName, Description, 3, &Type::PropConstructor}); }
 
+#define SignalClassName(Prop) FIN_StaticRefSignal_ ## Prefix
+#define BeginSignal(InternalName, DisplayName, Description) \
+	namespace SignalClassName(InternalName) { \
+		const int S = __COUNTER__; \
+		FFINStaticGlobalRegisterFunc RegSignal([](){ \
+			UFINStaticReflectionSource::AddSignal(GetUType(), S, FFINStaticSignalReg{#InternalName, DisplayName, Description});
+#define SignalParam(Pos, Type, InternalName, DisplayName, Description) \
+			UFINStaticReflectionSource::AddSignalParam(GetUType(), S, Pos, FFINStaticSignalParamReg{#InternalName, DisplayName, Description, &Type::PropConstructor});
+#define EndSignal() \
+		}); \
+	};
+
+#define Hook(HookClass) \
+	FFINStaticGlobalRegisterFunc Hook([](){ \
+		AFINHookSubsystem::RegisterHook(GetUType(), HookClass::StaticClass()); \
+	});
+
 #define TFS(Str) FText::FromString( Str )
 
 struct RInt {
@@ -683,6 +701,9 @@ EndClass()
 
 BeginClass(UFGPowerCircuit, "PowerCircuit", TFS("Power Circuit"), TFS("A Object that represents a whole power circuit."))
 // TODO: Hook & Signals - LuaLibHook(UFGPowerCircuit, UFINPowerCircuitHook)
+Hook(UFINPowerCircuitHook)
+BeginSignal(PowerFuseChanged, TFS("Power Fuse Changed"), TFS("Get Triggered when the fuse state of the power circuit changes."))
+EndSignal()
 BeginProp(RFloat, production, TFS("Production"), TFS("The amount of power produced by the whole circuit in the last tick.")) {
 	FPowerCircuitStats stats;
 	self->GetStats(stats);
@@ -705,6 +726,10 @@ EndClass()
 
 BeginClass(UFGFactoryConnectionComponent, "FactoryConnection", TFS("Factory Connection"), TFS("A actor component that is a connection point to which a conveyor or pipe can get attached to."))
 // TODO: Hook & Signals - LuaLibHook(UFGFactoryConnectionComponent, UFINFactoryConnectorHook)
+Hook(UFINFactoryConnectorHook)
+BeginSignal(ItemTransfer, TFS("Item Transfer"), TFS("Triggers when the factory connection component transfers an item."))
+	SignalParam(0, RStruct<FInventoryItem>, item, TFS("Item"), TFS("The transfered item"))
+EndSignal()
 BeginProp(RInt, type, TFS("Type"), TFS("Returns the type of the connection. 0 = Conveyor, 1 = Pipe")) {
 	Return (int64)self->GetConnector();
 } EndProp()
@@ -867,7 +892,7 @@ BeginFunc(setCurrentTarget, TFS("Set Current Target"), TFS("Sets the target with
 	Body()
 	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
 	AFGTargetPoint* Target = IndexToTarget(index, List);
-	// TODO: Exception - if (!Target) throw FFINException("index out of range");
+	if (!Target) throw FFINException("index out of range");
 	List->SetCurrentTarget(Target);
 } EndFunc()
 BeginFunc(getTarget, TFS("Get Target"), TFS("Returns the target struct at with the given index in the target list.")) {
@@ -876,7 +901,7 @@ BeginFunc(getTarget, TFS("Get Target"), TFS("Returns the target struct at with t
 	Body()
 	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
 	AFGTargetPoint* Target = IndexToTarget(index, List);
-	// TODO: Exception - if (!Target) throw FFINException("index out of range");
+	if (!Target) throw FFINException("index out of range");
 	target = (FINAny)FFINTargetPoint(Target);
 } EndFunc()
 BeginFunc(removeTarget, TFS("Remove Target"), TFS("Removes the target with the given index from the target list.")) {
@@ -884,7 +909,7 @@ BeginFunc(removeTarget, TFS("Remove Target"), TFS("Removes the target with the g
 	Body()
 	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
 	AFGTargetPoint* Target = IndexToTarget(index, List);
-	// TODO: Exception - if (!Target) throw FFINException( "index out of range");
+	if (!Target) throw FFINException( "index out of range");
 	List->RemoveItem(Target);
 	Target->Destroy();
 } EndFunc()
@@ -892,7 +917,7 @@ BeginFunc(addTarget, TFS("Add Target"), TFS("Adds the given target point struct 
 	InVal(0, RStruct<FFINTargetPoint>, target, TFS("Target"), TFS("The target point you want to add."))
 	Body()
 	AFGTargetPoint* Target = target.ToWheeledTargetPoint(self);
-	// TODO: Exception - if (!Target) throw FFINException("failed to create target");
+	if (!Target) throw FFINException("failed to create target");
 	self->GetTargetNodeLinkedList()->InsertItem(Target);
 } EndFunc()
 BeginFunc(setTarget, TFS("Set Target"), TFS("Allows to set the target at the given index to the given target point struct.")) {
@@ -901,7 +926,7 @@ BeginFunc(setTarget, TFS("Set Target"), TFS("Allows to set the target at the giv
 	Body()
 	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
 	AFGTargetPoint* Target = IndexToTarget(index, List);
-	// TODO: Excpetion - if (!Target) throw FFINException("index out of range");
+	if (!Target) throw FFINException("index out of range");
 	Target->SetActorLocation(target.Pos);
 	Target->SetActorRotation(target.Rot);
 	Target->SetTargetSpeed(target.Speed);
@@ -969,7 +994,7 @@ BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which
 	OutVal(2, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
 	Body()
 	FRailroadTrackPosition pos = self->GetTrackPosition();
-	if (!pos.IsValid()) return; // TODO: Exception
+	if (!pos.IsValid()) throw FFINException("Railroad track position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
 	offset = pos.Offset;
 	forward = pos.Forward;
@@ -1067,7 +1092,7 @@ BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which
     OutVal(2, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
     Body()
     FRailroadTrackPosition pos = self->GetTrackPosition();
-	if (!pos.IsValid()) return; // TODO: Exception
+	if (!pos.IsValid()) throw FFINException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
 	offset = pos.Offset;
 	forward = pos.Forward;
@@ -1211,6 +1236,10 @@ EndClass()
 
 BeginClass(AFGTrain, "Train", TFS("Train"), TFS("This class holds information and references about a trains (a collection of multiple railroad vehicles) and its timetable f.e."))
 // TODO: Signals & Hooks - LuaLibHook(AFGTrain, UFINTrainHook);
+Hook(UFINTrainHook)
+BeginSignal(SelfDrvingUpdate, TFS("Self Drving Update"), TFS("Triggers when the self driving mode of the train changes"))
+	SignalParam(0, RBool, enabled, TFS("Enabled"), TFS("True if the train is now self driving."))
+EndSignal()
 BeginFunc(getName, TFS("Get Name"), TFS("Returns the name of this train.")) {
 	OutVal(0, RString, name, TFS("Name"), TFS("The name of this train."))
 	Body()
@@ -1371,7 +1400,7 @@ BeginFunc(getClosestTrackPosition, TFS("Get Closeset Track Position"), TFS("Retu
     OutVal(3, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
     Body()
 	FRailroadTrackPosition pos = self->FindTrackPositionClosestToWorldLocation(worldPos);
-	if (!pos.IsValid()) return; // TODO: Exception
+	if (!pos.IsValid()) throw FFINException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
 	offset = pos.Offset;
 	forward = pos.Forward;
@@ -1437,7 +1466,7 @@ BeginFunc(getTrackPos, TFS("Get Track Pos"), TFS("Returns the track pos at which
     OutVal(2, RFloat, forward, TFS("Forward"), TFS("The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction"))
     Body()
     FRailroadTrackPosition pos = self->GetTrackPosition();
-	if (!pos.IsValid()) return; // TODO: Exception
+	if (!pos.IsValid()) throw FFINException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
 	offset = pos.Offset;
 	forward = pos.Forward;

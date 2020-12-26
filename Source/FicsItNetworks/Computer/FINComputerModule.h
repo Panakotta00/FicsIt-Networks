@@ -13,12 +13,6 @@ class AFINComputerModule : public AFGBuildable, public IFINModuleSystemModule, p
 	GENERATED_BODY()
 
 public:
-	/**
-    * The signal listeners listening to this component.
-    */
-    UPROPERTY()
-    TSet<FFINNetworkTrace> Listeners;
-    
 	UPROPERTY(EditDefaultsOnly, Category="ComputerModule")
 	FVector2D ModuleSize;
 
@@ -30,10 +24,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, SaveGame, Category="ComputerModule")
 	UFINModuleSystemPanel* ModulePanel = nullptr;
-
-	// Begin UObject
-	virtual void Serialize(FArchive& Ar) override;
-	// End UObject
 
 	// Begin AActor
 	virtual void EndPlay(EEndPlayReason::Type reason) override;

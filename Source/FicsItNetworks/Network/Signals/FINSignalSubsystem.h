@@ -2,7 +2,7 @@
 
 #include "FGSaveInterface.h"
 #include "FGSubsystem.h"
-#include "FINSignal.h"
+#include "FINSignalData.h"
 #include "Network/FINDynamicStructHolder.h"
 #include "FINSignalSubsystem.generated.h"
 
@@ -39,7 +39,7 @@ public:
 	/**
 	 * Distributes the given signal to all listeners listening to the given object
 	 */
-	void BroadcastSignal(UObject* Sender, TFINDynamicStruct<FFINSignal> Signal);
+	void BroadcastSignal(UObject* Sender, const FFINSignalData& Signal);
 
 	/**
 	 * Adds the given listener to the listener list of the given sender

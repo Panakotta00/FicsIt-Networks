@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+
+#include "FINNetworkTrace.h"
+
 #include "FINNetworkUtils.generated.h"
 
 UCLASS()
@@ -16,4 +19,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Utils")
 	static UObject* FindNetworkComponentFromObject(UObject* Obj);
+
+	UFUNCTION(BlueprintCallable, Category="Network|Utils")
+	static FFINNetworkTrace RedirectIfPossible(const FFINNetworkTrace& Trace);
 };
