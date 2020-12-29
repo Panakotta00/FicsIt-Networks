@@ -267,6 +267,7 @@ UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* 
 		} else {
 			UFINStructProperty* FINStructProp = NewObject<UFINStructProperty>(Outer);
 			FINStructProp->Property = StructProp;
+			FINStructProp->Struct = StructProp->Struct;
 			FINProp = FINStructProp;
 		}
     } else if (Cast<UArrayProperty>(Property)) {

@@ -655,6 +655,41 @@ namespace FicsItKernel {
 			return instance->Class;
 		}
 
+		int luaInstanceFuncDataUnpersist(lua_State* L) {
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+
+			// get class
+			UFINClass* Class = Cast<UFINClass>(Storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(1))));
+			UFINFunction* Function = Cast<UFINFunction>(Storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(2))));
+
+			// create value
+			LuaInstanceFunc* Func = static_cast<LuaInstanceFunc*>(lua_newuserdata(L, sizeof(LuaInstanceFunc)));
+			new (Func) LuaInstanceFunc();
+			Func->Class = Class;
+			Func->Func = Function;
+			luaL_setmetatable(L, INSTANCE_FUNC_DATA);
+			
+			return 1;
+		}
+
+		int luaInstanceFuncDataPersist(lua_State* L) {
+			LuaInstanceFunc* Func = (LuaInstanceFunc*) luaL_checkudata(L, 1, INSTANCE_FUNC_DATA);
+
+			// get persist storage
+			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
+			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+
+			// push type name to persist
+			lua_pushinteger(L, Storage->Add(Func->Class));
+			lua_pushinteger(L, Storage->Add(Func->Func));
+			
+			// create & return closure
+			lua_pushcclosure(L, &luaInstanceFuncDataUnpersist, 2);
+			return 1;
+		}
+
 		int luaInstanceFuncDataGC(lua_State* L) {
 			LuaInstanceFunc* Func = (LuaInstanceFunc*) luaL_checkudata(L, 1, INSTANCE_FUNC_DATA);
 			Func->~LuaInstanceFunc();
@@ -662,6 +697,7 @@ namespace FicsItKernel {
 		}
 
 		static const luaL_Reg luaInstanceFuncDataLib[] = {
+			{"__persist", luaInstanceFuncDataPersist},
 			{"__gc", luaInstanceFuncDataGC},
 			{NULL, NULL}
 		};
@@ -690,6 +726,8 @@ namespace FicsItKernel {
 			PersistValue("ClassInstanceUnpersist");			// ...
 			lua_pushcfunction(L, luaInstanceTypeUnpersist);		// ..., LuaInstanceTypeUnpersist
 			PersistValue("InstanceTypeUnpersist");				// ...
+			lua_pushcfunction(L, luaInstanceFuncDataUnpersist);	// ..., LuaInstanceFuncDataUnpersist
+			PersistValue("InstanceFuncDataUnpersist");			// ...
 		}
 
 		void setupMetatable(lua_State* L, UFINClass* Class) {

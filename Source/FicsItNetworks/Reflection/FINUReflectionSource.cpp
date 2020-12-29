@@ -321,6 +321,7 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClas
 		if (Prop && UFINReflectionUtils::CheckIfVarargs(Prop)) {
 			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_VarArgs;
 			FINFunc->VarArgsProperty = Prop;
+			FINFunc->Parameters.Pop();
 		}
 	}
 	return FINFunc;

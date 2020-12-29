@@ -3,10 +3,10 @@
 #include "FINArrayProperty.h"
 
 bool UFINReflectionUtils::CheckIfVarargs(UFINProperty* Prop) {
-	if (Prop->GetInternalName() != "varargs") return false;
-	UArrayProperty* ArrayProperty = Cast<UArrayProperty>(Prop);
-	if (!ArrayProperty || !ArrayProperty->Inner) return false;
-	UFINStructProperty* StructProperty = Cast<UFINStructProperty>(ArrayProperty->Inner);
+	if (!Prop->GetInternalName().Equals("varargs")) return false;
+	UFINArrayProperty* ArrayProperty = Cast<UFINArrayProperty>(Prop);
+	if (!ArrayProperty || !ArrayProperty->InnerType) return false;
+	UFINStructProperty* StructProperty = Cast<UFINStructProperty>(ArrayProperty->InnerType);
 	if (!StructProperty || StructProperty->Struct != FFINAnyNetworkValue::StaticStruct()) return false;
 	return true;
 }

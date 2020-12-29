@@ -21,26 +21,22 @@ public:
 			
 			TArray<FFINAnyNetworkValue> Output;
 			// allocate & initialize parameter struct
-			uint8* ParamStruct = (uint8*)FMemory::Malloc(RefFunction->PropertiesSize);
-			FMemory::Memzero(ParamStruct + RefFunction->ParmsSize, RefFunction->PropertiesSize - RefFunction->ParmsSize);
+			uint8* ParamStruct = (uint8*)FMemory_Alloca(RefFunction->PropertiesSize);
 			RefFunction->InitializeStruct(ParamStruct);
-			for (UProperty* LocalProp = RefFunction->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
-				LocalProp->InitializeValue_InContainer(ParamStruct);
-			}
-
+			
 			// copy parameters to parameter struct
 			int i = 0;
 			TArray<UFINProperty*> Parameters = GetParameters();
 			for (int j = 0; j < Parameters.Num(); ++j) {
 				UFINProperty* Param = Parameters[j];
 				if ((Param->GetPropertyFlags() & FIN_Prop_Param) && !(Param->GetPropertyFlags() & FIN_Prop_OutParam)) {
-					if (j == Parameters.Num()-1 && GetFunctionFlags() & FIN_Func_VarArgs) {
-						VarArgsProperty->SetValue(ParamStruct, TArray<FFINAnyNetworkValue>(&Params[i], Params.Num()-i));
-						i = Params.Num();
-					} else {
-						Param->SetValue(ParamStruct, Params[i++]);
-					}
+					Param->SetValue(ParamStruct, Params[i++]);
 				}
+			}
+			if (GetFunctionFlags() & FIN_Func_VarArgs) {
+				TArray<FFINAnyNetworkValue> VarArgs = TArray<FFINAnyNetworkValue>(&Params[i], Params.Num()-i);
+				VarArgsProperty->SetValue(ParamStruct, VarArgs);
+				i = Params.Num();
 			}
 			
 			Obj->ProcessEvent(RefFunction, ParamStruct);
@@ -58,7 +54,6 @@ public:
 					P->DestroyValue_InContainer(ParamStruct);
 				}
 			}
-			FMemory::Free(ParamStruct);
 			return Output;
 		}
 

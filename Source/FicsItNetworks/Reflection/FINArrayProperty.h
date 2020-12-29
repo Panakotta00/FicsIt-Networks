@@ -20,6 +20,7 @@ public:
 
 	/**
 	 * Returns the array as FINArray
+	 * Ctx needs to be pointer to the array
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	TArray<FFINAnyNetworkValue> GetArray(UObject* Ctx) const { return GetArray((void*)Ctx); }
@@ -27,6 +28,7 @@ public:
 
 	/**
 	 * Sets the array to the FINArray
+	 * Ctx needs to be pointer to the array
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	void SetArray(UObject* Ctx, const TArray<FFINAnyNetworkValue>& Array) const { SetArray((void*)Ctx, Array); }
@@ -34,6 +36,7 @@ public:
 
 	/**
 	 * Set value in the array in the given container
+	 * ctx needs to be pointer to the array
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	void AddValueToArray(UObject* Ctx, const FFINAnyNetworkValue& Value) const { AddValueToArray((void*)Ctx, Value); }
@@ -41,6 +44,7 @@ public:
 
 	/**
 	 * Returns the value at the given index in the given container array
+	 * ctx need to be pointer to the array
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	virtual FFINAnyNetworkValue GetValueInArray(UObject* Ctx, int Index) const { return GetValueInArray((void*)Ctx, Index); }
@@ -48,6 +52,7 @@ public:
 
 	/**
 	 * Sets the value at the given index in the given container array
+	 * ctx need to be pointer to the array
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	void SetValueInArray(UObject* Ctx, int Index, const FFINAnyNetworkValue& Value) const { SetValueInArray((void*)Ctx, Index, Value); }
@@ -62,6 +67,7 @@ public:
 
 	/**
 	 * Empties the whole array at the given index in the given container array
+	 * ctx need to be pointer to the array
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	void EmptyArray(UObject* Ctx) const { EmptyArray((void*)Ctx); }
@@ -69,6 +75,7 @@ public:
 
 	/**
 	 * Returns the number of entries in the array in the given container
+	 * ctx need to be pointer to the array
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	int GetNumOfArray(UObject* Ctx) const { return GetNumOfArray((void*)Ctx); }
@@ -76,6 +83,7 @@ public:
 
 	/**
 	 * Returns the inner type property of the array
+	 * ctx need to be pointer to the array
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	virtual UFINProperty* GetInnerType() const { return InnerType; }

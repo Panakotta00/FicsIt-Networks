@@ -14,16 +14,27 @@ public:
 	
 	// Begin UFINProperty
 	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
+		FINAny Value;
 		if (Property) {
 			if (Property->Struct == FFINDynamicStructHolder::StaticStruct()) {
-				return *Property->ContainerPtrToValuePtr<FFINDynamicStructHolder>(Ctx.GetGeneric());
+				Value = *Property->ContainerPtrToValuePtr<FFINDynamicStructHolder>(Ctx.GetGeneric());
+			} else {
+				Value = FFINDynamicStructHolder(Property->Struct, Property->ContainerPtrToValuePtr<void>(Ctx.GetGeneric()));
 			}
-			return FFINDynamicStructHolder(Property->Struct, Property->ContainerPtrToValuePtr<void>(Ctx.GetGeneric()));
+		} else {
+			Value = Super::GetValue(Ctx);
 		}
-		return Super::GetValue(Ctx);
+		if (Struct == FFINAnyNetworkValue::StaticStruct()) {
+			return Value.GetStruct().Get<FFINAnyNetworkValue>();
+		}
+		return Value;
 	}
 	
-	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
+	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& InValue) const override {
+		FINAny Value = InValue;
+		if (Struct == FFINAnyNetworkValue::StaticStruct()) {
+			Value = FINAny(TFINDynamicStruct<FFINAnyNetworkValue>(InValue));
+		}
 		if (Value.GetType() != FIN_STRUCT) return;
 		if (Property) {
 			if (Property->Struct == FFINDynamicStructHolder::StaticStruct()) {
@@ -37,6 +48,11 @@ public:
 	}
 
 	virtual TEnumAsByte<EFINNetworkValueType> GetType() const { return FIN_STRUCT; }
+
+	virtual bool IsValidValue(const FFINAnyNetworkValue& Value) const override {
+		if (Struct == FFINAnyNetworkValue::StaticStruct()) return true;
+		return Super::IsValidValue(Value);
+	}
 	// End UFINProperty
 
 	/**

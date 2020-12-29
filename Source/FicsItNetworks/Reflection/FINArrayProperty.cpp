@@ -1,12 +1,20 @@
 ﻿#include "FINArrayProperty.h"
 
 FINAny UFINArrayProperty::GetValue(const FFINExecutionContext& Ctx) const {
-	return GetArray(Ctx.GetGeneric());
+	void* Ptr = Ctx.GetGeneric();
+    if (Property) {
+    	Ptr = Property->ContainerPtrToValuePtr<void>(Ptr);
+    }
+	return GetArray(Ptr);
 }
 
 void UFINArrayProperty::SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const {
 	if (Value.GetType() != FIN_ARRAY) return;
-	SetArray(Ctx.GetGeneric(), Value.GetArray());
+	void* Ptr = Ctx.GetGeneric();
+	if (Property) {
+		Ptr = Property->ContainerPtrToValuePtr<void>(Ptr);
+	}
+	SetArray(Ptr, Value.GetArray());
 }
 
 FINArray UFINArrayProperty::GetArray(void* Ctx) const {
@@ -27,8 +35,8 @@ void UFINArrayProperty::SetArray(void* Ctx, const FINArray& Array) const {
 		SArr.EmptyValues();
 		for (int i = 0; i < Array.Num(); ++i) {
 			if (!InnerType->IsValidValue(Array[i])) continue;
-			SArr.AddValue();
-			InnerType->SetValue(SArr.GetRawPtr(i), Array[i]);
+			int j = SArr.AddValue();
+			InnerType->SetValue(SArr.GetRawPtr(j), Array[i]);
 		}
 	} else Super::SetValue(Ctx, Array);
 }
