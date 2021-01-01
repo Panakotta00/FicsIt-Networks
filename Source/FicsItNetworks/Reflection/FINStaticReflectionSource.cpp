@@ -182,6 +182,29 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		}
 		ToFillClass->Properties.Add(FINProp);
 	}
+
+	for (const TPair<int, FFINStaticSignalReg>& KVSignal : ClassReg->Signals) {
+		const FFINStaticSignalReg& Signal = KVSignal.Value;
+		UFINSignal* FINSignal = NewObject<UFINSignal>(ToFillClass);
+		FINSignal->InternalName = Signal.InternalName;
+		FINSignal->DisplayName = Signal.DisplayName;
+		FINSignal->Description = Signal.Description;
+		FINSignal->bIsVarArgs = Signal.bIsVarArgs;
+
+		TArray<int> ParamPos;
+		Signal.Parameters.GetKeys(ParamPos);
+		ParamPos.Sort();
+		for (int Pos : ParamPos) {
+			const FFINStaticSignalParamReg& Param = Signal.Parameters[Pos];
+			UFINProperty* FINProp = Param.PropConstructor(FINSignal);
+			FINProp->InternalName = Param.InternalName;
+			FINProp->DisplayName = Param.DisplayName;
+			FINProp->Description = Param.Description;
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param;
+			FINSignal->Parameters.Add(FINProp);
+		}
+		ToFillClass->Signals.Add(FINSignal);
+	}
 }
 
 void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFillStruct, UScriptStruct* Struct) const {
@@ -401,11 +424,11 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 	if (!_bGotReg) { UFINStaticReflectionSource::AddFuncParam(GetUType(), F, Pos, FFINStaticFuncParamReg{#InternalName, DisplayName, Description, 3, &Type::PropConstructor}); }
 
 #define SignalClassName(Prop) FIN_StaticRefSignal_ ## Prefix
-#define BeginSignal(InternalName, DisplayName, Description) \
+#define BeginSignal(InternalName, DisplayName, Description, ...) \
 	namespace SignalClassName(InternalName) { \
 		const int S = __COUNTER__; \
 		FFINStaticGlobalRegisterFunc RegSignal([](){ \
-			UFINStaticReflectionSource::AddSignal(GetUType(), S, FFINStaticSignalReg{#InternalName, DisplayName, Description});
+			UFINStaticReflectionSource::AddSignal(GetUType(), S, FFINStaticSignalReg{#InternalName, DisplayName, Description, GET_MACRO(0, ##__VA_ARGS__, false)});
 #define SignalParam(Pos, Type, InternalName, DisplayName, Description) \
 			UFINStaticReflectionSource::AddSignalParam(GetUType(), S, Pos, FFINStaticSignalParamReg{#InternalName, DisplayName, Description, &Type::PropConstructor});
 #define EndSignal() \
@@ -700,7 +723,6 @@ EndFunc()
 EndClass()
 
 BeginClass(UFGPowerCircuit, "PowerCircuit", TFS("Power Circuit"), TFS("A Object that represents a whole power circuit."))
-// TODO: Hook & Signals - LuaLibHook(UFGPowerCircuit, UFINPowerCircuitHook)
 Hook(UFINPowerCircuitHook)
 BeginSignal(PowerFuseChanged, TFS("Power Fuse Changed"), TFS("Get Triggered when the fuse state of the power circuit changes."))
 EndSignal()
@@ -725,7 +747,6 @@ BeginProp(RBool, isFuesed, TFS("Is Fuesed"), TFS("True if the fuse in the networ
 EndClass()
 
 BeginClass(UFGFactoryConnectionComponent, "FactoryConnection", TFS("Factory Connection"), TFS("A actor component that is a connection point to which a conveyor or pipe can get attached to."))
-// TODO: Hook & Signals - LuaLibHook(UFGFactoryConnectionComponent, UFINFactoryConnectorHook)
 Hook(UFINFactoryConnectorHook)
 BeginSignal(ItemTransfer, TFS("Item Transfer"), TFS("Triggers when the factory connection component transfers an item."))
 	SignalParam(0, RStruct<FInventoryItem>, item, TFS("Item"), TFS("The transfered item"))
@@ -1235,7 +1256,6 @@ BeginProp(RBool, isMoving, TFS("Is Moving"), TFS("True if this vehicle is curren
 EndClass()
 
 BeginClass(AFGTrain, "Train", TFS("Train"), TFS("This class holds information and references about a trains (a collection of multiple railroad vehicles) and its timetable f.e."))
-// TODO: Signals & Hooks - LuaLibHook(AFGTrain, UFINTrainHook);
 Hook(UFINTrainHook)
 BeginSignal(SelfDrvingUpdate, TFS("Self Drving Update"), TFS("Triggers when the self driving mode of the train changes"))
 	SignalParam(0, RBool, enabled, TFS("Enabled"), TFS("True if the train is now self driving."))

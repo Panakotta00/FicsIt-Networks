@@ -46,6 +46,7 @@ struct FFINStaticSignalReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
+	bool bIsVarArgs;
 	TMap<int, FFINStaticSignalParamReg> Parameters;
 };
 

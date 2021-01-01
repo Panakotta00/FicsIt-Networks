@@ -3,6 +3,7 @@
 #include "FGFactoryConnectionComponent.h"
 #include "FGPowerCircuit.h"
 #include "FGTrain.h"
+#include "FicsItNetworksModule.h"
 #include "FINReflection.h"
 #include "FINSignal.h"
 #include "mod/hooking.h"
@@ -42,51 +43,50 @@ private:
 	UPROPERTY()
 	UObject* Sender;
 	
-	static TMap<UClass*, bool> IsRegistered;
+	bool bIsRegistered;
+
+	UPROPERTY()
+	UFINSignal* Signal = nullptr;
 
 protected:
-	static TMap<UClass*, TSet<FWeakObjectPtr>> Senders;
-	static TMap<UClass*, TSharedRef<FCriticalSection>> Mutex;
-
-	static FCriticalSection* GetMutex(UClass* Class) {
-		TSharedPtr<FCriticalSection> Section = Mutex.FindOrAdd(Class);
-		return Section.Get();
+	UPROPERTY()
+	TSet<TWeakObjectPtr<UObject>> Senders;
+	FCriticalSection Mutex;
+	
+	bool IsSender(UObject* Obj) {
+		FScopeLock Lock(&Mutex);
+		return Senders.Contains(Obj);
 	}
 	
-	bool IsSender(UObject* Obj) const {
-		FScopeLock Lock(GetMutex(GetClass()));
-		return Senders.FindOrAdd(GetClass()).Contains(Obj);
-	}
-	
-	void Send(UObject* Obj, const FString& SignalName, const TArray<FFINAnyNetworkValue>& Data) const {
-		static UFINSignal* Signal = nullptr;
+	void Send(UObject* Obj, const FString& SignalName, const TArray<FFINAnyNetworkValue>& Data) {
 		if (!Signal) {
-			UFINSignal** SigPtr = FFINReflection::Get()->FindClass(Obj->GetClass())->GetSignals().FindByPredicate([&SignalName](UFINSignal* Signal) {
-                return Signal->GetInternalName() == SignalName;
-            });
-			if (SigPtr) Signal = *SigPtr;
+			UFINClass* Class = FFINReflection::Get()->FindClass(Obj->GetClass());
+			Signal = Class->FindFINSignal(SignalName);
+			if (!Signal) UE_LOG(LogFicsItNetworks, Error, TEXT("Signal with name '%s' not found for object '%s' of FINClass '%s'"), *SignalName, *Obj->GetName(), *Class->GetInternalName());
 		}
-		Signal->Trigger(Obj, Data);
+		if (Signal) Signal->Trigger(Obj, Data);
 	}
 
 	virtual void RegisterFuncHook() {}
+
+	virtual UFINFunctionHook* Self() { return nullptr; }
 
 public:		
 	void Register(UObject* sender) override {
 		Super::Register(sender);
 		
-		FScopeLock Lock(GetMutex(GetClass()));
-    	Senders.FindOrAdd(GetClass()).Add(Sender = sender);
+		FScopeLock Lock(&Self()->Mutex);
+    	Self()->Senders.Add(Sender = sender);
 
-		if (!IsRegistered.FindOrAdd(GetClass())) {
-			IsRegistered.FindOrAdd(GetClass()) = true;
-			RegisterFuncHook();
+		if (!Self()->bIsRegistered) {
+			Self()->bIsRegistered = true;
+			Self()->RegisterFuncHook();
 		}
     }
 		
 	void Unregister() override {
-		FScopeLock Lock(GetMutex(GetClass()));
-    	Senders.FindOrAdd(GetClass()).Remove(Sender);
+		FScopeLock Lock(&Self()->Mutex);
+    	Self()->Senders.Remove(Sender);
     }
 };
 
@@ -114,17 +114,24 @@ public:
 UCLASS()
 class UFINFactoryConnectorHook : public UFINFunctionHook {
 	GENERATED_BODY()
-			
+
+protected:
+	static UFINFactoryConnectorHook* StaticSelf() {
+		static UFINFactoryConnectorHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINFactoryConnectorHook*>(GetDefault<UFINFactoryConnectorHook>());
+		return Hook; 
+	}
+
+	// Begin UFINFunctionHook
+	virtual UFINFunctionHook* Self() {
+		return StaticSelf();
+	}
+	// End UFINFunctionHook
+
 private:
 	static FCriticalSection MutexFactoryGrab;
 	static TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, int8> FactoryGrabsRunning;
-
-	static const UFINFactoryConnectorHook* Self() {
-		static const UFINFactoryConnectorHook* Hook = nullptr;
-		if (!Hook) Hook = GetDefault<UFINFactoryConnectorHook>();
-		return Hook;
-	}
-
+	
 	static void LockFactoryGrab(UFGFactoryConnectionComponent* comp) {
 		MutexFactoryGrab.Lock();
 		++FactoryGrabsRunning.FindOrAdd(comp);
@@ -145,11 +152,11 @@ private:
 	}
 
 	static void DoFactoryGrab(UFGFactoryConnectionComponent* c, FInventoryItem& item) {
-		Self()->Send(c, "ItemTransfer", {FINAny(FInventoryItem(item))});
+		StaticSelf()->Send(c, "ItemTransfer", {FINAny(FInventoryItem(item))});
 	}
 
 	static void FactoryGrabHook(CallScope<bool(*)(UFGFactoryConnectionComponent*, FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>)>& scope, UFGFactoryConnectionComponent* c, FInventoryItem& item, float& offset, TSubclassOf<UFGItemDescriptor> type) {
-		if (!Self()->IsSender(c)) return;
+		if (!StaticSelf()->IsSender(c)) return;
 		LockFactoryGrab(c);
 		scope(c, item, offset, type);
 		if (UnlockFactoryGrab(c) && scope.getResult()) {
@@ -158,7 +165,7 @@ private:
 	}
 
 	static void FactoryGrabInternalHook(CallScope<bool(*)(UFGFactoryConnectionComponent*, FInventoryItem&, TSubclassOf<UFGItemDescriptor>)>& scope, UFGFactoryConnectionComponent* c, FInventoryItem& item, TSubclassOf< UFGItemDescriptor > type) {
-		if (!Self()->IsSender(c)) return;
+		if (!StaticSelf()->IsSender(c)) return;
 		LockFactoryGrab(c);
 		scope(c, item, type);
 		if (UnlockFactoryGrab(c) && scope.getResult()) {
@@ -176,6 +183,19 @@ public:
 UCLASS()
 class UFINPowerCircuitHook : public UFINFunctionHook {
 	GENERATED_BODY()
+
+protected:
+	static UFINPowerCircuitHook* StaticSelf() {
+		static UFINPowerCircuitHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINPowerCircuitHook*>(GetDefault<UFINPowerCircuitHook>());
+		return Hook; 
+	}
+
+	// Begin UFINFunctionHook
+	virtual UFINFunctionHook* Self() {
+		return StaticSelf();
+	}
+	// End UFINFunctionHook
 			
 private:
 	static void TickCircuitHook_Decl(UFGPowerCircuit*, float);
@@ -184,14 +204,13 @@ private:
 		scope(circuit, dt);
 		bool fused = circuit->IsFuseTriggered();
 		if (oldFused != fused) try {
-			GetMutex(StaticClass())->Lock();
-			FWeakObjectPtr* sender = Senders.FindOrAdd(StaticClass()).Find(circuit);
+			FScopeLock Lock(&StaticSelf()->Mutex);
+			TWeakObjectPtr<UObject>* sender = StaticSelf()->Senders.Find(circuit);
 			if (sender) {
 				UObject* obj = sender->Get();
 
-				GetDefault<UFINPowerCircuitHook>()->Send(obj, "PowerFuseChanged", {});
+				StaticSelf()->Send(obj, "PowerFuseChanged", {});
 			}
-			GetMutex(StaticClass())->Unlock();
 		} catch (...) {}
 	}
 			
