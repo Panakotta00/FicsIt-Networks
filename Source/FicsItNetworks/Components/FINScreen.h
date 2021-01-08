@@ -88,7 +88,26 @@ public:
 	void OnGPUValidChanged(bool bValid, UObject* newGPU);
 
 	UFUNCTION()
+    void netClass_Meta(FString& InternalName, FText& DisplayName) {
+		InternalName = TEXT("Screen");
+		DisplayName = FText::FromString(TEXT("Screen"));
+	}
+
+	UFUNCTION()
 	void netFunc_getSize(int& w, int& h);
+	UFUNCTION()
+    void netFuncMeta_getSize(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getSize";
+		DisplayName = FText::FromString("Get Size");
+		Description = FText::FromString("Returns the size of the screen in 'panels'.");
+		ParameterInternalNames.Add("width");
+		ParameterDisplayNames.Add(FText::FromString("Width"));
+		ParameterDescriptions.Add(FText::FromString("The width of the screen."));
+		ParameterInternalNames.Add("height");
+		ParameterDisplayNames.Add(FText::FromString("Height"));
+		ParameterDescriptions.Add(FText::FromString("The height of the screen."));
+		Runtime = 0;
+	}
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_OnGPUUpdate();

@@ -107,7 +107,7 @@ FInventoryItem AFINCodeableMerger::netFunc_getInput(int input) {
 	return FInventoryItem();
 }
 
-bool AFINCodeableMerger::netFunc_canOutput() {
+bool AFINCodeableMerger::netPropGet_canOutput() {
 	return OutputQueue.Num() < 2;
 }
 

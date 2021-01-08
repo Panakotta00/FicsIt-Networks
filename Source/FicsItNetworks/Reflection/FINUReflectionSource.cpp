@@ -18,6 +18,7 @@ bool UFINUReflectionSource::ProvidesRequirements(UClass* Class) const {
 		UFunction* Func = Cast<UFunction>(*Field);
 		if (Prop) {
 			if (Field->GetName().StartsWith("netProp_")) return true;
+			if (Field->GetName().StartsWith("netPropReadOnly_")) return true;
 		} else if (Func) {
 			if (Field->GetName().StartsWith("netPropGet_")) return true;
 			if (Field->GetName().StartsWith("netFunc_")) return true;
@@ -42,9 +43,12 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 		UProperty* Prop = Cast<UProperty>(*Field);
 		UFunction* Func = Cast<UFunction>(*Field);
 		if (Prop) {
-			if (Field->GetName().StartsWith("netProp_")) {}
+			if (Field->GetName().StartsWith("netProp_")) {
+				ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, Func));
+			}
 		} else if (Func) {
 			if (Field->GetName().StartsWith("netPropGet_")) {
+				ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, Func));
 			} else if (Field->GetName().StartsWith("netFunc_")) {
 				ToFillClass->Functions.Add(GenerateFunction(Ref, Class, Func));
 			} else if (Field->GetName().StartsWith("netSig_")) {
@@ -373,7 +377,7 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 	UFunction* Set = Class->FindFunctionByName(*(FString("netPropSet_") + FINProp->InternalName));
 	if (Set) {
 		UProperty* SetProp = nullptr;
-		for (TFieldIterator<UProperty> Param(Get); Param; ++Param) {
+		for (TFieldIterator<UProperty> Param(Set); Param; ++Param) {
 			if (Param->PropertyFlags & CPF_Parm) {
 				check(!(Param->PropertyFlags & CPF_OutParm));
 				check(SetProp == nullptr);

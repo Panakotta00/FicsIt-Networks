@@ -48,23 +48,48 @@ void AFINSpeakerPole::netClass_Meta(FString& InternalName, FText& DisplayName, F
 	Description = FText::FromString("This speaker pole allows to play custom sound files, In-Game");
 }
 
-
 void AFINSpeakerPole::netFunc_playSound(const FString& sound, float startPoint) {
 	PlaySound(sound, startPoint);
 }
 
-void AFINSpeakerPole::netFuncMeta_playSound(FText& DisplayName, FText& Description, TArray<FText>& ParameterDescriptions) {
+void AFINSpeakerPole::netFuncMeta_playSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+	InternalName = "playSound";
 	DisplayName = FText::FromString("Play Sound");
 	Description = FText::FromString("Plays a custom sound file ingame");
+	ParameterInternalNames.Add("sound");
+	ParameterDisplayNames.Add(FText::FromString("Sound"));
 	ParameterDescriptions.Add(FText::FromString("The sound file (without the file ending) you want to play"));
-	ParameterDescriptions.Add(FText::FromString("The start point in seconds at wich the system should start playing"));
+	ParameterInternalNames.Add("startPoint");
+	ParameterDisplayNames.Add(FText::FromString("Start Point"));
+	ParameterDescriptions.Add(FText::FromString("The start point in seconds at which the system should start playing"));
+	Runtime = 2;
 }
 
 void AFINSpeakerPole::netFunc_stopSound() {
 	StopSound();
 }
 
+void AFINSpeakerPole::netFuncMeta_stopSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+	InternalName = "stopSound";
+	DisplayName = FText::FromString("Stop Sound");
+	Description = FText::FromString("Stops the currently playing sound file.");
+	Runtime = 2;
+}
+
 void AFINSpeakerPole::netSig_SpeakerSound_Implementation(int type, const FString& sound) {}
+
+void AFINSpeakerPole::netSigMeta_SpeakerSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+	InternalName = "SpeakerSound";
+	DisplayName = FText::FromString("SpeakerSound");
+	Description = FText::FromString("Triggers when the sound play state of the speaker pole changes.");
+	ParameterInternalNames.Add("type");
+	ParameterDisplayNames.Add(FText::FromString("Type"));
+	ParameterDescriptions.Add(FText::FromString("The type of the speaker pole event."));
+	ParameterInternalNames.Add("sound");
+	ParameterDisplayNames.Add(FText::FromString("Sound"));
+	ParameterDescriptions.Add(FText::FromString("The sound file including in the event."));
+	Runtime = 2;
+}
 
 USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& sound) {
 	FString fsp = UFGSaveSystem::GetSaveDirectoryPath();

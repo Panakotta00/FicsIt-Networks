@@ -81,11 +81,11 @@ void AFINNetworkRouter::NetMulti_OnMessageHandled_Implementation(bool bCon1or2, 
 	OnMessageHandled(bCon1or2, bSendOrReceive);
 }
 
-void AFINNetworkRouter::netFunc_setPortWhitelist(bool bInWhitelist) {
+void AFINNetworkRouter::netPropSet_isWhitelist(bool bInWhitelist) {
 	bIsPortWhitelist = bInWhitelist;
 }
 
-bool AFINNetworkRouter::netFunc_getPortWhitelist() {
+bool AFINNetworkRouter::netPropGet_isWhitelist() {
 	return bIsPortWhitelist;
 }
 
@@ -105,11 +105,11 @@ TArray<int> AFINNetworkRouter::netFunc_getPortList() {
 	return PortList;
 }
 
-void AFINNetworkRouter::netFunc_setAddrWhitelist(bool bInWhitelist) {
+void AFINNetworkRouter::netPropSet_isAddrWhitelist(bool bInWhitelist) {
 	bIsAddrWhitelist = bInWhitelist;
 }
 
-bool AFINNetworkRouter::netFunc_getAddrWhitelist() {
+bool AFINNetworkRouter::netPropGet_isAddrWhitelist() {
 	return bIsAddrWhitelist;
 }
 

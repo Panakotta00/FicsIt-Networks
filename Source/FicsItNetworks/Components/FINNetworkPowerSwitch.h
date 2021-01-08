@@ -65,9 +65,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Network|Components")
 	void OnConnectedChanged();
 
-	UFUNCTION(BlueprintCallable, Category="Network|Component")
-    void netFunc_setConnected(bool newConnected);
+	UFUNCTION()
+    void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes) {
+		InternalName = TEXT("PowerSwitch");
+		DisplayName = FText::FromString(TEXT("Power Switch"));
+		PropertyInternalNames.Add("isConnected", "isConnected");
+		PropertyDisplayNames.Add("isConnected", FText::FromString("Is Connected"));
+		PropertyDescriptions.Add("isConnected", FText::FromString("True if the power circuit should be closed and the circuits are connected."));
+	}
 
 	UFUNCTION(BlueprintCallable, Category="Network|Component")
-    bool netFunc_isConnected();
+    void netPropSet_isConnected(bool newConnected);
+	UFUNCTION(BlueprintCallable, Category="Network|Component")
+    bool netPropGet_isConnected();
 };

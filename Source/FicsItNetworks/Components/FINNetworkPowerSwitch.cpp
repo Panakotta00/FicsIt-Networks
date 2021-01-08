@@ -65,11 +65,11 @@ void AFINNetworkPowerSwitch::Client_OnConnectedChanged_Implementation() {
 	OnConnectedChanged();
 }
 
-void AFINNetworkPowerSwitch::netFunc_setConnected(bool newConnected) {
+void AFINNetworkPowerSwitch::netPropSet_isConnected(bool newConnected) {
 	SetConnected(newConnected);
 }
 
-bool AFINNetworkPowerSwitch::netFunc_isConnected() {
+bool AFINNetworkPowerSwitch::netPropGet_isConnected() {
 	return bConnected;
 }
 

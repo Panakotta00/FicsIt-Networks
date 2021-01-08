@@ -52,16 +52,18 @@ public:
 	 * If able to play the sound, emits a play sound signal.
 	 */
 	UFUNCTION()
-	void netFunc_playSound(const FString& sound, float startPoint); // TODO: sync runtime
+	void netFunc_playSound(const FString& sound, float startPoint);
 	UFUNCTION()
-	void netFuncMeta_playSound(FText& DisplayName, FText& Description, TArray<FText>& ParameterDescriptions);
+	void netFuncMeta_playSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime);
 
 	/**
 	 * Stops the current playing sound.
 	 * Emits a stop sound signal if it actually was able to stop the current playing sound.
 	 */
 	UFUNCTION()
-	void netFunc_stopSound(); // TODO: sync runtime
+	void netFunc_stopSound();
+	UFUNCTION()
+    void netFuncMeta_stopSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime);
 
 	/**
 	 * Notifies when the state of the speaker pole has changed.
@@ -69,6 +71,9 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void netSig_SpeakerSound(int type, const FString& sound);
+	UFUNCTION()
+    void netSigMeta_SpeakerSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime);
+
 
 	/**
 	 * Loads the sound file referenced by the given relative path
