@@ -202,7 +202,7 @@ UFINUReflectionSource::FFINSignalMeta UFINUReflectionSource::GetSignalMeta(UClas
 	FFINSignalMeta Meta;
 
 	// try to get meta from function
-	UFunction* MetaFunc = Class->FindFunctionByName(*(FString("netSigMeta_") + GetFunctionNameFromUFunction(Func)));
+	UFunction* MetaFunc = Class->FindFunctionByName(*(FString("netSigMeta_") + GetSignalNameFromUFunction(Func)));
 	if (MetaFunc) {
 		// allocate parameter space
 		uint8* Params = (uint8*)FMemory::Malloc(MetaFunc->PropertiesSize);

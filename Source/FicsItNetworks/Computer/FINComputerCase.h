@@ -198,5 +198,27 @@ public:
 	void OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive);
 
 	UFUNCTION()
+    void netClass_Meta(FString& InternalName, FText& DisplayName) {
+		InternalName = TEXT("ComputerCase");
+		DisplayName = FText::FromString(TEXT("Computer Case"));
+	}
+
+	UFUNCTION()
     void netSig_FileSystemUpdate(int Type, const FString& From, const FString& To) {}
+	UFUNCTION()
+    void netSigMeta_FileSystemUpdate(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "FileSystemUpdate";
+		DisplayName = FText::FromString("File System Update");
+		Description = FText::FromString("Triggers when something in the filesystem changes.");
+		ParameterInternalNames.Add("type");
+		ParameterDisplayNames.Add(FText::FromString("Type"));
+		ParameterDescriptions.Add(FText::FromString("The type of the change."));
+		ParameterInternalNames.Add("from");
+		ParameterDisplayNames.Add(FText::FromString("From"));
+		ParameterDescriptions.Add(FText::FromString("The file path to the FS node that has changed."));
+		ParameterInternalNames.Add("to");
+		ParameterDisplayNames.Add(FText::FromString("To"));
+		ParameterDescriptions.Add(FText::FromString("The new file path of the node if it has changed."));
+		Runtime = 1;
+	}
 };

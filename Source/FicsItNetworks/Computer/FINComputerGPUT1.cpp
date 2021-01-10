@@ -280,6 +280,7 @@ UObject* AFINComputerGPUT1::netFunc_getScreen() {
 }
 
 void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
+	FScopeLock Lock(&DrawingMutex);
 	FString toSet = str;
 	while (toSet.Len() > 0) {
 		FString Line;
@@ -339,18 +340,22 @@ void AFINComputerGPUT1::netFunc_getSize(int& w, int& h) {
 }
 
 void AFINComputerGPUT1::netFunc_setSize(int w, int h) {
+	FScopeLock Lock(&DrawingMutex);
 	SetScreenSize(FVector2D(FMath::Clamp(w, 1, 300), FMath::Clamp(h, 1, 100)));
 }
 
 void AFINComputerGPUT1::netFunc_setForeground(float r, float g, float b, float a) {
+	FScopeLock Lock(&DrawingMutex);
 	CurrentForeground = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f), FMath::Clamp(a, 0.0f, 1.0f));
 }
 
 void AFINComputerGPUT1::netFunc_setBackground(float r, float g, float b, float a) {
+	FScopeLock Lock(&DrawingMutex);
 	CurrentBackground = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f), FMath::Clamp(a, 0.0f, 1.0f));
 }
 
 void AFINComputerGPUT1::netFunc_flush() {
+	FScopeLock Lock(&DrawingMutex);
 	TextGrid = TextGridBuffer;
 	Foreground = ForegroundBuffer;
 	Background = BackgroundBuffer;
