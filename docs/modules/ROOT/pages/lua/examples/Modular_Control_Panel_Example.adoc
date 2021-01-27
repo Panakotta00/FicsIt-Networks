@@ -1,0 +1,125 @@
+= Modular Control Panel Example.[RU]
+
+В этом примере показано использование модульной панели управления.
+В примере будут задействованны: 
+  • Переключатель,
+  • Кнопка,
+  • Регулятор,
+  • Экран.
+
+== Начало
+
+Установим компьютер с одним процессором и одним модулем RAM. Рядом ставим модульную панель и размещаем на ней модули как на скриншоте.
+
+== Принцип работы
+
+Переключатели меняют цвет кнопок над ними.
+Четыре кнопки спарва меняют размер надписи на экране.
+Регулятор меняет процент воображаемой мощности.
+Экран выводит информацию.
+
+== Код
+
+[source,Lua]
+----
+-- Start
+function start()
+  
+  -- Инициализация ссылок
+  panel = component.proxy(component.findComponent("Panel")[1]);
+  lever1 = panel:getModule(0,8);
+  lever2 = panel:getModule(1,8);
+  lever3 = panel:getModule(2,8);
+  light1 = panel:getModule(0,10);
+  light2 = panel:getModule(1,10);
+  light3 = panel:getModule(2,10);
+  pot = panel:getModule(5,9);
+  display = panel:getModule(10,10);
+  button1 = panel:getModule(7,8);
+  button2 = panel:getModule(8,8);
+  button3 = panel:getModule(9,8);
+  button4 = panel:getModule(10,8);
+  
+  -- Инициализация глобальных переменных 
+  light1_status = false;
+  light2_status = false;
+  light3_status = false;
+  power_value = 50;
+
+  -- Настройка модулей
+  button1:setColor(0,0,1,1);
+  button2:setColor(0,0,1,1);
+  button3:setColor(0,0,1,1);
+  button4:setColor(0,0,1,1);
+  display:setSize(40);
+  display:setMonospace(true);
+  display:setText("Мощность: "..power_value);
+  
+  -- Инициализация прослушки сигналов
+  event.listen(button1);
+  event.listen(button2);
+  event.listen(button3);
+  event.listen(button4);
+  event.listen(pot);
+  
+end
+
+-- Work
+function work(e,inst,...)
+  local arg = {...};
+
+  if e ~= nil then
+    if e == "Trigger" then
+      if inst == button1 then display:setSize(10) end
+      if inst == button2 then display:setSize(20) end
+      if inst == button3 then display:setSize(30) end
+      if inst == button4 then display:setSize(40) end
+    end
+    if e == "PotRotate" then
+      if arg[1] then
+        power_value = power_value - 10;
+      else
+        power_value = power_value + 10;
+      end
+      display:setText("Мощность: "..power_value);
+    end
+  end
+  
+  if light1_status ~= lever1:getState() then
+    light1_status = lever1:getState();
+    if light1_status then
+      light1:setColor(0,1,0,1);
+    else
+      light1:setColor(1,0,0,1);
+    end
+  end
+
+  if light2_status ~= lever2:getState() then
+    light2_status = lever2:getState();
+    if light2_status then
+      light2:setColor(0,1,0,1);
+    else
+      light2:setColor(1,0,0,1);
+    end
+  end
+
+  if light3_status ~= lever3:getState() then
+    light3_status = lever3:getState();
+    if light3_status then
+      light3:setColor(0,1,0,1);
+    else
+      light3:setColor(1,0,0,1);
+    end
+  end
+
+
+end
+
+function main()
+  start();
+  while true do
+    work(event.pull(0.0));
+  end
+end
+main()
+----
