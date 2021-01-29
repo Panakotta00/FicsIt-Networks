@@ -1,6 +1,19 @@
 ﻿#include "FINReflectionUIStyle.h"
 
 const FName FFINReflectionUIStyleStruct::TypeName(TEXT("FFINReflectionUIStyleStruct"));
+const FName FFINSplitterStyle::TypeName(TEXT("FFINSplitterStyle"));
+
+void FFINSplitterStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const {
+	Super::GetResources(OutBrushes);
+	
+	OutBrushes.Add(&HandleIconBrush);
+}
+
+const FFINSplitterStyle& FFINSplitterStyle::GetDefault() {
+	static FFINSplitterStyle* Default = nullptr;
+	if (!Default) Default = new FFINSplitterStyle();
+	return *Default;
+}
 
 FFINReflectionUIStyleStruct::FFINReflectionUIStyleStruct() {
 	

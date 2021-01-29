@@ -1,5 +1,7 @@
 ﻿#include "FINReflectionClassHirachyViewer.h"
 
+
+#include "FINReflectionTreeRow.h"
 #include "Reflection/FINReflection.h"
 
 void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const TSharedPtr<FFINReflectionUIStruct>& InSearchStruct, FFINReflectionUIContext* InContext) {
@@ -18,9 +20,12 @@ void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const
 	TSharedPtr<STreeView<TSharedPtr<FFINReflectionUIStruct>>> Tree;
 	ChildSlot[
 		SAssignNew(Tree, STreeView<TSharedPtr<FFINReflectionUIStruct>>)
+		.SelectionMode(ESelectionMode::Single)
 		.TreeItemsSource(&StructSource)
-		.OnGenerateRow_Lambda([](TSharedPtr<FFINReflectionUIStruct> Entry, const TSharedRef<STableViewBase>& Base) {
-			return SNew(STableRow<TSharedPtr<FFINReflectionUIStruct>>, Base).Content()[
+		.OnGenerateRow_Lambda([this](TSharedPtr<FFINReflectionUIStruct> Entry, const TSharedRef<STableViewBase>& Base) {
+			return SNew(SFINReflectionTreeRow<TSharedPtr<FFINReflectionUIStruct>>, Base)
+			.Style(&Context->Style.Get()->HirachyTreeRowStyle)
+			.Content()[
 				Entry->GetShortPreview()
 			];
 		})
@@ -38,7 +43,7 @@ void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const
 			}
 		})
 		.OnMouseButtonDoubleClick_Lambda([this](TSharedPtr<FFINReflectionUIStruct> Entry) {
-			this->Context->SetSelected(Entry.Get());
+			this->Context->NavigateTo(Entry.Get());
 		})
 	];
 	for (const TPair<UFINStruct*, TSharedPtr<FFINReflectionUIStruct>>& Entry : Context->Structs) {

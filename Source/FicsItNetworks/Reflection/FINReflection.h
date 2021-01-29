@@ -31,8 +31,8 @@ public:
 	UFINClass* FindClass(UClass* Clazz, bool bRecursive = true, bool bTryToReflect = true);
 	UFINStruct* FindStruct(UScriptStruct* Struct, bool bRecursive = true, bool bTryToReflect = true);
 	void PrintReflection();
-	inline const TMap<UClass*, UFINClass*> GetClasses() { return Classes; }
-	inline const TMap<UScriptStruct*, UFINStruct*> GetStructs() { return Structs; }
+	inline const TMap<UClass*, UFINClass*>& GetClasses() { return Classes; }
+	inline const TMap<UScriptStruct*, UFINStruct*>& GetStructs() { return Structs; }
 };
 
 UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* OverrideProperty, UObject* Outer);

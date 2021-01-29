@@ -12,6 +12,7 @@ void SFINReflectionSignatureViewer::Construct(const FArguments& InArgs, TArray<U
 	ChildSlot[
         SAssignNew(List, SListView<TSharedPtr<UFINProperty*>>)
         .ListItemsSource(&Source)
+        .ScrollbarVisibility(EVisibility::All)
         .OnGenerateRow_Lambda([this](TSharedPtr<UFINProperty*> Entry, const TSharedRef<STableViewBase>& Base) {
             return SNew(STableRow<TSharedPtr<UFINProperty*>>, Base).Content()[
                 SNew(SVerticalBox)

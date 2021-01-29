@@ -21,6 +21,7 @@
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Reflection/FINReflection.h"
+#include "UI/FINReflectionStyles.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
@@ -168,6 +169,9 @@ void FFicsItNetworksModule::StartupModule(){
 
 
 	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGGameState, AFGGameState::Init, [](AFGGameState* state) {
+		FSlateStyleRegistry::UnRegisterSlateStyle(FFINReflectionStyles::GetStyleSetName());
+		FFINReflectionStyles::Initialize();
+		
 		AFINNetworkAdapter::RegisterAdapterSettings();
 		FFINGlobalRegisterHelper::Register();
 		
@@ -175,10 +179,20 @@ void FFicsItNetworksModule::StartupModule(){
 		FFINReflection::Get()->LoadAllTypes();
 		FFINReflection::Get()->PrintReflection();
 	})
+
+#if WITH_EDITOR
+	AFINNetworkAdapter::RegisterAdapterSettings();
+	FFINGlobalRegisterHelper::Register();
+		
+	FFINReflection::Get()->PopulateSources();
+	FFINReflection::Get()->LoadAllTypes();
+#endif
 }
 #pragma optimize("", on)
 
-void FFicsItNetworksModule::ShutdownModule(){ }
+void FFicsItNetworksModule::ShutdownModule() {
+	FFINReflectionStyles::Shutdown();
+}
 
 extern "C" DLLEXPORT void BootstrapModule(std::ofstream& logFile) {
 	

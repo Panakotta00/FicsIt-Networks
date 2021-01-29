@@ -1,9 +1,25 @@
 ﻿#pragma once
 
 #include "SlateBrush.h"
+#include "SlateTypes.h"
 #include "SlateWidgetStyle.h"
 #include "SlateWidgetStyleContainerBase.h"
 #include "FINReflectionUIStyle.generated.h"
+
+USTRUCT(BlueprintType)
+struct FFINSplitterStyle : public FSplitterStyle {
+	GENERATED_USTRUCT_BODY()
+
+	virtual void GetResources( TArray< const FSlateBrush* >& OutBrushes ) const override;
+
+	static const FName TypeName;
+	virtual const FName GetTypeName() const override { return TypeName; };
+
+	static const FFINSplitterStyle& GetDefault();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateBrush HandleIconBrush;
+};
 
 USTRUCT(BlueprintType)
 struct FFINReflectionUIStyleStruct : public FSlateWidgetStyle {
@@ -43,6 +59,63 @@ struct FFINReflectionUIStyleStruct : public FSlateWidgetStyle {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FSlateBrush Signal;
 	FFINReflectionUIStyleStruct& SetSignal( const FSlateBrush& InSignal ){ Signal = InSignal; return *this; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle InternalNameTextStyle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle DisplayNameTextStyle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle DescriptionTextStyle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle FlagsTextStyle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle ParameterListTextStyle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle DataTypeTextStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor ClickableDataTypeColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor PropertyColor = FSlateColor(FColor::FromHex("e59445"));
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor FunctionColor = FSlateColor(FColor::FromHex("5dafc5"));
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor SignalColor = FSlateColor(FColor::FromHex("5bb71d"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor RuntimeFlagColor = FSlateColor(FColor::FromHex("830000"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor VarArgsFlagColor = FSlateColor(FColor::FromHex("bb2828"));
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor VarRetsFlagColor = FSlateColor(FColor::FromHex("bb2828"));
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor ReadOnlyFlagColor = FSlateColor(FColor::FromHex("ffcc00"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTableRowStyle SearchTreeRowStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTableRowStyle HirachyTreeRowStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTableRowStyle EntryListRowStyle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FEditableTextBoxStyle SearchInputStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FFINSplitterStyle SplitterStyle;
 };
 
 UCLASS(BlueprintType, hidecategories=Object, MinimalAPI)

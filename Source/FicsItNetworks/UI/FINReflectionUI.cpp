@@ -1,44 +1,82 @@
 ﻿#include "FINReflectionUI.h"
 
-#include "STreeView.h"
+#include "FINReflectionTreeRow.h"
+#include "FINSplitter.h"
 #include "Reflection/FINReflection.h"
 
 void SFINReflectionUI::Construct(const FArguments& InArgs) {
 	Context.Style = InArgs._Style;
-	TSharedPtr<SHorizontalBox> Box;
+	SSplitter::FSlot* TreeSlot;
+	TSharedPtr<SFINSplitter> Box;
 	ChildSlot[
-		SAssignNew(Box, SHorizontalBox)
-		+SHorizontalBox::Slot().FillWidth(0.3)[
+		SAssignNew(Box, SFINSplitter)
+		.PhysicalSplitterHandleSize(25)
+		.HitDetectionSplitterHandleSize(25)
+		.Style(&Context.Style.Get()->SplitterStyle)
+		+SSplitter::Slot().Expose(TreeSlot)[
 			SNew(SVerticalBox)
-			+SVerticalBox::Slot().AutoHeight()[
-				SNew(SEditableTextBox)
+			+SVerticalBox::Slot().AutoHeight().Padding(10)[
+				SAssignNew(SearchBox, SEditableTextBox)
+				.Style(&Context.Style.Get()->SearchInputStyle)
+				.HintText(FText::FromString("Search for Class/Struct/Property/Function/Signal"))
 				.OnTextChanged_Lambda([this](FText Text) {
 					FilterCache(Text.ToString());
 				})
+				.OnTextCommitted_Lambda([this](FText Text, ETextCommit::Type Type) {
+					if (Filtered.Num() > 0 && Type == ETextCommit::Type::OnEnter) {
+						TFunction<bool(const TArray<TSharedPtr<FFINReflectionUIEntry>>&)> CheckChildren;
+						FFINReflectionUIFilter Filter(Context.FilterString);
+						CheckChildren = [this, &Filter, &CheckChildren](const TArray<TSharedPtr<FFINReflectionUIEntry>>& Entries) {
+							for (const TSharedPtr<FFINReflectionUIEntry>& Entry : Entries) {
+								if (Entry->ApplyFilter(Filter) == FIN_Ref_Filter_Self) {
+									Context.NavigateTo(Entry.Get());
+									return true;
+								}
+								if (CheckChildren(Entry->GetChildren())) return true;
+							}
+							return false;
+						};
+						bool _ = CheckChildren(Filtered);
+					}
+				})
 			]
 			+SVerticalBox::Slot().FillHeight(1.0)[
-				SNew(SScrollBox)
-				.Orientation(EOrientation::Orient_Horizontal)
-				+SScrollBox::Slot()[
-					SAssignNew(Tree, STreeView<TSharedPtr<FFINReflectionUIEntry>>)
-					.TreeItemsSource(&Filtered)
-					.OnGenerateRow_Lambda([](TSharedPtr<FFINReflectionUIEntry> Entry, const TSharedRef<STableViewBase>& Base) {
-						return SNew(STableRow<TSharedPtr<FFINReflectionUIEntry>>, Base).Content()[
-							Entry->GetShortPreview()
-						];
-					})
-					.OnGetChildren_Lambda([](TSharedPtr<FFINReflectionUIEntry> Entry, TArray<TSharedPtr<FFINReflectionUIEntry>>& Childs) {
-						Childs = Entry->GetChildren();
-					})
-					.OnSelectionChanged_Lambda([this](TSharedPtr<FFINReflectionUIEntry> Entry, ESelectInfo::Type Type) {
-						this->Context.SetSelected(Entry.Get());
-					})
+				SAssignNew(Tree, STreeView<TSharedPtr<FFINReflectionUIEntry>>)
+				.TreeItemsSource(&Filtered)
+				.SelectionMode(ESelectionMode::Single)
+				.OnGenerateRow_Lambda([](TSharedPtr<FFINReflectionUIEntry> Entry, const TSharedRef<STableViewBase>& Base) {
+					return SNew(SFINReflectionTreeRow<TSharedPtr<FFINReflectionUIEntry>>, Base)
+					.Style(&Entry->Context->Style.Get()->SearchTreeRowStyle)
+					.Content()[
+						Entry->GetShortPreview()
+					];
+				})
+				.OnGetChildren_Lambda([](TSharedPtr<FFINReflectionUIEntry> Entry, TArray<TSharedPtr<FFINReflectionUIEntry>>& Childs) {
+					Childs = Entry->GetChildren();
+				})
+				.OnSelectionChanged_Lambda([this](TSharedPtr<FFINReflectionUIEntry> Entry, ESelectInfo::Type Type) {
+					this->Context.NavigateTo(Entry.Get());
+				})
+			]
+			+SVerticalBox::Slot().AutoHeight()[
+				SNew(SCheckBox)
+				.Content()[
+					SNew(STextBlock)
+					.Text(FText::FromString("Show Recursive"))
 				]
+				.ToolTipText(FText::FromString("Check if all lists of props/funcs/signals of structs/classes should also contain the entries from the parent struct/class."))
+				.IsChecked_Lambda([this]() {
+					return Context.GetShowRecursive() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+				})
+				.OnCheckStateChanged_Lambda([this](ECheckBoxState State) {
+					Context.SetShowRecursive(State == ECheckBoxState::Checked);
+				})
 			]
 		]
+		+SSplitter::Slot().Expose(Slot)
 	];
-	Slot = &Box->AddSlot();
-	Slot->FillWidth(1.0);
+	TreeSlot->SizeValue = 0.3f;
+	Slot->SizeValue = 1.0f;
 
 	Context.OnSelectionChanged.AddLambda([this](FFINReflectionUIEntry* Entry) {
 		if (Entry) {
@@ -88,6 +126,51 @@ void SFINReflectionUI::FilterCache(const FString& InFilter) {
 	}
 }
 
+FReply SFINReflectionUI::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent) {
+	SCompoundWidget::OnFocusReceived(MyGeometry, InFocusEvent);
+
+	return FReply::Unhandled().SetUserFocus(SearchBox.ToSharedRef());
+}
+
+FReply SFINReflectionUI::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
+	FKey Key = InKeyEvent.GetKey();
+	if (Key != EKeys::Left && Key != EKeys::Up && Key != EKeys::Right && Key != EKeys::Down && Key != EKeys::Tab) {
+		SCompoundWidget::OnKeyDown(MyGeometry, InKeyEvent);
+		return FReply::Unhandled().SetUserFocus(SearchBox.ToSharedRef());
+	}
+	return SCompoundWidget::OnKeyDown(MyGeometry, InKeyEvent);
+}
+
+FReply SFINReflectionUI::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	if (MouseEvent.GetEffectingButton() == EKeys::ThumbMouseButton) {
+		Context.NavigatePrevious();
+		return FReply::Handled();
+	}
+	if (MouseEvent.GetEffectingButton() == EKeys::ThumbMouseButton2) {
+		Context.NavigateNext();
+		return FReply::Handled();
+	}
+
+	return SCompoundWidget::OnMouseButtonDown(MyGeometry, MouseEvent);
+}
+
+bool SFINReflectionUI::IsInteractable() const {
+	return true;
+}
+
+bool SFINReflectionUI::SupportsKeyboardFocus() const {
+	return true;
+}
+
+void SFINReflectionUI::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) {
+	SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
+
+	if (!FSlateApplication::Get().GetKeyboardFocusedWidget().Get() || bInitFocus) {
+		bInitFocus = false;
+		FSlateApplication::Get().SetAllUserFocus(SearchBox);
+	}
+}
+
 void UFINReflectionUI::ReleaseSlateResources(bool bReleaseChildren) {
 	if (Container) Container.Reset();
 }
@@ -97,10 +180,16 @@ TSharedRef<SWidget> UFINReflectionUI::RebuildWidget() {
 	return Container.ToSharedRef();
 }
 
-void UFINReflectionUI::SetSelected(UFINStruct* InStruct) {
+void UFINReflectionUI::NavigateTo(UFINStruct* InStruct) {
 	if (Container) {
 		TSharedPtr<FFINReflectionUIStruct>* Entry = Container->Context.Structs.Find(InStruct);
-		if (Entry) Container->Context.SetSelected(Entry->Get());
-		else Container->Context.SetSelected(nullptr);
+		if (Entry) Container->Context.NavigateTo(Entry->Get());
+		else Container->Context.NavigateTo(nullptr);
+	}
+}
+
+void UFINReflectionUI::SetShowRecursive(bool bInShowRecursive) {
+	if (Container) {
+		Container->Context.SetShowRecursive(bInShowRecursive);
 	}
 }

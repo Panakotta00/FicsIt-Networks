@@ -30,6 +30,20 @@ bool UFINUReflectionSource::ProvidesRequirements(UClass* Class) const {
 }
 
 void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass, UClass* Class) const {
+	UFINClass* DirectParent = Ref->FindClass(Class->GetSuperClass(), false, false);
+	if (DirectParent) {
+		int childCount = 0;
+		for(TObjectIterator<UClass> It; It; ++It) {
+			if(It->IsChildOf(Class->GetSuperClass())) {
+				childCount++;
+			}
+		}
+		if (childCount < 2) {
+			const_cast<TMap<UClass*, UFINClass*>*>(&Ref->GetClasses())->Remove(Class);
+			ToFillClass = DirectParent;
+		}
+	}
+	
 	ToFillClass->InternalName = Class->GetName();
 	ToFillClass->DisplayName = FText::FromString(ToFillClass->InternalName);
 
@@ -42,6 +56,7 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 	for (TFieldIterator<UField> Field(Class); Field; ++Field) {
 		UProperty* Prop = Cast<UProperty>(*Field);
 		UFunction* Func = Cast<UFunction>(*Field);
+		if (Field->GetOuter() != Class) continue; 
 		if (Prop) {
 			if (Field->GetName().StartsWith("netProp_")) {
 				ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, Func));
@@ -80,7 +95,7 @@ UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* 
 
 	// try to get meta from function
 	UFunction* MetaFunc = Class->FindFunctionByName("netClass_Meta");
-	if (MetaFunc) {
+	if (MetaFunc && MetaFunc->GetOuter() == Class) {
 		// allocate parameter space
 		uint8* Params = (uint8*)FMemory::Malloc(MetaFunc->PropertiesSize);
 		FMemory::Memzero(Params + MetaFunc->ParmsSize, MetaFunc->PropertiesSize - MetaFunc->ParmsSize);

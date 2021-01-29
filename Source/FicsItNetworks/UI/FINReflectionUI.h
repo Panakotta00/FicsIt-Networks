@@ -16,9 +16,11 @@ public:
 	void Construct(const FArguments& InArgs);
 
 private:
-	SHorizontalBox::FSlot* Slot;
+	SSplitter::FSlot* Slot;
 	TArray<TSharedPtr<FFINReflectionUIEntry>> Filtered;
 	TSharedPtr<STreeView<TSharedPtr<FFINReflectionUIEntry>>> Tree;
+	TSharedPtr<SEditableTextBox> SearchBox;
+	bool bInitFocus = true;
 
 public:
 	FFINReflectionUIContext Context;
@@ -26,6 +28,13 @@ public:
 	SFINReflectionUI();
 
 	void FilterCache(const FString& Filter);
+
+	virtual FReply OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent) override;
+	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual bool IsInteractable() const override;
+	virtual bool SupportsKeyboardFocus() const override;
+	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 };
 
 UCLASS(BlueprintType)
@@ -47,5 +56,11 @@ public:
 	 * Sets the currently selected typer of the reflection viewer
 	 */
 	UFUNCTION(BlueprintCallable, Category="Reflection|UI")
-	void SetSelected(UFINStruct* InStruct);
+	void NavigateTo(UFINStruct* InStruct);
+
+	/**
+	 * Sets if entry lists should also show the entries of super structs/classes
+	 */
+	UFUNCTION(BlueprintCallable, Category="Reflection|UI")
+	void SetShowRecursive(bool bInShowRecursive);
 };

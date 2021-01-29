@@ -21,6 +21,7 @@ enum EFINFunctionFlags {
 	FIN_Func_MemberFunc		= 0b00010000,
 	FIN_Func_ClassFunc		= 0b00100000,
 	FIN_Func_StaticFunc		= 0b01000000,
+	FIN_Func_VarRets		= 0b10000000,
 };
 
 inline EFINFunctionFlags operator|(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {
