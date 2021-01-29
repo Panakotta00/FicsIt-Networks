@@ -14,17 +14,9 @@
 |image::items/Drive_T1.png[300,300,role="left"]
 |===
 
-The Drive is used to get pluged in into a drive holder which allows a computer to read/write
-data to the filesystem in the drive.
 
-Such a drive has a GUID to identify the filesystem and use the address in the DevDevice.
-This data is stored in the ItemState.
-
-The different types of drives have different capacities to store data.
-
-That means you can write data to the drive, unplug it, go to a different computer, plug it in
-and then read this data. So you can transfer large amounts of data from one PC to another one.
-
-Also, the data is persited over different computer sessions.
+The Drive can be placed into a drive slot in a Computer, which allows it to read and write data to the Drive.
+The Drive has a GUID to identify the filesystem.
+Data on the Drive is persistent, so you can use a single drive on different Computers.
 
 include::partial$item_footer.adoc[]

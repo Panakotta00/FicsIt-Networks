@@ -22,6 +22,7 @@
 ** xref:buildings/ModularControlPanel/index.adoc[Modular Control Panel]
 *** xref:buildings/ModularControlPanel/Button.adoc[Button]
 *** xref:buildings/ModularControlPanel/Lever.adoc[Lever]
+*** xref:buildings/ModularControlPanel/Potentiometer.adoc[Potentiometer]
 *** xref:buildings/ModularControlPanel/Display.adoc[Display]
 *** xref:buildings/ModularControlPanel/TextDisplay.adoc[Text Display]
 ** xref:buildings/NetworkCable.adoc[Network Cable]
