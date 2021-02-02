@@ -373,7 +373,7 @@ TSharedRef<SWidget> FFINReflectionUIEntry::GetLink() {
 		GetShortPreview()
 	]
 	.OnClicked_Lambda([this]() {
-		Context->NavigateTo(this);
+		this->Context->NavigateTo(this);
 		return FReply::Handled();
 	})
 	.Cursor(EMouseCursor::Hand);

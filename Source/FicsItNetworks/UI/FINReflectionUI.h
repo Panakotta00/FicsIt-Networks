@@ -4,7 +4,6 @@
 #include "FINReflectionUIStyle.h"
 #include "HorizontalBox.h"
 #include "SCompoundWidget.h"
-#include "Widget.h"
 #include "FINReflectionUI.generated.h"
 
 class SFINReflectionUI : public SCompoundWidget {

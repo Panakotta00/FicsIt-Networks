@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#pragma once
-
 #include "SlateBasics.h"
 
 class FFINReflectionStyles {

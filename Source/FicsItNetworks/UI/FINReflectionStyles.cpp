@@ -1,6 +1,5 @@
 ﻿#include "FINReflectionStyles.h"
 
-#include "FINReflectionStyles.h"
 #include "SlateGameResources.h" 
 
 TSharedPtr<FSlateStyleSet> FFINReflectionStyles::ReflectionStyleInstance = NULL;
