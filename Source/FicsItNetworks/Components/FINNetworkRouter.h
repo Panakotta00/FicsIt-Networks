@@ -5,6 +5,18 @@
 #include "Network/FINNetworkMessageInterface.h"
 #include "FINNetworkRouter.generated.h"
 
+UENUM()
+enum EFINNetworkRouterLampFlags {
+	FIN_NetRouter_None		= 0b0000,
+	FIN_NetRouter_Con1_Rx	= 0b0001,
+	FIN_NetRouter_Con1_Tx	= 0b0010,
+	FIN_NetRouter_Con1		= 0b0011,
+	FIN_NetRouter_Con2_Rx	= 0b0100,
+	FIN_NetRouter_Con2_Tx	= 0b1000,
+	FIN_NetRouter_Con2		= 0b1100,
+};
+ENUM_CLASS_FLAGS(EFINNetworkRouterLampFlags);
+
 UCLASS()
 class AFINNetworkRouter : public AFGBuildable {
 	GENERATED_BODY()
@@ -30,6 +42,9 @@ public:
 
 	UPROPERTY()
 	TArray<FGuid> HandledMessages;
+	FCriticalSection HandleMessageMutex;
+
+	EFINNetworkRouterLampFlags LampFlags;
 
 	AFINNetworkRouter();
 	~AFINNetworkRouter();
@@ -171,5 +186,5 @@ private:
 	bool HandleMessage(AFINNetworkCircuit* SendingCircuit, FGuid ID, FGuid Sender, FGuid Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data);
 
 	UFUNCTION(NetMulticast, Unreliable)
-    void NetMulti_OnMessageHandled(bool bCon1or2, bool bSendOrReceive);
+    void NetMulti_OnMessageHandled(EFINNetworkRouterLampFlags Flags);
 };

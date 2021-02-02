@@ -58,6 +58,7 @@ public:
 	 */
 	UPROPERTY()
 	TSet<FGuid> HandledMessages;
+	FCriticalSection HandledMessagesMutex;
 
 	AFINComputerNetworkCard();
 	

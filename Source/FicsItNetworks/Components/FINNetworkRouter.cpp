@@ -24,9 +24,9 @@ void AFINNetworkRouter::BeginPlay() {
         return PortList.Contains(Port) == bIsPortWhitelist;
     });
 	NetworkConnector1->OnNetworkMessageRecieved.AddLambda([this](FGuid ID, FGuid Sender, FGuid Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
-        NetMulti_OnMessageHandled(false, true);
+        this->LampFlags |= FIN_NetRouter_Con1_Tx;
         if (HandleMessage(IFINNetworkCircuitNode::Execute_GetCircuit(NetworkConnector2), ID, Sender, Reciever, Port, Data))
-        	NetMulti_OnMessageHandled(true, false);
+        	this->LampFlags |= FIN_NetRouter_Con2_Rx;
     });
 	NetworkConnector2->OnIsNetworkRouter.BindLambda([]() {
         return true;
@@ -35,9 +35,9 @@ void AFINNetworkRouter::BeginPlay() {
         return PortList.Contains(Port) == bIsPortWhitelist;
     });
 	NetworkConnector2->OnNetworkMessageRecieved.AddLambda([this](FGuid ID, FGuid Sender, FGuid Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
-        NetMulti_OnMessageHandled(true, true);
+        this->LampFlags |= FIN_NetRouter_Con2_Tx;
         if (HandleMessage(IFINNetworkCircuitNode::Execute_GetCircuit(NetworkConnector1), ID, Sender, Reciever, Port, Data))
-        	NetMulti_OnMessageHandled(false, false);
+	        this->LampFlags |= FIN_NetRouter_Con1_Rx;
     });
 }
 
@@ -45,11 +45,19 @@ void AFINNetworkRouter::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
 	HandledMessages.Empty();
+
+	if (LampFlags != FIN_NetRouter_None) {
+		NetMulti_OnMessageHandled(LampFlags);
+		LampFlags = FIN_NetRouter_None;
+	}
 }
 
 bool AFINNetworkRouter::HandleMessage(AFINNetworkCircuit* SendingCircuit, FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
-	if (HandledMessages.Contains(ID) || !SendingCircuit) return false;
-	HandledMessages.Add(ID);
+	{
+		FScopeLock Lock(&HandleMessageMutex);
+		if (HandledMessages.Contains(ID) || !SendingCircuit) return false;
+		HandledMessages.Add(ID);
+	}
 	if (AddrList.Contains(Sender.ToString()) != bIsAddrWhitelist) return false;
 	bool bSent = false;
 	if (Receiver.IsValid()) {
@@ -77,8 +85,19 @@ bool AFINNetworkRouter::HandleMessage(AFINNetworkCircuit* SendingCircuit, FGuid 
 	return bSent;
 }
 
-void AFINNetworkRouter::NetMulti_OnMessageHandled_Implementation(bool bCon1or2, bool bSendOrReceive) {
-	OnMessageHandled(bCon1or2, bSendOrReceive);
+void AFINNetworkRouter::NetMulti_OnMessageHandled_Implementation(EFINNetworkRouterLampFlags Flags) {
+	if (Flags & FIN_NetRouter_Con1_Rx) {
+		OnMessageHandled(false, false);
+	}
+	if (Flags & FIN_NetRouter_Con1_Tx) {
+		OnMessageHandled(false, true);
+	}
+	if (Flags & FIN_NetRouter_Con2_Rx) {
+		OnMessageHandled(true, false);
+	}
+	if (Flags & FIN_NetRouter_Con2_Tx) {
+		OnMessageHandled(true, true);
+	}
 }
 
 void AFINNetworkRouter::netPropSet_isWhitelist(bool bInWhitelist) {
