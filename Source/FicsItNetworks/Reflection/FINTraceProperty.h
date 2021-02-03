@@ -4,17 +4,13 @@
 #include "FINTraceProperty.generated.h"
 
 UCLASS(BlueprintType)
-class UFINTraceProperty : public UFINProperty {
+class UFINTraceProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
 	UPROPERTY()
 	UStructProperty* Property = nullptr;
 	UPROPERTY()
 	UClass* Subclass = nullptr;
-	UPROPERTY()
-	FFINPropertyGetterFunc GetterFunc;
-	UPROPERTY()
-	FFINPropertySetterFunc SetterFunc;
 	
 	// Begin UFINProperty
 	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {

@@ -1,15 +1,24 @@
 ﻿#pragma once
 
 #include "Network/FINNetworkTrace.h"
+#include "FINExecutionContext.generated.h"
 
-class FFINExecutionContext {
+USTRUCT()
+struct FFINExecutionContext {
+	GENERATED_BODY()
+
 public:
-	enum Type {
-		GENERIC,
-        OBJECT,
-        TRACE
+	enum Type : uint8 {
+		NONE = 0,
+		GENERIC = 1,
+        OBJECT = 2,
+        TRACE = 3
     };
 
+	FFINExecutionContext() : Obj(nullptr) {
+		Type = NONE;
+	}
+	
 	FFINExecutionContext(void* Generic) : Generic(Generic) {
 		Type = GENERIC;
 	}
@@ -99,6 +108,28 @@ public:
 		}
 		return FFINNetworkTrace();
 	}
+
+	bool Serialize(FArchive& Ar) {
+		if (Ar.IsLoading() && Type == TRACE) delete Trace;
+		Ar << *reinterpret_cast<uint8*>(&Type);
+		switch (Type) {
+		case NONE:
+			break;
+		case GENERIC:
+			Type = NONE;
+			break;
+		case OBJECT:
+			Ar << Obj;
+			break;
+		case TRACE:
+			if (Ar.IsLoading()) Trace = new FFINNetworkTrace();
+			Ar << *Trace;
+			break;
+		default: ;
+		}
+		
+		return true;
+	}
 	
 private:
 	Type Type;
@@ -108,4 +139,16 @@ private:
 		UObject* Obj;
 		FFINNetworkTrace* Trace;
 	};
+};
+
+inline FArchive& operator<<(FArchive& Ar, FFINExecutionContext& Ctx) {
+	Ctx.Serialize(Ar);
+	return Ar;
+}
+
+template<>
+struct TStructOpsTypeTraits<FFINExecutionContext> : TStructOpsTypeTraitsBase2<FFINExecutionContext> {
+	enum {
+		WithSerializer = true,
+    };
 };

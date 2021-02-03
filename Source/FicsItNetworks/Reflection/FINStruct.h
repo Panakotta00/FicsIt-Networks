@@ -2,6 +2,8 @@
 
 #include "FINBase.h"
 #include "FINFunction.h"
+#include "UObjectIterator.h"
+
 #include "FINStruct.generated.h"
 
 UCLASS(BlueprintType)
@@ -69,4 +71,14 @@ public:
 		}
 		return Childs;
 	}
+
+	/**
+	 * Trys to find a property with the given name
+	 */
+	UFINProperty* FindFINProperty(const FString& Name, EFINRepPropertyFlags FilterFlags = FIN_Prop_Attrib);
+
+	/**
+	 * Trys to find a function with the given name
+	 */
+	UFINFunction* FindFINFunction(const FString& Name, EFINFunctionFlags FilterFlags = FIN_Func_MemberFunc);
 };

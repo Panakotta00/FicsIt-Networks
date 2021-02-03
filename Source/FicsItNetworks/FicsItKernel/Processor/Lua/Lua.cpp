@@ -1,9 +1,12 @@
 #include "Lua.h"
 
+
+#include "LuaFuture.h"
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
 #include "LuaStructs.h"
 #include "Network/FINNetworkComponent.h"
+#include "Reflection/FINStruct.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -80,9 +83,9 @@ namespace FicsItKernel {
 				}
 			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
-				FFINDynamicStructHolder Struct(prop->Struct);
+				TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(prop->Struct);
 				luaGetStruct(L, i, Struct);
-				prop->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct.GetData());
+				prop->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct->GetData());
 			} else if (c & EClassCastFlags::CASTCLASS_UArrayProperty) {
 				UArrayProperty* prop = Cast<UArrayProperty>(p);
 				const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
@@ -123,7 +126,7 @@ namespace FicsItKernel {
 			default:
 				UFINStruct* StructType = luaGetStructType(L, i);
 				if (StructType) {
-					Val = FFINAnyNetworkValue(luaGetStruct(L, i));
+					Val = FFINAnyNetworkValue(*luaGetStruct(L, i));
 					break;
 				}
 				FFINNetworkTrace Trace = getObjInstance(L, i);

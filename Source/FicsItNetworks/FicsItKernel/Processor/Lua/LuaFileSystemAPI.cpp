@@ -117,7 +117,7 @@ namespace FicsItKernel {
 			auto path = luaL_checkstring(L, 1);
 			auto all = lua_toboolean(L, 2);
 			try {
-				lua_pushboolean(L, self->createDir(path, all) == 0);
+				lua_pushboolean(L, self->createDir(path, all).isValid());
 			} CatchExceptionLua
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})

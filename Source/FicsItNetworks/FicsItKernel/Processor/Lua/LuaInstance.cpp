@@ -4,6 +4,7 @@
 #include "LuaFuture.h"
 #include "LuaProcessor.h"
 #include "LuaProcessorStateStorage.h"
+#include "LuaRef.h"
 
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkUtils.h"
@@ -12,9 +13,6 @@
 #include "Reflection/FINReflection.h"
 
 #define INSTANCE_TYPE "InstanceType"
-#define INSTANCE_CACHE "InstanceCache"
-#define INSTANCE_FUNC_DATA "InstanceFuncData"
-#define CLASS_INSTANCE_FUNC_DATA "ClassInstanceFuncData"
 #define CLASS_INSTANCE_META_SUFFIX "-Class"
 
 #define OffsetParam(type, off) (type*)((std::uint64_t)param + off)
@@ -27,6 +25,7 @@ namespace FicsItKernel {
 		TMap<UFINClass*, FString> ClassToClassMetaName;
 		TMap<FString, UFINClass*> MetaNameToClass;
 		FCriticalSection ClassMetaNameLock;
+		FCriticalSection ClassClassMetaNameLock;
 		
 		void luaInstanceType(lua_State* L, LuaInstanceType&& instanceType);
 		int luaInstanceTypeUnpersist(lua_State* L) {
@@ -103,11 +102,11 @@ namespace FicsItKernel {
 
 		int luaInstanceFuncCall(lua_State* L) {		// Instance, args..., up: UFINFunction
 			// get function
-			LuaInstanceFunc* Func = (LuaInstanceFunc*) luaL_checkudata(L, lua_upvalueindex(1), INSTANCE_FUNC_DATA);
+			LuaRefFuncData* Func = static_cast<LuaRefFuncData*>(luaL_checkudata(L, lua_upvalueindex(1), LUA_REF_FUNC_DATA));
 			
 			// get and check instance
 			ClassMetaNameLock.Lock();
-			FString* MetaNamePtr = ClassToMetaName.Find(Func->Class);
+			FString* MetaNamePtr = ClassToMetaName.Find(Cast<UFINClass>(Func->Struct));
 			if (!MetaNamePtr) {
 				ClassMetaNameLock.Unlock();
 				return luaL_error(L, "Function name is invalid (internal error)");
@@ -118,40 +117,8 @@ namespace FicsItKernel {
 			UObject* Obj = *Instance->Trace;
 			if (!Obj) return luaL_argerror(L, 1, "Instance is invalid");
 
-			// get input parameters from lua stack
-			TArray<FINAny> Input;
-			int args = lua_gettop(L);
-			for (int i = 2; i <= args; ++i) {
-				FINAny Param;
-				luaToNetworkValue(L, i, Param);
-				Input.Add(Param);
-			}
-			args = 0;
-			
-			EFINFunctionFlags FuncFlags = Func->Func->GetFunctionFlags();
-			TSharedPtr<FLuaSyncCall> SyncCall;
-			bool bRunDirectly = false;
-			if (FuncFlags & FIN_Func_RT_Async) {
-				bRunDirectly = true;
-			} else if (FuncFlags & FIN_Func_RT_Parallel) {
-				SyncCall = MakeShared<FLuaSyncCall>(L);
-				bRunDirectly = true;
-			} else {
-				luaFuture(L, FFINFutureReflection(Func->Func, Instance->Trace, Input));
-				args = 1;
-			}
-
-			if (bRunDirectly) {
-				TArray<FINAny> Output = Func->Func->Execute(FFINExecutionContext(Instance->Trace), Input);
-
-				// push output onto lua stack
-				for (const FINAny& Value : Output) {
-					networkValueToLua(L, Value);
-					++args;
-				}
-			}
-			
-			return LuaProcessor::luaAPIReturn(L, args);
+			// call func
+			return luaCallFINFunc(L, Func->Func, FFINExecutionContext(Instance->Trace), "Instance");
 		}
 
 		int luaInstanceIndex(lua_State* L) {																			// Instance, FuncName
@@ -181,37 +148,10 @@ namespace FicsItKernel {
 				}
 			}
 
-			// try to find property
-			for (UFINProperty* Property : Class->GetProperties()) {
-				if ((Property->GetPropertyFlags() & FIN_Prop_Attrib) && Property->GetInternalName() == MemberName) {
-					TSharedPtr<FLuaSyncCall> SyncCall;
-					if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
-					networkValueToLua(L, Property->GetValue(Instance->Trace));
-					return LuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
-
-			// get cache function
-			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// Instance, FuncName, InstanceCache
 			ClassMetaNameLock.Lock();
-			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*(ClassToMetaName[Class] + "_" + MemberName))) != LUA_TNIL) {	// Instance, FuncName, InstanceCache, CachedFunc
-				ClassMetaNameLock.Unlock();
-				return LuaProcessor::luaAPIReturn(L, 1);
-			}																											// Instance, FuncName, InstanceCache, nil
+			FString MetaName = ClassToMetaName[Class];
 			ClassMetaNameLock.Unlock();
-
-			// try to find function
-			for (UFINFunction* Function : Class->GetFunctions()) {
-				if ((Function->GetFunctionFlags() & FIN_Func_MemberFunc) && Function->GetInternalName() == MemberName) {
-					LuaInstanceFunc* Func = (LuaInstanceFunc*) lua_newuserdata(L, sizeof(LuaInstanceFunc));
-					new (Func) LuaInstanceFunc{Function, Class};
-					luaL_setmetatable(L, INSTANCE_FUNC_DATA);
-					lua_pushcclosure(L, &luaInstanceFuncCall, 1);
-					return LuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
-			
-			return LuaProcessor::luaAPIReturn(L, 0);
+			return luaFindGetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, MetaName + "_" + MemberName, &luaInstanceFuncCall);
 		}
 
 		int luaInstanceNewIndex(lua_State* L) {
@@ -241,19 +181,7 @@ namespace FicsItKernel {
 				}
 			}
 
-			// try to find property
-			for (UFINProperty* Property : Class->GetProperties()) {
-				if (Property->GetPropertyFlags() & FIN_Prop_Attrib && Property->GetInternalName() == MemberName) {
-					TSharedPtr<FLuaSyncCall> SyncCall;
-					if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
-					FINAny Value;
-					luaToNetworkValue(L, 3, Value);
-					Property->SetValue(Obj, Value);
-					return LuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
-			
-			return luaL_error(L, TCHAR_TO_UTF8(*("No property with name '" + MemberName + "' found")));
+			return luaFindSetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName);
 		}
 
 		int luaInstanceEQ(lua_State* L) {
@@ -424,11 +352,11 @@ namespace FicsItKernel {
 		
 		int luaClassInstanceFuncCall(lua_State* L) {	// ClassInstance, Args..., up: FuncName, up: ClassInstance
 			// get function
-			LuaInstanceFunc* Func = (LuaInstanceFunc*) luaL_checkudata(L, lua_upvalueindex(1), INSTANCE_FUNC_DATA);
+			LuaRefFuncData* Func = static_cast<LuaRefFuncData*>(luaL_checkudata(L, lua_upvalueindex(1), LUA_REF_FUNC_DATA));
 			
 			// get and check instance
 			ClassMetaNameLock.Lock();
-			FString* MetaNamePtr = ClassToClassMetaName.Find(Func->Class);
+			FString* MetaNamePtr = ClassToClassMetaName.Find(Cast<UFINClass>(Func->Struct));
 			if (!MetaNamePtr) {
 				ClassMetaNameLock.Unlock();
 				return luaL_argerror(L, 1, "Function name is invalid (internal error)");
@@ -439,26 +367,8 @@ namespace FicsItKernel {
 			UObject* Obj = *Instance->Trace;
 			if (!Obj) return luaL_argerror(L, 1, "ClassInstance is invalid");
 
-			// sync call if necessery
-			TSharedPtr<FLuaSyncCall> SyncCall;
-			if (!(Func->Func->GetFunctionFlags() & FIN_Func_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
-
 			// call the function
-			TArray<FINAny> Input;
-			int args = lua_gettop(L);
-			for (int i = 2; i <= args; ++i) {
-				FINAny Param;
-				luaToNetworkValue(L, i, Param);
-				Input.Add(Param);
-			}
-			args = 0;
-			TArray<FINAny> Output = Func->Func->Execute(FFINExecutionContext(Instance->Trace), Input);
-			for (const FINAny& Value : Output) {
-				networkValueToLua(L, Value);
-				++args;
-			}
-			
-			return LuaProcessor::luaAPIReturn(L, args);
+			return luaCallFINFunc(L, Func->Func, FFINExecutionContext(Obj), "ClassInstance");
 		}
 		
 		int luaClassInstanceIndex(lua_State* L) {																		// ClassInstance, MemberName
@@ -475,37 +385,10 @@ namespace FicsItKernel {
 				return luaL_error(L, "ClassInstance is invalid");
 			}
 
-			// try to find property
-			for (UFINProperty* Property : Type->GetProperties()) {
-				if (Property->GetPropertyFlags() & FIN_Prop_ClassProp && Property->GetInternalName() == MemberName) {
-					TSharedPtr<FLuaSyncCall> SyncCall;
-					if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
-					networkValueToLua(L, Property->GetValue(Cast<UObject>(Class)));
-					return LuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
-
-			// get cache function
-			luaL_getmetafield(L, 1, INSTANCE_CACHE);																// Instance, FuncName, InstanceCache
-			ClassMetaNameLock.Lock();
-			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*(ClassToClassMetaName[Type] + "_" + MemberName))) != LUA_TNIL) {	// Instance, FuncName, InstanceCache, CachedFunc
-				ClassMetaNameLock.Unlock();
-				return LuaProcessor::luaAPIReturn(L, 1);
-			}																											// Instance, FuncName, InstanceCache, nil
-			ClassMetaNameLock.Unlock();
-
-			// try to find function
-			for (UFINFunction* Function : Type->GetFunctions()) {
-				if (Function->GetFunctionFlags() & FIN_Func_ClassFunc && Function->GetInternalName() == MemberName) {
-					LuaInstanceFunc* Func = (LuaInstanceFunc*) lua_newuserdata(L, sizeof(LuaInstanceFunc));
-					new (Func) LuaInstanceFunc{Function, Type};
-					luaL_setmetatable(L, INSTANCE_FUNC_DATA);
-					lua_pushcclosure(L, &luaClassInstanceFuncCall, 1);
-					return LuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
-			
-			return LuaProcessor::luaAPIReturn(L, 0);
+			ClassClassMetaNameLock.Lock();
+			FString MetaName = ClassToClassMetaName[Type];
+			ClassClassMetaNameLock.Unlock();
+			return luaFindGetMember(L, Type, FFINExecutionContext(Class), MemberName, MetaName + "_" + MemberName, &luaClassInstanceFuncCall);
 		}
 
 		int luaClassInstanceNewIndex(lua_State* L) {
@@ -522,19 +405,7 @@ namespace FicsItKernel {
 				return luaL_error(L, "ClassInstance is invalid");
 			}
 			
-			// try to find property
-			for (UFINProperty* Property : Type->GetProperties()) {
-				if (Property->GetPropertyFlags() & FIN_Prop_ClassProp && Property->GetInternalName() == MemberName) {
-					TSharedPtr<FLuaSyncCall> SyncCall;
-					if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
-					FINAny Value;
-					luaToNetworkValue(L, 3, Value);
-					Property->SetValue((UObject*)Class, Value);
-					return LuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
-			
-			return luaL_error(L, TCHAR_TO_UTF8(*("No property with name '" + MemberName + "' found")));
+			return luaFindSetMember(L, Type, FFINExecutionContext(Class), MemberName);
 		}
 
 		int luaClassInstanceEQ(lua_State* L) {
@@ -655,53 +526,6 @@ namespace FicsItKernel {
 			return instance->Class;
 		}
 
-		int luaInstanceFuncDataUnpersist(lua_State* L) {
-			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
-
-			// get class
-			UFINClass* Class = Cast<UFINClass>(Storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(1))));
-			UFINFunction* Function = Cast<UFINFunction>(Storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(2))));
-
-			// create value
-			LuaInstanceFunc* Func = static_cast<LuaInstanceFunc*>(lua_newuserdata(L, sizeof(LuaInstanceFunc)));
-			new (Func) LuaInstanceFunc();
-			Func->Class = Class;
-			Func->Func = Function;
-			luaL_setmetatable(L, INSTANCE_FUNC_DATA);
-			
-			return 1;
-		}
-
-		int luaInstanceFuncDataPersist(lua_State* L) {
-			LuaInstanceFunc* Func = (LuaInstanceFunc*) luaL_checkudata(L, 1, INSTANCE_FUNC_DATA);
-
-			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
-
-			// push type name to persist
-			lua_pushinteger(L, Storage->Add(Func->Class));
-			lua_pushinteger(L, Storage->Add(Func->Func));
-			
-			// create & return closure
-			lua_pushcclosure(L, &luaInstanceFuncDataUnpersist, 2);
-			return 1;
-		}
-
-		int luaInstanceFuncDataGC(lua_State* L) {
-			LuaInstanceFunc* Func = (LuaInstanceFunc*) luaL_checkudata(L, 1, INSTANCE_FUNC_DATA);
-			Func->~LuaInstanceFunc();
-			return 0;
-		}
-
-		static const luaL_Reg luaInstanceFuncDataLib[] = {
-			{"__persist", luaInstanceFuncDataPersist},
-			{"__gc", luaInstanceFuncDataGC},
-			{NULL, NULL}
-		};
-
 		void setupInstanceSystem(lua_State* L) {
 			PersistSetup("InstanceSystem", -2);
 			
@@ -712,10 +536,6 @@ namespace FicsItKernel {
 			PersistTable(INSTANCE_TYPE, -1);
 			lua_pop(L, 1);									// ...
 
-			luaL_newmetatable(L, INSTANCE_FUNC_DATA);
-			luaL_setfuncs(L, luaInstanceFuncDataLib, 0);
-			lua_pop(L, 1);
-			
 			lua_pushcfunction(L, luaInstanceFuncCall);			// ..., InstanceFuncCall
 			PersistValue("InstanceFuncCall");					// ...
 			lua_pushcfunction(L, luaClassInstanceFuncCall);		// ..., LuaClassInstanceFuncCall
@@ -726,8 +546,6 @@ namespace FicsItKernel {
 			PersistValue("ClassInstanceUnpersist");			// ...
 			lua_pushcfunction(L, luaInstanceTypeUnpersist);		// ..., LuaInstanceTypeUnpersist
 			PersistValue("InstanceTypeUnpersist");				// ...
-			lua_pushcfunction(L, luaInstanceFuncDataUnpersist);	// ..., LuaInstanceFuncDataUnpersist
-			PersistValue("InstanceFuncDataUnpersist");			// ...
 		}
 
 		void setupMetatable(lua_State* L, UFINClass* Class) {
@@ -748,7 +566,7 @@ namespace FicsItKernel {
 			lua_setfield(L, -2, "__metatable");
 			luaL_setfuncs(L, luaInstanceLib, 0);
 			lua_newtable(L);															// ..., InstanceMeta, InstanceCache
-			lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta
+			lua_setfield(L, -2, LUA_REF_CACHE);									// ..., InstanceMeta
 			PersistTable(TCHAR_TO_UTF8(*TypeName), -1);
 			lua_pop(L, 1);															// ...
 			MetaNameToClass.FindOrAdd(TypeName) = Class;
@@ -760,7 +578,7 @@ namespace FicsItKernel {
 			lua_setfield(L, -2, "__metatable");
 			luaL_setfuncs(L, luaClassInstanceLib, 0);
 			lua_newtable(L);															// ..., InstanceMeta, InstanceCache
-			lua_setfield(L, -2, INSTANCE_CACHE);									// ..., InstanceMeta
+			lua_setfield(L, -2, LUA_REF_CACHE);									// ..., InstanceMeta
 			PersistTable(TCHAR_TO_UTF8(*TypeName), -1);
 			lua_pop(L, 3);															// ...
 			MetaNameToClass.FindOrAdd(TypeName) = Class;

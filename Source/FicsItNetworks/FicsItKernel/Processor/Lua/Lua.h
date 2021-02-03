@@ -3,7 +3,10 @@
 #include "CoreMinimal.h"
 #include "LuaException.h"
 #include "Network/FINAnyNetworkValue.h"
+#include "Reflection/FINExecutionContext.h"
 
+class UFINStruct;
+class UFINFunction;
 struct FFINNetworkTrace;
 
 extern "C" {

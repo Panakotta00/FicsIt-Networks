@@ -1703,8 +1703,8 @@ BeginFunc(getTrains, TFS("Get Trains"), TFS("Returns a list of all trains in the
 	TArray<FINAny> Trains;
 	TArray<AFGTrain*> TrainList;
 	AFGRailroadSubsystem::Get(*self->Trace)->GetTrains(self->TrackID, TrainList);
-	for (const auto& Train : TrainList) {
-		Trains.Add(Train);
+	for (AFGTrain* Train : TrainList) {
+		Trains.Add(self->Trace / Train);
 	}
 	trains = Trains;
 } EndFunc()

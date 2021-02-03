@@ -42,13 +42,13 @@ struct FFINFutureReflection : public FFINFuture {
 	TArray<FFINAnyNetworkValue> Output;
 
 	UPROPERTY()
-	FFINNetworkTrace Context;
+	FFINExecutionContext Context;
 
 	UPROPERTY()
 	UFINFunction* Function;
 
 	FFINFutureReflection() = default;
-	FFINFutureReflection(UFINFunction* Function, const FFINNetworkTrace& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
+	FFINFutureReflection(UFINFunction* Function, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
 
 	bool Serialize(FArchive& Ar) {
 		Ar << bDone;
@@ -81,7 +81,6 @@ struct TStructOpsTypeTraits<FFINFutureReflection> : public TStructOpsTypeTraitsB
 		WithSerializer = true,
 	};
 };
-
 
 USTRUCT()
 struct FFINFunctionFuture : public FFINFuture {

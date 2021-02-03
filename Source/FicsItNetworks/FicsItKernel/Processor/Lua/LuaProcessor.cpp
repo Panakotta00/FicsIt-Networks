@@ -47,7 +47,6 @@ namespace FicsItKernel {
 			}
 		}
 
-#pragma optimize("", off)
 		LuaProcessorTick::LuaProcessorTick(LuaProcessor* Processor): Processor(Processor), Runnable(this) {
 			reset();
 		}
@@ -199,6 +198,7 @@ namespace FicsItKernel {
 			return false;
 		}
 
+#pragma optimize("", off)
 		void LuaProcessorTick::tickHook(lua_State* L) {
 			switch (State) {
 			case LUA_SYNC:
@@ -218,11 +218,13 @@ namespace FicsItKernel {
 			default: ;
 			}
 		}
+#pragma optimize("", on)
 
 		int luaAPIReturn_Resume(lua_State* L, int status, lua_KContext ctx) {
 			return static_cast<int>(ctx);
 		}
 
+#pragma optimize("", off)
 		int LuaProcessorTick::apiReturn(lua_State* L, int args) {
 			if (State != LUA_SYNC && State != LUA_ASYNC) { // tick state in error or crash
 				if (State & LUA_SYNC) State = LUA_SYNC;
@@ -231,6 +233,7 @@ namespace FicsItKernel {
 			}
 			return args;
 		}
+#pragma optimize("", on)
 
 		int LuaProcessorTick::steps() {
 			switch (State) {
@@ -252,8 +255,7 @@ namespace FicsItKernel {
 				return 0;
 			}
 		}
-#pragma optimize("", on)
-
+		
 		LuaProcessor* LuaProcessor::luaGetProcessor(lua_State* L) {
 			lua_getfield(L, LUA_REGISTRYINDEX, "LuaProcessorPtr");
 			LuaProcessor* p = *(LuaProcessor**) luaL_checkudata(L, -1, "LuaProcessor");
@@ -336,8 +338,8 @@ namespace FicsItKernel {
 			// clear some data
 			clearFileStreams();
 		}
-
 #pragma optimize("", on)
+
 		size_t luaLen(lua_State* L, int idx) {
 			size_t len = 0;
 			idx = lua_absindex(L, idx);
@@ -778,7 +780,8 @@ namespace FicsItKernel {
 			luaL_requiref(L, "string", luaopen_string, true);
 			PersistTable("string", -1);
 			lua_pop(L, 1);
-			
+
+			setupRefUtils(L);
 			setupInstanceSystem(L);
 			setupStructSystem(L);
 			setupComponentAPI(L);

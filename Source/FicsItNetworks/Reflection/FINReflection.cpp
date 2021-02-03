@@ -124,7 +124,7 @@ UFINStruct* FFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive, b
 			UFINStruct* FINStruct = nullptr;
 			for (const UFINReflectionSource* Source : Sources) {
 				if (Source->ProvidesRequirements(Struct)) {
-					FINStruct = NewObject<UFINStruct>();
+					FINStruct = NewObject<UFINStruct>(Struct);
 					break;
 				}
 			}

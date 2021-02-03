@@ -40,14 +40,6 @@ namespace FicsItKernel {
 		};
 
 		/**
-		 * Structure that contains all necessery infromation for a function
-		 */
-		struct LuaInstanceFunc {
-			UFINFunction* Func;
-			UFINClass* Class;
-		};
-
-		/**
 		 * Creates a new Lua Instance for the given network trace and pushes it onto the given stack.
 		 * Or pushes nil if not able to create the instance.
 		 * 

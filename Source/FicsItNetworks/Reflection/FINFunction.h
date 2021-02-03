@@ -36,6 +36,16 @@ inline EFINFunctionFlags operator~(EFINFunctionFlags Flags) {
 	return (EFINFunctionFlags)~(uint16)Flags;
 }
 
+USTRUCT()
+struct FFINFunctionBadArgumentException : public FFINReflectionException {
+	GENERATED_BODY()
+
+	int ArgumentIndex = 0;
+
+	FFINFunctionBadArgumentException() = default;
+	FFINFunctionBadArgumentException(UFINFunction* Func, int ArgumentIndex, const FString& Message) : FFINReflectionException(Cast<UFINBase>(Func), Message), ArgumentIndex(ArgumentIndex) {}
+};
+
 UCLASS(BlueprintType)
 class UFINFunction : public UFINBase {
 	GENERATED_BODY()

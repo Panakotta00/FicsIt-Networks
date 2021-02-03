@@ -30,10 +30,11 @@ public:
 			for (int j = 0; j < Parameters.Num(); ++j) {
 				UFINProperty* Param = Parameters[j];
 				if ((Param->GetPropertyFlags() & FIN_Prop_Param) && !(Param->GetPropertyFlags() & FIN_Prop_OutParam)) {
+					if (Params.Num() <= i) throw FFINReflectionException(const_cast<UFINUFunction*>(this), FString::Printf(TEXT("Required parameter '%s' is not provided."), *Param->GetInternalName())); 
 					Param->SetValue(ParamStruct, Params[i++]);
 				}
 			}
-			if (GetFunctionFlags() & FIN_Func_VarArgs) {
+			if (GetFunctionFlags() & FIN_Func_VarArgs && Params.Num() > i+1) {
 				TArray<FFINAnyNetworkValue> VarArgs = TArray<FFINAnyNetworkValue>(&Params[i], Params.Num()-i);
 				VarArgsProperty->SetValue(ParamStruct, VarArgs);
 				i = Params.Num();
