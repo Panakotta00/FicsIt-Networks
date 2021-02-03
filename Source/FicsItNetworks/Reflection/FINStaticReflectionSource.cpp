@@ -11,6 +11,7 @@
 #include "FGBuildableTrainPlatformCargo.h"
 #include "FGFactoryConnectionComponent.h"
 #include "FGHealthComponent.h"
+#include "FGItemCategory.h"
 #include "FGLocomotive.h"
 #include "FGPipeSubsystem.h"
 #include "FGPowerCircuit.h"
@@ -1642,8 +1643,38 @@ BeginClassFunc(getIngredients, TFS("Get Ingredients"), TFS("Returns a array of i
 EndClass()
 
 BeginClass(UFGItemDescriptor, "ItemType", TFS("Item Type"), TFS("The type of an item (iron plate, iron rod, leaves)"))
+BeginClassProp(RInt, form, TFS("Form"), TFS("The matter state of this resource.\n1: Solid\n2: Liquid\n3: Gas\n4: Heat")) {
+	Return (FINInt)UFGItemDescriptor::GetForm(self);
+} EndProp()
+BeginClassProp(RFloat, energy, TFS("Enery"), TFS("How much energy this resource provides if used as fuel.")) {
+	Return (FINFloat)UFGItemDescriptor::GetForm(self);
+} EndProp()
+BeginClassProp(RFloat, radioactiveDecay, TFS("Radioactive Decay"), TFS("The amount of radiation this item radiates.")) {
+	Return (FINFloat)UFGItemDescriptor::GetForm(self);
+} EndProp()
 BeginClassProp(RString, name, TFS("Name"), TFS("The name of the item.")) {
 	Return (FINStr)UFGItemDescriptor::GetItemName(self).ToString();
+} EndProp()
+BeginClassProp(RString, description, TFS("Description"), TFS("The description of this item.")) {
+	Return (FINStr)UFGItemDescriptor::GetItemDescription(self).ToString();
+} EndProp()
+BeginClassProp(RInt, max, TFS("Max"), TFS("The maximum stack size of this item.")) {
+	Return (FINInt)UFGItemDescriptor::GetStackSize(self);
+} EndProp()
+BeginClassProp(RBool, canBeDiscarded, TFS("Can be Discarded"), TFS("True if this item can be discarded.")) {
+	Return (FINBool)UFGItemDescriptor::CanBeDiscarded(self);
+} EndProp()
+BeginClassProp(RClass<UFGItemCategory>, category, TFS("Category"), TFS("The category in which this item is in.")) {
+	Return (FINClass)UFGItemDescriptor::GetItemCategory(self);
+} EndProp()
+BeginClassProp(RStruct<FLinearColor>, fluidColor, TFS("Fluid Color"), TFS("The color of this fluid.")) {
+	Return (FINStruct)(FLinearColor)UFGItemDescriptor::GetFluidColor(self);
+} EndProp()
+EndClass()
+
+BeginClass(UFGItemCategory, "ItemCategory", TFS("Item Category"), TFS("The category of some items."))
+BeginClassProp(RString, name, TFS("Name"), TFS("The name of the category.")) {
+	Return (FINStr)UFGItemCategory::GetCategoryName(self).ToString();
 } EndProp()
 EndClass()
 
