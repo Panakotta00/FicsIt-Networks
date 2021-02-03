@@ -15,6 +15,7 @@
 #include "FINStateEEPROMLua.h"
 #include "LuaDebugAPI.h"
 #include "LuaFuture.h"
+#include "LuaRef.h"
 #include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
@@ -40,19 +41,219 @@ namespace FicsItKernel {
 
 		void FLuaTickRunnable::DoWork() {
 			while (true) {
-				Processor->asyncMutex.Lock();
-				if (Processor->tickState != LUA_ASYNC) {
-					Processor->asyncMutex.Unlock();
+				if (!Tick->asyncTick()) {
 					break;
 				}
-				Processor->asyncMutex.Unlock();
-				Processor->luaTick();
-				Processor->asyncMutex.Lock();
-				if (bShouldSync) Processor->tickState = LUA_SYNC;
-				Processor->asyncMutex.Unlock();
 			}
 		}
-		
+
+#pragma optimize("", off)
+		LuaProcessorTick::LuaProcessorTick(LuaProcessor* Processor): Processor(Processor), Runnable(this) {
+			reset();
+		}
+
+		LuaProcessorTick::~LuaProcessorTick() {
+			stop();
+		}
+
+		void LuaProcessorTick::reset() {
+			stop();
+
+			AsyncSync = TPromise<void>();
+			SyncAsync = TPromise<void>();
+			AsyncSync.EmplaceValue();
+			SyncAsync.EmplaceValue();
+			bShouldPromote = false;
+			bShouldDemote = false;
+			bShouldStop = false;
+			bShouldCrash = false;
+			bDoSync = false;
+			State = LUA_SYNC;
+		}
+
+		void LuaProcessorTick::stop() {
+			if (!(State & LUA_SYNC)) {
+				demote();
+			}
+		}
+
+		void LuaProcessorTick::promote() {
+			if (State & LUA_ASYNC) return;
+			if (asyncTask.IsValid()) {
+				if (!asyncTask->IsDone()) asyncTask->EnsureCompletion();
+				asyncTask->Cancel();
+				asyncTask = nullptr;
+			}
+			asyncTask = MakeShared<FAsyncTask<FLuaTickRunnable>>(this);
+			asyncTask->StartBackgroundTask();
+			TickMutex.Lock();
+			State = LUA_ASYNC;
+			TickMutex.Unlock();
+		}
+
+		void LuaProcessorTick::demote() {
+			TickMutex.Lock();
+			State = LUA_SYNC;
+			TickMutex.Unlock();
+			if (bDoSync) {
+				SyncAsync = TPromise<void>();
+				AsyncSync.EmplaceValue();
+			}
+			asyncTask->EnsureCompletion();
+			asyncTask->Cancel();
+			TickMutex.Unlock();
+		}
+
+		void LuaProcessorTick::demoteInAsync() {
+			if (State & LUA_SYNC) return;
+			AsyncSyncMutex.Lock();
+			AsyncSync = TPromise<void>();
+			TFuture<void> Future = AsyncSync.GetFuture();
+			bDoSync = true;
+			AsyncSyncMutex.Unlock();
+			TickMutex.Unlock();
+			Future.Wait(); // wait for sync to continue this async
+			TickMutex.Lock();
+		}
+
+		void LuaProcessorTick::shouldStop() {
+			bShouldStop = true;
+		}
+
+		void LuaProcessorTick::shouldPromote() {
+			bShouldPromote = true;
+		}
+
+		void LuaProcessorTick::shouldDemote() {
+			bShouldDemote = true;
+		}
+
+		void LuaProcessorTick::shouldCrash(const KernelCrash& Crash) {
+			bShouldCrash = true;
+			ToCrash = Crash;
+		}
+
+		void LuaProcessorTick::syncTick() {
+			if (postTick()) return;
+			if (State & LUA_SYNC) {
+				TickMutex.Lock();
+				Processor->luaTick();
+				TickMutex.Unlock();
+				if (bShouldPromote) {
+					promote();
+				}
+			} else if (State & LUA_ASYNC) {
+				AsyncSyncMutex.Lock();
+				bool DoSync = bDoSync;
+				AsyncSyncMutex.Unlock();
+				if (DoSync) {
+					// async tick is waiting for sync
+					AsyncSyncMutex.Lock();
+					SyncAsync = TPromise<void>();
+					TFuture<void> Future = SyncAsync.GetFuture();
+					shouldDemote();
+					State = LUA_SYNC;
+					AsyncSync.EmplaceValue(); // continue async tick in sync with factory tick
+					AsyncSyncMutex.Unlock();
+					Future.Wait(); // wait for async tick to finish
+					AsyncSyncMutex.Lock();
+					bDoSync = false;
+					AsyncSyncMutex.Unlock();
+				}
+			}
+			if (postTick()) return;
+		}
+		bool LuaProcessorTick::asyncTick() {
+			if (State & LUA_ASYNC) {
+				TickMutex.Lock();
+				Processor->luaTick();
+				TickMutex.Unlock();
+				AsyncSyncMutex.Lock();
+				if (bDoSync) {
+					SyncAsync.EmplaceValue();
+				}
+				AsyncSyncMutex.Unlock();
+				if (bShouldDemote) {
+					TickMutex.Lock();
+					State = LUA_SYNC;
+					TickMutex.Unlock();
+					return false;
+				}
+				if (bShouldCrash || bShouldStop) {
+					return false;
+				}
+				return true;
+			}
+			return false;
+		}
+
+		bool LuaProcessorTick::postTick() {
+			if (bShouldCrash) {
+				Processor->getKernel()->crash(ToCrash);
+				return true;
+			}
+			if (bShouldStop) {
+				Processor->getKernel()->stop();
+				return true;
+			}
+			return false;
+		}
+
+		void LuaProcessorTick::tickHook(lua_State* L) {
+			switch (State) {
+			case LUA_SYNC:
+			case LUA_ASYNC:
+				State |= LUA_ERROR;
+				lua_sethook(Processor->luaThread, LuaProcessor::luaHook, LUA_MASKCOUNT, steps());
+				break;
+			case LUA_SYNC_ERROR:
+			case LUA_ASYNC_ERROR:
+				State |= LUA_END;
+				lua_sethook(Processor->luaThread, LuaProcessor::luaHook, LUA_MASKCOUNT, steps());
+				luaL_error(L, "out of time");
+				break;
+			case LUA_SYNC_END:
+            case LUA_ASYNC_END:
+                throw KernelCrash("out of time");
+			default: ;
+			}
+		}
+
+		int luaAPIReturn_Resume(lua_State* L, int status, lua_KContext ctx) {
+			return static_cast<int>(ctx);
+		}
+
+		int LuaProcessorTick::apiReturn(lua_State* L, int args) {
+			if (State != LUA_SYNC && State != LUA_ASYNC) { // tick state in error or crash
+				if (State & LUA_SYNC) State = LUA_SYNC;
+				else if (State & LUA_ASYNC) State = LUA_ASYNC;
+				return lua_yieldk(L, 0, args, &luaAPIReturn_Resume);
+			}
+			return args;
+		}
+
+		int LuaProcessorTick::steps() {
+			switch (State) {
+			case LUA_SYNC:
+				return SyncLen;
+			case LUA_SYNC_ERROR:
+				return SyncErrorLen;
+			case LUA_SYNC_END:
+				return SyncEndLen;
+			case LUA_ASYNC_BEGIN:
+				return AsyncLen;
+			case LUA_ASYNC:
+				return AsyncLen;
+			case LUA_ASYNC_ERROR:
+				return AsyncErrorLen;
+			case LUA_ASYNC_END:
+				return AsyncEndLen;
+			default:
+				return 0;
+			}
+		}
+#pragma optimize("", on)
+
 		LuaProcessor* LuaProcessor::luaGetProcessor(lua_State* L) {
 			lua_getfield(L, LUA_REGISTRYINDEX, "LuaProcessorPtr");
 			LuaProcessor* p = *(LuaProcessor**) luaL_checkudata(L, -1, "LuaProcessor");
@@ -60,15 +261,11 @@ namespace FicsItKernel {
 			return p;
 		}
 
-		LuaProcessor::LuaProcessor(int speed) : fileSystemListener(new LuaFileSystemListener(this)) {
+		LuaProcessor::LuaProcessor(int speed) :  tickHelper(this), fileSystemListener(new LuaFileSystemListener(this)) {
 			
 		}
 
-		LuaProcessor::~LuaProcessor() {
-			StopAsyncTick();
-			asyncPromiseThreadWait.SetValue();
-			asyncPromiseTickWait.SetValue();
-		}
+		LuaProcessor::~LuaProcessor() {}
 
 		void LuaProcessor::setKernel(KernelSystem* newKernel) {
 			if (getKernel() && getKernel()->getFileSystem()) getKernel()->getFileSystem()->removeListener(fileSystemListener);
@@ -78,65 +275,19 @@ namespace FicsItKernel {
 		void LuaProcessor::tick(float delta) {
 			if (!luaState || !luaThread) return;
 
-			asyncMutex.Lock();
-
-			if (bShouldStop) {
-				asyncMutex.Unlock();
-				kernel->stop();
-				bShouldStop = false;
-			} else if (bShouldCrash) {
-				asyncMutex.Unlock();
-				kernel->crash(ToCrash);
-				bShouldCrash = false;
-			} else if (tickState == LUA_ASYNC_BEGIN) {
-				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Change to Async-Tick-Thread..."));
-				if (asyncTask && !asyncTask->IsIdle()) {
-					tickState = LUA_SYNC;
-					asyncMutex.Unlock();
-					asyncTask->EnsureCompletion();
-					asyncMutex.Lock();
-				}
-				tickState = LUA_ASYNC;
-				// Create Lua Run Thread
-				asyncTask = MakeShared<FAsyncTask<FLuaTickRunnable>>(this);
-				asyncTask->StartBackgroundTask();
-				asyncMutex.Unlock();
-			} else if (tickState & LUA_SYNC) {
-				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Run Sync Tick..."));
-				asyncMutex.Unlock();
-				if (asyncTask && !asyncTask->IsIdle()) {
-					asyncTask->EnsureCompletion();
-					asyncTask = nullptr;
-				}
-				luaTick();
-			} else if (tickState & LUA_ASYNC) {
-				asyncMutex.Unlock();
-				RunSyncTick();
-				asyncMutex.Lock();
-				if (tickState & LUA_SYNC) {
-					asyncMutex.Unlock();
-					UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Run Sync Tick after async downgrade..."));
-					StopAsyncTick();
-					luaTick();
-				} else {
-					asyncMutex.Unlock();
-				}
-			} else {
-				asyncMutex.Unlock();
-			}
+			tickHelper.syncTick();
 		}
 
 		void LuaProcessor::stop(bool isCrash) {
 			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor stop %s"), isCrash ? TEXT("due to crash") : TEXT(""));
-			StopAsyncTick();
+			tickHelper.stop();
 		}
 
 #pragma optimize("", off)
 		void LuaProcessor::luaTick() {
-			FScopeLock Lock(&luaTickMutex);
 			try {
 				// reset out of time
-				lua_sethook(luaThread, LuaProcessor::luaHook, LUA_MASKCOUNT, luaStepsForTickState(tickState));
+				lua_sethook(luaThread, LuaProcessor::luaHook, LUA_MASKCOUNT, tickHelper.steps());
 				
 				int status = 0;
 				if (pullState != 0) {
@@ -171,83 +322,22 @@ namespace FicsItKernel {
 					if (getKernel()) getKernel()->recalculateResources(KernelSystem::PROCESSOR);
 				} else if (status == LUA_OK) {
 					// runtime finished execution -> stop system normally
-					asyncMutex.Lock();
-					tickState = LUA_SYNC;
-					bShouldStop = true;
-					asyncMutex.Unlock();
+					tickHelper.shouldStop();
 				} else {
 					// runtimed crashed -> crash system with runtime error message
 					luaL_traceback(luaThread, luaThread, lua_tostring(luaThread, -1), 0);
-					asyncMutex.Lock();
-					tickState = LUA_SYNC;
-					bShouldCrash = true;
-					ToCrash = KernelCrash(std::string(lua_tostring(luaThread, -1)));
-					asyncMutex.Unlock();
+					tickHelper.shouldCrash(KernelCrash(std::string(lua_tostring(luaThread, -1))));
 				}
 			} catch (...) {
 				// fatal end of time reached
-				asyncMutex.Lock();
-				tickState = LUA_SYNC;
-				bShouldCrash = true;
-				ToCrash = KernelCrash("out of time");
-				asyncMutex.Unlock();
+				tickHelper.shouldCrash(KernelCrash("out of time"));
 			}
 
 			// clear some data
 			clearFileStreams();
 		}
+
 #pragma optimize("", on)
-
-		void LuaProcessor::RunSyncTick() {
-			asyncMutex.Lock();
-			if (bWantsSync) {
-				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Run Async-Tick in Sync with Factory tick..."));
-				TFuture<void> Future = asyncPromiseTickWait.GetFuture();
-				asyncMutex.Unlock();
-				asyncPromiseThreadWait.SetValue();
-				Future.Wait();
-			} else {
-				asyncMutex.Unlock();
-			}
-		}
-
-		void LuaProcessor::StopAsyncTick() {
-			asyncMutex.Lock();
-			if (tickState & LUA_ASYNC) {
-				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Stop Async-Thread..."));
-				tickState = LUA_SYNC;
-				asyncMutex.Unlock();
-				RunSyncTick();
-			} else {
-				asyncMutex.Unlock();
-			}
-			if (asyncTask) {
-				asyncTask->EnsureCompletion();
-				asyncTask->Cancel();
-			}
-			asyncTask = nullptr;
-		}
-
-		struct SyncTickCtx {
-			jmp_buf env;
-			LuaProcessor* Processor;
-		};
-		
-		void LuaProcessor::syncTick(lua_State* L) {
-			asyncMutex.Lock();
-			if (tickState & LUA_ASYNC && tickState != LUA_ASYNC_BEGIN) {
-				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Sync Async-Thread with tick..."));
-				bWantsSync = true;
-				asyncPromiseThreadWait = TPromise<void>();
-				asyncPromiseTickWait = TPromise<void>();
-				asyncMutex.Unlock();
-				auto future = asyncPromiseThreadWait.GetFuture();
-				future.Wait();
-			} else {
-				asyncMutex.Unlock();
-			}
-		}
-
 		size_t luaLen(lua_State* L, int idx) {
 			size_t len = 0;
 			idx = lua_absindex(L, idx);
@@ -273,7 +363,7 @@ namespace FicsItKernel {
 
 		void LuaProcessor::reset() {
 			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor Reset"));
-			StopAsyncTick();
+			tickHelper.stop();
 			
 			// can't reset running system state
 			if (getKernel()->getState() != RUNNING) return;
@@ -324,14 +414,17 @@ namespace FicsItKernel {
 				kernel->crash(KernelCrash("No Valid EEPROM set"));
 				return;
 			}
-			std::string code = std::string(TCHAR_TO_UTF8(*eeprom->GetCode()));
+			FTCHARToUTF8 CodeConv(*eeprom->GetCode(), eeprom->GetCode().Len());
+			std::string code = std::string(CodeConv.Get(), CodeConv.Length());
 			luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
+			if (lua_isstring(luaThread, -1)) {
+				// Syntax error
+				kernel->crash(KernelCrash(lua_tostring(luaThread, -1)));
+				return;
+			}
 
 			// reset tick state
-			tickState = LUA_SYNC;
-			bWantsSync = false;
-			bShouldCrash = false;
-			bShouldStop = false;
+			tickHelper.reset();
 
 			// lua_gc(luaState, LUA_GCSETPAUSE, 100);
 			// TODO: Check if we actually want to use this or the manual gc call
@@ -360,7 +453,7 @@ namespace FicsItKernel {
 
 		void LuaProcessor::PreSerialize(UProcessorStateStorage* storage, bool bLoading) {
 			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor %s"), bLoading ? TEXT("PreDeserialize") : TEXT("PreSerialize"));
-			StopAsyncTick();
+			tickHelper.stop();
 			
 			for (LuaFile file : fileStreams) {
 				if (file->file) {
@@ -570,27 +663,6 @@ namespace FicsItKernel {
 			reset();
 		}
 
-		int LuaProcessor::luaStepsForTickState(LuaTickState state) {
-			switch (state) {
-			case LUA_SYNC:
-				return SyncLen;
-			case LUA_SYNC_ERROR:
-				return SyncErrorLen;
-			case LUA_SYNC_END:
-				return SyncEndLen;
-			case LUA_ASYNC_BEGIN:
-				return AsyncLen;
-			case LUA_ASYNC:
-				return AsyncLen;
-			case LUA_ASYNC_ERROR:
-				return AsyncErrorLen;
-			case LUA_ASYNC_END:
-				return AsyncEndLen;
-			default:
-				return 0;
-			}
-		}
-
 		int luaReYield(lua_State* L) {
 			lua_yield(L,0);
 			return 0;
@@ -739,57 +811,13 @@ namespace FicsItKernel {
 
 		void LuaProcessor::luaHook(lua_State* L, lua_Debug* ar) {
 			LuaProcessor* p = LuaProcessor::luaGetProcessor(L);
-			switch (p->tickState) {
-			case LUA_SYNC:
-				p->tickState = LUA_SYNC_ERROR;
-				lua_sethook(p->luaThread, luaHook, LUA_MASKCOUNT, p->luaStepsForTickState(p->tickState));
-				break;
-			case LUA_ASYNC:
-				p->tickState = LUA_ASYNC_ERROR;
-				lua_sethook(p->luaThread, luaHook, LUA_MASKCOUNT, p->luaStepsForTickState(p->tickState));
-				break;
-			case LUA_SYNC_ERROR:
-				p->tickState = LUA_SYNC_END;
-				lua_sethook(p->luaThread, luaHook, LUA_MASKCOUNT, p->luaStepsForTickState(p->tickState));
-				luaL_error(L, "out of time");
-				break;
-			case LUA_ASYNC_ERROR:
-				p->tickState = LUA_ASYNC_END;
-				lua_sethook(p->luaThread, luaHook, LUA_MASKCOUNT, p->luaStepsForTickState(p->tickState));
-				luaL_error(L, "out of time");
-				break;
-			case LUA_SYNC_END:
-			case LUA_ASYNC_END:
-				throw KernelCrash("out of time");
-				break;
-			default: ;
-			}
-		}
-
-		int luaAPIReturn_Resume(lua_State* L, int status, lua_KContext ctx) {
-			return static_cast<int>(ctx);
+			p->tickHelper.tickHook(L);
 		}
 
 #pragma optimize("", off)
 		int LuaProcessor::luaAPIReturn(lua_State* L, int args) {
 			LuaProcessor* p = LuaProcessor::luaGetProcessor(L);
-			p->asyncMutex.Lock();
-			if (p->bWantsSync) {
-				p->bWantsSync = false;
-				p->tickState = LUA_SYNC;
-				p->asyncPromiseTickWait.SetValue();
-				p->asyncMutex.Unlock();
-				UE_LOG(LogFicsItNetworks, Log, TEXT("LuaProcessor: Async-Tick Finished..."));
-				return lua_yieldk(L, 0, args, &luaAPIReturn_Resume);
-			}
-			if (p->tickState != LUA_SYNC && p->tickState != LUA_ASYNC) {
-				if (p->tickState & LUA_SYNC) p->tickState = LUA_SYNC;
-				else if (p->tickState & LUA_ASYNC && p->tickState != LUA_ASYNC_BEGIN) p->tickState = LUA_ASYNC;
-				p->asyncMutex.Unlock();
-				return lua_yieldk(L, 0, args, &luaAPIReturn_Resume);
-			}
-			p->asyncMutex.Unlock();
-			return args;
+			return p->tickHelper.apiReturn(L, args);
 		}
 #pragma optimize("", on)
 
