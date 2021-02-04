@@ -55,8 +55,10 @@ namespace FicsItKernel {
 #pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
-			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
-			    kernel->getAudio()->beep();
+			float pitch = 1;
+			if (lua_isnumber(L, 1)) pitch = lua_tonumber(L, 1);
+			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
+			    kernel->getAudio()->beep(pitch);
 			})));
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
