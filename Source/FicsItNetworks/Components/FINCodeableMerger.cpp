@@ -81,6 +81,7 @@ bool AFINCodeableMerger::Factory_GrabOutput_Implementation(UFGFactoryConnectionC
 	if (OutputQueue.Num() > 0) {
 		out_item = OutputQueue[0];
 		OutputQueue.RemoveAt(0);
+		netSig_ItemOutputted(out_item);
 		return true;
 	}
 	return false;
@@ -112,6 +113,7 @@ bool AFINCodeableMerger::netPropGet_canOutput() {
 }
 
 void AFINCodeableMerger::netSig_ItemRequest_Implementation(int input, const FInventoryItem& item) {}
+void AFINCodeableMerger::netSig_ItemOutputted_Implementation(const FInventoryItem& item) {}
 
 TArray<FInventoryItem>& AFINCodeableMerger::GetInput(int output) {
 	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);

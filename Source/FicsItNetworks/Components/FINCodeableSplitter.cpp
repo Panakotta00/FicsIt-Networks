@@ -82,10 +82,12 @@ bool AFINCodeableSplitter::Factory_PeekOutput_Implementation(const UFGFactoryCon
 }
 
 bool AFINCodeableSplitter::Factory_GrabOutput_Implementation(UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf<UFGItemDescriptor> type) {
-	TArray<FInventoryItem>& outputQueue = GetOutput(connection);
+	int32 Index = 0;
+	TArray<FInventoryItem>& outputQueue = GetOutput(connection, &Index);
 	if (outputQueue.Num() > 0) {
 		out_item = outputQueue[0];
 		outputQueue.RemoveAt(0);
+		netSig_ItemOutputted(Index, out_item);
 		return true;
 	}
 	return false;
@@ -134,6 +136,7 @@ bool AFINCodeableSplitter::netFunc_canOutput(int output) {
 }
 
 void AFINCodeableSplitter::netSig_ItemRequest_Implementation(const FInventoryItem& item) {}
+void AFINCodeableSplitter::netSig_ItemOutputted_Implementation(int output, const FInventoryItem& item) {}
 
 TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(int output) {
 	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);
@@ -147,16 +150,19 @@ TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(int output) {
 	}
 }
 
-TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(UFGFactoryConnectionComponent* connection) {
-	return const_cast<TArray<FInventoryItem>&>(GetOutput((const UFGFactoryConnectionComponent*) connection));
+TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(UFGFactoryConnectionComponent* connection, int32* Index) {
+	return const_cast<TArray<FInventoryItem>&>(GetOutput((const UFGFactoryConnectionComponent*) connection, Index));
 }
 
-const TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(const UFGFactoryConnectionComponent* connection) const {
+const TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(const UFGFactoryConnectionComponent* connection, int32* Index) const {
 	if (connection == Output1) {
+		if (Index) *Index = 1;
 		return OutputQueue1;
-	} else if (connection == Output2) {
-		return OutputQueue2;
-	} else {
-		return OutputQueue3;
 	}
+	if (connection == Output2) {
+		if (Index) *Index = 0;
+		return OutputQueue2;
+	}
+	if (Index) *Index = 2;
+	return OutputQueue3;
 }

@@ -134,6 +134,21 @@ public:
 		ParameterDescriptions.Add(FText::FromString("The new item in the input queue."));
 	}
 	
+	/**
+	 * This signal gets emitted when a item is popped from the output queue (aka it got outputted to an conveyor)
+	 */
+	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
+	void netSig_ItemOutputted(const FInventoryItem& item);
+	UFUNCTION()
+    void netSigMeta_ItemOutputted(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions) {
+		InternalName = "ItemOutputted";
+		DisplayName = FText::FromString("Item Outputted");
+		Description = FText::FromString("Triggers when an item is popped from the output queue (aka it got transferred to a conveyor).");
+		ParameterInternalNames.Add("item");
+		ParameterDisplayNames.Add(FText::FromString("Item"));
+		ParameterDescriptions.Add(FText::FromString("The item removed from the output queue."));
+	}
+	
 	TArray<FInventoryItem>& GetInput(int input);
 	TArray<FInventoryItem>& GetInput(UFGFactoryConnectionComponent* connection);
 	const TArray<FInventoryItem>& GetInput(const UFGFactoryConnectionComponent* connection) const;
