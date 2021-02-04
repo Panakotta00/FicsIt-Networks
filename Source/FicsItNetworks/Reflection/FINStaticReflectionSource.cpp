@@ -1808,3 +1808,26 @@ BeginProp(RClass<UFGItemDescriptor>, type, TFS("Type"), TFS("The type of the ite
 	self->ItemClass = Val;
 } EndProp()
 EndStruct()
+
+BeginStruct(FLinearColor, "Color", TFS("Color"), TFS("A structure that holds a rgba color value"))
+BeginProp(RFloat, r, TFS("Red"), TFS("The red portion of the color.")) {
+	Return (FINFloat) self->R;
+} PropSet() {
+	self->R = Val;
+} EndProp()
+BeginProp(RFloat, g, TFS("Green"), TFS("The green portion of the color.")) {
+	Return (FINFloat) self->G;
+} PropSet() {
+	self->G = Val;
+} EndProp()
+BeginProp(RFloat, b, TFS("Blue"), TFS("The blue portion of the color.")) {
+	Return (FINFloat) self->B;
+} PropSet() {
+	self->B = Val;
+} EndProp()
+BeginProp(RFloat, a, TFS("Alpha"), TFS("The alpha (opacity) portion of the color.")) {
+	Return (FINFloat) self->A;
+} PropSet() {
+	self->A = Val;
+} EndProp()
+EndStruct()

@@ -153,10 +153,11 @@ namespace FicsItKernel {
 			case FIN_FLOAT:
 				lua_pushnumber(L, Val.GetFloat());
 				break;
-			case FIN_STR:
-				lua_pushstring(L, TCHAR_TO_UTF8(*Val.GetString()));
+			case FIN_STR: {
+				FTCHARToUTF8 Conv(*Val.GetString(), Val.GetString().Len());
+				lua_pushlstring(L, Conv.Get(), Conv.Length());
 				break;
-			case FIN_OBJ:
+			} case FIN_OBJ:
 				newInstance(L, FFINNetworkTrace(Val.GetObj().Get()));
 				break;
 			case FIN_CLASS:
