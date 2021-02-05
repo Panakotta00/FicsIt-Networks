@@ -11,6 +11,7 @@
 
 #include "FGBlueprintFunctionLibrary.h"
 #include "Network/FINNetworkUtils.h"
+#include "Reflection/FINClass.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -54,8 +55,18 @@ namespace FicsItKernel {
 
 			for (int i = 1; i <= args; ++i) {
 				lua_newtable(L);
-				std::string nick = luaL_checkstring(L, i);
-				TSet<FFINNetworkTrace> comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByNick(nick.c_str());
+				TSet<FFINNetworkTrace> comps;
+				if (lua_isstring(L, i)) {
+					std::string nick = lua_tostring(L, i);
+					comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByNick(nick.c_str());
+				} else {
+					FFINNetworkTrace Obj = getObjInstance(L, i, UFINClass::StaticClass());
+					UFINClass* FINClass = Cast<UFINClass>(Obj.Get());
+					if (FINClass) {
+						UClass* Class = Cast<UClass>(FINClass->GetOuter());
+						comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByClass(Class);
+					}
+				}
 				int j = 0;
 				for (const FFINNetworkTrace& comp : comps) {
 					UObject* obj = *comp;

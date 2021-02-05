@@ -7,6 +7,7 @@
 
 #include "Network/FINNetworkTrace.h"
 #include "Network/Signals/FINSignalData.h"
+#include "Reflection/FINClass.h"
 
 namespace FicsItKernel {
 	namespace Network {
@@ -84,6 +85,11 @@ namespace FicsItKernel {
 			 * returns the components in the network with the given nick.
 			 */
 			TSet<FFINNetworkTrace> getComponentByNick(const FString& nick);
+
+			/**
+			 * returns the components in the network with of the given type.
+			 */
+			TSet<FFINNetworkTrace> getComponentByClass(UClass* Class);
 
 			/**
 			 * Should get called prior to de/serialization

@@ -60,6 +60,19 @@ namespace FicsItKernel {
 			return TSet<FFINNetworkTrace>();
 		}
 
+		TSet<FFINNetworkTrace> NetworkController::getComponentByClass(UClass* Class) {
+			if (component->Implements<UFINNetworkComponent>()) {
+				TSet<FFINNetworkTrace> outComps;
+				TSet<UObject*> Comps = IFINNetworkCircuitNode::Execute_GetCircuit(component)->GetComponents();
+				for (UObject* Comp : Comps) {
+					if (!Comp->IsA(Class)) continue;
+					outComps.Add(FFINNetworkTrace(component) / Comp);
+				}
+				return outComps;
+			}
+			return TSet<FFINNetworkTrace>();
+		}
+
 		void NetworkController::PreSerialize(bool load) {
 			lockSignalRecieving = true;
 		}
