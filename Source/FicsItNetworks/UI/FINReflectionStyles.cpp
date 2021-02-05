@@ -12,9 +12,11 @@ void FFINReflectionStyles::Initialize() {
 }
 
 void FFINReflectionStyles::Shutdown() {
-	FSlateStyleRegistry::UnRegisterSlateStyle(*ReflectionStyleInstance);
-	ensure(ReflectionStyleInstance.IsUnique());
-	ReflectionStyleInstance.Reset();
+	if (ReflectionStyleInstance.IsValid()) {
+		FSlateStyleRegistry::UnRegisterSlateStyle(*ReflectionStyleInstance);
+		ensure(ReflectionStyleInstance.IsUnique());
+		ReflectionStyleInstance.Reset();
+	}
 }
 
 FName FFINReflectionStyles::GetStyleSetName() {
@@ -28,5 +30,6 @@ TSharedRef<FSlateStyleSet> FFINReflectionStyles::Create() {
 }
 
 const ISlateStyle& FFINReflectionStyles::Get() {
+	Initialize();
 	return *ReflectionStyleInstance;
 }

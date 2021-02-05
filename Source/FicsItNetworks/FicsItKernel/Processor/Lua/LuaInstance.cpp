@@ -526,6 +526,78 @@ namespace FicsItKernel {
 			return instance->Class;
 		}
 
+		int luaFindClass(lua_State* L) {
+			int args = lua_gettop(L);
+
+			for (int i = 1; i <= args; ++i) {
+				bool isT = lua_istable(L, i);
+
+				TArray<FString> ClassNames;
+				if (isT) {
+					auto count = lua_rawlen(L, i);
+					for (int j = 1; j <= count; ++j) {
+						lua_geti(L, i, j);
+						if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
+						ClassNames.Add(lua_tostring(L, -1));
+						lua_pop(L, 1);
+					}
+					lua_newtable(L);
+				} else {
+					if (!lua_isstring(L, i)) return luaL_argerror(L, i, "is not string");
+					ClassNames.Add(lua_tostring(L, i));
+				}
+				int j = 0;
+				TArray<UFINClass*> Classes;
+				FFINReflection::Get()->GetClasses().GenerateValueArray(Classes);
+				for (const FString& ClassName : ClassNames) {
+					UFINClass** Class = Classes.FindByPredicate([ClassName](UFINClass* Class) {
+						if (Class->GetInternalName() == ClassName) return true;
+						return false;
+					});
+					if (Class) newInstance(L, FINTrace(*Class));
+					else lua_pushnil(L);
+					if (isT) lua_seti(L, -2, ++j);
+				}
+			}
+			return LuaProcessor::luaAPIReturn(L, args);
+		}
+
+		int luaFindStruct(lua_State* L) {
+			int args = lua_gettop(L);
+
+			for (int i = 1; i <= args; ++i) {
+				bool isT = lua_istable(L, i);
+
+				TArray<FString> StructNames;
+				if (isT) {
+					auto count = lua_rawlen(L, i);
+					for (int j = 1; j <= count; ++j) {
+						lua_geti(L, i, j);
+						if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
+						StructNames.Add(lua_tostring(L, -1));
+						lua_pop(L, 1);
+					}
+					lua_newtable(L);
+				} else {
+					if (!lua_isstring(L, i)) return luaL_argerror(L, i, "is not string");
+					StructNames.Add(lua_tostring(L, i));
+				}
+				int j = 0;
+				TArray<UFINStruct*> Structs;
+				FFINReflection::Get()->GetStructs().GenerateValueArray(Structs);
+				for (const FString& StructName : StructNames) {
+					UFINStruct** Struct = Structs.FindByPredicate([StructName](UFINStruct* Struct) {
+                        if (Struct->GetInternalName() == StructName) return true;
+                        return false;
+                    });
+					if (Struct) newInstance(L, FINTrace(*Struct));
+					else lua_pushnil(L);
+					if (isT) lua_seti(L, -2, ++j);
+				}
+			}
+			return LuaProcessor::luaAPIReturn(L, args);
+		}
+
 		void setupInstanceSystem(lua_State* L) {
 			PersistSetup("InstanceSystem", -2);
 			
@@ -535,6 +607,12 @@ namespace FicsItKernel {
 			luaL_setfuncs(L, luaInstanceTypeLib, 0);
 			PersistTable(INSTANCE_TYPE, -1);
 			lua_pop(L, 1);									// ...
+
+			lua_register(L, "findClass", luaFindClass);
+			PersistGlobal("findClass");
+
+			lua_register(L, "findStruct", luaFindStruct);
+			PersistGlobal("findStruct");
 
 			lua_pushcfunction(L, luaInstanceFuncCall);			// ..., InstanceFuncCall
 			PersistValue("InstanceFuncCall");					// ...

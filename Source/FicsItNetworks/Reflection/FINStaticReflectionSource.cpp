@@ -559,21 +559,129 @@ BeginClassFunc(getType, TFS("Get Type"), TFS("Returns the type (aka class) of th
 } EndFunc()
 EndClass()
 
-BeginClass(UFINClass, "Class", TFS("Class"), TFS("Object that contains all information about a type"))
-BeginProp(RString, name, TFS("Name"), TFS("The internal name of this class")) {
+BeginClass(UFINBase, "ReflectionBase", TFS("Reflection Base"), TFS("The base class for all things of the reflection system."))
+BeginProp(RString, name, TFS("Name"), TFS("The internal name.")) {
 	Return self->GetInternalName();
 } EndProp()
+BeginProp(RString, displayName, TFS("Display Name"), TFS("The display name used in UI which might be localized.")) {
+	Return self->GetDisplayName().ToString();
+} EndProp()
+BeginProp(RString, description, TFS("Description"), TFS("The description of this base.")) {
+	Return self->GetDescription().ToString();
+} EndProp()
+EndClass()
+
+BeginClass(UFINStruct, "Struct", TFS("Struct"), TFS("Reflection Object that holds information about structures."))
 BeginFunc(getParent, TFS("Get Parent"), TFS("Returns the parent type of this type."), false) {
-	OutVal(0, RObject<UFINClass>, parent, TFS("Parent"), TFS("The parent type of this type"));
+	OutVal(0, RObject<UFINClass>, parent, TFS("Parent"), TFS("The parent type of this type."));
 	Body()
-    if (self) parent = (FINObj)self->GetParentClass();
+    if (self) parent = (FINObj)self->GetParent();
 } EndFunc()
-BeginFunc(isChildOf, TFS("Is Child Of"), TFS("Allows to check if this class is a child class of the given class or the given class it self")) {
-	InVal(0, RObject<UFINClass>, parent, TFS("Parent"), TFS("The parent class you want to check if this class is a child of"))
-	OutVal(1, RBool, isChild, TFS("Is Child"), TFS("True if this class is a child of parent"))
+BeginFunc(getProperties, TFS("Get Properties"), TFS("Returns all the properties of this type.")) {
+	OutVal(0, RArray<RObject<UFINProperty>>, properties, TFS("Properties"), TFS("The properties this specific type implements (excluding properties from parent types)."))
 	Body()
-	if (self && parent.IsValid()) isChild = self->IsChildOf(Cast<UFINClass>(parent.Get()));
+	TArray<FINAny> Props;
+	for (UFINProperty* Prop : self->GetProperties(false)) Props.Add((FINObj)Prop);
+	properties = Props;
 } EndFunc()
+BeginFunc(getFunctions, TFS("Get Functions"), TFS("Returns all the functions of this type.")) {
+	OutVal(0, RArray<RObject<UFINFunction>>, functions, TFS("Functions"), TFS("The functions this specific type implements (excluding properties from parent types)."))
+    Body()
+    TArray<FINAny> Funcs;
+	for (UFINFunction* Func : self->GetFunctions(false)) Funcs.Add((FINObj)Func);
+	functions = Funcs;
+} EndFunc()
+BeginFunc(isChildOf, TFS("Is Child Of"), TFS("Allows to check if this struct is a child struct of the given struct or the given struct it self.")) {
+	InVal(0, RObject<UFINStruct>, parent, TFS("Parent"), TFS("The parent struct you want to check if this struct is a child of."))
+    OutVal(1, RBool, isChild, TFS("Is Child"), TFS("True if this struct is a child of parent."))
+    Body()
+    if (self && parent.IsValid()) isChild = self->IsChildOf(Cast<UFINStruct>(parent.Get()));
+} EndFunc()
+EndClass()
+
+BeginClass(UFINClass, "Class", TFS("Class"), TFS("Object that contains all information about a type."))
+BeginFunc(getSignals, TFS("Get Signals"), TFS("Returns all the signals of this type.")) {
+	OutVal(0, RArray<RObject<UFINSignal>>, signals, TFS("Signals"), TFS("The signals this specific type implements (excluding properties from parent types)."))
+    Body()
+    TArray<FINAny> Sigs;
+	for (UFINSignal* Sig : self->GetSignals(false)) Sigs.Add((FINObj)Sig);
+	signals = Sigs;
+} EndFunc()
+EndClass()
+
+BeginClass(UFINProperty, "Property", TFS("Property"), TFS("A Reflection object that holds information about properties and parameters."))
+BeginProp(RInt, dataType, TFS("Data Type"), TFS("The data type of this property.\n0: nil, 1: bool, 2: int, 3: float, 4: str, 5: object, 6: class, 7: trace, 8: struct, 9: array, 10: anything")) {
+	Return (FINInt)self->GetType().GetValue();
+} EndProp()
+BeginProp(RInt, flags, TFS("Flags"), TFS("The property bit flag register defining some behaviour of it.\n\nBits and their meaing (least significant bit first):\nIs this property a member attribute.\nIs this property read only.\nIs this property a parameter.\nIs this property a output paramter.\nIs this property a return value.\nCan this property get accessed in syncrounus runtime.\nCan this property can get accessed in parallel runtime.\nCan this property get accessed in asynchronus runtime.\nThis property is a class attribute.")) {
+	Return (FINInt) self->GetPropertyFlags();
+} EndProp()
+EndClass()
+
+BeginClass(UFINArrayProperty, "ArrayProperty", TFS("Array Property"), TFS("A reflection object representing a array property."))
+BeginFunc(getInner, TFS("Get Inner"), TFS("Returns the inner type of this array.")) {
+	OutVal(0, RObject<UFINProperty>, inner, TFS("Inner"), TFS("The inner type of this array."))
+	Body()
+	inner = (FINObj) self->GetInnerType();
+} EndFunc()
+EndClass()
+
+BeginClass(UFINObjectProperty, "ObjectProperty", TFS("Object Property"), TFS("A reflection object representing a object property."))
+BeginFunc(getSubclass, TFS("Get Subclass"), TFS("Returns the subclass type of this object. Meaning, the stored objects need to be of this type.")) {
+	OutVal(0, RObject<UFINClass>, subclass, TFS("Subclass"), TFS("The subclass of this object."))
+    Body()
+    subclass = (FINObj) FFINReflection::Get()->FindClass(self->GetSubclass());
+} EndFunc()
+EndClass()
+
+BeginClass(UFINTraceProperty, "TraceProperty", TFS("Trace Property"), TFS("A reflection object representing a trace property."))
+BeginFunc(getSubclass, TFS("Get Subclass"), TFS("Returns the subclass type of this trace. Meaning, the stored traces need to be of this type.")) {
+	OutVal(0, RObject<UFINClass>, subclass, TFS("Subclass"), TFS("The subclass of this trace."))
+    Body()
+    subclass = (FINObj) FFINReflection::Get()->FindClass(self->GetSubclass());
+} EndFunc()
+EndClass()
+
+BeginClass(UFINClassProperty, "ClassProperty", TFS("Class Property"), TFS("A reflection object representing a class property."))
+BeginFunc(getSubclass, TFS("Get Subclass"), TFS("Returns the subclass type of this class. Meaning, the stored classes need to be of this type.")) {
+	OutVal(0, RObject<UFINClass>, subclass, TFS("Subclass"), TFS("The subclass of this class property."))
+    Body()
+    subclass = (FINObj) FFINReflection::Get()->FindClass(self->GetSubclass());
+} EndFunc()
+EndClass()
+
+BeginClass(UFINStructProperty, "StructProperty", TFS("Struct Property"), TFS("A reflection object representing a struct property."))
+BeginFunc(getSubclass, TFS("Get Subclass"), TFS("Returns the subclass type of this struct. Meaning, the stored structs need to be of this type.")) {
+	OutVal(0, RObject<UFINStruct>, subclass, TFS("Subclass"), TFS("The subclass of this struct."))
+    Body()
+    subclass = (FINObj) FFINReflection::Get()->FindStruct(self->GetInner());
+} EndFunc()
+EndClass()
+
+BeginClass(UFINFunction, "Function", TFS("Function"), TFS("A reflection object representing a function."))
+BeginFunc(getParameters, TFS("Get Parameters"), TFS("Returns all the parameters of this function.")) {
+	OutVal(0, RArray<RObject<UFINProperty>>, parameters, TFS("Parameters"), TFS("The parameters this function."))
+    Body()
+    TArray<FINAny> ParamArray;
+	for (UFINProperty* Param : self->GetParameters()) ParamArray.Add((FINObj)Param);
+	parameters = ParamArray;
+} EndFunc()
+BeginProp(RInt, flags, TFS("Flags"), TFS("The function bit flag register defining some behaviour of it.\n\nBits and their meaing (least significant bit first):\nIs this function has a variable amount of input parameters.\nCan this function get called in syncrounus runtime.\nCan this function can get called in parallel runtime.\nCan this function get called in asynchronus runtime.\nIs this function a member function.\nThe function is a class function.\nThe function is a static function.\nThe function has a variable amount of return values.")) {
+	Return (FINInt) self->GetFunctionFlags();
+} EndProp()
+EndClass()
+
+BeginClass(UFINSignal, "Signal", TFS("Signal"), TFS("A reflection object representing a signal."))
+BeginFunc(getParameters, TFS("Get Parameters"), TFS("Returns all the parameters of this signal.")) {
+	OutVal(0, RArray<RObject<UFINProperty>>, parameters, TFS("Parameters"), TFS("The parameters this signal."))
+    Body()
+    TArray<FINAny> ParamArray;
+	for (UFINProperty* Param : self->GetParameters()) ParamArray.Add((FINObj)Param);
+	parameters = ParamArray;
+} EndFunc()
+BeginProp(RBool, isVarArgs, TFS("Is VarArgs"), TFS("True if this signal has a variable amount of arguments.")) {
+	Return (FINBool) self->IsVarArgs();
+} EndProp()
 EndClass()
 
 BeginClass(AActor, "Actor", TFS("Actor"), TFS("This is the base class of all things that can exist within the world by them self."))

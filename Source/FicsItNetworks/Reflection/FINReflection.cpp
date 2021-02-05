@@ -88,7 +88,7 @@ UFINClass* FFINReflection::FindClass(UClass* Clazz, bool bRecursive, bool bTryTo
 			UFINClass* Class = nullptr;
 			for (const UFINReflectionSource* Source : Sources) {
 				if (Source->ProvidesRequirements(Clazz)) {
-					Class = NewObject<UFINClass>();
+					Class = NewObject<UFINClass>(Clazz);
 					break;
 				}
 			}

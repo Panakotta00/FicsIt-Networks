@@ -10,7 +10,7 @@ struct FFINAnyNetworkValue;
 
 UENUM(BlueprintType)
 enum EFINNetworkValueType {
-	FIN_NIL,
+	FIN_NIL = 0,
 	FIN_BOOL,
 	FIN_INT,
 	FIN_FLOAT,
