@@ -1021,11 +1021,9 @@ FFINReflectionUIContext::FFINReflectionUIContext() {
 	Entries.Empty();
 	Structs.Empty();
 	for (const TPair<UClass*, UFINClass*>& Class : FFINReflection::Get()->GetClasses()) {
-		UE_LOG(LogTemp, Warning, TEXT("%p %s %p %s"), Class.Key, *Class.Key->GetName(), Class.Value, *Class.Value->GetInternalName());
 		Structs.Add(Class.Value, MakeShared<FFINReflectionUIClass>(nullptr, Class.Value, this));
 	}
 	for (const TPair<UScriptStruct*, UFINStruct*>& Struct : FFINReflection::Get()->GetStructs()) {
-		UE_LOG(LogTemp, Warning, TEXT("%p %s %p %s"), Struct.Key, *Struct.Key->GetName(), Struct.Value, *Struct.Value->GetInternalName());
 		Structs.Add(Struct.Value, MakeShared<FFINReflectionUIStruct>(nullptr, Struct.Value, this));
 	}
 	for (const TPair<UFINStruct*, TSharedPtr<FFINReflectionUIStruct>>& Struct : Structs) Entries.Add(Struct.Value);

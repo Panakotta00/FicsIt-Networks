@@ -20,9 +20,14 @@ FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayout
 
 }
 
+FFINLuaSyntaxHighlighterTextLayoutMarshaller::~FFINLuaSyntaxHighlighterTextLayoutMarshaller() {}
+
 TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle) {
 	TArray<FSyntaxTokenizer::FRule> TokenizerRules;
-	for (FString Token : TArray<FString>({" ", "\t", ".", ":", "\"", "\'", ",", "(", ")", "for", "in", "while", "do", "if", "then", "elseif", "else", "end", "local", "true", "false", "not", "and", "or", "function", "--[[", "]]--", "--", "+", "-", "/", "*", "%", "[", "]", "{", "}", "=", "!", "~"})) {
+	for (FString Token : TArray<FString>({
+		" ", "\t", ".", ":", "\"", "\'", ",", "(", ")", "for", "in", "while", "do", "if", "then", "elseif", "else",
+		"end", "local", "true", "false", "not", "and", "or", "function", "--[[", "]]--", "--", "+", "-", "/", "*", "%",
+		"[", "]", "{", "}", "=", "!", "~", "#", ">", "<"})) {
 		TokenizerRules.Add(FSyntaxTokenizer::FRule(Token));
 	}
 
@@ -37,13 +42,6 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 	TArray<FTextLayout::FNewLineData> LinesToAdd;
 	LinesToAdd.Reserve(TokenizedLines.Num());
 
-	FString Input = "42,42";
-	FString MatchText = ",";
-	bool b1 = FCString::Strncmp(&Input[0], *MatchText, MatchText.Len()) == 0;
-	bool b2 = FCString::Strncmp(&Input[1], *MatchText, MatchText.Len()) == 0;
-	bool b3 = FCString::Strncmp(&Input[2], *MatchText, MatchText.Len()) == 0;
-	bool b4 = FCString::Strncmp(&Input[3], *MatchText, MatchText.Len()) == 0;
-	bool b5 = FCString::Strncmp(&Input[4], *MatchText, MatchText.Len()) == 0;
 	bool bInString = false;
 	bool bInBlockComment = false;
 	TSharedPtr<ISlateRun> Run;
@@ -51,7 +49,11 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		TSharedRef<FString> ModelString = MakeShareable(new FString());
 		TArray<TSharedRef<IRun>> Runs;
 
-		auto DoNormal = [&](const FTextRange& Range) {
+		auto DoNormal = [&](FTextRange Range) {
+			if (Runs.Num() > 0 && Runs[Runs.Num()-1]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Normal") {
+				Range.BeginIndex = Runs[Runs.Num()-1]->GetTextRange().BeginIndex;
+				Runs.Pop();
+			}
 			FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Normal"));
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
@@ -95,13 +97,35 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());
 		};
-		auto DoOperator = [&](const FTextRange& Range) {
-			FTextBlockStyle Style = SyntaxTextStyle->OperatorTextStyle;
+		auto DoWhitespace = [&](const FTextRange& Range) {
+			FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Whitespace"));
+			RunInfo.MetaData.Add("Splitting");
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoOperator = [&](const FTextRange& Range, bool bColored) {
+			FTextBlockStyle Style = bColored ? SyntaxTextStyle->OperatorTextStyle : SyntaxTextStyle->NormalTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Operator"));
 			RunInfo.MetaData.Add("Splitting");
 			RunInfo.MetaData.Add("Operator", ModelString->Mid(Range.BeginIndex, Range.Len()));
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoFunction = [&](const FTextRange& Range, bool bDeclaration) {
+			FTextBlockStyle Style = bDeclaration ? SyntaxTextStyle->FunctionDeclarationTextStyle : SyntaxTextStyle->FunctionCallTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Function"));
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto FindPrevNoWhitespaceRun = [&](int32 StartIndex = -1) {
+			if (StartIndex < 0) StartIndex = Runs.Num()-1;
+			for (int i = StartIndex; i >= 0; i--) {
+				if (Runs[i]->GetRunInfo().Name != "SyntaxHighlight.FINLua.Whitespace") {
+					return i;
+				}
+			}
+			return -1;
 		};
 
 		int StringStart = 0;
@@ -180,8 +204,32 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 						continue;
 					}
 				}
-				if (TArray<FString>({",",":","+","-","*","/","%","(",")","[","]","{","}","=","~","!"," ","\t"}).Contains(TokenString)) {
-					DoOperator(FTextRange(Start, End));
+				if (TokenString == "(") {
+					int Index = FindPrevNoWhitespaceRun();
+					if (Index >= 0 && Runs[Index]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Normal") {
+						FTextRange OldRange = Runs[Index]->GetTextRange();
+						Runs.RemoveAt(Index);
+						int KeywordIndex = FindPrevNoWhitespaceRun(Index-1);
+						FString Keyword;
+						if (KeywordIndex >= 0) Keyword = ModelString->Mid(Runs[KeywordIndex]->GetTextRange().BeginIndex, Runs[KeywordIndex]->GetTextRange().EndIndex - Runs[KeywordIndex]->GetTextRange().BeginIndex);
+                        DoFunction(OldRange, KeywordIndex >= 0 && Runs[KeywordIndex]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Keyword" && Keyword == "function");
+						TSharedRef<IRun> NewRun = Runs[Runs.Num()-1];
+						Runs.RemoveAt(Runs.Num()-1);
+						Runs.Insert(NewRun, Index);
+						DoOperator(FTextRange(Start, End), false);
+						continue;
+					}
+				}
+				if (TArray<FString>({" ","\t"}).Contains(TokenString)) {
+					DoWhitespace(FTextRange(Start, End));
+					continue;
+				}
+				if (TArray<FString>({".",",",":","(",")","[","]","{","}"}).Contains(TokenString)) {
+					DoOperator(FTextRange(Start, End), false);
+					continue;
+				}
+				if (TArray<FString>({"+","-","*","/","%","#","=","~","!",">","<"}).Contains(TokenString)) {
+					DoOperator(FTextRange(Start, End), true);
 					continue;
 				}
 			} else {
@@ -224,18 +272,13 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 		.Padding(InArgs._Padding)
 		.Marshaller(SyntaxHighlighter)
 		.Style(InArgs._Style)
-		/*.OnIsTypedCharValid_Lambda([](TCHAR InChar) {
-			return true;
-		})*/
 	];
 }
 
 TSharedRef<SWidget> UFINLuaCodeEditor::RebuildWidget() {
-	CodeEditor =
-		SNew(SFINLuaCodeEditor)
+	return SAssignNew(CodeEditor, SFINLuaCodeEditor)
 		.Style(&Style)
 		.CodeStyle(&CodeStyle);
-	return CodeEditor.ToSharedRef();
 }
 
 void UFINLuaCodeEditor::SetIsReadOnly(bool bInReadOnly) {

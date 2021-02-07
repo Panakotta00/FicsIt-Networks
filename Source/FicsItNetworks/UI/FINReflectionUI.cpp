@@ -98,6 +98,9 @@ void SFINReflectionUI::Construct(const FArguments& InArgs) {
 		}
 	});
 
+	FSlateApplication::Get().GetNavigationConfig()->bKeyNavigation = true;
+	FSlateApplication::Get().GetNavigationConfig()->bTabNavigation = true;
+
 	FilterCache("");
 }
 

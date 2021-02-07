@@ -45,12 +45,19 @@ struct FFINLuaCodeEditorStyle : public FSlateWidgetStyle {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FTextBlockStyle OperatorTextStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle FunctionCallTextStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle FunctionDeclarationTextStyle;
 };
 
 class FICSITNETWORKS_API FFINLuaSyntaxHighlighterTextLayoutMarshaller : public FSyntaxHighlighterTextLayoutMarshaller {
 public:
 
 	FFINLuaSyntaxHighlighterTextLayoutMarshaller(TSharedPtr<FSyntaxTokenizer> InTokenizer, const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle);
+	~FFINLuaSyntaxHighlighterTextLayoutMarshaller();
 
 	static TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle);
 
