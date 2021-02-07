@@ -437,7 +437,7 @@ public:
 	void netFunc_setBackground(float r, float g, float b, float a);
 	UFUNCTION()
     void netFuncMeta_setBackground(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
-		InternalName = "setBackround";
+		InternalName = "setBackground";
 		DisplayName = FText::FromString("Set Background Color");
 		Description = FText::FromString("Changes the background color that is used for the next draw calls.");
 		ParameterInternalNames.Add("r");

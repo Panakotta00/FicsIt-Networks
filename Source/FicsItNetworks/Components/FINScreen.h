@@ -106,7 +106,7 @@ public:
 		ParameterInternalNames.Add("height");
 		ParameterDisplayNames.Add(FText::FromString("Height"));
 		ParameterDescriptions.Add(FText::FromString("The height of the screen."));
-		Runtime = 0;
+		Runtime = 2;
 	}
 
 	UFUNCTION(NetMulticast, Reliable)

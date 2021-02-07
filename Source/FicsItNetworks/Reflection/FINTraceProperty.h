@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FINProperty.h"
+#include "FINFuncProperty.h"
 #include "FINTraceProperty.generated.h"
 
 UCLASS(BlueprintType)

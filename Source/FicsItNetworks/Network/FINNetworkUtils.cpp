@@ -1,6 +1,7 @@
 ﻿#include "FINNetworkUtils.h"
 
 #include "FINAdvancedNetworkConnectionComponent.h"
+#include "FINNetworkAdapter.h"
 #include "FINNetworkComponent.h"
 #include "Components/ActorComponent.h"
 #include "GameFramework/Actor.h"
@@ -12,6 +13,8 @@ UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
 		for (UActorComponent* Connector : Connectors) {
 			if (Connector->Implements<UFINNetworkComponent>()) return Connector;
 		}
+		TArray<UActorComponent*> Adapters = Cast<AActor>(Obj)->GetComponentsByClass(UFINNetworkAdapterReference::StaticClass());
+		if (Adapters.Num() > 0) return Cast<UFINNetworkAdapterReference>(Adapters[0])->Ref->Connector;
 	}
 	return nullptr;
 }

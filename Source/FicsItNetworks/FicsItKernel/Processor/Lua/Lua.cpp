@@ -69,7 +69,8 @@ namespace FicsItKernel {
 				const char* s = lua_tolstring(L, i, &len);
 				if (!s) throw std::exception("Invalid String in string property parse");
 				FString* o = p->ContainerPtrToValuePtr<FString>(data);
-				*o = FString(UTF8_TO_TCHAR(s), len);
+				FUTF8ToTCHAR Conv(s, len);
+				*o = FString(Conv.Length(), Conv.Get());
 			} else if (c & EClassCastFlags::CASTCLASS_UClassProperty) {
 				UClass* o = getClassInstance(L, i, Cast<UClassProperty>(p)->PropertyClass);
 				*p->ContainerPtrToValuePtr<UClass*>(data) = o;
@@ -120,10 +121,11 @@ namespace FicsItKernel {
 				break;
 			case LUA_TSTRING: {
 				size_t len;
-				Val = FFINAnyNetworkValue(FINStr(lua_tolstring(L, i, &len), len));
+				const char* s = lua_tolstring(L, i, &len);
+				FUTF8ToTCHAR Conv(s, len);
+				Val = FFINAnyNetworkValue(FString(Conv.Length(), Conv.Get()));
 				break;
-			}
-			default:
+			} default:
 				UFINStruct* StructType = luaGetStructType(L, i);
 				if (StructType) {
 					Val = FFINAnyNetworkValue(*luaGetStruct(L, i));
