@@ -584,11 +584,25 @@ BeginFunc(getProperties, TFS("Get Properties"), TFS("Returns all the properties 
 	for (UFINProperty* Prop : self->GetProperties(false)) Props.Add((FINObj)Prop);
 	properties = Props;
 } EndFunc()
+BeginFunc(getAllProperties, TFS("Get All Properties"), TFS("Returns all the properties of this and parent types.")) {
+	OutVal(0, RArray<RObject<UFINProperty>>, properties, TFS("Properties"), TFS("The properties this type implements including properties from parent types."))
+    Body()
+    TArray<FINAny> Props;
+	for (UFINProperty* Prop : self->GetProperties(true)) Props.Add((FINObj)Prop);
+	properties = Props;
+} EndFunc()
 BeginFunc(getFunctions, TFS("Get Functions"), TFS("Returns all the functions of this type.")) {
 	OutVal(0, RArray<RObject<UFINFunction>>, functions, TFS("Functions"), TFS("The functions this specific type implements (excluding properties from parent types)."))
     Body()
     TArray<FINAny> Funcs;
 	for (UFINFunction* Func : self->GetFunctions(false)) Funcs.Add((FINObj)Func);
+	functions = Funcs;
+} EndFunc()
+BeginFunc(getAllFunctions, TFS("Get All Functions"), TFS("Returns all the functions of this and parent types.")) {
+	OutVal(0, RArray<RObject<UFINProperty>>, functions, TFS("Functions"), TFS("The functions this type implements including functions from parent types."))
+    Body()
+    TArray<FINAny> Funcs;
+	for (UFINFunction* Func : self->GetFunctions(true)) Funcs.Add((FINObj)Func);
 	functions = Funcs;
 } EndFunc()
 BeginFunc(isChildOf, TFS("Is Child Of"), TFS("Allows to check if this struct is a child struct of the given struct or the given struct it self.")) {
@@ -605,6 +619,13 @@ BeginFunc(getSignals, TFS("Get Signals"), TFS("Returns all the signals of this t
     Body()
     TArray<FINAny> Sigs;
 	for (UFINSignal* Sig : self->GetSignals(false)) Sigs.Add((FINObj)Sig);
+	signals = Sigs;
+} EndFunc()
+BeginFunc(getAllSignals, TFS("Get All Signals"), TFS("Returns all the signals of this and its parent types.")) {
+	OutVal(0, RArray<RObject<UFINSignal>>, signals, TFS("Signals"), TFS("The signals this type and all it parents implement."))
+    Body()
+    TArray<FINAny> Sigs;
+	for (UFINSignal* Sig : self->GetSignals(true)) Sigs.Add((FINObj)Sig);
 	signals = Sigs;
 } EndFunc()
 EndClass()
