@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINValueReader.h"
-
+#include "Reflection/FINFunction.h"
+#include "FicsItNetworksModule.h"
 #include "FINFuture.generated.h"
 
 USTRUCT(BlueprintType)
@@ -16,26 +16,70 @@ struct FFINFuture {
 	 * future queue of the kernel.
 	 */
 	virtual void Execute() {}
-
-	/**
-	 * This function write the resulting values of the future to the given reader.
-	 */
-	virtual int operator>>(FFINValueReader& Reader) const { return 0; }
-
+	
 	/**
 	 * Checks if the future has finished and we can get values from it.
 	 */
 	virtual bool IsDone() const { return false; }
+
+	/**
+	 * Returns the output data of the future
+	 */
+	virtual TArray<FFINAnyNetworkValue> GetOutput() const { return {}; }
 };
 
 USTRUCT()
-struct FFINFutureSimpleDone : public FFINFuture {
+struct FFINFutureReflection : public FFINFuture {
 	GENERATED_BODY()
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	bool bDone = false;
 
+	UPROPERTY()
+	TArray<FFINAnyNetworkValue> Input;
+
+	UPROPERTY()
+	TArray<FFINAnyNetworkValue> Output;
+
+	UPROPERTY()
+	FFINExecutionContext Context;
+
+	UPROPERTY()
+	UFINFunction* Function;
+
+	FFINFutureReflection() = default;
+	FFINFutureReflection(UFINFunction* Function, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
+
+	bool Serialize(FArchive& Ar) {
+		Ar << bDone;
+		Ar << Input;
+		Ar << Output;
+		Ar << Context;
+		Ar << Function;
+		return true;
+	}
+
 	virtual bool IsDone() const override { return bDone; }
+
+	virtual void Execute() override {
+		if (!Function) {
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Future unable to get executed due to invalid function pointer!"));
+			return;
+		}
+		Output = Function->Execute(Context, Input);
+		bDone = true;
+	}
+
+	virtual TArray<FFINAnyNetworkValue> GetOutput() const override {
+		return Output;
+	}
+};
+
+template<>
+struct TStructOpsTypeTraits<FFINFutureReflection> : public TStructOpsTypeTraitsBase2<FFINFutureReflection> {
+	enum {
+		WithSerializer = true,
+	};
 };
 
 USTRUCT()
@@ -43,7 +87,6 @@ struct FFINFunctionFuture : public FFINFuture {
 	GENERATED_BODY()
 
 	TFunction<void()> Func;
-
 	bool bDone = false;
 
 	FFINFunctionFuture() = default;
@@ -55,6 +98,4 @@ struct FFINFunctionFuture : public FFINFuture {
 	}
 
 	virtual bool IsDone() const override { return bDone; }
-
-	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
 };

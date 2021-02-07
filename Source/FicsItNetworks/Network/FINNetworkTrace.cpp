@@ -16,9 +16,7 @@
 
 #include "Components/FINVehicleScanner.h"
 
-#include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkCircuit.h"
-#include "util/Logging.h"
 
 #define StepFuncName(A, B) Step ## _ ## A ## _ ## B
 #define StepRegName(A, B) StepReg ## _ ## A ## _ ## B
@@ -283,6 +281,13 @@ bool FFINNetworkTrace::operator<(const FFINNetworkTrace& other) const {
 
 TWeakObjectPtr<UObject> FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
+}
+
+TWeakObjectPtr<UObject> FFINNetworkTrace::GetStartPtr() const {
+	const FFINNetworkTrace* Trace = this;
+	while (Trace->Prev) Trace = Trace->Prev.Get();
+	if (Trace) return Trace->Obj;
+	return nullptr;
 }
 
 FFINNetworkTrace::operator bool() const {

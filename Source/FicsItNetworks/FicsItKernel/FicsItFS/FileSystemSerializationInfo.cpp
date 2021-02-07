@@ -1,6 +1,6 @@
 ﻿#include "FileSystemSerializationInfo.h"
 
-#include "util/Logging.h"
+#include "FicsItNetworksModule.h"
 
 bool FFileSystemNodeIndex::Serialize(FArchive& Ar) {
 	bool valid = Node.IsValid();
@@ -26,7 +26,7 @@ FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString nam
 			stream->flush();
 			stream->close();
 		} catch (...) {
-			SML::Logging::error("Unable to deserialize VFS-File");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Unable to deserialize VFS-File"));
 			return nullptr;
 		}
 		return file;
@@ -101,5 +101,16 @@ FFileSystemNode& FFileSystemNode::Deserialize(FileSystem::SRef<FileSystem::Devic
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNode& Node) {
 	Node.Serialize(Ar);
+	return Ar;
+}
+
+bool FFileSystemSerializationInfo::Serialize(FArchive& Ar) {
+	Ar << Mounts;
+	Ar << Devices;
+	return true;
+}
+
+FArchive& operator<<(FArchive& Ar, FFileSystemSerializationInfo& Info) {
+	Info.Serialize(Ar);
 	return Ar;
 }

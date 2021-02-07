@@ -28,8 +28,6 @@ void AFINComputerGPU::BeginPlay() {
 void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
-	DrawDebugLine(this->GetWorld(), GetActorLocation(), GetActorLocation() + FVector(0,0,1000000), FColor::Red, true);
-	
 	if (HasAuthority() && (((bool)ScreenPtr) != Screen.IsValid())) {
 		if (!ScreenPtr) ScreenPtr = Screen.Get();
 		OnValidationChanged(Screen.IsValid(), ScreenPtr);

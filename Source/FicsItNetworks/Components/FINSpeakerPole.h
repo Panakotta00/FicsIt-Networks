@@ -3,50 +3,10 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINFuture.h"
-#include "Network/FINNetworkCustomType.h"
-
-
 #include "FINSpeakerPole.generated.h"
 
-class AFINSpeakerPole;
-
-USTRUCT()
-struct FFINSpeakersPlaySoundFuture : public FFINFutureSimpleDone {
-	GENERATED_BODY()
-
-	FFINSpeakersPlaySoundFuture() = default;
-	FFINSpeakersPlaySoundFuture(AFINSpeakerPole* Speakers, const FString& Sound, float Start) : Speakers(Speakers), Sound(Sound), Start(Start) {}
-	
-	UPROPERTY(SaveGame)
-	AFINSpeakerPole* Speakers = nullptr;
-
-	UPROPERTY(SaveGame)
-	FString Sound = "";
-
-	UPROPERTY(SaveGame)
-	float Start = 0.0f;
-
-	virtual void Execute() override;
-	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
-};
-
-USTRUCT()
-struct FFINSpeakersStopSoundFuture : public FFINFutureSimpleDone {
-	GENERATED_BODY()
-
-	FFINSpeakersStopSoundFuture() = default;
-	FFINSpeakersStopSoundFuture(AFINSpeakerPole* Speakers) : Speakers(Speakers) {}
-	
-	UPROPERTY(SaveGame)
-    AFINSpeakerPole* Speakers = nullptr;
-
-	virtual void Execute() override;
-	virtual int operator>>(FFINValueReader& Reader) const override { return 0; }
-};
-
 UCLASS(Blueprintable)
-class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender, public IFINNetworkCustomType {
+class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
 	GENERATED_BODY()
 
 public:
@@ -59,21 +19,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="SpeakerPole")
 	FString CurrentSound;
 
-	UPROPERTY(SaveGame)
-	TSet<FFINNetworkTrace> Listeners;
-
 	AFINSpeakerPole();
 
 	// Begin IFINNetworkSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINNetworkSignalSender
-
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("SpeakerPole"); }
-	// End IFINNetworkCustomType
 
 	UFUNCTION(NetMulticast, Reliable)
 	void PlaySound(const FString& Sound, float StartPoint);
@@ -90,20 +40,30 @@ public:
 	void OnSoundFinished(UAudioComponent* Audio);
 
 	/**
+	 * Returns meta-data for this type in the FINReflection-System
+	 */
+	UFUNCTION()
+	void netClass_Meta(FString& InternalName, FText& DisplayName, FText& Description);
+
+	/**
 	 * Loads and Plays the sound file in the Sounds folder appened with the given relative path without the file extension.
 	 * Plays the sound at the given startPoint.
 	 * Might cause the current sound playing to stop even if the new sound is not found.
 	 * If able to play the sound, emits a play sound signal.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Component")
-	FFINSpeakersPlaySoundFuture netFunc_playSound(const FString& sound, float startPoint);
+	UFUNCTION()
+	void netFunc_playSound(const FString& sound, float startPoint);
+	UFUNCTION()
+	void netFuncMeta_playSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime);
 
 	/**
 	 * Stops the current playing sound.
 	 * Emits a stop sound signal if it actually was able to stop the current playing sound.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Network|Component")
-	FFINDynamicStructHolder netFunc_stopSound();
+	UFUNCTION()
+	void netFunc_stopSound();
+	UFUNCTION()
+    void netFuncMeta_stopSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime);
 
 	/**
 	 * Notifies when the state of the speaker pole has changed.
@@ -111,6 +71,9 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void netSig_SpeakerSound(int type, const FString& sound);
+	UFUNCTION()
+    void netSigMeta_SpeakerSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime);
+
 
 	/**
 	 * Loads the sound file referenced by the given relative path

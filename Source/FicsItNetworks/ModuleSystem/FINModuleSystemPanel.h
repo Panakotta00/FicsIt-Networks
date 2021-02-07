@@ -2,9 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "FINModuleSystemModule.h"
 #include "FGInventoryLibrary.h"
-#include "util/Logging.h"
 
 #include "FINModuleSystemPanel.generated.h"
 
@@ -30,14 +28,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "ModuleSystem|Panel")
 	FFINModuleDelegate OnModuleChanged;
 
-	UPROPERTY(ReplicatedUsing=OnGridRep)
+	UPROPERTY(Replicated)
 	TArray<TWeakObjectPtr<UObject>> Grid;
-
-	UFUNCTION()
-	void OnGridRep() {
-		SML::Logging::error("Grid rep ", Grid.Num());
-	}
-
+	
 	UFINModuleSystemPanel();
 	~UFINModuleSystemPanel();
 

@@ -3,15 +3,14 @@
 #include "FINComputerModule.h"
 #include "Network/FINNetworkCircuitNode.h"
 #include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkCustomType.h"
 #include "Network/FINNetworkMessageInterface.h"
-#include "Network/Signals/FINSignal.h"
+#include "Network/Signals/FINSignalData.h"
 
 #include "FINComputerNetworkCard.generated.h"
 
 class AFINComputerCase;
 UCLASS()
-class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface, public IFINNetworkCustomType {
+class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface {
 	GENERATED_BODY()
 public:
 	/**
@@ -59,6 +58,7 @@ public:
 	 */
 	UPROPERTY()
 	TSet<FGuid> HandledMessages;
+	FCriticalSection HandledMessagesMutex;
 
 	AFINComputerNetworkCard();
 	
@@ -85,68 +85,95 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) override;
+	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
 	// End IFINNetworkMessageInterface
 
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("NetworkCard"); }
-	// End IFINNetworkCustomType
+	static bool CheckNetMessageData(const TArray<FFINAnyNetworkValue>& Data);
 
 	UFUNCTION()
+    void netClass_Meta(FString& InternalName, FText& DisplayName) {
+		InternalName = TEXT("NetworkCard");
+		DisplayName = FText::FromString(TEXT("Network Card"));
+	}
+	
+	UFUNCTION()
 	void netFunc_open(int port);
+	UFUNCTION()
+    void netFuncMeta_open(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "open";
+		DisplayName = FText::FromString("Open Port");
+		Description = FText::FromString("Opens the given port so the network card is able to receive network messages on the given port.");
+		ParameterInternalNames.Add("port");
+		ParameterDisplayNames.Add(FText::FromString("Port"));
+		ParameterDescriptions.Add(FText::FromString("The port you want to open."));
+		Runtime = 1;
+	}
 
 	UFUNCTION()
 	void netFunc_close(int port);
-
+	UFUNCTION()
+    void netFuncMeta_close(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "close";
+		DisplayName = FText::FromString("Close Port");
+		Description = FText::FromString("Closes the given port so the network card wont receive network messages on the given port.");
+		ParameterInternalNames.Add("port");
+		ParameterDisplayNames.Add(FText::FromString("Port"));
+		ParameterDescriptions.Add(FText::FromString("The port you want to close."));
+		Runtime = 1;
+	}
+	
 	UFUNCTION()
 	void netFunc_closeAll();
+	UFUNCTION()
+    void netFuncMeta_closeAll(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "closeAll";
+		DisplayName = FText::FromString("Close All Ports");
+		Description = FText::FromString("Closes all ports of the network card so no further messages are able to get received");
+		Runtime = 1;
+	}
 
 	UFUNCTION()
-	void netFunc_send(FString receiver, int port, FFINDynamicStructHolder args);
+	void netFunc_send(FString receiver, int port, const TArray<FFINAnyNetworkValue>& varargs);
+	UFUNCTION()
+	void netFuncMeta_send(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "send";
+		DisplayName = FText::FromString("Send Message");
+		Description = FText::FromString("Sends a network message to the receiver with the given address on the given port. The data you want to add can be passed as additional parameters. Max amount of such parameters is 7 and they can only be nil, booleans, numbers and strings.");
+		ParameterInternalNames.Add("receiver");
+		ParameterDisplayNames.Add(FText::FromString("Receiver"));
+		ParameterDescriptions.Add(FText::FromString("The component ID as string of the component you want to send the network message to."));
+		ParameterInternalNames.Add("port");
+		ParameterDisplayNames.Add(FText::FromString("Port"));
+		ParameterDescriptions.Add(FText::FromString("The port on which the network message should get sent. For outgoing network messages a port does not need to be opened."));
+		Runtime = 1;
+	}
 
 	UFUNCTION()
-	void netFunc_broadcast(int port, FFINDynamicStructHolder args);
+	void netFunc_broadcast(int port, const TArray<FFINAnyNetworkValue>& varargs);
+	UFUNCTION()
+	void netFuncMeta_broadcast(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "broadcast";
+		DisplayName = FText::FromString("Broadcast Message");
+		Description = FText::FromString("Sends a network message to all components in the network message network (including networks sepperated by network routers) on the given port. The data you want to add can be passed as additional parameters. Max amount of such parameters is 7 and they can only be nil, booleans, numbers and strings.");
+		ParameterInternalNames.Add("port");
+		ParameterDisplayNames.Add(FText::FromString("Port"));
+		ParameterDescriptions.Add(FText::FromString("The port on which the network message should get sent. For outgoing network messages a port does not need to be opened."));
+		Runtime = 1;
+	}
+
+	UFUNCTION()
+	void netSig_NetworkMessage(int port, const FString& sender, const TArray<FFINAnyNetworkValue>& varargs) {}
+	UFUNCTION()
+    void netSigMeta_NetworkMessage(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "NetworkMessage";
+		DisplayName = FText::FromString("Network Message");
+		Description = FText::FromString("Triggers when the network card receives a network message on one of its opened ports. The additional arguments are the data that is contained within the network message.");
+		ParameterInternalNames.Add("port");
+		ParameterDisplayNames.Add(FText::FromString("Port"));
+		ParameterDescriptions.Add(FText::FromString("The port on which the network message got sent."));
+		ParameterInternalNames.Add("sender");
+		ParameterDisplayNames.Add(FText::FromString("Sender"));
+		ParameterDescriptions.Add(FText::FromString("The component id of the sender of the network message."));
+		Runtime = 1;
+	}
 };
-
-struct FFINNetworkCardArgChecker : public FFINValueReader {
-	bool Fail = false;
-	
-	virtual void nil() override {};
-	virtual void operator<<(FINBool B) override {};
-	virtual void operator<<(FINInt Num) override {};
-	virtual void operator<<(FINFloat Num) override {};
-	virtual void operator<<(FINClass Class) override {};
-	virtual void operator<<(const FINStr& Str) override {};
-	virtual void operator<<(const FINObj& Obj) override;
-	virtual void operator<<(const FINTrace& Obj) override;
-	virtual void operator<<(const FINStruct& Struct) override;
-};
-
-USTRUCT()
-struct FFINNetworkMessageSignal : public FFINSignal {
-	GENERATED_BODY()
-
-	FGuid Sender;
-	int Port;
-	TFINDynamicStruct<FFINParameterList> Data;
-
-	FFINNetworkMessageSignal() = default;
-	FFINNetworkMessageSignal(FGuid Sender, int Port, const TFINDynamicStruct<FFINParameterList>& Data);
-
-	bool Serialize(FArchive& Ar);
-	
-	virtual int operator>>(FFINValueReader& reader) const override;
-};
-
-template<>
-struct TStructOpsTypeTraits<FFINNetworkMessageSignal> : TStructOpsTypeTraitsBase2<FFINNetworkMessageSignal>
-{
-	enum
-	{
-		WithSerializer = true,
-    };
-};
-
-inline bool operator<<(FArchive& Ar, FFINNetworkMessageSignal& Signal) {
-	return Signal.Serialize(Ar);
-}

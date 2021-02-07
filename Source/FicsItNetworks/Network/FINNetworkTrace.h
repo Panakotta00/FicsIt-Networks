@@ -1,8 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "util/Logging.h"
-
 #include "FINNetworkTrace.generated.h"
 
 /**
@@ -126,6 +124,11 @@ public:
 	 * returns the underlying weak object ptr without any checks
 	 */
 	TWeakObjectPtr<UObject> GetUnderlyingPtr() const;
+
+	/**
+	 * returns the starting object of the trace
+	 */
+	TWeakObjectPtr<UObject> GetStartPtr() const;
 
 	/**
 	 * returns if the trace is valid or not

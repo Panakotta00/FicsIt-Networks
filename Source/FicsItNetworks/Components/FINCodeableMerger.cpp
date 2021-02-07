@@ -43,18 +43,6 @@ void AFINCodeableMerger::GetDismantleRefund_Implementation(TArray<FInventoryStac
 	out_refund.Append(InputQueue3);
 }
 
-void AFINCodeableMerger::AddListener_Implementation(FFINNetworkTrace listener) {
-	SignalListeners.Add(listener);
-}
-
-void AFINCodeableMerger::RemoveListener_Implementation(FFINNetworkTrace listener) {
-	SignalListeners.Remove(listener);
-}
-
-TSet<FFINNetworkTrace> AFINCodeableMerger::GetListeners_Implementation() {
-	return SignalListeners;
-}
-
 UObject* AFINCodeableMerger::GetSignalSenderOverride_Implementation() {
 	return NetworkConnector;
 }
@@ -93,6 +81,7 @@ bool AFINCodeableMerger::Factory_GrabOutput_Implementation(UFGFactoryConnectionC
 	if (OutputQueue.Num() > 0) {
 		out_item = OutputQueue[0];
 		OutputQueue.RemoveAt(0);
+		netSig_ItemOutputted(out_item);
 		return true;
 	}
 	return false;
@@ -119,11 +108,12 @@ FInventoryItem AFINCodeableMerger::netFunc_getInput(int input) {
 	return FInventoryItem();
 }
 
-bool AFINCodeableMerger::netFunc_canOutput() {
+bool AFINCodeableMerger::netPropGet_canOutput() {
 	return OutputQueue.Num() < 2;
 }
 
 void AFINCodeableMerger::netSig_ItemRequest_Implementation(int input, const FInventoryItem& item) {}
+void AFINCodeableMerger::netSig_ItemOutputted_Implementation(const FInventoryItem& item) {}
 
 TArray<FInventoryItem>& AFINCodeableMerger::GetInput(int output) {
 	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);

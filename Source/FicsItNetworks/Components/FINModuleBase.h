@@ -1,22 +1,15 @@
 ﻿#pragma once
 
 #include "FGBuildable.h"
+#include "ModuleSystem/FINModuleSystemModule.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-#include "Network/FINNetworkCustomType.h"
-#include "Network/FINNetworkTrace.h"
 #include "Network/Signals/FINSignalSender.h"
 #include "FINModuleBase.generated.h"
 
 UCLASS()
-class AFINModuleBase : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender, public IFINNetworkCustomType {
+class AFINModuleBase : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender {
 	GENERATED_BODY()
 public:
-    /**
-    * The signal listeners listening to this component.
-    */
-    UPROPERTY()
-    TSet<FFINNetworkTrace> Listeners;
-    
     UPROPERTY(EditDefaultsOnly)
     FVector2D ModuleSize;
 
@@ -28,10 +21,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, SaveGame)
     UFINModuleSystemPanel* ModulePanel = nullptr;
-
-	// Begin UObject
-	virtual void Serialize(FArchive& Ar) override;
-	// End UObject
 
 	// Begin AActor
 	virtual void EndPlay(EEndPlayReason::Type reason) override;
@@ -48,13 +37,6 @@ public:
 	// End IFINModuleSystemModule
 
 	// Begin IFINSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
-
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ModuleBase"); }
-	// End IFINNetworkCustomType
 };

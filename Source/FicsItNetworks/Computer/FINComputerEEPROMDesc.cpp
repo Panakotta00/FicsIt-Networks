@@ -1,5 +1,7 @@
 ﻿#include "FINComputerEEPROMDesc.h"
 
+
+#include "FGPlayerController.h"
 #include "FINComputerRCO.h"
 
 AFINStateEEPROM* UFINComputerEEPROMDesc::GetEEPROM(UFGInventoryComponent* Inv, int SlotIdx) {

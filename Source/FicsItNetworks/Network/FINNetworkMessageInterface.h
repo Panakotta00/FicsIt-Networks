@@ -1,9 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINDynamicStructHolder.h"
-#include "FINNetworkTrace.h"
-#include "FINParameterList.h"
+#include "FINNetworkValues.h"
 #include "Interface.h"
 
 #include "FINNetworkMessageInterface.generated.h"
@@ -37,7 +35,7 @@ public:
 	 * @param[in]	Port			The port on which the message got sent
 	 * @param[in]	Data			The data frame of the message
 	 */
-	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TFINDynamicStruct<FFINParameterList>& Data) {};
+	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const FINArray& Data) {};
 
 	/**
 	 * Allows to check if this network message handler is capable

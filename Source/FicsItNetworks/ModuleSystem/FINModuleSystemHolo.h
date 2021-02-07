@@ -3,8 +3,6 @@
 #include "CoreMinimal.h"
 #include "FGBuildableHologram.h"
 #include "FINModuleSystemPanel.h"
-#include "util/Logging.h"
-
 #include "FINModuleSystemHolo.generated.h"
 
 UCLASS()

@@ -3,7 +3,10 @@
 #include "CoreMinimal.h"
 #include "LuaException.h"
 #include "Network/FINAnyNetworkValue.h"
+#include "Reflection/FINExecutionContext.h"
 
+class UFINStruct;
+class UFINFunction;
 struct FFINNetworkTrace;
 
 extern "C" {
@@ -98,5 +101,10 @@ namespace FicsItKernel {
 		 * Trys to convert the lua value at the given index to any kind of network value.
 		 */
 		void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val);
+
+		/**
+		 * Converts the given network value into a lua value and pushes it onto the stack
+		 */
+		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val);
 	}
 }

@@ -13,8 +13,6 @@ class UFINComponentUtility : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
 public:
-	static bool bAllowUsing;
-
 	/**
 	 * Trys to find the nearest network connector to the hit location of the the hit actor
 	 *
@@ -31,13 +29,4 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Utility")
 	static void ClipboardCopy(FString str);
-
-	/**
-	 * Enables or disables if the user can interact with anything.
-	 *
-	 * @param	WorldContextObject	the world context were you want to enable/disable interaction
-	 * @param	newUsing			true if you want to allow interaction, false if not
-	 */
-	UFUNCTION(BlueprintCallable,  Category = "Utility")
-	static void SetAllowUsing(UObject* WorldContextObject, bool newUsing);
 };

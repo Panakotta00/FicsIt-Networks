@@ -12,9 +12,16 @@ class AFINStateEEPROM : public AActor, public IFGSaveInterface {
 public:
 	UPROPERTY(BlueprintAssignable)
 	FFINEEPROMUpdateDelegate UpdateDelegate;
+
+	UPROPERTY()
+	bool bShouldUpdate = false;
 	
 	AFINStateEEPROM();
-	
+
+	// Begin AActor
+	virtual void Tick(float DeltaSeconds) override;
+	// End AActor
+
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface

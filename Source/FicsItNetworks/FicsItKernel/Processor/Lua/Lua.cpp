@@ -1,9 +1,12 @@
 #include "Lua.h"
 
+
+#include "LuaFuture.h"
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
 #include "LuaStructs.h"
 #include "Network/FINNetworkComponent.h"
+#include "Reflection/FINStruct.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -26,10 +29,9 @@ namespace FicsItKernel {
 					newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
 				} else {
 					UObject* Obj = *p->ContainerPtrToValuePtr<UObject*>(data);
-					UObject* Org = Obj;
-					if (Obj && Cast<UObjectProperty>(p)->PropertyClass == UObject::StaticClass() && Obj->Implements<UFINNetworkComponent>()) trace = trace / Obj / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
-					else trace = trace / Obj;
-					newInstance(L, trace, Org);
+					trace = trace / Obj;
+					if (Obj && Obj->Implements<UFINNetworkComponent>()) trace = trace / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+					newInstance(L, trace);
 				}
 			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
@@ -67,7 +69,8 @@ namespace FicsItKernel {
 				const char* s = lua_tolstring(L, i, &len);
 				if (!s) throw std::exception("Invalid String in string property parse");
 				FString* o = p->ContainerPtrToValuePtr<FString>(data);
-				*o = FString(UTF8_TO_TCHAR(s), len);
+				FUTF8ToTCHAR Conv(s, len);
+				*o = FString(Conv.Length(), Conv.Get());
 			} else if (c & EClassCastFlags::CASTCLASS_UClassProperty) {
 				UClass* o = getClassInstance(L, i, Cast<UClassProperty>(p)->PropertyClass);
 				*p->ContainerPtrToValuePtr<UClass*>(data) = o;
@@ -81,9 +84,9 @@ namespace FicsItKernel {
 				}
 			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
-				FFINDynamicStructHolder Struct(prop->Struct);
+				TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(prop->Struct);
 				luaGetStruct(L, i, Struct);
-				prop->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct.GetData());
+				prop->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct->GetData());
 			} else if (c & EClassCastFlags::CASTCLASS_UArrayProperty) {
 				UArrayProperty* prop = Cast<UArrayProperty>(p);
 				const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
@@ -118,18 +121,70 @@ namespace FicsItKernel {
 				break;
 			case LUA_TSTRING: {
 				size_t len;
-				Val = FFINAnyNetworkValue(FINStr(lua_tolstring(L, i, &len), len));
+				const char* s = lua_tolstring(L, i, &len);
+				FUTF8ToTCHAR Conv(s, len);
+				Val = FFINAnyNetworkValue(FString(Conv.Length(), Conv.Get()));
 				break;
-			}
-			default:
-				FString TypeName = luaL_typename(L, i);
-				UScriptStruct* StructType = FFINLuaStructRegistry::Get().GetType(TypeName);
+			} default:
+				UFINStruct* StructType = luaGetStructType(L, i);
 				if (StructType) {
-					Val = FFINAnyNetworkValue(luaGetStruct(L, i));
+					Val = FFINAnyNetworkValue(*luaGetStruct(L, i));
+					break;
+				}
+				FFINNetworkTrace Trace = getObjInstance(L, i);
+				if (Trace.IsValid()) {
+					Val = FFINAnyNetworkValue(Trace);
 					break;
 				}
 				Val = FFINAnyNetworkValue();
 				break;
+			}
+		}
+
+		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val) {
+			switch (Val.GetType()) {
+			case FIN_NIL:
+				lua_pushnil(L);
+				break;
+			case FIN_BOOL:
+				lua_pushboolean(L, Val.GetBool());
+				break;
+			case FIN_INT:
+				lua_pushinteger(L, Val.GetInt());
+				break;
+			case FIN_FLOAT:
+				lua_pushnumber(L, Val.GetFloat());
+				break;
+			case FIN_STR: {
+				FTCHARToUTF8 Conv(*Val.GetString(), Val.GetString().Len());
+				lua_pushlstring(L, Conv.Get(), Conv.Length());
+				break;
+			} case FIN_OBJ:
+				newInstance(L, FFINNetworkTrace(Val.GetObj().Get()));
+				break;
+			case FIN_CLASS:
+				newInstance(L, Val.GetClass());
+				break;
+			case FIN_TRACE:
+				newInstance(L, Val.GetTrace());
+				break;
+			case FIN_STRUCT:
+				luaStruct(L, Val.GetStruct());
+				break;
+			case FIN_ARRAY: {
+				lua_newtable(L);
+				int i = 0;
+				for (const FFINAnyNetworkValue& Entry : Val.GetArray()) {
+					networkValueToLua(L, Entry);
+					lua_seti(L, -2, ++i);
+				}
+				break;
+			} case FIN_ANY:
+				networkValueToLua(L, Val.GetAny());
+				lua_pushnil(L);
+				break;
+			default:
+				lua_pushnil(L);
 			}
 		}
 	}

@@ -4,11 +4,6 @@
 #include "UnrealNetwork.h"
 #include "ModuleSystem/FINModuleSystemHolo.h"
 
-void AFINModuleBase::Serialize(FArchive& Ar) {
-	Super::Serialize(Ar);
-	if (Ar.IsSaveGame()) Ar << Listeners;
-}
-
 void AFINModuleBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
@@ -37,19 +32,6 @@ void AFINModuleBase::getModuleSize_Implementation(int& Width, int& Height) const
 
 FName AFINModuleBase::getName_Implementation() const {
 	return ModuleName;
-}
-
-void AFINModuleBase::AddListener_Implementation(FFINNetworkTrace listener) {
-	if (Listeners.Contains(listener)) return;
-	Listeners.Add(listener);
-}
-
-void AFINModuleBase::RemoveListener_Implementation(FFINNetworkTrace listener) {
-	Listeners.Remove(listener);
-}
-
-TSet<FFINNetworkTrace> AFINModuleBase::GetListeners_Implementation() {
-	return Listeners;
 }
 
 UObject* AFINModuleBase::GetSignalSenderOverride_Implementation() {

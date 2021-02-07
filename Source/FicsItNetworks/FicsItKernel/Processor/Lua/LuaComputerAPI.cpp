@@ -49,22 +49,16 @@ namespace FicsItKernel {
 
 		int luaComputerSkip(lua_State* L) {
 			LuaProcessor* processor = LuaProcessor::luaGetProcessor(L);
-			processor->asyncMutex.Lock();
-			if (processor->tickState & (LUA_END | LUA_ERROR)) {
-				if (processor->tickState & LUA_SYNC) processor->tickState = LUA_ASYNC_BEGIN;
-				else if (processor->tickState & LUA_ASYNC && processor->tickState != LUA_ASYNC_BEGIN) processor->tickState = LUA_ASYNC;
-				processor->asyncMutex.Unlock();
-				return lua_yield(L, 0);
-			} else {
-				processor->asyncMutex.Unlock();
-				return 0;
-			}
+			processor->tickHelper.shouldPromote();
+			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 #pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
-			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
-			    kernel->getAudio()->beep();
+			float pitch = 1;
+			if (lua_isnumber(L, 1)) pitch = lua_tonumber(L, 1);
+			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
+			    kernel->getAudio()->beep(pitch);
 			})));
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}

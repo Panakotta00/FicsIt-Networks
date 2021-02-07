@@ -6,8 +6,8 @@
 #include <mutex>
 
 #include "Network/FINNetworkTrace.h"
-#include "Network/Signals/FINSignal.h"
-#include "Network/Signals/FINSmartSignal.h"
+#include "Network/Signals/FINSignalData.h"
+#include "Reflection/FINClass.h"
 
 namespace FicsItKernel {
 	namespace Network {
@@ -20,7 +20,7 @@ namespace FicsItKernel {
 			std::mutex mutexSignalListeners;
 			TSet<FFINNetworkTrace> signalListeners;
 			std::mutex mutexSignals;
-			std::deque<TPair<TFINDynamicStruct<FFINSignal>, FFINNetworkTrace>> signals;
+			std::deque<TPair<FFINSignalData, FFINNetworkTrace>> signals;
 			bool lockSignalRecieving = false;
 
 		public:
@@ -41,9 +41,9 @@ namespace FicsItKernel {
 			/**
 			 * The maximum amount of signals the signal queue can hold
 			 */
-			uint32 maxSignalCount = 100;
+			uint32 maxSignalCount = 1000;
 
-			void handleSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender);
+			void handleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);
 
 			/**
 			 * pops a signal form the queue.
@@ -52,7 +52,7 @@ namespace FicsItKernel {
 			 * @param sender - out put paramter for the sender of the signal
 			 * @return	singal from the queue
 			 */
-			TFINDynamicStruct<FFINSignal> popSignal(FFINNetworkTrace& sender);
+			FFINSignalData popSignal(FFINNetworkTrace& sender);
 
 			/**
 			 * pushes a signal to the queue.
@@ -60,7 +60,7 @@ namespace FicsItKernel {
 			 *
 			 * @param	signal	the singal you want to push
 			 */
-			void pushSignal(const TFINDynamicStruct<FFINSignal>& signal, const FFINNetworkTrace& sender);
+			void pushSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);
 
 			/**
 			 * Removes all signals from the signal queue.
@@ -87,14 +87,9 @@ namespace FicsItKernel {
 			TSet<FFINNetworkTrace> getComponentByNick(const FString& nick);
 
 			/**
-			 * pushes a signal to the queue.
-			 * uses the arguments to construct a signal struct.
-			 * Should only get used by the kernel modules to emit signals.
+			 * returns the components in the network with of the given type.
 			 */
-			template<typename... Ts>
-			void pushSignalKernel(const FString& signalName, Ts... args) {
-				pushSignal(FFINSmartSignal(signalName, {FFINAnyNetworkValue(args)...}), FFINNetworkTrace(component));
-			}
+			TSet<FFINNetworkTrace> getComponentByClass(UClass* Class);
 
 			/**
 			 * Should get called prior to de/serialization

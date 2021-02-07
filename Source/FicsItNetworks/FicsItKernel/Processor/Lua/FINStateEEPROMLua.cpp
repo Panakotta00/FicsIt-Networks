@@ -14,5 +14,5 @@ FString AFINStateEEPROMLua::GetCode() const {
 
 void AFINStateEEPROMLua::SetCode(const FString& NewCode) {
 	Code = NewCode;
-	OnCodeUpdate();
+	bShouldUpdate = true;
 }
