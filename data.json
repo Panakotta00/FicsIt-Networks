@@ -2,7 +2,7 @@
 	"mod_id": "AT6Zj38KmcKgZ6",
 	"mod_reference": "FicsItNetworks",
 	"name": "FicsIt-Networks",
-	"version": "0.0.10",
+	"version": "0.1.0",
 	"sml_version": "2.2.1",
 	"description": "Adds a computer network and programmable computers to the Game.",
 	"authors": ["Panakotta00", "Rossz", "Deantendo", "Cofeediction", "Raysh"],

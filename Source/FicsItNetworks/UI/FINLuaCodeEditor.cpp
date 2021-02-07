@@ -26,8 +26,8 @@ TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighte
 	TArray<FSyntaxTokenizer::FRule> TokenizerRules;
 	for (FString Token : TArray<FString>({
 		" ", "\t", ".", ":", "\"", "\'", ",", "(", ")", "for", "in", "while", "do", "if", "then", "elseif", "else",
-		"end", "local", "true", "false", "not", "and", "or", "function", "--[[", "]]--", "--", "+", "-", "/", "*", "%",
-		"[", "]", "{", "}", "=", "!", "~", "#", ">", "<"})) {
+		"end", "local", "true", "false", "not", "and", "or", "function", "return", "--[[", "]]--", "--", "+", "-", "/",
+		"*", "%", "[", "]", "{", "}", "=", "!", "~", "#", ">", "<"})) {
 		TokenizerRules.Add(FSyntaxTokenizer::FRule(Token));
 	}
 
@@ -193,7 +193,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 
 			if (Token.Type == FSyntaxTokenizer::ETokenType::Syntax) {
 				if (bIsNew) {
-					if (TArray<FString>({"while", "for", "in", "do", "if", "then", "elseif", "else", "end", "local", "not", "and", "or", "function"}).Contains(TokenString)) {
+					if (TArray<FString>({"while", "for", "in", "do", "if", "then", "elseif", "else", "end", "local", "not", "and", "or", "function", "return"}).Contains(TokenString)) {
 						DoKeyword(FTextRange(Start, End));
 						continue;
 					} else if (TokenString == "true") {
@@ -272,13 +272,25 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 		.Padding(InArgs._Padding)
 		.Marshaller(SyntaxHighlighter)
 		.Style(InArgs._Style)
+		.OnTextChanged(InArgs._OnTextChanged)
+		.OnTextCommitted(InArgs._OnTextCommitted)
 	];
+}
+
+void UFINLuaCodeEditor::HandleOnTextChanged(const FText& Text) {
+	OnTextChanged.Broadcast(Text);
+}
+
+void UFINLuaCodeEditor::HandleOnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod) {
+	OnTextCommitted.Broadcast(Text, CommitMethod);
 }
 
 TSharedRef<SWidget> UFINLuaCodeEditor::RebuildWidget() {
 	return SAssignNew(CodeEditor, SFINLuaCodeEditor)
 		.Style(&Style)
-		.CodeStyle(&CodeStyle);
+		.CodeStyle(&CodeStyle)
+		.OnTextChanged(BIND_UOBJECT_DELEGATE(FOnTextChanged, HandleOnTextChanged))
+		.OnTextCommitted(BIND_UOBJECT_DELEGATE(FOnTextCommitted, HandleOnTextCommitted));
 }
 
 void UFINLuaCodeEditor::SetIsReadOnly(bool bInReadOnly) {

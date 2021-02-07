@@ -78,6 +78,8 @@ public:
 	SLATE_STYLE_ARGUMENT(FEditableTextBoxStyle, Style)
 	SLATE_STYLE_ARGUMENT(FFINLuaCodeEditorStyle, CodeStyle)
 	SLATE_ATTRIBUTE( FMargin, Padding )
+	SLATE_EVENT( FOnTextChanged, OnTextChanged )
+    SLATE_EVENT( FOnTextCommitted, OnTextCommitted )
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
@@ -89,7 +91,20 @@ class UFINLuaCodeEditor : public UWidget {
 private:
 	TSharedPtr<SFINLuaCodeEditor> CodeEditor;
 
+protected:
+	void HandleOnTextChanged(const FText& Text);
+	void HandleOnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+
 public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFINCodeEditorChangedEvent, const FText&, Text);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFINCodeEditorCommittedEvent, const FText&, Text, ETextCommit::Type, CommitMethod);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFINCodeEditorChangedEvent OnTextChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFINCodeEditorCommittedEvent OnTextCommitted;
+	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FFINLuaCodeEditorStyle CodeStyle;
 	

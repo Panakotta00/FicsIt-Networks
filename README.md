@@ -28,7 +28,7 @@ You can download the latest build version [here](https://jenkins.massivebytes.ne
 
 Streams
 =======
-The biggest part of making this mod does get stream at [CoderDE](https://twitch.tv/coderde).
+The biggest part of making this mod does get stream at [Panakotta00](https://twitch.tv/panakotta00).
 
 You-Tube
 ========
@@ -62,6 +62,11 @@ Features
   Monitors and GPUs allow you to visualize data in multiple different forms. They also allow you to use montiors as user inputs like Keyboard, Mouse and Touch.
 - Vehicle Scanner
   Allows to interact with vehicles that pass over it. It also looks nice ;-)
+- Reflection System
+  The Reflection System allows to check data-types, functions, properties, signals and more. You can look up all sort of information and it helps you
+  for a more dynamic way to interact with the machines. This system also provides a abstraction layer so that further language implementations and such can get implemented more
+  easily and quicker. It also provides a dependency-less system so other mods can provide functionality that can be used by ficsit-networks.
+  It also provides the reflection viewer which is UI Widget allowing you to browse and explore the reflection data, like an ingame documentation.
 
 Dependencies
 ============
@@ -73,11 +78,9 @@ Roadmap
 =======
 You can find the detailed progress in the [project board](https://github.com/CoderDE/FicsIt-Networks/projects/1).
 
-- fixing some bugs
 - add new sensors (like player sensors)
 - microcontrollers
 - computer power consumption
-- tune and make improvements to general concepts and performance
 - adding support for a visual scripting language
 - port the mod to official mod kit (when released)
 (the list is dynamic and gets updated based on new ideas)
