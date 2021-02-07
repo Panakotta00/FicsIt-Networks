@@ -57,11 +57,11 @@ FString GetText(UFINProperty* Prop) {
 TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUIContext* Context) {
 	const FFINReflectionUIStyleStruct* Style = Context->Style.Get();
 	check(Style != nullptr);
+	TSharedPtr<SWidget> Widget;
 	switch (Prop->GetType()) {
 	case FIN_OBJ: {
 		UFINClass* Class = FFINReflection::Get()->FindClass(Cast<UFINObjectProperty>(Prop)->GetSubclass());
-		if (!Class) break;
-		return SNew(SBox).Content()[SNew(SHorizontalBox)
+		if (Class) SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
@@ -82,10 +82,10 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .Text(FText::FromString(")"))
         ]];
+		break;
 	} case FIN_CLASS: {
 		UFINClass* Class = FFINReflection::Get()->FindClass(Cast<UFINClassProperty>(Prop)->GetSubclass());
-		if (!Class) break;
-		return SNew(SBox).Content()[SNew(SHorizontalBox)
+		if (Class) SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
@@ -106,10 +106,10 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .Text(FText::FromString(")"))
         ]];
+		break;
 	} case FIN_TRACE: {
 		UFINClass* Class = FFINReflection::Get()->FindClass(Cast<UFINTraceProperty>(Prop)->GetSubclass());
-		if (!Class) break;
-		return SNew(SBox).Content()[SNew(SHorizontalBox)
+		if (Class) SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
@@ -130,10 +130,10 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .Text(FText::FromString(")"))
         ]];
+		break;
 	} case FIN_STRUCT: {
 		UFINStruct* Struct = FFINReflection::Get()->FindStruct(Cast<UFINStructProperty>(Prop)->GetInner());
-		if (!Struct) break;
-		return SNew(SBox).Content()[SNew(SHorizontalBox)
+		if (Struct) SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
@@ -154,8 +154,9 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .Text(FText::FromString(")"))
         ]];
+		break;
 	} case FIN_ARRAY: {
-		return SNew(SBox).Content()[SNew(SHorizontalBox)
+		SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
@@ -169,10 +170,26 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .Text(FText::FromString(")"))
         ]];
+		break;
 	} default: ; }
 
 	FString Text = GetText(Prop);
-	return SNew(STextBlock).Text(FText::FromString(Text)).TextStyle(&Context->Style.Get()->DataTypeTextStyle);
+	if (!Widget.IsValid()) SAssignNew(Widget, STextBlock).Text(FText::FromString(Text)).TextStyle(&Context->Style.Get()->DataTypeTextStyle);
+	
+	if (Prop->GetPropertyFlags() & FIN_Prop_OutParam || Prop->GetPropertyFlags() & FIN_Prop_RetVal) {
+		return SNew(SHorizontalBox)
+		+SHorizontalBox::Slot().VAlign(VAlign_Center).AutoWidth().Padding(0,0,5,0)[
+			SNew(STextBlock)
+			.TextStyle(&Context->Style.Get()->FlagsTextStyle)
+			.ColorAndOpacity(Context->Style.Get()->OutFlagColor)
+			.Text(FText::FromString("out"))
+			.ToolTipText(FText::FromString("Output Parameter - This parameter is returned by the function."))
+		]
+		+SHorizontalBox::Slot().VAlign(VAlign_Center).AutoWidth()[
+			Widget.ToSharedRef()
+		];
+	}
+	return Widget.ToSharedRef();
 }
 
 TSharedRef<SWidget> GeneratePropTypeIcon(UFINProperty* Prop, FFINReflectionUIContext* Context) {
@@ -405,7 +422,7 @@ TSharedRef<SWidget> FFINReflectionUIStruct::GetDetailsWidget() {
             .Stretch(EStretch::UserSpecified)
             .HAlign(HAlign_Fill)
             .VAlign(VAlign_Fill)
-            .UserSpecifiedScale(1.5)[
+            .UserSpecifiedScale(1.2)[
                 SNew(SVerticalBox)
                 +SVerticalBox::Slot()
                 .AutoHeight()
@@ -511,7 +528,7 @@ TSharedRef<SWidget> FFINReflectionUIClass::GetDetailsWidget() {
 			.Stretch(EStretch::UserSpecified)
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Fill)
-			.UserSpecifiedScale(1.5)[
+			.UserSpecifiedScale(1.2)[
 				SNew(SVerticalBox)
 				+SVerticalBox::Slot()
 				.AutoHeight()
@@ -577,7 +594,7 @@ TSharedRef<SWidget> FFINReflectionUIProperty::GetDetailsWidget() {
         .Stretch(EStretch::UserSpecified)
         .HAlign(HAlign_Fill)
         .VAlign(VAlign_Fill)
-        .UserSpecifiedScale(1.5)[
+        .UserSpecifiedScale(1.2)[
             SNew(SVerticalBox)
             +SVerticalBox::Slot()
             .AutoHeight()
@@ -686,7 +703,7 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetDetailsWidget() {
         .Stretch(EStretch::UserSpecified)
         .HAlign(HAlign_Fill)
         .VAlign(VAlign_Fill)
-        .UserSpecifiedScale(1.5)[
+        .UserSpecifiedScale(1.2)[
             SNew(SVerticalBox)
             +SVerticalBox::Slot()
             .AutoHeight()
@@ -863,7 +880,7 @@ TSharedRef<SWidget> FFINReflectionUISignal::GetDetailsWidget() {
         .Stretch(EStretch::UserSpecified)
         .HAlign(HAlign_Fill)
         .VAlign(VAlign_Fill)
-        .UserSpecifiedScale(1.5)[
+        .UserSpecifiedScale(1.2)[
             SNew(SVerticalBox)
             +SVerticalBox::Slot()
             .AutoHeight()

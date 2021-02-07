@@ -103,6 +103,9 @@ struct FFINReflectionUIStyleStruct : public FSlateWidgetStyle {
 	FSlateColor ReadOnlyFlagColor = FSlateColor(FColor::FromHex("ffcc00"));
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor OutFlagColor = FSlateColor(FColor::FromHex("63ff97"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FTableRowStyle SearchTreeRowStyle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
