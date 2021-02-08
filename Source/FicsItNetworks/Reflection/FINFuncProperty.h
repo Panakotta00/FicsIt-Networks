@@ -18,7 +18,7 @@ public:
 	}
 	
 	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
-		SetterFunc(Ctx, Value);
+		auto _ = SetterFunc(Ctx, Value);
 	}
 	// End UFINProperty
 };

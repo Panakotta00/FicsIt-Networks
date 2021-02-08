@@ -93,6 +93,7 @@ namespace FicsItKernel {
 				FINAny Value;
 				luaToNetworkValue(L, 3, Value);
 				Property->SetValue(Ctx, Value);
+				
 				return LuaProcessor::luaAPIReturn(L, 1);
 			}
 			

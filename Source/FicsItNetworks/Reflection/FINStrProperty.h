@@ -18,7 +18,8 @@ public:
 	
 	virtual void SetValue(const FFINExecutionContext& Ctx, const FINAny& Value) const override {
 		if (Value.GetType() != FIN_STR) return;
-		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Value.GetString());
+		FString Str = Value.GetString();
+		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Str);
 		else Super::SetValue(Ctx, Value);
 	}
 

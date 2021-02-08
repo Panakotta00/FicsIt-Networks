@@ -24,8 +24,8 @@ public:
 		if (Value.GetType() == FIN_INT) Val = Value.GetInt();
 		else if (Value.GetType() == FIN_FLOAT) Val = Value.GetFloat();
 		else return;
-		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Value.GetInt());
-		else if (Property64) Property64->SetPropertyValue_InContainer(Ctx.GetGeneric(), Value.GetInt());
+		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Val);
+		else if (Property64) Property64->SetPropertyValue_InContainer(Ctx.GetGeneric(), Val);
 		return Super::SetValue(Ctx, Value);
 	}
 
