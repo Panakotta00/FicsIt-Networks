@@ -1,5 +1,5 @@
-= Network Wall Plug (Double)
-:description: The network wall plug allows you to further distribute your computer networks near buildings and through walls.
+= Double Network Wall Plug
+:description: Network Pole that attaches to a wall. Has one connector on each side of the wall.
 
 [cols="1,3"]
 |===
@@ -7,7 +7,7 @@
 |Buildable
 
 |Max Network Connections
-|8
+|4
 |===
 
 [cols="a,a"]
@@ -18,10 +18,8 @@
 |image::buildings/NetworkPlugDouble_ig.jpg[300,300,role="left"]
 |===
 
-The network wall plug double is one of the more important buildings.
-The network wall plug double simply allows to connect more distant network connectors with each other and so to spread out the network mainly in-doors and near buildings.
-Also interesting is, this pole allows to connect multiple cables at the same time.
-You can also distribute now the network circuit through walls thanks to this plug.
+Can handle up to 4 Network connections.
+Connect Network Poles and Network nodes together to create FIC-SIT networks.
 
 
 

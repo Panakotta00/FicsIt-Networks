@@ -8,9 +8,9 @@ namespace FicsItKernel {
 			virtual ~AudioController() = default;
 			
 			/**
-			* Plays a short beep sound
-			*/
-			virtual void beep() = 0;
+			 * Plays a short beep sound
+			 */
+			virtual void beep(float Beep = 1.0f) = 0;
 		};
 	}
 }

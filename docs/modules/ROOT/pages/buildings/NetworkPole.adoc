@@ -18,9 +18,8 @@
 |image::buildings/NetworkPole_ig.jpg[300,300,role="left"]
 |===
 
-The network pole is also one of the more important buildings.
-The network pole simply allows to connect more distant network connectors with each other and so to spread out the network.
-Also interesting is, this pole allows to connect multiple cables at the same time.
+Can handle up to 4 Network connections.
+Connect Network Poles and Network nodes together to create FIC-SIT networks.
 
 
 

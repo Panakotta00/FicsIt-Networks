@@ -48,7 +48,6 @@ void AFINScreenHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	}
 	Parts.Empty();
 	SetActorHiddenInGame(true);
-	SML::Logging::error("EndPlay");
 }
 
 void AFINScreenHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -102,11 +101,23 @@ void AFINScreenHolo::SetHologramLocationAndRotation(const FHitResult& hitResult)
 		Normal = hitResult.ImpactNormal;
 		ScreenHeight = 1;
 		ScreenWidth = 1;
-		FRotator SnappedActorRotation = FRotator::ZeroRotator;
+		FTransform SnappedActorTransform = FTransform();
+		FVector UpVector = FVector(1,0,0);
 		if (AActor* SnappedActor = hitResult.GetActor()) {
-			SnappedActorRotation = FRotator(0,0,SnappedActor->GetActorRotation().Roll);
+			SnappedActorTransform = SnappedActor->GetActorTransform();
 		}
-		SetActorLocationAndRotation(hitResult.ImpactPoint, Normal.Rotation() + SnappedActorRotation + FRotator(0,0, GetScrollRotateValue()));
+		FQuat Quat;
+		if (FVector::Coincident(UpVector * -1, Normal) || FVector::Coincident(UpVector, Normal)) {
+			Quat = Normal.ToOrientationQuat();
+		} else {
+			FVector RotationAxis = FVector::CrossProduct(UpVector, Normal);
+			RotationAxis.Normalize();
+			float DotProduct = FVector::DotProduct(UpVector, Normal);
+			float RotationAngle = acosf(DotProduct);
+			Quat = FQuat(RotationAxis, RotationAngle);
+		}
+		FQuat NewQuat = Quat * FRotator(0, 0, GetScrollRotateValue()).Quaternion();
+		SetActorLocationAndRotation(hitResult.ImpactPoint, NewQuat.Rotator());
 	}
 }
 

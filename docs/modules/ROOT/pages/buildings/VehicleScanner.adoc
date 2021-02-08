@@ -1,5 +1,5 @@
 = Vehicle Scanner
-:description: The vehicle scanner looks nice and allows for communiction with vehicles driving over it.
+:description: The vehicle scanner allows for communication with vehicles driving over it.
 
 [cols="1,3a"]
 |===
@@ -18,11 +18,8 @@
 |image::buildings/VehicleScanner_ig.jpg[300,300,role="left"]
 |===
 
-The vehcile scanner is a computer network component that looks nice and on the top of it,
-allows you to communicate with the vehicles that drive over it.
-
-You can also dynamicly change the color of the scanner beams.
-
+The vehicle scanner is a computer network component that allows you to communicate with the vehicles that drive over it.
+The scanner beam colors can be modified.
 It also emits a couple of signals that allow for notification when a vehicle drives over it.
 
 == Functions

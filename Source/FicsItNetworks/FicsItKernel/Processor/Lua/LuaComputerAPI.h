@@ -2,10 +2,6 @@
 
 #include "Lua.h"
 
-#include "FicsItKernel/FicsItKernel.h"
-
-#include "LuaComputerAPI.generated.h"
-
 namespace FicsItKernel {
 	namespace Lua {
 		/**
@@ -15,22 +11,4 @@ namespace FicsItKernel {
 		*/
 		void setupComputerAPI(lua_State* L);
 	}
-}
-
-USTRUCT()
-struct FFINKernelFutureData {
-	GENERATED_BODY()
-
-	FicsItKernel::KernelSystem* kernel = nullptr;
-	
-	FFINKernelFutureData() = default;
-	FFINKernelFutureData(FicsItKernel::KernelSystem* kernel) : kernel(kernel) {}
-
-	inline bool Serialize(FArchive& Ar) {
-		return true;
-	}
-};
-
-inline void operator<<(FArchive& Ar, FFINKernelFutureData& InData) {
-	InData.Serialize(Ar);
 }

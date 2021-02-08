@@ -1,13 +1,8 @@
 #include "FINComputerModule.h"
 
-void AFINComputerModule::Serialize(FArchive& Ar) {
-	Super::Serialize(Ar);
-	Ar << Listeners;
-}
-
 void AFINComputerModule::EndPlay(EEndPlayReason::Type reason) {
 	Super::EndPlay(reason);
-	if (ModulePanel) ModulePanel->RemoveModule(this);
+	if (reason == EEndPlayReason::Destroyed && ModulePanel) ModulePanel->RemoveModule(this);
 }
 
 bool AFINComputerModule::ShouldSave_Implementation() const {
@@ -27,19 +22,6 @@ void AFINComputerModule::getModuleSize_Implementation(int& Width, int& Height) c
 
 FName AFINComputerModule::getName_Implementation() const {
 	return ModuleName;
-}
-
-void AFINComputerModule::AddListener_Implementation(FFINNetworkTrace listener) {
-	if (Listeners.Contains(listener)) return;
-	Listeners.Add(listener);
-}
-
-void AFINComputerModule::RemoveListener_Implementation(FFINNetworkTrace listener) {
-	Listeners.Remove(listener);
-}
-
-TSet<FFINNetworkTrace> AFINComputerModule::GetListeners_Implementation() {
-	return Listeners;
 }
 
 UObject* AFINComputerModule::GetSignalSenderOverride_Implementation() {

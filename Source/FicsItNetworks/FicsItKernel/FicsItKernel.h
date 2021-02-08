@@ -47,8 +47,10 @@ namespace FicsItKernel {
 
 	class KernelSystem {
 		friend Processor;
+		friend KernelListener;
 
 	private:
+		UObject* Owner;
 		KernelState state = KernelState::SHUTOFF;
 		KernelCrash kernelCrash;
 		std::int64_t memoryCapacity = 0;
@@ -77,7 +79,7 @@ namespace FicsItKernel {
 			ALL = 0b11
 		};
 
-		KernelSystem();
+		KernelSystem(UObject* Owner);
 		~KernelSystem();
 
 		/**

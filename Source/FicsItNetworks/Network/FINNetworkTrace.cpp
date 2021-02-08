@@ -16,9 +16,7 @@
 
 #include "Components/FINVehicleScanner.h"
 
-#include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkCircuit.h"
-#include "util/Logging.h"
 
 #define StepFuncName(A, B) Step ## _ ## A ## _ ## B
 #define StepRegName(A, B) StepReg ## _ ## A ## _ ## B
@@ -152,7 +150,7 @@ FFINNetworkTrace::FFINNetworkTrace(UObject* Obj) : Obj(Obj) {
 FFINNetworkTrace::~FFINNetworkTrace() {}
 
 bool FFINNetworkTrace::Serialize(FArchive& Ar) {
-	if (Ar.IsSaveGame()) {
+	if (Ar.IsSaveGame() || Ar.IsNetArchive()) {
 		bool valid = GetUnderlyingPtr().IsValid();
 		Ar << valid;
 		if (valid) {
@@ -207,6 +205,10 @@ UObject* FFINNetworkTrace::operator*() const {
 	}
 }
 
+UObject* FFINNetworkTrace::Get() const {
+	return **this;
+}
+
 UObject* FFINNetworkTrace::operator->() const {
 	return **this;
 }
@@ -237,7 +239,8 @@ void FFINNetworkTrace::CheckTrace() const {
 FFINNetworkTrace FFINNetworkTrace::Reverse() const {
 	if (!Obj.IsValid()) return FFINNetworkTrace(nullptr);
 	FFINNetworkTrace trace(Obj.Get());
-	TSharedPtr<FFINNetworkTrace> prev = MakeShared<FFINNetworkTrace>(*this->Prev);
+	TSharedPtr<FFINNetworkTrace> prev;
+	if (this->Prev) prev = MakeShared<FFINNetworkTrace>(*this->Prev);
 	while (prev) {
 		trace = trace / prev->Obj.Get();
 		prev = prev->Prev;
@@ -278,6 +281,17 @@ bool FFINNetworkTrace::operator<(const FFINNetworkTrace& other) const {
 
 TWeakObjectPtr<UObject> FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
+}
+
+TWeakObjectPtr<UObject> FFINNetworkTrace::GetStartPtr() const {
+	const FFINNetworkTrace* Trace = this;
+	while (Trace->Prev) Trace = Trace->Prev.Get();
+	if (Trace) return Trace->Obj;
+	return nullptr;
+}
+
+FFINNetworkTrace::operator bool() const {
+	return IsValid();
 }
 
 /* ############### */

@@ -1,6 +1,6 @@
 ﻿#include "FileSystemSerializationInfo.h"
 
-#include "util/Logging.h"
+#include "FicsItNetworksModule.h"
 
 bool FFileSystemNodeIndex::Serialize(FArchive& Ar) {
 	bool valid = Node.IsValid();
@@ -18,18 +18,22 @@ FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString nam
 	switch (Node->NodeType) {
 	case 0: {
 		FileSystem::SRef<FileSystem::File> file = parent->createFile(nodeName);
+		if (!file) return nullptr;
 		FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::OUTPUT | FileSystem::TRUNC);
+		if (!stream) return nullptr;
 		try {
 			stream->write(std::string(TCHAR_TO_UTF8(*Node->Data), Node->Data.Len()));
 			stream->flush();
 			stream->close();
 		} catch (...) {
-			SML::Logging::error("Unable to deserialize VFS-File");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Unable to deserialize VFS-File"));
+			return nullptr;
 		}
 		return file;
 	}
 	case 1: {
 		FileSystem::SRef<FileSystem::Directory> dir = parent->createSubdir(nodeName);
+		if (!dir) return nullptr;
 		for (TPair<FString, FFileSystemNodeIndex>& child : Node->ChildNodes) {
 			FileSystem::SRef<FileSystem::Node> node = child.Value.Deserialize(child.Key, dir);
 		}
@@ -98,5 +102,16 @@ FFileSystemNode& FFileSystemNode::Deserialize(FileSystem::SRef<FileSystem::Devic
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNode& Node) {
 	Node.Serialize(Ar);
+	return Ar;
+}
+
+bool FFileSystemSerializationInfo::Serialize(FArchive& Ar) {
+	Ar << Mounts;
+	Ar << Devices;
+	return true;
+}
+
+FArchive& operator<<(FArchive& Ar, FFileSystemSerializationInfo& Info) {
+	Info.Serialize(Ar);
 	return Ar;
 }

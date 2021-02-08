@@ -1,13 +1,13 @@
 #include "FINComputerGPUT1.h"
 
 
+#include "FGPlayerController.h"
 #include "FINComputerRCO.h"
+#include "SInvalidationPanel.h"
 #include "UnrealNetwork.h"
 #include "WidgetBlueprintLibrary.h"
 #include "WidgetLayoutLibrary.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
-#include "Network/FINNetworkComponent.h"
-#include "util/Logging.h"
 
 void SScreenMonitor::Construct(const FArguments& InArgs) {
 	Text = InArgs._Text;
@@ -159,6 +159,8 @@ SScreenMonitor::SScreenMonitor() {
 }
 
 AFINComputerGPUT1::AFINComputerGPUT1() {
+	PrimaryActorTick.bCanEverTick = false;
+	
 	SetScreenSize(FVector2D(120, 30));
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -170,7 +172,12 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	if (HasAuthority() && bFlushed) {
 		bFlushed = false;
 		ForceNetUpdate();
+		Flush();
 	}
+}
+
+void AFINComputerGPUT1::BindScreen(const FFINNetworkTrace& screen) {
+	Super::BindScreen(screen);
 }
 
 void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -182,11 +189,12 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AFINComputerGPUT1, ScreenSize);
 }
 
-#pragma optimize("", off)
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/Game/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
-	return SNew(SScreenMonitor)
+	return SAssignNew(CachedInvalidation, SInvalidationPanel)
+	.Content()[
+		SNew(SScreenMonitor)
 		.ScreenSize_Lambda([this]() {
 			return ScreenSize;
 		})
@@ -219,9 +227,9 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 		.OnKeyUp_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
 			RCO->GPUKeyEvent(this, 1,  c, key, btn);
 			return FReply::Handled();
-        });
+        })
+    ];
 }
-#pragma optimize("", on)
 
 void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	if (ScreenSize == size) return;
@@ -244,9 +252,16 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	ForegroundBuffer = Foreground;
 	BackgroundBuffer = Background;
 
-	netSig_ScreenSizeChanged(oldScreenSize.X, oldScreenSize.Y);
+	if (PrimaryActorTick.bCanEverTick) netSig_ScreenSizeChanged(oldScreenSize.X, oldScreenSize.Y);
 
 	ForceNetUpdate();
+}
+
+void AFINComputerGPUT1::Flush_Implementation() {
+	if (CachedInvalidation) {
+		CachedInvalidation->Invalidate(EInvalidateWidget::LayoutAndVolatility);
+		CachedInvalidation->InvalidateCache();
+	}
 }
 
 void AFINComputerGPUT1::netSig_OnMouseDown_Implementation(int x, int y, int btn) {}
@@ -256,15 +271,16 @@ void AFINComputerGPUT1::netSig_ScreenSizeChanged_Implementation(int oldW, int ol
 void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int btn) {}
 void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
 
-void AFINComputerGPUT1::netFunc_bindScreen(UObject* NewScreen) {
-	if (Cast<IFINScreenInterface>(NewScreen)) BindScreen(NewScreen);
+void AFINComputerGPUT1::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
+	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr().Get())) BindScreen(NewScreen);
 }
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {
-	return Screen;
+	return Screen.Get();
 }
 
 void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
+	FScopeLock Lock(&DrawingMutex);
 	FString toSet = str;
 	while (toSet.Len() > 0) {
 		FString Line;
@@ -283,16 +299,22 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 			int oldX = x + inLine.Len();
 			if (y >= 0 && x < ScreenSize.X && y < ScreenSize.Y) {
 				if (x < 0) {
-					inLine.RemoveAt(0, FMath::Abs(x));
-					x = 0;
+					if (inLine.Len() < FMath::Abs(x)) {
+						x = -1;
+					} else {
+						inLine.RemoveAt(0, FMath::Abs(x));
+						x = 0;
+					}
 				}
-				FString& text = TextGridBuffer[y];
-				int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X)-x-1);
-				text.RemoveAt(x, replace);
-				text.InsertAt(x, inLine.Left(replace));
-				for (int dx = 0; dx < replace; ++dx) {
-					ForegroundBuffer[y * ScreenSize.X + x + dx] = CurrentForeground;
-					BackgroundBuffer[y * ScreenSize.X + x + dx] = CurrentBackground;
+				if (x >= 0) {
+					FString& text = TextGridBuffer[y];
+					int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X)-x-1);
+					text.RemoveAt(x, replace);
+					text.InsertAt(x, inLine.Left(replace));
+					for (int dx = 0; dx < replace; ++dx) {
+						ForegroundBuffer[y * ScreenSize.X + x + dx] = CurrentForeground;
+						BackgroundBuffer[y * ScreenSize.X + x + dx] = CurrentBackground;
+					}
 				}
 			}
 			x = oldX;
@@ -305,6 +327,8 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 void AFINComputerGPUT1::netFunc_fill(int x, int y, int dx, int dy, const FString& str) {
 	FString c = str;
 	if (FRegexMatcher(FRegexPattern("^[[:cntrl:]]?$"), c).FindNext()) c = " ";
+	if (dx < 0) dx = 0;
+	if (dy < 0) dy = 0;
 	for (int ny = y; ny < y+dy; ++ny) {
 		netFunc_setText(x, ny, FString::ChrN(dx, c[0]));
 	}
@@ -316,18 +340,22 @@ void AFINComputerGPUT1::netFunc_getSize(int& w, int& h) {
 }
 
 void AFINComputerGPUT1::netFunc_setSize(int w, int h) {
+	FScopeLock Lock(&DrawingMutex);
 	SetScreenSize(FVector2D(FMath::Clamp(w, 1, 300), FMath::Clamp(h, 1, 100)));
 }
 
 void AFINComputerGPUT1::netFunc_setForeground(float r, float g, float b, float a) {
+	FScopeLock Lock(&DrawingMutex);
 	CurrentForeground = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f), FMath::Clamp(a, 0.0f, 1.0f));
 }
 
 void AFINComputerGPUT1::netFunc_setBackground(float r, float g, float b, float a) {
+	FScopeLock Lock(&DrawingMutex);
 	CurrentBackground = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f), FMath::Clamp(a, 0.0f, 1.0f));
 }
 
 void AFINComputerGPUT1::netFunc_flush() {
+	FScopeLock Lock(&DrawingMutex);
 	TextGrid = TextGridBuffer;
 	Foreground = ForegroundBuffer;
 	Background = BackgroundBuffer;

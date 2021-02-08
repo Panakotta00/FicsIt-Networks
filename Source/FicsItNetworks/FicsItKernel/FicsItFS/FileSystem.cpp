@@ -1,9 +1,10 @@
 #include "FileSystem.h"
 
 #include "CoreMinimal.h"
+
+#include "FicsItNetworksModule.h"
 #include "FileSystemSerializationInfo.h"
 #include "Library/NodeName.h"
-#include "util/Logging.h"
 
 namespace FicsItKernel {
 	namespace FicsItFS {
@@ -157,7 +158,7 @@ namespace FicsItKernel {
 				if (device.Value.NodeType == 3) {
 					FileSystem::SRef<FileSystem::Device> dev = new FileSystem::MemDevice();
 					if (!devDev->addDevice(dev, deviceName)) {
-						SML::Logging::error(("Unable to unpersist tmpfs '" + deviceName + "'").c_str());
+						UE_LOG(LogFicsItNetworks, Error, TEXT("Unable to unpersist tmpfs '%s'"), *FString(deviceName.c_str()));
 						continue;
 					}
 					device.Value.Deserialize(dev, deviceName);

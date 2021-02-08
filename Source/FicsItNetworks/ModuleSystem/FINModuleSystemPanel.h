@@ -2,8 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "FINModuleSystemModule.h"
 #include "FGInventoryLibrary.h"
+
 #include "FINModuleSystemPanel.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINModuleDelegate, UObject*, module, bool, added);
@@ -22,14 +22,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "ModuleSystem|Panel")
 	int PanelHeight = 1;
 
-	UPROPERTY(EditDefaultsOnly, Category = "ModuleSystem|Panel")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "ModuleSystem|Panel")
 	TArray<UClass*> AllowedModules;
 	
 	UPROPERTY(BlueprintAssignable, Category = "ModuleSystem|Panel")
 	FFINModuleDelegate OnModuleChanged;
-	
-	FWeakObjectPtr** grid = nullptr;
 
+	UPROPERTY(Replicated)
+	TArray<TWeakObjectPtr<UObject>> Grid;
+	
 	UFINModuleSystemPanel();
 	~UFINModuleSystemPanel();
 
@@ -85,6 +86,12 @@ public:
 	 * Check if it should allocate the grid cache
 	 */
 	void SetupGrid();
+
+	/**
+	 * Get Grid Slot at given location
+	 */
+	const TWeakObjectPtr<UObject>& GetGridSlot(int x, int y) const;
+	TWeakObjectPtr<UObject>& GetGridSlot(int x, int y);
 
 	static void GetModuleSpace(const FVector& Loc, int Rot, const FVector& MSize, FVector& OutMin, FVector& OutMax);
 };

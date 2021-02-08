@@ -26,24 +26,20 @@ void AFINIndicatorPole::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 }
 
 void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
-	Super::OnConstruction(transform);
-
-#if WITH_EDITOR
 	CreatePole();
-#endif
+
+	Super::OnConstruction(transform);
 }
 
 void AFINIndicatorPole::BeginPlay() {
 	Super::BeginPlay();
+	
+	CreatePole();
 
 	if (Indicator->GetMaterials().Num() > 0) {
 		IndicatorInstance = Indicator->CreateDynamicMaterialInstance(0);
 		Indicator->SetMaterial(0, IndicatorInstance);
 	}
-
-#if !WITH_EDITOR
-	CreatePole();
-#endif
 }
 
 void AFINIndicatorPole::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
@@ -68,7 +64,7 @@ void AFINIndicatorPole::CreatePole() {
 
 	// Construction
 	for (int i = 0; i < Height; ++i) {
-		UStaticMeshComponent* Pole = NewObject<UFGColoredInstanceMeshProxy>(this);
+		UFGColoredInstanceMeshProxy* Pole = NewObject<UFGColoredInstanceMeshProxy>(this);
 		check(Pole);
 		Pole->AttachToComponent(Indicator, FAttachmentTransformRules::KeepRelativeTransform);
 		Pole->SetRelativeLocation(FVector(0,0, -(i) * 100.0));
@@ -76,8 +72,11 @@ void AFINIndicatorPole::CreatePole() {
 		Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		Pole->SetStaticMesh(LongPole);
 		Pole->SetMobility(EComponentMobility::Static);
+		Pole->SetColorSlot(mColorSlot);
 		Poles.Add(Pole);
 	}
+
+	ReapplyColorSlot();
 }
 
 void AFINIndicatorPole::UpdateEmessive_Implementation() {

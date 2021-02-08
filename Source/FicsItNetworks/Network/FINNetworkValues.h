@@ -6,9 +6,11 @@
 #include "FINDynamicStructHolder.h"
 #include "FINNetworkValues.generated.h"
 
+struct FFINAnyNetworkValue;
+
 UENUM(BlueprintType)
 enum EFINNetworkValueType {
-	FIN_NIL,
+	FIN_NIL = 0,
 	FIN_BOOL,
 	FIN_INT,
 	FIN_FLOAT,
@@ -17,6 +19,7 @@ enum EFINNetworkValueType {
 	FIN_CLASS,
 	FIN_TRACE,
 	FIN_STRUCT,
+	FIN_ARRAY,
 	FIN_ANY,
 };
 
@@ -28,6 +31,8 @@ typedef FWeakObjectPtr FINObj;
 typedef UClass* FINClass;
 typedef FFINNetworkTrace FINTrace;
 typedef FFINDynamicStructHolder FINStruct;
+typedef FFINAnyNetworkValue FINAny;
+typedef TArray<FINAny> FINArray;
 
 static inline EFINNetworkValueType GetValueTypeFromProp(UProperty* Prop) {
 	EClassCastFlags CastFlags = Prop->GetClass()->ClassCastFlags;

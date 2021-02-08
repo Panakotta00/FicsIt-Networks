@@ -1,0 +1,211 @@
+= Network Router
+:description: The Network Router allows you to compartmentalize your FIC-SIT networks for easy modification.
+
+[cols="1,3a"]
+|===
+|Building Type
+|Buildable Network Component
+
+|Max Network Connections
+|1 (on each connector)
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/NetworkRouter_bg.png[300,300,role="left"]
+|image::buildings/NetworkRouter_ig.jpg[300,300,role="left"]
+|===
+
+The Network Router allows you to compartmentalize your FIC-SIT networks for easy modification,
+while still allowing cross-network communication.
+
+Filters can also be defined based on message port and address.
+Filters are set to Blacklist by default.
+
+=== Functions
+
+==== `setPortWhitelist(bool bInWhitelist)`
+
+Sets if the port-filter should run in Whitelist-Mode or Blacklist-Mode.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bInWhitelist
+|bool
+|true when the filter should run in Whitelist-Mode
+|===
+
+==== `bool getPortWhitelist()`
+
+Allows to check if the port-filter runs in Whitelist-Mode or Blacklist-Mode.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true when the filter runs in Whitelist-Mode
+|===
+
+==== `addPortList(int port)`
+
+Adds the given port to the port-filter-list.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|port
+|int
+|the port you want to add to the port-filter-list
+|===
+
+==== `removePortList(int port)`
+
+Removes the given port from the port-filter-list.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|port
+|int
+|the port you want to remove from the port-filter-list
+|===
+
+==== `setPortList(int[] ports)`
+
+Allows to set the list of ports for the port-filter.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|ports
+|int[]
+|The port list you want use now for the port-filter-list
+|===
+
+==== `int[] getPortList()`
+
+Allows to get the list of ports used by the port-filter.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int[]
+|int[]
+|The port list used by the port-filter-list
+|===
+
+==== `setAddrWhitelist(bool bInWhitelist)`
+
+Sets if the address-filter should run in Whitelist-Mode or Blacklist-Mode.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bInWhitelist
+|bool
+|true when the filter should run in Whitelist-Mode
+|===
+
+==== `bool getAddrWhitelist()`
+
+Allows to check if the address-filter runs in Whitelist-Mode or Blacklist-Mode.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|true when the filter runs in Whitelist-Mode
+|===
+
+==== `addAddrList(string addr)`
+
+Adds the given address to the address-filter-list.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|addr
+|string
+|The address you want to add to the address-filter-list
+|===
+
+==== `removeAddrList(string addr)`
+
+Removes the given address from the address-filter-list.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|addr
+|string
+|The address you want to remove from the address-filter-list
+|===
+
+==== `setAddrList(string[] addresses)`
+
+Allows to set the list of addresses for the address-filter.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|addresses
+|string[]
+|The address list you want use now for the address-filter-list
+|===
+
+==== `string[] getAddrList()`
+
+Allows to get the list of addresses used by the address-filter.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string[]
+|string[]
+|The address list used by the address-filter-list
+|===
+
+
+
+include::partial$building_footer.adoc[]

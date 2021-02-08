@@ -25,10 +25,10 @@ The splitter allows you to control the flow of items.
 
 It has one conveyor input and three outputs.
 
-It has a input inventory, when its empty one item autmatically gets transferd from the input to the inventory.
+It has an inventory. When the inventory is empty, it will automatically transfer one item from the input to the inventory..
 
-Each output also has its own output inventory, were the code can move items from the input inventory into it.
-If the inventory is full, the code can't move any further item into the output inventory.
+Each output also has its own output inventory, where the code can move items from the input inventory into it.
+If the inventory is full, the code cannot move any item into the output inventory.
 As long as the output inventory contains a item the corresponding conveyor output can grab these items.
 
 === Functions

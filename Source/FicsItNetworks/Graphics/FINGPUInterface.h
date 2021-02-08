@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Interface.h"
+#include "Network/FINNetworkTrace.h"
+
 #include "FINGPUInterface.generated.h"
 
 UINTERFACE(Blueprintable)
@@ -23,7 +25,7 @@ public:
 	 * @param[in]	screen	the new screen this GPU should get bound to.
 	 */
 	UFUNCTION()
-	virtual void BindScreen(UObject* screen) = 0;
+	virtual void BindScreen(const FFINNetworkTrace& screen) = 0;
 
 	/**
 	 * Returns the currently bound screen.
@@ -32,7 +34,7 @@ public:
 	 * @return	the currently bound screen
 	 */
 	UFUNCTION()
-	virtual UObject* GetScreen() const = 0;
+	virtual FFINNetworkTrace GetScreen() const = 0;
 
 	/**
 	* This gets called by the bound screen if it wants to get a new widget.

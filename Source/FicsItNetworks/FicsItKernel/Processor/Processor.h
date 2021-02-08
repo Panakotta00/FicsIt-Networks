@@ -50,6 +50,13 @@ namespace FicsItKernel {
 		virtual void tick(float delta) = 0;
 
 		/**
+		 * Gets called when the kernel stops or crashes.
+		 *
+		 * @param[in]	isCrash		true if the stop is caused by an creash
+		 */
+		virtual void stop(bool isCrash) {};
+
+		/**
 		* recalculates the processor memory usage
 		*
 		* @param[in]	recalc	set this to true if you want to force the processor to recalculate its memory usage

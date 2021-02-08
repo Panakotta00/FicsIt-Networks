@@ -1,6 +1,7 @@
 ﻿#include "FINNetworkConnectionComponent.h"
 
 #include "FINNetworkCable.h"
+#include "FINNetworkCableHologram.h"
 #include "FINNetworkCircuit.h"
 #include "UnrealNetwork.h"
 
@@ -66,6 +67,10 @@ void UFINNetworkConnectionComponent::RemoveConnectedNode(TScriptInterface<IFINNe
 	AFINNetworkCircuit::DisconnectNodes(this, this, Node);
 
 	GetOwner()->ForceNetUpdate();
+}
+
+TSet<AFINNetworkCable*> UFINNetworkConnectionComponent::GetConnectedCables() {
+	return ConnectedCables;
 }
 
 bool UFINNetworkConnectionComponent::AddConnectedCable(AFINNetworkCable* Cable) {

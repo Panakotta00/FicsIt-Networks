@@ -14,10 +14,17 @@ public:
 	UFINModuleSystemPanel* Snapped = nullptr;
 	FVector SnappedLoc;
 	int SnappedRot;
-	bool bIsValid;
+
+	//UPROPERTY(Replicated)
+	bool bIsValid = false;
+	bool bOldIsValid = false;
 
 	AFINModuleSystemHolo();
 	~AFINModuleSystemHolo();
+
+	// Begin AActor
+	virtual void Tick(float DeltaSeconds) override;
+	// End AActor
 
 	// Begin AFGHologram
 	virtual AActor* Construct(TArray<AActor*>& out_children, FNetConstructionID constructionID) override;
@@ -30,4 +37,7 @@ public:
 private:
 	bool checkSpace(FVector min, FVector max);
 	FVector getModuleSize();
+
+	//UFUNCTION(NetMulticast, Unreliable)
+	//void ValidChanged(bool bNewValid);
 };

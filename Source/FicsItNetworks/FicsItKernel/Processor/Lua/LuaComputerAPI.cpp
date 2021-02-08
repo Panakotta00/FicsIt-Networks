@@ -10,7 +10,8 @@
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
 	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
-	KernelSystem* kernel = processor->getKernel();
+	KernelSystem* kernel = processor->getKernel(); \
+	FLuaSyncCall SyncCall(L);
 
 
 namespace FicsItKernel {
@@ -41,19 +42,23 @@ namespace FicsItKernel {
 			lua_yield(L, 0);
 			return 0;
 		}
-#pragma optimize("", on)
 
 		int luaComputerSkipContinue(lua_State* L, int status, lua_KContext ctx) {
 			return 0;
 		}
 
-		LuaFunc(luaComputerSkip)
+		int luaComputerSkip(lua_State* L) {
+			LuaProcessor* processor = LuaProcessor::luaGetProcessor(L);
+			processor->tickHelper.shouldPromote();
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
+#pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
-			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
-			    kernel->getAudio()->beep();
+			float pitch = 1;
+			if (lua_isnumber(L, 1)) pitch = lua_tonumber(L, 1);
+			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
+			    kernel->getAudio()->beep(pitch);
 			})));
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}

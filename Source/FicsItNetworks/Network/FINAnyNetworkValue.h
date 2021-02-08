@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "FINNetworkValues.h"
-#include "FINValueReader.h"
 
 #include "FINAnyNetworkValue.generated.h"
 
@@ -29,6 +28,8 @@ struct FFINAnyNetworkValue {
 	FFINAnyNetworkValue(const FINTrace& e);
 
 	FFINAnyNetworkValue(const FINStruct& e);
+
+	FFINAnyNetworkValue(const FINArray& e);
 
 	FFINAnyNetworkValue(const FFINAnyNetworkValue& other);
 
@@ -101,7 +102,7 @@ struct FFINAnyNetworkValue {
 	 *
 	 * @return	the stored object
 	 */
-	const FINObj& GetObject() const {
+	const FINObj& GetObj() const {
 		return *Data.OBJECT;
 	}
 
@@ -125,9 +126,27 @@ struct FFINAnyNetworkValue {
 		return *Data.STRUCT;
 	}
 
-	bool Serialize(FArchive& Ar);
+	/**
+	 * Returns the network value as a network array.
+	 * Asserts if the type not array.
+	 *
+	 * @return the stored array
+	 */
+	const FINArray& GetArray() const {
+		return *Data.ARRAY;
+	}
 
-	void operator>>(FFINValueReader& Reader) const;
+	/**
+	 * Returns the the network value as a any value.
+	 * Asserts if the type is not any.
+	 *
+	 * @return	the stored trace
+	 */
+	const FINAny& GetAny() const {
+		return *Data.ANY;
+	}
+
+	bool Serialize(FArchive& Ar);
 
 private:
 	TEnumAsByte<EFINNetworkValueType> Type = FIN_NIL;
@@ -141,9 +160,18 @@ private:
 		FINObj*		OBJECT;
 		FINTrace*	TRACE;
 		FINStruct*	STRUCT;
+		FINArray*	ARRAY;
+		FINAny*		ANY;
 	} Data;
 };
 
 inline bool operator<<(FArchive& Ar, FFINAnyNetworkValue& Val) {
 	return Val.Serialize(Ar);
 }
+
+template<>
+struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFINAnyNetworkValue> {
+	enum {
+		WithSerializer = true,
+    };
+};

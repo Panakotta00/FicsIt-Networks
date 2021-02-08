@@ -1,8 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "util/Logging.h"
-
 #include "FINNetworkTrace.generated.h"
 
 /**
@@ -25,7 +23,12 @@ struct FICSITNETWORKS_API FFINNetworkTrace {
 private:
 	TSharedPtr<FFINNetworkTrace> Prev = nullptr;
 	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
+
+	UPROPERTY(SaveGame)
 	TWeakObjectPtr<UObject> Obj = nullptr;
+
+	UPROPERTY()
+	bool bDontAsk = false;
 
 public:
 	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> fallbackTraceStep;
@@ -48,6 +51,7 @@ public:
 	~FFINNetworkTrace();
 
 	bool Serialize(FArchive& Ar);
+//	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 
 	/**
 	 * Creates a copy of this network trace and adds potentially a new optimal trace step
@@ -63,6 +67,12 @@ public:
 	 * nullptr if trace is invalid
 	 */
 	UObject* operator*() const;
+
+	/**
+	 * Returns the reference object.
+	 * nullptr if trace is invalid
+	 */
+	UObject* Get() const;
 
 	/**
 	 * Accesses the referenced object.
@@ -114,6 +124,16 @@ public:
 	 * returns the underlying weak object ptr without any checks
 	 */
 	TWeakObjectPtr<UObject> GetUnderlyingPtr() const;
+
+	/**
+	 * returns the starting object of the trace
+	 */
+	TWeakObjectPtr<UObject> GetStartPtr() const;
+
+	/**
+	 * returns if the trace is valid or not
+	 */
+	operator bool() const;
 };
 
 inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
@@ -126,10 +146,9 @@ FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& Trace) {
 }
 
 template<>
-struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace>
-{
-	enum
-	{
+struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace> {
+	enum {
 		WithSerializer = true,
+//		WithNetSerializer = true,
     };
 };

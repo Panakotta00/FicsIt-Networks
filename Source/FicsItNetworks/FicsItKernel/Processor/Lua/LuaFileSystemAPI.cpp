@@ -7,7 +7,9 @@
 
 #define LuaFunc(funcName, Code) \
 int funcName(lua_State* L) { \
-	KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel(); \
+	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
+	FLuaSyncCall SyncCall(L); \
+	KernelSystem* kernel = processor->getKernel(); \
 	FicsItFS::Root* self = kernel->getFileSystem(); \
 	if (!self) return luaL_error(L, "component is invalid"); \
 	Code \
@@ -16,7 +18,9 @@ int funcName(lua_State* L) { \
 #define LuaFileFuncName(funcName) luaFile ## funcName
 #define LuaFileFunc(funcName, Code) \
 int LuaFileFuncName(funcName) (lua_State* L) { \
-	KernelSystem* kernel = LuaProcessor::luaGetProcessor(L)->getKernel(); \
+	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
+	FLuaSyncCall SyncCall(L); \
+	KernelSystem* kernel = processor->getKernel(); \
 	LuaFile* self_r = (LuaFile*)luaL_checkudata(L, 1, "File"); \
 	if (!self_r) return luaL_error(L, "file is invalid"); \
 	LuaFile& self = *self_r; \
@@ -51,6 +55,7 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 
 namespace FicsItKernel {
 	namespace Lua {
+#pragma optimize("", off)
 		LuaFunc(makeFileSystem, {
 			std::string type = luaL_checkstring(L, 1);
 			std::string name = luaL_checkstring(L, 2);
@@ -112,7 +117,7 @@ namespace FicsItKernel {
 			auto path = luaL_checkstring(L, 1);
 			auto all = lua_toboolean(L, 2);
 			try {
-				lua_pushboolean(L, self->createDir(path, all) == 0);
+				lua_pushboolean(L, self->createDir(path, all).isValid());
 			} CatchExceptionLua
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})
@@ -204,7 +209,6 @@ namespace FicsItKernel {
 			return lua_gettop(L) - 1;
 		}
 
-#pragma optimize("", off)
 		LuaFunc(doFile, {
 			FileSystem::Path path = luaL_checkstring(L, 1);
 			FileSystem::SRef<FileSystem::FileStream> file;
@@ -244,7 +248,6 @@ namespace FicsItKernel {
 			luaL_loadbufferx(L, code.c_str(), code.size(), ("@" + path.str()).c_str(), "t");
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})
-#pragma optimize("", on)
 
 		static const luaL_Reg luaFileSystemLib[] = {
 			{"makeFileSystem", makeFileSystem},
@@ -342,7 +345,10 @@ namespace FicsItKernel {
 		LuaFileFunc(ReadLine, {
 			try {
 				if (file->isEOF()) lua_pushnil(L);
-				else lua_pushstring(L, file->readLine().c_str());
+				else {
+					std::string text = file->readLine().c_str();
+                    lua_pushlstring(L, text.c_str(), text.length());
+				}
 			} CatchExceptionLua
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})
@@ -372,7 +378,7 @@ namespace FicsItKernel {
 			try {
 				text = file->readAll();
 			} CatchExceptionLua
-			lua_pushstring(L, text.c_str());
+			lua_pushlstring(L, text.c_str(), text.length());
 			return 1;
 		})
 
@@ -469,5 +475,6 @@ namespace FicsItKernel {
 			lua_pushcfunction(L, luaFileUnpersist);
 			PersistValue("FileUnpersist");
 		}
+#pragma optimize("", on)
 	}
 }

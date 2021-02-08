@@ -10,6 +10,7 @@
 #include "LuaInstance.h"
 #include "Network/FINHookSubsystem.h"
 #include "Network/FINNetworkTrace.h"
+#include "Network/Signals/FINSignalSubsystem.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -17,19 +18,12 @@ namespace FicsItKernel {
 			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
 			UObject* obj = *o;
 			if (!IsValid(obj)) luaL_error(L, "object is not valid");
-			if (obj->Implements<UFINSignalSender>()) {
-				IFINSignalSender::Execute_AddListener(obj, o.Reverse());
-				UFINSignalUtility::SetupSender(obj->GetClass());
-				AFINHookSubsystem::GetHookSubsystem(obj)->ClassesWithSignals.Add(obj->GetClass());
-			}
-
-			// Hooks
-			AFINHookSubsystem::GetHookSubsystem(obj)->AddListener(obj, o.Reverse());
-
-			net->signalSenders.Add(o);
+			AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(obj);
+			SigSubSys->Listen(obj, o.Reverse() / net->component);
 		}
 
 		int luaListen(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
@@ -47,6 +41,7 @@ namespace FicsItKernel {
 		}
 
 		int luaPull(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
 			double t = 0.0;
 			if (args > 0) t = lua_tonumber(L, 1);
@@ -70,16 +65,12 @@ namespace FicsItKernel {
 			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
 			UObject* obj = *o;
 			if (!IsValid(obj)) luaL_error(L, "object is not valid");
-			if (obj->Implements<UFINSignalSender>()) {
-				IFINSignalSender::Execute_RemoveListener(obj, o.Reverse());
-				net->signalSenders.Remove(o);
-			}
-
-			// Hooks
-			AFINHookSubsystem::GetHookSubsystem(obj)->RemoveListener(obj, *o.Reverse());
+			AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(obj);
+			SigSubSys->Ignore(obj, *o.Reverse());
 		}
 
 		int luaIgnore(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
@@ -91,18 +82,11 @@ namespace FicsItKernel {
 		}
 
 		int luaIgnoreAll(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
 			auto net = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork();
-			TSet<FFINNetworkTrace> senders = net->signalSenders;
-			for (FFINNetworkTrace sender : senders) {
-				UObject* s = *sender;
-				if (s) {
-					FFINNetworkTrace listener = sender.Reverse();
-					IFINSignalSender::Execute_RemoveListener(s, listener);
-					AFINHookSubsystem::GetHookSubsystem(net->component)->RemoveListener(s, net->component);
-				}
-			}
-			net->signalSenders.Empty();
-			return 1;
+			AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(net->component);
+			SigSubSys->IgnoreAll(net->component);
+			return LuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaClear(lua_State* L) {

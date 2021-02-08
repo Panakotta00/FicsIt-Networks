@@ -18,7 +18,7 @@ public:
 	// End UActorComponent
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void beep();
+	void beep(float Pitch);
 };
 
 namespace FicsItKernel {
@@ -33,7 +33,7 @@ namespace FicsItKernel {
 			AudioComponentController(UFINAudioComponentControllerTrampoline* Trampoline);
 
 			// Begin AudioController
-			virtual void beep() override;
+			virtual void beep(float Pitch) override;
 			// End AudioController
 		};
 	}

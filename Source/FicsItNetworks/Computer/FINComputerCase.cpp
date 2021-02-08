@@ -11,11 +11,9 @@
 #include "FINComputerFloppyDesc.h"
 #include "FINComputerNetworkCard.h"
 #include "FINComputerSubsystem.h"
-#include "FINConfig.h"
 #include "UnrealNetwork.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Audio/AudioComponentController.h"
-#include "util/Logging.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -77,10 +75,9 @@ void AFINComputerCase::Serialize(FArchive& Ar) {
 void AFINComputerCase::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 	
-	kernel = new FicsItKernel::KernelSystem();
+	kernel = new FicsItKernel::KernelSystem(this);
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
-	if (finConfig->HasField("SignalQueueSize")) kernel->getNetwork()->maxSignalCount = finConfig->GetIntegerField("SignalQueueSize");
 	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(SpeakerTrampoline));
 }
 
@@ -142,24 +139,26 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
-	KernelTickTime += dt;
-	if (KernelTickTime > 10.0) KernelTickTime = 10.0;
+	if (kernel) {
+		KernelTickTime += dt;
+		if (KernelTickTime > 10.0) KernelTickTime = 10.0;
 
-	float KernelTicksPerSec = 1.0;
-	if (Processors.Num() >= 1) KernelTicksPerSec = Processors.begin().ElementIt->Value->KernelTicksPerSecond;
+		float KernelTicksPerSec = 1.0;
+		if (Processors.Num() >= 1) KernelTicksPerSec = Processors.begin().ElementIt->Value->KernelTicksPerSecond;
 
-	while (KernelTickTime > 1.0/KernelTicksPerSec) {
-		KernelTickTime -= 1.0/KernelTicksPerSec;
-		//auto n = std::chrono::high_resolution_clock::now();
-		kernel->tick(dt);
-		//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
-		//SML::Logging::debug("Computer tick: ", dur.count());
+		while (KernelTickTime > 1.0/KernelTicksPerSec) {
+			KernelTickTime -= 1.0/KernelTicksPerSec;
+			//auto n = std::chrono::high_resolution_clock::now();
+			kernel->tick(dt);
+			//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
+			//SML::Logging::debug("Computer tick: ", dur.count());
 		
-		FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
-        if (dev) {
-        	SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
-			SerialOutput = SerialOutput.Right(1000);
-        }
+			FileSystem::SRef<FicsItKernel::FicsItFS::DevDevice> dev = kernel->getDevDevice();
+			if (dev && dev->getSerial()) {
+				SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(dev->getSerial()->readOutput().c_str()));
+				SerialOutput = SerialOutput.Right(1000);
+			}
+		}
 	}
 }
 
@@ -413,7 +412,7 @@ void AFINComputerCase::WriteSerialInput(const FString& str) {
 	}
 }
 
-void AFINComputerCase::HandleSignal(const FFINDynamicStructHolder& signal, const FFINNetworkTrace& sender) {
+void AFINComputerCase::HandleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
 	if (kernel) kernel->getNetwork()->pushSignal(signal, sender);
 }
 

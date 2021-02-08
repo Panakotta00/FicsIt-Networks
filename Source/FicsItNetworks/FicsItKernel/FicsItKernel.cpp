@@ -1,20 +1,25 @@
 #include "FicsItKernel.h"
 
 #include "KernelSystemSerializationInfo.h"
+#include "Computer/FINComputerCase.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "Network/FINFuture.h"
 #include "Processor/Lua/LuaProcessor.h"
-#include "SML/util/Logging.h"
+#include "Reflection/FINReflection.h"
 
 namespace FicsItKernel {
 	KernelCrash::KernelCrash(std::string what) : std::exception(what.c_str()) {}
 
 	KernelCrash::~KernelCrash() {}
 
-	KernelSystem::KernelSystem() : listener(new KernelListener(this)) {}
+	KernelSystem::KernelSystem(UObject* Owner) : Owner(Owner), listener(new KernelListener(this)) {}
 
-	KernelSystem::~KernelSystem() {}
+	KernelSystem::~KernelSystem() {
+		stop();
+		if (processor) processor->setKernel(nullptr);
+		processor.reset();
+	}
 
 	void KernelSystem::tick(float deltaSeconds) {
 		if (getState() == RESET) if (!start(true)) return;
@@ -40,6 +45,10 @@ namespace FicsItKernel {
 	}
 
 	void KernelSystem::setProcessor(Processor* newProcessor) {
+		stop();
+		if (getProcessor()) {
+			getProcessor()->setKernel(nullptr);
+		}
 		processor = std::unique_ptr<Processor>(newProcessor);
 		if (getProcessor()) {
 			newProcessor->setKernel(this);
@@ -165,6 +174,8 @@ namespace FicsItKernel {
 		// clear filesystem
 		filesystem = FicsItFS::Root();
 
+		if (processor) processor->stop(false);
+		
 		// finish stop
 		return true;
 	}
@@ -176,6 +187,8 @@ namespace FicsItKernel {
 		// set state & crash
 		state = CRASHED;
 		kernelCrash = crash;
+
+		if (processor) processor->stop(true);
 		
 		if (getDevDevice()) try {
 			auto serial = getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
@@ -184,17 +197,17 @@ namespace FicsItKernel {
 				serial->close();
 			}
 		} catch (std::exception ex) {
-			SML::Logging::error(ex.what());
+			UE_LOG(LogFicsItNetworks, Error, TEXT("%s"), *FString(ex.what()));
 		}
 	}
 
 	void KernelSystem::recalculateResources(Recalc components) {
+		FileSystem::SRef<FicsItFS::DevDevice> dev = filesystem.getDevDevice();
+		
 		memoryUsage = processor->getMemoryUsage(components & PROCESSOR);
 		memoryUsage += filesystem.getMemoryUsage(components & FILESYSTEM);
-		memoryUsage += devDevice->getSerial()->getSize();
-
+		if (dev && dev->getSerial().isValid()) memoryUsage += devDevice->getSerial()->getSize();
 		if (memoryUsage > memoryCapacity) crash({"out of memory"});
-		FileSystem::SRef<FicsItFS::DevDevice> dev = filesystem.getDevDevice();
 		if (dev) dev->updateCapacity(memoryCapacity - memoryUsage);
 	}
 
@@ -293,7 +306,6 @@ namespace FicsItKernel {
 		} else if (Ar.IsLoading()) {
 			// Deserialize processor
 			if (proc) {
-				checkf(processor.get(), L"Tryed to unpersist processor state but no processor set");
 				UClass* storageClass = nullptr;
 				Ar << storageClass;
 				OutSystemState.processorState = Cast<UProcessorStateStorage>(NewObject<UProcessorStateStorage>(GetTransientPackage(), storageClass));
@@ -340,26 +352,38 @@ namespace FicsItKernel {
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
 
 	void KernelListener::onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 4ll, FString(path.str().c_str()));
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {4ll, FString(path.str().c_str())});
 	}
 
 	void KernelListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 5ll, FString(path.str().c_str()));
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {5ll, FString(path.str().c_str())});
 	}
 
 	void KernelListener::onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 0ll, FString(path.str().c_str()), (FINInt)type);
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {0ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 	}
 
 	void KernelListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 1ll, FString(path.str().c_str()), (FINInt)type);
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {1ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 	}
 
 	void KernelListener::onNodeChanged(FileSystem::Path path, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 2ll, FString(path.str().c_str()), (FINInt)type);
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {2ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 	}
 
 	void KernelListener::onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) {
-		parent->getNetwork()->pushSignalKernel("FileSystemUpdate", 3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), (FINInt)type);
+		static UFINSignal* Signal = nullptr;
+		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+		Signal->Trigger(parent->Owner, {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FINInt>(type)});
 	}
 }

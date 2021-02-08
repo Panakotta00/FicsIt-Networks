@@ -6,8 +6,8 @@ namespace FicsItKernel {
 			this->Trampoline = Trampoline;
 		}
 
-		void AudioComponentController::beep() {
-			Trampoline->beep();
+		void AudioComponentController::beep(float Pitch) {
+			Trampoline->beep(Pitch);
 		}
 	}
 }
@@ -20,8 +20,9 @@ bool UFINAudioComponentControllerTrampoline::IsSupportedForNetworking() const {
 	return true;
 }
 
-void UFINAudioComponentControllerTrampoline::beep_Implementation() {
+void UFINAudioComponentControllerTrampoline::beep_Implementation(float Pitch) {
 	if (IsValid(Speaker)) {
+		Speaker->SetPitchMultiplier(Pitch);
 		Speaker->Play();
 	}
 }

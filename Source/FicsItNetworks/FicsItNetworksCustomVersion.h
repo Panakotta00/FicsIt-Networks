@@ -4,7 +4,6 @@
 #include "Misc/Guid.h"
 #include "FicsItNetworksCustomVersion.generated.h"
 
-
 UENUM(BlueprintType)
 enum EFINCustomVersion {
 	// Before any version changes were made

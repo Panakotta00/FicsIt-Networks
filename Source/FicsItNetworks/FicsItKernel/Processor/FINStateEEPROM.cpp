@@ -5,6 +5,18 @@ AFINStateEEPROM::AFINStateEEPROM() {
 
 	bReplicates = true;
 	bAlwaysRelevant = true;
+
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(true);
+}
+
+void AFINStateEEPROM::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+
+	if (bShouldUpdate) {
+		bShouldUpdate = false;
+		OnCodeUpdate();
+	}
 }
 
 bool AFINStateEEPROM::ShouldSave_Implementation() const {

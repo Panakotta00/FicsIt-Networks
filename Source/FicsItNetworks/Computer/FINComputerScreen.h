@@ -2,7 +2,6 @@
 
 #include "Computer/FINComputerModule.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
-#include "Network/FINNetworkCustomType.h"
 
 #include "FINComputerScreen.generated.h"
 
@@ -10,15 +9,20 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenWidgetUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenGPUUpdate);
 
 UCLASS()
-class AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface, public IFINNetworkCustomType {
+class AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface {
 	GENERATED_BODY()
 	
 private:
 	UPROPERTY(SaveGame, Replicated)
-	UObject* GPU = nullptr;
+	FFINNetworkTrace GPU;
+
+	UPROPERTY(Replicated)
+	UObject* GPUPtr = nullptr;
 	
 public:
 	TSharedPtr<SWidget> Widget;
+
+	AFINComputerScreen();
 
 	/**
 	 * This event gets triggered when a new widget got set by the GPU
@@ -33,7 +37,9 @@ public:
     FScreenGPUUpdate OnGPUUpdate;
 
 	// Begin AActor
+	virtual void BeginPlay() override;
 	void EndPlay(const EEndPlayReason::Type endPlayReason);
+	virtual void Tick(float DeltaSeconds) override;
 	// End AActor
 	
 	// Begin IFGSaveInterface
@@ -41,15 +47,15 @@ public:
 	// End IFGSaveInterface
 	
     // Begin IFINScreen
-    virtual void BindGPU(UObject* gpu) override;
-	virtual UObject* GetGPU() const override;
+    virtual void BindGPU(const FFINNetworkTrace& gpu) override;
+	virtual FFINNetworkTrace GetGPU() const override;
 	virtual void SetWidget(TSharedPtr<SWidget> widget) override;
 	virtual TSharedPtr<SWidget> GetWidget() const override;
+	virtual void RequestNewWidget() override;
 	// End IFINScreen
-	
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ScreenDriver"); }
-	// End IFINNetworkCustomType
+
+	UFUNCTION(NetMulticast, Reliable)
+	void OnGPUValidChanged(bool bValid, UObject* newGPU);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_OnGPUUpdate();

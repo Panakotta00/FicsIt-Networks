@@ -1,5 +1,5 @@
 = Speaker Pole
-:description: The speakers pole allows you to play custom sounds.
+:description: The speaker pole allows you to play custom sounds.
 
 [cols="1,3a"]
 |===
@@ -18,7 +18,7 @@
 |image::buildings/SpeakerPole_ig.jpg[300,300,role="left"]
 |===
 
-The Speaker Pole is a network component buildable wich provides the functionallity to play custom sound files ingame.
+The Speaker Pole is a network component buildable which provides the functionality to play custom sound files ingame.
 
 With the speaker you can create f.e. a alert sound when you run low on Modular Frames.
 
@@ -51,7 +51,7 @@ Stops the current playing sound
 
 ==== `setRange(number range)`
 
-Sets the range in which the speaker is hearable.
+Sets the range in which the speaker is audible.
 
 Parameters::
 +
@@ -66,7 +66,7 @@ Parameters::
 
 ==== `number getRange()`
 
-Returns the range in which the speaker is hearable.
+Returns the range in which the speaker is audible.
 
 Return Values::
 +
@@ -113,7 +113,7 @@ Return Values::
 
 ==== `SpeakerSound(int type, string sound)`
 
-This Signals gets pushed when f.e. the sound playing status changes.
+This signal gets pushed when f.e. the sound playing status changes.
 
 If the state changes over two steps (sound was playing but valid playSound gets called) multiple signals will get pushed in the corresponding order (type=1 and then type=0)
 
@@ -125,7 +125,7 @@ Parameters::
 
 |type
 |int
-|integer allowing to further sepperate different events
+|integer allowing to further separate different events
 
 - `0`
 +
