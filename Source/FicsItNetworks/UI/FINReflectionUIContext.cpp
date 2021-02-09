@@ -599,15 +599,12 @@ TSharedRef<SWidget> FFINReflectionUIProperty::GetDetailsWidget() {
             +SVerticalBox::Slot()
             .AutoHeight()
             .Padding(5)[
-                SNew(SHorizontalBox)
-                +SHorizontalBox::Slot()
-                .FillWidth(1)[
-                    GetPreview()
-                ]
-                +SHorizontalBox::Slot()
-                .AutoWidth()[
-                    Parent.Pin()->GetLink()
-                ]
+                GetPreview()
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+	        .Padding(5)[
+                Parent.Pin()->GetLink()
             ]
             +SVerticalBox::Slot()
             .AutoHeight()
@@ -708,15 +705,12 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetDetailsWidget() {
             +SVerticalBox::Slot()
             .AutoHeight()
             .Padding(5)[
-                SNew(SHorizontalBox)
-                +SHorizontalBox::Slot()
-                .FillWidth(1)[
-                	GetPreview()
-                ]
-                +SHorizontalBox::Slot()
-                .AutoWidth()[
-                	Parent.Pin()->GetLink()
-                ]
+                GetPreview()
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(5)[
+                Parent.Pin()->GetLink()
             ]
             +SVerticalBox::Slot()
             .AutoHeight()
@@ -885,15 +879,12 @@ TSharedRef<SWidget> FFINReflectionUISignal::GetDetailsWidget() {
             +SVerticalBox::Slot()
             .AutoHeight()
             .Padding(5)[
-                SNew(SHorizontalBox)
-                +SHorizontalBox::Slot()
-                .FillWidth(1)[
-                    GetPreview()
-                ]
-                +SHorizontalBox::Slot()
-                .AutoWidth()[
-                    Parent.Pin()->GetLink()
-                ]
+                GetPreview()
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(5)[
+                Parent.Pin()->GetLink()
             ]
             +SVerticalBox::Slot()
             .AutoHeight()

@@ -64,7 +64,7 @@ namespace FicsItKernel {
 					UFINClass* FINClass = Cast<UFINClass>(Obj.Get());
 					if (FINClass) {
 						UClass* Class = Cast<UClass>(FINClass->GetOuter());
-						comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByClass(Class);
+						comps = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->getComponentByClass(Class, true);
 					}
 				}
 				int j = 0;
@@ -81,29 +81,9 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, args);
 		}
 
-		int luaFindItem(lua_State* L) {
-			FLuaSyncCall SyncCall(L);
-			int nargs = lua_gettop(L);
-			if (nargs < 1) return LuaProcessor::luaAPIReturn(L, 0);
-			const char* str = luaL_tolstring(L, -1, 0);
-
-			TArray<TSubclassOf<UFGItemDescriptor>> items;
-			UFGBlueprintFunctionLibrary::Cheat_GetAllDescriptors(items);
-			if (str) for (TSubclassOf<UFGItemDescriptor> item : items) {
-				if (IsValid(item) && UFGItemDescriptor::GetItemName(item).ToString() == FString(str)) {
-					newInstance(L, item);
-					return LuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
-
-			lua_pushnil(L);
-			return LuaProcessor::luaAPIReturn(L, 1);
-		}
-
 		static const luaL_Reg luaComponentLib[] = {
 			{"proxy", luaComponentProxy},
 			{"findComponent", luaFindComponent},
-			{"findItem", luaFindItem},
 			{NULL,NULL}
 		};
 

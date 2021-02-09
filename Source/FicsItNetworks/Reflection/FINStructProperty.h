@@ -19,7 +19,7 @@ public:
 			if (Property->Struct == FFINDynamicStructHolder::StaticStruct()) {
 				Value = *Property->ContainerPtrToValuePtr<FFINDynamicStructHolder>(Ctx.GetGeneric());
 			} else {
-				Value = FFINDynamicStructHolder(Property->Struct, Property->ContainerPtrToValuePtr<void>(Ctx.GetGeneric()));
+				Value = FFINDynamicStructHolder::Copy(Property->Struct, Property->ContainerPtrToValuePtr<void>(Ctx.GetGeneric()));
 			}
 		} else {
 			Value = Super::GetValue(Ctx);

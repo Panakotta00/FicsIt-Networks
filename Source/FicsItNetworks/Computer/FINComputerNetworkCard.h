@@ -162,18 +162,18 @@ public:
 	}
 
 	UFUNCTION()
-	void netSig_NetworkMessage(int port, const FString& sender, const TArray<FFINAnyNetworkValue>& varargs) {}
+	void netSig_NetworkMessage(const FString& sender, int port, const TArray<FFINAnyNetworkValue>& varargs) {}
 	UFUNCTION()
     void netSigMeta_NetworkMessage(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "NetworkMessage";
 		DisplayName = FText::FromString("Network Message");
 		Description = FText::FromString("Triggers when the network card receives a network message on one of its opened ports. The additional arguments are the data that is contained within the network message.");
-		ParameterInternalNames.Add("port");
-		ParameterDisplayNames.Add(FText::FromString("Port"));
-		ParameterDescriptions.Add(FText::FromString("The port on which the network message got sent."));
 		ParameterInternalNames.Add("sender");
 		ParameterDisplayNames.Add(FText::FromString("Sender"));
 		ParameterDescriptions.Add(FText::FromString("The component id of the sender of the network message."));
+		ParameterInternalNames.Add("port");
+		ParameterDisplayNames.Add(FText::FromString("Port"));
+		ParameterDescriptions.Add(FText::FromString("The port on which the network message got sent."));
 		Runtime = 1;
 	}
 };

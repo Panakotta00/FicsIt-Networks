@@ -38,7 +38,7 @@ public:
 					Param->SetValue(ParamStruct, Params[i++]);
 				}
 			}
-			if (GetFunctionFlags() & FIN_Func_VarArgs && Params.Num() > i+1) {
+			if (GetFunctionFlags() & FIN_Func_VarArgs && Params.Num() > i) {
 				TArray<FFINAnyNetworkValue> VarArgs = TArray<FFINAnyNetworkValue>(&Params[i], Params.Num()-i);
 				VarArgsProperty->SetValue(ParamStruct, VarArgs);
 				i = Params.Num();

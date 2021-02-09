@@ -10,9 +10,12 @@ FINAny FFINPropertyGetterFunc::operator()(const FFINExecutionContext& Ctx, bool*
 		check(Obj != nullptr);
 		uint8* Params = (uint8*)FMemory::Malloc(Function->PropertiesSize);
 		FMemory::Memzero(Params + Function->ParmsSize, Function->PropertiesSize - Function->ParmsSize);
-		Function->InitializeStruct(Params);
+		/*Function->InitializeStruct(Params);
 		for (UProperty* LocalProp = Function->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 			LocalProp->InitializeValue_InContainer(Params);
+		}*/
+		for (TFieldIterator<UProperty> Prop(Function); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) Prop->InitializeValue_InContainer(Params);
 		}
 		Obj->ProcessEvent(Function, Params);
 		FINAny Return = Property->GetValue(FFINExecutionContext(Params));

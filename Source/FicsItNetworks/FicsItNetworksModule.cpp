@@ -167,9 +167,8 @@ void FFicsItNetworksModule::StartupModule(){
 		}
 	});
 
-
 	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGGameState, AFGGameState::Init, [](AFGGameState* state) {
-		FSlateStyleRegistry::UnRegisterSlateStyle(FFINReflectionStyles::GetStyleSetName());
+		FFINReflectionStyles::Shutdown();
 		FFINReflectionStyles::Initialize();
 		
 		AFINNetworkAdapter::RegisterAdapterSettings();
@@ -177,7 +176,6 @@ void FFicsItNetworksModule::StartupModule(){
 		
 	    FFINReflection::Get()->PopulateSources();
 		FFINReflection::Get()->LoadAllTypes();
-		FFINReflection::Get()->PrintReflection();
 	})
 
 #if WITH_EDITOR

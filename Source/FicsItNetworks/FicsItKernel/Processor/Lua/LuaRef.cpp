@@ -12,13 +12,21 @@ namespace FicsItKernel {
 			// get input parameters from lua stack
 			TArray<FINAny> Input;
 			int args = lua_gettop(L);
-			for (int i = 2; i <= args; ++i) {
+			int paramsLoaded = 2;
+			for (UFINProperty* Param : Func->GetParameters()) {
+				if (Param->GetPropertyFlags() & FIN_Prop_Param && !(Param->GetPropertyFlags() & (FIN_Prop_OutParam | FIN_Prop_RetVal))) {
+					FINAny NewParam = luaToProperty(L, Param, paramsLoaded++);
+					Input.Add(NewParam);
+				}
+			}
+			for (; paramsLoaded <= args; ++paramsLoaded) {
 				FINAny Param;
-				luaToNetworkValue(L, i, Param);
+				luaToNetworkValue(L, paramsLoaded, Param);
 				Input.Add(Param);
 			}
 			args = 0;
-			
+
+			// sync tick if necessary
 			EFINFunctionFlags FuncFlags = Func->GetFunctionFlags();
 			TSharedPtr<FLuaSyncCall> SyncCall;
 			bool bRunDirectly = false;
@@ -52,9 +60,9 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, args);
 		}
 
-		int luaFindGetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, const FString& MetaName, int(*callFunc)(lua_State*)) {
+		int luaFindGetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, const FString& MetaName, int(*callFunc)(lua_State*), bool classInstance) {
 			// try to find property
-			UFINProperty* Property = Struct->FindFINProperty(MemberName);
+			UFINProperty* Property = Struct->FindFINProperty(MemberName, classInstance ? FIN_Prop_ClassProp : FIN_Prop_Attrib);
 			if (Property) {
 				TSharedPtr<FLuaSyncCall> SyncCall;
 				if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
@@ -71,7 +79,7 @@ namespace FicsItKernel {
 			}																											// Instance, FuncName, InstanceCache, nil
 
 			// try to find function
-			UFINFunction* Function = Struct->FindFINFunction(MemberName);
+			UFINFunction* Function = Struct->FindFINFunction(MemberName, classInstance ? FIN_Func_ClassFunc : FIN_Func_MemberFunc);
 			if (Function) {
 				LuaRefFuncData* Func = static_cast<LuaRefFuncData*>(lua_newuserdata(L, sizeof(LuaRefFuncData)));
 				new (Func) LuaRefFuncData{Struct, Function};
@@ -83,9 +91,9 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, 0);
 		}
 
-		int luaFindSetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName) {
+		int luaFindSetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, bool classInstance) {
 			// try to find property
-			UFINProperty* Property = Struct->FindFINProperty(MemberName);
+			UFINProperty* Property = Struct->FindFINProperty(MemberName, classInstance ? FIN_Prop_ClassProp : FIN_Prop_Attrib);
 			if (Property) {
 				TSharedPtr<FLuaSyncCall> SyncCall;
 				if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);

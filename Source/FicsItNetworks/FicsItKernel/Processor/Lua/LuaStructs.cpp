@@ -122,7 +122,7 @@ namespace FicsItKernel {
 			StructMetaNameLock.Lock();
 			FString MetaName = StructToMetaName[Type];
 			StructMetaNameLock.Unlock();
-			return luaFindGetMember(L, Type, FFINExecutionContext(Struct->GetData()), MemberName, MetaName + "_" + MemberName, &luaStructFuncCall);
+			return luaFindGetMember(L, Type, FFINExecutionContext(Struct->GetData()), MemberName, MetaName + "_" + MemberName, &luaStructFuncCall, false);
 		}
 
 		int luaStructNewIndex(lua_State* L) {
@@ -138,7 +138,7 @@ namespace FicsItKernel {
 				return luaL_error(L, "Struct is invalid");
 			}
 			
-			return luaFindSetMember(L, Type, FFINExecutionContext(Struct->GetData()), MemberName);
+			return luaFindSetMember(L, Type, FFINExecutionContext(Struct->GetData()), MemberName, false);
 		}
 
 		int luaStructEQ(lua_State* L) {

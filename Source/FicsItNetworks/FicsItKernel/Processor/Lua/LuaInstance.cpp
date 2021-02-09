@@ -1,6 +1,7 @@
 #include "LuaInstance.h"
 
 
+#include "FGBlueprintFunctionLibrary.h"
 #include "LuaFuture.h"
 #include "LuaProcessor.h"
 #include "LuaProcessorStateStorage.h"
@@ -151,7 +152,7 @@ namespace FicsItKernel {
 			ClassMetaNameLock.Lock();
 			FString MetaName = ClassToMetaName[Class];
 			ClassMetaNameLock.Unlock();
-			return luaFindGetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, MetaName + "_" + MemberName, &luaInstanceFuncCall);
+			return luaFindGetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, MetaName + "_" + MemberName, &luaInstanceFuncCall, false);
 		}
 
 		int luaInstanceNewIndex(lua_State* L) {
@@ -181,7 +182,7 @@ namespace FicsItKernel {
 				}
 			}
 
-			return luaFindSetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName);
+			return luaFindSetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, false);
 		}
 
 		int luaInstanceEQ(lua_State* L) {
@@ -363,8 +364,8 @@ namespace FicsItKernel {
 			}
 			FString MetaName = *MetaNamePtr;
 			ClassMetaNameLock.Unlock();
-			LuaInstance* Instance = (LuaInstance*) luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName));
-			UObject* Obj = *Instance->Trace;
+			LuaClassInstance* Instance = (LuaClassInstance*) luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName));
+			UObject* Obj = Instance->Class;
 			if (!Obj) return luaL_argerror(L, 1, "ClassInstance is invalid");
 
 			// call the function
@@ -388,7 +389,7 @@ namespace FicsItKernel {
 			ClassClassMetaNameLock.Lock();
 			FString MetaName = ClassToClassMetaName[Type];
 			ClassClassMetaNameLock.Unlock();
-			return luaFindGetMember(L, Type, FFINExecutionContext(Class), MemberName, MetaName + "_" + MemberName, &luaClassInstanceFuncCall);
+			return luaFindGetMember(L, Type, FFINExecutionContext(Class), MemberName, MetaName + "_" + MemberName, &luaClassInstanceFuncCall, true);
 		}
 
 		int luaClassInstanceNewIndex(lua_State* L) {
@@ -405,7 +406,7 @@ namespace FicsItKernel {
 				return luaL_error(L, "ClassInstance is invalid");
 			}
 			
-			return luaFindSetMember(L, Type, FFINExecutionContext(Class), MemberName);
+			return luaFindSetMember(L, Type, FFINExecutionContext(Class), MemberName, true);
 		}
 
 		int luaClassInstanceEQ(lua_State* L) {
@@ -598,6 +599,25 @@ namespace FicsItKernel {
 			return LuaProcessor::luaAPIReturn(L, args);
 		}
 
+		int luaFindItem(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
+			int nargs = lua_gettop(L);
+			if (nargs < 1) return LuaProcessor::luaAPIReturn(L, 0);
+			const char* str = luaL_tolstring(L, -1, 0);
+
+			TArray<TSubclassOf<UFGItemDescriptor>> items;
+			UFGBlueprintFunctionLibrary::Cheat_GetAllDescriptors(items);
+			if (str) for (TSubclassOf<UFGItemDescriptor> item : items) {
+				if (IsValid(item) && UFGItemDescriptor::GetItemName(item).ToString() == FString(str)) {
+					newInstance(L, item);
+					return LuaProcessor::luaAPIReturn(L, 1);
+				}
+			}
+
+			lua_pushnil(L);
+			return LuaProcessor::luaAPIReturn(L, 1);
+		}
+
 		void setupInstanceSystem(lua_State* L) {
 			PersistSetup("InstanceSystem", -2);
 			
@@ -613,6 +633,9 @@ namespace FicsItKernel {
 
 			lua_register(L, "findStruct", luaFindStruct);
 			PersistGlobal("findStruct");
+
+			lua_register(L, "findItem", luaFindItem);
+			PersistGlobal("findItem");
 
 			lua_pushcfunction(L, luaInstanceFuncCall);			// ..., InstanceFuncCall
 			PersistValue("InstanceFuncCall");					// ...

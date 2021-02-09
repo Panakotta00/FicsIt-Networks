@@ -74,6 +74,11 @@ namespace FicsItKernel {
 			if (!(State & LUA_SYNC)) {
 				demote();
 			}
+			if (asyncTask.IsValid() && !asyncTask->IsIdle()) {
+				asyncTask->EnsureCompletion();
+				asyncTask->Cancel();
+				asyncTask.Reset();
+			}
 		}
 
 		void LuaProcessorTick::promote() {
@@ -84,8 +89,8 @@ namespace FicsItKernel {
 				asyncTask = nullptr;
 			}
 			asyncTask = MakeShared<FAsyncTask<FLuaTickRunnable>>(this);
-			asyncTask->StartBackgroundTask();
 			TickMutex.Lock();
+			asyncTask->StartBackgroundTask();
 			State = LUA_ASYNC;
 			TickMutex.Unlock();
 		}
@@ -107,6 +112,7 @@ namespace FicsItKernel {
 			if (State & LUA_SYNC) return;
 			AsyncSyncMutex.Lock();
 			AsyncSync = TPromise<void>();
+			SyncAsync = TPromise<void>();
 			TFuture<void> Future = AsyncSync.GetFuture();
 			bDoSync = true;
 			AsyncSyncMutex.Unlock();
@@ -132,6 +138,7 @@ namespace FicsItKernel {
 			ToCrash = Crash;
 		}
 
+#pragma optimize("", off)
 		void LuaProcessorTick::syncTick() {
 			if (postTick()) return;
 			if (State & LUA_SYNC) {
@@ -158,10 +165,15 @@ namespace FicsItKernel {
 					AsyncSyncMutex.Lock();
 					bDoSync = false;
 					AsyncSyncMutex.Unlock();
+				} else {
+					if (asyncTask->IsDone()) {
+						asyncTask->StartBackgroundTask();
+					}
 				}
 			}
 			if (postTick()) return;
 		}
+		
 		bool LuaProcessorTick::asyncTick() {
 			if (State & LUA_ASYNC) {
 				TickMutex.Lock();
@@ -170,6 +182,7 @@ namespace FicsItKernel {
 				AsyncSyncMutex.Lock();
 				if (bDoSync) {
 					SyncAsync.EmplaceValue();
+					bDoSync = false;
 				}
 				AsyncSyncMutex.Unlock();
 				if (bShouldDemote) {
@@ -179,6 +192,9 @@ namespace FicsItKernel {
 					return false;
 				}
 				if (bShouldCrash || bShouldStop) {
+					TickMutex.Lock();
+					State = LUA_SYNC;
+					TickMutex.Unlock();
 					return false;
 				}
 				return true;
@@ -198,7 +214,6 @@ namespace FicsItKernel {
 			return false;
 		}
 
-#pragma optimize("", off)
 		void LuaProcessorTick::tickHook(lua_State* L) {
 			switch (State) {
 			case LUA_SYNC:
