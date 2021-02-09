@@ -113,8 +113,8 @@ public:
 	bool netFunc_canOutput(int output);
 	UFUNCTION()
     void netFuncMeta_canOutput(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
-		InternalName = "getInput";
-		DisplayName = FText::FromString("Get Input");
+		InternalName = "canOutput";
+		DisplayName = FText::FromString("Can Output");
 		Description = FText::FromString("Allows to check if we can transfer an item to the given output queue.");
 		ParameterInternalNames.Add("output");
 		ParameterDisplayNames.Add(FText::FromString("Output"));

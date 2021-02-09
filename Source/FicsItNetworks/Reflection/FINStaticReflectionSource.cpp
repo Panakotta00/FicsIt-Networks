@@ -36,6 +36,7 @@
 #include "FINFloatProperty.h"
 #include "FINReflection.h"
 #include "FINStaticReflectionSourceHooks.h"
+#include "FINStrProperty.h"
 #include "FINTraceProperty.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "util/ReflectionHelper.h"
@@ -471,7 +472,7 @@ struct RString {
 	typedef FINStr CppType;
 	static FINStr Get(const FINAny& Any) { return Any.GetString(); }
 	static UFINProperty* PropConstructor(UObject* Outer) {
-		return NewObject<UFINStructProperty>(Outer);
+		return NewObject<UFINStrProperty>(Outer);
 	}
 };
 

@@ -6,7 +6,11 @@
 #include "LuaProcessor.h"
 #include "LuaStructs.h"
 #include "Network/FINNetworkComponent.h"
+#include "Reflection/FINArrayProperty.h"
+#include "Reflection/FINClassProperty.h"
+#include "Reflection/FINObjectProperty.h"
 #include "Reflection/FINStruct.h"
+#include "Reflection/FINTraceProperty.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -104,6 +108,69 @@ namespace FicsItKernel {
 			}
 		}
 
+		FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index) {
+			switch (Prop->GetType()) {
+			case FIN_NIL:
+				return FINAny();
+			case FIN_BOOL:
+				return static_cast<FINBool>(lua_toboolean(L, Index));
+			case FIN_INT:
+				return static_cast<FINInt>(luaL_checkinteger(L, Index));
+			case FIN_FLOAT:
+				return static_cast<FINFloat>(luaL_checknumber(L, Index));
+			case FIN_STR:
+				return static_cast<FINStr>(luaL_checkstring(L, Index));
+			case FIN_OBJ: {
+				UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Prop);
+				if (ObjProp && ObjProp->GetSubclass()) {
+					return static_cast<FINObj>(getObjInstance(L, Index, ObjProp->GetSubclass()).Get());
+				}
+				return static_cast<FINObj>(getObjInstance(L, Index).Get());
+			} case FIN_CLASS: {
+				UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Prop);
+				if (ClassProp && ClassProp->GetSubclass()) {
+					return static_cast<FINClass>(getClassInstance(L, Index, ClassProp->GetSubclass()));
+				}
+				return static_cast<FINClass>(getObjInstance(L, Index).Get());
+			} case FIN_TRACE: {
+				UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Prop);
+				if (TraceProp && TraceProp->GetSubclass()) {
+					return static_cast<FINTrace>(getObjInstance(L, Index, TraceProp->GetSubclass()));
+				}
+				return static_cast<FINTrace>(getObjInstance(L, Index));
+			} case FIN_STRUCT: {
+				UFINStructProperty* StructProp = Cast<UFINStructProperty>(Prop);
+				if (StructProp && StructProp->GetInner()) {
+					TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(StructProp->GetInner());
+					luaGetStruct(L, Index, Struct);
+					return *Struct;
+				}
+				return *luaGetStruct(L, Index);
+			} case FIN_ARRAY: {
+				luaL_checktype(L, Index, LUA_TTABLE);
+				UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Prop);
+				FINArray Array;
+				while (lua_next(L, Index) != 0) {
+					if (!lua_isinteger(L, -1)) break;
+					FINAny Value;
+					if (ArrayProp && ArrayProp->GetInnerType()) {
+						Value = luaToProperty(L, ArrayProp->GetInnerType(), -1);
+					} else {
+						luaToNetworkValue(L, -1, Value);
+					}
+					Array.Add(Value);
+					lua_pop(L, 1);
+				}
+				return static_cast<FINArray>(Array);
+			} case FIN_ANY: {
+				FINAny Value;
+				luaToNetworkValue(L, Index, Value);
+				return Value;
+			} default: ;
+			}
+			return FINAny();
+		}
+
 		void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val) {
 			switch (lua_type(L, i)) {
 			case LUA_TNIL:
@@ -134,6 +201,11 @@ namespace FicsItKernel {
 				FFINNetworkTrace Trace = getObjInstance(L, i);
 				if (Trace.IsValid()) {
 					Val = FFINAnyNetworkValue(Trace);
+					break;
+				}
+				UClass* Class = getClassInstance(L, i, UObject::StaticClass());
+				if (Class) {
+					Val = Class;
 					break;
 				}
 				Val = FFINAnyNetworkValue();

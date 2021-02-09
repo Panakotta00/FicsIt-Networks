@@ -5,6 +5,7 @@
 #include "Network/FINAnyNetworkValue.h"
 #include "Reflection/FINExecutionContext.h"
 
+class UFINProperty;
 class UFINStruct;
 class UFINFunction;
 struct FFINNetworkTrace;
@@ -96,6 +97,13 @@ namespace FicsItKernel {
 		 * to the given property in the given struct pointer.
 		 */
 		void luaToProperty(lua_State* L, UProperty* p, void* data, int i);
+
+		/**
+		 * Trys to convert the lua value at the given index on the given lua stack
+		 * to the given property and returns that value.
+		 * lua error if value not valid
+		 */
+		FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index);
 
 		/**
 		 * Trys to convert the lua value at the given index to any kind of network value.

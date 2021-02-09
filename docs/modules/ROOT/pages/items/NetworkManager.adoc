@@ -16,7 +16,7 @@
 |image::items/NetworkManager_InHand.jpg[300,300,role="left"]
 |===
 
-The network manager allows you to view detials of a network component.
+The network manager allows you to view details of a network component and the reflection system.
 
 When you take it in hands and look at a network component, you can left click to open the component debug window.
 This window will show you the UUID of the component, allows you to change and view the nick,
@@ -26,10 +26,15 @@ You can also click on such a listed network component to copy the UUID of it.
 image::items/NetworkManager_UI.jpg[300,300]
 
 When you hold ctrl, while looking at a network component and hit the left click,
-the debug window wont appear but you will copy the ID of the component directly.
+the debug window won't appear but you will copy the ID of the component directly.
 
-When you have the Manager in hand, you wont be able to interact with anything else except
-network components, if you still want to do that,
-you can use Caps-Lock to allow interaction with other things.
+The network manager also provides the reflection viewer which which you can explore and
+browse the reflection data.
+Each listed network component also has a small button on the right side,
+with which you can open that components type in the reflection viewer.
+If you just directly switch to the reflection viewer,
+you can view the type of the component you looked at.
+
+image::items/NetworkManager_RefViewer.jpg[300,300]
 
 include::partial$item_footer.adoc[]

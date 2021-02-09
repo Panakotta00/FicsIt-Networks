@@ -98,9 +98,6 @@ void SFINReflectionUI::Construct(const FArguments& InArgs) {
 		}
 	});
 
-	FSlateApplication::Get().GetNavigationConfig()->bKeyNavigation = true;
-	FSlateApplication::Get().GetNavigationConfig()->bTabNavigation = true;
-
 	FilterCache("");
 }
 
@@ -137,7 +134,7 @@ FReply SFINReflectionUI::OnFocusReceived(const FGeometry& MyGeometry, const FFoc
 
 FReply SFINReflectionUI::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	FKey Key = InKeyEvent.GetKey();
-	if (Key != EKeys::Left && Key != EKeys::Up && Key != EKeys::Right && Key != EKeys::Down && Key != EKeys::Tab) {
+	if (!InKeyEvent.GetModifierKeys().IsAltDown() && !InKeyEvent.GetModifierKeys().IsControlDown() && Key != EKeys::Left && Key != EKeys::Up && Key != EKeys::Right && Key != EKeys::Down && Key != EKeys::Tab) {
 		SCompoundWidget::OnKeyDown(MyGeometry, InKeyEvent);
 		return FReply::Unhandled().SetUserFocus(SearchBox.ToSharedRef());
 	}

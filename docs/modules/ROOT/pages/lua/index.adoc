@@ -37,37 +37,54 @@ You should have a look at the xref:lua/examples/multiThreading.adoc[multi thread
 == Lua Instances
 
 Lua Instances are speacial data-type FicsIt-Networks provides, allowing us to map a lot more easily different functions and properties of a game object to Lua.
-These instances work through pre defined functions which are coded it the source code of the mod and through the usage of the so called refelction system of unreal.
-Thanks to this, any other mod can very easily add support for FicsIt-Networks by simply filling a couple of conditions.
+These instances work through interacting with the xref::BasicConcept.adoc#_reflection_system[Reflection-System].
 
-If you want to read the members such a instance has in runtime, you should use the `string[] getMembers()` method to get an array of member names the instance has.
-If you pass `true` as the first parameter to the getMembers function, you will get a map of all the members where the membername is the key as string and a integer
-is the value. `0` represents a function and `1` represents a property.
-
-Lua instances also have a read-only property called `hash`.
-This is basically the hash value of the underlying direct pointer to the referenced object.
+The instance additionally  provides the `getHash`-Function and the `hash` property.
+These to will give you some hash value of the underlying object.
 This allows you to use instances as keys of tables.
+
+If a Lua Instance is also a network component it also has a nick and id property.
+You can read and write the string `nick` property to get and set the nickname of the component.
+You can just read the `id` string property to get the id of the component.
 
 === Properties
 
-The instance can have properties (aka. attributes) you can interact with just like a variable.
+The instance can have properties (aka. attributes) you can interact with them just like a variable.
 For this use the `.` access operator.
 
 Some properties are read only though, and if you try to write to them, a Lua exception gets thrown.
 
-If a Instance refers to a network component, the instance will have a string property with the name "nick" which allows you to get/set
-the nick of a component programatically and it will also have a read-only string property called "id" allowing you to get
-the id of the component.
-
 === Functions
 
-The instance can also have function allowing you to call subroutines. These function can have multiple input and output values.
+The instance can also have function allowing you to call subroutines. These functions can have multiple input and output values.
 To access such a member function you need to use the `:` member access operator or pass the instance as the first argument to the function.
 
 == Lua Structs
 
-Lua Structs work like a Lua Table with a special metatable attached.
-Those Lua Structs just allow for a way simpler data management and are not required to be referenced to a object in the unreal reflection system.
-Through that we can easily create and remove Lua Structs on the fly.
-With that said, some Lua Structs can be implicitly constructed from a normal lua table which simply fullfills the criteria the struct gives
-so it can be implicitly converted to such an struct when used in function parameters or write actions on properties.
+Lua structs work essentially the same as lua instances.
+But, they f.e. can't be nil and you can construct one your self.
+If f.e. a function has such a struct as input parameter,
+you can then provide a table with the property names as keys and the given values.
+These properties will the get used accordingly in the struct.
+
+f.e. if you have a `vector` input parameter you can provide the table
+[source,Lua]
+----
+{x = 42, y = 69, z = 42.69}
+----
+
+== Reflection
+
+The lua runtime additionally has a couple of functions allowing you to search for differnt things.
+
+=== `Type findClass(string name)`
+
+Trys to find a object type with the given name, and returns the found type.
+
+=== `Type findStruct(string name)`
+
+Trys to find a structure type with the given name, and returns the found type.
+
+=== `ItemType findItem(string name)`
+
+Trys to find a item type with the given name, and returns the found item type.

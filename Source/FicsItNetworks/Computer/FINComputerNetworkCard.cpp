@@ -91,7 +91,7 @@ void AFINComputerNetworkCard::HandleMessage(FGuid ID, FGuid Sender, FGuid Receiv
 		if (HandledMessages.Contains(ID) || !Signal) return;
 		HandledMessages.Add(ID);
 	}
-	TArray<FFINAnyNetworkValue> Parameters = { (FINInt)Port, Sender.ToString() };
+	TArray<FFINAnyNetworkValue> Parameters = { Sender.ToString(), (FINInt)Port };
 	Parameters.Append(Data);
 	Signal->Trigger(this, Parameters);
 }
@@ -152,7 +152,7 @@ void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, const TAr
 }
 
 void AFINComputerNetworkCard::netFunc_broadcast(int port, const TArray<FFINAnyNetworkValue>& args) {
-	if (!CheckNetMessageData(args) || port < 0 || port > 10000) return;
+ 	if (!CheckNetMessageData(args) || port < 0 || port > 10000) return;
 	FGuid MsgID = FGuid::NewGuid();
 	FGuid SenderID = Execute_GetID(this);
 	for (UObject* Component : GetCircuit_Implementation()->GetComponents()) {

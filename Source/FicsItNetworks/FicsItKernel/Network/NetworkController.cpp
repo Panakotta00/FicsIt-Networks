@@ -5,6 +5,7 @@
 
 #include "Network/FINDynamicStructHolder.h"
 #include "Network/FINNetworkCircuitNode.h"
+#include "Network/FINNetworkUtils.h"
 
 namespace FicsItKernel {
 	namespace Network {
@@ -60,12 +61,16 @@ namespace FicsItKernel {
 			return TSet<FFINNetworkTrace>();
 		}
 
-		TSet<FFINNetworkTrace> NetworkController::getComponentByClass(UClass* Class) {
+		TSet<FFINNetworkTrace> NetworkController::getComponentByClass(UClass* Class, bool bRedirect) {
 			if (component->Implements<UFINNetworkComponent>()) {
 				TSet<FFINNetworkTrace> outComps;
 				TSet<UObject*> Comps = IFINNetworkCircuitNode::Execute_GetCircuit(component)->GetComponents();
 				for (UObject* Comp : Comps) {
-					if (!Comp->IsA(Class)) continue;
+					if (bRedirect) {
+						UObject* RedirectedComp = UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(Comp)).Get();
+						if (!RedirectedComp->IsA(Class)) continue;
+					} else if (!Comp->IsA(Class)) continue;
+					if (!IFINNetworkComponent::Execute_AccessPermitted(Comp, IFINNetworkComponent::Execute_GetID(component))) continue;
 					outComps.Add(FFINNetworkTrace(component) / Comp);
 				}
 				return outComps;

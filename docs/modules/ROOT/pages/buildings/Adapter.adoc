@@ -8,9 +8,6 @@
 
 |Max Network Connections
 |1
-
-|APIs
-|xref:lua/api/Adapter.adoc[Adapter API]
 |===
 
 [cols="a"]

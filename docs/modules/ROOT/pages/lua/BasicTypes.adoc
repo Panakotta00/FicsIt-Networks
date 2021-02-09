@@ -6,21 +6,18 @@ Here are all basic types used by all kinds of apis and components listed.
 == Future
 
 This object allows for sync between the game and the Lua runtime.
-The problem is we can't run some functions of the game while beeing in a Lua tick.
+The problem is we can't run some functions of the game while being in a Lua tick.
 To workaround this, we introduce the Futures.
 
-With these objects you can check if the function you called has finishes processing,
-you can get the return values if it finished and you can even wait for it to finish.
+With these objects you can check if the function you called has finished processing,
+you can get the return values if it finished, and you can even wait for it to finish.
 
-With that said, some API functions return a Future wich returns the actual return values
-of the underlying function when called to.
-
-For that we use some special signatures in the declartions showed in this documentation.
-The syntax goes like `Future{[<ret type>] <ret name>, [<ret type2>] <ret name2>, ...}`.
+With that said, functions which ony have the "runtime synchronous" flag,
+won't return their output values directly, instead they will return such a future struct.
 
 === Functions
 
-The future sturcture provides a couple of functions allowing you to interact with the syncronization data.
+The future structure provides a couple of functions allowing you to interact with the synchronization data.
 
 ==== `bool canGet()`
 
@@ -51,7 +48,7 @@ Return Values::
 
 |Retvals...
 |...
-|All the differnt return values the underlying function returned.
+|All the different return values the underlying function returned.
 |===
 
 ==== `Retvals... await()`

@@ -89,7 +89,7 @@ namespace FicsItKernel {
 			/**
 			 * returns the components in the network with of the given type.
 			 */
-			TSet<FFINNetworkTrace> getComponentByClass(UClass* Class);
+			TSet<FFINNetworkTrace> getComponentByClass(UClass* Class, bool bRedirect);
 
 			/**
 			 * Should get called prior to de/serialization

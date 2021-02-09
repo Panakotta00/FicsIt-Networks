@@ -5,9 +5,20 @@ The Computer API provides a interface to the computer owns functionalities.
 
 == Functions
 
-=== `beep()`
+=== `beep(number pitch)`
 
-Lets the computer to emit a simple beep sound.
+Lets the computer to emit a simple beep sound with the given pitch.
+
+Parameter::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|pitch
+|number
+|The pitch of the beep sound you want to play.
+|===
 
 === `stop()`
 
