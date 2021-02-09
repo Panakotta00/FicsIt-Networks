@@ -3,7 +3,7 @@
 
 **Lua Lib: `component`**
 
-The Component API provides structures, functions and signals for interacting with the network itself like returning network component representation structures.
+The Component API provides structures, functions and signals for interacting with the network itself like returning network components.
 
 == Functions
 
@@ -46,9 +46,9 @@ Nil if the network component with the given ID was not found.
 Entries are Nil if the network component with the given ID was not found.
 |===
 
-=== `string[]... findComponent(string nick...)`
+=== `string[]... findComponent((string nick | string[] nicks | Type type | Type[] types)...)`
 
-Searches the component network for components wich pass the given nick filter.
+Searches the component network for components which pass the given nick filter or have the given type.
 
 Parameters::
 +
@@ -57,8 +57,20 @@ Parameters::
 |Name |Type |Description
 
 |nick
-|string...
+|string
 |nick filter as string used to get a list of component in the network.
+
+|nicks
+|string[]
+|nick filters as string array to get a list of components in the network.
+
+|type
+|Type
+|The type of the components in the network you want to get.
+
+|types
+|Type[]
+|The types of the components in the network you want to get.
 |===
 
 Return 	Value::
