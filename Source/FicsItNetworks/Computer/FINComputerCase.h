@@ -59,7 +59,7 @@ public:
 
 	// Cache
 	UPROPERTY()
-	TSet<AFINComputerProcessor*> Processors;
+	TArray<AFINComputerProcessor*> Processors;
 
 	UPROPERTY()
     TSet<AFINComputerMemory*> Memories;
@@ -190,6 +190,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	FString GetSerialOutput();
+	
+	UFUNCTION(BlueprintCallable, Category="Network|Computer")
+	AFINComputerProcessor* GetProcessor();
 
 	UFUNCTION()
 	void HandleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);

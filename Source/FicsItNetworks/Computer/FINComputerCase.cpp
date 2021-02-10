@@ -144,7 +144,7 @@ void AFINComputerCase::Factory_Tick(float dt) {
 		if (KernelTickTime > 10.0) KernelTickTime = 10.0;
 
 		float KernelTicksPerSec = 1.0;
-		if (Processors.Num() >= 1) KernelTicksPerSec = Processors.begin().ElementIt->Value->KernelTicksPerSecond;
+		if (Processors.Num() >= 1) KernelTicksPerSec = Processors[0]->KernelTicksPerSecond;
 
 		while (KernelTickTime > 1.0/KernelTicksPerSec) {
 			KernelTickTime -= 1.0/KernelTicksPerSec;
@@ -216,7 +216,7 @@ void AFINComputerCase::RemoveProcessor(AFINComputerProcessor* processor) {
 	Processors.Remove(processor);
 	if (Processors.Num() == 1) {
 		// two processors were added -> add leaving processor to kernel
-		kernel->setProcessor((*Processors.Find(0))->CreateProcessor());
+		kernel->setProcessor(Processors[0]->CreateProcessor());
 	} else {
 		// more than two processors were added or no processor remaining -> remove processor from kernel
 		kernel->setProcessor(nullptr);
@@ -403,6 +403,11 @@ EComputerState AFINComputerCase::GetState() {
 
 FString AFINComputerCase::GetSerialOutput() {
 	return SerialOutput;
+}
+
+AFINComputerProcessor* AFINComputerCase::GetProcessor() {
+	if (Processors.Num() != 1) return nullptr;
+	return Processors[0];
 }
 
 void AFINComputerCase::WriteSerialInput(const FString& str) {
