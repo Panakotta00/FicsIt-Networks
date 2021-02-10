@@ -3,7 +3,8 @@
 #include "FINScriptGraph.h"
 #include "SlateBasics.h"
 #include "SSearchBox.h"
-#include "Network/FINTypeManager.h"
+#include "Reflection/FINFunction.h"
+#include "Reflection/FINStruct.h"
 
 struct FFINScriptActionSelectionAction;
 DECLARE_DELEGATE_OneParam(FFINScriptActionSelectionOnActionExecuted, const TSharedPtr<FFINScriptActionSelectionAction>&);
@@ -11,9 +12,9 @@ DECLARE_DELEGATE_OneParam(FFINScriptActionSelectionOnActionExecuted, const TShar
 struct FFINScriptNodeCreationContext {
 	UFINScriptGraph* Graph;
 	FVector2D CreationLocation;
-	TSharedPtr<FFINScriptPin> Pin;
+	UFINScriptPin* Pin;
 
-	FFINScriptNodeCreationContext(UFINScriptGraph* inGraph, const FVector2D& inCreationLocation, const TSharedPtr<FFINScriptPin>& inPin) : Graph(inGraph), CreationLocation(inCreationLocation), Pin(inPin) {}
+	FFINScriptNodeCreationContext(UFINScriptGraph* inGraph, const FVector2D& inCreationLocation, UFINScriptPin* inPin) : Graph(inGraph), CreationLocation(inCreationLocation), Pin(inPin) {}
 };
 
 struct FFINScriptActionSelectionEntry;
@@ -131,13 +132,13 @@ struct FFINScriptActionSelectionAction : FFINScriptActionSelectionEntry {
 
 struct FFINScriptActionSelectionFuncAction : FFINScriptActionSelectionAction {
 private:
-	TSharedPtr<FFINFunction> Func;
+	UFINFunction* Func = nullptr;
 	FString LastFilter = "";
 
 	FFINScriptNodeCreationContext Context;
 
 public:
-	FFINScriptActionSelectionFuncAction(const TSharedPtr<FFINFunction>& Func, const FFINScriptNodeCreationContext& Context) : Func(Func), Context(Context) {}
+	FFINScriptActionSelectionFuncAction(UFINFunction* Func, const FFINScriptNodeCreationContext& Context) : Func(Func), Context(Context) {}
 
 	// Begin FFINScriptActionSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;
@@ -158,13 +159,13 @@ struct FFINScriptActionSelectionCategory : FFINScriptActionSelectionEntry {
 
 struct FFINScriptActionSelectionTypeCategory : FFINScriptActionSelectionCategory {
 private:
-	TSharedPtr<FFINType> Type;
+	UFINStruct* Type;
 	FString LastFilter = "";
 
 	FFINScriptNodeCreationContext Context;
 
 public:
-	FFINScriptActionSelectionTypeCategory(const TSharedPtr<FFINType>& Type, const FFINScriptNodeCreationContext& Context) : Type(Type), Context(Context) {}
+	FFINScriptActionSelectionTypeCategory(UFINStruct* Type, const FFINScriptNodeCreationContext& Context) : Type(Type), Context(Context) {}
 
 	// Begin FFINScriptNodeSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;

@@ -1,6 +1,7 @@
 ﻿#include "FINScriptGraphViewer.h"
 
 #include "FINScriptActionSelection.h"
+#include "Reflection/FINReflection.h"
 
 void FFINScriptConnectionDrawer::Reset() {
 	ConnectionUnderMouse = TPair<TSharedPtr<SFINScriptPinViewer>, TSharedPtr<SFINScriptPinViewer>>(nullptr, nullptr);
@@ -8,14 +9,14 @@ void FFINScriptConnectionDrawer::Reset() {
 }
 
 void FFINScriptConnectionDrawer::DrawConnection(TSharedRef<SFINScriptPinViewer> Pin1, TSharedRef<SFINScriptPinViewer> Pin2, TSharedRef<const SFINScriptGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
-	bool is1Wild = dynamic_cast<FFINScriptWildcardPin*>(Pin1->GetPin().Get());
-	bool is2Wild = dynamic_cast<FFINScriptWildcardPin*>(Pin2->GetPin().Get());
+	bool is1Wild = Cast<UFINScriptWildcardPin>(Pin1->GetPin());
+	bool is2Wild = Cast<UFINScriptWildcardPin>(Pin2->GetPin());
 
 	bool bShouldSwitch = false;
 	if (is1Wild) {
 		if (is2Wild) {
 			bool bHasInput = false;
-			for (const TSharedPtr<FFINScriptPin>& Con : Pin1->GetPin()->GetConnections()) if (Con->GetPinType() & FIVS_PIN_INPUT) {
+			for (UFINScriptPin* Con : Pin1->GetPin()->GetConnections()) if (Con->GetPinType() & FIVS_PIN_INPUT) {
 				bHasInput = true;
 				break;
 			}
@@ -111,7 +112,7 @@ int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 
 	// Draw Pin Connections
 	TMap<TSharedRef<SFINScriptPinViewer>, FVector2D> ConnectionLocations; 
-	TMap<TSharedPtr<FFINScriptPin>, TSharedRef<SFINScriptPinViewer>> PinMap;
+	TMap<UFINScriptPin*, TSharedRef<SFINScriptPinViewer>> PinMap;
 	
 	for (int i = 0; i < Children.Num(); ++i) {
 		TSharedRef<SFINScriptNodeViewer> Node = Children[i];
@@ -122,13 +123,13 @@ int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 		}
 	}
 
-	TSet<TPair<TSharedPtr<FFINScriptPin>, TSharedPtr<FFINScriptPin>>> DrawnPins;
+	TSet<TPair<UFINScriptPin*, UFINScriptPin*>> DrawnPins;
 	for (int i = 0; i < Children.Num(); ++i) {
 		TSharedRef<SFINScriptNodeViewer> Node = Children[i];
 		for (const TSharedRef<SFINScriptPinViewer>& Pin : Node->GetPinWidgets()) {
-			for (const TSharedPtr<FFINScriptPin>& ConnectionPin : Pin->GetPin()->GetConnections()) {
-				if (!DrawnPins.Contains(TPair<TSharedPtr<FFINScriptPin>, TSharedPtr<FFINScriptPin>>(Pin->GetPin(), ConnectionPin)) && !DrawnPins.Contains(TPair<TSharedPtr<FFINScriptPin>, TSharedPtr<FFINScriptPin>>(ConnectionPin, Pin->GetPin()))) {
-					DrawnPins.Add(TPair<TSharedPtr<FFINScriptPin>, TSharedPtr<FFINScriptPin>>(Pin->GetPin(), ConnectionPin));
+			for (UFINScriptPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
+				if (!DrawnPins.Contains(TPair<UFINScriptPin*, UFINScriptPin*>(Pin->GetPin(), ConnectionPin)) && !DrawnPins.Contains(TPair<UFINScriptPin*, UFINScriptPin*>(ConnectionPin, Pin->GetPin()))) {
+					DrawnPins.Add(TPair<UFINScriptPin*, UFINScriptPin*>(Pin->GetPin(), ConnectionPin));
 					ConnectionDrawer->DrawConnection(Pin, NodeToChild[ConnectionPin->ParentNode]->GetPinWidget(ConnectionPin), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId+1);
 				}
 			}
@@ -172,7 +173,7 @@ FReply SFINScriptGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, con
 		
 		FSlateApplication::Get().PushMenu(SharedThis(this), *MouseEvent.GetEventPath(), MenuBuilder.MakeWidget(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
 	} else if (NodeUnderMouse) {
-		if (PinUnderMouse.IsValid() && !MouseEvent.GetModifierKeys().IsControlDown()) {
+		if (PinUnderMouse && !MouseEvent.GetModifierKeys().IsControlDown()) {
 			bIsPinDrag = true;
 			PinDragStart = PinUnderMouse;
 		} else {
@@ -196,9 +197,9 @@ FReply SFINScriptGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, con
 
 FReply SFINScriptGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	if (bIsPinDrag) {
-		if (PinUnderMouse.IsValid()) {
+		if (PinUnderMouse) {
 			bIsPinDrag = false;
-			PinDragStart->AddConnection(PinUnderMouse.ToSharedRef());
+			PinDragStart->AddConnection(PinUnderMouse);
 		} else {
 			CreateActionSelectionMenu(*MouseEvent.GetEventPath(), MouseEvent.GetScreenSpacePosition(), [this](auto){ bIsPinDrag = false; }, FFINScriptNodeCreationContext(Graph, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())), PinDragStart));
 		}
@@ -219,8 +220,8 @@ FReply SFINScriptGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const
 FReply SFINScriptGraphViewer::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) {
 	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton) && ConnectionDrawer.IsValid() && ConnectionDrawer->ConnectionUnderMouse.Key) {
 		TPair<TSharedPtr<SFINScriptPinViewer>, TSharedPtr<SFINScriptPinViewer>> Connection = ConnectionDrawer->ConnectionUnderMouse;
-		TSharedPtr<FFINScriptPin> Pin1 = Connection.Key->GetPin();
-		TSharedPtr<FFINScriptPin> Pin2 = Connection.Value->GetPin();
+		UFINScriptPin* Pin1 = Connection.Key->GetPin();
+		UFINScriptPin* Pin2 = Connection.Value->GetPin();
 		UFINScriptRerouteNode* Node = NewObject<UFINScriptRerouteNode>();
 		Node->Pos = LocalToGraph(GetCachedGeometry().AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition())) - FVector2D(10, 10);
 		Pin1->RemoveConnection(Connection.Value->GetPin());
@@ -344,8 +345,8 @@ TSharedPtr<IMenu> SFINScriptGraphViewer::CreateActionSelectionMenu(const FWidget
 	TArray<TSharedPtr<FFINScriptActionSelectionEntry>> Entries;
     TArray<UClass*> Derived;
     GetDerivedClasses(UObject::StaticClass(), Derived);
-    for (UClass* Clazz : Derived) {
-    	Entries.Add(MakeShared<FFINScriptActionSelectionTypeCategory>(MakeShared<FFINUType>(Clazz), Context));
+    for (TTuple<UClass*, UFINClass*> Clazz : FFINReflection::Get()->GetClasses()) {
+    	Entries.Add(MakeShared<FFINScriptActionSelectionTypeCategory>(Clazz.Value, Context));
     }
     TSharedRef<SFINScriptActionSelection> Select = SNew(SFINScriptActionSelection).OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFINScriptActionSelectionAction>& Action) {
 		OnExecute(Action);

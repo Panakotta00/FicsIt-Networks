@@ -1,7 +1,7 @@
 ﻿#include "FINScriptNodeViewer.h"
 
 void SFINScriptPinViewer::Construct(const FArguments& InArgs) {
-	SetPin(InArgs._Pin.Get().ToSharedRef());
+	SetPin(InArgs._Pin);
 }
 
 SFINScriptPinViewer::SFINScriptPinViewer() : Children(this) {}
@@ -28,8 +28,8 @@ FReply SFINScriptPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const
             FText(),
             FSlateIcon(),
             FUIAction(FExecuteAction::CreateLambda([this]() {
-				TArray<TSharedPtr<FFINScriptPin>> Pins = Pin->GetConnections();
-	            for (const TSharedPtr<FFINScriptPin>& Pin : Pins) Pin->RemoveConnection(GetPin());
+				TArray<UFINScriptPin*> Pins = Pin->GetConnections();
+	            for (UFINScriptPin* Pin : Pins) Pin->RemoveConnection(GetPin());
 			})));
 		
 		FSlateApplication::Get().PushMenu(SharedThis(this), *MouseEvent.GetEventPath(), MenuBuilder.MakeWidget(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
@@ -56,11 +56,11 @@ FSlateColor SFINScriptPinViewer::GetPinColor() const {
 	return FLinearColor(FColor::White);
 }
 
-void SFINScriptPinViewer::SetPin(const TSharedPtr<FFINScriptPin>& newPin) {
+void SFINScriptPinViewer::SetPin(UFINScriptPin* newPin) {
 	Children.Empty();
 	Pin = newPin;
 	PinIconWidget = SNew(SImage).ColorAndOpacity_Raw(this, &SFINScriptPinViewer::GetPinColor);
-	if (Pin->Name.Len() == 0) {
+	if (Pin->GetName().ToString().Len() == 0) {
 		Children.Add(SNew(SBorder)
         .BorderBackgroundColor_Lambda([this]() {
             return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
@@ -83,7 +83,7 @@ void SFINScriptPinViewer::SetPin(const TSharedPtr<FFINScriptPin>& newPin) {
                 .Clipping(EWidgetClipping::Inherit)
                 .Justification(ETextJustify::Left)
                 .Text_Lambda([this]() {
-                    return FText::FromString(Pin->Name);
+                    return Pin->GetName();
                 })
             ]
 		]);
@@ -99,7 +99,7 @@ void SFINScriptPinViewer::SetPin(const TSharedPtr<FFINScriptPin>& newPin) {
 					.Clipping(EWidgetClipping::Inherit)
                     .Justification(ETextJustify::Left)
                     .Text_Lambda([this]() {
-                        return FText::FromString(Pin->Name);
+                        return Pin->GetName();
                     })
                 ]
                 +SHorizontalBox::Slot().Padding(1).VAlign(EVerticalAlignment::VAlign_Center)[
@@ -109,8 +109,8 @@ void SFINScriptPinViewer::SetPin(const TSharedPtr<FFINScriptPin>& newPin) {
 	}
 }
 
-TSharedPtr<FFINScriptPin> SFINScriptPinViewer::GetPin() const {
-	return Pin.ToSharedRef();
+UFINScriptPin* SFINScriptPinViewer::GetPin() const {
+	return Pin;
 }
 
 FVector2D SFINScriptPinViewer::GetConnectionPoint() const {
@@ -195,7 +195,7 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
                 ]
             ]);
 
-		for (const TSharedRef<FFINScriptPin>& Pin : newNode->GetNodePins()) {
+		for (UFINScriptPin* Pin : newNode->GetNodePins()) {
 			if (Pin->GetPinType() & FIVS_PIN_INPUT) {
 				TSharedRef<SFINScriptPinViewer> PinWidget = SNew(SFINScriptPinViewer)
                     .Pin(Pin);
@@ -216,7 +216,7 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
 		}
 	} else if (Node->IsA<UFINScriptRerouteNode>()) {
 		TSharedPtr<SFINScriptPinViewer> PinWidget;
-		TSharedRef<FFINScriptPin> Pin = Node->GetNodePins()[0];
+		UFINScriptPin* Pin = Node->GetNodePins()[0];
 		Children.Add(
             SNew(SBorder)
             .Padding(1)
@@ -249,10 +249,10 @@ const TArray<TSharedRef<SFINScriptPinViewer>>& SFINScriptNodeViewer::GetPinWidge
 	return PinWidgets;
 }
 
-TSharedPtr<FFINScriptPin> SFINScriptNodeViewer::GetPinUnderMouse() {
+UFINScriptPin* SFINScriptNodeViewer::GetPinUnderMouse() {
 	return PinUnderMouse;
 }
 
-TSharedRef<SFINScriptPinViewer> SFINScriptNodeViewer::GetPinWidget(const TSharedPtr<FFINScriptPin> Pin) {
+TSharedRef<SFINScriptPinViewer> SFINScriptNodeViewer::GetPinWidget(UFINScriptPin* Pin) {
 	return PinToWidget[Pin];
 }

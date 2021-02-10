@@ -3,7 +3,8 @@
 #include "CoreMinimal.h"
 #include "Network/FINNetworkValues.h"
 #include "SharedPointer.h"
-#include "Network/FINTypeManager.h"
+#include "Reflection/FINFunction.h"
+#include "Reflection/FINProperty.h"
 
 #include "FINScriptNode.generated.h"
 
@@ -21,41 +22,18 @@ enum EFINScriptPinType {
 	FIVS_PIN_EXEC_INPUT		= FIVS_PIN_EXEC | FIVS_PIN_INPUT,
 	FIVS_PIN_EXEC_OUTPUT	= FIVS_PIN_EXEC | FIVS_PIN_OUTPUT,
 };
+ENUM_CLASS_FLAGS(EFINScriptPinType)
 
-struct FFINScriptPin;
-
-struct FFINScriptPin : public TSharedFromThis<FFINScriptPin> {
+UCLASS()
+class UFINScriptPin : public UObject {
+	GENERATED_BODY()
 protected:
-	TArray<TSharedPtr<FFINScriptPin>> ConnectedPins;
+	UPROPERTY(SaveGame)
+	TArray<UFINScriptPin*> ConnectedPins;
 	
 public:
+	UPROPERTY()
 	UFINScriptNode* ParentNode = nullptr;
-	EFINNetworkValueType DataType;
-	EFINScriptPinType PinType;
-	FString Name;
-	
-public:
-	FFINScriptPin() = default;
-	FFINScriptPin(EFINNetworkValueType DataType, EFINScriptPinType PinType, FString Name) : DataType(DataType), PinType(PinType), Name(Name) {}
-	FFINScriptPin(const FFINFunctionParameter& Param);
-	virtual ~FFINScriptPin();
-	
-	/**
-	 * Creates a connection between this and the given pin
-	 */
-	void AddConnection(const TSharedPtr<FFINScriptPin>& Pin);
-
-	/**
-	 * Removes a connection between this and the given pin
-	 */
-	void RemoveConnection(const TSharedPtr<FFINScriptPin>& Pin);
-
-	/**
-	 * Returns all connected pins
-	 */
-	virtual const TArray<TSharedPtr<FFINScriptPin>>& GetConnections();
-
-	void GetAllConnected(TArray<TSharedPtr<FFINScriptPin>>& Searches);
 
 	/**
 	 * Returns the pin type
@@ -63,14 +41,36 @@ public:
 	virtual EFINScriptPinType GetPinType();
 
 	/**
-	 * Checks if the the pin can be connected to the given pin
-	 */
-	virtual bool CanConnect(const TSharedPtr<FFINScriptPin>& Pin);
-
-	/**
 	 * Returns the pin data type
 	 */
 	virtual EFINNetworkValueType GetPinDataType();
+
+	/**
+	 * Returns all connected pins
+	 */
+	virtual const TArray<UFINScriptPin*>& GetConnections();
+
+	/**
+	 * Returns the name of the pin
+	 */
+	virtual FText GetName();
+
+	/**
+	 * Checks if the the pin can be connected to the given pin
+	 */
+	virtual bool CanConnect(UFINScriptPin* Pin);
+	
+	/**
+	 * Creates a connection between this and the given pin
+	 */
+	void AddConnection(UFINScriptPin* Pin);
+
+	/**
+	 * Removes a connection between this and the given pin
+	 */
+	void RemoveConnection(UFINScriptPin* Pin);
+
+	void GetAllConnected(TArray<UFINScriptPin*>& Searches);
 
 	/**
 	 * Removes all connections of this pin
@@ -78,19 +78,63 @@ public:
 	void RemoveAllConnections();
 };
 
-struct FFINScriptWildcardPin : public FFINScriptPin {
-	FFINScriptWildcardPin();
-
+UCLASS()
+class UFINScriptGenericPin : public UFINScriptPin {
+	GENERATED_BODY()
+public:
+	EFINScriptPinType PinType = FIVS_PIN_NONE;
+	EFINNetworkValueType PinDataType = FIN_NIL;
+	FText Name = FText::FromString("Unnamed");
+	
+	// Begin UFINScriptPin
 	virtual EFINScriptPinType GetPinType() override;
 	virtual EFINNetworkValueType GetPinDataType() override;
-	virtual bool CanConnect(const TSharedPtr<FFINScriptPin>& Pin) override;
+	virtual FText GetName() override;
+	// End UFINScriptPin
+	
+	static UFINScriptGenericPin* Create(EFINNetworkValueType DataType, EFINScriptPinType PinType, const FString& Name);
+};
+
+UCLASS()
+class UFINScriptWildcardPin : public UFINScriptPin {
+	GENERATED_BODY()
+protected:
+	EFINNetworkValueType DataType;
+	EFINScriptPinType PinType;
+	
+public:
+	// Begin UFINScriptPin
+	virtual EFINScriptPinType GetPinType() override;
+	virtual EFINNetworkValueType GetPinDataType() override;
+	virtual bool CanConnect(UFINScriptPin* Pin) override;
+	// End UFINScriptPin
+};
+
+UCLASS()
+class UFINScriptReflectionPin : public UFINScriptPin {
+	GENERATED_BODY()
+protected:
+	UPROPERTY()
+	UFINProperty* Property = nullptr;
+
+public:	
+	// Begin UFINScriptPin
+	virtual EFINScriptPinType GetPinType() override;
+	virtual EFINNetworkValueType GetPinDataType() override;
+	virtual FText GetName() override;
+	// end UFINScriptPin
+
+	/**
+	 * changes the stored property to the given new one
+	 */
+	void SetProperty(UFINProperty* Prop);
 };
 
 /**
-* Notifies if the pin list of the node has changed.
-* Param1: type of change (0 = pin added, 1 = pin removed)
-* Param2: the changed pin
-*/
+ * Notifies if the pin list of the node has changed.
+ * Param1: type of change (0 = pin added, 1 = pin removed)
+ * Param2: the changed pin
+ */
 DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphPinChanged, int, int);
 
 UCLASS()
@@ -98,7 +142,7 @@ class UFINScriptNode : public UObject {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	FVector2D Pos;
 	
 	FFINScriptGraphPinChanged OnPinChanged;
@@ -106,7 +150,7 @@ public:
 	/**
 	 * Returns the list of pins of this node
 	 */
-	virtual TArray<TSharedRef<FFINScriptPin>> GetNodePins() const { return TArray<TSharedRef<FFINScriptPin>>(); }
+	virtual TArray<UFINScriptPin*> GetNodePins() const { return TArray<UFINScriptPin*>(); }
 
 	/**
 	 * Removes all connections of all pins
@@ -119,13 +163,14 @@ class UFINScriptRerouteNode : public UFINScriptNode {
 	GENERATED_BODY()
 	
 private:
-	TSharedRef<FFINScriptPin> Pin;
+	UPROPERTY()
+	UFINScriptPin* Pin = nullptr;
 
 public:
 	UFINScriptRerouteNode();
 	
 	// Begin UFINScriptNode
-	virtual TArray<TSharedRef<FFINScriptPin>> GetNodePins() const override;
+	virtual TArray<UFINScriptPin*> GetNodePins() const override;
 	// End UFINScriptNode
 };
 
@@ -134,7 +179,8 @@ class UFINScriptFuncNode : public UFINScriptNode {
 	GENERATED_BODY()
 	
 private:
-	TArray<TSharedRef<FFINScriptPin>> Pins;
+	UPROPERTY(SaveGame)
+	TArray<UFINScriptPin*> Pins;
 
 protected:
 	/**
@@ -143,7 +189,7 @@ protected:
 	* @param[in]	Pin		the pin you want to add
 	* @return	the index of the pin in the pin array
 	*/
-	int AddNodePin(const TSharedRef<FFINScriptPin>& Pin);
+	int AddNodePin(UFINScriptPin* Pin);
 
 	/**
 	* Removes the pin at the given index from the node
@@ -154,7 +200,7 @@ protected:
 	
 public:
 	// Begin UFINScriptNode
-	virtual TArray<TSharedRef<FFINScriptPin>> GetNodePins() const override;
+	virtual TArray<UFINScriptPin*> GetNodePins() const override;
 	// End UFINScriptNode
 
 	/**
@@ -173,7 +219,7 @@ public:
 	virtual FString GetNodeName() const override { return Name; }
 	// End UFINScriptFuncNode
 
-	int AddPin(const TSharedRef<FFINScriptPin>& Pin) { return AddNodePin(Pin); }
+	int AddPin(UFINScriptPin* Pin) { return AddNodePin(Pin); }
 	void RemovePin(int index) { RemoveNodePin(index); };
 };
 
@@ -181,7 +227,8 @@ UCLASS()
 class UFINScriptReflectedFuncNode : public UFINScriptFuncNode {
 	GENERATED_BODY()
 private:
-	TSharedPtr<FFINFunction> Function;
+	UPROPERTY()
+	UFINFunction* Function = nullptr;
 
 public:
 	// Begin UFINScriptFuncNode
@@ -192,10 +239,10 @@ public:
 	 * Sets the function this nodes uses.
 	 * Recreates all pins.
 	 */
-	void SetFunction(const TSharedPtr<FFINFunction>& Function);
+	void SetFunction(UFINFunction* Function);
 
 	/**
 	 * Returns the function
 	 */
-	TSharedPtr<FFINFunction> GetFunction() const;
+	UFINFunction* GetFunction() const;
 };

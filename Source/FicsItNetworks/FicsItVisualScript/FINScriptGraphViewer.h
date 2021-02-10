@@ -53,7 +53,7 @@ private:
 	TMap<UFINScriptNode*, TSharedRef<SFINScriptNodeViewer>> NodeToChild;
 
 	UFINScriptNode* NodeUnderMouse = nullptr;
-	TSharedPtr<FFINScriptPin> PinUnderMouse = nullptr;
+	UFINScriptPin* PinUnderMouse = nullptr;
 
 	bool bIsGraphDrag = false;
 	float GraphDragDelta;
@@ -69,7 +69,7 @@ private:
 	FVector2D NodeDragStart;
 
 	bool bIsPinDrag = false;
-	TSharedPtr<FFINScriptPin> PinDragStart;
+	UFINScriptPin* PinDragStart;
 	FVector2D PinDragEnd;
 
 	TSharedPtr<FFINScriptConnectionDrawer> ConnectionDrawer;

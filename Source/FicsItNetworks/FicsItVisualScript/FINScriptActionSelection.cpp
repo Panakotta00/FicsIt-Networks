@@ -1,7 +1,6 @@
 ﻿#include "FINScriptActionSelection.h"
 
 #include "SSearchBox.h"
-#include "Network/FINTypeManager.h"
 
 void FFINScriptActionSelectionTextFilter::CallFilterValid(const TSharedPtr<FFINScriptActionSelectionEntry>& Entries, TFunction<void(FFINScriptActionSelectionFilter*, const TSharedPtr<FFINScriptActionSelectionEntry>&, bool)> OnFiltered) {
 	OnFiltered(this, Entries, true);
@@ -109,7 +108,7 @@ TSharedRef<SWidget> FFINScriptActionSelectionFuncAction::GetTreeWidget() {
 	.Content()[
 		SNew(STextBlock)
 		.Text_Lambda([this]() {
-			return FText::FromString(Func->GetName());
+			return Func->GetDisplayName();
 		})
 		.HighlightText_Lambda([this](){ return FText::FromString(LastFilter); })
 		.HighlightColor(FLinearColor(FColor::Yellow))
@@ -118,7 +117,7 @@ TSharedRef<SWidget> FFINScriptActionSelectionFuncAction::GetTreeWidget() {
 }
 
 FString FFINScriptActionSelectionFuncAction::GetFilterText() const {
-	return Func->GetName();
+	return Func->GetDisplayName().ToString();
 }
 
 void FFINScriptActionSelectionFuncAction::OnFiltered(bool bFilterPassed, FFINScriptActionSelectionFilter* Filter) {
@@ -135,8 +134,8 @@ void FFINScriptActionSelectionFuncAction::ExecuteAction() {
 	UFINScriptReflectedFuncNode* Node = NewObject<UFINScriptReflectedFuncNode>();
 	Node->Pos = Context.CreationLocation;
 	Node->SetFunction(Func);
-	for (const TSharedRef<FFINScriptPin>& Pin : Node->GetNodePins()) {
-		if (Context.Pin.IsValid() && Pin->CanConnect(Context.Pin)) {
+	for (UFINScriptPin* Pin : Node->GetNodePins()) {
+		if (Context.Pin && Pin->CanConnect(Context.Pin)) {
 			Pin->AddConnection(Context.Pin);
 			break;
 		}
@@ -147,7 +146,7 @@ void FFINScriptActionSelectionFuncAction::ExecuteAction() {
 TSharedRef<SWidget> FFINScriptActionSelectionTypeCategory::GetTreeWidget() {
 	return SNew(STextBlock)
 	.Text_Lambda([this]() {
-		return FText::FromString(Type->GetName());
+		return Type->GetDisplayName();
 	})
 	.HighlightText_Lambda([this](){ return FText::FromString(LastFilter); })
     .HighlightColor(FLinearColor(FColor::Yellow))
@@ -156,15 +155,15 @@ TSharedRef<SWidget> FFINScriptActionSelectionTypeCategory::GetTreeWidget() {
 
 TArray<TSharedPtr<FFINScriptActionSelectionEntry>> FFINScriptActionSelectionTypeCategory::GenerateCache() {
 	TArray<TSharedPtr<FFINScriptActionSelectionEntry>> Childs;
-	TArray<TSharedRef<FFINFunction>> Functions = Type->GetFunctions();
-	for (const TSharedRef<FFINFunction>& Function : Functions) {
+	TArray<UFINFunction*> Functions = Type->GetFunctions(false);
+	for (UFINFunction* Function : Functions) {
 		Childs.Add(MakeShared<FFINScriptActionSelectionFuncAction>(Function, Context));
 	}
 	return Childs;
 }
 
 FString FFINScriptActionSelectionTypeCategory::GetFilterText() const {
-	return Type->GetName();
+	return Type->GetDisplayName().ToString();
 }
 
 void FFINScriptActionSelectionTypeCategory::OnFiltered(bool bFilterPassed, FFINScriptActionSelectionFilter* Filter) {

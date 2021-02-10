@@ -1,19 +1,19 @@
 ﻿#pragma once
 
-#include "DeclarativeSyntaxSupport.h"
+#include "SlateBasics.h"
 #include "SPanel.h"
 #include "FINScriptNode.h"
 
 class SFINScriptPinViewer : public SPanel {
 	SLATE_BEGIN_ARGS(SFINScriptPinViewer) {}
-		SLATE_ATTRIBUTE(TSharedPtr<FFINScriptPin>, Pin)
+		SLATE_ARGUMENT(UFINScriptPin*, Pin)
 	SLATE_END_ARGS()
 
 public:
 	void Construct(const FArguments& InArgs);
 
 private:
-	TSharedPtr<FFINScriptPin> Pin;
+	UFINScriptPin* Pin;
 	TSlotlessChildren<SBorder> Children;
 	TSharedPtr<SImage> PinIconWidget;
 	
@@ -34,12 +34,12 @@ public:
 	 *
 	 * @param[in]	newPin	the pin we should display
 	 */
-	void SetPin(const TSharedPtr<FFINScriptPin>& newPin);
+	void SetPin(UFINScriptPin* newPin);
 
 	/**
 	 * Returns the representating pin.
 	 */
-	TSharedPtr<FFINScriptPin> GetPin() const;
+	UFINScriptPin* GetPin() const;
 
 	/**
 	 * Returns the connection point in screen space.
@@ -63,13 +63,13 @@ private:
 	TSharedPtr<SVerticalBox> OutputPinBox;
 	
 	TArray<TSharedRef<SFINScriptPinViewer>> PinWidgets;
-	TMap<TSharedPtr<FFINScriptPin>, TSharedRef<SFINScriptPinViewer>> PinToWidget;
+	TMap<UFINScriptPin*, TSharedRef<SFINScriptPinViewer>> PinToWidget;
 
 	FSlateColorBrush OutlineBrush = FSlateColorBrush(FLinearColor(1,1,1));
 	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::FromHex("222222"));
 	FSlateColorBrush HeaderBrush = FSlateColorBrush(FColor::FromHex("b04600"));
 
-	TSharedPtr<FFINScriptPin> PinUnderMouse = nullptr;
+	UFINScriptPin* PinUnderMouse = nullptr;
 
 public:
 	bool bSelected = false;
@@ -105,6 +105,6 @@ public:
 	 */
 	const TArray<TSharedRef<SFINScriptPinViewer>>& GetPinWidgets();
 	
-	TSharedPtr<FFINScriptPin> GetPinUnderMouse();
-	TSharedRef<SFINScriptPinViewer> GetPinWidget(const TSharedPtr<FFINScriptPin> Pin);
+	UFINScriptPin* GetPinUnderMouse();
+	TSharedRef<SFINScriptPinViewer> GetPinWidget(UFINScriptPin* Pin);
 };
