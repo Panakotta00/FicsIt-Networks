@@ -25,17 +25,7 @@ enum EFINRepPropertyFlags {
 	FIN_Prop_ClassProp		= 0b100000000,
 };
 
-inline EFINRepPropertyFlags operator|(EFINRepPropertyFlags Flags1, EFINRepPropertyFlags Flags2) {
-	return (EFINRepPropertyFlags)((uint16)Flags1 | (uint16)Flags2);
-}
-
-inline EFINRepPropertyFlags operator&(EFINRepPropertyFlags Flags1, EFINRepPropertyFlags Flags2) {
-	return (EFINRepPropertyFlags)(((uint16)Flags1) & ((uint16)Flags2));
-}
-
-inline EFINRepPropertyFlags operator~(EFINRepPropertyFlags Flags) {
-	return (EFINRepPropertyFlags)~(uint16)Flags;
-}
+ENUM_CLASS_FLAGS(EFINRepPropertyFlags)
 
 class UFINProperty;
 
