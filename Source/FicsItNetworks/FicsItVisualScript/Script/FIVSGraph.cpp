@@ -1,6 +1,6 @@
-﻿#include "FINScriptGraph.h"
+﻿#include "FIVSGraph.h"
 
-int UFINScriptGraph::AddNode(UFINScriptNode* Node) {
+int UFIVSGraph::AddNode(UFIVSNode* Node) {
 	int idx = Nodes.AddUnique(Node);
 	if (idx >= 0) {
 		OnNodeChanged.Broadcast(0, Node);
@@ -8,7 +8,7 @@ int UFINScriptGraph::AddNode(UFINScriptNode* Node) {
 	return idx;
 }
 
-void UFINScriptGraph::RemoveNode(UFINScriptNode* Node) {
+void UFIVSGraph::RemoveNode(UFIVSNode* Node) {
 	if (Nodes.Contains(Node)) {
 		Node->RemoveAllConnections();
 		OnNodeChanged.Broadcast(1, Node);
@@ -16,6 +16,6 @@ void UFINScriptGraph::RemoveNode(UFINScriptNode* Node) {
 	}
 }
 
-const TArray<UFINScriptNode*>& UFINScriptGraph::GetNodes() const {
+const TArray<UFIVSNode*>& UFIVSGraph::GetNodes() const {
 	return Nodes;
 }

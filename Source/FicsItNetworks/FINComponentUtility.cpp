@@ -3,14 +3,11 @@
 #include "WindowsPlatformApplicationMisc.h"
 #include "EngineGlobals.h"
 #include "VorbisAudioInfo.h"
-//#include "Interfaces/IAudioFormat.h"
 
 #include "FGSaveSystem.h"
 #include "FGPlayerController.h"
-
+#include "FicsItVisualScript/Editor/FIVSEdGraphViewer.h"
 #include "Network/FINNetworkAdapter.h"
-
-#include "FicsItVisualScript/FINScriptGraphViewer.h"
 
 UFINNetworkConnectionComponent* UFINComponentUtility::GetNetworkConnectorFromHit(FHitResult hit) {
 	if (!hit.bBlockingHit) return nullptr;
@@ -56,53 +53,53 @@ void UFINComponentUtility::ClipboardCopy(FString str) {
 void UFINComponentUtility::TestFicsItVisualScript(UNativeWidgetHost* Widget) {
 	UFINComponentUtility* Utility = Cast<UFINComponentUtility>(UFINComponentUtility::StaticClass()->GetDefaultObject());
 	
-	UFINScriptGraph* Graph = Utility->Graph;
+	UFIVSGraph* Graph = Utility->Graph;
 	if (Graph) {
-		TArray<UFINScriptNode*> Nodes = Graph->GetNodes();
-		for (UFINScriptNode* Node : Nodes) Graph->RemoveNode(Node);
+		TArray<UFIVSNode*> Nodes = Graph->GetNodes();
+		for (UFIVSNode* Node : Nodes) Graph->RemoveNode(Node);
 	} else {
-		Utility->Graph = Graph = NewObject<UFINScriptGraph>();
+		Utility->Graph = Graph = NewObject<UFIVSGraph>();
 	}
-	UFINScriptGenericFuncNode* Node = NewObject<UFINScriptGenericFuncNode>();
+	UFIVSGenericFuncNode* Node = NewObject<UFIVSGenericFuncNode>();
 	Node->Name = "Node1";
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_BOOL, FIVS_PIN_DATA_INPUT, "In1"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In2"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_FLOAT, FIVS_PIN_DATA_INPUT, "In3"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_INT, FIVS_PIN_DATA_INPUT, "In4"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_OBJ, FIVS_PIN_DATA_OUTPUT, "Out1"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_STR, FIVS_PIN_DATA_OUTPUT, "Out2"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_STRUCT, FIVS_PIN_DATA_OUTPUT, "Out3"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_TRACE, FIVS_PIN_DATA_OUTPUT, "Out4"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_BOOL, FIVS_PIN_DATA_INPUT, "In1"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In2"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_FLOAT, FIVS_PIN_DATA_INPUT, "In3"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_INT, FIVS_PIN_DATA_INPUT, "In4"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_OBJ, FIVS_PIN_DATA_OUTPUT, "Out1"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_STR, FIVS_PIN_DATA_OUTPUT, "Out2"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_STRUCT, FIVS_PIN_DATA_OUTPUT, "Out3"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_TRACE, FIVS_PIN_DATA_OUTPUT, "Out4"));
 	Graph->AddNode(Node);
-	Node = NewObject<UFINScriptGenericFuncNode>();
+	Node = NewObject<UFIVSGenericFuncNode>();
 	Node->Name = "Node2";
 	Node->Pos = FVector2D(200,0);
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_BOOL, FIVS_PIN_DATA_OUTPUT, "Out1"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In1"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_FLOAT, FIVS_PIN_DATA_OUTPUT, "Out2"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_INT, FIVS_PIN_DATA_INPUT, "In2"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_OBJ, FIVS_PIN_DATA_OUTPUT, "Out3"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_STR, FIVS_PIN_DATA_INPUT, "In3"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_STRUCT, FIVS_PIN_DATA_OUTPUT, "Out4"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_TRACE, FIVS_PIN_DATA_INPUT, "In4"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_BOOL, FIVS_PIN_DATA_OUTPUT, "Out1"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In1"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_FLOAT, FIVS_PIN_DATA_OUTPUT, "Out2"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_INT, FIVS_PIN_DATA_INPUT, "In2"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_OBJ, FIVS_PIN_DATA_OUTPUT, "Out3"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_STR, FIVS_PIN_DATA_INPUT, "In3"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_STRUCT, FIVS_PIN_DATA_OUTPUT, "Out4"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_TRACE, FIVS_PIN_DATA_INPUT, "In4"));
 	Graph->AddNode(Node);
-	Node = NewObject<UFINScriptGenericFuncNode>();
+	Node = NewObject<UFIVSGenericFuncNode>();
 	Node->Name = "Node3";
 	Node->Pos = FVector2D(0,200);
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_BOOL, FIVS_PIN_DATA_OUTPUT, "Out1"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_CLASS, FIVS_PIN_DATA_OUTPUT, "Out2"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_FLOAT, FIVS_PIN_DATA_OUTPUT, "Out3"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_INT, FIVS_PIN_DATA_OUTPUT, "Out4"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_OBJ, FIVS_PIN_DATA_INPUT, "In1"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_STR, FIVS_PIN_DATA_INPUT, "IN2"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_STRUCT, FIVS_PIN_DATA_INPUT, "In3"));
-	Node->AddPin(UFINScriptGenericPin::Create(FIN_TRACE, FIVS_PIN_DATA_INPUT, "In4"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_BOOL, FIVS_PIN_DATA_OUTPUT, "Out1"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_CLASS, FIVS_PIN_DATA_OUTPUT, "Out2"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_FLOAT, FIVS_PIN_DATA_OUTPUT, "Out3"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_INT, FIVS_PIN_DATA_OUTPUT, "Out4"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_OBJ, FIVS_PIN_DATA_INPUT, "In1"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_STR, FIVS_PIN_DATA_INPUT, "IN2"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_STRUCT, FIVS_PIN_DATA_INPUT, "In3"));
+	Node->AddPin(UFIVSGenericPin::Create(FIN_TRACE, FIVS_PIN_DATA_INPUT, "In4"));
 	Graph->AddNode(Node);
-	UFINScriptRerouteNode* Reroute = NewObject<UFINScriptRerouteNode>();
+	UFIVSRerouteNode* Reroute = NewObject<UFIVSRerouteNode>();
 	Reroute->Pos = FVector2D(200, 200);
 	Graph->AddNode(Reroute);
-	Reroute = NewObject<UFINScriptRerouteNode>();
+	Reroute = NewObject<UFIVSRerouteNode>();
 	Reroute->Pos = FVector2D(300, 200);
 	Graph->AddNode(Reroute);
-	if (Widget) Widget->SetContent(SNew(SFINScriptGraphViewer).Graph(Graph));
+	if (Widget) Widget->SetContent(SNew(SFIVSEdGraphViewer).Graph(Graph));
 }

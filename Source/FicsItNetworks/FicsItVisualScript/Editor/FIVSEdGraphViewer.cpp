@@ -1,22 +1,20 @@
-﻿#include "FINScriptGraphViewer.h"
-
-#include "FINScriptActionSelection.h"
+﻿#include "FIVSEdGraphViewer.h"
 #include "Reflection/FINReflection.h"
 
-void FFINScriptConnectionDrawer::Reset() {
-	ConnectionUnderMouse = TPair<TSharedPtr<SFINScriptPinViewer>, TSharedPtr<SFINScriptPinViewer>>(nullptr, nullptr);
+void FFIVSEdConnectionDrawer::Reset() {
+	ConnectionUnderMouse = TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>>(nullptr, nullptr);
 	LastConnectionDistance = FLT_MAX;
 }
 
-void FFINScriptConnectionDrawer::DrawConnection(TSharedRef<SFINScriptPinViewer> Pin1, TSharedRef<SFINScriptPinViewer> Pin2, TSharedRef<const SFINScriptGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
-	bool is1Wild = Cast<UFINScriptWildcardPin>(Pin1->GetPin());
-	bool is2Wild = Cast<UFINScriptWildcardPin>(Pin2->GetPin());
+void FFIVSEdConnectionDrawer::DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, TSharedRef<SFIVSEdPinViewer> Pin2, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
+	bool is1Wild = Cast<UFIVSWildcardPin>(Pin1->GetPin());
+	bool is2Wild = Cast<UFIVSWildcardPin>(Pin2->GetPin());
 
 	bool bShouldSwitch = false;
 	if (is1Wild) {
 		if (is2Wild) {
 			bool bHasInput = false;
-			for (UFINScriptPin* Con : Pin1->GetPin()->GetConnections()) if (Con->GetPinType() & FIVS_PIN_INPUT) {
+			for (UFIVSPin* Con : Pin1->GetPin()->GetConnections()) if (Con->GetPinType() & FIVS_PIN_INPUT) {
 				bHasInput = true;
 				break;
 			}
@@ -34,7 +32,7 @@ void FFINScriptConnectionDrawer::DrawConnection(TSharedRef<SFINScriptPinViewer> 
 		bShouldSwitch = true;
 	}
 	if (bShouldSwitch) {
-		TSharedRef<SFINScriptPinViewer> Pin = Pin1;
+		TSharedRef<SFIVSEdPinViewer> Pin = Pin1;
 		Pin1 = Pin2;
 		Pin2 = Pin;
 	}
@@ -63,32 +61,32 @@ void FFINScriptConnectionDrawer::DrawConnection(TSharedRef<SFINScriptPinViewer> 
 		Point1 = Point2;
 	}
 	if (ClosestDistanceSquared < LastConnectionDistance && ClosestDistanceSquared < 100) {
-		ConnectionUnderMouse = TPair<TSharedPtr<SFINScriptPinViewer>, TSharedPtr<SFINScriptPinViewer>>(Pin1, Pin2);
+		ConnectionUnderMouse = TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>>(Pin1, Pin2);
 		LastConnectionDistance = ClosestDistanceSquared;
 	}
 }
 
-void FFINScriptConnectionDrawer::DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFINScriptGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
+void FFIVSEdConnectionDrawer::DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
 	FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start, FVector2D(300 * Graph->Zoom,0), End, FVector2D(300 * Graph->Zoom,0), 2 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
 }
 
-void SFINScriptGraphViewer::Construct(const FArguments& InArgs) {
-	SetGraph(InArgs._Graph.Get());
+void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
+	SetGraph(InArgs._Graph);
 }
 
-SFINScriptGraphViewer::SFINScriptGraphViewer() : Children(this) {
-	ConnectionDrawer = MakeShared<FFINScriptConnectionDrawer>();
+SFIVSEdGraphViewer::SFIVSEdGraphViewer() : Children(this) {
+	ConnectionDrawer = MakeShared<FFIVSEdConnectionDrawer>();
 }
 
-SFINScriptGraphViewer::~SFINScriptGraphViewer() {
+SFIVSEdGraphViewer::~SFIVSEdGraphViewer() {
 	if (Graph) Graph->OnNodeChanged.Remove(OnNodeChangedHandle);
 }
 
-FVector2D SFINScriptGraphViewer::ComputeDesiredSize(float) const {
+FVector2D SFIVSEdGraphViewer::ComputeDesiredSize(float) const {
 	return FVector2D(1000,1000);
 }
 
-int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
+int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	ConnectionDrawer->Reset();
 	int ret = SPanel::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId+2, InWidgetStyle, bParentEnabled);
 
@@ -111,33 +109,34 @@ int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 	}
 
 	// Draw Pin Connections
-	TMap<TSharedRef<SFINScriptPinViewer>, FVector2D> ConnectionLocations; 
-	TMap<UFINScriptPin*, TSharedRef<SFINScriptPinViewer>> PinMap;
+	TMap<TSharedRef<SFIVSEdPinViewer>, FVector2D> ConnectionLocations; 
+	TMap<UFIVSPin*, TSharedRef<SFIVSEdPinViewer>> PinMap;
 	
 	for (int i = 0; i < Children.Num(); ++i) {
-		TSharedRef<SFINScriptNodeViewer> Node = Children[i];
+		TSharedRef<SFIVSEdNodeViewer> Node = Children[i];
 		for (int j = 0; j < Node->GetPinWidgets().Num(); ++j) {
-			TSharedRef<SFINScriptPinViewer> Pin = Node->GetPinWidgets()[j];
+			TSharedRef<SFIVSEdPinViewer> Pin = Node->GetPinWidgets()[j];
 			ConnectionLocations.Add(Pin, Pin->GetConnectionPoint());
 			PinMap.Add(Pin->GetPin(), Pin);
 		}
 	}
 
-	TSet<TPair<UFINScriptPin*, UFINScriptPin*>> DrawnPins;
+	TSet<TPair<UFIVSPin*, UFIVSPin*>> DrawnPins;
 	for (int i = 0; i < Children.Num(); ++i) {
-		TSharedRef<SFINScriptNodeViewer> Node = Children[i];
-		for (const TSharedRef<SFINScriptPinViewer>& Pin : Node->GetPinWidgets()) {
-			for (UFINScriptPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
-				if (!DrawnPins.Contains(TPair<UFINScriptPin*, UFINScriptPin*>(Pin->GetPin(), ConnectionPin)) && !DrawnPins.Contains(TPair<UFINScriptPin*, UFINScriptPin*>(ConnectionPin, Pin->GetPin()))) {
-					DrawnPins.Add(TPair<UFINScriptPin*, UFINScriptPin*>(Pin->GetPin(), ConnectionPin));
+		TSharedRef<SFIVSEdNodeViewer> Node = Children[i];
+		for (const TSharedRef<SFIVSEdPinViewer>& Pin : Node->GetPinWidgets()) {
+			for (UFIVSPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
+				if (!DrawnPins.Contains(TPair<UFIVSPin*, UFIVSPin*>(Pin->GetPin(), ConnectionPin)) && !DrawnPins.Contains(TPair<UFIVSPin*, UFIVSPin*>(ConnectionPin, Pin->GetPin()))) {
+					DrawnPins.Add(TPair<UFIVSPin*, UFIVSPin*>(Pin->GetPin(), ConnectionPin));
 					ConnectionDrawer->DrawConnection(Pin, NodeToChild[ConnectionPin->ParentNode]->GetPinWidget(ConnectionPin), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId+1);
 				}
 			}
 		}
 	}
 
+	// draw new creating connection
 	if (bIsPinDrag) {
-		TSharedRef<SFINScriptPinViewer> PinWidget = NodeToChild[PinDragStart->ParentNode]->GetPinWidget(PinDragStart);
+		TSharedRef<SFIVSEdPinViewer> PinWidget = NodeToChild[PinDragStart->ParentNode]->GetPinWidget(PinDragStart);
 		FVector2D StartLoc = GetCachedGeometry().AbsoluteToLocal(PinWidget->GetConnectionPoint());
 		FVector2D EndLoc = PinDragEnd;
 		if (PinDragStart->GetPinType() & FIVS_PIN_INPUT) {
@@ -147,6 +146,7 @@ int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 		ConnectionDrawer->DrawConnection(StartLoc, EndLoc, PinWidget->GetPinColor().GetSpecifiedColor(), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId+100);
 	}
 
+	// Draw selection box
 	if (bIsSelectionDrag) {
 		FVector2D SelectStart = GetCachedGeometry().AbsoluteToLocal(SelectionDragStart);
 		FVector2D SelectEnd = GetCachedGeometry().AbsoluteToLocal(SelectionDragEnd);
@@ -156,11 +156,11 @@ int32 SFINScriptGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 	return ret;
 }
 
-FReply SFINScriptGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+FReply SFIVSEdGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	if (!MouseEvent.GetModifierKeys().IsShiftDown() && !SelectedNodes.Contains(NodeUnderMouse)) DeselectAll();
 
 	if (ConnectionDrawer->ConnectionUnderMouse.Key.IsValid() && MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)) {
-		TPair<TSharedPtr<SFINScriptPinViewer>, TSharedPtr<SFINScriptPinViewer>> Connection = ConnectionDrawer->ConnectionUnderMouse;
+		TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>> Connection = ConnectionDrawer->ConnectionUnderMouse;
 		TSharedPtr<IMenu> MenuHandle;
 		FMenuBuilder MenuBuilder(true, NULL);
 		MenuBuilder.AddMenuEntry(
@@ -176,26 +176,30 @@ FReply SFINScriptGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, con
 		if (PinUnderMouse && !MouseEvent.GetModifierKeys().IsControlDown()) {
 			bIsPinDrag = true;
 			PinDragStart = PinUnderMouse;
+			return FReply::Handled().CaptureMouse(AsShared());
 		} else {
 			bIsNodeDrag = true;
 			NodeDragStart = MouseEvent.GetScreenSpacePosition();
 			Select(NodeUnderMouse);
 			NodeDragPosStart.Empty();
-			for (UFINScriptNode* Node : SelectedNodes) {
+			for (UFIVSNode* Node : SelectedNodes) {
 				NodeDragPosStart.Add(Node->Pos);
 			}
+			return FReply::Handled().CaptureMouse(AsShared());
 		}
 	} else if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)) {
 		bIsSelectionDrag = true;
 		SelectionDragStart = MouseEvent.GetScreenSpacePosition();
+		return FReply::Handled().CaptureMouse(AsShared());
 	} else {
 		bIsGraphDrag = true;
 		GraphDragDelta = 0.0f;
+		return FReply::Handled().CaptureMouse(AsShared());
 	}
 	return FReply::Handled();
 }
 
-FReply SFINScriptGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+FReply SFIVSEdGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	if (bIsPinDrag) {
 		if (PinUnderMouse) {
 			bIsPinDrag = false;
@@ -203,26 +207,29 @@ FReply SFINScriptGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const
 		} else {
 			CreateActionSelectionMenu(*MouseEvent.GetEventPath(), MouseEvent.GetScreenSpacePosition(), [this](auto){ bIsPinDrag = false; }, FFINScriptNodeCreationContext(Graph, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())), PinDragStart));
 		}
+		return FReply::Handled().ReleaseMouseCapture();
 	} else if (bIsNodeDrag) {
 		bIsNodeDrag = false;
-		return FReply::Handled();
+		return FReply::Handled().ReleaseMouseCapture();
 	} else if (bIsSelectionDrag) {
 		bIsSelectionDrag = false;
+		return FReply::Handled().ReleaseMouseCapture();
 	} else if (bIsGraphDrag) {
 		bIsGraphDrag = false;
 		if (GraphDragDelta < 10) {
 			CreateActionSelectionMenu(*MouseEvent.GetEventPath(), MouseEvent.GetScreenSpacePosition(), [this](auto){}, FFINScriptNodeCreationContext(Graph, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())), nullptr));
 		}
+		return FReply::Handled().ReleaseMouseCapture();
 	}
 	return SPanel::OnMouseButtonUp(MyGeometry, MouseEvent);
 }
 
-FReply SFINScriptGraphViewer::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) {
+FReply SFIVSEdGraphViewer::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) {
 	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton) && ConnectionDrawer.IsValid() && ConnectionDrawer->ConnectionUnderMouse.Key) {
-		TPair<TSharedPtr<SFINScriptPinViewer>, TSharedPtr<SFINScriptPinViewer>> Connection = ConnectionDrawer->ConnectionUnderMouse;
-		UFINScriptPin* Pin1 = Connection.Key->GetPin();
-		UFINScriptPin* Pin2 = Connection.Value->GetPin();
-		UFINScriptRerouteNode* Node = NewObject<UFINScriptRerouteNode>();
+		TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>> Connection = ConnectionDrawer->ConnectionUnderMouse;
+		UFIVSPin* Pin1 = Connection.Key->GetPin();
+		UFIVSPin* Pin2 = Connection.Value->GetPin();
+		UFIVSRerouteNode* Node = NewObject<UFIVSRerouteNode>();
 		Node->Pos = LocalToGraph(GetCachedGeometry().AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition())) - FVector2D(10, 10);
 		Pin1->RemoveConnection(Connection.Value->GetPin());
 		Pin1->AddConnection(Node->GetNodePins()[0]);
@@ -233,10 +240,10 @@ FReply SFINScriptGraphViewer::OnMouseButtonDoubleClick(const FGeometry& InMyGeom
 	return SPanel::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
 }
 
-FReply SFINScriptGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+FReply SFIVSEdGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	FArrangedChildren ArrangedChildren(EVisibility::Visible);
 	ArrangeChildren(MyGeometry, ArrangedChildren);
-	int ChildUnderMouseIndex = FindChildUnderMouse(ArrangedChildren, MouseEvent);
+	int ChildUnderMouseIndex = FindChildUnderPosition(ArrangedChildren, MouseEvent.GetScreenSpacePosition());
 	if (ChildUnderMouseIndex >= 0) {
 		NodeUnderMouse = Children[ChildUnderMouseIndex]->GetNode();
 		PinUnderMouse = NodeToChild[NodeUnderMouse]->GetPinUnderMouse();
@@ -254,7 +261,7 @@ FReply SFINScriptGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPo
 			bool bSnapToGrid = !MouseEvent.GetModifierKeys().IsControlDown();
 			FVector2D MoveOffset = LocalToGraph(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())) - LocalToGraph(MyGeometry.AbsoluteToLocal(NodeDragStart));
 			if (bSnapToGrid) MoveOffset = FVector2D(FMath::RoundToFloat(MoveOffset.X/10.0)*10.0, FMath::RoundToFloat(MoveOffset.Y/10.0)*10.0);
-			UFINScriptNode* Node = SelectedNodes[i];
+			UFIVSNode* Node = SelectedNodes[i];
 			Node->Pos = NodeDragPosStart[i] + MoveOffset;
 			if (bSnapToGrid && SelectedNodes.Num() == 1 && !MouseEvent.GetModifierKeys().IsShiftDown()) {
 				FVector2D NPos = Node->Pos / 10.0;
@@ -269,8 +276,8 @@ FReply SFINScriptGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPo
 		FVector2D LocalStart = GetCachedGeometry().AbsoluteToLocal(SelectionDragStart);
 		FVector2D LocalEnd = GetCachedGeometry().AbsoluteToLocal(SelectionDragEnd);
 		FSlateRect SelectionRect = FSlateRect(FVector2D(FMath::Min(LocalStart.X, LocalEnd.X), FMath::Min(LocalStart.Y, LocalEnd.Y)), FVector2D(FMath::Max(LocalStart.X, LocalEnd.X), FMath::Max(LocalStart.Y, LocalEnd.Y)));
-		for (UFINScriptNode* Node : Graph->GetNodes()) {
-			TSharedRef<SFINScriptNodeViewer> NodeW = NodeToChild[Node];
+		if (Graph) for (UFIVSNode* Node : Graph->GetNodes()) {
+			TSharedRef<SFIVSEdNodeViewer> NodeW = NodeToChild[Node];
 			FSlateRect NodeRect = FSlateRect(GetCachedGeometry().AbsoluteToLocal(NodeW->GetCachedGeometry().GetAbsolutePosition()), GetCachedGeometry().AbsoluteToLocal(NodeW->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D(1,1))));
 			if (Node && FSlateRect::DoRectanglesIntersect(NodeRect, SelectionRect)) {
 				Select(Node);
@@ -286,7 +293,7 @@ FReply SFINScriptGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPo
 	return SPanel::OnMouseMove(MyGeometry, MouseEvent);
 }
 
-FReply SFINScriptGraphViewer::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+FReply SFIVSEdGraphViewer::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	FVector2D StartPos = LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()));
 	Zoom += MouseEvent.GetWheelDelta() / 10.0;
 	if (Zoom < 0.1) Zoom = 0.1;
@@ -297,10 +304,10 @@ FReply SFINScriptGraphViewer::OnMouseWheel(const FGeometry& MyGeometry, const FP
 	return FReply::Handled();
 }
 
-FReply SFINScriptGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
+FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	if (InKeyEvent.GetKey() == EKeys::Delete) {
 		if (SelectedNodes.Num() > 0) {
-			for (UFINScriptNode* Node : SelectedNodes) {
+			for (UFIVSNode* Node : SelectedNodes) {
 				Graph->RemoveNode(Node);
 			}
 		} else if (ConnectionDrawer && ConnectionDrawer->ConnectionUnderMouse.Key) {
@@ -309,46 +316,46 @@ FReply SFINScriptGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyE
 	}
 	return SPanel::OnKeyDown(MyGeometry, InKeyEvent);
 }
-FReply SFINScriptGraphViewer::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
+FReply SFIVSEdGraphViewer::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	return SPanel::OnKeyUp(MyGeometry, InKeyEvent);
 }
 
-bool SFINScriptGraphViewer::IsInteractable() const {
+bool SFIVSEdGraphViewer::IsInteractable() const {
 	return true;
 }
 
-bool SFINScriptGraphViewer::SupportsKeyboardFocus() const {
+bool SFIVSEdGraphViewer::SupportsKeyboardFocus() const {
 	return true;
 }
 
-FChildren* SFINScriptGraphViewer::GetChildren() {
+FChildren* SFIVSEdGraphViewer::GetChildren() {
 	return &Children;
 }
 
-void SFINScriptGraphViewer::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {
+void SFIVSEdGraphViewer::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {
 	for (int32 NodeIndex = 0; NodeIndex < Children.Num(); ++NodeIndex) {
-		const TSharedRef<SFINScriptNodeViewer>& Node = Children[NodeIndex];
+		const TSharedRef<SFIVSEdNodeViewer>& Node = Children[NodeIndex];
 		ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Node, Node->GetPosition() + Offset, Node->GetDesiredSize(), Zoom));
 	}
 }
 
-void SFINScriptGraphViewer::OnNodeChanged(int change, UFINScriptNode* Node) {
+void SFIVSEdGraphViewer::OnNodeChanged(int change, UFIVSNode* Node) {
 	if (change == 0) {
 		CreateNodeAsChild(Node);
 	} else {
-		TSharedRef<SFINScriptNodeViewer>* Viewer = NodeToChild.Find(Node);
+		TSharedRef<SFIVSEdNodeViewer>* Viewer = NodeToChild.Find(Node);
 		if (Viewer) Children.Remove(*Viewer);
 	}
 }
 
-TSharedPtr<IMenu> SFINScriptGraphViewer::CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFINScriptActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& Context) {
-	TArray<TSharedPtr<FFINScriptActionSelectionEntry>> Entries;
+TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFIVSEdActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& Context) {
+	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Entries;
     TArray<UClass*> Derived;
     GetDerivedClasses(UObject::StaticClass(), Derived);
     for (TTuple<UClass*, UFINClass*> Clazz : FFINReflection::Get()->GetClasses()) {
-    	Entries.Add(MakeShared<FFINScriptActionSelectionTypeCategory>(Clazz.Value, Context));
+    	Entries.Add(MakeShared<FFIVSEdActionSelectionTypeCategory>(Clazz.Value, Context));
     }
-    TSharedRef<SFINScriptActionSelection> Select = SNew(SFINScriptActionSelection).OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFINScriptActionSelectionAction>& Action) {
+    TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection).OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFIVSEdActionSelectionAction>& Action) {
 		OnExecute(Action);
     	ActiveActionSelection = nullptr;
     });
@@ -364,7 +371,7 @@ TSharedPtr<IMenu> SFINScriptGraphViewer::CreateActionSelectionMenu(const FWidget
 	return Menu;
 }
 
-void SFINScriptGraphViewer::SetGraph(UFINScriptGraph* NewGraph) {
+void SFIVSEdGraphViewer::SetGraph(UFIVSGraph* NewGraph) {
 	if (Graph) {
 		Graph->OnNodeChanged.Remove(OnNodeChangedHandle);
 		Children.Empty();
@@ -374,41 +381,41 @@ void SFINScriptGraphViewer::SetGraph(UFINScriptGraph* NewGraph) {
 	Graph = NewGraph;
 
 	if (Graph) {
-		OnNodeChangedHandle = Graph->OnNodeChanged.AddRaw(this, &SFINScriptGraphViewer::OnNodeChanged);
+		OnNodeChangedHandle = Graph->OnNodeChanged.AddRaw(this, &SFIVSEdGraphViewer::OnNodeChanged);
 		
 		// Generate Nodes Children
-		for (UFINScriptNode* Node : Graph->GetNodes()) {
+		for (UFIVSNode* Node : Graph->GetNodes()) {
 			CreateNodeAsChild(Node);
 		}
 	}
 }
 
-void SFINScriptGraphViewer::CreateNodeAsChild(UFINScriptNode* Node) {
-	TSharedRef<SFINScriptNodeViewer> Child = SNew(SFINScriptNodeViewer)
+void SFIVSEdGraphViewer::CreateNodeAsChild(UFIVSNode* Node) {
+	TSharedRef<SFIVSEdNodeViewer> Child = SNew(SFIVSEdNodeViewer)
         .Node(Node);
 	Children.Add(Child);
 	NodeToChild.Add(Node, Child);
 }
 
-void SFINScriptGraphViewer::Select(UFINScriptNode* Node) {
+void SFIVSEdGraphViewer::Select(UFIVSNode* Node) {
 	if (SelectedNodes.Contains(Node)) return;
 	SelectedNodes.Add(Node);
 	NodeToChild[Node]->bSelected = true;
 }
 
-void SFINScriptGraphViewer::Deselect(UFINScriptNode* Node) {
+void SFIVSEdGraphViewer::Deselect(UFIVSNode* Node) {
 	if (SelectedNodes.Remove(Node)) {
 		NodeToChild[Node]->bSelected = false;
 	}
 }
 
-void SFINScriptGraphViewer::DeselectAll() {
-	TArray<UFINScriptNode*> Nodes = SelectedNodes;
-	for (UFINScriptNode* Node : Nodes) {
+void SFIVSEdGraphViewer::DeselectAll() {
+	TArray<UFIVSNode*> Nodes = SelectedNodes;
+	for (UFIVSNode* Node : Nodes) {
 		Deselect(Node);
 	}
 }
 
-FVector2D SFINScriptGraphViewer::LocalToGraph(const FVector2D Local) {
+FVector2D SFIVSEdGraphViewer::LocalToGraph(const FVector2D Local) {
 	return (Local / Zoom) - Offset;
 }

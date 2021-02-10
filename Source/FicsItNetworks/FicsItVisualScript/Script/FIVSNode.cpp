@@ -1,43 +1,43 @@
-﻿#include "FINScriptNode.h"
+﻿#include "FIVSNode.h"
 
-void UFINScriptPin::GetAllConnected(TArray<UFINScriptPin*>& Searches) {
+void UFIVSPin::GetAllConnected(TArray<UFIVSPin*>& Searches) {
 	if (Searches.Contains(this)) return;
 	Searches.Add(this);
-	for (UFINScriptPin* Pin : GetConnections()) {
+	for (UFIVSPin* Pin : GetConnections()) {
 		Pin->GetAllConnected(Searches);
 	}
 }
 
-void UFINScriptPin::AddConnection(UFINScriptPin* Pin) {
+void UFIVSPin::AddConnection(UFIVSPin* Pin) {
 	if (!CanConnect(Pin) || !Pin->CanConnect(this)) return;
 	ConnectedPins.Add(Pin);
 	Pin->ConnectedPins.Add(this);
 }
 
-void UFINScriptPin::RemoveConnection(UFINScriptPin* Pin) {
+void UFIVSPin::RemoveConnection(UFIVSPin* Pin) {
 	if (ConnectedPins.Contains(Pin)) ConnectedPins.Remove(Pin);
 	if (Pin->ConnectedPins.Contains(this)) Pin->ConnectedPins.Remove(this);
 }
 
-EFINScriptPinType UFINScriptPin::GetPinType() {
+EFIVSPinType UFIVSPin::GetPinType() {
 	return FIVS_PIN_NONE;
 }
 
-EFINNetworkValueType UFINScriptPin::GetPinDataType() {
+EFINNetworkValueType UFIVSPin::GetPinDataType() {
 	return FIN_NIL;
 }
 
-const TArray<UFINScriptPin*>& UFINScriptPin::GetConnections() {
+const TArray<UFIVSPin*>& UFIVSPin::GetConnections() {
 	return ConnectedPins;
 }
 
-FText UFINScriptPin::GetName() {
+FText UFIVSPin::GetName() {
 	return FText::FromString("");
 }
 
-bool UFINScriptPin::CanConnect(UFINScriptPin* Pin) {
-	EFINScriptPinType ThisPinType = GetPinType();
-	EFINScriptPinType PinPinType = Pin->GetPinType();
+bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
+	EFIVSPinType ThisPinType = GetPinType();
+	EFIVSPinType PinPinType = Pin->GetPinType();
 	EFINNetworkValueType ThisPinDataType = GetPinDataType();
 	EFINNetworkValueType PinPinDataType = Pin->GetPinDataType();
 	if (ConnectedPins.Contains(Pin) || Pin == this) return false;
@@ -56,10 +56,10 @@ bool UFINScriptPin::CanConnect(UFINScriptPin* Pin) {
 	bool bPinHasInput = false;
 	bool bThisHasOutput = false;
 	bool bPinHasOutput = false;
-	TArray<UFINScriptPin*> Connections;
+	TArray<UFIVSPin*> Connections;
 	GetAllConnected(Connections);
-	for (UFINScriptPin* Connection : Connections) {
-		if (Cast<UFINScriptWildcardPin>(Connection)) continue;
+	for (UFIVSPin* Connection : Connections) {
+		if (Cast<UFIVSWildcardPin>(Connection)) continue;
 		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
 			bThisHasOutput = true;
 		}
@@ -69,8 +69,8 @@ bool UFINScriptPin::CanConnect(UFINScriptPin* Pin) {
 	}
 	Connections.Empty();
 	Pin->GetAllConnected(Connections);
-	for (UFINScriptPin* Connection : Connections) {
-		if (Cast<UFINScriptWildcardPin>(Connection)) continue;
+	for (UFIVSPin* Connection : Connections) {
+		if (Cast<UFIVSWildcardPin>(Connection)) continue;
 		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
 			bPinHasOutput = true;
 		}
@@ -87,107 +87,107 @@ bool UFINScriptPin::CanConnect(UFINScriptPin* Pin) {
 	return true;
 }
 
-void UFINScriptPin::RemoveAllConnections() {
-	TArray<UFINScriptPin*> Connections = GetConnections();
-	for (UFINScriptPin* Connection : Connections) {
+void UFIVSPin::RemoveAllConnections() {
+	TArray<UFIVSPin*> Connections = GetConnections();
+	for (UFIVSPin* Connection : Connections) {
 		RemoveConnection(Connection);
 	}
 }
 
-EFINScriptPinType UFINScriptGenericPin::GetPinType() {
+EFIVSPinType UFIVSGenericPin::GetPinType() {
 	return PinType;
 }
 
-EFINNetworkValueType UFINScriptGenericPin::GetPinDataType() {
+EFINNetworkValueType UFIVSGenericPin::GetPinDataType() {
 	return PinDataType;
 }
 
-FText UFINScriptGenericPin::GetName() {
+FText UFIVSGenericPin::GetName() {
 	return Name;
 }
 
-UFINScriptGenericPin* UFINScriptGenericPin::Create(EFINNetworkValueType DataType, EFINScriptPinType PinType, const FString& Name) {
-	UFINScriptGenericPin* Pin = NewObject<UFINScriptGenericPin>();
+UFIVSGenericPin* UFIVSGenericPin::Create(EFINNetworkValueType DataType, EFIVSPinType PinType, const FString& Name) {
+	UFIVSGenericPin* Pin = NewObject<UFIVSGenericPin>();
 	Pin->Name = FText::FromString(Name);
 	Pin->PinDataType = DataType;
 	Pin->PinType = PinType;
 	return Pin;
 }
 
-EFINScriptPinType UFINScriptWildcardPin::GetPinType() {
-	TArray<UFINScriptPin*> Connected;
+EFIVSPinType UFIVSWildcardPin::GetPinType() {
+	TArray<UFIVSPin*> Connected;
 	GetAllConnected(Connected);
-	EFINScriptPinType Type = (EFINScriptPinType)(FIVS_PIN_EXEC | FIVS_PIN_DATA);
-	for (UFINScriptPin* Pin : Connected) {
-		if (Cast<UFINScriptWildcardPin>(Pin)) continue;
-		EFINScriptPinType PinType = Pin->GetPinType();
+	EFIVSPinType Type = (EFIVSPinType)(FIVS_PIN_EXEC | FIVS_PIN_DATA);
+	for (UFIVSPin* Pin : Connected) {
+		if (Cast<UFIVSWildcardPin>(Pin)) continue;
+		EFIVSPinType PinType = Pin->GetPinType();
 		if (PinType & FIVS_PIN_DATA) {
 			if (PinType & FIVS_PIN_OUTPUT) {
-				return (EFINScriptPinType)(FIVS_PIN_DATA | FIVS_PIN_OUTPUT);
+				return (EFIVSPinType)(FIVS_PIN_DATA | FIVS_PIN_OUTPUT);
 			}
 			Type = FIVS_PIN_DATA;
 		}
 		if (PinType & FIVS_PIN_EXEC) {
 			if (PinType & FIVS_PIN_INPUT) {
-				return (EFINScriptPinType)(FIVS_PIN_EXEC | FIVS_PIN_INPUT);
+				return (EFIVSPinType)(FIVS_PIN_EXEC | FIVS_PIN_INPUT);
 			}
 			Type = FIVS_PIN_EXEC;
 		}
 	}
-	return (EFINScriptPinType)(Type | FIVS_PIN_INPUT | FIVS_PIN_OUTPUT);
+	return (EFIVSPinType)(Type | FIVS_PIN_INPUT | FIVS_PIN_OUTPUT);
 }
 
-EFINNetworkValueType UFINScriptWildcardPin::GetPinDataType() {
-	TArray<UFINScriptPin*> Connected;
+EFINNetworkValueType UFIVSWildcardPin::GetPinDataType() {
+	TArray<UFIVSPin*> Connected;
 	GetAllConnected(Connected);
 	EFINNetworkValueType Type = FIN_ANY;
-	for (UFINScriptPin* Pin : Connected) {
-		if (Cast<UFINScriptWildcardPin>(Pin)) continue;
+	for (UFIVSPin* Pin : Connected) {
+		if (Cast<UFIVSWildcardPin>(Pin)) continue;
 		Type = Pin->GetPinDataType();
 		break;
 	}
 	return Type;
 }
 
-bool UFINScriptWildcardPin::CanConnect(UFINScriptPin* Pin) {
-	return UFINScriptPin::CanConnect(Pin);
+bool UFIVSWildcardPin::CanConnect(UFIVSPin* Pin) {
+	return UFIVSPin::CanConnect(Pin);
 }
 
-EFINScriptPinType UFINScriptReflectionPin::GetPinType() {
+EFIVSPinType UFIVSReflectionPin::GetPinType() {
 	return Property->GetPropertyFlags() & (FIN_Prop_OutParam | FIN_Prop_RetVal) ? FIVS_PIN_DATA_OUTPUT : FIVS_PIN_DATA_INPUT;
 }
 
-EFINNetworkValueType UFINScriptReflectionPin::GetPinDataType() {
+EFINNetworkValueType UFIVSReflectionPin::GetPinDataType() {
 	if (Property) {
 		return Property->GetType();
 	}
 	return Super::GetPinDataType();
 }
 
-FText UFINScriptReflectionPin::GetName() {
+FText UFIVSReflectionPin::GetName() {
 	return Property->GetDisplayName();
 }
 
-void UFINScriptReflectionPin::SetProperty(UFINProperty* Prop) {
+void UFIVSReflectionPin::SetProperty(UFINProperty* Prop) {
 	Property = Prop;
 }
 
-void UFINScriptNode::RemoveAllConnections() {
-	for (UFINScriptPin* Pin : GetNodePins()) {
+void UFIVSNode::RemoveAllConnections() {
+	for (UFIVSPin* Pin : GetNodePins()) {
 		Pin->RemoveAllConnections();
 	}
 }
 
-UFINScriptRerouteNode::UFINScriptRerouteNode() {
-	Pin = CreateDefaultSubobject<UFINScriptWildcardPin>("Pin");
+UFIVSRerouteNode::UFIVSRerouteNode() {
+	Pin = CreateDefaultSubobject<UFIVSWildcardPin>("Pin");
 	Pin->ParentNode = this;
 }
 
-TArray<UFINScriptPin*> UFINScriptRerouteNode::GetNodePins() const {
+TArray<UFIVSPin*> UFIVSRerouteNode::GetNodePins() const {
 	return {Pin};
 }
 
-int UFINScriptFuncNode::AddNodePin(UFINScriptPin* Pin) {
+int UFIVSFuncNode::AddNodePin(UFIVSPin* Pin) {
 	int idx = Pins.Add(Pin);
 	if (idx >= 0) {
 		Pin->ParentNode = this;
@@ -196,56 +196,56 @@ int UFINScriptFuncNode::AddNodePin(UFINScriptPin* Pin) {
 	return idx;
 }
 
-void UFINScriptFuncNode::RemoveNodePin(int index) {
+void UFIVSFuncNode::RemoveNodePin(int index) {
 	Pins.RemoveAt(index);
 	OnPinChanged.Broadcast(1, index);
 }
 
-TArray<UFINScriptPin*> UFINScriptFuncNode::GetNodePins() const {
+TArray<UFIVSPin*> UFIVSFuncNode::GetNodePins() const {
 	return Pins;
 }
 
-FString UFINScriptReflectedFuncNode::GetNodeName() const {
+FString UFIVSReflectedFuncNode::GetNodeName() const {
 	return Function->GetInternalName();
 }
 
-void UFINScriptReflectedFuncNode::SetFunction(UFINFunction* inFunction) {
+void UFIVSReflectedFuncNode::SetFunction(UFINFunction* inFunction) {
 	if (Function) {
 		for (int i = 0; i < GetNodePins().Num(); ++i) {
 			RemoveNodePin(i);
 		}
 	}
 	Function = inFunction;
-	UFINScriptGenericPin* ExecIn = NewObject<UFINScriptGenericPin>(this);
+	UFIVSGenericPin* ExecIn = NewObject<UFIVSGenericPin>(this);
 	ExecIn->PinDataType = FIN_NIL;
 	ExecIn->PinType = FIVS_PIN_EXEC_INPUT;
 	ExecIn->Name = FText::FromString("Exec");
 	AddNodePin(ExecIn);
 	if (Function->GetFunctionFlags() & FIN_Func_MemberFunc) {
-		UFINScriptGenericPin* ReferenceIn = NewObject<UFINScriptGenericPin>(this);
+		UFIVSGenericPin* ReferenceIn = NewObject<UFIVSGenericPin>(this);
 		ReferenceIn->PinDataType = FIN_TRACE;
 		ReferenceIn->PinType = FIVS_PIN_DATA_INPUT;
 		ReferenceIn->Name = FText::FromString("Ref");
 		AddNodePin(ReferenceIn);
 	} else if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
-		UFINScriptGenericPin* ReferenceIn = NewObject<UFINScriptGenericPin>(this);
+		UFIVSGenericPin* ReferenceIn = NewObject<UFIVSGenericPin>(this);
 		ReferenceIn->PinDataType = FIN_CLASS;
 		ReferenceIn->PinType = FIVS_PIN_DATA_INPUT;
 		ReferenceIn->Name = FText::FromString("Ref");
 		AddNodePin(ReferenceIn);
 	}
-	UFINScriptGenericPin* ExecOut = NewObject<UFINScriptGenericPin>(this);
+	UFIVSGenericPin* ExecOut = NewObject<UFIVSGenericPin>(this);
 	ExecOut->PinDataType = FIN_NIL;
 	ExecOut->PinType = FIVS_PIN_EXEC_OUTPUT;
 	ExecOut->Name = FText::FromString("Return");
 	AddNodePin(ExecOut);
 	for (UFINProperty* Param : Function->GetParameters()) {
-		UFINScriptReflectionPin* Pin = NewObject<UFINScriptReflectionPin>(this);
+		UFIVSReflectionPin* Pin = NewObject<UFIVSReflectionPin>(this);
 		Pin->SetProperty(Param);
 		AddNodePin(Pin);
 	}
 }
 
-UFINFunction* UFINScriptReflectedFuncNode::GetFunction() const {
+UFINFunction* UFIVSReflectedFuncNode::GetFunction() const {
 	return Function;
 }

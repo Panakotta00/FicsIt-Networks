@@ -1,29 +1,24 @@
 ﻿#pragma once
 
 #include "SlateBasics.h"
-#include "SPanel.h"
-#include "FINScriptNode.h"
+#include "FicsItVisualScript/Script/FIVSNode.h"
 
-class SFINScriptPinViewer : public SPanel {
-	SLATE_BEGIN_ARGS(SFINScriptPinViewer) {}
-		SLATE_ARGUMENT(UFINScriptPin*, Pin)
+class SFIVSEdPinViewer : public SCompoundWidget {
+	SLATE_BEGIN_ARGS(SFIVSEdPinViewer) {}
+		SLATE_ARGUMENT(UFIVSPin*, Pin)
 	SLATE_END_ARGS()
 
 public:
 	void Construct(const FArguments& InArgs);
 
 private:
-	UFINScriptPin* Pin;
-	TSlotlessChildren<SBorder> Children;
+	UFIVSPin* Pin;
 	TSharedPtr<SImage> PinIconWidget;
 	
 public:
-	SFINScriptPinViewer();
+	SFIVSEdPinViewer();
 	
 	// Begin SWidget
-	virtual FVector2D ComputeDesiredSize(float) const override;
-	virtual FChildren* GetChildren() override;
-	virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	// End SWidget
 
@@ -34,12 +29,12 @@ public:
 	 *
 	 * @param[in]	newPin	the pin we should display
 	 */
-	void SetPin(UFINScriptPin* newPin);
+	void SetPin(UFIVSPin* newPin);
 
 	/**
 	 * Returns the representating pin.
 	 */
-	UFINScriptPin* GetPin() const;
+	UFIVSPin* GetPin() const;
 
 	/**
 	 * Returns the connection point in screen space.
@@ -47,39 +42,35 @@ public:
 	FVector2D GetConnectionPoint() const;
 };
 
-class SFINScriptNodeViewer : public SPanel {
-	SLATE_BEGIN_ARGS(SFINScriptNodeViewer) {}
-		SLATE_ATTRIBUTE(UFINScriptNode*, Node)
+class SFIVSEdNodeViewer : public SCompoundWidget {
+	SLATE_BEGIN_ARGS(SFIVSEdNodeViewer) {}
+		SLATE_ATTRIBUTE(UFIVSNode*, Node)
 	SLATE_END_ARGS()
 
 public:
 	void Construct( const FArguments& InArgs );
 
 private:
-	UFINScriptNode* Node = nullptr;
-	TSlotlessChildren<SWidget> Children;
+	UFIVSNode* Node = nullptr;
 
 	TSharedPtr<SVerticalBox> InputPinBox;
 	TSharedPtr<SVerticalBox> OutputPinBox;
 	
-	TArray<TSharedRef<SFINScriptPinViewer>> PinWidgets;
-	TMap<UFINScriptPin*, TSharedRef<SFINScriptPinViewer>> PinToWidget;
+	TArray<TSharedRef<SFIVSEdPinViewer>> PinWidgets;
+	TMap<UFIVSPin*, TSharedRef<SFIVSEdPinViewer>> PinToWidget;
 
 	FSlateColorBrush OutlineBrush = FSlateColorBrush(FLinearColor(1,1,1));
 	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::FromHex("222222"));
 	FSlateColorBrush HeaderBrush = FSlateColorBrush(FColor::FromHex("b04600"));
 
-	UFINScriptPin* PinUnderMouse = nullptr;
+	UFIVSPin* PinUnderMouse = nullptr;
 
 public:
 	bool bSelected = false;
 	
-	SFINScriptNodeViewer();
+	SFIVSEdNodeViewer();
 	
 	// Begin SWidget
-	virtual FVector2D ComputeDesiredSize(float) const override;
-	virtual FChildren* GetChildren() override;
-	virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	// End SWidget
 
@@ -88,12 +79,12 @@ public:
 	 *
 	 * @param[in]	newNode		the new node
 	 */
-	void SetNode(UFINScriptNode* newNode);
+	void SetNode(UFIVSNode* newNode);
 
 	/**
 	 * Returns the node we representate.
 	 */
-	UFINScriptNode* GetNode() const;
+	UFIVSNode* GetNode() const;
 	
 	/**
 	 * Returns the position were this node should be located in graph.
@@ -103,8 +94,8 @@ public:
 	/**
 	 * Returns the pin widget cache.
 	 */
-	const TArray<TSharedRef<SFINScriptPinViewer>>& GetPinWidgets();
+	const TArray<TSharedRef<SFIVSEdPinViewer>>& GetPinWidgets();
 	
-	UFINScriptPin* GetPinUnderMouse();
-	TSharedRef<SFINScriptPinViewer> GetPinWidget(UFINScriptPin* Pin);
+	UFIVSPin* GetPinUnderMouse();
+	TSharedRef<SFIVSEdPinViewer> GetPinWidget(UFIVSPin* Pin);
 };

@@ -1,25 +1,12 @@
-﻿#include "FINScriptNodeViewer.h"
+﻿#include "FIVSEdNodeViewer.h"
 
-void SFINScriptPinViewer::Construct(const FArguments& InArgs) {
+void SFIVSEdPinViewer::Construct(const FArguments& InArgs) {
 	SetPin(InArgs._Pin);
 }
 
-SFINScriptPinViewer::SFINScriptPinViewer() : Children(this) {}
+SFIVSEdPinViewer::SFIVSEdPinViewer() {}
 
-FVector2D SFINScriptPinViewer::ComputeDesiredSize(float) const {
-	if (Children.Num() > 0)return Children[0]->GetDesiredSize();
-	return FVector2D(10, 10);
-}
-
-FChildren* SFINScriptPinViewer::GetChildren() {
-	return &Children;
-}
-
-void SFINScriptPinViewer::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {
-	if (Children.Num() > 0) ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Children[0], FVector2D(), Children[0]->GetDesiredSize(), 1));
-}
-
-FReply SFINScriptPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+FReply SFIVSEdPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	if (!MouseEvent.GetModifierKeys().IsControlDown() && MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)) {
 		TSharedPtr<IMenu> MenuHandle;
 		FMenuBuilder MenuBuilder(true, NULL);
@@ -28,8 +15,8 @@ FReply SFINScriptPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const
             FText(),
             FSlateIcon(),
             FUIAction(FExecuteAction::CreateLambda([this]() {
-				TArray<UFINScriptPin*> Pins = Pin->GetConnections();
-	            for (UFINScriptPin* Pin : Pins) Pin->RemoveConnection(GetPin());
+				TArray<UFIVSPin*> Pins = Pin->GetConnections();
+	            for (UFIVSPin* Pin : Pins) Pin->RemoveConnection(GetPin());
 			})));
 		
 		FSlateApplication::Get().PushMenu(SharedThis(this), *MouseEvent.GetEventPath(), MenuBuilder.MakeWidget(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
@@ -38,7 +25,7 @@ FReply SFINScriptPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const
 	return FReply::Unhandled();
 }
 
-FSlateColor SFINScriptPinViewer::GetPinColor() const {
+FSlateColor SFIVSEdPinViewer::GetPinColor() const {
 	if (Pin->GetPinType() & FIVS_PIN_DATA) {
 		switch (Pin->GetPinDataType()) {
 		case FIN_BOOL:		return FLinearColor(FColor::FromHex("FF0000"));
@@ -56,39 +43,42 @@ FSlateColor SFINScriptPinViewer::GetPinColor() const {
 	return FLinearColor(FColor::White);
 }
 
-void SFINScriptPinViewer::SetPin(UFINScriptPin* newPin) {
-	Children.Empty();
+void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 	Pin = newPin;
-	PinIconWidget = SNew(SImage).ColorAndOpacity_Raw(this, &SFINScriptPinViewer::GetPinColor);
+	PinIconWidget = SNew(SImage).ColorAndOpacity_Raw(this, &SFIVSEdPinViewer::GetPinColor);
 	if (Pin->GetName().ToString().Len() == 0) {
-		Children.Add(SNew(SBorder)
-        .BorderBackgroundColor_Lambda([this]() {
-            return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
-        })
-        .Content()[
-            PinIconWidget.ToSharedRef()
-        ]);
+		ChildSlot[
+			SNew(SBorder)
+	        .BorderBackgroundColor_Lambda([this]() {
+	            return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
+	        })
+	        .Content()[
+	            PinIconWidget.ToSharedRef()
+	        ]
+	    ];
 	} else if (Pin->GetPinType() & FIVS_PIN_INPUT) {
-		Children.Add(SNew(SBorder)
-		.BorderBackgroundColor_Lambda([this]() {
-            return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
-        })
-		.Content()[
-            SNew(SHorizontalBox)
-            +SHorizontalBox::Slot().Padding(1).VAlign(EVerticalAlignment::VAlign_Center)[
-                PinIconWidget.ToSharedRef()
-            ]
-            +SHorizontalBox::Slot().Padding(5).VAlign(EVerticalAlignment::VAlign_Center)[
-                SNew(STextBlock)
-                .Clipping(EWidgetClipping::Inherit)
-                .Justification(ETextJustify::Left)
-                .Text_Lambda([this]() {
-                    return Pin->GetName();
-                })
-            ]
-		]);
+		ChildSlot[
+			SNew(SBorder)
+			.BorderBackgroundColor_Lambda([this]() {
+	            return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
+	        })
+			.Content()[
+	            SNew(SHorizontalBox)
+	            +SHorizontalBox::Slot().Padding(1).VAlign(EVerticalAlignment::VAlign_Center)[
+	                PinIconWidget.ToSharedRef()
+	            ]
+	            +SHorizontalBox::Slot().Padding(5).VAlign(EVerticalAlignment::VAlign_Center)[
+	                SNew(STextBlock)
+	                .Clipping(EWidgetClipping::Inherit)
+	                .Justification(ETextJustify::Left)
+	                .Text_Lambda([this]() {
+	                    return Pin->GetName();
+	                })
+	            ]
+			]
+		];
 	} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
-		Children.Add(
+		ChildSlot[
             SNew(SBorder)
             .BorderBackgroundColor_Lambda([this]() {
                 return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
@@ -105,41 +95,29 @@ void SFINScriptPinViewer::SetPin(UFINScriptPin* newPin) {
                 +SHorizontalBox::Slot().Padding(1).VAlign(EVerticalAlignment::VAlign_Center)[
                     PinIconWidget.ToSharedRef()
                 ]
-			]);
+			]
+		];
 	}
 }
 
-UFINScriptPin* SFINScriptPinViewer::GetPin() const {
+UFIVSPin* SFIVSEdPinViewer::GetPin() const {
 	return Pin;
 }
 
-FVector2D SFINScriptPinViewer::GetConnectionPoint() const {
+FVector2D SFIVSEdPinViewer::GetConnectionPoint() const {
 	if (PinIconWidget.IsValid()) return PinIconWidget->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D(0.5, 0.5));
 	return FVector2D();
 }
 
-void SFINScriptNodeViewer::Construct(const FArguments& InArgs) {
+void SFIVSEdNodeViewer::Construct(const FArguments& InArgs) {
 	SetNode(InArgs._Node.Get());
 }
 
-SFINScriptNodeViewer::SFINScriptNodeViewer() : Children(this) {}
+SFIVSEdNodeViewer::SFIVSEdNodeViewer() {}
 
-FVector2D SFINScriptNodeViewer::ComputeDesiredSize(float) const {
-	if (Children.Num() > 0) return Children[0]->GetDesiredSize();
-	return FVector2D(0,0);
-}
-
-FChildren* SFINScriptNodeViewer::GetChildren() {
-	return &Children;
-}
-
-void SFINScriptNodeViewer::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {
-	if (Children.Num() > 0) ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Children[0], FVector2D(), Children[0]->GetDesiredSize(), 1));
-}
-
-FReply SFINScriptNodeViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+FReply SFIVSEdNodeViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	PinUnderMouse = nullptr;
-	for (TSharedRef<SFINScriptPinViewer> Pin : PinWidgets) {
+	for (TSharedRef<SFIVSEdPinViewer> Pin : PinWidgets) {
 		if (Pin->GetCachedGeometry().IsUnderLocation(MouseEvent.GetScreenSpacePosition())) {
 			PinUnderMouse = Pin->GetPin();
 			break;
@@ -149,7 +127,7 @@ FReply SFINScriptNodeViewer::OnMouseMove(const FGeometry& MyGeometry, const FPoi
 	return FReply::Unhandled();
 }
 
-void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
+void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
 	if (InputPinBox) InputPinBox->ClearChildren();
 	if (OutputPinBox) OutputPinBox->ClearChildren();
 	PinWidgets.Empty();
@@ -157,8 +135,8 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
 
 	Node = newNode;
 
-	if (Node && Node->IsA<UFINScriptFuncNode>()) {
-		Children.Add(
+	if (Node && Node->IsA<UFIVSFuncNode>()) {
+		ChildSlot[
             SNew(SBorder)
             .Padding(1)
             .BorderImage_Lambda([this]() {
@@ -179,7 +157,7 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
                         [
                             SNew(STextBlock)
                             .Text_Lambda([this]() {
-                                return FText::FromString(Cast<UFINScriptFuncNode>(Node)->GetNodeName());
+                                return FText::FromString(Cast<UFIVSFuncNode>(Node)->GetNodeName());
                             })
                         ]
                     ]
@@ -193,11 +171,12 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
                         (OutputPinBox = SNew(SVerticalBox)).ToSharedRef()
                     ]
                 ]
-            ]);
+            ]
+        ];
 
-		for (UFINScriptPin* Pin : newNode->GetNodePins()) {
+		for (UFIVSPin* Pin : newNode->GetNodePins()) {
 			if (Pin->GetPinType() & FIVS_PIN_INPUT) {
-				TSharedRef<SFINScriptPinViewer> PinWidget = SNew(SFINScriptPinViewer)
+				TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer)
                     .Pin(Pin);
 				PinWidgets.Add(PinWidget);
 				PinToWidget.Add(Pin, PinWidget);
@@ -205,7 +184,7 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
                     PinWidget
                 ];
 			} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
-				TSharedRef<SFINScriptPinViewer> PinWidget = SNew(SFINScriptPinViewer)
+				TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer)
                     .Pin(Pin);
 				PinWidgets.Add(PinWidget);
 				PinToWidget.Add(Pin, PinWidget);
@@ -214,10 +193,10 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
                 ];
 			}
 		}
-	} else if (Node->IsA<UFINScriptRerouteNode>()) {
-		TSharedPtr<SFINScriptPinViewer> PinWidget;
-		UFINScriptPin* Pin = Node->GetNodePins()[0];
-		Children.Add(
+	} else if (Node->IsA<UFIVSRerouteNode>()) {
+		TSharedPtr<SFIVSEdPinViewer> PinWidget;
+		UFIVSPin* Pin = Node->GetNodePins()[0];
+		ChildSlot[
             SNew(SBorder)
             .Padding(1)
             .BorderImage_Lambda([this]() {
@@ -228,31 +207,32 @@ void SFINScriptNodeViewer::SetNode(UFINScriptNode* newNode) {
                 .BorderImage(&NodeBrush)
                 .Padding(5)
                 .Content()[
-					(PinWidget = SNew(SFINScriptPinViewer)
+					(PinWidget = SNew(SFIVSEdPinViewer)
 					.Pin(Pin)).ToSharedRef()
                 ]
-            ]);
+            ]
+        ];
 		PinWidgets.Add(PinWidget.ToSharedRef());
 		PinToWidget.Add(Pin, PinWidget.ToSharedRef());
 	}
 }
 
-UFINScriptNode* SFINScriptNodeViewer::GetNode() const {
+UFIVSNode* SFIVSEdNodeViewer::GetNode() const {
 	return Node;
 }
 
-FVector2D SFINScriptNodeViewer::GetPosition() const {
+FVector2D SFIVSEdNodeViewer::GetPosition() const {
 	return Node->Pos;
 }
 
-const TArray<TSharedRef<SFINScriptPinViewer>>& SFINScriptNodeViewer::GetPinWidgets() {
+const TArray<TSharedRef<SFIVSEdPinViewer>>& SFIVSEdNodeViewer::GetPinWidgets() {
 	return PinWidgets;
 }
 
-UFINScriptPin* SFINScriptNodeViewer::GetPinUnderMouse() {
+UFIVSPin* SFIVSEdNodeViewer::GetPinUnderMouse() {
 	return PinUnderMouse;
 }
 
-TSharedRef<SFINScriptPinViewer> SFINScriptNodeViewer::GetPinWidget(UFINScriptPin* Pin) {
+TSharedRef<SFIVSEdPinViewer> SFIVSEdNodeViewer::GetPinWidget(UFIVSPin* Pin) {
 	return PinToWidget[Pin];
 }

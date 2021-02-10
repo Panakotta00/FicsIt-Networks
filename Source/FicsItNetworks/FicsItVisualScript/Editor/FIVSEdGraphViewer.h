@@ -1,21 +1,19 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-
-
-#include "FINScriptActionSelection.h"
-#include "FINScriptGraph.h"
-#include "FINScriptNodeViewer.h"
+#include "FIVSEdActionSelection.h"
+#include "FIVSEdNodeViewer.h"
 #include "SlateBasics.h"
+#include "FicsItVisualScript/Script/FIVSGraph.h"
 
-class SFINScriptGraphViewer;
+class SFIVSEdGraphViewer;
 
-struct FFINScriptConnectionDrawer {
+struct FFIVSEdConnectionDrawer {
 public:
 	float LastConnectionDistance;
 
 public:
-	TPair<TSharedPtr<SFINScriptPinViewer>, TSharedPtr<SFINScriptPinViewer>> ConnectionUnderMouse;
+	TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>> ConnectionUnderMouse;
 	FVector2D LastMousePosition;
 
 	/**
@@ -28,7 +26,7 @@ public:
 	* Draws a connection between two pins.
 	* Checks if the mouse hovers over it, if so, sets connection under mouse.
 	*/
-	void DrawConnection(TSharedRef<SFINScriptPinViewer> Pin1, TSharedRef<SFINScriptPinViewer> Pin2, TSharedRef<const SFINScriptGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
+	void DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, TSharedRef<SFIVSEdPinViewer> Pin2, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
 
 	/**
 	* Draws a connection between two points.
@@ -36,24 +34,24 @@ public:
 	* @param[in]	Start	the start point (outputs)
 	* @param[in]	End		the end point (inputs)
 	*/
-	void DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFINScriptGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
+	void DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
 };
 
-class SFINScriptGraphViewer : public SPanel {
-	SLATE_BEGIN_ARGS(SFINScriptGraphViewer) {}
-		SLATE_ATTRIBUTE(UFINScriptGraph*, Graph)
+class SFIVSEdGraphViewer : public SPanel {
+	SLATE_BEGIN_ARGS(SFIVSEdGraphViewer) {}
+		SLATE_ARGUMENT(UFIVSGraph*, Graph)
 	SLATE_END_ARGS()
 
 public:
 	void Construct( const FArguments& InArgs );
 
 private:
-	UFINScriptGraph* Graph = nullptr;
-	TSlotlessChildren<SFINScriptNodeViewer> Children;
-	TMap<UFINScriptNode*, TSharedRef<SFINScriptNodeViewer>> NodeToChild;
+	UFIVSGraph* Graph = nullptr;
+	TSlotlessChildren<SFIVSEdNodeViewer> Children;
+	TMap<UFIVSNode*, TSharedRef<SFIVSEdNodeViewer>> NodeToChild;
 
-	UFINScriptNode* NodeUnderMouse = nullptr;
-	UFINScriptPin* PinUnderMouse = nullptr;
+	UFIVSNode* NodeUnderMouse = nullptr;
+	UFIVSPin* PinUnderMouse = nullptr;
 
 	bool bIsGraphDrag = false;
 	float GraphDragDelta;
@@ -62,19 +60,19 @@ private:
 	FVector2D SelectionDragStart;
 	FVector2D SelectionDragEnd;
 	
-	TArray<UFINScriptNode*> SelectedNodes;
+	TArray<UFIVSNode*> SelectedNodes;
 	
 	bool bIsNodeDrag = false;
 	TArray<FVector2D> NodeDragPosStart;
 	FVector2D NodeDragStart;
 
 	bool bIsPinDrag = false;
-	UFINScriptPin* PinDragStart;
+	UFIVSPin* PinDragStart;
 	FVector2D PinDragEnd;
 
-	TSharedPtr<FFINScriptConnectionDrawer> ConnectionDrawer;
+	TSharedPtr<FFIVSEdConnectionDrawer> ConnectionDrawer;
 
-	TSharedPtr<SFINScriptActionSelection> ActiveActionSelection;
+	TSharedPtr<SFIVSEdActionSelection> ActiveActionSelection;
 
 	FSlateColorBrush BackgroundBrush = FSlateColorBrush(FColor::FromHex("040404"));
 	FLinearColor GridColor = FColor::FromHex("0A0A0A");
@@ -84,8 +82,8 @@ public:
 	FVector2D Offset = FVector2D(0,0);
 	float Zoom = 1.0;
 	
-	SFINScriptGraphViewer();
-	~SFINScriptGraphViewer();
+	SFIVSEdGraphViewer();
+	~SFIVSEdGraphViewer();
 
 	// Begin SWidget
 	virtual FVector2D ComputeDesiredSize(float) const override;
@@ -104,12 +102,12 @@ public:
 	// End SWidget
 
 	FDelegateHandle OnNodeChangedHandle;
-	void OnNodeChanged(int change, UFINScriptNode* Node);
+	void OnNodeChanged(int change, UFIVSNode* Node);
 
 	/**
 	 * Creates an action selection menu with the given context
 	 */
-	TSharedPtr<IMenu> CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFINScriptActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& Context);
+	TSharedPtr<IMenu> CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFIVSEdActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& Context);
 	
 	/**
 	 * Sets the currently displayed Graph.
@@ -117,7 +115,7 @@ public:
 	 *
 	 * @param[in]	NewGraph	the new graph to display
 	 */
-	void SetGraph(UFINScriptGraph* NewGraph);
+	void SetGraph(UFIVSGraph* NewGraph);
 
 	/**
 	 * Adds the node at the given index in the graph
@@ -125,17 +123,16 @@ public:
 	 *
 	 * @pragma[in]	Node
 	 */
-	void CreateNodeAsChild(UFINScriptNode* Node);
-
+	void CreateNodeAsChild(UFIVSNode* Node);
 	/**
 	 * Selects the given node
 	 */
-	void Select(UFINScriptNode* Node);
+	void Select(UFIVSNode* Node);
 
 	/**
 	 * Deselects the given node
 	 */
-	void Deselect(UFINScriptNode* Node);
+	void Deselect(UFIVSNode* Node);
 
 	/**
 	 * Deselects all nodes.
