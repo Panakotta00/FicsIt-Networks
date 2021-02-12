@@ -5,6 +5,7 @@
 #include "FicsItKernel/FicsItKernel.h"
 
 #include "FGPowerCircuit.h"
+#include "FINSubsystemHolder.h"
 
 #include "LuaProcessor.h"
 #include "LuaInstance.h"
@@ -32,6 +33,22 @@ namespace FicsItKernel {
 				luaListen(L, trace / o);
 			}
 			return LuaProcessor::luaAPIReturn(L, 0);
+		}
+
+		int luaListening(lua_State* L) {
+			FLuaSyncCall SyncCall(L);
+			int args = lua_gettop(L);
+
+			UObject* netComp = LuaProcessor::luaGetProcessor(L)->getKernel()->getNetwork()->component;
+			
+			TArray<UObject*> Listening = AFINSignalSubsystem::GetSignalSubsystem(netComp)->GetListening(netComp);
+			int i = 0;
+			lua_newtable(L);
+			for (UObject* Obj : Listening) {
+				newInstance(L, FFINNetworkTrace(netComp) / Obj);
+				lua_seti(L, -2, ++i);
+			}
+			return 1;
 		}
 
 		int luaPullContinue(lua_State* L, int status, lua_KContext ctx) {
@@ -96,6 +113,7 @@ namespace FicsItKernel {
 
 		static const luaL_Reg luaEventLib[] = {
 			{"listen", luaListen},
+			{"listening", luaListening},
 			{"pull", luaPull},
 			{"ignore", luaIgnore},
 			{"ignoreAll", luaIgnoreAll},

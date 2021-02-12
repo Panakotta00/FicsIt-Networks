@@ -26,6 +26,7 @@ private:
 public:
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
+	virtual void PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	// End IFGSaveInterface
 	
 	/**
@@ -59,4 +60,10 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Signals")
 	void IgnoreAll(UObject* Receiver);
+
+	/**
+	 * Returns all the objects this object listens to
+	 */
+	UFUNCTION(BlueprintCallable, Category="Network|Signals")
+	TArray<UObject*> GetListening(UObject* Reciever);
 };

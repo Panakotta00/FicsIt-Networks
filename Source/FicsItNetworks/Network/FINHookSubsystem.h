@@ -33,6 +33,7 @@ private:
 	 */
 	UPROPERTY()
 	TMap<UObject*, FFINHookData> Data;
+	FCriticalSection DataLock;
 
 	/**
 	 * Contains the list of hooks accosiated with a class
