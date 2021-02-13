@@ -5,7 +5,7 @@
 
 namespace FicsItKernel {
 	namespace FicsItFS {
-		class DevDevice : public FileSystem::Device {
+		class FICSITNETWORKS_API DevDevice : public FileSystem::Device {
 		private:
 			std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> devices;
 			FileSystem::SRef<Serial> serial;

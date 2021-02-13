@@ -8,7 +8,7 @@
 #include "FINComputerProcessor.generated.h"
 
 UCLASS()
-class AFINComputerProcessor : public AFINComputerModule {
+class FICSITNETWORKS_API AFINComputerProcessor : public AFINComputerModule {
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditDefaultsOnly)

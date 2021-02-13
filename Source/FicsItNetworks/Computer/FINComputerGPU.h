@@ -6,7 +6,7 @@
 #include "FINComputerGPU.generated.h"
 
 UCLASS()
-class AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface {
+class FICSITNETWORKS_API AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface {
 	GENERATED_BODY()
 protected:
 	UPROPERTY(SaveGame, Replicated)

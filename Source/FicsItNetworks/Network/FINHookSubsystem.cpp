@@ -15,6 +15,7 @@ void AFINHookSubsystem::RegisterHook(UClass* clazz, TSubclassOf<UFINHook> hook) 
 
 void AFINHookSubsystem::AttachHooks(UObject* object) {
 	if (!IsValid(object)) return;
+	FScopeLock Lock(&DataLock);
 	ClearHooks(object);
 	FFINHookData& HookData = Data.FindOrAdd(object);
 	UClass* clazz = object->GetClass();
@@ -23,7 +24,6 @@ void AFINHookSubsystem::AttachHooks(UObject* object) {
 		if (hookClasses) for (TSubclassOf<UFINHook> hookClass : *hookClasses) {
 			UFINHook* hook = NewObject<UFINHook>(this, hookClass);
 			HookData.Hooks.Add(hook);
-			hook->Register(object);
 		}
 		
 		if (clazz == UObject::StaticClass()) clazz = nullptr;
@@ -35,6 +35,7 @@ void AFINHookSubsystem::AttachHooks(UObject* object) {
 }
 
 void AFINHookSubsystem::ClearHooks(UObject* object) {
+	FScopeLock Lock(&DataLock);
 	FFINHookData* data = Data.Find(object);
 	if (!data) return;
 	for (UFINHook* hook : data->Hooks) {

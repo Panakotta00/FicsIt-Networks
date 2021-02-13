@@ -11,7 +11,7 @@
 #include "FINComputerSubsystem.generated.h"
 
 UCLASS()
-class AFINComputerSubsystem : public AFGSubsystem, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINComputerSubsystem : public AFGSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 	
 public:

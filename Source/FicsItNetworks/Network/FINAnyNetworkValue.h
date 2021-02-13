@@ -8,7 +8,7 @@
  * This sturcture allows you to store any kind of network value.
  */
 USTRUCT(BlueprintType)
-struct FFINAnyNetworkValue {
+struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	GENERATED_BODY()
 
 	FFINAnyNetworkValue();

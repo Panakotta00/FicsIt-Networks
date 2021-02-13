@@ -5,7 +5,7 @@
 
 #include "FINStaticReflectionSource.generated.h"
 
-struct FFINStaticFuncParamReg {
+struct FICSITNETWORKS_API FFINStaticFuncParamReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
@@ -13,7 +13,7 @@ struct FFINStaticFuncParamReg {
 	UFINProperty*(*PropConstructor)(UObject*);
 };
 
-struct FFINStaticFuncReg {
+struct FICSITNETWORKS_API FFINStaticFuncReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
@@ -24,7 +24,7 @@ struct FFINStaticFuncReg {
 	TMap<int, FFINStaticFuncParamReg> Parameters;
 };
 
-struct FFINStaticPropReg {
+struct FICSITNETWORKS_API FFINStaticPropReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
@@ -35,14 +35,14 @@ struct FFINStaticPropReg {
 	TFunction<void(const FFINExecutionContext&, const FINAny&)> Set;
 };
 
-struct FFINStaticSignalParamReg {
+struct FICSITNETWORKS_API FFINStaticSignalParamReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
 	UFINProperty*(*PropConstructor)(UObject*);
 };
 
-struct FFINStaticSignalReg {
+struct FICSITNETWORKS_API FFINStaticSignalReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
@@ -50,7 +50,7 @@ struct FFINStaticSignalReg {
 	TMap<int, FFINStaticSignalParamReg> Parameters;
 };
 
-struct FFINStaticClassReg {
+struct FICSITNETWORKS_API FFINStaticClassReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
@@ -59,7 +59,7 @@ struct FFINStaticClassReg {
 	TMap<int, FFINStaticSignalReg> Signals;
 };
 
-struct FFINStaticStructReg {
+struct FICSITNETWORKS_API FFINStaticStructReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
@@ -68,7 +68,7 @@ struct FFINStaticStructReg {
 };
 
 UCLASS()
-class UFINStaticReflectionSource : public UFINReflectionSource {
+class FICSITNETWORKS_API UFINStaticReflectionSource : public UFINReflectionSource {
 	GENERATED_BODY()
 	
 	static TMap<UClass*, FFINStaticClassReg> Classes;

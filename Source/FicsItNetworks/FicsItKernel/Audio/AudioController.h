@@ -3,7 +3,7 @@
 
 namespace FicsItKernel {
 	namespace Audio {
-		class AudioController {
+		class FICSITNETWORKS_API AudioController {
 		public:
 			virtual ~AudioController() = default;
 			

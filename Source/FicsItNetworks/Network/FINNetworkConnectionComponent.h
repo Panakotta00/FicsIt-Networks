@@ -14,7 +14,7 @@ class AFINNetworkCable;
  * any network component logic. Use UFINNetworkConnector instead if you want so.
  */
 UCLASS(meta = (BlueprintSpawnableComponent))
-class UFINNetworkConnectionComponent : public USceneComponent, public IFINNetworkCircuitNode, public IFGSaveInterface {
+class FICSITNETWORKS_API UFINNetworkConnectionComponent : public USceneComponent, public IFINNetworkCircuitNode, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
 	/**

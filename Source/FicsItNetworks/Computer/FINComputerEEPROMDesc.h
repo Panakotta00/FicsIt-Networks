@@ -7,7 +7,7 @@
 #include "FINComputerEEPROMDesc.generated.h"
 
 UCLASS()
-class UFINComputerEEPROMDesc : public UFGEquipmentDescriptor {
+class FICSITNETWORKS_API UFINComputerEEPROMDesc : public UFGEquipmentDescriptor {
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditDefaultsOnly)

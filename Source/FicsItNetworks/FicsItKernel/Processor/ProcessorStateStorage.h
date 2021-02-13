@@ -4,6 +4,6 @@
 #include "ProcessorStateStorage.generated.h"
 
 UCLASS()
-class UProcessorStateStorage : public UObject {
+class FICSITNETWORKS_API UProcessorStateStorage : public UObject {
 	GENERATED_BODY()
 };

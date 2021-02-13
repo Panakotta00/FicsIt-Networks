@@ -126,7 +126,8 @@ namespace FicsItKernel {
 			// get instance
 			UFINClass* Class;
 			LuaInstance* Instance = CheckAndGetInstance(L, 1, &Class);
-				
+			check(Instance != nullptr);
+			
 			// get member name
 			FString MemberName = lua_tostring(L, 2);
 			

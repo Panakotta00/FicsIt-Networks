@@ -12,7 +12,7 @@ class TFINDynamicStruct;
  * This structure allows you to store any kind of UStruct
  */
 USTRUCT(BlueprintType)
-struct FFINDynamicStructHolder {
+struct FICSITNETWORKS_API FFINDynamicStructHolder {
 	GENERATED_BODY()
 	
 protected:

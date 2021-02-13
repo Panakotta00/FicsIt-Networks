@@ -4,7 +4,7 @@
 #include "FINBase.generated.h"
 
 UCLASS(BlueprintType)
-class UFINBase : public UObject {
+class FICSITNETWORKS_API UFINBase : public UObject {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

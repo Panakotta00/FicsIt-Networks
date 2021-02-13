@@ -31,16 +31,6 @@ public:
 	USceneComponent* SetupComponentFunc(USceneComponent*, UActorComponent*, const FName&) { return nullptr; }
 };
 
-class UFGFactoryConnectionComponent_Public : public UFGFactoryConnectionComponent {
-public:
-	bool Factory_GrabOutput(FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>) { return false; }
-};
-
-class AFGCharacterPlayer_Public : public AFGCharacterPlayer {
-public:
-	void UpdateBestUsableActor() {}
-};
-
 USceneComponent* Holo_SetupComponentDecl(AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName);
 void Holo_SetupComponent(CallScope<decltype(&Holo_SetupComponentDecl)>& scope, AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
 	UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
@@ -176,7 +166,7 @@ void FFicsItNetworksModule::StartupModule(){
 		
 	    FFINReflection::Get()->PopulateSources();
 		FFINReflection::Get()->LoadAllTypes();
-	})
+	});
 
 #if WITH_EDITOR
 	AFINNetworkAdapter::RegisterAdapterSettings();

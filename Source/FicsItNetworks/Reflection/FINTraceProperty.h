@@ -4,7 +4,7 @@
 #include "FINTraceProperty.generated.h"
 
 UCLASS(BlueprintType)
-class UFINTraceProperty : public UFINFuncProperty {
+class FICSITNETWORKS_API UFINTraceProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

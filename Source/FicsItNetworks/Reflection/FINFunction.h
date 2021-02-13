@@ -24,20 +24,10 @@ enum EFINFunctionFlags {
 	FIN_Func_VarRets		= 0b10000000,
 };
 
-inline EFINFunctionFlags operator|(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {
-	return (EFINFunctionFlags)(((uint16)Flags1) | ((uint16)Flags2));
-}
-
-inline EFINFunctionFlags operator&(EFINFunctionFlags Flags1, EFINFunctionFlags Flags2) {
-	return (EFINFunctionFlags)(((uint16)Flags1) & ((uint16)Flags2));
-}
-
-inline EFINFunctionFlags operator~(EFINFunctionFlags Flags) {
-	return (EFINFunctionFlags)~(uint16)Flags;
-}
+ENUM_CLASS_FLAGS(EFINFunctionFlags)
 
 USTRUCT()
-struct FFINFunctionBadArgumentException : public FFINReflectionException {
+struct FICSITNETWORKS_API FFINFunctionBadArgumentException : public FFINReflectionException {
 	GENERATED_BODY()
 
 	int ArgumentIndex = 0;
@@ -47,7 +37,7 @@ struct FFINFunctionBadArgumentException : public FFINReflectionException {
 };
 
 UCLASS(BlueprintType)
-class UFINFunction : public UFINBase {
+class FICSITNETWORKS_API UFINFunction : public UFINBase {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

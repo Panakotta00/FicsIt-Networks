@@ -7,7 +7,7 @@
 #include "FINClass.generated.h"
 
 UCLASS(BlueprintType)
-class UFINClass : public UFINStruct {
+class FICSITNETWORKS_API UFINClass : public UFINStruct {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

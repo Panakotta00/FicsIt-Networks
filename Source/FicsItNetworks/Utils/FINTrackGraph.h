@@ -12,7 +12,7 @@
  * This struct is mostly used for the usage in the kernel.
  */
 USTRUCT()
-struct FFINTrackGraph {
+struct FICSITNETWORKS_API FFINTrackGraph {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)

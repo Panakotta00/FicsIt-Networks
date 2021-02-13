@@ -9,7 +9,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenWidgetUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenGPUUpdate);
 
 UCLASS()
-class AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface {
+class FICSITNETWORKS_API AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface {
 	GENERATED_BODY()
 	
 private:

@@ -7,7 +7,7 @@
 #include "FINNetworkUtils.generated.h"
 
 UCLASS()
-class UFINNetworkUtils : public UObject {
+class FICSITNETWORKS_API UFINNetworkUtils : public UObject {
 	GENERATED_BODY()
 public:
 	/**

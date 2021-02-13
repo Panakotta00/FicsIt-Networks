@@ -12,7 +12,7 @@
  * This is mainly used with in the kernel.
  */
 USTRUCT()
-struct FFINTimeTableStop {
+struct FICSITNETWORKS_API FFINTimeTableStop {
 	GENERATED_BODY()
 	
 	UPROPERTY(SaveGame)

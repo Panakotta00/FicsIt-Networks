@@ -25,22 +25,12 @@ enum EFINRepPropertyFlags {
 	FIN_Prop_ClassProp		= 0b100000000,
 };
 
-inline EFINRepPropertyFlags operator|(EFINRepPropertyFlags Flags1, EFINRepPropertyFlags Flags2) {
-	return (EFINRepPropertyFlags)((uint16)Flags1 | (uint16)Flags2);
-}
-
-inline EFINRepPropertyFlags operator&(EFINRepPropertyFlags Flags1, EFINRepPropertyFlags Flags2) {
-	return (EFINRepPropertyFlags)(((uint16)Flags1) & ((uint16)Flags2));
-}
-
-inline EFINRepPropertyFlags operator~(EFINRepPropertyFlags Flags) {
-	return (EFINRepPropertyFlags)~(uint16)Flags;
-}
+ENUM_CLASS_FLAGS(EFINRepPropertyFlags)
 
 class UFINProperty;
 
 USTRUCT()
-struct FFINPropertyGetterFunc {
+struct FICSITNETWORKS_API FFINPropertyGetterFunc {
 	GENERATED_BODY()
 
 	UPROPERTY()
@@ -53,7 +43,7 @@ struct FFINPropertyGetterFunc {
 };
 
 USTRUCT()
-struct FFINPropertySetterFunc {
+struct FICSITNETWORKS_API FFINPropertySetterFunc {
 	GENERATED_BODY()
 
 	UPROPERTY()
@@ -66,7 +56,7 @@ struct FFINPropertySetterFunc {
 };
 
 UCLASS(BlueprintType)
-class UFINProperty : public UFINBase {
+class FICSITNETWORKS_API UFINProperty : public UFINBase {
 	GENERATED_BODY()
 public:
 	EFINRepPropertyFlags PropertyFlags = FIN_Prop_Sync;

@@ -9,6 +9,12 @@ bool AFINSignalSubsystem::ShouldSave_Implementation() const {
 	return true;
 }
 
+void AFINSignalSubsystem::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	for (const TPair<UObject*, FFINSignalListeners>& Sender : Listeners) {
+		AFINHookSubsystem::GetHookSubsystem(Sender.Key)->AttachHooks(Sender.Key);
+	}
+}
+
 AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldContext) {
 	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->SignalSubsystem;
 }
@@ -23,8 +29,6 @@ void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData&
 		}
 	}
 }
-
-// TODO: Make sure that using network traces work in combination with TArray::AddUnique, TArray::RemoveAll, etc.
 
 void AFINSignalSubsystem::Listen(UObject* Sender, const FFINNetworkTrace& Receiver) {
 	TArray<FFINNetworkTrace>& ListenerList = Listeners.FindOrAdd(Sender).Listeners;
@@ -41,7 +45,7 @@ void AFINSignalSubsystem::Ignore(UObject* Sender, UObject* Receiver) {
 			--i;
 		}
 	}
-	AFINHookSubsystem::GetHookSubsystem(Sender)->ClearHooks(Sender);
+	if (ListenerList->Listeners.Num() < 1) AFINHookSubsystem::GetHookSubsystem(Sender)->ClearHooks(Sender);
 }
 
 void AFINSignalSubsystem::IgnoreAll(UObject* Receiver) {
@@ -50,4 +54,14 @@ void AFINSignalSubsystem::IgnoreAll(UObject* Receiver) {
 	for (UObject* Sender : Senders) {
 		Ignore(Sender, Receiver);
 	}
+}
+
+TArray<UObject*> AFINSignalSubsystem::GetListening(UObject* Reciever) {
+	TArray<UObject*> Listening;
+	for (TPair<UObject*, FFINSignalListeners> Sender : Listeners) {
+		if (Sender.Value.Listeners.Contains(FFINNetworkTrace(Reciever))) {
+			Listening.Add(Sender.Key);
+		}
+	}
+	return Listening;
 }

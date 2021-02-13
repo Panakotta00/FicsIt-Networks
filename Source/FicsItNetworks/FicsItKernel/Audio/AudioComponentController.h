@@ -6,7 +6,7 @@
 #include "AudioComponentController.generated.h"
 
 UCLASS()
-class UFINAudioComponentControllerTrampoline : public UActorComponent {
+class FICSITNETWORKS_API UFINAudioComponentControllerTrampoline : public UActorComponent {
 	GENERATED_BODY()
 public:
 	UAudioComponent* Speaker = nullptr;
@@ -23,7 +23,7 @@ public:
 
 namespace FicsItKernel {
 	namespace Audio {
-		class AudioComponentController : public AudioController {
+		class FICSITNETWORKS_API AudioComponentController : public AudioController {
 		public:
             /**
             * The underlying audio component used to play the audio
