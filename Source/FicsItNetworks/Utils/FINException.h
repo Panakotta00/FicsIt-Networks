@@ -4,7 +4,7 @@
 #include "FINException.generated.h"
 
 USTRUCT()
-struct FFINException {
+struct FICSITNETWORKS_API FFINException {
 	GENERATED_BODY()
 	
 	FString Message;

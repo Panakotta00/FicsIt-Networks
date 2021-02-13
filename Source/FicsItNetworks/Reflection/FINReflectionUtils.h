@@ -4,7 +4,7 @@
 #include "FINReflectionUtils.generated.h"
 
 UCLASS()
-class UFINReflectionUtils : public UObject {
+class FICSITNETWORKS_API UFINReflectionUtils : public UObject {
 	GENERATED_BODY()
 public:
 	static bool CheckIfVarargs(UFINProperty* Prop);

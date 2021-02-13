@@ -9,7 +9,7 @@
  * Provides Utility functions for BP implemented network components
  */
 UCLASS()
-class UFINComponentUtility : public UBlueprintFunctionLibrary {
+class FICSITNETWORKS_API UFINComponentUtility : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
 public:

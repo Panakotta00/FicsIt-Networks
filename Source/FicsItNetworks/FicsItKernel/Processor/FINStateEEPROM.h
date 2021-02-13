@@ -7,7 +7,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFINEEPROMUpdateDelegate);
 
 UCLASS()
-class AFINStateEEPROM : public AActor, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINStateEEPROM : public AActor, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintAssignable)

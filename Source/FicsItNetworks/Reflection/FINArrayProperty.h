@@ -4,7 +4,7 @@
 #include "FINArrayProperty.generated.h"
 
 UCLASS(BlueprintType)
-class UFINArrayProperty : public UFINFuncProperty {
+class FICSITNETWORKS_API UFINArrayProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

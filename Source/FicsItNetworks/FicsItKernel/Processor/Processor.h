@@ -18,7 +18,7 @@ namespace FicsItKernel {
 	/**
 	 * A Processor handles the whole execution of a program and also makes sure that resource overusage causes a crash.
 	 */
-	class Processor {
+	class FICSITNETWORKS_API Processor {
 	protected:
 		KernelSystem* kernel = nullptr;
 

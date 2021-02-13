@@ -5,7 +5,7 @@
 #include "FINReflectionException.generated.h"
 
 USTRUCT()
-struct FFINReflectionException : public FFINException {
+struct FICSITNETWORKS_API FFINReflectionException : public FFINException {
 	GENERATED_BODY()
 
 	UPROPERTY()

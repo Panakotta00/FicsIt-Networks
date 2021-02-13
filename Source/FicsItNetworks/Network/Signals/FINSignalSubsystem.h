@@ -7,7 +7,7 @@
 #include "FINSignalSubsystem.generated.h"
 
 USTRUCT()
-struct FFINSignalListeners {
+struct FICSITNETWORKS_API FFINSignalListeners {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
@@ -15,7 +15,7 @@ struct FFINSignalListeners {
 };
 
 UCLASS(BlueprintType)
-class AFINSignalSubsystem : public AFGSubsystem, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINSignalSubsystem : public AFGSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 private:
 	/**

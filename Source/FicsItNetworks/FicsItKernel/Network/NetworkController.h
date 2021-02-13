@@ -15,7 +15,7 @@ namespace FicsItKernel {
 		 * Allows to control and manage network connection of a system.
 		 * Also manages the network signals.
 		 */
-		class NetworkController {
+		class FICSITNETWORKS_API NetworkController {
 		protected:
 			std::mutex mutexSignalListeners;
 			TSet<FFINNetworkTrace> signalListeners;

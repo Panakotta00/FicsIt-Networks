@@ -7,7 +7,7 @@
 
 struct FFINReflection;
 UCLASS()
-class UFINReflectionSource : public UObject {
+class FICSITNETWORKS_API UFINReflectionSource : public UObject {
 	GENERATED_BODY()
 public:
 	/**

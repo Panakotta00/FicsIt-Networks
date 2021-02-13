@@ -8,7 +8,7 @@
 class AFINComputerCase;
 
 UCLASS(Blueprintable)
-class UFINComputerCaseWidget : public UUserWidget {
+class FICSITNETWORKS_API UFINComputerCaseWidget : public UUserWidget {
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ExposeOnSpawn="true"))

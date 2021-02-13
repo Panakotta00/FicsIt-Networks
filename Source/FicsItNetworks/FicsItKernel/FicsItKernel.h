@@ -22,7 +22,7 @@ namespace FicsItKernel {
 		RESET
 	};
 
-	class KernelCrash : public std::exception {
+	class FICSITNETWORKS_API KernelCrash : public std::exception {
 	public:
 		KernelCrash(std::string what = "");
 
@@ -30,7 +30,7 @@ namespace FicsItKernel {
 	};
 
 	class KernelSystem;
-	class KernelListener : public FileSystem::Listener {
+	class FICSITNETWORKS_API KernelListener : public FileSystem::Listener {
 	private:
 		KernelSystem* parent;
 	
@@ -45,7 +45,7 @@ namespace FicsItKernel {
 		virtual void onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) override;
 	};
 
-	class KernelSystem {
+	class FICSITNETWORKS_API KernelSystem {
 		friend Processor;
 		friend KernelListener;
 

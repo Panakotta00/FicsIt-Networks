@@ -4,7 +4,7 @@
 
 namespace FicsItKernel {
 	namespace FicsItFS {
-		class Serial : public FileSystem::File {
+		class FICSITNETWORKS_API Serial : public FileSystem::File {
 			friend class SerialStream;
 
 		private:

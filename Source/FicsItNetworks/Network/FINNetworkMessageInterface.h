@@ -8,11 +8,11 @@
 
 class AFINNetworkCircuit;
 UINTERFACE(Blueprintable)
-class UFINNetworkMessageInterface : public UInterface {
+class FICSITNETWORKS_API UFINNetworkMessageInterface : public UInterface {
 	GENERATED_BODY()
 };
 
-class IFINNetworkMessageInterface {
+class FICSITNETWORKS_API IFINNetworkMessageInterface {
 	GENERATED_BODY()
 public:
 	/**

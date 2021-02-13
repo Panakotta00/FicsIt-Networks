@@ -14,7 +14,7 @@ namespace FicsItKernel {
 		 * - preventing DevDevices to get unmounted
 		 * - preventing a seccond DevDevice to get mounted
 		 */
-		class Root : public FileSystem::FileSystemRoot {
+		class FICSITNETWORKS_API Root : public FileSystem::FileSystemRoot {
 		public:
 			// Begin FileSystemRoot
 			bool mount(FileSystem::SRef<FileSystem::Device> device, FileSystem::Path path);

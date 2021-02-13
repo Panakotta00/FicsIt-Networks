@@ -4,7 +4,7 @@
 #include "FINExecutionContext.generated.h"
 
 USTRUCT()
-struct FFINExecutionContext {
+struct FICSITNETWORKS_API FFINExecutionContext {
 	GENERATED_BODY()
 
 public:

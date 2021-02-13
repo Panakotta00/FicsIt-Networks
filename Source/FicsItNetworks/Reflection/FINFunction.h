@@ -27,7 +27,7 @@ enum EFINFunctionFlags {
 ENUM_CLASS_FLAGS(EFINFunctionFlags)
 
 USTRUCT()
-struct FFINFunctionBadArgumentException : public FFINReflectionException {
+struct FICSITNETWORKS_API FFINFunctionBadArgumentException : public FFINReflectionException {
 	GENERATED_BODY()
 
 	int ArgumentIndex = 0;
@@ -37,7 +37,7 @@ struct FFINFunctionBadArgumentException : public FFINReflectionException {
 };
 
 UCLASS(BlueprintType)
-class UFINFunction : public UFINBase {
+class FICSITNETWORKS_API UFINFunction : public UFINBase {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

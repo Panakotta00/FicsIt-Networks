@@ -8,7 +8,7 @@
 #include "FINSubsystemHolder.generated.h"
 
 UCLASS()
-class UFINSubsystemHolder : public UModSubsystemHolder {
+class FICSITNETWORKS_API UFINSubsystemHolder : public UModSubsystemHolder {
 	GENERATED_BODY()
 	
 public:

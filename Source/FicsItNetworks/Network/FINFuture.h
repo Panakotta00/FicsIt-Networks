@@ -6,7 +6,7 @@
 #include "FINFuture.generated.h"
 
 USTRUCT(BlueprintType)
-struct FFINFuture {
+struct FICSITNETWORKS_API FFINFuture {
 	GENERATED_BODY()
 
 	virtual ~FFINFuture() = default;
@@ -29,7 +29,7 @@ struct FFINFuture {
 };
 
 USTRUCT()
-struct FFINFutureReflection : public FFINFuture {
+struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 	GENERATED_BODY()
 
 	UPROPERTY()
@@ -83,7 +83,7 @@ struct TStructOpsTypeTraits<FFINFutureReflection> : public TStructOpsTypeTraitsB
 };
 
 USTRUCT()
-struct FFINFunctionFuture : public FFINFuture {
+struct FICSITNETWORKS_API FFINFunctionFuture : public FFINFuture {
 	GENERATED_BODY()
 
 	TFunction<void()> Func;

@@ -7,7 +7,7 @@
 #include "FINReflection.generated.h"
 
 UCLASS(BlueprintType)
-class UFINReflection : public UObject {
+class FICSITNETWORKS_API UFINReflection : public UObject {
 	GENERATED_BODY()
 private:
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
@@ -17,7 +17,7 @@ private:
 	static UFINStruct* FindStruct(UScriptStruct* Struct, bool bRecursive = true);
 };
 
-struct FFINReflection {
+struct FICSITNETWORKS_API FFINReflection {
 private:
 	TMap<UClass*, UFINClass*> Classes;
 	TMap<UScriptStruct*, UFINStruct*> Structs;

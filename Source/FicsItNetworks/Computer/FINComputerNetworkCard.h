@@ -10,7 +10,7 @@
 
 class AFINComputerCase;
 UCLASS()
-class AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface {
+class FICSITNETWORKS_API AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface {
 	GENERATED_BODY()
 public:
 	/**

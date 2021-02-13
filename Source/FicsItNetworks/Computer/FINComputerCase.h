@@ -27,7 +27,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINSt
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
 
 UCLASS(Blueprintable)
-class AFINComputerCase : public AFGBuildable {
+class FICSITNETWORKS_API AFINComputerCase : public AFGBuildable {
 	GENERATED_BODY()
 
 public:

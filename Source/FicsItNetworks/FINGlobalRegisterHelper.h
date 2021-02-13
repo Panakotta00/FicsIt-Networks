@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-class FFINGlobalRegisterHelper {
+class FICSITNETWORKS_API FFINGlobalRegisterHelper {
 public:
 	typedef TFunction<void()> RegisterFunction;
 private:
@@ -28,7 +28,7 @@ public:
 	static void AddFunction(const RegisterFunction& Func);
 };
 
-struct FFINStaticGlobalRegisterFunc {
+struct FICSITNETWORKS_API FFINStaticGlobalRegisterFunc {
 	FFINStaticGlobalRegisterFunc(const FFINGlobalRegisterHelper::RegisterFunction& Func) {
 		FFINGlobalRegisterHelper::AddFunction(Func);
 	}

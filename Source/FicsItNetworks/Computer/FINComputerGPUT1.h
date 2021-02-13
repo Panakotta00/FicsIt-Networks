@@ -8,7 +8,7 @@
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenKeyEventHandler, uint32, uint32, int);
 
-class SScreenMonitor : public SLeafWidget {
+class FICSITNETWORKS_API SScreenMonitor : public SLeafWidget {
 	SLATE_BEGIN_ARGS(SScreenMonitor) : _Text(),
 		_Font(),
 		_ScreenSize()

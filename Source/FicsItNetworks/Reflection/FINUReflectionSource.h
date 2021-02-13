@@ -5,7 +5,7 @@
 
 class UFINReflection;
 UCLASS()
-class UFINUReflectionSource : public UFINReflectionSource {
+class FICSITNETWORKS_API UFINUReflectionSource : public UFINReflectionSource {
 	GENERATED_BODY()
 protected:
 	struct FFINTypeMeta {

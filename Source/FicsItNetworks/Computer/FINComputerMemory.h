@@ -5,7 +5,7 @@
 #include "FINComputerMemory.generated.h"
 
 UCLASS()
-class AFINComputerMemory : public AFINComputerModule {
+class FICSITNETWORKS_API AFINComputerMemory : public AFINComputerModule {
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditDefaultsOnly, Category="ComputerMemory")

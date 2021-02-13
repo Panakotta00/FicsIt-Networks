@@ -6,7 +6,7 @@
 #include "FINHookSubsystem.generated.h"
 
 UCLASS(Abstract)
-class UFINHook : public UObject {
+class FICSITNETWORKS_API UFINHook : public UObject {
 	GENERATED_BODY()
 public:
     virtual void Register(UObject* sender) {}
@@ -25,7 +25,7 @@ struct FICSITNETWORKS_API FFINHookData {
 };
 
 UCLASS()
-class AFINHookSubsystem : public AFGSubsystem, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINHookSubsystem : public AFGSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 private:
 	/**

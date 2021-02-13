@@ -30,7 +30,7 @@ ENUM_CLASS_FLAGS(EFINRepPropertyFlags)
 class UFINProperty;
 
 USTRUCT()
-struct FFINPropertyGetterFunc {
+struct FICSITNETWORKS_API FFINPropertyGetterFunc {
 	GENERATED_BODY()
 
 	UPROPERTY()
@@ -43,7 +43,7 @@ struct FFINPropertyGetterFunc {
 };
 
 USTRUCT()
-struct FFINPropertySetterFunc {
+struct FICSITNETWORKS_API FFINPropertySetterFunc {
 	GENERATED_BODY()
 
 	UPROPERTY()
@@ -56,7 +56,7 @@ struct FFINPropertySetterFunc {
 };
 
 UCLASS(BlueprintType)
-class UFINProperty : public UFINBase {
+class FICSITNETWORKS_API UFINProperty : public UFINBase {
 	GENERATED_BODY()
 public:
 	EFINRepPropertyFlags PropertyFlags = FIN_Prop_Sync;

@@ -5,7 +5,7 @@
 #include "FINSignal.generated.h"
 
 UCLASS(BlueprintType)
-class UFINSignal : public UFINBase {
+class FICSITNETWORKS_API UFINSignal : public UFINBase {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

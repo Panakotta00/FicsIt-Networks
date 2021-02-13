@@ -11,7 +11,7 @@
 #include "FINStaticReflectionSourceHooks.generated.h"
 
 UCLASS()
-class UFINStaticReflectionHook : public UFINHook {
+class FICSITNETWORKS_API UFINStaticReflectionHook : public UFINHook {
 	GENERATED_BODY()
 
 private:
@@ -36,7 +36,7 @@ public:
 };
 
 UCLASS()
-class UFINFunctionHook : public UFINHook {
+class FICSITNETWORKS_API UFINFunctionHook : public UFINHook {
 	GENERATED_BODY()
 
 private:

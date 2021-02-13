@@ -9,7 +9,7 @@
 #include "FINComputerModule.generated.h"
 
 UCLASS()
-class AFINComputerModule : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender {
+class FICSITNETWORKS_API AFINComputerModule : public AFGBuildable, public IFINModuleSystemModule, public IFINSignalSender {
 	GENERATED_BODY()
 
 public:

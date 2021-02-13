@@ -8,7 +8,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINDriveHolderDriveUpdate, AFINFile
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINDriveHolderLockedUpdateDelegate, bool, bOldLocked, AFINFileSystemState*, NewOrOldDrive);
 
 UCLASS()
-class AFINComputerDriveHolder : public AFINComputerModule {
+class FICSITNETWORKS_API AFINComputerDriveHolder : public AFINComputerModule {
 	GENERATED_BODY()
 
 protected:

@@ -5,7 +5,7 @@
 #include "FINUFunction.generated.h"
 
 UCLASS()
-class UFINUFunction : public UFINFunction {
+class FICSITNETWORKS_API UFINUFunction : public UFINFunction {
 	GENERATED_BODY()
 public:
 	UPROPERTY()

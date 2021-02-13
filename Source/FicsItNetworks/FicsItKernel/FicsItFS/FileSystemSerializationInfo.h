@@ -7,7 +7,7 @@
 struct FFileSystemNode;
 
 USTRUCT()
-struct FFileSystemNodeIndex {
+struct FICSITNETWORKS_API FFileSystemNodeIndex {
 	GENERATED_BODY()
 	
     TSharedPtr<FFileSystemNode> Node;
@@ -33,7 +33,7 @@ struct TStructOpsTypeTraits<FFileSystemNodeIndex> : TStructOpsTypeTraitsBase2<FF
 };
 
 USTRUCT()
-struct FFileSystemNode {
+struct FICSITNETWORKS_API FFileSystemNode {
 	GENERATED_BODY()
 
 	/**
@@ -73,7 +73,7 @@ struct TStructOpsTypeTraits<FFileSystemNode> : TStructOpsTypeTraitsBase2<FFileSy
 };
 
 USTRUCT()
-struct FFileSystemSerializationInfo {
+struct FICSITNETWORKS_API FFileSystemSerializationInfo {
 	GENERATED_BODY()
 
 	UPROPERTY()

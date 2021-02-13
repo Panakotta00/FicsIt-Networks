@@ -6,7 +6,7 @@
 class UFINSignal;
 
 USTRUCT()
-struct FFINSignalData {
+struct FICSITNETWORKS_API FFINSignalData {
 	GENERATED_BODY()
 
 	UPROPERTY()

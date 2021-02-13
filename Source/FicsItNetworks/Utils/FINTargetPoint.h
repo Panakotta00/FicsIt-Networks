@@ -5,7 +5,7 @@
 #include "FINTargetPoint.generated.h"
 
 USTRUCT()
-struct FFINTargetPoint {
+struct FICSITNETWORKS_API FFINTargetPoint {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
