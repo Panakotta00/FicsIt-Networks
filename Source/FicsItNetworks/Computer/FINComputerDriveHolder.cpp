@@ -13,6 +13,11 @@ AFINComputerDriveHolder::AFINComputerDriveHolder() {
 
 AFINComputerDriveHolder::~AFINComputerDriveHolder() {}
 
+void AFINComputerDriveHolder::EndPlay(EEndPlayReason::Type reason) {
+	SetLocked(false);
+	Super::EndPlay(reason);
+}
+
 void AFINComputerDriveHolder::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
@@ -45,8 +50,8 @@ bool AFINComputerDriveHolder::SetLocked(bool NewLocked) {
 
 	bLocked = NewLocked;
 	
-	NetMulti_OnLockedUpdate(!bLocked, IsValid(newState) ? newState : prev);
-	prev = newState;
+	NetMulti_OnLockedUpdate(!bLocked, IsValid(newState) ? newState : PrevFSState);
+	PrevFSState = newState;
 
 	return true;
 }

@@ -13,7 +13,7 @@ class AFINComputerDriveHolder : public AFINComputerModule {
 
 protected:
 	UPROPERTY(SaveGame)
-	AFINFileSystemState* prev = nullptr;
+	AFINFileSystemState* PrevFSState = nullptr;
 
 	UPROPERTY(SaveGame, Replicated)
 	bool bLocked = false;
@@ -30,6 +30,10 @@ public:
 
 	AFINComputerDriveHolder();
 	~AFINComputerDriveHolder();
+
+	// Begin AActor
+	virtual void EndPlay(EEndPlayReason::Type reason) override;
+	// End AActor
 
 	AFINFileSystemState* GetDrive();
 
