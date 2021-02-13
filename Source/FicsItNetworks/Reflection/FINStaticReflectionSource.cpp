@@ -535,6 +535,12 @@ BeginClass(UObject, "Object", TFS("Object"), TFS("The base class of every object
 BeginProp(RInt, hash, TFS("Hash"), TFS("A Hash of this object. This is a value that nearly uniquely identifies this object.")) {
 	Return (int64)GetTypeHash(self);
 } EndProp()
+BeginProp(RString, internalName, TFS("internalName"), TFS("The unreal engine internal name of this object.")) {
+	Return (FINStr) self->GetName();
+} EndProp()
+BeginProp(RString, internalPath, TFS("internalPath"), TFS("The unreal engine internal path name of this object.")) {
+	Return (FINStr) self->GetPathName();
+} EndProp()
 BeginFunc(getHash, TFS("Get Hash"), TFS("Returns a hash of this object. This is a value that nearly uniquely identifies this object.")) {
 	OutVal(0, RInt, hash, TFS("Hash"), TFS("The hash of this object."));
 	Body()
@@ -547,6 +553,12 @@ BeginFunc(getType, TFS("Get Type"), TFS("Returns the type (aka class) of this ob
 } EndFunc()
 BeginClassProp(RInt, hash, TFS("Hash"), TFS("A Hash of this object. This is a value that nearly uniquely identifies this object.")) {
 	Return (int64)GetTypeHash(self);
+} EndProp()
+BeginClassProp(RString, internalName, TFS("internalName"), TFS("The unreal engine internal name of this object.")) {
+	Return (FINStr) self->GetName();
+} EndProp()
+BeginClassProp(RString, internalPath, TFS("internalPath"), TFS("The unreal engine internal path name of this object.")) {
+	Return (FINStr) self->GetPathName();
 } EndProp()
 BeginClassFunc(getHash, TFS("Get Hash"), TFS("Returns the hash of this class. This is a value that nearly uniquely idenfies this object."), false) {
 	OutVal(0, RInt, hash, TFS("Hash"), TFS("The hash of this class."));
