@@ -71,6 +71,7 @@ namespace FicsItKernel {
 			bool bShouldPromote = false;
 			bool bShouldDemote = false;
 			bool bShouldStop = false;
+			bool bShouldReset = false;
 			bool bShouldCrash = false;
 			bool bDoSync = false;
 			KernelCrash ToCrash;
@@ -88,6 +89,7 @@ namespace FicsItKernel {
 			void demote();
 			void demoteInAsync();
 			void shouldStop();
+			void shouldReset();
 			void shouldPromote();
 			void shouldDemote();
 			void shouldCrash(const KernelCrash& Crash);
@@ -147,6 +149,11 @@ namespace FicsItKernel {
 			virtual void setEEPROM(AFINStateEEPROM* eeprom) override;
 			// End Processor
 
+			/**
+			 * returns the tick helper
+			 */
+			LuaProcessorTick& getTickHelper();
+			
 			/**
 			 * Executes one lua tick sync or async.
 			 * Might set after tick cache which should get handled by tick.

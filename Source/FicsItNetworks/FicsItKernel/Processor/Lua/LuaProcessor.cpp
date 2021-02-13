@@ -65,15 +65,15 @@ namespace FicsItKernel {
 			bShouldPromote = false;
 			bShouldDemote = false;
 			bShouldStop = false;
+			bShouldReset = false;
 			bShouldCrash = false;
 			bDoSync = false;
 			State = LUA_SYNC;
 		}
 
 		void LuaProcessorTick::stop() {
-			if (!(State & LUA_SYNC)) {
-				demote();
-			}
+			demote();
+			
 			if (asyncTask.IsValid() && !asyncTask->IsIdle()) {
 				asyncTask->EnsureCompletion();
 				asyncTask->Cancel();
@@ -97,6 +97,10 @@ namespace FicsItKernel {
 
 		void LuaProcessorTick::demote() {
 			TickMutex.Lock();
+			if (State & LUA_SYNC) {
+				TickMutex.Unlock();
+				return;
+			}
 			State = LUA_SYNC;
 			TickMutex.Unlock();
 			if (bDoSync) {
@@ -124,6 +128,10 @@ namespace FicsItKernel {
 		void LuaProcessorTick::shouldStop() {
 			bShouldStop = true;
 		}
+		
+		void LuaProcessorTick::shouldReset() {
+			bShouldReset = true;
+		}
 
 		void LuaProcessorTick::shouldPromote() {
 			bShouldPromote = true;
@@ -142,6 +150,11 @@ namespace FicsItKernel {
 		void LuaProcessorTick::syncTick() {
 			if (postTick()) return;
 			if (State & LUA_SYNC) {
+				if (asyncTask.IsValid() && !asyncTask->IsIdle()) {
+					asyncTask->EnsureCompletion();
+					asyncTask->Cancel();
+					asyncTask.Reset();
+				}
 				TickMutex.Lock();
 				Processor->luaTick();
 				TickMutex.Unlock();
@@ -191,7 +204,7 @@ namespace FicsItKernel {
 					TickMutex.Unlock();
 					return false;
 				}
-				if (bShouldCrash || bShouldStop) {
+				if (bShouldCrash || bShouldStop || bShouldReset) {
 					TickMutex.Lock();
 					State = LUA_SYNC;
 					TickMutex.Unlock();
@@ -209,6 +222,10 @@ namespace FicsItKernel {
 			}
 			if (bShouldStop) {
 				Processor->getKernel()->stop();
+				return true;
+			}
+			if (bShouldReset) {
+				Processor->getKernel()->reset();
 				return true;
 			}
 			return false;
@@ -678,6 +695,10 @@ namespace FicsItKernel {
 		void LuaProcessor::setEEPROM(AFINStateEEPROM* newEeprom) {
 			eeprom = Cast<AFINStateEEPROMLua>(newEeprom);
 			reset();
+		}
+
+		LuaProcessorTick& LuaProcessor::getTickHelper() {
+			return tickHelper;
 		}
 
 		int luaReYield(lua_State* L) {

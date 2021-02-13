@@ -948,7 +948,7 @@ BeginFunc(getRecipes, TFS("Get Recipes"), TFS("Returns the list of recipes this 
 	}
 	recipes = OutRecipes;
 } EndFunc()
-BeginFunc(setRecipe, TFS("Set Recipe"), TFS("Sets the currently producing recipe of this manufacturer."), 1) {
+BeginFunc(setRecipe, TFS("Set Recipe"), TFS("Sets the currently producing recipe of this manufacturer."), 0) {
 	InVal(0, RClass<UFGRecipe>, recipe, TFS("Recipe"), TFS("The recipe this manufacturer should produce."))
 	OutVal(1, RBool, gotSet, TFS("Got Set"), TFS("True if the current recipe got successfully set to the new recipe."))
 	Body()

@@ -23,19 +23,19 @@ namespace FicsItKernel {
 
 #pragma optimize("", off)
 		LuaFunc(luaComputerReset)
-			kernel->reset();
+			processor->getTickHelper().shouldReset();
 			lua_yield(L, 0);
 			return 0;
 		}
 
 		LuaFunc(luaComputerStop)
-			kernel->stop();
+			processor->getTickHelper().shouldStop();
 			lua_yield(L, 0);
 			return 0;
 		}
 
 		LuaFunc(luaComputerPanic)
-		    kernel->crash(KernelCrash(std::string("PANIC! '") + luaL_checkstring(L, 1) + "'"));
+		    processor->getTickHelper().shouldCrash(KernelCrash(std::string("PANIC! '") + luaL_checkstring(L, 1) + "'"));
 			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
 				kernel->getAudio()->beep();
 			})));
