@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 
 UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
+	if (!Obj) return nullptr;
 	if (Obj->Implements<UFINNetworkComponent>()) return Obj;
 	if (Obj->IsA<AActor>()) {
 		TArray<UActorComponent*> Connectors = Cast<AActor>(Obj)->GetComponentsByClass(UFINAdvancedNetworkConnectionComponent::StaticClass());
