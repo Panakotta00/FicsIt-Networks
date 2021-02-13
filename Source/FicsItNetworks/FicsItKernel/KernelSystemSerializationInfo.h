@@ -6,7 +6,7 @@
 #include "KernelSystemSerializationInfo.generated.h"
 
 USTRUCT()
-struct FKernelSystemSerializationInfo {
+struct FICSITNETWORKS_API FKernelSystemSerializationInfo {
 	GENERATED_BODY()
 
 	UPROPERTY()

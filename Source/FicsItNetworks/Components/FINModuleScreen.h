@@ -49,10 +49,6 @@ public:
 	virtual void RequestNewWidget() override;
 	// End IFINScreen
 
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("ModuleScreen"); }
-	// End IFINNetworkCustomType
-
 	UFUNCTION(NetMulticast, Reliable)
 	void OnGPUValidationChanged(bool bValid, UObject* newGPU);
 

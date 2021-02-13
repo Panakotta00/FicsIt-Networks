@@ -6,7 +6,7 @@
 #include "FINComputerDriveDesc.generated.h"
 
 UCLASS()
-class UFINComputerDriveDesc : public UFGItemDescriptor, public ISMLItemDisplayInterface {
+class FICSITNETWORKS_API UFINComputerDriveDesc : public UFGItemDescriptor, public ISMLItemDisplayInterface {
 	GENERATED_BODY()
 
 public:

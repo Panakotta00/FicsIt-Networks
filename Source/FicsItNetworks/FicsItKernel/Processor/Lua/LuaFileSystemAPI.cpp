@@ -117,7 +117,7 @@ namespace FicsItKernel {
 			auto path = luaL_checkstring(L, 1);
 			auto all = lua_toboolean(L, 2);
 			try {
-				lua_pushboolean(L, self->createDir(path, all) == 0);
+				lua_pushboolean(L, self->createDir(path, all).isValid());
 			} CatchExceptionLua
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})
@@ -345,7 +345,10 @@ namespace FicsItKernel {
 		LuaFileFunc(ReadLine, {
 			try {
 				if (file->isEOF()) lua_pushnil(L);
-				else lua_pushstring(L, file->readLine().c_str());
+				else {
+					std::string text = file->readLine().c_str();
+                    lua_pushlstring(L, text.c_str(), text.length());
+				}
 			} CatchExceptionLua
 			return LuaProcessor::luaAPIReturn(L, 1);
 		})
@@ -375,7 +378,7 @@ namespace FicsItKernel {
 			try {
 				text = file->readAll();
 			} CatchExceptionLua
-			lua_pushstring(L, text.c_str());
+			lua_pushlstring(L, text.c_str(), text.length());
 			return 1;
 		})
 

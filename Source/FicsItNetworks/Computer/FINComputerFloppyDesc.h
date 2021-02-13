@@ -3,7 +3,7 @@
 #include "FINComputerFloppyDesc.generated.h"
 
 UCLASS()
-class UFINComputerFloppyDesc : public UFINComputerDriveDesc {
+class FICSITNETWORKS_API UFINComputerFloppyDesc : public UFINComputerDriveDesc {
 	GENERATED_BODY()
 public:
 };

@@ -5,7 +5,7 @@
 #include "FINComputerProcessorLua.generated.h"
 
 UCLASS()
-class AFINComputerProcessorLua : public AFINComputerProcessor {
+class FICSITNETWORKS_API AFINComputerProcessorLua : public AFINComputerProcessor {
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditDefaultsOnly)

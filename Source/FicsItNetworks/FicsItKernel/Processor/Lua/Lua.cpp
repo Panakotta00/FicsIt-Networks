@@ -1,9 +1,16 @@
 #include "Lua.h"
 
+
+#include "LuaFuture.h"
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
 #include "LuaStructs.h"
 #include "Network/FINNetworkComponent.h"
+#include "Reflection/FINArrayProperty.h"
+#include "Reflection/FINClassProperty.h"
+#include "Reflection/FINObjectProperty.h"
+#include "Reflection/FINStruct.h"
+#include "Reflection/FINTraceProperty.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -26,10 +33,9 @@ namespace FicsItKernel {
 					newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
 				} else {
 					UObject* Obj = *p->ContainerPtrToValuePtr<UObject*>(data);
-					UObject* Org = Obj;
-					if (Obj && Cast<UObjectProperty>(p)->PropertyClass == UObject::StaticClass() && Obj->Implements<UFINNetworkComponent>()) trace = trace / Obj / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
-					else trace = trace / Obj;
-					newInstance(L, trace, Org);
+					trace = trace / Obj;
+					if (Obj && Obj->Implements<UFINNetworkComponent>()) trace = trace / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+					newInstance(L, trace);
 				}
 			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
@@ -67,7 +73,8 @@ namespace FicsItKernel {
 				const char* s = lua_tolstring(L, i, &len);
 				if (!s) throw std::exception("Invalid String in string property parse");
 				FString* o = p->ContainerPtrToValuePtr<FString>(data);
-				*o = FString(UTF8_TO_TCHAR(s), len);
+				FUTF8ToTCHAR Conv(s, len);
+				*o = FString(Conv.Length(), Conv.Get());
 			} else if (c & EClassCastFlags::CASTCLASS_UClassProperty) {
 				UClass* o = getClassInstance(L, i, Cast<UClassProperty>(p)->PropertyClass);
 				*p->ContainerPtrToValuePtr<UClass*>(data) = o;
@@ -81,9 +88,9 @@ namespace FicsItKernel {
 				}
 			} else if (c & EClassCastFlags::CASTCLASS_UStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
-				FFINDynamicStructHolder Struct(prop->Struct);
+				TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(prop->Struct);
 				luaGetStruct(L, i, Struct);
-				prop->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct.GetData());
+				prop->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct->GetData());
 			} else if (c & EClassCastFlags::CASTCLASS_UArrayProperty) {
 				UArrayProperty* prop = Cast<UArrayProperty>(p);
 				const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
@@ -99,6 +106,69 @@ namespace FicsItKernel {
 			} else {
 				lua_pushnil(L);
 			}
+		}
+
+		FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index) {
+			switch (Prop->GetType()) {
+			case FIN_NIL:
+				return FINAny();
+			case FIN_BOOL:
+				return static_cast<FINBool>(lua_toboolean(L, Index));
+			case FIN_INT:
+				return static_cast<FINInt>(luaL_checkinteger(L, Index));
+			case FIN_FLOAT:
+				return static_cast<FINFloat>(luaL_checknumber(L, Index));
+			case FIN_STR:
+				return static_cast<FINStr>(luaL_checkstring(L, Index));
+			case FIN_OBJ: {
+				UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Prop);
+				if (ObjProp && ObjProp->GetSubclass()) {
+					return static_cast<FINObj>(getObjInstance(L, Index, ObjProp->GetSubclass()).Get());
+				}
+				return static_cast<FINObj>(getObjInstance(L, Index).Get());
+			} case FIN_CLASS: {
+				UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Prop);
+				if (ClassProp && ClassProp->GetSubclass()) {
+					return static_cast<FINClass>(getClassInstance(L, Index, ClassProp->GetSubclass()));
+				}
+				return static_cast<FINClass>(getObjInstance(L, Index).Get());
+			} case FIN_TRACE: {
+				UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Prop);
+				if (TraceProp && TraceProp->GetSubclass()) {
+					return static_cast<FINTrace>(getObjInstance(L, Index, TraceProp->GetSubclass()));
+				}
+				return static_cast<FINTrace>(getObjInstance(L, Index));
+			} case FIN_STRUCT: {
+				UFINStructProperty* StructProp = Cast<UFINStructProperty>(Prop);
+				if (StructProp && StructProp->GetInner()) {
+					TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(StructProp->GetInner());
+					luaGetStruct(L, Index, Struct);
+					return *Struct;
+				}
+				return *luaGetStruct(L, Index);
+			} case FIN_ARRAY: {
+				luaL_checktype(L, Index, LUA_TTABLE);
+				UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Prop);
+				FINArray Array;
+				while (lua_next(L, Index) != 0) {
+					if (!lua_isinteger(L, -1)) break;
+					FINAny Value;
+					if (ArrayProp && ArrayProp->GetInnerType()) {
+						Value = luaToProperty(L, ArrayProp->GetInnerType(), -1);
+					} else {
+						luaToNetworkValue(L, -1, Value);
+					}
+					Array.Add(Value);
+					lua_pop(L, 1);
+				}
+				return static_cast<FINArray>(Array);
+			} case FIN_ANY: {
+				FINAny Value;
+				luaToNetworkValue(L, Index, Value);
+				return Value;
+			} default: ;
+			}
+			return FINAny();
 		}
 
 		void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val) {
@@ -118,18 +188,75 @@ namespace FicsItKernel {
 				break;
 			case LUA_TSTRING: {
 				size_t len;
-				Val = FFINAnyNetworkValue(FINStr(lua_tolstring(L, i, &len), len));
+				const char* s = lua_tolstring(L, i, &len);
+				FUTF8ToTCHAR Conv(s, len);
+				Val = FFINAnyNetworkValue(FString(Conv.Length(), Conv.Get()));
 				break;
-			}
-			default:
-				FString TypeName = luaL_typename(L, i);
-				UScriptStruct* StructType = FFINLuaStructRegistry::Get().GetType(TypeName);
+			} default:
+				UFINStruct* StructType = luaGetStructType(L, i);
 				if (StructType) {
-					Val = FFINAnyNetworkValue(luaGetStruct(L, i));
+					Val = FFINAnyNetworkValue(*luaGetStruct(L, i));
+					break;
+				}
+				FFINNetworkTrace Trace = getObjInstance(L, i);
+				if (Trace.IsValid()) {
+					Val = FFINAnyNetworkValue(Trace);
+					break;
+				}
+				UClass* Class = getClassInstance(L, i, UObject::StaticClass());
+				if (Class) {
+					Val = Class;
 					break;
 				}
 				Val = FFINAnyNetworkValue();
 				break;
+			}
+		}
+
+		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val) {
+			switch (Val.GetType()) {
+			case FIN_NIL:
+				lua_pushnil(L);
+				break;
+			case FIN_BOOL:
+				lua_pushboolean(L, Val.GetBool());
+				break;
+			case FIN_INT:
+				lua_pushinteger(L, Val.GetInt());
+				break;
+			case FIN_FLOAT:
+				lua_pushnumber(L, Val.GetFloat());
+				break;
+			case FIN_STR: {
+				FTCHARToUTF8 Conv(*Val.GetString(), Val.GetString().Len());
+				lua_pushlstring(L, Conv.Get(), Conv.Length());
+				break;
+			} case FIN_OBJ:
+				newInstance(L, FFINNetworkTrace(Val.GetObj().Get()));
+				break;
+			case FIN_CLASS:
+				newInstance(L, Val.GetClass());
+				break;
+			case FIN_TRACE:
+				newInstance(L, Val.GetTrace());
+				break;
+			case FIN_STRUCT:
+				luaStruct(L, Val.GetStruct());
+				break;
+			case FIN_ARRAY: {
+				lua_newtable(L);
+				int i = 0;
+				for (const FFINAnyNetworkValue& Entry : Val.GetArray()) {
+					networkValueToLua(L, Entry);
+					lua_seti(L, -2, ++i);
+				}
+				break;
+			} case FIN_ANY:
+				networkValueToLua(L, Val.GetAny());
+				lua_pushnil(L);
+				break;
+			default:
+				lua_pushnil(L);
 			}
 		}
 	}

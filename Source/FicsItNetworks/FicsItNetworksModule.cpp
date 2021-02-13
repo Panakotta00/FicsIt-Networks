@@ -13,34 +13,22 @@
 #include "SML/mod/hooking.h"
 
 #include "FINComponentUtility.h"
-#include "FINConfig.h"
 #include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
-#include "Computer/FINComputerProcessor.h"
 #include "Computer/FINComputerRCO.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-#include "Runtime/CoreUObject/Public/Misc/RedirectCollector.h"
+#include "Reflection/FINReflection.h"
+#include "UI/FINReflectionStyles.h"
 
-#include "FicsItKernel/Processor/Lua/LuaLib.h"
-
+DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
 class AFGBuildableHologram_Public : public AFGBuildableHologram {
 public:
 	USceneComponent* SetupComponentFunc(USceneComponent*, UActorComponent*, const FName&) { return nullptr; }
-};
-
-class UFGFactoryConnectionComponent_Public : public UFGFactoryConnectionComponent {
-public:
-	bool Factory_GrabOutput(FInventoryItem&, float&, TSubclassOf<UFGItemDescriptor>) { return false; }
-};
-
-class AFGCharacterPlayer_Public : public AFGCharacterPlayer {
-public:
-	void UpdateBestUsableActor() {}
 };
 
 USceneComponent* Holo_SetupComponentDecl(AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName);
@@ -89,6 +77,7 @@ class AActor_public : public AActor {
 	friend void FFicsItNetworksModule::StartupModule();
 };
 
+bool FINRefLoaded = false;
 #pragma optimize("", off)
 void FFicsItNetworksModule::StartupModule(){
 	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
@@ -100,16 +89,7 @@ void FFicsItNetworksModule::StartupModule(){
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.InputConnector"), TEXT("Input1")});
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
-	#if !WITH_EDITOR
-	finConfig->SetNumberField("SignalQueueSize", 1000);
-	finConfig = SML::ReadModConfig(MOD_NAME, finConfig);
-	#endif
-	
 	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
-
-	SUBSCRIBE_METHOD_MANUAL("?UpdateBestUsableActor@AFGCharacterPlayer@@IEAAXXZ", AFGCharacterPlayer_Public::UpdateBestUsableActor, [](auto& scope, AFGCharacterPlayer_Public* self) {
-		if (!UFINComponentUtility::bAllowUsing) scope.Cancel();
-	});
 
 	SUBSCRIBE_METHOD(AFGBuildable::Dismantle_Implementation, [](auto& scope, AFGBuildable* self_r) {
 		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
@@ -167,15 +147,40 @@ void FFicsItNetworksModule::StartupModule(){
 		    UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/Game/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
 	    	gm->RegisterRemoteCallObjectClass(ModuleRCO);
+
 	    }
 	});
-	
+
+	SUBSCRIBE_METHOD_AFTER(AGameMode::StartMatch, [](AGameMode* World) {
+		if (!FINRefLoaded) {
+			FINRefLoaded = true;
+		}
+	});
+
+	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGGameState, AFGGameState::Init, [](AFGGameState* state) {
+		FFINReflectionStyles::Shutdown();
+		FFINReflectionStyles::Initialize();
+		
+		AFINNetworkAdapter::RegisterAdapterSettings();
+		FFINGlobalRegisterHelper::Register();
+		
+	    FFINReflection::Get()->PopulateSources();
+		FFINReflection::Get()->LoadAllTypes();
+	});
+
+#if WITH_EDITOR
 	AFINNetworkAdapter::RegisterAdapterSettings();
 	FFINGlobalRegisterHelper::Register();
+		
+	FFINReflection::Get()->PopulateSources();
+	FFINReflection::Get()->LoadAllTypes();
+#endif
 }
 #pragma optimize("", on)
 
-void FFicsItNetworksModule::ShutdownModule(){ }
+void FFicsItNetworksModule::ShutdownModule() {
+	FFINReflectionStyles::Shutdown();
+}
 
 extern "C" DLLEXPORT void BootstrapModule(std::ofstream& logFile) {
 	

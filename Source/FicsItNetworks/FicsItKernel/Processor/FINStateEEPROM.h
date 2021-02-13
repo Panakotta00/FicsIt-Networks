@@ -7,14 +7,21 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFINEEPROMUpdateDelegate);
 
 UCLASS()
-class AFINStateEEPROM : public AActor, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINStateEEPROM : public AActor, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintAssignable)
 	FFINEEPROMUpdateDelegate UpdateDelegate;
+
+	UPROPERTY()
+	bool bShouldUpdate = false;
 	
 	AFINStateEEPROM();
-	
+
+	// Begin AActor
+	virtual void Tick(float DeltaSeconds) override;
+	// End AActor
+
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface

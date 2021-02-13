@@ -40,8 +40,7 @@ void AFINFileSystemState::Serialize(FArchive& Ar) {
 	}
 	
 	Ar << node;
-	// TODO: add check for pre serialize function
-
+	
 	// load devices
 	if (Ar.IsLoading()) {
 		GetDevice();

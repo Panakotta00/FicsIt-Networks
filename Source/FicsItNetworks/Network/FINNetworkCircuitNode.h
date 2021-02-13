@@ -12,11 +12,11 @@ class AFINNetworkCircuit;
  * is required to implement this interface.
  */
 UINTERFACE(Blueprintable)
-class UFINNetworkCircuitNode : public UInterface {
+class FICSITNETWORKS_API UFINNetworkCircuitNode : public UInterface {
 	GENERATED_BODY()
 };
 
-class IFINNetworkCircuitNode {
+class FICSITNETWORKS_API IFINNetworkCircuitNode {
 	GENERATED_BODY()
 
 public:

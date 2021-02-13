@@ -53,7 +53,20 @@ pipeline {
 		
 		stage('Setup SML & Assets') {
 			steps {
-				bat label: '', script: 'git clone --branch %SML_BRANCH% https://github.com/satisfactorymodding/SatisfactoryModLoader.git'
+			    checkout scm: [
+                    $class: 'GitSCM',
+                    branches: [[
+                        name: "07f4ae52099642e2fba016ae9642df41bf164749"
+                    ]],
+                    extensions: [[
+                        $class: 'RelativeTargetDirectory',
+                        relativeTargetDir: 'SatisfactoryModLoader'
+                    ]],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/satisfactorymodding/SatisfactoryModLoader.git'
+                    ]]
+                ]
+				// bat label: '', script: 'git clone https://github.com/satisfactorymodding/SatisfactoryModLoader.git'
 				bat label: '', script: 'xcopy /Y /E /I SatisfactoryModLoader\\Source\\FactoryGame FicsIt-Networks\\Source\\FactoryGame > copy.log'
 				bat label: '', script: 'xcopy /Y /E /I SatisfactoryModLoader\\Source\\SML FicsIt-Networks\\Source\\SML > copy.log'
 				bat label: '', script: 'xcopy /Y /E /I SatisfactoryModLoader\\Plugins\\Alpakit FicsIt-Networks\\Plugins\\Alpakit > copy.log'

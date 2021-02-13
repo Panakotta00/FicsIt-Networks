@@ -42,6 +42,11 @@ FFINAnyNetworkValue::FFINAnyNetworkValue(const FINStruct& e) {
 	Type = FIN_STRUCT;
 }
 
+FFINAnyNetworkValue::FFINAnyNetworkValue(const FINArray& e) {
+	Data.ARRAY = new FINArray(e);
+	Type = FIN_ARRAY;
+}
+
 FFINAnyNetworkValue::FFINAnyNetworkValue(const FFINAnyNetworkValue& other) {
 	*this = other;
 }
@@ -55,11 +60,18 @@ FFINAnyNetworkValue& FFINAnyNetworkValue::operator=(const FFINAnyNetworkValue& o
 		break;
 	case FIN_OBJ:
 		Data.OBJECT = new FINObj(*other.Data.OBJECT);
+		break;
 	case FIN_TRACE:
 		Data.TRACE = new FINTrace(*other.Data.TRACE);
 		break;
 	case FIN_STRUCT:
 		Data.STRUCT = new FINStruct(*other.Data.STRUCT);
+		break;
+	case FIN_ARRAY:
+		Data.ARRAY = new FINArray(*other.Data.ARRAY);
+		break;
+	case FIN_ANY:
+		Data.ANY = new FINAny(*other.Data.ANY);
 		break;
 	default:
 		Data = other.Data;
@@ -82,6 +94,12 @@ FFINAnyNetworkValue::~FFINAnyNetworkValue() {
 	case FIN_STRUCT:
 		delete Data.STRUCT;
 		break;
+	case FIN_ARRAY:
+		delete Data.ARRAY;
+		break;
+	case FIN_ANY:
+		delete Data.ANY;
+		break;
 	default:
 		break;
 	}
@@ -102,6 +120,12 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 		case FIN_STRUCT:
 			delete Data.STRUCT;
 			break;
+		case FIN_ARRAY:
+			delete Data.ARRAY;
+			break;
+		case FIN_ANY:
+			delete Data.ANY;
+			break;
 		default:
 			break;
 		}
@@ -121,6 +145,11 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 		case FIN_STRUCT:
 			Data.STRUCT = new FINStruct();
 			break;
+		case FIN_ARRAY:
+			Data.ARRAY = new FINArray();
+			break;
+		case FIN_ANY:
+			Data.ANY = new FINAny();
 		default:
 			break;
 		}
@@ -151,40 +180,14 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 	case FIN_STRUCT:
 		Ar << *Data.STRUCT;
 		break;
+	case FIN_ARRAY:
+		Ar << *Data.ARRAY;
+		break;
+	case FIN_ANY:
+		Ar << *Data.ANY;
+		break;
 	default:
 		break;
 	}
 	return true;
-}
-
-void FFINAnyNetworkValue::operator>>(FFINValueReader& Reader) const {
-	switch (GetType()) {
-	case FIN_NIL:
-		Reader.nil();
-		break;
-	case FIN_INT:
-		Reader << GetInt();
-		break;
-	case FIN_FLOAT:
-		Reader << GetFloat();
-		break;
-	case FIN_BOOL:
-		Reader << GetBool();
-		break;
-	case FIN_STR:
-		Reader << GetString();
-		break;
-	case FIN_OBJ:
-		Reader << GetObject();
-		break;
-	case FIN_CLASS:
-		Reader << GetClass();
-		break;
-	case FIN_TRACE:
-		Reader << GetTrace();
-		break;
-	case FIN_STRUCT:
-		Reader << GetStruct();
-		break;
-	}
 }

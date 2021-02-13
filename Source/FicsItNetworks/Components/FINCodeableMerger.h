@@ -4,12 +4,11 @@
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINNetworkCustomType.h"
 
 #include "FINCodeableMerger.generated.h"
 
 UCLASS()
-class AFINCodeableMerger : public AFGBuildableConveyorAttachment, public IFINSignalSender, public IFINNetworkCustomType {
+class AFINCodeableMerger : public AFGBuildableConveyorAttachment, public IFINSignalSender {
 	GENERATED_BODY()
 
 public:
@@ -40,9 +39,6 @@ public:
 	UPROPERTY(SaveGame)
 	TArray<FInventoryItem> InputQueue3;
 
-	UPROPERTY(SaveGame)
-	TSet<FFINNetworkTrace> SignalListeners;
-
 	AFINCodeableMerger();
 	~AFINCodeableMerger();
 
@@ -51,9 +47,6 @@ public:
 	// End IFGDismantleInterface
 	
 	// Begin IFINSignalSender
-	virtual void AddListener_Implementation(FFINNetworkTrace listener) override;
-	virtual void RemoveListener_Implementation(FFINNetworkTrace listener) override;
-	virtual TSet<FFINNetworkTrace> GetListeners_Implementation() override;
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 
@@ -64,40 +57,97 @@ public:
 	// TODO: Upgrade Implementation
 	// End AFGBuildable
 	
-	// Begin IFINNetworkCustomType
-	virtual FString GetCustomTypeName_Implementation() const override { return TEXT("CodeableMerger"); }
-	// End IFINNetworkCustomType
-
 private:
 	/**
 	 * This function is used in tick for internal handling of a input.
 	 */
 	void TickInput(UFGFactoryConnectionComponent* Connector, int InputID);
 public:
+	UFUNCTION()
+	void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes) {
+		InternalName = TEXT("CodeableMerger");
+		DisplayName = FText::FromString(TEXT("Codeable Merger"));
+		PropertyInternalNames.Add("canOutput", "canOutput");
+		PropertyDisplayNames.Add("canOutput", FText::FromString("Can Output"));
+		PropertyDescriptions.Add("canOutput", FText::FromString("Is true if the output queue has a slot available for an item from one of the input queues."));
+	}
 	
 	/**
 	 * This function transfers the next item from the input queue with the given index to the output queue.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Components|CodeableSplitter")
 	bool netFunc_transferItem(int input);
+	UFUNCTION()
+	void netFuncMeta_transferItem(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "transferItem";
+		DisplayName = FText::FromString("Transfer Item");
+		Description = FText::FromString("Allows to transfer an item from the given input queue to the output queue if possible.");
+		ParameterInternalNames.Add("input");
+		ParameterDisplayNames.Add(FText::FromString("Input"));
+		ParameterDescriptions.Add(FText::FromString("The index of the input queue you want to transfer the next item to the output queue. (0 = middle, 1 = left, 2 = right)"));
+		ParameterInternalNames.Add("transfered");
+		ParameterDisplayNames.Add(FText::FromString("Transfered"));
+		ParameterDescriptions.Add(FText::FromString("true if it was able to transfer the item."));
+		Runtime = 1;
+	}
 
 	/**
 	 * Allows to peek the next item at the input queue with the given index.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Components|CodeableSplitter")
 	FInventoryItem netFunc_getInput(int input);
+	UFUNCTION()
+	void netFuncMeta_getInput(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getInput";
+		DisplayName = FText::FromString("Get Input");
+		Description = FText::FromString("Returns the next item in the given input queue.");
+		ParameterInternalNames.Add("input");
+		ParameterDisplayNames.Add(FText::FromString("Input"));
+		ParameterDescriptions.Add(FText::FromString("The index of the input queue you want to check (0 = middle, 1 = left, 2 = right)"));
+		ParameterInternalNames.Add("item");
+		ParameterDisplayNames.Add(FText::FromString("Item"));
+		ParameterDescriptions.Add(FText::FromString("The next item in the input queue."));
+		Runtime = 1;
+	}
 
 	/**
 	 * Checks if the output queue with is able to contain one more item.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Components|CodeableSplitter")
-	bool netFunc_canOutput();
+	bool netPropGet_canOutput();
 
 	/**
 	 * This signal gets emit when a new item got pushed to the input queue with the given index.
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
 	void netSig_ItemRequest(int input, const FInventoryItem& item);
+	UFUNCTION()
+    void netSigMeta_ItemRequest(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions) {
+		InternalName = "ItemRequest";
+		DisplayName = FText::FromString("Item Request");
+		Description = FText::FromString("Triggers when a new item is ready in one of the input queues.");
+		ParameterInternalNames.Add("input");
+		ParameterDisplayNames.Add(FText::FromString("Input"));
+		ParameterDescriptions.Add(FText::FromString("The index of the input queue at which the item is ready."));
+		ParameterInternalNames.Add("item");
+		ParameterDisplayNames.Add(FText::FromString("Item"));
+		ParameterDescriptions.Add(FText::FromString("The new item in the input queue."));
+	}
+	
+	/**
+	 * This signal gets emitted when a item is popped from the output queue (aka it got outputted to an conveyor)
+	 */
+	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
+	void netSig_ItemOutputted(const FInventoryItem& item);
+	UFUNCTION()
+    void netSigMeta_ItemOutputted(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions) {
+		InternalName = "ItemOutputted";
+		DisplayName = FText::FromString("Item Outputted");
+		Description = FText::FromString("Triggers when an item is popped from the output queue (aka it got transferred to a conveyor).");
+		ParameterInternalNames.Add("item");
+		ParameterDisplayNames.Add(FText::FromString("Item"));
+		ParameterDescriptions.Add(FText::FromString("The item removed from the output queue."));
+	}
 	
 	TArray<FInventoryItem>& GetInput(int input);
 	TArray<FInventoryItem>& GetInput(UFGFactoryConnectionComponent* connection);

@@ -13,24 +13,6 @@ struct lua_Debug;
 
 namespace FicsItKernel {
 	namespace Lua {
-		class LuaValueReader : public FFINValueReader {
-		private:
-			lua_State* L = nullptr;
-
-		public:
-			LuaValueReader(lua_State* L);
-
-			virtual void nil() override;
-			virtual void operator<<(FINBool b) override;
-			virtual void operator<<(FINInt num) override;
-			virtual void operator<<(FINFloat num) override;
-			virtual void operator<<(FINClass clazz) override;
-			virtual void operator<<(const FINStr& str) override;
-			virtual void operator<<(const FINObj& obj) override;
-			virtual void operator<<(const FINTrace& obj) override;
-			virtual void operator<<(const FINStruct& struc) override;
-		};
-
 		class LuaFileSystemListener : public FileSystem::Listener {
 		private:
 			class LuaProcessor* parent = nullptr;
@@ -53,14 +35,14 @@ namespace FicsItKernel {
 			LUA_ASYNC_ERROR	= LUA_ASYNC | LUA_ERROR,
 			LUA_ASYNC_END	= LUA_ASYNC | LUA_END,
 		};
+		ENUM_CLASS_FLAGS(LuaTickState);
 
 		struct FLuaTickRunnable : public FNonAbandonableTask {
 		private:
-			class LuaProcessor* Processor;
-			bool bShouldSync = false;
+			class LuaProcessorTick* Tick;
 			
 		public:	
-			FLuaTickRunnable(class LuaProcessor* Processor) : Processor(Processor) {}
+			FLuaTickRunnable(class LuaProcessorTick* Tick) : Tick(Tick) {}
 			
 			void DoWork();
 
@@ -68,14 +50,8 @@ namespace FicsItKernel {
 				RETURN_QUICK_DECLARE_CYCLE_STAT(ExampleAsyncTask, STATGROUP_ThreadPoolAsyncTasks);
 			}
 		};
-		
-		class LuaProcessor : public Processor {
-			friend int luaPull(lua_State* L);
-			friend int luaComputerSkip(lua_State* L);
-			friend FLuaTickRunnable;
-			friend struct FLuaSyncCall;
 
-		private:
+		class LuaProcessorTick {
 			// Lua Tick state lua step lenghts
 			int SyncLen = 2500;
 			int SyncErrorLen = 1250;
@@ -83,6 +59,58 @@ namespace FicsItKernel {
 			int AsyncLen = 2500;
 			int AsyncErrorLen = 1200;
 			int AsyncEndLen = 500;
+			
+		private:
+			class LuaProcessor* Processor;
+			LuaTickState State = LUA_SYNC;
+			FLuaTickRunnable Runnable;
+			TSharedPtr<FAsyncTask<FLuaTickRunnable>> asyncTask;
+			FCriticalSection StateMutex;
+			FCriticalSection TickMutex;
+			FCriticalSection AsyncSyncMutex;
+			bool bShouldPromote = false;
+			bool bShouldDemote = false;
+			bool bShouldStop = false;
+			bool bShouldReset = false;
+			bool bShouldCrash = false;
+			bool bDoSync = false;
+			KernelCrash ToCrash;
+			TPromise<void> AsyncSync;
+			TPromise<void> SyncAsync;
+			
+		public:
+			LuaProcessorTick(class LuaProcessor* Processor);
+
+			~LuaProcessorTick();
+
+			void reset();
+			void stop();
+			void promote();
+			void demote();
+			void demoteInAsync();
+			void shouldStop();
+			void shouldReset();
+			void shouldPromote();
+			void shouldDemote();
+			void shouldCrash(const KernelCrash& Crash);
+			int steps();
+			
+			void syncTick();
+			bool asyncTick();
+			bool postTick();
+
+			void tickHook(lua_State* L);
+			int apiReturn(lua_State* L, int args);
+		};
+		
+		class LuaProcessor : public Processor {
+			friend int luaPull(lua_State* L);
+			friend int luaComputerSkip(lua_State* L);
+			friend FLuaTickRunnable;
+			friend struct FLuaSyncCall;
+			friend LuaProcessorTick;
+
+		private:
 
 			// Processor cache
 			TWeakObjectPtr<AFINStateEEPROMLua> eeprom;
@@ -91,18 +119,7 @@ namespace FicsItKernel {
 			lua_State* luaState = nullptr;
 			lua_State* luaThread = nullptr;
 			int luaThreadIndex = 0;
-			LuaTickState tickState = LUA_SYNC;
-
-			// async execution
-			TSharedPtr<FAsyncTask<FLuaTickRunnable>> asyncTask;
-			FCriticalSection asyncMutex;
-			FCriticalSection luaTickMutex;
-			bool bWantsSync = false;
-			TPromise<void> asyncPromiseThreadWait;
-			TPromise<void> asyncPromiseTickWait;
-			bool bShouldCrash = false;
-			KernelCrash ToCrash;
-			bool bShouldStop = false;
+			LuaProcessorTick tickHelper;
 
 			// signal pulling
 			int pullState = 0; // 0 = not pulling, 1 = pulling with timeout, 2 = pull indefinetly
@@ -133,38 +150,15 @@ namespace FicsItKernel {
 			// End Processor
 
 			/**
-			 * Returns the lua step count for the given lua tick state
+			 * returns the tick helper
 			 */
-			int luaStepsForTickState(LuaTickState state);
-
+			LuaProcessorTick& getTickHelper();
+			
 			/**
 			 * Executes one lua tick sync or async.
 			 * Might set after tick cache which should get handled by tick.
 			 */
 			void luaTick();
-
-			/**
-			 * Should be called by main thread to allow async task
-			 * to finish tick execution in sync with main thread.
-			 * If async task doesn't wait, directly returns.
-			 */
-			void RunSyncTick();
-
-			/**
-			 * Forces async task to stop
-			 * and waits for it finish.
-			 */
-			void StopAsyncTick();
-
-			/**
-			 * Continuation function used by syncTick
-			 */
-			static int syncTickContinue(lua_State*, int status, lua_KContext ctx);
-
-			/**
-			 * Waits till the lua tick is synced with the kernel tick (lua thread finished)
-			 */
-			void syncTick(lua_State* L);
 
 			/**
 			* Sets up the lua environment.
@@ -209,6 +203,11 @@ namespace FicsItKernel {
 			 * @return	if it even returns, returns the same as args
 			 */
 			static int luaAPIReturn(lua_State* L, int args);
+
+			/**
+			 * Returns the lua state
+			 */
+			lua_State* getLuaState() const;
 		};
 
 		struct FLuaSyncCall {
@@ -216,17 +215,7 @@ namespace FicsItKernel {
 
 			FLuaSyncCall(lua_State* L) {
 				Processor = LuaProcessor::luaGetProcessor(L);
-				Processor->syncTick(L);
-			}
-
-			~FLuaSyncCall() {
-				Processor->asyncMutex.Lock();
-				if (Processor->bWantsSync) {
-					Processor->bWantsSync = false;
-					Processor->tickState = LUA_SYNC;
-					Processor->asyncPromiseTickWait.SetValue();
-				}
-				Processor->asyncMutex.Unlock();
+				Processor->tickHelper.demoteInAsync();
 			}
         };
 	}

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-class FFINGlobalRegisterHelper {
+class FICSITNETWORKS_API FFINGlobalRegisterHelper {
 public:
 	typedef TFunction<void()> RegisterFunction;
 private:
@@ -26,6 +26,12 @@ public:
 	 * @param[in]	Func	the function you want to add to the list
 	 */
 	static void AddFunction(const RegisterFunction& Func);
+};
+
+struct FICSITNETWORKS_API FFINStaticGlobalRegisterFunc {
+	FFINStaticGlobalRegisterFunc(const FFINGlobalRegisterHelper::RegisterFunction& Func) {
+		FFINGlobalRegisterHelper::AddFunction(Func);
+	}
 };
 
 FORCEINLINE bool operator==(const FFINGlobalRegisterHelper::RegisterFunction& A, const FFINGlobalRegisterHelper::RegisterFunction& B) {

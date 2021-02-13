@@ -1,11 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "util/Logging.h"
-
 #include "FINDynamicStructHolder.generated.h"
 
-#define MakeDynamicStruct(Type, ...) MakeShared<FFINDynamicStructHolder>(Type::StaticStruct(), new Type{__VA_ARGS__})
+#define MakeDynamicStruct(Type, ...) MakeShared<FFINDynamicStructHolder>(TBaseStructure<Type>::Get(), new Type{__VA_ARGS__})
 
 template<typename T>
 class TFINDynamicStruct;
@@ -14,7 +12,7 @@ class TFINDynamicStruct;
  * This structure allows you to store any kind of UStruct
  */
 USTRUCT(BlueprintType)
-struct FFINDynamicStructHolder {
+struct FICSITNETWORKS_API FFINDynamicStructHolder {
 	GENERATED_BODY()
 	
 protected:
@@ -30,7 +28,7 @@ public:
 	FFINDynamicStructHolder& operator=(const FFINDynamicStructHolder& Other);
 
 	template<typename T>
-	FFINDynamicStructHolder(const T& Struct) : FFINDynamicStructHolder(Copy(T::StaticStruct(), &Struct)) {}
+	FFINDynamicStructHolder(const T& Struct) : FFINDynamicStructHolder(Copy(TBaseStructure<T>::Get(), &Struct)) {}
 
 	static FFINDynamicStructHolder Copy(UScriptStruct* Struct, const void* Data);
 	
@@ -52,7 +50,7 @@ public:
 
 	template<typename T>
 	TSharedPtr<T> SharedCopy() const {
-		if (Struct->IsChildOf(T::StaticStruct())) {
+		if (Struct->IsChildOf(TBaseStructure<T>::Get())) {
 			void* Data = FMemory::Malloc(Struct->GetStructureSize());
 			Struct->InitializeStruct(Data);
 			Struct->CopyScriptStruct(Data, this->Data);
@@ -83,30 +81,30 @@ inline void operator<<(FArchive& Ar, FFINDynamicStructHolder& Struct) {
 template<typename T>
 class TFINDynamicStruct : public FFINDynamicStructHolder {
 public:
-	TFINDynamicStruct() : FFINDynamicStructHolder(T::StaticStruct()) {}
-	TFINDynamicStruct(UScriptStruct* Struct) : FFINDynamicStructHolder(Struct) { check(Struct->IsChildOf(T::StaticStruct())) }
-	TFINDynamicStruct(UScriptStruct* Struct, void* Data) : FFINDynamicStructHolder(Struct, Data) { check(Struct->IsChildOf(T::StaticStruct())) }
+	TFINDynamicStruct() : FFINDynamicStructHolder(TBaseStructure<T>::Get()) {}
+	TFINDynamicStruct(UScriptStruct* Struct) : FFINDynamicStructHolder(Struct) { check(Struct->IsChildOf(TBaseStructure<T>::Get())) }
+	TFINDynamicStruct(UScriptStruct* Struct, void* Data) : FFINDynamicStructHolder(Struct, Data) { check(Struct->IsChildOf(TBaseStructure<T>::Get())) }
 	template<typename K>
 	TFINDynamicStruct(const TFINDynamicStruct<K>& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(Other.GetStruct(), Other.GetData())) {
-		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));
+		check(Other.GetStruct()->IsChildOf(TBaseStructure<T>::Get()));
 	}
 	TFINDynamicStruct(const FFINDynamicStructHolder& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(Other.GetStruct(), Other.GetData())) {
-		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));
+		check(Other.GetStruct()->IsChildOf(TBaseStructure<T>::Get()));
 	}
 	template<typename K>
-    TFINDynamicStruct(const K& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(K::StaticStruct(), &Other)) {
-		check(K::StaticStruct()->IsChildOf(T::StaticStruct()));
+    TFINDynamicStruct(const K& Other) : FFINDynamicStructHolder(FFINDynamicStructHolder::Copy(TBaseStructure<K>::Get(), &Other)) {
+		check(TBaseStructure<K>::Get()->IsChildOf(TBaseStructure<T>::Get()));
 	}
 
 	template<typename K>
 	TFINDynamicStruct<T>& operator=(const TFINDynamicStruct<K>& Other) {
-		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));
+		check(Other.GetStruct()->IsChildOf(TBaseStructure<T>::Get()));
 		FFINDynamicStructHolder::operator=(Other);
 		return *this;
 	}
 	
 	TFINDynamicStruct<T>& operator=(const FFINDynamicStructHolder& Other) {
-		check(Other.GetStruct()->IsChildOf(T::StaticStruct()));
+		check(Other.GetStruct()->IsChildOf(TBaseStructure<T>::Get()));
 		FFINDynamicStructHolder::operator=(Other);
 		return *this;
 	}

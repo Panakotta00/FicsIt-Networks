@@ -4,8 +4,6 @@
 #include "FINNetworkAdapter.h"
 #include "UnrealNetwork.h"
 
-#include "SML/util/Logging.h"
-
 AFINNetworkCable::AFINNetworkCable() {
 	CableSpline = CreateDefaultSubobject<USplineMeshComponent>("CableSpline");
 	CableSpline->SetupAttachment(RootComponent);

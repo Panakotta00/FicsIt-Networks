@@ -1,81 +1,307 @@
 #include "FINLuaCodeEditor.h"
 
-FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayoutMarshaller(TSharedPtr<FSyntaxTokenizer> InTokenizer, FFINLuaSyntaxTextStyle InLuaSyntaxTextStyle) :
+const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
+
+FFINLuaCodeEditorStyle::FFINLuaCodeEditorStyle() {}
+
+void FFINLuaCodeEditorStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const {
+	Super::GetResources(OutBrushes);
+}
+
+const FFINLuaCodeEditorStyle& FFINLuaCodeEditorStyle::GetDefault() {
+	static FFINLuaCodeEditorStyle* Default = nullptr;
+	if (!Default) Default = new FFINLuaCodeEditorStyle();
+	return *Default;
+}
+
+FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayoutMarshaller(TSharedPtr<FSyntaxTokenizer> InTokenizer, const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle) :
 	FSyntaxHighlighterTextLayoutMarshaller(InTokenizer),
 	SyntaxTextStyle(InLuaSyntaxTextStyle) {
 
 }
 
-TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(FFINLuaSyntaxTextStyle LuaSyntaxTextStyle) {
+FFINLuaSyntaxHighlighterTextLayoutMarshaller::~FFINLuaSyntaxHighlighterTextLayoutMarshaller() {}
+
+TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle) {
 	TArray<FSyntaxTokenizer::FRule> TokenizerRules;
-	TokenizerRules.Add(FSyntaxTokenizer::FRule(TEXT("print")));
-	TokenizerRules.Add(FSyntaxTokenizer::FRule(TEXT("\"")));
+	for (FString Token : TArray<FString>({
+		" ", "\t", ".", ":", "\"", "\'", ",", "(", ")", "for", "in", "while", "do", "if", "then", "elseif", "else",
+		"end", "local", "true", "false", "not", "and", "or", "function", "return", "--[[", "]]--", "--", "+", "-", "/",
+		"*", "%", "[", "]", "{", "}", "=", "!", "~", "#", ">", "<"})) {
+		TokenizerRules.Add(FSyntaxTokenizer::FRule(Token));
+	}
 
 	TokenizerRules.Sort([](const FSyntaxTokenizer::FRule& A, const FSyntaxTokenizer::FRule& B) {
 		return A.MatchText.Len() > B.MatchText.Len();
 	});
-
-
-	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(FSyntaxTokenizer::Create(TokenizerRules), LuaSyntaxTextStyle));
+	
+	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(MakeShared<FSyntaxTokenizer>(TokenizerRules), LuaSyntaxTextStyle));
 }
-
+#pragma optimize("", off)
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) {
 	TArray<FTextLayout::FNewLineData> LinesToAdd;
 	LinesToAdd.Reserve(TokenizedLines.Num());
 
+	bool bInString = false;
+	bool bInBlockComment = false;
+	TSharedPtr<ISlateRun> Run;
 	for (const FSyntaxTokenizer::FTokenizedLine& TokenizedLine : TokenizedLines) {
 		TSharedRef<FString> ModelString = MakeShareable(new FString());
 		TArray<TSharedRef<IRun>> Runs;
 
+		auto DoNormal = [&](FTextRange Range) {
+			if (Runs.Num() > 0 && Runs[Runs.Num()-1]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Normal") {
+				Range.BeginIndex = Runs[Runs.Num()-1]->GetTextRange().BeginIndex;
+				Runs.Pop();
+			}
+			FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Normal"));
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoComment = [&](const FTextRange& Range) {
+			FTextBlockStyle Style = SyntaxTextStyle->CommentTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Comment"));
+			RunInfo.MetaData.Add("Splitting");
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoString = [&](const FTextRange& Range) {
+			FTextBlockStyle Style = SyntaxTextStyle->StringTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.String"));
+			RunInfo.MetaData.Add("Splitting");
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoKeyword = [&](const FTextRange& Range) {
+			FTextBlockStyle Style = SyntaxTextStyle->KeywordTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Keyword"));
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoTrue = [&](const FTextRange& Range) {
+			FTextBlockStyle Style = SyntaxTextStyle->BoolTrueTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Keyword"));
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoFalse = [&](const FTextRange& Range) {
+			FTextBlockStyle Style = SyntaxTextStyle->BoolFalseTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Keyword"));
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoNumber = [&](const FTextRange& Range) {
+			FTextBlockStyle Style = SyntaxTextStyle->NumberTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Number"));
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoWhitespace = [&](const FTextRange& Range) {
+			FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Whitespace"));
+			RunInfo.MetaData.Add("Splitting");
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoOperator = [&](const FTextRange& Range, bool bColored) {
+			FTextBlockStyle Style = bColored ? SyntaxTextStyle->OperatorTextStyle : SyntaxTextStyle->NormalTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Operator"));
+			RunInfo.MetaData.Add("Splitting");
+			RunInfo.MetaData.Add("Operator", ModelString->Mid(Range.BeginIndex, Range.Len()));
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto DoFunction = [&](const FTextRange& Range, bool bDeclaration) {
+			FTextBlockStyle Style = bDeclaration ? SyntaxTextStyle->FunctionDeclarationTextStyle : SyntaxTextStyle->FunctionCallTextStyle;
+			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Function"));
+			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			Runs.Add(Run.ToSharedRef());
+		};
+		auto FindPrevNoWhitespaceRun = [&](int32 StartIndex = -1) {
+			if (StartIndex < 0) StartIndex = Runs.Num()-1;
+			for (int i = StartIndex; i >= 0; i--) {
+				if (Runs[i]->GetRunInfo().Name != "SyntaxHighlight.FINLua.Whitespace") {
+					return i;
+				}
+			}
+			return -1;
+		};
+
+		int StringStart = 0;
+		int StringEnd = 0;
+		bool bInNumber = false;
+		bool bNumberHadDecimal = false;
+		bool bInLineComment = false;
 		for (const FSyntaxTokenizer::FToken& Token : TokenizedLine.Tokens) {
 			const FString TokenString = SourceString.Mid(Token.Range.BeginIndex, Token.Range.Len());
-			const FTextRange ModelRange(ModelString->Len(), ModelString->Len() + TokenString.Len());
-
+			int Start = ModelString->Len();
+			int End = Start + TokenString.Len();
 			ModelString->Append(TokenString);
 
-			FTextBlockStyle CurrentBlockStyle = SyntaxTextStyle.NormalTextStyle;
-
-			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Normal"));
-
-			if (TokenString == "print") {
-				RunInfo.Name = TEXT("SyntaxHighlight.FINLua.Function");
-				CurrentBlockStyle = SyntaxTextStyle.FunctionTextStyle;
+			bool bIsNew = !Run.IsValid() || Start < 1 || Run->GetRunInfo().MetaData.Contains("Splitting");
+			
+			if (bInString || bInLineComment || bInBlockComment) {
+				StringEnd += TokenString.Len();
+			}
+			if (!bInBlockComment && !bInLineComment && (TokenString == "\"" || TokenString == "\'")) {
+				if (bInString) {
+					if (Start > 0 && (*ModelString)[Start-1] == '\\') continue;
+					DoString(FTextRange(StringStart, StringEnd));
+					bInString = false;
+					continue;
+				}
+				bInString = true;
+				StringStart = Start;
+				StringEnd = End;
+				continue;
+			}
+			if (!bInString) {
+				if (TokenString == "--[[" && !bInBlockComment && !bInLineComment) {
+					if (!bInBlockComment) {
+						bInBlockComment = true;
+						StringStart = Start;
+						StringEnd = End;
+					}
+				} else if (TokenString == "]]--" && bInBlockComment) {
+					bInBlockComment = false;
+					DoComment(FTextRange(StringStart, StringEnd));
+					continue;
+				} else if (TokenString == "--" && !bInLineComment && !bInBlockComment) {
+					bInLineComment = true;
+					StringStart = Start;
+					StringEnd = End;
+				}
+			}
+			if (bInString || bInLineComment || bInBlockComment) continue;
+			if (bInNumber) {
+				bool bStillNumber = false;
+				if (TokenString == ".") {
+					if (!bNumberHadDecimal) {
+						bNumberHadDecimal = true;
+						bStillNumber = true;
+					}
+				} else if (FRegexMatcher(FRegexPattern("^[0-9]+$"), TokenString).FindNext()) bStillNumber = true;
+				if (bStillNumber) {
+					StringEnd += TokenString.Len();
+					continue;
+				}
+				DoNumber(FTextRange(StringStart, StringEnd));
+				bIsNew = true;
+				bInNumber = false;
 			}
 
-			TSharedRef<ISlateRun> Run = FSlateTextRun::Create(RunInfo, ModelString, CurrentBlockStyle, ModelRange);
-			Runs.Add(Run);
+			if (Token.Type == FSyntaxTokenizer::ETokenType::Syntax) {
+				if (bIsNew) {
+					if (TArray<FString>({"while", "for", "in", "do", "if", "then", "elseif", "else", "end", "local", "not", "and", "or", "function", "return"}).Contains(TokenString)) {
+						DoKeyword(FTextRange(Start, End));
+						continue;
+					} else if (TokenString == "true") {
+						DoTrue(FTextRange(Start, End));
+						continue;
+					} else if (TokenString == "false") {
+						DoFalse(FTextRange(Start, End));
+						continue;
+					}
+				}
+				if (TokenString == "(") {
+					int Index = FindPrevNoWhitespaceRun();
+					if (Index >= 0 && Runs[Index]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Normal") {
+						FTextRange OldRange = Runs[Index]->GetTextRange();
+						Runs.RemoveAt(Index);
+						int KeywordIndex = FindPrevNoWhitespaceRun(Index-1);
+						FString Keyword;
+						if (KeywordIndex >= 0) Keyword = ModelString->Mid(Runs[KeywordIndex]->GetTextRange().BeginIndex, Runs[KeywordIndex]->GetTextRange().EndIndex - Runs[KeywordIndex]->GetTextRange().BeginIndex);
+                        DoFunction(OldRange, KeywordIndex >= 0 && Runs[KeywordIndex]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Keyword" && Keyword == "function");
+						TSharedRef<IRun> NewRun = Runs[Runs.Num()-1];
+						Runs.RemoveAt(Runs.Num()-1);
+						Runs.Insert(NewRun, Index);
+						DoOperator(FTextRange(Start, End), false);
+						continue;
+					}
+				}
+				if (TArray<FString>({" ","\t"}).Contains(TokenString)) {
+					DoWhitespace(FTextRange(Start, End));
+					continue;
+				}
+				if (TArray<FString>({".",",",":","(",")","[","]","{","}"}).Contains(TokenString)) {
+					DoOperator(FTextRange(Start, End), false);
+					continue;
+				}
+				if (TArray<FString>({"+","-","*","/","%","#","=","~","!",">","<"}).Contains(TokenString)) {
+					DoOperator(FTextRange(Start, End), true);
+					continue;
+				}
+			} else {
+				if (!bIsNew) {
+					FTextRange ModelRange = Run->GetTextRange();
+					Runs.RemoveAt(Runs.Num()-1);
+					DoNormal(ModelRange);
+					bIsNew = false;
+				} else if (TokenString.IsNumeric()) {
+					bInNumber = true;
+					StringStart = Start;
+					StringEnd = End;
+					continue;
+				}
+			}
+			DoNormal(FTextRange(Start, End));
 		}
+		
+		if (bInNumber) {
+			DoNumber(FTextRange(StringStart, StringEnd));
+		} else if (bInString) {
+			DoString(FTextRange(StringStart, StringEnd));
+		} else if (bInLineComment || bInBlockComment) {
+			DoComment(FTextRange(StringStart, StringEnd));
+		}
+		
 		LinesToAdd.Emplace(MoveTemp(ModelString), MoveTemp(Runs));
 	}
 	TargetTextLayout.AddLines(LinesToAdd);
 }
-
+#pragma optimize("", on)
 
 void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
-	FFINLuaSyntaxTextStyle LuaTextStyle;
+	SyntaxHighlighter = FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(InArgs._CodeStyle);
 
-	LuaTextStyle.NormalTextStyle = InArgs._StyleNormal;
-	LuaTextStyle.FunctionTextStyle = InArgs._StyleFunction;
-	
-	SyntaxHighlighter = FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(LuaTextStyle);
-
-	SMultiLineEditableTextBox::Construct(
-		SMultiLineEditableTextBox::FArguments()
+	ChildSlot[
+		SAssignNew(TextBox, SMultiLineEditableTextBox)
 		.AutoWrapText(false)
 		.Margin(0.0f)
-		.Text(FText::FromString(TEXT("print(\"test\")")))
+		.Padding(InArgs._Padding)
 		.Marshaller(SyntaxHighlighter)
-		.BackgroundColor(FSlateColor(FLinearColor::Black))
-		.ForegroundColor(FSlateColor(FLinearColor::White))
-	);
+		.Style(InArgs._Style)
+		.OnTextChanged(InArgs._OnTextChanged)
+		.OnTextCommitted(InArgs._OnTextCommitted)
+	];
+}
+
+void UFINLuaCodeEditor::HandleOnTextChanged(const FText& Text) {
+	OnTextChanged.Broadcast(Text);
+}
+
+void UFINLuaCodeEditor::HandleOnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod) {
+	OnTextCommitted.Broadcast(Text, CommitMethod);
 }
 
 TSharedRef<SWidget> UFINLuaCodeEditor::RebuildWidget() {
-	FTextBlockStyle styleN;
-	
-	CodeEditor =
-		SNew(SFINLuaCodeEditor)
-		.StyleNormal(StyleNormal)
-		.StyleFunction(StyleFunction);
-	return CodeEditor.ToSharedRef();
+	return SAssignNew(CodeEditor, SFINLuaCodeEditor)
+		.Style(&Style)
+		.CodeStyle(&CodeStyle)
+		.OnTextChanged(BIND_UOBJECT_DELEGATE(FOnTextChanged, HandleOnTextChanged))
+		.OnTextCommitted(BIND_UOBJECT_DELEGATE(FOnTextCommitted, HandleOnTextCommitted));
 }
+
+void UFINLuaCodeEditor::SetIsReadOnly(bool bInReadOnly) {
+	CodeEditor->TextBox->SetIsReadOnly(bInReadOnly);
+}
+
+void UFINLuaCodeEditor::SetText(FText InText) {
+	CodeEditor->TextBox->SetText(InText);
+}
+
+FText UFINLuaCodeEditor::GetText() const {
+	return CodeEditor->TextBox->GetText();
+}
+

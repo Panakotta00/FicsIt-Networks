@@ -1,6 +1,6 @@
 = Credits
 
-- https://twitch.tv/coderde[Panakotta00]
+- https://twitch.tv/panakotta00[Panakotta00]
 +
 Management & Development
 

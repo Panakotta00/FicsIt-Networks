@@ -1,17 +1,17 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+
+#include "FGCharacterPlayer.h"
 #include "FGSaveInterface.h"
 #include "FGSubsystem.h"
 #include "FicsItNetworksCustomVersion.h"
-#include "Queue.h"
 #include "WidgetInteractionComponent.h"
-#include "Network/FINNetworkTrace.h"
 
 #include "FINComputerSubsystem.generated.h"
 
 UCLASS()
-class AFINComputerSubsystem : public AFGSubsystem, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINComputerSubsystem : public AFGSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 	
 public:

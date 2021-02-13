@@ -8,12 +8,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINDriveHolderDriveUpdate, AFINFile
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINDriveHolderLockedUpdateDelegate, bool, bOldLocked, AFINFileSystemState*, NewOrOldDrive);
 
 UCLASS()
-class AFINComputerDriveHolder : public AFINComputerModule {
+class FICSITNETWORKS_API AFINComputerDriveHolder : public AFINComputerModule {
 	GENERATED_BODY()
 
 protected:
 	UPROPERTY(SaveGame)
-	AFINFileSystemState* prev = nullptr;
+	AFINFileSystemState* PrevFSState = nullptr;
 
 	UPROPERTY(SaveGame, Replicated)
 	bool bLocked = false;
@@ -30,6 +30,10 @@ public:
 
 	AFINComputerDriveHolder();
 	~AFINComputerDriveHolder();
+
+	// Begin AActor
+	virtual void EndPlay(EEndPlayReason::Type reason) override;
+	// End AActor
 
 	AFINFileSystemState* GetDrive();
 

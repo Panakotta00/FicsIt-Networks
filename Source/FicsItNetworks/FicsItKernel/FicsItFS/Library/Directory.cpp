@@ -2,8 +2,6 @@
 
 #include <fstream>
 
-#include "util/Logging.h"
-
 using namespace std;
 using namespace FileSystem;
 namespace filesystem = std::experimental::filesystem;
@@ -42,7 +40,7 @@ bool FileSystem::MemDirectory::isValid() const {
 WRef<Directory> MemDirectory::createSubdir(const NodeName& subdir) {
 	if (entries.find(subdir) != entries.end()) return entries[subdir];
 	if (!checkSize(subdir.length(), true)) return nullptr;
-	auto dir = new MemDirectory({listeners, subdir}, checkSize);
+	auto dir = new MemDirectory(ListenerListRef{listeners, subdir}, checkSize);
 	entries[subdir] = dir;
 	listeners.onNodeAdded(subdir, NT_Directory);
 	return dir;
@@ -51,7 +49,7 @@ WRef<Directory> MemDirectory::createSubdir(const NodeName& subdir) {
 WRef<File> MemDirectory::createFile(const NodeName& name) {
 	if (entries.find(name) != entries.end()) return entries[name];
 	if (!checkSize(name.length(), true)) return nullptr;
-	auto file = new MemFile({listeners, name}, checkSize);
+	auto file = new MemFile(ListenerListRef{listeners, name}, checkSize);
 	entries[name] = file;
 	listeners.onNodeAdded(name, NT_File);
 	return file;

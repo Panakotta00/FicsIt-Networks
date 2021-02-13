@@ -9,7 +9,7 @@
 #include "FINComputerRCO.generated.h"
 
 UCLASS(Blueprintable)
-class UFINComputerRCO : public UFGRemoteCallObject {
+class FICSITNETWORKS_API UFINComputerRCO : public UFGRemoteCallObject {
 	GENERATED_BODY()
 	
 public:
