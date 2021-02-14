@@ -2,5 +2,5 @@
 #include "FicsItKernel/Processor/Lua/LuaProcessor.h"
 
 FicsItKernel::Processor* AFINComputerProcessorLua::CreateProcessor() {
-	return new FicsItKernel::Lua::LuaProcessor(LuaInstructionsPerTick);
+	return new FicsItKernel::Lua::LuaProcessor(this->GetName(), LuaInstructionsPerTick);
 }

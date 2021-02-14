@@ -297,7 +297,7 @@ namespace FicsItKernel {
 			return p;
 		}
 
-		LuaProcessor::LuaProcessor(int speed) :  tickHelper(this), fileSystemListener(new LuaFileSystemListener(this)) {
+		LuaProcessor::LuaProcessor(const FString& DebugInfo, int speed) : tickHelper(this), fileSystemListener(new LuaFileSystemListener(this)), DebugInfo(DebugInfo) {
 			
 		}
 
@@ -315,7 +315,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::stop(bool isCrash) {
-			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor stop %s"), isCrash ? TEXT("due to crash") : TEXT(""));
+			UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor stop %s"), *DebugInfo, isCrash ? TEXT("due to crash") : TEXT(""));
 			tickHelper.stop();
 		}
 
@@ -398,7 +398,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::reset() {
-			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor Reset"));
+			UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Reset"), *DebugInfo);
 			tickHelper.stop();
 			
 			// can't reset running system state
@@ -488,7 +488,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::PreSerialize(UProcessorStateStorage* storage, bool bLoading) {
-			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor %s"), bLoading ? TEXT("PreDeserialize") : TEXT("PreSerialize"));
+			UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, bLoading ? TEXT("PreDeserialize") : TEXT("PreSerialize"));
 			tickHelper.stop();
 			
 			for (LuaFile file : fileStreams) {
@@ -508,7 +508,8 @@ namespace FicsItKernel {
 
 #pragma optimize("", off)
 		int luaPersist(lua_State* L) {
-			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor Persist"));
+			LuaProcessor* p = LuaProcessor::luaGetProcessor(L);
+			UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Persist"), *p->DebugInfo);
 			
 			// perm, globals, thread
 			
@@ -528,7 +529,7 @@ namespace FicsItKernel {
 #pragma optimize("", on)
 		
 		void LuaProcessor::Serialize(UProcessorStateStorage* storage, bool bLoading) {
-			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor %s"), bLoading ? TEXT("Deserialize") : TEXT("Serialize"));
+			UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, bLoading ? TEXT("Deserialize") : TEXT("Serialize"));
 			if (!bLoading) {
 				// check state & thread
 				if (!luaState || !luaThread || lua_status(luaThread) != LUA_YIELD) return;
@@ -574,7 +575,7 @@ namespace FicsItKernel {
 				} else {
 					// print error
 					if (lua_isstring(luaState, -1)) {
-						UE_LOG(LogFicsItNetworks, Log, TEXT("Unable to persit! '%s'"), *FString(lua_tostring(luaState, -1)));
+						UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Unable to persit! '%s'"), *DebugInfo, *FString(lua_tostring(luaState, -1)));
 					}
 
 					lua_pop(luaState, 1); // ..., perm, globals
@@ -603,7 +604,8 @@ namespace FicsItKernel {
 		}
 
 		int luaUnpersist(lua_State* L) {
-			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor Unpersist"));
+			LuaProcessor* p = LuaProcessor::luaGetProcessor(L);
+			UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Unpersist"), *p->DebugInfo);
 			
 			// str-thread, str-globals, uperm
 			// unpersist globals
@@ -620,7 +622,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessor::PostSerialize(UProcessorStateStorage* Storage, bool bLoading) {
-			UE_LOG(LogFicsItNetworks, Log, TEXT("Lua Processor %s"), bLoading ? TEXT("PostDeserialize") : TEXT("PostSerialize"));
+			UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, bLoading ? TEXT("PostDeserialize") : TEXT("PostSerialize"));
 			if (bLoading) {
 				if (kernel->getState() != RUNNING) return;
 
@@ -662,7 +664,7 @@ namespace FicsItKernel {
 				if (ok != LUA_OK) {
 					// print error
 					if (lua_isstring(luaState, -1)) {
-						UE_LOG(LogFicsItNetworks, Log, TEXT("Unable to unpersit! '%s'"), *FString(lua_tostring(luaState, -1)));
+						UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Unable to unpersit! '%s'"), *DebugInfo, *FString(lua_tostring(luaState, -1)));
 					}
 					
 					// cleanup

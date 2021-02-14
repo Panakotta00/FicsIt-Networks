@@ -7,12 +7,8 @@
 #include "FGBuildable.h"
 #include "FGBuildableHologram.h"
 #include "FGCharacterPlayer.h"
-#include "FGFactoryConnectionComponent.h"
 #include "FGGameMode.h"
-
 #include "SML/mod/hooking.h"
-
-#include "FINComponentUtility.h"
 #include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
 #include "Computer/FINComputerRCO.h"
@@ -86,7 +82,6 @@ void FFicsItNetworksModule::StartupModule(){
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/Game/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Property, TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.InputConnector"), TEXT("Input1")});
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
 	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);

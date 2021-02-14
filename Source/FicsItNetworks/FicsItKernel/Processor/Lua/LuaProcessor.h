@@ -111,7 +111,6 @@ namespace FicsItKernel {
 			friend LuaProcessorTick;
 
 		private:
-
 			// Processor cache
 			TWeakObjectPtr<AFINStateEEPROMLua> eeprom;
 
@@ -131,9 +130,11 @@ namespace FicsItKernel {
 			FileSystem::SRef<LuaFileSystemListener> fileSystemListener;
 			
 		public:
+			FString DebugInfo;
+			
 			static LuaProcessor* luaGetProcessor(lua_State* L);
 			
-			LuaProcessor(int speed = 1);
+			LuaProcessor(const FString& DebugInfo, int speed = 1);
 			~LuaProcessor();
 
 			// Begin Processor
