@@ -83,6 +83,7 @@ namespace FicsItKernel {
 
 		void LuaProcessorTick::promote() {
 			if (State & LUA_ASYNC) return;
+			if (bShouldStop || bShouldCrash || bShouldReset) return;
 			if (asyncTask.IsValid()) {
 				if (!asyncTask->IsDone()) asyncTask->EnsureCompletion();
 				asyncTask->Cancel();
@@ -134,6 +135,7 @@ namespace FicsItKernel {
 		}
 
 		void LuaProcessorTick::shouldPromote() {
+			if (bShouldStop || bShouldCrash || bShouldReset) return;
 			bShouldPromote = true;
 		}
 
@@ -779,12 +781,19 @@ namespace FicsItKernel {
 			}
 			
 			if (state == LUA_YIELD) nargs -= 1; // remove bool added by overwritten yield
+			if (state >= LUA_YIELD) {
+				lua_pushboolean(L, false);
+				nargs += 1;
+			} else {
+				lua_pushboolean(L, true);
+				nargs += 1;
+			}
 
 			// copy the parameters passed to yield or returned to our stack so we can return them
 			lua_xmove(thread, L, nargs);
 			return LuaProcessor::luaAPIReturn(L, nargs);
 		}
-
+		
 		void LuaProcessor::luaSetup(lua_State* L) {
 			PersistSetup("LuaProcessor", -2);
 
