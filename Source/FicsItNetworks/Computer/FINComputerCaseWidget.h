@@ -13,7 +13,10 @@ class FICSITNETWORKS_API UFINComputerCaseWidget : public UUserWidget {
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ExposeOnSpawn="true"))
 	AFINComputerCase* Computer = nullptr;
-
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ExposeOnSpawn="true"))
+	UUserWidget* ComputerCaseInteractionWidget = nullptr;
+	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void OnEEPROMUpdate(AFINStateEEPROM* EEPROM);
 };
