@@ -25,6 +25,11 @@ AFINCodeableSplitter::AFINCodeableSplitter() {
 	Output3->SetupAttachment(RootComponent);
 	Output3->SetMobility(EComponentMobility::Movable);
 
+	InputConnector_DEPRECATED = CreateDefaultSubobject<UFGFactoryConnectionComponent>("InputConnector");
+	InputConnector_DEPRECATED->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
+	InputConnector_DEPRECATED->SetupAttachment(RootComponent);
+	InputConnector_DEPRECATED->SetMobility(EComponentMobility::Movable);
+
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
 	mFactoryTickFunction.bRunOnAnyThread = true;
@@ -37,27 +42,26 @@ AFINCodeableSplitter::~AFINCodeableSplitter() {}
 
 void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 	Super::OnConstruction(transform);
-#if !WITH_EDITOR
-	if (HasAuthority() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes) {
-		UE_LOG(LogFicsItNetworks, Warning, TEXT("Old Splitter found. Try to apply construction update fixes... '%s'"), *this->GetName());
-		Input1->Rename(TEXT("InputConnector"));
-	}
-#endif
 }
 
 void AFINCodeableSplitter::BeginPlay() {
 	Super::BeginPlay();
-	if (HasAuthority() && AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes) {
+	if (HasAuthority() && (InputConnector_DEPRECATED->GetConnection() || AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes)) {
 		UE_LOG(LogFicsItNetworks, Log, TEXT("Old Splitter found. Try to apply beginplay update fixes... '%s'"), *this->GetName());
-		Input1->Rename(TEXT("Input1"));
-		RootComponent->AddRelativeRotation(FRotator(0,-90.0f,0));
+		UFGFactoryConnectionComponent* OldConnection = InputConnector_DEPRECATED->GetConnection();
+		InputConnector_DEPRECATED->ClearConnection();
+		Input1->SetConnection(OldConnection);
+		/*RootComponent->AddRelativeRotation(FRotator(0,-90.0f,0));
 		UFGFactoryConnectionComponent* NewOutput2 = Output1->GetConnection();
 		UFGFactoryConnectionComponent* NewOutput1 = Output2->GetConnection();
 		Output1->ClearConnection();
 		Output2->ClearConnection();
 		if (NewOutput1) Output1->SetConnection(NewOutput1);
-		if (NewOutput2) Output2->SetConnection(NewOutput2);
+		if (NewOutput2) Output2->SetConnection(NewOutput2);*/
 	}
+	InputConnector_DEPRECATED->RemoveFromRoot();
+	InputConnector_DEPRECATED->UnregisterComponent();
+	InputConnector_DEPRECATED = nullptr;
 }
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {
