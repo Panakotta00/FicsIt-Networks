@@ -203,6 +203,7 @@ namespace FicsItKernel {
 				if (bShouldDemote) {
 					TickMutex.Lock();
 					State = LUA_SYNC;
+					bShouldDemote = false;
 					TickMutex.Unlock();
 					return false;
 				}
@@ -762,6 +763,9 @@ namespace FicsItKernel {
 			if (lua_isboolean(L, 1)) threadIndex = 2;
 			if (!lua_isthread(L, threadIndex)) luaL_argerror(L, threadIndex, "is no thread");
 			lua_State* thread = lua_tothread(L, threadIndex);
+
+			// attach hook for out-of-time exception if thread got loaded from save and hook is not applied
+			lua_sethook(thread, LuaProcessor::luaHook, LUA_MASKCOUNT, LuaProcessor::luaGetProcessor(L)->getTickHelper().steps());
 
 			// copy passed arguments to coroutine so it can return these arguments from the yield function
 			// but dont move the passed coroutine and then resume the coroutine

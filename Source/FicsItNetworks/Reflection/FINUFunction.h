@@ -24,7 +24,7 @@ public:
 			uint8* ParamStruct = (uint8*)FMemory_Alloca(RefFunction->PropertiesSize);
 			for (TFieldIterator<UProperty> Prop(RefFunction); Prop; ++Prop) {
 				if (Prop->GetPropertyFlags() & CPF_Parm) {
-					Prop->InitializeValue_InContainer(ParamStruct);
+					if (Prop->IsInContainer(RefFunction->ParmsSize)) Prop->InitializeValue_InContainer(ParamStruct);
 				}
 			}
 			
@@ -55,7 +55,7 @@ public:
 
 			// destroy parameter struct
 			for (UProperty* P = RefFunction->DestructorLink; P; P = P->DestructorLinkNext) {
-				if (!P->IsInContainer(RefFunction->ParmsSize)) {
+				if (P->IsInContainer(RefFunction->ParmsSize)) {
 					P->DestroyValue_InContainer(ParamStruct);
 				}
 			}
