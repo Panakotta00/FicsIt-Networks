@@ -27,8 +27,9 @@ public:
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	virtual void PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
 	// End IFGSaveInterface
-	
+
 	/**
 	* Gets the loaded signal subsystem in the given world.
 	*
