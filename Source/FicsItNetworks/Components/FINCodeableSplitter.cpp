@@ -25,11 +25,11 @@ AFINCodeableSplitter::AFINCodeableSplitter() {
 	Output3->SetupAttachment(RootComponent);
 	Output3->SetMobility(EComponentMobility::Movable);
 
-	InputConnector_DEPRECATED = CreateDefaultSubobject<UFGFactoryConnectionComponent>("InputConnector");
-	InputConnector_DEPRECATED->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
-	InputConnector_DEPRECATED->SetupAttachment(RootComponent);
-	InputConnector_DEPRECATED->SetMobility(EComponentMobility::Movable);
-
+	InputConnector = CreateDefaultSubobject<UFGFactoryConnectionComponent>("InputConnector");
+	InputConnector->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
+	InputConnector->SetupAttachment(RootComponent);
+	InputConnector->SetMobility(EComponentMobility::Movable);
+	
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
 	mFactoryTickFunction.bRunOnAnyThread = true;
@@ -46,10 +46,10 @@ void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 
 void AFINCodeableSplitter::BeginPlay() {
 	Super::BeginPlay();
-	if (HasAuthority() && (InputConnector_DEPRECATED->GetConnection() || AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes)) {
+	if (HasAuthority() && (InputConnector->GetConnection() || AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes)) {
 		UE_LOG(LogFicsItNetworks, Log, TEXT("Old Splitter found. Try to apply beginplay update fixes... '%s'"), *this->GetName());
-		UFGFactoryConnectionComponent* OldConnection = InputConnector_DEPRECATED->GetConnection();
-		InputConnector_DEPRECATED->ClearConnection();
+		UFGFactoryConnectionComponent* OldConnection = InputConnector->GetConnection();
+		InputConnector->ClearConnection();
 		Input1->SetConnection(OldConnection);
 		/*RootComponent->AddRelativeRotation(FRotator(0,-90.0f,0));
 		UFGFactoryConnectionComponent* NewOutput2 = Output1->GetConnection();
@@ -59,9 +59,10 @@ void AFINCodeableSplitter::BeginPlay() {
 		if (NewOutput1) Output1->SetConnection(NewOutput1);
 		if (NewOutput2) Output2->SetConnection(NewOutput2);*/
 	}
-	InputConnector_DEPRECATED->RemoveFromRoot();
-	InputConnector_DEPRECATED->UnregisterComponent();
-	InputConnector_DEPRECATED = nullptr;
+	InputConnector->RemoveFromRoot();
+	InputConnector->UnregisterComponent();
+	InputConnector->DestroyComponent();
+	InputConnector = nullptr;
 }
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {
