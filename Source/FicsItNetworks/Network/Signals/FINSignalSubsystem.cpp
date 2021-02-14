@@ -20,12 +20,6 @@ void AFINSignalSubsystem::PostLoadGame_Implementation(int32 saveVersion, int32 g
 
 void AFINSignalSubsystem::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
 	out_dependentObjects.Add(AFINHookSubsystem::GetHookSubsystem(this));
-	for (const TPair<UObject*, FFINSignalListeners>& Sender : Listeners) {
-		out_dependentObjects.Add(Sender.Key);
-		for (const FFINNetworkTrace Trace : Sender.Value.Listeners) {
-			out_dependentObjects.Add(Trace.GetUnderlyingPtr().Get());
-		}
-	}
 }
 
 AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldContext) {
@@ -36,6 +30,10 @@ void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData&
 	FFINSignalListeners* ListenerList = Listeners.Find(Sender);
 	if (!ListenerList) return;
 	for (const FFINNetworkTrace& ReceiverTrace : ListenerList->Listeners) {
+		if (&ReceiverTrace == nullptr) {
+			UE_LOG(LogFicsItNetworks, Warning, TEXT("SignalSubsystem: Invalid receiver trave. Sender: %s, ListenerList: %p, Listeners.Num(): %i"), *Sender->GetName(), ListenerList, ListenerList->Listeners.Num());
+			continue;
+		}
 		IFINSignalListener* Receiver = Cast<IFINSignalListener>(ReceiverTrace.Get());
 		if (Receiver) {
 			Receiver->HandleSignal(Signal, ReceiverTrace.Reverse());

@@ -810,24 +810,27 @@ namespace FicsItKernel {
 			lua_setfield(L, -2, "dofile");
 			lua_pushnil(L);
 			lua_setfield(L, -2, "loadfile");
+			lua_pushcfunction(L, luaPrint);
+			lua_setfield(L, -2, "print");
 			PersistTable("global", -1);
 			lua_pop(L, 1);
+			
 			luaL_requiref(L, "table", luaopen_table, true);
 			PersistTable("table", -1);
 			lua_pop(L, 1);
+
 			luaL_requiref(L, "coroutine", luaopen_coroutine, true);
 			lua_pushcfunction(L, luaResume);
 			lua_setfield(L, -2, "resume");
 			lua_pushcfunction(L, luaYield);
 			lua_setfield(L, -2, "yield");
 			PersistTable("coroutine", -1);
-			lua_register(L, "print", luaPrint);
-			PersistGlobal("print");
 			lua_pop(L, 1);
 			
 			luaL_requiref(L, "math", luaopen_math, true);
 			PersistTable("math", -1);
 			lua_pop(L, 1);
+
 			luaL_requiref(L, "string", luaopen_string, true);
 			PersistTable("string", -1);
 			lua_pop(L, 1);
