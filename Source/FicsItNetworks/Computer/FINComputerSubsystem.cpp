@@ -35,11 +35,14 @@ void AFINComputerSubsystem::BeginPlay() {
 void AFINComputerSubsystem::Tick(float dt) {
 	Super::Tick(dt);
 	this->GetWorld()->GetFirstPlayerController()->PushInputComponent(Input);
-	Version = EFINCustomVersion::FINLatestVersion;
 }
 
 bool AFINComputerSubsystem::ShouldSave_Implementation() const {
 	return true;
+}
+
+void AFINComputerSubsystem::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	Version = FINLatestVersion;
 }
 
 void AFINComputerSubsystem::OnPrimaryFirePressed() {

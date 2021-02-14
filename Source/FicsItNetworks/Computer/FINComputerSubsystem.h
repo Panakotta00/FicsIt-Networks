@@ -36,6 +36,7 @@ public:
 	
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
+	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	// End IFGSaveInterface
 
 	void OnPrimaryFirePressed();
