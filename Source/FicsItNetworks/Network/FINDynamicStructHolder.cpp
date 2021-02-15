@@ -1,5 +1,7 @@
 ﻿#include "FINDynamicStructHolder.h"
 
+#include "FicsItNetworksModule.h"
+
 FFINDynamicStructHolder::FFINDynamicStructHolder() {}
 
 FFINDynamicStructHolder::FFINDynamicStructHolder(UScriptStruct* Struct) : Struct(Struct) {
@@ -68,7 +70,7 @@ bool FFINDynamicStructHolder::Serialize(FArchive& Ar) {
 		if (Struct) Struct->InitializeStruct(Data);
 	}
 	if (Struct) {
-		Struct->GetCppStructOps()->Serialize(Ar, Data);
+		Struct->SerializeBin(Ar, Data);
 	}
 	return true;
 }
