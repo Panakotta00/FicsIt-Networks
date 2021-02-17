@@ -63,6 +63,7 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AFINComputerCase, SerialOutput);
 	DOREPLIFETIME(AFINComputerCase, Screens);
 	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
+	DOREPLIFETIME(AFINComputerCase, Processors);
 }
 
 void AFINComputerCase::Serialize(FArchive& Ar) {
@@ -139,7 +140,7 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
-	if (kernel) {
+	if (HasAuthority()() && kernel) {
 		KernelTickTime += dt;
 		if (KernelTickTime > 10.0) KernelTickTime = 10.0;
 
@@ -200,6 +201,7 @@ void AFINComputerCase::NetMulti_OnFloppyChanged_Implementation(AFINFileSystemSta
 
 void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
 	Processors.Add(processor);
+	ForceNetUpdate();
 	if (Processors.Num() == 1) {
 		// no processor already added -> add new processor
 		kernel->setProcessor(processor->CreateProcessor());
@@ -214,6 +216,7 @@ void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
 
 void AFINComputerCase::RemoveProcessor(AFINComputerProcessor* processor) {
 	Processors.Remove(processor);
+	ForceNetUpdate();
 	if (Processors.Num() == 1) {
 		// two processors were added -> add leaving processor to kernel
 		kernel->setProcessor(Processors[0]->CreateProcessor());

@@ -2,6 +2,7 @@
 
 #include "FINNetworkComponent.h"
 #include "UnrealNetwork.h"
+#include "Engine/World.h"
 
 void AFINNetworkCircuit::AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add) {
 	if (Add.GetObject() && !Added.Contains(Add)) {
@@ -64,7 +65,7 @@ AFINNetworkCircuit* AFINNetworkCircuit::operator+(AFINNetworkCircuit* Circuit) {
 		if (Obj) IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Obj, 0, FromNodes);
 	}
 
-	for (const TSoftObjectPtr<UObject>& Node : From->Nodes) To->Nodes.AddUnique(Node);
+	for (const TSoftObjectPtr<UObject>& Node : From->Nodes) To->Nodes.AddUnique(Node.Get() );
 
 	return To;
 }

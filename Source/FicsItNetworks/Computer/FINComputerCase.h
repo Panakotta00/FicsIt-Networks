@@ -58,7 +58,7 @@ public:
 	FicsItKernel::KernelSystem* kernel = nullptr;
 
 	// Cache
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<AFINComputerProcessor*> Processors;
 
 	UPROPERTY()

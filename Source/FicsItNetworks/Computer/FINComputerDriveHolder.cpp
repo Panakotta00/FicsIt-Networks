@@ -45,6 +45,7 @@ bool AFINComputerDriveHolder::GetLocked() const {
 }
 
 bool AFINComputerDriveHolder::SetLocked(bool NewLocked) {
+	if (!HasAuthority()) return false;
 	AFINFileSystemState* newState = GetDrive();
 	if (bLocked == NewLocked || (!IsValid(newState) && NewLocked)) return false;
 

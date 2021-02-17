@@ -2,6 +2,7 @@
 
 
 #include "FGCharacterPlayer.h"
+#include "FicsItNetworksModule.h"
 #include "FINSubsystemHolder.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
@@ -104,7 +105,7 @@ AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* Worl
 }
 
 void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
-	if (!IsValid(character)) return;
+	if (!IsValid(character) || !character->GetController() || !character->GetController()->IsLocalPlayerController()) return;
 	DetachWidgetInteractionToPlayer(character);
 	UWidgetInteractionComponent* Comp = NewObject<UWidgetInteractionComponent>(character);
 	Comp->InteractionSource = EWidgetInteractionSource::World;

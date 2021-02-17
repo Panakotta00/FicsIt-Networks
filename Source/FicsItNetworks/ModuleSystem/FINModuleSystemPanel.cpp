@@ -1,6 +1,7 @@
 #include "FINModuleSystemPanel.h"
 
 #include "FGDismantleInterface.h"
+#include "FINModuleSystemModule.h"
 #include "UnrealNetwork.h"
 
 UFINModuleSystemPanel::UFINModuleSystemPanel() {
@@ -27,7 +28,7 @@ void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 		for (int x = 0; x < height; ++x) {
 			for (int y = 0; y < width; ++y) {
 				if (x < PanelHeight && y < PanelHeight) {
-					UObject* ptr = GetGridSlot(x, y).Get();
+					UObject* ptr = GetGridSlot(x, y);
 					Ar << ptr;
 					GetGridSlot(x, y) = ptr;
 				} else {
@@ -55,7 +56,7 @@ bool UFINModuleSystemPanel::AddModule(AActor* module, int x, int y, int rot) {
 	SetupGrid();
 
 	int w, h;
-	Cast<IFINModuleSystemModule>(module)->Execute_getModuleSize(module, w, h);
+	IFINModuleSystemModule::Execute_getModuleSize(module, w, h);
 
 	FVector min, max;
 	GetModuleSpace({static_cast<float>(x), static_cast<float>(y), 0.0f}, rot, {static_cast<float>(w), static_cast<float>(h), 0.0f}, min, max);
@@ -89,7 +90,7 @@ bool UFINModuleSystemPanel::RemoveModule(AActor* Module) {
 
 AActor* UFINModuleSystemPanel::GetModule(int x, int y) const {
 	if (Grid.Num() < 1) return nullptr;
-	return  (x >= 0 && x < PanelHeight && y >= 0 && y < PanelWidth) ? Cast<AActor>(GetGridSlot(x, y).Get()) : nullptr;;
+	return  (x >= 0 && x < PanelHeight && y >= 0 && y < PanelWidth) ? Cast<AActor>(GetGridSlot(x, y)) : nullptr;;
 }
 
 void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) const {
@@ -121,16 +122,16 @@ void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) 
 void UFINModuleSystemPanel::SetupGrid() {
 	if (Grid.Num() < 1) {
 		for (int i = 0; i < PanelHeight * PanelWidth; ++i) {
-			Grid.Add(TWeakObjectPtr<UObject>());
+			Grid.Add(nullptr);
 		}
 	}
 }
 
-const TWeakObjectPtr<UObject>& UFINModuleSystemPanel::GetGridSlot(int x, int y) const {
+UObject* UFINModuleSystemPanel::GetGridSlot(int x, int y) const {
 	return Grid[x*PanelWidth + y];
 }
 
-TWeakObjectPtr<UObject>& UFINModuleSystemPanel::GetGridSlot(int x, int y) {
+UObject*& UFINModuleSystemPanel::GetGridSlot(int x, int y) {
 	return Grid[x*PanelWidth + y];
 }
 

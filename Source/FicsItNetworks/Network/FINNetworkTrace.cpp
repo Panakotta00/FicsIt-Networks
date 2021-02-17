@@ -186,6 +186,16 @@ bool FFINNetworkTrace::Serialize(FArchive& Ar) {
 	return true;
 }
 
+void FFINNetworkTrace::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
+	UObject* Ptr = Obj.GetEvenIfUnreachable();
+	if (Ptr) {
+		ReferenceCollector.AddReferencedObject(Ptr);
+	}
+	if (Prev) {
+		Prev->AddStructReferencedObjects(ReferenceCollector);
+	}
+}
+
 FFINNetworkTrace FFINNetworkTrace::operator/(UObject* other) const {
 	FFINNetworkTrace trace(other);
 

@@ -51,6 +51,7 @@ public:
 	~FFINNetworkTrace();
 
 	bool Serialize(FArchive& Ar);
+	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 //	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 
 	/**
@@ -150,5 +151,7 @@ struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNe
 	enum {
 		WithSerializer = true,
 //		WithNetSerializer = true,
+		WithAddStructReferencedObjects = true,
+		WithCopy = true,
     };
 };

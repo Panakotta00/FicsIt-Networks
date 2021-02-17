@@ -95,7 +95,6 @@ void AFINIndicatorPole::netFunc_setColor(float r, float g, float b, float e) {
 	EmessiveStrength = FMath::Clamp(e, 0.0f, 5.0f);
 	netSig_ColorChanged(oldColor.R, oldColor.G, oldColor.B, oldEmissive);
 	bHasChanged = true;
-	ForceNetUpdate();
 }
 
 void AFINIndicatorPole::netFunc_getColor(float& r, float& g, float& b, float& e) {

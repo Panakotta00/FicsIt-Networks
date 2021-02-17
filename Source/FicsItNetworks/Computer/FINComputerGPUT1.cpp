@@ -171,8 +171,8 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 	if (HasAuthority() && bFlushed) {
 		bFlushed = false;
-		ForceNetUpdate();
 		Flush();
+		ForceNetUpdate();
 	}
 }
 
