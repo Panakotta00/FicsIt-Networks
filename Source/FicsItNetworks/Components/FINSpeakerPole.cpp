@@ -62,7 +62,7 @@ void AFINSpeakerPole::netFuncMeta_playSound(FString& InternalName, FText& Displa
 	ParameterInternalNames.Add("startPoint");
 	ParameterDisplayNames.Add(FText::FromString("Start Point"));
 	ParameterDescriptions.Add(FText::FromString("The start point in seconds at which the system should start playing"));
-	Runtime = 2;
+	Runtime = 0;
 }
 
 void AFINSpeakerPole::netFunc_stopSound() {
@@ -73,7 +73,7 @@ void AFINSpeakerPole::netFuncMeta_stopSound(FString& InternalName, FText& Displa
 	InternalName = "stopSound";
 	DisplayName = FText::FromString("Stop Sound");
 	Description = FText::FromString("Stops the currently playing sound file.");
-	Runtime = 2;
+	Runtime = 0;
 }
 
 void AFINSpeakerPole::netSig_SpeakerSound_Implementation(int type, const FString& sound) {}
@@ -88,7 +88,7 @@ void AFINSpeakerPole::netSigMeta_SpeakerSound(FString& InternalName, FText& Disp
 	ParameterInternalNames.Add("sound");
 	ParameterDisplayNames.Add(FText::FromString("Sound"));
 	ParameterDescriptions.Add(FText::FromString("The sound file including in the event."));
-	Runtime = 2;
+	Runtime = 1;
 }
 
 USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& sound) {
