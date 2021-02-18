@@ -55,7 +55,7 @@ public:
 	UPROPERTY()
 	FKernelSystemSerializationInfo KernelState;
 	
-	FicsItKernel::KernelSystem* kernel = nullptr;
+	TSharedPtr<FicsItKernel::KernelSystem> kernel = nullptr;
 
 	// Cache
 	UPROPERTY(Replicated)
@@ -90,9 +90,9 @@ public:
 	float KernelTickTime = 0.0;
 
 	AFINComputerCase();
-	~AFINComputerCase();
-
+	
 	// Begin UObject
+	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
 	virtual void Serialize(FArchive& ar) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// End UObject

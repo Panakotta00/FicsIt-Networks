@@ -349,6 +349,20 @@ namespace FicsItKernel {
 		if (bLoading) systemResetTimePoint -= std::chrono::milliseconds(Data.MillisSinceLastReset);
 	}
 
+	void KernelSystem::CollectReferences(FReferenceCollector& Collector) {
+		for (const TPair<void*, TFunction<void(void*, FReferenceCollector&)>>& Referencer : ReferencedObjects) {
+			Referencer.Value(Referencer.Key, Collector);
+		}
+	}
+
+	void KernelSystem::AddReferencer(void* Referencer, const TFunction<void(void*, FReferenceCollector&)>& CollectorFunc) {
+		ReferencedObjects.FindOrAdd(Referencer) = CollectorFunc;
+	}
+
+	void KernelSystem::RemoveReferencer(void* Referencer) {
+		ReferencedObjects.Remove(Referencer);
+	}
+
 	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
 
 	void KernelListener::onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {

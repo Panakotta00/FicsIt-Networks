@@ -854,7 +854,7 @@ namespace FicsItKernel {
 			auto net = getKernel()->getNetwork();
 			if (!net || net->getSignalCount() < 1) return 0;
 			FFINNetworkTrace sender;
-			FFINSignalData signal = net->popSignal(sender);
+			FFINSignalData signal = net->popSignal(sender); 
 			int props = 2;
 			if (signal.Signal) lua_pushstring(L, TCHAR_TO_UTF8(*signal.Signal->GetInternalName()));
 			else lua_pushnil(L);

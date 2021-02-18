@@ -45,7 +45,7 @@ namespace FicsItKernel {
 		virtual void onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) override;
 	};
 
-	class FICSITNETWORKS_API KernelSystem {
+	class FICSITNETWORKS_API KernelSystem : public TSharedFromThis<KernelSystem> {
 		friend Processor;
 		friend KernelListener;
 
@@ -67,6 +67,7 @@ namespace FicsItKernel {
 		TSet<FWeakObjectPtr> screens;
 		std::queue<TSharedPtr<TFINDynamicStruct<FFINFuture>>> futureQueue;
 		std::chrono::time_point<std::chrono::high_resolution_clock> systemResetTimePoint;
+		TMap<void*, TFunction<void(void*, FReferenceCollector&)>> ReferencedObjects;
 		
 	public:
 		/**
@@ -336,5 +337,20 @@ namespace FicsItKernel {
 		 * @param[in]	bLoading	true if it deserializes
 		 */
 		void PostSerialize(FKernelSystemSerializationInfo& Data, bool bLoading);
+
+		/**
+		 * Adds the all the objects stored in the reference storage to the given object collector
+		 */
+		void CollectReferences(FReferenceCollector& Collector);
+
+		/**
+		 * Adds a new referencer to the referencer storage
+		 */
+		void AddReferencer(void* Referencer, const TFunction<void(void*, FReferenceCollector&)>& CollectorFunc);
+
+		/**
+		 * Removes teh given referencer from the referencer storage
+		 */
+		void RemoveReferencer(void* Referencer);
 	};
 }

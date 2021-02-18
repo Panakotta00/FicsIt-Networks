@@ -59,6 +59,24 @@ namespace FicsItKernel {
 		}
 		
 #pragma optimize("", off)
+		LuaStruct::LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, const TSharedPtr<KernelSystem>& Kernel) : Type(Type), Struct(Struct), Kernel(Kernel) {
+			Kernel->AddReferencer(this, &CollectReferences);
+		}
+
+		LuaStruct::LuaStruct(const LuaStruct& Other) : Type(Other.Type), Struct(Other.Struct), Kernel(Other.Kernel) {
+			Kernel->AddReferencer(this, &CollectReferences);
+		}
+		
+		LuaStruct::~LuaStruct() {
+			Kernel->RemoveReferencer(this);
+		}
+
+		void LuaStruct::CollectReferences(void* Obj, FReferenceCollector& Collector) {
+			LuaStruct* Self = static_cast<LuaStruct*>(Obj);
+			Collector.AddReferencedObject(Self->Type);
+			Self->Struct.AddStructReferencedObjects(Collector);
+		}
+
 		void luaStruct(lua_State* L, const FINStruct& Struct) {
 			UFINStruct* Type = FFINReflection::Get()->FindStruct(Struct.GetStruct());
 			if (!Type) {
@@ -67,7 +85,7 @@ namespace FicsItKernel {
 			}
 			setupStructMetatable(L, Type);
 			LuaStruct* LStruct = static_cast<LuaStruct*>(lua_newuserdata(L, sizeof(LuaStruct)));
-			new (LStruct) LuaStruct{Type, Struct};
+			new (LStruct) LuaStruct(Type, Struct, LuaProcessor::luaGetProcessor(L)->getKernel()->AsShared());
 			luaL_setmetatable(L, TCHAR_TO_UTF8(*StructToMetaName[Type]));
 		}
 

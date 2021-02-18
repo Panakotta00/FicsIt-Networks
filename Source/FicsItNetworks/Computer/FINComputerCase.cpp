@@ -51,8 +51,11 @@ AFINComputerCase::AFINComputerCase() {
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
-AFINComputerCase::~AFINComputerCase() {
-	if (kernel) delete kernel;
+void AFINComputerCase::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) {
+	Super::AddReferencedObjects(InThis, Collector);
+
+	AFINComputerCase* Self = Cast<AFINComputerCase>(InThis);
+	if (Self && Self->kernel) Self->kernel->CollectReferences(Collector);
 }
 
 void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -76,7 +79,7 @@ void AFINComputerCase::Serialize(FArchive& Ar) {
 void AFINComputerCase::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 	
-	kernel = new FicsItKernel::KernelSystem(this);
+	kernel = MakeShared<FicsItKernel::KernelSystem>(this);
 	kernel->setNetwork(new FicsItKernel::Network::NetworkController());
 	kernel->getNetwork()->component = NetworkConnector;
 	kernel->setAudio(new FicsItKernel::Audio::AudioComponentController(SpeakerTrampoline));
@@ -140,7 +143,7 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 }
 
 void AFINComputerCase::Factory_Tick(float dt) {
-	if (HasAuthority()() && kernel) {
+	if (HasAuthority() && kernel) {
 		KernelTickTime += dt;
 		if (KernelTickTime > 10.0) KernelTickTime = 10.0;
 

@@ -17,12 +17,19 @@ class UFINClass;
 class UFINStruct;
 
 namespace FicsItKernel {
+	class KernelSystem;
+	
 	namespace Lua {
 		/**
 		 * Structure used in the userdata representing a instance.
 		 */
 		struct LuaInstance {
 			FFINNetworkTrace Trace;
+			TSharedPtr<KernelSystem> Kernel;
+			LuaInstance(const FFINNetworkTrace& Trace, const TSharedPtr<KernelSystem>& Kernel);
+			LuaInstance(const LuaInstance& Other);
+			~LuaInstance();
+			static void CollectReferences(void* Obj, FReferenceCollector& Collector);
 		};
 
 		/**

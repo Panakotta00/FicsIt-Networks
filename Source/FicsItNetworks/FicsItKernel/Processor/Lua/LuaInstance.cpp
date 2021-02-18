@@ -286,6 +286,22 @@ namespace FicsItKernel {
 			{NULL, NULL}
 		};
 
+		LuaInstance::LuaInstance(const FFINNetworkTrace& Trace, const TSharedPtr<KernelSystem>& Kernel) : Trace(Trace), Kernel(Kernel) {
+			Kernel->AddReferencer(this, &CollectReferences);
+		}
+		
+		LuaInstance::LuaInstance(const LuaInstance& Other) : Trace(Other.Trace), Kernel(Other.Kernel) {
+			Kernel->AddReferencer(this, &CollectReferences);
+		}
+
+		LuaInstance::~LuaInstance() {
+			Kernel->RemoveReferencer(this);
+		}
+
+		void LuaInstance::CollectReferences(void* Obj, FReferenceCollector& Collector) {
+			static_cast<LuaInstance*>(Obj)->Trace.AddStructReferencedObjects(Collector);
+		}
+
 		bool newInstance(lua_State* L, FFINNetworkTrace Trace) {
 			// check obj and if type is registered
 			UObject* Obj = Trace.GetUnderlyingPtr().Get();
@@ -309,7 +325,7 @@ namespace FicsItKernel {
 			
 			// create instance
 			LuaInstance* Instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
-			new (Instance) LuaInstance{Trace};
+			new (Instance) LuaInstance(Trace, LuaProcessor::luaGetProcessor(L)->getKernel()->AsShared());
 			
 			luaL_setmetatable(L, TCHAR_TO_UTF8(*Name));
 			return true;
