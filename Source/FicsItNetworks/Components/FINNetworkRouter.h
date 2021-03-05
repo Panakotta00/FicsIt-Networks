@@ -28,7 +28,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector2;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	bool bIsPortWhitelist = false;
 	
 	UPROPERTY(SaveGame)
