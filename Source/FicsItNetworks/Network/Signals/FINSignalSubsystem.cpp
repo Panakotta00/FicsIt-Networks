@@ -25,7 +25,7 @@ void AFINSignalSubsystem::GatherDependencies_Implementation(TArray<UObject*>& ou
 AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldContext) {
 	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->SignalSubsystem;
 }
-
+#pragma optimize("", off)
 void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData& Signal) {
 	FFINSignalListeners* ListenerList = Listeners.Find(Sender);
 	if (!ListenerList) return;
@@ -40,6 +40,7 @@ void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData&
 		}
 	}
 }
+#pragma optimize("", on)
 
 void AFINSignalSubsystem::Listen(UObject* Sender, const FFINNetworkTrace& Receiver) {
 	TArray<FFINNetworkTrace>& ListenerList = Listeners.FindOrAdd(Sender).Listeners;
@@ -56,7 +57,9 @@ void AFINSignalSubsystem::Ignore(UObject* Sender, UObject* Receiver) {
 			--i;
 		}
 	}
-	if (ListenerList->Listeners.Num() < 1) AFINHookSubsystem::GetHookSubsystem(Sender)->ClearHooks(Sender);
+	if (!Sender) return;
+	AFINHookSubsystem* HookSubsystem = AFINHookSubsystem::GetHookSubsystem(Sender);
+	if (ListenerList->Listeners.Num() < 1 && HookSubsystem) HookSubsystem->ClearHooks(Sender);
 }
 
 void AFINSignalSubsystem::IgnoreAll(UObject* Receiver) {

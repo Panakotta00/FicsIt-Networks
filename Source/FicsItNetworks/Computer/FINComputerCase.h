@@ -7,21 +7,12 @@
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "FicsItKernel/FicsItKernel.h"
-#include "FicsItKernel/KernelSystemSerializationInfo.h"
-#include "FicsItKernel/Audio/AudioComponentController.h"
 #include "FINComputerCase.generated.h"
 
 class AFINComputerNetworkCard;
 class AFINComputerDriveHolder;
 class AFINComputerMemory;
 class AFINComputerProcessor;
-
-UENUM()
-enum EComputerState {
-	RUNNING,
-	SHUTOFF,
-	CRASHED
-};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINStateEEPROM*, EEPROM);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
@@ -43,20 +34,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UAudioComponent* Speaker = nullptr;
 
-	UPROPERTY()
-	UFINAudioComponentControllerTrampoline* SpeakerTrampoline = nullptr;
-
 	UPROPERTY(SaveGame, Replicated)
 	FString SerialOutput = "";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	int LastTabIndex = 0;
 	
-	UPROPERTY()
-	FKernelSystemSerializationInfo KernelState;
-	
-	TSharedPtr<FicsItKernel::KernelSystem> kernel = nullptr;
+	UPROPERTY(SaveGame)
+	UFINKernelSystem* Kernel = nullptr;
 
+	UPROPERTY(SaveGame)
+	UFINKernelNetworkController* NetworkController = nullptr;
+
+	UPROPERTY(SaveGame)
+	UFINKernelAudioController* AudioController = nullptr;
+	
 	// Cache
 	UPROPERTY(Replicated)
 	TArray<AFINComputerProcessor*> Processors;
@@ -83,7 +75,7 @@ public:
 	FFINCaseFloppyUpdateDelegate OnFloppyUpdate;
 
 	UPROPERTY(Replicated)
-	TEnumAsByte<EComputerState> InternalKernelState = EComputerState::SHUTOFF;
+	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
 
 	FString OldSerialOutput = "";
 
@@ -92,13 +84,11 @@ public:
 	AFINComputerCase();
 	
 	// Begin UObject
-	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
-	virtual void Serialize(FArchive& ar) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// End UObject
 
 	// Begin AActor
-	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void OnConstruction(const FTransform& transform) override;
 	virtual void BeginPlay() override;
 	virtual void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	// End AActor
@@ -110,10 +100,7 @@ public:
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
-	virtual void PreLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	virtual void PostLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
-	virtual void PreSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
-	virtual void PostSaveGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	// End IFGSaveInterface
 
 	UFUNCTION(NetMulticast, Unreliable)
@@ -183,7 +170,7 @@ public:
 	FString GetCrash();
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-	EComputerState GetState();
+	EFINKernelState GetState();
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
     void WriteSerialInput(const FString& str);

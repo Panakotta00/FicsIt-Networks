@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "FINComputerCaseWidget.h"
 #include "FINComputerModule.h"
 #include "FicsItKernel/Processor/Processor.h"
@@ -17,5 +16,5 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UFINComputerCaseWidget> ComputerCaseWidget;
 	
-	virtual FicsItKernel::Processor* CreateProcessor();
+	virtual UFINKernelProcessor* CreateProcessor();
 };

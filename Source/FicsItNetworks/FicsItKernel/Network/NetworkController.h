@@ -1,116 +1,112 @@
+
 #pragma once
 
 #include "CoreMinimal.h"
 
-#include <deque>
-#include <mutex>
-
+#include "Queue.h"
+#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Network/FINNetworkComponent.h"
 #include "Network/FINNetworkTrace.h"
 #include "Network/Signals/FINSignalData.h"
-#include "Reflection/FINClass.h"
+#include "NetworkController.generated.h"
 
-namespace FicsItKernel {
-	namespace Network {
-		/**
-		 * Allows to control and manage network connection of a system.
-		 * Also manages the network signals.
-		 */
-		class FICSITNETWORKS_API NetworkController {
-		protected:
-			std::mutex mutexSignalListeners;
-			TSet<FFINNetworkTrace> signalListeners;
-			std::mutex mutexSignals;
-			std::deque<TPair<FFINSignalData, FFINNetworkTrace>> signals;
-			bool lockSignalRecieving = false;
+/**
+ * Allows to control and manage network connection of a system.
+ * Also manages the network signals.
+ */
+UCLASS()
+class FICSITNETWORKS_API UFINKernelNetworkController : public UObject, public IFGSaveInterface {
+	GENERATED_BODY()
+protected:
+	FCriticalSection MutexSignals;
+	TArray<TPair<FFINSignalData, FFINNetworkTrace>> SignalQueue;
+	bool bLockSignalReceiving = false;
 
-		public:
-			virtual ~NetworkController() {}
+	/**
+	 * Underlying Computer Network Component used for interacting with the network.
+	 * Needs to be a Signal Sender and a Signal Listener which redirect the interaction of both to this.
+	 */
+	UPROPERTY()
+	TScriptInterface<IFINNetworkComponent> Component = nullptr;
+	
+public:
+	/**
+	 * The maximum amount of signals the signal queue can hold
+	 */
+	uint32 MaxSignalCount = 1000;
 
-			/**
-			 * A chache containing all signals senders to which this object is registered
-			 * to listen to. Is used to stop listening to all senders.
-			 */
-			TSet<FFINNetworkTrace> signalSenders;
+	// Begin UObject
+	virtual void Serialize(FArchive& Ar) override;
+	// End UObject
 
-			/**
-			 * Underlying Computer Network Component used for interacting with the network.
-			 * Needs to be a Signal Sender and a Signal Listener which redirect the interaction of both to this.
-			 */
-			UObject* component = nullptr;
+	// Begin IFGSaveInterface
+	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	// End IFGSaveInterface
 
-			/**
-			 * The maximum amount of signals the signal queue can hold
-			 */
-			uint32 maxSignalCount = 1000;
+	/**
+	 * Sets the network component this controller is associated with.
+	 *
+	 * @param[in]	InNetworkComponent	the network component this controller uses
+	 */
+	void SetComponent(TScriptInterface<IFINNetworkComponent> InNetworkComponent);
 
-			void handleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);
+	/**
+	 * Returns the component used by the network controller to access the component network
+	 * */
+	TScriptInterface<IFINNetworkComponent> GetComponent() const;
 
-			/**
-			 * pops a signal form the queue.
-			 * returns nullptr if there is no signal left.
-			 *
-			 * @param sender - out put paramter for the sender of the signal
-			 * @return	singal from the queue
-			 */
-			FFINSignalData popSignal(FFINNetworkTrace& sender);
+	/**
+	 * Should get called by the network component so the signal gets added to the signal queue
+	 */
+	void HandleSignal(const FFINSignalData& InSignal, const FFINNetworkTrace& InSender);
 
-			/**
-			 * pushes a signal to the queue.
-			 * signal gets dropped if the queue is already full.
-			 *
-			 * @param	signal	the singal you want to push
-			 */
-			void pushSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);
+	/**
+	 * pops a signal form the queue.
+	 * returns nullptr if there is no signal left.
+	 *
+	 * @param[out]	OutSender	output-parameter for the sender of the signal
+	 * @return	signal from the queue
+	 */
+	FFINSignalData PopSignal(FFINNetworkTrace& OutSender);
 
-			/**
-			 * Removes all signals from the signal queue.
-			 */
-			void clearSignals();
+	/**
+	 * pushes a signal to the queue.
+	 * signal gets dropped if the queue is already full.
+	 *
+	 * @param[in]	InSignal	the signal you want to push
+	 * @param[in]	InSender	the signal sender of signal you try to push
+	 */
+	void PushSignal(const FFINSignalData& InSignal, const FFINNetworkTrace& InSender);
 
-			/**
-			 * gets the amount of signals in the queue
-			 *
-			 * @return	amount of signals
-			 */
-			size_t getSignalCount();
+	/**
+	 * Removes all signals from the signal queue.
+	 */
+	void ClearSignals();
 
-			/**
-			 * trys to find a component with the given ID.
-			 *
-			 * @return	the component you searched for, nullptr if it was not able to find the component
-			 */
-			FFINNetworkTrace getComponentByID(const FString& id);
+	/**
+	 * gets the amount of signals in the queue
+	 *
+	 * @return	amount of signals
+	 */
+	uint64 GetSignalCount();
 
-			/**
-			 * returns the components in the network with the given nick.
-			 */
-			TSet<FFINNetworkTrace> getComponentByNick(const FString& nick);
+	/**
+	 * tries to find a component with the given ID.
+	 *
+	 * @return	the component you searched for, nullptr if it was not able to find the component
+	 */
+	FFINNetworkTrace GetComponentByID(const FGuid& InID) const;
 
-			/**
-			 * returns the components in the network with of the given type.
-			 */
-			TSet<FFINNetworkTrace> getComponentByClass(UClass* Class, bool bRedirect);
+	/**
+	 * returns the components in the network with the given nick.
+	 */
+	TSet<FFINNetworkTrace> GetComponentByNick(const FString& InNick) const;
 
-			/**
-			 * Should get called prior to de/serialization
-			 *
-			 * @param[in]	load	true when it's deserializing
-			 */
-			void PreSerialize(bool load);
-
-			/**
-			 * De/Serializes the Network Controller to a archive
-			 *
-			 * @param[in]	Ar	the archive storing the infromation
-			 */
-			void Serialize(FArchive& Ar);
-
-			/**
-			* Should get called after de/serialization
-			*
-			* @param[in]	load	true when it's deserializing
-			*/
-			void PostSerialize(bool load);
-		};
-	}
-}
+	/**
+	 * returns the components in the network with of the given type.
+	 */
+	TSet<FFINNetworkTrace> GetComponentByClass(UClass* InClass, bool bInRedirect) const;
+};

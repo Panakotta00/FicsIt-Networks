@@ -51,7 +51,7 @@ namespace FicsItKernel {
 				StructMetaNameLock.Lock();
 				FString MetaName = StructToMetaName[Type];
 				StructMetaNameLock.Unlock();
-				LuaStruct* LStruct = (LuaStruct*) lua_touserdata(L, i);
+				LuaStruct* LStruct = static_cast<LuaStruct*>(lua_touserdata(L, i));
 				*Struct = LStruct->Struct;
 				return LStruct;
 			}
@@ -59,7 +59,7 @@ namespace FicsItKernel {
 		}
 		
 #pragma optimize("", off)
-		LuaStruct::LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, const TSharedPtr<KernelSystem>& Kernel) : Type(Type), Struct(Struct), Kernel(Kernel) {
+		LuaStruct::LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(Struct), Kernel(Kernel) {
 			Kernel->AddReferencer(this, &CollectReferences);
 		}
 
@@ -85,7 +85,7 @@ namespace FicsItKernel {
 			}
 			setupStructMetatable(L, Type);
 			LuaStruct* LStruct = static_cast<LuaStruct*>(lua_newuserdata(L, sizeof(LuaStruct)));
-			new (LStruct) LuaStruct(Type, Struct, LuaProcessor::luaGetProcessor(L)->getKernel()->AsShared());
+			new (LStruct) LuaStruct(Type, Struct, UFINLuaProcessor::luaGetProcessor(L)->GetKernel());
 			luaL_setmetatable(L, TCHAR_TO_UTF8(*StructToMetaName[Type]));
 		}
 
@@ -115,7 +115,7 @@ namespace FicsItKernel {
 				StructMetaNameLock.Unlock();
 				return luaL_argerror(L, 1, "Function name is invalid (internal error)");
 			}
-			FString MetaName = *MetaNamePtr;
+			const FString MetaName = *MetaNamePtr;
 			StructMetaNameLock.Unlock();
 			LuaStruct* Instance = static_cast<LuaStruct*>(luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName)));
 			if (!Instance->Struct.GetData()) return luaL_argerror(L, 1, "Struct is invalid");
@@ -126,11 +126,11 @@ namespace FicsItKernel {
 		
 		int luaStructIndex(lua_State* L) {
 			// get struct
-			TSharedPtr<FINStruct> Struct = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct = luaGetStruct(L, 1);
 			if (!Struct.IsValid()) return luaL_error(L, "Struct is invalid");
 			
 			// get member name
-			FString MemberName = lua_tostring(L, 2);
+			const FString MemberName = lua_tostring(L, 2);
 			
 			UFINStruct* Type = FFINReflection::Get()->FindStruct(Struct->GetStruct());
 			if (!IsValid(Type)) {
@@ -138,18 +138,18 @@ namespace FicsItKernel {
 			}
 
 			StructMetaNameLock.Lock();
-			FString MetaName = StructToMetaName[Type];
+			const FString MetaName = StructToMetaName[Type];
 			StructMetaNameLock.Unlock();
 			return luaFindGetMember(L, Type, FFINExecutionContext(Struct->GetData()), MemberName, MetaName + "_" + MemberName, &luaStructFuncCall, false);
 		}
 
 		int luaStructNewIndex(lua_State* L) {
 			// get struct
-			TSharedPtr<FINStruct> Struct = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct = luaGetStruct(L, 1);
 			if (!Struct.IsValid()) return luaL_error(L, "Struct is invalid");
 				
 			// get member name
-			FString MemberName = lua_tostring(L, 2);
+			const FString MemberName = lua_tostring(L, 2);
 			
 			UFINStruct* Type = FFINReflection::Get()->FindStruct(Struct->GetStruct());
 			if (!IsValid(Type)) {
@@ -160,46 +160,46 @@ namespace FicsItKernel {
 		}
 
 		int luaStructEQ(lua_State* L) {
-			TSharedPtr<FINStruct> Struct1 = luaGetStruct(L, 1);
-			TSharedPtr<FINStruct> Struct2 = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct1 = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct2 = luaGetStruct(L, 1);
 			if (!Struct1->GetData() || !Struct2->GetData() || Struct1->GetStruct() != Struct2->GetStruct()) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, Struct1->GetStruct()->CompareScriptStruct(Struct1->GetData(), Struct2->GetData(), 0));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaStructLt(lua_State* L) {
-			TSharedPtr<FINStruct> Struct1 = luaGetStruct(L, 1);
-			TSharedPtr<FINStruct> Struct2 = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct1 = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct2 = luaGetStruct(L, 1);
 			if (!Struct1->GetData() || !Struct2->GetData() || Struct1->GetStruct() != Struct2->GetStruct()) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, Struct1->GetStruct()->GetStructTypeHash(Struct1->GetData()) < Struct2->GetStruct()->GetStructTypeHash(Struct2->GetData()));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaStructLe(lua_State* L) {
-			TSharedPtr<FINStruct> Struct1 = luaGetStruct(L, 1);
-			TSharedPtr<FINStruct> Struct2 = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct1 = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct2 = luaGetStruct(L, 1);
 			if (!Struct1->GetData() || !Struct2->GetData() || Struct1->GetStruct() != Struct2->GetStruct()) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, Struct1->GetStruct()->GetStructTypeHash(Struct1->GetData()) <= Struct2->GetStruct()->GetStructTypeHash(Struct2->GetData()));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaStructToString(lua_State* L) {
-			TSharedPtr<FINStruct> Struct = luaGetStruct(L, 1);
+			const TSharedPtr<FINStruct> Struct = luaGetStruct(L, 1);
 			if (!Struct->GetData()) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushstring(L, TCHAR_TO_UTF8(*(FFINReflection::Get()->FindStruct(Struct->GetStruct())->GetInternalName() + "-Struct")));
@@ -207,12 +207,13 @@ namespace FicsItKernel {
 		}
 
 		int luaStructUnpersist(lua_State* L) {
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
-
+			FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+			
 			// get struct
-			const FFINDynamicStructHolder& Struct = *Storage->GetStruct(luaL_checkinteger(L, lua_upvalueindex(1)));
+			const FFINDynamicStructHolder& Struct = *Storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1)));
 			
 			// create instance
 			luaStruct(L, Struct);
@@ -224,12 +225,13 @@ namespace FicsItKernel {
 			// get struct
 			TSharedPtr<FINStruct> Struct = luaGetStruct(L, 1);
 
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 
 			// push struct to persist
-			lua_pushinteger(L, Storage->Add(Struct));
+			lua_pushinteger(L, Storage.Add(Struct));
 			
 			// create & return closure
 			lua_pushcclosure(L, &luaStructUnpersist, 1);

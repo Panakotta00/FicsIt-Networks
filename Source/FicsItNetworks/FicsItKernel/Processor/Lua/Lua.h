@@ -113,6 +113,6 @@ namespace FicsItKernel {
 		/**
 		 * Converts the given network value into a lua value and pushes it onto the stack
 		 */
-		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val);
+		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, FFINNetworkTrace Trace);
 	}
 }

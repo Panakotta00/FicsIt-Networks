@@ -145,6 +145,11 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 				StringEnd += TokenString.Len();
 			}
 			if (!bInBlockComment && !bInLineComment && (TokenString == "\"" || TokenString == "\'")) {
+				if (bInNumber) {
+					DoNumber(FTextRange(StringStart, StringEnd));
+					bIsNew = true;
+					bInNumber = false;
+				}
 				if (bInString) {
 					if (Start > 0 && (*ModelString)[Start-1] == '\\') continue;
 					DoString(FTextRange(StringStart, StringEnd));

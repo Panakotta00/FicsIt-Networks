@@ -1,109 +1,82 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FGSaveInterface.h"
 #include "Json.h"
-#include "ProcessorStateStorage.h"
-
-#include <string>
+#include "Processor.generated.h"
 
 class AFINStateEEPROM;
 
-namespace FicsItKernel {
-	enum ProcessorArchitecture {
-		LUA
-	};
+class UFINKernelSystem;
 
-	class KernelSystem;
+/**
+ * A Processor handles the whole execution of a program and also makes sure that resource overuse causes a crash.
+ */
+UCLASS()
+class FICSITNETWORKS_API UFINKernelProcessor : public UObject, public IFGSaveInterface {
+	GENERATED_BODY()
+	
+protected:
+	UPROPERTY()
+	UFINKernelSystem* Kernel = nullptr;
+	
+	UPROPERTY(SaveGame)
+	bool bTest = false;
+	
+public:
+	FString DebugInfo;
+	
+	// Begin IFGSaveInterface
+	virtual bool ShouldSave_Implementation() const override { return true; }
+	// End IFGSaveInterface
+	
+	/**
+	 * Sets the kernel this processor uses.
+	 *
+	 * @param[in]	InKernel	the new kernel the processor will use
+	 */
+	virtual void SetKernel(UFINKernelSystem* InKernel);
 
 	/**
-	 * A Processor handles the whole execution of a program and also makes sure that resource overusage causes a crash.
+	 * Allows to access the connected kernel
+	 *
+	 * @return	returns the connected kernel
 	 */
-	class FICSITNETWORKS_API Processor {
-	protected:
-		KernelSystem* kernel = nullptr;
+	UFINKernelSystem* GetKernel();
 
-	public:
-		virtual ~Processor() {}
+	/**
+	 * Does one processor cycle.
+	 * Processor needs to execute its speed accordingly.
+	 *
+	 * Basically redirects the factory tick
+	 *
+	 * @param[in]	InDeltaTime		the delta seconds since last tick
+	 */
+	virtual void Tick(float InDeltaTime) {}
 
-		/**
-		* Sets the kernel this processor uses.
-		*
-		* @param[in]	kernel	the new kernel the processor will use
-		*/
-		virtual void setKernel(KernelSystem* kernel);
+	/**
+	 * Gets called when the kernel stops or crashes.
+	 *
+	 * @param[in]	InIsCrash		true if the stop is caused by an crash
+	 */
+	virtual void Stop(bool InIsCrash) {}
 
-		/**
-		* Allows to access the connected kernel
-		*
-		* @return	returns the connected kernel
-		*/
-		KernelSystem* getKernel();
+	/**
+	 * recalculates the processor memory usage
+	 *
+	 * @param[in]	InRecalc	set this to true if you want to force the processor to recalculate its memory usage
+	 */
+	virtual int64 GetMemoryUsage(bool InRecalc = false) { return 0; }
 
-		/**
-		* Does one processor cycle.
-		* Processor needs to execute its speed accordingly.
-		*
-		* Basically redirects the factory tick
-		*
-		* @param[in]	delta	the delta seconds since last tick
-		*/
-		virtual void tick(float delta) = 0;
+	/**
+	 * Resets the execution state of the processor.
+	 * f.e. resets the code counter
+	 */
+	virtual void Reset() {}
 
-		/**
-		 * Gets called when the kernel stops or crashes.
-		 *
-		 * @param[in]	isCrash		true if the stop is caused by an creash
-		 */
-		virtual void stop(bool isCrash) {};
-
-		/**
-		* recalculates the processor memory usage
-		*
-		* @param[in]	recalc	set this to true if you want to force the processor to recalculate its memory usage
-		*/
-		virtual int64 getMemoryUsage(bool recalc = false) = 0;
-
-		/**
-		* Resets the execution state of the processor.
-		* f.e. resets the code counter
-		*/
-		virtual void reset() = 0;
-
-		/**
-		 * Sets the BIOS code of the processor.
-		 * Usage and events depend on implementation (f.e. reset on set)
-		 */
-		virtual void setEEPROM(AFINStateEEPROM* eeprom) = 0;
-
-		/**
-		 * Should get called prior to serialization.
-		 *
-		 * @param[in]	Storage		the serialization storage
-		 * @param[in]	bLoading	true if it should deserialize
-		 */
-		virtual void PreSerialize(UProcessorStateStorage* Storage, bool bLoading) = 0;
-
-		/**
-		 * Serializes the processor state and stores it in the given storage object
-		 *
-		 * @param[in]	Storage		the serialization storage object which will hold the serialized data
-		 * @param[in]	bLoading	true if it should deserialize
-		 */
-		virtual void Serialize(UProcessorStateStorage* Storage, bool bLoading) = 0;
-
-		/**
-		 * Gets called after serialization a storage object to a processor state and loads it
-		 *
-		 * @param[in]	Storage 	the storage object which holds the serialized data
-		 * @param[in]	bLoading	true if it should deserialize
-		 */
-		virtual void PostSerialize(UProcessorStateStorage* Storage, bool bLoading) = 0;
-
-		/**
-		 * Creates the storage object used to store serialization data
-		 *
-		 * @return	The created storage object
-		 */
-		virtual UProcessorStateStorage* CreateSerializationStorage() = 0;
-	};
-}
+	/**
+	 * Sets the BIOS code of the processor.
+	 * Usage and events depend on implementation (f.e. reset on set)
+	 */
+	virtual void SetEEPROM(AFINStateEEPROM* InEEPROM) {}
+};

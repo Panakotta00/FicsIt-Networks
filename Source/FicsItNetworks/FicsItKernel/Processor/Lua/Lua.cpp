@@ -213,7 +213,7 @@ namespace FicsItKernel {
 			}
 		}
 
-		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val) {
+		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, FFINNetworkTrace Trace) {
 			switch (Val.GetType()) {
 			case FIN_NIL:
 				lua_pushnil(L);
@@ -232,7 +232,7 @@ namespace FicsItKernel {
 				lua_pushlstring(L, Conv.Get(), Conv.Length());
 				break;
 			} case FIN_OBJ:
-				newInstance(L, FFINNetworkTrace(Val.GetObj().Get()));
+				newInstance(L, Trace / Val.GetObj().Get());
 				break;
 			case FIN_CLASS:
 				newInstance(L, Val.GetClass());
@@ -247,12 +247,12 @@ namespace FicsItKernel {
 				lua_newtable(L);
 				int i = 0;
 				for (const FFINAnyNetworkValue& Entry : Val.GetArray()) {
-					networkValueToLua(L, Entry);
+					networkValueToLua(L, Entry, Trace);
 					lua_seti(L, -2, ++i);
 				}
 				break;
 			} case FIN_ANY:
-				networkValueToLua(L, Val.GetAny());
+				networkValueToLua(L, Val.GetAny(), Trace);
 				lua_pushnil(L);
 				break;
 			default:

@@ -24,8 +24,7 @@ private:
 	TSharedPtr<FFINNetworkTrace> Prev = nullptr;
 	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
 
-	UPROPERTY(SaveGame)
-	TWeakObjectPtr<UObject> Obj = nullptr;
+	FWeakObjectPtr Obj = nullptr;
 
 	UPROPERTY()
 	bool bDontAsk = false;
@@ -51,6 +50,7 @@ public:
 	~FFINNetworkTrace();
 
 	bool Serialize(FArchive& Ar);
+	bool Serialize(FStructuredArchive::FSlot Slot);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 //	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 
@@ -124,12 +124,12 @@ public:
 	/**
 	 * returns the underlying weak object ptr without any checks
 	 */
-	TWeakObjectPtr<UObject> GetUnderlyingPtr() const;
+	FWeakObjectPtr GetUnderlyingPtr() const;
 
 	/**
 	 * returns the starting object of the trace
 	 */
-	TWeakObjectPtr<UObject> GetStartPtr() const;
+	FWeakObjectPtr GetStartPtr() const;
 
 	/**
 	 * returns if the trace is valid or not
@@ -138,8 +138,13 @@ public:
 };
 
 inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
-	trace.Serialize(Ar);
+	trace.Serialize(FStructuredArchiveFromArchive(Ar).GetSlot());
 	return Ar;
+}
+
+inline void operator<<(FStructuredArchive::FSlot Slot, FFINNetworkTrace& Trace)
+{
+	Trace.Serialize(Slot);
 }
 
 FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& Trace) {
@@ -150,7 +155,7 @@ template<>
 struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace> {
 	enum {
 		WithSerializer = true,
-//		WithNetSerializer = true,
+		WithStructuredSerializer = true,
 		WithAddStructReferencedObjects = true,
 		WithCopy = true,
     };

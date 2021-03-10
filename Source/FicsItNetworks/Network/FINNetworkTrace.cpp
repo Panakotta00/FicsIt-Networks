@@ -150,36 +150,32 @@ FFINNetworkTrace::FFINNetworkTrace(UObject* Obj) : Obj(Obj) {
 FFINNetworkTrace::~FFINNetworkTrace() {}
 
 bool FFINNetworkTrace::Serialize(FArchive& Ar) {
-	if (Ar.IsSaveGame() || Ar.IsNetArchive()) {
-		bool valid = GetUnderlyingPtr().IsValid();
-		Ar << valid;
-		if (valid) {
-			// obj ptr
-			UObject* ptr = GetUnderlyingPtr().Get();
-			Ar << ptr;
-			Obj = ptr;
-	
-			// prev trace
-			bool hasPrev = Prev.IsValid();
-			Ar << hasPrev;
-			if (hasPrev) {
-				FFINNetworkTrace prev;
-				if (Ar.IsSaving()) prev = *Prev;
-				Ar << prev;
-				if (Ar.IsLoading()) {
-					Prev = MakeShared<FFINNetworkTrace>(prev);
-				}
-			}
+	return Serialize(FStructuredArchiveFromArchive(Ar).GetSlot());
+}
 
-			// step
-			bool hasStep = Step.IsValid();
-			Ar << hasStep;
-			if (hasStep) {
-				FString save;
-				if (Ar.IsSaving()) save = inverseTraceStepRegistry[Step];
-				Ar << save;
-				if (Ar.IsLoading()) Step = traceStepRegistry[*save];
-			}
+bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
+	if (Slot.GetUnderlyingArchive().IsSaveGame()) {
+		FStructuredArchive::FRecord Record = Slot.EnterRecord();
+		UObject* ObjRaw = Obj.Get();
+		Record.EnterField(FIELD_NAME_TEXT("Ptr")) << ObjRaw;
+		Obj = ObjRaw;
+
+		TOptional<FStructuredArchive::FSlot> PrevSlot = Record.TryEnterField(FIELD_NAME_TEXT("Next"), Prev.IsValid());
+		if (PrevSlot.IsSet()) {
+			if (!Prev.IsValid()) Prev = MakeShared<FFINNetworkTrace>();
+			Prev->Serialize(PrevSlot.GetValue());
+		} else {
+			Prev.Reset();
+		}
+
+		TOptional<FStructuredArchive::FSlot> StepSlot = Record.TryEnterField(FIELD_NAME_TEXT("Step"), Step.IsValid());
+		if (StepSlot.IsSet()) {
+			FString StepName;
+			if (Step.IsValid()) StepName = inverseTraceStepRegistry[Step];
+			StepSlot.GetValue() << StepName;
+			Step = traceStepRegistry[StepName];
+		} else {
+			Step.Reset();
 		}
 	}
 	
@@ -232,7 +228,7 @@ FFINNetworkTrace FFINNetworkTrace::operator()(UObject* other) const {
 	if (trace.Prev) {
 		auto A = trace.Prev->Obj.Get();
 		if (!A) return FFINNetworkTrace(nullptr); // if the previous network trace object is invalid, the trace will be always invalid
-		trace.Step = findTraceStep(trace.Prev->Obj->GetClass(), other->GetClass());
+		trace.Step = findTraceStep(trace.Prev->Obj.Get()->GetClass(), other->GetClass());
 	}
 
 	return trace;
@@ -289,14 +285,14 @@ bool FFINNetworkTrace::operator<(const FFINNetworkTrace& other) const {
 	else return d1->ObjectSerialNumber < d2->ObjectSerialNumber;
 }
 
-TWeakObjectPtr<UObject> FFINNetworkTrace::GetUnderlyingPtr() const {
+FWeakObjectPtr FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
 }
 
-TWeakObjectPtr<UObject> FFINNetworkTrace::GetStartPtr() const {
+FWeakObjectPtr FFINNetworkTrace::GetStartPtr() const {
 	const FFINNetworkTrace* Trace = this;
 	while (Trace->Prev) Trace = Trace->Prev.Get();
-	if (Trace) return Trace->Obj;
+	if (Trace) return Trace->Obj.Get();
 	return nullptr;
 }
 

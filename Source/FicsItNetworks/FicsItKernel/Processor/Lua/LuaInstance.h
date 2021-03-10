@@ -15,6 +15,7 @@
 class UFINFunction;
 class UFINClass;
 class UFINStruct;
+class UFINKernelSystem;
 
 namespace FicsItKernel {
 	class KernelSystem;
@@ -25,8 +26,8 @@ namespace FicsItKernel {
 		 */
 		struct LuaInstance {
 			FFINNetworkTrace Trace;
-			TSharedPtr<KernelSystem> Kernel;
-			LuaInstance(const FFINNetworkTrace& Trace, const TSharedPtr<KernelSystem>& Kernel);
+			UFINKernelSystem* Kernel;
+			LuaInstance(const FFINNetworkTrace& Trace, UFINKernelSystem* Kernel);
 			LuaInstance(const LuaInstance& Other);
 			~LuaInstance();
 			static void CollectReferences(void* Obj, FReferenceCollector& Collector);

@@ -21,7 +21,7 @@
 #pragma optimize("", off)
 namespace FicsItKernel {
 	namespace Lua {
-		std::map<UObject*, std::mutex> objectLocks;
+		std::map<UObject*, FCriticalSection> objectLocks;
 		TMap<UFINClass*, FString> ClassToMetaName;
 		TMap<UFINClass*, FString> ClassToClassMetaName;
 		TMap<FString, UFINClass*> MetaNameToClass;
@@ -30,11 +30,12 @@ namespace FicsItKernel {
 		
 		void luaInstanceType(lua_State* L, LuaInstanceType&& instanceType);
 		int luaInstanceTypeUnpersist(lua_State* L) {
-			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 			
-			luaInstanceType(L, LuaInstanceType{Cast<UClass>(storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(1))))});
+			// get persist storage
+			FFINLuaProcessorStateStorage& storage = Processor->StateStorage;
+			
+			luaInstanceType(L, LuaInstanceType{Cast<UClass>(storage.GetRef(luaL_checkinteger(L, lua_upvalueindex(1))))});
 
 			return 1;
 		}
@@ -42,11 +43,12 @@ namespace FicsItKernel {
 		int luaInstanceTypePersist(lua_State* L) {
 			LuaInstanceType* type = static_cast<LuaInstanceType*>(luaL_checkudata(L, 1, INSTANCE_TYPE));
 			
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			FFINLuaProcessorStateStorage& storage = Processor->StateStorage;
 
-			lua_pushinteger(L, storage->Add(type->type));
+			lua_pushinteger(L, storage.Add(type->type));
 			
 			// create & return closure
 			lua_pushcclosure(L, &luaInstanceTypeUnpersist, 1);
@@ -62,7 +64,7 @@ namespace FicsItKernel {
 		static const luaL_Reg luaInstanceTypeLib[] = {
 			{"__persist", luaInstanceTypePersist},
 			{"__gc", luaInstanceTypeGC},
-			{NULL, NULL}
+			{nullptr, nullptr}
 		};
 
 		void luaInstanceType(lua_State* L, LuaInstanceType&& instanceType) {
@@ -92,7 +94,7 @@ namespace FicsItKernel {
 				*OutClass = *Class;
 				ClassMetaNameLock.Unlock();
 			}
-			return (LuaInstance*) lua_touserdata(L, Index);
+			return static_cast<LuaInstance*>(lua_touserdata(L, Index));
 		}
 
 		LuaInstance* CheckAndGetInstance(lua_State* L, int Index, UFINClass** OutClass = nullptr) {
@@ -112,9 +114,9 @@ namespace FicsItKernel {
 				ClassMetaNameLock.Unlock();
 				return luaL_error(L, "Function name is invalid (internal error)");
 			}
-			FString MetaName = *MetaNamePtr;
+			const FString MetaName = *MetaNamePtr;
 			ClassMetaNameLock.Unlock();
-			LuaInstance* Instance = (LuaInstance*) luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName));
+			LuaInstance* Instance = static_cast<LuaInstance*>(luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName)));
 			UObject* Obj = *Instance->Trace;
 			if (!Obj) return luaL_argerror(L, 1, "Instance is invalid");
 
@@ -129,7 +131,7 @@ namespace FicsItKernel {
 			check(Instance != nullptr);
 			
 			// get member name
-			FString MemberName = lua_tostring(L, 2);
+			const FString MemberName = lua_tostring(L, 2);
 			
 			UObject* Obj = *Instance->Trace;
 			UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(Obj);
@@ -142,16 +144,16 @@ namespace FicsItKernel {
 			if (NetworkHandler) {
 				if (MemberName == "id") {
 					lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString()));
-					return LuaProcessor::luaAPIReturn(L, 1);
+					return UFINLuaProcessor::luaAPIReturn(L, 1);
 				}
 				if (MemberName == "nick") {
 					lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetNick(NetworkHandler)));
-					return LuaProcessor::luaAPIReturn(L, 1);
+					return UFINLuaProcessor::luaAPIReturn(L, 1);
 				}
 			}
 
 			ClassMetaNameLock.Lock();
-			FString MetaName = ClassToMetaName[Class];
+			const FString MetaName = ClassToMetaName[Class];
 			ClassMetaNameLock.Unlock();
 			return luaFindGetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, MetaName + "_" + MemberName, &luaInstanceFuncCall, false);
 		}
@@ -162,7 +164,7 @@ namespace FicsItKernel {
 			LuaInstance* Instance = CheckAndGetInstance(L, 1, &Class);
 				
 			// get member name
-			FString MemberName = lua_tostring(L, 2);
+			const FString MemberName = lua_tostring(L, 2);
 			
 			UObject* Obj = *Instance->Trace;
 			UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(Obj);
@@ -177,9 +179,9 @@ namespace FicsItKernel {
 					return luaL_error(L, TCHAR_TO_UTF8(*("Property '" + MemberName + "' is read-only")));
 				}
 				if (MemberName == "nick") {
-					FString Nick = luaL_checkstring(L, 3);
+					const FString Nick = luaL_checkstring(L, 3);
 					IFINNetworkComponent::Execute_SetNick(NetworkHandler, Nick);
-					return LuaProcessor::luaAPIReturn(L, 1);
+					return UFINLuaProcessor::luaAPIReturn(L, 1);
 				}
 			}
 
@@ -191,11 +193,11 @@ namespace FicsItKernel {
 			LuaInstance* inst2 = GetInstance(L, 2);
 			if (!inst1 || !inst2) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, inst1->Trace.IsEqualObj(inst2->Trace));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaInstanceLt(lua_State* L) {
@@ -203,11 +205,11 @@ namespace FicsItKernel {
 			LuaInstance* inst2 = GetInstance(L, 2);
 			if (!inst1 || !inst2) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, GetTypeHash(inst1->Trace.GetUnderlyingPtr()) < GetTypeHash(inst2->Trace.GetUnderlyingPtr()));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaInstanceLe(lua_State* L) {
@@ -215,11 +217,11 @@ namespace FicsItKernel {
 			LuaInstance* inst2 = GetInstance(L, 2);
 			if (!inst1 || !inst2) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, GetTypeHash(inst1->Trace.GetUnderlyingPtr()) <= GetTypeHash(inst2->Trace.GetUnderlyingPtr()));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaInstanceToString(lua_State* L) {
@@ -230,7 +232,7 @@ namespace FicsItKernel {
 			UClass* Type = Obj->GetClass();
 			FString Msg = Class->GetInternalName();
 			if (Type->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-				FString Nick = IFINNetworkComponent::Execute_GetNick(Obj);
+				const FString Nick = IFINNetworkComponent::Execute_GetNick(Obj);
 				if (Nick.Len() > 0) Msg += " \"" + Nick + "\"";
 				Msg += " " + IFINNetworkComponent::Execute_GetID(Obj).ToString();
 			}
@@ -239,12 +241,13 @@ namespace FicsItKernel {
 		}
 
 		int luaInstanceUnpersist(lua_State* L) {
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 
 			// get trace and typename
-			FFINNetworkTrace Trace = Storage->GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
+			const FFINNetworkTrace Trace = Storage.GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
 			
 			// create instance
 			newInstance(L, Trace);
@@ -256,12 +259,13 @@ namespace FicsItKernel {
 			// get instance
 			LuaInstance* Instance = CheckAndGetInstance(L, 1);
 			
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 
 			// add trace to storage
-			lua_pushinteger(L, Storage->Add(Instance->Trace));
+			lua_pushinteger(L, Storage.Add(Instance->Trace));
 			
 			// create & return closure
 			lua_pushcclosure(L, &luaInstanceUnpersist, 1);
@@ -283,10 +287,10 @@ namespace FicsItKernel {
 			{"__tostring", luaInstanceToString},
 			{"__persist", luaInstancePersist},
 			{"__gc", luaInstanceGC},
-			{NULL, NULL}
+			{nullptr, nullptr}
 		};
 
-		LuaInstance::LuaInstance(const FFINNetworkTrace& Trace, const TSharedPtr<KernelSystem>& Kernel) : Trace(Trace), Kernel(Kernel) {
+		LuaInstance::LuaInstance(const FFINNetworkTrace& Trace, UFINKernelSystem* Kernel) : Trace(Trace), Kernel(Kernel) {
 			Kernel->AddReferencer(this, &CollectReferences);
 		}
 		
@@ -312,7 +316,7 @@ namespace FicsItKernel {
 				return false;
 			}
 			
-			setupMetatable(LuaProcessor::luaGetProcessor(L)->getLuaState(), Class);
+			setupMetatable(UFINLuaProcessor::luaGetProcessor(L)->GetLuaState(), Class);
 			ClassMetaNameLock.Lock();
 			FString* NamePtr = ClassToMetaName.Find(Class);
 			if (!NamePtr) {
@@ -320,12 +324,12 @@ namespace FicsItKernel {
 				lua_pushnil(L);
 				return false;
 			}
-			FString Name = *NamePtr;
+			const FString Name = *NamePtr;
 			ClassMetaNameLock.Unlock();
 			
 			// create instance
 			LuaInstance* Instance = static_cast<LuaInstance*>(lua_newuserdata(L, sizeof(LuaInstance)));
-			new (Instance) LuaInstance(Trace, LuaProcessor::luaGetProcessor(L)->getKernel()->AsShared());
+			new (Instance) LuaInstance(Trace, UFINLuaProcessor::luaGetProcessor(L)->GetKernel());
 			
 			luaL_setmetatable(L, TCHAR_TO_UTF8(*Name));
 			return true;
@@ -359,7 +363,7 @@ namespace FicsItKernel {
 				*OutClass = *Class;
 				ClassMetaNameLock.Unlock();
 			}
-			return (LuaClassInstance*) lua_touserdata(L, Index);
+			return static_cast<LuaClassInstance*>(lua_touserdata(L, Index));
 		}
 
 		LuaClassInstance* CheckAndGetClassInstance(lua_State* L, int Index, UFINClass** OutClass = nullptr) {
@@ -379,9 +383,9 @@ namespace FicsItKernel {
 				ClassMetaNameLock.Unlock();
 				return luaL_argerror(L, 1, "Function name is invalid (internal error)");
 			}
-			FString MetaName = *MetaNamePtr;
+			const FString MetaName = *MetaNamePtr;
 			ClassMetaNameLock.Unlock();
-			LuaClassInstance* Instance = (LuaClassInstance*) luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName));
+			LuaClassInstance* Instance = static_cast<LuaClassInstance*>(luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName)));
 			UObject* Obj = Instance->Class;
 			if (!Obj) return luaL_argerror(L, 1, "ClassInstance is invalid");
 
@@ -395,7 +399,7 @@ namespace FicsItKernel {
 			LuaClassInstance* Instance = CheckAndGetClassInstance(L, 1, &Type);
 				
 			// get member name
-			FString MemberName = lua_tostring(L, 2);
+			const FString MemberName = lua_tostring(L, 2);
 			
 			UClass* Class = Instance->Class;
 			
@@ -404,7 +408,7 @@ namespace FicsItKernel {
 			}
 
 			ClassClassMetaNameLock.Lock();
-			FString MetaName = ClassToClassMetaName[Type];
+			const FString MetaName = ClassToClassMetaName[Type];
 			ClassClassMetaNameLock.Unlock();
 			return luaFindGetMember(L, Type, FFINExecutionContext(Class), MemberName, MetaName + "_" + MemberName, &luaClassInstanceFuncCall, true);
 		}
@@ -415,7 +419,7 @@ namespace FicsItKernel {
 			LuaClassInstance* Instance = CheckAndGetClassInstance(L, 1, &Type);
 				
 			// get member name
-			FString MemberName = lua_tostring(L, 2);
+			const FString MemberName = lua_tostring(L, 2);
 			
 			UObject* Class = Instance->Class;
 
@@ -431,11 +435,11 @@ namespace FicsItKernel {
 			LuaClassInstance* inst2 = GetClassInstance(L, 2);
 			if (!inst2) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, inst1->Class == inst2->Class);
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaClassInstanceLt(lua_State* L) {
@@ -443,11 +447,11 @@ namespace FicsItKernel {
 			LuaClassInstance* inst2 = GetClassInstance(L, 2);
 			if (!inst2) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, GetTypeHash(inst1->Class) < GetTypeHash(inst2->Class));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaClassInstanceLe(lua_State* L) {
@@ -455,28 +459,29 @@ namespace FicsItKernel {
 			LuaClassInstance* inst2 = GetClassInstance(L, 2);
 			if (!inst2) {
 				lua_pushboolean(L, false);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			lua_pushboolean(L, GetTypeHash(inst1->Class) <= GetTypeHash(inst2->Class));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		int luaClassInstanceToString(lua_State* L) {
 			UFINClass* Type;
-			LuaClassInstance* Instance = CheckAndGetClassInstance(L, 1, &Type);
+			CheckAndGetClassInstance(L, 1, &Type);
 			
 			lua_pushstring(L, TCHAR_TO_UTF8(*(Type->GetInternalName() + "-Class")));
 			return 1;
 		}
 
 		int luaClassInstanceUnpersist(lua_State* L) {
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 
 			// get class
-			UClass* Class = Cast<UClass>(Storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(1))));
+			UClass* Class = Cast<UClass>(Storage.GetRef(luaL_checkinteger(L, lua_upvalueindex(1))));
 			
 			// create instance
 			newInstance(L, Class);
@@ -487,14 +492,15 @@ namespace FicsItKernel {
 		int luaClassInstancePersist(lua_State* L) {
 			// get data
 			UFINClass* Type;
-			LuaClassInstance* Instance = CheckAndGetClassInstance(L, 1, &Type);
-
+			CheckAndGetClassInstance(L, 1, &Type);
+			
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 
 			// push type name to persist
-			lua_pushinteger(L, Storage->Add(Type));
+			lua_pushinteger(L, Storage.Add(Type));
 			
 			// create & return closure
 			lua_pushcclosure(L, &luaClassInstanceUnpersist, 1);
@@ -516,7 +522,7 @@ namespace FicsItKernel {
 			{"__tostring", luaClassInstanceToString},
 			{"__persist", luaClassInstancePersist},
 			{"__gc", luaClassInstanceGC},
-			{NULL, NULL}
+			{nullptr, nullptr}
 		};
 
 		bool newInstance(lua_State* L, UClass* clazz) {
@@ -531,8 +537,8 @@ namespace FicsItKernel {
 			LuaClassInstance* instance = static_cast<LuaClassInstance*>(lua_newuserdata(L, sizeof(LuaClassInstance)));
 			new (instance) LuaClassInstance{clazz};
 
-			setupMetatable(LuaProcessor::luaGetProcessor(L)->getLuaState(), Type);
-			FString MetaName = Type->GetInternalName() + CLASS_INSTANCE_META_SUFFIX;
+			setupMetatable(UFINLuaProcessor::luaGetProcessor(L)->GetLuaState(), Type);
+			const FString MetaName = Type->GetInternalName() + CLASS_INSTANCE_META_SUFFIX;
 			
 			luaL_setmetatable(L, TCHAR_TO_UTF8(*MetaName));
 			return true;
@@ -545,14 +551,14 @@ namespace FicsItKernel {
 		}
 
 		int luaFindClass(lua_State* L) {
-			int args = lua_gettop(L);
+			const int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
-				bool isT = lua_istable(L, i);
+				const bool isT = lua_istable(L, i);
 
 				TArray<FString> ClassNames;
 				if (isT) {
-					auto count = lua_rawlen(L, i);
+					const auto count = lua_rawlen(L, i);
 					for (int j = 1; j <= count; ++j) {
 						lua_geti(L, i, j);
 						if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
@@ -577,18 +583,18 @@ namespace FicsItKernel {
 					if (isT) lua_seti(L, -2, ++j);
 				}
 			}
-			return LuaProcessor::luaAPIReturn(L, args);
+			return UFINLuaProcessor::luaAPIReturn(L, args);
 		}
 
 		int luaFindStruct(lua_State* L) {
-			int args = lua_gettop(L);
+			const int args = lua_gettop(L);
 
 			for (int i = 1; i <= args; ++i) {
-				bool isT = lua_istable(L, i);
+				const bool isT = lua_istable(L, i);
 
 				TArray<FString> StructNames;
 				if (isT) {
-					auto count = lua_rawlen(L, i);
+					const auto count = lua_rawlen(L, i);
 					for (int j = 1; j <= count; ++j) {
 						lua_geti(L, i, j);
 						if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
@@ -613,26 +619,27 @@ namespace FicsItKernel {
 					if (isT) lua_seti(L, -2, ++j);
 				}
 			}
-			return LuaProcessor::luaAPIReturn(L, args);
+			return UFINLuaProcessor::luaAPIReturn(L, args);
 		}
 
 		int luaFindItem(lua_State* L) {
+			// ReSharper disable once CppDeclaratorNeverUsed
 			FLuaSyncCall SyncCall(L);
-			int nargs = lua_gettop(L);
-			if (nargs < 1) return LuaProcessor::luaAPIReturn(L, 0);
-			const char* str = luaL_tolstring(L, -1, 0);
+			const int NumArgs = lua_gettop(L);
+			if (NumArgs < 1) return UFINLuaProcessor::luaAPIReturn(L, 0);
+			const char* str = luaL_tolstring(L, -1, nullptr);
 
 			TArray<TSubclassOf<UFGItemDescriptor>> items;
 			UFGBlueprintFunctionLibrary::Cheat_GetAllDescriptors(items);
 			if (str) for (TSubclassOf<UFGItemDescriptor> item : items) {
 				if (IsValid(item) && UFGItemDescriptor::GetItemName(item).ToString() == FString(str)) {
 					newInstance(L, item);
-					return LuaProcessor::luaAPIReturn(L, 1);
+					return UFINLuaProcessor::luaAPIReturn(L, 1);
 				}
 			}
 
 			lua_pushnil(L);
-			return LuaProcessor::luaAPIReturn(L, 1);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 		void setupInstanceSystem(lua_State* L) {

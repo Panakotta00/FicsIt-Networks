@@ -9,35 +9,35 @@
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
-	LuaProcessor* processor = LuaProcessor::luaGetProcessor(L); \
-	KernelSystem* kernel = processor->getKernel(); \
+	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
+	UFINKernelSystem* kernel = processor->GetKernel(); \
 	FLuaSyncCall SyncCall(L);
 
 
 namespace FicsItKernel {
 	namespace Lua {
 		LuaFunc(luaComputerGetInstance)
-			newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component));
-			return LuaProcessor::luaAPIReturn(L, 1);
+			newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()));
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
 #pragma optimize("", off)
 		LuaFunc(luaComputerReset)
-			processor->getTickHelper().shouldReset();
+			processor->GetTickHelper().shouldReset();
 			lua_yield(L, 0);
 			return 0;
 		}
 
 		LuaFunc(luaComputerStop)
-			processor->getTickHelper().shouldStop();
+			processor->GetTickHelper().shouldStop();
 			lua_yield(L, 0);
 			return 0;
 		}
 
 		LuaFunc(luaComputerPanic)
-		    processor->getTickHelper().shouldCrash(KernelCrash(std::string("PANIC! '") + luaL_checkstring(L, 1) + "'"));
-			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
-				kernel->getAudio()->beep();
+		    processor->GetTickHelper().shouldCrash(MakeShared<FFINKernelCrash>(FString("PANIC! '") + luaL_checkstring(L, 1) + "'"));
+			kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
+				kernel->GetAudio()->Beep();
 			})));
 			lua_yield(L, 0);
 			return 0;
@@ -48,51 +48,51 @@ namespace FicsItKernel {
 		}
 
 		int luaComputerSkip(lua_State* L) {
-			LuaProcessor* processor = LuaProcessor::luaGetProcessor(L);
-			processor->tickHelper.shouldPromote();
-			return LuaProcessor::luaAPIReturn(L, 0);
+			UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
+			processor->GetTickHelper().shouldPromote();
+			return UFINLuaProcessor::luaAPIReturn(L, 0);
 		}
 #pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
 			float pitch = 1;
 			if (lua_isnumber(L, 1)) pitch = lua_tonumber(L, 1);
-			kernel->pushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
-			    kernel->getAudio()->beep(pitch);
+			kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
+			    kernel->GetAudio()->Beep(pitch);
 			})));
-			return LuaProcessor::luaAPIReturn(L, 0);
+			return UFINLuaProcessor::luaAPIReturn(L, 0);
 		}
 
 		LuaFunc(luaComputerSetEEPROM)
-			AFINStateEEPROMLua* eeprom = static_cast<LuaProcessor*>(kernel->getProcessor())->getEEPROM();
+			AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 			if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
 			eeprom->SetCode(luaL_checkstring(L, 1));
 			return 0;
 		}
 
 		LuaFunc(luaComputerGetEEPROM)
-            AFINStateEEPROMLua* eeprom = static_cast<LuaProcessor*>(kernel->getProcessor())->getEEPROM();
+            const AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 			if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
 			lua_pushlstring(L, TCHAR_TO_UTF8(*eeprom->GetCode()), eeprom->GetCode().Len());
 			return 1;
 		}
 
 		LuaFunc(luaComputerTime)
-			AFGTimeOfDaySubsystem* subsys = AFGTimeOfDaySubsystem::Get(kernel->getNetwork()->component);
-			lua_pushnumber(L, subsys->GetPassedDays() * 86400 + subsys->GetDaySeconds());
+			const AFGTimeOfDaySubsystem* Subsystem = AFGTimeOfDaySubsystem::Get(kernel);
+			lua_pushnumber(L, Subsystem->GetPassedDays() * 86400 + Subsystem->GetDaySeconds());
 			return 1;
 		}
 		
 		LuaFunc(luaComputerMillis)
-			lua_pushinteger(L, kernel->getTimeSinceStart());
+			lua_pushinteger(L, kernel->GetTimeSinceStart());
 			return 1;
 		}
 		
 		LuaFunc(luaComputerGPUs)
 			lua_newtable(L);
 			int i = 1;
-			for (UObject* gpu : kernel->getGPUs()) {
-				newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component) / gpu);
+			for (TScriptInterface<IFINGPUInterface> gpu : kernel->GetGPUs()) {
+				newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / gpu.GetObject());
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -101,8 +101,8 @@ namespace FicsItKernel {
 		LuaFunc(luaComputerScreens)
 		    lua_newtable(L);
 			int i = 1;
-			for (UObject* screen : kernel->getScreens()) {
-				newInstance(L, FFINNetworkTrace(kernel->getNetwork()->component) / screen);
+			for (TScriptInterface<IFINScreenInterface> screen : kernel->GetScreens()) {
+				newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / screen.GetObject());
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -121,7 +121,7 @@ namespace FicsItKernel {
 			{"millis", luaComputerMillis},
 			{"getGPUs", luaComputerGPUs},
 			{"getScreens", luaComputerScreens},
-			{NULL,NULL}
+			{nullptr, nullptr}
 		};
 		
 		void setupComputerAPI(lua_State* L) {

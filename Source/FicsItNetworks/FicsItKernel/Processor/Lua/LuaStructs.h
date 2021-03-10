@@ -5,10 +5,7 @@
 #include "LuaProcessorStateStorage.h"
 #include "Network/FINNetworkValues.h"
 
-namespace FicsItKernel {
-	class KernelSystem;
-}
-
+class UFINKernelSystem;
 class UFINStruct;
 
 namespace FicsItKernel {
@@ -19,8 +16,8 @@ namespace FicsItKernel {
 		struct LuaStruct {
 			UFINStruct* Type = nullptr;
 			FFINDynamicStructHolder Struct;
-			TSharedPtr<KernelSystem> Kernel;
-			LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, const TSharedPtr<KernelSystem>& Kernel);
+			UFINKernelSystem* Kernel;
+			LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel);
 			LuaStruct(const LuaStruct& Other);
 			~LuaStruct();
 			static void CollectReferences(void* Obj, FReferenceCollector& Collector);

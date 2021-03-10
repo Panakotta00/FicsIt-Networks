@@ -1,5 +1,5 @@
 #include "FINComputerProcessor.h"
 
-FicsItKernel::Processor* AFINComputerProcessor::CreateProcessor() {
+UFINKernelProcessor* AFINComputerProcessor::CreateProcessor() {
 	return nullptr;
 }
