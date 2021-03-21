@@ -34,8 +34,8 @@ TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighte
 	TokenizerRules.Sort([](const FSyntaxTokenizer::FRule& A, const FSyntaxTokenizer::FRule& B) {
 		return A.MatchText.Len() > B.MatchText.Len();
 	});
-	
-	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(MakeShared<FSyntaxTokenizer>(TokenizerRules), LuaSyntaxTextStyle));
+
+	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(FSyntaxTokenizer::Create(TokenizerRules), LuaSyntaxTextStyle));
 }
 #pragma optimize("", off)
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) {
@@ -140,7 +140,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 			ModelString->Append(TokenString);
 
 			bool bIsNew = !Run.IsValid() || Start < 1 || Run->GetRunInfo().MetaData.Contains("Splitting");
-			
+
 			if (bInString || bInLineComment || bInBlockComment) {
 				StringEnd += TokenString.Len();
 			}
@@ -252,7 +252,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 			}
 			DoNormal(FTextRange(Start, End));
 		}
-		
+
 		if (bInNumber) {
 			DoNumber(FTextRange(StringStart, StringEnd));
 		} else if (bInString) {
@@ -260,7 +260,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		} else if (bInLineComment || bInBlockComment) {
 			DoComment(FTextRange(StringStart, StringEnd));
 		}
-		
+
 		LinesToAdd.Emplace(MoveTemp(ModelString), MoveTemp(Runs));
 	}
 	TargetTextLayout.AddLines(LinesToAdd);
