@@ -1,10 +1,10 @@
 #include "DevDevice.h"
 
 FFINKernelFSDevDevice::FFINKernelFSDevDevice() {
-	Serial = new FFINKernelFSSerial(FileSystem::ListenerListRef(listeners, ""));
+	Serial = new FFINKernelFSSerial(CodersFileSystem::ListenerListRef(listeners, ""));
 }
 
-FileSystem::SRef<FileSystem::FileStream> FFINKernelFSDevDevice::open(FileSystem::Path path, FileSystem::FileMode mode) {
+CodersFileSystem::SRef<CodersFileSystem::FileStream> FFINKernelFSDevDevice::open(CodersFileSystem::Path path, CodersFileSystem::FileMode mode) {
 	path.absolute = false;
 	if (path == "serial") {
 		return Serial->open(mode);
@@ -12,28 +12,28 @@ FileSystem::SRef<FileSystem::FileStream> FFINKernelFSDevDevice::open(FileSystem:
 	return nullptr;
 }
 
-FileSystem::SRef<FileSystem::Node> FFINKernelFSDevDevice::get(FileSystem::Path path) {
+CodersFileSystem::SRef<CodersFileSystem::Node> FFINKernelFSDevDevice::get(CodersFileSystem::Path path) {
 	try {
-		return new FileSystem::DeviceNode(Devices.at(path.str()));
+		return new CodersFileSystem::DeviceNode(Devices.at(path.str()));
 	} catch (...) {
 		return nullptr;
 	}
 }
 
-bool FFINKernelFSDevDevice::remove(FileSystem::Path path, bool recursive) {
+bool FFINKernelFSDevDevice::remove(CodersFileSystem::Path path, bool recursive) {
 	return false;
 }
 
-FileSystem::SRef<FileSystem::Directory> FFINKernelFSDevDevice::createDir(FileSystem::Path, bool tree) {
+CodersFileSystem::SRef<CodersFileSystem::Directory> FFINKernelFSDevDevice::createDir(CodersFileSystem::Path, bool tree) {
 	return nullptr;
 }
 
-bool FFINKernelFSDevDevice::rename(FileSystem::Path path, const FileSystem::NodeName& name) {
+bool FFINKernelFSDevDevice::rename(CodersFileSystem::Path path, const CodersFileSystem::NodeName& name) {
 	return false;
 }
 
-std::unordered_set<FileSystem::NodeName> FFINKernelFSDevDevice::childs(FileSystem::Path path) {
-	std::unordered_set<FileSystem::NodeName> list;
+std::unordered_set<CodersFileSystem::NodeName> FFINKernelFSDevDevice::childs(CodersFileSystem::Path path) {
+	std::unordered_set<CodersFileSystem::NodeName> list;
 	for (auto device : Devices) {
 		list.insert(device.first);
 	}
@@ -41,14 +41,14 @@ std::unordered_set<FileSystem::NodeName> FFINKernelFSDevDevice::childs(FileSyste
 	return list;
 }
 
-bool FFINKernelFSDevDevice::addDevice(FileSystem::SRef<FileSystem::Device> device, const FileSystem::NodeName& name) {
+bool FFINKernelFSDevDevice::addDevice(CodersFileSystem::SRef<CodersFileSystem::Device> device, const CodersFileSystem::NodeName& name) {
 	const auto dev = Devices.find(name);
 	if (dev != Devices.end() || name == "serial") return false;
 	Devices[name] = device;
 	return true;
 }
 
-bool FFINKernelFSDevDevice::removeDevice(FileSystem::SRef<FileSystem::Device> device) {
+bool FFINKernelFSDevDevice::removeDevice(CodersFileSystem::SRef<CodersFileSystem::Device> device) {
 	for (auto d = Devices.begin(); d != Devices.end(); d++) {
 		if (d->second == device) {
 			Devices.erase(d);
@@ -58,13 +58,13 @@ bool FFINKernelFSDevDevice::removeDevice(FileSystem::SRef<FileSystem::Device> de
 	return false;
 }
 
-std::unordered_map<FileSystem::NodeName, FileSystem::SRef<FileSystem::Device>> FFINKernelFSDevDevice::getDevices() const {
+std::unordered_map<CodersFileSystem::NodeName, CodersFileSystem::SRef<CodersFileSystem::Device>> FFINKernelFSDevDevice::getDevices() const {
 	return Devices;
 }
 
 void FFINKernelFSDevDevice::updateCapacity(std::int64_t capacity) {
 	for (auto& device : Devices) {
-		if (FileSystem::MemDevice* memDev = dynamic_cast<FileSystem::MemDevice*>(device.second.get())) {
+		if (CodersFileSystem::MemDevice* memDev = dynamic_cast<CodersFileSystem::MemDevice*>(device.second.get())) {
 			memDev->capacity = memDev->getUsed() + capacity;
 		}
 	}
@@ -72,12 +72,12 @@ void FFINKernelFSDevDevice::updateCapacity(std::int64_t capacity) {
 
 void FFINKernelFSDevDevice::tickListeners() {
 	for (auto& device : Devices) {
-		if (FileSystem::DiskDevice* diskDev = dynamic_cast<FileSystem::DiskDevice*>(device.second.get())) {
+		if (CodersFileSystem::DiskDevice* diskDev = dynamic_cast<CodersFileSystem::DiskDevice*>(device.second.get())) {
 			diskDev->tickWatcher();
 		}
 	}
 }
 
-FileSystem::SRef<FFINKernelFSSerial> FFINKernelFSDevDevice::getSerial() const {
+CodersFileSystem::SRef<FFINKernelFSSerial> FFINKernelFSDevDevice::getSerial() const {
 	return Serial;
 }

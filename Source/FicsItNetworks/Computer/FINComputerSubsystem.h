@@ -5,8 +5,8 @@
 #include "FGCharacterPlayer.h"
 #include "FGSaveInterface.h"
 #include "FGSubsystem.h"
-#include "FicsItNetworksCustomVersion.h"
-#include "WidgetInteractionComponent.h"
+#include "Components/WidgetInteractionComponent.h"
+#include "FicsItNetworks/FicsItNetworksCustomVersion.h"
 
 #include "FINComputerSubsystem.generated.h"
 

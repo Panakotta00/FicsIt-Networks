@@ -23,7 +23,7 @@ protected:
 	UPROPERTY(Replicated)
 	TArray<UObject*> Nodes;
 
-	void AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add);
+	void AddNodeRecursive(TArray<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add);
 
 public:
 	AFINNetworkCircuit();

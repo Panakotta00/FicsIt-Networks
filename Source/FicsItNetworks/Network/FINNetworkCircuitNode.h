@@ -1,8 +1,6 @@
 ﻿#pragma once
 
-#include "Interface.h"
-#include "WeakInterfacePtr.h"
-
+#include "CoreMinimal.h"
 #include "FINNetworkCircuitNode.generated.h"
 
 class AFINNetworkCircuit;

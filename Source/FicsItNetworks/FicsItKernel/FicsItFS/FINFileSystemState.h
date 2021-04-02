@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "FGInventoryComponent.h"
-#include "FicsItKernel/FicsItFS/FileSystem.h"
+#include "FicsItNetworks/FicsItKernel/FicsItFS/FileSystem.h"
 #include "FINFileSystemState.generated.h"
 
 UCLASS()
@@ -11,7 +11,9 @@ class FICSITNETWORKS_API AFINFileSystemState : public AActor, public IFGSaveInte
 	GENERATED_BODY()
 
 private:
-	FileSystem::SRef<FileSystem::Device> Device;
+	CodersFileSystem::SRef<CodersFileSystem::Device> Device;
+
+	void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path);
 	
 public:
 	UPROPERTY(SaveGame)
@@ -32,7 +34,7 @@ public:
 	~AFINFileSystemState();
 
 	// Begin UObject
-	virtual void Serialize(FArchive& Ar) override;
+	virtual void Serialize(FStructuredArchive::FRecord Record) override;
 	// End UObject
 	
 	// Begin AActor
@@ -43,7 +45,7 @@ public:
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
 	
-	FileSystem::SRef<FileSystem::Device> GetDevice();
+	CodersFileSystem::SRef<CodersFileSystem::Device> GetDevice(bool bInForceUpdate = false, bool bInForeCreate = false);
 
 	/**
 	 * Creates a new item state object wich holds information and functions about a save game saved filesystem.

@@ -4,8 +4,7 @@
 #include "FINStateEEPROMLua.h"
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
-#include "LuaStructs.h"
-#include "Network/FINDynamicStructHolder.h"
+#include "FicsItNetworks/Network/FINDynamicStructHolder.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \

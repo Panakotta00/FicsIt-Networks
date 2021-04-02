@@ -4,7 +4,8 @@
 #include "Computer/FINComputerSubsystem.h"
 #include "Network/FINHookSubsystem.h"
 #include "Network/Signals/FINSignalSubsystem.h"
-#include "SML/mod/ModSubsystems.h"
+#include "Subsystem/ModSubsystemHolder.h"
+
 #include "FINSubsystemHolder.generated.h"
 
 UCLASS()

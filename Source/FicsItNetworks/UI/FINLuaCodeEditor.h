@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Slate.h"
-#include "SyntaxHighlighterTextLayoutMarshaller.h"
-
-#include "Widget.h"
+#include "Components/Widget.h"
+#include "Framework/Text/SyntaxHighlighterTextLayoutMarshaller.h"
 
 #include "FINLuaCodeEditor.generated.h"
 

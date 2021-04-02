@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "FINComputerModule.h"
-#include "Network/FINNetworkCircuitNode.h"
-#include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkMessageInterface.h"
-#include "Network/Signals/FINSignalData.h"
+#include "FicsItNetworks/Network/FINNetworkCircuitNode.h"
+#include "FicsItNetworks/Network/FINNetworkComponent.h"
+#include "FicsItNetworks/Network/FINNetworkMessageInterface.h"
+#include "FicsItNetworks/Network/Signals/FINSignalData.h"
 
 #include "FINComputerNetworkCard.generated.h"
 
@@ -85,7 +85,7 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
+	virtual void HandleMessage(FGuid InID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
 	// End IFINNetworkMessageInterface
 
 	static bool CheckNetMessageData(const TArray<FFINAnyNetworkValue>& Data);

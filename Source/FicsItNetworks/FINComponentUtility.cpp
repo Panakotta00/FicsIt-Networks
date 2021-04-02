@@ -1,18 +1,8 @@
 #include "FINComponentUtility.h"
 
-#include "WindowsPlatformApplicationMisc.h"
-#include "EngineGlobals.h"
-#include "VorbisAudioInfo.h"
-//#include "Interfaces/IAudioFormat.h"
-
-#include "FGSaveSystem.h"
 #include "FGPlayerController.h"
-
 #include "Network/FINNetworkAdapter.h"
-
-#include <filesystem>
-#include <fstream>
-#include <sstream>
+#include "Windows/WindowsPlatformApplicationMisc.h"
 
 UFINNetworkConnectionComponent* UFINComponentUtility::GetNetworkConnectorFromHit(FHitResult hit) {
 	if (!hit.bBlockingHit) return nullptr;

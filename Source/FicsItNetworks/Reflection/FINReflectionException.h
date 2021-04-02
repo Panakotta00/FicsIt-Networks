@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "FINBase.h"
-#include "Utils/FINException.h"
+#include "FicsItNetworks/Utils/FINException.h"
 #include "FINReflectionException.generated.h"
 
 USTRUCT()

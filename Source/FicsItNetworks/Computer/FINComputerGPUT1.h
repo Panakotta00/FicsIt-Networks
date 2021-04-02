@@ -1,8 +1,6 @@
 #pragma once
 
 #include "FINComputerGPU.h"
-#include "SInvalidationPanel.h"
-
 #include "FINComputerGPUT1.generated.h"
 
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
@@ -15,7 +13,7 @@ class FICSITNETWORKS_API SScreenMonitor : public SLeafWidget {
 		{
 			_Clipping = EWidgetClipping::OnDemand;
 		}
-		SLATE_ATTRIBUTE(TArray<FString>, Text)
+		SLATE_ATTRIBUTE(FString, Text)
 		SLATE_ATTRIBUTE(FSlateFontInfo, Font)
 		SLATE_ATTRIBUTE(FVector2D, ScreenSize)
 		SLATE_ATTRIBUTE(TArray<FLinearColor>, Foreground)
@@ -36,7 +34,7 @@ public:
 	 *
 	 * @return	the currently displayed text grid
 	 */
-	TArray<FString> GetText() const;
+	FString GetText() const;
 
 	/**
 	 * Allows you to get information about the character screen size.
@@ -98,7 +96,7 @@ public:
 	static int InputToInt(const FInputEvent& InputEvent);
 	
 private:
-    TAttribute<TArray<FString>> Text;
+    TAttribute<FString> Text;
 	TAttribute<TArray<FLinearColor>> Foreground;
 	TAttribute<TArray<FLinearColor>> Background;
 	TAttribute<FSlateFontInfo> Font;
@@ -132,8 +130,11 @@ UCLASS()
 class AFINComputerGPUT1 : public AFINComputerGPU {
 	GENERATED_BODY()
 private:
+	UPROPERTY(SaveGame)
+	FFINNetworkTrace Test;
+
 	UPROPERTY(SaveGame, Replicated)
-	TArray<FString> TextGrid;
+	FString TextGrid;
 
 	UPROPERTY(SaveGame, Replicated)
 	FVector2D ScreenSize;
@@ -151,7 +152,7 @@ private:
 	TArray<FLinearColor> Background;
 
 	UPROPERTY(SaveGame)
-	TArray<FString> TextGridBuffer;
+	FString TextGridBuffer;
 
 	UPROPERTY(SaveGame)
 	TArray<FLinearColor> ForegroundBuffer;
@@ -171,6 +172,8 @@ public:
 
 	// Begin AActor
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void Serialize(FStructuredArchive::FRecord Record) override;
+	//virtual void Serialize(FArchive& Ar) override;
 	// End AActor
 
 	// Begin IFINGraphicsPorcessingUnit

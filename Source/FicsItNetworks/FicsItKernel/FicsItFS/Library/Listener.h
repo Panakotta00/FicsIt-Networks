@@ -5,7 +5,7 @@
 
 #include <unordered_set>
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	class Node;
 	class Device;
 

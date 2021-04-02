@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Network/FINAnyNetworkValue.h"
+#include "FicsItNetworks/Network/FINAnyNetworkValue.h"
 #include "FINSignalData.generated.h"
 
 class UFINSignal;
@@ -18,17 +18,22 @@ struct FICSITNETWORKS_API FFINSignalData {
 	FFINSignalData() = default;
 	FFINSignalData(UFINSignal* Signal, const FINArray& Data) : Signal(Signal), Data(Data) {}
 
-	bool Serialize(FArchive& Ar);
+	bool Serialize(FStructuredArchive::FSlot Slot);
 };
 
-inline FArchive& operator<<(FArchive& Ar, FFINSignalData& Signal) {
-	Signal.Serialize(Ar);
+inline FArchive& operator<<(FArchive& Ar, FFINSignalData& Data) {
+	Data.Serialize(FStructuredArchiveFromArchive(Ar).GetSlot());
 	return Ar;
+}
+
+inline void operator<<(FStructuredArchive::FSlot Slot, FFINSignalData& Data) {
+	Data.Serialize(Slot);
 }
 
 template<>
 struct TStructOpsTypeTraits<FFINSignalData> : TStructOpsTypeTraitsBase2<FFINSignalData> {
 	enum {
-		WithSerializer = true,
+		//WithSerializer = true,
+		WithStructuredSerializer = true,
 	};
 };

@@ -1,9 +1,8 @@
 #include "FINCodeableSplitter.h"
-#include "FicsItNetworksModule.h"
-#include "Computer/FINComputerSubsystem.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
+#include "FicsItNetworks/Computer/FINComputerSubsystem.h"
 
 AFINCodeableSplitter::AFINCodeableSplitter() {
-	RootComponent->SetMobility(EComponentMobility::Movable);
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->SetMobility(EComponentMobility::Movable);

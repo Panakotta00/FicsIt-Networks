@@ -1,6 +1,6 @@
 ﻿#include "FINNetworkRouter.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINNetworkCircuit.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
+#include "FicsItNetworks/Network/FINNetworkCircuit.h"
 
 AFINNetworkRouter::AFINNetworkRouter() {
 	NetworkConnector1 = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector1");

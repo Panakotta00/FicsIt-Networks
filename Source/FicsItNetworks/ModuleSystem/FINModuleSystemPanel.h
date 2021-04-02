@@ -30,12 +30,10 @@ public:
 
 	UPROPERTY(Replicated)
 	TArray<UObject*> Grid;
-	
-	UFINModuleSystemPanel();
-	~UFINModuleSystemPanel();
 
 	// Begin UObject
 	void Serialize(FArchive& Ar) override;
+	virtual void InitializeComponent() override;
 	// End UObject
 
 	// Begin UActorComponent

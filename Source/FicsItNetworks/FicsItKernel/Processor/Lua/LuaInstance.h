@@ -1,16 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SubclassOf.h"
-
 #include "Lua.h"
-
-#include <string>
-#include <map>
-#include <set>
-#include <functional>
-
-#include "Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 
 class UFINFunction;
 class UFINClass;

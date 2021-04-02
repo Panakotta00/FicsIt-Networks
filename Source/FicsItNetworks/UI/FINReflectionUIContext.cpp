@@ -3,14 +3,13 @@
 #include "FINReflectionClassHirachyViewer.h"
 #include "FINReflectionEntryListViewer.h"
 #include "FINSplitter.h"
-#include "Reflection/FINReflection.h"
-#include "Network/FINNetworkValues.h"
-#include "Reflection/FINArrayProperty.h"
-#include "Reflection/FINClassProperty.h"
-#include "Reflection/FINObjectProperty.h"
-#include "Reflection/FINStructProperty.h"
-#include "Reflection/FINTraceProperty.h"
-#include "SScaleBox.h"
+#include "FicsItNetworks/Network/FINNetworkValues.h"
+#include "FicsItNetworks/Reflection/FINArrayProperty.h"
+#include "FicsItNetworks/Reflection/FINClassProperty.h"
+#include "FicsItNetworks/Reflection/FINObjectProperty.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
+#include "FicsItNetworks/Reflection/FINTraceProperty.h"
+#include "Widgets/Layout/SScaleBox.h"
 
 FString GetText(UFINProperty* Prop) {
 	if (!Prop) return FString();
@@ -73,7 +72,7 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .ColorAndOpacity(Context->Style.Get()->ClickableDataTypeColor)
             .Text(Class->GetDisplayName())
-            .OnDoubleClicked_Lambda([Context, Class]() {
+            .OnDoubleClicked_Lambda([Context, Class](const FGeometry&, const FPointerEvent&) {
                 Context->NavigateTo(Context->Structs.Find(Class)->Get());
                 return FReply::Handled();
             })]
@@ -97,7 +96,7 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .ColorAndOpacity(Context->Style.Get()->ClickableDataTypeColor)
             .Text(Class->GetDisplayName())
-            .OnDoubleClicked_Lambda([Context, Class]() {
+            .OnDoubleClicked_Lambda([Context, Class](const FGeometry&, const FPointerEvent&) {
                 Context->NavigateTo(Context->Structs.Find(Class)->Get());
                 return FReply::Handled();
             })]
@@ -121,7 +120,7 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .ColorAndOpacity(Context->Style.Get()->ClickableDataTypeColor)
             .Text(Class->GetDisplayName())
-            .OnDoubleClicked_Lambda([Context, Class]() {
+            .OnDoubleClicked_Lambda([Context, Class](const FGeometry&, const FPointerEvent&) {
                 Context->NavigateTo(Context->Structs.Find(Class)->Get());
                 return FReply::Handled();
             })]
@@ -145,7 +144,7 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFINProperty* Prop, FFINReflectionUICon
             .TextStyle(&Context->Style.Get()->DataTypeTextStyle)
             .ColorAndOpacity(Context->Style.Get()->ClickableDataTypeColor)
             .Text(Struct->GetDisplayName())
-            .OnDoubleClicked_Lambda([Context, Struct]() {
+            .OnDoubleClicked_Lambda([Context, Struct](const FGeometry&, const FPointerEvent&) {
                 Context->NavigateTo(Context->Structs.Find(Struct)->Get());
                 return FReply::Handled();
             })]
@@ -463,22 +462,22 @@ TSharedRef<SWidget> FFINReflectionUIStruct::GetDetailsWidget() {
 }
 
 TSharedRef<SWidget> FFINReflectionUIStruct::GetShortPreview() {
-	FFINReflectionUIContext* Context = this->Context;
+	FFINReflectionUIContext* InContext = this->Context;
 	return SNew(SHorizontalBox)
     +SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0).VAlign(VAlign_Center)[
         SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->InternalNameTextStyle)
+		.TextStyle(&InContext->Style.Get()->InternalNameTextStyle)
         .Text( FText::FromString(Struct->GetInternalName()))
-        .HighlightText_Lambda([Context]() {
-            return FText::FromString(Context->FilterString);
+        .HighlightText_Lambda([InContext]() {
+            return FText::FromString(InContext->FilterString);
         })
     ]
     +SHorizontalBox::Slot().AutoWidth().VAlign(EVerticalAlignment::VAlign_Center)[
         SNew(STextBlock)
-        .TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+        .TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
         .Text(Struct->GetDisplayName())
-        .HighlightText_Lambda([Context]() {
-            return FText::FromString(Context->FilterString);
+        .HighlightText_Lambda([InContext]() {
+            return FText::FromString(InContext->FilterString);
         })
     ];
 }
@@ -619,61 +618,61 @@ TSharedRef<SWidget> FFINReflectionUIProperty::GetDetailsWidget() {
 }
 
 TSharedRef<SWidget> FFINReflectionUIProperty::GetShortPreview() {
-	FFINReflectionUIContext* Context = this->Context;
+	FFINReflectionUIContext* InContext = this->Context;
 	return SNew(SHorizontalBox)
 	+SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[
-		GeneratePropTypeIcon(Property, Context)
+		GeneratePropTypeIcon(Property, InContext)
 	]
 	+SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0).VAlign(VAlign_Center)[
-		GenerateDataTypeIcon(Property, Context)
+		GenerateDataTypeIcon(Property, InContext)
 	]
 	+SHorizontalBox::Slot().AutoWidth().Padding(5,0,0,0).VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->InternalNameTextStyle)
+		.TextStyle(&InContext->Style.Get()->InternalNameTextStyle)
 		.Text(FText::FromString(Property->GetInternalName()))
-		.HighlightText_Lambda([Context]() {
-			return FText::FromString(Context->FilterString);
+		.HighlightText_Lambda([InContext]() {
+			return FText::FromString(InContext->FilterString);
 		})
 	]
 	+SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0).VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+		.TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
 		.Text(Property->GetDisplayName())
-		.HighlightText_Lambda([Context]() {
-			return FText::FromString(Context->FilterString);
+		.HighlightText_Lambda([InContext]() {
+			return FText::FromString(InContext->FilterString);
 		})
 	];
 }
 TSharedRef<SWidget> FFINReflectionUIProperty::GetPreview() {
-	FFINReflectionUIContext* Context = this->Context;
+	FFINReflectionUIContext* InContext = this->Context;
 	return SNew(SHorizontalBox)
     +SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[
-        GeneratePropTypeIcon(Property, Context)
+        GeneratePropTypeIcon(Property, InContext)
     ]
     +SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0).VAlign(VAlign_Center)[
-        GenerateDataTypeIcon(Property, Context)
+        GenerateDataTypeIcon(Property, InContext)
     ]
     +SHorizontalBox::Slot().AutoWidth().Padding(5,0,0,0).VAlign(VAlign_Center)[
         SNew(STextBlock)
-        .TextStyle(&Context->Style.Get()->InternalNameTextStyle)
+        .TextStyle(&InContext->Style.Get()->InternalNameTextStyle)
         .Text(FText::FromString(Property->GetInternalName()))
-        .HighlightText_Lambda([Context]() {
-            return FText::FromString(Context->FilterString);
+        .HighlightText_Lambda([InContext]() {
+            return FText::FromString(InContext->FilterString);
         })
     ]
     +SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0).VAlign(VAlign_Center)[
         SNew(STextBlock)
-        .TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+        .TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
         .Text(Property->GetDisplayName())
-        .HighlightText_Lambda([Context]() {
-            return FText::FromString(Context->FilterString);
+        .HighlightText_Lambda([InContext]() {
+            return FText::FromString(InContext->FilterString);
         })
     ]
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)
 	.Padding(5, 0, 0, 0)[
-		GeneratePropFlags(Property, Context)
+		GeneratePropFlags(Property, InContext)
 	];
 }
 
@@ -733,21 +732,21 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetDetailsWidget() {
 }
 
 TSharedRef<SWidget> FFINReflectionUIFunction::GetShortPreview() {
-	FFINReflectionUIContext* Context = this->Context;
+	FFINReflectionUIContext* InContext = this->Context;
 	return SNew(SHorizontalBox)
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
-		GenerateFuncTypeIcon(Function, Context)
+		GenerateFuncTypeIcon(Function, InContext)
 	]
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->InternalNameTextStyle)
+		.TextStyle(&InContext->Style.Get()->InternalNameTextStyle)
 		.Text(FText::FromString(Function->GetInternalName()))
-		.HighlightText_Lambda([Context]() {
-			return FText::FromString(Context->FilterString);
+		.HighlightText_Lambda([InContext]() {
+			return FText::FromString(InContext->FilterString);
 		})
 	]
 	+SHorizontalBox::Slot()
@@ -755,30 +754,30 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetShortPreview() {
 	.Padding(5,0,5,0)
 	.VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+		.TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
 		.Text(Function->GetDisplayName())
-		.HighlightText_Lambda([Context]() {
-			return FText::FromString(Context->FilterString);
+		.HighlightText_Lambda([InContext]() {
+			return FText::FromString(InContext->FilterString);
 		})
 	];
 }
 TSharedRef<SWidget> FFINReflectionUIFunction::GetPreview() {
-	FFINReflectionUIContext* Context = this->Context;
+	FFINReflectionUIContext* InContext = this->Context;
 	TSharedPtr<SHorizontalBox> ParamBox;
 	TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox)
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
-		GenerateFuncTypeIcon(Function, Context)
+		GenerateFuncTypeIcon(Function, InContext)
 	]
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
         SNew(STextBlock)
-        .TextStyle(&Context->Style.Get()->InternalNameTextStyle)
+        .TextStyle(&InContext->Style.Get()->InternalNameTextStyle)
         .Text(FText::FromString(Function->GetInternalName()))
-        .HighlightText_Lambda([Context]() {
-            return FText::FromString(Context->FilterString);
+        .HighlightText_Lambda([InContext]() {
+            return FText::FromString(InContext->FilterString);
         })
     ]
     +SHorizontalBox::Slot()
@@ -786,17 +785,17 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetPreview() {
 	.Padding(5,0,5,0)
 	.VAlign(VAlign_Center)[
         SNew(STextBlock)
-        .TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+        .TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
         .Text(Function->GetDisplayName())
-        .HighlightText_Lambda([Context]() {
-            return FText::FromString(Context->FilterString);
+        .HighlightText_Lambda([InContext]() {
+            return FText::FromString(InContext->FilterString);
         })
     ]
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->ParameterListTextStyle)
+		.TextStyle(&InContext->Style.Get()->ParameterListTextStyle)
 		.Text(FText::FromString("("))
 	]
 	+SHorizontalBox::Slot()
@@ -809,13 +808,13 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetPreview() {
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->ParameterListTextStyle)
+		.TextStyle(&InContext->Style.Get()->ParameterListTextStyle)
 		.Text(FText::FromString(")"))
 	]
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
-		GenerateFuncFlags(Function, Context)
+		GenerateFuncFlags(Function, InContext)
 	];
 	
 	for (UFINProperty* Prop : Function->GetParameters()) {
@@ -825,7 +824,7 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetPreview() {
 			.VAlign(VAlign_Center)
 			.Padding(0,0,5,0)[
 				SNew(STextBlock)
-				.TextStyle(&Context->Style.Get()->ParameterListTextStyle)
+				.TextStyle(&InContext->Style.Get()->ParameterListTextStyle)
 				.Text(FText::FromString(","))
 			];
 		}
@@ -836,14 +835,14 @@ TSharedRef<SWidget> FFINReflectionUIFunction::GetPreview() {
 			+SHorizontalBox::Slot()
 			.AutoWidth()
 			.VAlign(VAlign_Center)[
-				GenerateDataTypeIcon(Prop, Context)
+				GenerateDataTypeIcon(Prop, InContext)
 			]
 			+SHorizontalBox::Slot()
 			.AutoWidth()
 			.VAlign(VAlign_Center)
 			.Padding(5,0,0,0)[
 				SNew(STextBlock)
-				.TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+				.TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
 				.Text(Prop->GetDisplayName())
 			]
 		];
@@ -907,46 +906,46 @@ TSharedRef<SWidget> FFINReflectionUISignal::GetDetailsWidget() {
 }
 
 TSharedRef<SWidget> FFINReflectionUISignal::GetShortPreview() {
-	FFINReflectionUIContext* Context = this->Context;
+	FFINReflectionUIContext* InContext = this->Context;
 	return SNew(SHorizontalBox)
 	+SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[
-        GenerateSignalTypeIcon(Signal, Context)
+        GenerateSignalTypeIcon(Signal, InContext)
     ]
 	+SHorizontalBox::Slot().AutoWidth().Padding(5,0,5,0).VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->InternalNameTextStyle)
+		.TextStyle(&InContext->Style.Get()->InternalNameTextStyle)
 		.Text(FText::FromString(Signal->GetInternalName()))
-		.HighlightText_Lambda([Context]() {
-			return FText::FromString(Context->FilterString);
+		.HighlightText_Lambda([InContext]() {
+			return FText::FromString(InContext->FilterString);
 		})
 	]
 	+SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+		.TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
 		.Text(Signal->GetDisplayName())
-		.HighlightText_Lambda([Context]() {
-			return FText::FromString(Context->FilterString);
+		.HighlightText_Lambda([InContext]() {
+			return FText::FromString(InContext->FilterString);
 		})
 	];
 }
 
 TSharedRef<SWidget> FFINReflectionUISignal::GetPreview() {
-	FFINReflectionUIContext* Context = this->Context;
+	FFINReflectionUIContext* InContext = this->Context;
 	TSharedPtr<SHorizontalBox> ParamBox;
 	TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox)
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
-		GenerateSignalTypeIcon(Signal, Context)
+		GenerateSignalTypeIcon(Signal, InContext)
 	]
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
         SNew(STextBlock)
-        .TextStyle(&Context->Style.Get()->InternalNameTextStyle)
+        .TextStyle(&InContext->Style.Get()->InternalNameTextStyle)
         .Text(FText::FromString(Signal->GetInternalName()))
-        .HighlightText_Lambda([Context]() {
-            return FText::FromString(Context->FilterString);
+        .HighlightText_Lambda([InContext]() {
+            return FText::FromString(InContext->FilterString);
         })
     ]
     +SHorizontalBox::Slot()
@@ -954,17 +953,17 @@ TSharedRef<SWidget> FFINReflectionUISignal::GetPreview() {
 	.Padding(5,0,5,0)
 	.VAlign(VAlign_Center)[
         SNew(STextBlock)
-        .TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+        .TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
         .Text(Signal->GetDisplayName())
-        .HighlightText_Lambda([Context]() {
-            return FText::FromString(Context->FilterString);
+        .HighlightText_Lambda([InContext]() {
+            return FText::FromString(InContext->FilterString);
         })
     ]
 	+SHorizontalBox::Slot()
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->ParameterListTextStyle)
+		.TextStyle(&InContext->Style.Get()->ParameterListTextStyle)
 		.Text(FText::FromString("("))
 	]
 	+SHorizontalBox::Slot()
@@ -977,7 +976,7 @@ TSharedRef<SWidget> FFINReflectionUISignal::GetPreview() {
 	.AutoWidth()
 	.VAlign(VAlign_Center)[
 		SNew(STextBlock)
-		.TextStyle(&Context->Style.Get()->ParameterListTextStyle)
+		.TextStyle(&InContext->Style.Get()->ParameterListTextStyle)
 		.Text(FText::FromString(")"))
 	];
 	
@@ -988,7 +987,7 @@ TSharedRef<SWidget> FFINReflectionUISignal::GetPreview() {
 			.VAlign(VAlign_Center)
 			.Padding(0,0,5,0)[
 				SNew(STextBlock)
-				.TextStyle(&Context->Style.Get()->ParameterListTextStyle)
+				.TextStyle(&InContext->Style.Get()->ParameterListTextStyle)
 				.Text(FText::FromString(","))
 			];
 		}
@@ -999,14 +998,14 @@ TSharedRef<SWidget> FFINReflectionUISignal::GetPreview() {
 			+SHorizontalBox::Slot()
 			.AutoWidth()
 			.VAlign(VAlign_Center)[
-				GenerateDataTypeIcon(Prop, Context)
+				GenerateDataTypeIcon(Prop, InContext)
 			]
 			+SHorizontalBox::Slot()
 			.AutoWidth()
 			.VAlign(VAlign_Center)
 			.Padding(5,0,0,0)[
 				SNew(STextBlock)
-				.TextStyle(&Context->Style.Get()->DisplayNameTextStyle)
+				.TextStyle(&InContext->Style.Get()->DisplayNameTextStyle)
 				.Text(Prop->GetDisplayName())
 			]
 		];

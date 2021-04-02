@@ -1,11 +1,11 @@
 #include "LuaComponentAPI.h"
-#include "Network/FINNetworkComponent.h"
-#include "FicsItKernel/FicsItKernel.h"
+#include "FicsItNetworks/Network/FINNetworkComponent.h"
+#include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
 #include "LuaInstance.h"
 #include "FGBlueprintFunctionLibrary.h"
 #include "LuaProcessor.h"
-#include "Network/FINNetworkUtils.h"
-#include "Reflection/FINClass.h"
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
+#include "FicsItNetworks/Reflection/FINClass.h"
 
 // ReSharper disable once IdentifierTypo
 namespace FicsItKernel {

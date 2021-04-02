@@ -6,7 +6,7 @@
 #include "Directory.h"
 #include "Device.h"
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	class FileSystemException : public std::exception {
 	public:
 		FileSystemException(std::string what);

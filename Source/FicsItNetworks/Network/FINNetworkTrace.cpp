@@ -1,9 +1,5 @@
 ﻿#include "FINNetworkTrace.h"
 
-#include "FGBuildableRailroadSignal.h"
-#include "FGBuildableRailroadStation.h"
-#include "FGBuildableRailroadSwitchControl.h"
-#include "FGBuildableTrainPlatform.h"
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
 #include "FGPowerCircuit.h"
@@ -12,11 +8,15 @@
 #include "FGRailroadVehicle.h"
 #include "FGRailroadVehicleMovementComponent.h"
 #include "FGTrain.h"
-#include "FGBuildableDockingStation.h"
-
-#include "Components/FINVehicleScanner.h"
-
-#include "Network/FINNetworkCircuit.h"
+#include "FINNetworkCircuit.h"
+#include "FINNetworkCircuitNode.h"
+#include "FINNetworkComponent.h"
+#include "Buildables/FGBuildableDockingStation.h"
+#include "Buildables/FGBuildableRailroadSignal.h"
+#include "Buildables/FGBuildableRailroadStation.h"
+#include "Buildables/FGBuildableRailroadSwitchControl.h"
+#include "Buildables/FGBuildableTrainPlatform.h"
+#include "FicsItNetworks/Components/FINVehicleScanner.h"
 
 #define StepFuncName(A, B) Step ## _ ## A ## _ ## B
 #define StepRegName(A, B) StepReg ## _ ## A ## _ ## B
@@ -149,18 +149,18 @@ FFINNetworkTrace::FFINNetworkTrace(UObject* Obj) : Obj(Obj) {
 
 FFINNetworkTrace::~FFINNetworkTrace() {}
 
-bool FFINNetworkTrace::Serialize(FArchive& Ar) {
-	return Serialize(FStructuredArchiveFromArchive(Ar).GetSlot());
-}
+//bool FFINNetworkTrace::Serialize(FArchive& Ar) {
+//		return true;
+//}
 
 bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
 	if (Slot.GetUnderlyingArchive().IsSaveGame()) {
 		FStructuredArchive::FRecord Record = Slot.EnterRecord();
 		UObject* ObjRaw = Obj.Get();
-		Record.EnterField(FIELD_NAME_TEXT("Ptr")) << ObjRaw;
+		Record.EnterField(SA_FIELD_NAME(TEXT("Ptr"))) << ObjRaw;
 		Obj = ObjRaw;
 
-		TOptional<FStructuredArchive::FSlot> PrevSlot = Record.TryEnterField(FIELD_NAME_TEXT("Next"), Prev.IsValid());
+		TOptional<FStructuredArchive::FSlot> PrevSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("Next")), Prev.IsValid());
 		if (PrevSlot.IsSet()) {
 			if (!Prev.IsValid()) Prev = MakeShared<FFINNetworkTrace>();
 			Prev->Serialize(PrevSlot.GetValue());
@@ -168,7 +168,7 @@ bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
 			Prev.Reset();
 		}
 
-		TOptional<FStructuredArchive::FSlot> StepSlot = Record.TryEnterField(FIELD_NAME_TEXT("Step"), Step.IsValid());
+		TOptional<FStructuredArchive::FSlot> StepSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("Step")), Step.IsValid());
 		if (StepSlot.IsSet()) {
 			FString StepName;
 			if (Step.IsValid()) StepName = inverseTraceStepRegistry[Step];
@@ -254,7 +254,6 @@ FFINNetworkTrace FFINNetworkTrace::Reverse() const {
 	return trace;
 }
 
-#pragma optimize("", off)
 bool FFINNetworkTrace::IsValid() const {
 	UObject* B = Obj.Get();
 	if (!B) return false;
@@ -267,7 +266,6 @@ bool FFINNetworkTrace::IsValid() const {
 	}
 	return true;
 }
-#pragma optimize("", on)
 
 bool FFINNetworkTrace::IsEqualObj(const FFINNetworkTrace& other) const {
 	return Obj == other.Obj;
@@ -387,21 +385,21 @@ Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadSwitchControl, {
 	return A->GetSwitchControl() == B;
 })
 Step(AFGBuildableRailroadSwitchControl, UFGRailroadTrackConnectionComponent, {
-    return A = B->GetSwitchControl();
+    return A == B->GetSwitchControl();
 })
 
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadSignal, {
     return A->GetSignal() == B;
 })
 Step(AFGBuildableRailroadSignal, UFGRailroadTrackConnectionComponent, {
-    return A = B->GetSignal();
+    return A == B->GetSignal();
 })
 
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadStation, {
     return A->GetStation() == B;
 })
 Step(AFGBuildableRailroadStation, UFGRailroadTrackConnectionComponent, {
-    return A = B->GetStation();
+    return A == B->GetStation();
 })
 
 Step(AFGVehicle, AFGBuildableDockingStation, {

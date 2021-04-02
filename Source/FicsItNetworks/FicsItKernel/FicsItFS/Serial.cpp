@@ -1,10 +1,10 @@
 #include "Serial.h"
 
-FFINKernelFSSerial::FFINKernelFSSerial(FileSystem::ListenerListRef listeners, FileSystem::SizeCheckFunc sizeCheck) : listeners(listeners), sizeCheck(sizeCheck) {}
+FFINKernelFSSerial::FFINKernelFSSerial(CodersFileSystem::ListenerListRef listeners, CodersFileSystem::SizeCheckFunc sizeCheck) : listeners(listeners), sizeCheck(sizeCheck) {}
 
-FileSystem::SRef<FileSystem::FileStream> FFINKernelFSSerial::open(FileSystem::FileMode m) {
+CodersFileSystem::SRef<CodersFileSystem::FileStream> FFINKernelFSSerial::open(CodersFileSystem::FileMode m) {
 	clearStreams();
-	FileSystem::SRef<FFINKernelSerialStream> stream = new FFINKernelSerialStream(this, m, listeners, sizeCheck);
+	CodersFileSystem::SRef<FFINKernelSerialStream> stream = new FFINKernelSerialStream(this, m, listeners, sizeCheck);
 	inStreams.insert(stream);
 	return stream;
 }
@@ -14,11 +14,11 @@ bool FFINKernelFSSerial::isValid() const {
 }
 
 void FFINKernelFSSerial::clearStreams() {
-	std::unordered_set<FileSystem::WRef<FileSystem::FileStream>> removeStreams;
-	for (FileSystem::WRef<FileSystem::FileStream> stream : inStreams) {
+	std::unordered_set<CodersFileSystem::WRef<CodersFileSystem::FileStream>> removeStreams;
+	for (CodersFileSystem::WRef<CodersFileSystem::FileStream> stream : inStreams) {
 		if (!stream) removeStreams.insert(stream);
 	}
-	for (FileSystem::WRef<FileSystem::FileStream> stream : removeStreams) {
+	for (CodersFileSystem::WRef<CodersFileSystem::FileStream> stream : removeStreams) {
 		inStreams.erase(stream);
 	}
 }
@@ -39,7 +39,7 @@ void FFINKernelFSSerial::write(std::string str) {
 
 		// write str to the input stream
 		FFINKernelSerialStream* s = stream->get();
-		if (s && s->mode & FileSystem::INPUT) s->input << str;
+		if (s && s->mode & CodersFileSystem::INPUT) s->input << str;
 	}
 }
 
@@ -49,24 +49,24 @@ std::string FFINKernelFSSerial::readOutput() {
 	return str;
 }
 
-FFINKernelSerialStream::FFINKernelSerialStream(FileSystem::SRef<FFINKernelFSSerial> FFINKernelFSSerial, FileSystem::FileMode mode, FileSystem::ListenerListRef& listeners, FileSystem::SizeCheckFunc sizeCheck) : FileStream(mode), serial(FFINKernelFSSerial), listeners(listeners), sizeCheck(sizeCheck) {}
+FFINKernelSerialStream::FFINKernelSerialStream(CodersFileSystem::SRef<FFINKernelFSSerial> FFINKernelFSSerial, CodersFileSystem::FileMode mode, CodersFileSystem::ListenerListRef& listeners, CodersFileSystem::SizeCheckFunc sizeCheck) : FileStream(mode), serial(FFINKernelFSSerial), listeners(listeners), sizeCheck(sizeCheck) {}
 
 FFINKernelSerialStream::~FFINKernelSerialStream() {}
 
 void FFINKernelSerialStream::write(std::string str) {
-	if (!(mode & FileSystem::OUTPUT)) return;
+	if (!(mode & CodersFileSystem::OUTPUT)) return;
 	buffer.append(str);
 }
 
 void FFINKernelSerialStream::flush() {
-	if (!(mode & FileSystem::OUTPUT)) return;
+	if (!(mode & CodersFileSystem::OUTPUT)) return;
 	serial->output << buffer;
 	serial->output.flush();
 	buffer = "";
 }
 
 std::string FFINKernelSerialStream::readChars(size_t chars) {
-	if (!(mode & FileSystem::INPUT)) return "";
+	if (!(mode & CodersFileSystem::INPUT)) return "";
 	char* buf = new char[chars];
 	try {
 		input.read(buf, chars);
@@ -81,7 +81,7 @@ std::string FFINKernelSerialStream::readChars(size_t chars) {
 }
 
 std::string FFINKernelSerialStream::readLine() {
-	if (!(mode & FileSystem::INPUT)) return "";
+	if (!(mode & CodersFileSystem::INPUT)) return "";
 	std::string s;
 	std::getline(input, s);
 	input = std::stringstream(input.str().erase(0, input.tellg()));
@@ -89,7 +89,7 @@ std::string FFINKernelSerialStream::readLine() {
 }
 
 std::string FFINKernelSerialStream::readAll() {
-	if (!(mode & FileSystem::INPUT)) return "";
+	if (!(mode & CodersFileSystem::INPUT)) return "";
 	std::stringstream s;
 	s << input.rdbuf();
 	input = std::stringstream(input.str().erase(0, input.tellg()));
@@ -97,7 +97,7 @@ std::string FFINKernelSerialStream::readAll() {
 }
 
 double FFINKernelSerialStream::readNumber() {
-	if (!(mode & FileSystem::INPUT)) return 0.0;
+	if (!(mode & CodersFileSystem::INPUT)) return 0.0;
 	double n = 0.0;
 	input >> n;
 	input = std::stringstream(input.str().erase(0, input.tellg()));

@@ -1,41 +1,37 @@
 #include "NetworkController.h"
 
-#include "FicsItNetworksCustomVersion.h"
-#include "Computer/FINComputerSubsystem.h"
-#include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkCircuit.h"
-#include "Network/FINNetworkCircuitNode.h"
-#include "Network/FINNetworkUtils.h"
+#include "FicsItNetworks/FicsItNetworksCustomVersion.h"
+#include "FicsItNetworks/Computer/FINComputerSubsystem.h"
+#include "FicsItNetworks/Network/FINNetworkComponent.h"
+#include "FicsItNetworks/Network/FINNetworkCircuit.h"
+#include "FicsItNetworks/Network/FINNetworkCircuitNode.h"
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
 
-void UFINKernelNetworkController::Serialize(FArchive& Ar) {
-	Super::Serialize(Ar);
-	if (!Ar.IsSaveGame()) return;
+void UFINKernelNetworkController::Serialize(FStructuredArchive::FRecord Record) {
+	Super::Serialize(Record);
+
+	if (!Record.GetUnderlyingArchive().IsSaveGame()) return;
 	
 	if (AFINComputerSubsystem::GetComputerSubsystem(this)->Version < FINKernelRefactor) return;
 	
 	// serialize signals
 	int32 SignalCount = SignalQueue.Num();
-	Ar << SignalCount;
-	if (Ar.IsLoading()) {
-		SignalQueue.Empty();
-	}
+	FStructuredArchive::FArray SignalListRecord = Record.EnterArray(SA_FIELD_NAME(TEXT("Signals")), SignalCount);
 	for (int i = 0; i < SignalCount; ++i) {
+		FStructuredArchive::FRecord SignalRecord = SignalListRecord.EnterElement().EnterRecord();
+		
 		FFINSignalData Signal;
 		FFINNetworkTrace Trace;
-		if (Ar.IsSaving()) {
+		if (SignalRecord.GetUnderlyingArchive().IsSaving()) {
 			const TTuple<FFINSignalData, FFINNetworkTrace>& SignalData = SignalQueue[i];
 			Signal = SignalData.Key;
 			Trace = SignalData.Value;
 		}
-		bool bIsValid = Trace.IsValid();
-		Ar << bIsValid;
-		if (!bIsValid) continue;
+
+		SignalRecord.EnterField(SA_FIELD_NAME(TEXT("Signal"))) << Signal;
+		SignalRecord.EnterField(SA_FIELD_NAME(TEXT("Trace"))) << Trace;
 		
-		// save/save signal
-		Signal.Serialize(Ar);
-		Ar << Trace;
-		
-		if (Ar.IsLoading()) {
+		if (SignalRecord.GetUnderlyingArchive().IsLoading()) {
 			SignalQueue.Add(TPair<FFINSignalData, FFINNetworkTrace>{Signal, Trace});
 		}
 	}

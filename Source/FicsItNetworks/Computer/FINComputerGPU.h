@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "FINComputerModule.h"
-#include "WidgetInteractionComponent.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FINComputerGPU.generated.h"
 

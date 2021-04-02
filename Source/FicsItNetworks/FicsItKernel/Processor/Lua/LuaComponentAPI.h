@@ -4,8 +4,6 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		class LuaProcessor;
-
 		/**
 		* Adds the Component API to the top stack entry if it is a table in the given Lua state.
 		*

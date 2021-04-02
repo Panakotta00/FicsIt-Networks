@@ -1,30 +1,27 @@
 ﻿#include "FINUReflectionSource.h"
 
-#include "FGBuildable.h"
-#include "FicsItNetworksModule.h"
 #include "FINArrayProperty.h"
 #include "FINFuncProperty.h"
 #include "FINReflection.h"
 #include "FINStructProperty.h"
 #include "FINUFunction.h"
-#include "Computer/FINComputerSubsystem.h"
+#include "Buildables/FGBuildable.h"
+#include "UObject/PropertyIterator.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 
 TMap<UFunction*, UFINSignal*> UFINUReflectionSource::FuncSignalMap;
 
 bool UFINUReflectionSource::ProvidesRequirements(UClass* Class) const {
 	if (Class->IsChildOf(AFGBuildable::StaticClass())) return true;
-	for (TFieldIterator<UField> Field(Class); Field; ++Field) {
-		UProperty* Prop = Cast<UProperty>(*Field);
-		UFunction* Func = Cast<UFunction>(*Field);
-		if (Prop) {
-			if (Field->GetName().StartsWith("netProp_")) return true;
-			if (Field->GetName().StartsWith("netPropReadOnly_")) return true;
-		} else if (Func) {
-			if (Field->GetName().StartsWith("netPropGet_")) return true;
-			if (Field->GetName().StartsWith("netFunc_")) return true;
-			if (Field->GetName().StartsWith("netSig_")) return true;
-			if (Field->GetName() == "netDesc" && Cast<UTextProperty>(Func->GetReturnProperty()) && Func->ParmsSize == sizeof(FText)) return true;
-		}
+	for (TFieldIterator<FProperty> Property(Class); Property; ++Property) {
+		if (Property->GetName().StartsWith("netProp_")) return true;
+		if (Property->GetName().StartsWith("netPropReadOnly_")) return true;
+	}
+	for (TFieldIterator<UFunction> Function(Class); Function; ++Function) {
+		if (Function->GetName().StartsWith("netPropGet_")) return true;
+		if (Function->GetName().StartsWith("netFunc_")) return true;
+		if (Function->GetName().StartsWith("netSig_")) return true;
+		if (Function->GetName() == "netDesc" && Cast<UTextProperty>(Function->GetReturnProperty()) && Function->ParmsSize == sizeof(FText)) return true;
 	}
 	return false;
 }
@@ -53,26 +50,24 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 	if (!Meta.DisplayName.IsEmpty()) ToFillClass->DisplayName = Meta.DisplayName;
 	if (!Meta.Description.IsEmpty()) ToFillClass->Description = Meta.Description;
 
-	for (TFieldIterator<UField> Field(Class); Field; ++Field) {
-		UProperty* Prop = Cast<UProperty>(*Field);
-		UFunction* Func = Cast<UFunction>(*Field);
-		if (Field->GetOuter() != Class) continue; 
-		if (Prop) {
-			if (Field->GetName().StartsWith("netProp_")) {
-				ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, Func));
-			}
-		} else if (Func) {
-			if (Field->GetName().StartsWith("netPropGet_")) {
-				ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, Func));
-			} else if (Field->GetName().StartsWith("netFunc_")) {
-				ToFillClass->Functions.Add(GenerateFunction(Ref, Class, Func));
-			} else if (Field->GetName().StartsWith("netSig_")) {
-				ToFillClass->Signals.Add(GenerateSignal(Ref, Class, Func));
-			} else if (Field->GetName() == "netDesc" && Cast<UTextProperty>(Func->GetReturnProperty()) && Func->ParmsSize == sizeof(FText)) {
-				FText Desc;
-				Class->GetDefaultObject()->ProcessEvent(Func, &Desc);
-				ToFillClass->Description = Desc;
-			}
+	for (TFieldIterator<UFunction> Function(Class); Function; ++Function) {
+		if (Function->GetOwnerClass() != Class) continue; 
+		if (Function->GetName().StartsWith("netProp_")) {
+			ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, *Function));
+		}
+	}
+	for (TFieldIterator<UFunction> Func(Class); Func; ++Func) {
+		if (Func->GetOwnerClass() != Class) continue; 
+		if (Func->GetName().StartsWith("netPropGet_")) {
+			ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, *Func));
+		} else if (Func->GetName().StartsWith("netFunc_")) {
+			ToFillClass->Functions.Add(GenerateFunction(Ref, Class, *Func));
+		} else if (Func->GetName().StartsWith("netSig_")) {
+			ToFillClass->Signals.Add(GenerateSignal(Ref, Class, *Func));
+		} else if (Func->GetName() == "netDesc" && Cast<UTextProperty>(Func->GetReturnProperty()) && Func->ParmsSize == sizeof(FText)) {
+			FText Desc;
+			Class->GetDefaultObject()->ProcessEvent(*Func, &Desc);
+			ToFillClass->Description = Desc;
 		}
 	}
 	

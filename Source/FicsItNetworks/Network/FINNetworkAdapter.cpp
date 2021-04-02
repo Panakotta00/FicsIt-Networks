@@ -1,10 +1,7 @@
 #include "FINNetworkAdapter.h"
-
 #include "FGPowerConnectionComponent.h"
 #include "FGItemPickup_Spawnable.h"
 #include "FINNetworkCable.h"
-#include "UnrealNetwork.h"
-
 #include "Components/SceneComponent.h"
 
 TArray<TPair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = TArray<TPair<UClass*, FFINAdapterSettings>>();
@@ -45,7 +42,7 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	Connector->bOuterAsRedirect = false;
 	
 	ConnectorMesh = CreateDefaultSubobject<UStaticMeshComponent>(L"StaticMesh");
-	ConnectorMesh->SetHiddenInGameSML(true, true);
+	ConnectorMesh->SetHiddenInGame(true, true);
 	ConnectorMesh->SetupAttachment(RootComponent);
 	ConnectorMesh->SetMobility(EComponentMobility::Type::Movable);
 	ConnectorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -107,7 +104,7 @@ void AFINNetworkAdapter::BeginPlay() {
 		SetActorLocationAndRotation(pos, Parent->GetActorRotation());
 		FHitResult res;
 		ConnectorMesh->K2_AddRelativeRotation(setting.rot, false, res, true);
-		ConnectorMesh->SetHiddenInGameSML(!setting.mesh, true);
+		ConnectorMesh->SetHiddenInGame(!setting.mesh, true);
 		Connector->MaxCables = setting.maxCables;
 		break;
 	}

@@ -3,8 +3,8 @@
 #include "LuaFuture.h"
 #include "LuaProcessor.h"
 #include "LuaProcessorStateStorage.h"
-#include "Reflection/FINFunction.h"
-#include "Reflection/FINStruct.h"
+#include "FicsItNetworks/Reflection/FINFunction.h"
+#include "FicsItNetworks/Reflection/FINStruct.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -63,6 +63,13 @@ namespace FicsItKernel {
 		}
 
 		int luaFindGetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, const FString& MetaName, int(*callFunc)(lua_State*), bool classInstance) {
+			// get cache function
+			luaL_getmetafield(L, 1, LUA_REF_CACHE);																// Instance, FuncName, InstanceCache
+			
+			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*MetaName)) != LUA_TNIL)  {										// Instance, FuncName, InstanceCache, CachedFunc
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
+			}																											// Instance, FuncName, InstanceCache, nil
+
 			// try to find property
 			UFINProperty* Property = Struct->FindFINProperty(MemberName, classInstance ? FIN_Prop_ClassProp : FIN_Prop_Attrib);
 			if (Property) {
@@ -75,13 +82,6 @@ namespace FicsItKernel {
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 
-			// get cache function
-			luaL_getmetafield(L, 1, LUA_REF_CACHE);																// Instance, FuncName, InstanceCache
-			
-			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*MetaName)) != LUA_TNIL) {	// Instance, FuncName, InstanceCache, CachedFunc
-				return UFINLuaProcessor::luaAPIReturn(L, 1);
-			}																											// Instance, FuncName, InstanceCache, nil
-
 			// try to find function
 			UFINFunction* Function = Struct->FindFINFunction(MemberName, classInstance ? FIN_Func_ClassFunc : FIN_Func_MemberFunc);
 			if (Function) {
@@ -89,6 +89,8 @@ namespace FicsItKernel {
 				new (Func) LuaRefFuncData{Struct, Function};
 				luaL_setmetatable(L, LUA_REF_FUNC_DATA);
 				lua_pushcclosure(L, callFunc, 1);
+				lua_pushvalue(L, -1);
+				lua_setfield(L, 3, TCHAR_TO_UTF8(*MetaName));
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			

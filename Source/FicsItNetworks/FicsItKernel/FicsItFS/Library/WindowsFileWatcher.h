@@ -4,7 +4,7 @@
 
 #include "FileSystem.h"
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	enum NodeType;
 	class Path;
 

@@ -1,9 +1,7 @@
 #pragma once
 
-#include "FGBuildableRailroadTrack.h"
 #include "Lua.h"
-#include "LuaProcessorStateStorage.h"
-#include "Network/FINNetworkValues.h"
+#include "FicsItNetworks/Network/FINNetworkValues.h"
 
 class UFINKernelSystem;
 class UFINStruct;

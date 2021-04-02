@@ -1,9 +1,7 @@
 ﻿#include "FINComputerSubsystem.h"
 
-
 #include "FGCharacterPlayer.h"
-#include "FicsItNetworksModule.h"
-#include "FINSubsystemHolder.h"
+#include "FicsItNetworks/FINSubsystemHolder.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input = CreateDefaultSubobject<UInputComponent>("Input");
@@ -94,7 +92,7 @@ AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* Worl
 #if WITH_EDITOR
 	return nullptr;
 #endif
-	UFINSubsystemHolder* Holder = GetSubsystemHolder<UFINSubsystemHolder>(WorldContext);
+	UFINSubsystemHolder* Holder = UFINSubsystemHolder::GetSubsystemHolder<UFINSubsystemHolder>(WorldContext);
 	if (Holder) return Holder->ComputerSubsystem;
 	else {
 		TArray<AActor*> FoundActors;

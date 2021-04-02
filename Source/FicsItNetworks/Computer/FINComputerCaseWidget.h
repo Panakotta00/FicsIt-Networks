@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "UserWidget.h"
-#include "FicsItKernel/Processor/FINStateEEPROM.h"
+#include "Blueprint/UserWidget.h"
+#include "FicsItNetworks/FicsItKernel/Processor/FINStateEEPROM.h"
 
 #include "FINComputerCaseWidget.generated.h"
 

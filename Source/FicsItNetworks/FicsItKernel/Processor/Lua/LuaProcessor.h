@@ -1,8 +1,8 @@
 #pragma once
 
-#include "FicsItKernel/Processor/Processor.h"
 #include "LuaProcessorStateStorage.h"
-#include "FicsItKernel/FicsItKernel.h"
+#include "FicsItNetworks/FicsItKernel/Processor/Processor.h"
+#include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
 #include "LuaFileSystemAPI.h"
 #include "LuaProcessor.generated.h"
 
@@ -15,14 +15,14 @@ namespace FicsItKernel {
 	}
 }
 
-class LuaFileSystemListener : public FileSystem::Listener {
+class LuaFileSystemListener : public CodersFileSystem::Listener {
 private:
 	class UFINLuaProcessor* Parent = nullptr;
 public:
 	LuaFileSystemListener(class UFINLuaProcessor* InParent) : Parent(InParent) {}
 	
-	virtual void onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) override;
-	virtual void onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) override;
+	virtual void onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) override;
+	virtual void onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
 };
 
 enum LuaTickState {
@@ -138,7 +138,7 @@ private:
 
 	// filesystem handling
 	TSet<FicsItKernel::Lua::LuaFile> FileStreams;
-	FileSystem::SRef<LuaFileSystemListener> FileSystemListener;
+	CodersFileSystem::SRef<LuaFileSystemListener> FileSystemListener;
 	
 public:
 	UPROPERTY(SaveGame)

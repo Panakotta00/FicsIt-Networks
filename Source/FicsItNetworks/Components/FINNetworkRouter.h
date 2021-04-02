@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "FGBuildable.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINNetworkMessageInterface.h"
+#include "Buildables/FGBuildable.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkRouter.generated.h"
 
 UENUM()

@@ -1,7 +1,4 @@
 ﻿#include "FINComputerScreen.h"
-
-
-#include "UnrealNetwork.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 void AFINComputerScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {

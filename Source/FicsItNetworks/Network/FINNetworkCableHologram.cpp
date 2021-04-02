@@ -1,15 +1,11 @@
 #include "FINNetworkCableHologram.h"
 
-
 #include "FGConstructDisqualifier.h"
 #include "FGOutlineComponent.h"
 #include "FINNetworkAdapter.h"
-#include "FINComponentUtility.h"
-
 #include "FGPowerConnectionComponent.h"
-
 #include "FINNetworkCable.h"
-#include "UnrealNetwork.h"
+#include "FicsItNetworks/FINComponentUtility.h"
 
 FVector FFINSnappedInfo::GetConnectorPos() const {
 	switch (SnapType) {
@@ -239,9 +235,9 @@ void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& 
 	bool validSnap = IsSnappedValid();
 	
 	if (Snapped.SnapType == FIN_NOT_SNAPPED || From.SnapType == FIN_NOT_SNAPPED) {
-		Cable->SetVisibilitySML(false, true);
-		Adapter1->SetVisibilitySML(false, true);
-		Adapter2->SetVisibilitySML(false, true);
+		Cable->SetVisibility(false, true);
+		Adapter1->SetVisibility(false, true);
+		Adapter2->SetVisibility(false, true);
 
 		if (mInvalidPlacementMaterial) {
 			Adapter1->SetMaterial(0, mInvalidPlacementMaterial);
@@ -250,7 +246,7 @@ void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& 
 
 		return;
 	}
-	Cable->SetVisibilitySML(true, true);
+	Cable->SetVisibility(true, true);
 
 	float offset = 250.0;
 	FVector start;
@@ -266,18 +262,18 @@ void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& 
 	Cable->SetStartAndEnd(start, start_t, end, end_t, true);
 
 	if (From.SnapType == FIN_SETTINGS) {
-		Adapter1->SetVisibilitySML(true, true);
+		Adapter1->SetVisibility(true, true);
 		Adapter1->SetRelativeRotation(RootComponent->GetComponentToWorld().InverseTransformRotation(From.GetConnectorRot().Quaternion()).Rotator());
 	} else {
-		Adapter1->SetVisibilitySML(false, true);
+		Adapter1->SetVisibility(false, true);
 	}
 	
 	if (Snapped.SnapType == FIN_SETTINGS) {
-		Adapter2->SetVisibilitySML(true, true);
+		Adapter2->SetVisibility(true, true);
 		Adapter2->SetRelativeLocation(end);
 		Adapter2->SetWorldRotation(Snapped.GetConnectorRot());
 	} else {
-		Adapter2->SetVisibilitySML(false, true);
+		Adapter2->SetVisibility(false, true);
 	}
 
 	PoleHologram->SetScrollRotateValue(GetScrollRotateValue());
@@ -351,6 +347,7 @@ AFINNetworkCableHologram::AFINNetworkCableHologram() {
 
 	this->mMaxPlacementFloorAngle = 90.0f;
 
+	RootComponent = NewObject<USceneComponent>();
 	RootComponent->SetWorldScale3D(FVector::OneVector);
 
 	Cable = CreateDefaultSubobject<USplineMeshComponent>(L"Cable");
@@ -370,14 +367,14 @@ AFINNetworkCableHologram::AFINNetworkCableHologram() {
 	Adapter1->SetupAttachment(RootComponent);
 	Adapter1->SetMobility(EComponentMobility::Movable);
 	Adapter1->SetStaticMesh(adapterMesh);
-	Adapter1->SetVisibilitySML(false);
+	Adapter1->SetVisibility(false);
 	Adapter1->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Adapter2 = CreateDefaultSubobject<UStaticMeshComponent>(L"Adapter2");
 	Adapter2->SetupAttachment(RootComponent);
 	Adapter2->SetMobility(EComponentMobility::Movable);
 	Adapter2->SetStaticMesh(adapterMesh);
-	Adapter2->SetVisibilitySML(false);
+	Adapter2->SetVisibility(false);
 	Adapter2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 

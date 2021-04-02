@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINSpeakerPole.generated.h"
 
 UCLASS(Blueprintable)

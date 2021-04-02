@@ -2,12 +2,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "Queue.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkTrace.h"
-#include "Network/Signals/FINSignalData.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
+#include "FicsItNetworks/Network/FINNetworkComponent.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/Signals/FINSignalData.h"
 #include "NetworkController.generated.h"
 
 /**
@@ -36,7 +34,7 @@ public:
 	uint32 MaxSignalCount = 1000;
 
 	// Begin UObject
-	virtual void Serialize(FArchive& Ar) override;
+	virtual void Serialize(FStructuredArchive::FRecord Record) override;
 	// End UObject
 
 	// Begin IFGSaveInterface

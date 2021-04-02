@@ -1,9 +1,9 @@
 ﻿#include "FINSignalSubsystem.h"
 
-#include "FicsItNetworksModule.h"
 #include "FINSignalListener.h"
-#include "FINSubsystemHolder.h"
-#include "mod/ModSubsystems.h"
+#include "FicsItNetworks/FINSubsystemHolder.h"
+#include "FicsItNetworks/Network/FINHookSubsystem.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 
 bool AFINSignalSubsystem::ShouldSave_Implementation() const {
 	return true;
@@ -23,7 +23,7 @@ void AFINSignalSubsystem::GatherDependencies_Implementation(TArray<UObject*>& ou
 }
 
 AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldContext) {
-	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->SignalSubsystem;
+	return UModSubsystemHolder::GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->SignalSubsystem;
 }
 #pragma optimize("", off)
 void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData& Signal) {

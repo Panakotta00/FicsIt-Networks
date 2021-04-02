@@ -1,12 +1,12 @@
 #include "LuaEventAPI.h"
 
-#include "FicsItKernel/FicsItKernel.h"
+#include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
 #include "FGPowerCircuit.h"
-#include "FINSubsystemHolder.h"
+#include "FicsItNetworks/FINSubsystemHolder.h"
 #include "LuaProcessor.h"
 #include "LuaInstance.h"
-#include "Network/FINNetworkTrace.h"
-#include "Network/Signals/FINSignalSubsystem.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/Signals/FINSignalSubsystem.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -66,7 +66,7 @@ namespace FicsItKernel {
 			const int a = luaProc->DoSignal(L);
 			if (!a && !(args > 0 && lua_isinteger(L, 1) && lua_tointeger(L, 1) == 0)) {
 				luaProc->Timeout = t;
-				luaProc->PullStart =  FTimespan(luaProc->GetWorld()->GetRealTimeSeconds()).GetTotalMilliseconds();
+				luaProc->PullStart =  (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds();
 				luaProc->PullState = (args > 0) ? 1 : 2;
 				
 				lua_yieldk(L, 0, args, luaPullContinue);

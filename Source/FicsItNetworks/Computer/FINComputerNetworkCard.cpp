@@ -1,10 +1,8 @@
 ﻿#include "FINComputerNetworkCard.h"
 
-
-#include "UnrealNetwork.h"
-#include "Network/FINNetworkCircuit.h"
-#include "Network/Signals/FINSignalListener.h"
-#include "Reflection/FINReflection.h"
+#include "FicsItNetworks/Network/FINNetworkCircuit.h"
+#include "FicsItNetworks/Network/Signals/FINSignalListener.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
 
 void AFINComputerNetworkCard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -83,13 +81,13 @@ bool AFINComputerNetworkCard::IsPortOpen(int Port) {
 	return OpenPorts.Contains(Port);
 }
 
-void AFINComputerNetworkCard::HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+void AFINComputerNetworkCard::HandleMessage(FGuid InID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
 	static UFINSignal* Signal = nullptr;
 	if (!Signal) Signal = FFINReflection::Get()->FindClass(StaticClass())->FindFINSignal("NetworkMessage");
 	{
 		FScopeLock Lock(&HandledMessagesMutex);
-		if (HandledMessages.Contains(ID) || !Signal) return;
-		HandledMessages.Add(ID);
+		if (HandledMessages.Contains(InID) || !Signal) return;
+		HandledMessages.Add(InID);
 	}
 	TArray<FFINAnyNetworkValue> Parameters = { Sender.ToString(), (FINInt)Port };
 	Parameters.Append(Data);

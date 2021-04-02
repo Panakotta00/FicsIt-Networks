@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FINComputerModule.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItNetworks/FicsItKernel/FicsItFS/FINFileSystemState.h"
 #include "FINComputerDriveHolder.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINDriveHolderDriveUpdate, AFINFileSystemState*, Drive);

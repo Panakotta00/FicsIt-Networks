@@ -1,8 +1,5 @@
 ﻿#include "FINModuleBase.h"
-
-
-#include "UnrealNetwork.h"
-#include "ModuleSystem/FINModuleSystemHolo.h"
+#include "FicsItNetworks/ModuleSystem/FINModuleSystemHolo.h"
 
 void AFINModuleBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

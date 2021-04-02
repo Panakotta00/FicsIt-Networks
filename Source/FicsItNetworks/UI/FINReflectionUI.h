@@ -2,8 +2,8 @@
 
 #include "FINReflectionUIContext.h"
 #include "FINReflectionUIStyle.h"
-#include "HorizontalBox.h"
-#include "SCompoundWidget.h"
+#include "Components/Widget.h"
+
 #include "FINReflectionUI.generated.h"
 
 class SFINReflectionUI : public SCompoundWidget {

@@ -1,10 +1,6 @@
 ﻿#include "FINComputerGPU.h"
 
-
-#include "UnrealNetwork.h"
-#include "WidgetInteractionComponent.h"
-#include "Graphics/FINScreenInterface.h"
-#include "Private/KismetTraceUtils.h"
+#include "FicsItNetworks/Graphics/FINScreenInterface.h"
 
 AFINComputerGPU::AFINComputerGPU() {
 	SetActorTickEnabled(true);

@@ -5,7 +5,7 @@
 #include "FINComputerCase.h"
 #include "FINComputerDriveHolder.h"
 #include "FINComputerGPUT1.h"
-#include "FicsItKernel/Processor/Lua/FINStateEEPROMLua.h"
+#include "FicsItNetworks/FicsItKernel/Processor/Lua/FINStateEEPROMLua.h"
 #include "FINComputerRCO.generated.h"
 
 UCLASS(Blueprintable)

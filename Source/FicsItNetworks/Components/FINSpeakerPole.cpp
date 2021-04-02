@@ -6,7 +6,6 @@
 
 #include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
 #include "VorbisAudioInfo.h"
-#include "FicsItKernel/Processor/Lua/LuaStructs.h"
 
 AFINSpeakerPole::AFINSpeakerPole() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -37,7 +36,7 @@ void AFINSpeakerPole::StopSound_Implementation() {
 	CurrentSound = "";
 }
 
-void AFINSpeakerPole::OnSoundFinished(UAudioComponent* AudioComponent) {
+void AFINSpeakerPole::OnSoundFinished(UAudioComponent* InAudioComponent) {
 	netSig_SpeakerSound(2, CurrentSound);
 	CurrentSound = "";
 }
@@ -92,18 +91,22 @@ void AFINSpeakerPole::netSigMeta_SpeakerSound(FString& InternalName, FText& Disp
 }
 
 USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& sound) {
-	FString fsp = UFGSaveSystem::GetSaveDirectoryPath();
-
+    FString fsp;
+	// TODO: Get UFGSaveSystem::GetSaveDirectoryPath() working
+    if (fsp.IsEmpty()) {
+        fsp = FPaths::Combine( FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT( "Saved/" ) TEXT( "SaveGames/" ) );
+    }
+	
 	auto file = sound + TEXT(".ogg");
-	auto path = std::experimental::filesystem::path(*file);
+	auto path = std::filesystem::path(*file);
 
-	std::experimental::filesystem::path root = *fsp;
+	std::filesystem::path root = *fsp;
 	root /= "Computers/Sounds";
-	std::experimental::filesystem::create_directories(root);
+	std::filesystem::create_directories(root);
 	auto pathToFile = root / path;
-	pathToFile = std::experimental::filesystem::absolute(pathToFile);
+	pathToFile = std::filesystem::absolute(pathToFile);
 	auto ps = pathToFile.string();
-	if (ps.rfind(std::experimental::filesystem::absolute(root).string(), 0) != 0 || !std::experimental::filesystem::exists(pathToFile)) {
+	if (ps.rfind(std::filesystem::absolute(root).string(), 0) != 0 || !std::filesystem::exists(pathToFile)) {
 		return nullptr;
 	}
 
@@ -131,8 +134,6 @@ USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& sound) {
 	sw->Duration = info.Duration;
 	sw->RawPCMDataSize = info.SampleDataSize;
 	sw->SetSampleRate(info.SampleRate);
-
-	sw->bVirtualizeWhenSilent = true;
 
 	delete vorbis_obj;
 

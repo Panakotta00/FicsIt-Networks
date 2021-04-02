@@ -2,8 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "FINNetworkValues.h"
-#include "Interface.h"
-
 #include "FINNetworkMessageInterface.generated.h"
 
 class AFINNetworkCircuit;

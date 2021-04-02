@@ -169,6 +169,10 @@ inline bool operator<<(FArchive& Ar, FFINAnyNetworkValue& Val) {
 	return Val.Serialize(Ar);
 }
 
+inline bool operator<<(FStructuredArchive::FSlot Slot, FFINAnyNetworkValue& Val) {
+	return Val.Serialize(Slot.GetUnderlyingArchive());
+}
+
 template<>
 struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFINAnyNetworkValue> {
 	enum {

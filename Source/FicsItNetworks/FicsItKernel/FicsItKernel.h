@@ -1,14 +1,13 @@
 #pragma once
 
-#include "JsonObject.h"
 #include "Audio/AudioController.h"
 #include "FicsItFS/FINFileSystemState.h"
 #include "FicsItFS/DevDevice.h"
 #include "Network/NetworkController.h"
-#include "Graphics/FINGPUInterface.h"
-#include "Graphics/FINScreenInterface.h"
-#include "Network/FINFuture.h"
-#include "Utils/FINException.h"
+#include "FicsItNetworks/Graphics/FINGPUInterface.h"
+#include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "FicsItNetworks/Network/FINFuture.h"
+#include "FicsItNetworks/Utils/FINException.h"
 #include "FicsItKernel.generated.h"
 
 class UFINKernelProcessor;
@@ -30,19 +29,19 @@ struct FICSITNETWORKS_API FFINKernelCrash : public FFINException {
 
 class UFINKernelSystem;
 
-class FICSITNETWORKS_API FFINKernelListener : public FileSystem::Listener {
+class FICSITNETWORKS_API FFINKernelListener : public CodersFileSystem::Listener {
 private:
 	UFINKernelSystem* parent;
 
 public:
 	FFINKernelListener(UFINKernelSystem* parent);
 
-	virtual void onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) override;
-	virtual void onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) override;
-	virtual void onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) override;
-	virtual void onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) override;
-	virtual void onNodeChanged(FileSystem::Path  path, FileSystem::NodeType type) override;
-	virtual void onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) override;
+	virtual void onMounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) override;
+	virtual void onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) override;
+	virtual void onNodeAdded(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
+	virtual void onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
+	virtual void onNodeChanged(CodersFileSystem::Path  path, CodersFileSystem::NodeType type) override;
+	virtual void onNodeRenamed(CodersFileSystem::Path newPath, CodersFileSystem::Path oldPath, CodersFileSystem::NodeType type) override;
 };
 
 UCLASS()
@@ -57,12 +56,12 @@ private:
 	UFINKernelNetworkController* Network = nullptr;
 	UPROPERTY()
 	UFINKernelAudioController* Audio = nullptr;
-	TSet<TScriptInterface<IFINGPUInterface>> GPUs;
-	TSet<TScriptInterface<IFINScreenInterface>> Screens;
+	TArray<TScriptInterface<IFINGPUInterface>> GPUs;
+	TArray<TScriptInterface<IFINScreenInterface>> Screens;
 	FFINKernelFSRoot FileSystem;
-	FileSystem::SRef<FFINKernelFSDevDevice> DevDevice = nullptr;
+	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = nullptr;
 	int64 MemoryCapacity = 0;
-	TMap<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> Drives;
+	TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> Drives;
 
 	// Runtime Environment/State
 	UPROPERTY(SaveGame)
@@ -73,7 +72,7 @@ private:
 	FString DevDeviceMountPoint;
 	TSharedPtr<FFINKernelCrash> KernelCrash;
 	int64 MemoryUsage = 0;
-	FileSystem::SRef<FFINKernelListener> FileSystemListener;
+	CodersFileSystem::SRef<FFINKernelListener> FileSystemListener;
 
 	// Cache
 	TSharedPtr<FJsonObject> ReadyToUnpersist = nullptr;
@@ -199,14 +198,14 @@ public:
 	 *
 	 * @return	the drives
 	 */
-	TMap<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> GetDrives() const;
+	TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> GetDrives() const;
 
 	/**
 	 * Gets the internally used DevDevice
 	 *
 	 * @return	the used DevDevice
 	 */
-	FileSystem::SRef<FFINKernelFSDevDevice> GetDevDevice() const;
+	CodersFileSystem::SRef<FFINKernelFSDevDevice> GetDevDevice() const;
 
 	/**
 	 * Mounts the currently used devDevice to the given path in the currently used file system.
@@ -214,7 +213,7 @@ public:
 	 * @param	InPath	path were the DevDevice should get mounted to
 	 * @return	true if it was able to mount the DevDevice, false if not (f.e. when the DevDevice got already mounted in this run state)
 	 */
-	bool InitFileSystem(FileSystem::Path InPath);
+	bool InitFileSystem(CodersFileSystem::Path InPath);
 
 	/**
 	 * Starts the system.
@@ -297,7 +296,7 @@ public:
 	 *
 	 * @return list of added gpus
 	 */
-	const TSet<TScriptInterface<IFINGPUInterface>>& GetGPUs() const;
+	const TArray<TScriptInterface<IFINGPUInterface>>& GetGPUs() const;
 
 	/**
 	* Adds the given screen to the kernel
@@ -318,7 +317,7 @@ public:
 	*
 	* @return list of added screen
 	*/
-	const TSet<TScriptInterface<IFINScreenInterface>>& GetScreens() const;
+	const TArray<TScriptInterface<IFINScreenInterface>>& GetScreens() const;
 
 	/**
 	 * Returns the amount of milliseconds passed since the system started.

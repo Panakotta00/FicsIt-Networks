@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINCodeableSplitter.generated.h"
 
 UCLASS()

@@ -2,7 +2,7 @@
 
 #include "Device.h"
 
-using namespace FileSystem;
+using namespace CodersFileSystem;
 using namespace std;
 
 #define ListenerLoop(listenerVarName) \
@@ -43,7 +43,7 @@ void ListenerList::onNodeChanged(Path path, NodeType type) {
 	}
 }
 
-void FileSystem::ListenerList::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
+void CodersFileSystem::ListenerList::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
 	ListenerLoop(listener)
 		listener.onNodeRenamed(newPath, oldPath, type);
 	}
@@ -51,7 +51,7 @@ void FileSystem::ListenerList::onNodeRenamed(Path newPath, Path oldPath, NodeTyp
 
 ListenerListRef::ListenerListRef(ListenerList & listeners, const Path & path) : listeners(listeners), path(path) {}
 
-FileSystem::ListenerListRef::ListenerListRef(ListenerListRef & listenersRef, const Path & path) : listeners(listenersRef.listeners), path(listenersRef.path / path) {}
+CodersFileSystem::ListenerListRef::ListenerListRef(ListenerListRef & listenersRef, const Path & path) : listeners(listenersRef.listeners), path(listenersRef.path / path) {}
 
 void ListenerListRef::onMounted(Path newPath, SRef<Device> device) {
 	listeners.onMounted(path / newPath, device);
@@ -73,7 +73,7 @@ void ListenerListRef::onNodeChanged(Path newPath, NodeType type) {
 	listeners.onNodeChanged(path / newPath, type);
 }
 
-void FileSystem::ListenerListRef::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
+void CodersFileSystem::ListenerListRef::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
 	listeners.onNodeRenamed(path / newPath, path / oldPath, type);
 }
 
@@ -103,7 +103,7 @@ void PathBoundListener::onNodeRenamed(Path newPath, Path oldPath, NodeType type)
 	listener->onNodeRenamed(additionalPath / newPath, additionalPath / oldPath, type);
 }
 
-NodeType FileSystem::getTypeFromRef(SRef<Node> node) {
+NodeType CodersFileSystem::getTypeFromRef(SRef<Node> node) {
 	auto p = node.get();
 	if (dynamic_cast<Directory*>(p)) return NT_Directory;
 	else if (dynamic_cast<File*>(p)) return NT_File;

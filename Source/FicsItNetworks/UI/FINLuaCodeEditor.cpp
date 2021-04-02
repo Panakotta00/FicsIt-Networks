@@ -35,7 +35,7 @@ TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighte
 		return A.MatchText.Len() > B.MatchText.Len();
 	});
 	
-	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(MakeShared<FSyntaxTokenizer>(TokenizerRules), LuaSyntaxTextStyle));
+	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(FSyntaxTokenizer::Create(TokenizerRules), LuaSyntaxTextStyle));
 }
 #pragma optimize("", off)
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) {

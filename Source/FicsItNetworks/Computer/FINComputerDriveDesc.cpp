@@ -1,13 +1,8 @@
 #include "FINComputerDriveDesc.h"
-
-
-#include "GridPanel.h"
-#include "GridSlot.h"
-#include "HorizontalBox.h"
-#include "HorizontalBoxSlot.h"
-#include "TextBlock.h"
-#include "UnrealNetwork.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "Components/GridPanel.h"
+#include "Components/GridSlot.h"
+#include "Components/TextBlock.h"
+#include "FicsItNetworks/FicsItKernel/FicsItFS/FINFileSystemState.h"
 
 UFINComputerDriveDesc::UFINComputerDriveDesc() {
 	mStackSize = EStackSize::SS_ONE;

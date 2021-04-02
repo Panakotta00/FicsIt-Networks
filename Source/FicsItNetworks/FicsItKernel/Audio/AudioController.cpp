@@ -8,7 +8,7 @@ void UFINKernelAudioController::ExecBeep_Implementation(float Pitch) {
 }
 
 UFINKernelAudioController::UFINKernelAudioController() {
-	bReplicates = true;
+	
 }
 
 bool UFINKernelAudioController::IsSupportedForNetworking() const {

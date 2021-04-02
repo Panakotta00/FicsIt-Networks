@@ -1,8 +1,5 @@
 ﻿#include "FINIndicatorPole.h"
-
-
 #include "FGColoredInstanceMeshProxy.h"
-#include "ProxyInstancedStaticMeshComponent.h"
 
 AFINIndicatorPole::AFINIndicatorPole() {
 	Indicator = CreateDefaultSubobject<UStaticMeshComponent>("Indicator");

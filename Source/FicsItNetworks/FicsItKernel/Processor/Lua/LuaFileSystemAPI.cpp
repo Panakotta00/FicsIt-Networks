@@ -1,9 +1,7 @@
 #include "LuaFileSystemAPI.h"
-
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
-
-#include "FicsItKernel/FicsItFS/FileSystem.h"
+#include "FicsItNetworks/FicsItKernel/FicsItFS/FileSystem.h"
 
 #define LuaFunc(funcName, Code) \
 int funcName(lua_State* L) { \
@@ -25,11 +23,11 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 	if (!self_r) return luaL_error(L, "file is invalid"); \
 	LuaFile& self = *self_r; \
 	if (self->transfer) { \
-		FileSystem::FileMode mode; \
+		CodersFileSystem::FileMode mode; \
 		if (self->transfer->open) { \
 			mode = self->transfer->mode; \
-			mode = mode & ~FileSystem::FileMode::TRUNC; \
-		} else mode = FileSystem::INPUT; \
+			mode = mode & ~CodersFileSystem::FileMode::TRUNC; \
+		} else mode = CodersFileSystem::INPUT; \
 		self->file = kernel->GetFileSystem()->open(kernel->GetFileSystem()->unpersistPath(self->path), mode); \
 		if (self->transfer->open) { \
 			self->file->seek("set", self->transfer->pos); \
@@ -38,10 +36,10 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 			self->file->close(); \
 		} \
 		lua_getfield(L, LUA_REGISTRYINDEX, "FileStreamStorage"); \
-        std::set<LuaFile>& streams = *static_cast<std::set<LuaFile>*>(lua_touserdata(L, -1)); \
-		streams.insert(self); \
+        TSet<LuaFile>& streams = *static_cast<TSet<LuaFile>*>(lua_touserdata(L, -1)); \
+		streams.Add(self); \
 	} \
-	FileSystem::SRef<FileSystem::FileStream>& file = self->file; \
+	CodersFileSystem::SRef<CodersFileSystem::FileStream>& file = self->file; \
 	if (!file) { \
 		return luaL_error(L, "filestream not open"); \
 	} \
@@ -59,12 +57,12 @@ namespace FicsItKernel {
 		LuaFunc(makeFileSystem, {
 			const std::string type = luaL_checkstring(L, 1);
 			const std::string name = luaL_checkstring(L, 2);
-			FileSystem::SRef<FileSystem::Device> device;
+			CodersFileSystem::SRef<CodersFileSystem::Device> device;
 			if (type == "tmpfs") {
-				device = new FileSystem::MemDevice();
+				device = new CodersFileSystem::MemDevice();
 			} else return luaL_argerror(L, 1, "No valid FileSystem Type");
 			if (!device.isValid()) luaL_argerror(L, 1, "Invalid Device");
-			FileSystem::SRef<FFINKernelFSDevDevice> dev = self->getDevDevice();
+			CodersFileSystem::SRef<FFINKernelFSDevDevice> dev = self->getDevDevice();
 			try {
 				lua_pushboolean(L, dev.isValid() ? dev->addDevice(device, name) : false);
 			} CatchExceptionLua
@@ -73,12 +71,12 @@ namespace FicsItKernel {
 
 		LuaFunc(removeFileSystem, {
 			const std::string name = luaL_checkstring(L, 1);
-			const FileSystem::SRef<FFINKernelFSDevDevice> dev = self->getDevDevice();
+			const CodersFileSystem::SRef<FFINKernelFSDevDevice> dev = self->getDevDevice();
 			if (dev.isValid()) {
 				try {
 					const auto devices = dev->getDevices();
 					const auto device = devices.find(name);
-					if (device != devices.end() && dynamic_cast<FileSystem::MemDevice*>(device->second.get())) {
+					if (device != devices.end() && dynamic_cast<CodersFileSystem::MemDevice*>(device->second.get())) {
 						lua_pushboolean(L, dev->removeDevice(device->second));
 						return UFINLuaProcessor::luaAPIReturn(L, 1);
 					}
@@ -90,41 +88,42 @@ namespace FicsItKernel {
 
 		LuaFunc(initFileSystem, {
 			const std::string path = luaL_checkstring(L, 1);
-			lua_pushboolean(L, kernel->InitFileSystem(path));
+			lua_pushboolean(L, kernel->InitFileSystem(CodersFileSystem::Path(path)));
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		})
 
 		LuaFunc(open, {
-			std::string mode = "r";
-			if (lua_isstring(L, 2)) mode = lua_tostring(L, 2);
-			FileSystem::FileMode m;
-			if (mode == "r") m = FileSystem::INPUT;
-			else if (mode == "w") m = FileSystem::OUTPUT | FileSystem::TRUNC;
-			else if (mode == "a") m = FileSystem::OUTPUT | FileSystem::APPEND;
-			else if (mode == "+r") m = FileSystem::INPUT | FileSystem::OUTPUT;
-			else if (mode == "+w") m = FileSystem::INPUT | FileSystem::OUTPUT | FileSystem::TRUNC;
-			else if (mode == "+a") m = FileSystem::INPUT | FileSystem::OUTPUT | FileSystem::APPEND;
+			FString Mode = "r";
+			if (lua_isstring(L, 2)) Mode = FString(lua_tostring(L, 2));
+			CodersFileSystem::FileMode m;
+			if (Mode.Contains("+r")) m = CodersFileSystem::INPUT | CodersFileSystem::OUTPUT;
+			else if (Mode.Contains("+w")) m = CodersFileSystem::INPUT | CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC;
+			else if (Mode.Contains("+a")) m = CodersFileSystem::INPUT | CodersFileSystem::OUTPUT | CodersFileSystem::APPEND;
+			else if (Mode.Contains("r")) m = CodersFileSystem::INPUT;
+			else if (Mode.Contains("w")) m = CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC;
+			else if (Mode.Contains("a")) m = CodersFileSystem::OUTPUT | CodersFileSystem::APPEND;
 			else return luaL_argerror(L, 2, "is not valid file mode");
+			if (Mode.Contains("b")) m = m | CodersFileSystem::BINARY;
 			try {
-				const std::string path = luaL_checkstring(L, 1);
-				const FileSystem::SRef<FileSystem::FileStream> stream = self->open(path, m);
+				const CodersFileSystem::Path path = CodersFileSystem::Path(luaL_checkstring(L, 1));
+				const CodersFileSystem::SRef<CodersFileSystem::FileStream> stream = self->open(path, m);
 				luaFile(L, stream, stream ? self->persistPath(path) : "");
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		})
 
 		LuaFunc(createDir, {
-			const auto path = luaL_checkstring(L, 1);
-			const auto all = lua_toboolean(L, 2);
+			const std::string path = luaL_checkstring(L, 1);
+			const bool all = (bool)lua_toboolean(L, 2);
 			try {
-				lua_pushboolean(L, self->createDir(path, all).isValid());
+				lua_pushboolean(L, self->createDir(CodersFileSystem::Path(path), all).isValid());
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		})
 
 		LuaFunc(remove, {
-			const auto path = luaL_checkstring(L, 1);
-			const bool all = lua_toboolean(L, 2);
+			const CodersFileSystem::Path path = CodersFileSystem::Path(luaL_checkstring(L, 1));
+			const bool all = (bool)lua_toboolean(L, 2);
 			try {
 				lua_pushboolean(L, self->remove(path, all));
 			} CatchExceptionLua
@@ -132,8 +131,8 @@ namespace FicsItKernel {
 		})
 
 		LuaFunc(move, {
-			const auto from = luaL_checkstring(L, 1);
-			const auto to = luaL_checkstring(L, 2);
+			const auto from = CodersFileSystem::Path(luaL_checkstring(L, 1));
+			const auto to = CodersFileSystem::Path(luaL_checkstring(L, 2));
 			try {
 				lua_pushboolean(L, self->move(from, to) == 0);
 			} CatchExceptionLua
@@ -141,8 +140,8 @@ namespace FicsItKernel {
 		})
 
 		LuaFunc(rename, {
-			const auto from = luaL_checkstring(L, 1);
-			const auto to = luaL_checkstring(L, 2);
+			const auto from = CodersFileSystem::Path(luaL_checkstring(L, 1));
+			const auto to = CodersFileSystem::NodeName(luaL_checkstring(L, 2));
 			try {
 				lua_pushboolean(L, self->rename(from, to));
 			} CatchExceptionLua
@@ -150,7 +149,7 @@ namespace FicsItKernel {
 		})
 
 		LuaFunc(exists, {
-			const auto path = luaL_checkstring(L, 1);
+			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			try {
 				lua_pushboolean(L, self->get(path).isValid());
 			} CatchExceptionLua
@@ -158,8 +157,8 @@ namespace FicsItKernel {
 		})
 
 		LuaFunc(childs, {
-			const auto path = luaL_checkstring(L, 1);
-			std::unordered_set<FileSystem::NodeName> childs;
+			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
+			std::unordered_set<CodersFileSystem::NodeName> childs;
 			try {
 				childs = self->childs(path);
 			} CatchExceptionLua
@@ -173,32 +172,32 @@ namespace FicsItKernel {
 		})
 
 		LuaFunc(isFile, {
-			const auto path = luaL_checkstring(L, 1);
+			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			try {
-				lua_pushboolean(L, !!dynamic_cast<FileSystem::File*>(self->get(path).get()));
+				lua_pushboolean(L, !!dynamic_cast<CodersFileSystem::File*>(self->get(path).get()));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		})
 
 		LuaFunc(isDir, {
-			const auto path = luaL_checkstring(L, 1);
+			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			try {
-				lua_pushboolean(L, !!dynamic_cast<FileSystem::Directory*>(self->get(path).get()));
+				lua_pushboolean(L, !!dynamic_cast<CodersFileSystem::Directory*>(self->get(path).get()));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		})
 
 		LuaFunc(mount, {
-			const auto devPath = luaL_checkstring(L, 1);
-			const auto mountPath = luaL_checkstring(L, 2);
+			const auto devPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
+			const auto mountPath = CodersFileSystem::Path(luaL_checkstring(L, 2));
 			try {
-				lua_pushboolean(L, FileSystem::DeviceNode::mount(*self, devPath, mountPath));
+				lua_pushboolean(L, CodersFileSystem::DeviceNode::mount(*self, devPath, mountPath));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		})
 
 		LuaFunc(unmount, {
-			const auto mountPath = luaL_checkstring(L, 1);
+			const auto mountPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			try {
 				lua_pushboolean(L, self->unmount(mountPath));
 			} CatchExceptionLua
@@ -210,10 +209,10 @@ namespace FicsItKernel {
 		}
 
 		LuaFunc(doFile, {
-			const FileSystem::Path path = luaL_checkstring(L, 1);
-			FileSystem::SRef<FileSystem::FileStream> file;
+			const CodersFileSystem::Path path(luaL_checkstring(L, 1));
+			CodersFileSystem::SRef<CodersFileSystem::FileStream> file;
 			try {
-				file = self->open(path, FileSystem::INPUT);
+				file = self->open(path, CodersFileSystem::INPUT);
 			} CatchExceptionLua
 			if (!file.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;
@@ -229,10 +228,10 @@ namespace FicsItKernel {
 		})
 
 		LuaFunc(loadFile, {
-			const FileSystem::Path path = luaL_checkstring(L, 1);
-			FileSystem::SRef<FileSystem::FileStream> file;
+			const CodersFileSystem::Path path = luaL_checkstring(L, 1);
+			CodersFileSystem::SRef<CodersFileSystem::FileStream> file;
 			try {
-				file = self->open(path, FileSystem::INPUT);
+				file = self->open(path, CodersFileSystem::INPUT);
 			} CatchExceptionLua
 			if (!file.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;
@@ -382,17 +381,17 @@ namespace FicsItKernel {
 
 		int luaFileUnpersist(lua_State* L) {
 			UFINKernelSystem* kernel = UFINLuaProcessor::luaGetProcessor(L)->GetKernel();
-			const bool valid = lua_toboolean(L, lua_upvalueindex(1));
+			const bool valid = (bool)lua_toboolean(L, lua_upvalueindex(1));
 			std::string path = "";
 			if (valid) {
 				path = lua_tostring(L, lua_upvalueindex(2));
-				const bool open = lua_toboolean(L, lua_upvalueindex(3));
-				FileSystem::SRef<FileSystem::FileStream> stream;
+				const bool open = (bool)lua_toboolean(L, lua_upvalueindex(3));
+				CodersFileSystem::SRef<CodersFileSystem::FileStream> stream;
 				if (open) {
-					path = kernel->GetFileSystem()->unpersistPath(path);
-					FileSystem::FileMode mode = static_cast<FileSystem::FileMode>(static_cast<int>(lua_tonumber(L, lua_upvalueindex(4))));
-					mode = mode & ~FileSystem::FileMode::TRUNC;
-					stream = kernel->GetFileSystem()->open(path, mode);
+					path = kernel->GetFileSystem()->unpersistPath(path).str();
+					CodersFileSystem::FileMode mode = static_cast<CodersFileSystem::FileMode>(static_cast<int>(lua_tonumber(L, lua_upvalueindex(4))));
+					mode = mode & ~CodersFileSystem::FileMode::TRUNC;
+					stream = kernel->GetFileSystem()->open(CodersFileSystem::Path(path), mode);
 					stream->seek("set", static_cast<int>(lua_tonumber(L, lua_upvalueindex(5))));
 				} else {
 					path = "";
@@ -442,16 +441,16 @@ namespace FicsItKernel {
 			{nullptr, nullptr}
 		};
 
-		void luaFile(lua_State* L, FileSystem::SRef<FileSystem::FileStream> file, const std::string& path) {
-			LuaFile* const f = static_cast<LuaFile*>(lua_newuserdata(L, sizeof(LuaFile)));
+		void luaFile(lua_State* L, CodersFileSystem::SRef<CodersFileSystem::FileStream> file, const std::string& path) {
+			LuaFile* f = static_cast<LuaFile*>(lua_newuserdata(L, sizeof(LuaFile)));
 			luaL_setmetatable(L, "File");
 			new (f) LuaFile(new LuaFileContainer());
 			f->get()->file = file;
 			f->get()->path = path;
 			lua_getfield(L, LUA_REGISTRYINDEX, "FileStreamStorage");
 			if (file.isValid()) {
-				std::set<LuaFile>& streams = *static_cast<std::set<LuaFile>*>(lua_touserdata(L, -1));
-				streams.insert(*f);
+				TSet<LuaFile>& streams = *static_cast<TSet<LuaFile>*>(lua_touserdata(L, -1));
+				streams.Add(*f);
 			}
 			lua_pop(L, 1);
 		}

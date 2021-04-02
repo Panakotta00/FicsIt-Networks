@@ -1,7 +1,6 @@
 #include "FINReflection.h"
 
 #include "AssetRegistryModule.h"
-#include "FicsItNetworksModule.h"
 #include "FINArrayProperty.h"
 #include "FINBoolProperty.h"
 #include "FINClassProperty.h"
@@ -14,9 +13,9 @@
 #include "FINStructProperty.h"
 #include "FINTraceProperty.h"
 #include "FINUReflectionSource.h"
-#include "UObjectIterator.h"
 #include "Engine/Blueprint.h"
 #include "Engine/BlueprintGeneratedClass.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 
 UFINClass* UFINReflection::FindClass(UClass* Clazz, bool bRecursive) {
 	return FFINReflection::Get()->FindClass(Clazz, bRecursive);

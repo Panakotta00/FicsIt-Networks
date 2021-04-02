@@ -1,9 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interface.h"
-#include "FINSignalData.h"
-#include "Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/Signals/FINSignalData.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 
 #include "FINSignalListener.generated.h"
 

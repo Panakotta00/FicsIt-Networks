@@ -1,10 +1,9 @@
 ﻿#pragma once
 
-#include "FGBuildable.h"
-#include "WidgetComponent.h"
-#include "Computer/FINComputerScreen.h"
-#include "Graphics/FINScreenInterface.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Components/WidgetComponent.h"
+#include "FicsItNetworks/Computer/FINComputerScreen.h"
+#include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINScreen.generated.h"
 
 UCLASS()

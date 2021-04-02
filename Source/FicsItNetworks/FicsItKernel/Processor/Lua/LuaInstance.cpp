@@ -7,11 +7,10 @@
 #include "LuaProcessorStateStorage.h"
 #include "LuaRef.h"
 
-#include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkUtils.h"
-#include "Reflection/FINClass.h"
-#include "Reflection/FINFunction.h"
-#include "Reflection/FINReflection.h"
+#include "FicsItNetworks/Network/FINNetworkComponent.h"
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
+#include "FicsItNetworks/Reflection/FINClass.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
 
 #define INSTANCE_TYPE "InstanceType"
 #define CLASS_INSTANCE_META_SUFFIX "-Class"
@@ -119,7 +118,7 @@ namespace FicsItKernel {
 			LuaInstance* Instance = static_cast<LuaInstance*>(luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName)));
 			UObject* Obj = *Instance->Trace;
 			if (!Obj) return luaL_argerror(L, 1, "Instance is invalid");
-
+			
 			// call func
 			return luaCallFINFunc(L, Func->Func, FFINExecutionContext(Instance->Trace), "Instance");
 		}

@@ -49,7 +49,7 @@ public:
 	explicit FFINNetworkTrace(UObject* obj);
 	~FFINNetworkTrace();
 
-	bool Serialize(FArchive& Ar);
+//	bool Serialize(FArchive& Ar);
 	bool Serialize(FStructuredArchive::FSlot Slot);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 //	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
@@ -142,8 +142,7 @@ inline FArchive& operator<<(FArchive& Ar, FFINNetworkTrace& trace) {
 	return Ar;
 }
 
-inline void operator<<(FStructuredArchive::FSlot Slot, FFINNetworkTrace& Trace)
-{
+inline void operator<<(FStructuredArchive::FSlot Slot, FFINNetworkTrace& Trace) {
 	Trace.Serialize(Slot);
 }
 
@@ -154,7 +153,7 @@ FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& Trace) {
 template<>
 struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace> {
 	enum {
-		WithSerializer = true,
+		//WithSerializer = true,
 		WithStructuredSerializer = true,
 		WithAddStructReferencedObjects = true,
 		WithCopy = true,

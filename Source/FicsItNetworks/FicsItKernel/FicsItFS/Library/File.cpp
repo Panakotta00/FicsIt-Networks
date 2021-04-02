@@ -1,19 +1,19 @@
 #include "File.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 
 using namespace std;
-using namespace FileSystem;
+using namespace CodersFileSystem;
 
-FileMode FileSystem::operator|(FileMode l, FileMode r) {
+FileMode CodersFileSystem::operator|(FileMode l, FileMode r) {
 	return (FileMode)(((unsigned char)l) | ((unsigned char)r));
 }
 
-FileMode FileSystem::operator&(FileMode l, FileMode r) {
+FileMode CodersFileSystem::operator&(FileMode l, FileMode r) {
 	return (FileMode)(((unsigned char)l) & ((unsigned char)r));
 }
 
-FileMode FileSystem::operator~(FileMode m) {
+FileMode CodersFileSystem::operator~(FileMode m) {
 	return (FileMode)~(unsigned char)m;
 }
 
@@ -30,7 +30,7 @@ SRef<FileStream> MemFile::open(FileMode m) {
 	return io = new MemFileStream(&data, m, listeners, sizeCheck);
 }
 
-bool FileSystem::MemFile::isValid() const {
+bool CodersFileSystem::MemFile::isValid() const {
 	return true;
 }
 
@@ -52,8 +52,8 @@ FileStream& FileStream::operator<<(const std::string& str) {
 
 MemFileStream::MemFileStream(string * data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck) : FileStream(mode), data(data), listeners(listeners), sizeCheck(sizeCheck) {
 	buf = *data;
-	if ((mode & FileSystem::OUTPUT) && (mode & FileSystem::APPEND)) pos = buf.length();
-	else if (mode & FileSystem::TRUNC) *data = buf = "";
+	if ((mode & CodersFileSystem::OUTPUT) && (mode & CodersFileSystem::APPEND)) pos = buf.length();
+	else if (mode & CodersFileSystem::TRUNC) *data = buf = "";
 	open = true;
 }
 
@@ -149,7 +149,7 @@ bool DiskFile::isValid() const {
 
 DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck) : FileStream(mode), path(realPath), sizeCheck(sizeCheck) {
 	if (mode & FileMode::OUTPUT && !std::filesystem::exists(realPath)) std::fstream(realPath, std::ios::out).close();
-	stream = std::fstream(realPath, std::ios::in);
+	stream = std::fstream(realPath, (mode & FileMode::BINARY) ? (std::ios::in | std::ios::binary) : std::ios::in);
 	if (!stream.is_open()) return;
 	if (!(mode & FileMode::TRUNC)) {
 		stringstream s;
@@ -158,7 +158,7 @@ DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeChe
 	} else sizeCheck(-static_cast<int64_t>(std::filesystem::file_size(realPath)), true);
 	if (mode & FileMode::OUTPUT) {
 		stream.close();
-		stream = std::fstream(realPath, std::ios::out | std::ios::trunc);
+		stream = std::fstream(realPath, (mode & FileMode::BINARY) ? (std::ios::out | std::ios::trunc | std::ios::binary) : (std::ios::out | std::ios::trunc));
 		stream << buf;
 		stream.flush();
 	}

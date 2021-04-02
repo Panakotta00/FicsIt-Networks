@@ -1,16 +1,15 @@
 #include "LuaStructs.h"
 
 #include "CoreMinimal.h"
-#include "FGBuildableTrainPlatform.h"
 #include "FGRailroadSubsystem.h"
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
 #include "LuaProcessorStateStorage.h"
 #include "LuaRef.h"
-#include "FicsItKernel/FicsItKernel.h"
-#include "Reflection/FINReflection.h"
-#include "Reflection/FINStruct.h"
-#include "Utils/FINTargetPoint.h"
+#include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
+#include "FicsItNetworks/Reflection/FINStruct.h"
+#include "FicsItNetworks/Utils/FINTargetPoint.h"
 
 #define PersistParams \
 	const std::string& _persist_namespace, \

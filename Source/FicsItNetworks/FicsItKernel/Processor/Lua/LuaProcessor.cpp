@@ -10,11 +10,11 @@
 #include "LuaEventAPI.h"
 #include "LuaFuture.h"
 #include "LuaRef.h"
-#include "Network/FINNetworkTrace.h"
-#include "Network/FINNetworkUtils.h"
-#include "Reflection/FINSignal.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
+#include "FicsItNetworks/Reflection/FINSignal.h"
 
-void LuaFileSystemListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
+void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
 	for (FicsItKernel::Lua::LuaFile file : Parent->GetFileStreams()) {
 		if (file.isValid() && (!Parent->GetKernel()->GetFileSystem() || !Parent->GetKernel()->GetFileSystem()->checkUnpersistPath(file->path))) {
 			file->file->close();
@@ -22,7 +22,7 @@ void LuaFileSystemListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<
 	}
 }
 
-void LuaFileSystemListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
+void LuaFileSystemListener::onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
 	for (FicsItKernel::Lua::LuaFile file : Parent->GetFileStreams()) {
 		if (file.isValid() && file->path.length() > 0 && (!Parent->GetKernel()->GetFileSystem() || Parent->GetKernel()->GetFileSystem()->unpersistPath(file->path) == path)) {
 			file->file->close();
@@ -344,7 +344,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 
 	for (FicsItKernel::Lua::LuaFile file : FileStreams) {
 		if (file->file) {
-			file->transfer = FileSystem::SRef<FicsItKernel::Lua::LuaFilePersistTransfer>(new FicsItKernel::Lua::LuaFilePersistTransfer());
+			file->transfer = CodersFileSystem::SRef<FicsItKernel::Lua::LuaFilePersistTransfer>(new FicsItKernel::Lua::LuaFilePersistTransfer());
 			file->transfer->open = file->file->isOpen();
 			if (file->transfer->open) {
 				file->transfer->mode = file->file->getMode();
@@ -540,7 +540,7 @@ void UFINLuaProcessor::LuaTick() {
 					// signal popped -> resume yield with signal as parameters (passing signals parameters back to pull yield)
 					Status = lua_resume(luaThread, nullptr, SigArgCount);
 				}
-			} else if (PullState == 2 || Timeout > (static_cast<double>(FTimespan::FromSeconds(GetWorld()->GetRealTimeSeconds()).GetTotalMilliseconds() - PullStart) / 1000.0)) {
+			} else if (PullState == 2 || Timeout > (static_cast<double>((FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0)) {
 				// no signal available & not timeout reached -> skip tick
 				return;
 			} else {
@@ -587,11 +587,11 @@ size_t luaLen(lua_State* L, int idx) {
 }
 
 void UFINLuaProcessor::ClearFileStreams() {
-	TSet<FileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>> ToRemove;
-	for (const FileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>& fs : FileStreams) {
+	TSet<CodersFileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>> ToRemove;
+	for (const CodersFileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>& fs : FileStreams) {
 		if (!fs.isValid()) ToRemove.Add(fs);
 	}
-	for (const FileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>& fs : ToRemove) {
+	for (const CodersFileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>& fs : ToRemove) {
 		FileStreams.Remove(fs);
 	}
 }
@@ -704,7 +704,7 @@ int luaPrint(lua_State* L) {
 	if (log.length() > 0) log = log.erase(log.length()-1);
 	
 	try {
-		FileSystem::SRef<FileSystem::FileStream> serial = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetDevDevice()->getSerial()->open(FileSystem::OUTPUT);
+		CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
 		if (serial) {
 			*serial << log << "\r\n";
 			serial->close();

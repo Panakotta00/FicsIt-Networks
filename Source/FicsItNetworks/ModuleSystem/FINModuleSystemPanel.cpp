@@ -2,13 +2,6 @@
 
 #include "FGDismantleInterface.h"
 #include "FINModuleSystemModule.h"
-#include "UnrealNetwork.h"
-
-UFINModuleSystemPanel::UFINModuleSystemPanel() {
-	SetIsReplicated(true);
-}
-
-UFINModuleSystemPanel::~UFINModuleSystemPanel() {}
 
 void UFINModuleSystemPanel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -38,6 +31,11 @@ void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 			}
 		}
 	}
+}
+
+void UFINModuleSystemPanel::InitializeComponent() {
+	Super::InitializeComponent();
+	SetIsReplicated(true);
 }
 
 void UFINModuleSystemPanel::EndPlay(const EEndPlayReason::Type reason) {

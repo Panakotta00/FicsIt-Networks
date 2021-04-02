@@ -4,9 +4,11 @@
 #include "FINComputerGPU.h"
 #include "FINComputerScreen.h"
 #include "Buildables/FGBuildable.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "ModuleSystem/FINModuleSystemPanel.h"
-#include "FicsItKernel/FicsItKernel.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
+#include "FicsItNetworks/ModuleSystem/FINModuleSystemPanel.h"
+#include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
+#include "FicsItNetworks/FicsItKernel/Processor/FINStateEEPROM.h"
+
 #include "FINComputerCase.generated.h"
 
 class AFINComputerNetworkCard;

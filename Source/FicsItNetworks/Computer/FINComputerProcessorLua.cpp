@@ -1,5 +1,5 @@
 #include "FINComputerProcessorLua.h"
-#include "FicsItKernel/Processor/Lua/LuaProcessor.h"
+#include "FicsItNetworks/FicsItKernel/Processor/Lua/LuaProcessor.h"
 
 UFINKernelProcessor* AFINComputerProcessorLua::CreateProcessor() {
 	UFINLuaProcessor* Processor = NewObject<UFINLuaProcessor>(this);

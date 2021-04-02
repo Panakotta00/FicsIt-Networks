@@ -1,9 +1,7 @@
 ﻿#include "FINScreenHolo.h"
-
-#include "FGBuildableFoundation.h"
-#include "FGBuildableWall.h"
 #include "FINScreen.h"
-#include "UnrealNetwork.h"
+#include "Buildables/FGBuildableFoundation.h"
+#include "Buildables/FGBuildableWall.h"
 
 AFINScreenHolo::AFINScreenHolo() {
 	PrimaryActorTick.bCanEverTick = true;

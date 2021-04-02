@@ -1,8 +1,9 @@
 ﻿#pragma once
 
-#include "FGEquipmentDescriptor.h"
 #include "FGInventoryComponent.h"
-#include "FicsItKernel/Processor/FINStateEEPROM.h"
+#include "FicsItNetworks/FicsItKernel/Processor/FINStateEEPROM.h"
+#include "Resources/FGEquipmentDescriptor.h"
+
 
 #include "FINComputerEEPROMDesc.generated.h"
 

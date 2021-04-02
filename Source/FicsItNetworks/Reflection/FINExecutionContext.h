@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 #include "FINExecutionContext.generated.h"
 
 USTRUCT()
@@ -109,25 +109,26 @@ public:
 		return FFINNetworkTrace();
 	}
 
-	bool Serialize(FArchive& Ar) {
-		if (Ar.IsLoading() && Type == TRACE) delete Trace;
-		Ar << *reinterpret_cast<uint8*>(&Type);
-		switch (Type) {
-		case NONE:
-			break;
-		case GENERIC:
-			Type = NONE;
-			break;
-		case OBJECT:
-			Ar << Obj;
-			break;
-		case TRACE:
-			if (Ar.IsLoading()) Trace = new FFINNetworkTrace();
-			Ar << *Trace;
-			break;
-		default: ;
+	bool Serialize(FStructuredArchive::FSlot Slot) {
+		FStructuredArchive::FRecord Record = Slot.EnterRecord();
+		TOptional<FStructuredArchive::FSlot> TraceField = Record.TryEnterField(SA_FIELD_NAME(TEXT("Trace")), Type == TRACE);
+		if (TraceField.IsSet()) {
+			if (Type != TRACE) Trace = new FFINNetworkTrace();
+			Type = TRACE;
+			Trace->Serialize(TraceField.GetValue());
+			return true;
+		} else if (Type == TRACE) {
+			delete Trace;
 		}
-		
+
+		TOptional<FStructuredArchive::FSlot> ObjectField = Record.TryEnterField(SA_FIELD_NAME(TEXT("Object")), Type == OBJECT);
+		if (ObjectField.IsSet()) {
+			Type = OBJECT;
+			ObjectField.GetValue() << Obj;
+			return true;
+		}
+
+		if (Record.GetUnderlyingArchive().IsLoading()) Type = NONE;
 		return true;
 	}
 	
@@ -142,13 +143,17 @@ private:
 };
 
 inline FArchive& operator<<(FArchive& Ar, FFINExecutionContext& Ctx) {
-	Ctx.Serialize(Ar);
+	Ctx.Serialize(FStructuredArchiveFromArchive(Ar).GetSlot());
 	return Ar;
+}
+
+inline void operator<<(FStructuredArchive::FSlot Slot, FFINExecutionContext& Ctx) {
+	Ctx.Serialize(Slot);
 }
 
 template<>
 struct TStructOpsTypeTraits<FFINExecutionContext> : TStructOpsTypeTraitsBase2<FFINExecutionContext> {
 	enum {
-		WithSerializer = true,
+		WithStructuredSerializer = true,
     };
 };

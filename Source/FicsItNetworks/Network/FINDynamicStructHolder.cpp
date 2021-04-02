@@ -1,7 +1,5 @@
 ﻿#include "FINDynamicStructHolder.h"
 
-#include "FicsItNetworksModule.h"
-
 FFINDynamicStructHolder::FFINDynamicStructHolder() {}
 
 FFINDynamicStructHolder::FFINDynamicStructHolder(UScriptStruct* Struct) : Struct(Struct) {

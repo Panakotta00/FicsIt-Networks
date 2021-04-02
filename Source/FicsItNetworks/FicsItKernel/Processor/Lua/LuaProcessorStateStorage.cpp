@@ -1,15 +1,17 @@
 ﻿#include "LuaProcessorStateStorage.h"
 
-#include "Network/FINDynamicStructHolder.h"
+
+#include "FicsItNetworks/FicsItNetworksModule.h"
+#include "FicsItNetworks/Network/FINDynamicStructHolder.h"
 
 bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
 	FStructuredArchive::FRecord Record = Slot.EnterRecord();
-	Record.EnterField(FIELD_NAME_TEXT("Traces")).GetUnderlyingArchive() << Traces;
-	Record.EnterField(FIELD_NAME_TEXT("References")) << References;
-	Record.EnterField(FIELD_NAME_TEXT("Thread")) << Thread;
-	Record.EnterField(FIELD_NAME_TEXT("Globals")) << Globals;
+	Record.EnterField(SA_FIELD_NAME(TEXT("Traces"))).GetUnderlyingArchive() << Traces;
+	Record.EnterField(SA_FIELD_NAME(TEXT("References"))) << References;
+	Record.EnterField(SA_FIELD_NAME(TEXT("Thread"))) << Thread;
+	Record.EnterField(SA_FIELD_NAME(TEXT("Globals"))) << Globals;
 
-	FStructuredArchive::FSlot Ar = Record.EnterField(FIELD_NAME_TEXT("Structs"));
+	FStructuredArchive::FSlot Ar = Record.EnterField(SA_FIELD_NAME(TEXT("Structs")));
 	
 	int StructNum = Structs.Num();
 	Ar << StructNum;
@@ -52,6 +54,10 @@ UObject* FFINLuaProcessorStateStorage::GetRef(int32 id) {
 }
 
 TSharedPtr<FFINDynamicStructHolder> FFINLuaProcessorStateStorage::GetStruct(int32 id) {
+	if (id >= Structs.Num()) {
+		UE_LOG(LogFicsItNetworks, Warning, TEXT("Unable to find struct in lua processor state storage with id %i"), id);
+		return MakeShared<FFINDynamicStructHolder>();
+	}
 	return Structs[id];
 }
 

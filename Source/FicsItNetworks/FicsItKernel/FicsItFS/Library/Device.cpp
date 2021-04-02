@@ -6,30 +6,30 @@
 
 using namespace std;
 namespace fs = std::filesystem;
-namespace FileSystem {
+namespace CodersFileSystem {
 	ByteCountedDevice::ByteCountedDeviceListener::ByteCountedDeviceListener(ByteCountedDevice* root) : root(root) {}
 
-	void FileSystem::ByteCountedDevice::ByteCountedDeviceListener::onMounted(Path path, SRef<Device> device) {
+	void CodersFileSystem::ByteCountedDevice::ByteCountedDeviceListener::onMounted(Path path, SRef<Device> device) {
 		if (root->listenerMask & 0b000001) root->usedValid = false;
 	}
 
-	void FileSystem::ByteCountedDevice::ByteCountedDeviceListener::onUnmounted(Path path, SRef<Device> device) {
+	void CodersFileSystem::ByteCountedDevice::ByteCountedDeviceListener::onUnmounted(Path path, SRef<Device> device) {
 		if (root->listenerMask & 0b000010) root->usedValid = false;
 	}
 
-	void FileSystem::ByteCountedDevice::ByteCountedDeviceListener::onNodeAdded(Path path, NodeType type) {
+	void CodersFileSystem::ByteCountedDevice::ByteCountedDeviceListener::onNodeAdded(Path path, NodeType type) {
 		if (root->listenerMask & 0b000100) root->usedValid = false;
 	}
 
-	void FileSystem::ByteCountedDevice::ByteCountedDeviceListener::onNodeRemoved(Path path, NodeType type) {
+	void CodersFileSystem::ByteCountedDevice::ByteCountedDeviceListener::onNodeRemoved(Path path, NodeType type) {
 		if (root->listenerMask & 0b001000) root->usedValid = false;
 	}
 
-	void FileSystem::ByteCountedDevice::ByteCountedDeviceListener::onNodeChanged(Path path, NodeType type) {
+	void CodersFileSystem::ByteCountedDevice::ByteCountedDeviceListener::onNodeChanged(Path path, NodeType type) {
 		if (root->listenerMask & 0b010000) root->usedValid = false;
 	}
 
-	void FileSystem::ByteCountedDevice::ByteCountedDeviceListener::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
+	void CodersFileSystem::ByteCountedDevice::ByteCountedDeviceListener::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
 		if (root->listenerMask & 0b100000) root->usedValid = false;
 	}
 
@@ -77,7 +77,7 @@ namespace FileSystem {
 		return count;
 	}
 
-	size_t FileSystem::MemDevice::getSize() const {
+	size_t CodersFileSystem::MemDevice::getSize() const {
 		return getSizeFromNode(root);
 	}
 
@@ -99,7 +99,7 @@ namespace FileSystem {
 	SRef<Directory> MemDevice::createDir(Path path, bool createTree) {
 		SRef<Directory> parent = root;
 		while (!path.isFinal()) {
-			SRef<Directory> newParent = get(path.getRoot());
+			SRef<Directory> newParent = get(Path(path.getRoot()));
 			if (!newParent.isValid()) {
 				if (createTree) {
 					newParent = parent->createSubdir(path.getRoot());
@@ -214,8 +214,8 @@ namespace FileSystem {
 
 	bool DiskDevice::rename(Path path, const NodeName& name) {
 		if (path.getNodeCount() < 1) return false;
-		if (!fs::exists(realPath / path) || fs::exists(realPath / path.prev() / name) || path.getNodeCount() < 1) return false;
-		fs::rename(realPath / path, realPath / path.prev() / name);
+		if (!fs::exists(realPath / path) || fs::exists(realPath / (path.prev() / name)) || path.getNodeCount() < 1) return false;
+		fs::rename(realPath / path, realPath / (path.prev() / name));
 		tickWatcher();
 		return true;
 	}
@@ -255,7 +255,7 @@ namespace FileSystem {
 		return unordered_set<NodeName>();
 	}
 
-	bool FileSystem::DeviceNode::isValid() const {
+	bool CodersFileSystem::DeviceNode::isValid() const {
 		return true;
 	}
 

@@ -1,12 +1,11 @@
 ﻿#include "FINHookSubsystem.h"
 
-#include "FINSubsystemHolder.h"
-#include "Signals/FINSignalListener.h"
+#include "FicsItNetworks/FINSubsystemHolder.h"
 
 TMap<UClass*, TSet<TSubclassOf<UFINHook>>> AFINHookSubsystem::HookRegistry;
 
 AFINHookSubsystem* AFINHookSubsystem::GetHookSubsystem(UObject* WorldContext) {
-	return GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->HookSubsystem;
+	return UModSubsystemHolder::GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->HookSubsystem;
 }
 
 void AFINHookSubsystem::RegisterHook(UClass* clazz, TSubclassOf<UFINHook> hook) {

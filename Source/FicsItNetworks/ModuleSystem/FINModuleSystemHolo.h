@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FGBuildableHologram.h"
 #include "FINModuleSystemPanel.h"
+#include "Hologram/FGBuildableHologram.h"
 #include "FINModuleSystemHolo.generated.h"
 
 UCLASS()

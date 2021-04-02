@@ -2,8 +2,7 @@
 
 
 #include "FGColoredInstanceMeshProxy.h"
-#include "ProxyInstancedStaticMeshComponent.h"
-#include "Graphics/FINGPUInterface.h"
+#include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 AFINScreen::AFINScreen() {
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");

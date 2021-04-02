@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FGBuildableHologram.h"
+#include "Hologram/FGBuildableHologram.h"
 #include "FINScreenHolo.generated.h"
 
 UCLASS()

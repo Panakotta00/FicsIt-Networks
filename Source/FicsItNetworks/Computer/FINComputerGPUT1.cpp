@@ -1,13 +1,9 @@
 #include "FINComputerGPUT1.h"
 
-
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
-#include "SInvalidationPanel.h"
-#include "UnrealNetwork.h"
-#include "WidgetBlueprintLibrary.h"
-#include "WidgetLayoutLibrary.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "Widgets/SInvalidationPanel.h"
 
 void SScreenMonitor::Construct(const FArguments& InArgs) {
 	Text = InArgs._Text;
@@ -23,7 +19,7 @@ void SScreenMonitor::Construct(const FArguments& InArgs) {
 	SetCanTick(false);
 }
 
-TArray<FString> SScreenMonitor::GetText() const {
+FString SScreenMonitor::GetText() const {
 	return Text.Get();
 }
 
@@ -77,25 +73,25 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 	const TArray<FLinearColor>& ForegroundCache = this->Foreground.Get();
 	const TArray<FLinearColor>& BackgroundCache = this->Background.Get();
 	
-	const TArray<FString>& TextGrid = Text.Get();
-	for (int Y = 0; Y < ScreenSizeV.Y && Y < TextGrid.Num(); ++Y) {
-		const FString Line = TextGrid[Y];
-		
-		for (int X = 0; X < ScreenSizeV.X && X < Line.Len(); ++X) {
+	const FString& TextGrid = Text.Get();
+	for (int Y = 0; Y < ScreenSizeV.Y; ++Y) {
+		for (int X = 0; X < ScreenSizeV.X; ++X) {
+			int64 CharIndex = Y * ScreenSizeV.X + X;
+			
 			FLinearColor ForegroundV = FLinearColor(1,1,1,1);
-			if (Y * ScreenSizeV.X + X < ForegroundCache.Num()) {
-				ForegroundV = ForegroundCache[Y * ScreenSizeV.X + X];
+			if (CharIndex < ForegroundCache.Num()) {
+				ForegroundV = ForegroundCache[CharIndex];
 			}
 			FLinearColor BackgroundV = FLinearColor(0,0,0,0);
-			if (Y * ScreenSizeV.X + X < BackgroundCache.Num()) {
-				BackgroundV = BackgroundCache[Y * ScreenSizeV.X + X];
+			if (CharIndex < BackgroundCache.Num()) {
+				BackgroundV = BackgroundCache[CharIndex];
 			}
 
 			FSlateDrawElement::MakeText(
                 OutDrawElements,
                 LayerId+1,
                 AllottedGeometry.ToOffsetPaintGeometry(FVector2D(X,Y) * CharSize),
-                Line.Mid(X,1),
+                TextGrid.Mid(CharIndex,1),
                 Font.Get(),
                 ESlateDrawEffect::None,
                 ForegroundV
@@ -176,6 +172,12 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	}
 }
 
+#pragma optimize("", off)
+void AFINComputerGPUT1::Serialize(FStructuredArchive::FRecord Record) {
+	Super::Serialize(Record);
+}
+#pragma optimize("", on)
+
 void AFINComputerGPUT1::BindScreen(const FFINNetworkTrace& screen) {
 	Super::BindScreen(screen);
 }
@@ -240,8 +242,8 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	Foreground.Empty();
 	Background.Empty();
 
+	TextGrid = FString::ChrN(size.X * size.Y, ' ');
 	for (int y = 0; y < size.Y; ++y) {
-		TextGrid.Add(FString::ChrN(size.X, ' '));
 		for (int x = 0; x < size.X; ++x) {
 			Foreground.Add(CurrentForeground);
 			Background.Add(CurrentBackground);
@@ -260,7 +262,6 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 void AFINComputerGPUT1::Flush_Implementation() {
 	if (CachedInvalidation) {
 		CachedInvalidation->Invalidate(EInvalidateWidget::LayoutAndVolatility);
-		CachedInvalidation->InvalidateCache();
 	}
 }
 
@@ -307,13 +308,15 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 					}
 				}
 				if (x >= 0) {
-					FString& text = TextGridBuffer[y];
 					int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X)-x-1);
-					text.RemoveAt(x, replace);
-					text.InsertAt(x, inLine.Left(replace));
-					for (int dx = 0; dx < replace; ++dx) {
-						ForegroundBuffer[y * ScreenSize.X + x + dx] = CurrentForeground;
-						BackgroundBuffer[y * ScreenSize.X + x + dx] = CurrentBackground;
+					if (replace > 0) {
+						int64 CharIndex = y * ScreenSize.X + x;
+						TextGridBuffer.RemoveAt(CharIndex, replace);
+						TextGridBuffer.InsertAt(CharIndex, inLine.Left(replace));
+						for (int dx = 0; dx < replace; ++dx) {
+							ForegroundBuffer[CharIndex + dx] = CurrentForeground;
+							BackgroundBuffer[CharIndex + dx] = CurrentBackground;
+						}
 					}
 				}
 			}

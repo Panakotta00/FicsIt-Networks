@@ -1,8 +1,6 @@
 #include "FINNetworkCable.h"
-
 #include "FINNetworkConnectionComponent.h"
 #include "FINNetworkAdapter.h"
-#include "UnrealNetwork.h"
 
 AFINNetworkCable::AFINNetworkCable() {
 	CableSpline = CreateDefaultSubobject<USplineMeshComponent>("CableSpline");
@@ -25,7 +23,7 @@ void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
 	
-	CableSpline->SetVisibilitySML(true, true);
+	CableSpline->SetVisibility(true, true);
 
 	float offset = 250.0;
 	FVector start = FVector(0.0, 0.0, 0.0);

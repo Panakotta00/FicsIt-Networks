@@ -3,7 +3,7 @@
 #include "FGSaveInterface.h"
 #include "FGSubsystem.h"
 #include "FINSignalData.h"
-#include "Network/FINDynamicStructHolder.h"
+#include "FicsItNetworks/Network/FINDynamicStructHolder.h"
 #include "FINSignalSubsystem.generated.h"
 
 USTRUCT()

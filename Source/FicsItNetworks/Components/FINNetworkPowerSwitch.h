@@ -4,7 +4,7 @@
 #include "Buildables/FGBuildable.h"
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkPowerSwitch.generated.h"
 
 UCLASS()

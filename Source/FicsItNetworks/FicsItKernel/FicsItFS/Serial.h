@@ -2,20 +2,20 @@
 
 #include "Library/File.h"
 
-class FICSITNETWORKS_API FFINKernelFSSerial : public FileSystem::File {
+class FICSITNETWORKS_API FFINKernelFSSerial : public CodersFileSystem::File {
 	friend class FFINKernelSerialStream;
 
 private:
 	std::stringstream output;
-	std::unordered_set<FileSystem::WRef<FFINKernelSerialStream>> inStreams;
-	FileSystem::ListenerListRef listeners;
-	FileSystem::SizeCheckFunc sizeCheck;
+	std::unordered_set<CodersFileSystem::WRef<FFINKernelSerialStream>> inStreams;
+	CodersFileSystem::ListenerListRef listeners;
+	CodersFileSystem::SizeCheckFunc sizeCheck;
 
 public:
-	FFINKernelFSSerial(FileSystem::ListenerListRef listeners, FileSystem::SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
+	FFINKernelFSSerial(CodersFileSystem::ListenerListRef listeners, CodersFileSystem::SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
 
 	// Begin FileSystem::Node
-	virtual FileSystem::SRef<FileSystem::FileStream> open(FileSystem::FileMode m) override;
+	virtual CodersFileSystem::SRef<CodersFileSystem::FileStream> open(CodersFileSystem::FileMode m) override;
 	virtual bool isValid() const override;
 	// End FileSystem::Node
 
@@ -46,18 +46,18 @@ public:
 	std::string readOutput();
 };
 
-class FFINKernelSerialStream : public FileSystem::FileStream {
+class FFINKernelSerialStream : public CodersFileSystem::FileStream {
 	friend FFINKernelFSSerial;
 
 protected:
-	FileSystem::SRef<FFINKernelFSSerial> serial;
-	FileSystem::ListenerListRef& listeners;
-	FileSystem::SizeCheckFunc sizeCheck;
+	CodersFileSystem::SRef<FFINKernelFSSerial> serial;
+	CodersFileSystem::ListenerListRef& listeners;
+	CodersFileSystem::SizeCheckFunc sizeCheck;
 	std::string buffer;
 	std::stringstream input;
 
 public:
-	FFINKernelSerialStream(FileSystem::SRef<FFINKernelFSSerial> serial, FileSystem::FileMode mode, FileSystem::ListenerListRef& listeners, FileSystem::SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
+	FFINKernelSerialStream(CodersFileSystem::SRef<FFINKernelFSSerial> serial, CodersFileSystem::FileMode mode, CodersFileSystem::ListenerListRef& listeners, CodersFileSystem::SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
 	~FFINKernelSerialStream();
 
 	// Begin FileSystem::FileStream

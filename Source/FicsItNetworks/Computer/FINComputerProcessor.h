@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FINComputerCaseWidget.h"
 #include "FINComputerModule.h"
-#include "FicsItKernel/Processor/Processor.h"
+#include "FicsItNetworks/FicsItKernel/Processor/Processor.h"
 #include "FINComputerProcessor.generated.h"
 
 UCLASS()

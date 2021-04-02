@@ -1,23 +1,24 @@
 #include "FicsItNetworksModule.h"
 
 #include "CoreMinimal.h"
-#include "CoreRedirects.h"
-#include "Components/StaticMeshComponent.h"
 
-#include "FGBuildable.h"
-#include "FGBuildableHologram.h"
+#include "AssetRegistryModule.h"
+#include "Components/StaticMeshComponent.h"
 #include "FGCharacterPlayer.h"
 #include "FGGameMode.h"
-#include "SML/mod/hooking.h"
+#include "FGGameState.h"
 #include "FINGlobalRegisterHelper.h"
 #include "FINSubsystemHolder.h"
 #include "Computer/FINComputerRCO.h"
+#include "Hologram/FGBuildableHologram.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Patching/NativeHookManager.h"
 #include "Reflection/FINReflection.h"
 #include "UI/FINReflectionStyles.h"
+#include "UObject/CoreRedirects.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
@@ -73,20 +74,44 @@ class AActor_public : public AActor {
 	friend void FFicsItNetworksModule::StartupModule();
 };
 
+FDateTime FFicsItNetworksModule::GameStart;
+
 bool FINRefLoaded = false;
 #pragma optimize("", off)
 void FFicsItNetworksModule::StartupModule(){
-	FSubsystemInfoHolder::RegisterSubsystemHolder(UFINSubsystemHolder::StaticClass());
-
+	GameStart = FDateTime::Now();
+	
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/Game/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
+
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+
+	TArray<FString> PathsToScan;
+	PathsToScan.Add(TEXT("/FicsItNetworks"));
+	AssetRegistryModule.Get().ScanPathsSynchronous(PathsToScan, true);
+	
+	TArray<FAssetData> AssetData;
+	AssetRegistryModule.Get().GetAssetsByPath(TEXT("/FicsItNetworks"), AssetData, true);
+
+	for (const FAssetData& Asset : AssetData) {
+		FString NewPath = Asset.ObjectPath.ToString();
+		FString OldPath = TEXT("/Game") + Asset.ObjectPath.ToString();
+		if (Asset.AssetClass == TEXT("Blueprint") || Asset.AssetClass == TEXT("WidgetBlueprint")) {
+			NewPath += TEXT("_C");
+			OldPath += TEXT("_C");
+		}
+		UE_LOG(LogFicsItNetworks, Warning, TEXT("FIN Redirect: '%s' -> '%s'"), *OldPath, *NewPath);
+		redirects.Add(FCoreRedirect(ECoreRedirectFlags::Type_AllMask, OldPath, NewPath));
+	}
+
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
-	SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
+#if !WITH_EDITOR
+	// TODO: SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
 
-	SUBSCRIBE_METHOD(AFGBuildable::Dismantle_Implementation, [](auto& scope, AFGBuildable* self_r) {
+	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildable::Dismantle_Implementation, (void*)GetDefault<AFGBuildable>(), [](auto& scope, AFGBuildable* self_r) {
 		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
 		AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);
 		TInlineComponentArray<UFINNetworkConnectionComponent*> connectors;
@@ -119,9 +144,9 @@ void FFicsItNetworksModule::StartupModule(){
 		}
 	})
 
-	SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
-
-	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor_public::BeginPlay, [](AActor* self) {
+	// TODO: SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
+	
+	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::BeginPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self) {
 		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
         if (character) {
 	        AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
@@ -129,7 +154,7 @@ void FFicsItNetworksModule::StartupModule(){
 		}
 	})
 
-	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGCharacterPlayer, AActor::EndPlay, [](AActor* self, EEndPlayReason::Type Reason) {
+	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::EndPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self, EEndPlayReason::Type Reason) {
         AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
 		if (character) {
 			AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
@@ -137,22 +162,21 @@ void FFicsItNetworksModule::StartupModule(){
 		}
     })
 
-	SUBSCRIBE_METHOD(AFGGameMode::PostLogin, [](auto& scope, AFGGameMode* gm, APlayerController* pc) {
+	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
 	    if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
 		    UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/Game/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
 	    	gm->RegisterRemoteCallObjectClass(ModuleRCO);
-
 	    }
 	});
 
-	SUBSCRIBE_METHOD_AFTER(AGameMode::StartMatch, [](AGameMode* World) {
+	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AGameMode::StartMatch, (void*)GetDefault<AFGGameMode>(), [](AGameMode* World) {
 		if (!FINRefLoaded) {
 			FINRefLoaded = true;
 		}
 	});
 
-	SUBSCRIBE_VIRTUAL_FUNCTION_AFTER(AFGGameState, AFGGameState::Init, [](AFGGameState* state) {
+	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameState::Init, (void*)GetDefault<AFGGameState>(), [](AFGGameState* state) {
 		FFINReflectionStyles::Shutdown();
 		FFINReflectionStyles::Initialize();
 		
@@ -163,7 +187,6 @@ void FFicsItNetworksModule::StartupModule(){
 		FFINReflection::Get()->LoadAllTypes();
 	});
 
-#if WITH_EDITOR
 	AFINNetworkAdapter::RegisterAdapterSettings();
 	FFINGlobalRegisterHelper::Register();
 		

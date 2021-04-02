@@ -1,9 +1,5 @@
 ﻿#pragma once
 
-#include "SlateBrush.h"
-#include "SlateTypes.h"
-#include "SlateWidgetStyle.h"
-#include "SlateWidgetStyleContainerBase.h"
 #include "FINReflectionUIStyle.generated.h"
 
 USTRUCT(BlueprintType)
@@ -128,7 +124,6 @@ public:
 	GENERATED_BODY()
 
 public:
-	/** The actual data describing the button's appearance. */
 	UPROPERTY(Category=Appearance, EditAnywhere, BlueprintReadWrite, meta=( ShowOnlyInnerProperties ))
 	FFINReflectionUIStyleStruct ReflectionUIStyle;
 
@@ -136,7 +131,4 @@ public:
 	{
 		return static_cast< const struct FSlateWidgetStyle* >( &ReflectionUIStyle );
 	}
-
-public:
-	MODDING_SHIPPING_FORCEINLINE ~UFINReflectionUIStyle() = default;
 };

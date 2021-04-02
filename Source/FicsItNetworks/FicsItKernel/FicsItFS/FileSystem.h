@@ -12,11 +12,11 @@ class FArchive;
  * - preventing DevDevices to get unmounted
  * - preventing a second DevDevice to get mounted
  */
-class FICSITNETWORKS_API FFINKernelFSRoot : public FileSystem::FileSystemRoot {
+class FICSITNETWORKS_API FFINKernelFSRoot : public CodersFileSystem::FileSystemRoot {
 public:
 	// Begin FileSystemRoot
-	virtual bool mount(FileSystem::SRef<FileSystem::Device> device, FileSystem::Path path) override;
-	virtual bool unmount(FileSystem::Path path) override;
+	virtual bool mount(CodersFileSystem::SRef<CodersFileSystem::Device> device, CodersFileSystem::Path path) override;
+	virtual bool unmount(CodersFileSystem::Path path) override;
 	// End FileSystemRoot
 
 	/**
@@ -24,7 +24,7 @@ public:
 	 *
 	 * @param[in]	device	the device you want to unmounts
 	 */
-	bool unmount(FileSystem::SRef<FileSystem::Device> device);
+	bool unmount(CodersFileSystem::SRef<CodersFileSystem::Device> device);
 
 	/**
 	* Returns the memory consumption of the filesystem.
@@ -40,7 +40,7 @@ public:
 	 *
 	 * @return	the found DevDevice, nullptr if not found
 	 */
-	FileSystem::WRef<FFINKernelFSDevDevice> getDevDevice();
+	CodersFileSystem::WRef<FFINKernelFSDevDevice> getDevDevice();
 
 	/**
 	 * Gets the mountpoint from a device
@@ -48,7 +48,7 @@ public:
 	 * @param[in]	device	the device you want to get the path from
 	 * @return	the path of the device
 	 */
-	FileSystem::Path getMountPoint(FileSystem::SRef<FFINKernelFSDevDevice> device);
+	CodersFileSystem::Path getMountPoint(CodersFileSystem::SRef<FFINKernelFSDevDevice> device);
 
 	/**
 	 * Converts the given path into a string which is persistable.
@@ -56,7 +56,7 @@ public:
 	 * @param[in]	path	the path you want to convert
 	 * @return	the path converted to persistable string.
 	 */
-	std::string persistPath(FileSystem::Path path);
+	std::string persistPath(CodersFileSystem::Path path);
 
 	/**
 	 * Converts a persisted path into a valid file system path.
@@ -64,7 +64,7 @@ public:
 	 * @param[in]	path	the persisted path as string
 	 * @return	the unpersisted path
 	 */
-	FileSystem::Path unpersistPath(std::string path);
+	CodersFileSystem::Path unpersistPath(std::string path);
 
 	/**
 	 * Checks if the given path can get unpersisted

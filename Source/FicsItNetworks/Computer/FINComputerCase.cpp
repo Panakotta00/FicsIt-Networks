@@ -1,18 +1,16 @@
 #include "FINComputerCase.h"
 
-#include "FicsItNetworksCustomVersion.h"
 #include "FINComputerProcessor.h"
 #include "FINComputerMemory.h"
 #include "FINComputerDriveHolder.h"
-#include "FicsItKernel/Processor/Lua/LuaProcessor.h"
 #include "FGInventoryComponent.h"
 #include "FINComputerDriveDesc.h"
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
 #include "FINComputerNetworkCard.h"
 #include "FINComputerSubsystem.h"
-#include "UnrealNetwork.h"
-#include "FicsItKernel/FicsItKernel.h"
+#include "FicsItNetworks/FicsItKernel/Processor/Lua/LuaProcessor.h"
+#include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -133,7 +131,7 @@ void AFINComputerCase::Factory_Tick(float dt) {
 			//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
 			//SML::Logging::debug("Computer tick: ", dur.count());
 		
-			FileSystem::SRef<FFINKernelFSDevDevice> DevDevice = Kernel->GetDevDevice();
+			CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = Kernel->GetDevDevice();
 			if (DevDevice && DevDevice->getSerial()) {
 				SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(DevDevice->getSerial()->readOutput().c_str()));
 				SerialOutput = SerialOutput.Right(1000);
@@ -384,7 +382,7 @@ AFINComputerProcessor* AFINComputerCase::GetProcessor() {
 }
 
 void AFINComputerCase::WriteSerialInput(const FString& str) {
-	FileSystem::SRef<FFINKernelFSDevDevice> DevDevice = Kernel->GetDevDevice();
+	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = Kernel->GetDevDevice();
 	if (DevDevice) {
 		DevDevice->getSerial()->write(TCHAR_TO_UTF8(*str));
 	}

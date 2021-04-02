@@ -1,10 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Interface.h"
-#include "SWidget.h"
-#include "Network/FINNetworkTrace.h"
-
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 #include "FINScreenInterface.generated.h"
 
 UINTERFACE(Blueprintable)

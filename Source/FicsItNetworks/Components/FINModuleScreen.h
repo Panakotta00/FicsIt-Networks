@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "FINModuleBase.h"
-#include "WidgetComponent.h"
-#include "Computer/FINComputerScreen.h"
+#include "Components/WidgetComponent.h"
+#include "FicsItNetworks/Computer/FINComputerScreen.h"
 #include "FINModuleScreen.generated.h"
 
 UCLASS()
