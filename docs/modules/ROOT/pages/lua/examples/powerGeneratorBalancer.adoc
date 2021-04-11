@@ -1,0 +1,93 @@
+= Paint Example
+
+This code shows how to automatically control the generators according to the current load.
+
+== Setup
+
+You need small computer with a Lua CPU, a little bit RAM.
+Then just plug in a Lua EEPROM and fill it with the code below.
+Rename the generators to by analogy CoalGen1, CoalGen2, etc.
+
+== Code
+
+[source,Lua]
+----
+function round(exact, quantum)
+    local quant,frac = math.modf(exact/quantum)
+    return quantum * (quant + (frac > 0.5 and 1 or 0))
+end
+
+function sleep(delay)
+ event.pull(delay)
+end
+
+nickname = "CoalGen"
+
+num = 1
+exit = false
+while num < 10 and not exit do
+  name = nickname .. tostring(num)
+  id = component.findComponent(nickname .. tostring(num))
+  gen = component.proxy(id)[1]
+  if not gen then 
+    exit = true
+  else
+    num = num + 1
+  end
+end
+
+w,h=gpu:getSize()
+print(w,h)
+target_efficiency = 60
+
+average_workload = 100
+
+function main()
+ while true do
+   for j = 1, num -1, 1 do 
+    name = nickname .. tostring(j)
+    id = component.findComponent(name)
+    generator = component.proxy(id)[1]
+    name = generator.nick
+    connectors = generator.getPowerConnectors(generator)
+    if not generator.standby then
+      connector = connectors[1]
+      power_info = connector.GetPower(connector)
+      circuit = power_info.getCircuit(power_info)
+      current_workload = round(circuit.production / circuit.capacity * 100, 2)
+      -- print("Fuesed:", circuit.isFuesed)
+      average_workload = average_workload + current_workload
+      average_workload = average_workload / 2
+      print("Workload:", average_workload,"%")
+      gpu:setBackground(0,0,0,0)
+      gpu:fill(0,0,w,h," ")
+      gpu:setText(0,0,current_workload)
+      gpu:flush()
+      if power_info.maxDynProduction > 0 then
+        efficiency = round(power_info.dynProduction / power_info.maxDynProduction * 100, 2)
+        if efficiency < target_efficiency and efficiency > 0 and average_workload < target_efficiency then
+           print(name, efficiency,"%", " -> down")
+           generator.standby = true
+           sleep(0.5)
+           break
+        else
+           print(name, efficiency,"%", " OK")
+        end
+      else
+        print(name, "starting")
+      end
+    else
+      generator.standby = false
+      sleep(0.5)
+      print(name, "down")
+    end
+  end
+  print("Workload:", average_workload,"%")
+  sleep(0.5)
+ end
+end
+
+main()
+----
+
+include::partial$lua_examples_footer.adoc[]
