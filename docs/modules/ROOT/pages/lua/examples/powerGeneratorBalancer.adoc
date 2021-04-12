@@ -36,10 +36,9 @@ while num < 10 and not exit do
   end
 end
 
-
-print(w,h)
 target_efficiency = 60
 average_workload = 100
+wait_time = 0.5
 
 function main()
  while true do
@@ -63,7 +62,7 @@ function main()
         if efficiency < target_efficiency and efficiency > 0 and average_workload < target_efficiency then
            print(name, efficiency,"%", " -> down")
            generator.standby = true
-           sleep(0.5)
+           sleep(wait_time)
            break
         else
            print(name, efficiency,"%", " OK")
@@ -73,12 +72,12 @@ function main()
       end
     else
       generator.standby = false
-      sleep(0.5)
+      sleep(wait_time)
       print(name, "down")
     end
   end
   print("Workload:", average_workload,"%")
-  sleep(0.5)
+  sleep(wait_time)
  end
 end
 
