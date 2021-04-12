@@ -36,10 +36,9 @@ while num < 10 and not exit do
   end
 end
 
-w,h=gpu:getSize()
+
 print(w,h)
 target_efficiency = 60
-
 average_workload = 100
 
 function main()
@@ -59,10 +58,6 @@ function main()
       average_workload = average_workload + current_workload
       average_workload = average_workload / 2
       print("Workload:", average_workload,"%")
-      gpu:setBackground(0,0,0,0)
-      gpu:fill(0,0,w,h," ")
-      gpu:setText(0,0,current_workload)
-      gpu:flush()
       if power_info.maxDynProduction > 0 then
         efficiency = round(power_info.dynProduction / power_info.maxDynProduction * 100, 2)
         if efficiency < target_efficiency and efficiency > 0 and average_workload < target_efficiency then
