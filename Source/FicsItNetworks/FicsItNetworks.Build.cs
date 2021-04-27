@@ -3,6 +3,7 @@
 using UnrealBuildTool;
 using System.IO;
 using System;
+using Tools.DotNETCommon;
 
 public class FicsItNetworks : ModuleRules
 {
@@ -49,5 +50,8 @@ public class FicsItNetworks : ModuleRules
         bUseRTTI = true;
 		
         CppStandard = CppStandardVersion.Cpp17;
+
+        var factoryGamePchPath = new DirectoryReference(Path.Combine(Target.ProjectFile.Directory.ToString(), "Source", "FactoryGame", "Public", "FactoryGame.h"));
+        PrivatePCHHeaderFile = factoryGamePchPath.MakeRelativeTo(new DirectoryReference(ModuleDirectory));
     }
 }

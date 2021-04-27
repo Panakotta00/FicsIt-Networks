@@ -74,6 +74,8 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 	const TArray<FLinearColor>& BackgroundCache = this->Background.Get();
 	
 	const FString& TextGrid = Text.Get();
+	FSlateFontInfo FontToUse = Font.Get();
+	
 	for (int Y = 0; Y < ScreenSizeV.Y; ++Y) {
 		for (int X = 0; X < ScreenSizeV.X; ++X) {
 			int64 CharIndex = Y * ScreenSizeV.X + X;
@@ -86,13 +88,13 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 			if (CharIndex < BackgroundCache.Num()) {
 				BackgroundV = BackgroundCache[CharIndex];
 			}
-
-			FSlateDrawElement::MakeText(
+			FString Char(1, &TextGrid[CharIndex]);
+			if (Char.TrimStartAndEnd().Len() > 0) FSlateDrawElement::MakeText(
                 OutDrawElements,
                 LayerId+1,
                 AllottedGeometry.ToOffsetPaintGeometry(FVector2D(X,Y) * CharSize),
-                TextGrid.Mid(CharIndex,1),
-                Font.Get(),
+                *Char,
+				FontToUse,
                 ESlateDrawEffect::None,
                 ForegroundV
             );
@@ -105,7 +107,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 				BackgroundV);
 		}
 	}
-	return LayerId;
+	return LayerId+1;
 }
 
 FReply SScreenMonitor::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
@@ -172,12 +174,6 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	}
 }
 
-#pragma optimize("", off)
-void AFINComputerGPUT1::Serialize(FStructuredArchive::FRecord Record) {
-	Super::Serialize(Record);
-}
-#pragma optimize("", on)
-
 void AFINComputerGPUT1::BindScreen(const FFINNetworkTrace& screen) {
 	Super::BindScreen(screen);
 }
@@ -192,7 +188,7 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 }
 
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
-	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/Game/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
+	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SAssignNew(CachedInvalidation, SInvalidationPanel)
 	.Content()[
@@ -209,7 +205,7 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 		.Background_Lambda([this]() {
 			return Background;
 		})
-		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/Game/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
+		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
 		.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
 			RCO->GPUMouseEvent(this, 0, x, y, btn);
 			return FReply::Handled();
@@ -261,7 +257,10 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 
 void AFINComputerGPUT1::Flush_Implementation() {
 	if (CachedInvalidation) {
-		CachedInvalidation->Invalidate(EInvalidateWidget::LayoutAndVolatility);
+		CachedInvalidation->InvalidateRoot();
+		CachedInvalidation->InvalidateChildOrder();
+		CachedInvalidation->InvalidateScreenPosition();
+		CachedInvalidation->InvalidatePrepass();
 	}
 }
 

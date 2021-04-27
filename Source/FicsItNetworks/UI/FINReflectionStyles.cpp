@@ -25,7 +25,7 @@ FName FFINReflectionStyles::GetStyleSetName() {
 }
 
 TSharedRef<FSlateStyleSet> FFINReflectionStyles::Create() {
-	TSharedRef<FSlateStyleSet> StyleRef = FSlateGameResources::New(FFINReflectionStyles::GetStyleSetName(), "/Game/FicsItNetworks/UI/Styles", "/Game/FicsItNetworks/UI/Styles");
+	TSharedRef<FSlateStyleSet> StyleRef = FSlateGameResources::New(FFINReflectionStyles::GetStyleSetName(), "/FicsItNetworks/UI/Styles", "/FicsItNetworks/UI/Styles");
 	return StyleRef;
 }
 

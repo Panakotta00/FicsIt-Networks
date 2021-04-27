@@ -23,11 +23,7 @@ struct FICSITNETWORKS_API FFINNetworkTrace {
 private:
 	TSharedPtr<FFINNetworkTrace> Prev = nullptr;
 	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
-
 	FWeakObjectPtr Obj = nullptr;
-
-	UPROPERTY()
-	bool bDontAsk = false;
 
 public:
 	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> fallbackTraceStep;
@@ -49,10 +45,8 @@ public:
 	explicit FFINNetworkTrace(UObject* obj);
 	~FFINNetworkTrace();
 
-//	bool Serialize(FArchive& Ar);
 	bool Serialize(FStructuredArchive::FSlot Slot);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
-//	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 
 	/**
 	 * Creates a copy of this network trace and adds potentially a new optimal trace step
@@ -124,7 +118,7 @@ public:
 	/**
 	 * returns the underlying weak object ptr without any checks
 	 */
-	FWeakObjectPtr GetUnderlyingPtr() const;
+	const FWeakObjectPtr& GetUnderlyingPtr() const;
 
 	/**
 	 * returns the starting object of the trace
@@ -153,9 +147,10 @@ FORCEINLINE uint32 GetTypeHash(const FFINNetworkTrace& Trace) {
 template<>
 struct TStructOpsTypeTraits<FFINNetworkTrace> : TStructOpsTypeTraitsBase2<FFINNetworkTrace> {
 	enum {
-		//WithSerializer = true,
 		WithStructuredSerializer = true,
 		WithAddStructReferencedObjects = true,
 		WithCopy = true,
+		WithIdenticalViaEquality = true,
+		
     };
 };

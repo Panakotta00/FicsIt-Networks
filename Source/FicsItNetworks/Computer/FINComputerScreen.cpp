@@ -64,6 +64,7 @@ TSharedPtr<SWidget> AFINComputerScreen::GetWidget() const {
 }
 
 void AFINComputerScreen::RequestNewWidget() {
+	if (!GPUPtr) GPUPtr = GPU.Get();
 	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 }
 

@@ -149,10 +149,6 @@ FFINNetworkTrace::FFINNetworkTrace(UObject* Obj) : Obj(Obj) {
 
 FFINNetworkTrace::~FFINNetworkTrace() {}
 
-//bool FFINNetworkTrace::Serialize(FArchive& Ar) {
-//		return true;
-//}
-
 bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
 	if (Slot.GetUnderlyingArchive().IsSaveGame()) {
 		FStructuredArchive::FRecord Record = Slot.EnterRecord();
@@ -276,14 +272,13 @@ bool FFINNetworkTrace::operator<(const FFINNetworkTrace& other) const {
 		int32		ObjectIndex;
 		int32		ObjectSerialNumber;
 	};
-
 	TWOP* d1 = (TWOP*)&Obj;
 	TWOP* d2 = (TWOP*)&other.Obj;
 	if (d1->ObjectIndex < d2->ObjectIndex) return true;
 	else return d1->ObjectSerialNumber < d2->ObjectSerialNumber;
 }
 
-FWeakObjectPtr FFINNetworkTrace::GetUnderlyingPtr() const {
+const FWeakObjectPtr& FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
 }
 

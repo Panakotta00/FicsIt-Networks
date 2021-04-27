@@ -301,7 +301,7 @@ USceneComponent* AFINNetworkCableHologram::SetupComponent(USceneComponent* attac
 }
 
 void AFINNetworkCableHologram::SpawnChildren(AActor* hologramOwner, FVector spawnLocation, APawn* hologramInstigator) {
-	TSubclassOf<UFGRecipe> Recipe = LoadObject<UClass>(NULL, TEXT("/Game/FicsItNetworks/Network/NetworkPole/Recipe_NetworkPole.Recipe_NetworkPole_C"));
+	TSubclassOf<UFGRecipe> Recipe = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Network/NetworkPole/Recipe_NetworkPole.Recipe_NetworkPole_C"));
 	PoleHologram = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, Recipe, hologramOwner, spawnLocation, hologramInstigator));
 	PoleHologram->SetDisabled(true);
 }
@@ -342,13 +342,10 @@ void AFINNetworkCableHologram::OnEndSnap(FFINSnappedInfo a) {
 }
 
 AFINNetworkCableHologram::AFINNetworkCableHologram() {
-	UStaticMesh* cableMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
-	UStaticMesh* adapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
+	UStaticMesh* cableMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
+	UStaticMesh* adapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
 
 	this->mMaxPlacementFloorAngle = 90.0f;
-
-	RootComponent = NewObject<USceneComponent>();
-	RootComponent->SetWorldScale3D(FVector::OneVector);
 
 	Cable = CreateDefaultSubobject<USplineMeshComponent>(L"Cable");
 	Cable->SetMobility(EComponentMobility::Movable);

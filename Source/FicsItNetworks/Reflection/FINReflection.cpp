@@ -40,7 +40,7 @@ void FFINReflection::LoadAllTypes() {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
 	TArray<FString> PathsToScan;
-	PathsToScan.Add(TEXT("/Game/FicsItNetworks/"));
+	PathsToScan.Add(TEXT("/FicsItNetworks/"));
 	AssetRegistryModule.Get().ScanPathsSynchronous(PathsToScan, true);
 
 	TArray<FAssetData> AssetData;

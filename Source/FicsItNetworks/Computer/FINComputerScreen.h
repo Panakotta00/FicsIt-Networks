@@ -11,7 +11,7 @@ UCLASS()
 class FICSITNETWORKS_API AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface {
 	GENERATED_BODY()
 	
-private:
+protected:
 	UPROPERTY(SaveGame, Replicated)
 	FFINNetworkTrace GPU;
 
@@ -22,7 +22,7 @@ public:
 	TSharedPtr<SWidget> Widget;
 
 	AFINComputerScreen();
-
+	
 	/**
 	 * This event gets triggered when a new widget got set by the GPU
 	 */

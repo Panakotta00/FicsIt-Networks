@@ -1,5 +1,7 @@
 #include "FINLuaCodeEditor.h"
 
+#include "FicsItNetworks/FicsItNetworksModule.h"
+
 const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
 
 FFINLuaCodeEditorStyle::FFINLuaCodeEditorStyle() {}
@@ -14,13 +16,28 @@ const FFINLuaCodeEditorStyle& FFINLuaCodeEditorStyle::GetDefault() {
 	return *Default;
 }
 
-FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayoutMarshaller(TSharedPtr<FSyntaxTokenizer> InTokenizer, const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle) :
-	FSyntaxHighlighterTextLayoutMarshaller(InTokenizer),
-	SyntaxTextStyle(InLuaSyntaxTextStyle) {
+void FFINLuaSyntaxHighlighterTextLayoutMarshaller::SetText(const FString& SourceString, FTextLayout& TargetTextLayout) {
+	TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines;
+	TArray<FTextRange> LineRanges;
+	FTextRange::CalculateLineRangesFromString(SourceString, LineRanges);
 
+	for (const FTextRange& LineRange : LineRanges) {
+		FSyntaxTokenizer::FTokenizedLine TokenizedLine;
+		TokenizedLine.Range = LineRange;
+		TokenizedLine.Tokens.Add(FSyntaxTokenizer::FToken(FSyntaxTokenizer::ETokenType::Literal, FTextRange(TokenizedLine.Range.BeginIndex, TokenizedLine.Range.EndIndex)));
+		TokenizedLines.Add(TokenizedLine);
+	}
+	
+	ParseTokens(SourceString, TargetTextLayout, TokenizedLines);
 }
 
-FFINLuaSyntaxHighlighterTextLayoutMarshaller::~FFINLuaSyntaxHighlighterTextLayoutMarshaller() {}
+bool FFINLuaSyntaxHighlighterTextLayoutMarshaller::RequiresLiveUpdate() const {
+	return true;
+}
+
+FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayoutMarshaller(const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle) : SyntaxTextStyle(InLuaSyntaxTextStyle) {
+
+}
 
 TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle) {
 	TArray<FSyntaxTokenizer::FRule> TokenizerRules;
@@ -35,7 +52,7 @@ TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighte
 		return A.MatchText.Len() > B.MatchText.Len();
 	});
 	
-	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(FSyntaxTokenizer::Create(TokenizerRules), LuaSyntaxTextStyle));
+	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(LuaSyntaxTextStyle));
 }
 #pragma optimize("", off)
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) {

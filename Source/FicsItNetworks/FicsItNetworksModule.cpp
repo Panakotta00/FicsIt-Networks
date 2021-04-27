@@ -23,27 +23,6 @@
 DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
-class AFGBuildableHologram_Public : public AFGBuildableHologram {
-public:
-	USceneComponent* SetupComponentFunc(USceneComponent*, UActorComponent*, const FName&) { return nullptr; }
-};
-
-USceneComponent* Holo_SetupComponentDecl(AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName);
-void Holo_SetupComponent(CallScope<decltype(&Holo_SetupComponentDecl)>& scope, AFGBuildableHologram_Public* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
-	UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
-	if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
-		auto comp = NewObject<UStaticMeshComponent>(attachParent);
-		comp->RegisterComponent();
-		comp->SetMobility(EComponentMobility::Movable);
-		comp->SetStaticMesh(networkConnectorHoloMesh);
-		comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
-		comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
-		comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			
-		scope.Override(comp);
-	}
-}
-
 void GetDismantleRefund_Decl(IFGDismantleInterface*, TArray<FInventoryStack>&);
 void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {
 	AFGBuildable* self = reinterpret_cast<AFGBuildable*>(disInt);
@@ -83,8 +62,8 @@ void FFicsItNetworksModule::StartupModule(){
 	
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/Game/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/Game/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
 
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
@@ -109,7 +88,20 @@ void FFicsItNetworksModule::StartupModule(){
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
 #if !WITH_EDITOR
-	// TODO: SUBSCRIBE_METHOD_MANUAL("?SetupComponent@AFGBuildableHologram@@MEAAPEAVUSceneComponent@@PEAV2@PEAVUActorComponent@@AEBVFName@@@Z", AFGBuildableHologram_Public::SetupComponentFunc, &Holo_SetupComponent);
+	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
+	    UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
+	    if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
+	        auto comp = NewObject<UStaticMeshComponent>(attachParent);
+	        comp->RegisterComponent();
+	        comp->SetMobility(EComponentMobility::Movable);
+	        comp->SetStaticMesh(networkConnectorHoloMesh);
+	        comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
+	        comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
+	        comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				
+	        scope.Override(comp);
+	    }
+	});
 
 	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildable::Dismantle_Implementation, (void*)GetDefault<AFGBuildable>(), [](auto& scope, AFGBuildable* self_r) {
 		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
@@ -164,7 +156,7 @@ void FFicsItNetworksModule::StartupModule(){
 
 	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
 	    if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
-		    UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/Game/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
+		    UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
 	    	gm->RegisterRemoteCallObjectClass(ModuleRCO);
 	    }

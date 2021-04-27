@@ -172,8 +172,6 @@ public:
 
 	// Begin AActor
 	virtual void Tick(float DeltaSeconds) override;
-	virtual void Serialize(FStructuredArchive::FRecord Record) override;
-	//virtual void Serialize(FArchive& Ar) override;
 	// End AActor
 
 	// Begin IFINGraphicsPorcessingUnit

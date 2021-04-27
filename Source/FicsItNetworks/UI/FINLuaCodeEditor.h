@@ -52,16 +52,17 @@ struct FFINLuaCodeEditorStyle : public FSlateWidgetStyle {
 	FTextBlockStyle FunctionDeclarationTextStyle;
 };
 
-class FICSITNETWORKS_API FFINLuaSyntaxHighlighterTextLayoutMarshaller : public FSyntaxHighlighterTextLayoutMarshaller {
+class FICSITNETWORKS_API FFINLuaSyntaxHighlighterTextLayoutMarshaller : public FPlainTextLayoutMarshaller {
 public:
+	virtual void SetText(const FString& SourceString, FTextLayout& TargetTextLayout) override;
+	virtual bool RequiresLiveUpdate() const override;
 
-	FFINLuaSyntaxHighlighterTextLayoutMarshaller(TSharedPtr<FSyntaxTokenizer> InTokenizer, const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle);
-	~FFINLuaSyntaxHighlighterTextLayoutMarshaller();
+	FFINLuaSyntaxHighlighterTextLayoutMarshaller(const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle);
 
 	static TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle);
 
 protected:
-	virtual void ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) override;
+	void ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines);
 
 	const FFINLuaCodeEditorStyle* SyntaxTextStyle;
 };

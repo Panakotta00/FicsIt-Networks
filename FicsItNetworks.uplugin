@@ -23,9 +23,10 @@
 		}
 	],
 	"Plugins": [
-		{
-			"Name": "SML",
-			"Enabled": true
-		}
-	]
+        {
+            "Name": "SML",
+            "SemVersion": "^3.0.0",
+            "Enabled": true
+        }
+    ]
 }

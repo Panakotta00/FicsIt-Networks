@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
+#include "Widgets/Layout/SSplitter.h"
 #include "FINReflectionUIStyle.generated.h"
 
 USTRUCT(BlueprintType)
@@ -118,8 +120,7 @@ struct FFINReflectionUIStyleStruct : public FSlateWidgetStyle {
 };
 
 UCLASS(BlueprintType, hidecategories=Object, MinimalAPI)
-class UFINReflectionUIStyle : public USlateWidgetStyleContainerBase
-{
+class UFINReflectionUIStyle : public USlateWidgetStyleContainerBase {
 public:
 	GENERATED_BODY()
 

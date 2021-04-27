@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Audio/AudioController.h"
+#include "Dom/JsonObject.h"
 #include "FicsItFS/FINFileSystemState.h"
 #include "FicsItFS/DevDevice.h"
 #include "Network/NetworkController.h"

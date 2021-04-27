@@ -138,6 +138,8 @@ void UFINScreenWidget::ReleaseSlateResources(bool bReleaseChildren) {
 
 TSharedRef<SWidget> UFINScreenWidget::RebuildWidget() {
 	Container = SNew(SBox);
+	Container->SetHAlign(HAlign_Center);
+	Container->SetVAlign(VAlign_Center);
 	OnNewWidget();
 	return Container.ToSharedRef();
 }
