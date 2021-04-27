@@ -85,7 +85,7 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(FGuid InID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
+	virtual void HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
 	// End IFINNetworkMessageInterface
 
 	static bool CheckNetMessageData(const TArray<FFINAnyNetworkValue>& Data);

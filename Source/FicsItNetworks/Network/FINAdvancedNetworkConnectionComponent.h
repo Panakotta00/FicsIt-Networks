@@ -100,7 +100,7 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
+	virtual void HandleMessage(const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
 	virtual bool IsNetworkMessageRouter() const override;
 	// End IFINNetworkMessageInterface
 

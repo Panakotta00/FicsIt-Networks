@@ -23,7 +23,7 @@ void AFINNetworkRouter::BeginPlay() {
 	NetworkConnector1->OnIsNetworkPortOpen.BindLambda([this](int Port) {
         return PortList.Contains(Port) == bIsPortWhitelist;
     });
-	NetworkConnector1->OnNetworkMessageRecieved.AddLambda([this](FGuid ID, FGuid Sender, FGuid Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+	NetworkConnector1->OnNetworkMessageRecieved.AddLambda([this](const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
         this->LampFlags |= FIN_NetRouter_Con1_Tx;
         if (HandleMessage(IFINNetworkCircuitNode::Execute_GetCircuit(NetworkConnector2), ID, Sender, Reciever, Port, Data))
         	this->LampFlags |= FIN_NetRouter_Con2_Rx;
@@ -34,7 +34,7 @@ void AFINNetworkRouter::BeginPlay() {
 	NetworkConnector2->OnIsNetworkPortOpen.BindLambda([this](int Port) {
         return PortList.Contains(Port) == bIsPortWhitelist;
     });
-	NetworkConnector2->OnNetworkMessageRecieved.AddLambda([this](FGuid ID, FGuid Sender, FGuid Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+	NetworkConnector2->OnNetworkMessageRecieved.AddLambda([this](const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
         this->LampFlags |= FIN_NetRouter_Con2_Tx;
         if (HandleMessage(IFINNetworkCircuitNode::Execute_GetCircuit(NetworkConnector1), ID, Sender, Reciever, Port, Data))
 	        this->LampFlags |= FIN_NetRouter_Con1_Rx;
@@ -52,32 +52,38 @@ void AFINNetworkRouter::Tick(float DeltaSeconds) {
 	}
 }
 
-bool AFINNetworkRouter::HandleMessage(AFINNetworkCircuit* SendingCircuit, FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+bool AFINNetworkRouter::HandleMessage(AFINNetworkCircuit* SendingCircuit, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
 	{
 		FScopeLock Lock(&HandleMessageMutex);
 		if (HandledMessages.Contains(ID) || !SendingCircuit) return false;
 		HandledMessages.Add(ID);
 	}
+	
 	if (AddrList.Contains(Sender.ToString()) != bIsAddrWhitelist) return false;
+	if (PortList.Contains(Port) != bIsPortWhitelist) return false;
+	
 	bool bSent = false;
 	if (Receiver.IsValid()) {
 		UObject* Obj = SendingCircuit->FindComponent(Receiver, nullptr).GetObject();
 		IFINNetworkMessageInterface* NetMsgI = Cast<IFINNetworkMessageInterface>(Obj);
-		if (NetMsgI && NetMsgI->IsPortOpen(Port)) {
+		if (NetMsgI) {
+			// send to specified component
 			NetMsgI->HandleMessage(ID, Sender, Receiver, Port, Data);
 			bSent = true;
 		} else if (!NetMsgI) {
+			// distribute over network routers
 			for (UObject* Router : SendingCircuit->GetComponents()) {
 				IFINNetworkMessageInterface* MsgI = Cast<IFINNetworkMessageInterface>(Router);
-				if (!MsgI || !MsgI->IsNetworkMessageRouter() || !MsgI->IsPortOpen(Port)) continue;
+				if (!MsgI || !MsgI->IsNetworkMessageRouter()) continue;
 				MsgI->HandleMessage(ID, Sender, Receiver, Port, Data);
 				bSent = true;
 			}
 		}
 	} else {
+		// distribute to components
 		for (UObject* MsgHandler : SendingCircuit->GetComponents()) {
 			IFINNetworkMessageInterface* MsgI = Cast<IFINNetworkMessageInterface>(MsgHandler);
-			if (!MsgI || !MsgI->IsPortOpen(Port)) continue;
+			if (!MsgI) continue;
 			MsgI->HandleMessage(ID, Sender, Receiver, Port, Data);
 			bSent = true;
 		}

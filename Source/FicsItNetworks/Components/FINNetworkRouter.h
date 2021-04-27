@@ -182,7 +182,7 @@ public:
     void OnMessageHandled(bool bCon1or2, bool bSendOrReceive);
 	
 private:
-	bool HandleMessage(AFINNetworkCircuit* SendingCircuit, FGuid ID, FGuid Sender, FGuid Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data);
+	bool HandleMessage(AFINNetworkCircuit* SendingCircuit, const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data);
 
 	UFUNCTION(NetMulticast, Unreliable)
     void NetMulti_OnMessageHandled(EFINNetworkRouterLampFlags Flags);
