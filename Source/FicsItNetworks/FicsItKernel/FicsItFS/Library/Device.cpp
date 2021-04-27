@@ -232,8 +232,11 @@ namespace CodersFileSystem {
 
 	unordered_set<NodeName> DiskDevice::childs(Path path) {
 		std::unordered_set<NodeName> childs;
-		for (const auto& entry : fs::directory_iterator(realPath / path))
-			childs.insert(entry.path().filename().string());
+		std::filesystem::path NewPath = realPath / path;
+		for (const auto& entry : fs::directory_iterator(NewPath)) {
+			NodeName childName = entry.path().filename().string();
+			childs.insert(childName);
+		}
 		return childs;
 	}
 

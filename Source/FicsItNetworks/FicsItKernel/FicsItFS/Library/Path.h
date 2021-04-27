@@ -28,7 +28,7 @@ namespace CodersFileSystem {
 		bool startsWith(const Path& other) const;
 		Path next() const;
 		Path prev() const;
-		std::string str() const;
+		std::string str(bool noAbsolute = false) const;
 		size_t getNodeCount() const;
 		Path removeFrontNodes(size_t count) const;
 		std::string getFinal() const;

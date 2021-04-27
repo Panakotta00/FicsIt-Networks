@@ -20,6 +20,7 @@ namespace CodersFileSystem {
 }
 
 inline std::filesystem::path operator/(const std::filesystem::path& LeftPath, const CodersFileSystem::NodeName& RightNode) {
+	if (RightNode.length() < 1) return LeftPath;
 	return LeftPath / std::filesystem::path(std::string(RightNode));
 }
 

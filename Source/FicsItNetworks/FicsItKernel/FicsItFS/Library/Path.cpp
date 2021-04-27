@@ -67,8 +67,8 @@ Path CodersFileSystem::Path::prev() const {
 	return Path(nPath, absolute);
 }
 
-std::string CodersFileSystem::Path::str() const {
-	std::string p = (absolute) ? "/" : "";
+std::string CodersFileSystem::Path::str(bool noAbsolute) const {
+	std::string p = (absolute && !noAbsolute) ? "/" : "";
 	for (auto n : path) {
 		p += n + "/";
 	}
@@ -111,6 +111,7 @@ Path CodersFileSystem::Path::operator/(const Path & other) const {
 }
 
 Path Path::operator/(const NodeName& node) const {
+	if (node.length() < 1) return *this;
 	Path newPath(path, absolute);
 	newPath.path.push_back(node);
 	return newPath;
@@ -123,7 +124,7 @@ Path & CodersFileSystem::Path::operator=(const Path & other) {
 }
 
 CodersFileSystem::Path::operator std::filesystem::path() const {
-	return str();
+	return str(true);
 }
 
 
