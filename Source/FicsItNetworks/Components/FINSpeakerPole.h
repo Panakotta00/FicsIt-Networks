@@ -81,5 +81,5 @@ public:
 	 * without the file extension.
 	 * If it was unable to load the sound file, return nullptr.
 	 */
-	USoundWave* LoadSoundFromFile(const FString& sound);
+	USoundWave* LoadSoundFromFile(const FString& InSound);
 };

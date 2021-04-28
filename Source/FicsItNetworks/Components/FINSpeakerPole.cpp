@@ -1,11 +1,9 @@
 #include "FINSpeakerPole.h"
 
-#include <filesystem>
-#include <fstream>
-#include <sstream>
-
+#include "AudioCompressionSettingsUtils.h"
 #include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
 #include "VorbisAudioInfo.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 
 AFINSpeakerPole::AFINSpeakerPole() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -90,52 +88,56 @@ void AFINSpeakerPole::netSigMeta_SpeakerSound(FString& InternalName, FText& Disp
 	Runtime = 1;
 }
 
-USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& sound) {
+USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& InSound) {
     FString fsp;
 	// TODO: Get UFGSaveSystem::GetSaveDirectoryPath() working
     if (fsp.IsEmpty()) {
         fsp = FPaths::Combine( FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT( "Saved/" ) TEXT( "SaveGames/" ) );
     }
 	
-	auto file = sound + TEXT(".ogg");
-	auto path = std::filesystem::path(*file);
+	IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
+	
+	FString FolderPath = FPaths::Combine(fsp, TEXT("Computers/Sounds"));
 
-	std::filesystem::path root = *fsp;
-	root /= "Computers/Sounds";
-	std::filesystem::create_directories(root);
-	auto pathToFile = root / path;
-	pathToFile = std::filesystem::absolute(pathToFile);
-	auto ps = pathToFile.string();
-	if (ps.rfind(std::filesystem::absolute(root).string(), 0) != 0 || !std::filesystem::exists(pathToFile)) {
+	FileManager.CreateDirectoryTree(*FolderPath);
+	
+	FString FilePath = FileManager.ConvertToAbsolutePathForExternalAppForRead(*FPaths::Combine(FolderPath, InSound + TEXT(".ogg")));
+	if (!FilePath.StartsWith(FolderPath)) {
+		UE_LOG(LogFicsItNetworks, Warning, TEXT("Tried to load sound from '%s' but outside of sounds folder."), *FilePath);
+		return nullptr;
+	}
+
+	TArray<uint8> DataArray;
+	if (!FFileHelper::LoadFileToArray(DataArray, *FilePath)) {
+		UE_LOG(LogFicsItNetworks, Warning, TEXT("Sound file '%s' not found in sounds folder."), *FilePath);
 		return nullptr;
 	}
 
 	USoundWave* sw = NewObject<USoundWave>();
 	if (!sw) return nullptr;
-	bool loaded = false;
-	std::fstream f;
-	f.open(pathToFile, std::fstream::in | std::fstream::binary);
-	std::stringstream strs;
-	strs << f.rdbuf();
-	auto s = strs.str();
-	FByteBulkData& data = sw->CompressedFormatData.GetFormat(L"OGG");
-	data.Lock(0x2);
-	memcpy(data.Realloc(s.size()), s.data(), s.size());
-	data.Unlock();
-	
-	FSoundQualityInfo info;
-	FVorbisAudioInfo* vorbis_obj = new FVorbisAudioInfo();
-	if (!vorbis_obj->ReadCompressedInfo((const uint8*) s.data(), (unsigned int)s.size(), &info)) {
-		return nullptr;
+
+	FName Format = TEXT("OGG");
+	const FPlatformAudioCookOverrides* CompressionOverrides = FPlatformCompressionUtilities::GetCookOverrides();
+	if (CompressionOverrides) {
+		FString HashedString = *Format.ToString();
+		FPlatformAudioCookOverrides::GetHashSuffix(CompressionOverrides, HashedString);
+		Format = *HashedString;
 	}
 
-	sw->SoundGroup = ESoundGroup::SOUNDGROUP_Default;
-	sw->NumChannels = info.NumChannels;
-	sw->Duration = info.Duration;
-	sw->RawPCMDataSize = info.SampleDataSize;
-	sw->SetSampleRate(info.SampleRate);
+	FByteBulkData* BulkData = &sw->CompressedFormatData.GetFormat(Format);
 
-	delete vorbis_obj;
+	BulkData->Lock(LOCK_READ_WRITE);
+	FMemory::Memcpy(BulkData->Realloc(DataArray.Num()), DataArray.GetData(), DataArray.Num());
+	BulkData->Unlock();
+
+	FSoundQualityInfo Quality; 
+	FVorbisAudioInfo Vorbis;
+	if (!Vorbis.ReadCompressedInfo(DataArray.GetData(), DataArray.Num(), &Quality)) return nullptr;
+	sw->SetSampleRate(Quality.SampleRate);
+	sw->Duration = Quality.Duration;
+	sw->NumChannels = Quality.NumChannels;
+	sw->RawPCMDataSize = Quality.SampleDataSize;
+	sw->SoundGroup = SOUNDGROUP_Default;
 
 	return sw;
 }
