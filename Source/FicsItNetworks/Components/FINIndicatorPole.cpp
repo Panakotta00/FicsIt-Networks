@@ -34,12 +34,14 @@ void AFINIndicatorPole::BeginPlay() {
 	CreatePole();
 
 	if (Indicator->GetMaterials().Num() > 0) {
-		IndicatorInstance = Indicator->CreateDynamicMaterialInstance(0);
+		IndicatorInstance = UMaterialInstanceDynamic::Create(Cast<UMaterialInstanceDynamic>(Indicator->GetMaterial(0))->Parent, nullptr);
 		Indicator->SetMaterial(0, IndicatorInstance);
 	}
 }
 
 void AFINIndicatorPole::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
+	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
+	
 	if (bHasChanged) {
 		bHasChanged = false;
 		UpdateEmessive();

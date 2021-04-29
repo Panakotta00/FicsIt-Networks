@@ -97,12 +97,12 @@ USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& InSound) {
 	
 	IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
 	
-	FString FolderPath = FPaths::Combine(fsp, TEXT("Computers/Sounds"));
+	FString SoundsFolderPath = FPaths::Combine(fsp, TEXT("Computers/Sounds"));
 
-	FileManager.CreateDirectoryTree(*FolderPath);
+	FileManager.CreateDirectoryTree(*SoundsFolderPath);
 	
-	FString FilePath = FileManager.ConvertToAbsolutePathForExternalAppForRead(*FPaths::Combine(FolderPath, InSound + TEXT(".ogg")));
-	if (!FilePath.StartsWith(FolderPath)) {
+	FString FilePath = FileManager.ConvertToAbsolutePathForExternalAppForRead(*FPaths::Combine(SoundsFolderPath, InSound + TEXT(".ogg")));
+	if (!FilePath.StartsWith(SoundsFolderPath)) {
 		UE_LOG(LogFicsItNetworks, Warning, TEXT("Tried to load sound from '%s' but outside of sounds folder."), *FilePath);
 		return nullptr;
 	}
