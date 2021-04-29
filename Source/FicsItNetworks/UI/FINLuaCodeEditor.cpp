@@ -21,10 +21,38 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::SetText(const FString& Source
 	TArray<FTextRange> LineRanges;
 	FTextRange::CalculateLineRangesFromString(SourceString, LineRanges);
 
+	TArray<FString> Rules = TArray<FString>({
+		" ", "\t", "\\.", "\\:", "\\\"", "\\\'", "\\,", "\\(", "\\)", "for", "in", "while", "do", "if", "then", "elseif", "else",
+		"end", "local", "true", "false", "not", "and", "or", "function", "return", "--\\[\\[", "\\]\\]--", "--", "\\+", "\\-", "\\/",
+		"\\*", "\\%", "\\[", "\\]", "\\{", "\\}", "\\=", "\\!", "\\~", "\\#", "\\>", "\\<"});
+	
+	FString Pat;
+	for (const FString& Rule : Rules) {
+		Pat += FString::Printf(TEXT("(%s)|"), *Rule);
+	}
+	if (Rules.Num() > 0) Pat = Pat.LeftChop(1);
+	FRegexPattern Pattern(Pat);
+
 	for (const FTextRange& LineRange : LineRanges) {
 		FSyntaxTokenizer::FTokenizedLine TokenizedLine;
 		TokenizedLine.Range = LineRange;
-		TokenizedLine.Tokens.Add(FSyntaxTokenizer::FToken(FSyntaxTokenizer::ETokenType::Literal, FTextRange(TokenizedLine.Range.BeginIndex, TokenizedLine.Range.EndIndex)));
+
+		FString Line = SourceString.Mid(LineRange.BeginIndex, LineRange.EndIndex - LineRange.BeginIndex);
+		FRegexMatcher Match(Pattern, Line);
+		int32 Start = 0;
+		int32 End = 0;
+		while (Match.FindNext()) {
+			int32 MatchStart = Match.GetMatchBeginning();
+			End = Match.GetMatchEnding();
+			if (MatchStart != Start) {
+				TokenizedLine.Tokens.Add(FSyntaxTokenizer::FToken(FSyntaxTokenizer::ETokenType::Literal, FTextRange(LineRange.BeginIndex + Start, LineRange.BeginIndex + MatchStart)));
+			}
+			Start = End;
+			TokenizedLine.Tokens.Add(FSyntaxTokenizer::FToken(FSyntaxTokenizer::ETokenType::Syntax, FTextRange(LineRange.BeginIndex + MatchStart, LineRange.BeginIndex + End)));
+		}
+		if (End < LineRange.EndIndex - LineRange.BeginIndex || TokenizedLine.Tokens.Num() < 1) {
+			TokenizedLine.Tokens.Add(FSyntaxTokenizer::FToken(FSyntaxTokenizer::ETokenType::Syntax, FTextRange(LineRange.BeginIndex + End, LineRange.EndIndex)));
+		}
 		TokenizedLines.Add(TokenizedLine);
 	}
 	
