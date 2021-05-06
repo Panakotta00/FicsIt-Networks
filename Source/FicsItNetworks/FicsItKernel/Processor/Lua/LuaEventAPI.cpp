@@ -2,7 +2,6 @@
 
 #include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
 #include "FGPowerCircuit.h"
-#include "FicsItNetworks/FINSubsystemHolder.h"
 #include "LuaProcessor.h"
 #include "LuaInstance.h"
 #include "FicsItNetworks/Network/FINNetworkTrace.h"

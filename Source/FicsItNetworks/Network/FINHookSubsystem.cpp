@@ -1,11 +1,15 @@
-﻿#include "FINHookSubsystem.h"
+#include "FINHookSubsystem.h"
 
-#include "FicsItNetworks/FINSubsystemHolder.h"
+#include "Subsystem/SubsystemActorManager.h"
+#include "Engine/Engine.h"
 
 TMap<UClass*, TSet<TSubclassOf<UFINHook>>> AFINHookSubsystem::HookRegistry;
 
 AFINHookSubsystem* AFINHookSubsystem::GetHookSubsystem(UObject* WorldContext) {
-	return UModSubsystemHolder::GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->HookSubsystem;
+	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
+	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
+	check(SubsystemActorManager);
+	return SubsystemActorManager->GetSubsystemActor<AFINHookSubsystem>();
 }
 
 void AFINHookSubsystem::RegisterHook(UClass* clazz, TSubclassOf<UFINHook> hook) {

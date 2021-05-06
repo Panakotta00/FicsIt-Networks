@@ -1,9 +1,8 @@
 ﻿#pragma once
 
+#include "Subsystem/ModSubsystem.h"
 #include "FGSaveInterface.h"
-#include "FGSubsystem.h"
 #include "FINSignalData.h"
-#include "FicsItNetworks/Network/FINDynamicStructHolder.h"
 #include "FINSignalSubsystem.generated.h"
 
 USTRUCT()
@@ -15,7 +14,7 @@ struct FICSITNETWORKS_API FFINSignalListeners {
 };
 
 UCLASS(BlueprintType)
-class FICSITNETWORKS_API AFINSignalSubsystem : public AFGSubsystem, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINSignalSubsystem : public AModSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 private:
 	/**

@@ -1,8 +1,7 @@
 ﻿#pragma once
+
+#include "Subsystem/ModSubsystem.h"
 #include "FGSaveInterface.h"
-#include "FGSubsystem.h"
-#include "FINNetworkTrace.h"
-#include "Signals/FINSignalData.h"
 #include "FINHookSubsystem.generated.h"
 
 UCLASS(Abstract)
@@ -25,7 +24,7 @@ struct FICSITNETWORKS_API FFINHookData {
 };
 
 UCLASS()
-class FICSITNETWORKS_API AFINHookSubsystem : public AFGSubsystem, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINHookSubsystem : public AModSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 private:
 	/**

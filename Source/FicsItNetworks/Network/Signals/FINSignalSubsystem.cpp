@@ -1,7 +1,8 @@
-﻿#include "FINSignalSubsystem.h"
+#include "FINSignalSubsystem.h"
 
+#include "Subsystem/SubsystemActorManager.h"
 #include "FINSignalListener.h"
-#include "FicsItNetworks/FINSubsystemHolder.h"
+#include "Engine/Engine.h"
 #include "FicsItNetworks/Network/FINHookSubsystem.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
 
@@ -23,7 +24,10 @@ void AFINSignalSubsystem::GatherDependencies_Implementation(TArray<UObject*>& ou
 }
 
 AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldContext) {
-	return UModSubsystemHolder::GetSubsystemHolder<UFINSubsystemHolder>(WorldContext)->SignalSubsystem;
+	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
+	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
+	check(SubsystemActorManager);
+	return SubsystemActorManager->GetSubsystemActor<AFINSignalSubsystem>();
 }
 #pragma optimize("", off)
 void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData& Signal) {
