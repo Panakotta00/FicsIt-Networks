@@ -13,7 +13,7 @@ namespace FicsItKernel {
 		 */
 		struct LuaStruct {
 			UFINStruct* Type = nullptr;
-			FFINDynamicStructHolder Struct;
+			TSharedRef<FFINDynamicStructHolder> Struct;
 			UFINKernelSystem* Kernel;
 			LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel);
 			LuaStruct(const LuaStruct& Other);

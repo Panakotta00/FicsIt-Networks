@@ -81,7 +81,7 @@ void FFicsItNetworksModule::StartupModule(){
 			NewPath += TEXT("_C");
 			OldPath += TEXT("_C");
 		}
-		UE_LOG(LogFicsItNetworks, Warning, TEXT("FIN Redirect: '%s' -> '%s'"), *OldPath, *NewPath);
+		// UE_LOG(LogFicsItNetworks, Warning, TEXT("FIN Redirect: '%s' -> '%s'"), *OldPath, *NewPath);
 		redirects.Add(FCoreRedirect(ECoreRedirectFlags::Type_AllMask, OldPath, NewPath));
 	}
 

@@ -53,7 +53,18 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 * @return	the stored integer
 	 */
 	FINInt GetInt() const {
-		return Data.INT;
+		switch (GetType()) {
+		case FIN_INT:
+			return Data.INT;
+		case FIN_FLOAT:
+			return (FINInt) Data.FLOAT;
+		case FIN_NIL:
+			return 0;
+		case FIN_BOOL:
+			return (FINInt) Data.BOOL;
+		default:
+			return 0;
+		}
 	}
 
 	/**
@@ -63,7 +74,18 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 * @return	the stored float
 	 */
 	FINFloat GetFloat() const {
-		return Data.FLOAT;
+		switch (GetType()) {
+		case FIN_FLOAT:
+			return Data.FLOAT;
+		case FIN_INT:
+			return (FINFloat) Data.INT;
+		case FIN_BOOL:
+			return (FINFloat) Data.BOOL;
+		case FIN_NIL:
+			return 0.0;
+		default:
+			return 0.0;
+		}
 	}
 
 	/**

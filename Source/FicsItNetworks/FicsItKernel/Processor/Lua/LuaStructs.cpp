@@ -38,9 +38,14 @@ namespace FicsItKernel {
 				return nullptr;
 			}
 			if (lua_istable(L, i)) {
+				int j = 0;
 				for (UFINProperty* Prop : Type->GetProperties()) {
 					if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
-					lua_getfield(L, i, TCHAR_TO_UTF8(*Prop->GetInternalName()));
+					++j;
+					if (lua_getfield(L, i, TCHAR_TO_UTF8(*Prop->GetInternalName())) == LUA_TNIL) {
+						lua_pop(L, 1);
+						lua_geti(L, i, j);
+					}
 					FINAny Value;
 					luaToNetworkValue(L, -1, Value);
 					lua_pop(L, 1);
@@ -51,14 +56,14 @@ namespace FicsItKernel {
 				FString MetaName = StructToMetaName[Type];
 				StructMetaNameLock.Unlock();
 				LuaStruct* LStruct = static_cast<LuaStruct*>(lua_touserdata(L, i));
-				*Struct = LStruct->Struct;
+				Struct = LStruct->Struct;
 				return LStruct;
 			}
 			return nullptr;
 		}
 		
 #pragma optimize("", off)
-		LuaStruct::LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(Struct), Kernel(Kernel) {
+		LuaStruct::LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(MakeShared<FFINDynamicStructHolder>(Struct)), Kernel(Kernel) {
 			Kernel->AddReferencer(this, &CollectReferences);
 		}
 
@@ -73,7 +78,7 @@ namespace FicsItKernel {
 		void LuaStruct::CollectReferences(void* Obj, FReferenceCollector& Collector) {
 			LuaStruct* Self = static_cast<LuaStruct*>(Obj);
 			Collector.AddReferencedObject(Self->Type);
-			Self->Struct.AddStructReferencedObjects(Collector);
+			Self->Struct->AddStructReferencedObjects(Collector);
 		}
 
 		void luaStruct(lua_State* L, const FINStruct& Struct) {
@@ -117,10 +122,10 @@ namespace FicsItKernel {
 			const FString MetaName = *MetaNamePtr;
 			StructMetaNameLock.Unlock();
 			LuaStruct* Instance = static_cast<LuaStruct*>(luaL_checkudata(L, 1, TCHAR_TO_UTF8(*MetaName)));
-			if (!Instance->Struct.GetData()) return luaL_argerror(L, 1, "Struct is invalid");
+			if (!Instance->Struct->GetData()) return luaL_argerror(L, 1, "Struct is invalid");
 
 			// call the function
-			return luaCallFINFunc(L, Func->Func, FFINExecutionContext(Instance->Struct.GetData()), "Struct");
+			return luaCallFINFunc(L, Func->Func, FFINExecutionContext(Instance->Struct->GetData()), "Struct");
 		}
 		
 		int luaStructIndex(lua_State* L) {
