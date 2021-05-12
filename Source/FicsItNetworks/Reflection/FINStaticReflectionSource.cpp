@@ -1,6 +1,7 @@
 ﻿#include "FINStaticReflectionSource.h"
 
 #include "FGFactoryConnectionComponent.h"
+#include "FGGameState.h"
 #include "FGHealthComponent.h"
 #include "FGItemCategory.h"
 #include "FGLocomotive.h"
@@ -33,6 +34,8 @@
 #include "Buildables/FGBuildableCircuitSwitch.h"
 #include "Buildables/FGBuildableDockingStation.h"
 #include "Buildables/FGBuildableFactory.h"
+#include "Buildables/FGBuildableLightsControlPanel.h"
+#include "Buildables/FGBuildableLightSource.h"
 #include "Buildables/FGBuildableManufacturer.h"
 #include "Buildables/FGBuildablePipelinePump.h"
 #include "Buildables/FGBuildablePipeReservoir.h"
@@ -1868,6 +1871,78 @@ BeginProp(RFloat, indicatorHeadlift, "Indicator Headlift", "The amount of headli
 } EndProp()
 BeginProp(RFloat, indicatorHeadliftPct, "Indicator Headlift Percent", "The amount of headlift the indicator shows as percantage from max.") {
 	Return self->GetIndicatorHeadLiftPct();
+} EndProp()
+EndClass()
+
+BeginClass(AFGBuildableLightSource, "LightSource", "Light Source", "The base class for all light you can build.")
+BeginProp(RBool, isLightEnabled, "Is Light Enabled", "True if the light is enabled") {
+	return self->IsLightEnabled();
+} PropSet() {
+	self->SetLightEnabled(Val);
+} EndProp()
+BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the light should automatically turn on and off depending on the time of the day.") {
+	return self->GetLightControlData().IsTimeOfDayAware;
+} PropSet() {
+	FLightSourceControlData data = self->GetLightControlData();
+	data.IsTimeOfDayAware = Val;
+	self->SetLightControlData(data);
+} EndProp()
+BeginProp(RFloat, intensity, "Intensity", "The intensity of the light.") {
+	return self->GetLightControlData().Intensity;
+} PropSet() {
+	FLightSourceControlData data = self->GetLightControlData();
+	data.Intensity = Val;
+	self->SetLightControlData(data);
+} EndProp()
+BeginProp(RInt, colorSlot, "Color Slot", "The color slot the light uses.") {
+	return (int64) self->GetLightControlData().ColorSlotIndex;
+} PropSet() {
+	FLightSourceControlData data = self->GetLightControlData();
+	data.ColorSlotIndex = Val;
+	self->SetLightControlData(data);
+} EndProp()
+BeginFunc(getColorFromSlot, "Get Color from Slot", "Returns the light color that is referenced by the given slot.") {
+	InVal(0, RInt, slot, "Slot", "The slot you want to get the referencing color from.")
+	OutVal(1, RStruct<FLinearColor>, color, "Color", "The color this slot references.")
+	Body()
+	AFGBuildableSubsystem* SubSys = AFGBuildableSubsystem::Get(self);
+	color = (FINStruct) SubSys->GetBuildableLightColorSlot(slot);
+} EndFunc()
+BeginFunc(setColorFromSlot, "Set Color from Slot", "Allows to update the light color that is referenced by the given slot.", 0) {
+	InVal(0, RInt, slot, "Slot", "The slot you want to update the referencing color for.")
+	InVal(1, RStruct<FLinearColor>, color, "Color", "The color this slot should now reference.")
+	Body()
+	AFGBuildableSubsystem* SubSys = AFGBuildableSubsystem::Get(self);
+	Cast<AFGGameState>(self->GetWorld()->GetGameState())->Server_SetBuildableLightColorSlot(slot, color);
+} EndFunc()
+EndClass()
+
+BeginClass(AFGBuildableLightsControlPanel, "LightsControlPanel", "Light Source", "A control panel to configure multiple lights at once.")
+BeginProp(RBool, isLightEnabled, "Is Light Enabled", "True if the lights should be enabled") {
+	return self->IsLightEnabled();
+} PropSet() {
+	self->SetLightEnabled(Val);
+} EndProp()
+BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the lights should automatically turn on and off depending on the time of the day.") {
+	return self->GetLightControlData().IsTimeOfDayAware;
+} PropSet() {
+	FLightSourceControlData data = self->GetLightControlData();
+	data.IsTimeOfDayAware = Val;
+	self->SetLightControlData(data);
+} EndProp()
+BeginProp(RFloat, intensity, "Intensity", "The intensity of the lights.") {
+	return self->GetLightControlData().Intensity;
+} PropSet() {
+	FLightSourceControlData data = self->GetLightControlData();
+	data.Intensity = Val;
+	self->SetLightControlData(data);
+} EndProp()
+BeginProp(RInt, colorSlot, "Color Slot", "The color slot the lights should use.") {
+	return (int64) self->GetLightControlData().ColorSlotIndex;
+} PropSet() {
+	FLightSourceControlData data = self->GetLightControlData();
+	data.ColorSlotIndex = Val;
+	self->SetLightControlData(data);
 } EndProp()
 EndClass()
 
