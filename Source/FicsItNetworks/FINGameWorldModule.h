@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Module/GameWorldModule.h"
+#include "FINGameWorldModule.generated.h"
 
-class UFINGameWorldModule : UGameWorldModule {
+UCLASS()
+class UFINGameWorldModule : public UGameWorldModule {
+	GENERATED_BODY()
 public:
 	UFINGameWorldModule();
 };
