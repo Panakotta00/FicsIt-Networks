@@ -29,6 +29,7 @@ AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldConte
 	check(SubsystemActorManager);
 	return SubsystemActorManager->GetSubsystemActor<AFINSignalSubsystem>();
 }
+
 #pragma optimize("", off)
 void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData& Signal) {
 	FFINSignalListeners* ListenerList = Listeners.Find(Sender);
