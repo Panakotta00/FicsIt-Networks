@@ -13,9 +13,11 @@ class FICSITNETWORKS_API AFINFileSystemState : public AActor, public IFGSaveInte
 private:
 	CodersFileSystem::SRef<CodersFileSystem::Device> Device;
 
-	void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path);
+	bool bUseOldSerialization = false;
 	
 public:
+	static void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path);
+
 	UPROPERTY(SaveGame)
 	FGuid ID;
 
@@ -42,6 +44,7 @@ public:
 	// End AActor
 
 	// Begin IFGSaveInterface
+	virtual void PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
 	
@@ -55,4 +58,6 @@ public:
 
 	UFUNCTION()
 	void UpdateUsage();
+
+	void Serialize_DEPRECATED(FArchive& Ar);
 };

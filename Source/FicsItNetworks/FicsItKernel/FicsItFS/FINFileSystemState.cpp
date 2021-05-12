@@ -72,7 +72,12 @@ void AFINFileSystemState::Serialize(FStructuredArchive::FRecord Record) {
 	}
 	
 	FStructuredArchive::FSlot RootNode = Record.EnterField(SA_FIELD_NAME(TEXT("RootNode")));
-	SerializePath(SerializeDevice, RootNode.EnterRecord(), "/");
+	if (!bUseOldSerialization) {
+		SerializePath(SerializeDevice, RootNode.EnterRecord(), "/");
+	} else {
+		Serialize_DEPRECATED(RootNode.GetUnderlyingArchive());
+		bUseOldSerialization = false;
+	}
 }
 
 void AFINFileSystemState::BeginPlay() {
@@ -80,6 +85,10 @@ void AFINFileSystemState::BeginPlay() {
 	GetDevice();
 	
 	if (HasAuthority()) GetWorld()->GetTimerManager().SetTimer(UsageUpdateHandler, this, &AFINFileSystemState::UpdateUsage, 1.0f, true);
+}
+
+void AFINFileSystemState::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	bUseOldSerialization = gameVersion < 150216;
 }
 
 bool AFINFileSystemState::ShouldSave_Implementation() const {
@@ -130,4 +139,34 @@ void AFINFileSystemState::UpdateUsage() {
 	CodersFileSystem::SRef<CodersFileSystem::ByteCountedDevice> UsageDevice = GetDevice();
 	if (Device) Usage = UsageDevice->getUsed();
 	else Usage = 0.0f;
+}
+
+void AFINFileSystemState::Serialize_DEPRECATED(FArchive& Ar) {
+	if (!Ar.IsSaveGame()) return;
+	
+	FFileSystemNode node;
+	node.NodeType = -1;
+
+	// serialize filesystem devices
+	if (Ar.IsSaving()) {
+		if (dynamic_cast<CodersFileSystem::MemDevice*>(Device.get())) node.NodeType = 3;
+		if (dynamic_cast<CodersFileSystem::DiskDevice*>(Device.get())) node.NodeType = 2;
+		if (node.NodeType == 2 || node.NodeType == 3) {
+			std::unordered_set<CodersFileSystem::NodeName> nodes = Device->childs("");
+			for (CodersFileSystem::NodeName newNode : nodes) {
+				TSharedPtr<FFileSystemNode> newSerializeNode = MakeShareable(new FFileSystemNode());
+				newSerializeNode->Serialize(Device, newNode.c_str());
+				node.ChildNodes.Add(FString(newNode.c_str()), newSerializeNode);
+			}
+		}
+	}
+	
+	Ar << node;
+	
+	// load devices
+	if (Ar.IsLoading()) {
+		GetDevice();
+		std::string deviceName = TCHAR_TO_UTF8(*ID.ToString());
+		node.Deserialize(Device, deviceName);
+	}
 }

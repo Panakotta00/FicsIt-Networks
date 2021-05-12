@@ -82,7 +82,7 @@ public:
 	 * @param[in]	Ar		archive from which you want to read/write fro/to
 	 * @param[in]	info	info storage were to store the readed data to
 	 */
-	void Serialize(FArchive& Ar, FFileSystemSerializationInfo& info);
+	void Serialize(FStructuredArchive::FRecord Record, FFileSystemSerializationInfo& info);
 
 	/**
 	 * Reads the data from the info storage object

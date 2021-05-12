@@ -76,7 +76,7 @@ void UFINKernelSystem::Serialize(FStructuredArchive::FRecord Record) {
 	// TODO: serialize kernel crash
 
 	TOptional<FStructuredArchive::FSlot> FSSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("FileSystem")), true);
-	if (FSSlot.IsSet()) FileSystem.Serialize(FSSlot->GetUnderlyingArchive(), FileSystemSerializationInfo);
+	if (FSSlot.IsSet()) FileSystem.Serialize(FSSlot->EnterRecord(), FileSystemSerializationInfo);
 
 	//TOptional<FStructuredArchive::FSlot> ProcessorSlot = Record.TryEnterField(FIELD_NAME_TEXT("Processor"), true);
 	//if (ProcessorSlot.IsSet()) ProcessorSlot->GetUnderlyingArchive() << Processor;

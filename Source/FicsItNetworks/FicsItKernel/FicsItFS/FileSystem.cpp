@@ -1,6 +1,7 @@
 #include "FileSystem.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FileSystemSerializationInfo.h"
+#include "FINFileSystemState.h"
 #include "Library/NodeName.h"
 
 bool FFINKernelFSRoot::mount(CodersFileSystem::SRef<CodersFileSystem::Device> device, CodersFileSystem::Path path) {
@@ -119,8 +120,8 @@ bool FFINKernelFSRoot::checkUnpersistPath(std::string path) {
 	return false;
 }
 
-void FFINKernelFSRoot::Serialize(FArchive& Ar, FFileSystemSerializationInfo& info) {
-	if (Ar.IsSaving() && getDevDevice()) {
+void FFINKernelFSRoot::Serialize(FStructuredArchive::FRecord Record, FFileSystemSerializationInfo& info) {
+	if (Record.GetUnderlyingArchive().IsSaving() && getDevDevice()) {
 		// serialize mount points
 		for (auto mount : mounts) {
 			for (auto device : getDevDevice()->getDevices()) {
@@ -139,8 +140,8 @@ void FFINKernelFSRoot::Serialize(FArchive& Ar, FFileSystemSerializationInfo& inf
 			info.Devices.Add(dev.first.c_str(), node);
 		}
 	}
-	Ar << info.Mounts;
-	Ar << info.Devices;
+	Record.EnterField(SA_FIELD_NAME(TEXT("Mounts"))) << info.Mounts;
+	Record.EnterField(SA_FIELD_NAME(TEXT("Devices"))) << info.Devices;
 }
 
 void FFINKernelFSRoot::PostLoad(const FFileSystemSerializationInfo& info) {
