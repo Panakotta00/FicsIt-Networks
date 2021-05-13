@@ -8,6 +8,11 @@ pipeline {
 		skipDefaultCheckout(true)
 	}
 
+	environment {
+        MOD_NAME = 'FicsItNetworks'
+    }
+
+
 	stages {
 		stage('SML') {
 			checkout scm: [
@@ -33,7 +38,7 @@ pipeline {
 						branches: scm.branches,
 						extensions: [[
 							$class: 'RelativeTargetDirectory',
-							relativeTargetDir: 'FicsItNetworks'
+							relativeTargetDir: '${MOD_NAME}'
 						]],
 						submoduleCfg: scm.submoduleCfg,
 						doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
@@ -46,8 +51,8 @@ pipeline {
 		stage('Apply Patches') {
 			steps {
 				dir("SatisfactoryModLoader") {
-					bat label: 'Apply SML Patch', script: 'git apply Plugins\\FicsItNetworks\\SML_Patch.patch'
-					bat label: 'Apply Asset Patch', script: 'git apply %ASSETS%'
+					bat label: 'Apply SML Patch', script: 'git apply Plugins\\%MOD_NAME%\\SML_Patch.patch -v'
+					bat label: 'Apply Asset Patch', script: 'git apply %ASSETS% -v'
 					bat label: 'Add WWise', script: '7z x %WWISE_PLUGIN% -oPlugins\\'
 				}
 			}
@@ -58,11 +63,11 @@ pipeline {
 				dir('ue4') {
 					withCredentials([string(credentialsId: 'GitHub-API', variable: 'GITHUB_TOKEN')]) {
 						retry(3) {
-							bat label: '', script: 'github-release download --user SatisfactoryModdingUE --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.zip" > UnrealEngine-CSS-Editor-Win64.zip'
+							bat label: 'Download UE', script: 'github-release download --user SatisfactoryModdingUE --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.zip" > UnrealEngine-CSS-Editor-Win64.zip'
 						}
-						bat label: '', script: '7z x UnrealEngine-CSS-Editor-Win64.zip'
+						bat label: 'Extract UE', script: '7z x UnrealEngine-CSS-Editor-Win64.zip'
 					}
-					bat label: '', script: 'SetupScripts\\Register.bat'
+					bat label: 'Register UE', script: 'SetupScripts\\Register.bat'
 				}
 			}
 		}
@@ -70,15 +75,15 @@ pipeline {
 
 		stage('Build FicsIt-Networks') {
 			steps {
-				bat label: '', script: '.\\ue4\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe  -projectfiles -project="%WORKSPACE%\\FicsIt-Networks\\FactoryGame.uproject" -game -rocket -progress'
-				bat label: '', script: 'MSBuild.exe .\\SatisfactoryModLoader\\FactoryGame.sln /p:Configuration="Shipping" /p:Platform="Win64" /t:"Games\\FactoryGame"'
-				bat label: '', script: 'MSBuild.exe .\\SatisfactoryModLoader\\FactoryGame.sln /p:Configuration="Development Editor" /p:Platform="Win64" /t:"Games\\FactoryGame"'
+				bat label: 'Create project files', script: '.\\ue4\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe -projectfiles -project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -game -rocket -progress'
+				bat label: 'Build for Shipping', script: 'MSBuild.exe .\\SatisfactoryModLoader\\FactoryGame.sln /p:Configuration="Shipping" /p:Platform="Win64" /t:"Games\\FactoryGame"'
+				bat label: 'Build for Editor', script: 'MSBuild.exe .\\SatisfactoryModLoader\\FactoryGame.sln /p:Configuration="Development Editor" /p:Platform="Win64" /t:"Games\\FactoryGame"'
 			}
 		}
 
 		stage('Package FicsIt-Networks') {
 			retry(3) {
-				bat label: '', script: '.\\ue4\\Engine\\Build\\BatchFiles\\RunUAT.bat -ScriptsForProject="%WORKSPACE%\\FicsIt-Networks\\FactoryGame.uproject" PackagePlugin -Project="%WORKSPACE%\\FicsIt-Networks\\FactoryGame.uproject" -PluginName="FicsItNetworks"'
+				bat label: 'Alpakit!', script: '.\\ue4\\Engine\\Build\\BatchFiles\\RunUAT.bat -ScriptsForProject="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" PackagePlugin -Project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -PluginName="%MOD_NAME%"'
 			}
 
 			when {
@@ -86,8 +91,10 @@ pipeline {
 					changeRequest()
 				}
 			}
+			
 			steps {
-				archiveArtifacts artifacts: 'SatisfactoryModLoader\\Saved\\ArchivedPlugins\\WindowsNoEditor\\FicsItNetworks.zip', fingerprint: true, onlyIfSuccessful: true
+				bat script: 'rename .\\SatisfactoryModLoader\\Saved\\ArchivedPlugins\\WindowsNoEditor\\${MOD_NAME}.zip ${MOD_NAME}_${BRANCH_NAME}_${BUILD_NUMBER}.zip'
+				archiveArtifacts artifacts: 'SatisfactoryModLoader\\Saved\\ArchivedPlugins\\WindowsNoEditor\\${MOD_NAME}_${BRANCH_NAME}_${BUILD_NUMBER}.zip', fingerprint: true, onlyIfSuccessful: true
 			}
 		}
 	}
