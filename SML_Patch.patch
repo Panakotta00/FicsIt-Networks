@@ -1,4 +1,4 @@
-diff --git a/Content/FactoryGame/Character/Player/Widget_PlayerInventoryAddon.uasset b/Content/FactoryGame/Character/Player/Widget_PlayerInventoryAddon.uasset
+diff --git Content/FactoryGame/Character/Player/Widget_PlayerInventoryAddon.uasset Content/FactoryGame/Character/Player/Widget_PlayerInventoryAddon.uasset
 index 7700a16ff917364a8f7ad8b0f9ee6446eff6715d..bba6e9f788c3683b57dc8f25ae658d04650c9bf0 100644
 GIT binary patch
 literal 89156
@@ -823,7 +823,7 @@ zAy|BOD>~xn8V|X2%24wX%F8L^j1gR}rrbt(73BuXD=Fh(2yYXOr;LZq@CaC2faD~~
 z8I&_Ao2kWkBxW6l0Z3zF>6O~1A|IwY*y!Vl0zT@9lEH~I)JYl1ss~3W!Zw^V?u!2d
 Djpeha
 
-diff --git a/Content/FactoryGame/Interface/UI/InGame/-Shared/Widget_SlidingTabs.uasset b/Content/FactoryGame/Interface/UI/InGame/-Shared/Widget_SlidingTabs.uasset
+diff --git Content/FactoryGame/Interface/UI/InGame/-Shared/Widget_SlidingTabs.uasset Content/FactoryGame/Interface/UI/InGame/-Shared/Widget_SlidingTabs.uasset
 index 5166c41823302d787a7652bfa123bd00c4ce304f..1e1565c3f298b6a0af9bc426e4524fa4816e672c 100644
 GIT binary patch
 literal 44077
@@ -1255,7 +1255,7 @@ z?Lw8!gqc-$rNYDTi&Uag#g^+fy$`WI*Qm_(_CjC`ZstI+U-p%6&O#11D&sZ8=&LWR
 zXuosIqVJ5}e#vVu?YxNT1IY#Wp^(%DTn^^zQs4>#Q{uwn4i6N><>5(mSTR5H&8gS^
 EFIg4?TmS$7
 
-diff --git a/Content/FactoryGame/Interface/UI/InGame/Widget_GlowingFactoryButton.uasset b/Content/FactoryGame/Interface/UI/InGame/Widget_GlowingFactoryButton.uasset
+diff --git Content/FactoryGame/Interface/UI/InGame/Widget_GlowingFactoryButton.uasset Content/FactoryGame/Interface/UI/InGame/Widget_GlowingFactoryButton.uasset
 index 8afc5a4a7599e76f1a93d05e6903cdadd9669137..7e4b7722d3865830ee0c75b36b26872ac17f1483 100644
 GIT binary patch
 literal 68476
@@ -1847,7 +1847,7 @@ zS<{wmWWk)OD%Y7CK`=O7N3x4g;|C9hnTi|g_IvN%K0DK=PFO!`$yw9pRy@e`f%H*@
 zxd{(lse*%cR!*L&F`fm9!{~`rPNLkGGL8wcZ#afBPTz10){pXWluIf1r#ygi8Rg?C
 M8@btZ_JHgEAOGhIBme*a
 
-diff --git a/Content/FactoryGame/Interface/UI/Widget_Window_DarkMode.uasset b/Content/FactoryGame/Interface/UI/Widget_Window_DarkMode.uasset
+diff --git Content/FactoryGame/Interface/UI/Widget_Window_DarkMode.uasset Content/FactoryGame/Interface/UI/Widget_Window_DarkMode.uasset
 index 8abd368e65228ebc03c67e8b85d9c0f8a0346982..1add87d68ceacc9b27e85c7b91706529926d45c9 100644
 GIT binary patch
 literal 151095
@@ -2992,10 +2992,10 @@ z^Qa%HyjBEuFEbz~znTc9H)m#W7!E{_6{gZT%k==(z%L(Na82=DBk$h!$cjfE{^%;H
 zANQp*qY*q{m!@p274g;K4suf1x_~ZFa6fr8?@sbKVZMU=6!K`eC&|A-elmF+@xny$
 zqvR)%Ur8Q)+kNDxlE;$SjpSF6pHIG#{08!Pv`yr(wgFoK*h*j?oZoRzzvce{nIMYM
 
-diff --git a/Source/FactoryGame/Public/FGOptionsSettings.h b/Source/FactoryGame/Public/FGOptionsSettings.h
+diff --git Source/FactoryGame/Public/FGOptionsSettings.h Source/FactoryGame/Public/FGOptionsSettings.h
 index 4fc16b38a..f878e244c 100644
---- a/Source/FactoryGame/Public/FGOptionsSettings.h
-+++ b/Source/FactoryGame/Public/FGOptionsSettings.h
+--- Source/FactoryGame/Public/FGOptionsSettings.h
++++ Source/FactoryGame/Public/FGOptionsSettings.h
 @@ -3,6 +3,8 @@
  #pragma once
  
@@ -3005,10 +3005,10 @@ index 4fc16b38a..f878e244c 100644
  #include "FGOptionsSettings.generated.h"
  
  UENUM( BlueprintType )
-diff --git a/Source/FactoryGame/Public/FGSaveSession.h b/Source/FactoryGame/Public/FGSaveSession.h
+diff --git Source/FactoryGame/Public/FGSaveSession.h Source/FactoryGame/Public/FGSaveSession.h
 index d0d87de9a..051da2e2f 100644
---- a/Source/FactoryGame/Public/FGSaveSession.h
-+++ b/Source/FactoryGame/Public/FGSaveSession.h
+--- Source/FactoryGame/Public/FGSaveSession.h
++++ Source/FactoryGame/Public/FGSaveSession.h
 @@ -5,6 +5,7 @@
  #include "FactoryGame.h" // MODDING EDIT: no PCH
  #include "UObject/Object.h"
@@ -3017,10 +3017,10 @@ index d0d87de9a..051da2e2f 100644
  #include "FGObjectReference.h"
  #include "FGSaveSession.generated.h"
  
-diff --git a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
+diff --git Source/FactoryGame/Public/Hologram/FGBuildableHologram.h Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 index 5a088bdfe..c7f7be54b 100644
---- a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
-+++ b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
+--- Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
++++ Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 @@ -16,6 +16,10 @@ UCLASS()
  class FACTORYGAME_API AFGBuildableHologram : public AFGHologram
  {
@@ -3032,10 +3032,10 @@ index 5a088bdfe..c7f7be54b 100644
  public:
  	/** Tags for marking components in the hologram. */
  	static FName mInputConnectionMeshTag;
-diff --git a/Source/FactoryGame/Public/ItemAmount.h b/Source/FactoryGame/Public/ItemAmount.h
+diff --git Source/FactoryGame/Public/ItemAmount.h Source/FactoryGame/Public/ItemAmount.h
 index 19438189f..aa627d5f3 100644
---- a/Source/FactoryGame/Public/ItemAmount.h
-+++ b/Source/FactoryGame/Public/ItemAmount.h
+--- Source/FactoryGame/Public/ItemAmount.h
++++ Source/FactoryGame/Public/ItemAmount.h
 @@ -4,6 +4,7 @@
  
  #include "FactoryGame.h" // MODDING EDIT: no PCH
@@ -3044,10 +3044,10 @@ index 19438189f..aa627d5f3 100644
  #include "ItemAmount.generated.h"
  
  /**
-diff --git a/Source/FactoryGame/Public/Resources/FGItemDescriptor.h b/Source/FactoryGame/Public/Resources/FGItemDescriptor.h
+diff --git Source/FactoryGame/Public/Resources/FGItemDescriptor.h Source/FactoryGame/Public/Resources/FGItemDescriptor.h
 index 3e9e5a5b8..b498b779d 100644
---- a/Source/FactoryGame/Public/Resources/FGItemDescriptor.h
-+++ b/Source/FactoryGame/Public/Resources/FGItemDescriptor.h
+--- Source/FactoryGame/Public/Resources/FGItemDescriptor.h
++++ Source/FactoryGame/Public/Resources/FGItemDescriptor.h
 @@ -3,6 +3,7 @@
  #pragma once
  
@@ -3056,10 +3056,10 @@ index 3e9e5a5b8..b498b779d 100644
  #include "Styling/SlateBrush.h"
  #include "FGItemDescriptor.generated.h"
  
-diff --git a/Source/FactoryGame/Public/SharedInventoryStatePtr.h b/Source/FactoryGame/Public/SharedInventoryStatePtr.h
+diff --git Source/FactoryGame/Public/SharedInventoryStatePtr.h Source/FactoryGame/Public/SharedInventoryStatePtr.h
 index bfdfe9eeb..c05cfb358 100644
---- a/Source/FactoryGame/Public/SharedInventoryStatePtr.h
-+++ b/Source/FactoryGame/Public/SharedInventoryStatePtr.h
+--- Source/FactoryGame/Public/SharedInventoryStatePtr.h
++++ Source/FactoryGame/Public/SharedInventoryStatePtr.h
 @@ -3,6 +3,7 @@
  #pragma once
  
