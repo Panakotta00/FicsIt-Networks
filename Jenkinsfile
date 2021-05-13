@@ -15,19 +15,21 @@ pipeline {
 
 	stages {
 		stage('SML') {
-			checkout scm: [
-                $class: 'GitSCM',
-                branches: [[
-                    name: "07f4ae52099642e2fba016ae9642df41bf164749"
-                ]],
-                extensions: [[
-                    $class: 'RelativeTargetDirectory',
-                    relativeTargetDir: 'SatisfactoryModLoader'
-                ]],
-                userRemoteConfigs: [[
-                    url: 'https://github.com/satisfactorymodding/SatisfactoryModLoader.git'
-                ]]
-            ]
+			steps {
+				checkout scm: [
+	                $class: 'GitSCM',
+	                branches: [[
+	                    name: "07f4ae52099642e2fba016ae9642df41bf164749"
+	                ]],
+	                extensions: [[
+	                    $class: 'RelativeTargetDirectory',
+	                    relativeTargetDir: 'SatisfactoryModLoader'
+	                ]],
+	                userRemoteConfigs: [[
+	                    url: 'https://github.com/satisfactorymodding/SatisfactoryModLoader.git'
+	                ]]
+	            ]
+	        }
 		}
 
 		stage('Checkout') {
@@ -82,10 +84,14 @@ pipeline {
 		}
 
 		stage('Package FicsIt-Networks') {
-			retry(3) {
-				bat label: 'Alpakit!', script: '.\\ue4\\Engine\\Build\\BatchFiles\\RunUAT.bat -ScriptsForProject="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" PackagePlugin -Project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -PluginName="%MOD_NAME%"'
+			steps {
+				retry(3) {
+					bat label: 'Alpakit!', script: '.\\ue4\\Engine\\Build\\BatchFiles\\RunUAT.bat -ScriptsForProject="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" PackagePlugin -Project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -PluginName="%MOD_NAME%"'
+				}
 			}
+		}
 
+		stage('Archive') {
 			when {
 				not {
 					changeRequest()
@@ -98,6 +104,7 @@ pipeline {
 			}
 		}
 	}
+	
 	post {
 		always {
 			cleanWs()
