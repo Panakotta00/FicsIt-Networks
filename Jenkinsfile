@@ -19,7 +19,7 @@ pipeline {
 				checkout scm: [
 	                $class: 'GitSCM',
 	                branches: [[
-	                    name: "07f4ae52099642e2fba016ae9642df41bf164749"
+	                    name: "master"
 	                ]],
 	                extensions: [[
 	                    $class: 'RelativeTargetDirectory',
