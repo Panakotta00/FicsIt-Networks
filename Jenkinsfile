@@ -53,8 +53,7 @@ pipeline {
 		stage('Apply Patches') {
 			steps {
 				dir("SatisfactoryModLoader") {
-					bat label: 'Apply Source Patch', script: 'git apply Plugins\\%MOD_NAME%\\Source_Patch.patch -v'
-					bat label: 'Apply Content Patch', script: 'git apply Plugins\\%MOD_NAME%\\Content_Patch.patch -v'
+					bat label: 'Apply Source Patch', script: 'git apply Plugins\\%MOD_NAME%\\SML_Patch.patch -v'
 					bat label: 'Apply Asset Patch', script: 'git apply %ASSETS% -v'
 					bat label: 'Add WWise', script: '7z x %WWISE_PLUGIN% -oPlugins\\'
 				}
