@@ -23,9 +23,45 @@
 DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
-void GetDismantleRefund_Decl(IFGDismantleInterface*, TArray<FInventoryStack>&);
-void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IFGDismantleInterface* disInt, TArray<FInventoryStack>& refund) {
-	AFGBuildable* self = reinterpret_cast<AFGBuildable*>(disInt);
+FDateTime FFicsItNetworksModule::GameStart;
+
+bool FINRefLoaded = false;
+#pragma optimize("", off)
+
+void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterface*)>& scope, IFGDismantleInterface* self_r) {
+	AFGBuildable* self = dynamic_cast<AFGBuildable*>(self_r);
+	TInlineComponentArray<UFINNetworkConnectionComponent*> connectors;
+	self->GetComponents(connectors);
+	TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
+	self->GetComponents(adapters);
+	TInlineComponentArray<UFINModuleSystemPanel*> panels;
+	self->GetComponents(panels);
+	for (UFINNetworkAdapterReference* adapter_ref : adapters) {
+		if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
+			connectors.Add(adapter->Connector);
+		}
+	}
+	for (UFINNetworkConnectionComponent* connector : connectors) {
+		for (AFINNetworkCable* cable : connector->ConnectedCables) {
+			cable->Execute_Dismantle(cable);
+		}
+	}
+	for (UFINNetworkAdapterReference* adapter_ref : adapters) {
+		if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
+			adapter->Destroy();
+		}
+	}
+	for (UFINModuleSystemPanel* panel : panels) {
+		TArray<AActor*> modules;
+		panel->GetModules(modules);
+		for (AActor* module : modules) {
+			module->Destroy();
+		}
+	}
+}
+
+void AFGBuildable_GetDismantleRefund_Implementation(CallScope<void(*)(const IFGDismantleInterface*, TArray<FInventoryStack>&)>& scope, const IFGDismantleInterface* self_r, TArray<FInventoryStack>& refund) {
+	const AFGBuildable* self = dynamic_cast<const AFGBuildable*>(self_r);
 	if (!self->IsA<AFINNetworkCable>()) {
 		TInlineComponentArray<UFINNetworkConnectionComponent*> components;
 		self->GetComponents(components);
@@ -33,7 +69,7 @@ void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IF
 		self->GetComponents(adapters);
 		TInlineComponentArray<UFINModuleSystemPanel*> panels;
 		self->GetComponents(panels);
- 		for (UFINNetworkAdapterReference* adapter_ref : adapters) {
+		for (UFINNetworkAdapterReference* adapter_ref : adapters) {
 			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
 				components.Add(adapter->Connector);
 			}
@@ -49,14 +85,6 @@ void GetDismantleRefund(CallScope<decltype(&GetDismantleRefund_Decl)>& scope, IF
 	}
 }
 
-class AActor_public : public AActor {
-	friend void FFicsItNetworksModule::StartupModule();
-};
-
-FDateTime FFicsItNetworksModule::GameStart;
-
-bool FINRefLoaded = false;
-#pragma optimize("", off)
 void FFicsItNetworksModule::StartupModule(){
 	GameStart = FDateTime::Now();
 	
@@ -88,102 +116,73 @@ void FFicsItNetworksModule::StartupModule(){
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
 #if !WITH_EDITOR
-	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
-	    UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
-	    if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
-	        auto comp = NewObject<UStaticMeshComponent>(attachParent);
-	        comp->RegisterComponent();
-	        comp->SetMobility(EComponentMobility::Movable);
-	        comp->SetStaticMesh(networkConnectorHoloMesh);
-	        comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
-	        comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
-	        comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				
-	        scope.Override(comp);
-	    }
-	});
-
-	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildable::Dismantle_Implementation, (void*)GetDefault<AFGBuildable>(), [](auto& scope, AFGBuildable* self_r) {
-		IFGDismantleInterface* disInt = reinterpret_cast<IFGDismantleInterface*>(self_r);
-		AFGBuildable* self = dynamic_cast<AFGBuildable*>(disInt);
-		TInlineComponentArray<UFINNetworkConnectionComponent*> connectors;
-		self->GetComponents(connectors);
-		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
-		self->GetComponents(adapters);
-		TInlineComponentArray<UFINModuleSystemPanel*> panels;
-		self->GetComponents(panels);
-		for (UFINNetworkAdapterReference* adapter_ref : adapters) {
-			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
-				connectors.Add(adapter->Connector);
+	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
+		SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
+			UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
+			if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
+				auto comp = NewObject<UStaticMeshComponent>(attachParent);
+				comp->RegisterComponent();
+				comp->SetMobility(EComponentMobility::Movable);
+				comp->SetStaticMesh(networkConnectorHoloMesh);
+				comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
+				comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
+				comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					
+				scope.Override(comp);
 			}
-		}
-		for (UFINNetworkConnectionComponent* connector : connectors) {
-			for (AFINNetworkCable* cable : connector->ConnectedCables) {
-				cable->Execute_Dismantle(cable);
-			}
-		}
-		for (UFINNetworkAdapterReference* adapter_ref : adapters) {
-			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
-				adapter->Destroy();
-			}
-		}
-		for (UFINModuleSystemPanel* panel : panels) {
-			TArray<AActor*> modules;
-			panel->GetModules(modules);
-			for (AActor* module : modules) {
-				module->Destroy();
-			}
-		}
-	})
+		});
 
-	// TODO: SUBSCRIBE_METHOD_MANUAL("?GetDismantleBlueprintReturns@AFGBuildable@@IEBAXAEAV?$TArray@UFInventoryStack@@VFDefaultAllocator@@@@@Z", GetDismantleRefund_Decl, &GetDismantleRefund);
-	
-	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::BeginPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self) {
-		AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
-        if (character) {
-	        AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
-        	if (SubSys) SubSys->AttachWidgetInteractionToPlayer(character);
-		}
-	})
-
-	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::EndPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self, EEndPlayReason::Type Reason) {
-        AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
-		if (character) {
-			AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
-			if (SubSys) SubSys->DetachWidgetInteractionToPlayer(character);
-		}
-    })
-
-	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
-	    if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
-		    UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
-	        gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
-	    	gm->RegisterRemoteCallObjectClass(ModuleRCO);
-	    }
-	});
-
-	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AGameMode::StartMatch, (void*)GetDefault<AFGGameMode>(), [](AGameMode* World) {
-		if (!FINRefLoaded) {
-			FINRefLoaded = true;
-		}
-	});
-
-	SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameState::Init, (void*)GetDefault<AFGGameState>(), [](AFGGameState* state) {
-		FFINReflectionStyles::Shutdown();
-		FFINReflectionStyles::Initialize();
+		SUBSCRIBE_METHOD_VIRTUAL(IFGDismantleInterface::Dismantle_Implementation, (void*)static_cast<const IFGDismantleInterface*>(GetDefault<AFGBuildable>()), &AFGBuildable_Dismantle_Implementation)
+		SUBSCRIBE_METHOD_VIRTUAL(IFGDismantleInterface::GetDismantleRefund_Implementation, (void*)static_cast<const IFGDismantleInterface*>(GetDefault<AFGBuildable>()), &AFGBuildable_GetDismantleRefund_Implementation)
 		
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::BeginPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self) {
+			AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
+			if (character) {
+				AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
+				if (SubSys) SubSys->AttachWidgetInteractionToPlayer(character);
+			}
+		})
+
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::EndPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self, EEndPlayReason::Type Reason) {
+			AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
+			if (character) {
+				AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
+				if (SubSys) SubSys->DetachWidgetInteractionToPlayer(character);
+			}
+		})
+
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
+			if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
+				UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
+				check(ModuleRCO);
+				gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
+				gm->RegisterRemoteCallObjectClass(ModuleRCO);
+			}
+		});
+
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AGameMode::StartMatch, (void*)GetDefault<AFGGameMode>(), [](AGameMode* World) {
+			if (!FINRefLoaded) {
+				FINRefLoaded = true;
+			}
+		});
+
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameState::Init, (void*)GetDefault<AFGGameState>(), [](AFGGameState* state) {
+			FFINReflectionStyles::Shutdown();
+			FFINReflectionStyles::Initialize();
+			
+			AFINNetworkAdapter::RegisterAdapterSettings();
+			FFINGlobalRegisterHelper::Register();
+			
+			FFINReflection::Get()->PopulateSources();
+			FFINReflection::Get()->LoadAllTypes();
+		});
+
 		AFINNetworkAdapter::RegisterAdapterSettings();
 		FFINGlobalRegisterHelper::Register();
-		
-	    FFINReflection::Get()->PopulateSources();
+			
+		FFINReflection::Get()->PopulateSources();
 		FFINReflection::Get()->LoadAllTypes();
 	});
-
-	AFINNetworkAdapter::RegisterAdapterSettings();
-	FFINGlobalRegisterHelper::Register();
-		
-	FFINReflection::Get()->PopulateSources();
-	FFINReflection::Get()->LoadAllTypes();
 #endif
 }
 #pragma optimize("", on)
