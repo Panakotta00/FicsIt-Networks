@@ -181,7 +181,7 @@ void DiskFileStream::flush() {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::OUTPUT)) return;
 	stream.close();
-	stream = std::fstream(path, std::ios::out | std::ios::trunc);
+	stream = std::fstream(path, (mode & BINARY) ? std::ios::out | std::ios::trunc | ios::binary : std::ios::out | std::ios::trunc);
 	stream << buf;
 	stream.flush();
 }
@@ -196,7 +196,7 @@ string DiskFileStream::readLine() {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
 	string s;
-	getline(std::stringstream(buf.substr(pos)), s);
+	getline(std::stringstream(buf.substr(pos), (mode & BINARY) ? ios::in | ios::out | ios::binary : ios::in | ios::out), s);
 	pos += s.length();
 	return s;
 }
@@ -211,7 +211,7 @@ double DiskFileStream::readNumber() {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
 	double n = 0.0;
-	stringstream s(buf.substr(pos));
+	stringstream s(buf.substr(pos), (mode & BINARY) ? ios::in | ios::out | ios::binary : ios::in | ios::out);
 	s >> n;
 	pos += s.tellg();
 	return n;
