@@ -28,6 +28,7 @@ public:
 	AFINScreenHolo();
 
 	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	// End AActor
