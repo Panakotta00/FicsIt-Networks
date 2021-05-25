@@ -25,7 +25,6 @@ IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
 FDateTime FFicsItNetworksModule::GameStart;
 
-bool FINRefLoaded = false;
 #pragma optimize("", off)
 
 void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterface*)>& scope, IFGDismantleInterface* self_r) {
@@ -155,35 +154,17 @@ void FFicsItNetworksModule::StartupModule(){
 			if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
 				gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
 
-				UClass* ModuleRCO = LoadClass<UFGRemoteCallObject>(NULL, TEXT("Blueprint'/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C'"));
+				UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 				check(ModuleRCO);
 				gm->RegisterRemoteCallObjectClass(ModuleRCO);
 			}
 		});
-
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AGameMode::StartMatch, (void*)GetDefault<AFGGameMode>(), [](AGameMode* World) {
-			if (!FINRefLoaded) {
-				FINRefLoaded = true;
-			}
-		});
-
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameState::Init, (void*)GetDefault<AFGGameState>(), [](AFGGameState* state) {
-			FFINReflectionStyles::Shutdown();
-			FFINReflectionStyles::Initialize();
-			
-			AFINNetworkAdapter::RegisterAdapterSettings();
-			FFINGlobalRegisterHelper::Register();
-			
-			FFINReflection::Get()->PopulateSources();
-			FFINReflection::Get()->LoadAllTypes();
-		});
-
-		AFINNetworkAdapter::RegisterAdapterSettings();
-		FFINGlobalRegisterHelper::Register();
-			
-		FFINReflection::Get()->PopulateSources();
-		FFINReflection::Get()->LoadAllTypes();
 	});
+#else
+	FFINGlobalRegisterHelper::Register();
+		
+	FFINReflection::Get()->PopulateSources();
+	FFINReflection::Get()->LoadAllTypes();
 #endif
 }
 #pragma optimize("", on)
