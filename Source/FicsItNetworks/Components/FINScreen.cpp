@@ -76,7 +76,14 @@ void AFINScreen::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 	if (bGPUChanged) {
 		bGPUChanged = false;
-		ForceNetUpdate();
+		
+		if (GPUPtr) {
+			Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
+		} else {
+			SetWidget(SNew(SScaleBox));
+		}
+
+		OnGPUUpdate.Broadcast();
 	}
 	if (HasAuthority() && (((bool)GPUPtr) != GPU.IsValid())) {
 		if (!GPUPtr) GPUPtr = GPU.Get();
@@ -157,12 +164,7 @@ void AFINScreen::netFunc_getSize(int& w, int& h) {
 }
 
 void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {
-	if (GPUPtr) {
-		Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
-	} else {
-		SetWidget(SNew(SScaleBox));
-	}
-	OnGPUUpdate.Broadcast();
+	bGPUChanged = true;
 }
 
 void AFINScreen::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts) {
