@@ -14,21 +14,23 @@ You can join our [discord server](https://discord.gg/3VfZ6Da) where you can get 
 Work In Progress
 ================
 This project is in no finished state!
-We are constantly working on features to get the mod to release soon.
-This doesn't mean you can't build the mod your self to test it though.
+We are constantly working on features to make the mod even greater.
 
 Want to test the Mod?
 =====================
 If you want to test the mod and so help with development,
-we would reccomend you to join the Satisfactory Modding Discord Server and contact one of the mod developers.
+we would reccomend you to join the [FicsIt-Networks Discord Server](https://discord.gg/3VfZ6Da) and contact one of the mod developers for a more in depth help.
 Testing means, it would not be a good idea to use the mod in your normal game state,
 testing means testing the mod in its own world to make sure every features works as intended.
 
 You can download the latest build version [here](https://jenkins.massivebytes.net/job/FicsIt-Networks/job/master).
 
+To install it, simply download the .zip artifact and extract the contents of it into the `<sf installation>/FactoryGame/Mods/FicsItNetworks` folder.
+It has to be this exact path and folder name! Extract it in a way, so the `.uplugin`-File is located within this folder.
+
 Streams
 =======
-The biggest part of making this mod does get stream at [Panakotta00](https://twitch.tv/panakotta00).
+The biggest part of making this mod gets streamed at [Panakotta00's Twitch Channel](https://twitch.tv/panakotta00).
 
 You-Tube
 ========

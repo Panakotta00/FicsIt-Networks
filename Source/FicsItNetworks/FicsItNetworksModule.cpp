@@ -114,8 +114,8 @@ void FFicsItNetworksModule::StartupModule(){
 
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
-#if !WITH_EDITOR
 	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
+#if !WITH_EDITOR
 		SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
 			UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
 			if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
@@ -159,13 +159,13 @@ void FFicsItNetworksModule::StartupModule(){
 				gm->RegisterRemoteCallObjectClass(ModuleRCO);
 			}
 		});
-	});
 #else
-	FFINGlobalRegisterHelper::Register();
-		
-	FFINReflection::Get()->PopulateSources();
-	FFINReflection::Get()->LoadAllTypes();
+		/*FFINGlobalRegisterHelper::Register();
+			
+		FFINReflection::Get()->PopulateSources();
+		FFINReflection::Get()->LoadAllTypes();*/
 #endif
+	});
 }
 #pragma optimize("", on)
 
