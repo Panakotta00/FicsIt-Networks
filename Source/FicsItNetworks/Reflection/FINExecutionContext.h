@@ -15,29 +15,29 @@ public:
         TRACE = 3
     };
 
-	FFINExecutionContext() : Obj(nullptr) {
+	FORCEINLINE FFINExecutionContext() : Obj(nullptr) {
 		Type = NONE;
 	}
 	
-	FFINExecutionContext(void* Generic) : Generic(Generic) {
+	FORCEINLINE FFINExecutionContext(void* Generic) : Generic(Generic) {
 		Type = GENERIC;
 	}
 
-	FFINExecutionContext(UObject* Obj) : Obj(Obj) {
+	FORCEINLINE FFINExecutionContext(UObject* Obj) : Obj(Obj) {
 		Type = OBJECT;
 	}
 
-	FFINExecutionContext(const FFINNetworkTrace& InTrace) {
+	FORCEINLINE FFINExecutionContext(const FFINNetworkTrace& InTrace) {
 		Type = TRACE;
 		Trace = new FFINNetworkTrace(InTrace);
 	}
 
-	FFINExecutionContext(const FFINExecutionContext& Other) {
+	FORCEINLINE FFINExecutionContext(const FFINExecutionContext& Other) {
 		Type = GENERIC;
 		*this = Other;
 	}
 
-	~FFINExecutionContext() {
+	FORCEINLINE ~FFINExecutionContext() {
 		switch (Type) {
 		case TRACE:
 			delete Trace;
@@ -46,7 +46,7 @@ public:
 		}
 	}
 	
-	FFINExecutionContext& operator=(const FFINExecutionContext& Other) {
+	FORCEINLINE FFINExecutionContext& operator=(const FFINExecutionContext& Other) {
 		switch (Type) {
 		case TRACE:
 			delete Trace;
@@ -70,11 +70,11 @@ public:
 		return *this;
 	}
 
-	Type GetType() const {
+	FORCEINLINE Type GetType() const {
 		return Type;
 	}
 
-	void* GetGeneric() const {
+	FORCEINLINE void* GetGeneric() const {
 		switch (Type) {
 		case GENERIC:
 			return Generic;
@@ -87,7 +87,7 @@ public:
 		return nullptr;
 	}
 
-	UObject* GetObject() const {
+	FORCEINLINE UObject* GetObject() const {
 		switch (Type) {
 		case OBJECT:
 			return Obj;
@@ -98,7 +98,7 @@ public:
 		return nullptr;
 	}
 
-	FFINNetworkTrace GetTrace() const {
+	FORCEINLINE FFINNetworkTrace GetTrace() const {
 		switch (Type) {
 		case OBJECT:
 			return FFINNetworkTrace(Obj);
@@ -109,7 +109,7 @@ public:
 		return FFINNetworkTrace();
 	}
 
-	bool Serialize(FStructuredArchive::FSlot Slot) {
+	FORCEINLINE bool Serialize(FStructuredArchive::FSlot Slot) {
 		FStructuredArchive::FRecord Record = Slot.EnterRecord();
 		TOptional<FStructuredArchive::FSlot> TraceField = Record.TryEnterField(SA_FIELD_NAME(TEXT("Trace")), Type == TRACE);
 		if (TraceField.IsSet()) {

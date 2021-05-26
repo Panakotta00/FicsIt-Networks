@@ -305,7 +305,7 @@ namespace FicsItKernel {
 			static_cast<LuaInstance*>(Obj)->Trace.AddStructReferencedObjects(Collector);
 		}
 
-		bool newInstance(lua_State* L, FFINNetworkTrace Trace) {
+		bool newInstance(lua_State* L, const FFINNetworkTrace& Trace) {
 			// check obj and if type is registered
 			UObject* Obj = Trace.GetUnderlyingPtr().Get();
 			UFINClass* Class = nullptr;

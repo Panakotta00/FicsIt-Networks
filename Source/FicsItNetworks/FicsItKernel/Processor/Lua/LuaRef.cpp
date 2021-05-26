@@ -16,13 +16,13 @@ namespace FicsItKernel {
 			for (UFINProperty* Param : Func->GetParameters()) {
 				if (Param->GetPropertyFlags() & FIN_Prop_Param && !(Param->GetPropertyFlags() & (FIN_Prop_OutParam | FIN_Prop_RetVal))) {
 					FINAny NewParam = luaToProperty(L, Param, paramsLoaded++);
-					Input.Add(NewParam);
+					Input.Add(MoveTemp(NewParam));
 				}
 			}
 			for (; paramsLoaded <= args; ++paramsLoaded) {
 				FINAny Param;
 				luaToNetworkValue(L, paramsLoaded, Param);
-				Input.Add(Param);
+				Input.Add(MoveTemp(Param));
 			}
 			args = 0;
 

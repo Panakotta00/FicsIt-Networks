@@ -90,7 +90,7 @@ namespace FicsItKernel {
 		 * to a lua value and pushes it onto the stack.
 		 * The trace allows for object properties to have additionally a this trace attached.
 		 */
-		void propertyToLua(lua_State* L, UProperty* p, void* data, FFINNetworkTrace trace);
+		void propertyToLua(lua_State* L, UProperty* p, void* data, const FFINNetworkTrace& trace);
 
 		/**
 		 * Trys to convert the lua value at the given index on the given lua stack
@@ -113,6 +113,6 @@ namespace FicsItKernel {
 		/**
 		 * Converts the given network value into a lua value and pushes it onto the stack
 		 */
-		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, FFINNetworkTrace Trace);
+		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, const FFINNetworkTrace& Trace);
 	}
 }

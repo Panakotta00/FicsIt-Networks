@@ -22,11 +22,7 @@ public:
 			TArray<FFINAnyNetworkValue> Output;
 			// allocate & initialize parameter struct
 			uint8* ParamStruct = (uint8*)FMemory_Alloca(RefFunction->PropertiesSize);
-			for (TFieldIterator<UProperty> Prop(RefFunction); Prop; ++Prop) {
-				if (Prop->GetPropertyFlags() & CPF_Parm) {
-					if (Prop->IsInContainer(RefFunction->ParmsSize)) Prop->InitializeValue_InContainer(ParamStruct);
-				}
-			}
+			RefFunction->InitializeStruct(ParamStruct);
 			
 			// copy parameters to parameter struct
 			int i = 0;
@@ -47,18 +43,15 @@ public:
 			Obj->ProcessEvent(RefFunction, ParamStruct);
 
 			// copy output parameters from paramter struct
-			for (UFINProperty* Param : GetParameters()) {
+			for (UFINProperty* Param : Parameters) {
 				if ((Param->GetPropertyFlags() & FIN_Prop_Param) && (Param->GetPropertyFlags() & FIN_Prop_OutParam)) {
 					Output.Add(Param->GetValue(ParamStruct));
 				}
 			}
 
 			// destroy parameter struct
-			for (UProperty* P = RefFunction->DestructorLink; P; P = P->DestructorLinkNext) {
-				if (P->IsInContainer(RefFunction->ParmsSize)) {
-					P->DestroyValue_InContainer(ParamStruct);
-				}
-			}
+			RefFunction->DestroyStruct(ParamStruct);
+			
 			return Output;
 		}
 

@@ -13,7 +13,7 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		void propertyToLua(lua_State* L, UProperty* p, void* data, FFINNetworkTrace trace) {
+		void propertyToLua(lua_State* L, UProperty* p, void* data, const FFINNetworkTrace& trace) {
 			auto c = p->GetClass()->GetCastFlags();
 			if (c & EClassCastFlags::CASTCLASS_FBoolProperty) {
 				lua_pushboolean(L, *p->ContainerPtrToValuePtr<bool>(data));
@@ -32,9 +32,9 @@ namespace FicsItKernel {
 					newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
 				} else {
 					UObject* Obj = *p->ContainerPtrToValuePtr<UObject*>(data);
-					trace = trace / Obj;
-					if (Obj && Obj->Implements<UFINNetworkComponent>()) trace = trace / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
-					newInstance(L, trace);
+					FINTrace newTrace = trace / Obj;
+					if (Obj && Obj->Implements<UFINNetworkComponent>()) newTrace = newTrace / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
+					newInstance(L, newTrace);
 				}
 			} else if (c & EClassCastFlags::CASTCLASS_FStructProperty) {
 				UStructProperty* prop = Cast<UStructProperty>(p);
@@ -212,7 +212,7 @@ namespace FicsItKernel {
 			}
 		}
 
-		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, FFINNetworkTrace Trace) {
+		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, const FFINNetworkTrace& Trace) {
 			switch (Val.GetType()) {
 			case FIN_NIL:
 				lua_pushnil(L);
