@@ -1,8 +1,8 @@
 {
 	"FileVersion": 3,
-	"Version": 3,
-	"VersionName": "0.3",
-	"SemVersion": "0.3.0",
+	"Version": 2,
+	"VersionName": "0.2",
+	"SemVersion": "0.2.0",
 	"FriendlyName": "FicsIt-Networks",
 	"Description": "Adds a computer network and programmable computers to the Game.",
 	"Category": "Modding",
