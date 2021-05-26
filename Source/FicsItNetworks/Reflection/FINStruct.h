@@ -2,8 +2,6 @@
 
 #include "FINBase.h"
 #include "FINFunction.h"
-#include "UObjectIterator.h"
-
 #include "FINStruct.generated.h"
 
 UCLASS(BlueprintType)

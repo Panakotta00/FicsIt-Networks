@@ -1,6 +1,6 @@
 ﻿#pragma once
+#include "Hologram/FGBuildableHologram.h"
 
-#include "FGBuildableHologram.h"
 #include "FINIndicatorPoleHolo.generated.h"
 
 class AFINIndicatorPole;

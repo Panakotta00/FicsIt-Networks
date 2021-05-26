@@ -12,6 +12,6 @@ public:
 	int LuaInstructionsPerTick = 1;
 	
 	// Begin AFINComputerProcessorLua
-	virtual FicsItKernel::Processor* CreateProcessor() override;
+	virtual UFINKernelProcessor* CreateProcessor() override;
 	// End AFINComputerProcessorLua
 };

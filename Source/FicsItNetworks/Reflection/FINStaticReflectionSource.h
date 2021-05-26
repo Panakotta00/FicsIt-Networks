@@ -1,8 +1,7 @@
 ﻿#pragma once
 
 #include "FINReflectionSource.h"
-#include "Network/FINHookSubsystem.h"
-
+#include "FicsItNetworks/Network/FINHookSubsystem.h"
 #include "FINStaticReflectionSource.generated.h"
 
 struct FICSITNETWORKS_API FFINStaticFuncParamReg {

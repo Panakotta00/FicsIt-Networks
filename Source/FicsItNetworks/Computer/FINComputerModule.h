@@ -2,9 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
-#include "ModuleSystem/FINModuleSystemModule.h"
-#include "ModuleSystem/FINModuleSystemPanel.h"
-#include "Network/Signals/FINSignalSender.h"
+#include "FicsItNetworks/ModuleSystem/FINModuleSystemModule.h"
+#include "FicsItNetworks/ModuleSystem/FINModuleSystemPanel.h"
+#include "FicsItNetworks/Network/Signals/FINSignalSender.h"
 
 #include "FINComputerModule.generated.h"
 

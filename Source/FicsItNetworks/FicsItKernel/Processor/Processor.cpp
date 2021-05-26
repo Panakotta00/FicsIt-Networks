@@ -1,11 +1,9 @@
 #include "Processor.h"
 
-namespace FicsItKernel {
-	void Processor::setKernel(KernelSystem* newKernel) {
-		kernel = newKernel;
-	}
+void UFINKernelProcessor::SetKernel(UFINKernelSystem* InKernel) {
+	Kernel = InKernel;
+}
 
-	KernelSystem * Processor::getKernel() {
-		return kernel;
-	}
+UFINKernelSystem* UFINKernelProcessor::GetKernel() {
+	return Kernel;
 }

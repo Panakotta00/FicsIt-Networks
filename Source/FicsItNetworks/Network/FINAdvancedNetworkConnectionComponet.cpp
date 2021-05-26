@@ -1,14 +1,7 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
-
 #include "FINNetworkCircuit.h"
-#include "UnrealNetwork.h"
 #include "Engine/World.h"
-
-UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent() {
-	SetIsReplicated(true);
-}
-
-UFINAdvancedNetworkConnectionComponent::~UFINAdvancedNetworkConnectionComponent() {}
+#include "Net/UnrealNetwork.h"
 
 void UFINAdvancedNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -91,8 +84,8 @@ bool UFINAdvancedNetworkConnectionComponent::IsPortOpen(int Port) {
 	return false;
 }
 
-void UFINAdvancedNetworkConnectionComponent::HandleMessage(FGuid ID, FGuid Sender, FGuid Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
-	OnNetworkMessageRecieved.Broadcast(ID, Sender, Receiver, Port, Data);
+void UFINAdvancedNetworkConnectionComponent::HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+	OnNetworkMessageRecieved.Broadcast(InID, Sender, Receiver, Port, Data);
 }
 
 bool UFINAdvancedNetworkConnectionComponent::IsNetworkMessageRouter() const {

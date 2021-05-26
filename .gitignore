@@ -32,26 +32,8 @@ Binaries/
 *.VC.db
 *.VC.opendb
 
-# Precompiled Assets
-SourceArt/**/*.png
-SourceArt/**/*.tga
-
-# Binary Files
-# Binaries/*
-Plugins/*/Binaries/*
-!Plugins/Alpakit/Binaries/*
-
 # Builds
 Build/*
-CMakeLists.txt
-
-# Whitelist PakBlacklist-<BuildConfiguration>.txt files
-!Build/*/
-Build/*/**
-!Build/*/PakBlacklist*.txt
-
-# Don't ignore icon files in Build
-!Build/**/*.ico
 
 # Built data for maps
 *_BuiltData.uasset
@@ -61,30 +43,9 @@ Saved/*
 
 # Compiled source files for the engine to use
 Intermediate/*
-Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
 
-# Wwise
-*_WwiseProject/*
-Plugins/Wwise/*
-
-# Alpakit Mods folder
-Mods/*
-*.pak
-
-# Satisfactory Mod Loader + Game Headers + Alpakit
-Source/SML
-Source/FactoryGame
-Source/Alpakit
-Plugins/Alpakit
-Content/SML
-
 # Rider
 .idea
-Plugins/Developer/RiderLink
-
-# FactoryUproject for auto added plugins (f.e. Rider, Electronic Nodes)
-./FactoryGame.uproject
-FactoryGame.uproject

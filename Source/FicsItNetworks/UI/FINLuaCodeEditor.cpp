@@ -1,5 +1,7 @@
 #include "FINLuaCodeEditor.h"
 
+#include "FicsItNetworks/FicsItNetworksModule.h"
+
 const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
 
 FFINLuaCodeEditorStyle::FFINLuaCodeEditorStyle() {}
@@ -14,13 +16,56 @@ const FFINLuaCodeEditorStyle& FFINLuaCodeEditorStyle::GetDefault() {
 	return *Default;
 }
 
-FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayoutMarshaller(TSharedPtr<FSyntaxTokenizer> InTokenizer, const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle) :
-	FSyntaxHighlighterTextLayoutMarshaller(InTokenizer),
-	SyntaxTextStyle(InLuaSyntaxTextStyle) {
+void FFINLuaSyntaxHighlighterTextLayoutMarshaller::SetText(const FString& SourceString, FTextLayout& TargetTextLayout) {
+	TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines;
+	TArray<FTextRange> LineRanges;
+	FTextRange::CalculateLineRangesFromString(SourceString, LineRanges);
 
+	TArray<FString> Rules = TArray<FString>({
+		" ", "\t", "\\.", "\\:", "\\\"", "\\\'", "\\,", "\\(", "\\)", "for", "in", "while", "do", "if", "then", "elseif", "else",
+		"end", "local", "true", "false", "not", "and", "or", "function", "return", "--\\[\\[", "\\]\\]--", "--", "\\+", "\\-", "\\/",
+		"\\*", "\\%", "\\[", "\\]", "\\{", "\\}", "\\=", "\\!", "\\~", "\\#", "\\>", "\\<"});
+	
+	FString Pat;
+	for (const FString& Rule : Rules) {
+		Pat += FString::Printf(TEXT("(%s)|"), *Rule);
+	}
+	if (Rules.Num() > 0) Pat = Pat.LeftChop(1);
+	FRegexPattern Pattern(Pat);
+
+	for (const FTextRange& LineRange : LineRanges) {
+		FSyntaxTokenizer::FTokenizedLine TokenizedLine;
+		TokenizedLine.Range = LineRange;
+
+		FString Line = SourceString.Mid(LineRange.BeginIndex, LineRange.EndIndex - LineRange.BeginIndex);
+		FRegexMatcher Match(Pattern, Line);
+		int32 Start = 0;
+		int32 End = 0;
+		while (Match.FindNext()) {
+			int32 MatchStart = Match.GetMatchBeginning();
+			End = Match.GetMatchEnding();
+			if (MatchStart != Start) {
+				TokenizedLine.Tokens.Add(FSyntaxTokenizer::FToken(FSyntaxTokenizer::ETokenType::Literal, FTextRange(LineRange.BeginIndex + Start, LineRange.BeginIndex + MatchStart)));
+			}
+			Start = End;
+			TokenizedLine.Tokens.Add(FSyntaxTokenizer::FToken(FSyntaxTokenizer::ETokenType::Syntax, FTextRange(LineRange.BeginIndex + MatchStart, LineRange.BeginIndex + End)));
+		}
+		if (End < LineRange.EndIndex - LineRange.BeginIndex || TokenizedLine.Tokens.Num() < 1) {
+			TokenizedLine.Tokens.Add(FSyntaxTokenizer::FToken(FSyntaxTokenizer::ETokenType::Syntax, FTextRange(LineRange.BeginIndex + End, LineRange.EndIndex)));
+		}
+		TokenizedLines.Add(TokenizedLine);
+	}
+	
+	ParseTokens(SourceString, TargetTextLayout, TokenizedLines);
 }
 
-FFINLuaSyntaxHighlighterTextLayoutMarshaller::~FFINLuaSyntaxHighlighterTextLayoutMarshaller() {}
+bool FFINLuaSyntaxHighlighterTextLayoutMarshaller::RequiresLiveUpdate() const {
+	return true;
+}
+
+FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayoutMarshaller(const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle) : SyntaxTextStyle(InLuaSyntaxTextStyle) {
+
+}
 
 TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle) {
 	TArray<FSyntaxTokenizer::FRule> TokenizerRules;
@@ -35,7 +80,7 @@ TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighte
 		return A.MatchText.Len() > B.MatchText.Len();
 	});
 	
-	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(MakeShared<FSyntaxTokenizer>(TokenizerRules), LuaSyntaxTextStyle));
+	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(LuaSyntaxTextStyle));
 }
 #pragma optimize("", off)
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) {
@@ -145,6 +190,11 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 				StringEnd += TokenString.Len();
 			}
 			if (!bInBlockComment && !bInLineComment && (TokenString == "\"" || TokenString == "\'")) {
+				if (bInNumber) {
+					DoNumber(FTextRange(StringStart, StringEnd));
+					bIsNew = true;
+					bInNumber = false;
+				}
 				if (bInString) {
 					if (Start > 0 && (*ModelString)[Start-1] == '\\') continue;
 					DoString(FTextRange(StringStart, StringEnd));

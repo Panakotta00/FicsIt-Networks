@@ -1,131 +1,120 @@
 #include "NetworkController.h"
 
-#include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkCircuit.h"
+#include "FicsItNetworks/FicsItNetworksCustomVersion.h"
+#include "FicsItNetworks/Computer/FINComputerSubsystem.h"
+#include "FicsItNetworks/Network/FINNetworkComponent.h"
+#include "FicsItNetworks/Network/FINNetworkCircuit.h"
+#include "FicsItNetworks/Network/FINNetworkCircuitNode.h"
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
 
-#include "Network/FINDynamicStructHolder.h"
-#include "Network/FINNetworkCircuitNode.h"
-#include "Network/FINNetworkUtils.h"
+void UFINKernelNetworkController::Serialize(FStructuredArchive::FRecord Record) {
+	Super::Serialize(Record);
 
-namespace FicsItKernel {
-	namespace Network {
-		void NetworkController::handleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
-			pushSignal(signal, sender);
+	if (!Record.GetUnderlyingArchive().IsSaveGame()) return;
+	
+	if (AFINComputerSubsystem::GetComputerSubsystem(this)->Version < FINKernelRefactor) return;
+	
+	// serialize signals
+	int32 SignalCount = SignalQueue.Num();
+	FStructuredArchive::FArray SignalListRecord = Record.EnterArray(SA_FIELD_NAME(TEXT("Signals")), SignalCount);
+	for (int i = 0; i < SignalCount; ++i) {
+		FStructuredArchive::FRecord SignalRecord = SignalListRecord.EnterElement().EnterRecord();
+		
+		FFINSignalData Signal;
+		FFINNetworkTrace Trace;
+		if (SignalRecord.GetUnderlyingArchive().IsSaving()) {
+			const TTuple<FFINSignalData, FFINNetworkTrace>& SignalData = SignalQueue[i];
+			Signal = SignalData.Key;
+			Trace = SignalData.Value;
 		}
 
-		FFINSignalData NetworkController::popSignal(FFINNetworkTrace& sender) {
-			if (getSignalCount() < 1) return FFINSignalData();
-			mutexSignals.lock();
-			auto sig = signals.front();
-			signals.pop_front();
-			mutexSignals.unlock();
-			sender = sig.Value;
-			return sig.Key;
-		}
-
-		void NetworkController::pushSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
-			std::lock_guard<std::mutex> m(mutexSignals);
-			if (signals.size() >= maxSignalCount || lockSignalRecieving) return;
-			signals.push_back(TPair<FFINSignalData, FFINNetworkTrace>{signal, sender});
-		}
-
-		void NetworkController::clearSignals() {
-			std::lock_guard<std::mutex> m(mutexSignals);
-			signals.clear();
-		}
-
-		size_t NetworkController::getSignalCount() {
-			std::lock_guard<std::mutex> m(mutexSignals);
-			return signals.size();
-		}
-
-		FFINNetworkTrace NetworkController::getComponentByID(const FString& id) {
-			FGuid guid;
-			if (FGuid::Parse(id, guid)) {
-				if (component->Implements<UFINNetworkComponent>()) {
-					return FFINNetworkTrace(component) / IFINNetworkCircuitNode::Execute_GetCircuit(component)->FindComponent(guid, component).GetObject();
-				}
-			}
-			return FFINNetworkTrace(nullptr);
-		}
-
-		TSet<FFINNetworkTrace> NetworkController::getComponentByNick(const FString& nick) {
-			if (component->Implements<UFINNetworkComponent>()) {
-				TSet<FFINNetworkTrace> outComps;
-				auto comps = IFINNetworkCircuitNode::Execute_GetCircuit(component)->FindComponentsByNick(nick, component);
-				for (auto& c : comps) {
-					outComps.Add(FFINNetworkTrace(component) / c);
-				}
-				return outComps;
-			}
-			return TSet<FFINNetworkTrace>();
-		}
-
-		TSet<FFINNetworkTrace> NetworkController::getComponentByClass(UClass* Class, bool bRedirect) {
-			if (component->Implements<UFINNetworkComponent>()) {
-				TSet<FFINNetworkTrace> outComps;
-				TSet<UObject*> Comps = IFINNetworkCircuitNode::Execute_GetCircuit(component)->GetComponents();
-				for (UObject* Comp : Comps) {
-					if (bRedirect) {
-						UObject* RedirectedComp = UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(Comp)).Get();
-						if (!RedirectedComp->IsA(Class)) continue;
-					} else if (!Comp->IsA(Class)) continue;
-					if (!IFINNetworkComponent::Execute_AccessPermitted(Comp, IFINNetworkComponent::Execute_GetID(component))) continue;
-					outComps.Add(FFINNetworkTrace(component) / Comp);
-				}
-				return outComps;
-			}
-			return TSet<FFINNetworkTrace>();
-		}
-
-		void NetworkController::PreSerialize(bool load) {
-			lockSignalRecieving = true;
-		}
-
-		void NetworkController::Serialize(FArchive& Ar) {
-			// serialize signal listeners
-			TArray<FFINNetworkTrace> networkTraces;
-			if (Ar.IsSaving()) for (const FFINNetworkTrace& trace : signalListeners) {
-				networkTraces.Add(trace);
-			}
-			Ar << networkTraces;
-			if (Ar.IsLoading()) for (FFINNetworkTrace& trace : networkTraces) {
-				signalListeners.Add(trace);
-			}
-
-			// serialize signals
-			int32 signalCount = signals.size();
-			Ar << signalCount;
-			if (Ar.IsLoading()) {
-				signals.clear();
-			}
-			for (int i = 0; i < signalCount; ++i) {
-				FFINSignalData Signal;
-				FFINNetworkTrace Trace;
-				if (Ar.IsSaving()) {
-					const auto& sig = signals[i];
-					Signal = sig.Key;
-					Trace = sig.Value;
-				}
-				bool valid = Trace.IsValid();
-				Ar << valid;
-				if (!valid) continue;
-				
-				// save/save signal
-				Signal.Serialize(Ar);
-				Trace.Serialize(Ar);
-				
-				if (Ar.IsLoading()) {
-					signals.push_back(TPair<FFINSignalData, FFINNetworkTrace>{Signal, Trace});
-				}
-			}
-
-			// serialize signal senders
-			Ar << signalSenders;
-		}
-
-		void NetworkController::PostSerialize(bool load) {
-			lockSignalRecieving = false;
+		SignalRecord.EnterField(SA_FIELD_NAME(TEXT("Signal"))) << Signal;
+		SignalRecord.EnterField(SA_FIELD_NAME(TEXT("Trace"))) << Trace;
+		
+		if (SignalRecord.GetUnderlyingArchive().IsLoading()) {
+			SignalQueue.Add(TPair<FFINSignalData, FFINNetworkTrace>{Signal, Trace});
 		}
 	}
+}
+
+void UFINKernelNetworkController::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	bLockSignalReceiving = true;
+}
+
+void UFINKernelNetworkController::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	bLockSignalReceiving = false;
+}
+
+void UFINKernelNetworkController::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	bLockSignalReceiving = true;
+}
+
+void UFINKernelNetworkController::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	bLockSignalReceiving = false;
+}
+
+void UFINKernelNetworkController::SetComponent(TScriptInterface<IFINNetworkComponent> InNetworkComponent) {
+	Component = InNetworkComponent;
+}
+
+TScriptInterface<IFINNetworkComponent> UFINKernelNetworkController::GetComponent() const {
+	return Component;
+}
+
+void UFINKernelNetworkController::HandleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
+	PushSignal(signal, sender);
+}
+
+FFINSignalData UFINKernelNetworkController::PopSignal(FFINNetworkTrace& OutSender) {
+	if (GetSignalCount() < 1) return FFINSignalData();
+	FScopeLock Lock(&MutexSignals);
+	const TTuple<FFINSignalData, FFINNetworkTrace> Signal = SignalQueue.Pop();
+	OutSender = Signal.Value;
+	return Signal.Key;
+}
+
+void UFINKernelNetworkController::PushSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
+	FScopeLock Lock(&MutexSignals);
+	if (GetSignalCount() >= MaxSignalCount || bLockSignalReceiving) return;
+	SignalQueue.Add(TPair<FFINSignalData, FFINNetworkTrace>{signal, sender});
+}
+
+void UFINKernelNetworkController::ClearSignals() {
+	FScopeLock Lock(&MutexSignals);
+	SignalQueue.Empty();
+}
+
+size_t UFINKernelNetworkController::GetSignalCount() {
+	FScopeLock Lock(&MutexSignals);
+	return SignalQueue.Num();
+}
+
+FFINNetworkTrace UFINKernelNetworkController::GetComponentByID(const FGuid& InID) const {
+	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return FFINNetworkTrace();
+	return FFINNetworkTrace(Component.GetObject()) / IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->FindComponent(InID, Component).GetObject();
+}
+
+TSet<FFINNetworkTrace> UFINKernelNetworkController::GetComponentByNick(const FString& InNick) const {
+	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return TSet<FFINNetworkTrace>();
+	TSet<FFINNetworkTrace> OutComponents;
+	TSet<UObject*> Components = IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->FindComponentsByNick(InNick, Component);
+	for (UObject* Comp : Components) {
+		OutComponents.Add(FFINNetworkTrace(Component.GetObject()) / Comp);
+	}
+	return OutComponents;
+}
+
+TSet<FFINNetworkTrace> UFINKernelNetworkController::GetComponentByClass(UClass* InClass, bool bRedirect) const {
+	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return TSet<FFINNetworkTrace>();
+	TSet<FFINNetworkTrace> outComps;
+	TSet<UObject*> Comps = IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->GetComponents();
+	for (UObject* Comp : Comps) {
+		if (bRedirect) {
+			UObject* RedirectedComp = UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(Comp)).Get();
+			if (!RedirectedComp->IsA(InClass)) continue;
+		} else if (!Comp->IsA(InClass)) continue;
+		if (!IFINNetworkComponent::Execute_AccessPermitted(Comp, IFINNetworkComponent::Execute_GetID(Component.GetObject()))) continue;
+		outComps.Add(FFINNetworkTrace(Component.GetObject()) / Comp);
+	}
+	return outComps;
 }

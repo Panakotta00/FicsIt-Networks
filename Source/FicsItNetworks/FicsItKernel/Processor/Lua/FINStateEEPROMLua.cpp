@@ -1,7 +1,5 @@
 ﻿#include "FINStateEEPROMLua.h"
 
-#include "UnrealNetwork.h"
-
 void AFINStateEEPROMLua::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	

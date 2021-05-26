@@ -4,8 +4,6 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		class LuaProcessor;
-
 		/**
 		* Adds the Event API to the given lua state.
 		*

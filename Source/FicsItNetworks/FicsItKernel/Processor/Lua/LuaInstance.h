@@ -1,28 +1,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SubclassOf.h"
-
 #include "Lua.h"
-
-#include <string>
-#include <map>
-#include <set>
-#include <functional>
-
-#include "Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 
 class UFINFunction;
 class UFINClass;
 class UFINStruct;
+class UFINKernelSystem;
 
 namespace FicsItKernel {
+	class KernelSystem;
+	
 	namespace Lua {
 		/**
 		 * Structure used in the userdata representing a instance.
 		 */
 		struct LuaInstance {
 			FFINNetworkTrace Trace;
+			UFINKernelSystem* Kernel;
+			LuaInstance(const FFINNetworkTrace& Trace, UFINKernelSystem* Kernel);
+			LuaInstance(const LuaInstance& Other);
+			~LuaInstance();
+			static void CollectReferences(void* Obj, FReferenceCollector& Collector);
 		};
 
 		/**
@@ -47,7 +47,7 @@ namespace FicsItKernel {
 		 * @param[in]	obj					the obj you want to create the lua instance for.
 		 * @return	returns true if the instance got created successfully.
 		 */
-		bool newInstance(lua_State* L, FFINNetworkTrace obj);
+		bool newInstance(lua_State* L, const FFINNetworkTrace& obj);
 
 		/**
 		 * Trys to get a Lua Instance from the given lua stack at the given index of the given type.

@@ -1,9 +1,8 @@
 ﻿#pragma once
 
+#include "Subsystem/ModSubsystem.h"
 #include "FGSaveInterface.h"
-#include "FGSubsystem.h"
 #include "FINSignalData.h"
-#include "Network/FINDynamicStructHolder.h"
 #include "FINSignalSubsystem.generated.h"
 
 USTRUCT()
@@ -15,7 +14,7 @@ struct FICSITNETWORKS_API FFINSignalListeners {
 };
 
 UCLASS(BlueprintType)
-class FICSITNETWORKS_API AFINSignalSubsystem : public AFGSubsystem, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINSignalSubsystem : public AModSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 private:
 	/**
@@ -27,8 +26,9 @@ public:
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	virtual void PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
 	// End IFGSaveInterface
-	
+
 	/**
 	* Gets the loaded signal subsystem in the given world.
 	*

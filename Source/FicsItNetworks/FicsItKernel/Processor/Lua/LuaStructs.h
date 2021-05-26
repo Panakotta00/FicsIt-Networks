@@ -1,10 +1,9 @@
 #pragma once
 
-#include "FGBuildableRailroadTrack.h"
 #include "Lua.h"
-#include "LuaProcessorStateStorage.h"
-#include "Network/FINNetworkValues.h"
+#include "FicsItNetworks/Network/FINNetworkValues.h"
 
+class UFINKernelSystem;
 class UFINStruct;
 
 namespace FicsItKernel {
@@ -14,7 +13,12 @@ namespace FicsItKernel {
 		 */
 		struct LuaStruct {
 			UFINStruct* Type = nullptr;
-			FFINDynamicStructHolder Struct;
+			TSharedRef<FFINDynamicStructHolder> Struct;
+			UFINKernelSystem* Kernel;
+			LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel);
+			LuaStruct(const LuaStruct& Other);
+			~LuaStruct();
+			static void CollectReferences(void* Obj, FReferenceCollector& Collector);
 		};
 		
 		/**

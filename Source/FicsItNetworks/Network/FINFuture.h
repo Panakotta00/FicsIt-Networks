@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Reflection/FINFunction.h"
-#include "FicsItNetworksModule.h"
+#include "FicsItNetworks/Reflection/FINFunction.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FINFuture.generated.h"
 
 USTRUCT(BlueprintType)
@@ -50,12 +50,13 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 	FFINFutureReflection() = default;
 	FFINFutureReflection(UFINFunction* Function, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
 
-	bool Serialize(FArchive& Ar) {
-		Ar << bDone;
-		Ar << Input;
-		Ar << Output;
-		Ar << Context;
-		Ar << Function;
+	bool Serialize(FStructuredArchive::FSlot Slot) {
+		FStructuredArchive::FRecord Record = Slot.EnterRecord();
+		Record.EnterField(SA_FIELD_NAME(TEXT("Done"))) << bDone;
+		Record.EnterField(SA_FIELD_NAME(TEXT("Input"))) << Input;
+		Record.EnterField(SA_FIELD_NAME(TEXT("Output"))) << Output;
+		Record.EnterField(SA_FIELD_NAME(TEXT("Context"))) << Context;
+		Record.EnterField(SA_FIELD_NAME(TEXT("Function"))) << Function;
 		return true;
 	}
 
@@ -78,7 +79,7 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 template<>
 struct TStructOpsTypeTraits<FFINFutureReflection> : public TStructOpsTypeTraitsBase2<FFINFutureReflection> {
 	enum {
-		WithSerializer = true,
+		WithStructuredSerializer = true,
 	};
 };
 

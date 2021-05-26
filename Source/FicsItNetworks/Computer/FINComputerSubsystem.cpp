@@ -1,8 +1,7 @@
-﻿#include "FINComputerSubsystem.h"
+#include "FINComputerSubsystem.h"
 
-
+#include "Subsystem/SubsystemActorManager.h"
 #include "FGCharacterPlayer.h"
-#include "FINSubsystemHolder.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input = CreateDefaultSubobject<UInputComponent>("Input");
@@ -35,11 +34,14 @@ void AFINComputerSubsystem::BeginPlay() {
 void AFINComputerSubsystem::Tick(float dt) {
 	Super::Tick(dt);
 	this->GetWorld()->GetFirstPlayerController()->PushInputComponent(Input);
-	Version = EFINCustomVersion::FINLatestVersion;
 }
 
 bool AFINComputerSubsystem::ShouldSave_Implementation() const {
 	return true;
+}
+
+void AFINComputerSubsystem::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	Version = FINLatestVersion;
 }
 
 void AFINComputerSubsystem::OnPrimaryFirePressed() {
@@ -90,18 +92,14 @@ AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* Worl
 #if WITH_EDITOR
 	return nullptr;
 #endif
-	UFINSubsystemHolder* Holder = GetSubsystemHolder<UFINSubsystemHolder>(WorldContext);
-	if (Holder) return Holder->ComputerSubsystem;
-	else {
-		TArray<AActor*> FoundActors;
-		UGameplayStatics::GetAllActorsOfClass(WorldContext->GetWorld(), AFINComputerSubsystem::StaticClass(), FoundActors);
-		if (FoundActors.Num() > 0) return Cast<AFINComputerSubsystem>(FoundActors[0]);
-		else return nullptr;
-	}
+	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
+	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
+	check(SubsystemActorManager);
+	return SubsystemActorManager->GetSubsystemActor<AFINComputerSubsystem>();
 }
 
 void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
-	if (!IsValid(character)) return;
+	if (!IsValid(character) || !character->GetController() || !character->GetController()->IsLocalPlayerController()) return;
 	DetachWidgetInteractionToPlayer(character);
 	UWidgetInteractionComponent* Comp = NewObject<UWidgetInteractionComponent>(character);
 	Comp->InteractionSource = EWidgetInteractionSource::World;

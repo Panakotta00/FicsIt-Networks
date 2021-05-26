@@ -1,7 +1,4 @@
 ﻿#include "FINComputerScreen.h"
-
-
-#include "UnrealNetwork.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 void AFINComputerScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -67,6 +64,7 @@ TSharedPtr<SWidget> AFINComputerScreen::GetWidget() const {
 }
 
 void AFINComputerScreen::RequestNewWidget() {
+	if (!GPUPtr) GPUPtr = GPU.Get();
 	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 }
 

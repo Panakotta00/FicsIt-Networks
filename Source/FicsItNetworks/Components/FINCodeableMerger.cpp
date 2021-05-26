@@ -1,7 +1,6 @@
 ﻿#include "FINCodeableMerger.h"
 
 AFINCodeableMerger::AFINCodeableMerger() {
-	RootComponent->SetMobility(EComponentMobility::Static);
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->SetMobility(EComponentMobility::Static);

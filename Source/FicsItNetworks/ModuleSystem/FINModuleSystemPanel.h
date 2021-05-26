@@ -29,13 +29,11 @@ public:
 	FFINModuleDelegate OnModuleChanged;
 
 	UPROPERTY(Replicated)
-	TArray<TWeakObjectPtr<UObject>> Grid;
-	
-	UFINModuleSystemPanel();
-	~UFINModuleSystemPanel();
+	TArray<UObject*> Grid;
 
 	// Begin UObject
 	void Serialize(FArchive& Ar) override;
+	virtual void InitializeComponent() override;
 	// End UObject
 
 	// Begin UActorComponent
@@ -90,8 +88,8 @@ public:
 	/**
 	 * Get Grid Slot at given location
 	 */
-	const TWeakObjectPtr<UObject>& GetGridSlot(int x, int y) const;
-	TWeakObjectPtr<UObject>& GetGridSlot(int x, int y);
+	UObject* GetGridSlot(int x, int y) const;
+	UObject*& GetGridSlot(int x, int y);
 
 	static void GetModuleSpace(const FVector& Loc, int Rot, const FVector& MSize, FVector& OutMin, FVector& OutMax);
 };

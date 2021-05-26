@@ -1,9 +1,6 @@
 ﻿#include "FINComputerRCO.h"
-
-
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerGPUT1.h"
-#include "UnrealNetwork.h"
 
 void UFINComputerRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -98,7 +95,7 @@ void UFINComputerRCO::CreateEEPROMState_Implementation(UFGInventoryComponent* In
 	params.bNoFail = true;
 	AFINStateEEPROM* eeprom = Inv->GetWorld()->SpawnActor<AFINStateEEPROM>(clazz, loc, rot, params);
 	if (!IsValid(eeprom)) return;
-	Inv->SetStateOnIndex(SlotIdx, FSharedInventoryStatePtr::MakeShared(eeprom));
+	Inv->SetStateOnIndex(SlotIdx, FSharedInventoryStatePtr::MakeShared((AActor*)eeprom));
 }
 
 bool UFINComputerRCO::CreateEEPROMState_Validate(UFGInventoryComponent* Inv, int SlotIdx) {

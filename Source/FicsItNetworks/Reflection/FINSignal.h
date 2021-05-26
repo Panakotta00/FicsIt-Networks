@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "FINProperty.h"
-#include "Network/Signals/FINSignalSubsystem.h"
+#include "FicsItNetworks/Network/Signals/FINSignalSubsystem.h"
 #include "FINSignal.generated.h"
 
 UCLASS(BlueprintType)

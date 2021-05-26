@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interface.h"
 #include "FINModuleSystemModule.generated.h"
 
 class UFINModuleSystemPanel;

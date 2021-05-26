@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "FGBuildable.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINNetworkMessageInterface.h"
+#include "Buildables/FGBuildable.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkRouter.generated.h"
 
 UENUM()
@@ -28,7 +27,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector2;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	bool bIsPortWhitelist = false;
 	
 	UPROPERTY(SaveGame)
@@ -183,7 +182,7 @@ public:
     void OnMessageHandled(bool bCon1or2, bool bSendOrReceive);
 	
 private:
-	bool HandleMessage(AFINNetworkCircuit* SendingCircuit, FGuid ID, FGuid Sender, FGuid Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data);
+	bool HandleMessage(AFINNetworkCircuit* SendingCircuit, const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data);
 
 	UFUNCTION(NetMulticast, Unreliable)
     void NetMulti_OnMessageHandled(EFINNetworkRouterLampFlags Flags);

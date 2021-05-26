@@ -3,19 +3,19 @@
 #include "FINNetworkCable.h"
 #include "FINNetworkCableHologram.h"
 #include "FINNetworkCircuit.h"
-#include "UnrealNetwork.h"
 
 void UFINNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UFINNetworkConnectionComponent, Circuit);
 }
 
-UFINNetworkConnectionComponent::UFINNetworkConnectionComponent() {
-	SetIsReplicated(true);
-}
-
 bool UFINNetworkConnectionComponent::IsSupportedForNetworking() const {
 	return true;
+}
+
+void UFINNetworkConnectionComponent::InitializeComponent() {
+	Super::InitializeComponent();
+	SetIsReplicated(true);
 }
 
 TSet<UObject*> UFINNetworkConnectionComponent::GetConnected_Implementation() const {

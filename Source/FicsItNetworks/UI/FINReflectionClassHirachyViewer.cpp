@@ -1,8 +1,6 @@
 ﻿#include "FINReflectionClassHirachyViewer.h"
-
-
 #include "FINReflectionTreeRow.h"
-#include "Reflection/FINReflection.h"
+#include "FicsItNetworks/Reflection/FINStruct.h"
 
 void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const TSharedPtr<FFINReflectionUIStruct>& InSearchStruct, FFINReflectionUIContext* InContext) {
 	Style = InArgs._Style;

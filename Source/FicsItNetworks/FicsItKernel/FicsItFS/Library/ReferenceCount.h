@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	template<class T>
 	class Ref;
 	template<class T>
@@ -32,8 +32,8 @@ namespace FileSystem {
 		friend class SRef;
 		template<class T>
 		friend class WRef;
-		friend struct std::hash<FileSystem::WRef<T>>;
-		friend struct std::hash<FileSystem::SRef<T>>;
+		friend struct std::hash<CodersFileSystem::WRef<T>>;
+		friend struct std::hash<CodersFileSystem::SRef<T>>;
 
 	protected:
 		ReferenceCounted* ref;
@@ -77,7 +77,7 @@ namespace FileSystem {
 		}
 
 		bool isValid() const {
-			return get();
+			return (bool)get();
 		}
 	};
 
@@ -138,15 +138,15 @@ namespace FileSystem {
 
 namespace std {
 	template<typename R>
-	struct hash<FileSystem::WRef<R>> {
-		std::size_t operator()(FileSystem::WRef<R> const& o) const noexcept {
+	struct hash<CodersFileSystem::WRef<R>> {
+		std::size_t operator()(CodersFileSystem::WRef<R> const& o) const noexcept {
 			return std::hash<void*>{}(o.ref);
 		}
 	};
 
 	template<typename R>
-	struct hash<FileSystem::SRef<R>> {
-		std::size_t operator()(FileSystem::WRef<R> const& o) const noexcept {
+	struct hash<CodersFileSystem::SRef<R>> {
+		std::size_t operator()(CodersFileSystem::WRef<R> const& o) const noexcept {
 			return std::hash<void*>{}(o.ref);
 		}
 	};

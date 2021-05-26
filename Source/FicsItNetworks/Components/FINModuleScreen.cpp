@@ -1,8 +1,5 @@
 ﻿#include "FINModuleScreen.h"
-
-
-#include "UnrealNetwork.h"
-#include "Graphics/FINGPUInterface.h"
+#include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 AFINModuleScreen::AFINModuleScreen() {
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");

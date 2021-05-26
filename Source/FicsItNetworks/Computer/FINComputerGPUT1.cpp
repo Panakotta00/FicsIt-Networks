@@ -1,13 +1,9 @@
 #include "FINComputerGPUT1.h"
 
-
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
-#include "SInvalidationPanel.h"
-#include "UnrealNetwork.h"
-#include "WidgetBlueprintLibrary.h"
-#include "WidgetLayoutLibrary.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "Widgets/SInvalidationPanel.h"
 
 void SScreenMonitor::Construct(const FArguments& InArgs) {
 	Text = InArgs._Text;
@@ -23,7 +19,7 @@ void SScreenMonitor::Construct(const FArguments& InArgs) {
 	SetCanTick(false);
 }
 
-TArray<FString> SScreenMonitor::GetText() const {
+FString SScreenMonitor::GetText() const {
 	return Text.Get();
 }
 
@@ -77,26 +73,28 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 	const TArray<FLinearColor>& ForegroundCache = this->Foreground.Get();
 	const TArray<FLinearColor>& BackgroundCache = this->Background.Get();
 	
-	const TArray<FString>& TextGrid = Text.Get();
-	for (int Y = 0; Y < ScreenSizeV.Y && Y < TextGrid.Num(); ++Y) {
-		const FString Line = TextGrid[Y];
-		
-		for (int X = 0; X < ScreenSizeV.X && X < Line.Len(); ++X) {
+	const FString& TextGrid = Text.Get();
+	FSlateFontInfo FontToUse = Font.Get();
+	
+	for (int Y = 0; Y < ScreenSizeV.Y; ++Y) {
+		for (int X = 0; X < ScreenSizeV.X; ++X) {
+			int64 CharIndex = Y * ScreenSizeV.X + X;
+			
 			FLinearColor ForegroundV = FLinearColor(1,1,1,1);
-			if (Y * ScreenSizeV.X + X < ForegroundCache.Num()) {
-				ForegroundV = ForegroundCache[Y * ScreenSizeV.X + X];
+			if (CharIndex < ForegroundCache.Num()) {
+				ForegroundV = ForegroundCache[CharIndex];
 			}
 			FLinearColor BackgroundV = FLinearColor(0,0,0,0);
-			if (Y * ScreenSizeV.X + X < BackgroundCache.Num()) {
-				BackgroundV = BackgroundCache[Y * ScreenSizeV.X + X];
+			if (CharIndex < BackgroundCache.Num()) {
+				BackgroundV = BackgroundCache[CharIndex];
 			}
-
-			FSlateDrawElement::MakeText(
+			FString Char(1, &TextGrid[CharIndex]);
+			if (Char.TrimStartAndEnd().Len() > 0) FSlateDrawElement::MakeText(
                 OutDrawElements,
                 LayerId+1,
                 AllottedGeometry.ToOffsetPaintGeometry(FVector2D(X,Y) * CharSize),
-                Line.Mid(X,1),
-                Font.Get(),
+                *Char,
+				FontToUse,
                 ESlateDrawEffect::None,
                 ForegroundV
             );
@@ -109,7 +107,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 				BackgroundV);
 		}
 	}
-	return LayerId;
+	return LayerId+1;
 }
 
 FReply SScreenMonitor::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
@@ -171,8 +169,8 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 	if (HasAuthority() && bFlushed) {
 		bFlushed = false;
-		ForceNetUpdate();
 		Flush();
+		ForceNetUpdate();
 	}
 }
 
@@ -190,7 +188,7 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 }
 
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
-	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/Game/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
+	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SAssignNew(CachedInvalidation, SInvalidationPanel)
 	.Content()[
@@ -207,7 +205,7 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 		.Background_Lambda([this]() {
 			return Background;
 		})
-		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/Game/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
+		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
 		.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
 			RCO->GPUMouseEvent(this, 0, x, y, btn);
 			return FReply::Handled();
@@ -240,8 +238,8 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 	Foreground.Empty();
 	Background.Empty();
 
+	TextGrid = FString::ChrN(size.X * size.Y, ' ');
 	for (int y = 0; y < size.Y; ++y) {
-		TextGrid.Add(FString::ChrN(size.X, ' '));
 		for (int x = 0; x < size.X; ++x) {
 			Foreground.Add(CurrentForeground);
 			Background.Add(CurrentBackground);
@@ -259,8 +257,10 @@ void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
 
 void AFINComputerGPUT1::Flush_Implementation() {
 	if (CachedInvalidation) {
-		CachedInvalidation->Invalidate(EInvalidateWidget::LayoutAndVolatility);
-		CachedInvalidation->InvalidateCache();
+		CachedInvalidation->InvalidateRoot();
+		CachedInvalidation->InvalidateChildOrder();
+		CachedInvalidation->InvalidateScreenPosition();
+		CachedInvalidation->InvalidatePrepass();
 	}
 }
 
@@ -307,13 +307,15 @@ void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 					}
 				}
 				if (x >= 0) {
-					FString& text = TextGridBuffer[y];
 					int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X)-x-1);
-					text.RemoveAt(x, replace);
-					text.InsertAt(x, inLine.Left(replace));
-					for (int dx = 0; dx < replace; ++dx) {
-						ForegroundBuffer[y * ScreenSize.X + x + dx] = CurrentForeground;
-						BackgroundBuffer[y * ScreenSize.X + x + dx] = CurrentBackground;
+					if (replace > 0) {
+						int64 CharIndex = y * ScreenSize.X + x;
+						TextGridBuffer.RemoveAt(CharIndex, replace);
+						TextGridBuffer.InsertAt(CharIndex, inLine.Left(replace));
+						for (int dx = 0; dx < replace; ++dx) {
+							ForegroundBuffer[CharIndex + dx] = CurrentForeground;
+							BackgroundBuffer[CharIndex + dx] = CurrentBackground;
+						}
 					}
 				}
 			}

@@ -2,8 +2,7 @@
 
 
 #include "FGColoredInstanceMeshProxy.h"
-#include "ProxyInstancedStaticMeshComponent.h"
-#include "Graphics/FINGPUInterface.h"
+#include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 AFINScreen::AFINScreen() {
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
@@ -51,7 +50,7 @@ void AFINScreen::BeginPlay() {
 }
 
 void AFINScreen::OnConstruction(const FTransform& transform) {
-	SpawnComponents(ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
+	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
 	FVector ConnectorOffset;
 	if (ScreenHeight < 0) {
 		if (ScreenWidth < 0) {
@@ -77,7 +76,14 @@ void AFINScreen::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 	if (bGPUChanged) {
 		bGPUChanged = false;
-		ForceNetUpdate();
+		
+		if (GPUPtr) {
+			Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
+		} else {
+			SetWidget(SNew(SScaleBox));
+		}
+
+		OnGPUUpdate.Broadcast();
 	}
 	if (HasAuthority() && (((bool)GPUPtr) != GPU.IsValid())) {
 		if (!GPUPtr) GPUPtr = GPU.Get();
@@ -158,20 +164,15 @@ void AFINScreen::netFunc_getSize(int& w, int& h) {
 }
 
 void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {
-	if (GPUPtr) {
-		Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
-	} else {
-		SetWidget(SNew(SScaleBox));
-	}
-	OnGPUUpdate.Broadcast();
+	bGPUChanged = true;
 }
 
-void AFINScreen::SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts) {
+void AFINScreen::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts) {
 	int xf = ScreenWidth/FMath::Abs(ScreenWidth);
 	int yf = ScreenHeight/FMath::Abs(ScreenHeight);
 	for (int x = 0; x < FMath::Abs(ScreenWidth); ++x) {
 		for (int y = 0; y < FMath::Abs(ScreenHeight); ++y) {
-			UStaticMeshComponent* MiddlePart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
+			UStaticMeshComponent* MiddlePart = NewObject<UStaticMeshComponent>(Parent, Class);
 			MiddlePart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 			MiddlePart->SetRelativeLocation(FVector(0, x * 100 * xf - 50, y * 100 * yf - 50));
 			MiddlePart->RegisterComponent();
@@ -182,21 +183,21 @@ void AFINScreen::SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh*
 		}
 	}
 	for (int x = 0; x < FMath::Abs(ScreenWidth); ++x) {
-		SpawnEdgeComponent(x * xf, 0, 2, EdgePartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
-		SpawnEdgeComponent(x * xf, ScreenHeight - 1, 0, EdgePartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
+		SpawnEdgeComponent(Class, x * xf, 0, 2, EdgePartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
+		SpawnEdgeComponent(Class, x * xf, ScreenHeight - 1, 0, EdgePartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
 	}
 	for (int y = 0; y < FMath::Abs(ScreenHeight); ++y) {
-		SpawnEdgeComponent(0, y * yf, -1, EdgePartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
-		SpawnEdgeComponent(ScreenWidth - 1, y * yf, 1,  EdgePartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
+		SpawnEdgeComponent(Class, 0, y * yf, -1, EdgePartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
+		SpawnEdgeComponent(Class, ScreenWidth - 1, y * yf, 1,  EdgePartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
 	}
-	SpawnCornerComponent(0,0,0, CornerPartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
-	SpawnCornerComponent(ScreenWidth-1,0,1, CornerPartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
-	SpawnCornerComponent(0,ScreenHeight-1,-1, CornerPartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
-	SpawnCornerComponent(ScreenWidth-1,ScreenHeight-1,2, CornerPartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
+	SpawnCornerComponent(Class, 0,0,0, CornerPartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
+	SpawnCornerComponent(Class, ScreenWidth-1,0,1, CornerPartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
+	SpawnCornerComponent(Class, 0,ScreenHeight-1,-1, CornerPartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
+	SpawnCornerComponent(Class, ScreenWidth-1,ScreenHeight-1,2, CornerPartMesh, Parent, Attach, ScreenWidth, ScreenHeight, OutParts);
 }
 
-void AFINScreen::SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts) {
-	UFGColoredInstanceMeshProxy* EdgePart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
+void AFINScreen::SpawnEdgeComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts) {
+	UStaticMeshComponent* EdgePart = NewObject<UStaticMeshComponent>(Parent, Class);
 	EdgePart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 
 	if (ScreenWidth < 0) {
@@ -236,8 +237,8 @@ void AFINScreen::SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMe
 	OutParts.Add(EdgePart);
 }
 
-void AFINScreen::SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts) {
-	UFGColoredInstanceMeshProxy* CornerPart = NewObject<UFGColoredInstanceMeshProxy>(Parent);
+void AFINScreen::SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts) {
+	UStaticMeshComponent* CornerPart = NewObject<UStaticMeshComponent>(Parent, Class);
 	CornerPart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 
 	if (ScreenWidth < 0) {

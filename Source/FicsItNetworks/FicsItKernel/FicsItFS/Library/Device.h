@@ -7,7 +7,7 @@
 
 #include <unordered_set>
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	class FileSystemRoot;
 
 	typedef std::function<bool(long long, bool)> SizeCheckFunc;

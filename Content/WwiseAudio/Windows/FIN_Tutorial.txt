@@ -1,6 +1,0 @@
-Event	ID	Name			Wwise Object Path	Notes
-	3263503306	Play_FINTutorial_Introduction			\Default Work Unit\Play_FINTutorial_Introduction	
-
-In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
-	101779832	Introduction	G:\Projects\Satisfactory\Mods\FicsIt-Networks\FicsIt-Networks_WwiseProject\.cache\Windows\SFX\Introduction - Kopie_56D34C19.wem		\Actor-Mixer Hierarchy\Default Work Unit\Introduction		578144
-

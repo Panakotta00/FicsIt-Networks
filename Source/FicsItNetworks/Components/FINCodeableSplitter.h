@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINCodeableSplitter.generated.h"
 
 UCLASS()
@@ -13,6 +13,9 @@ class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINS
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UFGFactoryConnectionComponent* InputConnector = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGFactoryConnectionComponent* Input1 = nullptr;

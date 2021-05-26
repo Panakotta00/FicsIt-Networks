@@ -11,7 +11,7 @@
 
 namespace fs = std::filesystem;
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	struct DiskDeviceWatcher {
 		HANDLE watcher;
 		OVERLAPPED ovl;

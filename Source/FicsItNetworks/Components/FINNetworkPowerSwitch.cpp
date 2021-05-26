@@ -1,8 +1,8 @@
 #include "FINNetworkPowerSwitch.h"
 
-#include "UnrealNetwork.h"
-
 AFINNetworkPowerSwitch::AFINNetworkPowerSwitch() {
+	RootComponent = NewObject<USceneComponent>();
+	
 	PowerConnection1 = CreateDefaultSubobject<UFGPowerConnectionComponent>("PowerConnection1");
 	PowerConnection1->SetupAttachment(RootComponent);
 	PowerConnection2 = CreateDefaultSubobject<UFGPowerConnectionComponent>("PowerConnection2");

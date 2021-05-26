@@ -1,389 +1,380 @@
 #include "FicsItKernel.h"
-
-#include "KernelSystemSerializationInfo.h"
-#include "Computer/FINComputerCase.h"
+#include "FicsItNetworks/Computer/FINComputerCase.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
-#include "Network/FINFuture.h"
+#include "FicsItNetworks/Network/FINFuture.h"
 #include "Processor/Lua/LuaProcessor.h"
-#include "Reflection/FINReflection.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
 
-namespace FicsItKernel {
-	KernelCrash::KernelCrash(std::string what) : std::exception(what.c_str()) {}
+FFINKernelListener::FFINKernelListener(UFINKernelSystem* parent) : parent(parent) {}
 
-	KernelCrash::~KernelCrash() {}
+void FFINKernelListener::onMounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
+	static UFINSignal* Signal = nullptr;
+	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {4ll, FString(path.str().c_str())});
+}
 
-	KernelSystem::KernelSystem(UObject* Owner) : Owner(Owner), listener(new KernelListener(this)) {}
+void FFINKernelListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
+	static UFINSignal* Signal = nullptr;
+	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {5ll, FString(path.str().c_str())});
+}
 
-	KernelSystem::~KernelSystem() {
-		stop();
-		if (processor) processor->setKernel(nullptr);
-		processor.reset();
+void FFINKernelListener::onNodeAdded(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
+	static UFINSignal* Signal = nullptr;
+	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {0ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
+}
+
+void FFINKernelListener::onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
+	static UFINSignal* Signal = nullptr;
+	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {1ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
+}
+
+void FFINKernelListener::onNodeChanged(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
+	static UFINSignal* Signal = nullptr;
+	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {2ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
+}
+
+void FFINKernelListener::onNodeRenamed(CodersFileSystem::Path newPath, CodersFileSystem::Path oldPath, CodersFileSystem::NodeType type) {
+	static UFINSignal* Signal = nullptr;
+	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FINInt>(type)});
+}
+
+void UFINKernelSystem::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) {
+	Super::AddReferencedObjects(InThis, Collector);
+	
+	UFINKernelSystem* This = Cast<UFINKernelSystem>(InThis);
+	for (const TPair<void*, TFunction<void(void*, FReferenceCollector&)>>& Referencer : This->ReferencedObjects) {
+		Referencer.Value(Referencer.Key, Collector);
 	}
+}
 
-	void KernelSystem::tick(float deltaSeconds) {
-		if (getState() == RESET) if (!start(true)) return;
-		if (getState() == RUNNING) {
-			if (devDevice) devDevice->tickListeners();
-			if (processor) processor->tick(deltaSeconds);
-			else crash(FicsItKernel::KernelCrash("Processor Unplugged"));
+/*void UFINKernelSystem::Serialize(FArchive& Ar) {
+	Super::Serialize(Ar);
+
+	if (!Ar.IsSaveGame()) return;
+
+	FStructuredArchive::FRecord Record = FStructuredArchiveFromArchive(Ar).GetSlot().EnterRecord();
+
+	// TODO: serialize kernel crash
+
+	TOptional<FStructuredArchive::FSlot> Slot = Record.TryEnterField(FIELD_NAME_TEXT("FileSystem"), true);
+	if (Slot.IsSet()) FileSystem.Serialize(Slot->GetUnderlyingArchive(), FileSystemSerializationInfo);
+
+	if (GetProcessor()) GetProcessor()->SetKernel(this);
+}*/
+
+void UFINKernelSystem::Serialize(FStructuredArchive::FRecord Record) {
+	Super::Serialize(Record);
+	
+	if (!Record.GetUnderlyingArchive().IsSaveGame()) return;
+
+	// TODO: serialize kernel crash
+
+	TOptional<FStructuredArchive::FSlot> FSSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("FileSystem")), true);
+	if (FSSlot.IsSet()) FileSystem.Serialize(FSSlot->EnterRecord(), FileSystemSerializationInfo);
+
+	//TOptional<FStructuredArchive::FSlot> ProcessorSlot = Record.TryEnterField(FIELD_NAME_TEXT("Processor"), true);
+	//if (ProcessorSlot.IsSet()) ProcessorSlot->GetUnderlyingArchive() << Processor;
+
+	if (GetProcessor()) GetProcessor()->SetKernel(this);
+}
+
+void UFINKernelSystem::BeginDestroy() {
+	Stop();
+	if (Processor) Processor->SetKernel(nullptr);
+	Processor = nullptr;
+	
+	Super::BeginDestroy();
+}
+
+bool UFINKernelSystem::ShouldSave_Implementation() const {
+	return true;
+}
+
+void UFINKernelSystem::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	SystemResetTimePoint = (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - SystemResetTimePoint;
+}
+
+void UFINKernelSystem::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	SystemResetTimePoint = (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - SystemResetTimePoint;
+}
+
+void UFINKernelSystem::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {}
+
+void UFINKernelSystem::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	if (State == FIN_KERNEL_CRASHED || State == FIN_KERNEL_RUNNING) {
+		if (State == FIN_KERNEL_CRASHED) Crash(MakeShared<FFINKernelCrash>());
+
+		FileSystem = FFINKernelFSRoot();
+		FileSystem.addListener(FileSystemListener);
+		MemoryUsage = 0;
+
+		// create & init devDevice
+		DevDevice = new FFINKernelFSDevDevice();
+		for (const TPair<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
+			DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key->ID.ToString()));
 		}
+		
+		if (DevDeviceMountPoint.Len() > 0) FileSystem.mount(DevDevice, TCHAR_TO_UTF8(*DevDeviceMountPoint));
+		
+		FileSystem.PostLoad(FileSystemSerializationInfo);
+	}
+	
+	SystemResetTimePoint = (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - SystemResetTimePoint;
+}
+
+void UFINKernelSystem::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	//if (Processor) out_dependentObjects.Add(Processor);
+}
+
+void UFINKernelSystem::Tick(float InDeltaSeconds) {
+	if (GetState() == FIN_KERNEL_RESET) if (!Start(true)) return;
+	if (GetState() == FIN_KERNEL_RUNNING) {
+		if (DevDevice) DevDevice->tickListeners();
+		if (Processor) Processor->Tick(InDeltaSeconds);
+		else Crash(MakeShared<FFINKernelCrash>("Processor Unplugged"));
+	}
+}
+
+FFINKernelFSRoot* UFINKernelSystem::GetFileSystem() {
+	if (GetState() == FIN_KERNEL_RUNNING) return &FileSystem;
+	return nullptr;
+}
+
+void UFINKernelSystem::SetCapacity(int64 Capacity) {
+	MemoryCapacity = Capacity;
+}
+
+int64 UFINKernelSystem::GetCapacity() const {
+	return MemoryCapacity;
+}
+
+void UFINKernelSystem::SetProcessor(UFINKernelProcessor* InProcessor) {
+	Stop();
+	if (GetProcessor()) {
+		GetProcessor()->SetKernel(nullptr);
+	}
+	Processor = InProcessor;
+	if (GetProcessor()) {
+		InProcessor->SetKernel(this);
+	}
+}
+
+UFINKernelProcessor* UFINKernelSystem::GetProcessor() const {
+	return Processor;
+}
+
+TSharedPtr<FFINKernelCrash> UFINKernelSystem::GetCrash() const {
+	return KernelCrash;
+}
+
+EFINKernelState UFINKernelSystem::GetState() const {
+	return State;
+}
+
+void UFINKernelSystem::AddDrive(AFINFileSystemState* InDrive) {
+	// check if drive is added & return if found
+	if (Drives.Contains(InDrive)) return;
+
+	// create & assign device from drive
+	Drives.Add(InDrive) = InDrive->GetDevice();
+
+	// add drive to devDevice
+	if (DevDevice.isValid()) {
+		if (!DevDevice->addDevice(Drives[InDrive], TCHAR_TO_UTF8(*InDrive->ID.ToString()))) Drives.Remove(InDrive);
+	}
+}
+
+void UFINKernelSystem::RemoveDrive(AFINFileSystemState* InDrive) {
+	// try to find location of drive
+	CodersFileSystem::SRef<CodersFileSystem::Device>* FSDevice = Drives.Find(InDrive);
+	if (!FSDevice) return;
+
+	// remove drive from devDevice
+	if (DevDevice.isValid()) {
+		if (!DevDevice->removeDevice(*FSDevice)) return;
 	}
 
-	FicsItFS::Root* KernelSystem::getFileSystem() {
-		if (getState() == RUNNING) return &filesystem;
-		return nullptr;
+	// unmount device
+	FileSystem.unmount(*FSDevice);
+
+	// remove drive from filesystem
+	Drives.Remove(InDrive);
+}
+
+void UFINKernelSystem::PushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> InFuture) {
+	FutureQueue.Enqueue(InFuture);
+}
+
+void UFINKernelSystem::HandleFutures() {
+	while (!FutureQueue.IsEmpty()) {
+		TSharedPtr<TFINDynamicStruct<FFINFuture>> Future;
+		FutureQueue.Peek(Future);
+		FutureQueue.Pop();
+		(*Future)->Execute();
 	}
+}
 
-	void KernelSystem::setCapacity(std::int64_t capacity) {
-		memoryCapacity = capacity;
-		if (getState() == RUNNING) start(true);
+TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> UFINKernelSystem::GetDrives() const {
+	return Drives;
+}
+
+CodersFileSystem::SRef<FFINKernelFSDevDevice> UFINKernelSystem::GetDevDevice() const {
+	return DevDevice;
+}
+
+bool UFINKernelSystem::InitFileSystem(CodersFileSystem::Path InPath) {
+	if (GetState() == FIN_KERNEL_RUNNING) {
+		return FileSystem.mount(DevDevice, InPath);
 	}
+	return false;
+}
 
-	std::int64_t KernelSystem::getCapacity() const {
-		return memoryCapacity;
-	}
-
-	void KernelSystem::setProcessor(Processor* newProcessor) {
-		stop();
-		if (getProcessor()) {
-			getProcessor()->setKernel(nullptr);
-		}
-		processor = std::unique_ptr<Processor>(newProcessor);
-		if (getProcessor()) {
-			newProcessor->setKernel(this);
-		}
-	}
-
-	Processor* KernelSystem::getProcessor() const {
-		return processor.get();
-	}
-
-	KernelCrash KernelSystem::getCrash() const {
-		return kernelCrash;
-	}
-
-	KernelState KernelSystem::getState() const {
-		return state;
-	}
-
-	void KernelSystem::addDrive(AFINFileSystemState* drive) {
-		// check if drive is added & return if found
-		if (drives.find(drive) != drives.end()) return;
-
-		// create & assign device from drive
-		drives[drive] = drive->GetDevice();
-
-		// add drive to devDevice
-		if (devDevice.isValid()) {
-			if (!devDevice->addDevice(drives[drive], TCHAR_TO_UTF8(*drive->ID.ToString()))) drives.erase(drive);
-		}
-	}
-
-	void KernelSystem::removeDrive(AFINFileSystemState* drive) {
-		// try to find location of drive
-		auto s = drives.find(drive);
-		if (s == drives.end()) return;
-
-		// remove drive from devDevice
-		if (devDevice.isValid()) {
-			if (!devDevice->removeDevice(s->second)) return;
-		}
-
-		// unmount device
-		filesystem.unmount(s->second);
-
-		// remove drive from filesystem
-		drives.erase(s);
-	}
-
-	void KernelSystem::pushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> future) {
-		futureQueue.push(future);
-	}
-
-	void KernelSystem::handleFutures() {
-		while (futureQueue.size() > 0) {
-			TSharedPtr<TFINDynamicStruct<FFINFuture>> future = futureQueue.front();
-			futureQueue.pop();
-			(*future)->Execute();
-		}
-	}
-
-	std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> KernelSystem::getDrives() const {
-		return drives;
-	}
-
-	FileSystem::SRef<FicsItFS::DevDevice> KernelSystem::getDevDevice() {
-		return devDevice;
-	}
-
-	bool KernelSystem::initFileSystem(FileSystem::Path path) {
-		if (getState() == RUNNING) {
-			return filesystem.mount(devDevice, path);
+bool UFINKernelSystem::Start(bool InReset) {
+	// check state and stop if needed
+	if (GetState() == FIN_KERNEL_RUNNING) {
+		if (InReset) {
+			if (!Stop()) return false;
 		} else return false;
 	}
 
-	bool KernelSystem::start(bool reset) {
-		// check state and stop if needed
-		if (getState() == RUNNING) {
-			if (reset) {
-				if (!stop()) return false;
-			} else return false;
-		}
+	State = FIN_KERNEL_RUNNING;
+	
+	KernelCrash = MakeShared<FFINKernelCrash>("");
 
-		state = RUNNING;
-		
-		kernelCrash = KernelCrash("");
+	// reset whole system (filesystem, memory, processor, signal stuff)
+	FileSystem = FFINKernelFSRoot();
+	FileSystem.addListener(FileSystemListener);
+	MemoryUsage = 0;
 
-		// reset whole system (filesystem, memory, processor, signal stuff)
-		filesystem = FicsItFS::Root();
-		filesystem.addListener(listener);
-		memoryUsage = 0;
-
-		// create & init devDevice
-		devDevice = new FicsItFS::DevDevice();
-		for (auto& drive : drives) {
-			devDevice->addDevice(drive.second, TCHAR_TO_UTF8(*drive.first->ID.ToString()));
-		}
-
-		// check & reset processor
-		if (getProcessor() == nullptr) {
-			crash(KernelCrash("No processor set"));
-			return false;
-		}
-		processor->reset();
-
-		systemResetTimePoint = std::chrono::high_resolution_clock::now();
-
-		// finish start
-		return true;
+	// create & init devDevice
+	DevDevice = new FFINKernelFSDevDevice();
+	for (const TPair<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
+		DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key->ID.ToString()));
 	}
 
-	bool KernelSystem::reset() {
-		if (stop()) {
-			state = RESET;
-			return true;
-		}
+	// check & reset processor
+	if (GetProcessor() == nullptr) {
+		Crash(MakeShared<FFINKernelCrash>("No processor set"));
 		return false;
 	}
+	Processor->Reset();
 
-	bool KernelSystem::stop() {
-		// set state
-		state = SHUTOFF;
+	SystemResetTimePoint = (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds();
 
-		// clear filesystem
-		filesystem = FicsItFS::Root();
+	// finish start
+	return true;
+}
 
-		if (processor) processor->stop(false);
-		
-		// finish stop
+bool UFINKernelSystem::Reset() {
+	if (Stop()) {
+		State = FIN_KERNEL_RESET;
 		return true;
 	}
+	return false;
+}
 
-	void KernelSystem::crash(KernelCrash crash) {
-		// check state
-		if (getState() != RUNNING) return;
+bool UFINKernelSystem::Stop() {
+	// set state
+	State = FIN_KERNEL_SHUTOFF;
 
-		// set state & crash
-		state = CRASHED;
-		kernelCrash = crash;
+	// clear filesystem
+	FileSystem = FFINKernelFSRoot();
 
-		if (processor) processor->stop(true);
-		
-		if (getDevDevice()) try {
-			auto serial = getDevDevice()->getSerial()->open(FileSystem::OUTPUT);
-			if (serial) {
-				*serial << "\r\n" << kernelCrash.what() << "\r\n";
-				serial->close();
-			}
-		} catch (std::exception ex) {
-			UE_LOG(LogFicsItNetworks, Error, TEXT("%s"), *FString(ex.what()));
-		}
-	}
-
-	void KernelSystem::recalculateResources(Recalc components) {
-		FileSystem::SRef<FicsItFS::DevDevice> dev = filesystem.getDevDevice();
-		
-		memoryUsage = processor->getMemoryUsage(components & PROCESSOR);
-		memoryUsage += filesystem.getMemoryUsage(components & FILESYSTEM);
-		if (dev && dev->getSerial().isValid()) memoryUsage += devDevice->getSerial()->getSize();
-		if (memoryUsage > memoryCapacity) crash({"out of memory"});
-		if (dev) dev->updateCapacity(memoryCapacity - memoryUsage);
-	}
-
-	void KernelSystem::setNetwork(Network::NetworkController* controller) {
-		network.reset(controller);
-	}
-
-	Audio::AudioController* KernelSystem::getAudio() {
-		return audio.get();
-	}
-
-	void KernelSystem::setAudio(Audio::AudioController* controller) {
-		audio.reset(controller);
-	}
-
-	Network::NetworkController* KernelSystem::getNetwork() {
-		return network.get();
-	}
-
-	std::int64_t KernelSystem::getMemoryUsage() {
-		return memoryUsage;
-	}
-
-	void KernelSystem::addGPU(UObject* gpu) {
-		check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
-		gpus.Add(gpu);
-	}
-
-	void KernelSystem::removeGPU(UObject* gpu) {
-		gpus.Remove(gpu);
-	}
-
-	TSet<UObject*> KernelSystem::getGPUs() {
-		TSet<UObject*> set;
-		for (const FWeakObjectPtr& ptr : gpus) set.Add(ptr.Get());
-		return set;
-	}
-
-	void KernelSystem::addScreen(UObject* screen) {
-		check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
-        auto i = screens.Find(screen);
-		if (!i) screens.Add(screen);
-	}
-
-	void KernelSystem::removeScreen(UObject* screen) {
-		screens.Remove(screen);
-	}
+	if (Processor) Processor->Stop(false);
 	
-	TSet<UObject*> KernelSystem::getScreens() {
-		TSet<UObject*> set;
-		for (const FWeakObjectPtr& ptr : screens) set.Add(ptr.Get());
-		return set;
-	}
+	// finish stop
+	return true;
+}
 
-	int64 KernelSystem::getTimeSinceStart() const {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - systemResetTimePoint).count();
-	}
+void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
+	// check state
+	if (GetState() != FIN_KERNEL_RUNNING) return;
 
-	void KernelSystem::PreSerialize(FKernelSystemSerializationInfo& Data, bool bLoading) {
-		Data.bPreSerialized = true;
+	// set state & crash
+	State = FIN_KERNEL_CRASHED;
+	KernelCrash = InCrash;
 
-		Data.MillisSinceLastReset = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - systemResetTimePoint).count();
-
-		// pre serialize network
-		network->PreSerialize(bLoading);
-		
-		// pre serialize processor
-		if (processor.get() != nullptr) {
-			Data.processorState = processor->CreateSerializationStorage();
-			processor->PreSerialize(Data.processorState, bLoading);
-		}
-	}
+	if (Processor) Processor->Stop(true);
 	
-	void KernelSystem::Serialize(FArchive& Ar, FKernelSystemSerializationInfo& OutSystemState) {
-		if (!Ar.IsSaveGame() || !OutSystemState.bPreSerialized) return;
-		
-		// serialize system state
-		OutSystemState.systemState = state;
-		Ar << OutSystemState.systemState;
-
-		// serialize kernel crash
-		OutSystemState.crash = kernelCrash.what();
-		Ar << OutSystemState.crash;
-
-		// serialize processor
-		bool proc = (processor.get() != nullptr) && OutSystemState.processorState;
-		Ar << proc;
-		if (Ar.IsSaving()) {
-			// Serialize processor
-			if (proc) {
-				TSubclassOf<UProcessorStateStorage> storageClass = OutSystemState.processorState->GetClass();
-				Ar << storageClass;
-				processor->Serialize(OutSystemState.processorState, false);
-				OutSystemState.processorState->Serialize(Ar);
-			}
-		} else if (Ar.IsLoading()) {
-			// Deserialize processor
-			if (proc) {
-				UClass* storageClass = nullptr;
-				Ar << storageClass;
-				OutSystemState.processorState = Cast<UProcessorStateStorage>(NewObject<UProcessorStateStorage>(GetTransientPackage(), storageClass));
-				OutSystemState.processorState->Serialize(Ar);
-				if (processor.get()) processor->Serialize(OutSystemState.processorState, true);
-			}
+	if (GetDevDevice()) try {
+		auto serial = GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
+		if (serial) {
+			*serial << "\r\n" << TCHAR_TO_UTF8(*KernelCrash->GetMessage()) << "\r\n";
+			serial->close();
 		}
-		
-		// Serialize Network
-		network->Serialize(Ar);
-
-		OutSystemState.devDeviceMountPoint = UTF8_TO_TCHAR(filesystem.getMountPoint(devDevice).str().c_str());
-		Ar << OutSystemState.devDeviceMountPoint;
-		
-		// Serialize FileSystem
-		filesystem.Serialize(Ar, OutSystemState.fileSystemState);
-
-		Ar << OutSystemState.MillisSinceLastReset;
+	} catch (std::exception ex) {
+		UE_LOG(LogFicsItNetworks, Error, TEXT("%s"), *FString(ex.what()));
 	}
+}
 
-	void KernelSystem::PostSerialize(FKernelSystemSerializationInfo& Data, bool bLoading) {
-		state = static_cast<KernelState>(Data.systemState);
-		if (bLoading && (state == CRASHED || state == RUNNING)) {
-			start(true);
-			if (state == CRASHED) crash(KernelCrash(TCHAR_TO_UTF8(*Data.crash)));
-			
-			if (Data.devDeviceMountPoint.Len() > 0) filesystem.mount(devDevice, TCHAR_TO_UTF8(*Data.devDeviceMountPoint));
-			
-			filesystem.PostLoad(Data.fileSystemState);
-		}
-		
-		if (Data.processorState || processor.get()) {
-			processor->PostSerialize(Data.processorState, bLoading);
-		}
-		Data.processorState = nullptr;
+void UFINKernelSystem::RecalculateResources(ERecalc InComponents) {
+	CodersFileSystem::SRef<FFINKernelFSDevDevice> Device = FileSystem.getDevDevice();
+	
+	MemoryUsage = Processor->GetMemoryUsage(InComponents & PROCESSOR);
+	MemoryUsage += FileSystem.getMemoryUsage(InComponents & FILESYSTEM);
+	if (Device && Device->getSerial().isValid()) MemoryUsage += Device->getSerial()->getSize();
+	if (MemoryUsage > MemoryCapacity) Crash(MakeShared<FFINKernelCrash>("out of memory"));
+	if (Device) Device->updateCapacity(MemoryCapacity - MemoryUsage);
+}
 
-		network->PostSerialize(bLoading);
+void UFINKernelSystem::SetNetwork(UFINKernelNetworkController* InController) {
+	Network = InController;
+}
 
-		Data.bPreSerialized = false;
+UFINKernelNetworkController* UFINKernelSystem::GetNetwork() const {
+	return Network;
+}
 
-		if (bLoading) systemResetTimePoint -= std::chrono::milliseconds(Data.MillisSinceLastReset);
-	}
+UFINKernelAudioController* UFINKernelSystem::GetAudio() const {
+	return Audio;
+}
 
-	KernelListener::KernelListener(KernelSystem* parent) : parent(parent) {}
+void UFINKernelSystem::SetAudio(UFINKernelAudioController* InController) {
+	Audio = InController;
+}
 
-	void KernelListener::onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		static UFINSignal* Signal = nullptr;
-		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-		Signal->Trigger(parent->Owner, {4ll, FString(path.str().c_str())});
-	}
+int64 UFINKernelSystem::GetMemoryUsage() const {
+	return MemoryUsage;
+}
 
-	void KernelListener::onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) {
-		static UFINSignal* Signal = nullptr;
-		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-		Signal->Trigger(parent->Owner, {5ll, FString(path.str().c_str())});
-	}
+void UFINKernelSystem::AddGPU(TScriptInterface<IFINGPUInterface> InGPU) {
+	GPUs.Add(InGPU);
+}
 
-	void KernelListener::onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) {
-		static UFINSignal* Signal = nullptr;
-		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-		Signal->Trigger(parent->Owner, {0ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
-	}
+void UFINKernelSystem::RemoveGPU(TScriptInterface<IFINGPUInterface> InGPU) {
+	GPUs.Remove(InGPU);
+}
 
-	void KernelListener::onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) {
-		static UFINSignal* Signal = nullptr;
-		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-		Signal->Trigger(parent->Owner, {1ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
-	}
+const TArray<TScriptInterface<IFINGPUInterface>>& UFINKernelSystem::GetGPUs() const {
+	return GPUs;
+}
 
-	void KernelListener::onNodeChanged(FileSystem::Path path, FileSystem::NodeType type) {
-		static UFINSignal* Signal = nullptr;
-		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-		Signal->Trigger(parent->Owner, {2ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
-	}
+void UFINKernelSystem::AddScreen(TScriptInterface<IFINScreenInterface> InScreen) {
+	Screens.Add(InScreen);
+}
 
-	void KernelListener::onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) {
-		static UFINSignal* Signal = nullptr;
-		if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-		Signal->Trigger(parent->Owner, {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FINInt>(type)});
-	}
+void UFINKernelSystem::RemoveScreen(TScriptInterface<IFINScreenInterface> InScreen) {
+	Screens.Remove(InScreen);
+}
+
+const TArray<TScriptInterface<IFINScreenInterface>>& UFINKernelSystem::GetScreens() const {
+	return Screens;
+}
+
+int64 UFINKernelSystem::GetTimeSinceStart() const {
+	return (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - SystemResetTimePoint;
+}
+
+void UFINKernelSystem::AddReferencer(void* Referencer, const TFunction<void(void*, FReferenceCollector&)>& CollectorFunc) {
+	ReferencedObjects.FindOrAdd(Referencer) = CollectorFunc;
+}
+
+void UFINKernelSystem::RemoveReferencer(void* Referencer) {
+	ReferencedObjects.Remove(Referencer);
 }

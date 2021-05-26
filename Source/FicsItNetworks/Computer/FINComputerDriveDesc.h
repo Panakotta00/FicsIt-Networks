@@ -1,8 +1,7 @@
 #pragma once
 
-#include "FGItemDescriptor.h"
-#include "tooltip/ItemTooltipHandler.h"
-
+#include "Resources/FGItemDescriptor.h"
+#include "Tooltip/SMLItemDisplayInterface.h"
 #include "FINComputerDriveDesc.generated.h"
 
 UCLASS()

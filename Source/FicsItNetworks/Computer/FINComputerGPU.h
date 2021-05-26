@@ -1,15 +1,15 @@
 ﻿#pragma once
 
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 #include "FINComputerModule.h"
-#include "WidgetInteractionComponent.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FINComputerGPU.generated.h"
 
 UCLASS()
 class FICSITNETWORKS_API AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface {
 	GENERATED_BODY()
-protected:
-	UPROPERTY(SaveGame, Replicated)
+public:
+	UPROPERTY(BlueprintReadWrite, SaveGame, Replicated)
     FFINNetworkTrace Screen;
 
 	UPROPERTY(Replicated)

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 #include "FINExecutionContext.generated.h"
 
 USTRUCT()
@@ -15,29 +15,29 @@ public:
         TRACE = 3
     };
 
-	FFINExecutionContext() : Obj(nullptr) {
+	FORCEINLINE FFINExecutionContext() : Obj(nullptr) {
 		Type = NONE;
 	}
 	
-	FFINExecutionContext(void* Generic) : Generic(Generic) {
+	FORCEINLINE FFINExecutionContext(void* Generic) : Generic(Generic) {
 		Type = GENERIC;
 	}
 
-	FFINExecutionContext(UObject* Obj) : Obj(Obj) {
+	FORCEINLINE FFINExecutionContext(UObject* Obj) : Obj(Obj) {
 		Type = OBJECT;
 	}
 
-	FFINExecutionContext(const FFINNetworkTrace& InTrace) {
+	FORCEINLINE FFINExecutionContext(const FFINNetworkTrace& InTrace) {
 		Type = TRACE;
 		Trace = new FFINNetworkTrace(InTrace);
 	}
 
-	FFINExecutionContext(const FFINExecutionContext& Other) {
+	FORCEINLINE FFINExecutionContext(const FFINExecutionContext& Other) {
 		Type = GENERIC;
 		*this = Other;
 	}
 
-	~FFINExecutionContext() {
+	FORCEINLINE ~FFINExecutionContext() {
 		switch (Type) {
 		case TRACE:
 			delete Trace;
@@ -46,7 +46,7 @@ public:
 		}
 	}
 	
-	FFINExecutionContext& operator=(const FFINExecutionContext& Other) {
+	FORCEINLINE FFINExecutionContext& operator=(const FFINExecutionContext& Other) {
 		switch (Type) {
 		case TRACE:
 			delete Trace;
@@ -70,11 +70,11 @@ public:
 		return *this;
 	}
 
-	Type GetType() const {
+	FORCEINLINE Type GetType() const {
 		return Type;
 	}
 
-	void* GetGeneric() const {
+	FORCEINLINE void* GetGeneric() const {
 		switch (Type) {
 		case GENERIC:
 			return Generic;
@@ -87,7 +87,7 @@ public:
 		return nullptr;
 	}
 
-	UObject* GetObject() const {
+	FORCEINLINE UObject* GetObject() const {
 		switch (Type) {
 		case OBJECT:
 			return Obj;
@@ -98,7 +98,7 @@ public:
 		return nullptr;
 	}
 
-	FFINNetworkTrace GetTrace() const {
+	FORCEINLINE FFINNetworkTrace GetTrace() const {
 		switch (Type) {
 		case OBJECT:
 			return FFINNetworkTrace(Obj);
@@ -109,25 +109,26 @@ public:
 		return FFINNetworkTrace();
 	}
 
-	bool Serialize(FArchive& Ar) {
-		if (Ar.IsLoading() && Type == TRACE) delete Trace;
-		Ar << *reinterpret_cast<uint8*>(&Type);
-		switch (Type) {
-		case NONE:
-			break;
-		case GENERIC:
-			Type = NONE;
-			break;
-		case OBJECT:
-			Ar << Obj;
-			break;
-		case TRACE:
-			if (Ar.IsLoading()) Trace = new FFINNetworkTrace();
-			Ar << *Trace;
-			break;
-		default: ;
+	FORCEINLINE bool Serialize(FStructuredArchive::FSlot Slot) {
+		FStructuredArchive::FRecord Record = Slot.EnterRecord();
+		TOptional<FStructuredArchive::FSlot> TraceField = Record.TryEnterField(SA_FIELD_NAME(TEXT("Trace")), Type == TRACE);
+		if (TraceField.IsSet()) {
+			if (Type != TRACE) Trace = new FFINNetworkTrace();
+			Type = TRACE;
+			Trace->Serialize(TraceField.GetValue());
+			return true;
+		} else if (Type == TRACE) {
+			delete Trace;
 		}
-		
+
+		TOptional<FStructuredArchive::FSlot> ObjectField = Record.TryEnterField(SA_FIELD_NAME(TEXT("Object")), Type == OBJECT);
+		if (ObjectField.IsSet()) {
+			Type = OBJECT;
+			ObjectField.GetValue() << Obj;
+			return true;
+		}
+
+		if (Record.GetUnderlyingArchive().IsLoading()) Type = NONE;
 		return true;
 	}
 	
@@ -142,13 +143,17 @@ private:
 };
 
 inline FArchive& operator<<(FArchive& Ar, FFINExecutionContext& Ctx) {
-	Ctx.Serialize(Ar);
+	Ctx.Serialize(FStructuredArchiveFromArchive(Ar).GetSlot());
 	return Ar;
+}
+
+inline void operator<<(FStructuredArchive::FSlot Slot, FFINExecutionContext& Ctx) {
+	Ctx.Serialize(Slot);
 }
 
 template<>
 struct TStructOpsTypeTraits<FFINExecutionContext> : TStructOpsTypeTraitsBase2<FFINExecutionContext> {
 	enum {
-		WithSerializer = true,
+		WithStructuredSerializer = true,
     };
 };

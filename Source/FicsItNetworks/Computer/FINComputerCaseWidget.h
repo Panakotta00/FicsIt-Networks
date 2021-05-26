@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "UserWidget.h"
-#include "FicsItKernel/Processor/FINStateEEPROM.h"
+#include "Blueprint/UserWidget.h"
+#include "FicsItNetworks/FicsItKernel/Processor/FINStateEEPROM.h"
 
 #include "FINComputerCaseWidget.generated.h"
 
@@ -13,7 +13,10 @@ class FICSITNETWORKS_API UFINComputerCaseWidget : public UUserWidget {
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ExposeOnSpawn="true"))
 	AFINComputerCase* Computer = nullptr;
-
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ExposeOnSpawn="true"))
+	UUserWidget* ComputerCaseInteractionWidget = nullptr;
+	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void OnEEPROMUpdate(AFINStateEEPROM* EEPROM);
 };

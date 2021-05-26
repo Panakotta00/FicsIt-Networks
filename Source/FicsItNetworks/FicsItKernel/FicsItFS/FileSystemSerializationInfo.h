@@ -20,7 +20,7 @@ struct FICSITNETWORKS_API FFileSystemNodeIndex {
 
 	bool Serialize(FArchive& Ar);
 
-	FileSystem::SRef<FileSystem::Node> Deserialize(FString name, FileSystem::SRef<FileSystem::Directory> parent) const;
+	CodersFileSystem::SRef<CodersFileSystem::Node> Deserialize(FString name, CodersFileSystem::SRef<CodersFileSystem::Directory> parent) const;
 };
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNodeIndex& Node);
@@ -59,8 +59,8 @@ struct FICSITNETWORKS_API FFileSystemNode {
 
 	bool Serialize(FArchive& Ar);
 
-	FFileSystemNode& Deserialize(FileSystem::SRef<FileSystem::Device> device, const std::string& deviceName);
-	FFileSystemNode& Serialize(FileSystem::SRef<FileSystem::Device> device, const FileSystem::Path& path);
+	FFileSystemNode& Deserialize(CodersFileSystem::SRef<CodersFileSystem::Device> device, const std::string& deviceName);
+	FFileSystemNode& Serialize(CodersFileSystem::SRef<CodersFileSystem::Device> device, const CodersFileSystem::Path& path);
 };
 
 FArchive& operator<<(FArchive& Ar, FFileSystemNode& Node);

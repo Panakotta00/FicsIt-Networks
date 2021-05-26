@@ -4,8 +4,6 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		class LuaProcessor;
-
 		/**
 		* Adds the Debug API and overrides base functions like pcall and xpcall of the given Lua state.
 		*

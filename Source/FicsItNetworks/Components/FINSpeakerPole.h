@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINSpeakerPole.generated.h"
 
 UCLASS(Blueprintable)
@@ -81,5 +81,5 @@ public:
 	 * without the file extension.
 	 * If it was unable to load the sound file, return nullptr.
 	 */
-	USoundWave* LoadSoundFromFile(const FString& sound);
+	USoundWave* LoadSoundFromFile(const FString& InSound);
 };

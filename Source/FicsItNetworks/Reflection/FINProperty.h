@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "FINBase.h"
-#include "Network/FINAnyNetworkValue.h"
-#include "Network/FINNetworkValues.h"
 #include "FINExecutionContext.h"
+#include "FicsItNetworks/Network/FINAnyNetworkValue.h"
+#include "FicsItNetworks/Network/FINNetworkValues.h"
 #include "FINProperty.generated.h"
 
 UENUM(BlueprintType)
 enum EFINRepPropertyFlags {
-	FIN_Prop_None			= 0b000000000,
+	FIN_Prop_None			= 0,
 	FIN_Prop_Attrib			= 0b000000001,
 	FIN_Prop_ReadOnly		= 0b000000010,
 	FIN_Prop_Param			= 0b000000100,

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 #include "FGRailroadTimeTable.h"
-#include "FGBuildableRailroadStation.h"
+#include "Buildables/FGBuildableRailroadStation.h"
 #include "FINTimeTableStop.generated.h"
 
 /**

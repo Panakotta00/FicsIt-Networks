@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "Computer/FINComputerModule.h"
+#include "FicsItNetworks/Computer/FINComputerModule.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
-
 #include "FINComputerScreen.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenWidgetUpdate);
@@ -12,7 +11,7 @@ UCLASS()
 class FICSITNETWORKS_API AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface {
 	GENERATED_BODY()
 	
-private:
+protected:
 	UPROPERTY(SaveGame, Replicated)
 	FFINNetworkTrace GPU;
 
@@ -23,7 +22,7 @@ public:
 	TSharedPtr<SWidget> Widget;
 
 	AFINComputerScreen();
-
+	
 	/**
 	 * This event gets triggered when a new widget got set by the GPU
 	 */

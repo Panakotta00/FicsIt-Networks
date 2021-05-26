@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FGBuildableHologram.h"
-#include "FGBuildableFactory.h"
 #include "FINNetworkAdapter.h"
 #include "FINNetworkConnectionComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "Hologram/FGBuildableHologram.h"
+
 #include "FINNetworkCableHologram.generated.h"
 
 UENUM()

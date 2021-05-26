@@ -2,7 +2,7 @@
 
 #include "FINReflectionTreeRow.h"
 #include "FINSplitter.h"
-#include "Reflection/FINReflection.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
 
 void SFINReflectionUI::Construct(const FArguments& InArgs) {
 	Context.Style = InArgs._Style;

@@ -1,8 +1,8 @@
 ﻿#include "FINTrackGraph.h"
 
-#include "FGBuildableTrainPlatform.h"
 #include "FGRailroadVehicle.h"
 #include "FGTrain.h"
+#include "Buildables/FGBuildableTrainPlatform.h"
 
 int FFINTrackGraph::GetTrackID(UObject* obj) {
 	if (AFGBuildableTrainPlatform* platform = Cast<AFGBuildableTrainPlatform>(obj)) {

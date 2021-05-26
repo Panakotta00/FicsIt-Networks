@@ -3,8 +3,8 @@
 #include "LuaFuture.h"
 #include "LuaProcessor.h"
 #include "LuaProcessorStateStorage.h"
-#include "Reflection/FINFunction.h"
-#include "Reflection/FINStruct.h"
+#include "FicsItNetworks/Reflection/FINFunction.h"
+#include "FicsItNetworks/Reflection/FINStruct.h"
 
 namespace FicsItKernel {
 	namespace Lua {
@@ -16,18 +16,20 @@ namespace FicsItKernel {
 			for (UFINProperty* Param : Func->GetParameters()) {
 				if (Param->GetPropertyFlags() & FIN_Prop_Param && !(Param->GetPropertyFlags() & (FIN_Prop_OutParam | FIN_Prop_RetVal))) {
 					FINAny NewParam = luaToProperty(L, Param, paramsLoaded++);
-					Input.Add(NewParam);
+					Input.Add(MoveTemp(NewParam));
 				}
 			}
 			for (; paramsLoaded <= args; ++paramsLoaded) {
 				FINAny Param;
 				luaToNetworkValue(L, paramsLoaded, Param);
-				Input.Add(Param);
+				Input.Add(MoveTemp(Param));
 			}
 			args = 0;
 
 			// sync tick if necessary
-			EFINFunctionFlags FuncFlags = Func->GetFunctionFlags();
+			const EFINFunctionFlags FuncFlags = Func->GetFunctionFlags();
+			// ReSharper disable once CppEntityAssignedButNoRead
+			// ReSharper disable once CppJoinDeclarationAndAssignment
 			TSharedPtr<FLuaSyncCall> SyncCall;
 			bool bRunDirectly = false;
 			if (FuncFlags & FIN_Func_RT_Async) {
@@ -52,31 +54,33 @@ namespace FicsItKernel {
 
 				// push output onto lua stack
 				for (const FINAny& Value : Output) {
-					networkValueToLua(L, Value);
+					networkValueToLua(L, Value, Ctx.GetTrace());
 					++args;
 				}
 			}
 			
-			return LuaProcessor::luaAPIReturn(L, args);
+			return UFINLuaProcessor::luaAPIReturn(L, args);
 		}
 
 		int luaFindGetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, const FString& MetaName, int(*callFunc)(lua_State*), bool classInstance) {
-			// try to find property
-			UFINProperty* Property = Struct->FindFINProperty(MemberName, classInstance ? FIN_Prop_ClassProp : FIN_Prop_Attrib);
-			if (Property) {
-				TSharedPtr<FLuaSyncCall> SyncCall;
-				if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
-				
-				networkValueToLua(L, Property->GetValue(Ctx));
-				return LuaProcessor::luaAPIReturn(L, 1);
-			}
-
 			// get cache function
 			luaL_getmetafield(L, 1, LUA_REF_CACHE);																// Instance, FuncName, InstanceCache
 			
-			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*MetaName)) != LUA_TNIL) {	// Instance, FuncName, InstanceCache, CachedFunc
-				return LuaProcessor::luaAPIReturn(L, 1);
+			if (lua_getfield(L, -1, TCHAR_TO_UTF8(*MetaName)) != LUA_TNIL)  {										// Instance, FuncName, InstanceCache, CachedFunc
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}																											// Instance, FuncName, InstanceCache, nil
+
+			// try to find property
+			UFINProperty* Property = Struct->FindFINProperty(MemberName, classInstance ? FIN_Prop_ClassProp : FIN_Prop_Attrib);
+			if (Property) {
+				// ReSharper disable once CppEntityAssignedButNoRead
+				// ReSharper disable once CppJoinDeclarationAndAssignment
+				TSharedPtr<FLuaSyncCall> SyncCall;
+				if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
+				
+				networkValueToLua(L, Property->GetValue(Ctx), Ctx.GetTrace());
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
+			}
 
 			// try to find function
 			UFINFunction* Function = Struct->FindFINFunction(MemberName, classInstance ? FIN_Func_ClassFunc : FIN_Func_MemberFunc);
@@ -85,16 +89,20 @@ namespace FicsItKernel {
 				new (Func) LuaRefFuncData{Struct, Function};
 				luaL_setmetatable(L, LUA_REF_FUNC_DATA);
 				lua_pushcclosure(L, callFunc, 1);
-				return LuaProcessor::luaAPIReturn(L, 1);
+				lua_pushvalue(L, -1);
+				lua_setfield(L, 3, TCHAR_TO_UTF8(*MetaName));
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
-			return LuaProcessor::luaAPIReturn(L, 0);
+			return UFINLuaProcessor::luaAPIReturn(L, 0);
 		}
 
 		int luaFindSetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, bool classInstance) {
 			// try to find property
 			UFINProperty* Property = Struct->FindFINProperty(MemberName, classInstance ? FIN_Prop_ClassProp : FIN_Prop_Attrib);
 			if (Property) {
+				// ReSharper disable once CppEntityAssignedButNoRead
+				// ReSharper disable once CppJoinDeclarationAndAssignment
 				TSharedPtr<FLuaSyncCall> SyncCall;
 				if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
 				
@@ -102,20 +110,21 @@ namespace FicsItKernel {
 				luaToNetworkValue(L, 3, Value);
 				Property->SetValue(Ctx, Value);
 				
-				return LuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 			
 			return luaL_argerror(L, 2, TCHAR_TO_UTF8(*("No property with name '" + MemberName + "' found")));
 		}
 
 		int luaRefFuncDataUnpersist(lua_State* L) {
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 
 			// get class
-			UFINStruct* Struct = Cast<UFINStruct>(Storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(1))));
-			UFINFunction* Function = Cast<UFINFunction>(Storage->GetRef(luaL_checkinteger(L, lua_upvalueindex(2))));
+			UFINStruct* Struct = Cast<UFINStruct>(Storage.GetRef(luaL_checkinteger(L, lua_upvalueindex(1))));
+			UFINFunction* Function = Cast<UFINFunction>(Storage.GetRef(luaL_checkinteger(L, lua_upvalueindex(2))));
 
 			// create value
 			LuaRefFuncData* Func = static_cast<LuaRefFuncData*>(lua_newuserdata(L, sizeof(LuaRefFuncData)));
@@ -130,13 +139,14 @@ namespace FicsItKernel {
 		int luaRefFuncDataPersist(lua_State* L) {
 			LuaRefFuncData* Func = static_cast<LuaRefFuncData*>(luaL_checkudata(L, 1, LUA_REF_FUNC_DATA));
 
+			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+			
 			// get persist storage
-			lua_getfield(L, LUA_REGISTRYINDEX, "PersistStorage");
-			ULuaProcessorStateStorage* Storage = static_cast<ULuaProcessorStateStorage*>(lua_touserdata(L, -1));
+			FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 
 			// push type name to persist
-			lua_pushinteger(L, Storage->Add(Func->Struct));
-			lua_pushinteger(L, Storage->Add(Func->Func));
+			lua_pushinteger(L, Storage.Add(Func->Struct));
+			lua_pushinteger(L, Storage.Add(Func->Func));
 			
 			// create & return closure
 			lua_pushcclosure(L, &luaRefFuncDataUnpersist, 2);
@@ -152,7 +162,7 @@ namespace FicsItKernel {
 		static const luaL_Reg luaRefFuncDataLib[] = {
 			{"__persist", luaRefFuncDataPersist},
 			{"__gc", luaRefFuncDataGC},
-			{NULL, NULL}
+			{nullptr, nullptr}
 		};
 
 		void setupRefUtils(lua_State* L) {

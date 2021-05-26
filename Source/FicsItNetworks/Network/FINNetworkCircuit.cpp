@@ -1,9 +1,9 @@
 #include "FINNetworkCircuit.h"
-
 #include "FINNetworkComponent.h"
-#include "UnrealNetwork.h"
+#include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
 
-void AFINNetworkCircuit::AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add) {
+void AFINNetworkCircuit::AddNodeRecursive(TArray<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add) {
 	if (Add.GetObject() && !Added.Contains(Add)) {
 		Added.Add(Add);
 		Nodes.AddUnique(Add.GetObject());
@@ -64,7 +64,7 @@ AFINNetworkCircuit* AFINNetworkCircuit::operator+(AFINNetworkCircuit* Circuit) {
 		if (Obj) IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Obj, 0, FromNodes);
 	}
 
-	for (const TSoftObjectPtr<UObject>& Node : From->Nodes) To->Nodes.AddUnique(Node);
+	for (const TSoftObjectPtr<UObject>& Node : From->Nodes) To->Nodes.AddUnique(Node.Get() );
 
 	return To;
 }
@@ -72,7 +72,7 @@ AFINNetworkCircuit* AFINNetworkCircuit::operator+(AFINNetworkCircuit* Circuit) {
 void AFINNetworkCircuit::Recalculate(const TScriptInterface<IFINNetworkCircuitNode>& Node) {
 	Nodes.Empty();
 
-	TSet<TScriptInterface<IFINNetworkCircuitNode>> Added;
+	TArray<TScriptInterface<IFINNetworkCircuitNode>> Added;
 	AddNodeRecursive(Added, Node);
 }
 
