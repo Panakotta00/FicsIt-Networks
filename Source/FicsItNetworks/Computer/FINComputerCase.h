@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "FINComputerGPU.h"
 #include "FINComputerScreen.h"
+#include "FINInternetCard.h"
 #include "Buildables/FGBuildable.h"
 #include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FicsItNetworks/ModuleSystem/FINModuleSystemPanel.h"
@@ -212,5 +213,15 @@ public:
 		ParameterDisplayNames.Add(FText::FromString("To"));
 		ParameterDescriptions.Add(FText::FromString("The new file path of the node if it has changed."));
 		Runtime = 1;
+	}
+
+	UFUNCTION()
+	AFINInternetCard* netFunc_getINetCard() {
+		TArray<AActor*> Modules;
+		Panel->GetModules(Modules);
+		for (AActor* Actor : Modules) {
+			if (Actor->IsA<AFINInternetCard>()) return Cast<AFINInternetCard>(Actor);
+		}
+		return nullptr;
 	}
 };

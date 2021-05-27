@@ -239,10 +239,15 @@ namespace FicsItKernel {
 			case FIN_TRACE:
 				newInstance(L, Val.GetTrace());
 				break;
-			case FIN_STRUCT:
-				luaStruct(L, Val.GetStruct());
+			case FIN_STRUCT: {
+				const FINStruct& Struct = Val.GetStruct();
+				if (Struct.GetStruct()->IsChildOf(FFINFuture::StaticStruct())) {
+					luaFuture(L, Struct);
+				} else {
+					luaStruct(L, Val.GetStruct());
+				}
 				break;
-			case FIN_ARRAY: {
+			} case FIN_ARRAY: {
 				lua_newtable(L);
 				int i = 0;
 				for (const FFINAnyNetworkValue& Entry : Val.GetArray()) {

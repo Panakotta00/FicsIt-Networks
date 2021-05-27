@@ -30,8 +30,9 @@ public class FicsItNetworks : ModuleRules
             "Slate", "SlateCore",
             "Json",
             "ApplicationCore",
-            "Vorbis"
-            });
+            "Vorbis",
+            "Http"
+		});
 
         if (Target.Type == TargetRules.TargetType.Editor) {
 			PublicDependencyModuleNames.AddRange(new string[] {"OnlineBlueprintSupport", "AnimGraph"});
