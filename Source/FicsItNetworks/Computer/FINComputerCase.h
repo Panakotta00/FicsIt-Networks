@@ -1,9 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FINComputerGPU.h"
-#include "FINComputerScreen.h"
-#include "FINInternetCard.h"
+#include "FINPciDeviceInterface.h"
 #include "Buildables/FGBuildable.h"
 #include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FicsItNetworks/ModuleSystem/FINModuleSystemPanel.h"
@@ -63,19 +61,16 @@ public:
     TSet<AFINComputerDriveHolder*> DriveHolders;
 
 	UPROPERTY()
-	TSet<AFINComputerNetworkCard*> NetworkCards;
-
-	UPROPERTY()
 	AFINFileSystemState* Floppy = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
-	TArray<AFINComputerScreen*> Screens;
 
 	UPROPERTY(BlueprintAssignable)
 	FFINCaseEEPROMUpdateDelegate OnEEPROMUpdate;
 
 	UPROPERTY(BlueprintAssignable)
 	FFINCaseFloppyUpdateDelegate OnFloppyUpdate;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<TScriptInterface<IFINPciDeviceInterface>> PCIDevices;
 
 	UPROPERTY(Replicated)
 	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
@@ -134,22 +129,10 @@ public:
     void RemoveDrive(AFINComputerDriveHolder* DriveHolder);
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-	void AddGPU(AFINComputerGPU* GPU);
+	void AddPCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-	void RemoveGPU(AFINComputerGPU* GPU);
-	
-	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-	void AddScreen(AFINComputerScreen* Screen);
-	
-	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-	void RemoveScreen(AFINComputerScreen* Screen);
-
-	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-    void AddNetCard(AFINComputerNetworkCard* NetCard);
-	
-	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
-    void RemoveNetCard(AFINComputerNetworkCard* NetCard);
+	void RemovePCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice);
 	
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddModule(AActor* Module);
@@ -213,15 +196,5 @@ public:
 		ParameterDisplayNames.Add(FText::FromString("To"));
 		ParameterDescriptions.Add(FText::FromString("The new file path of the node if it has changed."));
 		Runtime = 1;
-	}
-
-	UFUNCTION()
-	AFINInternetCard* netFunc_getINetCard() {
-		TArray<AActor*> Modules;
-		Panel->GetModules(Modules);
-		for (AActor* Actor : Modules) {
-			if (Actor->IsA<AFINInternetCard>()) return Cast<AFINInternetCard>(Actor);
-		}
-		return nullptr;
 	}
 };

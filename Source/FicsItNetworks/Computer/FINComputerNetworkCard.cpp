@@ -96,6 +96,10 @@ void AFINComputerNetworkCard::HandleMessage(const FGuid& InID, const FGuid& Send
 	Signal->Trigger(this, Parameters);
 }
 
+void AFINComputerNetworkCard::SetPCINetworkConnection_Implementation(const TScriptInterface<IFINNetworkCircuitNode>& InNode) {
+	ConnectedComponent = InNode.GetObject();
+}
+
 bool AFINComputerNetworkCard::CheckNetMessageData(const TArray<FFINAnyNetworkValue>& Data) {
 	if (Data.Num() > 7) return false;
 	for (const FFINAnyNetworkValue& Value : Data) {

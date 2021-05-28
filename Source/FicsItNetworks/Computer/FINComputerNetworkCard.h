@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FINComputerModule.h"
+#include "FINPciDeviceInterface.h"
 #include "FicsItNetworks/Network/FINNetworkCircuitNode.h"
 #include "FicsItNetworks/Network/FINNetworkComponent.h"
 #include "FicsItNetworks/Network/FINNetworkMessageInterface.h"
@@ -10,7 +11,7 @@
 
 class AFINComputerCase;
 UCLASS()
-class FICSITNETWORKS_API AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface {
+class FICSITNETWORKS_API AFINComputerNetworkCard : public AFINComputerModule, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface, public IFINPciDeviceInterface {
 	GENERATED_BODY()
 public:
 	/**
@@ -88,6 +89,11 @@ public:
 	virtual void HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
 	// End IFINNetworkMessageInterface
 
+	// Begin IFINPciDeviceInterface
+	virtual bool NeedsPCINetworkConnection_Implementation() const override { return true; }
+	virtual void SetPCINetworkConnection_Implementation(const TScriptInterface<IFINNetworkCircuitNode>& InNode) override;
+	// End IFINPciDeviceInterface
+	
 	static bool CheckNetMessageData(const TArray<FFINAnyNetworkValue>& Data);
 
 	UFUNCTION()

@@ -4,6 +4,7 @@
 #include "Dom/JsonObject.h"
 #include "FicsItFS/FINFileSystemState.h"
 #include "FicsItFS/DevDevice.h"
+#include "FicsItNetworks/Computer/FINPciDeviceInterface.h"
 #include "Network/NetworkController.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
@@ -57,11 +58,11 @@ private:
 	UFINKernelNetworkController* Network = nullptr;
 	UPROPERTY()
 	UFINKernelAudioController* Audio = nullptr;
-	TArray<TScriptInterface<IFINGPUInterface>> GPUs;
-	TArray<TScriptInterface<IFINScreenInterface>> Screens;
+	TArray<TScriptInterface<IFINPciDeviceInterface>> PCIDevices;
 	FFINKernelFSRoot FileSystem;
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = nullptr;
 	int64 MemoryCapacity = 0;
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> Drives;
 
 	// Runtime Environment/State
@@ -279,46 +280,25 @@ public:
 	int64 GetMemoryUsage() const;
 
 	/**
-	 * Adds the given GPU to the kernel
+	 * Adds the given PCI Device to the kernel
 	 *
-	 * @param[in]	InGPU		the gpu you want to add.
+	 * @param[in]	InPCIDevice		the PCI Device you want to add.
 	 */
-	void AddGPU(TScriptInterface<IFINGPUInterface> InGPU);
+	void AddPCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice);
 
 	/**
 	* Removes the given GPU from the kernel
 	*
-	* @param[in]	InGPU		the gpu you want to remove.
+	* @param[in]	InPCIDevice		the PCI Device you want to remove.
 	*/
-	void RemoveGPU(TScriptInterface<IFINGPUInterface> InGPU);
+	void RemovePCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice);
 
 	/**
-	 * Returns the list of added GPUs.
+	 * Returns the list of added PCI Devices.
 	 *
-	 * @return list of added gpus
+	 * @return list of added PCI Devices
 	 */
-	const TArray<TScriptInterface<IFINGPUInterface>>& GetGPUs() const;
-
-	/**
-	* Adds the given screen to the kernel
-	*
-	* @param[in]	InScreen		the screen you want to add.
-	*/
-	void AddScreen(TScriptInterface<IFINScreenInterface> InScreen);
-
-	/**
-	* Removes the given screen from the kernel
-	*
-	* @param[in]	InScreen		the screen you want to remove.
-	*/
-	void RemoveScreen(TScriptInterface<IFINScreenInterface> InScreen);
-
-	/**
-	* Returns the list of added screens.
-	*
-	* @return list of added screen
-	*/
-	const TArray<TScriptInterface<IFINScreenInterface>>& GetScreens() const;
+	const TArray<TScriptInterface<IFINPciDeviceInterface>>& GetPCIDevices() const;
 
 	/**
 	 * Returns the amount of milliseconds passed since the system started.

@@ -343,28 +343,16 @@ int64 UFINKernelSystem::GetMemoryUsage() const {
 	return MemoryUsage;
 }
 
-void UFINKernelSystem::AddGPU(TScriptInterface<IFINGPUInterface> InGPU) {
-	GPUs.Add(InGPU);
+void UFINKernelSystem::AddPCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice) {
+	PCIDevices.AddUnique(InPCIDevice);
 }
 
-void UFINKernelSystem::RemoveGPU(TScriptInterface<IFINGPUInterface> InGPU) {
-	GPUs.Remove(InGPU);
+void UFINKernelSystem::RemovePCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice) {
+	PCIDevices.Remove(InPCIDevice);
 }
 
-const TArray<TScriptInterface<IFINGPUInterface>>& UFINKernelSystem::GetGPUs() const {
-	return GPUs;
-}
-
-void UFINKernelSystem::AddScreen(TScriptInterface<IFINScreenInterface> InScreen) {
-	Screens.Add(InScreen);
-}
-
-void UFINKernelSystem::RemoveScreen(TScriptInterface<IFINScreenInterface> InScreen) {
-	Screens.Remove(InScreen);
-}
-
-const TArray<TScriptInterface<IFINScreenInterface>>& UFINKernelSystem::GetScreens() const {
-	return Screens;
+const TArray<TScriptInterface<IFINPciDeviceInterface>>& UFINKernelSystem::GetPCIDevices() const {
+	return PCIDevices;
 }
 
 int64 UFINKernelSystem::GetTimeSinceStart() const {

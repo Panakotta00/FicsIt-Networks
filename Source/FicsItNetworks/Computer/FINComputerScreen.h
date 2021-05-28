@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "FINPciDeviceInterface.h"
 #include "FicsItNetworks/Computer/FINComputerModule.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "FINComputerScreen.generated.h"
@@ -8,7 +9,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenWidgetUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScreenGPUUpdate);
 
 UCLASS()
-class FICSITNETWORKS_API AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface {
+class FICSITNETWORKS_API AFINComputerScreen : public AFINComputerModule, public IFINScreenInterface, public IFINPciDeviceInterface {
 	GENERATED_BODY()
 	
 protected:
@@ -52,7 +53,7 @@ public:
 	virtual TSharedPtr<SWidget> GetWidget() const override;
 	virtual void RequestNewWidget() override;
 	// End IFINScreen
-
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void OnGPUValidChanged(bool bValid, UObject* newGPU);
 

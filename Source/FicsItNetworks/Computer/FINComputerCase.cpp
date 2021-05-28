@@ -9,6 +9,7 @@
 #include "FINComputerFloppyDesc.h"
 #include "FINComputerNetworkCard.h"
 #include "FINComputerSubsystem.h"
+#include "FINPciDeviceInterface.h"
 #include "FicsItNetworks/FicsItKernel/Processor/Lua/LuaProcessor.h"
 #include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
 
@@ -51,7 +52,6 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AFINComputerCase, DataStorage);
 	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
 	DOREPLIFETIME(AFINComputerCase, SerialOutput);
-	DOREPLIFETIME(AFINComputerCase, Screens);
 	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
 	DOREPLIFETIME(AFINComputerCase, Processors);
 }
@@ -229,34 +229,22 @@ void AFINComputerCase::RemoveDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (FileSystemState) Kernel->RemoveDrive(FileSystemState);
 }
 
-void AFINComputerCase::AddGPU(AFINComputerGPU* GPU) {
-	Kernel->AddGPU(GPU);
+void AFINComputerCase::AddPCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice) {
+	if (IFINPciDeviceInterface::Execute_NeedsPCINetworkConnection(InPCIDevice.GetObject())) {
+		IFINPciDeviceInterface::Execute_SetPCINetworkConnection(InPCIDevice.GetObject(), NetworkConnector);
+		NetworkConnector->AddConnectedNode(InPCIDevice.GetObject());
+	}
+	PCIDevices.Add(InPCIDevice);
+	Kernel->AddPCIDevice(InPCIDevice);
 }
 
-void AFINComputerCase::RemoveGPU(AFINComputerGPU* GPU) {
-	Kernel->RemoveGPU(GPU);
-}
-
-void AFINComputerCase::AddScreen(AFINComputerScreen* Screen) {
-	Kernel->AddScreen(Screen);
-	Screens.Add(Screen);
-}
-
-void AFINComputerCase::RemoveScreen(AFINComputerScreen* Screen) {
-	Kernel->RemoveScreen(Screen);
-	Screens.Remove(Screen);
-}
-
-void AFINComputerCase::AddNetCard(AFINComputerNetworkCard* NetCard) {
-	NetCard->ConnectedComponent = NetworkConnector;
-	NetworkConnector->AddConnectedNode(NetCard);
-	NetworkCards.Add(NetCard);
-}
-
-void AFINComputerCase::RemoveNetCard(AFINComputerNetworkCard* NetCard) {
-	NetCard->ConnectedComponent = nullptr;
-	NetworkConnector->RemoveConnectedNode(NetCard);
-	NetworkCards.Remove(NetCard);
+void AFINComputerCase::RemovePCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice) {
+	if (IFINPciDeviceInterface::Execute_NeedsPCINetworkConnection(InPCIDevice.GetObject())) {
+		IFINPciDeviceInterface::Execute_SetPCINetworkConnection(InPCIDevice.GetObject(), nullptr);
+		NetworkConnector->RemoveConnectedNode(InPCIDevice.GetObject());
+	}
+	PCIDevices.Remove(InPCIDevice);
+	Kernel->RemovePCIDevice(InPCIDevice);
 }
 
 void AFINComputerCase::AddModule(AActor* module) {
@@ -267,12 +255,8 @@ void AFINComputerCase::AddModule(AActor* module) {
 			AddMemory(memory);
 		} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
 			AddDrive(holder);
-		} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
-			AddScreen(screen);
-		} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
-			AddGPU(gpu);
-		} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
-			AddNetCard(netCard);
+		} else if (module->Implements<UFINPciDeviceInterface>()) {
+			AddPCIDevice(module);
 		}
 	}
 }
@@ -285,12 +269,8 @@ void AFINComputerCase::RemoveModule(AActor* module) {
 			RemoveMemory(memory);
 		} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
 			RemoveDrive(holder);
-		} else if (AFINComputerScreen* screen = Cast<AFINComputerScreen>(module)) {
-			RemoveScreen(screen);
-		} else if (AFINComputerGPU* gpu = Cast<AFINComputerGPU>(module)) {
-			RemoveGPU(gpu);
-		} else if (AFINComputerNetworkCard* netCard = Cast<AFINComputerNetworkCard>(module)) {
-			RemoveNetCard(netCard);
+		} else if (module->Implements<UFINPciDeviceInterface>()) {
+			AddPCIDevice(module);
 		}
 	}
 }

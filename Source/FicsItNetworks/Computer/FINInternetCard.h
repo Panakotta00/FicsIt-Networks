@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FINComputerModule.h"
+#include "FINPciDeviceInterface.h"
 #include "FicsItNetworks/Network/FINFuture.h"
 #include "Interfaces/IHttpRequest.h"
 
@@ -38,7 +39,7 @@ public:
 };
 
 UCLASS()
-class AFINInternetCard : public AFINComputerModule {
+class AFINInternetCard : public AFINComputerModule, public IFINPciDeviceInterface {
 	GENERATED_BODY()
 public:
 	UFUNCTION()
