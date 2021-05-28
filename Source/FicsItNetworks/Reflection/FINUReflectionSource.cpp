@@ -26,6 +26,13 @@ bool UFINUReflectionSource::ProvidesRequirements(UClass* Class) const {
 	return false;
 }
 
+bool UFINUReflectionSource::ProvidesRequirements(UScriptStruct* Struct) const {
+	if (Struct->GetName().EndsWith("_NetType")) {
+		return true;
+	}
+	return false;
+}
+
 void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass, UClass* Class) const {
 	UFINClass* DirectParent = Ref->FindClass(Class->GetSuperClass(), false, false);
 	if (DirectParent) {
@@ -73,6 +80,12 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 	
 	ToFillClass->Parent = Ref->FindClass(Class->GetSuperClass());
 	if (ToFillClass->Parent == ToFillClass) ToFillClass->Parent = nullptr;
+}
+
+void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFillStruct, UScriptStruct* Struct) const {
+	ToFillStruct->DisplayName = FText::FromString(Struct->GetName());
+	ToFillStruct->InternalName = Struct->GetName();
+	ToFillStruct->Description = FText::FromString("");
 }
 
 UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* Class) const {
@@ -331,11 +344,18 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClas
 		FINFunc->Parameters.Add(FINProp);
 	}
 	if (FINFunc->Parameters.Num() > 0) {
-		UFINArrayProperty* Prop = Cast<UFINArrayProperty>(FINFunc->Parameters.Last());
+		UFINArrayProperty* Prop = nullptr;
+		for (int i = FINFunc->Parameters.Num()-1; i >= 0; --i) {
+			UFINArrayProperty* ArrProp = Cast<UFINArrayProperty>(FINFunc->Parameters[i]);
+			if (ArrProp && !(ArrProp->GetPropertyFlags() & FIN_Prop_OutParam || ArrProp->GetPropertyFlags() & FIN_Prop_RetVal)) {
+				Prop = ArrProp;
+				break;
+			}
+		}
 		if (Prop && UFINReflectionUtils::CheckIfVarargs(Prop)) {
 			FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_VarArgs;
 			FINFunc->VarArgsProperty = Prop;
-			FINFunc->Parameters.Pop();
+			FINFunc->Parameters.Remove(Prop);
 		}
 	}
 	return FINFunc;

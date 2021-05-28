@@ -50,7 +50,9 @@ protected:
 public:
 	// Begin UFINReflectionSource
 	virtual bool ProvidesRequirements(UClass* Class) const override;
+	virtual bool ProvidesRequirements(UScriptStruct* Struct) const override;
 	virtual void FillData(FFINReflection* Ref, UFINClass* ToFillClass, UClass* Class) const override;
+	virtual void FillData(FFINReflection* Ref, UFINStruct* ToFillStruct, UScriptStruct* Struct) const override;
 	// End UFINReflectionSource
 
 	UFINFunction* GenerateFunction(FFINReflection* Ref, UClass* Class, UFunction* Func) const;
