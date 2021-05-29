@@ -135,7 +135,7 @@ void AFINComputerNetworkCard::netFunc_closeAll() {
 	OpenPorts.Empty();
 }
 
-void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, const TArray<FFINAnyNetworkValue>& args) {
+void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, TArray<FFINAnyNetworkValue> args) {
 	if (!CheckNetMessageData(args) || port < 0 || port > 10000) return;
 	FGuid receiverID;
 	FGuid::Parse(receiver, receiverID);
@@ -157,7 +157,7 @@ void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, const TAr
 	}
 }
 
-void AFINComputerNetworkCard::netFunc_broadcast(int port, const TArray<FFINAnyNetworkValue>& args) {
+void AFINComputerNetworkCard::netFunc_broadcast(int port, TArray<FFINAnyNetworkValue> args) {
  	if (!CheckNetMessageData(args) || port < 0 || port > 10000) return;
 	FGuid MsgID = FGuid::NewGuid();
 	FGuid SenderID = Execute_GetID(this);
