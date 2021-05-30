@@ -1,6 +1,7 @@
 #include "FINFileSystemState.h"
 #include "FGSaveSystem.h"
 #include "TimerManager.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 
 AFINFileSystemState::AFINFileSystemState() {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"RootComponent");
@@ -15,9 +16,14 @@ void AFINFileSystemState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 }
 
 void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path) {
-	std::unordered_set<CodersFileSystem::NodeName> childs = SerializeDevice->childs(Path);
-	std::unordered_set<CodersFileSystem::NodeName>::iterator childIterator = childs.begin();
-	int ChildNodeNum = childs.size();
+	std::unordered_set<CodersFileSystem::NodeName> childs;
+	std::unordered_set<CodersFileSystem::NodeName>::iterator childIterator;
+	int ChildNodeNum;
+	if (Record.GetUnderlyingArchive().IsSaving()) {
+		childs = SerializeDevice->childs(Path);
+		childIterator = childs.begin();
+		ChildNodeNum = childs.size();
+	}
 	FStructuredArchive::FArray ChildNodes = Record.EnterArray(SA_FIELD_NAME(TEXT("ChildNodes")), ChildNodeNum);
 	for (int i = 0; i < ChildNodeNum; ++i) {
 		FStructuredArchive::FRecord Child = ChildNodes.EnterElement().EnterRecord();
@@ -52,6 +58,7 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
             	Content << Data;
             }
 		} else if (Type == 2) {
+			SerializeDevice->createDir(Path / stdChildName);
 			SerializePath(SerializeDevice, Child, Path / stdChildName);
 		}
 	}
