@@ -28,4 +28,7 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
     void OnCodeUpdate();
+
+	UFUNCTION(BlueprintCallable, Category="Computer")
+	virtual bool CopyDataTo(AFINStateEEPROM* InFrom) { return false; }
 };

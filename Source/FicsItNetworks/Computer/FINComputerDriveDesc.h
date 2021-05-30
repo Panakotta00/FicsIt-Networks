@@ -1,11 +1,12 @@
 #pragma once
 
+#include "FicsItNetworks/Utils/FINCopyableItem.h"
 #include "Resources/FGItemDescriptor.h"
 #include "Tooltip/SMLItemDisplayInterface.h"
 #include "FINComputerDriveDesc.generated.h"
 
 UCLASS()
-class FICSITNETWORKS_API UFINComputerDriveDesc : public UFGItemDescriptor, public ISMLItemDisplayInterface {
+class FICSITNETWORKS_API UFINComputerDriveDesc : public UFGItemDescriptor, public ISMLItemDisplayInterface, public IFINCopyableItemInterface {
 	GENERATED_BODY()
 
 public:
@@ -23,6 +24,10 @@ public:
 	virtual UWidget* CreateDescriptionWidget_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) override;
 	// End ISMLItemDisplayInterface
 
+	// Begin IFINCopyableItemInterface
+	virtual bool CopyData_Implementation(UObject* WorldContext, const FInventoryItem& InFrom, const FInventoryItem& InTo, FInventoryItem& OutItem) override;
+	// End IFINCopyableItemInterface
+	
 	UFUNCTION(BlueprintCallable, Category = "FileSystem|Drive")
 	static int32 GetStorageCapacity(TSubclassOf<UFINComputerDriveDesc> drive);
 

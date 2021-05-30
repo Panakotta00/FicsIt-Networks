@@ -39,4 +39,7 @@ public:
 
 	UFUNCTION(Server, WithValidation, Reliable)
 	void CreateEEPROMState(UFGInventoryComponent* Inv, int SlotIdx);
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable)
+	void CopyDataItem(UFGInventoryComponent* InProviderInc, int InProviderIdx, UFGInventoryComponent* InFromInv, int InFromIdx, UFGInventoryComponent* InToInv, int InToIdx);
 };

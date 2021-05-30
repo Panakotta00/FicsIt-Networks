@@ -101,3 +101,23 @@ void UFINComputerRCO::CreateEEPROMState_Implementation(UFGInventoryComponent* In
 bool UFINComputerRCO::CreateEEPROMState_Validate(UFGInventoryComponent* Inv, int SlotIdx) {
 	return true;
 }
+
+void UFINComputerRCO::CopyDataItem_Implementation(UFGInventoryComponent* InProviderInc, int InProviderIdx, UFGInventoryComponent* InFromInv, int InFromIdx, UFGInventoryComponent* InToInv, int InToIdx) {
+	FInventoryStack Provider;
+	if (!InProviderInc->GetStackFromIndex(InProviderIdx, Provider)) return;
+	FInventoryStack From;
+	if (!InFromInv->GetStackFromIndex(InFromIdx, From)) return;
+	if (!InToInv->IsIndexEmpty(InToIdx)) return;
+	if (!Provider.Item.ItemClass || !From.Item.ItemClass) return;
+	UObject* Descriptor = const_cast<UObject*>(GetDefault<UObject>(Provider.Item.ItemClass));
+	if (!Descriptor->Implements<UFINCopyableItemInterface>()) return;
+	bool bDone = IFINCopyableItemInterface::Execute_CopyData(Descriptor, InProviderInc, Provider.Item, From.Item, From.Item);
+	if (bDone) {
+		InFromInv->RemoveAllFromIndex(InFromIdx);
+		InToInv->AddStackToIndex(InToIdx, From);
+	}
+}
+
+bool UFINComputerRCO::CopyDataItem_Validate(UFGInventoryComponent* InProviderInc, int InProviderIdx, UFGInventoryComponent* InFromInv, int InFromIdx, UFGInventoryComponent* InToInv, int InToIdx) {
+	return true;
+}
