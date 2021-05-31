@@ -1978,7 +1978,7 @@ BeginClass(UFGItemDescriptor, "ItemType", "Item Type", "The type of an item (iro
 BeginClassProp(RInt, form, "Form", "The matter state of this resource.\n1: Solid\n2: Liquid\n3: Gas\n4: Heat") {
 	Return (FINInt)UFGItemDescriptor::GetForm(self);
 } EndProp()
-BeginClassProp(RFloat, energy, "Enery", "How much energy this resource provides if used as fuel.") {
+BeginClassProp(RFloat, energy, "Energy", "How much energy this resource provides if used as fuel.") {
 	Return (FINFloat)UFGItemDescriptor::GetForm(self);
 } EndProp()
 BeginClassProp(RFloat, radioactiveDecay, "Radioactive Decay", "The amount of radiation this item radiates.") {
