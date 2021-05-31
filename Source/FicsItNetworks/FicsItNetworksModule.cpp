@@ -8,6 +8,7 @@
 #include "FGGameMode.h"
 #include "FGGameState.h"
 #include "FINGlobalRegisterHelper.h"
+#include "Computer/FINComputerDriveDesc.h"
 #include "Computer/FINComputerRCO.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Hologram/FGBuildableHologram.h"
@@ -15,8 +16,12 @@
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Patching/BlueprintHookHelper.h"
+#include "Patching/BlueprintHookManager.h"
 #include "Patching/NativeHookManager.h"
 #include "Reflection/FINReflection.h"
+#include "Reflection/ReflectionHelper.h"
+#include "UI/FINCopyUUIDButton.h"
 #include "UI/FINReflectionStyles.h"
 #include "UObject/CoreRedirects.h"
 
@@ -159,6 +164,19 @@ void FFicsItNetworksModule::StartupModule(){
 				gm->RegisterRemoteCallObjectClass(ModuleRCO);
 			}
 		});
+
+		UClass* StackPlitter = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_StackSplitSlider.Widget_StackSplitSlider_C"));
+		check(StackPlitter);
+		UFunction* Function = StackPlitter->FindFunctionByName(TEXT("Construct"));
+
+		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
+		HookManager->HookBlueprintFunction(Function, [](FBlueprintHookHelper& HookHelper) {
+			UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
+			UVerticalBox* MenuList = Cast<UVerticalBox>(self->GetWidgetFromName("VerticalBox_0"));
+			UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
+			UUIDButton->InitSlotWidget(Cast<UUserWidget>(FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mSourceSlot"))));
+			MenuList->AddChildToVerticalBox(UUIDButton);
+		}, EPredefinedHookOffset::Start);
 #else
 		/*FFINGlobalRegisterHelper::Register();
 			
