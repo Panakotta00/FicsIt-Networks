@@ -2,9 +2,6 @@
 
 #include "FGInventoryComponent.h"
 #include "Blueprint/WidgetTree.h"
-#include "Components/PanelWidget.h"
-#include "Components/TextBlock.h"
-#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/FINComponentUtility.h"
 #include "FicsItNetworks/FicsItKernel/FicsItFS/FINFileSystemState.h"
 #include "Reflection/ReflectionHelper.h"
@@ -32,12 +29,17 @@ void UFINCopyUUIDButton::InitSlotWidget(UWidget* InSlotWidget) {
 	MCDelegate->AddDelegate(Delegate, Button);
 }
 
-void UFINCopyUUIDButton::OnCopyUUIDClicked() {
+AFINFileSystemState* UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(UWidget* InSlot) {
 	struct {
 		FInventoryStack Stack;
 	} Params;
-	FReflectionHelper::CallScriptFunction(SlotWidget, TEXT("GetStack"), &Params);
+	FReflectionHelper::CallScriptFunction(InSlot, TEXT("GetStack"), &Params);
 	AFINFileSystemState* State = Cast<AFINFileSystemState>(Params.Stack.Item.ItemState.Get());
+	return State;
+}
+
+void UFINCopyUUIDButton::OnCopyUUIDClicked() {
+	AFINFileSystemState* State = GetFileSystemStateFromSlotWidget(SlotWidget);
 	if (State) {
 		UFINComponentUtility::ClipboardCopy(State->ID.ToString());
 	}

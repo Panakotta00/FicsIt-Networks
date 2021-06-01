@@ -165,17 +165,21 @@ void FFicsItNetworksModule::StartupModule(){
 			}
 		});
 
+		// Copy FS UUID Item Context Menu Entry //
 		UClass* StackPlitter = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_StackSplitSlider.Widget_StackSplitSlider_C"));
 		check(StackPlitter);
 		UFunction* Function = StackPlitter->FindFunctionByName(TEXT("Construct"));
-
 		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
 		HookManager->HookBlueprintFunction(Function, [](FBlueprintHookHelper& HookHelper) {
 			UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
-			UVerticalBox* MenuList = Cast<UVerticalBox>(self->GetWidgetFromName("VerticalBox_0"));
-			UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
-			UUIDButton->InitSlotWidget(Cast<UUserWidget>(FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mSourceSlot"))));
-			MenuList->AddChildToVerticalBox(UUIDButton);
+			UUserWidget* SourceSlot = Cast<UUserWidget>(FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mSourceSlot")));
+			AFINFileSystemState* State = UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(SourceSlot);
+			if (State) {
+				UVerticalBox* MenuList = Cast<UVerticalBox>(self->GetWidgetFromName("VerticalBox_0"));
+				UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
+				UUIDButton->InitSlotWidget(SourceSlot);
+				MenuList->AddChildToVerticalBox(UUIDButton);
+			}
 		}, EPredefinedHookOffset::Start);
 #else
 		/*FFINGlobalRegisterHelper::Register();
