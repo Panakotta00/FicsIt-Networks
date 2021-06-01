@@ -25,9 +25,8 @@ AFINComputerCase::AFINComputerCase() {
 	DataStorage = CreateDefaultSubobject<UFGInventoryComponent>("DataStorage");
 	DataStorage->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
 	DataStorage->OnItemAddedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
-	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> item, int32 i) {
-        return (i == 0 && item->IsChildOf<UFINComputerEEPROMDesc>()) || (i == 1 && item->IsChildOf<UFINComputerFloppyDesc>());
-    });
+	DataStorage->SetAllowedItemOnIndex(0, UFINComputerEEPROMDesc::StaticClass());
+	DataStorage->SetAllowedItemOnIndex(1, UFINComputerFloppyDesc::StaticClass());
 	DataStorage->SetIsReplicated(true);
 
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
