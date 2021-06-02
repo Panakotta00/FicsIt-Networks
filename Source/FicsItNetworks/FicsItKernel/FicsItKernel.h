@@ -93,6 +93,8 @@ public:
 		ALL = 0b11
 	};
 
+	UFINKernelSystem();
+
 	// Begin UObject
 	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
 	//virtual void Serialize(FArchive& Ar) override;

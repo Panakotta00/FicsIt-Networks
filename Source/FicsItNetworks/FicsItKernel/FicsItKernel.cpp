@@ -44,6 +44,10 @@ void FFINKernelListener::onNodeRenamed(CodersFileSystem::Path newPath, CodersFil
 	Signal->Trigger(parent->GetOuter(), {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FINInt>(type)});
 }
 
+UFINKernelSystem::UFINKernelSystem() {
+	FileSystemListener = new FFINKernelListener(this);
+}
+
 void UFINKernelSystem::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) {
 	Super::AddReferencedObjects(InThis, Collector);
 	
