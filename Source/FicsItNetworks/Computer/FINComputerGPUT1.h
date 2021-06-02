@@ -5,6 +5,7 @@
 
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenKeyEventHandler, uint32, uint32, int);
+DECLARE_DELEGATE_RetVal_TwoParams(FReply, FScreenKeyCharEventHandler, TCHAR, int);
 
 class FICSITNETWORKS_API SScreenMonitor : public SLeafWidget {
 	SLATE_BEGIN_ARGS(SScreenMonitor) : _Text(),
@@ -24,10 +25,11 @@ class FICSITNETWORKS_API SScreenMonitor : public SLeafWidget {
 		SLATE_EVENT(FScreenCursorEventHandler, OnMouseMove)
 		SLATE_EVENT(FScreenKeyEventHandler, OnKeyDown)
 		SLATE_EVENT(FScreenKeyEventHandler, OnKeyUp)
+		SLATE_EVENT(FScreenKeyCharEventHandler, OnKeyChar)
 	SLATE_END_ARGS()
 
 public:
-    void Construct( const FArguments& InArgs );
+    void Construct( const FArguments& InArgs, UObject* Context);
 
 	/**
 	 * Returns the currently displayed text grid.
@@ -106,6 +108,8 @@ private:
 	FScreenCursorEventHandler OnMouseMoveEvent;
 	FScreenKeyEventHandler OnKeyDownEvent;
 	FScreenKeyEventHandler OnKeyUpEvent;
+	FScreenKeyCharEventHandler OnKeyCharEvent;
+	UObject* WorldContext;
 
 	int lastMoveX = -1;
 	int lastMoveY = -1;
@@ -121,9 +125,12 @@ public:
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply OnKeyChar(const FGeometry& MyGeometry, const FCharacterEvent& InCharacterEvent) override;
 	virtual bool IsInteractable() const override;
 	virtual bool SupportsKeyboardFocus() const override;
 	// End SWidget
+
+	bool HandleShortCut(const FKeyEvent& InKeyEvent);
 };
 
 UCLASS()
@@ -288,6 +295,22 @@ public:
 		ParameterInternalNames.Add("code");
 		ParameterDisplayNames.Add(FText::FromString("Code"));
 		ParameterDescriptions.Add(FText::FromString("The number code of the pressed key."));
+		ParameterInternalNames.Add("btn");
+		ParameterDisplayNames.Add(FText::FromString("Button"));
+		ParameterDescriptions.Add(FText::FromString("The Button-Bit-Field providing information about the key release event.\nBits:\n1th left mouse pressed\n2th right mouse button pressed\n3th ctrl key pressed\n4th shift key pressed\n5th alt key pressed\n6th cmd key pressed"));
+		Runtime = 1;
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void netSig_OnKeyChar(const FString& c, int btn);
+	UFUNCTION()
+	void netSigMeta_OnKeyChar(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "OnKeyChar";
+		DisplayName = FText::FromString("On Key Character");
+		Description = FText::FromString("Triggers when a character key got 'clicked' and essentially a character got typed in, usful for text input.");
+		ParameterInternalNames.Add("c");
+		ParameterDisplayNames.Add(FText::FromString("Character"));
+		ParameterDescriptions.Add(FText::FromString("The character that got typed in as string."));
 		ParameterInternalNames.Add("btn");
 		ParameterDisplayNames.Add(FText::FromString("Button"));
 		ParameterDescriptions.Add(FText::FromString("The Button-Bit-Field providing information about the key release event.\nBits:\n1th left mouse pressed\n2th right mouse button pressed\n3th ctrl key pressed\n4th shift key pressed\n5th alt key pressed\n6th cmd key pressed"));

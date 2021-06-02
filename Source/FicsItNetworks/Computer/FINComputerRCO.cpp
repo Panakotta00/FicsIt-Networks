@@ -82,6 +82,14 @@ bool UFINComputerRCO::GPUKeyEvent_Validate(AFINComputerGPUT1* GPU, int type, int
 	return true;
 }
 
+void UFINComputerRCO::GPUKeyCharEvent_Implementation(AFINComputerGPUT1* GPU, const FString& c, int btn) {
+	GPU->netSig_OnKeyChar(c, btn);
+}
+
+bool UFINComputerRCO::GPUKeyCharEvent_Validate(AFINComputerGPUT1* GPU, const FString& c, int btn) {
+	return true;
+}
+
 void UFINComputerRCO::CreateEEPROMState_Implementation(UFGInventoryComponent* Inv, int SlotIdx) {
 	FInventoryStack stack;
 	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.ItemClass)) return;

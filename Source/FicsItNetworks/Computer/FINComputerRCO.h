@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
 	void GPUKeyEvent(AFINComputerGPUT1* GPU, int type, int64 c, int64 code, int btn);
 
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
+	void GPUKeyCharEvent(AFINComputerGPUT1* GPU, const FString& c, int btn);
+
 	UFUNCTION(Server, WithValidation, Reliable)
 	void CreateEEPROMState(UFGInventoryComponent* Inv, int SlotIdx);
 

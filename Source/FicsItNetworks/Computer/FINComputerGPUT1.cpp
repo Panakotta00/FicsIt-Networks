@@ -2,10 +2,12 @@
 
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
+#include "FicsItNetworks/FINComponentUtility.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "Widgets/SInvalidationPanel.h"
+#include "Windows/WindowsPlatformApplicationMisc.h"
 
-void SScreenMonitor::Construct(const FArguments& InArgs) {
+void SScreenMonitor::Construct(const FArguments& InArgs, UObject* InWorldContext) {
 	Text = InArgs._Text;
 	Foreground = InArgs._Foreground;
 	Background = InArgs._Background;
@@ -16,7 +18,9 @@ void SScreenMonitor::Construct(const FArguments& InArgs) {
 	OnMouseMoveEvent = InArgs._OnMouseMove;
 	OnKeyDownEvent = InArgs._OnKeyDown;
 	OnKeyUpEvent = InArgs._OnKeyUp;
+	OnKeyCharEvent = InArgs._OnKeyChar;
 	SetCanTick(false);
+	WorldContext = InWorldContext;
 }
 
 FString SScreenMonitor::GetText() const {
@@ -135,6 +139,7 @@ FReply SScreenMonitor::OnMouseMove(const FGeometry& MyGeometry, const FPointerEv
 }
 
 FReply SScreenMonitor::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
+	if (HandleShortCut(InKeyEvent)) return FReply::Handled();
 	if (OnKeyDownEvent.IsBound()) return OnKeyDownEvent.Execute(InKeyEvent.GetCharacter(), InKeyEvent.GetKeyCode(), InputToInt(InKeyEvent));
 	return FReply::Unhandled();
 }
@@ -144,12 +149,54 @@ FReply SScreenMonitor::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InK
 	return FReply::Unhandled();
 }
 
+FReply SScreenMonitor::OnKeyChar(const FGeometry& MyGeometry, const FCharacterEvent& InCharacterEvent) {
+	if (OnKeyCharEvent.IsBound()) return OnKeyCharEvent.Execute(InCharacterEvent.GetCharacter(), InputToInt(InCharacterEvent));
+	return FReply::Unhandled();
+}
+
 bool SScreenMonitor::IsInteractable() const {
 	return true;
 }
 
 bool SScreenMonitor::SupportsKeyboardFocus() const {
 	return true;
+}
+
+bool IsAction(UObject* Context, const FKeyEvent& InKeyEvent, const FName& ActionName) {
+	TArray<FInputActionKeyMapping> Mappings = Context->GetWorld()->GetFirstPlayerController()->PlayerInput->GetKeysForAction(ActionName);
+	if (Mappings.Num() > 0) {
+		const FInputActionKeyMapping& Mapping = Mappings[0];
+		return Mapping.Key == InKeyEvent.GetKey() &&
+			Mapping.bAlt == InKeyEvent.GetModifierKeys().IsAltDown() &&
+			Mapping.bCmd == InKeyEvent.GetModifierKeys().IsCommandDown() &&
+			Mapping.bCtrl == InKeyEvent.GetModifierKeys().IsControlDown() &&
+			Mapping.bShift == InKeyEvent.GetModifierKeys().IsShiftDown();
+	}
+	return false;
+}
+
+bool SScreenMonitor::HandleShortCut(const FKeyEvent& InKeyEvent) {
+	if (IsAction(WorldContext, InKeyEvent, TEXT("FicsItNetworks.CopyScreen"))) {
+		FVector2D Size = ScreenSize.Get();
+		FString AllText = Text.Get();
+		FString FormattedText = "";
+		int i = 0;
+		while (i < AllText.Len()) {
+			FormattedText += AllText.Mid(i, Size.X).TrimEnd() + '\n';
+			i += Size.X;
+		}
+		UFINComponentUtility::ClipboardCopy(FormattedText);
+		return true;
+	} else if (IsAction(WorldContext, InKeyEvent, TEXT("FicsItNetworks.PasteScreen"))) {
+		FString PasteText;
+		FWindowsPlatformApplicationMisc::ClipboardPaste(PasteText);
+		for (TCHAR CharKey : PasteText) {
+			FCharacterEvent CharacterEvent(CharKey, FModifierKeysState(), InKeyEvent.GetUserIndex(), false);
+			FSlateApplication::Get().ProcessKeyCharEvent(CharacterEvent);
+		}
+		return true;
+	}
+	return false;
 }
 
 SScreenMonitor::SScreenMonitor() {
@@ -192,7 +239,7 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SAssignNew(CachedInvalidation, SInvalidationPanel)
 	.Content()[
-		SNew(SScreenMonitor)
+		SNew(SScreenMonitor,(UObject*)GetWorld())
 		.ScreenSize_Lambda([this]() {
 			return ScreenSize;
 		})
@@ -225,6 +272,10 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 		.OnKeyUp_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
 			RCO->GPUKeyEvent(this, 1,  c, key, btn);
 			return FReply::Handled();
+        })
+        .OnKeyChar_Lambda([this, RCO](TCHAR c, int btn) {
+	        RCO->GPUKeyCharEvent(this, FString::Chr(c), btn);
+        	return FReply::Handled();
         })
     ];
 }
@@ -270,6 +321,7 @@ void AFINComputerGPUT1::netSig_OnMouseMove_Implementation(int x, int y, int btn)
 void AFINComputerGPUT1::netSig_ScreenSizeChanged_Implementation(int oldW, int oldH) {}
 void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int btn) {}
 void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
+void AFINComputerGPUT1::netSig_OnKeyChar_Implementation(const FString& c, int btn) {}
 
 void AFINComputerGPUT1::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
 	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr().Get())) BindScreen(NewScreen);
