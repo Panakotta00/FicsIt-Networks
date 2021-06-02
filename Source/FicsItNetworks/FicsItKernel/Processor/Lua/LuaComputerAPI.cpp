@@ -94,7 +94,7 @@ namespace FicsItKernel {
 			UFINClass* Type = Cast<UFINClass>(Obj.Get());
 			int i = 1;
 			for (TScriptInterface<IFINPciDeviceInterface> Device : kernel->GetPCIDevices()) {
-				if (Type && !Device.GetObject()->IsA(Cast<UClass>(Type->GetOuter()))) continue;
+				if (!Device || (Type && !Device.GetObject()->IsA(Cast<UClass>(Type->GetOuter())))) continue;
 				newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / Device.GetObject());
 				lua_seti(L, -2, i++);
 			}

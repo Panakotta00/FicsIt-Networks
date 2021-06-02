@@ -269,7 +269,7 @@ void AFINComputerCase::RemoveModule(AActor* module) {
 		} else if (AFINComputerDriveHolder* holder = Cast<AFINComputerDriveHolder>(module)) {
 			RemoveDrive(holder);
 		} else if (module->Implements<UFINPciDeviceInterface>()) {
-			AddPCIDevice(module);
+			RemovePCIDevice(module);
 		}
 	}
 }
