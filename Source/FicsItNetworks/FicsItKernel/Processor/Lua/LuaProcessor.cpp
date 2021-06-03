@@ -340,6 +340,8 @@ int luaPersist(lua_State* L) {
 
 void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("PreSerialize"));
+	if (!Kernel || Kernel->GetState() != FIN_KERNEL_RUNNING) return;
+	
 	tickHelper.stop();
 
 	for (FicsItKernel::Lua::LuaFile file : FileStreams) {

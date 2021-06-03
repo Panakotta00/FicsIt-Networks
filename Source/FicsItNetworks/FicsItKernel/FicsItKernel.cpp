@@ -1,7 +1,5 @@
 #include "FicsItKernel.h"
 #include "FicsItNetworks/Computer/FINComputerCase.h"
-#include "FicsItNetworks/Graphics/FINGPUInterface.h"
-#include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "FicsItNetworks/Network/FINFuture.h"
 #include "Processor/Lua/LuaProcessor.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
