@@ -153,7 +153,7 @@ namespace CodersFileSystem {
 	class DiskDevice : public ByteCountedDevice {
 	private:
 		std::filesystem::path realPath;
-		WindowsFileWatcher watcher;
+		//WindowsFileWatcher watcher;
 
 	protected:
 		virtual size_t getSize() const override;
