@@ -324,6 +324,7 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 		.Style(InArgs._Style)
 		.OnTextChanged(InArgs._OnTextChanged)
 		.OnTextCommitted(InArgs._OnTextCommitted)
+		.TextShapingMethod(ETextShapingMethod::FullShaping)
 	];
 }
 
