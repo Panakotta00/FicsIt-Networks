@@ -480,6 +480,25 @@ public:
 	}
 
 	UFUNCTION()
+	void netFunc_setBuffer(const FString& characterBuf, TArray<float> foregroundBuf, TArray<float> backgroundBuf);
+	UFUNCTION()
+	void netFuncMeta_setBuffer(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "setBuffer";
+		DisplayName = FText::FromString("Set Buffer");
+		Description = FText::FromString("Completely overwrites the internal hidden buffer with the provided data. Flush still has to get called to apply buffer changes to active buffer.");
+		ParameterInternalNames.Add("characters");
+		ParameterDisplayNames.Add(FText::FromString("Character Buffer"));
+		ParameterDescriptions.Add(FText::FromString("String holding all character of the buffer from upper-left to lower-right, no line breaks. Every character within the string resembles one character on the display. The string has to have exactly the length screen width * screen height. e.g. with a screen size of 300x100 the string has to have an length of exactly 30000 characters."));
+		ParameterInternalNames.Add("foreground");
+		ParameterDisplayNames.Add(FText::FromString("Foreground Buffer"));
+		ParameterDescriptions.Add(FText::FromString("An array of numbers that holds the rgba values of each character on the display. The array is split into sets of four values that combined give a color value rgba. Since there has to be a set for each character drawn, the array has to have a length of width * height * 4. e.g. with a screen size of 300x100 the array should have 120000 number values."));
+		ParameterInternalNames.Add("background");
+		ParameterDisplayNames.Add(FText::FromString("Background Buffer"));
+		ParameterDescriptions.Add(FText::FromString("An array of numbers that holds the rgba values of each character background box on the display. The array is split into sets of four values that combined give a color value rgba. Since there has to be a set for each character background drawn, the array has to have a length of width * height * 4. e.g. with a screen size of 300x100 the array should have 120000 number values."));
+		Runtime = 2;
+	}
+
+	UFUNCTION()
 	void netFunc_flush();
 	UFUNCTION()
     void netFuncMeta_flush(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {

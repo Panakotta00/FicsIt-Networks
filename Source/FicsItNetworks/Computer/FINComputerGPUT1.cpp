@@ -2,6 +2,7 @@
 
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
+#include "Async/ParallelFor.h"
 #include "FicsItNetworks/FINComponentUtility.h"
 #include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "Widgets/SInvalidationPanel.h"
@@ -406,6 +407,28 @@ void AFINComputerGPUT1::netFunc_setForeground(float r, float g, float b, float a
 void AFINComputerGPUT1::netFunc_setBackground(float r, float g, float b, float a) {
 	FScopeLock Lock(&DrawingMutex);
 	CurrentBackground = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f), FMath::Clamp(a, 0.0f, 1.0f));
+}
+
+void AFINComputerGPUT1::netFunc_setBuffer(const FString& characters, TArray<float> foreground, TArray<float> background) {
+	FScopeLock Lock(&DrawingMutex);
+	int Length = ScreenSize.X * ScreenSize.Y;
+	if (characters.Len() != Length) return;
+	if (foreground.Num() != Length*4) return;
+	if (background.Num() != Length*4) return;
+	TextGridBuffer = characters;
+	ParallelFor(Length, [this, &foreground, &background](int i) {
+		FLinearColor& FColor = ForegroundBuffer[i];
+		FLinearColor& BColor = BackgroundBuffer[i];
+		i = i * 4;
+		FColor.R = foreground[i];
+		FColor.G = foreground[i+1];
+		FColor.B = foreground[i+2];
+		FColor.A = foreground[i+3];
+		BColor.R = background[i];
+		BColor.G = background[i+1];
+		BColor.B = background[i+2];
+		BColor.A = background[i+3];
+	});
 }
 
 void AFINComputerGPUT1::netFunc_flush() {
