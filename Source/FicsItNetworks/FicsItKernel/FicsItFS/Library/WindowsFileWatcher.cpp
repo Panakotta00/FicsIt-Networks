@@ -35,6 +35,8 @@ namespace CodersFileSystem {
 	}
 
 	WindowsFileWatcher::~WindowsFileWatcher() {
+		CloseHandle(watcherInfo->OverlappedIO.hEvent);
+		CloseHandle(watcherInfo->DirectoryHandle);
 		delete watcherInfo;
 	}
 
