@@ -185,8 +185,6 @@ namespace CodersFileSystem {
 		std::filesystem::path path;
 		SizeCheckFunc sizeCheck;
 		std::fstream stream;
-		int64_t pos = 0;
-		std::string buf;
 
 	public:
 		DiskFileStream(std::filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
