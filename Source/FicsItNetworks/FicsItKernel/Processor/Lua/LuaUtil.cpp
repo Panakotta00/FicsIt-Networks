@@ -149,8 +149,9 @@ namespace FicsItKernel {
 				luaL_checktype(L, Index, LUA_TTABLE);
 				UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Prop);
 				FINArray Array;
+				lua_pushnil(L);
 				while (lua_next(L, Index) != 0) {
-					if (!lua_isinteger(L, -1)) break;
+					if (!lua_isinteger(L, -2)) break;
 					FINAny Value;
 					if (ArrayProp && ArrayProp->GetInnerType()) {
 						Value = luaToProperty(L, ArrayProp->GetInnerType(), -1);
