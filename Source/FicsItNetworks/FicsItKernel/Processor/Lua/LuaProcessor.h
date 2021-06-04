@@ -105,6 +105,8 @@ public:
 
 	void tickHook(lua_State* L);
 	int apiReturn(lua_State* L, int args);
+
+	LuaTickState getState() { return State; }
 };
 
 UCLASS()

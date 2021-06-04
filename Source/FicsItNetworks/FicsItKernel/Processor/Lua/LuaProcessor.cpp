@@ -524,7 +524,11 @@ void UFINLuaProcessor::Tick(float InDelta) {
 
 void UFINLuaProcessor::Stop(bool bIsCrash) {
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor stop %s"), *DebugInfo, bIsCrash ? TEXT("due to crash") : TEXT(""));
-	tickHelper.stop();
+	if (tickHelper.getState() & LUA_ASYNC) {
+		tickHelper.shouldStop();
+	} else {
+		tickHelper.stop();
+	}
 }
 
 //#pragma optimize("", off)
