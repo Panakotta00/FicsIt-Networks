@@ -93,6 +93,12 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
 	FStructuredArchive::FArray ChildNodes = Record.EnterArray(SA_FIELD_NAME(TEXT("ChildNodes")), ChildNodeNum);
 	std::unordered_set<CodersFileSystem::NodeName> DiskChilds = SerializeDevice->childs(Path);
 	CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
+	if (KeepDisk == 0) {
+		for (std::string DiskChild : DiskChilds) {
+			SerializeDevice->remove(Path / DiskChild, true);
+		}
+		DiskChilds.clear();
+	}
 
 	for (int i = 0; i < ChildNodeNum; ++i) {
 		FStructuredArchive::FRecord Child = ChildNodes.EnterElement().EnterRecord();
