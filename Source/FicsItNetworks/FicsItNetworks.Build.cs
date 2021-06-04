@@ -45,7 +45,7 @@ public class FicsItNetworks : ModuleRules
         var platformName = Target.Platform.ToString();
         var libraryFolder = Path.Combine(thirdPartyFolder, platformName);
         
-        PublicAdditionalLibraries.Add(Path.Combine(libraryFolder, "lua53.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(libraryFolder, "eris.lib"));
         
         bEnableExceptions = true;
         bUseRTTI = true;

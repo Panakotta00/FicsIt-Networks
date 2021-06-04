@@ -14,6 +14,10 @@
 #include "FicsItNetworks/Network/FINNetworkUtils.h"
 #include "FicsItNetworks/Reflection/FINSignal.h"
 
+extern "C" {
+	#include "eris.h"
+}
+#pragma optimize("", off)
 void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
 	for (FicsItKernel::Lua::LuaFile file : Parent->GetFileStreams()) {
 		if (file.isValid() && (!Parent->GetKernel()->GetFileSystem() || !Parent->GetKernel()->GetFileSystem()->checkUnpersistPath(file->path))) {
@@ -142,7 +146,7 @@ void FFINLuaProcessorTick::shouldCrash(const TSharedRef<FFINKernelCrash>& Crash)
 	ToCrash = Crash;
 }
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 void FFINLuaProcessorTick::syncTick() {
 	if (postTick()) return;
 	if (State & LUA_SYNC) {
@@ -248,13 +252,14 @@ void FFINLuaProcessorTick::tickHook(lua_State* L) {
 	default: ;
 	}
 }
-#pragma optimize("", on)
+//#pragma optimize("", on)
 
 int luaAPIReturn_Resume(lua_State* L, int status, lua_KContext ctx) {
-	return static_cast<int>(ctx);
+	//return static_cast<int>(ctx);
+	return 0;
 }
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 int FFINLuaProcessorTick::apiReturn(lua_State* L, int args) {
 	if (State != LUA_SYNC && State != LUA_ASYNC) { // tick state in error or crash
 		if (State & LUA_SYNC) State = LUA_SYNC;
@@ -263,7 +268,7 @@ int FFINLuaProcessorTick::apiReturn(lua_State* L, int args) {
 	}
 	return args;
 }
-#pragma optimize("", on)
+//#pragma optimize("", on)
 
 int FFINLuaProcessorTick::steps() const {
 	switch (State) {
@@ -317,7 +322,7 @@ FString Base64Encode(const uint8* Source, uint32 Length) {
 	return OutBuffer;
 }
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 int luaPersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Persist"), *p->DebugInfo);
@@ -429,7 +434,7 @@ bool Base64Decode(const FString& Source, TArray<ANSICHAR>& OutData) {
 	return true;
 }
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 int luaUnpersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Unpersist"), *p->DebugInfo);
@@ -447,7 +452,7 @@ int luaUnpersist(lua_State* L) {
 	
 	return 2;
 }
-#pragma optimize("", on)
+//#pragma optimize("", on)
 
 void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("PostDeserialize"));
@@ -522,12 +527,13 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 	tickHelper.stop();
 }
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 void UFINLuaProcessor::LuaTick() {
 	try {
 		// reset out of time
 		lua_sethook(luaThread, UFINLuaProcessor::luaHook, LUA_MASKCOUNT, tickHelper.steps());
 		
+		int nres = -1;
 		int Status;
 		if (PullState != 0) {
 			// Runtime is pulling a signal
@@ -540,7 +546,7 @@ void UFINLuaProcessor::LuaTick() {
 					Status = LUA_ERRRUN;
 				} else {
 					// signal popped -> resume yield with signal as parameters (passing signals parameters back to pull yield)
-					Status = lua_resume(luaThread, nullptr, SigArgCount);
+					Status = lua_resume(luaThread, luaState, SigArgCount, &nres);
 				}
 			} else if (PullState == 2 || Timeout > (static_cast<double>((FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0)) {
 				// no signal available & not timeout reached -> skip tick
@@ -548,13 +554,12 @@ void UFINLuaProcessor::LuaTick() {
 			} else {
 				// no signal available & timeout reached -> resume yield with  no parameters
 				PullState = 0;
-				Status = lua_resume(luaThread, nullptr, 0);
+				Status = lua_resume(luaThread, luaState, 0, &nres);
 			}
 		} else {
 			// resume runtime normally
-			Status = lua_resume(luaThread, nullptr, 0);
+			Status = lua_resume(luaThread, luaState, 0, &nres);
 		}
-		
 		if (Status == LUA_YIELD) {
 			// system yielded and waits for next tick
 			lua_gc(luaState, LUA_GCCOLLECT, 0);
@@ -567,6 +572,9 @@ void UFINLuaProcessor::LuaTick() {
 			luaL_traceback(luaThread, luaThread, lua_tostring(luaThread, -1), 0);
 			tickHelper.shouldCrash(MakeShared<FFINKernelCrash>(UTF8_TO_TCHAR(lua_tostring(luaThread, -1))));
 		}
+		if (nres > -1) {
+			lua_pop(luaThread, nres);
+		}
 	} catch (...) {
 		// fatal end of time reached
 		tickHelper.shouldCrash(MakeShared<FFINKernelCrash>("out of time"));
@@ -575,7 +583,7 @@ void UFINLuaProcessor::LuaTick() {
 	// clear some data
 	ClearFileStreams();
 }
-#pragma optimize("", on)
+//#pragma optimize("", on)
 
 size_t luaLen(lua_State* L, int idx) {
 	size_t len = 0;
@@ -720,7 +728,8 @@ int luaPrint(lua_State* L) {
 
 int luaYieldResume(lua_State* L, int status, lua_KContext ctx) {
 	// don't pass pushed bool for user executed yield identification
-	return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L) - 1);
+	//return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L) - 1);
+	return UFINLuaProcessor::luaAPIReturn(L, 0);
 }
 
 int luaYield(lua_State* L) {
@@ -738,12 +747,12 @@ int luaResume(lua_State* L); // pre-declare
 int luaResumeResume(lua_State* L, int status, lua_KContext ctx) {
 	return UFINLuaProcessor::luaAPIReturn(L, luaResume(L));
 }
-
+//#pragma optimize("", off)
 int luaResume(lua_State* L) {
 	const int args = lua_gettop(L);
 	int threadIndex = 1;
 	if (lua_isboolean(L, 1)) threadIndex = 2;
-	if (!lua_isthread(L, threadIndex)) luaL_argerror(L, threadIndex, "is no thread");
+	if (!lua_isthread(L, threadIndex)) return luaL_argerror(L, threadIndex, "is no thread");
 	lua_State* thread = lua_tothread(L, threadIndex);
 
 	// attach hook for out-of-time exception if thread got loaded from save and hook is not applied
@@ -752,9 +761,9 @@ int luaResume(lua_State* L) {
 	// copy passed arguments to coroutine so it can return these arguments from the yield function
 	// but don't move the passed coroutine and then resume the coroutine
 	lua_xmove(L, thread, args - threadIndex);
-	const int state = lua_resume(thread, L, args - threadIndex);
+	int argCount = 0;
+	const int state = lua_resume(thread, L, args - threadIndex, &argCount);
 
-	int argCount = lua_gettop(thread);
 	// no args indicates return or internal yield (count hook)
 	if (argCount == 0) {
 		// yield self to cascade the yield down and so the lua execution halts
@@ -779,8 +788,9 @@ int luaResume(lua_State* L) {
 
 	// copy the parameters passed to yield or returned to our stack so we can return them
 	lua_xmove(thread, L, argCount);
-	return UFINLuaProcessor::luaAPIReturn(L, argCount);
+	return UFINLuaProcessor::luaAPIReturn(L, 1);
 }
+//#pragma optimize("", on)
 
 void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	PersistSetup("LuaProcessor", -2);
@@ -828,7 +838,7 @@ void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	FicsItKernel::Lua::setupFutureAPI(L);
 }
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 int UFINLuaProcessor::DoSignal(lua_State* L) {
 	UFINKernelNetworkController* net = GetKernel()->GetNetwork();
 	if (!net || net->GetSignalCount() < 1) return 0;
@@ -844,20 +854,23 @@ int UFINLuaProcessor::DoSignal(lua_State* L) {
 	}
 	return props;
 }
-#pragma optimize("", on)
+//#pragma optimize("", on)
 
 void UFINLuaProcessor::luaHook(lua_State* L, lua_Debug* ar) {
-	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
-	p->tickHelper.tickHook(L);
+	//UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
+	//p->tickHelper.tickHook(L);
+	lua_yield(L, 0);
 }
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 int UFINLuaProcessor::luaAPIReturn(lua_State* L, int args) {
-	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
-	return p->tickHelper.apiReturn(L, args);
+	//UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
+	//return p->tickHelper.apiReturn(L, args);
+	return args;
 }
-#pragma optimize("", on)
+//#pragma optimize("", on)
 
 lua_State* UFINLuaProcessor::GetLuaState() const {
 	return luaState;
 }
+#pragma optimize("", on)
