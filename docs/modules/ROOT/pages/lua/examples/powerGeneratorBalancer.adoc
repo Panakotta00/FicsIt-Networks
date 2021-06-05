@@ -25,63 +25,67 @@ nickname = "CoalGen"
 
 num = 1
 exit = false
-while num < 10 and not exit do
+while num < 200 and not exit do
   name = nickname .. tostring(num)
   id = component.findComponent(nickname .. tostring(num))
   gen = component.proxy(id)[1]
-  if not gen then 
+  if not gen then
     exit = true
   else
+    print("Init:", name)
     num = num + 1
   end
 end
 
-target_efficiency = 60
+target_efficiency = 90
 average_workload = 100
 wait_time = 0.5
 
+function get_average_workload(circuit)
+  current_workload = round(circuit.production / circuit.capacity * 100, 2)
+  average_workload = average_workload + current_workload
+  average_workload = average_workload / 2
+  return average_workload
+end
+
 function main()
+ iter = 0
  while true do
-   for j = 1, num -1, 1 do 
-    name = nickname .. tostring(j)
-    id = component.findComponent(name)
-    generator = component.proxy(id)[1]
-    name = generator.nick
-    connectors = generator.getPowerConnectors(generator)
-    if not generator.standby then
-      connector = connectors[1]
-      power_info = connector.GetPower(connector)
-      circuit = power_info.getCircuit(power_info)
-      current_workload = round(circuit.production / circuit.capacity * 100, 2)
-      -- print("Fuesed:", circuit.isFuesed)
-      average_workload = average_workload + current_workload
-      average_workload = average_workload / 2
-      print("Workload:", average_workload,"%")
-      if power_info.maxDynProduction > 0 then
-        efficiency = round(power_info.dynProduction / power_info.maxDynProduction * 100, 2)
-        if efficiency < target_efficiency and efficiency > 0 and average_workload < target_efficiency then
-           print(name, efficiency,"%", " -> down")
-           generator.standby = true
-           sleep(wait_time)
-           break
-        else
-           print(name, efficiency,"%", " OK")
-        end
-      else
-        print(name, "starting")
-      end
-    else
-      generator.standby = false
-      sleep(wait_time)
-      print(name, "down")
-    end
+   iter = iter + 1
+   for j = 1, num -1, 1 do
+     name = nickname .. tostring(j)
+     id = component.findComponent(name)
+     generator = component.proxy(id)[1]
+     name = generator.nick
+     connectors = generator.getPowerConnectors(generator)
+     connector = connectors[1]
+     power_info = connector.GetPower(connector)
+     circuit = power_info.getCircuit(power_info)
+     print("Workload:", get_average_workload(circuit), "%")
+     efficiency = round(circuit.consumption / circuit.production * 100, 2)
+     print("Efficiency:", efficiency, "%")
+     if not generator.standby then
+       if efficiency < target_efficiency then
+         generator.standby = true
+       end 
+     else
+       if efficiency < target_efficiency and efficiency > 0  then
+          print(name, efficiency, "%", " -> down")
+          generator.standby = true
+          sleep(wait_time)
+       else
+          print(name, efficiency, "%", " OK")
+          generator.standby = false
+          sleep(wait_time*3)
+       end
+     end
   end
-  print("Workload:", average_workload,"%")
-  sleep(wait_time)
- end
+  print(iter, "Workload:", average_workload,"%")
+  sleep(wait_time) end
 end
 
 main()
+print("Exited")
 ----
 
 include::partial$lua_examples_footer.adoc[]
