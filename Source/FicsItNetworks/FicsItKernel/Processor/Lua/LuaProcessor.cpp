@@ -732,8 +732,8 @@ int luaPrint(lua_State* L) {
 
 int luaYieldResume(lua_State* L, int status, lua_KContext ctx) {
 	// don't pass pushed bool for user executed yield identification
-	//return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L) - 1);
-	return UFINLuaProcessor::luaAPIReturn(L, 0);
+	return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L) - 1);
+	//return UFINLuaProcessor::luaAPIReturn(L, 0);
 }
 
 int luaYield(lua_State* L) {
@@ -792,7 +792,7 @@ int luaResume(lua_State* L) {
 
 	// copy the parameters passed to yield or returned to our stack so we can return them
 	lua_xmove(thread, L, argCount);
-	return UFINLuaProcessor::luaAPIReturn(L, 1);
+	return UFINLuaProcessor::luaAPIReturn(L, argCount);
 }
 //#pragma optimize("", on)
 
