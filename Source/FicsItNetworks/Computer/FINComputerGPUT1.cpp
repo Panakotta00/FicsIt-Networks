@@ -8,12 +8,11 @@
 #include "Widgets/SInvalidationPanel.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
 
+const FFINGPUT1BufferPixel FFINGPUT1BufferPixel::InvalidPixel;
+
 void SScreenMonitor::Construct(const FArguments& InArgs, UObject* InWorldContext) {
-	Text = InArgs._Text;
-	Foreground = InArgs._Foreground;
-	Background = InArgs._Background;
+	Buffer = InArgs._Buffer;
 	Font = InArgs._Font;
-	ScreenSize = InArgs._ScreenSize;
 	OnMouseDownEvent = InArgs._OnMouseDown;
 	OnMouseUpEvent = InArgs._OnMouseUp;
 	OnMouseMoveEvent = InArgs._OnMouseMove;
@@ -24,16 +23,10 @@ void SScreenMonitor::Construct(const FArguments& InArgs, UObject* InWorldContext
 	WorldContext = InWorldContext;
 }
 
-FString SScreenMonitor::GetText() const {
-	return Text.Get();
-}
-
-FVector2D SScreenMonitor::GetScreenSize() const {
-	return ScreenSize.Get();
-}
-
-void SScreenMonitor::SetScreenSize(FVector2D NewScreenSize) {
-	ScreenSize = NewScreenSize;
+FFINGPUT1Buffer SScreenMonitor::GetBuffer() const {
+	const FFINGPUT1Buffer* Buf = Buffer.Get();
+	if (Buf) return *Buf;
+	else return FFINGPUT1Buffer();
 }
 
 FVector2D SScreenMonitor::GetCharSize() const {
@@ -68,32 +61,26 @@ int SScreenMonitor::InputToInt(const FInputEvent& KeyEvent) {
 }
 
 FVector2D SScreenMonitor::ComputeDesiredSize(float f) const {
-	return GetCharSize() * ScreenSize.Get();
+	const FFINGPUT1Buffer* Buf = Buffer.Get();
+	int X, Y;
+	Buf->GetSize(X, Y);
+	return GetCharSize() * FVector2D(X, Y);
 }
 
 int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	FVector2D CharSize = GetCharSize();
-	FVector2D ScreenSizeV = ScreenSize.Get();
+	const FFINGPUT1Buffer* Buf = Buffer.Get();
+	int Width, Height;
+	Buf->GetSize(Width, Height);
 	FSlateBrush boxBrush = FSlateBrush();
-	const TArray<FLinearColor>& ForegroundCache = this->Foreground.Get();
-	const TArray<FLinearColor>& BackgroundCache = this->Background.Get();
-	
-	const FString& TextGrid = Text.Get();
 	FSlateFontInfo FontToUse = Font.Get();
 	
-	for (int Y = 0; Y < ScreenSizeV.Y; ++Y) {
-		for (int X = 0; X < ScreenSizeV.X; ++X) {
-			int64 CharIndex = Y * ScreenSizeV.X + X;
+	for (int Y = 0; Y < Height; ++Y) {
+		for (int X = 0; X < Width; ++X) {
+			const FFINGPUT1BufferPixel& Pixel = Buf->Get(X, Y);
 			
-			FLinearColor ForegroundV = FLinearColor(1,1,1,1);
-			if (CharIndex < ForegroundCache.Num()) {
-				ForegroundV = ForegroundCache[CharIndex];
-			}
-			FLinearColor BackgroundV = FLinearColor(0,0,0,0);
-			if (CharIndex < BackgroundCache.Num()) {
-				BackgroundV = BackgroundCache[CharIndex];
-			}
-			FString Char(1, &TextGrid[CharIndex]);
+			
+			FString Char = FString::Chr(Pixel.Character);
 			if (Char.TrimStartAndEnd().Len() > 0) FSlateDrawElement::MakeText(
                 OutDrawElements,
                 LayerId+1,
@@ -101,7 +88,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
                 *Char,
 				FontToUse,
                 ESlateDrawEffect::None,
-                ForegroundV
+                Pixel.ForegroundColor
             );
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
@@ -109,7 +96,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1), 1),
 				&boxBrush,
 				ESlateDrawEffect::None,
-				BackgroundV);
+				Pixel.BackgroundColor);
 		}
 	}
 	return LayerId+1;
@@ -178,13 +165,14 @@ bool IsAction(UObject* Context, const FKeyEvent& InKeyEvent, const FName& Action
 
 bool SScreenMonitor::HandleShortCut(const FKeyEvent& InKeyEvent) {
 	if (IsAction(WorldContext, InKeyEvent, TEXT("FicsItNetworks.CopyScreen"))) {
-		FVector2D Size = ScreenSize.Get();
-		FString AllText = Text.Get();
+		int Width, Height;
+		Buffer.Get()->GetSize(Width, Height);
+		FString AllText = Buffer.Get()->GetAsText();
 		FString FormattedText = "";
 		int i = 0;
 		while (i < AllText.Len()) {
-			FormattedText += AllText.Mid(i, Size.X).TrimEnd() + '\n';
-			i += Size.X;
+			FormattedText += AllText.Mid(i, Width).TrimEnd() + '\n';
+			i += Width;
 		}
 		UFINComponentUtility::ClipboardCopy(FormattedText);
 		return true;
@@ -207,7 +195,7 @@ SScreenMonitor::SScreenMonitor() {
 AFINComputerGPUT1::AFINComputerGPUT1() {
 	PrimaryActorTick.bCanEverTick = false;
 	
-	SetScreenSize(FVector2D(120, 30));
+	SetScreenSize(120, 30);
 
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
@@ -229,10 +217,7 @@ void AFINComputerGPUT1::BindScreen(const FFINNetworkTrace& screen) {
 void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(AFINComputerGPUT1, TextGrid);
-	DOREPLIFETIME(AFINComputerGPUT1, Foreground);
-	DOREPLIFETIME(AFINComputerGPUT1, Background);
-	DOREPLIFETIME(AFINComputerGPUT1, ScreenSize);
+	DOREPLIFETIME(AFINComputerGPUT1, FrontBuffer);
 }
 
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
@@ -241,17 +226,9 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	return SAssignNew(CachedInvalidation, SInvalidationPanel)
 	.Content()[
 		SNew(SScreenMonitor,(UObject*)GetWorld())
-		.ScreenSize_Lambda([this]() {
-			return ScreenSize;
-		})
-		.Text_Lambda([this]() {
-            return TextGrid;
-		})
-		.Foreground_Lambda([this]() {
-			return Foreground;
-		})
-		.Background_Lambda([this]() {
-			return Background;
+		.Buffer_Lambda([this]() {
+			FScopeLock Lock(&DrawingMutex);
+            return &FrontBuffer;
 		})
 		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
 		.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
@@ -281,28 +258,12 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
     ];
 }
 
-void AFINComputerGPUT1::SetScreenSize(FVector2D size) {
-	if (ScreenSize == size) return;
-	FVector2D oldScreenSize = ScreenSize;
-	ScreenSize = size;
+void AFINComputerGPUT1::SetScreenSize(int Width, int Height) {
+	FScopeLock Lock(&DrawingMutex);
 
-	TextGrid.Empty();
-	Foreground.Empty();
-	Background.Empty();
+	if (!BackBuffer.SetSize(Width, Height)) return;
 
-	TextGrid = FString::ChrN(size.X * size.Y, ' ');
-	for (int y = 0; y < size.Y; ++y) {
-		for (int x = 0; x < size.X; ++x) {
-			Foreground.Add(CurrentForeground);
-			Background.Add(CurrentBackground);
-		}
-	}
-
-	TextGridBuffer = TextGrid;
-	ForegroundBuffer = Foreground;
-	BackgroundBuffer = Background;
-
-	if (PrimaryActorTick.bCanEverTick) netSig_ScreenSizeChanged(oldScreenSize.X, oldScreenSize.Y);
+	if (PrimaryActorTick.bCanEverTick) netSig_ScreenSizeChanged(Width, Height);
 
 	ForceNetUpdate();
 }
@@ -334,69 +295,22 @@ UObject* AFINComputerGPUT1::netFunc_getScreen() {
 
 void AFINComputerGPUT1::netFunc_setText(int x, int y, const FString& str) {
 	FScopeLock Lock(&DrawingMutex);
-	FString toSet = str;
-	while (toSet.Len() > 0) {
-		FString Line;
-		bool newLine = toSet.Split("\n", &Line, &toSet);
-		if (!newLine) {
-			Line = toSet;
-			toSet = "";
-		}
-		while (Line.Len() > 0) {
-			FString inLine;
-			bool returned = Line.Split("\r", &inLine, &Line);
-			if (!returned) {
-				inLine = Line;
-				Line = "";
-			}
-			int oldX = x + inLine.Len();
-			if (y >= 0 && x < ScreenSize.X && y < ScreenSize.Y) {
-				if (x < 0) {
-					if (inLine.Len() < FMath::Abs(x)) {
-						x = -1;
-					} else {
-						inLine.RemoveAt(0, FMath::Abs(x));
-						x = 0;
-					}
-				}
-				if (x >= 0) {
-					int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(ScreenSize.X)-x-1);
-					if (replace > 0) {
-						int64 CharIndex = y * ScreenSize.X + x;
-						TextGridBuffer.RemoveAt(CharIndex, replace);
-						TextGridBuffer.InsertAt(CharIndex, inLine.Left(replace));
-						for (int dx = 0; dx < replace; ++dx) {
-							ForegroundBuffer[CharIndex + dx] = CurrentForeground;
-							BackgroundBuffer[CharIndex + dx] = CurrentBackground;
-						}
-					}
-				}
-			}
-			x = oldX;
-			if (returned) x = 0;
-		}
-		if (newLine) ++y;
-	}
+	BackBuffer.SetText(x, y, str, CurrentForeground, CurrentBackground);
 }
 
 void AFINComputerGPUT1::netFunc_fill(int x, int y, int dx, int dy, const FString& str) {
 	FString c = str;
 	if (FRegexMatcher(FRegexPattern("^[[:cntrl:]]?$"), c).FindNext()) c = " ";
-	if (dx < 0) dx = 0;
-	if (dy < 0) dy = 0;
-	for (int ny = y; ny < y+dy; ++ny) {
-		netFunc_setText(x, ny, FString::ChrN(dx, c[0]));
-	}
+	BackBuffer.Fill(x, y, dx, dy, FFINGPUT1BufferPixel(c[0], CurrentForeground, CurrentBackground));
 }
 
 void AFINComputerGPUT1::netFunc_getSize(int& w, int& h) {
-	w = ScreenSize.X;
-	h = ScreenSize.Y;
+	BackBuffer.GetSize(w, h);
 }
 
 void AFINComputerGPUT1::netFunc_setSize(int w, int h) {
 	FScopeLock Lock(&DrawingMutex);
-	SetScreenSize(FVector2D(FMath::Clamp(w, 1, 300), FMath::Clamp(h, 1, 100)));
+	SetScreenSize(FMath::Clamp(w, 1, 300), FMath::Clamp(h, 1, 100));
 }
 
 void AFINComputerGPUT1::netFunc_setForeground(float r, float g, float b, float a) {
@@ -409,32 +323,18 @@ void AFINComputerGPUT1::netFunc_setBackground(float r, float g, float b, float a
 	CurrentBackground = FLinearColor(FMath::Clamp(r, 0.0f, 1.0f), FMath::Clamp(g, 0.0f, 1.0f), FMath::Clamp(b, 0.0f, 1.0f), FMath::Clamp(a, 0.0f, 1.0f));
 }
 
-void AFINComputerGPUT1::netFunc_setBuffer(const FString& characters, TArray<float> foreground, TArray<float> background) {
+void AFINComputerGPUT1::netFunc_setBuffer(FFINGPUT1Buffer Buffer) {
 	FScopeLock Lock(&DrawingMutex);
-	int Length = ScreenSize.X * ScreenSize.Y;
-	if (characters.Len() != Length) return;
-	if (foreground.Num() != Length*4) return;
-	if (background.Num() != Length*4) return;
-	TextGridBuffer = characters;
-	ParallelFor(Length, [this, &foreground, &background](int i) {
-		FLinearColor& FColor = ForegroundBuffer[i];
-		FLinearColor& BColor = BackgroundBuffer[i];
-		i = i * 4;
-		FColor.R = foreground[i];
-		FColor.G = foreground[i+1];
-		FColor.B = foreground[i+2];
-		FColor.A = foreground[i+3];
-		BColor.R = background[i];
-		BColor.G = background[i+1];
-		BColor.B = background[i+2];
-		BColor.A = background[i+3];
-	});
+	BackBuffer = Buffer;
+}
+
+FFINGPUT1Buffer AFINComputerGPUT1::netFunc_getBuffer() {
+	FScopeLock Lock(&DrawingMutex);
+	return BackBuffer;
 }
 
 void AFINComputerGPUT1::netFunc_flush() {
 	FScopeLock Lock(&DrawingMutex);
-	TextGrid = TextGridBuffer;
-	Foreground = ForegroundBuffer;
-	Background = BackgroundBuffer;
+	FrontBuffer = BackBuffer;
 	bFlushed = true;
 }

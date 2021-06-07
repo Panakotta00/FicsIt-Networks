@@ -1,24 +1,308 @@
 #pragma once
 
 #include "FINComputerGPU.h"
+#include "Async/ParallelFor.h"
+
 #include "FINComputerGPUT1.generated.h"
 
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenKeyEventHandler, uint32, uint32, int);
 DECLARE_DELEGATE_RetVal_TwoParams(FReply, FScreenKeyCharEventHandler, TCHAR, int);
 
+USTRUCT()
+struct FFINGPUT1BufferPixel {
+	GENERATED_BODY()
+public:
+	static const FFINGPUT1BufferPixel InvalidPixel;
+	
+	TCHAR Character;
+	FLinearColor ForegroundColor;
+	FLinearColor BackgroundColor;
+
+	bool Serialize(FStructuredArchive::FSlot Slot) {
+		FStructuredArchiveRecord Record = Slot.EnterRecord();
+		Record.EnterField(SA_FIELD_NAME(TEXT("Character"))) << Character;
+		Record.EnterField(SA_FIELD_NAME(TEXT("ForegroundColor"))) << ForegroundColor;
+		Record.EnterField(SA_FIELD_NAME(TEXT("BackgroundColor"))) << BackgroundColor;
+		return true;
+	}
+	
+	FORCEINLINE explicit FFINGPUT1BufferPixel(TCHAR InCharacter = 0, FLinearColor InForeground = FLinearColor::White, FLinearColor InBackground = FLinearColor::Transparent) :
+		Character(InCharacter),
+		ForegroundColor(InForeground),
+		BackgroundColor(InBackground) {}
+	
+	FORCEINLINE bool IsValid() const {
+		return Character != 0;
+	}
+};
+
+template<>
+struct TStructOpsTypeTraits<FFINGPUT1BufferPixel> : TStructOpsTypeTraitsBase2<FFINGPUT1BufferPixel> {
+	enum {
+		WithStructuredSerializer = true
+	};
+};
+
+USTRUCT()
+struct FFINGPUT1Buffer {
+	GENERATED_BODY()
+private:
+	UPROPERTY(SaveGame)
+	int Width = 0;
+
+	UPROPERTY(SaveGame)
+	int Height = 0;
+
+	UPROPERTY(SaveGame)
+	TArray<FFINGPUT1BufferPixel> Pixels;
+
+	FORCEINLINE int PosToIndex(int X, int Y) const {
+		if (!FMath::IsWithinInclusive(X, 0, Width)
+			|| !FMath::IsWithinInclusive(Y, 0, Height)) return -1;
+		return Y * Width + X;
+	}
+
+	FORCEINLINE bool IndexToPos(int Index, int& X, int& Y) const {
+		if (!FMath::IsWithinInclusive(Index, 0, Width*Height - 1)) return false;
+		X = Index % Width;
+		Y = Index / Width;
+		return true;
+	}
+
+public:
+	FFINGPUT1Buffer() = default;
+
+	/**
+	 * Creates and fills a new buffer with the default pixels.
+	 * If CopyFrom is given, copies the buffer into the upper left corner of the new buffer.
+	 */
+	FORCEINLINE FFINGPUT1Buffer(int InWidth, int InHeight, const FFINGPUT1Buffer* CopyFrom = nullptr) : Width(InWidth), Height(InHeight) {
+		check(InWidth >= 0 && InHeight >= 0);
+		
+		int EmptyHeight = Height;
+
+		if (CopyFrom) {
+			const int CopyWidth = FMath::Min(Width, CopyFrom->Width);
+			const int CopyHeight = FMath::Min(Height, CopyFrom->Height);
+			const int EmptyWidth = Width - CopyWidth;
+			EmptyHeight = Height - CopyHeight;
+
+			for (int i = 0; i < CopyHeight; ++i) {
+				Pixels.AddUninitialized(CopyWidth);
+				FMemory::Memcpy(&Pixels[i * Width], &CopyFrom->Pixels[i * CopyFrom->Width], CopyWidth * sizeof(FFINGPUT1BufferPixel));
+				Pixels.AddDefaulted(EmptyWidth);
+			}
+		}
+		
+		Pixels.AddDefaulted(EmptyHeight * Width);
+	}
+	
+	/**
+	 * Allows to get the dimensions of the buffer
+	 *
+	 * @param	OutWidth	the width of the buffer
+	 * @param	OutHeight	the height of the buffer
+	 */
+	FORCEINLINE void GetSize(int& OutWidth, int& OutHeight) const {
+		OutWidth = Width;
+		OutHeight = Height;
+	}
+
+	/**
+	 * Allows to resize the buffer, data that was already inside the buffer will be positioned the at the same location.
+	 *
+	 * @param	InWidth		the new width of the buffer
+	 * @param	InHeight	the new height of the buffer
+	 */
+	FORCEINLINE void SetSize(int InWidth, int InHeight) {
+		if (InWidth < 0) InWidth = 0;
+		if (InHeight < 0) InHeight = 0;
+		*this = FFINGPUT1Buffer(InWidth, InHeight, this);
+	}
+	
+	/**
+	 * Allows to get the character on the given position in the buffer.
+	 *
+	 * @param	X				X Position of the character you want to get
+	 * @param	Y				Y Position of the character you want to get
+	 * @retrun	The pixel at the given location. Invalid Pixel if invalid position.
+	 */
+	FORCEINLINE const FFINGPUT1BufferPixel& Get(int X, int Y) const {
+		const int Index = PosToIndex(X, Y);
+		if (Index < 0) return FFINGPUT1BufferPixel::InvalidPixel;
+		return Pixels[Index];
+	}
+
+	/**
+	 * Allows to set the character on the given position in the buffer.
+	 *
+	 * @param	X			X Position of the character you want to set
+	 * @param	Y			Y Position of the character you want to set
+	 * @param	Pixel	The pixel you want to store at the given location.
+	 * @retrun	True if valid position and able to set pixel.
+	 */
+	FORCEINLINE bool Set(int X, int Y, FFINGPUT1BufferPixel Pixel) {
+		const int Index = PosToIndex(X, Y);
+		if (Index < 0) return false;
+		Pixels[Index] = Pixel;
+		return true;
+	}
+
+	/**
+	 * Allows to copy a given buffer to this buffer at the given location
+	 *
+	 * @param	X		the X position of the upper left corner at witch it should get copied to
+	 * @param	Y		the Y position of the upper left corner at witch it should get copied to
+	 * @param	From	the buffer which you want to copy from
+	 */
+	FORCEINLINE void Copy(int X, int Y, const FFINGPUT1Buffer& From) {
+		const int CopyWidth = X < 0 ? FMath::Min(Width, From.Width - X) : FMath::Min(Width - X, From.Width);
+		const int CopyHeight = Y < 0 ? FMath::Min(Height, From.Height - Y) : FMath::Min(Height - Y, From.Height);
+		const int OffsetX = FMath::Clamp(X, 0, TNumericLimits<int>::Max());
+		const int OffsetY = FMath::Clamp(Y, 0, TNumericLimits<int>::Max());
+		const int FOffsetX = FMath::Clamp(-X, 0, TNumericLimits<int>::Max());
+		const int FOffsetY = FMath::Clamp(-Y, 0, TNumericLimits<int>::Max());
+		if (OffsetX >= Width || OffsetY >= Height) return;
+		if (FOffsetX >= From.Width || FOffsetY >= From.Height) return;
+
+		for (int i = 0; i < CopyHeight; ++i) {
+			const int Offset = OffsetX + (OffsetY + i) * Width;
+			const int FOffset = FOffsetX + (FOffsetY + i) * From.Width;
+			FMemory::Memcpy(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth * sizeof(FFINGPUT1BufferPixel));
+		}
+	}
+
+	/**
+	 * Allows to fill this buffer in the given range with the given pixel
+	 *
+	 * @param	InX			the x position were the upper left corner of the range should be
+	 * @param	InY			the y position were the upper left corner of the range should be
+	 * @param	InWidth		the width of the range
+	 * @param	InHeight	the height of the range
+	 * @param	InPixel		the pixel you want to place on each pixel of the range
+	 */
+	FORCEINLINE void Fill(int InX, int InY, int InWidth, int InHeight, const FFINGPUT1BufferPixel& InPixel) {
+		const int CopyWidth = InX < 0 ? FMath::Min(Width, InWidth - InX) : FMath::Min(Width - InX, InWidth);
+		const int CopyHeight = InX < 0 ? FMath::Min(Height, InHeight - InY) : FMath::Min(Height - InY, InHeight);
+		const int OffsetX = FMath::Clamp(InX, 0, TNumericLimits<int>::Max());
+		const int OffsetY = FMath::Clamp(InY, 0, TNumericLimits<int>::Max());
+		if (OffsetX >= Width || OffsetY >= Height) return;
+		
+		for (int X = 0; X < CopyWidth; ++X) {
+			for (int Y = 0; Y < CopyHeight; ++Y) {
+				const int Offset = OffsetX + X + (OffsetY + Y) * Width;
+				Pixels[Offset] = InPixel;
+			}
+		}
+	}
+
+	/**
+	 * Allows to write the given text onto the buffer and with the given offset.
+	 *
+	 * @param	InX				the X Position at which the text should begin to get written
+	 * @param	InY				the Y Position at which the text should begin to get written
+	 * @param	InText			the text that should get written
+	 * @param	InForeground	the foreground color which will be used to write the text
+	 * @param	InBackground	the background color which will be used to write the text
+	 */
+	FORCEINLINE void SetText(int InX, int InY, const FString& InText, const FLinearColor& InForeground, const FLinearColor& InBackground) {
+		FString toSet = InText;
+		while (toSet.Len() > 0) {
+			FString Line;
+			bool newLine = toSet.Split("\n", &Line, &toSet);
+			if (!newLine) {
+				Line = toSet;
+				toSet = "";
+			}
+			while (Line.Len() > 0) {
+				FString inLine;
+				bool returned = Line.Split("\r", &inLine, &Line);
+				if (!returned) {
+					inLine = Line;
+					Line = "";
+				}
+				int oldX = InX + inLine.Len();
+				if (InY >= 0 && InX < Width && InY < Height) {
+					if (InX < 0) {
+						if (inLine.Len() < FMath::Abs(InX)) {
+							InX = -1;
+						} else {
+							inLine.RemoveAt(0, FMath::Abs(InX));
+							InX = 0;
+						}
+					}
+					if (InX >= 0) {
+						int replace = FMath::Clamp(inLine.Len(), 0, static_cast<int>(Width)-InX);
+						if (replace > 0) {
+							int64 CharIndex = InY * Width + InX;
+							for (int dx = 0; dx < replace; ++dx) {
+								Set(InX + dx, InY, FFINGPUT1BufferPixel(inLine[dx], InForeground, InBackground));
+							}
+						}
+					}
+				}
+				InX = oldX;
+				if (returned) InX = 0;
+			}
+			if (newLine) ++InY;
+		}
+	}
+
+	/**
+	 * Sets the internal data based on the given data.
+	 *
+	 * @param	InCharacters	the characters you want to draw with a length of exactly width*height
+	 * @param	InForeground	the values of the foreground color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4
+	 * @param	InBackground	the values of the background color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4
+	 * @return	True when successfully able to set the raw data of this buffer
+	 */
+	FORCEINLINE bool SetRaw(const FString& InCharacters, const TArray<float>& InForeground, const TArray<float>& InBackground) {
+		const int Length = Width * Height;
+		if (InCharacters.Len() != Length) return false;
+		if (InForeground.Num() != Length*4) return false;
+		if (InBackground.Num() != Length*4) return false;
+		ParallelFor(Length, [this, &InCharacters, &InForeground, &InBackground, Width, Height](int i) {
+			int Offset = i * 4;
+			const FLinearColor ForegroundColor(
+				InForeground[Offset],
+				InForeground[Offset+1],
+				InForeground[Offset+2],
+				InForeground[Offset+3]);
+			const FLinearColor BackgroundColor(
+				InBackground[Offset],
+				InBackground[Offset+1],
+				InBackground[Offset+2],
+				InBackground[Offset+3]);
+			Set(i % Width, i / Width, FFINGPUT1BufferPixel(InCharacters[i], ForegroundColor, BackgroundColor));
+		});
+		return true;
+	}
+
+	/**
+	 * Returns the buffer as String with no ending whitespace.
+	 */
+	FORCEINLINE FString GetAsText() const {
+		FString Out;
+		for (int Y = 0; Y < Height; ++Y) {
+			const int LineOffset = Y * Width;
+			FString Line;
+			for (int X = 0; X < Width; ++X) {
+				Line += Pixels[LineOffset + X].Character;
+			}
+			Out += Line.TrimEnd() + '\n';
+		}
+		return Out;
+	}
+};
+
 class FICSITNETWORKS_API SScreenMonitor : public SLeafWidget {
-	SLATE_BEGIN_ARGS(SScreenMonitor) : _Text(),
-		_Font(),
-		_ScreenSize()
+	SLATE_BEGIN_ARGS(SScreenMonitor) : _Font()
 		{
 			_Clipping = EWidgetClipping::OnDemand;
 		}
-		SLATE_ATTRIBUTE(FString, Text)
 		SLATE_ATTRIBUTE(FSlateFontInfo, Font)
-		SLATE_ATTRIBUTE(FVector2D, ScreenSize)
-		SLATE_ATTRIBUTE(TArray<FLinearColor>, Foreground)
-		SLATE_ATTRIBUTE(TArray<FLinearColor>, Background)
+		SLATE_ATTRIBUTE(const FFINGPUT1Buffer*, Buffer)
 
 		SLATE_EVENT(FScreenCursorEventHandler, OnMouseDown)
 		SLATE_EVENT(FScreenCursorEventHandler, OnMouseUp)
@@ -32,25 +316,11 @@ public:
     void Construct( const FArguments& InArgs, UObject* Context);
 
 	/**
-	 * Returns the currently displayed text grid.
+	 * Returns the currently displayed buffer.
 	 *
-	 * @return	the currently displayed text grid
+	 * @return	the currently displayed buffer.
 	 */
-	FString GetText() const;
-
-	/**
-	 * Allows you to get information about the character screen size.
-	 *
-	 * @return	the screen size
-	 */
-	FVector2D GetScreenSize() const;
-
-	/**
-	 * Allows you to set the screen size of the display.
-	 *
-	 * @param[in]	ScreenSize	the new screen size for the display
-	 */
-	void SetScreenSize(FVector2D ScreenSize);
+	FFINGPUT1Buffer GetBuffer() const;
 
 	/**
 	 * This function returns the size of a single displayed character slot in the widgets local space
@@ -98,11 +368,8 @@ public:
 	static int InputToInt(const FInputEvent& InputEvent);
 	
 private:
-    TAttribute<FString> Text;
-	TAttribute<TArray<FLinearColor>> Foreground;
-	TAttribute<TArray<FLinearColor>> Background;
+    TAttribute<const FFINGPUT1Buffer*> Buffer;
 	TAttribute<FSlateFontInfo> Font;
-	TAttribute<FVector2D> ScreenSize;
 	FScreenCursorEventHandler OnMouseDownEvent;
 	FScreenCursorEventHandler OnMouseUpEvent;
 	FScreenCursorEventHandler OnMouseMoveEvent;
@@ -137,14 +404,8 @@ UCLASS()
 class AFINComputerGPUT1 : public AFINComputerGPU {
 	GENERATED_BODY()
 private:
-	UPROPERTY(SaveGame)
-	FFINNetworkTrace Test;
-
 	UPROPERTY(SaveGame, Replicated)
-	FString TextGrid;
-
-	UPROPERTY(SaveGame, Replicated)
-	FVector2D ScreenSize;
+	FFINGPUT1Buffer FrontBuffer;
 
 	UPROPERTY(SaveGame)
 	FLinearColor CurrentForeground = FLinearColor(1,1,1,1);
@@ -152,20 +413,8 @@ private:
 	UPROPERTY(SaveGame)
 	FLinearColor CurrentBackground = FLinearColor(0,0,0,0);
 
-	UPROPERTY(SaveGame, Replicated)
-	TArray<FLinearColor> Foreground;
-
-	UPROPERTY(SaveGame, Replicated)
-	TArray<FLinearColor> Background;
-
 	UPROPERTY(SaveGame)
-	FString TextGridBuffer;
-
-	UPROPERTY(SaveGame)
-	TArray<FLinearColor> ForegroundBuffer;
-
-	UPROPERTY(SaveGame)
-	TArray<FLinearColor> BackgroundBuffer;
+	FFINGPUT1Buffer BackBuffer;
 	
 	UPROPERTY()
 	FSlateBrush boxBrush;
@@ -190,9 +439,10 @@ public:
 	/**
 	* Reallocates the TextGrid for the new given screen size.
 	*
-	* @param[in]	size	the new screen size
+	* @param[in]	Width	the new width of the screen
+	* @param[in]	Height	the new height of the screen
 	*/
-	void SetScreenSize(FVector2D size);
+	void SetScreenSize(int Width, int Height);
 
 	/**
 	 * Validates the screen widget on all clients and server
@@ -480,23 +730,9 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_setBuffer(const FString& characterBuf, TArray<float> foregroundBuf, TArray<float> backgroundBuf);
+	void netFunc_setBuffer(FFINGPUT1Buffer Buffer);
 	UFUNCTION()
-	void netFuncMeta_setBuffer(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
-		InternalName = "setBuffer";
-		DisplayName = FText::FromString("Set Buffer");
-		Description = FText::FromString("Completely overwrites the internal hidden buffer with the provided data. Flush still has to get called to apply buffer changes to active buffer.");
-		ParameterInternalNames.Add("characters");
-		ParameterDisplayNames.Add(FText::FromString("Character Buffer"));
-		ParameterDescriptions.Add(FText::FromString("String holding all character of the buffer from upper-left to lower-right, no line breaks. Every character within the string resembles one character on the display. The string has to have exactly the length screen width * screen height. e.g. with a screen size of 300x100 the string has to have an length of exactly 30000 characters."));
-		ParameterInternalNames.Add("foreground");
-		ParameterDisplayNames.Add(FText::FromString("Foreground Buffer"));
-		ParameterDescriptions.Add(FText::FromString("An array of numbers that holds the rgba values of each character on the display. The array is split into sets of four values that combined give a color value rgba. Since there has to be a set for each character drawn, the array has to have a length of width * height * 4. e.g. with a screen size of 300x100 the array should have 120000 number values."));
-		ParameterInternalNames.Add("background");
-		ParameterDisplayNames.Add(FText::FromString("Background Buffer"));
-		ParameterDescriptions.Add(FText::FromString("An array of numbers that holds the rgba values of each character background box on the display. The array is split into sets of four values that combined give a color value rgba. Since there has to be a set for each character background drawn, the array has to have a length of width * height * 4. e.g. with a screen size of 300x100 the array should have 120000 number values."));
-		Runtime = 2;
-	}
+	FFINGPUT1Buffer netFunc_getBuffer();
 
 	UFUNCTION()
 	void netFunc_flush();
