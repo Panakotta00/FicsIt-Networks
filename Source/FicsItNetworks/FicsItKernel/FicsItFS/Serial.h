@@ -10,6 +10,7 @@ private:
 	std::unordered_set<CodersFileSystem::WRef<FFINKernelSerialStream>> inStreams;
 	CodersFileSystem::ListenerListRef listeners;
 	CodersFileSystem::SizeCheckFunc sizeCheck;
+	FCriticalSection Mutex;
 
 public:
 	FFINKernelFSSerial(CodersFileSystem::ListenerListRef listeners, CodersFileSystem::SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
