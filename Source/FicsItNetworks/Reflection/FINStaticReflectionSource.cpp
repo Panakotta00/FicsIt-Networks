@@ -45,6 +45,7 @@
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
+#include "FicsItNetworks/Computer/FINComputerGPUT1.h"
 #include "FicsItNetworks/Network/FINFuture.h"
 #include "FicsItNetworks/Network/FINNetworkConnectionComponent.h"
 #include "FicsItNetworks/Utils/FINTargetPoint.h"
@@ -2165,4 +2166,72 @@ BeginProp(RFloat, a, "Alpha", "The alpha (opacity) portion of the color.") {
 } PropSet() {
 	self->A = Val;
 } EndProp()
+EndStruct()
+
+BeginStruct(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A structure that can hold a buffer of characters and colors that can be displayed with a gpu")
+BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.") {
+	OutVal(0, RFloat, width, "Width", "The width of this buffer")
+	OutVal(1, RFloat, height, "Height", "The height of this buffer")
+	Body()
+	int Width, Height;
+	self->GetSize(Width, Height);
+	width = (FINInt)Width;
+	height = (FINInt)Height;
+} EndFunc()
+BeginFunc(setSize, "Set Size", "Allows to set the dimensions of the buffer.") {
+	InVal(0, RFloat, width, "Width", "The width this buffer should now have")
+	InVal(1, RFloat, height, "Height", "The height this buffer now have")
+	Body()
+	self->SetSize(width, height);
+} EndFunc()
+
+BeginFunc(get, "Get", "Allows to get a single pixel from the buffer at the given position", 2) {
+	InVal(0, RInt, x, "X", "The x position of the character you want to get")
+	InVal(1, RInt, y, "Y", "The y position of the character you want to get")
+	OutVal(2, RString, c, "Char", "The character at the given position")
+	OutVal(3, RStruct<FLinearColor>, foreground, "Foreground Color", "The foreground color of the pixel at the given position")
+	OutVal(4, RStruct<FLinearColor>, background, "Background Color", "The background color of the pixel at the given position")
+	Body()
+	const FFINGPUT1BufferPixel& Pixel = self->Get(x, y);
+	c = FString::Chr(Pixel.Character);
+	foreground = (FINStruct) Pixel.ForegroundColor;
+	background = (FINStruct) Pixel.BackgroundColor;
+} EndFunc()
+BeginFunc(set, "Set", "Allows to set a single pixel of the buffer at the given position", 2) {
+	InVal(0, RInt, x, "X", "The x position of the character you want to set")
+	InVal(1, RInt, y, "Y", "The y position of the character you want to set")
+	InVal(2, RString, c, "Char", "The character the pixel should have")
+	InVal(3, RStruct<FLinearColor>, foreground, "Foreground Color", "The foreground color the pixel at the given position should have")
+	InVal(4, RStruct<FLinearColor>, background, "Background Color", "The background color the pixel at the given position should have")
+	OutVal(5, RBool, done, "Done", "True if the pixel got set successfully")
+	Body()
+	if (c.Len() < 1) return;
+	done = self->Set(x, y, FFINGPUT1BufferPixel(c[0], foreground, background));
+} EndFunc()
+BeginFunc(copy, "Copy", "Copies the given buffer at the given offset of the upper left corner into this buffer.") {
+	InVal(0, RInt, x, "X", "The x offset of the upper left corner of the buffer relative to this buffer")
+	InVal(1, RInt, y, "Y", "The y offset of the upper left corener of the buffer relative to this buffer")
+	InVal(2, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The buffer from wich you want to copy from")
+	Body()
+	self->Copy(x, y, buffer);
+} EndFunc()
+BeginFunc(setText, "Set Text", "Allows to write the given text onto the buffer and with the given offset.") {
+	InVal(0, RInt, x, "X", "The X Position at which the text should begin to get written.")
+	InVal(1, RInt, y, "Y", "The Y Position at which the text should begin to get written.")
+	InVal(2, RString, text, "Text", "The text that should get written.")
+	InVal(3, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color which will be used to write the text.")
+	InVal(4, RStruct<FLinearColor>, background, "Background", "The background color which will be used to write the text.")
+	Body()
+	self->SetText(x, y, text, foreground, background);
+} EndFunc()
+BeginFunc(fill, "Fill", "Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.")
+	InVal(0, RInt, x, "X", "The x coordinate at which the rectangle should get drawn. (upper-left corner)")
+	InVal(1, RInt, y, "Y", "The y coordinate at which the rectangle should get drawn. (upper-left corner)")
+	InVal(2, RInt, width, "Width", "The width of the rectangle.")
+	InVal(3, RInt, height, "Height", "The height of the rectangle.")
+	InVal(4, RString, character, "Character", "A string with a single character that will be used for each pixel in the range you want to fill.")
+	Body()
+	if (character.Len() < 1) character = " ";
+	self->Fill(x, y, width, height, character[0]);
+} EndFunc()
 EndStruct()
