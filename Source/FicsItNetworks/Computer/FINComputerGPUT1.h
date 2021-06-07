@@ -114,11 +114,14 @@ public:
 	 *
 	 * @param	InWidth		the new width of the buffer
 	 * @param	InHeight	the new height of the buffer
+	 * @retrun	True if the size has changed (f.e. false if the size was the same as the current size)
 	 */
-	FORCEINLINE void SetSize(int InWidth, int InHeight) {
+	FORCEINLINE bool SetSize(int InWidth, int InHeight) {
 		if (InWidth < 0) InWidth = 0;
 		if (InHeight < 0) InHeight = 0;
+		if (InWidth == Width && InHeight == Height) return false;
 		*this = FFINGPUT1Buffer(InWidth, InHeight, this);
+		return true;
 	}
 	
 	/**
@@ -262,7 +265,7 @@ public:
 		if (InCharacters.Len() != Length) return false;
 		if (InForeground.Num() != Length*4) return false;
 		if (InBackground.Num() != Length*4) return false;
-		ParallelFor(Length, [this, &InCharacters, &InForeground, &InBackground, Width, Height](int i) {
+		ParallelFor(Length, [this, &InCharacters, &InForeground, &InBackground](int i) {
 			int Offset = i * 4;
 			const FLinearColor ForegroundColor(
 				InForeground[Offset],
@@ -732,7 +735,28 @@ public:
 	UFUNCTION()
 	void netFunc_setBuffer(FFINGPUT1Buffer Buffer);
 	UFUNCTION()
+	void netFuncMeta_setBuffer(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "setBuffer";
+		DisplayName = FText::FromString("Set Buffer");
+		Description = FText::FromString("Allows to change the back buffer of the GPU to the given buffer.");
+		ParameterInternalNames.Add("buffer");
+		ParameterDisplayNames.Add(FText::FromString("Buffer"));
+		ParameterDescriptions.Add(FText::FromString("The Buffer you want to now use as back buffer."));
+		Runtime = 2;
+	}
+	
+	UFUNCTION()
 	FFINGPUT1Buffer netFunc_getBuffer();
+	UFUNCTION()
+    void netFuncMeta_getBuffer(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+    	InternalName = "getBuffer";
+    	DisplayName = FText::FromString("Get Buffer");
+    	Description = FText::FromString("Returns the back buffer as struct to be able to use advanced buffer handling functions. (struct is a copy)");
+    	ParameterInternalNames.Add("buffer");
+    	ParameterDisplayNames.Add(FText::FromString("Buffer"));
+    	ParameterDescriptions.Add(FText::FromString("The Buffer that is currently the back buffer."));
+    	Runtime = 2;
+    }
 
 	UFUNCTION()
 	void netFunc_flush();

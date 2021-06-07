@@ -2184,7 +2184,6 @@ BeginFunc(setSize, "Set Size", "Allows to set the dimensions of the buffer.") {
 	Body()
 	self->SetSize(width, height);
 } EndFunc()
-
 BeginFunc(get, "Get", "Allows to get a single pixel from the buffer at the given position", 2) {
 	InVal(0, RInt, x, "X", "The x position of the character you want to get")
 	InVal(1, RInt, y, "Y", "The y position of the character you want to get")
@@ -2208,14 +2207,14 @@ BeginFunc(set, "Set", "Allows to set a single pixel of the buffer at the given p
 	if (c.Len() < 1) return;
 	done = self->Set(x, y, FFINGPUT1BufferPixel(c[0], foreground, background));
 } EndFunc()
-BeginFunc(copy, "Copy", "Copies the given buffer at the given offset of the upper left corner into this buffer.") {
+BeginFunc(copy, "Copy", "Copies the given buffer at the given offset of the upper left corner into this buffer.", 2) {
 	InVal(0, RInt, x, "X", "The x offset of the upper left corner of the buffer relative to this buffer")
 	InVal(1, RInt, y, "Y", "The y offset of the upper left corener of the buffer relative to this buffer")
 	InVal(2, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The buffer from wich you want to copy from")
 	Body()
 	self->Copy(x, y, buffer);
 } EndFunc()
-BeginFunc(setText, "Set Text", "Allows to write the given text onto the buffer and with the given offset.") {
+BeginFunc(setText, "Set Text", "Allows to write the given text onto the buffer and with the given offset.", 2) {
 	InVal(0, RInt, x, "X", "The X Position at which the text should begin to get written.")
 	InVal(1, RInt, y, "Y", "The Y Position at which the text should begin to get written.")
 	InVal(2, RString, text, "Text", "The text that should get written.")
@@ -2224,14 +2223,36 @@ BeginFunc(setText, "Set Text", "Allows to write the given text onto the buffer a
 	Body()
 	self->SetText(x, y, text, foreground, background);
 } EndFunc()
-BeginFunc(fill, "Fill", "Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.")
+BeginFunc(fill, "Fill", "Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.", 2) {
 	InVal(0, RInt, x, "X", "The x coordinate at which the rectangle should get drawn. (upper-left corner)")
 	InVal(1, RInt, y, "Y", "The y coordinate at which the rectangle should get drawn. (upper-left corner)")
 	InVal(2, RInt, width, "Width", "The width of the rectangle.")
 	InVal(3, RInt, height, "Height", "The height of the rectangle.")
 	InVal(4, RString, character, "Character", "A string with a single character that will be used for each pixel in the range you want to fill.")
+	InVal(5, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color which will be used to fill the rectangle.")
+	InVal(6, RStruct<FLinearColor>, background, "Background", "The background color which will be used to fill the rectangle.")
 	Body()
 	if (character.Len() < 1) character = " ";
-	self->Fill(x, y, width, height, character[0]);
+	self->Fill(x, y, width, height, FFINGPUT1BufferPixel(character[0], foreground, background));
+} EndFunc()
+BeginFunc(setRaw, "Set Raw", "Allows to set the internal data of the buffer more directly.", 2) {
+	InVal(0, RString, characters, "Characters", "The characters you want to draw with a length of exactly width*height.")
+	InVal(1, RArray<RFloat>, foreground, "Foreground Color", "The values of the foreground color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.")
+	InVal(2, RArray<RFloat>, background, "Background Color", "The values of the background color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.")
+	OutVal(3, RBool, success, "Success", "True if the raw data was successfully written")
+	Body()
+	TArray<float> Foreground, Background;
+	if (foreground.Num() != background.Num()) success = false;
+	else {
+		//Foreground.AddUninitialized(foreground.Num());
+		//Background.AddUninitialized(background.Num());
+		//ParallelFor(foreground.Num(), [&Foreground, &foreground, &Background, &background](int i) {
+		for (int i = 0; i < foreground.Num(); ++i) {
+			Foreground.Add(foreground[i].GetFloat());
+			Background.Add(background[i].GetFloat());
+		//});
+		}
+		success = self->SetRaw(characters, Foreground, Background);
+	}
 } EndFunc()
 EndStruct()
