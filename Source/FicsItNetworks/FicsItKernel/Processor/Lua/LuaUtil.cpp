@@ -13,6 +13,7 @@
 
 namespace FicsItKernel {
 	namespace Lua {
+#pragma optimize("", off)
 		void propertyToLua(lua_State* L, UProperty* p, void* data, const FFINNetworkTrace& trace) {
 			auto c = p->GetClass()->GetCastFlags();
 			if (c & EClassCastFlags::CASTCLASS_FBoolProperty) {
@@ -264,5 +265,6 @@ namespace FicsItKernel {
 				lua_pushnil(L);
 			}
 		}
+#pragma optimize("", on)
 	}
 }

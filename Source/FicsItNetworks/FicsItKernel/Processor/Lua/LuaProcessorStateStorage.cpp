@@ -5,6 +5,7 @@
 #include "FicsItNetworks/Network/FINDynamicStructHolder.h"
 
 bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
+	if (!Slot.GetUnderlyingArchive().IsSaveGame()) return false;
 	FStructuredArchive::FRecord Record = Slot.EnterRecord();
 	Record.EnterField(SA_FIELD_NAME(TEXT("Traces"))).GetUnderlyingArchive() << Traces;
 	Record.EnterField(SA_FIELD_NAME(TEXT("References"))) << References;

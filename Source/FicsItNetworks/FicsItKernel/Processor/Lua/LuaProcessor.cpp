@@ -718,7 +718,8 @@ int luaPrint(lua_State* L) {
 	if (log.length() > 0) log = log.erase(log.length()-1);
 	
 	try {
-		CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
+		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+		CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = Processor->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
 		if (serial) {
 			*serial << log << "\r\n";
 			serial->close();
@@ -732,7 +733,7 @@ int luaPrint(lua_State* L) {
 
 int luaYieldResume(lua_State* L, int status, lua_KContext ctx) {
 	// don't pass pushed bool for user executed yield identification
-	return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L) - 1);
+	return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L));
 	//return UFINLuaProcessor::luaAPIReturn(L, 0);
 }
 
@@ -759,6 +760,12 @@ int luaResume(lua_State* L) {
 	if (!lua_isthread(L, threadIndex)) return luaL_argerror(L, threadIndex, "is no thread");
 	lua_State* thread = lua_tothread(L, threadIndex);
 
+	if (!lua_checkstack(thread, args - threadIndex)) {
+		lua_pushboolean(L, false);
+		lua_pushliteral(L, "too many arguments to resume");
+		return UFINLuaProcessor::luaAPIReturn(L, 2);
+	}
+
 	// attach hook for out-of-time exception if thread got loaded from save and hook is not applied
 	lua_sethook(thread, UFINLuaProcessor::luaHook, LUA_MASKCOUNT, UFINLuaProcessor::luaGetProcessor(L)->GetTickHelper().steps());
 
@@ -778,21 +785,28 @@ int luaResume(lua_State* L) {
 			} else {
 				return lua_yieldk(L, 0, NULL, &luaResumeResume);
 			}
-		} else return UFINLuaProcessor::luaAPIReturn(L, 0);
+		} else {
+			lua_pop(thread, argCount - 1);
+			argCount = 1;
+		}
 	}
 	
-	if (state == LUA_YIELD) argCount -= 1; // remove bool added by overwritten yield
-	if (state >= LUA_YIELD) {
+	if (state > LUA_YIELD) {
 		lua_pushboolean(L, false);
-		argCount += 1;
 	} else {
 		lua_pushboolean(L, true);
-		argCount += 1;
 	}
-
-	// copy the parameters passed to yield or returned to our stack so we can return them
-	lua_xmove(thread, L, argCount);
-	return UFINLuaProcessor::luaAPIReturn(L, argCount);
+	
+	if (!lua_checkstack(L, argCount)) {
+		lua_pop(thread, argCount);
+		lua_pushliteral(L, "too many results to resume");
+		argCount = 1;
+	} else {
+		// copy the parameters passed to yield or returned to our stack so we can return them
+		lua_xmove(thread, L, argCount);
+	}
+	
+	return UFINLuaProcessor::luaAPIReturn(L, argCount+1);
 }
 //#pragma optimize("", on)
 

@@ -21,7 +21,7 @@ namespace FicsItKernel {
 		TMap<UFINStruct*, FString> StructToMetaName;
 		TMap<FString, UFINStruct*> MetaNameToStruct;
 		FCriticalSection StructMetaNameLock;
-
+#pragma optimize("", off)
 		TSharedPtr<FINStruct> luaGetStruct(lua_State* L, int i, LuaStruct** LStructPtr) {
 			UFINStruct* Type = luaGetStructType(L, i);
 			if (!Type) return nullptr;
@@ -55,14 +55,14 @@ namespace FicsItKernel {
 				StructMetaNameLock.Lock();
 				FString MetaName = StructToMetaName[Type];
 				StructMetaNameLock.Unlock();
-				LuaStruct* LStruct = static_cast<LuaStruct*>(lua_touserdata(L, i));
+				LuaStruct* LStruct = static_cast<LuaStruct*>(luaL_checkudata(L, i, TCHAR_TO_UTF8(*MetaName)));
 				Struct = LStruct->Struct;
 				return LStruct;
 			}
 			return nullptr;
 		}
 		
-#pragma optimize("", off)
+//#pragma optimize("", off)
 		LuaStruct::LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(MakeShared<FFINDynamicStructHolder>(Struct)), Kernel(Kernel) {
 			Kernel->AddReferencer(this, &CollectReferences);
 		}

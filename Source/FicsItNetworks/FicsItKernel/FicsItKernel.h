@@ -60,6 +60,7 @@ private:
 	UFINKernelAudioController* Audio = nullptr;
 	TArray<TScriptInterface<IFINPciDeviceInterface>> PCIDevices;
 	FFINKernelFSRoot FileSystem;
+	FCriticalSection MutexDevDevice;
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = nullptr;
 	int64 MemoryCapacity = 0;
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
@@ -315,8 +316,10 @@ public:
 	 * Tries to use cached memory usages for the components not set.
 	 *
 	 * @param	InComponents	the registry of system components you want to recalculate.
+	 * @param	bShouldCrash	due to the fact that the processor may need to run this, it may also not be good for it to cause a system crash. If this is set to false, it wont cause a crash.
+	 * @return	returns true if resources are not enough and essentially "failed" (f.e. out of memory)
 	 */
-	void RecalculateResources(ERecalc InComponents);
+	bool RecalculateResources(ERecalc InComponents, bool bShouldCrash = true);
 
 	/**
 	 * Adds a new referencer to the referencer storage
