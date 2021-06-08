@@ -153,8 +153,9 @@ public:
 
 	// Begin UObject
 	virtual void Serialize(FArchive& Ar) override;
+	virtual void BeginDestroy() override;
 	// End UObject
-
+	
 	// Begin IFGSaveInterface
 	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	virtual void PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;

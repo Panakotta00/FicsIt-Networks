@@ -70,6 +70,7 @@ void FFINLuaProcessorTick::reset() {
 }
 
 void FFINLuaProcessorTick::stop() {
+	if (!(State & LUA_ASYNC)) return;
 	demote();
 	
 	if (asyncTask.IsValid() && !asyncTask->IsIdle()) {
@@ -416,6 +417,11 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 
 void UFINLuaProcessor::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
+}
+
+void UFINLuaProcessor::BeginDestroy() {
+	Super::BeginDestroy();
+	tickHelper.stop();
 }
 
 void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {}

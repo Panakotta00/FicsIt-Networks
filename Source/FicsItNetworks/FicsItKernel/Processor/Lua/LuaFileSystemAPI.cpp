@@ -462,6 +462,8 @@ namespace FicsItKernel {
 			luaL_setfuncs(L, luaFileSystemLib, 0);
 			PersistTable("Lib", -1);
 			lua_setglobal(L, "filesystem");
+			lua_pushcfunction(L, (int(*)(lua_State*))luaDoFileCont);
+			PersistValue("doFileCont");
 
 			luaL_newmetatable(L, "File");
 			lua_pushvalue(L, -1);

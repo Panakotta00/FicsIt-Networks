@@ -127,6 +127,8 @@ namespace FicsItKernel {
 			luaL_setfuncs(L, luaEventLib, 0);
 			PersistTable("Lib", -1);
 			lua_setglobal(L, "event");
+			lua_pushcfunction(L, (int(*)(lua_State*))luaPullContinue);
+			PersistValue("pullContinue");
 		}
 	}
 }
