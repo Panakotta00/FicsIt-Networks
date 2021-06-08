@@ -72,7 +72,7 @@ private:
 
 public:
 	FFINGPUT1Buffer() = default;
-
+	
 	/**
 	 * Creates and fills a new buffer with the default pixels.
 	 * If CopyFrom is given, copies the buffer into the upper left corner of the new buffer.
@@ -160,8 +160,8 @@ public:
 	 * @param	From	the buffer which you want to copy from
 	 */
 	FORCEINLINE void Copy(int X, int Y, const FFINGPUT1Buffer& From) {
-		const int CopyWidth = X < 0 ? FMath::Min(Width, From.Width - X) : FMath::Min(Width - X, From.Width);
-		const int CopyHeight = Y < 0 ? FMath::Min(Height, From.Height - Y) : FMath::Min(Height - Y, From.Height);
+		const int CopyWidth = X < 0 ? FMath::Min(Width, From.Width + X) : FMath::Min(Width - X, From.Width);
+		const int CopyHeight = Y < 0 ? FMath::Min(Height, From.Height + Y) : FMath::Min(Height - Y, From.Height);
 		const int OffsetX = FMath::Clamp(X, 0, TNumericLimits<int>::Max());
 		const int OffsetY = FMath::Clamp(Y, 0, TNumericLimits<int>::Max());
 		const int FOffsetX = FMath::Clamp(-X, 0, TNumericLimits<int>::Max());
@@ -186,8 +186,8 @@ public:
 	 * @param	InPixel		the pixel you want to place on each pixel of the range
 	 */
 	FORCEINLINE void Fill(int InX, int InY, int InWidth, int InHeight, const FFINGPUT1BufferPixel& InPixel) {
-		const int CopyWidth = InX < 0 ? FMath::Min(Width, InWidth - InX) : FMath::Min(Width - InX, InWidth);
-		const int CopyHeight = InX < 0 ? FMath::Min(Height, InHeight - InY) : FMath::Min(Height - InY, InHeight);
+		const int CopyWidth = InX < 0 ? FMath::Min(Width, InWidth + InX) : FMath::Min(Width - InX, InWidth);
+		const int CopyHeight = InX < 0 ? FMath::Min(Height, InHeight + InY) : FMath::Min(Height - InY, InHeight);
 		const int OffsetX = FMath::Clamp(InX, 0, TNumericLimits<int>::Max());
 		const int OffsetY = FMath::Clamp(InY, 0, TNumericLimits<int>::Max());
 		if (OffsetX >= Width || OffsetY >= Height) return;
