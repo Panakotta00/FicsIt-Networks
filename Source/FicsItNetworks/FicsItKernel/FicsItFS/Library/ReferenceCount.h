@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <mutex>
+#include <atomic>
 
 namespace CodersFileSystem {
 	template<class T>

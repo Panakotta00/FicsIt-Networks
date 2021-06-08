@@ -2252,7 +2252,29 @@ BeginFunc(setRaw, "Set Raw", "Allows to set the internal data of the buffer more
 			Background.Add(background[i].GetFloat());
 		//});
 		}
-		success = self->SetRaw(characters, Foreground, Background);
+		int Width, Height;
+		self->GetSize(Width, Height);
+		const int Length = Width * Height;
+		if (characters.Len() != Length
+			|| foreground.Num() != Length*4
+			|| background.Num() != Length*4) {
+			success = false;
+		}
+		ParallelFor(Length, [self, Width, &characters, &foreground, &background](int i) {
+			int Offset = i * 4;
+			const FLinearColor ForegroundColor(
+				foreground[Offset].GetFloat(),
+				foreground[Offset+1].GetFloat(),
+				foreground[Offset+2].GetFloat(),
+				foreground[Offset+3].GetFloat());
+			const FLinearColor BackgroundColor(
+				background[Offset].GetFloat(),
+				background[Offset+1].GetFloat(),
+				background[Offset+2].GetFloat(),
+				background[Offset+3].GetFloat());
+			self->Set(i % Width, i / Width, FFINGPUT1BufferPixel(characters[i], ForegroundColor, BackgroundColor));
+		});
+		success = true;
 	}
 } EndFunc()
 EndStruct()
