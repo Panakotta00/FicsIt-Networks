@@ -54,9 +54,9 @@ public:
 			}
 
 			// destroy parameter struct
-			for (UProperty* P = RefFunction->DestructorLink; P; P = P->DestructorLinkNext) {
-				if (P->IsInContainer(RefFunction->ParmsSize)) {
-					P->DestroyValue_InContainer(ParamStruct);
+			for (TFieldIterator<UProperty> Prop(RefFunction); Prop; ++Prop) {
+				if (Prop->GetPropertyFlags() & CPF_Parm) {
+					if (Prop->IsInContainer(RefFunction->ParmsSize)) Prop->DestroyValue_InContainer(ParamStruct);
 				}
 			}
 			

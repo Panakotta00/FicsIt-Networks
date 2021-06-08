@@ -278,7 +278,8 @@ template<>
 struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFINAnyNetworkValue> {
 	enum {
 		WithSerializer = true,
-    };
+		WithCopy = true,
+	};
 };
 
 template<>
