@@ -69,6 +69,9 @@ Features
   for a more dynamic way to interact with the machines. This system also provides a abstraction layer so that further language implementations and such can get implemented more
   easily and quicker. It also provides a dependency-less system so other mods can provide functionality that can be used by ficsit-networks.
   It also provides the reflection viewer which is UI Widget allowing you to browse and explore the reflection data, like an ingame documentation.
+- Internet Card
+  The Internet Card allows you to connect to the internet so you can do f.e. http requests and download
+  custom user made scripts from f.e. gist or pastebin. But you can use it in anyway, like talking to an REST API.
 
 Dependencies
 ============
@@ -89,8 +92,9 @@ You can find the detailed progress in the [project board](https://github.com/Cod
 
 Contributors
 ============
-- [Panakotta00](https://twitch.tv/coderde)
+- [Panakotta00](https://twitch.tv/panakotta00)
 - [RosszEmber](https://www.deviantart.com/ronsemberg)
 - Deantendo
 - Coffeediction
 - [Raysh](https://www.artstation.com/raysh)
+- Esper

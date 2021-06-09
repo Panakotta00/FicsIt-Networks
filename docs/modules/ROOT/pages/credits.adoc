@@ -19,3 +19,7 @@ UI/UX
 - https://www.artstation.com/raysh[Raysh]
 +
 3D Concepts
+
+- Esper
++
+Cost balancing
