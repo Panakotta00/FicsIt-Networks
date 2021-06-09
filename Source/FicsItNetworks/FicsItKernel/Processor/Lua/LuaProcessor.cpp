@@ -328,20 +328,12 @@ int luaPersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Persist"), *p->DebugInfo);
 	
-	// perm, globals, thread
+	// perm, data
 	
-	// persist globals table
-	eris_persist(L, 1, 2); // perm, globals, thread, str-globals
-
-	// add global table to perm table
-	lua_pushvalue(L, 2); // perm, globals, thread, str-globals, globals
-	lua_pushstring(L, "Globals"); // perm, globals, thread, str-globals, globals, "globals"
-	lua_settable(L, 1); // perm, globals, thread, str-globals
-
-	// persist thread
-	eris_persist(L, 1, 3); // perm, globals, thread, str-globals, str-thread
-
-	return 2;
+	// persist data table
+	eris_persist(L, 1, 2); // perm, data, data-str
+	
+	return 1;
 }
 
 void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
@@ -369,34 +361,32 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 	// check state & thread
 	if (luaState && luaThread && lua_status(luaThread) == LUA_YIELD) {
 		// prepare state data
-		lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); // ..., perm
-		lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., perm, globals
-		lua_pushvalue(luaState, -1); // ..., perm, globals, globals
-		lua_pushnil(luaState); // ..., perm, globals, globals, nil
-		lua_settable(luaState, -4); // ..., perm, globals
-		lua_pushvalue(luaState, -2); // ..., perm, globals, perm
-		lua_pushvalue(luaState, -2); // ..., perm, globals, perm, globals
-		lua_pushvalue(luaState, luaThreadIndex); // ..., perm, globals, perm, globals, thread
+		lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm");	// ..., perm
+		lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);	// ..., perm, globals
+		lua_pushvalue(luaState, -1);									// ..., perm, globals, globals
+		lua_pushnil(luaState);											// ..., perm, globals, globals, nil
+		lua_settable(luaState, -4);									// ..., perm, globals
+		lua_pushvalue(luaState, -2);									// ..., perm, globals, perm
+		lua_newtable(luaState);										// ..., perm, globals, perm, data
+		lua_pushvalue(luaState, -3);									// ..., perm, globals, perm, data, globals
+		lua_setfield(luaState, -2, "globals");						// ..., perm, globals, perm, data
+		lua_pushvalue(luaState, luaThreadIndex);						// ..., perm, globals, perm, data, thread
+		lua_setfield(luaState, -2, "thread");						// ..., perm, globals, perm, data
+		
 
-		lua_pushcfunction(luaState, luaPersist);  // ..., perm, globals, perm, globals, thread, persist-func
-		lua_insert(luaState, -4); // ..., perm, globals, persist-func, perm, globals, thread
-		const int status = lua_pcall(luaState, 3, 2, 0); // ..., perm, globals, str-globals, str-thread
+		lua_pushcfunction(luaState, luaPersist);					// ..., perm, globals, perm, data, persist-func
+		lua_insert(luaState, -3);									// ..., perm, globals, persist-func, perm, data
+		const int status = lua_pcall(luaState, 2, 1, 0);			// ..., perm, globals, data-str
 
 		// check unpersist
 		if (status == LUA_OK) {
-			// encode persisted globals
-			size_t globals_l = 0;
-			const char* globals_r = lua_tolstring(luaState, -2, &globals_l);
+			// encode persisted data
+			size_t data_l = 0;
+			const char* data_r = lua_tolstring(luaState, -1, &data_l);
 			// ReSharper disable once CppCStyleCast
-			StateStorage.Globals = Base64Encode((uint8*)(globals_r), globals_l);
-
-			// encode persisted thread
-			size_t thread_l = 0;
-			const char* thread_r = lua_tolstring(luaState, -1, &thread_l);
-			// ReSharper disable once CppCStyleCast
-			StateStorage.Thread = Base64Encode((uint8*)thread_r, thread_l);
+			StateStorage.LuaData = Base64Encode((uint8*)(data_r), data_l);
 	
-			lua_pop(luaState, 2); // ..., perm, globals
+			lua_pop(luaState, 1); // ..., perm, globals
 		} else {
 			// print error
 			if (lua_isstring(luaState, -1)) {
@@ -445,18 +435,12 @@ int luaUnpersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Unpersist"), *p->DebugInfo);
 	
-	// str-thread, str-globals, uperm
-	// unpersist globals
-	eris_unpersist(L, 3, 2); // str-thread, str-globals, uperm, globals
-
-	// add globals to uperm
-	lua_pushvalue(L, -1); // str-thread, str-globals, uperm, globals, globals
-	lua_setfield(L, 3, "Globals"); // str-thread, str-globals, uperm, globals
+	// data-str, uperm
 	
-	// unpersist thread
-	eris_unpersist(L, 3, 1); // str-thread, str-globals, uperm, globals, thread
+	// unpersist data
+	eris_unpersist(L, 2, 1); // data-str, uperm, data
 	
-	return 2;
+	return 1;
 }
 //#pragma optimize("", on)
 
@@ -467,25 +451,22 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	Reset();
 
 	// decode & check data from json
-	TArray<ANSICHAR> thread;
-	Base64Decode(StateStorage.Thread, thread);
-	TArray<ANSICHAR> globals;
-	Base64Decode(StateStorage.Globals, globals);
-	if (thread.Num() <= 1 && globals.Num() <= 1) return;
+	TArray<ANSICHAR> data;
+	Base64Decode(StateStorage.LuaData, data);
+	if (data.Num() <= 1) return;
 
 	// get uperm table
-	lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // ..., uperm
+	lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistUperm");			// ..., uperm
 
 	// prepare protected unpersist
-	lua_pushcfunction(luaState, luaUnpersist); // ..., uperm, unpersist
+	lua_pushcfunction(luaState, luaUnpersist);							// ..., uperm, unpersist-func
 
 	// push data for protected unpersist
-	lua_pushlstring(luaState, thread.GetData(), thread.Num()); // ..., uperm, unpersist, str-thread
-	lua_pushlstring(luaState, globals.GetData(), globals.Num()); // ..., uperm, unpersist, str-thread, str-globals
-	lua_pushvalue(luaState, -4); // ..., uperm, unpersist, str-thread, str-globals, uperm
+	lua_pushlstring(luaState, data.GetData(), data.Num());				// ..., uperm, unpersist-func, data-str
+	lua_pushvalue(luaState, -3);											// ..., uperm, unpersist-func, data-str, uperm
 
 	// do unpersist
-	const int ok = lua_pcall(luaState, 3, 2, 0); // ...,  uperm, globals, thread
+	const int ok = lua_pcall(luaState, 2, 1, 0); // ...,  uperm, data
 
 	// check unpersist
 	if (ok != LUA_OK) {
@@ -504,16 +485,16 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 		//throw std::exception("Unable to unpersist");
 	} else {
 		// cleanup
-		lua_pushnil(luaState); // ..., uperm, globals, thread, nil
-		lua_setfield(luaState, -4, "Globals"); // ..., uperm, globals, thread
-		lua_pushnil(luaState); // ..., uperm, globals, thread, nil
-		lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ..., uperm, globals, thread
+		lua_pushnil(luaState); // ..., uperm, data, nil
+		lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistTraces"); // ..., uperm, data
 	
 		// place persisted data
-		lua_replace(luaState, luaThreadIndex); // ..., uperm, globals
-		lua_seti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., uperm
+		lua_getfield(luaState, -1, "thread");
+		lua_replace(luaState, luaThreadIndex); // ..., uperm, data
+		lua_getfield(luaState, -1, "globals");
+		lua_seti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., uperm, data
 		luaThread = lua_tothread(luaState, luaThreadIndex);
-		lua_pop(luaState, 1); // ...
+		lua_pop(luaState, 2); // ...
 	}
 }
 
@@ -740,7 +721,6 @@ int luaPrint(lua_State* L) {
 int luaYieldResume(lua_State* L, int status, lua_KContext ctx) {
 	// don't pass pushed bool for user executed yield identification
 	return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L));
-	//return UFINLuaProcessor::luaAPIReturn(L, 0);
 }
 
 int luaYield(lua_State* L) {
@@ -816,6 +796,15 @@ int luaResume(lua_State* L) {
 }
 //#pragma optimize("", on)
 
+int luaRunning(lua_State* L) {
+	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
+	int ismain = lua_pushthread(L);
+	lua_State* thread = lua_tothread(L, -1);
+	if (thread == p->GetLuaThread()) ismain = 1;
+	lua_pushboolean(L, ismain);
+	return 2;
+}
+
 void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	PersistSetup("LuaProcessor", -2);
 
@@ -840,8 +829,15 @@ void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	lua_setfield(L, -2, "resume");
 	lua_pushcfunction(L, luaYield);
 	lua_setfield(L, -2, "yield");
+	lua_pushcfunction(L, luaRunning);
+	lua_setfield(L, -2, "running");
 	PersistTable("coroutine", -1);
 	lua_pop(L, 1);
+
+	lua_pushcfunction(L, (int(*)(lua_State*))luaYieldResume);
+	PersistValue("coroutineYieldContinue");
+	lua_pushcfunction(L, (int(*)(lua_State*))luaResumeResume);
+	PersistValue("coroutineResumeContinue");
 	
 	luaL_requiref(L, "math", luaopen_math, true);
 	PersistTable("math", -1);
@@ -897,4 +893,9 @@ int UFINLuaProcessor::luaAPIReturn(lua_State* L, int args) {
 lua_State* UFINLuaProcessor::GetLuaState() const {
 	return luaState;
 }
+
+lua_State* UFINLuaProcessor::GetLuaThread() const {
+	return luaThread;
+}
+
 #pragma optimize("", on)

@@ -231,6 +231,11 @@ public:
 	 * Returns the lua state
 	 */
 	lua_State* GetLuaState() const;
+
+	/**
+	 * Returns the current lua thread
+	 */
+	lua_State* GetLuaThread() const;
 };
 
 struct FLuaSyncCall {

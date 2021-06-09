@@ -22,10 +22,7 @@ private:
 
 public:
 	UPROPERTY(SaveGame)
-	FString Thread;
-	
-	UPROPERTY(SaveGame)
-	FString Globals;
+	FString LuaData;
 	
     // Begin Struct
 	bool Serialize(FStructuredArchive::FSlot Slot);
