@@ -2169,7 +2169,7 @@ BeginProp(RFloat, a, "Alpha", "The alpha (opacity) portion of the color.") {
 EndStruct()
 
 BeginStruct(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A structure that can hold a buffer of characters and colors that can be displayed with a gpu")
-BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.") {
+BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.", 2) {
 	OutVal(0, RFloat, width, "Width", "The width of this buffer")
 	OutVal(1, RFloat, height, "Height", "The height of this buffer")
 	Body()
@@ -2178,7 +2178,7 @@ BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.") {
 	width = (FINInt)Width;
 	height = (FINInt)Height;
 } EndFunc()
-BeginFunc(setSize, "Set Size", "Allows to set the dimensions of the buffer.") {
+BeginFunc(setSize, "Set Size", "Allows to set the dimensions of the buffer.", 2) {
 	InVal(0, RFloat, width, "Width", "The width this buffer should now have")
 	InVal(1, RFloat, height, "Height", "The height this buffer now have")
 	Body()
@@ -2211,8 +2211,11 @@ BeginFunc(copy, "Copy", "Copies the given buffer at the given offset of the uppe
 	InVal(0, RInt, x, "X", "The x offset of the upper left corner of the buffer relative to this buffer")
 	InVal(1, RInt, y, "Y", "The y offset of the upper left corener of the buffer relative to this buffer")
 	InVal(2, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The buffer from wich you want to copy from")
+	InVal(3, RInt, textBlendMode, "Text Blend Mode", "The blend mode that is used for the text.\n0 = Overwrite this with the content of the given buffer\n1 = Overwrite with only characters that are not ' '\n2 = Overwrite only were this characters are ' '\n3 = Keep this buffer")
+	InVal(4, RInt, foregroundBlendMode, "Foreground Color Blend Mode", "The blend mode that is used for the foreground color.\n0 = Overwrite with the given color\n1 = Normal alpha composition\n2 = Multiply\n3 = Divide\n4 = Addition\n5 = Subtraction\n6 = Difference\n7 = Darken Only\n8 = Lighten Only\n9 = None")
+	InVal(5, RInt, backgroundBlendMode, "Background Color Blend Mode", "The blend mode that is used for the background color.\n0 = Overwrite with the given color\n1 = Normal alpha composition\n2 = Multiply\n3 = Divide\n4 = Addition\n5 = Subtraction\n6 = Difference\n7 = Darken Only\n8 = Lighten Only\n9 = None")
 	Body()
-	self->Copy(x, y, buffer);
+	self->Copy(x, y, buffer, (EFINGPUT1TextBlendingMethod)textBlendMode, (EFINGPUT1ColorBlendingMethod)foregroundBlendMode, (EFINGPUT1ColorBlendingMethod)backgroundBlendMode);
 } EndFunc()
 BeginFunc(setText, "Set Text", "Allows to write the given text onto the buffer and with the given offset.", 2) {
 	InVal(0, RInt, x, "X", "The X Position at which the text should begin to get written.")
@@ -2276,5 +2279,10 @@ BeginFunc(setRaw, "Set Raw", "Allows to set the internal data of the buffer more
 		});
 		success = true;
 	}
+} EndFunc()
+BeginFunc(clone, "Clone", "Clones this buffer into a new struct") {
+	OutVal(1, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The clone of this buffer")
+	Body()
+	buffer = (FINStruct) *self;
 } EndFunc()
 EndStruct()

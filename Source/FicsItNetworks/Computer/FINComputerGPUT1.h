@@ -44,6 +44,26 @@ struct TStructOpsTypeTraits<FFINGPUT1BufferPixel> : TStructOpsTypeTraitsBase2<FF
 	};
 };
 
+enum EFINGPUT1TextBlendingMethod {
+	FIN_GPUT1_TEXT_OVERWRITE,
+	FIN_GPUT1_TEXT_NORMAL,
+	FIN_GPUT1_TEXT_FILL,
+	FIN_GPUT1_TEXT_NONE,
+};
+
+enum EFINGPUT1ColorBlendingMethod {
+	FIN_GPUT1_OVERWRITE,
+	FIN_GPUT1_NORMAL,
+	FIN_GPUT1_MULTIPLY,
+	FIN_GPUT1_DIVIDE,
+	FIN_GPUT1_ADDITION,
+	FIN_GPUT1_SUBTRACT,
+	FIN_GPUT1_DIFFERENCE,
+	FIN_GPUT1_DARKEN_ONLY,
+	FIN_GPUT1_LIGHTEN_ONLY,
+	FIN_GPUT1_NONE
+};
+
 USTRUCT()
 struct FFINGPUT1Buffer {
 	GENERATED_BODY()
@@ -152,14 +172,131 @@ public:
 		return true;
 	}
 
+	FORCEINLINE void BlendPixelRow(FFINGPUT1BufferPixel* Source, const FFINGPUT1BufferPixel* From, int Count, EFINGPUT1TextBlendingMethod BlendMode) {
+		FFINGPUT1BufferPixel* SourceEnd = Source + Count;
+		switch (BlendMode) {
+		case FIN_GPUT1_TEXT_OVERWRITE:
+			while (Source < SourceEnd) {
+				Source->Character = From->Character;
+				Source += 1;
+				From += 1;
+			}
+			break;
+		case FIN_GPUT1_TEXT_NORMAL:
+			while (Source < SourceEnd) {
+				if (From->Character != ' ') Source->Character = From->Character;
+				Source += 1;
+				From += 1;
+			}
+			break;
+		case FIN_GPUT1_TEXT_FILL:
+			while (Source < SourceEnd) {
+				if (Source->Character != ' ') Source->Character = From->Character;
+				Source += 1;
+				From += 1;
+			}
+			break;
+		case FIN_GPUT1_TEXT_NONE:
+		default: ;
+		}
+	}
+	
+	FORCEINLINE void BlendPixelRow(FFINGPUT1BufferPixel* Source, const FFINGPUT1BufferPixel* From, int Count, EFINGPUT1ColorBlendingMethod BlendMode, int Offset) {
+		FLinearColor* CSource = (FLinearColor*)(((uint8*)Source) + Offset);
+		const FLinearColor* CFrom = (const FLinearColor*)(((const uint8*)From) + Offset);
+		FLinearColor* SourceEnd = (FLinearColor*)((uint8*)CSource + Count*sizeof(FFINGPUT1BufferPixel));
+		switch (BlendMode) {
+		case FIN_GPUT1_OVERWRITE:
+			while (CSource < SourceEnd) {
+				*CSource = *CFrom;
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		case FIN_GPUT1_NORMAL:
+			while (CSource < SourceEnd) {
+				float alpha = CFrom->A + CSource->A * (1 - CFrom->A);
+				CSource->R = (CFrom->R * CFrom->A + CSource->R * CSource->A * (1 - CFrom->A)) / alpha;
+				CSource->G = (CFrom->G * CFrom->A + CSource->G * CSource->A * (1 - CFrom->A)) / alpha;
+				CSource->B = (CFrom->B * CFrom->A + CSource->B * CSource->A * (1 - CFrom->A)) / alpha;
+				CSource->A = alpha;
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		case FIN_GPUT1_MULTIPLY:
+			while (CSource < SourceEnd) {
+				*CSource *= *CFrom;
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		case FIN_GPUT1_DIVIDE:
+			while (CSource < SourceEnd) {
+				*CSource /= *CFrom;
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		case FIN_GPUT1_ADDITION:
+			while (CSource < SourceEnd) {
+				*CSource += *CFrom;
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		case FIN_GPUT1_SUBTRACT:
+			while (CSource < SourceEnd) {
+				*CSource -= *CFrom;
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		case FIN_GPUT1_DIFFERENCE:
+			while (CSource < SourceEnd) {
+				CSource->R = FMath::Abs(CFrom->R - CSource->R);
+				CSource->G = FMath::Abs(CFrom->G - CSource->G);
+				CSource->B = FMath::Abs(CFrom->B - CSource->B);
+				CSource->A = FMath::Abs(CFrom->A - CSource->A);
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		case FIN_GPUT1_DARKEN_ONLY:
+			while (CSource < SourceEnd) {
+				CSource->R = FMath::Min(CFrom->R, CSource->R);
+				CSource->G = FMath::Min(CFrom->G, CSource->G);
+				CSource->B = FMath::Min(CFrom->B, CSource->B);
+				CSource->A = FMath::Min(CFrom->A, CSource->A);
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		case FIN_GPUT1_LIGHTEN_ONLY:
+			while (CSource < SourceEnd) {
+				CSource->R = FMath::Max(CFrom->R, CSource->R);
+				CSource->G = FMath::Max(CFrom->G, CSource->G);
+				CSource->B = FMath::Max(CFrom->B, CSource->B);
+				CSource->A = FMath::Max(CFrom->A, CSource->A);
+				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
+				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
+			}
+			break;
+		default: ;
+		}
+	}
+
 	/**
 	 * Allows to copy a given buffer to this buffer at the given location
 	 *
-	 * @param	X		the X position of the upper left corner at witch it should get copied to
-	 * @param	Y		the Y position of the upper left corner at witch it should get copied to
-	 * @param	From	the buffer which you want to copy from
+	 * @param	X					the X position of the upper left corner at witch it should get copied to
+	 * @param	Y					the Y position of the upper left corner at witch it should get copied to
+	 * @param	From				the buffer which you want to copy from
+	 * @param	TextBlendMode		the blend mode that should be used to combine the text of the two buffers
+	 * @param	ForegroundBlendMode	the blend mode that should be used to combine the two buffers foreground
+	 * @param	BackgroundBlendMode	the blend mode that should be used to combine the two buffers background
 	 */
-	FORCEINLINE void Copy(int X, int Y, const FFINGPUT1Buffer& From) {
+	FORCEINLINE void Copy(int X, int Y, const FFINGPUT1Buffer& From, EFINGPUT1TextBlendingMethod TextBlendMode, EFINGPUT1ColorBlendingMethod ForegroundBlendMode, EFINGPUT1ColorBlendingMethod BackgroundBlendMode) {
 		const int CopyWidth = X < 0 ? FMath::Min(Width, From.Width + X) : FMath::Min(Width - X, From.Width);
 		const int CopyHeight = Y < 0 ? FMath::Min(Height, From.Height + Y) : FMath::Min(Height - Y, From.Height);
 		const int OffsetX = FMath::Clamp(X, 0, TNumericLimits<int>::Max());
@@ -172,7 +309,13 @@ public:
 		for (int i = 0; i < CopyHeight; ++i) {
 			const int Offset = OffsetX + (OffsetY + i) * Width;
 			const int FOffset = FOffsetX + (FOffsetY + i) * From.Width;
-			FMemory::Memcpy(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth * sizeof(FFINGPUT1BufferPixel));
+			if (ForegroundBlendMode == FIN_GPUT1_OVERWRITE && BackgroundBlendMode == FIN_GPUT1_OVERWRITE && TextBlendMode == FIN_GPUT1_TEXT_OVERWRITE) {
+				FMemory::Memcpy(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth * sizeof(FFINGPUT1BufferPixel));
+			} else {
+				BlendPixelRow(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth, TextBlendMode);
+				BlendPixelRow(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth, ForegroundBlendMode, offsetof(FFINGPUT1BufferPixel, ForegroundColor));
+				BlendPixelRow(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth, BackgroundBlendMode, offsetof(FFINGPUT1BufferPixel, BackgroundColor));
+			}
 		}
 	}
 
