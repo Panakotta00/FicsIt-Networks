@@ -145,7 +145,7 @@ void FFINLuaProcessorTick::shouldCrash(const TSharedRef<FFINKernelCrash>& Crash)
 	ToCrash = Crash;
 }
 
-//void FFINLuaProcessorTick::syncTick() {
+void FFINLuaProcessorTick::syncTick() {
 	if (postTick()) return;
 	if (State & LUA_SYNC) {
 		if (asyncTask.IsValid() && !asyncTask->IsIdle()) {
@@ -250,13 +250,12 @@ void FFINLuaProcessorTick::tickHook(lua_State* L) {
 	default: ;
 	}
 }
-//
+
 int luaAPIReturn_Resume(lua_State* L, int status, lua_KContext ctx) {
-	//return static_cast<int>(ctx);
-	return 0;
+	return static_cast<int>(ctx);
 }
 
-//int FFINLuaProcessorTick::apiReturn(lua_State* L, int args) {
+int FFINLuaProcessorTick::apiReturn(lua_State* L, int args) {
 	if (State != LUA_SYNC && State != LUA_ASYNC) { // tick state in error or crash
 		if (State & LUA_SYNC) State = LUA_SYNC;
 		else if (State & LUA_ASYNC) State = LUA_ASYNC;
@@ -264,7 +263,7 @@ int luaAPIReturn_Resume(lua_State* L, int status, lua_KContext ctx) {
 	}
 	return args;
 }
-//
+
 int FFINLuaProcessorTick::steps() const {
 	switch (State) {
 	case LUA_SYNC:
@@ -317,7 +316,7 @@ FString Base64Encode(const uint8* Source, uint32 Length) {
 	return OutBuffer;
 }
 
-//int luaPersist(lua_State* L) {
+int luaPersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Persist"), *p->DebugInfo);
 	
@@ -423,7 +422,7 @@ bool Base64Decode(const FString& Source, TArray<ANSICHAR>& OutData) {
 	return true;
 }
 
-//int luaUnpersist(lua_State* L) {
+int luaUnpersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Unpersist"), *p->DebugInfo);
 	
@@ -434,7 +433,7 @@ bool Base64Decode(const FString& Source, TArray<ANSICHAR>& OutData) {
 	
 	return 1;
 }
-//
+
 void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("PostDeserialize"));
 	if (!Kernel || Kernel->GetState() != FIN_KERNEL_RUNNING) return;
@@ -509,7 +508,7 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 	}
 }
 
-//void UFINLuaProcessor::LuaTick() {
+void UFINLuaProcessor::LuaTick() {
 	try {
 		// reset out of time
 		lua_sethook(luaThread, UFINLuaProcessor::luaHook, LUA_MASKCOUNT, tickHelper.steps());
@@ -564,7 +563,7 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 	// clear some data
 	ClearFileStreams();
 }
-//
+
 size_t luaLen(lua_State* L, int idx) {
 	size_t len = 0;
 	idx = lua_absindex(L, idx);
@@ -727,7 +726,8 @@ int luaResume(lua_State* L); // pre-declare
 int luaResumeResume(lua_State* L, int status, lua_KContext ctx) {
 	return UFINLuaProcessor::luaAPIReturn(L, luaResume(L));
 }
-//int luaResume(lua_State* L) {
+
+int luaResume(lua_State* L) {
 	const int args = lua_gettop(L);
 	int threadIndex = 1;
 	if (lua_isboolean(L, 1)) threadIndex = 2;
@@ -845,7 +845,7 @@ void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	FicsItKernel::Lua::setupFutureAPI(L);
 }
 
-//int UFINLuaProcessor::DoSignal(lua_State* L) {
+int UFINLuaProcessor::DoSignal(lua_State* L) {
 	UFINKernelNetworkController* net = GetKernel()->GetNetwork();
 	if (!net || net->GetSignalCount() < 1) return 0;
 	FFINNetworkTrace sender;
@@ -860,19 +860,19 @@ void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	}
 	return props;
 }
-//
+
 void UFINLuaProcessor::luaHook(lua_State* L, lua_Debug* ar) {
 	//UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	//p->tickHelper.tickHook(L);
 	lua_yield(L, 0);
 }
 
-//int UFINLuaProcessor::luaAPIReturn(lua_State* L, int args) {
+int UFINLuaProcessor::luaAPIReturn(lua_State* L, int args) {
 	//UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	//return p->tickHelper.apiReturn(L, args);
 	return args;
 }
-//
+
 lua_State* UFINLuaProcessor::GetLuaState() const {
 	return luaState;
 }

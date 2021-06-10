@@ -62,7 +62,7 @@ namespace FicsItKernel {
 			return nullptr;
 		}
 		
-//		LuaStruct::LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(MakeShared<FFINDynamicStructHolder>(Struct)), Kernel(Kernel) {
+		LuaStruct::LuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(MakeShared<FFINDynamicStructHolder>(Struct)), Kernel(Kernel) {
 			Kernel->AddReferencer(this, &CollectReferences);
 		}
 
