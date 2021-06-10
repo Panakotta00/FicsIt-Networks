@@ -216,9 +216,9 @@ public:
 		case FIN_GPUT1_NORMAL:
 			while (CSource < SourceEnd) {
 				float alpha = CFrom->A + CSource->A * (1 - CFrom->A);
-				CSource->R = (CFrom->R * CFrom->A + CSource->R * CSource->A * (1 - CFrom->A)) / alpha;
-				CSource->G = (CFrom->G * CFrom->A + CSource->G * CSource->A * (1 - CFrom->A)) / alpha;
-				CSource->B = (CFrom->B * CFrom->A + CSource->B * CSource->A * (1 - CFrom->A)) / alpha;
+				CSource->R = alpha != 0.0f ? (CFrom->R * CFrom->A + CSource->R * CSource->A * (1 - CFrom->A)) / alpha : 0.0f;
+				CSource->G = alpha != 0.0f ? (CFrom->G * CFrom->A + CSource->G * CSource->A * (1 - CFrom->A)) / alpha : 0.0f;
+				CSource->B = alpha != 0.0f ? (CFrom->B * CFrom->A + CSource->B * CSource->A * (1 - CFrom->A)) / alpha : 0.0f;
 				CSource->A = alpha;
 				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
 				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
@@ -233,7 +233,10 @@ public:
 			break;
 		case FIN_GPUT1_DIVIDE:
 			while (CSource < SourceEnd) {
-				*CSource /= *CFrom;
+				CSource->R = CFrom->R != 0.0f ? CSource->R / CFrom->R : 0.0f;
+				CSource->G = CFrom->G != 0.0f ? CSource->G / CFrom->G : 0.0f;
+				CSource->B = CFrom->B != 0.0f ? CSource->B / CFrom->B : 0.0f;
+				CSource->A = CFrom->A != 0.0f ? CSource->A / CFrom->A : 0.0f;
 				CSource = (FLinearColor*)((uint8*)CSource + sizeof(FFINGPUT1BufferPixel));
 				CFrom = (FLinearColor*)((uint8*)CFrom + sizeof(FFINGPUT1BufferPixel));
 			}
