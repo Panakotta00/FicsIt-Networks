@@ -68,7 +68,6 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 	Kernel->SetAudio(AudioController);
 }
 
-#pragma optimize("", off)
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
 
@@ -91,7 +90,6 @@ void AFINComputerCase::BeginPlay() {
 		}
 	}
 }
-#pragma optimize("", on)
 
 void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);

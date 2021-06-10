@@ -21,7 +21,6 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
-#pragma optimize("", off)
 		LuaFunc(luaComputerReset)
 			processor->GetTickHelper().shouldReset();
 			lua_yield(L, 0);
@@ -52,7 +51,6 @@ namespace FicsItKernel {
 			processor->GetTickHelper().shouldPromote();
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
 		}
-#pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
 			float pitch = 1;

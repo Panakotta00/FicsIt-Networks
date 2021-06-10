@@ -30,7 +30,7 @@ IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
 FDateTime FFicsItNetworksModule::GameStart;
 
-#pragma optimize("", off)
+//#pragma optimize("", o
 
 void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterface*)>& scope, IFGDismantleInterface* self_r) {
 	AFGBuildable* self = dynamic_cast<AFGBuildable*>(self_r);
@@ -189,7 +189,6 @@ void FFicsItNetworksModule::StartupModule(){
 #endif
 	});
 }
-#pragma optimize("", on)
 
 void FFicsItNetworksModule::ShutdownModule() {
 	FFINReflectionStyles::Shutdown();

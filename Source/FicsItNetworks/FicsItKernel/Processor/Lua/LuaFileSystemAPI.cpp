@@ -53,7 +53,6 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 
 namespace FicsItKernel {
 	namespace Lua {
-#pragma optimize("", off)
 		LuaFunc(makeFileSystem, {
 			const std::string type = luaL_checkstring(L, 1);
 			const std::string name = luaL_checkstring(L, 2);
@@ -474,6 +473,5 @@ namespace FicsItKernel {
 			lua_pushcfunction(L, luaFileUnpersist);
 			PersistValue("FileUnpersist");
 		}
-#pragma optimize("", on)
 	}
 }

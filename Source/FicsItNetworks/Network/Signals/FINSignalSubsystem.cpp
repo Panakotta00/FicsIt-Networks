@@ -30,7 +30,6 @@ AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldConte
 	return SubsystemActorManager->GetSubsystemActor<AFINSignalSubsystem>();
 }
 
-#pragma optimize("", off)
 void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData& Signal) {
 	FFINSignalListeners* ListenerList = Listeners.Find(Sender);
 	if (!ListenerList) return;
@@ -45,7 +44,6 @@ void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData&
 		}
 	}
 }
-#pragma optimize("", on)
 
 void AFINSignalSubsystem::Listen(UObject* Sender, const FFINNetworkTrace& Receiver) {
 	TArray<FFINNetworkTrace>& ListenerList = Listeners.FindOrAdd(Sender).Listeners;

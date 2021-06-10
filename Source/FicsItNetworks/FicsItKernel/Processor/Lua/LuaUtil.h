@@ -5,7 +5,9 @@
 #include "FicsItNetworks/Network/FINAnyNetworkValue.h"
 #include "FicsItNetworks/Reflection/FINExecutionContext.h"
 
-#include "lua.hpp"
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 class UFINProperty;
 class UFINStruct;
