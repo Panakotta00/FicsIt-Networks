@@ -989,7 +989,9 @@ BeginClass(AFGBuildableCircuitSwitch, "CircuitSwitch", "Circuit Switch", "A circ
 BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are connected to each other and act as one entity.") {
 	Return self->IsSwitchOn();
 } PropSet() {
-	self->SetSwitchOn(Val);
+	self->GetGameInstance()->GetTimerManager().SetTimerForNextTick([self, Val]() {
+		self->SetSwitchOn(Val);
+	});
 } EndProp()
 EndClass()
 
