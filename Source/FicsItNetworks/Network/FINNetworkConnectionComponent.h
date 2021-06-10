@@ -42,7 +42,6 @@ public:
 	AFINNetworkCircuit* Circuit = nullptr;
 
 	// Begin UObject
-	virtual bool IsSupportedForNetworking() const override;
 	virtual void InitializeComponent() override;
 	// End UObject
 

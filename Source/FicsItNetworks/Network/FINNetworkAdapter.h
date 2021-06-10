@@ -42,7 +42,7 @@ public:
 	AFGBuildable* Parent = nullptr;
 	
 	/** the network connector of the adapter */
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 	
 	/** the network adapter reference attached to the parent factory */

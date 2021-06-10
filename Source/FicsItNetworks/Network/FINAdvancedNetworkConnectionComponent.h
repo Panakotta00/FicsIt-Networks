@@ -68,6 +68,8 @@ public:
 	FFINIsNetworkRouter OnIsNetworkRouter;
 	FFINIsNetworkPortOpen OnIsNetworkPortOpen;
 
+	UFINAdvancedNetworkConnectionComponent();
+
 	// Begin AActor
 	virtual void BeginPlay() override;
 	virtual void Serialize(FArchive& Ar) override;

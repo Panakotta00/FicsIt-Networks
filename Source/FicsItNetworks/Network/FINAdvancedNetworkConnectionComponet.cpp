@@ -3,6 +3,10 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
+UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent() {
+	SetIsReplicated(true);
+}
+
 void UFINAdvancedNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UFINAdvancedNetworkConnectionComponent, ID);

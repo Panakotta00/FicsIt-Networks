@@ -81,10 +81,6 @@ public:
 
 	AFINComputerCase();
 	
-	// Begin UObject
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	// End UObject
-
 	// Begin AActor
 	virtual void OnConstruction(const FTransform& transform) override;
 	virtual void BeginPlay() override;

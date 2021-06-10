@@ -29,6 +29,7 @@ void AFINNetworkAdapter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(AFINNetworkAdapter, Parent);
+	DOREPLIFETIME(AFINNetworkAdapter, Connector);
 }
 
 AFINNetworkAdapter::AFINNetworkAdapter() {
@@ -41,6 +42,7 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(L"Connector");
 	Connector->SetupAttachment(RootComponent);
 	Connector->bOuterAsRedirect = false;
+	Connector->SetIsReplicated(true);
 	
 	ConnectorMesh = CreateDefaultSubobject<UStaticMeshComponent>(L"StaticMesh");
 	ConnectorMesh->SetHiddenInGame(true, true);
