@@ -4,7 +4,7 @@
 #include "FicsItNetworks/Network/FINNetworkCircuitNode.h"
 #include "FINPciDeviceInterface.generated.h"
 
-UINTERFACE()
+UINTERFACE(Blueprintable)
 class FICSITNETWORKS_API UFINPciDeviceInterface : public UInterface {
 	GENERATED_BODY()
 };

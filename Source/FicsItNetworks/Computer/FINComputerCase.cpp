@@ -17,6 +17,7 @@ AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
+	NetworkConnector->SetIsReplicated(true);
 	
 	Panel = CreateDefaultSubobject<UFINModuleSystemPanel>("Panel");
 	Panel->SetupAttachment(RootComponent);
@@ -53,6 +54,8 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AFINComputerCase, SerialOutput);
 	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
 	DOREPLIFETIME(AFINComputerCase, Processors);
+	DOREPLIFETIME(AFINComputerCase, PCIDevices);
+	DOREPLIFETIME(AFINComputerCase, NetworkConnector);
 }
 
 void AFINComputerCase::OnConstruction(const FTransform& transform) {
@@ -231,7 +234,7 @@ void AFINComputerCase::AddPCIDevice(TScriptInterface<IFINPciDeviceInterface> InP
 		IFINPciDeviceInterface::Execute_SetPCINetworkConnection(InPCIDevice.GetObject(), NetworkConnector);
 		NetworkConnector->AddConnectedNode(InPCIDevice.GetObject());
 	}
-	PCIDevices.Add(InPCIDevice);
+	PCIDevices.Add(InPCIDevice.GetObject());
 	Kernel->AddPCIDevice(InPCIDevice);
 }
 
@@ -240,7 +243,7 @@ void AFINComputerCase::RemovePCIDevice(TScriptInterface<IFINPciDeviceInterface> 
 		IFINPciDeviceInterface::Execute_SetPCINetworkConnection(InPCIDevice.GetObject(), nullptr);
 		NetworkConnector->RemoveConnectedNode(InPCIDevice.GetObject());
 	}
-	PCIDevices.Remove(InPCIDevice);
+	PCIDevices.Remove(InPCIDevice.GetObject());
 	Kernel->RemovePCIDevice(InPCIDevice);
 }
 

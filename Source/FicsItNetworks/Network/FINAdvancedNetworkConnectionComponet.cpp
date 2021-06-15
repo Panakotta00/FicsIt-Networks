@@ -34,6 +34,7 @@ void UFINAdvancedNetworkConnectionComponent::Serialize(FArchive& Ar) {
 
 void UFINAdvancedNetworkConnectionComponent::InitializeComponent() {
 	Super::InitializeComponent();
+	SetIsReplicatedByDefault(true);
 	SetIsReplicated(true);
 }
 

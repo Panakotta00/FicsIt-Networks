@@ -23,7 +23,7 @@ class FICSITNETWORKS_API AFINComputerCase : public AFGBuildable {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
@@ -69,8 +69,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FFINCaseFloppyUpdateDelegate OnFloppyUpdate;
 
-	UPROPERTY(BlueprintReadOnly)
-	TArray<TScriptInterface<IFINPciDeviceInterface>> PCIDevices;
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	TArray<UObject*> PCIDevices;
 
 	UPROPERTY(Replicated)
 	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;

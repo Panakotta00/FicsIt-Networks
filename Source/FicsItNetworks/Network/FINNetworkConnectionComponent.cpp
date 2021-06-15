@@ -11,6 +11,7 @@ void UFINNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetime
 
 void UFINNetworkConnectionComponent::InitializeComponent() {
 	Super::InitializeComponent();
+	SetIsReplicatedByDefault(true);
 	SetIsReplicated(true);
 }
 

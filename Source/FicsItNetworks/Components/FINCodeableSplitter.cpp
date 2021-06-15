@@ -6,6 +6,7 @@ AFINCodeableSplitter::AFINCodeableSplitter() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->SetMobility(EComponentMobility::Movable);
+	NetworkConnector->SetIsReplicated(true);
 
 	Input1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input1");
 	Input1->SetDirection(EFactoryConnectionDirection::FCD_INPUT);

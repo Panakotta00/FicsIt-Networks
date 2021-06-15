@@ -8,6 +8,7 @@
 AFINSpeakerPole::AFINSpeakerPole() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
+	NetworkConnector->SetIsReplicated(true);
 
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>("AudioComponent");
 	AudioComponent->SetupAttachment(RootComponent);
