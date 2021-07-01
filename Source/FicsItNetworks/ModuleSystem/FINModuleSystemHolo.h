@@ -37,7 +37,4 @@ public:
 private:
 	bool checkSpace(FVector min, FVector max);
 	FVector getModuleSize();
-
-	//UFUNCTION(NetMulticast, Unreliable)
-	//void ValidChanged(bool bNewValid);
 };

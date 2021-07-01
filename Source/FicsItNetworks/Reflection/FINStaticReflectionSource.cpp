@@ -986,12 +986,10 @@ BeginProp(RBool, isBridgeActive, "Is Bridge Active", "True if the two circuits a
 EndClass()
 
 BeginClass(AFGBuildableCircuitSwitch, "CircuitSwitch", "Circuit Switch", "A circuit bridge that can be activated and deactivate by the player.")
-BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are connected to each other and act as one entity.") {
+BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are connected to each other and act as one entity.", 0) {
 	Return self->IsSwitchOn();
 } PropSet() {
-	self->GetGameInstance()->GetTimerManager().SetTimerForNextTick([self, Val]() {
-		self->SetSwitchOn(Val);
-	});
+	self->SetSwitchOn(Val);
 } EndProp()
 EndClass()
 

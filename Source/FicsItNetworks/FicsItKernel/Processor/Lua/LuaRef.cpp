@@ -103,12 +103,22 @@ namespace FicsItKernel {
 			if (Property) {
 				// ReSharper disable once CppEntityAssignedButNoRead
 				// ReSharper disable once CppJoinDeclarationAndAssignment
-				TSharedPtr<FLuaSyncCall> SyncCall;
-				if (!(Property->GetPropertyFlags() & FIN_Prop_RT_Async)) SyncCall = MakeShared<FLuaSyncCall>(L);
-				
 				FINAny Value;
 				luaToNetworkValue(L, 3, Value);
-				Property->SetValue(Ctx, Value);
+				
+				TSharedPtr<FLuaSyncCall> SyncCall;
+				EFINRepPropertyFlags PropFlags = Property->GetPropertyFlags();
+				bool bRunDirectly = false;
+				if (PropFlags & FIN_Prop_RT_Async) {
+					bRunDirectly = true;
+				} else if (PropFlags & FIN_Prop_RT_Parallel) {
+					SyncCall = MakeShared<FLuaSyncCall>(L);
+					bRunDirectly = true;
+				} else {
+					luaFuture(L, FFINFutureReflection(Property, Ctx, {Value}));
+				}
+				
+				if (bRunDirectly) Property->SetValue(Ctx, Value);
 				
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
