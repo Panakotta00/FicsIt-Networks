@@ -79,7 +79,6 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 		for (int X = 0; X < Width; ++X) {
 			const FFINGPUT1BufferPixel& Pixel = Buf->Get(X, Y);
 			
-			
 			FString Char = FString::Chr(Pixel.Character);
 			if (Char.TrimStartAndEnd().Len() > 0) FSlateDrawElement::MakeText(
                 OutDrawElements,
@@ -192,6 +191,23 @@ SScreenMonitor::SScreenMonitor() {
 	
 }
 
+void AFINComputerGPUT1::SetFrontBufferChunk_Implementation(int InOffset, const TArray<FFINGPUT1BufferPixel>& InPixels) {
+	FrontBuffer.SetChunk(InOffset, InPixels);
+}
+
+void AFINComputerGPUT1::SetFrontBuffer_Implementation(const FFINGPUT1Buffer& Buffer) {
+	FrontBuffer = Buffer;
+}
+
+void AFINComputerGPUT1::ReplicateFrontBuffer() {
+	SetFrontBuffer(FrontBuffer);
+	/*for (int i = 0; i < FrontBuffer.GetData().Num(); i += UNetworkSettings::DefaultMaxRepArraySize/2) {
+		int Count = FMath::Min(FrontBuffer.GetData().Num() - i, UNetworkSettings::DefaultMaxRepArraySize/2);
+		TArray<FFINGPUT1BufferPixel> Chunk(FrontBuffer.GetData().GetData() + i, Count);
+		SetFrontBufferChunk(i, Chunk);
+	}*/
+}
+
 AFINComputerGPUT1::AFINComputerGPUT1() {
 	PrimaryActorTick.bCanEverTick = false;
 	
@@ -199,6 +215,8 @@ AFINComputerGPUT1::AFINComputerGPUT1() {
 
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
+	bAlwaysRelevant = true;
+	NetPriority = 2.0;
 }
 
 void AFINComputerGPUT1::Tick(float DeltaSeconds) {
@@ -206,7 +224,8 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	if (HasAuthority() && bFlushed) {
 		bFlushed = false;
 		Flush();
-		ForceNetUpdate();
+		//ForceNetUpdate();
+		ReplicateFrontBuffer();
 	}
 }
 

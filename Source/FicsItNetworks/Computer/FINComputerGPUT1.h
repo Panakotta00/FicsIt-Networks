@@ -26,6 +26,18 @@ public:
 		Record.EnterField(SA_FIELD_NAME(TEXT("BackgroundColor"))) << BackgroundColor;
 		return true;
 	}
+
+	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) {
+		bOutSuccess = true;
+		Ar << Character;
+		FColor Color = ForegroundColor.Quantize();
+		Ar << Color;
+		ForegroundColor = Color;
+		Color = BackgroundColor.Quantize();
+		Ar << Color;
+		BackgroundColor = Color;
+		return true;
+	}
 	
 	FORCEINLINE explicit FFINGPUT1BufferPixel(TCHAR InCharacter = 0, FLinearColor InForeground = FLinearColor::White, FLinearColor InBackground = FLinearColor::Transparent) :
 		Character(InCharacter),
@@ -40,9 +52,15 @@ public:
 template<>
 struct TStructOpsTypeTraits<FFINGPUT1BufferPixel> : TStructOpsTypeTraitsBase2<FFINGPUT1BufferPixel> {
 	enum {
-		WithStructuredSerializer = true
+		WithStructuredSerializer = true,
+		WithNetSerializer = true,
 	};
 };
+
+inline FStructuredArchive::FSlot& operator<<(FStructuredArchive::FSlot& Slot, FFINGPUT1BufferPixel& Pixel) {
+	Pixel.Serialize(Slot);
+	return Slot;
+}
 
 enum EFINGPUT1TextBlendingMethod {
 	FIN_GPUT1_TEXT_OVERWRITE,
@@ -74,8 +92,8 @@ private:
 	UPROPERTY(SaveGame)
 	int Height = 0;
 
-	UPROPERTY(SaveGame)
-	TArray<FFINGPUT1BufferPixel> Pixels;
+	UPROPERTY(SaveGame, NotReplicated)
+	TArray<FFINGPUT1BufferPixel> Items;
 
 	FORCEINLINE int PosToIndex(int X, int Y) const {
 		if (!FMath::IsWithinInclusive(X, 0, Width)
@@ -93,6 +111,28 @@ private:
 public:
 	FFINGPUT1Buffer() = default;
 	
+	void SetChunk(int InOffset, const TArray<FFINGPUT1BufferPixel>& InPixels) {
+		int Count = InOffset + InPixels.Num() - Items.Num();
+		if (Count > 0) Items.AddDefaulted(Count);
+		FMemory::Memcpy(Items.GetData() + InOffset, InPixels.GetData(), InPixels.Num() * Items.GetTypeSize());
+	}
+
+	TArray<FFINGPUT1BufferPixel>& GetData() {
+		return Items;
+	}
+
+	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) {
+		bOutSuccess = true;
+		Ar << Width << Height;
+		int Count = Items.Num();
+		Ar << Count;
+		if (Ar.IsLoading()) Items.SetNumUninitialized(Count);
+		for (int i = 0; i < Count && bOutSuccess; ++i) {
+			Items[i].NetSerialize(Ar, Map, bOutSuccess);
+		}
+		return true;
+	}
+
 	/**
 	 * Creates and fills a new buffer with the default pixels.
 	 * If CopyFrom is given, copies the buffer into the upper left corner of the new buffer.
@@ -109,13 +149,13 @@ public:
 			EmptyHeight = Height - CopyHeight;
 
 			for (int i = 0; i < CopyHeight; ++i) {
-				Pixels.AddUninitialized(CopyWidth);
-				FMemory::Memcpy(&Pixels[i * Width], &CopyFrom->Pixels[i * CopyFrom->Width], CopyWidth * sizeof(FFINGPUT1BufferPixel));
-				Pixels.AddDefaulted(EmptyWidth);
+				Items.AddUninitialized(CopyWidth);
+				FMemory::Memcpy(&Items[i * Width], &CopyFrom->Items[i * CopyFrom->Width], CopyWidth * sizeof(FFINGPUT1BufferPixel));
+				Items.AddDefaulted(EmptyWidth);
 			}
 		}
 		
-		Pixels.AddDefaulted(EmptyHeight * Width);
+		Items.AddDefaulted(EmptyHeight * Width);
 	}
 	
 	/**
@@ -153,8 +193,8 @@ public:
 	 */
 	FORCEINLINE const FFINGPUT1BufferPixel& Get(int X, int Y) const {
 		const int Index = PosToIndex(X, Y);
-		if (Index < 0) return FFINGPUT1BufferPixel::InvalidPixel;
-		return Pixels[Index];
+		if (Index < 0 || Index >= Items.Num()) return FFINGPUT1BufferPixel::InvalidPixel;
+		return Items[Index];
 	}
 
 	/**
@@ -168,7 +208,7 @@ public:
 	FORCEINLINE bool Set(int X, int Y, FFINGPUT1BufferPixel Pixel) {
 		const int Index = PosToIndex(X, Y);
 		if (Index < 0) return false;
-		Pixels[Index] = Pixel;
+		Items[Index] = Pixel;
 		return true;
 	}
 
@@ -313,11 +353,11 @@ public:
 			const int Offset = OffsetX + (OffsetY + i) * Width;
 			const int FOffset = FOffsetX + (FOffsetY + i) * From.Width;
 			if (ForegroundBlendMode == FIN_GPUT1_OVERWRITE && BackgroundBlendMode == FIN_GPUT1_OVERWRITE && TextBlendMode == FIN_GPUT1_TEXT_OVERWRITE) {
-				FMemory::Memcpy(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth * sizeof(FFINGPUT1BufferPixel));
+				FMemory::Memcpy(&Items[Offset], &From.Items[FOffset], CopyWidth * sizeof(FFINGPUT1BufferPixel));
 			} else {
-				BlendPixelRow(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth, TextBlendMode);
-				BlendPixelRow(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth, ForegroundBlendMode, offsetof(FFINGPUT1BufferPixel, ForegroundColor));
-				BlendPixelRow(&Pixels[Offset], &From.Pixels[FOffset], CopyWidth, BackgroundBlendMode, offsetof(FFINGPUT1BufferPixel, BackgroundColor));
+				BlendPixelRow(&Items[Offset], &From.Items[FOffset], CopyWidth, TextBlendMode);
+				BlendPixelRow(&Items[Offset], &From.Items[FOffset], CopyWidth, ForegroundBlendMode, offsetof(FFINGPUT1BufferPixel, ForegroundColor));
+				BlendPixelRow(&Items[Offset], &From.Items[FOffset], CopyWidth, BackgroundBlendMode, offsetof(FFINGPUT1BufferPixel, BackgroundColor));
 			}
 		}
 	}
@@ -341,7 +381,7 @@ public:
 		for (int X = 0; X < CopyWidth; ++X) {
 			for (int Y = 0; Y < CopyHeight; ++Y) {
 				const int Offset = OffsetX + X + (OffsetY + Y) * Width;
-				Pixels[Offset] = InPixel;
+				Items[Offset] = InPixel;
 			}
 		}
 	}
@@ -414,7 +454,7 @@ public:
 		ParallelFor(Length, [this, &InCharacters, &InForeground, &InBackground](int i) {
 			int Offset = i * 4;
 			const FLinearColor ForegroundColor(
-				InForeground[Offset],
+					InForeground[Offset],
 				InForeground[Offset+1],
 				InForeground[Offset+2],
 				InForeground[Offset+3]);
@@ -437,12 +477,19 @@ public:
 			const int LineOffset = Y * Width;
 			FString Line;
 			for (int X = 0; X < Width; ++X) {
-				Line += Pixels[LineOffset + X].Character;
+				Line += Items[LineOffset + X].Character;
 			}
 			Out += Line.TrimEnd() + '\n';
 		}
 		return Out;
 	}
+};
+
+template<>
+struct TStructOpsTypeTraits<FFINGPUT1Buffer> : TStructOpsTypeTraitsBase2<FFINGPUT1Buffer> {
+	enum {
+		WithNetSerializer = true,
+	};
 };
 
 class FICSITNETWORKS_API SScreenMonitor : public SLeafWidget {
@@ -571,6 +618,13 @@ private:
 	TSharedPtr<SInvalidationPanel> CachedInvalidation;
 	bool bFlushed = false;
 	FCriticalSection DrawingMutex;
+
+	UFUNCTION(NetMulticast, Client, Unreliable)
+	void SetFrontBufferChunk(int InOffset, const TArray<FFINGPUT1BufferPixel>& InPixels);
+	UFUNCTION(NetMulticast, Client, Unreliable)
+	void SetFrontBuffer(const FFINGPUT1Buffer& Buffer);
+	
+	void ReplicateFrontBuffer();
 	
 public:
 	AFINComputerGPUT1();
