@@ -381,6 +381,7 @@ public:
 		for (int X = 0; X < CopyWidth; ++X) {
 			for (int Y = 0; Y < CopyHeight; ++Y) {
 				const int Offset = OffsetX + X + (OffsetY + Y) * Width;
+				if (Items.Num() <= Offset) return;
 				Items[Offset] = InPixel;
 			}
 		}
