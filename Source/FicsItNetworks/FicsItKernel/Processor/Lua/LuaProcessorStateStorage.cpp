@@ -1,15 +1,17 @@
-﻿#include "LuaProcessorStateStorage.h"
+#include "LuaProcessorStateStorage.h"
 
 
 #include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/Network/FINDynamicStructHolder.h"
 
 bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
+	if (!Slot.GetUnderlyingArchive().IsSaveGame()) return false;
 	FStructuredArchive::FRecord Record = Slot.EnterRecord();
 	Record.EnterField(SA_FIELD_NAME(TEXT("Traces"))).GetUnderlyingArchive() << Traces;
 	Record.EnterField(SA_FIELD_NAME(TEXT("References"))) << References;
-	Record.EnterField(SA_FIELD_NAME(TEXT("Thread"))) << Thread;
-	Record.EnterField(SA_FIELD_NAME(TEXT("Globals"))) << Globals;
+	Record.EnterField(SA_FIELD_NAME(TEXT("Thread"))) << LuaData;
+	FString Str;
+	Record.EnterField(SA_FIELD_NAME(TEXT("Globals"))) << Str;
 
 	FStructuredArchive::FSlot Ar = Record.EnterField(SA_FIELD_NAME(TEXT("Structs")));
 	
@@ -31,7 +33,6 @@ bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
 	}
 	return true;
 }
-
 
 int32 FFINLuaProcessorStateStorage::Add(const FFINNetworkTrace& Trace) {
 	return Traces.AddUnique(Trace);
@@ -65,6 +66,5 @@ void FFINLuaProcessorStateStorage::Clear() {
 	Traces.Empty();
 	References.Empty();
 	Structs.Empty();
-	Thread.Empty();
-	Globals.Empty();
+	LuaData.Empty();
 }

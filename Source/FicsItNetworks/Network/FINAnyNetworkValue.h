@@ -11,7 +11,7 @@ USTRUCT(BlueprintType)
 struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	GENERATED_BODY()
 	
-	FORCEINLINE FFINAnyNetworkValue() : Type(FIN_ANY), Data() {}
+	FORCEINLINE FFINAnyNetworkValue() : Type(FIN_NIL), Data() {}
 
 	FORCEINLINE FFINAnyNetworkValue(FINInt e) {
 		Data.INT = e;
@@ -278,7 +278,8 @@ template<>
 struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFINAnyNetworkValue> {
 	enum {
 		WithSerializer = true,
-    };
+		WithCopy = true,
+	};
 };
 
 template<>

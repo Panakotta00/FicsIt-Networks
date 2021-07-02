@@ -10,8 +10,7 @@
 // ReSharper disable once IdentifierTypo
 namespace FicsItKernel {
 	namespace Lua {
-		#pragma optimize("", off)
-		int luaComponentProxy(lua_State* L) {
+				int luaComponentProxy(lua_State* L) {
 			// ReSharper disable once CppDeclaratorNeverUsed
 			FLuaSyncCall SyncCall(L);
 			const int args = lua_gettop(L);
@@ -45,8 +44,7 @@ namespace FicsItKernel {
 			}
 			return UFINLuaProcessor::luaAPIReturn(L, args);
 		}
-		#pragma optimize("", on)
-
+		
 		int luaFindComponent(lua_State* L) {
 			// ReSharper disable once CppDeclaratorNeverUsed
 			FLuaSyncCall SyncCall(L);

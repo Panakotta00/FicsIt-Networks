@@ -17,7 +17,6 @@
 
 #define OffsetParam(type, off) (type*)((std::uint64_t)param + off)
 
-#pragma optimize("", off)
 namespace FicsItKernel {
 	namespace Lua {
 		std::map<UObject*, FCriticalSection> objectLocks;
@@ -710,4 +709,3 @@ namespace FicsItKernel {
 		}
 	}
 }
-#pragma optimize("", on)

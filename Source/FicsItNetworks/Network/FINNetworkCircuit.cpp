@@ -18,13 +18,10 @@ void AFINNetworkCircuit::AddNodeRecursive(TArray<TScriptInterface<IFINNetworkCir
 AFINNetworkCircuit::AFINNetworkCircuit() {
 	bReplicates = true;
 	bAlwaysRelevant = true;
+	SetReplicates(true);
 }
 
 AFINNetworkCircuit::~AFINNetworkCircuit() {}
-
-bool AFINNetworkCircuit::IsSupportedForNetworking() const {
-	return true;
-}
 
 void AFINNetworkCircuit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

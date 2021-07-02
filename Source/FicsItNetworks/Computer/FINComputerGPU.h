@@ -2,11 +2,12 @@
 
 #include "FicsItNetworks/Network/FINNetworkTrace.h"
 #include "FINComputerModule.h"
+#include "FINPciDeviceInterface.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 #include "FINComputerGPU.generated.h"
 
 UCLASS()
-class FICSITNETWORKS_API AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface {
+class FICSITNETWORKS_API AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface, public IFINPciDeviceInterface {
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintReadWrite, SaveGame, Replicated)

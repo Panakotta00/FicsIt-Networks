@@ -5,17 +5,14 @@
 #include "FicsItNetworks/Network/FINAnyNetworkValue.h"
 #include "FicsItNetworks/Reflection/FINExecutionContext.h"
 
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+
 class UFINProperty;
 class UFINStruct;
 class UFINFunction;
 struct FFINNetworkTrace;
-
-extern "C" {
-	#include "lua.h"
-	#include "lauxlib.h"
-	#include "lualib.h"
-	#include "eris.h"
-}
 
 /**
  * Adds some variables to the C-Scope needed by the Helper-Persist-Macros.

@@ -16,7 +16,7 @@ private:
 	bool bUseOldSerialization = false;
 	
 public:
-	static void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path);
+	static void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk);
 
 	UPROPERTY(SaveGame)
 	FGuid ID;

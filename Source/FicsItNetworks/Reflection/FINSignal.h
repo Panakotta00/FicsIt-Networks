@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FINProperty.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/Network/Signals/FINSignalSubsystem.h"
 #include "FINSignal.generated.h"
 
@@ -30,6 +31,11 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	virtual void Trigger(UObject* Context, const TArray<FFINAnyNetworkValue>& Data) {
-		AFINSignalSubsystem::GetSignalSubsystem(Context)->BroadcastSignal(Context, FFINSignalData(this, Data));
+		AFINSignalSubsystem* SubSys = AFINSignalSubsystem::GetSignalSubsystem(Context);
+		if (!SubSys) {
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Unable to get signal subsystem for executing signal '%s'"), *GetInternalName())
+			return;
+		}
+		SubSys->BroadcastSignal(Context, FFINSignalData(this, Data));
 	}
 };

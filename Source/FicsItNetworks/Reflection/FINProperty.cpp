@@ -1,7 +1,6 @@
 ﻿#include "FINProperty.h"
 
 
-#pragma optimize("", on)
 FINAny FFINPropertyGetterFunc::operator()(const FFINExecutionContext& Ctx, bool* Done) const {
 	if (Function) {
 		if (Done) *Done = true;
@@ -61,4 +60,3 @@ bool FFINPropertySetterFunc::operator()(const FFINExecutionContext& Ctx, const F
 	}
 	return false;
 }
-#pragma optimize("", on)

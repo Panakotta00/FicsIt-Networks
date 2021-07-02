@@ -22,7 +22,11 @@ public:
 			TArray<FFINAnyNetworkValue> Output;
 			// allocate & initialize parameter struct
 			uint8* ParamStruct = (uint8*)FMemory_Alloca(RefFunction->PropertiesSize);
-			RefFunction->InitializeStruct(ParamStruct);
+			for (TFieldIterator<UProperty> Prop(RefFunction); Prop; ++Prop) {
+				if (Prop->GetPropertyFlags() & CPF_Parm) {
+					if (Prop->IsInContainer(RefFunction->ParmsSize)) Prop->InitializeValue_InContainer(ParamStruct);
+				}
+			}
 			
 			// copy parameters to parameter struct
 			int i = 0;
@@ -50,7 +54,11 @@ public:
 			}
 
 			// destroy parameter struct
-			RefFunction->DestroyStruct(ParamStruct);
+			for (TFieldIterator<UProperty> Prop(RefFunction); Prop; ++Prop) {
+				if (Prop->GetPropertyFlags() & CPF_Parm) {
+					if (Prop->IsInContainer(RefFunction->ParmsSize)) Prop->DestroyValue_InContainer(ParamStruct);
+				}
+			}
 			
 			return Output;
 		}

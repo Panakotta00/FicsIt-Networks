@@ -3,6 +3,7 @@
 FFINKernelFSSerial::FFINKernelFSSerial(CodersFileSystem::ListenerListRef listeners, CodersFileSystem::SizeCheckFunc sizeCheck) : listeners(listeners), sizeCheck(sizeCheck) {}
 
 CodersFileSystem::SRef<CodersFileSystem::FileStream> FFINKernelFSSerial::open(CodersFileSystem::FileMode m) {
+	FScopeLock Lock(&Mutex);
 	clearStreams();
 	CodersFileSystem::SRef<FFINKernelSerialStream> stream = new FFINKernelSerialStream(this, m, listeners, sizeCheck);
 	inStreams.insert(stream);
@@ -14,6 +15,7 @@ bool FFINKernelFSSerial::isValid() const {
 }
 
 void FFINKernelFSSerial::clearStreams() {
+	FScopeLock Lock(&Mutex);
 	std::unordered_set<CodersFileSystem::WRef<CodersFileSystem::FileStream>> removeStreams;
 	for (CodersFileSystem::WRef<CodersFileSystem::FileStream> stream : inStreams) {
 		if (!stream) removeStreams.insert(stream);
@@ -29,6 +31,7 @@ size_t FFINKernelFSSerial::getSize() const {
 }
 
 void FFINKernelFSSerial::write(std::string str) {
+	FScopeLock Lock(&Mutex);
 	for (auto stream = inStreams.begin(); stream != inStreams.end(); ++stream) {
 		// check if stream is invalid and erase if that's the case
 		if (!stream->isValid()) {
@@ -44,6 +47,7 @@ void FFINKernelFSSerial::write(std::string str) {
 }
 
 std::string FFINKernelFSSerial::readOutput() {
+	FScopeLock Lock(&Mutex);
 	std::string str = output.str();
 	output = std::stringstream();
 	return str;
@@ -60,6 +64,7 @@ void FFINKernelSerialStream::write(std::string str) {
 
 void FFINKernelSerialStream::flush() {
 	if (!(mode & CodersFileSystem::OUTPUT)) return;
+	FScopeLock Lock(&serial->Mutex);
 	serial->output << buffer;
 	serial->output.flush();
 	buffer = "";

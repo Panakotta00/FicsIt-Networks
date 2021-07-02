@@ -13,62 +13,84 @@ namespace fs = std::filesystem;
 
 namespace CodersFileSystem {
 	struct DiskDeviceWatcher {
-		HANDLE watcher;
-		OVERLAPPED ovl;
-		FILE_NOTIFY_INFORMATION info[16];
+		HANDLE DirectoryHandle;
+		OVERLAPPED OverlappedIO;
+		uint8 Buffer[1024];
 	};
 
 	WindowsFileWatcher::WindowsFileWatcher(const std::filesystem::path& path, std::function<void(int, NodeType, Path, Path)> event) : eventFunc(event), realPath(path) {
 		watcherInfo = new DiskDeviceWatcher();
-		watcherInfo->watcher = ::CreateFile(path.wstring().c_str(),
+		watcherInfo->DirectoryHandle = ::CreateFile(
+			path.wstring().c_str(),
 			FILE_LIST_DIRECTORY,
 			FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-			NULL, OPEN_EXISTING,
-			FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL);
-		watcherInfo->ovl = {0};
-		watcherInfo->ovl.hEvent = CreateEvent(NULL, true, false, NULL);
-		memset(&watcherInfo->info, 0, sizeof(watcherInfo->info));
-		ReadDirectoryChangesW(watcherInfo->watcher, &watcherInfo->info, sizeof(watcherInfo->info), true, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_LAST_WRITE, NULL, &watcherInfo->ovl, NULL);
+			NULL,
+			OPEN_EXISTING,
+			FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+			NULL);
+		ZeroMemory(&watcherInfo->OverlappedIO, sizeof(watcherInfo->OverlappedIO));
+		watcherInfo->OverlappedIO.hEvent = CreateEvent(NULL, true, false, NULL);
+		
+		tryReadChanges();
 	}
 
 	WindowsFileWatcher::~WindowsFileWatcher() {
+		CloseHandle(watcherInfo->OverlappedIO.hEvent);
+		CloseHandle(watcherInfo->DirectoryHandle);
 		delete watcherInfo;
 	}
 
 	void WindowsFileWatcher::tick() {
-		DWORD status = WaitForSingleObject(watcherInfo->ovl.hEvent, 0);
+		DWORD status = WaitForSingleObject(watcherInfo->OverlappedIO.hEvent, 0);
 		if (status != WAIT_OBJECT_0) return;
 
-		FILE_NOTIFY_INFORMATION* current = &watcherInfo->info[0];
-		std::wstring bufStr;
-		while (current) {
-			std::wstring fname = std::wstring((const wchar_t*)&current->FileName, current->FileNameLength);
-			std::replace(fname.begin(), fname.end(), L'\\', L'/');
-			Path path = fs::path(fname);
-			bool isDir = fs::is_directory(realPath / path);
-			NodeType type = (isDir) ? NT_Directory : NT_File;
-			switch (current->Action) {
-			case FILE_ACTION_ADDED:
-				eventFunc(0, type, path, Path());
-				break;
-			case FILE_ACTION_REMOVED:
-				eventFunc(1, type, path, Path());
-				break;
-			case FILE_ACTION_MODIFIED:
-				eventFunc(2, type, path, Path());
-				break;
-			case FILE_ACTION_RENAMED_NEW_NAME:
-				eventFunc(3, type, path, fs::path(bufStr));
-				break;
-			case FILE_ACTION_RENAMED_OLD_NAME:
-				bufStr = fname;
-				break;
-			}
-			if (current->NextEntryOffset <= 0) break;
-			auto old = current;
-			current = (FILE_NOTIFY_INFORMATION*)((size_t)current + current->NextEntryOffset);
+		FILE_NOTIFY_INFORMATION* Event = (FILE_NOTIFY_INFORMATION*)watcherInfo->Buffer;
+		
+		while (true) {
+			handleChangeEvent(Event);
+						
+			if (Event->NextEntryOffset) {
+				*((uint8**)&Event) += Event->NextEntryOffset;
+			} else break;
 		}
-		memset(&watcherInfo->info, 0, sizeof(watcherInfo->info));
-		ReadDirectoryChangesW(watcherInfo->watcher, &watcherInfo->info, sizeof(watcherInfo->info), true, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_LAST_WRITE, NULL, &watcherInfo->ovl, NULL);
+		tryReadChanges();
+	}
+
+	void WindowsFileWatcher::tryReadChanges() {
+		memset(&watcherInfo->Buffer, 0, sizeof(watcherInfo->Buffer));
+		ReadDirectoryChangesW(
+			watcherInfo->DirectoryHandle,
+			&watcherInfo->Buffer,
+			sizeof(watcherInfo->Buffer),
+			true,
+			FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_LAST_WRITE,
+			NULL,
+			&watcherInfo->OverlappedIO,
+			NULL);
+	}
+
+	void WindowsFileWatcher::handleChangeEvent(FILE_NOTIFY_INFORMATION* changeEvent) {
+		std::wstring fname = std::wstring((const wchar_t*)&changeEvent->FileName, changeEvent->FileNameLength);
+		std::replace(fname.begin(), fname.end(), L'\\', L'/');
+		Path path = fs::path(fname);
+		bool isDir = fs::is_directory(realPath / path);
+		NodeType type = (isDir) ? NT_Directory : NT_File;
+		switch (changeEvent->Action) {
+		case FILE_ACTION_ADDED:
+			eventFunc(0, type, path, Path());
+			break;
+		case FILE_ACTION_REMOVED:
+			eventFunc(1, type, path, Path());
+			break;
+		case FILE_ACTION_MODIFIED:
+			eventFunc(2, type, path, Path());
+			break;
+		case FILE_ACTION_RENAMED_NEW_NAME:
+			eventFunc(3, type, path, fs::path(oldNameBufString));
+			break;
+		case FILE_ACTION_RENAMED_OLD_NAME:
+			oldNameBufString = fname;
+			break;
+		}
 	}
 }

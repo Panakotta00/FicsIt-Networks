@@ -95,7 +95,6 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
 		}
 
-#pragma optimize("", off)
 		int luaIgnoreAll(lua_State* L) {
 			// ReSharper disable once CppDeclaratorNeverUsed
 			FLuaSyncCall SyncCall(L);
@@ -104,7 +103,6 @@ namespace FicsItKernel {
 			SigSubSys->IgnoreAll(net->GetComponent().GetObject());
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
-#pragma optimize("", on)
 
 		int luaClear(lua_State* L) {
 			UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->ClearSignals();
@@ -127,6 +125,8 @@ namespace FicsItKernel {
 			luaL_setfuncs(L, luaEventLib, 0);
 			PersistTable("Lib", -1);
 			lua_setglobal(L, "event");
+			lua_pushcfunction(L, (int(*)(lua_State*))luaPullContinue);
+			PersistValue("pullContinue");
 		}
 	}
 }

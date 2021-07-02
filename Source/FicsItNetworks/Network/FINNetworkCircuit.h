@@ -28,11 +28,7 @@ protected:
 public:
 	AFINNetworkCircuit();
 	~AFINNetworkCircuit();
-
-	// Begin UObject
-	virtual bool IsSupportedForNetworking() const override;
-	// End UObject
-	
+		
 	/**
 	 * Adds the given circuit to this circuit.
 	 * Causes correct update signals for the components.

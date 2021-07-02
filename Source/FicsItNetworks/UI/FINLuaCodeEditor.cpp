@@ -82,7 +82,7 @@ TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighte
 	
 	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(LuaSyntaxTextStyle));
 }
-#pragma optimize("", off)
+
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) {
 	TArray<FTextLayout::FNewLineData> LinesToAdd;
 	LinesToAdd.Reserve(TokenizedLines.Num());
@@ -310,7 +310,6 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 	}
 	TargetTextLayout.AddLines(LinesToAdd);
 }
-#pragma optimize("", on)
 
 void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 	SyntaxHighlighter = FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(InArgs._CodeStyle);
@@ -324,6 +323,7 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 		.Style(InArgs._Style)
 		.OnTextChanged(InArgs._OnTextChanged)
 		.OnTextCommitted(InArgs._OnTextCommitted)
+		.TextShapingMethod(ETextShapingMethod::Auto)
 	];
 }
 

@@ -5,9 +5,11 @@
 AFINNetworkRouter::AFINNetworkRouter() {
 	NetworkConnector1 = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector1");
 	NetworkConnector1->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	NetworkConnector1->SetIsReplicated(true);
 	
 	NetworkConnector2 = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector2");
 	NetworkConnector2->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	NetworkConnector2->SetIsReplicated(true);
 
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);

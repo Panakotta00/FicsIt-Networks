@@ -8,6 +8,7 @@
 #include "FGGameMode.h"
 #include "FGGameState.h"
 #include "FINGlobalRegisterHelper.h"
+#include "Computer/FINComputerDriveDesc.h"
 #include "Computer/FINComputerRCO.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Hologram/FGBuildableHologram.h"
@@ -15,8 +16,12 @@
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Patching/BlueprintHookHelper.h"
+#include "Patching/BlueprintHookManager.h"
 #include "Patching/NativeHookManager.h"
 #include "Reflection/FINReflection.h"
+#include "Reflection/ReflectionHelper.h"
+#include "UI/FINCopyUUIDButton.h"
 #include "UI/FINReflectionStyles.h"
 #include "UObject/CoreRedirects.h"
 
@@ -25,7 +30,7 @@ IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
 FDateTime FFicsItNetworksModule::GameStart;
 
-#pragma optimize("", off)
+//#pragma optimize("", o
 
 void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterface*)>& scope, IFGDismantleInterface* self_r) {
 	AFGBuildable* self = dynamic_cast<AFGBuildable*>(self_r);
@@ -159,6 +164,23 @@ void FFicsItNetworksModule::StartupModule(){
 				gm->RegisterRemoteCallObjectClass(ModuleRCO);
 			}
 		});
+
+		// Copy FS UUID Item Context Menu Entry //
+		UClass* StackPlitter = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_StackSplitSlider.Widget_StackSplitSlider_C"));
+		check(StackPlitter);
+		UFunction* Function = StackPlitter->FindFunctionByName(TEXT("Construct"));
+		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
+		HookManager->HookBlueprintFunction(Function, [](FBlueprintHookHelper& HookHelper) {
+			UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
+			UUserWidget* SourceSlot = Cast<UUserWidget>(FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mSourceSlot")));
+			AFINFileSystemState* State = UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(SourceSlot);
+			if (State) {
+				UVerticalBox* MenuList = Cast<UVerticalBox>(self->GetWidgetFromName("VerticalBox_0"));
+				UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
+				UUIDButton->InitSlotWidget(SourceSlot);
+				MenuList->AddChildToVerticalBox(UUIDButton);
+			}
+		}, EPredefinedHookOffset::Start);
 #else
 		/*FFINGlobalRegisterHelper::Register();
 			
@@ -167,7 +189,6 @@ void FFicsItNetworksModule::StartupModule(){
 #endif
 	});
 }
-#pragma optimize("", on)
 
 void FFicsItNetworksModule::ShutdownModule() {
 	FFINReflectionStyles::Shutdown();

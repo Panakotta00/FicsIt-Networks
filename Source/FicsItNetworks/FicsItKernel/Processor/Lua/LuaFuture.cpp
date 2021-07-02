@@ -7,7 +7,6 @@ namespace FicsItKernel {
 	namespace Lua {
 		typedef TSharedPtr<TFINDynamicStruct<FFINFuture>> LuaFuture;
 
-#pragma optimize("", off)
 		int luaFutureAwaitContinue(lua_State* L, int, lua_KContext) {
 			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
 			if ((*future)->IsDone()) {
@@ -80,7 +79,6 @@ namespace FicsItKernel {
 			
 			return 1;
 		}
-#pragma optimize("", on)
 
 		static const luaL_Reg luaFutureLib[] = {
 			{"await", luaFutureAwait},

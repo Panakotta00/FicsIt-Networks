@@ -105,6 +105,8 @@ public:
 
 	void tickHook(lua_State* L);
 	int apiReturn(lua_State* L, int args);
+
+	LuaTickState getState() { return State; }
 };
 
 UCLASS()
@@ -151,8 +153,9 @@ public:
 
 	// Begin UObject
 	virtual void Serialize(FArchive& Ar) override;
+	virtual void BeginDestroy() override;
 	// End UObject
-
+	
 	// Begin IFGSaveInterface
 	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	virtual void PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
@@ -228,6 +231,11 @@ public:
 	 * Returns the lua state
 	 */
 	lua_State* GetLuaState() const;
+
+	/**
+	 * Returns the current lua thread
+	 */
+	lua_State* GetLuaThread() const;
 };
 
 struct FLuaSyncCall {

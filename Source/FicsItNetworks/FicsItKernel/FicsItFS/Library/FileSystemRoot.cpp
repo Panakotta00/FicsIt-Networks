@@ -208,22 +208,20 @@ int FileSystemRoot::move(Path from, Path to) {
 }
 
 SRef<Node> FileSystemRoot::get(Path path) {
-	try {
-		auto node = cache.find(path);
-		if (node == cache.end()) throw std::exception();
-		if (!node->second.isValid()) {
-			cache.erase(node);
-			throw std::exception();
+	auto cached_node = cache.find(path);
+	if (cached_node != cache.end()) {
+		if (!cached_node->second.isValid()) {
+			cache.erase(cached_node);
+		} else {
+			return cached_node->second;
 		}
-		return node->second;
-	} catch (...) {
-		Path pending = "";
-		auto device = getDevice(path, pending);
-		if (!device.isValid()) return nullptr;
-		auto node = device->get(pending);
-		if (!node.isValid()) return nullptr;
-		return cache[path] = node;
 	}
+	Path pending = "";
+	auto device = getDevice(path, pending);
+	if (!device.isValid()) return nullptr;
+	auto node = device->get(pending);
+	if (!node.isValid()) return nullptr;
+	return cache[path] = node;
 }
 
 unordered_set<NodeName> FileSystemRoot::childs(Path path) {

@@ -5,6 +5,7 @@
 AFINVehicleScanner::AFINVehicleScanner() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(TEXT("NetworkConnector"));
 	NetworkConnector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	NetworkConnector->SetIsReplicated(true);
 	StaticMesh = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>(TEXT("StaticMesh"));
 	StaticMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	LampMesh= CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LampMesh"));

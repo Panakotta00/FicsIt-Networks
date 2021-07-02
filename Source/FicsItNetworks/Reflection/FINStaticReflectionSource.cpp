@@ -45,6 +45,8 @@
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
+#include "FicsItNetworks/Computer/FINComputerGPUT1.h"
+#include "FicsItNetworks/Network/FINFuture.h"
 #include "FicsItNetworks/Network/FINNetworkConnectionComponent.h"
 #include "FicsItNetworks/Utils/FINTargetPoint.h"
 #include "FicsItNetworks/Utils/FINTimeTableStop.h"
@@ -984,7 +986,7 @@ BeginProp(RBool, isBridgeActive, "Is Bridge Active", "True if the two circuits a
 EndClass()
 
 BeginClass(AFGBuildableCircuitSwitch, "CircuitSwitch", "Circuit Switch", "A circuit bridge that can be activated and deactivate by the player.")
-BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are connected to each other and act as one entity.") {
+BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are connected to each other and act as one entity.", 0) {
 	Return self->IsSwitchOn();
 } PropSet() {
 	self->SetSwitchOn(Val);
@@ -1977,7 +1979,7 @@ BeginClass(UFGItemDescriptor, "ItemType", "Item Type", "The type of an item (iro
 BeginClassProp(RInt, form, "Form", "The matter state of this resource.\n1: Solid\n2: Liquid\n3: Gas\n4: Heat") {
 	Return (FINInt)UFGItemDescriptor::GetForm(self);
 } EndProp()
-BeginClassProp(RFloat, energy, "Enery", "How much energy this resource provides if used as fuel.") {
+BeginClassProp(RFloat, energy, "Energy", "How much energy this resource provides if used as fuel.") {
 	Return (FINFloat)UFGItemDescriptor::GetForm(self);
 } EndProp()
 BeginClassProp(RFloat, radioactiveDecay, "Radioactive Decay", "The amount of radiation this item radiates.") {
@@ -2008,6 +2010,9 @@ BeginClassProp(RString, name, "Name", "The name of the category.") {
 	Return (FINStr)UFGItemCategory::GetCategoryName(self).ToString();
 } EndProp()
 EndClass()
+
+BeginStruct(FFINFuture, "Future", "Future", "A Future struct MAY BE HANDLED BY CPU IMPLEMENTATION differently, generaly, this is used to make resources available on a later point in time. Like if data won't be avaialble right away and you have to wait for it to process first. Like when you do a HTTP Request, then it takes some time to get the data from the web server. And since we don't want to halt the game and wait for the data, you can use a future to check if the data is available, or let just the Lua Code wait, till the data becomes available.")
+EndStruct()
 
 BeginStruct(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
@@ -2161,4 +2166,123 @@ BeginProp(RFloat, a, "Alpha", "The alpha (opacity) portion of the color.") {
 } PropSet() {
 	self->A = Val;
 } EndProp()
+EndStruct()
+
+BeginStruct(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A structure that can hold a buffer of characters and colors that can be displayed with a gpu")
+BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.", 2) {
+	OutVal(0, RFloat, width, "Width", "The width of this buffer")
+	OutVal(1, RFloat, height, "Height", "The height of this buffer")
+	Body()
+	int Width, Height;
+	self->GetSize(Width, Height);
+	width = (FINInt)Width;
+	height = (FINInt)Height;
+} EndFunc()
+BeginFunc(setSize, "Set Size", "Allows to set the dimensions of the buffer.", 2) {
+	InVal(0, RFloat, width, "Width", "The width this buffer should now have")
+	InVal(1, RFloat, height, "Height", "The height this buffer now have")
+	Body()
+	self->SetSize(width, height);
+} EndFunc()
+BeginFunc(get, "Get", "Allows to get a single pixel from the buffer at the given position", 2) {
+	InVal(0, RInt, x, "X", "The x position of the character you want to get")
+	InVal(1, RInt, y, "Y", "The y position of the character you want to get")
+	OutVal(2, RString, c, "Char", "The character at the given position")
+	OutVal(3, RStruct<FLinearColor>, foreground, "Foreground Color", "The foreground color of the pixel at the given position")
+	OutVal(4, RStruct<FLinearColor>, background, "Background Color", "The background color of the pixel at the given position")
+	Body()
+	const FFINGPUT1BufferPixel& Pixel = self->Get(x, y);
+	c = FString::Chr(Pixel.Character);
+	foreground = (FINStruct) Pixel.ForegroundColor;
+	background = (FINStruct) Pixel.BackgroundColor;
+} EndFunc()
+BeginFunc(set, "Set", "Allows to set a single pixel of the buffer at the given position", 2) {
+	InVal(0, RInt, x, "X", "The x position of the character you want to set")
+	InVal(1, RInt, y, "Y", "The y position of the character you want to set")
+	InVal(2, RString, c, "Char", "The character the pixel should have")
+	InVal(3, RStruct<FLinearColor>, foreground, "Foreground Color", "The foreground color the pixel at the given position should have")
+	InVal(4, RStruct<FLinearColor>, background, "Background Color", "The background color the pixel at the given position should have")
+	OutVal(5, RBool, done, "Done", "True if the pixel got set successfully")
+	Body()
+	if (c.Len() < 1) return;
+	done = self->Set(x, y, FFINGPUT1BufferPixel(c[0], foreground, background));
+} EndFunc()
+BeginFunc(copy, "Copy", "Copies the given buffer at the given offset of the upper left corner into this buffer.", 2) {
+	InVal(0, RInt, x, "X", "The x offset of the upper left corner of the buffer relative to this buffer")
+	InVal(1, RInt, y, "Y", "The y offset of the upper left corener of the buffer relative to this buffer")
+	InVal(2, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The buffer from wich you want to copy from")
+	InVal(3, RInt, textBlendMode, "Text Blend Mode", "The blend mode that is used for the text.\n0 = Overwrite this with the content of the given buffer\n1 = Overwrite with only characters that are not ' '\n2 = Overwrite only were this characters are ' '\n3 = Keep this buffer")
+	InVal(4, RInt, foregroundBlendMode, "Foreground Color Blend Mode", "The blend mode that is used for the foreground color.\n0 = Overwrite with the given color\n1 = Normal alpha composition\n2 = Multiply\n3 = Divide\n4 = Addition\n5 = Subtraction\n6 = Difference\n7 = Darken Only\n8 = Lighten Only\n9 = None")
+	InVal(5, RInt, backgroundBlendMode, "Background Color Blend Mode", "The blend mode that is used for the background color.\n0 = Overwrite with the given color\n1 = Normal alpha composition\n2 = Multiply\n3 = Divide\n4 = Addition\n5 = Subtraction\n6 = Difference\n7 = Darken Only\n8 = Lighten Only\n9 = None")
+	Body()
+	self->Copy(x, y, buffer, (EFINGPUT1TextBlendingMethod)textBlendMode, (EFINGPUT1ColorBlendingMethod)foregroundBlendMode, (EFINGPUT1ColorBlendingMethod)backgroundBlendMode);
+} EndFunc()
+BeginFunc(setText, "Set Text", "Allows to write the given text onto the buffer and with the given offset.", 2) {
+	InVal(0, RInt, x, "X", "The X Position at which the text should begin to get written.")
+	InVal(1, RInt, y, "Y", "The Y Position at which the text should begin to get written.")
+	InVal(2, RString, text, "Text", "The text that should get written.")
+	InVal(3, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color which will be used to write the text.")
+	InVal(4, RStruct<FLinearColor>, background, "Background", "The background color which will be used to write the text.")
+	Body()
+	self->SetText(x, y, text, foreground, background);
+} EndFunc()
+BeginFunc(fill, "Fill", "Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.", 2) {
+	InVal(0, RInt, x, "X", "The x coordinate at which the rectangle should get drawn. (upper-left corner)")
+	InVal(1, RInt, y, "Y", "The y coordinate at which the rectangle should get drawn. (upper-left corner)")
+	InVal(2, RInt, width, "Width", "The width of the rectangle.")
+	InVal(3, RInt, height, "Height", "The height of the rectangle.")
+	InVal(4, RString, character, "Character", "A string with a single character that will be used for each pixel in the range you want to fill.")
+	InVal(5, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color which will be used to fill the rectangle.")
+	InVal(6, RStruct<FLinearColor>, background, "Background", "The background color which will be used to fill the rectangle.")
+	Body()
+	if (character.Len() < 1) character = " ";
+	self->Fill(x, y, width, height, FFINGPUT1BufferPixel(character[0], foreground, background));
+} EndFunc()
+BeginFunc(setRaw, "Set Raw", "Allows to set the internal data of the buffer more directly.", 2) {
+	InVal(0, RString, characters, "Characters", "The characters you want to draw with a length of exactly width*height.")
+	InVal(1, RArray<RFloat>, foreground, "Foreground Color", "The values of the foreground color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.")
+	InVal(2, RArray<RFloat>, background, "Background Color", "The values of the background color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.")
+	OutVal(3, RBool, success, "Success", "True if the raw data was successfully written")
+	Body()
+	TArray<float> Foreground, Background;
+	if (foreground.Num() != background.Num()) success = false;
+	else {
+		//Foreground.AddUninitialized(foreground.Num());
+		//Background.AddUninitialized(background.Num());
+		//ParallelFor(foreground.Num(), [&Foreground, &foreground, &Background, &background](int i) {
+		for (int i = 0; i < foreground.Num(); ++i) {
+			Foreground.Add(foreground[i].GetFloat());
+			Background.Add(background[i].GetFloat());
+		//});
+		}
+		int Width, Height;
+		self->GetSize(Width, Height);
+		const int Length = Width * Height;
+		if (characters.Len() != Length
+			|| foreground.Num() != Length*4
+			|| background.Num() != Length*4) {
+			success = false;
+		}
+		ParallelFor(Length, [self, Width, &characters, &foreground, &background](int i) {
+			int Offset = i * 4;
+			const FLinearColor ForegroundColor(
+				foreground[Offset].GetFloat(),
+				foreground[Offset+1].GetFloat(),
+				foreground[Offset+2].GetFloat(),
+				foreground[Offset+3].GetFloat());
+			const FLinearColor BackgroundColor(
+				background[Offset].GetFloat(),
+				background[Offset+1].GetFloat(),
+				background[Offset+2].GetFloat(),
+				background[Offset+3].GetFloat());
+			self->Set(i % Width, i / Width, FFINGPUT1BufferPixel(characters[i], ForegroundColor, BackgroundColor));
+		});
+		success = true;
+	}
+} EndFunc()
+BeginFunc(clone, "Clone", "Clones this buffer into a new struct") {
+	OutVal(1, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The clone of this buffer")
+	Body()
+	buffer = (FINStruct) *self;
+} EndFunc()
 EndStruct()

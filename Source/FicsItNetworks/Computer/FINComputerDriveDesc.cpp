@@ -73,6 +73,51 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 	return Grid;
 }
 
+void CopyPath(CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice, CodersFileSystem::SRef<CodersFileSystem::Device> ToDevice, CodersFileSystem::Path Path) {
+	for (CodersFileSystem::NodeName Child : FromDevice->childs(Path)) {
+		CodersFileSystem::Path ChildPath = Path / Child;
+		CodersFileSystem::SRef<CodersFileSystem::Node> ChildNode = FromDevice->get(ChildPath);
+		if (CodersFileSystem::SRef<CodersFileSystem::File> File = ChildNode) {
+			CodersFileSystem::SRef<CodersFileSystem::FileStream> InputStream = FromDevice->open(ChildPath, CodersFileSystem::FileMode::INPUT | CodersFileSystem::FileMode::BINARY);
+			CodersFileSystem::SRef<CodersFileSystem::FileStream> OutputStream = ToDevice->open(ChildPath, CodersFileSystem::FileMode::OUTPUT | CodersFileSystem::FileMode::BINARY);
+			OutputStream->write(InputStream->readAll());
+			OutputStream->close();
+			InputStream->close();
+		} else if (CodersFileSystem::SRef<CodersFileSystem::Directory> Dir = ChildNode) {
+			ToDevice->createDir(ChildPath);
+			CopyPath(FromDevice, ToDevice, ChildPath);
+		}
+	}
+}
+
+bool UFINComputerDriveDesc::CopyData_Implementation(UObject* WorldContext, const FInventoryItem& InFrom, const FInventoryItem& InTo, FInventoryItem& OutItem) {
+	TSubclassOf<UFINComputerDriveDesc> DriveClass;
+	DriveClass = InTo.ItemClass;
+	if (!IsValid(DriveClass)) return false;
+	AFINFileSystemState* From = Cast<AFINFileSystemState>(InFrom.ItemState.Get());
+	AFINFileSystemState* To = Cast<AFINFileSystemState>(InTo.ItemState.Get());
+	OutItem = InTo;
+	if (!To) {
+		To = WorldContext->GetWorld()->SpawnActor<AFINFileSystemState>();
+		To->Capacity = GetStorageCapacity(DriveClass);
+		if (!IsValid(To)) return false;
+		OutItem.ItemState = FSharedInventoryStatePtr::MakeShared(To);
+	}
+	if (!From || !To) return false;
+	CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice = From->GetDevice();
+	CodersFileSystem::SRef<CodersFileSystem::Device> ToDevice = To->GetDevice();
+
+	// delete all data in ToDevice
+	for (CodersFileSystem::NodeName Child : ToDevice->childs("/")) {
+		ToDevice->remove(CodersFileSystem::Path(Child), true);
+	}
+
+	// copy all data
+	CopyPath(FromDevice, ToDevice, "/");
+	
+	return true;
+}
+
 int32 UFINComputerDriveDesc::GetStorageCapacity(TSubclassOf<UFINComputerDriveDesc> drive) {
 	return Cast<UFINComputerDriveDesc>(drive->GetDefaultObject())->StorageCapacity;
 }

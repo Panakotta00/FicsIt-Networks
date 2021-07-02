@@ -9,12 +9,9 @@ void UFINNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetime
 	DOREPLIFETIME(UFINNetworkConnectionComponent, Circuit);
 }
 
-bool UFINNetworkConnectionComponent::IsSupportedForNetworking() const {
-	return true;
-}
-
 void UFINNetworkConnectionComponent::InitializeComponent() {
 	Super::InitializeComponent();
+	SetIsReplicatedByDefault(true);
 	SetIsReplicated(true);
 }
 

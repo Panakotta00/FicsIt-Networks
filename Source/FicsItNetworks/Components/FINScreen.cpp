@@ -10,6 +10,7 @@ AFINScreen::AFINScreen() {
 	
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	Connector->SetIsReplicated(true);
 
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);

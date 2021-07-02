@@ -32,6 +32,12 @@ void UFINAdvancedNetworkConnectionComponent::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
 }
 
+void UFINAdvancedNetworkConnectionComponent::InitializeComponent() {
+	Super::InitializeComponent();
+	SetIsReplicatedByDefault(true);
+	SetIsReplicated(true);
+}
+
 bool UFINAdvancedNetworkConnectionComponent::ShouldSave_Implementation() const {
 	return true;
 }

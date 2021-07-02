@@ -4,6 +4,7 @@ AFINCodeableMerger::AFINCodeableMerger() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->SetMobility(EComponentMobility::Static);
+	NetworkConnector->SetIsReplicated(true);
 
 	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
 	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);

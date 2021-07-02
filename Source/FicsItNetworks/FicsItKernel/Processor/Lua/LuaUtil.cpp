@@ -149,8 +149,9 @@ namespace FicsItKernel {
 				luaL_checktype(L, Index, LUA_TTABLE);
 				UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Prop);
 				FINArray Array;
+				lua_pushnil(L);
 				while (lua_next(L, Index) != 0) {
-					if (!lua_isinteger(L, -1)) break;
+					if (!lua_isinteger(L, -2)) break;
 					FINAny Value;
 					if (ArrayProp && ArrayProp->GetInnerType()) {
 						Value = luaToProperty(L, ArrayProp->GetInnerType(), -1);
@@ -239,10 +240,15 @@ namespace FicsItKernel {
 			case FIN_TRACE:
 				newInstance(L, Val.GetTrace());
 				break;
-			case FIN_STRUCT:
-				luaStruct(L, Val.GetStruct());
+			case FIN_STRUCT: {
+				const FINStruct& Struct = Val.GetStruct();
+				if (Struct.GetStruct()->IsChildOf(FFINFuture::StaticStruct())) {
+					luaFuture(L, Struct);
+				} else {
+					luaStruct(L, Val.GetStruct());
+				}
 				break;
-			case FIN_ARRAY: {
+			} case FIN_ARRAY: {
 				lua_newtable(L);
 				int i = 0;
 				for (const FFINAnyNetworkValue& Entry : Val.GetArray()) {

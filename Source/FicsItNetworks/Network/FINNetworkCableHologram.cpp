@@ -6,8 +6,9 @@
 #include "FGPowerConnectionComponent.h"
 #include "FINNetworkCable.h"
 #include "FicsItNetworks/FINComponentUtility.h"
+#include "FicsItNetworks/Utils/FINWallAndFoundationHologram.h"
 
-FVector FFINSnappedInfo::GetConnectorPos() const {
+FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 	switch (SnapType) {
 	case FIN_CONNECTOR:
 	case FIN_POWER:
@@ -15,13 +16,16 @@ FVector FFINSnappedInfo::GetConnectorPos() const {
 	case FIN_SETTINGS:
 		return Cast<AFGBuildable>(SnappedObj)->GetActorTransform().TransformPosition(AdapterSettings.loc);
 	case FIN_POLE: {
-		return PolePostition + FVector(0,0,635);
+		return Cast<AActor>(SnappedObj)->GetActorLocation() + FVector(0,0,635);
+	}
+	case FIN_PLUG: {
+		return Cast<AActor>(SnappedObj)->GetActorLocation() + Cast<AActor>(SnappedObj)->GetActorRotation().RotateVector(FVector(65,0, 0));
 	} default:
 		return FVector::ZeroVector;
 	}
 }
 
-FRotator FFINSnappedInfo::GetConnectorRot() const {
+FRotator FFINCablePlacementStepInfo::GetConnectorRot() const {
 	switch (SnapType) {
 	case FIN_CONNECTOR:
 	case FIN_POWER: {
@@ -33,12 +37,16 @@ FRotator FFINSnappedInfo::GetConnectorRot() const {
 		AFINNetworkCableHologram* Holo = Cast<AFINNetworkCableHologram>(SnappedObj);
 		check(Holo);
 		return Holo->GetActorRotation();
+	} case FIN_PLUG: {
+		AFINWallAndFoundationHologram* Holo2 = Cast<AFINWallAndFoundationHologram>(SnappedObj);
+		check(Holo2);
+		return Holo2->GetActorRotation();
 	} default:
 		return FRotator::ZeroRotator;
 	}
 }
 
-AActor* FFINSnappedInfo::GetActor() const {
+AActor* FFINCablePlacementStepInfo::GetActor() const {
 	switch (SnapType) {
 	case FIN_CONNECTOR:
 		return Cast<UFINNetworkConnectionComponent>(SnappedObj)->GetAttachmentRootActor();
@@ -59,7 +67,7 @@ void AFINNetworkCableHologram::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 }
 
 bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {
-	if (From.SnapType != FIN_NOT_SNAPPED) return IsSnappedValid();
+	if (IsInSecondStep()) return IsSnappedValid();
 	if (Snapped.SnapType == FIN_NOT_SNAPPED) {
 		return false;
 	}
@@ -71,7 +79,7 @@ bool AFINNetworkCableHologram::DoMultiStepPlacement(bool isInputFromARelease) {
 	return false;
 }
 
-UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINSnappedInfo s) {
+UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINCablePlacementStepInfo s) {
 	switch (s.SnapType) {
 	case FIN_CONNECTOR:
 		return Cast<UFINNetworkConnectionComponent>(s.SnappedObj);
@@ -90,6 +98,8 @@ UFINNetworkConnectionComponent* AFINNetworkCableHologram::SetupSnapped(FFINSnapp
 		return a->Connector;
 	} case FIN_POLE: {
 		return nullptr;
+	} case FIN_PLUG: {
+		return nullptr;
 	} default:
 		return nullptr;
 	}
@@ -99,17 +109,27 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 	Connector1Cache = SetupSnapped(From);
 	Connector2Cache = SetupSnapped(Snapped);
 
-	if (Connector1Cache) SetActorLocation(Connector1Cache->GetComponentToWorld().GetTranslation());
 	AFINNetworkCable* FinishedCable = Cast<AFINNetworkCable>(Super::Construct(childs, constructionID));
-	if (Snapped.SnapType == EFINNetworkCableHologramSnapType::FIN_POLE) {
-		AActor* Pole = childs[0];
-		UFINNetworkConnectionComponent* Con = Cast<UFINNetworkConnectionComponent>(Pole->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
-		FinishedCable->Connector2 = Con;
-		FinishedCable->ConnectConnectors();
+	int i = childs.Num()-1;
+	if (From.SnapType == FIN_POLE || From.SnapType == FIN_PLUG) {
+		AActor* Plug = childs[i--];
+		UFINNetworkConnectionComponent* Con = Cast<UFINNetworkConnectionComponent>(Plug->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
+		Connector1Cache = Con;
 	}
+	if (Snapped.SnapType == FIN_POLE || Snapped.SnapType == FIN_PLUG) {
+		AActor* Pole = childs[i--];
+		UFINNetworkConnectionComponent* Con = Cast<UFINNetworkConnectionComponent>(Pole->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
+		Connector2Cache = Con;
+	}
+	if (Connector1Cache) FinishedCable->SetActorLocation(Connector1Cache->GetComponentToWorld().GetTranslation());
+
+	FinishedCable->Connector1 = Connector1Cache;
+	FinishedCable->Connector2 = Connector2Cache;
+	FinishedCable->ConnectConnectors();
+	FinishedCable->RerunConstructionScripts();
 	
-	Snapped = FFINSnappedInfo();
-	From = FFINSnappedInfo();
+	Snapped = FFINCablePlacementStepInfo();
+	From = FFINCablePlacementStepInfo();
 	ForceNetUpdate();
 	return FinishedCable;
 }
@@ -117,9 +137,10 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 void AFINNetworkCableHologram::ConfigureActor(AFGBuildable* inBuildable) const {
 	Super::ConfigureActor(inBuildable);
 
-	AFINNetworkCable* ToBuildCable = Cast<AFINNetworkCable>(inBuildable);
+	/*AFINNetworkCable* ToBuildCable = Cast<AFINNetworkCable>(inBuildable);
 	ToBuildCable->Connector1 = Connector1Cache;
 	ToBuildCable->Connector2 = Connector2Cache;
+	ToBuildCable->ConnectConnectors();*/
 }
 
 int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {
@@ -132,11 +153,17 @@ bool AFINNetworkCableHologram::IsValidHitResult(const FHitResult& hit) const {
 }
 
 bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
+	UStaticMeshComponent* Adapter = IsInSecondStep() ? Adapter1 : Adapter2;
+	AFGBuildableHologram* PlugHolo = IsInSecondStep() ? PlugHologram1 : PlugHologram2;
+	AFGBuildableHologram* PoleHolo = IsInSecondStep() ? PoleHologram1 : PoleHologram2;
+	Adapter->SetVisibility(false, true);
+	PoleHolo->SetDisabled(true);
+	PlugHolo->SetDisabled(true);
+	
 	// Check if hit actor is valid
 	auto actor = hitResult.Actor.Get();
 	if (!actor) {
 		Snapped = {FIN_NOT_SNAPPED};
-		SetHologramLocationAndRotation(hitResult);
 		OnInvalidHitResult();
 		return false;
 	}
@@ -178,19 +205,14 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 		if (actor->IsA(clazz)) {
 			auto t = actor->GetTransform().TransformPosition(setting.loc);
 			auto r = actor->GetTransform().TransformRotation(setting.rot.Quaternion());
-			Snapped = { FIN_SETTINGS, actor, FVector(), setting };
+			Snapped = { FIN_SETTINGS, actor, setting };
 			SetHologramLocationAndRotation(hitResult);
 			return true;
 		}
 	}
 
-	// no connection point found -> pole
-	if (From.SnapType != FIN_NOT_SNAPPED) {
-		Snapped = {FIN_POLE, this, hitResult.Location};
-	} else Snapped = {FIN_NOT_SNAPPED, nullptr};
+	Snapped = { FIN_NOT_SNAPPED };
 
-	SetHologramLocationAndRotation(hitResult);
-	
 	return false;
 }
 
@@ -228,26 +250,33 @@ bool AFINNetworkCableHologram::IsSnappedValid() {
 }
 
 void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& hit) {
-	if (From.SnapType == FIN_NOT_SNAPPED) this->RootComponent->SetWorldLocation(Snapped.GetConnectorPos());
+	UStaticMeshComponent* Adapter = IsInSecondStep() ? Adapter1 : Adapter2;
+	AFGBuildableHologram* PlugHolo = IsInSecondStep() ? PlugHologram1 : PlugHologram2;
+	AFGBuildableHologram* PoleHolo = IsInSecondStep() ? PoleHologram1 : PoleHologram2;
+	if (Snapped.SnapType == FIN_NOT_SNAPPED) {
+		AActor* Actor = hit.GetActor();
+		if (Actor) {
+			if ((Actor->IsA<AFGBuildableFoundation>() || Actor->IsA<AFGBuildableWall>()) && !hit.Normal.Equals(FVector(0, 0, 1), 0.1)) {
+				Snapped = { FIN_PLUG, PlugHolo };
+				PlugHolo->SetHologramLocationAndRotation(hit);
+			} else {
+				Snapped = { FIN_POLE, PoleHolo };
+				PoleHolo->SetHologramLocationAndRotation(hit);
+			}
+		}
+	}
+	
+	// place to snap start
+	if (!IsInSecondStep()) this->RootComponent->SetWorldLocation(Snapped.GetConnectorPos());
 	else this->RootComponent->SetWorldLocation(From.GetConnectorPos());
 
+	// update snapp data and sub holos
 	UpdateSnapped();
-	bool validSnap = IsSnappedValid();
 	
-	if (Snapped.SnapType == FIN_NOT_SNAPPED || From.SnapType == FIN_NOT_SNAPPED) {
-		Cable->SetVisibility(false, true);
-		Adapter1->SetVisibility(false, true);
-		Adapter2->SetVisibility(false, true);
+	bool validSnap = IsSnappedValid();
+	UpdateMeshValidity(validSnap);
 
-		if (mInvalidPlacementMaterial) {
-			Adapter1->SetMaterial(0, mInvalidPlacementMaterial);
-			Adapter2->SetMaterial(0, mInvalidPlacementMaterial);
-		}
-
-		return;
-	}
-	Cable->SetVisibility(true, true);
-
+	// update cable mesh
 	float offset = 250.0;
 	FVector start;
 	start.X = start.Y = start.Z = 0;
@@ -258,38 +287,28 @@ void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& 
 	start_t.Z -= offset;
 	FVector end_t = end;
 	end_t.Z += offset;
-	
 	Cable->SetStartAndEnd(start, start_t, end, end_t, true);
 
-	if (From.SnapType == FIN_SETTINGS) {
-		Adapter1->SetVisibility(true, true);
-		Adapter1->SetRelativeRotation(RootComponent->GetComponentToWorld().InverseTransformRotation(From.GetConnectorRot().Quaternion()).Rotator());
-	} else {
-		Adapter1->SetVisibility(false, true);
-	}
-	
-	if (Snapped.SnapType == FIN_SETTINGS) {
-		Adapter2->SetVisibility(true, true);
-		Adapter2->SetRelativeLocation(end);
-		Adapter2->SetWorldRotation(Snapped.GetConnectorRot());
-	} else {
-		Adapter2->SetVisibility(false, true);
+	// update snap visibilty to
+	Adapter->SetVisibility(false, false);
+	PoleHolo->SetDisabled(true);
+	PlugHolo->SetDisabled(true);
+	switch (Snapped.SnapType) {
+	case FIN_SETTINGS:
+		Adapter->SetVisibility(true, true);
+		Adapter->SetRelativeLocation(end);
+		Adapter->SetWorldRotation(Snapped.GetConnectorRot());
+		break;
+	case FIN_POLE:
+	case FIN_PLUG:
+		Cast<AFGBuildableHologram>(Snapped.SnappedObj)->SetDisabled(false);
+		Cast<AFGBuildableHologram>(Snapped.SnappedObj)->SetHologramLocationAndRotation(hit);
+		Cast<AFGBuildableHologram>(Snapped.SnappedObj)->SetScrollRotateValue(GetScrollRotateValue());
+		break;
+	default: ;
 	}
 
-	PoleHologram->SetScrollRotateValue(GetScrollRotateValue());
-	PoleHologram->SetHologramLocationAndRotation(hit);
-
-	if (validSnap) {
-		Cable->SetMaterial(0, mValidPlacementMaterial);
-		Adapter1->SetMaterial(0, mValidPlacementMaterial);
-		Adapter2->SetMaterial(0, mValidPlacementMaterial);
-		for (UActorComponent* Comp : PoleHologram->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, mValidPlacementMaterial);
-	} else {
-		Cable->SetMaterial(0, mInvalidPlacementMaterial);
-		Adapter1->SetMaterial(0, mInvalidPlacementMaterial);
-		Adapter2->SetMaterial(0, mInvalidPlacementMaterial);
-		for (UActorComponent* Comp : PoleHologram->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, mInvalidPlacementMaterial);
-	}
+	UpdateMeshValidity(validSnap);
 }
 
 bool AFINNetworkCableHologram::IsChanged() const {
@@ -301,9 +320,16 @@ USceneComponent* AFINNetworkCableHologram::SetupComponent(USceneComponent* attac
 }
 
 void AFINNetworkCableHologram::SpawnChildren(AActor* hologramOwner, FVector spawnLocation, APawn* hologramInstigator) {
-	TSubclassOf<UFGRecipe> Recipe = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Network/NetworkPole/Recipe_NetworkPole.Recipe_NetworkPole_C"));
-	PoleHologram = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, Recipe, hologramOwner, spawnLocation, hologramInstigator));
-	PoleHologram->SetDisabled(true);
+	TSubclassOf<UFGRecipe> RecipePole = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Network/NetworkPole/Recipe_NetworkPole.Recipe_NetworkPole_C"));
+	TSubclassOf<UFGRecipe> RecipePlug = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Network/NetworkWallPlug/Recipe_NetworkWallPlug.Recipe_NetworkWallPlug_C"));
+	PoleHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipePole, hologramOwner, spawnLocation, hologramInstigator));
+	PoleHologram1->SetDisabled(true);
+	PlugHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipePlug, hologramOwner, spawnLocation, hologramInstigator));
+	PlugHologram1->SetDisabled(true);
+	PoleHologram2 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipePole, hologramOwner, spawnLocation, hologramInstigator));
+	PoleHologram2->SetDisabled(true);
+	PlugHologram2 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipePlug, hologramOwner, spawnLocation, hologramInstigator));
+	PlugHologram2->SetDisabled(true);
 }
 
 void AFINNetworkCableHologram::OnInvalidHitResult() {
@@ -317,24 +343,33 @@ void AFINNetworkCableHologram::UpdateSnapped() {
 		OnEndSnap(OldSnapped);
 		OnBeginSnap(Snapped, IsSnappedValid());
 
-		if (Snapped.SnapType == FIN_POLE) {
-			PoleHologram->SetDisabled(false);
-		} else {
-			PoleHologram->SetDisabled(true);
-		}
-
 		OldSnapped = Snapped;
 	}
 }
 
-void AFINNetworkCableHologram::OnBeginSnap(FFINSnappedInfo a, bool isValid) {
+void AFINNetworkCableHologram::UpdateMeshValidity(bool bValid) {
+	UMaterialInstance* Material = bValid ? mValidPlacementMaterial : mInvalidPlacementMaterial;
+	Cable->SetMaterial(0, Material);
+	Adapter1->SetMaterial(0, Material);
+	Adapter2->SetMaterial(0, Material);
+	for (UActorComponent* Comp : PoleHologram1->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, Material);
+	for (UActorComponent* Comp : PoleHologram2->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, Material);
+	for (UActorComponent* Comp : PlugHologram1->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, Material);
+	for (UActorComponent* Comp : PlugHologram2->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, Material);
+}
+
+bool AFINNetworkCableHologram::IsInSecondStep() {
+	return From.SnapType != FIN_NOT_SNAPPED;
+}
+
+void AFINNetworkCableHologram::OnBeginSnap(FFINCablePlacementStepInfo a, bool isValid) {
 	if (a.SnapType != FIN_NOT_SNAPPED) {
 		AActor* o = a.GetActor();
 		if (o) UFGOutlineComponent::Get(this->GetWorld())->ShowOutline(o, isValid ? EOutlineColor::OC_HOLOGRAM : EOutlineColor::OC_RED);
 	}
 }
 
-void AFINNetworkCableHologram::OnEndSnap(FFINSnappedInfo a) {
+void AFINNetworkCableHologram::OnEndSnap(FFINCablePlacementStepInfo a) {
 	if (a.SnapType != FIN_NOT_SNAPPED) {
 		AActor* o = a.GetActor();
 		if (o) UFGOutlineComponent::Get(o->GetWorld())->HideOutline();

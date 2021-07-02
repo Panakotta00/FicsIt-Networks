@@ -1,7 +1,5 @@
 #include "FicsItKernel.h"
 #include "FicsItNetworks/Computer/FINComputerCase.h"
-#include "FicsItNetworks/Graphics/FINGPUInterface.h"
-#include "FicsItNetworks/Graphics/FINScreenInterface.h"
 #include "FicsItNetworks/Network/FINFuture.h"
 #include "Processor/Lua/LuaProcessor.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
@@ -44,6 +42,10 @@ void FFINKernelListener::onNodeRenamed(CodersFileSystem::Path newPath, CodersFil
 	Signal->Trigger(parent->GetOuter(), {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FINInt>(type)});
 }
 
+UFINKernelSystem::UFINKernelSystem() {
+	FileSystemListener = new FFINKernelListener(this);
+}
+
 void UFINKernelSystem::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) {
 	Super::AddReferencedObjects(InThis, Collector);
 	
@@ -52,21 +54,6 @@ void UFINKernelSystem::AddReferencedObjects(UObject* InThis, FReferenceCollector
 		Referencer.Value(Referencer.Key, Collector);
 	}
 }
-
-/*void UFINKernelSystem::Serialize(FArchive& Ar) {
-	Super::Serialize(Ar);
-
-	if (!Ar.IsSaveGame()) return;
-
-	FStructuredArchive::FRecord Record = FStructuredArchiveFromArchive(Ar).GetSlot().EnterRecord();
-
-	// TODO: serialize kernel crash
-
-	TOptional<FStructuredArchive::FSlot> Slot = Record.TryEnterField(FIELD_NAME_TEXT("FileSystem"), true);
-	if (Slot.IsSet()) FileSystem.Serialize(Slot->GetUnderlyingArchive(), FileSystemSerializationInfo);
-
-	if (GetProcessor()) GetProcessor()->SetKernel(this);
-}*/
 
 void UFINKernelSystem::Serialize(FStructuredArchive::FRecord Record) {
 	Super::Serialize(Record);
@@ -77,10 +64,7 @@ void UFINKernelSystem::Serialize(FStructuredArchive::FRecord Record) {
 
 	TOptional<FStructuredArchive::FSlot> FSSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("FileSystem")), true);
 	if (FSSlot.IsSet()) FileSystem.Serialize(FSSlot->EnterRecord(), FileSystemSerializationInfo);
-
-	//TOptional<FStructuredArchive::FSlot> ProcessorSlot = Record.TryEnterField(FIELD_NAME_TEXT("Processor"), true);
-	//if (ProcessorSlot.IsSet()) ProcessorSlot->GetUnderlyingArchive() << Processor;
-
+	
 	if (GetProcessor()) GetProcessor()->SetKernel(this);
 }
 
@@ -225,6 +209,7 @@ TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> UFI
 }
 
 CodersFileSystem::SRef<FFINKernelFSDevDevice> UFINKernelSystem::GetDevDevice() const {
+	FScopeLock(const_cast<FCriticalSection*>(&MutexDevDevice));
 	return DevDevice;
 }
 
@@ -253,9 +238,12 @@ bool UFINKernelSystem::Start(bool InReset) {
 	MemoryUsage = 0;
 
 	// create & init devDevice
-	DevDevice = new FFINKernelFSDevDevice();
-	for (const TPair<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
-		DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key->ID.ToString()));
+	{
+		FScopeLock Lock(&MutexDevDevice);
+		DevDevice = new FFINKernelFSDevDevice();
+		for (const TPair<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
+			DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key->ID.ToString()));
+		}
 	}
 
 	// check & reset processor
@@ -313,14 +301,21 @@ void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
 	}
 }
 
-void UFINKernelSystem::RecalculateResources(ERecalc InComponents) {
+bool UFINKernelSystem::RecalculateResources(ERecalc InComponents, bool bShouldCrash) {
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> Device = FileSystem.getDevDevice();
-	
+
+	bool bFail = false;
 	MemoryUsage = Processor->GetMemoryUsage(InComponents & PROCESSOR);
 	MemoryUsage += FileSystem.getMemoryUsage(InComponents & FILESYSTEM);
 	if (Device && Device->getSerial().isValid()) MemoryUsage += Device->getSerial()->getSize();
-	if (MemoryUsage > MemoryCapacity) Crash(MakeShared<FFINKernelCrash>("out of memory"));
+	if (MemoryUsage > MemoryCapacity) {
+		bFail = true;
+		KernelCrash = MakeShared<FFINKernelCrash>("out of memory");
+		if (bShouldCrash) Crash(KernelCrash.ToSharedRef());
+		
+	}
 	if (Device) Device->updateCapacity(MemoryCapacity - MemoryUsage);
+	return bFail;
 }
 
 void UFINKernelSystem::SetNetwork(UFINKernelNetworkController* InController) {
@@ -343,28 +338,16 @@ int64 UFINKernelSystem::GetMemoryUsage() const {
 	return MemoryUsage;
 }
 
-void UFINKernelSystem::AddGPU(TScriptInterface<IFINGPUInterface> InGPU) {
-	GPUs.Add(InGPU);
+void UFINKernelSystem::AddPCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice) {
+	PCIDevices.AddUnique(InPCIDevice);
 }
 
-void UFINKernelSystem::RemoveGPU(TScriptInterface<IFINGPUInterface> InGPU) {
-	GPUs.Remove(InGPU);
+void UFINKernelSystem::RemovePCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice) {
+	PCIDevices.Remove(InPCIDevice);
 }
 
-const TArray<TScriptInterface<IFINGPUInterface>>& UFINKernelSystem::GetGPUs() const {
-	return GPUs;
-}
-
-void UFINKernelSystem::AddScreen(TScriptInterface<IFINScreenInterface> InScreen) {
-	Screens.Add(InScreen);
-}
-
-void UFINKernelSystem::RemoveScreen(TScriptInterface<IFINScreenInterface> InScreen) {
-	Screens.Remove(InScreen);
-}
-
-const TArray<TScriptInterface<IFINScreenInterface>>& UFINKernelSystem::GetScreens() const {
-	return Screens;
+const TArray<TScriptInterface<IFINPciDeviceInterface>>& UFINKernelSystem::GetPCIDevices() const {
+	return PCIDevices;
 }
 
 int64 UFINKernelSystem::GetTimeSinceStart() const {

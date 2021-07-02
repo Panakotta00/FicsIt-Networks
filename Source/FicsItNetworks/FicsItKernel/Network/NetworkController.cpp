@@ -68,7 +68,8 @@ void UFINKernelNetworkController::HandleSignal(const FFINSignalData& signal, con
 FFINSignalData UFINKernelNetworkController::PopSignal(FFINNetworkTrace& OutSender) {
 	if (GetSignalCount() < 1) return FFINSignalData();
 	FScopeLock Lock(&MutexSignals);
-	const TTuple<FFINSignalData, FFINNetworkTrace> Signal = SignalQueue.Pop();
+	const TTuple<FFINSignalData, FFINNetworkTrace> Signal = SignalQueue[0];
+	SignalQueue.RemoveAt(0);
 	OutSender = Signal.Value;
 	return Signal.Key;
 }

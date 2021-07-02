@@ -5,6 +5,7 @@
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
 #include "FicsItNetworks/Network/FINDynamicStructHolder.h"
+#include "FicsItNetworks/Reflection/FINClass.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
@@ -20,7 +21,6 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
-#pragma optimize("", off)
 		LuaFunc(luaComputerReset)
 			processor->GetTickHelper().shouldReset();
 			lua_yield(L, 0);
@@ -51,7 +51,6 @@ namespace FicsItKernel {
 			processor->GetTickHelper().shouldPromote();
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
 		}
-#pragma optimize("", on)
 
 		LuaFunc(luaComputerBeep)
 			float pitch = 1;
@@ -87,21 +86,14 @@ namespace FicsItKernel {
 			return 1;
 		}
 		
-		LuaFunc(luaComputerGPUs)
+		LuaFunc(luaComputerPCIDevices)
 			lua_newtable(L);
+			FFINNetworkTrace Obj = getObjInstance(L, 1, UFINClass::StaticClass());
+			UFINClass* Type = Cast<UFINClass>(Obj.Get());
 			int i = 1;
-			for (TScriptInterface<IFINGPUInterface> gpu : kernel->GetGPUs()) {
-				newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / gpu.GetObject());
-				lua_seti(L, -2, i++);
-			}
-			return 1;
-		}
-
-		LuaFunc(luaComputerScreens)
-		    lua_newtable(L);
-			int i = 1;
-			for (TScriptInterface<IFINScreenInterface> screen : kernel->GetScreens()) {
-				newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / screen.GetObject());
+			for (TScriptInterface<IFINPciDeviceInterface> Device : kernel->GetPCIDevices()) {
+				if (!Device || (Type && !Device.GetObject()->IsA(Cast<UClass>(Type->GetOuter())))) continue;
+				newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / Device.GetObject());
 				lua_seti(L, -2, i++);
 			}
 			return 1;
@@ -118,8 +110,7 @@ namespace FicsItKernel {
 			{"getEEPROM", luaComputerGetEEPROM},
 			{"time", luaComputerTime},
 			{"millis", luaComputerMillis},
-			{"getGPUs", luaComputerGPUs},
-			{"getScreens", luaComputerScreens},
+			{"getPCIDevices", luaComputerPCIDevices},
 			{nullptr, nullptr}
 		};
 		

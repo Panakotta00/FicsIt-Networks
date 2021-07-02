@@ -7,6 +7,7 @@ AFINIndicatorPole::AFINIndicatorPole() {
 	
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	Connector->SetIsReplicated(true);
 
 	SetActorTickEnabled(true);
 	PrimaryActorTick.SetTickFunctionEnable(true);

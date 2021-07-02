@@ -16,4 +16,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Computer")
 	void SetCode(const FString& NewCode);
+
+	virtual bool CopyDataTo(AFINStateEEPROM* InFrom) override;
 };
