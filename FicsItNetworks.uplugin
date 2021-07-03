@@ -27,6 +27,12 @@
             "Name": "SML",
             "SemVersion": "^3.1.0",
             "Enabled": true
+        }, 
+        {
+            "Name": "PTSDInteraction",
+            "SemVersion": "^1.0.0",
+            "bIsOptional": false,
+            "Enabled": true
         }
     ]
 }
