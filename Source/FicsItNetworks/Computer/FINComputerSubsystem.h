@@ -17,8 +17,6 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadOnly)
 	TEnumAsByte<EFINCustomVersion> Version = EFINCustomVersion::FINBeforeCustomVersionWasAdded;
 
-	int VirtualUserNum = 0;
-
 	AFINComputerSubsystem();
 	
 	// Begin IFGSaveInterface
