@@ -1,7 +1,8 @@
 ﻿#pragma once
+
 #include "FINReflectionUIStyle.h"
 #include "SlateCore.h"
-#include "SSplitter.h"
+#include "Widgets/Layout/SSplitter.h"
 
 class SFINSplitter : public SSplitter {
 	SLATE_BEGIN_ARGS(SFINSplitter)

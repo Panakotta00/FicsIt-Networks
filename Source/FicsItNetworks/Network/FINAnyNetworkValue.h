@@ -10,39 +10,118 @@
 USTRUCT(BlueprintType)
 struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	GENERATED_BODY()
+	
+	FORCEINLINE FFINAnyNetworkValue() : Type(FIN_NIL), Data() {}
 
-	FFINAnyNetworkValue();
+	FORCEINLINE FFINAnyNetworkValue(FINInt e) {
+		Data.INT = e;
+		Type = FIN_INT;
+	}
 
-	FFINAnyNetworkValue(FINInt e);
+	FORCEINLINE FFINAnyNetworkValue(FINFloat e) {
+		Data.FLOAT = e;
+		Type = FIN_FLOAT;
+	}
 
-	FFINAnyNetworkValue(FINFloat e);
+	FORCEINLINE FFINAnyNetworkValue(FINBool e) {
+		Data.BOOL = e;
+		Type = FIN_BOOL;
+	}
 
-	FFINAnyNetworkValue(FINBool e);
+	FORCEINLINE FFINAnyNetworkValue(FINClass e) {
+		Data.CLASS = e;
+		Type = FIN_CLASS;
+	}
 
-	FFINAnyNetworkValue(FINClass e);
+	FORCEINLINE FFINAnyNetworkValue(const FINStr& e) {
+		Data.STRING = new FINStr(e);
+		Type = FIN_STR;
+	}
 
-	FFINAnyNetworkValue(const FINStr& e);
+	FORCEINLINE FFINAnyNetworkValue(const FINObj& e) {
+		Data.OBJECT = new FINObj(e);
+		Type = FIN_OBJ;
+	}
 
-	FFINAnyNetworkValue(const FINObj& e);
+	FORCEINLINE FFINAnyNetworkValue(const FINTrace& e) {
+		Data.TRACE = new FINTrace(e);
+		Type = FIN_TRACE;
+	}
 
-	FFINAnyNetworkValue(const FINTrace& e);
+	FORCEINLINE FFINAnyNetworkValue(const FINStruct& e) {
+		Data.STRUCT = new FINStruct(e);
+		Type = FIN_STRUCT;
+	}
 
-	FFINAnyNetworkValue(const FINStruct& e);
+	FORCEINLINE FFINAnyNetworkValue(const FINArray& e) {
+		Data.ARRAY = new FINArray(e);
+		Type = FIN_ARRAY;
+	}
 
-	FFINAnyNetworkValue(const FINArray& e);
+	FORCEINLINE FFINAnyNetworkValue(const FFINAnyNetworkValue& other) {
+		*this = other;
+	}
 
-	FFINAnyNetworkValue(const FFINAnyNetworkValue& other);
+	FORCEINLINE FFINAnyNetworkValue& operator=(const FFINAnyNetworkValue& other) {
+		this->~FFINAnyNetworkValue();
+		Type = other.Type;
+		switch (Type) {
+		case FIN_STR:
+			Data.STRING = new FINStr(*other.Data.STRING);
+			break;
+		case FIN_OBJ:
+			Data.OBJECT = new FINObj(*other.Data.OBJECT);
+			break;
+		case FIN_TRACE:
+			Data.TRACE = new FINTrace(*other.Data.TRACE);
+			break;
+		case FIN_STRUCT:
+			Data.STRUCT = new FINStruct(*other.Data.STRUCT);
+			break;
+		case FIN_ARRAY:
+			Data.ARRAY = new FINArray(*other.Data.ARRAY);
+			break;
+		case FIN_ANY:
+			Data.ANY = new FINAny(*other.Data.ANY);
+			break;
+		default:
+			Data = other.Data;
+			break;
+		}
+		return *this;
+	}
 
-	FFINAnyNetworkValue& operator=(const FFINAnyNetworkValue& other);
-
-	~FFINAnyNetworkValue();
+	FORCEINLINE ~FFINAnyNetworkValue() {
+		switch (Type) {
+		case FIN_STR:
+			delete Data.STRING;
+			break;
+		case FIN_OBJ:
+			delete Data.OBJECT;
+			break;
+		case FIN_TRACE:
+			delete Data.TRACE;
+			break;
+		case FIN_STRUCT:
+			delete Data.STRUCT;
+			break;
+		case FIN_ARRAY:
+			delete Data.ARRAY;
+			break;
+		case FIN_ANY:
+			delete Data.ANY;
+			break;
+		default:
+			break;
+		}
+	}
 
 	/**
 	 * Allows you to get the type of the network value.
 	 *
 	 * @return	the type of the value
 	 */
-	EFINNetworkValueType GetType() const {
+	FORCEINLINE EFINNetworkValueType GetType() const {
 		return Type;
 	}
 
@@ -52,8 +131,19 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored integer
 	 */
-	FINInt GetInt() const {
-		return Data.INT;
+	FORCEINLINE FINInt GetInt() const {
+		switch (GetType()) {
+		case FIN_INT:
+			return Data.INT;
+		case FIN_FLOAT:
+			return (FINInt) Data.FLOAT;
+		case FIN_NIL:
+			return 0;
+		case FIN_BOOL:
+			return (FINInt) Data.BOOL;
+		default:
+			return 0;
+		}
 	}
 
 	/**
@@ -62,8 +152,19 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored float
 	 */
-	FINFloat GetFloat() const {
-		return Data.FLOAT;
+	FORCEINLINE FINFloat GetFloat() const {
+		switch (GetType()) {
+		case FIN_FLOAT:
+			return Data.FLOAT;
+		case FIN_INT:
+			return (FINFloat) Data.INT;
+		case FIN_BOOL:
+			return (FINFloat) Data.BOOL;
+		case FIN_NIL:
+			return 0.0;
+		default:
+			return 0.0;
+		}
 	}
 
 	/**
@@ -72,7 +173,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored bool
 	 */
-	FINBool GetBool() const {
+	FORCEINLINE FINBool GetBool() const {
 		return Data.BOOL;
 	}
 
@@ -82,7 +183,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored class
 	 */
-	FINClass GetClass() const {
+	FORCEINLINE FINClass GetClass() const {
 		return Data.CLASS;
 	}
 
@@ -92,7 +193,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored string
 	 */
-	const FINStr& GetString() const {
+	FORCEINLINE const FINStr& GetString() const {
 		return *Data.STRING;
 	}
 
@@ -102,7 +203,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored object
 	 */
-	const FINObj& GetObj() const {
+	FORCEINLINE const FINObj& GetObj() const {
 		return *Data.OBJECT;
 	}
 
@@ -112,7 +213,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored trace
 	 */
-	const FINTrace& GetTrace() const {
+	FORCEINLINE const FINTrace& GetTrace() const {
 		return *Data.TRACE;
 	}
 
@@ -122,7 +223,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored struct
 	 */
-	const FINStruct& GetStruct() const {
+	FORCEINLINE const FINStruct& GetStruct() const {
 		return *Data.STRUCT;
 	}
 
@@ -132,7 +233,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return the stored array
 	 */
-	const FINArray& GetArray() const {
+	FORCEINLINE const FINArray& GetArray() const {
 		return *Data.ARRAY;
 	}
 
@@ -142,7 +243,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored trace
 	 */
-	const FINAny& GetAny() const {
+	FORCEINLINE const FINAny& GetAny() const {
 		return *Data.ANY;
 	}
 
@@ -169,9 +270,18 @@ inline bool operator<<(FArchive& Ar, FFINAnyNetworkValue& Val) {
 	return Val.Serialize(Ar);
 }
 
+inline bool operator<<(FStructuredArchive::FSlot Slot, FFINAnyNetworkValue& Val) {
+	return Val.Serialize(Slot.GetUnderlyingArchive());
+}
+
 template<>
 struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFINAnyNetworkValue> {
 	enum {
 		WithSerializer = true,
-    };
+		WithCopy = true,
+	};
+};
+
+template<>
+struct TMoveSupportTraits<FFINAnyNetworkValue> : TMoveSupportTraitsBase<FFINAnyNetworkValue, const FFINAnyNetworkValue&> {
 };

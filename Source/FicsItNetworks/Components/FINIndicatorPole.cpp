@@ -1,8 +1,5 @@
 ﻿#include "FINIndicatorPole.h"
-
-
 #include "FGColoredInstanceMeshProxy.h"
-#include "ProxyInstancedStaticMeshComponent.h"
 
 AFINIndicatorPole::AFINIndicatorPole() {
 	Indicator = CreateDefaultSubobject<UStaticMeshComponent>("Indicator");
@@ -10,6 +7,7 @@ AFINIndicatorPole::AFINIndicatorPole() {
 	
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	Connector->SetIsReplicated(true);
 
 	SetActorTickEnabled(true);
 	PrimaryActorTick.SetTickFunctionEnable(true);
@@ -37,12 +35,14 @@ void AFINIndicatorPole::BeginPlay() {
 	CreatePole();
 
 	if (Indicator->GetMaterials().Num() > 0) {
-		IndicatorInstance = Indicator->CreateDynamicMaterialInstance(0);
+		IndicatorInstance = UMaterialInstanceDynamic::Create(Cast<UMaterialInstanceDynamic>(Indicator->GetMaterial(0))->Parent, nullptr);
 		Indicator->SetMaterial(0, IndicatorInstance);
 	}
 }
 
 void AFINIndicatorPole::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
+	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
+	
 	if (bHasChanged) {
 		bHasChanged = false;
 		UpdateEmessive();
@@ -72,7 +72,7 @@ void AFINIndicatorPole::CreatePole() {
 		Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		Pole->SetStaticMesh(LongPole);
 		Pole->SetMobility(EComponentMobility::Static);
-		Pole->SetColorSlot(mColorSlot);
+		//Pole->SetColorSlot(mColorSlot);
 		Poles.Add(Pole);
 	}
 
@@ -95,7 +95,6 @@ void AFINIndicatorPole::netFunc_setColor(float r, float g, float b, float e) {
 	EmessiveStrength = FMath::Clamp(e, 0.0f, 5.0f);
 	netSig_ColorChanged(oldColor.R, oldColor.G, oldColor.B, oldEmissive);
 	bHasChanged = true;
-	ForceNetUpdate();
 }
 
 void AFINIndicatorPole::netFunc_getColor(float& r, float& g, float& b, float& e) {

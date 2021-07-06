@@ -1,19 +1,19 @@
 #include "File.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 
 using namespace std;
-using namespace FileSystem;
+using namespace CodersFileSystem;
 
-FileMode FileSystem::operator|(FileMode l, FileMode r) {
+FileMode CodersFileSystem::operator|(FileMode l, FileMode r) {
 	return (FileMode)(((unsigned char)l) | ((unsigned char)r));
 }
 
-FileMode FileSystem::operator&(FileMode l, FileMode r) {
+FileMode CodersFileSystem::operator&(FileMode l, FileMode r) {
 	return (FileMode)(((unsigned char)l) & ((unsigned char)r));
 }
 
-FileMode FileSystem::operator~(FileMode m) {
+FileMode CodersFileSystem::operator~(FileMode m) {
 	return (FileMode)~(unsigned char)m;
 }
 
@@ -30,7 +30,7 @@ SRef<FileStream> MemFile::open(FileMode m) {
 	return io = new MemFileStream(&data, m, listeners, sizeCheck);
 }
 
-bool FileSystem::MemFile::isValid() const {
+bool CodersFileSystem::MemFile::isValid() const {
 	return true;
 }
 
@@ -52,8 +52,8 @@ FileStream& FileStream::operator<<(const std::string& str) {
 
 MemFileStream::MemFileStream(string * data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck) : FileStream(mode), data(data), listeners(listeners), sizeCheck(sizeCheck) {
 	buf = *data;
-	if ((mode & FileSystem::OUTPUT) && (mode & FileSystem::APPEND)) pos = buf.length();
-	else if (mode & FileSystem::TRUNC) *data = buf = "";
+	if ((mode & CodersFileSystem::OUTPUT) && (mode & CodersFileSystem::APPEND)) pos = buf.length();
+	else if (mode & CodersFileSystem::TRUNC) *data = buf = "";
 	open = true;
 }
 
@@ -148,23 +148,20 @@ bool DiskFile::isValid() const {
 }
 
 DiskFileStream::DiskFileStream(filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck) : FileStream(mode), path(realPath), sizeCheck(sizeCheck) {
-	if (mode & FileMode::OUTPUT && !std::filesystem::exists(realPath)) std::fstream(realPath, std::ios::out).close();
-	stream = std::fstream(realPath, std::ios::in);
-	if (!stream.is_open()) return;
-	if (!(mode & FileMode::TRUNC)) {
-		stringstream s;
-		s << stream.rdbuf();
-		buf = s.str();
-	} else sizeCheck(-static_cast<int64_t>(std::filesystem::file_size(realPath)), true);
-	if (mode & FileMode::OUTPUT) {
-		stream.close();
-		stream = std::fstream(realPath, std::ios::out | std::ios::trunc);
-		stream << buf;
-		stream.flush();
+	if (!(mode & (FileMode::OUTPUT | FileMode::INPUT))) {
+		throw std::exception("I/O mode not set");
 	}
-	if (mode & FileMode::APPEND) {
-		pos = buf.size();
+	if ((mode & FileMode::TRUNC) && filesystem::exists(realPath)) {
+		sizeCheck(-static_cast<int64_t>(std::filesystem::file_size(realPath)), true);
 	}
+	ios_base::openmode nativeMode = 0;
+	if (mode & FileMode::OUTPUT) nativeMode |= ios::out;
+	if (mode & FileMode::INPUT) nativeMode |= ios::in;
+	if (mode & FileMode::APPEND) nativeMode |= ios::app;
+	if (mode & FileMode::TRUNC) nativeMode |= ios::trunc;
+	if (mode & FileMode::BINARY) nativeMode |= ios::binary;
+
+	stream = std::fstream(realPath, nativeMode);
 }
 
 DiskFileStream::~DiskFileStream() {}
@@ -172,66 +169,106 @@ DiskFileStream::~DiskFileStream() {}
 void DiskFileStream::write(string data) {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!sizeCheck(data.length(), true)) throw std::exception("out of capacity");
-	buf = buf.erase(pos, data.length());
-	buf.insert(pos, data);
-	pos += data.length();
+	stream << data;
 }
 
 void DiskFileStream::flush() {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::OUTPUT)) return;
-	stream.close();
-	stream = std::fstream(path, std::ios::out | std::ios::trunc);
-	stream << buf;
 	stream.flush();
 }
 
 string DiskFileStream::readChars(size_t chars) {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-	return buf.substr(pos, chars);
+	string s;
+	// Ensure buffer is large enough to hold characters.
+	s.resize(chars);
+	stream.read(s.data(), chars);
+	// Shrink the string to the actual number of characters we read.
+	s.resize(stream.gcount());
+	return s;
 }
 
 string DiskFileStream::readLine() {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
 	string s;
-	getline(std::stringstream(buf.substr(pos)), s);
-	pos += s.length();
+	getline(stream, s);
 	return s;
 }
 
 string DiskFileStream::readAll() {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-	return buf;
+
+	std::stringstream buffer;
+	buffer << stream.rdbuf();
+	return buffer.str();
 }
 
 double DiskFileStream::readNumber() {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
 	double n = 0.0;
-	stringstream s(buf.substr(pos));
-	s >> n;
-	pos += s.tellg();
+	stream >> n;
 	return n;
 }
 
 int64_t DiskFileStream::seek(string str, int64_t off) {
 	if (!isOpen()) throw std::exception("filestream not open");
-	if (mode & APPEND) return pos;
-	if (str == "set") pos = off;
-	else if (str == "cur") pos += off;
-	else if (str == "end") pos = buf.length() + off;
-	else throw exception("no valid whence");
-	if (pos > static_cast<int64_t>(buf.length())) pos = buf.length();
-	else if (pos < 0) pos = 0;
-	return pos;
+
+	enum {
+		WHENCE_INVALID,
+		WHENCE_SET,
+		WHENCE_CUR,
+		WHENCE_END
+	} whence = WHENCE_INVALID;
+
+	if (str == "set") whence = WHENCE_SET;
+	else if (str == "cur") whence = WHENCE_CUR;
+	else if (str == "end") whence = WHENCE_END;
+
+	if (whence == WHENCE_INVALID) throw std::exception("Invalid whence");
+
+	if (mode & FileMode::INPUT) {
+		switch (whence) {
+		case WHENCE_SET:
+			stream.seekg(off);
+			break;
+		case WHENCE_CUR:
+			stream.seekg(off, ios_base::cur);
+			break;
+		case WHENCE_END:
+			stream.seekg(off, ios_base::end);
+			break;
+		}
+	}
+
+	if ((mode & FileMode::OUTPUT) && !(mode & FileMode::APPEND)) {
+		switch (whence) {
+		case WHENCE_SET:
+			stream.seekp(off);
+			break;
+		case WHENCE_CUR:
+			stream.seekp(off, ios_base::cur);
+			break;
+		case WHENCE_END:
+			stream.seekp(off, ios_base::end);
+			break;
+		}
+	}
+
+	// Default to returning read position (ie if both read and write)
+	if (mode & FileMode::INPUT) {
+		return stream.tellg();
+	} else {
+		return stream.tellp();
+	}
 }
 
 void DiskFileStream::close() {
 	if (isOpen()) {
-		if (mode & OUTPUT) flush();
 		stream.close();
 	}
 }

@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	class FileStream;
 	enum FileMode;
 

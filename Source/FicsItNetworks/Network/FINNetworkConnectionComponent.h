@@ -41,12 +41,10 @@ public:
 	UPROPERTY(Replicated)
 	AFINNetworkCircuit* Circuit = nullptr;
 
-	UFINNetworkConnectionComponent();
-	
 	// Begin UObject
-	virtual bool IsSupportedForNetworking() const override;
+	virtual void InitializeComponent() override;
 	// End UObject
-	
+
 	// Begin IFINNetworkCircuitNode
 	virtual TSet<UObject*> GetConnected_Implementation() const override;
 	virtual AFINNetworkCircuit* GetCircuit_Implementation() const override;

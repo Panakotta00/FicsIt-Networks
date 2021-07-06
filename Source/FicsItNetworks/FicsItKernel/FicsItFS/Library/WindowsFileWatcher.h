@@ -2,9 +2,10 @@
 
 #include <functional>
 
+#include "AkAcousticPortal.h"
 #include "FileSystem.h"
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	enum NodeType;
 	class Path;
 
@@ -15,9 +16,14 @@ namespace FileSystem {
 		DiskDeviceWatcher* watcherInfo = nullptr;
 		std::function<void(int, NodeType, Path, Path)> eventFunc;
 		std::filesystem::path realPath;
+		std::wstring oldNameBufString;
 
 		WindowsFileWatcher(const std::filesystem::path& path, std::function<void(int, NodeType, Path, Path)> eventFunc);
 		~WindowsFileWatcher();
 		void tick();
+
+	private:
+		void tryReadChanges();
+		void handleChangeEvent(::FILE_NOTIFY_INFORMATION* changeEvent);
 	};
 }

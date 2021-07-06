@@ -1,10 +1,7 @@
 #include "FINNetworkAdapter.h"
-
 #include "FGPowerConnectionComponent.h"
 #include "FGItemPickup_Spawnable.h"
 #include "FINNetworkCable.h"
-#include "UnrealNetwork.h"
-
 #include "Components/SceneComponent.h"
 
 TArray<TPair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = TArray<TPair<UClass*, FFINAdapterSettings>>();
@@ -23,14 +20,16 @@ void AFINNetworkAdapter::RegisterAdapterSettings() {
 	// init adapter settings
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageContainerMk1/Build_StorageContainerMk1.Build_StorageContainerMk1_C")), FFINAdapterSettings{FVector(290,0,400), FRotator(0,-90,0), true, 2});
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageContainerMk2/Build_StorageContainerMk2.Build_StorageContainerMk2_C")), FFINAdapterSettings{FVector(290,0,800), FRotator(0,-90,0), true, 2});
-	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/IndustrialFluidContainer/Build_IndustrialTank.Build_IndustrialTank_C")), FFINAdapterSettings{FVector(0,540,1250), FRotator(0,0,0), true, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/IndustrialFluidContainer/Build_IndustrialTank.Build_IndustrialTank_C")), FFINAdapterSettings{FVector(0,540,1250), FRotator(0,-90,0), true, 2});
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/StorageTank/Build_PipeStorageTank.Build_PipeStorageTank_C")), FFINAdapterSettings{FVector(180,180,600), FRotator(0,-45,0), true, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/PipeValve/Build_Valve.Build_Valve_C")), FFINAdapterSettings{FVector(0,0,0), FRotator(0,0,0), false, 2});
 }
 
 void AFINNetworkAdapter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(AFINNetworkAdapter, Parent);
+	DOREPLIFETIME(AFINNetworkAdapter, Connector);
 }
 
 AFINNetworkAdapter::AFINNetworkAdapter() {
@@ -43,9 +42,10 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(L"Connector");
 	Connector->SetupAttachment(RootComponent);
 	Connector->bOuterAsRedirect = false;
+	Connector->SetIsReplicated(true);
 	
 	ConnectorMesh = CreateDefaultSubobject<UStaticMeshComponent>(L"StaticMesh");
-	ConnectorMesh->SetHiddenInGameSML(true, true);
+	ConnectorMesh->SetHiddenInGame(true, true);
 	ConnectorMesh->SetupAttachment(RootComponent);
 	ConnectorMesh->SetMobility(EComponentMobility::Type::Movable);
 	ConnectorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -58,7 +58,7 @@ AFINNetworkAdapter::~AFINNetworkAdapter() {}
 void AFINNetworkAdapter::BeginPlay() {
 	Super::BeginPlay();
 
-	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/Game/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
+	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
 	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
 
 	if (!IsValid(Parent)) {
@@ -107,7 +107,7 @@ void AFINNetworkAdapter::BeginPlay() {
 		SetActorLocationAndRotation(pos, Parent->GetActorRotation());
 		FHitResult res;
 		ConnectorMesh->K2_AddRelativeRotation(setting.rot, false, res, true);
-		ConnectorMesh->SetHiddenInGameSML(!setting.mesh, true);
+		ConnectorMesh->SetHiddenInGame(!setting.mesh, true);
 		Connector->MaxCables = setting.maxCables;
 		break;
 	}

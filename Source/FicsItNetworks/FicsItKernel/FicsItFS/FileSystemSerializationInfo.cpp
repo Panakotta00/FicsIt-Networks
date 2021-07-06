@@ -1,6 +1,5 @@
 ﻿#include "FileSystemSerializationInfo.h"
-
-#include "FicsItNetworksModule.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 
 bool FFileSystemNodeIndex::Serialize(FArchive& Ar) {
 	bool valid = Node.IsValid();
@@ -13,16 +12,17 @@ bool FFileSystemNodeIndex::Serialize(FArchive& Ar) {
 	return true;
 }
 
-FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString name, FileSystem::SRef<FileSystem::Directory> parent) const {
+CodersFileSystem::SRef<CodersFileSystem::Node> FFileSystemNodeIndex::Deserialize(FString name, CodersFileSystem::SRef<CodersFileSystem::Directory> parent) const {
 	const std::string nodeName = TCHAR_TO_UTF8(*name);
 	switch (Node->NodeType) {
 	case 0: {
-		FileSystem::SRef<FileSystem::File> file = parent->createFile(nodeName);
+		CodersFileSystem::SRef<CodersFileSystem::File> file = parent->createFile(nodeName);
 		if (!file) return nullptr;
-		FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::OUTPUT | FileSystem::TRUNC);
+		CodersFileSystem::SRef<CodersFileSystem::FileStream> stream = file->open(CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC | CodersFileSystem::BINARY);
 		if (!stream) return nullptr;
 		try {
-			stream->write(std::string(TCHAR_TO_UTF8(*Node->Data), Node->Data.Len()));
+			FTCHARToUTF8 Convert(*Node->Data, Node->Data.Len());
+			stream->write(std::string(Convert.Get(), Convert.Length()));
 			stream->flush();
 			stream->close();
 		} catch (...) {
@@ -32,10 +32,10 @@ FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString nam
 		return file;
 	}
 	case 1: {
-		FileSystem::SRef<FileSystem::Directory> dir = parent->createSubdir(nodeName);
+		CodersFileSystem::SRef<CodersFileSystem::Directory> dir = parent->createSubdir(nodeName);
 		if (!dir) return nullptr;
 		for (TPair<FString, FFileSystemNodeIndex>& child : Node->ChildNodes) {
-			FileSystem::SRef<FileSystem::Node> node = child.Value.Deserialize(child.Key, dir);
+			CodersFileSystem::SRef<CodersFileSystem::Node> node = child.Value.Deserialize(child.Key, dir);
 		}
 		return dir;
 	}
@@ -45,17 +45,17 @@ FileSystem::SRef<FileSystem::Node> FFileSystemNodeIndex::Deserialize(FString nam
 	}
 }
 
-FFileSystemNode& FFileSystemNode::Serialize(FileSystem::SRef<FileSystem::Device> device, const FileSystem::Path& path) {
-	const FileSystem::SRef<FileSystem::Node> node = device->get(path);
-	if (FileSystem::SRef<FileSystem::File> file = node) {
+FFileSystemNode& FFileSystemNode::Serialize(CodersFileSystem::SRef<CodersFileSystem::Device> device, const CodersFileSystem::Path& path) {
+	const CodersFileSystem::SRef<CodersFileSystem::Node> node = device->get(path);
+	if (CodersFileSystem::SRef<CodersFileSystem::File> file = node) {
 		NodeType = 0;
-		FileSystem::SRef<FileSystem::FileStream> stream = file->open(FileSystem::INPUT);
+		CodersFileSystem::SRef<CodersFileSystem::FileStream> stream = file->open(CodersFileSystem::INPUT | CodersFileSystem::BINARY);
 		std::string str = stream->readAll();
-		auto Convert = FUTF8ToTCHAR(str.c_str(), str.length());
-		Data = FString(Convert.Get(), Convert.Length());
-	} else if (FileSystem::SRef<FileSystem::Directory> dir = node) {
+		FUTF8ToTCHAR Convert(str.c_str(), str.length());
+		Data = FString(Convert.Length(), Convert.Get());
+	} else if (CodersFileSystem::SRef<CodersFileSystem::Directory> dir = node) {
 		NodeType = 1;
-		for (FileSystem::NodeName child : dir->getChilds()) {
+		for (CodersFileSystem::NodeName child : dir->getChilds()) {
 			TSharedPtr<FFileSystemNode> newNode = MakeShareable(new FFileSystemNode());
 			newNode->Serialize(device, path / child);
 			ChildNodes.Add(child.c_str(), newNode);
@@ -77,23 +77,23 @@ bool FFileSystemNode::Serialize(FArchive& Ar) {
 	return true;
 }
 
-FFileSystemNode& FFileSystemNode::Deserialize(FileSystem::SRef<FileSystem::Device> Device, const std::string& deviceName) {
+FFileSystemNode& FFileSystemNode::Deserialize(CodersFileSystem::SRef<CodersFileSystem::Device> Device, const std::string& deviceName) {
 	if (NodeType == 2 || NodeType == 3) {
 		// check the device we should deserialize
 		if (!Device.isValid()) throw std::exception(("unable to find device to unpersist '" + deviceName + "'").c_str());
 		// delete previously existing contents
 		if (NodeType == 2) {
-			for (FileSystem::NodeName child : Device->childs("/")) {
-				FileSystem::Path childPath = "/";
+			for (CodersFileSystem::NodeName child : Device->childs("/")) {
+				CodersFileSystem::Path childPath = "/";
 				childPath = childPath / child;
 				Device->remove(childPath, true);
 			}
 		}
 		// deserialize children
-		FileSystem::SRef<FileSystem::Directory> root = Device->get("/");
+		CodersFileSystem::SRef<CodersFileSystem::Directory> root = Device->get("/");
 		if (!root.isValid()) throw std::exception(("root of device '" + deviceName + "' can not be found").c_str());
 		for (TPair<FString, FFileSystemNodeIndex>& child : ChildNodes) {
-			FileSystem::SRef<FileSystem::FileStream> node = child.Value.Deserialize(child.Key, root);
+			CodersFileSystem::SRef<CodersFileSystem::FileStream> node = child.Value.Deserialize(child.Key, root);
 		}
 	}
 

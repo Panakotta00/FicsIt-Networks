@@ -1,9 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interface.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
-#include "Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 #include "FINSignalSender.generated.h"
 
 /**

@@ -1,7 +1,7 @@
 #include "Path.h"
 
 using namespace std;
-using namespace FileSystem;
+using namespace CodersFileSystem;
 
 Path::Path(std::vector<NodeName> path, bool absolute) : path(path), absolute(absolute) {}
 
@@ -49,7 +49,7 @@ bool Path::isFinal() const {
 	return path.size() <= 1;
 }
 
-bool FileSystem::Path::startsWith(const Path & other) const {
+bool CodersFileSystem::Path::startsWith(const Path & other) const {
 	if (path.size() < other.path.size()) return false;
 	for (int i = 0; i < other.path.size(); ++i) if (other.path[i] != path[i]) return false;
 	return true;
@@ -61,14 +61,14 @@ Path Path::next() const {
 	return Path(nPath, absolute);
 }
 
-Path FileSystem::Path::prev() const {
+Path CodersFileSystem::Path::prev() const {
 	auto nPath = path;
 	if (nPath.size() > 0) nPath.erase(nPath.end() - 1);
 	return Path(nPath, absolute);
 }
 
-std::string FileSystem::Path::str() const {
-	std::string p = (absolute) ? "/" : "";
+std::string CodersFileSystem::Path::str(bool noAbsolute) const {
+	std::string p = (absolute && !noAbsolute) ? "/" : "";
 	for (auto n : path) {
 		p += n + "/";
 	}
@@ -76,11 +76,11 @@ std::string FileSystem::Path::str() const {
 	return p;
 }
 
-size_t FileSystem::Path::getNodeCount() const {
+size_t CodersFileSystem::Path::getNodeCount() const {
 	return path.size();
 }
 
-Path FileSystem::Path::removeFrontNodes(size_t count) const {
+Path CodersFileSystem::Path::removeFrontNodes(size_t count) const {
 	Path p = *this;
 	if (p.path.size() < count) count = p.path.size();
 	p.path.erase(p.path.begin(), p.path.begin() + count);
@@ -92,17 +92,17 @@ string Path::getFinal() const {
 	return path[path.size()-1];
 }
 
-bool FileSystem::Path::operator==(const Path & other) const {
+bool CodersFileSystem::Path::operator==(const Path & other) const {
 	if (other.absolute != absolute || other.path.size() != path.size()) return false;
 	for (int i = 0; i < other.path.size(); ++i) if (other.path[i] != path[i]) return false;
 	return true;
 }
 
-bool FileSystem::Path::operator<(const Path & other) const {
+bool CodersFileSystem::Path::operator<(const Path & other) const {
 	return path < other.path;
 }
 
-Path FileSystem::Path::operator/(const Path & other) const {
+Path CodersFileSystem::Path::operator/(const Path & other) const {
 	Path np(path, absolute);
 	for (auto& n : other.path) {
 		np.path.push_back(n);
@@ -110,18 +110,21 @@ Path FileSystem::Path::operator/(const Path & other) const {
 	return np;
 }
 
-Path & FileSystem::Path::operator=(const Path & other) {
+Path Path::operator/(const NodeName& node) const {
+	if (node.length() < 1) return *this;
+	Path newPath(path, absolute);
+	newPath.path.push_back(node);
+	return newPath;
+}
+
+Path & CodersFileSystem::Path::operator=(const Path & other) {
 	absolute = other.absolute;
 	path = other.path;
 	return *this;
 }
 
-FileSystem::Path::operator std::string() const {
-	return str();
-}
-
-FileSystem::Path::operator std::filesystem::path() const {
-	return str();
+CodersFileSystem::Path::operator std::filesystem::path() const {
+	return str(true);
 }
 
 

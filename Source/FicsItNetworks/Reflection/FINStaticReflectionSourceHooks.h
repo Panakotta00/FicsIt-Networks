@@ -3,11 +3,12 @@
 #include "FGFactoryConnectionComponent.h"
 #include "FGPowerCircuit.h"
 #include "FGTrain.h"
-#include "FicsItNetworksModule.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FINReflection.h"
 #include "FINSignal.h"
-#include "mod/hooking.h"
-#include "Network/FINHookSubsystem.h"
+#include "FicsItNetworks/Network/FINHookSubsystem.h"
+#include "Patching/NativeHookManager.h"
+
 #include "FINStaticReflectionSourceHooks.generated.h"
 
 UCLASS()
@@ -175,7 +176,9 @@ private:
 			
 public:		
 	void RegisterFuncHook() override {
-		SUBSCRIBE_METHOD_MANUAL("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_GrabOutput, &FactoryGrabHook);
+		// TODO: Check if this works now
+		// SUBSCRIBE_METHOD_MANUAL("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_GrabOutput, &FactoryGrabHook);
+		SUBSCRIBE_METHOD(UFGFactoryConnectionComponent::Factory_GrabOutput, &FactoryGrabHook);
 		SUBSCRIBE_METHOD(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, &FactoryGrabInternalHook);
     }
 };
@@ -216,6 +219,8 @@ private:
 			
 public:
 	void RegisterFuncHook() override {
-		SUBSCRIBE_METHOD_MANUAL("?TickCircuit@UFGPowerCircuit@@MEAAXM@Z", TickCircuitHook_Decl, &TickCircuitHook);
+		// TODO: Check if this works now
+		//SUBSCRIBE_METHOD_MANUAL("?TickCircuit@UFGPowerCircuit@@MEAAXM@Z", TickCircuitHook_Decl, &TickCircuitHook);
+		//SUBSCRIBE_METHOD(UFGPowerCircuit::TickCircuit, &TickCircuitHook);
     }
 };

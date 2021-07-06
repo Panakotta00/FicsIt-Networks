@@ -2,8 +2,6 @@
 
 #include "FINStruct.h"
 #include "FINSignal.h"
-#include "UObjectIterator.h"
-
 #include "FINClass.generated.h"
 
 UCLASS(BlueprintType)
@@ -17,11 +15,11 @@ public:
 	 * Returns the parent class of this class
 	 */
 	UFINClass* GetParentClass() const {
-		UFINStruct* Parent = GetParent();
-		while (!Cast<UFINClass>(Parent) && Parent) {
-			Parent = Parent->GetParent();
+		UFINStruct* CurParent = GetParent();
+		while (!Cast<UFINClass>(CurParent) && CurParent) {
+			CurParent = CurParent->GetParent();
 		}
-		return Cast<UFINClass>(Parent);
+		return Cast<UFINClass>(CurParent);
 	}
 
 	/**

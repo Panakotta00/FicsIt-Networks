@@ -1,5 +1,6 @@
 ﻿#include "FINReflectionSignatureViewer.h"
-#include "Reflection/FINReflection.h"
+
+#include "FicsItNetworks/Reflection/FINProperty.h"
 
 void SFINReflectionSignatureViewer::Construct(const FArguments& InArgs, TArray<UFINProperty*> InSource, FFINReflectionUIContext* InContext) {
 	Style = InArgs._Style;

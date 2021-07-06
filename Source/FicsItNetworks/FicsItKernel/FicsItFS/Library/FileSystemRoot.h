@@ -6,7 +6,7 @@
 #include "Directory.h"
 #include "Device.h"
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	class FileSystemException : public std::exception {
 	public:
 		FileSystemException(std::string what);
@@ -65,7 +65,7 @@ namespace FileSystem {
 		* @param[in]	mode	the mode the filestream should be opened with
 		* @return	the opened filestream
 		*/
-		SRef<FileStream> open(Path path, FileMode mode);
+		virtual SRef<FileStream> open(Path path, FileMode mode);
 
 		/*
 		* Trys to create a directory at the given path
@@ -74,7 +74,7 @@ namespace FileSystem {
 		* @param[in]	createTree	true if you want also to create the tree to the given directory if it doesnt exist
 		* @return	the newly created directory
 		*/
-		SRef<Directory> createDir(Path path, bool createTree = false);
+		virtual SRef<Directory> createDir(Path path, bool createTree = false);
 
 		/*
 		* removes the node at the given path
@@ -83,7 +83,7 @@ namespace FileSystem {
 		* @param[in]	path		path to the node you want to remove
 		* @param[in]	recursive	true if you want to remove a folder and its content
 		*/
-		bool remove(Path path, bool recursive = false);
+		virtual bool remove(Path path, bool recursive = false);
 
 		/*
 		* rename the node at the given path to the new given name
@@ -92,7 +92,7 @@ namespace FileSystem {
 		* @param[in]	name	the new name of the node
 		* @return	returns true if it was able to rename the node
 		*/
-		bool rename(Path path, const NodeName& name);
+		virtual bool rename(Path path, const NodeName& name);
 
 		/*
 		* copies the from node to the to node
@@ -102,7 +102,7 @@ namespace FileSystem {
 		* @param[in]	recursive	true if you want to copy a folder and its content
 		* @return	0 if copy worked, 1 if was fully not able to copy and 2 if it was able to partially copy
 		*/
-		int copy(Path from, Path to, bool recursive = false);
+		virtual int copy(Path from, Path to, bool recursive = false);
 
 		/*
 		* moves the from node to the to node
@@ -113,7 +113,7 @@ namespace FileSystem {
 		* @param[in]	recursive	true if you want to move a folder and its content
 		* @return	0 if move worked, 1 if was filly not able to move and 2 if it was able to move partially
 		*/
-		int move(Path from, Path to);
+		virtual int move(Path from, Path to);
 
 		/*
 		* trys to get the node at the given path
@@ -121,7 +121,7 @@ namespace FileSystem {
 		* @param[in]	path	path to the node you want to get
 		* @return	node you want to get
 		*/
-		SRef<Node> get(Path path);
+		virtual SRef<Node> get(Path path);
 
 		/*
 		* gets the names of direct childs of the node at the given path
@@ -129,7 +129,7 @@ namespace FileSystem {
 		* @param[in]	path	path to the node you want to get the childs form
 		* @return	returns a list of names
 		*/
-		std::unordered_set<NodeName> childs(Path path);
+		virtual std::unordered_set<NodeName> childs(Path path);
 
 		/*
 		* trys to mount the given device at teh given path
@@ -138,7 +138,7 @@ namespace FileSystem {
 		* @param[in]	path	the path were the device should get mounted to
 		* @return	returns true if it was able to mount the device
 		*/
-		bool mount(SRef<Device> device, Path path);
+		virtual bool mount(SRef<Device> device, Path path);
 
 		/*
 		* trys to umount the given mountpoint
@@ -147,7 +147,7 @@ namespace FileSystem {
 		* @param[in]	path	path tto the mointpoint
 		* @return	returns true if it was able to unmount the mountpoint
 		*/
-		bool unmount(Path path);
+		virtual bool unmount(Path path);
 
 		/*
 		* adds a new listener to the filesystem.
@@ -156,13 +156,13 @@ namespace FileSystem {
 		*
 		* @param[in]	listener	listener you want to add
 		*/
-		void addListener(WRef<Listener> listener);
+		virtual void addListener(WRef<Listener> listener);
 
 		/*
 		* removes the given listener from the filesystem.
 		*
 		* @param[in]	listener	listener you want to remove
 		*/
-		void removeListener(WRef<Listener> listener);
+		virtual void removeListener(WRef<Listener> listener);
 	};
 }

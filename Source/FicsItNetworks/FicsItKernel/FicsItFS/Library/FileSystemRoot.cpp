@@ -1,6 +1,6 @@
 #include "FileSystemRoot.h"
 
-using namespace FileSystem;
+using namespace CodersFileSystem;
 using namespace std;
 
 FileSystemException::FileSystemException(std::string what) : std::exception(what.c_str()) {}
@@ -26,17 +26,17 @@ SRef<Device> FileSystemRoot::getDevice(Path path, Path& pending) {
 	return mountD;
 }
 
-FileSystem::FileSystemRoot::FileSystemRoot() {
+CodersFileSystem::FileSystemRoot::FileSystemRoot() {
 	listener = new RootListener(this);
 }
 
-FileSystem::FileSystemRoot::FileSystemRoot(FileSystemRoot&& other) {
+CodersFileSystem::FileSystemRoot::FileSystemRoot(FileSystemRoot&& other) {
 	*this = std::move(other);
 }
 
-FileSystem::FileSystemRoot::~FileSystemRoot() {}
+CodersFileSystem::FileSystemRoot::~FileSystemRoot() {}
 
-FileSystemRoot& FileSystem::FileSystemRoot::operator=(FileSystemRoot&& other) {
+FileSystemRoot& CodersFileSystem::FileSystemRoot::operator=(FileSystemRoot&& other) {
 	mounts = other.mounts;
 	cache = other.cache;
 	listeners = other.listeners;
@@ -208,22 +208,20 @@ int FileSystemRoot::move(Path from, Path to) {
 }
 
 SRef<Node> FileSystemRoot::get(Path path) {
-	try {
-		auto node = cache.find(path);
-		if (node == cache.end()) throw std::exception();
-		if (!node->second.isValid()) {
-			cache.erase(node);
-			throw std::exception();
+	auto cached_node = cache.find(path);
+	if (cached_node != cache.end()) {
+		if (!cached_node->second.isValid()) {
+			cache.erase(cached_node);
+		} else {
+			return cached_node->second;
 		}
-		return node->second;
-	} catch (...) {
-		Path pending = "";
-		auto device = getDevice(path, pending);
-		if (!device.isValid()) return nullptr;
-		auto node = device->get(pending);
-		if (!node.isValid()) return nullptr;
-		return cache[path] = node;
 	}
+	Path pending = "";
+	auto device = getDevice(path, pending);
+	if (!device.isValid()) return nullptr;
+	auto node = device->get(pending);
+	if (!node.isValid()) return nullptr;
+	return cache[path] = node;
 }
 
 unordered_set<NodeName> FileSystemRoot::childs(Path path) {
@@ -266,7 +264,7 @@ void FileSystemRoot::removeListener(WRef<Listener> newListener) {
 
 FileSystemRoot::RootListener::RootListener(FileSystemRoot * root) : root(root) {}
 
-FileSystem::FileSystemRoot::RootListener::~RootListener() {}
+CodersFileSystem::FileSystemRoot::RootListener::~RootListener() {}
 
 void FileSystemRoot::RootListener::onMounted(Path path, SRef<Device> device) {
 	for (auto i = root->cache.begin(); i != root->cache.end(); i++) if (i->first.startsWith(path)) root->cache.erase(i--);
@@ -291,7 +289,7 @@ void FileSystemRoot::RootListener::onNodeChanged(Path path, NodeType type) {
 	root->listeners.onNodeChanged(path, type);
 }
 
-void FileSystem::FileSystemRoot::RootListener::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
+void CodersFileSystem::FileSystemRoot::RootListener::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
 	try {
 		root->cache[newPath] = root->cache.at(oldPath);
 		root->cache.erase(oldPath);

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FGBuildable.h"
+
+#include "Buildables/FGBuildable.h"
 #include "Components/SplineMeshComponent.h"
 #include "FINNetworkCable.generated.h"
 

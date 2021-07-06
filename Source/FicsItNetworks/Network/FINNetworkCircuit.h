@@ -3,7 +3,8 @@
 #include "CoreMinimal.h"
 #include "FINNetworkCircuitNode.h"
 #include "FINNetworkComponent.h"
-#include "Network/FINNetworkTrace.h"
+#include "GameFramework/Actor.h"
+
 #include "FINNetworkCircuit.generated.h"
 
 class UFINAdvancedNetworkConnectionComponent;
@@ -20,18 +21,14 @@ class FICSITNETWORKS_API AFINNetworkCircuit : public AActor {
 
 protected:
 	UPROPERTY(Replicated)
-	TArray<TSoftObjectPtr<UObject>> Nodes;
+	TArray<UObject*> Nodes;
 
-	void AddNodeRecursive(TSet<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add);
+	void AddNodeRecursive(TArray<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add);
 
 public:
 	AFINNetworkCircuit();
 	~AFINNetworkCircuit();
-
-	// Begin UObject
-	virtual bool IsSupportedForNetworking() const override;
-	// End UObject
-	
+		
 	/**
 	 * Adds the given circuit to this circuit.
 	 * Causes correct update signals for the components.

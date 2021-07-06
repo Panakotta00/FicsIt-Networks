@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Reflection/FINFunction.h"
-#include "FicsItNetworksModule.h"
+#include "FicsItNetworks/Reflection/FINFunction.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FINFuture.generated.h"
 
 USTRUCT(BlueprintType)
@@ -32,54 +32,44 @@ USTRUCT()
 struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	bool bDone = false;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TArray<FFINAnyNetworkValue> Input;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TArray<FFINAnyNetworkValue> Output;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	FFINExecutionContext Context;
 
-	UPROPERTY()
-	UFINFunction* Function;
+	UPROPERTY(SaveGame)
+	UFINFunction* Function = nullptr;
+
+	UPROPERTY(SaveGame)
+	UFINProperty* Property = nullptr;
 
 	FFINFutureReflection() = default;
 	FFINFutureReflection(UFINFunction* Function, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
-
-	bool Serialize(FArchive& Ar) {
-		Ar << bDone;
-		Ar << Input;
-		Ar << Output;
-		Ar << Context;
-		Ar << Function;
-		return true;
-	}
+	FFINFutureReflection(UFINProperty* Property, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Property(Property) {}
 
 	virtual bool IsDone() const override { return bDone; }
 
 	virtual void Execute() override {
-		if (!Function) {
-			UE_LOG(LogFicsItNetworks, Error, TEXT("Future unable to get executed due to invalid function pointer!"));
-			return;
+		if (Function) {
+			Output = Function->Execute(Context, Input);
+			bDone = true;
+		} else if (Property) {
+			Property->SetValue(Context, Input[0]);
+		} else {
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Future unable to get executed due to invalid function/property pointer!"));
 		}
-		Output = Function->Execute(Context, Input);
-		bDone = true;
 	}
 
 	virtual TArray<FFINAnyNetworkValue> GetOutput() const override {
 		return Output;
 	}
-};
-
-template<>
-struct TStructOpsTypeTraits<FFINFutureReflection> : public TStructOpsTypeTraitsBase2<FFINFutureReflection> {
-	enum {
-		WithSerializer = true,
-	};
 };
 
 USTRUCT()

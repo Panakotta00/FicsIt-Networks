@@ -1,6 +1,8 @@
 #include "FINComputerProcessorLua.h"
-#include "FicsItKernel/Processor/Lua/LuaProcessor.h"
+#include "FicsItNetworks/FicsItKernel/Processor/Lua/LuaProcessor.h"
 
-FicsItKernel::Processor* AFINComputerProcessorLua::CreateProcessor() {
-	return new FicsItKernel::Lua::LuaProcessor(LuaInstructionsPerTick);
+UFINKernelProcessor* AFINComputerProcessorLua::CreateProcessor() {
+	UFINLuaProcessor* Processor = NewObject<UFINLuaProcessor>(this);
+	Processor->DebugInfo = this->GetName();
+	return Processor;
 }

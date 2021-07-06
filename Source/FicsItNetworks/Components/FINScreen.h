@@ -1,10 +1,9 @@
 ﻿#pragma once
 
-#include "FGBuildable.h"
-#include "WidgetComponent.h"
-#include "Computer/FINComputerScreen.h"
-#include "Graphics/FINScreenInterface.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "Components/WidgetComponent.h"
+#include "FicsItNetworks/Computer/FINComputerScreen.h"
+#include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINScreen.generated.h"
 
 UCLASS()
@@ -112,7 +111,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_OnGPUUpdate();
 	
-	static void SpawnComponents(int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts);
-	static void SpawnEdgeComponent(int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
-	static void SpawnCornerComponent(int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
+	static void SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts);
+	static void SpawnEdgeComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
+	static void SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
 };

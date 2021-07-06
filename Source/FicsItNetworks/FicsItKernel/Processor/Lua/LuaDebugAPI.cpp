@@ -1,5 +1,7 @@
 ﻿#include "LuaDebugAPI.h"
 
+#include "LuaUtil.h"
+
 namespace FicsItKernel {
 	namespace Lua {
 		void setupDebugAPI(lua_State* L) {

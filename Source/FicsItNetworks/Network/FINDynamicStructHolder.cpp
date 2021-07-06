@@ -68,9 +68,17 @@ bool FFINDynamicStructHolder::Serialize(FArchive& Ar) {
 		if (Struct) Struct->InitializeStruct(Data);
 	}
 	if (Struct) {
-		Struct->GetCppStructOps()->Serialize(Ar, Data);
+		Struct->SerializeBin(Ar, Data);
 	}
 	return true;
+}
+
+void FFINDynamicStructHolder::AddStructReferencedObjects(FReferenceCollector& Collector) const {
+	UScriptStruct* ThisStruct = Struct;
+	if (Struct) Collector.AddReferencedObject(ThisStruct);
+	if (Struct && Data) {
+		if (Struct->GetCppStructOps()->HasAddStructReferencedObjects()) Struct->GetCppStructOps()->AddStructReferencedObjects()(Data, Collector);
+	}
 }
 
 UScriptStruct* FFINDynamicStructHolder::GetStruct() const {

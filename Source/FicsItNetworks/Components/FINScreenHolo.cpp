@@ -1,13 +1,36 @@
 ﻿#include "FINScreenHolo.h"
 
-#include "FGBuildableFoundation.h"
-#include "FGBuildableWall.h"
+#include "FGColoredInstanceMeshProxy.h"
 #include "FINScreen.h"
-#include "UnrealNetwork.h"
+#include "Buildables/FGBuildableFoundation.h"
+#include "Buildables/FGBuildableWall.h"
 
 AFINScreenHolo::AFINScreenHolo() {
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
+}
+
+void AFINScreenHolo::OnConstruction(const FTransform& Transform) {
+	Super::OnConstruction(Transform);
+	
+	// Clear Components
+	for (UStaticMeshComponent* comp : Parts) {
+		comp->UnregisterComponent();
+		comp->SetActive(false);
+		comp->DestroyComponent();
+	}
+	Parts.Empty();
+
+	// Create Components
+	UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
+	UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
+	UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
+	AFINScreen::SpawnComponents(UStaticMeshComponent::StaticClass(), ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
+	RootComponent->SetMobility(EComponentMobility::Movable);
+	for (UStaticMeshComponent* Part : Parts) {
+		Part->SetMobility(EComponentMobility::Movable);
+		Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AFINScreenHolo::Tick(float DeltaSeconds) {
@@ -17,22 +40,7 @@ void AFINScreenHolo::Tick(float DeltaSeconds) {
 		OldScreenHeight = ScreenHeight;
 		OldScreenWidth = ScreenWidth;
 		
-		// Clear Components
-		for (UStaticMeshComponent* comp : Parts) {
-			comp->UnregisterComponent();
-			comp->SetActive(false);
-			comp->DestroyComponent();
-		}
-		Parts.Empty();
-
-		// Create Components
-		UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
-		UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
-		UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
-		AFINScreen::SpawnComponents(ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
-		for (UStaticMeshComponent* Part : Parts) {
-			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
+		RerunConstructionScripts();
 	}
 }
 

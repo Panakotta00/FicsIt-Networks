@@ -6,7 +6,7 @@
 #include "FileSystem.h"
 #include "NodeName.h"
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	class Path {
 	private:
 		std::vector<NodeName> path;
@@ -19,8 +19,8 @@ namespace FileSystem {
 
 		Path();
 		Path(const char* path);
-		Path(std::string path);
-		Path(NodeName node);
+		explicit Path(std::string path);
+		explicit Path(NodeName node);
 		Path(std::filesystem::path path);
 
 		std::string getRoot() const;
@@ -28,7 +28,7 @@ namespace FileSystem {
 		bool startsWith(const Path& other) const;
 		Path next() const;
 		Path prev() const;
-		std::string str() const;
+		std::string str(bool noAbsolute = false) const;
 		size_t getNodeCount() const;
 		Path removeFrontNodes(size_t count) const;
 		std::string getFinal() const;
@@ -36,9 +36,9 @@ namespace FileSystem {
 		bool operator==(const Path& other) const;
 		bool operator<(const Path& other) const;
 		Path operator/(const Path& other) const;
+		Path operator/(const NodeName& node) const;
 		Path& operator=(const Path& other);
 
-		operator std::string() const;
 		operator std::filesystem::path() const;
 	};
 }

@@ -1,7 +1,6 @@
 #include "FINComputerDriveHolder.h"
 
 #include "FINComputerDriveDesc.h"
-#include "UnrealNetwork.h"
 
 AFINComputerDriveHolder::AFINComputerDriveHolder() {
 	DriveInventory = CreateDefaultSubobject<UFGInventoryComponent>("DriveInventory");
@@ -45,6 +44,7 @@ bool AFINComputerDriveHolder::GetLocked() const {
 }
 
 bool AFINComputerDriveHolder::SetLocked(bool NewLocked) {
+	if (!HasAuthority()) return false;
 	AFINFileSystemState* newState = GetDrive();
 	if (bLocked == NewLocked || (!IsValid(newState) && NewLocked)) return false;
 

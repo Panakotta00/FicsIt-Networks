@@ -1,340 +1,333 @@
 #pragma once
 
-#include <memory>
-#include <queue>
-
-
-#include "Processor/Processor.h"
+#include "Audio/AudioController.h"
+#include "Dom/JsonObject.h"
 #include "FicsItFS/FINFileSystemState.h"
 #include "FicsItFS/DevDevice.h"
-#include "FicsItFS/FileSystem.h"
+#include "FicsItNetworks/Computer/FINPciDeviceInterface.h"
 #include "Network/NetworkController.h"
-#include "Audio/AudioController.h"
-#include "Network/FINFuture.h"
+#include "FicsItNetworks/Graphics/FINGPUInterface.h"
+#include "FicsItNetworks/Graphics/FINScreenInterface.h"
+#include "FicsItNetworks/Network/FINFuture.h"
+#include "FicsItNetworks/Utils/FINException.h"
+#include "FicsItKernel.generated.h"
 
-struct FKernelSystemSerializationInfo;
+class UFINKernelProcessor;
+UENUM()
+enum EFINKernelState {
+	FIN_KERNEL_SHUTOFF,
+	FIN_KERNEL_RUNNING,
+	FIN_KERNEL_CRASHED,
+	FIN_KERNEL_RESET
+};
 
-namespace FicsItKernel {
-	enum KernelState {
-		SHUTOFF,
-		RUNNING,
-		CRASHED,
-		RESET
-	};
-
-	class FICSITNETWORKS_API KernelCrash : public std::exception {
-	public:
-		KernelCrash(std::string what = "");
-
-		virtual ~KernelCrash();
-	};
-
-	class KernelSystem;
-	class FICSITNETWORKS_API KernelListener : public FileSystem::Listener {
-	private:
-		KernelSystem* parent;
+USTRUCT()
+struct FICSITNETWORKS_API FFINKernelCrash : public FFINException {
+	GENERATED_BODY()
 	
-	public:
-		KernelListener(KernelSystem* parent);
+	FFINKernelCrash() = default;
+	FFINKernelCrash(const FString& Message) : FFINException(Message) {}
+};
 
-		virtual void onMounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) override;
-		virtual void onUnmounted(FileSystem::Path path, FileSystem::SRef<FileSystem::Device> device) override;
-		virtual void onNodeAdded(FileSystem::Path path, FileSystem::NodeType type) override;
-		virtual void onNodeRemoved(FileSystem::Path path, FileSystem::NodeType type) override;
-		virtual void onNodeChanged(FileSystem::Path  path, FileSystem::NodeType type) override;
-		virtual void onNodeRenamed(FileSystem::Path newPath, FileSystem::Path oldPath, FileSystem::NodeType type) override;
+class UFINKernelSystem;
+
+class FICSITNETWORKS_API FFINKernelListener : public CodersFileSystem::Listener {
+private:
+	UFINKernelSystem* parent;
+
+public:
+	FFINKernelListener(UFINKernelSystem* parent);
+
+	virtual void onMounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) override;
+	virtual void onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) override;
+	virtual void onNodeAdded(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
+	virtual void onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
+	virtual void onNodeChanged(CodersFileSystem::Path  path, CodersFileSystem::NodeType type) override;
+	virtual void onNodeRenamed(CodersFileSystem::Path newPath, CodersFileSystem::Path oldPath, CodersFileSystem::NodeType type) override;
+};
+
+UCLASS()
+class FICSITNETWORKS_API UFINKernelSystem : public UObject, public IFGSaveInterface {
+	GENERATED_BODY()
+	
+private:
+	// System Setup
+	UPROPERTY(SaveGame)
+	UFINKernelProcessor* Processor = nullptr;
+	UPROPERTY()
+	UFINKernelNetworkController* Network = nullptr;
+	UPROPERTY()
+	UFINKernelAudioController* Audio = nullptr;
+	TArray<TScriptInterface<IFINPciDeviceInterface>> PCIDevices;
+	FFINKernelFSRoot FileSystem;
+	FCriticalSection MutexDevDevice;
+	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = nullptr;
+	int64 MemoryCapacity = 0;
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
+	TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> Drives;
+
+	// Runtime Environment/State
+	UPROPERTY(SaveGame)
+	TEnumAsByte<EFINKernelState> State = FIN_KERNEL_SHUTOFF;
+	UPROPERTY(SaveGame)
+	uint64 SystemResetTimePoint = 0;
+	UPROPERTY(SaveGame)
+	FString DevDeviceMountPoint;
+	TSharedPtr<FFINKernelCrash> KernelCrash;
+	int64 MemoryUsage = 0;
+	CodersFileSystem::SRef<FFINKernelListener> FileSystemListener;
+
+	// Cache
+	TSharedPtr<FJsonObject> ReadyToUnpersist = nullptr;
+	TQueue<TSharedPtr<TFINDynamicStruct<FFINFuture>>> FutureQueue;
+	TMap<void*, TFunction<void(void*, FReferenceCollector&)>> ReferencedObjects;
+	FFileSystemSerializationInfo FileSystemSerializationInfo;
+	
+public:
+	/**
+	 * defines which resource usage should get recalculated
+	 */
+	enum ERecalc {
+		NONE = 0b00,
+		PROCESSOR = 0b01,
+		FILESYSTEM = 0b10,
+		ALL = 0b11
 	};
 
-	class FICSITNETWORKS_API KernelSystem {
-		friend Processor;
-		friend KernelListener;
+	UFINKernelSystem();
 
-	private:
-		UObject* Owner;
-		KernelState state = KernelState::SHUTOFF;
-		KernelCrash kernelCrash;
-		std::int64_t memoryCapacity = 0;
-		std::int64_t memoryUsage = 0;
-		std::unique_ptr<Processor> processor = nullptr;
-		FicsItFS::Root filesystem;
-		FileSystem::SRef<FicsItFS::DevDevice> devDevice = nullptr;
-		std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> drives;
-		std::unique_ptr<Network::NetworkController> network = nullptr;
-		std::unique_ptr<Audio::AudioController> audio = nullptr;
-		FileSystem::SRef<KernelListener> listener;
-		TSharedPtr<FJsonObject> readyToUnpersist = nullptr;
-		TSet<FWeakObjectPtr> gpus;
-		TSet<FWeakObjectPtr> screens;
-		std::queue<TSharedPtr<TFINDynamicStruct<FFINFuture>>> futureQueue;
-		std::chrono::time_point<std::chrono::high_resolution_clock> systemResetTimePoint;
-		
-	public:
-		/**
-		 * defines which resource usage should get recalculated
-		 */
-		enum Recalc {
-			NONE = 0b00,
-			PROCESSOR = 0b01,
-			FILESYSTEM = 0b10,
-			ALL = 0b11
-		};
+	// Begin UObject
+	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
+	//virtual void Serialize(FArchive& Ar) override;
+	virtual void Serialize(FStructuredArchive::FRecord Record) override;
+	virtual void BeginDestroy() override;
+	// End UObject
 
-		KernelSystem(UObject* Owner);
-		~KernelSystem();
+	// Begin IFGSaveInterface
+	virtual bool ShouldSave_Implementation() const override;
+	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
+	// End IFGSaveInterface
 
-		/**
-		 * Ticks the whole system.
-		 *
-		 * @param	deltaSeconds	time in seconds since last tick
-		 */
-		void tick(float deltaSeconds);
+	/**
+	 * Ticks the whole system.
+	 *
+	 * @param	DeltaSeconds	time in seconds since last tick
+	 */
+	void Tick(float DeltaSeconds);
 
-		/**
-		 * Allows to access the filesystem of the kernel.
-		 * Returns nullptr if it is not running or if it is not setup.
-		 *
-		 * @return	returns the current running filesystem as pointer
-		 */
-		FicsItFS::Root* getFileSystem();
+	/**
+	 * Allows to access the filesystem of the kernel.
+	 * Returns nullptr if it is not running or if it is not setup.
+	 *
+	 * @return	returns the current running filesystem as pointer
+	 */
+	FFINKernelFSRoot* GetFileSystem();
 
-		/**
-		 * Sets the memory capacity to the given value.
-		 * If the system is running, causes a hard reset.
-		 *
-		 * @param	capacity	the new memory capacity
-		 */
-		void setCapacity(std::int64_t capacity);
+	/**
+	 * Sets the memory capacity to the given value.
+	 * If the system is running, causes a hard reset.
+	 *
+	 * @param	InCapacity	the new memory capacity
+	 */
+	void SetCapacity(int64 InCapacity);
 
-		/**
-		 * Returns the current memory capacity.
-		 *
-		 * @return	current memory capacity
-		 */
-		std::int64_t getCapacity() const;
+	/**
+	 * Returns the current memory capacity.
+	 *
+	 * @return	current memory capacity
+	 */
+	int64 GetCapacity() const;
 
-		/**
-		 * Sets the processor.
-		 * If the system is running, causes a hard reset.
-		 * The given pointer will get fully occupied and so, manual deletion is not allowed.
-		 *
-		 * @param	processor	the process you want now use
-		 */
-		void setProcessor(Processor* processor);
+	/**
+	 * Sets the processor.
+	 * If the system is running, causes a hard reset.
+	 * The given pointer will get fully occupied and so, manual deletion is not allowed.
+	 *
+	 * @param	InProcessor	the process you want now use
+	 */
+	void SetProcessor(UFINKernelProcessor* InProcessor);
 
-		/**
-		 * Returns the currently use processor
-		 */
-		Processor* getProcessor() const;
+	/**
+	 * Returns the currently use processor
+	 */
+	UFINKernelProcessor* GetProcessor() const;
 
-		/**
-		 * Returns the current kernel crash.
-		 *
-		 * @return	current kernel crash
-		 */
-		KernelCrash getCrash() const;
+	/**
+	 * Returns the current kernel crash.
+	 *
+	 * @return	current kernel crash
+	 */
+	TSharedPtr<FFINKernelCrash> GetCrash() const;
 
-		/**
-		 * Returns the current kernel state.
-		 *
-		 * @return	current kernel state
-		 */
-		KernelState getState() const;
+	/**
+	 * Returns the current kernel state.
+	 *
+	 * @return	current kernel state
+	 */
+	EFINKernelState GetState() const;
 
-		/**
-		 * Adds the given drive to the system.
-		 *
-		 * @param	drive	the drive you want to add
-		 */
-		void addDrive(AFINFileSystemState* drive);
+	/**
+	 * Adds the given drive to the system.
+	 *
+	 * @param	Drive	the drive you want to add
+	 */
+	void AddDrive(AFINFileSystemState* Drive);
 
-		/**
-		 * Removes the given drive from the system.
-		 *
-		 * @param	drive	the drive you want to remove
-		 */
-		void removeDrive(AFINFileSystemState* drive);
+	/**
+	 * Removes the given drive from the system.
+	 *
+	 * @param	Drive	the drive you want to remove
+	 */
+	void RemoveDrive(AFINFileSystemState* Drive);
 
-		/**
-		 * Adds a future to resolve to the future queue.
-		 * So it gets resolved in on of the next main thread ticks.
-		 *
-		 * @param[in]	future	shared ptr to the future you want to resolve
-		 */
-		void pushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> future);
+	/**
+	 * Adds a future to resolve to the future queue.
+	 * So it gets resolved in on of the next main thread ticks.
+	 *
+	 * @param[in]	Future	shared ptr to the future you want to resolve
+	 */
+	void PushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> Future);
 
-		/**
-		 * This function should get executed every main thread tick.
-		 * @note	ONLY FROM THE MAIN THREAD!!!
-		 */
-		void handleFutures();
+	/**
+	 * This function should get executed every main thread tick.
+	 * @note	ONLY FROM THE MAIN THREAD!!!
+	 */
+	void HandleFutures();
 
-		/**
-		 * Returns all drive added to the kernel
-		 *
-		 * @return	the drives
-		 */
-		std::unordered_map<AFINFileSystemState*, FileSystem::SRef<FileSystem::Device>> getDrives() const;
+	/**
+	 * Returns all drive added to the kernel
+	 *
+	 * @return	the drives
+	 */
+	TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> GetDrives() const;
 
-		/**
-		 * Gets the internally used DevDevice
-		 *
-		 * @return	the used DevDevice
-		 */
-		FileSystem::SRef<FicsItFS::DevDevice> getDevDevice();
+	/**
+	 * Gets the internally used DevDevice
+	 *
+	 * @return	the used DevDevice
+	 */
+	CodersFileSystem::SRef<FFINKernelFSDevDevice> GetDevDevice() const;
 
-		/**
-		 * Mounts the currently used devDevice to the given path in the currently used file system.
-		 *
-		 * @param	path	path were the DevDevice should get mounted to
-		 * @return	true if it was able to mount the DevDevice, fals if not (f.e. when the DevDevice got already mounted in this run state)
-		 */
-		bool initFileSystem(FileSystem::Path path);
+	/**
+	 * Mounts the currently used devDevice to the given path in the currently used file system.
+	 *
+	 * @param	InPath	path were the DevDevice should get mounted to
+	 * @return	true if it was able to mount the DevDevice, false if not (f.e. when the DevDevice got already mounted in this run state)
+	 */
+	bool InitFileSystem(CodersFileSystem::Path InPath);
 
-		/**
-		 * Starts the system.
-		 * If the system is already running, resets the system if given reset is set.
-		 * Crashes the system if no processor is set.
-		 *
-		 * @param	reset	set it to true if you want to allow a system reset
-		 * @return	returns flase if system is already running and reset is not set, else it returns true
-		 */
-		bool start(bool reset);
+	/**
+	 * Starts the system.
+	 * If the system is already running, resets the system if given reset is set.
+	 * Crashes the system if no processor is set.
+	 *
+	 * @param	bInReset	set it to true if you want to allow a system reset
+	 * @return	returns false if system is already running and reset is not set, else it returns true
+	 */
+	bool Start(bool bInReset);
 
-		/**
-		 * Resets the system.
-		 * This is like start(true) but it is capable of getting called within a system tick.
-		 * It basically stops the system and changes the state to reset. In the next tick the system will then get started again.
-		 *
-		 * @return	returns false if system was not able to get stopped
-		 */
-		bool reset();
+	/**
+	 * Resets the system.
+	 * This is like start(true) but it is capable of getting called within a system tick.
+	 * It basically stops the system and changes the state to reset. In the next tick the system will then get started again.
+	 *
+	 * @return	returns false if system was not able to get stopped
+	 */
+	bool Reset();
 
-		/**
-		 * Stops the system.
-		 *
-		 * @return	returns false if system is already not running, else it returns true
-		 */
-		bool stop();
+	/**
+	 * Stops the system.
+	 *
+	 * @return	returns false if system is already not running, else it returns true
+	 */
+	bool Stop();
 
-		/**
-		 * Crashes the system with the given kernel crash.
-		 *
-		 * @param	crash	the kernel crash wich is the reason for the crash
-		 */
-		void crash(KernelCrash crash);
+	/**
+	 * Crashes the system with the given kernel crash.
+	 *
+	 * @param	InCrash	the kernel crash which is the reason for the crash
+	 */
+	void Crash(const TSharedRef<FFINKernelCrash>& InCrash);
 
-		/**
-		 * Returns the currently used network controller.
-		 */
-		Network::NetworkController* getNetwork();
+	/**
+	 * Returns the currently used network controller.
+	 */
+	UFINKernelNetworkController* GetNetwork() const;
 
-		/**
-		 * Sets the currently used network controller.
-		 * Completely occupys the controller, that means, it gets manged and so you should never free the controller.
-		 */
-		void setNetwork(Network::NetworkController* controller);
+	/**
+	 * Sets the currently used network controller.
+	 * Completely occupies the controller, that means, it gets manged and so you should never free the controller.
+	 */
+	void SetNetwork(UFINKernelNetworkController* InController);
 
-		/**
-		 * Returns the currently used audio controller.
-		 */
-		Audio::AudioController* getAudio();
+	/**
+	 * Returns the currently used audio controller.
+	 */
+	UFINKernelAudioController* GetAudio() const;
 
-		/**
-		 * Sets the currently used audio controller.
-		 * Completely occupys the controller, that means, it gets managed and so you should never free the controller.
-		 */
-		void setAudio(Audio::AudioController* controller);
+	/**
+	 * Sets the currently used audio controller.
+	 * Completely occupies the controller, that means, it gets managed and so you should never free the controller.
+	 */
+	void SetAudio(UFINKernelAudioController* InController);
 
-		/**
-		 * Get current used memory.
-		 *
-		 * @return	current memory usage
-		 */
-		int64 getMemoryUsage();
+	/**
+	 * Get current used memory.
+	 *
+	 * @return	current memory usage
+	 */
+	int64 GetMemoryUsage() const;
 
-		/**
-		 * Adds the given GPU to the kernel
-		 *
-		 * @param[in]	gpu		the gpu you want to add.
-		 */
-		void addGPU(UObject* gpu);
+	/**
+	 * Adds the given PCI Device to the kernel
+	 *
+	 * @param[in]	InPCIDevice		the PCI Device you want to add.
+	 */
+	void AddPCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice);
 
-		/**
-		* Removes the given GPU from the kernel
-		*
-		* @param[in]	gpu		the gpu you want to remove.
-		*/
-		void removeGPU(UObject* gpu);
+	/**
+	* Removes the given GPU from the kernel
+	*
+	* @param[in]	InPCIDevice		the PCI Device you want to remove.
+	*/
+	void RemovePCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice);
 
-		/**
-		 * Returns the list of added GPUs.
-		 *
-		 * @return list of added gpus
-		 */
-		TSet<UObject*> getGPUs();
+	/**
+	 * Returns the list of added PCI Devices.
+	 *
+	 * @return list of added PCI Devices
+	 */
+	const TArray<TScriptInterface<IFINPciDeviceInterface>>& GetPCIDevices() const;
 
-		/**
-		* Adds the given screen to the kernel
-		*
-		* @param[in]	screen		the screen you want to add.
-		*/
-		void addScreen(UObject* screen);
+	/**
+	 * Returns the amount of milliseconds passed since the system started.
+	 *
+	 * @return	amount of milliseconds since system start
+	 */
+	int64 GetTimeSinceStart() const;
+	
+	/**
+	 * Recalculates the given system components resource usage like memory.
+	 * Can cause a kernel crash to occur.
+	 * Tries to use cached memory usages for the components not set.
+	 *
+	 * @param	InComponents	the registry of system components you want to recalculate.
+	 * @param	bShouldCrash	due to the fact that the processor may need to run this, it may also not be good for it to cause a system crash. If this is set to false, it wont cause a crash.
+	 * @return	returns true if resources are not enough and essentially "failed" (f.e. out of memory)
+	 */
+	bool RecalculateResources(ERecalc InComponents, bool bShouldCrash = true);
 
-		/**
-		* Removes the given screen from the kernel
-		*
-		* @param[in]	screen		the screen you want to remove.
-		*/
-		void removeScreen(UObject* screen);
+	/**
+	 * Adds a new referencer to the referencer storage
+	 */
+	void AddReferencer(void* Referencer, const TFunction<void(void*, FReferenceCollector&)>& CollectorFunc);
 
-		/**
-		* Returns the list of added screens.
-		*
-		* @return list of added screen
-		*/
-		TSet<UObject*> getScreens();
-
-		/**
-		 * Returns the amount of milliseconds passed since the system started.
-		 *
-		 * @return	amount of milliseconds since system start
-		 */
-		int64 getTimeSinceStart() const;
-		
-		/**
-		 * Recalculates the given system components resource usage like memory.
-		 * Can cause a kernel crash to occur.
-		 * Trys to use cached memory usages for the components not set.
-		 *
-		 * @param	components	the registry of system components you want to recalculate.
-		 */
-		void recalculateResources(Recalc components);
-
-		/**
-		 * This should get called prior to serialization.
-		 *
-		 * @param[in]	Data		The kernel data object.
-		 * @param[in]	bLoading	true if it deserializes
-		 */
-		void PreSerialize(FKernelSystemSerializationInfo& Data, bool bLoading);
-		
-		/**
-		 * Serializes/Deserializes the System to/from FArchive.
-		 * Loads most data directly.
-		 * Dynamic data like drives & processors will finish initialization with postLoad
-		 *
-		 * @param[in]	Ar				The Archive were to/from un/serialize from/to.
-		 * @parm[out]	OutSystemState	the structure which will hold the system state
-		 */
-		void Serialize(FArchive& Ar, FKernelSystemSerializationInfo& OutSystemState);
-
-		/**
-		 * This will cause the processor finally to load it's state.
-		 * Call this after every necessery information got DE7serialized.
-		 *
-		 * @param[in]	Data		The kernel data object fully de/serialized.
-		 * @param[in]	bLoading	true if it deserializes
-		 */
-		void PostSerialize(FKernelSystemSerializationInfo& Data, bool bLoading);
-	};
-}
+	/**
+	 * Removes teh given referencer from the referencer storage
+	 */
+	void RemoveReferencer(void* Referencer);
+};

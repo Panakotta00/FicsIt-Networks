@@ -2,7 +2,6 @@
 
 #include "FINReflectionStyles.h"
 #include "SlateCore.h"
-#include "STableRow.h"
 
 template<typename ItemType>
 class SFINReflectionTreeRow : public STableRow<ItemType> {

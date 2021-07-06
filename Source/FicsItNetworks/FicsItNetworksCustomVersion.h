@@ -15,6 +15,9 @@ enum EFINCustomVersion {
 	// Codeable Splitter Attachment Fixes
 	FINCodeableSplitterAttachmentFixes,
 
+	// FicsIt-Kernel Refactor
+	FINKernelRefactor,
+
     // -----<new versions can be added above this line>-------------------------------------------------
     FINVersionPlusOne,
     FINLatestVersion = FINVersionPlusOne - 1

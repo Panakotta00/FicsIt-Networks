@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "FGBuildable.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 
+#include "Buildables/FGBuildable.h"
+#include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
 #include "FINVehicleScanner.generated.h"
 
 class AFGVehicle;

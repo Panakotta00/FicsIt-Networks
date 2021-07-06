@@ -1,30 +1,35 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FGBuildableHologram.h"
-#include "FGBuildableFactory.h"
 #include "FINNetworkAdapter.h"
 #include "FINNetworkConnectionComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "Hologram/FGBuildableHologram.h"
+
 #include "FINNetworkCableHologram.generated.h"
 
 UENUM()
-enum EFINNetworkCableHologramSnapType {
+enum EFINNetworkCableHologramPlacementStepType {
 	FIN_NOT_SNAPPED,
 	FIN_CONNECTOR,
 	FIN_SETTINGS,
 	FIN_POWER,
 	FIN_POLE,
+	FIN_PLUG,
 };
 
 USTRUCT()
-struct FICSITNETWORKS_API FFINSnappedInfo {
+struct FICSITNETWORKS_API FFINCablePlacementStepInfo {
 	GENERATED_BODY()
 
 public:
-	EFINNetworkCableHologramSnapType SnapType = FIN_NOT_SNAPPED;
+	UPROPERTY()
+	TEnumAsByte<EFINNetworkCableHologramPlacementStepType> SnapType = FIN_NOT_SNAPPED;
+
+	UPROPERTY()
 	UObject* SnappedObj = nullptr;
-	FVector PolePostition;
+	
+	UPROPERTY()
 	FFINAdapterSettings AdapterSettings;
 
 	/** Location of the connector in world space */
@@ -51,16 +56,25 @@ public:
 	UStaticMeshComponent* Adapter2 = nullptr;
 
 	UPROPERTY(Replicated)
-	FFINSnappedInfo Snapped;
+	FFINCablePlacementStepInfo Snapped;
 
 	UPROPERTY(Replicated)
-	FFINSnappedInfo OldSnapped;
+	FFINCablePlacementStepInfo OldSnapped;
 
 	UPROPERTY(Replicated)
-	FFINSnappedInfo From;
+	FFINCablePlacementStepInfo From;
 
 	UPROPERTY()
-	AFGBuildableHologram* PoleHologram = nullptr;
+	AFGBuildableHologram* PoleHologram1 = nullptr;
+
+	UPROPERTY()
+	AFGBuildableHologram* PlugHologram1 = nullptr;
+
+	UPROPERTY()
+	AFGBuildableHologram* PoleHologram2 = nullptr;
+
+	UPROPERTY()
+	AFGBuildableHologram* PlugHologram2 = nullptr;
 
 	UPROPERTY()
 	UFINNetworkConnectionComponent* Connector1Cache = nullptr;
@@ -85,10 +99,12 @@ public:
 	AFINNetworkCableHologram();
 	~AFINNetworkCableHologram();
 
-	void OnBeginSnap(FFINSnappedInfo a, bool isValid);
-	void OnEndSnap(FFINSnappedInfo a);
-	UFINNetworkConnectionComponent* SetupSnapped(FFINSnappedInfo s);
+	void OnBeginSnap(FFINCablePlacementStepInfo a, bool isValid);
+	void OnEndSnap(FFINCablePlacementStepInfo a);
+	UFINNetworkConnectionComponent* SetupSnapped(FFINCablePlacementStepInfo s);
 	void UpdateSnapped();
+	void UpdateMeshValidity(bool bValid);
+	bool IsInSecondStep();
 	
 	/**
 	 * Checks if the currently snapped object is valid

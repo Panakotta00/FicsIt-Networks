@@ -1,7 +1,0 @@
-Audio Bus	ID	Name			Wwise Object Path	Notes
-	3803692087	Master Audio Bus			\Default Work Unit\Master Audio Bus	
-
-Audio Devices	ID	Name	Type				Notes
-	2317455096	No_Output	No Output			
-	3859886410	System	System			
-

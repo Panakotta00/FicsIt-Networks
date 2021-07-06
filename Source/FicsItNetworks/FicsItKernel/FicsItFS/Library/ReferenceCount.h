@@ -1,8 +1,10 @@
 #pragma once
 
 #include <functional>
+#include <mutex>
+#include <atomic>
 
-namespace FileSystem {
+namespace CodersFileSystem {
 	template<class T>
 	class Ref;
 	template<class T>
@@ -19,8 +21,8 @@ namespace FileSystem {
 		friend class WRef;
 
 	private:
-		int weak_count = 0;
-		size_t shared_count = 0;
+		std::atomic<int> weak_count = 0;
+		std::atomic<size_t> shared_count = 0;
 
 	public:
 		virtual ~ReferenceCounted() {}
@@ -32,11 +34,12 @@ namespace FileSystem {
 		friend class SRef;
 		template<class T>
 		friend class WRef;
-		friend struct std::hash<FileSystem::WRef<T>>;
-		friend struct std::hash<FileSystem::SRef<T>>;
+		friend struct std::hash<CodersFileSystem::WRef<T>>;
+		friend struct std::hash<CodersFileSystem::SRef<T>>;
 
 	protected:
 		ReferenceCounted* ref;
+		std::mutex mutex;
 
 		Ref(T* ref) : ref(dynamic_cast<ReferenceCounted*>(ref)) {
 			static_assert(std::is_base_of<ReferenceCounted, T>::value, "T not derived from ReferenceCounted");
@@ -51,7 +54,9 @@ namespace FileSystem {
 		}
 
 		T* get() const {
-			if (!ref || ref->shared_count < 1) return nullptr;
+			if (!ref) return nullptr;
+			std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(mutex));
+			if (ref->shared_count < 1) return nullptr;
 			else return dynamic_cast<T*>(ref);
 		}
 
@@ -77,7 +82,7 @@ namespace FileSystem {
 		}
 
 		bool isValid() const {
-			return get();
+			return (bool)get();
 		}
 	};
 
@@ -89,10 +94,10 @@ namespace FileSystem {
 			if (this->ref) this->ref->shared_count++;
 		}
 
-		SRef(const SRef<T>& other) : SRef(dynamic_cast<T*>(other.ref)) {}
+		SRef(const SRef<T>& other) : SRef(dynamic_cast<T*>(other.get())) {}
 
 		template<class O>
-		SRef(const Ref<O>& other) : SRef(dynamic_cast<T*>(other.ref)) {}
+		SRef(const Ref<O>& other) : SRef(dynamic_cast<T*>(other.get())) {}
 
 		~SRef() {
 			auto r = Ref<T>::ref;
@@ -100,10 +105,14 @@ namespace FileSystem {
 		}
 
 		SRef& operator=(const SRef& newRef) {
-			auto r = Ref<T>::ref;
+			if (&newRef == this) return *this;
+			auto r = Ref<T>::get();
 			if (r) r->shared_count--;
-			Ref<T>::ref = newRef.ref;
-			if (newRef.ref) newRef.ref->shared_count++;
+			{
+				std::lock_guard<std::mutex> lock(Ref<T>::mutex);
+				Ref<T>::ref = newRef.get();
+			}
+			if (newRef.ref) Ref<T>::get()->shared_count++;
 			return *this;
 		}
 	};
@@ -116,16 +125,20 @@ namespace FileSystem {
 			if (ref) ref->weak_count++;
 		}
 
-		WRef(const WRef<T>& other) : WRef(dynamic_cast<T*>(other.ref)) {}
+		WRef(const WRef<T>& other) : WRef(dynamic_cast<T*>(other.get())) {}
 
 		template<class O>
-		WRef(const Ref<O>& other) : WRef(dynamic_cast<T*>(other.ref)) {}
+		WRef(const Ref<O>& other) : WRef(dynamic_cast<T*>(other.get())) {}
 
 		WRef& operator=(const WRef& newRef) {
-			auto r = Ref<T>::ref;
+			if (&newRef == this) return *this;
+			auto r = Ref<T>::get();
 			if (r) r->weak_count--;
-			Ref<T>::ref = newRef.ref;
-			if (newRef.ref) newRef.ref->weak_count++;
+			{
+				std::lock_guard<std::mutex> lock(Ref<T>::mutex);
+				Ref<T>::ref = newRef.get();
+			}
+			if (Ref<T>::get()) Ref<T>::get()->weak_count++;
 			return *this;
 		}
 
@@ -138,15 +151,15 @@ namespace FileSystem {
 
 namespace std {
 	template<typename R>
-	struct hash<FileSystem::WRef<R>> {
-		std::size_t operator()(FileSystem::WRef<R> const& o) const noexcept {
+	struct hash<CodersFileSystem::WRef<R>> {
+		std::size_t operator()(CodersFileSystem::WRef<R> const& o) const noexcept {
 			return std::hash<void*>{}(o.ref);
 		}
 	};
 
 	template<typename R>
-	struct hash<FileSystem::SRef<R>> {
-		std::size_t operator()(FileSystem::WRef<R> const& o) const noexcept {
+	struct hash<CodersFileSystem::SRef<R>> {
+		std::size_t operator()(CodersFileSystem::WRef<R> const& o) const noexcept {
 			return std::hash<void*>{}(o.ref);
 		}
 	};

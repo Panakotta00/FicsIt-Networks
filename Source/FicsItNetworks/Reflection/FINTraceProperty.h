@@ -14,7 +14,7 @@ public:
 	
 	// Begin UFINProperty
 	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
-		if (Property) return Property->ContainerPtrToValuePtr<FFINNetworkTrace>(Ctx.GetGeneric());
+		if (Property) return *Property->ContainerPtrToValuePtr<FFINNetworkTrace>(Ctx.GetGeneric());
 		return Super::GetValue(Ctx);
 	}
 	

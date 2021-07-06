@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FGBuildableHologram.h"
 #include "FINModuleSystemPanel.h"
+#include "Hologram/FGBuildableHologram.h"
 #include "FINModuleSystemHolo.generated.h"
 
 UCLASS()
@@ -37,7 +37,4 @@ public:
 private:
 	bool checkSpace(FVector min, FVector max);
 	FVector getModuleSize();
-
-	//UFUNCTION(NetMulticast, Unreliable)
-	//void ValidChanged(bool bNewValid);
 };

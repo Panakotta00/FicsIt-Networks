@@ -1,31 +1,15 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FicsItKernel/Processor/ProcessorStateStorage.h"
-#include "Network/FINDynamicStructHolder.h"
-#include "Network/FINNetworkTrace.h"
-
+#include "FicsItNetworks/Network/FINDynamicStructHolder.h"
+#include "FicsItNetworks/Network/FINNetworkTrace.h"
 #include "LuaProcessorStateStorage.generated.h"
 
+/**
+ * This struct holds information from the lua processor that is only needed in serialization like persistence data.
+ */
 USTRUCT()
-struct FFINBoolData {
-	GENERATED_BODY()
-	
-    bool Data;
-	
-	inline bool Serialize(FArchive& Ar) {
-		Ar << Data;
-		return true;
-	}
-};
-
-inline void operator<<(FArchive& Ar, FFINBoolData& Data) {
-	Data.Serialize(Ar);
-}
-
-class UFGPowerCircuit;
-UCLASS()
-class ULuaProcessorStateStorage : public UProcessorStateStorage {
+struct FFINLuaProcessorStateStorage {
 	GENERATED_BODY()
 private:
 	UPROPERTY(SaveGame)
@@ -38,23 +22,11 @@ private:
 
 public:
 	UPROPERTY(SaveGame)
-	FString Thread;
+	FString LuaData;
 	
-	UPROPERTY(SaveGame)
-	FString Globals;
-
-	UPROPERTY(SaveGame)
-	int PullState = 0;
-
-	UPROPERTY(SaveGame)
-    double Timeout = 0;
-
-	UPROPERTY(SaveGame)
-    uint64 PullStart = 0;
-
-    // Begin UProcessorStateStorage
-	virtual void Serialize(FArchive& Ar) override;
-	// End UProcessorStateStorage
+    // Begin Struct
+	bool Serialize(FStructuredArchive::FSlot Slot);
+	// End Struct
 			
 	int32 Add(const FFINNetworkTrace& Trace);
 
@@ -67,4 +39,13 @@ public:
 	UObject* GetRef(int32 id);
 
 	TSharedPtr<FFINDynamicStructHolder> GetStruct(int32 id);
+
+	void Clear();
+};
+
+template<>
+struct TStructOpsTypeTraits<FFINLuaProcessorStateStorage> : TStructOpsTypeTraitsBase2<FFINLuaProcessorStateStorage> {
+	enum {
+		WithStructuredSerializer = true,
+    };
 };

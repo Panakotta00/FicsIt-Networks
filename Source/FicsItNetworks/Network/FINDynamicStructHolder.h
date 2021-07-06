@@ -33,6 +33,7 @@ public:
 	static FFINDynamicStructHolder Copy(UScriptStruct* Struct, const void* Data);
 	
 	bool Serialize(FArchive& Ar);
+	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 
 	/**
 	 * Returns the struct type stored in this holder.
@@ -71,6 +72,8 @@ struct TStructOpsTypeTraits<FFINDynamicStructHolder> : public TStructOpsTypeTrai
 	enum
 	{
 		WithSerializer = true,
+		WithAddStructReferencedObjects = true,
+        WithCopy = true,
     };
 };
 

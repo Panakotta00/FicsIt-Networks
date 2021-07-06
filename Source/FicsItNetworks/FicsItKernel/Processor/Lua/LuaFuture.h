@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Lua.h"
-#include "Network/FINFuture.h"
+#include "FicsItNetworks/Network/FINFuture.h"
 
 namespace FicsItKernel {
 	namespace Lua {
