@@ -116,7 +116,7 @@ void FFicsItNetworksModule::StartupModule(){
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/FicsItNetworks/Components/RozeModularSystem/ThinNetworkCable/ThinNetworkCable.ThinNetworkCable_C"), TEXT("/FicsItNetworks/Network/ThinNetworkCable/ThinNetworkCable.ThinNetworkCable_C")});
+	//redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/FicsItNetworks/Components/RozeModularSystem/ThinNetworkCable/ThinNetworkCable.ThinNetworkCable_C"), TEXT("/FicsItNetworks/Network/ThinNetworkCable/ThinNetworkCable.ThinNetworkCable_C")});
 	
 	AddRedirects(TEXT(""), TEXT(""),
 		{	TEXT("FicsItNetworks/Components/RozeModularSystem"), TEXT("FicsItNetworks/Components/MicroControlPanels"),{
