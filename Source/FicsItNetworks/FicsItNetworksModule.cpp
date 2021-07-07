@@ -89,6 +89,26 @@ void AFGBuildable_GetDismantleRefund_Implementation(CallScope<void(*)(const IFGD
 	}
 }
 
+struct ClassChange {
+	FString From;
+	FString To;
+	TArray<ClassChange> Children;
+};
+
+void AddRedirects(FString FromParent, FString ToParent, const ClassChange& Change, TArray<FCoreRedirect>& Redirects) {
+	FromParent += "/" + Change.From;
+	ToParent += "/" + Change.To;
+	if (Change.Children.Num() < 1) {
+		FString From = FString::Printf(TEXT("%s.%s_C"), *FromParent, *Change.From);
+		FString To = FString::Printf(TEXT("%s.%s_C"), *ToParent, *Change.To);
+		UE_LOG(LogFicsItNetworks, Warning, TEXT("From: '%s' To: '%s'"), *From, *To);
+		Redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, From, To});
+	}
+	for (const ClassChange& Child : Change.Children) {
+		AddRedirects(FromParent, ToParent, Child, Redirects);
+	}
+}
+
 void FFicsItNetworksModule::StartupModule(){
 	GameStart = FDateTime::Now();
 	
@@ -96,7 +116,45 @@ void FFicsItNetworksModule::StartupModule(){
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
-
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/FicsItNetworks/Components/RozeModularSystem/ThinNetworkCable/ThinNetworkCable.ThinNetworkCable_C"), TEXT("/FicsItNetworks/Network/ThinNetworkCable/ThinNetworkCable.ThinNetworkCable_C")});
+	
+	AddRedirects(TEXT(""), TEXT(""),
+		{	TEXT("FicsItNetworks/Components/RozeModularSystem"), TEXT("FicsItNetworks/Components/MicroControlPanels"),{
+			{TEXT("Enclosures"), TEXT("MicroControlPanels"), {
+				{TEXT("1pointReceiver"), TEXT("MCP_1Point"), {
+					{TEXT("Item_1pointbox"), TEXT("MCP_1Point")},
+					{TEXT("Item_1pointCenterBox"), TEXT("MCP_1Point_Center")},
+				}},
+				{TEXT("2pointReceiver"), TEXT("MCP_2Point"), {
+					{TEXT("Item_2pointbox"), TEXT("MCP_2Point")},
+				}},
+				{TEXT("3pointReceiver"), TEXT("MCP_3Point"), {
+					{TEXT("Item_3pointbox"), TEXT("MCP_3Point")},
+				}},
+				{TEXT("6pointReceiver"), TEXT("MCP_6Point"), {
+					{TEXT("Item_6pointbox"), TEXT("MCP_6Point")},
+				}},
+			}},
+			{TEXT("Modules"), TEXT("Modules"), {
+				{TEXT("2positionswitch"), TEXT("2PosSwitch"), {
+					{TEXT("2PositionSwitch-Item"), TEXT("MCP_Mod_2Pos_Switch")}
+				}},
+				{TEXT("Indicator"), TEXT("Indicator"), {
+					{TEXT("Item_IndicatorModule"), TEXT("MCP_Mod_Indicator")}
+				}},
+				{TEXT("MushroomPushbutton"), TEXT("MushroomPushbutton"), {
+					{TEXT("Item_MushroomPushButtonModule"), TEXT("MCP_Mod_MushroomPushButtonModule")}
+				}},
+				{TEXT("Plug"), TEXT("Plug"), {
+					{TEXT("Item_PlugModule"), TEXT("MCP_Mod_Plug")}
+				}},
+				{TEXT("PushButton"), TEXT("PushButton"), {
+					{TEXT("PushButtonModule-Item"), TEXT("MCP_Mod_PushButton")}
+				}}
+			}}
+		}
+	}, redirects);
+	
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
 	TArray<FString> PathsToScan;
