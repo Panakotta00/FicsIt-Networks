@@ -4,7 +4,7 @@
 #include "FIVSEdActionSelection.h"
 #include "FIVSEdNodeViewer.h"
 #include "SlateBasics.h"
-#include "FicsItVisualScript/Script/FIVSGraph.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
 
 class SFIVSEdGraphViewer;
 

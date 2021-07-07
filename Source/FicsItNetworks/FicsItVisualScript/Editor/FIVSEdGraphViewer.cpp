@@ -1,5 +1,5 @@
 ﻿#include "FIVSEdGraphViewer.h"
-#include "Reflection/FINReflection.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
 
 void FFIVSEdConnectionDrawer::Reset() {
 	ConnectionUnderMouse = TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>>(nullptr, nullptr);

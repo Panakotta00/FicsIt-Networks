@@ -35,14 +35,14 @@ typedef FFINAnyNetworkValue FINAny;
 typedef TArray<FINAny> FINArray;
 
 static inline EFINNetworkValueType GetValueTypeFromProp(UProperty* Prop) {
-	EClassCastFlags CastFlags = Prop->GetClass()->ClassCastFlags;
-	if (CastFlags & CASTCLASS_UBoolProperty) return FIN_BOOL;
-	if (CastFlags & CASTCLASS_UIntProperty) return FIN_INT;
-	if (CastFlags & CASTCLASS_UFloatProperty) return FIN_FLOAT;
-	if (CastFlags & CASTCLASS_UStrProperty) return FIN_STR;
-	if (CastFlags & CASTCLASS_UObjectProperty) return FIN_OBJ;
-	if (CastFlags & CASTCLASS_UClassProperty) return FIN_CLASS;
-	if (CastFlags & CASTCLASS_UStructProperty) {
+	uint64 CastFlags = Prop->GetClass()->GetCastFlags();
+	if (CastFlags & CASTCLASS_FBoolProperty) return FIN_BOOL;
+	if (CastFlags & CASTCLASS_FIntProperty) return FIN_INT;
+	if (CastFlags & CASTCLASS_FFloatProperty) return FIN_FLOAT;
+	if (CastFlags & CASTCLASS_FStrProperty) return FIN_STR;
+	if (CastFlags & CASTCLASS_FObjectProperty) return FIN_OBJ;
+	if (CastFlags & CASTCLASS_FClassProperty) return FIN_CLASS;
+	if (CastFlags & CASTCLASS_FStructProperty) {
 		UStructProperty* StructProp = Cast<UStructProperty>(Prop);
 		if (StructProp->Struct == FFINNetworkTrace::StaticStruct()) {
 			return FIN_TRACE;

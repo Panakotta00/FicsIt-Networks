@@ -2,6 +2,6 @@
 
 #include "Kernel/FIVSProcessor.h"
 
-FicsItKernel::Processor* AFINScriptProcessor::CreateProcessor() {
-	return new FicsItKernel::FIVS::FIVSProcessor();
+UFINKernelProcessor* AFINScriptProcessor::CreateProcessor() {
+	return NewObject<UFIVSProcessor>();
 }

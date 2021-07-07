@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "SlateBasics.h"
-#include "SSearchBox.h"
-#include "FicsItVisualScript/Script/FIVSGraph.h"
-#include "Reflection/FINFunction.h"
-#include "Reflection/FINStruct.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
+#include "FicsItNetworks/Reflection/FINFunction.h"
+#include "FicsItNetworks/Reflection/FINStruct.h"
+#include "Widgets/Input/SSearchBox.h"
 
 struct FFIVSEdActionSelectionAction;
 DECLARE_DELEGATE_OneParam(FFINScriptActionSelectionOnActionExecuted, const TSharedPtr<FFIVSEdActionSelectionAction>&);

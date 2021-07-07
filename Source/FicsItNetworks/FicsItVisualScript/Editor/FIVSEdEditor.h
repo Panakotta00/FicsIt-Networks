@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "FIVSEdGraphViewer.h"
-#include "Widget.h"
 
+#include "FIVSEdGraphViewer.h"
+#include "Components/Widget.h"
 #include "FIVSEdEditor.generated.h"
 
 class UFIVSGraph;

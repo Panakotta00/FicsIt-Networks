@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Network/FINNetworkValues.h"
-#include "Reflection/FINFunction.h"
-#include "Reflection/FINProperty.h"
+#include "FicsItNetworks/Network/FINNetworkValues.h"
+#include "FicsItNetworks/Reflection/FINFunction.h"
+#include "FicsItNetworks/Reflection/FINProperty.h"
 #include "FIVSNode.generated.h"
 
 class UFIVSNode;

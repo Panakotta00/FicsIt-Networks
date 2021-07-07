@@ -1,5 +1,4 @@
 ﻿#include "FIVSEdActionSelection.h"
-#include "SSearchBox.h"
 
 void FFIVSEdActionSelectionTextFilter::CallFilterValid(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entries, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnFiltered) {
 	OnFiltered(this, Entries, true);

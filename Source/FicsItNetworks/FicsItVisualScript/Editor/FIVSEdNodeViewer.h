@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "SlateBasics.h"
-#include "FicsItVisualScript/Script/FIVSNode.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode.h"
 
 class SFIVSEdPinViewer : public SCompoundWidget {
 	SLATE_BEGIN_ARGS(SFIVSEdPinViewer) {}

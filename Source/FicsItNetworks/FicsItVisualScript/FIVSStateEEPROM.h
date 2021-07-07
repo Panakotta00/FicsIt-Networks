@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FicsItKernel/Processor/FINStateEEPROM.h"
+#include "FicsItNetworks/FicsItKernel/Processor/FINStateEEPROM.h"
 #include "Script/FIVSGraph.h"
 #include "FIVSStateEEPROM.generated.h"
 

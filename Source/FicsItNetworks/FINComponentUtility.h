@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UserWidget.h"
 #include "FicsItVisualScript/Script/FIVSGraph.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Network/FINNetworkConnectionComponent.h"
