@@ -1,11 +1,14 @@
 ﻿#pragma once
 
+#include "FIVSEdStyle.h"
 #include "SlateBasics.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode.h"
 
 class SFIVSEdPinViewer : public SCompoundWidget {
-	SLATE_BEGIN_ARGS(SFIVSEdPinViewer) {}
-		SLATE_ARGUMENT(UFIVSPin*, Pin)
+	SLATE_BEGIN_ARGS(SFIVSEdPinViewer) :
+		_Style(&FFIVSEdStyle::GetDefault()) {}
+	SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+	SLATE_ARGUMENT(UFIVSPin*, Pin)
 	SLATE_END_ARGS()
 
 public:
@@ -13,7 +16,8 @@ public:
 
 private:
 	UFIVSPin* Pin;
-	TSharedPtr<SImage> PinIconWidget;
+	TSharedPtr<SWidget> PinIconWidget;
+	const FFIVSEdStyle* Style = nullptr;
 	
 public:
 	SFIVSEdPinViewer();
@@ -43,14 +47,17 @@ public:
 };
 
 class SFIVSEdNodeViewer : public SCompoundWidget {
-	SLATE_BEGIN_ARGS(SFIVSEdNodeViewer) {}
-		SLATE_ATTRIBUTE(UFIVSNode*, Node)
+	SLATE_BEGIN_ARGS(SFIVSEdNodeViewer) :
+		_Style(&FFIVSEdStyle::GetDefault()) {}
+	SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+	SLATE_ATTRIBUTE(UFIVSNode*, Node)
 	SLATE_END_ARGS()
 
 public:
 	void Construct( const FArguments& InArgs );
 
 private:
+	const FFIVSEdStyle* Style = nullptr;
 	UFIVSNode* Node = nullptr;
 
 	TSharedPtr<SVerticalBox> InputPinBox;

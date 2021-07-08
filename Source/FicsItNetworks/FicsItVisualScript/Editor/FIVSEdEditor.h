@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FIVSEdGraphViewer.h"
+#include "FIVSEdStyle.h"
 #include "Components/Widget.h"
 #include "FIVSEdEditor.generated.h"
 
@@ -15,11 +16,18 @@ protected:
 
 	TSharedPtr<SFIVSEdGraphViewer> Viewer;
 
-public:
 	// Begin UWidget
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	// End UWidget
+	
+public:
+	//~ Begin UVisual Interface
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	//~ End UVisual Interface
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance", meta=( DisplayName="Style" ))
+	FFIVSEdStyle Style;
+	
 	UFUNCTION(BlueprintCallable)
 	void SetGraph(UFIVSGraph* InGraph);
 

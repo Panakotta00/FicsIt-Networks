@@ -1,6 +1,7 @@
 ﻿#include "FIVSEdNodeViewer.h"
 
 void SFIVSEdPinViewer::Construct(const FArguments& InArgs) {
+	Style = InArgs._Style;
 	SetPin(InArgs._Pin);
 }
 
@@ -45,7 +46,20 @@ FSlateColor SFIVSEdPinViewer::GetPinColor() const {
 
 void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 	Pin = newPin;
-	PinIconWidget = SNew(SImage).ColorAndOpacity_Raw(this, &SFIVSEdPinViewer::GetPinColor);
+	PinIconWidget = SNew(SBox)
+	.HeightOverride(16)
+	.WidthOverride(16)
+	.Content()[
+		SNew(SImage)
+		.Image_Lambda([this]() {
+			if (Pin->GetConnections().Num() > 0) {
+				return &Style->DataPinConnectedIcon;
+			} else {
+				return &Style->DataPinIcon;
+			}
+		})
+		.ColorAndOpacity_Raw(this, &SFIVSEdPinViewer::GetPinColor)
+	];
 	if (Pin->GetName().ToString().Len() == 0) {
 		ChildSlot[
 			SNew(SBorder)
@@ -110,6 +124,7 @@ FVector2D SFIVSEdPinViewer::GetConnectionPoint() const {
 }
 
 void SFIVSEdNodeViewer::Construct(const FArguments& InArgs) {
+	Style = InArgs._Style;
 	SetNode(InArgs._Node.Get());
 }
 
@@ -162,13 +177,13 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
                         ]
                     ]
                     +SGridPanel::Slot(0, 1)[
-                        (InputPinBox = SNew(SVerticalBox)).ToSharedRef()
+                        SAssignNew(InputPinBox, SVerticalBox)
                     ]
                     +SGridPanel::Slot(1, 1)[
                         SNew(SSpacer).Size(FVector2D(20, 20))
                     ]
                     +SGridPanel::Slot(2, 1)[
-                        (OutputPinBox = SNew(SVerticalBox)).ToSharedRef()
+                        SAssignNew(OutputPinBox, SVerticalBox)
                     ]
                 ]
             ]
@@ -177,7 +192,8 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
 		for (UFIVSPin* Pin : newNode->GetNodePins()) {
 			if (Pin->GetPinType() & FIVS_PIN_INPUT) {
 				TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer)
-                    .Pin(Pin);
+				.Style(Style)
+                .Pin(Pin);
 				PinWidgets.Add(PinWidget);
 				PinToWidget.Add(Pin, PinWidget);
 				InputPinBox->AddSlot()[
@@ -185,7 +201,8 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
                 ];
 			} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
 				TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer)
-                    .Pin(Pin);
+				.Style(Style)
+                .Pin(Pin);
 				PinWidgets.Add(PinWidget);
 				PinToWidget.Add(Pin, PinWidget);
 				OutputPinBox->AddSlot()[
@@ -207,8 +224,9 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
                 .BorderImage(&NodeBrush)
                 .Padding(5)
                 .Content()[
-					(PinWidget = SNew(SFIVSEdPinViewer)
-					.Pin(Pin)).ToSharedRef()
+					SAssignNew(PinWidget, SFIVSEdPinViewer)
+					.Style(Style)
+					.Pin(Pin)
                 ]
             ]
         ];

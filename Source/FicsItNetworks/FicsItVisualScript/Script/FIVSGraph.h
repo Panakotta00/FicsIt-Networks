@@ -12,7 +12,7 @@
  */
 DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphNodeChanged, int, UFIVSNode*);
 
-UCLASS()
+UCLASS(BlueprintType)
 class UFIVSGraph : public UObject {
 	GENERATED_BODY()
 private:

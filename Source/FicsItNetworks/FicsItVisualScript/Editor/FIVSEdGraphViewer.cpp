@@ -7,8 +7,8 @@ void FFIVSEdConnectionDrawer::Reset() {
 }
 
 void FFIVSEdConnectionDrawer::DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, TSharedRef<SFIVSEdPinViewer> Pin2, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
-	bool is1Wild = Cast<UFIVSWildcardPin>(Pin1->GetPin());
-	bool is2Wild = Cast<UFIVSWildcardPin>(Pin2->GetPin());
+	bool is1Wild = !!Cast<UFIVSWildcardPin>(Pin1->GetPin());
+	bool is2Wild = !!Cast<UFIVSWildcardPin>(Pin2->GetPin());
 
 	bool bShouldSwitch = false;
 	if (is1Wild) {
@@ -66,11 +66,14 @@ void FFIVSEdConnectionDrawer::DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, 
 	}
 }
 
+
 void FFIVSEdConnectionDrawer::DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
-	FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start, FVector2D(300 * Graph->Zoom,0), End, FVector2D(300 * Graph->Zoom,0), 2 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
+	//FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start, FVector2D(300 * Graph->Zoom,0), End, FVector2D(300 * Graph->Zoom,0), 2 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
+	FSlateDrawElement::MakeLines(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, ConnectionColor, true, 2 * Graph->Zoom);
 }
 
 void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
+	Style = InArgs._Style;
 	SetGraph(InArgs._Graph);
 }
 
@@ -216,7 +219,7 @@ FReply SFIVSEdGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const FP
 		return FReply::Handled().ReleaseMouseCapture();
 	} else if (bIsGraphDrag) {
 		bIsGraphDrag = false;
-		if (GraphDragDelta < 10) {
+		if (GraphDragDelta < 10 && Graph) {
 			CreateActionSelectionMenu(*MouseEvent.GetEventPath(), MouseEvent.GetScreenSpacePosition(), [this](auto){}, FFINScriptNodeCreationContext(Graph, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())), nullptr));
 		}
 		return FReply::Handled().ReleaseMouseCapture();
@@ -392,7 +395,8 @@ void SFIVSEdGraphViewer::SetGraph(UFIVSGraph* NewGraph) {
 
 void SFIVSEdGraphViewer::CreateNodeAsChild(UFIVSNode* Node) {
 	TSharedRef<SFIVSEdNodeViewer> Child = SNew(SFIVSEdNodeViewer)
-        .Node(Node);
+	.Style(Style)
+    .Node(Node);
 	Children.Add(Child);
 	NodeToChild.Add(Node, Child);
 }

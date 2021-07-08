@@ -38,14 +38,17 @@ public:
 };
 
 class SFIVSEdGraphViewer : public SPanel {
-	SLATE_BEGIN_ARGS(SFIVSEdGraphViewer) {}
-		SLATE_ARGUMENT(UFIVSGraph*, Graph)
+	SLATE_BEGIN_ARGS(SFIVSEdGraphViewer) :
+		_Style(&FFIVSEdStyle::GetDefault()) {}
+	SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+	SLATE_ARGUMENT(UFIVSGraph*, Graph)
 	SLATE_END_ARGS()
 
 public:
 	void Construct( const FArguments& InArgs );
 
 private:
+	const FFIVSEdStyle* Style = nullptr;
 	UFIVSGraph* Graph = nullptr;
 	TSlotlessChildren<SFIVSEdNodeViewer> Children;
 	TMap<UFIVSNode*, TSharedRef<SFIVSEdNodeViewer>> NodeToChild;
@@ -67,7 +70,7 @@ private:
 	FVector2D NodeDragStart;
 
 	bool bIsPinDrag = false;
-	UFIVSPin* PinDragStart;
+	UFIVSPin* PinDragStart = nullptr;
 	FVector2D PinDragEnd;
 
 	TSharedPtr<FFIVSEdConnectionDrawer> ConnectionDrawer;

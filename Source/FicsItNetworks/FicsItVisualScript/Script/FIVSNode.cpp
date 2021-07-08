@@ -120,15 +120,15 @@ EFIVSPinType UFIVSWildcardPin::GetPinType() {
 	EFIVSPinType Type = (EFIVSPinType)(FIVS_PIN_EXEC | FIVS_PIN_DATA);
 	for (UFIVSPin* Pin : Connected) {
 		if (Cast<UFIVSWildcardPin>(Pin)) continue;
-		EFIVSPinType PinType = Pin->GetPinType();
-		if (PinType & FIVS_PIN_DATA) {
-			if (PinType & FIVS_PIN_OUTPUT) {
+		EFIVSPinType ConnectedPinType = Pin->GetPinType();
+		if (ConnectedPinType & FIVS_PIN_DATA) {
+			if (ConnectedPinType & FIVS_PIN_OUTPUT) {
 				return (EFIVSPinType)(FIVS_PIN_DATA | FIVS_PIN_OUTPUT);
 			}
 			Type = FIVS_PIN_DATA;
 		}
-		if (PinType & FIVS_PIN_EXEC) {
-			if (PinType & FIVS_PIN_INPUT) {
+		if (ConnectedPinType & FIVS_PIN_EXEC) {
+			if (ConnectedPinType & FIVS_PIN_INPUT) {
 				return (EFIVSPinType)(FIVS_PIN_EXEC | FIVS_PIN_INPUT);
 			}
 			Type = FIVS_PIN_EXEC;
