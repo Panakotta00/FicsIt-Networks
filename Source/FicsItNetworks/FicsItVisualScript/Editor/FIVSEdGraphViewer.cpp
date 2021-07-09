@@ -179,6 +179,7 @@ FReply SFIVSEdGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const 
 		if (PinUnderMouse && !MouseEvent.GetModifierKeys().IsControlDown()) {
 			bIsPinDrag = true;
 			PinDragStart = PinUnderMouse;
+			PinDragEnd = MouseEvent.GetScreenSpacePosition();
 			return FReply::Handled().CaptureMouse(AsShared());
 		} else {
 			bIsNodeDrag = true;
@@ -192,7 +193,7 @@ FReply SFIVSEdGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const 
 		}
 	} else if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)) {
 		bIsSelectionDrag = true;
-		SelectionDragStart = MouseEvent.GetScreenSpacePosition();
+		SelectionDragStart = SelectionDragEnd = MouseEvent.GetScreenSpacePosition();
 		return FReply::Handled().CaptureMouse(AsShared());
 	} else {
 		bIsGraphDrag = true;

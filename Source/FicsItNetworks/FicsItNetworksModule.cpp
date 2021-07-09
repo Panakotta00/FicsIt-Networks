@@ -239,13 +239,20 @@ void FFicsItNetworksModule::StartupModule(){
 				MenuList->AddChildToVerticalBox(UUIDButton);
 			}
 		}, EPredefinedHookOffset::Start);
-#else
-		/*FFINGlobalRegisterHelper::Register();
-			
-		FFINReflection::Get()->PopulateSources();
-		FFINReflection::Get()->LoadAllTypes();*/
 #endif
 	});
+
+#if WITH_EDITOR
+	FCoreDelegates::OnFEngineLoopInitComplete.AddLambda([]() {
+		FFINReflectionStyles::Shutdown();
+		FFINReflectionStyles::Initialize();
+		
+		FFINGlobalRegisterHelper::Register();
+			
+		FFINReflection::Get()->PopulateSources();
+		FFINReflection::Get()->LoadAllTypes();
+	});
+#endif
 }
 
 void FFicsItNetworksModule::ShutdownModule() {

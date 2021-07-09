@@ -57,12 +57,13 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 	if (!Meta.DisplayName.IsEmpty()) ToFillClass->DisplayName = Meta.DisplayName;
 	if (!Meta.Description.IsEmpty()) ToFillClass->Description = Meta.Description;
 
-	for (TFieldIterator<UFunction> Function(Class); Function; ++Function) {
-		if (Function->GetOwnerClass() != Class) continue; 
-		if (Function->GetName().StartsWith("netProp_")) {
-			ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, *Function));
+	for (TFieldIterator<FProperty> Property(Class); Property; ++Property) {
+		if (Property->GetOwnerClass() != Class) continue; 
+		if (Property->GetName().StartsWith("netProp_")) {
+			ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, *Property));
 		}
 	}
+	
 	for (TFieldIterator<UFunction> Func(Class); Func; ++Func) {
 		if (Func->GetOwnerClass() != Class) continue; 
 		if (Func->GetName().StartsWith("netPropGet_")) {
@@ -105,19 +106,20 @@ UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* 
 	UFunction* MetaFunc = Class->FindFunctionByName("netClass_Meta");
 	if (MetaFunc && MetaFunc->GetOuter() == Class) {
 		// allocate parameter space
-		uint8* Params = (uint8*)FMemory::Malloc(MetaFunc->PropertiesSize);
+		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->PropertiesSize);
 		FMemory::Memzero(Params + MetaFunc->ParmsSize, MetaFunc->PropertiesSize - MetaFunc->ParmsSize);
-		MetaFunc->InitializeStruct(Params);
 		bool bInvalidDeclaration = false;
-		for (UProperty* LocalProp = MetaFunc->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
-			LocalProp->InitializeValue_InContainer(Params);
-			if (!(LocalProp->PropertyFlags & CPF_OutParm)) bInvalidDeclaration = true;
+		for (TFieldIterator<FProperty> Prop(MetaFunc); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) {
+				if (Prop->IsInContainer(MetaFunc->ParmsSize)) Prop->InitializeValue_InContainer(Params);
+				if (!(Prop->PropertyFlags & CPF_OutParm)) bInvalidDeclaration = true;
+			}
 		}
 
 		if (!bInvalidDeclaration) {
 			Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
 
-			for (TFieldIterator<UProperty> Property(MetaFunc); Property; ++Property) {
+			for (TFieldIterator<FProperty> Property(MetaFunc); Property; ++Property) {
 				UTextProperty* TextProp = Cast<UTextProperty>(*Property);
 				UStrProperty* StrProp = Cast<UStrProperty>(*Property);
 				UMapProperty* MapProp = Cast<UMapProperty>(*Property);
@@ -148,12 +150,11 @@ UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* 
 			}
 		}
 		
-		for (UProperty* P = MetaFunc->DestructorLink; P; P = P->DestructorLinkNext) {
-			if (!P->IsInContainer(MetaFunc->ParmsSize)) {
-				P->DestroyValue_InContainer(Params);
+		for (TFieldIterator<FProperty> Prop(MetaFunc); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) {
+				if (Prop->IsInContainer(MetaFunc->ParmsSize)) Prop->DestroyValue_InContainer(Params);
 			}
 		}
-		FMemory::Free(Params);
 	}
 	
 	return Meta;
@@ -166,19 +167,20 @@ UFINUReflectionSource::FFINFunctionMeta UFINUReflectionSource::GetFunctionMeta(U
 	UFunction* MetaFunc = Class->FindFunctionByName(*(FString("netFuncMeta_") + GetFunctionNameFromUFunction(Func)));
 	if (MetaFunc) {
 		// allocate parameter space
-		uint8* Params = (uint8*)FMemory::Malloc(MetaFunc->PropertiesSize);
+		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->PropertiesSize);
 		FMemory::Memzero(Params + MetaFunc->ParmsSize, MetaFunc->PropertiesSize - MetaFunc->ParmsSize);
-		MetaFunc->InitializeStruct(Params);
 		bool bInvalidDeclaration = false;
-		for (UProperty* LocalProp = MetaFunc->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
-			LocalProp->InitializeValue_InContainer(Params);
-			if (!(LocalProp->PropertyFlags & CPF_OutParm)) bInvalidDeclaration = true;
+		for (TFieldIterator<FProperty> Prop(MetaFunc); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) {
+				if (Prop->IsInContainer(MetaFunc->ParmsSize)) Prop->InitializeValue_InContainer(Params);
+				if (!(Prop->PropertyFlags & CPF_OutParm)) bInvalidDeclaration = true;
+			}
 		}
 
 		if (!bInvalidDeclaration) {
 			Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
 
-			for (TFieldIterator<UProperty> Property(MetaFunc); Property; ++Property) {
+			for (TFieldIterator<FProperty> Property(MetaFunc); Property; ++Property) {
 				UTextProperty* TextProp = Cast<UTextProperty>(*Property);
 				UStrProperty* StrProp = Cast<UStrProperty>(*Property);
 				UArrayProperty* ArrayProp = Cast<UArrayProperty>(*Property);
@@ -210,12 +212,11 @@ UFINUReflectionSource::FFINFunctionMeta UFINUReflectionSource::GetFunctionMeta(U
 			}
 		}
 	
-		for (UProperty* P = MetaFunc->DestructorLink; P; P = P->DestructorLinkNext) {
-			if (!P->IsInContainer(MetaFunc->ParmsSize)) {
-				P->DestroyValue_InContainer(Params);
+		for (TFieldIterator<FProperty> Prop(MetaFunc); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) {
+				if (Prop->IsInContainer(MetaFunc->ParmsSize)) Prop->DestroyValue_InContainer(Params);
 			}
 		}
-		FMemory::Free(Params);
 	}
 
 	return Meta;
@@ -228,19 +229,20 @@ UFINUReflectionSource::FFINSignalMeta UFINUReflectionSource::GetSignalMeta(UClas
 	UFunction* MetaFunc = Class->FindFunctionByName(*(FString("netSigMeta_") + GetSignalNameFromUFunction(Func)));
 	if (MetaFunc) {
 		// allocate parameter space
-		uint8* Params = (uint8*)FMemory::Malloc(MetaFunc->PropertiesSize);
+		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->PropertiesSize);
 		FMemory::Memzero(Params + MetaFunc->ParmsSize, MetaFunc->PropertiesSize - MetaFunc->ParmsSize);
-		MetaFunc->InitializeStruct(Params);
 		bool bInvalidDeclaration = false;
-		for (UProperty* LocalProp = MetaFunc->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
-			LocalProp->InitializeValue_InContainer(Params);
-			if (!(LocalProp->PropertyFlags & CPF_OutParm)) bInvalidDeclaration = true;
+		for (TFieldIterator<FProperty> Prop(MetaFunc); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) {
+				if (Prop->IsInContainer(MetaFunc->ParmsSize)) Prop->InitializeValue_InContainer(Params);
+				if (!(Prop->PropertyFlags & CPF_OutParm)) bInvalidDeclaration = true;
+			}
 		}
 
 		if (!bInvalidDeclaration) {
 			Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
 
-			for (TFieldIterator<UProperty> Property(MetaFunc); Property; ++Property) {
+			for (TFieldIterator<FProperty> Property(MetaFunc); Property; ++Property) {
 				UTextProperty* TextProp = Cast<UTextProperty>(*Property);
 				UStrProperty* StrProp = Cast<UStrProperty>(*Property);
 				UArrayProperty* ArrayProp = Cast<UArrayProperty>(*Property);
@@ -271,12 +273,11 @@ UFINUReflectionSource::FFINSignalMeta UFINUReflectionSource::GetSignalMeta(UClas
 			}
 		}
 	
-		for (UProperty* P = MetaFunc->DestructorLink; P; P = P->DestructorLinkNext) {
-			if (!P->IsInContainer(MetaFunc->ParmsSize)) {
-				P->DestroyValue_InContainer(Params);
+		for (TFieldIterator<FProperty> Prop(MetaFunc); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) {
+				if (Prop->IsInContainer(MetaFunc->ParmsSize)) Prop->DestroyValue_InContainer(Params);
 			}
 		}
-		FMemory::Free(Params);
 	}
 
 	return Meta;
@@ -294,7 +295,7 @@ FString UFINUReflectionSource::GetPropertyNameFromUFunction(UFunction* Func) con
 	return Name;
 }
 
-FString UFINUReflectionSource::GetPropertyNameFromUProperty(UProperty* Prop, bool& bReadOnly) const {
+FString UFINUReflectionSource::GetPropertyNameFromFProperty(FProperty* Prop, bool& bReadOnly) const {
 	FString Name = Prop->GetName();
 	if (!Name.RemoveFromStart("netProp_")) bReadOnly = Name.RemoveFromStart("netPropReadOnly_");
 	return Name;
@@ -331,10 +332,10 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClas
 	default:
 		break;
 	}
-	for (TFieldIterator<UProperty> Param(Func); Param; ++Param) {
+	for (TFieldIterator<FProperty> Param(Func); Param; ++Param) {
 		if (!(Param->PropertyFlags & CPF_Parm)) continue;
 		int i = FINFunc->Parameters.Num();
-		UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(*Param, FINFunc);
+		UFINProperty* FINProp = FINCreateFINPropertyFromFProperty(*Param, FINFunc);
 		FINProp->InternalName = Param->GetName();
 		FINProp->DisplayName = FText::FromString(FINProp->InternalName);
 		if (Meta.ParameterInternalNames.Num() > i) FINProp->InternalName = Meta.ParameterInternalNames[i];
@@ -361,11 +362,11 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClas
 	return FINFunc;
 }
 
-UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UProperty* Prop) const {
-	UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(Prop, Ref->FindClass(Class, false, false));
+UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, FProperty* Prop) const {
+	UFINProperty* FINProp = FINCreateFINPropertyFromFProperty(Prop, Ref->FindClass(Class, false, false));
 	FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
 	bool bReadOnly = false;
-	FINProp->InternalName = GetPropertyNameFromUProperty(Prop, bReadOnly);
+	FINProp->InternalName = GetPropertyNameFromFProperty(Prop, bReadOnly);
 	if (bReadOnly) FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ReadOnly;
 	if (Meta.PropertyInternalNames.Contains(FINProp->GetInternalName())) FINProp->InternalName = Meta.PropertyInternalNames[FINProp->GetInternalName()];
 	if (Meta.PropertyDisplayNames.Contains(FINProp->GetInternalName())) FINProp->DisplayName = Meta.PropertyDisplayNames[FINProp->GetInternalName()];
@@ -387,27 +388,27 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 	}
 	return FINProp;
 }
-
+#pragma optimize("", off)
 UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const FFINTypeMeta& Meta, UClass* Class, UFunction* Get) const {
-	UProperty* GetProp = nullptr;
-	for (TFieldIterator<UProperty> Param(Get); Param; ++Param) {
+	FProperty* GetProp = nullptr;
+	for (TFieldIterator<FProperty> Param(Get); Param; ++Param) {
 		if (Param->PropertyFlags & CPF_Parm) {
 			check(Param->PropertyFlags & CPF_OutParm);
 			check(GetProp == nullptr);
 			GetProp = *Param;
 		}
 	}
-	UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(GetProp, nullptr, Ref->FindClass(Class, false, false));
+	UFINProperty* FINProp = FINCreateFINPropertyFromFProperty(GetProp, nullptr, Ref->FindClass(Class, false, false));
 	FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
 	FINProp->InternalName = GetPropertyNameFromUFunction(Get);
 	if (UFINFuncProperty* FINSProp = Cast<UFINFuncProperty>(FINProp)) {
 		FINSProp->GetterFunc.Function = Get;
-		FINSProp->GetterFunc.Property = FINCreateFINPropertyFromUProperty(GetProp, FINProp);
+		FINSProp->GetterFunc.Property = FINCreateFINPropertyFromFProperty(GetProp, FINProp);
 	}
 	UFunction* Set = Class->FindFunctionByName(*(FString("netPropSet_") + FINProp->InternalName));
 	if (Set) {
-		UProperty* SetProp = nullptr;
-		for (TFieldIterator<UProperty> Param(Set); Param; ++Param) {
+		FProperty* SetProp = nullptr;
+		for (TFieldIterator<FProperty> Param(Set); Param; ++Param) {
 			if (Param->PropertyFlags & CPF_Parm) {
 				check(!(Param->PropertyFlags & CPF_OutParm));
 				check(SetProp == nullptr);
@@ -417,7 +418,7 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 		}
 		if (UFINFuncProperty* FINSProp = Cast<UFINFuncProperty>(FINProp)) {
 			FINSProp->SetterFunc.Function = Set;
-			FINSProp->SetterFunc.Property = FINCreateFINPropertyFromUProperty(SetProp, FINProp);
+			FINSProp->SetterFunc.Property = FINCreateFINPropertyFromFProperty(SetProp, FINProp);
 		}
 	} else {
 		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ReadOnly;
@@ -443,6 +444,7 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 	
 	return FINProp;
 }
+#pragma optimize("", on)
 
 UFINSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) const {
 	FFINSignalMeta Meta = GetSignalMeta(Class, Func);
@@ -454,10 +456,10 @@ UFINSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass* C
 	if (Meta.InternalName.Len()) FINSignal->InternalName = Meta.InternalName;
 	if (!Meta.DisplayName.IsEmpty()) FINSignal->DisplayName = Meta.DisplayName;
 	if (!Meta.Description.IsEmpty()) FINSignal->Description = Meta.Description;
-	for (TFieldIterator<UProperty> Param(Func); Param; ++Param) {
+	for (TFieldIterator<FProperty> Param(Func); Param; ++Param) {
 		if (!(Param->PropertyFlags & CPF_Parm)) continue;
 		int i = FINSignal->Parameters.Num();
-		UFINProperty* FINProp = FINCreateFINPropertyFromUProperty(*Param, FINSignal);
+		UFINProperty* FINProp = FINCreateFINPropertyFromFProperty(*Param, FINSignal);
 		FINProp->InternalName = Param->GetName();
 		FINProp->DisplayName = FText::FromString(FINProp->InternalName);
 		if (Meta.ParameterInternalNames.Num() > i) FINProp->InternalName = Meta.ParameterInternalNames[i];
@@ -502,11 +504,11 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 	void* ParamStruct = FMemory::Malloc(Stack.CurrentNativeFunction->PropertiesSize);
 	FMemory::Memzero(((uint8*)ParamStruct) + Stack.CurrentNativeFunction->ParmsSize, Stack.CurrentNativeFunction->PropertiesSize - Stack.CurrentNativeFunction->ParmsSize);
 	Stack.CurrentNativeFunction->InitializeStruct(ParamStruct);
-	for (UProperty* LocalProp = Stack.CurrentNativeFunction->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
+	for (FProperty* LocalProp = Stack.CurrentNativeFunction->FirstPropertyToInit; LocalProp != NULL; LocalProp = (FProperty*)LocalProp->Next) {
 		LocalProp->InitializeValue_InContainer(ParamStruct);
 	}
 
-	for (auto p = TFieldIterator<UProperty>(Stack.CurrentNativeFunction); p; ++p) {
+	for (auto p = TFieldIterator<FProperty>(Stack.CurrentNativeFunction); p; ++p) {
 		auto dp = p->ContainerPtrToValuePtr<void>(ParamStruct);
 		if (Stack.Code) {
 			std::invoke(&FFrame::Step, Stack, Context, dp);
@@ -528,7 +530,7 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 	}
 
 	// destroy parameter struct
-	for (UProperty* P = Stack.CurrentNativeFunction->DestructorLink; P; P = P->DestructorLinkNext) {
+	for (FProperty* P = Stack.CurrentNativeFunction->DestructorLink; P; P = P->DestructorLinkNext) {
 		if (!P->IsInContainer(Stack.CurrentNativeFunction->ParmsSize)) {
 			P->DestroyValue_InContainer(ParamStruct);
 		}
@@ -541,6 +543,8 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 }
 
 void UFINUReflectionSource::SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func) const {
+#if !WITH_EDITOR
 	Func->SetNativeFunc(&FINUFunctionBasedSignalExecute);
 	Func->FunctionFlags |= FUNC_Native;
+#endif
 }

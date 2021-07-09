@@ -78,10 +78,16 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 	        })
 			.Content()[
 	            SNew(SHorizontalBox)
-	            +SHorizontalBox::Slot().Padding(1).VAlign(EVerticalAlignment::VAlign_Center)[
+	            +SHorizontalBox::Slot()
+				.AutoWidth()
+	            .Padding(1)
+	            .VAlign(EVerticalAlignment::VAlign_Center)[
 	                PinIconWidget.ToSharedRef()
 	            ]
-	            +SHorizontalBox::Slot().Padding(5).VAlign(EVerticalAlignment::VAlign_Center)[
+	            +SHorizontalBox::Slot()
+				.FillWidth(1)
+	            .Padding(5)
+	            .VAlign(EVerticalAlignment::VAlign_Center)[
 	                SNew(STextBlock)
 	                .Clipping(EWidgetClipping::Inherit)
 	                .Justification(ETextJustify::Left)
@@ -98,7 +104,10 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
                 return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
             })
             .Content()[SNew(SHorizontalBox)
-                +SHorizontalBox::Slot().Padding(5).VAlign(EVerticalAlignment::VAlign_Center)[
+                +SHorizontalBox::Slot()
+                .FillWidth(1)
+                .Padding(5)
+                .VAlign(EVerticalAlignment::VAlign_Center)[
                     SNew(STextBlock)
 					.Clipping(EWidgetClipping::Inherit)
                     .Justification(ETextJustify::Left)
@@ -106,7 +115,10 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
                         return Pin->GetName();
                     })
                 ]
-                +SHorizontalBox::Slot().Padding(1).VAlign(EVerticalAlignment::VAlign_Center)[
+                +SHorizontalBox::Slot()
+				.AutoWidth()
+                .Padding(1)
+                .VAlign(EVerticalAlignment::VAlign_Center)[
                     PinIconWidget.ToSharedRef()
                 ]
 			]

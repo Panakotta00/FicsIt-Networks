@@ -7,23 +7,22 @@ FINAny FFINPropertyGetterFunc::operator()(const FFINExecutionContext& Ctx, bool*
 		UObject* Obj = Ctx.GetObject();
 		check(Property != nullptr);
 		check(Obj != nullptr);
-		uint8* Params = (uint8*)FMemory::Malloc(Function->PropertiesSize);
-		FMemory::Memzero(Params + Function->ParmsSize, Function->PropertiesSize - Function->ParmsSize);
-		/*Function->InitializeStruct(Params);
-		for (UProperty* LocalProp = Function->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
-			LocalProp->InitializeValue_InContainer(Params);
-		}*/
+		uint8* Params = (uint8*)FMemory_Alloca(Function->PropertiesSize);
+		for (TFieldIterator<UProperty> Prop(Function); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) {
+				if (Prop->IsInContainer(Function->ParmsSize)) Prop->InitializeValue_InContainer(Params);
+			}
+		}
 		for (TFieldIterator<UProperty> Prop(Function); Prop; ++Prop) {
 			if (Prop->GetPropertyFlags() & CPF_Parm) Prop->InitializeValue_InContainer(Params);
 		}
 		Obj->ProcessEvent(Function, Params);
 		FINAny Return = Property->GetValue(FFINExecutionContext(Params));
-		for (UProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
-			if (!P->IsInContainer(Function->ParmsSize)) {
-				P->DestroyValue_InContainer(Params);
+		for (TFieldIterator<UProperty> Prop(Function); Prop; ++Prop) {
+			if (Prop->GetPropertyFlags() & CPF_Parm) {
+				if (Prop->IsInContainer(Function->ParmsSize)) Prop->DestroyValue_InContainer(Params);
 			}
 		}
-		FMemory::Free(Params);
 		return Return;
 	}
 	if (GetterFunc) {

@@ -227,53 +227,58 @@ void FFINReflection::PrintReflection() {
 	}
 }
 
-UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* OverrideProperty, UObject* Outer) {
+UFINProperty* FINCreateFINPropertyFromFProperty(FProperty* Property, FProperty* OverrideProperty, UObject* Outer) {
+#if WITH_EDITOR
+	OverrideProperty = nullptr;
+#endif
 	UFINProperty* FINProp = nullptr;
-	if (Cast<UStrProperty>(Property)) {
+	if (Cast<FStrProperty>(Property)) {
 		UFINStrProperty* FINStrProp = NewObject<UFINStrProperty>(Outer);
-		FINStrProp->Property = Cast<UStrProperty>(OverrideProperty);
+		FINStrProp->Property = Cast<FStrProperty>(OverrideProperty);
 		FINProp = FINStrProp;
-	} else if (Cast<UIntProperty>(Property)) {
+	} else if (Cast<FIntProperty>(Property)) {
 		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
-		FINIntProp->Property = Cast<UIntProperty>(OverrideProperty);
+		FINIntProp->Property = Cast<FIntProperty>(OverrideProperty);
 		FINProp = FINIntProp;
-	} else if (Cast<UInt64Property>(Property)) {
+	} else if (Cast<FInt64Property>(Property)) {
 		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
-		FINIntProp->Property64 = Cast<UInt64Property>(OverrideProperty);
+		FINIntProp->Property64 = Cast<FInt64Property>(OverrideProperty);
 		FINProp = FINIntProp;
-	} else if (Cast<UFloatProperty>(Property)) {
+	} else if (Cast<FFloatProperty>(Property)) {
 		UFINFloatProperty* FINFloatProp = NewObject<UFINFloatProperty>(Outer);
-		FINFloatProp->Property = Cast<UFloatProperty>(OverrideProperty);
+		FINFloatProp->Property = Cast<FFloatProperty>(OverrideProperty);
 		FINProp = FINFloatProp;
-	} else if (Cast<UBoolProperty>(Property)) {
+	} else if (Cast<FBoolProperty>(Property)) {
 		UFINBoolProperty* FINBoolProp = NewObject<UFINBoolProperty>(Outer);
-		FINBoolProp->Property = Cast<UBoolProperty>(OverrideProperty);
+		FINBoolProp->Property = Cast<FBoolProperty>(OverrideProperty);
 		FINProp = FINBoolProp;
-	} else if (Cast<UClassProperty>(Property)) {
+	} else if (Cast<FClassProperty>(Property)) {
 		UFINClassProperty* FINClassProp = NewObject<UFINClassProperty>(Outer);
-		FINClassProp->Property = Cast<UClassProperty>(OverrideProperty);
+		FINClassProp->Property = Cast<FClassProperty>(OverrideProperty);
 		FINProp = FINClassProp;
-	} else if (Cast<UObjectProperty>(Property)) {
+	} else if (Cast<FObjectProperty>(Property)) {
 		UFINObjectProperty* FINObjectProp = NewObject<UFINObjectProperty>(Outer);
-		FINObjectProp->Property = Cast<UObjectProperty>(OverrideProperty);
+		FINObjectProp->Property = Cast<FObjectProperty>(OverrideProperty);
 		FINProp = FINObjectProp;
-	} else  if (Cast<UStructProperty>(Property)) {
-		UStructProperty* StructProp = Cast<UStructProperty>(OverrideProperty);
-		if (StructProp->Struct == FFINNetworkTrace::StaticStruct()) {
+	} else  if (Cast<FStructProperty>(Property)) {
+		FStructProperty* StructProp = Cast<FStructProperty>(OverrideProperty);
+		FStructProperty* SProp = StructProp ? StructProp : Cast<FStructProperty>(Property);
+		if (StructProp && StructProp->Struct == FFINNetworkTrace::StaticStruct()) {
 			UFINTraceProperty* FINTraceProp = NewObject<UFINTraceProperty>(Outer);
 			FINTraceProp->Property = StructProp;
 			FINProp = FINTraceProp;
 		} else {
 			UFINStructProperty* FINStructProp = NewObject<UFINStructProperty>(Outer);
 			FINStructProp->Property = StructProp;
-			FINStructProp->Struct = StructProp->Struct;
+			FINStructProp->Struct = SProp->Struct;
 			FINProp = FINStructProp;
 		}
-    } else if (Cast<UArrayProperty>(Property)) {
-    	UArrayProperty* ArrayProperty = Cast<UArrayProperty>(OverrideProperty);
+    } else if (Cast<FArrayProperty>(Property)) {
+    	FArrayProperty* ArrayProperty = Cast<FArrayProperty>(OverrideProperty);
+    	FArrayProperty* AProperty = ArrayProperty ? ArrayProperty : Cast<FArrayProperty>(Property);
 	    UFINArrayProperty* FINArrayProp = NewObject<UFINArrayProperty>(Outer);
     	FINArrayProp->Property = ArrayProperty;
-    	FINArrayProp->InnerType = FINCreateFINPropertyFromUProperty(ArrayProperty->Inner, FINArrayProp);
+    	FINArrayProp->InnerType = FINCreateFINPropertyFromFProperty(AProperty->Inner, FINArrayProp);
     	FINProp = FINArrayProp;
     }
 	check(FINProp != nullptr);

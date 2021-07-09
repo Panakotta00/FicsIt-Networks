@@ -35,7 +35,7 @@ public:
 	inline const TMap<UScriptStruct*, UFINStruct*>& GetStructs() { return Structs; }
 };
 
-UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* OverrideProperty, UObject* Outer);
-inline UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UObject* Outer) {
-	return FINCreateFINPropertyFromUProperty(Property, Property, Outer);
+UFINProperty* FINCreateFINPropertyFromFProperty(FProperty* Property, FProperty* OverrideProperty, UObject* Outer);
+inline UFINProperty* FINCreateFINPropertyFromFProperty(FProperty* Property, UObject* Outer) {
+	return FINCreateFINPropertyFromFProperty(Property, Property, Outer);
 }
