@@ -77,7 +77,7 @@ FString URozeBlueprintLibrary::GetFileName(FString path, bool stripExtension) {
 }
 
 FString URozeBlueprintLibrary::ColorToHexString(FLinearColor color) {
-	const FColor c = color.ToRGBE();
+	const FColor c = color.ToFColor(true);
 	return c.ToHex();
 }
 
