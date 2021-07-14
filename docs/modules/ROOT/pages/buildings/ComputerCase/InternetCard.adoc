@@ -1,0 +1,49 @@
+= Internet Card
+:description: This PCI device allows you to communicate with the real-life internet from within FicsIt-Networks!
+
+[cols="1,3"]
+|===
+|Building Type
+|xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device]
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/InternetCard_bg.png[300,300,role="left"]
+|image::buildings/InternetCard_ig.jpg[300,300,role="left"]
+|===
+
+The Internet Card is a xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device] you can place into a computer case and is available over xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Interface].
+
+The Internet Card is a rather simple device not providing any big functionality.
+
+The whole internet card can be used, to do http requests in every shape imaginable.
+
+With this, you can f.e. download pastebin scripts or communicate with a custom REST Server.
+
+*Planned Features*
+- Make it optional by config file for security reasons
+- Add socket connection support
+
+== Do a HTTP-Request
+To do make http requests you can use the `request` function. +
+This function simply takes as first argument the URL you want to send the request to.
+As second argument it takes the request method (like `GET`, `POST`, `PUT`, etc.).
+As third argument it takes the body (aka. content) you want to send in the http request
+(leave it empty if there is non, like when you do just a get request). +
+The function is a var-args function, so you can now pass additional parameters to the function.
+The request function now requires additional parameters in pairs of two strings.
+The first string of a pair is a header name of an additional header you might want to send.
+The second string of a pair is the value of that header. +
+The function will return a future-struct which you can check or wait if the response got received, you can then get the request data like the response body.
+
+WARNING: When sending data in the request body, you *ALWAYS* have to define the `Content-Type` header field, otherwise the function will fail.
+
+Have a look at xref:lua/examples/InternetCard.adoc[this] example to see how it is done in Lua.
+
+
+
+
+include::partial$computer_modules_footer.adoc[]
