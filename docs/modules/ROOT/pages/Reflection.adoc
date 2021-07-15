@@ -1,0 +1,8321 @@
+= Reflection
+
+// #FINReflectionDocumentation //
+// #FINReflectionDocumentationBlock Begin //
+== Classes
+[#Class-Object]
+=== *Object* `Object`
+The base class of every object.
+
+==== Properties
+===== _Int_ *Hash* `hash`
+A Hash of this object. This is a value that nearly uniquely identifies this object.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _String_ *internalName* `internalName`
+The unreal engine internal name of this object.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _String_ *internalPath* `internalPath`
+The unreal engine internal path name of this object.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Hash* `hash`
+A Hash of this object. This is a value that nearly uniquely identifies this object.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _String_ *internalName* `internalName`
+The unreal engine internal name of this object.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _String_ *internalPath* `internalPath`
+The unreal engine internal path name of this object.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Hash* `getHash` (_Int_ *Hash* `hash` _out_)
+Returns the hash of this class. This is a value that nearly uniquely idenfies this object.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Hash* `hash`
+| Int
+| The hash of this class.
+
+|===
+
+===== *Get Type* `getType` (_Object(<<Class-Class,Class>>)_ *Type* `type` _out_)
+Returns the type (aka class) of this class instance.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Type* `type`
+| Object(<<Class-Class,Class>>)
+| The type of this class instance
+
+|===
+
+===== *Get Hash* `getHash` (_Int_ *Hash* `hash` _out_)
+Returns the hash of this class. This is a value that nearly uniquely idenfies this object.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassFunc</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Hash* `hash`
+| Int
+| The hash of this class.
+
+|===
+
+===== *Get Type* `getType` (_Object(<<Class-Class,Class>>)_ *Type* `type` _out_)
+Returns the type (aka class) of this class instance.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassFunc</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Type* `type`
+| Object(<<Class-Class,Class>>)
+| The type of this class instance
+
+|===
+
+[#Class-Actor]
+=== *Actor* `Actor`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+This is the base class of all things that can exist within the world by them self.
+
+==== Properties
+===== _Struct(<<Struct-Vector,Vector>>)_ *Location* `location`
+The location of the actor in the world.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Struct(<<Struct-Vector,Vector>>)_ *Scale* `scale`
+The scale of the actor in the world.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Struct(<<Struct-Rotator,Rotator>>)_ *Rotation* `rotation`
+The rotation of the actor in the world.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Power Connectors* `getPowerConnectors` (_Array(Trace(<<Class-PowerConnection,PowerConnection>>))_ *Connectors* `connectors` _out_)
+Returns a list of power connectors this actor might have.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Connectors* `connectors`
+| Array(Trace(<<Class-PowerConnection,PowerConnection>>))
+| The power connectors this actor has.
+
+|===
+
+===== *Get Factory Connectors* `getFactoryConnectors` (_Array(Trace(<<Class-FactoryConnection,FactoryConnection>>))_ *Connectors* `connectors` _out_)
+Returns a list of factory connectors this actor might have.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Connectors* `connectors`
+| Array(Trace(<<Class-FactoryConnection,FactoryConnection>>))
+| The factory connectors this actor has.
+
+|===
+
+===== *Get Inventories* `getInventories` (_Array(Trace(<<Class-Inventory,Inventory>>))_ *Inventories* `inventories` _out_)
+Returns a list of inventories this actor might have.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inventories* `inventories`
+| Array(Trace(<<Class-Inventory,Inventory>>))
+| The inventories this actor has.
+
+|===
+
+===== *Get Network Connectors* `getNetworkConnectors` (_Array(Trace(<<Class-Object,Object>>))_ *Connectors* `connectors` _out_)
+Returns the name of network connectors this actor might have.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Connectors* `connectors`
+| Array(Trace(<<Class-Object,Object>>))
+| The factory connectors this actor has.
+
+|===
+
+[#Class-CircuitBridge]
+=== *Circuite Bridget* `CircuitBridge`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+A building that can connect two circuit networks together.
+
+==== Properties
+===== _Bool_ *Is Bridge Connected* `isBridgeConnected`
+True if the bridge is connected to two circuits.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Bridge Active* `isBridgeActive`
+True if the two circuits are connected to each other and act as one entity.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-CircuitSwitch]
+=== *Circuit Switch* `CircuitSwitch`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-CircuitBridge,CircuitBridge>>
+|===
+
+A circuit bridge that can be activated and deactivate by the player.
+
+==== Properties
+===== _Bool_ *Is Switch On* `isSwitchOn`
+True if the two circuits are connected to each other and act as one entity.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+[#Class-LightsControlPanel]
+=== *Light Source* `LightsControlPanel`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-CircuitBridge,FGBuildableControlPanelHost>>
+|===
+
+A control panel to configure multiple lights at once.
+
+==== Properties
+===== _Bool_ *Is Light Enabled* `isLightEnabled`
+True if the lights should be enabled
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Bool_ *Is Time of Day Aware* `isTimeOfDayAware`
+True if the lights should automatically turn on and off depending on the time of the day.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Intensity* `intensity`
+The intensity of the lights.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Int_ *Color Slot* `colorSlot`
+The color slot the lights should use.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Class-ComputerCase]
+=== *Computer Case* `ComputerCase`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+
+
+==== Signals
+===== *File System Update* `FileSystemUpdate` (_Int_ *Type* `type`, _String_ *From* `from`, _String_ *To* `to`)
+Triggers when something in the filesystem changes.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Type* `type`
+| Int
+| The type of the change.
+
+| *From* `from`
+| String
+| The file path to the FS node that has changed.
+
+| *To* `to`
+| String
+| The new file path of the node if it has changed.
+
+|===
+
+[#Class-Factory]
+=== *Factory* `Factory`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+The base class of most machines you can build.
+
+==== Properties
+===== _Float_ *Progress* `progress`
+The current production progress of the current production cycle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Producing Power Consumption* `powerConsumProducing`
+The power consumption when producing.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Productivity* `productivity`
+The productivity of this factory.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Cycle Time* `cycleTime`
+The time that passes till one production cycle is finsihed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Potential* `maxPotential`
+The maximum potential this factory can be set to.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Min Potential* `minPotential`
+The minimum potential this factory needs to be set to.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Standby* `standby`
+True if the factory is in standby.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Potential* `potential`
+The potential this factory is currently set to. (the overclock value) +
+ 0 = 0%, 1 = 100%
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Class-DockingStation]
+=== *Docking Station* `DockingStation`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,Factory>>
+|===
+
+A docking station for wheeled vehicles to transfer cargo.
+
+==== Properties
+===== _Bool_ *Is Load Mode* `isLoadMode`
+True if the docking station loads docked vehicles, flase if it unloads them.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Bool_ *Is Load Unloading* `isLoadUnloading`
+True if the docking station is currently loading or unloading a docked vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Fueld Inventory* `getFuelInv` (_Trace(<<Class-Inventory,Inventory>>)_ *Inventory* `inventory` _out_)
+Returns the fuel inventory of the docking station.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inventory* `inventory`
+| Trace(<<Class-Inventory,Inventory>>)
+| The fuel inventory of the docking station.
+
+|===
+
+===== *Get Inventory* `getInv` (_Trace(<<Class-Inventory,Inventory>>)_ *Inventory* `inventory` _out_)
+Returns the cargo inventory of the docking staiton.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inventory* `inventory`
+| Trace(<<Class-Inventory,Inventory>>)
+| The cargo inventory of this docking station.
+
+|===
+
+===== *Get Docked* `getDocked` (_Trace(<<Class-Actor,Actor>>)_ *Docked* `docked` _out_)
+Returns the currently docked actor.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Docked* `docked`
+| Trace(<<Class-Actor,Actor>>)
+| The currently docked actor.
+
+|===
+
+===== *Undock* `undock` ()
+Undocked the currently docked vehicle from this docking station.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Class-CodeableMerger]
+=== *Codeable Merger* `CodeableMerger`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,FGBuildableConveyorAttachment>>
+|===
+
+
+
+==== Properties
+===== _Bool_ *Can Output* `canOutput`
+Is true if the output queue has a slot available for an item from one of the input queues.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Transfer Item* `transferItem` (_Int_ *Input* `input`, _Bool_ *Transfered* `transfered` _out_)
+Allows to transfer an item from the given input queue to the output queue if possible.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Input* `input`
+| Int
+| The index of the input queue you want to transfer the next item to the output queue. (0 = middle, 1 = left, 2 = right)
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Transfered* `transfered`
+| Bool
+| true if it was able to transfer the item.
+
+|===
+
+===== *Get Input* `getInput` (_Int_ *Input* `input`, _Struct(<<Struct-Item,Item>>)_ *Item* `item` _out_)
+Returns the next item in the given input queue.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Input* `input`
+| Int
+| The index of the input queue you want to check (0 = middle, 1 = left, 2 = right)
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Item* `item`
+| Struct(<<Struct-Item,Item>>)
+| The next item in the input queue.
+
+|===
+
+==== Signals
+===== *Item Request* `ItemRequest` (_Int_ *Input* `input`, _Struct(<<Struct-Item,Item>>)_ *Item* `item`)
+Triggers when a new item is ready in one of the input queues.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Input* `input`
+| Int
+| The index of the input queue at which the item is ready.
+
+| *Item* `item`
+| Struct(<<Struct-Item,Item>>)
+| The new item in the input queue.
+
+|===
+
+===== *Item Outputted* `ItemOutputted` (_Struct(<<Struct-Item,Item>>)_ *Item* `item`)
+Triggers when an item is popped from the output queue (aka it got transferred to a conveyor).
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Item* `item`
+| Struct(<<Struct-Item,Item>>)
+| The item removed from the output queue.
+
+|===
+
+[#Class-CodeableSplitter]
+=== *Codeable Splitter* `CodeableSplitter`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,FGBuildableConveyorAttachment>>
+|===
+
+
+
+==== Functions
+===== *Transfer Item* `transferItem` (_Int_ *Output* `output`, _Bool_ *Transfered* `transfered` _out_)
+Allows to transfer an item from the input queue to the given output queue if possible.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Output* `output`
+| Int
+| The index of the output queue you want to transfer the next item to (0 = middle, 1 = left, 2 = right)
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Transfered* `transfered`
+| Bool
+| true if it was able to transfer the item.
+
+|===
+
+===== *Get Input* `getInput` (_Struct(<<Struct-Item,Item>>)_ *Item* `item` _out_)
+Returns the next item in the input queue.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Item* `item`
+| Struct(<<Struct-Item,Item>>)
+| The next item in the input queue.
+
+|===
+
+===== *Can Output* `canOutput` (_Int_ *Output* `output`, _Bool_ *Can Transfer* `canTransfer` _out_)
+Allows to check if we can transfer an item to the given output queue.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Output* `output`
+| Int
+| The index of the output queue you want to check (0 = middle, 1 = left, 2 = right)
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Can Transfer* `canTransfer`
+| Bool
+| True if you could transfer an item to the given output queue.
+
+|===
+
+==== Signals
+===== *Item Request* `ItemRequest` (_Struct(<<Struct-Item,Item>>)_ *Item* `item`)
+Triggers when a new item is ready in the input queue.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Item* `item`
+| Struct(<<Struct-Item,Item>>)
+| The new item in the input queue.
+
+|===
+
+===== *Item Outputted* `ItemOutputted` (_Int_ *Output* `output`, _Struct(<<Struct-Item,Item>>)_ *Item* `item`)
+Triggers when an item is popped from on of the output queues (aka it got transferred to a conveyor).
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Output* `output`
+| Int
+| The index of the output queue from which the item got removed.
+
+| *Item* `item`
+| Struct(<<Struct-Item,Item>>)
+| The item removed from the output queue.
+
+|===
+
+[#Class-PipelinePump]
+=== *PipelinePump* `PipelinePump`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,FGBuildablePipelineAttachment>>
+|===
+
+A building that can pump fluids to a higher level within a pipeline.
+
+==== Properties
+===== _Float_ *Max Headlift* `maxHeadlift`
+The maximum amount of headlift this pump can provide.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Designed Headlift* `designedHeadlift`
+The amomunt of headlift this pump is designed for.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Indicator Headlift* `indicatorHeadlift`
+The amount of headlift the indicator shows.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Indicator Headlift Percent* `indicatorHeadliftPct`
+The amount of headlift the indicator shows as percantage from max.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-Manufacturer]
+=== *Manufacturer* `Manufacturer`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,Factory>>
+|===
+
+The base class of every machine that uses a recipe to produce something automatically.
+
+==== Functions
+===== *Get Recipe* `getRecipe` (_Class(<<Class-Recipe,Recipe>>)_ *Recipe* `recipe` _out_)
+Returns the currently set recipe of the manufacturer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Recipe* `recipe`
+| Class(<<Class-Recipe,Recipe>>)
+| The currently set recipe.
+
+|===
+
+===== *Get Recipes* `getRecipes` (_Array(Class(<<Class-Recipe,Recipe>>))_ *Recipes* `recipes` _out_)
+Returns the list of recipes this manufacturer can get set to and process.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Recipes* `recipes`
+| Array(Class(<<Class-Recipe,Recipe>>))
+| The list of avalible recipes.
+
+|===
+
+===== *Set Recipe* `setRecipe` (_Class(<<Class-Recipe,Recipe>>)_ *Recipe* `recipe`, _Bool_ *Got Set* `gotSet` _out_)
+Sets the currently producing recipe of this manufacturer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Recipe* `recipe`
+| Class(<<Class-Recipe,Recipe>>)
+| The recipe this manufacturer should produce.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Got Set* `gotSet`
+| Bool
+| True if the current recipe got successfully set to the new recipe.
+
+|===
+
+===== *Get Input Inventory* `getInputInv` (_Trace(<<Class-Inventory,Inventory>>)_ *Inventory* `inventory` _out_)
+Returns the input inventory of this manufacturer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inventory* `inventory`
+| Trace(<<Class-Inventory,Inventory>>)
+| The input inventory of this manufacturer
+
+|===
+
+===== *Get Output Inventory* `getOutputInv` (_Trace(<<Class-Inventory,Inventory>>)_ *Inventory* `inventory` _out_)
+Returns the output inventory of this manufacturer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inventory* `inventory`
+| Trace(<<Class-Inventory,Inventory>>)
+| The output inventory of this manufacturer.
+
+|===
+
+[#Class-PipeReservoir]
+=== *Pipe Reservoir* `PipeReservoir`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,Factory>>
+|===
+
+The base class for all fluid tanks.
+
+==== Properties
+===== _Float_ *Fluid Content* `fluidContent`
+The amount of fluid in the tank.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Fluid Content* `maxFluidContent`
+The maximum amount of fluid this tank can hold.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Flow Fill* `flowFill`
+The currentl inflow rate of fluid.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Float Drain* `flowDrain`
+The current outflow rate of fluid.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Flow Limit* `flowLimit`
+The maximum flow rate of fluid this tank can handle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Flush* `flush` ()
+Emptys the whole fluid container.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Get Fluid Type* `getFluidType` (_Class(<<Class-ItemType,ItemType>>)_ *Type* `type` _out_)
+Returns the type of the fluid.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Type* `type`
+| Class(<<Class-ItemType,ItemType>>)
+| The type of the fluid the tank contains.
+
+|===
+
+[#Class-PowerStorage]
+=== *Power Storage* `PowerStorage`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,Factory>>
+|===
+
+A building that can store power for later usage.
+
+==== Properties
+===== _Float_ *Power Store* `powerStore`
+The current amount of energy stored in the storage.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Power Capacity* `powerCapacity`
+The amount of energy the storage can hold max.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Power Store Percent* `powerStorePercent`
+The current power store in percent.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Power Input* `powerIn`
+The amount of power coming into the storage.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Power Output* `powerOut`
+The amount of power going out from the storage.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Time until Full* `timeUntilFull`
+The time in seconds until the storage is filled.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Time until Empty* `timeUntilEmpty`
+The time in seconds until the storage is empty.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Battery Status* `batteryStatus`
+The current status of the battery. +
+0 = Idle, 1 = Idle Empty, 2 = Idle Full, 3 = Power In, 4 = Power Out
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Max Indicator Level* `batteryMaxIndicatorLevel`
+The maximum count of Level lights that are shown.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-RailroadSwitchControl]
+=== *Railroad Switch Control* `RailroadSwitchControl`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,Factory>>
+|===
+
+The controler object for a railroad switch.
+
+==== Functions
+===== *Toggle Switch* `toggleSwitch` ()
+Toggles the railroad switch like if you interact with it.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Switch Position* `switchPosition` (_Int_ *Position* `position` _out_)
+Returns the current switch position of this switch.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Position* `position`
+| Int
+| The current switch position of this switch.
+
+|===
+
+[#Class-TrainPlatform]
+=== *Train Platform* `TrainPlatform`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Factory,Factory>>
+|===
+
+The base class for all train station parts.
+
+==== Properties
+===== _Int_ *Status* `status`
+The current docking status of the platform.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Reversed* `isReversed`
+True if the orientation of the platform is reversed relative to the track/station.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Track Graph* `getTrackGraph` (_Struct(<<Struct-TrackGraph,TrackGraph>>)_ *Graph* `graph` _out_)
+Returns the track graph of which this platform is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Graph* `graph`
+| Struct(<<Struct-TrackGraph,TrackGraph>>)
+| The track graph of which this platform is part of.
+
+|===
+
+===== *Get Track Pos* `getTrackPos` (_Trace(<<Class-RailroadTrack,RailroadTrack>>)_ *Track* `track` _out_, _Float_ *Offset* `offset` _out_, _Float_ *Forward* `forward` _out_)
+Returns the track pos at which this train platform is placed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Trace(<<Class-RailroadTrack,RailroadTrack>>)
+| The track the track pos points to.
+
+| *Offset* `offset`
+| Float
+| The offset of the track pos.
+
+| *Forward* `forward`
+| Float
+| The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+
+|===
+
+===== *Get Connected Platform* `getConnectedPlatform` (_Int_ *Direction* `direction`, _Trace(<<Class-TrainPlatform,TrainPlatform>>)_ *Platform* `platform` _out_)
+Returns the connected platform in the given direction.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Direction* `direction`
+| Int
+| The direction in which you want to get the connected platform.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Platform* `platform`
+| Trace(<<Class-TrainPlatform,TrainPlatform>>)
+| The platform connected to this platform in the given direction.
+
+|===
+
+===== *Get Docked Vehicle* `getDockedVehicle` (_Trace(<<Class-Vehicle,Vehicle>>)_ *Vehicle* `vehicle` _out_)
+Returns the currently docked vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Vehicle* `vehicle`
+| Trace(<<Class-Vehicle,Vehicle>>)
+| The currently docked vehicle
+
+|===
+
+===== *Get Master* `getMaster` (_Trace(<<Class-RailroadVehicle,RailroadVehicle>>)_ *Master* `master` _out_)
+Returns the master platform of this train station.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Master* `master`
+| Trace(<<Class-RailroadVehicle,RailroadVehicle>>)
+| The master platform of this train station.
+
+|===
+
+===== *Get Docked Locomotive* `getDockedLocomotive` (_Trace(<<Class-RailroadVehicle,RailroadVehicle>>)_ *Locomotive* `locomotive` _out_)
+Returns the currently docked locomotive at the train station.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Locomotive* `locomotive`
+| Trace(<<Class-RailroadVehicle,RailroadVehicle>>)
+| The currently docked locomotive at the train station.
+
+|===
+
+[#Class-RailroadStation]
+=== *Railroad Station* `RailroadStation`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-TrainPlatform,TrainPlatform>>
+|===
+
+The train station master platform. This platform holds the name and manages docking of trains.
+
+==== Properties
+===== _String_ *Name* `name`
+The name of the railroad station.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Int_ *Docked Offset* `dockedOffset`
+The Offset to the beginning of the station at which trains dock.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-TrainPlatformCargo]
+=== *Train Platform Cargo* `TrainPlatformCargo`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-TrainPlatform,TrainPlatform>>
+|===
+
+A train platform that allows for loading and unloading cargo cars.
+
+==== Properties
+===== _Bool_ *Is Loading* `isLoading`
+True if the cargo platform is currently loading the docked cargo vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Unloading* `isUnloading`
+True if the cargo platform is currently unloading the docked cargo vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Docked Offset* `dockedOffset`
+The offset to the track start of the platform at were the vehicle docked.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Output Flow* `outputFlow`
+The current output flow rate.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Input Flow* `inputFlow`
+The current input flow rate.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Full Load* `fullLoad`
+True if the docked cargo vehicle is fully loaded.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Full Unload* `fullUnload`
+Ture if the docked cargo vehicle is fully unloaded.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-FINComputerGPU]
+=== *FINComputerGPU* `FINComputerGPU`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINComputerModule>>
+|===
+
+
+
+==== Signals
+===== *ScreenBound* `ScreenBound` (_Trace_ *oldScreen* `oldScreen`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *oldScreen* `oldScreen`
+| Trace
+| 
+
+|===
+
+[#Class-GPUT1]
+=== *Computer GPU T1* `GPUT1`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-FINComputerGPU,FINComputerGPU>>
+|===
+
+
+
+==== Functions
+===== *Set Text* `setText` (_Int_ *X* `x`, _Int_ *Y* `y`, _String_ *String* `str`)
+Draws the given text at the given position to the hidden screen buffer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x coordinate at which the text should get drawn.
+
+| *Y* `y`
+| Int
+| The y coordinate at which the text should get drawn.
+
+| *String* `str`
+| String
+| The text you want to draw on-to the buffer.
+
+|===
+
+===== *Set Size* `setSize` (_Int_ *Width* `w`, _Int_ *Height* `h`)
+Changes the size of the text-grid (and buffer).
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Width* `w`
+| Int
+| The width of the text-gird.
+
+| *Height* `h`
+| Int
+| The height of the text-grid.
+
+|===
+
+===== *Set Foreground Color* `setForeground` (_Float_ *Red* `r`, _Float_ *Green* `g`, _Float_ *Blue* `b`, _Float_ *Alpha* `a`)
+Changes the foreground color that is used for the next draw calls.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Red* `r`
+| Float
+| The red portion of the foreground color. (0.0 - 1.0)
+
+| *Green* `g`
+| Float
+| The green portion of the foreground color. (0.0 - 1.0)
+
+| *Blue* `b`
+| Float
+| The blue portion of the foreground color. (0.0 - 1.0)
+
+| *Alpha* `a`
+| Float
+| The opacity of the foreground color. (0.0 - 1.0)
+
+|===
+
+===== *Set Buffer* `setBuffer` (_Struct(<<Struct-GPUT1Buffer,GPUT1Buffer>>)_ *Buffer* `buffer`)
+Allows to change the back buffer of the GPU to the given buffer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Buffer* `buffer`
+| Struct(<<Struct-GPUT1Buffer,GPUT1Buffer>>)
+| The Buffer you want to now use as back buffer.
+
+|===
+
+===== *Set Background Color* `setBackground` (_Float_ *Red* `r`, _Float_ *Green* `g`, _Float_ *Blue* `b`, _Float_ *Alpha* `a`)
+Changes the background color that is used for the next draw calls.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Red* `r`
+| Float
+| The red portion of the background color. (0.0 - 1.0)
+
+| *Green* `g`
+| Float
+| The green portion of the background color. (0.0 - 1.0)
+
+| *Blue* `b`
+| Float
+| The blue portion of the background color. (0.0 - 1.0)
+
+| *Alpha* `a`
+| Float
+| The opacity of the background color. (0.0 - 1.0)
+
+|===
+
+===== *Get Size* `getSize` (_Int_ *Width* `w` _out_, _Int_ *Height* `h` _out_)
+Returns the size of the text-grid (and buffer).
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Width* `w`
+| Int
+| The width of the text-gird.
+
+| *Height* `h`
+| Int
+| The height of the text-grid.
+
+|===
+
+===== *Get Screen* `getScreen` (_Object(<<Class-Object,Object>>)_ *Screen* `screen` _out_)
+Returns the currently bound screen.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Screen* `screen`
+| Object(<<Class-Object,Object>>)
+| The currently bound screen.
+
+|===
+
+===== *Get Buffer* `getBuffer` (_Struct(<<Struct-GPUT1Buffer,GPUT1Buffer>>)_ *Buffer* `buffer` _out_)
+Returns the back buffer as struct to be able to use advanced buffer handling functions. (struct is a copy)
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Buffer* `buffer`
+| Struct(<<Struct-GPUT1Buffer,GPUT1Buffer>>)
+| The Buffer that is currently the back buffer.
+
+|===
+
+===== *Flush* `flush` ()
+Flushes the hidden screen buffer to the visible screen buffer and so makes the draw calls visible.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Fill* `fill` (_Int_ *X* `x`, _Int_ *Y* `y`, _Int_ *DX* `dx`, _Int_ *DY* `dy`, _String_ *String* `str`)
+Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x coordinate at which the rectangle should get drawn. (upper-left corner)
+
+| *Y* `y`
+| Int
+| The y coordinate at which the rectangle should get drawn. (upper-left corner)
+
+| *DX* `dx`
+| Int
+| The width of the rectangle.
+
+| *DY* `dy`
+| Int
+| The height of the rectangle.
+
+| *String* `str`
+| String
+| The character you want to use for the rectangle. (first char in the given string)
+
+|===
+
+===== *Bind Screen* `bindScreen` (_Trace_ *New Screen* `newScreen`)
+Binds this GPU to the given screen. Unbinds the already bound screen.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *New Screen* `newScreen`
+| Trace
+| The screen you want to bind this GPU to. Null if you want to unbind the screen.
+
+|===
+
+==== Signals
+===== *Screen Size Changed* `ScreenSizeChanged` (_Int_ *old Width* `oldW`, _Int_ *old Height* `oldH`)
+Triggers when the size of the text grid changed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *old Width* `oldW`
+| Int
+| The old width of the screen.
+
+| *old Height* `oldH`
+| Int
+| The old height of the screen.
+
+|===
+
+===== *On Mouse Up* `OnMouseUp` (_Int_ *X* `x`, _Int_ *Y* `y`, _Int_ *Button* `btn`)
+Triggers when a mouse button got released.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x position of the cursor.
+
+| *Y* `y`
+| Int
+| The y position of the cursor.
+
+| *Button* `btn`
+| Int
+| The Button-Bit-Field providing information about the released button event. +
+Bits: +
+1th left mouse pressed +
+2th right mouse button pressed +
+3th ctrl key pressed +
+4th shift key pressed +
+5th alt key pressed +
+6th cmd key pressed
+
+|===
+
+===== *On Mouse Move* `OnMouseMove` (_Int_ *X* `x`, _Int_ *Y* `y`, _Int_ *Button* `btn`)
+Triggers when the mouse cursor moves on the screen.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x position of the cursor.
+
+| *Y* `y`
+| Int
+| The y position of the cursor.
+
+| *Button* `btn`
+| Int
+| The Button-Bit-Field providing information about the move event. +
+Bits: +
+1th left mouse pressed +
+2th right mouse button pressed +
+3th ctrl key pressed +
+4th shift key pressed +
+5th alt key pressed +
+6th cmd key pressed
+
+|===
+
+===== *On Mouse Down* `OnMouseDown` (_Int_ *X* `x`, _Int_ *Y* `y`, _Int_ *Button* `btn`)
+Triggers when a mouse button got pressed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x position of the cursor.
+
+| *Y* `y`
+| Int
+| The y position of the cursor.
+
+| *Button* `btn`
+| Int
+| The Button-Bit-Field providing information about the pressed button event. +
+Bits: +
+1th left mouse pressed +
+2th right mouse button pressed +
+3th ctrl key pressed +
+4th shift key pressed +
+5th alt key pressed +
+6th cmd key pressed
+
+|===
+
+===== *On Key Up* `OnKeyUp` (_Int_ *C* `c`, _Int_ *Code* `code`, _Int_ *Button* `btn`)
+Triggers when a key got released.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *C* `c`
+| Int
+| The ASCII number of the character typed in.
+
+| *Code* `code`
+| Int
+| The number code of the pressed key.
+
+| *Button* `btn`
+| Int
+| The Button-Bit-Field providing information about the key release event. +
+Bits: +
+1th left mouse pressed +
+2th right mouse button pressed +
+3th ctrl key pressed +
+4th shift key pressed +
+5th alt key pressed +
+6th cmd key pressed
+
+|===
+
+===== *On Key Down* `OnKeyDown` (_Int_ *C* `c`, _Int_ *Code* `code`, _Int_ *Button* `btn`)
+Triggers when a key got pressed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *C* `c`
+| Int
+| The ASCII number of the character typed in.
+
+| *Code* `code`
+| Int
+| The number code of the pressed key.
+
+| *Button* `btn`
+| Int
+| The Button-Bit-Field providing information about the key press event. +
+Bits: +
+1th left mouse pressed +
+2th right mouse button pressed +
+3th ctrl key pressed +
+4th shift key pressed +
+5th alt key pressed +
+6th cmd key pressed
+
+|===
+
+===== *On Key Character* `OnKeyChar` (_String_ *Character* `c`, _Int_ *Button* `btn`)
+Triggers when a character key got 'clicked' and essentially a character got typed in, usful for text input.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Character* `c`
+| String
+| The character that got typed in as string.
+
+| *Button* `btn`
+| Int
+| The Button-Bit-Field providing information about the key release event. +
+Bits: +
+1th left mouse pressed +
+2th right mouse button pressed +
+3th ctrl key pressed +
+4th shift key pressed +
+5th alt key pressed +
+6th cmd key pressed
+
+|===
+
+[#Class-FINInternetCard]
+=== *FINInternetCard* `FINInternetCard`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINComputerModule>>
+|===
+
+
+
+==== Functions
+===== *request* `request` (_String_ *InURL* `InURL`, _String_ *InMethod* `InMethod`, _String_ *InData* `InData`, _Struct(<<Struct-Future,Future>>)_ *ReturnValue* `ReturnValue` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>VarArgs</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *InURL* `InURL`
+| String
+| 
+
+| *InMethod* `InMethod`
+| String
+| 
+
+| *InData* `InData`
+| String
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *ReturnValue* `ReturnValue`
+| Struct(<<Struct-Future,Future>>)
+| 
+
+|===
+
+[#Class-NetworkCard]
+=== *Network Card* `NetworkCard`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINComputerModule>>
+|===
+
+
+
+==== Functions
+===== *Send Message* `send` (_String_ *Receiver* `receiver`, _Int_ *Port* `port`)
+Sends a network message to the receiver with the given address on the given port. The data you want to add can be passed as additional parameters. Max amount of such parameters is 7 and they can only be nil, booleans, numbers and strings.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>VarArgs</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Receiver* `receiver`
+| String
+| The component ID as string of the component you want to send the network message to.
+
+| *Port* `port`
+| Int
+| The port on which the network message should get sent. For outgoing network messages a port does not need to be opened.
+
+|===
+
+===== *Open Port* `open` (_Int_ *Port* `port`)
+Opens the given port so the network card is able to receive network messages on the given port.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Port* `port`
+| Int
+| The port you want to open.
+
+|===
+
+===== *Close All Ports* `closeAll` ()
+Closes all ports of the network card so no further messages are able to get received
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Close Port* `close` (_Int_ *Port* `port`)
+Closes the given port so the network card wont receive network messages on the given port.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Port* `port`
+| Int
+| The port you want to close.
+
+|===
+
+===== *Broadcast Message* `broadcast` (_Int_ *Port* `port`)
+Sends a network message to all components in the network message network (including networks sepperated by network routers) on the given port. The data you want to add can be passed as additional parameters. Max amount of such parameters is 7 and they can only be nil, booleans, numbers and strings.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>VarArgs</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Port* `port`
+| Int
+| The port on which the network message should get sent. For outgoing network messages a port does not need to be opened.
+
+|===
+
+==== Signals
+===== *Network Message* `NetworkMessage` (_String_ *Sender* `sender`, _Int_ *Port* `port`)
+Triggers when the network card receives a network message on one of its opened ports. The additional arguments are the data that is contained within the network message.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#e59445'><i>VarArgs</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Sender* `sender`
+| String
+| The component id of the sender of the network message.
+
+| *Port* `port`
+| Int
+| The port on which the network message got sent.
+
+|===
+
+[#Class-IndicatorModule_Item]
+=== *IndicatorModule_Item* `IndicatorModule_Item`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+Indicator Module for panels
+
+==== Functions
+===== *setColor* `setColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`, _Float_ *Emit* `Emit`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+| *Emit* `Emit`
+| Float
+| 
+
+|===
+
+[#Class-Item_MushroomPushButtonModule]
+=== *Item_MushroomPushButtonModule* `Item_MushroomPushButtonModule`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+This Mushroom Button Module for modular I/O Panels can have different knob color and brightnesses and you can use them to trigger specific programmed events.
+
+==== Functions
+===== *setColor* `setColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`, _Float_ *Emit* `Emit`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+| *Emit* `Emit`
+| Float
+| 
+
+|===
+
+===== *Trigger* `trigger` ()
+Triggers a button press by code.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+==== Signals
+===== *Trigger* `Trigger` ()
+Triggers when the button gets pressed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+[#Class-MCP_Mod_2Pos_Switch_C]
+=== *Illuminable 2 Position Switch* `MCP_Mod_2Pos_Switch_C`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+This Button Module for modular I/O Panels can have different knob color and brightnesses and you can use them to trigger specific programmed events.
+
+==== Properties
+===== _Bool_ *Unknown FINBase* `state`
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+==== Functions
+===== *setColor* `setColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`, _Float_ *Emit* `Emit`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+| *Emit* `Emit`
+| Float
+| 
+
+|===
+
+==== Signals
+===== *ChangeState* `ChangeState` (_Bool_ *State2* `State2`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *State2* `State2`
+| Bool
+| 
+
+|===
+
+[#Class-ModuleButton]
+=== *Module Button* `ModuleButton`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+This Button Module for modular I/O Panels can have different knob color and brightnesses and you can use them to trigger specific programmed events.
+
+==== Functions
+===== *setColor* `setColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`, _Float_ *Emit* `Emit`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+| *Emit* `Emit`
+| Float
+| 
+
+|===
+
+===== *Trigger* `trigger` ()
+Triggers a button press by code.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+==== Signals
+===== *Trigger* `Trigger` ()
+Triggers when the button gets pressed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+[#Class-ModulePotentiometer]
+=== *Module Potentiometer* `ModulePotentiometer`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+The Potentiometer Module for the Modular I/O Control Panel allows you to have rotation input value for you programs. +
+
+You can rotate it indefinetly into any direction where every rotation triggers a computer network signal.
+
+==== Functions
+===== *rotate* `rotate` (_Bool_ *Anticlockwise* `Anticlockwise`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Anticlockwise* `Anticlockwise`
+| Bool
+| 
+
+|===
+
+==== Signals
+===== *PotRotate* `PotRotate` (_Bool_ *Anticlockwise* `Anticlockwise`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Anticlockwise* `Anticlockwise`
+| Bool
+| 
+
+|===
+
+[#Class-ModuleStopButton]
+=== *Module Stop Button* `ModuleStopButton`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+This Stop Button Module for the modular I/O Panel is used to trigger important programmable events.
+
+==== Functions
+===== *Trigger* `trigger` ()
+Triggers a button press by code.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+==== Signals
+===== *Trigger* `Trigger` ()
+Triggers when the button gets pressed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+[#Class-ModuleSwitch_C]
+=== *Lever Module* `ModuleSwitch_C`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+The Lever Module for the modular I/O Panel is used to switch a programm state between two different value (on or off).
+
+==== Properties
+===== _Bool_ *Unknown FINBase* `state`
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+==== Signals
+===== *ChangeState* `ChangeState` (_Bool_ *State* `State`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *State* `State`
+| Bool
+| 
+
+|===
+
+[#Class-ModuleTextDisplay_C]
+=== *Text Display* `ModuleTextDisplay_C`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+The FicsIt-Networks Text-Display Module for the Modular Control Panel is a simple GPU and Screen combined! +
+
+It allows you to display any kind of text with differnt font sizes and you can even switch between two fonts! +
+
+But you can't interact with it, nor change the background/foreground color as you can do with a GPU.
+
+==== Properties
+===== _Bool_ *Unknown FINBase* `monospace`
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+===== _Int_ *Unknown FINBase* `size`
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+===== _String_ *Unknown FINBase* `text`
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+[#Class-PushButtonModule-Item]
+=== *PushButtonModule-Item* `PushButtonModule-Item`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FINModuleBase>>
+|===
+
+This Button Module for modular I/O Panels can have different knob color and brightnesses and you can use them to trigger specific programmed events.
+
+==== Functions
+===== *setColor* `setColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`, _Float_ *Emit* `Emit`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+| *Emit* `Emit`
+| Float
+| 
+
+|===
+
+===== *Trigger* `trigger` ()
+Triggers a button press by code.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+==== Signals
+===== *Trigger* `Trigger` ()
+Triggers when the button gets pressed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+[#Class-IndicatorPole]
+=== *Indicator Pole* `IndicatorPole`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+
+
+==== Functions
+===== *Set Color* `setColor` (_Float_ *Red* `r`, _Float_ *Green* `g`, _Float_ *Blue* `b`, _Float_ *Emissive* `e`)
+Allows to change the color and light intensity of the indicator lamp.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Red* `r`
+| Float
+| The red part of the color in which the light glows. (0.0 - 1.0)
+
+| *Green* `g`
+| Float
+| The green part of the color in which the light glows. (0.0 - 1.0)
+
+| *Blue* `b`
+| Float
+| The blue part of the color in which the light glows. (0.0 - 1.0)
+
+| *Emissive* `e`
+| Float
+| The light intensity of the pole. (0.0 - 5.0)
+
+|===
+
+===== *Get Top Pole* `getTopPole` (_Object(<<Class-IndicatorPole,IndicatorPole>>)_ *Top Pole* `topPole` _out_)
+Allows to get the pole placed on top of this pole.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Top Pole* `topPole`
+| Object(<<Class-IndicatorPole,IndicatorPole>>)
+| The pole placed on top of this pole.
+
+|===
+
+===== *Get Color* `getColor` (_Float_ *Red* `r` _out_, _Float_ *Green* `g` _out_, _Float_ *Blue* `b` _out_, _Float_ *Emissive* `e` _out_)
+Allows to get the color and light intensity of the indicator lamp.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Red* `r`
+| Float
+| The red part of the color in which the light glows. (0.0 - 1.0)
+
+| *Green* `g`
+| Float
+| The green part of the color in which the light glows. (0.0 - 1.0)
+
+| *Blue* `b`
+| Float
+| The blue part of the color in which the light glows. (0.0 - 1.0)
+
+| *Emissive* `e`
+| Float
+| The light intensity of the pole. (0.0 - 5.0)
+
+|===
+
+===== *getBottomPole* `getBottomPole` (_Object(<<Class-IndicatorPole,IndicatorPole>>)_ *ReturnValue* `ReturnValue` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *ReturnValue* `ReturnValue`
+| Object(<<Class-IndicatorPole,IndicatorPole>>)
+| 
+
+|===
+
+==== Signals
+===== *Color Changed* `ColorChanged` (_Float_ *Red* `r`, _Float_ *Green* `g`, _Float_ *Blue* `b`, _Float_ *Emissive* `e`)
+Triggers when the color of the indicator pole changes.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Red* `r`
+| Float
+| The red part of the color in which the light glows. (0.0 - 1.0)
+
+| *Green* `g`
+| Float
+| The green part of the color in which the light glows. (0.0 - 1.0)
+
+| *Blue* `b`
+| Float
+| The blue part of the color in which the light glows. (0.0 - 1.0)
+
+| *Emissive* `e`
+| Float
+| The light intensity of the pole. (0.0 - 5.0)
+
+|===
+
+[#Class-LargeControlPanel]
+=== *Large Control Panel* `LargeControlPanel`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+This large modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programms. +
+
+You can connect it to the FicsIt-Network. +
+
+Important to note is that every module is it's own component, that means if you want to listen to the signals, you will need to listen to each of them individually.
+
+==== Functions
+===== *getModules* `getModules` (_Array(Object(<<Class-Object,Object>>))_ *modules* `modules` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *modules* `modules`
+| Array(Object(<<Class-Object,Object>>))
+| 
+
+|===
+
+===== *getModule* `getModule` (_Int_ *X* `X`, _Int_ *Y* `Y`, _Object(<<Class-Actor,Actor>>)_ *Module* `Module` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `X`
+| Int
+| 
+
+| *Y* `Y`
+| Int
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Module* `Module`
+| Object(<<Class-Actor,Actor>>)
+| 
+
+|===
+
+[#Class-LargeVerticalControlPanel]
+=== *Large Vertical Control Panel* `LargeVerticalControlPanel`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+This large verical modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programms. +
+
+You can connect it to the FicsIt-Network. +
+
+Important to note is that every module is it's own component, that means if you want to listen to the signals, you will need to listen to each of them individually.
+
+==== Functions
+===== *getModules* `getModules` (_Array(Object(<<Class-Object,Object>>))_ *modules* `modules` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *modules* `modules`
+| Array(Object(<<Class-Object,Object>>))
+| 
+
+|===
+
+===== *getModule* `getModule` (_Int_ *X* `X`, _Int_ *Y* `Y`, _Int_ *Panel* `Panel`, _Object(<<Class-Actor,Actor>>)_ *Module* `Module` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `X`
+| Int
+| 
+
+| *Y* `Y`
+| Int
+| 
+
+| *Panel* `Panel`
+| Int
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Module* `Module`
+| Object(<<Class-Actor,Actor>>)
+| 
+
+|===
+
+[#Class-LightSource]
+=== *Light Source* `LightSource`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+The base class for all light you can build.
+
+==== Properties
+===== _Bool_ *Is Light Enabled* `isLightEnabled`
+True if the light is enabled
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Bool_ *Is Time of Day Aware* `isTimeOfDayAware`
+True if the light should automatically turn on and off depending on the time of the day.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Intensity* `intensity`
+The intensity of the light.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Int_ *Color Slot* `colorSlot`
+The color slot the light uses.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Color from Slot* `getColorFromSlot` (_Int_ *Slot* `slot`, _Struct(<<Struct-Color,Color>>)_ *Color* `color` _out_)
+Returns the light color that is referenced by the given slot.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Slot* `slot`
+| Int
+| The slot you want to get the referencing color from.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Color* `color`
+| Struct(<<Struct-Color,Color>>)
+| The color this slot references.
+
+|===
+
+===== *Set Color from Slot* `setColorFromSlot` (_Int_ *Slot* `slot`, _Struct(<<Struct-Color,Color>>)_ *Color* `color`)
+Allows to update the light color that is referenced by the given slot.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Slot* `slot`
+| Int
+| The slot you want to update the referencing color for.
+
+| *Color* `color`
+| Struct(<<Struct-Color,Color>>)
+| The color this slot should now reference.
+
+|===
+
+[#Class-NetworkRouter]
+=== *Network Router* `NetworkRouter`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+
+
+==== Properties
+===== _Bool_ *Unknown FINBase* `isWhitelist`
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+===== _Bool_ *Is Address Whitelist* `isAddrWhitelist`
+True if the address filter list is used as whitelist.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+==== Functions
+===== *Set Port List* `setPortList` (_Array(Int)_ *Ports* `ports` _out_)
+Overrides the port filter list with the given array.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Ports* `ports`
+| Array(Int)
+| The port array you want to override the filter list with.
+
+|===
+
+===== *Set Address List* `setAddrList` (_Array(String)_ *Addresses* `addresses` _out_)
+Overrides the address filter list with the given array.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Addresses* `addresses`
+| Array(String)
+| The address array you want to override the filter list with.
+
+|===
+
+===== *Remove Port from List* `removePortList` (_Int_ *Port* `port`)
+Removes the given port from the port filter list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Port* `port`
+| Int
+| The port you want to remove from the list.
+
+|===
+
+===== *Remove Address from List* `removeAddrList` (_String_ *Address* `addr`)
+Removes the given address from the address filter list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Address* `addr`
+| String
+| The address you want to remove from the list.
+
+|===
+
+===== *Get Port List* `getPortList` (_Array(Int)_ *Ports* `ports` _out_)
+Allows to get all the ports of the port filter list as array.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Ports* `ports`
+| Array(Int)
+| The port array of the filter list.
+
+|===
+
+===== *Get Address List* `getAddrList` (_Array(String)_ *Addresses* `addresses` _out_)
+Allows to get all the addresses of the address filter list as array.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Addresses* `addresses`
+| Array(String)
+| The address array of the filter list.
+
+|===
+
+===== *Add Port to List* `addPortList` (_Int_ *Port* `port`)
+Adds a given port to the port filter list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Port* `port`
+| Int
+| The port you want to add to the list.
+
+|===
+
+===== *addAddrList* `addAddrList` (_String_ *addr* `addr`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *addr* `addr`
+| String
+| 
+
+|===
+
+[#Class-RailroadTrack]
+=== *Railroad Track* `RailroadTrack`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+A peice of railroad track over which trains can drive.
+
+==== Properties
+===== _Float_ *Length* `length`
+The length of the track.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Owned By Platform* `isOwnedByPlatform`
+True if the track is part of/owned by a railroad platform.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Closeset Track Position* `getClosestTrackPosition` (_Struct(<<Struct-Vector,Vector>>)_ *World Pos* `worldPos`, _Trace(<<Class-RailroadTrack,RailroadTrack>>)_ *Track* `track` _out_, _Float_ *Offset* `offset` _out_, _Float_ *Forward* `forward` _out_)
+Returns the closes track position from the given world position
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *World Pos* `worldPos`
+| Struct(<<Struct-Vector,Vector>>)
+| The world position form which you want to get the closest track position.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Trace(<<Class-RailroadTrack,RailroadTrack>>)
+| The track the track pos points to.
+
+| *Offset* `offset`
+| Float
+| The offset of the track pos.
+
+| *Forward* `forward`
+| Float
+| The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+
+|===
+
+===== *Get World Location And Rotation At Position* `getWorldLocAndRotAtPos` (_Trace(<<Class-RailroadTrack,RailroadTrack>>)_ *Track* `track`, _Float_ *Offset* `offset`, _Float_ *Forward* `forward`, _Struct(<<Struct-Vector,Vector>>)_ *Location* `location` _out_, _Struct(<<Struct-Vector,Vector>>)_ *Rotation* `rotation` _out_)
+Returns the world location and world rotation of the track position from the given track position.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Trace(<<Class-RailroadTrack,RailroadTrack>>)
+| The track the track pos points to.
+
+| *Offset* `offset`
+| Float
+| The offset of the track pos.
+
+| *Forward* `forward`
+| Float
+| The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Location* `location`
+| Struct(<<Struct-Vector,Vector>>)
+| The location at the given track position
+
+| *Rotation* `rotation`
+| Struct(<<Struct-Vector,Vector>>)
+| The rotation at the given track position (forward vector)
+
+|===
+
+===== *Get Connection* `getConnection` (_Int_ *Direction* `direction`, _Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>)_ *Connection* `connection` _out_)
+Returns the railroad track connection at the given direction.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Direction* `direction`
+| Int
+| The direction of which you want to get the connector from. 0 = front, 1 = back
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Connection* `connection`
+| Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>)
+| The connection component in the given direction.
+
+|===
+
+===== *Get Track Graph* `getTrackGraph` (_Struct(<<Struct-TrackGraph,TrackGraph>>)_ *Track* `track` _out_)
+Returns the track graph of which this track is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Struct(<<Struct-TrackGraph,TrackGraph>>)
+| The track graph of which this track is part of.
+
+|===
+
+[#Class-RF_3PointBox]
+=== *Roze 3 Point Wall Box* `RF_3PointBox`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+Enclosure for 1 command points
+
+==== Functions
+===== *getYModule* `getYModule` (_Int_ *Y* `Y`, _Object(<<Class-Actor,Actor>>)_ *Module* `Module` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Y* `Y`
+| Int
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Module* `Module`
+| Object(<<Class-Actor,Actor>>)
+| 
+
+|===
+
+===== *getXModule* `getXModule` (_Int_ *X* `X`, _Object(<<Class-Actor,Actor>>)_ *Module* `Module` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `X`
+| Int
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Module* `Module`
+| Object(<<Class-Actor,Actor>>)
+| 
+
+|===
+
+===== *setForeground* `setForeground` (_Int_ *Index* `Index`, _Float_ *R* `R`, _Float_ *G* `G`, _Float_ *B* `B`, _Bool_ *Success* `Success` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `Index`
+| Int
+| 
+
+| *R* `R`
+| Float
+| 
+
+| *G* `G`
+| Float
+| 
+
+| *B* `B`
+| Float
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Success* `Success`
+| Bool
+| 
+
+|===
+
+===== *setText* `setText` (_Int_ *Index* `Index`, _String_ *Text* `Text`, _Bool_ *Vertical* `Vertical`, _Bool_ *Success* `Success` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `Index`
+| Int
+| 
+
+| *Text* `Text`
+| String
+| 
+
+| *Vertical* `Vertical`
+| Bool
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Success* `Success`
+| Bool
+| 
+
+|===
+
+===== *setLabelIcon* `setLabelIcon` (_Int_ *CommandPointNumber* `CommandPointNumber`, _String_ *Path* `Path`, _Bool_ *Vertical* `Vertical`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *CommandPointNumber* `CommandPointNumber`
+| Int
+| 
+
+| *Path* `Path`
+| String
+| 
+
+| *Vertical* `Vertical`
+| Bool
+| 
+
+|===
+
+===== *getModules* `getModules` (_Array(Object(<<Class-Object,Object>>))_ *modules* `modules` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *modules* `modules`
+| Array(Object(<<Class-Object,Object>>))
+| 
+
+|===
+
+===== *getModule* `getModule` (_Int_ *X* `X`, _Int_ *Y* `Y`, _Object(<<Class-Actor,Actor>>)_ *Module* `Module` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `X`
+| Int
+| 
+
+| *Y* `Y`
+| Int
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Module* `Module`
+| Object(<<Class-Actor,Actor>>)
+| 
+
+|===
+
+[#Class-MCP_1Point_Center_C]
+=== *Micro Control Panel 1 C-Point* `MCP_1Point_Center_C`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-RF_3PointBox,RF_3PointBox>>
+|===
+
+Micro Control Panel for 1 command point, center placement. +
+
+These Micro Control Panels can be used through out your factory and allow you to have an easier look on the state of your factory and they allow you to control your factory more easily. +
+
+You can fully customize the control panels with buttons lights etc.
+
+==== Functions
+===== *setLabelColor* `setLabelColor` (_Int_ *Index* `Index`, _Float_ *R* `R`, _Float_ *G* `G`, _Float_ *B* `B`, _Bool_ *Success* `Success` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `Index`
+| Int
+| 
+
+| *R* `R`
+| Float
+| 
+
+| *G* `G`
+| Float
+| 
+
+| *B* `B`
+| Float
+| 
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Success* `Success`
+| Bool
+| 
+
+|===
+
+[#Class-Screen]
+=== *Screen* `Screen`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+
+
+==== Functions
+===== *Get Size* `getSize` (_Int_ *Width* `width` _out_, _Int_ *Height* `height` _out_)
+Returns the size of the screen in 'panels'.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Width* `width`
+| Int
+| The width of the screen.
+
+| *Height* `height`
+| Int
+| The height of the screen.
+
+|===
+
+[#Class-SpeakerPole]
+=== *Speaker Pole* `SpeakerPole`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+This speaker pole allows to play custom sound files, In-Game
+
+==== Functions
+===== *Stop Sound* `stopSound` ()
+Stops the currently playing sound file.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+===== *Play Sound* `playSound` (_String_ *Sound* `sound`, _Float_ *Start Point* `startPoint`)
+Plays a custom sound file ingame
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Sound* `sound`
+| String
+| The sound file (without the file ending) you want to play
+
+| *Start Point* `startPoint`
+| Float
+| The start point in seconds at which the system should start playing
+
+|===
+
+==== Signals
+===== *SpeakerSound* `SpeakerSound` (_Int_ *Type* `type`, _String_ *Sound* `sound`)
+Triggers when the sound play state of the speaker pole changes.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Type* `type`
+| Int
+| The type of the speaker pole event.
+
+| *Sound* `sound`
+| String
+| The sound file including in the event.
+
+|===
+
+[#Class-Speakers_C]
+=== *Speaker-Pole* `Speakers_C`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-SpeakerPole,SpeakerPole>>
+|===
+
+The FicsIt-Networks speaker pole is a network component which allows you to use one more sense of the pioneers to give commands to them or to just make ambient better. +
+
+The speaker pole can play sound files located in the Computer Folder "/Sounds" in your Satisfactory Save-Games-Folder. The FicsIt-Networks speaker pole is only able to play .ogg files cause FicsIt Inc. has the opinion other file formates are useless.
+
+==== Functions
+===== *setVolume* `setVolume` (_Float_ *Volume* `Volume`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Volume* `Volume`
+| Float
+| 
+
+|===
+
+===== *setRange* `setRange` (_Float_ *Range* `Range`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Range* `Range`
+| Float
+| 
+
+|===
+
+===== *getVolume* `getVolume` (_Float_ *Volume* `Volume` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Volume* `Volume`
+| Float
+| 
+
+|===
+
+===== *getRange* `getRange` (_Float_ *Range* `Range` _out_)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Range* `Range`
+| Float
+| 
+
+|===
+
+==== Signals
+===== *SpeakerSetting* `SpeakerSetting` (_Int_ *Setting* `Setting`, _Float_ *New* `New`, _Float_ *Old* `Old`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Setting* `Setting`
+| Int
+| 
+
+| *New* `New`
+| Float
+| 
+
+| *Old* `Old`
+| Float
+| 
+
+|===
+
+[#Class-VehicleScanner]
+=== *Vehicle Scanner* `VehicleScanner`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,FGBuildable>>
+|===
+
+
+
+==== Functions
+===== *Set Color* `setColor` (_Float_ *Red* `r`, _Float_ *Green* `g`, _Float_ *Blue* `b`, _Float_ *Emissive* `e`)
+Allows to change the color and light intensity of the scanner.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Red* `r`
+| Float
+| The red part of the color in which the scanner glows. (0.0 - 1.0)
+
+| *Green* `g`
+| Float
+| The green part of the color in which the scanner glows. (0.0 - 1.0)
+
+| *Blue* `b`
+| Float
+| The blue part of the color in which the scanner glows. (0.0 - 1.0)
+
+| *Emissive* `e`
+| Float
+| The light intensity of the scanner. (0.0 - 5.0)
+
+|===
+
+===== *Get Last Vehicle* `getLastVehicle` (_Object(<<Class-Vehicle,Vehicle>>)_ *Vehicle* `vehicle` _out_)
+Returns the last vehicle that entered the scanner.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Vehicle* `vehicle`
+| Object(<<Class-Vehicle,Vehicle>>)
+| The vehicle that entered the scanner. null if it has already left the scanner.
+
+|===
+
+===== *Get Color* `getColor` (_Float_ *Red* `r` _out_, _Float_ *Green* `g` _out_, _Float_ *Blue* `b` _out_, _Float_ *Emissive* `e` _out_)
+Allows to get the color and light intensity of the scanner.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Red* `r`
+| Float
+| The red part of the color in which the scanner glows. (0.0 - 1.0)
+
+| *Green* `g`
+| Float
+| The green part of the color in which the scanner glows. (0.0 - 1.0)
+
+| *Blue* `b`
+| Float
+| The blue part of the color in which the scanner glows. (0.0 - 1.0)
+
+| *Emissive* `e`
+| Float
+| The light intensity of the scanner. (0.0 - 5.0)
+
+|===
+
+==== Signals
+===== *On Vehicle Exit* `OnVehicleExit` (_Object(<<Class-Vehicle,Vehicle>>)_ *Vehicle* `vehicle`)
+Triggers when a vehicle leaves the scanner.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Vehicle* `vehicle`
+| Object(<<Class-Vehicle,Vehicle>>)
+| The vehicle that left the scanner.
+
+|===
+
+===== *On Vehicle Enter* `OnVehicleEnter` (_Object(<<Class-Vehicle,Vehicle>>)_ *Vehicle* `vehicle`)
+Triggers when a vehicle enters the scanner.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Vehicle* `vehicle`
+| Object(<<Class-Vehicle,Vehicle>>)
+| The vehicle that entered the scanner.
+
+|===
+
+[#Class-TimeTable]
+=== *Time Table* `TimeTable`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,Actor>>
+|===
+
+Contains the time table information of train.
+
+==== Properties
+===== _Int_ *Num Stops* `numStops`
+The current number of stops in the time table.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Add Stop* `addStop` (_Int_ *Index* `index`, _Trace(<<Class-RailroadStation,RailroadStation>>)_ *Station* `station`, _Float_ *Duration* `duration`, _Bool_ *Added* `added` _out_)
+Adds a stop to the time table.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index at which the stop should get added.
+
+| *Station* `station`
+| Trace(<<Class-RailroadStation,RailroadStation>>)
+| The railroad station at which the stop should happen.
+
+| *Duration* `duration`
+| Float
+| The duration how long the train should stop at the station.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Added* `added`
+| Bool
+| True if the stop got sucessfully added to the time table.
+
+|===
+
+===== *Remove Stop* `removeStop` (_Int_ *Index* `index`)
+Removes the stop with the given index from the time table.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index at which the stop should get added.
+
+|===
+
+===== *Get Stops* `getStops` (_Array(Struct(<<Struct-TimeTableStop,TimeTableStop>>))_ *Stops* `stops` _out_)
+Returns a list of all the stops this time table has
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Stops* `stops`
+| Array(Struct(<<Struct-TimeTableStop,TimeTableStop>>))
+| A list of time table stops this time table has.
+
+|===
+
+===== *Set Stops* `setStops` (_Bool_ *Got Set* `gotSet` _out_)
+Allows to empty and fill the stops of this time table with the given list of new stops.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Got Set* `gotSet`
+| Bool
+| True if the stops got sucessfully set.
+
+|===
+
+===== *Is Valid Stop* `isValidStop` (_Int_ *Index* `index`, _Bool_ *Valid* `valid` _out_)
+Allows to check if the given stop index is valid.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The stop index you want to check its validity.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Valid* `valid`
+| Bool
+| True if the stop index is valid.
+
+|===
+
+===== *Get Stop* `getStop` (_Int_ *Index* `index`, _Struct(<<Struct-TimeTableStop,TimeTableStop>>)_ *Stop* `stop` _out_)
+Returns the stop at the given index.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the stop you want to get.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Stop* `stop`
+| Struct(<<Struct-TimeTableStop,TimeTableStop>>)
+| The time table stop at the given index.
+
+|===
+
+===== *Set Current Stop* `setCurrentStop` (_Int_ *Index* `index`)
+Sets the stop, to which the train trys to drive to right now.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the stop the train should drive to right now.
+
+|===
+
+===== *Increment Current Stop* `incrementCurrentStop` ()
+Sets the current stop to the next stop in the time table.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Get Current Stop* `getCurrentStop` (_Int_ *Index* `index` _out_)
+Returns the index of the stop the train drives to right now.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the stop the train tries to drive to right now.
+
+|===
+
+[#Class-Train]
+=== *Train* `Train`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,Actor>>
+|===
+
+This class holds information and references about a trains (a collection of multiple railroad vehicles) and its timetable f.e.
+
+==== Properties
+===== _Bool_ *Is Player Driven* `isPlayerDriven`
+True if the train is currently player driven.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Self Driving* `isSelfDriving`
+True if the train is currently self driving.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Self Driving Error* `selfDrivingError`
+The last self driving error. +
+0 = No Error +
+1 = No Power +
+2 = No Time Table +
+3 = Invalid Next Stop +
+4 = Invalid Locomotive Placement +
+5 = No Path
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Has Time Table* `hasTimeTable`
+True if the train has currently a time table.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Dock State* `dockState`
+The current docking state of the train.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Docked* `isDocked`
+True if the train is currently docked.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Name* `getName` (_String_ *Name* `name` _out_)
+Returns the name of this train.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Name* `name`
+| String
+| The name of this train.
+
+|===
+
+===== *Set Name* `setName` (_String_ *Name* `name`)
+Allows to set the name of this train.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Name* `name`
+| String
+| The new name of this trian.
+
+|===
+
+===== *Get Track Graph* `getTrackGraph` (_Struct(<<Struct-TrackGraph,TrackGraph>>)_ *Track* `track` _out_)
+Returns the track graph of which this train is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Struct(<<Struct-TrackGraph,TrackGraph>>)
+| The track graph of which this train is part of.
+
+|===
+
+===== *Set Self Driving* `setSelfDriving` (_Bool_ *Self Driving* `selfDriving`)
+Allows to set if the train should be self driving or not.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Self Driving* `selfDriving`
+| Bool
+| True if the train should be self driving.
+
+|===
+
+===== *Get Master* `getMaster` (_Trace(<<Class-RailroadVehicle,RailroadVehicle>>)_ *Master* `master` _out_)
+Returns the master locomotive that is part of this train.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Master* `master`
+| Trace(<<Class-RailroadVehicle,RailroadVehicle>>)
+| The master locomotive of this train.
+
+|===
+
+===== *Get Time Table* `getTimeTable` (_Trace(<<Class-TimeTable,TimeTable>>)_ *Time Table* `timeTable` _out_)
+Returns the timetable of this train.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Time Table* `timeTable`
+| Trace(<<Class-TimeTable,TimeTable>>)
+| The timetable of this train.
+
+|===
+
+===== *New Time Table* `newTimeTable` (_Trace(<<Class-TimeTable,TimeTable>>)_ *Time Table* `timeTable` _out_)
+Creates and returns a new timetable for this train.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Time Table* `timeTable`
+| Trace(<<Class-TimeTable,TimeTable>>)
+| The new timetable for this train.
+
+|===
+
+===== *Get First* `getFirst` (_Trace(<<Class-RailroadVehicle,RailroadVehicle>>)_ *First* `first` _out_)
+Returns the first railroad vehicle that is part of this train.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *First* `first`
+| Trace(<<Class-RailroadVehicle,RailroadVehicle>>)
+| The first railroad vehicle that is part of this train.
+
+|===
+
+===== *Get Last* `getLast` (_Trace(<<Class-RailroadVehicle,RailroadVehicle>>)_ *Last* `last` _out_)
+Returns the last railroad vehicle that is part of this train.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Last* `last`
+| Trace(<<Class-RailroadVehicle,RailroadVehicle>>)
+| The last railroad vehicle that is part of this train.
+
+|===
+
+===== *Dock* `dock` ()
+Trys to dock the train to the station it is currently at.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Get Vehicles* `getVehicles` (_Array(Trace(<<Class-RailroadVehicle,RailroadVehicle>>))_ *Vehicles* `vehicles` _out_)
+Returns a list of all the vehicles this train has.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Vehicles* `vehicles`
+| Array(Trace(<<Class-RailroadVehicle,RailroadVehicle>>))
+| A list of all the vehicles this train has.
+
+|===
+
+==== Signals
+===== *Self Drving Update* `SelfDrvingUpdate` (_Bool_ *Enabled* `enabled`)
+Triggers when the self driving mode of the train changes
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Enabled* `enabled`
+| Bool
+| True if the train is now self driving.
+
+|===
+
+[#Class-Vehicle]
+=== *Vehicle* `Vehicle`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Actor,Actor>>
+|===
+
+A base class for all vehciles.
+
+==== Properties
+===== _Float_ *Health* `health`
+The health of the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Health* `maxHealth`
+The maximum amount of health this vehicle can have.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Self Driving* `isSelfDriving`
+True if the vehicle is currently self driving.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Class-RailroadVehicle]
+=== *Railroad Vehicle* `RailroadVehicle`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Vehicle,Vehicle>>
+|===
+
+The base class for any vehicle that drives on train tracks.
+
+==== Properties
+===== _Float_ *Length* `length`
+The length of this vehicle on the track.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Docked* `isDocked`
+True if this vehicle is currently docked to a platform.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Reversed* `isReversed`
+True if the vheicle is placed reversed on the track.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Train* `getTrain` (_Trace(<<Class-Train,Train>>)_ *Train* `train` _out_)
+Returns the train of which this vehicle is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Train* `train`
+| Trace(<<Class-Train,Train>>)
+| The train of which this vehicle is part of
+
+|===
+
+===== *Is Coupled* `isCoupled` (_Int_ *Coupler* `coupler`, _Bool_ *Coupled* `coupled` _out_)
+Allows to check if the given coupler is coupled to another car.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Coupler* `coupler`
+| Int
+| The Coupler you want to check. 0 = Front, 1 = Back
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Coupled* `coupled`
+| Bool
+| True of the give coupler is coupled to another car.
+
+|===
+
+===== *Get Coupled* `getCoupled` (_Int_ *Coupler* `coupler`, _Trace(<<Class-RailroadVehicle,RailroadVehicle>>)_ *Coupled* `coupled` _out_)
+Allows to get the coupled vehicle at the given coupler.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Coupler* `coupler`
+| Int
+| The Coupler you want to get the car from. 0 = Front, 1 = Back
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Coupled* `coupled`
+| Trace(<<Class-RailroadVehicle,RailroadVehicle>>)
+| The coupled car of the given coupler is coupled to another car.
+
+|===
+
+===== *Get Track Graph* `getTrackGraph` (_Struct(<<Struct-TrackGraph,TrackGraph>>)_ *Track* `track` _out_)
+Returns the track graph of which this vehicle is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Struct(<<Struct-TrackGraph,TrackGraph>>)
+| The track graph of which this vehicle is part of.
+
+|===
+
+===== *Get Track Pos* `getTrackPos` (_Trace(<<Class-RailroadTrack,RailroadTrack>>)_ *Track* `track` _out_, _Float_ *Offset* `offset` _out_, _Float_ *Forward* `forward` _out_)
+Returns the track pos at which this vehicle is.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Trace(<<Class-RailroadTrack,RailroadTrack>>)
+| The track the track pos points to.
+
+| *Offset* `offset`
+| Float
+| The offset of the track pos.
+
+| *Forward* `forward`
+| Float
+| The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+
+|===
+
+===== *Get Movement* `getMovement` (_Trace(<<Class-RailroadVehicleMovement,RailroadVehicleMovement>>)_ *Movement* `movement` _out_)
+Returns the vehicle movement of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Movement* `movement`
+| Trace(<<Class-RailroadVehicleMovement,RailroadVehicleMovement>>)
+| The movement of this vehicle.
+
+|===
+
+[#Class-WheeledVehicle]
+=== *Wheeled Vehicle* `WheeledVehicle`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Vehicle,Vehicle>>
+|===
+
+The base class for all vehicles that used wheels for movement.
+
+==== Properties
+===== _Float_ *Speed* `speed`
+The current forward speed of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Burn Ratio* `burnRatio`
+The amount of fuel this vehicle burns.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Wheels On Ground* `wheelsOnGround`
+The number of wheels currenlty on the ground.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Has Fuel* `hasFuel`
+True if the vehicle has currently fuel to drive.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is In Air* `isInAir`
+True if the vehicle is currently in the air.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Wants To Move* `wantsToMove`
+True if the vehicle currently wants to move.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Drifting* `isDrifting`
+True if the vehicle is currently drifting.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Fuel Inventory* `getFuelInv` (_Trace(<<Class-Inventory,Inventory>>)_ *Inventory* `inventory` _out_)
+Returns the inventory that contains the fuel of the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inventory* `inventory`
+| Trace(<<Class-Inventory,Inventory>>)
+| The fuel inventory of the vehicle.
+
+|===
+
+===== *Get Storage Inventory* `getStorageInv` (_Trace(<<Class-Inventory,Inventory>>)_ *Inventory* `inventory` _out_)
+Returns the inventory that contains the storage of the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inventory* `inventory`
+| Trace(<<Class-Inventory,Inventory>>)
+| The storage inventory of the vehicle.
+
+|===
+
+===== *Is Valid Fuel* `isValidFuel` (_Class(<<Class-ItemType,ItemType>>)_ *Item* `item`, _Bool_ *Is Valid* `isValid` _out_)
+Allows to check if the given item type is a valid fuel for this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Item* `item`
+| Class(<<Class-ItemType,ItemType>>)
+| The item type you want to check.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Is Valid* `isValid`
+| Bool
+| True if the given item type is a valid fuel for this vehicle.
+
+|===
+
+===== *Get Current Target* `getCurrentTarget` (_Int_ *Index* `index` _out_)
+Returns the index of the target that the vehicle tries to move to right now.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the current target.
+
+|===
+
+===== *Next Target* `nextTarget` ()
+Sets the current target to the next target in the list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Set Current Target* `setCurrentTarget` (_Int_ *Index* `index`)
+Sets the target with the given index as the target this vehicle tries to move to right now.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the target this vehicle should move to now.
+
+|===
+
+===== *Get Target* `getTarget` (_Struct(<<Struct-TargetPoint,TargetPoint>>)_ *Target* `target` _out_)
+Returns the target struct at with the given index in the target list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Target* `target`
+| Struct(<<Struct-TargetPoint,TargetPoint>>)
+| The TargetPoint-Struct with the given index in the target list.
+
+|===
+
+===== *Remove Target* `removeTarget` (_Int_ *Index* `index`)
+Removes the target with the given index from the target list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the target point you want to remove from the target list.
+
+|===
+
+===== *Add Target* `addTarget` (_Struct(<<Struct-TargetPoint,TargetPoint>>)_ *Target* `target`)
+Adds the given target point struct at the end of the target list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Target* `target`
+| Struct(<<Struct-TargetPoint,TargetPoint>>)
+| The target point you want to add.
+
+|===
+
+===== *Set Target* `setTarget` (_Int_ *Index* `index`, _Struct(<<Struct-TargetPoint,TargetPoint>>)_ *Target* `target`)
+Allows to set the target at the given index to the given target point struct.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the target point you want to update with the given target point struct.
+
+| *Target* `target`
+| Struct(<<Struct-TargetPoint,TargetPoint>>)
+| The new target point struct for the given index.
+
+|===
+
+===== *Clear Targets* `clearTargets` ()
+Removes all targets from the target point list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Get Targets* `getTargets` (_Array(Struct(<<Struct-TargetPoint,TargetPoint>>))_ *Targets* `targets` _out_)
+Returns a list of target point structs of all the targets in the target point list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Targets* `targets`
+| Array(Struct(<<Struct-TargetPoint,TargetPoint>>))
+| A list of target point structs containing all the targets of the target point list.
+
+|===
+
+===== *Set Targets* `setTargets` (_Array(Struct(<<Struct-TargetPoint,TargetPoint>>))_ *Targets* `targets`)
+Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Targets* `targets`
+| Array(Struct(<<Struct-TargetPoint,TargetPoint>>))
+| A list of target point structs you want to place into the empty target point list.
+
+|===
+
+[#Class-FactoryConnection]
+=== *Factory Connection* `FactoryConnection`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+A actor component that is a connection point to which a conveyor or pipe can get attached to.
+
+==== Properties
+===== _Int_ *Type* `type`
+Returns the type of the connection. 0 = Conveyor, 1 = Pipe
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Direction* `direction`
+The direction in which the items/fluids flow. 0 = Input, 1 = Output, 2 = Any, 3 = Used just as snap point
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Connected* `isConnected`
+True if something is connected to this connection.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Inventory* `getInventory` (_Trace(<<Class-Inventory,Inventory>>)_ *Inventory* `inventory` _out_)
+Returns the internal inventory of the connection component.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inventory* `inventory`
+| Trace(<<Class-Inventory,Inventory>>)
+| The internal inventory of the connection component.
+
+|===
+
+==== Signals
+===== *Item Transfer* `ItemTransfer` (_Struct(<<Struct-Item,Item>>)_ *Item* `item`)
+Triggers when the factory connection component transfers an item.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Item* `item`
+| Struct(<<Struct-Item,Item>>)
+| The transfered item
+
+|===
+
+[#Class-FINAdvancedNetworkConnectionComponent]
+=== *FINAdvancedNetworkConnectionComponent* `FINAdvancedNetworkConnectionComponent`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+
+
+==== Signals
+===== *NetworkUpdate* `NetworkUpdate` (_Int_ *changeType* `changeType`, _String_ *ChangedComponent* `ChangedComponent`)
+
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *changeType* `changeType`
+| Int
+| 
+
+| *ChangedComponent* `ChangedComponent`
+| String
+| 
+
+|===
+
+[#Class-Inventory]
+=== *Inventory* `Inventory`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+A actor component that can hold multiple item stacks.
+
+==== Properties
+===== _Int_ *Item Count* `itemCount`
+The absolute amount of items in the whole inventory.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Size* `size`
+The count of available item stack slots this inventory has.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Stack* `getStack` ()
+Returns the item stack at the given index. +
+Takes integers as input and returns the corresponding stacks.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>VarArgs</i></span> 
++++
+|===
+
+===== *Sort* `sort` ()
+Sorts the whole inventory. (like the middle mouse click into a inventory)
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== *Flush* `flush` ()
+Removes all discardable items from the inventory completely. They will be gone! No way to get them back!
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+[#Class-ItemCategory]
+=== *Item Category* `ItemCategory`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+The category of some items.
+
+==== Properties
+===== _String_ *Name* `name`
+The name of the category.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-ItemType]
+=== *Item Type* `ItemType`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+The type of an item (iron plate, iron rod, leaves)
+
+==== Properties
+===== _Int_ *Form* `form`
+The matter state of this resource. +
+1: Solid +
+2: Liquid +
+3: Gas +
+4: Heat
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Energy* `energy`
+How much energy this resource provides if used as fuel.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Radioactive Decay* `radioactiveDecay`
+The amount of radiation this item radiates.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _String_ *Name* `name`
+The name of the item.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _String_ *Description* `description`
+The description of this item.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Max* `max`
+The maximum stack size of this item.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Can be Discarded* `canBeDiscarded`
+True if this item can be discarded.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Class(<<Class-ItemCategory,ItemCategory>>)_ *Category* `category`
+The category in which this item is in.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Struct(<<Struct-Color,Color>>)_ *Fluid Color* `fluidColor`
+The color of this fluid.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-PowerCircuit]
+=== *Power Circuit* `PowerCircuit`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+A Object that represents a whole power circuit.
+
+==== Properties
+===== _Float_ *Production* `production`
+The amount of power produced by the whole circuit in the last tick.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Consumption* `consumption`
+The power consumption of the whole circuit in thge last tick.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Capacity* `capacity`
+The power capacity of the whole network in the last tick. (The max amount of power available in the last tick)
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Battery Input* `batteryInput`
+The power that gone into batteries in the last tick.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Power Consumption* `maxPowerConsumption`
+The maximum consumption of power in the last tick.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Fuesed* `isFuesed`
+True if the fuse in the network triggered.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Has Batteries* `hasBatteries`
+True if the power circuit has batteries connected to it.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Battery Capacity* `batteryCapacity`
+The energy capacity all batteries of the network combined provide.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Battery Store* `batteryStore`
+The amount of energy currently stored in all battereies of the network combined.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Battery Store Percentage* `batteryStorePercent`
+The fill status in percent of all battereies of the network combined.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Battery Time until Full* `batteryTimeUntilFull`
+The time in seconds until every battery in the network is filled.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Battery Time until Empty* `batteryTimeUntilEmpty`
+The time in seconds until every battery in the network is empty.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Battery Input* `batteryIn`
+The amount of energy that currently gets stored in every battery of the whole network.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Battery Output* `batteryOut`
+The amount of energy that currently discharges from every battery in the whole network.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Signals
+===== *Power Fuse Changed* `PowerFuseChanged` ()
+Get Triggered when the fuse state of the power circuit changes.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+[#Class-PowerConnection]
+=== *Power Connection* `PowerConnection`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+A actor component that allows for a connection point to the power network. Basically a point were a power cable can get attached to.
+
+==== Properties
+===== _Int_ *Connections* `connections`
+The amount of connections this power connection has.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Max Connections* `maxConnections`
+The maximum amount of connections this power connection can handle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Power* `getPower` (_Trace(<<Class-PowerInfo,PowerInfo>>)_ *Power* `power` _out_)
+Returns the power info component of this power connection.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Power* `power`
+| Trace(<<Class-PowerInfo,PowerInfo>>)
+| The power info compoent this power connection uses.
+
+|===
+
+===== *Get Circuit* `getCircuit` (_Trace(<<Class-PowerCircuit,PowerCircuit>>)_ *Circuit* `circuit` _out_)
+Returns the power circuit to which this connection component is attached to.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Circuit* `circuit`
+| Trace(<<Class-PowerCircuit,PowerCircuit>>)
+| The Power Circuit this connection component is attached to.
+
+|===
+
+[#Class-PowerInfo]
+=== *Power Info* `PowerInfo`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+A actor component that provides information and mainly statistics about the power connection it is attached to.
+
+==== Properties
+===== _Float_ *Dynamic Production* `dynProduction`
+The production cpacity this connection provided last tick.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Base Production* `baseProduction`
+The base production capactiy this connection always provides.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Dynamic Production* `maxDynProduction`
+The maximum production capactiy this connection could have provided to the circuit in the last tick.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Target Consumption* `targetConsumption`
+The amount of energy the connection wanted to consume from the circuit in the last tick.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Consumption* `consumption`
+The amount of energy the connection actually consumed in the last tick.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Has Power* `hasPower`
+True if the connection has satisfied power values and counts as beeing powered. (True if it has power)
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Circuit* `getCircuit` (_Trace(<<Class-PowerCircuit,PowerCircuit>>)_ *Circuit* `circuit` _out_)
+Returns the power circuit this info component is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Circuit* `circuit`
+| Trace(<<Class-PowerCircuit,PowerCircuit>>)
+| The Power Circuit this info component is attached to.
+
+|===
+
+[#Class-RailroadTrackConnection]
+=== *Railroad Track Connection* `RailroadTrackConnection`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+This is a actor component for railroad tracks that allows to connecto to other track connections and so to connection multiple tracks with each eather so you can build a train network.
+
+==== Properties
+===== _Struct(<<Struct-Vector,Vector>>)_ *Connector Location* `connectorLocation`
+The world location of the the connection.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Struct(<<Struct-Vector,Vector>>)_ *Connector Normal* `connectorNormal`
+The normal vecotr of the connector.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Connected* `isConnected`
+True if the connection has any connection to other connections.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Facing Switch* `isFacingSwitch`
+True if this connection is pointing to the merge/spread point of the switch.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Trailing Switch* `isTrailingSwitch`
+True if this connection is pointing away from the merge/spread point of a switch.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Num Switch Positions* `numSwitchPositions`
+Returns the number of different switch poisitions this switch can have.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Connection* `getConnection` (_Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>)_ *Connection* `connection` _out_, _Int_ *Index* `index`)
+Returns the connected connection with the given index.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the connected connection you want to get.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Connection* `connection`
+| Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>)
+| The connected connection at the given index.
+
+|===
+
+===== *Get Connections* `getConnections` (_Array(Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>))_ *Connections* `connections` _out_)
+Returns a list of all connected connections.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Connections* `connections`
+| Array(Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>))
+| A list of all connected connections.
+
+|===
+
+===== *Get Track Pos* `getTrackPos` (_Trace(<<Class-RailroadTrack,RailroadTrack>>)_ *Track* `track` _out_, _Float_ *Offset* `offset` _out_, _Float_ *Forward* `forward` _out_)
+Returns the track pos at which this connection is.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Trace(<<Class-RailroadTrack,RailroadTrack>>)
+| The track the track pos points to.
+
+| *Offset* `offset`
+| Float
+| The offset of the track pos.
+
+| *Forward* `forward`
+| Float
+| The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+
+|===
+
+===== *Get Track* `getTrack` (_Trace(<<Class-RailroadTrack,RailroadTrack>>)_ *Track* `track` _out_)
+Returns the track of which this connection is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Track* `track`
+| Trace(<<Class-RailroadTrack,RailroadTrack>>)
+| The track of which this connection is part of.
+
+|===
+
+===== *Get Switch Control* `getSwitchControl` (_Trace(<<Class-RailroadSwitchControl,RailroadSwitchControl>>)_ *Switch* `switchControl` _out_)
+Returns the switch control of this connection.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Switch* `switchControl`
+| Trace(<<Class-RailroadSwitchControl,RailroadSwitchControl>>)
+| The switch control of this connection.
+
+|===
+
+===== *Get Station* `getStation` (_Trace(<<Class-RailroadStation,RailroadStation>>)_ *Station* `station` _out_)
+Returns the station of which this connection is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Station* `station`
+| Trace(<<Class-RailroadStation,RailroadStation>>)
+| The station of which this connection is part of.
+
+|===
+
+===== *Get Signal* `getSignal` (_Trace(<<Class-Actor,FGBuildableRailroadSignal>>)_ *Signal* `signal` _out_)
+Returns the signal of which this connection is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Signal* `signal`
+| Trace(<<Class-Actor,FGBuildableRailroadSignal>>)
+| The signal of which this connection is part of.
+
+|===
+
+===== *Get Opposite* `getOpposite` (_Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>)_ *Opposite* `opposite` _out_)
+Returns the opposite connection of the track this connection is part of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Opposite* `opposite`
+| Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>)
+| The opposite connection of the track this connection is part of.
+
+|===
+
+===== *Get Next* `getNext` (_Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>)_ *Next* `next` _out_)
+Returns the next connection in the direction of the track. (used the correct path switched point to)
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Next* `next`
+| Trace(<<Class-RailroadTrackConnection,RailroadTrackConnection>>)
+| The next connection in the direction of the track.
+
+|===
+
+===== *Set Switch Position* `setSwitchPosition` (_Int_ *Index* `index`)
+Sets the position (connection index) to which the track switch points to.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The connection index to which the switch should point to.
+
+|===
+
+===== *Get Switch Position* `getSwitchPosition` (_Int_ *Index* `index` _out_)
+Returns the current switch position.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the connection connection the switch currently points to.
+
+|===
+
+[#Class-RailroadVehicleMovement]
+=== *Railroad Vehicle Movement* `RailroadVehicleMovement`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+This actor component contains all the infomation about the movement of a railroad vehicle.
+
+==== Properties
+===== _Float_ *Orientation* `orientation`
+The orientation of the vehicle
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Mass* `mass`
+The current mass of the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Tare Mass* `tareMass`
+The tare mass of the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Payload Mass* `payloadMass`
+The mass of the payload of the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Speed* `speed`
+The current forward speed of the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Relative Speed* `relativeSpeed`
+The current relative forward speed to the ground.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Speed* `maxSpeed`
+The maximum forward speed the vehicle can reach.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Gravitationl Force* `gravitationalForce`
+The current gravitational force acting on the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Tractive Force* `tractiveForce`
+The current tractive force acting on the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Resistive Froce* `resistiveForce`
+The resistive force currently acting on the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Gradient Force* `gradientForce`
+The gradient force currently acting on the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Braking Force* `brakingForce`
+The braking force currently acting on the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Air Braking Force* `airBrakingForce`
+The air braking force currently acting on the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Dynamic Braking Force* `dynamicBrakingForce`
+The dynamic braking force currently acting on the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Tractive Effort* `maxTractiveEffort`
+The maximum tractive effort of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Dynamic Braking Effort* `maxDynamicBrakingEffort`
+The maximum dynamic braking effort of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Max Air Braking Effort* `maxAirBrakingEffort`
+The maximum air braking effort of this vehcile.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Track Grade* `trackGrade`
+The current track grade of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Track Curvature* `trackCurvature`
+The current track curvature of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Wheelset Angle* `wheelsetAngle`
+The wheelset angle of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Rolling Resistance* `rollingResistance`
+The current rolling resistance of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Curvature Resistance* `curvatureResistance`
+The current curvature resistance of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Air Resistance* `airResistance`
+The current air resistance of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Gradient Resistance* `gradientResistance`
+The current gardient resistance of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Wheel Rotation* `wheelRotation`
+The current wheel rotation of this vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Num Wheelsets* `numWheelsets`
+The number of wheelsets this vehicle has.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Bool_ *Is Moving* `isMoving`
+True if this vehicle is currently moving.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Vehicle* `getVehicle` (_Trace(<<Class-RailroadVehicle,RailroadVehicle>>)_ *Vehicle* `vehicle` _out_)
+Returns the vehicle this movement component holds the movement information of.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Vehicle* `vehicle`
+| Trace(<<Class-RailroadVehicle,RailroadVehicle>>)
+| The vehicle this movement component holds the movement information of.
+
+|===
+
+===== *Get Wheelset Rotation* `getWheelsetRotation` (_Int_ *Wheelset* `wheelset`, _Float_ *X* `x` _out_, _Float_ *Y* `y` _out_, _Float_ *Z* `z` _out_)
+Returns the current rotation of the given wheelset.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Wheelset* `wheelset`
+| Int
+| The index of the wheelset you want to get the rotation of.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Float
+| The wheelset's rotation X component.
+
+| *Y* `y`
+| Float
+| The wheelset's rotation Y component.
+
+| *Z* `z`
+| Float
+| The wheelset's rotation Z component.
+
+|===
+
+===== *Get Wheelset Offset* `getWheelsetOffset` (_Int_ *Wheelset* `wheelset`, _Float_ *Offset* `offset` _out_)
+Returns the offset of the wheelset with the given index from the start of the vehicle.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Wheelset* `wheelset`
+| Int
+| The index of the wheelset you want to get the offset of.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Offset* `offset`
+| Float
+| The offset of the wheelset.
+
+|===
+
+===== *Get Coupler Rotation And Extention* `getCouplerRotationAndExtention` (_Int_ *Coupler* `coupler`, _Float_ *X* `x` _out_, _Float_ *Y* `y` _out_, _Float_ *Z* `z` _out_, _Float_ *Extention* `extention` _out_)
+Returns the normal vector and the extention of the coupler with the given index.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Coupler* `coupler`
+| Int
+| The index of which you want to get the normal and extention of.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Float
+| The X component of the coupler normal.
+
+| *Y* `y`
+| Float
+| The Y component of the coupler normal.
+
+| *Z* `z`
+| Float
+| The Z component of the coupler normal.
+
+| *Extention* `extention`
+| Float
+| The extention of the coupler.
+
+|===
+
+[#Class-Recipe]
+=== *Recipe* `Recipe`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+A struct that holds information about a recipe in its class. Means don't use it as object, use it as class type!
+
+==== Properties
+===== _String_ *Name* `name`
+The name of this recipe.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Float_ *Duration* `duration`
+The duration how much time it takes to cycle the recipe once.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Products* `getProducts` (_Array(Struct(<<Struct-ItemAmount,ItemAmount>>))_ *Products* `products` _out_)
+Returns a array of item amounts, this recipe returns (outputs) when the recipe is processed once.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassFunc</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Products* `products`
+| Array(Struct(<<Struct-ItemAmount,ItemAmount>>))
+| The products of this recipe.
+
+|===
+
+===== *Get Ingredients* `getIngredients` (_Array(Struct(<<Struct-ItemAmount,ItemAmount>>))_ *Ingredients* `ingredients` _out_)
+Returns a array of item amounts, this recipe needs (input) so the recipe can be processed.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassFunc</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Ingredients* `ingredients`
+| Array(Struct(<<Struct-ItemAmount,ItemAmount>>))
+| The ingredients of this recipe.
+
+|===
+
+[#Class-ReflectionBase]
+=== *Reflection Base* `ReflectionBase`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Object,Object>>
+|===
+
+The base class for all things of the reflection system.
+
+==== Properties
+===== _String_ *Name* `name`
+The internal name.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _String_ *Display Name* `displayName`
+The display name used in UI which might be localized.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _String_ *Description* `description`
+The description of this base.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-Function]
+=== *Function* `Function`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-ReflectionBase,ReflectionBase>>
+|===
+
+A reflection object representing a function.
+
+==== Properties
+===== _Int_ *Flags* `flags`
+The function bit flag register defining some behaviour of it. +
+
+Bits and their meaing (least significant bit first): +
+Is this function has a variable amount of input parameters. +
+Can this function get called in syncrounus runtime. +
+Can this function can get called in parallel runtime. +
+Can this function get called in asynchronus runtime. +
+Is this function a member function. +
+The function is a class function. +
+The function is a static function. +
+The function has a variable amount of return values.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Parameters* `getParameters` (_Array(Object(<<Class-Property,Property>>))_ *Parameters* `parameters` _out_)
+Returns all the parameters of this function.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Parameters* `parameters`
+| Array(Object(<<Class-Property,Property>>))
+| The parameters this function.
+
+|===
+
+[#Class-Property]
+=== *Property* `Property`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-ReflectionBase,ReflectionBase>>
+|===
+
+A Reflection object that holds information about properties and parameters.
+
+==== Properties
+===== _Int_ *Data Type* `dataType`
+The data type of this property. +
+0: nil, 1: bool, 2: int, 3: float, 4: str, 5: object, 6: class, 7: trace, 8: struct, 9: array, 10: anything
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+===== _Int_ *Flags* `flags`
+The property bit flag register defining some behaviour of it. +
+
+Bits and their meaing (least significant bit first): +
+Is this property a member attribute. +
+Is this property read only. +
+Is this property a parameter. +
+Is this property a output paramter. +
+Is this property a return value. +
+Can this property get accessed in syncrounus runtime. +
+Can this property can get accessed in parallel runtime. +
+Can this property get accessed in asynchronus runtime. +
+This property is a class attribute.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+[#Class-ArrayProperty]
+=== *Array Property* `ArrayProperty`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Property,Property>>
+|===
+
+A reflection object representing a array property.
+
+==== Functions
+===== *Get Inner* `getInner` (_Object(<<Class-Property,Property>>)_ *Inner* `inner` _out_)
+Returns the inner type of this array.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Inner* `inner`
+| Object(<<Class-Property,Property>>)
+| The inner type of this array.
+
+|===
+
+[#Class-ClassProperty]
+=== *Class Property* `ClassProperty`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Property,Property>>
+|===
+
+A reflection object representing a class property.
+
+==== Functions
+===== *Get Subclass* `getSubclass` (_Object(<<Class-Class,Class>>)_ *Subclass* `subclass` _out_)
+Returns the subclass type of this class. Meaning, the stored classes need to be of this type.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Subclass* `subclass`
+| Object(<<Class-Class,Class>>)
+| The subclass of this class property.
+
+|===
+
+[#Class-ObjectProperty]
+=== *Object Property* `ObjectProperty`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Property,Property>>
+|===
+
+A reflection object representing a object property.
+
+==== Functions
+===== *Get Subclass* `getSubclass` (_Object(<<Class-Class,Class>>)_ *Subclass* `subclass` _out_)
+Returns the subclass type of this object. Meaning, the stored objects need to be of this type.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Subclass* `subclass`
+| Object(<<Class-Class,Class>>)
+| The subclass of this object.
+
+|===
+
+[#Class-StructProperty]
+=== *Struct Property* `StructProperty`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Property,Property>>
+|===
+
+A reflection object representing a struct property.
+
+==== Functions
+===== *Get Subclass* `getSubclass` (_Object(<<Class-Struct,Struct>>)_ *Subclass* `subclass` _out_)
+Returns the subclass type of this struct. Meaning, the stored structs need to be of this type.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Subclass* `subclass`
+| Object(<<Class-Struct,Struct>>)
+| The subclass of this struct.
+
+|===
+
+[#Class-TraceProperty]
+=== *Trace Property* `TraceProperty`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Property,Property>>
+|===
+
+A reflection object representing a trace property.
+
+==== Functions
+===== *Get Subclass* `getSubclass` (_Object(<<Class-Class,Class>>)_ *Subclass* `subclass` _out_)
+Returns the subclass type of this trace. Meaning, the stored traces need to be of this type.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Subclass* `subclass`
+| Object(<<Class-Class,Class>>)
+| The subclass of this trace.
+
+|===
+
+[#Class-Signal]
+=== *Signal* `Signal`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-ReflectionBase,ReflectionBase>>
+|===
+
+A reflection object representing a signal.
+
+==== Properties
+===== _Bool_ *Is VarArgs* `isVarArgs`
+True if this signal has a variable amount of arguments.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+==== Functions
+===== *Get Parameters* `getParameters` (_Array(Object(<<Class-Property,Property>>))_ *Parameters* `parameters` _out_)
+Returns all the parameters of this signal.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Parameters* `parameters`
+| Array(Object(<<Class-Property,Property>>))
+| The parameters this signal.
+
+|===
+
+[#Class-Struct]
+=== *Struct* `Struct`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-ReflectionBase,ReflectionBase>>
+|===
+
+Reflection Object that holds information about structures.
+
+==== Functions
+===== *Get Parent* `getParent` (_Object(<<Class-Class,Class>>)_ *Parent* `parent` _out_)
+Returns the parent type of this type.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Parent* `parent`
+| Object(<<Class-Class,Class>>)
+| The parent type of this type.
+
+|===
+
+===== *Get Properties* `getProperties` (_Array(Object(<<Class-Property,Property>>))_ *Properties* `properties` _out_)
+Returns all the properties of this type.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Properties* `properties`
+| Array(Object(<<Class-Property,Property>>))
+| The properties this specific type implements (excluding properties from parent types).
+
+|===
+
+===== *Get All Properties* `getAllProperties` (_Array(Object(<<Class-Property,Property>>))_ *Properties* `properties` _out_)
+Returns all the properties of this and parent types.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Properties* `properties`
+| Array(Object(<<Class-Property,Property>>))
+| The properties this type implements including properties from parent types.
+
+|===
+
+===== *Get Functions* `getFunctions` (_Array(Object(<<Class-Function,Function>>))_ *Functions* `functions` _out_)
+Returns all the functions of this type.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Functions* `functions`
+| Array(Object(<<Class-Function,Function>>))
+| The functions this specific type implements (excluding properties from parent types).
+
+|===
+
+===== *Get All Functions* `getAllFunctions` (_Array(Object(<<Class-Property,Property>>))_ *Functions* `functions` _out_)
+Returns all the functions of this and parent types.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Functions* `functions`
+| Array(Object(<<Class-Property,Property>>))
+| The functions this type implements including functions from parent types.
+
+|===
+
+===== *Is Child Of* `isChildOf` (_Object(<<Class-Struct,Struct>>)_ *Parent* `parent`, _Bool_ *Is Child* `isChild` _out_)
+Allows to check if this struct is a child struct of the given struct or the given struct it self.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Parent* `parent`
+| Object(<<Class-Struct,Struct>>)
+| The parent struct you want to check if this struct is a child of.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Is Child* `isChild`
+| Bool
+| True if this struct is a child of parent.
+
+|===
+
+[#Class-Class]
+=== *Class* `Class`
+[cols = "1,5a"]
+|===
+| Parent
+| <<Class-Struct,Struct>>
+|===
+
+Object that contains all information about a type.
+
+==== Functions
+===== *Get Signals* `getSignals` (_Array(Object(<<Class-Signal,Signal>>))_ *Signals* `signals` _out_)
+Returns all the signals of this type.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Signals* `signals`
+| Array(Object(<<Class-Signal,Signal>>))
+| The signals this specific type implements (excluding properties from parent types).
+
+|===
+
+===== *Get All Signals* `getAllSignals` (_Array(Object(<<Class-Signal,Signal>>))_ *Signals* `signals` _out_)
+Returns all the signals of this and its parent types.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Signals* `signals`
+| Array(Object(<<Class-Signal,Signal>>))
+| The signals this type and all it parents implement.
+
+|===
+
+== Structs
+[#Struct-Color]
+=== *Color* `Color`
+A structure that holds a rgba color value
+
+==== Properties
+===== _Float_ *Red* `r`
+The red portion of the color.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Green* `g`
+The green portion of the color.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Blue* `b`
+The blue portion of the color.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Alpha* `a`
+The alpha (opacity) portion of the color.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Struct-GPUT1Buffer]
+=== *GPU T1 Buffer* `GPUT1Buffer`
+A structure that can hold a buffer of characters and colors that can be displayed with a gpu
+
+==== Functions
+===== *Get Size* `getSize` (_Float_ *Width* `width` _out_, _Float_ *Height* `height` _out_)
+Allows to get the dimensions of the buffer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Width* `width`
+| Float
+| The width of this buffer
+
+| *Height* `height`
+| Float
+| The height of this buffer
+
+|===
+
+===== *Set Size* `setSize` (_Float_ *Width* `width`, _Float_ *Height* `height`)
+Allows to set the dimensions of the buffer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Width* `width`
+| Float
+| The width this buffer should now have
+
+| *Height* `height`
+| Float
+| The height this buffer now have
+
+|===
+
+===== *Get* `get` (_Int_ *X* `x`, _Int_ *Y* `y`, _String_ *Char* `c` _out_, _Struct(<<Struct-Color,Color>>)_ *Foreground Color* `foreground` _out_, _Struct(<<Struct-Color,Color>>)_ *Background Color* `background` _out_)
+Allows to get a single pixel from the buffer at the given position
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x position of the character you want to get
+
+| *Y* `y`
+| Int
+| The y position of the character you want to get
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Char* `c`
+| String
+| The character at the given position
+
+| *Foreground Color* `foreground`
+| Struct(<<Struct-Color,Color>>)
+| The foreground color of the pixel at the given position
+
+| *Background Color* `background`
+| Struct(<<Struct-Color,Color>>)
+| The background color of the pixel at the given position
+
+|===
+
+===== *Set* `set` (_Int_ *X* `x`, _Int_ *Y* `y`, _String_ *Char* `c`, _Struct(<<Struct-Color,Color>>)_ *Foreground Color* `foreground`, _Struct(<<Struct-Color,Color>>)_ *Background Color* `background`, _Bool_ *Done* `done` _out_)
+Allows to set a single pixel of the buffer at the given position
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x position of the character you want to set
+
+| *Y* `y`
+| Int
+| The y position of the character you want to set
+
+| *Char* `c`
+| String
+| The character the pixel should have
+
+| *Foreground Color* `foreground`
+| Struct(<<Struct-Color,Color>>)
+| The foreground color the pixel at the given position should have
+
+| *Background Color* `background`
+| Struct(<<Struct-Color,Color>>)
+| The background color the pixel at the given position should have
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Done* `done`
+| Bool
+| True if the pixel got set successfully
+
+|===
+
+===== *Copy* `copy` (_Int_ *X* `x`, _Int_ *Y* `y`, _Struct(<<Struct-GPUT1Buffer,GPUT1Buffer>>)_ *Buffer* `buffer`, _Int_ *Text Blend Mode* `textBlendMode`, _Int_ *Foreground Color Blend Mode* `foregroundBlendMode`, _Int_ *Background Color Blend Mode* `backgroundBlendMode`)
+Copies the given buffer at the given offset of the upper left corner into this buffer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x offset of the upper left corner of the buffer relative to this buffer
+
+| *Y* `y`
+| Int
+| The y offset of the upper left corener of the buffer relative to this buffer
+
+| *Buffer* `buffer`
+| Struct(<<Struct-GPUT1Buffer,GPUT1Buffer>>)
+| The buffer from wich you want to copy from
+
+| *Text Blend Mode* `textBlendMode`
+| Int
+| The blend mode that is used for the text. +
+0 = Overwrite this with the content of the given buffer +
+1 = Overwrite with only characters that are not ' ' +
+2 = Overwrite only were this characters are ' ' +
+3 = Keep this buffer
+
+| *Foreground Color Blend Mode* `foregroundBlendMode`
+| Int
+| The blend mode that is used for the foreground color. +
+0 = Overwrite with the given color +
+1 = Normal alpha composition +
+2 = Multiply +
+3 = Divide +
+4 = Addition +
+5 = Subtraction +
+6 = Difference +
+7 = Darken Only +
+8 = Lighten Only +
+9 = None
+
+| *Background Color Blend Mode* `backgroundBlendMode`
+| Int
+| The blend mode that is used for the background color. +
+0 = Overwrite with the given color +
+1 = Normal alpha composition +
+2 = Multiply +
+3 = Divide +
+4 = Addition +
+5 = Subtraction +
+6 = Difference +
+7 = Darken Only +
+8 = Lighten Only +
+9 = None
+
+|===
+
+===== *Set Text* `setText` (_Int_ *X* `x`, _Int_ *Y* `y`, _String_ *Text* `text`, _Struct(<<Struct-Color,Color>>)_ *Foreground* `foreground`, _Struct(<<Struct-Color,Color>>)_ *Background* `background`)
+Allows to write the given text onto the buffer and with the given offset.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The X Position at which the text should begin to get written.
+
+| *Y* `y`
+| Int
+| The Y Position at which the text should begin to get written.
+
+| *Text* `text`
+| String
+| The text that should get written.
+
+| *Foreground* `foreground`
+| Struct(<<Struct-Color,Color>>)
+| The foreground color which will be used to write the text.
+
+| *Background* `background`
+| Struct(<<Struct-Color,Color>>)
+| The background color which will be used to write the text.
+
+|===
+
+===== *Fill* `fill` (_Int_ *X* `x`, _Int_ *Y* `y`, _Int_ *Width* `width`, _Int_ *Height* `height`, _String_ *Character* `character`, _Struct(<<Struct-Color,Color>>)_ *Foreground* `foreground`, _Struct(<<Struct-Color,Color>>)_ *Background* `background`)
+Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *X* `x`
+| Int
+| The x coordinate at which the rectangle should get drawn. (upper-left corner)
+
+| *Y* `y`
+| Int
+| The y coordinate at which the rectangle should get drawn. (upper-left corner)
+
+| *Width* `width`
+| Int
+| The width of the rectangle.
+
+| *Height* `height`
+| Int
+| The height of the rectangle.
+
+| *Character* `character`
+| String
+| A string with a single character that will be used for each pixel in the range you want to fill.
+
+| *Foreground* `foreground`
+| Struct(<<Struct-Color,Color>>)
+| The foreground color which will be used to fill the rectangle.
+
+| *Background* `background`
+| Struct(<<Struct-Color,Color>>)
+| The background color which will be used to fill the rectangle.
+
+|===
+
+===== *Set Raw* `setRaw` (_String_ *Characters* `characters`, _Array(Float)_ *Foreground Color* `foreground`, _Array(Float)_ *Background Color* `background`, _Bool_ *Success* `success` _out_)
+Allows to set the internal data of the buffer more directly.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> 
++++
+|===
+
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Characters* `characters`
+| String
+| The characters you want to draw with a length of exactly width*height.
+
+| *Foreground Color* `foreground`
+| Array(Float)
+| The values of the foreground color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.
+
+| *Background Color* `background`
+| Array(Float)
+| The values of the background color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.
+
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Success* `success`
+| Bool
+| True if the raw data was successfully written
+
+|===
+
+===== *Clone* `clone` (_Struct(<<Struct-GPUT1Buffer,GPUT1Buffer>>)_ *Buffer* `buffer` _out_)
+Clones this buffer into a new struct
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Buffer* `buffer`
+| Struct(<<Struct-GPUT1Buffer,GPUT1Buffer>>)
+| The clone of this buffer
+
+|===
+
+[#Struct-Item]
+=== *Item* `Item`
+A structure that holds item information.
+
+==== Properties
+===== _Class(<<Class-ItemType,ItemType>>)_ *Type* `type`
+The type of the item.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Struct-ItemAmount]
+=== *Item Amount* `ItemAmount`
+A struct that holds a pair of amount and item type.
+
+==== Properties
+===== _Int_ *Amount* `amount`
+The amount of items.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Class(<<Class-ItemType,ItemType>>)_ *Type* `type`
+The type of the items.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Struct-ItemStack]
+=== *Item Stack* `ItemStack`
+A structure that holds item information and item amount to represent an item stack.
+
+==== Properties
+===== _Int_ *Count* `count`
+The count of items.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Struct(<<Struct-Item,Item>>)_ *Item* `item`
+The item information of this stack.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Struct-Rotator]
+=== *Rotator* `Rotator`
+Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.
+
+==== Properties
+===== _Float_ *Pitch* `pitch`
+The pitch component
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Yaw* `yaw`
+The yaw component
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Roll* `roll`
+The roll component
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Struct-TargetPoint]
+=== *Target Point* `TargetPoint`
+Target Point in the waypoint list of a wheeled vehicle.
+
+==== Properties
+===== _Struct(<<Struct-Vector,Vector>>)_ *Pos* `pos`
+The position of the target point in the world.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Struct(<<Struct-Rotator,Rotator>>)_ *Rot* `rot`
+The rotation of the target point in the world.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Speed* `speed`
+The speed at which the vehicle should pass the target point.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Wait* `wait`
+The amount of time which needs to pass till the vehicle will continue to the next target point.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Struct-TimeTableStop]
+=== *Time Table Stop* `TimeTableStop`
+Information about a train stop in a time table.
+
+==== Properties
+===== _Trace(<<Class-RailroadStation,RailroadStation>>)_ *Station* `station`
+The station at which the train should stop
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Duration* `duration`
+The time interval the train will wait at the station
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+[#Struct-TrackGraph]
+=== *Track Graph* `TrackGraph`
+Struct that holds a cache of a whole train/rail network.
+
+==== Functions
+===== *Get Trains* `getTrains` (_Array(Trace(<<Class-Train,Train>>))_ *Trains* `trains` _out_)
+Returns a list of all trains in the network.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Trains* `trains`
+| Array(Trace(<<Class-Train,Train>>))
+| The list of trains in the network.
+
+|===
+
+===== *Get Stations* `getStations` (_Array(Trace(<<Class-RailroadStation,RailroadStation>>))_ *Stations* `stations` _out_)
+Returns a list of all trainstations in the network.
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Stations* `stations`
+| Array(Trace(<<Class-RailroadStation,RailroadStation>>))
+| The list of trainstations in the network.
+
+|===
+
+[#Struct-Vector]
+=== *Vector* `Vector`
+Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space
+
+==== Properties
+===== _Float_ *X* `x`
+The X coordinate component
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Y* `y`
+The Y coordinate component
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+===== _Float_ *Z* `z`
+The Z coordinate component
+
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// #FINReflectionDocumentationBlock End //
