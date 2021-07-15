@@ -28,6 +28,14 @@ The type of EEPROM varies between processor types, because different processors 
 
 You need exactly one processor for the computer case to work.
 
+== PCI-Interface
+The PCI-Interface of a computer allows addressing/referencing computer components directly. +
+`PCI-Devices` is the name for this kind computer components. +
+This Interface usually is exposed by the computers kernel and the specific CPU implementation.
+It should provide a function that allows you to retrieve a list of,
+in the computer case currently installed PCI-Devices of a given type. +
+Have a look at xref:/lua/examples/PCIDevices.adoc[this] example to see how it is done in Lua.
+
 include::partial$computer_modules.adoc[]
 
 include::partial$building_footer.adoc[]
