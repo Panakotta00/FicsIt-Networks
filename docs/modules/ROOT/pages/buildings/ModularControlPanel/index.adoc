@@ -25,58 +25,7 @@ The Module Control Panel provides a plane were you can place I/O modules like yo
 You can then connect the panel to the computer network so you can then use the I/O modules
 for controlling and monitoring what happens in the network or whatever.
 
-== Functions
 
-=== `iomodule getModule(x, y[, z])`
-
-Returns the IOModule at the given location.
-The x and y values origin of the coordinate system is in the lower left corner of a panel.
-Where the x-Axis is the horizontal one, and the y-Axis is the vertical one.
-
-Params::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|x
-|int
-|the x position of the module you want to get
-
-|y
-|int
-|the y position of the module you want to get
-
-|z
-|int
-|the plane id the module is place on. Only required for panels with multiple planes (f.e. LargeVerticalControlPanel)
-|===
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|iomodule
-|IOModule
-|The instance of the module at the given location
-|===
-
-=== `iomodules getModules()`
-
-Returns all IOModules attached to the panel
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|iomodules
-|IOModule[]
-|Array of instances of the modules placed onto the panel
-|===
 
 include::partial$io_modules.adoc[]
 
