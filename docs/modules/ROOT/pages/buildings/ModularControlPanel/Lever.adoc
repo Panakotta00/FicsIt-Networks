@@ -18,42 +18,6 @@
 This IO-Module allows you to use a bi-stable lever to trigger a signal and get the lever state.
 So you can f.e. turn on and off a part of a computer program.
 
-== Functions
 
-=== `setState(bool)`
-
-Sets the state of the Lever.
-
-Params::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|The new state of the Lever
-|===
-
-=== `bool getState()`
-
-Gets the current lever state.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|bool
-|bool
-|the current lever state
-|===
-
-== Signals
-
-=== `ChangeState()`
-
-This signal gets emitted when the lever state changes by player or code.
 
 include::partial$io_modules_footer.adoc[]

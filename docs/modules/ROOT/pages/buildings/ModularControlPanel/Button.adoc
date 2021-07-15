@@ -18,43 +18,6 @@
 This IO-Module allows you to change trigger a button trigger signal
 and to show some kind of state by changing the color and light intensity of the button head.
 
-== Functions
 
-=== `trigger()`
-
-Triggers the trigger signal so it looks like the button got pressed by a player.
-
-=== `setColor(r, g, b, e)`
-
-Sets the color and the light intensity of the button head.
-
-Params::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|r
-|number
-|the red value of the color from `0.0` to `1.0`
-
-|g
-|number
-|the green value of the color from `0.0` to `1.0`
-
-|b
-|number
-|the blue value of the color from `0.0` to `1.0`
-
-|e
-|number
-|the light intensity from `0.0` to `5.0`
-|===
-
-== Signals
-
-=== `Trigger()`
-
-This signal gets emitted when the button got pressed.
 
 include::partial$io_modules_footer.adoc[]

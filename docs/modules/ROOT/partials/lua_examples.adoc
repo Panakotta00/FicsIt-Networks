@@ -3,6 +3,8 @@ Lua Examples::
 ====
 xref:lua/examples/multiThreading.adoc[Multi Threading]
 -
+xref:lua/examples/PCIDevices.adoc[PCI-Devices]
+-
 xref:lua/examples/paint.adoc[Paint]
 -
 xref:lua/examples/randomPlot.adoc[Random Plot]
@@ -10,4 +12,6 @@ xref:lua/examples/randomPlot.adoc[Random Plot]
 xref:lua/examples/storageRefill.adoc[Storage Refill]
 -
 xref:lua/examples/drive.adoc[Drive Example]
+-
+xref:lua/examples/InternetCard.adoc[Internet Card]
 ====

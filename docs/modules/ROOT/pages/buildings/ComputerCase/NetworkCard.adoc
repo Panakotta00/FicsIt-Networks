@@ -4,7 +4,7 @@
 [cols="1,3"]
 |===
 |Building Type
-|Computer Module
+|xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device]
 |===
 
 [cols="a,a"]
