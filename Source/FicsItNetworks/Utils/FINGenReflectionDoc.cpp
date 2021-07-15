@@ -90,7 +90,7 @@ void FINGenRefClass(TSharedPtr<FJsonObject> Obj, UFINClass* Class) {
 		FINGenRefSignal(SignalObj, Signal);
 		Signals.Add(MakeShared<FJsonValueObject>(SignalObj));
 	}
-	Obj->SetArrayField(TEXT("functions"), Signals);
+	Obj->SetArrayField(TEXT("signals"), Signals);
 }
 
 bool FINGenReflectionDoc(UWorld* World, const TCHAR* Command, FOutputDevice& Ar) {
