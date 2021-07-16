@@ -18,6 +18,9 @@
 This IO-Module allows you to use a bi-stable lever to trigger a signal and get the lever state.
 So you can f.e. turn on and off a part of a computer program.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-ModuleSwitch_C,leveloffset=-1]
+
 
 
 include::partial$io_modules_footer.adoc[]

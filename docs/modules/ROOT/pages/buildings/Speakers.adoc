@@ -24,6 +24,9 @@ With the speaker you can create f.e. a alert sound when you run low on Modular F
 
 If you want to add a sound, open your saves folder, go to the `Computers\Sounds` folder and place your sound file as ogg in there. You don't even need to restart your game, you can directly use it. Subfolders are also allowed.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-SpeakerPole,leveloffset=-1]
+
 
 
 include::partial$building_footer.adoc[]

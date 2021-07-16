@@ -24,6 +24,9 @@ while still allowing cross-network communication.
 Filters can also be defined based on message port and address.
 Filters are set to Blacklist by default.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-NetworkRouter,leveloffset=-1]
+
 
 
 include::partial$building_footer.adoc[]

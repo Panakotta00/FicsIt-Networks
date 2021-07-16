@@ -18,6 +18,9 @@
 This IO-Module allows you to change trigger a button trigger signal
 and to show some kind of state by changing the color and light intensity of the button head.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-ModuleButton,leveloffset=-1]
+
 
 
 include::partial$io_modules_footer.adoc[]
