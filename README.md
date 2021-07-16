@@ -4,7 +4,7 @@ FicsIt-Networks is a mod for Satisfactory, written in C++/BP using Unreal Engine
 It is inspired by [OpenComputers](https://github.com/MightyPirates/OpenComputers).
 
 **If you want to learn more:**
-[please visit the Documentation](https://docs.ficsit.app/ficsit-networks/0.0.1)
+[please visit the Documentation](https://docs.ficsit.app/ficsit-networks/latest)
 [or the SMR Mod page](https://ficsit.app/mod/8d8gk4imvFanRs)
 
 Discord
@@ -37,6 +37,7 @@ You-Tube
 - [Release Trailer](https://www.youtube.com/watch?v=EErI0OiWttw)
 - [Mod Showcase by RandomGamer](https://www.youtube.com/watch?v=EtybEOkgJ4o)
 - [Tutorial Series](https://www.youtube.com/playlist?list=PLKTdAeAt_BilFGjKoIG9GObwjqmxdSoeE)
+- [Lua Tutorial Series](https://www.youtube.com/playlist?list=PLKTdAeAt_BimxLkH05GSNBZpydxc553hE)
 
 Features
 ========
@@ -96,5 +97,6 @@ Contributors
 - [RosszEmber](https://www.deviantart.com/ronsemberg)
 - Deantendo
 - Coffeediction
+- [Roze](https://github.com/RozeDoyanawa)
 - [Raysh](https://www.artstation.com/raysh)
 - Esper

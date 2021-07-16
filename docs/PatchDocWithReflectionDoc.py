@@ -20,10 +20,10 @@ def redirect_struct(struct):
 
 
 def ref_class(clazz):
-    return "<<Class-" + redirect_class(clazz) + "," + clazz + ">>"
+    return "xref::Reflection.adoc#Class-" + redirect_class(clazz) + "[" + clazz + "]"
 
 def ref_struct(struct):
-    return "<<Struct-" + redirect_struct(struct) + "," + struct + ">>"
+    return "xref::Reflection.adoc#Struct-" + redirect_struct(struct) + "[" + struct + "]"
 
 
 def get_adoc_files():
@@ -64,10 +64,19 @@ def write_description(f, obj):
     f.write(desc + "\n\n")
 
 
-def write_property(f, prop):
-    f.write(
-        "===== _" + format_data_type(prop["type"]) + "_ *" + prop["displayName"] + "* `" + prop["internalName"] + "`\n")
+def write_property(f, prop, parent):
+    section_id = parent
+    if prop["Flag_ClassProp"]:
+        section_id = section_id + "_Class"
+    section_id = section_id + "-props-" + prop["internalName"]
+    f.write("[#" + section_id + "]\n")
+    f.write("// tag::" + section_id + "__title[]\n")
+    f.write("===== _" + format_data_type(prop["type"]) + "_ *" + prop["displayName"] + "* `" + prop["internalName"] + "`\n")
+    f.write("// tag::" + section_id + "[]\n")
+    f.write("// tag::" + section_id + "__description[]\n")
     write_description(f, prop)
+    f.write("// end::" + section_id + "__description[]\n")
+    f.write("// tag::" + section_id + "__flags[]\n")
     f.write('[cols = "1,5a"]\n|===\n')
     f.write('| Flags\n')
     f.write('| +++')
@@ -82,19 +91,31 @@ def write_property(f, prop):
     if prop["Flag_ReadOnly"]:
         f.write("<span style='color:#e59445'><i>ReadOnly</i></span> ")
     f.write('\n+++\n|===\n\n')
+    f.write("// end::" + section_id + "__flags[]\n")
+    f.write("// end::" + section_id + "[]\n")
+    f.write("// end::" + section_id + "__title[]\n")
 
 
 def write_parameters(f, list, prefix):
     f.write(prefix + '::\n+\n[%header,cols="1,1,4a"]\n|===\n|Name |Type |Description\n\n')
     for param in list:
         f.write("| *" + param["displayName"] + "* `" + param["internalName"] + "`\n")
-        f.write("| " + format_data_type(param["type"]) + "\n")
+        f.write("| " + format_data_type(param["type"]))
+        if param["Flag_OutParam"] or param["Flag_RetVal"]:
+            f.write(" _out_")
+        f.write("\n")
         f.write("| ")
         write_description(f, param)
     f.write("|===\n\n")
 
 
-def write_function(f, func):
+def write_function(f, func, parent):
+    section_id = parent
+    if func["Flag_ClassFunc"]:
+        section_id = section_id + "_Class"
+    section_id = section_id + "-Funcs-" + func["internalName"]
+    f.write("[#" + section_id + "]\n")
+    f.write("// tag::" + section_id + "__title[]\n")
     f.write("===== *" + func["displayName"] + "* `" + func["internalName"] + "` (")
     in_params = []
     out_params = []
@@ -110,8 +131,12 @@ def write_function(f, func):
         else:
             in_params.append(param)
     f.write(")\n")
+    f.write("// tag::" + section_id + "[]\n")
+    f.write("// tag::" + section_id + "__description[]\n")
     write_description(f, func)
+    f.write("// end::" + section_id + "__description[]\n")
 
+    f.write("// tag::" + section_id + "__flags[]\n")
     f.write('[cols = "1,5a"]\n|===\n')
     f.write('| Flags\n')
     f.write('| +++')
@@ -130,15 +155,26 @@ def write_function(f, func):
     if func["Flag_VarRets"]:
         f.write("<span style='color:#e59445'><i>VarReturns</i></span> ")
     f.write('\n+++\n|===\n\n')
+    f.write("// end::" + section_id + "__flags[]\n")
 
     if len(in_params) > 0:
+        f.write("// tag::" + section_id + "__params[]\n")
         write_parameters(f, in_params, "Parameters")
+        f.write("// end::" + section_id + "__params[]\n")
 
     if len(out_params) > 0:
+        f.write("// tag::" + section_id + "__retvals[]\n")
         write_parameters(f, out_params, "Return Values")
+        f.write("// end::" + section_id + "__retvals[]\n")
+
+    f.write("// end::" + section_id + "[]\n")
+    f.write("// end::" + section_id + "__title[]\n")
 
 
-def write_signal(f, signal):
+def write_signal(f, signal, parent):
+    section_id = parent + "-Signals-" + signal["internalName"]
+    f.write("// tag::" + section_id + "__title[]\n")
+    f.write("[#" + section_id + "]\n")
     f.write("===== *" + signal["displayName"] + "* `" + signal["internalName"] + "` (")
     firstparam = True
     for param in signal["parameters"]:
@@ -147,59 +183,108 @@ def write_signal(f, signal):
         firstparam = False
         f.write("_" + format_data_type(param["type"]) + "_ *" + param["displayName"] + "* `" + param["internalName"] + "`")
     f.write(")\n")
+    f.write("// tag::" + section_id + "[]\n")
+    f.write("// tag::" + section_id + "__description[]\n")
     write_description(f, signal)
+    f.write("// end::" + section_id + "__description[]\n")
 
+    f.write("// tag::" + section_id + "__flags[]\n")
     f.write('[cols = "1,5a"]\n|===\n')
     f.write('| Flags\n')
     f.write('| +++')
     if signal["isVarArgs"]:
         f.write("<span style='color:#e59445'><i>VarArgs</i></span> ")
     f.write('\n+++\n|===\n\n')
+    f.write("// end::" + section_id + "__flags[]\n")
 
     if len(signal["parameters"]) > 0:
+        f.write("// tag::" + section_id + "__params[]\n")
         write_parameters(f, signal["parameters"], "Parameters")
+        f.write("// end::" + section_id + "__params[]\n")
+
+    f.write("// end::" + section_id + "[]\n")
+    f.write("// end::" + section_id + "__title[]\n")
 
 
 def write_class(f, clazz):
-    f.write("[#Class-" + clazz["internalName"] + "]\n")
+    section_id = "Class-" + clazz["internalName"]
+    f.write("// tag::" + section_id + "__title[]\n")
+    f.write("[#" + section_id + "]\n")
     f.write("=== *" + clazz["displayName"] + "* `" + clazz["internalName"] + "`\n")
+    f.write("// tag::" + section_id + "[]\n")
+    f.write("// tag::" + section_id + "__parent[]\n")
     if "parent" in clazz and len(clazz["parent"]) > 0:
         f.write('[cols = "1,5a"]\n|===\n')
         f.write('| Parent\n')
         f.write('| ' + ref_class(clazz["parent"]) + '\n')
         f.write('|===\n\n')
+    f.write("// end::" + section_id + "__parent[]\n")
+    f.write("// tag::" + section_id + "__description[]\n")
     write_description(f, clazz)
+    f.write("// end::" + section_id + "__description[]\n")
     if len(clazz["properties"]) > 0:
+        f.write("// tag::" + section_id + "-Props__title[]\n")
+        f.write("[#" + section_id + "-Props]\n")
         f.write("==== Properties\n")
+        f.write("// tag::" + section_id + "-Props[]\n")
         for prop in clazz["properties"]:
-            write_property(f, prop)
+            write_property(f, prop, section_id)
+        f.write("// end::" + section_id + "-Props[]\n")
+        f.write("// end::" + section_id + "-Props__title[]\n")
     if len(clazz["functions"]) > 0:
+        f.write("// tag::" + section_id + "-Funcs__title[]\n")
+        f.write("[#" + section_id + "-Funcs]\n")
         f.write("==== Functions\n")
+        f.write("// tag::" + section_id + "-Funcs[]\n")
         for func in clazz["functions"]:
-            write_function(f, func)
+            write_function(f, func, section_id)
+        f.write("// end::" + section_id + "-Funcs[]\n")
+        f.write("// end::" + section_id + "-Funcs__title[]\n")
     if len(clazz["signals"]) > 0:
+        f.write("// tag::" + section_id + "-Signals__title[]\n")
+        f.write("[#" + section_id + "-Signals]\n")
         f.write("==== Signals\n")
+        f.write("// tag::" + section_id + "-Signals[]\n")
         for signal in clazz["signals"]:
-            write_signal(f, signal)
+            write_signal(f, signal, section_id)
+        f.write("// end::" + section_id + "-Signals[]\n")
+        f.write("// end::" + section_id + "-Signals__title[]\n")
+    f.write("// end::" + section_id + "[]\n")
+    f.write("// end::" + section_id + "__title[]\n")
 
 
 def write_struct(f, struct):
-    f.write("[#Struct-" + struct["internalName"] + "]\n")
+    section_id = "Struct-" + struct["internalName"]
+    f.write("// tag::" + section_id + "__title[]\n")
+    f.write("[#" + section_id + "]\n")
     f.write("=== *" + struct["displayName"] + "* `" + struct["internalName"] + "`\n")
+    f.write("// tag::" + section_id + "[]\n")
     if "parent" in struct and len(struct["parent"]) > 0:
+        f.write("// tag::" + section_id + "__parent[]\n")
         f.write('[cols = "1,5a"]\n|===\n')
         f.write('| Parent\n')
         f.write('| ' + ref_struct(struct["parent"]) + '\n')
         f.write('|===\n\n')
+        f.write("// end::" + section_id + "__parent[]\n")
+    f.write("// tag::" + section_id + "__description[]\n")
     write_description(f, struct)
+    f.write("// end::" + section_id + "__description[]\n")
     if len(struct["properties"]) > 0:
+        f.write("// tag::" + section_id + "__Prop[]\n")
+        f.write("[#" + section_id + "-Props]\n")
         f.write("==== Properties\n")
         for prop in struct["properties"]:
-            write_property(f, prop)
+            write_property(f, prop, section_id)
+        f.write("// end::" + section_id + "__Props[]\n")
     if len(struct["functions"]) > 0:
+        f.write("// tag::" + section_id + "__Funcs[]\n")
+        f.write("[#" + section_id + "-Funcs]\n")
         f.write("==== Functions\n")
         for func in struct["functions"]:
-            write_function(f, func)
+            write_function(f, func, section_id)
+        f.write("// end::" + section_id + "__Funcs[]\n")
+    f.write("// end::" + section_id + "[]\n")
+    f.write("// end::" + section_id + "__title[]\n")
 
 
 def write_full_doc(f):

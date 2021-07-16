@@ -25,6 +25,12 @@ The Module Control Panel provides a plane were you can place I/O modules like yo
 You can then connect the panel to the computer network so you can then use the I/O modules
 for controlling and monitoring what happens in the network or whatever.
 
+== Interface - Large Control Panel
+include::page$Reflection.adoc[tag=Class-LargeControlPanel,leveloffset=-1]
+
+== Interface - Large Vertical Control Panel
+include::page$Reflection.adoc[tag=Class-LargeVerticalControlPanel,leveloffset=-1]
+
 
 
 include::partial$io_modules.adoc[]

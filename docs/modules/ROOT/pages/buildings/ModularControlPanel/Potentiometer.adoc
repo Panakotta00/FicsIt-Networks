@@ -19,6 +19,9 @@ This IO-Module allows the player to use a rotational movement as input for the c
 The player can rotate the knob indefinetly in any direction.
 Where every rotation emits a network signal.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-ModulePotentiometer,leveloffset=-1]
+
 
 
 include::partial$io_modules_footer.adoc[]

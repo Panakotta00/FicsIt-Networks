@@ -26,6 +26,9 @@ The indicator pole has a dynamic height and can also get stacked.
 You can even access the stacked pole via the API so you don't need to
 connect every pole it self to a computer network.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-IndicatorPole,leveloffset=-1]
+
 
 
 include::partial$building_footer.adoc[]

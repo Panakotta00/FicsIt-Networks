@@ -28,6 +28,9 @@ to the screen for the gpu's bind function so you can bind the screen with a gpu.
 
 The maximum size of a screen is 10 x 10.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-Screen,leveloffset=-1]
+
 
 
 include::partial$building_footer.adoc[]

@@ -21,6 +21,9 @@ You can change the font size dynamically and you can even switch between a monos
 Even if you miss alot features a GPU would provide, the convience of it is, that you are not required
 to have a GPU, so it is more like a plug and play experience.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-ModuleTextDisplay_C,leveloffset=-1]
+
 
 
 include::partial$io_modules_footer.adoc[]

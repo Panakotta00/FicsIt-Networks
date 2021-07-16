@@ -22,6 +22,9 @@ The vehicle scanner is a computer network component that allows you to communica
 The scanner beam colors can be modified.
 It also emits a couple of signals that allow for notification when a vehicle drives over it.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-VehicleScanner,leveloffset=-1]
+
 
 
 include::partial$building_footer.adoc[]

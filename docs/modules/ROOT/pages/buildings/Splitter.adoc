@@ -31,6 +31,9 @@ Each output also has its own output inventory, where the code can move items fro
 If the inventory is full, the code cannot move any item into the output inventory.
 As long as the output inventory contains a item the corresponding conveyor output can grab these items.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-CodeableSplitter,leveloffset=-1]
+
 
 
 include::partial$building_footer.adoc[]

@@ -43,6 +43,8 @@ WARNING: When sending data in the request body, you *ALWAYS* have to define the 
 
 Have a look at xref:lua/examples/InternetCard.adoc[this] example to see how it is done in Lua.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-FINInternetCard,leveloffset=-1]
 
 
 
