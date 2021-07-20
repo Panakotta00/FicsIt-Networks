@@ -7,7 +7,7 @@ The Computer API provides a interface to the computer owns functionalities.
 
 === `beep(number pitch)`
 
-Lets the computer to emit a simple beep sound with the given pitch.
+Lets the computer emit a simple beep sound with the given pitch.
 
 Parameter::
 +
@@ -47,14 +47,12 @@ Stops the current code execution immediately and queues the system to restart in
 
 === `skip()`
 
-If the tick is in the second Lua tick stage, the function will yield the runtime for the tick.
-If it is in the first Lua tick stage, the function will simply do nothing.
-
-Withit you can prevent a out of time exception to occur.
+This function is mainly used to allow switching to a higher tick runtime state.
+Usually you use this when you want to make your code run faster when using functions that can run in asynchronous environment.
 
 === `string getEEPROM()`
 
-Returns the code the current eeprom contains.
+Returns the code the current eeprom contents.
 
 Return Values::
 +
@@ -100,7 +98,7 @@ Return Values::
 
 === `int millis()`
 
-Retruns the amount of milliseconds passed since the system started.
+Returns the amount of milliseconds passed since the system started.
 
 Return Values::
 +
@@ -113,24 +111,11 @@ Return Values::
 |Amount of milliseconds since system start
 |===
 
-=== `GPU[] getGPUs()`
+=== `Object[] getPCIDevices(Class type)`
 
-This function allows you to retrieve the list of all GPUs built into the computer.
+This function allows you to get all installed xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Devices] in a computer of a given type.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|GPU[]
-|GPU[]
-|A array containing instances for each GPU built into the computer.
-|===
-
-=== `Screen[] getScreens()`
-
-This function allows you to retrieve the list of all Screens built into the computer (not own components).
+Have a look at xref:lua/examples/PCIDevices.adoc[this] example to fully understand how it works.
 
 Return Values::
 +
@@ -138,9 +123,9 @@ Return Values::
 |===
 |Name |Type |Description
 
-|Screen[]
-|Screen[]
-|A array containing instances for every Screen built into the computer.
+|Object[]
+|Object[]
+|An array containing instances for each xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device] built into the computer.
 |===
 
 
