@@ -19,14 +19,34 @@
 |===
 
 The Computer Case allows you to build dynamically a computer with different modules.
-Each module provides then a functionallity you might need like a processor or RAM.
+Each module provides then a functionality you might need like a processor or RAM.
 The Computer Case is like the mother board which connects all the different modules together
 and is then capable of running programs.
 
-It also manages the EEPROM, you need at least one EEPROM which then holds the boot code of the computer.
-The type of EEPROM varies between processor types, because different processors use different types of code.
+It also manages the xref:items/EEPROM.adoc[EEPROM], you need at least one xref:items/EEPROM.adoc[EEPROM] which then holds the boot code of the computer.
+The type of xref:items/EEPROM.adoc[EEPROM] varies between processor types, because different processors use different types of code.
 
 You need exactly one processor for the computer case to work.
+
+== Computer Modules
+Computer modules provide different additional features to a computer. +
+A CPU f.e. decides how the computer will process data and what kind of xref:items/EEPROM.adoc[EEPROMs] are allowed.
+Multiple xref:buildings/ComputerCase/RAM.adoc[RAM modules] can be used to increase the internal memory of the computer. +
+The computer case provides a slot places wer you can place these modules with the build gun.
+You can freely arrange these modules and fully customize your computer this way.
+
+== CPUs
+You can only install one CPU into each computer case.
+This CPU then decides how the computer will process data and actually run a program.
+The Lua CPU f.e. allows you to execute Lua programs. Since the underlying data structure my vary between implementations, the installed CPU also decides which xref:items/EEPROM.adoc[EEPROMs] can be used in the computer.
+
+== PCI-Interface
+The PCI-Interface of a computer allows addressing/referencing computer components directly. +
+`PCI-Devices` is the name for this kind computer components. +
+This Interface usually is exposed by the computers kernel and the specific CPU implementation.
+It should provide a function that allows you to retrieve a list of,
+in the computer case currently installed PCI-Devices of a given type. +
+Have a look at xref:/lua/examples/PCIDevices.adoc[this] example to see how it is done in Lua.
 
 include::partial$computer_modules.adoc[]
 

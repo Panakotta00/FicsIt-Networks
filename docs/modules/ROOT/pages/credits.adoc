@@ -16,6 +16,10 @@ UI/UX
 +
 3D Modelling
 
+- https://github.com/RozeDoyanawa[Roze]
++
+Development
+
 - https://www.artstation.com/raysh[Raysh]
 +
 3D Concepts

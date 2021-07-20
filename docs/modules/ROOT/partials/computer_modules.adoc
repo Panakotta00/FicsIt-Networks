@@ -7,6 +7,8 @@ xref:buildings/ComputerCase/GPU.adoc[GPU Base]
 -
 xref:buildings/ComputerCase/GPUT1.adoc[GPU T1]
 -
+xref:buildings/ComputerCase/InternetCard.adoc[Internet Card]
+-
 xref:buildings/ComputerCase/NetworkCard.adoc[Network Card]
 -
 xref:buildings/ComputerCase/ProcessorLua.adoc[Processor Lua]

@@ -22,6 +22,21 @@ Parameters::
 |The network component lua representation the computer should now listen to.
 |===
 
+=== `Object[] listening()`
+
+Returns all signal senders this computer is listening to.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Object[]
+|Object[]
+|An array containing instances to all sginal senders this computer is listening too.
+|===
+
 === `ignore(Component...)`
 
 Removes the running lua context from the listen queue of the given components.
@@ -41,7 +56,7 @@ Parameters::
 === `ignoreAll()`
 
 Stops listening to any signal sender.
-If afterwards there are still coming signals in, it might be the system it self or caching bug.
+If afterwards there are still coming signals in, it might be the system itself or caching bug.
 
 === `clear()`
 
@@ -49,9 +64,9 @@ Clears every signal from the signal queue.
 
 === `string e, Component s, ... pull([number timeout])`
 
-Waits for a signal in the queue. Blocks the excecution until a signal got pushed to the signal queue or the timeout is reached.
+Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached.
 
-Returns directly if ther is already a signal in the queue (the tick doesn't get yieled).
+Returns directly if there is already a signal in the queue (the tick doesn't get yielded).
 
 Parameters::
 +
@@ -62,7 +77,7 @@ Parameters::
 |timeout
 |number
 |The amount of time needs to pass until pull unblocks when no signal got pushed.
- If not set, the function will block indefinetly until a signal gets pushed.
+ If not set, the function will block indefinitely until a signal gets pushed.
  If set to `0` (int), will not yield the tick and directly return with
  the signal data or nil if no signal was in the queue.
 |===
@@ -77,31 +92,20 @@ Return Values::
 |string
 |The name of the returned signal.
 
-Nil when timout got reached.
+Nil when timeout got reached.
 
 |s
 |Component
 |The component representation of the signal sender.
 
-Not set when timout got reached.
+Not set when timeout got reached.
 
 |...
 |...
 |The parameters passed to the signal.
 
-Not set when timout got reached.
+Not set when timeout got reached.
 |===
-
-== Examples
-
-Gets a network component representation, listens to it and waits max. 10 secconds for a signal::
-+
-```lua
-c = component.proxy("0123456789abcdef0123456789abcdef")
-event.listen(c)
-
-e, s, test = event.pull(10)
-```
 
 
 

@@ -31,6 +31,8 @@ You can transfer items from on of the inputs to the output if the given input ha
 Each input queue gets automaticaly filled by the attached conveyor with up to two values.
 You can then decide for each input when the first item in the queue get transfered to the output.
 
+== Interface
+include::page$Reflection.adoc[tag=Class-CodeableMerger,leveloffset=-1]
 
 
 

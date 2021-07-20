@@ -148,7 +148,7 @@ Parameters::
 
 === `File open(string path, string mode)`
 
-Openes a file-stream and returns it as File-table.
+Opens a file-stream and returns it as File-table.
 
 Parameters::
 +

@@ -4,7 +4,7 @@
 [cols="1,3"]
 |===
 |Building Type
-|Computer Module
+|xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device]
 |===
 
 This is the base type of all GPUs.
@@ -21,56 +21,8 @@ Because the GPUs rendering processes might vary, they might have
 different functions and signals provided.
 But there are a couple which are implemented by every GPU.
 
-== Functions
-
-=== `bindScreen(Screen screen)`
-
-This function binds the gpu to the given screen.
-If the gpu is already bound to a screen, the old bound will get destroyed.
-If the screen is nil, the gpu will just unbind from the current bound screen.
-
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|screen
-|Screen
-|the screen you want to bind to
-|===
-
-=== `Screen getScreen()`
-
-This function allows you to access the currently bound screen of the gpu.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|Screen
-|Screen
-|the currently bound screen of the gpu. Nil if not screen is bound.
-|===
-
-== Signals
-
-=== `ScreenBound(Scrren oldScreen)`
-
-This signal gets emitted when a new screen gets bound to the gpu.
-
-Paramteres::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|oldScreen
-|Screen
-|the previously to the gpu bound screen.
-|===
+== Interface
+include::page$Reflection.adoc[tag=Class-FINComputerGPU,leveloffset=-1]
 
 
 
