@@ -34,7 +34,7 @@ public:
     static FString ExpandPath(FString folder, FString file, FString extension);
 
 	UFUNCTION(BlueprintCallable, Category = "Utilities")
-	static TArray<FString> GetFilesInPath(FString folder, FString extension);
+	static TArray<FString> GetFilesInPath(FString folder, FString extension, bool create);
 
 	UFUNCTION(BlueprintCallable, Category = "Utilities")
 	static FString GetFileName(FString path, bool stripExtension);
