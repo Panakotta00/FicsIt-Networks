@@ -48,7 +48,7 @@ void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
 }
 
 void AFINComputerGPU::BindScreen(const FFINNetworkTrace& screen) {
-	if (screen.GetUnderlyingPtr().IsValid()) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
+	if (IsValid(screen.GetUnderlyingPtr())) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
 	if (Screen == screen) return;
 	FFINNetworkTrace oldScreen = Screen;
 	Screen = FFINNetworkTrace();

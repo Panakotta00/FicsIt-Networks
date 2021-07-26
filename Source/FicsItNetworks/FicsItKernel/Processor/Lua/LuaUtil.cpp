@@ -114,12 +114,15 @@ namespace FicsItKernel {
 			case FIN_BOOL:
 				return static_cast<FINBool>(lua_toboolean(L, Index));
 			case FIN_INT:
-				return static_cast<FINInt>(luaL_checkinteger(L, Index));
+				return static_cast<FINInt>(lua_tointeger(L, Index));
 			case FIN_FLOAT:
-				return static_cast<FINFloat>(luaL_checknumber(L, Index));
-			case FIN_STR:
-				return static_cast<FINStr>(luaL_checkstring(L, Index));
-			case FIN_OBJ: {
+				return static_cast<FINFloat>(lua_tonumber(L, Index));
+			case FIN_STR: {
+				size_t len;
+				const char* s = luaL_tolstring(L, Index, &len);
+				FUTF8ToTCHAR Conv(s, len);
+				return FString(Conv.Length(), Conv.Get());
+			} case FIN_OBJ: {
 				UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Prop);
 				if (ObjProp && ObjProp->GetSubclass()) {
 					return static_cast<FINObj>(getObjInstance(L, Index, ObjProp->GetSubclass()).Get());

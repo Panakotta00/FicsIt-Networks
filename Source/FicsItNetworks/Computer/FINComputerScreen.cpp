@@ -1,4 +1,4 @@
-#include "FINComputerScreen.h"
+﻿#include "FINComputerScreen.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 void AFINComputerScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -38,13 +38,13 @@ bool AFINComputerScreen::ShouldSave_Implementation() const {
 }
 
 void AFINComputerScreen::BindGPU(const FFINNetworkTrace& gpu) {
-	if (gpu.GetUnderlyingPtr().IsValid()) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
+	if (IsValid(gpu.GetUnderlyingPtr())) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
 	if (!(GPU == gpu)) {
 		FFINNetworkTrace oldGPU = GPU;
 		GPU = FFINNetworkTrace();
-		if (oldGPU.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr().Get())->BindScreen(FFINNetworkTrace());
+		if (IsValid(oldGPU.GetUnderlyingPtr())) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr())->BindScreen(FFINNetworkTrace());
 		GPU = gpu;
-		if (gpu.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr().Get())->BindScreen(gpu / this);
+		if (IsValid(gpu.GetUnderlyingPtr())) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
 		GPUPtr = GPU.Get();
 	}
 	GetWorldTimerManager().SetTimerForNextTick([this]() {
