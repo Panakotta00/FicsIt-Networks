@@ -1,4 +1,4 @@
-﻿#include "FINComputerScreen.h"
+#include "FINComputerScreen.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 void AFINComputerScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -47,7 +47,9 @@ void AFINComputerScreen::BindGPU(const FFINNetworkTrace& gpu) {
 		if (gpu.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr().Get())->BindScreen(gpu / this);
 		GPUPtr = GPU.Get();
 	}
-	NetMulti_OnGPUUpdate();
+	GetWorldTimerManager().SetTimerForNextTick([this]() {
+		NetMulti_OnGPUUpdate();
+	});
 }
 
 FFINNetworkTrace AFINComputerScreen::GetGPU() const {

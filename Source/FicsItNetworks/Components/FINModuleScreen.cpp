@@ -1,4 +1,4 @@
-﻿#include "FINModuleScreen.h"
+#include "FINModuleScreen.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
 
 AFINModuleScreen::AFINModuleScreen() {
@@ -46,7 +46,9 @@ void AFINModuleScreen::BindGPU(const FFINNetworkTrace& gpu) {
 		if (gpu.GetUnderlyingPtr().IsValid()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr().Get())->BindScreen(gpu / this);
 		GPUPtr = GPU.Get();
 	}
-	NetMulti_OnGPUUpdate();
+	GetWorldTimerManager().SetTimerForNextTick([this]() {
+		NetMulti_OnGPUUpdate();
+	});
 }
 
 FFINNetworkTrace AFINModuleScreen::GetGPU() const {

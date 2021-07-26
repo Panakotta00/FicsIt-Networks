@@ -1,4 +1,4 @@
-﻿#include "FINScreen.h"
+#include "FINScreen.h"
 
 
 #include "FGColoredInstanceMeshProxy.h"
@@ -120,7 +120,9 @@ void AFINScreen::BindGPU(const FFINNetworkTrace& gpu) {
 		bGPUChanged = true;
 		GPUPtr = GPU.Get();
 	}
-	NetMulti_OnGPUUpdate();
+	GetWorldTimerManager().SetTimerForNextTick([this]() {
+		NetMulti_OnGPUUpdate();
+	});
 }
 
 FFINNetworkTrace AFINScreen::GetGPU() const {
