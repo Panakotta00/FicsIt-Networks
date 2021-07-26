@@ -306,7 +306,7 @@ namespace FicsItKernel {
 
 		bool newInstance(lua_State* L, const FFINNetworkTrace& Trace) {
 			// check obj and if type is registered
-			UObject* Obj = Trace.GetUnderlyingPtr().Get();
+			UObject* Obj = Trace.GetUnderlyingPtr();
 			UFINClass* Class = nullptr;
 			if (IsValid(Obj)) Class = FFINReflection::Get()->FindClass(Obj->GetClass());
 			if (!Class) {

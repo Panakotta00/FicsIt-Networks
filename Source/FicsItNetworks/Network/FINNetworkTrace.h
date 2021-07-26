@@ -23,7 +23,9 @@ struct FICSITNETWORKS_API FFINNetworkTrace {
 private:
 	TSharedPtr<FFINNetworkTrace> Prev = nullptr;
 	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
-	FWeakObjectPtr Obj = nullptr;
+
+	UPROPERTY()
+	UObject* Obj = nullptr;
 
 public:
 	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> fallbackTraceStep;
@@ -34,8 +36,8 @@ public:
 	static TMap<UClass*, TPair<TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>, TMap<UClass*, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>>>> interfaceTraceStepMap;
 
 	/**
-	* Trys to find the most suitable trace step of for both given classes
-	*/
+	 * Trys to find the most suitable trace step of for both given classes
+	 */
 	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> findTraceStep(UClass* A, UClass* B);
 	
 	FFINNetworkTrace(const FFINNetworkTrace& trace);
@@ -118,12 +120,12 @@ public:
 	/**
 	 * returns the underlying weak object ptr without any checks
 	 */
-	const FWeakObjectPtr& GetUnderlyingPtr() const;
+	UObject* GetUnderlyingPtr() const;
 
 	/**
 	 * returns the starting object of the trace
 	 */
-	FWeakObjectPtr GetStartPtr() const;
+	UObject* GetStartPtr() const;
 
 	/**
 	 * returns if the trace is valid or not

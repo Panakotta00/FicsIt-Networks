@@ -14,77 +14,39 @@ The following list contains all available standard Lua libraries, non-standard l
 - string
 - IO (only the File-Table)
 - Serialization
+- debug (parts of it for error handling)
 
 === Specialties
 
 ==== `coroutine.resume`
 
-The `coroutine.resume` function got a small upgrad allowing for the implementation of multithreading.
+The `coroutine.resume` function got a small upgrade allowing for the implementation of multithreading.
 
-You can use it just as usual, but if you add a additional paramter at the beginning
-of the paramter list (before the thread) of type bool and it is set to true,
+You can use it just as usual, but if you add a parameter at the beginning
+of the parameter list (before the thread) of type bool, and it is set to true,
 then the resuming function will only keep executing until the end of this lua tick.
-After that lua tick, the function will return and you can do something else.
+After that lua tick, the function will return, and you can do something else.
 
-Important to note is though, you dont know if the resumed function yielded it self,
+Important to note is though, you don't know if the resumed function yielded itself,
 or if it was due to the end of the lua tick.
 Since the return will contain nothing if it yielded based on the end of the lua tick.
-With that said, also resuming a function that yielded that way with paramters will do nothing
-about those paramters, they will just get dropped.
+With that said, also resuming a function that yielded that way with parameters will do nothing
+about those parameters, they will just get dropped.
 
 You should have a look at the xref:lua/examples/multiThreading.adoc[multi threading example] to find a use case for it.
 
-== Lua Instances
+== Additional Runtime Functions (besides APIs)
 
-Lua Instances are speacial data-type FicsIt-Networks provides, allowing us to map a lot more easily different functions and properties of a game object to Lua.
-These instances work through interacting with the xref::BasicConcept.adoc#_reflection_system[Reflection-System].
+The lua runtime additionally has a couple of functions allowing you to search for different things of the reflection system and the game itself.
 
-The instance additionally  provides the `getHash`-Function and the `hash` property.
-These to will give you some hash value of the underlying object.
-This allows you to use instances as keys of tables.
+=== `Class findClass(string name)`
 
-If a Lua Instance is also a network component it also has a nick and id property.
-You can read and write the string `nick` property to get and set the nickname of the component.
-You can just read the `id` string property to get the id of the component.
+Tries to find an object type with the given name, and returns the found type.
 
-=== Properties
+=== `Class findStruct(string name)`
 
-The instance can have properties (aka. attributes) you can interact with them just like a variable.
-For this use the `.` access operator.
-
-Some properties are read only though, and if you try to write to them, a Lua exception gets thrown.
-
-=== Functions
-
-The instance can also have function allowing you to call subroutines. These functions can have multiple input and output values.
-To access such a member function you need to use the `:` member access operator or pass the instance as the first argument to the function.
-
-== Lua Structs
-
-Lua structs work essentially the same as lua instances.
-But, they f.e. can't be nil and you can construct one your self.
-If f.e. a function has such a struct as input parameter,
-you can then provide a table with the property names as keys and the given values.
-These properties will the get used accordingly in the struct.
-
-f.e. if you have a `vector` input parameter you can provide the table
-[source,Lua]
-----
-{x = 42, y = 69, z = 42.69}
-----
-
-== Reflection
-
-The lua runtime additionally has a couple of functions allowing you to search for differnt things.
-
-=== `Type findClass(string name)`
-
-Trys to find a object type with the given name, and returns the found type.
-
-=== `Type findStruct(string name)`
-
-Trys to find a structure type with the given name, and returns the found type.
+Tries to find a structure type with the given name, and returns the found type.
 
 === `ItemType findItem(string name)`
 
-Trys to find a item type with the given name, and returns the found item type.
+Tries to find an item type with the given name, and returns the found item type.
