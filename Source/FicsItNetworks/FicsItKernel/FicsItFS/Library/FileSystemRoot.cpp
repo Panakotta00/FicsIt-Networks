@@ -7,22 +7,22 @@ FileSystemException::FileSystemException(std::string what) : std::exception(what
 
 SRef<Device> FileSystemRoot::getDevice(Path path, Path& pending) {
 	Path mountP = "";
+	path = path.absolute();
 	SRef<Device> mountD;
 	for (auto mount = mounts.begin(); mount != mounts.end(); mount++) {
 		if (!mount->second.first.isValid()) {
 			mounts.erase(mount--);
 			continue;
 		}
-		if (path.startsWith(mount->first) && mount->first.getNodeCount() >= mountP.getNodeCount()) {
+		if (path.startsWith(mount->first) && mount->first.str().size() >= mountP.str().size()) {
 			mountP = mount->first;
 			mountD = mount->second.first;
 		}
 	}
 	if (mountD.isValid()) {
-		pending = path;
-		for (int i = mountP.getNodeCount(); i > 0; --i) pending = pending.next();
+		pending = path.str().erase(0, mountP.str().size());
 	}
-	pending.absolute = false;
+	pending = pending.relative();
 	return mountD;
 }
 
@@ -47,23 +47,25 @@ FileSystemRoot& CodersFileSystem::FileSystemRoot::operator=(FileSystemRoot&& oth
 
 SRef<FileStream> FileSystemRoot::open(Path path, FileMode mode) {
 	Path pending = "";
-	auto device = getDevice(path, pending);
+	auto device = getDevice(path.absolute(), pending);
 	if (!device.isValid()) return nullptr;
 	return device->open(pending, mode);
 }
 
 SRef<Directory> FileSystemRoot::createDir(Path path, bool createTree) {
 	Path pending = "";
-	auto device = getDevice(path.prev(), pending);
+	path = path.absolute();
+	auto device = getDevice(path / "..", pending);
 	if (!device.isValid()) return nullptr;
-	return device->createDir(pending / path.getFinal(), createTree);
+	return device->createDir(pending / path.fileName(), createTree);
 }
 
 bool FileSystemRoot::remove(Path path, bool recursive) {
 	Path pending = "";
-	auto device = getDevice(path.prev(), pending);
+	path = path.absolute();
+	auto device = getDevice(path / "..", pending);
 	if (!device.isValid()) return false;
-	auto removed = device->remove(pending / path.getFinal(), recursive);
+	auto removed = device->remove(pending / path.fileName(), recursive);
 	if (removed) {
 		for (auto i = mounts.begin(); i != mounts.end(); i++) {
 			if (i->first.startsWith(path)) {
@@ -74,16 +76,18 @@ bool FileSystemRoot::remove(Path path, bool recursive) {
 	return true;
 }
 
-bool FileSystemRoot::rename(Path path, const NodeName& name) {
+bool FileSystemRoot::rename(Path path, const std::string& name) {
+	if (!Path::isNode(name)) return false;
+	path = path.absolute();
 	Path pending = "";
-	auto device = getDevice(path.prev(), pending);
+	auto device = getDevice(path / "..", pending);
 	if (!device.isValid()) return false;
-	auto renamed = device->rename(pending / path.getFinal(), name);
+	auto renamed = device->rename(pending / path.fileName(), name);
 	if (renamed) {
 		for (auto i = mounts.begin(); i != mounts.end(); i++) {
 			if (i->first.startsWith(path)) {
-				auto newMountPathSub = i->first.removeFrontNodes(path.getNodeCount());
-				mounts[path.prev() / name / newMountPathSub] = i->second;
+				auto newMountPathSub = i->first.relative().str().erase(0, path.relative().str().size());
+				mounts[path / ".." / name / newMountPathSub] = i->second;
 				mounts.erase(i--);
 			}
 		}
@@ -92,6 +96,8 @@ bool FileSystemRoot::rename(Path path, const NodeName& name) {
 }
 
 int FileSystemRoot::copy(Path from, Path to, bool recursive) {
+	from = from.absolute();
+	to = to.absolute();
 	Path pendingFrom = "";
 	Path pendingTo = "";
 	auto deviceFrom = getDevice(from, pendingFrom);
@@ -105,18 +111,18 @@ int FileSystemRoot::copy(Path from, Path to, bool recursive) {
 	if (!recursive && dynamic_cast<Directory*>(f.get())) return 1;
 
 	if (!t.isValid()) {
-		SRef<Directory> prevT = deviceTo->get(pendingTo.prev());
+		SRef<Directory> prevT = deviceTo->get(pendingTo / "..");
 		if (!prevT.isValid()) return 1;
 		if (dynamic_cast<File*>(f.get())) {
-			t = prevT->createFile(pendingTo.getFinal());
+			t = prevT->createFile(pendingTo.fileName());
 		} else if (dynamic_cast<Directory*>(f.get())) {
-			t = prevT->createSubdir(pendingTo.getFinal());
+			t = prevT->createSubdir(pendingTo.fileName());
 		}
-	} else if (from.getFinal() != to.getFinal()) {
+	} else if (from.fileName() != to.fileName()) {
 		SRef<Directory> tDir = t;
 		if (tDir.isValid()) {
-			t = tDir->createSubdir(from.getFinal());
-			to = to / from.getFinal();
+			t = tDir->createSubdir(from.fileName());
+			to = to / from.fileName();
 		}
 	}
 	if (!t.isValid()) return 1;
@@ -144,6 +150,8 @@ int FileSystemRoot::copy(Path from, Path to, bool recursive) {
 int FileSystemRoot::moveInternal(Path from, Path to) {
 	Path pendingFrom = "";
 	Path pendingTo = "";
+	from = from.absolute();
+	to = to.absolute();
 	auto deviceFrom = getDevice(from, pendingFrom);
 	if (!deviceFrom.isValid()) return 1;
 	auto deviceTo = getDevice(to, pendingTo);
@@ -153,22 +161,22 @@ int FileSystemRoot::moveInternal(Path from, Path to) {
 	auto t = deviceTo->get(pendingTo);
 
 	if (!t.isValid()) {
-		SRef<Directory> prevT = deviceTo->get(pendingTo.prev());
+		SRef<Directory> prevT = deviceTo->get(pendingTo / "..");
 		if (!prevT.isValid()) return 1;
 		if (dynamic_cast<File*>(f.get())) {
-			t = prevT->createFile(pendingTo.getFinal());
+			t = prevT->createFile(pendingTo.fileName());
 		} else if (dynamic_cast<Directory*>(f.get())) {
-			t = prevT->createSubdir(pendingTo.getFinal());
+			t = prevT->createSubdir(pendingTo.fileName());
 		}
-	} else if (from.getFinal() != to.getFinal()) {
+	} else if (from.fileName() != to.fileName()) {
 		SRef<Directory> tDir = t;
 		if (tDir.isValid()) {
 			if (dynamic_cast<File*>(f.get())) {
-				t = tDir->createFile(from.getFinal());
+				t = tDir->createFile(from.fileName());
 			} else if (dynamic_cast<Directory*>(f.get())) {
-				t = tDir->createSubdir(from.getFinal());
+				t = tDir->createSubdir(from.fileName());
 			}
-			to = to / from.getFinal();
+			to = to / from.fileName();
 		}
 	}
 	if (!t.isValid()) return 1;
@@ -198,9 +206,11 @@ int FileSystemRoot::moveInternal(Path from, Path to) {
 }
 
 int FileSystemRoot::move(Path from, Path to) {
-	if (from.getNodeCount() < 1) return 1;
+	from = from.absolute();
+	if (from.isRoot()) return 1;
+	to = to.absolute();
 	Path pendingFrom = "";
-	auto deviceFrom = getDevice(from.prev(), pendingFrom);
+	auto deviceFrom = getDevice(from / "..", pendingFrom);
 	if (!deviceFrom.isValid()) return 1;
 	auto prevFrom = deviceFrom->get(pendingFrom);
 	if (!prevFrom.isValid()) return 1;
@@ -208,6 +218,7 @@ int FileSystemRoot::move(Path from, Path to) {
 }
 
 SRef<Node> FileSystemRoot::get(Path path) {
+	path = path.absolute();
 	auto cached_node = cache.find(path);
 	if (cached_node != cache.end()) {
 		if (!cached_node->second.isValid()) {
@@ -224,19 +235,21 @@ SRef<Node> FileSystemRoot::get(Path path) {
 	return cache[path] = node;
 }
 
-unordered_set<NodeName> FileSystemRoot::childs(Path path) {
+unordered_set<std::string> FileSystemRoot::childs(Path path) {
+	path = path.absolute();
 	Path pending = "";
 	auto device = getDevice(path, pending);
 	if (!device.isValid()) throw FileSystemException("no device at path found");
-	unordered_set<NodeName> names = device->childs(pending);
+	unordered_set<std::string> names = device->childs(pending);
 	for (auto mount : mounts) {
 		Path mountPoint = mount.first;
-		if (mountPoint.getNodeCount() > 0 && mountPoint.prev() == path) names.insert(mountPoint.getFinal());
+		if (!mountPoint.isRoot() && (mountPoint / "..") == path) names.insert(mountPoint.fileName());
 	}
 	return names;
 }
 
 bool FileSystemRoot::mount(SRef<Device> device, Path path) {
+	path = path.absolute();
 	for (auto& mount : mounts) {
 		if (mount.first == path && mount.second.first == device) return false;
 	}
@@ -246,6 +259,7 @@ bool FileSystemRoot::mount(SRef<Device> device, Path path) {
 }
 
 bool FileSystemRoot::unmount(Path path) {
+	path = path.absolute();
 	auto p = mounts.find(path);
 	if (p == mounts.end()) return false;
 	p->second.first->removeListener(p->second.second);

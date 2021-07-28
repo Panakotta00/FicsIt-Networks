@@ -92,7 +92,7 @@ namespace CodersFileSystem {
 		* @param[in]	name	the new name of the node
 		* @return	returns true if it was able to rename the node
 		*/
-		virtual bool rename(Path path, const NodeName& name);
+		virtual bool rename(Path path, const std::string& name);
 
 		/*
 		* copies the from node to the to node
@@ -129,7 +129,7 @@ namespace CodersFileSystem {
 		* @param[in]	path	path to the node you want to get the childs form
 		* @return	returns a list of names
 		*/
-		virtual std::unordered_set<NodeName> childs(Path path);
+		virtual std::unordered_set<std::string> childs(Path path);
 
 		/*
 		* trys to mount the given device at teh given path

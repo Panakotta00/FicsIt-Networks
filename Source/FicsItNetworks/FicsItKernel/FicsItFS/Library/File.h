@@ -28,7 +28,7 @@ namespace CodersFileSystem {
 	public:
 		File();
 
-		virtual std::unordered_set<NodeName> getChilds() const override;
+		virtual std::unordered_set<std::string> getChilds() const override;
 	};
 
 	class MemFile : public File {

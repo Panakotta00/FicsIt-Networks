@@ -1,44 +1,170 @@
 #pragma once
 
+#include <regex>
 #include <string>
-#include <vector>
-
-#include "FileSystem.h"
-#include "NodeName.h"
 
 namespace CodersFileSystem {
 	class Path {
 	private:
-		std::vector<NodeName> path;
-
-	protected:
-		Path(std::vector<NodeName> path, bool absolute);
-
+		static std::regex sepperatorPattern;
+		static std::regex nodePattern;
+		std::string path;
+	
 	public:
-		bool absolute = false;
+		static bool isNode(const std::string& str) {
+			return std::regex_match(str, nodePattern);
+		}
+		
+		Path() = default;
+		Path(const char* path) : Path(std::string(path)) {}
+		Path(std::string str) {
+			if (str.size() < 1) return;
+			if (str[0] == '/') path = "/";
+			std::smatch match;
+			while (std::regex_search(str, match, sepperatorPattern)) {
+				if (0 != match.position()) {
+					std::string node = str.substr(0, match.position());
+					append(node);
+				}
+				str = match.suffix();
+			}
+			append(str);
+		}
 
-		Path();
-		Path(const char* path);
-		explicit Path(std::string path);
-		explicit Path(NodeName node);
-		Path(std::filesystem::path path);
+		Path& append(std::string node) {
+			size_t pos = path.find_last_of("/");
+			if (node == ".") {
+				if (pos != path.size()-1) path.append("/");
+				path.append(node);
+			} else if (node == "..") {
+				if (pos != path.size()-1) path.append("/");
+				path.append(node);
+			} else if (isNode(node)) {
+				if (pos != path.size()-1) path.append("/");
+				path.append(node);
+			}
+			return *this;
+		}
+		
+		std::string getRoot() const {
+			std::string str = relative();
+			size_t slash = str.find_first_of("/");
+			return str.substr(0, slash);
+		}
+		
+		bool isSingle() const {
+			size_t pos = path.find('/', 1);
+			return (pos == std::string::npos && path.size() > 0 && path != "/");
+		}
 
-		std::string getRoot() const;
-		bool isFinal() const;
-		bool startsWith(const Path& other) const;
-		Path next() const;
-		Path prev() const;
-		std::string str(bool noAbsolute = false) const;
-		size_t getNodeCount() const;
-		Path removeFrontNodes(size_t count) const;
-		std::string getFinal() const;
+		bool isAbsolute() const {
+			return path.substr(0, 1) == "/";
+		}
 
-		bool operator==(const Path& other) const;
-		bool operator<(const Path& other) const;
-		Path operator/(const Path& other) const;
-		Path operator/(const NodeName& node) const;
-		Path& operator=(const Path& other);
+		bool isEmpty() const {
+			return (path.size() == 1 && isAbsolute()) || path.size() == 0;
+		}
 
-		operator std::filesystem::path() const;
+		bool isRoot() const {
+			return path == "/";
+		}
+		
+		bool startsWith(const Path& other) const {
+			Path o = isAbsolute() ? other.absolute() : other.relative();
+			return path.substr(0, o.path.size()) == o.str();
+		}
+
+		Path removeFrontNodes(size_t count) const {
+			size_t pos = 0;
+			for (int i = 0; i < count; ++i) {
+				pos = path.find('/', pos);
+				if (pos == std::string::npos) return "";
+				pos = pos + 1;
+			}
+			return path.substr(pos);
+		}
+
+		std::string fileName() const {
+			size_t slash = path.find_last_of("/");
+			if (slash == std::string::npos) return path;
+			return path.substr(slash+1);
+		}
+
+		std::string fileExtension() const {
+			std::string name = fileName();
+			size_t pos = name.find_last_of(".");
+			return name.substr(pos < 1 ? std::string::npos : pos);
+		}
+
+		std::string fileStem() const {
+			std::string name = fileName();
+			size_t pos = name.find_last_of(".");
+			return name.substr(0, pos < 1 ? std::string::npos : pos);
+		}
+
+		Path normalize() const {
+			Path newPath;
+			if (isAbsolute()) newPath.path = "/";
+			size_t posEnd, posStart = 0;
+			do {
+				posEnd = path.find_first_of("/", posStart);
+				std::string node = path.substr(posStart, posEnd-posStart);
+				posStart = posEnd+1;
+				if (node == ".") {
+				} else if (node == "..") {
+					size_t pos = newPath.path.find_last_of("/");
+					if (pos == std::string::npos) {
+						newPath.path = "";
+					} else {
+						newPath.path.erase(pos);
+					}
+					if (newPath.path.size() < 1 && isAbsolute()) newPath.path = "/";
+				} else if (isNode(node)) {
+					if (newPath.path.size() > 0 && newPath.path.back() != '/') {
+						newPath.path.append("/");
+					}
+					newPath.path.append(node);
+				}
+			} while (posEnd != std::string::npos);
+			return newPath;
+		}
+		
+		Path absolute() const {
+			if (isAbsolute()) return normalize();
+			return "/" + normalize().path;
+		}
+		
+		Path relative() const {
+			if (isAbsolute()) return normalize().path.substr(1);
+			return normalize();
+		}
+		
+		Path operator/(const Path& other) const {
+			if (other.isAbsolute()) return other;
+			Path newPath = *this;
+			size_t posEnd, posStart = 0;
+			do {
+				posEnd = other.path.find_first_of("/", posStart);
+				newPath.append(other.path.substr(posStart, posEnd-posStart));
+				posStart = posEnd+1;
+			} while (posEnd != std::string::npos);
+			return newPath;
+		}
+
+		std::string str() const {
+			return path;
+		}
+
+		bool operator==(const Path& other) const {
+			return relative().str() == other.relative().str();
+		}
+
+		bool operator<(const Path& other) const {
+			return str() < other.str();
+		}
+		
+		operator std::string() const {
+			return path;
+		}
 	};
 }

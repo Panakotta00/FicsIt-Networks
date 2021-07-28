@@ -74,7 +74,7 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 }
 
 void CopyPath(CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice, CodersFileSystem::SRef<CodersFileSystem::Device> ToDevice, CodersFileSystem::Path Path) {
-	for (CodersFileSystem::NodeName Child : FromDevice->childs(Path)) {
+	for (std::string Child : FromDevice->childs(Path)) {
 		CodersFileSystem::Path ChildPath = Path / Child;
 		CodersFileSystem::SRef<CodersFileSystem::Node> ChildNode = FromDevice->get(ChildPath);
 		if (CodersFileSystem::SRef<CodersFileSystem::File> File = ChildNode) {
@@ -108,7 +108,7 @@ bool UFINComputerDriveDesc::CopyData_Implementation(UObject* WorldContext, const
 	CodersFileSystem::SRef<CodersFileSystem::Device> ToDevice = To->GetDevice();
 
 	// delete all data in ToDevice
-	for (CodersFileSystem::NodeName Child : ToDevice->childs("/")) {
+	for (std::string Child : ToDevice->childs("/")) {
 		ToDevice->remove(CodersFileSystem::Path(Child), true);
 	}
 

@@ -19,8 +19,8 @@ FileMode CodersFileSystem::operator~(FileMode m) {
 
 File::File() {}
 
-unordered_set<NodeName> File::getChilds() const {
-	return unordered_set<NodeName>();
+unordered_set<std::string> File::getChilds() const {
+	return unordered_set<std::string>();
 }
 
 MemFile::MemFile(ListenerListRef listeners, SizeCheckFunc sizeCheck) : File(), listeners(listeners), sizeCheck(sizeCheck) {}

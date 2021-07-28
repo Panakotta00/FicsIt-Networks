@@ -3,18 +3,18 @@
 #include "LuaProcessor.h"
 #include "FicsItNetworks/FicsItKernel/FicsItFS/FileSystem.h"
 
-#define LuaFunc(funcName, Code) \
+#define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
 	FLuaSyncCall SyncCall(L); \
 	UFINKernelSystem* kernel = processor->GetKernel(); \
 	FFINKernelFSRoot* self = kernel->GetFileSystem(); \
-	if (!self) return luaL_error(L, "component is invalid"); \
-	Code \
+	if (!self) return luaL_error(L, "component is invalid");
+#define LuaFuncEnd() \
 }
 
 #define LuaFileFuncName(funcName) luaFile ## funcName
-#define LuaFileFunc(funcName, Code) \
+#define LuaFileFunc(funcName) \
 int LuaFileFuncName(funcName) (lua_State* L) { \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
 	FLuaSyncCall SyncCall(L); \
@@ -42,18 +42,17 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 	CodersFileSystem::SRef<CodersFileSystem::FileStream>& file = self->file; \
 	if (!file) { \
 		return luaL_error(L, "filestream not open"); \
-	} \
-	Code \
-}
+	}
 
 #define CatchExceptionLua \
 	catch (const std::exception& ex) { \
+		FDebug::DumpStackTraceToLog(); \
 		return luaL_error(L, ex.what()); \
 	}
 
 namespace FicsItKernel {
 	namespace Lua {
-		LuaFunc(makeFileSystem, {
+		LuaFunc(makeFileSystem) {
 			const std::string type = luaL_checkstring(L, 1);
 			const std::string name = luaL_checkstring(L, 2);
 			CodersFileSystem::SRef<CodersFileSystem::Device> device;
@@ -66,9 +65,9 @@ namespace FicsItKernel {
 				lua_pushboolean(L, dev.isValid() ? dev->addDevice(device, name) : false);
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(removeFileSystem, {
+		LuaFunc(removeFileSystem) {
 			const std::string name = luaL_checkstring(L, 1);
 			const CodersFileSystem::SRef<FFINKernelFSDevDevice> dev = self->getDevDevice();
 			if (dev.isValid()) {
@@ -83,15 +82,15 @@ namespace FicsItKernel {
 			}
 			lua_pushboolean(L, false);
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(initFileSystem, {
+		LuaFunc(initFileSystem) {
 			const std::string path = luaL_checkstring(L, 1);
 			lua_pushboolean(L, kernel->InitFileSystem(CodersFileSystem::Path(path)));
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(open, {
+		LuaFunc(open) {
 			FString Mode = "r";
 			if (lua_isstring(L, 2)) Mode = FString(lua_tostring(L, 2));
 			CodersFileSystem::FileMode m;
@@ -109,55 +108,55 @@ namespace FicsItKernel {
 				luaFile(L, stream, stream ? self->persistPath(path) : "");
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(createDir, {
+		LuaFunc(createDir) {
 			const std::string path = luaL_checkstring(L, 1);
 			const bool all = (bool)lua_toboolean(L, 2);
 			try {
 				lua_pushboolean(L, self->createDir(CodersFileSystem::Path(path), all).isValid());
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(remove, {
+		LuaFunc(remove) {
 			const CodersFileSystem::Path path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			const bool all = (bool)lua_toboolean(L, 2);
 			try {
 				lua_pushboolean(L, self->remove(path, all));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(move, {
+		LuaFunc(move) {
 			const auto from = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			const auto to = CodersFileSystem::Path(luaL_checkstring(L, 2));
 			try {
 				lua_pushboolean(L, self->move(from, to) == 0);
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(rename, {
+		LuaFunc(rename) {
 			const auto from = CodersFileSystem::Path(luaL_checkstring(L, 1));
-			const auto to = CodersFileSystem::NodeName(luaL_checkstring(L, 2));
+			const auto to = std::string(luaL_checkstring(L, 2));
 			try {
 				lua_pushboolean(L, self->rename(from, to));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(exists, {
+		LuaFunc(exists) {
 			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			try {
 				lua_pushboolean(L, self->get(path).isValid());
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(childs, {
+		LuaFunc(childs) {
 			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
-			std::unordered_set<CodersFileSystem::NodeName> childs;
+			std::unordered_set<std::string> childs;
 			try {
 				childs = self->childs(path);
 			} CatchExceptionLua
@@ -168,46 +167,46 @@ namespace FicsItKernel {
 				lua_seti(L, -2, i++);
 			}
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(isFile, {
+		LuaFunc(isFile) {
 			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			try {
 				lua_pushboolean(L, !!dynamic_cast<CodersFileSystem::File*>(self->get(path).get()));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(isDir, {
+		LuaFunc(isDir) {
 			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			try {
 				lua_pushboolean(L, !!dynamic_cast<CodersFileSystem::Directory*>(self->get(path).get()));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(mount, {
+		LuaFunc(mount) {
 			const auto devPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			const auto mountPath = CodersFileSystem::Path(luaL_checkstring(L, 2));
 			try {
 				lua_pushboolean(L, CodersFileSystem::DeviceNode::mount(*self, devPath, mountPath));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(unmount, {
+		LuaFunc(unmount) {
 			const auto mountPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			try {
 				lua_pushboolean(L, self->unmount(mountPath));
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 		
 		static int luaDoFileCont(lua_State *L, int d1, lua_KContext d2) {
 			return lua_gettop(L) - 1;
 		}
 
-		LuaFunc(doFile, {
+		LuaFunc(doFile) {
 			const CodersFileSystem::Path path(luaL_checkstring(L, 1));
 			CodersFileSystem::SRef<CodersFileSystem::FileStream> file;
 			try {
@@ -224,9 +223,9 @@ namespace FicsItKernel {
 			luaL_loadbufferx(L, code.c_str(), code.size(), ("@" + path.str()).c_str(), "t");
 			lua_callk(L, 0, LUA_MULTRET, 0, luaDoFileCont);
 			return luaDoFileCont(L, 0, 0);
-		})
+		} LuaFuncEnd()
 
-		LuaFunc(loadFile, {
+		LuaFunc(loadFile) {
 			const CodersFileSystem::Path path = luaL_checkstring(L, 1);
 			CodersFileSystem::SRef<CodersFileSystem::FileStream> file;
 			try {
@@ -243,7 +242,61 @@ namespace FicsItKernel {
 			
 			luaL_loadbufferx(L, code.c_str(), code.size(), ("@" + path.str()).c_str(), "t");
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
+		LuaFunc(path) {
+			int args = lua_gettop(L);
+			int start = 1;
+			int conversion = -1;
+			if (lua_isinteger(L, start)) conversion = lua_tointeger(L, start++);
+			CodersFileSystem::Path path;
+			for (int i = start; i <= args; ++i) path = path / CodersFileSystem::Path(lua_tostring(L, i));
+			std::string out;
+			switch (conversion) {
+			case 0:
+				out = path.normalize().str();
+				break;
+			case 1:
+				out = path.absolute().str();
+				break;
+			case 2:
+				out = path.relative().str();
+				break;
+			case 3:
+				out = path.fileName();
+				break;
+			case 4:
+				out = path.fileStem();
+				break;
+			case 5:
+				out = path.fileExtension();
+				break;
+			default:
+				out = path.str();
+			}
+			lua_pushstring(L,out.c_str());
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
+		} LuaFuncEnd()
+		LuaFunc(analyzePath) {
+			int args = lua_gettop(L);
+			for (int i = 1; i <= args; ++i) {
+				CodersFileSystem::Path path = lua_tostring(L, i);
+				int flags = 0;
+				if (path.isRoot())						flags |= 0b00001;
+				if (path.isEmpty())						flags |= 0b00010;
+				if (path.isAbsolute())					flags |= 0b00100;
+				if (path.isSingle())					flags |= 0b01000;
+				if (path.fileExtension().size() > 0)	flags |= 0b10000;
+				lua_pushinteger(L, flags);
+			}
+			return UFINLuaProcessor::luaAPIReturn(L, args);
+		} LuaFuncEnd()
+		LuaFunc(isNode) {
+			int args = lua_gettop(L);
+			for (int i = 1; i <= args; ++i) {
+				lua_pushboolean(L, CodersFileSystem::Path::isNode(lua_tostring(L, i)));
+			}
+			return UFINLuaProcessor::luaAPIReturn(L, args);
+		} LuaFuncEnd()
 
 		static const luaL_Reg luaFileSystemLib[] = {
 			{"makeFileSystem", makeFileSystem},
@@ -262,17 +315,20 @@ namespace FicsItKernel {
 			{"unmount", unmount},
 			{"doFile", doFile},
 			{"loadFile", loadFile},
+			{"path", path},
+			{"analyzePath", analyzePath},
+			{"isNode", isNode},
 			{nullptr, nullptr}
 		};
 
-		LuaFileFunc(Close, {
+		LuaFileFunc(Close) {
 			try {
 				file->close();
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
-		})
+		} LuaFuncEnd()
 
-		LuaFileFunc(Write, {
+		LuaFileFunc(Write) {
 			const auto s = lua_gettop(L);
 			for (int i = 2; i <= s; ++i) {
 				size_t str_len = 0;
@@ -282,16 +338,16 @@ namespace FicsItKernel {
 				} CatchExceptionLua
 			}
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
-		})
+		} LuaFuncEnd()
 
-		LuaFileFunc(Flush, {
+		LuaFileFunc(Flush) {
 			try {
 				file->flush();
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
-		})
+		} LuaFuncEnd()
 
-		LuaFileFunc(Read, {
+		LuaFileFunc(Read) {
 			const auto args = lua_gettop(L);
 			for (int i = 2; i <= args; ++i) {
 				bool invalidFormat = false;
@@ -336,9 +392,9 @@ namespace FicsItKernel {
 				if (invalidFormat) return luaL_argerror(L, i, "no valid format");
 			}
 			return UFINLuaProcessor::luaAPIReturn(L, args - 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFileFunc(ReadLine, {
+		LuaFileFunc(ReadLine) {
 			try {
 				if (file->isEOF()) lua_pushnil(L);
 				else {
@@ -347,15 +403,15 @@ namespace FicsItKernel {
 				}
 			} CatchExceptionLua
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFileFunc(Lines, {
+		LuaFileFunc(Lines) {
 			luaL_checkudata(L, 1, "File");
 			lua_pushcclosure(L, luaFileReadLine, 1);
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFileFunc(Seek, {
+		LuaFileFunc(Seek) {
 			LuaFile& f = *static_cast<LuaFile*>(luaL_checkudata(L, 1, "File"));
 			std::string w = "cur";
 			std::int64_t off = 0;
@@ -367,16 +423,16 @@ namespace FicsItKernel {
 			} CatchExceptionLua
 			lua_pushinteger(L, seek);
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		})
+		} LuaFuncEnd()
 
-		LuaFileFunc(String, {
+		LuaFileFunc(String) {
 			std::string text;
 			try {
 				text = file->readAll();
 			} CatchExceptionLua
 			lua_pushlstring(L, text.c_str(), text.length());
 			return 1;
-		})
+		} LuaFuncEnd()
 
 		int luaFileUnpersist(lua_State* L) {
 			UFINKernelSystem* kernel = UFINLuaProcessor::luaGetProcessor(L)->GetKernel();
