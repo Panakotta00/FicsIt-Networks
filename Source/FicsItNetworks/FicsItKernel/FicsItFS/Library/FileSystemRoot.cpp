@@ -141,7 +141,7 @@ int FileSystemRoot::copy(Path from, Path to, bool recursive) {
 		auto ofs = tFile->open(OUTPUT);
 		auto ifs = f->open(INPUT);
 		if (!ofs.isValid() || !ifs.isValid()) return 1;
-		ofs->write(ifs->readAll());
+		ofs->write(FileStream::readAll(ifs));
 		ofs->close();
 	}
 	return 1;
@@ -197,7 +197,7 @@ int FileSystemRoot::moveInternal(Path from, Path to) {
 		auto ofs = tFile->open(OUTPUT);
 		auto ifs = f->open(INPUT);
 		if (!ofs.isValid() || !ifs.isValid()) return 1;
-		ofs->write(ifs->readAll());
+		ofs->write(FileStream::readAll(ifs));
 		ofs->close();
 		ifs->close();
 		return remove(from, false);

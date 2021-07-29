@@ -132,7 +132,7 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
 			FStructuredArchive::FSlot Content = Child.EnterField(SA_FIELD_NAME(TEXT("FileContent")));
 			if (Record.GetUnderlyingArchive().IsLoading()) {
 				std::string diskData;
-				if (KeepDisk == -1) diskData = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY)->readAll();
+				if (KeepDisk == -1) diskData = CodersFileSystem::FileStream::readAll(SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY));
 				FString Data;
 				Content << Data;
 				FTCHARToUTF8 Convert(*Data, Data.Len());
@@ -141,12 +141,11 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
 				if (KeepDisk == 0) {
 					CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC | CodersFileSystem::BINARY);
 					Stream->write(stdData);
-					Stream->flush();
 					Stream->close();
 				}
             } else if (Record.GetUnderlyingArchive().IsSaving()) {
             	CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY);
-            	std::string RawData = Stream->readAll();
+            	std::string RawData = CodersFileSystem::FileStream::readAll(Stream);
             	Stream->close();
             	FUTF8ToTCHAR Convert(RawData.c_str(), RawData.length());
             	FString Data(Convert.Length(), Convert.Get());

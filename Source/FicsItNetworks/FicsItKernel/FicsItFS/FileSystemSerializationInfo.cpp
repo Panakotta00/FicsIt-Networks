@@ -23,7 +23,6 @@ CodersFileSystem::SRef<CodersFileSystem::Node> FFileSystemNodeIndex::Deserialize
 		try {
 			FTCHARToUTF8 Convert(*Node->Data, Node->Data.Len());
 			stream->write(std::string(Convert.Get(), Convert.Length()));
-			stream->flush();
 			stream->close();
 		} catch (...) {
 			UE_LOG(LogFicsItNetworks, Error, TEXT("Unable to deserialize VFS-File"));
@@ -50,7 +49,7 @@ FFileSystemNode& FFileSystemNode::Serialize(CodersFileSystem::SRef<CodersFileSys
 	if (CodersFileSystem::SRef<CodersFileSystem::File> file = node) {
 		NodeType = 0;
 		CodersFileSystem::SRef<CodersFileSystem::FileStream> stream = file->open(CodersFileSystem::INPUT | CodersFileSystem::BINARY);
-		std::string str = stream->readAll();
+		std::string str = CodersFileSystem::FileStream::readAll(stream);
 		FUTF8ToTCHAR Convert(str.c_str(), str.length());
 		Data = FString(Convert.Length(), Convert.Get());
 	} else if (CodersFileSystem::SRef<CodersFileSystem::Directory> dir = node) {

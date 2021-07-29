@@ -215,7 +215,7 @@ namespace FicsItKernel {
 			if (!file.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;
 			try {
-				code = file->readAll();
+				code = CodersFileSystem::FileStream::readAll(file);
 			} CatchExceptionLua
 			try {
 				file->close();
@@ -234,7 +234,7 @@ namespace FicsItKernel {
 			if (!file.isValid()) return luaL_error(L, "not able to create filestream");
 			std::string code;
 			try {
-				code = file->readAll();
+				code = CodersFileSystem::FileStream::readAll(file);
 			} CatchExceptionLua
 			try {
 				file->close();
@@ -340,75 +340,19 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
 		} LuaFuncEnd()
 
-		LuaFileFunc(Flush) {
-			try {
-				file->flush();
-			} CatchExceptionLua
-			return UFINLuaProcessor::luaAPIReturn(L, 0);
-		} LuaFuncEnd()
-
 		LuaFileFunc(Read) {
 			const auto args = lua_gettop(L);
 			for (int i = 2; i <= args; ++i) {
-				bool invalidFormat = false;
 				try {
-					if (lua_isnumber(L, i)) {
-						if (file->isEOF()) lua_pushnil(L);
-						const auto n = lua_tointeger(L, i);
-						std::string s = file->readChars(n);
-						lua_pushlstring(L, s.c_str(), s.size());
-					} else {
-						char fo = 'l';
-						if (lua_isstring(L, i)) {
-							std::string s = lua_tostring(L, i);
-							if (s.size() != 2 || s[0] != '*') fo = '\0';
-							fo = s[1];
-						}
-						switch (fo) {
-						case 'n':
-						{
-							lua_pushnumber(L, file->readNumber());
-							break;
-						} case 'a':
-						{
-							std::string s = file->readAll();
-							lua_pushlstring(L, s.c_str(), s.size());
-							break;
-						} case 'l':
-						{
-							if (!file->isEOF()) {
-								std::string s = file->readLine();
-								lua_pushlstring(L, s.c_str(), s.size());
-							} else lua_pushnil(L);
-							break;
-						}
-						default:
-							invalidFormat = true;
-						}
-					}
+					const auto n = lua_tointeger(L, i);
+					std::string s = file->read(n);
+					if (s.size() == 0 && file->isEOF()) lua_pushnil(L);
+					else lua_pushlstring(L, s.c_str(), s.size());
 				} catch (const std::exception& ex) {
 					luaL_error(L, ex.what());
 				}
-				if (invalidFormat) return luaL_argerror(L, i, "no valid format");
 			}
 			return UFINLuaProcessor::luaAPIReturn(L, args - 1);
-		} LuaFuncEnd()
-
-		LuaFileFunc(ReadLine) {
-			try {
-				if (file->isEOF()) lua_pushnil(L);
-				else {
-					const std::string text = file->readLine().c_str();
-                    lua_pushlstring(L, text.c_str(), text.length());
-				}
-			} CatchExceptionLua
-			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		} LuaFuncEnd()
-
-		LuaFileFunc(Lines) {
-			luaL_checkudata(L, 1, "File");
-			lua_pushcclosure(L, luaFileReadLine, 1);
-			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		} LuaFuncEnd()
 
 		LuaFileFunc(Seek) {
@@ -426,11 +370,7 @@ namespace FicsItKernel {
 		} LuaFuncEnd()
 
 		LuaFileFunc(String) {
-			std::string text;
-			try {
-				text = file->readAll();
-			} CatchExceptionLua
-			lua_pushlstring(L, text.c_str(), text.length());
+			lua_pushstring(L, self->path.c_str());
 			return 1;
 		} LuaFuncEnd()
 
@@ -486,9 +426,7 @@ namespace FicsItKernel {
 		static const luaL_Reg luaFileLib[] = {
 			{"close", luaFileClose},
 			{"write", luaFileWrite},
-			{"flush", luaFileFlush},
 			{"read", luaFileRead},
-			{"lines", luaFileLines},
 			{"seek", luaFileSeek},
 			{"__tostring", luaFileString},
 			{"__persist", luaFilePersist},

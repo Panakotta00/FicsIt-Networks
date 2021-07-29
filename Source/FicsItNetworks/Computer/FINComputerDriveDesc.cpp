@@ -80,7 +80,7 @@ void CopyPath(CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice, Coder
 		if (CodersFileSystem::SRef<CodersFileSystem::File> File = ChildNode) {
 			CodersFileSystem::SRef<CodersFileSystem::FileStream> InputStream = FromDevice->open(ChildPath, CodersFileSystem::FileMode::INPUT | CodersFileSystem::FileMode::BINARY);
 			CodersFileSystem::SRef<CodersFileSystem::FileStream> OutputStream = ToDevice->open(ChildPath, CodersFileSystem::FileMode::OUTPUT | CodersFileSystem::FileMode::BINARY);
-			OutputStream->write(InputStream->readAll());
+			OutputStream->write(CodersFileSystem::FileStream::readAll(InputStream));
 			OutputStream->close();
 			InputStream->close();
 		} else if (CodersFileSystem::SRef<CodersFileSystem::Directory> Dir = ChildNode) {
