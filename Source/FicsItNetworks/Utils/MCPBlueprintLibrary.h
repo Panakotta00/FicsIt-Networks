@@ -2,7 +2,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
 
-#include "RozeBlueprintLibrary.generated.h"
+#include "MCPBlueprintLibrary.generated.h"
 
 USTRUCT(Blueprintable)
 struct FFINUIFileInfo {
@@ -23,7 +23,7 @@ struct FFINUIFileInfo {
 
 
 UCLASS()
-class URozeBlueprintLibrary : public UBlueprintFunctionLibrary
+class UMCPBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 public:
 	GENERATED_BODY()

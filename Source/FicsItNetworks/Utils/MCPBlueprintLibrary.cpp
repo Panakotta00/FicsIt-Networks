@@ -1,4 +1,4 @@
-﻿#include "RozeBlueprintLibrary.h"
+﻿#include "MCPBlueprintLibrary.h"
 
 #include "FGSaveSystem.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
@@ -10,7 +10,7 @@
 
 
 
-FString URozeBlueprintLibrary::ExpandPath(FString folder, FString fileName, FString extension){
+FString UMCPBlueprintLibrary::ExpandPath(FString folder, FString fileName, FString extension){
 	FString fsp = UFGSaveSystem::GetSaveDirectoryPath();
 	extension = extension.ToLower();
 	auto file = fileName + extension;
@@ -52,7 +52,7 @@ public:
 	}
 };
 
-TArray<FString> URozeBlueprintLibrary::GetFilesInPath(FString folder, FString extension, bool create) {
+TArray<FString> UMCPBlueprintLibrary::GetFilesInPath(FString folder, FString extension, bool create) {
 	FString fsp = UFGSaveSystem::GetSaveDirectoryPath();
 	FString root = fsp;
 	if(!root.EndsWith("/")) {
@@ -74,7 +74,7 @@ TArray<FString> URozeBlueprintLibrary::GetFilesInPath(FString folder, FString ex
 }
 
 
-FString URozeBlueprintLibrary::GetFileName(FString path, bool stripExtension) {
+FString UMCPBlueprintLibrary::GetFileName(FString path, bool stripExtension) {
 	FString toMutate = path;
 	int32 pos = 0;
 	if(toMutate.FindLastChar('/', pos)) {
@@ -89,12 +89,12 @@ FString URozeBlueprintLibrary::GetFileName(FString path, bool stripExtension) {
 	return toMutate;
 }
 
-FString URozeBlueprintLibrary::ColorToHexString(FLinearColor color) {
+FString UMCPBlueprintLibrary::ColorToHexString(FLinearColor color) {
 	const FColor c = color.ToFColor(true);
 	return c.ToHex();
 }
 
-FLinearColor URozeBlueprintLibrary::HexStringToLinearColor(FString colorString) {
+FLinearColor UMCPBlueprintLibrary::HexStringToLinearColor(FString colorString) {
 	const FColor c = FColor::FromHex(colorString);
 	return FLinearColor::FromSRGBColor(c);
 }

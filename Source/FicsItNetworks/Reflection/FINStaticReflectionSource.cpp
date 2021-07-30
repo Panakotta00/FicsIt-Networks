@@ -1212,6 +1212,7 @@ BeginFunc(getCurrentTarget, "Get Current Target", "Returns the index of the targ
 	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
 	index = (int64)TargetToIndex(List->GetCurrentTarget(), List);
 } EndFunc()
+
 BeginFunc(nextTarget, "Next Target", "Sets the current target to the next target in the list.") {
 	Body()
 	self->GetTargetNodeLinkedList()->SetNextTarget();
