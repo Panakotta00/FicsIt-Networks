@@ -44,4 +44,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Utilities")
 	static FLinearColor HexStringToLinearColor(FString colorString);
+
+	UFUNCTION(BlueprintCallable, Category = "Utilities")
+	static FVector2D MeasureStringRenderSize(UFont* Font, FString Text);
 };

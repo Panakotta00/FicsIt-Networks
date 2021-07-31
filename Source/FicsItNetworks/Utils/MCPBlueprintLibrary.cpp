@@ -98,3 +98,13 @@ FLinearColor UMCPBlueprintLibrary::HexStringToLinearColor(FString colorString) {
 	const FColor c = FColor::FromHex(colorString);
 	return FLinearColor::FromSRGBColor(c);
 }
+
+FVector2D UMCPBlueprintLibrary::MeasureStringRenderSize(UFont* Font, FString Text) {
+	//TSharedRef<FSlateFontMeasure> fontMeasureService = (
+	//	FSlateApplication::Get().GetRenderer()->GetFontMeasureService()	
+	//);
+	//return fontMeasureService->Measure(Text, Font->GetLegacySlateFontInfo());
+	FVector2D vector;
+	vector.X = Font->GetStringSize(*Text);
+	return vector;
+}
