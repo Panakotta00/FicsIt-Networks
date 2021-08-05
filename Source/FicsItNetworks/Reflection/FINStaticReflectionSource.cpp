@@ -1,6 +1,7 @@
 ﻿#include "FINStaticReflectionSource.h"
 
 #include "FGFactoryConnectionComponent.h"
+#include "FGPipeConnectionComponent.h"
 #include "FGGameState.h"
 #include "FGHealthComponent.h"
 #include "FGItemCategory.h"
@@ -777,6 +778,19 @@ BeginFunc(getFactoryConnectors, "Get Factory Connectors", "Returns a list of fac
 	}
 	connectors = Output;
 } EndFunc()
+BeginFunc(getPipeConnectors, "Get Pipe Connectors", "Returns a list of pipe connectors this actor might have.") {
+	OutVal(0, RArray<RTrace<UFGPipeConnectionComponent>>, connectors, "Connectors", "The factory connectors this actor has.");
+	Body()
+	FINArray Output;
+	const TSet<UActorComponent*>& Components = self->GetComponents();
+	for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+		if (!prop->PropertyClass->IsChildOf(UFGPipeConnectionComponent::StaticClass())) continue;
+		UObject* Connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
+		if (!Components.Contains(Cast<UActorComponent>(Connector))) continue;
+		Output.Add(Ctx.GetTrace() / Connector);
+	}
+	connectors = Output;
+} EndFunc()
 BeginFunc(getInventories, "Get Inventories", "Returns a list of inventories this actor might have.") {
 	OutVal(0, RArray<RTrace<UFGInventoryComponent>>, inventories, "Inventories", "The inventories this actor has.");
 	Body()
@@ -1014,6 +1028,53 @@ BeginFunc(getInventory, "Get Inventory", "Returns the internal inventory of the 
 } EndFunc()
 EndClass()
 
+BeginClass(UFGPipeConnectionComponent, "PipeConnection", "Pipe Connection", "A actor component that is a connection point to which a conveyor or pipe can get attached to.")
+//Hook(UFINFactoryConnectorHook)
+BeginProp(RBool, isConnected, "Is Connected", "True if something is connected to this connection.") {
+	Return self->IsConnected();
+} EndProp()
+BeginProp(RFloat, fluidBoxContent, "Fluid Box Content", "Returns the amount of fluid this fluid container contains") {
+	Return self->GetFluidIntegrant()->GetFluidBox()->Content;
+} EndProp()
+BeginProp(RFloat, fluidBoxHeight, "Fluid Box Height", "Returns the height of this fluid container") {
+	Return self->GetFluidIntegrant()->GetFluidBox()->Height;
+} EndProp()
+BeginProp(RFloat, fluidBoxLaminarHeight, "Fluid Box Laminar Height", "Returns the laminar height of this fluid container") {
+	Return self->GetFluidIntegrant()->GetFluidBox()->LaminarHeight;
+} EndProp()
+BeginProp(RFloat, fluidBoxFlowThrough, "Fluid Box Flow Through", "Returns the amount of fluid flowing through this fluid container") {
+	Return self->GetFluidIntegrant()->GetFluidBox()->FlowThrough;
+} EndProp()
+BeginProp(RFloat, fluidBoxFlowFill, "Fluid Box Flow Fill", "Returns the fill rate of this fluid container") {
+	Return self->GetFluidIntegrant()->GetFluidBox()->FlowFill;
+} EndProp()
+BeginProp(RFloat, fluidBoxFlowDrain, "Fluid Box Flow Drain", "Returns the drain rate of this fluid container") {
+	Return self->GetFluidIntegrant()->GetFluidBox()->FlowDrain;
+} EndProp()
+BeginProp(RFloat, fluidBoxFlowLimit, "Fluid Box Flow Limit", "Returns the the maximum flow limit of this fluid container") {
+	Return self->GetFluidIntegrant()->GetFluidBox()->FlowLimit;
+} EndProp()
+BeginProp(RInt, networkID, "Get Network ID", "Returns the network ID of the pipe network this connection is associated with") {
+	Return (int64)self->GetPipeNetworkID();
+} EndProp();
+BeginFunc(getFluidDescriptor, "Get Fluid Descriptor", "?") {  /* TODO: Write DOC when figured out exactly what it does */
+	OutVal(0, RTrace<UFGItemDescriptor>, fluidDescriptor, "Fluid Descriptor", "?")   /* TODO: Write DOC */
+	Body()
+	fluidDescriptor = Ctx.GetTrace() / self->GetFluidDescriptor();
+} EndFunc()
+/*BeginFunc(getFluidIntegrant, "Get Fluid Integrant", "?") {  
+	OutVal(0, RObject<IFGFluidIntegrantInterface>, fluidIntegrant, "Fluid Descriptor", "?")
+    Body()
+    fluidIntegrant = Ctx.GetTrace() / self->GetFluidIntegrant();
+} EndFunc()*/
+BeginFunc(flushPipeNetwork, "Flush Pipe Network", "Flush the associated pipe network") {  
+    Body()
+	auto networkID = self->GetPipeNetworkID();
+    auto subsystem = AFGPipeSubsystem::GetPipeSubsystem(self->GetWorld());
+	subsystem->FlushPipeNetwork(networkID);
+} EndFunc()
+EndClass()
+
 BeginClass(AFGBuildableFactory, "Factory", "Factory", "The base class of most machines you can build.")
 BeginProp(RFloat, progress, "Progress", "The current production progress of the current production cycle.") {
 	Return self->GetProductionProgress();
@@ -1151,6 +1212,7 @@ BeginFunc(getCurrentTarget, "Get Current Target", "Returns the index of the targ
 	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
 	index = (int64)TargetToIndex(List->GetCurrentTarget(), List);
 } EndFunc()
+
 BeginFunc(nextTarget, "Next Target", "Sets the current target to the next target in the list.") {
 	Body()
 	self->GetTargetNodeLinkedList()->SetNextTarget();
