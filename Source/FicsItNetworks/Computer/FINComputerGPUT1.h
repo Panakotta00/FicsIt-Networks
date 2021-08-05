@@ -207,7 +207,7 @@ public:
 	 */
 	FORCEINLINE bool Set(int X, int Y, FFINGPUT1BufferPixel Pixel) {
 		const int Index = PosToIndex(X, Y);
-		if (Index < 0) return false;
+		if (Index < 0 || Index >= Items.Num()) return false;
 		Items[Index] = Pixel;
 		return true;
 	}
