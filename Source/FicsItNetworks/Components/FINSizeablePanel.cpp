@@ -46,7 +46,7 @@ void AFINSizeablePanel::Tick(float DeltaSeconds) {
 }
 
 void AFINSizeablePanel::OnConstruction(const FTransform& transform) {
-	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), PanelWidth, PanelHeight, PanelUL, PanelUC, PanelUR, PanelCL, PanelCC, PanelCR, PanelDL, PanelDC, PanelDR, this, RootComponent, Parts);
+	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), PanelWidth, PanelHeight, PanelCornerMesh, PanelSideMesh, PanelCenterMesh, this, RootComponent, Parts);
 	FVector ConnectorOffset;
 	if (PanelHeight < 0) {
 		if (PanelWidth < 0) {
@@ -92,13 +92,7 @@ bool AFINSizeablePanel::ShouldSave_Implementation() const {
 void AFINSizeablePanel::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int PanelWidth, int PanelHeight,
                                         UStaticMesh* ULMesh,
                                         UStaticMesh* UCMesh,
-                                        UStaticMesh* URMesh,
-                                        UStaticMesh* CLMesh,
                                         UStaticMesh* CCMesh,
-                                        UStaticMesh* CRMesh,
-                                        UStaticMesh* DLMesh,
-                                        UStaticMesh* DCMesh,
-                                        UStaticMesh* DRMesh,
                                         AActor* Parent, USceneComponent* Attach,
                                         TArray<UStaticMeshComponent*>& OutParts)
 {

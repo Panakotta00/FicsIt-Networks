@@ -10,23 +10,11 @@ class AFINSizeablePanel  : public AFGBuildable {
 public:
 	
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelUL = nullptr;
+	UStaticMesh* PanelCornerMesh = nullptr;
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelUC = nullptr;
+	UStaticMesh* PanelSideMesh = nullptr;
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelUR = nullptr;
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelCL = nullptr;
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelCC = nullptr;
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelCR = nullptr;
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelDL = nullptr;
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelDC = nullptr;
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMesh* PanelDR = nullptr;
+	UStaticMesh* PanelCenterMesh = nullptr;
 	
 	UPROPERTY(SaveGame, VisibleAnywhere, BlueprintReadWrite)
 	UFINModuleSystemPanel* ModularPanel = nullptr;
@@ -65,7 +53,12 @@ public:
 
 	
 
-	static void SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int PanelWidth, int PanelHeight, UStaticMesh* ULMesh, UStaticMesh* UCMesh, UStaticMesh* URMesh, UStaticMesh* CLMesh, UStaticMesh* CCMesh, UStaticMesh* CRMesh, UStaticMesh* DLMesh, UStaticMesh* DCMesh, UStaticMesh* DRMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts);
+	static void SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int PanelWidth, int PanelHeight,
+                                        UStaticMesh* ULMesh,
+                                        UStaticMesh* UCMesh,
+                                        UStaticMesh* CCMesh,
+                                        AActor* Parent, USceneComponent* Attach,
+                                        TArray<UStaticMeshComponent*>& OutParts);
 	static void SpawnEdgeComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, int scaleX, int scaleY, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts); 
 	static void SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
 

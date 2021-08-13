@@ -22,16 +22,10 @@ void AFINSizeablePanelHolo::OnConstruction(const FTransform& Transform) {
 	Parts.Empty();
 
 	// Create Components
-	UStaticMesh* UL = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelUL;
-	UStaticMesh* UC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelUC;
-	UStaticMesh* UR = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelUR;
-	UStaticMesh* CL = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCL;
-	UStaticMesh* CC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCC;
-	UStaticMesh* CR = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCR;
-	UStaticMesh* DL = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelDL;
-	UStaticMesh* DC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelDC;
-	UStaticMesh* DR = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelDR;
-	AFINSizeablePanel::SpawnComponents(UStaticMeshComponent::StaticClass(), PanelWidth, PanelHeight, UL, UC, UR, CL, CC, CR, DL, DC, DR, this, RootComponent, Parts);
+	UStaticMesh* UL = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCornerMesh;
+	UStaticMesh* UC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelSideMesh;
+	UStaticMesh* CC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCenterMesh;
+	AFINSizeablePanel::SpawnComponents(UStaticMeshComponent::StaticClass(), PanelWidth, PanelHeight, UL, UC, CC, this, RootComponent, Parts);
 	RootComponent->SetMobility(EComponentMobility::Movable);
 	for (UStaticMeshComponent* Part : Parts) {
 		Part->SetMobility(EComponentMobility::Movable);
