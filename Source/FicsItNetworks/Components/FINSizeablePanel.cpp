@@ -5,6 +5,7 @@
 #include "FINModuleBase.h"
 #include "FINScreen.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
+#include "FicsItNetworks/Network/FINMCPAdvConnector.h"
 
 AFINSizeablePanel::AFINSizeablePanel() {
 	ModularPanel = CreateDefaultSubobject<UFINModuleSystemPanel>("Panel");
@@ -13,16 +14,17 @@ AFINSizeablePanel::AFINSizeablePanel() {
 	ModularPanel->SetIsReplicated(true);
 	ModularPanel->AllowedModules.AddUnique(AFINModuleBase::StaticClass());
 	
-	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
+	Connector = CreateDefaultSubobject<UFINMCPAdvConnector>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	Connector->SetIsReplicated(true);
+	Connector->MaxCables = 1;
 
 	Plane = CreateDefaultSubobject<UStaticMeshComponent>("Plane");
 	Plane->AttachToComponent(ModularPanel, FAttachmentTransformRules::KeepRelativeTransform);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneMesh(TEXT("/Engine/BasicShapes/Plane.Plane"));  
 	Plane->SetStaticMesh(PlaneMesh.Object);
-	static ConstructorHelpers::FObjectFinder<UMaterial> MeshMaterial(TEXT("/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/SizeablePanel/Temp.Temp"));
-	Plane->SetMaterial(0, MeshMaterial.Object);
+	//static ConstructorHelpers::FObjectFinder<UMaterial> MeshMaterial(TEXT("/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/SizeablePanel/Temp.Temp"));
+	//Plane->SetMaterial(0, MeshMaterial.Object);
 	
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
@@ -46,20 +48,16 @@ void AFINSizeablePanel::Tick(float DeltaSeconds) {
 }
 
 void AFINSizeablePanel::OnConstruction(const FTransform& transform) {
-	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), PanelWidth, PanelHeight, PanelCornerMesh, PanelSideMesh, PanelCenterMesh, this, RootComponent, Parts);
+	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), PanelWidth, PanelHeight, PanelCornerMesh, PanelSideMesh, PanelCenterMesh, PanelConnectorMesh, this, RootComponent, Parts);
 	FVector ConnectorOffset;
-	if (PanelHeight < 0) {
-		if (PanelWidth < 0) {
-			ConnectorOffset = {0, 5, 5};
-		} else {
-			ConnectorOffset = {0, -5, 5};
-		}
-	} else {
-		if (PanelWidth < 0) {
-			ConnectorOffset = {0, 5, -5};
-		} else {
-			ConnectorOffset = {0, -5, -5};
-		}
+	if(PanelWidth < 0 && PanelHeight < 0) {
+		ConnectorOffset = {3.3, 0, 8};
+	}else if(PanelWidth < 0 && PanelHeight >= 0) {
+		ConnectorOffset = {3.3, 0, static_cast<float>(PanelHeight * 10 - 2)};
+	}else if(PanelWidth >= 0 && PanelHeight < 0) {
+		ConnectorOffset = {3.3, static_cast<float>((PanelWidth - 1) * 10), 8};
+	}else{
+		ConnectorOffset = {3.3, static_cast<float>((PanelWidth - 1) * 10), static_cast<float>(PanelHeight * 10 - 2)};
 	}
 	Connector->SetMobility(EComponentMobility::Movable);
 	Connector->SetRelativeLocation(ConnectorOffset);
@@ -93,6 +91,7 @@ void AFINSizeablePanel::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class,
                                         UStaticMesh* ULMesh,
                                         UStaticMesh* UCMesh,
                                         UStaticMesh* CCMesh,
+                                        UStaticMesh* ConnectorMesh,
                                         AActor* Parent, USceneComponent* Attach,
                                         TArray<UStaticMeshComponent*>& OutParts)
 {
@@ -130,6 +129,27 @@ void AFINSizeablePanel::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class,
 	SpawnCornerComponent(Class, PanelWidth-1,0,1, ULMesh, Parent, Attach, PanelWidth, PanelHeight, OutParts); //DR
 	SpawnCornerComponent(Class, 0,PanelHeight-1,-1, ULMesh, Parent, Attach, PanelWidth, PanelHeight, OutParts);  //UL
 	SpawnCornerComponent(Class, PanelWidth-1,PanelHeight-1,2, ULMesh, Parent, Attach, PanelWidth, PanelHeight, OutParts); //UR
+
+	UStaticMeshComponent* ConnectorMeshComponent = NewObject<UStaticMeshComponent>(Parent, Class);
+	ConnectorMeshComponent->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
+	if(PanelWidth < 0 && PanelHeight < 0) {
+		ConnectorMeshComponent->SetRelativeLocation(FVector(0, 0, 5));
+		ConnectorMeshComponent->SetRelativeRotation(FRotator(0, 0, 0));
+	}else if(PanelWidth < 0 && PanelHeight >= 0) {
+		ConnectorMeshComponent->SetRelativeLocation(FVector(0, 0, PanelHeight * 10 - 5));
+		ConnectorMeshComponent->SetRelativeRotation(FRotator(0, 0, 0));
+	}else if(PanelWidth >= 0 && PanelHeight < 0) {
+		ConnectorMeshComponent->SetRelativeLocation(FVector(0, (PanelWidth - 1) * 10, 5));
+		ConnectorMeshComponent->SetRelativeRotation(FRotator(0, 0, 0));
+	}else{
+		ConnectorMeshComponent->SetRelativeLocation(FVector(0, (PanelWidth - 1) * 10, PanelHeight * 10 - 5));
+		ConnectorMeshComponent->SetRelativeRotation(FRotator(0, 0, 0));
+	}
+	ConnectorMeshComponent->RegisterComponent();
+	ConnectorMeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+	ConnectorMeshComponent->SetStaticMesh(ConnectorMesh);
+	ConnectorMeshComponent->SetMobility(EComponentMobility::Static);
+	OutParts.Add(ConnectorMeshComponent);
 }
 
 void AFINSizeablePanel::SpawnEdgeComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, int scaleX, int scaleY, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int PanelWidth, int PanelHeight, TArray<UStaticMeshComponent*>& OutParts) {

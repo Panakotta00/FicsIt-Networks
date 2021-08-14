@@ -15,6 +15,8 @@ public:
 	UStaticMesh* PanelSideMesh = nullptr;
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* PanelCenterMesh = nullptr;
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* PanelConnectorMesh = nullptr;
 	
 	UPROPERTY(SaveGame, VisibleAnywhere, BlueprintReadWrite)
 	UFINModuleSystemPanel* ModularPanel = nullptr;
@@ -57,6 +59,7 @@ public:
                                         UStaticMesh* ULMesh,
                                         UStaticMesh* UCMesh,
                                         UStaticMesh* CCMesh,
+                                        UStaticMesh* ConnectorMesh,
                                         AActor* Parent, USceneComponent* Attach,
                                         TArray<UStaticMeshComponent*>& OutParts);
 	static void SpawnEdgeComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, int scaleX, int scaleY, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts); 
