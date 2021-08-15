@@ -281,7 +281,7 @@ int FFINLuaProcessorTick::steps() const {
 	case LUA_ASYNC_END:
 		return AsyncEndLen;
 	default:
-		return 0;
+		return LUA_SYNC;
 	}
 }
 
@@ -767,8 +767,10 @@ int luaResume(lua_State* L) {
 	
 	if (state > LUA_YIELD) {
 		lua_pushboolean(L, false);
+		argCount = 1;
 	} else {
 		lua_pushboolean(L, true);
+		--argCount;
 	}
 	
 	if (!lua_checkstack(L, argCount)) {
@@ -782,7 +784,7 @@ int luaResume(lua_State* L) {
 	
 	return UFINLuaProcessor::luaAPIReturn(L, argCount+1);
 }
-//
+
 int luaRunning(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	int ismain = lua_pushthread(L);

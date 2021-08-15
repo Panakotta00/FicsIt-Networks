@@ -1338,17 +1338,17 @@ BeginFunc(getConnectedPlatform, "Get Connected Platform", "Returns the connected
 BeginFunc(getDockedVehicle, "Get Docked Vehicle", "Returns the currently docked vehicle.") {
 	OutVal(0, RTrace<AFGVehicle>, vehicle, "Vehicle", "The currently docked vehicle")
 	Body()
-	vehicle = Ctx.GetTrace() / FReflectionHelper::GetObjectPropertyValue<UObject>(self, TEXT("mDockedRailroadVehicle"));
+	vehicle = Ctx.GetTrace() / FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mDockedRailroadVehicle"));
 } EndFunc()
 BeginFunc(getMaster, "Get Master", "Returns the master platform of this train station.") {
 	OutVal(0, RTrace<AFGRailroadVehicle>, master, "Master", "The master platform of this train station.")
 	Body()
-	master = Ctx.GetTrace() / FReflectionHelper::GetObjectPropertyValue<UObject>(self, TEXT("mStationDockingMaster"));
+	master = Ctx.GetTrace() / FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mStationDockingMaster"));
 } EndFunc()
 BeginFunc(getDockedLocomotive, "Get Docked Locomotive", "Returns the currently docked locomotive at the train station.") {
 	OutVal(0, RTrace<AFGLocomotive>, locomotive, "Locomotive", "The currently docked locomotive at the train station.")
 	Body()
-	locomotive = Ctx.GetTrace() / FReflectionHelper::GetObjectPropertyValue<UObject>(self, TEXT("mDockingLocomotive"));
+	locomotive = Ctx.GetTrace() / FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mDockingLocomotive"));
 } EndFunc()
 BeginProp(RInt, status, "Status", "The current docking status of the platform.") {
 	Return (int64)self->GetDockingStatus();

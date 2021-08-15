@@ -1,6 +1,6 @@
 = Credits
 
-- https://twitch.tv/panakotta00[Panakotta00]
+- https://panakotta00.massivebytes.net[Panakotta00]
 +
 Management & Development
 

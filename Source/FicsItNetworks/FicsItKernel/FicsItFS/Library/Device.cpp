@@ -88,8 +88,8 @@ namespace CodersFileSystem {
 	SRef<FileStream> MemDevice::open(Path path, FileMode mode) {
 		auto node = get(path);
 		if (!node.isValid()) {
-			SRef<Directory> dir = get(path.prev());
-			if (dir.isValid()) node = dir->createFile(path.getFinal());
+			SRef<Directory> dir = get(path / "..");
+			if (dir.isValid()) node = dir->createFile(path.fileName());
 		}
 		SRef<File> file = node;
 		if (!file.isValid()) return nullptr;
@@ -98,7 +98,7 @@ namespace CodersFileSystem {
 
 	SRef<Directory> MemDevice::createDir(Path path, bool createTree) {
 		SRef<Directory> parent = root;
-		while (!path.isFinal()) {
+		while (!path.isSingle()) {
 			SRef<Directory> newParent = get(Path(path.getRoot()));
 			if (!newParent.isValid()) {
 				if (createTree) {
@@ -106,36 +106,36 @@ namespace CodersFileSystem {
 				} else return nullptr;
 			}
 			parent = newParent;
-			path = path.next();
+			path = path.removeFrontNodes(1);
 		}
 		if (!parent.isValid()) return nullptr;
 		return parent->createSubdir(path.getRoot());
 	}
 
 	bool MemDevice::remove(Path path, bool recursive) {
-		SRef<Directory> d = get(path.prev());
-		if (!d.isValid() || path.getNodeCount() < 1) return false;
-		return d->remove(path.getFinal(), recursive);
+		SRef<Directory> d = get(path / "..");
+		if (!d.isValid() || path.isRoot()) return false;
+		return d->remove(path.fileName(), recursive);
 	}
 
-	bool MemDevice::rename(Path path, const NodeName& name) {
-		SRef<Directory> d = get(path.prev());
-		if (!d.isValid() || path.getNodeCount() < 1) return false;
-		return d->rename(path.getFinal(), name);
+	bool MemDevice::rename(Path path, const std::string& name) {
+		SRef<Directory> d = get(path / "..");
+		if (!d.isValid() || path.isRoot() || !Path::isNode(name)) return false;
+		return d->rename(path.fileName(), name);
 	}
 
 	SRef<Node> MemDevice::get(Path path) {
-		if (path.getNodeCount() < 1) return root;
+		if (path.isRoot()) return root;
 		SRef<MemDirectory> dir = root;
-		while (!path.isFinal() && dir.isValid()) {
+		while (!path.isSingle() && dir.isValid()) {
 			dir = dir->get(path.getRoot());
-			path = path.next();
+			path = path.removeFrontNodes(1);
 		}
 		if (dir.isValid()) return dir->get(path.getRoot());
 		else return nullptr;
 	}
 
-	unordered_set<NodeName> MemDevice::childs(Path path) {
+	unordered_set<std::string> MemDevice::childs(Path path) {
 		auto n = get(path);
 		if (n.isValid()) return n->getChilds();
 		return {};
@@ -180,31 +180,34 @@ namespace CodersFileSystem {
 	}
 
 	SRef<FileStream> DiskDevice::open(Path path, FileMode mode) {
-		if (fs::exists(realPath / path) && !fs::is_regular_file(realPath / path)) return nullptr;
-		else if (!fs::is_directory(realPath / path.prev())) return nullptr;
-		return new DiskFileStream(realPath / path, mode, checkSize);
+		std::filesystem::path spath = realPath / path.relative().str();
+		if (fs::exists(spath) && !fs::is_regular_file(spath)) return nullptr;
+		else if (!fs::is_directory(spath / "..")) return nullptr;
+		return new DiskFileStream(spath, mode, checkSize);
 	}
 
 	SRef<Directory> DiskDevice::createDir(Path path, bool createTree) {
-		if (fs::exists(realPath / path)) {
-			if (fs::is_directory(realPath / path)) return get(path);
+		std::filesystem::path spath = realPath / path.relative().str();
+		if (fs::exists(spath)) {
+			if (fs::is_directory(spath)) return get(path);
 			else return nullptr;
 		}
 		
 		if (createTree) {
-			fs::create_directories(realPath / path);
-		} else if (fs::is_directory(realPath / path.prev())) {
-			fs::create_directory(realPath / path);
+			fs::create_directories(spath);
+		} else if (fs::is_directory(spath / "..")) {
+			fs::create_directory(spath);
 		} else return nullptr;
 		tickWatcher();
 		return get(path);
 	}
 #pragma optimize("",off)
 	bool DiskDevice::remove(Path path, bool recursive) {
-		if (path.getNodeCount() < 1) return false;
+		if (path.isEmpty()) return false;
+		std::filesystem::path spath = realPath / path.relative().str();
 		try {
-			if (recursive) return fs::remove_all(realPath / path) > 0;
-			else return fs::remove(realPath / path);
+			if (recursive) return fs::remove_all(spath) > 0;
+			else return fs::remove(spath);
 			tickWatcher();
 		} catch (...) {
 			return false;
@@ -212,29 +215,33 @@ namespace CodersFileSystem {
 	}
 #pragma optimize("",on)
 
-	bool DiskDevice::rename(Path path, const NodeName& name) {
-		if (path.getNodeCount() < 1) return false;
-		if (!fs::exists(realPath / path) || fs::exists(realPath / (path.prev() / name)) || path.getNodeCount() < 1) return false;
-		fs::rename(realPath / path, realPath / (path.prev() / name));
+	bool DiskDevice::rename(Path path, const std::string& name) {
+		if (path.isEmpty() || !Path::isNode(name)) return false;
+		path = path.relative();
+		std::filesystem::path spath = realPath / path.str();
+		if (!fs::exists(spath) || fs::exists(realPath / (path / ".." / name).str()) || path.isRoot()) return false;
+		fs::rename(spath, realPath / (path / ".." / name).str());
 		tickWatcher();
 		return true;
 	}
 
 	SRef<Node> DiskDevice::get(Path path) {
-		if (path.getNodeCount() < 1) return new DiskDirectory(realPath, checkSize);
-		if (fs::is_regular_file(realPath / path)) {
-			return new DiskFile(realPath / path, checkSize);
-		} else if (fs::is_directory(realPath / path)) {
-			return new DiskDirectory(realPath / path, checkSize);
+		if (path.isEmpty()) return new DiskDirectory(realPath, checkSize);
+		std::filesystem::path spath = realPath / path.relative().str();
+		if (fs::is_regular_file(spath)) {
+			return new DiskFile(spath, checkSize);
+		} else if (fs::is_directory(spath)) {
+			return new DiskDirectory(spath, checkSize);
 		}
 		return nullptr;
 	}
 
-	unordered_set<NodeName> DiskDevice::childs(Path path) {
-		std::unordered_set<NodeName> childs;
-		std::filesystem::path NewPath = realPath / path;
+	unordered_set<std::string> DiskDevice::childs(Path path) {
+		std::unordered_set<std::string> childs;
+		std::filesystem::path spath = realPath / path.relative().str();
+		std::filesystem::path NewPath = spath;
 		for (const auto& entry : fs::directory_iterator(NewPath)) {
-			NodeName childName = entry.path().filename().string();
+			std::string childName = entry.path().filename().string();
 			childs.insert(childName);
 		}
 		return childs;
@@ -254,8 +261,8 @@ namespace CodersFileSystem {
 		return SRef<FileStream>();
 	}
 
-	unordered_set<NodeName> DeviceNode::getChilds() const {
-		return unordered_set<NodeName>();
+	unordered_set<std::string> DeviceNode::getChilds() const {
+		return unordered_set<std::string>();
 	}
 
 	bool CodersFileSystem::DeviceNode::isValid() const {

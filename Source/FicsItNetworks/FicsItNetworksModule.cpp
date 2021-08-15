@@ -11,6 +11,7 @@
 #include "Computer/FINComputerDriveDesc.h"
 #include "Computer/FINComputerRCO.h"
 #include "Computer/FINComputerSubsystem.h"
+#include "FicsItKernel/FicsItFS/Library/Tests.h"
 #include "Hologram/FGBuildableHologram.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
@@ -110,6 +111,8 @@ void AddRedirects(FString FromParent, FString ToParent, const ClassChange& Chang
 }
 
 void FFicsItNetworksModule::StartupModule(){
+	CodersFileSystem::Tests::TestPath();
+		
 	GameStart = FDateTime::Now();
 	
 	TArray<FCoreRedirect> redirects;
