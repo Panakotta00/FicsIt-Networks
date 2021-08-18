@@ -794,6 +794,10 @@ int luaRunning(lua_State* L) {
 	return 2;
 }
 
+int luaXpcall(lua_State* L) {
+	return 0;
+}
+
 void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	PersistSetup("LuaProcessor", -2);
 
@@ -804,6 +808,9 @@ void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	lua_setfield(L, -2, "dofile");
 	lua_pushnil(L);
 	lua_setfield(L, -2, "loadfile");
+	//lua_pushcfunction(L, luaXpcall);
+	lua_pushnil(L);
+	lua_setfield(L, -2, "xpcall");
 	lua_pushcfunction(L, luaPrint);
 	lua_setfield(L, -2, "print");
 	PersistTable("global", -1);
