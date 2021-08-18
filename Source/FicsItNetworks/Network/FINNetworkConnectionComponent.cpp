@@ -3,10 +3,15 @@
 #include "FINNetworkCable.h"
 #include "FINNetworkCableHologram.h"
 #include "FINNetworkCircuit.h"
+#include "Resources/FGBuildingDescriptor.h"
 
 void UFINNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UFINNetworkConnectionComponent, Circuit);
+}
+
+UFINNetworkConnectionComponent::UFINNetworkConnectionComponent() {
+	AllowedCableConnections.Add(LoadClass<UFGBuildingDescriptor>(NULL, TEXT("/FicsItNetworks/Network/NetworkCable/BD_NetworkCable.BD_NetworkCable_C")));
 }
 
 void UFINNetworkConnectionComponent::InitializeComponent() {
