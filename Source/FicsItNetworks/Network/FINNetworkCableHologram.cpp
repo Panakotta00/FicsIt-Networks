@@ -1,5 +1,6 @@
 #include "FINNetworkCableHologram.h"
 
+#include "FGBackgroundThread.h"
 #include "FGConstructDisqualifier.h"
 #include "FGOutlineComponent.h"
 #include "FINNetworkAdapter.h"
@@ -23,9 +24,8 @@ FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 	}
 	case FIN_PLUG: {
 		AFGBuildableHologram* Holo = Cast<AFGBuildableHologram>(SnappedObj);
-		AFGBuildable* Plug = AFINNetworkCableHologram::GetDefaultBuildable_Static<AFGBuildable>(Holo);
-		UFINNetworkConnectionComponent* Connector = Cast<UFINNetworkConnectionComponent>(Plug->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
-		if (Connector) return Holo->GetTransform().TransformPosition(Connector->GetComponentToWorld().InverseTransformPosition(Connector->GetComponentLocation()));
+		TArray<UFINNetworkConnectionComponent*> Connector = UFINComponentUtility::GetComponentsFromSubclass<UFINNetworkConnectionComponent>(AFINNetworkCableHologram::GetBuildClass(Holo));
+		if (Connector.Num() > 0) return Holo->GetTransform().TransformPosition(Connector[0]->GetRelativeLocation());
 		else return Holo->GetActorLocation();
 	} default:
 		return FVector::ZeroVector;
