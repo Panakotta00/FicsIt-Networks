@@ -35,9 +35,6 @@ void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
 	FVector end_t = end;
 	end_t.Z += offset;
 
-	UStaticMesh* cableMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
-	CableSpline->SetStaticMesh(cableMesh);
-
 	CableSpline->SetStartAndEnd(start, start_t, end, end_t, true);
 	CableSpline->UpdateMesh();
 

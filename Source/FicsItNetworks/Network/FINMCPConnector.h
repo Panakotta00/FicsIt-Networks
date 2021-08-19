@@ -6,5 +6,5 @@ UCLASS(meta = (BlueprintSpawnableComponent))
 class FICSITNETWORKS_API UFINMCPConnector : public UFINNetworkConnectionComponent {
 	GENERATED_BODY()
 public:
-	
+	UFINMCPConnector();
 };
