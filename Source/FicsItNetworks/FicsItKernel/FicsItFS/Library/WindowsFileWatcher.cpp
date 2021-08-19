@@ -72,8 +72,8 @@ namespace CodersFileSystem {
 	void WindowsFileWatcher::handleChangeEvent(FILE_NOTIFY_INFORMATION* changeEvent) {
 		std::wstring fname = std::wstring((const wchar_t*)&changeEvent->FileName, changeEvent->FileNameLength);
 		std::replace(fname.begin(), fname.end(), L'\\', L'/');
-		Path path = fs::path(fname);
-		bool isDir = fs::is_directory(realPath / path);
+		Path path = fs::path(fname).string();
+		bool isDir = fs::is_directory(realPath / path.str());
 		NodeType type = (isDir) ? NT_Directory : NT_File;
 		switch (changeEvent->Action) {
 		case FILE_ACTION_ADDED:
@@ -86,7 +86,7 @@ namespace CodersFileSystem {
 			eventFunc(2, type, path, Path());
 			break;
 		case FILE_ACTION_RENAMED_NEW_NAME:
-			eventFunc(3, type, path, fs::path(oldNameBufString));
+			eventFunc(3, type, path, fs::path(oldNameBufString).string());
 			break;
 		case FILE_ACTION_RENAMED_OLD_NAME:
 			oldNameBufString = fname;

@@ -21,7 +21,7 @@ UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
 }
 
 FFINNetworkTrace UFINNetworkUtils::RedirectIfPossible(const FFINNetworkTrace& Trace) {
-	UObject* Obj = Trace.GetUnderlyingPtr().Get();
+	UObject* Obj = Trace.GetUnderlyingPtr();
 	if (Obj && Obj->Implements<UFINNetworkComponent>()) {
 		UObject* RedirectObj = IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
 		if (RedirectObj) return Trace / RedirectObj;

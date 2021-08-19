@@ -2,7 +2,6 @@
 #include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FileSystemSerializationInfo.h"
 #include "FINFileSystemState.h"
-#include "Library/NodeName.h"
 
 bool FFINKernelFSRoot::mount(CodersFileSystem::SRef<CodersFileSystem::Device> device, CodersFileSystem::Path path) {
 	// if device is DevDevice, search for existing DevDevice in mounts & prevent mount if found
@@ -64,9 +63,9 @@ CodersFileSystem::Path FFINKernelFSRoot::getMountPoint(CodersFileSystem::SRef<FF
 std::string FFINKernelFSRoot::persistPath(CodersFileSystem::Path path) {
 	CodersFileSystem::Path pending;
 	const CodersFileSystem::SRef<CodersFileSystem::Device> dev = getDevice(path, pending);
-	CodersFileSystem::NodeName name = "";
+	std::string name = "";
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> devDev = getDevDevice();
-	if (dev != devDev && devDev) for (std::pair<const CodersFileSystem::NodeName, CodersFileSystem::SRef<CodersFileSystem::Device>>& device : devDev->getDevices()) {
+	if (dev != devDev && devDev) for (std::pair<const std::string, CodersFileSystem::SRef<CodersFileSystem::Device>>& device : devDev->getDevices()) {
 		if (device.second == dev) {
 			name = device.first;
 			break;
@@ -78,13 +77,13 @@ std::string FFINKernelFSRoot::persistPath(CodersFileSystem::Path path) {
 
 CodersFileSystem::Path FFINKernelFSRoot::unpersistPath(std::string path) {
 	const size_t pos = path.find(':');
-	const CodersFileSystem::NodeName name = path.substr(0, pos);
+	const std::string name = path.substr(0, pos);
 	const CodersFileSystem::Path pending = path.substr(pos+1);
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> devDev = getDevDevice();
 	CodersFileSystem::SRef<CodersFileSystem::Device> dev;
 	if (pos == 0) {
 		dev = devDev;
-    } else for (std::pair<const CodersFileSystem::NodeName, CodersFileSystem::SRef<CodersFileSystem::Device>>& device : devDev->getDevices()) {
+    } else for (std::pair<const std::string, CodersFileSystem::SRef<CodersFileSystem::Device>>& device : devDev->getDevices()) {
 		if (device.first == name) {
 			dev = device.second;
 			break;
@@ -100,13 +99,13 @@ CodersFileSystem::Path FFINKernelFSRoot::unpersistPath(std::string path) {
 
 bool FFINKernelFSRoot::checkUnpersistPath(std::string path) {
 	const size_t pos = path.find(':');
-	const CodersFileSystem::NodeName name = path.substr(0, pos);
+	const std::string name = path.substr(0, pos);
 	CodersFileSystem::Path pending = path.substr(pos+1);
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> devDev = getDevDevice();
 	CodersFileSystem::SRef<CodersFileSystem::Device> dev;
 	if (pos == 0) {
 		dev = devDev;
-	} else for (std::pair<const CodersFileSystem::NodeName, CodersFileSystem::SRef<CodersFileSystem::Device>>& device : devDev->getDevices()) {
+	} else for (std::pair<const std::string, CodersFileSystem::SRef<CodersFileSystem::Device>>& device : devDev->getDevices()) {
 		if (device.first == name) {
 			dev = device.second;
 			break;
@@ -133,7 +132,7 @@ void FFINKernelFSRoot::Serialize(FStructuredArchive::FRecord Record, FFileSystem
 		}
 
 		// serialize temp-fs
-		for (std::pair<const CodersFileSystem::NodeName, CodersFileSystem::SRef<CodersFileSystem::Device>> dev : getDevDevice()->getDevices()) {
+		for (std::pair<const std::string, CodersFileSystem::SRef<CodersFileSystem::Device>> dev : getDevDevice()->getDevices()) {
 			if (!dynamic_cast<CodersFileSystem::MemDevice*>(dev.second.get())) continue;
 			FFileSystemNode node = FFileSystemNode().Serialize(dev.second, "/");
 			node.NodeType = 3;

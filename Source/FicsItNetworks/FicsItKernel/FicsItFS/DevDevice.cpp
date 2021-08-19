@@ -5,8 +5,8 @@ FFINKernelFSDevDevice::FFINKernelFSDevDevice() {
 }
 
 CodersFileSystem::SRef<CodersFileSystem::FileStream> FFINKernelFSDevDevice::open(CodersFileSystem::Path path, CodersFileSystem::FileMode mode) {
-	path.absolute = false;
-	if (path == "serial") {
+	path = path.relative();
+	if (path.str() == "serial") {
 		return Serial->open(mode);
 	}
 	return nullptr;
@@ -28,12 +28,12 @@ CodersFileSystem::SRef<CodersFileSystem::Directory> FFINKernelFSDevDevice::creat
 	return nullptr;
 }
 
-bool FFINKernelFSDevDevice::rename(CodersFileSystem::Path path, const CodersFileSystem::NodeName& name) {
+bool FFINKernelFSDevDevice::rename(CodersFileSystem::Path path, const std::string& name) {
 	return false;
 }
 
-std::unordered_set<CodersFileSystem::NodeName> FFINKernelFSDevDevice::childs(CodersFileSystem::Path path) {
-	std::unordered_set<CodersFileSystem::NodeName> list;
+std::unordered_set<std::string> FFINKernelFSDevDevice::childs(CodersFileSystem::Path path) {
+	std::unordered_set<std::string> list;
 	for (auto device : Devices) {
 		list.insert(device.first);
 	}
@@ -41,7 +41,7 @@ std::unordered_set<CodersFileSystem::NodeName> FFINKernelFSDevDevice::childs(Cod
 	return list;
 }
 
-bool FFINKernelFSDevDevice::addDevice(CodersFileSystem::SRef<CodersFileSystem::Device> device, const CodersFileSystem::NodeName& name) {
+bool FFINKernelFSDevDevice::addDevice(CodersFileSystem::SRef<CodersFileSystem::Device> device, const std::string& name) {
 	const auto dev = Devices.find(name);
 	if (dev != Devices.end() || name == "serial") return false;
 	Devices[name] = device;
@@ -58,7 +58,7 @@ bool FFINKernelFSDevDevice::removeDevice(CodersFileSystem::SRef<CodersFileSystem
 	return false;
 }
 
-std::unordered_map<CodersFileSystem::NodeName, CodersFileSystem::SRef<CodersFileSystem::Device>> FFINKernelFSDevDevice::getDevices() const {
+std::unordered_map<std::string, CodersFileSystem::SRef<CodersFileSystem::Device>> FFINKernelFSDevDevice::getDevices() const {
 	return Devices;
 }
 

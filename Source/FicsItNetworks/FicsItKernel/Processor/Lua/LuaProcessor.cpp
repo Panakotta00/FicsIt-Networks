@@ -281,7 +281,7 @@ int FFINLuaProcessorTick::steps() const {
 	case LUA_ASYNC_END:
 		return AsyncEndLen;
 	default:
-		return 0;
+		return LUA_SYNC;
 	}
 }
 
@@ -767,8 +767,10 @@ int luaResume(lua_State* L) {
 	
 	if (state > LUA_YIELD) {
 		lua_pushboolean(L, false);
+		argCount = 1;
 	} else {
 		lua_pushboolean(L, true);
+		--argCount;
 	}
 	
 	if (!lua_checkstack(L, argCount)) {
@@ -782,7 +784,7 @@ int luaResume(lua_State* L) {
 	
 	return UFINLuaProcessor::luaAPIReturn(L, argCount+1);
 }
-//
+
 int luaRunning(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	int ismain = lua_pushthread(L);
@@ -790,6 +792,10 @@ int luaRunning(lua_State* L) {
 	if (thread == p->GetLuaThread()) ismain = 1;
 	lua_pushboolean(L, ismain);
 	return 2;
+}
+
+int luaXpcall(lua_State* L) {
+	return 0;
 }
 
 void UFINLuaProcessor::LuaSetup(lua_State* L) {
@@ -802,6 +808,9 @@ void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	lua_setfield(L, -2, "dofile");
 	lua_pushnil(L);
 	lua_setfield(L, -2, "loadfile");
+	//lua_pushcfunction(L, luaXpcall);
+	lua_pushnil(L);
+	lua_setfield(L, -2, "xpcall");
 	lua_pushcfunction(L, luaPrint);
 	lua_setfield(L, -2, "print");
 	PersistTable("global", -1);

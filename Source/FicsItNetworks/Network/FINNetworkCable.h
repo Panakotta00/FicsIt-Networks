@@ -21,7 +21,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	USplineMeshComponent* CableSpline = nullptr;
-
+	
 	AFINNetworkCable();
 	~AFINNetworkCable();
 

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FGFactoryConnectionComponent.h"
+#include "FGPipeConnectionComponent.h"
 #include "FGPowerCircuit.h"
 #include "FGTrain.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
@@ -180,6 +181,30 @@ public:
 		// SUBSCRIBE_METHOD_MANUAL("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_GrabOutput, &FactoryGrabHook);
 		SUBSCRIBE_METHOD(UFGFactoryConnectionComponent::Factory_GrabOutput, &FactoryGrabHook);
 		SUBSCRIBE_METHOD(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, &FactoryGrabInternalHook);
+    }
+};
+
+UCLASS()
+class UFINPipeConnectorHook : public UFINFunctionHook {
+	GENERATED_BODY()
+
+protected:
+	static UFINPipeConnectorHook* StaticSelf() {
+		static UFINPipeConnectorHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINPipeConnectorHook*>(GetDefault<UFINPipeConnectorHook>());
+		return Hook; 
+	}
+
+	// Begin UFINFunctionHook
+	virtual UFINFunctionHook* Self() {
+		return StaticSelf();
+	}
+	// End UFINFunctionHook
+			
+public:		
+	void RegisterFuncHook() override {
+		// TODO: Check if this works now
+		// SUBSCRIBE_METHOD_MANUAL("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_GrabOutput, &FactoryGrabHook);
     }
 };
 

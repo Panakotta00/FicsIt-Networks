@@ -54,7 +54,6 @@ protected:
 	CodersFileSystem::SRef<FFINKernelFSSerial> serial;
 	CodersFileSystem::ListenerListRef& listeners;
 	CodersFileSystem::SizeCheckFunc sizeCheck;
-	std::string buffer;
 	std::stringstream input;
 
 public:
@@ -63,11 +62,7 @@ public:
 
 	// Begin FileSystem::FileStream
 	virtual void write(std::string str) override;
-	virtual void flush() override;
-	virtual std::string readChars(size_t chars) override;
-	virtual std::string readLine() override;
-	virtual std::string readAll() override;
-	virtual double readNumber() override;
+	virtual std::string read(size_t chars) override;
 	virtual std::int64_t seek(std::string w, std::int64_t off) override;
 	virtual void close() override;
 	virtual bool isEOF() override;

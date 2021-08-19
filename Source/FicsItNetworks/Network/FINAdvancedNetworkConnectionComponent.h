@@ -18,7 +18,7 @@ DECLARE_DELEGATE_RetVal_OneParam(bool, FFINIsNetworkPortOpen, int);
  * This network connectionc component allows for cabled connections and additionally
  * it also allows for a basic implementation for a network component, signal sender and signal listener.
  */
-UCLASS()
+UCLASS(meta = (BlueprintSpawnableComponent))
 class FICSITNETWORKS_API UFINAdvancedNetworkConnectionComponent : public UFINNetworkConnectionComponent, public IFINNetworkComponent, public IFINSignalSender, public IFINSignalListener, public IFINNetworkMessageInterface {
 	GENERATED_BODY()
 

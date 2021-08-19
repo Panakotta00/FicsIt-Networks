@@ -28,7 +28,7 @@ namespace CodersFileSystem {
 	public:
 		File();
 
-		virtual std::unordered_set<NodeName> getChilds() const override;
+		virtual std::unordered_set<std::string> getChilds() const override;
 	};
 
 	class MemFile : public File {
@@ -86,46 +86,31 @@ namespace CodersFileSystem {
 		virtual void write(std::string str) = 0;
 
 		/*
-		* "Saves" the changes of the stream to the actual file
-		*/
-		virtual void flush() = 0;
+		 * reads the given amount of characters of the input-stream at the current input-stream pos.
+		 * might return less characters than requested, but stream may still have characters available later.
+		 *
+		 * If no further characters are available in filestream, EOF flag will be set and can be checked with the isEOF function.
+		 *
+		 * @param[in]	chars	the count of chars you want to read
+		 * @return	the read chars as string
+		 */
+		virtual std::string read(size_t chars) = 0;
+
+		/**
+		 * Returns true if the end-of-file (EOF) flag was set.
+		 * Flag will be overwritten by further successful reads or any seek operations.
+		 *
+		 * @return true if the stream doesn't have any more characters available to read.
+		 */
+		virtual bool isEOF() = 0;
 
 		/*
-		* reads the given amount of characters of the input-stream at the current input-stream pos
-		*
-		* @param[in]	chars	the count of chars you want to read
-		* @return	the read chars as string
-		*/
-		virtual std::string readChars(size_t chars) = 0;
-
-		/*
-		* reads one line of the input-stream at the current input-stream pos
-		*
-		* @return	returns the read line as string
-		*/
-		virtual std::string readLine() = 0;
-
-		/*
-		* reads the whole content of the input-stream
-		*
-		* @return	returns all the content of the input-stream
-		*/
-		virtual std::string readAll() = 0;
-
-		/*
-		* reads a number of the input-stream at the current input-stream pos
-		*
-		* @return	returns the read number as double
-		*/
-		virtual double readNumber() = 0;
-
-		/*
-		* sets the output-stream pos and the input stream-pos to the given position
-		* 
-		* @param[in]	w	a string defining if the new stream pos should get set relative to the beginning of the file ("set"), the current stream pos ("cur") or the end of the stream ("end")
-		* @param[in]	off	the offset to the given relative position the new stream pos should get set to
-		* @return	returns the new output-stream pos
-		*/
+		 * sets the output-stream pos and the input stream-pos to the given position
+		 * 
+		 * @param[in]	w	a string defining if the new stream pos should get set relative to the beginning of the file ("set"), the current stream pos ("cur") or the end of the stream ("end")
+		 * @param[in]	off	the offset to the given relative position the new stream pos should get set to
+		 * @return	returns the new output-stream pos
+		 */
 		virtual std::int64_t seek(std::string w, std::int64_t off) = 0;
 
 		/*
@@ -134,17 +119,10 @@ namespace CodersFileSystem {
 		virtual void close() = 0;
 
 		/*
-		* checks if the stream pos is at the end of the file
-		*
-		* @return	returns true if the stream pos is at the end of the file
-		*/
-		virtual bool isEOF() = 0;
-
-		/*
-		* checks if the filestream is open and I/O functions are allowed to get called
-		*
-		* @return	returns true if filestream is open
-		*/
+		 * checks if the filestream is open and I/O functions are allowed to get called
+		 *
+		 * @return	returns true if filestream is open
+		 */
 		virtual bool isOpen() = 0;
 
 		/**
@@ -153,31 +131,35 @@ namespace CodersFileSystem {
 		 * @param	str		the string you want to write to the stream
 		 */
 		FileStream& operator<<(const std::string& str);
+
+		/**
+		 * Reads the given stream till EOF
+		 *
+		 * @param[in]	stream	the stream you want to read till EOF
+		 * @return all the content of the stream read til EOF
+		 */
+		static std::string readAll(SRef<FileStream> stream);
 	};
 
 	class MemFileStream : public FileStream {
 	protected:
 		std::string* data;
-		int64_t pos = 0;
-		std::string buf;
+		uint64_t pos = 0;
 		ListenerListRef& listeners;
 		SizeCheckFunc sizeCheck;
 		bool open = false;
+		bool flagEOF = false;
 
 	public:
 		MemFileStream(std::string* data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
 		~MemFileStream();
 
-		virtual void write(std::string str);
-		virtual void flush();
-		virtual std::string readChars(size_t chars);
-		virtual std::string readLine();
-		virtual std::string readAll();
-		virtual double readNumber();
-		virtual std::int64_t seek(std::string w, std::int64_t off);
-		virtual void close();
-		virtual bool isEOF();
-		virtual bool isOpen();
+		virtual void write(std::string str) override;
+		virtual std::string read(size_t chars) override;
+		virtual bool isEOF() override;
+		virtual std::int64_t seek(std::string w, std::int64_t off) override;
+		virtual void close() override;
+		virtual bool isOpen() override;
 	};
 
 	class DiskFileStream : public FileStream {
@@ -190,15 +172,11 @@ namespace CodersFileSystem {
 		DiskFileStream(std::filesystem::path realPath, FileMode mode, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
 		~DiskFileStream();
 
-		virtual void write(std::string str);
-		virtual void flush();
-		virtual std::string readChars(size_t chars);
-		virtual std::string readLine();
-		virtual std::string readAll();
-		virtual double readNumber();
-		virtual std::int64_t seek(std::string w, std::int64_t off);
-		virtual void close();
-		virtual bool isEOF();
-		virtual bool isOpen();
+		virtual void write(std::string str) override;
+		virtual std::string read(size_t chars) override;
+		virtual bool isEOF() override;
+		virtual std::int64_t seek(std::string w, std::int64_t off) override;
+		virtual void close() override;
+		virtual bool isOpen() override;
 	};
 }

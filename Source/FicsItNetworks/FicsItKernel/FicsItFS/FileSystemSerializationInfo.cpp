@@ -23,7 +23,6 @@ CodersFileSystem::SRef<CodersFileSystem::Node> FFileSystemNodeIndex::Deserialize
 		try {
 			FTCHARToUTF8 Convert(*Node->Data, Node->Data.Len());
 			stream->write(std::string(Convert.Get(), Convert.Length()));
-			stream->flush();
 			stream->close();
 		} catch (...) {
 			UE_LOG(LogFicsItNetworks, Error, TEXT("Unable to deserialize VFS-File"));
@@ -50,12 +49,12 @@ FFileSystemNode& FFileSystemNode::Serialize(CodersFileSystem::SRef<CodersFileSys
 	if (CodersFileSystem::SRef<CodersFileSystem::File> file = node) {
 		NodeType = 0;
 		CodersFileSystem::SRef<CodersFileSystem::FileStream> stream = file->open(CodersFileSystem::INPUT | CodersFileSystem::BINARY);
-		std::string str = stream->readAll();
+		std::string str = CodersFileSystem::FileStream::readAll(stream);
 		FUTF8ToTCHAR Convert(str.c_str(), str.length());
 		Data = FString(Convert.Length(), Convert.Get());
 	} else if (CodersFileSystem::SRef<CodersFileSystem::Directory> dir = node) {
 		NodeType = 1;
-		for (CodersFileSystem::NodeName child : dir->getChilds()) {
+		for (std::string child : dir->getChilds()) {
 			TSharedPtr<FFileSystemNode> newNode = MakeShareable(new FFileSystemNode());
 			newNode->Serialize(device, path / child);
 			ChildNodes.Add(child.c_str(), newNode);
@@ -83,7 +82,7 @@ FFileSystemNode& FFileSystemNode::Deserialize(CodersFileSystem::SRef<CodersFileS
 		if (!Device.isValid()) throw std::exception(("unable to find device to unpersist '" + deviceName + "'").c_str());
 		// delete previously existing contents
 		if (NodeType == 2) {
-			for (CodersFileSystem::NodeName child : Device->childs("/")) {
+			for (std::string child : Device->childs("/")) {
 				CodersFileSystem::Path childPath = "/";
 				childPath = childPath / child;
 				Device->remove(childPath, true);

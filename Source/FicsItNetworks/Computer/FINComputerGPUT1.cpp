@@ -305,7 +305,7 @@ void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int b
 void AFINComputerGPUT1::netSig_OnKeyChar_Implementation(const FString& c, int btn) {}
 
 void AFINComputerGPUT1::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
-	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr().Get())) BindScreen(NewScreen);
+	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr())) BindScreen(NewScreen);
 }
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {

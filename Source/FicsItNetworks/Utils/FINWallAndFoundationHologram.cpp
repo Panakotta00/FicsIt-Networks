@@ -7,21 +7,22 @@ void AFINWallAndFoundationHologram::SetHologramLocationAndRotation(const FHitRes
 	AActor* Actor = hitResult.Actor.Get();
 	FVector Location = hitResult.Location;
 	FRotator Rotation = FRotator::ZeroRotator;
-	if (Actor->IsA<AFGBuildableWall>()) {
-		SnapToWall(Cast<AFGBuildableWall>(Actor), hitResult.Normal, hitResult.Location, EAxis::X, FVector(0, 0, 0), 0, Location, Rotation);
-	} else if (Actor->IsA<AFGBuildableFoundation>()) {
-		bool bTop = hitResult.Normal.Equals(FVector(0, 0, hitResult.Normal.Size()), 0.1);
-		bool bBottom = hitResult.Normal.Equals(FVector(0, 0, -hitResult.Normal.Size()), 0.1);
-		if (bTop || bBottom) {
-			Rotation = Actor->GetActorRotation();
-			SnapToFloor(Cast<AFGBuildable>(Actor), Location, Rotation);
-			Rotation = (Rotation.Quaternion() + FRotator(bBottom ? -90.0f : 90.0f, 0, 0).Quaternion()).Rotator();
-		} else {
-			SnapToFoundationSide(Cast<AFGBuildableFoundation>(Actor), Actor->GetActorTransform().InverseTransformRotation(hitResult.Normal.Rotation().Quaternion()).Vector(), Location, Rotation);
+	if(Actor) {
+		if (Actor->IsA<AFGBuildableWall>()) {
+			SnapToWall(Cast<AFGBuildableWall>(Actor), hitResult.Normal, hitResult.Location, EAxis::X, FVector(0, 0, 0), 0, Location, Rotation);
+		} else if (Actor->IsA<AFGBuildableFoundation>()) {
+			bool bTop = hitResult.Normal.Equals(FVector(0, 0, hitResult.Normal.Size()), 0.1);
+			bool bBottom = hitResult.Normal.Equals(FVector(0, 0, -hitResult.Normal.Size()), 0.1);
+			if (bTop || bBottom) {
+				Rotation = Actor->GetActorRotation();
+				SnapToFloor(Cast<AFGBuildable>(Actor), Location, Rotation);
+				Rotation = (Rotation.Quaternion() + FRotator(bBottom ? -90.0f : 90.0f, 0, 0).Quaternion()).Rotator();
+			} else {
+				SnapToFoundationSide(Cast<AFGBuildableFoundation>(Actor), Actor->GetActorTransform().InverseTransformRotation(hitResult.Normal.Rotation().Quaternion()).Vector(), Location, Rotation);
+			}
+			Location -= Rotation.Vector() * 35;
 		}
-		Location -= Rotation.Vector() * 35;
 	}
-	
 	SetActorLocationAndRotation(Location, Rotation);
 }
 

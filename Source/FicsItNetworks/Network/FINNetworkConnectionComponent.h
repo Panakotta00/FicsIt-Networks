@@ -3,6 +3,7 @@
 #include "FGSaveInterface.h"
 #include "FINNetworkCircuitNode.h"
 #include "Components/SceneComponent.h"
+#include "Resources/FGBuildingDescriptor.h"
 #include "FINNetworkConnectionComponent.generated.h"
 
 class AFINNetworkCable;
@@ -13,7 +14,7 @@ class AFINNetworkCable;
  * This component is only used for the network circuit and doesn't implement
  * any network component logic. Use UFINNetworkConnector instead if you want so.
  */
-UCLASS(meta = (BlueprintSpawnableComponent))
+UCLASS(meta = (BlueprintSpawnableComponent), Blueprintable)
 class FICSITNETWORKS_API UFINNetworkConnectionComponent : public USceneComponent, public IFINNetworkCircuitNode, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
@@ -23,6 +24,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	int MaxCables = -1;
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<TSubclassOf<UFGBuildingDescriptor>> AllowedCableConnections; 
+	
 	/**
 	 * The "hidden" connections to other network connectors.
 	 */
@@ -41,6 +45,8 @@ public:
 	UPROPERTY(Replicated)
 	AFINNetworkCircuit* Circuit = nullptr;
 
+	UFINNetworkConnectionComponent();
+	
 	// Begin UObject
 	virtual void InitializeComponent() override;
 	// End UObject
