@@ -34,6 +34,11 @@ void AFINModuleScreen::Tick(float DeltaSeconds) {
 		OnGPUValidationChanged(GPU.IsValid(), GPUPtr);
 		GPUPtr = GPU.Get();
 	}
+	if (bDoGPUUpdate) {
+		bDoGPUUpdate = false;
+
+		NetMulti_OnGPUUpdate();
+	}
 }
 
 void AFINModuleScreen::BindGPU(const FFINNetworkTrace& gpu) {
@@ -46,9 +51,7 @@ void AFINModuleScreen::BindGPU(const FFINNetworkTrace& gpu) {
 		if (IsValid(gpu.GetUnderlyingPtr())) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
 		GPUPtr = GPU.Get();
 	}
-	GetWorldTimerManager().SetTimerForNextTick([this]() {
-		NetMulti_OnGPUUpdate();
-	});
+	bDoGPUUpdate = true;
 }
 
 FFINNetworkTrace AFINModuleScreen::GetGPU() const {
