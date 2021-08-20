@@ -83,14 +83,14 @@ bool AFINSizeablePanelHolo::IsValidHitResult(const FHitResult& hitResult) const 
 	return hitResult.GetActor() && (hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>());
 }
 
-void AFINSizeablePanelHolo::SetHologramLocationAndRotation(const FHitResult& hitResult) {
+void AFINSizeablePanelHolo::SetHologramLocationAndRotation(const FHitResult& HitResult) {
 	if (bSnapped) {
 		FVector PlaneNormal = Normal;
 		PlaneNormal.Normalize(0.01);
 		FVector PlanePosition = GetActorLocation();
-		FVector LineDirection = (hitResult.TraceEnd - hitResult.TraceStart);
+		FVector LineDirection = (HitResult.TraceEnd - HitResult.TraceStart);
 		LineDirection.Normalize(0.01);
-		FVector LinePosition = hitResult.TraceStart;
+		FVector LinePosition = HitResult.TraceStart;
 		float PlaneDotLine = FVector::DotProduct(PlaneNormal, LineDirection);
 		if (PlaneDotLine == 0.0) {
 			PanelHeight = 1;
@@ -106,12 +106,12 @@ void AFINSizeablePanelHolo::SetHologramLocationAndRotation(const FHitResult& hit
 			if (PanelWidth == 0) PanelWidth = 1;
 		}
 	} else {
-		Normal = hitResult.ImpactNormal;
+		Normal = HitResult.ImpactNormal;
 		PanelHeight = 1;
 		PanelWidth = 1;
 		FTransform SnappedActorTransform = FTransform();
 		FVector UpVector = FVector(1,0,0);
-		if (AActor* SnappedActor = hitResult.GetActor()) {
+		if (AActor* SnappedActor = HitResult.GetActor()) {
 			SnappedActorTransform = SnappedActor->GetActorTransform();
 		}
 		FQuat Quat;
@@ -125,7 +125,14 @@ void AFINSizeablePanelHolo::SetHologramLocationAndRotation(const FHitResult& hit
 			Quat = FQuat(RotationAxis, RotationAngle);
 		}
 		FQuat NewQuat = Quat * FRotator(0, 0, GetScrollRotateValue()).Quaternion();
-		SetActorLocationAndRotation(hitResult.ImpactPoint, NewQuat.Rotator());
+		auto Location = HitResult.GetActor()->GetActorLocation();
+		auto Rotation = HitResult.GetActor()->GetActorRotation();
+		auto VectorInActorLocalSpace = Rotation.UnrotateVector(HitResult.ImpactPoint - Location);
+		FVector GridPos = VectorInActorLocalSpace.GridSnap(5);
+		FVector ResDiffPos = GridPos - VectorInActorLocalSpace;
+		FVector ResDiffPosR = Rotation.RotateVector(ResDiffPos);
+		FVector Res = HitResult.ImpactPoint + ResDiffPosR;
+		SetActorLocationAndRotation(Res, NewQuat.Rotator());
 	}
 }
 

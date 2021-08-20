@@ -37,7 +37,7 @@ public:
 	virtual bool DoMultiStepPlacement(bool isInputFromARelease) override;
 	virtual int32 GetBaseCostMultiplier() const override;
 	virtual bool IsValidHitResult(const FHitResult& hitResult) const override;
-	virtual void SetHologramLocationAndRotation(const FHitResult& hitResult) override;
+	virtual void SetHologramLocationAndRotation(const FHitResult& HitResult) override;
 	virtual AActor* Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) override;
 	virtual void CheckValidFloor() override;
 	virtual void ConfigureActor(AFGBuildable* inBuildable) const override;
