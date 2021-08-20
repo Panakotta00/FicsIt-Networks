@@ -42,6 +42,7 @@ bool AFINWallBoxHolo::IsValidHitResult(const FHitResult& hitResult) const {
 	return hitResult.GetActor() && (hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>());
 }
 
+#pragma optimize("", off)
 void AFINWallBoxHolo::SetHologramLocationAndRotation(const FHitResult& hitResult) {
 	Normal = hitResult.ImpactNormal;
 	FVector UpVector = FVector(1,0,0);
@@ -56,8 +57,17 @@ void AFINWallBoxHolo::SetHologramLocationAndRotation(const FHitResult& hitResult
 		Quat = FQuat(RotationAxis, RotationAngle);
 	}
 	FQuat NewQuat = Quat * FRotator(0, 0, GetScrollRotateValue()).Quaternion();
-	SetActorLocationAndRotation(hitResult.ImpactPoint, NewQuat.Rotator());
+	auto location = hitResult.GetActor()->GetActorLocation();
+	auto rotation = hitResult.GetActor()->GetActorRotation();
+	auto VectorInActorLocalSpace = rotation.UnrotateVector(hitResult.ImpactPoint - location);
+	FVector gridPos = VectorInActorLocalSpace.GridSnap(5);
+	FVector resDiffPos = gridPos - VectorInActorLocalSpace;
+	FVector resDiffPosR = rotation.RotateVector(resDiffPos);
+	FVector res = hitResult.ImpactPoint + resDiffPosR;
+	//resDiffPos = FVector::CrossProduct();
+	SetActorLocationAndRotation(res, NewQuat.Rotator());
 }
+#pragma optimize("", on)
 
 AActor* AFINWallBoxHolo::Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) {
 	return Super::Construct(out_children, netConstructionID);
