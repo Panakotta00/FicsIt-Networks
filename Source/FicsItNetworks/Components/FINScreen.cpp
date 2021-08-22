@@ -85,6 +85,8 @@ void AFINScreen::Tick(float DeltaSeconds) {
 		}
 
 		OnGPUUpdate.Broadcast();
+
+		NetMulti_OnGPUUpdate();
 	}
 	if (HasAuthority() && (((bool)GPUPtr) != GPU.IsValid())) {
 		if (!GPUPtr) GPUPtr = GPU.Get();
@@ -120,9 +122,6 @@ void AFINScreen::BindGPU(const FFINNetworkTrace& gpu) {
 		bGPUChanged = true;
 		GPUPtr = GPU.Get();
 	}
-	GetWorldTimerManager().SetTimerForNextTick([this]() {
-		NetMulti_OnGPUUpdate();
-	});
 }
 
 FFINNetworkTrace AFINScreen::GetGPU() const {

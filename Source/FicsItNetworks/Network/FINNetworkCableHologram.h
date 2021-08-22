@@ -132,4 +132,6 @@ public:
 protected:
 	template<typename T>
 	static T* GetDefaultBuildable_Static(AFGBuildableHologram* Holo) { return Holo->GetDefaultBuildable<T>(); }
+	
+	static UClass* GetBuildClass(AFGBuildableHologram* Holo) { return Holo->mBuildClass; }
 };

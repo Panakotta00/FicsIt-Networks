@@ -31,6 +31,10 @@ void AFINComputerScreen::Tick(float DeltaSeconds) {
 		GPUPtr = GPU.Get();
 		ForceNetUpdate();
 	}
+	if (bDoGPUUpdate) {
+		bDoGPUUpdate = false;
+		NetMulti_OnGPUUpdate();
+	}
 }
 
 bool AFINComputerScreen::ShouldSave_Implementation() const {
@@ -47,9 +51,7 @@ void AFINComputerScreen::BindGPU(const FFINNetworkTrace& gpu) {
 		if (IsValid(gpu.GetUnderlyingPtr())) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
 		GPUPtr = GPU.Get();
 	}
-	GetWorldTimerManager().SetTimerForNextTick([this]() {
-		NetMulti_OnGPUUpdate();
-	});
+	bDoGPUUpdate = true;
 }
 
 FFINNetworkTrace AFINComputerScreen::GetGPU() const {

@@ -1,5 +1,6 @@
 #include "FINNetworkCableHologram.h"
 
+#include "FGBackgroundThread.h"
 #include "FGConstructDisqualifier.h"
 #include "FGOutlineComponent.h"
 #include "FINNetworkAdapter.h"
@@ -23,9 +24,8 @@ FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 	}
 	case FIN_PLUG: {
 		AFGBuildableHologram* Holo = Cast<AFGBuildableHologram>(SnappedObj);
-		AFGBuildable* Plug = AFINNetworkCableHologram::GetDefaultBuildable_Static<AFGBuildable>(Holo);
-		UFINNetworkConnectionComponent* Connector = Cast<UFINNetworkConnectionComponent>(Plug->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
-		if (Connector) return Holo->GetTransform().TransformPosition(Connector->GetComponentToWorld().InverseTransformPosition(Connector->GetComponentLocation()));
+		TArray<UFINNetworkConnectionComponent*> Connector = UFINComponentUtility::GetComponentsFromSubclass<UFINNetworkConnectionComponent>(AFINNetworkCableHologram::GetBuildClass(Holo));
+		if (Connector.Num() > 0) return Holo->GetTransform().TransformPosition(Connector[0]->GetRelativeLocation());
 		else return Holo->GetActorLocation();
 	} default:
 		return FVector::ZeroVector;
@@ -371,6 +371,11 @@ void AFINNetworkCableHologram::UpdateMeshValidity(bool bValid) {
 	for (UActorComponent* Comp : PoleHologram2->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, Material);
 	for (UActorComponent* Comp : PlugHologram1->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, Material);
 	for (UActorComponent* Comp : PlugHologram2->GetComponentsByClass(UStaticMeshComponent::StaticClass())) Cast<UStaticMeshComponent>(Comp)->SetMaterial(0, Material);
+	if (Snapped.SnapType == FIN_NOT_SNAPPED || (IsInSecondStep() && From.SnapType == FIN_NOT_SNAPPED)) {
+		Cable->SetVisibility(false, true);
+	} else {
+		Cable->SetVisibility(true, true);
+	}
 }
 
 bool AFINNetworkCableHologram::IsInSecondStep() {
