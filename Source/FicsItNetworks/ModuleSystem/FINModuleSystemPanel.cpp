@@ -15,12 +15,12 @@ void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 		SetupGrid();
 
 		int height = PanelHeight, width = PanelWidth;
-		Ar << height;
-		Ar << width;
-	
-		for (int x = 0; x < height; ++x) {
-			for (int y = 0; y < width; ++y) {
-				if (x < PanelHeight && y < PanelHeight) {
+		Ar << PanelHeight;
+		Ar << PanelWidth;
+
+		for (int x = 0; x < PanelHeight; ++x) {
+			for (int y = 0; y < PanelWidth; ++y) {
+				if (x < height && y < width) {
 					UObject* ptr = GetGridSlot(x, y);
 					Ar << ptr;
 					GetGridSlot(x, y) = ptr;
