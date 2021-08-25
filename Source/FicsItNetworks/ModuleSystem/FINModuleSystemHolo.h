@@ -32,6 +32,7 @@ public:
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;
 	virtual void SetHologramLocationAndRotation(const FHitResult& hit) override;
 	virtual void CheckValidPlacement() override;
+	virtual void BeginPlay() override;
 	// End AFGHologram
 
 private:
