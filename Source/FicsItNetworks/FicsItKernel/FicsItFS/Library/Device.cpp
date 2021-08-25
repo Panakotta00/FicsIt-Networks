@@ -160,7 +160,7 @@ namespace CodersFileSystem {
 		return getSizeFromPath(realPath);
 	}
 
-	DiskDevice::DiskDevice(fs::path realPath, size_t capacity) : ByteCountedDevice(capacity), realPath(realPath), watcher(realPath,
+	DiskDevice::DiskDevice(fs::path realPath, size_t capacity) : ByteCountedDevice(capacity), realPath(realPath)/*, watcher(realPath,
 		[&](int eventType, auto node, auto to, auto from) {
 			switch (eventType) {
 			case 0:
@@ -176,7 +176,7 @@ namespace CodersFileSystem {
 				listeners.onNodeRenamed(to, from, node);
 				break;
 			}
-		}) {
+		})*/ {
 		getUsed();
 	}
 
@@ -227,6 +227,7 @@ namespace CodersFileSystem {
 	}
 
 	SRef<Node> DiskDevice::get(Path path) {
+		path = path.normalize();
 		if (path.isEmpty()) return new DiskDirectory(realPath, checkSize);
 		std::filesystem::path spath = realPath / path.relative().str();
 		if (fs::is_regular_file(spath)) {
@@ -249,7 +250,7 @@ namespace CodersFileSystem {
 	}
 
 	void DiskDevice::tickWatcher() {
-		watcher.tick();
+		//watcher.tick();
 	}
 
 	std::filesystem::path DiskDevice::getRealPath() const {
