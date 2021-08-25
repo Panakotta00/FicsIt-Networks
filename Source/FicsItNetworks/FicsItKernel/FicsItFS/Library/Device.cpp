@@ -87,7 +87,7 @@ namespace CodersFileSystem {
 
 	SRef<FileStream> MemDevice::open(Path path, FileMode mode) {
 		auto node = get(path);
-		if (!node.isValid()) {
+		if (!node.isValid() && mode & FileMode::OUTPUT) {
 			SRef<Directory> dir = get(path / "..");
 			if (dir.isValid()) node = dir->createFile(path.fileName());
 		}
@@ -125,6 +125,7 @@ namespace CodersFileSystem {
 	}
 
 	SRef<Node> MemDevice::get(Path path) {
+		path = path.absolute();
 		if (path.isRoot()) return root;
 		SRef<MemDirectory> dir = root;
 		while (!path.isSingle() && dir.isValid()) {

@@ -27,7 +27,9 @@ MemFile::MemFile(ListenerListRef listeners, SizeCheckFunc sizeCheck) : File(), l
 
 SRef<FileStream> MemFile::open(FileMode m) {
 	if (io.isValid() && io->isOpen()) return nullptr;
-	return io = new MemFileStream(&data, m, listeners, sizeCheck);
+	SRef<MemFileStream> FS = new MemFileStream(&data, m, listeners, sizeCheck);
+	io = FS;
+	return FS;
 }
 
 bool CodersFileSystem::MemFile::isValid() const {
