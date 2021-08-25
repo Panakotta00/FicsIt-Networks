@@ -1752,7 +1752,7 @@ BeginFunc(getConnection, "Get Connection", "Returns the railroad track connectio
 	InVal(0, RInt, direction, "Direction", "The direction of which you want to get the connector from. 0 = front, 1 = back")
 	OutVal(1, RTrace<UFGRailroadTrackConnectionComponent>, connection, "Connection", "The connection component in the given direction.")
 	Body()
-	connection = Ctx.GetTrace() / self->GetConnection(direction);
+	connection = Ctx.GetTrace() / self->GetConnection(FMath::Clamp<int>(direction, 0, 1));
 } EndFunc()
 BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which this track is part of.") {
 	OutVal(0, RStruct<FFINTrackGraph>, track, "Track", "The track graph of which this track is part of.")
