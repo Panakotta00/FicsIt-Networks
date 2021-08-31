@@ -5,6 +5,7 @@
 #include "LuaInstance.h"
 #include "LuaProcessor.h"
 #include "FicsItNetworks/Network/FINDynamicStructHolder.h"
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
 #include "FicsItNetworks/Reflection/FINClass.h"
 
 #define LuaFunc(funcName) \
@@ -13,11 +14,10 @@ int funcName(lua_State* L) { \
 	UFINKernelSystem* kernel = processor->GetKernel(); \
 	FLuaSyncCall SyncCall(L);
 
-
 namespace FicsItKernel {
 	namespace Lua {
 		LuaFunc(luaComputerGetInstance)
-			newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()));
+			newInstance(L, UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject())));
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 
