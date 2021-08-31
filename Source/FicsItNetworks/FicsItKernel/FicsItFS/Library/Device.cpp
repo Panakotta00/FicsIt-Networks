@@ -87,7 +87,7 @@ namespace CodersFileSystem {
 
 	SRef<FileStream> MemDevice::open(Path path, FileMode mode) {
 		auto node = get(path);
-		if (!node.isValid()) {
+		if (!node.isValid() && mode & FileMode::OUTPUT) {
 			SRef<Directory> dir = get(path / "..");
 			if (dir.isValid()) node = dir->createFile(path.fileName());
 		}
@@ -125,6 +125,7 @@ namespace CodersFileSystem {
 	}
 
 	SRef<Node> MemDevice::get(Path path) {
+		path = path.absolute();
 		if (path.isRoot()) return root;
 		SRef<MemDirectory> dir = root;
 		while (!path.isSingle() && dir.isValid()) {
@@ -201,7 +202,7 @@ namespace CodersFileSystem {
 		tickWatcher();
 		return get(path);
 	}
-#pragma optimize("",off)
+
 	bool DiskDevice::remove(Path path, bool recursive) {
 		if (path.isEmpty()) return false;
 		std::filesystem::path spath = realPath / path.relative().str();
@@ -213,7 +214,6 @@ namespace CodersFileSystem {
 			return false;
 		}
 	}
-#pragma optimize("",on)
 
 	bool DiskDevice::rename(Path path, const std::string& name) {
 		if (path.isEmpty() || !Path::isNode(name)) return false;
@@ -226,6 +226,7 @@ namespace CodersFileSystem {
 	}
 
 	SRef<Node> DiskDevice::get(Path path) {
+		path = path.normalize();
 		if (path.isEmpty()) return new DiskDirectory(realPath, checkSize);
 		std::filesystem::path spath = realPath / path.relative().str();
 		if (fs::is_regular_file(spath)) {

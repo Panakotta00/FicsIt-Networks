@@ -3,6 +3,7 @@
 
 #include "FGColoredInstanceMeshProxy.h"
 #include "FicsItNetworks/Graphics/FINGPUInterface.h"
+#include "FicsItNetworks/Network/FINNetworkCable.h"
 
 AFINScreen::AFINScreen() {
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
@@ -48,6 +49,8 @@ void AFINScreen::BeginPlay() {
 
 	if (HasAuthority()) GPUPtr = GPU.Get();
 	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
+
+	for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) Cable->RerunConstructionScripts();
 }
 
 void AFINScreen::OnConstruction(const FTransform& transform) {
