@@ -333,6 +333,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 	if (!Kernel || Kernel->GetState() != FIN_KERNEL_RUNNING) return;
 	
 	tickHelper.stop();
+	StateStorage.Clear();
 
 	for (FicsItKernel::Lua::LuaFile file : FileStreams) {
 		if (file->file) {

@@ -160,7 +160,7 @@ namespace CodersFileSystem {
 		return getSizeFromPath(realPath);
 	}
 
-	DiskDevice::DiskDevice(fs::path realPath, size_t capacity) : ByteCountedDevice(capacity), realPath(realPath)/*, watcher(realPath,
+	DiskDevice::DiskDevice(fs::path realPath, size_t capacity) : ByteCountedDevice(capacity), realPath(realPath), watcher(realPath,
 		[&](int eventType, auto node, auto to, auto from) {
 			switch (eventType) {
 			case 0:
@@ -176,7 +176,7 @@ namespace CodersFileSystem {
 				listeners.onNodeRenamed(to, from, node);
 				break;
 			}
-		})*/ {
+		}) {
 		getUsed();
 	}
 
@@ -202,7 +202,7 @@ namespace CodersFileSystem {
 		tickWatcher();
 		return get(path);
 	}
-#pragma optimize("",off)
+
 	bool DiskDevice::remove(Path path, bool recursive) {
 		if (path.isEmpty()) return false;
 		std::filesystem::path spath = realPath / path.relative().str();
@@ -214,7 +214,6 @@ namespace CodersFileSystem {
 			return false;
 		}
 	}
-#pragma optimize("",on)
 
 	bool DiskDevice::rename(Path path, const std::string& name) {
 		if (path.isEmpty() || !Path::isNode(name)) return false;
@@ -250,7 +249,7 @@ namespace CodersFileSystem {
 	}
 
 	void DiskDevice::tickWatcher() {
-		//watcher.tick();
+		watcher.tick();
 	}
 
 	std::filesystem::path DiskDevice::getRealPath() const {

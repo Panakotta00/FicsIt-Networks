@@ -152,6 +152,7 @@ FFINNetworkTrace::~FFINNetworkTrace() {}
 bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
 	if (Slot.GetUnderlyingArchive().IsSaveGame()) {
 		FStructuredArchive::FRecord Record = Slot.EnterRecord();
+		if (!::IsValid(Obj)) Obj = nullptr;
 		Record.EnterField(SA_FIELD_NAME(TEXT("Ptr"))) << Obj;
 
 		TOptional<FStructuredArchive::FSlot> PrevSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("Next")), Prev.IsValid());
@@ -171,16 +172,19 @@ bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
 		} else {
 			Step.Reset();
 		}
+
+		return true;
 	}
 	
-	return true;
+	return false;
 }
 
 void FFINNetworkTrace::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
 	if (Obj) {
 		ReferenceCollector.AddReferencedObject(const_cast<UObject*&>(Obj));
+		if (Obj) Obj->CallAddReferencedObjects(ReferenceCollector);
 	}
-	if (Prev) {
+	if (Prev.IsValid()) {
 		Prev->AddStructReferencedObjects(ReferenceCollector);
 	}
 }

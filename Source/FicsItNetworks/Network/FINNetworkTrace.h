@@ -24,6 +24,7 @@ private:
 	TSharedPtr<FFINNetworkTrace> Prev = nullptr;
 	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
 
+	UPROPERTY()
 	UObject* Obj = nullptr;
 
 public:
