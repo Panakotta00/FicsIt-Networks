@@ -104,7 +104,23 @@ FVector2D UMCPBlueprintLibrary::MeasureStringRenderSize(UFont* Font, FString Tex
 	//	FSlateApplication::Get().GetRenderer()->GetFontMeasureService()	
 	//);
 	//return fontMeasureService->Measure(Text, Font->GetLegacySlateFontInfo());
+	const TCHAR* Delims[] = {TEXT("\n"), TEXT("\r\n")};
 	FVector2D vector;
-	vector.X = Font->GetStringSize(*Text);
+	TArray<FString> Array;
+	Text.ParseIntoArray(Array, Delims, 2);
+	int MWidth = 0;
+	int MHeight = 0;
+	for (auto Line : Array) {
+		int W = Font->GetStringSize(*Line);
+		int H = Font->GetStringHeightSize(*Line);
+		if(W > MWidth) {
+			MWidth = W;
+		}
+		if(H > MHeight) {
+			MHeight = H;
+		}
+	}
+	vector.X = MWidth;
+	vector.Y = MHeight * Array.Num();
 	return vector;
 }
