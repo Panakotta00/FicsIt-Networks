@@ -140,6 +140,16 @@ void FFINLuaProcessorTick::shouldDemote() {
 	bShouldDemote = true;
 }
 
+void FFINLuaProcessorTick::shouldWaitForSignal() {
+	if (State & LUA_ASYNC) {
+		bWaitForSignal = true;
+	}
+}
+
+void FFINLuaProcessorTick::signalFound() {
+	bWaitForSignal = false;
+}
+
 void FFINLuaProcessorTick::shouldCrash(const TSharedRef<FFINKernelCrash>& Crash) {
 	bShouldCrash = true;
 	ToCrash = Crash;
@@ -162,6 +172,7 @@ void FFINLuaProcessorTick::syncTick() {
 	} else if (State & LUA_ASYNC) {
 		AsyncSyncMutex.Lock();
 		const bool DoSync = bDoSync;
+		const bool WaitForSignal = bWaitForSignal;
 		AsyncSyncMutex.Unlock();
 		if (DoSync) {
 			// async tick is waiting for sync
@@ -177,7 +188,10 @@ void FFINLuaProcessorTick::syncTick() {
 			bDoSync = false;
 			AsyncSyncMutex.Unlock();
 		} else {
-			if (asyncTask->IsDone()) {
+			if (asyncTask->IsDone() && (!WaitForSignal || Processor->GetKernel()->GetNetwork()->GetSignalCount() > 0)) {
+				AsyncSyncMutex.Lock();
+				bWaitForSignal = false;
+				AsyncSyncMutex.Unlock();
 				asyncTask->StartBackgroundTask();
 			}
 		}
@@ -209,7 +223,7 @@ bool FFINLuaProcessorTick::asyncTick() {
 			TickMutex.Unlock();
 			return false;
 		}
-		return true;
+		return !bWaitForSignal;
 	}
 	return false;
 }
@@ -521,6 +535,7 @@ void UFINLuaProcessor::LuaTick() {
 			if (GetKernel() && GetKernel()->GetNetwork() && GetKernel()->GetNetwork()->GetSignalCount() > 0) {
 				// Signal available -> reset timeout and pull signal from network
 				PullState = 0;
+				GetTickHelper().signalFound();
 				const int SigArgCount = DoSignal(luaThread);
 				if (SigArgCount < 1) {
 					// no signals popped -> crash system
@@ -535,6 +550,7 @@ void UFINLuaProcessor::LuaTick() {
 			} else {
 				// no signal available & timeout reached -> resume yield with  no parameters
 				PullState = 0;
+				GetTickHelper().signalFound();
 				Status = lua_resume(luaThread, luaState, 0, &nres);
 			}
 		} else {
