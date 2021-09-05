@@ -6,6 +6,12 @@
 #include "FicsItNetworks/Network/FINHookSubsystem.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
 
+void FFINSignalListeners::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
+	for (const FFINNetworkTrace& Trace : Listeners) {
+		Trace.AddStructReferencedObjects(ReferenceCollector);
+	}
+}
+
 bool AFINSignalSubsystem::ShouldSave_Implementation() const {
 	return true;
 }

@@ -70,18 +70,21 @@ private:
 	TSharedPtr<FAsyncTask<FLuaTickRunnable>> asyncTask;
 	FCriticalSection StateMutex;
 	FCriticalSection TickMutex;
-	FCriticalSection AsyncSyncMutex;
 	bool bShouldPromote = false;
 	bool bShouldDemote = false;
 	bool bShouldStop = false;
 	bool bShouldReset = false;
 	bool bShouldCrash = false;
 	bool bDoSync = false;
+	bool bWaitForSignal = false;
 	TSharedPtr<FFINKernelCrash> ToCrash;
 	TPromise<void> AsyncSync;
 	TPromise<void> SyncAsync;
+	FCriticalSection AsyncSyncMutex;
 	
+
 public:
+
 	FFINLuaProcessorTick();
 	FFINLuaProcessorTick(class UFINLuaProcessor* Processor);
 
@@ -96,6 +99,8 @@ public:
 	void shouldReset();
 	void shouldPromote();
 	void shouldDemote();
+	void shouldWaitForSignal();
+	void signalFound();
 	void shouldCrash(const TSharedRef<FFINKernelCrash>& Crash);
 	int steps() const;
 	
