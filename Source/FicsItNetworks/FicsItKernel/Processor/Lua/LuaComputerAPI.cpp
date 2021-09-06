@@ -52,6 +52,27 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
 		}
 
+		int luaComputerPromote(lua_State* L) {
+			UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
+			processor->GetTickHelper().shouldPromote();
+			return UFINLuaProcessor::luaAPIReturn(L, 0);
+		}
+		
+		int luaComputerDemote(lua_State* L) {
+			FLuaSyncCall Sync(L);
+			return UFINLuaProcessor::luaAPIReturn(L, 0);
+		}
+
+		int luaComputerState(lua_State* L) {
+			UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
+			int state = 0;
+			if (processor->GetTickHelper().getState() & LUA_ASYNC) {
+				state = 1;
+			}
+			lua_pushinteger(L, state);
+			return UFINLuaProcessor::luaAPIReturn(L, 1);
+		}
+		
 		LuaFunc(luaComputerBeep)
 			float pitch = 1;
 			if (lua_isnumber(L, 1)) pitch = lua_tonumber(L, 1);
@@ -105,6 +126,9 @@ namespace FicsItKernel {
 			{"stop", luaComputerStop},
 			{"panic", luaComputerPanic},
 			{"skip", luaComputerSkip},
+			{"promote", luaComputerPromote},
+			{"demote", luaComputerDemote},
+			{"state", luaComputerState},
 			{"beep", luaComputerBeep},
 			{"setEEPROM", luaComputerSetEEPROM},
 			{"getEEPROM", luaComputerGetEEPROM},

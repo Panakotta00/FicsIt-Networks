@@ -181,6 +181,11 @@ public:
 	 * returns the tick helper
 	 */
 	FFINLuaProcessorTick& GetTickHelper();
+
+	/**
+	 * Checks if the pull timeout has been reached
+	 */
+	bool PullTimeoutReached();
 	
 	/**
 	 * Executes one lua tick sync or async.

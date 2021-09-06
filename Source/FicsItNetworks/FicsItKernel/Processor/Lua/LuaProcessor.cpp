@@ -188,7 +188,7 @@ void FFINLuaProcessorTick::syncTick() {
 			bDoSync = false;
 			AsyncSyncMutex.Unlock();
 		} else {
-			if (asyncTask->IsDone() && (!WaitForSignal || Processor->GetKernel()->GetNetwork()->GetSignalCount() > 0)) {
+			if (asyncTask->IsDone() && (!WaitForSignal || Processor->GetKernel()->GetNetwork()->GetSignalCount() > 0 || Processor->PullTimeoutReached())) {
 				AsyncSyncMutex.Lock();
 				bWaitForSignal = false;
 				AsyncSyncMutex.Unlock();
@@ -544,7 +544,7 @@ void UFINLuaProcessor::LuaTick() {
 					// signal popped -> resume yield with signal as parameters (passing signals parameters back to pull yield)
 					Status = lua_resume(luaThread, luaState, SigArgCount, &nres);
 				}
-			} else if (PullState == 2 || Timeout > (static_cast<double>((FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0)) {
+			} else if (PullState == 2 || !PullTimeoutReached()) {
 				// no signal available & not timeout reached -> skip tick
 				return;
 			} else {
@@ -689,6 +689,10 @@ AFINStateEEPROMLua* UFINLuaProcessor::GetEEPROM() const {
 
 FFINLuaProcessorTick& UFINLuaProcessor::GetTickHelper() {
 	return tickHelper;
+}
+
+bool UFINLuaProcessor::PullTimeoutReached() {
+	return Timeout <= (static_cast<double>((FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0);
 }
 
 int luaReYield(lua_State* L) {
