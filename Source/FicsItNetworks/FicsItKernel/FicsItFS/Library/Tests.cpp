@@ -18,6 +18,7 @@ void CodersFileSystem::Tests::TestPath() {
 	Path root_relative_back = "/..";
 	Path relative_back_file = "../test";
 	Path root_relative_back_file = "/folder/../test";
+	Path folder_ref = "/test/";
 
 	check(empty.isEmpty());
 	check(!empty.isAbsolute());
@@ -72,4 +73,13 @@ void CodersFileSystem::Tests::TestPath() {
 	check(mountPoint2.isRoot());
 	check(mountPoint2 / ".." == "/");
 	check(mountPoint2.fileName() == "");
+
+	check(folder_ref.isDir());
+	Path rootOverride = "/test//meep";
+	check(!rootOverride.isEmpty());
+	check(rootOverride.isAbsolute());
+	check(rootOverride.isSingle());
+	check(!rootOverride.isRoot());
+	check(rootOverride.fileName() == "meep");
+	check(!rootOverride.isDir());
 }

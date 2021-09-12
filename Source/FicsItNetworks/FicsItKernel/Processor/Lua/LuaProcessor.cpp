@@ -750,12 +750,10 @@ int luaResumeResume(lua_State* L, int status, lua_KContext ctx) {
 
 int luaResume(lua_State* L) {
 	const int args = lua_gettop(L);
-	int threadIndex = 1;
-	if (lua_isboolean(L, 1)) threadIndex = 2;
-	if (!lua_isthread(L, threadIndex)) return luaL_argerror(L, threadIndex, "is no thread");
-	lua_State* thread = lua_tothread(L, threadIndex);
+	if (!lua_isthread(L, 1)) return luaL_argerror(L, 1, "is no thread");
+	lua_State* thread = lua_tothread(L, 1);
 
-	if (!lua_checkstack(thread, args - threadIndex)) {
+	if (!lua_checkstack(thread, args - 1)) {
 		lua_pushboolean(L, false);
 		lua_pushliteral(L, "too many arguments to resume");
 		return UFINLuaProcessor::luaAPIReturn(L, 2);
@@ -766,20 +764,16 @@ int luaResume(lua_State* L) {
 
 	// copy passed arguments to coroutine so it can return these arguments from the yield function
 	// but don't move the passed coroutine and then resume the coroutine
-	lua_xmove(L, thread, args - threadIndex);
+	lua_xmove(L, thread, args - 1);
 	int argCount = 0;
-	const int state = lua_resume(thread, L, args - threadIndex, &argCount);
+	const int state = lua_resume(thread, L, args - 1, &argCount);
 
 	// no args indicates return or internal yield (count hook)
 	if (argCount == 0) {
 		// yield self to cascade the yield down and so the lua execution halts
 		if (state == LUA_YIELD) {
 			// yield from count hook
-			if (threadIndex == 2 && lua_toboolean(L, 1)) {
-				return lua_yield(L, 0);
-			} else {
-				return lua_yieldk(L, 0, NULL, &luaResumeResume);
-			}
+			return lua_yieldk(L, 0, NULL, &luaResumeResume);
 		} else {
 			lua_pop(thread, argCount - 1);
 			argCount = 1;
