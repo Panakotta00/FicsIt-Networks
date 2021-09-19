@@ -8,8 +8,8 @@ USTRUCT(Blueprintable)
 struct FFINUIFileInfo {
 	GENERATED_BODY()
 	
-	FFINUIFileInfo(FString fullPath) : FullPath(fullPath), Filename(""), Path("")  {}
-	FFINUIFileInfo() : FullPath(""), Filename(), Path()  {}
+	FFINUIFileInfo(FString fullPath) : Path(""), Filename(""), FullPath(fullPath)  {}
+	FFINUIFileInfo() : Path(), Filename(), FullPath("")  {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Path;
@@ -23,7 +23,7 @@ struct FFINUIFileInfo {
 
 
 UCLASS()
-class UMCPBlueprintLibrary : public UBlueprintFunctionLibrary
+class FICSITNETWORKS_API UMCPBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 public:
 	GENERATED_BODY()
