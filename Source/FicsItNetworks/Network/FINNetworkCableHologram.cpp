@@ -1,6 +1,5 @@
 #include "FINNetworkCableHologram.h"
 
-#include "FGBackgroundThread.h"
 #include "FGConstructDisqualifier.h"
 #include "FGOutlineComponent.h"
 #include "FINNetworkAdapter.h"
@@ -9,7 +8,6 @@
 #include "FicsItNetworks/FINComponentUtility.h"
 #include "FicsItNetworks/Utils/FINWallAndFoundationHologram.h"
 
-#pragma optimize("", off)
 FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 	switch (SnapType) {
 	case FIN_CONNECTOR:
@@ -31,7 +29,6 @@ FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 		return FVector::ZeroVector;
 	}
 }
-#pragma optimize("", on)
 
 FRotator FFINCablePlacementStepInfo::GetConnectorRot() const {
 	switch (SnapType) {
@@ -76,6 +73,10 @@ void AFINNetworkCableHologram::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 
 void AFINNetworkCableHologram::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
+}
+
+void AFINNetworkCableHologram::BeginPlay() {
+	Super::BeginPlay();
 
 	UStaticMesh* Mesh = GetDefaultBuildable<AFINNetworkCable>()->CableSpline->GetStaticMesh();
 	Cable->SetStaticMesh(Mesh);

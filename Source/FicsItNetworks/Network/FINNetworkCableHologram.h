@@ -96,6 +96,7 @@ public:
 
 	// Begin AActor
 	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginPlay() override;
 	// End AActor
 
 	// Begin FGBuildableHologram
