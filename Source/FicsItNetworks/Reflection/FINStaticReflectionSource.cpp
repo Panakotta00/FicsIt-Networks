@@ -1280,7 +1280,7 @@ BeginFunc(getTargets, "Get Targets", "Returns a list of target point structs of 
 	} while (CurrentTarget && CurrentTarget != List->GetLastTarget());
 	targets = Targets;
 } EndFunc()
-BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.") {
+BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.", 0) {
 	InVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs you want to place into the empty target point list.")
 	Body()
 	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
