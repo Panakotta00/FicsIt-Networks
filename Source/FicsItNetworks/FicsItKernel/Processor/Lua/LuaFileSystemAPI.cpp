@@ -301,6 +301,30 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, args);
 		} LuaFuncEnd()
 
+		LuaFunc(meta) {
+			int args = lua_gettop(L);
+			for (int i = 1; i <= args; ++i) {
+				CodersFileSystem::Path Path = lua_tostring(L, i);
+				CodersFileSystem::SRef<CodersFileSystem::Node> Node = self->get(Path);
+				if (!Node.isValid()) {
+					lua_pushnil(L);
+					continue;
+				}
+				lua_newtable(L);
+				if (dynamic_cast<CodersFileSystem::File*>(Node.get())) {
+					lua_pushstring(L, "File");
+				} else if (dynamic_cast<CodersFileSystem::Directory*>(Node.get())) {
+					lua_pushstring(L, "Directory");
+				} else if (dynamic_cast<CodersFileSystem::DeviceNode*>(Node.get())) {
+					lua_pushstring(L, "Device");
+				} else {
+					lua_pushstring(L, "Unknown");
+				}
+				lua_setfield(L, -2, "type");
+			}
+			return UFINLuaProcessor::luaAPIReturn(L, args);
+		} LuaFuncEnd()
+
 		static const luaL_Reg luaFileSystemLib[] = {
 			{"makeFileSystem", makeFileSystem},
 			{"removeFileSystem", removeFileSystem},
