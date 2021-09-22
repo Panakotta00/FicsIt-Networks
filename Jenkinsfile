@@ -64,7 +64,9 @@ pipeline {
 			steps {
 				dir('ue4') {
 					withCredentials([string(credentialsId: 'SMR', variable: 'SMR_TOKEN')]) {
-						bat label: 'Download UE', script: 'aria2c -x 8 -s 8 https://%SMR_TOKEN%@ci.ficsit.app/job/UE-4.25.3-CSS/lastSuccessfulBuild/artifact/UnrealEngine-CSS-Editor-Win64.zip'
+						retry(5) {
+							bat label: 'Download UE', script: 'aria2c -x 8 -s 8 -c https://%SMR_TOKEN%@ci.ficsit.app/job/UE-4.25.3-CSS/lastSuccessfulBuild/artifact/UnrealEngine-CSS-Editor-Win64.zip'
+						}
 					}
 					bat label: 'Extract UE', script: '7z x UnrealEngine-CSS-Editor-Win64.zip'
 					bat label: 'Register UE', script: 'SetupScripts\\Register.bat'
