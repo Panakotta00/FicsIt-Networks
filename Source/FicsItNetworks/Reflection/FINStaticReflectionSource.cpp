@@ -819,6 +819,12 @@ BeginFunc(getNetworkConnectors, "Get Network Connectors", "Returns the name of n
 } EndFunc()
 EndClass()
 
+BeginClass(UActorComponent, "ActorComponent", "Actor Component", "A component/part of an actor in the world.")
+BeginProp(RTrace<AActor>, owner, "Owner", "The parent actor of which this component is part of") {
+	return Ctx.GetTrace() / self->GetOwner();
+} EndProp()
+EndClass()
+
 BeginClass(UFGInventoryComponent, "Inventory", "Inventory", "A actor component that can hold multiple item stacks.")
 BeginFuncVA(getStack, "Get Stack", "Returns the item stack at the given index.\nTakes integers as input and returns the corresponding stacks.") {
 	Body()
@@ -1025,6 +1031,11 @@ BeginFunc(getInventory, "Get Inventory", "Returns the internal inventory of the 
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The internal inventory of the connection component.")
 	Body()
 	inventory = Ctx.GetTrace() / self->GetInventory();
+} EndFunc()
+BeginFunc(getConnected, "Get Connected", "Returns the connected factory connection component.") {
+	OutVal(0, RTrace<UFGInventoryComponent>, connected, "Connected", "The connected factory connection component.")
+	Body()
+	connected = Ctx.GetTrace() / self->GetConnection();
 } EndFunc()
 EndClass()
 
@@ -1280,7 +1291,7 @@ BeginFunc(getTargets, "Get Targets", "Returns a list of target point structs of 
 	} while (CurrentTarget && CurrentTarget != List->GetLastTarget());
 	targets = Targets;
 } EndFunc()
-BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.") {
+BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.", 0) {
 	InVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs you want to place into the empty target point list.")
 	Body()
 	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();

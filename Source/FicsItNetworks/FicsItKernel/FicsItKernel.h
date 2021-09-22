@@ -70,7 +70,7 @@ private:
 	UPROPERTY(SaveGame)
 	TEnumAsByte<EFINKernelState> State = FIN_KERNEL_SHUTOFF;
 	UPROPERTY(SaveGame)
-	uint64 SystemResetTimePoint = 0;
+	int64 SystemResetTimePoint = 0;
 	UPROPERTY(SaveGame)
 	FString DevDeviceMountPoint;
 	TSharedPtr<FFINKernelCrash> KernelCrash;
