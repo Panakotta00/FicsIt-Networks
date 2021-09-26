@@ -4,6 +4,8 @@
 #include "Lua.h"
 #include "FicsItNetworks/Network/FINNetworkTrace.h"
 
+#define CLASS_INSTANCE_META_SUFFIX "-Class"
+
 class UFINFunction;
 class UFINClass;
 class UFINStruct;
