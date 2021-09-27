@@ -13,9 +13,6 @@ class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINS
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFGFactoryConnectionComponent* InputConnector = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGFactoryConnectionComponent* Input1 = nullptr;
