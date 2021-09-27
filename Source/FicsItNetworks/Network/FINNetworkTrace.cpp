@@ -399,10 +399,10 @@ Step(AFGBuildableRailroadStation, UFGRailroadTrackConnectionComponent, {
 })
 
 Step(AFGVehicle, AFGBuildableDockingStation, {
-	return false;
+	return B->GetDockedActor() == A;
 })
 Step(AFGBuildableDockingStation, AFGVehicle, {
-	return false;
+	return A->GetDockedActor() == B;
 })
 
 Step(AFGVehicle, AFINVehicleScanner, {

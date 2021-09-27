@@ -6,6 +6,7 @@
 #include "FINScreen.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/Network/FINMCPAdvConnector.h"
+#include "FicsItNetworks/Network/FINNetworkCable.h"
 
 AFINSizeablePanel::AFINSizeablePanel() {
 	ModularPanel = CreateDefaultSubobject<UFINModuleSystemPanel>("Panel");
@@ -41,6 +42,10 @@ void AFINSizeablePanel::BeginPlay() {
 	ModularPanel->PanelHeight = abs(PanelHeight);
 	RerunConstructionScripts();
 	Super::BeginPlay();
+	
+	for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) {
+		Cable->RerunConstructionScripts();
+	}
 }
 
 void AFINSizeablePanel::Tick(float DeltaSeconds) {

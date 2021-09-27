@@ -556,6 +556,8 @@ Return Values::
 !Is only a file/folder name
 !5
 !Filename has extension
+!6
+!Ends with a `/` -> refers a directory
 !===
 |===
 

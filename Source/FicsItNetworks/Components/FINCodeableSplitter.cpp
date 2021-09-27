@@ -1,5 +1,4 @@
 #include "FINCodeableSplitter.h"
-#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/Computer/FINComputerSubsystem.h"
 
 AFINCodeableSplitter::AFINCodeableSplitter() {
@@ -8,27 +7,22 @@ AFINCodeableSplitter::AFINCodeableSplitter() {
 	NetworkConnector->SetMobility(EComponentMobility::Movable);
 	NetworkConnector->SetIsReplicated(true);
 
-	Input1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input1");
-	Input1->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
-	Input1->SetupAttachment(RootComponent);
-	Input1->SetMobility(EComponentMobility::Movable);
-	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
-	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
-	Output1->SetupAttachment(RootComponent);
-	Output1->SetMobility(EComponentMobility::Movable);
 	Output2 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output2");
 	Output2->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
 	Output2->SetupAttachment(RootComponent);
 	Output2->SetMobility(EComponentMobility::Movable);
+	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
+	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
+	Output1->SetupAttachment(RootComponent);
+	Output1->SetMobility(EComponentMobility::Movable);
 	Output3 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output3");
 	Output3->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
 	Output3->SetupAttachment(RootComponent);
 	Output3->SetMobility(EComponentMobility::Movable);
-
-	InputConnector = CreateDefaultSubobject<UFGFactoryConnectionComponent>("InputConnector");
-	InputConnector->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
-	InputConnector->SetupAttachment(RootComponent);
-	InputConnector->SetMobility(EComponentMobility::Movable);
+	Input1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input1");
+	Input1->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
+	Input1->SetupAttachment(RootComponent);
+	Input1->SetMobility(EComponentMobility::Movable);
 	
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
@@ -46,23 +40,6 @@ void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 
 void AFINCodeableSplitter::BeginPlay() {
 	Super::BeginPlay();
-	if (HasAuthority() && (InputConnector->GetConnection() || AFINComputerSubsystem::GetComputerSubsystem(this)->Version < EFINCustomVersion::FINCodeableSplitterAttachmentFixes)) {
-		UE_LOG(LogFicsItNetworks, Log, TEXT("Old Splitter found. Try to apply beginplay update fixes... '%s'"), *this->GetName());
-		UFGFactoryConnectionComponent* OldConnection = InputConnector->GetConnection();
-		InputConnector->ClearConnection();
-		Input1->SetConnection(OldConnection);
-		/*RootComponent->AddRelativeRotation(FRotator(0,-90.0f,0));
-		UFGFactoryConnectionComponent* NewOutput2 = Output1->GetConnection();
-		UFGFactoryConnectionComponent* NewOutput1 = Output2->GetConnection();
-		Output1->ClearConnection();
-		Output2->ClearConnection();
-		if (NewOutput1) Output1->SetConnection(NewOutput1);
-		if (NewOutput2) Output2->SetConnection(NewOutput2);*/
-	}
-	InputConnector->RemoveFromRoot();
-	InputConnector->UnregisterComponent();
-	InputConnector->DestroyComponent();
-	InputConnector = nullptr;
 }
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {

@@ -25,10 +25,13 @@ namespace CodersFileSystem {
 				if (0 != match.position()) {
 					std::string node = str.substr(0, match.position());
 					append(node);
+				} else {
+					path = "/";
 				}
 				str = match.suffix();
 			}
-			append(str);
+			if (str.length() < 1 && path.size() > 0 && path[path.size()-1] != '/') path += "/";
+			else append(str);
 		}
 
 		Path& append(std::string node) {
@@ -38,6 +41,8 @@ namespace CodersFileSystem {
 				path.append(node);
 			} else if (node == "..") {
 				if (pos != path.size()-1) path.append("/");
+				path.append(node);
+			} else if (node == "/") {
 				path.append(node);
 			} else if (isNode(node)) {
 				if (pos != path.size()-1) path.append("/");
@@ -68,6 +73,10 @@ namespace CodersFileSystem {
 		bool isRoot() const {
 			return path == "/";
 		}
+
+		bool isDir() const {
+			return path[path.size()-1] == '/';
+		}
 		
 		bool startsWith(const Path& other) const {
 			Path o = isAbsolute() ? other.absolute() : other.relative();
@@ -93,7 +102,8 @@ namespace CodersFileSystem {
 		std::string fileExtension() const {
 			std::string name = fileName();
 			size_t pos = name.find_last_of(".");
-			return name.substr(pos < 1 ? std::string::npos : pos);
+			if (pos == std::string::npos || pos == 0) return "";
+			return name.substr(pos);
 		}
 
 		std::string fileStem() const {

@@ -6,22 +6,22 @@ AFINCodeableMerger::AFINCodeableMerger() {
 	NetworkConnector->SetMobility(EComponentMobility::Static);
 	NetworkConnector->SetIsReplicated(true);
 
-	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
-	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
-	Output1->SetupAttachment(RootComponent);
-	Output1->SetMobility(EComponentMobility::Static);
-	Input1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input1");
-	Input1->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
-	Input1->SetupAttachment(RootComponent);
-	Input1->SetMobility(EComponentMobility::Static);
 	Input2 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input2");
 	Input2->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
 	Input2->SetupAttachment(RootComponent);
 	Input2->SetMobility(EComponentMobility::Static);
+	Input1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input1");
+	Input1->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
+	Input1->SetupAttachment(RootComponent);
+	Input1->SetMobility(EComponentMobility::Static);
 	Input3 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input3");
 	Input3->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
 	Input3->SetupAttachment(RootComponent);
 	Input3->SetMobility(EComponentMobility::Static);
+	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
+	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
+	Output1->SetupAttachment(RootComponent);
+	Output1->SetMobility(EComponentMobility::Static);
 
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;

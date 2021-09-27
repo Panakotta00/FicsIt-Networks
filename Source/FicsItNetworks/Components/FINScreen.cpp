@@ -168,9 +168,7 @@ void AFINScreen::netFunc_getSize(int& w, int& h) {
 	h = FMath::Abs(ScreenHeight);
 }
 
-void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {
-	bGPUChanged = true;
-}
+void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {}
 
 void AFINScreen::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts) {
 	int xf = ScreenWidth/FMath::Abs(ScreenWidth);

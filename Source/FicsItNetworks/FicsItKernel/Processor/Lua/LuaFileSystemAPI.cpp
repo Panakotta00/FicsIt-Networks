@@ -154,7 +154,7 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		} LuaFuncEnd()
 
-		LuaFunc(childs) {
+		LuaFunc(children) {
 			const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			std::unordered_set<std::string> childs;
 			try {
@@ -251,6 +251,8 @@ namespace FicsItKernel {
 			CodersFileSystem::Path path;
 			for (int i = start; i <= args; ++i) path = path / CodersFileSystem::Path(lua_tostring(L, i));
 			std::string out;
+			int retargs = 1;
+			bool custom = false;
 			switch (conversion) {
 			case 0:
 				out = path.normalize().str();
@@ -273,19 +275,20 @@ namespace FicsItKernel {
 			default:
 				out = path.str();
 			}
-			lua_pushstring(L,out.c_str());
-			return UFINLuaProcessor::luaAPIReturn(L, 1);
+			if (!custom) lua_pushstring(L,out.c_str());
+			return UFINLuaProcessor::luaAPIReturn(L, retargs);
 		} LuaFuncEnd()
 		LuaFunc(analyzePath) {
 			int args = lua_gettop(L);
 			for (int i = 1; i <= args; ++i) {
 				CodersFileSystem::Path path = lua_tostring(L, i);
 				int flags = 0;
-				if (path.isRoot())						flags |= 0b00001;
-				if (path.isEmpty())						flags |= 0b00010;
-				if (path.isAbsolute())					flags |= 0b00100;
-				if (path.isSingle())					flags |= 0b01000;
-				if (path.fileExtension().size() > 0)	flags |= 0b10000;
+				if (path.isRoot())						flags |= 0b000001;
+				if (path.isEmpty())						flags |= 0b000010;
+				if (path.isAbsolute())					flags |= 0b000100;
+				if (path.isSingle())					flags |= 0b001000;
+				if (path.fileExtension().size() > 0)	flags |= 0b010000;
+				if (path.isDir())						flags |= 0b100000;
 				lua_pushinteger(L, flags);
 			}
 			return UFINLuaProcessor::luaAPIReturn(L, args);
@@ -294,6 +297,30 @@ namespace FicsItKernel {
 			int args = lua_gettop(L);
 			for (int i = 1; i <= args; ++i) {
 				lua_pushboolean(L, CodersFileSystem::Path::isNode(lua_tostring(L, i)));
+			}
+			return UFINLuaProcessor::luaAPIReturn(L, args);
+		} LuaFuncEnd()
+
+		LuaFunc(meta) {
+			int args = lua_gettop(L);
+			for (int i = 1; i <= args; ++i) {
+				CodersFileSystem::Path Path = lua_tostring(L, i);
+				CodersFileSystem::SRef<CodersFileSystem::Node> Node = self->get(Path);
+				if (!Node.isValid()) {
+					lua_pushnil(L);
+					continue;
+				}
+				lua_newtable(L);
+				if (dynamic_cast<CodersFileSystem::File*>(Node.get())) {
+					lua_pushstring(L, "File");
+				} else if (dynamic_cast<CodersFileSystem::Directory*>(Node.get())) {
+					lua_pushstring(L, "Directory");
+				} else if (dynamic_cast<CodersFileSystem::DeviceNode*>(Node.get())) {
+					lua_pushstring(L, "Device");
+				} else {
+					lua_pushstring(L, "Unknown");
+				}
+				lua_setfield(L, -2, "type");
 			}
 			return UFINLuaProcessor::luaAPIReturn(L, args);
 		} LuaFuncEnd()
@@ -308,7 +335,8 @@ namespace FicsItKernel {
 			{"move", move},
 			{"rename", rename},
 			{"exists", exists},
-			{"childs", childs},
+			{"childs", children},
+			{"children", children},
 			{"isFile", isFile},
 			{"isDir", isDir},
 			{"mount", mount},

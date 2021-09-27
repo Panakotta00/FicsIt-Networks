@@ -1,6 +1,5 @@
 #include "FINNetworkCableHologram.h"
 
-#include "FGBackgroundThread.h"
 #include "FGConstructDisqualifier.h"
 #include "FGOutlineComponent.h"
 #include "FINNetworkAdapter.h"
@@ -9,7 +8,6 @@
 #include "FicsItNetworks/FINComponentUtility.h"
 #include "FicsItNetworks/Utils/FINWallAndFoundationHologram.h"
 
-#pragma optimize("", off)
 FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 	switch (SnapType) {
 	case FIN_CONNECTOR:
@@ -31,7 +29,6 @@ FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 		return FVector::ZeroVector;
 	}
 }
-#pragma optimize("", on)
 
 FRotator FFINCablePlacementStepInfo::GetConnectorRot() const {
 	switch (SnapType) {
@@ -76,6 +73,10 @@ void AFINNetworkCableHologram::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 
 void AFINNetworkCableHologram::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
+}
+
+void AFINNetworkCableHologram::BeginPlay() {
+	Super::BeginPlay();
 
 	UStaticMesh* Mesh = GetDefaultBuildable<AFINNetworkCable>()->CableSpline->GetStaticMesh();
 	Cable->SetStaticMesh(Mesh);
@@ -292,18 +293,27 @@ void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& 
 	bool validSnap = IsSnappedValid();
 	UpdateMeshValidity(validSnap);
 
+	float MaxSlack = 250;
+	float DistanceFactor = 1;
+	AFINNetworkCable* LocalCable = Cast<AFINNetworkCable>(mBuildClass->GetDefaultObject());
+	if(LocalCable != nullptr) {
+		MaxSlack = LocalCable->MaxCableSlack;
+		DistanceFactor = LocalCable->SlackLengthFactor;
+	}
 	// update cable mesh
-	float offset = 250.0;
-	FVector start;
-	start.X = start.Y = start.Z = 0;
-	FVector end = RootComponent->GetComponentToWorld().InverseTransformPosition(Snapped.GetConnectorPos());
-	FVector start_t = end;
-	end = end + 0.0001;
-	if ((FMath::Abs(start_t.X) < 10 || FMath::Abs(start_t.Y) < 10) && FMath::Abs(start_t.Z) <= offset) offset = 1;
-	start_t.Z -= offset;
-	FVector end_t = end;
-	end_t.Z += offset;
-	Cable->SetStartAndEnd(start, start_t, end, end_t, true);
+	float Offset = 250.0;
+	FVector Start;
+	Start.X = Start.Y = Start.Z = 0;
+	FVector End = RootComponent->GetComponentToWorld().InverseTransformPosition(Snapped.GetConnectorPos());
+	FVector Start_T = End;
+	End = End + 0.0001;
+	if ((FMath::Abs(Start_T.X) < 10 || FMath::Abs(Start_T.Y) < 10) && FMath::Abs(Start_T.Z) <= Offset) Offset = 1;
+	const int Length = FVector::Distance(Start, End);
+	Offset = FMath::Min(Length * DistanceFactor , MaxSlack);
+	Start_T.Z -= Offset;
+	FVector End_T = End;
+	End_T.Z += Offset;
+	Cable->SetStartAndEnd(Start, Start_T, End, End_T, true);
 
 	// update snap visibilty to
 	Adapter->SetVisibility(false, false);
@@ -312,7 +322,7 @@ void AFINNetworkCableHologram::SetHologramLocationAndRotation(const FHitResult& 
 	switch (Snapped.SnapType) {
 	case FIN_SETTINGS:
 		Adapter->SetVisibility(true, true);
-		Adapter->SetRelativeLocation(end);
+		Adapter->SetRelativeLocation(End);
 		Adapter->SetWorldRotation(Snapped.GetConnectorRot());
 		break;
 	case FIN_POLE:
