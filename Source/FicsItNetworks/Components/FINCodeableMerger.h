@@ -15,16 +15,16 @@ public:
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFGFactoryConnectionComponent* Output1 = nullptr;
-
+	UFGFactoryConnectionComponent* Input2 = nullptr;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGFactoryConnectionComponent* Input1 = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFGFactoryConnectionComponent* Input2 = nullptr;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGFactoryConnectionComponent* Input3 = nullptr;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UFGFactoryConnectionComponent* Output1 = nullptr;
 
 	UPROPERTY(SaveGame)
 	TArray<FInventoryItem> OutputQueue;

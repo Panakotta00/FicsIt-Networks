@@ -1,5 +1,4 @@
 #include "FINCodeableSplitter.h"
-#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/Computer/FINComputerSubsystem.h"
 
 AFINCodeableSplitter::AFINCodeableSplitter() {
@@ -8,22 +7,22 @@ AFINCodeableSplitter::AFINCodeableSplitter() {
 	NetworkConnector->SetMobility(EComponentMobility::Movable);
 	NetworkConnector->SetIsReplicated(true);
 
-	Input1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input1");
-	Input1->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
-	Input1->SetupAttachment(RootComponent);
-	Input1->SetMobility(EComponentMobility::Movable);
-	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
-	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
-	Output1->SetupAttachment(RootComponent);
-	Output1->SetMobility(EComponentMobility::Movable);
 	Output2 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output2");
 	Output2->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
 	Output2->SetupAttachment(RootComponent);
 	Output2->SetMobility(EComponentMobility::Movable);
+	Output1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output1");
+	Output1->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
+	Output1->SetupAttachment(RootComponent);
+	Output1->SetMobility(EComponentMobility::Movable);
 	Output3 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Output3");
 	Output3->SetDirection(EFactoryConnectionDirection::FCD_OUTPUT);
 	Output3->SetupAttachment(RootComponent);
 	Output3->SetMobility(EComponentMobility::Movable);
+	Input1 = CreateDefaultSubobject<UFGFactoryConnectionComponent>("Input1");
+	Input1->SetDirection(EFactoryConnectionDirection::FCD_INPUT);
+	Input1->SetupAttachment(RootComponent);
+	Input1->SetMobility(EComponentMobility::Movable);
 	
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
