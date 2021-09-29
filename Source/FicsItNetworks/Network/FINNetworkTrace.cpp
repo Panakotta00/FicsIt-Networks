@@ -152,9 +152,8 @@ FFINNetworkTrace::~FFINNetworkTrace() {}
 bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
 	if (Slot.GetUnderlyingArchive().IsSaveGame()) {
 		FStructuredArchive::FRecord Record = Slot.EnterRecord();
-		UObject* ObjRaw = Obj.Get();
-		Record.EnterField(SA_FIELD_NAME(TEXT("Ptr"))) << ObjRaw;
-		Obj = ObjRaw;
+		if (!::IsValid(Obj)) Obj = nullptr;
+		Record.EnterField(SA_FIELD_NAME(TEXT("Ptr"))) << Obj;
 
 		TOptional<FStructuredArchive::FSlot> PrevSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("Next")), Prev.IsValid());
 		if (PrevSlot.IsSet()) {
@@ -173,17 +172,19 @@ bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
 		} else {
 			Step.Reset();
 		}
+
+		return true;
 	}
 	
-	return true;
+	return false;
 }
 
 void FFINNetworkTrace::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
-	UObject* Ptr = Obj.GetEvenIfUnreachable();
-	if (Ptr) {
-		ReferenceCollector.AddReferencedObject(Ptr);
+	if (Obj) {
+		ReferenceCollector.AddReferencedObject(const_cast<UObject*&>(Obj));
+		if (Obj) Obj->CallAddReferencedObjects(ReferenceCollector);
 	}
-	if (Prev) {
+	if (Prev.IsValid()) {
 		Prev->AddStructReferencedObjects(ReferenceCollector);
 	}
 }
@@ -191,16 +192,16 @@ void FFINNetworkTrace::AddStructReferencedObjects(FReferenceCollector& Reference
 FFINNetworkTrace FFINNetworkTrace::operator/(UObject* other) const {
 	FFINNetworkTrace trace(other);
 
-	UObject* A = Obj.Get();
-	if (!A || !other) return FFINNetworkTrace(nullptr); // if A is not valid, the network trace will always be not invalid
+	UObject* A = Obj;
+	if (!::IsValid(A) || !other) return FFINNetworkTrace(nullptr); // if A is not valid, the network trace will always be not invalid
 	trace.Prev = MakeShared<FFINNetworkTrace>(*this);
 	trace.Step = findTraceStep(A->GetClass(), other->GetClass());
 	return trace;
 }
 
 UObject* FFINNetworkTrace::operator*() const {
-	UObject* B = Obj.Get();
-	if (IsValid() && B) {
+	UObject* B = Obj;
+	if (IsValid() && ::IsValid(B)) {
 		return B;
 	} else {
 		return nullptr;
@@ -222,9 +223,9 @@ FFINNetworkTrace FFINNetworkTrace::operator()(UObject* other) const {
 	trace.Obj = other;
 	
 	if (trace.Prev) {
-		auto A = trace.Prev->Obj.Get();
-		if (!A) return FFINNetworkTrace(nullptr); // if the previous network trace object is invalid, the trace will be always invalid
-		trace.Step = findTraceStep(trace.Prev->Obj.Get()->GetClass(), other->GetClass());
+		auto A = trace.Prev->Obj;
+		if (!::IsValid(A)) return FFINNetworkTrace(nullptr); // if the previous network trace object is invalid, the trace will be always invalid
+		trace.Step = findTraceStep(trace.Prev->Obj->GetClass(), other->GetClass());
 	}
 
 	return trace;
@@ -239,22 +240,22 @@ void FFINNetworkTrace::CheckTrace() const {
 }
 
 FFINNetworkTrace FFINNetworkTrace::Reverse() const {
-	if (!Obj.IsValid()) return FFINNetworkTrace(nullptr);
-	FFINNetworkTrace trace(Obj.Get());
+	if (!::IsValid(Obj)) return FFINNetworkTrace(nullptr);
+	FFINNetworkTrace trace(Obj);
 	TSharedPtr<FFINNetworkTrace> prev;
 	if (this->Prev) prev = MakeShared<FFINNetworkTrace>(*this->Prev);
 	while (prev) {
-		trace = trace / prev->Obj.Get();
+		trace = trace / prev->Obj;
 		prev = prev->Prev;
 	}
 	return trace;
 }
 
 bool FFINNetworkTrace::IsValid() const {
-	UObject* B = Obj.Get();
-	if (!B) return false;
+	UObject* B = Obj;
+	if (!::IsValid(B)) return false;
 	if (Prev && Step && *Step) {
-		UObject* A = Prev->Obj.Get();
+		UObject* A = Prev->Obj;
 		if (!A || !(*Step)(A, B)) return false;
 	}
 	if (Prev) {
@@ -278,14 +279,14 @@ bool FFINNetworkTrace::operator<(const FFINNetworkTrace& other) const {
 	else return d1->ObjectSerialNumber < d2->ObjectSerialNumber;
 }
 
-const FWeakObjectPtr& FFINNetworkTrace::GetUnderlyingPtr() const {
+UObject* FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
 }
 
-FWeakObjectPtr FFINNetworkTrace::GetStartPtr() const {
+UObject* FFINNetworkTrace::GetStartPtr() const {
 	const FFINNetworkTrace* Trace = this;
 	while (Trace->Prev) Trace = Trace->Prev.Get();
-	if (Trace) return Trace->Obj.Get();
+	if (Trace) return Trace->Obj;
 	return nullptr;
 }
 
@@ -398,10 +399,10 @@ Step(AFGBuildableRailroadStation, UFGRailroadTrackConnectionComponent, {
 })
 
 Step(AFGVehicle, AFGBuildableDockingStation, {
-	return false;
+	return B->GetDockedActor() == A;
 })
 Step(AFGBuildableDockingStation, AFGVehicle, {
-	return false;
+	return A->GetDockedActor() == B;
 })
 
 Step(AFGVehicle, AFINVehicleScanner, {

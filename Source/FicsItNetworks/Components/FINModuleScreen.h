@@ -14,6 +14,8 @@ private:
 
 	UPROPERTY(Replicated)
 	UObject* GPUPtr = nullptr;
+
+	bool bDoGPUUpdate = false;
 	
 public:
     TSharedPtr<SWidget> Widget;

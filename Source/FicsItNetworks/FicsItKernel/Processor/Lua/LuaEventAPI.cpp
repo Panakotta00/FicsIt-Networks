@@ -54,8 +54,6 @@ namespace FicsItKernel {
 		}
 
 		int luaPull(lua_State* L) {
-			// ReSharper disable once CppDeclaratorNeverUsed
-			FLuaSyncCall SyncCall(L);
 			const int args = lua_gettop(L);
 			double t = 0.0;
 			if (args > 0) t = lua_tonumber(L, 1);
@@ -67,9 +65,10 @@ namespace FicsItKernel {
 				luaProc->Timeout = t;
 				luaProc->PullStart =  (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds();
 				luaProc->PullState = (args > 0) ? 1 : 2;
+
+				luaProc->GetTickHelper().shouldWaitForSignal();
 				
-				lua_yieldk(L, 0, args, luaPullContinue);
-				return UFINLuaProcessor::luaAPIReturn(L, 0);
+				return lua_yieldk(L, 0, args, luaPullContinue);
 			}
 			luaProc->PullState = 0;
 			return UFINLuaProcessor::luaAPIReturn(L, a);

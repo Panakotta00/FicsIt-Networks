@@ -19,15 +19,17 @@ FileMode CodersFileSystem::operator~(FileMode m) {
 
 File::File() {}
 
-unordered_set<NodeName> File::getChilds() const {
-	return unordered_set<NodeName>();
+unordered_set<std::string> File::getChilds() const {
+	return unordered_set<std::string>();
 }
 
 MemFile::MemFile(ListenerListRef listeners, SizeCheckFunc sizeCheck) : File(), listeners(listeners), sizeCheck(sizeCheck) {}
 
 SRef<FileStream> MemFile::open(FileMode m) {
 	if (io.isValid() && io->isOpen()) return nullptr;
-	return io = new MemFileStream(&data, m, listeners, sizeCheck);
+	SRef<MemFileStream> FS = new MemFileStream(&data, m, listeners, sizeCheck);
+	io = FS;
+	return FS;
 }
 
 bool CodersFileSystem::MemFile::isValid() const {
@@ -50,10 +52,17 @@ FileStream& FileStream::operator<<(const std::string& str) {
 	return *this;
 }
 
+std::string FileStream::readAll(SRef<FileStream> stream) {
+	std::string str;
+	do {
+		str.append(stream->read(1024));
+	} while (!stream->isEOF());
+	return str;
+}
+
 MemFileStream::MemFileStream(string * data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck) : FileStream(mode), data(data), listeners(listeners), sizeCheck(sizeCheck) {
-	buf = *data;
-	if ((mode & CodersFileSystem::OUTPUT) && (mode & CodersFileSystem::APPEND)) pos = buf.length();
-	else if (mode & CodersFileSystem::TRUNC) *data = buf = "";
+	if ((mode & CodersFileSystem::OUTPUT) && (mode & CodersFileSystem::APPEND)) pos = data->length();
+	else if (mode & CodersFileSystem::TRUNC) *data = "";
 	open = true;
 }
 
@@ -63,72 +72,44 @@ MemFileStream::~MemFileStream() {
 
 void MemFileStream::write(string newData) {
 	if (!isOpen()) throw std::exception("filestream not open");
-	if (!sizeCheck(buf.length(), true)) throw std::exception("out of memory");
-	buf = buf.erase(pos, newData.length());
-	buf.insert(pos, newData);
+	if (!sizeCheck(data->length(), true)) throw std::exception("out of memory");
+	data->erase(pos, newData.length());
+	data->insert(pos, newData);
 	pos += newData.length();
 }
 
-void MemFileStream::flush() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	if (!(mode & FileMode::OUTPUT)) return;
-	*data = buf;
-	listeners.onNodeChanged("", NT_File);
-}
-
-string MemFileStream::readChars(size_t chars) {
+string MemFileStream::read(size_t chars) {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-	return buf.substr(pos, chars);
+	if (pos >= data->size()) {
+		flagEOF = true;
+		return "";
+	}
+	flagEOF = false;
+	return data->substr(pos, chars);
 }
 
-string MemFileStream::readLine() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-	string s;
-	getline(std::stringstream(buf.substr(pos)), s);
-	pos += s.length();
-	return s;
-}
-
-string MemFileStream::readAll() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-	return buf;
-}
-
-double MemFileStream::readNumber() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-	double n = 0.0;
-	stringstream s(buf.substr(pos));
-	s >> n;
-	pos += s.tellg();
-	return n;
+bool MemFileStream::isEOF() {
+	return flagEOF;
 }
 
 int64_t MemFileStream::seek(string str, int64_t off) {
 	if (!isOpen()) throw std::exception("filestream not open");
+	flagEOF = false;
 	if (mode & APPEND) return pos;
 	if (str == "set") pos = off;
 	else if (str == "cur") pos += off;
-	else if (str == "end") pos = buf.length() + off;
+	else if (str == "end") pos = data->length() + off;
 	else throw exception("no valid whence");
-	if (pos > static_cast<int64_t>(buf.length())) pos = buf.length();
+	if (pos > static_cast<uint64_t>(data->length())) pos = data->length();
 	else if (pos < 0) pos = 0;
 	return pos;
 }
 
 void MemFileStream::close() {
 	if (isOpen()) {
-		flush();
 		open = false;
 	}
-}
-
-bool MemFileStream::isEOF() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	return pos >= static_cast<int64_t>(buf.length());
 }
 
 bool MemFileStream::isOpen() {
@@ -170,54 +151,27 @@ void DiskFileStream::write(string data) {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!sizeCheck(data.length(), true)) throw std::exception("out of capacity");
 	stream << data;
-}
-
-void DiskFileStream::flush() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	if (!(mode & FileMode::OUTPUT)) return;
 	stream.flush();
 }
 
-string DiskFileStream::readChars(size_t chars) {
+string DiskFileStream::read(size_t chars) {
 	if (!isOpen()) throw std::exception("filestream not open");
 	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
 	string s;
 	// Ensure buffer is large enough to hold characters.
 	s.resize(chars);
-	stream.read(s.data(), chars);
+	stream.read(const_cast<char*>(s.data()), chars);
 	// Shrink the string to the actual number of characters we read.
 	s.resize(stream.gcount());
 	return s;
 }
 
-string DiskFileStream::readLine() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-	string s;
-	getline(stream, s);
-	return s;
-}
-
-string DiskFileStream::readAll() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-
-	std::stringstream buffer;
-	buffer << stream.rdbuf();
-	return buffer.str();
-}
-
-double DiskFileStream::readNumber() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	if (!(mode & FileMode::INPUT)) throw std::exception("filestream not in input mode");
-	double n = 0.0;
-	stream >> n;
-	return n;
+bool DiskFileStream::isEOF() {
+	return stream.eof();
 }
 
 int64_t DiskFileStream::seek(string str, int64_t off) {
 	if (!isOpen()) throw std::exception("filestream not open");
-
 	enum {
 		WHENCE_INVALID,
 		WHENCE_SET,
@@ -271,11 +225,6 @@ void DiskFileStream::close() {
 	if (isOpen()) {
 		stream.close();
 	}
-}
-
-bool DiskFileStream::isEOF() {
-	if (!isOpen()) throw std::exception("filestream not open");
-	return stream.eof();
 }
 
 bool DiskFileStream::isOpen() {

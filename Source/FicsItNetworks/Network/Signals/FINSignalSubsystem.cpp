@@ -6,8 +6,18 @@
 #include "FicsItNetworks/Network/FINHookSubsystem.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
 
+void FFINSignalListeners::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
+	for (const FFINNetworkTrace& Trace : Listeners) {
+		Trace.AddStructReferencedObjects(ReferenceCollector);
+	}
+}
+
 bool AFINSignalSubsystem::ShouldSave_Implementation() const {
 	return true;
+}
+
+void AFINSignalSubsystem::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	Cleanup();
 }
 
 void AFINSignalSubsystem::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
@@ -21,6 +31,27 @@ void AFINSignalSubsystem::PostLoadGame_Implementation(int32 saveVersion, int32 g
 
 void AFINSignalSubsystem::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
 	out_dependentObjects.Add(AFINHookSubsystem::GetHookSubsystem(this));
+}
+
+void AFINSignalSubsystem::Cleanup() {
+	TArray<UObject*> ListenerKeys;
+	Listeners.GetKeys(ListenerKeys);
+	for (UObject* Sender : ListenerKeys) {
+		if (!IsValid(Sender)) {
+			Listeners.Remove(Sender);
+		} else {
+			TArray<FFINNetworkTrace>& Listen = Listeners[Sender].Listeners;
+			for (int i = 0; i < Listen.Num(); ++i) {
+				const FFINNetworkTrace& Listener = Listen[i];
+				if (!IsValid(Listener.GetUnderlyingPtr())) {
+					Listen.RemoveAt(i--);
+				}
+			}
+			if (Listen.Num() < 1) {
+				Listeners.Remove(Sender);
+			}
+		}
+	}
 }
 
 AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldContext) {

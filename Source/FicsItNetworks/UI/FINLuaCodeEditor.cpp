@@ -208,6 +208,10 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 			}
 			if (!bInString) {
 				if (TokenString == "--[[" && !bInBlockComment && !bInLineComment) {
+					if (bInNumber) {
+						bInNumber = false;
+						DoNumber(FTextRange(StringStart, StringEnd));
+					}
 					if (!bInBlockComment) {
 						bInBlockComment = true;
 						StringStart = Start;
@@ -218,6 +222,10 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 					DoComment(FTextRange(StringStart, StringEnd));
 					continue;
 				} else if (TokenString == "--" && !bInLineComment && !bInBlockComment) {
+					if (bInNumber) {
+						bInNumber = false;
+						DoNumber(FTextRange(StringStart, StringEnd));
+					}
 					bInLineComment = true;
 					StringStart = Start;
 					StringEnd = End;
@@ -295,7 +303,8 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 					continue;
 				}
 			}
-			DoNormal(FTextRange(Start, End));
+			if (TokenString.IsNumeric()) DoNumber(FTextRange(Start, End));
+			else DoNormal(FTextRange(Start, End));
 		}
 		
 		if (bInNumber) {

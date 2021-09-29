@@ -20,7 +20,7 @@ namespace CodersFileSystem {
 		* @param[in]	subdir	name of the subdir you want to create
 		* @return	Returns the created Directory. Nullptr if it was not able to create the directory.
 		*/
-		virtual WRef<Directory> createSubdir(const NodeName& subdir) = 0;
+		virtual WRef<Directory> createSubdir(const std::string& subdir) = 0;
 
 		/*
 		* Creates a file with the given name in itself.
@@ -28,7 +28,7 @@ namespace CodersFileSystem {
 		* @param[in]	name	name of the new file
 		* @return	Returns the created file. Nullptr if it was not able to create the file.
 		*/
-		virtual WRef<File> createFile(const NodeName& name) = 0;
+		virtual WRef<File> createFile(const std::string& name) = 0;
 
 		/*
 		* Removes the entry in the directory with the given name.
@@ -38,7 +38,7 @@ namespace CodersFileSystem {
 		* @param[in]	recursive	true if you want to remove a directory
 		* @return	returns	true if it was able to remove the entry
 		*/
-		virtual bool remove(const NodeName& entry, bool recursive) = 0;
+		virtual bool remove(const std::string& entry, bool recursive) = 0;
 
 		/*
 		* Trys to rename the entry with the given name to the given new name
@@ -47,12 +47,12 @@ namespace CodersFileSystem {
 		* @param[in]	name	the new name for the entry
 		* @return	returns true if it was able to rename the entry
 		*/
-		virtual bool rename(const NodeName& entry, const NodeName& name) = 0;
+		virtual bool rename(const std::string& entry, const std::string& name) = 0;
 	};
 
 	class MemDirectory : public Directory {
 	protected:
-		std::unordered_map<NodeName, SRef<Node>> entries;
+		std::unordered_map<std::string, SRef<Node>> entries;
 		ListenerListRef listeners;
 		SizeCheckFunc checkSize;
 
@@ -61,14 +61,14 @@ namespace CodersFileSystem {
 		virtual ~MemDirectory();
 		
 		/* Begin Directory-Interface-Implementation */
-		virtual std::unordered_set<NodeName> getChilds() const override;
+		virtual std::unordered_set<std::string> getChilds() const override;
 		virtual SRef<FileStream> open(FileMode mode) override;
 		virtual bool isValid() const override;
 		
-		virtual WRef<Directory> createSubdir(const NodeName& subdir) override;
-		virtual WRef<File> createFile(const NodeName& name) override;
-		virtual bool remove(const NodeName& subdir, bool recursive) override;
-		virtual bool rename(const NodeName& entry, const NodeName& name) override;
+		virtual WRef<Directory> createSubdir(const std::string& subdir) override;
+		virtual WRef<File> createFile(const std::string& name) override;
+		virtual bool remove(const std::string& subdir, bool recursive) override;
+		virtual bool rename(const std::string& entry, const std::string& name) override;
 		/* End Directory-Interface-Implementation */
 
 		/*
@@ -77,7 +77,7 @@ namespace CodersFileSystem {
 		* @param[in]	name	the name of the entry you want to find
 		* @return	returns the found entry, nullptr if not found
 		*/
-		SRef<Node> get(const NodeName& name);
+		SRef<Node> get(const std::string& name);
 
 		/*
 		* Adds any given node to the directory tree.
@@ -87,7 +87,7 @@ namespace CodersFileSystem {
 		* @param[in]	node	node wich should get added to the directory tree
 		* @return	returns true if it was able to add the node to the directory tree
 		*/
-		bool add(const SRef<Node>& node, const NodeName& name);
+		bool add(const SRef<Node>& node, const std::string& name);
 	};
 
 	class DiskDirectory : public Directory {
@@ -96,14 +96,14 @@ namespace CodersFileSystem {
 		SizeCheckFunc checkSize;
 
 		/* Begin Directory-Interface-Implementation */
-		virtual std::unordered_set<NodeName> getChilds() const override;
+		virtual std::unordered_set<std::string> getChilds() const override;
 		virtual SRef<FileStream> open(FileMode mode) override;
 		virtual bool isValid() const override;
 
-		virtual WRef<Directory> createSubdir(const NodeName& subdir) override;
-		virtual WRef<File> createFile(const NodeName& name) override;
-		virtual bool remove(const NodeName& subdir, bool recursive) override;
-		virtual bool rename(const NodeName& entry, const NodeName& name) override;
+		virtual WRef<Directory> createSubdir(const std::string& subdir) override;
+		virtual WRef<File> createFile(const std::string& name) override;
+		virtual bool remove(const std::string& subdir, bool recursive) override;
+		virtual bool rename(const std::string& entry, const std::string& name) override;
 		/* End Directory-Interface-Implementation */
 
 	public:

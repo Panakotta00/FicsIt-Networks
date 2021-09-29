@@ -17,6 +17,7 @@ void SFINReflectionUI::Construct(const FArguments& InArgs) {
 			SNew(SVerticalBox)
 			+SVerticalBox::Slot().AutoHeight().Padding(10)[
 				SAssignNew(SearchBox, SEditableTextBox)
+				.ClearKeyboardFocusOnCommit(false)
 				.Style(&Context.Style.Get()->SearchInputStyle)
 				.HintText(FText::FromString("Search for Class/Struct/Property/Function/Signal"))
 				.OnTextChanged_Lambda([this](FText Text) {
@@ -24,6 +25,7 @@ void SFINReflectionUI::Construct(const FArguments& InArgs) {
 				})
 				.OnTextCommitted_Lambda([this](FText Text, ETextCommit::Type Type) {
 					if (this->Filtered.Num() > 0 && Type == ETextCommit::Type::OnEnter) {
+						
 						TFunction<bool(const TArray<TSharedPtr<FFINReflectionUIEntry>>&)> CheckChildren;
 						FFINReflectionUIFilter Filter(this->Context.FilterString);
 						CheckChildren = [this, &Filter, &CheckChildren](const TArray<TSharedPtr<FFINReflectionUIEntry>>& Entries) {

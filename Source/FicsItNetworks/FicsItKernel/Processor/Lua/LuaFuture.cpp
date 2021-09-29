@@ -27,7 +27,7 @@ namespace FicsItKernel {
 		int luaFutureGet(lua_State* L) {
 			LuaFuture& future = *static_cast<LuaFuture*>(luaL_checkudata(L, 1, "Future"));
 			luaL_argcheck(L, (*future)->IsDone(), 1, "Future is not ready");
-			const TArray<FFINAnyNetworkValue>& Data = future->Get<FFINFutureReflection>().Output;
+			const TArray<FFINAnyNetworkValue>& Data = future->Get<FFINFuture>().GetOutput();
 			FFINNetworkTrace Trace;
 			if (future->GetStruct() == FFINFutureReflection::StaticStruct()) Trace = future->Get<FFINFutureReflection>().Context.GetTrace();
 			for (const FFINAnyNetworkValue& Param : Data) networkValueToLua(L, Param, Trace);

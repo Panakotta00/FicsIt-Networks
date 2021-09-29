@@ -21,9 +21,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	USplineMeshComponent* CableSpline = nullptr;
-
+	
 	AFINNetworkCable();
 	~AFINNetworkCable();
+	
+	UPROPERTY(EditDefaultsOnly)
+	float MaxCableSlack = 250;
+
+	UPROPERTY(EditDefaultsOnly)
+	float SlackLengthFactor = 1;
 
 	// Begin AActor
 	virtual void OnConstruction(const FTransform& Transform) override;

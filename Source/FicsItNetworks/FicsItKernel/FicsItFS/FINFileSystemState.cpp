@@ -79,8 +79,8 @@ int AskForDiskOrSave(FString Name) {
 	}
 
 void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk) {
-	std::unordered_set<CodersFileSystem::NodeName> childs;
-	std::unordered_set<CodersFileSystem::NodeName>::iterator childIterator;
+	std::unordered_set<std::string> childs;
+	std::unordered_set<std::string>::iterator childIterator;
 	int ChildNodeNum;
 	bool bIsSaving = Record.GetUnderlyingArchive().IsSaving();
 	bool bIsLoading = Record.GetUnderlyingArchive().IsLoading();
@@ -91,7 +91,7 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
 		ChildNodeNum = childs.size();
 	}
 	FStructuredArchive::FArray ChildNodes = Record.EnterArray(SA_FIELD_NAME(TEXT("ChildNodes")), ChildNodeNum);
-	std::unordered_set<CodersFileSystem::NodeName> DiskChilds = SerializeDevice->childs(Path);
+	std::unordered_set<std::string> DiskChilds = SerializeDevice->childs(Path);
 	CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
 	if (KeepDisk == 0) {
 		for (std::string DiskChild : DiskChilds) {
@@ -132,7 +132,7 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
 			FStructuredArchive::FSlot Content = Child.EnterField(SA_FIELD_NAME(TEXT("FileContent")));
 			if (Record.GetUnderlyingArchive().IsLoading()) {
 				std::string diskData;
-				if (KeepDisk == -1) diskData = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY)->readAll();
+				if (KeepDisk == -1) diskData = CodersFileSystem::FileStream::readAll(SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY));
 				FString Data;
 				Content << Data;
 				FTCHARToUTF8 Convert(*Data, Data.Len());
@@ -141,12 +141,11 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
 				if (KeepDisk == 0) {
 					CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC | CodersFileSystem::BINARY);
 					Stream->write(stdData);
-					Stream->flush();
 					Stream->close();
 				}
             } else if (Record.GetUnderlyingArchive().IsSaving()) {
             	CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY);
-            	std::string RawData = Stream->readAll();
+            	std::string RawData = CodersFileSystem::FileStream::readAll(Stream);
             	Stream->close();
             	FUTF8ToTCHAR Convert(RawData.c_str(), RawData.length());
             	FString Data(Convert.Length(), Convert.Get());
@@ -260,8 +259,8 @@ void AFINFileSystemState::Serialize_DEPRECATED(FArchive& Ar) {
 		if (dynamic_cast<CodersFileSystem::MemDevice*>(Device.get())) node.NodeType = 3;
 		if (dynamic_cast<CodersFileSystem::DiskDevice*>(Device.get())) node.NodeType = 2;
 		if (node.NodeType == 2 || node.NodeType == 3) {
-			std::unordered_set<CodersFileSystem::NodeName> nodes = Device->childs("");
-			for (CodersFileSystem::NodeName newNode : nodes) {
+			std::unordered_set<std::string> nodes = Device->childs("");
+			for (std::string newNode : nodes) {
 				TSharedPtr<FFileSystemNode> newSerializeNode = MakeShareable(new FFileSystemNode());
 				newSerializeNode->Serialize(Device, newNode.c_str());
 				node.ChildNodes.Add(FString(newNode.c_str()), newSerializeNode);

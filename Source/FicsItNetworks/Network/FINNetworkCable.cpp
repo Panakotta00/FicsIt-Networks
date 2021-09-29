@@ -20,25 +20,24 @@ void AFINNetworkCable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 	if (!IsValid(Connector1) || !IsValid(Connector2)) return;
-	FVector startPos = Connector1->GetComponentLocation();
-	FVector endPos = Connector2->GetComponentLocation();
+	const FVector StartPos = Connector1->GetComponentLocation();
+	const FVector EndPos = Connector2->GetComponentLocation();
+	const int Length = FVector::Distance(StartPos, EndPos);
 	
 	CableSpline->SetVisibility(true, true);
 
-	float offset = 250.0;
-	FVector start = FVector(0.0, 0.0, 0.0);
-	FVector end = RootComponent->GetComponentTransform().InverseTransformPosition(endPos);
-	FVector start_t = end;
-	end = end + 0.0001;
-	if ((FMath::Abs(start_t.X) < 10 || FMath::Abs(start_t.Y) < 10) && FMath::Abs(start_t.Z) <= offset) offset = 1;
-	start_t.Z -= offset;
-	FVector end_t = end;
-	end_t.Z += offset;
+	float Offset = 250.0;
+	const FVector Start = FVector(0.0, 0.0, 0.0);
+	FVector End = RootComponent->GetComponentTransform().InverseTransformPosition(EndPos);
+	FVector Start_T = End;
+	End = End + 0.0001;
+	if ((FMath::Abs(Start_T.X) < 10 || FMath::Abs(Start_T.Y) < 10) && FMath::Abs(Start_T.Z) <= Offset) Offset = 1;
+	Offset = FMath::Min(Length * SlackLengthFactor , MaxCableSlack);
+	Start_T.Z -= Offset;
+	FVector End_T = End;
+	End_T.Z += Offset;
 
-	UStaticMesh* cableMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/NetworkCable/Mesh_NetworkCable.Mesh_NetworkCable"));
-	CableSpline->SetStaticMesh(cableMesh);
-
-	CableSpline->SetStartAndEnd(start, start_t, end, end_t, true);
+	CableSpline->SetStartAndEnd(Start, Start_T, End, End_T, true);
 	CableSpline->UpdateMesh();
 
 	CableSpline->SetMobility(EComponentMobility::Type::Static);

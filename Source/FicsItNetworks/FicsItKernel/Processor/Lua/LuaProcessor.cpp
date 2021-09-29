@@ -140,6 +140,16 @@ void FFINLuaProcessorTick::shouldDemote() {
 	bShouldDemote = true;
 }
 
+void FFINLuaProcessorTick::shouldWaitForSignal() {
+	if (State & LUA_ASYNC) {
+		bWaitForSignal = true;
+	}
+}
+
+void FFINLuaProcessorTick::signalFound() {
+	bWaitForSignal = false;
+}
+
 void FFINLuaProcessorTick::shouldCrash(const TSharedRef<FFINKernelCrash>& Crash) {
 	bShouldCrash = true;
 	ToCrash = Crash;
@@ -162,6 +172,7 @@ void FFINLuaProcessorTick::syncTick() {
 	} else if (State & LUA_ASYNC) {
 		AsyncSyncMutex.Lock();
 		const bool DoSync = bDoSync;
+		const bool WaitForSignal = bWaitForSignal;
 		AsyncSyncMutex.Unlock();
 		if (DoSync) {
 			// async tick is waiting for sync
@@ -177,7 +188,10 @@ void FFINLuaProcessorTick::syncTick() {
 			bDoSync = false;
 			AsyncSyncMutex.Unlock();
 		} else {
-			if (asyncTask->IsDone()) {
+			if (asyncTask->IsDone() && (!WaitForSignal || Processor->GetKernel()->GetNetwork()->GetSignalCount() > 0 || Processor->PullTimeoutReached())) {
+				AsyncSyncMutex.Lock();
+				bWaitForSignal = false;
+				AsyncSyncMutex.Unlock();
 				asyncTask->StartBackgroundTask();
 			}
 		}
@@ -209,7 +223,7 @@ bool FFINLuaProcessorTick::asyncTick() {
 			TickMutex.Unlock();
 			return false;
 		}
-		return true;
+		return !bWaitForSignal;
 	}
 	return false;
 }
@@ -281,7 +295,7 @@ int FFINLuaProcessorTick::steps() const {
 	case LUA_ASYNC_END:
 		return AsyncEndLen;
 	default:
-		return 0;
+		return LUA_SYNC;
 	}
 }
 
@@ -333,6 +347,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 	if (!Kernel || Kernel->GetState() != FIN_KERNEL_RUNNING) return;
 	
 	tickHelper.stop();
+	StateStorage.Clear();
 
 	for (FicsItKernel::Lua::LuaFile file : FileStreams) {
 		if (file->file) {
@@ -520,6 +535,7 @@ void UFINLuaProcessor::LuaTick() {
 			if (GetKernel() && GetKernel()->GetNetwork() && GetKernel()->GetNetwork()->GetSignalCount() > 0) {
 				// Signal available -> reset timeout and pull signal from network
 				PullState = 0;
+				GetTickHelper().signalFound();
 				const int SigArgCount = DoSignal(luaThread);
 				if (SigArgCount < 1) {
 					// no signals popped -> crash system
@@ -528,12 +544,13 @@ void UFINLuaProcessor::LuaTick() {
 					// signal popped -> resume yield with signal as parameters (passing signals parameters back to pull yield)
 					Status = lua_resume(luaThread, luaState, SigArgCount, &nres);
 				}
-			} else if (PullState == 2 || Timeout > (static_cast<double>((FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0)) {
+			} else if (PullState == 2 || !PullTimeoutReached()) {
 				// no signal available & not timeout reached -> skip tick
 				return;
 			} else {
 				// no signal available & timeout reached -> resume yield with  no parameters
 				PullState = 0;
+				GetTickHelper().signalFound();
 				Status = lua_resume(luaThread, luaState, 0, &nres);
 			}
 		} else {
@@ -674,6 +691,10 @@ FFINLuaProcessorTick& UFINLuaProcessor::GetTickHelper() {
 	return tickHelper;
 }
 
+bool UFINLuaProcessor::PullTimeoutReached() {
+	return Timeout <= (static_cast<double>((FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0);
+}
+
 int luaReYield(lua_State* L) {
 	lua_yield(L,0);
 	return 0;
@@ -729,12 +750,10 @@ int luaResumeResume(lua_State* L, int status, lua_KContext ctx) {
 
 int luaResume(lua_State* L) {
 	const int args = lua_gettop(L);
-	int threadIndex = 1;
-	if (lua_isboolean(L, 1)) threadIndex = 2;
-	if (!lua_isthread(L, threadIndex)) return luaL_argerror(L, threadIndex, "is no thread");
-	lua_State* thread = lua_tothread(L, threadIndex);
+	if (!lua_isthread(L, 1)) return luaL_argerror(L, 1, "is no thread");
+	lua_State* thread = lua_tothread(L, 1);
 
-	if (!lua_checkstack(thread, args - threadIndex)) {
+	if (!lua_checkstack(thread, args - 1)) {
 		lua_pushboolean(L, false);
 		lua_pushliteral(L, "too many arguments to resume");
 		return UFINLuaProcessor::luaAPIReturn(L, 2);
@@ -745,20 +764,16 @@ int luaResume(lua_State* L) {
 
 	// copy passed arguments to coroutine so it can return these arguments from the yield function
 	// but don't move the passed coroutine and then resume the coroutine
-	lua_xmove(L, thread, args - threadIndex);
+	lua_xmove(L, thread, args - 1);
 	int argCount = 0;
-	const int state = lua_resume(thread, L, args - threadIndex, &argCount);
+	const int state = lua_resume(thread, L, args - 1, &argCount);
 
 	// no args indicates return or internal yield (count hook)
 	if (argCount == 0) {
 		// yield self to cascade the yield down and so the lua execution halts
 		if (state == LUA_YIELD) {
 			// yield from count hook
-			if (threadIndex == 2 && lua_toboolean(L, 1)) {
-				return lua_yield(L, 0);
-			} else {
-				return lua_yieldk(L, 0, NULL, &luaResumeResume);
-			}
+			return lua_yieldk(L, 0, NULL, &luaResumeResume);
 		} else {
 			lua_pop(thread, argCount - 1);
 			argCount = 1;
@@ -767,8 +782,10 @@ int luaResume(lua_State* L) {
 	
 	if (state > LUA_YIELD) {
 		lua_pushboolean(L, false);
+		argCount = 1;
 	} else {
 		lua_pushboolean(L, true);
+		--argCount;
 	}
 	
 	if (!lua_checkstack(L, argCount)) {
@@ -782,7 +799,7 @@ int luaResume(lua_State* L) {
 	
 	return UFINLuaProcessor::luaAPIReturn(L, argCount+1);
 }
-//
+
 int luaRunning(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	int ismain = lua_pushthread(L);
@@ -791,6 +808,87 @@ int luaRunning(lua_State* L) {
 	lua_pushboolean(L, ismain);
 	return 2;
 }
+
+int luaXpcallMsg(lua_State* L) {
+	lua_newtable(L);
+	lua_insert(L, -2);
+	lua_setfield(L, -2, "message");
+	luaL_traceback(L, L, NULL, 0);
+	lua_setfield(L, -2, "trace");
+	return 1;
+}
+
+int luaXpcallFinish(lua_State *L, int status, lua_KContext extra) {
+	if (status != LUA_OK && status != LUA_YIELD) {
+		lua_pushboolean(L, 0);
+		lua_pushvalue(L, -2);
+		return 2;
+	}
+	lua_pushboolean(L, 1);
+	lua_rotate(L, 1 + extra, 1);
+	return lua_gettop(L) - extra;
+}
+
+// xpcall-reimplementation adding traceback to error object
+int luaXpcall(lua_State *L) {
+	int n = lua_gettop(L);
+	luaL_checktype(L, 1, LUA_TFUNCTION);
+	lua_pushcfunction(L, &luaXpcallMsg);
+	lua_rotate(L, 1, 1);
+	int status = lua_pcallk(L, n - 1, LUA_MULTRET, 1, 0, luaXpcallFinish);
+	return luaXpcallFinish(L, status, 1);
+}
+
+// Theoratical better xpcall-reimplementation for FIN but
+// doesn't work because not easy to interact with non LUA_OK or LUA_YIELD coroutines
+/*
+int luaXpcallMsgContinue(lua_State* L2, int args, lua_KContext ctx) {
+	lua_State* L = (lua_State*)ctx;
+	lua_pushboolean(L, 0);
+	return args+1;
+}
+
+int luaXpcallContinue(lua_State* L, int args, lua_KContext ctx) {
+	lua_State* L2 = (lua_State*)ctx;
+	int res;
+	int status = lua_resume(L2, L, 0, &res);
+	if (status == LUA_YIELD) {
+		return lua_yieldk(L, 0, ctx, &luaXpcallContinue);
+	}
+	if (status > LUA_YIELD) {
+		lua_rotate(L2, 1, -1);
+		lua_rotate(L2, -2, -1);
+		lua_callk(L2, 1, 1, (lua_KContext)L, &luaXpcallMsgContinue);
+	}
+	lua_pushboolean(L, 1);
+	return res+1;
+}
+#pragma optimize("", off)
+int luaXpcall(lua_State* L) {
+	int n = lua_gettop(L);
+	luaL_checktype(L, 1, LUA_TFUNCTION); // check actual function
+	luaL_checktype(L, 2, LUA_TFUNCTION); // check msg function
+	lua_State* L2 = lua_newthread(L);
+	lua_rotate(L, 1, -1);
+	lua_xmove(L, L2, n - 1);
+	int L2n = lua_gettop(L2);
+	int res;
+	int status = lua_resume(L2, L, n - 2, &res);
+	if (status == LUA_YIELD) {
+		return lua_yieldk(L, 0, (lua_KContext)L2, &luaXpcallContinue);
+	}
+	if (status > LUA_YIELD) {
+		luaL_checktype(L2, L2n, LUA_TFUNCTION);
+		lua_rotate(L2, L2n, -1);
+		lua_rotate(L2, -2, -1);
+		luaL_checktype(L2, -2, LUA_TFUNCTION);
+		lua_pcallk(L2, 1, 1, 0, (lua_KContext)L, &luaXpcallMsgContinue);
+	}
+	lua_pushboolean(L, 1);
+	return res+1;
+}
+#pragma optimize("", on)
+*/
 
 void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	PersistSetup("LuaProcessor", -2);
@@ -802,6 +900,8 @@ void UFINLuaProcessor::LuaSetup(lua_State* L) {
 	lua_setfield(L, -2, "dofile");
 	lua_pushnil(L);
 	lua_setfield(L, -2, "loadfile");
+	lua_pushcfunction(L, luaXpcall);
+	lua_setfield(L, -2, "xpcall");
 	lua_pushcfunction(L, luaPrint);
 	lua_setfield(L, -2, "print");
 	PersistTable("global", -1);

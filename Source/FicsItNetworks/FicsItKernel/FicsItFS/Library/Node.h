@@ -20,7 +20,7 @@ namespace CodersFileSystem {
 		*
 		* @return	the list of direct childs
 		*/
-		virtual std::unordered_set<NodeName> getChilds() const = 0;
+		virtual std::unordered_set<std::string> getChilds() const = 0;
 
 		/*
 		* trys to open the node. Returns the Ref to the FileStream for IO which is now in charge of managing the files content.

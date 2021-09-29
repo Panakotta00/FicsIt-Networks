@@ -41,11 +41,23 @@ public:
 	AActor* GetActor() const;
 };
 
-UCLASS()
+UCLASS(Blueprintable)
 class FICSITNETWORKS_API AFINNetworkCableHologram : public AFGBuildableHologram {
 	GENERATED_BODY()
-
+	friend FFINCablePlacementStepInfo;
 public:
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UFGRecipe> RecipePlug = nullptr;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UFGRecipe> RecipePole = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly)
+	bool bEnablePole = true;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bEnablePlug = true;
+	
 	UPROPERTY()
 	USplineMeshComponent* Cable = nullptr;
 
@@ -82,6 +94,11 @@ public:
 	UPROPERTY()
 	UFINNetworkConnectionComponent* Connector2Cache = nullptr;
 
+	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginPlay() override;
+	// End AActor
+
 	// Begin FGBuildableHologram
 	virtual bool DoMultiStepPlacement(bool isInputFromARelease) override;
 	virtual AActor* Construct(TArray<AActor*>& childs, FNetConstructionID constructionID) override;
@@ -105,9 +122,17 @@ public:
 	void UpdateSnapped();
 	void UpdateMeshValidity(bool bValid);
 	bool IsInSecondStep();
+
+	virtual void GetRecipes(TSubclassOf<UFGRecipe>& OutRecipePole, TSubclassOf<UFGRecipe>& OutRecipePlug);
 	
 	/**
 	 * Checks if the currently snapped object is valid
 	 */
 	bool IsSnappedValid();
+
+protected:
+	template<typename T>
+	static T* GetDefaultBuildable_Static(AFGBuildableHologram* Holo) { return Holo->GetDefaultBuildable<T>(); }
+	
+	static UClass* GetBuildClass(AFGBuildableHologram* Holo) { return Holo->mBuildClass; }
 };

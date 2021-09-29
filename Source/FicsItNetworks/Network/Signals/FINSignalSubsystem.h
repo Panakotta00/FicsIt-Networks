@@ -11,6 +11,15 @@ struct FICSITNETWORKS_API FFINSignalListeners {
 
 	UPROPERTY(SaveGame)
 	TArray<FFINNetworkTrace> Listeners;
+
+	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
+};
+
+template<>
+struct TStructOpsTypeTraits<FFINSignalListeners> : TStructOpsTypeTraitsBase2<FFINSignalListeners> {
+	enum {
+		WithAddStructReferencedObjects = true,
+	};
 };
 
 UCLASS(BlueprintType)
@@ -22,12 +31,25 @@ private:
 	 */
 	UPROPERTY(SaveGame)
 	TMap<UObject*, FFINSignalListeners> Listeners;
+	
 public:
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
+	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	virtual void PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
 	// End IFGSaveInterface
+
+	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& ReferenceCollector) {
+		Super::AddReferencedObjects(InThis, ReferenceCollector);
+		AFINSignalSubsystem* SigSubSys = Cast<AFINSignalSubsystem>(InThis);
+		for (TPair<UObject*, FFINSignalListeners>& Listener : SigSubSys->Listeners) Listener.Value.AddStructReferencedObjects(ReferenceCollector);
+	}
+
+	/**
+	 * Removes all Listeners and sender that don't exist anymore
+	 */
+	void Cleanup();
 
 	/**
 	* Gets the loaded signal subsystem in the given world.

@@ -13,7 +13,6 @@
 #include "FicsItNetworks/Reflection/FINReflection.h"
 
 #define INSTANCE_TYPE "InstanceType"
-#define CLASS_INSTANCE_META_SUFFIX "-Class"
 
 #define OffsetParam(type, off) (type*)((std::uint64_t)param + off)
 
@@ -306,7 +305,7 @@ namespace FicsItKernel {
 
 		bool newInstance(lua_State* L, const FFINNetworkTrace& Trace) {
 			// check obj and if type is registered
-			UObject* Obj = Trace.GetUnderlyingPtr().Get();
+			UObject* Obj = Trace.GetUnderlyingPtr();
 			UFINClass* Class = nullptr;
 			if (IsValid(Obj)) Class = FFINReflection::Get()->FindClass(Obj->GetClass());
 			if (!Class) {

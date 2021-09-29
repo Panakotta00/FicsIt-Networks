@@ -15,16 +15,16 @@ public:
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFGFactoryConnectionComponent* Output1 = nullptr;
-
+	UFGFactoryConnectionComponent* Input2 = nullptr;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGFactoryConnectionComponent* Input1 = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFGFactoryConnectionComponent* Input2 = nullptr;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGFactoryConnectionComponent* Input3 = nullptr;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UFGFactoryConnectionComponent* Output1 = nullptr;
 
 	UPROPERTY(SaveGame)
 	TArray<FInventoryItem> OutputQueue;
@@ -83,7 +83,7 @@ public:
 		Description = FText::FromString("Allows to transfer an item from the given input queue to the output queue if possible.");
 		ParameterInternalNames.Add("input");
 		ParameterDisplayNames.Add(FText::FromString("Input"));
-		ParameterDescriptions.Add(FText::FromString("The index of the input queue you want to transfer the next item to the output queue. (0 = middle, 1 = left, 2 = right)"));
+		ParameterDescriptions.Add(FText::FromString("The index of the input queue you want to transfer the next item to the output queue. (0 = right, 1 = middle, 2 = left)"));
 		ParameterInternalNames.Add("transfered");
 		ParameterDisplayNames.Add(FText::FromString("Transfered"));
 		ParameterDescriptions.Add(FText::FromString("true if it was able to transfer the item."));
@@ -102,7 +102,7 @@ public:
 		Description = FText::FromString("Returns the next item in the given input queue.");
 		ParameterInternalNames.Add("input");
 		ParameterDisplayNames.Add(FText::FromString("Input"));
-		ParameterDescriptions.Add(FText::FromString("The index of the input queue you want to check (0 = middle, 1 = left, 2 = right)"));
+		ParameterDescriptions.Add(FText::FromString("The index of the input queue you want to check (0 = right, 1 = middle, 2 = left)"));
 		ParameterInternalNames.Add("item");
 		ParameterDisplayNames.Add(FText::FromString("Item"));
 		ParameterDescriptions.Add(FText::FromString("The next item in the input queue."));

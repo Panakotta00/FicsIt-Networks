@@ -34,7 +34,28 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Utility")
 	static void ClipboardCopy(FString str);
-
+	
 	UFUNCTION(BlueprintCallable)
 	static void TestFicsItVisualScript(UNativeWidgetHost* Widget);
+	
+	template<typename ComponentType>
+	static TArray<ComponentType*> GetComponentsFromSubclass(const UClass* InActorClass) {
+		TArray< ComponentType* > outComponents;
+
+		if (IsValid(InActorClass)) {
+			if(const UBlueprintGeneratedClass* ActorBlueprintGeneratedClass = Cast<UBlueprintGeneratedClass>(InActorClass)) {
+				const TArray< USCS_Node* >& ActorBlueprintNodes = ActorBlueprintGeneratedClass->SimpleConstructionScript->GetAllNodes();
+
+				for (USCS_Node* Node : ActorBlueprintNodes) {
+					if (UClass::FindCommonBase(Node->ComponentClass, ComponentType::StaticClass()) && !Node->IsEditorOnly()) {
+						if (ComponentType* BlueprintComponent = Cast<ComponentType>(Node->ComponentTemplate)) {
+							outComponents.Add(BlueprintComponent);
+						}
+					}
+				}
+			}
+		}
+
+		return outComponents;
+	}
 };

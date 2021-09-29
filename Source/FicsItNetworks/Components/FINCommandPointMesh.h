@@ -18,6 +18,45 @@ public:
 
 
 USTRUCT(Blueprintable)
+struct FFINCommandLabelReferences {
+	GENERATED_BODY()
+
+	FFINCommandLabelReferences(UObject* reference, UObject* textReference, int index) : Reference(reference), TextObjectReference(textReference), Index(index) {}
+	FFINCommandLabelReferences() : Reference(nullptr), TextObjectReference(nullptr), Index(0)  {}
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	int Index;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UObject* Reference;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UObject* TextObjectReference;
+	
+};
+
+USTRUCT(Blueprintable)
+struct FFINCommandLabelData  {
+	GENERATED_BODY()
+
+	FFINCommandLabelData() : ImagePath(""), Text(""), TextColor(0,0,0,1), Vertical(false){}
+	FFINCommandLabelData(FString imagePath, FString text, FLinearColor textColor, bool vertical) : ImagePath(imagePath), Text(text), TextColor(textColor), Vertical(vertical){}
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	FString ImagePath;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	bool Vertical;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	FString Text;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	FLinearColor TextColor;
+	
+};
+
+USTRUCT(Blueprintable)
 struct FFINCommandLabelStructure
 {
 	GENERATED_BODY()

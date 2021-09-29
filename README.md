@@ -93,7 +93,7 @@ You can find the detailed progress in the [project board](https://github.com/Cod
 
 Contributors
 ============
-- [Panakotta00](https://twitch.tv/panakotta00)
+- [Panakotta00](https://panakotta00.massivebytes.net)
 - [RosszEmber](https://www.deviantart.com/ronsemberg)
 - Deantendo
 - Coffeediction

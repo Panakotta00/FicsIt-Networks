@@ -22,14 +22,16 @@ void AFINScreenHolo::OnConstruction(const FTransform& Transform) {
 	Parts.Empty();
 
 	// Create Components
-	UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
-	UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
-	UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
-	AFINScreen::SpawnComponents(UStaticMeshComponent::StaticClass(), ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
-	RootComponent->SetMobility(EComponentMobility::Movable);
-	for (UStaticMeshComponent* Part : Parts) {
-		Part->SetMobility(EComponentMobility::Movable);
-		Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (mBuildClass) {
+		UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
+		UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
+		UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
+		AFINScreen::SpawnComponents(UStaticMeshComponent::StaticClass(), ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
+		RootComponent->SetMobility(EComponentMobility::Movable);
+		for (UStaticMeshComponent* Part : Parts) {
+			Part->SetMobility(EComponentMobility::Movable);
+			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 	}
 }
 
@@ -42,6 +44,12 @@ void AFINScreenHolo::Tick(float DeltaSeconds) {
 		
 		RerunConstructionScripts();
 	}
+}
+
+void AFINScreenHolo::BeginPlay() {
+	Super::BeginPlay();
+	
+	RerunConstructionScripts();
 }
 
 void AFINScreenHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {

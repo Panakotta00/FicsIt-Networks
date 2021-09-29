@@ -5,6 +5,8 @@
 #include "FINModuleSystemModule.h"
 #include "FINModuleSystemPanel.h"
 #include "FGConstructDisqualifier.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
+#include "Framework/MultiBox/ToolMenuBase.h"
 
 AFINModuleSystemHolo::AFINModuleSystemHolo() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -39,6 +41,8 @@ AActor* AFINModuleSystemHolo::Construct(TArray<AActor*>& childs, FNetConstructio
 	
 	return a;
 }
+
+
 
 bool AFINModuleSystemHolo::checkSpace(FVector min, FVector max) {
 	if (min.X < 0 || min.X >= Snapped->PanelHeight || min.Y < 0 || min.Y >= Snapped->PanelWidth) return false;
@@ -139,4 +143,32 @@ void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit)
 
 void AFINModuleSystemHolo::CheckValidPlacement() {
 	if (!bIsValid) AddConstructDisqualifier(UFGCDInvalidPlacement::StaticClass());
+}
+
+void AFINModuleSystemHolo::BeginPlay() {
+	Super::BeginPlay();
+	//if(this->GetRecipe()->Getname)
+	FVector ActorOrigin = {0, 0, 0};
+	FVector ActorExtent = {0,0,0};
+	this->GetActorBounds(false, ActorOrigin, ActorExtent);
+	UStaticMesh* ArrowMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Components/Helpers/Arrow2.Arrow2"), NULL, LOAD_None, NULL);
+	auto comp = NewObject<UStaticMeshComponent>(this);
+	comp->RegisterComponent();
+	comp->SetMobility(EComponentMobility::Movable);
+	comp->SetStaticMesh(ArrowMesh);
+	comp->AttachToComponent(this->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+	comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	comp->SetVisibility(true);
+	comp->SetRelativeScale3D(FVector(0.5, 0.5, 0.5 ));
+	comp->SetRelativeRotation(FRotator(0.000000,90.000000,-90.000000));
+	//auto actor = Cast<AActor>(mBuildClass->GetDefaultObject());
+	UE_LOG(LogFicsItNetworks, Log, TEXT("Origin: %s"), *(ActorOrigin.ToString()));
+	UE_LOG(LogFicsItNetworks, Log, TEXT("Extent: %s"), *(ActorExtent.ToString()));
+	ActorOrigin-= this->GetActorLocation(); 
+	ActorOrigin.Z+= FMath::Abs(ActorExtent.Z) + 1;
+	ActorOrigin.X-= 2;
+	UE_LOG(LogFicsItNetworks, Log, TEXT("Origin local: %s"), *(ActorOrigin.ToString()));
+	//FVector ArrowLocation = {0, }
+	comp->SetRelativeLocation(ActorOrigin);
+
 }

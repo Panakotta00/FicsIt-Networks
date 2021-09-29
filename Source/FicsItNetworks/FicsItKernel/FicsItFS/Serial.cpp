@@ -59,18 +59,12 @@ FFINKernelSerialStream::~FFINKernelSerialStream() {}
 
 void FFINKernelSerialStream::write(std::string str) {
 	if (!(mode & CodersFileSystem::OUTPUT)) return;
-	buffer.append(str);
-}
-
-void FFINKernelSerialStream::flush() {
-	if (!(mode & CodersFileSystem::OUTPUT)) return;
 	FScopeLock Lock(&serial->Mutex);
-	serial->output << buffer;
+	serial->output << str;
 	serial->output.flush();
-	buffer = "";
 }
 
-std::string FFINKernelSerialStream::readChars(size_t chars) {
+std::string FFINKernelSerialStream::read(size_t chars) {
 	if (!(mode & CodersFileSystem::INPUT)) return "";
 	char* buf = new char[chars];
 	try {
@@ -85,37 +79,11 @@ std::string FFINKernelSerialStream::readChars(size_t chars) {
 	return s;
 }
 
-std::string FFINKernelSerialStream::readLine() {
-	if (!(mode & CodersFileSystem::INPUT)) return "";
-	std::string s;
-	std::getline(input, s);
-	input = std::stringstream(input.str().erase(0, input.tellg()));
-	return s;
-}
-
-std::string FFINKernelSerialStream::readAll() {
-	if (!(mode & CodersFileSystem::INPUT)) return "";
-	std::stringstream s;
-	s << input.rdbuf();
-	input = std::stringstream(input.str().erase(0, input.tellg()));
-	return s.str();
-}
-
-double FFINKernelSerialStream::readNumber() {
-	if (!(mode & CodersFileSystem::INPUT)) return 0.0;
-	double n = 0.0;
-	input >> n;
-	input = std::stringstream(input.str().erase(0, input.tellg()));
-	return n;
-}
-
 std::int64_t FFINKernelSerialStream::seek(std::string str, std::int64_t off) {
 	return 0;
 }
 
-void FFINKernelSerialStream::close() {
-	flush();
-}
+void FFINKernelSerialStream::close() {}
 
 bool FFINKernelSerialStream::isEOF() {
 	return input.eof();
