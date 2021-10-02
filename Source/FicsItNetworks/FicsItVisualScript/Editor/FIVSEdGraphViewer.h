@@ -37,6 +37,91 @@ public:
 	void DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
 };
 
+
+class FFIVSEdSelectionManager {
+public:
+	typedef UFIVSNode* T;
+	
+	DECLARE_DELEGATE_TwoParams(FFIVSEdSelectionChanged, T, bool)
+	FFIVSEdSelectionChanged OnSelectionChanged;
+	
+	void DeselectAll() {
+		for (UFIVSNode* Node : Selection) OnSelectionChanged.ExecuteIfBound(Node, false);
+		Selection.Empty();
+	}
+	
+	void SetSelection(const TArray<T>& InSelection) {
+		for (UFIVSNode* Node : Selection) OnSelectionChanged.ExecuteIfBound(Node, false);
+		Selection = InSelection;
+		for (UFIVSNode* Node : Selection) OnSelectionChanged.ExecuteIfBound(Node, true);
+	}
+
+	void SetSelected(T InObject, bool bInSelected) {
+		int Index = Selection.Find(InObject);
+		if (Index < 0) {
+			if (bInSelected) {
+				Selection.Add(InObject);
+				OnSelectionChanged.ExecuteIfBound(InObject, true);
+			}
+		} else {
+			if (!bInSelected) {
+				Selection.RemoveAt(Index);
+				OnSelectionChanged.ExecuteIfBound(InObject, false);
+			}
+		}
+	}
+
+	void Select(T InObject, const FInputEvent& InputEvent) {
+		Select(TArray<T>{InObject}, InputEvent, true);
+	}
+
+	void Select(const TArray<T>& InObjects, const FInputEvent& InputEvent, bool bSingleSelect = false) {
+		if (InputEvent.IsControlDown()) {
+			for (T Object : InObjects) SetSelected(Object, true);
+		} else if (InputEvent.IsShiftDown()) {
+			for (T Object : InObjects) SetSelected(Object, false);
+		} else {
+			if (!bSingleSelect || !Selection.Contains(InObjects[0])) DeselectAll();
+			for (T Object : InObjects) SetSelected(Object, true);
+		}
+	}
+	
+	const TArray<T>& GetSelection() { return Selection; }
+	
+private:
+	TArray<T> Selection;
+};
+
+class FFIVSEdSelectionBoxHandler {
+public:
+	void BeginDrag(FVector2D InStartPos) {
+		StartPos = EndPos = InStartPos;
+		bIsActive = true;
+	}
+
+	void UpdateDrag(FVector2D InEndPos) {
+		EndPos = InEndPos;
+	}
+
+	void EndDrag() {
+		bIsActive = false;
+	}
+
+	bool IsActive() const {
+		return bIsActive;
+	}
+
+	void GetRect(FVector2D& OutStartPos, FVector2D& OutEndPos) const {
+		OutStartPos = StartPos;
+		OutEndPos = EndPos;
+	}
+
+private:
+	bool bIsActive = false;
+	FVector2D StartPos;
+	FVector2D EndPos;
+};
+
 class SFIVSEdGraphViewer : public SPanel {
 	SLATE_BEGIN_ARGS(SFIVSEdGraphViewer) :
 		_Style(&FFIVSEdStyle::GetDefault()) {}
@@ -53,26 +138,12 @@ private:
 	TSlotlessChildren<SFIVSEdNodeViewer> Children;
 	TMap<UFIVSNode*, TSharedRef<SFIVSEdNodeViewer>> NodeToChild;
 
-	UFIVSNode* NodeUnderMouse = nullptr;
-	UFIVSPin* PinUnderMouse = nullptr;
-
 	bool bIsGraphDrag = false;
-	float GraphDragDelta;
+	float GraphDragDelta = 0;
 
-	bool bIsSelectionDrag = false;
-	FVector2D SelectionDragStart;
-	FVector2D SelectionDragEnd;
+	TArray<TSharedRef<SFIVSEdPinViewer>> DraggingPins;
+	FVector2D DraggingPinsEndpoint;
 	
-	TArray<UFIVSNode*> SelectedNodes;
-	
-	bool bIsNodeDrag = false;
-	TArray<FVector2D> NodeDragPosStart;
-	FVector2D NodeDragStart;
-
-	bool bIsPinDrag = false;
-	UFIVSPin* PinDragStart = nullptr;
-	FVector2D PinDragEnd;
-
 	TSharedPtr<FFIVSEdConnectionDrawer> ConnectionDrawer;
 
 	TSharedPtr<SFIVSEdActionSelection> ActiveActionSelection;
@@ -81,7 +152,12 @@ private:
 	FLinearColor GridColor = FColor::FromHex("0A0A0A");
 	FSlateColorBrush SelectionBrush = FSlateColorBrush(FLinearColor(1,1,1,0.1));
 
+	void OnSelectionChanged(UFIVSNode* InNode, bool bIsSelected);
+
 public:
+	FFIVSEdSelectionManager SelectionManager;
+	FFIVSEdSelectionBoxHandler SelectionBoxHandler;
+	
 	FVector2D Offset = FVector2D(0,0);
 	float Zoom = 1.0;
 	
@@ -98,11 +174,21 @@ public:
 	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) override;
 	virtual bool IsInteractable() const override;
 	virtual bool SupportsKeyboardFocus() const override;
 	virtual FChildren* GetChildren() override;
 	virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
 	// End SWidget
+
+	void BeginDragPin(TSharedRef<SFIVSEdPinViewer> PinViewer) {
+		DraggingPins.Add(PinViewer);
+	}
+
+	void EndDragPin(TSharedRef<SFIVSEdPinViewer> PinViewer) {
+		DraggingPins.Remove(PinViewer);
+	}
 
 	FDelegateHandle OnNodeChangedHandle;
 	void OnNodeChanged(int change, UFIVSNode* Node);
@@ -127,23 +213,25 @@ public:
 	 * @pragma[in]	Node
 	 */
 	void CreateNodeAsChild(UFIVSNode* Node);
-	/**
-	 * Selects the given node
-	 */
-	void Select(UFIVSNode* Node);
-
-	/**
-	 * Deselects the given node
-	 */
-	void Deselect(UFIVSNode* Node);
-
-	/**
-	 * Deselects all nodes.
-	 */
-	void DeselectAll();
 
 	/**
 	 * Converts the given local position to the position in the graph
 	 */
 	FVector2D LocalToGraph(const FVector2D Local);
+};
+
+class FFIVSEdSelectionBoxDragDrop : public FDragDropOperation {
+public:
+	DRAG_DROP_OPERATOR_TYPE(FFIVSEdSelectionBoxDragDrop, FDragDropOperation)
+	
+	FFIVSEdSelectionBoxDragDrop(FFIVSEdSelectionBoxHandler& SelectionBoxHandler, FVector2D StartPos) : SelectionBoxHandler(SelectionBoxHandler) {
+		SelectionBoxHandler.BeginDrag(StartPos);
+	}
+
+	virtual void OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent) override;
+
+	FFIVSEdSelectionBoxHandler& GetSelectionBoxHandler() { return SelectionBoxHandler; }
+	
+private:
+	FFIVSEdSelectionBoxHandler& SelectionBoxHandler;
 };

@@ -75,6 +75,11 @@ void FFIVSEdConnectionDrawer::DrawConnection(const FVector2D& Start, const FVect
 void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 	Style = InArgs._Style;
 	SetGraph(InArgs._Graph);
+	SelectionManager.OnSelectionChanged.BindRaw(this, &SFIVSEdGraphViewer::OnSelectionChanged);
+}
+
+void SFIVSEdGraphViewer::OnSelectionChanged(UFIVSNode* InNode, bool bIsSelected) {
+	NodeToChild[InNode]->bSelected = bIsSelected;
 }
 
 SFIVSEdGraphViewer::SFIVSEdGraphViewer() : Children(this) {
@@ -89,7 +94,7 @@ FVector2D SFIVSEdGraphViewer::ComputeDesiredSize(float) const {
 	return FVector2D(1000,1000);
 }
 
-int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
+int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	ConnectionDrawer->Reset();
 	int ret = SPanel::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId+2, InWidgetStyle, bParentEnabled);
 
@@ -138,21 +143,22 @@ int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 	}
 
 	// draw new creating connection
-	if (bIsPinDrag) {
-		TSharedRef<SFIVSEdPinViewer> PinWidget = NodeToChild[PinDragStart->ParentNode]->GetPinWidget(PinDragStart);
-		FVector2D StartLoc = GetCachedGeometry().AbsoluteToLocal(PinWidget->GetConnectionPoint());
-		FVector2D EndLoc = PinDragEnd;
-		if (PinDragStart->GetPinType() & FIVS_PIN_INPUT) {
-			EndLoc = StartLoc;
-			StartLoc = PinDragEnd;
+	for (TSharedRef<SFIVSEdPinViewer> DraggingPin : DraggingPins) {
+		FVector2D StartLoc = GetCachedGeometry().AbsoluteToLocal(DraggingPin->GetConnectionPoint());
+		FVector2D EndLoc = GetCachedGeometry().AbsoluteToLocal(DraggingPinsEndpoint);
+		if (DraggingPin->GetPin()->GetPinType() & FIVS_PIN_INPUT) {
+			Swap(EndLoc, StartLoc);
 		}
-		ConnectionDrawer->DrawConnection(StartLoc, EndLoc, PinWidget->GetPinColor().GetSpecifiedColor(), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId+100);
+		ConnectionDrawer->DrawConnection(StartLoc, EndLoc, DraggingPin->GetPinColor().GetSpecifiedColor(), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId+100);
 	}
-
+	
 	// Draw selection box
-	if (bIsSelectionDrag) {
-		FVector2D SelectStart = GetCachedGeometry().AbsoluteToLocal(SelectionDragStart);
-		FVector2D SelectEnd = GetCachedGeometry().AbsoluteToLocal(SelectionDragEnd);
+	if (SelectionBoxHandler.IsActive()) {
+		FVector2D SelectStart;
+		FVector2D SelectEnd;
+		SelectionBoxHandler.GetRect(SelectStart, SelectEnd);
+		SelectStart = GetCachedGeometry().AbsoluteToLocal(SelectStart);
+		SelectEnd = GetCachedGeometry().AbsoluteToLocal(SelectEnd);
 		FSlateDrawElement::MakeBox(OutDrawElements, LayerId+200, AllottedGeometry.ToPaintGeometry(SelectStart, SelectEnd - SelectStart), &SelectionBrush, ESlateDrawEffect::None, FLinearColor(1,1,1,0.1));
 	}
 	
@@ -160,8 +166,6 @@ int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 }
 
 FReply SFIVSEdGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
-	if (!MouseEvent.GetModifierKeys().IsShiftDown() && !SelectedNodes.Contains(NodeUnderMouse)) DeselectAll();
-
 	if (ConnectionDrawer->ConnectionUnderMouse.Key.IsValid() && MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)) {
 		TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>> Connection = ConnectionDrawer->ConnectionUnderMouse;
 		TSharedPtr<IMenu> MenuHandle;
@@ -175,55 +179,29 @@ FReply SFIVSEdGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const 
             })));
 		
 		FSlateApplication::Get().PushMenu(SharedThis(this), *MouseEvent.GetEventPath(), MenuBuilder.MakeWidget(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
-	} else if (NodeUnderMouse) {
-		if (PinUnderMouse && !MouseEvent.GetModifierKeys().IsControlDown()) {
-			bIsPinDrag = true;
-			PinDragStart = PinUnderMouse;
-			PinDragEnd = MouseEvent.GetScreenSpacePosition();
-			return FReply::Handled().CaptureMouse(AsShared());
-		} else {
-			bIsNodeDrag = true;
-			NodeDragStart = MouseEvent.GetScreenSpacePosition();
-			Select(NodeUnderMouse);
-			NodeDragPosStart.Empty();
-			for (UFIVSNode* Node : SelectedNodes) {
-				NodeDragPosStart.Add(Node->Pos);
-			}
-			return FReply::Handled().CaptureMouse(AsShared());
-		}
-	} else if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)) {
-		bIsSelectionDrag = true;
-		SelectionDragStart = SelectionDragEnd = MouseEvent.GetScreenSpacePosition();
-		return FReply::Handled().CaptureMouse(AsShared());
-	} else {
+	} else if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton) {
+		return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
+	} else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton) {
 		bIsGraphDrag = true;
 		GraphDragDelta = 0.0f;
 		return FReply::Handled().CaptureMouse(AsShared());
 	}
-	return FReply::Handled();
+	return FReply::Unhandled();
 }
 
 FReply SFIVSEdGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
-	if (bIsPinDrag) {
-		if (PinUnderMouse) {
-			bIsPinDrag = false;
-			PinDragStart->AddConnection(PinUnderMouse);
-		} else {
-			CreateActionSelectionMenu(*MouseEvent.GetEventPath(), MouseEvent.GetScreenSpacePosition(), [this](auto){ bIsPinDrag = false; }, FFINScriptNodeCreationContext(Graph, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())), PinDragStart));
-		}
-		return FReply::Handled().ReleaseMouseCapture();
-	} else if (bIsNodeDrag) {
-		bIsNodeDrag = false;
-		return FReply::Handled().ReleaseMouseCapture();
-	} else if (bIsSelectionDrag) {
-		bIsSelectionDrag = false;
-		return FReply::Handled().ReleaseMouseCapture();
-	} else if (bIsGraphDrag) {
+	if (bIsGraphDrag) {
 		bIsGraphDrag = false;
 		if (GraphDragDelta < 10 && Graph) {
 			CreateActionSelectionMenu(*MouseEvent.GetEventPath(), MouseEvent.GetScreenSpacePosition(), [this](auto){}, FFINScriptNodeCreationContext(Graph, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())), nullptr));
 		}
 		return FReply::Handled().ReleaseMouseCapture();
+	} else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton) {
+		CreateActionSelectionMenu(*MouseEvent.GetEventPath(), MouseEvent.GetScreenSpacePosition(), [this](auto){}, FFINScriptNodeCreationContext(Graph, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())), nullptr));
+		return FReply::Handled();
+	} else if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton) {
+		SelectionManager.DeselectAll();
+		return FReply::Handled();
 	}
 	return SPanel::OnMouseButtonUp(MyGeometry, MouseEvent);
 }
@@ -245,52 +223,9 @@ FReply SFIVSEdGraphViewer::OnMouseButtonDoubleClick(const FGeometry& InMyGeometr
 }
 
 FReply SFIVSEdGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
-	FArrangedChildren ArrangedChildren(EVisibility::Visible);
-	ArrangeChildren(MyGeometry, ArrangedChildren);
-	int ChildUnderMouseIndex = FindChildUnderPosition(ArrangedChildren, MouseEvent.GetScreenSpacePosition());
-	if (ChildUnderMouseIndex >= 0) {
-		NodeUnderMouse = Children[ChildUnderMouseIndex]->GetNode();
-		PinUnderMouse = NodeToChild[NodeUnderMouse]->GetPinUnderMouse();
-	} else {
-		NodeUnderMouse = nullptr;
-		PinUnderMouse = nullptr;
-	}
 	if (ConnectionDrawer) ConnectionDrawer->LastMousePosition = MouseEvent.GetScreenSpacePosition();
-	if (bIsPinDrag && !ActiveActionSelection.IsValid()) {
-		PinDragEnd = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
-		return FReply::Handled();
-	}
-	if (bIsNodeDrag) {
-		for (int i = 0; i < SelectedNodes.Num(); ++i) {
-			bool bSnapToGrid = !MouseEvent.GetModifierKeys().IsControlDown();
-			FVector2D MoveOffset = LocalToGraph(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())) - LocalToGraph(MyGeometry.AbsoluteToLocal(NodeDragStart));
-			if (bSnapToGrid) MoveOffset = FVector2D(FMath::RoundToFloat(MoveOffset.X/10.0)*10.0, FMath::RoundToFloat(MoveOffset.Y/10.0)*10.0);
-			UFIVSNode* Node = SelectedNodes[i];
-			Node->Pos = NodeDragPosStart[i] + MoveOffset;
-			if (bSnapToGrid && SelectedNodes.Num() == 1 && !MouseEvent.GetModifierKeys().IsShiftDown()) {
-				FVector2D NPos = Node->Pos / 10.0;
-				Node->Pos = FVector2D(FMath::RoundToFloat(NPos.X), FMath::RoundToFloat(NPos.Y))*10.0;
-			}
-		}
-		return FReply::Handled();
-	}
-	if (bIsSelectionDrag) {
-		if (!FSlateApplication::Get().GetModifierKeys().IsShiftDown()) DeselectAll();
-		SelectionDragEnd = MouseEvent.GetScreenSpacePosition();
-		FVector2D LocalStart = GetCachedGeometry().AbsoluteToLocal(SelectionDragStart);
-		FVector2D LocalEnd = GetCachedGeometry().AbsoluteToLocal(SelectionDragEnd);
-		FSlateRect SelectionRect = FSlateRect(FVector2D(FMath::Min(LocalStart.X, LocalEnd.X), FMath::Min(LocalStart.Y, LocalEnd.Y)), FVector2D(FMath::Max(LocalStart.X, LocalEnd.X), FMath::Max(LocalStart.Y, LocalEnd.Y)));
-		if (Graph) for (UFIVSNode* Node : Graph->GetNodes()) {
-			TSharedRef<SFIVSEdNodeViewer> NodeW = NodeToChild[Node];
-			FSlateRect NodeRect = FSlateRect(GetCachedGeometry().AbsoluteToLocal(NodeW->GetCachedGeometry().GetAbsolutePosition()), GetCachedGeometry().AbsoluteToLocal(NodeW->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D(1,1))));
-			if (Node && FSlateRect::DoRectanglesIntersect(NodeRect, SelectionRect)) {
-				Select(Node);
-			}
-		}
-		return FReply::Handled();
-	}
 	if (bIsGraphDrag) {
-		Offset += LocalToGraph(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition())) - LocalToGraph(MyGeometry.AbsoluteToLocal(MouseEvent.GetLastScreenSpacePosition()));
+		Offset += (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()) - MyGeometry.AbsoluteToLocal(MouseEvent.GetLastScreenSpacePosition())) / Zoom;
 		GraphDragDelta += MouseEvent.GetCursorDelta().Size();
 		return FReply::Handled();
 	}
@@ -310,8 +245,8 @@ FReply SFIVSEdGraphViewer::OnMouseWheel(const FGeometry& MyGeometry, const FPoin
 
 FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	if (InKeyEvent.GetKey() == EKeys::Delete) {
-		if (SelectedNodes.Num() > 0) {
-			for (UFIVSNode* Node : SelectedNodes) {
+		if (SelectionManager.GetSelection().Num() > 0) {
+			for (UFIVSNode* Node : SelectionManager.GetSelection()) {
 				Graph->RemoveNode(Node);
 			}
 		} else if (ConnectionDrawer && ConnectionDrawer->ConnectionUnderMouse.Key) {
@@ -322,6 +257,50 @@ FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEven
 }
 FReply SFIVSEdGraphViewer::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	return SPanel::OnKeyUp(MyGeometry, InKeyEvent);
+}
+
+FReply SFIVSEdGraphViewer::OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)) {
+		return FReply::Handled().BeginDragDrop(MakeShared<FFIVSEdSelectionBoxDragDrop>(SelectionBoxHandler, MouseEvent.GetScreenSpacePosition()));
+	}
+	return FReply::Unhandled();
+}
+
+FReply SFIVSEdGraphViewer::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) {
+	TSharedPtr<FDragDropOperation> Operation = DragDropEvent.GetOperation();
+	if (Operation->IsOfType<FFIVSEdPinConnectDragDrop>()) {
+		DraggingPinsEndpoint = DragDropEvent.GetScreenSpacePosition();
+		return FReply::Handled();
+	}
+	if (Operation->IsOfType<FFIVSEdSelectionBoxDragDrop>()) {
+		TSharedPtr<FFIVSEdSelectionBoxDragDrop> SelectionBox = DragDropEvent.GetOperationAs<FFIVSEdSelectionBoxDragDrop>();
+		FFIVSEdSelectionBoxHandler& BoxHandler = SelectionBox->GetSelectionBoxHandler();
+		BoxHandler.UpdateDrag(DragDropEvent.GetScreenSpacePosition());
+		
+		FVector2D LocalStart;
+		FVector2D LocalEnd;
+		BoxHandler.GetRect(LocalStart, LocalEnd);
+		LocalStart = GetCachedGeometry().AbsoluteToLocal(LocalStart);
+		LocalEnd = GetCachedGeometry().AbsoluteToLocal(LocalEnd);
+
+		FSlateRect SelectionRect = FSlateRect(FVector2D(FMath::Min(LocalStart.X, LocalEnd.X), FMath::Min(LocalStart.Y, LocalEnd.Y)), FVector2D(FMath::Max(LocalStart.X, LocalEnd.X), FMath::Max(LocalStart.Y, LocalEnd.Y)));
+		
+		if (Graph) {
+			TArray<UFIVSNode*> SelectedNodes;
+			for (UFIVSNode* Node : Graph->GetNodes()) {
+				TSharedRef<SFIVSEdNodeViewer> NodeW = NodeToChild[Node];
+
+				FSlateRect NodeRect = FSlateRect(GetCachedGeometry().AbsoluteToLocal(NodeW->GetCachedGeometry().GetAbsolutePosition()), GetCachedGeometry().AbsoluteToLocal(NodeW->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D(1,1))));
+
+				if (Node && FSlateRect::DoRectanglesIntersect(NodeRect, SelectionRect)) {
+					SelectedNodes.Add(Node);
+				}
+			}
+			SelectionManager.Select(SelectedNodes, DragDropEvent);
+		}
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
 }
 
 bool SFIVSEdGraphViewer::IsInteractable() const {
@@ -395,32 +374,16 @@ void SFIVSEdGraphViewer::SetGraph(UFIVSGraph* NewGraph) {
 }
 
 void SFIVSEdGraphViewer::CreateNodeAsChild(UFIVSNode* Node) {
-	TSharedRef<SFIVSEdNodeViewer> Child = SNew(SFIVSEdNodeViewer)
-	.Style(Style)
-    .Node(Node);
+	TSharedRef<SFIVSEdNodeViewer> Child = SNew(SFIVSEdNodeViewer, this, Node)
+	.Style(Style);
 	Children.Add(Child);
 	NodeToChild.Add(Node, Child);
 }
 
-void SFIVSEdGraphViewer::Select(UFIVSNode* Node) {
-	if (SelectedNodes.Contains(Node)) return;
-	SelectedNodes.Add(Node);
-	NodeToChild[Node]->bSelected = true;
-}
-
-void SFIVSEdGraphViewer::Deselect(UFIVSNode* Node) {
-	if (SelectedNodes.Remove(Node)) {
-		NodeToChild[Node]->bSelected = false;
-	}
-}
-
-void SFIVSEdGraphViewer::DeselectAll() {
-	TArray<UFIVSNode*> Nodes = SelectedNodes;
-	for (UFIVSNode* Node : Nodes) {
-		Deselect(Node);
-	}
-}
-
 FVector2D SFIVSEdGraphViewer::LocalToGraph(const FVector2D Local) {
 	return (Local / Zoom) - Offset;
+}
+
+void FFIVSEdSelectionBoxDragDrop::OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent) {
+	SelectionBoxHandler.EndDrag();
 }

@@ -1,14 +1,17 @@
 ﻿#include "FIVSEdNodeViewer.h"
 
-void SFIVSEdPinViewer::Construct(const FArguments& InArgs) {
+#include "FIVSEdGraphViewer.h"
+
+void SFIVSEdPinViewer::Construct(const FArguments& InArgs, SFIVSEdNodeViewer* InNodeViewer, UFIVSPin* InPin) {
 	Style = InArgs._Style;
-	SetPin(InArgs._Pin);
+	NodeViewer = InNodeViewer;
+	SetPin(InPin);
 }
 
 SFIVSEdPinViewer::SFIVSEdPinViewer() {}
 
 FReply SFIVSEdPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
-	if (!MouseEvent.GetModifierKeys().IsControlDown() && MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)) {
+	if (!MouseEvent.GetModifierKeys().IsControlDown() && MouseEvent.GetEffectingButton() == EKeys::RightMouseButton) {
 		TSharedPtr<IMenu> MenuHandle;
 		FMenuBuilder MenuBuilder(true, NULL);
 		MenuBuilder.AddMenuEntry(
@@ -23,7 +26,21 @@ FReply SFIVSEdPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FP
 		FSlateApplication::Get().PushMenu(SharedThis(this), *MouseEvent.GetEventPath(), MenuBuilder.MakeWidget(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
 		return FReply::Handled();
 	}
-	return FReply::Unhandled();
+	return FReply::Handled().DetectDrag(SharedThis(this), MouseEvent.GetEffectingButton());
+}
+
+FReply SFIVSEdPinViewer::OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	TSharedRef<FFIVSEdPinConnectDragDrop> DragDropOperation = MakeShared<FFIVSEdPinConnectDragDrop>(SharedThis(this));
+	return FReply::Handled().BeginDragDrop(DragDropOperation);
+}
+
+FReply SFIVSEdPinViewer::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) {
+	TSharedPtr<FFIVSEdPinConnectDragDrop> Operator = DragDropEvent.GetOperationAs<FFIVSEdPinConnectDragDrop>();
+	if (Operator.IsValid()) {
+		Operator->GetPinViewer()->GetPin()->AddConnection(GetPin());
+		return FReply::Handled().EndDragDrop();
+	}
+	return SCompoundWidget::OnDrop(MyGeometry, DragDropEvent);
 }
 
 FSlateColor SFIVSEdPinViewer::GetPinColor() const {
@@ -135,22 +152,43 @@ FVector2D SFIVSEdPinViewer::GetConnectionPoint() const {
 	return FVector2D();
 }
 
-void SFIVSEdNodeViewer::Construct(const FArguments& InArgs) {
+FFIVSEdPinConnectDragDrop::FFIVSEdPinConnectDragDrop(TSharedRef<SFIVSEdPinViewer> InPin) : Pin(InPin) {
+	Pin->GetNodeViewer()->GetGraphViewer()->BeginDragPin(Pin);
+}
+
+void FFIVSEdPinConnectDragDrop::OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent) {
+	FDragDropOperation::OnDrop(bDropWasHandled, MouseEvent);
+	Pin->GetNodeViewer()->GetGraphViewer()->EndDragPin(Pin);
+}
+
+void SFIVSEdNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraphViewer* InGraphViewer, UFIVSNode* InNode) {
 	Style = InArgs._Style;
-	SetNode(InArgs._Node.Get());
+	SetNode(InNode);
+	GraphViewer = InGraphViewer;
 }
 
 SFIVSEdNodeViewer::SFIVSEdNodeViewer() {}
 
-FReply SFIVSEdNodeViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
-	PinUnderMouse = nullptr;
-	for (TSharedRef<SFIVSEdPinViewer> Pin : PinWidgets) {
-		if (Pin->GetCachedGeometry().IsUnderLocation(MouseEvent.GetScreenSpacePosition())) {
-			PinUnderMouse = Pin->GetPin();
-			break;
-		}
+FReply SFIVSEdNodeViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton) {
+		GetGraphViewer()->SelectionManager.Select(Node, MouseEvent);
+		return FReply::Handled().DetectDrag(AsShared(), EKeys::LeftMouseButton);
 	}
-	
+	return FReply::Handled();
+}
+
+FReply SFIVSEdNodeViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	return FReply::Handled();
+}
+
+FReply SFIVSEdNodeViewer::OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)) {
+		return FReply::Handled().BeginDragDrop(MakeShared<FFIVSEdNodeDragDrop>(SharedThis(this)));
+	}
+	return FReply::Unhandled();
+}
+
+FReply SFIVSEdNodeViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	return FReply::Unhandled();
 }
 
@@ -203,18 +241,16 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
 
 		for (UFIVSPin* Pin : newNode->GetNodePins()) {
 			if (Pin->GetPinType() & FIVS_PIN_INPUT) {
-				TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer)
-				.Style(Style)
-                .Pin(Pin);
+				TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)
+				.Style(Style);
 				PinWidgets.Add(PinWidget);
 				PinToWidget.Add(Pin, PinWidget);
 				InputPinBox->AddSlot()[
                     PinWidget
                 ];
 			} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
-				TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer)
-				.Style(Style)
-                .Pin(Pin);
+				TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)
+				.Style(Style);
 				PinWidgets.Add(PinWidget);
 				PinToWidget.Add(Pin, PinWidget);
 				OutputPinBox->AddSlot()[
@@ -236,9 +272,8 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
                 .BorderImage(&NodeBrush)
                 .Padding(5)
                 .Content()[
-					SAssignNew(PinWidget, SFIVSEdPinViewer)
+					SAssignNew(PinWidget, SFIVSEdPinViewer, this, Pin)
 					.Style(Style)
-					.Pin(Pin)
                 ]
             ]
         ];
@@ -259,10 +294,18 @@ const TArray<TSharedRef<SFIVSEdPinViewer>>& SFIVSEdNodeViewer::GetPinWidgets() {
 	return PinWidgets;
 }
 
-UFIVSPin* SFIVSEdNodeViewer::GetPinUnderMouse() {
-	return PinUnderMouse;
-}
-
 TSharedRef<SFIVSEdPinViewer> SFIVSEdNodeViewer::GetPinWidget(UFIVSPin* Pin) {
 	return PinToWidget[Pin];
 }
+
+FFIVSEdNodeDragDrop::FFIVSEdNodeDragDrop(TSharedRef<SFIVSEdNodeViewer> InNodeViewer) : NodeViewer(InNodeViewer) {}
+
+void FFIVSEdNodeDragDrop::OnDragged(const FDragDropEvent& DragDropEvent) {
+	SFIVSEdGraphViewer* GraphViewer = NodeViewer->GetGraphViewer();
+	FVector2D StartPos = GraphViewer->LocalToGraph(GraphViewer->GetCachedGeometry().AbsoluteToLocal(DragDropEvent.GetLastScreenSpacePosition()));
+	FVector2D EndPos = GraphViewer->LocalToGraph(GraphViewer->GetCachedGeometry().AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition()));
+	FVector2D Offset = EndPos - StartPos;
+	for (UFIVSNode* Node : GraphViewer->SelectionManager.GetSelection()) {
+		Node->Pos += Offset;
+	}
+ }
