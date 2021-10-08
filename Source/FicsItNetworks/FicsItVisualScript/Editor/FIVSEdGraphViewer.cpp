@@ -303,6 +303,18 @@ FReply SFIVSEdGraphViewer::OnDragOver(const FGeometry& MyGeometry, const FDragDr
 	return FReply::Unhandled();
 }
 
+FReply SFIVSEdGraphViewer::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) {
+	TSharedPtr<FFIVSEdPinConnectDragDrop> PinConnect = DragDropEvent.GetOperationAs<FFIVSEdPinConnectDragDrop>();
+	if (PinConnect.IsValid()) {
+		int UserIndex = DragDropEvent.GetUserIndex();
+		CreateActionSelectionMenu(*DragDropEvent.GetEventPath(), DragDropEvent.GetScreenSpacePosition(), [this, UserIndex](auto) {
+			FSlateApplication::Get().GetUser(UserIndex)->CancelDragDrop();
+		}, FFINScriptNodeCreationContext(Graph, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition())), PinConnect->GetPinViewer()->GetPin()));
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
+}
+
 bool SFIVSEdGraphViewer::IsInteractable() const {
 	return true;
 }
@@ -338,6 +350,7 @@ TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPat
     for (TTuple<UClass*, UFINClass*> Clazz : FFINReflection::Get()->GetClasses()) {
     	Entries.Add(MakeShared<FFIVSEdActionSelectionTypeCategory>(Clazz.Value, Context));
     }
+	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeBranch::StaticClass(), Context));
     TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection).OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFIVSEdActionSelectionAction>& Action) {
 		OnExecute(Action);
     	ActiveActionSelection = nullptr;
