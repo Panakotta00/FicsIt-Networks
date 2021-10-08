@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "SlateBasics.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSGenericNode.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
 #include "FicsItNetworks/Reflection/FINFunction.h"
 #include "FicsItNetworks/Reflection/FINStruct.h"
@@ -139,6 +140,29 @@ private:
 
 public:
 	FFIVSEdActionSelectionFuncAction(UFINFunction* Func, const FFINScriptNodeCreationContext& Context) : Func(Func), Context(Context) {}
+
+	// Begin FFINScriptActionSelectionEntry
+	virtual TSharedRef<SWidget> GetTreeWidget() override;
+	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GenerateCache() override { return TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>(); }
+	virtual FString GetFilterText() const override;
+	virtual void OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) override;
+	virtual void ResetFilter() override;
+	// End FFINScriptActionSelectionEntry
+
+	// Begin FFINScriptActionSelectionAction
+	virtual void ExecuteAction() override;
+	// End FFINScriptActionSelectionAction
+};
+
+struct FFIVSEdActionSelectionGenericAction : FFIVSEdActionSelectionAction {
+private:
+	TSubclassOf<UFIVSGenericNode> Generic = nullptr;
+	FString LastFilter = "";
+
+	FFINScriptNodeCreationContext Context;
+
+public:
+	FFIVSEdActionSelectionGenericAction(TSubclassOf<UFIVSGenericNode> Generic, const FFINScriptNodeCreationContext& Context) : Generic(Generic), Context(Context) {}
 
 	// Begin FFINScriptActionSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;

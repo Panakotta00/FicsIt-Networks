@@ -141,6 +141,49 @@ void FFIVSEdActionSelectionFuncAction::ExecuteAction() {
 	Context.Graph->AddNode(Node);
 }
 
+
+TSharedRef<SWidget> FFIVSEdActionSelectionGenericAction::GetTreeWidget() {
+	return SNew(SBorder)
+	.BorderImage_Lambda([this]() {
+		return bSelected ? &SelectedBrush : &UnselectedBrush;
+	})
+	.Content()[
+		SNew(STextBlock)
+		.Text_Lambda([this]() {
+			return FText::FromString(GetDefault<UFIVSGenericNode>(Generic)->GetNodeName());
+		})
+		.HighlightText_Lambda([this](){ return FText::FromString(LastFilter); })
+		.HighlightColor(FLinearColor(FColor::Yellow))
+		.HighlightShape(&HighlightBrush)
+	];
+}
+
+FString FFIVSEdActionSelectionGenericAction::GetFilterText() const {
+	return GetDefault<UFIVSGenericNode>(Generic)->GetNodeName();
+}
+
+void FFIVSEdActionSelectionGenericAction::OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) {
+	FFIVSEdActionSelectionTextFilter* TextFilter = dynamic_cast<FFIVSEdActionSelectionTextFilter*>(Filter);
+	if (TextFilter) LastFilter = TextFilter->GetFilterText();
+}
+
+void FFIVSEdActionSelectionGenericAction::ResetFilter() {
+	FFIVSEdActionSelectionAction::ResetFilter();
+	LastFilter = "";
+}
+
+void FFIVSEdActionSelectionGenericAction::ExecuteAction() {
+	UFIVSGenericNode* Node = NewObject<UFIVSGenericNode>(GetTransientPackage(), Generic);
+	Node->Pos = Context.CreationLocation;
+	for (UFIVSPin* Pin : Node->GetNodePins()) {
+		if (Context.Pin && Pin->CanConnect(Context.Pin)) {
+			Pin->AddConnection(Context.Pin);
+			break;
+		}
+	}
+	Context.Graph->AddNode(Node);
+}
+
 TSharedRef<SWidget> FFIVSEdActionSelectionTypeCategory::GetTreeWidget() {
 	return SNew(STextBlock)
 	.Text_Lambda([this]() {

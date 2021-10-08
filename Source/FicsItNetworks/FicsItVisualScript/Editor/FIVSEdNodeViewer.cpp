@@ -1,6 +1,7 @@
 ﻿#include "FIVSEdNodeViewer.h"
 
 #include "FIVSEdGraphViewer.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSGenericNode.h"
 
 void SFIVSEdPinViewer::Construct(const FArguments& InArgs, SFIVSEdNodeViewer* InNodeViewer, UFIVSPin* InPin) {
 	Style = InArgs._Style;
@@ -200,7 +201,10 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
 
 	Node = newNode;
 
-	if (Node && Node->IsA<UFIVSFuncNode>()) {
+	if (Node && (Node->IsA<UFIVSFuncNode>() || Node->IsA<UFIVSGenericNode>())) {
+		FString Name;
+		if (Node->IsA<UFIVSFuncNode>()) Name = Cast<UFIVSFuncNode>(Node)->GetNodeName();
+		else Name = Cast<UFIVSGenericNode>(Node)->GetNodeName();
 		ChildSlot[
             SNew(SBorder)
             .Padding(1)
@@ -221,8 +225,8 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
                         .Content()
                         [
                             SNew(STextBlock)
-                            .Text_Lambda([this]() {
-                                return FText::FromString(Cast<UFIVSFuncNode>(Node)->GetNodeName());
+                            .Text_Lambda([this, Name]() {
+                                return FText::FromString(Name);
                             })
                         ]
                     ]
