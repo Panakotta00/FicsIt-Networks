@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 #include "FINBase.h"
 #include "FINExecutionContext.h"
-#include "FicsItNetworks/Network/FINAnyNetworkValue.h"
 #include "FicsItNetworks/Network/FINNetworkValues.h"
+#include "FicsItNetworks/Network/FINAnyNetworkValue.h"
 #include "FINProperty.generated.h"
 
 UENUM(BlueprintType)

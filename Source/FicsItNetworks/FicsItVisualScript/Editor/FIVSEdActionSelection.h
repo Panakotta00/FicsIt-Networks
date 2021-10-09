@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "SlateBasics.h"
-#include "FicsItNetworks/FicsItVisualScript/Script/FIVSGenericNode.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSScriptNode.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
 #include "FicsItNetworks/Reflection/FINFunction.h"
 #include "FicsItNetworks/Reflection/FINStruct.h"
@@ -154,15 +154,20 @@ public:
 	// End FFINScriptActionSelectionAction
 };
 
+DECLARE_DELEGATE_OneParam(FFIVSEdActionSelectionGenericActionInit, UFIVSScriptNode*)
+
 struct FFIVSEdActionSelectionGenericAction : FFIVSEdActionSelectionAction {
 private:
-	TSubclassOf<UFIVSGenericNode> Generic = nullptr;
+	TSubclassOf<UFIVSScriptNode> ScriptNode = nullptr;
 	FString LastFilter = "";
 
 	FFINScriptNodeCreationContext Context;
 
+
 public:
-	FFIVSEdActionSelectionGenericAction(TSubclassOf<UFIVSGenericNode> Generic, const FFINScriptNodeCreationContext& Context) : Generic(Generic), Context(Context) {}
+	FFIVSEdActionSelectionGenericActionInit Init;
+	
+	FFIVSEdActionSelectionGenericAction(TSubclassOf<UFIVSScriptNode> ScriptNode, const FFINScriptNodeCreationContext& Context) : ScriptNode(ScriptNode), Context(Context) {}
 
 	// Begin FFINScriptActionSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;

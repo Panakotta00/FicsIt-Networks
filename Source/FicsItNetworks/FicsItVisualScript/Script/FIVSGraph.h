@@ -16,7 +16,7 @@ UCLASS(BlueprintType)
 class UFIVSGraph : public UObject {
 	GENERATED_BODY()
 private:
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TArray<UFIVSNode*> Nodes;
 
 public:

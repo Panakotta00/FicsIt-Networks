@@ -20,9 +20,6 @@ protected:
 	UPROPERTY()
 	UFINKernelSystem* Kernel = nullptr;
 	
-	UPROPERTY(SaveGame)
-	bool bTest = false;
-	
 public:
 	FString DebugInfo;
 	

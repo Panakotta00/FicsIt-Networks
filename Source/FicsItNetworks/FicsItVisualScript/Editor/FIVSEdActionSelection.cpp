@@ -129,9 +129,10 @@ void FFIVSEdActionSelectionFuncAction::ResetFilter() {
 }
 
 void FFIVSEdActionSelectionFuncAction::ExecuteAction() {
-	UFIVSReflectedFuncNode* Node = NewObject<UFIVSReflectedFuncNode>();
+	UFIVSNodeCallFunction* Node = NewObject<UFIVSNodeCallFunction>(Context.Graph);
 	Node->Pos = Context.CreationLocation;
 	Node->SetFunction(Func);
+	Node->InitPins();
 	for (UFIVSPin* Pin : Node->GetNodePins()) {
 		if (Context.Pin && Pin->CanConnect(Context.Pin)) {
 			Pin->AddConnection(Context.Pin);
@@ -150,7 +151,7 @@ TSharedRef<SWidget> FFIVSEdActionSelectionGenericAction::GetTreeWidget() {
 	.Content()[
 		SNew(STextBlock)
 		.Text_Lambda([this]() {
-			return FText::FromString(GetDefault<UFIVSGenericNode>(Generic)->GetNodeName());
+			return FText::FromString(GetFilterText());
 		})
 		.HighlightText_Lambda([this](){ return FText::FromString(LastFilter); })
 		.HighlightColor(FLinearColor(FColor::Yellow))
@@ -159,7 +160,9 @@ TSharedRef<SWidget> FFIVSEdActionSelectionGenericAction::GetTreeWidget() {
 }
 
 FString FFIVSEdActionSelectionGenericAction::GetFilterText() const {
-	return GetDefault<UFIVSGenericNode>(Generic)->GetNodeName();
+	UFIVSScriptNode* Node = const_cast<UFIVSScriptNode*>(GetDefault<UFIVSScriptNode>(ScriptNode));
+	Init.ExecuteIfBound(Node);
+	return Node->GetNodeName();
 }
 
 void FFIVSEdActionSelectionGenericAction::OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) {
@@ -173,8 +176,10 @@ void FFIVSEdActionSelectionGenericAction::ResetFilter() {
 }
 
 void FFIVSEdActionSelectionGenericAction::ExecuteAction() {
-	UFIVSGenericNode* Node = NewObject<UFIVSGenericNode>(GetTransientPackage(), Generic);
+	UFIVSScriptNode* Node = NewObject<UFIVSScriptNode>(Context.Graph, ScriptNode);
 	Node->Pos = Context.CreationLocation;
+	Init.ExecuteIfBound(Node);
+	Node->InitPins();
 	for (UFIVSPin* Pin : Node->GetNodePins()) {
 		if (Context.Pin && Pin->CanConnect(Context.Pin)) {
 			Pin->AddConnection(Context.Pin);
@@ -199,6 +204,26 @@ TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> FFIVSEdActionSelectionTypeCatego
 	TArray<UFINFunction*> Functions = Type->GetFunctions(false);
 	for (UFINFunction* Function : Functions) {
 		Childs.Add(MakeShared<FFIVSEdActionSelectionFuncAction>(Function, Context));
+	}
+	TArray<UFINProperty*> Properties = Type->GetProperties(false);
+	for (UFINProperty* Property : Properties) {
+		EFINRepPropertyFlags Flags = Property->GetPropertyFlags();
+		if (Flags & FIN_Prop_Attrib) {
+			TSharedRef<FFIVSEdActionSelectionGenericAction> GetAction = MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeGetProperty::StaticClass(), Context);
+			GetAction->Init.BindLambda([Property](UFIVSNode* Node) {
+				UFIVSNodeGetProperty* GetNode = Cast<UFIVSNodeGetProperty>(Node);
+				GetNode->SetProperty(Property);
+			});
+			Childs.Add(GetAction);
+			if (!(Flags & FIN_Prop_ReadOnly)) {
+				TSharedRef<FFIVSEdActionSelectionGenericAction> SetAction = MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeSetProperty::StaticClass(), Context);
+				SetAction->Init.BindLambda([Property](UFIVSNode* Node) {
+					UFIVSNodeSetProperty* SetNode = Cast<UFIVSNodeSetProperty>(Node);
+					SetNode->SetProperty(Property);
+				});
+				Childs.Add(SetAction);
+			}
+		}
 	}
 	return Childs;
 }

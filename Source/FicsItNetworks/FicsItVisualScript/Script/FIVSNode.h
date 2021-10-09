@@ -28,11 +28,33 @@ class UFIVSPin : public UObject {
 protected:
 	UPROPERTY(SaveGame)
 	TArray<UFIVSPin*> ConnectedPins;
+
+	UPROPERTY(SaveGame)
+	FFINAnyNetworkValue Literal;
 	
 public:
 	UPROPERTY()
 	UFIVSNode* ParentNode = nullptr;
 
+	/**
+	 * Returns the literal value of the given pin.
+	 * The literal value will be used if pin has no connection to any other pins.
+	 */
+	FFINAnyNetworkValue GetLiteral() {
+		if (Literal.GetType() != GetPinDataType()) {
+			SetLiteral(FFINAnyNetworkValue(GetPinDataType()));
+		}
+		return Literal;
+	}
+
+	/**
+	 * Allows to set/change the literal of the pin.
+	 * For more info on literals, see GetLiteral()
+	 */
+	void SetLiteral(FFINAnyNetworkValue InLiteral) {
+		if (InLiteral.GetType() == GetPinDataType()) Literal = InLiteral;
+	}
+	
 	/**
 	 * Returns the pin type
 	 */
@@ -69,6 +91,17 @@ public:
 	void RemoveConnection(UFIVSPin* Pin);
 
 	void GetAllConnected(TArray<UFIVSPin*>& Searches);
+	TArray<UFIVSPin*> GetAllConnected() {
+		TArray<UFIVSPin*> Connected;
+		GetAllConnected(Connected);
+		return Connected;
+	}
+
+	/**
+	 * Trys to find the data-source for the network of pins this pin is connected to,
+	 * or in the case of exec pins, trys to find the next Exec-Pin.
+	 * */
+	UFIVSPin* FindConnected();
 
 	/**
 	 * Removes all connections of this pin
@@ -108,26 +141,6 @@ public:
 	// End UFINScriptPin
 };
 
-UCLASS()
-class UFIVSReflectionPin : public UFIVSPin {
-	GENERATED_BODY()
-protected:
-	UPROPERTY()
-	UFINProperty* Property = nullptr;
-
-public:	
-	// Begin UFINScriptPin
-	virtual EFIVSPinType GetPinType() override;
-	virtual EFINNetworkValueType GetPinDataType() override;
-	virtual FText GetName() override;
-	// end UFINScriptPin
-
-	/**
-	 * changes the stored property to the given new one
-	 */
-	void SetProperty(UFINProperty* Prop);
-};
-
 /**
  * Notifies if the pin list of the node has changed.
  * Param1: type of change (0 = pin added, 1 = pin removed)
@@ -161,7 +174,7 @@ class UFIVSRerouteNode : public UFIVSNode {
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	UFIVSPin* Pin = nullptr;
 
 public:
@@ -170,77 +183,4 @@ public:
 	// Begin UFINScriptNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override;
 	// End UFINScriptNode
-};
-
-UCLASS()
-class UFIVSFuncNode : public UFIVSNode {
-	GENERATED_BODY()
-	
-private:
-	UPROPERTY(SaveGame)
-	TArray<UFIVSPin*> Pins;
-
-protected:
-	/**
-	* Adds the given pin to the node
-	*
-	* @param[in]	Pin		the pin you want to add
-	* @return	the index of the pin in the pin array
-	*/
-	int AddNodePin(UFIVSPin* Pin);
-
-	/**
-	* Removes the pin at the given index from the node
-	*
-	* @param[in]	index	the index of the pin
-	*/
-	void RemoveNodePin(int index);
-	
-public:
-	// Begin UFINScriptNode
-	virtual TArray<UFIVSPin*> GetNodePins() const override;
-	// End UFINScriptNode
-
-	/**
-	 * Returns the header name of that function node
-	 */
-	virtual FString GetNodeName() const { return "Undefined"; }
-};
-
-UCLASS()
-class UFIVSGenericFuncNode : public UFIVSFuncNode {
-	GENERATED_BODY()
-public:
-	FString Name;
-
-	// Begin UFINScriptFuncNode
-	virtual FString GetNodeName() const override { return Name; }
-	// End UFINScriptFuncNode
-
-	int AddPin(UFIVSPin* Pin) { return AddNodePin(Pin); }
-	void RemovePin(int index) { RemoveNodePin(index); };
-};
-
-UCLASS()
-class UFIVSReflectedFuncNode : public UFIVSFuncNode {
-	GENERATED_BODY()
-private:
-	UPROPERTY()
-	UFINFunction* Function = nullptr;
-
-public:
-	// Begin UFINScriptFuncNode
-	virtual FString GetNodeName() const override;
-	// End UFINScriptFuncNode
-
-	/**
-	 * Sets the function this nodes uses.
-	 * Recreates all pins.
-	 */
-	void SetFunction(UFINFunction* Function);
-
-	/**
-	 * Returns the function
-	 */
-	UFINFunction* GetFunction() const;
 };

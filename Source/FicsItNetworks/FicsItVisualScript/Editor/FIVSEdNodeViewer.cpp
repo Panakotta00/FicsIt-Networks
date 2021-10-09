@@ -1,7 +1,7 @@
 ﻿#include "FIVSEdNodeViewer.h"
 
 #include "FIVSEdGraphViewer.h"
-#include "FicsItNetworks/FicsItVisualScript/Script/FIVSGenericNode.h"
+#include "Widgets/Input/SNumericEntryBox.h"
 
 void SFIVSEdPinViewer::Construct(const FArguments& InArgs, SFIVSEdNodeViewer* InNodeViewer, UFIVSPin* InPin) {
 	Style = InArgs._Style;
@@ -89,32 +89,103 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 	        ]
 	    ];
 	} else if (Pin->GetPinType() & FIVS_PIN_INPUT) {
+		TSharedRef<SBox> LiteralBox = SNew(SBox);
+		TSharedPtr<SBorder> Test;
 		ChildSlot[
-			SNew(SBorder)
+			SAssignNew(Test, SBorder)
 			.BorderBackgroundColor_Lambda([this]() {
 	            return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
 	        })
 			.Content()[
-	            SNew(SHorizontalBox)
-	            +SHorizontalBox::Slot()
-				.AutoWidth()
+	            SNew(SGridPanel)
+	            .FillColumn(1, 1)
+	            +SGridPanel::Slot(0, 0)
 	            .Padding(1)
 	            .VAlign(EVerticalAlignment::VAlign_Center)[
 	                PinIconWidget.ToSharedRef()
 	            ]
-	            +SHorizontalBox::Slot()
-				.FillWidth(1)
+	            +SGridPanel::Slot(1, 0)
 	            .Padding(5)
 	            .VAlign(EVerticalAlignment::VAlign_Center)[
-	                SNew(STextBlock)
+					SNew(STextBlock)
 	                .Clipping(EWidgetClipping::Inherit)
 	                .Justification(ETextJustify::Left)
 	                .Text_Lambda([this]() {
 	                    return Pin->GetName();
 	                })
 	            ]
-			]
+                +SGridPanel::Slot(1, 1)[
+                	LiteralBox
+                ]
+            ]
 		];
+		
+		TSharedPtr<SWidget> LiteralWidget;
+		switch (Pin->GetPinDataType()) {
+		case FIN_BOOL:
+			LiteralBox->SetContent(SNew(SCheckBox)
+			.OnCheckStateChanged_Lambda([this](ECheckBoxState InState) {
+				if (InState == ECheckBoxState::Checked) {
+					Pin->SetLiteral(true);
+				} else {
+					Pin->SetLiteral(false);
+				}
+			})
+			.IsChecked_Lambda([this]() {
+				return Pin->GetLiteral().GetBool() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+			})
+			.IsEnabled_Lambda([this]() { return Pin->GetConnections().Num() < 1; }));
+			break;
+		case FIN_INT:
+			LiteralWidget = SNew(SNumericEntryBox<int>)
+			.OnValueChanged_Lambda([this](int Value) {
+				Pin->SetLiteral((FINInt)Value);
+			})
+			.Value_Lambda([this]() {
+				return Pin->GetLiteral().GetInt();
+			})
+			.IsEnabled_Lambda([this]() { return Pin->GetConnections().Num() < 1; });
+			break;
+		case FIN_FLOAT:
+			LiteralWidget = SNew(SNumericEntryBox<double>)
+			.OnValueChanged_Lambda([this](double Value) {
+				Pin->SetLiteral((FINFloat)Value);
+			})
+			.Value_Lambda([this]() {
+				return Pin->GetLiteral().GetFloat();
+			})
+			.IsEnabled_Lambda([this]() { return Pin->GetConnections().Num() < 1; });
+			break;
+		case FIN_STR:
+			LiteralWidget = SNew(SEditableTextBox)
+			.OnTextCommitted_Lambda([this](FText Value, ETextCommit::Type) {
+				Pin->SetLiteral(Value.ToString());
+			})
+			.Text_Lambda([this]() {
+				return FText::FromString(Pin->GetLiteral().GetString());
+			})
+			.MinDesiredWidth(100)
+			.IsEnabled_Lambda([this]() { return Pin->GetConnections().Num() < 1; });
+			break;
+		case FIN_OBJ:
+			break;
+		case FIN_CLASS:
+			break;
+		case FIN_TRACE:
+			break;
+		case FIN_STRUCT:
+			break;
+		case FIN_ARRAY:
+			break;
+		case FIN_ANY:
+			break;
+		default: ;
+		}
+		if (LiteralWidget) {
+			LiteralBox->SetPadding(5);
+			LiteralBox->SetContent(LiteralWidget.ToSharedRef());
+			Test->Invalidate(EInvalidateWidgetReason::All);
+		}
 	} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
 		ChildSlot[
             SNew(SBorder)
@@ -201,10 +272,7 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
 
 	Node = newNode;
 
-	if (Node && (Node->IsA<UFIVSFuncNode>() || Node->IsA<UFIVSGenericNode>())) {
-		FString Name;
-		if (Node->IsA<UFIVSFuncNode>()) Name = Cast<UFIVSFuncNode>(Node)->GetNodeName();
-		else Name = Cast<UFIVSGenericNode>(Node)->GetNodeName();
+	if (Node && (Node->IsA<UFIVSScriptNode>())) {
 		ChildSlot[
             SNew(SBorder)
             .Padding(1)
@@ -225,8 +293,8 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
                         .Content()
                         [
                             SNew(STextBlock)
-                            .Text_Lambda([this, Name]() {
-                                return FText::FromString(Name);
+                            .Text_Lambda([this]() {
+                                return FText::FromString(Cast<UFIVSScriptNode>(Node)->GetNodeName());
                             })
                         ]
                     ]

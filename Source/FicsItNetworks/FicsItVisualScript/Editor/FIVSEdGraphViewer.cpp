@@ -91,7 +91,7 @@ SFIVSEdGraphViewer::~SFIVSEdGraphViewer() {
 }
 
 FVector2D SFIVSEdGraphViewer::ComputeDesiredSize(float) const {
-	return FVector2D(1000,1000);
+	return FVector2D(0,0);
 }
 
 int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
@@ -351,12 +351,28 @@ TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPat
     	Entries.Add(MakeShared<FFIVSEdActionSelectionTypeCategory>(Clazz.Value, Context));
     }
 	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeBranch::StaticClass(), Context));
+	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodePrint::StaticClass(), Context));
+	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeTick::StaticClass(), Context));
+	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeProxy::StaticClass(), Context));
     TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection).OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFIVSEdActionSelectionAction>& Action) {
 		OnExecute(Action);
     	ActiveActionSelection = nullptr;
     });
+	for (EFINNetworkValueType FromType : TEnumRange<EFINNetworkValueType>()) {
+		for (EFINNetworkValueType ToType : TEnumRange<EFINNetworkValueType>()) {
+			if (FINCastNetworkValue(FFINAnyNetworkValue(FromType), ToType).GetType() != FIN_NIL) {
+				TSharedRef<FFIVSEdActionSelectionGenericAction> Action = MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeConvert::StaticClass(), Context);
+				Action->Init.BindLambda([FromType, ToType](UFIVSNode* Node) {
+					UFIVSNodeConvert* ConvertNode = Cast<UFIVSNodeConvert>(Node);
+					ConvertNode->FromType = FromType;
+					ConvertNode->ToType = ToType;
+				});
+				Entries.Add(Action);
+			}
+		}
+	}
     Select->SetSource(Entries);
-    TSharedPtr<IMenu> Menu = FSlateApplication::Get().PushMenu(SharedThis(this), Path, Select, Location, FPopupTransitionEffect::None);
+    TSharedPtr<IMenu> Menu = FSlateApplication::Get().PushMenu(SharedThis(this), FWidgetPath(), Select, Location, FPopupTransitionEffect::None);
 	Select->SetMenu(Menu);
     Select->SetFocus();
 	ActiveActionSelection = Select;

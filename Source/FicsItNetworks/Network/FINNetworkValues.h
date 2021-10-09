@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-
 #include "FINNetworkTrace.h"
 #include "FINDynamicStructHolder.h"
 #include "FINNetworkValues.generated.h"
@@ -22,6 +21,7 @@ enum EFINNetworkValueType {
 	FIN_ARRAY,
 	FIN_ANY,
 };
+ENUM_RANGE_BY_COUNT(EFINNetworkValueType, FIN_ANY + 1)
 
 typedef bool FINBool;
 typedef int64 FINInt;
@@ -50,4 +50,34 @@ static inline EFINNetworkValueType GetValueTypeFromProp(UProperty* Prop) {
 		return FIN_STRUCT;
 	}
 	return FIN_NIL;
+}
+
+static FORCEINLINE FString FINGetNetworkValueTypeName(EFINNetworkValueType InType) {
+	switch (InType) {
+	case FIN_NIL:
+		return TEXT("Nil");
+	case FIN_BOOL:
+		return TEXT("Bool");
+	case FIN_INT:
+		return TEXT("Int");
+	case FIN_FLOAT:
+		return TEXT("Float");
+	case FIN_STR:
+		return TEXT("String");
+	case FIN_OBJ:
+		return TEXT("Object");
+	case FIN_CLASS:
+		return TEXT("Class");
+	case FIN_TRACE:
+		return TEXT("Trace");
+	case FIN_STRUCT:
+		return TEXT("Struct");
+	case FIN_ARRAY:
+		return TEXT("Array");
+	case FIN_ANY:
+		return TEXT("Any");
+	default:
+		return TEXT("Unknown");
+	}
+
 }

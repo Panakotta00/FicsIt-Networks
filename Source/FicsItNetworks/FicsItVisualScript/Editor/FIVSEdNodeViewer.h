@@ -74,7 +74,7 @@ class SFIVSEdNodeViewer : public SCompoundWidget {
 	SLATE_END_ARGS()
 	
 public:
-	void Construct( const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node );
+	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
 	
 private:
 	const FFIVSEdStyle* Style = nullptr;

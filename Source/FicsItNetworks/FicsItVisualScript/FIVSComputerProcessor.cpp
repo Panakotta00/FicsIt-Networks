@@ -3,5 +3,5 @@
 #include "Kernel/FIVSProcessor.h"
 
 UFINKernelProcessor* AFINScriptProcessor::CreateProcessor() {
-	return NewObject<UFIVSProcessor>();
+	return NewObject<UFIVSProcessor>(this);
 }

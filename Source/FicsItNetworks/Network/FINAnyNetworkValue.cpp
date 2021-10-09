@@ -1,5 +1,6 @@
 ﻿#include "FINAnyNetworkValue.h"
 
+#include "FicsItNetworks/Reflection/FINReflection.h"
 
 bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 	if (Ar.IsLoading()) {
@@ -86,4 +87,22 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 		break;
 	}
 	return true;
+}
+
+FString FINObjectToString(UObject* InObj) {
+	if (!InObj) return TEXT("Nil");
+	FString Text = FFINReflection::Get()->FindClass(InObj->GetClass())->GetInternalName();
+	if (InObj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
+		Text += TEXT(" ") + IFINNetworkComponent::Execute_GetID(InObj).ToString();
+		FString Nick = IFINNetworkComponent::Execute_GetNick(InObj);
+		if (Nick.Len() > 0) {
+			Text += TEXT(" '") + Nick + TEXT("'");
+		}
+	}
+	return Text;
+}
+
+FString FINClassToString(UClass* InClass) {
+	if (!InClass) return TEXT("Nil");
+	return FFINReflection::Get()->FindClass(InClass)->GetInternalName() + TEXT("-Type");
 }

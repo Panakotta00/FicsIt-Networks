@@ -1,6 +1,7 @@
 #include "FINComponentUtility.h"
 
 #include "FGPlayerController.h"
+#include "FicsItVisualScript/Editor/FIVSEdGraphViewer.h"
 #include "Network/FINNetworkAdapter.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
 
@@ -55,7 +56,7 @@ void UFINComponentUtility::TestFicsItVisualScript(UNativeWidgetHost* Widget) {
 	} else {
 		Utility->Graph = Graph = NewObject<UFIVSGraph>();
 	}
-	UFIVSGenericFuncNode* Node = NewObject<UFIVSGenericFuncNode>();
+	/*UFIVSGenericFuncNode* Node = NewObject<UFIVSGenericFuncNode>();
 	Node->Name = "Node1";
 	Node->AddPin(UFIVSGenericPin::Create(FIN_BOOL, FIVS_PIN_DATA_INPUT, "In1"));
 	Node->AddPin(UFIVSGenericPin::Create(FIN_CLASS, FIVS_PIN_DATA_INPUT, "In2"));
@@ -95,6 +96,6 @@ void UFINComponentUtility::TestFicsItVisualScript(UNativeWidgetHost* Widget) {
 	Graph->AddNode(Reroute);
 	Reroute = NewObject<UFIVSRerouteNode>();
 	Reroute->Pos = FVector2D(300, 200);
-	Graph->AddNode(Reroute);
+	Graph->AddNode(Reroute);*/
 	if (Widget) Widget->SetContent(SNew(SFIVSEdGraphViewer).Graph(Graph));
 }

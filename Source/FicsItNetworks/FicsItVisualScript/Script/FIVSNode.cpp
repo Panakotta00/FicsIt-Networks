@@ -8,6 +8,14 @@ void UFIVSPin::GetAllConnected(TArray<UFIVSPin*>& Searches) {
 	}
 }
 
+UFIVSPin* UFIVSPin::FindConnected() {
+	EFIVSPinType PinType = (GetPinType() & FIVS_PIN_DATA) != 0 ? FIVS_PIN_OUTPUT : FIVS_PIN_INPUT;
+	for (UFIVSPin* Pin :  GetAllConnected()) {
+		if ((Pin->GetPinType() & PinType) > 0) return Pin;
+	}
+	return nullptr;
+}
+
 void UFIVSPin::AddConnection(UFIVSPin* Pin) {
 	if (!CanConnect(Pin) || !Pin->CanConnect(this)) return;
 	ConnectedPins.Add(Pin);
@@ -153,25 +161,6 @@ bool UFIVSWildcardPin::CanConnect(UFIVSPin* Pin) {
 	return UFIVSPin::CanConnect(Pin);
 }
 
-EFIVSPinType UFIVSReflectionPin::GetPinType() {
-	return Property->GetPropertyFlags() & (FIN_Prop_OutParam | FIN_Prop_RetVal) ? FIVS_PIN_DATA_OUTPUT : FIVS_PIN_DATA_INPUT;
-}
-
-EFINNetworkValueType UFIVSReflectionPin::GetPinDataType() {
-	if (Property) {
-		return Property->GetType();
-	}
-	return Super::GetPinDataType();
-}
-
-FText UFIVSReflectionPin::GetName() {
-	return Property->GetDisplayName();
-}
-
-void UFIVSReflectionPin::SetProperty(UFINProperty* Prop) {
-	Property = Prop;
-}
-
 void UFIVSNode::RemoveAllConnections() {
 	for (UFIVSPin* Pin : GetNodePins()) {
 		Pin->RemoveAllConnections();
@@ -185,67 +174,4 @@ UFIVSRerouteNode::UFIVSRerouteNode() {
 
 TArray<UFIVSPin*> UFIVSRerouteNode::GetNodePins() const {
 	return {Pin};
-}
-
-int UFIVSFuncNode::AddNodePin(UFIVSPin* Pin) {
-	int idx = Pins.Add(Pin);
-	if (idx >= 0) {
-		Pin->ParentNode = this;
-		OnPinChanged.Broadcast(1, idx);
-	}
-	return idx;
-}
-
-void UFIVSFuncNode::RemoveNodePin(int index) {
-	Pins.RemoveAt(index);
-	OnPinChanged.Broadcast(1, index);
-}
-
-TArray<UFIVSPin*> UFIVSFuncNode::GetNodePins() const {
-	return Pins;
-}
-
-FString UFIVSReflectedFuncNode::GetNodeName() const {
-	return Function->GetInternalName();
-}
-
-void UFIVSReflectedFuncNode::SetFunction(UFINFunction* inFunction) {
-	if (Function) {
-		for (int i = 0; i < GetNodePins().Num(); ++i) {
-			RemoveNodePin(i);
-		}
-	}
-	Function = inFunction;
-	UFIVSGenericPin* ExecIn = NewObject<UFIVSGenericPin>(this);
-	ExecIn->PinDataType = FIN_NIL;
-	ExecIn->PinType = FIVS_PIN_EXEC_INPUT;
-	ExecIn->Name = FText::FromString("Exec");
-	AddNodePin(ExecIn);
-	if (Function->GetFunctionFlags() & FIN_Func_MemberFunc) {
-		UFIVSGenericPin* ReferenceIn = NewObject<UFIVSGenericPin>(this);
-		ReferenceIn->PinDataType = FIN_TRACE;
-		ReferenceIn->PinType = FIVS_PIN_DATA_INPUT;
-		ReferenceIn->Name = FText::FromString("Ref");
-		AddNodePin(ReferenceIn);
-	} else if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
-		UFIVSGenericPin* ReferenceIn = NewObject<UFIVSGenericPin>(this);
-		ReferenceIn->PinDataType = FIN_CLASS;
-		ReferenceIn->PinType = FIVS_PIN_DATA_INPUT;
-		ReferenceIn->Name = FText::FromString("Ref");
-		AddNodePin(ReferenceIn);
-	}
-	UFIVSGenericPin* ExecOut = NewObject<UFIVSGenericPin>(this);
-	ExecOut->PinDataType = FIN_NIL;
-	ExecOut->PinType = FIVS_PIN_EXEC_OUTPUT;
-	ExecOut->Name = FText::FromString("Return");
-	AddNodePin(ExecOut);
-	for (UFINProperty* Param : Function->GetParameters()) {
-		UFIVSReflectionPin* Pin = NewObject<UFIVSReflectionPin>(this);
-		Pin->SetProperty(Param);
-		AddNodePin(Pin);
-	}
-}
-
-UFINFunction* UFIVSReflectedFuncNode::GetFunction() const {
-	return Function;
 }
