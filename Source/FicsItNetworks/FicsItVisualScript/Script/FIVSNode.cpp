@@ -11,6 +11,7 @@ void UFIVSPin::GetAllConnected(TArray<UFIVSPin*>& Searches) {
 UFIVSPin* UFIVSPin::FindConnected() {
 	EFIVSPinType PinType = (GetPinType() & FIVS_PIN_DATA) != 0 ? FIVS_PIN_OUTPUT : FIVS_PIN_INPUT;
 	for (UFIVSPin* Pin :  GetAllConnected()) {
+		if (Pin->IsA<UFIVSWildcardPin>()) continue;
 		if ((Pin->GetPinType() & PinType) > 0) return Pin;
 	}
 	return nullptr;
@@ -50,15 +51,20 @@ bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
 	EFINNetworkValueType PinPinDataType = Pin->GetPinDataType();
 	if (ConnectedPins.Contains(Pin) || Pin == this) return false;
 	if (!((PinPinType & FIVS_PIN_INPUT && ThisPinType & FIVS_PIN_OUTPUT) || (PinPinType & FIVS_PIN_OUTPUT && ThisPinType & FIVS_PIN_INPUT))) return false;
-	
+
+	bool bWouldFail = false;
 	if (ThisPinType & FIVS_PIN_DATA) {
-		if (!(PinPinType & FIVS_PIN_DATA)) return false;
-		if (!((PinPinDataType == ThisPinDataType) ||
+		bWouldFail = false;
+		if (!(PinPinType & FIVS_PIN_DATA)) bWouldFail = true;
+		else if (!((PinPinDataType == ThisPinDataType) ||
             (PinPinDataType == FIN_ANY) ||
-            (ThisPinDataType == FIN_ANY))) return false;
-	} else if (ThisPinType & FIVS_PIN_EXEC) {
-		if (!(PinPinType & FIVS_PIN_EXEC)) return false;
+            (ThisPinDataType == FIN_ANY))) bWouldFail = true;
 	}
+	if (ThisPinType & FIVS_PIN_EXEC) {
+		bWouldFail = false;
+		if (!(PinPinType & FIVS_PIN_EXEC)) bWouldFail = true;
+	}
+	if (bWouldFail) return false;
 
 	bool bThisHasInput = false;
 	bool bPinHasInput = false;

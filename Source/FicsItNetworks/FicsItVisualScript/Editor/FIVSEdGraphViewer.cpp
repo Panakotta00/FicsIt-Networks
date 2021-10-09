@@ -91,10 +91,12 @@ SFIVSEdGraphViewer::~SFIVSEdGraphViewer() {
 }
 
 FVector2D SFIVSEdGraphViewer::ComputeDesiredSize(float) const {
-	return FVector2D(0,0);
+	return FVector2D(160.0f, 120.0f);
 }
 
 int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
+	OutDrawElements.PushClip(FSlateClippingZone(AllottedGeometry));
+	
 	ConnectionDrawer->Reset();
 	int ret = SPanel::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId+2, InWidgetStyle, bParentEnabled);
 
@@ -161,6 +163,8 @@ int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 		SelectEnd = GetCachedGeometry().AbsoluteToLocal(SelectEnd);
 		FSlateDrawElement::MakeBox(OutDrawElements, LayerId+200, AllottedGeometry.ToPaintGeometry(SelectStart, SelectEnd - SelectStart), &SelectionBrush, ESlateDrawEffect::None, FLinearColor(1,1,1,0.1));
 	}
+
+	OutDrawElements.PopClip();
 	
 	return ret;
 }

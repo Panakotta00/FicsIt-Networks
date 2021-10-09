@@ -89,10 +89,12 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 	        ]
 	    ];
 	} else if (Pin->GetPinType() & FIVS_PIN_INPUT) {
-		TSharedRef<SBox> LiteralBox = SNew(SBox);
-		TSharedPtr<SBorder> Test;
+		TSharedRef<SBox> LiteralBox = SNew(SBox)
+		.Visibility_Lambda([this]() {
+			return Pin->GetConnections().Num() < 1 ? EVisibility::Visible : EVisibility::Collapsed;
+		});
 		ChildSlot[
-			SAssignNew(Test, SBorder)
+			SNew(SBorder)
 			.BorderBackgroundColor_Lambda([this]() {
 	            return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
 	        })
@@ -101,20 +103,23 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 	            .FillColumn(1, 1)
 	            +SGridPanel::Slot(0, 0)
 	            .Padding(1)
-	            .VAlign(EVerticalAlignment::VAlign_Center)[
+	            .VAlign(VAlign_Center)
+	            .HAlign(HAlign_Center)[
 	                PinIconWidget.ToSharedRef()
 	            ]
 	            +SGridPanel::Slot(1, 0)
 	            .Padding(5)
-	            .VAlign(EVerticalAlignment::VAlign_Center)[
+	            .VAlign(VAlign_Center)
+	            .HAlign(HAlign_Left)[
 					SNew(STextBlock)
 	                .Clipping(EWidgetClipping::Inherit)
-	                .Justification(ETextJustify::Left)
 	                .Text_Lambda([this]() {
 	                    return Pin->GetName();
 	                })
 	            ]
-                +SGridPanel::Slot(1, 1)[
+                +SGridPanel::Slot(1, 1)
+                .VAlign(VAlign_Center)
+                .HAlign(HAlign_Fill)[
                 	LiteralBox
                 ]
             ]
@@ -133,8 +138,7 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 			})
 			.IsChecked_Lambda([this]() {
 				return Pin->GetLiteral().GetBool() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-			})
-			.IsEnabled_Lambda([this]() { return Pin->GetConnections().Num() < 1; }));
+			}));
 			break;
 		case FIN_INT:
 			LiteralWidget = SNew(SNumericEntryBox<int>)
@@ -143,8 +147,7 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 			})
 			.Value_Lambda([this]() {
 				return Pin->GetLiteral().GetInt();
-			})
-			.IsEnabled_Lambda([this]() { return Pin->GetConnections().Num() < 1; });
+			});
 			break;
 		case FIN_FLOAT:
 			LiteralWidget = SNew(SNumericEntryBox<double>)
@@ -153,8 +156,7 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 			})
 			.Value_Lambda([this]() {
 				return Pin->GetLiteral().GetFloat();
-			})
-			.IsEnabled_Lambda([this]() { return Pin->GetConnections().Num() < 1; });
+			});
 			break;
 		case FIN_STR:
 			LiteralWidget = SNew(SEditableTextBox)
@@ -164,8 +166,7 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 			.Text_Lambda([this]() {
 				return FText::FromString(Pin->GetLiteral().GetString());
 			})
-			.MinDesiredWidth(100)
-			.IsEnabled_Lambda([this]() { return Pin->GetConnections().Num() < 1; });
+			.MinDesiredWidth(100);
 			break;
 		case FIN_OBJ:
 			break;
@@ -184,7 +185,6 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 		if (LiteralWidget) {
 			LiteralBox->SetPadding(5);
 			LiteralBox->SetContent(LiteralWidget.ToSharedRef());
-			Test->Invalidate(EInvalidateWidgetReason::All);
 		}
 	} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
 		ChildSlot[
@@ -196,10 +196,10 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
                 +SHorizontalBox::Slot()
                 .FillWidth(1)
                 .Padding(5)
-                .VAlign(EVerticalAlignment::VAlign_Center)[
+                .VAlign(VAlign_Center)
+                .HAlign(HAlign_Right)[
                     SNew(STextBlock)
 					.Clipping(EWidgetClipping::Inherit)
-                    .Justification(ETextJustify::Left)
                     .Text_Lambda([this]() {
                         return Pin->GetName();
                     })
@@ -207,7 +207,8 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
                 +SHorizontalBox::Slot()
 				.AutoWidth()
                 .Padding(1)
-                .VAlign(EVerticalAlignment::VAlign_Center)[
+                .VAlign(VAlign_Center)
+                .HAlign(HAlign_Center)[
                     PinIconWidget.ToSharedRef()
                 ]
 			]
@@ -317,7 +318,8 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
 				.Style(Style);
 				PinWidgets.Add(PinWidget);
 				PinToWidget.Add(Pin, PinWidget);
-				InputPinBox->AddSlot()[
+				InputPinBox->AddSlot()
+				.AutoHeight()[
                     PinWidget
                 ];
 			} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
@@ -325,7 +327,8 @@ void SFIVSEdNodeViewer::SetNode(UFIVSNode* newNode) {
 				.Style(Style);
 				PinWidgets.Add(PinWidget);
 				PinToWidget.Add(Pin, PinWidget);
-				OutputPinBox->AddSlot()[
+				OutputPinBox->AddSlot()
+				.AutoHeight()[
                     PinWidget
                 ];
 			}
