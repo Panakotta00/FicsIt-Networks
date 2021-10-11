@@ -52,15 +52,19 @@ public:
 		switch (Step.StepType) {
 		case FIVS_STEP_PRENODE: {
 			TArray<UFIVSPin*> ToEvaluate = Cast<UFIVSScriptNode>(Step.NodeOrPin)->PreExecPin(Cast<UFIVSPin>(Step.Callee), *RuntimeContext.Get());
-			for (UFIVSPin* Eval : ToEvaluate) {
-				MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_EVAL, Eval, nullptr));
-			}
 			MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_NODE, Step.NodeOrPin, Step.Callee));
+			for (UFIVSPin* Eval : ToEvaluate) {
+				if (Eval->GetConnections().Num() > 0) MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_EVAL, Eval, nullptr));
+			}
 			break;
-		} case FIVS_STEP_EVAL:
-			// TODO: Eval Data
+		} case FIVS_STEP_EVAL: {
+			UFIVSPin* Connected = Cast<UFIVSPin>(Step.NodeOrPin)->FindConnected();
+			check(Connected); // TODO: FIVS Exception Handling
+			if (Connected->ParentNode->IsPure()) {
+				MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_PRENODE, Connected->ParentNode, nullptr));
+			}
 			break;
-		case FIVS_STEP_NODE: {
+		} case FIVS_STEP_NODE: {
 			UFIVSPin* OutPin = Cast<UFIVSScriptNode>(Step.NodeOrPin)->ExecPin(Cast<UFIVSPin>(Step.Callee), *RuntimeContext.Get());
 			if (OutPin) {
 				UFIVSPin* NextPin = OutPin->FindConnected();

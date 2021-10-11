@@ -5,6 +5,8 @@
 #include "FINDynamicStructHolder.h"
 #include "FINNetworkValues.generated.h"
 
+class UFINProperty;
+class UFINStruct;
 struct FFINAnyNetworkValue;
 
 UENUM(BlueprintType)
@@ -22,6 +24,81 @@ enum EFINNetworkValueType {
 	FIN_ANY,
 };
 ENUM_RANGE_BY_COUNT(EFINNetworkValueType, FIN_ANY + 1)
+
+USTRUCT()
+struct FFINExpandedNetworkValueType {
+	GENERATED_BODY()
+private:
+	EFINNetworkValueType Type;
+	union {
+		UFINStruct* RefSubType;
+		FFINExpandedNetworkValueType* SubType;
+	};
+
+public:
+	FFINExpandedNetworkValueType() : Type(FIN_NIL), SubType(nullptr) {}
+
+	FFINExpandedNetworkValueType(EFINNetworkValueType InType) : Type(InType), SubType(nullptr) {
+		check(InType < FIN_OBJ || InType == FIN_ANY);
+	}
+
+	FFINExpandedNetworkValueType(EFINNetworkValueType InType, UFINStruct* InSubRefType) : Type(InType), RefSubType(InSubRefType) {
+		check(InType != FIN_ARRAY);
+	}
+
+	FFINExpandedNetworkValueType(EFINNetworkValueType InType, const FFINExpandedNetworkValueType& InSubType) : Type(FIN_ARRAY), SubType(new FFINExpandedNetworkValueType(InSubType)) {
+		check(InType == FIN_ARRAY);
+	}
+
+	FFINExpandedNetworkValueType(UFINProperty* Property);
+
+	FFINExpandedNetworkValueType(const FFINExpandedNetworkValueType& Other) : Type(Other.Type) {
+		if (Type == FIN_ARRAY) {
+			SubType = new FFINExpandedNetworkValueType(*Other.SubType);
+		} else {
+			RefSubType = Other.RefSubType;
+		}
+	}
+
+	~FFINExpandedNetworkValueType() {
+		if (Type == FIN_ARRAY) {
+			delete SubType;
+		}
+	}
+
+	FFINExpandedNetworkValueType& operator=(const FFINExpandedNetworkValueType& Other) {
+		if (Other.Type == FIN_ARRAY) {
+			if (Type == FIN_ARRAY) *SubType = *Other.SubType;
+			else SubType = new FFINExpandedNetworkValueType(*Other.SubType);
+		} else {
+			if (Type == FIN_ARRAY) delete SubType;
+			RefSubType = Other.RefSubType;
+		}
+		Type = Other.Type;
+		return *this;
+	}
+
+	bool Equals(const FFINExpandedNetworkValueType& Other) {
+		if (Type != Other.Type) return false;
+		if (Type == FIN_ARRAY) return SubType->Equals(*Other.SubType);
+		if (Type >= FIN_OBJ && Type != FIN_ANY) return RefSubType == Other.RefSubType;
+		return true;
+	}
+
+	bool IsA(const FFINExpandedNetworkValueType& Other);
+
+	EFINNetworkValueType GetType() const { return Type; }
+
+	UFINStruct* GetRefSubType() const {
+		check(Type >= FIN_OBJ && Type != FIN_ANY && Type != FIN_ARRAY);
+		return RefSubType;
+	}
+
+	FFINExpandedNetworkValueType GetSubType() const {
+		check(Type == FIN_ARRAY);
+		return *SubType;
+	}
+};
 
 typedef bool FINBool;
 typedef int64 FINInt;

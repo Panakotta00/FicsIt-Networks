@@ -4,6 +4,7 @@
 #include "FicsItNetworks/Network/FINNetworkValues.h"
 #include "FicsItNetworks/Reflection/FINFunction.h"
 #include "FicsItNetworks/Reflection/FINProperty.h"
+#include "FicsItNetworks/UI/FINReflectionUIContext.h"
 #include "FIVSNode.generated.h"
 
 class UFIVSNode;
@@ -21,6 +22,31 @@ enum EFIVSPinType {
 	FIVS_PIN_EXEC_OUTPUT	= FIVS_PIN_EXEC | FIVS_PIN_OUTPUT,
 };
 ENUM_CLASS_FLAGS(EFIVSPinType)
+
+USTRUCT()
+struct FFIVSFullPinType {
+	GENERATED_BODY()
+	
+	EFIVSPinType PinType;
+	FFINExpandedNetworkValueType DataType;
+
+	FFIVSFullPinType() = default;
+	FFIVSFullPinType(EFIVSPinType PinType) : PinType(PinType) {}
+	FFIVSFullPinType(EFIVSPinType PinType, FFINExpandedNetworkValueType DataType) : PinType(PinType), DataType(DataType) {}
+	FFIVSFullPinType(UFINProperty* Property) {
+		EFINRepPropertyFlags Flags = Property->GetPropertyFlags();
+		if (Flags & FIN_Prop_Param) {
+			if (Flags & FIN_Prop_OutParam) {
+				PinType = FIVS_PIN_DATA_OUTPUT;
+			} else {
+				PinType = FIVS_PIN_DATA_INPUT;
+			}
+		} else if (Flags & FIN_Prop_Attrib) {
+			PinType = FIVS_PIN_DATA;
+		}
+		DataType = FFINExpandedNetworkValueType(Property);
+	}
+};
 
 UCLASS()
 class UFIVSPin : public UObject {
@@ -141,6 +167,24 @@ public:
 	// End UFINScriptPin
 };
 
+DECLARE_DELEGATE_RetVal(TSharedRef<SWidget>, FFIVSNodeActionCreateTooltip)
+
+struct FFIVSNodeAction {
+	FText Title;
+
+	FFIVSNodeActionCreateTooltip OnCreateTooltip;
+	
+	/**
+	 * This array contains descriptions of all pins of the node action and is used to filter by context.
+	 */
+	TArray<FFIVSFullPinType> Pins;
+	
+	/**
+	 * The searchable text used by the text filter to determine if a given user query matches this node action
+	 */
+	FString SearchableText;
+};
+
 /**
  * Notifies if the pin list of the node has changed.
  * Param1: type of change (0 = pin added, 1 = pin removed)
@@ -164,9 +208,26 @@ public:
 	virtual TArray<UFIVSPin*> GetNodePins() const { return TArray<UFIVSPin*>(); }
 
 	/**
+	 * This function will be called on the CDO of this class and should return a list of Actions that
+	 * will get added to the action selection menu of the graph editor.
+	 */
+	virtual TArray<FFIVSNodeAction> GetNodeActions() const { return TArray<FFIVSNodeAction>(); }
+
+	/**
 	 * Removes all connections of all pins
 	 */
 	void RemoveAllConnections();
+
+	/**
+	 * Returns true if the node is a pure node.
+	 * A pure node is a node that does not have any exec pins.
+	 */
+	bool IsPure() {
+		for (UFIVSPin* Pin : GetNodePins()) {
+			if (Pin->GetPinType() & FIVS_PIN_EXEC) return false; 
+		}
+		return true;
+	}
 };
 
 UCLASS()
@@ -183,4 +244,13 @@ public:
 	// Begin UFINScriptNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override;
 	// End UFINScriptNode
+};
+
+USTRUCT()
+struct FFIVSNodeSignature {
+	GENERATED_BODY()
+
+	TArray<FFIVSFullPinType> Pins;
+	FText Name;
+	FText Description;
 };

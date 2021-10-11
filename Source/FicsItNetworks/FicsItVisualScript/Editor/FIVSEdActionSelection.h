@@ -5,6 +5,7 @@
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
 #include "FicsItNetworks/Reflection/FINFunction.h"
 #include "FicsItNetworks/Reflection/FINStruct.h"
+#include "Framework/Text/SyntaxHighlighterTextLayoutMarshaller.h"
 #include "Widgets/Input/SSearchBox.h"
 
 struct FFIVSEdActionSelectionAction;
@@ -24,39 +25,39 @@ struct FFIVSEdActionSelectionFilter : TSharedFromThis<FFIVSEdActionSelectionFilt
 	virtual ~FFIVSEdActionSelectionFilter() = default;
 	
 	/**
-	 * Filteres the given action selection entry list,
-	 * and returns the filtered list.
+	 * Enables or disables the given entry if the filter applies or not.
+	 * Returns true if this entry passes filter directly and causes all children to also pass.
 	 */
-	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Filter(const TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>& ToFilter, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnEntryHandled = [](auto, auto, auto){}) = 0;
+	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) = 0;
 
-	/**
-	 * Resets the filter cache
-	 */
+	virtual void OnFiltered(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, int Pass) {}
+
 	virtual void Reset() {}
 };
 
 struct FFIVSEdActionSelectionTextFilter : FFIVSEdActionSelectionFilter {
 private:
-	TArray<FString> FilterTockens;
-
+	TArray<FString> FilterTokens;
+	
 	void CallFilterValid(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnFiltered);
-
+	
 public:
 	TSharedPtr<FFIVSEdActionSelectionEntry> BestMatch;
 	float BestMatchPercentage = 0.0f;
-
+	
 	FFIVSEdActionSelectionTextFilter(const FString& FilterText);
 	
 	// Begin FFINScriptActionSelectionFilter
-	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Filter(const TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>& ToFilter, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)>) override;
+	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) override;
+	virtual void OnFiltered(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, int Pass) override;
 	virtual void Reset() override;
 	// End FFINScriptActionSelectionFilter
-
+	
 	/**
 	 * Returns the filter text
 	 */
 	FString GetFilterText();
-
+	
 	/**
 	 * Generates a new token list of the given string
 	 */
@@ -64,117 +65,71 @@ public:
 };
 
 struct FFIVSEdActionSelectionEntry : TSharedFromThis<FFIVSEdActionSelectionEntry> {
-protected:
-	bool bReloadCache = true;
-	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Cache;
-	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> FilteredCache;
-
 public:
 	virtual ~FFIVSEdActionSelectionEntry() = default;
 
 	/**
-	 * Returns the filtered child list
+	 * Defines if this action is enabled and should be shown in the action selection menu.
+	 * This may be changed by a filter.
 	 */
-	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GetChilds() { return FilteredCache; }
+	bool bIsEnabled = true;
 
 	/**
-	 * Generates a list of all new children to be stored in the cache
+	 * Defines the highlight text of this action.
+	 * This my be changed by a filter.
 	 */
-	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GenerateCache() = 0;
+	FText HighlightText;
+	
+	/**
+	 * Returns the child list
+	 */
+	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GetChildren() {
+		return TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>();
+	}
 
 	/**
-	 * Returns all the childs in a list
+	 * returns the pins of the node action necessary for the context filter
 	 */
-	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GetAllChilds();
-
+	virtual FFIVSNodeSignature GetSignature() { return FFIVSNodeSignature(); }
+	
 	/**
 	 * Constructs a widget that represents this action selection entry in the tree view
 	 */
 	virtual TSharedRef<SWidget> GetTreeWidget() = 0;
-	
-	/**
-	 * Returns the text that is used for the generic filtering
-	 */
-	virtual FString GetFilterText() const = 0;
-	
-	/**
-	 * Expands this and all child entries in the given tree view
-	 */
-	virtual void Expand(const TSharedPtr<STreeView<TSharedPtr<FFIVSEdActionSelectionEntry>>>& View);
 
 	/**
-	 * Gets called by the filter if filtered
+	 * Returns true if this action should be selectable (f.e. arrow navigation)
 	 */
-	virtual void OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) {};
-
-	/**
-	 * Filters the Children with the given filter
-	 */
-	virtual void Filter(const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnFiltered);
-
-	/**
-	 * Resets all appllied filters on the children
-	 */
-	virtual void ResetFilter();
+	virtual bool IsRelevant() const { return false; }
 };
 
 struct FFIVSEdActionSelectionAction : FFIVSEdActionSelectionEntry {
-	bool bSelected = false;
-
-	FSlateColorBrush SelectedBrush = FSlateColorBrush(FLinearColor(0.3, 0.3, 0.3, 0.3));
-	FSlateColorBrush UnselectedBrush = FSlateColorBrush(FColor::Transparent);
-	FSlateColorBrush HighlightBrush = FSlateColorBrush(FColor::Orange);
-
 	/**
 	 * Executes this action
 	 */
 	virtual void ExecuteAction() = 0;
 };
 
-struct FFIVSEdActionSelectionFuncAction : FFIVSEdActionSelectionAction {
-private:
-	UFINFunction* Func = nullptr;
-	FString LastFilter = "";
-
-	FFINScriptNodeCreationContext Context;
-
-public:
-	FFIVSEdActionSelectionFuncAction(UFINFunction* Func, const FFINScriptNodeCreationContext& Context) : Func(Func), Context(Context) {}
-
-	// Begin FFINScriptActionSelectionEntry
-	virtual TSharedRef<SWidget> GetTreeWidget() override;
-	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GenerateCache() override { return TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>(); }
-	virtual FString GetFilterText() const override;
-	virtual void OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) override;
-	virtual void ResetFilter() override;
-	// End FFINScriptActionSelectionEntry
-
-	// Begin FFINScriptActionSelectionAction
-	virtual void ExecuteAction() override;
-	// End FFINScriptActionSelectionAction
-};
-
 DECLARE_DELEGATE_OneParam(FFIVSEdActionSelectionGenericActionInit, UFIVSScriptNode*)
 
-struct FFIVSEdActionSelectionGenericAction : FFIVSEdActionSelectionAction {
+struct FFIVSEdActionSelectionScriptNodeAction : FFIVSEdActionSelectionAction {
 private:
 	TSubclassOf<UFIVSScriptNode> ScriptNode = nullptr;
-	FString LastFilter = "";
-
+	FFIVSNodeSignature NodeSignature;
+	
 	FFINScriptNodeCreationContext Context;
 
+	FSlateColorBrush HighlightBrush = FSlateColorBrush(FColor::Orange);
 
 public:
 	FFIVSEdActionSelectionGenericActionInit Init;
 	
-	FFIVSEdActionSelectionGenericAction(TSubclassOf<UFIVSScriptNode> ScriptNode, const FFINScriptNodeCreationContext& Context) : ScriptNode(ScriptNode), Context(Context) {}
-
+	FFIVSEdActionSelectionScriptNodeAction(TSubclassOf<UFIVSScriptNode> ScriptNode, const FFIVSNodeSignature& NodeSignature, const FFINScriptNodeCreationContext& Context) : ScriptNode(ScriptNode), NodeSignature(NodeSignature), Context(Context) {}
+	
 	// Begin FFINScriptActionSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;
-	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GenerateCache() override { return TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>(); }
-	virtual FString GetFilterText() const override;
-	virtual void OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) override;
-	virtual void ResetFilter() override;
+	virtual FFIVSNodeSignature GetSignature() override;
+	virtual bool IsRelevant() const override { return true; }
 	// End FFINScriptActionSelectionEntry
 
 	// Begin FFINScriptActionSelectionAction
@@ -184,24 +139,15 @@ public:
 
 struct FFIVSEdActionSelectionCategory : FFIVSEdActionSelectionEntry {
 	FSlateColorBrush HighlightBrush = FSlateColorBrush(FColor::Orange);
-};
+	
+	FText Name;
+	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Children;
 
-struct FFIVSEdActionSelectionTypeCategory : FFIVSEdActionSelectionCategory {
-private:
-	UFINStruct* Type;
-	FString LastFilter = "";
-
-	FFINScriptNodeCreationContext Context;
-
-public:
-	FFIVSEdActionSelectionTypeCategory(UFINStruct* Type, const FFINScriptNodeCreationContext& Context) : Type(Type), Context(Context) {}
-
+	FFIVSEdActionSelectionCategory(FText Name, TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Children) : Name(Name), Children(Children) {}
+	
 	// Begin FFINScriptNodeSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;
-	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GenerateCache() override;
-	virtual FString GetFilterText() const override;
-	virtual void OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) override;
-	virtual void ResetFilter() override;
+	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GetChildren() override { return Children; }
 	// End FFINScriptNodeSelectionEntry
 };
 
@@ -225,16 +171,15 @@ private:
 	TSharedPtr<SSearchBox> SearchBox;
 	
 	TSharedPtr<IMenu> Menu;
-	TSharedPtr<FFIVSEdActionSelectionAction> SelectedAction;
+	TSharedPtr<FFIVSEdActionSelectionEntry> SelectedEntry;
 
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Source;
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Filtered;
+	TMap<TSharedPtr<FFIVSEdActionSelectionEntry>, TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>> FilteredChildren;
 
 	TArray<TSharedPtr<FFIVSEdActionSelectionFilter>> Filters;
 	TSharedPtr<FFIVSEdActionSelectionTextFilter> TextFilter;
-
-	TArray<TSharedPtr<FFIVSEdActionSelectionAction>> FilteredActions;
-
+	
 	FSlateColorBrush BackgroundBrush = FSlateColorBrush(FLinearColor(0.02, 0.02, 0.02));
 public:
 	SFIVSEdActionSelection();
@@ -273,6 +218,7 @@ public:
 	 * Updates the filtered node list
 	 */
 	void Filter();
+	void Filter_Internal(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, bool bForceAdd);
 
 	/**
 	 * Expands all filtered entries
@@ -283,12 +229,12 @@ public:
 	 * Returns the next action next to the given entry or the entry it self if it is an action.
 	 * nullptr if no action is found.
 	 */
-	TSharedPtr<FFIVSEdActionSelectionAction> FindNextAction(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry);
+	TSharedPtr<FFIVSEdActionSelectionEntry> FindNextRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry);
 	
 	/**
 	 * Selects the given action
 	 */
-	void SelectAction(const TSharedPtr<FFIVSEdActionSelectionAction>& Action);
+	void SelectRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry);
 
 	/**
 	 * Selects the next action in the tress

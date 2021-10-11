@@ -346,26 +346,49 @@ void SFIVSEdGraphViewer::OnNodeChanged(int change, UFIVSNode* Node) {
 		if (Viewer) Children.Remove(*Viewer);
 	}
 }
-
+#pragma optimize("", off)
 TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFIVSEdActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& Context) {
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Entries;
     TArray<UClass*> Derived;
     GetDerivedClasses(UObject::StaticClass(), Derived);
-    for (TTuple<UClass*, UFINClass*> Clazz : FFINReflection::Get()->GetClasses()) {
-    	Entries.Add(MakeShared<FFIVSEdActionSelectionTypeCategory>(Clazz.Value, Context));
+    for (TTuple<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
+    	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> ClassChildren;
+    	for (UFINFunction* Function : Class.Value->GetFunctions(false)) {
+    		TSharedRef<FFIVSEdActionSelectionScriptNodeAction> NodeAction = MakeShared<FFIVSEdActionSelectionScriptNodeAction>(UFIVSNodeCallFunction::StaticClass(), UFIVSNodeCallFunction::SignatureFromFunction(Function), Context);
+    		NodeAction->Init.BindLambda([Function](UFIVSNode* Node) {
+    			Cast<UFIVSNodeCallFunction>(Node)->SetFunction(Function);
+    		});
+    		ClassChildren.Add(NodeAction);
+    	}
+    	for (UFINProperty* Property : Class.Value->GetProperties(false)) {
+			TSharedRef<FFIVSEdActionSelectionScriptNodeAction> GetAction = MakeShared<FFIVSEdActionSelectionScriptNodeAction>(UFIVSNodeGetProperty::StaticClass(), UFIVSNodeGetProperty::SignatureFromProperty(Property, false), Context);
+    		GetAction->Init.BindLambda([Property](UFIVSNode* Node) {
+    			Cast<UFIVSNodeGetProperty>(Node)->SetProperty(Property);
+    		});
+    		ClassChildren.Add(GetAction);
+    		if (!(Property->GetPropertyFlags() & FIN_Prop_ReadOnly)) {
+				TSharedRef<FFIVSEdActionSelectionScriptNodeAction> SetAction = MakeShared<FFIVSEdActionSelectionScriptNodeAction>(UFIVSNodeGetProperty::StaticClass(), UFIVSNodeGetProperty::SignatureFromProperty(Property, true), Context);
+    			SetAction->Init.BindLambda([Property](UFIVSNode* Node) {
+    				  Cast<UFIVSNodeGetProperty>(Node)->SetProperty(Property);
+				});
+    			ClassChildren.Add(SetAction);
+    		}
+    	}
+		Entries.Add(MakeShared<FFIVSEdActionSelectionCategory>(Class.Value->GetDisplayName(), ClassChildren));
     }
-	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeBranch::StaticClass(), Context));
-	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodePrint::StaticClass(), Context));
-	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeTick::StaticClass(), Context));
-	Entries.Add(MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeProxy::StaticClass(), Context));
+	Entries.Add(MakeShared<FFIVSEdActionSelectionScriptNodeAction>(UFIVSNodeBranch::StaticClass(), UFIVSNodeBranch::GetSignature(), Context));
+	Entries.Add(MakeShared<FFIVSEdActionSelectionScriptNodeAction>(UFIVSNodePrint::StaticClass(), UFIVSNodePrint::GetSignature(), Context));
+	Entries.Add(MakeShared<FFIVSEdActionSelectionScriptNodeAction>(UFIVSNodeTick::StaticClass(), UFIVSNodeTick::GetSignature(), Context));
+	Entries.Add(MakeShared<FFIVSEdActionSelectionScriptNodeAction>(UFIVSNodeProxy::StaticClass(), UFIVSNodeProxy::GetSignature(), Context));
     TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection).OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFIVSEdActionSelectionAction>& Action) {
 		OnExecute(Action);
     	ActiveActionSelection = nullptr;
     });
 	for (EFINNetworkValueType FromType : TEnumRange<EFINNetworkValueType>()) {
 		for (EFINNetworkValueType ToType : TEnumRange<EFINNetworkValueType>()) {
+			if (FromType == FIN_ARRAY || ToType == FIN_ARRAY || FromType == FIN_NIL || ToType == FIN_NIL || FromType == FIN_ANY || ToType == FIN_ANY || FromType == FIN_STRUCT || ToType == FIN_STRUCT) continue; 
 			if (FINCastNetworkValue(FFINAnyNetworkValue(FromType), ToType).GetType() != FIN_NIL) {
-				TSharedRef<FFIVSEdActionSelectionGenericAction> Action = MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeConvert::StaticClass(), Context);
+				TSharedRef<FFIVSEdActionSelectionScriptNodeAction> Action = MakeShared<FFIVSEdActionSelectionScriptNodeAction>(UFIVSNodeConvert::StaticClass(), UFIVSNodeConvert::SignatureFromTypes(FromType, ToType), Context);
 				Action->Init.BindLambda([FromType, ToType](UFIVSNode* Node) {
 					UFIVSNodeConvert* ConvertNode = Cast<UFIVSNodeConvert>(Node);
 					ConvertNode->FromType = FromType;
@@ -386,6 +409,7 @@ TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPat
 	});
 	return Menu;
 }
+#pragma optimize("", on)
 
 void SFIVSEdGraphViewer::SetGraph(UFIVSGraph* NewGraph) {
 	if (Graph) {

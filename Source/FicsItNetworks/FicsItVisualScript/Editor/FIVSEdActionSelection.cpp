@@ -2,7 +2,7 @@
 
 void FFIVSEdActionSelectionTextFilter::CallFilterValid(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entries, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnFiltered) {
 	OnFiltered(this, Entries, true);
-	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Entries->GetChilds()) {
+	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Entries->GetChildren()) {
 		CallFilterValid(Entry, OnFiltered);
 	}
 }
@@ -11,36 +11,34 @@ FFIVSEdActionSelectionTextFilter::FFIVSEdActionSelectionTextFilter(const FString
     SetFilterText(Filter);
 }
 
-TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> FFIVSEdActionSelectionTextFilter::Filter(const TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>& ToFilter, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnFiltered) {
-	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Filtered;
-    for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : ToFilter) {
-    	FString FilterText = Entry->GetFilterText().Replace(TEXT(" "), TEXT(""));
-    	bool bIsValid = true;
-    	float MatchLength = 0.0f;
-    	for (const FString& Token : FilterTockens) {
-    		if (!FilterText.Contains(Token)) {
-    			bIsValid = false;
-    		}
-    		MatchLength += Token.Len();
+bool FFIVSEdActionSelectionTextFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) {
+    FString FilterText = ToFilter->GetSignature().Name.ToString().Replace(TEXT(" "), TEXT(""));
+    bool bIsValid = true;
+    float MatchLength = 0.0f;
+    for (const FString& Token : FilterTokens) {
+    	if (!FilterText.Contains(Token)) {
+    		bIsValid = false;
     	}
-    	if (bIsValid) {
-    		float MatchPercentage = MatchLength / ((float)FilterText.Len());
-    		if (BestMatchPercentage < MatchPercentage) {
-    			BestMatchPercentage = MatchPercentage;
-    			BestMatch = Entry;
-    		}
-    	}
-    	if (!bIsValid) {
-    		Entry->Filter(SharedThis(this), OnFiltered);
-    		bIsValid = Entry->GetChilds().Num() > 0;
-    	} else {
-    		CallFilterValid(Entry, OnFiltered);
-    	}
-    	if (bIsValid) Filtered.Add(Entry);
-    	Entry->OnFiltered(bIsValid, this);
-    	OnFiltered(this, Entry, bIsValid);
+    	MatchLength += Token.Len();
     }
-    return Filtered;
+    if (bIsValid) {
+    	float MatchPercentage = MatchLength / ((float)FilterText.Len());
+    	if (BestMatchPercentage < MatchPercentage) {
+    		BestMatchPercentage = MatchPercentage;
+    		BestMatch = ToFilter;
+    	}
+    }
+    if (bIsValid) {
+    	ToFilter->bIsEnabled = true;
+    	return true;
+    } else {
+    	ToFilter->bIsEnabled = false;
+    	return false;
+    }
+}
+
+void FFIVSEdActionSelectionTextFilter::OnFiltered(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, int Pass) {
+	Entry->HighlightText = FText::FromString(GetFilterText());
 }
 
 void FFIVSEdActionSelectionTextFilter::Reset() {
@@ -50,7 +48,7 @@ void FFIVSEdActionSelectionTextFilter::Reset() {
 
 FString FFIVSEdActionSelectionTextFilter::GetFilterText() {
 	FString FilterText;
-	for (const FString& Token : FilterTockens) {
+	for (const FString& Token : FilterTokens) {
 		if (FilterText.Len() > 0) FilterText = FilterText.Append(" ");
 		FilterText.Append(Token);
 	}
@@ -59,123 +57,33 @@ FString FFIVSEdActionSelectionTextFilter::GetFilterText() {
 
 void FFIVSEdActionSelectionTextFilter::SetFilterText(const FString& FilterText) {
 	FString TokenList = FilterText;
-	FilterTockens.Empty();
+	FilterTokens.Empty();
 	while (TokenList.Len() > 0) {
 		FString Token;
 		if (TokenList.Split(" ", &Token, &TokenList)) {
-			if (Token.Len() > 0) FilterTockens.Add(Token);
+			if (Token.Len() > 0) FilterTokens.Add(Token);
 		} else {
-			FilterTockens.Add(TokenList);
+			FilterTokens.Add(TokenList);
 			TokenList = "";
 		}
 	}
 }
 
-TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> FFIVSEdActionSelectionEntry::GetAllChilds() {
-	if (bReloadCache) {
-		bReloadCache = false;
-		Cache = GenerateCache();
-		ResetFilter();
-	}
-	return Cache;
-}
-
-void FFIVSEdActionSelectionEntry::Expand(const TSharedPtr<STreeView<TSharedPtr<FFIVSEdActionSelectionEntry>>>& View) {
-	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : GetChilds()) {
-		View->SetItemExpansion(Entry, true);
-		Entry->Expand(View);
-	}
-}
-
-void FFIVSEdActionSelectionEntry::Filter(const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnFiltered) {
-	FilteredCache = Filter->Filter(FilteredCache, OnFiltered);
-}
-
-void FFIVSEdActionSelectionEntry::ResetFilter() {
-	FilteredCache = GetAllChilds();
-	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : FilteredCache) {
-		Child->ResetFilter();
-	}
-}
-
-TSharedRef<SWidget> FFIVSEdActionSelectionFuncAction::GetTreeWidget() {
-	return SNew(SBorder)
-	.BorderImage_Lambda([this]() {
-		return bSelected ? &SelectedBrush : &UnselectedBrush;
+TSharedRef<SWidget> FFIVSEdActionSelectionScriptNodeAction::GetTreeWidget() {
+	return SNew(STextBlock)
+	.Text_Lambda([this]() {
+		return NodeSignature.Name;
 	})
-	.Content()[
-		SNew(STextBlock)
-		.Text_Lambda([this]() {
-			return Func->GetDisplayName();
-		})
-		.HighlightText_Lambda([this](){ return FText::FromString(LastFilter); })
-		.HighlightColor(FLinearColor(FColor::Yellow))
-		.HighlightShape(&HighlightBrush)
-	];
+	.HighlightText_Lambda([this](){ return HighlightText; })
+	.HighlightColor(FLinearColor(FColor::Yellow))
+	.HighlightShape(&HighlightBrush);
 }
 
-FString FFIVSEdActionSelectionFuncAction::GetFilterText() const {
-	return Func->GetDisplayName().ToString();
+FFIVSNodeSignature FFIVSEdActionSelectionScriptNodeAction::GetSignature() {
+	return NodeSignature;
 }
 
-void FFIVSEdActionSelectionFuncAction::OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) {
-	FFIVSEdActionSelectionTextFilter* TextFilter = dynamic_cast<FFIVSEdActionSelectionTextFilter*>(Filter);
-	if (TextFilter) LastFilter = TextFilter->GetFilterText();
-}
-
-void FFIVSEdActionSelectionFuncAction::ResetFilter() {
-	FFIVSEdActionSelectionAction::ResetFilter();
-	LastFilter = "";
-}
-
-void FFIVSEdActionSelectionFuncAction::ExecuteAction() {
-	UFIVSNodeCallFunction* Node = NewObject<UFIVSNodeCallFunction>(Context.Graph);
-	Node->Pos = Context.CreationLocation;
-	Node->SetFunction(Func);
-	Node->InitPins();
-	for (UFIVSPin* Pin : Node->GetNodePins()) {
-		if (Context.Pin && Pin->CanConnect(Context.Pin)) {
-			Pin->AddConnection(Context.Pin);
-			break;
-		}
-	}
-	Context.Graph->AddNode(Node);
-}
-
-
-TSharedRef<SWidget> FFIVSEdActionSelectionGenericAction::GetTreeWidget() {
-	return SNew(SBorder)
-	.BorderImage_Lambda([this]() {
-		return bSelected ? &SelectedBrush : &UnselectedBrush;
-	})
-	.Content()[
-		SNew(STextBlock)
-		.Text_Lambda([this]() {
-			return FText::FromString(GetFilterText());
-		})
-		.HighlightText_Lambda([this](){ return FText::FromString(LastFilter); })
-		.HighlightColor(FLinearColor(FColor::Yellow))
-		.HighlightShape(&HighlightBrush)
-	];
-}
-
-FString FFIVSEdActionSelectionGenericAction::GetFilterText() const {
-	UFIVSScriptNode* Node = const_cast<UFIVSScriptNode*>(GetDefault<UFIVSScriptNode>(ScriptNode));
-	Init.ExecuteIfBound(Node);
-	return Node->GetNodeName();
-}
-
-void FFIVSEdActionSelectionGenericAction::OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) {
-	FFIVSEdActionSelectionTextFilter* TextFilter = dynamic_cast<FFIVSEdActionSelectionTextFilter*>(Filter);
-	if (TextFilter) LastFilter = TextFilter->GetFilterText();
-}
-
-void FFIVSEdActionSelectionGenericAction::ResetFilter() {
-	FFIVSEdActionSelectionAction::ResetFilter();
-	LastFilter = "";
-}
-
-void FFIVSEdActionSelectionGenericAction::ExecuteAction() {
+void FFIVSEdActionSelectionScriptNodeAction::ExecuteAction() {
 	UFIVSScriptNode* Node = NewObject<UFIVSScriptNode>(Context.Graph, ScriptNode);
 	Node->Pos = Context.CreationLocation;
 	Init.ExecuteIfBound(Node);
@@ -189,57 +97,14 @@ void FFIVSEdActionSelectionGenericAction::ExecuteAction() {
 	Context.Graph->AddNode(Node);
 }
 
-TSharedRef<SWidget> FFIVSEdActionSelectionTypeCategory::GetTreeWidget() {
+TSharedRef<SWidget> FFIVSEdActionSelectionCategory::GetTreeWidget() {
 	return SNew(STextBlock)
 	.Text_Lambda([this]() {
-		return Type->GetDisplayName();
+		return Name;
 	})
-	.HighlightText_Lambda([this](){ return FText::FromString(LastFilter); })
+	.HighlightText_Lambda([this](){ return HighlightText; })
     .HighlightColor(FLinearColor(FColor::Yellow))
     .HighlightShape(&HighlightBrush);
-}
-
-TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> FFIVSEdActionSelectionTypeCategory::GenerateCache() {
-	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Childs;
-	TArray<UFINFunction*> Functions = Type->GetFunctions(false);
-	for (UFINFunction* Function : Functions) {
-		Childs.Add(MakeShared<FFIVSEdActionSelectionFuncAction>(Function, Context));
-	}
-	TArray<UFINProperty*> Properties = Type->GetProperties(false);
-	for (UFINProperty* Property : Properties) {
-		EFINRepPropertyFlags Flags = Property->GetPropertyFlags();
-		if (Flags & FIN_Prop_Attrib) {
-			TSharedRef<FFIVSEdActionSelectionGenericAction> GetAction = MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeGetProperty::StaticClass(), Context);
-			GetAction->Init.BindLambda([Property](UFIVSNode* Node) {
-				UFIVSNodeGetProperty* GetNode = Cast<UFIVSNodeGetProperty>(Node);
-				GetNode->SetProperty(Property);
-			});
-			Childs.Add(GetAction);
-			if (!(Flags & FIN_Prop_ReadOnly)) {
-				TSharedRef<FFIVSEdActionSelectionGenericAction> SetAction = MakeShared<FFIVSEdActionSelectionGenericAction>(UFIVSNodeSetProperty::StaticClass(), Context);
-				SetAction->Init.BindLambda([Property](UFIVSNode* Node) {
-					UFIVSNodeSetProperty* SetNode = Cast<UFIVSNodeSetProperty>(Node);
-					SetNode->SetProperty(Property);
-				});
-				Childs.Add(SetAction);
-			}
-		}
-	}
-	return Childs;
-}
-
-FString FFIVSEdActionSelectionTypeCategory::GetFilterText() const {
-	return Type->GetDisplayName().ToString();
-}
-
-void FFIVSEdActionSelectionTypeCategory::OnFiltered(bool bFilterPassed, FFIVSEdActionSelectionFilter* Filter) {
-	FFIVSEdActionSelectionTextFilter* TextFilter = dynamic_cast<FFIVSEdActionSelectionTextFilter*>(Filter);
-	if (TextFilter) LastFilter = TextFilter->GetFilterText();
-}
-
-void FFIVSEdActionSelectionTypeCategory::ResetFilter() {
-	FFIVSEdActionSelectionCategory::ResetFilter();
-	LastFilter = "";
 }
 
 void SFIVSEdActionSelection::Construct(const FArguments& InArgs) {
@@ -268,7 +133,7 @@ void SFIVSEdActionSelection::Construct(const FArguments& InArgs) {
 					Filter();
 					View->RequestTreeRefresh();
 					ExpandAll();
-					if (TextFilter->BestMatch.IsValid()) SelectAction(FindNextAction(TextFilter->BestMatch));
+					if (TextFilter->BestMatch.IsValid()) SelectRelevant(FindNextRelevant(TextFilter->BestMatch));
 				})
 			]
 			+SGridPanel::Slot(0, 3).ColumnSpan(2)[
@@ -282,8 +147,13 @@ void SFIVSEdActionSelection::Construct(const FArguments& InArgs) {
 							Entry->GetTreeWidget()
 						];
 					})
-					.OnGetChildren_Lambda([](TSharedPtr<FFIVSEdActionSelectionEntry> Entry, TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>& Childs) {
-						Childs = Entry->GetChilds();
+					.OnGetChildren_Lambda([this](TSharedPtr<FFIVSEdActionSelectionEntry> Entry, TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>& Childs) {
+						if (FilteredChildren.Num() > 0) {
+							TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>* Filtered = FilteredChildren.Find(Entry);
+							if (Filtered) Childs = *Filtered;
+						} else {
+							Childs = Entry->GetChildren();
+						}
 					})
 					.TreeItemsSource(&Filtered)
 					.OnMouseButtonClick_Lambda([this](TSharedPtr<FFIVSEdActionSelectionEntry> Entry) {
@@ -317,7 +187,7 @@ FReply SFIVSEdActionSelection::OnKeyDown(const FGeometry& MyGeometry, const FKey
 		return FReply::Handled();
 	}
 	if (InKeyEvent.GetKey() == EKeys::Enter) {
-		ExecuteEntry(SelectedAction);
+		ExecuteEntry(SelectedEntry);
 		Close();
 	}
 	return SCompoundWidget::OnKeyDown(MyGeometry, InKeyEvent);
@@ -340,9 +210,7 @@ void SFIVSEdActionSelection::ClearSource() {
 
 void SFIVSEdActionSelection::ResetFilters() {
 	Filtered = Source;
-	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Filtered) {
-		Entry->ResetFilter();
-	}
+	FilteredChildren.Empty(); 
 	for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
 		Filter->Reset();
 	}
@@ -353,13 +221,28 @@ void SFIVSEdActionSelection::SetMenu(const TSharedPtr<IMenu>& inMenu) {
 }
 
 void SFIVSEdActionSelection::Filter() {
-	FilteredActions.Empty();
 	ResetFilters();
-	for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
-		Filtered = Filter->Filter(Filtered, [this](FFIVSEdActionSelectionFilter* Filter, const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry, bool bIsValid) {
-			if (bIsValid && dynamic_cast<FFIVSEdActionSelectionAction*>(Entry.Get())) FilteredActions.Add(StaticCastSharedPtr<FFIVSEdActionSelectionAction>(Entry));
-		});
+	Filtered.Empty();
+	FilteredChildren.Empty();
+	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Source) {
+		Filter_Internal(Entry, false);
+		if (Entry->bIsEnabled) Filtered.Add(Entry);
 	}
+}
+
+void SFIVSEdActionSelection::Filter_Internal(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, bool bForceAdd) {
+	Entry->bIsEnabled = true;
+	bool bBeginForce = true;
+	if (!bForceAdd) for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
+		bBeginForce = bBeginForce && Filter->Filter(Entry);
+	}
+	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>& Entries = FilteredChildren.FindOrAdd(Entry);
+	for (TSharedPtr<FFIVSEdActionSelectionEntry> Child : Entry->GetChildren()) {
+		Filter_Internal(Child, bForceAdd || bBeginForce);
+		if (Child->bIsEnabled) Entries.Add(Child);
+	}
+	if (Entries.Num() < 1) FilteredChildren.Remove(Entry);
+	else Entry->bIsEnabled = true;
 }
 
 void SFIVSEdActionSelection::ExpandAll() {
@@ -368,47 +251,40 @@ void SFIVSEdActionSelection::ExpandAll() {
 	}
 }
 
-TSharedPtr<FFIVSEdActionSelectionAction> FindNextChildAction(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
-	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : Entry->GetChilds()) {
-		if (dynamic_cast<FFIVSEdActionSelectionAction*>(Entry.Get())) return StaticCastSharedPtr<FFIVSEdActionSelectionAction>(Entry);
-	}
-	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : Entry->GetChilds()) {
-		TSharedPtr<FFIVSEdActionSelectionAction> FoundEntry = FindNextChildAction(Child);
+TSharedPtr<FFIVSEdActionSelectionEntry> FindNextChildRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
+	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : Entry->GetChildren()) {
+		if (Entry->IsRelevant()) return Entry;
+		TSharedPtr<FFIVSEdActionSelectionEntry> FoundEntry = FindNextChildRelevant(Child);
 		if (FoundEntry.IsValid()) return FoundEntry;
 	}
 	return nullptr;
 }
 
-TSharedPtr<FFIVSEdActionSelectionAction> SFIVSEdActionSelection::FindNextAction(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
-	if (dynamic_cast<FFIVSEdActionSelectionAction*>(Entry.Get())) return StaticCastSharedPtr<FFIVSEdActionSelectionAction>(Entry);
-	return FindNextChildAction(Entry);
+TSharedPtr<FFIVSEdActionSelectionEntry> SFIVSEdActionSelection::FindNextRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
+	if (Entry->IsRelevant()) return Entry;
+	return FindNextChildRelevant(Entry);
 }
 
-void SFIVSEdActionSelection::SelectAction(const TSharedPtr<FFIVSEdActionSelectionAction>& Action) {
-	if (SelectedAction.IsValid()) SelectedAction->bSelected = false;
-	SelectedAction = Action;
-	if (SelectedAction.IsValid()) {
-		SelectedAction->bSelected = true;
-		View->RequestScrollIntoView(SelectedAction);
-	}
+void SFIVSEdActionSelection::SelectRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
+	View->SetSelection(Entry, ESelectInfo::Direct);
 }
 
 void SFIVSEdActionSelection::SelectNext() {
-	int SelectedIndex = FilteredActions.Find(SelectedAction);
-	if (!SelectedAction.IsValid()) SelectedIndex = -1;
+	if (Filtered.Num() < 1) return;
+	int SelectedIndex = -1;
+	if (View->GetSelectedItems().Num() > 0) SelectedIndex = Filtered.Find(View->GetSelectedItems()[0]);
 	++SelectedIndex;
-	if (SelectedIndex >= FilteredActions.Num()) SelectedIndex = 0;
-	if (FilteredActions.Num() > 0) SelectAction(FilteredActions[SelectedIndex]);
-	else SelectAction(nullptr);
+	if (SelectedIndex >= Filtered.Num()) SelectedIndex = 0;
+	SelectRelevant(FindNextRelevant(Filtered[SelectedIndex]));
 }
 
 void SFIVSEdActionSelection::SelectPrevious() {
-	int SelectedIndex = FilteredActions.Find(SelectedAction);
-	if (!SelectedAction.IsValid()) SelectedIndex = -1;
+	if (Filtered.Num() < 1) return;
+	int SelectedIndex = Filtered.Num()-1;
+	if (View->GetSelectedItems().Num() > 0) SelectedIndex = Filtered.Find(View->GetSelectedItems()[0]);
 	--SelectedIndex;
-	if (SelectedIndex < 0) SelectedIndex = FilteredActions.Num()-1;
-	if (FilteredActions.Num() > 0) SelectAction(FilteredActions[SelectedIndex]);
-	else SelectAction(nullptr);
+	if (SelectedIndex < Filtered.Num()) SelectedIndex = Filtered.Num()-1;
+	SelectRelevant(FindNextRelevant(Filtered[SelectedIndex]));
 }
 
 void SFIVSEdActionSelection::Close() {
