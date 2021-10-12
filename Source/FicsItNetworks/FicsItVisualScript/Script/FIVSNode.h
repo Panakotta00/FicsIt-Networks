@@ -23,12 +23,14 @@ enum EFIVSPinType {
 };
 ENUM_CLASS_FLAGS(EFIVSPinType)
 
+typedef FFINExpandedNetworkValueType FFIVSPinDataType;
+
 USTRUCT()
 struct FFIVSFullPinType {
 	GENERATED_BODY()
 	
 	EFIVSPinType PinType;
-	FFINExpandedNetworkValueType DataType;
+	FFIVSPinDataType DataType;
 
 	FFIVSFullPinType() = default;
 	FFIVSFullPinType(EFIVSPinType PinType) : PinType(PinType) {}
@@ -48,7 +50,7 @@ struct FFIVSFullPinType {
 	}
 };
 
-UCLASS()
+UCLASS(Abstract)
 class UFIVSPin : public UObject {
 	GENERATED_BODY()
 protected:
@@ -67,8 +69,8 @@ public:
 	 * The literal value will be used if pin has no connection to any other pins.
 	 */
 	FFINAnyNetworkValue GetLiteral() {
-		if (Literal.GetType() != GetPinDataType()) {
-			SetLiteral(FFINAnyNetworkValue(GetPinDataType()));
+		if (Literal.GetType() != GetPinDataType().GetType()) {
+			SetLiteral(FFINAnyNetworkValue(GetPinDataType().GetType()));
 		}
 		return Literal;
 	}
@@ -78,18 +80,18 @@ public:
 	 * For more info on literals, see GetLiteral()
 	 */
 	void SetLiteral(FFINAnyNetworkValue InLiteral) {
-		if (InLiteral.GetType() == GetPinDataType()) Literal = InLiteral;
+		if (InLiteral.GetType() == GetPinDataType().GetType()) Literal = InLiteral;
 	}
 	
 	/**
-	 * Returns the pin type
+	 * Returns the pin type use to determine if this pin is a input, output, data or exec pin.
 	 */
 	virtual EFIVSPinType GetPinType();
 
 	/**
-	 * Returns the pin data type
+	 * Returns the pin data type use to check if two pins can be connected.
 	 */
-	virtual EFINNetworkValueType GetPinDataType();
+	virtual FFIVSPinDataType GetPinDataType();
 
 	/**
 	 * Returns all connected pins
@@ -140,12 +142,12 @@ class UFIVSGenericPin : public UFIVSPin {
 	GENERATED_BODY()
 public:
 	EFIVSPinType PinType = FIVS_PIN_NONE;
-	EFINNetworkValueType PinDataType = FIN_NIL;
+	FFIVSPinDataType PinDataType = FIN_NIL;
 	FText Name = FText::FromString("Unnamed");
 	
 	// Begin UFINScriptPin
 	virtual EFIVSPinType GetPinType() override;
-	virtual EFINNetworkValueType GetPinDataType() override;
+	virtual FFIVSPinDataType GetPinDataType() override;
 	virtual FText GetName() override;
 	// End UFINScriptPin
 	
@@ -156,23 +158,40 @@ UCLASS()
 class UFIVSWildcardPin : public UFIVSPin {
 	GENERATED_BODY()
 protected:
-	EFINNetworkValueType DataType;
+	FFIVSPinDataType DataType;
 	EFIVSPinType PinType;
 	
 public:
 	// Begin UFINScriptPin
 	virtual EFIVSPinType GetPinType() override;
-	virtual EFINNetworkValueType GetPinDataType() override;
+	virtual FFIVSPinDataType GetPinDataType() override;
 	virtual bool CanConnect(UFIVSPin* Pin) override;
 	// End UFINScriptPin
 };
 
 DECLARE_DELEGATE_RetVal(TSharedRef<SWidget>, FFIVSNodeActionCreateTooltip)
+DECLARE_DELEGATE_OneParam(FFIVSNodeActionExecute, UFIVSNode*)
 
 struct FFIVSNodeAction {
+	/**
+	 * This is class is used to create the node when the action gets executed
+	 */
+	TSubclassOf<UFIVSNode> NodeType;
+	
+	/**
+	 * The text that is shown in the tree-view of the action selection menu
+	 */
 	FText Title;
 
-	FFIVSNodeActionCreateTooltip OnCreateTooltip;
+	/**
+	 * The category in which this node action should be shown in
+	 */
+	FText Category;
+
+	/**
+	 * The searchable text used by the text filter to determine if a given user query matches this node action
+	 */
+	FText SearchableText;
 	
 	/**
 	 * This array contains descriptions of all pins of the node action and is used to filter by context.
@@ -180,9 +199,16 @@ struct FFIVSNodeAction {
 	TArray<FFIVSFullPinType> Pins;
 	
 	/**
-	 * The searchable text used by the text filter to determine if a given user query matches this node action
+	 * This delegate gets called if the user wants to execute this action.
 	 */
-	FString SearchableText;
+	FFIVSNodeActionExecute OnExecute;
+
+	/**
+	 * This delegate gets called if the user hovers long enough over a action in the action selection menu
+	 * and a more detailed description of the action should appear, this delegate should create this
+	 * slate widget. If unbound, no tooltip will be shown.
+	 */
+	FFIVSNodeActionCreateTooltip OnCreateTooltip;
 };
 
 /**
@@ -192,7 +218,7 @@ struct FFIVSNodeAction {
  */
 DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphPinChanged, int, int);
 
-UCLASS()
+UCLASS(Abstract)
 class UFIVSNode : public UObject {
 	GENERATED_BODY()
 
@@ -202,6 +228,11 @@ public:
 	
 	FFINScriptGraphPinChanged OnPinChanged;
 
+	/**
+	 * Should create all pins of this node
+	 */
+	virtual void InitPins() {}
+	
 	/**
 	 * Returns the list of pins of this node
 	 */
@@ -243,14 +274,6 @@ public:
 	
 	// Begin UFINScriptNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override;
+	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
 	// End UFINScriptNode
-};
-
-USTRUCT()
-struct FFIVSNodeSignature {
-	GENERATED_BODY()
-
-	TArray<FFIVSFullPinType> Pins;
-	FText Name;
-	FText Description;
 };

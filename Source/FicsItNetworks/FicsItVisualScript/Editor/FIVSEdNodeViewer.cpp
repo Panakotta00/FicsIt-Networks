@@ -46,7 +46,7 @@ FReply SFIVSEdPinViewer::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
 
 FSlateColor SFIVSEdPinViewer::GetPinColor() const {
 	if (Pin->GetPinType() & FIVS_PIN_DATA) {
-		switch (Pin->GetPinDataType()) {
+		switch (Pin->GetPinDataType().GetType()) {
 		case FIN_BOOL:		return FLinearColor(FColor::FromHex("FF0000"));
 		case FIN_CLASS:		return FLinearColor(FColor::FromHex("AA00AA"));
 		case FIN_FLOAT:		return FLinearColor(FColor::FromHex("00FF00"));
@@ -126,7 +126,7 @@ void SFIVSEdPinViewer::SetPin(UFIVSPin* newPin) {
 		];
 		
 		TSharedPtr<SWidget> LiteralWidget;
-		switch (Pin->GetPinDataType()) {
+		switch (Pin->GetPinDataType().GetType()) {
 		case FIN_BOOL:
 			LiteralBox->SetContent(SNew(SCheckBox)
 			.OnCheckStateChanged_Lambda([this](ECheckBoxState InState) {

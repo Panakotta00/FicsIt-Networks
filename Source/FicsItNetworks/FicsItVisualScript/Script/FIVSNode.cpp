@@ -32,7 +32,7 @@ EFIVSPinType UFIVSPin::GetPinType() {
 	return FIVS_PIN_NONE;
 }
 
-EFINNetworkValueType UFIVSPin::GetPinDataType() {
+FFIVSPinDataType UFIVSPin::GetPinDataType() {
 	return FIN_NIL;
 }
 
@@ -45,24 +45,32 @@ FText UFIVSPin::GetName() {
 }
 
 bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
-	EFIVSPinType ThisPinType = GetPinType();
-	EFIVSPinType PinPinType = Pin->GetPinType();
-	EFINNetworkValueType ThisPinDataType = GetPinDataType();
-	EFINNetworkValueType PinPinDataType = Pin->GetPinDataType();
 	if (ConnectedPins.Contains(Pin) || Pin == this) return false;
-	if (!((PinPinType & FIVS_PIN_INPUT && ThisPinType & FIVS_PIN_OUTPUT) || (PinPinType & FIVS_PIN_OUTPUT && ThisPinType & FIVS_PIN_INPUT))) return false;
+
+	UFIVSPin* OutputPin = this;
+	UFIVSPin* InputPin = Pin;
+	EFIVSPinType OutputPinType = GetPinType();
+	EFIVSPinType InputPinType = Pin->GetPinType();
+	FFIVSPinDataType OutputPinDataType = GetPinDataType();
+	FFIVSPinDataType InputPinDataType = Pin->GetPinDataType();
+
+	// Swap Input and Output Pins if it makes sense to swap them
+	if (OutputPinType & FIVS_PIN_INPUT && InputPinType & FIVS_PIN_OUTPUT) {
+		Swap(OutputPinType, InputPinType);
+		Swap(OutputPinDataType, InputPinDataType);
+		Swap(OutputPin, InputPin);
+	}
+	if (!(OutputPinType & FIVS_PIN_OUTPUT && InputPinType & FIVS_PIN_INPUT)) return false;
 
 	bool bWouldFail = false;
-	if (ThisPinType & FIVS_PIN_DATA) {
+	if (OutputPinType & FIVS_PIN_DATA) {
 		bWouldFail = false;
-		if (!(PinPinType & FIVS_PIN_DATA)) bWouldFail = true;
-		else if (!((PinPinDataType == ThisPinDataType) ||
-            (PinPinDataType == FIN_ANY) ||
-            (ThisPinDataType == FIN_ANY))) bWouldFail = true;
+		if (!(InputPinType & FIVS_PIN_DATA)) bWouldFail = true;
+		else if (!OutputPinDataType.IsA(InputPinDataType) && OutputPinType != (FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT) && InputPinType != (FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT) /* Exclude wildcard pins with no yet defined state */) bWouldFail = true;
 	}
-	if (ThisPinType & FIVS_PIN_EXEC) {
+	if (bWouldFail && OutputPinType & FIVS_PIN_EXEC) {
 		bWouldFail = false;
-		if (!(PinPinType & FIVS_PIN_EXEC)) bWouldFail = true;
+		if (!(InputPinType & FIVS_PIN_EXEC)) bWouldFail = true;
 	}
 	if (bWouldFail) return false;
 
@@ -71,7 +79,7 @@ bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
 	bool bThisHasOutput = false;
 	bool bPinHasOutput = false;
 	TArray<UFIVSPin*> Connections;
-	GetAllConnected(Connections);
+	OutputPin->GetAllConnected(Connections);
 	for (UFIVSPin* Connection : Connections) {
 		if (Cast<UFIVSWildcardPin>(Connection)) continue;
 		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
@@ -82,7 +90,7 @@ bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
 		}
 	}
 	Connections.Empty();
-	Pin->GetAllConnected(Connections);
+	InputPin->GetAllConnected(Connections);
 	for (UFIVSPin* Connection : Connections) {
 		if (Cast<UFIVSWildcardPin>(Connection)) continue;
 		if (Connection->GetPinType() & FIVS_PIN_INPUT) {
@@ -93,9 +101,9 @@ bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
 		}
 	}
 
-	if (ThisPinType & FIVS_PIN_DATA) {
+	if (OutputPinType & FIVS_PIN_DATA) {
 		if (bThisHasInput && bPinHasInput) return false;
-	} else if (ThisPinType & FIVS_PIN_EXEC) {
+	} else if (OutputPinType & FIVS_PIN_EXEC) {
 		if (bThisHasOutput && bPinHasOutput) return false;
 	}
 	return true;
@@ -112,7 +120,7 @@ EFIVSPinType UFIVSGenericPin::GetPinType() {
 	return PinType;
 }
 
-EFINNetworkValueType UFIVSGenericPin::GetPinDataType() {
+FFIVSPinDataType UFIVSGenericPin::GetPinDataType() {
 	return PinDataType;
 }
 
@@ -151,10 +159,10 @@ EFIVSPinType UFIVSWildcardPin::GetPinType() {
 	return (EFIVSPinType)(Type | FIVS_PIN_INPUT | FIVS_PIN_OUTPUT);
 }
 
-EFINNetworkValueType UFIVSWildcardPin::GetPinDataType() {
+FFIVSPinDataType UFIVSWildcardPin::GetPinDataType() {
 	TArray<UFIVSPin*> Connected;
 	GetAllConnected(Connected);
-	EFINNetworkValueType Type = FIN_ANY;
+	FFIVSPinDataType Type = FIN_ANY;
 	for (UFIVSPin* Pin : Connected) {
 		if (Cast<UFIVSWildcardPin>(Pin)) continue;
 		Type = Pin->GetPinDataType();
@@ -180,4 +188,18 @@ UFIVSRerouteNode::UFIVSRerouteNode() {
 
 TArray<UFIVSPin*> UFIVSRerouteNode::GetNodePins() const {
 	return {Pin};
+}
+
+TArray<FFIVSNodeAction> UFIVSRerouteNode::GetNodeActions() const {
+	return {
+		{
+			UFIVSRerouteNode::StaticClass(),
+			FText::FromString("Create Reroute node"),
+			FText::FromString(""),
+			FText::FromString("Create Reroute Node"),
+			{
+				{FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FIN_ANY}
+			}
+		}
+	};
 }

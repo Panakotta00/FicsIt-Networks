@@ -3,6 +3,7 @@
 #include "FIVSRuntimeContext.h"
 #include "FicsItNetworks/FicsItKernel/Processor/Processor.h"
 #include "FicsItNetworks/FicsItVisualScript/FIVSStateEEPROM.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode_OnTick.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSScriptNode.h"
 #include "FIVSProcessor.generated.h"
 
@@ -79,7 +80,7 @@ public:
 		RuntimeContext = MakeShared<FFIVSRuntimeContext>(Graph, GetKernel());
 		MicroSteps.Empty();
 		for (UFIVSNode* Node : RuntimeContext->GetScript()->GetNodes()) {
-			if (Node->IsA<UFIVSNodeTick>()) {
+			if (Node->IsA<UFIVSNode_OnTick>()) {
 				MicroSteps.Add(FFIVSMicroStep(FIVS_STEP_PRENODE, Node, nullptr));
 				break;
 			}

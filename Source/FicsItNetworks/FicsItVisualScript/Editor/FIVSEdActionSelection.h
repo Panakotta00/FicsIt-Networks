@@ -90,7 +90,7 @@ public:
 	/**
 	 * returns the pins of the node action necessary for the context filter
 	 */
-	virtual FFIVSNodeSignature GetSignature() { return FFIVSNodeSignature(); }
+	virtual FFIVSNodeAction GetSignature() { return FFIVSNodeAction(); }
 	
 	/**
 	 * Constructs a widget that represents this action selection entry in the tree view
@@ -112,23 +112,20 @@ struct FFIVSEdActionSelectionAction : FFIVSEdActionSelectionEntry {
 
 DECLARE_DELEGATE_OneParam(FFIVSEdActionSelectionGenericActionInit, UFIVSScriptNode*)
 
-struct FFIVSEdActionSelectionScriptNodeAction : FFIVSEdActionSelectionAction {
+struct FFIVSEdActionSelectionNodeAction : FFIVSEdActionSelectionAction {
 private:
-	TSubclassOf<UFIVSScriptNode> ScriptNode = nullptr;
-	FFIVSNodeSignature NodeSignature;
+	FFIVSNodeAction NodeAction;
 	
 	FFINScriptNodeCreationContext Context;
 
 	FSlateColorBrush HighlightBrush = FSlateColorBrush(FColor::Orange);
 
 public:
-	FFIVSEdActionSelectionGenericActionInit Init;
-	
-	FFIVSEdActionSelectionScriptNodeAction(TSubclassOf<UFIVSScriptNode> ScriptNode, const FFIVSNodeSignature& NodeSignature, const FFINScriptNodeCreationContext& Context) : ScriptNode(ScriptNode), NodeSignature(NodeSignature), Context(Context) {}
+	FFIVSEdActionSelectionNodeAction(const FFIVSNodeAction& NodeAction, const FFINScriptNodeCreationContext& Context) : NodeAction(NodeAction), Context(Context) {}
 	
 	// Begin FFINScriptActionSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;
-	virtual FFIVSNodeSignature GetSignature() override;
+	virtual FFIVSNodeAction GetSignature() override { return NodeAction; }
 	virtual bool IsRelevant() const override { return true; }
 	// End FFINScriptActionSelectionEntry
 
@@ -147,6 +144,7 @@ struct FFIVSEdActionSelectionCategory : FFIVSEdActionSelectionEntry {
 	
 	// Begin FFINScriptNodeSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;
+	virtual FFIVSNodeAction GetSignature() { return FFIVSNodeAction{nullptr, Name}; }
 	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GetChildren() override { return Children; }
 	// End FFINScriptNodeSelectionEntry
 };
@@ -171,8 +169,7 @@ private:
 	TSharedPtr<SSearchBox> SearchBox;
 	
 	TSharedPtr<IMenu> Menu;
-	TSharedPtr<FFIVSEdActionSelectionEntry> SelectedEntry;
-
+	
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Source;
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Filtered;
 	TMap<TSharedPtr<FFIVSEdActionSelectionEntry>, TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>> FilteredChildren;

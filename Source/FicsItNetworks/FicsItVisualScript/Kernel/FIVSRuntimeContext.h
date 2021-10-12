@@ -53,6 +53,6 @@ public:
 	 * This function can be used to define the value that a data-output-pin currently returns
 	 */
 	void SetValue(UFIVSPin* InPin, FFINAnyNetworkValue Value) {
-		PinValues.FindOrAdd(InPin) = FINCastNetworkValue(Value, InPin->GetPinDataType());
+		PinValues.FindOrAdd(InPin) = FINCastNetworkValue(Value, InPin->GetPinDataType().GetType());
 	}
 };

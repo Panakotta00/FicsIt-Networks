@@ -12,7 +12,7 @@ FFIVSEdActionSelectionTextFilter::FFIVSEdActionSelectionTextFilter(const FString
 }
 
 bool FFIVSEdActionSelectionTextFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) {
-    FString FilterText = ToFilter->GetSignature().Name.ToString().Replace(TEXT(" "), TEXT(""));
+    FString FilterText = ToFilter->GetSignature().Title.ToString().Replace(TEXT(" "), TEXT(""));
     bool bIsValid = true;
     float MatchLength = 0.0f;
     for (const FString& Token : FilterTokens) {
@@ -69,32 +69,29 @@ void FFIVSEdActionSelectionTextFilter::SetFilterText(const FString& FilterText) 
 	}
 }
 
-TSharedRef<SWidget> FFIVSEdActionSelectionScriptNodeAction::GetTreeWidget() {
+TSharedRef<SWidget> FFIVSEdActionSelectionNodeAction::GetTreeWidget() {
 	return SNew(STextBlock)
 	.Text_Lambda([this]() {
-		return NodeSignature.Name;
+		return NodeAction.Title;
 	})
 	.HighlightText_Lambda([this](){ return HighlightText; })
 	.HighlightColor(FLinearColor(FColor::Yellow))
 	.HighlightShape(&HighlightBrush);
 }
 
-FFIVSNodeSignature FFIVSEdActionSelectionScriptNodeAction::GetSignature() {
-	return NodeSignature;
-}
-
-void FFIVSEdActionSelectionScriptNodeAction::ExecuteAction() {
-	UFIVSScriptNode* Node = NewObject<UFIVSScriptNode>(Context.Graph, ScriptNode);
+void FFIVSEdActionSelectionNodeAction::ExecuteAction() {
+	UFIVSNode* Node = NewObject<UFIVSNode>(Context.Graph, NodeAction.NodeType);
 	Node->Pos = Context.CreationLocation;
-	Init.ExecuteIfBound(Node);
+	NodeAction.OnExecute.ExecuteIfBound(Node);
 	Node->InitPins();
+	Context.Graph->AddNode(Node);
+
 	for (UFIVSPin* Pin : Node->GetNodePins()) {
 		if (Context.Pin && Pin->CanConnect(Context.Pin)) {
 			Pin->AddConnection(Context.Pin);
 			break;
 		}
 	}
-	Context.Graph->AddNode(Node);
 }
 
 TSharedRef<SWidget> FFIVSEdActionSelectionCategory::GetTreeWidget() {
@@ -187,8 +184,14 @@ FReply SFIVSEdActionSelection::OnKeyDown(const FGeometry& MyGeometry, const FKey
 		return FReply::Handled();
 	}
 	if (InKeyEvent.GetKey() == EKeys::Enter) {
-		ExecuteEntry(SelectedEntry);
-		Close();
+		TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> SelectedItems = View->GetSelectedItems();
+		if (SelectedItems.Num() > 0) {
+			TSharedPtr<FFIVSEdActionSelectionEntry> Selected = SelectedItems[0];
+			if (Selected->IsRelevant()) {
+				ExecuteEntry(View->GetSelectedItems()[0]);
+				Close();
+			}
+		}
 	}
 	return SCompoundWidget::OnKeyDown(MyGeometry, InKeyEvent);
 }
@@ -248,6 +251,9 @@ void SFIVSEdActionSelection::Filter_Internal(TSharedPtr<FFIVSEdActionSelectionEn
 void SFIVSEdActionSelection::ExpandAll() {
 	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Filtered) {
 		View->SetItemExpansion(Entry, true);
+	}
+	for (TTuple<TSharedPtr<FFIVSEdActionSelectionEntry>, TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>> Entry : FilteredChildren) {
+		View->SetItemExpansion(Entry.Key, true);
 	}
 }
 
