@@ -217,6 +217,17 @@ void SFIVSEdActionSelection::ResetFilters() {
 	for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
 		Filter->Reset();
 	}
+	AllRelevant.Empty();
+	TFunction<void(const TSharedPtr<FFIVSEdActionSelectionEntry>&)> AddRelevant;
+	AddRelevant = [&AddRelevant, this](const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
+		if (Entry->IsRelevant()) AllRelevant.Add(Entry);
+		for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : Entry->GetChildren()) {
+			AddRelevant(Child);
+		}
+	};
+	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Filtered) {
+		AddRelevant(Entry);
+	}
 }
 
 void SFIVSEdActionSelection::SetMenu(const TSharedPtr<IMenu>& inMenu) {
@@ -239,13 +250,16 @@ void SFIVSEdActionSelection::Filter_Internal(TSharedPtr<FFIVSEdActionSelectionEn
 	if (!bForceAdd) for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
 		bBeginForce = bBeginForce && Filter->Filter(Entry);
 	}
-	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>& Entries = FilteredChildren.FindOrAdd(Entry);
+	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> EnabledChildren;
 	for (TSharedPtr<FFIVSEdActionSelectionEntry> Child : Entry->GetChildren()) {
 		Filter_Internal(Child, bForceAdd || bBeginForce);
-		if (Child->bIsEnabled) Entries.Add(Child);
+		if (Child->bIsEnabled) EnabledChildren.Add(Child);
 	}
-	if (Entries.Num() < 1) FilteredChildren.Remove(Entry);
-	else Entry->bIsEnabled = true;
+	if (EnabledChildren.Num() > 0) {
+		FilteredChildren.FindOrAdd(Entry).Append(EnabledChildren);
+		Entry->bIsEnabled = true;
+	} else if (!bBeginForce) Entry->bIsEnabled = false;
+	if (Entry->bIsEnabled && Entry->IsRelevant()) AllRelevant.Add(Entry);
 }
 
 void SFIVSEdActionSelection::ExpandAll() {
@@ -276,21 +290,21 @@ void SFIVSEdActionSelection::SelectRelevant(const TSharedPtr<FFIVSEdActionSelect
 }
 
 void SFIVSEdActionSelection::SelectNext() {
-	if (Filtered.Num() < 1) return;
+	if (AllRelevant.Num() < 1) return;
 	int SelectedIndex = -1;
-	if (View->GetSelectedItems().Num() > 0) SelectedIndex = Filtered.Find(View->GetSelectedItems()[0]);
+	if (View->GetSelectedItems().Num() > 0) SelectedIndex = AllRelevant.Find(View->GetSelectedItems()[0]);
 	++SelectedIndex;
-	if (SelectedIndex >= Filtered.Num()) SelectedIndex = 0;
-	SelectRelevant(FindNextRelevant(Filtered[SelectedIndex]));
+	if (SelectedIndex >= AllRelevant.Num()) SelectedIndex = 0;
+	SelectRelevant(FindNextRelevant(AllRelevant[SelectedIndex]));
 }
 
 void SFIVSEdActionSelection::SelectPrevious() {
-	if (Filtered.Num() < 1) return;
-	int SelectedIndex = Filtered.Num()-1;
-	if (View->GetSelectedItems().Num() > 0) SelectedIndex = Filtered.Find(View->GetSelectedItems()[0]);
+	if (AllRelevant.Num() < 1) return;
+	int SelectedIndex = AllRelevant.Num()-1;
+	if (View->GetSelectedItems().Num() > 0) SelectedIndex = AllRelevant.Find(View->GetSelectedItems()[0]);
 	--SelectedIndex;
-	if (SelectedIndex < Filtered.Num()) SelectedIndex = Filtered.Num()-1;
-	SelectRelevant(FindNextRelevant(Filtered[SelectedIndex]));
+	if (SelectedIndex < 0) SelectedIndex = AllRelevant.Num()-1;
+	SelectRelevant(FindNextRelevant(AllRelevant[SelectedIndex]));
 }
 
 void SFIVSEdActionSelection::Close() {

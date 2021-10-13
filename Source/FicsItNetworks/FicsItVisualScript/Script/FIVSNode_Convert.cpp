@@ -12,6 +12,7 @@ TArray<FFIVSNodeAction> UFIVSNode_Convert::GetNodeActions() const {
 			// Checks if default conversion of input and output type works
 			if (FINCastNetworkValue(FFINAnyNetworkValue(ConvertFromType), ConvertToType).GetType() != FIN_NIL) {
 				FFIVSNodeAction Action;
+				Action.NodeType = UFIVSNode_Convert::StaticClass();
 				Action.Title = FText::FromString(TEXT("Convert ") + FINGetNetworkValueTypeName(ConvertFromType) + TEXT(" to ") + FINGetNetworkValueTypeName(ConvertToType));
 				Action.SearchableText = Action.Title;
 				Action.Category = FText::FromString(TEXT("Conversions"));

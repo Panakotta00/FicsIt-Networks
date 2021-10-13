@@ -173,6 +173,7 @@ private:
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Source;
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Filtered;
 	TMap<TSharedPtr<FFIVSEdActionSelectionEntry>, TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>> FilteredChildren;
+	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> AllRelevant;
 
 	TArray<TSharedPtr<FFIVSEdActionSelectionFilter>> Filters;
 	TSharedPtr<FFIVSEdActionSelectionTextFilter> TextFilter;
