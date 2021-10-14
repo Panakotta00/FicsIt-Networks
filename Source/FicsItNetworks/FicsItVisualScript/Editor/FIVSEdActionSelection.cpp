@@ -12,7 +12,7 @@ FFIVSEdActionSelectionTextFilter::FFIVSEdActionSelectionTextFilter(const FString
 }
 
 bool FFIVSEdActionSelectionTextFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) {
-    FString FilterText = ToFilter->GetSignature().Title.ToString().Replace(TEXT(" "), TEXT(""));
+    FString FilterText = ToFilter->GetSignature().SearchableText.ToString().Replace(TEXT(" "), TEXT(""));
     bool bIsValid = true;
     float MatchLength = 0.0f;
     for (const FString& Token : FilterTokens) {
@@ -238,6 +238,7 @@ void SFIVSEdActionSelection::Filter() {
 	ResetFilters();
 	Filtered.Empty();
 	FilteredChildren.Empty();
+	AllRelevant.Empty();
 	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Source) {
 		Filter_Internal(Entry, false);
 		if (Entry->bIsEnabled) Filtered.Add(Entry);
@@ -295,7 +296,7 @@ void SFIVSEdActionSelection::SelectNext() {
 	if (View->GetSelectedItems().Num() > 0) SelectedIndex = AllRelevant.Find(View->GetSelectedItems()[0]);
 	++SelectedIndex;
 	if (SelectedIndex >= AllRelevant.Num()) SelectedIndex = 0;
-	SelectRelevant(FindNextRelevant(AllRelevant[SelectedIndex]));
+	SelectRelevant(AllRelevant[SelectedIndex]);
 }
 
 void SFIVSEdActionSelection::SelectPrevious() {
@@ -304,7 +305,7 @@ void SFIVSEdActionSelection::SelectPrevious() {
 	if (View->GetSelectedItems().Num() > 0) SelectedIndex = AllRelevant.Find(View->GetSelectedItems()[0]);
 	--SelectedIndex;
 	if (SelectedIndex < 0) SelectedIndex = AllRelevant.Num()-1;
-	SelectRelevant(FindNextRelevant(AllRelevant[SelectedIndex]));
+	SelectRelevant(AllRelevant[SelectedIndex]);
 }
 
 void SFIVSEdActionSelection::Close() {

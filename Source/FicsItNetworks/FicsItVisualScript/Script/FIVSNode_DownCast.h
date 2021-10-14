@@ -21,8 +21,6 @@ private:
 	bool bPure = true;
 
 	UPROPERTY()
-	UFINClass* FromClass = nullptr;
-	UPROPERTY()
 	UFINClass* ToClass = nullptr;
 	
 public:
