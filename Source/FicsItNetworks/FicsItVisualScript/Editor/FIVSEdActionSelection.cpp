@@ -21,12 +21,10 @@ bool FFIVSEdActionSelectionTextFilter::Filter(TSharedPtr<FFIVSEdActionSelectionE
     	}
     	MatchLength += Token.Len();
     }
-    if (bIsValid) {
+    if (bIsValid && ToFilter->bIsEnabled) {
     	float MatchPercentage = MatchLength / ((float)FilterText.Len());
-    	if (BestMatchPercentage < MatchPercentage) {
-    		BestMatchPercentage = MatchPercentage;
-    		BestMatch = ToFilter;
-    	}
+    	TSharedPtr<FFIVSEdActionSelectionEntry>* Entry = BestMatch.Find(MatchPercentage);
+    	if (!Entry || !Entry->Get()->bIsEnabled) BestMatch.FindOrAdd(MatchPercentage) = ToFilter;
     }
     if (bIsValid) {
     	ToFilter->bIsEnabled = true;
@@ -42,8 +40,8 @@ void FFIVSEdActionSelectionTextFilter::OnFiltered(TSharedPtr<FFIVSEdActionSelect
 }
 
 void FFIVSEdActionSelectionTextFilter::Reset() {
-	BestMatch = nullptr;
-	BestMatchPercentage = 0.0f;
+	BestMatch.Empty();
+	SetFilterText(TEXT(""));
 }
 
 FString FFIVSEdActionSelectionTextFilter::GetFilterText() {
@@ -67,6 +65,17 @@ void FFIVSEdActionSelectionTextFilter::SetFilterText(const FString& FilterText) 
 			TokenList = "";
 		}
 	}
+}
+
+bool FFIVSEdActionSelectionPinFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) {
+	if (FilterPinType.DataType.GetType() == FIN_NIL) return true;
+	for (const FFIVSFullPinType& Pin : ToFilter->GetSignature().Pins) {
+		if (FilterPinType.CanConnect(Pin)) {
+			return true;
+		}
+	}
+	ToFilter->bIsEnabled = false;
+	return false;
 }
 
 TSharedRef<SWidget> FFIVSEdActionSelectionNodeAction::GetTreeWidget() {
@@ -104,9 +113,10 @@ TSharedRef<SWidget> FFIVSEdActionSelectionCategory::GetTreeWidget() {
     .HighlightShape(&HighlightBrush);
 }
 
-void SFIVSEdActionSelection::Construct(const FArguments& InArgs) {
+void SFIVSEdActionSelection::Construct(const FArguments& InArgs, const FFIVSFullPinType& ContextPin) {
 	bContextSensitive = InArgs._ContextSensetive.Get();
 	OnActionExecuted = InArgs._OnActionExecuted;
+	PinFilter->SetFilterPin(ContextPin);
 
 	ChildSlot[
 		SNew(SBorder)
@@ -130,7 +140,17 @@ void SFIVSEdActionSelection::Construct(const FArguments& InArgs) {
 					Filter();
 					View->RequestTreeRefresh();
 					ExpandAll();
-					if (TextFilter->BestMatch.IsValid()) SelectRelevant(FindNextRelevant(TextFilter->BestMatch));
+					TArray<float> Keys;
+					TextFilter->BestMatch.GetKeys(Keys);
+					Keys.Sort();
+					for (int i = 0; i < Keys.Num(); ++i) {
+						TSharedPtr<FFIVSEdActionSelectionEntry> Match = TextFilter->BestMatch[Keys[i]];
+						if (Match->bIsEnabled) {
+							SelectRelevant(Match);
+							return;
+						}
+					}
+					if (AllRelevant.Num() > 0) SelectRelevant(AllRelevant[0]);
 				})
 			]
 			+SGridPanel::Slot(0, 3).ColumnSpan(2)[
@@ -163,6 +183,8 @@ void SFIVSEdActionSelection::Construct(const FArguments& InArgs) {
 	];
 
 	SearchBox->SetOnKeyDownHandler(FOnKeyDown::CreateSP(this, &SFIVSEdActionSelection::OnKeyDown));
+
+	ExpandAll();
 }
 
 void SFIVSEdActionSelection::SetFocus() {
@@ -171,7 +193,9 @@ void SFIVSEdActionSelection::SetFocus() {
 
 SFIVSEdActionSelection::SFIVSEdActionSelection() {
 	TextFilter = MakeShared<FFIVSEdActionSelectionTextFilter>(TEXT(""));
+	PinFilter = MakeShared<FFIVSEdActionSelectionPinFilter>(FFIVSFullPinType(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FIN_NIL));
 	Filters.Add(TextFilter);
+	Filters.Add(PinFilter);
 }
 
 FReply SFIVSEdActionSelection::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
@@ -212,22 +236,14 @@ void SFIVSEdActionSelection::ClearSource() {
 }
 
 void SFIVSEdActionSelection::ResetFilters() {
-	Filtered = Source;
+	Filtered.Empty();
 	FilteredChildren.Empty(); 
+	AllRelevant.Empty();
 	for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
 		Filter->Reset();
 	}
-	AllRelevant.Empty();
-	TFunction<void(const TSharedPtr<FFIVSEdActionSelectionEntry>&)> AddRelevant;
-	AddRelevant = [&AddRelevant, this](const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
-		if (Entry->IsRelevant()) AllRelevant.Add(Entry);
-		for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : Entry->GetChildren()) {
-			AddRelevant(Child);
-		}
-	};
-	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Filtered) {
-		AddRelevant(Entry);
-	}
+	Filter();
+	ExpandAll();
 }
 
 void SFIVSEdActionSelection::SetMenu(const TSharedPtr<IMenu>& inMenu) {
@@ -235,7 +251,6 @@ void SFIVSEdActionSelection::SetMenu(const TSharedPtr<IMenu>& inMenu) {
 }
 
 void SFIVSEdActionSelection::Filter() {
-	ResetFilters();
 	Filtered.Empty();
 	FilteredChildren.Empty();
 	AllRelevant.Empty();
@@ -247,9 +262,9 @@ void SFIVSEdActionSelection::Filter() {
 
 void SFIVSEdActionSelection::Filter_Internal(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, bool bForceAdd) {
 	Entry->bIsEnabled = true;
-	bool bBeginForce = true;
+	bool bBeginForce = false;
 	if (!bForceAdd) for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
-		bBeginForce = bBeginForce && Filter->Filter(Entry);
+		bBeginForce = Filter->Filter(Entry) && bBeginForce;
 	}
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> EnabledChildren;
 	for (TSharedPtr<FFIVSEdActionSelectionEntry> Child : Entry->GetChildren()) {
@@ -259,21 +274,25 @@ void SFIVSEdActionSelection::Filter_Internal(TSharedPtr<FFIVSEdActionSelectionEn
 	if (EnabledChildren.Num() > 0) {
 		FilteredChildren.FindOrAdd(Entry).Append(EnabledChildren);
 		Entry->bIsEnabled = true;
-	} else if (!bBeginForce) Entry->bIsEnabled = false;
+	}
 	if (Entry->bIsEnabled && Entry->IsRelevant()) AllRelevant.Add(Entry);
 }
 
 void SFIVSEdActionSelection::ExpandAll() {
+	TFunction<void(const TSharedPtr<FFIVSEdActionSelectionEntry>&)> ExpandAllChildren;
+	ExpandAllChildren = [this, &ExpandAllChildren](const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
+		this->View->SetItemExpansion(Entry, true);
+		for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : Entry->GetChildren()) ExpandAllChildren(Child);
+	};
 	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Filtered) {
 		View->SetItemExpansion(Entry, true);
-	}
-	for (TTuple<TSharedPtr<FFIVSEdActionSelectionEntry>, TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>> Entry : FilteredChildren) {
-		View->SetItemExpansion(Entry.Key, true);
+		ExpandAllChildren(Entry);
 	}
 }
 
-TSharedPtr<FFIVSEdActionSelectionEntry> FindNextChildRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
-	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : Entry->GetChildren()) {
+TSharedPtr<FFIVSEdActionSelectionEntry> SFIVSEdActionSelection::FindNextChildRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
+	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>>* Children = FilteredChildren.Find(Entry);
+	if (Children) for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Child : *Children) {
 		if (Entry->IsRelevant()) return Entry;
 		TSharedPtr<FFIVSEdActionSelectionEntry> FoundEntry = FindNextChildRelevant(Child);
 		if (FoundEntry.IsValid()) return FoundEntry;
@@ -281,13 +300,26 @@ TSharedPtr<FFIVSEdActionSelectionEntry> FindNextChildRelevant(const TSharedPtr<F
 	return nullptr;
 }
 
-TSharedPtr<FFIVSEdActionSelectionEntry> SFIVSEdActionSelection::FindNextRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
-	if (Entry->IsRelevant()) return Entry;
-	return FindNextChildRelevant(Entry);
+TSharedPtr<FFIVSEdActionSelectionEntry> SFIVSEdActionSelection::FindNextRelevant(TSharedPtr<FFIVSEdActionSelectionEntry> Entry) {
+	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Keys;
+	FilteredChildren.GetKeys(Keys);
+	int Index;
+	do {
+		if (Entry->IsRelevant()) return Entry;
+		TSharedPtr<FFIVSEdActionSelectionEntry> FoundChild = FindNextChildRelevant(Entry);
+		if (FoundChild.IsValid()) return FoundChild;
+		Index = Keys.Find(Entry);
+		if (Index == INDEX_NONE) {
+			Index = Filtered.Find(Entry);
+			if (Index != INDEX_NONE) Entry = Filtered[abs((Index + 1) % Filtered.Num())];
+		} else Entry = Keys[abs((Index + 1) % Keys.Num())];
+	} while (Index != INDEX_NONE);
+	return nullptr;
 }
 
 void SFIVSEdActionSelection::SelectRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
-	View->SetSelection(Entry, ESelectInfo::Direct);
+	View->SetSelection(Entry);
+	View->RequestScrollIntoView(Entry);
 }
 
 void SFIVSEdActionSelection::SelectNext() {

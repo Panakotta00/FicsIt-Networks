@@ -28,6 +28,28 @@ void UFIVSPin::RemoveConnection(UFIVSPin* Pin) {
 	if (Pin->ConnectedPins.Contains(this)) Pin->ConnectedPins.Remove(this);
 }
 
+bool FFIVSFullPinType::CanConnect(const FFIVSFullPinType& Other) const {
+	const FFIVSFullPinType* Output = this;
+	const FFIVSFullPinType* Input = &Other;
+	if (Output->PinType & FIVS_PIN_INPUT && Input->PinType & FIVS_PIN_OUTPUT) {
+		Swap(Output, Input);
+	}
+	if (!(Output->PinType & FIVS_PIN_OUTPUT && Input->PinType & FIVS_PIN_INPUT)) return false;
+	
+	bool bWouldFail = true;
+	if (Output->PinType & FIVS_PIN_DATA) {
+		bWouldFail = false;
+		if (!(Input->PinType & FIVS_PIN_DATA)) bWouldFail = true;
+		else if (!Output->DataType.IsA(Input->DataType) && Output->PinType != (FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT) && Input->PinType != (FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT) /* Exclude wildcard pins with no yet defined state */) bWouldFail = true;
+	}
+	if (bWouldFail && Output->PinType & FIVS_PIN_EXEC) {
+		bWouldFail = false;
+		if (!(Input->PinType & FIVS_PIN_EXEC)) bWouldFail = true;
+	}
+	if (bWouldFail) return false;
+	return true;
+}
+
 EFIVSPinType UFIVSPin::GetPinType() {
 	return FIVS_PIN_NONE;
 }
@@ -61,19 +83,9 @@ bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
 		Swap(OutputPin, InputPin);
 	}
 	if (!(OutputPinType & FIVS_PIN_OUTPUT && InputPinType & FIVS_PIN_INPUT)) return false;
-
-	bool bWouldFail = false;
-	if (OutputPinType & FIVS_PIN_DATA) {
-		bWouldFail = false;
-		if (!(InputPinType & FIVS_PIN_DATA)) bWouldFail = true;
-		else if (!OutputPinDataType.IsA(InputPinDataType) && OutputPinType != (FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT) && InputPinType != (FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT) /* Exclude wildcard pins with no yet defined state */) bWouldFail = true;
-	}
-	if (bWouldFail && OutputPinType & FIVS_PIN_EXEC) {
-		bWouldFail = false;
-		if (!(InputPinType & FIVS_PIN_EXEC)) bWouldFail = true;
-	}
-	if (bWouldFail) return false;
-
+	
+	if (!FFIVSFullPinType(OutputPinType, OutputPinDataType).CanConnect(FFIVSFullPinType(InputPinType, InputPinDataType))) return false;
+	
 	bool bThisHasInput = false;
 	bool bPinHasInput = false;
 	bool bThisHasOutput = false;

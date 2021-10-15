@@ -85,7 +85,7 @@ public:
 		return true;
 	}
 
-	bool IsA(const FFINExpandedNetworkValueType& Other);
+	bool IsA(const FFINExpandedNetworkValueType& Other) const;
 
 	EFINNetworkValueType GetType() const { return Type; }
 

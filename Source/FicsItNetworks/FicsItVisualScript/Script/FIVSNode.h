@@ -48,6 +48,8 @@ struct FFIVSFullPinType {
 		}
 		DataType = FFINExpandedNetworkValueType(Property);
 	}
+
+	bool CanConnect(const FFIVSFullPinType& Other) const;
 };
 
 UCLASS(Abstract)

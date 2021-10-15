@@ -29,7 +29,7 @@ FFINExpandedNetworkValueType::FFINExpandedNetworkValueType(UFINProperty* Propert
 	}
 }
 
-bool FFINExpandedNetworkValueType::IsA(const FFINExpandedNetworkValueType& Other) {
+bool FFINExpandedNetworkValueType::IsA(const FFINExpandedNetworkValueType& Other) const {
 	if (Other.Type == FIN_ANY) return true;
 	if (Type != Other.Type) return false;
 	if (Type == FIN_ARRAY) return SubType->IsA(*Other.SubType);

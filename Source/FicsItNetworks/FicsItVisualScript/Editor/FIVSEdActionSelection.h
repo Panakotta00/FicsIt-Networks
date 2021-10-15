@@ -42,8 +42,7 @@ private:
 	void CallFilterValid(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnFiltered);
 	
 public:
-	TSharedPtr<FFIVSEdActionSelectionEntry> BestMatch;
-	float BestMatchPercentage = 0.0f;
+	TMap<float, TSharedPtr<FFIVSEdActionSelectionEntry>> BestMatch;
 	
 	FFIVSEdActionSelectionTextFilter(const FString& FilterText);
 	
@@ -62,6 +61,25 @@ public:
 	 * Generates a new token list of the given string
 	 */
 	void SetFilterText(const FString& FilterText);
+};
+
+struct FFIVSEdActionSelectionPinFilter : FFIVSEdActionSelectionFilter {
+private:
+	FFIVSFullPinType FilterPinType;
+
+public:
+	FFIVSEdActionSelectionPinFilter(FFIVSFullPinType InFilterPinType) : FilterPinType(InFilterPinType) {}
+
+	// Begin FFIVSEdActionSelectionFilter
+	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) override;
+	virtual void Reset() override {
+		//SetFilterPin(FFIVSFullPinType(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT));
+	}
+	// End FFIVSEdActionSelectionFilter
+
+	void SetFilterPin(const FFIVSFullPinType& InFilterPin) {
+		FilterPinType = InFilterPin;
+	}
 };
 
 struct FFIVSEdActionSelectionEntry : TSharedFromThis<FFIVSEdActionSelectionEntry> {
@@ -158,7 +176,7 @@ public:
 	SLATE_END_ARGS()
 
 public:
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, const FFIVSFullPinType& ContextPin = FFIVSFullPinType(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT));
 	void SetFocus();
 
 private:
@@ -177,6 +195,7 @@ private:
 
 	TArray<TSharedPtr<FFIVSEdActionSelectionFilter>> Filters;
 	TSharedPtr<FFIVSEdActionSelectionTextFilter> TextFilter;
+	TSharedPtr<FFIVSEdActionSelectionPinFilter> PinFilter;
 	
 	FSlateColorBrush BackgroundBrush = FSlateColorBrush(FLinearColor(0.02, 0.02, 0.02));
 public:
@@ -227,7 +246,8 @@ public:
 	 * Returns the next action next to the given entry or the entry it self if it is an action.
 	 * nullptr if no action is found.
 	 */
-	TSharedPtr<FFIVSEdActionSelectionEntry> FindNextRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry);
+	TSharedPtr<FFIVSEdActionSelectionEntry> FindNextRelevant(TSharedPtr<FFIVSEdActionSelectionEntry> Entry);
+	TSharedPtr<FFIVSEdActionSelectionEntry> FindNextChildRelevant(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry);
 	
 	/**
 	 * Selects the given action
