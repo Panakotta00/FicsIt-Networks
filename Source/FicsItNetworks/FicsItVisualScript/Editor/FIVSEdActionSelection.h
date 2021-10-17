@@ -1,12 +1,11 @@
 ﻿#pragma once
 
 #include "SlateBasics.h"
-#include "FicsItNetworks/FicsItVisualScript/Script/FIVSScriptNode.h"
-#include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
-#include "FicsItNetworks/Reflection/FINFunction.h"
-#include "FicsItNetworks/Reflection/FINStruct.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode.h"
 #include "Framework/Text/SyntaxHighlighterTextLayoutMarshaller.h"
 #include "Widgets/Input/SSearchBox.h"
+
+class UFIVSScriptNode;
 
 struct FFIVSEdActionSelectionAction;
 DECLARE_DELEGATE_OneParam(FFINScriptActionSelectionOnActionExecuted, const TSharedPtr<FFIVSEdActionSelectionAction>&);

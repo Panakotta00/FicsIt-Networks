@@ -1,12 +1,14 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FicsItNetworks/FicsItVisualScript/Editor/FIVSEdGraphViewer.h"
 #include "FicsItNetworks/Network/FINNetworkValues.h"
-#include "FicsItNetworks/Reflection/FINFunction.h"
 #include "FicsItNetworks/Reflection/FINProperty.h"
-#include "FicsItNetworks/UI/FINReflectionUIContext.h"
 #include "FIVSNode.generated.h"
 
+struct FFIVSEdStyle;
+class UFIVSGraph;
+class SFIVSEdNodeViewer;
 class UFIVSNode;
 
 UENUM()
@@ -247,6 +249,11 @@ public:
 	virtual TArray<FFIVSNodeAction> GetNodeActions() const { return TArray<FFIVSNodeAction>(); }
 
 	/**
+	 * Returns a SFIVSEdNodeViewer that is used to display this node in a graph editor.
+	 */
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const;
+	
+	/**
 	 * Removes all connections of all pins
 	 */
 	void RemoveAllConnections();
@@ -261,6 +268,11 @@ public:
 		}
 		return true;
 	}
+
+	/**
+	 * Retruns the outer/parent graph of this node
+	 */
+	UFIVSGraph* GetOuterGraph() const;
 };
 
 UCLASS()
@@ -277,5 +289,6 @@ public:
 	// Begin UFINScriptNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override;
 	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const override;
 	// End UFINScriptNode
 };

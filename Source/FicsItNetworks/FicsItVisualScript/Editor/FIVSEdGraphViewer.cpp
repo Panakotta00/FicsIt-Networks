@@ -432,8 +432,7 @@ void SFIVSEdGraphViewer::SetGraph(UFIVSGraph* NewGraph) {
 }
 
 void SFIVSEdGraphViewer::CreateNodeAsChild(UFIVSNode* Node) {
-	TSharedRef<SFIVSEdNodeViewer> Child = SNew(SFIVSEdNodeViewer, this, Node)
-	.Style(Style);
+	TSharedRef<SFIVSEdNodeViewer> Child = Node->CreateNodeViewer(this, Style);
 	Children.Add(Child);
 	NodeToChild.Add(Node, Child);
 }

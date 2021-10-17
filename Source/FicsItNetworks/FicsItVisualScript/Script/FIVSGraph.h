@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-
-#include "FIVSNode.h"
 #include "FIVSGraph.generated.h"
+
+class UFIVSNode;
 
 /**
  * Notifies if the node list of the graph has changed.

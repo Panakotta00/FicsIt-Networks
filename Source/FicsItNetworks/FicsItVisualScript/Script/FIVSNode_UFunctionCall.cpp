@@ -1,5 +1,5 @@
 #include "FIVSNode_UFunctionCall.h"
-
+#include "FicsItNetworks/FicsItVisualScript/Editor/FIVSEdNodeViewer.h"
 #include "FIVSMathLib.h"
 #include "UObject/PropertyIterator.h"
 
@@ -74,6 +74,11 @@ TArray<FFIVSNodeAction> UFIVSNode_UFunctionCall::GetNodeActions() const {
 
 FString UFIVSNode_UFunctionCall::GetNodeName() const {
 	return Function->GetName();
+}
+
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode_UFunctionCall::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const {
+	return SNew(SFIVSEdOperatorNodeViewer, GraphViewer, this)
+	.Style(Style);
 }
 
 TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {

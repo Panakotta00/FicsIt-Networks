@@ -2,9 +2,7 @@
 
 #include "FIVSNode.h"
 #include "FicsItNetworks/FicsItVisualScript/Kernel/FIVSRuntimeContext.h"
-#include "FicsItNetworks/Network/FINNetworkUtils.h"
 #include "FicsItNetworks/Reflection/FINClass.h"
-#include "FicsItNetworks/Reflection/FINReflection.h"
 #include "FIVSScriptNode.generated.h"
 
 UCLASS(Abstract)

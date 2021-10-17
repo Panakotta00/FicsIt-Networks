@@ -1,4 +1,6 @@
 ﻿#include "FIVSNode.h"
+#include "FicsItNetworks/FicsItVisualScript/Editor/FIVSEdNodeViewer.h"
+#include "FIVSGraph.h"
 
 void UFIVSPin::GetAllConnected(TArray<UFIVSPin*>& Searches) {
 	if (Searches.Contains(this)) return;
@@ -187,10 +189,19 @@ bool UFIVSWildcardPin::CanConnect(UFIVSPin* Pin) {
 	return UFIVSPin::CanConnect(Pin);
 }
 
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const {
+	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
+	.Style(Style);
+}
+
 void UFIVSNode::RemoveAllConnections() {
 	for (UFIVSPin* Pin : GetNodePins()) {
 		Pin->RemoveAllConnections();
 	}
+}
+
+UFIVSGraph* UFIVSNode::GetOuterGraph() const {
+	return Cast<UFIVSGraph>(GetOuter());
 }
 
 UFIVSRerouteNode::UFIVSRerouteNode() {
@@ -214,4 +225,9 @@ TArray<FFIVSNodeAction> UFIVSRerouteNode::GetNodeActions() const {
 			}
 		}
 	};
+}
+
+TSharedRef<SFIVSEdNodeViewer> UFIVSRerouteNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const {
+	return SNew(SFIVSEdRerouteNodeViewer, GraphViewer, this)
+	.Style(Style);
 }

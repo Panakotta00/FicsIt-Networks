@@ -2,8 +2,9 @@
 
 #include "FIVSEdStyle.h"
 #include "SlateBasics.h"
-#include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode.h"
 
+class UFIVSNode;
+class UFIVSPin;
 class SFIVSEdGraphViewer;
 class SFIVSEdNodeViewer;
 
@@ -68,33 +69,22 @@ private:
 };
 
 class SFIVSEdNodeViewer : public SCompoundWidget {
-	SLATE_BEGIN_ARGS(SFIVSEdNodeViewer) :
-		_Style(&FFIVSEdStyle::GetDefault()) {}
-	SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+	SLATE_BEGIN_ARGS(SFIVSEdNodeViewer) {}
 	SLATE_END_ARGS()
 	
 public:
 	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
 	
 private:
-	const FFIVSEdStyle* Style = nullptr;
 	UFIVSNode* Node = nullptr;
-	SFIVSEdGraphViewer* GraphViewer;
+	SFIVSEdGraphViewer* GraphViewer = nullptr;
 	
-	TSharedPtr<SVerticalBox> InputPinBox;
-	TSharedPtr<SVerticalBox> OutputPinBox;
-	
+protected:
 	TArray<TSharedRef<SFIVSEdPinViewer>> PinWidgets;
 	TMap<UFIVSPin*, TSharedRef<SFIVSEdPinViewer>> PinToWidget;
 	
-	FSlateColorBrush OutlineBrush = FSlateColorBrush(FLinearColor(1,1,1));
-	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::FromHex("222222"));
-	FSlateColorBrush HeaderBrush = FSlateColorBrush(FColor::FromHex("b04600"));
-	
 public:
 	bool bSelected = false;
-	
-	SFIVSEdNodeViewer();
 	
 	// Begin SWidget
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
@@ -104,13 +94,6 @@ public:
 	// End SWidget
 
 	SFIVSEdGraphViewer* GetGraphViewer() { return GraphViewer; }
-	
-	/**
-	 * Sets the node we representate.
-	 *
-	 * @param[in]	newNode		the new node
-	 */
-	void SetNode(UFIVSNode* newNode);
 	
 	/**
 	 * Returns the node we representate.
@@ -125,9 +108,69 @@ public:
 	/**
 	 * Returns the pin widget cache.
 	 */
-	const TArray<TSharedRef<SFIVSEdPinViewer>>& GetPinWidgets();
+	const TArray<TSharedRef<SFIVSEdPinViewer>>& GetPinWidgets() const;
 	
-	TSharedRef<SFIVSEdPinViewer> GetPinWidget(UFIVSPin* Pin);
+	TSharedRef<SFIVSEdPinViewer> GetPinWidget(UFIVSPin* Pin) const;
+};
+
+class SFIVSEdRerouteNodeViewer : public SFIVSEdNodeViewer {
+	SLATE_BEGIN_ARGS(SFIVSEdRerouteNodeViewer) :
+		_Style(&FFIVSEdStyle::GetDefault()) {}
+		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("222222");
+	SLATE_END_ARGS()
+	
+	const FFIVSEdStyle* Style;
+	
+public:
+	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
+
+	FSlateColorBrush OutlineBrush = FSlateColorBrush(FColor::White);
+	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::Black);
+};
+
+class SFIVSEdFunctionNodeViewer : public SFIVSEdNodeViewer {
+	SLATE_BEGIN_ARGS(SFIVSEdFunctionNodeViewer) :
+		_Style(&FFIVSEdStyle::GetDefault()) {}
+		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("222222");
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, HeaderColor) = FColor::FromHex("b04600");
+	SLATE_END_ARGS()
+
+	const FFIVSEdStyle* Style;
+	
+public:
+	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
+	
+	TSharedPtr<SVerticalBox> InputPinBox;
+	TSharedPtr<SVerticalBox> OutputPinBox;
+
+	FSlateColorBrush OutlineBrush = FSlateColorBrush(FColor::White);
+	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::Black);
+	FSlateColorBrush HeaderBrush = FSlateColorBrush(FColor::Orange);
+};
+
+class SFIVSEdOperatorNodeViewer : public SFIVSEdNodeViewer {
+	SLATE_BEGIN_ARGS(SFIVSEdOperatorNodeViewer) :
+		_Style(&FFIVSEdStyle::GetDefault()) {}
+		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("222222");
+	SLATE_END_ARGS()
+
+	const FFIVSEdStyle* Style;
+	
+public:
+	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
+	
+	TSharedPtr<SVerticalBox> InputPinBox;
+	TSharedPtr<SVerticalBox> OutputPinBox;
+
+	FSlateColorBrush OutlineBrush = FSlateColorBrush(FColor::White);
+	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::Black);
+	FSlateColorBrush HeaderBrush = FSlateColorBrush(FColor::Orange);
 };
 
 class FFIVSEdNodeDragDrop : public FDragDropOperation {
