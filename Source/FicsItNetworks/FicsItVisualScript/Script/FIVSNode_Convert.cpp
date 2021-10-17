@@ -36,8 +36,14 @@ TArray<FFIVSNodeAction> UFIVSNode_Convert::GetNodeActions() const {
 }
 
 void UFIVSNode_Convert::InitPins() {
-	Input = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Input"), FromType);
-	Output = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString("Output"), ToType);
+	if (FromType == FIN_TRACE || FromType == FIN_OBJ || FromType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
+		Input = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Input")), FFINExpandedNetworkValueType(FromType, FFINReflection::Get()->FindClass(UObject::StaticClass())));
+	else
+		Input = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Input")), FFINExpandedNetworkValueType(FromType));
+	if (ToType == FIN_TRACE || ToType == FIN_OBJ || ToType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
+		Output = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("Output")), FFINExpandedNetworkValueType(ToType, FFINReflection::Get()->FindClass(UObject::StaticClass())));
+	else
+		Output = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("Output")), FFINExpandedNetworkValueType(ToType));
 }
 
 TArray<UFIVSPin*> UFIVSNode_Convert::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {

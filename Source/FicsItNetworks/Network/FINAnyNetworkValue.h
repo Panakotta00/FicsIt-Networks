@@ -101,6 +101,18 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 		*this = other;
 	}
 
+	FORCEINLINE FFINAnyNetworkValue(FProperty* Property, void* ValuePtr) {
+		if (Property->IsA<FFloatProperty>()) {
+			Type = FIN_FLOAT;
+			Data.FLOAT = *(float*)ValuePtr;
+		} else if (Property->IsA<FIntProperty>()) {
+			Type = FIN_INT;
+			Data.INT = *(int*)ValuePtr;
+		} else {
+			Type = FIN_NIL;
+		}
+	}
+
 	FORCEINLINE FFINAnyNetworkValue& operator=(const FFINAnyNetworkValue& other) {
 		this->~FFINAnyNetworkValue();
 		Type = other.Type;
@@ -284,6 +296,25 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 */
 	FORCEINLINE const FINAny& GetAny() const {
 		return *Data.ANY;
+	}
+	
+	/**
+	 * Returns the pointer to the underlying data structure.
+	 * Mainly intended to do be able to direct data copy into UE Reflected Structs.
+	 */
+	FORCEINLINE void* GetData() {
+		return &Data;
+	}
+	
+	void Copy(const FProperty* Prop, void* Dest) {
+		switch (Type) {
+		case FIN_FLOAT: {
+			float Value = Data.FLOAT;
+			Prop->CopyCompleteValue(Dest, &Value);
+			break;
+		} default:
+			Prop->CopyCompleteValue(Dest, GetData());
+		}
 	}
 
 	bool Serialize(FArchive& Ar);
