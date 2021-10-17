@@ -11,7 +11,7 @@ FFIVSEdActionSelectionTextFilter::FFIVSEdActionSelectionTextFilter(const FString
     SetFilterText(Filter);
 }
 
-bool FFIVSEdActionSelectionTextFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) {
+bool FFIVSEdActionSelectionTextFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter, bool bForce) {
     FString FilterText = ToFilter->GetSignature().SearchableText.ToString().Replace(TEXT(" "), TEXT(""));
     bool bIsValid = true;
     float MatchLength = 0.0f;
@@ -26,7 +26,7 @@ bool FFIVSEdActionSelectionTextFilter::Filter(TSharedPtr<FFIVSEdActionSelectionE
     	TSharedPtr<FFIVSEdActionSelectionEntry>* Entry = BestMatch.Find(MatchPercentage);
     	if (!Entry || !Entry->Get()->bIsEnabled) BestMatch.FindOrAdd(MatchPercentage) = ToFilter;
     }
-    if (bIsValid) {
+    if (bIsValid || bForce) {
     	ToFilter->bIsEnabled = true;
     	return true;
     } else {
@@ -67,8 +67,8 @@ void FFIVSEdActionSelectionTextFilter::SetFilterText(const FString& FilterText) 
 	}
 }
 
-bool FFIVSEdActionSelectionPinFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) {
-	if (FilterPinType.DataType.GetType() == FIN_NIL) return true;
+bool FFIVSEdActionSelectionPinFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter, bool bForce) {
+	if (FilterPinType.DataType.GetType() == FIN_NIL) return false;
 	for (const FFIVSFullPinType& Pin : ToFilter->GetSignature().Pins) {
 		if (FilterPinType.CanConnect(Pin)) {
 			return true;
@@ -262,13 +262,13 @@ void SFIVSEdActionSelection::Filter() {
 
 void SFIVSEdActionSelection::Filter_Internal(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, bool bForceAdd) {
 	Entry->bIsEnabled = true;
-	bool bBeginForce = false;
-	if (!bForceAdd) for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
-		bBeginForce = Filter->Filter(Entry) && bBeginForce;
+	bool bBeginForce = bForceAdd;
+	for (const TSharedPtr<FFIVSEdActionSelectionFilter>& Filter : Filters) {
+		bBeginForce = Filter->Filter(Entry, bForceAdd) || bBeginForce;
 	}
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> EnabledChildren;
 	for (TSharedPtr<FFIVSEdActionSelectionEntry> Child : Entry->GetChildren()) {
-		Filter_Internal(Child, bForceAdd || bBeginForce);
+		Filter_Internal(Child, bBeginForce);
 		if (Child->bIsEnabled) EnabledChildren.Add(Child);
 	}
 	if (EnabledChildren.Num() > 0) {

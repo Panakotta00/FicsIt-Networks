@@ -69,7 +69,7 @@ void FFIVSEdConnectionDrawer::DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, 
 
 void FFIVSEdConnectionDrawer::DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
 	//FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start, FVector2D(300 * Graph->Zoom,0), End, FVector2D(300 * Graph->Zoom,0), 2 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
-	FSlateDrawElement::MakeLines(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, ConnectionColor, true, 2 * Graph->Zoom);
+	FSlateDrawElement::MakeLines(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, ConnectionColor, true, 2 * Graph->GetZoom());
 }
 
 void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
@@ -108,14 +108,14 @@ int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 	FVector2D RenderOffset = FVector2D(FMath::Fractional(Start.X) * Distance.X, FMath::Fractional(Start.Y) * Distance.Y);
 	int GridOffsetX = FMath::FloorToInt(Start.X) * FMath::RoundToInt(Distance.X);
 	int GridOffsetY = FMath::FloorToInt(Start.Y) * FMath::RoundToInt(Distance.Y);
-	Distance *= Zoom;
-	Start *= Zoom;
-	RenderOffset *= Zoom;
+	Distance *= GetZoom();
+	Start *= GetZoom();
+	RenderOffset *= GetZoom();
 	for (float x = 0; x <= AllottedGeometry.GetLocalSize().X; x += Distance.X) {
-		FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {FVector2D(x + RenderOffset.X, 0), FVector2D(x + RenderOffset.X, AllottedGeometry.GetLocalSize().Y)}, ESlateDrawEffect::None, GridColor, true, ((FMath::RoundToInt(x/Zoom) - GridOffsetX) % 100 == 0) ? 1.0 : 0.05);
+		FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {FVector2D(x + RenderOffset.X, 0), FVector2D(x + RenderOffset.X, AllottedGeometry.GetLocalSize().Y)}, ESlateDrawEffect::None, GridColor, true, ((FMath::RoundToInt(x/GetZoom()) - GridOffsetX) % 100 == 0) ? 1.0 : 0.05);
 	}
 	for (float y = 0; y <= AllottedGeometry.GetLocalSize().Y; y += Distance.Y) {
-		FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {FVector2D(0, y + RenderOffset.Y), FVector2D(AllottedGeometry.GetLocalSize().X, y + RenderOffset.Y)}, ESlateDrawEffect::None, GridColor, true, ((FMath::RoundToInt(y/Zoom) - GridOffsetY) % 100 == 0) ? 1.0 : 0.05);
+		FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {FVector2D(0, y + RenderOffset.Y), FVector2D(AllottedGeometry.GetLocalSize().X, y + RenderOffset.Y)}, ESlateDrawEffect::None, GridColor, true, ((FMath::RoundToInt(y/GetZoom()) - GridOffsetY) % 100 == 0) ? 1.0 : 0.05);
 	}
 
 	// Draw Pin Connections
@@ -229,7 +229,8 @@ FReply SFIVSEdGraphViewer::OnMouseButtonDoubleClick(const FGeometry& InMyGeometr
 FReply SFIVSEdGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	if (ConnectionDrawer) ConnectionDrawer->LastMousePosition = MouseEvent.GetScreenSpacePosition();
 	if (bIsGraphDrag) {
-		Offset += (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()) - MyGeometry.AbsoluteToLocal(MouseEvent.GetLastScreenSpacePosition())) / Zoom;
+		FVector2D Delta = (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()) - MyGeometry.AbsoluteToLocal(MouseEvent.GetLastScreenSpacePosition())) / GetZoom();
+		Offset += Delta;
 		GraphDragDelta += MouseEvent.GetCursorDelta().Size();
 		return FReply::Handled();
 	}
@@ -238,9 +239,9 @@ FReply SFIVSEdGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPoint
 
 FReply SFIVSEdGraphViewer::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	FVector2D StartPos = LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()));
-	Zoom += MouseEvent.GetWheelDelta() / 10.0;
+	Zoom += MouseEvent.GetWheelDelta()/10;
 	if (Zoom < 0.1) Zoom = 0.1;
-	if (Zoom > 10) Zoom = 10;
+	if (Zoom > 5) Zoom = 5;
 	FVector2D EndPos = LocalToGraph(GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()));
 	FVector2D Off = StartPos - EndPos;
 	Offset -= Off;
@@ -334,7 +335,7 @@ FChildren* SFIVSEdGraphViewer::GetChildren() {
 void SFIVSEdGraphViewer::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {
 	for (int32 NodeIndex = 0; NodeIndex < Children.Num(); ++NodeIndex) {
 		const TSharedRef<SFIVSEdNodeViewer>& Node = Children[NodeIndex];
-		ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Node, Node->GetPosition() + Offset, Node->GetDesiredSize(), Zoom));
+		ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Node, Node->GetPosition() + Offset, Node->GetDesiredSize(), GetZoom()));
 	}
 }
 
@@ -438,7 +439,7 @@ void SFIVSEdGraphViewer::CreateNodeAsChild(UFIVSNode* Node) {
 }
 
 FVector2D SFIVSEdGraphViewer::LocalToGraph(const FVector2D Local) {
-	return (Local / Zoom) - Offset;
+	return (Local / GetZoom()) - Offset;
 }
 
 void FFIVSEdSelectionBoxDragDrop::OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent) {

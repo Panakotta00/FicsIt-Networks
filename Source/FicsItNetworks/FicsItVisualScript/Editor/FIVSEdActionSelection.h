@@ -26,9 +26,10 @@ struct FFIVSEdActionSelectionFilter : TSharedFromThis<FFIVSEdActionSelectionFilt
 	
 	/**
 	 * Enables or disables the given entry if the filter applies or not.
+	 * bForce is true if parent entry returned true from filter, this may be ignored if a filter has a higher priority, like context filter
 	 * Returns true if this entry passes filter directly and causes all children to also pass.
 	 */
-	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) = 0;
+	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter, bool bForce) = 0;
 
 	virtual void OnFiltered(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, int Pass) {}
 
@@ -47,7 +48,7 @@ public:
 	FFIVSEdActionSelectionTextFilter(const FString& FilterText);
 	
 	// Begin FFINScriptActionSelectionFilter
-	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) override;
+	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter, bool bForce) override;
 	virtual void OnFiltered(TSharedPtr<FFIVSEdActionSelectionEntry> Entry, int Pass) override;
 	virtual void Reset() override;
 	// End FFINScriptActionSelectionFilter
@@ -71,7 +72,7 @@ public:
 	FFIVSEdActionSelectionPinFilter(FFIVSFullPinType InFilterPinType) : FilterPinType(InFilterPinType) {}
 
 	// Begin FFIVSEdActionSelectionFilter
-	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter) override;
+	virtual bool Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter, bool bForce) override;
 	virtual void Reset() override {
 		//SetFilterPin(FFIVSFullPinType(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT));
 	}
@@ -162,7 +163,7 @@ struct FFIVSEdActionSelectionCategory : FFIVSEdActionSelectionEntry {
 	
 	// Begin FFINScriptNodeSelectionEntry
 	virtual TSharedRef<SWidget> GetTreeWidget() override;
-	virtual FFIVSNodeAction GetSignature() { return FFIVSNodeAction{nullptr, Name}; }
+	virtual FFIVSNodeAction GetSignature() { return FFIVSNodeAction{nullptr, Name, FText::GetEmpty(), Name}; }
 	virtual TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> GetChildren() override { return Children; }
 	// End FFINScriptNodeSelectionEntry
 };

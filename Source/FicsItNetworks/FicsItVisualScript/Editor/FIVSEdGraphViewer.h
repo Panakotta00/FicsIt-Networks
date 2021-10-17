@@ -159,7 +159,7 @@ public:
 	FFIVSEdSelectionBoxHandler SelectionBoxHandler;
 	
 	FVector2D Offset = FVector2D(0,0);
-	float Zoom = 1.0;
+	float Zoom = 2;
 	
 	SFIVSEdGraphViewer();
 	~SFIVSEdGraphViewer();
@@ -194,6 +194,10 @@ public:
 	FDelegateHandle OnNodeChangedHandle;
 	void OnNodeChanged(int change, UFIVSNode* Node);
 
+	float GetZoom() const {
+		return exp(Zoom)/10;
+	}
+	
 	/**
 	 * Creates an action selection menu with the given context
 	 */
