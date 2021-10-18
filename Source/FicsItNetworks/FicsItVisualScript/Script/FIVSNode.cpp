@@ -189,7 +189,7 @@ bool UFIVSWildcardPin::CanConnect(UFIVSPin* Pin) {
 	return UFIVSPin::CanConnect(Pin);
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const {
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) {
 	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
 	.Style(Style);
 }
@@ -227,7 +227,7 @@ TArray<FFIVSNodeAction> UFIVSRerouteNode::GetNodeActions() const {
 	};
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSRerouteNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const {
+TSharedRef<SFIVSEdNodeViewer> UFIVSRerouteNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) {
 	return SNew(SFIVSEdRerouteNodeViewer, GraphViewer, this)
 	.Style(Style);
 }

@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FicsItNetworks/FicsItVisualScript/Editor/FIVSEdGraphViewer.h"
 #include "FicsItNetworks/Network/FINNetworkValues.h"
 #include "FicsItNetworks/Reflection/FINProperty.h"
 #include "FIVSNode.generated.h"
 
+class SFIVSEdGraphViewer;
 struct FFIVSEdStyle;
 class UFIVSGraph;
 class SFIVSEdNodeViewer;
@@ -251,7 +251,7 @@ public:
 	/**
 	 * Returns a SFIVSEdNodeViewer that is used to display this node in a graph editor.
 	 */
-	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style);
 	
 	/**
 	 * Removes all connections of all pins
@@ -289,6 +289,6 @@ public:
 	// Begin UFINScriptNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override;
 	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
-	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) override;
 	// End UFINScriptNode
 };

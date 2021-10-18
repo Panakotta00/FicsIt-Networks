@@ -12,6 +12,7 @@ class SFIVSEdPinViewer : public SCompoundWidget {
 	SLATE_BEGIN_ARGS(SFIVSEdPinViewer) :
 		_Style(&FFIVSEdStyle::GetDefault()) {}
 	SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+	SLATE_ARGUMENT_DEFAULT(bool, ShowName) = true;
 	SLATE_END_ARGS()
 	
 public:
@@ -118,7 +119,7 @@ class SFIVSEdRerouteNodeViewer : public SFIVSEdNodeViewer {
 		_Style(&FFIVSEdStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
 		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("222222");
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("333333");
 	SLATE_END_ARGS()
 	
 	const FFIVSEdStyle* Style;
@@ -135,7 +136,7 @@ class SFIVSEdFunctionNodeViewer : public SFIVSEdNodeViewer {
 		_Style(&FFIVSEdStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
 		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("222222");
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("333333");
 		SLATE_ARGUMENT_DEFAULT(FLinearColor, HeaderColor) = FColor::FromHex("b04600");
 	SLATE_END_ARGS()
 
@@ -157,7 +158,8 @@ class SFIVSEdOperatorNodeViewer : public SFIVSEdNodeViewer {
 		_Style(&FFIVSEdStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
 		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("222222");
+		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("333333");
+		SLATE_ARGUMENT(FString, Symbol)
 	SLATE_END_ARGS()
 
 	const FFIVSEdStyle* Style;
@@ -170,7 +172,6 @@ public:
 
 	FSlateColorBrush OutlineBrush = FSlateColorBrush(FColor::White);
 	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::Black);
-	FSlateColorBrush HeaderBrush = FSlateColorBrush(FColor::Orange);
 };
 
 class FFIVSEdNodeDragDrop : public FDragDropOperation {

@@ -3,6 +3,8 @@
 #include "FIVSMathLib.h"
 #include "UObject/PropertyIterator.h"
 
+TMap<UClass*, TMap<FString, FFIVSNodeUFunctionCallMeta>> UFIVSNode_UFunctionCall::FunctionMetaData;
+
 void UFIVSNode_UFunctionCall::InitPins() {
 	
 	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
@@ -34,13 +36,23 @@ void UFIVSNode_UFunctionCall::InitPins() {
 
 TArray<FFIVSNodeAction> UFIVSNode_UFunctionCall::GetNodeActions() const {
 	TArray<FFIVSNodeAction> Actions;
+	TMap<FString, FFIVSNodeUFunctionCallMeta>* FuncMeta = FunctionMetaData.Find(UFIVSMathLib::StaticClass());
 	for (TFieldIterator<UFunction> Func(UFIVSMathLib::StaticClass()); Func; ++Func) {
+		FFIVSNodeUFunctionCallMeta* Meta = FuncMeta ? FuncMeta->Find(Func->GetName()) : nullptr;
 		if (!Func->GetName().StartsWith("FIVSFunc_")) continue;
+		FString MetaSymbol;
 		FFIVSNodeAction Action;
 		Action.NodeType = UFIVSNode_UFunctionCall::StaticClass();
-		Action.Title = FText::FromString(Func->GetName());
-		Action.Category = FText::FromString(TEXT("Math"));
-		Action.SearchableText = Action.Title;
+		if (Meta) {
+			Action.Title = Meta->Title;
+			Action.Category = Meta->Categrory;
+			Action.SearchableText = Meta->SearchableText;
+			MetaSymbol = Meta->Symbol;
+		} else {
+			Action.Title = FText::FromString(Func->GetName());
+			Action.Category = FText::FromString(TEXT("Math"));
+			Action.SearchableText = Action.Title;
+		}
 		for (TFieldIterator<FProperty> Prop(*Func); Prop; ++Prop) {
 			auto Flags = Prop->GetPropertyFlags();
 			UFIVSPin* Pin = nullptr;
@@ -64,8 +76,9 @@ TArray<FFIVSNodeAction> UFIVSNode_UFunctionCall::GetNodeActions() const {
 			}
 		}
 		UFunction* F = *Func;
-		Action.OnExecute.BindLambda([F](UFIVSNode* Node) {
+		Action.OnExecute.BindLambda([F, MetaSymbol](UFIVSNode* Node) {
 			Cast<UFIVSNode_UFunctionCall>(Node)->Function = F;
+			Cast<UFIVSNode_UFunctionCall>(Node)->Symbol = MetaSymbol;
 		});
 		Actions.Add(Action);
 	}
@@ -76,9 +89,10 @@ FString UFIVSNode_UFunctionCall::GetNodeName() const {
 	return Function->GetName();
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSNode_UFunctionCall::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) const {
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode_UFunctionCall::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) {
 	return SNew(SFIVSEdOperatorNodeViewer, GraphViewer, this)
-	.Style(Style);
+	.Style(Style)
+	.Symbol(Symbol);
 }
 
 TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {

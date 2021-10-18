@@ -2,7 +2,6 @@
 
 #include "SlateBasics.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode.h"
-#include "Framework/Text/SyntaxHighlighterTextLayoutMarshaller.h"
 #include "Widgets/Input/SSearchBox.h"
 
 class UFIVSScriptNode;
