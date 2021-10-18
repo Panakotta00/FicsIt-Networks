@@ -83,7 +83,7 @@ public:
 		Description = FText::FromString("Allows to transfer an item from the input queue to the given output queue if possible.");
 		ParameterInternalNames.Add("output");
 		ParameterDisplayNames.Add(FText::FromString("Output"));
-		ParameterDescriptions.Add(FText::FromString("The index of the output queue you want to transfer the next item to (0 = middle, 1 = left, 2 = right)"));
+		ParameterDescriptions.Add(FText::FromString("The index of the output queue you want to transfer the next item to (0 = left, 1 = middle, 2 = right)"));
 		ParameterInternalNames.Add("transfered");
 		ParameterDisplayNames.Add(FText::FromString("Transfered"));
 		ParameterDescriptions.Add(FText::FromString("true if it was able to transfer the item."));
