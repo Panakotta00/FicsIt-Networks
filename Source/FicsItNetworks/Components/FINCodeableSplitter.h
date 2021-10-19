@@ -118,7 +118,7 @@ public:
 		Description = FText::FromString("Allows to check if we can transfer an item to the given output queue.");
 		ParameterInternalNames.Add("output");
 		ParameterDisplayNames.Add(FText::FromString("Output"));
-		ParameterDescriptions.Add(FText::FromString("The index of the output queue you want to check (0 = middle, 1 = left, 2 = right)"));
+		ParameterDescriptions.Add(FText::FromString("The index of the output queue you want to check (0 = left, 1 = middle, 2 = right)"));
 		ParameterInternalNames.Add("canTransfer");
 		ParameterDisplayNames.Add(FText::FromString("Can Transfer"));
 		ParameterDescriptions.Add(FText::FromString("True if you could transfer an item to the given output queue."));
