@@ -9,7 +9,7 @@ public class FicsItNetworks : ModuleRules
 {
     public FicsItNetworks(ReadOnlyTargetRules Target) : base(Target)
     {
-        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         bLegacyPublicIncludePaths = false;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
@@ -28,7 +28,7 @@ public class FicsItNetworks : ModuleRules
             "GameplayTasks",
             "AnimGraphRuntime",
             "Slate", "SlateCore",
-            "Json",
+            "Json", "JsonUtilities",
             "ApplicationCore",
             "Vorbis",
             "Http"

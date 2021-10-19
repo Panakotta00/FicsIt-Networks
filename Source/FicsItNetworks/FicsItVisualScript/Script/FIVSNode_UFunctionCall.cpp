@@ -95,6 +95,14 @@ TSharedRef<SFIVSEdNodeViewer> UFIVSNode_UFunctionCall::CreateNodeViewer(SFIVSEdG
 	.Symbol(Symbol);
 }
 
+void UFIVSNode_UFunctionCall::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
+	Properties.Properties.Add(TEXT("Function"), Function->GetPathName());
+}
+
+void UFIVSNode_UFunctionCall::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
+	Function = Cast<UFunction>(FSoftObjectPath(Properties.Properties[TEXT("Function")]).TryLoad());
+}
+
 TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	TArray<UFIVSPin*> InputPins;
 	PropertyToPin.GenerateValueArray(InputPins);

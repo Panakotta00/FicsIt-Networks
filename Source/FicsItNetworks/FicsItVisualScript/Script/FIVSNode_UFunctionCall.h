@@ -34,6 +34,8 @@ public:
 	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
 	virtual FString GetNodeName() const override;
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) override;
+	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
+	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FIVSNodeSerialization.h"
 #include "FicsItNetworks/Network/FINNetworkValues.h"
 #include "FicsItNetworks/Reflection/FINProperty.h"
 #include "FIVSNode.generated.h"
@@ -252,6 +253,22 @@ public:
 	 * Returns a SFIVSEdNodeViewer that is used to display this node in a graph editor.
 	 */
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style);
+
+	/**
+	 * Called if this nodes gets serialized.
+	 * Is supposed to store additional node properties to the serialization data that will be used on deserialization
+	 * for initializing the node so it can successfully recreate the Node name, Pins, functionality, etc.
+	 */
+	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const {};
+
+	/**
+	 * Called when the node gets deserialized.
+	 * When a (partial) graph, gets deserialized, a new object of this node-class my get created.
+	 * It then has to be initialized with data stored additionally in the serialization data (see SerializeNodeProperties(...)),
+	 * this should happen here, so that directly after this function got called, the InitPins() function can be called normally,
+	 * to create all Pins like it was before serialization.
+	 */
+	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {};
 	
 	/**
 	 * Removes all connections of all pins

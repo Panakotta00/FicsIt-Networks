@@ -12,7 +12,7 @@ void UFIVSPin::GetAllConnected(TArray<UFIVSPin*>& Searches) {
 
 UFIVSPin* UFIVSPin::FindConnected() {
 	EFIVSPinType PinType = (GetPinType() & FIVS_PIN_DATA) != 0 ? FIVS_PIN_OUTPUT : FIVS_PIN_INPUT;
-	for (UFIVSPin* Pin :  GetAllConnected()) {
+	for (UFIVSPin* Pin : GetAllConnected()) {
 		if (Pin->IsA<UFIVSWildcardPin>()) continue;
 		if ((Pin->GetPinType() & PinType) > 0) return Pin;
 	}
