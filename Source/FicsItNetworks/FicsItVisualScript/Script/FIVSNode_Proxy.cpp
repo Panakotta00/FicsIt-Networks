@@ -1,5 +1,7 @@
 #include "FIVSNode_Proxy.h"
 
+#include "FicsItNetworks/Reflection/FINReflection.h"
+
 TArray<FFIVSNodeAction> UFIVSNode_Proxy::GetNodeActions() const {
 	return {
 			{

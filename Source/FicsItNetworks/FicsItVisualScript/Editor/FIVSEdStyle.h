@@ -1,11 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Styling/SlateWidgetStyle.h"
 #include "FIVSEdStyle.generated.h"
 
 USTRUCT(BlueprintType)
 struct FFIVSEdStyle : public FSlateWidgetStyle {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 	static const FFIVSEdStyle& GetDefault();
 	static const FName TypeName;

@@ -1,5 +1,7 @@
 #include "FIVSNode_CallReflectionFunction.h"
 
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
 
 TArray<FFIVSNodeAction> UFIVSNode_CallReflectionFunction::GetNodeActions() const {
 	TArray<FFIVSNodeAction> Actions;
@@ -51,7 +53,7 @@ TArray<UFIVSPin*> UFIVSNode_CallReflectionFunction::PreExecPin(UFIVSPin* ExecPin
 
 UFIVSPin* UFIVSNode_CallReflectionFunction::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	TArray<FFINAnyNetworkValue> InputValues;
-	FFINExecutionContext ExecContext( UFINNetworkUtils::RedirectIfPossible(Context.GetValue(Self).GetTrace()));
+	FFINExecutionContext ExecContext(UFINNetworkUtils::RedirectIfPossible(Context.GetValue(Self).GetTrace()));
 	for (UFIVSPin* InputPin : InputPins) {
 		InputValues.Add(Context.GetValue(InputPin));
 	}

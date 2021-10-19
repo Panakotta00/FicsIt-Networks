@@ -1,5 +1,7 @@
 #include "FIVSNode_DownCast.h"
 
+#include "FicsItNetworks/Reflection/FINReflection.h"
+
 TArray<FFIVSNodeAction> UFIVSNode_DownCast::GetNodeActions() const {
 	TArray<FFIVSNodeAction> Actions;
 

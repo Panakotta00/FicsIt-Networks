@@ -1,5 +1,8 @@
 #include "FIVSNode_SetProperty.h"
 
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
+
 TArray<FFIVSNodeAction> UFIVSNode_SetProperty::GetNodeActions() const {
 	TArray<FFIVSNodeAction> Actions;
 	for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {

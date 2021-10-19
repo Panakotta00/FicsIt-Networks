@@ -1,5 +1,7 @@
 #include "FIVSNode_Convert.h"
 
+#include "FicsItNetworks/Reflection/FINReflection.h"
+
 TArray<FFIVSNodeAction> UFIVSNode_Convert::GetNodeActions() const {
 	TArray<FFIVSNodeAction> Actions;
 	for (EFINNetworkValueType ConvertFromType : TEnumRange<EFINNetworkValueType>()) {

@@ -47,4 +47,4 @@ public:
 #define FIVSNode_UFunctionOperatorMeta(FunctionName, Title, Symbol, Description, Category) \
 	FFINStaticGlobalRegisterFunc CAT(FIVSNode_UFunctionOperatorMeta, __COUNTER__) = FFINStaticGlobalRegisterFunc([]() { \
 		UFIVSNode_UFunctionCall::RegisterMetaData(StaticClass(), TEXT(#FunctionName), {FText::FromString(TEXT(Title)), TEXT(Symbol), FText::FromString(TEXT(Description)), FText::FromString(TEXT(Category)), FText::FromString(TEXT(Title ## Symbol))}); \
-	});
+	})
