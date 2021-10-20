@@ -111,6 +111,9 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 		} else if (Property->IsA<FInt64Property>()) {
 			Type = FIN_INT;
 			Data.INT = *(int64*)ValuePtr;
+		} else if (Property->IsA<FStrProperty>()) {
+			Type = FIN_STR;
+			Data.STRING = new FString(*(const FString*)ValuePtr);
 		} else {
 			Type = FIN_NIL;
 		}
@@ -315,7 +318,17 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 			float Value = Data.FLOAT;
 			Prop->CopyCompleteValue(Dest, &Value);
 			break;
-		} default:
+		} case FIN_INT: {
+			if (Prop->IsA<UIntProperty>()) {
+				int Value = Data.INT;
+				Prop->CopyCompleteValue(Dest, &Value);
+			} else if (Prop->IsA<UInt64Property>()) {
+				Prop->CopyCompleteValue(Dest, &Data.INT);
+			}
+		} case FIN_STR:
+			Prop->CopyCompleteValue(Dest, Data.STRING);
+		// TODO: Add more data types
+		default:
 			Prop->CopyCompleteValue(Dest, GetData());
 		}
 	}

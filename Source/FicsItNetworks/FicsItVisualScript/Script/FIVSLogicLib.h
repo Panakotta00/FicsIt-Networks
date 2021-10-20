@@ -22,8 +22,8 @@ public:
 
 	FIVSNode_UFunctionOperatorMeta(FIVSFunc_Not, "Not", "!", "Negates a boolean value.", "Logic");
 	UFUNCTION()
-	static bool FIVSFunc_Not(bool A, bool B) {
-		return A && B;
+	static bool FIVSFunc_Not(bool A) {
+		return !A;
 	}
 
 	FIVSNode_UFunctionOperatorMeta(FIVSFunc_EqualTo, "Equal To", "==", "Checks if two boolean values are the same.", "Logic");

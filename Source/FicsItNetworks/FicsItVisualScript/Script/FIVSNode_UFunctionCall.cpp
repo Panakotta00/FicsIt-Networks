@@ -1,6 +1,5 @@
 #include "FIVSNode_UFunctionCall.h"
 #include "FicsItNetworks/FicsItVisualScript/Editor/FIVSEdNodeViewer.h"
-#include "FIVSMathLib.h"
 #include "UObject/PropertyIterator.h"
 
 TMap<UClass*, TMap<FString, FFIVSNodeUFunctionCallMeta>> UFIVSNode_UFunctionCall::FunctionMetaData;
@@ -25,6 +24,8 @@ void UFIVSNode_UFunctionCall::InitPins() {
 				PinDataType = FIN_INT;
 			} else if (Prop->IsA<FBoolProperty>()) {
 				PinDataType = FIN_BOOL;
+			} else if (Prop->IsA<FStrProperty>()) {
+				PinDataType = FIN_STR;
 			}
 			Pin = CreatePin(PinType, FText::FromString(Prop->GetName()), PinDataType);
 		}
@@ -36,51 +37,56 @@ void UFIVSNode_UFunctionCall::InitPins() {
 
 TArray<FFIVSNodeAction> UFIVSNode_UFunctionCall::GetNodeActions() const {
 	TArray<FFIVSNodeAction> Actions;
-	TMap<FString, FFIVSNodeUFunctionCallMeta>* FuncMeta = FunctionMetaData.Find(UFIVSMathLib::StaticClass());
-	for (TFieldIterator<UFunction> Func(UFIVSMathLib::StaticClass()); Func; ++Func) {
-		FFIVSNodeUFunctionCallMeta* Meta = FuncMeta ? FuncMeta->Find(Func->GetName()) : nullptr;
-		if (!Func->GetName().StartsWith("FIVSFunc_")) continue;
-		FString MetaSymbol;
-		FFIVSNodeAction Action;
-		Action.NodeType = UFIVSNode_UFunctionCall::StaticClass();
-		if (Meta) {
-			Action.Title = Meta->Title;
-			Action.Category = Meta->Categrory;
-			Action.SearchableText = Meta->SearchableText;
-			MetaSymbol = Meta->Symbol;
-		} else {
-			Action.Title = FText::FromString(Func->GetName());
-			Action.Category = FText::FromString(TEXT("Math"));
-			Action.SearchableText = Action.Title;
-		}
-		for (TFieldIterator<FProperty> Prop(*Func); Prop; ++Prop) {
-			auto Flags = Prop->GetPropertyFlags();
-			UFIVSPin* Pin = nullptr;
-			EFIVSPinType PinType = FIVS_PIN_DATA;
-			EFINNetworkValueType PinDataType = FIN_NIL;
-			if (Flags & CPF_Parm) {
-				if (Flags & CPF_OutParm) {
-					PinType |= FIVS_PIN_OUTPUT;
-				} else {
-					PinType |= FIVS_PIN_INPUT;
-				}
-			
-				if (Prop->IsA<FFloatProperty>()) {
-					PinDataType = FIN_FLOAT;
-				} else if (Prop->IsA<FIntProperty>() || Prop->IsA<FInt64Property>()) {
-					PinDataType = FIN_INT;
-				} else if (Prop->IsA<FBoolProperty>()) {
-					PinDataType = FIN_BOOL;
-				}
-				Action.Pins.Add(FFIVSFullPinType(PinType, PinDataType));
+	for(TObjectIterator<UClass> It; It; ++It) {
+		UClass* Class = *It;
+		TMap<FString, FFIVSNodeUFunctionCallMeta>* FuncMeta = FunctionMetaData.Find(Class);
+		for (TFieldIterator<UFunction> Func(Class); Func; ++Func) {
+			FFIVSNodeUFunctionCallMeta* Meta = FuncMeta ? FuncMeta->Find(Func->GetName()) : nullptr;
+			if (!Func->GetName().StartsWith("FIVSFunc_")) continue;
+			FString MetaSymbol;
+			FFIVSNodeAction Action;
+			Action.NodeType = UFIVSNode_UFunctionCall::StaticClass();
+			if (Meta) {
+				Action.Title = Meta->Title;
+				Action.Category = Meta->Categrory;
+				Action.SearchableText = Meta->SearchableText;
+				MetaSymbol = Meta->Symbol;
+			} else {
+				Action.Title = FText::FromString(Func->GetName());
+				Action.Category = FText::FromString(TEXT("Math"));
+				Action.SearchableText = Action.Title;
 			}
+			for (TFieldIterator<FProperty> Prop(*Func); Prop; ++Prop) {
+				auto Flags = Prop->GetPropertyFlags();
+				UFIVSPin* Pin = nullptr;
+				EFIVSPinType PinType = FIVS_PIN_DATA;
+				EFINNetworkValueType PinDataType = FIN_NIL;
+				if (Flags & CPF_Parm) {
+					if (Flags & CPF_OutParm) {
+						PinType |= FIVS_PIN_OUTPUT;
+					} else {
+						PinType |= FIVS_PIN_INPUT;
+					}
+				
+					if (Prop->IsA<FFloatProperty>()) {
+						PinDataType = FIN_FLOAT;
+					} else if (Prop->IsA<FIntProperty>() || Prop->IsA<FInt64Property>()) {
+						PinDataType = FIN_INT;
+					} else if (Prop->IsA<FBoolProperty>()) {
+						PinDataType = FIN_BOOL;
+					} else if (Prop->IsA<FStrProperty>()) {
+						PinDataType = FIN_STR;
+					}
+					Action.Pins.Add(FFIVSFullPinType(PinType, PinDataType));
+				}
+			}
+			UFunction* F = *Func;
+			Action.OnExecute.BindLambda([F, MetaSymbol](UFIVSNode* Node) {
+				Cast<UFIVSNode_UFunctionCall>(Node)->Function = F;
+				Cast<UFIVSNode_UFunctionCall>(Node)->Symbol = MetaSymbol;
+			});
+			Actions.Add(Action);
 		}
-		UFunction* F = *Func;
-		Action.OnExecute.BindLambda([F, MetaSymbol](UFIVSNode* Node) {
-			Cast<UFIVSNode_UFunctionCall>(Node)->Function = F;
-			Cast<UFIVSNode_UFunctionCall>(Node)->Symbol = MetaSymbol;
-		});
-		Actions.Add(Action);
 	}
 	return Actions;
 }
@@ -112,7 +118,7 @@ TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRu
 		return Pin->GetPinType() == FIVS_PIN_DATA_INPUT;
 	});
 }
-#pragma optimize("", off)
+
 UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	TArray<FFINAnyNetworkValue> Output;
 	// allocate & initialize parameter struct
@@ -122,7 +128,6 @@ UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContex
 			if (Prop->IsInContainer(Function->ParmsSize)) {
 				Prop->InitializeValue_InContainer(ParamStruct);
 				if (!(Prop->GetPropertyFlags() & CPF_OutParm)) {
-					//if (Params.Num() <= i) throw FFINReflectionException(const_cast<UFINUFunction*>(this), FString::Printf(TEXT("Required parameter '%s' is not provided."), *Param->GetInternalName()));
 					FFINAnyNetworkValue Value = Context.GetValue(PropertyToPin[*Prop]);
 					Value.Copy(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct));
 				}
@@ -146,4 +151,3 @@ UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContex
 			
 	return nullptr;
 }
-#pragma optimize("", on)
