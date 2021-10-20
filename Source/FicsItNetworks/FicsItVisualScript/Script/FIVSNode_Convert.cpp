@@ -37,6 +37,16 @@ TArray<FFIVSNodeAction> UFIVSNode_Convert::GetNodeActions() const {
 	return Actions;
 }
 
+void UFIVSNode_Convert::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
+	Properties.Properties.Add(TEXT("From"), FString::FromInt(FromType));
+	Properties.Properties.Add(TEXT("To"), FString::FromInt(ToType));
+}
+
+void UFIVSNode_Convert::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
+	FDefaultValueHelper::ParseInt(Properties.Properties[TEXT("From")], (int&)FromType);
+	FDefaultValueHelper::ParseInt(Properties.Properties[TEXT("To")], (int&)ToType);
+}
+
 void UFIVSNode_Convert::InitPins() {
 	if (FromType == FIN_TRACE || FromType == FIN_OBJ || FromType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
 		Input = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Input")), FFINExpandedNetworkValueType(FromType, FFINReflection::Get()->FindClass(UObject::StaticClass())));

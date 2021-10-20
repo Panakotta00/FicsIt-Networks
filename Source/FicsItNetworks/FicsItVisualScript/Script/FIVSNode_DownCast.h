@@ -27,6 +27,8 @@ public:
 	// Begin UFIVSNode
 	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
 	virtual void InitPins() override;
+	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
+	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
 	// End UFIVSNode
 	
 	// Begin UFIVSScriptNode

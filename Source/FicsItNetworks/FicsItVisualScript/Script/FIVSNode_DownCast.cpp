@@ -33,6 +33,14 @@ void UFIVSNode_DownCast::InitPins() {
 	}
 }
 
+void UFIVSNode_DownCast::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
+	Properties.Properties.Add(TEXT("ToClass"), ToClass->GetFullName());
+}
+
+void UFIVSNode_DownCast::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
+	ToClass = Cast<UFINClass>(FSoftObjectPath(Properties.Properties[TEXT("ToClass")]).TryLoad());
+}
+
 FString UFIVSNode_DownCast::GetNodeName() const {
 	return TEXT("Cast to ") + ToClass->GetDisplayName().ToString();
 }

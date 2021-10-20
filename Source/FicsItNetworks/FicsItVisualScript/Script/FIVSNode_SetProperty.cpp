@@ -27,6 +27,14 @@ TArray<FFIVSNodeAction> UFIVSNode_SetProperty::GetNodeActions() const {
 	return Actions;
 }
 
+void UFIVSNode_SetProperty::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
+	Properties.Properties.Add(TEXT("Property"), Property->GetPathName());
+}
+
+void UFIVSNode_SetProperty::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
+	Property = Cast<UFINProperty>(FSoftObjectPath(Properties.Properties[TEXT("Property")]).TryLoad());
+}
+
 void UFIVSNode_SetProperty::InitPins() {
 	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, FText::FromString("Exec"));
 	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, FText::FromString("Out"));

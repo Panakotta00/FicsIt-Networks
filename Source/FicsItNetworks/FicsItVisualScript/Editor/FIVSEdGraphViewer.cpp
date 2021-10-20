@@ -1,6 +1,9 @@
 ﻿#include "FIVSEdGraphViewer.h"
 
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
+#include "GenericPlatform/GenericPlatformApplicationMisc.h"
+#include "Windows/WindowsPlatformApplicationMisc.h"
 
 void FFIVSEdConnectionDrawer::Reset() {
 	ConnectionUnderMouse = TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>>(nullptr, nullptr);
@@ -258,6 +261,12 @@ FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEven
 		} else if (ConnectionDrawer && ConnectionDrawer->ConnectionUnderMouse.Key) {
 			ConnectionDrawer->ConnectionUnderMouse.Key->GetPin()->RemoveConnection(ConnectionDrawer->ConnectionUnderMouse.Value->GetPin());
 		}
+	} else if (InKeyEvent.GetKey() == EKeys::C && InKeyEvent.IsControlDown()) {
+		FWindowsPlatformApplicationMisc::ClipboardCopy(*UFIVSSerailizationUtils::FIVS_SerializePartial(SelectionManager.GetSelection(), true));
+	} else if (InKeyEvent.GetKey() == EKeys::V && InKeyEvent.IsControlDown()) {
+		FString Paste;
+		FWindowsPlatformApplicationMisc::ClipboardPaste(Paste);
+		UFIVSSerailizationUtils::FIVS_DeserializeGraph(Graph, Paste, LocalToGraph(MyGeometry.AbsoluteToLocal(FSlateApplication::Get().GetCursorPos())));
 	}
 	return SPanel::OnKeyDown(MyGeometry, InKeyEvent);
 }

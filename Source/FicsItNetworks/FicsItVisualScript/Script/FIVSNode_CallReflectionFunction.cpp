@@ -27,6 +27,14 @@ TArray<FFIVSNodeAction> UFIVSNode_CallReflectionFunction::GetNodeActions() const
 	return Actions;
 }
 
+void UFIVSNode_CallReflectionFunction::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
+	Properties.Properties.Add(TEXT("Function"), Function->GetPathName());
+}
+
+void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
+	Function = Cast<UFINFunction>(FSoftObjectPath(Properties.Properties["Function"]).TryLoad());
+}
+
 void UFIVSNode_CallReflectionFunction::InitPins() {
 	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, FText::FromString(TEXT("Exec")));
 	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, FText::FromString(TEXT("Run")));

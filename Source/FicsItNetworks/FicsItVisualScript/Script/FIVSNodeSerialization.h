@@ -77,11 +77,13 @@ struct FFIVSSerializedGraph {
 	TArray<FFIVSSerializedPinConnection> PinConnections;
 };
 
-static FString FIVS_SerializePartial(TArray<UFIVSNode*> InNodes);
-
 UCLASS()
 class UFIVSSerailizationUtils : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static FString FIVS_SerializePartial(TArray<UFIVSNode*> InNodes, bool bZeroOffset);
 
 	UFUNCTION(BlueprintCallable)
 	static FString FIVS_SerailizeGraph(UFIVSGraph* Graph);

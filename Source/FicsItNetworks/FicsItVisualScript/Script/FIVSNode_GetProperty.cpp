@@ -1,5 +1,6 @@
 #include "FIVSNode_GetProperty.h"
 
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
 
 TArray<FFIVSNodeAction> UFIVSNode_GetProperty::GetNodeActions() const {
@@ -22,6 +23,14 @@ TArray<FFIVSNodeAction> UFIVSNode_GetProperty::GetNodeActions() const {
 		}
 	}
 	return Actions;
+}
+
+void UFIVSNode_GetProperty::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
+	Properties.Properties.Add(TEXT("Property"), Property->GetPathName());
+}
+
+void UFIVSNode_GetProperty::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
+	Property = Cast<UFINProperty>(FSoftObjectPath(Properties.Properties[TEXT("Property")]).TryLoad());
 }
 
 void UFIVSNode_GetProperty::InitPins() {
