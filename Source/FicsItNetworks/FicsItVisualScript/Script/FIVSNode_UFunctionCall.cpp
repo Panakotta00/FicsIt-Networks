@@ -21,7 +21,7 @@ void UFIVSNode_UFunctionCall::InitPins() {
 			
 			if (Prop->IsA<FFloatProperty>()) {
 				PinDataType = FIN_FLOAT;
-			} else if (Prop->IsA<FIntProperty>()) {
+			} else if (Prop->IsA<FIntProperty>() || Prop->IsA<FInt64Property>()) {
 				PinDataType = FIN_INT;
 			} else if (Prop->IsA<FBoolProperty>()) {
 				PinDataType = FIN_BOOL;
@@ -67,7 +67,7 @@ TArray<FFIVSNodeAction> UFIVSNode_UFunctionCall::GetNodeActions() const {
 			
 				if (Prop->IsA<FFloatProperty>()) {
 					PinDataType = FIN_FLOAT;
-				} else if (Prop->IsA<FIntProperty>()) {
+				} else if (Prop->IsA<FIntProperty>() || Prop->IsA<FInt64Property>()) {
 					PinDataType = FIN_INT;
 				} else if (Prop->IsA<FBoolProperty>()) {
 					PinDataType = FIN_BOOL;

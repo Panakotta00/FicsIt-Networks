@@ -108,6 +108,9 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 		} else if (Property->IsA<FIntProperty>()) {
 			Type = FIN_INT;
 			Data.INT = *(int*)ValuePtr;
+		} else if (Property->IsA<FInt64Property>()) {
+			Type = FIN_INT;
+			Data.INT = *(int64*)ValuePtr;
 		} else {
 			Type = FIN_NIL;
 		}
