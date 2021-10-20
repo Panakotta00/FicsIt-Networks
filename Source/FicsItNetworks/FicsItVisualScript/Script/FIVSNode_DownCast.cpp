@@ -34,7 +34,7 @@ void UFIVSNode_DownCast::InitPins() {
 }
 
 void UFIVSNode_DownCast::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Properties.Properties.Add(TEXT("ToClass"), ToClass->GetFullName());
+	Properties.Properties.Add(TEXT("ToClass"), ToClass->GetPathName());
 }
 
 void UFIVSNode_DownCast::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {

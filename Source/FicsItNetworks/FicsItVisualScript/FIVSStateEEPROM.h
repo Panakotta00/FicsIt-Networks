@@ -8,8 +8,10 @@ UCLASS()
 class AFIVSStateEEPROM : public AFINStateEEPROM {
 	GENERATED_BODY()
 public:
-	UPROPERTY(SaveGame, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
 	UFIVSGraph* Graph = nullptr;
 
 	AFIVSStateEEPROM();
+
+	virtual void Serialize(FStructuredArchive::FRecord Record) override;
 };
