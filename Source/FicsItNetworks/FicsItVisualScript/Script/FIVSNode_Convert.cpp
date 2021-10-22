@@ -63,7 +63,7 @@ TArray<UFIVSPin*> UFIVSNode_Convert::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeC
 }
 
 UFIVSPin* UFIVSNode_Convert::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FFINAnyNetworkValue InputVal = Context.GetValue(Input);
+	FFINAnyNetworkValue InputVal = *Context.GetValue(Input);
 	Context.SetValue(Output, FINCastNetworkValue(InputVal, ToType));
 	return nullptr;
 }

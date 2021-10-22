@@ -9,11 +9,15 @@ TArray<FFIVSNodeAction> UFIVSNode_SetProperty::GetNodeActions() const {
 		for (UFINProperty* SetProperty : Class.Value->GetProperties(false)) {
 			FFIVSNodeAction Action;
 			Action.NodeType = UFIVSNode_SetProperty::StaticClass();
-			Action.Title = FText::FromString(TEXT("Set ") + SetProperty->GetDisplayName().ToString());
+			if (SetProperty->GetPropertyFlags() & FIN_Prop_ClassProp) {
+				Action.Title = FText::FromString(TEXT("Set ") + SetProperty->GetDisplayName().ToString() + TEXT(" (Class)"));
+			} else {
+				Action.Title = FText::FromString(TEXT("Set ") + SetProperty->GetDisplayName().ToString());
+			}
 			Action.SearchableText = Action.Title;
 			Action.Category = FText::FromString(Class.Value->GetDisplayName().ToString() + TEXT("|Properties"));
 			Action.Pins.Add(FIVS_PIN_EXEC_INPUT);
-			Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFINExpandedNetworkValueType(FIN_TRACE, Class.Value)));
+			Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFINExpandedNetworkValueType(SetProperty->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Class.Value)));
 			FFIVSFullPinType PinType(SetProperty);
 			PinType.PinType |= FIVS_PIN_INPUT;
 			Action.Pins.Add(PinType);
@@ -38,7 +42,7 @@ void UFIVSNode_SetProperty::DeserializeNodeProperties(const FFIVSNodeProperties&
 void UFIVSNode_SetProperty::InitPins() {
 	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, FText::FromString("Exec"));
 	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, FText::FromString("Out"));
-	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Instance"), FFIVSPinDataType(FIN_TRACE, Cast<UFINClass>(Property->GetOuter())));
+	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())));
 	FFIVSPinDataType Type(Property);
 	if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
 	DataIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Value"), Type);
@@ -49,9 +53,11 @@ TArray<UFIVSPin*> UFIVSNode_SetProperty::PreExecPin(UFIVSPin* ExecPin, FFIVSRunt
 }
 
 UFIVSPin* UFIVSNode_SetProperty::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FFINNetworkTrace Instance = Context.GetValue(InstanceIn).GetTrace();
-	FFINAnyNetworkValue Data = Context.GetValue(DataIn);
-	FFINExecutionContext ExecContext(UFINNetworkUtils::RedirectIfPossible(Instance));
-	Property->SetValue(ExecContext, Data);
+	FFIVSValue Instance = Context.GetValue(InstanceIn);
+	FFIVSValue Data = Context.GetValue(DataIn);
+	FFINExecutionContext ExecContext;
+	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) ExecContext = Instance->GetClass();
+	else ExecContext = UFINNetworkUtils::RedirectIfPossible(Instance->GetTrace());
+	Property->SetValue(ExecContext, *Data);
 	return ExecOut;
 }

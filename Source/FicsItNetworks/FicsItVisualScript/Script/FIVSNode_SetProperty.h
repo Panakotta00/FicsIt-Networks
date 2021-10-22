@@ -34,7 +34,13 @@ public:
 	// Begin UFIVSGenericNode
 	virtual void InitPins() override;
 
-	virtual FString GetNodeName() const override { return TEXT("Set ") + Property->GetInternalName(); }
+	virtual FString GetNodeName() const override {
+		if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) {
+			return TEXT("Set ") + Property->GetInternalName() + TEXT(" (Class)");
+		} else {
+			return TEXT("Set ") + Property->GetInternalName();
+		}
+	}
 
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 

@@ -27,7 +27,7 @@ TArray<UFIVSPin*> UFIVSNode_Print::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeCon
 }
 
 UFIVSPin* UFIVSNode_Print::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FString Message = Context.GetValue(MessageIn).GetString();
+	FString Message = Context.GetValue(MessageIn)->GetString();
 	CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = Context.GetKernelContext()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
 	if (serial) {
 		*serial << TCHAR_TO_UTF8(*Message) << "\r\n";

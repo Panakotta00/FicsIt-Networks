@@ -27,7 +27,7 @@ void UFIVSNode_Proxy::InitPins() {
 }
 
 UFIVSPin* UFIVSNode_Proxy::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FString Addr = Context.GetValue(AddrIn).GetString();
+	FString Addr = Context.GetValue(AddrIn)->GetString();
 	FGuid Guid;
 	if (!FGuid::Parse(Addr, Guid)) {
 		Context.GetKernelContext()->Crash(MakeShared<FFINKernelCrash>(TEXT("Address not valid!")));

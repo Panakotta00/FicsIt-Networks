@@ -9,10 +9,14 @@ TArray<FFIVSNodeAction> UFIVSNode_GetProperty::GetNodeActions() const {
 		for (UFINProperty* GetProperty : Class.Value->GetProperties(false)) {
 			FFIVSNodeAction Action;
 			Action.NodeType = UFIVSNode_GetProperty::StaticClass();
-			Action.Title = FText::FromString(TEXT("Get ") + GetProperty->GetDisplayName().ToString());
+			if (GetProperty->GetPropertyFlags() & FIN_Prop_ClassProp) {
+				Action.Title = FText::FromString(TEXT("Get ") + GetProperty->GetDisplayName().ToString() + TEXT(" (Class)"));
+			} else {
+				Action.Title = FText::FromString(TEXT("Get ") + GetProperty->GetDisplayName().ToString());
+			}
 			Action.SearchableText = Action.Title;
 			Action.Category = FText::FromString(Class.Value->GetDisplayName().ToString() + TEXT("|Properties"));
-			Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFINExpandedNetworkValueType(FIN_TRACE, Class.Value)));
+			Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFINExpandedNetworkValueType(GetProperty->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Class.Value)));
 			FFIVSFullPinType PinType(GetProperty);
 			PinType.PinType |= FIVS_PIN_OUTPUT;
 			Action.Pins.Add(PinType);
@@ -34,7 +38,7 @@ void UFIVSNode_GetProperty::DeserializeNodeProperties(const FFIVSNodeProperties&
 }
 
 void UFIVSNode_GetProperty::InitPins() {
-	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Instance"), {FIN_TRACE, Cast<UFINClass>(Property->GetOuter())});
+	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Instance"), {Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())});
 	FFIVSPinDataType Type(Property);
 	if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
 	DataOut = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString("Value"), Type);
@@ -45,8 +49,10 @@ TArray<UFIVSPin*> UFIVSNode_GetProperty::PreExecPin(UFIVSPin* ExecPin, FFIVSRunt
 }
 
 UFIVSPin* UFIVSNode_GetProperty::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FFINNetworkTrace Instance = Context.GetValue(InstanceIn).GetTrace();
-	FFINExecutionContext ExecContext(UFINNetworkUtils::RedirectIfPossible(Instance));
+	FFIVSValue Instance = Context.GetValue(InstanceIn);
+	FFINExecutionContext ExecContext;
+	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) ExecContext = Instance->GetClass();
+	else ExecContext = UFINNetworkUtils::RedirectIfPossible(Instance->GetTrace());
 	FFINAnyNetworkValue Value = Property->GetValue(ExecContext);
 	Context.SetValue(DataOut, Value);
 	return nullptr;

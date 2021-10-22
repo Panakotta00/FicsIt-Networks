@@ -25,6 +25,6 @@ void UFIVSNode_Branch::InitPins() {
 }
 
 UFIVSPin* UFIVSNode_Branch::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	bool bCondition = Context.GetValue(Condition).GetBool();
+	bool bCondition = Context.GetValue(Condition)->GetBool();
 	return bCondition ? ExecTrue : ExecFalse;
 }

@@ -6,10 +6,10 @@ void UFIVSNode_SepperateStruct::InitPins() {
 	EFIVSPinType PinType = bBreak ? FIVS_PIN_DATA_OUTPUT : FIVS_PIN_DATA_INPUT;
 	for (UFINProperty* Prop : Struct->GetProperties()) {
 		UFIVSPin* Pin = CreatePin(PinType, FText::FromString(Prop->GetInternalName()), FFIVSPinDataType(Prop));
-		if (!bBreak) InputPins.Add(Prop->GetInternalName(), Pin);
+		(bBreak ? OutputPins : InputPins).Add(Prop->GetInternalName(), Pin);
 	}
 	UFIVSPin* Pin = CreatePin(bBreak ? FIVS_PIN_DATA_INPUT : FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("Struct")), FFIVSPinDataType(FIN_STRUCT, Struct));
-	if (bBreak) InputPins.Add(TEXT("Struct"), Pin);
+	(bBreak ? InputPins : OutputPins).Add(TEXT("Struct"), Pin);
 }
 
 TArray<FFIVSNodeAction> UFIVSNode_SepperateStruct::GetNodeActions() const {
@@ -70,11 +70,11 @@ TArray<UFIVSPin*> UFIVSNode_SepperateStruct::PreExecPin(UFIVSPin* ExecPin, FFIVS
 
 UFIVSPin* UFIVSNode_SepperateStruct::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	if (bBreak) {
-		FFINDynamicStructHolder StructObj = Context.GetValue(InputPins[TEXT("Struct")]).GetStruct();
+		FFINDynamicStructHolder StructObj = Context.GetValue(InputPins[TEXT("Struct")])->GetStruct();
 		FFINExecutionContext Ctx(StructObj.GetData());
 		for (UFINProperty* Prop : Struct->GetProperties()) {
 			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
-			UFIVSPin** Pin = InputPins.Find(Prop->GetInternalName());
+			UFIVSPin** Pin = OutputPins.Find(Prop->GetInternalName());
 			if (Pin) Context.SetValue(*Pin, Prop->GetValue(Ctx));
 		}
 	} else {
@@ -83,8 +83,9 @@ UFIVSPin* UFIVSNode_SepperateStruct::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeCont
 		for (UFINProperty* Prop : Struct->GetProperties()) {
 			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
 			UFIVSPin** Pin = InputPins.Find(Prop->GetInternalName());
-			if (Pin) Prop->SetValue(Ctx, Context.GetValue(*Pin));
+			if (Pin) Prop->SetValue(Ctx, *Context.GetValue(*Pin));
 		}
+		Context.SetValue(OutputPins[TEXT("Struct")], StructObj);
 	}
 	return nullptr;
 }

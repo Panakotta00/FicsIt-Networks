@@ -14,6 +14,8 @@ class UFIVSNode_SepperateStruct : public UFIVSScriptNode {
 
 	UPROPERTY()
 	TMap<FString, UFIVSPin*> InputPins;
+	UPROPERTY()
+	TMap<FString, UFIVSPin*> OutputPins;
 	
 public:
 	// Begin UFIVSNode

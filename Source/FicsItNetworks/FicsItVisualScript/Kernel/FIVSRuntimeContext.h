@@ -1,9 +1,9 @@
 #pragma once
 
+#include "FIVSValue.h"
 #include "FicsItNetworks/FicsItKernel/FicsItKernel.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode.h"
-#include "FicsItNetworks/Network/FINAnyNetworkValue.h"
 #include "FIVSRuntimeContext.generated.h"
 
 USTRUCT()
@@ -11,7 +11,7 @@ struct FFIVSRuntimeContext {
 	GENERATED_BODY()
 private:
 	UPROPERTY()
-	TMap<UFIVSPin*, FFINAnyNetworkValue> PinValues;
+	TMap<UFIVSPin*, FFIVSValue> PinValues;
 
 	UPROPERTY()
 	UFINKernelSystem* KernelContext = nullptr;
@@ -36,23 +36,28 @@ public:
 	 * connected pin if it is available, otherwise it returns nil.
 	 * If no value is set directly and there are no connections to other pins, returns the literal value of the pin.
 	 */
-	FFINAnyNetworkValue GetValue(UFIVSPin* InPin) {
-		FFINAnyNetworkValue* Value = PinValues.Find(InPin);
+	FFIVSValue GetValue(UFIVSPin* InPin) {
+		FFIVSValue* Value = PinValues.Find(InPin);
 		if (Value) return *Value;
 		if (InPin->GetConnections().Num() < 1) {
-			return InPin->GetLiteral();
+			return FFIVSValue(FFINAnyNetworkValue(InPin->GetLiteral()));
 		} else {
 			UFIVSPin* Source = InPin->FindConnected();
 			if (Source) Value = PinValues.Find(Source);
 			if (Value) return *Value;
-			return FFINAnyNetworkValue(InPin->GetPinDataType());
+			return FFIVSValue(FFINAnyNetworkValue(InPin->GetPinDataType()));
 		}
 	}
 
 	/**
 	 * This function can be used to define the value that a data-output-pin currently returns
 	 */
-	void SetValue(UFIVSPin* InPin, FFINAnyNetworkValue Value) {
-		PinValues.FindOrAdd(InPin) = FINCastNetworkValue(Value, InPin->GetPinDataType().GetType());
+	void SetValue(UFIVSPin* InPin, FFIVSValue Value) {
+		Value = FINCastNetworkValue(*Value, InPin->GetPinDataType().GetType());
+		PinValues.FindOrAdd(InPin) = Value;
+	}
+
+	void SetValue(UFIVSPin* InPin, const FFINAnyNetworkValue& Value) {
+		SetValue(InPin, FFIVSValue(Value));
 	}
 };

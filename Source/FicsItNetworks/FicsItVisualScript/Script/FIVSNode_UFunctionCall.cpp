@@ -128,8 +128,8 @@ UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContex
 			if (Prop->IsInContainer(Function->ParmsSize)) {
 				Prop->InitializeValue_InContainer(ParamStruct);
 				if (!(Prop->GetPropertyFlags() & CPF_OutParm)) {
-					FFINAnyNetworkValue Value = Context.GetValue(PropertyToPin[*Prop]);
-					Value.Copy(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct));
+					FFIVSValue Value = Context.GetValue(PropertyToPin[*Prop]);
+					Value->Copy(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct));
 				}
 			}
 		}

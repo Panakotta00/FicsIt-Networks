@@ -50,12 +50,13 @@ TArray<UFIVSPin*> UFIVSNode_DownCast::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntime
 }
 
 UFIVSPin* UFIVSNode_DownCast::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FFINNetworkTrace Trace = Context.GetValue(DataInput).GetTrace();
+	FFIVSValue Value = Context.GetValue(DataInput);
+	FFINNetworkTrace Trace = Value->GetTrace();
 	UObject* Obj = *Trace;
 	bool bSuccess = Obj && Obj->IsA(Cast<UClass>(ToClass->GetOuter()));
 	if (bPure) {
 		Context.SetValue(SuccessOutput, bSuccess);
-		Context.SetValue(DataOutput, Trace);
+		Context.SetValue(DataOutput, Value);
 	}
 	return nullptr;
 }

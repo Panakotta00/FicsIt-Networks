@@ -33,7 +33,13 @@ public:
 	// Begin UFIVSScriptNode
 	virtual void InitPins() override;
 
-	virtual FString GetNodeName() const override { return Function->GetDisplayName().ToString(); }
+	virtual FString GetNodeName() const override {
+		if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
+			return Function->GetDisplayName().ToString() + TEXT(" (Class)");
+		} else {
+			return Function->GetDisplayName().ToString();
+		}
+	}
 
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 
