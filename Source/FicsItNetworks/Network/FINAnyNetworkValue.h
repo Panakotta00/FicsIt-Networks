@@ -325,8 +325,10 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 			} else if (Prop->IsA<UInt64Property>()) {
 				Prop->CopyCompleteValue(Dest, &Data.INT);
 			}
+			break;
 		} case FIN_STR:
 			Prop->CopyCompleteValue(Dest, Data.STRING);
+			break;
 		// TODO: Add more data types
 		default:
 			Prop->CopyCompleteValue(Dest, GetData());

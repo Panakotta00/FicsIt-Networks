@@ -13,7 +13,7 @@ USTRUCT()
 struct FFIVSValue {
 	GENERATED_BODY()
 private:
-	EFIVS_ValueType ValueType;
+	TEnumAsByte<EFIVS_ValueType> ValueType;
 	FFINAnyNetworkValue* Value;
 
 public:

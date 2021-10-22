@@ -119,16 +119,19 @@ TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRu
 	});
 }
 
+#pragma optimize("", off)
 UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	TArray<FFINAnyNetworkValue> Output;
+	
 	// allocate & initialize parameter struct
 	uint8* ParamStruct = (uint8*)FMemory_Alloca(Function->PropertiesSize);
+	FFIVSValue Value;
 	for (TFieldIterator<UProperty> Prop(Function); Prop; ++Prop) {
 		if (Prop->GetPropertyFlags() & CPF_Parm) {
 			if (Prop->IsInContainer(Function->ParmsSize)) {
 				Prop->InitializeValue_InContainer(ParamStruct);
 				if (!(Prop->GetPropertyFlags() & CPF_OutParm)) {
-					FFIVSValue Value = Context.GetValue(PropertyToPin[*Prop]);
+					Value = Context.GetValue(PropertyToPin[*Prop]);
 					Value->Copy(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct));
 				}
 			}
@@ -151,3 +154,4 @@ UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContex
 			
 	return nullptr;
 }
+#pragma optimize("", on)
