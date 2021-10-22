@@ -26,7 +26,42 @@ enum EFIVSPinType {
 };
 ENUM_CLASS_FLAGS(EFIVSPinType)
 
-typedef FFINExpandedNetworkValueType FFIVSPinDataType;
+USTRUCT()
+struct FFIVSPinDataType : public FFINExpandedNetworkValueType {
+	GENERATED_BODY()
+private:
+	bool bReference = false;
+
+public:
+	FFIVSPinDataType() = default;
+	FFIVSPinDataType(const FFIVSPinDataType&) = default;
+	FFIVSPinDataType(const FFINExpandedNetworkValueType& Other) : FFINExpandedNetworkValueType(Other) {}
+	FFIVSPinDataType(EFINNetworkValueType InType, UFINStruct* InRefType) : FFINExpandedNetworkValueType(InType, InRefType) {}
+
+	bool IsReference() const { return bReference; }
+	
+	bool Equals(const FFIVSPinDataType& Other) {
+		if (Other.bReference && !bReference) return false;
+		return Super::Equals(Other);
+	}
+
+	bool IsA(const FFIVSPinDataType& Other) const {
+		if (Other.bReference && !bReference) return false;
+		return Super::IsA(Other);
+	}
+
+	FFIVSPinDataType AsRef() const {
+		FFIVSPinDataType NewType(*this);
+		NewType.bReference = true;
+		return NewType;
+	}
+
+	FFIVSPinDataType AsVal() const {
+		FFIVSPinDataType NewType(*this);
+		NewType.bReference = false;
+		return NewType;
+	}
+};
 
 USTRUCT()
 struct FFIVSFullPinType {
@@ -37,7 +72,7 @@ struct FFIVSFullPinType {
 
 	FFIVSFullPinType() = default;
 	FFIVSFullPinType(EFIVSPinType PinType) : PinType(PinType) {}
-	FFIVSFullPinType(EFIVSPinType PinType, FFINExpandedNetworkValueType DataType) : PinType(PinType), DataType(DataType) {}
+	FFIVSFullPinType(EFIVSPinType PinType, FFIVSPinDataType DataType) : PinType(PinType), DataType(DataType) {}
 	FFIVSFullPinType(UFINProperty* Property) {
 		EFINRepPropertyFlags Flags = Property->GetPropertyFlags();
 		if (Flags & FIN_Prop_Param) {
@@ -49,7 +84,7 @@ struct FFIVSFullPinType {
 		} else if (Flags & FIN_Prop_Attrib) {
 			PinType = FIVS_PIN_DATA;
 		}
-		DataType = FFINExpandedNetworkValueType(Property);
+		DataType = FFIVSPinDataType(Property);
 	}
 
 	bool CanConnect(const FFIVSFullPinType& Other) const;
@@ -147,7 +182,7 @@ class UFIVSGenericPin : public UFIVSPin {
 	GENERATED_BODY()
 public:
 	EFIVSPinType PinType = FIVS_PIN_NONE;
-	FFIVSPinDataType PinDataType = FIN_NIL;
+	FFIVSPinDataType PinDataType = FFINExpandedNetworkValueType(FIN_NIL);
 	FText Name = FText::FromString("Unnamed");
 	
 	// Begin UFINScriptPin
@@ -156,7 +191,7 @@ public:
 	virtual FText GetName() override;
 	// End UFINScriptPin
 	
-	static UFIVSGenericPin* Create(EFINNetworkValueType DataType, EFIVSPinType PinType, const FString& Name);
+	static UFIVSGenericPin* Create(FFIVSPinDataType DataType, EFIVSPinType PinType, const FString& Name);
 };
 
 UCLASS()

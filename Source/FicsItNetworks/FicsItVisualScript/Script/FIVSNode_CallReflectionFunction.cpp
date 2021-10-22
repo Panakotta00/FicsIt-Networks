@@ -42,7 +42,7 @@ void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const FFIVSNode
 void UFIVSNode_CallReflectionFunction::InitPins() {
 	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, FText::FromString(TEXT("Exec")));
 	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, FText::FromString(TEXT("Run")));
-	Self = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Self")), {Function->GetFunctionFlags() & FIN_Func_ClassFunc ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Function->GetOuter())});
+	Self = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIN_Func_ClassFunc ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Function->GetOuter())));
 	for (UFINProperty* Param : Function->GetParameters()) {
 		EFINRepPropertyFlags Flags = Param->GetPropertyFlags();
 		if (Flags & FIN_Prop_Param) {

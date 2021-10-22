@@ -404,7 +404,7 @@ TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPat
 		}
 	}
 	
-    TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection, Context.Pin ? FFIVSFullPinType(Context.Pin->GetPinType(), Context.Pin->GetPinDataType()) : FFIVSFullPinType(FIVS_PIN_DATA_INPUT & FIVS_PIN_EXEC_OUTPUT, FIN_NIL))
+    TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection, Context.Pin ? FFIVSFullPinType(Context.Pin->GetPinType(), Context.Pin->GetPinDataType()) : FFIVSFullPinType(FIVS_PIN_DATA_INPUT & FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIN_NIL)))
 		.OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFIVSEdActionSelectionAction>& Action) {
 		OnExecute(Action);
     	ActiveActionSelection = nullptr;

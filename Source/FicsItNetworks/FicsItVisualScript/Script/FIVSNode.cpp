@@ -142,7 +142,7 @@ FText UFIVSGenericPin::GetName() {
 	return Name;
 }
 
-UFIVSGenericPin* UFIVSGenericPin::Create(EFINNetworkValueType DataType, EFIVSPinType PinType, const FString& Name) {
+UFIVSGenericPin* UFIVSGenericPin::Create(FFIVSPinDataType DataType, EFIVSPinType PinType, const FString& Name) {
 	UFIVSGenericPin* Pin = NewObject<UFIVSGenericPin>();
 	Pin->Name = FText::FromString(Name);
 	Pin->PinDataType = DataType;
@@ -221,7 +221,7 @@ TArray<FFIVSNodeAction> UFIVSRerouteNode::GetNodeActions() const {
 			FText::FromString(""),
 			FText::FromString("Create Reroute Node"),
 			{
-				{FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FIN_ANY}
+				{FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIN_ANY)}
 			}
 		}
 	};

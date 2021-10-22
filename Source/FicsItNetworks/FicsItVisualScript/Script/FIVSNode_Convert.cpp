@@ -21,11 +21,11 @@ TArray<FFIVSNodeAction> UFIVSNode_Convert::GetNodeActions() const {
 				if (ConvertFromType == FIN_TRACE || ConvertFromType == FIN_OBJ || ConvertFromType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
 					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFINExpandedNetworkValueType(ConvertFromType, FFINReflection::Get()->FindClass(UObject::StaticClass()))));
 				else
-					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, ConvertFromType));
+					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFIVSPinDataType(ConvertFromType)));
 				if (ConvertToType == FIN_TRACE || ConvertToType == FIN_OBJ || ConvertToType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
 					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_OUTPUT, FFINExpandedNetworkValueType(ConvertToType, FFINReflection::Get()->FindClass(UObject::StaticClass()))));
 				else
-					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_OUTPUT, ConvertToType));
+					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(ConvertToType)));
 				Action.OnExecute.BindLambda([ConvertFromType, ConvertToType](UFIVSNode* Node) {
 					Cast<UFIVSNode_Convert>(Node)->FromType = ConvertFromType;
 					Cast<UFIVSNode_Convert>(Node)->ToType = ConvertToType;;

@@ -13,9 +13,9 @@ TArray<FFIVSNodeAction> UFIVSNode_DownCast::GetNodeActions() const {
 		Action.Category = FText::FromString(TEXT("Casts"));
 		Action.SearchableText = Action.Title;
 		Action.Pins = {
-			{FIVS_PIN_DATA_INPUT, {FIN_TRACE, FromClass}},
-			{FIVS_PIN_DATA_OUTPUT, {FIN_TRACE, Class.Value}},
-			{FIVS_PIN_DATA_OUTPUT, FIN_BOOL}
+			{FIVS_PIN_DATA_INPUT, FFIVSPinDataType(FIN_TRACE, FromClass)},
+			{FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(FIN_TRACE, Class.Value)},
+			{FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(FIN_BOOL)}
 		};
 		Action.OnExecute.BindLambda([FromClass, Class](UFIVSNode* Node) {
 			Cast<UFIVSNode_DownCast>(Node)->ToClass = Class.Value;
@@ -27,9 +27,9 @@ TArray<FFIVSNodeAction> UFIVSNode_DownCast::GetNodeActions() const {
 
 void UFIVSNode_DownCast::InitPins() {
 	if (bPure) {
-		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("From")), {FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass())});
-		DataOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("To")), {FIN_TRACE, ToClass});
-		SuccessOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("Success")), {FIN_BOOL});
+		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("From")), FFIVSPinDataType(FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass())));
+		DataOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("To")), FFIVSPinDataType(FIN_TRACE, ToClass));
+		SuccessOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("Success")), FFIVSPinDataType(FIN_BOOL));
 	}
 }
 

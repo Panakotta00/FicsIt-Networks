@@ -14,6 +14,9 @@ private:
 	TMap<UFIVSPin*, FFIVSValue> PinValues;
 
 	UPROPERTY()
+	TMap<FString, FFINAnyNetworkValue> LocalVariables;
+
+	UPROPERTY()
 	UFINKernelSystem* KernelContext = nullptr;
 
 	UPROPERTY()
@@ -59,5 +62,13 @@ public:
 
 	void SetValue(UFIVSPin* InPin, const FFINAnyNetworkValue& Value) {
 		SetValue(InPin, FFIVSValue(Value));
+	}
+
+	FFINAnyNetworkValue* GetLocalVariable(const FString& InVarName) {
+		return LocalVariables.Find(InVarName);
+	}
+
+	FFINAnyNetworkValue& SetLocalVariable(const FString& InVarName, const FFINAnyNetworkValue& InValue) {
+		return LocalVariables.FindOrAdd(InVarName) = InValue;
 	}
 };

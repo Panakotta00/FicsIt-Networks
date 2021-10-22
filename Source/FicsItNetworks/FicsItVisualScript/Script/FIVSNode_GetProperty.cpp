@@ -38,7 +38,7 @@ void UFIVSNode_GetProperty::DeserializeNodeProperties(const FFIVSNodeProperties&
 }
 
 void UFIVSNode_GetProperty::InitPins() {
-	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Instance"), {Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())});
+	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())));
 	FFIVSPinDataType Type(Property);
 	if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
 	DataOut = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString("Value"), Type);

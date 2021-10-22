@@ -193,7 +193,7 @@ void SFIVSEdActionSelection::SetFocus() {
 
 SFIVSEdActionSelection::SFIVSEdActionSelection() {
 	TextFilter = MakeShared<FFIVSEdActionSelectionTextFilter>(TEXT(""));
-	PinFilter = MakeShared<FFIVSEdActionSelectionPinFilter>(FFIVSFullPinType(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FIN_NIL));
+	PinFilter = MakeShared<FFIVSEdActionSelectionPinFilter>(FFIVSFullPinType(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIN_NIL)));
 	Filters.Add(TextFilter);
 	Filters.Add(PinFilter);
 }

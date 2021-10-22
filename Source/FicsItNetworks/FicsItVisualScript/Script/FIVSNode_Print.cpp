@@ -9,7 +9,7 @@ TArray<FFIVSNodeAction> UFIVSNode_Print::GetNodeActions() const {
 				FText::FromString(TEXT("Print")),
 				{
 					FIVS_PIN_EXEC_INPUT,
-					{FIVS_PIN_DATA_INPUT, FIN_STR},
+					{FIVS_PIN_DATA_INPUT, FFIVSPinDataType(FIN_STR)},
 					FIVS_PIN_EXEC_OUTPUT,
 				}
 			}
@@ -19,7 +19,7 @@ TArray<FFIVSNodeAction> UFIVSNode_Print::GetNodeActions() const {
 void UFIVSNode_Print::InitPins() {
 	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, FText::FromString("Exec"));
 	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, FText::FromString("Out"));
-	MessageIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Message"), FIN_STR);
+	MessageIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Message"), FFIVSPinDataType(FIN_STR));
 }
 
 TArray<UFIVSPin*> UFIVSNode_Print::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {

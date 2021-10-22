@@ -5,7 +5,6 @@
 TMap<UClass*, TMap<FString, FFIVSNodeUFunctionCallMeta>> UFIVSNode_UFunctionCall::FunctionMetaData;
 
 void UFIVSNode_UFunctionCall::InitPins() {
-	
 	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
 		auto Flags = Prop->GetPropertyFlags();
 		UFIVSPin* Pin = nullptr;
@@ -27,7 +26,7 @@ void UFIVSNode_UFunctionCall::InitPins() {
 			} else if (Prop->IsA<FStrProperty>()) {
 				PinDataType = FIN_STR;
 			}
-			Pin = CreatePin(PinType, FText::FromString(Prop->GetName()), PinDataType);
+			Pin = CreatePin(PinType, FText::FromString(Prop->GetName()), FFIVSPinDataType(PinDataType));
 		}
 		if (Pin) {
 			PropertyToPin.Add(*Prop, Pin);
@@ -77,7 +76,7 @@ TArray<FFIVSNodeAction> UFIVSNode_UFunctionCall::GetNodeActions() const {
 					} else if (Prop->IsA<FStrProperty>()) {
 						PinDataType = FIN_STR;
 					}
-					Action.Pins.Add(FFIVSFullPinType(PinType, PinDataType));
+					Action.Pins.Add(FFIVSFullPinType(PinType, FFIVSPinDataType(PinDataType)));
 				}
 			}
 			UFunction* F = *Func;
@@ -119,7 +118,6 @@ TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRu
 	});
 }
 
-#pragma optimize("", off)
 UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	TArray<FFINAnyNetworkValue> Output;
 	
@@ -154,4 +152,3 @@ UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContex
 			
 	return nullptr;
 }
-#pragma optimize("", on)
