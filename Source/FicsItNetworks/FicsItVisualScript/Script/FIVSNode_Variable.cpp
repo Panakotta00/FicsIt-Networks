@@ -45,35 +45,6 @@ TArray<FFIVSNodeAction> UFIVSNode_Variable::GetNodeActions() const {
 	return Actions;
 }
 
-void UFIVSNode_Variable::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-}
-
-void UFIVSNode_Variable::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-}
-
 FString UFIVSNode_Variable::GetNodeName() const {
 	return TEXT("Test");
-}
-
-TArray<UFIVSPin*> UFIVSNode_Variable::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	TArray<UFIVSPin*> InputPins;
-	if (DataInput) InputPins.Add(DataInput);
-	return InputPins;
-}
-
-UFIVSPin* UFIVSNode_Variable::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	if (bAssignment) {
-		FFIVSValue Variable = Context.GetValue(VarPin);
-		FFIVSValue Value = Context.GetValue(DataInput);
-		*Variable = *Value;
-		return ExecOutput;
-	} else {
-		FFINAnyNetworkValue* Value = Context.GetLocalVariable(GetFullName());
-		if (!Value) {
-			FFIVSValue InitValue = Context.GetValue(DataInput);
-			Value = &Context.SetLocalVariable(GetFullName(), *InitValue); // TODO: Use different var name, current one is not persistable since Object it self doesnt get persisted but recreated
-		}
-		Context.SetValue(VarPin, FFIVSValue(Value));
-		return nullptr;
-	}
 }

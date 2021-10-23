@@ -6,8 +6,7 @@
 UCLASS()
 class UFIVSNode_Variable : public UFIVSScriptNode {
 	GENERATED_BODY()
-	
-	
+
 	UPROPERTY()
 	FFIVSPinDataType Type;
 
@@ -22,20 +21,34 @@ class UFIVSNode_Variable : public UFIVSScriptNode {
 
 	UPROPERTY()
 	UFIVSPin* DataInput;
-	
+
 public:
-	// TODO: When there is a details panel available, use it to define data type
-	
 	// Begin UFIVSNode
 	virtual void InitPins() override;
 	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
-	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
-	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
 	virtual FString GetNodeName() const override;
 	// End UFIVSNode
-
-	// Begin UFIVSScriptNode
-	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
-	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
-	// End UFIVSScriptNode
+	
+	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override {
+		TArray<UFIVSPin*> InputPins;
+		if (DataInput) InputPins.Add(DataInput);
+		return InputPins;
+	}
+	
+	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override {
+		if (bAssignment) {
+			FFIVSValue Variable = Context.GetValue(VarPin);
+			FFIVSValue Value = Context.GetValue(DataInput);
+			*Variable = *Value;
+			return ExecOutput;
+		} else {
+			FFINAnyNetworkValue* Value = Context.GetLocalVariable(GetFullName());
+			if (!Value) {
+				FFIVSValue InitValue = Context.GetValue(DataInput);
+				Value = &Context.SetLocalVariable(GetFullName(), *InitValue); // TODO: Use different var name, current one is not persistable since Object it self doesnt get persisted but recreated
+			}
+			Context.SetValue(VarPin, FFIVSValue(Value));
+			return nullptr;
+		}
+	}
 };
