@@ -28,7 +28,7 @@ namespace FicsItKernel {
 			} else if (c & EClassCastFlags::CASTCLASS_FClassProperty) {
 				newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
 			} else if (c & EClassCastFlags::CASTCLASS_FObjectProperty) {
-				if (Cast<UObjectProperty>(p)->PropertyClass->IsChildOf<UClass>()) {
+				if (CastField<FObjectProperty>(p)->PropertyClass->IsChildOf<UClass>()) {
 					newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
 				} else {
 					UObject* Obj = *p->ContainerPtrToValuePtr<UObject*>(data);

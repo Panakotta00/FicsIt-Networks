@@ -57,15 +57,15 @@ EFIVSPinType UFIVSPin::GetPinType() {
 }
 
 FFIVSPinDataType UFIVSPin::GetPinDataType() {
-	return FIN_NIL;
+	return FFIVSPinDataType(FIN_NIL);
 }
 
 const TArray<UFIVSPin*>& UFIVSPin::GetConnections() {
 	return ConnectedPins;
 }
 
-FText UFIVSPin::GetName() {
-	return FText::FromString("");
+FString UFIVSPin::GetName() {
+	return "Unnamed Pin";
 }
 
 bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
@@ -138,13 +138,14 @@ FFIVSPinDataType UFIVSGenericPin::GetPinDataType() {
 	return PinDataType;
 }
 
-FText UFIVSGenericPin::GetName() {
+FString UFIVSGenericPin::GetName() {
 	return Name;
 }
 
-UFIVSGenericPin* UFIVSGenericPin::Create(FFIVSPinDataType DataType, EFIVSPinType PinType, const FString& Name) {
+UFIVSGenericPin* UFIVSGenericPin::Create(FFIVSPinDataType DataType, EFIVSPinType PinType, const FString& Name, const FText& DisplayName) {
 	UFIVSGenericPin* Pin = NewObject<UFIVSGenericPin>();
-	Pin->Name = FText::FromString(Name);
+	Pin->Name = Name;
+	Pin->DisplayName = DisplayName;
 	Pin->PinDataType = DataType;
 	Pin->PinType = PinType;
 	return Pin;

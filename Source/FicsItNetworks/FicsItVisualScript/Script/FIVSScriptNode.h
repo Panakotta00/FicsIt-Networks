@@ -16,7 +16,7 @@ protected:
 	/**
 	 * Creates a new pin with the given info, adds it to the pin list and returns the pin.
 	 */
-	UFIVSPin* CreatePin(EFIVSPinType PinType, FText Name, FFIVSPinDataType DataType = FFIVSPinDataType(FIN_ANY));
+	UFIVSPin* CreatePin(EFIVSPinType PinType, const FString& Name, const FText& DisplayName, FFIVSPinDataType DataType = FFIVSPinDataType(FIN_ANY));
 
 public:
 	// Begin UFIVSNode

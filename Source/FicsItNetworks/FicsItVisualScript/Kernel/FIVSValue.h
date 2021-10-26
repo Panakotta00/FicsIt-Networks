@@ -36,6 +36,12 @@ public:
 		}
 	}
 
+	~FFIVSValue() {
+		if (ValueType == FIVS_Value_RValue) {
+			delete Value;
+		}
+	}	
+
 	FFIVSValue& operator=(const FFIVSValue& InValue) {
 		if (InValue.ValueType == FIVS_Value_RValue) {
 			if (ValueType == FIVS_Value_RValue) {

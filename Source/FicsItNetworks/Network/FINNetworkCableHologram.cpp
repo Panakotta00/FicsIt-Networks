@@ -7,6 +7,8 @@
 #include "FINNetworkCable.h"
 #include "FicsItNetworks/FINComponentUtility.h"
 #include "FicsItNetworks/Utils/FINWallAndFoundationHologram.h"
+#include "FactoryGame/Public/Buildables/FGBuildableWall.h"
+#include "FactoryGame/Public/Buildables/FGBuildableFoundation.h"
 
 FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 	switch (SnapType) {

@@ -120,7 +120,7 @@ static inline EFINNetworkValueType GetValueTypeFromProp(UProperty* Prop) {
 	if (CastFlags & CASTCLASS_FObjectProperty) return FIN_OBJ;
 	if (CastFlags & CASTCLASS_FClassProperty) return FIN_CLASS;
 	if (CastFlags & CASTCLASS_FStructProperty) {
-		UStructProperty* StructProp = Cast<UStructProperty>(Prop);
+		FStructProperty* StructProp = CastField<FStructProperty>(Prop);
 		if (StructProp->Struct == FFINNetworkTrace::StaticStruct()) {
 			return FIN_TRACE;
 		}

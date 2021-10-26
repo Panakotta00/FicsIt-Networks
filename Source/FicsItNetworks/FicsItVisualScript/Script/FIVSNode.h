@@ -139,9 +139,14 @@ public:
 	virtual const TArray<UFIVSPin*>& GetConnections();
 
 	/**
-	 * Returns the name of the pin
+	 * Returns the internal name of the pin. Mainly used for referencing the pin.
 	 */
-	virtual FText GetName();
+	virtual FString GetName();
+
+	/**
+	 * Returns the display name of the pin.
+	 */
+	virtual FText GetDisplayName() { return FText::FromString(GetName()); }
 
 	/**
 	 * Checks if the the pin can be connected to the given pin
@@ -183,15 +188,16 @@ class UFIVSGenericPin : public UFIVSPin {
 public:
 	EFIVSPinType PinType = FIVS_PIN_NONE;
 	FFIVSPinDataType PinDataType = FFINExpandedNetworkValueType(FIN_NIL);
-	FText Name = FText::FromString("Unnamed");
+	FString Name = TEXT("Unnamed");
+	FText DisplayName = FText::FromString("Unnamed");
 	
 	// Begin UFINScriptPin
 	virtual EFIVSPinType GetPinType() override;
 	virtual FFIVSPinDataType GetPinDataType() override;
-	virtual FText GetName() override;
+	virtual FString GetName() override;
 	// End UFINScriptPin
 	
-	static UFIVSGenericPin* Create(FFIVSPinDataType DataType, EFIVSPinType PinType, const FString& Name);
+	static UFIVSGenericPin* Create(FFIVSPinDataType DataType, EFIVSPinType PinType, const FString& Name, const FText& DisplayName);
 };
 
 UCLASS()
