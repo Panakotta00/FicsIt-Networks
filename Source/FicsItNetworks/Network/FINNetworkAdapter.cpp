@@ -26,7 +26,16 @@ void AFINNetworkAdapter::RegisterAdapterSettings() {
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/Train/Signal/Build_RailroadBlockSignal.Build_RailroadBlockSignal_C")), FFINAdapterSettings{FVector(0, 470, 936), FRotator(), false, 2});
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/Train/Signal/Build_RailroadPathSignal.Build_RailroadPathSignal_C")), FFINAdapterSettings{FVector(0, 470, 936), FRotator(), false, 2});
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/Train/Signal/Build_RailroadPathSignal.Build_RailroadPathSignal_C")), FFINAdapterSettings{FVector(0, 470, 936), FRotator(), false, 2});
-	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/Train/SignPole/Build_SignPole.Build_SignPole_C")), FFINAdapterSettings{FVector(0, 0, 500), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Huge.Build_StandaloneWidgetSign_Huge_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Large.Build_StandaloneWidgetSign_Large_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Medium.Build_StandaloneWidgetSign_Medium_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Portrait.Build_StandaloneWidgetSign_Portrait_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Small.Build_StandaloneWidgetSign_Small_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_SmallVeryWide.Build_StandaloneWidgetSign_SmallVeryWide_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_SmallWide.Build_StandaloneWidgetSign_SmallWide_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Square.Build_StandaloneWidgetSign_Square_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Square_Small.Build_StandaloneWidgetSign_Square_Small_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Square_Tiny.Build_StandaloneWidgetSign_Square_Tiny_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
 }
 
 void AFINNetworkAdapter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
