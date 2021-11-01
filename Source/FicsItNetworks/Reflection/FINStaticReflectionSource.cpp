@@ -37,12 +37,16 @@
 #include "Buildables/FGBuildableManufacturer.h"
 #include "Buildables/FGBuildablePipelinePump.h"
 #include "Buildables/FGBuildablePipeReservoir.h"
+#include "Buildables/FGBuildablePixelSign.h"
 #include "Buildables/FGBuildablePowerStorage.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadStation.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
+#include "Buildables/FGBuildableSignBase.h"
+#include "Buildables/FGBuildableSpeedSign.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
+#include "Buildables/FGBuildableWidgetSign.h"
 #include "FicsItNetworks/Computer/FINComputerGPUT1.h"
 #include "FicsItNetworks/Network/FINFuture.h"
 #include "FicsItNetworks/Network/FINNetworkConnectionComponent.h"
@@ -1807,7 +1811,7 @@ BeginFunc(getFacingSignal, "Get Facing Signal", "Returns the signal this connect
 	Body()
 	signal = Ctx.GetTrace() / self->GetFacingSignal();
 } EndFunc()
-BeginFunc(getTailingSignal, "Get Trailing Signal", "Returns the signal this connection is trailing from.") {
+BeginFunc(getTrailingSignal, "Get Trailing Signal", "Returns the signal this connection is trailing from.") {
 	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal this connection is trailing.")
 	Body()
 	signal = Ctx.GetTrace() / self->GetTrailingSignal();
@@ -2037,6 +2041,12 @@ BeginProp(RInt, colorSlot, "Color Slot", "The color slot the lights should use."
 	data.ColorSlotIndex = Val;
 	self->SetLightControlData(data);
 } EndProp()
+EndClass()
+
+BeginClass(AFGBuildableSignBase, "SignBase", "Sign Base", "The base class for all signs in the game.")
+EndClass()
+
+BeginClass(AFGBuildableWidgetSign)
 EndClass()
 
 BeginClass(UFGRecipe, "Recipe", "Recipe", "A struct that holds information about a recipe in its class. Means don't use it as object, use it as class type!")
