@@ -72,11 +72,9 @@ void AFINIndicatorPole::CreatePole() {
 		Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		Pole->SetStaticMesh(LongPole);
 		Pole->SetMobility(EComponentMobility::Static);
-		//Pole->SetColorSlot(mColorSlot);
+		Pole->mInstanceHandle.SetColorIndex(mColorSlot);
 		Poles.Add(Pole);
 	}
-
-	ReapplyColorSlot();
 }
 
 void AFINIndicatorPole::UpdateEmessive_Implementation() {

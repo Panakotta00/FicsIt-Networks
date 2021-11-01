@@ -21,10 +21,7 @@
 #include "FGRailroadTimeTable.h"
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FGRailroadVehicleMovementComponent.h"
-#include "FGTargetPointLinkedList.h"
 #include "FGTrainStationIdentifier.h"
-#include "FGWheeledVehicle.h"
-#include "FGTargetPoint.h"
 #include "FINBoolProperty.h"
 #include "FINClassProperty.h"
 #include "FINFloatProperty.h"
@@ -53,6 +50,8 @@
 #include "FicsItNetworks/Utils/FINTimeTableStop.h"
 #include "FicsItNetworks/Utils/FINTrackGraph.h"
 #include "Reflection/ReflectionHelper.h"
+#include "WheeledVehicles/FGTargetPointLinkedList.h"
+#include "WheeledVehicles/FGWheeledVehicle.h"
 
 TMap<UClass*, FFINStaticClassReg> UFINStaticReflectionSource::Classes;
 TMap<UScriptStruct*, FFINStaticStructReg> UFINStaticReflectionSource::Structs;
@@ -1196,109 +1195,28 @@ BeginFunc(isValidFuel, "Is Valid Fuel", "Allows to check if the given item type 
 	isValid = self->IsValidFuel(item);
 } EndFunc()
 
-inline int TargetToIndex(AFGTargetPoint* Target, UFGTargetPointLinkedList* List) {
-	AFGTargetPoint* CurrentTarget = nullptr;
-	int i = 0;
-	do {
-		if (i) CurrentTarget = CurrentTarget->mNext;
-		else CurrentTarget = List->GetFirstTarget();
-		if (CurrentTarget == Target) return i;
-		++i;
-	} while (CurrentTarget && CurrentTarget != List->GetLastTarget());
-	return -1;
-}
-
-inline AFGTargetPoint* IndexToTarget(int index, UFGTargetPointLinkedList* List) {
-	if (index < 0) return nullptr;
-	AFGTargetPoint* CurrentTarget = List->GetFirstTarget();
-	for (int i = 0; i < index && CurrentTarget; ++i) {
-		CurrentTarget = CurrentTarget->mNext;
-	}
-	return CurrentTarget;
-}
-
 BeginFunc(getCurrentTarget, "Get Current Target", "Returns the index of the target that the vehicle tries to move to right now.") {
 	OutVal(0, RInt, index, "Index", "The index of the current target.")
 	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	index = (int64)TargetToIndex(List->GetCurrentTarget(), List);
+	AFGDrivingTargetList* List = self->GetTargetList();
+	index = (int64)List->FindTargetIndex(self->GetCurrentTarget());
 } EndFunc()
-
 BeginFunc(nextTarget, "Next Target", "Sets the current target to the next target in the list.") {
 	Body()
-	self->GetTargetNodeLinkedList()->SetNextTarget();
+	self->PickNextTarget();
 } EndFunc()
 BeginFunc(setCurrentTarget, "Set Current Target", "Sets the target with the given index as the target this vehicle tries to move to right now.") {
 	InVal(0, RInt, index, "Index", "The index of the target this vehicle should move to now.")
 	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* Target = IndexToTarget(index, List);
+	AFGDrivingTargetList* List = self->GetTargetList();
+	AFGTargetPoint* Target = List->FindTargetByIndex(index);
 	if (!Target) throw FFINException("index out of range");
-	List->SetCurrentTarget(Target);
+	self->SetCurrentTarget(Target);
 } EndFunc()
-BeginFunc(getTarget, "Get Target", "Returns the target struct at with the given index in the target list.") {
-	InVal(0, RInt, index, "Index", "The index of the target you want to get the struct from.")
-	OutVal(0, RStruct<FFINTargetPoint>, target, "Target", "The TargetPoint-Struct with the given index in the target list.")
+BeginFunc(getTargetList, "Get Target List", "Returns the list of targets/path waypoints.") {
+	OutVal(0, RTrace<AFGDrivingTargetList>, targetList, "Target List", "The list of targets/path-waypoints.")
 	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* Target = IndexToTarget(index, List);
-	if (!Target) throw FFINException("index out of range");
-	target = (FINAny)FFINTargetPoint(Target);
-} EndFunc()
-BeginFunc(removeTarget, "Remove Target", "Removes the target with the given index from the target list.") {
-	InVal(0, RInt, index, "Index", "The index of the target point you want to remove from the target list.")
-	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* Target = IndexToTarget(index, List);
-	if (!Target) throw FFINException( "index out of range");
-	List->RemoveItem(Target);
-	Target->Destroy();
-} EndFunc()
-BeginFunc(addTarget, "Add Target", "Adds the given target point struct at the end of the target list.") {
-	InVal(0, RStruct<FFINTargetPoint>, target, "Target", "The target point you want to add.")
-	Body()
-	AFGTargetPoint* Target = target.ToWheeledTargetPoint(self);
-	if (!Target) throw FFINException("failed to create target");
-	self->GetTargetNodeLinkedList()->InsertItem(Target);
-} EndFunc()
-BeginFunc(setTarget, "Set Target", "Allows to set the target at the given index to the given target point struct.") {
-	InVal(0, RInt, index, "Index", "The index of the target point you want to update with the given target point struct.")
-	InVal(1, RStruct<FFINTargetPoint>, target, "Target", "The new target point struct for the given index.")
-	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* Target = IndexToTarget(index, List);
-	if (!Target) throw FFINException("index out of range");
-	Target->SetActorLocation(target.Pos);
-	Target->SetActorRotation(target.Rot);
-	Target->SetTargetSpeed(target.Speed);
-	Target->SetWaitTime(target.Wait);
-} EndFunc()
-BeginFunc(clearTargets, "Clear Targets", "Removes all targets from the target point list.") {
-	Body()
-	self->GetTargetNodeLinkedList()->ClearRecording();
-} EndFunc()
-BeginFunc(getTargets, "Get Targets", "Returns a list of target point structs of all the targets in the target point list.") {
-	OutVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs containing all the targets of the target point list.")
-	Body()
-	TArray<FINAny> Targets;
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* CurrentTarget = nullptr;
-	int i = 0;
-	do {
-		if (i++) CurrentTarget = CurrentTarget->mNext;
-		else CurrentTarget = List->GetFirstTarget();
-		Targets.Add((FINAny)FFINTargetPoint(CurrentTarget));
-	} while (CurrentTarget && CurrentTarget != List->GetLastTarget());
-	targets = Targets;
-} EndFunc()
-BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.", 0) {
-	InVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs you want to place into the empty target point list.")
-	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	List->ClearRecording();
-	for (const FINAny& Target : targets) {
-		List->InsertItem(Target.GetStruct().Get<FFINTargetPoint>().ToWheeledTargetPoint(self));
-	}
+	targetList = Ctx.GetTrace() / self->GetTargetList();
 } EndFunc()
 BeginProp(RFloat, speed, "Speed", "The current forward speed of this vehicle.") {
 	Return self->GetForwardSpeed();
@@ -1315,12 +1233,70 @@ BeginProp(RBool, hasFuel, "Has Fuel", "True if the vehicle has currently fuel to
 BeginProp(RBool, isInAir, "Is In Air", "True if the vehicle is currently in the air.") {
 	Return self->GetIsInAir();
 } EndProp()
-BeginProp(RBool, wantsToMove, "Wants To Move", "True if the vehicle currently wants to move.") {
-	Return self->WantsToMove();
-} EndProp()
 BeginProp(RBool, isDrifting, "Is Drifting", "True if the vehicle is currently drifting.") {
 	Return self->GetIsDrifting();
 } EndProp()
+EndClass()
+
+BeginClass(AFGDrivingTargetList, "TargetList", "Target List", "The list of targets/path-waypoints a autonomous vehicle can drive")
+BeginFunc(getTarget, "Get Target", "Returns the target struct at with the given index in the target list.") {
+	InVal(0, RInt, index, "Index", "The index of the target you want to get the struct from.")
+	OutVal(0, RStruct<FFINTargetPoint>, target, "Target", "The TargetPoint-Struct with the given index in the target list.")
+	Body()
+	AFGTargetPoint* Target = self->FindTargetByIndex(index);
+	if (!Target) throw FFINException("index out of range");
+	target = (FINAny)FFINTargetPoint(Target);
+} EndFunc()
+BeginFunc(removeTarget, "Remove Target", "Removes the target with the given index from the target list.") {
+	InVal(0, RInt, index, "Index", "The index of the target point you want to remove from the target list.")
+	Body()
+	AFGTargetPoint* Target = self->FindTargetByIndex(index);
+	if (!Target) throw FFINException( "index out of range");
+	self->RemoveItem(Target);
+	Target->Destroy();
+} EndFunc()
+BeginFunc(addTarget, "Add Target", "Adds the given target point struct at the end of the target list.") {
+	InVal(0, RStruct<FFINTargetPoint>, target, "Target", "The target point you want to add.")
+	Body()
+	AFGTargetPoint* Target = target.ToWheeledTargetPoint(self);
+	if (!Target) throw FFINException("failed to create target");
+	self->InsertItem(Target, self->mLast);
+} EndFunc()
+BeginFunc(setTarget, "Set Target", "Allows to set the target at the given index to the given target point struct.") {
+	InVal(0, RInt, index, "Index", "The index of the target point you want to update with the given target point struct.")
+	InVal(1, RStruct<FFINTargetPoint>, target, "Target", "The new target point struct for the given index.")
+	Body()
+	AFGTargetPoint* Target = self->FindTargetByIndex(index);
+	if (!Target) throw FFINException("index out of range");
+	Target->SetActorLocation(target.Pos);
+	Target->SetActorRotation(target.Rot);
+	Target->SetTargetSpeed(target.Speed);
+	Target->SetWaitTime(target.Wait);
+} EndFunc()
+BeginFunc(getTargets, "Get Targets", "Returns a list of target point structs of all the targets in the target point list.") {
+	OutVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs containing all the targets of the target point list.")
+	Body()
+	TArray<FINAny> Targets;
+	AFGTargetPoint* CurrentTarget = nullptr;
+	int i = 0;
+	do {
+		if (i++) CurrentTarget = CurrentTarget->GetNext();
+		else CurrentTarget = self->GetFirstTarget();
+		Targets.Add((FINAny)FFINTargetPoint(CurrentTarget));
+	} while (CurrentTarget && CurrentTarget != self->GetLastTarget());
+	targets = Targets;
+} EndFunc()
+BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.", 0) {
+	InVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs you want to place into the empty target point list.")
+	Body()
+	int Count = self->GetTargetCount();
+	for (const FINAny& Target : targets) {
+		self->InsertItem(Target.GetStruct().Get<FFINTargetPoint>().ToWheeledTargetPoint(self), self->mLast);
+	}
+	for (int i = 0; i < Count; ++i) {
+		self->RemoveItem(self->mFirst);
+	}
+} EndFunc()
 EndClass()
 
 BeginClass(AFGBuildableTrainPlatform, "TrainPlatform", "Train Platform", "The base class for all train station parts.")
@@ -1662,12 +1638,12 @@ BeginClass(AFGRailroadTimeTable, "TimeTable", "Time Table", "Contains the time t
 BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
 	InVal(0, RInt, index, "Index", "The index at which the stop should get added.")
 	InVal(1, RTrace<AFGBuildableRailroadStation>, station, "Station", "The railroad station at which the stop should happen.")
-	InVal(2, RFloat, duration, "Duration", "The duration how long the train should stop at the station.")
+	InVal(2, RStruct<FTrainDockingRuleSet>, ruleSet, "Rule Set", "The docking rule set that descibes when the train will depart from the station.")
 	OutVal(3, RBool, added, "Added", "True if the stop got sucessfully added to the time table.")
 	Body()
 	FTimeTableStop stop;
 	stop.Station = Cast<AFGBuildableRailroadStation>(station.Get())->GetStationIdentifier();
-	stop.Duration =duration;
+	stop.DockingRuleSet = ruleSet;
 	added = self->AddStop(index, stop);
 } EndFunc()
 BeginFunc(removeStop, "Remove Stop", "Removes the stop with the given index from the time table.") {
@@ -1682,7 +1658,7 @@ BeginFunc(getStops, "Get Stops", "Returns a list of all the stops this time tabl
 	TArray<FTimeTableStop> Stops;
 	self->GetStops(Stops);
 	for (const FTimeTableStop& Stop : Stops) {
-		Output.Add((FINAny)FFINTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.Duration});
+		Output.Add((FINAny)FFINTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.DockingRuleSet});
 	}
 	stops = Output;
 } EndFunc()
@@ -1708,7 +1684,7 @@ BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
 	Body()
 	FTimeTableStop Stop = self->GetStop(index);
 	if (IsValid(Stop.Station)) {
-		stop = (FINAny)FFINTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.Duration};
+		stop = (FINAny)FFINTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.DockingRuleSet};
 	} else {
 		stop = FINAny();
 	}
@@ -1826,10 +1802,15 @@ BeginFunc(getStation, "Get Station", "Returns the station of which this connecti
 	Body()
 	station = Ctx.GetTrace() / self->GetStation();
 } EndFunc()
-BeginFunc(getSignal, "Get Signal", "Returns the signal of which this connection is part of.") {
-	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal of which this connection is part of.")
+BeginFunc(getFacingSignal, "Get Facing Signal", "Returns the signal this connection is facing to.") {
+	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal this connection is facing.")
 	Body()
-	signal = Ctx.GetTrace() / self->GetSignal();
+	signal = Ctx.GetTrace() / self->GetFacingSignal();
+} EndFunc()
+BeginFunc(getTailingSignal, "Get Trailing Signal", "Returns the signal this connection is trailing from.") {
+	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal this connection is trailing.")
+	Body()
+	signal = Ctx.GetTrace() / self->GetTrailingSignal();
 } EndFunc()
 BeginFunc(getOpposite, "Get Opposite", "Returns the opposite connection of the track this connection is part of.") {
 	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, opposite, "Opposite", "The opposite connection of the track this connection is part of.")
@@ -1875,6 +1856,43 @@ BeginFunc(switchPosition, "Switch Position", "Returns the current switch positio
     Body()
     position = (int64)self->GetSwitchPosition();
 } EndFunc()
+EndClass()
+
+BeginClass(AFGBuildableRailroadSignal, "RailroadSignal", "Railroad Signal", "A train signal to control trains on a track.")
+Hook(UFINRailroadSignalHook)
+BeginSignal(AspectChanged, "Aspect Changed", "Triggers when the aspect of this signal changes.")
+	SignalParam(0, RInt, aspect, "Aspect", "The new aspect of the signal (see 'Get Aspect' for more information)")
+EndSignal()
+BeginProp(RBool, isPathSignal, "Is Path Signal", "True if this signal is a path-signal.") {
+	Return self->IsPathSignal();
+} EndProp()
+BeginProp(RBool, isBiDirectional, "Is Bi-Directional", "True if this signal is bi-directional. (trains can pass into both directions)") {
+	Return self->IsBiDirectional();
+} EndProp()
+BeginProp(RBool, hasObservedBlock, "Has Observed Block", "True if this signal is currently observing at least one block.") {
+	Return self->HasObservedBlock();
+} EndProp()
+BeginProp(RInt, getBlockValidation, "Get Block Validation", "Returns any error states of the block.\n0 = Unknown\n1 = No Error\n2 = No Exit Signal\n3 = Contains Loop\n4 = Contains Mixed Entry Signals") {
+	Return (int64)self->GetBlockValidation();
+} EndProp()
+BeginProp(RInt, getAspect, "Get Aspect", "Returns the aspect of the signal. The aspect shows if a train is allowed to pass (clear) or not and if it should dock.\n0 = Unknown\n1 = The track is clear and the train is allowed to pass.\n2 = The next track is Occupied and the train should stop\n3 = The train should dock.") {
+	Return (int64)self->GetAspect();
+} EndProp()
+BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
+	auto Block = self->GetObservedBlock();
+	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return Block.Pin()->IsOccupied();
+} EndProp()
+BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
+	auto Block = self->GetObservedBlock();
+	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return Block.Pin()->HaveReservations();
+} EndProp()
+BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
+	auto Block = self->GetObservedBlock();
+	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return Block.Pin()->IsPathBlock();
+} EndProp()
 EndClass()
 
 BeginClass(AFGBuildableDockingStation, "DockingStation", "Docking Station", "A docking station for wheeled vehicles to transfer cargo.")
@@ -2129,10 +2147,54 @@ BeginProp(RTrace<AFGBuildableRailroadStation>, station, "Station", "The station 
 } PropSet() {
 	self->Station = Val;
 } EndProp()
-BeginProp(RFloat, duration, "Duration", "The time interval the train will wait at the station") {
-	Return self->Duration;
+BeginProp(RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set wich describe when the train will depart from the train station") {
+	Return self->RuleSet;
 } PropSet() {
-	self->Duration = Val;
+	self->RuleSet = Val;
+} EndProp()
+EndStruct()
+
+BeginStruct(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
+BeginProp(RInt, definition, "Defintion", "0 = Load/Unload Once, 1 = Fully Load/Unload") {
+	Return (FINInt)self->DockingDefinition;
+} PropSet() {
+	self->DockingDefinition = (ETrainDockingDefinition)Val;
+} EndProp()
+BeginProp(RFloat, duration, "Duration", "The amount of time the train will dock at least.") {
+	Return self->DockForDuration;
+} PropSet() {
+	self->DockForDuration = Val;
+} EndProp()
+BeginProp(RBool, isDurationAndRule, "Is Duration and Rule", "True if the duration of the train stop and the other rules have to be applied.") {
+	Return self->IsDurationAndRule;
+} PropSet() {
+	self->IsDurationAndRule = Val;
+} EndProp()
+BeginProp(RArray<RClass<UFGItemDescriptor>>, loadFilters, "Load Filters", "The types of items that will be loaded.") {
+	TArray<FINAny> Filters;
+	for (TSubclassOf<UFGItemDescriptor> Filter : self->LoadFilterDescriptors) {
+		Filters.Add((FINClass)Filter);
+	}
+	Return Filters;
+} PropSet() {
+	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
+	for (const FINAny& Filter : Val) {
+		Filters.Add(Filter.GetClass());
+	}
+	self->LoadFilterDescriptors = Filters;
+} EndProp()
+BeginProp(RArray<RClass<UFGItemDescriptor>>, unloadFilters, "Unload Filters", "The types of items that will be unloaded.") {
+	TArray<FINAny> Filters;
+	for (TSubclassOf<UFGItemDescriptor> Filter : self->UnloadFilterDescriptors) {
+		Filters.Add((FINClass)Filter);
+	}
+	Return Filters;
+} PropSet() {
+	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
+	for (const FINAny& Filter : Val) {
+		Filters.Add(Filter.GetClass());
+	}
+	self->UnloadFilterDescriptors = Filters;
 } EndProp()
 EndStruct()
 
