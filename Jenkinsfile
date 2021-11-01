@@ -67,10 +67,18 @@ pipeline {
 						retry(5) {
 							bat label: 'Download UE', script: 'aria2c -x 8 -s 8 -c https://%SMR_TOKEN%@ci.ficsit.app/job/UE-4.25.3-CSS/lastSuccessfulBuild/artifact/UnrealEngine-CSS-Editor-Win64.zip'
 						}
-					}*/
+					}
 					bat label: 'Copy UE', script: 'copy C:\\Jenkins\\UnrealEngine-CSS-Editor-Win64.zip .'
 					bat label: 'Extract UE', script: '7z x UnrealEngine-CSS-Editor-Win64.zip'
-					bat label: 'Register UE', script: 'SetupScripts\\Register.bat'
+					bat label: 'Register UE', script: 'SetupScripts\\Register.bat'*/
+					withCredentials([string(credentialsId: 'GitHub-API', variable: 'GITHUB_TOKEN')]) {
+                        retry(3) {
+                            bat label: 'Download UE - Part 1', script: 'github-release download --user SatisfactoryModdingUE --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.001" > UnrealEngine-CSS-Editor-Win64.7z.001'
+                            bat label: 'Download UE - Part 2', script: 'github-release download --user SatisfactoryModdingUE --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.002" > UnrealEngine-CSS-Editor-Win64.7z.002'
+                        }
+                        bat label: '', script: '7z x UnrealEngine-CSS-Editor-Win64.7z.001'
+                    }
+                    bat label: '', script: 'SetupScripts\\Register.bat'
 				}
 			}
 		}
