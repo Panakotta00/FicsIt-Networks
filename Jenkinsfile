@@ -19,7 +19,7 @@ pipeline {
 				checkout scm: [
 	                $class: 'GitSCM',
 	                branches: [[
-	                    name: "master"
+	                    name: "sml-dev"
 	                ]],
 	                extensions: [[
 	                    $class: 'RelativeTargetDirectory',
@@ -67,10 +67,18 @@ pipeline {
 						retry(5) {
 							bat label: 'Download UE', script: 'aria2c -x 8 -s 8 -c https://%SMR_TOKEN%@ci.ficsit.app/job/UE-4.25.3-CSS/lastSuccessfulBuild/artifact/UnrealEngine-CSS-Editor-Win64.zip'
 						}
-					}*/
+					}
 					bat label: 'Copy UE', script: 'copy C:\\Jenkins\\UnrealEngine-CSS-Editor-Win64.zip .'
 					bat label: 'Extract UE', script: '7z x UnrealEngine-CSS-Editor-Win64.zip'
-					bat label: 'Register UE', script: 'SetupScripts\\Register.bat'
+					bat label: 'Register UE', script: 'SetupScripts\\Register.bat'*/
+					withCredentials([string(credentialsId: 'GitHub-API', variable: 'GITHUB_TOKEN')]) {
+                        retry(3) {
+                            bat label: 'Download UE - Part 1', script: 'github-release download --user SatisfactoryModdingUE --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.001" > UnrealEngine-CSS-Editor-Win64.7z.001'
+                            bat label: 'Download UE - Part 2', script: 'github-release download --user SatisfactoryModdingUE --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.002" > UnrealEngine-CSS-Editor-Win64.7z.002'
+                        }
+                        bat label: '', script: '7z x UnrealEngine-CSS-Editor-Win64.7z.001'
+                    }
+                    bat label: '', script: 'SetupScripts\\Register.bat'
 				}
 			}
 		}
@@ -78,7 +86,7 @@ pipeline {
 
 		stage('Build FicsIt-Networks') {
 			steps {
-				bat label: 'Create project files', script: '.\\ue4\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe -projectfiles -project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -game -rocket -progress'
+				bat label: 'Create project files', script: '.\\ue4\\lb\\win\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe -projectfiles -project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -game -rocket -progress'
 				bat label: 'Build for Shipping', script: 'MSBuild.exe /p:CL_MPCount=5 .\\SatisfactoryModLoader\\FactoryGame.sln /p:Configuration="Shipping" /p:Platform="Win64" /t:"Games\\FactoryGame"'
 				bat label: 'Build for Editor', script: 'MSBuild.exe /p:CL_MPCount=5 .\\SatisfactoryModLoader\\FactoryGame.sln /p:Configuration="Development Editor" /p:Platform="Win64" /t:"Games\\FactoryGame"'
 			}
@@ -87,7 +95,7 @@ pipeline {
 		stage('Package FicsIt-Networks') {
 			steps {
 				retry(3) {
-					bat label: 'Alpakit!', script: '.\\ue4\\Engine\\Build\\BatchFiles\\RunUAT.bat -ScriptsForProject="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" PackagePlugin -Project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -PluginName="%MOD_NAME%"'
+					bat label: 'Alpakit!', script: '.\\ue4\\lb\\win\\Engine\\Build\\BatchFiles\\RunUAT.bat -ScriptsForProject="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" PackagePlugin -Project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -PluginName="%MOD_NAME%"'
 				}
 			}
 		}

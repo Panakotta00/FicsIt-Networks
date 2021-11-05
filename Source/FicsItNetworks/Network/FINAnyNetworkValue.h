@@ -231,7 +231,22 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 * @return	the stored bool
 	 */
 	FORCEINLINE FINBool GetBool() const {
-		return Data.BOOL;
+		switch (GetType()) {
+		case FIN_FLOAT:
+			return (FINBool) Data.FLOAT;
+		case FIN_INT:
+			return (FINBool) Data.INT;
+		case FIN_NIL:
+			return false;
+		case FIN_BOOL:
+			return Data.BOOL;
+		case FIN_OBJ:
+			return (FINBool) Data.OBJECT;
+		case FIN_TRACE:
+			return (FINBool) Data.TRACE->IsValid();
+		default:
+			return false;
+		}
 	}
 
 	/**
@@ -241,7 +256,12 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 * @return	the stored class
 	 */
 	FORCEINLINE FINClass GetClass() const {
-		return Data.CLASS;
+		switch (GetType()) {
+		case FIN_CLASS:
+			return Data.CLASS;
+		default:
+			return nullptr;
+		}
 	}
 
 	/**
@@ -260,8 +280,15 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored object
 	 */
-	FORCEINLINE const FINObj& GetObj() const {
-		return *Data.OBJECT;
+	FORCEINLINE FINObj GetObj() const {
+		switch (GetType()) {
+		case FIN_OBJ:
+			return *Data.OBJECT;
+		case FIN_TRACE:
+			return **Data.TRACE;
+		default:
+			return nullptr;
+		}
 	}
 
 	/**
@@ -270,8 +297,15 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 *
 	 * @return	the stored trace
 	 */
-	FORCEINLINE const FINTrace& GetTrace() const {
-		return *Data.TRACE;
+	FORCEINLINE FINTrace GetTrace() const {
+		switch (GetType()) {
+		case FIN_TRACE:
+			return *Data.TRACE;
+		case FIN_OBJ:
+			return FINTrace(Data.OBJECT->Get());
+		default:
+			return FINTrace();
+		}
 	}
 
 	/**

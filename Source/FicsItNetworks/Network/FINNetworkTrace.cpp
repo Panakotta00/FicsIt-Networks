@@ -385,10 +385,10 @@ Step(AFGBuildableRailroadSwitchControl, UFGRailroadTrackConnectionComponent, {
 })
 
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadSignal, {
-    return A->GetSignal() == B;
+    return A->GetFacingSignal() == B || A->GetTrailingSignal() == B;
 })
 Step(AFGBuildableRailroadSignal, UFGRailroadTrackConnectionComponent, {
-    return A == B->GetSignal();
+    return A == B->GetFacingSignal() || A == B->GetTrailingSignal();
 })
 
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadStation, {

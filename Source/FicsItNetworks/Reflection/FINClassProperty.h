@@ -22,9 +22,9 @@ public:
 		UClass* Class = nullptr;
 		if (Value.GetType() == FIN_CLASS) Class = Value.GetClass();
 		else if (Value.GetType() == FIN_OBJ) Class = Cast<UClass>(Value.GetObj().Get());
-		else return;
+		else if (Class) return;
 		if (Class && GetSubclass() && !Class->IsChildOf(GetSubclass())) return;
-		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Value.GetClass());
+		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Class);
 		else Super::SetValue(Ctx, Value);
 	}
 

@@ -1,7 +1,6 @@
 #include "FicsItNetworksModule.h"
 
 #include "CoreMinimal.h"
-
 #include "AssetRegistryModule.h"
 #include "Components/StaticMeshComponent.h"
 #include "FGCharacterPlayer.h"
@@ -26,6 +25,7 @@
 #include "UI/FINReflectionStyles.h"
 #include "UObject/CoreRedirects.h"
 
+DEFINE_LOG_CATEGORY( LogGame );
 DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
