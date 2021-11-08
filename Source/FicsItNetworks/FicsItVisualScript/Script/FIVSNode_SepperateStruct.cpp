@@ -5,15 +5,14 @@
 void UFIVSNode_SepperateStruct::InitPins() {
 	EFIVSPinType PinType = bBreak ? FIVS_PIN_DATA_OUTPUT : FIVS_PIN_DATA_INPUT;
 	for (UFINProperty* Prop : Struct->GetProperties()) {
-		UFIVSPin* Pin = CreatePin(PinType, FText::FromString(Prop->GetInternalName()), FFIVSPinDataType(Prop));
+		UFIVSPin* Pin = CreatePin(PinType, Prop->GetInternalName(), Prop->GetDisplayName(), FFIVSPinDataType(Prop));
 		(bBreak ? OutputPins : InputPins).Add(Prop->GetInternalName(), Pin);
 	}
-	UFIVSPin* Pin = CreatePin(bBreak ? FIVS_PIN_DATA_INPUT : FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("Struct")), FFIVSPinDataType(FIN_STRUCT, Struct));
+	UFIVSPin* Pin = CreatePin(bBreak ? FIVS_PIN_DATA_INPUT : FIVS_PIN_DATA_OUTPUT, TEXT("Struct"), FText::FromString(TEXT("Struct")), FFIVSPinDataType(FIN_STRUCT, Struct));
 	(bBreak ? InputPins : OutputPins).Add(TEXT("Struct"), Pin);
 }
 
-TArray<FFIVSNodeAction> UFIVSNode_SepperateStruct::GetNodeActions() const {
-	TArray<FFIVSNodeAction> Actions;
+void UFIVSNode_SepperateStruct::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TTuple<UScriptStruct*, UFINStruct*> StructPair : FFINReflection::Get()->GetStructs()) {
 		FFIVSNodeAction BreakAction;
 		BreakAction.NodeType = UFIVSNode_SepperateStruct::StaticClass();
@@ -44,7 +43,6 @@ TArray<FFIVSNodeAction> UFIVSNode_SepperateStruct::GetNodeActions() const {
 		});
 		Actions.Add(MakeAction);
 	}
-	return Actions;
 }
 
 void UFIVSNode_SepperateStruct::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {

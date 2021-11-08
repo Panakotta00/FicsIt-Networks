@@ -78,16 +78,16 @@ FString UFIVSSerailizationUtils::FIVS_SerializePartial(TArray<UFIVSNode*> InNode
 		SerializedNode.NodeID = Graph.Nodes.Num();
 		for (UFIVSPin* Pin : Node->GetNodePins()) {
 			FFIVSSerializedPin SerializedPin;
-			SerializedPin.PinName = Pin->GetName().ToString();
+			SerializedPin.PinName = Pin->GetName();
 			SerializedPin.PinLiteralValue = FIVS_GetPinLiteralAsJson(Pin);
 			for (UFIVSPin* Connected : Pin->GetConnections()) {
 				int* ConnectedNodeRef = SerializedNodes.Find(Connected->ParentNode);
 				if (ConnectedNodeRef) {
 					FFIVSSerializedPinConnection Connection;
 					Connection.Pin1.NodeID = *ConnectedNodeRef;
-					Connection.Pin1.PinName = Connected->GetName().ToString();
+					Connection.Pin1.PinName = Connected->GetName();
 					Connection.Pin2.NodeID = SerializedNode.NodeID;
-					Connection.Pin2.PinName = Pin->GetName().ToString();
+					Connection.Pin2.PinName = Pin->GetName();
 					Graph.PinConnections.Add(MoveTemp(Connection));
 				}
 			}
@@ -103,7 +103,7 @@ FString UFIVSSerailizationUtils::FIVS_SerializePartial(TArray<UFIVSNode*> InNode
 
 	FJsonObjectConverter::CustomExportCallback ExportCallback;
 	ExportCallback.BindLambda([](FProperty* InProp, const void* InVal) -> TSharedPtr<FJsonValue> {
-		if (InProp->IsA<FStructProperty>() && Cast<FStructProperty>(InProp)->Struct == FFIVSSerializedPin::StaticStruct()) {
+		if (InProp->IsA<FStructProperty>() && ((void*)Cast<FStructProperty>(InProp)->Struct == (void*)FFIVSSerializedPin::StaticStruct())) {
 			const FFIVSSerializedPin& SerializedPin = *static_cast<const FFIVSSerializedPin*>(InVal);
 			
 			if (SerializedPin.PinLiteralValue.IsValid()) {
@@ -188,7 +188,7 @@ void UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString I
 		TArray<UFIVSPin*> Pins = Node->GetNodePins();
 		for (const FFIVSSerializedPin& SerializedPin : SerializedNode.Pins) {
 			UFIVSPin** Pin = Pins.FindByPredicate([&SerializedPin](UFIVSPin* Pin) {
-				return Pin->GetName().ToString() == SerializedPin.PinName;
+				return Pin->GetName() == SerializedPin.PinName;
 			});
 			if (Pin) {
 				FIVS_SetPinLiteralFromJson(*Pin, SerializedPin.PinLiteralValue);
@@ -203,11 +203,11 @@ void UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString I
 		if (!Node1 || !Node2) continue;
 		TArray<UFIVSPin*> Pins1 = (*Node1)->GetNodePins();
 		UFIVSPin** Pin1 = Pins1.FindByPredicate([&SerializedPinConnection](UFIVSPin* Pin) {
-			return Pin->GetName().ToString() == SerializedPinConnection.Pin1.PinName;
+			return Pin->GetName() == SerializedPinConnection.Pin1.PinName;
 		});
 		TArray<UFIVSPin*> Pins2 = (*Node2)->GetNodePins();
 		UFIVSPin** Pin2 = Pins2.FindByPredicate([&SerializedPinConnection](UFIVSPin* Pin) {
-			return Pin->GetName().ToString() == SerializedPinConnection.Pin2.PinName;
+			return Pin->GetName() == SerializedPinConnection.Pin2.PinName;
 		});
 		if (!Pin1 || !Pin2 || !*Pin1 || !*Pin2) continue;
 		(*Pin1)->AddConnection(*Pin2);

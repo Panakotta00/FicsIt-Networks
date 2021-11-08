@@ -40,8 +40,9 @@ public:
 class FFIVSEdSelectionManager {
 public:
 	typedef UFIVSNode* T;
-	
+
 	DECLARE_DELEGATE_TwoParams(FFIVSEdSelectionChanged, T, bool)
+	
 	FFIVSEdSelectionChanged OnSelectionChanged;
 	
 	void DeselectAll() {
@@ -121,11 +122,14 @@ private:
 	FVector2D EndPos;
 };
 
+DECLARE_DELEGATE_TwoParams(FFIVSEdSelectionChanged, UFIVSNode*, bool);
+
 class SFIVSEdGraphViewer : public SPanel {
 	SLATE_BEGIN_ARGS(SFIVSEdGraphViewer) :
 		_Style(&FFIVSEdStyle::GetDefault()) {}
 	SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
 	SLATE_ARGUMENT(UFIVSGraph*, Graph)
+	SLATE_EVENT(FFIVSEdSelectionChanged, OnSelectionChanged)
 	SLATE_END_ARGS()
 
 public:
@@ -134,6 +138,7 @@ public:
 private:
 	const FFIVSEdStyle* Style = nullptr;
 	UFIVSGraph* Graph = nullptr;
+	FFIVSEdSelectionChanged SelectionChanged;
 	TSlotlessChildren<SFIVSEdNodeViewer> Children;
 	TMap<UFIVSNode*, TSharedRef<SFIVSEdNodeViewer>> NodeToChild;
 

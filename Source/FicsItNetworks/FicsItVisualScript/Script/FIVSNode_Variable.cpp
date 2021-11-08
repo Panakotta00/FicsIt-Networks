@@ -2,18 +2,17 @@
 
 void UFIVSNode_Variable::InitPins() {
 	if (bAssignment) {
-		CreatePin(FIVS_PIN_EXEC_INPUT, FText::FromString(TEXT("Exec")));
-		ExecOutput = CreatePin(FIVS_PIN_EXEC_OUTPUT, FText::FromString(TEXT("Out")));
-		VarPin = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Var")), Type.AsRef());
-		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Value")), Type.AsVal());
+		CreatePin(FIVS_PIN_EXEC_INPUT,TEXT("Exec"), FText::FromString(TEXT("Exec")));
+		ExecOutput = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Out"), FText::FromString(TEXT("Out")));
+		VarPin = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Var"), FText::FromString(TEXT("Var")), Type.AsRef());
+		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Value"), FText::FromString(TEXT("Value")), Type.AsVal());
 	} else {
-		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Init Value")), Type.AsVal());
-		VarPin = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("Var")), Type.AsRef());
+		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Init Value"), FText::FromString(TEXT("Init Value")), Type.AsVal());
+		VarPin = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Var"), FText::FromString(TEXT("Var")), Type.AsRef());
 	}
 }
 
-TArray<FFIVSNodeAction> UFIVSNode_Variable::GetNodeActions() const {
-	TArray<FFIVSNodeAction> Actions;
+void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (EFINNetworkValueType DataType : TEnumRange<EFINNetworkValueType>()) {
 		// Input FIN_ANY is excluded from conversion because it may fail or not and needs its own node
 		if (DataType >= FIN_OBJ || DataType == FIN_NIL) continue;
@@ -44,7 +43,6 @@ TArray<FFIVSNodeAction> UFIVSNode_Variable::GetNodeActions() const {
 		});
 		Actions.Add(Action);
 	}
-	return Actions;
 }
 
 FString UFIVSNode_Variable::GetNodeName() const {

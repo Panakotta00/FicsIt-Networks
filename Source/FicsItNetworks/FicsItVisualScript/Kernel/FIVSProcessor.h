@@ -4,7 +4,10 @@
 #include "FicsItNetworks/FicsItKernel/Processor/Processor.h"
 #include "FicsItNetworks/FicsItVisualScript/FIVSStateEEPROM.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode_OnTick.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSScriptContext.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSScriptNode.h"
+#include "FicsItNetworks/Network/FINNetworkCircuit.h"
+#include "FicsItNetworks/Reflection/FINReflection.h"
 #include "FIVSProcessor.generated.h"
 
 UENUM()
@@ -28,7 +31,7 @@ struct FFIVSMicroStep {
 };
 
 UCLASS()
-class UFIVSProcessor : public UFINKernelProcessor {
+class UFIVSProcessor : public UFINKernelProcessor, public IFIVSScriptContext_Interface {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
@@ -97,4 +100,25 @@ public:
 		Graph = FIVSEEPROM->Graph;
 	}
 	// End UFINKernelProcessor
+
+	// Begin IFIVSScriptContext_Interface
+	virtual void GetRelevantObjects_Implementation(TArray<FFINNetworkTrace>& OutObjects) override {
+		UObject* Component = GetKernel()->GetNetwork()->GetComponent().GetObject();
+		for (UObject* Object : IFINNetworkCircuitNode::Execute_GetCircuit(Component)->GetComponents()) {
+			OutObjects.Add(FFINNetworkTrace(Component) / Object);
+		}
+	}
+
+	virtual void GetRelevantClasses_Implementation(TArray<UFINClass*>& OutClasses) override {
+		for (const TPair<UClass*, UFINClass*>& Class : FFINReflection::Get()->GetClasses()) {
+			OutClasses.Add(Class.Value);
+		}
+	}
+
+	virtual void GetRelevantStructs_Implementation(TArray<UFINStruct*>& OutStructs) override {
+		for (const TPair<UScriptStruct*, UFINStruct*>& Struct : FFINReflection::Get()->GetStructs()) {
+			OutStructs.Add(Struct.Value);
+		}
+	}
+	// End IFVSScriptContext_Interface
 };

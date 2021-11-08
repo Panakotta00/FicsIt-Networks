@@ -205,6 +205,10 @@ UFIVSGraph* UFIVSNode::GetOuterGraph() const {
 	return Cast<UFIVSGraph>(GetOuter());
 }
 
+void UFIVSNode::ReconstructPins() {
+	InitPins();
+}
+
 UFIVSRerouteNode::UFIVSRerouteNode() {
 	Pin = CreateDefaultSubobject<UFIVSWildcardPin>("Pin");
 	Pin->ParentNode = this;
@@ -214,18 +218,16 @@ TArray<UFIVSPin*> UFIVSRerouteNode::GetNodePins() const {
 	return {Pin};
 }
 
-TArray<FFIVSNodeAction> UFIVSRerouteNode::GetNodeActions() const {
-	return {
+void UFIVSRerouteNode::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
+	Actions.Add({
+		UFIVSRerouteNode::StaticClass(),
+		FText::FromString("Create Reroute node"),
+		FText::FromString(""),
+		FText::FromString("Create Reroute Node"),
 		{
-			UFIVSRerouteNode::StaticClass(),
-			FText::FromString("Create Reroute node"),
-			FText::FromString(""),
-			FText::FromString("Create Reroute Node"),
-			{
-				{FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIN_ANY)}
-			}
+			{FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIN_ANY)}
 		}
-	};
+	});
 }
 
 TSharedRef<SFIVSEdNodeViewer> UFIVSRerouteNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) {

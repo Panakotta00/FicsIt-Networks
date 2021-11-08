@@ -79,6 +79,7 @@ public:
 private:
 	UFIVSNode* Node = nullptr;
 	SFIVSEdGraphViewer* GraphViewer = nullptr;
+	FDelegateHandle OnPinChangeHandle;
 	
 protected:
 	TArray<TSharedRef<SFIVSEdPinViewer>> PinWidgets;
@@ -86,6 +87,8 @@ protected:
 	
 public:
 	bool bSelected = false;
+
+	virtual ~SFIVSEdNodeViewer() override;
 	
 	// Begin SWidget
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
@@ -93,6 +96,12 @@ public:
 	virtual FReply OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	// End SWidget
+
+	/**
+	 * This function will be called if something requests a reconstruction of the pins (like pin changes).
+	 * Implementations may use it for initial construction too.
+	 */
+	virtual void ReconstructPins() = 0;
 
 	SFIVSEdGraphViewer* GetGraphViewer() { return GraphViewer; }
 	
@@ -127,6 +136,8 @@ class SFIVSEdRerouteNodeViewer : public SFIVSEdNodeViewer {
 public:
 	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
 
+	virtual void ReconstructPins() override {}
+
 	FSlateColorBrush OutlineBrush = FSlateColorBrush(FColor::White);
 	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::Black);
 };
@@ -144,6 +155,7 @@ class SFIVSEdFunctionNodeViewer : public SFIVSEdNodeViewer {
 	
 public:
 	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
+	virtual void ReconstructPins() override;
 	
 	TSharedPtr<SVerticalBox> InputPinBox;
 	TSharedPtr<SVerticalBox> OutputPinBox;
@@ -166,6 +178,7 @@ class SFIVSEdOperatorNodeViewer : public SFIVSEdNodeViewer {
 	
 public:
 	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
+	virtual void ReconstructPins() override;
 	
 	TSharedPtr<SVerticalBox> InputPinBox;
 	TSharedPtr<SVerticalBox> OutputPinBox;

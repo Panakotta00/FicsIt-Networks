@@ -20,7 +20,7 @@ class UFIVSNode_SepperateStruct : public UFIVSScriptNode {
 public:
 	// Begin UFIVSNode
 	virtual void InitPins() override;
-	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
+	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
 	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
 	virtual FString GetNodeName() const override;

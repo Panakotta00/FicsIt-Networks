@@ -26,7 +26,7 @@ void UFIVSNode_UFunctionCall::InitPins() {
 			} else if (Prop->IsA<FStrProperty>()) {
 				PinDataType = FIN_STR;
 			}
-			Pin = CreatePin(PinType, FText::FromString(Prop->GetName()), FFIVSPinDataType(PinDataType));
+			Pin = CreatePin(PinType, Prop->GetName(), FText::FromString(Prop->GetName()), FFIVSPinDataType(PinDataType));
 		}
 		if (Pin) {
 			PropertyToPin.Add(*Prop, Pin);
@@ -34,8 +34,7 @@ void UFIVSNode_UFunctionCall::InitPins() {
 	}
 }
 
-TArray<FFIVSNodeAction> UFIVSNode_UFunctionCall::GetNodeActions() const {
-	TArray<FFIVSNodeAction> Actions;
+void UFIVSNode_UFunctionCall::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for(TObjectIterator<UClass> It; It; ++It) {
 		UClass* Class = *It;
 		TMap<FString, FFIVSNodeUFunctionCallMeta>* FuncMeta = FunctionMetaData.Find(Class);
@@ -87,7 +86,6 @@ TArray<FFIVSNodeAction> UFIVSNode_UFunctionCall::GetNodeActions() const {
 			Actions.Add(Action);
 		}
 	}
-	return Actions;
 }
 
 FString UFIVSNode_UFunctionCall::GetNodeName() const {

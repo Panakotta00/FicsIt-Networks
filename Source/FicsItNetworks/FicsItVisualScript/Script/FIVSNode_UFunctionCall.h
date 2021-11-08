@@ -31,7 +31,7 @@ public:
 	
 	// Begin UFIVSNode
 	virtual void InitPins() override;
-	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
+	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	virtual FString GetNodeName() const override;
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) override;
 	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;

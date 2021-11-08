@@ -2,9 +2,7 @@
 
 #include "FicsItNetworks/Reflection/FINReflection.h"
 
-TArray<FFIVSNodeAction> UFIVSNode_DownCast::GetNodeActions() const {
-	TArray<FFIVSNodeAction> Actions;
-
+void UFIVSNode_DownCast::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	UFINClass* FromClass = FFINReflection::Get()->FindClass(UObject::StaticClass());
 	for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
 		FFIVSNodeAction Action;
@@ -22,14 +20,13 @@ TArray<FFIVSNodeAction> UFIVSNode_DownCast::GetNodeActions() const {
 		});
 		Actions.Add(Action);
 	}
-	return Actions;
 }
 
 void UFIVSNode_DownCast::InitPins() {
 	if (bPure) {
-		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("From")), FFIVSPinDataType(FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass())));
-		DataOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("To")), FFIVSPinDataType(FIN_TRACE, ToClass));
-		SuccessOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, FText::FromString(TEXT("Success")), FFIVSPinDataType(FIN_BOOL));
+		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("From"), FText::FromString(TEXT("From")), FFIVSPinDataType(FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass())));
+		DataOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("To"), FText::FromString(TEXT("To")), FFIVSPinDataType(FIN_TRACE, ToClass));
+		SuccessOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Success"), FText::FromString(TEXT("Success")), FFIVSPinDataType(FIN_BOOL));
 	}
 }
 

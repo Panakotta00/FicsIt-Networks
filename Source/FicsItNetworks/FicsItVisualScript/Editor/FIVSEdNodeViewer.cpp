@@ -23,7 +23,7 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, SFIVSEdNodeViewer* In
 		})
 		.ColorAndOpacity_Raw(this, &SFIVSEdPinViewer::GetPinColor)
 	];
-	if (Pin->GetName().ToString().Len() == 0) {
+	if (Pin->GetDisplayName().ToString().Len() == 0) {
 		ChildSlot[
 			SNew(SBorder)
 	        .BorderBackgroundColor_Lambda([this]() {
@@ -70,7 +70,7 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, SFIVSEdNodeViewer* In
 				SNew(STextBlock)
 				.Clipping(EWidgetClipping::Inherit)
 				.Text_Lambda([this]() {
-					return Pin->GetName();
+					return Pin->GetDisplayName();
 				})
 			];
 			(*Slot2)[
@@ -170,7 +170,7 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, SFIVSEdNodeViewer* In
 			SNew(STextBlock)
 			.Clipping(EWidgetClipping::Inherit)
 			.Text_Lambda([this]() {
-				return Pin->GetName();
+				return Pin->GetDisplayName();
 			})
 		];
 	}
@@ -250,6 +250,13 @@ void FFIVSEdPinConnectDragDrop::OnDrop(bool bDropWasHandled, const FPointerEvent
 void SFIVSEdNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraphViewer* InGraphViewer, UFIVSNode* InNode) {
 	Node = InNode;
 	GraphViewer = InGraphViewer;
+	OnPinChangeHandle = Node->OnPinChanged.AddLambda([this](EFIVSNodePinChange, UFIVSPin*) {
+		ReconstructPins();
+	});
+}
+
+SFIVSEdNodeViewer::~SFIVSEdNodeViewer() {
+	Node->OnPinChanged.Remove(OnPinChangeHandle);
 }
 
 FReply SFIVSEdNodeViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
@@ -364,6 +371,13 @@ void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraph
         ]
     ];
 
+	ReconstructPins();
+}
+
+void SFIVSEdFunctionNodeViewer::ReconstructPins() {
+	InputPinBox->ClearChildren(); 
+	OutputPinBox->ClearChildren();
+	
 	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
 		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
 			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)
@@ -372,8 +386,8 @@ void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraph
 			PinToWidget.Add(Pin, PinWidget);
 			InputPinBox->AddSlot()
 			.AutoHeight()[
-                PinWidget
-            ];
+				PinWidget
+			];
 		} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
 			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)
 			.Style(Style);
@@ -381,8 +395,8 @@ void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraph
 			PinToWidget.Add(Pin, PinWidget);
 			OutputPinBox->AddSlot()
 			.AutoHeight()[
-                PinWidget
-            ];
+				PinWidget
+			];
 		}
 	}
 }
@@ -432,6 +446,13 @@ void SFIVSEdOperatorNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraph
 		]
 	];
 
+	ReconstructPins();
+}
+
+void SFIVSEdOperatorNodeViewer::ReconstructPins() {
+	InputPinBox->ClearChildren();
+	OutputPinBox->ClearChildren();
+	
 	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
 		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
 			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)

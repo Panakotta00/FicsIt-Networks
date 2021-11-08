@@ -3,8 +3,7 @@
 #include "FicsItNetworks/Network/FINNetworkUtils.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
 
-TArray<FFIVSNodeAction> UFIVSNode_CallReflectionFunction::GetNodeActions() const {
-	TArray<FFIVSNodeAction> Actions;
+void UFIVSNode_CallReflectionFunction::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
 		for (UFINFunction* CallFunction : Class.Value->GetFunctions(false)) {
 			FFIVSNodeAction Action;
@@ -28,7 +27,6 @@ TArray<FFIVSNodeAction> UFIVSNode_CallReflectionFunction::GetNodeActions() const
 			Actions.Add(Action);
 		}
 	}
-	return Actions;
 }
 
 void UFIVSNode_CallReflectionFunction::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
@@ -40,18 +38,18 @@ void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const FFIVSNode
 }
 
 void UFIVSNode_CallReflectionFunction::InitPins() {
-	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, FText::FromString(TEXT("Exec")));
-	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, FText::FromString(TEXT("Run")));
-	Self = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIN_Func_ClassFunc ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Function->GetOuter())));
+	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
+	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Run"), FText::FromString(TEXT("Run")));
+	Self = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Run"), FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIN_Func_ClassFunc ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Function->GetOuter())));
 	for (UFINProperty* Param : Function->GetParameters()) {
 		EFINRepPropertyFlags Flags = Param->GetPropertyFlags();
 		if (Flags & FIN_Prop_Param) {
 			FFIVSPinDataType Type = Param;
 			if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
 			if (Flags & FIN_Prop_OutParam) {
-				OutputPins.Add(CreatePin(FIVS_PIN_DATA_OUTPUT, Param->GetDisplayName(), Type));
+				OutputPins.Add(CreatePin(FIVS_PIN_DATA_OUTPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
 			} else {
-				InputPins.Add(CreatePin(FIVS_PIN_DATA_INPUT, Param->GetDisplayName(), Type));
+				InputPins.Add(CreatePin(FIVS_PIN_DATA_INPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
 			}
 		}
 	}

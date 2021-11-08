@@ -18,7 +18,7 @@ private:
 
 public:
 	// Begin UFIVSNode
-	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
+	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	// End UFIVSNodes
 	
 	// Begin UFIVSGenericNode

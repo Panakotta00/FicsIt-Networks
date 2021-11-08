@@ -34,6 +34,6 @@ struct FICSITNETWORKS_API FFINStaticGlobalRegisterFunc {
 	}
 };
 
-FORCEINLINE bool operator==(const FFINGlobalRegisterHelper::RegisterFunction& A, const FFINGlobalRegisterHelper::RegisterFunction& B) {
+/*FORCEINLINE bool operator==(const FFINGlobalRegisterHelper::RegisterFunction& A, const FFINGlobalRegisterHelper::RegisterFunction& B) {
 	return TFunction<void()>(A) == TFunction<void()>(B);
-}
+}*/

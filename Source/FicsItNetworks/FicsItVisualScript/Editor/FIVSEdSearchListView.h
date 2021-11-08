@@ -1,0 +1,114 @@
+﻿#pragma once
+
+#include "SlateBasics.h"
+#include "FIVSEdTextSearch.h"
+#include "Widgets/Input/SSearchBox.h"
+
+/**
+ * This class allows you to have a filtered and searchable list view of a given type.
+ */
+template<typename T>
+class SFIVSEdSearchListView : public SCompoundWidget {
+public:
+	struct FEntry {
+		T Element;
+
+		FEntry(const T& InElement) : Element(InElement) {}
+	};
+	
+	DECLARE_DELEGATE_RetVal_OneParam(FString, FGetSearchableText, T&)
+	DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FGetElementWidget, const T&)
+	DECLARE_DELEGATE_OneParam(FSelectionChanged, T&)
+	DECLARE_DELEGATE_OneParam(FCommited, T&)
+	
+private:
+	SLATE_BEGIN_ARGS(SFIVSEdSearchListView<T>) {}
+	SLATE_EVENT(FGetSearchableText, OnGetSearchableText)
+	SLATE_EVENT(FGetElementWidget, OnGetElementWidget)
+	SLATE_EVENT(FSelectionChanged, OnSelectionChanged)
+	SLATE_EVENT(FCommited, OnCommited)
+	SLATE_END_ARGS()
+
+	TArray<T> Elements; 
+	TArray<TSharedPtr<FEntry>> FilteredEntries;
+
+	FFIVSEdTextSearch Search;
+	TSharedPtr<SListView<TSharedPtr<FEntry>>> ListView;
+	
+public:
+	FGetSearchableText OnGetSearchableText;
+	FGetElementWidget OnGetElementWidget;
+	FSelectionChanged OnSelectionChanged;
+	FCommited OnCommited;
+	
+	void Construct(const FArguments& InArgs, TArray<T> InElements) {
+		Elements = InElements;
+		
+		OnGetSearchableText = InArgs._OnGetSearchableText;
+		OnGetElementWidget = InArgs._OnGetElementWidget;
+		OnSelectionChanged = InArgs._OnSelectionChanged;
+		OnCommited = InArgs._OnCommited;
+		
+		ChildSlot[
+			SNew(SVerticalBox)
+			+SVerticalBox::Slot()
+			.AutoHeight()[
+				SNew(SSearchBox)
+				.SelectAllTextWhenFocused(true)
+				.OnTextChanged_Lambda([this](FText InText) {
+					Search.SetSearchText(InText.ToString());
+					FilterEntries();
+				})
+				
+			]
+			+SVerticalBox::Slot()[
+				SAssignNew(ListView, SListView<TSharedPtr<FEntry>>)
+				.SelectionMode(ESelectionMode::Single)
+				.ListItemsSource(&FilteredEntries)
+				.OnMouseButtonClick_Lambda([this](TSharedPtr<FEntry> InEntry) {
+					OnSelectionChanged.ExecuteIfBound(InEntry->Element);
+					OnCommited.ExecuteIfBound(InEntry->Element);
+				})
+				.OnSelectionChanged_Lambda([this](TSharedPtr<FEntry> InEntry, ESelectInfo::Type) {
+					if (InEntry) OnSelectionChanged.ExecuteIfBound(InEntry->Element);
+				})
+				.OnGenerateRow_Lambda([this](TSharedPtr<FEntry> InEntry, const TSharedRef<STableViewBase>& Row) {
+					return SNew(STableRow<TSharedPtr<FEntry>>, Row)[
+						OnGetElementWidget.Execute(InEntry->Element)
+					];
+				})
+			]
+		];
+
+		FilterEntries();
+	}
+
+	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override {
+		if (InKeyEvent.GetKey() == EKeys::Enter) {
+			if (ListView->GetSelectedItems().Num() > 0) OnCommited.Execute(ListView->GetSelectedItems()[0]->Element);
+			return FReply::Handled();
+		}
+		return FReply::Unhandled();
+	}
+	
+	void FilterEntries() {
+		FilteredEntries.Empty();
+		TSharedPtr<FEntry> MostRelevantEntry;
+		int MostRelevantSignificance = TNumericLimits<int>::Max();
+		for (T& Element : Elements) {
+			FString SearchableText = OnGetSearchableText.Execute(Element);
+			int Significance;
+			if (Search.Search(SearchableText, &Significance)) {
+				TSharedPtr<FEntry> Entry = MakeShared<FEntry>(Element);
+				if (MostRelevantSignificance < Significance) {
+					MostRelevantSignificance = Significance;
+					MostRelevantEntry = Entry;
+				}
+				FilteredEntries.Add(Entry);
+			}
+		}
+
+		ListView->RequestListRefresh();
+	}
+};
+

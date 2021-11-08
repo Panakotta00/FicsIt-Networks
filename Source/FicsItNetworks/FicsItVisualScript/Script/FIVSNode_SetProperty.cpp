@@ -3,8 +3,7 @@
 #include "FicsItNetworks/Network/FINNetworkUtils.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
 
-TArray<FFIVSNodeAction> UFIVSNode_SetProperty::GetNodeActions() const {
-	TArray<FFIVSNodeAction> Actions;
+void UFIVSNode_SetProperty::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
 		for (UFINProperty* SetProperty : Class.Value->GetProperties(false)) {
 			FFIVSNodeAction Action;
@@ -28,7 +27,6 @@ TArray<FFIVSNodeAction> UFIVSNode_SetProperty::GetNodeActions() const {
 			Actions.Add(Action);
 		}
 	}
-	return Actions;
 }
 
 void UFIVSNode_SetProperty::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
@@ -40,12 +38,12 @@ void UFIVSNode_SetProperty::DeserializeNodeProperties(const FFIVSNodeProperties&
 }
 
 void UFIVSNode_SetProperty::InitPins() {
-	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, FText::FromString("Exec"));
-	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, FText::FromString("Out"));
-	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())));
+	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString("Exec"));
+	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Out"), FText::FromString("Out"));
+	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Instance"), FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())));
 	FFIVSPinDataType Type(Property);
 	if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
-	DataIn = CreatePin(FIVS_PIN_DATA_INPUT, FText::FromString("Value"), Type);
+	DataIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Value"), FText::FromString("Value"), Type);
 }
 
 TArray<UFIVSPin*> UFIVSNode_SetProperty::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {

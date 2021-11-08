@@ -6,6 +6,7 @@
 #include "FicsItNetworks/Reflection/FINProperty.h"
 #include "FIVSNode.generated.h"
 
+class IFIVSScriptContext_Interface;
 class SFIVSEdGraphViewer;
 struct FFIVSEdStyle;
 class UFIVSGraph;
@@ -257,12 +258,18 @@ struct FFIVSNodeAction {
 	FFIVSNodeActionCreateTooltip OnCreateTooltip;
 };
 
+UENUM()
+enum EFIVSNodePinChange {
+	FIVS_PinChange_Added,
+	FIVS_PinChange_Removed,
+};
+
 /**
  * Notifies if the pin list of the node has changed.
- * Param1: type of change (0 = pin added, 1 = pin removed)
+ * Param1: type of change
  * Param2: the changed pin
  */
-DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphPinChanged, int, int);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphPinChanged, EFIVSNodePinChange, UFIVSPin*);
 
 UCLASS(Abstract)
 class UFIVSNode : public UObject {
@@ -288,7 +295,7 @@ public:
 	 * This function will be called on the CDO of this class and should return a list of Actions that
 	 * will get added to the action selection menu of the graph editor.
 	 */
-	virtual TArray<FFIVSNodeAction> GetNodeActions() const { return TArray<FFIVSNodeAction>(); }
+	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const { }
 
 	/**
 	 * Returns a SFIVSEdNodeViewer that is used to display this node in a graph editor.
@@ -296,11 +303,21 @@ public:
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style);
 
 	/**
+	 * Creates and returns a new widget that can be used to change detailed information of this node.
+	 */
+	virtual TSharedPtr<SWidget> CreateDetailsWidget(TScriptInterface<IFIVSScriptContext_Interface> Context) { return nullptr; }
+	
+	/**
+	 * Removed all Pins and calls InitPins again, may cause the UI to update its rendering.
+	 */
+	virtual void ReconstructPins();
+
+	/**
 	 * Called if this nodes gets serialized.
 	 * Is supposed to store additional node properties to the serialization data that will be used on deserialization
 	 * for initializing the node so it can successfully recreate the Node name, Pins, functionality, etc.
 	 */
-	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const {};
+	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const {}
 
 	/**
 	 * Called when the node gets deserialized.
@@ -328,6 +345,17 @@ public:
 	}
 
 	/**
+	 * Tries to find a Pin with the given internal name.
+	 * If no pin was found, returns nullptr.
+	 */
+	UFIVSPin* FindPinByName(const FString& Name) {
+		for (UFIVSPin* Pin : GetNodePins()) {
+			if (Pin->GetName() == Name) return Pin;
+		}
+		return nullptr;
+	}
+
+	/**
 	 * Retruns the outer/parent graph of this node
 	 */
 	UFIVSGraph* GetOuterGraph() const;
@@ -346,7 +374,7 @@ public:
 	
 	// Begin UFINScriptNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override;
-	virtual TArray<FFIVSNodeAction> GetNodeActions() const override;
+	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) override;
 	// End UFINScriptNode
 };

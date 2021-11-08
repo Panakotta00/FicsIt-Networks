@@ -21,6 +21,7 @@ protected:
 public:
 	// Begin UFIVSNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override { return Pins; }
+	virtual void ReconstructPins() override;
 	// End UFIVSNode
 	
 	/**

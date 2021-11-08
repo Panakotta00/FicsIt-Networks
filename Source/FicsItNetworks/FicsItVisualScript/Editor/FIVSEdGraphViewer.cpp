@@ -1,5 +1,6 @@
 ﻿#include "FIVSEdGraphViewer.h"
 
+#include "../../../../../Developer/RiderLink/Source/RD/thirdparty/spdlog/include/spdlog/details/windows_include.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSGraph.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
 #include "GenericPlatform/GenericPlatformApplicationMisc.h"
@@ -79,11 +80,13 @@ void FFIVSEdConnectionDrawer::DrawConnection(const FVector2D& Start, const FVect
 void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 	Style = InArgs._Style;
 	SetGraph(InArgs._Graph);
+	SelectionChanged = InArgs._OnSelectionChanged;
 	SelectionManager.OnSelectionChanged.BindRaw(this, &SFIVSEdGraphViewer::OnSelectionChanged);
 }
 
 void SFIVSEdGraphViewer::OnSelectionChanged(UFIVSNode* InNode, bool bIsSelected) {
 	NodeToChild[InNode]->bSelected = bIsSelected;
+	SelectionChanged.ExecuteIfBound(InNode, bIsSelected);
 }
 
 SFIVSEdGraphViewer::SFIVSEdGraphViewer() : Children(this) {
@@ -98,6 +101,7 @@ FVector2D SFIVSEdGraphViewer::ComputeDesiredSize(float) const {
 	return FVector2D(160.0f, 120.0f);
 }
 
+#pragma optimize("", off)
 int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	OutDrawElements.PushClip(FSlateClippingZone(AllottedGeometry));
 	
@@ -139,11 +143,13 @@ int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 	for (int i = 0; i < Children.Num(); ++i) {
 		TSharedRef<SFIVSEdNodeViewer> Node = Children[i];
 		for (const TSharedRef<SFIVSEdPinViewer>& Pin : Node->GetPinWidgets()) {
-			for (UFIVSPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
+			if (Pin->GetPin()->IsValidLowLevel()) for (UFIVSPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
 				if (!DrawnPins.Contains(TPair<UFIVSPin*, UFIVSPin*>(Pin->GetPin(), ConnectionPin)) && !DrawnPins.Contains(TPair<UFIVSPin*, UFIVSPin*>(ConnectionPin, Pin->GetPin()))) {
 					DrawnPins.Add(TPair<UFIVSPin*, UFIVSPin*>(Pin->GetPin(), ConnectionPin));
 					ConnectionDrawer->DrawConnection(Pin, NodeToChild[ConnectionPin->ParentNode]->GetPinWidget(ConnectionPin), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId+1);
 				}
+			} else {
+				UE_LOG(LogFicsItNetworks, Warning, TEXT("WTF"));
 			}
 		}
 	}
@@ -172,6 +178,7 @@ int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 	
 	return ret;
 }
+#pragma optimize("", off)
 
 FReply SFIVSEdGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	if (ConnectionDrawer->ConnectionUnderMouse.Key.IsValid() && MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)) {
@@ -364,7 +371,9 @@ TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPat
 	
 	for(TObjectIterator<UClass> It; It; ++It) {
 		if(It->IsChildOf(UFIVSNode::StaticClass()) && !It->HasAnyClassFlags(CLASS_Abstract)) {
-			for (const FFIVSNodeAction& Action : GetDefault<UFIVSNode>(*It)->GetNodeActions()) {
+			TArray<FFIVSNodeAction> Actions;
+			GetDefault<UFIVSNode>(*It)->GetNodeActions(Actions);
+			for (const FFIVSNodeAction& Action : Actions) {
 				FString CategoryStr = Action.Category.ToString();
 				TSharedPtr<FFIVSEdActionSelectionCategory> Category;
 				int Sepperator = INDEX_NONE;
