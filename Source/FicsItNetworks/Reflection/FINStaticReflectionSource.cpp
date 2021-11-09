@@ -1918,7 +1918,7 @@ BeginFunc(getDocked, "Get Docked", "Returns the currently docked actor.") {
 } EndFunc()
 BeginFunc(undock, "Undock", "Undocked the currently docked vehicle from this docking station.") {
 	Body()
-	self->Undock();
+	self->Undock(true);
 } EndFunc()
 BeginProp(RBool, isLoadMode, "Is Load Mode", "True if the docking station loads docked vehicles, flase if it unloads them.") {
 	Return self->GetIsInLoadMode();
