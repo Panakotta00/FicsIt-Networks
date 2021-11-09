@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FIVSNode.h"
 #include "FIVSGraph.generated.h"
 
 class UFIVSNode;
@@ -18,6 +19,8 @@ class UFIVSGraph : public UObject {
 private:
 	UPROPERTY(SaveGame)
 	TArray<UFIVSNode*> Nodes;
+
+	TMap<UFIVSNode*, FDelegateHandle> NodeDelegateHandles;
 
 public:
 	FFINScriptGraphNodeChanged OnNodeChanged;
@@ -41,4 +44,7 @@ public:
 	 * Returns all nodes of the graph.
 	 */
 	const TArray<UFIVSNode*>& GetNodes() const;
+	
+private:
+	void OnPinChanged(EFIVSNodePinChange, UFIVSPin*);
 };

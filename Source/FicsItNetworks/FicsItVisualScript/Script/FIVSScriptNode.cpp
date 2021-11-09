@@ -19,6 +19,7 @@ void UFIVSScriptNode::ReconstructPins() {
 	for (UFIVSPin* Pin : Pins) {
 		TArray<UFIVSPin*>& Connections = Connected.FindOrAdd(Pin->GetName());
 		for (UFIVSPin* Connection : Pin->GetConnections()) Connections.Add(Connection);
+		Pin->RemoveAllConnections();
 		OnPinChanged.Broadcast(FIVS_PinChange_Removed, Pin);
 	}
 	Pins.Empty();

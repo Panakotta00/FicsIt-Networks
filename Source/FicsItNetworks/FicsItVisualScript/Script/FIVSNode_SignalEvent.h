@@ -33,4 +33,7 @@ public:
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
+
+	UFINSignal* GetSignal() { return Signal; }
+	const FFINNetworkTrace& GetSender() { return Sender; }
 };

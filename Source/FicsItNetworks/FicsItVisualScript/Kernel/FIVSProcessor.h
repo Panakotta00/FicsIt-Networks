@@ -6,6 +6,7 @@
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode_OnTick.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSScriptContext.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSScriptNode.h"
+#include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode_SignalEvent.h"
 #include "FicsItNetworks/Network/FINNetworkCircuit.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
 #include "FIVSProcessor.generated.h"
@@ -39,6 +40,10 @@ class UFIVSProcessor : public UFINKernelProcessor, public IFIVSScriptContext_Int
 
 	TSharedPtr<FFIVSRuntimeContext> RuntimeContext;
 	TArray<FFIVSMicroStep> MicroSteps;
+
+	TMap<FFINNetworkTrace, TMap<UFINSignal*, UFIVSNode_SignalEvent*>> SignalEvents;
+
+	bool bTick = true;
 	
 public:
 	// Begin UFINKernelProcessor
@@ -49,6 +54,21 @@ public:
 		}
 
 		NextStep();
+	}
+
+	UFIVSNode_SignalEvent* Pull() {
+		FFINNetworkTrace Sender;
+		FFINSignalData Signal = GetKernel()->GetNetwork()->PopSignal(Sender);
+		if (Sender.IsValid()) {
+			TMap<UFINSignal*, UFIVSNode_SignalEvent*>* Signals = SignalEvents.Find(Sender);
+			if (Signals) {
+				UFIVSNode_SignalEvent** Event = Signals->Find(Signal.Signal);
+				if (Event) {
+					return *Event;
+				}
+			}
+		}
+		return nullptr;
 	}
 
 	void NextStep() {
@@ -80,14 +100,36 @@ public:
 	}
 
 	virtual void Reset() override {
-		RuntimeContext = MakeShared<FFIVSRuntimeContext>(Graph, GetKernel());
-		MicroSteps.Empty();
-		for (UFIVSNode* Node : RuntimeContext->GetScript()->GetNodes()) {
-			if (Node->IsA<UFIVSNode_OnTick>()) {
-				MicroSteps.Add(FFIVSMicroStep(FIVS_STEP_PRENODE, Node, nullptr));
-				break;
+		AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(this);
+		for (auto Sender : SignalEvents) {
+			for (auto Signal : Sender.Value) {
+				SigSubSys->Listen(*Sender.Key, Sender.Key.Reverse());
 			}
 		}
+		RuntimeContext = MakeShared<FFIVSRuntimeContext>(Graph, GetKernel());
+		MicroSteps.Empty();
+		if (!bTick) {
+			UFIVSNode_SignalEvent* Event = Pull();
+			if (Event) {
+				MicroSteps.Add(FFIVSMicroStep(FIVS_STEP_PRENODE, Event, nullptr));
+			} else {
+				bTick = true;
+			}
+		}
+		if (bTick) {
+			for (UFIVSNode* Node : RuntimeContext->GetScript()->GetNodes()) {
+				if (Node->IsA<UFIVSNode_OnTick>()) {
+					MicroSteps.Add(FFIVSMicroStep(FIVS_STEP_PRENODE, Node, nullptr));
+					break;
+				}
+			}
+		}
+		bTick = !bTick;
+	}
+
+	virtual void Stop(bool) override {
+		AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(this);
+		SigSubSys->IgnoreAll(this);
 	}
 
 	virtual void SetEEPROM(AFINStateEEPROM* InEEPROM) override {
@@ -98,6 +140,16 @@ public:
 		}
 		
 		Graph = FIVSEEPROM->Graph;
+
+		for (UFIVSNode* Node : Graph->GetNodes()) {
+			UFIVSNode_SignalEvent* Event = Cast<UFIVSNode_SignalEvent>(Node);
+			if (Event) {
+				FFINNetworkTrace Sender = Event->GetSender();
+				UFINSignal* Signal = Event->GetSignal();
+				if (!Sender || !Signal) continue;
+				SignalEvents.FindOrAdd(Sender).FindOrAdd(Signal) = Event;
+			}
+		}
 	}
 	// End UFINKernelProcessor
 

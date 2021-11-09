@@ -360,8 +360,10 @@ void SFIVSEdGraphViewer::OnNodeChanged(int change, UFIVSNode* Node) {
 	if (change == 0) {
 		CreateNodeAsChild(Node);
 	} else {
+		SelectionManager.SetSelected(Node, false);
 		TSharedRef<SFIVSEdNodeViewer>* Viewer = NodeToChild.Find(Node);
 		if (Viewer) Children.Remove(*Viewer);
+		NodeToChild.Remove(Node);
 	}
 }
 #pragma optimize("", off)

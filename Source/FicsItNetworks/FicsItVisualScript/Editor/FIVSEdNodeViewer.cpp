@@ -377,6 +377,8 @@ void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraph
 void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 	InputPinBox->ClearChildren(); 
 	OutputPinBox->ClearChildren();
+	PinWidgets.Empty();
+	PinToWidget.Empty();
 	
 	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
 		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
@@ -452,6 +454,8 @@ void SFIVSEdOperatorNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraph
 void SFIVSEdOperatorNodeViewer::ReconstructPins() {
 	InputPinBox->ClearChildren();
 	OutputPinBox->ClearChildren();
+	PinWidgets.Empty();
+	PinToWidget.Empty();
 	
 	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
 		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
