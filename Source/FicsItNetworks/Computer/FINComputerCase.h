@@ -41,7 +41,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	int LastTabIndex = 0;
 	
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, BlueprintReadOnly)
 	UFINKernelSystem* Kernel = nullptr;
 
 	UPROPERTY(SaveGame)

@@ -154,6 +154,7 @@ public:
 	/**
 	 * Returns the currently use processor
 	 */
+	UFUNCTION(BlueprintCallable)
 	UFINKernelProcessor* GetProcessor() const;
 
 	/**
