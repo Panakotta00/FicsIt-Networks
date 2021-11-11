@@ -22,18 +22,23 @@ public:
 	DECLARE_DELEGATE_OneParam(FCommited, T&)
 	
 private:
-	SLATE_BEGIN_ARGS(SFIVSEdSearchListView<T>) {}
+	SLATE_BEGIN_ARGS(SFIVSEdSearchListView<T>) : _BackgroundBrush(&DefaultBackgroundBrush) {}
 	SLATE_EVENT(FGetSearchableText, OnGetSearchableText)
 	SLATE_EVENT(FGetElementWidget, OnGetElementWidget)
 	SLATE_EVENT(FSelectionChanged, OnSelectionChanged)
 	SLATE_EVENT(FCommited, OnCommited)
+	SLATE_ATTRIBUTE(const FSlateBrush*, BackgroundBrush)
 	SLATE_END_ARGS()
+
+	const static inline FSlateColorBrush DefaultBackgroundBrush = FSlateColorBrush(FColor::FromHex(TEXT("0F0F0F")));
 
 	TArray<T> Elements; 
 	TArray<TSharedPtr<FEntry>> FilteredEntries;
+	TAttribute<const FSlateBrush*> BackgroundBrush;
 
 	FFIVSEdTextSearch Search;
 	TSharedPtr<SListView<TSharedPtr<FEntry>>> ListView;
+	TSharedPtr<SSearchBox> SearchBox;
 	
 public:
 	FGetSearchableText OnGetSearchableText;
@@ -48,39 +53,50 @@ public:
 		OnGetElementWidget = InArgs._OnGetElementWidget;
 		OnSelectionChanged = InArgs._OnSelectionChanged;
 		OnCommited = InArgs._OnCommited;
+		BackgroundBrush = InArgs._BackgroundBrush;
 		
 		ChildSlot[
-			SNew(SVerticalBox)
-			+SVerticalBox::Slot()
-			.AutoHeight()[
-				SNew(SSearchBox)
-				.SelectAllTextWhenFocused(true)
-				.OnTextChanged_Lambda([this](FText InText) {
-					Search.SetSearchText(InText.ToString());
-					FilterEntries();
-				})
-				
-			]
-			+SVerticalBox::Slot()[
-				SAssignNew(ListView, SListView<TSharedPtr<FEntry>>)
-				.SelectionMode(ESelectionMode::Single)
-				.ListItemsSource(&FilteredEntries)
-				.OnMouseButtonClick_Lambda([this](TSharedPtr<FEntry> InEntry) {
-					OnSelectionChanged.ExecuteIfBound(InEntry->Element);
-					OnCommited.ExecuteIfBound(InEntry->Element);
-				})
-				.OnSelectionChanged_Lambda([this](TSharedPtr<FEntry> InEntry, ESelectInfo::Type) {
-					if (InEntry) OnSelectionChanged.ExecuteIfBound(InEntry->Element);
-				})
-				.OnGenerateRow_Lambda([this](TSharedPtr<FEntry> InEntry, const TSharedRef<STableViewBase>& Row) {
-					return SNew(STableRow<TSharedPtr<FEntry>>, Row)[
-						OnGetElementWidget.Execute(InEntry->Element)
-					];
-				})
+			SNew(SBorder)
+			.BorderImage(BackgroundBrush)
+			.Content()[
+				SNew(SVerticalBox)
+				+SVerticalBox::Slot()
+				.AutoHeight()[
+					SAssignNew(SearchBox, SSearchBox)
+					.SelectAllTextWhenFocused(true)
+					.OnTextChanged_Lambda([this](FText InText) {
+						Search.SetSearchText(InText.ToString());
+						FilterEntries();
+					})
+				]
+				+SVerticalBox::Slot()[
+					SAssignNew(ListView, SListView<TSharedPtr<FEntry>>)
+					.SelectionMode(ESelectionMode::Single)
+					.ListItemsSource(&FilteredEntries)
+					.OnMouseButtonClick_Lambda([this](TSharedPtr<FEntry> InEntry) {
+						OnSelectionChanged.ExecuteIfBound(InEntry->Element);
+						OnCommited.ExecuteIfBound(InEntry->Element);
+					})
+					.OnSelectionChanged_Lambda([this](TSharedPtr<FEntry> InEntry, ESelectInfo::Type) {
+						if (InEntry) OnSelectionChanged.ExecuteIfBound(InEntry->Element);
+					})
+					.OnGenerateRow_Lambda([this](TSharedPtr<FEntry> InEntry, const TSharedRef<STableViewBase>& Row) {
+						return SNew(STableRow<TSharedPtr<FEntry>>, Row)[
+							OnGetElementWidget.Execute(InEntry->Element)
+						];
+					})
+				]
 			]
 		];
 
 		FilterEntries();
+
+		RegisterActiveTimer(0.016f, FWidgetActiveTimerDelegate::CreateLambda([this](double InCurrentTime, float InDeltaTime) {
+			FWidgetPath FocusMe;
+			FSlateApplication::Get().GeneratePathToWidgetChecked( SearchBox.ToSharedRef(), FocusMe );
+			FSlateApplication::Get().SetKeyboardFocus( FocusMe, EFocusCause::SetDirectly );
+			return EActiveTimerReturnType::Stop;
+		}));
 	}
 
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override {

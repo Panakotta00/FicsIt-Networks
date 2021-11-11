@@ -1,6 +1,7 @@
 ﻿#include "FIVSNode_SignalEvent.h"
 
 #include "FIVSScriptContext.h"
+#include "FicsItNetworks/FicsItVisualScript/FIVSUtils.h"
 #include "FicsItNetworks/FicsItVisualScript/Editor/FIVSEdObjectSelection.h"
 #include "FicsItNetworks/FicsItVisualScript/Editor/FIVSEdSignalSelection.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
@@ -38,10 +39,12 @@ void UFIVSNode_SignalEvent::GetNodeActions(TArray<FFIVSNodeAction>& Actions) con
 
 void UFIVSNode_SignalEvent::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
 	if (Signal) Properties.Properties.Add(TEXT("Signal"), Signal->GetPathName());
+	Properties.Properties.Add(TEXT("Sender"), UFIVSUtils::NetworkTraceToString(Sender));
 }
 
 void UFIVSNode_SignalEvent::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
 	if (Properties.Properties.Contains(TEXT("Signal"))) Signal = Cast<UFINSignal>(FSoftObjectPath(Properties.Properties[TEXT("Signal")]).TryLoad());
+	if (Properties.Properties.Contains(TEXT("Sender"))) Sender = UFIVSUtils::StringToNetworkTrace(Properties.Properties[TEXT("Sender")]);
 }
 
 FString UFIVSNode_SignalEvent::GetNodeName() const {

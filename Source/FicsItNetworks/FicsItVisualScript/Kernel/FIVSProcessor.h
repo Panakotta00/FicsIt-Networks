@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FIVSRuntimeContext.h"
+#include "FicsItNetworks/FINComponentUtility.h"
 #include "FicsItNetworks/FicsItKernel/Processor/Processor.h"
 #include "FicsItNetworks/FicsItVisualScript/FIVSStateEEPROM.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode_OnTick.h"
@@ -8,6 +9,7 @@
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSScriptNode.h"
 #include "FicsItNetworks/FicsItVisualScript/Script/FIVSNode_SignalEvent.h"
 #include "FicsItNetworks/Network/FINNetworkCircuit.h"
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
 #include "FicsItNetworks/Reflection/FINReflection.h"
 #include "FIVSProcessor.generated.h"
 
@@ -56,9 +58,8 @@ public:
 		NextStep();
 	}
 
-	UFIVSNode_SignalEvent* Pull() {
-		FFINNetworkTrace Sender;
-		FFINSignalData Signal = GetKernel()->GetNetwork()->PopSignal(Sender);
+	virtual UFIVSNode_SignalEvent* Pull(FFINNetworkTrace& Sender, FFINSignalData& Signal) {
+		Signal = GetKernel()->GetNetwork()->PopSignal(Sender);
 		if (Sender.IsValid()) {
 			TMap<UFINSignal*, UFIVSNode_SignalEvent*>* Signals = SignalEvents.Find(Sender);
 			if (Signals) {
@@ -71,7 +72,7 @@ public:
 		return nullptr;
 	}
 
-	void NextStep() {
+	virtual void NextStep() {
 		FFIVSMicroStep Step = MicroSteps.Pop();
 		switch (Step.StepType) {
 		case FIVS_STEP_PRENODE: {
@@ -109,8 +110,15 @@ public:
 		RuntimeContext = MakeShared<FFIVSRuntimeContext>(Graph, GetKernel());
 		MicroSteps.Empty();
 		if (!bTick) {
-			UFIVSNode_SignalEvent* Event = Pull();
+			FFINNetworkTrace Sender;
+			FFINSignalData SignalData;
+			UFIVSNode_SignalEvent* Event = Pull(Sender, SignalData);
 			if (Event) {
+				RuntimeContext->SetValue(Event->FindPinByName(TEXT("Sender")), Sender);
+				int i = 0;
+				for (UFINProperty* Param : SignalData.Signal->GetParameters()) {
+					RuntimeContext->SetValue(Event->FindPinByName(Param->GetInternalName()), SignalData.Data[i++]);
+				}
 				MicroSteps.Add(FFIVSMicroStep(FIVS_STEP_PRENODE, Event, nullptr));
 			} else {
 				bTick = true;
@@ -144,7 +152,7 @@ public:
 		for (UFIVSNode* Node : Graph->GetNodes()) {
 			UFIVSNode_SignalEvent* Event = Cast<UFIVSNode_SignalEvent>(Node);
 			if (Event) {
-				FFINNetworkTrace Sender = Event->GetSender();
+				FFINNetworkTrace Sender = UFINNetworkUtils::RedirectIfPossible(Event->GetSender());
 				UFINSignal* Signal = Event->GetSignal();
 				if (!Sender || !Signal) continue;
 				SignalEvents.FindOrAdd(Sender).FindOrAdd(Signal) = Event;

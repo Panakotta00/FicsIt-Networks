@@ -19,6 +19,7 @@ void AFINHookSubsystem::RegisterHook(UClass* clazz, TSubclassOf<UFINHook> hook) 
 void AFINHookSubsystem::AttachHooks(UObject* object) {
 	if (!IsValid(object)) return;
 	FScopeLock Lock(&DataLock);
+	if (Data.Contains(object)) return;
 	ClearHooks(object);
 	FFINHookData& HookData = Data.FindOrAdd(object);
 	UClass* clazz = object->GetClass();

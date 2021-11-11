@@ -6,7 +6,7 @@
 #include "UI/FINReflectionStyles.h"
 
 UFINGameInstanceModule::UFINGameInstanceModule() {
-	ModKeyBindings.Add({
+	/*ModKeyBindings.Add({
 		TEXT("FicsItNetworks.CopyUUID"),
 		FInputActionKeyMapping(TEXT("FicsItNetworks.CopyUUID"), EKeys::C, false, true, false),
 		FText::FromString(TEXT("Copy FIN Comp. ID"))
@@ -30,7 +30,7 @@ UFINGameInstanceModule::UFINGameInstanceModule() {
 		TEXT("FicsItNetworks.PasteScreen"),
 		FInputActionKeyMapping(TEXT("FicsItNetworks.PasteScreen"), EKeys::V, false, true, false),
 		FText::FromString(TEXT("Paste FIN Screen Content"))
-	});
+	});*/
 }
 
 void UFINGameInstanceModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {

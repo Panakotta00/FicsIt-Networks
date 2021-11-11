@@ -7,23 +7,36 @@
 class SFIVSEdObjectSelection : public SCompoundWidget {
 	DECLARE_DELEGATE_OneParam(FSelectionChanged, const FFINNetworkTrace&)
 	
-	SLATE_BEGIN_ARGS(SFIVSEdObjectSelection) {}
+	SLATE_BEGIN_ARGS(SFIVSEdObjectSelection) :
+		_PrimaryFont(FCoreStyle::GetDefaultFontStyle("Regular", FCoreStyle::RegularTextSize)),
+		_SecondaryFont(FCoreStyle::GetDefaultFontStyle("Regular", FCoreStyle::SmallTextSize)) {}
 	SLATE_EVENT(FSelectionChanged, OnSelectionChanged)
 	SLATE_ARGUMENT(FFINNetworkTrace, InitSelection)
+	SLATE_ATTRIBUTE(FSlateFontInfo, PrimaryFont)
+	SLATE_ATTRIBUTE(FSlateFontInfo, SecondaryFont)
 	SLATE_END_ARGS()
 
 	TSharedPtr<SBox> WidgetHolder;
 	FSelectionChanged OnSelectionChanged;
 	TArray<FFINNetworkTrace> Components;
+	TAttribute<FSlateFontInfo> PrimaryFont;
+	TAttribute<FSlateFontInfo> SecondaryFont;
 	
 public:
 	void Construct(const FArguments& InArgs, const TArray<FFINNetworkTrace>& InComponents) {
 		OnSelectionChanged = InArgs._OnSelectionChanged;
+		PrimaryFont = InArgs._PrimaryFont;
+		SecondaryFont = InArgs._SecondaryFont;
+		
 		Components = InComponents;
 		Components.Add(FFINNetworkTrace());
 		
 		ChildSlot[
-			SAssignNew(WidgetHolder, SBox)
+			SNew(SBorder)
+			.BorderImage(FCoreStyle::Get().GetBrush("Border"))
+			.Content()[
+				SAssignNew(WidgetHolder, SBox)
+			]
 		];
 
 		SelectObject(InArgs._InitSelection);
@@ -60,6 +73,34 @@ public:
 		else
 			return SNew(STextBlock)
 			.Text(FText::FromString(TEXT("(None)")));
+	}
+
+	TSharedRef<SWidget> CreateLargeComponentWidget(const FFINNetworkTrace& Component) {
+		if (Component.GetUnderlyingPtr()) {
+			TSharedRef<SVerticalBox> Box = SNew(SVerticalBox);
+			FString Nick = IFINNetworkComponent::Execute_GetNick(*Component);
+			FString ID = IFINNetworkComponent::Execute_GetID(*Component).ToString();
+			if (Nick.Len() > 0) {
+				Box->AddSlot()[
+					SNew(STextBlock)
+					.Text(FText::FromString(Nick))
+					.Font(PrimaryFont)
+				];
+				Box->AddSlot()[
+					SNew(STextBlock)
+					.Text(FText::FromString(ID))
+				];
+			} else {
+				Box->AddSlot()[
+					SNew(STextBlock)
+					.Text(FText::FromString(ID))
+				];
+			}
+			return Box;
+		} else {
+			return SNew(STextBlock)
+			.Text(FText::FromString(TEXT("(None)")));
+		}
 	}
 
 	TSharedRef<SWidget> CreateSignalSearch() {

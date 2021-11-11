@@ -21,7 +21,11 @@ public:
 		OnSelectionChanged = InArgs._OnSelectionChanged;
 		
 		ChildSlot[
-			SAssignNew(SignalWidgetHolder, SBox)
+			SNew(SBorder)
+			.BorderImage(FCoreStyle::Get().GetBrush("Border"))
+			.Content()[
+				SAssignNew(SignalWidgetHolder, SBox)
+			]
 		];
 
 		SelectObject(InArgs._InitSelection);
@@ -38,11 +42,11 @@ public:
 	}
 
 	void SelectObject(UFINSignal* Signal) {
-		SignalWidgetHolder->SetContent(CreateSignalWidget(Signal));
+		SignalWidgetHolder->SetContent(CreateSmallSignalWidget(Signal));
 		OnSelectionChanged.ExecuteIfBound(Signal);
 	}
 
-	TSharedRef<SWidget> CreateSignalWidget(UFINSignal* InSignal) {
+	TSharedRef<SWidget> CreateSmallSignalWidget(UFINSignal* InSignal) {
 		if (InSignal)
 			return SNew(SHorizontalBox)
 			+SHorizontalBox::Slot()[
@@ -69,7 +73,7 @@ public:
 			return InSignal->GetDisplayName().ToString() + TEXT(" ") + Cast<UFINClass>(InSignal->GetOuter())->GetDisplayName().ToString();
 		})
 		.OnGetElementWidget_Lambda([this](UFINSignal* InSignal) {
-			return CreateSignalWidget(InSignal);
+			return CreateSmallSignalWidget(InSignal);
 		})
 		.OnCommited_Lambda([this](UFINSignal* InSignal) {
 			SelectObject(InSignal);

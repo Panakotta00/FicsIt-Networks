@@ -58,6 +58,16 @@ public:
 	 * @return the copied and expanded network trace
 	 */
 	FFINNetworkTrace operator/(UObject* other) const;
+	FFINNetworkTrace append(UObject* other, TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> InStep = nullptr) {
+		if (!InStep.IsValid()) return *this / other;
+		FFINNetworkTrace trace(other);
+
+		UObject* A = Obj;
+		if (!::IsValid(A) || !other) return FFINNetworkTrace(nullptr); // if A is not valid, the network trace will always be not invalid
+		trace.Prev = MakeShared<FFINNetworkTrace>(*this);
+		trace.Step = InStep;
+		return trace;
+	}
 
 	/**
 	 * Returns the referenced object.
@@ -127,6 +137,20 @@ public:
 	 */
 	UObject* GetStartPtr() const;
 
+	/**
+	 * Returns the instance of the previous network trace, essentially exposing the whole trace-path.
+	 */
+	TSharedPtr<const FFINNetworkTrace> GetPrev() const {
+		return Prev;
+	}
+
+	/**
+	 * Returns the currently used step function
+	 */
+	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> GetStep() const {
+		return Step;
+	}
+	
 	/**
 	 * returns if the trace is valid or not
 	 */
