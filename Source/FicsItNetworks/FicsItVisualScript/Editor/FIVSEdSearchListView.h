@@ -63,6 +63,18 @@ public:
 				+SVerticalBox::Slot()
 				.AutoHeight()[
 					SAssignNew(SearchBox, SSearchBox)
+					.OnKeyDownHandler_Lambda([this](const FGeometry&, const FKeyEvent& KeyEvent) {
+						if (KeyEvent.GetKey() == EKeys::Escape) {
+							return FReply::Handled().ClearUserFocus();
+						}
+						if (KeyEvent.GetKey() == EKeys::Enter) {
+							if (ListView->GetNumItemsSelected() > 0) {
+								OnCommited.Execute(ListView->GetSelectedItems()[0]->Element);
+								return FReply::Handled().ClearUserFocus();
+							}
+						}
+						return FReply::Unhandled();
+					})
 					.SelectAllTextWhenFocused(true)
 					.OnTextChanged_Lambda([this](FText InText) {
 						Search.SetSearchText(InText.ToString());
@@ -110,7 +122,7 @@ public:
 	void FilterEntries() {
 		FilteredEntries.Empty();
 		TSharedPtr<FEntry> MostRelevantEntry;
-		int MostRelevantSignificance = TNumericLimits<int>::Max();
+		int MostRelevantSignificance = TNumericLimits<int>::Min();
 		for (T& Element : Elements) {
 			FString SearchableText = OnGetSearchableText.Execute(Element);
 			int Significance;
@@ -125,6 +137,7 @@ public:
 		}
 
 		ListView->RequestListRefresh();
+		ListView->SetItemSelection(MostRelevantEntry, true);
 	}
 };
 

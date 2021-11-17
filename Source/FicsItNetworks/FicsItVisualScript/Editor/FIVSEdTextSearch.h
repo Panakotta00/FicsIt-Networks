@@ -24,7 +24,7 @@ public:
 			KeywordLength += Keyword.Len();
 		}
 		if (OutSignificance) {
-			*OutSignificance = InSearchableText.Len() - KeywordLength;
+			*OutSignificance = TNumericLimits<int>::Max() - FMath::Abs(InSearchableText.Replace(TEXT(" "), TEXT("")).Len() - KeywordLength);
 		}
 		return true;
 	}
