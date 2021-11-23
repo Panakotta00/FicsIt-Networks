@@ -51,12 +51,13 @@ public:
 	
 	/** the visible mesh of the adapter */
 	UPROPERTY()
-	UStaticMeshComponent* ConnectorMesh = nullptr;
+	UFGColoredInstanceMeshProxy* ConnectorMesh = nullptr;
 
 	AFINNetworkAdapter();
 	~AFINNetworkAdapter();
 	
 	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	// End AActor
 
