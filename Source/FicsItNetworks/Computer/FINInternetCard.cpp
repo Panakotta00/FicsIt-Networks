@@ -3,7 +3,7 @@
 #include "HttpModule.h"
 #include "Interfaces/IHttpResponse.h"
 
-FFINInternetCardHttpRequestFuture::FFINInternetCardHttpRequestFuture(TSharedRef<IHttpRequest> InRequest) {
+FFINInternetCardHttpRequestFuture::FFINInternetCardHttpRequestFuture(TSharedRef<IHttpRequest, ESPMode::ThreadSafe> InRequest) {
 	Request = InRequest;
 }
 
@@ -33,7 +33,7 @@ TArray<FFINAnyNetworkValue> FFINInternetCardHttpRequestFuture::GetOutput() const
 }
 
 FFINInternetCardHttpRequestFuture AFINInternetCard::netFunc_request(const FString& InURL, const FString& InMethod, const FString& InData, TArray<FFINAnyNetworkValue> varargs) {
-	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(InURL);
 	Request->SetVerb(InMethod);
 	Request->SetContentAsString(InData);

@@ -11,11 +11,11 @@ USTRUCT()
 struct FFINInternetCardHttpRequestFuture : public FFINFuture {
 	GENERATED_BODY()
 private:
-	TSharedPtr<IHttpRequest> Request;
+	TSharedPtr<IHttpRequest, ESPMode::ThreadSafe> Request;
 
 public:
 	FFINInternetCardHttpRequestFuture() = default;
-	FFINInternetCardHttpRequestFuture(TSharedRef<IHttpRequest> InRequest);
+	FFINInternetCardHttpRequestFuture(TSharedRef<IHttpRequest, ESPMode::ThreadSafe> InRequest);
 	
 	// Begin FFINFuture
 	virtual void Execute() override;

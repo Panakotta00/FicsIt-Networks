@@ -86,7 +86,9 @@ string MemFileStream::read(size_t chars) {
 		return "";
 	}
 	flagEOF = false;
-	return data->substr(pos, chars);
+	string buf = data->substr(pos, chars);
+	pos += buf.length();
+	return buf;
 }
 
 bool MemFileStream::isEOF() {

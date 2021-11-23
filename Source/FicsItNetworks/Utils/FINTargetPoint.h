@@ -1,7 +1,6 @@
 ﻿#pragma once
+#include "WheeledVehicles/FGTargetPoint.h"
 
-#include "FGWheeledVehicle.h"
-#include "FGTargetPoint.h"
 #include "FINTargetPoint.generated.h"
 
 USTRUCT()

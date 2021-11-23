@@ -7,6 +7,7 @@
 #include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FINReflection.h"
 #include "FINSignal.h"
+#include "Buildables/FGBuildableRailroadSignal.h"
 #include "FicsItNetworks/Network/FINHookSubsystem.h"
 #include "Patching/NativeHookManager.h"
 
@@ -16,7 +17,7 @@ UCLASS()
 class FICSITNETWORKS_API UFINStaticReflectionHook : public UFINHook {
 	GENERATED_BODY()
 
-private:
+protected:
 	UPROPERTY()
 	UFINSignal* Signal = nullptr;
 
@@ -110,6 +111,30 @@ public:
 		
 	void Unregister() override {
 		Cast<AFGTrain>(Sender)->mOnSelfDrivingChanged.RemoveDynamic(this, &UFINTrainHook::SelfDrvingUpdate);
+	}
+};
+
+UCLASS()
+class UFINRailroadSignalHook : public UFINStaticReflectionHook {
+	GENERATED_BODY()
+			
+public:
+	UFUNCTION()
+	void AspectChanged(ERailroadSignalAspect Aspect) {
+		Send({(int64)Aspect});
+	}
+	
+	void Register(UObject* sender) override {
+		Super::Register(sender);
+		
+		UFINClass* Class = FFINReflection::Get()->FindClass(Sender->GetClass());
+		Signal = Class->FindFINSignal(TEXT("AspectChanged"));
+		
+		Cast<AFGBuildableRailroadSignal>(sender)->mOnAspectChangedDelegate.AddDynamic(this, &UFINRailroadSignalHook::AspectChanged);
+	}
+		
+	void Unregister() override {
+		Cast<AFGBuildableRailroadSignal>(Sender)->mOnAspectChangedDelegate.RemoveDynamic(this, &UFINRailroadSignalHook::AspectChanged);
 	}
 };
 

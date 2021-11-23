@@ -19,9 +19,9 @@ struct FICSITNETWORKS_API FFINTimeTableStop {
 	FFINNetworkTrace Station;
 
 	UPROPERTY(SaveGame)
-	float Duration = 0.0f;
+	FTrainDockingRuleSet RuleSet;
 
 	operator FTimeTableStop() const {
-		return FTimeTableStop{Cast<AFGBuildableRailroadStation>(*Station)->GetStationIdentifier(), Duration};
+		return FTimeTableStop{Cast<AFGBuildableRailroadStation>(*Station)->GetStationIdentifier(), RuleSet};
 	}
 };

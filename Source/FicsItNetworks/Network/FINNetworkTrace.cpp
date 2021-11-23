@@ -385,10 +385,10 @@ Step(AFGBuildableRailroadSwitchControl, UFGRailroadTrackConnectionComponent, {
 })
 
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadSignal, {
-    return A->GetSignal() == B;
+    return A->GetFacingSignal() == B || A->GetTrailingSignal() == B;
 })
 Step(AFGBuildableRailroadSignal, UFGRailroadTrackConnectionComponent, {
-    return A == B->GetSignal();
+    return A == B->GetFacingSignal() || A == B->GetTrailingSignal();
 })
 
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadStation, {
@@ -407,11 +407,11 @@ Step(AFGBuildableDockingStation, AFGVehicle, {
 
 Step(AFGVehicle, AFINVehicleScanner, {
 	TArray<AActor*> Actors;
-	B->VehicleCollision->GetOverlappingActors(Actors);
+	B->GetOverlappingActors(Actors);
 	return Actors.Contains(A);
 })
 Step(AFINVehicleScanner, AFGVehicle, {
     TArray<AActor*> Actors;
-    A->VehicleCollision->GetOverlappingActors(Actors);
+    A->GetOverlappingActors(Actors);
     return Actors.Contains(B);
 })
