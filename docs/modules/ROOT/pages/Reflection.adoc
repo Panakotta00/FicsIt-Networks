@@ -1423,7 +1423,7 @@ Parameters::
 
 | *Output* `output`
 | Int
-| The index of the output queue you want to transfer the next item to (0 = middle, 1 = left, 2 = right)
+| The index of the output queue you want to transfer the next item to (0 = left, 1 = middle, 2 = right)
 
 |===
 
@@ -1503,7 +1503,7 @@ Parameters::
 
 | *Output* `output`
 | Int
-| The index of the output queue you want to check (0 = middle, 1 = left, 2 = right)
+| The index of the output queue you want to check (0 = left, 1 = middle, 2 = right)
 
 |===
 
@@ -5178,7 +5178,7 @@ Triggers a button press by code.
 // tag::Class-ModuleStopButton-Signals[]
 // tag::Class-ModuleStopButton-Signals-Trigger__title[]
 [#Class-ModuleStopButton-Signals-Trigger]
-===== *Trigger* `Trigger` ()
+===== *Triggers when the button gets pressed.* `Trigger` ()
 // tag::Class-ModuleStopButton-Signals-Trigger[]
 // tag::Class-ModuleStopButton-Signals-Trigger__description[]
 Triggers when the button gets pressed.
@@ -5433,7 +5433,7 @@ Parameters::
 // end::Class-MushroomPushbuttonModule-Funcs-setColor__title[]
 [#Class-MushroomPushbuttonModule-Funcs-trigger]
 // tag::Class-MushroomPushbuttonModule-Funcs-trigger__title[]
-===== *Trigger* `trigger` ()
+===== *Triggers a button press by code.* `trigger` ()
 // tag::Class-MushroomPushbuttonModule-Funcs-trigger[]
 // tag::Class-MushroomPushbuttonModule-Funcs-trigger__description[]
 Triggers a button press by code.
@@ -5458,10 +5458,10 @@ Triggers a button press by code.
 // tag::Class-MushroomPushbuttonModule-Signals[]
 // tag::Class-MushroomPushbuttonModule-Signals-Trigger__title[]
 [#Class-MushroomPushbuttonModule-Signals-Trigger]
-===== *Trigger* `Trigger` ()
+===== *Triggers a button press by code.* `Trigger` ()
 // tag::Class-MushroomPushbuttonModule-Signals-Trigger[]
 // tag::Class-MushroomPushbuttonModule-Signals-Trigger__description[]
-Triggers when the button gets pressed.
+Triggers a button press by code.
 
 // end::Class-MushroomPushbuttonModule-Signals-Trigger__description[]
 // tag::Class-MushroomPushbuttonModule-Signals-Trigger__flags[]
@@ -5546,7 +5546,7 @@ Parameters::
 // end::Class-PushbuttonModule-Funcs-setColor__title[]
 [#Class-PushbuttonModule-Funcs-trigger]
 // tag::Class-PushbuttonModule-Funcs-trigger__title[]
-===== *Trigger* `trigger` ()
+===== *Triggers a button press by code.* `trigger` ()
 // tag::Class-PushbuttonModule-Funcs-trigger[]
 // tag::Class-PushbuttonModule-Funcs-trigger__description[]
 Triggers a button press by code.
@@ -5571,10 +5571,10 @@ Triggers a button press by code.
 // tag::Class-PushbuttonModule-Signals[]
 // tag::Class-PushbuttonModule-Signals-Trigger__title[]
 [#Class-PushbuttonModule-Signals-Trigger]
-===== *Trigger* `Trigger` ()
+===== *Triggers a button press by code.* `Trigger` ()
 // tag::Class-PushbuttonModule-Signals-Trigger[]
 // tag::Class-PushbuttonModule-Signals-Trigger__description[]
-Triggers when the button gets pressed.
+Triggers a button press by code.
 
 // end::Class-PushbuttonModule-Signals-Trigger__description[]
 // tag::Class-PushbuttonModule-Signals-Trigger__flags[]
@@ -6883,6 +6883,230 @@ Parameters::
 // end::Class-NetworkRouter-Funcs__title[]
 // end::Class-NetworkRouter[]
 // end::Class-NetworkRouter__title[]
+// tag::Class-RailroadSignal__title[]
+[#Class-RailroadSignal]
+=== *Railroad Signal* `RailroadSignal`
+// tag::Class-RailroadSignal[]
+// tag::Class-RailroadSignal__parent[]
+[cols = "1,5a"]
+|===
+| Parent
+| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|===
+
+// end::Class-RailroadSignal__parent[]
+// tag::Class-RailroadSignal__description[]
+A train signal to control trains on a track.
+
+// end::Class-RailroadSignal__description[]
+// tag::Class-RailroadSignal-Props__title[]
+[#Class-RailroadSignal-Props]
+==== Properties
+// tag::Class-RailroadSignal-Props[]
+[#Class-RailroadSignal-props-isPathSignal]
+// tag::Class-RailroadSignal-props-isPathSignal__title[]
+===== _Bool_ *Is Path Signal* `isPathSignal`
+// tag::Class-RailroadSignal-props-isPathSignal[]
+// tag::Class-RailroadSignal-props-isPathSignal__description[]
+True if this signal is a path-signal.
+
+// end::Class-RailroadSignal-props-isPathSignal__description[]
+// tag::Class-RailroadSignal-props-isPathSignal__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-RailroadSignal-props-isPathSignal__flags[]
+// end::Class-RailroadSignal-props-isPathSignal[]
+// end::Class-RailroadSignal-props-isPathSignal__title[]
+[#Class-RailroadSignal-props-isBiDirectional]
+// tag::Class-RailroadSignal-props-isBiDirectional__title[]
+===== _Bool_ *Is Bi-Directional* `isBiDirectional`
+// tag::Class-RailroadSignal-props-isBiDirectional[]
+// tag::Class-RailroadSignal-props-isBiDirectional__description[]
+True if this signal is bi-directional. (trains can pass into both directions)
+
+// end::Class-RailroadSignal-props-isBiDirectional__description[]
+// tag::Class-RailroadSignal-props-isBiDirectional__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-RailroadSignal-props-isBiDirectional__flags[]
+// end::Class-RailroadSignal-props-isBiDirectional[]
+// end::Class-RailroadSignal-props-isBiDirectional__title[]
+[#Class-RailroadSignal-props-hasObservedBlock]
+// tag::Class-RailroadSignal-props-hasObservedBlock__title[]
+===== _Bool_ *Has Observed Block* `hasObservedBlock`
+// tag::Class-RailroadSignal-props-hasObservedBlock[]
+// tag::Class-RailroadSignal-props-hasObservedBlock__description[]
+True if this signal is currently observing at least one block.
+
+// end::Class-RailroadSignal-props-hasObservedBlock__description[]
+// tag::Class-RailroadSignal-props-hasObservedBlock__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-RailroadSignal-props-hasObservedBlock__flags[]
+// end::Class-RailroadSignal-props-hasObservedBlock[]
+// end::Class-RailroadSignal-props-hasObservedBlock__title[]
+[#Class-RailroadSignal-props-blockValidation]
+// tag::Class-RailroadSignal-props-blockValidation__title[]
+===== _Int_ *Block Validation* `blockValidation`
+// tag::Class-RailroadSignal-props-blockValidation[]
+// tag::Class-RailroadSignal-props-blockValidation__description[]
+Any error states of the block. +
+0 = Unknown +
+1 = No Error +
+2 = No Exit Signal +
+3 = Contains Loop +
+4 = Contains Mixed Entry Signals
+
+// end::Class-RailroadSignal-props-blockValidation__description[]
+// tag::Class-RailroadSignal-props-blockValidation__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-RailroadSignal-props-blockValidation__flags[]
+// end::Class-RailroadSignal-props-blockValidation[]
+// end::Class-RailroadSignal-props-blockValidation__title[]
+[#Class-RailroadSignal-props-aspect]
+// tag::Class-RailroadSignal-props-aspect__title[]
+===== _Int_ *Aspect* `aspect`
+// tag::Class-RailroadSignal-props-aspect[]
+// tag::Class-RailroadSignal-props-aspect__description[]
+The aspect of the signal. The aspect shows if a train is allowed to pass (clear) or not and if it should dock. +
+0 = Unknown +
+1 = The track is clear and the train is allowed to pass. +
+2 = The next track is Occupied and the train should stop +
+3 = The train should dock.
+
+// end::Class-RailroadSignal-props-aspect__description[]
+// tag::Class-RailroadSignal-props-aspect__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-RailroadSignal-props-aspect__flags[]
+// end::Class-RailroadSignal-props-aspect[]
+// end::Class-RailroadSignal-props-aspect__title[]
+[#Class-RailroadSignal-props-isBlockOccupied]
+// tag::Class-RailroadSignal-props-isBlockOccupied__title[]
+===== _Bool_ *Is Block Occupied* `isBlockOccupied`
+// tag::Class-RailroadSignal-props-isBlockOccupied[]
+// tag::Class-RailroadSignal-props-isBlockOccupied__description[]
+True if the block this signal is observing is currently occupied by a vehicle.
+
+// end::Class-RailroadSignal-props-isBlockOccupied__description[]
+// tag::Class-RailroadSignal-props-isBlockOccupied__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-RailroadSignal-props-isBlockOccupied__flags[]
+// end::Class-RailroadSignal-props-isBlockOccupied[]
+// end::Class-RailroadSignal-props-isBlockOccupied__title[]
+[#Class-RailroadSignal-props-hasBlockReservation]
+// tag::Class-RailroadSignal-props-hasBlockReservation__title[]
+===== _Bool_ *Has Block Reservation* `hasBlockReservation`
+// tag::Class-RailroadSignal-props-hasBlockReservation[]
+// tag::Class-RailroadSignal-props-hasBlockReservation__description[]
+True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.
+
+// end::Class-RailroadSignal-props-hasBlockReservation__description[]
+// tag::Class-RailroadSignal-props-hasBlockReservation__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-RailroadSignal-props-hasBlockReservation__flags[]
+// end::Class-RailroadSignal-props-hasBlockReservation[]
+// end::Class-RailroadSignal-props-hasBlockReservation__title[]
+[#Class-RailroadSignal-props-isPathBlock]
+// tag::Class-RailroadSignal-props-isPathBlock__title[]
+===== _Bool_ *Is Path Block* `isPathBlock`
+// tag::Class-RailroadSignal-props-isPathBlock[]
+// tag::Class-RailroadSignal-props-isPathBlock__description[]
+True if the block this signal is observing is a path-block.
+
+// end::Class-RailroadSignal-props-isPathBlock__description[]
+// tag::Class-RailroadSignal-props-isPathBlock__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-RailroadSignal-props-isPathBlock__flags[]
+// end::Class-RailroadSignal-props-isPathBlock[]
+// end::Class-RailroadSignal-props-isPathBlock__title[]
+// end::Class-RailroadSignal-Props[]
+// end::Class-RailroadSignal-Props__title[]
+// tag::Class-RailroadSignal-Signals__title[]
+[#Class-RailroadSignal-Signals]
+==== Signals
+// tag::Class-RailroadSignal-Signals[]
+// tag::Class-RailroadSignal-Signals-AspectChanged__title[]
+[#Class-RailroadSignal-Signals-AspectChanged]
+===== *Aspect Changed* `AspectChanged` (_Int_ *Aspect* `aspect`)
+// tag::Class-RailroadSignal-Signals-AspectChanged[]
+// tag::Class-RailroadSignal-Signals-AspectChanged__description[]
+Triggers when the aspect of this signal changes.
+
+// end::Class-RailroadSignal-Signals-AspectChanged__description[]
+// tag::Class-RailroadSignal-Signals-AspectChanged__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+// end::Class-RailroadSignal-Signals-AspectChanged__flags[]
+// tag::Class-RailroadSignal-Signals-AspectChanged__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Aspect* `aspect`
+| Int
+| The new aspect of the signal (see 'Get Aspect' for more information)
+
+|===
+
+// end::Class-RailroadSignal-Signals-AspectChanged__params[]
+// end::Class-RailroadSignal-Signals-AspectChanged[]
+// end::Class-RailroadSignal-Signals-AspectChanged__title[]
+// end::Class-RailroadSignal-Signals[]
+// end::Class-RailroadSignal-Signals__title[]
+// end::Class-RailroadSignal[]
+// end::Class-RailroadSignal__title[]
 // tag::Class-RailroadTrack__title[]
 [#Class-RailroadTrack]
 === *Railroad Track* `RailroadTrack`
@@ -7206,6 +7430,153 @@ Return Values::
 // end::Class-Screen-Funcs__title[]
 // end::Class-Screen[]
 // end::Class-Screen__title[]
+// tag::Class-SignBase__title[]
+[#Class-SignBase]
+=== *Sign Base* `SignBase`
+// tag::Class-SignBase[]
+// tag::Class-SignBase__parent[]
+[cols = "1,5a"]
+|===
+| Parent
+| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|===
+
+// end::Class-SignBase__parent[]
+// tag::Class-SignBase__description[]
+The base class for all signs in the game.
+
+// end::Class-SignBase__description[]
+// tag::Class-SignBase-Funcs__title[]
+[#Class-SignBase-Funcs]
+==== Functions
+// tag::Class-SignBase-Funcs[]
+[#Class-SignBase-Funcs-getSignType]
+// tag::Class-SignBase-Funcs-getSignType__title[]
+===== *Get Sign Type* `getSignType` (_Class(xref::Reflection.adoc#Class-SignType[SignType])_ *Descriptor* `descriptor` _out_)
+// tag::Class-SignBase-Funcs-getSignType[]
+// tag::Class-SignBase-Funcs-getSignType__description[]
+Returns the sign type descriptor
+
+// end::Class-SignBase-Funcs-getSignType__description[]
+// tag::Class-SignBase-Funcs-getSignType__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-SignBase-Funcs-getSignType__flags[]
+// tag::Class-SignBase-Funcs-getSignType__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Descriptor* `descriptor`
+| Class(xref::Reflection.adoc#Class-SignType[SignType]) _out_
+| The sign type descriptor
+
+|===
+
+// end::Class-SignBase-Funcs-getSignType__retvals[]
+// end::Class-SignBase-Funcs-getSignType[]
+// end::Class-SignBase-Funcs-getSignType__title[]
+// end::Class-SignBase-Funcs[]
+// end::Class-SignBase-Funcs__title[]
+// end::Class-SignBase[]
+// end::Class-SignBase__title[]
+// tag::Class-WidgetSign__title[]
+[#Class-WidgetSign]
+=== *Widget Sign* `WidgetSign`
+// tag::Class-WidgetSign[]
+// tag::Class-WidgetSign__parent[]
+[cols = "1,5a"]
+|===
+| Parent
+| xref::Reflection.adoc#Class-SignBase[SignBase]
+|===
+
+// end::Class-WidgetSign__parent[]
+// tag::Class-WidgetSign__description[]
+The type of sign that allows you to define layouts, images, texts and colors manually.
+
+// end::Class-WidgetSign__description[]
+// tag::Class-WidgetSign-Funcs__title[]
+[#Class-WidgetSign-Funcs]
+==== Functions
+// tag::Class-WidgetSign-Funcs[]
+[#Class-WidgetSign-Funcs-setPrefabSignData]
+// tag::Class-WidgetSign-Funcs-setPrefabSignData__title[]
+===== *Set Prefab Sign Data* `setPrefabSignData` (_Struct(xref::Reflection.adoc#Struct-PrefabSignData[PrefabSignData])_ *Prefab Sign Data* `prefabSignData`)
+// tag::Class-WidgetSign-Funcs-setPrefabSignData[]
+// tag::Class-WidgetSign-Funcs-setPrefabSignData__description[]
+Sets the prefabg sign data e.g. the user settings like colo and more to define the signs content.
+
+// end::Class-WidgetSign-Funcs-setPrefabSignData__description[]
+// tag::Class-WidgetSign-Funcs-setPrefabSignData__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+// end::Class-WidgetSign-Funcs-setPrefabSignData__flags[]
+// tag::Class-WidgetSign-Funcs-setPrefabSignData__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Prefab Sign Data* `prefabSignData`
+| Struct(xref::Reflection.adoc#Struct-PrefabSignData[PrefabSignData])
+| The new prefab sign data for this sign.
+
+|===
+
+// end::Class-WidgetSign-Funcs-setPrefabSignData__params[]
+// end::Class-WidgetSign-Funcs-setPrefabSignData[]
+// end::Class-WidgetSign-Funcs-setPrefabSignData__title[]
+[#Class-WidgetSign-Funcs-getPrefabSignData]
+// tag::Class-WidgetSign-Funcs-getPrefabSignData__title[]
+===== *Get Prefab Sign Data* `getPrefabSignData` (_Struct(xref::Reflection.adoc#Struct-PrefabSignData[PrefabSignData])_ *Prefab Sign Data* `prefabSignData` _out_)
+// tag::Class-WidgetSign-Funcs-getPrefabSignData[]
+// tag::Class-WidgetSign-Funcs-getPrefabSignData__description[]
+Returns the prefabg sign data e.g. the user settings like colo and more to define the signs content.
+
+// end::Class-WidgetSign-Funcs-getPrefabSignData__description[]
+// tag::Class-WidgetSign-Funcs-getPrefabSignData__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-WidgetSign-Funcs-getPrefabSignData__flags[]
+// tag::Class-WidgetSign-Funcs-getPrefabSignData__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Prefab Sign Data* `prefabSignData`
+| Struct(xref::Reflection.adoc#Struct-PrefabSignData[PrefabSignData]) _out_
+| The new prefab sign data for this sign.
+
+|===
+
+// end::Class-WidgetSign-Funcs-getPrefabSignData__retvals[]
+// end::Class-WidgetSign-Funcs-getPrefabSignData[]
+// end::Class-WidgetSign-Funcs-getPrefabSignData__title[]
+// end::Class-WidgetSign-Funcs[]
+// end::Class-WidgetSign-Funcs__title[]
+// end::Class-WidgetSign[]
+// end::Class-WidgetSign__title[]
 // tag::Class-SpeakerPole__title[]
 [#Class-SpeakerPole]
 === *Speaker Pole* `SpeakerPole`
@@ -7491,7 +7862,7 @@ Return Values::
 // tag::Class-Speakers_C-Signals[]
 // tag::Class-Speakers_C-Signals-SpeakerSetting__title[]
 [#Class-Speakers_C-Signals-SpeakerSetting]
-===== *SpeakerSetting* `SpeakerSetting` (_Int_ *Setting* `Setting`, _Float_ *New* `New`, _Float_ *Old* `Old`)
+===== *SpeakerSetting* `SpeakerSetting` (_Int_ *Setting* `Setting`, _Float_ *New* `New`, _Float_ *OLD* `OLD`)
 // tag::Class-Speakers_C-Signals-SpeakerSetting[]
 // tag::Class-Speakers_C-Signals-SpeakerSetting__description[]
 
@@ -7521,7 +7892,7 @@ Parameters::
 | Float
 | 
 
-| *Old* `Old`
+| *OLD* `OLD`
 | Float
 | 
 
@@ -7753,6 +8124,232 @@ Parameters::
 // end::Class-VehicleScanner-Signals__title[]
 // end::Class-VehicleScanner[]
 // end::Class-VehicleScanner__title[]
+// tag::Class-TargetList__title[]
+[#Class-TargetList]
+=== *Target List* `TargetList`
+// tag::Class-TargetList[]
+// tag::Class-TargetList__parent[]
+[cols = "1,5a"]
+|===
+| Parent
+| xref::Reflection.adoc#Class-Actor[Actor]
+|===
+
+// end::Class-TargetList__parent[]
+// tag::Class-TargetList__description[]
+The list of targets/path-waypoints a autonomous vehicle can drive
+
+// end::Class-TargetList__description[]
+// tag::Class-TargetList-Funcs__title[]
+[#Class-TargetList-Funcs]
+==== Functions
+// tag::Class-TargetList-Funcs[]
+[#Class-TargetList-Funcs-getTarget]
+// tag::Class-TargetList-Funcs-getTarget__title[]
+===== *Get Target* `getTarget` (_Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])_ *Target* `target` _out_)
+// tag::Class-TargetList-Funcs-getTarget[]
+// tag::Class-TargetList-Funcs-getTarget__description[]
+Returns the target struct at with the given index in the target list.
+
+// end::Class-TargetList-Funcs-getTarget__description[]
+// tag::Class-TargetList-Funcs-getTarget__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-TargetList-Funcs-getTarget__flags[]
+// tag::Class-TargetList-Funcs-getTarget__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Target* `target`
+| Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint]) _out_
+| The TargetPoint-Struct with the given index in the target list.
+
+|===
+
+// end::Class-TargetList-Funcs-getTarget__retvals[]
+// end::Class-TargetList-Funcs-getTarget[]
+// end::Class-TargetList-Funcs-getTarget__title[]
+[#Class-TargetList-Funcs-removeTarget]
+// tag::Class-TargetList-Funcs-removeTarget__title[]
+===== *Remove Target* `removeTarget` (_Int_ *Index* `index`)
+// tag::Class-TargetList-Funcs-removeTarget[]
+// tag::Class-TargetList-Funcs-removeTarget__description[]
+Removes the target with the given index from the target list.
+
+// end::Class-TargetList-Funcs-removeTarget__description[]
+// tag::Class-TargetList-Funcs-removeTarget__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-TargetList-Funcs-removeTarget__flags[]
+// tag::Class-TargetList-Funcs-removeTarget__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the target point you want to remove from the target list.
+
+|===
+
+// end::Class-TargetList-Funcs-removeTarget__params[]
+// end::Class-TargetList-Funcs-removeTarget[]
+// end::Class-TargetList-Funcs-removeTarget__title[]
+[#Class-TargetList-Funcs-addTarget]
+// tag::Class-TargetList-Funcs-addTarget__title[]
+===== *Add Target* `addTarget` (_Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])_ *Target* `target`)
+// tag::Class-TargetList-Funcs-addTarget[]
+// tag::Class-TargetList-Funcs-addTarget__description[]
+Adds the given target point struct at the end of the target list.
+
+// end::Class-TargetList-Funcs-addTarget__description[]
+// tag::Class-TargetList-Funcs-addTarget__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-TargetList-Funcs-addTarget__flags[]
+// tag::Class-TargetList-Funcs-addTarget__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Target* `target`
+| Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])
+| The target point you want to add.
+
+|===
+
+// end::Class-TargetList-Funcs-addTarget__params[]
+// end::Class-TargetList-Funcs-addTarget[]
+// end::Class-TargetList-Funcs-addTarget__title[]
+[#Class-TargetList-Funcs-setTarget]
+// tag::Class-TargetList-Funcs-setTarget__title[]
+===== *Set Target* `setTarget` (_Int_ *Index* `index`, _Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])_ *Target* `target`)
+// tag::Class-TargetList-Funcs-setTarget[]
+// tag::Class-TargetList-Funcs-setTarget__description[]
+Allows to set the target at the given index to the given target point struct.
+
+// end::Class-TargetList-Funcs-setTarget__description[]
+// tag::Class-TargetList-Funcs-setTarget__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-TargetList-Funcs-setTarget__flags[]
+// tag::Class-TargetList-Funcs-setTarget__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Index* `index`
+| Int
+| The index of the target point you want to update with the given target point struct.
+
+| *Target* `target`
+| Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])
+| The new target point struct for the given index.
+
+|===
+
+// end::Class-TargetList-Funcs-setTarget__params[]
+// end::Class-TargetList-Funcs-setTarget[]
+// end::Class-TargetList-Funcs-setTarget__title[]
+[#Class-TargetList-Funcs-getTargets]
+// tag::Class-TargetList-Funcs-getTargets__title[]
+===== *Get Targets* `getTargets` (_Array(Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint]))_ *Targets* `targets` _out_)
+// tag::Class-TargetList-Funcs-getTargets[]
+// tag::Class-TargetList-Funcs-getTargets__description[]
+Returns a list of target point structs of all the targets in the target point list.
+
+// end::Class-TargetList-Funcs-getTargets__description[]
+// tag::Class-TargetList-Funcs-getTargets__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-TargetList-Funcs-getTargets__flags[]
+// tag::Class-TargetList-Funcs-getTargets__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Targets* `targets`
+| Array(Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])) _out_
+| A list of target point structs containing all the targets of the target point list.
+
+|===
+
+// end::Class-TargetList-Funcs-getTargets__retvals[]
+// end::Class-TargetList-Funcs-getTargets[]
+// end::Class-TargetList-Funcs-getTargets__title[]
+[#Class-TargetList-Funcs-setTargets]
+// tag::Class-TargetList-Funcs-setTargets__title[]
+===== *Set Targets* `setTargets` (_Array(Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint]))_ *Targets* `targets`)
+// tag::Class-TargetList-Funcs-setTargets[]
+// tag::Class-TargetList-Funcs-setTargets__description[]
+Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.
+
+// end::Class-TargetList-Funcs-setTargets__description[]
+// tag::Class-TargetList-Funcs-setTargets__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+// end::Class-TargetList-Funcs-setTargets__flags[]
+// tag::Class-TargetList-Funcs-setTargets__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Targets* `targets`
+| Array(Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint]))
+| A list of target point structs you want to place into the empty target point list.
+
+|===
+
+// end::Class-TargetList-Funcs-setTargets__params[]
+// end::Class-TargetList-Funcs-setTargets[]
+// end::Class-TargetList-Funcs-setTargets__title[]
+// end::Class-TargetList-Funcs[]
+// end::Class-TargetList-Funcs__title[]
+// end::Class-TargetList[]
+// end::Class-TargetList__title[]
 // tag::Class-TimeTable__title[]
 [#Class-TimeTable]
 === *Time Table* `TimeTable`
@@ -7800,7 +8397,7 @@ The current number of stops in the time table.
 // tag::Class-TimeTable-Funcs[]
 [#Class-TimeTable-Funcs-addStop]
 // tag::Class-TimeTable-Funcs-addStop__title[]
-===== *Add Stop* `addStop` (_Int_ *Index* `index`, _Trace(xref::Reflection.adoc#Class-RailroadStation[RailroadStation])_ *Station* `station`, _Float_ *Duration* `duration`, _Bool_ *Added* `added` _out_)
+===== *Add Stop* `addStop` (_Int_ *Index* `index`, _Trace(xref::Reflection.adoc#Class-RailroadStation[RailroadStation])_ *Station* `station`, _Struct(xref::Reflection.adoc#Struct-TrainDockingRuleSet[TrainDockingRuleSet])_ *Rule Set* `ruleSet`, _Bool_ *Added* `added` _out_)
 // tag::Class-TimeTable-Funcs-addStop[]
 // tag::Class-TimeTable-Funcs-addStop__description[]
 Adds a stop to the time table.
@@ -7830,9 +8427,9 @@ Parameters::
 | Trace(xref::Reflection.adoc#Class-RailroadStation[RailroadStation])
 | The railroad station at which the stop should happen.
 
-| *Duration* `duration`
-| Float
-| The duration how long the train should stop at the station.
+| *Rule Set* `ruleSet`
+| Struct(xref::Reflection.adoc#Struct-TrainDockingRuleSet[TrainDockingRuleSet])
+| The docking rule set that descibes when the train will depart from the station.
 
 |===
 
@@ -9190,25 +9787,6 @@ True if the vehicle is currently in the air.
 // end::Class-WheeledVehicle-props-isInAir__flags[]
 // end::Class-WheeledVehicle-props-isInAir[]
 // end::Class-WheeledVehicle-props-isInAir__title[]
-[#Class-WheeledVehicle-props-wantsToMove]
-// tag::Class-WheeledVehicle-props-wantsToMove__title[]
-===== _Bool_ *Wants To Move* `wantsToMove`
-// tag::Class-WheeledVehicle-props-wantsToMove[]
-// tag::Class-WheeledVehicle-props-wantsToMove__description[]
-True if the vehicle currently wants to move.
-
-// end::Class-WheeledVehicle-props-wantsToMove__description[]
-// tag::Class-WheeledVehicle-props-wantsToMove__flags[]
-[cols = "1,5a"]
-|===
-| Flags
-| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
-+++
-|===
-
-// end::Class-WheeledVehicle-props-wantsToMove__flags[]
-// end::Class-WheeledVehicle-props-wantsToMove[]
-// end::Class-WheeledVehicle-props-wantsToMove__title[]
 [#Class-WheeledVehicle-props-isDrifting]
 // tag::Class-WheeledVehicle-props-isDrifting__title[]
 ===== _Bool_ *Is Drifting* `isDrifting`
@@ -9432,15 +10010,15 @@ Parameters::
 // end::Class-WheeledVehicle-Funcs-setCurrentTarget__params[]
 // end::Class-WheeledVehicle-Funcs-setCurrentTarget[]
 // end::Class-WheeledVehicle-Funcs-setCurrentTarget__title[]
-[#Class-WheeledVehicle-Funcs-getTarget]
-// tag::Class-WheeledVehicle-Funcs-getTarget__title[]
-===== *Get Target* `getTarget` (_Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])_ *Target* `target` _out_)
-// tag::Class-WheeledVehicle-Funcs-getTarget[]
-// tag::Class-WheeledVehicle-Funcs-getTarget__description[]
-Returns the target struct at with the given index in the target list.
+[#Class-WheeledVehicle-Funcs-getTargetList]
+// tag::Class-WheeledVehicle-Funcs-getTargetList__title[]
+===== *Get Target List* `getTargetList` (_Trace(xref::Reflection.adoc#Class-TargetList[TargetList])_ *Target List* `targetList` _out_)
+// tag::Class-WheeledVehicle-Funcs-getTargetList[]
+// tag::Class-WheeledVehicle-Funcs-getTargetList__description[]
+Returns the list of targets/path waypoints.
 
-// end::Class-WheeledVehicle-Funcs-getTarget__description[]
-// tag::Class-WheeledVehicle-Funcs-getTarget__flags[]
+// end::Class-WheeledVehicle-Funcs-getTargetList__description[]
+// tag::Class-WheeledVehicle-Funcs-getTargetList__flags[]
 [cols = "1,5a"]
 |===
 | Flags
@@ -9448,211 +10026,23 @@ Returns the target struct at with the given index in the target list.
 +++
 |===
 
-// end::Class-WheeledVehicle-Funcs-getTarget__flags[]
-// tag::Class-WheeledVehicle-Funcs-getTarget__retvals[]
+// end::Class-WheeledVehicle-Funcs-getTargetList__flags[]
+// tag::Class-WheeledVehicle-Funcs-getTargetList__retvals[]
 Return Values::
 +
 [%header,cols="1,1,4a"]
 |===
 |Name |Type |Description
 
-| *Target* `target`
-| Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint]) _out_
-| The TargetPoint-Struct with the given index in the target list.
+| *Target List* `targetList`
+| Trace(xref::Reflection.adoc#Class-TargetList[TargetList]) _out_
+| The list of targets/path-waypoints.
 
 |===
 
-// end::Class-WheeledVehicle-Funcs-getTarget__retvals[]
-// end::Class-WheeledVehicle-Funcs-getTarget[]
-// end::Class-WheeledVehicle-Funcs-getTarget__title[]
-[#Class-WheeledVehicle-Funcs-removeTarget]
-// tag::Class-WheeledVehicle-Funcs-removeTarget__title[]
-===== *Remove Target* `removeTarget` (_Int_ *Index* `index`)
-// tag::Class-WheeledVehicle-Funcs-removeTarget[]
-// tag::Class-WheeledVehicle-Funcs-removeTarget__description[]
-Removes the target with the given index from the target list.
-
-// end::Class-WheeledVehicle-Funcs-removeTarget__description[]
-// tag::Class-WheeledVehicle-Funcs-removeTarget__flags[]
-[cols = "1,5a"]
-|===
-| Flags
-| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
-+++
-|===
-
-// end::Class-WheeledVehicle-Funcs-removeTarget__flags[]
-// tag::Class-WheeledVehicle-Funcs-removeTarget__params[]
-Parameters::
-+
-[%header,cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-| *Index* `index`
-| Int
-| The index of the target point you want to remove from the target list.
-
-|===
-
-// end::Class-WheeledVehicle-Funcs-removeTarget__params[]
-// end::Class-WheeledVehicle-Funcs-removeTarget[]
-// end::Class-WheeledVehicle-Funcs-removeTarget__title[]
-[#Class-WheeledVehicle-Funcs-addTarget]
-// tag::Class-WheeledVehicle-Funcs-addTarget__title[]
-===== *Add Target* `addTarget` (_Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])_ *Target* `target`)
-// tag::Class-WheeledVehicle-Funcs-addTarget[]
-// tag::Class-WheeledVehicle-Funcs-addTarget__description[]
-Adds the given target point struct at the end of the target list.
-
-// end::Class-WheeledVehicle-Funcs-addTarget__description[]
-// tag::Class-WheeledVehicle-Funcs-addTarget__flags[]
-[cols = "1,5a"]
-|===
-| Flags
-| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
-+++
-|===
-
-// end::Class-WheeledVehicle-Funcs-addTarget__flags[]
-// tag::Class-WheeledVehicle-Funcs-addTarget__params[]
-Parameters::
-+
-[%header,cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-| *Target* `target`
-| Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])
-| The target point you want to add.
-
-|===
-
-// end::Class-WheeledVehicle-Funcs-addTarget__params[]
-// end::Class-WheeledVehicle-Funcs-addTarget[]
-// end::Class-WheeledVehicle-Funcs-addTarget__title[]
-[#Class-WheeledVehicle-Funcs-setTarget]
-// tag::Class-WheeledVehicle-Funcs-setTarget__title[]
-===== *Set Target* `setTarget` (_Int_ *Index* `index`, _Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])_ *Target* `target`)
-// tag::Class-WheeledVehicle-Funcs-setTarget[]
-// tag::Class-WheeledVehicle-Funcs-setTarget__description[]
-Allows to set the target at the given index to the given target point struct.
-
-// end::Class-WheeledVehicle-Funcs-setTarget__description[]
-// tag::Class-WheeledVehicle-Funcs-setTarget__flags[]
-[cols = "1,5a"]
-|===
-| Flags
-| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
-+++
-|===
-
-// end::Class-WheeledVehicle-Funcs-setTarget__flags[]
-// tag::Class-WheeledVehicle-Funcs-setTarget__params[]
-Parameters::
-+
-[%header,cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-| *Index* `index`
-| Int
-| The index of the target point you want to update with the given target point struct.
-
-| *Target* `target`
-| Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])
-| The new target point struct for the given index.
-
-|===
-
-// end::Class-WheeledVehicle-Funcs-setTarget__params[]
-// end::Class-WheeledVehicle-Funcs-setTarget[]
-// end::Class-WheeledVehicle-Funcs-setTarget__title[]
-[#Class-WheeledVehicle-Funcs-clearTargets]
-// tag::Class-WheeledVehicle-Funcs-clearTargets__title[]
-===== *Clear Targets* `clearTargets` ()
-// tag::Class-WheeledVehicle-Funcs-clearTargets[]
-// tag::Class-WheeledVehicle-Funcs-clearTargets__description[]
-Removes all targets from the target point list.
-
-// end::Class-WheeledVehicle-Funcs-clearTargets__description[]
-// tag::Class-WheeledVehicle-Funcs-clearTargets__flags[]
-[cols = "1,5a"]
-|===
-| Flags
-| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
-+++
-|===
-
-// end::Class-WheeledVehicle-Funcs-clearTargets__flags[]
-// end::Class-WheeledVehicle-Funcs-clearTargets[]
-// end::Class-WheeledVehicle-Funcs-clearTargets__title[]
-[#Class-WheeledVehicle-Funcs-getTargets]
-// tag::Class-WheeledVehicle-Funcs-getTargets__title[]
-===== *Get Targets* `getTargets` (_Array(Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint]))_ *Targets* `targets` _out_)
-// tag::Class-WheeledVehicle-Funcs-getTargets[]
-// tag::Class-WheeledVehicle-Funcs-getTargets__description[]
-Returns a list of target point structs of all the targets in the target point list.
-
-// end::Class-WheeledVehicle-Funcs-getTargets__description[]
-// tag::Class-WheeledVehicle-Funcs-getTargets__flags[]
-[cols = "1,5a"]
-|===
-| Flags
-| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
-+++
-|===
-
-// end::Class-WheeledVehicle-Funcs-getTargets__flags[]
-// tag::Class-WheeledVehicle-Funcs-getTargets__retvals[]
-Return Values::
-+
-[%header,cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-| *Targets* `targets`
-| Array(Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint])) _out_
-| A list of target point structs containing all the targets of the target point list.
-
-|===
-
-// end::Class-WheeledVehicle-Funcs-getTargets__retvals[]
-// end::Class-WheeledVehicle-Funcs-getTargets[]
-// end::Class-WheeledVehicle-Funcs-getTargets__title[]
-[#Class-WheeledVehicle-Funcs-setTargets]
-// tag::Class-WheeledVehicle-Funcs-setTargets__title[]
-===== *Set Targets* `setTargets` (_Array(Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint]))_ *Targets* `targets`)
-// tag::Class-WheeledVehicle-Funcs-setTargets[]
-// tag::Class-WheeledVehicle-Funcs-setTargets__description[]
-Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.
-
-// end::Class-WheeledVehicle-Funcs-setTargets__description[]
-// tag::Class-WheeledVehicle-Funcs-setTargets__flags[]
-[cols = "1,5a"]
-|===
-| Flags
-| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
-+++
-|===
-
-// end::Class-WheeledVehicle-Funcs-setTargets__flags[]
-// tag::Class-WheeledVehicle-Funcs-setTargets__params[]
-Parameters::
-+
-[%header,cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-| *Targets* `targets`
-| Array(Struct(xref::Reflection.adoc#Struct-TargetPoint[TargetPoint]))
-| A list of target point structs you want to place into the empty target point list.
-
-|===
-
-// end::Class-WheeledVehicle-Funcs-setTargets__params[]
-// end::Class-WheeledVehicle-Funcs-setTargets[]
-// end::Class-WheeledVehicle-Funcs-setTargets__title[]
+// end::Class-WheeledVehicle-Funcs-getTargetList__retvals[]
+// end::Class-WheeledVehicle-Funcs-getTargetList[]
+// end::Class-WheeledVehicle-Funcs-getTargetList__title[]
 // end::Class-WheeledVehicle-Funcs[]
 // end::Class-WheeledVehicle-Funcs__title[]
 // end::Class-WheeledVehicle[]
@@ -11003,15 +11393,15 @@ Return Values::
 // end::Class-RailroadTrackConnection-Funcs-getStation__retvals[]
 // end::Class-RailroadTrackConnection-Funcs-getStation[]
 // end::Class-RailroadTrackConnection-Funcs-getStation__title[]
-[#Class-RailroadTrackConnection-Funcs-getSignal]
-// tag::Class-RailroadTrackConnection-Funcs-getSignal__title[]
-===== *Get Signal* `getSignal` (_Trace(xref::Reflection.adoc#Class-Actor[FGBuildableRailroadSignal])_ *Signal* `signal` _out_)
-// tag::Class-RailroadTrackConnection-Funcs-getSignal[]
-// tag::Class-RailroadTrackConnection-Funcs-getSignal__description[]
-Returns the signal of which this connection is part of.
+[#Class-RailroadTrackConnection-Funcs-getFacingSignal]
+// tag::Class-RailroadTrackConnection-Funcs-getFacingSignal__title[]
+===== *Get Facing Signal* `getFacingSignal` (_Trace(xref::Reflection.adoc#Class-RailroadSignal[RailroadSignal])_ *Signal* `signal` _out_)
+// tag::Class-RailroadTrackConnection-Funcs-getFacingSignal[]
+// tag::Class-RailroadTrackConnection-Funcs-getFacingSignal__description[]
+Returns the signal this connection is facing to.
 
-// end::Class-RailroadTrackConnection-Funcs-getSignal__description[]
-// tag::Class-RailroadTrackConnection-Funcs-getSignal__flags[]
+// end::Class-RailroadTrackConnection-Funcs-getFacingSignal__description[]
+// tag::Class-RailroadTrackConnection-Funcs-getFacingSignal__flags[]
 [cols = "1,5a"]
 |===
 | Flags
@@ -11019,8 +11409,8 @@ Returns the signal of which this connection is part of.
 +++
 |===
 
-// end::Class-RailroadTrackConnection-Funcs-getSignal__flags[]
-// tag::Class-RailroadTrackConnection-Funcs-getSignal__retvals[]
+// end::Class-RailroadTrackConnection-Funcs-getFacingSignal__flags[]
+// tag::Class-RailroadTrackConnection-Funcs-getFacingSignal__retvals[]
 Return Values::
 +
 [%header,cols="1,1,4a"]
@@ -11028,14 +11418,47 @@ Return Values::
 |Name |Type |Description
 
 | *Signal* `signal`
-| Trace(xref::Reflection.adoc#Class-Actor[FGBuildableRailroadSignal]) _out_
-| The signal of which this connection is part of.
+| Trace(xref::Reflection.adoc#Class-RailroadSignal[RailroadSignal]) _out_
+| The signal this connection is facing.
 
 |===
 
-// end::Class-RailroadTrackConnection-Funcs-getSignal__retvals[]
-// end::Class-RailroadTrackConnection-Funcs-getSignal[]
-// end::Class-RailroadTrackConnection-Funcs-getSignal__title[]
+// end::Class-RailroadTrackConnection-Funcs-getFacingSignal__retvals[]
+// end::Class-RailroadTrackConnection-Funcs-getFacingSignal[]
+// end::Class-RailroadTrackConnection-Funcs-getFacingSignal__title[]
+[#Class-RailroadTrackConnection-Funcs-getTrailingSignal]
+// tag::Class-RailroadTrackConnection-Funcs-getTrailingSignal__title[]
+===== *Get Trailing Signal* `getTrailingSignal` (_Trace(xref::Reflection.adoc#Class-RailroadSignal[RailroadSignal])_ *Signal* `signal` _out_)
+// tag::Class-RailroadTrackConnection-Funcs-getTrailingSignal[]
+// tag::Class-RailroadTrackConnection-Funcs-getTrailingSignal__description[]
+Returns the signal this connection is trailing from.
+
+// end::Class-RailroadTrackConnection-Funcs-getTrailingSignal__description[]
+// tag::Class-RailroadTrackConnection-Funcs-getTrailingSignal__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-RailroadTrackConnection-Funcs-getTrailingSignal__flags[]
+// tag::Class-RailroadTrackConnection-Funcs-getTrailingSignal__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Signal* `signal`
+| Trace(xref::Reflection.adoc#Class-RailroadSignal[RailroadSignal]) _out_
+| The signal this connection is trailing.
+
+|===
+
+// end::Class-RailroadTrackConnection-Funcs-getTrailingSignal__retvals[]
+// end::Class-RailroadTrackConnection-Funcs-getTrailingSignal[]
+// end::Class-RailroadTrackConnection-Funcs-getTrailingSignal__title[]
 [#Class-RailroadTrackConnection-Funcs-getOpposite]
 // tag::Class-RailroadTrackConnection-Funcs-getOpposite__title[]
 ===== *Get Opposite* `getOpposite` (_Trace(xref::Reflection.adoc#Class-RailroadTrackConnection[RailroadTrackConnection])_ *Opposite* `opposite` _out_)
@@ -13540,6 +13963,195 @@ Return Values::
 // end::Class-Class-Funcs__title[]
 // end::Class-Class[]
 // end::Class-Class__title[]
+// tag::Class-SignType__title[]
+[#Class-SignType]
+=== *Sign Type* `SignType`
+// tag::Class-SignType[]
+// tag::Class-SignType__parent[]
+[cols = "1,5a"]
+|===
+| Parent
+| xref::Reflection.adoc#Class-Object[Object]
+|===
+
+// end::Class-SignType__parent[]
+// tag::Class-SignType__description[]
+Describes the type of a sign.
+
+// end::Class-SignType__description[]
+// tag::Class-SignType-Props__title[]
+[#Class-SignType-Props]
+==== Properties
+// tag::Class-SignType-Props[]
+[#Class-SignType_Class-props-dimensions]
+// tag::Class-SignType_Class-props-dimensions__title[]
+===== _Struct(xref::Reflection.adoc#Struct-Vector2D[Vector2D])_ *Dimensions* `dimensions`
+// tag::Class-SignType_Class-props-dimensions[]
+// tag::Class-SignType_Class-props-dimensions__description[]
+The canvas dimensions of this sign.
+
+// end::Class-SignType_Class-props-dimensions__description[]
+// tag::Class-SignType_Class-props-dimensions__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassProp</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#e59445'><i>ReadOnly</i></span> 
++++
+|===
+
+// end::Class-SignType_Class-props-dimensions__flags[]
+// end::Class-SignType_Class-props-dimensions[]
+// end::Class-SignType_Class-props-dimensions__title[]
+// end::Class-SignType-Props[]
+// end::Class-SignType-Props__title[]
+// tag::Class-SignType-Funcs__title[]
+[#Class-SignType-Funcs]
+==== Functions
+// tag::Class-SignType-Funcs[]
+[#Class-SignType_Class-Funcs-getColors]
+// tag::Class-SignType_Class-Funcs-getColors__title[]
+===== *Get Colors* `getColors` (_Struct(xref::Reflection.adoc#Struct-Color[Color])_ *Foreground* `foreground` _out_, _Struct(xref::Reflection.adoc#Struct-Color[Color])_ *Background* `background` _out_, _Struct(xref::Reflection.adoc#Struct-Color[Color])_ *Auxiliary* `auxiliary` _out_)
+// tag::Class-SignType_Class-Funcs-getColors[]
+// tag::Class-SignType_Class-Funcs-getColors__description[]
+Returns the default foreground/background/auxiliary colors of this sign type.
+
+// end::Class-SignType_Class-Funcs-getColors__description[]
+// tag::Class-SignType_Class-Funcs-getColors__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassFunc</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-SignType_Class-Funcs-getColors__flags[]
+// tag::Class-SignType_Class-Funcs-getColors__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Foreground* `foreground`
+| Struct(xref::Reflection.adoc#Struct-Color[Color]) _out_
+| The foreground color
+
+| *Background* `background`
+| Struct(xref::Reflection.adoc#Struct-Color[Color]) _out_
+| The background color
+
+| *Auxiliary* `auxiliary`
+| Struct(xref::Reflection.adoc#Struct-Color[Color]) _out_
+| The auxiliary color
+
+|===
+
+// end::Class-SignType_Class-Funcs-getColors__retvals[]
+// end::Class-SignType_Class-Funcs-getColors[]
+// end::Class-SignType_Class-Funcs-getColors__title[]
+[#Class-SignType_Class-Funcs-getPrefabs]
+// tag::Class-SignType_Class-Funcs-getPrefabs__title[]
+===== *Get Prefabs* `getPrefabs` (_Array(Class(xref::Reflection.adoc#Class-Object[SignPrefab]))_ *Prefabs* `prefabs` _out_)
+// tag::Class-SignType_Class-Funcs-getPrefabs[]
+// tag::Class-SignType_Class-Funcs-getPrefabs__description[]
+Returns a list of all sign prefabs this sign can use.
+
+// end::Class-SignType_Class-Funcs-getPrefabs__description[]
+// tag::Class-SignType_Class-Funcs-getPrefabs__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassFunc</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-SignType_Class-Funcs-getPrefabs__flags[]
+// tag::Class-SignType_Class-Funcs-getPrefabs__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Prefabs* `prefabs`
+| Array(Class(xref::Reflection.adoc#Class-Object[SignPrefab])) _out_
+| The sign prefabs this sign can use
+
+|===
+
+// end::Class-SignType_Class-Funcs-getPrefabs__retvals[]
+// end::Class-SignType_Class-Funcs-getPrefabs[]
+// end::Class-SignType_Class-Funcs-getPrefabs__title[]
+[#Class-SignType_Class-Funcs-getTextElements]
+// tag::Class-SignType_Class-Funcs-getTextElements__title[]
+===== *Get Text Elements* `getTextElements` (_Array(String)_ *Text Elements Default Values* `textElementsDefaultValues` _out_)
+// tag::Class-SignType_Class-Funcs-getTextElements[]
+// tag::Class-SignType_Class-Funcs-getTextElements__description[]
+Returns a list of element names and their default text values.
+
+// end::Class-SignType_Class-Funcs-getTextElements__description[]
+// tag::Class-SignType_Class-Funcs-getTextElements__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassFunc</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-SignType_Class-Funcs-getTextElements__flags[]
+// tag::Class-SignType_Class-Funcs-getTextElements__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Text Elements Default Values* `textElementsDefaultValues`
+| Array(String) _out_
+| A list of default values for the text elements of this type.
+
+|===
+
+// end::Class-SignType_Class-Funcs-getTextElements__retvals[]
+// end::Class-SignType_Class-Funcs-getTextElements[]
+// end::Class-SignType_Class-Funcs-getTextElements__title[]
+[#Class-SignType_Class-Funcs-getIconElements]
+// tag::Class-SignType_Class-Funcs-getIconElements__title[]
+===== *Get Icon Elements* `getIconElements` (_Array(Object(xref::Reflection.adoc#Class-Object[Object]))_ *Icon Elements Default Values* `iconElementsDefaultValues` _out_)
+// tag::Class-SignType_Class-Funcs-getIconElements[]
+// tag::Class-SignType_Class-Funcs-getIconElements__description[]
+Returns a list of element names and their default icon values.
+
+// end::Class-SignType_Class-Funcs-getIconElements__description[]
+// tag::Class-SignType_Class-Funcs-getIconElements__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#5dafc5'><i>ClassFunc</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-SignType_Class-Funcs-getIconElements__flags[]
+// tag::Class-SignType_Class-Funcs-getIconElements__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Icon Elements Default Values* `iconElementsDefaultValues`
+| Array(Object(xref::Reflection.adoc#Class-Object[Object])) _out_
+| A list of default values for the icon elements of this type.
+
+|===
+
+// end::Class-SignType_Class-Funcs-getIconElements__retvals[]
+// end::Class-SignType_Class-Funcs-getIconElements[]
+// end::Class-SignType_Class-Funcs-getIconElements__title[]
+// end::Class-SignType-Funcs[]
+// end::Class-SignType-Funcs__title[]
+// end::Class-SignType[]
+// end::Class-SignType__title[]
 == Structs
 // tag::Struct-Color__title[]
 [#Struct-Color]
@@ -14249,6 +14861,435 @@ The item information of this stack.
 // end::Struct-ItemStack__Props[]
 // end::Struct-ItemStack[]
 // end::Struct-ItemStack__title[]
+// tag::Struct-PrefabSignData__title[]
+[#Struct-PrefabSignData]
+=== *Prefab Sign Data* `PrefabSignData`
+// tag::Struct-PrefabSignData[]
+// tag::Struct-PrefabSignData__description[]
+This structure stores all data that defines what a sign displays.
+
+// end::Struct-PrefabSignData__description[]
+// tag::Struct-PrefabSignData__Prop[]
+[#Struct-PrefabSignData-Props]
+==== Properties
+[#Struct-PrefabSignData-props-layout]
+// tag::Struct-PrefabSignData-props-layout__title[]
+===== _Class(xref::Reflection.adoc#Class-Object[Object])_ *Layout* `layout`
+// tag::Struct-PrefabSignData-props-layout[]
+// tag::Struct-PrefabSignData-props-layout__description[]
+The object that actually displayes the layout
+
+// end::Struct-PrefabSignData-props-layout__description[]
+// tag::Struct-PrefabSignData-props-layout__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-props-layout__flags[]
+// end::Struct-PrefabSignData-props-layout[]
+// end::Struct-PrefabSignData-props-layout__title[]
+[#Struct-PrefabSignData-props-foreground]
+// tag::Struct-PrefabSignData-props-foreground__title[]
+===== _Struct(xref::Reflection.adoc#Struct-Color[Color])_ *Foreground* `foreground`
+// tag::Struct-PrefabSignData-props-foreground[]
+// tag::Struct-PrefabSignData-props-foreground__description[]
+The foreground Color.
+
+// end::Struct-PrefabSignData-props-foreground__description[]
+// tag::Struct-PrefabSignData-props-foreground__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-props-foreground__flags[]
+// end::Struct-PrefabSignData-props-foreground[]
+// end::Struct-PrefabSignData-props-foreground__title[]
+[#Struct-PrefabSignData-props-background]
+// tag::Struct-PrefabSignData-props-background__title[]
+===== _Struct(xref::Reflection.adoc#Struct-Color[Color])_ *bBckground* `background`
+// tag::Struct-PrefabSignData-props-background[]
+// tag::Struct-PrefabSignData-props-background__description[]
+The background Color.
+
+// end::Struct-PrefabSignData-props-background__description[]
+// tag::Struct-PrefabSignData-props-background__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-props-background__flags[]
+// end::Struct-PrefabSignData-props-background[]
+// end::Struct-PrefabSignData-props-background__title[]
+[#Struct-PrefabSignData-props-auxiliary]
+// tag::Struct-PrefabSignData-props-auxiliary__title[]
+===== _Struct(xref::Reflection.adoc#Struct-Color[Color])_ *Auxiliary* `auxiliary`
+// tag::Struct-PrefabSignData-props-auxiliary[]
+// tag::Struct-PrefabSignData-props-auxiliary__description[]
+The auxiliary Color.
+
+// end::Struct-PrefabSignData-props-auxiliary__description[]
+// tag::Struct-PrefabSignData-props-auxiliary__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-props-auxiliary__flags[]
+// end::Struct-PrefabSignData-props-auxiliary[]
+// end::Struct-PrefabSignData-props-auxiliary__title[]
+[#Struct-PrefabSignData-props-signType]
+// tag::Struct-PrefabSignData-props-signType__title[]
+===== _Class(xref::Reflection.adoc#Class-SignType[SignType])_ *Sign Type* `signType`
+// tag::Struct-PrefabSignData-props-signType[]
+// tag::Struct-PrefabSignData-props-signType__description[]
+The type of sign this prefab fits to.
+
+// end::Struct-PrefabSignData-props-signType__description[]
+// tag::Struct-PrefabSignData-props-signType__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-props-signType__flags[]
+// end::Struct-PrefabSignData-props-signType[]
+// end::Struct-PrefabSignData-props-signType__title[]
+// end::Struct-PrefabSignData__Props[]
+// tag::Struct-PrefabSignData__Funcs[]
+[#Struct-PrefabSignData-Funcs]
+==== Functions
+[#Struct-PrefabSignData-Funcs-getTextElements]
+// tag::Struct-PrefabSignData-Funcs-getTextElements__title[]
+===== *Get Text Elements* `getTextElements` (_Array(String)_ *Text Elements* `textElements` _out_, _Array(String)_ *Text Element Values* `textElementValues` _out_)
+// tag::Struct-PrefabSignData-Funcs-getTextElements[]
+// tag::Struct-PrefabSignData-Funcs-getTextElements__description[]
+Returns all text elements and their values.
+
+// end::Struct-PrefabSignData-Funcs-getTextElements__description[]
+// tag::Struct-PrefabSignData-Funcs-getTextElements__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-Funcs-getTextElements__flags[]
+// tag::Struct-PrefabSignData-Funcs-getTextElements__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Text Elements* `textElements`
+| Array(String) _out_
+| The element names for all text elements.
+
+| *Text Element Values* `textElementValues`
+| Array(String) _out_
+| The values for all text elements.
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-getTextElements__retvals[]
+// end::Struct-PrefabSignData-Funcs-getTextElements[]
+// end::Struct-PrefabSignData-Funcs-getTextElements__title[]
+[#Struct-PrefabSignData-Funcs-getIconElements]
+// tag::Struct-PrefabSignData-Funcs-getIconElements__title[]
+===== *Get Icon Elements* `getIconElements` (_Array(String)_ *Icon Elements* `iconElements` _out_, _Array(Int)_ *Icon Element Values* `iconElementValues` _out_)
+// tag::Struct-PrefabSignData-Funcs-getIconElements[]
+// tag::Struct-PrefabSignData-Funcs-getIconElements__description[]
+Returns all icon elements and their values.
+
+// end::Struct-PrefabSignData-Funcs-getIconElements__description[]
+// tag::Struct-PrefabSignData-Funcs-getIconElements__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-Funcs-getIconElements__flags[]
+// tag::Struct-PrefabSignData-Funcs-getIconElements__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Icon Elements* `iconElements`
+| Array(String) _out_
+| The element names for all icon elements.
+
+| *Icon Element Values* `iconElementValues`
+| Array(Int) _out_
+| The values for all icon elements.
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-getIconElements__retvals[]
+// end::Struct-PrefabSignData-Funcs-getIconElements[]
+// end::Struct-PrefabSignData-Funcs-getIconElements__title[]
+[#Struct-PrefabSignData-Funcs-setTextElements]
+// tag::Struct-PrefabSignData-Funcs-setTextElements__title[]
+===== *Set Text Elements* `setTextElements` (_Array(String)_ *Text Elements* `textElements`, _Array(String)_ *Text Element Values* `textElementValues`)
+// tag::Struct-PrefabSignData-Funcs-setTextElements[]
+// tag::Struct-PrefabSignData-Funcs-setTextElements__description[]
+Sets all text elements and their values.
+
+// end::Struct-PrefabSignData-Funcs-setTextElements__description[]
+// tag::Struct-PrefabSignData-Funcs-setTextElements__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-Funcs-setTextElements__flags[]
+// tag::Struct-PrefabSignData-Funcs-setTextElements__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Text Elements* `textElements`
+| Array(String)
+| The element names for all text elements.
+
+| *Text Element Values* `textElementValues`
+| Array(String)
+| The values for all text elements.
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-setTextElements__params[]
+// end::Struct-PrefabSignData-Funcs-setTextElements[]
+// end::Struct-PrefabSignData-Funcs-setTextElements__title[]
+[#Struct-PrefabSignData-Funcs-setIconElements]
+// tag::Struct-PrefabSignData-Funcs-setIconElements__title[]
+===== *Set Icon Elements* `setIconElements` (_Array(String)_ *Icon Elements* `iconElements`, _Array(Int)_ *Icon Element Values* `iconElementValues`)
+// tag::Struct-PrefabSignData-Funcs-setIconElements[]
+// tag::Struct-PrefabSignData-Funcs-setIconElements__description[]
+Sets all icon elements and their values.
+
+// end::Struct-PrefabSignData-Funcs-setIconElements__description[]
+// tag::Struct-PrefabSignData-Funcs-setIconElements__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-Funcs-setIconElements__flags[]
+// tag::Struct-PrefabSignData-Funcs-setIconElements__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Icon Elements* `iconElements`
+| Array(String)
+| The element names for all icon elements.
+
+| *Icon Element Values* `iconElementValues`
+| Array(Int)
+| The values for all icon elements.
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-setIconElements__params[]
+// end::Struct-PrefabSignData-Funcs-setIconElements[]
+// end::Struct-PrefabSignData-Funcs-setIconElements__title[]
+[#Struct-PrefabSignData-Funcs-setTextElement]
+// tag::Struct-PrefabSignData-Funcs-setTextElement__title[]
+===== *Set Text Element* `setTextElement` (_String_ *Element Name* `elementName`, _String_ *Value* `value`)
+// tag::Struct-PrefabSignData-Funcs-setTextElement[]
+// tag::Struct-PrefabSignData-Funcs-setTextElement__description[]
+Sets a text element with the given element name.
+
+// end::Struct-PrefabSignData-Funcs-setTextElement__description[]
+// tag::Struct-PrefabSignData-Funcs-setTextElement__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-Funcs-setTextElement__flags[]
+// tag::Struct-PrefabSignData-Funcs-setTextElement__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Element Name* `elementName`
+| String
+| The name of the text element
+
+| *Value* `value`
+| String
+| The value of the text element
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-setTextElement__params[]
+// end::Struct-PrefabSignData-Funcs-setTextElement[]
+// end::Struct-PrefabSignData-Funcs-setTextElement__title[]
+[#Struct-PrefabSignData-Funcs-setIconElement]
+// tag::Struct-PrefabSignData-Funcs-setIconElement__title[]
+===== *Set Icon Element* `setIconElement` (_String_ *Element Name* `elementName`, _Int_ *Value* `value`)
+// tag::Struct-PrefabSignData-Funcs-setIconElement[]
+// tag::Struct-PrefabSignData-Funcs-setIconElement__description[]
+Sets a icon element with the given element name.
+
+// end::Struct-PrefabSignData-Funcs-setIconElement__description[]
+// tag::Struct-PrefabSignData-Funcs-setIconElement__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-Funcs-setIconElement__flags[]
+// tag::Struct-PrefabSignData-Funcs-setIconElement__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Element Name* `elementName`
+| String
+| The name of the icon element
+
+| *Value* `value`
+| Int
+| The value of the icon element
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-setIconElement__params[]
+// end::Struct-PrefabSignData-Funcs-setIconElement[]
+// end::Struct-PrefabSignData-Funcs-setIconElement__title[]
+[#Struct-PrefabSignData-Funcs-getTextElement]
+// tag::Struct-PrefabSignData-Funcs-getTextElement__title[]
+===== *Get Text Element* `getTextElement` (_String_ *Element Name* `elementName`, _Int_ *Value* `value` _out_)
+// tag::Struct-PrefabSignData-Funcs-getTextElement[]
+// tag::Struct-PrefabSignData-Funcs-getTextElement__description[]
+Gets a text element with the given element name.
+
+// end::Struct-PrefabSignData-Funcs-getTextElement__description[]
+// tag::Struct-PrefabSignData-Funcs-getTextElement__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-Funcs-getTextElement__flags[]
+// tag::Struct-PrefabSignData-Funcs-getTextElement__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Element Name* `elementName`
+| String
+| The name of the text element
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-getTextElement__params[]
+// tag::Struct-PrefabSignData-Funcs-getTextElement__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Value* `value`
+| Int _out_
+| The value of the text element
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-getTextElement__retvals[]
+// end::Struct-PrefabSignData-Funcs-getTextElement[]
+// end::Struct-PrefabSignData-Funcs-getTextElement__title[]
+[#Struct-PrefabSignData-Funcs-getIconElement]
+// tag::Struct-PrefabSignData-Funcs-getIconElement__title[]
+===== *Get Icon Element* `getIconElement` (_String_ *Element Name* `elementName`, _Int_ *Value* `value` _out_)
+// tag::Struct-PrefabSignData-Funcs-getIconElement[]
+// tag::Struct-PrefabSignData-Funcs-getIconElement__description[]
+Gets a icon element with the given element name.
+
+// end::Struct-PrefabSignData-Funcs-getIconElement__description[]
+// tag::Struct-PrefabSignData-Funcs-getIconElement__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-PrefabSignData-Funcs-getIconElement__flags[]
+// tag::Struct-PrefabSignData-Funcs-getIconElement__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Element Name* `elementName`
+| String
+| The name of the icon element
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-getIconElement__params[]
+// tag::Struct-PrefabSignData-Funcs-getIconElement__retvals[]
+Return Values::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Value* `value`
+| Int _out_
+| The value of the icon element
+
+|===
+
+// end::Struct-PrefabSignData-Funcs-getIconElement__retvals[]
+// end::Struct-PrefabSignData-Funcs-getIconElement[]
+// end::Struct-PrefabSignData-Funcs-getIconElement__title[]
+// end::Struct-PrefabSignData__Funcs[]
+// end::Struct-PrefabSignData[]
+// end::Struct-PrefabSignData__title[]
 // tag::Struct-Rotator__title[]
 [#Struct-Rotator]
 === *Rotator* `Rotator`
@@ -14440,15 +15481,15 @@ The station at which the train should stop
 // end::Struct-TimeTableStop-props-station__flags[]
 // end::Struct-TimeTableStop-props-station[]
 // end::Struct-TimeTableStop-props-station__title[]
-[#Struct-TimeTableStop-props-duration]
-// tag::Struct-TimeTableStop-props-duration__title[]
-===== _Float_ *Duration* `duration`
-// tag::Struct-TimeTableStop-props-duration[]
-// tag::Struct-TimeTableStop-props-duration__description[]
-The time interval the train will wait at the station
+[#Struct-TimeTableStop-props-ruleset]
+// tag::Struct-TimeTableStop-props-ruleset__title[]
+===== _Struct(xref::Reflection.adoc#Struct-TrainDockingRuleSet[TrainDockingRuleSet])_ *Rule Set* `ruleset`
+// tag::Struct-TimeTableStop-props-ruleset[]
+// tag::Struct-TimeTableStop-props-ruleset__description[]
+The rule set wich describe when the train will depart from the train station
 
-// end::Struct-TimeTableStop-props-duration__description[]
-// tag::Struct-TimeTableStop-props-duration__flags[]
+// end::Struct-TimeTableStop-props-ruleset__description[]
+// tag::Struct-TimeTableStop-props-ruleset__flags[]
 [cols = "1,5a"]
 |===
 | Flags
@@ -14456,9 +15497,9 @@ The time interval the train will wait at the station
 +++
 |===
 
-// end::Struct-TimeTableStop-props-duration__flags[]
-// end::Struct-TimeTableStop-props-duration[]
-// end::Struct-TimeTableStop-props-duration__title[]
+// end::Struct-TimeTableStop-props-ruleset__flags[]
+// end::Struct-TimeTableStop-props-ruleset[]
+// end::Struct-TimeTableStop-props-ruleset__title[]
 // end::Struct-TimeTableStop__Props[]
 // end::Struct-TimeTableStop[]
 // end::Struct-TimeTableStop__title[]
@@ -14542,6 +15583,115 @@ Return Values::
 // end::Struct-TrackGraph__Funcs[]
 // end::Struct-TrackGraph[]
 // end::Struct-TrackGraph__title[]
+// tag::Struct-TrainDockingRuleSet__title[]
+[#Struct-TrainDockingRuleSet]
+=== *Train Docking Rule Set* `TrainDockingRuleSet`
+// tag::Struct-TrainDockingRuleSet[]
+// tag::Struct-TrainDockingRuleSet__description[]
+Contains infromation about the rules that descibe when a trian should depart from a station
+
+// end::Struct-TrainDockingRuleSet__description[]
+// tag::Struct-TrainDockingRuleSet__Prop[]
+[#Struct-TrainDockingRuleSet-Props]
+==== Properties
+[#Struct-TrainDockingRuleSet-props-definition]
+// tag::Struct-TrainDockingRuleSet-props-definition__title[]
+===== _Int_ *Defintion* `definition`
+// tag::Struct-TrainDockingRuleSet-props-definition[]
+// tag::Struct-TrainDockingRuleSet-props-definition__description[]
+0 = Load/Unload Once, 1 = Fully Load/Unload
+
+// end::Struct-TrainDockingRuleSet-props-definition__description[]
+// tag::Struct-TrainDockingRuleSet-props-definition__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-TrainDockingRuleSet-props-definition__flags[]
+// end::Struct-TrainDockingRuleSet-props-definition[]
+// end::Struct-TrainDockingRuleSet-props-definition__title[]
+[#Struct-TrainDockingRuleSet-props-duration]
+// tag::Struct-TrainDockingRuleSet-props-duration__title[]
+===== _Float_ *Duration* `duration`
+// tag::Struct-TrainDockingRuleSet-props-duration[]
+// tag::Struct-TrainDockingRuleSet-props-duration__description[]
+The amount of time the train will dock at least.
+
+// end::Struct-TrainDockingRuleSet-props-duration__description[]
+// tag::Struct-TrainDockingRuleSet-props-duration__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-TrainDockingRuleSet-props-duration__flags[]
+// end::Struct-TrainDockingRuleSet-props-duration[]
+// end::Struct-TrainDockingRuleSet-props-duration__title[]
+[#Struct-TrainDockingRuleSet-props-isDurationAndRule]
+// tag::Struct-TrainDockingRuleSet-props-isDurationAndRule__title[]
+===== _Bool_ *Is Duration and Rule* `isDurationAndRule`
+// tag::Struct-TrainDockingRuleSet-props-isDurationAndRule[]
+// tag::Struct-TrainDockingRuleSet-props-isDurationAndRule__description[]
+True if the duration of the train stop and the other rules have to be applied.
+
+// end::Struct-TrainDockingRuleSet-props-isDurationAndRule__description[]
+// tag::Struct-TrainDockingRuleSet-props-isDurationAndRule__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-TrainDockingRuleSet-props-isDurationAndRule__flags[]
+// end::Struct-TrainDockingRuleSet-props-isDurationAndRule[]
+// end::Struct-TrainDockingRuleSet-props-isDurationAndRule__title[]
+[#Struct-TrainDockingRuleSet-props-loadFilters]
+// tag::Struct-TrainDockingRuleSet-props-loadFilters__title[]
+===== _Array(Class(xref::Reflection.adoc#Class-ItemType[ItemType]))_ *Load Filters* `loadFilters`
+// tag::Struct-TrainDockingRuleSet-props-loadFilters[]
+// tag::Struct-TrainDockingRuleSet-props-loadFilters__description[]
+The types of items that will be loaded.
+
+// end::Struct-TrainDockingRuleSet-props-loadFilters__description[]
+// tag::Struct-TrainDockingRuleSet-props-loadFilters__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-TrainDockingRuleSet-props-loadFilters__flags[]
+// end::Struct-TrainDockingRuleSet-props-loadFilters[]
+// end::Struct-TrainDockingRuleSet-props-loadFilters__title[]
+[#Struct-TrainDockingRuleSet-props-unloadFilters]
+// tag::Struct-TrainDockingRuleSet-props-unloadFilters__title[]
+===== _Array(Class(xref::Reflection.adoc#Class-ItemType[ItemType]))_ *Unload Filters* `unloadFilters`
+// tag::Struct-TrainDockingRuleSet-props-unloadFilters[]
+// tag::Struct-TrainDockingRuleSet-props-unloadFilters__description[]
+The types of items that will be unloaded.
+
+// end::Struct-TrainDockingRuleSet-props-unloadFilters__description[]
+// tag::Struct-TrainDockingRuleSet-props-unloadFilters__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-TrainDockingRuleSet-props-unloadFilters__flags[]
+// end::Struct-TrainDockingRuleSet-props-unloadFilters[]
+// end::Struct-TrainDockingRuleSet-props-unloadFilters__title[]
+// end::Struct-TrainDockingRuleSet__Props[]
+// end::Struct-TrainDockingRuleSet[]
+// end::Struct-TrainDockingRuleSet__title[]
 // tag::Struct-Vector__title[]
 [#Struct-Vector]
 === *Vector* `Vector`
@@ -14613,4 +15763,56 @@ The Z coordinate component
 // end::Struct-Vector__Props[]
 // end::Struct-Vector[]
 // end::Struct-Vector__title[]
+// tag::Struct-Vector2D__title[]
+[#Struct-Vector2D]
+=== *Vector 2D* `Vector2D`
+// tag::Struct-Vector2D[]
+// tag::Struct-Vector2D__description[]
+Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space
+
+// end::Struct-Vector2D__description[]
+// tag::Struct-Vector2D__Prop[]
+[#Struct-Vector2D-Props]
+==== Properties
+[#Struct-Vector2D-props-x]
+// tag::Struct-Vector2D-props-x__title[]
+===== _Float_ *X* `x`
+// tag::Struct-Vector2D-props-x[]
+// tag::Struct-Vector2D-props-x__description[]
+The X coordinate component
+
+// end::Struct-Vector2D-props-x__description[]
+// tag::Struct-Vector2D-props-x__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-Vector2D-props-x__flags[]
+// end::Struct-Vector2D-props-x[]
+// end::Struct-Vector2D-props-x__title[]
+[#Struct-Vector2D-props-y]
+// tag::Struct-Vector2D-props-y__title[]
+===== _Float_ *Y* `y`
+// tag::Struct-Vector2D-props-y[]
+// tag::Struct-Vector2D-props-y__description[]
+The Y coordinate component
+
+// end::Struct-Vector2D-props-y__description[]
+// tag::Struct-Vector2D-props-y__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Struct-Vector2D-props-y__flags[]
+// end::Struct-Vector2D-props-y[]
+// end::Struct-Vector2D-props-y__title[]
+// end::Struct-Vector2D__Props[]
+// end::Struct-Vector2D[]
+// end::Struct-Vector2D__title[]
 // #FINReflectionDocumentationBlock End //
