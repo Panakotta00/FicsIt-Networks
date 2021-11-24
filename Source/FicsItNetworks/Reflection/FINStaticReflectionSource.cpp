@@ -2294,6 +2294,19 @@ EndClass()
 BeginStruct(FFINFuture, "Future", "Future", "A Future struct MAY BE HANDLED BY CPU IMPLEMENTATION differently, generaly, this is used to make resources available on a later point in time. Like if data won't be avaialble right away and you have to wait for it to process first. Like when you do a HTTP Request, then it takes some time to get the data from the web server. And since we don't want to halt the game and wait for the data, you can use a future to check if the data is available, or let just the Lua Code wait, till the data becomes available.")
 EndStruct()
 
+BeginStruct(FVector2D, "Vector2D", "Vector 2D", "Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space")
+BeginProp(RFloat, x, "X", "The X coordinate component") {
+	Return self->X;
+} PropSet() {
+	self->X = Val;
+} EndProp()
+BeginProp(RFloat, y, "Y", "The Y coordinate component") {
+	Return self->Y;
+} PropSet() {
+	self->Y = Val;
+} EndProp()
+EndStruct()
+
 BeginStruct(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
 	Return self->X;
