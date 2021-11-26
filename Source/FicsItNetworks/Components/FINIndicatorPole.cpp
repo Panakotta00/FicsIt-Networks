@@ -35,7 +35,8 @@ void AFINIndicatorPole::BeginPlay() {
 	CreatePole();
 
 	if (Indicator->GetMaterials().Num() > 0) {
-		IndicatorInstance = UMaterialInstanceDynamic::Create(Cast<UMaterialInstanceDynamic>(Indicator->GetMaterial(0))->Parent, nullptr);
+		UMaterialInterface* Material = Indicator->GetMaterial(0);
+		IndicatorInstance = UMaterialInstanceDynamic::Create(Cast<UMaterialInstance>(Material)->Parent, nullptr);
 		Indicator->SetMaterial(0, IndicatorInstance);
 	}
 }
@@ -72,11 +73,9 @@ void AFINIndicatorPole::CreatePole() {
 		Pole->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		Pole->SetStaticMesh(LongPole);
 		Pole->SetMobility(EComponentMobility::Static);
-		//Pole->SetColorSlot(mColorSlot);
+		Pole->mInstanceHandle.SetColorIndex(mColorSlot);
 		Poles.Add(Pole);
 	}
-
-	ReapplyColorSlot();
 }
 
 void AFINIndicatorPole::UpdateEmessive_Implementation() {

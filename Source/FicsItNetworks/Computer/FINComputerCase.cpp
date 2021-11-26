@@ -24,10 +24,22 @@ AFINComputerCase::AFINComputerCase() {
 	Panel->OnModuleChanged.AddDynamic(this, &AFINComputerCase::OnModuleChanged);
 
 	DataStorage = CreateDefaultSubobject<UFGInventoryComponent>("DataStorage");
+	DataStorage->SetDefaultSize(2);
+	DataStorage->Resize(2);
 	DataStorage->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
 	DataStorage->OnItemAddedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
-	DataStorage->SetAllowedItemOnIndex(0, UFINComputerEEPROMDesc::StaticClass());
-	DataStorage->SetAllowedItemOnIndex(1, UFINComputerFloppyDesc::StaticClass());
+	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> Item, int32 Index) {
+		switch (Index) {
+		case -1:
+			return Item->IsChildOf(UFINComputerEEPROMDesc::StaticClass()) || Item->IsChildOf(UFINComputerFloppyDesc::StaticClass());
+		case 0:
+			return Item->IsChildOf(UFINComputerEEPROMDesc::StaticClass());
+		case 1:
+			return Item->IsChildOf(UFINComputerFloppyDesc::StaticClass());
+		default:
+			return false;
+		}
+	});
 	DataStorage->SetIsReplicated(true);
 
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
@@ -290,7 +302,7 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 }
 
 void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num) {
-	if (HasAuthority()) {
+	if (HasAuthority() && Kernel) {
 		if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
 			UFINKernelProcessor* Processor = Kernel->GetProcessor();
 			AFINStateEEPROM* EEPROM = UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0);

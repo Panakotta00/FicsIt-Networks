@@ -46,7 +46,7 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 
 #define CatchExceptionLua \
 	catch (const std::exception& ex) { \
-		FDebug::DumpStackTraceToLog(); \
+		FDebug::DumpStackTraceToLog(ELogVerbosity::Warning); \
 		return luaL_error(L, ex.what()); \
 	}
 

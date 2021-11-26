@@ -21,10 +21,8 @@
 #include "FGRailroadTimeTable.h"
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FGRailroadVehicleMovementComponent.h"
-#include "FGTargetPointLinkedList.h"
+#include "FGSignLibrary.h"
 #include "FGTrainStationIdentifier.h"
-#include "FGWheeledVehicle.h"
-#include "FGTargetPoint.h"
 #include "FINBoolProperty.h"
 #include "FINClassProperty.h"
 #include "FINFloatProperty.h"
@@ -40,12 +38,16 @@
 #include "Buildables/FGBuildableManufacturer.h"
 #include "Buildables/FGBuildablePipelinePump.h"
 #include "Buildables/FGBuildablePipeReservoir.h"
+#include "Buildables/FGBuildablePixelSign.h"
 #include "Buildables/FGBuildablePowerStorage.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadStation.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
+#include "Buildables/FGBuildableSignBase.h"
+#include "Buildables/FGBuildableSpeedSign.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
+#include "Buildables/FGBuildableWidgetSign.h"
 #include "FicsItNetworks/Computer/FINComputerGPUT1.h"
 #include "FicsItNetworks/Network/FINFuture.h"
 #include "FicsItNetworks/Network/FINNetworkConnectionComponent.h"
@@ -53,6 +55,8 @@
 #include "FicsItNetworks/Utils/FINTimeTableStop.h"
 #include "FicsItNetworks/Utils/FINTrackGraph.h"
 #include "Reflection/ReflectionHelper.h"
+#include "WheeledVehicles/FGTargetPointLinkedList.h"
+#include "WheeledVehicles/FGWheeledVehicle.h"
 
 TMap<UClass*, FFINStaticClassReg> UFINStaticReflectionSource::Classes;
 TMap<UScriptStruct*, FFINStaticStructReg> UFINStaticReflectionSource::Structs;
@@ -1196,109 +1200,28 @@ BeginFunc(isValidFuel, "Is Valid Fuel", "Allows to check if the given item type 
 	isValid = self->IsValidFuel(item);
 } EndFunc()
 
-inline int TargetToIndex(AFGTargetPoint* Target, UFGTargetPointLinkedList* List) {
-	AFGTargetPoint* CurrentTarget = nullptr;
-	int i = 0;
-	do {
-		if (i) CurrentTarget = CurrentTarget->mNext;
-		else CurrentTarget = List->GetFirstTarget();
-		if (CurrentTarget == Target) return i;
-		++i;
-	} while (CurrentTarget && CurrentTarget != List->GetLastTarget());
-	return -1;
-}
-
-inline AFGTargetPoint* IndexToTarget(int index, UFGTargetPointLinkedList* List) {
-	if (index < 0) return nullptr;
-	AFGTargetPoint* CurrentTarget = List->GetFirstTarget();
-	for (int i = 0; i < index && CurrentTarget; ++i) {
-		CurrentTarget = CurrentTarget->mNext;
-	}
-	return CurrentTarget;
-}
-
 BeginFunc(getCurrentTarget, "Get Current Target", "Returns the index of the target that the vehicle tries to move to right now.") {
 	OutVal(0, RInt, index, "Index", "The index of the current target.")
 	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	index = (int64)TargetToIndex(List->GetCurrentTarget(), List);
+	AFGDrivingTargetList* List = self->GetTargetList();
+	index = (int64)List->FindTargetIndex(self->GetCurrentTarget());
 } EndFunc()
-
 BeginFunc(nextTarget, "Next Target", "Sets the current target to the next target in the list.") {
 	Body()
-	self->GetTargetNodeLinkedList()->SetNextTarget();
+	self->PickNextTarget();
 } EndFunc()
 BeginFunc(setCurrentTarget, "Set Current Target", "Sets the target with the given index as the target this vehicle tries to move to right now.") {
 	InVal(0, RInt, index, "Index", "The index of the target this vehicle should move to now.")
 	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* Target = IndexToTarget(index, List);
+	AFGDrivingTargetList* List = self->GetTargetList();
+	AFGTargetPoint* Target = List->FindTargetByIndex(index);
 	if (!Target) throw FFINException("index out of range");
-	List->SetCurrentTarget(Target);
+	self->SetCurrentTarget(Target);
 } EndFunc()
-BeginFunc(getTarget, "Get Target", "Returns the target struct at with the given index in the target list.") {
-	InVal(0, RInt, index, "Index", "The index of the target you want to get the struct from.")
-	OutVal(0, RStruct<FFINTargetPoint>, target, "Target", "The TargetPoint-Struct with the given index in the target list.")
+BeginFunc(getTargetList, "Get Target List", "Returns the list of targets/path waypoints.") {
+	OutVal(0, RTrace<AFGDrivingTargetList>, targetList, "Target List", "The list of targets/path-waypoints.")
 	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* Target = IndexToTarget(index, List);
-	if (!Target) throw FFINException("index out of range");
-	target = (FINAny)FFINTargetPoint(Target);
-} EndFunc()
-BeginFunc(removeTarget, "Remove Target", "Removes the target with the given index from the target list.") {
-	InVal(0, RInt, index, "Index", "The index of the target point you want to remove from the target list.")
-	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* Target = IndexToTarget(index, List);
-	if (!Target) throw FFINException( "index out of range");
-	List->RemoveItem(Target);
-	Target->Destroy();
-} EndFunc()
-BeginFunc(addTarget, "Add Target", "Adds the given target point struct at the end of the target list.") {
-	InVal(0, RStruct<FFINTargetPoint>, target, "Target", "The target point you want to add.")
-	Body()
-	AFGTargetPoint* Target = target.ToWheeledTargetPoint(self);
-	if (!Target) throw FFINException("failed to create target");
-	self->GetTargetNodeLinkedList()->InsertItem(Target);
-} EndFunc()
-BeginFunc(setTarget, "Set Target", "Allows to set the target at the given index to the given target point struct.") {
-	InVal(0, RInt, index, "Index", "The index of the target point you want to update with the given target point struct.")
-	InVal(1, RStruct<FFINTargetPoint>, target, "Target", "The new target point struct for the given index.")
-	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* Target = IndexToTarget(index, List);
-	if (!Target) throw FFINException("index out of range");
-	Target->SetActorLocation(target.Pos);
-	Target->SetActorRotation(target.Rot);
-	Target->SetTargetSpeed(target.Speed);
-	Target->SetWaitTime(target.Wait);
-} EndFunc()
-BeginFunc(clearTargets, "Clear Targets", "Removes all targets from the target point list.") {
-	Body()
-	self->GetTargetNodeLinkedList()->ClearRecording();
-} EndFunc()
-BeginFunc(getTargets, "Get Targets", "Returns a list of target point structs of all the targets in the target point list.") {
-	OutVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs containing all the targets of the target point list.")
-	Body()
-	TArray<FINAny> Targets;
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	AFGTargetPoint* CurrentTarget = nullptr;
-	int i = 0;
-	do {
-		if (i++) CurrentTarget = CurrentTarget->mNext;
-		else CurrentTarget = List->GetFirstTarget();
-		Targets.Add((FINAny)FFINTargetPoint(CurrentTarget));
-	} while (CurrentTarget && CurrentTarget != List->GetLastTarget());
-	targets = Targets;
-} EndFunc()
-BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.", 0) {
-	InVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs you want to place into the empty target point list.")
-	Body()
-	UFGTargetPointLinkedList* List = self->GetTargetNodeLinkedList();
-	List->ClearRecording();
-	for (const FINAny& Target : targets) {
-		List->InsertItem(Target.GetStruct().Get<FFINTargetPoint>().ToWheeledTargetPoint(self));
-	}
+	targetList = Ctx.GetTrace() / self->GetTargetList();
 } EndFunc()
 BeginProp(RFloat, speed, "Speed", "The current forward speed of this vehicle.") {
 	Return self->GetForwardSpeed();
@@ -1315,12 +1238,70 @@ BeginProp(RBool, hasFuel, "Has Fuel", "True if the vehicle has currently fuel to
 BeginProp(RBool, isInAir, "Is In Air", "True if the vehicle is currently in the air.") {
 	Return self->GetIsInAir();
 } EndProp()
-BeginProp(RBool, wantsToMove, "Wants To Move", "True if the vehicle currently wants to move.") {
-	Return self->WantsToMove();
-} EndProp()
 BeginProp(RBool, isDrifting, "Is Drifting", "True if the vehicle is currently drifting.") {
 	Return self->GetIsDrifting();
 } EndProp()
+EndClass()
+
+BeginClass(AFGDrivingTargetList, "TargetList", "Target List", "The list of targets/path-waypoints a autonomous vehicle can drive")
+BeginFunc(getTarget, "Get Target", "Returns the target struct at with the given index in the target list.") {
+	InVal(0, RInt, index, "Index", "The index of the target you want to get the struct from.")
+	OutVal(0, RStruct<FFINTargetPoint>, target, "Target", "The TargetPoint-Struct with the given index in the target list.")
+	Body()
+	AFGTargetPoint* Target = self->FindTargetByIndex(index);
+	if (!Target) throw FFINException("index out of range");
+	target = (FINAny)FFINTargetPoint(Target);
+} EndFunc()
+BeginFunc(removeTarget, "Remove Target", "Removes the target with the given index from the target list.") {
+	InVal(0, RInt, index, "Index", "The index of the target point you want to remove from the target list.")
+	Body()
+	AFGTargetPoint* Target = self->FindTargetByIndex(index);
+	if (!Target) throw FFINException( "index out of range");
+	self->RemoveItem(Target);
+	Target->Destroy();
+} EndFunc()
+BeginFunc(addTarget, "Add Target", "Adds the given target point struct at the end of the target list.") {
+	InVal(0, RStruct<FFINTargetPoint>, target, "Target", "The target point you want to add.")
+	Body()
+	AFGTargetPoint* Target = target.ToWheeledTargetPoint(self);
+	if (!Target) throw FFINException("failed to create target");
+	self->InsertItem(Target, self->mLast);
+} EndFunc()
+BeginFunc(setTarget, "Set Target", "Allows to set the target at the given index to the given target point struct.") {
+	InVal(0, RInt, index, "Index", "The index of the target point you want to update with the given target point struct.")
+	InVal(1, RStruct<FFINTargetPoint>, target, "Target", "The new target point struct for the given index.")
+	Body()
+	AFGTargetPoint* Target = self->FindTargetByIndex(index);
+	if (!Target) throw FFINException("index out of range");
+	Target->SetActorLocation(target.Pos);
+	Target->SetActorRotation(target.Rot);
+	Target->SetTargetSpeed(target.Speed);
+	Target->SetWaitTime(target.Wait);
+} EndFunc()
+BeginFunc(getTargets, "Get Targets", "Returns a list of target point structs of all the targets in the target point list.") {
+	OutVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs containing all the targets of the target point list.")
+	Body()
+	TArray<FINAny> Targets;
+	AFGTargetPoint* CurrentTarget = nullptr;
+	int i = 0;
+	do {
+		if (i++) CurrentTarget = CurrentTarget->GetNext();
+		else CurrentTarget = self->GetFirstTarget();
+		Targets.Add((FINAny)FFINTargetPoint(CurrentTarget));
+	} while (CurrentTarget && CurrentTarget != self->GetLastTarget());
+	targets = Targets;
+} EndFunc()
+BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.", 0) {
+	InVal(0, RArray<RStruct<FFINTargetPoint>>, targets, "Targets", "A list of target point structs you want to place into the empty target point list.")
+	Body()
+	int Count = self->GetTargetCount();
+	for (const FINAny& Target : targets) {
+		self->InsertItem(Target.GetStruct().Get<FFINTargetPoint>().ToWheeledTargetPoint(self), self->mLast);
+	}
+	for (int i = 0; i < Count; ++i) {
+		self->RemoveItem(self->mFirst);
+	}
+} EndFunc()
 EndClass()
 
 BeginClass(AFGBuildableTrainPlatform, "TrainPlatform", "Train Platform", "The base class for all train station parts.")
@@ -1662,12 +1643,12 @@ BeginClass(AFGRailroadTimeTable, "TimeTable", "Time Table", "Contains the time t
 BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
 	InVal(0, RInt, index, "Index", "The index at which the stop should get added.")
 	InVal(1, RTrace<AFGBuildableRailroadStation>, station, "Station", "The railroad station at which the stop should happen.")
-	InVal(2, RFloat, duration, "Duration", "The duration how long the train should stop at the station.")
+	InVal(2, RStruct<FTrainDockingRuleSet>, ruleSet, "Rule Set", "The docking rule set that descibes when the train will depart from the station.")
 	OutVal(3, RBool, added, "Added", "True if the stop got sucessfully added to the time table.")
 	Body()
 	FTimeTableStop stop;
 	stop.Station = Cast<AFGBuildableRailroadStation>(station.Get())->GetStationIdentifier();
-	stop.Duration =duration;
+	stop.DockingRuleSet = ruleSet;
 	added = self->AddStop(index, stop);
 } EndFunc()
 BeginFunc(removeStop, "Remove Stop", "Removes the stop with the given index from the time table.") {
@@ -1682,7 +1663,7 @@ BeginFunc(getStops, "Get Stops", "Returns a list of all the stops this time tabl
 	TArray<FTimeTableStop> Stops;
 	self->GetStops(Stops);
 	for (const FTimeTableStop& Stop : Stops) {
-		Output.Add((FINAny)FFINTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.Duration});
+		Output.Add((FINAny)FFINTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.DockingRuleSet});
 	}
 	stops = Output;
 } EndFunc()
@@ -1708,7 +1689,7 @@ BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
 	Body()
 	FTimeTableStop Stop = self->GetStop(index);
 	if (IsValid(Stop.Station)) {
-		stop = (FINAny)FFINTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.Duration};
+		stop = (FINAny)FFINTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.DockingRuleSet};
 	} else {
 		stop = FINAny();
 	}
@@ -1826,10 +1807,15 @@ BeginFunc(getStation, "Get Station", "Returns the station of which this connecti
 	Body()
 	station = Ctx.GetTrace() / self->GetStation();
 } EndFunc()
-BeginFunc(getSignal, "Get Signal", "Returns the signal of which this connection is part of.") {
-	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal of which this connection is part of.")
+BeginFunc(getFacingSignal, "Get Facing Signal", "Returns the signal this connection is facing to.") {
+	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal this connection is facing.")
 	Body()
-	signal = Ctx.GetTrace() / self->GetSignal();
+	signal = Ctx.GetTrace() / self->GetFacingSignal();
+} EndFunc()
+BeginFunc(getTrailingSignal, "Get Trailing Signal", "Returns the signal this connection is trailing from.") {
+	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal this connection is trailing.")
+	Body()
+	signal = Ctx.GetTrace() / self->GetTrailingSignal();
 } EndFunc()
 BeginFunc(getOpposite, "Get Opposite", "Returns the opposite connection of the track this connection is part of.") {
 	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, opposite, "Opposite", "The opposite connection of the track this connection is part of.")
@@ -1877,6 +1863,43 @@ BeginFunc(switchPosition, "Switch Position", "Returns the current switch positio
 } EndFunc()
 EndClass()
 
+BeginClass(AFGBuildableRailroadSignal, "RailroadSignal", "Railroad Signal", "A train signal to control trains on a track.")
+Hook(UFINRailroadSignalHook)
+BeginSignal(AspectChanged, "Aspect Changed", "Triggers when the aspect of this signal changes.")
+	SignalParam(0, RInt, aspect, "Aspect", "The new aspect of the signal (see 'Get Aspect' for more information)")
+EndSignal()
+BeginProp(RBool, isPathSignal, "Is Path Signal", "True if this signal is a path-signal.") {
+	Return self->IsPathSignal();
+} EndProp()
+BeginProp(RBool, isBiDirectional, "Is Bi-Directional", "True if this signal is bi-directional. (trains can pass into both directions)") {
+	Return self->IsBiDirectional();
+} EndProp()
+BeginProp(RBool, hasObservedBlock, "Has Observed Block", "True if this signal is currently observing at least one block.") {
+	Return self->HasObservedBlock();
+} EndProp()
+BeginProp(RInt, blockValidation, "Block Validation", "Any error states of the block.\n0 = Unknown\n1 = No Error\n2 = No Exit Signal\n3 = Contains Loop\n4 = Contains Mixed Entry Signals") {
+	Return (int64)self->GetBlockValidation();
+} EndProp()
+BeginProp(RInt, aspect, "Aspect", "The aspect of the signal. The aspect shows if a train is allowed to pass (clear) or not and if it should dock.\n0 = Unknown\n1 = The track is clear and the train is allowed to pass.\n2 = The next track is Occupied and the train should stop\n3 = The train should dock.") {
+	Return (int64)self->GetAspect();
+} EndProp()
+BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
+	auto Block = self->GetObservedBlock();
+	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return Block.Pin()->IsOccupied();
+} EndProp()
+BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
+	auto Block = self->GetObservedBlock();
+	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return Block.Pin()->HaveReservations();
+} EndProp()
+BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
+	auto Block = self->GetObservedBlock();
+	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return Block.Pin()->IsPathBlock();
+} EndProp()
+EndClass()
+
 BeginClass(AFGBuildableDockingStation, "DockingStation", "Docking Station", "A docking station for wheeled vehicles to transfer cargo.")
 BeginFunc(getFuelInv, "Get Fueld Inventory", "Returns the fuel inventory of the docking station.") {
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The fuel inventory of the docking station.")
@@ -1895,7 +1918,7 @@ BeginFunc(getDocked, "Get Docked", "Returns the currently docked actor.") {
 } EndFunc()
 BeginFunc(undock, "Undock", "Undocked the currently docked vehicle from this docking station.") {
 	Body()
-	self->Undock();
+	self->Undock(true);
 } EndFunc()
 BeginProp(RBool, isLoadMode, "Is Load Mode", "True if the docking station loads docked vehicles, flase if it unloads them.") {
 	Return self->GetIsInLoadMode();
@@ -2021,6 +2044,190 @@ BeginProp(RInt, colorSlot, "Color Slot", "The color slot the lights should use."
 } EndProp()
 EndClass()
 
+BeginClass(AFGBuildableSignBase, "SignBase", "Sign Base", "The base class for all signs in the game.")
+BeginFunc(getSignType, "Get Sign Type", "Returns the sign type descriptor") {
+	OutVal(0, RClass<UFGSignTypeDescriptor>, descriptor, "Descriptor", "The sign type descriptor")
+	Body()
+	descriptor = (FINClass)IFGSignInterface::Execute_GetSignTypeDescriptor(self);
+} EndFunc()
+EndClass()
+
+BeginClass(AFGBuildableWidgetSign, "WidgetSign", "Widget Sign", "The type of sign that allows you to define layouts, images, texts and colors manually.")
+BeginFunc(setPrefabSignData, "Set Prefab Sign Data", "Sets the prefabg sign data e.g. the user settings like colo and more to define the signs content.", 0) {
+	InVal(0, RStruct<FPrefabSignData>, prefabSignData, "Prefab Sign Data", "The new prefab sign data for this sign.")
+	Body()
+	self->SetPrefabSignData(prefabSignData);
+} EndFunc()
+BeginFunc(getPrefabSignData, "Get Prefab Sign Data", "Returns the prefabg sign data e.g. the user settings like colo and more to define the signs content.") {
+	OutVal(0, RStruct<FPrefabSignData>, prefabSignData, "Prefab Sign Data", "The new prefab sign data for this sign.")
+	Body()
+	FPrefabSignData SignData;
+	self->GetSignPrefabData(SignData);
+	prefabSignData = (FINStruct)SignData;
+} EndFunc()
+EndClass()
+
+BeginClass(UFGSignTypeDescriptor, "SignType", "Sign Type", "Describes the type of a sign.")
+BeginClassProp(RStruct<FVector2D>, dimensions, "Dimensions", "The canvas dimensions of this sign.") {
+	FVector2D dimensions;
+	UFGSignLibrary::GetCanvasDimensionsFromSignDescriptor(self, dimensions);
+	Return dimensions;
+} EndProp()
+BeginClassFunc(getColors, "Get Colors", "Returns the default foreground/background/auxiliary colors of this sign type.", false) {
+	OutVal(0, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color")
+	OutVal(1, RStruct<FLinearColor>, background, "Background", "The background color")
+	OutVal(2, RStruct<FLinearColor>, auxiliary, "Auxiliary", "The auxiliary color")
+	Body()
+	FLinearColor fg, bg, au;
+	UFGSignLibrary::GetDefaultColorsFromSignDescriptor(self, fg, bg, au);
+	foreground = (FINStruct)fg;
+	background = (FINStruct)bg;
+	auxiliary = (FINStruct)au;
+} EndFunc()
+BeginClassFunc(getPrefabs, "Get Prefabs", "Returns a list of all sign prefabs this sign can use.", false) {
+	OutVal(0, RArray<RClass<UFGSignPrefabWidget>>, prefabs, "Prefabs", "The sign prefabs this sign can use")
+	Body()
+	TArray<FINAny> PrefabsArray;
+	TArray<TSubclassOf<UFGSignPrefabWidget>> PrefabList;
+	UFGSignLibrary::GetPrefabLayoutsFromSignDescriptor(self, PrefabList);
+	for (TSubclassOf<UFGSignPrefabWidget> Prefab : PrefabList) {
+		PrefabsArray.Add((FINClass)Prefab);
+	}
+	prefabs = PrefabsArray;
+} EndFunc()
+BeginClassFunc(getTextElements, "Get Text Elements", "Returns a list of element names and their default text values.", false) {
+	OutVal(0, RArray<RString>, textElements, "Text Elements", "A list of text element names of this type.")
+	OutVal(0, RArray<RString>, textElementsDefaultValues, "Text Elements Default Values", "A list of default values for the text elements of this type.")
+	Body()
+	TArray<FINAny> TextElements, TextElementsDefaultValues;
+	TMap<FString, FString> Elements;
+	UFGSignLibrary::GetTextElementNameMapFromSignDescriptor(self, Elements);
+	for (const TPair<FString, FString>& Element : Elements) {
+		TextElements.Add(Element.Key);
+		TextElementsDefaultValues.Add(Element.Value);
+	}
+	textElements = TextElements;
+	textElementsDefaultValues = TextElementsDefaultValues;
+} EndFunc()
+BeginClassFunc(getIconElements, "Get Icon Elements", "Returns a list of element names and their default icon values.", false) {
+	OutVal(0, RArray<RString>, iconElements, "Icon Elements", "A list of icon element names of this type.")
+	OutVal(0, RArray<RObject<UTexture2D>>, iconElementsDefaultValues, "Icon Elements Default Values", "A list of default values for the icon elements of this type.")
+	Body()
+	TArray<FINAny> IconElements, IconElementsDefaultValues;
+	TMap<FString, UObject*> Elements;
+	UFGSignLibrary::GetIconElementNameMapFromSignDescriptor(self, Elements);
+	for (const TPair<FString, UObject*>& Element : Elements) {
+		IconElements.Add(Element.Key);
+		IconElementsDefaultValues.Add((FINObj)Element.Value);
+	}
+	iconElements = IconElements;
+	iconElementsDefaultValues = IconElementsDefaultValues;
+} EndFunc()
+EndClass()
+
+BeginClass(UFGSignPrefabWidget, "SignPrefab", "Sign Prefab", "Descibes a layout of a sign.")
+EndClass()
+
+BeginStruct(FPrefabSignData, "PrefabSignData", "Prefab Sign Data", "This structure stores all data that defines what a sign displays.")
+BeginProp(RClass<UObject>, layout, "Layout", "The object that actually displayes the layout") {
+	Return (FINClass)self->PrefabLayout;
+} PropSet() {
+	self->PrefabLayout = Val;
+} EndProp()
+BeginProp(RStruct<FLinearColor>, foreground, "Foreground", "The foreground Color.") {
+	Return (FINStruct)self->ForegroundColor;
+} PropSet() {
+	self->ForegroundColor = Val;
+} EndProp()
+BeginProp(RStruct<FLinearColor>, background, "bBckground", "The background Color.") {
+	Return (FINStruct)self->BackgroundColor;
+} PropSet() {
+	self->BackgroundColor = Val;
+} EndProp()
+BeginProp(RStruct<FLinearColor>, auxiliary, "Auxiliary", "The auxiliary Color.") {
+	Return (FINStruct)self->AuxiliaryColor;
+} PropSet() {
+	self->AuxiliaryColor = Val;
+} EndProp()
+BeginProp(RClass<UFGSignTypeDescriptor>, signType, "Sign Type", "The type of sign this prefab fits to.") {
+	Return (FINClass)self->SignTypeDesc;
+} PropSet() {
+	self->SignTypeDesc = Val;
+} EndProp()
+BeginFunc(getTextElements, "Get Text Elements", "Returns all text elements and their values.") {
+	OutVal(0, RArray<RString>, textElements, "Text Elements", "The element names for all text elements.")
+	OutVal(1, RArray<RString>, textElementValues, "Text Element Values", "The values for all text elements.")
+	Body()
+	TArray<FINAny> TextElements, TextElementValues;
+	for (const TPair<FString, FString>& Element : self->TextElementData) {
+		TextElements.Add(Element.Key);
+		TextElementValues.Add(Element.Value);
+	}
+	textElements = (FINArray)TextElements;
+	textElementValues = (FINArray)TextElementValues;
+} EndFunc()
+BeginFunc(getIconElements, "Get Icon Elements", "Returns all icon elements and their values.") {
+	OutVal(0, RArray<RString>, iconElements, "Icon Elements", "The element names for all icon elements.")
+	OutVal(1, RArray<RInt>, iconElementValues, "Icon Element Values", "The values for all icon elements.")
+	Body()
+	TArray<FINAny> IconElements, IconElementValues;
+	for (const TPair<FString, int32>& Element : self->IconElementData) {
+		IconElements.Add(Element.Key);
+		IconElementValues.Add((FINInt)Element.Value);
+	}
+	iconElements = IconElements;
+	iconElementValues = IconElementValues;
+} EndFunc()
+BeginFunc(setTextElements, "Set Text Elements", "Sets all text elements and their values.") {
+	InVal(0, RArray<RString>, textElements, "Text Elements", "The element names for all text elements.")
+	InVal(1, RArray<RString>, textElementValues, "Text Element Values", "The values for all text elements.")
+	Body()
+	if (textElements.Num() != textElementValues.Num()) throw FFINException(TEXT("Count of element names and element values are not the same."));
+	self->TextElementData.Empty();
+	for (int i = 0; i < textElements.Num(); ++i) {
+		self->TextElementData.Add(textElements[i].GetString(), textElementValues[i].GetString());
+	}
+} EndFunc()
+BeginFunc(setIconElements, "Set Icon Elements", "Sets all icon elements and their values.") {
+	InVal(0, RArray<RString>, iconElements, "Icon Elements", "The element names for all icon elements.")
+	InVal(1, RArray<RInt>, iconElementValues, "Icon Element Values", "The values for all icon elements.")
+	Body()
+	if (iconElements.Num() != iconElementValues.Num()) throw FFINException(TEXT("Count of element names and element values are not the same."));
+	self->IconElementData.Empty();
+	for (int i = 0; i < iconElements.Num(); ++i) {
+		self->IconElementData.Add(iconElements[i].GetString(), iconElementValues[i].GetInt());
+	}
+} EndFunc()
+BeginFunc(setTextElement, "Set Text Element", "Sets a text element with the given element name.") {
+	InVal(0, RString, elementName, "Element Name", "The name of the text element")
+	InVal(1, RString, value, "Value", "The value of the text element")
+	Body()
+	self->TextElementData.Add(elementName, value);
+} EndFunc()
+BeginFunc(setIconElement, "Set Icon Element", "Sets a icon element with the given element name.") {
+	InVal(0, RString, elementName, "Element Name", "The name of the icon element")
+	InVal(1, RInt, value, "Value", "The value of the icon element")
+	Body()
+	self->IconElementData.Add(elementName, value);
+} EndFunc()
+BeginFunc(getTextElement, "Get Text Element", "Gets a text element with the given element name.") {
+	InVal(0, RString, elementName, "Element Name", "The name of the text element")
+	OutVal(1, RInt, value, "Value", "The value of the text element")
+	Body()
+	FString* Element = self->TextElementData.Find(elementName);
+	if (!Element) throw FFINException(TEXT("No element with the given name found"));
+	value = *Element;
+} EndFunc()
+BeginFunc(getIconElement, "Get Icon Element", "Gets a icon element with the given element name.") {
+	InVal(0, RString, elementName, "Element Name", "The name of the icon element")
+	OutVal(1, RInt, value, "Value", "The value of the icon element")
+	Body()
+	int* Element = self->IconElementData.Find(elementName);
+	if (!Element) throw FFINException(TEXT("No element with the given name found"));
+	value = (FINInt)*Element;
+} EndFunc()
+EndStruct()
+
 BeginClass(UFGRecipe, "Recipe", "Recipe", "A struct that holds information about a recipe in its class. Means don't use it as object, use it as class type!")
 BeginClassProp(RString, name, "Name", "The name of this recipe.") {
 	Return (FINStr)UFGRecipe::GetRecipeName(self).ToString();
@@ -2087,6 +2294,19 @@ EndClass()
 BeginStruct(FFINFuture, "Future", "Future", "A Future struct MAY BE HANDLED BY CPU IMPLEMENTATION differently, generaly, this is used to make resources available on a later point in time. Like if data won't be avaialble right away and you have to wait for it to process first. Like when you do a HTTP Request, then it takes some time to get the data from the web server. And since we don't want to halt the game and wait for the data, you can use a future to check if the data is available, or let just the Lua Code wait, till the data becomes available.")
 EndStruct()
 
+BeginStruct(FVector2D, "Vector2D", "Vector 2D", "Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space")
+BeginProp(RFloat, x, "X", "The X coordinate component") {
+	Return self->X;
+} PropSet() {
+	self->X = Val;
+} EndProp()
+BeginProp(RFloat, y, "Y", "The Y coordinate component") {
+	Return self->Y;
+} PropSet() {
+	self->Y = Val;
+} EndProp()
+EndStruct()
+
 BeginStruct(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
 	Return self->X;
@@ -2129,10 +2349,54 @@ BeginProp(RTrace<AFGBuildableRailroadStation>, station, "Station", "The station 
 } PropSet() {
 	self->Station = Val;
 } EndProp()
-BeginProp(RFloat, duration, "Duration", "The time interval the train will wait at the station") {
-	Return self->Duration;
+BeginProp(RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set wich describe when the train will depart from the train station") {
+	Return self->RuleSet;
 } PropSet() {
-	self->Duration = Val;
+	self->RuleSet = Val;
+} EndProp()
+EndStruct()
+
+BeginStruct(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
+BeginProp(RInt, definition, "Defintion", "0 = Load/Unload Once, 1 = Fully Load/Unload") {
+	Return (FINInt)self->DockingDefinition;
+} PropSet() {
+	self->DockingDefinition = (ETrainDockingDefinition)Val;
+} EndProp()
+BeginProp(RFloat, duration, "Duration", "The amount of time the train will dock at least.") {
+	Return self->DockForDuration;
+} PropSet() {
+	self->DockForDuration = Val;
+} EndProp()
+BeginProp(RBool, isDurationAndRule, "Is Duration and Rule", "True if the duration of the train stop and the other rules have to be applied.") {
+	Return self->IsDurationAndRule;
+} PropSet() {
+	self->IsDurationAndRule = Val;
+} EndProp()
+BeginProp(RArray<RClass<UFGItemDescriptor>>, loadFilters, "Load Filters", "The types of items that will be loaded.") {
+	TArray<FINAny> Filters;
+	for (TSubclassOf<UFGItemDescriptor> Filter : self->LoadFilterDescriptors) {
+		Filters.Add((FINClass)Filter);
+	}
+	Return Filters;
+} PropSet() {
+	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
+	for (const FINAny& Filter : Val) {
+		Filters.Add(Filter.GetClass());
+	}
+	self->LoadFilterDescriptors = Filters;
+} EndProp()
+BeginProp(RArray<RClass<UFGItemDescriptor>>, unloadFilters, "Unload Filters", "The types of items that will be unloaded.") {
+	TArray<FINAny> Filters;
+	for (TSubclassOf<UFGItemDescriptor> Filter : self->UnloadFilterDescriptors) {
+		Filters.Add((FINClass)Filter);
+	}
+	Return Filters;
+} PropSet() {
+	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
+	for (const FINAny& Filter : Val) {
+		Filters.Add(Filter.GetClass());
+	}
+	self->UnloadFilterDescriptors = Filters;
 } EndProp()
 EndStruct()
 

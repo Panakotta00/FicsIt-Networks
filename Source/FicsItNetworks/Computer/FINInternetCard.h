@@ -11,11 +11,11 @@ USTRUCT()
 struct FFINInternetCardHttpRequestFuture : public FFINFuture {
 	GENERATED_BODY()
 private:
-	TSharedPtr<IHttpRequest> Request;
+	TSharedPtr<IHttpRequest, ESPMode::ThreadSafe> Request;
 
 public:
 	FFINInternetCardHttpRequestFuture() = default;
-	FFINInternetCardHttpRequestFuture(TSharedRef<IHttpRequest> InRequest);
+	FFINInternetCardHttpRequestFuture(TSharedRef<IHttpRequest, ESPMode::ThreadSafe> InRequest);
 	
 	// Begin FFINFuture
 	virtual void Execute() override;
@@ -31,10 +31,10 @@ public:
 	UFUNCTION()
 	FFINInternetCardHttpRequestFuture netFunc_request(const FString& InURL, const FString& InMethod, const FString& InData, TArray<FFINAnyNetworkValue> varargs);
 	UFUNCTION()
-	void netFuncMeta_send(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+	void netFuncMeta_request(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "request";
 		DisplayName = FText::FromString("Request");
-		Description = FText::FromString("Does an HTTP-Request. If a payload is given, the Content-Type header has to be set. All additional parameters have to be strings and in pairs of to for defining the http headers and values.");
+		Description = FText::FromString("Does an HTTP-Request. If a payload is given, the Content-Type header has to be set. All additional parameters have to be strings and in pairs of two for defining the http headers and values.");
 		ParameterInternalNames.Add("url");
 		ParameterDisplayNames.Add(FText::FromString("URL"));
 		ParameterDescriptions.Add(FText::FromString("The URL for which you want to make an HTTP Request."));

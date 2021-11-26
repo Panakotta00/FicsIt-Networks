@@ -31,7 +31,8 @@ public class FicsItNetworks : ModuleRules
             "Json",
             "ApplicationCore",
             "Vorbis",
-            "Http"
+            "Http",
+            "AudioPlatformConfiguration"
 		});
 
         if (Target.Type == TargetRules.TargetType.Editor) {

@@ -109,8 +109,15 @@ namespace FicsItKernel {
 		
 		LuaFunc(luaComputerPCIDevices)
 			lua_newtable(L);
-			FFINNetworkTrace Obj = getObjInstance(L, 1, UFINClass::StaticClass());
-			UFINClass* Type = Cast<UFINClass>(Obj.Get());
+			int args = lua_gettop(L);
+			UFINClass* Type = nullptr;
+			if (args > 0) {
+				FFINNetworkTrace Obj = getObjInstance(L, 1, UFINClass::StaticClass());
+				Type = Cast<UFINClass>(Obj.Get());
+				if (!Type) {
+					return 1;
+				}
+			}
 			int i = 1;
 			for (TScriptInterface<IFINPciDeviceInterface> Device : kernel->GetPCIDevices()) {
 				if (!Device || (Type && !Device.GetObject()->IsA(Cast<UClass>(Type->GetOuter())))) continue;
