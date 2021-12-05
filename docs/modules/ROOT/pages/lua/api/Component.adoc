@@ -57,6 +57,8 @@ Entries are Nil if the network component with the given ID was not found.
 Searches the component network for components with the given query or have the given type. +
 You can pass multiple parameters and each parameter will be handled separately and returns a corresponding return value.
 
+Note: returns components on ALL networks, not just the one the current computer is on.
+
 Parameters::
 +
 [cols="1,1,4a"]
