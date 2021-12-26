@@ -267,7 +267,7 @@ void AFINSizeablePanel::SetPanelSize(int width, int height) {
 	auto InY = 5 + (PanelWidth < 0?0:FMath::Abs(PanelWidth) - 1) * 10;
 	auto InZ = -5 + (PanelHeight < 0?(PanelHeight + 1) * 10:0);
 	ModularPanel->SetMobility(EComponentMobility::Movable);
-	ModularPanel->SetRelativeLocation(FVector(7, InY, InZ));
+	ModularPanel->SetRelativeLocation(FVector(7.05, InY, InZ));
 	ModularPanel->SetRelativeRotation(FRotator(90, 180, 0));
 	float plx;
 	float ply;
