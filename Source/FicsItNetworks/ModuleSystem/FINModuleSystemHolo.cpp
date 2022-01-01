@@ -1,5 +1,6 @@
 #include "FINModuleSystemHolo.h"
 
+#include "FGColoredInstanceMeshProxy.h"
 #include "Buildables/FGBuildable.h"
 
 #include "FINModuleSystemModule.h"
@@ -139,6 +140,37 @@ void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit)
 	loc = Snapped->GetComponentToWorld().TransformPosition(loc);
 	SetActorScale3D(Snapped->GetComponentScale());
 	SetActorLocationAndRotation(loc, rot);
+
+	if(IsValid(CompassRose)) {
+		FVector ActorOrigin = {0, 0, 0};
+		FVector ActorExtent = {0,0,0};
+		this->GetActorBounds(false, ActorOrigin, ActorExtent);
+		UE_LOG(LogFicsItNetworks, Log, TEXT("Origin: %s"), *(ActorOrigin.ToString()));
+		UE_LOG(LogFicsItNetworks, Log, TEXT("Extent: %s"), *(ActorExtent.ToString()));
+		ActorOrigin-= this->GetActorLocation(); 
+		ActorOrigin.Z+= FMath::Abs(ActorExtent.Z) + 1;
+		ActorOrigin.X-= 2;
+		FVector ActorLocation = {-2,0,FMath::Abs(ActorExtent.Z) + 1};
+		UE_LOG(LogFicsItNetworks, Log, TEXT("Origin local: %s"), *(ActorOrigin.ToString()));
+		UE_LOG(LogFicsItNetworks, Log, TEXT("Origin location: %s"), *(ActorLocation.ToString()));
+		//FVector ArrowLocation = {0, }
+		CompassRose->SetRelativeLocation(ActorLocation);
+	}
+	
+	//if(IsValid(CompassComponent)) {
+	//	FVector ActorOrigin = {0, 0, 0};
+	//	FVector ActorExtent = {0,0,0};
+	//	this->GetActorBounds(false, ActorOrigin, ActorExtent);
+	//	UE_LOG(LogFicsItNetworks, Log, TEXT("Actor Origin: %s"), *(ActorOrigin.ToString()));
+	//	UE_LOG(LogFicsItNetworks, Log, TEXT("Actor Extent: %s"), *(ActorExtent.ToString()));
+	//	ActorOrigin-= this->GetActorLocation(); 
+	//	ActorOrigin.Z+= FMath::Abs(ActorExtent.Z) + 1;
+	//	ActorOrigin.X-= 2;
+	//	const FVector ActorLocation = {-2,0,FMath::Abs(ActorExtent.Z) + 1};
+	//	CompassComponent->SetRelativeLocation(ActorLocation);
+	//	UE_LOG(LogFicsItNetworks, Log, TEXT("New Origin: %s"), *(ActorOrigin.ToString()));
+	//	UE_LOG(LogFicsItNetworks, Log, TEXT("New Location: %s"), *(ActorLocation.ToString()));
+	//}
 }
 
 void AFINModuleSystemHolo::CheckValidPlacement() {
@@ -148,27 +180,32 @@ void AFINModuleSystemHolo::CheckValidPlacement() {
 void AFINModuleSystemHolo::BeginPlay() {
 	Super::BeginPlay();
 	//if(this->GetRecipe()->Getname)
+	UStaticMesh* ArrowMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Components/Helpers/Arrow2.Arrow2"), NULL, LOAD_None, NULL);
+	CompassRose = NewObject<UStaticMeshComponent>(this);
+	CompassRose->RegisterComponent();
+	CompassRose->SetMobility(EComponentMobility::Movable);
+	CompassRose->SetStaticMesh(ArrowMesh);
+	CompassRose->AttachToComponent(this->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+	CompassRose->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CompassRose->SetVisibility(true);
+	CompassRose->SetRelativeScale3D(FVector(0.5, 0.5, 0.5 ));
+	CompassRose->SetRelativeRotation(FRotator(0.000000,90.000000,-90.000000));
+	//auto actor = Cast<AActor>(mBuildClass->GetDefaultObject());
 	FVector ActorOrigin = {0, 0, 0};
 	FVector ActorExtent = {0,0,0};
 	this->GetActorBounds(false, ActorOrigin, ActorExtent);
-	UStaticMesh* ArrowMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Components/Helpers/Arrow2.Arrow2"), NULL, LOAD_None, NULL);
-	auto comp = NewObject<UStaticMeshComponent>(this);
-	comp->RegisterComponent();
-	comp->SetMobility(EComponentMobility::Movable);
-	comp->SetStaticMesh(ArrowMesh);
-	comp->AttachToComponent(this->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-	comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	comp->SetVisibility(true);
-	comp->SetRelativeScale3D(FVector(0.5, 0.5, 0.5 ));
-	comp->SetRelativeRotation(FRotator(0.000000,90.000000,-90.000000));
-	//auto actor = Cast<AActor>(mBuildClass->GetDefaultObject());
 	UE_LOG(LogFicsItNetworks, Log, TEXT("Origin: %s"), *(ActorOrigin.ToString()));
 	UE_LOG(LogFicsItNetworks, Log, TEXT("Extent: %s"), *(ActorExtent.ToString()));
 	ActorOrigin-= this->GetActorLocation(); 
 	ActorOrigin.Z+= FMath::Abs(ActorExtent.Z) + 1;
 	ActorOrigin.X-= 2;
+	FVector ActorLocation = {-2,0,FMath::Abs(ActorExtent.Z) + 1};
 	UE_LOG(LogFicsItNetworks, Log, TEXT("Origin local: %s"), *(ActorOrigin.ToString()));
+	UE_LOG(LogFicsItNetworks, Log, TEXT("Origin location: %s"), *(ActorLocation.ToString()));
 	//FVector ArrowLocation = {0, }
-	comp->SetRelativeLocation(ActorOrigin);
+	CompassRose->SetRelativeLocation(ActorLocation);
 
+}
+void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
+	Super::OnConstruction(MovieSceneBlends);
 }

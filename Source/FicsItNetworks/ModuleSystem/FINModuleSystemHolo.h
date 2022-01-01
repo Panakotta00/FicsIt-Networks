@@ -33,9 +33,12 @@ public:
 	virtual void SetHologramLocationAndRotation(const FHitResult& hit) override;
 	virtual void CheckValidPlacement() override;
 	virtual void BeginPlay() override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 	// End AFGHologram
-
+	
 private:
 	bool checkSpace(FVector min, FVector max);
 	FVector getModuleSize();
+
+	UStaticMeshComponent* CompassRose = nullptr;
 };
