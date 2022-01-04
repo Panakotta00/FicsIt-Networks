@@ -2050,6 +2050,9 @@ BeginProp(RBool, isLightEnabled, "Is Light Enabled", "True if the lights should 
 	return self->IsLightEnabled();
 } PropSet() {
 	self->SetLightEnabled(Val);
+	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
+		Cast<AFGBuildableLightSource>(Light)->SetLightEnabled(Val);
+	}
 } EndProp()
 BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the lights should automatically turn on and off depending on the time of the day.") {
 	return self->GetLightControlData().IsTimeOfDayAware;
@@ -2057,6 +2060,9 @@ BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the lights s
 	FLightSourceControlData data = self->GetLightControlData();
 	data.IsTimeOfDayAware = Val;
 	self->SetLightControlData(data);
+	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
+		Cast<AFGBuildableLightSource>(Light)->SetLightControlData(data);
+	}
 } EndProp()
 BeginProp(RFloat, intensity, "Intensity", "The intensity of the lights.") {
 	return self->GetLightControlData().Intensity;
@@ -2064,6 +2070,9 @@ BeginProp(RFloat, intensity, "Intensity", "The intensity of the lights.") {
 	FLightSourceControlData data = self->GetLightControlData();
 	data.Intensity = Val;
 	self->SetLightControlData(data);
+	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
+		Cast<AFGBuildableLightSource>(Light)->SetLightControlData(data);
+	}
 } EndProp()
 BeginProp(RInt, colorSlot, "Color Slot", "The color slot the lights should use.") {
 	return (int64) self->GetLightControlData().ColorSlotIndex;
@@ -2071,7 +2080,17 @@ BeginProp(RInt, colorSlot, "Color Slot", "The color slot the lights should use."
 	FLightSourceControlData data = self->GetLightControlData();
 	data.ColorSlotIndex = Val;
 	self->SetLightControlData(data);
+	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
+		Cast<AFGBuildableLightSource>(Light)->SetLightControlData(data);
+	}
 } EndProp()
+BeginFunc(setColorFromSlot, "Set Color from Slot", "Allows to update the light color that is referenced by the given slot.", 0) {
+	InVal(0, RInt, slot, "Slot", "The slot you want to update the referencing color for.")
+	InVal(1, RStruct<FLinearColor>, color, "Color", "The color this slot should now reference.")
+	Body()
+	AFGBuildableSubsystem* SubSys = AFGBuildableSubsystem::Get(self);
+	Cast<AFGGameState>(self->GetWorld()->GetGameState())->Server_SetBuildableLightColorSlot(slot, color);
+} EndFunc()
 EndClass()
 
 BeginClass(AFGBuildableSignBase, "SignBase", "Sign Base", "The base class for all signs in the game.")
