@@ -875,7 +875,7 @@ BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click
 			RepDetailActor->FlushReplicationActorStateToOwner();
 		}
 	}
-	self->SortInventory();
+	if (!self->IsLocked() && self->GetCanBeRearranged()) self->SortInventory();
 } EndFunc()
 BeginFunc(flush, "Flush", "Removes all discardable items from the inventory completely. They will be gone! No way to get them back!", 0) {
 	Body()
