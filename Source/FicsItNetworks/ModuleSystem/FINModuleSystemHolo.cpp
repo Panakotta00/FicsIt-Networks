@@ -141,18 +141,10 @@ void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit)
 	SetActorScale3D(Snapped->GetComponentScale());
 	SetActorLocationAndRotation(loc, rot);
 
-	if(IsValid(CompassRose)) {
-		FVector ActorOrigin = {0, 0, 0};
-		FVector ActorExtent = {0,0,0};
-		this->GetActorBounds(false, ActorOrigin, ActorExtent);
-		UE_LOG(LogFicsItNetworks, Log, TEXT("Origin: %s"), *(ActorOrigin.ToString()));
-		UE_LOG(LogFicsItNetworks, Log, TEXT("Extent: %s"), *(ActorExtent.ToString()));
-		ActorOrigin-= this->GetActorLocation(); 
-		ActorOrigin.Z+= FMath::Abs(ActorExtent.Z) + 1;
-		ActorOrigin.X-= 2;
-		FVector ActorLocation = {-2,0,FMath::Abs(ActorExtent.Z) + 1};
-		UE_LOG(LogFicsItNetworks, Log, TEXT("Origin local: %s"), *(ActorOrigin.ToString()));
-		UE_LOG(LogFicsItNetworks, Log, TEXT("Origin location: %s"), *(ActorLocation.ToString()));
+	if(ShowCompass && IsValid(CompassRose)) {
+		//AFGBuildable* module = const_cast<AFGBuildable*>(GetDefault<AFGBuildable>(mBuildClass));
+		FVector ActorLocation = { (getModuleSize().X - 1) * 5,  (getModuleSize().Y - 1 ) * 5,0};
+		ActorLocation += CompassSurfaceOffset;
 		//FVector ArrowLocation = {0, }
 		CompassRose->SetRelativeLocation(ActorLocation);
 	}
@@ -180,32 +172,30 @@ void AFINModuleSystemHolo::CheckValidPlacement() {
 void AFINModuleSystemHolo::BeginPlay() {
 	Super::BeginPlay();
 	//if(this->GetRecipe()->Getname)
-	UStaticMesh* ArrowMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Components/Helpers/Arrow2.Arrow2"), NULL, LOAD_None, NULL);
-	CompassRose = NewObject<UStaticMeshComponent>(this);
-	CompassRose->RegisterComponent();
-	CompassRose->SetMobility(EComponentMobility::Movable);
-	CompassRose->SetStaticMesh(ArrowMesh);
-	CompassRose->AttachToComponent(this->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-	CompassRose->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	CompassRose->SetVisibility(true);
-	CompassRose->SetRelativeScale3D(FVector(0.5, 0.5, 0.5 ));
-	CompassRose->SetRelativeRotation(FRotator(0.000000,90.000000,-90.000000));
-	//auto actor = Cast<AActor>(mBuildClass->GetDefaultObject());
-	FVector ActorOrigin = {0, 0, 0};
-	FVector ActorExtent = {0,0,0};
-	this->GetActorBounds(false, ActorOrigin, ActorExtent);
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Origin: %s"), *(ActorOrigin.ToString()));
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Extent: %s"), *(ActorExtent.ToString()));
-	ActorOrigin-= this->GetActorLocation(); 
-	ActorOrigin.Z+= FMath::Abs(ActorExtent.Z) + 1;
-	ActorOrigin.X-= 2;
-	FVector ActorLocation = {-2,0,FMath::Abs(ActorExtent.Z) + 1};
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Origin local: %s"), *(ActorOrigin.ToString()));
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Origin location: %s"), *(ActorLocation.ToString()));
-	//FVector ArrowLocation = {0, }
-	CompassRose->SetRelativeLocation(ActorLocation);
 
 }
 void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
 	Super::OnConstruction(MovieSceneBlends);
+
+	if(ShowCompass) {
+		CompassRose = NewObject<UStaticMeshComponent>(this);
+		CompassRose->RegisterComponent();
+		CompassRose->SetMobility(EComponentMobility::Movable);
+		if(CompassMesh == nullptr || !IsValid(CompassMesh)) {
+			UStaticMesh* ArrowMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Components/Helpers/Arrow2.Arrow2"), NULL, LOAD_None, NULL);
+			CompassRose->SetStaticMesh(ArrowMesh);
+		}else {
+			CompassRose->SetStaticMesh(CompassMesh);
+		}
+		CompassRose->AttachToComponent(this->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		CompassRose->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		CompassRose->SetVisibility(true);
+		CompassRose->SetRelativeScale3D(CompassScale);
+		CompassRose->SetRelativeRotation(CompassRotation);
+
+		FVector ActorLocation = {0,0,0};
+		ActorLocation += CompassSurfaceOffset;
+
+		CompassRose->SetRelativeLocation(ActorLocation);
+	}
 }

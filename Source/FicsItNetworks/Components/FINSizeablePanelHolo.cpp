@@ -28,9 +28,9 @@ void AFINSizeablePanelHolo::OnConstruction(const FTransform& Transform) {
 		UStaticMesh* CC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCenterMesh;
 		UStaticMesh* Con = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelConnectorMesh;
 		AFINSizeablePanel::SpawnComponents(UStaticMeshComponent::StaticClass(), PanelWidth, PanelHeight, UL, UC, CC, Con, this, RootComponent, Parts);
-		RootComponent->SetMobility(EComponentMobility::Static);
+		RootComponent->SetMobility(EComponentMobility::Movable);
 		for (UStaticMeshComponent* Part : Parts) {
-			Part->SetMobility(EComponentMobility::Static);
+			Part->SetMobility(EComponentMobility::Movable);
 			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 	}
