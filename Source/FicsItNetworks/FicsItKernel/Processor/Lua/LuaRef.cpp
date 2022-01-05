@@ -103,8 +103,7 @@ namespace FicsItKernel {
 			if (Property) {
 				// ReSharper disable once CppEntityAssignedButNoRead
 				// ReSharper disable once CppJoinDeclarationAndAssignment
-				FINAny Value;
-				luaToNetworkValue(L, 3, Value);
+				FINAny Value = luaToProperty(L, Property, 3);
 				
 				TSharedPtr<FLuaSyncCall> SyncCall;
 				EFINRepPropertyFlags PropFlags = Property->GetPropertyFlags();

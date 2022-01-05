@@ -832,6 +832,12 @@ EndClass()
 BeginClass(UFGInventoryComponent, "Inventory", "Inventory", "A actor component that can hold multiple item stacks.")
 BeginFuncVA(getStack, "Get Stack", "Returns the item stack at the given index.\nTakes integers as input and returns the corresponding stacks.") {
 	Body()
+	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
+		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
+		if (RepDetailActor) {
+			RepDetailActor->FlushReplicationActorStateToOwner();
+		}
+	}
 	int ArgNum = Params.Num();
 	for (int i = 0; i < ArgNum; ++i) {
 		const FINAny& Any = Params[i];
@@ -844,17 +850,41 @@ BeginFuncVA(getStack, "Get Stack", "Returns the item stack at the given index.\n
 	}
 } EndFunc()
 BeginProp(RInt, itemCount, "Item Count", "The absolute amount of items in the whole inventory.") {
+	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
+		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
+		if (RepDetailActor) {
+			RepDetailActor->FlushReplicationActorStateToOwner();
+		}
+	}
 	Return (int64)self->GetNumItems(nullptr);
 } EndProp()
 BeginProp(RInt, size, "Size", "The count of available item stack slots this inventory has.") {
+	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
+		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
+		if (RepDetailActor) {
+			RepDetailActor->FlushReplicationActorStateToOwner();
+		}
+	}
 	Return (int64)self->GetSizeLinear();
 } EndProp()
 BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click into a inventory)") {
 	Body()
-	self->SortInventory();
+	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
+		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
+		if (RepDetailActor) {
+			RepDetailActor->FlushReplicationActorStateToOwner();
+		}
+	}
+	if (!self->IsLocked() && self->GetCanBeRearranged()) self->SortInventory();
 } EndFunc()
 BeginFunc(flush, "Flush", "Removes all discardable items from the inventory completely. They will be gone! No way to get them back!", 0) {
 	Body()
+	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
+		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
+		if (RepDetailActor) {
+			RepDetailActor->FlushReplicationActorStateToOwner();
+		}
+	}
 	TArray<FInventoryStack> stacks;
 	self->GetInventoryStacks(stacks);
 	self->Empty();
@@ -2020,6 +2050,9 @@ BeginProp(RBool, isLightEnabled, "Is Light Enabled", "True if the lights should 
 	return self->IsLightEnabled();
 } PropSet() {
 	self->SetLightEnabled(Val);
+	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
+		Cast<AFGBuildableLightSource>(Light)->SetLightEnabled(Val);
+	}
 } EndProp()
 BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the lights should automatically turn on and off depending on the time of the day.") {
 	return self->GetLightControlData().IsTimeOfDayAware;
@@ -2027,6 +2060,9 @@ BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the lights s
 	FLightSourceControlData data = self->GetLightControlData();
 	data.IsTimeOfDayAware = Val;
 	self->SetLightControlData(data);
+	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
+		Cast<AFGBuildableLightSource>(Light)->SetLightControlData(data);
+	}
 } EndProp()
 BeginProp(RFloat, intensity, "Intensity", "The intensity of the lights.") {
 	return self->GetLightControlData().Intensity;
@@ -2034,6 +2070,9 @@ BeginProp(RFloat, intensity, "Intensity", "The intensity of the lights.") {
 	FLightSourceControlData data = self->GetLightControlData();
 	data.Intensity = Val;
 	self->SetLightControlData(data);
+	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
+		Cast<AFGBuildableLightSource>(Light)->SetLightControlData(data);
+	}
 } EndProp()
 BeginProp(RInt, colorSlot, "Color Slot", "The color slot the lights should use.") {
 	return (int64) self->GetLightControlData().ColorSlotIndex;
@@ -2041,7 +2080,17 @@ BeginProp(RInt, colorSlot, "Color Slot", "The color slot the lights should use."
 	FLightSourceControlData data = self->GetLightControlData();
 	data.ColorSlotIndex = Val;
 	self->SetLightControlData(data);
+	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
+		Cast<AFGBuildableLightSource>(Light)->SetLightControlData(data);
+	}
 } EndProp()
+BeginFunc(setColorFromSlot, "Set Color from Slot", "Allows to update the light color that is referenced by the given slot.", 0) {
+	InVal(0, RInt, slot, "Slot", "The slot you want to update the referencing color for.")
+	InVal(1, RStruct<FLinearColor>, color, "Color", "The color this slot should now reference.")
+	Body()
+	AFGBuildableSubsystem* SubSys = AFGBuildableSubsystem::Get(self);
+	Cast<AFGGameState>(self->GetWorld()->GetGameState())->Server_SetBuildableLightColorSlot(slot, color);
+} EndFunc()
 EndClass()
 
 BeginClass(AFGBuildableSignBase, "SignBase", "Sign Base", "The base class for all signs in the game.")

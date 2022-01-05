@@ -4,7 +4,9 @@
 #include "FGPowerCircuit.h"
 #include "LuaProcessor.h"
 #include "LuaInstance.h"
+#include "FicsItNetworks/Network/FINNetworkCircuit.h"
 #include "FicsItNetworks/Network/FINNetworkTrace.h"
+#include "FicsItNetworks/Network/FINNetworkUtils.h"
 #include "FicsItNetworks/Network/Signals/FINSignalSubsystem.h"
 
 namespace FicsItKernel {
@@ -108,6 +110,18 @@ namespace FicsItKernel {
 			return 0;
 		}
 
+		int luaKaito(lua_State* L) {
+			TScriptInterface<IFINNetworkComponent> Component = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->GetComponent();
+			if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return 0;
+			AFINSignalSubsystem* SubSys = AFINSignalSubsystem::GetSignalSubsystem(Component.GetObject());
+			TSet<UObject*> Components = IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->GetComponents();
+			for (UObject* Comp : Components) {
+				FFINNetworkTrace Sender = UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(Comp));
+				SubSys->Listen(*Sender, Sender / Component.GetObject());
+			}
+			return 0;
+		}
+
 		static const luaL_Reg luaEventLib[] = {
 			{"listen", luaListen},
 			{"listening", luaListening},
@@ -122,6 +136,12 @@ namespace FicsItKernel {
 			PersistSetup("Event", -2);
 			lua_newtable(L);
 			luaL_setfuncs(L, luaEventLib, 0);
+			lua_newtable(L);
+			lua_newtable(L);
+			lua_pushcfunction(L, &luaKaito);
+			lua_setfield(L, -2, "kaito");
+			lua_setfield(L, -2, "__index");
+			lua_setmetatable(L, -2);
 			PersistTable("Lib", -1);
 			lua_setglobal(L, "event");
 			lua_pushcfunction(L, (int(*)(lua_State*))luaPullContinue);
