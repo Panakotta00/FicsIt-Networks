@@ -75,6 +75,7 @@ void AFINNetworkAdapter::OnConstruction(const FTransform& Transform) {
 	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
 	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
 	ConnectorMesh->SetHiddenInGame(true, true);
+	ConnectorMesh->SetVisibility(false);
 }
 
 void AFINNetworkAdapter::BeginPlay() {
@@ -128,8 +129,14 @@ void AFINNetworkAdapter::BeginPlay() {
 		ConnectorMesh->SetHiddenInGame(!setting.mesh, true);
 		ConnectorMesh->SetInstanced(false);
 		ConnectorMesh->SetInstanced(true);
+		ConnectorMesh->SetVisibility(true);
 		Connector->MaxCables = setting.maxCables;
 		break;
+	} else {
+		ConnectorMesh->SetHiddenInGame(true, true);
+		ConnectorMesh->SetInstanced(false);
+		ConnectorMesh->SetInstanced(true);
+		ConnectorMesh->SetVisibility(false);
 	}
 }
 

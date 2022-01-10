@@ -249,7 +249,7 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 			FScopeLock Lock(&DrawingMutex);
             return &FrontBuffer;
 		})
-		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/GuiHelpers/Inconsolata_Font.Inconsolata_Font'")), 12, "InConsolata"))
+		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/UI/FiraCode.FiraCode'")), 12, "FiraCode-Regular"))
 		.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
 			RCO->GPUMouseEvent(this, 0, x, y, btn);
 			return FReply::Handled();
