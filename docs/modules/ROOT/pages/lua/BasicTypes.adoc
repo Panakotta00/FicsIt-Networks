@@ -13,6 +13,35 @@ A value of such a type is also known as `Instance` or `Reference` to a object.
 
 You can access these functions and properties like you do in normal tables (a period `.` or array operator `[]`).
 
+=== Additional Fields
+Is a Instance additionally a network Component, which is not directly class, then it has some additional fields:
+
+==== Nick `nick`
+The `nick` field is a string field you can read and write to.
+It allows you to access the nick of a component which you could also set with the network manager.
+One of the main purposes is to read additional data like configurations settings per component from it.
+
+```lua
+local comp = component.proxy(component.findComponent("machine")[1])
+local fields = {}
+for key, value in string.gmatch(comp.nick, "(%w+)=([^%s]+)") do
+ fields[key] = value
+end
+-- if there is now a component with the nick "machine setting1=42 setting2=meep"
+-- then the fields table will look like {"setting1"="42", "setting2"="meep"}
+```
+
+==== ID `id`
+The `id` is a read-only string field allowing you to read the UUID of the component.
+Mainly intended allowing you to print or display the ID of a component.
+For comparing/identifying components,
+use the default way of comparing/identifying instances with the hash functions and properties.
+
+```lua
+local comp = component.proxy(component.findComponent("machine")[1])
+print(comp.id) -- prints the ID of the component with a nick group "machine"
+```
+
 === Properties
 Properties can be used just normally.
 Tho read-only properties will cause a error when you try to assign a value to them
