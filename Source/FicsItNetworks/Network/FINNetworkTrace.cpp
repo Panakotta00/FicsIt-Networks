@@ -320,7 +320,9 @@ Step(UFGPowerConnectionComponent, UFGPowerInfoComponent, {
 })
 
 Step(UFINNetworkComponent, UFINNetworkComponent, {
-	return IFINNetworkCircuitNode::Execute_GetCircuit(oA)->HasNode(oB);
+	auto circuit = IFINNetworkCircuitNode::Execute_GetCircuit(oA);
+	if(circuit == nullptr) return false;
+	return circuit->HasNode(oB);
 })
 
 Step(UFINNetworkComponent, AFINNetworkCircuit, {
