@@ -19,7 +19,7 @@ pipeline {
 				checkout scm: [
 	                $class: 'GitSCM',
 	                branches: [[
-	                    name: "sml-dev"
+	                    name: "auto-header-update"
 	                ]],
 	                extensions: [[
 	                    $class: 'RelativeTargetDirectory',
