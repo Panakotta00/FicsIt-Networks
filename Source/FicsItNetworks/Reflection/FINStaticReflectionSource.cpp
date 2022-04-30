@@ -1209,7 +1209,7 @@ BeginProp(RBool, isSelfDriving, "Is Self Driving", "True if the vehicle is curre
 	Return self->IsSelfDriving();
 } PropSet() {
 	FReflectionHelper::SetPropertyValue<UBoolProperty>(self, TEXT("mIsSelfDriving"), Val);
-} EndProp()
+} EndProp() 
 EndClass()
 
 BeginClass(AFGWheeledVehicle, "WheeledVehicle", "Wheeled Vehicle", "The base class for all vehicles that used wheels for movement.")
@@ -1234,7 +1234,7 @@ BeginFunc(getCurrentTarget, "Get Current Target", "Returns the index of the targ
 	OutVal(0, RInt, index, "Index", "The index of the current target.")
 	Body()
 	AFGDrivingTargetList* List = self->GetTargetList();
-	index = (int64)List->FindTargetIndex(self->GetCurrentTarget());
+	index = (int64)List->FindTargetIndex(List->mCurrentTarget);
 } EndFunc()
 BeginFunc(nextTarget, "Next Target", "Sets the current target to the next target in the list.") {
 	Body()
@@ -1246,7 +1246,7 @@ BeginFunc(setCurrentTarget, "Set Current Target", "Sets the target with the give
 	AFGDrivingTargetList* List = self->GetTargetList();
 	AFGTargetPoint* Target = List->FindTargetByIndex(index);
 	if (!Target) throw FFINException("index out of range");
-	self->SetCurrentTarget(Target);
+	List->mCurrentTarget = Target;
 } EndFunc()
 BeginFunc(getTargetList, "Get Target List", "Returns the list of targets/path waypoints.") {
 	OutVal(0, RTrace<AFGDrivingTargetList>, targetList, "Target List", "The list of targets/path-waypoints.")
