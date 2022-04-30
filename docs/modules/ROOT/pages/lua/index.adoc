@@ -5,6 +5,19 @@ The first and most powerful coding language implement into FicsIt-Networks is Lu
 
 Visit the https://lua.org/[Lua Website] to learn more.
 
+== Useful Notes
+
+It may seem odd that things like the external libraries, the additional runtime functions and the APIs
+are not shown in the reflection viewer.
+The reflection viewer is intended to only show the contents of the reflection system
+and not as full documentation system.
+Later on we may implement more other ways to code, like visual scripting.
+These implementations will work different and can use Lua external libraries and do stuff like the APIs differently.
+Because of this, this information is only available right now in the online documentation and not in-game.
+But because of the nature of the reflection system, we are able to show all functions and properties of the system
+in the reflection viewer because these interactions will work in any implementation,
+that's the main purpose of the reflection system.
+
 == External Libraries
 
 The following list contains all available standard Lua libraries, non-standard libraries if they are reimplemented you can see the changes.
@@ -12,28 +25,7 @@ The following list contains all available standard Lua libraries, non-standard l
 - math
 - table
 - string
-- IO (only the File-Table)
-- Serialization
 - debug (parts of it for error handling)
-
-=== Specialties
-
-==== `coroutine.resume`
-
-The `coroutine.resume` function got a small upgrade allowing for the implementation of multithreading.
-
-You can use it just as usual, but if you add a parameter at the beginning
-of the parameter list (before the thread) of type bool, and it is set to true,
-then the resuming function will only keep executing until the end of this lua tick.
-After that lua tick, the function will return, and you can do something else.
-
-Important to note is though, you don't know if the resumed function yielded itself,
-or if it was due to the end of the lua tick.
-Since the return will contain nothing if it yielded based on the end of the lua tick.
-With that said, also resuming a function that yielded that way with parameters will do nothing
-about those parameters, they will just get dropped.
-
-You should have a look at the xref:lua/examples/multiThreading.adoc[multi threading example] to find a use case for it.
 
 == Additional Runtime Functions (besides APIs)
 

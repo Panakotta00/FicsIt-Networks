@@ -49,6 +49,7 @@ FFINLuaProcessorTick::FFINLuaProcessorTick(UFINLuaProcessor* Processor): Process
 
 FFINLuaProcessorTick::~FFINLuaProcessorTick() {
 	stop();
+	if (asyncTask) asyncTask->EnsureCompletion();
 }
 
 void FFINLuaProcessorTick::reset() {
