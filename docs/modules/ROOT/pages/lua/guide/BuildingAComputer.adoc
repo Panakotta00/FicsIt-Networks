@@ -1,0 +1,116 @@
+= Building a Computer
+
+In this section we will construct our first computer and learn what the different components do.
+
+There are many more things you can add to a computer to extend its functionality,
+but we won't have a look at them right now, only about the necessities.
+We will discuss these advanced features in seperated sections.
+
+All you need to do for now is to unlock the Tier 3 `Basics Networks` Schematic in the hub
+to be able to build a computer.
+
+== Basic Computer Setup
+After unlocking the `Basics Networks` Schematic you are able to build a `Computer Case` with the build gun.
+Place it somewhere to your liking.
+
+This computer case is the heart of building computers.
+Internally it also provides abstract interfaces that are necessary for the different components
+to communicate and interact with each other. This system als referred as "FicsIt-Kernel".
+
+The computer case has a network connector on the top part of the case
+that allows you to connect a network cable to the computer case.
+
+The computer case also has a "window" that scrolls up automatically when you approach the computer.
+This section is like the cover of your real computer and houses something like the motherboard.
+
+In this section you can place computer parts using the build gun.
+
+Many such computer parts are "PCI Devices" and mainly extend the computer's functionality,
+like GPUs, Network Cards and such. These PCI Devices can be accessed via a unified API in Lua code.
+We will have a look at those in a later section.
+
+Some other parts are crucial to the computers function.
+
+Such a part is the CPU. +
+There can be many types of CPUs and each of them influences the computer heavily.
+The FicsIt-Kernel's architecture allows for unified inner workings while being able to highly customize
+the way you interact with the computer based on the CPU Type.
+This also means you can only install one CPU at a time. +
+Right now there is only `Lua CPU` that allows for running Lua code in the computer.
+
+Another such crucial part is memory. +
+Depending on the type of CPU, the memory will be calculated and used differently.
+But one thing is for sure, if you are out of available memory, your program won't work as intended.
+So always add enough memory to your computer. +
+You can add as many memory bars as you want.
+
+The arrangement of the different parts doesn't matter.
+You just have to think through which parts you want to prioritize, because you might run out of space.
+
+For our basic computer setup we need for now: +
+
+* 1x `Lua CPU`
+* 1x `Memory T1`
+
+That's it, with regard to computer parts.
+
+== Computer Case UI
+After building our PC, we want to be able to interact with it. +
+For this you can simply interact with the computer like any other machine to open its UI.
+
+The UI of the computer can look different based on the type of CPU you have installed.
+If you have no CPU installed, you will be greeted with a "No CPU Detected" warning sign.
+
+The Computer UI is split into different tabs.
+
+* `Code` +
+  The first tab is defined by the given CPU and allows you to control and interact with the computer.
+* `EEPROM` +
+  The second tab allows you to interact with the computers ports. +
+  On the left you can find a large floppy drive that allows you to insert a floppy disk into the computer.
+  You can simply drag'n'drop a floppy disk onto the drive or take it out. +
+  Next to the floppy drive on the right in a thin bar you can find a slot where you can drag'n'drop an eeprom onto or from.
+* `Reflection` +
+  The third tab shows the so called `reflection viewer` which is like an in-game reference
+  for all available classes, functions and properties that are exposed using the reflection system. +
+  We will discuss this more in-depth in a later section.
+
+The Lua's code tab is split into four sections.
+
+* On the left you can find the Component Network Outliner
+  which shows all connected computer network components as well as the name of the connected computer network,
+  this computers UUID and this computers nick. +
+  We will talk about this in a later section.
+* On the bottom left you can find the power button and status LEDs. +
+  Pressing the Power button once allows you to start the computer.
+  Pressing it while the computer is already running causes the computer to get killed. +
+  The power symbol shows the computers run state.
+  Red means the computer is turned off, green means the computer is running. +
+  The warning sign is unlit by default. If the computer crashed, then it will light up.
+  It's state will be reset with the next boot of the computer.
+* On the bottom right you can find a rudimentary console log. +
+  This small window is intended for you to be able to get some basic text output for logging and debugging purposes.
+* The largest section is the coding window +
+  that allows you to edit the Lua code that is inside the EEPROM you inserted into the computer. +
+  If no EEPROM is inserted, it will show a "No EEPROM Detected" message. +
+  This window will be our best friend for the foreseeable future.
+
+== EEPROM
+There is one last thing we have to talk about before we can start coding.
+
+An EEPROM is a small storage chip that allows you to hold some code. +
+This is an item you can craft in the work bench and insert into a computer in the EEPROM tab,
+by dragging and dropping the item onto the EEPROM slot.
+
+After you have inserted such an EEPROM the computer will be able to load a basic program on boot of the computer. +
+You can view such an EEPROM chip as the storage device that holds the BIOS of your computer.
+
+Different CPUs require different types of EEPROM. +
+The Lua CPU requires a Lua/Text EEPROM.
+
+The EEPROM items persist their code, that means you can take out an EEPROM of one computer
+and insert it into another computer to use your program there instead.
+
+You can also copy the contents of an EEPROM to another EEPROM using the Data-Workbench inside a network manager tool.
+
+For this guide at first, you should craft a single EEPROM and insert into the computer you just built.

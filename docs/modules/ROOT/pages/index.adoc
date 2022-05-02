@@ -1,11 +1,60 @@
 = FicsIt-Networks
 :description: FicsIt-Networks allows you to control, monitor, manage and automate each process of you Satisfactory-Factory.
 
-FicsIt-Networks is a mod for Satisfactory, written in C++/BP using Unreal Engine and the Satisfactory Mod Loader, which allows you to control, monitor, manage and automate each process of your factory by providing a network system and programmable computers and other I/O.
+FicsIt-Networks is a mod for Satisfactory that adds computers and computer networks to the game.
+
+In the current state of the mod, the main goal is to allow the player code in-game Lua code that allows you to control, monitor, manage and automate your factory. +
+This also means the mod wont make your life easier.
+The mod is intended to add completely new gameplay mechanics just like a good DLC.
+
+To use the mod, install it using https://ficsit.app/mod/FicsItNetworks[SMM and SMR].
+
+To allow the player maximum control, currently the mod only implemented the https://lua.org[Lua-Programming Language]. +
+The mod is structured in such a way, it can be extended with other languages
+even by optional addition mods. For now the mod focuses on a good Lua implementation.
+*Don't be scared tho!* +
+Lua is a fairly easy programming language and designed for absolute programming beginners. +
+Important to note is, Lua is highly customizable by its embedding nature.
+This means even if you already have some experience with Lua,
+the API is quite different from application to application. +
+This documentation doesn't focus on "how to code with Lua",
+instead if focuses on how to adapt your Lua-Knowledge to the FicsIt-Networks environment. +
+The Documentation will link to the official Lua guide often,
+allowing you to read upon the needed aspects easily.
+
+Checkout the xref:lua/guide/index.adoc[Lua Getting Started Guide] to begin using the mod.
+
+The mod is still in development and tries to improve the ease of use. +
+One of these ventures is the FicsIt-OS.
+We try to create a system allowing players to easily reuse pre-made scripts from other users.
+But this is a venture for now. +
+Tho even right now there are ways to share scripts between players.
+
+To learn more about sharing scripts or generally using the mod,
+check out our https://discord.gg/3VfZ6Da[Discord Server].
+
+== Documentation Structure
+
+The documentation is seperated areas.
+
+- This current main area provides pages into the deep technical aspects
+  of the mod and how different systems work.
+  These pages explain in-depth how to make the most out of the mod.
+- The xref:buildings/index.adoc[Building-Section] lists all constructable buildings
+  you can place using the build gun.
+- The xref:items/index.adoc[Item-Section] lists all items the mod adds
+  which you f.e. can craft in a crafting bench.
+- The xref:lua/index.adoc[Lua-Section] contains everything related to the Lua programming language.
+  Which is the current only way to use the mod.
+- The xref::Reflection.adoc[Reflection-Section] contains a dump of the reflection system. +
+  This means it contains all the classes, functions and properties that are used
+  to interact with the game.
+  There are language specific things which are placed in their respective sections,
+  but this section contains teh whole API references to interact with f.e. constructors.
 
 == Source Code
 
-You can visit our https://github.com/CoderDE/FicsIt-Networks[GitHub-Repository] to view the source code.
+You can visit our https://github.com/Panakotta00/FicsIt-Networks[GitHub-Repository] to view the source code.
 
 include::partial$items.adoc[]
 
