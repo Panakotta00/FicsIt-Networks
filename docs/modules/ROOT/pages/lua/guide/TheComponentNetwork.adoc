@@ -111,3 +111,61 @@ using network cables with at least one network pole in between
 (The network pole is not important, we just want to have one for later use to be able to expand the network more easily).
 
 == Network Manager
+The network manager is a hand-held tool that allows you to
+interact and debug a computer component network. +
+It additionally provides the data-workbench and a portable reflection viewer.
+
+You can craft the network manager in the equipment workbench. +
+
+When you now place the network manager into your active hand slot,
+you will be able to see an outline to appear around objects you are looking at. +
+A orange outline means the object is not a computer network component,
+but you can still interact with it to f.e. get access to its functions
+via the reflection viewer or get access to the data workbench.
+This is useful since some objects (f.e. trains) can not be attached
+to the computer component network, instead it can be referred indirectly
+by calling a function of a network component (f.e. train station). +
+If the outline is blue, this means you are looking at a computer network component
+or an object that has a network adapter attached.
+
+While looking at an object, pressing the primary fire button (left mouse click)
+will open the network manager's UI with the outlined objects context.
+
+If the object was a network component or had a network adapter attached,
+then the network manager will open into the component network outliner.
+This outliner is the same as inside the computer. +
+It provides a input field to change the network component's nick, +
+a read-only field containing its UUID, +
+a field showing the name of the connected network and +
+a list of all connected network components (including it-self). +
+Each entry of the component list shows the UUID of the component
+if no nick is set for that component, or it shows the nick instead. +
+Clicking on the list entry copies that components UUID into your clipboard,
+so you can easily copy & paste the UUID if necessary. +
+The icon at the right end of such an entry is clickable and
+opens the reflection viewer with focus on the type of the network component.
+
+Holding control while opening the UI of the network manager
+will cause the UI to open into the reflection viewer tab.
+
+The reflection viewer tab is the same as inside a computer.
+When you open the tab it will show initially the class (type)
+of the object you were looking at.
+
+While looking at network component or object with a network adapter attached
+you can press `ctrl + c` to copy the components UUID into your clipboard. +
+You can also press `ctrl + shift + c` to copy the components nick. +
+And you can also press `ctrl + shift + v` to paste your clipboard into the nick field of the component.
+
+The network manager has a third tab, the data-workbench. +
+The data-workbench allows you, as already mentioned, to copy contents
+of one data storage item to another on. +
+You can place the item you want to write to into the top slot.
+The item you want to copy the data from needs to be placed into the middle slot.
+At the point when you have both these slots filled with compatible items,
+the input item in the top slot will be written with the contents of the item in the middle slot
+and be moved into the bottom output slot. +
+This only works with compatible items.
+You can not copy the data from a EEPROM to a drive or vice versa,
+but you can copy the data from one EEPROM to another or
+copy the data from one Drive to another.

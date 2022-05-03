@@ -1,0 +1,82 @@
+= Interacting with Components
+
+Enough talk! Now that we have built a computer,
+know how it works and how the component network works,
+we can finally start with writing some code to interact with machines.
+
+What we have done so far:
+
+* We built a computer case with a Lua CPU and a Memory T1 Module
+* We built a component network with one attached storage container
+
+We want to write a program that prints the count of items of the storage container
+into the console output. +
+For this we first have to reference the storage container
+and then interact with to storage container.
+
+== Lua APIs
+In the Lua runtime the CPU provides a couple of APIs and libraries that allow you
+to interact with the computer case and other internal systems.
+
+These libraries are "tables" in "global variables" containing "static" functions.
+This means you can use these libraries and their functions everywhere in your program.
+
+For now, we focus on the "component" library
+which allows us to interact with the computer component network.
+
+== Proxy Components
+As already mentioned, the UUID of a component is a unique identifier like a MAC-Address
+of a network component and can be used to reference an individual component.
+
+The `component` library provides a `proxy` function to get a Lua Reference
+of a component by its id.
+
+[source,lua]
+local container = component.proxy("123")
+
+When you replace the `123` in the code snippet above with the UUID
+of your storage container, you get a reference to it
+which is stored in the `container` variable.
+
+Using the `print` function which got reimplemented by FIN
+you can output the variable to the console.
+It will convert the reference to descriptive string for easy debugging.
+
+[source,lua]
+print(container)
+
+For a component with id `123`, nick `test meep` and type `Computer`
+you will get an output like: `123 "test meep" Computer`. +
+For a component with id `123`, no nick and type `Computer`
+you will get an output like: `123 Computer`
+
+The value that the proxy function returns is also referred as
+Object-, Component-, -Instance or -Reference. +
+These are special values created by FIN and not necessary Lua native. +
+It's of type "userdata" which behaves similar to tables in Lua. +
+Each object type also has its own meta-table. +
+But that goes more in-depth, we will have a look at those unique things
+slowly as we progress.
+
+If the proxy function can not find a network component with the given id,
+it will return `nil`.
+
+The proxy function also allows you to do batch proxies.
+Meaning you can "resolve" multiple UUIDs at the same time to their references. +
+This can be done in multiple ways.
+
+Instead of a single string you can also pass an array of strings to the proxy function,
+and it will return an array/list of references.
+
+[source,lua]
+local arr = component.proxy({"123", "456", "789"})
+print(arr[1], arr[2], arr[3]) -- 123 456 789 in that order
+
+Additionally, the proxy function can take a variable amount of arguments
+and convert each argument separately.
+It will then return the converted values in the multiple return values
+in the same order as given in the parameter list.
+
+[source,lua]
+local c1, a1, c2, a2, a3 = component.proxy("...", {...}, "...", {...}, {...})
+
