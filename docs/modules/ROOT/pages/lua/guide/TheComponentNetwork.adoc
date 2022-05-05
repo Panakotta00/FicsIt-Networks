@@ -48,7 +48,7 @@ The nick allows for one more thing. Holding data.
 You can exploit the nick property to add data like configuration data to a component.
 But your program will have to figure out how to parse this data it-self.
 
-[WARN]
+[WARNING]
 ====
 In a component network there can be an infinite amount of network components,
 but large networks are not recommended as they can be slow the game down
@@ -72,7 +72,7 @@ It also allows you to start and end with network poles and wall plugs. +
 You can place network poles and wall plugs individually if you want.
 Wall plugs can be unlocked in the AWESOME-Shop.
 
-[WARN]
+[WARNING]
 ====
 When building a cable network, make sure you actually build on the connectors, poles and plugs. +
 You might target a pole or plug not correctly and
