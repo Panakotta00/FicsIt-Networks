@@ -67,7 +67,7 @@ We will talk about that in more detail later.
 
 Here an example that gets all storage containers in the network:
 [source,lua]
-local containerIDs = component.findComponent(findClass(""))
+local containerIDs = component.findComponent(findClass("FGBuildableStorage"))
 
 == Using findComponent
 Let's expand our Item-Count program to sum the Item Count of all storage containers
@@ -76,7 +76,7 @@ in the network.
 First we need to get all containers.
 
 [source,lua]
-local containerIDs = component.findComponent(findClass(""))
+local containerIDs = component.findComponent(findClass("FGBuildableStorage"))
 local containers = component.proxy(containerIDs)
 
 After that we need to iterate our containers
@@ -104,7 +104,7 @@ print("Item-Count:", sum)
 We should now have a combined code like this:
 [source,lua]
 ----
-local containerIDs = component.findComponent(findClass(""))
+local containerIDs = component.findComponent(findClass("FGBuildableStorage"))
 local containers = component.proxy(containerIDs)
 
 local sum = 0

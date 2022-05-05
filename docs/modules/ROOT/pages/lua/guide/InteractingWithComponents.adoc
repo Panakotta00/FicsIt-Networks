@@ -175,7 +175,7 @@ Class Instances are different from Objects of Type Class. +
 Objects of type class are objects that hold information for a given type,
 while Class Instances are like singletons. +
 We use Class Instances to represent in-game "object types" that hold information.
-f.e. a Item Type (Iron Plate), doesn't have instanced, there are not many different "Iron Plate Types",
+f.e. an Item Type (Iron Plate), doesn't have instanced, there are not many "Iron Plate Types",
 there is just one type of "Iron Plate".
 Tho, such a type holds information like
 a name, if you can discard the item or not, or how much energy it releases when burned.

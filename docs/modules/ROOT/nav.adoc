@@ -39,6 +39,8 @@
 *** xref:lua/guide/BuildingAComputer.adoc[1. Building a Computer]
 *** xref:lua/guide/TheComponentNetwork.adoc[2. The Component Network]
 *** xref:lua/guide/InteractingWithComponents.adoc[3. Interacting with Components]
+*** xref:lua/guide/AdvancedNetworking.adoc[4. Advanced Networking]
+*** xref:lua/guide/StructsAndClassInstances.adoc[5. Structs and Class Instances]
 ** xref:lua/BasicTypes.adoc[Basic Types]
 ** xref:lua/api/index.adoc[APIs]
 *** xref:lua/api/Component.adoc[Component API]
