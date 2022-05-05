@@ -1,0 +1,116 @@
+= Advanced Networking
+
+Now we can access our storage container easily using the proxy function
+and a hard-coded UUID string.
+As already mentioned, is this not a good approach to get a reference to a component.
+Instead, we want a more dynamic way of referencing our components.
+
+== Using component nicks
+We can use the component nicks to reference the components more dynamically.
+
+For this we can use the `findComponent` function of the `component` API.
+
+The `findComponent` function takes in variable amount of arguments,
+where each argument is a string containing a nick query. +
+Each parameter has a corresponding return value.
+These return values are arrays of strings containing the IDs of the components
+that mach the given nick query.
+
+As already mentioned, the keywords in the query are space separated
+and matching components have to have at least the queried keywords in their nick.
+
+Imagine you have the components A `test meep north`, B `test meep south`, C `test north okay`, D `okay test south`, E `okay`. +
+The query `test meep north` matches A. +
+The query `test norh` matches A and C. +
+The query `okay` matches C, D and E. +
+The query `north` matches A and C. +
+The query `okay meep` matches nothing.
+
+Here is some sample code using it:
+[source,lua]
+local comps1, comps2 = component.findComponent("test north", "okay")
+
+You can inline use it with the proxy function to convert the ids into references.
+
+[source,lua]
+local comps = component.proxy(component.findComponent("..."))
+local comp1 = comps[1] -- access first entry in the array
+
+This works, because as we have learned we can also convert
+arrays of strings containing UUIDs into arrays of references.
+
+[TIP]
+====
+Depending on your network, the `findComponent` function
+can return many UUIDs in one array.
+Because `proxy` is kinda heavy,
+it's recommended you filter the UUID array before you pass it to proxy if possible. +
+(this is f.e. the case if you just need 1 or n entries).
+
+This is slow:
+[source,lua]
+local comp1 = component.proxy(component.findComponent("..."))[1]
+
+This is fast:
+[source,lua]
+local comp1 = component.proxy(component.findComponent("...")[1])
+====
+
+Additionally, you can use an instance of a class instead of the nick-query-string.
+This allows you to get all components in the network that are of the given type
+represented by the instance of the class (and all components their type extends the given one, "recursive")
+
+You can use the global `findClass` function to get a instance of a class
+based on classes name. +
+You can get the class names using the reflection viewer.
+We will talk about that in more detail later.
+
+Here an example that gets all storage containers in the network:
+[source,lua]
+local containerIDs = component.findComponent(findClass(""))
+
+== Using findComponent
+Let's expand our Item-Count program to sum the Item Count of all storage containers
+in the network.
+
+First we need to get all containers.
+
+[source,lua]
+local containerIDs = component.findComponent(findClass(""))
+local containers = component.proxy(containerIDs)
+
+After that we need to iterate our containers
+[source,lua]
+for _, container in ipairs(containers) do
+    ...
+end
+
+Before we iterate the containers we need a variable
+to store the sum of all item-counts.
+[source,lua]
+local sum = 0
+
+Inside the for-loop-body we want to get the first inventory
+of the storage container and add the `itemCount` to our `sum` variable.
+
+[source,lua]
+sum = sum + container:getInventories()[1].itemCount
+
+Last but not least, we need to print our sum to the console.
+
+[source,lua]
+print("Item-Count:", sum)
+
+We should now have a combined code like this:
+[source,lua]
+----
+local containerIDs = component.findComponent(findClass(""))
+local containers = component.proxy(containerIDs)
+
+local sum = 0
+for _, container in ipairs(containers) do
+    sum = sum + container:getInventories()[1].itemCount
+end
+
+print("Item-Count:", sum)
+----

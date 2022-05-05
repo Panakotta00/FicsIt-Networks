@@ -187,6 +187,12 @@ Properties can be used just like fields in a Lua table. +
 Tho many are read-only and Lua will throw an exception accordingly. +
 This behaviour is implemented by overwriting the index and new-index functions in the meta-table.
 
+Referencing a component is a bit special. +
+Such reference will have additionally two more properties you can work with. +
+The additional readonly `id` field allows you to get the UUID of the component. +
+The additional `nick` field allows you to read and write the components nick.
+This especially useful when you use the nick as means of storing configuration.
+
 == Actually using this Information
 Phew... that was exhausting. +
 This was some very useful information we want to understand to make the best out of our programs. +
@@ -201,25 +207,38 @@ it is the simplest way of doing it.
 [source,lua]
 local container = component.proxy("...")
 
+Now we need to get a reference to the internal inventory object of the container.
+This inventory object type is used all over the place to store multiple stacks of items.
+Every object that exists inside the world and is not part of another world object,
+is called Actor (see the unreal engine reference).
+The Actor class provides a `getInventories()` function,
+that allows us to get all inventory components of the actor. +
+We exactly need this in our code to access the first (and only) inventory
+of the storage container, to get the count of items.
+
+[source,lua]
+local inventory = container:getInventories()[1]
+
 Now we want to print the item-count to the console.
-We could separate the part were we get the item-count from the container and the part where we print to the console,
+We could separate the part were we get the item-count from the inventory and the part where we print to the console,
 but since its not much code in one line we don't do that now.
 
 [source,lua]
 print("Item-Count:")
 
-This will only print "Item-Count:" to the console. In an additional parameter of the print function
+This will only print "Item-Count:" to the console.
+In an additional parameter of the print function
 we want to pass the item count we get from the container.
-We can get the item count from the container by using the containers `itemCount` property.
+We can get the item count from the inventory by using the inventories `itemCount` property.
 
 [source,lua]
-container.itemCount
+inventory.itemCount
 
 We should now have some code like:
 
 [source,lua]
 local container = component.proxy("...")
-print("Item-Count:", container.itemCount)
+print("Item-Count:", inventory.itemCount)
 
 When we now hit the power button of the computer case,
 it will briefly run and then stop since we reached the end of our program.
