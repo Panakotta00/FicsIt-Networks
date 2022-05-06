@@ -1,4 +1,4 @@
-= Interacting with Components
+= 3. Interacting with Components
 
 Enough talk! Now that we have built a computer,
 know how it works and how the component network works,

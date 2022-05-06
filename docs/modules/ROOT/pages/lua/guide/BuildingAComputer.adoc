@@ -1,4 +1,4 @@
-= Building a Computer
+= 1. Building a Computer
 
 In this section we will construct our first computer and learn what the different components do.
 

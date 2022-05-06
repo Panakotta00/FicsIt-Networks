@@ -1,0 +1,211 @@
+= 6. Modular Panel and Events
+
+Right now we have to open the computer, press the start button
+and then get the output in the console.
+
+This it not really user-friendly, instead it would be nice,
+if we could press a button in the game,
+and the computer updates a screen or sign or something.
+
+For this we first want to get the "button press" working.
+Here we gonna rely on the Modular Control Panel to create a hardware control panel.
+
+To figure out how it works, we will ignore our current code and just focus
+on the panel stuff, later we will combine them.
+
+== Modular Control Panel
+After you have unlocked the "Modular I/O" schematic in the HUB
+you can build a modular control panel.
+
+You can build a Large Vertical Control panel, and you will see it consists
+of three actual panels where you can place things on. +
+These panels have panel-index that start at 0 from the bottom. +
+Bottom Panel `0`, Center Panel `1` and Top Panel `2`.
+
+The Large Control panel is similar just with one panel of index `0`.
+
+Each panel is like a x-y-graph and coordinate system. +
+The origin (0, 0) is in the bottom left corner,
+The X-Axis goes to the right and the Y-Axis goes up.
+
+You can now place different module onto the panels.
+
+You can then use in Lua the modular control panels `getModule(x,y,p)` function
+to get a module at a given position on the given panel. +
+The first parameter is the X-Position, the second parameter is the Y-Position
+and the third parameter is the panel-index.
+The function returns a reference to the given module.
+
+Many modules are larger than just one module slot (f.e. a switch is 1x2 module-slots).
+The same module can be referenced over all the occupied module-slots.
+
+On the control panel we will place a normal button module
+and connect the panel to our computer.
+
+First we need to get a reference to our panel.
+[source,lua]
+local panel = component.proxy("...")
+
+After that we want to get the reference to the module using the `getModule` funciton.
+[source,lua]
+local btn = panel:getModule(0,0,0)
+
+Change the coordinates according to your button placement and remove the third
+parameter if you have used the Large Control Panel.
+
+The normal button module has a `setColor(...)` function that allows you
+to change the color and light emission of the button head.
+[source,lua]
+btn:setColor(1,0,0,5)
+
+The above code should make the button light up bright red.
+
+The whole code:
+[source,lua]
+local panel = component.proxy("...")
+local btn = panel:getModule(0,0,0)
+btn:setColor(1,0,0,5)
+
+
+== Component Signals / Events
+Now we want to print some text to the console, when the button gets pressed. +
+For this we have to have a look at component signals.
+
+Component Signals are a way for components to notify computers about different things.
+The way they do it is different from events. +
+Events (aka. interrupts) would pause your normal code execution
+and execute an interrupt routine instead. +
+FicsIt-Networks doesn't do that, instead you have more control over,
+when you actually want to handle such a signal.
+
+Ironically the API we need is called `event`.
+
+With the signal system the computer has to first tell the different components,
+that it wants to receive their signals.
+This is especially useful because in large systems you would be constantly
+be spammed with signals you probably don't even care about.
+
+You can use the `event.listen(...)` function to listen to components. +
+It is a variadic function that takes component references as parameters
+and tells those components that this computer wants to listen to signals.
+
+The counterpart is `event.ignore(...)` that works the same as `event.listen(...)`. +
+The difference is, it tells the component to stop sending signals to this computer.
+
+You can also use the `event.ignoreAll()` function,
+to essentially call the ignore function on all components the computer
+is currently listening to.
+
+Each computer has its own signal queue. +
+This signal queue holds all unprocessed signals a computer has received. +
+When the computer receives a new signal from a component,
+the signal will be added to the top of the queue.
+If the queue is full, then the new signal will simply get discarded. +
+To empty the queue, you can either clear all signals at once, unprocessed,
+or you simply process all signals.
+
+To clear the signal-queue at once you can use the `event.clearAll()` function. +
+Often you want to call this right after your computer started,
+because the queue may still contain old signals.
+
+To finally actually process signals you have to `pull()` them from the stack. +
+One pull returns the "oldest" signal. +
+If the queue is empty, the pull function "blocks".
+That means your code will wait, till there is a signal available and returns that. +
+Everytime you get the "oldest" signal, it will be removed from the queue.
+
+The problem now is, your code can not do anything as long as there is no signal.
+So you can not f.e. update a clock, or a blinking light. +
+As solution, the pull function takes a "timeout" parameter. +
+This parameter allows you to define after how many seconds the pull should
+return anyway, if it does, the pull function will return nil.
+
+If no parameter is given, the pull function will wait indefinitely for the next signal. +
+If `0` is given, the pull function will return immediately in the same Lua tick
+if there is no signal available. +
+If `0.0` is given, the pull function will yield the current Lua tick and
+return immediately in the next Lua tick.
+If a number greater than `0.0` is given,
+the pull function will wait that amount of seconds till it returns nil.
+
+When a signal is received and your code is already waiting for the timeout,
+the function will return immediately with that new signal.
+
+When you wait for a signal but also do some other stuff in the meantime
+(using timeout), so you call the pull function over and over again.
+This is called polling.
+
+A signal can have a variable amount of parameters that are emitted with it.
+That is why the pull function returns either nil for no signal or
+some return values that are always present and the variable parameters of the signal.
+
+The return values of valid signal are:
+
+1. The signal internal name. +
+   The signal internal name is specified by the type of the signal and allows you
+   to identify the different types of signals because it is a unique name.
+2. The signal sender reference. +
+   The second return value is a reference to the signal sender which you can use
+   to identify the exact source of the signal.
+   We can f.e. check if it is the same as a reference we already have
+   or use the hash of it as table key.
+3. The third and all following return values are the parameters that got emitted
+   together with the signal.
+
+[source,lua]
+local eventName, signalSender, val1, val2, ... = event.pull(...)
+
+== Finishing our event sample code
+
+As mentioned, we want to print some text when the button gets pressed. +
+The button emits a signal when it gets pressed,
+that means we first want clear the queue and then listen to the button.
+[source,lua]
+----
+event.ignoreAll()
+event.clear()
+
+event.listen(btn)
+----
+
+Next thing we need is to create an infinite loop in which we can poll the signals.
+[source,lua]
+while true do
+    ...
+end
+
+Inside this loop we will wait indefinitely for a signal and get that signal.
+[source,lua]
+local e, s = event.pull()
+
+Followed that we will check if the signal sender is our button
+and if the event is the Button Press "Trigger" event.
+[source,lua]
+if s == btn and e == "Trigger" then
+    ...
+end
+
+Inside this if we can then do the things we want to do, when the button gets pressed.
+In out case, print some stuff to the console.
+
+[source,lua]
+print("meep")
+
+Out complete code should be something like:
+[source,lua]
+----
+local panel = component.proxy("...")
+local btn = panel:getModule(0,0,0)
+
+event.ignoreAll()
+event.clear()
+
+event.listen(btn)
+
+while true do
+    local e, s = event.pull()
+    if s == btn and e == "Trigger" then
+        print("meep")
+    end
+end
+----

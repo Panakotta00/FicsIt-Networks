@@ -1,4 +1,4 @@
-= Advanced Networking
+= 4. Advanced Networking
 
 Now we can access our storage container easily using the proxy function
 and a hard-coded UUID string.

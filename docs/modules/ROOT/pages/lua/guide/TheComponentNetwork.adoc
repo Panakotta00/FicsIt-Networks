@@ -1,4 +1,4 @@
-= The Component Network
+= 2. The Component Network
 
 Now we could start coding with Lua.
 

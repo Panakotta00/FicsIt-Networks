@@ -1,4 +1,4 @@
-= Structs and Class Instances
+= 5. Structs and Class Instances
 
 Okay, our program already can count the items of multiple container.
 
