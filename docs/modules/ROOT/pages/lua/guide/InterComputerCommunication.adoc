@@ -1,0 +1,187 @@
+= 8. Inter Computer Communication
+
+As your software gets larger, you need to separate your network into multiple smaler ones.
+The mod doesn't enforce this, but your computer will, as it will start to struggle
+showing the component list in the component outliner and other stuff.
+Since you still want to connect these separate networks somehow with each other,
+you will need to use network routers in between.
+Now the only way of communication is using network messages.
+
+== Network Card
+The network card is a PCI device you can build into your computer
+and is its fully own network component, that means it also has its own UUID and Nick.
+It will be connected to the same component network as your computer.
+This also allows you to have multiple network cards if desired.
+
+A network card can be used to send and receive network messages that are sent across the network.
+
+To get a reference to your network card (or any other PCI device),
+you can use the `computer.getPCIDevices(...)` function. +
+It takes an Instance of a Class that represents the type of the PCI devices you want to get,
+and returns an array of PCI devices that match the given class.
+
+[source,lua]
+local net = computer.getPCIDevices(findClass("NetworkCard"))[1]
+
+[WARNING]
+====
+As mentioned, the network card has a different UUID than the Computer Case! +
+This means if you want to address a network card to uni-cast send a message to it,
+you have to use the network cards UUID, the computer case UUID won't work.
+====
+
+Before you can receive network messages,
+you have to open the port of the network messages you want to receive.
+You can do that by using the `open(port)` function of the network card:
+[source,lua]
+net:open(42) -- opens port 42 of the network card
+
+You can close a port using the `close(port)` function:
+[source,lua]
+net:close(42)
+
+If you want to close all open ports at once, you can use the `closeAll()` function:
+[source,lua]
+net:closeAll()
+
+== Network Messages
+A network messages is a payload message you can send from one network card to another. +
+It contains the sender UUID, a Port Number, receiver UUID and up to 7 data parameters.
+
+Messages can be grouped using Ports.
+You can f.e. define that storage system messages are sent on port 1
+and production management on port 2. +
+They don't have a special meaning by FIN, they exist for your convenience.
+
+You can send a message either to one specific network card,
+or all network cards that are listening to the port of the message.
+
+When receiving a network message, and you pull the signal,
+you get following parameters:
+
+1. signal/event name (every signal)
+2. instance of signal sender (every signal) +
+ In this case, the network card the received the message,
+ especially useful when working with multiple network cards.
+3. message sender +
+ A string containing the UUID of the network message that sent the network message.
+4. message port +
+ A integer that defines the port on which this network message was sent.
+5. Up to 7 additional data parameters that are sent as payload.
+
+[source,lua]
+local e, reveiver, sender, port, d1, d2, d3, d4, d5, d6, d7 = event.pull()
+
+Network messages can be sent in 2 different ways:
+
+- send (uni-case) +
+ Using the `send(...)` function of the network card, you can send a network message
+ to one specific other network card. +
+ If this receiving network card has the port, the message was sent on, not open,
+ it will not receive the network message and nothing happens. +
+ The `send(...)` function takes following parameters: +
+ 1. receiver +
+  The UUID string of the network card you want to send the message too.
+ 2. port +
+  The port on which you want to send the message as integer.
+ 3. Up to 7 data payload parameters of primitive type (number, string, boolean)
+  that will be sent along in the network message.
+[source,lua]
+net:send("123", 42, "my", "data", 42, 56.9, true)
+
+- broadcast (multi-cast/broadcast)
+ Using the `broadcast(...)` function you can send a network message to all
+ network cards that listen to the port you are sending the message to. +
+ The `broadcase(...)` function takes following parameters:
+ 1. port +
+  The port on which you want to send the message as integer.
+ 2. Up to 7 data payload parameters of primitive type that will be sent along
+  in the network message.
+[source,lua]
+net:broadcast(43, "my", "broadcast", 69, false, "data")
+
+[WARNING]
+====
+As mentioned, +
+you can not send instances/references, structs, functions, arrays or tables via network  +
+you would have to serialize tables etc. first to a string.
+====
+
+== Network Router
+The network router building allows you to transfer network messages between
+multiple separate component networks.
+
+It has two component network connectors you can connect your networks. +
+The router will have separate network components for each network.
+
+It will redirect any network message by default, +
+but you can also filter network messages if you want to.
+
+In default configuration, you can simply send messages between the networks,
+including broadcast messages.
+
+There are two filters you can use, a port filter, and an address filter. +
+You can interact with them separately. +
+Each Filter can run in Whitelist or Blacklist mode.
+
+If in whitelist mode, it only redirects network messages that match the filter. +
+If in blacklist mode, it blocks network messages that match the filter.
+
+A network message matches the port filter, if the port of the network message
+is contained in the port list of the filter.
+
+A network message matches the address filter, if the sender address
+is contained in the address list of the filter.
+
+If you want to learn more about how to setup the filters,
+refer to the xref::Reflection.adoc#Class-NetworkRouter[reflection].
+
+== Example
+Computer A
+[source,Lua]
+----
+local net = computer.getPCIDevices(findClass("NetworkCard"))[1]
+
+event.ignoreAll()
+net:open(42)
+
+while true do
+ local data = {event.pull()}
+ e, s, sender, port, data = function(e,s,sender,port,...)
+  return e, s, sender, port, {...}
+ end(table.unpack(data))
+ if e == "NetworkMessage" then
+  if d1 == "ping" then
+   net:send(sender, port, "pong")
+  elseif d1 == "foo" then
+   foo(table.unpack(data))
+  end
+ end
+end
+
+function foo(p1, p2, p3)
+ print(p1, p2, p3)
+end
+----
+
+[NOTE]
+====
+[source,lua]
+e, s, sender, port, data = function(e,s,sender,port,...)
+ return e, s, sender, port, {...}
+end(table.unpack(data))
+
+This code my seem a bit odd, but all it does is return the data from the `event.pull`
+just normally as we are used to. +
+But the additional parameters which we don't know how they could look like,
+are packed into an array `data` for later use. +
+For a general purpose event handler,
+you can do this for everything besides signal name and signal sender.
+====
+
+Computer B
+[source,lua]
+----
+local net = computer.getPCIDevices(findClass("NetworkCard"))[1]
+net.send("123", 42, "ping")
+net.send("123", 42, "foo", "meep", "muup", 69)
