@@ -728,6 +728,49 @@ The color slot the lights should use.
 // end::Class-LightsControlPanel-props-colorSlot__title[]
 // end::Class-LightsControlPanel-Props[]
 // end::Class-LightsControlPanel-Props__title[]
+// tag::Class-LightsControlPanel-Funcs__title[]
+[#Class-LightsControlPanel-Funcs]
+==== Functions
+// tag::Class-LightsControlPanel-Funcs[]
+[#Class-LightsControlPanel-Funcs-setColorFromSlot]
+// tag::Class-LightsControlPanel-Funcs-setColorFromSlot__title[]
+===== *Set Color from Slot* `setColorFromSlot` (_Int_ *Slot* `slot`, _Struct(xref::Reflection.adoc#Struct-Color[Color])_ *Color* `color`)
+// tag::Class-LightsControlPanel-Funcs-setColorFromSlot[]
+// tag::Class-LightsControlPanel-Funcs-setColorFromSlot__description[]
+Allows to update the light color that is referenced by the given slot.
+
+// end::Class-LightsControlPanel-Funcs-setColorFromSlot__description[]
+// tag::Class-LightsControlPanel-Funcs-setColorFromSlot__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+// end::Class-LightsControlPanel-Funcs-setColorFromSlot__flags[]
+// tag::Class-LightsControlPanel-Funcs-setColorFromSlot__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Slot* `slot`
+| Int
+| The slot you want to update the referencing color for.
+
+| *Color* `color`
+| Struct(xref::Reflection.adoc#Struct-Color[Color])
+| The color this slot should now reference.
+
+|===
+
+// end::Class-LightsControlPanel-Funcs-setColorFromSlot__params[]
+// end::Class-LightsControlPanel-Funcs-setColorFromSlot[]
+// end::Class-LightsControlPanel-Funcs-setColorFromSlot__title[]
+// end::Class-LightsControlPanel-Funcs[]
+// end::Class-LightsControlPanel-Funcs__title[]
 // end::Class-LightsControlPanel[]
 // end::Class-LightsControlPanel__title[]
 // tag::Class-ComputerCase__title[]
@@ -4046,6 +4089,109 @@ Parameters::
 // end::Class-IndicatorModule-Funcs__title[]
 // end::Class-IndicatorModule[]
 // end::Class-IndicatorModule__title[]
+// tag::Class-LargeMicroDisplayModule__title[]
+[#Class-LargeMicroDisplayModule]
+=== *Large Micro Display Module* `LargeMicroDisplayModule`
+// tag::Class-LargeMicroDisplayModule[]
+// tag::Class-LargeMicroDisplayModule__parent[]
+[cols = "1,5a"]
+|===
+| Parent
+| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|===
+
+// end::Class-LargeMicroDisplayModule__parent[]
+// tag::Class-LargeMicroDisplayModule__description[]
+Provides a relatively small text only display for Control Panels.  +
+Text height is fixed, but text is squeezed to fit horizontally.
+
+// end::Class-LargeMicroDisplayModule__description[]
+// tag::Class-LargeMicroDisplayModule-Funcs__title[]
+[#Class-LargeMicroDisplayModule-Funcs]
+==== Functions
+// tag::Class-LargeMicroDisplayModule-Funcs[]
+[#Class-LargeMicroDisplayModule-Funcs-setText]
+// tag::Class-LargeMicroDisplayModule-Funcs-setText__title[]
+===== *setText* `setText` (_String_ *Text* `Text`)
+// tag::Class-LargeMicroDisplayModule-Funcs-setText[]
+// tag::Class-LargeMicroDisplayModule-Funcs-setText__description[]
+
+
+// end::Class-LargeMicroDisplayModule-Funcs-setText__description[]
+// tag::Class-LargeMicroDisplayModule-Funcs-setText__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-LargeMicroDisplayModule-Funcs-setText__flags[]
+// tag::Class-LargeMicroDisplayModule-Funcs-setText__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Text* `Text`
+| String
+| 
+
+|===
+
+// end::Class-LargeMicroDisplayModule-Funcs-setText__params[]
+// end::Class-LargeMicroDisplayModule-Funcs-setText[]
+// end::Class-LargeMicroDisplayModule-Funcs-setText__title[]
+[#Class-LargeMicroDisplayModule-Funcs-setColor]
+// tag::Class-LargeMicroDisplayModule-Funcs-setColor__title[]
+===== *setColor* `setColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`, _Float_ *Emit* `Emit`)
+// tag::Class-LargeMicroDisplayModule-Funcs-setColor[]
+// tag::Class-LargeMicroDisplayModule-Funcs-setColor__description[]
+
+
+// end::Class-LargeMicroDisplayModule-Funcs-setColor__description[]
+// tag::Class-LargeMicroDisplayModule-Funcs-setColor__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-LargeMicroDisplayModule-Funcs-setColor__flags[]
+// tag::Class-LargeMicroDisplayModule-Funcs-setColor__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+| *Emit* `Emit`
+| Float
+| 
+
+|===
+
+// end::Class-LargeMicroDisplayModule-Funcs-setColor__params[]
+// end::Class-LargeMicroDisplayModule-Funcs-setColor[]
+// end::Class-LargeMicroDisplayModule-Funcs-setColor__title[]
+// end::Class-LargeMicroDisplayModule-Funcs[]
+// end::Class-LargeMicroDisplayModule-Funcs__title[]
+// end::Class-LargeMicroDisplayModule[]
+// end::Class-LargeMicroDisplayModule__title[]
 // tag::Class-MCP_Mod_2Pos_Switch_C__title[]
 [#Class-MCP_Mod_2Pos_Switch_C]
 === *Illuminable 2 Position Switch* `MCP_Mod_2Pos_Switch_C`
@@ -4422,7 +4568,7 @@ Parameters::
 // end::Class-MCP_Mod_Encoder_C__title[]
 // tag::Class-MCP_Mod_Guage_C__title[]
 [#Class-MCP_Mod_Guage_C]
-=== *Gauge* `MCP_Mod_Guage_C`
+=== *Mini Gauge* `MCP_Mod_Guage_C`
 // tag::Class-MCP_Mod_Guage_C[]
 // tag::Class-MCP_Mod_Guage_C__parent[]
 [cols = "1,5a"]
@@ -4529,6 +4675,47 @@ Parameters::
 // end::Class-MCP_Mod_Guage_C-Funcs-setColor__params[]
 // end::Class-MCP_Mod_Guage_C-Funcs-setColor[]
 // end::Class-MCP_Mod_Guage_C-Funcs-setColor__title[]
+[#Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor]
+// tag::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor__title[]
+===== *setBackgroundColor* `setBackgroundColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`)
+// tag::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor[]
+// tag::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor__description[]
+
+
+// end::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor__description[]
+// tag::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor__flags[]
+// tag::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+|===
+
+// end::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor__params[]
+// end::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor[]
+// end::Class-MCP_Mod_Guage_C-Funcs-setBackgroundColor__title[]
 // end::Class-MCP_Mod_Guage_C-Funcs[]
 // end::Class-MCP_Mod_Guage_C-Funcs__title[]
 // end::Class-MCP_Mod_Guage_C[]
@@ -4704,6 +4891,229 @@ Parameters::
 // end::Class-MCP_Mod_Potentiometer_C-Signals__title[]
 // end::Class-MCP_Mod_Potentiometer_C[]
 // end::Class-MCP_Mod_Potentiometer_C__title[]
+// tag::Class-MCP_Mod_PotWNum_C__title[]
+[#Class-MCP_Mod_PotWNum_C]
+=== *Potentiometer with Readout* `MCP_Mod_PotWNum_C`
+// tag::Class-MCP_Mod_PotWNum_C[]
+// tag::Class-MCP_Mod_PotWNum_C__parent[]
+[cols = "1,5a"]
+|===
+| Parent
+| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|===
+
+// end::Class-MCP_Mod_PotWNum_C__parent[]
+// tag::Class-MCP_Mod_PotWNum_C__description[]
+This Potentiometer Module allows for input of a fixed value range and fires a signal with the new value each time the internal counter changes. This version has a readout display on it.
+
+// end::Class-MCP_Mod_PotWNum_C__description[]
+// tag::Class-MCP_Mod_PotWNum_C-Props__title[]
+[#Class-MCP_Mod_PotWNum_C-Props]
+==== Properties
+// tag::Class-MCP_Mod_PotWNum_C-Props[]
+[#Class-MCP_Mod_PotWNum_C-props-autovalue]
+// tag::Class-MCP_Mod_PotWNum_C-props-autovalue__title[]
+===== _Bool_ *Unknown FINBase* `autovalue`
+// tag::Class-MCP_Mod_PotWNum_C-props-autovalue[]
+// tag::Class-MCP_Mod_PotWNum_C-props-autovalue__description[]
+
+
+// end::Class-MCP_Mod_PotWNum_C-props-autovalue__description[]
+// tag::Class-MCP_Mod_PotWNum_C-props-autovalue__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-props-autovalue__flags[]
+// end::Class-MCP_Mod_PotWNum_C-props-autovalue[]
+// end::Class-MCP_Mod_PotWNum_C-props-autovalue__title[]
+[#Class-MCP_Mod_PotWNum_C-props-value]
+// tag::Class-MCP_Mod_PotWNum_C-props-value__title[]
+===== _Int_ *Unknown FINBase* `value`
+// tag::Class-MCP_Mod_PotWNum_C-props-value[]
+// tag::Class-MCP_Mod_PotWNum_C-props-value__description[]
+
+
+// end::Class-MCP_Mod_PotWNum_C-props-value__description[]
+// tag::Class-MCP_Mod_PotWNum_C-props-value__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-props-value__flags[]
+// end::Class-MCP_Mod_PotWNum_C-props-value[]
+// end::Class-MCP_Mod_PotWNum_C-props-value__title[]
+[#Class-MCP_Mod_PotWNum_C-props-max]
+// tag::Class-MCP_Mod_PotWNum_C-props-max__title[]
+===== _Int_ *Unknown FINBase* `max`
+// tag::Class-MCP_Mod_PotWNum_C-props-max[]
+// tag::Class-MCP_Mod_PotWNum_C-props-max__description[]
+
+
+// end::Class-MCP_Mod_PotWNum_C-props-max__description[]
+// tag::Class-MCP_Mod_PotWNum_C-props-max__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-props-max__flags[]
+// end::Class-MCP_Mod_PotWNum_C-props-max[]
+// end::Class-MCP_Mod_PotWNum_C-props-max__title[]
+[#Class-MCP_Mod_PotWNum_C-props-min]
+// tag::Class-MCP_Mod_PotWNum_C-props-min__title[]
+===== _Int_ *Unknown FINBase* `min`
+// tag::Class-MCP_Mod_PotWNum_C-props-min[]
+// tag::Class-MCP_Mod_PotWNum_C-props-min__description[]
+
+
+// end::Class-MCP_Mod_PotWNum_C-props-min__description[]
+// tag::Class-MCP_Mod_PotWNum_C-props-min__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> 
++++
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-props-min__flags[]
+// end::Class-MCP_Mod_PotWNum_C-props-min[]
+// end::Class-MCP_Mod_PotWNum_C-props-min__title[]
+// end::Class-MCP_Mod_PotWNum_C-Props[]
+// end::Class-MCP_Mod_PotWNum_C-Props__title[]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs__title[]
+[#Class-MCP_Mod_PotWNum_C-Funcs]
+==== Functions
+// tag::Class-MCP_Mod_PotWNum_C-Funcs[]
+[#Class-MCP_Mod_PotWNum_C-Funcs-setColor]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setColor__title[]
+===== *setColor* `setColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`, _Float_ *Emit* `Emit`)
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setColor[]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setColor__description[]
+
+
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setColor__description[]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setColor__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setColor__flags[]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setColor__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+| *Emit* `Emit`
+| Float
+| 
+
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setColor__params[]
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setColor[]
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setColor__title[]
+[#Class-MCP_Mod_PotWNum_C-Funcs-setText]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setText__title[]
+===== *setText* `setText` (_String_ *Text* `Text`)
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setText[]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setText__description[]
+
+
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setText__description[]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setText__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setText__flags[]
+// tag::Class-MCP_Mod_PotWNum_C-Funcs-setText__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Text* `Text`
+| String
+| 
+
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setText__params[]
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setText[]
+// end::Class-MCP_Mod_PotWNum_C-Funcs-setText__title[]
+// end::Class-MCP_Mod_PotWNum_C-Funcs[]
+// end::Class-MCP_Mod_PotWNum_C-Funcs__title[]
+// tag::Class-MCP_Mod_PotWNum_C-Signals__title[]
+[#Class-MCP_Mod_PotWNum_C-Signals]
+==== Signals
+// tag::Class-MCP_Mod_PotWNum_C-Signals[]
+// tag::Class-MCP_Mod_PotWNum_C-Signals-valueChanged__title[]
+[#Class-MCP_Mod_PotWNum_C-Signals-valueChanged]
+===== *valueChanged* `valueChanged` (_Int_ *Value* `Value`)
+// tag::Class-MCP_Mod_PotWNum_C-Signals-valueChanged[]
+// tag::Class-MCP_Mod_PotWNum_C-Signals-valueChanged__description[]
+
+
+// end::Class-MCP_Mod_PotWNum_C-Signals-valueChanged__description[]
+// tag::Class-MCP_Mod_PotWNum_C-Signals-valueChanged__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++
++++
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-Signals-valueChanged__flags[]
+// tag::Class-MCP_Mod_PotWNum_C-Signals-valueChanged__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *Value* `Value`
+| Int
+| 
+
+|===
+
+// end::Class-MCP_Mod_PotWNum_C-Signals-valueChanged__params[]
+// end::Class-MCP_Mod_PotWNum_C-Signals-valueChanged[]
+// end::Class-MCP_Mod_PotWNum_C-Signals-valueChanged__title[]
+// end::Class-MCP_Mod_PotWNum_C-Signals[]
+// end::Class-MCP_Mod_PotWNum_C-Signals__title[]
+// end::Class-MCP_Mod_PotWNum_C[]
+// end::Class-MCP_Mod_PotWNum_C__title[]
 // tag::Class-MicroDisplayModule__title[]
 [#Class-MicroDisplayModule]
 === *Micro Display Module* `MicroDisplayModule`
@@ -4809,7 +5219,7 @@ Parameters::
 // end::Class-MicroDisplayModule__title[]
 // tag::Class-Module_BigGuage_C__title[]
 [#Class-Module_BigGuage_C]
-=== *Gauge* `Module_BigGuage_C`
+=== *Big Gauge* `Module_BigGuage_C`
 // tag::Class-Module_BigGuage_C[]
 // tag::Class-Module_BigGuage_C__parent[]
 [cols = "1,5a"]
@@ -4916,6 +5326,51 @@ Parameters::
 // end::Class-Module_BigGuage_C-Funcs-setColor__params[]
 // end::Class-Module_BigGuage_C-Funcs-setColor[]
 // end::Class-Module_BigGuage_C-Funcs-setColor__title[]
+[#Class-Module_BigGuage_C-Funcs-setBackgroundColor]
+// tag::Class-Module_BigGuage_C-Funcs-setBackgroundColor__title[]
+===== *setBackgroundColor* `setBackgroundColor` (_Float_ *red* `red`, _Float_ *green* `green`, _Float_ *blue* `blue`, _Float_ *Emit* `Emit`)
+// tag::Class-Module_BigGuage_C-Funcs-setBackgroundColor[]
+// tag::Class-Module_BigGuage_C-Funcs-setBackgroundColor__description[]
+
+
+// end::Class-Module_BigGuage_C-Funcs-setBackgroundColor__description[]
+// tag::Class-Module_BigGuage_C-Funcs-setBackgroundColor__flags[]
+[cols = "1,5a"]
+|===
+| Flags
+| +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> 
++++
+|===
+
+// end::Class-Module_BigGuage_C-Funcs-setBackgroundColor__flags[]
+// tag::Class-Module_BigGuage_C-Funcs-setBackgroundColor__params[]
+Parameters::
++
+[%header,cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+| *red* `red`
+| Float
+| 
+
+| *green* `green`
+| Float
+| 
+
+| *blue* `blue`
+| Float
+| 
+
+| *Emit* `Emit`
+| Float
+| 
+
+|===
+
+// end::Class-Module_BigGuage_C-Funcs-setBackgroundColor__params[]
+// end::Class-Module_BigGuage_C-Funcs-setBackgroundColor[]
+// end::Class-Module_BigGuage_C-Funcs-setBackgroundColor__title[]
 // end::Class-Module_BigGuage_C-Funcs[]
 // end::Class-Module_BigGuage_C-Funcs__title[]
 // end::Class-Module_BigGuage_C[]
@@ -5594,7 +6049,7 @@ Triggers a button press by code.
 // end::Class-PushbuttonModule__title[]
 // tag::Class-SizeableModulePanel__title[]
 [#Class-SizeableModulePanel]
-=== *Sizeable ModulePanel* `SizeableModulePanel`
+=== *Sizeable Module Panel* `SizeableModulePanel`
 // tag::Class-SizeableModulePanel[]
 // tag::Class-SizeableModulePanel__parent[]
 [cols = "1,5a"]
