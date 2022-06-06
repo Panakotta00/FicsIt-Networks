@@ -6,7 +6,9 @@
 UCLASS()
 class AFINSizeablePanelHolo : public AFGBuildableHologram {
 	GENERATED_BODY()
-	
+
+private:
+
 public:
 	UPROPERTY(Replicated)
 	int PanelWidth = 1;
@@ -42,4 +44,8 @@ public:
 	virtual void CheckValidFloor() override;
 	virtual void ConfigureActor(AFGBuildable* inBuildable) const override;
 	// End AFGBuildableHologram
+
+	// Begin AFGHologram
+	TArray< FItemAmount > GetBaseCost() const;
+	// End AFGHologram
 };
