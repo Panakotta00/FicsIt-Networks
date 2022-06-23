@@ -1,4 +1,4 @@
-﻿#include "FINSizeablePanel.h"
+#include "FINSizeablePanel.h"
 
 
 #include "FGColoredInstanceMeshProxy.h"
