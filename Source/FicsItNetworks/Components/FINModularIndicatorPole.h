@@ -85,7 +85,7 @@ public:
 	}
 	
 	UFUNCTION()
-	AFINModularIndicatorPoleModule* netFunc_getNext();
+	AActor* netFunc_getNext();
 	UFUNCTION()
 	void netFuncMeta_getNext(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "getNext";
@@ -98,8 +98,7 @@ public:
 	}
 
 	UFUNCTION()
-	AFINModularIndicatorPoleModule* netFunc_getModule(int Index);
-
+	AActor* netFunc_getModule(int Index);
 	UFUNCTION()
 	void netFuncMeta_getModule(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "getModule";
@@ -111,5 +110,6 @@ public:
 		ParameterInternalNames.Add("index");
 		ParameterDisplayNames.Add(FText::FromString("Module Offset"));
 		ParameterDescriptions.Add(FText::FromString("The index in the stack, 0 being the first module"));
+		Runtime = 1;
 	}
 };

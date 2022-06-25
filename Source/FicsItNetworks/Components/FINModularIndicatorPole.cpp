@@ -71,7 +71,7 @@ int32 AFINModularIndicatorPole::GetDismantleRefundReturnsMultiplier() const {
 	return 1;
 }
 
-AFINModularIndicatorPoleModule* AFINModularIndicatorPole::netFunc_getNext() {
+AActor* AFINModularIndicatorPole::netFunc_getNext() {
 	if (!IsValid(ChildModule)) ChildModule = nullptr;
 	return ChildModule;
 }
@@ -84,7 +84,7 @@ void AFINModularIndicatorPole::GetChildDismantleActors_Implementation(TArray<AAc
 	}
 }
 
-AFINModularIndicatorPoleModule* AFINModularIndicatorPole::netFunc_getModule(int Index) {
+AActor* AFINModularIndicatorPole::netFunc_getModule(int Index) {
 	int i = 0;
 	AFINModularIndicatorPoleModule* Obj = ChildModule;
 	while (i < Index) {

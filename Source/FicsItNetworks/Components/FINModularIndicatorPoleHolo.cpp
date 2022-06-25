@@ -1,5 +1,7 @@
 ﻿#include "FINModularIndicatorPoleHolo.h"
 #include "FINModularIndicatorPole.h"
+#include "Buildables/FGBuildableFactoryBuilding.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworks_DebugRoze);
@@ -93,6 +95,43 @@ bool AFINModularIndicatorPoleHolo::IsValidHitResult(const FHitResult& HitResult)
 	return HitResult.GetActor() && (HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>());
 }
 
+int AFINModularIndicatorPoleHolo::GetHitSideSingleAxis(const FVector A, const FVector B) {
+	float Q = FVector::DotProduct(A, B);
+	if(Q >= 0.7071) {
+		return 1;		
+	}
+	if(Q <= -0.7071) {
+		return -1;
+	}
+	return 0;
+}
+//#pragma optimize("", off)
+EFoundationSide AFINModularIndicatorPoleHolo::GetHitSide(FVector AxisX, FVector AxisY, FVector AxisZ, FVector HitNormal) {
+	int Q = GetHitSideSingleAxis(AxisX, HitNormal);
+	if(Q > 0) {
+		return EFoundationSide::FoundationFront;
+	}
+	if(Q < 0){
+		return EFoundationSide::FoundationBack;
+	}
+	Q = GetHitSideSingleAxis(AxisY, HitNormal);
+	if(Q > 0) {
+		return EFoundationSide::FoundationRight;
+	}
+	if(Q < 0){
+		return EFoundationSide::FoundationLeft;
+	}
+	Q = GetHitSideSingleAxis(AxisZ, HitNormal);
+	if(Q > 0) {
+		return EFoundationSide::FoundationTop;
+	}
+	if(Q < 0){
+		return EFoundationSide::FoundationBottom;
+	}
+	return EFoundationSide::Invalid;
+}
+//#pragma optimize("", on)
+
 void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& HitResult) {
 	if (bSnapped) {
 		float horizontalDistance = FVector::DistXY(HitResult.TraceStart, SnappedLoc);
@@ -102,14 +141,38 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 			Extension = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
 		}else {
 			float verticalDistance = horizontalDistance * FMath::Tan(angleOfTrace) + HitResult.TraceStart.Z - SnappedLoc.Z;
-			Extension = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
+			if(UpsideDown) {
+				Extension = GetHeight(SnappedLoc + FVector(0,0,-verticalDistance));
+			}else{
+				Extension = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
+			}
 		}
 	} else {
+		UpsideDown = false;
 		if(HitResult.GetActor()) {
 			if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>()) {
 				Vertical = true;
 			}else {
-				Vertical = false;
+				FVector VX, VY, VZ;
+				UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
+				//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
+				const auto q = GetHitSide(VX, VY, VZ, HitResult.Normal);
+				switch(q) {
+				case EFoundationSide::FoundationBottom:{
+					Vertical = false;
+					UpsideDown = true;
+					break;
+				}
+				case EFoundationSide::FoundationTop: {
+					Vertical = false;
+					break;
+				}
+				case EFoundationSide::FoundationBack: case EFoundationSide::FoundationFront: case EFoundationSide::FoundationLeft: case EFoundationSide::FoundationRight: {
+					Vertical = true;
+					break;
+				}
+				default: Vertical = true;
+				}	
 			}
 		}
 		Normal = HitResult.ImpactNormal;
@@ -120,8 +183,10 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 			UpVector = FVector(0, 0, 1);
 		}
 		FQuat Quat;
-		if (FVector::Coincident(UpVector * -1, Normal) || FVector::Coincident(UpVector, Normal)) {
+		if (FVector::Coincident(UpVector, Normal)) {
 			Quat = Normal.ToOrientationQuat();
+		}else if(FVector::Coincident(UpVector * -1, Normal)) {
+			Quat = Normal.ToOrientationQuat() * -1;
 		} else {
 			FVector RotationAxis = FVector::CrossProduct(UpVector, Normal);
 			RotationAxis.Normalize();
@@ -133,7 +198,12 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 		if(Vertical) {
 			NewQuat = Quat * FRotator(0, 0, GetScrollRotateValue()).Quaternion();
 		}else {
-			NewQuat = HitResult.GetActor()->GetActorRotation().Quaternion() * FRotator(0,0,0).Quaternion() * FRotator(0, GetScrollRotateValue(), 0).Quaternion();
+			NewQuat = HitResult.GetActor()->GetActorRotation().Quaternion();
+			NewQuat*= FRotator(0,0,0).Quaternion();
+			if(UpsideDown){
+				NewQuat*= FRotator(0,0,180).Quaternion();
+			}
+			NewQuat*= FRotator(0, GetScrollRotateValue(), 0).Quaternion();
 		}
 		const auto Location = HitResult.GetActor()->GetActorLocation();
 		const auto Rotation = HitResult.GetActor()->GetActorRotation();

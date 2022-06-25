@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "FINModularIndicatorPole.h"
+#include "Buildables/FGBuildableFactoryBuilding.h"
 #include "Hologram/FGBuildableHologram.h"
 
 #include "FINModularIndicatorPoleHolo.generated.h"
@@ -27,6 +28,9 @@ public:
 	
 	UPROPERTY(Replicated)
 	bool Vertical = false;
+	
+	UPROPERTY(Replicated)
+	bool UpsideDown = false;
 	
 	
 	UPROPERTY()
@@ -56,4 +60,7 @@ public:
 	// End AFGBuildableHologram
 
 	int GetHeight(FVector worldLoc) const;
+
+	static int GetHitSideSingleAxis(const FVector A, const FVector B);
+	static EFoundationSide GetHitSide(FVector AxisX, FVector AxisY, FVector AxisZ, FVector HitNormal);
 };
