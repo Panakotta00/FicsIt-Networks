@@ -31,7 +31,7 @@ public:
 	int Extension = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* Connector2;
+	UFINAdvancedNetworkConnectionComponent* Connector;
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Parts;

@@ -6,10 +6,10 @@
 
 AFINModularIndicatorPole::AFINModularIndicatorPole() {
 	
-	Connector2 = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector2");
-	Connector2->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	Connector2->SetIsReplicated(true);
-	Connector2->MaxCables = 2;
+	Connector = CreateDefaultSubobject<UFINMCPAdvConnector>("Connector");
+	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	Connector->SetIsReplicated(true);
+	Connector->MaxCables = 2;
 
 	SetActorTickEnabled(true);
 	PrimaryActorTick.SetTickFunctionEnable(true);
@@ -28,16 +28,16 @@ void AFINModularIndicatorPole::OnConstruction(const FTransform& transform) {
 	Parts.Empty();
 	//UE_LOG(LogFicsItNetworks_DebugRoze, Log, TEXT("AFINModularIndicatorPole::OnConstruction(%d,%s)"), Extension, BToS(Vertical));
 	Super::OnConstruction(transform);
-	if(IsValid(Connector2)) {
-		Connector2->SetMobility(EComponentMobility::Movable);
+	if(IsValid(Connector)) {
+		Connector->SetMobility(EComponentMobility::Movable);
 		if(Vertical) {
 			ConnectorLocation = FVector(18.2365, 0.323992,-12.806);
-			Connector2->SetRelativeLocation(ConnectorLocation);
+			Connector->SetRelativeLocation(ConnectorLocation);
 		}else {
 			ConnectorLocation = FVector(7.0538,-4.2,15.7995);
-			Connector2->SetRelativeLocation(ConnectorLocation);
+			Connector->SetRelativeLocation(ConnectorLocation);
 		}
-		Connector2->SetMobility(EComponentMobility::Static);
+		Connector->SetMobility(EComponentMobility::Static);
 	}
 	if(Vertical) {
 		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, VerticalBaseMesh, VerticalExtensionMesh, VerticalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts );

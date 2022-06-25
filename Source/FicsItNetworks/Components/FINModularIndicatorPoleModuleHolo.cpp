@@ -28,7 +28,7 @@ int32 AFINModularIndicatorPoleModuleHolo::GetBaseCostMultiplier() const {
 }
 
 bool AFINModularIndicatorPoleModuleHolo::IsValidHitResult(const FHitResult& hitResult) const {
-	UPrimitiveComponent* Component = hitResult.Component.Get();
+	AActor* Component = hitResult.GetActor();
 	if(const AFINModularIndicatorPoleModule* Temp = Cast<AFINModularIndicatorPoleModule>(Component); IsValid(Temp)) {
 		return true;
 	}
