@@ -143,6 +143,7 @@ Computer A
 local net = computer.getPCIDevices(findClass("NetworkCard"))[1]
 
 event.ignoreAll()
+event.listen(net)
 net:open(42)
 
 while true do
