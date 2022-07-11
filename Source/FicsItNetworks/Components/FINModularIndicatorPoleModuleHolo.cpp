@@ -5,6 +5,10 @@
 AFINModularIndicatorPoleModuleHolo::AFINModularIndicatorPoleModuleHolo() {
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
+	//mMaxZoopAmount = 10;
+	//mPlacementRequirements = EFactoryBuildingPlacementRequirements::FBPR_MustSnap;
+	//mBuildModeCategory = EHologramBuildModeCategory::HBMC_ActorClass;
+	//mDefaultBlockedZoopDirections = (uint8)EHologramZoopDirections::HZD_Backward + (uint8)EHologramZoopDirections::HZD_Forward + (uint8)EHologramZoopDirections::HZD_Left;
 }
 
 void AFINModularIndicatorPoleModuleHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -30,10 +34,10 @@ int32 AFINModularIndicatorPoleModuleHolo::GetBaseCostMultiplier() const {
 bool AFINModularIndicatorPoleModuleHolo::IsValidHitResult(const FHitResult& hitResult) const {
 	AActor* Component = hitResult.GetActor();
 	if(const AFINModularIndicatorPoleModule* Temp = Cast<AFINModularIndicatorPoleModule>(Component); IsValid(Temp)) {
-		return true;
+		return !IsValid(Temp->NextChild);
 	}
 	if(const AFINModularIndicatorPole* Temp = Cast<AFINModularIndicatorPole>(Component); IsValid(Temp)) {
-		return true;
+		return !IsValid(Temp->ChildModule);
 	}
 	return false;
 }
@@ -94,4 +98,18 @@ bool AFINModularIndicatorPoleModuleHolo::TrySnapToActor(const FHitResult& hitRes
 	}
 	return false;
 }
+
+//bool AFINModularIndicatorPoleModuleHolo::CanBeZooped() const {
+//	return true;
+//	//return Super::CanBeZooped();
+//}
+//
+//void AFINModularIndicatorPoleModuleHolo::ConstructZoop(TArray<AActor*>& Actors) {
+//	Super::ConstructZoop(Actors);
+//}
+//
+//void AFINModularIndicatorPoleModuleHolo::GetSupportedBuildModes_Implementation(
+//	TArray<TSubclassOf<UFGHologramBuildModeDescriptor>>& MovieSceneBlendses) const {
+//	Super::GetSupportedBuildModes_Implementation(MovieSceneBlendses);
+//}
 

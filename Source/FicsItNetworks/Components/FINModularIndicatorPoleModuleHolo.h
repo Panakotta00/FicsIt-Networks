@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Hologram/FGBuildableHologram.h"
+#include "Hologram/FGFactoryBuildingHologram.h"
 
 #include "FINModularIndicatorPoleModuleHolo.generated.h"
 
@@ -40,6 +41,12 @@ public:
 	virtual void CheckValidFloor() override;
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;
 	// End AFGBuildableHologram
+
+	//virtual bool CanBeZooped() const override;
+//
+	//virtual void ConstructZoop(TArray<AActor*>& out_children) override;
+//
+	//virtual void GetSupportedBuildModes_Implementation(TArray<TSubclassOf<UFGHologramBuildModeDescriptor>>& out_buildmodes) const override;
 
 	FVector GetAttachPoint(AFGBuildable* Object) const;
 };
