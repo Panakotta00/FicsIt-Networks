@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "FINSizeablePanelHolo.h"
 #include "Buildables/FGBuildable.h"
 #include "FicsItNetworks/ModuleSystem/FINModuleSystemPanel.h"
 #include "FicsItNetworks/Network/FINAdvancedNetworkConnectionComponent.h"
@@ -65,5 +66,19 @@ public:
 	static void SpawnEdgeComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, int scaleX, int scaleY, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts); 
 	static void SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
 
+	UFUNCTION(BlueprintCallable)
+
+	
+	static TArray<FItemAmount> GetModifiedCost(const int Width, const int Height) {
+		const int Cells = FGenericPlatformMath::Max(Width * Height, 1);
+		
+		TArray<FItemAmount> Items = TArray<FItemAmount>();
+		Items.Push(FItemAmount(LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Resource/Parts/CircuitBoard/Desc_CircuitBoard.Desc_CircuitBoard_C")), 1));
+		Items.Push(FItemAmount(LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Resource/Parts/IronPlateReinforced/Desc_IronPlateReinforced.Desc_IronPlateReinforced_C")), FGenericPlatformMath::Max(1, Cells / 10)));
+		Items.Push(FItemAmount(LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Resource/Parts/Wire/Desc_Wire.Desc_Wire_C")), 2 * Cells));
+
+		return Items;
+	}
+	
 	void SetPanelSize(int width, int height);
 };

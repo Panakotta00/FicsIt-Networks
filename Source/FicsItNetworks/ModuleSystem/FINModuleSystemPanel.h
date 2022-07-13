@@ -16,10 +16,10 @@ class FICSITNETWORKS_API UFINModuleSystemPanel : public USceneComponent, public 
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "ModuleSystem|Panel")
+	UPROPERTY(EditDefaultsOnly, Category = "ModuleSystem|Panel", BlueprintReadOnly)
 	int PanelWidth = 1;
 
-	UPROPERTY(EditDefaultsOnly, Category = "ModuleSystem|Panel")
+	UPROPERTY(EditDefaultsOnly, Category = "ModuleSystem|Panel", BlueprintReadOnly)
 	int PanelHeight = 1;
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "ModuleSystem|Panel")

@@ -1,5 +1,7 @@
 ﻿#include "FINWallBoxHolo.h"
 
+#include "FGBuildableBeam.h"
+#include "FGBuildablePillar.h"
 #include "Buildables/FGBuildableFoundation.h"
 #include "Buildables/FGBuildableWall.h"
 
@@ -39,7 +41,10 @@ int32 AFINWallBoxHolo::GetBaseCostMultiplier() const {
 }
 
 bool AFINWallBoxHolo::IsValidHitResult(const FHitResult& hitResult) const {
-	return hitResult.GetActor() && (hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>());
+	return hitResult.GetActor() && (hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || 
+	hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>() || 
+	hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildablePillar>() || 
+	hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>());
 }
 
 //#pragma optimize("", off)
