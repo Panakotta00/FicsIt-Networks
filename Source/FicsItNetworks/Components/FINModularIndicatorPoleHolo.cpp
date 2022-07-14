@@ -159,6 +159,7 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 		if(HitResult.GetActor()) {
 			if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>()) {
 				Vertical = true;
+			}else if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>()){
 			}else {
 				FVector VX, VY, VZ;
 				UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
@@ -232,9 +233,7 @@ void AFINModularIndicatorPoleHolo::ConfigureActor(AFGBuildable* inBuildable) con
 	Pole->Vertical = Vertical;
 }
 
-void AFINModularIndicatorPoleHolo::CheckValidFloor() {
-	if (!bSnapped) Super::CheckValidFloor();
-}
+void AFINModularIndicatorPoleHolo::CheckValidFloor() {}
 
 bool AFINModularIndicatorPoleHolo::TrySnapToActor(const FHitResult& hitResult) {
 	return false;
