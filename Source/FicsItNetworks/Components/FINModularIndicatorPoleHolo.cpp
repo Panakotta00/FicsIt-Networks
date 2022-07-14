@@ -46,20 +46,16 @@ void AFINModularIndicatorPoleHolo::OnConstruction(const FTransform& Transform) {
 
 	// Create Components
 	if (mBuildClass) {
-		UStaticMesh* AM;
-		UStaticMesh* BM;
-		UStaticMesh* EM;
-		UStaticMesh* CM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->ConnectorMesh;
+		const AFINModularIndicatorPole* Pole = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject());
 		if(Vertical) {
-			BM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->VerticalBaseMesh;
-			EM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->VerticalExtensionMesh;
-			AM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->VerticalAttachmentMesh;
+			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->VerticalBaseMesh, Pole->VerticalExtensionMesh, Pole->VerticalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
+													  Pole->VerticalBaseOffset, Pole->VerticalExtensionOffset, Pole->VerticalExtensionMultiplier, Pole->VerticalAttachmentOffset,
+													  Pole->VerticalConnectorMeshOffset, Pole->VerticalConnectorMeshRotation, Pole->VerticalConnectorMeshScale);
 		}else{
-			BM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->NormalBaseMesh;
-			EM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->NormalExtensionMesh;
-			AM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->NormalAttachmentMesh;
+			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->NormalBaseMesh, Pole->NormalExtensionMesh, Pole->NormalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
+													  Pole->HorizontalBaseOffset, Pole->HorizontalExtensionOffset, Pole->HorizontalExtensionMultiplier, Pole->HorizontalAttachmentOffset,
+													  Pole->HorizontalConnectorMeshOffset, Pole->HorizontalConnectorMeshRotation, Pole->HorizontalConnectorMeshScale);
 		}
-		AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, BM, EM, AM, CM, this, RootComponent, Parts);
 		RootComponent->SetMobility(EComponentMobility::Movable);
 		for (UStaticMeshComponent* Part : Parts) {
 			Part->SetMobility(EComponentMobility::Movable);
@@ -160,6 +156,26 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 			if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>()) {
 				Vertical = true;
 			}else if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>()){
+				FVector VX, VY, VZ;
+				UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
+				//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
+				const auto q = GetHitSide(VX, VY, VZ, HitResult.Normal);
+				switch(q) {
+				case EFoundationSide::FoundationBottom:{
+					Vertical = false;
+					UpsideDown = true;
+					break;
+				}
+				case EFoundationSide::FoundationTop: {
+					Vertical = false;
+					break;
+				}
+				case EFoundationSide::FoundationBack: case EFoundationSide::FoundationFront: case EFoundationSide::FoundationLeft: case EFoundationSide::FoundationRight: {
+					Vertical = true;
+					break;
+				}
+				default: Vertical = true;
+				}	
 			}else {
 				FVector VX, VY, VZ;
 				UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);

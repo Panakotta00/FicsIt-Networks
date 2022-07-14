@@ -31,20 +31,25 @@ void AFINModularIndicatorPole::OnConstruction(const FTransform& transform) {
 	if(IsValid(Connector)) {
 		Connector->SetMobility(EComponentMobility::Movable);
 		if(Vertical) {
-			ConnectorLocation = FVector(18.2365, 0.323992,-12.806);
+			ConnectorLocation = VerticalConnectorLocation;
 			Connector->SetRelativeLocation(ConnectorLocation);
 		}else {
-			ConnectorLocation = FVector(7.0538,-4.2,15.7995);
+			ConnectorLocation = HorizontalConnectorLocation;
 			Connector->SetRelativeLocation(ConnectorLocation);
 		}
 		Connector->SetMobility(EComponentMobility::Static);
 	}
 	if(Vertical) {
-		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, VerticalBaseMesh, VerticalExtensionMesh, VerticalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts );
-		ModuleConnectionPoint = FVector(15.9591 + 40.8858 + (float)(Extension) * 10.6,0, 61.6469);
+		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, VerticalBaseMesh, VerticalExtensionMesh, VerticalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts,
+			VerticalBaseOffset, VerticalExtensionOffset, VerticalExtensionMultiplier, VerticalAttachmentOffset,
+			 VerticalConnectorMeshOffset, VerticalConnectorMeshRotation, VerticalConnectorMeshScale);
+		FVector vt = VerticalExtensionMultiplier * Extension;
+		ModuleConnectionPoint = VerticalModuleConnectionPointOffset + FVector(-vt.Y, vt.X, vt.Z);
 	}else {
-		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, NormalBaseMesh, NormalExtensionMesh, NormalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts);
-		ModuleConnectionPoint = FVector(0,0, 32.3555 + 6.66872 + (float)(Extension) * 26.6992);
+		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, NormalBaseMesh, NormalExtensionMesh, NormalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts,
+			HorizontalBaseOffset, HorizontalExtensionOffset, HorizontalExtensionMultiplier, HorizontalAttachmentOffset,
+			HorizontalConnectorMeshOffset, HorizontalConnectorMeshRotation, HorizontalConnectorMeshScale);
+		ModuleConnectionPoint = HorizontalModuleConnectionPointOffset + HorizontalExtensionMultiplier * Extension;
 	}
 
 }
@@ -106,16 +111,15 @@ void AFINModularIndicatorPole::SpawnComponents(TSubclassOf<UStaticMeshComponent>
 									UStaticMesh* AtachMesh,
 									UStaticMesh* ConnectorMesh,
 									AActor* Parent, USceneComponent* Attach,
-									TArray<UStaticMeshComponent*>& OutParts) {
+									TArray<UStaticMeshComponent*>& OutParts,
+									FVector BO, FVector EO, FVector EM, FVector AO,
+									FVector CMO, FRotator CMR, FVector CMS
+									) {
 	//UE_LOG(LogFicsItNetworks_DebugRoze, Log, TEXT("SpawnComponents(%d,%s)"), Extension, BToS(IsVertical));
 	UStaticMeshComponent* BaseMeshComponent = NewObject<UStaticMeshComponent>(Parent, Class);
 	BaseMeshComponent->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
-	BaseMeshComponent->SetRelativeLocation(FVector(0,0, 0));
-	if(IsVertical) {
-		BaseMeshComponent->SetRelativeRotation(FRotator(0, 90, 0));
-	}else {
-		BaseMeshComponent->SetRelativeRotation(FRotator(0,90,0)); // FRotator(0,270,90)
-	}
+	BaseMeshComponent->SetRelativeLocation(BO);
+	BaseMeshComponent->SetRelativeRotation(FRotator(0, 90, 0));
 	BaseMeshComponent->RegisterComponent();
 	BaseMeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 	BaseMeshComponent->SetStaticMesh(BaseMesh);
@@ -125,13 +129,8 @@ void AFINModularIndicatorPole::SpawnComponents(TSubclassOf<UStaticMeshComponent>
 	for(int i = 0; i < Extension; i++) {
 		UStaticMeshComponent* ExtMeshComponent = NewObject<UStaticMeshComponent>(Parent, Class);
 		ExtMeshComponent->AttachToComponent(BaseMeshComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		if(IsVertical) {
-			ExtMeshComponent->SetRelativeLocation(FVector(0, -17.0591 - (float)(i) * 10.6, 1.6));
-			ExtMeshComponent->SetRelativeRotation(FRotator(0,0,0));
-		}else {
-			ExtMeshComponent->SetRelativeLocation(FVector(0,0, 32.3555 + (float)(i) * 26.6992));
-			ExtMeshComponent->SetRelativeRotation(FRotator(0,0,0));
-		}
+		ExtMeshComponent->SetRelativeLocation(EO + EM * i);
+		ExtMeshComponent->SetRelativeRotation(FRotator(0,0,0));
 		ExtMeshComponent->RegisterComponent();
 		ExtMeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		ExtMeshComponent->SetStaticMesh(ExtMesh);
@@ -141,13 +140,8 @@ void AFINModularIndicatorPole::SpawnComponents(TSubclassOf<UStaticMeshComponent>
 	
 	UStaticMeshComponent* AttachMeshComponent = NewObject<UStaticMeshComponent>(Parent, Class);
 	AttachMeshComponent->AttachToComponent(BaseMeshComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	if(IsVertical) {
-		AttachMeshComponent->SetRelativeLocation(FVector(0, -15.9591 - (float)(Extension) * 10.6,0));
-		AttachMeshComponent->SetRelativeRotation(FRotator(0,0,0));
-	}else {
-		AttachMeshComponent->SetRelativeLocation(FVector(0,0, 32.3555 + (float)(Extension) * 26.6992));
-		AttachMeshComponent->SetRelativeRotation(FRotator(0,0,0));
-	}
+	AttachMeshComponent->SetRelativeLocation(AO + EM * Extension);
+	AttachMeshComponent->SetRelativeRotation(FRotator(0,0,0));
 	AttachMeshComponent->RegisterComponent();
 	AttachMeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 	AttachMeshComponent->SetStaticMesh(AtachMesh);
@@ -157,15 +151,9 @@ void AFINModularIndicatorPole::SpawnComponents(TSubclassOf<UStaticMeshComponent>
 	
 	UStaticMeshComponent* ConnectorMeshComponent = NewObject<UStaticMeshComponent>(Parent, Class);
 	ConnectorMeshComponent->AttachToComponent(BaseMeshComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	if(IsVertical) {
-		ConnectorMeshComponent->SetRelativeLocation(FVector(-8.1,-13.5,-13));
-		ConnectorMeshComponent->SetRelativeRotation(FRotator(0, 0, -90));
-		ConnectorMeshComponent->SetRelativeScale3D(FVector(2.4, 2.4, 1.8));
-	}else {
-		ConnectorMeshComponent->SetRelativeLocation(FVector(-8.4,-2.9,15.8));
-		ConnectorMeshComponent->SetRelativeRotation(FRotator(0, 0, -90));
-		ConnectorMeshComponent->SetRelativeScale3D(FVector(1.2, 1.2, 1.6));
-	}
+	ConnectorMeshComponent->SetRelativeLocation(CMO);
+	ConnectorMeshComponent->SetRelativeRotation(CMR);
+	ConnectorMeshComponent->SetRelativeScale3D(CMS);
 	ConnectorMeshComponent->RegisterComponent();
 	ConnectorMeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 	ConnectorMeshComponent->SetStaticMesh(ConnectorMesh);

@@ -67,7 +67,6 @@ void AFINModularIndicatorPoleModuleHolo::ConfigureActor(AFGBuildable* inBuildabl
 }
 
 void AFINModularIndicatorPoleModuleHolo::CheckValidFloor() {
-	if (!bSnapped) Super::CheckValidFloor();
 }
 
 FVector AFINModularIndicatorPoleModuleHolo::GetAttachPoint(AFGBuildable* Object) const {
