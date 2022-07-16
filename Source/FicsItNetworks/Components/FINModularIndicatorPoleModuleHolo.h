@@ -42,6 +42,8 @@ public:
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;
 	// End AFGBuildableHologram
 
+	
+
 	//virtual bool CanBeZooped() const override;
 //
 	//virtual void ConstructZoop(TArray<AActor*>& out_children) override;

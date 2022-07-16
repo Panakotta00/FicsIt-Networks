@@ -7,12 +7,44 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworks_DebugRoze, Log, Log);
 
+UCLASS()
+class UBuildMode_Auto : public UFGHologramBuildModeDescriptor {
+	GENERATED_BODY()
+public:
+	UBuildMode_Auto();
+};
+
+UCLASS()
+class UBuildMode_OnVertical : public UFGHologramBuildModeDescriptor {
+	GENERATED_BODY()
+public:
+	UBuildMode_OnVertical();
+};
+
+UCLASS()
+class UBuildMode_OnHorizontal : public UFGHologramBuildModeDescriptor {
+	GENERATED_BODY()
+public:
+	UBuildMode_OnHorizontal();
+};
+
 class AFINModularIndicatorPoleHolo;
 UCLASS()
 class AFINModularIndicatorPoleHolo : public AFGBuildableHologram {
 	GENERATED_BODY()
 	
 public:
+	UPROPERTY( EditDefaultsOnly, Category = "Hologram|BuildMode" )
+	TSubclassOf< class UFGHologramBuildModeDescriptor > mBuildModeAuto;
+	
+	UPROPERTY( EditDefaultsOnly, Category = "Hologram|BuildMode" )
+	TSubclassOf< class UFGHologramBuildModeDescriptor > mBuildModeOnVerticalSurface;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Hologram|BuildMode" )
+	TSubclassOf< class UFGHologramBuildModeDescriptor > mBuildModeOnHorizontalSurface;
+	
+	virtual void GetSupportedBuildModes_Implementation( TArray< TSubclassOf<UFGHologramBuildModeDescriptor> >& out_buildmodes ) const override;
+	
 	UPROPERTY()
 	FVector SnappedLoc;
 
@@ -58,7 +90,7 @@ public:
 	virtual void CheckValidFloor() override;
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;
 	// End AFGBuildableHologram
-
+	
 	int GetHeight(FVector worldLoc) const;
 
 	static int GetHitSideSingleAxis(const FVector A, const FVector B);
