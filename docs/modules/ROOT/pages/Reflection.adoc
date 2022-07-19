@@ -1,9 +1,9 @@
-= Reflection
 :doctype: book
 
 // #FINReflectionDocumentation //
 // #FINReflectionDocumentationBlock Begin //
 = Classes
+
 // tag::Class-Object__title[]
 [#Class-Object]
 == *Object* `Object`
