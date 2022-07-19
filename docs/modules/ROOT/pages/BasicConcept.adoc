@@ -1,17 +1,31 @@
 = Basic Concept
 :description: The basic concepts of FicsIt-Networks like network setup and interaction.
 
-== Network Connector
+_FicsIt-Networks enables you to monitor, control, and automate your Satisfactory operations. But how does it work in-game? This section is a general overview of the entire system, including enough rudimentary information to get started._
 
-A Network Connector is simply a point of a building were you can connect a network cable to and so, connect multiple different network components with eachother.
+== Networks
 
-The Network Connector is also a Network Component itself.
+In order to interact with components in your factory, they must first be able to communicate with a computer. This is accomplished by creating a *network* with these components and connecting a computer to the network.
 
-== Network Component
+=== Network Setup
 
-A Network Component is anything that is connected to the network and can provide a interface for interactions to the network.
+You can build a network by simply connecting a *network cable* to each of the components you wish to include. The resulting network can be as small as one computer linked to a single power pole, or as big as dozens of different elements all linked together. 
 
-Network Components can be identified individually by their ID which is a guid (a implementation of UUID)
+To extend the network, the mod provides network-specific *poles* and *wall outlets*. Additionally, you can check what components are connected to a network by using the *Network Manager* in the *Inventory* menu (once you've built it, of course).
+
+=== Network Connectors
+
+The *Network Connector* is simply the point on a building where a network cable connects. This Network Connector allows for the connection of virtually every object in the game to a computer network for additional automation.
+
+// In fact, the Network Connector is also a Network Component itself!
+
+=== Network Components
+
+A *Network Component* is anything that is connected to the network and can provide an *interface*. This interface is what our code uses over the network to interact with Network Components.
+
+=== Component IDs
+
+Network Components can be identified individually by their "globally unique identifier" or GUID. This GUID can be found by using the *Network Manager* on a Network Component.
 
 Example::
 +
@@ -19,8 +33,11 @@ Example::
 0123456789abcdef0123456789abcdef
 ```
 
-Network Components can have a nick, which is a list of custom names seperated by spaces allowing you to group and name your network components.
-Nick filters are then used to check if a network component has specific nicknames.
+=== Component "Nicks"
+
+In addition to their GUID, Network Components can also have a *nick* (short for "nickname"). A nick is one or more custom names seperated by spaces. Any component can be given a nick using the Network Manager.
+
+By using multiple nicks, you can easily group similar components together. When looking for components, the mod will filter components on the network using the nicks you've given them.
 
 Example::
 +
@@ -36,56 +53,180 @@ filter4 = "Power Nice" -- nick filter maches noone
 filter5 = "" -- nick filter maches every component (also components with no nick)
 ----
 
-== Reflection-System
+== Computers
 
-The Reflection System provided by FicsIt-Networks,
-provides users and developers a abstract interface with game functionality.
-Compared to the reflection system provided by unreal engine,
-this reflection system additional holds metadata like localized display names and descriptions,
-for all the different pieces in the system.
+Now that we've connected our components, a *Computer* will allow us to run code that interacts with them!
 
-The system also only allows to access "reasonable" functions and properties,
-so even when you have full access to this reflection system,
-you can not use it to cheat, like creating items out of nowhere.
+=== Computer Setup
 
-The reflection system provides a couple of description objects:
+Computers are built by placing the *Computer Case* structure in your factory. This structure will hold additional buildables that can be used to configure the computer.
 
-- Base
-+
-Is the base for all following things, providing some basic information like
-the internal name, which is used for referencing and f.e. in Lua code,
-the display name which is localized and used to show a good name to the user
-and a localized description.
-- Struct
-+
-Holds additionally a list of functions and properties this type has.
-Is used to describe a structure type.
-- Class
-+
-Bases of `Struct` and additional contains a list of signals this class has.
-Is used to describe object types.
+The mod comes with several components for expansion, but a basic computer must at least contain:
 
-- Property
-+
-Holds information about function parameters, signal parameters or simple attributes.
-It also stores the network value type, and bit flag register with information about
-allowed runtime environments, read only mode, accessibility and such.
+- A Lua CPU
+- One RAM module
+- An EEPROM (installed in the case menu)
 
-- Function
-+
-Holds information about a function you can call.
-This is done by additionally holding a list of input and output parameters of this function.
-As well as holding a bit flag register with information about
-allowed runtime environments, accessibility and such.
+The Lua CPU allows the computer to run code written in the Lua programming language, the RAM modules allow the computer to store data, and the EEPROM allows the computer to store code for execution.
 
-- Signal
-+
-Holds information about a push signal a object might emit.
-Provides a list of parameters this signal has and if it has a variable amount of parameters.
+=== Connecting a Computer
 
-The reflection system utilizes multiple sources to generate the interface.
-One is simply using the unreal reflection system and searching for special functions and properties (see xref::ModIntegration.adoc[Mod Integration] for more details).
-Another is a static registry that matches existing types, like objects from Satisfactory (like a constructor), with reflection data.
+In order to communicate with Network Components, a computer must then be connected to the network using a network cable. This isn't new information, we're just reminding you to do it.
 
-You can look up all this information with the reflection viewer,
-which you can open f.e. with the network manager.
+=== Computer Expansion
+
+Additional modules are available in the Build Menu on an as-needed basis. Want to connect to a screen? Check out the *GPU* and *Screen Driver*. Want to connect to the _actual Internet_? The *Internet Card* is at your service. We won't go into the details of each there, but it is important to know that they are available.
+
+== Reflection System
+
+Once we have our components networked and our computer connected, it's time to write code. But how does this code interact with the components?
+
+That's where the *Reflection System* comes in!
+
+=== What is it?
+
+*In technical terms:* the Reflection System provided by FicsIt-Networks provides users and developers with an abstract interface with game functionality. 
+
+*In less technical terms:* the Reflection System provides a structured way for computers to interact with Network Components.
+
+Compared to the reflection system provided by Unreal Engine,
+this reflection system holds additional "metadata" like localized display names and descriptions for all the different pieces in the system.
+
+It is important to note, however, that the system _only_ allows access to "reasonable" functions and properties.
+Therefore, even when you have full control of the system, it will _not_ allow you to do things that would be considered cheating (e.g. creating items from nowhere).
+
+=== Structure
+
+As mentioned earlier, the Reflection System is a structured system. It is also extremely robust (take a quick look at xref::Reflection.adoc[Reflection] and you'll see what we mean). Therefore, understanding its structure is a helpful way to make sense of the pages and pages of functionality it provides.
+
+==== Classes
+
+Every object in the game is expressed as a *class*. Classes are collections of properties and functions that form a blueprint for objects of the same type. The system is structured this way in order to avoid having to explicitly define the characteristics of each object individually. Instead, every time we connect a Constructor to the network, we already have a predefined set of things it can do and properties it has!
+
+*Properties*
+
+A *property* is a value that is associated with a class. For example, the class `TrainPlatform` has a property called `status` whose value is an indicator of whether or not it is in use. Another class, `PowerStorage` has a property named `powerStorePercent` that indicates what percentage of power capacity is charged.
+
+*Functions*
+
+A *function* is a capability that is associated with a class. For example, the class `Manufacturer` has a function called `setRecipe` that, when given the name of a recipe, actually changes the active recipe on a Manufacturer!
+
+_Note: If a lot of these descriptions seem obvious (e.g. "setRecipe sets a recipe"), that's because the system itself is designed to make sense to a human reading it--albeit in a highly technical manner. The more you use it, the better you'll get at reading the documentation and understanding its functions intuitively._
+
+==== Class Inheritance
+
+Earlier we mentioned that every object in the game is made up of a blueprint called a class. In fact, each object is constructed of _multiple_ classes. This is because of a principal called *class inheritance*, which allows an object to inherit the functions and properties of _each_ class that constructs it.
+
+For example, a look at the documentation shows a class called `Actor` (also called `FGBuildable`) with the description, "This is the base class of all things that can exist within the world by themselves." From that description, we can infer that it contains properties (e.g. `location`, `rotation`) and functions (e.g. `getInventories`) that are common to _all_ buildables. Because we've expressed these characteristics in a *parent class*, everything that falls under that class (known as *child classes*) inherits them without having to repeatedly include them in their description!
+
+That's useful when for _building_ a system, but what does it mean when you're _using_ it? In short, when referring to the Reflection docs, you should understand that any class you reference has the functions and properties of itself and _every_ parent it has (found by clicking link labeled "Parent" at the top of its description). Doing so will help make the reference easier to understand and more powerful to use.
+
+=== Types
+
+For code to run properly, functions must receive properly formatted inputs and return properly formatted outputs. In order to ensure that this happens every single time, the Reflection System uses types. 
+
+*Types* in coding are simply definitions that prescribe what kind of value something can have. When a value is entered into a function that does not match its pre-defined input type, the code fails in order to prevent it from doing unexpected things.
+
+==== Simple Values
+
+Individual values are expressed using basic types. Here are the most common:
+
+- `String` - Sequence of letters and other characters
+
+- `Int` - Integer, e.g. 1, 35, 7009
+
+- `Float` - A number with a floating decimal point, e.g. 1.23456
+
+- `bool` - 'true' or 'false'
+
+==== Complex Types
+
+Collections of values use different types based on the types of the items in them.
+
+- `Array` - Ordered collection of data of the _same_ type
+
+- `Struct` - Unordered collection of data that can contain _different_ types
+
+- `Class` - Unordered collection of data and functions
+
+That's right! Even a class is a type!
+
+=== Putting It All Together
+
+So, we understand how objects in the game are structured. We also understand that the input values given to functions, the output values they return, and the values of any properties in a class are defined by rules called types.
+
+However, you probably don't feel like you're any closer to using the system. That's a fair feeling right now, especially if you're a newbie.
+
+In order to make things more clear, let's work through an example. In this case, our goal is to write a script that tells us the current recipe on a Constructor.
+
+_Note: The steps in this example are provided with the intent to get you up-and-running as quickly as possible. To better understand each of these steps, see the xref::lua/guide/index.adoc[Lua Guide] for more information._
+
+==== Step 1: Finding the Component
+
+The first step in your code is to find the Constructor on the network and save a *reference* to it in a variable. By saving a reference, we can then refer to its respective functions and properties very easily.
+
+This is accomplished by using the `component.proxy` function. We can use the function by itself and feed it the GUID of the Constructor in order to save a reference to it:
+
+`constructor = component.proxy('0123456789...')`
+
+But we used the Network Manager to name our Constructor "WireFactory Constructor1", and we'd like to use that nick instead of a long string of random numbers when we search for our component. Fortunately, we can let `component.findComponent` find the GUID for us using our nicks.
+
+`constructor = component.proxy(component.findComponent(
+    "WireFactory Constructor1")[1])`
+
+Is it pretty? No. Is it functional? Yes. 
+
+The function returns an array containing GUIDs of every component in the network whose nick matched the query string. Our query string should only return our one Constructor, so now we just need to reference the first element in the array. We add `[1]` at the end of our `findComponent` function call in order to reference the first item it returns. 
+
+_Note: in Lua, arrays start at one, which is unlike most programming languages._
+
+==== Step 2: Using the 'getRecipe' Function
+
+Now that we have a reference to our Constructor saved in the variable `constructor`, we can reference its functions and properties with very little effort.
+
+A look at the description for the https://docs.ficsit.app/ficsit-networks/latest/Reflection.html#Class-Manufacturer[Manufacturer component] informs us that it is actually the base class for _all_ machines that use a recipe, including our Constructor. We don't have to scroll much farther to see that `getRecipe` is the function in that class that we need to achieve our goal!
+
+Looking at the description of `getRecipe`, we see the following:
+
+"Get Recipe `getRecipe` (Class(Recipe) Recipe `recipe` _out_)"
+
+This might look like gibberish at first, but here's a look at each of the pieces individually:
+
+- *Get Recipe* - More readable, "localized name" of the function
+- `getRecipe` - Name of the function within the Reflection System
+- *()* - Parentheses indicate a list of the inputs and outputs of the function (known as "arguments") separated by commas
+- *Class(Recipe)* - Type of the argument. In this case, the type of the output argument is the `Recipe` class
+- *Recipe* - Localized name of the argument
+- `recipe` - Name of the argument in the Reflection System
+- _out_ - Indicates that the argument is an output
+
+Thanks to this information, we now know that the function `getRecipe` has an output argument called `recipe`, which is exactly what we need! 
+
+We can call the function by using something called "dot notation":
+
+`constructor.getRecipe()`
+
+As you can see, we simply referenced the `getRecipe` function by adding a dot to the end of our variable and then calling the function we want! The empty parentheses at the end are used when calling a function with no inputs.
+
+==== Step 3: The Script
+
+Now we just need to put this into the Lua programming language to make it useful. It looks something like this:
+
+----
+constructor = component.proxy(component.findComponent("WireFactory Constructor1")[1])
+currentRecipe = constructor.getRecipe()
+
+print(currentRecipe)
+----
+
+After typing this into the code input and pressing the go button in the case menu, our script will run, printing the name of the current recipe that our Constructor is using in the console. We've officially accomplished our goal! Furthermore, we figured out _how_ to accomplish our goal by understanding the structure of the Reflection System itself!
+
+== Wrapping Up
+
+You're an intelligent person. You probably realize that our "goal" -- to print information, once, to a console we can only see if we're in a specific menu--is pretty useless in the context of a factory.
+
+Admittedly, this is just the beginning of what you can accomplish with FicsIt-Networks. However, we hope that this quick example, and the success you feel when you accomplish something so seemingly trivial, inspires you to dive deeper.
+
+Because it doesn't take long looking at the Reflection documentation to spark the imagination. Functions that you had to perform manually can now be automated, across dozens of machines, in response to live factory statistics. And frankly, if that doesn't inspire you, then we suggest you check your pulse.
+
+Excelsior, Pioneers! 
