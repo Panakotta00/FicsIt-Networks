@@ -194,7 +194,7 @@ This might look like gibberish at first, but here's a look at each of the pieces
 
 - *Get Recipe* - More readable, "localized name" of the function
 - `getRecipe` - Name of the function within the Reflection System
-- *()* - Parentheses indicate a list of the inputs and outputs of the function (known as "arguments") separated by commas
+- *()* - Parentheses indicate a list of the inputs and outputs of the function (known as "parameters") separated by commas
 - *Class(Recipe)* - Type of the argument. In this case, the type of the output argument is the `Recipe` class
 - *Recipe* - Localized name of the argument
 - `recipe` - Name of the argument in the Reflection System
