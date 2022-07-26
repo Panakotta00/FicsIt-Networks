@@ -202,9 +202,9 @@ This might look like gibberish at first, but here's a look at each of the pieces
 
 Thanks to this information, we now know that the function `getRecipe` has an output argument called `recipe`, which is exactly what we need! 
 
-We can call the function by using something called "dot notation":
+We can call the function in Lua by using a colon after our variable name, like so:
 
-`constructor.getRecipe()`
+`constructor:getRecipe()`
 
 As you can see, we simply referenced the `getRecipe` function by adding a dot to the end of our variable and then calling the function we want! The empty parentheses at the end are used when calling a function with no inputs.
 
@@ -214,7 +214,7 @@ Now we just need to put this into the Lua programming language to make it useful
 
 ----
 constructor = component.proxy(component.findComponent("WireFactory Constructor1")[1])
-currentRecipe = constructor.getRecipe()
+currentRecipe = constructor:getRecipe()
 
 print(currentRecipe)
 ----
