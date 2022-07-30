@@ -147,10 +147,6 @@ Collections of values use different types based on the types of the items in the
 
 - `Struct` - Unordered collection of data that can contain _different_ types
 
-- `Class` - Unordered collection of data and functions
-
-That's right! Even a class is a type!
-
 === Putting It All Together
 
 So, we understand how objects in the game are structured. We also understand that the input values given to functions, the output values they return, and the values of any properties in a class are defined by rules called types.
