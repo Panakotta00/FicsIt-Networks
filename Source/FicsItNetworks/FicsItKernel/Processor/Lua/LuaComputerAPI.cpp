@@ -85,7 +85,10 @@ namespace FicsItKernel {
 		LuaFunc(luaComputerSetEEPROM)
 			AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 			if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
-			eeprom->SetCode(luaL_checkstring(L, 1));
+			size_t len;
+			const char* str = luaL_checklstring(L, 1, &len);
+			FUTF8ToTCHAR Conv(str, len);
+			eeprom->SetCode(FString(Conv.Length(), Conv.Get()));
 			return 0;
 		}
 
