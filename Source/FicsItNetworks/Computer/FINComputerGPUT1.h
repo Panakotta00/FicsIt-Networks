@@ -797,7 +797,7 @@ public:
 		ParameterInternalNames.Add("newScreen");
 		ParameterDisplayNames.Add(FText::FromString("New Screen"));
 		ParameterDescriptions.Add(FText::FromString("The screen you want to bind this GPU to. Null if you want to unbind the screen."));
-		Runtime = 1;
+		Runtime = 0;
 	}
 
 	UFUNCTION()
