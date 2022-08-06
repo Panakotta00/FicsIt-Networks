@@ -36,7 +36,7 @@ void AFINIndicatorPole::BeginPlay() {
 
 	if (Indicator->GetMaterials().Num() > 0) {
 		UMaterialInterface* Material = Indicator->GetMaterial(0);
-		IndicatorInstance = UMaterialInstanceDynamic::Create(Cast<UMaterialInstance>(Material)->Parent, nullptr);
+		IndicatorInstance = UMaterialInstanceDynamic::Create(Cast<UMaterialInstance>(Material), nullptr);
 		Indicator->SetMaterial(0, IndicatorInstance);
 	}
 }
