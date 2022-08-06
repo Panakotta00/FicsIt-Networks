@@ -112,8 +112,8 @@ bool AFINCodeableMerger::netPropGet_canOutput() {
 	return OutputQueue.Num() < 2;
 }
 
-void AFINCodeableMerger::netSig_ItemRequest_Implementation(int input, const FInventoryItem& item) {}
-void AFINCodeableMerger::netSig_ItemOutputted_Implementation(const FInventoryItem& item) {}
+void AFINCodeableMerger::netSig_ItemRequest_Implementation(int input, FInventoryItem item) {}
+void AFINCodeableMerger::netSig_ItemOutputted_Implementation(FInventoryItem item) {}
 
 TArray<FInventoryItem>& AFINCodeableMerger::GetInput(int output) {
 	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);
