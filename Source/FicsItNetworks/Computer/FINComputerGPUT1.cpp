@@ -200,12 +200,12 @@ void AFINComputerGPUT1::SetFrontBuffer_Implementation(const FFINGPUT1Buffer& Buf
 }
 
 void AFINComputerGPUT1::ReplicateFrontBuffer() {
-	SetFrontBuffer(FrontBuffer);
-	/*for (int i = 0; i < FrontBuffer.GetData().Num(); i += UNetworkSettings::DefaultMaxRepArraySize/2) {
+	//SetFrontBuffer(FrontBuffer);
+	for (int i = 0; i < FrontBuffer.GetData().Num(); i += UNetworkSettings::DefaultMaxRepArraySize/2) {
 		int Count = FMath::Min(FrontBuffer.GetData().Num() - i, UNetworkSettings::DefaultMaxRepArraySize/2);
 		TArray<FFINGPUT1BufferPixel> Chunk(FrontBuffer.GetData().GetData() + i, Count);
 		SetFrontBufferChunk(i, Chunk);
-	}*/
+	}
 }
 
 AFINComputerGPUT1::AFINComputerGPUT1() {
@@ -221,11 +221,18 @@ AFINComputerGPUT1::AFINComputerGPUT1() {
 
 void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
-	if (HasAuthority() && bFlushed) {
+	if (FlushTime > 0.0) FlushTime -= DeltaSeconds;
+	if (bFlushed) {
 		bFlushed = false;
+		FlushBackToFront();
+		bNetFlushed = true;
+	}
+	if (HasAuthority() && bNetFlushed && FlushTime <= 0.0) {
+		bNetFlushed = false;
 		Flush();
 		//ForceNetUpdate();
 		ReplicateFrontBuffer();
+		FlushTime = 1.0;
 	}
 }
 
@@ -288,6 +295,10 @@ void AFINComputerGPUT1::SetScreenSize(int Width, int Height) {
 }
 
 void AFINComputerGPUT1::Flush_Implementation() {
+	FlushBackToFront();
+}
+
+void AFINComputerGPUT1::FlushBackToFront() {
 	if (CachedInvalidation) {
 		CachedInvalidation->InvalidateRoot();
 		CachedInvalidation->InvalidateChildOrder();
