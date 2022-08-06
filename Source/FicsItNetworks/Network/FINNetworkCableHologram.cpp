@@ -194,6 +194,7 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 		float dist = -1.0f;
 		USceneComponent* con = nullptr;
 		for (UActorComponent* c : cons) {
+			if (Cast<UFGPowerConnectionComponent>(c)->GetMaxNumConnections() < 1 || Cast<UFGPowerConnectionComponent>(c)->IsHidden()) continue;
 			float d = (Cast<USceneComponent>(c)->GetComponentToWorld().GetTranslation() - hitResult.Location).Size();
 			if (dist < 0.0f || dist > d) {
 				con = Cast<USceneComponent>(c);
