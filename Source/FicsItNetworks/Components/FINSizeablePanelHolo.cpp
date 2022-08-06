@@ -82,7 +82,8 @@ int32 AFINSizeablePanelHolo::GetBaseCostMultiplier() const {
 
 bool AFINSizeablePanelHolo::IsValidHitResult(const FHitResult& hitResult) const {
 	if (bSnapped) return true;
-	return hitResult.GetActor() && (hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>());
+	//return hitResult.GetActor() && (hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>());
+	return true;
 }
 
 void AFINSizeablePanelHolo::SetHologramLocationAndRotation(const FHitResult& HitResult) {

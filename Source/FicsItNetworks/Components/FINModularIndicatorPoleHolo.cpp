@@ -118,11 +118,12 @@ int32 AFINModularIndicatorPoleHolo::GetBaseCostMultiplier() const {
 
 bool AFINModularIndicatorPoleHolo::IsValidHitResult(const FHitResult& HitResult) const {
 	if (bSnapped) return true;
-	return HitResult.GetActor() && (HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() ||
-		HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>() || 
-		HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildablePillar>() || 
-		HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>() 
-	);
+	return true;
+	//return HitResult.GetActor() && (HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() ||
+	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>() || 
+	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildablePillar>() || 
+	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>() 
+	//);
 }
 
 int AFINModularIndicatorPoleHolo::GetHitSideSingleAxis(const FVector A, const FVector B) {
