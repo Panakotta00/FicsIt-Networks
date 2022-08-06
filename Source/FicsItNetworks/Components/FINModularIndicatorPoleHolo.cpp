@@ -287,7 +287,6 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 				float RotationAngle = acosf(DotProduct);
 
 				Quat = FQuat(RotationAxis, RotationAngle);
-				FQuat RootQuat = GetRootComponent()->GetComponentQuat();
 
 				NewQuat = Quat; //;
 				
