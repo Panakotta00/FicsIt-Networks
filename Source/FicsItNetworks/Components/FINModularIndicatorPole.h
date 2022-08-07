@@ -42,7 +42,25 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FVector ConnectorLocation = FVector();
+	
+	UPROPERTY(EditDefaultsOnly)
+	FVector VerticalConnectorLocation = FVector(18.2365, 0.323992,-12.806);
+	UPROPERTY(EditDefaultsOnly)
+	FVector HorizontalConnectorLocation = FVector(7.0538,-4.2,15.7995);
 
+	UPROPERTY(EditDefaultsOnly)
+	FVector VerticalConnectorMeshOffset = FVector(-8.1,-13.5,-13);
+	UPROPERTY(EditDefaultsOnly)
+	FVector HorizontalConnectorMeshOffset = FVector(-8.4,-2.9,15.8);
+	UPROPERTY(EditDefaultsOnly)
+	FRotator VerticalConnectorMeshRotation = FRotator(0, 0, -90);
+	UPROPERTY(EditDefaultsOnly)
+	FRotator HorizontalConnectorMeshRotation = FRotator(0, 0, -90);
+	UPROPERTY(EditDefaultsOnly)
+	FVector VerticalConnectorMeshScale = FVector(2.4, 2.4, 1.8);
+	UPROPERTY(EditDefaultsOnly)
+	FVector HorizontalConnectorMeshScale = FVector(1.2, 1.2, 1.6);
+	
 	UPROPERTY(SaveGame, Replicated)
 	AFINModularIndicatorPoleModule* ChildModule;
 	
@@ -51,6 +69,30 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, SaveGame, Replicated)
 	bool Vertical = false;
+	
+	UPROPERTY(EditDefaultsOnly)
+	FVector VerticalBaseOffset = FVector();
+	UPROPERTY(EditDefaultsOnly)
+	FVector VerticalExtensionOffset = FVector(0, -17.0591, 1.6);
+	UPROPERTY(EditDefaultsOnly)
+	FVector VerticalExtensionMultiplier = FVector(0, 10.6, 0);
+	UPROPERTY(EditDefaultsOnly)
+	FVector VerticalAttachmentOffset = FVector(0, -15.9591, 0);
+	
+	UPROPERTY(EditDefaultsOnly)
+	FVector HorizontalBaseOffset = FVector();
+	UPROPERTY(EditDefaultsOnly)
+	FVector HorizontalExtensionOffset = FVector(0, 0, 32.3555);
+	UPROPERTY(EditDefaultsOnly)
+	FVector HorizontalExtensionMultiplier = FVector(0, 0, 26.6992);
+	UPROPERTY(EditDefaultsOnly)
+	FVector HorizontalAttachmentOffset = FVector(0, 0, 32.3555);
+
+	UPROPERTY(EditDefaultsOnly)
+	FVector HorizontalModuleConnectionPointOffset = FVector(0,0, 32.3555 + 6.66872);
+	UPROPERTY(EditDefaultsOnly)
+	FVector VerticalModuleConnectionPointOffset = FVector(15.9591 + 40.8858,0, 61.6469);
+
 	
 	AFINModularIndicatorPole();
 	
@@ -76,7 +118,10 @@ public:
 	                            UStaticMesh* AtachMesh,
 	                            UStaticMesh* ConnectorMesh,
 	                            AActor* Parent, USceneComponent* Attach,
-	                            TArray<UStaticMeshComponent*>& OutParts);
+	                            TArray<UStaticMeshComponent*>& OutParts,
+	                            FVector BO, FVector EO, FVector EM, FVector AO,
+	                            FVector CMO, FRotator CMR, FVector CMS
+	                            );
 	
 	UFUNCTION()
     void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes) {

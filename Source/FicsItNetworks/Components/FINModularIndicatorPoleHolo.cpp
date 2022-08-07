@@ -1,5 +1,7 @@
 ﻿#include "FINModularIndicatorPoleHolo.h"
 
+#include <algorithm>
+
 #include "FGBuildableBeam.h"
 #include "FGBuildablePillar.h"
 #include "FINModularIndicatorPole.h"
@@ -9,9 +11,34 @@
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworks_DebugRoze);
 
+
+UBuildMode_Auto::UBuildMode_Auto() {
+	mDisplayName = FText::FromString("Auto");
+}
+
+UBuildMode_OnVertical::UBuildMode_OnVertical() {
+	mDisplayName = FText::FromString("Vertical Mode");
+}
+
+UBuildMode_OnHorizontal::UBuildMode_OnHorizontal() {
+	mDisplayName = FText::FromString("Horizontal Mode");
+}
+
 AFINModularIndicatorPoleHolo::AFINModularIndicatorPoleHolo() {
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
+	mBuildModeAuto = UBuildMode_Auto::StaticClass();
+	mDefaultBuildMode = mBuildModeAuto;
+	mBuildModeOnHorizontalSurface = UBuildMode_OnHorizontal::StaticClass();
+	mBuildModeOnVerticalSurface = UBuildMode_OnVertical::StaticClass();
+}
+
+void AFINModularIndicatorPoleHolo::GetSupportedBuildModes_Implementation(
+	TArray<TSubclassOf<UFGHologramBuildModeDescriptor>>& out_buildmodes) const {
+	Super::GetSupportedBuildModes_Implementation(out_buildmodes);
+	out_buildmodes.Add(mBuildModeAuto);
+	out_buildmodes.Add(mBuildModeOnHorizontalSurface);
+	out_buildmodes.Add(mBuildModeOnVerticalSurface);
 }
 
 void AFINModularIndicatorPoleHolo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -46,20 +73,16 @@ void AFINModularIndicatorPoleHolo::OnConstruction(const FTransform& Transform) {
 
 	// Create Components
 	if (mBuildClass) {
-		UStaticMesh* AM;
-		UStaticMesh* BM;
-		UStaticMesh* EM;
-		UStaticMesh* CM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->ConnectorMesh;
+		const AFINModularIndicatorPole* Pole = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject());
 		if(Vertical) {
-			BM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->VerticalBaseMesh;
-			EM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->VerticalExtensionMesh;
-			AM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->VerticalAttachmentMesh;
+			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->VerticalBaseMesh, Pole->VerticalExtensionMesh, Pole->VerticalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
+													  Pole->VerticalBaseOffset, Pole->VerticalExtensionOffset, Pole->VerticalExtensionMultiplier, Pole->VerticalAttachmentOffset,
+													  Pole->VerticalConnectorMeshOffset, Pole->VerticalConnectorMeshRotation, Pole->VerticalConnectorMeshScale);
 		}else{
-			BM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->NormalBaseMesh;
-			EM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->NormalExtensionMesh;
-			AM = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject())->NormalAttachmentMesh;
+			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->NormalBaseMesh, Pole->NormalExtensionMesh, Pole->NormalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
+													  Pole->HorizontalBaseOffset, Pole->HorizontalExtensionOffset, Pole->HorizontalExtensionMultiplier, Pole->HorizontalAttachmentOffset,
+													  Pole->HorizontalConnectorMeshOffset, Pole->HorizontalConnectorMeshRotation, Pole->HorizontalConnectorMeshScale);
 		}
-		AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, BM, EM, AM, CM, this, RootComponent, Parts);
 		RootComponent->SetMobility(EComponentMobility::Movable);
 		for (UStaticMeshComponent* Part : Parts) {
 			Part->SetMobility(EComponentMobility::Movable);
@@ -84,7 +107,7 @@ bool AFINModularIndicatorPoleHolo::DoMultiStepPlacement(bool isInputFromARelease
 	} else {
 		bSnapped = true;
 		SnappedLoc = GetActorLocation();
-		
+		SetScrollRotateValue(0);
 		return false;
 	}
 }
@@ -95,11 +118,12 @@ int32 AFINModularIndicatorPoleHolo::GetBaseCostMultiplier() const {
 
 bool AFINModularIndicatorPoleHolo::IsValidHitResult(const FHitResult& HitResult) const {
 	if (bSnapped) return true;
-	return HitResult.GetActor() && (HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() ||
-		HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>() || 
-		HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildablePillar>() || 
-		HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>() 
-	);
+	return true;
+	//return HitResult.GetActor() && (HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() ||
+	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>() || 
+	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildablePillar>() || 
+	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>() 
+	//);
 }
 
 int AFINModularIndicatorPoleHolo::GetHitSideSingleAxis(const FVector A, const FVector B) {
@@ -143,45 +167,81 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 	if (bSnapped) {
 		float horizontalDistance = FVector::DistXY(HitResult.TraceStart, SnappedLoc);
 		float angleOfTrace = FMath::DegreesToRadians((HitResult.TraceEnd - HitResult.TraceStart).Rotation().Pitch);
-		if(Vertical) {
-			float verticalDistance = horizontalDistance * FMath::Tan(angleOfTrace) + HitResult.TraceStart.Z - SnappedLoc.Z;
-			Extension = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
-		}else {
-			float verticalDistance = horizontalDistance * FMath::Tan(angleOfTrace) + HitResult.TraceStart.Z - SnappedLoc.Z;
-			if(UpsideDown) {
-				Extension = GetHeight(SnappedLoc + FVector(0,0,-verticalDistance));
-			}else{
-				Extension = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
-			}
-		}
+		Extension = FMath::Clamp(GetScrollRotateValue() / 10 + 1, 1, 10);
+;;;;;		//if(Vertical) {
+		//	float verticalDistance = horizontalDistance * FMath::Tan(angleOfTrace) + HitResult.TraceStart.Z - SnappedLoc.Z;
+		//	Extension = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
+		//}else {
+		//	float verticalDistance = horizontalDistance * FMath::Tan(angleOfTrace) + HitResult.TraceStart.Z - SnappedLoc.Z;
+		//	if(UpsideDown) {
+		//		Extension = GetHeight(SnappedLoc + FVector(0,0,-verticalDistance));
+		//	}else{
+		//		Extension = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
+		//	}
+		//}
 	} else {
 		UpsideDown = false;
-		if(HitResult.GetActor()) {
-			if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>()) {
-				Vertical = true;
-			}else {
-				FVector VX, VY, VZ;
-				UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
-				//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
-				const auto q = GetHitSide(VX, VY, VZ, HitResult.Normal);
-				switch(q) {
-				case EFoundationSide::FoundationBottom:{
-					Vertical = false;
-					UpsideDown = true;
-					break;
-				}
-				case EFoundationSide::FoundationTop: {
-					Vertical = false;
-					break;
-				}
-				case EFoundationSide::FoundationBack: case EFoundationSide::FoundationFront: case EFoundationSide::FoundationLeft: case EFoundationSide::FoundationRight: {
+		if(mCurrentBuildMode == mBuildModeAuto) {
+			if(HitResult.GetActor()) {
+				if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>()) {
 					Vertical = true;
-					break;
+				}else if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>()){
+					FVector VX, VY, VZ;
+					UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
+					//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
+					const auto q = GetHitSide(VX, VY, VZ, HitResult.Normal);
+					switch(q) {
+					case EFoundationSide::FoundationBottom:{
+						Vertical = false;
+						UpsideDown = true;
+						break;
+					}
+					case EFoundationSide::FoundationTop: {
+						Vertical = false;
+						break;
+					}
+					case EFoundationSide::FoundationBack: case EFoundationSide::FoundationFront: case EFoundationSide::FoundationLeft: case EFoundationSide::FoundationRight: {
+						Vertical = true;
+						break;
+					}
+					default: Vertical = true;
+					}	
+				}else {
+					FVector VX, VY, VZ;
+					UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
+					//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
+					const auto q = GetHitSide(VX, VY, VZ, HitResult.Normal);
+					switch(q) {
+					case EFoundationSide::FoundationBottom:{
+						Vertical = false;
+						UpsideDown = true;
+						break;
+					}
+					case EFoundationSide::FoundationTop: {
+						Vertical = false;
+						break;
+					}
+					case EFoundationSide::FoundationBack: case EFoundationSide::FoundationFront: case EFoundationSide::FoundationLeft: case EFoundationSide::FoundationRight: {
+						Vertical = true;
+						break;
+					}
+					default: Vertical = true;
+					}	
 				}
-				default: Vertical = true;
-				}	
 			}
+		}else if(mCurrentBuildMode == mBuildModeOnHorizontalSurface) {
+			Vertical = false;
+			FVector VX, VY, VZ;
+			UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
+			//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
+			const auto q = GetHitSide(VX, VY, VZ, HitResult.Normal);
+			if(q == EFoundationSide::FoundationBottom) {
+				UpsideDown = true;
+			}
+		}else if(mCurrentBuildMode == mBuildModeOnVerticalSurface) {
+			Vertical = true;
 		}
+		
 		Normal = HitResult.ImpactNormal;
 		FVector UpVector;
 		if(Vertical) {
@@ -195,22 +255,50 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 		}else if(FVector::Coincident(UpVector * -1, Normal)) {
 			Quat = Normal.ToOrientationQuat() * -1;
 		} else {
-			FVector RotationAxis = FVector::CrossProduct(UpVector, Normal);
-			RotationAxis.Normalize();
-			float DotProduct = FVector::DotProduct(UpVector, Normal);
-			float RotationAngle = acosf(DotProduct);
-			Quat = FQuat(RotationAxis, RotationAngle);
+			if(mCurrentBuildMode == mBuildModeAuto) {
+				Quat = Normal.ToOrientationQuat();
+			}else{
+				FVector RotationAxis = FVector::CrossProduct(UpVector, Normal);
+				RotationAxis.Normalize();
+				float DotProduct = FVector::DotProduct(UpVector, Normal);
+				float RotationAngle = acosf(DotProduct);
+				Quat = FQuat(RotationAxis, RotationAngle);
+			}
 		}
 		FQuat NewQuat;
 		if(Vertical) {
 			NewQuat = Quat * FRotator(0, 0, GetScrollRotateValue()).Quaternion();
 		}else {
-			NewQuat = HitResult.GetActor()->GetActorRotation().Quaternion();
-			NewQuat*= FRotator(0,0,0).Quaternion();
-			if(UpsideDown){
-				NewQuat*= FRotator(0,0,180).Quaternion();
+			if(mCurrentBuildMode == mBuildModeOnHorizontalSurface) {
+				//NewQuat = Normal.ToOrientationQuat();
+				//NewQuat = UKismetMathLibrary::MakeRotationFromAxes(Normal, FVector(0,1, 0), FVector(0,0,1)).Quaternion();
+				//NewQuat = UKismetMathLibrary::MakeRotFromX(Normal).Quaternion();
+				//NewQuat*= FRotator(0,90,0).Quaternion();
+				//if(UpsideDown){
+				//	NewQuat*= FRotator(0,0,180).Quaternion();
+				//}
+				UpVector = FVector(0,0,1);
+				FVector NormalVector = Normal;
+
+				FVector RotationAxis = FVector::CrossProduct(UpVector, NormalVector);
+				RotationAxis.Normalize();
+
+				float DotProduct = FVector::DotProduct(UpVector, NormalVector);
+				float RotationAngle = acosf(DotProduct);
+
+				Quat = FQuat(RotationAxis, RotationAngle);
+
+				NewQuat = Quat; //;
+				
+				NewQuat*= FRotator(0, GetScrollRotateValue(), 0).Quaternion();
+			}else{
+				NewQuat = HitResult.GetActor()->GetActorRotation().Quaternion();
+				NewQuat*= FRotator(0,0,0).Quaternion();
+				if(UpsideDown){
+					NewQuat*= FRotator(0,0,180).Quaternion();
+				}
+				NewQuat*= FRotator(0, GetScrollRotateValue(), 0).Quaternion();
 			}
-			NewQuat*= FRotator(0, GetScrollRotateValue(), 0).Quaternion();
 		}
 		const auto Location = HitResult.GetActor()->GetActorLocation();
 		const auto Rotation = HitResult.GetActor()->GetActorRotation();
@@ -232,9 +320,7 @@ void AFINModularIndicatorPoleHolo::ConfigureActor(AFGBuildable* inBuildable) con
 	Pole->Vertical = Vertical;
 }
 
-void AFINModularIndicatorPoleHolo::CheckValidFloor() {
-	if (!bSnapped) Super::CheckValidFloor();
-}
+void AFINModularIndicatorPoleHolo::CheckValidFloor() {}
 
 bool AFINModularIndicatorPoleHolo::TrySnapToActor(const FHitResult& hitResult) {
 	return false;
