@@ -49,6 +49,12 @@ FFileSystemNode& FFileSystemNode::Serialize(CodersFileSystem::SRef<CodersFileSys
 	if (CodersFileSystem::SRef<CodersFileSystem::File> file = node) {
 		NodeType = 0;
 		CodersFileSystem::SRef<CodersFileSystem::FileStream> stream = file->open(CodersFileSystem::INPUT | CodersFileSystem::BINARY);
+		if (!stream) {
+			std::string path_str = path.str();
+			FUTF8ToTCHAR conv(path_str.c_str(), path_str.length());
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Failed to serialize file '%s'!"), *FString(conv.Get(), conv.Length()));
+			return *this;
+		}
 		std::string str = CodersFileSystem::FileStream::readAll(stream);
 		FUTF8ToTCHAR Convert(str.c_str(), str.length());
 		Data = FString(Convert.Length(), Convert.Get());
