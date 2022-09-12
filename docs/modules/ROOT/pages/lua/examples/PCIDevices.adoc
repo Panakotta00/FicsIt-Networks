@@ -11,7 +11,7 @@ TIP: When you want to get all installed xref:buildings/ComputerCase/index.adoc#_
 This example gives all xref:buildings/ComputerCase/GPUT1.adoc[GPU T1] installed. +
 You can see it as replacement for the `getGPUs` function of older mod versions.
 ```Lua
-local GPUs = computer.getPCIDevices(findClass("FIN_GPU_T1"))
+local GPUs = computer.getPCIDevices(findClass("GPU_T1_C"))
 ```
 
 == Get Network Card
