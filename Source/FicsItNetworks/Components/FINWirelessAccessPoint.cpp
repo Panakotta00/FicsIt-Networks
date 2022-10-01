@@ -83,12 +83,21 @@ TArray<UFINWirelessAccessPointConnection*> AFINWirelessAccessPoint::GetAvailable
 	
 	TArray<AActor*> RadarTowers;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFGBuildableRadarTower::StaticClass(), RadarTowers);
+	// The script could be called after an "EndPlay" event. In this case the object is still returned even if being destroyed
+	RadarTowers = RadarTowers.FilterByPredicate([](const AActor* Tower) {
+		return !Tower->IsActorBeingDestroyed();
+	});
+	UE_LOG(LogFicsItNetworks, Log, TEXT("Found %d Radar Towers"), RadarTowers.Num());
 
 	TArray<AActor*> AccessPoints;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFINWirelessAccessPoint::StaticClass(), AccessPoints);
-	TMap<AFGBuildableRadarTower*, AFINWirelessAccessPoint*> AccessPointsAttachments;
-
+	AccessPoints = AccessPoints.FilterByPredicate([](const AActor* AccessPoint) {
+		return !AccessPoint->IsActorBeingDestroyed();
+	});
+	UE_LOG(LogFicsItNetworks, Log, TEXT("Found %d Access Points"), AccessPoints.Num());
+	
 	// We register the accesspoint-radartower connection
+	TMap<AFGBuildableRadarTower*, AFINWirelessAccessPoint*> AccessPointsAttachments;
 	for (AActor* Actor : AccessPoints) {
 		if (const auto AccessPoint = Cast<AFINWirelessAccessPoint>(Actor); IsValid(AccessPoint->AttachedTower)) {
 			AccessPointsAttachments.Add(AccessPoint->AttachedTower, AccessPoint);

@@ -7,6 +7,7 @@
 #include "FGGameMode.h"
 #include "FGGameState.h"
 #include "FINGlobalRegisterHelper.h"
+#include "Buildables/FGBuildableRadarTower.h"
 #include "Computer/FINComputerDriveDesc.h"
 #include "Computer/FINComputerRCO.h"
 #include "Computer/FINComputerSubsystem.h"
@@ -16,6 +17,7 @@
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Network/Wireless/FINWirelessSubsystem.h"
 #include "Patching/BlueprintHookHelper.h"
 #include "Patching/BlueprintHookManager.h"
 #include "Patching/NativeHookManager.h"
@@ -222,6 +224,14 @@ void FFicsItNetworksModule::StartupModule(){
 				UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 				check(ModuleRCO);
 				gm->RegisterRemoteCallObjectClass(ModuleRCO);
+			}
+		});
+
+		// Wireless - Recalculate network topology when radar tower is destroyed
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRadarTower::EndPlay, (void*)GetDefault<AFGBuildableRadarTower>(), [](AActor* self, EEndPlayReason::Type Reason) {
+			if (Reason == EEndPlayReason::Destroyed) {
+				UE_LOG(LogFicsItNetworks, Log, TEXT("[Wireless] Radar tower destroyed, recalculating network topology"));
+				AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
 			}
 		});
 
