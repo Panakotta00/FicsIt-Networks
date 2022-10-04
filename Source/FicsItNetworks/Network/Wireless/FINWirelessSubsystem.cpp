@@ -57,7 +57,7 @@ void AFINWirelessSubsystem::RecalculateWirelessConnections() {
 void AFINWirelessSubsystem::BeginPlay() {
 	Super::BeginPlay();
 
-	RecalculateWirelessConnections();
+	UE_LOG(LogFicsItNetworks, Log, TEXT("Wireless Subsystem started"));
 }
 
 AFINWirelessSubsystem* AFINWirelessSubsystem::Get(UObject* WorldContext) {
