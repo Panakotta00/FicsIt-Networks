@@ -68,6 +68,11 @@ private:
 	 */
 	UPROPERTY()
 	TArray<UFINWirelessAccessPointConnection*> mConnectedAccessPoints;
+
+	/**
+	 * Verifies if this Access Point is ready to send/receive signals
+	 */
+	bool CanHandleMessages();
 	
 	bool HandleMessage(EFINWirelessDirection Direction, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data);
 };

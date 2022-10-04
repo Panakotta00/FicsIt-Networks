@@ -1,5 +1,6 @@
 ﻿#include "FINWirelessAccessPoint.h"
 
+#include "FGPowerInfoComponent.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/Network/FINNetworkCircuit.h"
 
@@ -48,6 +49,11 @@ void AFINWirelessAccessPoint::BeginPlay() {
 			// this->LampFlags |= FIN_NetRouter_Con2_Rx;
 		}
 	});
+
+	// UE_LOG(LogFicsItNetworks, Log, TEXT("OnHasPowerChanged is bound? %s"), AttachedTower->GetPowerInfo()->OnHasPowerChanged.IsBound() ? TEXT("true") : TEXT("false"));
+	// AttachedTower->GetPowerInfo()->OnHasPowerChanged.BindLambda([this](UFGPowerInfoComponent* PowerInfoComponent) {
+	// 	AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
+	// });
 
 	AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
 }
@@ -156,10 +162,20 @@ TArray<UFINWirelessAccessPointConnection*> AFINWirelessAccessPoint::GetAvailable
 }
 
 /**
+ * A Radar Tower needs power in order to receive messages.
+ * We check it here in order to avoid recalculating the connections everytime a tower gets powerered/unpowered.
+ */
+bool AFINWirelessAccessPoint::CanHandleMessages() {
+	return IsValid(AttachedTower) && AttachedTower->HasPower();
+}
+
+/**
  * The wireless direction specifies if this message is "internal" (from the current circuit) or "external" (from wireless
  * network). If it's coming from the inside, we don't need to propagate it to the components of the circuit.
  */
 bool AFINWirelessAccessPoint::HandleMessage(EFINWirelessDirection Direction, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+	if (!CanHandleMessages()) return false;
+
 	const auto SendingCircuit = IFINNetworkCircuitNode::Execute_GetCircuit(NetworkConnector1);
 
 	{
