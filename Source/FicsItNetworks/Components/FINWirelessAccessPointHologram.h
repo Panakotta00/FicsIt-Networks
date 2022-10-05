@@ -9,19 +9,13 @@
 #include "Hologram/FGHologram.h"
 #include "FINWirelessAccessPointHologram.generated.h"
 
-// TODO Currently not implemented
-enum class EFINWirelessAccessPointBuildStep : uint8 {
-	Place = 0 UMETA(DisplayName = "Place"),
-	Rotate = 1 UMETA(DisplayName = "Rotate")
-};
-
 #define LOCTEXT_NAMESPACE "Construct Disqualifier FIN"
 
 UCLASS()
-class FICSITNETWORKS_API UFGCDWirelessAccessPointRequiresTower : public UFGConstructDisqualifier {
+class FICSITNETWORKS_API UFINCDWirelessAccessPointRequiresTower : public UFGConstructDisqualifier {
 	GENERATED_BODY()
 
-	UFGCDWirelessAccessPointRequiresTower() {
+	UFINCDWirelessAccessPointRequiresTower() {
 		mDisqfualifyingText = LOCTEXT( "UFGCDWirelessAccessPointRequiresTower", "Must snap to a Radio Tower!" );
 	}
 };
@@ -52,7 +46,7 @@ public:
 	virtual void CheckValidPlacement() override;
 	virtual void SetHologramLocationAndRotation(const FHitResult& HitResult) override;
 	virtual AActor* Construct(TArray<AActor*>& out_children, FNetConstructionID netConstructionID) override;
-	// virtual void CheckValidFloor() override;
+	virtual void CheckValidFloor() override;
 	virtual void ConfigureActor(AFGBuildable* inBuildable) const override;
 	// End AFGBuildableHologram
 };

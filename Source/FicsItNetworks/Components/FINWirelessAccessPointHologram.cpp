@@ -12,6 +12,7 @@ AFINWirelessAccessPointHologram::AFINWirelessAccessPointHologram() {
 	SetActorTickEnabled(true);
 
 	this->mValidHitClasses.Add(AFGBuildableRadarTower::StaticClass());
+	this->mScrollMode = EHologramScrollMode::HSM_ROTATE;
 }
 
 // Called when the game starts or when spawned
@@ -39,14 +40,15 @@ bool AFINWirelessAccessPointHologram::TrySnapToActor(const FHitResult& hitResult
 	const auto Actor = hitResult.Actor.Get();
 
 	if (Actor && Actor->IsA<AFGBuildableRadarTower>()) {
-		// UE_LOG(LogFicsItNetworks, Display, TEXT("TrySnapToActor: snapped!"));
 		IsSnapped = true;
 		SnappedObj = Cast<AFGBuildable>(Actor);
 		
+		const float rotationAngle = GetScrollRotateValue() / 10 * 90;
 		const auto rotator = SnappedObj->GetActorRotation().Quaternion();
-		const auto snapRotator = rotator * FQuat(FVector::UpVector, FMath::DegreesToRadians(-90));
-		SetActorRotation(snapRotator);
-		SetActorLocation(SnappedObj->GetActorLocation() + rotator.RotateVector(FVector(362, 0, 50)));
+		const auto actorRotator = rotator * FQuat(FVector::UpVector, FMath::DegreesToRadians(rotationAngle));
+		const auto snapRotator = actorRotator * FQuat(FVector::UpVector, PI / 2.0f);
+		SetActorRotation(actorRotator);
+		SetActorLocation(SnappedObj->GetActorLocation() + snapRotator.RotateVector(FVector(362, 0, 50)));
 		
 		return true;
 	}
@@ -58,11 +60,11 @@ bool AFINWirelessAccessPointHologram::TrySnapToActor(const FHitResult& hitResult
 
 void AFINWirelessAccessPointHologram::CheckValidPlacement() {
 	if (!SnappedObj.IsValid() || !SnappedObj.Get()->IsA<AFGBuildableRadarTower>()) {
-		AddConstructDisqualifier(UFGCDWirelessAccessPointRequiresTower::StaticClass());
+		AddConstructDisqualifier(UFINCDWirelessAccessPointRequiresTower::StaticClass());
 	}
-	
-	Super::CheckValidPlacement();
 }
+
+void AFINWirelessAccessPointHologram::CheckValidFloor() {}
 
 void AFINWirelessAccessPointHologram::SetHologramLocationAndRotation(const FHitResult& hitResult) {
 	Super::SetHologramLocationAndRotation(hitResult);
