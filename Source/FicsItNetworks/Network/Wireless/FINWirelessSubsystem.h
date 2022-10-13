@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FINWirelessAccessPointConnection.h"
+#include "Buildables/FGBuildableRadarTower.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "Subsystem/ModSubsystem.h"
 #include "FINWirelessSubsystem.generated.h"
 
@@ -27,6 +30,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Network|Wireless")
 	void RecalculateWirelessConnections();
 
+	/**
+	 * Identifies the connections to other Wireless Access Points or Radar Towers
+	 * with detailed information for each of them
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Network|Wireless")
+	TArray<UFINWirelessAccessPointConnection*> GetAvailableConnections(AFINWirelessAccessPoint* CurrentAccessPoint);
+
+	UPROPERTY(Replicated, BlueprintReadOnly, ReplicatedUsing=OnRep_CachedAccessPoints, Category = "Network|Wireless")
+	TArray<AActor*> CachedAccessPoints;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Network|Wireless")
+	TArray<AActor*> CachedRadarTowers;
+
+	UFUNCTION()
+	void OnRep_CachedAccessPoints() {
+		UE_LOG(LogFicsItNetworks, Log, TEXT("CachedAccessPoints.Replicated %d"), CachedAccessPoints.Num());
+	}
+
 protected:
 	virtual void BeginPlay() override;
+	void CacheTowersAndAccessPoints();
 };

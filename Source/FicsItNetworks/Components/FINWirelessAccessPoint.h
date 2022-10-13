@@ -64,7 +64,8 @@ public:
 private:
 	/**
 	 * We store a cache of the connected access points (calculated by WirelessSubsystem) to
-	 * avoid expensive calculations each tick
+	 * avoid expensive calculations each tick.
+	 * We don't care about replication since these are used only on the host.
 	 */
 	UPROPERTY()
 	TArray<UFINWirelessAccessPointConnection*> mConnectedAccessPoints;

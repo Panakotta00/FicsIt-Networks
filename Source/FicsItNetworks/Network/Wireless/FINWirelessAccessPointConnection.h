@@ -42,4 +42,11 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UFINWirelessAccessPointActorRepresentation* ActorRepresentation = nullptr;
+
+	/**
+	 * Check if communication can be established through this connection from the source WAP.
+	 */
+	bool CanCommunicate() const {
+		return IsConnected && IsInRange && !IsRepeated;
+	}
 };
