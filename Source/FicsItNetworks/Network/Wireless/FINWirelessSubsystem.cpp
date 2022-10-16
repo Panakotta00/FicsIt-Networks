@@ -13,6 +13,11 @@ AFINWirelessSubsystem::AFINWirelessSubsystem() {
 	bAlwaysRelevant = true;
 }
 
+void AFINWirelessSubsystem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFINWirelessSubsystem, bDummy);
+}
+
 /**
  * Gets the cached access points and make sure they are valid before using them.
  */

@@ -21,6 +21,11 @@ class FICSITNETWORKS_API AFINWirelessSubsystem : public AModSubsystem {
 public:
 	AFINWirelessSubsystem();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(Replicated)
+	bool bDummy;
+
 	UFUNCTION(BlueprintCallable, Category = "Network|Wireless", meta = (WorldContext = "WorldContext"))
 	static AFINWirelessSubsystem* Get(UObject* WorldContext);
 

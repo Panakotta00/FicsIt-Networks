@@ -53,7 +53,9 @@ void AFINWirelessAccessPoint::BeginPlay() {
 	});
 	
 	UE_LOG(LogFicsItNetworks, Log, TEXT("FINWirelessAccessPoint::BeginPlay"));
-	AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
+	if (HasAuthority()) {
+		AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
+	}
 }
 
 void AFINWirelessAccessPoint::Tick(float DeltaTime) {
@@ -64,7 +66,7 @@ void AFINWirelessAccessPoint::Tick(float DeltaTime) {
 void AFINWirelessAccessPoint::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	Super::EndPlay(EndPlayReason);
 
-	if (EndPlayReason == EEndPlayReason::Destroyed) {
+	if (EndPlayReason == EEndPlayReason::Destroyed && HasAuthority()) {
 		AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
 	}
 }
