@@ -17,6 +17,7 @@
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Network/Wireless/FINWirelessRCO.h"
 #include "Network/Wireless/FINWirelessSubsystem.h"
 #include "Patching/BlueprintHookHelper.h"
 #include "Patching/BlueprintHookManager.h"
@@ -220,6 +221,7 @@ void FFicsItNetworksModule::StartupModule(){
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
 			if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
 				gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
+				gm->RegisterRemoteCallObjectClass(UFINWirelessRCO::StaticClass());
 
 				UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 				check(ModuleRCO);
@@ -230,8 +232,6 @@ void FFicsItNetworksModule::StartupModule(){
 		// Wireless - Recalculate network topology when radar tower is created or destroyed
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRadarTower::BeginPlay, (void*)GetDefault<AFGBuildableRadarTower>(), [](AActor* self) {
 			UE_LOG(LogFicsItNetworks, Log, TEXT("[Wireless] Radar tower created, recalculating network topology"));
-			self->bAlwaysRelevant = true;
-			self->power
 			AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
 		});
 		

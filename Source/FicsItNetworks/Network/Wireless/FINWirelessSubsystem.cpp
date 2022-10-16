@@ -13,12 +13,9 @@ AFINWirelessSubsystem::AFINWirelessSubsystem() {
 	bAlwaysRelevant = true;
 }
 
-void AFINWirelessSubsystem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AFINWirelessSubsystem, CachedAccessPoints);
-	DOREPLIFETIME(AFINWirelessSubsystem, CachedRadarTowers);
-}
-
+/**
+ * Gets the cached access points and make sure they are valid before using them.
+ */
 TArray<AFINWirelessAccessPoint*> AFINWirelessSubsystem::GetAccessPoints() {
 	TArray<AFINWirelessAccessPoint*> AccessPoints;
 
@@ -51,17 +48,12 @@ void AFINWirelessSubsystem::RecalculateWirelessConnections() {
 	
 	const auto AccessPoints = GetAccessPoints();
 	for (const auto AccessPoint : AccessPoints) {
-		AccessPoint->mConnectedAccessPoints =  {};
+		AccessPoint->mWirelessConnections =  {};
 
 		const auto Connections = GetAvailableConnections(AccessPoint);
 		for (const auto Connection : Connections) {
-			if (
-				Connection->IsConnected &&
-				Connection->IsInRange &&
-				!Connection->IsRepeated &&
-				Connection->AccessPoint.Get() != AccessPoint
-				) {
-				AccessPoint->mConnectedAccessPoints.Emplace(Connection);
+			if (Connection->CanCommunicate()) {
+				AccessPoint->mWirelessConnections.Emplace(Connection);
 			}
 		}
 	}
@@ -72,10 +64,10 @@ void AFINWirelessSubsystem::RecalculateWirelessConnections() {
  * All data (towers & waps) are cached in the subsystem.
  */
 TArray<UFINWirelessAccessPointConnection*> AFINWirelessSubsystem::GetAvailableConnections(AFINWirelessAccessPoint* CurrentAccessPoint) {
-	TArray<UFINWirelessAccessPointConnection*> FoundAccessPoints;
+	TArray<UFINWirelessAccessPointConnection*> FoundConnections;
 
 	const auto AttachedTower = CurrentAccessPoint->AttachedTower;
-	if (!IsValid(AttachedTower)) return FoundAccessPoints;
+	if (!IsValid(AttachedTower)) return FoundConnections;
 
 	const float AttachedRange = AFINWirelessAccessPoint::GetWirelessRange(AttachedTower);
 	
@@ -113,8 +105,8 @@ TArray<UFINWirelessAccessPointConnection*> AFINWirelessSubsystem::GetAvailableCo
 		bool IsRepeated = false;
 		bool IsInRange = (TargetRange + AttachedRange) > Distance;
 		if (!IsInRange) {
-			for (const auto Repeater : FoundAccessPoints) {
-				if (!Repeater->IsConnected || !Repeater->IsInRange) continue;
+			for (const auto Repeater : FoundConnections) {
+				if (!Repeater->Data.IsConnected || !Repeater->Data.IsInRange) continue;
 				
 				const auto RepeaterDistance = TargetTower->GetDistanceTo(Repeater->AccessPoint->AttachedTower);
 				
@@ -126,21 +118,26 @@ TArray<UFINWirelessAccessPointConnection*> AFINWirelessSubsystem::GetAvailableCo
 			}
 		}
 
-		const auto FoundAccessPoint = NewObject<UFINWirelessAccessPointConnection>();
-		FoundAccessPoint->RadarTower = TargetTower;
-		FoundAccessPoint->AccessPoint = IsConnected ?  *AccessPoint : nullptr;
-		FoundAccessPoint->Distance = Distance;
-		FoundAccessPoint->IsInRange = IsInRange;
-		FoundAccessPoint->IsConnected = IsConnected;
-		FoundAccessPoint->IsRepeated = IsRepeated;
+		const auto FoundConnection = NewObject<UFINWirelessAccessPointConnection>();
+		FoundConnection->RadarTower = TargetTower;
+		FoundConnection->AccessPoint = IsConnected ?  *AccessPoint : nullptr;
+		FoundConnection->Data.Distance = Distance;
+		FoundConnection->Data.IsInRange = IsInRange;
+		FoundConnection->Data.IsConnected = IsConnected;
+		FoundConnection->Data.IsRepeated = IsRepeated;
+		FoundConnection->Data.IsSelf = IsConnected && CurrentAccessPoint == *AccessPoint;
+
+		// Cached data for replication
+		FoundConnection->Data.RepresentationLocation = TargetTower->GetActorLocation();
+		FoundConnection->Data.RepresentationText = TargetTower->GetRepresentationText();
+		FoundConnection->Data.RadarTowerHasPower = TargetTower->HasPower();
 		
-		FoundAccessPoint->ActorRepresentation = NewObject<UFINWirelessAccessPointActorRepresentation>();
-		FoundAccessPoint->ActorRepresentation->Setup(FoundAccessPoint);
+		FoundConnection->SetupActorRepresentation();
 		
-		FoundAccessPoints.Add(FoundAccessPoint);
+		FoundConnections.Add(FoundConnection);
 	}
 	
-	return FoundAccessPoints;
+	return FoundConnections;
 }
 
 void AFINWirelessSubsystem::BeginPlay() {

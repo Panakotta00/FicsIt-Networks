@@ -14,6 +14,8 @@ enum class EFINWirelessDirection : uint8 {
 	FromCircuit
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFinWirelessAccessPointConnectionsUpdateDelegate);
+
 /**
  * The Wireless Access Point allows to connect an existing Network Circuit to a
  * Radar Tower, which sends/receives signals from other towers.
@@ -45,6 +47,10 @@ public:
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
 
+	// Networking
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	// End Networking
+
 	static float GetWirelessRange(AFGBuildableRadarTower* TargetTower);
 
 	UFUNCTION(BlueprintCallable, Category="Network|Wireless")
@@ -55,7 +61,34 @@ public:
 	 * with detailed information for each of them
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Wireless")
-	TArray<UFINWirelessAccessPointConnection*> GetAvailableWirelessConnections();
+	TArray<UFINWirelessAccessPointConnection*> GetDisplayedWirelessConnections();
+
+	/** Cached and replicated connections data. */
+	UPROPERTY(Replicated, ReplicatedUsing=OnRep_WirelessConnectionsData, BlueprintReadOnly, Category = "Network|Wireless")
+	TArray<FFINWirelessAccessPointConnectionData> mAvailableWirelessConnectionsData;
+
+	/** Locally displayed connections, calculated from mAvailableWirelessConnectionsData if on Guest MP. */
+	UPROPERTY(BlueprintReadOnly, Category="Network|Wireless")
+	TArray<UFINWirelessAccessPointConnection*> mDisplayedWirelessConnections;
+
+	/** Updates (both on Host and Guest MP) the locally displayed connections. */
+	void RefreshWirelessConnectionsData();
+
+	UPROPERTY(BlueprintAssignable, Category = "Network|Wireless")
+	FFinWirelessAccessPointConnectionsUpdateDelegate OnWirelessConnectionsDataUpdated;
+
+	UFUNCTION()
+	void OnRep_WirelessConnectionsData() {
+		UE_LOG(LogFicsItNetworks, Log, TEXT("OnRep_WirelessConnectionsData received %d connections"), mAvailableWirelessConnectionsData.Num());
+		mDisplayedWirelessConnections.Reset();
+		for (const FFINWirelessAccessPointConnectionData& Data : mAvailableWirelessConnectionsData) {
+			auto Connection = NewObject<UFINWirelessAccessPointConnection>();
+			Connection->FromData(Data);
+			mDisplayedWirelessConnections.Add(Connection);
+		}
+
+		OnWirelessConnectionsDataUpdated.Broadcast();
+	}
 
 	UPROPERTY()
 	TArray<FGuid> HandledMessages;
@@ -68,7 +101,7 @@ private:
 	 * We don't care about replication since these are used only on the host.
 	 */
 	UPROPERTY()
-	TArray<UFINWirelessAccessPointConnection*> mConnectedAccessPoints;
+	TArray<UFINWirelessAccessPointConnection*> mWirelessConnections;
 
 	/**
 	 * Verifies if this Access Point is ready to send/receive signals

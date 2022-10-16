@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FINWirelessAccessPointActorRepresentation.h"
+#include "FINWirelessAccessPointConnectionData.h"
 #include "Buildables/FGBuildableRadarTower.h"
 #include "UObject/Object.h"
 #include "FINWirelessAccessPointConnection.generated.h"
@@ -17,7 +18,10 @@ class FICSITNETWORKS_API UFINWirelessAccessPointConnection : public UObject {
 	GENERATED_BODY()
 
 public:
-	UFINWirelessAccessPointConnection() : RadarTower(nullptr), AccessPoint(nullptr), Distance(0.0f), IsConnected(false), IsInRange(false) {}
+	UFINWirelessAccessPointConnection() : RadarTower(nullptr), AccessPoint(nullptr) {}
+
+	// virtual bool IsSupportedForNetworking() const override { return true; }
+	// virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 		
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<AFGBuildableRadarTower> RadarTower;
@@ -25,20 +29,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<AFINWirelessAccessPoint> AccessPoint;
 
+	// Conversion
 	UPROPERTY(BlueprintReadOnly)
-	float Distance;
-
-	/** Identifies if Radar Tower is connected to a WAP */
-	UPROPERTY(BlueprintReadOnly)
-	bool IsConnected;
-
-	/** Identifies if Radar Tower is within this tower communication range. */
-	UPROPERTY(BlueprintReadOnly)
-	bool IsInRange;
-
-	/** If this a direct or repeated connection (with a Repeater Tower between source & target) */
-	UPROPERTY(BlueprintReadOnly)
-	bool IsRepeated;
+	FFINWirelessAccessPointConnectionData Data;
 
 	UPROPERTY(BlueprintReadOnly)
 	UFINWirelessAccessPointActorRepresentation* ActorRepresentation = nullptr;
@@ -46,7 +39,26 @@ public:
 	/**
 	 * Check if communication can be established through this connection from the source WAP.
 	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Network|Wireless")
 	bool CanCommunicate() const {
-		return IsConnected && IsInRange && !IsRepeated;
+		return Data.IsConnected && Data.IsInRange && !Data.IsRepeated && !Data.IsSelf;
 	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Network|Wireless")
+	FText GetRepresentationText() {
+		return RadarTower == nullptr ? Data.RepresentationText : RadarTower->GetRepresentationText();
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Network|Wireless")
+	FVector GetRepresentationLocation() const {
+		return RadarTower == nullptr ? Data.RepresentationLocation : RadarTower->GetActorLocation();
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Network|Wireless")
+	bool HasPower() const {
+		return RadarTower == nullptr ? Data.RadarTowerHasPower : RadarTower->HasPower();
+	}
+	
+	void FromData(const FFINWirelessAccessPointConnectionData& NewData);
+	void SetupActorRepresentation();
 };

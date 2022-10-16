@@ -1,8 +1,10 @@
 ﻿#include "FINWirelessAccessPoint.h"
 
+#include "FGPlayerController.h"
 #include "FGPowerInfoComponent.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/Network/FINNetworkCircuit.h"
+#include "FicsItNetworks/Network/Wireless/FINWirelessRCO.h"
 
 
 AFINWirelessAccessPoint::AFINWirelessAccessPoint() {
@@ -49,11 +51,7 @@ void AFINWirelessAccessPoint::BeginPlay() {
 			// this->LampFlags |= FIN_NetRouter_Con2_Rx;
 		}
 	});
-
-	// UE_LOG(LogFicsItNetworks, Log, TEXT("OnHasPowerChanged is bound? %s"), AttachedTower->GetPowerInfo()->OnHasPowerChanged.IsBound() ? TEXT("true") : TEXT("false"));
-	// AttachedTower->GetPowerInfo()->OnHasPowerChanged.BindLambda([this](UFGPowerInfoComponent* PowerInfoComponent) {
-	// 	AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
-	// });
+	
 	UE_LOG(LogFicsItNetworks, Log, TEXT("FINWirelessAccessPoint::BeginPlay"));
 	AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
 }
@@ -80,89 +78,36 @@ bool AFINWirelessAccessPoint::ShouldSave_Implementation() const {
 void AFINWirelessAccessPoint::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AFINWirelessAccessPoint, AttachedTower);
+	DOREPLIFETIME(AFINWirelessAccessPoint, mAvailableWirelessConnectionsData);
 }
 
-TArray<UFINWirelessAccessPointConnection*> AFINWirelessAccessPoint::GetAvailableWirelessConnections() {
-	const auto WirelessSubsystem = AFINWirelessSubsystem::Get(GetWorld());
-	return WirelessSubsystem->GetAvailableConnections(this);
-	// TArray<UFINWirelessAccessPointConnection*> FoundAccessPoints;
-	//
-	// if (!IsValid(AttachedTower)) return FoundAccessPoints;
-	//
-	// const float AttachedRange = GetWirelessRange(AttachedTower);
-	//
-	// TArray<AActor*> RadarTowers;
-	// UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFGBuildableRadarTower::StaticClass(), RadarTowers);
-	// // The script could be called after an "EndPlay" event. In this case the object is still returned even if being destroyed
-	// RadarTowers = RadarTowers.FilterByPredicate([](const AActor* Tower) {
-	// 	return !Tower->IsActorBeingDestroyed();
-	// });
-	// UE_LOG(LogFicsItNetworks, Log, TEXT("Found %d Radar Towers"), RadarTowers.Num());
-	//
-	// TArray<AActor*> AccessPoints;
-	// UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFINWirelessAccessPoint::StaticClass(), AccessPoints);
-	// AccessPoints = AccessPoints.FilterByPredicate([](const AActor* AccessPoint) {
-	// 	return !AccessPoint->IsActorBeingDestroyed();
-	// });
-	// UE_LOG(LogFicsItNetworks, Log, TEXT("Found %d Access Points"), AccessPoints.Num());
-	//
-	// // We register the accesspoint-radartower connection
-	// TMap<AFGBuildableRadarTower*, AFINWirelessAccessPoint*> AccessPointsAttachments;
-	// for (AActor* Actor : AccessPoints) {
-	// 	if (const auto AccessPoint = Cast<AFINWirelessAccessPoint>(Actor); IsValid(AccessPoint->AttachedTower)) {
-	// 		AccessPointsAttachments.Add(AccessPoint->AttachedTower, AccessPoint);
-	// 	}
-	// }
-	//
-	// // Sort all the towers putting the nearest first. This way we can check all the previous towers
-	// // For a connection to the next tower.
-	// Algo::SortBy(RadarTowers, [this](const AActor* Actor) {
-	// 	return FVector::DistSquared(Actor->GetActorLocation(), AttachedTower->GetActorLocation());
-	// });
-	//
-	// for (AActor* Actor : RadarTowers) {
-	// 	const auto TargetTower = Cast<AFGBuildableRadarTower>(Actor);
-	// 	const auto TargetRange = GetWirelessRange(TargetTower);
-	// 	
-	// 	const auto Distance = TargetTower->GetDistanceTo(AttachedTower);
-	// 	const auto AccessPoint = AccessPointsAttachments.Find(TargetTower);
-	// 	const bool IsConnected = AccessPoint != nullptr;
-	//
-	// 	// If RadarTower is not inside the AccessPoint range, it could still be connected through
-	// 	// repeaters antennas (WAP1 -> WAP2 -> WAP3).
-	// 	// We don't need this information for game logic, since repetition is handled by the network circuit itself,
-	// 	// however we store the information to display it in the UI
-	// 	bool IsRepeated = false;
-	// 	bool IsInRange = (TargetRange + AttachedRange) > Distance;
-	// 	if (!IsInRange) {
-	// 		for (const auto Repeater : FoundAccessPoints) {
-	// 			if (!Repeater->IsConnected || !Repeater->IsInRange) continue;
-	// 			
-	// 			const auto RepeaterDistance = TargetTower->GetDistanceTo(Repeater->AccessPoint->AttachedTower);
-	// 			
-	// 			if (TargetRange + GetWirelessRange(Repeater->AccessPoint->AttachedTower) > RepeaterDistance) {
-	// 				IsInRange = true;
-	// 				IsRepeated = true;
-	// 				break;
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	const auto FoundAccessPoint = NewObject<UFINWirelessAccessPointConnection>();
-	// 	FoundAccessPoint->RadarTower = TargetTower;
-	// 	FoundAccessPoint->AccessPoint = IsConnected ?  *AccessPoint : nullptr;
-	// 	FoundAccessPoint->Distance = Distance;
-	// 	FoundAccessPoint->IsInRange = IsInRange;
-	// 	FoundAccessPoint->IsConnected = IsConnected;
-	// 	FoundAccessPoint->IsRepeated = IsRepeated;
-	// 	
-	// 	FoundAccessPoint->ActorRepresentation = NewObject<UFINWirelessAccessPointActorRepresentation>();
-	// 	FoundAccessPoint->ActorRepresentation->Setup(FoundAccessPoint);
-	// 	
-	// 	FoundAccessPoints.Add(FoundAccessPoint);
-	// }
-	//
-	// return FoundAccessPoints;
+/**
+ * On Multiplayer Host, it just refreshes the UI data and then updates on data to be replicated.
+ * On Multiplayer Guest, it requests (through RCO) to get the updated data from the host.
+ */
+void AFINWirelessAccessPoint::RefreshWirelessConnectionsData() {
+	if (HasAuthority()) {
+		const auto WirelessSubsystem = AFINWirelessSubsystem::Get(GetWorld());
+		// TODO Refresh RadarTowers&WAPs? Should not be needed
+		mDisplayedWirelessConnections = WirelessSubsystem->GetAvailableConnections(this);
+
+		mAvailableWirelessConnectionsData.Reset();
+		for (const auto Connection : mDisplayedWirelessConnections) {
+			mAvailableWirelessConnectionsData.Add(Connection->Data);
+		}
+
+		// Replicates the connections data to guests
+		ForceNetUpdate();
+	}
+	else {
+		UFINWirelessRCO* RCO = Cast<UFINWirelessRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINWirelessRCO::StaticClass()));
+		RCO->SubscribeWirelessAccessPointConnections(this, true);
+	}
+}
+
+TArray<UFINWirelessAccessPointConnection*> AFINWirelessAccessPoint::GetDisplayedWirelessConnections() {
+	RefreshWirelessConnectionsData();
+	return mDisplayedWirelessConnections;
 }
 
 /**
@@ -211,7 +156,7 @@ bool AFINWirelessAccessPoint::HandleMessage(EFINWirelessDirection Direction, con
 	}
 
 	// distribute over wireless routers
-	for (const auto Connection : mConnectedAccessPoints) {
+	for (const auto Connection : mWirelessConnections) {
 		if (IsValid(Connection->AccessPoint.Get())) {
 			Connection->AccessPoint->HandleMessage(EFINWirelessDirection::FromWireless, ID, Sender, Receiver, Port, Data);
 			bSent = true;

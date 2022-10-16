@@ -18,11 +18,13 @@ class FICSITNETWORKS_API UFINWirelessAccessPointActorRepresentation : public UFG
 public:
 	UFINWirelessAccessPointActorRepresentation();
 
+	// virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	inline static const FLinearColor Green = FLinearColor::FromSRGBColor(FColor(128, 177, 57));
 	inline static const FLinearColor Orange = FLinearColor::FromSRGBColor(FColor(242, 100, 24));
 	inline static const FLinearColor Red = FLinearColor::FromSRGBColor(FColor(210, 52, 48));
 	
-	void Setup(const UFINWirelessAccessPointConnection* Connection);
+	void Setup(UFINWirelessAccessPointConnection* Connection);
 
 	// Begin UFGActorRepresentation
 	virtual bool IsSupportedForNetworking() const override { return false; }

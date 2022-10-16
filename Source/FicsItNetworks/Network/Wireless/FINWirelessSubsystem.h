@@ -37,17 +37,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Network|Wireless")
 	TArray<UFINWirelessAccessPointConnection*> GetAvailableConnections(AFINWirelessAccessPoint* CurrentAccessPoint);
 
-	UPROPERTY(Replicated, BlueprintReadOnly, ReplicatedUsing=OnRep_CachedAccessPoints, Category = "Network|Wireless")
+	UPROPERTY(BlueprintReadOnly, Category = "Network|Wireless")
 	TArray<AActor*> CachedAccessPoints;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Network|Wireless")
+	UPROPERTY(BlueprintReadOnly, Category = "Network|Wireless")
 	TArray<AActor*> CachedRadarTowers;
-
-	UFUNCTION()
-	void OnRep_CachedAccessPoints() {
-		UE_LOG(LogFicsItNetworks, Log, TEXT("CachedAccessPoints.Replicated %d"), CachedAccessPoints.Num());
-	}
-
+	
 protected:
 	virtual void BeginPlay() override;
 	void CacheTowersAndAccessPoints();
