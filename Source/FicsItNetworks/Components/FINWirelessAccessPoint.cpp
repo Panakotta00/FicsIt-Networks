@@ -144,7 +144,18 @@ bool AFINWirelessAccessPoint::HandleMessage(EFINWirelessDirection Direction, con
 			if (NetMsgI) {
 				// send to specified component
 				NetMsgI->HandleMessage(ID, Sender, Receiver, Port, Data);
+
+				// We return here since if we found the component, we don't need to propagate the message through
+				// the wireless network.
 				return true;
+			} else if (!NetMsgI) {
+				// distribute over network routers
+				for (UObject* Router : SendingCircuit->GetComponents()) {
+					IFINNetworkMessageInterface* MsgI = Cast<IFINNetworkMessageInterface>(Router);
+					if (!MsgI || !MsgI->IsNetworkMessageRouter()) continue;
+					MsgI->HandleMessage(ID, Sender, Receiver, Port, Data);
+					bSent = true;
+				}
 			}
 		} else {
 			// distribute to components
