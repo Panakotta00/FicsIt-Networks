@@ -32,6 +32,7 @@
 ** xref:buildings/NetworkWallPlugDouble.adoc[Network Wall Plug (Double)]
 ** xref:buildings/Speakers.adoc[Speakers]
 ** xref:buildings/VehicleScanner.adoc[Vehicle Scanner]
+** xref:buildings/WirelessAccessPoint.adoc[Wireless Access Point]
 * xref:lua/index.adoc[Lua]
 ** xref:lua/guide/index.adoc[Lua Guide]
 *** xref:lua/guide/BuildingAComputer.adoc[1. Building a Computer]

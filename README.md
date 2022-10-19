@@ -73,6 +73,8 @@ Features
 - Internet Card
   The Internet Card allows you to connect to the internet so you can do f.e. http requests and download
   custom user made scripts from f.e. gist or pastebin. But you can use it in anyway, like talking to an REST API.
+- Wireless Networks
+  You can broaden your horizons with Wireless Access Points which connect to already built Radar Towers and allow wireless communications over long distances.
 
 Dependencies
 ============
