@@ -2000,6 +2000,23 @@ BeginProp(RFloat, indicatorHeadlift, "Indicator Headlift", "The amount of headli
 BeginProp(RFloat, indicatorHeadliftPct, "Indicator Headlift Percent", "The amount of headlift the indicator shows as percantage from max.") {
 	Return self->GetIndicatorHeadLiftPct();
 } EndProp()
+BeginProp(RFloat, userFlowLimit, "User Flow Limit", "The flow limit of this pump the user can specifiy. Use -1 for now user set limit. (in m^3/s)") {
+	Return self->GetUserFlowLimit();
+} PropSet() {
+	self->SetUserFlowLimit(Val);
+} EndProp()
+BeginProp(RFloat, flowLimit, "Flow Limit", "The overal flow limit of this pump. (in m^3/s)") {
+	Return self->GetFlowLimit();
+} EndProp()
+BeginProp(RFloat, flowLimitPct, "Flow Limit Pct", "The overal flow limit of this pump. (in percent)") {
+	Return self->GetFlowLimitPct();
+} EndProp()
+BeginProp(RFloat, flow, "Flow", "The current flow amount. (in m^3/s)") {
+	Return self->GetIndicatorFlow();
+} EndProp()
+BeginProp(RFloat, flowPct, "Float Pct", "The current flow amount. (in percent)") {
+	Return self->GetIndicatorFlowPct();
+} EndProp()
 EndClass()
 
 BeginClass(AFGBuildableLightSource, "LightSource", "Light Source", "The base class for all light you can build.")
