@@ -1,7 +1,4 @@
-﻿// Copyright Coffee Stain Studios. All Rights Reserved.
-
-
-#include "FINWirelessRCO.h"
+﻿#include "FINWirelessRCO.h"
 
 void UFINWirelessRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

@@ -1,6 +1,4 @@
-﻿// Copyright Coffee Stain Studios. All Rights Reserved.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "FGActorRepresentation.h"
@@ -9,7 +7,10 @@
 class UFINWirelessAccessPointConnection;
 
 /**
- * ActorRepresentation for a Wireless Connection, this is used to show the connection in the map.
+ * ActorRepresentation for a Wireless Access Point. This is used to show the Access Point connection status relative
+ * to the currently selected access point in the UI map.
+ *
+ * Note: this ActorRepresentation is _not_ used in the player map, just in the map inside the WAP widget gui.
  */
 UCLASS()
 class FICSITNETWORKS_API UFINWirelessAccessPointActorRepresentation : public UFGActorRepresentation {
@@ -17,9 +18,7 @@ class FICSITNETWORKS_API UFINWirelessAccessPointActorRepresentation : public UFG
 
 public:
 	UFINWirelessAccessPointActorRepresentation();
-
-	// virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
+	
 	inline static const FLinearColor Green = FLinearColor::FromSRGBColor(FColor(128, 177, 57));
 	inline static const FLinearColor Orange = FLinearColor::FromSRGBColor(FColor(242, 100, 24));
 	inline static const FLinearColor Red = FLinearColor::FromSRGBColor(FColor(210, 52, 48));

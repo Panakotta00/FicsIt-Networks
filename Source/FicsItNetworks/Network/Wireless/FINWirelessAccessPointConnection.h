@@ -19,10 +19,7 @@ class FICSITNETWORKS_API UFINWirelessAccessPointConnection : public UObject {
 
 public:
 	UFINWirelessAccessPointConnection() : RadarTower(nullptr), AccessPoint(nullptr) {}
-
-	// virtual bool IsSupportedForNetworking() const override { return true; }
-	// virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-		
+	
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<AFGBuildableRadarTower> RadarTower;
 

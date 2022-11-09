@@ -1,16 +1,8 @@
-﻿// Copyright Coffee Stain Studios. All Rights Reserved.
-
-
-#include "FINWirelessAccessPointActorRepresentation.h"
+﻿#include "FINWirelessAccessPointActorRepresentation.h"
 #include "FINWirelessAccessPointConnection.h"
 #include "FicsItNetworks/FicsItNetworksModule.h"
 
 UFINWirelessAccessPointActorRepresentation::UFINWirelessAccessPointActorRepresentation() {}
-
-// void UFINWirelessAccessPointActorRepresentation::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
-// 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-// 	DOREPLIFETIME(UFINWirelessAccessPointActorRepresentation, mRealActorLocation);
-// }
 
 void UFINWirelessAccessPointActorRepresentation::Setup(UFINWirelessAccessPointConnection* Connection) {
 	this->mIsLocal = true;

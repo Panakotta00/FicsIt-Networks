@@ -1,7 +1,4 @@
-﻿// Copyright Coffee Stain Studios. All Rights Reserved.
-
-
-#include "FINWirelessSubsystem.h"
+﻿#include "FINWirelessSubsystem.h"
 
 #include "FicsItNetworks/FicsItNetworksModule.h"
 #include "FicsItNetworks/Components/FINWirelessAccessPoint.h"
@@ -51,11 +48,11 @@ void AFINWirelessSubsystem::RecalculateWirelessConnections() {
 	// Update cache
 	CacheTowersAndAccessPoints();
 	
-	const auto AccessPoints = GetAccessPoints();
+	const TArray<AFINWirelessAccessPoint*> AccessPoints = GetAccessPoints();
 	for (const auto AccessPoint : AccessPoints) {
 		AccessPoint->mWirelessConnections =  {};
 
-		const auto Connections = GetAvailableConnections(AccessPoint);
+		const TArray<UFINWirelessAccessPointConnection*> Connections = GetAvailableConnections(AccessPoint);
 		for (const auto Connection : Connections) {
 			if (Connection->CanCommunicate()) {
 				AccessPoint->mWirelessConnections.Emplace(Connection);
@@ -97,10 +94,10 @@ TArray<UFINWirelessAccessPointConnection*> AFINWirelessSubsystem::GetAvailableCo
 
 	for (AActor* Actor : RadarTowers) {
 		const auto TargetTower = Cast<AFGBuildableRadarTower>(Actor);
-		const auto TargetRange = AFINWirelessAccessPoint::GetWirelessRange(TargetTower);
+		const float TargetRange = AFINWirelessAccessPoint::GetWirelessRange(TargetTower);
 		
-		const auto Distance = TargetTower->GetDistanceTo(AttachedTower);
-		const auto AccessPoint = AccessPointsAttachments.Find(TargetTower);
+		const float Distance = TargetTower->GetDistanceTo(AttachedTower);
+		AFINWirelessAccessPoint** AccessPoint = AccessPointsAttachments.Find(TargetTower);
 		const bool IsConnected = AccessPoint != nullptr;
 
 		// If RadarTower is not inside the AccessPoint range, it could still be connected through
@@ -113,7 +110,7 @@ TArray<UFINWirelessAccessPointConnection*> AFINWirelessSubsystem::GetAvailableCo
 			for (const auto Repeater : FoundConnections) {
 				if (!Repeater->Data.IsConnected || !Repeater->Data.IsInRange) continue;
 				
-				const auto RepeaterDistance = TargetTower->GetDistanceTo(Repeater->AccessPoint->AttachedTower);
+				const float RepeaterDistance = TargetTower->GetDistanceTo(Repeater->AccessPoint->AttachedTower);
 				
 				if (TargetRange + AFINWirelessAccessPoint::GetWirelessRange(Repeater->AccessPoint->AttachedTower) > RepeaterDistance) {
 					IsInRange = true;

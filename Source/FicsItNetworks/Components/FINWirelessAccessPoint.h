@@ -14,7 +14,7 @@ enum class EFINWirelessDirection : uint8 {
 	FromCircuit
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFinWirelessAccessPointConnectionsUpdateDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFINWirelessAccessPointConnectionsUpdateDelegate);
 
 /**
  * The Wireless Access Point allows to connect an existing Network Circuit to a
@@ -75,7 +75,7 @@ public:
 	void RefreshWirelessConnectionsData();
 
 	UPROPERTY(BlueprintAssignable, Category = "Network|Wireless")
-	FFinWirelessAccessPointConnectionsUpdateDelegate OnWirelessConnectionsDataUpdated;
+	FFINWirelessAccessPointConnectionsUpdateDelegate OnWirelessConnectionsDataUpdated;
 
 	UFUNCTION()
 	void OnRep_WirelessConnectionsData() {

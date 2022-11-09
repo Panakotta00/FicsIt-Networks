@@ -27,9 +27,9 @@ float AFINWirelessAccessPoint::GetWirelessRange(AFGBuildableRadarTower* TargetTo
 bool AFINWirelessAccessPoint::IsInWirelessRange(AFGBuildableRadarTower* Tower) {
 	if (!IsValid(AttachedTower)) return false;
 	
-	const auto Distance = FVector::Dist(AttachedTower->GetActorLocation(), Tower->GetActorLocation());
-	const auto SourceRange = GetWirelessRange(AttachedTower);
-	const auto TargetRange = GetWirelessRange(Tower);
+	const float Distance = FVector::Dist(AttachedTower->GetActorLocation(), Tower->GetActorLocation());
+	const float SourceRange = GetWirelessRange(AttachedTower);
+	const float TargetRange = GetWirelessRange(Tower);
 
 	return SourceRange + TargetRange > Distance;
 }
@@ -89,7 +89,7 @@ void AFINWirelessAccessPoint::GetLifetimeReplicatedProps(TArray<FLifetimePropert
  */
 void AFINWirelessAccessPoint::RefreshWirelessConnectionsData() {
 	if (HasAuthority()) {
-		const auto WirelessSubsystem = AFINWirelessSubsystem::Get(GetWorld());
+		AFINWirelessSubsystem* WirelessSubsystem = AFINWirelessSubsystem::Get(GetWorld());
 		// TODO Refresh RadarTowers&WAPs? Should not be needed
 		mDisplayedWirelessConnections = WirelessSubsystem->GetAvailableConnections(this);
 

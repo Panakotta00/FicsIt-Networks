@@ -1,5 +1,3 @@
-﻿// Copyright Coffee Stain Studios. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -16,7 +14,7 @@ class FICSITNETWORKS_API UFINCDWirelessAccessPointRequiresTower : public UFGCons
 	GENERATED_BODY()
 
 	UFINCDWirelessAccessPointRequiresTower() {
-		mDisqfualifyingText = LOCTEXT( "UFGCDWirelessAccessPointRequiresTower", "Must snap to a Radio Tower!" );
+		mDisqfualifyingText = LOCTEXT( "UFINCDWirelessAccessPointRequiresTower", "Must snap to a Radio Tower!" );
 	}
 };
 
