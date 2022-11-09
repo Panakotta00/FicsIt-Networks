@@ -41,8 +41,8 @@ int32 AFINAnyBoxHolo::GetBaseCostMultiplier() const {
 }
 
 bool AFINAnyBoxHolo::IsValidHitResult(const FHitResult& hitResult) const {
-	return true;
-	//return hitResult.GetActor() && (hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || 
+	return !!hitResult.GetActor();
+	// && (hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() || 
 	//hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>() || 
 	//hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildablePillar>() || 
 	//hitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableBeam>());

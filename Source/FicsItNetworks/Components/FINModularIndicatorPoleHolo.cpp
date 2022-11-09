@@ -118,7 +118,7 @@ int32 AFINModularIndicatorPoleHolo::GetBaseCostMultiplier() const {
 
 bool AFINModularIndicatorPoleHolo::IsValidHitResult(const FHitResult& HitResult) const {
 	if (bSnapped) return true;
-	return true;
+	return !!HitResult.GetActor();
 	//return HitResult.GetActor() && (HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() ||
 	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>() || 
 	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildablePillar>() || 
