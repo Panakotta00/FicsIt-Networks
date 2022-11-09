@@ -7,6 +7,7 @@
 #include "FGGameMode.h"
 #include "FGGameState.h"
 #include "FINGlobalRegisterHelper.h"
+#include "Buildables/FGBuildableRadarTower.h"
 #include "Computer/FINComputerDriveDesc.h"
 #include "Computer/FINComputerRCO.h"
 #include "Computer/FINComputerSubsystem.h"
@@ -16,6 +17,8 @@
 #include "Network/FINNetworkAdapter.h"
 #include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "Network/Wireless/FINWirelessRCO.h"
+#include "Network/Wireless/FINWirelessSubsystem.h"
 #include "Patching/BlueprintHookHelper.h"
 #include "Patching/BlueprintHookManager.h"
 #include "Patching/NativeHookManager.h"
@@ -218,10 +221,26 @@ void FFicsItNetworksModule::StartupModule(){
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
 			if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
 				gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
+				gm->RegisterRemoteCallObjectClass(UFINWirelessRCO::StaticClass());
 
 				UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 				check(ModuleRCO);
 				gm->RegisterRemoteCallObjectClass(ModuleRCO);
+			}
+		});
+
+		// Wireless - Recalculate network topology when radar tower is created or destroyed
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRadarTower::BeginPlay, (void*)GetDefault<AFGBuildableRadarTower>(), [](AActor* self) {
+			if (self->HasAuthority()) {
+				UE_LOG(LogFicsItNetworks, Log, TEXT("[Wireless] Radar tower Created, recalculating network topology"));
+				AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
+			}
+		});
+		
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRadarTower::EndPlay, (void*)GetDefault<AFGBuildableRadarTower>(), [](AActor* self, EEndPlayReason::Type Reason) {
+			if (Reason == EEndPlayReason::Destroyed && self->HasAuthority()) {
+				UE_LOG(LogFicsItNetworks, Log, TEXT("[Wireless] Radar tower Destroyed, recalculating network topology"));
+				AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
 			}
 		});
 

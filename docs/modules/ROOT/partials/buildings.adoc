@@ -28,4 +28,6 @@ xref:buildings/NetworkWallPlugDouble.adoc[Network Wall Plug (Double)]
 xref:buildings/Speakers.adoc[Speakers]
 -
 xref:buildings/VehicleScanner.adoc[Vehicle Scanner]
+-
+xref:buildings/WirelessAccessPoint.adoc[Wireless Access Point]
 ====
