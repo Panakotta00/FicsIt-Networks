@@ -1913,20 +1913,25 @@ BeginProp(RInt, blockValidation, "Block Validation", "Any error states of the bl
 BeginProp(RInt, aspect, "Aspect", "The aspect of the signal. The aspect shows if a train is allowed to pass (clear) or not and if it should dock.\n0 = Unknown\n1 = The track is clear and the train is allowed to pass.\n2 = The next track is Occupied and the train should stop\n3 = The train should dock.") {
 	Return (int64)self->GetAspect();
 } EndProp()
-BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
-	auto Block = self->GetObservedBlock();
-	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
-	Return Block.Pin()->IsOccupied();
+BeginFunc(getObservedBlock, "Get Observed Block", "Returns the track block this signals observes.") {
+	OutVal(0, RStruct<FFINRailroadSignalBlock>, block, "Block", "The railroad signal block this signal is observing.")
+	Body()
+	block = FINStruct(FFINRailroadSignalBlock(self->GetObservedBlock()));
+} EndFunc()
+EndClass()
+
+BeginClass(AFGBuildableResourceSink, "ResourceSink", "Resource Sink", "The resource sink, also known a A.W.E.S.O.M.E Sink")
+BeginProp(RInt, numPoints, "Num Points", "The number of available points.") {
+	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumTotalPoints();
 } EndProp()
-BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
-	auto Block = self->GetObservedBlock();
-	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
-	Return Block.Pin()->HaveReservations();
+BeginProp(RInt, numCoupons, "Num Coupons", "The number of available coupons to print.") {
+	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumCoupons();
 } EndProp()
-BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
-	auto Block = self->GetObservedBlock();
-	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
-	Return Block.Pin()->IsPathBlock();
+BeginProp(RInt, numPointsToNextCoupon, "Num Points To Next Coupon", "The number of needed points for the next coupon.") {
+	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumPointsToNextCoupon();
+} EndProp()
+BeginProp(RFloat, couponProgress, "Coupon Progress", "The percentage of the progress for the next coupon.") {
+	Return AFGResourceSinkSubsystem::Get(self)->GetProgressionTowardsNextCoupon();
 } EndProp()
 EndClass()
 
@@ -2488,6 +2493,38 @@ BeginFunc(getStations, "Get Stations", "Returns a list of all trainstations in t
 		Stations.Add(self->Trace / Station->mStation);
 	}
 	stations = Stations;
+} EndFunc()
+EndStruct()
+
+BeginStruct(FFINRailroadSignalBlock, "RailroadSignalBlock", "Railroad Signal Block", "A track section that combines the area between multiple signals.")
+BeginProp(RBool, isValid, "Is Valid", "Is true if this signal block reference is valid.") {
+	Return self->Block.IsValid();
+} EndProp()
+BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The block reference is invalid"));
+	Return self->Block.Pin()->IsOccupied();
+} EndProp()
+BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return self->Block.Pin()->HaveReservations();
+} EndProp()
+BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return self->Block.Pin()->IsPathBlock();
+} PropSet() {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	self->Block.Pin()->SetIsPathBlock(Val);
+} EndProp()
+BeginProp(RInt, blockValidation, "Block Validation", "Returns the blocks validation status.") {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return (int64)self->Block.Pin()->GetBlockValidation();
+} EndProp()
+BeginFunc(isOccupiedBy, "Is Occupied By", "Allows you to check if this block is occupied by a given train.") {
+	InVal(0, RObject<AFGTrain>, train, "Train", "The train you want to check if it occupies this block")
+	OutVal(1, RBool, isOccupied, "Is Occupied", "True if the given train occupies this block.")
+	Body()
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	isOccupied = self->Block.Pin()->IsOccupiedBy(train.Get());
 } EndFunc()
 EndStruct()
 
