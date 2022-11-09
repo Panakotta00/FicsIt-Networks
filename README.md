@@ -102,3 +102,4 @@ Contributors
 - [Roze](https://github.com/RozeDoyanawa)
 - [Raysh](https://www.artstation.com/raysh)
 - Esper
+- [leonardfactory](https://github.com/rockfactory)
