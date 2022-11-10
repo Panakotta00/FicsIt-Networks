@@ -517,8 +517,8 @@ struct RClass {
 
 template<typename T>
 struct RObject {
-	typedef FINObj CppType;
-	static FINObj Get(const FINAny& Any) { return Any.GetObj(); }
+	typedef TWeakObjectPtr<T> CppType;
+	static CppType Get(const FINAny& Any) { return CppType(Cast<T>(Any.GetObj().Get())); }
 	static UFINProperty* PropConstructor(UObject* Outer) {
 		UFINObjectProperty* Prop = NewObject<UFINObjectProperty>(Outer);
 		Prop->Subclass = T::StaticClass();
