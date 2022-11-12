@@ -14,6 +14,7 @@
 #include "FINIntProperty.h"
 #include "FINObjectProperty.h"
 #include "FINStructProperty.h"
+#include "FicsItNetworks/Utils/FINRailroadSignalBlock.h"
 
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
@@ -21,6 +22,7 @@
 #include "FGRailroadTimeTable.h"
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FGRailroadVehicleMovementComponent.h"
+#include "FGResourceSinkSubsystem.h"
 #include "FGSignLibrary.h"
 #include "FGTrainStationIdentifier.h"
 #include "FINBoolProperty.h"
@@ -43,6 +45,7 @@
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadStation.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
+#include "Buildables/FGBuildableResourceSink.h"
 #include "Buildables/FGBuildableSignBase.h"
 #include "Buildables/FGBuildableSpeedSign.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
