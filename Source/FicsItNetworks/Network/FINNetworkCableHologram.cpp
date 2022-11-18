@@ -401,14 +401,20 @@ void AFINNetworkCableHologram::GetRecipes(TSubclassOf<UFGRecipe>& OutRecipePole,
 void AFINNetworkCableHologram::OnBeginSnap(FFINCablePlacementStepInfo a, bool isValid) {
 	if (a.SnapType != FIN_NOT_SNAPPED) {
 		AActor* o = a.GetActor();
-		if (o) UFGOutlineComponent::Get(this->GetWorld())->ShowOutline(o, isValid ? EOutlineColor::OC_HOLOGRAM : EOutlineColor::OC_RED);
+		if (o) {
+			UFGOutlineComponent* Outline = UFGOutlineComponent::Get(this->GetWorld());
+			if (Outline) Outline->ShowOutline(o, isValid ? EOutlineColor::OC_HOLOGRAM : EOutlineColor::OC_RED);
+		}
 	}
 }
 
 void AFINNetworkCableHologram::OnEndSnap(FFINCablePlacementStepInfo a) {
 	if (a.SnapType != FIN_NOT_SNAPPED) {
 		AActor* o = a.GetActor();
-		if (o) UFGOutlineComponent::Get(o->GetWorld())->HideOutline();
+		if (o) {
+			UFGOutlineComponent* Outline = UFGOutlineComponent::Get(this->GetWorld());
+			Outline->HideOutline();
+		}
 	}
 }
 
