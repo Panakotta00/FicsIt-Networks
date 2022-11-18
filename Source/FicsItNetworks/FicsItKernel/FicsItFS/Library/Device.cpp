@@ -125,6 +125,7 @@ namespace CodersFileSystem {
 	}
 
 	SRef<Node> MemDevice::get(Path path) {
+		path = path.normalize().absolute();
 		if (path.isRoot()) return root;
 		SRef<MemDirectory> dir = root;
 		while (!path.isSingle() && dir.isValid()) {
