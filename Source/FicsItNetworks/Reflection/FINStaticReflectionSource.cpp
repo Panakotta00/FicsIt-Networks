@@ -1925,16 +1925,16 @@ EndClass()
 
 BeginClass(AFGBuildableResourceSink, "ResourceSink", "Resource Sink", "The resource sink, also known a A.W.E.S.O.M.E Sink")
 BeginProp(RInt, numPoints, "Num Points", "The number of available points.") {
-	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumTotalPoints();
+	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumTotalPoints(EResourceSinkTrack::RST_Default);
 } EndProp()
 BeginProp(RInt, numCoupons, "Num Coupons", "The number of available coupons to print.") {
 	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumCoupons();
 } EndProp()
 BeginProp(RInt, numPointsToNextCoupon, "Num Points To Next Coupon", "The number of needed points for the next coupon.") {
-	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumPointsToNextCoupon();
+	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumPointsToNextCoupon(EResourceSinkTrack::RST_Default);
 } EndProp()
 BeginProp(RFloat, couponProgress, "Coupon Progress", "The percentage of the progress for the next coupon.") {
-	Return AFGResourceSinkSubsystem::Get(self)->GetProgressionTowardsNextCoupon();
+	Return AFGResourceSinkSubsystem::Get(self)->GetProgressionTowardsNextCoupon(EResourceSinkTrack::RST_Default);
 } EndProp()
 EndClass()
 
@@ -2423,11 +2423,16 @@ BeginProp(RTrace<AFGBuildableRailroadStation>, station, "Station", "The station 
 } PropSet() {
 	self->Station = Val;
 } EndProp()
-BeginProp(RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set wich describe when the train will depart from the train station") {
-	Return self->RuleSet;
-} PropSet() {
-	self->RuleSet = Val;
-} EndProp()
+BeginFunc(getRuleSet, "Get Rule Set", "Returns The rule set wich describe when the train will depart from the train station.") {
+	OutVal(0, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set of this time table stop.")
+	Body()
+	ruleset = FINStruct(self->RuleSet);
+} EndFunc()
+BeginFunc(setRuleSet, "Set Rule Set", "Allows you to change the Rule Set of this time table stop.") {
+	InVal(1, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set you want to use instead.")
+	Body()
+	self->RuleSet = ruleset;
+} EndFunc()
 EndStruct()
 
 BeginStruct(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
@@ -2582,9 +2587,9 @@ EndStruct()
 
 BeginStruct(FInventoryItem, "Item", "Item", "A structure that holds item information.")
 BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the item.") {
-	Return (UClass*)self->ItemClass;
+	Return (UClass*)self->GetItemClass();
 } PropSet() {
-	self->ItemClass = Val;
+	self->SetItemClass(Val);
 } EndProp()
 EndStruct()
 

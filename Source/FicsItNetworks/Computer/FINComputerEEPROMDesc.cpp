@@ -10,7 +10,7 @@ bool UFINComputerEEPROMDesc::CopyData_Implementation(UObject* WorldContext, cons
 	OutItem = InTo;
 	if (!To) {
 		if (!InTo.IsValid()) return false; 
-		UFINComputerEEPROMDesc* Descriptor = Cast<UFINComputerEEPROMDesc>(InTo.ItemClass->GetDefaultObject());
+		UFINComputerEEPROMDesc* Descriptor = Cast<UFINComputerEEPROMDesc>(InTo.GetItemClass()->GetDefaultObject());
 		if (!IsValid(Descriptor)) return false;
 		UClass* StateClass = Descriptor->EEPROMStateClass;
 		FVector loc = FVector::ZeroVector;
@@ -26,8 +26,8 @@ bool UFINComputerEEPROMDesc::CopyData_Implementation(UObject* WorldContext, cons
 
 AFINStateEEPROM* UFINComputerEEPROMDesc::GetEEPROM(UFGInventoryComponent* Inv, int SlotIdx) {
 	FInventoryStack stack;
-	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.ItemClass)) return nullptr;
-	UFINComputerEEPROMDesc* desc = Cast<UFINComputerEEPROMDesc>(stack.Item.ItemClass->GetDefaultObject());
+	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.GetItemClass())) return nullptr;
+	UFINComputerEEPROMDesc* desc = Cast<UFINComputerEEPROMDesc>(stack.Item.GetItemClass()->GetDefaultObject());
 	if (!IsValid(desc)) return nullptr;
 	UClass* clazz = desc->EEPROMStateClass;
 	if (stack.Item.ItemState.IsValid()) {

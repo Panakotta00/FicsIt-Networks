@@ -15,7 +15,7 @@ void UFINComputerDriveDesc::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 }
 
 FText UFINComputerDriveDesc::GetOverridenItemName_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
-	return UFGItemDescriptor::GetItemName(InventoryStack.Item.ItemClass);
+	return UFGItemDescriptor::GetItemName(InventoryStack.Item.GetItemClass());
 }
 
 FText UFINComputerDriveDesc::GetOverridenItemDescription_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
@@ -92,7 +92,7 @@ void CopyPath(CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice, Coder
 
 bool UFINComputerDriveDesc::CopyData_Implementation(UObject* WorldContext, const FInventoryItem& InFrom, const FInventoryItem& InTo, FInventoryItem& OutItem) {
 	TSubclassOf<UFINComputerDriveDesc> DriveClass;
-	DriveClass = InTo.ItemClass;
+	DriveClass = InTo.GetItemClass();
 	if (!IsValid(DriveClass)) return false;
 	AFINFileSystemState* From = Cast<AFINFileSystemState>(InFrom.ItemState.Get());
 	AFINFileSystemState* To = Cast<AFINFileSystemState>(InTo.ItemState.Get());

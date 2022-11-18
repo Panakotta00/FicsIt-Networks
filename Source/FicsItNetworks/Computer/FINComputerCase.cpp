@@ -92,7 +92,7 @@ void AFINComputerCase::BeginPlay() {
 		// load floppy
 		FInventoryStack stack;
 		if (DataStorage->GetStackFromIndex(1, stack)) {
-			const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
+			const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
 			AFINFileSystemState* FileSystemState = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
 			if (IsValid(DriveDesc)) {
 				if (!IsValid(FileSystemState)) {
@@ -312,7 +312,7 @@ void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int3
 			AFINFileSystemState* state = nullptr;
 			FInventoryStack stack;
 			if (DataStorage->GetStackFromIndex(1, stack)) {
-				const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
+				const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
 				state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
 				if (IsValid(DriveDesc)) {
 					if (!IsValid(state)) {
