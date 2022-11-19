@@ -109,6 +109,16 @@ namespace FicsItKernel {
 			lua_pushinteger(L, kernel->GetTimeSinceStart());
 			return 1;
 		}
+
+		LuaFunc(luaComputerMagicTime)
+			FDateTime Now = FDateTime::UtcNow();
+			lua_pushinteger(L, Now.ToUnixTimestamp());
+			FTCHARToUTF8 ConvertStr(*Now.ToString());
+			lua_pushlstring(L, ConvertStr.Get(), ConvertStr.Length());
+			FTCHARToUTF8 ConvertIso(*Now.ToIso8601());
+			lua_pushlstring(L, ConvertIso.Get(), ConvertIso.Length());
+			return 3;
+		}
 		
 		LuaFunc(luaComputerPCIDevices)
 			lua_newtable(L);
@@ -144,6 +154,7 @@ namespace FicsItKernel {
 			{"getEEPROM", luaComputerGetEEPROM},
 			{"time", luaComputerTime},
 			{"millis", luaComputerMillis},
+			{"magicTime", luaComputerMagicTime},
 			{"getPCIDevices", luaComputerPCIDevices},
 			{nullptr, nullptr}
 		};

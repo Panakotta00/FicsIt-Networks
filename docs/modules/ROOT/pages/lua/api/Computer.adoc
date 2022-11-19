@@ -111,6 +111,29 @@ Return Values::
 |Amount of milliseconds since system start
 |===
 
+=== `int, string, string magiTime()`
+
+Returns some kind of strange/mysterious time data from a unknown place (the real life).
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|Unix Timestamp
+
+|string
+|string
+|Serverside Formated Date-Time-Stamp
+
+|string
+|string
+|Date-Time-Stamp after ISO 8601
+|===
+
 === `Object[] getPCIDevices(Class type)`
 
 This function allows you to get all installed xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Devices] in a computer of a given type.
