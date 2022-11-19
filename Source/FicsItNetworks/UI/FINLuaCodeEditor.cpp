@@ -22,7 +22,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::SetText(const FString& Source
 	FTextRange::CalculateLineRangesFromString(SourceString, LineRanges);
 
 	TArray<FString> Rules = TArray<FString>({
-		" ", "\t", "\\.", "\\:", "\\\"", "\\\'", "\\,", "\\(", "\\)", "for", "in", "while", "do", "if", "then", "elseif", "else",
+		" ", "\t", "\\.", "\\:", "\\\"", "\\\'", "\\,", "\\\\", "\\(", "\\)", "for", "in", "while", "do", "if", "then", "elseif", "else",
 		"end", "local", "true", "false", "not", "and", "or", "function", "return", "--\\[\\[", "\\]\\]--", "--", "\\+", "\\-", "\\/",
 		"\\*", "\\%", "\\[", "\\]", "\\{", "\\}", "\\=", "\\!", "\\~", "\\#", "\\>", "\\<"});
 	
@@ -70,7 +70,7 @@ FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayout
 TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle) {
 	TArray<FSyntaxTokenizer::FRule> TokenizerRules;
 	for (FString Token : TArray<FString>({
-		" ", "\t", ".", ":", "\"", "\'", ",", "(", ")", "for", "in", "while", "do", "if", "then", "elseif", "else",
+		" ", "\t", ".", ":", "\"", "\'", "\\", ",", "(", ")", "for", "in", "while", "do", "if", "then", "elseif", "else",
 		"end", "local", "true", "false", "not", "and", "or", "function", "return", "--[[", "]]--", "--", "+", "-", "/",
 		"*", "%", "[", "]", "{", "}", "=", "!", "~", "#", ">", "<"})) {
 		TokenizerRules.Add(FSyntaxTokenizer::FRule(Token));
@@ -178,16 +178,25 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		bool bInNumber = false;
 		bool bNumberHadDecimal = false;
 		bool bInLineComment = false;
+		bool bIsEscaped = false;
 		for (const FSyntaxTokenizer::FToken& Token : TokenizedLine.Tokens) {
 			const FString TokenString = SourceString.Mid(Token.Range.BeginIndex, Token.Range.Len());
 			int Start = ModelString->Len();
 			int End = Start + TokenString.Len();
 			ModelString->Append(TokenString);
+			bool bWasEscaped = bIsEscaped;
+			bIsEscaped = false;
 
 			bool bIsNew = !Run.IsValid() || Start < 1 || Run->GetRunInfo().MetaData.Contains("Splitting");
 			
 			if (bInString || bInLineComment || bInBlockComment) {
 				StringEnd += TokenString.Len();
+			}
+			if (!bInBlockComment && !bInLineComment && (TokenString == "\\")) {
+				if (bInString) {
+					bIsEscaped = !bWasEscaped;
+					continue;
+				}
 			}
 			if (!bInBlockComment && !bInLineComment && (TokenString == "\"" || TokenString == "\'")) {
 				if (bInNumber) {
@@ -196,7 +205,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 					bInNumber = false;
 				}
 				if (bInString) {
-					if (Start > 0 && (*ModelString)[Start-1] == '\\') continue;
+					if (Start > 0 && bWasEscaped) continue;
 					DoString(FTextRange(StringStart, StringEnd));
 					bInString = false;
 					continue;
