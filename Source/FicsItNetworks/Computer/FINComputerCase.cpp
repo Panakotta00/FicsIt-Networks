@@ -157,7 +157,7 @@ bool AFINComputerCase::ShouldSave_Implementation() const {
 }
 
 void AFINComputerCase::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
-	out_dependentObjects.Add(AFINComputerSubsystem::GetComputerSubsystem(this));
+	//out_dependentObjects.Add(AFINComputerSubsystem::GetComputerSubsystem(this)); // TODO: Check if really not needed anymore
 }
 
 void AFINComputerCase::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
