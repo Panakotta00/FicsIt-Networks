@@ -58,7 +58,7 @@ AActor* FFINCablePlacementStepInfo::GetActor() const {
 	case FIN_SETTINGS:
 		return Cast<AFGBuildable>(SnappedObj);
 	case FIN_POWER:
-		return Cast<UFGPowerConnectionComponent>(SnappedObj)->GetAttachmentRootActor();
+		return Cast<USceneComponent>(SnappedObj)->GetAttachmentRootActor();
 	default:
 		return nullptr;
 	}
@@ -190,20 +190,29 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 
 	// find the nearest power connector to hit if actor is factory
 	if (actor->IsA<AFGBuildable>()) {
-		const TArray<UActorComponent*> cons = actor->GetComponentsByClass(UFGPowerConnectionComponent::StaticClass());
-		float dist = -1.0f;
-		USceneComponent* con = nullptr;
-		for (UActorComponent* c : cons) {
-			if (Cast<UFGPowerConnectionComponent>(c)->GetMaxNumConnections() < 1 || Cast<UFGPowerConnectionComponent>(c)->IsHidden()) continue;
-			float d = (Cast<USceneComponent>(c)->GetComponentToWorld().GetTranslation() - hitResult.Location).Size();
-			if (dist < 0.0f || dist > d) {
-				con = Cast<USceneComponent>(c);
-				dist = d;
+		TArray<UActorComponent*> Components;
+		actor->GetComponents(USceneComponent::StaticClass(), Components);
+		float Distance = -1.0f;
+		USceneComponent* SnappedComponent = nullptr;
+		for (UActorComponent* Component : Components) {
+			bool bShouldSnap = false;
+			UFGPowerConnectionComponent* Power = Cast<UFGPowerConnectionComponent>(Component);
+			if (Power) {
+				bShouldSnap = !(Power->GetMaxNumConnections() < 1 || Power->IsHidden());
+			} else if (Cast<USceneComponent>(Component)->GetName().EndsWith("FINConnector")) {
+				bShouldSnap = true;
+			}
+			if (bShouldSnap) {
+				float ComponentDistance = (Cast<USceneComponent>(Component)->GetComponentToWorld().GetTranslation() - hitResult.Location).Size();
+				if (Distance < 0.0f || Distance > ComponentDistance) {
+					SnappedComponent = Cast<USceneComponent>(Component);
+					Distance = ComponentDistance;
+				}
 			}
 		}
-		if (con) {
+		if (SnappedComponent) {
 			// use nearest power connector as connection point by using adapter logic
-			Snapped = {FIN_POWER, con};
+			Snapped = {FIN_POWER, SnappedComponent};
 			SetHologramLocationAndRotation(hitResult);
 			return true;
 		}
