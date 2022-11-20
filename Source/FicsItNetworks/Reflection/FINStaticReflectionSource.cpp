@@ -892,7 +892,7 @@ BeginFunc(flush, "Flush", "Removes all discardable items from the inventory comp
 	self->GetInventoryStacks(stacks);
 	self->Empty();
 	for (const FInventoryStack& stack : stacks) {
-		if (stack.HasItems() && stack.Item.IsValid() && !UFGItemDescriptor::CanBeDiscarded(stack.Item.ItemClass)) {
+		if (stack.HasItems() && stack.Item.IsValid() && !UFGItemDescriptor::CanBeDiscarded(stack.Item.GetItemClass())) {
 			self->AddStack(stack);
 		}
 	}
