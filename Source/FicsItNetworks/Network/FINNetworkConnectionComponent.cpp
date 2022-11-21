@@ -10,10 +10,6 @@ void UFINNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetime
 	DOREPLIFETIME(UFINNetworkConnectionComponent, Circuit);
 }
 
-UFINNetworkConnectionComponent::UFINNetworkConnectionComponent() {
-	AllowedCableConnections.Add(LoadClass<UFGBuildingDescriptor>(NULL, TEXT("/FicsItNetworks/Network/NetworkCable/BD_NetworkCable.BD_NetworkCable_C")));
-}
-
 void UFINNetworkConnectionComponent::InitializeComponent() {
 	Super::InitializeComponent();
 	SetIsReplicatedByDefault(true);
@@ -112,4 +108,9 @@ bool UFINNetworkConnectionComponent::IsConnected(const TScriptInterface<IFINNetw
 		if (Cable->Connector1 == Node.GetObject() || Cable->Connector2 == Node.GetObject()) return true;
 	}
 	return false;
+}
+
+void UFINNetworkConnectionComponent::GetAllowedCableConnections(TArray<TSubclassOf<UFGBuildingDescriptor>>& OutAllowedConnections) const {
+	OutAllowedConnections.Append(AllowedCableConnections);
+	if (AllowedCableConnections.Num() < 1) OutAllowedConnections.Add(LoadClass<UFGBuildingDescriptor>(NULL, TEXT("/FicsItNetworks/Network/NetworkCable/BD_NetworkCable.BD_NetworkCable_C")));
 }

@@ -28,7 +28,7 @@ public:
  * Allows to connect pre existing actors, buildables and factories to the computer network.
  */
 UCLASS()
-class FICSITNETWORKS_API AFINNetworkAdapter : public AActor, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINNetworkAdapter : public AFGBuildable {
 	GENERATED_BODY()
 
 public:
@@ -37,12 +37,14 @@ public:
 	static void RegistererAdapterSetting(FString BPPath, FFINAdapterSettings);
 	static void RegisterAdapterSettings();
 
+	static bool FindConnection(AActor* Actor, FVector HitLocation, FTransform& OutTransform, bool& OutMesh, int& OutMaxCables);
+	
 	/** the building this adapter is attached to */
 	UPROPERTY(SaveGame, Replicated)
 	AFGBuildable* Parent = nullptr;
 	
 	/** the network connector of the adapter */
-	UPROPERTY(Replicated)
+	UPROPERTY(EditAnywhere, Replicated)
 	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 	
 	/** the network adapter reference attached to the parent factory */
@@ -50,7 +52,7 @@ public:
 	UFINNetworkAdapterReference* Attachment = nullptr;
 	
 	/** the visible mesh of the adapter */
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	UFGColoredInstanceMeshProxy* ConnectorMesh = nullptr;
 
 	AFINNetworkAdapter();
@@ -77,7 +79,7 @@ class FICSITNETWORKS_API UFINNetworkAdapterReference : public UActorComponent {
 
 public:
 	/** the reference to the actual network adapter */
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	AFINNetworkAdapter* Ref = nullptr;
 
 	UFINNetworkAdapterReference();

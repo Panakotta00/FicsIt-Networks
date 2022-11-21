@@ -12,8 +12,7 @@ UENUM()
 enum EFINNetworkCableHologramPlacementStepType {
 	FIN_NOT_SNAPPED,
 	FIN_CONNECTOR,
-	FIN_SETTINGS,
-	FIN_POWER,
+	FIN_ADAPTER,
 	FIN_POLE,
 	FIN_PLUG,
 };
@@ -51,21 +50,21 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UFGRecipe> RecipePole = nullptr;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UFGRecipe> RecipeAdapter = nullptr;
 	
 	UPROPERTY(EditDefaultsOnly)
 	bool bEnablePole = true;
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bEnablePlug = true;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bEnableAdapter = true;
 	
 	UPROPERTY()
 	USplineMeshComponent* Cable = nullptr;
-
-	UPROPERTY()
-	UStaticMeshComponent* Adapter1 = nullptr;
-
-	UPROPERTY()
-	UStaticMeshComponent* Adapter2 = nullptr;
 
 	UPROPERTY(Replicated)
 	FFINCablePlacementStepInfo Snapped;
@@ -87,6 +86,12 @@ public:
 
 	UPROPERTY()
 	AFGBuildableHologram* PlugHologram2 = nullptr;
+	
+	UPROPERTY()
+	AFGBuildableHologram* AdapterHologram1 = nullptr;
+
+	UPROPERTY()
+	AFGBuildableHologram* AdapterHologram2 = nullptr;
 
 	UPROPERTY()
 	UFINNetworkConnectionComponent* Connector1Cache = nullptr;
@@ -116,15 +121,17 @@ public:
 	AFINNetworkCableHologram();
 	~AFINNetworkCableHologram();
 
+	void GetHolos(AFGBuildableHologram*& OutAdapterHolo, AFGBuildableHologram*& OutPlugHolo, AFGBuildableHologram*& OutPoleHolo);
+	void UpdateCable();
+	void UpdateChildHolos(const FHitResult& HitResult);
+	void UpdateSnapping(const FHitResult& HitResult);
 	void OnBeginSnap(FFINCablePlacementStepInfo a, bool isValid);
 	void OnEndSnap(FFINCablePlacementStepInfo a);
 	UFINNetworkConnectionComponent* SetupSnapped(FFINCablePlacementStepInfo s);
-	void UpdateSnapped();
+	void UpdateSnappingEffects();
 	void UpdateMeshValidity(bool bValid);
 	bool IsInSecondStep();
 
-	virtual void GetRecipes(TSubclassOf<UFGRecipe>& OutRecipePole, TSubclassOf<UFGRecipe>& OutRecipePlug);
-	
 	/**
 	 * Checks if the currently snapped object is valid
 	 */

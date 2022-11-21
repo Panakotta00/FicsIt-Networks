@@ -1,6 +1,8 @@
+#include "FGBlueprintSubsystem.h"
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkCircuit.h"
 #include "Engine/World.h"
+#include "FicsItNetworks/FicsItNetworksModule.h"
 #include "Net/UnrealNetwork.h"
 
 void UFINAdvancedNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -11,24 +13,28 @@ void UFINAdvancedNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<F
 
 void UFINAdvancedNetworkConnectionComponent::BeginPlay() {
 	Super::BeginPlay();
-	
-	if (bOuterAsRedirect) RedirectionObject = GetOuter();
 
-	if (GetOwner()->HasAuthority()) {
-		if (!bIdCreated) {
-			ID = FGuid::NewGuid();
-			bIdCreated = true;
-		}
+	AFGBuildable* Buildable = GetOwner<AFGBuildable>();
+	if (!Buildable || !Buildable->GetBlueprintDesigner()) {
+		if (bOuterAsRedirect) RedirectionObject = GetOuter();
 
-		// setup circuit
-		if (!Circuit) {
-			Circuit = GetWorld()->SpawnActor<AFINNetworkCircuit>();
-			Circuit->Recalculate(this);
+		if (GetOwner()->HasAuthority()) {
+			if (!bIdCreated) {
+				ID = FGuid::NewGuid();
+				bIdCreated = true;
+			}
+
+			// setup circuit
+			if (!Circuit) {
+				Circuit = GetWorld()->SpawnActor<AFINNetworkCircuit>();
+				Circuit->Recalculate(this);
+			}
 		}
 	}
 }
 
 void UFINAdvancedNetworkConnectionComponent::Serialize(FArchive& Ar) {
+//	UE_LOG(LogFicsItNetworks, Warning, Ar.)
 	Super::Serialize(Ar);
 }
 
