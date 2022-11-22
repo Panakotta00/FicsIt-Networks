@@ -18,16 +18,18 @@ AFINComputerNetworkCard::AFINComputerNetworkCard() {
 
 void AFINComputerNetworkCard::BeginPlay() {
 	Super::BeginPlay();
-	
-	if (!bIdCreated) {
-		ID = FGuid::NewGuid();
-		bIdCreated = true;
-	}
 
-	// setup circuit
-	if (!Circuit && HasAuthority()) {
-		Circuit = GetWorld()->SpawnActor<AFINNetworkCircuit>();
-		Circuit->Recalculate(this);
+	if (HasAuthority() && !GetBlueprintDesigner()) {
+		if (!bIdCreated) {
+			ID = FGuid::NewGuid();
+			bIdCreated = true;
+		}
+
+		// setup circuit
+		if (!Circuit) {
+			Circuit = GetWorld()->SpawnActor<AFINNetworkCircuit>();
+			Circuit->Recalculate(this);
+		}
 	}
 }
 
