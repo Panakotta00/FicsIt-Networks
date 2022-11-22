@@ -45,8 +45,11 @@ void AFINNetworkCable::OnConstruction(const FTransform& Transform) {
 
 void AFINNetworkCable::BeginPlay() {
 	Super::BeginPlay();
-	
-	ConnectConnectors();
+
+	AFGBuildable* Buildable = Cast<AFGBuildable>(GetOwner());
+	if (!Buildable || !Buildable->GetBlueprintDesigner()) {
+		ConnectConnectors();
+	}
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
