@@ -251,7 +251,7 @@ bool AFINNetworkCableHologram::IsSnappedValid() {
 			else bToInDesigner = !!BPSubSys->IsLocationInsideABlueprintDesigner(ToScene->GetComponentLocation());
 		}
 		if (bFromInDesigner != bToInDesigner) {
-			AddConstructDisqualifier(UFGDesignerWorldCommingling::StaticClass());
+			AddConstructDisqualifier(UFGCDDesignerWorldCommingling::StaticClass());
 		}
 	}
 	return ret;
