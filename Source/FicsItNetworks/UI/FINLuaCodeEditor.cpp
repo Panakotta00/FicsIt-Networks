@@ -1,6 +1,6 @@
 #include "FINLuaCodeEditor.h"
 
-#include "FicsItNetworks/FicsItNetworksModule.h"
+#include "Input/HittestGrid.h"
 
 const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
 
@@ -173,8 +173,8 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 			return -1;
 		};
 
-		int StringStart = 0;
-		int StringEnd = 0;
+		int StringStart = ModelString->Len();
+		int StringEnd = ModelString->Len();
 		bool bInNumber = false;
 		bool bNumberHadDecimal = false;
 		bool bInLineComment = false;
@@ -330,19 +330,111 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 }
 
 void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
-	SyntaxHighlighter = FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(InArgs._CodeStyle);
+	SyntaxHighlighter = FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(InArgs._Style);
+	Style = InArgs._Style;
 
-	ChildSlot[
-		SAssignNew(TextBox, SMultiLineEditableTextBox)
-		.AutoWrapText(false)
-		.Margin(0.0f)
-		.Padding(InArgs._Padding)
-		.Marshaller(SyntaxHighlighter)
-		.Style(InArgs._Style)
-		.OnTextChanged(InArgs._OnTextChanged)
-		.OnTextCommitted(InArgs._OnTextCommitted)
-		.TextShapingMethod(ETextShapingMethod::Auto)
-	];
+	HScrollBar = SNew(SScrollBar)
+				.Style(&InArgs._Style->ScrollBarStyle)
+				.Orientation(Orient_Horizontal)
+				.Thickness(FVector2D(9.0f, 9.0f));
+
+	VScrollBar = SNew(SScrollBar)
+				.Style(&InArgs._Style->ScrollBarStyle)
+				.Orientation(Orient_Vertical)
+				.Thickness(FVector2D(9.0f, 9.0f));
+	
+	SBorder::Construct(SBorder::FArguments()
+		.BorderImage(&Style->BorderImage)
+		.BorderBackgroundColor(Style->BackgroundColor)
+		.ForegroundColor(Style->ForegroundColor)
+		.Padding(Style->Padding)[
+			SNew(SHorizontalBox)
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Fill)
+			.HAlign(HAlign_Fill)
+			.FillWidth(1)[
+				SNew(SVerticalBox)
+				+SVerticalBox::Slot()
+				.VAlign(VAlign_Fill)
+				.HAlign(HAlign_Fill)
+				.FillHeight(1)[
+					SAssignNew(TextEdit, SMultiLineEditableText)
+					.AutoWrapText(false)
+					.Margin(0.0f)
+					.Marshaller(SyntaxHighlighter)
+					.OnTextChanged(InArgs._OnTextChanged)
+					.OnTextCommitted(InArgs._OnTextCommitted)
+					.TextShapingMethod(ETextShapingMethod::Auto)
+					.TextStyle(&InArgs._Style->NormalTextStyle)
+					.HScrollBar(HScrollBar)
+					.VScrollBar(VScrollBar)
+					.CreateSlateTextLayout_Lambda([this](SWidget* InOwningWidget, const FTextBlockStyle& InDefaultTextStyle) {
+						TextLayout = FSlateTextLayout::Create(InOwningWidget, InDefaultTextStyle);
+						return TextLayout.ToSharedRef();
+					})
+				]
+				+SVerticalBox::Slot()
+				.AutoHeight()[
+					SNew(SBox)
+					.Padding(Style->HScrollBarPadding)[
+						HScrollBar.ToSharedRef()
+					]
+				]
+			]
+			+SHorizontalBox::Slot()
+			.AutoWidth()[
+				SNew(SBox)
+				.Padding(Style->VScrollBarPadding)[
+					VScrollBar.ToSharedRef()
+				]
+			]
+		]
+	);
+}
+
+SFINLuaCodeEditor::SFINLuaCodeEditor() {}
+
+int32 SFINLuaCodeEditor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
+	float LineNumberWidth = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(FString::FromInt(TextLayout->GetLineViews().Num()), Style->LineNumberStyle.Font, 1).X;
+	LineNumberWidth += 5.0;
+	FGeometry CodeGeometry = AllottedGeometry.MakeChild(AllottedGeometry.GetLocalSize() - FVector2D(LineNumberWidth, 0), FSlateLayoutTransform(FVector2D(LineNumberWidth, 0)));
+	FSlateRect CodeRect = MyCullingRect.ExtendBy(FMargin(LineNumberWidth, 0, 0, 0));
+
+	const float InverseScale = Inverse(AllottedGeometry.Scale);
+	int LineNumber = 0;
+	OutDrawElements.PushClip(FSlateClippingZone(AllottedGeometry));
+	for (const FTextLayout::FLineView& LineView : TextLayout->GetLineViews()) {
+		++LineNumber;
+		const FVector2D LocalLineOffset = LineView.Offset * InverseScale;
+		const FSlateRect LineViewRect(AllottedGeometry.GetRenderBoundingRect(FSlateRect(LocalLineOffset * FVector2D(0, 1), LocalLineOffset + (LineView.Size * InverseScale))));
+		if ( !FSlateRect::DoRectanglesIntersect(LineViewRect, MyCullingRect)) {
+			continue;
+		}
+
+		FSlateDrawElement::MakeText(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(FVector2D(0, LocalLineOffset.Y))), FText::FromString(FString::FromInt(LineNumber)), Style->LineNumberStyle.Font, ESlateDrawEffect::None, Style->LineNumberStyle.ColorAndOpacity.GetColor(InWidgetStyle));
+	}
+	OutDrawElements.PopClip();
+
+	// A CompoundWidget just draws its children
+	FArrangedChildren ArrangedChildren(EVisibility::Visible);
+	this->ArrangeChildren(AllottedGeometry, ArrangedChildren);
+	
+	if(ArrangedChildren.Num() > 0) {
+		check( ArrangedChildren.Num() == 1);
+		FArrangedWidget& TheChild = ArrangedChildren[0];
+
+		int32 Layer = 0;
+		Layer = TheChild.Widget->Paint( Args.WithNewParent(this), TheChild.Geometry, MyCullingRect, OutDrawElements, LayerId + 1, InWidgetStyle, ShouldBeEnabled( bParentEnabled ) );
+		return Layer;
+	}
+	return LayerId;
+}
+
+void SFINLuaCodeEditor::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {
+	float LineNumberWidth = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(FString::FromInt(TextLayout->GetLineViews().Num()), Style->LineNumberStyle.Font, 1).X;
+	LineNumberWidth += 5.0;
+	FGeometry CodeGeo = AllottedGeometry.MakeChild(AllottedGeometry.Size - FVector2D(LineNumberWidth, 0), FSlateLayoutTransform(FVector2D(LineNumberWidth, 0)));
+	ArrangeSingleChild(GSlateFlowDirection, CodeGeo, ArrangedChildren, ChildSlot, FVector2D(1));
 }
 
 void UFINLuaCodeEditor::HandleOnTextChanged(const FText& Text) {
@@ -356,20 +448,23 @@ void UFINLuaCodeEditor::HandleOnTextCommitted(const FText& Text, ETextCommit::Ty
 TSharedRef<SWidget> UFINLuaCodeEditor::RebuildWidget() {
 	return SAssignNew(CodeEditor, SFINLuaCodeEditor)
 		.Style(&Style)
-		.CodeStyle(&CodeStyle)
 		.OnTextChanged(BIND_UOBJECT_DELEGATE(FOnTextChanged, HandleOnTextChanged))
 		.OnTextCommitted(BIND_UOBJECT_DELEGATE(FOnTextCommitted, HandleOnTextCommitted));
 }
 
+void UFINLuaCodeEditor::ReleaseSlateResources(bool bReleaseChildren) {
+	CodeEditor.Reset();
+}
+
 void UFINLuaCodeEditor::SetIsReadOnly(bool bInReadOnly) {
-	CodeEditor->TextBox->SetIsReadOnly(bInReadOnly);
+	CodeEditor->TextEdit->SetIsReadOnly(bInReadOnly);
 }
 
 void UFINLuaCodeEditor::SetText(FText InText) {
-	CodeEditor->TextBox->SetText(InText);
+	CodeEditor->TextEdit->SetText(InText);
 }
 
 FText UFINLuaCodeEditor::GetText() const {
-	return CodeEditor->TextBox->GetText();
+	return CodeEditor->TextEdit->GetText();
 }
 

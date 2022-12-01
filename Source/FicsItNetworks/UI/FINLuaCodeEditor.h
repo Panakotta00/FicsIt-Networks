@@ -22,6 +22,9 @@ struct FFINLuaCodeEditorStyle : public FSlateWidgetStyle {
 	static const FFINLuaCodeEditorStyle& GetDefault();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle LineNumberStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FTextBlockStyle NormalTextStyle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
@@ -50,7 +53,43 @@ struct FFINLuaCodeEditorStyle : public FSlateWidgetStyle {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FTextBlockStyle FunctionDeclarationTextStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FScrollBarStyle ScrollBarStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FMargin HScrollBarPadding;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FMargin VScrollBarPadding;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateBrush BorderImage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor BackgroundColor;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateColor ForegroundColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FMargin Padding;
 };
+
+UCLASS(BlueprintType, hidecategories=Object, MinimalAPI)
+class UFINCodeEditorStyle : public USlateWidgetStyleContainerBase {
+public:
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(Category=Appearance, EditAnywhere, BlueprintReadWrite, meta=( ShowOnlyInnerProperties ))
+	FFINLuaCodeEditorStyle Style;
+
+	virtual const struct FSlateWidgetStyle* const GetStyle() const override {
+		return static_cast< const struct FSlateWidgetStyle* >( &Style );
+	}
+};
+
 
 class FICSITNETWORKS_API FFINLuaSyntaxHighlighterTextLayoutMarshaller : public FPlainTextLayoutMarshaller {
 public:
@@ -67,22 +106,35 @@ protected:
 	const FFINLuaCodeEditorStyle* SyntaxTextStyle;
 };
 
-class SFINLuaCodeEditor : public SCompoundWidget {
+class SFINLuaCodeEditor : public SBorder {
+public:
 private:
 	TSharedPtr<FFINLuaSyntaxHighlighterTextLayoutMarshaller> SyntaxHighlighter;
 
+	TSharedPtr<FSlateTextLayout> TextLayout;
+
+	const FFINLuaCodeEditorStyle* Style = nullptr;
+
 public:
-	TSharedPtr<SMultiLineEditableTextBox> TextBox;
+	TSharedPtr<SMultiLineEditableText> TextEdit;
+	TSharedPtr<SScrollBar> HScrollBar;
+	TSharedPtr<SScrollBar> VScrollBar;
 	
 	SLATE_BEGIN_ARGS(SFINLuaCodeEditor) {}
-	SLATE_STYLE_ARGUMENT(FEditableTextBoxStyle, Style)
-	SLATE_STYLE_ARGUMENT(FFINLuaCodeEditorStyle, CodeStyle)
+	SLATE_STYLE_ARGUMENT(FFINLuaCodeEditorStyle, Style)
 	SLATE_ATTRIBUTE( FMargin, Padding )
 	SLATE_EVENT( FOnTextChanged, OnTextChanged )
     SLATE_EVENT( FOnTextCommitted, OnTextCommitted )
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
+
+	SFINLuaCodeEditor();
+	
+	// Begin SWidget
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+	virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
+	// End SWidget
 };
 
 UCLASS()
@@ -106,12 +158,12 @@ public:
 	FOnFINCodeEditorCommittedEvent OnTextCommitted;
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	FFINLuaCodeEditorStyle CodeStyle;
-	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	FEditableTextBoxStyle Style;
+	FFINLuaCodeEditorStyle Style;
 
+	// Begin UWidget
 	virtual TSharedRef<SWidget> RebuildWidget() override;
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	// End UWidget
 
 	UFUNCTION(BlueprintCallable)
 	void SetIsReadOnly(bool bInReadOnly);
