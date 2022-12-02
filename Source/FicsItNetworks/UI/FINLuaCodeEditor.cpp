@@ -1,5 +1,7 @@
 #include "FINLuaCodeEditor.h"
 
+#include "Framework/Text/RunUtils.h"
+#include "Framework/Text/ShapedTextCache.h"
 #include "Input/HittestGrid.h"
 
 const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
@@ -14,6 +16,123 @@ const FFINLuaCodeEditorStyle& FFINLuaCodeEditorStyle::GetDefault() {
 	static FFINLuaCodeEditorStyle* Default = nullptr;
 	if (!Default) Default = new FFINLuaCodeEditorStyle();
 	return *Default;
+}
+
+TSharedRef<FFINTabRun> FFINTabRun::Create(const FRunInfo& InRunInfo, const TSharedRef<const FString>& InText, const FTextBlockStyle& Style, const FTextRange& InRange, int32 InTabWidth) {
+	return MakeShared<FFINTabRun>(InRunInfo, InText, Style, InRange, InTabWidth);
+}
+
+FFINTabRun::FFINTabRun(const FRunInfo& InRunInfo, const TSharedRef<const FString>& InText, const FTextBlockStyle& InStyle, const FTextRange& InRange, int32 InTabWidth):
+	RunInfo(InRunInfo), Text(InText), Style(InStyle), Range(InRange), TabWidthInSpaces(InTabWidth) {}
+
+FTextRange FFINTabRun::GetTextRange() const {
+	return Range;
+}
+
+void FFINTabRun::SetTextRange(const FTextRange& Value) {
+	Range = Value;
+}
+
+int16 FFINTabRun::GetBaseLine(float Scale) const  {
+	const TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	return FontMeasure->GetBaseline(Style.Font, Scale);
+}
+
+int16 FFINTabRun::GetMaxHeight(float Scale) const {
+	const TSharedRef< FSlateFontMeasure > FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	return FontMeasure->GetMaxCharacterHeight(Style.Font, Scale);
+}
+
+FVector2D FFINTabRun::Measure(int32 StartIndex, int32 EndIndex, float Scale, const FRunTextContext& TextContext) const {
+	const TSharedRef< FSlateFontMeasure > FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	float Width = FontMeasure->Measure(TEXT(" "), Style.Font, Scale).X * CharsTillTabStep;
+	if (StartIndex == Range.BeginIndex && EndIndex == StartIndex) {
+		return FVector2D(0 , GetMaxHeight(Scale));
+	}
+	return FVector2D(Width , GetMaxHeight(Scale));
+}
+
+int8 FFINTabRun::GetKerning(int32 CurrentIndex, float Scale, const FRunTextContext& TextContext) const {
+	return 0;
+}
+
+TSharedRef<ILayoutBlock> FFINTabRun::CreateBlock(int32 StartIndex, int32 EndIndex, FVector2D Size, const FLayoutBlockTextContext& TextContext, const TSharedPtr<IRunRenderer>& Renderer) {
+	return FDefaultLayoutBlock::Create(SharedThis(this), FTextRange(StartIndex, EndIndex), Size, TextContext, Renderer);
+}
+
+int32 FFINTabRun::GetTextIndexAt(const TSharedRef<ILayoutBlock>& Block, const FVector2D& Location, float Scale, ETextHitPoint* const OutHitPoint) const {
+	const TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	FVector2D BlockOffset = Block->GetLocationOffset();
+	float Width = FontMeasure->Measure(TEXT(" "), Style.Font, Scale).X * CharsTillTabStep;
+	float Offset = BlockOffset.X + Width/2;
+	if (Location.X < BlockOffset.X || Location.X > BlockOffset.X + Width) {
+		return INDEX_NONE;
+	}
+	int32 Index = (Location.X < Offset) ? Range.BeginIndex : Range.EndIndex;
+	*OutHitPoint = Index == Range.BeginIndex ? ETextHitPoint::LeftGutter : ETextHitPoint::WithinText;
+	return Index;
+}
+
+FVector2D FFINTabRun::GetLocationAt(const TSharedRef<ILayoutBlock>& Block, int32 Offset, float Scale) const {
+	const TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	float Width = FontMeasure->Measure(TEXT(" "), Style.Font, Scale).X * CharsTillTabStep;
+	FVector2D LocalOffset = Block->GetLocationOffset();
+	return FVector2D((Offset == 0) ? LocalOffset.X : LocalOffset.X + Width, LocalOffset.Y);
+}
+
+void FFINTabRun::BeginLayout() {
+	CharsTillTabStep = CalcCharacterTillNextTabStop(*Text, Range.BeginIndex, TabWidthInSpaces);
+}
+
+void FFINTabRun::EndLayout() {}
+
+void FFINTabRun::Move(const TSharedRef<FString>& NewText, const FTextRange& NewRange) {
+	Text = NewText;
+	Range = NewRange;
+}
+
+TSharedRef<IRun> FFINTabRun::Clone() const {
+	return FFINTabRun::Create(RunInfo, Text, Style, Range, TabWidthInSpaces);
+}
+
+void FFINTabRun::AppendTextTo(FString& AppendToText) const {
+	AppendToText.Append(**Text + Range.BeginIndex, Range.Len());
+}
+
+void FFINTabRun::AppendTextTo(FString& AppendToText, const FTextRange& PartialRange) const {
+	check(Range.BeginIndex <= PartialRange.BeginIndex);
+	check(Range.EndIndex >= PartialRange.EndIndex);
+
+	AppendToText.Append(**Text + PartialRange.BeginIndex, PartialRange.Len());
+}
+
+const FRunInfo& FFINTabRun::GetRunInfo() const {
+	return RunInfo;
+}
+
+ERunAttributes FFINTabRun::GetRunAttributes() const {
+	return ERunAttributes::SupportsText;
+}
+
+int32 FFINTabRun::OnPaint(const FPaintArgs& Args, const FTextLayout::FLineView& Line, const TSharedRef<ILayoutBlock>& Block, const FTextBlockStyle& DefaultStyle, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
+	return LayerId;
+}
+
+const TArray<TSharedRef<SWidget>>& FFINTabRun::GetChildren() {
+	static TArray<TSharedRef<SWidget>> NoChildren;
+	return NoChildren;
+}
+
+void FFINTabRun::ArrangeChildren(const TSharedRef<ILayoutBlock>& Block, const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {}
+
+int32 FFINTabRun::CalcCharacterTillNextTabStop(const FString& Text, int32 Offset, int32 TabWidth) {
+	int32 LastTab;
+	int32 CharsSinceLastTab = Offset;
+	if (Text.Left(Offset).FindLastChar('\t', LastTab)) {
+		CharsSinceLastTab = (Offset-1) - LastTab;
+	}
+	int32 FillerChars = CharsSinceLastTab % TabWidth;
+	return TabWidth - FillerChars;
 }
 
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::SetText(const FString& SourceString, FTextLayout& TargetTextLayout) {
@@ -146,7 +265,11 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 			FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Whitespace"));
 			RunInfo.MetaData.Add("Splitting");
-			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			if ((*ModelString)[Range.BeginIndex] == '\t') {
+				Run = FFINTabRun::Create(RunInfo, ModelString, Style, Range, 4);
+			} else {
+				Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
+			}
 			Runs.Add(Run.ToSharedRef());
 		};
 		auto DoOperator = [&](const FTextRange& Range, bool bColored) {
@@ -371,6 +494,9 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 					.CreateSlateTextLayout_Lambda([this](SWidget* InOwningWidget, const FTextBlockStyle& InDefaultTextStyle) {
 						TextLayout = FSlateTextLayout::Create(InOwningWidget, InDefaultTextStyle);
 						return TextLayout.ToSharedRef();
+					})
+					.OnIsTypedCharValid_Lambda([](const TCHAR) {
+						return true;
 					})
 				]
 				+SVerticalBox::Slot()
