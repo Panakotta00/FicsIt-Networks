@@ -85,7 +85,10 @@ namespace FicsItKernel {
 		LuaFunc(luaComputerSetEEPROM)
 			AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 			if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
-			eeprom->SetCode(luaL_checkstring(L, 1));
+			size_t len;
+			const char* str = luaL_checklstring(L, 1, &len);
+			FUTF8ToTCHAR Conv(str, len);
+			eeprom->SetCode(FString(Conv.Length(), Conv.Get()));
 			return 0;
 		}
 
@@ -105,6 +108,16 @@ namespace FicsItKernel {
 		LuaFunc(luaComputerMillis)
 			lua_pushinteger(L, kernel->GetTimeSinceStart());
 			return 1;
+		}
+
+		LuaFunc(luaComputerMagicTime)
+			FDateTime Now = FDateTime::UtcNow();
+			lua_pushinteger(L, Now.ToUnixTimestamp());
+			FTCHARToUTF8 ConvertStr(*Now.ToString());
+			lua_pushlstring(L, ConvertStr.Get(), ConvertStr.Length());
+			FTCHARToUTF8 ConvertIso(*Now.ToIso8601());
+			lua_pushlstring(L, ConvertIso.Get(), ConvertIso.Length());
+			return 3;
 		}
 		
 		LuaFunc(luaComputerPCIDevices)
@@ -141,6 +154,7 @@ namespace FicsItKernel {
 			{"getEEPROM", luaComputerGetEEPROM},
 			{"time", luaComputerTime},
 			{"millis", luaComputerMillis},
+			{"magicTime", luaComputerMagicTime},
 			{"getPCIDevices", luaComputerPCIDevices},
 			{nullptr, nullptr}
 		};

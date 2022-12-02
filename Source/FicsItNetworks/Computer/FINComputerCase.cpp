@@ -92,7 +92,7 @@ void AFINComputerCase::BeginPlay() {
 		// load floppy
 		FInventoryStack stack;
 		if (DataStorage->GetStackFromIndex(1, stack)) {
-			const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
+			const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
 			AFINFileSystemState* FileSystemState = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
 			if (IsValid(DriveDesc)) {
 				if (!IsValid(FileSystemState)) {
@@ -157,7 +157,7 @@ bool AFINComputerCase::ShouldSave_Implementation() const {
 }
 
 void AFINComputerCase::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
-	out_dependentObjects.Add(AFINComputerSubsystem::GetComputerSubsystem(this));
+	//out_dependentObjects.Add(AFINComputerSubsystem::GetComputerSubsystem(this)); // TODO: Check if really not needed anymore
 }
 
 void AFINComputerCase::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
@@ -312,7 +312,7 @@ void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int3
 			AFINFileSystemState* state = nullptr;
 			FInventoryStack stack;
 			if (DataStorage->GetStackFromIndex(1, stack)) {
-				const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.ItemClass);
+				const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
 				state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
 				if (IsValid(DriveDesc)) {
 					if (!IsValid(state)) {

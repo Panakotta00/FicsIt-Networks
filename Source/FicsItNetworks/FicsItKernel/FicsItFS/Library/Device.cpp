@@ -97,9 +97,9 @@ namespace CodersFileSystem {
 	}
 
 	SRef<Directory> MemDevice::createDir(Path path, bool createTree) {
-		SRef<Directory> parent = root;
+		SRef<MemDirectory> parent = root;
 		while (!path.isSingle()) {
-			SRef<Directory> newParent = get(Path(path.getRoot()));
+			SRef<MemDirectory> newParent = parent->get(Path(path.getRoot()));
 			if (!newParent.isValid()) {
 				if (createTree) {
 					newParent = parent->createSubdir(path.getRoot());
@@ -125,7 +125,7 @@ namespace CodersFileSystem {
 	}
 
 	SRef<Node> MemDevice::get(Path path) {
-		path = path.absolute();
+		path = path.normalize().absolute();
 		if (path.isRoot()) return root;
 		SRef<MemDirectory> dir = root;
 		while (!path.isSingle() && dir.isValid()) {

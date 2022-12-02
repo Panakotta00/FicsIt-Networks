@@ -616,7 +616,11 @@ private:
 	UPROPERTY()
 	FSlateBrush boxBrush;
 
+	UPROPERTY()
+	float FlushTime = 0.0f;
+
 	TSharedPtr<SInvalidationPanel> CachedInvalidation;
+	bool bNetFlushed = false;
 	bool bFlushed = false;
 	FCriticalSection DrawingMutex;
 
@@ -653,6 +657,9 @@ public:
 	 */
 	UFUNCTION(NetMulticast, Reliable)
 	void Flush();
+
+	UFUNCTION()
+	void FlushBackToFront();
 	
 	UFUNCTION()
     void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes) {
@@ -797,7 +804,7 @@ public:
 		ParameterInternalNames.Add("newScreen");
 		ParameterDisplayNames.Add(FText::FromString("New Screen"));
 		ParameterDescriptions.Add(FText::FromString("The screen you want to bind this GPU to. Null if you want to unbind the screen."));
-		Runtime = 1;
+		Runtime = 0;
 	}
 
 	UFUNCTION()

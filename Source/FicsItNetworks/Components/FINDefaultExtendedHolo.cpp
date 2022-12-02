@@ -36,23 +36,15 @@ void AFINDefaultExtendedHolo::SetHologramLocationAndRotation(const FHitResult& H
 	if(mCurrentBuildMode == mBuildModeAuto) {
 		AFGBuildableHologram::SetHologramLocationAndRotation(HitResult);
 	}else if(mCurrentBuildMode == mBuildMode45 || mCurrentBuildMode == mBuildModeFree) {
-		FVector VX, VY, VZ;
-		UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
-		//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
-		
 		FVector Normal = HitResult.ImpactNormal;
 
-		FVector UpVector = FVector(0, 0, 1);
-		FVector NormalVector = Normal;
+		FQuat Quat;
 
-		FVector RotationAxis = FVector::CrossProduct(UpVector, NormalVector);
-		RotationAxis.Normalize();
-
-		float DotProduct = FVector::DotProduct(UpVector, NormalVector);
-		float RotationAngle = acosf(DotProduct);
-
-		FQuat Quat = FQuat(RotationAxis, RotationAngle);
-
+		FVector LocalNormal = HitResult.GetActor()->GetTransform().InverseTransformVectorNoScale(Normal);
+		Quat = HitResult.GetActor()->GetTransform().GetRotation();
+		FVector UpVector = Quat.GetUpVector();
+		Quat *= FQuat(FVector::CrossProduct(UpVector, LocalNormal), FMath::Acos(FVector::DotProduct(LocalNormal, UpVector)));
+		
 		FQuat NewQuat = Quat; //;
 		if(mCurrentBuildMode == mBuildModeFree) {
 			NewQuat*= FRotator(0, GetScrollRotateValue(), 0).Quaternion();

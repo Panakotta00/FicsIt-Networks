@@ -2,8 +2,9 @@
 #include "FGColoredInstanceMeshProxy.h"
 
 AFINIndicatorPole::AFINIndicatorPole() {
-	Indicator = CreateDefaultSubobject<UStaticMeshComponent>("Indicator");
+	Indicator = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>("Indicator");
 	Indicator->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	Indicator->SetInstanced(true);
 	
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
@@ -27,6 +28,8 @@ void AFINIndicatorPole::OnConstruction(const FTransform& transform) {
 	CreatePole();
 
 	Super::OnConstruction(transform);
+
+	UpdateEmessive();
 }
 
 void AFINIndicatorPole::BeginPlay() {
@@ -34,11 +37,9 @@ void AFINIndicatorPole::BeginPlay() {
 	
 	CreatePole();
 
-	if (Indicator->GetMaterials().Num() > 0) {
-		UMaterialInterface* Material = Indicator->GetMaterial(0);
-		IndicatorInstance = UMaterialInstanceDynamic::Create(Cast<UMaterialInstance>(Material), nullptr);
-		Indicator->SetMaterial(0, IndicatorInstance);
-	}
+	UpdateEmessive();
+
+	bHasChanged = true;
 }
 
 void AFINIndicatorPole::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
@@ -46,7 +47,7 @@ void AFINIndicatorPole::TickActor(float DeltaTime, ELevelTick TickType, FActorTi
 	
 	if (bHasChanged) {
 		bHasChanged = false;
-		UpdateEmessive();
+		UpdateEmessive_Net();
 		ForceNetUpdate();
 	}
 }
@@ -57,6 +58,14 @@ bool AFINIndicatorPole::ShouldSave_Implementation() const {
 
 int32 AFINIndicatorPole::GetDismantleRefundReturnsMultiplier() const {
 	return Height + 6;
+}
+
+void AFINIndicatorPole::OnBuildEffectFinished() {
+	Super::OnBuildEffectFinished();
+
+	UpdateEmessive();
+	
+	bHasChanged = true;
 }
 
 void AFINIndicatorPole::CreatePole() {
@@ -78,10 +87,24 @@ void AFINIndicatorPole::CreatePole() {
 	}
 }
 
-void AFINIndicatorPole::UpdateEmessive_Implementation() {
-	if (IndicatorInstance) {
-		IndicatorInstance->SetVectorParameterValue("Emissive Color", IndicatorColor);
-		IndicatorInstance->SetScalarParameterValue("Emissive Strenght", EmessiveStrength);
+void AFINIndicatorPole::UpdateEmessive_Net_Implementation() {
+	UpdateEmessive();
+}
+
+void AFINIndicatorPole::UpdateEmessive() {
+	Indicator->SetUserDefinedData(TArray<float>{0, IndicatorColor.R, IndicatorColor.G, IndicatorColor.B});
+	const bool bIsInstanced = Indicator->mInstanceHandle.IsInstanced();
+	if (bIsInstanced) {
+		Indicator->mInstanceHandle.SetCustomDataById(0, 0);
+		Indicator->mInstanceHandle.SetCustomDataById(1, IndicatorColor.R);
+		Indicator->mInstanceHandle.SetCustomDataById(2, IndicatorColor.G);
+		Indicator->mInstanceHandle.SetCustomDataById(3, IndicatorColor.B);
+		Indicator->mInstanceManager->UpdateColorForInstanceFromDataArray(Indicator->mInstanceHandle);
+	} else {
+		Indicator->SetCustomPrimitiveDataFloat(0, 0);
+		Indicator->SetCustomPrimitiveDataFloat(1, IndicatorColor.R);
+		Indicator->SetCustomPrimitiveDataFloat(2, IndicatorColor.G);
+		Indicator->SetCustomPrimitiveDataFloat(3, IndicatorColor.B);
 	}
 }
 

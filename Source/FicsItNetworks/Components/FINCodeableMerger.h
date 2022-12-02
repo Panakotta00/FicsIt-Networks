@@ -119,7 +119,7 @@ public:
 	 * This signal gets emit when a new item got pushed to the input queue with the given index.
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
-	void netSig_ItemRequest(int input, const FInventoryItem& item);
+	void netSig_ItemRequest(int input, FInventoryItem item);
 	UFUNCTION()
     void netSigMeta_ItemRequest(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions) {
 		InternalName = "ItemRequest";
@@ -137,7 +137,7 @@ public:
 	 * This signal gets emitted when a item is popped from the output queue (aka it got outputted to an conveyor)
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
-	void netSig_ItemOutputted(const FInventoryItem& item);
+	void netSig_ItemOutputted(FInventoryItem item);
 	UFUNCTION()
     void netSigMeta_ItemOutputted(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions) {
 		InternalName = "ItemOutputted";

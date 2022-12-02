@@ -22,7 +22,7 @@ public:
 	UFINAdvancedNetworkConnectionComponent* Connector;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	UStaticMeshComponent* Indicator;
+	UFGColoredInstanceMeshProxy* Indicator;
 
 	UPROPERTY(SaveGame, Replicated)
 	FLinearColor IndicatorColor = FLinearColor::Black;
@@ -43,7 +43,9 @@ public:
 	TArray<UStaticMeshComponent*> Poles;
 
 	UPROPERTY()
-	bool bHasChanged = false;
+	bool bHasChanged = true;
+
+	int ChangeCount = 0;
 	
 	AFINIndicatorPole();
 	
@@ -61,6 +63,8 @@ public:
 	virtual int32 GetDismantleRefundReturnsMultiplier() const override;
 	// End IFGDismantleInterface
 
+	virtual void OnBuildEffectFinished() override;
+
 	/**
 	 * Spawns all the pole static meshes
 	 */
@@ -70,8 +74,11 @@ public:
 	 * Updates the material paramteres of the dynamic material instance
 	 * to the variables.
 	 */
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION()
 	void UpdateEmessive();
+	UFUNCTION(NetMulticast, Reliable)
+	void UpdateEmessive_Net();
+
 	
 	UFUNCTION()
     void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes) {

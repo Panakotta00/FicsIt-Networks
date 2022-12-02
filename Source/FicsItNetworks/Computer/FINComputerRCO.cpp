@@ -92,8 +92,8 @@ bool UFINComputerRCO::GPUKeyCharEvent_Validate(AFINComputerGPUT1* GPU, const FSt
 
 void UFINComputerRCO::CreateEEPROMState_Implementation(UFGInventoryComponent* Inv, int SlotIdx) {
 	FInventoryStack stack;
-	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.ItemClass)) return;
-	UFINComputerEEPROMDesc* desc = Cast<UFINComputerEEPROMDesc>(stack.Item.ItemClass->GetDefaultObject());
+	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.GetItemClass())) return;
+	UFINComputerEEPROMDesc* desc = Cast<UFINComputerEEPROMDesc>(stack.Item.GetItemClass()->GetDefaultObject());
 	if (!IsValid(desc)) return;
 	UClass* clazz = desc->EEPROMStateClass;
 	
@@ -116,8 +116,8 @@ void UFINComputerRCO::CopyDataItem_Implementation(UFGInventoryComponent* InProvi
 	FInventoryStack From;
 	if (!InFromInv->GetStackFromIndex(InFromIdx, From)) return;
 	if (!InToInv->IsIndexEmpty(InToIdx)) return;
-	if (!Provider.Item.ItemClass || !From.Item.ItemClass) return;
-	UObject* Descriptor = const_cast<UObject*>(GetDefault<UObject>(Provider.Item.ItemClass));
+	if (!Provider.Item.GetItemClass() || !From.Item.GetItemClass()) return;
+	UObject* Descriptor = const_cast<UObject*>(GetDefault<UObject>(Provider.Item.GetItemClass()));
 	if (!Descriptor->Implements<UFINCopyableItemInterface>()) return;
 	bool bDone = IFINCopyableItemInterface::Execute_CopyData(Descriptor, InProviderInc, Provider.Item, From.Item, From.Item);
 	if (bDone) {

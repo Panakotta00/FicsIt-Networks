@@ -118,7 +118,7 @@ int32 AFINModularIndicatorPoleHolo::GetBaseCostMultiplier() const {
 
 bool AFINModularIndicatorPoleHolo::IsValidHitResult(const FHitResult& HitResult) const {
 	if (bSnapped) return true;
-	return true;
+	return !!HitResult.GetActor();
 	//return HitResult.GetActor() && (HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>() ||
 	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableFoundation>() || 
 	//	HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildablePillar>() || 
@@ -168,7 +168,7 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 		float horizontalDistance = FVector::DistXY(HitResult.TraceStart, SnappedLoc);
 		float angleOfTrace = FMath::DegreesToRadians((HitResult.TraceEnd - HitResult.TraceStart).Rotation().Pitch);
 		Extension = FMath::Clamp(GetScrollRotateValue() / 10 + 1, 1, 10);
-;;;;;		//if(Vertical) {
+		//if(Vertical) {
 		//	float verticalDistance = horizontalDistance * FMath::Tan(angleOfTrace) + HitResult.TraceStart.Z - SnappedLoc.Z;
 		//	Extension = GetHeight(SnappedLoc + FVector(0,0,verticalDistance));
 		//}else {
@@ -229,14 +229,16 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 					}	
 				}
 			}
-		}else if(mCurrentBuildMode == mBuildModeOnHorizontalSurface) {
-			Vertical = false;
-			FVector VX, VY, VZ;
-			UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
-			//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
-			const auto q = GetHitSide(VX, VY, VZ, HitResult.Normal);
-			if(q == EFoundationSide::FoundationBottom) {
-				UpsideDown = true;
+		} else if(mCurrentBuildMode == mBuildModeOnHorizontalSurface) {
+			if (HitResult.GetActor()) {
+				Vertical = false;
+				FVector VX, VY, VZ;
+				UKismetMathLibrary::GetAxes(HitResult.GetActor()->GetActorRotation(), VX, VY, VZ);
+				//const auto q = FFoundationHelpers::FindBestMatchingFoundationSideFromLocalNormal(Normal);
+				const auto q = GetHitSide(VX, VY, VZ, HitResult.Normal);
+				if(q == EFoundationSide::FoundationBottom) {
+					UpsideDown = true;
+				}
 			}
 		}else if(mCurrentBuildMode == mBuildModeOnVerticalSurface) {
 			Vertical = true;

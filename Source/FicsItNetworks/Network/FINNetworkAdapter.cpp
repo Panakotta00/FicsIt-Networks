@@ -40,6 +40,58 @@ void AFINNetworkAdapter::RegisterAdapterSettings() {
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/SignDigital/Build_StandaloneWidgetSign_Square_Tiny.Build_StandaloneWidgetSign_Square_Tiny_C")), FFINAdapterSettings{FVector(0, -20, 0), FRotator(), false, 2});
 }
 
+bool AFINNetworkAdapter::FindConnection(AActor* Actor, FVector HitLocation, FTransform& OutTransform, bool& OutMesh, int& OutMaxCables) {
+	if (Actor->IsA<AFGBuildable>()) {
+		// Try to find fitting component
+		TArray<UActorComponent*> Components;
+		Actor->GetComponents(USceneComponent::StaticClass(), Components);
+		float Distance = -1.0f;
+		USceneComponent* FoundComponent = nullptr;
+		for (UActorComponent* Component : Components) {
+			bool bShouldSnap = false;
+			bool bMesh = false;
+
+			UFGPowerConnectionComponent* Power = Cast<UFGPowerConnectionComponent>(Component);
+			if (Power) {
+				bShouldSnap = !(Power->GetMaxNumConnections() < 1 || Power->IsHidden());
+			} else if (Cast<USceneComponent>(Component)->GetName().EndsWith("FINConnector")) {
+				bShouldSnap = true;
+				bMesh = Cast<USceneComponent>(Component)->GetName().EndsWith("Visible_FINConnector");
+			}
+			
+			if (bShouldSnap) {
+				float ComponentDistance = (Cast<USceneComponent>(Component)->GetComponentToWorld().GetTranslation() - HitLocation).Size();
+				if (Distance < 0.0f || Distance > ComponentDistance) {
+					Distance = ComponentDistance;
+					FoundComponent = Cast<USceneComponent>(Component);
+					OutMesh = bMesh;
+				}
+			}
+		}
+		if (FoundComponent) {
+			OutTransform = FoundComponent->GetComponentTransform();
+			return true;
+		}
+
+		// find pre defined adapter setting
+		for (const TPair<UClass*, FFINAdapterSettings>& entry : AFINNetworkAdapter::settings) {
+			const FFINAdapterSettings& setting = entry.Value;
+			UClass* clazz = entry.Key;
+
+			if (Actor->IsA(clazz)) {
+				FVector translation = Actor->GetTransform().TransformPosition(setting.loc);
+				FQuat rotation = Actor->GetTransform().TransformRotation(setting.rot.Quaternion());
+				OutTransform = FTransform(rotation, translation);
+				OutMesh = setting.mesh;
+				OutMaxCables = setting.maxCables;
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
 void AFINNetworkAdapter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
@@ -62,8 +114,7 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	ConnectorMesh = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>(L"StaticMesh");
 	ConnectorMesh->SetupAttachment(RootComponent);
 	ConnectorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ConnectorMesh->SetHiddenInGame(true, true);
-
+	
 	Connector->MaxCables = 1;
 }
 
@@ -72,10 +123,8 @@ AFINNetworkAdapter::~AFINNetworkAdapter() {}
 void AFINNetworkAdapter::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 
-	UStaticMesh* networkAdapterMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_Adapter.Mesh_Adapter"));
-	ConnectorMesh->SetStaticMesh(networkAdapterMesh);
-	ConnectorMesh->SetHiddenInGame(true, true);
-	ConnectorMesh->SetVisibility(false);
+	//ConnectorMesh->SetHiddenInGame(true, true);
+	//ConnectorMesh->SetVisibility(false);
 }
 
 void AFINNetworkAdapter::BeginPlay() {
@@ -101,42 +150,16 @@ void AFINNetworkAdapter::BeginPlay() {
 	Attachment->Ref = this;
 	Attachment->RegisterComponent();
 
-	bool done = false;
-	if (Parent->IsA<AFGBuildable>()) {
-		auto cons = Parent->GetComponentsByClass(UFGPowerConnectionComponent::StaticClass());
-		float dist = -1.0f;
-		USceneComponent* con = nullptr;
-		for (auto c : cons) {
-			float d = (Cast<USceneComponent>(c)->GetComponentToWorld().GetTranslation() - this->GetActorLocation()).Size();
-			if (dist < 0.0f || dist > d) {
-				con = Cast<USceneComponent>(c);
-				dist = d;
-			}
-		}
-		if (con) {
-			SetActorLocationAndRotation(con->GetComponentLocation(), con->GetComponentRotation());
-			done = true;
-		}
-	}
-
-	if (!done) for (auto setting_entry : settings) {
-		auto clazz = setting_entry.Key;
-		auto setting = setting_entry.Value;
-		if (!Parent->IsA(clazz)) continue;
-		FVector pos = Parent->GetActorTransform().TransformPosition(Parent->K2_GetActorLocation());
-		SetActorLocationAndRotation(pos, Parent->GetActorRotation());
-		ConnectorMesh->AddRelativeRotation(setting.rot);
-		ConnectorMesh->SetHiddenInGame(!setting.mesh, true);
+	FTransform ConnectorTransform;
+	bool bMesh;
+	int MaxCables;
+	if (FindConnection(Parent, GetActorLocation(), ConnectorTransform, bMesh, MaxCables)) {
+		SetActorTransform(ConnectorTransform);
+		Connector->MaxCables = MaxCables;
+		ConnectorMesh->SetHiddenInGame(!bMesh, true);
 		ConnectorMesh->SetInstanced(false);
 		ConnectorMesh->SetInstanced(true);
-		ConnectorMesh->SetVisibility(true);
-		Connector->MaxCables = setting.maxCables;
-		break;
-	} else {
-		ConnectorMesh->SetHiddenInGame(true, true);
-		ConnectorMesh->SetInstanced(false);
-		ConnectorMesh->SetInstanced(true);
-		ConnectorMesh->SetVisibility(false);
+		ConnectorMesh->SetVisibility(bMesh);
 	}
 }
 

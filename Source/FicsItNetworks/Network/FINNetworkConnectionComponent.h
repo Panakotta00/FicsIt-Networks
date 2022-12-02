@@ -17,15 +17,16 @@ class AFINNetworkCable;
 UCLASS(meta = (BlueprintSpawnableComponent), Blueprintable)
 class FICSITNETWORKS_API UFINNetworkConnectionComponent : public USceneComponent, public IFINNetworkCircuitNode, public IFGSaveInterface {
 	GENERATED_BODY()
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TArray<TSubclassOf<UFGBuildingDescriptor>> AllowedCableConnections; 
+	
 public:
 	/**
 	 * The maximum amount of cables you can connect to this connector.
 	 */
 	UPROPERTY(EditDefaultsOnly)
 	int MaxCables = -1;
-
-	UPROPERTY(EditDefaultsOnly)
-	TArray<TSubclassOf<UFGBuildingDescriptor>> AllowedCableConnections; 
 	
 	/**
 	 * The "hidden" connections to other network connectors.
@@ -45,8 +46,6 @@ public:
 	UPROPERTY(Replicated)
 	AFINNetworkCircuit* Circuit = nullptr;
 
-	UFINNetworkConnectionComponent();
-	
 	// Begin UObject
 	virtual void InitializeComponent() override;
 	// End UObject
@@ -93,4 +92,15 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
     bool IsConnected(const TScriptInterface<IFINNetworkCircuitNode>& Node) const;
+
+	/**
+	 * Returns a list of cable types that are allowed to connect to this connection component.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Network|Connector")
+	void GetAllowedCableConnections(TArray<TSubclassOf<UFGBuildingDescriptor>>& OutAllowedConnections) const;
+	TArray<TSubclassOf<UFGBuildingDescriptor>> GetAllowedCableConnections() const {
+		TArray<TSubclassOf<UFGBuildingDescriptor>> AllowedConnections;
+		GetAllowedCableConnections(AllowedConnections);
+		return AllowedConnections;
+	}
 };

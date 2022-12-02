@@ -2,11 +2,11 @@
 	"FileVersion": 3,
 	"Version": 0,
 	"VersionName": "0.3",
-	"SemVersion": "0.3.7",
+	"SemVersion": "0.3.12",
 	"FriendlyName": "FicsIt-Networks",
 	"Description": "Adds a computer network and programmable computers to the Game.",
 	"Category": "Modding",
-	"CreatedBy": "Panakotta00, RosszEmber, Deantendo, Coffeediction, Roze, Raysh, Esper",
+	"CreatedBy": "Panakotta00, RosszEmber, Deantendo, Coffeediction, Roze, Raysh, Esper, leonardfactory",
 	"CreatedByURL": "",
 	"DocsURL": "https://docs.ficsit.app/ficsit-networks/latest/index.html",
 	"MarketplaceURL": "",
@@ -25,7 +25,7 @@
 	"Plugins": [
         {
             "Name": "SML",
-            "SemVersion": "^3.3.0",
+            "SemVersion": "^3.4.1",
             "Enabled": true
         }
     ]

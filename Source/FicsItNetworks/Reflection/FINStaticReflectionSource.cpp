@@ -14,6 +14,7 @@
 #include "FINIntProperty.h"
 #include "FINObjectProperty.h"
 #include "FINStructProperty.h"
+#include "FicsItNetworks/Utils/FINRailroadSignalBlock.h"
 
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
@@ -21,6 +22,7 @@
 #include "FGRailroadTimeTable.h"
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FGRailroadVehicleMovementComponent.h"
+#include "FGResourceSinkSubsystem.h"
 #include "FGSignLibrary.h"
 #include "FGTrainStationIdentifier.h"
 #include "FINBoolProperty.h"
@@ -43,6 +45,7 @@
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadStation.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
+#include "Buildables/FGBuildableResourceSink.h"
 #include "Buildables/FGBuildableSignBase.h"
 #include "Buildables/FGBuildableSpeedSign.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
@@ -517,8 +520,8 @@ struct RClass {
 
 template<typename T>
 struct RObject {
-	typedef FINObj CppType;
-	static FINObj Get(const FINAny& Any) { return Any.GetObj(); }
+	typedef TWeakObjectPtr<T> CppType;
+	static CppType Get(const FINAny& Any) { return CppType(Cast<T>(Any.GetObj().Get())); }
 	static UFINProperty* PropConstructor(UObject* Outer) {
 		UFINObjectProperty* Prop = NewObject<UFINObjectProperty>(Outer);
 		Prop->Subclass = T::StaticClass();
@@ -889,7 +892,7 @@ BeginFunc(flush, "Flush", "Removes all discardable items from the inventory comp
 	self->GetInventoryStacks(stacks);
 	self->Empty();
 	for (const FInventoryStack& stack : stacks) {
-		if (stack.HasItems() && stack.Item.IsValid() && !UFGItemDescriptor::CanBeDiscarded(stack.Item.ItemClass)) {
+		if (stack.HasItems() && stack.Item.IsValid() && !UFGItemDescriptor::CanBeDiscarded(stack.Item.GetItemClass())) {
 			self->AddStack(stack);
 		}
 	}
@@ -1913,20 +1916,25 @@ BeginProp(RInt, blockValidation, "Block Validation", "Any error states of the bl
 BeginProp(RInt, aspect, "Aspect", "The aspect of the signal. The aspect shows if a train is allowed to pass (clear) or not and if it should dock.\n0 = Unknown\n1 = The track is clear and the train is allowed to pass.\n2 = The next track is Occupied and the train should stop\n3 = The train should dock.") {
 	Return (int64)self->GetAspect();
 } EndProp()
-BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
-	auto Block = self->GetObservedBlock();
-	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
-	Return Block.Pin()->IsOccupied();
+BeginFunc(getObservedBlock, "Get Observed Block", "Returns the track block this signals observes.") {
+	OutVal(0, RStruct<FFINRailroadSignalBlock>, block, "Block", "The railroad signal block this signal is observing.")
+	Body()
+	block = FINStruct(FFINRailroadSignalBlock(self->GetObservedBlock()));
+} EndFunc()
+EndClass()
+
+BeginClass(AFGBuildableResourceSink, "ResourceSink", "Resource Sink", "The resource sink, also known a A.W.E.S.O.M.E Sink")
+BeginProp(RInt, numPoints, "Num Points", "The number of available points.") {
+	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumTotalPoints(EResourceSinkTrack::RST_Default);
 } EndProp()
-BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
-	auto Block = self->GetObservedBlock();
-	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
-	Return Block.Pin()->HaveReservations();
+BeginProp(RInt, numCoupons, "Num Coupons", "The number of available coupons to print.") {
+	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumCoupons();
 } EndProp()
-BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
-	auto Block = self->GetObservedBlock();
-	if (!Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
-	Return Block.Pin()->IsPathBlock();
+BeginProp(RInt, numPointsToNextCoupon, "Num Points To Next Coupon", "The number of needed points for the next coupon.") {
+	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumPointsToNextCoupon(EResourceSinkTrack::RST_Default);
+} EndProp()
+BeginProp(RFloat, couponProgress, "Coupon Progress", "The percentage of the progress for the next coupon.") {
+	Return AFGResourceSinkSubsystem::Get(self)->GetProgressionTowardsNextCoupon(EResourceSinkTrack::RST_Default);
 } EndProp()
 EndClass()
 
@@ -1999,6 +2007,23 @@ BeginProp(RFloat, indicatorHeadlift, "Indicator Headlift", "The amount of headli
 } EndProp()
 BeginProp(RFloat, indicatorHeadliftPct, "Indicator Headlift Percent", "The amount of headlift the indicator shows as percantage from max.") {
 	Return self->GetIndicatorHeadLiftPct();
+} EndProp()
+BeginProp(RFloat, userFlowLimit, "User Flow Limit", "The flow limit of this pump the user can specifiy. Use -1 for now user set limit. (in m^3/s)") {
+	Return self->GetUserFlowLimit();
+} PropSet() {
+	self->SetUserFlowLimit(Val);
+} EndProp()
+BeginProp(RFloat, flowLimit, "Flow Limit", "The overal flow limit of this pump. (in m^3/s)") {
+	Return self->GetFlowLimit();
+} EndProp()
+BeginProp(RFloat, flowLimitPct, "Flow Limit Pct", "The overal flow limit of this pump. (in percent)") {
+	Return self->GetFlowLimitPct();
+} EndProp()
+BeginProp(RFloat, flow, "Flow", "The current flow amount. (in m^3/s)") {
+	Return self->GetIndicatorFlow();
+} EndProp()
+BeginProp(RFloat, flowPct, "Float Pct", "The current flow amount. (in percent)") {
+	Return self->GetIndicatorFlowPct();
 } EndProp()
 EndClass()
 
@@ -2398,11 +2423,16 @@ BeginProp(RTrace<AFGBuildableRailroadStation>, station, "Station", "The station 
 } PropSet() {
 	self->Station = Val;
 } EndProp()
-BeginProp(RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set wich describe when the train will depart from the train station") {
-	Return self->RuleSet;
-} PropSet() {
-	self->RuleSet = Val;
-} EndProp()
+BeginFunc(getRuleSet, "Get Rule Set", "Returns The rule set wich describe when the train will depart from the train station.") {
+	OutVal(0, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set of this time table stop.")
+	Body()
+	ruleset = FINStruct(self->RuleSet);
+} EndFunc()
+BeginFunc(setRuleSet, "Set Rule Set", "Allows you to change the Rule Set of this time table stop.") {
+	InVal(1, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set you want to use instead.")
+	Body()
+	self->RuleSet = ruleset;
+} EndFunc()
 EndStruct()
 
 BeginStruct(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
@@ -2474,6 +2504,38 @@ BeginFunc(getStations, "Get Stations", "Returns a list of all trainstations in t
 } EndFunc()
 EndStruct()
 
+BeginStruct(FFINRailroadSignalBlock, "RailroadSignalBlock", "Railroad Signal Block", "A track section that combines the area between multiple signals.")
+BeginProp(RBool, isValid, "Is Valid", "Is true if this signal block reference is valid.") {
+	Return self->Block.IsValid();
+} EndProp()
+BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The block reference is invalid"));
+	Return self->Block.Pin()->IsOccupied();
+} EndProp()
+BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return self->Block.Pin()->HaveReservations();
+} EndProp()
+BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return self->Block.Pin()->IsPathBlock();
+} PropSet() {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	self->Block.Pin()->SetIsPathBlock(Val);
+} EndProp()
+BeginProp(RInt, blockValidation, "Block Validation", "Returns the blocks validation status.") {
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	Return (int64)self->Block.Pin()->GetBlockValidation();
+} EndProp()
+BeginFunc(isOccupiedBy, "Is Occupied By", "Allows you to check if this block is occupied by a given train.") {
+	InVal(0, RObject<AFGTrain>, train, "Train", "The train you want to check if it occupies this block")
+	OutVal(1, RBool, isOccupied, "Is Occupied", "True if the given train occupies this block.")
+	Body()
+	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	isOccupied = self->Block.Pin()->IsOccupiedBy(train.Get());
+} EndFunc()
+EndStruct()
+
 BeginStruct(FFINTargetPoint, "TargetPoint", "Target Point", "Target Point in the waypoint list of a wheeled vehicle.")
 BeginProp(RStruct<FVector>, pos, "Pos", "The position of the target point in the world.") {
 	Return self->Pos;
@@ -2525,9 +2587,9 @@ EndStruct()
 
 BeginStruct(FInventoryItem, "Item", "Item", "A structure that holds item information.")
 BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the item.") {
-	Return (UClass*)self->ItemClass;
+	Return (UClass*)self->GetItemClass();
 } PropSet() {
-	self->ItemClass = Val;
+	self->SetItemClass(Val);
 } EndProp()
 EndStruct()
 
