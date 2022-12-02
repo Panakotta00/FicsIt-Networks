@@ -395,6 +395,17 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 SFINLuaCodeEditor::SFINLuaCodeEditor() {}
 
 int32 SFINLuaCodeEditor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
+	FArrangedChildren ArrangedChildren(EVisibility::Visible);
+	this->ArrangeChildren(AllottedGeometry, ArrangedChildren);
+
+	if(ArrangedChildren.Num() > 0) {
+		check( ArrangedChildren.Num() == 1);
+		FArrangedWidget& TheChild = ArrangedChildren[0];
+
+		int32 Layer = 0;
+		Layer = TheChild.Widget->Paint( Args.WithNewParent(this), TheChild.Geometry, MyCullingRect, OutDrawElements, LayerId + 1, InWidgetStyle, ShouldBeEnabled( bParentEnabled ) );
+	}
+	
 	float LineNumberWidth = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(FString::FromInt(TextLayout->GetLineViews().Num()), Style->LineNumberStyle.Font, 1).X;
 	LineNumberWidth += 5.0;
 	FGeometry CodeGeometry = AllottedGeometry.MakeChild(AllottedGeometry.GetLocalSize() - FVector2D(LineNumberWidth, 0), FSlateLayoutTransform(FVector2D(LineNumberWidth, 0)));
@@ -411,22 +422,11 @@ int32 SFINLuaCodeEditor::OnPaint(const FPaintArgs& Args, const FGeometry& Allott
 			continue;
 		}
 
-		FSlateDrawElement::MakeText(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(FVector2D(0, LocalLineOffset.Y))), FText::FromString(FString::FromInt(LineNumber)), Style->LineNumberStyle.Font, ESlateDrawEffect::None, Style->LineNumberStyle.ColorAndOpacity.GetColor(InWidgetStyle));
+		FPaintGeometry LineGeo = AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(TransformPoint(InverseScale, LineView.Offset)));
+		FSlateDrawElement::MakeText(OutDrawElements, LayerId++, LineGeo, FText::FromString(FString::FromInt(LineNumber)), Style->LineNumberStyle.Font, ESlateDrawEffect::None, Style->LineNumberStyle.ColorAndOpacity.GetColor(InWidgetStyle));
 	}
 	OutDrawElements.PopClip();
-
-	// A CompoundWidget just draws its children
-	FArrangedChildren ArrangedChildren(EVisibility::Visible);
-	this->ArrangeChildren(AllottedGeometry, ArrangedChildren);
 	
-	if(ArrangedChildren.Num() > 0) {
-		check( ArrangedChildren.Num() == 1);
-		FArrangedWidget& TheChild = ArrangedChildren[0];
-
-		int32 Layer = 0;
-		Layer = TheChild.Widget->Paint( Args.WithNewParent(this), TheChild.Geometry, MyCullingRect, OutDrawElements, LayerId + 1, InWidgetStyle, ShouldBeEnabled( bParentEnabled ) );
-		return Layer;
-	}
 	return LayerId;
 }
 
@@ -437,12 +437,14 @@ void SFINLuaCodeEditor::OnArrangeChildren(const FGeometry& AllottedGeometry, FAr
 	ArrangeSingleChild(GSlateFlowDirection, CodeGeo, ArrangedChildren, ChildSlot, FVector2D(1));
 }
 
-void UFINLuaCodeEditor::HandleOnTextChanged(const FText& Text) {
-	OnTextChanged.Broadcast(Text);
+void UFINLuaCodeEditor::HandleOnTextChanged(const FText& InText) {
+	Text = InText;
+	OnTextChanged.Broadcast(InText);
 }
 
-void UFINLuaCodeEditor::HandleOnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod) {
-	OnTextCommitted.Broadcast(Text, CommitMethod);
+void UFINLuaCodeEditor::HandleOnTextCommitted(const FText& InText, ETextCommit::Type CommitMethod) {
+	Text = InText;
+	OnTextCommitted.Broadcast(InText, CommitMethod);
 }
 
 TSharedRef<SWidget> UFINLuaCodeEditor::RebuildWidget() {
@@ -457,14 +459,16 @@ void UFINLuaCodeEditor::ReleaseSlateResources(bool bReleaseChildren) {
 }
 
 void UFINLuaCodeEditor::SetIsReadOnly(bool bInReadOnly) {
-	CodeEditor->TextEdit->SetIsReadOnly(bInReadOnly);
+	bReadOnly = bInReadOnly;
+	if (CodeEditor) CodeEditor->TextEdit->SetIsReadOnly(bInReadOnly);
 }
 
 void UFINLuaCodeEditor::SetText(FText InText) {
-	CodeEditor->TextEdit->SetText(InText);
+	Text = InText;
+	if (CodeEditor) CodeEditor->TextEdit->SetText(InText);
 }
 
 FText UFINLuaCodeEditor::GetText() const {
-	return CodeEditor->TextEdit->GetText();
+	return Text;
 }
 

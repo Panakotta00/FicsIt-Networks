@@ -143,13 +143,19 @@ class UFINLuaCodeEditor : public UWidget {
 private:
 	TSharedPtr<SFINLuaCodeEditor> CodeEditor;
 
+	UPROPERTY(EditDefaultsOnly)
+	FText Text;
+
+	UPROPERTY()
+	bool bReadOnly = false;
+
 protected:
-	void HandleOnTextChanged(const FText& Text);
-	void HandleOnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+	void HandleOnTextChanged(const FText& InText);
+	void HandleOnTextCommitted(const FText& InText, ETextCommit::Type CommitMethod);
 
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFINCodeEditorChangedEvent, const FText&, Text);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFINCodeEditorCommittedEvent, const FText&, Text, ETextCommit::Type, CommitMethod);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFINCodeEditorChangedEvent, const FText&, InText);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFINCodeEditorCommittedEvent, const FText&, InText, ETextCommit::Type, CommitMethod);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFINCodeEditorChangedEvent OnTextChanged;
