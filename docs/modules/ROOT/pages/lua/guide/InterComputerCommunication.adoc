@@ -148,20 +148,21 @@ net:open(42)
 
 while true do
  local data = {event.pull()}
- e, s, sender, port, data = function(e,s,sender,port,...)
+ e, s, sender, port, data = (function(e,s,sender,port,...)
   return e, s, sender, port, {...}
- end(table.unpack(data))
+ end) (table.unpack(data))
+ local d1, d2, d3, d4, d5, d6, d7 = table.unpack(data)
  if e == "NetworkMessage" then
   if d1 == "ping" then
    net:send(sender, port, "pong")
   elseif d1 == "foo" then
-   foo(table.unpack(data))
+   foo(data)
   end
  end
 end
 
-function foo(p1, p2, p3)
- print(p1, p2, p3)
+function foo(data)
+ print(table.unpack(data))
 end
 ----
 
