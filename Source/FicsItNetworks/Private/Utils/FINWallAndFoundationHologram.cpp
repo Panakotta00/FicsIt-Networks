@@ -15,6 +15,7 @@ void AFINWallAndFoundationHologram::SetHologramLocationAndRotation(const FHitRes
 			if (bTop || bBottom) {
 				Rotation = Actor->GetActorRotation();
 				SnapToFloor(Cast<AFGBuildable>(Actor), Location, Rotation);
+				if (bBottom) Location.Z -= Cast<AFGBuildableFoundation>(Actor)->GetCachedBounds().GetExtent().Z * 2;
 				Rotation = (Rotation.Quaternion() + FRotator(bBottom ? -90.0f : 90.0f, 0, 0).Quaternion()).Rotator();
 			} else {
 				SnapToFoundationSide(Cast<AFGBuildableFoundation>(Actor), Actor->GetActorTransform().InverseTransformRotation(hitResult.Normal.Rotation().Quaternion()).Vector(), EAxis::X, Location, Rotation);
