@@ -43,6 +43,8 @@ public class FicsItNetworks : ModuleRules
         var thirdPartyFolder = Path.Combine(ModuleDirectory, "../../ThirdParty");
         PublicIncludePaths.Add(Path.Combine(thirdPartyFolder, "include"));
         
+        PublicIncludePaths.Add("Public");
+        
         var platformName = Target.Platform.ToString();
         var libraryFolder = Path.Combine(thirdPartyFolder, platformName);
         
