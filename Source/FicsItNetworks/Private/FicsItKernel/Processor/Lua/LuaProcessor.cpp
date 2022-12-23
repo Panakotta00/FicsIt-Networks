@@ -724,7 +724,7 @@ int luaPrint(lua_State* L) {
 
 int luaYieldResume(lua_State* L, int status, lua_KContext ctx) {
 	// don't pass pushed bool for user executed yield identification
-	return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L));
+	return UFINLuaProcessor::luaAPIReturn(L, lua_gettop(L)-1);
 }
 
 int luaYield(lua_State* L) {
@@ -751,7 +751,7 @@ int luaResume(lua_State* L) {
 	if (!lua_checkstack(thread, args - 1)) {
 		lua_pushboolean(L, false);
 		lua_pushliteral(L, "too many arguments to resume");
-		return UFINLuaProcessor::luaAPIReturn(L, 2);
+		return -1;
 	}
 
 	// attach hook for out-of-time exception if thread got loaded from save and hook is not applied
@@ -761,38 +761,25 @@ int luaResume(lua_State* L) {
 	// but don't move the passed coroutine and then resume the coroutine
 	lua_xmove(L, thread, args - 1);
 	int argCount = 0;
-	const int state = lua_resume(thread, L, args - 1, &argCount);
+	const int status = lua_resume(thread, L, args - 1, &argCount);
 
-	// no args indicates return or internal yield (count hook)
-	if (argCount == 0) {
-		// yield self to cascade the yield down and so the lua execution halts
-		if (state == LUA_YIELD) {
-			// yield from count hook
+	if (status == LUA_OK || status == LUA_YIELD) {
+		if (argCount == 0) {
+			// A hook yielded the thread
 			return lua_yieldk(L, 0, NULL, &luaResumeResume);
-		} else {
-			lua_pop(thread, argCount - 1);
-			argCount = 1;
 		}
-	}
-	
-	if (state > LUA_YIELD) {
-		lua_pushboolean(L, false);
-		argCount = 1;
+
+		if (!lua_checkstack(L, argCount + 1)) {
+			lua_pop(thread, argCount);
+			lua_pushliteral(L, "too many results to resume");
+			return -1;
+		}
+		lua_xmove(thread, L, argCount-1);
+		return argCount-1;
 	} else {
-		lua_pushboolean(L, true);
-		--argCount;
+		lua_xmove(thread, L, 1);
+		return -1;
 	}
-	
-	if (!lua_checkstack(L, argCount)) {
-		lua_pop(thread, argCount);
-		lua_pushliteral(L, "too many results to resume");
-		argCount = 1;
-	} else {
-		// copy the parameters passed to yield or returned to our stack so we can return them
-		lua_xmove(thread, L, argCount);
-	}
-	
-	return UFINLuaProcessor::luaAPIReturn(L, argCount+1);
 }
 
 int luaRunning(lua_State* L) {
