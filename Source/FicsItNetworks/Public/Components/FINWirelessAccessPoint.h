@@ -78,7 +78,7 @@ public:
 
 	UFUNCTION()
 	void OnRep_WirelessConnectionsData() {
-		UE_LOG(LogFicsItNetworks, Log, TEXT("OnRep_WirelessConnectionsData received %d connections"), mAvailableWirelessConnectionsData.Num());
+		UE_LOG(LogFicsItNetworks, Display, TEXT("OnRep_WirelessConnectionsData received %d connections"), mAvailableWirelessConnectionsData.Num());
 		mDisplayedWirelessConnections.Reset();
 		for (const FFINWirelessAccessPointConnectionData& Data : mAvailableWirelessConnectionsData) {
 			auto Connection = NewObject<UFINWirelessAccessPointConnection>();

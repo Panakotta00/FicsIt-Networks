@@ -41,7 +41,7 @@ void AFINWirelessSubsystem::RecalculateWirelessConnections() {
 	// inside the single Access Points.
 	if (!HasAuthority()) return;
 	
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Recalculating Wireless Connections"));
+	UE_LOG(LogFicsItNetworks, Display, TEXT("Recalculating Wireless Connections"));
 
 	// Update cache
 	CacheTowersAndAccessPoints();
@@ -85,7 +85,7 @@ TArray<UFINWirelessAccessPointConnection*> AFINWirelessSubsystem::GetAvailableCo
 	RadarTowers = RadarTowers.FilterByPredicate([](const AActor* Actor) {
 		return IsValid(Actor);
 	});
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Found %d (%d valid) radar towers"), CachedRadarTowers.Num(), RadarTowers.Num());
+	UE_LOG(LogFicsItNetworks, Display, TEXT("Found %d (%d valid) radar towers"), CachedRadarTowers.Num(), RadarTowers.Num());
 	Algo::SortBy(RadarTowers, [AttachedTower](const AActor* Actor) {
 		return FVector::DistSquared(Actor->GetActorLocation(), AttachedTower->GetActorLocation());
 	});
@@ -143,24 +143,24 @@ TArray<UFINWirelessAccessPointConnection*> AFINWirelessSubsystem::GetAvailableCo
 void AFINWirelessSubsystem::BeginPlay() {
 	Super::BeginPlay();
 
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Wireless Subsystem started"));
+	UE_LOG(LogFicsItNetworks, Display, TEXT("Wireless Subsystem started"));
 }
 
 void AFINWirelessSubsystem::CacheTowersAndAccessPoints() {
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Wireless Subsystem: caching towers & wap"));
+	UE_LOG(LogFicsItNetworks, Display, TEXT("Wireless Subsystem: caching towers & wap"));
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFGBuildableRadarTower::StaticClass(), CachedRadarTowers);
 	// The script could be called after an "EndPlay" event. In this case the object is still returned even if being destroyed
 	CachedRadarTowers = CachedRadarTowers.FilterByPredicate([](const AActor* Tower) {
 		return !Tower->IsActorBeingDestroyed();
 	});
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Found %d Radar Towers"), CachedRadarTowers.Num());
+	UE_LOG(LogFicsItNetworks, Display, TEXT("Found %d Radar Towers"), CachedRadarTowers.Num());
 	
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFINWirelessAccessPoint::StaticClass(), CachedAccessPoints);
 	CachedAccessPoints = CachedAccessPoints.FilterByPredicate([](const AActor* AccessPoint) {
 		return !AccessPoint->IsActorBeingDestroyed();
 	});
-	UE_LOG(LogFicsItNetworks, Log, TEXT("Found %d Access Points"), CachedAccessPoints.Num());
+	UE_LOG(LogFicsItNetworks, Display, TEXT("Found %d Access Points"), CachedAccessPoints.Num());
 }
 
 AFINWirelessSubsystem* AFINWirelessSubsystem::Get(UObject* WorldContext) {

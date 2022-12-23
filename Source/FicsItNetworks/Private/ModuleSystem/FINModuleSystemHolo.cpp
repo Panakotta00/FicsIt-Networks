@@ -149,15 +149,15 @@ void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit)
 	//	FVector ActorOrigin = {0, 0, 0};
 	//	FVector ActorExtent = {0,0,0};
 	//	this->GetActorBounds(false, ActorOrigin, ActorExtent);
-	//	UE_LOG(LogFicsItNetworks, Log, TEXT("Actor Origin: %s"), *(ActorOrigin.ToString()));
-	//	UE_LOG(LogFicsItNetworks, Log, TEXT("Actor Extent: %s"), *(ActorExtent.ToString()));
+	//	UE_LOG(LogFicsItNetworks, Display, TEXT("Actor Origin: %s"), *(ActorOrigin.ToString()));
+	//	UE_LOG(LogFicsItNetworks, Display, TEXT("Actor Extent: %s"), *(ActorExtent.ToString()));
 	//	ActorOrigin-= this->GetActorLocation(); 
 	//	ActorOrigin.Z+= FMath::Abs(ActorExtent.Z) + 1;
 	//	ActorOrigin.X-= 2;
 	//	const FVector ActorLocation = {-2,0,FMath::Abs(ActorExtent.Z) + 1};
 	//	CompassComponent->SetRelativeLocation(ActorLocation);
-	//	UE_LOG(LogFicsItNetworks, Log, TEXT("New Origin: %s"), *(ActorOrigin.ToString()));
-	//	UE_LOG(LogFicsItNetworks, Log, TEXT("New Location: %s"), *(ActorLocation.ToString()));
+	//	UE_LOG(LogFicsItNetworks, Display, TEXT("New Origin: %s"), *(ActorOrigin.ToString()));
+	//	UE_LOG(LogFicsItNetworks, Display, TEXT("New Location: %s"), *(ActorLocation.ToString()));
 	//}
 }
 

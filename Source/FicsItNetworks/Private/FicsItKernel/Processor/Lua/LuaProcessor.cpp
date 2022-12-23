@@ -331,7 +331,7 @@ FString Base64Encode(const uint8* Source, uint32 Length) {
 
 int luaPersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Persist"), *p->DebugInfo);
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor Persist"), *p->DebugInfo);
 	
 	// perm, data
 	
@@ -342,7 +342,7 @@ int luaPersist(lua_State* L) {
 }
 
 void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("PreSerialize"));
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("PreSerialize"));
 	if (!Kernel || Kernel->GetState() != FIN_KERNEL_RUNNING) return;
 	
 	tickHelper.stop();
@@ -362,7 +362,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		} else file->transfer = nullptr;
 	}
 
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("'Serialized'"));
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("'Serialized'"));
 
 	// check state & thread
 	if (luaState && luaThread && lua_status(luaThread) == LUA_YIELD) {
@@ -396,7 +396,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		} else {
 			// print error
 			if (lua_isstring(luaState, -1)) {
-				UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Unable to persit! '%s'"), *DebugInfo, *FString(lua_tostring(luaState, -1)));
+				UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Unable to persit! '%s'"), *DebugInfo, *FString(lua_tostring(luaState, -1)));
 			}
 
 			lua_pop(luaState, 1); // ..., perm, globals
@@ -438,7 +438,7 @@ bool Base64Decode(const FString& Source, TArray<ANSICHAR>& OutData) {
 
 int luaUnpersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Unpersist"), *p->DebugInfo);
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor Unpersist"), *p->DebugInfo);
 	
 	// data-str, uperm
 	
@@ -449,7 +449,7 @@ int luaUnpersist(lua_State* L) {
 }
 
 void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("PostDeserialize"));
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor %s"), *DebugInfo, TEXT("PostDeserialize"));
 	if (!Kernel || Kernel->GetState() != FIN_KERNEL_RUNNING) return;
 
 	Reset();
@@ -476,7 +476,7 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	if (ok != LUA_OK) {
 		// print error
 		if (lua_isstring(luaState, -1)) {
-			UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Unable to unpersit! '%s'"), *DebugInfo, *FString(lua_tostring(luaState, -1)));
+			UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Unable to unpersit! '%s'"), *DebugInfo, *FString(lua_tostring(luaState, -1)));
 		}
 		
 		// cleanup
@@ -514,7 +514,7 @@ void UFINLuaProcessor::Tick(float InDelta) {
 }
 
 void UFINLuaProcessor::Stop(bool bIsCrash) {
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor stop %s"), *DebugInfo, bIsCrash ? TEXT("due to crash") : TEXT(""));
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor stop %s"), *DebugInfo, bIsCrash ? TEXT("due to crash") : TEXT(""));
 	tickHelper.stop();
 }
 
@@ -602,7 +602,7 @@ TSet<FicsItKernel::Lua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
 }
 
 void UFINLuaProcessor::Reset() {
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s: Lua Processor Reset"), *DebugInfo);
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor Reset"), *DebugInfo);
 	tickHelper.stop();
 	
 	// can't reset running system state

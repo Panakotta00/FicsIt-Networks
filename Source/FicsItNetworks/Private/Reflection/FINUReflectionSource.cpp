@@ -488,7 +488,7 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 	// get signal name
 	UFINSignal* FINSignal = UFINUReflectionSource::GetSignalFromFunction(Stack.CurrentNativeFunction);
 	if (!FINSignal || !Context) {
-		UE_LOG(LogFicsItNetworks, Log, TEXT("Invalid Unreal Reflection Signal Execution '%s'"), *Stack.CurrentNativeFunction->GetName());
+		UE_LOG(LogFicsItNetworks, Display, TEXT("Invalid Unreal Reflection Signal Execution '%s'"), *Stack.CurrentNativeFunction->GetName());
 
 		P_FINISH;
 		

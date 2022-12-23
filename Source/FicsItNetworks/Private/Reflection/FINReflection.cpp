@@ -162,7 +162,7 @@ void PrintProperty(FString Prefix, UFINProperty* Property) {
 	if (Property->GetPropertyFlags() & FIN_Prop_RT_Parallel) Log += " Parallel";
 	if (Property->GetPropertyFlags() & FIN_Prop_RT_Async) Log += " Async";
 	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) Log += " Class";
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s"), *Log);
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s"), *Log);
 }
 
 void PrintFunction(FString Prefix, UFINFunction* Function) {
@@ -176,7 +176,7 @@ void PrintFunction(FString Prefix, UFINFunction* Function) {
 	if (Function->GetFunctionFlags() & FIN_Func_RT_Async) Log += " Async";
 	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) Log += " Class";
 	if (Function->GetFunctionFlags() & FIN_Func_StaticFunc) Log += " Static";
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s"), *Log);
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s"), *Log);
 	Prefix += " ";
 	for (UFINProperty* Param : Function->GetParameters()) {
 		PrintProperty(Prefix, Param);
@@ -188,7 +188,7 @@ void PrintSignal(FString Prefix, UFINSignal* Signal) {
 	Log += "Signal: " + Signal->GetInternalName();
 	Log += " '" + Signal->GetDisplayName().ToString() + "'";
 	Log += " Desc:'" + Signal->GetDescription().ToString() + "'";
-	UE_LOG(LogFicsItNetworks, Log, TEXT("%s"), *Log);
+	UE_LOG(LogFicsItNetworks, Display, TEXT("%s"), *Log);
 	Prefix += " ";
 	for (UFINProperty* Param : Signal->GetParameters()) {
 		PrintProperty(Prefix, Param);
@@ -197,7 +197,7 @@ void PrintSignal(FString Prefix, UFINSignal* Signal) {
 
 void FFINReflection::PrintReflection() {
 	for (TPair<UClass*, UFINClass*> Class : Classes) {
-		UE_LOG(LogFicsItNetworks, Log, TEXT("Class: %s '%s' Desc:'%s'"), *Class.Value->GetInternalName(), *Class.Value->GetDisplayName().ToString(), *Class.Value->GetDescription().ToString());
+		UE_LOG(LogFicsItNetworks, Display, TEXT("Class: %s '%s' Desc:'%s'"), *Class.Value->GetInternalName(), *Class.Value->GetDisplayName().ToString(), *Class.Value->GetDescription().ToString());
 		for (UFINFunction* Function : Class.Value->GetFunctions()) {
 			PrintFunction(" ", Function);
 		}
@@ -220,7 +220,7 @@ void FFINReflection::PrintReflection() {
 		for (UFINProperty* Prop : FINStruct.Value->GetProperties()) {
 			PrintProperty(" ", Prop);
 		}
-		UE_LOG(LogFicsItNetworks, Log, TEXT("Class: %s"), *Log);
+		UE_LOG(LogFicsItNetworks, Display, TEXT("Class: %s"), *Log);
 	}
 }
 

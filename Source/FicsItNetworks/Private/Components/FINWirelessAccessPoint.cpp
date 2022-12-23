@@ -50,7 +50,7 @@ void AFINWirelessAccessPoint::BeginPlay() {
 		}
 	});
 	
-	UE_LOG(LogFicsItNetworks, Log, TEXT("FINWirelessAccessPoint::BeginPlay"));
+	UE_LOG(LogFicsItNetworks, Display, TEXT("FINWirelessAccessPoint::BeginPlay"));
 	if (HasAuthority()) {
 		AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
 	}
