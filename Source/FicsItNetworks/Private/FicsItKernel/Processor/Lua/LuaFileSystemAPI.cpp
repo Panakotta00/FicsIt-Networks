@@ -249,7 +249,7 @@ namespace FicsItKernel {
 			int conversion = -1;
 			if (lua_isinteger(L, start)) conversion = lua_tointeger(L, start++);
 			CodersFileSystem::Path path;
-			for (int i = start; i <= args; ++i) path = path / CodersFileSystem::Path(lua_tostring(L, i));
+			for (int i = start; i <= args; ++i) path = path / CodersFileSystem::Path(luaL_checkstring(L, i));
 			std::string out;
 			int retargs = 1;
 			bool custom = false;
