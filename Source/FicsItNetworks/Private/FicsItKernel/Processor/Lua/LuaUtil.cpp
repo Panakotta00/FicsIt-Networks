@@ -201,12 +201,12 @@ namespace FicsItKernel {
 					Val = FFINAnyNetworkValue(*luaGetStruct(L, i));
 					break;
 				}
-				FFINNetworkTrace Trace = getObjInstance(L, i);
+				FFINNetworkTrace Trace = getObjInstance(L, i, UObject::StaticClass(), false);
 				if (Trace.IsValid()) {
 					Val = FFINAnyNetworkValue(Trace);
 					break;
 				}
-				UClass* Class = getClassInstance(L, i, UObject::StaticClass());
+				UClass* Class = getClassInstance(L, i, UObject::StaticClass(), false);
 				if (Class) {
 					Val = Class;
 					break;

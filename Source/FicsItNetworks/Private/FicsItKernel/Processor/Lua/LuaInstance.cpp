@@ -329,10 +329,12 @@ namespace FicsItKernel {
 			return true;
 		}
 
-		FFINNetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz) {
+		FFINNetworkTrace getObjInstance(lua_State* L, int index, UClass* clazz, bool bError) {
 			if (lua_isnil(L, index)) return FFINNetworkTrace(nullptr);
-			LuaInstance* instance = CheckAndGetInstance(L, index);
-			if (!instance->Trace.IsValid() || !instance->Trace->GetClass()->IsChildOf(clazz)) return FFINNetworkTrace(nullptr);
+			LuaInstance* instance;
+			if (bError) instance = CheckAndGetInstance(L, index);
+			else instance = GetInstance(L, index);
+			if (!instance || !instance->Trace.IsValid() || !instance->Trace->GetClass()->IsChildOf(clazz)) return FFINNetworkTrace(nullptr);
 			return instance->Trace;
 		}
 
@@ -538,9 +540,11 @@ namespace FicsItKernel {
 			return true;
 		}
 
-		UClass* getClassInstance(lua_State* L, int index, UClass* clazz) {
-			LuaClassInstance* instance = CheckAndGetClassInstance(L, index);
-			if (!instance->Class->IsChildOf(clazz)) return nullptr;
+		UClass* getClassInstance(lua_State* L, int index, UClass* clazz, bool bError) {
+			LuaClassInstance* instance;
+			if (bError) instance = CheckAndGetClassInstance(L, index);
+			else instance = GetClassInstance(L, index);
+			if (!instance || !instance->Class->IsChildOf(clazz)) return nullptr;
 			return instance->Class;
 		}
 
