@@ -58,7 +58,6 @@
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
 #include "Buildables/FGBuildableWidgetSign.h"
-#include "Reflection/FINStaticReflectionSourceHooks.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
 #include "WheeledVehicles/FGWheeledVehicle.h"
 
@@ -1078,6 +1077,15 @@ BeginFunc(getConnected, "Get Connected", "Returns the connected factory connecti
 	Body()
 	connected = Ctx.GetTrace() / self->GetConnection();
 } EndFunc()
+EndClass()
+
+BeginClass(AFGBuildablePipeHyperPart, "PipeHyperPart", "Pipe Hyper Part", "A actor that is a hypertube buildable")
+Hook(UFINAFGPipeHyperStartHook)
+BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube connection.")
+	SignalParam(0, RBool, success, "Sucess", "True if the transfer was sucessfull")
+	SignalParam(1, RTrace<UFGPipeConnectionComponentBase>, throughConnector, "Through Connector", "The connector we entered through, can be nil if we transfered from outside world (like and entrance)")
+	SignalParam(2, RTrace<AActor>, fromPipe, "From Pipe", "The pipe we came from, if any.")
+EndSignal()
 EndClass()
 
 BeginClass(UFGPipeConnectionComponentBase, "PipeConnectionBase", "Pipe Connection Base", "A actor component base that is a connection point to which a pipe for fluid or hyper can get attached to.")

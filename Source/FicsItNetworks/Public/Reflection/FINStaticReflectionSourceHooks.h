@@ -9,6 +9,7 @@
 #include "FGPowerCircuit.h"
 #include "FGTrain.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
+#include "Buildables/FGPipeHyperStart.h"
 #include "Patching/NativeHookManager.h"
 #include "FINStaticReflectionSourceHooks.generated.h"
 
@@ -135,6 +136,39 @@ public:
 	void Unregister() override {
 		Cast<AFGBuildableRailroadSignal>(Sender)->mOnAspectChangedDelegate.RemoveDynamic(this, &UFINRailroadSignalHook::AspectChanged);
 	}
+};
+
+UCLASS()
+class UFINAFGPipeHyperPartHook : public UFINFunctionHook {
+	GENERATED_BODY()
+
+	protected:
+	static UFINAFGPipeHyperPartHook* StaticSelf() {
+		static UFINAFGPipeHyperPartHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINAFGPipeHyperPartHook*>(GetDefault<UFINAFGPipeHyperPartHook>());
+		return Hook; 
+	}
+
+	// Begin UFINFunctionHook
+	virtual UFINFunctionHook* Self() {
+		return StaticSelf();
+	}
+	// End UFINFunctionHook
+
+private:
+	
+	static void OnPipeEnterHook(const bool& retVal, IFGPipeHyperInterface* self_r, UFGCharacterMovementComponent* charMove, const UFGPipeConnectionComponentBase* enteredThrough, const AActor* fromPipe) {
+		AFGBuildablePipeHyperPart* AfgBuildablePipeHyperPart = static_cast<AFGBuildablePipeHyperPart*>(self_r);
+		if(AfgBuildablePipeHyperPart) {
+			StaticSelf()->Send(AfgBuildablePipeHyperPart, "PlayerEntered", {FINAny(retVal), FINTrace((UObject*)enteredThrough), FINTrace((UObject*)fromPipe)});
+		}
+	}
+
+			
+public:		
+	void RegisterFuncHook() override {
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnter_Implementation, (void*)static_cast<const IFGPipeHyperInterface*>(GetDefault<AFGBuildablePipeHyperPart>()), &OnPipeEnterHook)
+    }
 };
 
 UCLASS()
