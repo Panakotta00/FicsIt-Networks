@@ -1080,7 +1080,7 @@ BeginFunc(getConnected, "Get Connected", "Returns the connected factory connecti
 EndClass()
 
 BeginClass(AFGBuildablePipeHyperPart, "PipeHyperPart", "Pipe Hyper Part", "A actor that is a hypertube buildable")
-Hook(UFINAFGPipeHyperStartHook)
+Hook(UFINAFGPipeHyperPartHook)
 BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube connection.")
 	SignalParam(0, RBool, success, "Sucess", "True if the transfer was sucessfull")
 	SignalParam(1, RTrace<UFGPipeConnectionComponentBase>, throughConnector, "Through Connector", "The connector we entered through, can be nil if we transfered from outside world (like and entrance)")
