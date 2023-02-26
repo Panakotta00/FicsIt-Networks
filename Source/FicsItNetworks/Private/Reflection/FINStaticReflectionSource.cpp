@@ -786,15 +786,18 @@ BeginFunc(getFactoryConnectors, "Get Factory Connectors", "Returns a list of fac
 	}
 	connectors = Output;
 } EndFunc()
-BeginFunc(getPipeConnectors, "Get Pipe Connectors", "Returns a list of pipe connectors this actor might have.") {
-	OutVal(0, RArray<RTrace<UFGPipeConnectionComponent>>, connectors, "Connectors", "The factory connectors this actor has.");
+BeginFunc(getPipeConnectors, "Get Pipe Connectors", "Returns a list of pipe (fluid & hyper) connectors this actor might have.") {
+	OutVal(0, RArray<RTrace<UFGPipeConnectionComponentBase>>, connectors, "Connectors", "The pipe connectors this actor has.");
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
+	TSet<UObject*> Outputted;
 	for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
-		if (!prop->PropertyClass->IsChildOf(UFGPipeConnectionComponent::StaticClass())) continue;
+		if (!prop->PropertyClass->IsChildOf(UFGPipeConnectionComponentBase::StaticClass())) continue;
 		UObject* Connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
 		if (!Components.Contains(Cast<UActorComponent>(Connector))) continue;
+		if (Outputted.Contains(Connector)) continue;
+		Outputted.Add(Connector);
 		Output.Add(Ctx.GetTrace() / Connector);
 	}
 	connectors = Output;
@@ -1077,11 +1080,19 @@ BeginFunc(getConnected, "Get Connected", "Returns the connected factory connecti
 } EndFunc()
 EndClass()
 
-BeginClass(UFGPipeConnectionComponent, "PipeConnection", "Pipe Connection", "A actor component that is a connection point to which a conveyor or pipe can get attached to.")
-//Hook(UFINFactoryConnectorHook)
+BeginClass(UFGPipeConnectionComponentBase, "PipeConnectionBase", "Pipe Connection Base", "A actor component base that is a connection point to which a pipe for fluid or hyper can get attached to.")
 BeginProp(RBool, isConnected, "Is Connected", "True if something is connected to this connection.") {
 	Return self->IsConnected();
 } EndProp()
+BeginFunc(getConnection, "Get Connection", "Returns the connected pipe connection component.") {
+	OutVal(0, RTrace<UFGPipeConnectionComponentBase>, connected, "Connected", "The connected pipe connection component.")
+	Body()
+	connected = Ctx.GetTrace() / self->GetConnection();
+} EndFunc()
+EndClass()
+
+BeginClass(UFGPipeConnectionComponent, "PipeConnection", "Pipe Connection", "A actor component that is a connection point to which a fluid pipe can get attached to.")
+//Hook(UFINFactoryConnectorHook)
 BeginProp(RFloat, fluidBoxContent, "Fluid Box Content", "Returns the amount of fluid this fluid container contains") {
 	Return self->GetFluidIntegrant()->GetFluidBox()->Content;
 } EndProp()
