@@ -70,6 +70,7 @@ bool AFINNetworkAdapter::FindConnection(AActor* Actor, FVector HitLocation, FTra
 		if (FoundComponent) {
 			OutMaxCables = 1;
 			OutTransform = FoundComponent->GetComponentTransform();
+			OutMaxCables = 1;
 			return true;
 		}
 
