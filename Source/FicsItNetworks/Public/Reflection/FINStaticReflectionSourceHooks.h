@@ -8,6 +8,7 @@
 #include "FGPipeConnectionComponent.h"
 #include "FGPowerCircuit.h"
 #include "FGTrain.h"
+#include "Buildables/FGBuildablePipeHyper.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGPipeHyperStart.h"
 #include "Patching/NativeHookManager.h"
@@ -139,13 +140,13 @@ public:
 };
 
 UCLASS()
-class UFINAFGPipeHyperPartHook : public UFINFunctionHook {
+class UFINAFGPipeHyperStartHook : public UFINFunctionHook {
 	GENERATED_BODY()
 
 	protected:
-	static UFINAFGPipeHyperPartHook* StaticSelf() {
-		static UFINAFGPipeHyperPartHook* Hook = nullptr;
-		if (!Hook) Hook = const_cast<UFINAFGPipeHyperPartHook*>(GetDefault<UFINAFGPipeHyperPartHook>());
+	static UFINAFGPipeHyperStartHook* StaticSelf() {
+		static UFINAFGPipeHyperStartHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINAFGPipeHyperStartHook*>(GetDefault<UFINAFGPipeHyperStartHook>());
 		return Hook; 
 	}
 
@@ -158,9 +159,13 @@ class UFINAFGPipeHyperPartHook : public UFINFunctionHook {
 private:
 	
 	static void OnPipeEnterHook(const bool& retVal, IFGPipeHyperInterface* self_r, UFGCharacterMovementComponent* charMove, const UFGPipeConnectionComponentBase* enteredThrough, const AActor* fromPipe) {
-		AFGBuildablePipeHyperPart* AfgBuildablePipeHyperPart = static_cast<AFGBuildablePipeHyperPart*>(self_r);
-		if(AfgBuildablePipeHyperPart) {
-			StaticSelf()->Send(AfgBuildablePipeHyperPart, "PlayerEntered", {FINAny(retVal), FINTrace((UObject*)enteredThrough), FINTrace((UObject*)fromPipe)});
+		AFGBuildablePipeHyperPart* part = dynamic_cast<AFGBuildablePipeHyperPart*>(self_r);
+		if(IsValid(part)) {
+			StaticSelf()->Send(part, "PlayerEntered", {FINAny(retVal), FINTrace((UObject*)enteredThrough), FINTrace((UObject*)fromPipe)});
+		}
+		AFGBuildablePipeHyper* pipe = dynamic_cast<AFGBuildablePipeHyper*>(self_r);
+		if(IsValid(pipe)) {
+			StaticSelf()->Send(pipe, "PlayerEntered", {FINAny(retVal), FINTrace((UObject*)enteredThrough), FINTrace((UObject*)fromPipe)});
 		}
 	}
 
@@ -168,6 +173,7 @@ private:
 public:		
 	void RegisterFuncHook() override {
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnter_Implementation, (void*)static_cast<const IFGPipeHyperInterface*>(GetDefault<AFGPipeHyperStart>()), &OnPipeEnterHook)
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnter_Implementation, (void*)static_cast<const IFGPipeHyperInterface*>(GetDefault<AFGBuildablePipeHyper>()), &OnPipeEnterHook)
     }
 };
 
