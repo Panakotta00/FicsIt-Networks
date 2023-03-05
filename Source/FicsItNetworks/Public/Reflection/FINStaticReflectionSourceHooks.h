@@ -167,7 +167,7 @@ private:
 			
 public:		
 	void RegisterFuncHook() override {
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnter_Implementation, (void*)static_cast<const IFGPipeHyperInterface*>(GetDefault<AFGBuildablePipeHyperPart>()), &OnPipeEnterHook)
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnter_Implementation, (void*)static_cast<const IFGPipeHyperInterface*>(GetDefault<AFGPipeHyperStart>()), &OnPipeEnterHook)
     }
 };
 
