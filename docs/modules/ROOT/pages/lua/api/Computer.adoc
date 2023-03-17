@@ -111,7 +111,7 @@ Return Values::
 |Amount of milliseconds since system start
 |===
 
-=== `int, string, string magiTime()`
+=== `int, string, string magicTime()`
 
 Returns some kind of strange/mysterious time data from a unknown place (the real life).
 
