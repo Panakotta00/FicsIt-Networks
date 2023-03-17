@@ -12,34 +12,35 @@ int funcName(lua_State* L) { \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
 	UFINKernelSystem* kernel = processor->GetKernel(); \
 	FLuaSyncCall SyncCall(L);
+#define LuaFuncEnd() }
 
 namespace FicsItKernel {
 	namespace Lua {
-		LuaFunc(luaComputerGetInstance)
+		LuaFunc(luaComputerGetInstance) {
 			newInstance(L, UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject())));
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		}
+		} LuaFuncEnd()
 
-		LuaFunc(luaComputerReset)
+		LuaFunc(luaComputerReset) {
 			processor->GetTickHelper().shouldReset();
 			lua_yield(L, 0);
 			return 0;
-		}
+		} LuaFuncEnd()
 
-		LuaFunc(luaComputerStop)
+		LuaFunc(luaComputerStop) {
 			processor->GetTickHelper().shouldStop();
 			lua_yield(L, 0);
 			return 0;
-		}
+		} LuaFuncEnd()
 
-		LuaFunc(luaComputerPanic)
+		LuaFunc(luaComputerPanic) {
 		    processor->GetTickHelper().shouldCrash(MakeShared<FFINKernelCrash>(FString("PANIC! '") + luaL_checkstring(L, 1) + "'"));
 			kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
 				kernel->GetAudio()->Beep();
 			})));
 			lua_yield(L, 0);
 			return 0;
-		}
+		} LuaFuncEnd()
 
 		int luaComputerSkipContinue(lua_State* L, int status, lua_KContext ctx) {
 			return 0;
@@ -72,16 +73,16 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 		
-		LuaFunc(luaComputerBeep)
+		LuaFunc(luaComputerBeep) {
 			float pitch = 1;
 			if (lua_isnumber(L, 1)) pitch = lua_tonumber(L, 1);
 			kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
 			    kernel->GetAudio()->Beep(pitch);
 			})));
 			return UFINLuaProcessor::luaAPIReturn(L, 0);
-		}
+		} LuaFuncEnd()
 
-		LuaFunc(luaComputerSetEEPROM)
+		LuaFunc(luaComputerSetEEPROM) {
 			AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 			if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
 			size_t len;
@@ -89,29 +90,29 @@ namespace FicsItKernel {
 			FUTF8ToTCHAR Conv(str, len);
 			eeprom->SetCode(FString(Conv.Length(), Conv.Get()));
 			return 0;
-		}
+		} LuaFuncEnd()
 
-		LuaFunc(luaComputerGetEEPROM)
+		LuaFunc(luaComputerGetEEPROM) {
             const AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 			if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
 			FString Code = eeprom->GetCode();
 			FTCHARToUTF8 Conv(*Code, Code.Len());
 			lua_pushlstring(L, Conv.Get(), Conv.Length());
 			return 1;
-		}
+		} LuaFuncEnd()
 
-		LuaFunc(luaComputerTime)
+		LuaFunc(luaComputerTime) {
 			const AFGTimeOfDaySubsystem* Subsystem = AFGTimeOfDaySubsystem::Get(kernel);
 			lua_pushnumber(L, Subsystem->GetPassedDays() * 86400 + Subsystem->GetDaySeconds());
 			return 1;
-		}
+		} LuaFuncEnd()
 		
-		LuaFunc(luaComputerMillis)
+		LuaFunc(luaComputerMillis) {
 			lua_pushinteger(L, kernel->GetTimeSinceStart());
 			return 1;
-		}
+		} LuaFuncEnd()
 
-		LuaFunc(luaComputerMagicTime)
+		LuaFunc(luaComputerMagicTime) {
 			FDateTime Now = FDateTime::UtcNow();
 			lua_pushinteger(L, Now.ToUnixTimestamp());
 			FTCHARToUTF8 ConvertStr(*Now.ToString());
@@ -119,9 +120,9 @@ namespace FicsItKernel {
 			FTCHARToUTF8 ConvertIso(*Now.ToIso8601());
 			lua_pushlstring(L, ConvertIso.Get(), ConvertIso.Length());
 			return 3;
-		}
+		} LuaFuncEnd()
 		
-		LuaFunc(luaComputerPCIDevices)
+		LuaFunc(luaComputerPCIDevices) {
 			lua_newtable(L);
 			int args = lua_gettop(L);
 			UFINClass* Type = nullptr;
@@ -139,9 +140,18 @@ namespace FicsItKernel {
 				lua_seti(L, -2, i++);
 			}
 			return 1;
-		}
+		} LuaFuncEnd()
+
+		LuaFunc(luaComputerMemory) {
+			int64 Usage = kernel->GetMemoryUsage();
+			int64 Capacity = kernel->GetCapacity();
+			lua_pushinteger(L, Usage);
+			lua_pushinteger(L, Capacity);
+			return 2;
+		} LuaFuncEnd()
 
 		static const luaL_Reg luaComputerLib[] = {
+			{"getMemory", luaComputerMemory},
 			{"getInstance", luaComputerGetInstance},
 			{"reset", luaComputerReset},
 			{"stop", luaComputerStop},

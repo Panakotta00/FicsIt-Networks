@@ -671,7 +671,7 @@ void UFINLuaProcessor::Reset() {
 }
 
 int64 UFINLuaProcessor::GetMemoryUsage(bool bInRecalc) {
-	return lua_gc(luaState, LUA_GCCOUNT, 0)* 100;
+	return lua_gc(luaState, LUA_GCCOUNT, 0) * 100;
 }
 
 void UFINLuaProcessor::SetEEPROM(AFINStateEEPROM* InEEPROM) {
