@@ -339,6 +339,8 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClas
 		if (Meta.ParameterDescriptions.Num() > i) FINProp->Description = Meta.ParameterDescriptions[i];
 		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param;
 		FINFunc->Parameters.Add(FINProp);
+
+		checkf(CheckName(FINFunc->GetInternalName()), TEXT("Invalid parameter name '%s' for function '%s'"), *FINProp->GetInternalName(), *Func->GetFullName());
 	}
 	if (FINFunc->Parameters.Num() > 0) {
 		UFINArrayProperty* Prop = nullptr;
@@ -355,6 +357,9 @@ UFINFunction* UFINUReflectionSource::GenerateFunction(FFINReflection* Ref, UClas
 			FINFunc->Parameters.Remove(Prop);
 		}
 	}
+
+	checkf(CheckName(FINFunc->GetInternalName()), TEXT("Invalid function name '%s' for class '%s'"), *FINFunc->GetInternalName(), *Class->GetFullName());
+	
 	return FINFunc;
 }
 
@@ -382,6 +387,9 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 			break;
 		}
 	}
+
+	checkf(CheckName(FINProp->GetInternalName()), TEXT("Invalid property name '%s' for class '%s'"), *FINProp->GetInternalName(), *Class->GetFullName());
+	
 	return FINProp;
 }
 
@@ -438,6 +446,8 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 		}
 	}
 	
+	checkf(CheckName(FINProp->GetInternalName()), TEXT("Invalid property name '%s' for class '%s'"), *FINProp->GetInternalName(), *Class->GetFullName());
+	
 	return FINProp;
 }
 
@@ -475,6 +485,9 @@ UFINSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, UClass* C
 	}
 	FuncSignalMap.Add(Func, FINSignal);
 	SetupFunctionAsSignal(Ref, Func);
+
+	checkf(CheckName(FINSignal->GetInternalName()), TEXT("Invalid signal name '%s' for class '%s'"), *FINSignal->GetInternalName(), *Class->GetFullName());
+	
 	return FINSignal;
 }
 
@@ -540,4 +553,9 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 void UFINUReflectionSource::SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func) const {
 	Func->SetNativeFunc(&FINUFunctionBasedSignalExecute);
 	Func->FunctionFlags |= FUNC_Native;
+}
+
+bool UFINUReflectionSource::CheckName(const FString& Name) {
+	FRegexPattern Pattern(TEXT("^[\\w]+$"));
+	return FRegexMatcher(Pattern, Name).FindNext();
 }

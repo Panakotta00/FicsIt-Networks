@@ -61,4 +61,5 @@ public:
 	UFINSignal* GenerateSignal(FFINReflection* Ref, UClass* Class, UFunction* Func) const;
 	static UFINSignal* GetSignalFromFunction(UFunction* Func);
 	void SetupFunctionAsSignal(FFINReflection* Ref, UFunction* Func) const;
+	static bool CheckName(const FString& Name);
 };
