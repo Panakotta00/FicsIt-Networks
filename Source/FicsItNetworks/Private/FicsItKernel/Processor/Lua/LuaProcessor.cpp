@@ -12,7 +12,7 @@
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINSignal.h"
-#include "eris.h"
+#include "lua/eris.h"
 
 void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
 	for (FicsItKernel::Lua::LuaFile file : Parent->GetFileStreams()) {

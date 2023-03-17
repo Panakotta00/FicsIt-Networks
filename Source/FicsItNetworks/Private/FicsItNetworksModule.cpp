@@ -12,6 +12,7 @@
 #include "FGCharacterPlayer.h"
 #include "FGGameMode.h"
 #include "FGGameState.h"
+#include "Buildables/FGPipeHyperStart.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Hologram/FGBuildableHologram.h"
 #include "Network/Wireless/FINWirelessRCO.h"
