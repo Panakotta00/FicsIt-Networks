@@ -27,9 +27,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 	
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
 	int PanelWidth = 10;
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
 	int PanelHeight = 10;
 	
 	UPROPERTY()
