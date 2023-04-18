@@ -1638,7 +1638,7 @@ BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which th
 	Body()
 	track = (FINAny) FFINTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
 } EndFunc()
-BeginFunc(setSelfDriving, "Set Self Driving", "Allows to set if the train should be self driving or not.") {
+BeginFunc(setSelfDriving, "Set Self Driving", "Allows to set if the train should be self driving or not.", 0) {
 	InVal(0, RBool, selfDriving, "Self Driving", "True if the train should be self driving.")
 	Body()
 	self->SetSelfDrivingEnabled(selfDriving);
