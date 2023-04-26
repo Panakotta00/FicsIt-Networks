@@ -82,7 +82,8 @@ void AFINSizeablePanel::EndPlay(const EEndPlayReason::Type endPlayReason) {
 }
 
 int32 AFINSizeablePanel::GetDismantleRefundReturnsMultiplier() const {
-	return FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight);
+	//return FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight);
+	return FGenericPlatformMath::Max((FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight)) / 10, 1);
 }
 
 bool AFINSizeablePanel::ShouldSave_Implementation() const {

@@ -74,7 +74,7 @@ bool AFINSizeablePanelHolo::DoMultiStepPlacement(bool isInputFromARelease) {
 }
 
 int32 AFINSizeablePanelHolo::GetBaseCostMultiplier() const {
-	return FGenericPlatformMath::Max((PanelWidth * PanelHeight) / 10, 1);
+	return FGenericPlatformMath::Max((FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight)) / 10, 1);
 }
 
 bool AFINSizeablePanelHolo::IsValidHitResult(const FHitResult& hitResult) const {
