@@ -33,8 +33,8 @@ AFINCodeableMerger::AFINCodeableMerger() {
 
 AFINCodeableMerger::~AFINCodeableMerger() {}
 
-void AFINCodeableMerger::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund) const {
-	Super::GetDismantleRefund_Implementation(out_refund);
+void AFINCodeableMerger::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund, bool noBuildCostEnabled) const {
+	Super::GetDismantleRefund_Implementation(out_refund, noBuildCostEnabled);
 
 	//TArray<FInventoryItem> items = InputQueue;
 	out_refund.Append(OutputQueue);

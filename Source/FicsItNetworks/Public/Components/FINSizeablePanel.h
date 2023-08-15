@@ -55,7 +55,7 @@ public:
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
 
-	
+	void ConstructParts();
 
 	static void SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int PanelWidth, int PanelHeight,
                                         UStaticMesh* ULMesh,
@@ -68,8 +68,6 @@ public:
 	static void SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
 
 	UFUNCTION(BlueprintCallable)
-
-	
 	static TArray<FItemAmount> GetModifiedCost(const int Width, const int Height) {
 		const int Cells = FGenericPlatformMath::Max(Width * Height, 1);
 		

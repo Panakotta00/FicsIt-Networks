@@ -16,7 +16,7 @@ public:
 	TMap<AFGCharacterPlayer*, UWidgetInteractionComponent*> ScreenInteraction;
 
 	UPROPERTY()
-	UInputComponent* Input;
+	UEnhancedInputComponent* Input;
 
 	UPROPERTY(SaveGame, BlueprintReadOnly)
 	TEnumAsByte<EFINCustomVersion> Version = EFINCustomVersion::FINBeforeCustomVersionWasAdded;

@@ -1,5 +1,6 @@
 ﻿#include "Components/FINWirelessAccessPointHologram.h"
 #include "Buildables/FGBuildableRadarTower.h"
+#include "Components/FINWirelessAccessPoint.h"
 
 // Sets default values
 AFINWirelessAccessPointHologram::AFINWirelessAccessPointHologram() {
@@ -8,7 +9,7 @@ AFINWirelessAccessPointHologram::AFINWirelessAccessPointHologram() {
 	SetActorTickEnabled(true);
 
 	this->mValidHitClasses.Add(AFGBuildableRadarTower::StaticClass());
-	this->mScrollMode = EHologramScrollMode::HSM_ROTATE;
+	//this->mScrollMode = EHologramScrollMode::HSM_ROTATE; // TODO: Check if needed
 }
 
 // Called when the game starts or when spawned
@@ -28,12 +29,12 @@ void AFINWirelessAccessPointHologram::ConfigureActor(AFGBuildable* inBuildable) 
 }
 
 bool AFINWirelessAccessPointHologram::IsValidHitResult(const FHitResult& hitResult) const {
-	return hitResult.Actor.IsValid();
+	return IsValid(hitResult.GetActor());
 }
 
 bool AFINWirelessAccessPointHologram::TrySnapToActor(const FHitResult& hitResult) {
 	// Check if hit actor is valid
-	const auto Actor = hitResult.Actor.Get();
+	const auto Actor = hitResult.GetActor();
 
 	if (Actor && Actor->IsA<AFGBuildableRadarTower>()) {
 		IsSnapped = true;

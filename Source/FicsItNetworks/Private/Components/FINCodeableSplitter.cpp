@@ -76,8 +76,8 @@ bool AFINCodeableSplitter::Factory_GrabOutput_Implementation(UFGFactoryConnectio
 }
 
 
-void AFINCodeableSplitter::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund) const {
-	Super::GetDismantleRefund_Implementation(out_refund);
+void AFINCodeableSplitter::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund, bool noBuildCostEnabled) const {
+	Super::GetDismantleRefund_Implementation(out_refund, noBuildCostEnabled);
 
 	out_refund.Append(InputQueue);
 	out_refund.Append(OutputQueue1);

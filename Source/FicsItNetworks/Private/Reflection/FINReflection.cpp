@@ -45,13 +45,13 @@ void FFINReflection::LoadAllTypes() {
 	Filter.bRecursivePaths = true;
 	Filter.bRecursiveClasses = true;
 	Filter.PackagePaths.Add("/");
-	Filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName());
+	Filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName()); // TODO: Check if ClassNamePaths could work and how
 	Filter.ClassNames.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
 	Filter.ClassNames.Add(UClass::StaticClass()->GetFName());
 	AssetRegistryModule.Get().GetAssets(Filter, AssetData);
 
 	for (const FAssetData& Asset : AssetData) {
-		FString Path = Asset.ObjectPath.ToString();
+		FString Path = Asset.GetObjectPathString();
 		if (!Path.EndsWith("_C")) Path += "_C";
 		UClass* Class = LoadClass<UObject>(NULL, *Path);
 		if (!Class) {
@@ -224,53 +224,58 @@ void FFINReflection::PrintReflection() {
 	}
 }
 
-UFINProperty* FINCreateFINPropertyFromUProperty(UProperty* Property, UProperty* OverrideProperty, UObject* Outer) {
+UFINProperty* FINCreateFINPropertyFromFProperty(FProperty* Property, FProperty* OverrideProperty, UObject* Outer) {
 	UFINProperty* FINProp = nullptr;
-	if (Cast<UStrProperty>(Property)) {
+	if (CastField<FStrProperty>(Property)) {
 		UFINStrProperty* FINStrProp = NewObject<UFINStrProperty>(Outer);
-		FINStrProp->Property = Cast<UStrProperty>(OverrideProperty);
+		FINStrProp->Property = Cast<FStrProperty>(OverrideProperty);
 		FINProp = FINStrProp;
-	} else if (Cast<UIntProperty>(Property)) {
+	} else if (CastField<FIntProperty>(Property)) {
 		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
-		FINIntProp->Property = Cast<UIntProperty>(OverrideProperty);
+		FINIntProp->Property = Cast<FIntProperty>(OverrideProperty);
 		FINProp = FINIntProp;
-	} else if (Cast<UInt64Property>(Property)) {
+	} else if (CastField<FInt64Property>(Property)) {
 		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
-		FINIntProp->Property64 = Cast<UInt64Property>(OverrideProperty);
+		FINIntProp->Property64 = Cast<FInt64Property>(OverrideProperty);
 		FINProp = FINIntProp;
-	} else if (Cast<UFloatProperty>(Property)) {
+	} else if (CastField<FFloatProperty>(Property)) {
 		UFINFloatProperty* FINFloatProp = NewObject<UFINFloatProperty>(Outer);
-		FINFloatProp->Property = Cast<UFloatProperty>(OverrideProperty);
+		FINFloatProp->FloatProperty = Cast<FFloatProperty>(OverrideProperty);
 		FINProp = FINFloatProp;
-	} else if (Cast<UBoolProperty>(Property)) {
+	} else if (CastField<FDoubleProperty>(Property)) {
+		UFINFloatProperty* FINFloatProp = NewObject<UFINFloatProperty>(Outer);
+		FINFloatProp->DoubleProperty = Cast<FDoubleProperty>(OverrideProperty);
+		FINProp = FINFloatProp;
+	} else if (CastField<FBoolProperty>(Property)) {
 		UFINBoolProperty* FINBoolProp = NewObject<UFINBoolProperty>(Outer);
-		FINBoolProp->Property = Cast<UBoolProperty>(OverrideProperty);
+		FINBoolProp->Property = Cast<FBoolProperty>(OverrideProperty);
 		FINProp = FINBoolProp;
-	} else if (Cast<UClassProperty>(Property)) {
+	} else if (CastField<FClassProperty>(Property)) {
 		UFINClassProperty* FINClassProp = NewObject<UFINClassProperty>(Outer);
-		FINClassProp->Property = Cast<UClassProperty>(OverrideProperty);
+		FINClassProp->Property = Cast<FClassProperty>(OverrideProperty);
 		FINProp = FINClassProp;
-	} else if (Cast<UObjectProperty>(Property)) {
+	} else if (CastField<FObjectProperty>(Property)) {
 		UFINObjectProperty* FINObjectProp = NewObject<UFINObjectProperty>(Outer);
-		FINObjectProp->Property = Cast<UObjectProperty>(OverrideProperty);
+		FINObjectProp->Property = Cast<FObjectProperty>(OverrideProperty);
 		FINProp = FINObjectProp;
-	} else  if (Cast<UStructProperty>(Property)) {
-		UStructProperty* StructProp = Cast<UStructProperty>(OverrideProperty);
+	} else  if (CastField<FStructProperty>(Property)) {
+		FStructProperty* StructProp = CastField<FStructProperty>(OverrideProperty);
 		if (StructProp->Struct == FFINNetworkTrace::StaticStruct()) {
 			UFINTraceProperty* FINTraceProp = NewObject<UFINTraceProperty>(Outer);
 			FINTraceProp->Property = StructProp;
 			FINProp = FINTraceProp;
 		} else {
 			UFINStructProperty* FINStructProp = NewObject<UFINStructProperty>(Outer);
+			checkf(StructProp->Struct == FFINAnyNetworkValue::StaticStruct() || FFINReflection::Get()->FindStruct(StructProp->Struct) != nullptr, TEXT("Struct Property '%s' of reflection-base '%s' uses non-reflectable struct '%s'"), *Property->GetFullName(), *Outer->GetName(), *StructProp->Struct->GetName());
 			FINStructProp->Property = StructProp;
 			FINStructProp->Struct = StructProp->Struct;
 			FINProp = FINStructProp;
 		}
-    } else if (Cast<UArrayProperty>(Property)) {
-    	UArrayProperty* ArrayProperty = Cast<UArrayProperty>(OverrideProperty);
+    } else if (CastField<FArrayProperty>(Property)) {
+    	FArrayProperty* ArrayProperty = CastField<FArrayProperty>(OverrideProperty);
 	    UFINArrayProperty* FINArrayProp = NewObject<UFINArrayProperty>(Outer);
     	FINArrayProp->Property = ArrayProperty;
-    	FINArrayProp->InnerType = FINCreateFINPropertyFromUProperty(ArrayProperty->Inner, FINArrayProp);
+    	FINArrayProp->InnerType = FINCreateFINPropertyFromFProperty(ArrayProperty->Inner, FINArrayProp);
     	FINProp = FINArrayProp;
     }
 	check(FINProp != nullptr);

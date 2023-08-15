@@ -29,7 +29,7 @@ public:
 	AFINNetworkAdapterHologram();
 
 	// Begin AFGBuildableHologram
-	virtual USceneComponent* SetupComponent(USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) override;
+	virtual USceneComponent* SetupComponent(USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName, const FName& socketName) override;
 	virtual bool IsValidHitResult(const FHitResult& hitResult) const override;
 	virtual void OnInvalidHitResult() override;
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;

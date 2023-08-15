@@ -10,27 +10,7 @@ AFINSizeablePanelHolo::AFINSizeablePanelHolo() {
 void AFINSizeablePanelHolo::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 	
-	// Clear Components
-	for (UStaticMeshComponent* comp : Parts) {
-		comp->UnregisterComponent();
-		comp->SetActive(false);
-		comp->DestroyComponent();
-	}
-	Parts.Empty();
-
-	// Create Components
-	if (mBuildClass) {
-		UStaticMesh* UL = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCornerMesh;
-		UStaticMesh* UC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelSideMesh;
-		UStaticMesh* CC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCenterMesh;
-		UStaticMesh* Con = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelConnectorMesh;
-		AFINSizeablePanel::SpawnComponents(UStaticMeshComponent::StaticClass(), PanelWidth, PanelHeight, UL, UC, CC, Con, this, RootComponent, Parts);
-		RootComponent->SetMobility(EComponentMobility::Movable);
-		for (UStaticMeshComponent* Part : Parts) {
-			Part->SetMobility(EComponentMobility::Movable);
-			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-	}
+	ConstructParts();
 }
 
 void AFINSizeablePanelHolo::Tick(float DeltaSeconds) {
@@ -40,7 +20,7 @@ void AFINSizeablePanelHolo::Tick(float DeltaSeconds) {
 		OldPanelHeight = PanelHeight;
 		OldPanelWidth = PanelWidth;
 		
-		RerunConstructionScripts();
+		ConstructParts();
 	}
 }
 
@@ -149,4 +129,28 @@ void AFINSizeablePanelHolo::ConfigureActor(AFGBuildable* inBuildable) const {
 	
 	AFINSizeablePanel* Panel = Cast<AFINSizeablePanel>(inBuildable);
 	Panel->SetPanelSize(PanelWidth, PanelHeight);
+}
+
+void AFINSizeablePanelHolo::ConstructParts() {
+	// Clear Components
+	for (UStaticMeshComponent* comp : Parts) {
+		comp->UnregisterComponent();
+		comp->SetActive(false);
+		comp->DestroyComponent();
+	}
+	Parts.Empty();
+
+	// Create Components
+	if (mBuildClass) {
+		UStaticMesh* UL = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCornerMesh;
+		UStaticMesh* UC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelSideMesh;
+		UStaticMesh* CC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCenterMesh;
+		UStaticMesh* Con = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelConnectorMesh;
+		AFINSizeablePanel::SpawnComponents(UStaticMeshComponent::StaticClass(), PanelWidth, PanelHeight, UL, UC, CC, Con, this, RootComponent, Parts);
+		RootComponent->SetMobility(EComponentMobility::Movable);
+		for (UStaticMeshComponent* Part : Parts) {
+			Part->SetMobility(EComponentMobility::Movable);
+			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
 }

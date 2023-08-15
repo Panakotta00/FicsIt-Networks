@@ -37,11 +37,11 @@ void AFINSizeablePanel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 void AFINSizeablePanel::BeginPlay() {
 	ModularPanel->PanelWidth = abs(PanelWidth);
 	ModularPanel->PanelHeight = abs(PanelHeight);
-	RerunConstructionScripts();
+	ConstructParts();
 	Super::BeginPlay();
 	
 	for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) {
-		Cable->RerunConstructionScripts();
+		//Cable->RerunConstructionScripts(); TODO: Check if really needed
 	}
 }
 
@@ -50,6 +50,35 @@ void AFINSizeablePanel::Tick(float DeltaSeconds) {
 }
 
 void AFINSizeablePanel::OnConstruction(const FTransform& transform) {
+	ConstructParts();
+
+	Super::OnConstruction(transform);
+	
+}
+
+void AFINSizeablePanel::EndPlay(const EEndPlayReason::Type endPlayReason) {
+	Super::EndPlay(endPlayReason);
+}
+
+int32 AFINSizeablePanel::GetDismantleRefundReturnsMultiplier() const {
+	//return FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight);
+	return FGenericPlatformMath::Max((FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight)) / 10, 1);
+}
+
+bool AFINSizeablePanel::ShouldSave_Implementation() const {
+	return true;
+}
+
+void AFINSizeablePanel::ConstructParts() {
+	// Clear Components
+	for (UStaticMeshComponent* comp : Parts) {
+		comp->UnregisterComponent();
+		comp->SetActive(false);
+		comp->DestroyComponent();
+	}
+	Parts.Empty();
+
+	// Create Components
 	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), PanelWidth, PanelHeight, PanelCornerMesh, PanelSideMesh, PanelCenterMesh, PanelConnectorMesh, this, RootComponent, Parts);
 	FVector ConnectorOffset;
 	if(PanelWidth < 0 && PanelHeight < 0) {
@@ -72,22 +101,6 @@ void AFINSizeablePanel::OnConstruction(const FTransform& transform) {
 	Plane->SetVisibility(false);
 
 	SetPanelSize(PanelWidth, PanelHeight);
-
-	Super::OnConstruction(transform);
-	
-}
-
-void AFINSizeablePanel::EndPlay(const EEndPlayReason::Type endPlayReason) {
-	Super::EndPlay(endPlayReason);
-}
-
-int32 AFINSizeablePanel::GetDismantleRefundReturnsMultiplier() const {
-	//return FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight);
-	return FGenericPlatformMath::Max((FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight)) / 10, 1);
-}
-
-bool AFINSizeablePanel::ShouldSave_Implementation() const {
-	return true;
 }
 
 void AFINSizeablePanel::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int PanelWidth, int PanelHeight,

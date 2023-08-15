@@ -28,8 +28,7 @@ AFINModularIndicatorPoleHolo::AFINModularIndicatorPoleHolo() {
 	mBuildModeOnVerticalSurface = UBuildMode_OnVertical::StaticClass();
 }
 
-void AFINModularIndicatorPoleHolo::GetSupportedBuildModes_Implementation(
-	TArray<TSubclassOf<UFGHologramBuildModeDescriptor>>& out_buildmodes) const {
+void AFINModularIndicatorPoleHolo::GetSupportedBuildModes_Implementation(TArray<TSubclassOf<UFGBuildGunModeDescriptor>>& out_buildmodes) const {
 	Super::GetSupportedBuildModes_Implementation(out_buildmodes);
 	out_buildmodes.Add(mBuildModeAuto);
 	out_buildmodes.Add(mBuildModeOnHorizontalSurface);
@@ -49,41 +48,15 @@ void AFINModularIndicatorPoleHolo::Tick(float DeltaSeconds) {
 		LastExtension = Extension;
 		LastVertical = Vertical;
 		
-		RerunConstructionScripts();
+		ConstructParts();
 	}
-	
 }
 
 
 void AFINModularIndicatorPoleHolo::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 	
-	// Clear Components
-	for (UStaticMeshComponent* comp : Parts) {
-		comp->UnregisterComponent();
-		comp->SetActive(false);
-		comp->DestroyComponent();
-	}
-	Parts.Empty();
-
-	// Create Components
-	if (mBuildClass) {
-		const AFINModularIndicatorPole* Pole = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject());
-		if(Vertical) {
-			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->VerticalBaseMesh, Pole->VerticalExtensionMesh, Pole->VerticalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
-													  Pole->VerticalBaseOffset, Pole->VerticalExtensionOffset, Pole->VerticalExtensionMultiplier, Pole->VerticalAttachmentOffset,
-													  Pole->VerticalConnectorMeshOffset, Pole->VerticalConnectorMeshRotation, Pole->VerticalConnectorMeshScale);
-		}else{
-			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->NormalBaseMesh, Pole->NormalExtensionMesh, Pole->NormalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
-													  Pole->HorizontalBaseOffset, Pole->HorizontalExtensionOffset, Pole->HorizontalExtensionMultiplier, Pole->HorizontalAttachmentOffset,
-													  Pole->HorizontalConnectorMeshOffset, Pole->HorizontalConnectorMeshRotation, Pole->HorizontalConnectorMeshScale);
-		}
-		RootComponent->SetMobility(EComponentMobility::Movable);
-		for (UStaticMeshComponent* Part : Parts) {
-			Part->SetMobility(EComponentMobility::Movable);
-			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-	}
+	ConstructParts();
 }
 
 void AFINModularIndicatorPoleHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {
@@ -156,7 +129,35 @@ EFoundationSide AFINModularIndicatorPoleHolo::GetHitSide(FVector AxisX, FVector 
 	}
 	return EFoundationSide::Invalid;
 }
-//#pragma optimize("", on)
+
+void AFINModularIndicatorPoleHolo::ConstructParts() {
+	// Clear Components
+	for (UStaticMeshComponent* comp : Parts) {
+		comp->UnregisterComponent();
+		comp->SetActive(false);
+		comp->DestroyComponent();
+	}
+	Parts.Empty();
+
+	// Create Components
+	if (mBuildClass) {
+		const AFINModularIndicatorPole* Pole = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject());
+		if(Vertical) {
+			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->VerticalBaseMesh, Pole->VerticalExtensionMesh, Pole->VerticalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
+													  Pole->VerticalBaseOffset, Pole->VerticalExtensionOffset, Pole->VerticalExtensionMultiplier, Pole->VerticalAttachmentOffset,
+													  Pole->VerticalConnectorMeshOffset, Pole->VerticalConnectorMeshRotation, Pole->VerticalConnectorMeshScale);
+		}else{
+			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->NormalBaseMesh, Pole->NormalExtensionMesh, Pole->NormalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
+													  Pole->HorizontalBaseOffset, Pole->HorizontalExtensionOffset, Pole->HorizontalExtensionMultiplier, Pole->HorizontalAttachmentOffset,
+													  Pole->HorizontalConnectorMeshOffset, Pole->HorizontalConnectorMeshRotation, Pole->HorizontalConnectorMeshScale);
+		}
+		RootComponent->SetMobility(EComponentMobility::Movable);
+		for (UStaticMeshComponent* Part : Parts) {
+			Part->SetMobility(EComponentMobility::Movable);
+			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
+}
 
 void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& HitResult) {
 	if (bSnapped) {
@@ -176,7 +177,7 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 		//}
 	} else {
 		UpsideDown = false;
-		if(mCurrentBuildMode == mBuildModeAuto) {
+		if(IsCurrentBuildMode(mBuildModeAuto)) {
 			if(HitResult.GetActor()) {
 				if(HitResult.GetActor()->GetClass()->IsChildOf<AFGBuildableWall>()) {
 					Vertical = true;
@@ -224,7 +225,7 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 					}	
 				}
 			}
-		} else if(mCurrentBuildMode == mBuildModeOnHorizontalSurface) {
+		} else if(IsCurrentBuildMode(mBuildModeOnHorizontalSurface)) {
 			if (HitResult.GetActor()) {
 				Vertical = false;
 				FVector VX, VY, VZ;
@@ -235,7 +236,7 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 					UpsideDown = true;
 				}
 			}
-		}else if(mCurrentBuildMode == mBuildModeOnVerticalSurface) {
+		}else if(IsCurrentBuildMode(mBuildModeOnVerticalSurface)) {
 			Vertical = true;
 		}
 		
@@ -252,7 +253,7 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 		}else if(FVector::Coincident(UpVector * -1, Normal)) {
 			Quat = Normal.ToOrientationQuat() * -1;
 		} else {
-			if(mCurrentBuildMode == mBuildModeAuto) {
+			if(IsCurrentBuildMode(mBuildModeAuto)) {
 				Quat = Normal.ToOrientationQuat();
 			}else{
 				FVector RotationAxis = FVector::CrossProduct(UpVector, Normal);
@@ -266,7 +267,7 @@ void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResu
 		if(Vertical) {
 			NewQuat = Quat * FRotator(0, 0, GetScrollRotateValue()).Quaternion();
 		}else {
-			if(mCurrentBuildMode == mBuildModeOnHorizontalSurface) {
+			if(IsCurrentBuildMode(mBuildModeOnHorizontalSurface)) {
 				//NewQuat = Normal.ToOrientationQuat();
 				//NewQuat = UKismetMathLibrary::MakeRotationFromAxes(Normal, FVector(0,1, 0), FVector(0,0,1)).Quaternion();
 				//NewQuat = UKismetMathLibrary::MakeRotFromX(Normal).Quaternion();

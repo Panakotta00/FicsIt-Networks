@@ -6,9 +6,9 @@
 void SFINReflectionUI::Construct(const FArguments& InArgs) {
 	Context.Style = InArgs._Style;
 	SSplitter::FSlot* TreeSlot;
-	TSharedPtr<SFINSplitter> Box;
+	TSharedPtr<SSplitter> Box;
 	ChildSlot[
-		SAssignNew(Box, SFINSplitter)
+		SAssignNew(Box, SSplitter) // TODO: Alternative or Rewrite of FINSplitter
 		.PhysicalSplitterHandleSize(25)
 		.HitDetectionSplitterHandleSize(25)
 		.Style(&Context.Style.Get()->SplitterStyle)
@@ -76,8 +76,8 @@ void SFINReflectionUI::Construct(const FArguments& InArgs) {
 		]
 		+SSplitter::Slot().Expose(this->Slot)
 	];
-	TreeSlot->SizeValue = 0.3f;
-	Slot->SizeValue = 1.0f;
+	TreeSlot->SetSizeValue(0.3f);
+	Slot->SetSizeValue(1.0f);
 
 	Context.OnSelectionChanged.AddLambda([this](FFINReflectionUIEntry* Entry) {
 		if (Entry) {

@@ -48,4 +48,7 @@ public:
 	// Begin AFGHologram
 	TArray< FItemAmount > GetBaseCost() const;
 	// End AFGHologram
+
+private:
+	void ConstructParts();
 };

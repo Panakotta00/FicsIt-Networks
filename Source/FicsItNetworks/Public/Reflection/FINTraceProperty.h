@@ -7,8 +7,7 @@ UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINTraceProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-	UStructProperty* Property = nullptr;
+	FStructProperty* Property = nullptr;
 	UPROPERTY()
 	UClass* Subclass = nullptr;
 	

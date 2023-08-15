@@ -13,22 +13,21 @@
 
 namespace FicsItKernel {
 	namespace Lua {
-		void propertyToLua(lua_State* L, UProperty* p, void* data, const FFINNetworkTrace& trace) {
-			auto c = p->GetClass()->GetCastFlags();
-			if (c & EClassCastFlags::CASTCLASS_FBoolProperty) {
+		void propertyToLua(lua_State* L, FProperty* p, void* data, const FFINNetworkTrace& trace) {
+			if (p->IsA<FBoolProperty>()) {
 				lua_pushboolean(L, *p->ContainerPtrToValuePtr<bool>(data));
-			} else if (c & EClassCastFlags::CASTCLASS_FIntProperty) {
+			} else if (p->IsA<FIntProperty>()) {
 				lua_pushinteger(L, *p->ContainerPtrToValuePtr<std::int32_t>(data));
-			} else if (c & EClassCastFlags::CASTCLASS_FInt64Property) {
+			} else if (p->IsA<FInt64Property>()) {
 				lua_pushinteger(L, *p->ContainerPtrToValuePtr<std::int64_t>(data));
-			} else if (c & EClassCastFlags::CASTCLASS_FFloatProperty) {
+			} else if (p->IsA<FFloatProperty>()) {
 				lua_pushnumber(L, *p->ContainerPtrToValuePtr<float>(data));
-			} else if (c & EClassCastFlags::CASTCLASS_FStrProperty) {
+			} else if (p->IsA<FStrProperty>()) {
 				lua_pushstring(L, TCHAR_TO_UTF8(**p->ContainerPtrToValuePtr<FString>(data)));
-			} else if (c & EClassCastFlags::CASTCLASS_FClassProperty) {
+			} else if (p->IsA<FClassProperty>()) {
 				newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
-			} else if (c & EClassCastFlags::CASTCLASS_FObjectProperty) {
-				if (Cast<UObjectProperty>(p)->PropertyClass->IsChildOf<UClass>()) {
+			} else if (FObjectProperty* objProp = CastField<FObjectProperty>(p)) {
+				if (objProp->PropertyClass->IsChildOf<UClass>()) {
 					newInstance(L, *p->ContainerPtrToValuePtr<UClass*>(data));
 				} else {
 					UObject* Obj = *p->ContainerPtrToValuePtr<UObject*>(data);
@@ -36,20 +35,19 @@ namespace FicsItKernel {
 					if (Obj && Obj->Implements<UFINNetworkComponent>()) newTrace = newTrace / IFINNetworkComponent::Execute_GetInstanceRedirect(Obj);
 					newInstance(L, newTrace);
 				}
-			} else if (c & EClassCastFlags::CASTCLASS_FStructProperty) {
-				UStructProperty* prop = Cast<UStructProperty>(p);
-				if (prop->Struct == FFINDynamicStructHolder::StaticStruct()) {
+			} else if (FStructProperty* sProp = CastField<FStructProperty>(p)) {
+				if (sProp->Struct == FFINDynamicStructHolder::StaticStruct()) {
 					luaStruct(L, *p->ContainerPtrToValuePtr<FFINDynamicStructHolder>(data));
 				} else {
-					luaStruct(L, FFINDynamicStructHolder::Copy(prop->Struct, p->ContainerPtrToValuePtr<void>(data)));
+					luaStruct(L, FFINDynamicStructHolder::Copy(sProp->Struct, p->ContainerPtrToValuePtr<void>(data)));
 				}
-			} else if (c & EClassCastFlags::CASTCLASS_FArrayProperty) {
-				UArrayProperty* prop = Cast<UArrayProperty>(p);
-				const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
+			} else if (FArrayProperty* aProp = CastField<FArrayProperty>(p)) {
+				//const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
+				const FScriptArray& arr = *aProp->ContainerPtrToValuePtr<FScriptArray>(data); // TODO: Check in Game
 				lua_newtable(L);
 				for (int i = 0; i < arr.Num(); ++i) {
-					FScriptArrayHelper Helper(prop, data);
-					propertyToLua(L, prop->Inner, ((uint8*)Helper.GetRawPtr()) + (prop->Inner->ElementSize * i), trace);
+					FScriptArrayHelper Helper(aProp, data);
+					propertyToLua(L, aProp->Inner, ((uint8*)Helper.GetRawPtr()) + (aProp->Inner->ElementSize * i), trace);
 					lua_seti(L, -2, i+1);
 				}
 			} else {
@@ -57,48 +55,46 @@ namespace FicsItKernel {
 			}
 		}
 
-		void luaToProperty(lua_State* L, UProperty* p, void* data, int i) {
-			auto c = p->GetClass()->GetCastFlags();
-			if (c & EClassCastFlags::CASTCLASS_FBoolProperty) {
+		void luaToProperty(lua_State* L, FProperty* p, void* data, int i) {
+			if (p->IsA<FBoolProperty>()) {
 				*p->ContainerPtrToValuePtr<bool>(data) = static_cast<bool>(lua_toboolean(L, i));
-			} else if (c & EClassCastFlags::CASTCLASS_FIntProperty) {
+			} else if (p->IsA<FIntProperty>()) {
 				*p->ContainerPtrToValuePtr<std::int32_t>(data) = static_cast<std::int32_t>(lua_tointeger(L, i));
-			} else if (c & EClassCastFlags::CASTCLASS_FInt64Property) {
+			} else if (p->IsA<FInt64Property>()) {
 				*p->ContainerPtrToValuePtr<std::int64_t>(data) = static_cast<std::int64_t>(lua_tointeger(L, i));
-			} else if (c & EClassCastFlags::CASTCLASS_FFloatProperty) {
+			} else if (p->IsA<FFloatProperty>()) {
 				*p->ContainerPtrToValuePtr<float>(data) = static_cast<float>(lua_tonumber(L, i));
-			} else if (c & EClassCastFlags::CASTCLASS_FStrProperty) {
+			} else if (p->IsA<FStrProperty>()) {
 				size_t len;
 				const char* s = lua_tolstring(L, i, &len);
 				if (!s) throw std::exception("Invalid String in string property parse");
 				FString* o = p->ContainerPtrToValuePtr<FString>(data);
 				FUTF8ToTCHAR Conv(s, len);
 				*o = FString(Conv.Length(), Conv.Get());
-			} else if (c & EClassCastFlags::CASTCLASS_FClassProperty) {
-				UClass* o = getClassInstance(L, i, Cast<UClassProperty>(p)->PropertyClass);
+			} else if (FClassProperty* cProp = CastField<FClassProperty>(p)) {
+				UClass* o = getClassInstance(L, i, cProp->PropertyClass);
 				*p->ContainerPtrToValuePtr<UClass*>(data) = o;
-			} else if (c & EClassCastFlags::CASTCLASS_FObjectProperty) {
-				if (Cast<UObjectProperty>(p)->PropertyClass->IsChildOf<UClass>()) {
-					UClass* o = getClassInstance(L, i, Cast<UObjectProperty>(p)->PropertyClass);
+			} else if (FObjectProperty* objProp = CastField<FObjectProperty>(p)) {
+				if (objProp->PropertyClass->IsChildOf<UClass>()) {
+					UClass* o = getClassInstance(L, i, objProp->PropertyClass);
 					*p->ContainerPtrToValuePtr<UObject*>(data) = o;
 				} else {
-					auto o = getObjInstance(L, i, Cast<UObjectProperty>(p)->PropertyClass);
+					FFINNetworkTrace o = getObjInstance(L, i, objProp->PropertyClass);
 					*p->ContainerPtrToValuePtr<UObject*>(data) = *o;
 				}
-			} else if (c & EClassCastFlags::CASTCLASS_FStructProperty) {
-				UStructProperty* prop = Cast<UStructProperty>(p);
-				TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(prop->Struct);
+			} else if (FStructProperty* sProp = CastField<FStructProperty>(p)) {
+				TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(sProp->Struct);
 				luaGetStruct(L, i, Struct);
-				prop->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct->GetData());
-			} else if (c & EClassCastFlags::CASTCLASS_FArrayProperty) {
-				UArrayProperty* prop = Cast<UArrayProperty>(p);
-				const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
+				sProp->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct->GetData());
+			} else if (FArrayProperty* aProp = CastField<FArrayProperty>(p)) {
+				//const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
+				const FScriptArray& arr = *aProp->ContainerPtrToValuePtr<FScriptArray>(data); // TODO: Check in Game
 				lua_pushnil(L);
-				FScriptArrayHelper Helper(prop, data);
+				FScriptArrayHelper Helper(aProp, data);
 				while (lua_next(L, i) != 0) {
 					if (!lua_isinteger(L, -1)) break;
 					Helper.AddValue();
-					luaToProperty(L, prop->Inner, ((uint8*)Helper.GetRawPtr()) + (prop->Inner->ElementSize * (Helper.Num()-1)), -1);
+					luaToProperty(L, aProp->Inner, ((uint8*)Helper.GetRawPtr()) + (aProp->Inner->ElementSize * (Helper.Num()-1)), -1);
 					
 					lua_pop(L, 1);
 				}

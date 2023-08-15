@@ -300,7 +300,6 @@ void AFINComputerGPUT1::Flush_Implementation() {
 void AFINComputerGPUT1::FlushBackToFront() {
 	if (CachedInvalidation) {
 		CachedInvalidation->InvalidateRoot();
-		CachedInvalidation->InvalidateChildOrder();
 		CachedInvalidation->InvalidateScreenPosition();
 		CachedInvalidation->InvalidatePrepass();
 	}

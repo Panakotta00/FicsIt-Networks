@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
 #include "FINFuncProperty.h"
 #include "FINStructProperty.generated.h"
 
@@ -7,8 +8,7 @@ UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINStructProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-	UStructProperty* Property = nullptr;
+	FStructProperty* Property = nullptr;
 	UPROPERTY()
 	UScriptStruct* Struct = nullptr;
 	

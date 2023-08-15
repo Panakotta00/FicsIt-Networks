@@ -156,4 +156,7 @@ public:
 		ParameterDescriptions.Add(FText::FromString("The index in the stack, 0 being the first module"));
 		Runtime = 1;
 	}
+
+private:
+	void ConstructParts();
 };

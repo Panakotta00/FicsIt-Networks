@@ -21,8 +21,7 @@ AFINDefaultExtendedHolo::AFINDefaultExtendedHolo() {
 	mBuildModeFree = UBuildMode_FreePlacement::StaticClass();
 }
 
-void AFINDefaultExtendedHolo::GetSupportedBuildModes_Implementation(
-	TArray<TSubclassOf<UFGHologramBuildModeDescriptor>>& out_buildmodes) const {
+void AFINDefaultExtendedHolo::GetSupportedBuildModes_Implementation(TArray<TSubclassOf<UFGBuildGunModeDescriptor>>& out_buildmodes) const {
 	Super::GetSupportedBuildModes_Implementation(out_buildmodes);
 	out_buildmodes.Add(mBuildModeAuto);
 	out_buildmodes.Add(mBuildMode45);
@@ -31,9 +30,9 @@ void AFINDefaultExtendedHolo::GetSupportedBuildModes_Implementation(
 
 void AFINDefaultExtendedHolo::SetHologramLocationAndRotation(const FHitResult& HitResult) {
 	//AFGBuildableHologram::SetHologramLocationAndRotation(hitResult);
-	if(mCurrentBuildMode == mBuildModeAuto) {
+	if (IsCurrentBuildMode(mBuildModeAuto)) {
 		AFGBuildableHologram::SetHologramLocationAndRotation(HitResult);
-	}else if(mCurrentBuildMode == mBuildMode45 || mCurrentBuildMode == mBuildModeFree) {
+	}else if(IsCurrentBuildMode(mBuildMode45) || IsCurrentBuildMode(mBuildModeFree)) {
 		FVector Normal = HitResult.ImpactNormal;
 
 		FQuat Quat;
@@ -44,7 +43,7 @@ void AFINDefaultExtendedHolo::SetHologramLocationAndRotation(const FHitResult& H
 		Quat *= FQuat(FVector::CrossProduct(UpVector, LocalNormal), FMath::Acos(FVector::DotProduct(LocalNormal, UpVector)));
 		
 		FQuat NewQuat = Quat; //;
-		if(mCurrentBuildMode == mBuildModeFree) {
+		if(IsCurrentBuildMode(mBuildModeFree)) {
 			NewQuat*= FRotator(0, GetScrollRotateValue(), 0).Quaternion();
 			const FVector Res = HitResult.ImpactPoint;
 			//resDiffPos = FVector::CrossProduct();

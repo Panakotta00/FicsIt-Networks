@@ -3,7 +3,7 @@
 #include "Buildables/FGBuildableWall.h"
 
 void AFINWallAndFoundationHologram::SetHologramLocationAndRotation(const FHitResult& hitResult) {
-	AActor* Actor = hitResult.Actor.Get();
+	AActor* Actor = hitResult.GetActor();
 	FVector Location = hitResult.Location;
 	FRotator Rotation = FRotator::ZeroRotator;
 	if(Actor) {
@@ -27,7 +27,7 @@ void AFINWallAndFoundationHologram::SetHologramLocationAndRotation(const FHitRes
 }
 
 bool AFINWallAndFoundationHologram::IsValidHitResult(const FHitResult& hitResult) const {
-	AActor* Actor = hitResult.Actor.Get();
+	AActor* Actor = hitResult.GetActor();
 	if (!Actor) return false;
 	if (Actor->IsA<AFGBuildableWall>() || Actor->IsA<AFGBuildableFoundation>()) return true;
 	return false;

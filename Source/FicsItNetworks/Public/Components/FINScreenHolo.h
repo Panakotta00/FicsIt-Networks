@@ -43,4 +43,7 @@ public:
 	virtual void CheckValidFloor() override;
 	virtual void ConfigureActor(AFGBuildable* inBuildable) const override;
 	// End AFGBuildableHologram
+
+private:
+	void ConstructParts();
 };

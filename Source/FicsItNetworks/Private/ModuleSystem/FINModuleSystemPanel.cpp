@@ -102,7 +102,7 @@ void UFINModuleSystemPanel::GetModules(TArray<AActor*>& modules) const {
 	}
 }
 
-void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) const {
+void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund, bool noCost) const {
 	if (Grid.Num() < 1) return;
 	TSet<AActor*> modules;
 	for (int x = 0; x < PanelHeight; ++x) for (int y = 0; y < PanelWidth; ++y) {
@@ -110,7 +110,7 @@ void UFINModuleSystemPanel::GetDismantleRefund(TArray<FInventoryStack>& refund) 
 		if (m && !modules.Contains(m)) {
 			modules.Add(m);
 			if (m->Implements<UFGDismantleInterface>()) {
-				IFGDismantleInterface::Execute_GetDismantleRefund(m, refund);
+				IFGDismantleInterface::Execute_GetDismantleRefund(m, refund, noCost);
 			}
 		}
 	}

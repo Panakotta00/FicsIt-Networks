@@ -46,5 +46,5 @@ class AFINDefaultExtendedHolo : public AFGBuildableHologram{
 	UPROPERTY( EditDefaultsOnly, Category = "Hologram|BuildMode" )
 	TSubclassOf< class UFGHologramBuildModeDescriptor > mBuildMode45;
 	
-	virtual void GetSupportedBuildModes_Implementation( TArray< TSubclassOf<UFGHologramBuildModeDescriptor> >& out_buildmodes ) const override;
+	virtual void GetSupportedBuildModes_Implementation( TArray< TSubclassOf<UFGBuildGunModeDescriptor> >& out_buildmodes ) const override;
 };

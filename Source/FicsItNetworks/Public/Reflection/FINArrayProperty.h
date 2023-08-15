@@ -7,8 +7,7 @@ UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINArrayProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-	UArrayProperty* Property = nullptr;
+	FArrayProperty* Property = nullptr;
 	UPROPERTY()
 	UFINProperty* InnerType = nullptr;
 	

@@ -410,7 +410,7 @@ void FFINReflectionUIStruct::LoadChildren() {
 FFINReflectionUIStruct::FFINReflectionUIStruct(const TWeakPtr<FFINReflectionUIEntry>& Parent, UFINStruct* Struct, FFINReflectionUIContext* Context) : FFINReflectionUIEntry(Parent, Context), Struct(Struct) {}
 
 TSharedRef<SWidget> FFINReflectionUIStruct::GetDetailsWidget() {
-	return SNew(SFINSplitter)
+	return SNew(SSplitter) // TODO: Use alternative or rewrite of FINSPlitter
     .PhysicalSplitterHandleSize(25)
     .HitDetectionSplitterHandleSize(25)
     .Style(&Context->Style.Get()->SplitterStyle)
@@ -515,7 +515,7 @@ void FFINReflectionUIClass::LoadChildren() {
 FFINReflectionUIClass::FFINReflectionUIClass(const TWeakPtr<FFINReflectionUIEntry>& Parent, UFINClass* Class, FFINReflectionUIContext* Context) : FFINReflectionUIStruct(Parent, Class, Context) {}
 
 TSharedRef<SWidget> FFINReflectionUIClass::GetDetailsWidget() {
-	return SNew(SFINSplitter)
+	return SNew(SSplitter) // TODO: Use alternative or rewrite of FINSplitter
     .PhysicalSplitterHandleSize(25)
     .HitDetectionSplitterHandleSize(25)
     .Style(&Context->Style.Get()->SplitterStyle)

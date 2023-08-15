@@ -25,37 +25,12 @@ void AFINModularIndicatorPole::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 }
 
 void AFINModularIndicatorPole::OnConstruction(const FTransform& transform) {
-	Parts.Empty();
-	//UE_LOG(LogFicsItNetworks_DebugRoze, Log, TEXT("AFINModularIndicatorPole::OnConstruction(%d,%s)"), Extension, BToS(Vertical));
 	Super::OnConstruction(transform);
-	if(IsValid(Connector)) {
-		Connector->SetMobility(EComponentMobility::Movable);
-		if(Vertical) {
-			ConnectorLocation = VerticalConnectorLocation;
-			Connector->SetRelativeLocation(ConnectorLocation);
-		}else {
-			ConnectorLocation = HorizontalConnectorLocation;
-			Connector->SetRelativeLocation(ConnectorLocation);
-		}
-		Connector->SetMobility(EComponentMobility::Static);
-	}
-	if(Vertical) {
-		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, VerticalBaseMesh, VerticalExtensionMesh, VerticalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts,
-			VerticalBaseOffset, VerticalExtensionOffset, VerticalExtensionMultiplier, VerticalAttachmentOffset,
-			 VerticalConnectorMeshOffset, VerticalConnectorMeshRotation, VerticalConnectorMeshScale);
-		FVector vt = VerticalExtensionMultiplier * Extension;
-		ModuleConnectionPoint = VerticalModuleConnectionPointOffset + FVector(-vt.Y, vt.X, vt.Z);
-	}else {
-		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, NormalBaseMesh, NormalExtensionMesh, NormalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts,
-			HorizontalBaseOffset, HorizontalExtensionOffset, HorizontalExtensionMultiplier, HorizontalAttachmentOffset,
-			HorizontalConnectorMeshOffset, HorizontalConnectorMeshRotation, HorizontalConnectorMeshScale);
-		ModuleConnectionPoint = HorizontalModuleConnectionPointOffset + HorizontalExtensionMultiplier * Extension;
-	}
-
+	ConstructParts();
 }
 
 void AFINModularIndicatorPole::BeginPlay() {
-	RerunConstructionScripts();
+	ConstructParts();
 	Super::BeginPlay();
 }
 
@@ -105,16 +80,43 @@ AActor* AFINModularIndicatorPole::netFunc_getModule(int Index) {
 	return nullptr;
 }
 
+void AFINModularIndicatorPole::ConstructParts() {
+	Parts.Empty();
+	if(IsValid(Connector)) {
+		Connector->SetMobility(EComponentMobility::Movable);
+		if(Vertical) {
+			ConnectorLocation = VerticalConnectorLocation;
+			Connector->SetRelativeLocation(ConnectorLocation);
+		}else {
+			ConnectorLocation = HorizontalConnectorLocation;
+			Connector->SetRelativeLocation(ConnectorLocation);
+		}
+		Connector->SetMobility(EComponentMobility::Static);
+	}
+	if(Vertical) {
+		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, VerticalBaseMesh, VerticalExtensionMesh, VerticalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts,
+			VerticalBaseOffset, VerticalExtensionOffset, VerticalExtensionMultiplier, VerticalAttachmentOffset,
+			 VerticalConnectorMeshOffset, VerticalConnectorMeshRotation, VerticalConnectorMeshScale);
+		FVector vt = VerticalExtensionMultiplier * Extension;
+		ModuleConnectionPoint = VerticalModuleConnectionPointOffset + FVector(-vt.Y, vt.X, vt.Z);
+	}else {
+		SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, NormalBaseMesh, NormalExtensionMesh, NormalAttachmentMesh, ConnectorMesh, this, RootComponent, Parts,
+			HorizontalBaseOffset, HorizontalExtensionOffset, HorizontalExtensionMultiplier, HorizontalAttachmentOffset,
+			HorizontalConnectorMeshOffset, HorizontalConnectorMeshRotation, HorizontalConnectorMeshScale);
+		ModuleConnectionPoint = HorizontalModuleConnectionPointOffset + HorizontalExtensionMultiplier * Extension;
+	}
+}
+
 void AFINModularIndicatorPole::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int Extension, bool IsVertical,
-									UStaticMesh* BaseMesh,
-									UStaticMesh* ExtMesh,
-									UStaticMesh* AtachMesh,
-									UStaticMesh* ConnectorMesh,
-									AActor* Parent, USceneComponent* Attach,
-									TArray<UStaticMeshComponent*>& OutParts,
-									FVector BO, FVector EO, FVector EM, FVector AO,
-									FVector CMO, FRotator CMR, FVector CMS
-									) {
+												UStaticMesh* BaseMesh,
+												UStaticMesh* ExtMesh,
+												UStaticMesh* AtachMesh,
+												UStaticMesh* ConnectorMesh,
+												AActor* Parent, USceneComponent* Attach,
+												TArray<UStaticMeshComponent*>& OutParts,
+												FVector BO, FVector EO, FVector EM, FVector AO,
+												FVector CMO, FRotator CMR, FVector CMS
+) {
 	//UE_LOG(LogFicsItNetworks_DebugRoze, Log, TEXT("SpawnComponents(%d,%s)"), Extension, BToS(IsVertical));
 	UStaticMeshComponent* BaseMeshComponent = NewObject<UStaticMeshComponent>(Parent, Class);
 	BaseMeshComponent->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);

@@ -43,7 +43,7 @@ public:
 	UPROPERTY( EditDefaultsOnly, Category = "Hologram|BuildMode" )
 	TSubclassOf< class UFGHologramBuildModeDescriptor > mBuildModeOnHorizontalSurface;
 	
-	virtual void GetSupportedBuildModes_Implementation( TArray< TSubclassOf<UFGHologramBuildModeDescriptor> >& out_buildmodes ) const override;
+	virtual void GetSupportedBuildModes_Implementation( TArray< TSubclassOf<UFGBuildGunModeDescriptor> >& out_buildmodes ) const override;
 	
 	UPROPERTY()
 	FVector SnappedLoc;
@@ -95,4 +95,7 @@ public:
 
 	static int GetHitSideSingleAxis(const FVector A, const FVector B);
 	static EFoundationSide GetHitSide(FVector AxisX, FVector AxisY, FVector AxisZ, FVector HitNormal);
+
+private:
+	void ConstructParts();
 };

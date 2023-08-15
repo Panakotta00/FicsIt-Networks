@@ -113,7 +113,7 @@ ERunAttributes FFINTabRun::GetRunAttributes() const {
 	return ERunAttributes::SupportsText;
 }
 
-int32 FFINTabRun::OnPaint(const FPaintArgs& Args, const FTextLayout::FLineView& Line, const TSharedRef<ILayoutBlock>& Block, const FTextBlockStyle& DefaultStyle, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
+int32 FFINTabRun::OnPaint(const FPaintArgs& Args, const FTextArgs& TextArgs, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	return LayerId;
 }
 
@@ -225,14 +225,14 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		auto DoComment = [&](const FTextRange& Range) {
 			FTextBlockStyle Style = SyntaxTextStyle->CommentTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Comment"));
-			RunInfo.MetaData.Add("Splitting");
+			//RunInfo.MetaData.Add(TEXT("Splitting"));
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());
 		};
 		auto DoString = [&](const FTextRange& Range) {
 			FTextBlockStyle Style = SyntaxTextStyle->StringTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.String"));
-			RunInfo.MetaData.Add("Splitting");
+			//RunInfo.MetaData.Add("Splitting");
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());
 		};
@@ -263,7 +263,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		auto DoWhitespace = [&](const FTextRange& Range) {
 			FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Whitespace"));
-			RunInfo.MetaData.Add("Splitting");
+			//RunInfo.MetaData.Add("Splitting");
 			if ((*ModelString)[Range.BeginIndex] == '\t') {
 				Run = FFINTabRun::Create(RunInfo, ModelString, Style, Range, 4);
 			} else {
@@ -274,7 +274,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		auto DoOperator = [&](const FTextRange& Range, bool bColored) {
 			FTextBlockStyle Style = bColored ? SyntaxTextStyle->OperatorTextStyle : SyntaxTextStyle->NormalTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Operator"));
-			RunInfo.MetaData.Add("Splitting");
+			//RunInfo.MetaData.Add("Splitting");
 			RunInfo.MetaData.Add("Operator", ModelString->Mid(Range.BeginIndex, Range.Len()));
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());

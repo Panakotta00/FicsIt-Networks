@@ -7,12 +7,13 @@ UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINFloatProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-	UFloatProperty* Property = nullptr;
+	FFloatProperty* FloatProperty = nullptr;
+	FDoubleProperty* DoubleProperty = nullptr;
 
 	// Begin UFINProperty
 	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
-		if (Property) return Property->GetPropertyValue_InContainer(Ctx.GetGeneric());
+		if (FloatProperty) return FloatProperty->GetPropertyValue_InContainer(Ctx.GetGeneric());
+		if (DoubleProperty) return DoubleProperty->GetPropertyValue_InContainer(Ctx.GetGeneric());
 		return Super::GetValue(Ctx);
 	}
 	
@@ -21,7 +22,8 @@ public:
 		if (Value.GetType() == FIN_FLOAT) Val = Value.GetFloat();
 		else if (Value.GetType() == FIN_INT) Val = Value.GetInt();
 		else return;
-		if (Property) Property->SetPropertyValue_InContainer(Ctx.GetGeneric(), Val);
+		if (FloatProperty) FloatProperty->SetPropertyValue_InContainer(Ctx.GetGeneric(), Val);
+		if (DoubleProperty) DoubleProperty->SetPropertyValue_InContainer(Ctx.GetGeneric(), Val);
 		else Super::SetValue(Ctx, Value);
 	}
 

@@ -1,14 +1,19 @@
 #include "Computer/FINComputerSubsystem.h"
+
+#include "EnhancedInputComponent.h"
 #include "Subsystem/SubsystemActorManager.h"
 #include "FGCharacterPlayer.h"
+#include "FGInputSettings.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
-	Input = CreateDefaultSubobject<UInputComponent>("Input");
-	Input->BindAction("PrimaryFire", EInputEvent::IE_Pressed, this, &AFINComputerSubsystem::OnPrimaryFirePressed).bConsumeInput = false;
-	Input->BindAction("PrimaryFire", EInputEvent::IE_Released, this, &AFINComputerSubsystem::OnPrimaryFireReleased).bConsumeInput = false;
-	Input->BindAction("SecondaryFire", EInputEvent::IE_Pressed, this, &AFINComputerSubsystem::OnSecondaryFirePressed).bConsumeInput = false;
-	Input->BindAction("SecondaryFire", EInputEvent::IE_Released, this, &AFINComputerSubsystem::OnSecondaryFireReleased).bConsumeInput = false;
-
+	Input = CreateDefaultSubobject<UEnhancedInputComponent>("Input");
+	const UFGInputSettings* Settings = UFGInputSettings::Get();
+	
+	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnPrimaryFirePressed);
+	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnPrimaryFireReleased);
+	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnSecondaryFirePressed);
+	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnSecondaryFireReleased);
+	
 	SetActorTickEnabled(true);
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;

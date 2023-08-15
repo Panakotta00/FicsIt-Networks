@@ -45,6 +45,9 @@ public:
 	// End IFGDismantleInterface
 
 	UFUNCTION()
+	void ReconstructCable();
+
+	UFUNCTION()
 	void OnConnectorUpdate();
 
 	UFUNCTION(NetMulticast, Reliable)

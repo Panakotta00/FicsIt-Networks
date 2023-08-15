@@ -1,7 +1,9 @@
 #include "Components/FINSpeakerPole.h"
 #include "AudioCompressionSettingsUtils.h"
+#include "FicsItNetworksModule.h"
 #include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
 #include "VorbisAudioInfo.h"
+#include "Sound/SoundWaveProcedural.h"
 
 AFINSpeakerPole::AFINSpeakerPole() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -112,7 +114,7 @@ USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& InSound) {
 		return nullptr;
 	}
 
-	USoundWave* sw = NewObject<USoundWave>();
+	USoundWaveProcedural* sw = NewObject<USoundWaveProcedural>();
 	if (!sw) return nullptr;
 
 	FName Format = TEXT("OGG");
@@ -122,21 +124,37 @@ USoundWave* AFINSpeakerPole::LoadSoundFromFile(const FString& InSound) {
 		FPlatformAudioCookOverrides::GetHashSuffix(CompressionOverrides, HashedString);
 		Format = *HashedString;
 	}
+	
+	//sw->SoundWaveDataPtr->GetCompressedData();
+	//FByteBulkData* BulkData = sw->GetCompressedData(Format, CompressionOverrides);
+	//FByteBulkData* BulkData = (FByteBulkData*)sw->GetResourceData(); // TODO: Check in Game
 
-	FByteBulkData* BulkData = &sw->CompressedFormatData.GetFormat(Format);
+	//FByteBulkData BulkData;
+	//BulkData.Lock(LOCK_READ_WRITE);
+	//FMemory::Memcpy(BulkData.Realloc(DataArray.Num()), DataArray.GetData(), DataArray.Num());
+	//BulkData.Unlock();
 
-	BulkData->Lock(LOCK_READ_WRITE);
-	FMemory::Memcpy(BulkData->Realloc(DataArray.Num()), DataArray.GetData(), DataArray.Num());
-	BulkData->Unlock();
+	//sw->InitAudioResource(BulkData);
+	//volatile FByteBulkData* Data = sw->GetCompressedData(Format, CompressionOverrides);
+	//Data->Realloc(DataArray.Num());
+	//sw->SoundWaveDataPtr->GetResourceSize();
+	
+	AsyncTask(ENamedThreads::AnyThread, [DataArray, sw]() mutable {
+		FSoundQualityInfo Quality; 
+		FVorbisAudioInfo Vorbis;
+		if (!Vorbis.ReadCompressedInfo(DataArray.GetData(), DataArray.Num(), &Quality)) return;
 
-	FSoundQualityInfo Quality; 
-	FVorbisAudioInfo Vorbis;
-	if (!Vorbis.ReadCompressedInfo(DataArray.GetData(), DataArray.Num(), &Quality)) return nullptr;
-	sw->SetSampleRate(Quality.SampleRate);
-	sw->Duration = Quality.Duration;
-	sw->NumChannels = Quality.NumChannels;
-	sw->RawPCMDataSize = Quality.SampleDataSize;
-	sw->SoundGroup = SOUNDGROUP_Default;
+		sw->SetSampleRate(Quality.SampleRate);
+		sw->Duration = Quality.Duration;
+		sw->NumChannels = Quality.NumChannels;
+		sw->RawPCMDataSize = Quality.SampleDataSize;
+		sw->SoundGroup = SOUNDGROUP_Default;
+		
+		TArray<uint8> RawData;
+		RawData.AddUninitialized(Quality.SampleDataSize);
+		Vorbis.ExpandFile(RawData.GetData(), &Quality);
+		sw->QueueAudio(RawData.GetData(), RawData.Num());
+	});
 
 	return sw;
 }

@@ -3,7 +3,7 @@
 using UnrealBuildTool;
 using System.IO;
 using System;
-using Tools.DotNETCommon;
+using EpicGames.Core;
 
 public class FicsItNetworks : ModuleRules
 {
@@ -16,23 +16,18 @@ public class FicsItNetworks : ModuleRules
             "Core", "CoreUObject",
             "Engine",
             "InputCore",
-            "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemNULL",
-            "SignificanceManager",
-            "PhysX", "APEX", "PhysXVehicles", "ApexDestruction",
-            "AkAudio",
             "ReplicationGraph",
             "UMG",
-            "AIModule",
-            "NavigationSystem",
             "AssetRegistry",
-            "GameplayTasks",
             "AnimGraphRuntime",
             "Slate", "SlateCore",
-            "Json",
+            "AudioPlatformConfiguration",
+            "EnhancedInput",
+            "GameplayTags",
             "ApplicationCore",
+            "Json",
             "Vorbis",
             "Http",
-            "AudioPlatformConfiguration"
 		});
 
         if (Target.Type == TargetRules.TargetType.Editor) {

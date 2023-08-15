@@ -1,6 +1,6 @@
 ﻿#include "UI/FINSplitter.h"
 
-void SFINSplitter::Construct(const FArguments& InArgs) {
+void SFINSplitter::Construct(FArguments InArgs) {
 	SSplitter::FArguments Args;
 	Args._Clipping = InArgs._Clipping;
 	Args._Cursor = InArgs._Cursor;
@@ -21,7 +21,7 @@ void SFINSplitter::Construct(const FArguments& InArgs) {
 	Args._ToolTip = InArgs._ToolTip;
 	Args._ToolTipText = InArgs._ToolTipText;
 	Args._Visibility = InArgs._Visibility;
-	Args.Slots = InArgs.Slots;
+	//Args._Slots = MoveTemp(InArgs._Slots);
 	Args.MetaData = InArgs.MetaData;
 	SSplitter::Construct(Args);
 

@@ -12,12 +12,12 @@ FINAny FFINPropertyGetterFunc::operator()(const FFINExecutionContext& Ctx, bool*
 		for (UProperty* LocalProp = Function->FirstPropertyToInit; LocalProp != NULL; LocalProp = (UProperty*)LocalProp->Next) {
 			LocalProp->InitializeValue_InContainer(Params);
 		}*/
-		for (TFieldIterator<UProperty> Prop(Function); Prop; ++Prop) {
+		for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
 			if (Prop->GetPropertyFlags() & CPF_Parm) Prop->InitializeValue_InContainer(Params);
 		}
 		Obj->ProcessEvent(Function, Params);
 		FINAny Return = Property->GetValue(FFINExecutionContext(Params));
-		for (UProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
+		for (FProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
 			if (!P->IsInContainer(Function->ParmsSize)) {
 				P->DestroyValue_InContainer(Params);
 			}
@@ -40,12 +40,12 @@ bool FFINPropertySetterFunc::operator()(const FFINExecutionContext& Ctx, const F
 		check(Property != nullptr);
 		uint8* Params = (uint8*)FMemory::Malloc(Function->PropertiesSize);
 		FMemory::Memzero(Params + Function->ParmsSize, Function->PropertiesSize - Function->ParmsSize);
-		for (TFieldIterator<UProperty> Prop(Function); Prop; ++Prop) {
+		for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
 			if (Prop->GetPropertyFlags() & CPF_Parm) Prop->InitializeValue_InContainer(Params);
 		}
 		Property->SetValue(FFINExecutionContext(Params), Any);
 		Obj->ProcessEvent(Function, Params);
-		for (UProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
+		for (FProperty* P = Function->DestructorLink; P; P = P->DestructorLinkNext) {
 			if (!P->IsInContainer(Function->ParmsSize)) {
 				P->DestroyValue_InContainer(Params);
 			}

@@ -764,7 +764,7 @@ BeginFunc(getPowerConnectors, "Get Power Connectors", "Returns a list of power c
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
-	for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
 		if (!prop->PropertyClass->IsChildOf(UFGPowerConnectionComponent::StaticClass())) continue;
 		UObject* Connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
 		if (!Components.Contains(Cast<UActorComponent>(Connector))) continue;
@@ -777,7 +777,7 @@ BeginFunc(getFactoryConnectors, "Get Factory Connectors", "Returns a list of fac
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
-	for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
 		if (!prop->PropertyClass->IsChildOf(UFGFactoryConnectionComponent::StaticClass())) continue;
 		UObject* Connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
 		if (!Components.Contains(Cast<UActorComponent>(Connector))) continue;
@@ -791,7 +791,7 @@ BeginFunc(getPipeConnectors, "Get Pipe Connectors", "Returns a list of pipe (flu
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
 	TSet<UObject*> Outputted;
-	for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
 		if (!prop->PropertyClass->IsChildOf(UFGPipeConnectionComponentBase::StaticClass())) continue;
 		UObject* Connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
 		if (!Components.Contains(Cast<UActorComponent>(Connector))) continue;
@@ -806,7 +806,7 @@ BeginFunc(getInventories, "Get Inventories", "Returns a list of inventories this
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
-	for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
 		if (!prop->PropertyClass->IsChildOf(UFGInventoryComponent::StaticClass())) continue;
 		UObject* inventory = *prop->ContainerPtrToValuePtr<UObject*>(self);
 		if (!Components.Contains(Cast<UActorComponent>(inventory))) continue;
@@ -819,7 +819,7 @@ BeginFunc(getNetworkConnectors, "Get Network Connectors", "Returns the name of n
 	Body()
 	FINArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
-	for (TFieldIterator<UObjectProperty> prop(self->GetClass()); prop; ++prop) {
+	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
 		if (!prop->PropertyClass->IsChildOf(UFINNetworkConnectionComponent::StaticClass())) continue;
 		UObject* connector = *prop->ContainerPtrToValuePtr<UObject*>(self);
 		if (!Components.Contains(Cast<UActorComponent>(connector))) continue;
@@ -1240,7 +1240,7 @@ BeginProp(RFloat, maxHealth, "Max Health", "The maximum amount of health this ve
 BeginProp(RBool, isSelfDriving, "Is Self Driving", "True if the vehicle is currently self driving.") {
 	Return self->IsSelfDriving();
 } PropSet() {
-	FReflectionHelper::SetPropertyValue<UBoolProperty>(self, TEXT("mIsSelfDriving"), Val);
+	FReflectionHelper::SetPropertyValue<FBoolProperty>(self, TEXT("mIsSelfDriving"), Val);
 } EndProp() 
 EndClass()
 
@@ -1291,17 +1291,8 @@ BeginProp(RFloat, speed, "Speed", "The current forward speed of this vehicle.") 
 BeginProp(RFloat, burnRatio, "Burn Ratio", "The amount of fuel this vehicle burns.") {
 	Return self->GetFuelBurnRatio();
 } EndProp()
-BeginProp(RInt, wheelsOnGround, "Wheels On Ground", "The number of wheels currenlty on the ground.") {
-	Return (int64)self->NumWheelsOnGround();
-} EndProp()
 BeginProp(RBool, hasFuel, "Has Fuel", "True if the vehicle has currently fuel to drive.") {
 	Return self->HasFuel();
-} EndProp()
-BeginProp(RBool, isInAir, "Is In Air", "True if the vehicle is currently in the air.") {
-	Return self->GetIsInAir();
-} EndProp()
-BeginProp(RBool, isDrifting, "Is Drifting", "True if the vehicle is currently drifting.") {
-	Return self->GetIsDrifting();
 } EndProp()
 EndClass()
 
@@ -2381,7 +2372,7 @@ BeginClassProp(RBool, canBeDiscarded, "Can be Discarded", "True if this item can
 	Return (FINBool)UFGItemDescriptor::CanBeDiscarded(self);
 } EndProp()
 BeginClassProp(RClass<UFGItemCategory>, category, "Category", "The category in which this item is in.") {
-	Return (FINClass)UFGItemDescriptor::GetItemCategory(self);
+	Return (FINClass)UFGItemDescriptor::GetCategory(self);
 } EndProp()
 BeginClassProp(RStruct<FLinearColor>, fluidColor, "Fluid Color", "The color of this fluid.") {
 	Return (FINStruct)(FLinearColor)UFGItemDescriptor::GetFluidColor(self);

@@ -102,7 +102,7 @@ void AFINIndicatorPoleHolo::CheckValidFloor() {
 
 bool AFINIndicatorPoleHolo::TrySnapToActor(const FHitResult& hitResult) {
 	if (!bSnapped) {
-		AFINIndicatorPole* Pole = Cast<AFINIndicatorPole>(hitResult.Actor.Get());
+		AFINIndicatorPole* Pole = Cast<AFINIndicatorPole>(hitResult.GetActor());
 		if (Pole && !IsValid(Pole->TopConnected)) {
 			SnappedPole = Pole;
 			SetActorLocation(Pole->GetActorLocation() + FVector(0,0,300));

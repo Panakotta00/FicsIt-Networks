@@ -1,14 +1,15 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
 #include "FINFuncProperty.h"
+#include "UObject/UnrealTypePrivate.h"
 #include "FINObjectProperty.generated.h"
 
 UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINObjectProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-	UObjectProperty* Property = nullptr;
+	FObjectProperty* Property = nullptr;
 	UPROPERTY()
 	UClass* Subclass = nullptr;
 

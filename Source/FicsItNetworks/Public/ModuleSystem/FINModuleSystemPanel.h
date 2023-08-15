@@ -76,7 +76,7 @@ public:
 	 * Returns the dismantle refund sum of all modules added to the panel.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "ModuleSystem|Panel")
-	void GetDismantleRefund(UPARAM(ref) TArray<FInventoryStack>& out_refund) const;
+	void GetDismantleRefund(UPARAM(ref) TArray<FInventoryStack>& out_refund, bool noCost) const;
 
 	/**
 	 * Check if it should allocate the grid cache

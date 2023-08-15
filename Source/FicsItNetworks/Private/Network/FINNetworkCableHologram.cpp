@@ -5,6 +5,8 @@
 #include "FGBlueprintSubsystem.h"
 #include "FGConstructDisqualifier.h"
 #include "FGOutlineComponent.h"
+#include "Buildables/FGBuildableWall.h"
+#include "Buildables/FGBuildableFoundation.h"
 
 FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 	switch (SnapType) {
@@ -127,7 +129,7 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 	FinishedCable->Connector1 = Connector1Cache;
 	FinishedCable->Connector2 = Connector2Cache;
 	FinishedCable->ConnectConnectors();
-	FinishedCable->RerunConstructionScripts();
+	//FinishedCable->RerunConstructionScripts(); // TODO: Check if really needed
 	
 	Snapped = FFINCablePlacementStepInfo();
 	From = FFINCablePlacementStepInfo();
@@ -145,7 +147,7 @@ int32 AFINNetworkCableHologram::GetBaseCostMultiplier() const {
 }
 
 bool AFINNetworkCableHologram::IsValidHitResult(const FHitResult& hit) const {
-	return hit.Actor.IsValid();
+	return IsValid(hit.GetActor());
 }
 
 bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
@@ -160,8 +162,8 @@ bool AFINNetworkCableHologram::TrySnapToActor(const FHitResult& hitResult) {
 	if (bEnableAdapter && AdapterHolo) bAdapterSnapped = AdapterHolo->TrySnapToActor(hitResult);
 	
 	// Check if hit actor is valid
-	AActor* actor = hitResult.Actor.Get();
-	if (!actor) {
+	AActor* actor = hitResult.GetActor();
+	if (!IsValid(actor)) {
 		Snapped = {FIN_NOT_SNAPPED};
 		OnInvalidHitResult();
 		return false;
@@ -336,7 +338,7 @@ bool AFINNetworkCableHologram::IsChanged() const {
 	return Snapped.SnapType != FIN_NOT_SNAPPED;
 }
 
-USceneComponent* AFINNetworkCableHologram::SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName) {
+USceneComponent* AFINNetworkCableHologram::SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName, const FName& socketName) {
 	return nullptr;
 }
 

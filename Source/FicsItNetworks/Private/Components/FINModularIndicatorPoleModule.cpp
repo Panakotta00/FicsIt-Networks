@@ -18,7 +18,7 @@ void AFINModularIndicatorPoleModule::OnConstruction(const FTransform& transform)
 void AFINModularIndicatorPoleModule::BeginPlay() {
 	Super::BeginPlay();
 	
-	RerunConstructionScripts();
+	// RerunConstructionScripts(); TODO: Check if really needed
 }
 
 void AFINModularIndicatorPoleModule::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {

@@ -132,7 +132,7 @@ void AFINNetworkAdapter::BeginPlay() {
 	if (!IsValid(Parent)) {
 		for (AFINNetworkCable* cable : Connector->ConnectedCables) {
 			TArray<FInventoryStack> refund;
-			IFGDismantleInterface::Execute_GetDismantleRefund(cable, refund);
+			IFGDismantleInterface::Execute_GetDismantleRefund(cable, refund, false);
 			float radius;
 			FVector pos = IFGDismantleInterface::Execute_GetRefundSpawnLocationAndArea(cable, cable->GetActorLocation(), radius);
 			TArray<class AFGItemPickup_Spawnable*> drops;

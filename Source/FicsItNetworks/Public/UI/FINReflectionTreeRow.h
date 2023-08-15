@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
 #include "FINReflectionStyles.h"
 
 template<typename ItemType>
@@ -18,11 +19,13 @@ public:
 		STableRow<ItemType>::Construct(SuperArgs, InOwnerTableView);
 	}
 	
-	virtual void ConstructChildren(ETableViewMode::Type InOwnerTableMode, const TAttribute<FMargin>& InPadding, const TSharedRef<SWidget>& InContent) {
+	virtual void ConstructChildren(ETableViewMode::Type InOwnerTableMode, const TAttribute<FMargin>& InPadding, const TSharedRef<SWidget>& InContent) override {
 		this->Content = InContent;
 		this->InnerContentSlot = nullptr;
 
 		SHorizontalBox::FSlot* InnerContentSlotNativePtr = nullptr;
+
+		TSharedRef<ITableRow> row = TSharedFromThis<SWidget>::SharedThis(this);
 
 		this->ChildSlot[
             SNew(SHorizontalBox)
@@ -30,7 +33,7 @@ public:
             .AutoWidth()
             .HAlign(HAlign_Right)
             .VAlign(VAlign_Fill)[
-                SNew(SExpanderArrow, SharedThis(this) )
+                SNew(SExpanderArrow, row)
                 .StyleSet(this->ExpanderStyleSet)
             ]
             + SHorizontalBox::Slot()

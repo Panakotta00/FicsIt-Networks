@@ -81,9 +81,9 @@ FVector AFINModularIndicatorPoleModuleHolo::GetAttachPoint(AFGBuildable* Object)
 bool AFINModularIndicatorPoleModuleHolo::TrySnapToActor(const FHitResult& hitResult) {
 	if (!bSnapped) {
 		AFGBuildable* Snapped = nullptr;
-		if (AFINModularIndicatorPole* Pole = Cast<AFINModularIndicatorPole>(hitResult.Actor.Get()); Pole && !IsValid(Pole->ChildModule)) {
+		if (AFINModularIndicatorPole* Pole = Cast<AFINModularIndicatorPole>(hitResult.GetActor()); Pole && !IsValid(Pole->ChildModule)) {
 			Snapped = Pole;
-		}else if(AFINModularIndicatorPoleModule* Module = Cast<AFINModularIndicatorPoleModule>(hitResult.Actor.Get()); Module && !IsValid(Module->NextChild)) {
+		} else if(AFINModularIndicatorPoleModule* Module = Cast<AFINModularIndicatorPoleModule>(hitResult.GetActor()); Module && !IsValid(Module->NextChild)) {
 			Snapped = Module;
 		}
 		if(IsValid(Snapped)) {

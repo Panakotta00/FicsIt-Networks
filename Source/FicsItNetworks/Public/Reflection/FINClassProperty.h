@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "FINFuncProperty.h"
+#include "FINObjectProperty.h"
 #include "FINClassProperty.generated.h"
 
 UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINClassProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-	UClassProperty* Property = nullptr;
+	FClassProperty* Property = nullptr;
 	UPROPERTY()
 	UClass* Subclass = nullptr;
 

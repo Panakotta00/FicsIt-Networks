@@ -7,10 +7,8 @@ UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINIntProperty : public UFINFuncProperty {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-	UIntProperty* Property = nullptr;
-	UPROPERTY()
-	UInt64Property* Property64 = nullptr;
+	FIntProperty* Property = nullptr;
+	FInt64Property* Property64 = nullptr;
 
 	// Begin UFINProperty
 	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {

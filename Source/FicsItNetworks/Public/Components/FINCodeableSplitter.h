@@ -53,7 +53,7 @@ public:
 	// End AFGBuildable
 
 	//~ Begin IFGDismantleInterface
-	virtual void GetDismantleRefund_Implementation( TArray< FInventoryStack >& out_refund ) const override;
+	virtual void GetDismantleRefund_Implementation( TArray< FInventoryStack >& out_refund, bool noBuildCostEnabled) const override;
 	// End IFGDismantleInterface
 	
 	// Begin IFGSaveGame

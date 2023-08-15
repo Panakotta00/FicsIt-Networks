@@ -209,7 +209,7 @@ TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> UFI
 }
 
 CodersFileSystem::SRef<FFINKernelFSDevDevice> UFINKernelSystem::GetDevDevice() const {
-	FScopeLock(const_cast<FCriticalSection*>(&MutexDevDevice));
+	FScopeLock lock(const_cast<FCriticalSection*>(&MutexDevDevice));
 	return DevDevice;
 }
 

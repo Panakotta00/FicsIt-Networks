@@ -84,13 +84,13 @@ namespace FicsItKernel {
 		 * to a lua value and pushes it onto the stack.
 		 * The trace allows for object properties to have additionally a this trace attached.
 		 */
-		void propertyToLua(lua_State* L, UProperty* p, void* data, const FFINNetworkTrace& trace);
+		void propertyToLua(lua_State* L, FProperty* p, void* data, const FFINNetworkTrace& trace);
 
 		/**
 		 * Trys to convert the lua value at the given index on the given lua stack
 		 * to the given property in the given struct pointer.
 		 */
-		void luaToProperty(lua_State* L, UProperty* p, void* data, int i);
+		void luaToProperty(lua_State* L, FProperty* p, void* data, int i);
 
 		/**
 		 * Trys to convert the lua value at the given index on the given lua stack

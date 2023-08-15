@@ -2,6 +2,7 @@
 #include "FGColoredInstanceMeshProxy.h"
 #include "Buildables/FGBuildableFoundation.h"
 #include "Buildables/FGBuildableWall.h"
+#include "Components/FINScreen.h"
 
 AFINScreenHolo::AFINScreenHolo() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -11,26 +12,7 @@ AFINScreenHolo::AFINScreenHolo() {
 void AFINScreenHolo::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 	
-	// Clear Components
-	for (UStaticMeshComponent* comp : Parts) {
-		comp->UnregisterComponent();
-		comp->SetActive(false);
-		comp->DestroyComponent();
-	}
-	Parts.Empty();
-
-	// Create Components
-	if (mBuildClass) {
-		UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
-		UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
-		UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
-		AFINScreen::SpawnComponents(UStaticMeshComponent::StaticClass(), ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
-		RootComponent->SetMobility(EComponentMobility::Movable);
-		for (UStaticMeshComponent* Part : Parts) {
-			Part->SetMobility(EComponentMobility::Movable);
-			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-	}
+	ConstructParts();
 }
 
 void AFINScreenHolo::Tick(float DeltaSeconds) {
@@ -40,14 +22,14 @@ void AFINScreenHolo::Tick(float DeltaSeconds) {
 		OldScreenHeight = ScreenHeight;
 		OldScreenWidth = ScreenWidth;
 		
-		RerunConstructionScripts();
+		ConstructParts();
 	}
 }
 
 void AFINScreenHolo::BeginPlay() {
 	Super::BeginPlay();
 	
-	RerunConstructionScripts();
+	//RerunConstructionScripts(); TODO: Check if really needed
 }
 
 void AFINScreenHolo::EndPlay(const EEndPlayReason::Type EndPlayReason) {
@@ -149,4 +131,27 @@ void AFINScreenHolo::ConfigureActor(AFGBuildable* inBuildable) const {
 	AFINScreen* Screen = Cast<AFINScreen>(inBuildable);
 	Screen->ScreenHeight = ScreenHeight;
 	Screen->ScreenWidth = ScreenWidth;
+}
+
+void AFINScreenHolo::ConstructParts() {
+	// Clear Components
+	for (UStaticMeshComponent* comp : Parts) {
+		comp->UnregisterComponent();
+		comp->SetActive(false);
+		comp->DestroyComponent();
+	}
+	Parts.Empty();
+
+	// Create Components
+	if (mBuildClass) {
+		UStaticMesh* MiddlePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenMiddle;
+		UStaticMesh* EdgePartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenEdge;
+		UStaticMesh* CornerPartMesh = Cast<AFINScreen>(mBuildClass->GetDefaultObject())->ScreenCorner;
+		AFINScreen::SpawnComponents(UStaticMeshComponent::StaticClass(), ScreenWidth, ScreenHeight, MiddlePartMesh, EdgePartMesh, CornerPartMesh, this, RootComponent, Parts);
+		RootComponent->SetMobility(EComponentMobility::Movable);
+		for (UStaticMeshComponent* Part : Parts) {
+			Part->SetMobility(EComponentMobility::Movable);
+			Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
 }

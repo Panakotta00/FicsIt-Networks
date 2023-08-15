@@ -60,7 +60,7 @@ void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterfa
 	}
 }
 
-void AFGBuildable_GetDismantleRefund_Implementation(CallScope<void(*)(const IFGDismantleInterface*, TArray<FInventoryStack>&)>& scope, const IFGDismantleInterface* self_r, TArray<FInventoryStack>& refund) {
+void AFGBuildable_GetDismantleRefund_Implementation(CallScope<void(*)(const IFGDismantleInterface*, TArray<FInventoryStack>&, bool)>& scope, const IFGDismantleInterface* self_r, TArray<FInventoryStack>& refund, bool noCost) {
 	const AFGBuildable* self = dynamic_cast<const AFGBuildable*>(self_r);
 	if (!self->IsA<AFINNetworkCable>()) {
 		TInlineComponentArray<UFINNetworkConnectionComponent*> components;
@@ -76,11 +76,11 @@ void AFGBuildable_GetDismantleRefund_Implementation(CallScope<void(*)(const IFGD
 		}
 		for (UFINNetworkConnectionComponent* connector : components) {
 			for (AFINNetworkCable* cable : connector->ConnectedCables) {
-				cable->Execute_GetDismantleRefund(cable, refund);
+				cable->Execute_GetDismantleRefund(cable, refund, noCost);
 			}
 		}
 		for (UFINModuleSystemPanel* panel : panels) {
-			panel->GetDismantleRefund(refund);
+			panel->GetDismantleRefund(refund, noCost);
 		}
 	}
 }
@@ -162,9 +162,9 @@ void FFicsItNetworksModule::StartupModule(){
 	AssetRegistryModule.Get().GetAssetsByPath(TEXT("/FicsItNetworks"), AssetData, true);
 
 	for (const FAssetData& Asset : AssetData) {
-		FString NewPath = Asset.ObjectPath.ToString();
-		FString OldPath = TEXT("/Game") + Asset.ObjectPath.ToString();
-		if (Asset.AssetClass == TEXT("Blueprint") || Asset.AssetClass == TEXT("WidgetBlueprint")) {
+		FString NewPath = Asset.GetObjectPathString();
+		FString OldPath = TEXT("/Game") + Asset.GetObjectPathString();
+		if (Asset.AssetClass == TEXT("Blueprint") || Asset.AssetClass == TEXT("WidgetBlueprint")) { // TODO: Check if AssetClassPath works, and how?
 			NewPath += TEXT("_C");
 			OldPath += TEXT("_C");
 		}
@@ -176,7 +176,7 @@ void FFicsItNetworksModule::StartupModule(){
 	
 	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
 #if !WITH_EDITOR
-		SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
+		SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName, const FName& socketName) {
 			UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
 			if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
 				auto comp = NewObject<UStaticMeshComponent>(attachParent);

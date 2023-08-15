@@ -7,14 +7,14 @@ AFINNetworkAdapterHologram::AFINNetworkAdapterHologram() {
 	SetSnapToGuideLines(false);
 }
 
-USceneComponent* AFINNetworkAdapterHologram::SetupComponent(USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName) {
-	USceneComponent* Component = Super::SetupComponent(attachParent, componentTemplate, componentName);
+USceneComponent* AFINNetworkAdapterHologram::SetupComponent(USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName, const FName& socketName) {
+	USceneComponent* Component = Super::SetupComponent(attachParent, componentTemplate, componentName, socketName);
 	if (componentTemplate->IsA<UStaticMeshComponent>()) CachedComponents.Add(Component);
 	return Component;
 }
 
 bool AFINNetworkAdapterHologram::IsValidHitResult(const FHitResult& hitResult) const {
-	return hitResult.Actor.IsValid();
+	return IsValid(hitResult.GetActor());
 }
 
 void AFINNetworkAdapterHologram::OnInvalidHitResult() {

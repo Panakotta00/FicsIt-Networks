@@ -58,7 +58,7 @@ FVector AFINModuleSystemHolo::getModuleSize() {
 }
 
 bool AFINModuleSystemHolo::IsValidHitResult(const FHitResult& hit) const {
-	auto r = GetScrollValue(EHologramScrollMode::HSM_ROTATE);
+	auto r = GetScrollRotateValue();
 
 	USceneComponent* panel = Cast<USceneComponent>(hit.Component.Get());
 	while (IsValid(panel) && !panel->IsA<UFINModuleSystemPanel>()) panel = Cast<USceneComponent>(panel->GetAttachParent());

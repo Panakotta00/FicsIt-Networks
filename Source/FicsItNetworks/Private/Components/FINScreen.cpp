@@ -25,7 +25,7 @@ void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 }
 
 void AFINScreen::BeginPlay() {
-	RerunConstructionScripts();
+	ConstructParts();
 
 	Super::BeginPlay();
 
@@ -49,28 +49,11 @@ void AFINScreen::BeginPlay() {
 	if (HasAuthority()) GPUPtr = GPU.Get();
 	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 
-	for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) Cable->RerunConstructionScripts();
+	//for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) Cable->RerunConstructionScripts(); TODO: Check if really needed
 }
 
 void AFINScreen::OnConstruction(const FTransform& transform) {
-	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
-	FVector ConnectorOffset;
-	if (ScreenHeight < 0) {
-		if (ScreenWidth < 0) {
-			ConnectorOffset = {0, 50, 50};
-		} else {
-			ConnectorOffset = {0, -50, 50};
-		}
-	} else {
-		if (ScreenWidth < 0) {
-			ConnectorOffset = {0, 50, -50};
-		} else {
-			ConnectorOffset = {0, -50, -50};
-		}
-	}
-	Connector->SetMobility(EComponentMobility::Movable);
-	Connector->SetRelativeLocation(ConnectorOffset);
-	Connector->SetMobility(EComponentMobility::Static);
+	ConstructParts();
 
 	Super::OnConstruction(transform);
 }
@@ -291,4 +274,35 @@ void AFINScreen::SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, i
 	CornerPart->SetStaticMesh(CornerPartMesh);
 	CornerPart->SetMobility(EComponentMobility::Static);
 	OutParts.Add(CornerPart);
+}
+
+void AFINScreen::ConstructParts() {
+	// Clear Components
+	for (UStaticMeshComponent* comp : Parts) {
+		comp->UnregisterComponent();
+		comp->SetActive(false);
+		comp->DestroyComponent();
+	}
+	Parts.Empty();
+
+	// Create Components
+	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), ScreenWidth, ScreenHeight, ScreenMiddle, ScreenEdge, ScreenCorner, this, RootComponent, Parts);
+	
+	FVector ConnectorOffset;
+	if (ScreenHeight < 0) {
+		if (ScreenWidth < 0) {
+			ConnectorOffset = {0, 50, 50};
+		} else {
+			ConnectorOffset = {0, -50, 50};
+		}
+	} else {
+		if (ScreenWidth < 0) {
+			ConnectorOffset = {0, 50, -50};
+		} else {
+			ConnectorOffset = {0, -50, -50};
+		}
+	}
+	Connector->SetMobility(EComponentMobility::Movable);
+	Connector->SetRelativeLocation(ConnectorOffset);
+	Connector->SetMobility(EComponentMobility::Static);
 }

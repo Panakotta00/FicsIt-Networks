@@ -9,23 +9,24 @@ UFINNetworkConnectionComponent* UFINComponentUtility::GetNetworkConnectorFromHit
 	UFINNetworkConnectionComponent* connector = nullptr;
 	FVector pos;
 
-	if (!hit.Actor.IsValid()) return nullptr;
+	if (!IsValid(hit.GetActor())) return nullptr;
 	
-	TArray<UActorComponent*> connectors = hit.Actor->GetComponentsByClass(UFINNetworkConnectionComponent::StaticClass());
+	TArray<UFINNetworkConnectionComponent*> connectors;
+	hit.GetActor()->GetComponents<UFINNetworkConnectionComponent>(connectors);
 
-	for (UActorComponent* con : connectors) {
-		if (!Cast<USceneComponent>(con)) continue;
+	for (UFINNetworkConnectionComponent* con : connectors) {
+		if (!con) continue;
 
-		FVector npos = Cast<USceneComponent>(con)->GetComponentLocation();
+		FVector npos = con->GetComponentLocation();
 		if (!connector || (pos - hit.ImpactPoint).Size() > (npos - hit.ImpactPoint).Size()) {
 			pos = npos;
-			connector = Cast<UFINNetworkConnectionComponent>(con);
+			connector = con;
 		}
 	}
 
 	if (connector) return connector;
 	
-	TArray<UActorComponent*> adapters = hit.Actor->GetComponentsByClass(UFINNetworkAdapterReference::StaticClass());
+	TArray<UActorComponent*> adapters = hit.GetActor()->GetComponentsByClass(UFINNetworkAdapterReference::StaticClass());
 	
 	for (UActorComponent* adapterref : adapters) {
 		if (!adapterref || !static_cast<UFINNetworkAdapterReference*>(adapterref)->Ref) continue;
