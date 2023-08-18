@@ -158,22 +158,22 @@ class UFINAFGPipeHyperStartHook : public UFINFunctionHook {
 
 private:
 	
-	static void OnPipeEnterHook(const bool& retVal, IFGPipeHyperInterface* self_r, UFGCharacterMovementComponent* charMove, const UFGPipeConnectionComponentBase* enteredThrough, const AActor* fromPipe) {
+	static void OnPipeEnterHook(const EPipeHyperEnterResult& retVal, IFGPipeHyperInterface* self_r, AFGCharacterPlayer* character, UFGPipeConnectionComponentBase* enteredThrough, TStructOnScope<FFGPipeHyperBasePipeData>& outPipeData) {
 		AFGBuildablePipeHyperPart* part = dynamic_cast<AFGBuildablePipeHyperPart*>(self_r);
 		if(IsValid(part)) {
-			StaticSelf()->Send(part, "PlayerEntered", {FINAny(retVal), FINTrace((UObject*)enteredThrough), FINTrace((UObject*)fromPipe)});
+			StaticSelf()->Send(part, "PlayerEntered", {FINAny((FINInt)retVal), FINTrace((UObject*)enteredThrough)});
 		}
 		AFGBuildablePipeHyper* pipe = dynamic_cast<AFGBuildablePipeHyper*>(self_r);
 		if(IsValid(pipe)) {
-			StaticSelf()->Send(pipe, "PlayerEntered", {FINAny(retVal), FINTrace((UObject*)enteredThrough), FINTrace((UObject*)fromPipe)});
+			StaticSelf()->Send(pipe, "PlayerEntered", {FINAny((FINInt)retVal), FINTrace((UObject*)enteredThrough)});
 		}
 	}
 
 			
 public:		
 	void RegisterFuncHook() override {
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnter_Implementation, (void*)static_cast<const IFGPipeHyperInterface*>(GetDefault<AFGPipeHyperStart>()), &OnPipeEnterHook)
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnter_Implementation, (void*)static_cast<const IFGPipeHyperInterface*>(GetDefault<AFGBuildablePipeHyper>()), &OnPipeEnterHook)
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnterReal, (void*)GetDefault<AFGPipeHyperStart>(), &OnPipeEnterHook)
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnterReal, (void*)GetDefault<AFGBuildablePipeHyper>(), &OnPipeEnterHook)
     }
 };
 
