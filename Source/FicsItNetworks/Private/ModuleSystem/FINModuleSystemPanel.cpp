@@ -9,7 +9,6 @@ void UFINModuleSystemPanel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(UFINModuleSystemPanel, Grid);
 }
 
-#pragma optimize("", off)
 void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 	bool bOldObj = Ar.IsSaveGame() && Ar.CustomVer(FSaveCustomVersion::GUID) < FSaveCustomVersion::ResetBrokenBlueprintSplines;
 	int Ver = 0;
@@ -45,7 +44,6 @@ void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 		}
 	}
 }
-#pragma optimize("", on)
 
 void UFINModuleSystemPanel::InitializeComponent() {
 	Super::InitializeComponent();
