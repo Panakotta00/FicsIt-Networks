@@ -1,5 +1,6 @@
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "FGDismantleInterface.h"
+#include "SaveCustomVersion.h"
 #include "ModuleSystem/FINModuleSystemModule.h"
 
 void UFINModuleSystemPanel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -8,9 +9,22 @@ void UFINModuleSystemPanel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(UFINModuleSystemPanel, Grid);
 }
 
+#pragma optimize("", off)
 void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
+	bool bOldObj = Ar.IsSaveGame() && Ar.CustomVer(FSaveCustomVersion::GUID) < FSaveCustomVersion::ResetBrokenBlueprintSplines;
+	int Ver = 0;
+	if(bOldObj) {
+		Ver = Ar.CustomVer(FFortniteReleaseBranchCustomObjectVersion::GUID);
+		Ar.SetCustomVersion(FFortniteReleaseBranchCustomObjectVersion::GUID, 1, TEXT("FFortniteReleaseBranchCustomObjectVersion"));
+	}
+
 	Super::Serialize(Ar);
+	
 	if (Ar.IsSaveGame()) {
+		if(bOldObj) {
+			Ar.SetCustomVersion(FFortniteReleaseBranchCustomObjectVersion::GUID, Ver, TEXT("FFortniteReleaseBranchCustomObjectVersion"));
+		}
+		
 		SetupGrid();
 
 		int height = PanelHeight, width = PanelWidth;
@@ -31,6 +45,7 @@ void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 		}
 	}
 }
+#pragma optimize("", on)
 
 void UFINModuleSystemPanel::InitializeComponent() {
 	Super::InitializeComponent();
