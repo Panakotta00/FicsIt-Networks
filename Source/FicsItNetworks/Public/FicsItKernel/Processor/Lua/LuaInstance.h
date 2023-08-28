@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "lua/Lua.h"
+#include "LuaUtil.h"
 #include "Network/FINNetworkTrace.h"
 
 #define CLASS_INSTANCE_META_SUFFIX "-Class"

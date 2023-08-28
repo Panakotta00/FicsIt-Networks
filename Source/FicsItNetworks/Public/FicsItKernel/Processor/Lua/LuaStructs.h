@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lua/lua.h"
+#include "LuaUtil.h"
 #include "Network/FINNetworkValues.h"
 
 class UFINKernelSystem;

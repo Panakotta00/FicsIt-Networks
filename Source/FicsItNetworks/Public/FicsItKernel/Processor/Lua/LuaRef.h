@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "lua/lua.h"
+#include "LuaUtil.h"
 
 class UFINFunction;
 class UFINStruct;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lua/Lua.h"
+#include "LuaUtil.h"
 
 namespace FicsItKernel {
 	namespace Lua {

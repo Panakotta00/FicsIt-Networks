@@ -12,7 +12,7 @@
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINSignal.h"
-#include "lua/eris.h"
+
 
 void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
 	for (FicsItKernel::Lua::LuaFile file : Parent->GetFileStreams()) {
@@ -311,24 +311,6 @@ UFINLuaProcessor::UFINLuaProcessor() : tickHelper(this), FileSystemListener(new 
 
 UFINLuaProcessor::~UFINLuaProcessor() {}
 
-
-static constexpr uint32 Base64GetEncodedDataSize(uint32 NumBytes) {
-	return ((NumBytes + 2) / 3) * 4;
-}
-
-FString Base64Encode(const uint8* Source, uint32 Length) {
-	const uint32 ExpectedLength = Base64GetEncodedDataSize(Length);
-
-	FString OutBuffer;
-
-	TArray<TCHAR>& OutCharArray = OutBuffer.GetCharArray();
-	OutCharArray.SetNum(ExpectedLength + 1);
-	const int64 EncodedLength = FBase64::Encode(Source, Length, OutCharArray.GetData());
-	verify(EncodedLength == OutBuffer.Len());
-
-	return OutBuffer;
-}
-
 int luaPersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor Persist"), *p->DebugInfo);
@@ -389,8 +371,8 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 			// encode persisted data
 			size_t data_l = 0;
 			const char* data_r = lua_tolstring(luaState, -1, &data_l);
-			// ReSharper disable once CppCStyleCast
-			StateStorage.LuaData = Base64Encode((uint8*)(data_r), data_l);
+			TArray<uint8> data((uint8*)data_r, data_l);
+			StateStorage.LuaData = FBase64::Encode(data);
 	
 			lua_pop(luaState, 1); // ..., perm, globals
 		} else {
@@ -424,18 +406,6 @@ void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 game
 
 void UFINLuaProcessor::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {}
 
-bool Base64Decode(const FString& Source, TArray<ANSICHAR>& OutData) {
-	const uint32 ExpectedLength = FBase64::GetDecodedDataSize(Source);
-
-	TArray<ANSICHAR> TempDest;
-	TempDest.AddZeroed(ExpectedLength + 1);
-	if(!FBase64::Decode(*Source, Source.Len(), reinterpret_cast<uint8*>(TempDest.GetData()))) {
-		return false;
-	}
-	OutData = TempDest;
-	return true;
-}
-
 int luaUnpersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
 	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor Unpersist"), *p->DebugInfo);
@@ -455,8 +425,8 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	Reset();
 
 	// decode & check data from json
-	TArray<ANSICHAR> data;
-	Base64Decode(StateStorage.LuaData, data);
+	TArray<uint8> data;
+	FBase64::Decode(StateStorage.LuaData, data);
 	if (data.Num() <= 1) return;
 
 	// get uperm table
@@ -466,7 +436,7 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	lua_pushcfunction(luaState, luaUnpersist);							// ..., uperm, unpersist-func
 
 	// push data for protected unpersist
-	lua_pushlstring(luaState, data.GetData(), data.Num());				// ..., uperm, unpersist-func, data-str
+	lua_pushlstring(luaState, (char*)data.GetData(), data.Num());				// ..., uperm, unpersist-func, data-str
 	lua_pushvalue(luaState, -3);											// ..., uperm, unpersist-func, data-str, uperm
 
 	// do unpersist
@@ -962,4 +932,3 @@ lua_State* UFINLuaProcessor::GetLuaState() const {
 lua_State* UFINLuaProcessor::GetLuaThread() const {
 	return luaThread;
 }
-
