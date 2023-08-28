@@ -1,4 +1,5 @@
 #include "ModuleSystem/FINModuleSystemPanel.h"
+#include "FactoryGameCustomVersion.h"
 #include "FGDismantleInterface.h"
 #include "SaveCustomVersion.h"
 #include "ModuleSystem/FINModuleSystemModule.h"

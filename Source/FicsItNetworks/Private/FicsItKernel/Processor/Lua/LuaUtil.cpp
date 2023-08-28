@@ -22,6 +22,8 @@ namespace FicsItKernel {
 				lua_pushinteger(L, *p->ContainerPtrToValuePtr<std::int64_t>(data));
 			} else if (p->IsA<FFloatProperty>()) {
 				lua_pushnumber(L, *p->ContainerPtrToValuePtr<float>(data));
+			} else if (p->IsA<FDoubleProperty>()) {
+				lua_pushnumber(L, *p->ContainerPtrToValuePtr<double>(data));
 			} else if (p->IsA<FStrProperty>()) {
 				lua_pushstring(L, TCHAR_TO_UTF8(**p->ContainerPtrToValuePtr<FString>(data)));
 			} else if (p->IsA<FClassProperty>()) {
@@ -64,6 +66,8 @@ namespace FicsItKernel {
 				*p->ContainerPtrToValuePtr<std::int64_t>(data) = static_cast<std::int64_t>(lua_tointeger(L, i));
 			} else if (p->IsA<FFloatProperty>()) {
 				*p->ContainerPtrToValuePtr<float>(data) = static_cast<float>(lua_tonumber(L, i));
+			} else if (p->IsA<FDoubleProperty>()) {
+				*p->ContainerPtrToValuePtr<double>(data) = static_cast<double>(lua_tonumber(L, i));
 			} else if (p->IsA<FStrProperty>()) {
 				size_t len;
 				const char* s = lua_tolstring(L, i, &len);
