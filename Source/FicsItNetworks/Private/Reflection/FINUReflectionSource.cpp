@@ -54,11 +54,9 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 	if (!Meta.DisplayName.IsEmpty()) ToFillClass->DisplayName = Meta.DisplayName;
 	if (!Meta.Description.IsEmpty()) ToFillClass->Description = Meta.Description;
 
-	UE_LOG(LogFicsItNetworks, Warning, TEXT("Reflection Package: %s"), *Class->GetOuterUPackage()->GetName());
 	if (Class->GetOuterUPackage()->GetName().Contains("FactoryGame")) {
 		ToFillClass->InternalName.ReplaceCharInline('-', '_');
 	}
-	checkf(CheckName(ToFillClass->InternalName), TEXT("Invalid name '%s' for class '%s'"), *ToFillClass->InternalName, *Class->GetPathName());
 
 	for (TFieldIterator<UFunction> Function(Class); Function; ++Function) {
 		if (Function->GetOwnerClass() != Class) continue; 
@@ -80,9 +78,13 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 			ToFillClass->Description = Desc;
 		}
 	}
-	
+		
 	ToFillClass->Parent = Ref->FindClass(Class->GetSuperClass());
 	if (ToFillClass->Parent == ToFillClass) ToFillClass->Parent = nullptr;
+
+	if (ToFillClass->Properties.Num() > 0 && ToFillClass->Functions.Num() > 0 && ToFillClass->Signals.Num() > 0) {
+		checkf(CheckName(ToFillClass->InternalName), TEXT("Invalid name '%s' for class '%s'"), *ToFillClass->InternalName, *Class->GetPathName());
+	}
 }
 
 void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFillStruct, UScriptStruct* Struct) const {
