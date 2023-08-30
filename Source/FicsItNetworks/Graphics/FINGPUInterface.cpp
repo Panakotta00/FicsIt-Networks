@@ -1,1 +1,0 @@
-﻿#include "FINGPUInterface.h"
