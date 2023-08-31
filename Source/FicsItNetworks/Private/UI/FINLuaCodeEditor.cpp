@@ -205,8 +205,10 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 	TArray<FTextLayout::FNewLineData> LinesToAdd;
 	LinesToAdd.Reserve(TokenizedLines.Num());
 
+	// Multiline State
 	bool bInString = false;
 	bool bInBlockComment = false;
+	
 	TSharedPtr<ISlateRun> Run;
 	for (const FSyntaxTokenizer::FTokenizedLine& TokenizedLine : TokenizedLines) {
 		TSharedRef<FString> ModelString = MakeShareable(new FString());
@@ -225,14 +227,14 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		auto DoComment = [&](const FTextRange& Range) {
 			FTextBlockStyle Style = SyntaxTextStyle->CommentTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Comment"));
-			//RunInfo.MetaData.Add(TEXT("Splitting"));
+			RunInfo.MetaData.Add(TEXT("Splitting"), TEXT(""));
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());
 		};
 		auto DoString = [&](const FTextRange& Range) {
 			FTextBlockStyle Style = SyntaxTextStyle->StringTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.String"));
-			//RunInfo.MetaData.Add("Splitting");
+			RunInfo.MetaData.Add(TEXT("Splitting"), TEXT(""));
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());
 		};
@@ -263,7 +265,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		auto DoWhitespace = [&](const FTextRange& Range) {
 			FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Whitespace"));
-			//RunInfo.MetaData.Add("Splitting");
+			RunInfo.MetaData.Add(TEXT("Splitting"), TEXT(""));
 			if ((*ModelString)[Range.BeginIndex] == '\t') {
 				Run = FFINTabRun::Create(RunInfo, ModelString, Style, Range, 4);
 			} else {
@@ -274,7 +276,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		auto DoOperator = [&](const FTextRange& Range, bool bColored) {
 			FTextBlockStyle Style = bColored ? SyntaxTextStyle->OperatorTextStyle : SyntaxTextStyle->NormalTextStyle;
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Operator"));
-			//RunInfo.MetaData.Add("Splitting");
+			RunInfo.MetaData.Add(TEXT("Splitting"), TEXT(""));
 			RunInfo.MetaData.Add("Operator", ModelString->Mid(Range.BeginIndex, Range.Len()));
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());
@@ -297,15 +299,21 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 
 		int StringStart = ModelString->Len();
 		int StringEnd = ModelString->Len();
+
+		// Single-Line State
 		bool bInNumber = false;
 		bool bNumberHadDecimal = false;
 		bool bInLineComment = false;
 		bool bIsEscaped = false;
+
 		for (const FSyntaxTokenizer::FToken& Token : TokenizedLine.Tokens) {
 			const FString TokenString = SourceString.Mid(Token.Range.BeginIndex, Token.Range.Len());
+			
 			int Start = ModelString->Len();
 			int End = Start + TokenString.Len();
 			ModelString->Append(TokenString);
+
+			// Update Escaped-State
 			bool bWasEscaped = bIsEscaped;
 			bIsEscaped = false;
 
