@@ -505,6 +505,21 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 					.OnIsTypedCharValid_Lambda([](const TCHAR) {
 						return true;
 					})
+					.OnKeyCharHandler_Lambda([this](const FGeometry&, const FCharacterEvent& Event) {
+						if (Event.GetCharacter() == '\r') {
+							int32 Index = TextEdit->GetCursorLocation().GetLineIndex()-1;
+							if (Index >= 0) {
+								FString Line;
+								TextEdit->GetTextLine(Index, Line);
+								FRegexPattern Pattern(TEXT("^\\s*"));
+								FRegexMatcher Regex(Pattern, Line);
+								if (Regex.FindNext()) {
+									TextEdit->InsertTextAtCursor(Regex.GetCaptureGroup(0));
+								}
+							}
+						}
+						return FReply::Unhandled();
+					})
 				]
 				+SVerticalBox::Slot()
 				.AutoHeight()[
