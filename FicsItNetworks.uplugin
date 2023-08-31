@@ -25,7 +25,7 @@
 	"Plugins": [
         {
             "Name": "SML",
-            "SemVersion": "^3.4.1",
+            "SemVersion": "^3.5.1",
             "Enabled": true
         }
     ]
