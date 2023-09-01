@@ -837,6 +837,20 @@ BeginFunc(getNetworkConnectors, "Get Network Connectors", "Returns the name of n
 	}
 	connectors = Output;
 } EndFunc()
+BeginFunc(getComponents, "Get Components", "Returns the components that make-up this actor.") {
+	InVal(0, RClass<UActorComponent>, componentType, "Component Type", "The class will be used as filter.")
+	OutVal(1, RArray<RTrace<UActorComponent>>, components, "Components", "The components of this actor.")
+	Body()
+	FINArray Output;
+	const TSet<UActorComponent*>& Components = self->GetComponents();
+	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
+		if (!prop->PropertyClass->IsChildOf(componentType)) continue;
+		UObject* component = *prop->ContainerPtrToValuePtr<UObject*>(self);
+		if (!Components.Contains(Cast<UActorComponent>(component))) continue;
+		Output.Add(Ctx.GetTrace() / component);
+	}
+	components = Output;
+} EndFunc()
 EndClass()
 
 BeginClass(UActorComponent, "ActorComponent", "Actor Component", "A component/part of an actor in the world.")
@@ -1944,6 +1958,11 @@ BeginFunc(switchPosition, "Switch Position", "Returns the current switch positio
 	OutVal(0, RInt, position, "Position", "The current switch position of this switch.")
     Body()
     position = (int64)self->GetSwitchPosition();
+} EndFunc()
+BeginFunc(getControlledConnection, "Get Controlled Connection", "Returns the Railroad Connection this switch is controlling.") {
+	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, connection, "Connection", "The controlled connectino.")
+	Body()
+	connection = Ctx.GetTrace() / self->GetmControlledConnection();
 } EndFunc()
 EndClass()
 
