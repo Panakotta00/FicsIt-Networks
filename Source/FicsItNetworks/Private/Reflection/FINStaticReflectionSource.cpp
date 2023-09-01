@@ -1,4 +1,6 @@
 ﻿#include "Reflection/FINStaticReflectionSource.h"
+
+#include "FGBuildableDoor.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINBoolProperty.h"
 #include "Reflection/FINClassProperty.h"
@@ -49,6 +51,7 @@
 #include "Buildables/FGBuildablePipeReservoir.h"
 #include "Buildables/FGBuildablePixelSign.h"
 #include "Buildables/FGBuildablePowerStorage.h"
+#include "Buildables/FGBuildablePriorityPowerSwitch.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadStation.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
@@ -562,6 +565,13 @@ struct RArray {
 	}
 };
 
+class FStaticReflectionSourceHelper {
+public:
+	static void AFGBuildableDoor_Update(AFGBuildableDoor* InDoor, EDoorConfiguration InConfig) {
+		InDoor->OnRep_DoorConfiguration();
+	}
+};
+
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
 BeginProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
 	Return (int64)GetTypeHash(self);
@@ -1053,6 +1063,14 @@ BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are conne
 } EndProp()
 EndClass()
 
+BeginClass(AFGBuildablePriorityPowerSwitch, "CircuitSwitchPriority", "Circuit Priority Switch", "A circuit power switch that can be activated and deactivated based on a priority to prevent a full factory power shutdown.")
+BeginProp(RInt, priority, "Priority", "The priority group of which this switch is part of.") {
+	Return (FINInt)self->GetPriority();
+} PropSet() {
+	self->SetPriority(Val);
+} EndProp()
+EndClass()
+
 BeginClass(UFGFactoryConnectionComponent, "FactoryConnection", "Factory Connection", "A actor component that is a connection point to which a conveyor or pipe can get attached to.")
 Hook(UFINFactoryConnectorHook)
 BeginSignal(ItemTransfer, "Item Transfer", "Triggers when the factory connection component transfers an item.")
@@ -1225,6 +1243,21 @@ BeginFunc(getOutputInv, "Get Output Inventory", "Returns the output inventory of
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The output inventory of this manufacturer.")
 	Body()
 	inventory = Ctx.GetTrace() / self->GetOutputInventory();
+} EndFunc()
+EndClass()
+
+BeginClass(AFGBuildableDoor, "Door", "Door", "The base class of all doors.")
+BeginFunc(getConfiguration, "Get Configuration", "Returns the Door Mode/Configuration.\n0 = Automatic\n1 = Always Closed\n2 = Always Open") {
+	OutVal(0, RInt, configuration, "Configuration", "The current door mode/configuration.")
+	Body()
+	configuration = (FINInt)self->GetmDoorConfiguration();
+} EndFunc()
+BeginFunc(setConfiguration, "Set Configuration", "Sets the Door Mode/Configuration, only some modes are allowed, if the mod you try to set is invalid, nothing changes.\n0 = Automatic\n1 = Always Closed\n2 = Always Open", 0) {
+	InVal(0, RInt, configuration, "Configuration", "The new configuration for the door.")
+	Body()
+	EDoorConfiguration Config = (EDoorConfiguration)FMath::Clamp(configuration, 0, 2);
+	self->SetmDoorConfiguration(Config);
+	FStaticReflectionSourceHelper::AFGBuildableDoor_Update(self, Config);
 } EndFunc()
 EndClass()
 
