@@ -12,6 +12,8 @@
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGPipeHyperStart.h"
 #include "Patching/NativeHookManager.h"
+#include "FGCharacterMovementComponent.h"
+#include "FGCharacterPlayer.h"
 #include "FINStaticReflectionSourceHooks.generated.h"
 
 UCLASS()
@@ -140,16 +142,16 @@ public:
 };
 
 UCLASS()
-class UFINAFGPipeHyperStartHook : public UFINFunctionHook {
+class UFINPipeHyperStartHook : public UFINFunctionHook {
 	GENERATED_BODY()
 
 	protected:
-	static UFINAFGPipeHyperStartHook* StaticSelf() {
-		static UFINAFGPipeHyperStartHook* Hook = nullptr;
-		if (!Hook) Hook = const_cast<UFINAFGPipeHyperStartHook*>(GetDefault<UFINAFGPipeHyperStartHook>());
+	static UFINPipeHyperStartHook* StaticSelf() {
+		static UFINPipeHyperStartHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINPipeHyperStartHook*>(GetDefault<UFINPipeHyperStartHook>());
 		return Hook; 
 	}
-
+	
 	// Begin UFINFunctionHook
 	virtual UFINFunctionHook* Self() {
 		return StaticSelf();
@@ -157,23 +159,28 @@ class UFINAFGPipeHyperStartHook : public UFINFunctionHook {
 	// End UFINFunctionHook
 
 private:
-	
-	static void OnPipeEnterHook(const EPipeHyperEnterResult& retVal, IFGPipeHyperInterface* self_r, AFGCharacterPlayer* character, UFGPipeConnectionComponentBase* enteredThrough, TStructOnScope<FFGPipeHyperBasePipeData>& outPipeData) {
-		AFGBuildablePipeHyperPart* part = dynamic_cast<AFGBuildablePipeHyperPart*>(self_r);
-		if(IsValid(part)) {
-			StaticSelf()->Send(part, "PlayerEntered", {FINAny((FINInt)retVal), FINTrace((UObject*)enteredThrough)});
-		}
-		AFGBuildablePipeHyper* pipe = dynamic_cast<AFGBuildablePipeHyper*>(self_r);
-		if(IsValid(pipe)) {
-			StaticSelf()->Send(pipe, "PlayerEntered", {FINAny((FINInt)retVal), FINTrace((UObject*)enteredThrough)});
+
+	static void EnterHyperPipe(const bool& retVal, UFGCharacterMovementComponent* CharacterMovementConstants, AFGPipeHyperStart* HyperStart) {
+		if(retVal && IsValid(HyperStart)) {
+			StaticSelf()->Send(HyperStart, "Transport", { FINStr("Entered"), FINBool(retVal)});
 		}
 	}
-
-			
-public:		
+	static void ExitHyperPipe(CallScope<void(*)(UFGCharacterMovementComponent*, bool)>& call, UFGCharacterMovementComponent* charMove, bool bRagdoll){
+		AActor* actor = charMove->GetTravelingPipeHyperActor();
+		UObject* obj = dynamic_cast<UObject*>(actor);
+		auto v = charMove->mPipeData.mConnectionToEjectThrough;
+		if(IsValid(v)) {
+			UFGPipeConnectionComponentBase* connection = v->mConnectedComponent;
+			if(IsValid(connection)) {
+				StaticSelf()->Send(connection->GetOwner(), "Transport", {FINStr("Exited"), true, FINTrace(connection)});
+			}
+		}
+	} 
+				
+public:
 	void RegisterFuncHook() override {
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnterReal, (void*)GetDefault<AFGPipeHyperStart>(), &OnPipeEnterHook)
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnterReal, (void*)GetDefault<AFGBuildablePipeHyper>(), &OnPipeEnterHook)
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGCharacterMovementComponent::EnterPipeHyper, (void*)GetDefault<UFGCharacterMovementComponent>(), &EnterHyperPipe)
+		SUBSCRIBE_METHOD_VIRTUAL(UFGCharacterMovementComponent::PipeHyperForceExit, (void*)GetDefault<UFGCharacterMovementComponent>(), &ExitHyperPipe)  
     }
 };
 
