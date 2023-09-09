@@ -97,6 +97,65 @@ public:
 };
 
 UCLASS()
+class FICSITNETWORKS_API UFINMultiFunctionHook : public UFINHook {
+	GENERATED_BODY()
+
+private:
+	UPROPERTY()
+	UObject* Sender;
+	
+	bool bIsRegistered;
+
+	UPROPERTY()
+	TMap<FString, UFINSignal*> Signals;
+
+protected:
+	UPROPERTY()
+	TSet<TWeakObjectPtr<UObject>> Senders;
+	FCriticalSection Mutex;
+	
+	bool IsSender(UObject* Obj) {
+		FScopeLock Lock(&Mutex);
+		return Senders.Contains(Obj);
+	}
+	
+	void Send(UObject* Obj, const FString& SignalName, const TArray<FFINAnyNetworkValue>& Data) {
+		UFINSignal* Signal;
+		if (Signals.Contains(SignalName)) {
+			Signal = Signals[SignalName];
+		}else{
+			UFINClass* Class = FFINReflection::Get()->FindClass(Obj->GetClass());
+			Signal = Class->FindFINSignal(SignalName);
+			if (!Signal) UE_LOG(LogFicsItNetworks, Error, TEXT("Signal with name '%s' not found for object '%s' of FINClass '%s'"), *SignalName, *Obj->GetName(), *Class->GetInternalName());
+			Signals.Add(SignalName, Signal);
+		}
+		if (Signal) Signal->Trigger(Obj, Data);
+	}
+
+	virtual void RegisterFuncHook() {}
+
+	virtual UFINMultiFunctionHook* Self() { return nullptr; }
+
+public:		
+	void Register(UObject* sender) override {
+		Super::Register(sender);
+		
+		FScopeLock Lock(&Self()->Mutex);
+    	Self()->Senders.Add(Sender = sender);
+
+		if (!Self()->bIsRegistered) {
+			Self()->bIsRegistered = true;
+			Self()->RegisterFuncHook();
+		}
+    }
+		
+	void Unregister() override {
+		FScopeLock Lock(&Self()->Mutex);
+    	Self()->Senders.Remove(Sender);
+    }
+};
+
+UCLASS()
 class UFINTrainHook : public UFINStaticReflectionHook {
 	GENERATED_BODY()
 			
@@ -142,7 +201,7 @@ public:
 };
 
 UCLASS()
-class UFINPipeHyperStartHook : public UFINFunctionHook {
+class UFINPipeHyperStartHook : public UFINMultiFunctionHook {
 	GENERATED_BODY()
 
 	protected:
@@ -153,7 +212,7 @@ class UFINPipeHyperStartHook : public UFINFunctionHook {
 	}
 	
 	// Begin UFINFunctionHook
-	virtual UFINFunctionHook* Self() {
+	virtual UFINMultiFunctionHook* Self() {
 		return StaticSelf();
 	}
 	// End UFINFunctionHook
@@ -162,7 +221,7 @@ private:
 
 	static void EnterHyperPipe(const bool& retVal, UFGCharacterMovementComponent* CharacterMovementConstants, AFGPipeHyperStart* HyperStart) {
 		if(retVal && IsValid(HyperStart)) {
-			StaticSelf()->Send(HyperStart, "Transport", { FINStr("Entered"), FINBool(retVal)});
+			StaticSelf()->Send(HyperStart, "PlayerEntered", { FINBool(retVal)});
 		}
 	}
 	static void ExitHyperPipe(CallScope<void(*)(UFGCharacterMovementComponent*, bool)>& call, UFGCharacterMovementComponent* charMove, bool bRagdoll){
@@ -172,7 +231,7 @@ private:
 		if(IsValid(v)) {
 			UFGPipeConnectionComponentBase* connection = v->mConnectedComponent;
 			if(IsValid(connection)) {
-				StaticSelf()->Send(connection->GetOwner(), "Transport", {FINStr("Exited"), true, FINTrace(connection)});
+				StaticSelf()->Send(connection->GetOwner(), "PlayerExited", {});
 			}
 		}
 	} 

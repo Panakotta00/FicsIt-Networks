@@ -458,7 +458,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 
 #define FINRefSignalLocText(KeyName, Value) FINRefLocText(*(FString(TName) + TEXT("_") + FString(SName) + TEXT("_") + TEXT(KeyName)), TEXT(Value))
 #define FINRefSignalParamLocText(ParamName, KeyName, Value) FINRefLocText(*(FString(TName) + TEXT("_") + FString(SName) + TEXT("_") + TEXT(ParamName) + TEXT("_") + TEXT(KeyName)), TEXT(Value))
-#define SignalClassName(Prop) FIN_StaticRefSignal_ ## Prefix
+#define SignalClassName(Prop) FIN_StaticRefSignal_ ## Prop
 #define BeginSignal(InternalName, DisplayName, Description, ...) \
 	namespace SignalClassName(InternalName) { \
 		const int S = __COUNTER__; \
@@ -1113,17 +1113,14 @@ EndClass()
 
 BeginClass(AFGPipeHyperStart, "PipeHyperStart", "Pipe Hyper Start", "A actor that is a hypertube entrance buildable")
 Hook(UFINPipeHyperStartHook)
-BeginSignal(Transport, "Player Entered", "Triggers when a players enters into this hypertube connection.")
-	SignalParam(0, RString, transferType, "Transfer Type", "Tells what type of transfer was done. Entered if a player went into the pipe, and Exited if a player exited the pipe")
+BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube entrance.")
 	SignalParam(1, RBool, success, "Sucess", "True if the transfer was sucessfull")
+EndSignal()
+BeginSignal(PlayerExited, "Player Exited", "Triggers when a players leaves through this hypertube entrance.")
 EndSignal()
 EndClass()
 
 BeginClass(AFGBuildablePipeHyper, "BuildablePipeHyper", "Buildable Pipe Hyper", "A hypertube pipe")
-BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube connection.")
-	SignalParam(0, RBool, success, "Sucess", "True if the transfer was sucessfull")
-	SignalParam(1, RTrace<UFGPipeConnectionComponentBase>, throughConnector, "Through Connector", "The connector we entered through, can be nil if we transfered from outside world (like and entrance)")
-EndSignal()
 EndClass()
 
 BeginClass(UFGPipeConnectionComponentBase, "PipeConnectionBase", "Pipe Connection Base", "A actor component base that is a connection point to which a pipe for fluid or hyper can get attached to.")
