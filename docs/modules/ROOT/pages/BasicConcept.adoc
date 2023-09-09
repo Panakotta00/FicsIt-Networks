@@ -212,7 +212,7 @@ Now we just need to put this into the Lua programming language to make it useful
 constructor = component.proxy(component.findComponent("WireFactory Constructor1")[1])
 currentRecipe = constructor:getRecipe()
 
-print(currentRecipe)
+print(currentRecipe.Name)
 ----
 
 After typing this into the code input and pressing the go button in the case menu, our script will run, printing the name of the current recipe that our Constructor is using in the console. We've officially accomplished our goal! Furthermore, we figured out _how_ to accomplish our goal by understanding the structure of the Reflection System itself!
