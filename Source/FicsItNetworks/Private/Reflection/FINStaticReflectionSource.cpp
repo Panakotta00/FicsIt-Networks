@@ -1458,8 +1458,10 @@ EndClass()
 BeginClass(AFGBuildableTrainPlatformCargo, "TrainPlatformCargo", "Train Platform Cargo", "A train platform that allows for loading and unloading cargo cars.")
 BeginProp(RBool, isLoading, "Is Loading", "True if the cargo platform is currently loading the docked cargo vehicle.") {
 	Return self->GetIsInLoadMode();
+} PropSet() {
+	self->SetIsInLoadMode(Val);
 } EndProp()
-BeginProp(RBool, isUnloading, "Is Unloading", "True if the cargo platform is currently unloading the docked cargo vehicle.") {
+BeginProp(RBool, isUnloading, "Is Unloading", "True if the cargo platform is currently loading or unloading the docked cargo vehicle.") {
 	Return self->IsLoadUnloading();
 } EndProp()
 BeginProp(RFloat, dockedOffset, "Docked Offset", "The offset to the track start of the platform at were the vehicle docked.") {
