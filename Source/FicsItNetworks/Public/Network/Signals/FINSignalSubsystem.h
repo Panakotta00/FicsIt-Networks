@@ -40,6 +40,10 @@ public:
 	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
 	// End IFGSaveInterface
 
+	// Begin AActor
+	virtual void BeginPlay() override;
+	// End AActor
+
 	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& ReferenceCollector) {
 		Super::AddReferencedObjects(InThis, ReferenceCollector);
 		AFINSignalSubsystem* SigSubSys = Cast<AFINSignalSubsystem>(InThis);

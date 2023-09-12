@@ -92,15 +92,17 @@ namespace FicsItKernel {
 				sProp->Struct->CopyScriptStruct(p->ContainerPtrToValuePtr<void>(data), Struct->GetData());
 			} else if (FArrayProperty* aProp = CastField<FArrayProperty>(p)) {
 				//const FScriptArray& arr = prop->GetPropertyValue_InContainer(data);
-				const FScriptArray& arr = *aProp->ContainerPtrToValuePtr<FScriptArray>(data); // TODO: Check in Game
-				lua_pushnil(L);
-				FScriptArrayHelper Helper(aProp, data);
-				while (lua_next(L, i) != 0) {
-					if (!lua_isinteger(L, -1)) break;
-					Helper.AddValue();
-					luaToProperty(L, aProp->Inner, ((uint8*)Helper.GetRawPtr()) + (aProp->Inner->ElementSize * (Helper.Num()-1)), -1);
+				if (lua_istable(L, i)) {
+					const FScriptArray& arr = *aProp->ContainerPtrToValuePtr<FScriptArray>(data); // TODO: Check in Game
+					lua_pushnil(L);
+					FScriptArrayHelper Helper(aProp, data);
+					while (lua_next(L, i) != 0) {
+						if (!lua_isinteger(L, -1)) break;
+						Helper.AddValue();
+						luaToProperty(L, aProp->Inner, ((uint8*)Helper.GetRawPtr()) + (aProp->Inner->ElementSize * (Helper.Num()-1)), -1);
 					
-					lua_pop(L, 1);
+						lua_pop(L, 1);
+					}
 				}
 			} else {
 				lua_pushnil(L);

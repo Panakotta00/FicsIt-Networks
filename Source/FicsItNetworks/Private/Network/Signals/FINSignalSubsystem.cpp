@@ -20,16 +20,22 @@ void AFINSignalSubsystem::PreSaveGame_Implementation(int32 saveVersion, int32 ga
 }
 
 void AFINSignalSubsystem::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	
+}
+
+void AFINSignalSubsystem::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(AFINHookSubsystem::GetHookSubsystem(this));
+}
+
+void AFINSignalSubsystem::BeginPlay() {
+	Super::BeginPlay();
+
 	AFINHookSubsystem* HookSubsystem = AFINHookSubsystem::GetHookSubsystem(this);
 	if (HookSubsystem) for (const TPair<UObject*, FFINSignalListeners>& Sender : Listeners) {
 		HookSubsystem->AttachHooks(Sender.Key);
 	} else {
 		UE_LOG(LogFicsItNetworks, Warning, TEXT("Hook Subsystem not found! Unable to reattach hooks!"));
 	}
-}
-
-void AFINSignalSubsystem::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
-	out_dependentObjects.Add(AFINHookSubsystem::GetHookSubsystem(this));
 }
 
 void AFINSignalSubsystem::Cleanup() {
