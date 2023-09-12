@@ -570,6 +570,18 @@ public:
 	static void AFGBuildableDoor_Update(AFGBuildableDoor* InDoor, EDoorConfiguration InConfig) {
 		InDoor->OnRep_DoorConfiguration();
 	}
+
+	static TArray<TWeakObjectPtr<AFGRailroadVehicle>> FFGRailroadSignalBlock_GetOccupiedBy(const FFGRailroadSignalBlock& Block) {
+		return Block.mOccupiedBy;
+	}
+
+	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetQueuedReservations(const FFGRailroadSignalBlock& Block) {
+		return Block.mQueuedReservations;
+	}
+	
+	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
+		return Block.mApprovedReservations;
+	}
 };
 
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
@@ -1176,6 +1188,22 @@ BeginFunc(flushPipeNetwork, "Flush Pipe Network", "Flush the associated pipe net
     auto subsystem = AFGPipeSubsystem::GetPipeSubsystem(self->GetWorld());
 	subsystem->FlushPipeNetwork(networkID);
 } EndFunc()
+EndClass()
+
+BeginClass(AFGBuildable, "Buildable", "Buildable", "The base class of all buildables.")
+Hook(UFINBuildableHook)
+BeginSignal(ProductionChanged, "Production Changed", "Triggers when the production state of the buildable changes.")
+	SignalParam(0, RInt, state, "State", "The new production state.")
+EndSignal()
+BeginProp(RInt, numPowerConnections, "Num Power Connection", "The count of available power connections this building has.") {
+	Return (FINInt)self->GetNumPowerConnections();
+} EndProp()
+BeginProp(RInt, numFactoryConnections, "Num Factory Connection", "The cound of available factory connections this building has.") {
+	Return (FINInt)self->GetNumFactoryConnections();
+} EndProp()
+BeginProp(RInt, numFactoryOutputConnections, "Num Factory Output Connection", "The count of available factory output connections this building has.") {
+	Return (FINInt)self->GetNumFactoryOuputConnections();
+} EndProp()
 EndClass()
 
 BeginClass(AFGBuildableFactory, "Factory", "Factory", "The base class of most machines you can build.")
@@ -1790,6 +1818,21 @@ BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
 		stop = FINAny();
 	}
 } EndFunc()
+BeginFunc(setStop, "Set Stop", "Allows to override a stop already in the time table.") {
+	InVal(0, RInt, index, "Index", "The index of the stop you want to override.")
+	InVal(1, RStruct<FFINTimeTableStop>, stop, "Stop", "The time table stop you want to override with.")
+	OutVal(2, RBool, success, "Success", "True if setting was successful, false if not, f.e. invalid index.")
+	Body()
+	TArray<FTimeTableStop> Stops;
+	self->GetStops(Stops);
+	if (index < Stops.Num()) {
+		Stops[index] = stop;
+		self->SetStops(Stops);
+		success = true;
+	} else {
+		success = false;
+	}
+} EndFunc()
 BeginFunc(setCurrentStop, "Set Current Stop", "Sets the stop, to which the train trys to drive to right now.") {
 	InVal(0, RInt, index, "Index", "The index of the stop the train should drive to right now.")
 	Body()
@@ -1810,6 +1853,13 @@ BeginProp(RInt, numStops, "Num Stops", "The current number of stops in the time 
 EndClass()
 
 BeginClass(AFGBuildableRailroadTrack, "RailroadTrack", "Railroad Track", "A peice of railroad track over which trains can drive.")
+Hook(UFINRailroadTrackHook)
+BeginSignal(VehicleEnter, "VehicleEnter", "Triggered when a vehicle enters the track.")
+	SignalParam(0, RTrace<AFGRailroadVehicle>, Vehicle, "Vehicle", "The vehicle that entered the track.")
+EndSignal()
+BeginSignal(VehicleExit, "VehicleExit", "Triggered when a vehcile exists the track.")
+	SignalParam(0, RTrace<AFGRailroadVehicle>, Vehicle, "Vehicle", "The vehicle that exited the track.")
+EndSignal()
 BeginFunc(getClosestTrackPosition, "Get Closeset Track Position", "Returns the closes track position from the given world position") {
 	InVal(0, RStruct<FVector>, worldPos, "World Pos", "The world position form which you want to get the closest track position.")
 	OutVal(1, RTrace<AFGBuildableRailroadTrack>, track, "Track", "The track the track pos points to.")
@@ -1988,6 +2038,24 @@ BeginFunc(getObservedBlock, "Get Observed Block", "Returns the track block this 
 	OutVal(0, RStruct<FFINRailroadSignalBlock>, block, "Block", "The railroad signal block this signal is observing.")
 	Body()
 	block = FINStruct(FFINRailroadSignalBlock(self->GetObservedBlock()));
+} EndFunc()
+BeginFunc(getGuardedConnnections, "Get Guarded Connections", "Returns a list of the guarded connections. (incoming connections)") {
+	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, guardedConnections, "GuardedConnections", "The guarded connections.")
+	Body()
+	TArray<FINAny> GuardedConnections;
+	for (UFGRailroadTrackConnectionComponent* Connection : self->GetGuardedConnections()) {
+		GuardedConnections.Add(Ctx.GetTrace() / Connection);
+	}
+	guardedConnections = GuardedConnections;
+} EndFunc()
+BeginFunc(getObservedConnections, "Get Observed Connections", "Returns a list of the observed connections. (outgoing connections)") {
+	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, observedConnections, "ObservedConnections", "The observed connections.")
+	Body()
+	TArray<FINAny> ObservedConnections;
+	for (UFGRailroadTrackConnectionComponent* Connection : self->GetObservedConnections()) {
+		ObservedConnections.Add(Ctx.GetTrace() / Connection);
+	}
+	observedConnections = ObservedConnections;
 } EndFunc()
 EndClass()
 
@@ -2497,7 +2565,7 @@ BeginFunc(getRuleSet, "Get Rule Set", "Returns The rule set wich describe when t
 	ruleset = FINStruct(self->RuleSet);
 } EndFunc()
 BeginFunc(setRuleSet, "Set Rule Set", "Allows you to change the Rule Set of this time table stop.") {
-	InVal(1, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set you want to use instead.")
+	InVal(0, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set you want to use instead.")
 	Body()
 	self->RuleSet = ruleset;
 } EndFunc()
@@ -2519,32 +2587,42 @@ BeginProp(RBool, isDurationAndRule, "Is Duration and Rule", "True if the duratio
 } PropSet() {
 	self->IsDurationAndRule = Val;
 } EndProp()
-BeginProp(RArray<RClass<UFGItemDescriptor>>, loadFilters, "Load Filters", "The types of items that will be loaded.") {
+BeginFunc(getLoadFilters, "Get Load Filters", "Returns the types of items that will be loaded.") {
+	OutVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
+	Body()
 	TArray<FINAny> Filters;
 	for (TSubclassOf<UFGItemDescriptor> Filter : self->LoadFilterDescriptors) {
 		Filters.Add((FINClass)Filter);
 	}
-	Return Filters;
-} PropSet() {
+	filters = Filters;
+} EndFunc()
+BeginFunc(setLoadFilters, "Set Load Filters", "Sets the types of items that will be loaded.") {
+	InVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
+	Body()
 	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
-	for (const FINAny& Filter : Val) {
+	for (const FINAny& Filter : filters) {
 		Filters.Add(Filter.GetClass());
 	}
 	self->LoadFilterDescriptors = Filters;
-} EndProp()
-BeginProp(RArray<RClass<UFGItemDescriptor>>, unloadFilters, "Unload Filters", "The types of items that will be unloaded.") {
+} EndFunc()
+BeginFunc(getUnloadFilters, "Get Unload Filters", "Returns the types of items that will be unloaded.") {
+	OutVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
+	Body()
 	TArray<FINAny> Filters;
 	for (TSubclassOf<UFGItemDescriptor> Filter : self->UnloadFilterDescriptors) {
 		Filters.Add((FINClass)Filter);
 	}
-	Return Filters;
-} PropSet() {
+	filters = Filters;
+} EndFunc()
+BeginFunc(setUnloadFilters, "Set Unload Filters", "Sets the types of items that will be loaded.") {
+	InVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
+	Body()
 	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
-	for (const FINAny& Filter : Val) {
+	for (const FINAny& Filter : filters) {
 		Filters.Add(Filter.GetClass());
 	}
 	self->UnloadFilterDescriptors = Filters;
-} EndProp()
+} EndFunc()
 EndStruct()
 
 BeginStruct(FFINTrackGraph, "TrackGraph", "Track Graph", "Struct that holds a cache of a whole train/rail network.")
@@ -2577,30 +2655,64 @@ BeginProp(RBool, isValid, "Is Valid", "Is true if this signal block reference is
 	Return self->Block.IsValid();
 } EndProp()
 BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The block reference is invalid"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->IsOccupied();
 } EndProp()
 BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->HaveReservations();
 } EndProp()
 BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->IsPathBlock();
 } PropSet() {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	self->Block.Pin()->SetIsPathBlock(Val);
 } EndProp()
 BeginProp(RInt, blockValidation, "Block Validation", "Returns the blocks validation status.") {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	Return (int64)self->Block.Pin()->GetBlockValidation();
 } EndProp()
 BeginFunc(isOccupiedBy, "Is Occupied By", "Allows you to check if this block is occupied by a given train.") {
 	InVal(0, RObject<AFGTrain>, train, "Train", "The train you want to check if it occupies this block")
 	OutVal(1, RBool, isOccupied, "Is Occupied", "True if the given train occupies this block.")
 	Body()
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	isOccupied = self->Block.Pin()->IsOccupiedBy(train.Get());
+} EndFunc()
+BeginFunc(getOccupation, "Get Occupation", "Returns a list of trains that currently occupate the block.") {
+	OutVal(0, RArray<RTrace<AFGTrain>>, occupation, "Occupation", "A list of trains occupying the block.")
+	Body()
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
+	TArray<FINAny> Occupation;
+	for (TWeakObjectPtr<AFGRailroadVehicle> train : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetOccupiedBy(*self->Block.Pin())) {
+		if (train.IsValid()) Occupation.Add(Ctx.GetTrace() / train.Get());
+	}
+	occupation = Occupation;
+} EndFunc()
+BeginFunc(getQueuedReservations, "Get Queued Reservations", "Returns a list of trains that try to reserve this block and wait for approval.") {
+	OutVal(0, RArray<RTrace<AFGTrain>>, reservations, "Reservations", "A list of trains that try to reserve this block and wait for approval.")
+	Body()
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
+	TArray<FINAny> Reservations;
+	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetQueuedReservations(*self->Block.Pin())) {
+		if (!Reservation.IsValid()) continue;
+		AFGTrain* Train = Reservation->Train.Get();
+		if (Train) Reservations.Add(Ctx.GetTrace() / Train);
+	}
+	reservations = Reservations;
+} EndFunc()
+BeginFunc(getApprovedReservations, "Get Approved Reservations", "Returns a list of trains that are approved by this block.") {
+	OutVal(0, RArray<RTrace<AFGTrain>>, reservations, "Reservations", "A list of trains that are approved by this block.")
+	Body()
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
+	TArray<FINAny> Reservations;
+	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetApprovedReservations(*self->Block.Pin())) {
+		if (!Reservation.IsValid()) continue;
+		AFGTrain* Train = Reservation->Train.Get();
+		if (Train) Reservations.Add(Ctx.GetTrace() / Train);
+	}
+	reservations = Reservations;
 } EndFunc()
 EndStruct()
 
