@@ -54,6 +54,8 @@ public:
 	UPROPERTY(Replicated)
 	bool bFinished = false;
 
+	UPROPERTY(Replicated)
+	bool CanExtend = true;
 	
 	UPROPERTY(Replicated)
 	int Extension = 1;

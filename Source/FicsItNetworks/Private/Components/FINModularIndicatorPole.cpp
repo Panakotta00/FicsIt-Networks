@@ -81,6 +81,12 @@ AActor* AFINModularIndicatorPole::netFunc_getModule(int Index) {
 }
 
 void AFINModularIndicatorPole::ConstructParts() {
+	// Clear Components
+	for (UStaticMeshComponent* comp : Parts) {
+		comp->UnregisterComponent();
+		comp->SetActive(false);
+		comp->DestroyComponent();
+	}
 	Parts.Empty();
 	if(IsValid(Connector)) {
 		Connector->SetMobility(EComponentMobility::Movable);

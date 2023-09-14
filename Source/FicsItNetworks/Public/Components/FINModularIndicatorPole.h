@@ -25,6 +25,9 @@ public:
 	UStaticMesh* VerticalAttachmentMesh = nullptr;
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* ConnectorMesh = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, SaveGame, Replicated)
+	bool CanExtend = true;
 	
 	UPROPERTY(EditDefaultsOnly, SaveGame, Replicated)
 	int Extension = 1;
