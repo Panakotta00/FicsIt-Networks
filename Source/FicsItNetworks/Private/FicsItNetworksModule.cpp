@@ -105,6 +105,20 @@ void AddRedirects(FString FromParent, FString ToParent, const ClassChange& Chang
 	}
 }
 
+void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
+	UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
+	UObject* InventorySlot = HookHelper.GetContext();
+	TObjectPtr<UObject>* WidgetPtr = HookHelper.GetOutVariablePtr<FObjectProperty>();
+	UUserWidget* Widget = Cast<UUserWidget>(WidgetPtr->Get());
+	AFINFileSystemState* State = UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(self);
+	if (State) {
+		UVerticalBox* MenuList = Cast<UVerticalBox>(Widget->GetWidgetFromName("VerticalBox_0"));
+		UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
+		UUIDButton->InitSlotWidget(self);
+		MenuList->AddChildToVerticalBox(UUIDButton);
+	}
+}
+
 void FFicsItNetworksModule::StartupModule(){
 	CodersFileSystem::Tests::TestPath();
 	
@@ -237,21 +251,12 @@ void FFicsItNetworksModule::StartupModule(){
 		});
 
 		// Copy FS UUID Item Context Menu Entry //
-		UClass* StackPlitter = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_StackSplitSlider.Widget_StackSplitSlider_C"));
-		check(StackPlitter);
-		UFunction* Function = StackPlitter->FindFunctionByName(TEXT("Construct"));
+		UClass* Slot = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/InventorySlots/Widget_InventorySlot.Widget_InventorySlot_C"));
+		check(Slot);
+		UFunction* Function = Slot->FindFunctionByName(TEXT("CreateSplitSlider"));
 		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
-		HookManager->HookBlueprintFunction(Function, [](FBlueprintHookHelper& HookHelper) {
-			UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
-			UUserWidget* SourceSlot = Cast<UUserWidget>(FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mSourceSlot")));
-			AFINFileSystemState* State = UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(SourceSlot);
-			if (State) {
-				UVerticalBox* MenuList = Cast<UVerticalBox>(self->GetWidgetFromName("VerticalBox_0"));
-				UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
-				UUIDButton->InitSlotWidget(SourceSlot);
-				MenuList->AddChildToVerticalBox(UUIDButton);
-			}
-		}, EPredefinedHookOffset::Start);
+		HookManager->HookBlueprintFunction(Function, InventorSlot_CreateWidgetSlider_Hook, EPredefinedHookOffset::Return);
+		
 #else
 		/*FFINGlobalRegisterHelper::Register();
 			
