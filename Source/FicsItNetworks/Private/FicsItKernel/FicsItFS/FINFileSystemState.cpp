@@ -3,6 +3,7 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Widgets/SViewport.h"
 
 AFINFileSystemState::AFINFileSystemState() {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"RootComponent");
@@ -63,7 +64,7 @@ int AskForDiskOrSave(FString Name) {
 				]
 			]
 		];
-	FSlateApplication::Get().AddModalWindow(Window, FSlateApplication::Get().GetActiveTopLevelWindow());
+	FSlateApplication::Get().AddModalWindow(Window, GEngine->GetGameViewportWidget());
 	return KeepDisk;
 }
 
