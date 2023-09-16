@@ -11,6 +11,8 @@
 #include "Reflection/FINStructProperty.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
 
 #define LOCTEXT_NAMESPACE "FicsIt-Networks"
 #define stringify( name ) # name

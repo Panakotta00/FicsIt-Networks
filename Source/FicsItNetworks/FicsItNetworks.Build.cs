@@ -9,7 +9,7 @@ public class FicsItNetworks : ModuleRules
 {
     public FicsItNetworks(ReadOnlyTargetRules Target) : base(Target)
     {
-        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         bLegacyPublicIncludePaths = false;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
@@ -29,6 +29,7 @@ public class FicsItNetworks : ModuleRules
             "Vorbis",
             "Http",
 		});
+	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 
         if (Target.Type == TargetRules.TargetType.Editor) {
 			PublicDependencyModuleNames.AddRange(new string[] {"OnlineBlueprintSupport", "AnimGraph"});

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "FicsItNetworksModule.h"
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Network/Wireless/FINWirelessAccessPointConnection.h"
 #include "Network/Wireless/FINWirelessSubsystem.h"

@@ -82,6 +82,34 @@ TSharedPtr<SWidget> AFINComputerGPU::CreateWidget() {
 	return nullptr;
 }
 
+int AFINComputerGPU::MouseToInt(const FPointerEvent& MouseEvent) {
+	int mouseEvent = 0;
+	if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))	mouseEvent |= 0b0000000001;
+	if (MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))	mouseEvent |= 0b0000000010;
+	if (MouseEvent.IsControlDown())								mouseEvent |= 0b0000000100;
+	if (MouseEvent.IsShiftDown())								mouseEvent |= 0b0000001000;
+	if (MouseEvent.IsAltDown())									mouseEvent |= 0b0000010000;
+	if (MouseEvent.IsCommandDown())								mouseEvent |= 0b0000100000;
+	return mouseEvent;
+}
+
+int AFINComputerGPU::InputToInt(const FInputEvent& KeyEvent) {
+	int mouseEvent = 0;
+	if (KeyEvent.IsControlDown())								mouseEvent |= 0b0000000100;
+	if (KeyEvent.IsShiftDown())									mouseEvent |= 0b0000001000;
+	if (KeyEvent.IsAltDown())									mouseEvent |= 0b0000010000;
+	if (KeyEvent.IsCommandDown())								mouseEvent |= 0b0000100000;
+	return mouseEvent;
+}
+
+void AFINComputerGPU::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
+	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr())) BindScreen(NewScreen);
+}
+
+FVector2D AFINComputerGPU::netFunc_getScreenSize() {
+	return Widget->GetCachedGeometry().GetLocalSize();
+}
+
 void AFINComputerGPU::netSig_ScreenBound_Implementation(const FFINNetworkTrace& oldScreen) {}
 
 void UFINScreenWidget::OnNewWidget() {
@@ -136,9 +164,7 @@ void UFINScreenWidget::ReleaseSlateResources(bool bReleaseChildren) {
 }
 
 TSharedRef<SWidget> UFINScreenWidget::RebuildWidget() {
-	Container = SNew(SBox);
-	Container->SetHAlign(HAlign_Center);
-	Container->SetVAlign(VAlign_Center);
+	Container = SNew(SBox).HAlign(HAlign_Fill).VAlign(VAlign_Fill);
 	OnNewWidget();
 	return Container.ToSharedRef();
 }

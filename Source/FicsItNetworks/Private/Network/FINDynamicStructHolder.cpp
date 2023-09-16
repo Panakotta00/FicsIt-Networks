@@ -73,6 +73,11 @@ bool FFINDynamicStructHolder::Serialize(FArchive& Ar) {
 	return true;
 }
 
+bool FFINDynamicStructHolder::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) {
+	bOutSuccess = Serialize(Ar);
+	return bOutSuccess;
+}
+
 void FFINDynamicStructHolder::AddStructReferencedObjects(FReferenceCollector& Collector) const {
 	UScriptStruct* ThisStruct = Struct;
 	if (Struct) Collector.AddReferencedObject(ThisStruct);

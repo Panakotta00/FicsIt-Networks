@@ -51,8 +51,56 @@ public:
      */
     virtual TSharedPtr<SWidget> CreateWidget();
 
+	/**
+	 * This function converts a mouse events button states to a int which is actually a bit field
+	 * for each of the button states.
+	 * The states from least significant bit to most:
+	 * - Left Mouse Button down
+	 * - Right Mouse Button down
+	 * - control key down
+	 * - alt key down
+	 * - shift key down
+	 * - command key down
+	 *
+	 * @return	the integer holding the bit field
+	 */
+	static int MouseToInt(const FPointerEvent& MouseEvent);
+	
+	/**
+	* This function converts a key events button states to a int which is actually a bit field
+	* for each of the button states.
+	* The states from least significant bit to most:
+	* - 0
+	* - 0
+	* - control key down
+	* - alt key down
+	* - shift key down
+	* - command key down
+	*
+	* @return	the integer holding the bit field
+	*/
+	static int InputToInt(const FInputEvent& InputEvent);
+
+	// Begin FIN Reflection
+	UFUNCTION()
+	void netFunc_bindScreen(FFINNetworkTrace NewScreen);
+	UFUNCTION()
+	void netFuncMeta_bindScreen(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "bindScreen";
+		DisplayName = FText::FromString("Bind Screen");
+		Description = FText::FromString("Binds this GPU to the given screen. Unbinds the already bound screen.");
+		ParameterInternalNames.Add("newScreen");
+		ParameterDisplayNames.Add(FText::FromString("New Screen"));
+		ParameterDescriptions.Add(FText::FromString("The screen you want to bind this GPU to. Null if you want to unbind the screen."));
+		Runtime = 0;
+	}
+
+	UFUNCTION()
+	FVector2D netFunc_getScreenSize();
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
     void netSig_ScreenBound(const FFINNetworkTrace& oldScreen);
+	// End FIN Reflection
 };
 
 /**

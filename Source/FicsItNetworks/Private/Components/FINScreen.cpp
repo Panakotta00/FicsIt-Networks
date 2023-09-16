@@ -66,7 +66,7 @@ void AFINScreen::Tick(float DeltaSeconds) {
 		if (GPUPtr) {
 			Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 		} else {
-			SetWidget(SNew(SScaleBox));
+			SetWidget(SNew(SBox));
 		}
 
 		OnGPUUpdate.Broadcast();
@@ -115,16 +115,7 @@ FFINNetworkTrace AFINScreen::GetGPU() const {
 
 void AFINScreen::SetWidget(TSharedPtr<SWidget> widget) {
 	if (Widget != widget) Widget = widget;
-	WidgetComponent->SetSlateWidget(
-		Widget.IsValid() ?
-			SNew(SScaleBox)
-			.Stretch(EStretch::ScaleToFit)
-			.Content()[
-				Widget.ToSharedRef()
-			]
-		:
-			SNew(SScaleBox)
-		);
+	WidgetComponent->SetSlateWidget(Widget.ToSharedRef());
 	WidgetComponent->RequestRedraw();
 	OnWidgetUpdate.Broadcast();
 }

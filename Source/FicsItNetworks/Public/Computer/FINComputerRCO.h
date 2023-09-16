@@ -38,6 +38,15 @@ public:
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
 	void GPUKeyCharEvent(AFINComputerGPUT1* GPU, const FString& c, int btn);
 
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
+	void GPUT2MouseEvent(AFINComputerGPUT2* GPU, int Type, FVector2D Position, int Modifiers);
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
+	void GPUT2KeyEvent(AFINComputerGPUT2* GPU, int Type, int64 C, int64 Code, int Modifiers);
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
+	void GPUT2KeyCharEvent(AFINComputerGPUT2* GPU, const FString& C, int Modifiers);
+
 	UFUNCTION(Server, WithValidation, Reliable)
 	void CreateEEPROMState(UFGInventoryComponent* Inv, int SlotIdx);
 
