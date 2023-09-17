@@ -39,8 +39,8 @@ FFINDynamicStructHolder& FFINDynamicStructHolder::operator=(const FFINDynamicStr
 	if (Data) {
 		Struct->InitializeStruct(Data);
 		Struct->CopyScriptStruct(Data, Other.Data);
-	}
 	
+	}
 	return *this;
 }
 
@@ -52,10 +52,12 @@ FFINDynamicStructHolder FFINDynamicStructHolder::Copy(UScriptStruct* Struct, con
 
 bool FFINDynamicStructHolder::Serialize(FArchive& Ar) {
 	UScriptStruct* OldStruct = Struct;
+	// TODO: TObjectPtr<UObject> ObjectPtr; ????
 	Ar << Struct;
+	
 	if (Ar.IsLoading()) {
 		if (Data) {
-			OldStruct->DestroyStruct(Data);
+			if (OldStruct) OldStruct->DestroyStruct(Data);
 			if (Struct) {
 				Data = FMemory::Realloc(Data, Struct->GetStructureSize());
 			} else {

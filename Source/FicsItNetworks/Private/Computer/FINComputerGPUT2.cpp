@@ -4,25 +4,118 @@
 #include "Computer/FINComputerRCO.h"
 #include "Interfaces/ISlateNullRendererModule.h"
 
-const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINReflectionUIStyleStruct"));
+const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINGPUT2WidgetStyle"));
 
-int32 FFINGPUT2DC_Line::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
-	FSlateDrawElement::MakeLines(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, Color, true, Thickness);
+int32 FFINGPUT2DC_PushTransform::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	FSlateRenderTransform Transform = FSlateRenderTransform(TScale2<float>(Scale.X, Scale.Y), Translation);
+	Transform.Concatenate(FSlateRenderTransform(TQuat2<float>(Rotation)));
+	FGeometry NewGeometry = AllottedGeometry.MakeChild(Transform);
+	Context.GeometryStack.Push(NewGeometry);
 	return LayerId;
 }
 
-int32 FFINGPUT2DC_Ellipse::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
-	return FFINGPUT2DrawCall::OnPaint(Args, AllottedGeometry, OutDrawElements, LayerId, InWidgetStyle);
+int32 FFINGPUT2DC_PushLayout::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	FGeometry NewGeometry = AllottedGeometry.MakeChild(Size, FSlateLayoutTransform(Scale, Offset));
+	Context.GeometryStack.Push(NewGeometry);
+	return LayerId;
 }
 
-int32 FFINGPUT2DC_Text::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
-	FSlateFontInfo Font = FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/UI/FiraCode.FiraCode'")), Size, "FiraCode-Regular");
+int32 FFINGPUT2DC_PopGeometry::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	if (Context.GeometryStack.Num() > 1) { // Needs to be 1 as there has to be at least one Geometry in the stack, that is the whole Widgets Geometry
+		Context.GeometryStack.Pop(false);
+	}
+	return LayerId;
+}
+
+int32 FFINGPUT2DC_PushClipRect::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	FSlateClippingZone Clip(AllottedGeometry.GetLayoutBoundingRect(FSlateRect::FromPointAndExtent(Position, Size)));
+	Context.ClippingStack.Add(Clip);
+	OutDrawElements.PushClip(Clip);
+	return LayerId;
+}
+
+int32 FFINGPUT2DC_PushClipPolygon::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	FSlateClippingZone Clip(TopLeft, TopRight, BottomLeft, BottomRight);
+	Context.ClippingStack.Add(Clip);
+	OutDrawElements.PushClip(Clip);
+	return LayerId;
+}
+
+int32 FFINGPUT2DC_PopClip::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	if (Context.GeometryStack.Num() > 0) {
+		Context.ClippingStack.Pop();
+		OutDrawElements.PopClip();
+	}
+	return LayerId;
+}
+
+int32 FFINGPUT2DC_Lines::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	FSlateDrawElement::MakeLines(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(), Points, ESlateDrawEffect::None, Color, true, Thickness);
+	return LayerId;
+}
+
+int32 FFINGPUT2DC_Text::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	const FSlateFontInfo& Font = bUseMonospace ? Context.Style->MonospaceText : Context.Style->NormalText;
 	FSlateDrawElement::MakeText(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(Position)), Text, Font, ESlateDrawEffect::None, Color);
+	return LayerId;
+}
+
+int32 FFINGPUT2DC_Spline::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	FSlateDrawElement::MakeSpline(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(), Start, StartDirection, End, EndDirection, Thickness, ESlateDrawEffect::None, Color);
+	return LayerId;
+}
+
+int32 FFINGPUT2DC_Bezier::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	FSlateDrawElement::MakeCubicBezierSpline(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(), P0, P1, P2, P3, Thickness, ESlateDrawEffect::None, Color);
+	return LayerId;
+}
+
+int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
+	FSlateBrush Brush;
+	if (bIsBorder) {
+		Brush = Context.Style->HollowBox;
+		Brush.Margin = FMargin(MarginLeft, MarginTop, MarginRight, MarginBottom);
+	} else {
+		Brush = Context.Style->FilledBox;
+	}
+
+	if (bIsRounded || bHasOutline) {
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.OutlineSettings.RoundingType = ESlateBrushRoundingType::FixedRadius;
+	}
+
+	if (bIsRounded) {
+		Brush.OutlineSettings.CornerRadii = FVector4d(RadiusTopLeft, RadiusTopRight, RadiusBottomRight, RadiusBottomLeft);
+	} else {
+		Brush.OutlineSettings.CornerRadii = FVector4d(0);
+	}
+
+	if (bHasOutline) {
+		Brush.OutlineSettings.Width = OutlineThickness;
+		Brush.OutlineSettings.Color = OutlineColor;
+	}
+
+	FVector2D Translation = Position;
+	TOptional<FVector2d> RotationPoint;
+	if (bHasCenteredOrigin) {
+		Translation -= Size / 2;
+	} else {
+		RotationPoint = FVector2d(0);
+	}
+
+	double RotationAngle = FMath::DegreesToRadians(Rotation);
+	
+	FPaintGeometry PaintGeometry = AllottedGeometry.ToPaintGeometry(Size, FSlateLayoutTransform(Translation)); 
+	
+	FSlateDrawElement::MakeRotatedBox(OutDrawElements, LayerId++, PaintGeometry, &Brush, ESlateDrawEffect::None, RotationAngle, RotationPoint, FSlateDrawElement::ERotationSpace::RelativeToElement, Color);
 	return LayerId;
 }
 
 void FFINGPUT2WidgetStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const {
 	FSlateWidgetStyle::GetResources(OutBrushes);
+
+	OutBrushes.Add(&HollowBox);
+	OutBrushes.Add(&FilledBox);
 }
 
 const FFINGPUT2WidgetStyle& FFINGPUT2WidgetStyle::GetDefault() {
@@ -49,9 +142,11 @@ FVector2D SFINGPUT2Widget::ComputeDesiredSize(float LayoutScaleMultiplier) const
 }
 
 int32 SFINGPUT2Widget::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
+	FFINGPUT2DrawContext Context(Style);
+	Context.GeometryStack.Add(AllottedGeometry);
 	for (const FFINDynamicStructHolder& DrawCallBase : DrawCalls.Get()) {
 		FFINGPUT2DrawCall* DrawCall = DrawCallBase.GetPtr<FFINGPUT2DrawCall>();
-		if (DrawCall) LayerId = DrawCall->OnPaint(Args, AllottedGeometry, OutDrawElements, LayerId, InWidgetStyle);
+		if (DrawCall) LayerId = DrawCall->OnPaint(Context, Args, Context.GeometryStack.Last(), OutDrawElements, LayerId, InWidgetStyle);
 	}
 	return LayerId;
 }
@@ -172,21 +267,80 @@ void AFINComputerGPUT2::FlushDrawCalls() {
 	DrawCalls.Empty();
 }
 
+void AFINComputerGPUT2::AddDrawCall(TFINDynamicStruct<FFINGPUT2DrawCall> DrawCall) {
+	FScopeLock Lock(&DrawingMutex);
+	DrawCalls.Add(DrawCall);
+}
+
 void AFINComputerGPUT2::netFunc_flush() {
 	FlushDrawCalls();
 	bFlushOverNetwork = true;
 }
 
-void AFINComputerGPUT2::netFunc_drawLine(FVector2D start, FVector2D end, double thickness, FLinearColor color) {
-	DrawCalls.Add(FFINGPUT2DC_Line(start, end, thickness, color.QuantizeRound()));
+void AFINComputerGPUT2::netFunc_pushTransform(FVector2D translation, double rotation, FVector2D scale) {
+	AddDrawCall(FFINGPUT2DC_PushTransform(translation, rotation, scale));
 }
 
-void AFINComputerGPUT2::netFunc_drawEllipse(FVector2D position, double radius1, double radius2, double rotation, double thickness, FLinearColor color) {
-	DrawCalls.Add(FFINGPUT2DC_Ellipse(position, radius1, radius2, rotation, thickness, color.QuantizeRound()));
+void AFINComputerGPUT2::netFunc_pushLayout(FVector2D offset, FVector2D size, double scale) {
+	AddDrawCall(FFINGPUT2DC_PushLayout(offset, size, scale));
 }
 
-void AFINComputerGPUT2::netFunc_drawText(FVector2D position, const FString& text, double size, FLinearColor color) {
-	DrawCalls.Add(FFINGPUT2DC_Text(position, text, size, color.QuantizeRound()));
+void AFINComputerGPUT2::netFunc_popGeometry() {
+	AddDrawCall(FFINGPUT2DC_PopGeometry());
+}
+
+void AFINComputerGPUT2::netFunc_pushClipRect(FVector2D position, FVector2D size) {
+	AddDrawCall(FFINGPUT2DC_PushClipRect(position, size));
+}
+
+void AFINComputerGPUT2::netFunc_pushClipPolygon(FVector2D topLeft, FVector2D topRight, FVector2D bottomLeft, FVector2D bottomRight) {
+	AddDrawCall(FFINGPUT2DC_PushClipPolygon(topLeft, topRight, bottomLeft, bottomRight));
+}
+
+void AFINComputerGPUT2::netFunc_popClip() {
+	AddDrawCall(FFINGPUT2DC_PopClip());
+}
+
+void AFINComputerGPUT2::netFunc_drawLines(TArray<FVector2D> points, double thickness, FLinearColor color) {
+	AddDrawCall(FFINGPUT2DC_Lines(points, thickness, color.QuantizeRound()));
+}
+
+void AFINComputerGPUT2::netFunc_drawText(FVector2D position, const FString& text, double size, FLinearColor color, bool monospace) {
+	AddDrawCall(FFINGPUT2DC_Text(position, text, size, color.QuantizeRound(), monospace));
+}
+
+void AFINComputerGPUT2::netFunc_drawSpline(FVector2D start, FVector2D startDirection, FVector2D end, FVector2D endDirection, double thickness, FLinearColor color) {
+	AddDrawCall(FFINGPUT2DC_Spline(start, startDirection, end, endDirection, thickness, color.QuantizeRound()));
+}
+
+void AFINComputerGPUT2::netFunc_drawBezier(FVector2D p1, FVector2D p2, FVector2D p3, FVector2D p4, double thickness, FLinearColor color) {
+	AddDrawCall(FFINGPUT2DC_Bezier(p1, p2, p3, p4, thickness, color.QuantizeRound()));
+}
+
+void AFINComputerGPUT2::netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color,
+										bool hasCenteredOrigin, bool isBorder, double marginLeft, double marginRight, double marginTop,
+										double marginBottom, bool isRounded, double radiusTopLeft, double radiusTopRight, double radiusBottomRight,
+										double radiusBottomLeft, bool hasOutline, double outlineThickness, FLinearColor outlineColor) {
+	FFINGPUT2DC_Box DC(position, size, rotation, color.QuantizeRound());
+	DC.bHasCenteredOrigin = hasCenteredOrigin;
+	DC.bIsBorder = isBorder;
+	DC.MarginLeft = marginLeft;
+	DC.MarginRight = marginRight;
+	DC.MarginTop = marginTop;
+	DC.MarginBottom = marginBottom;
+	DC.bIsRounded = isRounded;
+	DC.RadiusTopLeft = radiusTopLeft;
+	DC.RadiusTopRight = radiusTopRight;
+	DC.RadiusBottomRight = radiusBottomRight;
+	DC.RadiusBottomLeft = radiusBottomLeft;
+	DC.bHasOutline = hasOutline;
+	DC.OutlineThickness = outlineThickness;
+	DC.OutlineColor = outlineColor.QuantizeRound();
+	DrawCalls.Add(DC);
+}
+
+void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, double rotation) {
+	DrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound()));
 }
 
 FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool bMonospace) {
