@@ -12,6 +12,7 @@
 #include "FGCharacterPlayer.h"
 #include "FGGameMode.h"
 #include "FGGameState.h"
+#include "FGRailroadTrackConnectionComponent.h"
 #include "Buildables/FGPipeHyperStart.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Hologram/FGBuildableHologram.h"
@@ -116,6 +117,13 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 		UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
 		UUIDButton->InitSlotWidget(self);
 		MenuList->AddChildToVerticalBox(UUIDButton);
+	}
+}
+
+void UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,int32)>& Scope, UFGRailroadTrackConnectionComponent* self, int32 Index) {
+	int64 ForcedTrack = AFINComputerSubsystem::GetComputerSubsystem(self)->GetForcedRailroadSwitch(self);
+	if (ForcedTrack >= 0) {
+		Scope(self, ForcedTrack);
 	}
 }
 
@@ -247,6 +255,14 @@ void FFicsItNetworksModule::StartupModule(){
 			if (Reason == EEndPlayReason::Destroyed && self->HasAuthority()) {
 				UE_LOG(LogFicsItNetworks, Display, TEXT("[Wireless] Radar tower Destroyed, recalculating network topology"));
 				AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
+			}
+		});
+
+		SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::SetSwitchPosition, UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook);
+
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGRailroadTrackConnectionComponent::EndPlay, (void*)GetDefault<UFGRailroadTrackConnectionComponent>(), [](UActorComponent* self, EEndPlayReason::Type Reason) {
+			if (Reason == EEndPlayReason::Destroyed) {
+				AFINComputerSubsystem::GetComputerSubsystem(self)->ForceRailroadSwitch(Cast<UFGRailroadTrackConnectionComponent>(self), -1);
 			}
 		});
 

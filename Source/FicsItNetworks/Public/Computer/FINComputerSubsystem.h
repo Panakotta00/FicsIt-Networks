@@ -10,6 +10,7 @@
 
 class AFINComputerGPU;
 class UFINGPUWidgetSign;
+class UFGRailroadTrackConnectionComponent;
 
 UCLASS()
 class FICSITNETWORKS_API AFINComputerSubsystem : public AModSubsystem, public IFGSaveInterface {
@@ -23,9 +24,6 @@ public:
 	TMap<AFINComputerGPU*, UFINGPUWidgetSign*> GPU2WidgetSign;
 	UPROPERTY()
 	TMap<UFINGPUWidgetSign*, AFINComputerGPU*> WidgetSign2GPU;
-
-	UPROPERTY()
-	TMap<AFGBuildableRailroadSwitchControl*, int64> ForcedRailroadSwitches;
 
 	UPROPERTY()
 	UEnhancedInputComponent* Input;
@@ -64,6 +62,13 @@ public:
 
 	UFINGPUWidgetSign* AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign);
 	void DeleteGPUWidgetSign(AFINComputerGPU* GPU);
+
+	void ForceRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch, int64 Track);
+	int64 GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch);
+
+private:
+	UPROPERTY(SaveGame)
+	TMap<UFGRailroadTrackConnectionComponent*, int64> ForcedRailroadSwitches;
 };
 
 UCLASS()

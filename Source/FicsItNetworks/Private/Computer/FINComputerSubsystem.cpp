@@ -4,6 +4,8 @@
 #include "Subsystem/SubsystemActorManager.h"
 #include "FGCharacterPlayer.h"
 #include "FGInputSettings.h"
+#include "FGRailroadTrackConnectionComponent.h"
+#include "Buildables/FGBuildableRailroadSwitchControl.h"
 #include "Computer/FINComputerGPU.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
@@ -149,6 +151,18 @@ void AFINComputerSubsystem::DeleteGPUWidgetSign(AFINComputerGPU* GPU) {
 		GPU2WidgetSign.Remove(GPU);
 		WidgetSign2GPU.Remove(*WidgetSign);
 	}
+}
+
+void AFINComputerSubsystem::ForceRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch, int64 Track) {
+	if (!IsValid(RailroadSwitch)) return;
+	if (Track < 0) ForcedRailroadSwitches.Remove(RailroadSwitch);
+	else ForcedRailroadSwitches.Add(RailroadSwitch, Track);
+}
+
+int64 AFINComputerSubsystem::GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch) {
+	int64* Track = ForcedRailroadSwitches.Find(RailroadSwitch);
+	if (Track) return *Track;
+	return -1;
 }
 
 TSharedRef<SWidget> UFINGPUSignPrefabWidget::RebuildWidget() {

@@ -61,6 +61,7 @@
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
 #include "Buildables/FGBuildableWidgetSign.h"
+#include "Computer/FINComputerSubsystem.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
 #include "WheeledVehicles/FGWheeledVehicle.h"
 
@@ -1982,6 +1983,12 @@ BeginFunc(getSwitchPosition, "Get Switch Position", "Returns the current switch 
 	OutVal(0, RInt, index, "Index", "The index of the connection connection the switch currently points to.")
     Body()
     index = (int64)self->GetSwitchPosition();
+} EndFunc()
+BeginFunc(forceSwitchPosition, "Force Switch Position", "Forces the switch position to a given location. Even autopilot will be forced to use this track. A negative number can be used to remove the forced track.") {
+	InVal(0, RInt, index, "Index", "The connection index to whcih the switch should be force to point to. Negative number to remove the lock.")
+	Body()
+	self->SetSwitchPosition(index);
+	AFINComputerSubsystem::GetComputerSubsystem(self)->ForceRailroadSwitch(self, index);
 } EndFunc()
 BeginProp(RBool, isConnected, "Is Connected", "True if the connection has any connection to other connections.") {
 	Return self->IsConnected();
