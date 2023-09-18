@@ -17,8 +17,6 @@ public:
 	 * Might cause the GPU to reset and the widget to get recreated.
 	 * Pass nullptr if you want to unbind the current GPU.
 	 *
-	 * Server Only
-	 *
 	 * @param[in]	gpu		the new gpu this screen should bind to.
 	 */
 	UFUNCTION()
@@ -27,8 +25,6 @@ public:
 	/**
 	 * Returns the currently bound GPU.
 	 * Nullptr if no gpu is bound.
-	 *
-	 * Server Only
 	 *
 	 * @return	the currently bound gpu.
 	 */
@@ -52,9 +48,4 @@ public:
 	 * @return	the currently cached widget
 	 */
 	virtual TSharedPtr<SWidget> GetWidget() const = 0;
-
-	/**
-	 * Lets the screen to request a new widget from the gpu.
-	 */
-	virtual void RequestNewWidget() = 0;
 };

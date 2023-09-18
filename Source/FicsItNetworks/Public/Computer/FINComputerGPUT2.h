@@ -22,9 +22,6 @@ struct FFINGPUT2WidgetStyle : public FSlateWidgetStyle {
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FSlateFontInfo MonospaceText;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
-	FSlateBrush HollowBox;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FSlateBrush FilledBox;
@@ -193,7 +190,7 @@ struct FFINGPUT2DC_Text : public FFINGPUT2DrawCall {
 	FString Text;
 
 	UPROPERTY(SaveGame)
-	double Size;
+	int64 Size;
 
 	UPROPERTY(SaveGame)
 	FColor Color;
@@ -202,7 +199,7 @@ struct FFINGPUT2DC_Text : public FFINGPUT2DrawCall {
 	bool bUseMonospace;
 
 	FFINGPUT2DC_Text() = default;
-	FFINGPUT2DC_Text(FVector2D Position, FString Text, double Size, FColor Color, bool bUseMonospace) : Position(Position), Text(Text), Size(Size), Color(Color), bUseMonospace(bUseMonospace) {}
+	FFINGPUT2DC_Text(FVector2D Position, FString Text, int64 Size, FColor Color, bool bUseMonospace) : Position(Position), Text(Text), Size(Size), Color(Color), bUseMonospace(bUseMonospace) {}
 
 	virtual int32 OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const override;
 };
@@ -506,6 +503,7 @@ public:
 
 	UFUNCTION()
 	void netFunc_popClip();
+	UFUNCTION()
 	void netFuncMeta_popClip(FString& InternalName, FText& DisplayName, FText& Description, int32& Runtime) {
 		InternalName = "popClip";
 		DisplayName = FText::FromString("Pop Clipping Zone");
@@ -533,7 +531,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_drawText(FVector2D position, const FString& text, double size, FLinearColor color, bool monospace);
+	void netFunc_drawText(FVector2D position, const FString& text, int64 size, FLinearColor color, bool monospace);
 	UFUNCTION()
 	void netFuncMeta_drawText(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "drawText";

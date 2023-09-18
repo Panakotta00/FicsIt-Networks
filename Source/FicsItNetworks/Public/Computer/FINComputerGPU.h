@@ -4,23 +4,16 @@
 #include "FINComputerModule.h"
 #include "FINPciDeviceInterface.h"
 #include "Graphics/FINGPUInterface.h"
+#include "Graphics/FINScreenInterface.h"
 #include "FINComputerGPU.generated.h"
 
 UCLASS()
 class FICSITNETWORKS_API AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface, public IFINPciDeviceInterface {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite, SaveGame, Replicated)
+	UPROPERTY(BlueprintReadWrite, SaveGame, Replicated, ReplicatedUsing=OnRep_Screen)
     FFINNetworkTrace Screen;
 
-	UPROPERTY(Replicated)
-	UObject* ScreenPtr = nullptr;
-
-	TSharedPtr<SWidget> Widget;
-	bool bShouldCreate = false;
-	bool bScreenChanged = false;
-
-public:
 	AFINComputerGPU();
 
 	// Begin AActor
@@ -33,16 +26,11 @@ public:
 	virtual void BindScreen(const FFINNetworkTrace& screen) override;
 	virtual FFINNetworkTrace GetScreen() const override;
 	virtual void RequestNewWidget() override;
-	virtual void DropWidget() override;
 	// End IFINGraphicsProcessor
 
-	/**
-	 * Gets called by the repeating trace validation check
-	 * to notify clients to show or hide screen
-	 */
-	UFUNCTION(NetMulticast, Reliable)
-	void OnValidationChanged(bool bValid, UObject* newScreen);
-	
+	UFUNCTION()
+	TScriptInterface<IFINScreenInterface> GetScreenInterface();
+
 	/**
      * Creates a new widget for use in the screen.
      * Does *not* tell the screen to use it.
@@ -81,6 +69,17 @@ public:
 	*/
 	static int InputToInt(const FInputEvent& InputEvent);
 
+private:
+	UFUNCTION()
+	void OnRep_Screen();
+
+	UFUNCTION()
+	void UpdateScreen();
+
+	UPROPERTY()
+	FFINNetworkTrace OldScreenCache;
+	
+public:
 	// Begin FIN Reflection
 	UFUNCTION()
 	void netFunc_bindScreen(FFINNetworkTrace NewScreen);
@@ -145,11 +144,29 @@ public:
 	 * @return	the screen we are bound to
 	 */
 	UFUNCTION(BlueprintCallable, Category="Computer|Graphics")
-    UObject* GetScreen();
+    TScriptInterface<IFINScreenInterface> GetScreen();
 
 	/**
 	 * Focuses the users input to the widget provided by the GPU
 	 */
 	UFUNCTION(BlueprintCallable, Category="Computer|Graphics")
 	void Focus();
+};
+
+/**
+ * Helper class to implement Screen interface for use with vanilla signs
+ */
+UCLASS()
+class UFINGPUWidgetSign : public UObject, public IFINScreenInterface {
+	GENERATED_BODY()
+public:
+	UPROPERTY()
+	FFINNetworkTrace GPU;
+
+	// Begin IFINScreenInterface
+	virtual void BindGPU(const FFINNetworkTrace& gpu) override;
+	virtual FFINNetworkTrace GetGPU() const override;
+	virtual void SetWidget(TSharedPtr<SWidget> widget) override;
+	virtual TSharedPtr<SWidget> GetWidget() const override;
+	// End IFINScreenInterface
 };

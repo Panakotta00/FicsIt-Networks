@@ -4,8 +4,12 @@
 #include "Subsystem/ModSubsystem.h"
 #include "FGCharacterPlayer.h"
 #include "FGSaveInterface.h"
+#include "Buildables/FGBuildableWidgetSign.h"
 #include "Components/WidgetInteractionComponent.h"
 #include "FINComputerSubsystem.generated.h"
+
+class AFINComputerGPU;
+class UFINGPUWidgetSign;
 
 UCLASS()
 class FICSITNETWORKS_API AFINComputerSubsystem : public AModSubsystem, public IFGSaveInterface {
@@ -14,6 +18,11 @@ class FICSITNETWORKS_API AFINComputerSubsystem : public AModSubsystem, public IF
 public:
 	UPROPERTY()
 	TMap<AFGCharacterPlayer*, UWidgetInteractionComponent*> ScreenInteraction;
+
+	UPROPERTY()
+	TMap<AFINComputerGPU*, UFINGPUWidgetSign*> GPU2WidgetSign;
+	UPROPERTY()
+	TMap<UFINGPUWidgetSign*, AFINComputerGPU*> WidgetSign2GPU;
 
 	UPROPERTY()
 	UEnhancedInputComponent* Input;
@@ -49,4 +58,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Computer")
 	void DetachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
+
+	void AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign);
 };

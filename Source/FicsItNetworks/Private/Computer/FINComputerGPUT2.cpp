@@ -55,7 +55,8 @@ int32 FFINGPUT2DC_Lines::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs
 }
 
 int32 FFINGPUT2DC_Text::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
-	const FSlateFontInfo& Font = bUseMonospace ? Context.Style->MonospaceText : Context.Style->NormalText;
+	FSlateFontInfo Font = bUseMonospace ? Context.Style->MonospaceText : Context.Style->NormalText;
+	Font.Size = Size;
 	FSlateDrawElement::MakeText(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(Position)), Text, Font, ESlateDrawEffect::None, Color);
 	return LayerId;
 }
@@ -71,12 +72,9 @@ int32 FFINGPUT2DC_Bezier::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArg
 }
 
 int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
-	FSlateBrush Brush;
+	FSlateBrush Brush = Context.Style->FilledBox;
 	if (bIsBorder) {
-		Brush = Context.Style->HollowBox;
 		Brush.Margin = FMargin(MarginLeft, MarginTop, MarginRight, MarginBottom);
-	} else {
-		Brush = Context.Style->FilledBox;
 	}
 
 	if (bIsRounded || bHasOutline) {
@@ -114,7 +112,6 @@ int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& 
 void FFINGPUT2WidgetStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const {
 	FSlateWidgetStyle::GetResources(OutBrushes);
 
-	OutBrushes.Add(&HollowBox);
 	OutBrushes.Add(&FilledBox);
 }
 
@@ -128,7 +125,7 @@ void SFINGPUT2Widget::Construct(const FArguments& InArgs) {
 	Style = InArgs._Style;
 	DrawCalls = InArgs._DrawCalls;
 	OnMouseDownEvent = InArgs._OnMouseDown;
-	OnMouseLeaveEvent = InArgs._OnMouseLeave;
+	OnMouseUpEvent = InArgs._OnMouseUp;
 	OnMouseMoveEvent = InArgs._OnMouseMove;
 	OnMouseEnterEvent = InArgs._OnMouseEnter;
 	OnMouseLeaveEvent = InArgs._OnMouseLeave;
@@ -305,7 +302,7 @@ void AFINComputerGPUT2::netFunc_drawLines(TArray<FVector2D> points, double thick
 	AddDrawCall(FFINGPUT2DC_Lines(points, thickness, color.QuantizeRound()));
 }
 
-void AFINComputerGPUT2::netFunc_drawText(FVector2D position, const FString& text, double size, FLinearColor color, bool monospace) {
+void AFINComputerGPUT2::netFunc_drawText(FVector2D position, const FString& text, int64 size, FLinearColor color, bool monospace) {
 	AddDrawCall(FFINGPUT2DC_Text(position, text, size, color.QuantizeRound(), monospace));
 }
 

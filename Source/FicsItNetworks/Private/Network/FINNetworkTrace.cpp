@@ -282,6 +282,10 @@ UObject* FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
 }
 
+bool FFINNetworkTrace::IsValidPtr() const {
+	return ::IsValid(GetUnderlyingPtr());
+}
+
 UObject* FFINNetworkTrace::GetStartPtr() const {
 	const FFINNetworkTrace* Trace = this;
 	while (Trace->Prev) Trace = Trace->Prev.Get();

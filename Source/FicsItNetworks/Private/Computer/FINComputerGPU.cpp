@@ -1,4 +1,6 @@
 ﻿#include "Computer/FINComputerGPU.h"
+
+#include "Buildables/FGBuildableWidgetSign.h"
 #include "Graphics/FINScreenInterface.h"
 
 AFINComputerGPU::AFINComputerGPU() {
@@ -11,34 +13,19 @@ AFINComputerGPU::AFINComputerGPU() {
 void AFINComputerGPU::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(AFINComputerGPU, ScreenPtr);
 	DOREPLIFETIME(AFINComputerGPU, Screen);
 }
 
 void AFINComputerGPU::BeginPlay() {
 	Super::BeginPlay();
-	if (HasAuthority()) ScreenPtr = Screen.Get();
+
+	UpdateScreen();
 }
 
 void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
-	if (HasAuthority() && (((bool)ScreenPtr) != Screen.IsValid())) {
-		if (!ScreenPtr) ScreenPtr = Screen.Get();
-		OnValidationChanged(Screen.IsValid(), ScreenPtr);
-		ScreenPtr = Screen.Get();
-		ForceNetUpdate();
-	}
-	if (bShouldCreate) {
-		bShouldCreate = false;
-		if (!ScreenPtr) return;
-		if (!Widget.IsValid()) Widget = CreateWidget();
-		Cast<IFINScreenInterface>(ScreenPtr)->SetWidget(Widget);
-	}
-	if (bScreenChanged) {
-		bScreenChanged = false;
-		ForceNetUpdate();
-	}
+	// TODO: Continuesly check for Trace Validity and udate widget accordingly
 }
 
 void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
@@ -47,17 +34,11 @@ void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
 }
 
 void AFINComputerGPU::BindScreen(const FFINNetworkTrace& screen) {
-	if (IsValid(screen.GetUnderlyingPtr())) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
+	if (screen.IsValidPtr()) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
 	if (Screen == screen) return;
-	FFINNetworkTrace oldScreen = Screen;
-	Screen = FFINNetworkTrace();
-	if (oldScreen.IsValid()) Cast<IFINScreenInterface>(oldScreen.Get())->BindGPU(FFINNetworkTrace());
-	if (!screen.IsValid()) DropWidget();
+
 	Screen = screen;
-	if (screen.IsValid()) Cast<IFINScreenInterface>(screen.Get())->BindGPU(screen / this);
-	ScreenPtr = screen.Get();
-	netSig_ScreenBound(oldScreen);
-	bScreenChanged = true;
+	UpdateScreen();
 }
 
 FFINNetworkTrace AFINComputerGPU::GetScreen() const {
@@ -65,17 +46,12 @@ FFINNetworkTrace AFINComputerGPU::GetScreen() const {
 }
 
 void AFINComputerGPU::RequestNewWidget() {
-	bShouldCreate = true;
+	if (!GetScreenInterface()) return;
+	GetScreenInterface()->SetWidget(CreateWidget());
 }
 
-void AFINComputerGPU::DropWidget() {
-	Widget.Reset();
-	if (ScreenPtr) Cast<IFINScreenInterface>(ScreenPtr)->SetWidget(nullptr);
-}
-
-void AFINComputerGPU::OnValidationChanged_Implementation(bool bValid, UObject* newScreen) {
-	if (!bValid) DropWidget();
-	else RequestNewWidget();
+TScriptInterface<IFINScreenInterface> AFINComputerGPU::GetScreenInterface() {
+	return Screen.GetUnderlyingPtr();
 }
 
 TSharedPtr<SWidget> AFINComputerGPU::CreateWidget() {
@@ -102,12 +78,40 @@ int AFINComputerGPU::InputToInt(const FInputEvent& KeyEvent) {
 	return mouseEvent;
 }
 
+void AFINComputerGPU::OnRep_Screen() {
+	UpdateScreen();
+}
+
+void AFINComputerGPU::UpdateScreen() {
+	FFINNetworkTrace newScreen = Screen;
+	Screen = FFINNetworkTrace();
+	if (OldScreenCache.IsValidPtr()) Cast<IFINScreenInterface>(OldScreenCache.Get())->BindGPU(FFINNetworkTrace());
+	FFINNetworkTrace oldScreen = OldScreenCache;
+	OldScreenCache = Screen = newScreen;
+	
+	if (Screen.IsValidPtr()) Cast<IFINScreenInterface>(Screen.Get())->BindGPU(Screen / this);
+
+	if (HasAuthority()) netSig_ScreenBound(oldScreen);
+}
+
 void AFINComputerGPU::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
-	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr())) BindScreen(NewScreen);
+	if (AFGBuildableWidgetSign* WidgetSign = Cast<AFGBuildableWidgetSign>(*NewScreen)) {
+		// TODO: Vanilla Sign Support
+	}
+	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr())) {
+		BindScreen(NewScreen);
+		return;
+	}
+	BindScreen(FFINNetworkTrace());
 }
 
 FVector2D AFINComputerGPU::netFunc_getScreenSize() {
-	return Widget->GetCachedGeometry().GetLocalSize();
+	TScriptInterface<IFINScreenInterface> screen = GetScreenInterface();
+	if (screen) {
+		return screen->GetWidget()->GetCachedGeometry().GetLocalSize();
+	} else {
+		return FVector2D::Zero();
+	}
 }
 
 void AFINComputerGPU::netSig_ScreenBound_Implementation(const FFINNetworkTrace& oldScreen) {}
@@ -123,23 +127,22 @@ void UFINScreenWidget::OnNewWidget() {
 }
 
 void UFINScreenWidget::OnNewGPU() {
-	if (Screen && Cast<IFINScreenInterface>(Screen)->GetGPU()) {
-		Cast<IFINScreenInterface>(Screen)->RequestNewWidget();
-	} else if (Container.IsValid()) {
-		Container->SetContent(SNew(SBox));
+	if (Screen) {
+		TScriptInterface<IFINGPUInterface> GPU = GetScreen()->GetGPU().GetUnderlyingPtr();
+		if (GPU) {
+			GPU->RequestNewWidget();
+			return;
+		}
 	}
+	if (Container.IsValid()) Container->SetContent(SNew(SBox));
 }
 
 void UFINScreenWidget::SetScreen(UObject* NewScreen) {
 	Screen = NewScreen;
-	if (Screen) {
-		if (Container.IsValid()) {
-			Cast<IFINScreenInterface>(Screen)->RequestNewWidget();
-		}
-	}
+	OnNewGPU();
 }
 
-UObject* UFINScreenWidget::GetScreen() {
+TScriptInterface<IFINScreenInterface> UFINScreenWidget::GetScreen() {
 	return Screen;
 }
 
@@ -155,6 +158,8 @@ void UFINScreenWidget::Focus() {
 void UFINScreenWidget::ReleaseSlateResources(bool bReleaseChildren) {
 	Super::ReleaseSlateResources(bReleaseChildren);
 
+	Container.Reset();
+
 	/*if (Screen) {
 		IFINGPUInterface* GPU = Cast<IFINGPUInterface>(Cast<IFINScreenInterface>(Screen)->GetGPU());
 		if (GPU) GPU->DropWidget();
@@ -167,4 +172,14 @@ TSharedRef<SWidget> UFINScreenWidget::RebuildWidget() {
 	Container = SNew(SBox).HAlign(HAlign_Fill).VAlign(VAlign_Fill);
 	OnNewWidget();
 	return Container.ToSharedRef();
+}
+
+void UFINGPUWidgetSign::BindGPU(const FFINNetworkTrace& gpu) {}
+FFINNetworkTrace UFINGPUWidgetSign::GetGPU() const {
+	return GPU;
+}
+
+void UFINGPUWidgetSign::SetWidget(TSharedPtr<SWidget> widget) {}
+TSharedPtr<SWidget> UFINGPUWidgetSign::GetWidget() const {
+	return nullptr;
 }

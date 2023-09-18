@@ -4,6 +4,7 @@
 #include "Subsystem/SubsystemActorManager.h"
 #include "FGCharacterPlayer.h"
 #include "FGInputSettings.h"
+#include "Computer/FINComputerGPU.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input = CreateDefaultSubobject<UEnhancedInputComponent>("Input");
@@ -122,4 +123,10 @@ void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 		(*Comp)->UnregisterComponent();
 		ScreenInteraction.Remove(character);
 	}
+}
+
+void AFINComputerSubsystem::AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign) {
+	UFINGPUWidgetSign* WidgetSign = NewObject<UFINGPUWidgetSign>(this);
+	GPU2WidgetSign.Add(GPU, WidgetSign);
+	WidgetSign2GPU.Add(WidgetSign, GPU);
 }
