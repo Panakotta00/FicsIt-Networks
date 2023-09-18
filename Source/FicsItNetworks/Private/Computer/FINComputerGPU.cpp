@@ -1,6 +1,7 @@
 ﻿#include "Computer/FINComputerGPU.h"
 
 #include "Buildables/FGBuildableWidgetSign.h"
+#include "Computer/FINComputerSubsystem.h"
 #include "Graphics/FINScreenInterface.h"
 
 AFINComputerGPU::AFINComputerGPU() {
@@ -95,14 +96,17 @@ void AFINComputerGPU::UpdateScreen() {
 }
 
 void AFINComputerGPU::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
-	if (AFGBuildableWidgetSign* WidgetSign = Cast<AFGBuildableWidgetSign>(*NewScreen)) {
-		// TODO: Vanilla Sign Support
+	if (AFGBuildableWidgetSign* BuildableWidget = Cast<AFGBuildableWidgetSign>(*NewScreen)) {
+		UFINGPUWidgetSign* WidgetSign = AFINComputerSubsystem::GetComputerSubsystem(this)->AddGPUWidgetSign(this, BuildableWidget);
+		BindScreen(NewScreen / WidgetSign);
+		return;
 	}
 	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr())) {
 		BindScreen(NewScreen);
 		return;
 	}
 	BindScreen(FFINNetworkTrace());
+	AFINComputerSubsystem::GetComputerSubsystem(this)->DeleteGPUWidgetSign(this);
 }
 
 FVector2D AFINComputerGPU::netFunc_getScreenSize() {
@@ -174,12 +178,32 @@ TSharedRef<SWidget> UFINScreenWidget::RebuildWidget() {
 	return Container.ToSharedRef();
 }
 
-void UFINGPUWidgetSign::BindGPU(const FFINNetworkTrace& gpu) {}
+void UFINGPUWidgetSign::BindGPU(const FFINNetworkTrace& gpu) {
+	if (gpu.IsValidPtr()) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
+	if (GPU == gpu) return;
+	
+	FFINNetworkTrace oldGPU = GPU;
+	GPU = FFINNetworkTrace();
+	if (oldGPU.IsValidPtr()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr())->BindScreen(FFINNetworkTrace());
+
+	GPU = gpu;
+	if (gpu.IsValidPtr()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
+
+	OnGPUUpdate.Broadcast();
+}
+
 FFINNetworkTrace UFINGPUWidgetSign::GetGPU() const {
 	return GPU;
 }
 
-void UFINGPUWidgetSign::SetWidget(TSharedPtr<SWidget> widget) {}
+void UFINGPUWidgetSign::SetWidget(TSharedPtr<SWidget> widget) {
+	if (Widget == widget) return;
+
+	Widget = widget;
+	
+	OnWidgetUpdate.Broadcast();
+}
+
 TSharedPtr<SWidget> UFINGPUWidgetSign::GetWidget() const {
-	return nullptr;
+	return Widget;
 }

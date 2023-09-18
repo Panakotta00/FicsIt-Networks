@@ -1,6 +1,7 @@
 ﻿#include "Components/FINScreen.h"
 
 #include "FGColoredInstanceMeshProxy.h"
+#include "Computer/FINComputerGPU.h"
 #include "Graphics/FINGPUInterface.h"
 #include "Network/FINNetworkCable.h"
 
@@ -62,10 +63,6 @@ int32 AFINScreen::GetDismantleRefundReturnsMultiplier() const {
 	return FMath::Abs(ScreenWidth) * FMath::Abs(ScreenHeight);
 }
 
-bool AFINScreen::ShouldSave_Implementation() const {
-	return true;
-}
-
 void AFINScreen::BindGPU(const FFINNetworkTrace& gpu) {
 	if (gpu.IsValidPtr()) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
 	if (GPU == gpu) return;
@@ -76,8 +73,11 @@ void AFINScreen::BindGPU(const FFINNetworkTrace& gpu) {
 
 	GPU = gpu;
 	if (gpu.IsValidPtr()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
-
+	
 	OnGPUUpdate.Broadcast();
+
+	if (!gpu.IsValidPtr()) WidgetComponent->SetSlateWidget(nullptr);
+	else Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->RequestNewWidget();
 }
 
 FFINNetworkTrace AFINScreen::GetGPU() const {
@@ -85,9 +85,12 @@ FFINNetworkTrace AFINScreen::GetGPU() const {
 }
 
 void AFINScreen::SetWidget(TSharedPtr<SWidget> widget) {
-	if (Widget != widget) Widget = widget;
-	WidgetComponent->SetSlateWidget(Widget.ToSharedRef());
-	WidgetComponent->RequestRedraw();
+	if (Widget == widget) return;
+
+	Widget = widget;
+
+	WidgetComponent->SetSlateWidget(widget);
+	
 	OnWidgetUpdate.Broadcast();
 }
 

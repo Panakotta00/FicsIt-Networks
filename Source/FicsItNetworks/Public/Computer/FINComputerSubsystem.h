@@ -25,6 +25,9 @@ public:
 	TMap<UFINGPUWidgetSign*, AFINComputerGPU*> WidgetSign2GPU;
 
 	UPROPERTY()
+	TMap<AFGBuildableRailroadSwitchControl*, int64> ForcedRailroadSwitches;
+
+	UPROPERTY()
 	UEnhancedInputComponent* Input;
 
 	UPROPERTY(SaveGame, BlueprintReadOnly)
@@ -59,5 +62,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Computer")
 	void DetachWidgetInteractionToPlayer(AFGCharacterPlayer* character);
 
-	void AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign);
+	UFINGPUWidgetSign* AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign);
+	void DeleteGPUWidgetSign(AFINComputerGPU* GPU);
+};
+
+UCLASS()
+class UFINGPUSignPrefabWidget : public UFGSignPrefabWidget {
+	GENERATED_BODY()
+protected:
+    // UWidget interface
+    virtual TSharedRef<SWidget> RebuildWidget() override;
+	// End of UWidget interface
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void OnNewWidget();
+
+	UFUNCTION(BlueprintCallable)
+	void OnNewGPU();
+
+	void SetWidgetSign(UFINGPUWidgetSign* Sign);
+
+private:
+	TSharedPtr<SBox> Container = nullptr;
+
+	UPROPERTY()
+	UFINGPUWidgetSign* WidgetSign = nullptr;
 };

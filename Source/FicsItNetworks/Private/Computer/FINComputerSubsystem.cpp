@@ -125,8 +125,64 @@ void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 	}
 }
 
-void AFINComputerSubsystem::AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign) {
+UFINGPUWidgetSign* AFINComputerSubsystem::AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign) {
 	UFINGPUWidgetSign* WidgetSign = NewObject<UFINGPUWidgetSign>(this);
 	GPU2WidgetSign.Add(GPU, WidgetSign);
 	WidgetSign2GPU.Add(WidgetSign, GPU);
+
+	FPrefabSignData Prefab;
+	Prefab.PrefabLayout = UFINGPUSignPrefabWidget::StaticClass();
+	BuildableSign->SetPrefabSignData(Prefab);
+	Cast<UFINGPUSignPrefabWidget>(BuildableSign->mPrefabLayout)->SetWidgetSign(WidgetSign);
+	WidgetSign->BuildableSign = BuildableSign;
+	
+	return WidgetSign;
+}
+
+void AFINComputerSubsystem::DeleteGPUWidgetSign(AFINComputerGPU* GPU) {
+	UFINGPUWidgetSign** WidgetSign = GPU2WidgetSign.Find(GPU);
+	if (WidgetSign) {
+		AFGBuildableWidgetSign* BuildableSign = (*WidgetSign)->BuildableSign;
+		FPrefabSignData Prefab;
+		BuildableSign->SetPrefabSignData(Prefab);
+		(*WidgetSign)->BuildableSign = nullptr;
+		GPU2WidgetSign.Remove(GPU);
+		WidgetSign2GPU.Remove(*WidgetSign);
+	}
+}
+
+TSharedRef<SWidget> UFINGPUSignPrefabWidget::RebuildWidget() {
+	Container = SNew(SBox).HAlign(HAlign_Fill).VAlign(VAlign_Fill);
+	OnNewWidget();
+	return Container.ToSharedRef();
+}
+
+void UFINGPUSignPrefabWidget::OnNewWidget() {
+	if (Container.IsValid()) {
+		if (WidgetSign && WidgetSign->GetWidget().IsValid()) {
+			Container->SetContent(WidgetSign->GetWidget().ToSharedRef());
+		} else {
+			Container->SetContent(SNew(SBox));
+		}
+	}
+}
+
+void UFINGPUSignPrefabWidget::OnNewGPU() {
+	if (WidgetSign) {
+    		TScriptInterface<IFINGPUInterface> GPU = WidgetSign->GetGPU().GetUnderlyingPtr();
+    		if (GPU) {
+    			GPU->RequestNewWidget();
+    			return;
+    		}
+    	}
+    	if (Container.IsValid()) Container->SetContent(SNew(SBox));
+}
+
+void UFINGPUSignPrefabWidget::SetWidgetSign(UFINGPUWidgetSign* Sign) {
+	WidgetSign = Sign;
+
+	Sign->OnGPUUpdate.AddDynamic(this, &UFINGPUSignPrefabWidget::OnNewGPU);
+	Sign->OnWidgetUpdate.AddDynamic(this, &UFINGPUSignPrefabWidget::OnNewWidget);
+	
+	OnNewGPU();
 }

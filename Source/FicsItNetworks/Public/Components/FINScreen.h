@@ -65,10 +65,6 @@ public:
 	virtual int32 GetDismantleRefundReturnsMultiplier() const override;
 	// End AFGBuildable
 
-	// Begin IFGSaveInterface
-	virtual bool ShouldSave_Implementation() const override;
-	// End IFGSaveInterface
-
 	// Begin IFINScreenInterface
 	void BindGPU(const FFINNetworkTrace& gpu) override;
 	FFINNetworkTrace GetGPU() const override;

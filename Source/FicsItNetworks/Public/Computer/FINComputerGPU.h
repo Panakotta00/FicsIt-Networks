@@ -2,10 +2,13 @@
 
 #include "Network/FINNetworkTrace.h"
 #include "FINComputerModule.h"
+#include "FINComputerScreen.h"
 #include "FINPciDeviceInterface.h"
 #include "Graphics/FINGPUInterface.h"
 #include "Graphics/FINScreenInterface.h"
 #include "FINComputerGPU.generated.h"
+
+class AFGBuildableWidgetSign;
 
 UCLASS()
 class FICSITNETWORKS_API AFINComputerGPU : public AFINComputerModule, public IFINGPUInterface, public IFINPciDeviceInterface {
@@ -162,6 +165,17 @@ class UFINGPUWidgetSign : public UObject, public IFINScreenInterface {
 public:
 	UPROPERTY()
 	FFINNetworkTrace GPU;
+
+	UPROPERTY()
+	AFGBuildableWidgetSign* BuildableSign;
+
+	TSharedPtr<SWidget> Widget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
+	FScreenWidgetUpdate OnWidgetUpdate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
+	FScreenGPUUpdate OnGPUUpdate;
 
 	// Begin IFINScreenInterface
 	virtual void BindGPU(const FFINNetworkTrace& gpu) override;
