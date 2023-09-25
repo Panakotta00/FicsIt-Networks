@@ -1984,7 +1984,7 @@ BeginFunc(getSwitchPosition, "Get Switch Position", "Returns the current switch 
     Body()
     index = (int64)self->GetSwitchPosition();
 } EndFunc()
-BeginFunc(forceSwitchPosition, "Force Switch Position", "Forces the switch position to a given location. Even autopilot will be forced to use this track. A negative number can be used to remove the forced track.") {
+BeginFunc(forceSwitchPosition, "Force Switch Position", "Forces the switch position to a given location. Even autopilot will be forced to use this track. A negative number can be used to remove the forced track.", 0) {
 	InVal(0, RInt, index, "Index", "The connection index to whcih the switch should be force to point to. Negative number to remove the lock.")
 	Body()
 	self->SetSwitchPosition(index);

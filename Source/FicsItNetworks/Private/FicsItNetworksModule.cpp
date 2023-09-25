@@ -121,10 +121,18 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 }
 
 void UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,int32)>& Scope, UFGRailroadTrackConnectionComponent* self, int32 Index) {
-	int64 ForcedTrack = AFINComputerSubsystem::GetComputerSubsystem(self)->GetForcedRailroadSwitch(self);
-	if (ForcedTrack >= 0) {
-		Scope(self, ForcedTrack);
+	FFINRailroadSwitchForce* ForcedTrack = AFINComputerSubsystem::GetComputerSubsystem(self)->GetForcedRailroadSwitch(self);
+	if (ForcedTrack) {
+		Scope(self, 0);
 	}
+}
+
+void UFGRailroadTrackConnectionComponent_AddConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
+	AFINComputerSubsystem::GetComputerSubsystem(self)->AddRailroadSwitchConnection(Scope, self, Connection);
+}
+
+void UFGRailroadTrackConnectionComponent_RemoveConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
+	AFINComputerSubsystem::GetComputerSubsystem(self)->RemoveRailroadSwitchConnection(Scope, self, Connection);
 }
 
 void FFicsItNetworksModule::StartupModule(){
@@ -259,6 +267,8 @@ void FFicsItNetworksModule::StartupModule(){
 		});
 
 		SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::SetSwitchPosition, UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook);
+		SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::AddConnection, UFGRailroadTrackConnectionComponent_AddConnection_Hook);
+		SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::RemoveConnection, UFGRailroadTrackConnectionComponent_RemoveConnection_Hook);
 
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGRailroadTrackConnectionComponent::EndPlay, (void*)GetDefault<UFGRailroadTrackConnectionComponent>(), [](UActorComponent* self, EEndPlayReason::Type Reason) {
 			if (Reason == EEndPlayReason::Destroyed) {

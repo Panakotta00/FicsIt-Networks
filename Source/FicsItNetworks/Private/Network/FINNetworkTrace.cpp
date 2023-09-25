@@ -323,7 +323,8 @@ Step(UFGPowerConnectionComponent, UFGPowerInfoComponent, {
 })
 
 Step(UFINNetworkComponent, UFINNetworkComponent, {
-	return IFINNetworkCircuitNode::Execute_GetCircuit(oA)->HasNode(oB);
+	AFINNetworkCircuit* Circuit = IFINNetworkCircuitNode::Execute_GetCircuit(oA);
+	return Circuit && oB && Circuit->HasNode(oB);
 })
 
 Step(UFINNetworkComponent, AFINNetworkCircuit, {

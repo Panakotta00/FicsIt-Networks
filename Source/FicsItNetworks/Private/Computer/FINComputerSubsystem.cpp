@@ -5,8 +5,11 @@
 #include "FGCharacterPlayer.h"
 #include "FGInputSettings.h"
 #include "FGRailroadTrackConnectionComponent.h"
+#include "FGTrain.h"
+#include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
 #include "Computer/FINComputerGPU.h"
+#include "Patching/NativeHookManager.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input = CreateDefaultSubobject<UEnhancedInputComponent>("Input");
@@ -36,6 +39,11 @@ void AFINComputerSubsystem::BeginPlay() {
 	TArray<AActor*> FoundCharacters;
 	UGameplayStatics::GetAllActorsOfClass(this, AFGCharacterPlayer::StaticClass(), FoundCharacters);
 	for (AActor* Character : FoundCharacters) AttachWidgetInteractionToPlayer(Cast<AFGCharacterPlayer>(Character));
+
+	for (TTuple<UFGRailroadTrackConnectionComponent*, FFINRailroadSwitchForce>& Force : ForcedRailroadSwitches) {
+		ForcedRailroadSwitchCleanup(Force.Value, Force.Key);
+		UpdateRailroadSwitch(Force.Value, Force.Key);
+	}
 }
 
 void AFINComputerSubsystem::Tick(float dt) {
@@ -155,14 +163,87 @@ void AFINComputerSubsystem::DeleteGPUWidgetSign(AFINComputerGPU* GPU) {
 
 void AFINComputerSubsystem::ForceRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch, int64 Track) {
 	if (!IsValid(RailroadSwitch)) return;
-	if (Track < 0) ForcedRailroadSwitches.Remove(RailroadSwitch);
-	else ForcedRailroadSwitches.Add(RailroadSwitch, Track);
+
+	FFINRailroadSwitchForce OldForce;
+	if (ForcedRailroadSwitches.RemoveAndCopyValue(RailroadSwitch, OldForce)) {
+		ForcedRailroadSwitchCleanup(OldForce, RailroadSwitch);
+	}
+	
+	if (Track >= 0) {
+		FFINRailroadSwitchForce& Force = ForcedRailroadSwitches.Add(RailroadSwitch, FFINRailroadSwitchForce{Track});
+		UpdateRailroadSwitch(Force, RailroadSwitch);
+	}
 }
 
-int64 AFINComputerSubsystem::GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch) {
-	int64* Track = ForcedRailroadSwitches.Find(RailroadSwitch);
-	if (Track) return *Track;
-	return -1;
+FFINRailroadSwitchForce* AFINComputerSubsystem::GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch) {
+	return ForcedRailroadSwitches.Find(RailroadSwitch);
+}
+
+
+void AFINComputerSubsystem::UpdateRailroadSwitch(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch) {
+	if (Force.ActualConnections.Num() == 0) {
+		Force.ActualConnections = Switch->mConnectedComponents;
+	}
+	TArray<UFGRailroadTrackConnectionComponent*> Components = Switch->mConnectedComponents;
+	for (UFGRailroadTrackConnectionComponent* Conn : Components) {
+		if (!Conn) continue;
+		Switch->RemoveConnectionInternal(Conn);
+		//Conn->RemoveConnectionInternal(Switch);
+	}
+	if (Force.ActualConnections.Num() > Force.ForcedPosition) {
+		UFGRailroadTrackConnectionComponent* ForcedTrack = Force.ActualConnections[Force.ForcedPosition];
+		if (ForcedTrack) {
+			Switch->AddConnectionInternal(ForcedTrack);
+			//ForcedTrack->AddConnectionInternal(Switch);
+		}
+	}
+
+	for (AFGRailroadVehicle* vehicle : Switch->GetTrack()->GetVehicles()) {
+		vehicle->GetTrain()->mAtcData.ClearPath();
+	}
+	
+	TWeakPtr<FFGRailroadSignalBlock> Block = Switch->GetConnections().Num() > 0 ? Switch->GetConnections()[0]->GetSignalBlock() : nullptr;
+	AFGRailroadSubsystem::Get(Switch)->RebuildSignalBlocks(Switch->GetTrack()->GetTrackGraphID());
+	if (AFGBuildableRailroadSignal* FacingSignal = Switch->GetFacingSignal()) {
+		//FacingSignal->SetObservedBlock(Block);
+		FacingSignal->UpdateConnections();
+	}
+}
+
+void AFINComputerSubsystem::AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection) {
+	FFINRailroadSwitchForce* ForcedTrack = GetForcedRailroadSwitch(Switch);
+	if (ForcedTrack) {
+		ForcedTrack->ActualConnections.Add(Connection);
+		Connection->RemoveConnectionInternal(Switch);
+	}
+}
+
+void AFINComputerSubsystem::RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*, UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection) {
+	FFINRailroadSwitchForce* ForcedTrack = GetForcedRailroadSwitch(Switch);
+	if (ForcedTrack) {
+		Switch->RemoveConnectionInternal(Connection);
+		ForcedTrack->ActualConnections.Remove(Connection);
+	}
+}
+
+void AFINComputerSubsystem::ForcedRailroadSwitchCleanup(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch) {
+	TArray<UFGRailroadTrackConnectionComponent*> Components = Switch->mConnectedComponents;
+	for (UFGRailroadTrackConnectionComponent* Conn : Components) {
+		if (!Conn) continue;
+		Switch->RemoveConnectionInternal(Conn);
+		Conn->RemoveConnectionInternal(Switch);
+	}
+	for (UFGRailroadTrackConnectionComponent* Conn : Force.ActualConnections) {
+		if (!Conn) continue;
+		Switch->AddConnectionInternal(Conn);
+		Conn->AddConnectionInternal(Switch);
+	}
+	TWeakPtr<FFGRailroadSignalBlock> Block = Switch->GetConnections().Num() > 0 ? Switch->GetConnections()[0]->GetSignalBlock() : nullptr;
+	AFGRailroadSubsystem::Get(Switch)->RebuildSignalBlocks(Switch->GetTrack()->GetTrackGraphID());
+	if (AFGBuildableRailroadSignal* FacingSignal = Switch->GetFacingSignal()) {
+		//FacingSignal->SetObservedBlock(Block);
+		FacingSignal->UpdateConnections();
+	}
 }
 
 TSharedRef<SWidget> UFINGPUSignPrefabWidget::RebuildWidget() {

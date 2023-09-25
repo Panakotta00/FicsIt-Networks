@@ -6,11 +6,23 @@
 #include "FGSaveInterface.h"
 #include "Buildables/FGBuildableWidgetSign.h"
 #include "Components/WidgetInteractionComponent.h"
+#include "Patching/NativeHookManager.h"
+#include "FGRailroadTrackConnectionComponent.h"
 #include "FINComputerSubsystem.generated.h"
 
 class AFINComputerGPU;
 class UFINGPUWidgetSign;
-class UFGRailroadTrackConnectionComponent;
+
+USTRUCT()
+struct FFINRailroadSwitchForce {
+	GENERATED_BODY()
+	
+	UPROPERTY(SaveGame)
+	int64 ForcedPosition;
+	
+	UPROPERTY(SaveGame)
+	TArray<UFGRailroadTrackConnectionComponent*> ActualConnections;
+};
 
 UCLASS()
 class FICSITNETWORKS_API AFINComputerSubsystem : public AModSubsystem, public IFGSaveInterface {
@@ -64,11 +76,17 @@ public:
 	void DeleteGPUWidgetSign(AFINComputerGPU* GPU);
 
 	void ForceRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch, int64 Track);
-	int64 GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch);
+	FFINRailroadSwitchForce* GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch);
 
+	void AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
+	void RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
+	
 private:
+	void UpdateRailroadSwitch(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch);
+	void ForcedRailroadSwitchCleanup(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* RailroadSwitch);
+	
 	UPROPERTY(SaveGame)
-	TMap<UFGRailroadTrackConnectionComponent*, int64> ForcedRailroadSwitches;
+	TMap<UFGRailroadTrackConnectionComponent*, FFINRailroadSwitchForce> ForcedRailroadSwitches;
 };
 
 UCLASS()
