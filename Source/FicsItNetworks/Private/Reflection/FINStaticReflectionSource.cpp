@@ -1474,6 +1474,16 @@ BeginProp(RBool, isReversed, "Is Reversed", "True if the orientation of the plat
 EndClass()
 
 BeginClass(AFGBuildableRailroadStation, "RailroadStation", "Railroad Station", "The train station master platform. This platform holds the name and manages docking of trains.")
+Hook(UFINRailroadStationHook)
+BeginSignal(StartDocking, "Start Docking", "Triggers when a train tries to dock onto the station.")
+	SignalParam(0, RBool, successful, "Successful", "True if the train successfully docked.")
+	SignalParam(0, RTrace<AFGLocomotive>, locomotive, "Locomotive", "The locomotive that tries to dock onto the station.")
+	SignalParam(0, RFloat, offset, "Offset", "The offset at witch the train tried to dock.")
+EndSignal()
+BeginSignal(FinishDocking, "Finish Docking", "Triggers when a train finished the docking procedure and is ready to depart the station.")
+EndSignal()
+BeginSignal(CancelDocking, "Cancel Docking", "Triggers when a train cancels the docking procedure.")
+EndSignal()
 BeginProp(RString, name, "Name", "The name of the railroad station.") {
 	Return self->GetStationIdentifier()->GetStationName().ToString();
 } PropSet() {

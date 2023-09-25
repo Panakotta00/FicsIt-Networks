@@ -14,6 +14,8 @@
 #include "Patching/NativeHookManager.h"
 #include "FGCharacterMovementComponent.h"
 #include "FGCharacterPlayer.h"
+#include "FGLocomotive.h"
+#include "Buildables/FGBuildableRailroadStation.h"
 #include "FINStaticReflectionSourceHooks.generated.h"
 
 UCLASS()
@@ -226,7 +228,7 @@ UCLASS()
 class UFINTrainHook : public UFINStaticReflectionHook {
 	GENERATED_BODY()
 			
-public:	
+public:
 	UFUNCTION()
 	void SelfDrvingUpdate(bool enabled) {
 		Send({enabled});
@@ -243,6 +245,50 @@ public:
 		
 	void Unregister() override {
 		Cast<AFGTrain>(Sender)->mOnSelfDrivingChanged.RemoveDynamic(this, &UFINTrainHook::SelfDrvingUpdate);
+	}
+};
+
+UCLASS()
+class UFINRailroadStationHook : public UFINFunctionHook {
+	GENERATED_BODY()
+private:
+	UPROPERTY()
+	UFINSignal* VehicleEnterSignal;
+
+	UPROPERTY()
+	UFINSignal* VehicleExitSignal;
+	
+protected:
+	static UFINRailroadStationHook* StaticSelf() {
+		static UFINRailroadStationHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINRailroadStationHook*>(GetDefault<UFINRailroadStationHook>());
+		return Hook; 
+	}
+
+	// Begin UFINFunctionHook
+	virtual UFINFunctionHook* Self() override {
+		return StaticSelf();
+	}
+	// End UFINFunctionHook
+	
+private:
+	static void StartDocking(bool RetVal, AFGBuildableRailroadStation* Self, AFGLocomotive* Locomotive, float Offset) {
+		StaticSelf()->Send(Self, TEXT("StartDocking"), {RetVal, (FINTrace)Locomotive, Offset});
+	}
+	
+	static void FinishDocking(AFGBuildableRailroadStation* Self) {
+		StaticSelf()->Send(Self, TEXT("FinishDocking"), {});
+	}
+
+	static void CancelDocking(AFGBuildableRailroadStation* Self) {
+		StaticSelf()->Send(Self, TEXT("CancelDocking"), {});
+	}
+	
+public:
+	void RegisterFuncHook() override {
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadStation::StartDocking, GetDefault<AFGBuildableRailroadStation>(), &UFINRailroadStationHook::StartDocking);
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadStation::FinishDockingSequence, GetDefault<AFGBuildableRailroadStation>(), &UFINRailroadStationHook::FinishDocking);
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadStation::CancelDockingSequence, GetDefault<AFGBuildableRailroadStation>(), &UFINRailroadStationHook::CancelDocking);
 	}
 };
 
