@@ -1898,6 +1898,15 @@ BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which th
     Body()
     track = (FINAny)FFINTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
 } EndFunc()
+BeginFunc(getVehciles, "Get Vehicles", "Returns a list of Railroad Vehicles on the Track") {
+	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "THe list of vehciles on the track.")
+	Body()
+	TArray<FINAny> Vehicles;
+	for (AFGRailroadVehicle* vehicle : self->GetVehicles()) {
+		Vehicles.Add(Ctx.GetTrace() / vehicle);
+	}
+	vehicles = Vehicles;
+} EndFunc()
 BeginProp(RFloat, length, "Length", "The length of the track.") {
 	Return self->GetLength();
 } EndProp()
