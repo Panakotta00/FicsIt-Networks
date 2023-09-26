@@ -1118,7 +1118,7 @@ BeginFunc(getInventory, "Get Inventory", "Returns the internal inventory of the 
 	inventory = Ctx.GetTrace() / self->GetInventory();
 } EndFunc()
 BeginFunc(getConnected, "Get Connected", "Returns the connected factory connection component.") {
-	OutVal(0, RTrace<UFGInventoryComponent>, connected, "Connected", "The connected factory connection component.")
+	OutVal(0, RTrace<UFGFactoryConnectionComponent>, connected, "Connected", "The connected factory connection component.")
 	Body()
 	connected = Ctx.GetTrace() / self->GetConnection();
 } EndFunc()
