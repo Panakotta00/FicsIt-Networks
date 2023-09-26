@@ -20,13 +20,24 @@
 			"Name": "FicsItNetworks",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItNetworksEd",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
-        {
-            "Name": "SML",
-            "SemVersion": "^3.5.1",
-            "Enabled": true
-        }
-    ]
+		{
+			"Name": "SML",
+			"SemVersion": "^3.5.1",
+			"Enabled": true
+		}
+	],
+	"LocalizationTargets": [
+		{
+			"Name": "FicsItNetworks",
+			"LoadingPolicy": "Always"
+		}
+	]
 }

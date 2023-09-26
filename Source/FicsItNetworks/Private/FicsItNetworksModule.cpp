@@ -13,6 +13,7 @@
 #include "FGGameMode.h"
 #include "FGGameState.h"
 #include "FGRailroadTrackConnectionComponent.h"
+#include "FINGlobalRegisterHelper.h"
 #include "Buildables/FGPipeHyperStart.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Hologram/FGBuildableHologram.h"
@@ -20,6 +21,7 @@
 #include "Patching/BlueprintHookHelper.h"
 #include "Patching/BlueprintHookManager.h"
 #include "Patching/NativeHookManager.h"
+#include "Reflection/FINReflection.h"
 #include "Reflection/ReflectionHelper.h"
 #include "UObject/CoreRedirects.h"
 
@@ -284,10 +286,10 @@ void FFicsItNetworksModule::StartupModule(){
 		HookManager->HookBlueprintFunction(Function, InventorSlot_CreateWidgetSlider_Hook, EPredefinedHookOffset::Return);
 		
 #else
-		/*FFINGlobalRegisterHelper::Register();
+		FFINGlobalRegisterHelper::Register();
 			
 		FFINReflection::Get()->PopulateSources();
-		FFINReflection::Get()->LoadAllTypes();*/
+		FFINReflection::Get()->LoadAllTypes();
 #endif
 	});
 }

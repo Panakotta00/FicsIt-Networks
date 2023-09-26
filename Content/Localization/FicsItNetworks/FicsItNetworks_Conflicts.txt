@@ -1,0 +1,48 @@
+ - 2531DA534420D90182C0BBA4C69A6965 
+	/FicsItNetworks/Network/Utils/Widget_ComponentDebugInteract.Widget_ComponentDebugInteract_C:WidgetTree.WindowDark_2.Title - "Component Debug" 
+	/FicsItNetworks/Network/NetworkManager/Widget_ComponentDebugInteract.Widget_ComponentDebugInteract_C:WidgetTree.WindowDark_2.Title - "Network Manager" 
+
+ - [47A5783B4D9D988A64DA3A91AF74ECFA] 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/SizeablePanel/Build_SizeablePanel.Build_SizeablePanel_C:netFuncMeta_getModule [Script Bytecode] - "Returns the module placed at the given location on the panel." 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/SizeablePanel/Build_SizeablePanel.Build_SizeablePanel_C:netFuncMeta_getModule [Script Bytecode] - "Get Module" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/SizeablePanel/Build_SizeablePanel.Build_SizeablePanel_C:netFuncMeta_getModules [Script Bytecode] - "Get All Modules" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/SizeablePanel/Build_SizeablePanel.Build_SizeablePanel_C:netFuncMeta_getModules [Script Bytecode] - "Returns all modules placed on the panel." 
+
+ - [35217979444EDC2D9B6D5F8E8212D2B9] 
+	/FicsItNetworks/Components/MicroControlPanels/Modules/PushButton/MCP_Mod_PushButton.MCP_Mod_PushButton_C:netSigMeta_Trigger [Script Bytecode] - "Triggers when the button gets pressed." 
+	/FicsItNetworks/Components/MicroControlPanels/Modules/PushButton/MCP_Mod_PushButton.MCP_Mod_PushButton_C:netFuncMeta_trigger [Script Bytecode] - "Trigger" 
+	/FicsItNetworks/Components/MicroControlPanels/Modules/PushButton/MCP_Mod_PushButton.MCP_Mod_PushButton_C:netFuncMeta_trigger [Script Bytecode] - "Triggers a button press by code." 
+
+ - [20537E1846320A95F392F2BEBEC830C6] 
+	/FicsItNetworks/Components/MicroControlPanels/Modules/MushroomPushbutton/MCP_Mod_MushroomPushButtonModule.MCP_Mod_MushroomPushButtonModule_C:netSigMeta_Trigger [Script Bytecode] - "Triggers when the button gets pressed." 
+	/FicsItNetworks/Components/MicroControlPanels/Modules/MushroomPushbutton/MCP_Mod_MushroomPushButtonModule.MCP_Mod_MushroomPushButtonModule_C:netFuncMeta_trigger [Script Bytecode] - "Trigger" 
+	/FicsItNetworks/Components/MicroControlPanels/Modules/MushroomPushbutton/MCP_Mod_MushroomPushButtonModule.MCP_Mod_MushroomPushButtonModule_C:netFuncMeta_trigger [Script Bytecode] - "Triggers a button press by code." 
+
+ - [59EA29794FEC6F354E068A93E69B2C5D] 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:netFuncMeta_getModule [Script Bytecode] - "Returns the module placed at the given location on the panel." 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:netFuncMeta_getModule [Script Bytecode] - "Get Module" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:netFuncMeta_getModules [Script Bytecode] - "Get All Modules" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:netFuncMeta_getModules [Script Bytecode] - "Returns all modules placed on the panel." 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:_netFuncMeta_setLabelIcon [Script Bytecode] - "Set Label Icon" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:_netFuncMeta_setLabelIcon [Script Bytecode] - "Set Label Icon Path for command point" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:_netFuncMeta_setText [Script Bytecode] - "Set Label Text" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:_netFuncMeta_setText [Script Bytecode] - "Sets text value" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:_netFuncMeta_setForeground [Script Bytecode] - "Set Foreground Color" 
+	/FicsItNetworks/Components/MicroControlPanels/MicroControlPanels/LabeledMicroControlPanelBase.LabeledMicroControlPanelBase_C:_netFuncMeta_setForeground [Script Bytecode] - "Sets text foreground" 
+
+FicsItNetworks-StaticReflection - Object_getHash_Description 
+	/Engine/Binaries/Win64/ - "Returns the hash of this class. This is a value that nearly uniquely idenfies this object." 
+	/Engine/Binaries/Win64/ - "Returns a hash of this object. This is a value that nearly uniquely identifies this object." 
+
+FicsItNetworks-StaticReflection - Object_getHash_hash_Description 
+	/Engine/Binaries/Win64/ - "The hash of this class." 
+	/Engine/Binaries/Win64/ - "The hash of this object." 
+
+FicsItNetworks-StaticReflection - Object_getType_Description 
+	/Engine/Binaries/Win64/ - "Returns the type (aka class) of this class instance." 
+	/Engine/Binaries/Win64/ - "Returns the type (aka class) of this object." 
+
+FicsItNetworks-StaticReflection - Object_getType_type_Description 
+	/Engine/Binaries/Win64/ - "The type of this class instance" 
+	/Engine/Binaries/Win64/ - "The type of this object" 
+

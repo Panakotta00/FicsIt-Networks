@@ -9,19 +9,20 @@
 UENUM(BlueprintType)
 enum EFINRepPropertyFlags {
 	FIN_Prop_None			= 0,
-	FIN_Prop_Attrib			= 0b000000001,
-	FIN_Prop_ReadOnly		= 0b000000010,
-	FIN_Prop_Param			= 0b000000100,
-	FIN_Prop_OutParam		= 0b000001000,
-	FIN_Prop_RetVal			= 0b000010000,
-	FIN_Prop_Runtime		= 0b011100000,
-	FIN_Prop_RT_Sync		= 0b000100000,
-	FIN_Prop_RT_Parallel	= 0b001000000,
-	FIN_Prop_RT_Async		= 0b010000000,
-	FIN_Prop_Sync			= 0b000100000,
-	FIN_Prop_Parallel		= 0b001100000,
-	FIN_Prop_Async			= 0b011100000,
-	FIN_Prop_ClassProp		= 0b100000000,
+	FIN_Prop_Attrib			= 0b0000000001,
+	FIN_Prop_ReadOnly		= 0b0000000010,
+	FIN_Prop_Param			= 0b0000000100,
+	FIN_Prop_OutParam		= 0b0000001000,
+	FIN_Prop_RetVal			= 0b0000010000,
+	FIN_Prop_Runtime		= 0b0011100000,
+	FIN_Prop_RT_Sync		= 0b0000100000,
+	FIN_Prop_RT_Parallel	= 0b0001000000,
+	FIN_Prop_RT_Async		= 0b0010000000,
+	FIN_Prop_Sync			= 0b0000100000,
+	FIN_Prop_Parallel		= 0b0001100000,
+	FIN_Prop_Async			= 0b0011100000,
+	FIN_Prop_ClassProp		= 0b0100000000,
+	FIN_Prop_StaticSource	= 0b1000000000,
 };
 
 ENUM_CLASS_FLAGS(EFINRepPropertyFlags)

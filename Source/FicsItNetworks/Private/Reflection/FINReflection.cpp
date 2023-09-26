@@ -45,9 +45,9 @@ void FFINReflection::LoadAllTypes() {
 	Filter.bRecursivePaths = true;
 	Filter.bRecursiveClasses = true;
 	Filter.PackagePaths.Add("/");
-	Filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName()); // TODO: Check if ClassNamePaths could work and how
-	Filter.ClassNames.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
-	Filter.ClassNames.Add(UClass::StaticClass()->GetFName());
+	Filter.ClassPaths.Add(UBlueprint::StaticClass()->GetClassPathName());
+	Filter.ClassPaths.Add(UBlueprintGeneratedClass::StaticClass()->GetClassPathName());
+	Filter.ClassPaths.Add(UClass::StaticClass()->GetClassPathName());
 	AssetRegistryModule.Get().GetAssets(Filter, AssetData);
 
 	for (const FAssetData& Asset : AssetData) {

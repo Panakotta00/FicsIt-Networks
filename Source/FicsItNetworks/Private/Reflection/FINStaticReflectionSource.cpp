@@ -83,6 +83,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 	ToFillClass->DisplayName = ClassReg->DisplayName;
 	ToFillClass->Description = ClassReg->Description;
 	ToFillClass->Parent = Ref->FindClass(Class->GetSuperClass());
+	ToFillClass->StructFlags |= FIN_Struct_StaticSource;
 	if (ToFillClass->Parent == ToFillClass) ToFillClass->Parent = nullptr;
 
 	for (const TPair<int, FFINStaticFuncReg>& KVFunc : ClassReg->Functions) {
@@ -91,6 +92,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		FINFunc->InternalName = Func.InternalName;
 		FINFunc->DisplayName = Func.DisplayName;
 		FINFunc->Description = Func.Description;
+		FINFunc->FunctionFlags |= FIN_Func_StaticSource;
 		if (Func.VarArgs) FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_VarArgs;
 		switch (Func.Runtime) {
 		case 0:
@@ -126,7 +128,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			FINProp->InternalName = Param.InternalName;
 			FINProp->DisplayName = Param.DisplayName;
 			FINProp->Description = Param.Description;
-			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param;
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param | FIN_Prop_StaticSource;
 			switch (Param.ParamType) {
 				case 2:
 					FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_RetVal;
@@ -177,7 +179,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		FINProp->InternalName = Prop.InternalName;
 		FINProp->DisplayName = Prop.DisplayName;
 		FINProp->Description = Prop.Description;
-		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
+		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib | FIN_Prop_StaticSource;
 		if (UFINFuncProperty* FINFuncProp = Cast<UFINFuncProperty>(FINProp)) {
 			FINFuncProp->GetterFunc.GetterFunc = Prop.Get;
 			if ((bool)Prop.Set) FINFuncProp->SetterFunc.SetterFunc = Prop.Set;
@@ -213,6 +215,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		FINSignal->DisplayName = Signal.DisplayName;
 		FINSignal->Description = Signal.Description;
 		FINSignal->bIsVarArgs = Signal.bIsVarArgs;
+		FINSignal->SignalFlags = FIN_Signal_StaticSource;
 
 		TArray<int> ParamPos;
 		Signal.Parameters.GetKeys(ParamPos);
@@ -237,6 +240,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 	ToFillStruct->DisplayName = StructReg->DisplayName;
 	ToFillStruct->Description = StructReg->Description;
 	ToFillStruct->Parent = Ref->FindStruct(Cast<UScriptStruct>(Struct->GetSuperStruct()));
+	ToFillStruct->StructFlags |= FIN_Struct_StaticSource;
 	if (ToFillStruct->Parent == ToFillStruct) ToFillStruct->Parent = nullptr;
 
 	for (const TPair<int, FFINStaticFuncReg>& KVFunc : StructReg->Functions) {
@@ -245,6 +249,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		FINFunc->InternalName = Func.InternalName;
 		FINFunc->DisplayName = Func.DisplayName;
 		FINFunc->Description = Func.Description;
+		FINFunc->FunctionFlags |= FIN_Func_StaticSource;
 		if (Func.VarArgs) FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_VarArgs;
 		switch (Func.Runtime) {
 		case 0:
@@ -280,7 +285,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 			FINProp->InternalName = Param.InternalName;
 			FINProp->DisplayName = Param.DisplayName;
 			FINProp->Description = Param.Description;
-			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param;
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param | FIN_Prop_StaticSource;
 			switch (Param.ParamType) {
 				case 2:
 					FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_RetVal;
@@ -328,7 +333,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		FINProp->InternalName = Prop.InternalName;
 		FINProp->DisplayName = Prop.DisplayName;
 		FINProp->Description = Prop.Description;
-		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
+		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib | FIN_Prop_StaticSource;
 		if (UFINFuncProperty* FINFuncProp = Cast<UFINFuncProperty>(FINProp)) {
 			FINFuncProp->GetterFunc.GetterFunc = Prop.Get;
 			if ((bool)Prop.Set) FINFuncProp->SetterFunc.SetterFunc = Prop.Set;
@@ -360,13 +365,13 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 
 
 #define TypeClassName(Type) FIN_StaticRef_ ## Type
-#define NSName "FIN_StaticReflection"
+#define NSName "FicsItNetworks-StaticReflection"
 #define FINRefLocText(KeyName, Value) FInternationalization::ForUseOnlyByLocMacroAndGraphNodeTextLiterals_CreateText(Value, TEXT(NSName), KeyName)
 #define FINRefTypeLocText(KeyName, Value) FINRefLocText(*(FString(TName) + TEXT("_") + TEXT(KeyName)), TEXT(Value))
 #define BeginClass(Type, InternalName, DisplayName, Description) \
 	namespace TypeClassName(Type) { \
 		using T = Type; \
-		constexpr auto TName = TEXT(#Type) ; \
+		constexpr auto TName = TEXT(InternalName) ; \
 		UClass* GetUType() { return T::StaticClass(); } \
 		FORCEINLINE T* GetFromCtx(const FFINExecutionContext& Ctx) { return Cast<T>(Ctx.GetObject()); } \
 		FFINStaticGlobalRegisterFunc RegClass([](){ \
@@ -377,7 +382,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 #define BeginStruct(Type, InternalName, DisplayName, Description) \
 	namespace TypeStructName(Type) { \
 		using T = Type; \
-		constexpr auto TName = TEXT(#Type) ; \
+		constexpr auto TName = TEXT(InternalName) ; \
 		UScriptStruct* GetUType() { return TBaseStructure<T>::Get(); } \
 		FORCEINLINE T* GetFromCtx(const FFINExecutionContext& Ctx) { return static_cast<T*>(Ctx.GetGeneric()); } \
 		FFINStaticGlobalRegisterFunc RegStruct([](){ \

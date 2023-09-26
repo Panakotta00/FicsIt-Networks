@@ -6,19 +6,20 @@
 #include "FINFunction.generated.h"
 
 enum EFINFunctionFlags {
-	FIN_Func_None			= 0b00000000,
-	FIN_Func_VarArgs		= 0b00000001,
-	FIN_Func_Runtime		= 0b00001110,
-	FIN_Func_RT_Sync		= 0b00000010,
-	FIN_Func_RT_Parallel	= 0b00000100,
-	FIN_Func_RT_Async		= 0b00001000,
-	FIN_Func_Sync			= 0b00000010,
-	FIN_Func_Parallel		= 0b00000110,
-	FIN_Func_Async			= 0b00001110,
-	FIN_Func_MemberFunc		= 0b00010000,
-	FIN_Func_ClassFunc		= 0b00100000,
-	FIN_Func_StaticFunc		= 0b01000000,
-	FIN_Func_VarRets		= 0b10000000,
+	FIN_Func_None			= 0b000000000,
+	FIN_Func_VarArgs		= 0b000000001,
+	FIN_Func_Runtime		= 0b000001110,
+	FIN_Func_RT_Sync		= 0b000000010,
+	FIN_Func_RT_Parallel	= 0b000000100,
+	FIN_Func_RT_Async		= 0b000001000,
+	FIN_Func_Sync			= 0b000000010,
+	FIN_Func_Parallel		= 0b000000110,
+	FIN_Func_Async			= 0b000001110,
+	FIN_Func_MemberFunc		= 0b000010000,
+	FIN_Func_ClassFunc		= 0b000100000,
+	FIN_Func_StaticFunc		= 0b001000000,
+	FIN_Func_VarRets		= 0b010000000,
+	FIN_Func_StaticSource	= 0b100000000,
 };
 
 ENUM_CLASS_FLAGS(EFINFunctionFlags)

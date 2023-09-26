@@ -5,6 +5,14 @@
 #include "Network/Signals/FINSignalSubsystem.h"
 #include "FINSignal.generated.h"
 
+UENUM()
+enum EFINSignalFlags {
+	FIN_Signal_None			= 0,
+	FIN_Signal_StaticSource	= 0b1,
+};
+
+ENUM_CLASS_FLAGS(EFINSignalFlags)
+
 UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINSignal : public UFINBase {
 	GENERATED_BODY()
@@ -13,6 +21,13 @@ public:
 	bool bIsVarArgs = false;
 	UPROPERTY()
 	TArray<UFINProperty*> Parameters;
+
+	EFINSignalFlags SignalFlags = FIN_Signal_None;
+
+	/**
+	 * Returns the signal flags of this struct
+	 */
+	virtual EFINSignalFlags GetSignalFlags() const { return SignalFlags; }
 	
 	/**
 	 * Returns the parameters of the signal

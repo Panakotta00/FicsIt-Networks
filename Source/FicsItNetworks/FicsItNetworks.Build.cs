@@ -28,6 +28,8 @@ public class FicsItNetworks : ModuleRules
             "Json",
             "Vorbis",
             "Http",
+            "OnlineSubsystemUtils",
+            "ReplicationGraph"
 		});
 	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 
