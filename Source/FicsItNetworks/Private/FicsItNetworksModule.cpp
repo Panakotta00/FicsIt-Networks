@@ -271,7 +271,7 @@ void FFicsItNetworksModule::StartupModule(){
 		SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::RemoveConnection, UFGRailroadTrackConnectionComponent_RemoveConnection_Hook);
 
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGRailroadTrackConnectionComponent::EndPlay, (void*)GetDefault<UFGRailroadTrackConnectionComponent>(), [](UActorComponent* self, EEndPlayReason::Type Reason) {
-			if (Reason == EEndPlayReason::Destroyed) {
+			if (Reason == EEndPlayReason::Destroyed && self->GetWorld()) {
 				AFINComputerSubsystem::GetComputerSubsystem(self)->ForceRailroadSwitch(Cast<UFGRailroadTrackConnectionComponent>(self), -1);
 			}
 		});
