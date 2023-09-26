@@ -82,7 +82,6 @@ private:
 	TPromise<void> SyncAsync;
 	FCriticalSection AsyncSyncMutex;
 	
-
 public:
 
 	FFINLuaProcessorTick();
@@ -146,6 +145,13 @@ private:
 	// filesystem handling
 	TSet<FicsItKernel::Lua::LuaFile> FileStreams;
 	CodersFileSystem::SRef<LuaFileSystemListener> FileSystemListener;
+
+	bool bWasPriorToGCPromoted;
+	FDelegateHandle OnPreGarbageCollectionHandle;
+	FDelegateHandle OnPostGarbageCollectionHandle;
+	
+	void OnPreGarbageCollection();
+	void OnPostGarbageCollection();
 	
 public:
 	UPROPERTY(SaveGame)

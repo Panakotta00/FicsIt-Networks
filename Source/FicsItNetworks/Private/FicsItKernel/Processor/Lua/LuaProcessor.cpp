@@ -305,11 +305,29 @@ UFINLuaProcessor* UFINLuaProcessor::luaGetProcessor(lua_State* L) {
 	return p;
 }
 
-UFINLuaProcessor::UFINLuaProcessor() : tickHelper(this), FileSystemListener(new LuaFileSystemListener(this)) {
-	
+void UFINLuaProcessor::OnPreGarbageCollection() {
+	bWasPriorToGCPromoted = (bool)(tickHelper.getState() & LUA_ASYNC);
+	if (bWasPriorToGCPromoted) {
+		tickHelper.demote();
+	}
 }
 
-UFINLuaProcessor::~UFINLuaProcessor() {}
+void UFINLuaProcessor::OnPostGarbageCollection() {
+	if (bWasPriorToGCPromoted) {
+		tickHelper.promote();
+	}
+}
+
+
+UFINLuaProcessor::UFINLuaProcessor() : tickHelper(this), FileSystemListener(new LuaFileSystemListener(this)) {
+	OnPreGarbageCollectionHandle = FCoreUObjectDelegates::GetPreGarbageCollectDelegate().AddUObject(this, &UFINLuaProcessor::OnPreGarbageCollection);
+	OnPostGarbageCollectionHandle = FCoreUObjectDelegates::GetPostGarbageCollect().AddUObject(this, &UFINLuaProcessor::OnPostGarbageCollection);
+}
+
+UFINLuaProcessor::~UFINLuaProcessor() {
+	FCoreUObjectDelegates::GetPreGarbageCollectDelegate().Remove(OnPreGarbageCollectionHandle);
+	FCoreUObjectDelegates::GetPostGarbageCollect().Remove(OnPostGarbageCollectionHandle);
+}
 
 int luaPersist(lua_State* L) {
 	UFINLuaProcessor* p = UFINLuaProcessor::luaGetProcessor(L);
