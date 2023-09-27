@@ -34,7 +34,7 @@ pipeline {
 
 		stage('Checkout') {
 			steps {
-				dir("SatisfactoryModLoader/Plugins") {
+				dir("SatisfactoryModLoader/Mods") {
 					checkout scm: [
 						$class: 'GitSCM',
 						branches: scm.branches,
@@ -53,7 +53,7 @@ pipeline {
 		stage('Apply Patches') {
 			steps {
 				dir("SatisfactoryModLoader") {
-					bat label: 'Apply Source Patch', script: 'git apply Plugins\\%MOD_NAME%\\SML_Patch.patch -v'
+					bat label: 'Apply Source Patch', script: 'git apply Mods\\%MOD_NAME%\\SML_Patch.patch -v'
 					//bat label: 'Apply Asset Patch', script: 'git apply %ASSETS% -v'
 					bat label: 'Add WWise', script: '7z x %WWISE_PLUGIN% -oPlugins\\'
 				}
