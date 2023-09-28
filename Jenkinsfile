@@ -73,10 +73,11 @@ pipeline {
 					bat label: 'Register UE', script: 'SetupScripts\\Register.bat'*/
 					withCredentials([string(credentialsId: 'GitHub-API', variable: 'GITHUB_TOKEN')]) {
                         retry(3) {
-                            bat label: 'Download UE - Part 1', script: 'github-release download --user SatisfactoryModdingUE --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.001" > UnrealEngine-CSS-Editor-Win64.7z.001'
-                            bat label: 'Download UE - Part 2', script: 'github-release download --user SatisfactoryModdingUE --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.002" > UnrealEngine-CSS-Editor-Win64.7z.002'
+                            bat label: 'Download UE - Part 1', script: 'github-release download --user SatisfactoryModding --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.001" > UnrealEngine-CSS-Editor-Win64.7z.001'
+                            bat label: 'Download UE - Part 2', script: 'github-release download --user SatisfactoryModding --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.002" > UnrealEngine-CSS-Editor-Win64.7z.002'
+                            bat label: 'Download UE - Part 2', script: 'github-release download --user SatisfactoryModding --repo UnrealEngine -l -n "UnrealEngine-CSS-Editor-Win64.7z.003" > UnrealEngine-CSS-Editor-Win64.7z.003'
                         }
-                        bat label: '', script: '7z x UnrealEngine-CSS-Editor-Win64.7z.001'
+                        bat label: '', script: '7z x -mmt=10 UnrealEngine-CSS-Editor-Win64.7z.001'
                     }
                     bat label: '', script: 'SetupScripts\\Register.bat'
 				}
