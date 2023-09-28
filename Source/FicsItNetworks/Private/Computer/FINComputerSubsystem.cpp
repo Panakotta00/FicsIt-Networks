@@ -59,6 +59,10 @@ void AFINComputerSubsystem::PreSaveGame_Implementation(int32 saveVersion, int32 
 	Version = FINLatestVersion;
 }
 
+void AFINComputerSubsystem::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	SetFSAlways(FIN_FS_Ask);
+}
+
 void AFINComputerSubsystem::OnPrimaryFirePressed() {
 	AController* controller = GetWorld()->GetFirstPlayerController();
 	if (controller) {
@@ -224,6 +228,19 @@ void AFINComputerSubsystem::RemoveRailroadSwitchConnection(CallScope<void(*)(UFG
 		Switch->RemoveConnectionInternal(Connection);
 		ForcedTrack->ActualConnections.Remove(Connection);
 	}
+}
+
+static EFINFSAlways FSAlways = FIN_FS_Ask;
+static FCriticalSection FSAlwaysMutex;
+
+void AFINComputerSubsystem::SetFSAlways(EFINFSAlways InAlways) {
+	FScopeLock ScopeLock(&FSAlwaysMutex);
+	FSAlways = InAlways;
+}
+
+EFINFSAlways AFINComputerSubsystem::GetFSAlways() {
+	FScopeLock ScopeLock(&FSAlwaysMutex);
+	return FSAlways;
 }
 
 void AFINComputerSubsystem::ForcedRailroadSwitchCleanup(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch) {

@@ -13,6 +13,13 @@
 class AFINComputerGPU;
 class UFINGPUWidgetSign;
 
+UENUM()
+enum EFINFSAlways {
+	FIN_FS_Ask,
+	FIN_FS_AlwaysOverride,
+	FIN_FS_AlwaysKeep,
+};
+
 USTRUCT()
 struct FFINRailroadSwitchForce {
 	GENERATED_BODY()
@@ -56,6 +63,7 @@ public:
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override;
 	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	// End IFGSaveInterface
 
 	void OnPrimaryFirePressed();
@@ -80,6 +88,9 @@ public:
 
 	void AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
 	void RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
+
+	static void SetFSAlways(EFINFSAlways InAlways);
+	static EFINFSAlways GetFSAlways();
 	
 private:
 	void UpdateRailroadSwitch(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch);
