@@ -87,7 +87,7 @@ pipeline {
 
 		stage('Build FicsIt-Networks') {
 			steps {
-				bat label: 'Create project files', script: '.\\ue4\\lb\\win\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe -projectfiles -project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -game -rocket -progress'
+				bat label: 'Create project files', script: '.\\ue4\\lb\\win\\Engine\\Binaries\\DotNET\\UnrealBuildTool\\UnrealBuildTool.exe -projectfiles -project="%WORKSPACE%\\SatisfactoryModLoader\\FactoryGame.uproject" -game -rocket -progress'
 				bat label: 'Build for Shipping', script: 'MSBuild.exe /p:CL_MPCount=5 .\\SatisfactoryModLoader\\FactoryGame.sln /p:Configuration="Shipping" /p:Platform="Win64" /t:"Games\\FactoryGame"'
 				bat label: 'Build for Editor', script: 'MSBuild.exe /p:CL_MPCount=5 .\\SatisfactoryModLoader\\FactoryGame.sln /p:Configuration="Development Editor" /p:Platform="Win64" /t:"Games\\FactoryGame"'
 			}
