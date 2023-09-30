@@ -269,5 +269,10 @@ namespace FicsItKernel {
 				lua_pushnil(L);
 			}
 		}
+
+		void luaFIN_pushfstring(lua_State* L, const FString& Str) {
+			FTCHARToUTF8 conv(*Str, Str.Len());
+			lua_pushlstring(L, conv.Get(), conv.Length());
+		}
 	}
 }

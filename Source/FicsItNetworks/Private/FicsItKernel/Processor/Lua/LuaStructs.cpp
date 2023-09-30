@@ -6,6 +6,7 @@
 #include "Reflection/FINReflection.h"
 #include "Reflection/FINStruct.h"
 #include "FGRailroadSubsystem.h"
+#include "FicsItKernel/Processor/Lua/LuaInstance.h"
 
 #define PersistParams \
 	const std::string& _persist_namespace, \
@@ -255,6 +256,42 @@ namespace FicsItKernel {
 			{NULL, NULL}
 		};
 
+		int luaFindStruct(lua_State* L) {
+			const int args = lua_gettop(L);
+
+			for (int i = 1; i <= args; ++i) {
+				const bool isT = lua_istable(L, i);
+
+				TArray<FString> StructNames;
+				if (isT) {
+					const auto count = lua_rawlen(L, i);
+					for (int j = 1; j <= count; ++j) {
+						lua_geti(L, i, j);
+						if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
+						StructNames.Add(lua_tostring(L, -1));
+						lua_pop(L, 1);
+					}
+					lua_newtable(L);
+				} else {
+					if (!lua_isstring(L, i)) return luaL_argerror(L, i, "is not string");
+					StructNames.Add(lua_tostring(L, i));
+				}
+				int j = 0;
+				TArray<UFINStruct*> Structs;
+				FFINReflection::Get()->GetStructs().GenerateValueArray(Structs);
+				for (const FString& StructName : StructNames) {
+					UFINStruct** Struct = Structs.FindByPredicate([StructName](UFINStruct* Struct) {
+						if (Struct->GetInternalName() == StructName) return true;
+						return false;
+					});
+					if (Struct) newInstance(L, FINTrace(*Struct));
+					else lua_pushnil(L);
+					if (isT) lua_seti(L, -2, ++j);
+				}
+			}
+			return UFINLuaProcessor::luaAPIReturn(L, args);
+		}
+
 		void setupStructSystem(lua_State* L) {
 			PersistSetup("StructSystem", -2);
 			
@@ -262,6 +299,8 @@ namespace FicsItKernel {
 			PersistValue("StructFuncCall");				// ...
 			lua_pushcfunction(L, luaStructUnpersist);			// ..., LuaInstanceUnpersist
 			PersistValue("StructUnpersist");				// ...
+			lua_register(L, "findStruct", luaFindStruct);	// ..., findStruct
+			PersistGlobal("findStruct");					// ...
 		}
 
 		void setupStructMetatable(lua_State* L, UFINStruct* Struct) {

@@ -200,14 +200,6 @@ public:
 	void LuaTick();
 
 	/**
-	 * Sets up the lua environment.
-	 * Adds the Computer API in global namespace and adds the FileSystem API in global namespace.
-	 *
-	 * @param[in]	L	the lua context you want to setup
-	 */
-	static void LuaSetup(lua_State* L);
-
-	/**
 	 * Allows to access the the eeprom used by the processor.
 	 * Nullptr if no eeprom is currently set.
 	 *

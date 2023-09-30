@@ -584,62 +584,6 @@ namespace FicsItKernel {
 			return UFINLuaProcessor::luaAPIReturn(L, args);
 		}
 
-		int luaFindStruct(lua_State* L) {
-			const int args = lua_gettop(L);
-
-			for (int i = 1; i <= args; ++i) {
-				const bool isT = lua_istable(L, i);
-
-				TArray<FString> StructNames;
-				if (isT) {
-					const auto count = lua_rawlen(L, i);
-					for (int j = 1; j <= count; ++j) {
-						lua_geti(L, i, j);
-						if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
-						StructNames.Add(lua_tostring(L, -1));
-						lua_pop(L, 1);
-					}
-					lua_newtable(L);
-				} else {
-					if (!lua_isstring(L, i)) return luaL_argerror(L, i, "is not string");
-					StructNames.Add(lua_tostring(L, i));
-				}
-				int j = 0;
-				TArray<UFINStruct*> Structs;
-				FFINReflection::Get()->GetStructs().GenerateValueArray(Structs);
-				for (const FString& StructName : StructNames) {
-					UFINStruct** Struct = Structs.FindByPredicate([StructName](UFINStruct* Struct) {
-                        if (Struct->GetInternalName() == StructName) return true;
-                        return false;
-                    });
-					if (Struct) newInstance(L, FINTrace(*Struct));
-					else lua_pushnil(L);
-					if (isT) lua_seti(L, -2, ++j);
-				}
-			}
-			return UFINLuaProcessor::luaAPIReturn(L, args);
-		}
-
-		int luaFindItem(lua_State* L) {
-			// ReSharper disable once CppDeclaratorNeverUsed
-			FLuaSyncCall SyncCall(L);
-			const int NumArgs = lua_gettop(L);
-			if (NumArgs < 1) return UFINLuaProcessor::luaAPIReturn(L, 0);
-			const char* str = luaL_tolstring(L, -1, nullptr);
-
-			TArray<TSubclassOf<UFGItemDescriptor>> items;
-			UFGBlueprintFunctionLibrary::Cheat_GetAllDescriptors(items);
-			if (str) for (TSubclassOf<UFGItemDescriptor> item : items) {
-				if (IsValid(item) && UFGItemDescriptor::GetItemName(item).ToString() == FString(str)) {
-					newInstance(L, item);
-					return UFINLuaProcessor::luaAPIReturn(L, 1);
-				}
-			}
-
-			lua_pushnil(L);
-			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		}
-
 		void setupInstanceSystem(lua_State* L) {
 			PersistSetup("InstanceSystem", -2);
 			
@@ -652,12 +596,6 @@ namespace FicsItKernel {
 
 			lua_register(L, "findClass", luaFindClass);
 			PersistGlobal("findClass");
-
-			lua_register(L, "findStruct", luaFindStruct);
-			PersistGlobal("findStruct");
-
-			lua_register(L, "findItem", luaFindItem);
-			PersistGlobal("findItem");
 
 			lua_pushcfunction(L, luaInstanceFuncCall);			// ..., InstanceFuncCall
 			PersistValue("InstanceFuncCall");					// ...
