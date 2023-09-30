@@ -1271,9 +1271,10 @@ BeginFunc(setRecipe, "Set Recipe", "Sets the currently producing recipe of this 
 	if (recipes.Contains(recipe)) {
 		TArray<FInventoryStack> stacks;
 		self->GetInputInventory()->GetInventoryStacks(stacks);
+		self->GetInputInventory()->Empty();
 		self->GetOutputInventory()->AddStacks(stacks);
 		self->SetRecipe(recipe);
-		gotSet = true;
+		gotSet = self->GetCurrentRecipe() == recipe;
 	} else {
 		gotSet = false;
 	}
