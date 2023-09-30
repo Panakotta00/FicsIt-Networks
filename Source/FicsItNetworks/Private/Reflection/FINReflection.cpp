@@ -128,9 +128,11 @@ UFINStruct* FFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive, b
 				Struct->AddToRoot();
 				FINStruct->AddToRoot();
 				Structs.Add(Struct, FINStruct);
+				StructsReversed.Add(FINStruct, Struct);
 				for (const UFINReflectionSource* Source : Sources) {
 					Source->FillData(this, FINStruct, Struct);
 				}
+				StructNames.Add(FINStruct->GetInternalName(), FINStruct);
 				return FINStruct;
 			}
 		}
@@ -139,6 +141,18 @@ UFINStruct* FFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive, b
 		Struct = Cast<UScriptStruct>(Struct->GetSuperStruct());
 	} while (Struct && bRecursive);
 	return nullptr;
+}
+
+UFINStruct* FFINReflection::FindStruct(const FString& StructName) const {
+	UFINStruct* const* Struct = StructNames.Find(StructName);
+	if (Struct) return *Struct;
+	else return nullptr;
+}
+
+UScriptStruct* FFINReflection::FindScriptStruct(UFINStruct* Struct) const {
+	UScriptStruct* const* ScriptStruct = StructsReversed.Find(Struct);
+	if (ScriptStruct) return *ScriptStruct;
+	else return nullptr;
 }
 
 void PrintProperty(FString Prefix, UFINProperty* Property) {

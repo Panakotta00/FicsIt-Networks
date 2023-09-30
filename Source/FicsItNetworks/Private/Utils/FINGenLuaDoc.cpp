@@ -1,5 +1,5 @@
 #include "Utils/FINGenLuaDoc.h"
-#include "FicsItKernel/Processor/Lua/LuaInstance.h"
+#include "LuaProcessor/LuaInstance.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINClassProperty.h"
 #include "Reflection/FINObjectProperty.h"

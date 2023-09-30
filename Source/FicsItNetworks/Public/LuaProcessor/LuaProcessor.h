@@ -9,10 +9,8 @@
 class AFINStateEEPROMLua;
 struct lua_State;
 struct lua_Debug;
-namespace FicsItKernel {
-	namespace Lua {
-		int luaPull(lua_State*);
-	}
+namespace FINLua {
+	int luaPull(lua_State*);
 }
 
 class LuaFileSystemListener : public CodersFileSystem::Listener {
@@ -117,7 +115,7 @@ UCLASS()
 class UFINLuaProcessor : public UFINKernelProcessor {
 	GENERATED_BODY()
 
-	friend int FicsItKernel::Lua::luaPull(lua_State* L);
+	friend int FINLua::luaPull(lua_State* L);
 	friend int luaComputerSkip(lua_State* L);
 	friend FLuaTickRunnable;
 	friend struct FLuaSyncCall;
@@ -143,7 +141,7 @@ private:
 	uint64 PullStart = 0;
 
 	// filesystem handling
-	TSet<FicsItKernel::Lua::LuaFile> FileStreams;
+	TSet<FINLua::LuaFile> FileStreams;
 	CodersFileSystem::SRef<LuaFileSystemListener> FileSystemListener;
 
 	bool bWasPriorToGCPromoted;
@@ -217,7 +215,7 @@ public:
 	int DoSignal(lua_State* L);
 	
 	void ClearFileStreams();
-	TSet<FicsItKernel::Lua::LuaFile> GetFileStreams() const;
+	TSet<FINLua::LuaFile> GetFileStreams() const;
 
 	static void luaHook(lua_State* L, lua_Debug* ar);
 

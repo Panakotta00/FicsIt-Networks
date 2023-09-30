@@ -2,7 +2,7 @@
 
 #include "FINComputerCase.h"
 #include "FINComputerGPUT1.h"
-#include "FicsItKernel/Processor/Lua/FINStateEEPROMLua.h"
+#include "LuaProcessor/FINStateEEPROMLua.h"
 #include "FGRemoteCallObject.h"
 #include "FINComputerRCO.generated.h"
 

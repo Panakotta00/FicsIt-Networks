@@ -1,7 +1,7 @@
 #include "FicsItKernel/FicsItKernel.h"
 #include "Computer/FINComputerCase.h"
 #include "Network/FINFuture.h"
-#include "FicsItKernel/Processor/Lua/LuaProcessor.h"
+#include "LuaProcessor/LuaProcessor.h"
 #include "Reflection/FINReflection.h"
 
 FFINKernelListener::FFINKernelListener(UFINKernelSystem* parent) : parent(parent) {}

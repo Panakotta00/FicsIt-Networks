@@ -78,38 +78,42 @@ inline void _PersistTable(lua_State* L, int _persist_permTableIdx, int _persist_
 	PersistValue(name);
 }
 
-namespace FicsItKernel {
-	namespace Lua {
-		/**
-		 * Converts the given property within the given struct pointer
-		 * to a lua value and pushes it onto the stack.
-		 * The trace allows for object properties to have additionally a this trace attached.
-		 */
-		void propertyToLua(lua_State* L, FProperty* p, void* data, const FFINNetworkTrace& trace);
+namespace FINLua {
+	/**
+	 * Converts the given property within the given struct pointer
+	 * to a lua value and pushes it onto the stack.
+	 * The trace allows for object properties to have additionally a this trace attached.
+	 */
+	void propertyToLua(lua_State* L, FProperty* p, void* data, const FFINNetworkTrace& trace);
 
-		/**
-		 * Trys to convert the lua value at the given index on the given lua stack
-		 * to the given property in the given struct pointer.
-		 */
-		void luaToProperty(lua_State* L, FProperty* p, void* data, int i);
+	/**
+	 * Trys to convert the lua value at the given index on the given lua stack
+	 * to the given property in the given struct pointer.
+	 */
+	void luaToProperty(lua_State* L, FProperty* p, void* data, int i);
 
-		/**
-		 * Trys to convert the lua value at the given index on the given lua stack
-		 * to the given property and returns that value.
-		 * lua error if value not valid
-		 */
-		FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index);
+	/**
+	 * Trys to convert the lua value at the given index on the given lua stack
+	 * to the given property and returns that value.
+	 * lua error if value not valid
+	 */
+	FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index);
 
-		/**
-		 * Trys to convert the lua value at the given index to any kind of network value.
-		 */
-		void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val);
+	/**
+	 * Trys to convert the lua value at the given index to any kind of network value.
+	 */
+	void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val);
 
-		/**
-		 * Converts the given network value into a lua value and pushes it onto the stack
-		 */
-		void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, const FFINNetworkTrace& Trace);
+	/**
+	 * Converts the given network value into a lua value and pushes it onto the stack
+	 */
+	void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, const FFINNetworkTrace& Trace);
 
-		void luaFIN_pushfstring(lua_State* L, const FString& Str);
-	}
+	void luaFIN_pushfstring(lua_State* L, const FString& Str);
+	FString luaFIN_checkfstring(lua_State* L, int Index);
+	void luaFIN_pushSimpleStructRef(lua_State* L, UFINStruct* Struct);
+	UFINStruct* luaFIN_toSimpleStructRef(lua_State* L, int index);
+	UFINStruct* luaFIN_checkSimpleStructRef(lua_State* L, int index);
+
+	void setupUtilLib(lua_State* L);
 }

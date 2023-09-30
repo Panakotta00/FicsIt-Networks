@@ -20,6 +20,8 @@ struct FICSITNETWORKS_API FFINReflection {
 private:
 	TMap<UClass*, UFINClass*> Classes;
 	TMap<UScriptStruct*, UFINStruct*> Structs;
+	TMap<FString, UFINStruct*> StructNames;
+	TMap<UFINStruct*, UScriptStruct*> StructsReversed;
 	TArray<const UFINReflectionSource*> Sources;
 	
 public:
@@ -29,6 +31,8 @@ public:
 	void LoadAllTypes();
 	UFINClass* FindClass(UClass* Clazz, bool bRecursive = true, bool bTryToReflect = true);
 	UFINStruct* FindStruct(UScriptStruct* Struct, bool bRecursive = true, bool bTryToReflect = true);
+	UFINStruct* FindStruct(const FString& StructName) const;
+	UScriptStruct* FindScriptStruct(UFINStruct* Struct) const;
 	void PrintReflection();
 	inline const TMap<UClass*, UFINClass*>& GetClasses() { return Classes; }
 	inline const TMap<UScriptStruct*, UFINStruct*>& GetStructs() { return Structs; }

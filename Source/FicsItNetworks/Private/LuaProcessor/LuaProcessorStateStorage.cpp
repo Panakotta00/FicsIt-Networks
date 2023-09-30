@@ -1,4 +1,4 @@
-#include "FicsItKernel/Processor/Lua/LuaProcessorStateStorage.h"
+#include "LuaProcessor/LuaProcessorStateStorage.h"
 #include "FicsItNetworksModule.h"
 #include "Network/FINDynamicStructHolder.h"
 

@@ -1,12 +1,13 @@
-#include "FicsItKernel/Processor/Lua/LuaProcessor.h"
-#include "FicsItKernel/Processor/Lua/FINStateEEPROMLua.h"
-#include "FicsItKernel/Processor/Lua/LuaGlobalLib.h"
+#include "LuaProcessor/LuaProcessor.h"
+#include "LuaProcessor/FINStateEEPROMLua.h"
+#include "LuaProcessor/LuaGlobalLib.h"
+#include "LuaProcessor/LuaInstance.h"
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINSignal.h"
 
 void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
-	for (FicsItKernel::Lua::LuaFile file : Parent->GetFileStreams()) {
+	for (FINLua::LuaFile file : Parent->GetFileStreams()) {
 		if (file.isValid() && (!Parent->GetKernel()->GetFileSystem() || !Parent->GetKernel()->GetFileSystem()->checkUnpersistPath(file->path))) {
 			file->file->close();
 		}
@@ -14,7 +15,7 @@ void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileS
 }
 
 void LuaFileSystemListener::onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
-	for (FicsItKernel::Lua::LuaFile file : Parent->GetFileStreams()) {
+	for (FINLua::LuaFile file : Parent->GetFileStreams()) {
 		if (file.isValid() && file->path.length() > 0 && (!Parent->GetKernel()->GetFileSystem() || Parent->GetKernel()->GetFileSystem()->unpersistPath(file->path) == path)) {
 			file->file->close();
 		}
@@ -339,9 +340,9 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 	tickHelper.stop();
 	StateStorage.Clear();
 
-	for (FicsItKernel::Lua::LuaFile file : FileStreams) {
+	for (FINLua::LuaFile file : FileStreams) {
 		if (file->file) {
-			file->transfer = CodersFileSystem::SRef<FicsItKernel::Lua::LuaFilePersistTransfer>(new FicsItKernel::Lua::LuaFilePersistTransfer());
+			file->transfer = CodersFileSystem::SRef<FINLua::LuaFilePersistTransfer>(new FINLua::LuaFilePersistTransfer());
 			file->transfer->open = file->file->isOpen();
 			if (file->transfer->open) {
 				file->transfer->mode = file->file->getMode();
@@ -567,16 +568,16 @@ size_t luaLen(lua_State* L, int idx) {
 }
 
 void UFINLuaProcessor::ClearFileStreams() {
-	TSet<CodersFileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>> ToRemove;
-	for (const CodersFileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>& fs : FileStreams) {
+	TSet<CodersFileSystem::SRef<FINLua::LuaFileContainer>> ToRemove;
+	for (const CodersFileSystem::SRef<FINLua::LuaFileContainer>& fs : FileStreams) {
 		if (!fs.isValid()) ToRemove.Add(fs);
 	}
-	for (const CodersFileSystem::SRef<FicsItKernel::Lua::LuaFileContainer>& fs : ToRemove) {
+	for (const CodersFileSystem::SRef<FINLua::LuaFileContainer>& fs : ToRemove) {
 		FileStreams.Remove(fs);
 	}
 }
 
-TSet<FicsItKernel::Lua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
+TSet<FINLua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
 	return FileStreams;
 }
 
@@ -677,9 +678,9 @@ int UFINLuaProcessor::DoSignal(lua_State* L) {
 	int props = 2;
 	if (signal.Signal) lua_pushstring(L, TCHAR_TO_UTF8(*signal.Signal->GetInternalName()));
 	else lua_pushnil(L);
-	FicsItKernel::Lua::newInstance(L, UFINNetworkUtils::RedirectIfPossible(sender));
+	FINLua::newInstance(L, UFINNetworkUtils::RedirectIfPossible(sender));
 	for (const FFINAnyNetworkValue& Value : signal.Data) {
-		FicsItKernel::Lua::networkValueToLua(L, Value, sender);
+		FINLua::networkValueToLua(L, Value, sender);
 		props++;
 	}
 	return props;

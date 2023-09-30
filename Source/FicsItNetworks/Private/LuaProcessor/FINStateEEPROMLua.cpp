@@ -1,4 +1,4 @@
-﻿#include "FicsItKernel/Processor/Lua/FINStateEEPROMLua.h"
+﻿#include "LuaProcessor/FINStateEEPROMLua.h"
 
 void AFINStateEEPROMLua::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
