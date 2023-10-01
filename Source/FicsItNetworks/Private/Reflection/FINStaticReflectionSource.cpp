@@ -882,7 +882,7 @@ BeginProp(RTrace<AActor>, owner, "Owner", "The parent actor of which this compon
 } EndProp()
 EndClass()
 
-BeginClass(UFGInventoryComponent, "Inventory", "Inventory", "A actor component that can hold multiple item stacks.")
+BeginClass(UFGInventoryComponent, "Inventory", "Inventory", "A actor component that can hold multiple item stacks.\nWARNING! Be aware of container inventories, and never open their UI, otherwise these function will not work as expected.")
 BeginFuncVA(getStack, "Get Stack", "Returns the item stack at the given index.\nTakes integers as input and returns the corresponding stacks.") {
 	Body()
 	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
@@ -929,6 +929,13 @@ BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click
 		}
 	}
 	if (!self->IsLocked() && self->GetCanBeRearranged()) self->SortInventory();
+} EndFunc()
+BeginFunc(swapStacks, "Swap Stacks", "Swaps two given stacks inside the inventory.", 1) {
+	InVal(0, RInt, index1, "Index 1", "The index of the first stack in the inventory.")
+	InVal(1, RInt, index2, "Index 2", "The index of the second stack in the inventory.")
+	OutVal(2, RBool, successful, "Successful", "True if the swap was successful.")
+	Body()
+	successful = UFGInventoryLibrary::MoveInventoryItem(self, index1, self, index2);
 } EndFunc()
 BeginFunc(flush, "Flush", "Removes all discardable items from the inventory completely. They will be gone! No way to get them back!", 0) {
 	Body()
