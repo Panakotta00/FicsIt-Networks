@@ -33,6 +33,7 @@ namespace FINLua {
 			return nullptr;
 		}
 		if (lua_istable(L, i)) {
+			if (!(Type->GetStructFlags() & FIN_Struct_Constructable)) return nullptr;
 			int j = 0;
 			for (UFINProperty* Prop : Type->GetProperties()) {
 				if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
@@ -329,7 +330,7 @@ namespace FINLua {
 	int luaStructLibIndex(lua_State* L) {
 		FString StructName = luaFIN_checkfstring(L, 2);
 		UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
-		if (Struct) {
+		if (Struct && (Struct->GetStructFlags() & FIN_Struct_Constructable)) {
 			luaFIN_pushSimpleStructRef(L, Struct);
 			lua_pushcclosure(L, &luaStructConstructor, 1);
 		} else {

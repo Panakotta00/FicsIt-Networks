@@ -62,8 +62,12 @@ struct FICSITNETWORKS_API FFINStaticStructReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
+	bool bConstructable;
 	TMap<int, FFINStaticFuncReg> Functions;
 	TMap<int, FFINStaticPropReg> Properties;
+
+	FFINStaticStructReg() = default;
+	FFINStaticStructReg(const FString& InternalName, const FText& DisplayName, const FText& Description, bool bConstructable) : InternalName(InternalName), DisplayName(DisplayName), Description(Description), bConstructable(bConstructable) {}
 };
 
 UCLASS()
@@ -78,7 +82,7 @@ public:
 		Classes.FindOrAdd(Class) = ClassReg;
 	}
 	static void AddStruct(UScriptStruct* Struct, const FFINStaticStructReg& StructReg) {
-		Structs.FindOrAdd(Struct) = StructReg;
+		Structs.Add(Struct, StructReg);
 	}
 	static void AddFunction(UClass* Class, int FuncID, const FFINStaticFuncReg& FuncReg) {
 		Classes.Find(Class)->Functions.FindOrAdd(FuncID) = FuncReg;

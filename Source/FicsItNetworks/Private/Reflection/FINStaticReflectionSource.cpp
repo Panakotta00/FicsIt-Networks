@@ -57,7 +57,6 @@
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
 #include "Buildables/FGBuildableResourceSink.h"
 #include "Buildables/FGBuildableSignBase.h"
-#include "Buildables/FGBuildableSpeedSign.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
 #include "Buildables/FGBuildableWidgetSign.h"
@@ -241,6 +240,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 	ToFillStruct->Description = StructReg->Description;
 	ToFillStruct->Parent = Ref->FindStruct(Cast<UScriptStruct>(Struct->GetSuperStruct()));
 	ToFillStruct->StructFlags |= FIN_Struct_StaticSource;
+	if (StructReg->bConstructable) ToFillStruct->StructFlags |= FIN_Struct_Constructable;
 	if (ToFillStruct->Parent == ToFillStruct) ToFillStruct->Parent = nullptr;
 
 	for (const TPair<int, FFINStaticFuncReg>& KVFunc : StructReg->Functions) {
@@ -379,15 +379,17 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		});
 #define EndClass() };
 #define TypeStructName(Type) FIN_StaticRef_ ## Type
-#define BeginStruct(Type, InternalName, DisplayName, Description) \
+#define _BeginStruct(Type, InternalName, DisplayName, Description, bConstructable) \
 	namespace TypeStructName(Type) { \
 		using T = Type; \
 		constexpr auto TName = TEXT(InternalName) ; \
 		UScriptStruct* GetUType() { return TBaseStructure<T>::Get(); } \
 		FORCEINLINE T* GetFromCtx(const FFINExecutionContext& Ctx) { return static_cast<T*>(Ctx.GetGeneric()); } \
 		FFINStaticGlobalRegisterFunc RegStruct([](){ \
-			UFINStaticReflectionSource::AddStruct(GetUType(), FFINStaticStructReg{TEXT(InternalName), FINRefTypeLocText("DisplayName", DisplayName), FINRefTypeLocText("Description", Description)}); \
+			UFINStaticReflectionSource::AddStruct(GetUType(), FFINStaticStructReg(TEXT(InternalName), FINRefTypeLocText("DisplayName", DisplayName), FINRefTypeLocText("Description", Description), bConstructable)); \
 		});
+#define BeginStruct(Type, InternalName, DisplayName, Description) _BeginStruct(Type, InternalName, DisplayName, Description, false)
+#define BeginStructConstructable(Type, InternalName, DisplayName, Description) _BeginStruct(Type, InternalName, DisplayName, Description, true)
 #define EndStruct() };
 #define GetClassFunc [](){ return T::StaticClass(); }
 #define FuncClassName(Prefix, Func) FIN_StaticRefFunc_ ## Prefix ## _ ## Func
@@ -644,6 +646,9 @@ BeginProp(RString, description, "Description", "The description of this base.") 
 EndClass()
 
 BeginClass(UFINStruct, "Struct", "Struct", "Reflection Object that holds information about structures.")
+BeginProp(RBool, isConstructable, "Is Constructable", "True if this struct can be constructed by the user directly.") {
+	Return (FINBool)(self->GetStructFlags() & FIN_Struct_Constructable);
+} EndProp()
 BeginFunc(getParent, "Get Parent", "Returns the parent type of this type.", false) {
 	OutVal(0, RObject<UFINClass>, parent, "Parent", "The parent type of this type.");
 	Body()
@@ -2370,7 +2375,7 @@ EndClass()
 BeginClass(UFGSignPrefabWidget, "SignPrefab", "Sign Prefab", "Descibes a layout of a sign.")
 EndClass()
 
-BeginStruct(FPrefabSignData, "PrefabSignData", "Prefab Sign Data", "This structure stores all data that defines what a sign displays.")
+BeginStructConstructable(FPrefabSignData, "PrefabSignData", "Prefab Sign Data", "This structure stores all data that defines what a sign displays.")
 BeginProp(RClass<UObject>, layout, "Layout", "The object that actually displayes the layout") {
 	Return (FINClass)self->PrefabLayout;
 } PropSet() {
@@ -2536,7 +2541,7 @@ EndClass()
 BeginStruct(FFINFuture, "Future", "Future", "A Future struct MAY BE HANDLED BY CPU IMPLEMENTATION differently, generaly, this is used to make resources available on a later point in time. Like if data won't be avaialble right away and you have to wait for it to process first. Like when you do a HTTP Request, then it takes some time to get the data from the web server. And since we don't want to halt the game and wait for the data, you can use a future to check if the data is available, or let just the Lua Code wait, till the data becomes available.")
 EndStruct()
 
-BeginStruct(FVector2D, "Vector2D", "Vector 2D", "Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space")
+BeginStructConstructable(FVector2D, "Vector2D", "Vector 2D", "Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
 	Return self->X;
 } PropSet() {
@@ -2549,7 +2554,7 @@ BeginProp(RFloat, y, "Y", "The Y coordinate component") {
 } EndProp()
 EndStruct()
 
-BeginStruct(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")
+BeginStructConstructable(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
 	Return self->X;
 } PropSet() {
@@ -2567,7 +2572,7 @@ BeginProp(RFloat, z, "Z", "The Z coordinate component") {
 } EndProp()
 EndStruct()
 
-BeginStruct(FRotator, "Rotator", "Rotator", "Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.")
+BeginStructConstructable(FRotator, "Rotator", "Rotator", "Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.")
 BeginProp(RFloat, pitch, "Pitch", "The pitch component") {
 	Return self->Pitch;
 } PropSet() {
@@ -2585,7 +2590,7 @@ BeginProp(RFloat, roll, "Roll", "The roll component") {
 } EndProp()
 EndStruct()
 
-BeginStruct(FFINTimeTableStop, "TimeTableStop", "Time Table Stop", "Information about a train stop in a time table.")
+BeginStructConstructable(FFINTimeTableStop, "TimeTableStop", "Time Table Stop", "Information about a train stop in a time table.")
 BeginProp(RTrace<AFGBuildableRailroadStation>, station, "Station", "The station at which the train should stop") {
 	Return self->Station;
 } PropSet() {
@@ -2603,7 +2608,7 @@ BeginFunc(setRuleSet, "Set Rule Set", "Allows you to change the Rule Set of this
 } EndFunc()
 EndStruct()
 
-BeginStruct(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
+BeginStructConstructable(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
 BeginProp(RInt, definition, "Defintion", "0 = Load/Unload Once, 1 = Fully Load/Unload") {
 	Return (FINInt)self->DockingDefinition;
 } PropSet() {
@@ -2748,7 +2753,7 @@ BeginFunc(getApprovedReservations, "Get Approved Reservations", "Returns a list 
 } EndFunc()
 EndStruct()
 
-BeginStruct(FFINTargetPoint, "TargetPoint", "Target Point", "Target Point in the waypoint list of a wheeled vehicle.")
+BeginStructConstructable(FFINTargetPoint, "TargetPoint", "Target Point", "Target Point in the waypoint list of a wheeled vehicle.")
 BeginProp(RStruct<FVector>, pos, "Pos", "The position of the target point in the world.") {
 	Return self->Pos;
 } PropSet() {
@@ -2771,7 +2776,7 @@ BeginProp(RFloat, wait, "Wait", "The amount of time which needs to pass till the
 } EndProp()
 EndStruct()
 
-BeginStruct(FItemAmount, "ItemAmount", "Item Amount", "A struct that holds a pair of amount and item type.")
+BeginStructConstructable(FItemAmount, "ItemAmount", "Item Amount", "A struct that holds a pair of amount and item type.")
 BeginProp(RInt, amount, "Amount", "The amount of items.") {
 	Return (int64) self->Amount;
 } PropSet() {
@@ -2784,7 +2789,7 @@ BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the items.") {
 } EndProp()
 EndStruct()
 
-BeginStruct(FInventoryStack, "ItemStack", "Item Stack", "A structure that holds item information and item amount to represent an item stack.")
+BeginStructConstructable(FInventoryStack, "ItemStack", "Item Stack", "A structure that holds item information and item amount to represent an item stack.")
 BeginProp(RInt, count, "Count", "The count of items.") {
 	Return (int64) self->NumItems;
 } PropSet() {
@@ -2797,7 +2802,7 @@ BeginProp(RStruct<FInventoryItem>, item, "Item", "The item information of this s
 } EndProp()
 EndStruct()
 
-BeginStruct(FInventoryItem, "Item", "Item", "A structure that holds item information.")
+BeginStructConstructable(FInventoryItem, "Item", "Item", "A structure that holds item information.")
 BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the item.") {
 	Return (UClass*)self->GetItemClass();
 } PropSet() {
@@ -2805,7 +2810,7 @@ BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the item.") {
 } EndProp()
 EndStruct()
 
-BeginStruct(FLinearColor, "Color", "Color", "A structure that holds a rgba color value")
+BeginStructConstructable(FLinearColor, "Color", "Color", "A structure that holds a rgba color value")
 BeginProp(RFloat, r, "Red", "The red portion of the color.") {
 	Return (FINFloat) self->R;
 } PropSet() {
@@ -2828,7 +2833,7 @@ BeginProp(RFloat, a, "Alpha", "The alpha (opacity) portion of the color.") {
 } EndProp()
 EndStruct()
 
-BeginStruct(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A structure that can hold a buffer of characters and colors that can be displayed with a gpu")
+BeginStructConstructable(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A structure that can hold a buffer of characters and colors that can be displayed with a gpu")
 BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.", 2) {
 	OutVal(0, RFloat, width, "Width", "The width of this buffer")
 	OutVal(1, RFloat, height, "Height", "The height of this buffer")

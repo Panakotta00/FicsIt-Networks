@@ -6,8 +6,9 @@
 
 UENUM()
 enum EFINStructFlags {
-	FIN_Struct_None			= 0,
-	FIN_Struct_StaticSource	= 0b1,
+	FIN_Struct_None				= 0,
+	FIN_Struct_StaticSource		= 0b01,
+	FIN_Struct_Constructable	= 0b10,
 };
 
 ENUM_CLASS_FLAGS(EFINStructFlags)
