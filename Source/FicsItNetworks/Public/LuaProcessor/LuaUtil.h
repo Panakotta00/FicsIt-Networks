@@ -111,9 +111,9 @@ namespace FINLua {
 
 	void luaFIN_pushfstring(lua_State* L, const FString& Str);
 	FString luaFIN_checkfstring(lua_State* L, int Index);
-	void luaFIN_pushSimpleStructRef(lua_State* L, UFINStruct* Struct);
-	UFINStruct* luaFIN_toSimpleStructRef(lua_State* L, int index);
-	UFINStruct* luaFIN_checkSimpleStructRef(lua_State* L, int index);
+	void luaFIN_pushStructType(lua_State* L, UFINStruct* Struct);
+	UFINStruct* luaFIN_toStructType(lua_State* L, int index);
+	UFINStruct* luaFIN_checkStructType(lua_State* L, int index);
 
 	void setupUtilLib(lua_State* L);
 }

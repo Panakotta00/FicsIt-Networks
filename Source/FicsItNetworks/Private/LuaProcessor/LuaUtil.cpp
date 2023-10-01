@@ -12,8 +12,6 @@
 #include "Reflection/FINStructProperty.h"
 #include "Reflection/FINTraceProperty.h"
 
-#define SIMPLE_STRUCT_REF_METATABLE_NAME "SimpleStructRefMetatable"
-
 namespace FINLua {
 	void propertyToLua(lua_State* L, FProperty* p, void* data, const FFINNetworkTrace& trace) {
 		if (p->IsA<FBoolProperty>()) {
@@ -271,25 +269,6 @@ namespace FINLua {
 			lua_pushnil(L);
 		}
 	}
-	
-	int luaSimpleStructRefUnpersist(lua_State* L) {
-		FString StructName = luaFIN_checkfstring(L, lua_upvalueindex(1));
-		UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
-		luaFIN_pushSimpleStructRef(L, Struct);
-		return 1;
-	}
-
-	int luaSimpleStructRefPersist(lua_State* L) {
-		UFINStruct* Type = (UFINStruct*)lua_getuservalue(L, 1);
-		luaFIN_pushfstring(L, Type->GetInternalName());
-		lua_pushcclosure(L, &luaSimpleStructRefUnpersist, 1);
-		return 1;
-	}
-	
-	static const luaL_Reg luaSimpleStructRefMetatable[] = {
-		{"__persist", luaSimpleStructRefPersist},
-		{nullptr, nullptr}
-	};
 
 	void luaFIN_pushfstring(lua_State* L, const FString& Str) {
 		FTCHARToUTF8 conv(*Str, Str.Len());
@@ -303,33 +282,9 @@ namespace FINLua {
 		return FString(conv.Length(), conv.Get());
 	}
 
-	void luaFIN_pushSimpleStructRef(lua_State* L, UFINStruct* Struct) {
-		if (Struct) {
-			lua_pushlightuserdata(L, Struct);
-			luaL_setmetatable(L, SIMPLE_STRUCT_REF_METATABLE_NAME);
-		} else {
-			lua_pushnil(L);
-		}
-	}
-
-	UFINStruct* luaFIN_toSimpleStructRef(lua_State* L, int index) {
-		if (lua_isnil(L, index)) return nullptr;
-		return luaFIN_checkSimpleStructRef(L, index);
-	}
-
-	UFINStruct* luaFIN_checkSimpleStructRef(lua_State* L, int index) {
-		UFINStruct* Struct = (UFINStruct*)luaL_checkudata(L, index, SIMPLE_STRUCT_REF_METATABLE_NAME);
-		return Struct;
-	}
-
 	void setupUtilLib(lua_State* L) {
 		PersistSetup("UtilLib", -2);
 		
-		luaL_newmetatable(L, SIMPLE_STRUCT_REF_METATABLE_NAME);
-		luaL_setfuncs(L, luaSimpleStructRefMetatable, 0);
-		lua_pushboolean(L, true);
-		lua_setfield(L, -2, "__metatable");
-		PersistTable(SIMPLE_STRUCT_REF_METATABLE_NAME, -1);
-		lua_pop(L, 1);
+		
 	}
 }

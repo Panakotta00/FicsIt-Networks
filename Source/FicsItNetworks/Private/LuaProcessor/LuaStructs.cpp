@@ -7,6 +7,8 @@
 #include "Reflection/FINReflection.h"
 #include "Reflection/FINStruct.h"
 
+#define STRUCT_TYPE_METATABLE_NAME "SimpleStructRefMetatable"
+
 #define PersistParams \
 	const std::string& _persist_namespace, \
 	const int _persist_permTableIdx, \
@@ -316,23 +318,61 @@ namespace FINLua {
 		StructToMetaName.FindOrAdd(Struct) = TypeName;
 	}
 
-	int luaStructConstructor(lua_State* L) {
-		UFINStruct* Struct = luaFIN_toSimpleStructRef(L, lua_upvalueindex(1));
+	int luaStructTypeCall(lua_State* L) {
+		UFINStruct* Struct = luaFIN_toStructType(L, 1);
 		if (!Struct) return 0;
 		UScriptStruct* ScriptStruct = FFINReflection::Get()->FindScriptStruct(Struct);
 		if (!ScriptStruct) return 0;
 		TSharedRef<FINStruct> StructContainer = MakeShared<FINStruct>(ScriptStruct);
-		luaGetStruct(L, 1, StructContainer);
+		luaGetStruct(L, 2, StructContainer);
 		luaStruct(L, *StructContainer);
 		return 1;
+	}
+
+	int luaStructTypeUnpersist(lua_State* L) {
+		FString StructName = luaFIN_checkfstring(L, lua_upvalueindex(1));
+		UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
+		luaFIN_pushStructType(L, Struct);
+		return 1;
+	}
+
+	int luaStructTypePersist(lua_State* L) {
+		UFINStruct* Type = (UFINStruct*)lua_getuservalue(L, 1);
+		luaFIN_pushfstring(L, Type->GetInternalName());
+		lua_pushcclosure(L, &luaStructTypeUnpersist, 1);
+		return 1;
+	}
+
+	static const luaL_Reg luaStructTypeMetatable[] = {
+		{"__call", luaStructTypeCall},
+		{"__persist", luaStructTypePersist},
+		{nullptr, nullptr}
+	};
+
+	void luaFIN_pushStructType(lua_State* L, UFINStruct* Struct) {
+		if (Struct) {
+			lua_pushlightuserdata(L, Struct);
+			luaL_setmetatable(L, STRUCT_TYPE_METATABLE_NAME);
+		} else {
+			lua_pushnil(L);
+		}
+	}
+
+	UFINStruct* luaFIN_toStructType(lua_State* L, int index) {
+		if (lua_isnil(L, index)) return nullptr;
+		return luaFIN_checkStructType(L, index);
+	}
+
+	UFINStruct* luaFIN_checkStructType(lua_State* L, int index) {
+		UFINStruct* Struct = (UFINStruct*)luaL_checkudata(L, index, STRUCT_TYPE_METATABLE_NAME);
+		return Struct;
 	}
 
 	int luaStructLibIndex(lua_State* L) {
 		FString StructName = luaFIN_checkfstring(L, 2);
 		UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
 		if (Struct && (Struct->GetStructFlags() & FIN_Struct_Constructable)) {
-			luaFIN_pushSimpleStructRef(L, Struct);
-			lua_pushcclosure(L, &luaStructConstructor, 1);
+			luaFIN_pushStructType(L, Struct);
 		} else {
 			lua_pushnil(L);
 		}
@@ -366,5 +406,12 @@ namespace FINLua {
 
 		lua_pushcfunction(L, luaStructLibIndex);				// ..., LuaStructLibIndex
 		PersistValue("StructStructLibIndex");				// ...
+
+		luaL_newmetatable(L, STRUCT_TYPE_METATABLE_NAME);
+		luaL_setfuncs(L, luaStructTypeMetatable, 0);
+		lua_pushboolean(L, true);
+		lua_setfield(L, -2, "__metatable");
+		PersistTable(STRUCT_TYPE_METATABLE_NAME, -1);
+		lua_pop(L, 1);
 	}
 }
