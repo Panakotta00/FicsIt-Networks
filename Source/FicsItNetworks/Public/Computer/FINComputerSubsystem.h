@@ -31,6 +31,20 @@ struct FFINRailroadSwitchForce {
 	TArray<UFGRailroadTrackConnectionComponent*> ActualConnections;
 };
 
+USTRUCT()
+struct FFINFactoryConnectorSettings {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	TSubclassOf<UFGItemDescriptor> AllowedItem;
+
+	UPROPERTY(SaveGame)
+	bool bBlocked = false;
+
+	UPROPERTY(SaveGame)
+	int64 UnblockedTransfers;
+};
+
 UCLASS()
 class FICSITNETWORKS_API AFINComputerSubsystem : public AModSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
@@ -91,13 +105,28 @@ public:
 
 	static void SetFSAlways(EFINFSAlways InAlways);
 	static EFINFSAlways GetFSAlways();
+
+	TOptional<TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>> GetFactoryConnectorSettings(UFGFactoryConnectionComponent* InConnector);
+	void SetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector, TSubclassOf<UFGItemDescriptor> InAllowedItem);
+	TSubclassOf<UFGItemDescriptor> GetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector);
+	void SetFactoryConnectorBlocked(UFGFactoryConnectionComponent* InConnector, bool bInBlocked);
+	bool GetFactoryConnectorBlocked(UFGFactoryConnectionComponent* InConnector);
+	int64 AddFactoryConnectorUnblockedTransfers(UFGFactoryConnectionComponent* InConnector, int64 InUnblockedTransfers);
+	int64 GetFactoryConnectorUnblockedTransfers(UFGFactoryConnectionComponent* InConnector);
 	
 private:
 	void UpdateRailroadSwitch(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch);
 	void ForcedRailroadSwitchCleanup(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* RailroadSwitch);
-	
+
+	void FactoryConnectorCleanup(UFGFactoryConnectionComponent* InConnector, FFINFactoryConnectorSettings& Settings);
+
+	FCriticalSection ForcedRailroadSwitchesMutex;
 	UPROPERTY(SaveGame)
 	TMap<UFGRailroadTrackConnectionComponent*, FFINRailroadSwitchForce> ForcedRailroadSwitches;
+
+	FCriticalSection FactoryConnectorSettingsMutex;
+	UPROPERTY(SaveGame)
+	TMap<UFGFactoryConnectionComponent*, FFINFactoryConnectorSettings> FactoryConnectorSettings;
 };
 
 UCLASS()

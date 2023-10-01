@@ -1129,6 +1129,25 @@ BeginProp(RInt, direction, "Direction", "The direction in which the items/fluids
 BeginProp(RBool, isConnected, "Is Connected", "True if something is connected to this connection.") {
 	Return self->IsConnected();
 } EndProp()
+BeginProp(RClass<UFGItemDescriptor>, allowedItem, "Allowed Item", "This item type defines which items are the only ones this connector can transfer. Null allows all items to be transfered.") {
+	Return (FINClass)AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorAllowedItem(self);
+} PropSet() {
+	AFINComputerSubsystem::GetComputerSubsystem(self)->SetFactoryConnectorAllowedItem(self, Val);
+} EndProp()
+BeginProp(RBool, blocked, "Blocked", "True if this connector doesn't transfer any items except the 'Unblocked Transfers'.") {
+	Return AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorBlocked(self);
+} PropSet() {
+	AFINComputerSubsystem::GetComputerSubsystem(self)->SetFactoryConnectorBlocked(self, Val);
+} EndProp()
+BeginProp(RInt, unblockedTransfers, "Unblocked Transfers", "The count of transfers that can still happen even if the connector is blocked. Use the 'AddUnblockedTransfers' function to change this. The count decreases by one when an item gets transfered.") {
+	Return AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorUnblockedTransfers(self);
+} EndProp()
+BeginFunc(addUnblockedTransfers, "Add Unblocked Transfers", "Adds the given count to the unblocked transfers counter. The resulting value gets clamped to >= 0. Negative values allow to decrease the counter manually. The returning int is the now set count.") {
+	InVal(0, RInt, unblockedTransfers, "Unblocked Transfers", "The count of unblocked transfers to add.")
+	OutVal(1, RInt, newUnblockedTransfers, "New Unblocked Transfers", "The new count of unblocked transfers.")
+	Body()
+	newUnblockedTransfers = (FINInt) AFINComputerSubsystem::GetComputerSubsystem(self)->AddFactoryConnectorUnblockedTransfers(self, unblockedTransfers);
+} EndFunc()
 BeginFunc(getInventory, "Get Inventory", "Returns the internal inventory of the connection component.") {
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The internal inventory of the connection component.")
 	Body()

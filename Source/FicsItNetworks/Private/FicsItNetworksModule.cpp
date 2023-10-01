@@ -10,6 +10,7 @@
 #include "FicsItKernel/FicsItFS/Library/Tests.h"
 #include "AssetRegistryModule.h"
 #include "FGCharacterPlayer.h"
+#include "FGFactoryConnectionComponent.h"
 #include "FGGameMode.h"
 #include "FGGameState.h"
 #include "FGRailroadTrackConnectionComponent.h"
@@ -135,6 +136,48 @@ void UFGRailroadTrackConnectionComponent_AddConnection_Hook(CallScope<void(*)(UF
 
 void UFGRailroadTrackConnectionComponent_RemoveConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
 	AFINComputerSubsystem::GetComputerSubsystem(self)->RemoveRailroadSwitchConnection(Scope, self, Connection);
+}
+
+void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFactoryConnectionComponent*,TArray<FInventoryItem>&,TSubclassOf<UFGItemDescriptor>)>& Scope, const UFGFactoryConnectionComponent* const_self, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) {
+	UFGFactoryConnectionComponent* self = const_cast<UFGFactoryConnectionComponent*>(const_self);
+	TOptional<TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>> OptionalSettings = AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFINFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_items, Settings.AllowedItem ? Settings.AllowedItem : type);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
+}
+
+void UFGFactoryConnectionComponent_GrabOutput_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,float&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf<UFGItemDescriptor> type) {
+	TOptional<TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>> OptionalSettings = AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFINFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_item, out_OffsetBeyond, Settings.AllowedItem ? Settings.AllowedItem : type);
+			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
+}
+
+void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, TSubclassOf<UFGItemDescriptor> type) {
+	TOptional<TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>> OptionalSettings = AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFINFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_item, Settings.AllowedItem ? Settings.AllowedItem : type);
+			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
 }
 
 void FFicsItNetworksModule::StartupModule(){
@@ -274,9 +317,15 @@ void FFicsItNetworksModule::StartupModule(){
 
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGRailroadTrackConnectionComponent::EndPlay, (void*)GetDefault<UFGRailroadTrackConnectionComponent>(), [](UActorComponent* self, EEndPlayReason::Type Reason) {
 			if (Reason == EEndPlayReason::Destroyed && self->GetWorld()) {
-				AFINComputerSubsystem::GetComputerSubsystem(self)->ForceRailroadSwitch(Cast<UFGRailroadTrackConnectionComponent>(self), -1);
+				AFINComputerSubsystem* Subsystem = AFINComputerSubsystem::GetComputerSubsystem(self);
+				if (Subsystem) Subsystem->ForceRailroadSwitch(Cast<UFGRailroadTrackConnectionComponent>(self), -1);
 			}
 		});
+
+		SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_PeekOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
+		SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_PeekOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
+		SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_GrabOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_GrabOutput_Hook);
+		SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook);
 
 		// Copy FS UUID Item Context Menu Entry //
 		UClass* Slot = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/InventorySlots/Widget_InventorySlot.Widget_InventorySlot_C"));
