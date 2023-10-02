@@ -270,6 +270,154 @@ namespace FINLua {
 		}
 	}
 
+	TOptional<EFINNetworkValueType> luaFIN_getnetworkvaluetype(lua_State* L, int Index) {
+		switch (lua_type(L, Index)) {
+		case LUA_TNIL:
+			return FIN_NIL;
+		case LUA_TBOOLEAN:
+			return FIN_BOOL;
+		case LUA_TNUMBER:
+			if (lua_isinteger(L, Index)) {
+				return FIN_INT;
+			} else {
+				return FIN_FLOAT;
+			}
+		case LUA_TSTRING:
+			return FIN_STR;
+		case LUA_TUSERDATA:
+			if (luaFIN_getstructtype(L, Index)) return FIN_STRUCT;
+			if (luaFIN_getobjecttype(L, Index)) return FIN_TRACE;
+			// if (luaFIN_getclasstype(L, index)) return FIN_CLASS; // TODO: Add this feature (probably in combination with Class Instance rewrite inspired by structtype
+		default: return TOptional<EFINNetworkValueType>();
+		}
+	}
+
+	TOptional<FINAny> luaFIN_tonetworkvaluebyprop(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
+		int LuaType = lua_type(L, Index);
+		
+		switch (Property->GetType()) {
+		case FIN_NIL:
+			return FINAny();
+		case FIN_BOOL:
+			if (!bImplicitConversion && LuaType != LUA_TBOOLEAN) return TOptional<FINAny>();
+			return FINAny(luaFIN_toFinBool(L, Index));
+		case FIN_INT:
+			if (!bImplicitConversion && (LuaType != LUA_TNUMBER || !lua_isinteger(L, Index))) return TOptional<FINAny>();
+			return FINAny(luaFIN_toFinInt(L, Index));
+		case FIN_FLOAT:
+			if (!bImplicitConversion && LuaType != LUA_TNUMBER) return TOptional<FINAny>();
+			return FINAny(luaFIN_toFinFloat(L, Index));
+		case FIN_STR: {
+			if (!bImplicitConversion && LuaType != LUA_TSTRING) return TOptional<FINAny>();
+			return FINAny(luaFIN_toFinString(L, Index));
+		} case FIN_OBJ: {
+			// TODO: Refactored getObjInstance function
+			if (LuaType == LUA_TNIL || LuaType == LUA_TNONE) return FINAny(FINObj());
+			// TODO: Expect LuaObj type, otherwise return None (right now it returns nullptr Obj)
+			UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Property);
+			if (ObjProp && ObjProp->GetSubclass()) {
+				return FINAny(static_cast<FINObj>(getObjInstance(L, Index, ObjProp->GetSubclass()).Get()));
+			}
+			return FINAny(static_cast<FINObj>(getObjInstance(L, Index).Get()));
+		} case FIN_CLASS: {
+			// TODO: Refactored getClassInstance function
+			if (LuaType == LUA_TNIL || LuaType == LUA_TNONE) return FINAny(FINClass());
+			// TODO: Expect LuaClass type, otherwise return None (right now it returns nullptr Class)
+			
+			UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Property);
+			if (ClassProp && ClassProp->GetSubclass()) {
+				return FINAny(static_cast<FINClass>(getClassInstance(L, Index, ClassProp->GetSubclass())));
+			}
+			return FINAny(static_cast<FINClass>(getObjInstance(L, Index).Get()));
+		} case FIN_TRACE: {
+			// TODO: Refactored getObjInstance function
+			if (LuaType == LUA_TNIL || LuaType == LUA_TNONE) return FINAny(FINTrace());
+			// TODO: Expect LuaObj type, otherwise return None (right now it returns nullptr Trace)
+			
+			UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Property);
+			if (TraceProp && TraceProp->GetSubclass()) {
+				return FINAny(static_cast<FINTrace>(getObjInstance(L, Index, TraceProp->GetSubclass())));
+			}
+			return FINAny(static_cast<FINTrace>(getObjInstance(L, Index)));
+		} case FIN_STRUCT: {
+			TSharedPtr<FINStruct> Struct;
+			
+			UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property);
+			if (StructProp && StructProp->GetInner()) {
+				UFINStruct* Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
+				Struct = luaFIN_tostruct(L, Index, Type, nullptr, bImplicitConstruction);
+			} else {
+				Struct = luaFIN_tostruct(L, Index);
+			}
+			if (Struct.IsValid()) return FINAny(*Struct);
+			return TOptional<FINAny>();
+		} case FIN_ARRAY: {
+			if (LuaType != LUA_TTABLE) return TOptional<FINAny>();
+			UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Property);
+			FINArray Array;
+			lua_pushnil(L);
+			while (lua_next(L, Index) != 0) {
+				if (!lua_isinteger(L, -2)) break;
+				FINAny Value;
+				if (ArrayProp && ArrayProp->GetInnerType()) {
+					Value = luaToProperty(L, ArrayProp->GetInnerType(), -1);
+				} else {
+					luaToNetworkValue(L, -1, Value);
+				}
+				Array.Add(Value);
+				lua_pop(L, 1);
+			}
+			return FINAny(Array);
+		} case FIN_ANY: {
+			FINAny Value;
+			luaToNetworkValue(L, Index, Value);
+			return Value;
+		} default: ;
+		}
+		return FINAny();
+	}
+	
+	TOptional<FINAny> luaFIN_tonetworkvalue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
+		if (Property) return luaFIN_tonetworkvaluebyprop(L, Index, Property, bImplicitConversion, bImplicitConstruction);
+		else return luaFIN_tonetworkvalue(L, Index);
+	}
+
+	TOptional<FINAny> luaFIN_tonetworkvalue(lua_State* L, int Index) {
+		switch (lua_type(L, Index)) {
+		case LUA_TNIL:
+			return FINAny();
+		case LUA_TBOOLEAN:
+			return FINAny(luaFIN_toFinBool(L, Index));
+		case LUA_TNUMBER:
+			if (lua_isinteger(L, Index)) {
+				return FINAny(luaFIN_toFinInt(L, Index));
+			} else {
+				return FINAny(luaFIN_toFinFloat(L, Index));
+			}
+		case LUA_TSTRING:
+			return FINAny(luaFIN_toFinString(L, Index));
+		case LUA_TTABLE: {
+			FINArray Array;
+			lua_pushnil(L);
+			while (lua_next(L, Index) != 0) {
+				if (!lua_isinteger(L, -2)) break;
+				TOptional<FINAny> Value = luaFIN_tonetworkvalue(L, -1);
+				lua_pop(L, 1);
+				if (!Value.IsSet()) return TOptional<FINAny>();
+				Array.Add(*Value);
+			}
+			return FINAny(Array);
+		} default:
+			TSharedPtr<FINStruct> Struct = luaFIN_tostruct(L, Index);
+			if (Struct.IsValid()) return FINAny(*Struct);
+			FFINNetworkTrace Trace = getObjInstance(L, Index, UObject::StaticClass(), false);
+			if (Trace.IsValid()) return FINAny(Trace);
+			UClass* Class = getClassInstance(L, Index, UObject::StaticClass(), false);
+			if (Class) return FINAny(static_cast<FINClass>(Class));
+		}
+		return TOptional<FINAny>();
+	}
+
 	void luaFIN_pushfstring(lua_State* L, const FString& Str) {
 		FTCHARToUTF8 conv(*Str, Str.Len());
 		lua_pushlstring(L, conv.Get(), conv.Length());
@@ -278,6 +426,13 @@ namespace FINLua {
 	FString luaFIN_checkfstring(lua_State* L, int Index) {
 		size_t len;
 		const char* str = luaL_checklstring(L, Index, &len);
+		FUTF8ToTCHAR conv(str, len);
+		return FString(conv.Length(), conv.Get());
+	}
+
+	FString luaFIN_tofstring(lua_State* L, int index) {
+		size_t len;
+		const char* str = luaL_tolstring(L, index, &len);
 		FUTF8ToTCHAR conv(str, len);
 		return FString(conv.Length(), conv.Get());
 	}

@@ -115,6 +115,8 @@ namespace FINLua {
 		return getClassInstance(L, index, T::StaticClass());
 	}
 
+	UFINClass* luaFIN_getobjecttype(lua_State* L, int index);
+
 	/**
 	 * Registers all metatables and persistency infromation
 	 * for the instace types to given lua stack.

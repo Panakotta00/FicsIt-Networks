@@ -88,7 +88,9 @@ public:
 		Classes.Find(Class)->Functions.FindOrAdd(FuncID) = FuncReg;
 	}
 	static void AddFunction(UScriptStruct* Struct, int FuncID, const FFINStaticFuncReg& FuncReg) {
-		Structs.Find(Struct)->Functions.FindOrAdd(FuncID) = FuncReg;
+		FFINStaticStructReg* StructReg = Structs.Find(Struct);
+		FFINStaticFuncReg& Reg = StructReg->Functions.FindOrAdd(FuncID, FuncReg);
+		Reg.InternalName.RemoveFromEnd(TEXT("_0"));
 	}
 	static void AddFuncParam(UClass* Class, int FuncID, int ParamPos, const FFINStaticFuncParamReg& ParamReg) {
 		Classes.FindOrAdd(Class).Functions.FindOrAdd(FuncID).Parameters.FindOrAdd(ParamPos) = ParamReg;

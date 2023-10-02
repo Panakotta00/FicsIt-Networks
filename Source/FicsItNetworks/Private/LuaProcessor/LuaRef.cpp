@@ -95,7 +95,7 @@ namespace FINLua {
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
 
-	int luaFindSetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, bool classInstance) {
+	int luaFindSetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, bool classInstance, bool bCauseError) {
 		// try to find property
 		UFINProperty* Property = Struct->FindFINProperty(MemberName, classInstance ? FIN_Prop_ClassProp : FIN_Prop_Attrib);
 		if (Property) {
@@ -120,7 +120,8 @@ namespace FINLua {
 			return UFINLuaProcessor::luaAPIReturn(L, 1);
 		}
 		
-		return luaL_argerror(L, 2, TCHAR_TO_UTF8(*("No property with name '" + MemberName + "' found")));
+		if (bCauseError) return luaL_argerror(L, 2, TCHAR_TO_UTF8(*("No property with name '" + MemberName + "' found")));
+		return 0;
 	}
 
 	int luaRefFuncDataUnpersist(lua_State* L) {

@@ -95,7 +95,8 @@ namespace FINLua {
 	/**
 	 * Trys to convert the lua value at the given index on the given lua stack
 	 * to the given property and returns that value.
-	 * lua error if value not valid
+	 * lua error if value not valid TODO: Are you sure about that?
+	 * @deprecated 
 	 */
 	FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index);
 
@@ -109,10 +110,53 @@ namespace FINLua {
 	 */
 	void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, const FFINNetworkTrace& Trace);
 
-	void luaFIN_pushfstring(lua_State* L, const FString& Str);
-	FString luaFIN_checkfstring(lua_State* L, int Index);
+	/**
+	 * Tries to estimate the Network Value Type from a lua value.
+	 * Convertibles like tables as structs or arrays are not considered an result in None.
+	 */
+	TOptional<EFINNetworkValueType> luaFIN_getnetworkvaluetype(lua_State* L, int Index);
+
+	/**
+	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index.
+	 * @param L the lua state
+	 * @param Index the index on the stack of the lua value you want to retrieve
+	 * @param Property  used to as template for the expected value
+	 * @param bImplicitConversion if set to true, primitives will be converted to the target value specified by Property, if false lua value has to match the properties expected value
+	 * @param bImplicitConstruction if set to true, tables can be converted to the struct specified by Property, if false tables will result in None
+	 * @return The retrieved value or None if not able to retrieve
+	 */
+	TOptional<FINAny> luaFIN_tonetworkvaluebyprop(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
+
+	/**
+	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index.
+	 * @param L the lua state
+	 * @param Index the index on the stack of the lua value you want to retrieve
+	 * @param Property if not nullptr, used to as template for the expected value
+	 * @param bImplicitConversion if set to true, primitives will be converted to the target value specified by Property, if false lua value has to match the properties expected value
+	 * @param bImplicitConstruction if set to true, tables can be converted to the struct specified by Property, if false tables will result in None if property was specified, otherwise they get interpreted as arrays
+	 * @return The retrieved value or None if not able to retrieve
+	 */
+	TOptional<FINAny> luaFIN_tonetworkvalue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
+	
+	/**
+	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index. Tables will be interpreted as None. Unknown UserData will be interpreted as none.
+	 * @param L the lua state
+	 * @param Index the index on the stack of the lua value you want to retrieve
+	 * @return The tretrieved value or None if not able to retrieve
+	 */
+	TOptional<FINAny> luaFIN_tonetworkvalue(lua_State* L, int Index);
+	
+	void luaFIN_pushfstring(lua_State* L, const FString& str);
+	FString luaFIN_checkfstring(lua_State* L, int index);
+	FString luaFIN_tofstring(lua_State* L, int index);
+
+	FORCEINLINE FINBool luaFIN_toFinBool(lua_State* L, int index) { return static_cast<FINBool>(lua_toboolean(L, index)); }
+	FORCEINLINE FINInt luaFIN_toFinInt(lua_State* L, int index) { return static_cast<FINInt>(lua_tointeger(L, index)); }
+	FORCEINLINE FINFloat luaFIN_toFinFloat(lua_State* L, int index) { return static_cast<FINFloat>(lua_tonumber(L, index)); }
+	FORCEINLINE FINStr luaFIN_toFinString(lua_State* L, int index) { return static_cast<FINStr>(lua_tostring(L, index)); }
+	
 	void luaFIN_pushStructType(lua_State* L, UFINStruct* Struct);
-	UFINStruct* luaFIN_toStructType(lua_State* L, int index);
+	UFINStruct* luaFIN_tostructtype(lua_State* L, int index);
 	UFINStruct* luaFIN_checkStructType(lua_State* L, int index);
 
 	void setupUtilLib(lua_State* L);

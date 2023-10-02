@@ -5,6 +5,31 @@
 #include "FINReflectionException.h"
 #include "FINFunction.generated.h"
 
+#define FIN_Operator_Add operatorAdd
+#define FIN_Operator_Sub operatorSub
+#define FIN_Operator_Mul operatorMul
+#define FIN_Operator_Div operatorDiv
+#define FIN_Operator_Mod operatorMod
+#define FIN_Operator_Pow peratorPow
+#define FIN_Operator_Neg operatorNeg
+#define FIN_Operator_FDiv operatorFDiv
+#define FIN_Operator_BitAND operatorBitAND
+#define FIN_Operator_BitOR operatorBitOR
+#define FIN_Operator_BitXOR operatorBitXOR
+#define FIN_Operator_BitNOT operatorBitNOT
+#define FIN_Operator_ShiftL operatorLShift
+#define FIN_Operator_ShiftR operatorRShift
+#define FIN_Operator_Concat operatorConcat
+#define FIN_Operator_Len operatorLen
+#define FIN_Operator_Equals operatorEquals
+#define FIN_Operator_LessThan operatorLessThan
+#define FIN_Operator_LessOrEqualThan operatorLessOrEqualThan
+#define FIN_Operator_Index operatorIndex
+#define FIN_Operator_NewIndex operatorNewIndex
+#define FIN_Operator_Call operatorCall
+
+#define FIN_OP_TEXT(OP) #OP
+
 enum EFINFunctionFlags {
 	FIN_Func_None			= 0b000000000,
 	FIN_Func_VarArgs		= 0b000000001,

@@ -582,6 +582,22 @@ namespace FINLua {
 		return UFINLuaProcessor::luaAPIReturn(L, args);
 	}
 
+	UFINClass* luaFIN_getobjecttype(lua_State* L, int index) {
+		if (lua_type(L, index) != LUA_TUSERDATA) return nullptr;
+		int type = luaL_getmetafield(L, index, "__name");
+		if (type != LUA_TSTRING) {
+			if (type != LUA_TNIL) lua_pop(L, 1);
+			return nullptr;
+		}
+		FString TypeName = luaFIN_tofstring(L, -1);
+		lua_pop(L, 1);
+		ClassMetaNameLock.Lock();
+		UFINClass** Type = MetaNameToClass.Find(TypeName);
+		ClassMetaNameLock.Unlock();
+		if (!Type) return nullptr;
+		return *Type;
+	}
+
 	void setupInstanceSystem(lua_State* L) {
 		PersistSetup("InstanceSystem", -2);
 		

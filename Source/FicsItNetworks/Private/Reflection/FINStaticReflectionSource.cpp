@@ -409,6 +409,8 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 #define GET_MACRO(_0, VAL,...) VAL
 #define BeginFunc(InternalName, DisplayName, Description, ...) BeginFuncRT(Member, InternalName, DisplayName, Description, false, 0, GET_MACRO(0 , ##__VA_ARGS__, 1) ) \
 		T* self = GetFromCtx(Ctx);
+#define BeginOp(InternalName, OperatorNum, DisplayName, Description, ...) BeginFuncRT(Member, InternalName ## _ ## OperatorNum, DisplayName, Description, false, 0, GET_MACRO(0 , ##__VA_ARGS__, 1) ) \
+		T* self = GetFromCtx(Ctx);
 #define BeginFuncVA(InternalName, DisplayName, Description, ...) BeginFuncRT(Member, InternalName, DisplayName, Description, true, 0, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 		T* self = GetFromCtx(Ctx);
 #define BeginClassFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Class, InternalName, DisplayName, Description, VA, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
@@ -2578,6 +2580,29 @@ BeginProp(RFloat, y, "Y", "The Y coordinate component") {
 } PropSet() {
 	self->Y = Val;
 } EndProp()
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The Add (+) operator for this struct.") {
+	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector that should be added to this vector")
+	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector addition")
+	Body()
+	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Neg, 0, "Operator Neg", "The Negation operator for this struct.") {
+	OutVal(0, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector negation")
+	Body()
+	result = (FINStruct)(-*self);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 0, "Scalar Product", "") {
+	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector to calculate the scalar product with.")
+	OutVal(1, RFloat, result, "Result", "The resulting scalar product.")
+	Body()
+	result = (FINStruct)(*self * other);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 1, "Vector Factor Scaling", "") {
+	InVal(0, RFloat, factor, "Factor", "The factor with which this vector should be scaled with.")
+	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting scaled vector.")
+	Body()
+	result = (FINStruct)(*self * factor);
+} EndFunc()
 EndStruct()
 
 BeginStructConstructable(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")

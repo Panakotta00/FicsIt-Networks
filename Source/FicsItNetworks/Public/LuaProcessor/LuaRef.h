@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "LuaUtil.h"
+#include "Reflection/FINExecutionContext.h"
 
 class UFINFunction;
 class UFINStruct;
@@ -30,7 +31,7 @@ namespace FINLua {
 	/**
 	 * Trys to find property by memebername and sets the value in the given struct. Uses also given cache.
 	 */
-	int luaFindSetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, bool classInstance);
+	int luaFindSetMember(lua_State* L, UFINStruct* Struct, const FFINExecutionContext& Ctx, const FString& MemberName, bool classInstance, bool bCauseError = true);
 
 	/**
 	 * Registers all metatables and persistency infromation

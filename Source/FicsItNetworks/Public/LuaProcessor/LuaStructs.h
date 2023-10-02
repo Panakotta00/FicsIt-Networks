@@ -19,6 +19,8 @@ namespace FINLua {
 		~FLuaStruct();
 		static void CollectReferences(void* Obj, FReferenceCollector& Collector);
 	};
+
+	UFINStruct* luaStructFindStructFromMetaName(const FString& MetatableName);
 	
 	/**
 	 * Trys to push the given struct onto the lua stack.
@@ -45,6 +47,28 @@ namespace FINLua {
 	TSharedPtr<FINStruct> luaGetStruct(lua_State* L, int i, FLuaStruct** LStruct = nullptr);
 
 	/**
+	 * Tries to convert a table at the given index to a struct of the given template type.
+	 * If unable to convert, returns nullptr.
+	 */
+	TSharedPtr<FINStruct> luaFIN_converttostruct(lua_State* L, int i, UFINStruct* templateType, bool bAllowImplicitConstruction);
+
+	/**
+	 * Returns the struct at the given index.
+	 * If a table and a template type is given, tries to convert the table to the struct.
+	 * If a struct, then optional luaStruct pointer will be set to the luaStruct from the stack.
+	 * If unable to convert to a struct, the value was not a struct or the value was not the same type as the template, returns nullptr.
+	 */
+	TSharedPtr<FINStruct> luaFIN_tostruct(lua_State* L, int i, UFINStruct* templateType = nullptr, FLuaStruct** luaStruct = nullptr, bool bAllowConstruction = false);
+
+	/**
+	 * Returns the struct at the given index.
+	 * If a table and a template type is given, tries to convert the table to the struct.
+	 * If a struct, then optional luaStruct pointer will be set to the luaStruct from the stack.
+	 * If unable to convert to a struct, the value was not a struct or the value was not the same type as the template, throws an lua error.
+	 */
+	TSharedRef<FINStruct> luaFIN_checkstruct(lua_State* L, int i, UFINStruct* templateType = nullptr, FLuaStruct** luaStruct = nullptr);
+
+	/**
 	 * Try to convert the lua value at the given index to the given struct.
 	 * If able to convert, returns the resulting struct.
 	 * If unable to convert, throws a lua argument error.
@@ -61,6 +85,12 @@ namespace FINLua {
 	 * nullptr if it is not a struct
 	 */
 	UFINStruct* luaGetStructType(lua_State* L, int i);
+
+	/**
+	 * Returns the struct type of the value at the given index.
+	 * nullptr if it is not a struct
+	 */
+	UFINStruct* luaFIN_getstructtype(lua_State* L, int i);
 
 	/**
 	 * Registers all metatables and persistency infromation
