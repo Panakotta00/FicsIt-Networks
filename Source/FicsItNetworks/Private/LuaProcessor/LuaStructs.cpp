@@ -627,7 +627,7 @@ namespace FINLua {
 	}
 
 	int luaStructTypePersist(lua_State* L) {
-		UFINStruct* Type = *(UFINStruct**)lua_getuservalue(L, 1);
+		UFINStruct* Type = *(UFINStruct**)lua_touserdata(L, 1);
 		luaFIN_pushfstring(L, Type->GetInternalName());
 		lua_pushcclosure(L, &luaStructTypeUnpersist, 1);
 		return 1;
