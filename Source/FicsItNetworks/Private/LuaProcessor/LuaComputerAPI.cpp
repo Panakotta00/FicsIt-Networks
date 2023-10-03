@@ -62,6 +62,13 @@ namespace FINLua {
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
 
+	int luaComputerIsPromoted(lua_State* L) {
+		UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
+		bool bPromoted = (bool)(processor->GetTickHelper().getState() & LUA_ASYNC);
+		lua_pushboolean(L, bPromoted);
+		return 1;
+	}
+
 	int luaComputerState(lua_State* L) {
 		UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
 		int state = 0;
@@ -158,6 +165,7 @@ namespace FINLua {
 		{"skip", luaComputerSkip},
 		{"promote", luaComputerPromote},
 		{"demote", luaComputerDemote},
+		{"isPromoted", luaComputerIsPromoted},
 		{"state", luaComputerState},
 		{"beep", luaComputerBeep},
 		{"setEEPROM", luaComputerSetEEPROM},
