@@ -19,9 +19,13 @@ private:
 struct FICSITNETWORKS_API FFINReflection {
 private:
 	TMap<UClass*, UFINClass*> Classes;
+	TMap<UFINClass*, UClass*> ClassesReversed;
+	TMap<FString, UFINClass*> ClassNames;
+	
 	TMap<UScriptStruct*, UFINStruct*> Structs;
-	TMap<FString, UFINStruct*> StructNames;
 	TMap<UFINStruct*, UScriptStruct*> StructsReversed;
+	TMap<FString, UFINStruct*> StructNames;
+	
 	TArray<const UFINReflectionSource*> Sources;
 	
 public:
@@ -29,11 +33,16 @@ public:
 	
 	void PopulateSources();
 	void LoadAllTypes();
-	UFINClass* FindClass(UClass* Clazz, bool bRecursive = true, bool bTryToReflect = true);
+	
+	UFINClass* FindClass(UClass* Class, bool bRecursive = true, bool bTryToReflect = true);
+	UFINClass* FindClass(const FString& ClassName) const;
+	UClass* FindUClass(UFINClass* Class) const;
 	UFINStruct* FindStruct(UScriptStruct* Struct, bool bRecursive = true, bool bTryToReflect = true);
 	UFINStruct* FindStruct(const FString& StructName) const;
 	UScriptStruct* FindScriptStruct(UFINStruct* Struct) const;
+
 	void PrintReflection();
+
 	inline const TMap<UClass*, UFINClass*>& GetClasses() { return Classes; }
 	inline const TMap<UScriptStruct*, UFINStruct*>& GetStructs() { return Structs; }
 };

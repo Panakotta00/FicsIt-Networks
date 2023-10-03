@@ -36,13 +36,6 @@ namespace FINLua {
 	};
 
 	/**
-	 * Structure used in the userdata representing a class instance.
-	 */
-	struct LuaClassInstance {
-		UClass* Class;
-	};
-
-	/**
 	 * Creates a new Lua Instance for the given network trace and pushes it onto the given stack.
 	 * Or pushes nil if not able to create the instance.
 	 * 
@@ -80,53 +73,17 @@ namespace FINLua {
 		return Cast<T>(*obj);
 	}
 
-	/**
-	 * Creates a new Lua Class Instance for the class and pushes it onto the given stack.
-	 * Or pushes nil if not able to create the class instance.
-	 * 
-	 * @param[in]	L		the lua state where the class instance should get created.
-	 * @param[in]	clazz	the clazz you want to create the lua class instance for.
-	 * @return	returns true if the class instance got created successfully.
-	 */
-	bool newInstance(lua_State* L, UClass* clazz);
-
-	/**
-	 * Trys to get a Lua Class Instance from the given lua stack at the given index of the given type.
-	 * If unable to find it returns nullptr.
-	 *
-	 * @param[in]	L		the lua stack you want to get the class instance from
-	 * @param[in]	index	the index of the class instance in the stack
-	 * @param[in]	clazz	the base type of the instance it should be
-	 * @retrun	returns the type or nullptr if not found
-	 */
-	UClass* getClassInstance(lua_State* L, int index, UClass* clazz, bool bError = true);
-
-	/**
-	 * Trys to get a Lua Class Instance from the given lua stack at the given index of the given type.
-	 * If unable to find it returns nullptr.
-	 *
-	 * @param[in]	T		the type of the class instance it should be
-	 * @param[in]	L		the lua stack you want to get the class instance from
-	 * @param[in]	index	the index of the class instance in the stack
-	 * @retrun	returns a pointer to the type, nullptr if not found
-	 */
-	template<typename T>
-	FORCEINLINE TSubclassOf<T> getClassInstance(lua_State* L, int index) {
-		return getClassInstance(L, index, T::StaticClass());
-	}
-
-	UFINClass* luaFIN_getobjecttype(lua_State* L, int index);
-
-	/**
-	 * Registers all metatables and persistency infromation
-	 * for the instace types to given lua stack.
-	 *
-	 * @param[in]	L	the lua stack the metatables should get registered to.
-	 */
-	void setupInstanceSystem(lua_State* L);
+	UFINClass* luaFIN_getObjectType(lua_State* L, int index);
 
 	/**
 	 * sets up the metatable for the given class in the given stack
 	 */
 	void setupMetatable(lua_State* L, UFINClass* Class);
+	
+	/**
+	 * Registers globals, metatables, registries and persistence data relevant to the Lua Object System
+	 *
+	 * @param[in]	L	the lua stack
+	 */
+	void setupInstanceSystem(lua_State* L);
 }

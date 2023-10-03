@@ -12,7 +12,7 @@
 				TArray<FFINAnyNetworkValue> Data = future->Get<FFINFuture>().GetOutput();
 				FFINNetworkTrace Trace;
 				if (future->GetStruct() == FFINFutureReflection::StaticStruct()) Trace = future->Get<FFINFutureReflection>().Context.GetTrace();
-				for (const FFINAnyNetworkValue& Param : Data) networkValueToLua(L, Param, Trace);
+				for (const FFINAnyNetworkValue& Param : Data) luaFIN_pushNetworkValue(L, Param, Trace);
 				return Data.Num();
 			}
 			return lua_yieldk(L, LUA_MULTRET, NULL, luaFutureAwaitContinue);
@@ -29,7 +29,7 @@
 			const TArray<FFINAnyNetworkValue>& Data = future->Get<FFINFuture>().GetOutput();
 			FFINNetworkTrace Trace;
 			if (future->GetStruct() == FFINFutureReflection::StaticStruct()) Trace = future->Get<FFINFutureReflection>().Context.GetTrace();
-			for (const FFINAnyNetworkValue& Param : Data) networkValueToLua(L, Param, Trace);
+			for (const FFINAnyNetworkValue& Param : Data) luaFIN_pushNetworkValue(L, Param, Trace);
 			return Data.Num();
 		}
 

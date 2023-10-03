@@ -680,7 +680,7 @@ int UFINLuaProcessor::DoSignal(lua_State* L) {
 	else lua_pushnil(L);
 	FINLua::newInstance(L, UFINNetworkUtils::RedirectIfPossible(sender));
 	for (const FFINAnyNetworkValue& Value : signal.Data) {
-		FINLua::networkValueToLua(L, Value, sender);
+		FINLua::luaFIN_pushNetworkValue(L, Value, sender);
 		props++;
 	}
 	return props;

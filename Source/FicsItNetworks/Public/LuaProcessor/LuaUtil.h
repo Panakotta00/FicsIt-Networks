@@ -83,14 +83,16 @@ namespace FINLua {
 	 * Converts the given property within the given struct pointer
 	 * to a lua value and pushes it onto the stack.
 	 * The trace allows for object properties to have additionally a this trace attached.
+	 * @deprecated 
 	 */
-	void propertyToLua(lua_State* L, FProperty* p, void* data, const FFINNetworkTrace& trace);
+	[[deprecated]] void propertyToLua(lua_State* L, FProperty* p, void* data, const FFINNetworkTrace& trace);
 
 	/**
 	 * Trys to convert the lua value at the given index on the given lua stack
 	 * to the given property in the given struct pointer.
+	 * @deprecated 
 	 */
-	void luaToProperty(lua_State* L, FProperty* p, void* data, int i);
+	[[deprecated]] void luaToProperty(lua_State* L, FProperty* p, void* data, int i);
 
 	/**
 	 * Trys to convert the lua value at the given index on the given lua stack
@@ -98,23 +100,27 @@ namespace FINLua {
 	 * lua error if value not valid TODO: Are you sure about that?
 	 * @deprecated 
 	 */
-	FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index);
+	[[deprecated]] FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index);
 
 	/**
 	 * Trys to convert the lua value at the given index to any kind of network value.
+	 * @deprecated 
 	 */
-	void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val);
+	[[deprecated]] void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val);
 
 	/**
-	 * Converts the given network value into a lua value and pushes it onto the stack
+	 * @brief Pushes the given network value as lua value onto the stack
+	 * @param L the lua state
+	 * @param Value the network value you want to push
+	 * @param ObjectPrefixTrace if the value is a FINObj then it gets appended to this trace because lua only stores traces
 	 */
-	void networkValueToLua(lua_State* L, const FFINAnyNetworkValue& Val, const FFINNetworkTrace& Trace);
+	void luaFIN_pushNetworkValue(lua_State* L, const FINAny& Value, const FFINNetworkTrace& ObjectPrefixTrace = FFINNetworkTrace());
 
 	/**
 	 * Tries to estimate the Network Value Type from a lua value.
 	 * Convertibles like tables as structs or arrays are not considered an result in None.
 	 */
-	TOptional<EFINNetworkValueType> luaFIN_getnetworkvaluetype(lua_State* L, int Index);
+	TOptional<EFINNetworkValueType> luaFIN_getNetworkValueType(lua_State* L, int Index);
 
 	/**
 	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index.
@@ -125,7 +131,7 @@ namespace FINLua {
 	 * @param bImplicitConstruction if set to true, tables can be converted to the struct specified by Property, if false tables will result in None
 	 * @return The retrieved value or None if not able to retrieve
 	 */
-	TOptional<FINAny> luaFIN_tonetworkvaluebyprop(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
+	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
 
 	/**
 	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index.
@@ -136,28 +142,51 @@ namespace FINLua {
 	 * @param bImplicitConstruction if set to true, tables can be converted to the struct specified by Property, if false tables will result in None if property was specified, otherwise they get interpreted as arrays
 	 * @return The retrieved value or None if not able to retrieve
 	 */
-	TOptional<FINAny> luaFIN_tonetworkvalue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
+	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
 	
 	/**
 	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index. Tables will be interpreted as None. Unknown UserData will be interpreted as none.
 	 * @param L the lua state
 	 * @param Index the index on the stack of the lua value you want to retrieve
-	 * @return The tretrieved value or None if not able to retrieve
+	 * @return The retrieved value or None if not able to retrieve
 	 */
-	TOptional<FINAny> luaFIN_tonetworkvalue(lua_State* L, int Index);
+	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index);
+
+	/**
+	 * @brief Returns the name of the value represented by the given property
+	 * @param L the lua state
+	 * @param Property the property of witch the lua value name should get found
+	 * @return the lua value name of the given property
+	 */
+	FString luaFIN_getPropertyTypeName(lua_State* L, UFINProperty* Property);
+
+	/**
+	 * @breif Causes a lua type error with the expected type derived from the given property
+	 * @param L the lua state
+	 * @param Index the index of the value that caused the error
+	 * @param Property the property of whom the value type name will be used
+	 */
+	FORCEINLINE int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property) {
+		FTCHARToUTF8 Convert(luaFIN_getPropertyTypeName(L, Property));
+		return luaL_typeerror(L, Index, Convert.Get());
+	}
+
+	/**
+	 * @brief Retrieves the type name specified in the metatable of the lua value at the given index in the lua stack
+	 * @param L the lua stack
+	 * @param Index the value of witch you want to get the metatable name from
+	 * @return Empty String if no userdata or no name field, otherwise the content of the name field
+	 */
+	FString luaFIN_getUserDataMetaName(lua_State* L, int Index);
 	
-	void luaFIN_pushfstring(lua_State* L, const FString& str);
-	FString luaFIN_checkfstring(lua_State* L, int index);
-	FString luaFIN_tofstring(lua_State* L, int index);
+	void luaFIN_pushFString(lua_State* L, const FString& str);
+	FString luaFIN_checkFString(lua_State* L, int index);
+	FString luaFIN_toFString(lua_State* L, int index);
 
 	FORCEINLINE FINBool luaFIN_toFinBool(lua_State* L, int index) { return static_cast<FINBool>(lua_toboolean(L, index)); }
 	FORCEINLINE FINInt luaFIN_toFinInt(lua_State* L, int index) { return static_cast<FINInt>(lua_tointeger(L, index)); }
 	FORCEINLINE FINFloat luaFIN_toFinFloat(lua_State* L, int index) { return static_cast<FINFloat>(lua_tonumber(L, index)); }
 	FORCEINLINE FINStr luaFIN_toFinString(lua_State* L, int index) { return static_cast<FINStr>(lua_tostring(L, index)); }
-	
-	void luaFIN_pushStructType(lua_State* L, UFINStruct* Struct);
-	UFINStruct* luaFIN_tostructtype(lua_State* L, int index);
-	UFINStruct* luaFIN_checkStructType(lua_State* L, int index);
 
 	void setupUtilLib(lua_State* L);
 }

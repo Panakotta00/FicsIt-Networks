@@ -92,9 +92,11 @@ UFINClass* FFINReflection::FindClass(UClass* Clazz, bool bRecursive, bool bTryTo
 				Clazz->AddToRoot();
 				Class->AddToRoot();
 				Classes.Add(Clazz, Class);
+				ClassesReversed.Add(Class, Clazz);
 				for (const UFINReflectionSource* Source : Sources) {
 					Source->FillData(this, Class, Clazz);
 				}
+				ClassNames.Add(Class->GetInternalName(), Class);
 				return Class;
 			}
 		}
@@ -104,6 +106,18 @@ UFINClass* FFINReflection::FindClass(UClass* Clazz, bool bRecursive, bool bTryTo
 		else Clazz = Clazz->GetSuperClass();
 	} while (Clazz && bRecursive);
 	return nullptr;
+}
+
+UFINClass* FFINReflection::FindClass(const FString& ClassName) const {
+	UFINClass* const* Class = ClassNames.Find(ClassName);
+	if (Class) return *Class;
+	else return nullptr;
+}
+
+UClass* FFINReflection::FindUClass(UFINClass* Class) const {
+	UClass* const* UClass = ClassesReversed.Find(Class);
+	if (UClass) return *UClass;
+	else return nullptr;
 }
 
 UFINStruct* FFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive, bool bTryToReflect) {

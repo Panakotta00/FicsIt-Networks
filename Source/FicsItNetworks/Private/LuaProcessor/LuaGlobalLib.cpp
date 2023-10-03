@@ -1,14 +1,16 @@
 #include "LuaProcessor/LuaGlobalLib.h"
 
+#include "LuaProcessor/LuaClass.h"
 #include "LuaProcessor/LuaComponentAPI.h"
 #include "LuaProcessor/LuaComputerAPI.h"
 #include "LuaProcessor/LuaDebugAPI.h"
 #include "LuaProcessor/LuaEventAPI.h"
 #include "LuaProcessor/LuaFuture.h"
 #include "LuaProcessor/LuaInstance.h"
+#include "LuaProcessor/LuaObject.h"
 #include "LuaProcessor/LuaProcessor.h"
 #include "LuaProcessor/LuaRef.h"
-#include "LuaProcessor/LuaStructs.h"
+#include "..\..\Public\LuaProcessor\LuaStruct.h"
 #include "Registry/ModContentRegistry.h"
 
 namespace FINLua {
@@ -196,7 +198,6 @@ namespace FINLua {
 	*/
 	
 	int luaFindItem(lua_State* L) {
-		// ReSharper disable once CppDeclaratorNeverUsed
 		FLuaSyncCall SyncCall(L);
 		const int NumArgs = lua_gettop(L);
 		if (NumArgs < 1) return UFINLuaProcessor::luaAPIReturn(L, 0);
@@ -206,7 +207,7 @@ namespace FINLua {
 		UFGBlueprintFunctionLibrary::Cheat_GetAllDescriptors(items);
 		if (str) for (TSubclassOf<UFGItemDescriptor> item : items) {
 			if (IsValid(item) && UFGItemDescriptor::GetItemName(item).ToString() == FString(str)) {
-				newInstance(L, item);
+				luaFIN_pushClass(L, item);
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 		}
@@ -247,8 +248,8 @@ namespace FINLua {
 				FString Name = UFGItemDescriptor::GetItemName(ItemDescriptor).ToString();
 				if (Name.Contains(Filter)) {
 					if (pageOffset * pageSize <= CurrentIndex) {
-						luaFIN_pushfstring(L, Name);
-						newInstance(L, ItemDescriptor);
+						luaFIN_pushFString(L, Name);
+						luaFIN_pushClass(L, ItemDescriptor);
 						lua_settable(L, -3);
 					}
 					CurrentIndex += 1;
@@ -310,6 +311,8 @@ namespace FINLua {
 
 		setupUtilLib(L);
 		setupRefUtils(L);
+		setupClassSystem(L);
+		setupObjectSystem(L);
 		setupInstanceSystem(L);
 		setupStructSystem(L);
 		setupComponentAPI(L);

@@ -1,4 +1,4 @@
-#include "LuaProcessor/LuaStructs.h"
+#include "..\..\Public\LuaProcessor\LuaStruct.h"
 #include "LuaProcessor/LuaRef.h"
 #include "LuaProcessor/LuaUtil.h"
 #include "LuaProcessor/LuaProcessor.h"
@@ -6,8 +6,6 @@
 #include "FicsItKernel/FicsItKernel.h"
 #include "Reflection/FINReflection.h"
 #include "Reflection/FINStruct.h"
-
-#define STRUCT_TYPE_METATABLE_NAME "SimpleStructRefMetatable"
 
 #define PersistParams \
 	const std::string& _persist_namespace, \
@@ -47,7 +45,7 @@ namespace FINLua {
 				lua_geti(L, i, ++j);
 			}
 			FINAny Value;
-			if (bAllowImplicitConstruction || luaFIN_getnetworkvaluetype(L, -1).IsSet()) {
+			if (bAllowImplicitConstruction || luaFIN_getNetworkValueType(L, -1).IsSet()) {
 				Value = luaToProperty(L, Prop, -1);
 			} else {
 				lua_pop(L, 1);
@@ -159,14 +157,8 @@ namespace FINLua {
 	}
 
 	UFINStruct* luaFIN_getstructtype(lua_State* L, int i) {
-		if (lua_type(L, i) != LUA_TUSERDATA) return nullptr;
-		int type = luaL_getmetafield(L, i, "__name");
-		if (type != LUA_TSTRING) {
-			if (type != LUA_TNIL) lua_pop(L, 1);
-			return nullptr;
-		}
-		FString TypeName = luaFIN_tofstring(L, -1);
-		lua_pop(L, 1);
+		FString TypeName = luaFIN_getUserDataMetaName(L, i);
+		if (TypeName.IsEmpty()) return nullptr;
 		StructMetaNameLock.Lock();
 		UFINStruct** Type = MetaNameToStruct.Find(TypeName);
 		StructMetaNameLock.Unlock();
@@ -176,11 +168,12 @@ namespace FINLua {
 
 	int luaStructFuncCall(lua_State* L) {
 		// get function
-		LuaRefFuncData* Func = static_cast<LuaRefFuncData*>(luaL_checkudata(L, lua_upvalueindex(1), LUA_REF_FUNC_DATA));
+		UFINFunction* Function = luaFIN_checkReflectionFunction(L, lua_upvalueindex(1));
+		UFINStruct* Type = Function->GetTypedOuter<UFINStruct>();
 		
 		// get and check instance
 		StructMetaNameLock.Lock();
-		FString* MetaNamePtr = StructToMetaName.Find(Cast<UFINStruct>(Func->Struct));
+		FString* MetaNamePtr = StructToMetaName.Find(Cast<UFINStruct>(Type));
 		if (!MetaNamePtr) {
 			StructMetaNameLock.Unlock();
 			return luaL_argerror(L, 1, "Function name is invalid (internal error)");
@@ -191,7 +184,7 @@ namespace FINLua {
 		if (!Instance->Struct->GetData()) return luaL_argerror(L, 1, "Struct is invalid");
 
 		// call the function
-		return luaCallFINFunc(L, Func->Func, FFINExecutionContext(Instance->Struct->GetData()), "Struct");
+		return luaCallFINFunc(L, Function, FFINExecutionContext(Instance->Struct->GetData()), "Struct");
 	}
 
 	/**
@@ -215,7 +208,7 @@ namespace FINLua {
 			int ParameterIndex = 0;
 			for (int OperandIndex : OperandIndices) {
 				UFINProperty* param1 = func->GetParameters()[ParameterIndex++];
-				TOptional<FINAny> otherValue = luaFIN_tonetworkvaluebyprop(L, OperandIndex, param1, true, false);
+				TOptional<FINAny> otherValue = luaFIN_toNetworkValueByProp(L, OperandIndex, param1, true, false);
 				if (!otherValue.IsSet()) break;
 				Operands.Add(*otherValue);
 			}
@@ -243,7 +236,7 @@ namespace FINLua {
 		FFINExecutionContext Ctx(Struct->GetData());
 		TArray<FINAny> result = func->Execute(Ctx, parameters);
 		for (const FINAny& val : result) {
-			networkValueToLua(L, val, FFINNetworkTrace());
+			luaFIN_pushNetworkValue(L, val, FFINNetworkTrace());
 		} 
 		return result.Num();
 	}
@@ -609,7 +602,8 @@ namespace FINLua {
 	}
 
 	int luaStructTypeCall(lua_State* L) {
-		UFINStruct* Struct = luaFIN_tostructtype(L, 1);
+		UFINStruct* Struct = luaFIN_toStructType(L, 1);
+		luaL_argcheck(L, Struct->GetStructFlags() & FIN_Struct_Constructable, 1, "Can not be constructed.");
 		if (!Struct) return 0;
 		UScriptStruct* ScriptStruct = FFINReflection::Get()->FindScriptStruct(Struct);
 		if (!ScriptStruct) return 0;
@@ -620,7 +614,7 @@ namespace FINLua {
 	}
 
 	int luaStructTypeUnpersist(lua_State* L) {
-		FString StructName = luaFIN_checkfstring(L, lua_upvalueindex(1));
+		FString StructName = luaFIN_checkFString(L, lua_upvalueindex(1));
 		UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
 		luaFIN_pushStructType(L, Struct);
 		return 1;
@@ -628,7 +622,7 @@ namespace FINLua {
 
 	int luaStructTypePersist(lua_State* L) {
 		UFINStruct* Type = *(UFINStruct**)lua_touserdata(L, 1);
-		luaFIN_pushfstring(L, Type->GetInternalName());
+		luaFIN_pushFString(L, Type->GetInternalName());
 		lua_pushcclosure(L, &luaStructTypeUnpersist, 1);
 		return 1;
 	}
@@ -642,26 +636,26 @@ namespace FINLua {
 	void luaFIN_pushStructType(lua_State* L, UFINStruct* Struct) {
 		if (Struct) {
 			*(UFINStruct**)lua_newuserdata(L, sizeof(UFINStruct*)) = Struct;
-			luaL_setmetatable(L, STRUCT_TYPE_METATABLE_NAME);
+			luaL_setmetatable(L, FIN_LUA_STRUCT_TYPE_METATABLE_NAME);
 		} else {
 			lua_pushnil(L);
 		}
 	}
 
-	UFINStruct* luaFIN_tostructtype(lua_State* L, int index) {
+	UFINStruct* luaFIN_toStructType(lua_State* L, int index) {
 		if (lua_isnil(L, index)) return nullptr;
 		return luaFIN_checkStructType(L, index);
 	}
 
 	UFINStruct* luaFIN_checkStructType(lua_State* L, int index) {
-		UFINStruct* Struct = *(UFINStruct**)luaL_checkudata(L, index, STRUCT_TYPE_METATABLE_NAME);
+		UFINStruct* Struct = *(UFINStruct**)luaL_checkudata(L, index, FIN_LUA_STRUCT_TYPE_METATABLE_NAME);
 		return Struct;
 	}
 
 	int luaStructLibIndex(lua_State* L) {
-		FString StructName = luaFIN_checkfstring(L, 2);
+		FString StructName = luaFIN_checkFString(L, 2);
 		UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
-		if (Struct && (Struct->GetStructFlags() & FIN_Struct_Constructable)) {
+		if (Struct) {
 			luaFIN_pushStructType(L, Struct);
 		} else {
 			lua_pushnil(L);
@@ -697,11 +691,11 @@ namespace FINLua {
 		lua_pushcfunction(L, luaStructLibIndex);				// ..., LuaStructLibIndex
 		PersistValue("StructStructLibIndex");				// ...
 
-		luaL_newmetatable(L, STRUCT_TYPE_METATABLE_NAME);
+		luaL_newmetatable(L, FIN_LUA_STRUCT_TYPE_METATABLE_NAME);
 		luaL_setfuncs(L, luaStructTypeMetatable, 0);
 		lua_pushboolean(L, true);
 		lua_setfield(L, -2, "__metatable");
-		PersistTable(STRUCT_TYPE_METATABLE_NAME, -1);
+		PersistTable(FIN_LUA_STRUCT_TYPE_METATABLE_NAME, -1);
 		lua_pop(L, 1);
 	}
 }

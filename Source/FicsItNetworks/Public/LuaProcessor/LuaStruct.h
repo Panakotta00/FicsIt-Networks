@@ -6,6 +6,8 @@
 class UFINKernelSystem;
 class UFINStruct;
 
+#define FIN_LUA_STRUCT_TYPE_METATABLE_NAME "SimpleStructRefMetatable"
+
 namespace FINLua {
 	/**
 	 * Contains all information about the struct
@@ -91,6 +93,10 @@ namespace FINLua {
 	 * nullptr if it is not a struct
 	 */
 	UFINStruct* luaFIN_getstructtype(lua_State* L, int i);
+
+	void luaFIN_pushStructType(lua_State* L, UFINStruct* Struct);
+	UFINStruct* luaFIN_toStructType(lua_State* L, int index);
+	UFINStruct* luaFIN_checkStructType(lua_State* L, int index);
 
 	/**
 	 * Registers all metatables and persistency infromation
