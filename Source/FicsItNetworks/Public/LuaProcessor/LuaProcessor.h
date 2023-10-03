@@ -109,6 +109,7 @@ public:
 	int apiReturn(lua_State* L, int args);
 
 	LuaTickState getState() { return State; }
+	bool getShouldPromote() { return bShouldPromote; }
 };
 
 UCLASS()
@@ -246,9 +247,20 @@ public:
 
 struct FLuaSyncCall {
 	UFINLuaProcessor* Processor;
+	bool bShouldPromote;
 
 	FLuaSyncCall(lua_State* L) {
 		Processor = UFINLuaProcessor::luaGetProcessor(L);
-		Processor->tickHelper.demoteInAsync();
+		bShouldPromote = Processor->GetTickHelper().getShouldPromote();
+		if (Processor->GetTickHelper().getState() & LUA_ASYNC) {
+			bShouldPromote = true;
+			Processor->tickHelper.demoteInAsync();
+		}
+	}
+
+	~FLuaSyncCall() {
+		if (bShouldPromote) {
+			Processor->GetTickHelper().shouldPromote();
+		}
 	}
 };
