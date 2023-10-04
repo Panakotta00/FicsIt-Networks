@@ -65,6 +65,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	bool IsChildOf(const UFINStruct* Struct) const {
+		if (!Struct) return true;
 		const UFINStruct* Self = this;
 		while (Self) {
 			if (Self == Struct) return true;

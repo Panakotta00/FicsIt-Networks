@@ -3,7 +3,7 @@
 #include "LuaUtil.h"
 #include "Reflection/FINReflection.h"
 
-#define FIN_LUA_CLASSLIB_METATABLE_NAME "ClassLib"
+#define FIN_LUA_CLASS_LIB_METATABLE_NAME "ClassLib"
 #define FIN_LUA_CLASS_METATABLE_NAME "Class-Metatable"
 
 namespace FINLua {

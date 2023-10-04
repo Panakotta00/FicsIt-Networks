@@ -155,11 +155,11 @@ namespace FINLua {
 
 		// Add & Persist ClassLib as global 'classes'
 		lua_newuserdata(L, 0);										// ..., ClassLib
-		luaL_newmetatable(L, FIN_LUA_CLASSLIB_METATABLE_NAME);		// ..., ClassLib, ClassLibMetatable
+		luaL_newmetatable(L, FIN_LUA_CLASS_LIB_METATABLE_NAME);		// ..., ClassLib, ClassLibMetatable
 		luaL_setfuncs(L, luaClassLibMetatable, 0);
-		lua_pushstring(L, FIN_LUA_CLASSLIB_METATABLE_NAME);			// ..., ClassLib, ClassLibMetatable, bool
+		lua_pushstring(L, FIN_LUA_CLASS_LIB_METATABLE_NAME);			// ..., ClassLib, ClassLibMetatable, bool
 		lua_setfield(L, -2, "__metatable");						// ..., ClassLib, ClassLibMetatable
-		PersistTable(FIN_LUA_CLASSLIB_METATABLE_NAME, -1);
+		PersistTable(FIN_LUA_CLASS_LIB_METATABLE_NAME, -1);
 		lua_setmetatable(L, -2);									// ..., ClassLib
 		lua_setglobal(L, "classes");								// ...
 		PersistGlobal("classes");

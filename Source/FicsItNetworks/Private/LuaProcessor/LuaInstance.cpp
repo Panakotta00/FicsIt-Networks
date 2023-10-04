@@ -112,7 +112,8 @@ namespace FINLua {
 		if (!Obj) return luaL_argerror(L, 1, "Instance is invalid");
 		
 		// call func
-		return luaCallFINFunc(L, Function, FFINExecutionContext(Instance->Trace), "Instance");
+		//return luaCallFINFunc(L, Function, FFINExecutionContext(Instance->Trace), "Instance");
+		return 0;
 	}
 
 	int luaInstanceIndex(lua_State* L) {																			// Instance, FuncName
@@ -146,7 +147,8 @@ namespace FINLua {
 		ClassMetaNameLock.Lock();
 		const FString MetaName = ClassToMetaName[Class];
 		ClassMetaNameLock.Unlock();
-		return luaFindGetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, MetaName + "_" + MemberName, &luaInstanceFuncCall, false);
+		//return luaFindGetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, MetaName + "_" + MemberName, &luaInstanceFuncCall, false);
+		return 0;
 	}
 
 	int luaInstanceNewIndex(lua_State* L) {
@@ -176,7 +178,8 @@ namespace FINLua {
 			}
 		}
 
-		return luaFindSetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, false);
+		//return luaFindSetMember(L, Class, FFINExecutionContext(Instance->Trace), MemberName, false);
+		return 0;
 	}
 
 	int luaInstanceEQ(lua_State* L) {

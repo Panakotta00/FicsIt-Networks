@@ -80,35 +80,6 @@ inline void _PersistTable(lua_State* L, int _persist_permTableIdx, int _persist_
 
 namespace FINLua {
 	/**
-	 * Converts the given property within the given struct pointer
-	 * to a lua value and pushes it onto the stack.
-	 * The trace allows for object properties to have additionally a this trace attached.
-	 * @deprecated 
-	 */
-	[[deprecated]] void propertyToLua(lua_State* L, FProperty* p, void* data, const FFINNetworkTrace& trace);
-
-	/**
-	 * Trys to convert the lua value at the given index on the given lua stack
-	 * to the given property in the given struct pointer.
-	 * @deprecated 
-	 */
-	[[deprecated]] void luaToProperty(lua_State* L, FProperty* p, void* data, int i);
-
-	/**
-	 * Trys to convert the lua value at the given index on the given lua stack
-	 * to the given property and returns that value.
-	 * lua error if value not valid TODO: Are you sure about that?
-	 * @deprecated 
-	 */
-	[[deprecated]] FINAny luaToProperty(lua_State* L, UFINProperty* Prop, int Index);
-
-	/**
-	 * Trys to convert the lua value at the given index to any kind of network value.
-	 * @deprecated 
-	 */
-	[[deprecated]] void luaToNetworkValue(lua_State* L, int i, FFINAnyNetworkValue& Val);
-
-	/**
 	 * @brief Pushes the given network value as lua value onto the stack
 	 * @param L the lua state
 	 * @param Value the network value you want to push
