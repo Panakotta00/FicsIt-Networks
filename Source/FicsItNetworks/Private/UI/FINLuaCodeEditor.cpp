@@ -68,7 +68,7 @@ int32 FFINTabRun::GetTextIndexAt(const TSharedRef<ILayoutBlock>& Block, const FV
 		return INDEX_NONE;
 	}
 	int32 Index = (Location.X < Offset) ? Range.BeginIndex : Range.EndIndex;
-	*OutHitPoint = Index == Range.BeginIndex ? ETextHitPoint::LeftGutter : ETextHitPoint::WithinText;
+	if (OutHitPoint) *OutHitPoint = Index == Range.BeginIndex ? ETextHitPoint::LeftGutter : ETextHitPoint::WithinText;
 	return Index;
 }
 
