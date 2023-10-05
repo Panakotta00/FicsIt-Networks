@@ -6,11 +6,10 @@
 #include "LuaProcessor/LuaDebugAPI.h"
 #include "LuaProcessor/LuaEventAPI.h"
 #include "LuaProcessor/LuaFuture.h"
-#include "LuaProcessor/LuaInstance.h"
 #include "LuaProcessor/LuaObject.h"
 #include "LuaProcessor/LuaProcessor.h"
 #include "LuaProcessor/LuaRef.h"
-#include "..\..\Public\LuaProcessor\LuaStruct.h"
+#include "LuaProcessor/LuaStruct.h"
 #include "Registry/ModContentRegistry.h"
 
 namespace FINLua {
@@ -224,10 +223,7 @@ namespace FINLua {
 		FString Filter;
 		int i = 1;
 		if (lua_isstring(L, i)) {
-			size_t len;
-			const char* str = luaL_tolstring(L, i++, &len);
-			FUTF8ToTCHAR conv(str, len);
-			Filter = FString(conv.Length(), conv.Get());
+			Filter = luaFIN_toFString(L, i++);
 		}
 
 		int64 pageSize = TNumericLimits<int64>::Max();
@@ -311,10 +307,9 @@ namespace FINLua {
 
 		setupUtilLib(L);
 		setupRefUtils(L);
-		setupClassSystem(L);
-		setupObjectSystem(L);
-		setupInstanceSystem(L);
 		setupStructSystem(L);
+		setupObjectSystem(L);
+		setupClassSystem(L);
 		setupComponentAPI(L);
 		setupEventAPI(L);
 		setupFileSystemAPI(L);

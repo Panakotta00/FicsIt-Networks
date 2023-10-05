@@ -2,12 +2,15 @@
 
 #include "LuaProcessor/LuaClass.h"
 #include "LuaProcessor/LuaFuture.h"
+#include "LuaProcessor/LuaObject.h"
 #include "LuaProcessor/LuaProcessor.h"
+#include "LuaProcessor/LuaStruct.h"
 #include "LuaProcessor/LuaUtil.h"
 #include "Reflection/FINReflection.h"
 
 namespace FINLua {
 	TArray<FINAny> luaFIN_callReflectionFunctionProcessInput(lua_State* L, UFINFunction* Function, int nArgs) {
+		int startArg = 1;
 		TArray<FINAny> Input;
 		TArray<UFINProperty*> Parameters = Function->GetParameters();
 		for (UFINProperty* Parameter : Parameters) {
@@ -15,7 +18,10 @@ namespace FINLua {
 				int index = lua_absindex(L, -nArgs);
 				TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, index, Parameter, true, true);
 				if (Value.IsSet()) Input.Add(*Value);
-				else luaFIN_propertyError(L, index, Parameter);
+				else {
+					lua_gettop(L);
+					luaFIN_propertyError(L, Input.Num() + startArg, Parameter);
+				}
 				nArgs -= 1;
 				if (nArgs <= 0) break;
 			}
@@ -75,15 +81,16 @@ namespace FINLua {
 		FFINExecutionContext Context;
 		if (UFINClass* Class = Cast<UFINClass>(Type)) {
 			if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
-				FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1, Cast<UFINClass>(Class));
+				FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
+				if (!LuaClass->FINClass->IsChildOf(Class)) luaL_argerror(L, 1, "Expected Class");
 				Context = FFINExecutionContext(LuaClass->UClass);
 			} else {
-				// TODO: Refactor Objects & Set Object Execution Context
-				luaL_error(L, "Not implemented for Objects");
+				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, Class);
+				Context = FFINExecutionContext(LuaObject->Object);
 			}
 		} else {
-			// TODO: Refactor Structs & Set Struct Execution Context
-			luaL_error(L, "Not implemented for Structs");
+			FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, 1, Type);
+			Context = FFINExecutionContext(LuaStruct->Struct->GetData()); // TODO: Add wrapper to Execution Context ot be able to hold a TSharedRef to the FINStruct, in Sync call, GC may collect struct!
 		}
 
 		return luaFIN_callReflectionFunction(L, Function, Context, lua_gettop(L)-1, LUA_MULTRET);
@@ -182,15 +189,19 @@ namespace FINLua {
 	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError) {
 		UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags);
 		if (Property) {
-			FINAny Value = luaToProperty(L, Property, ValueIndex);
+			TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, ValueIndex, Property, true, true);
+			if (!Value.IsSet()) {
+				luaL_argerror(L, ValueIndex, "Not of expected Network Value type!"); // TODO: Better error message!
+				return false;
+			}
 			
 			// TODO: Add C++ try catch block to SetProperty Execution
 			EFINRepPropertyFlags PropFlags = Property->GetPropertyFlags();
 			if (PropFlags & FIN_Prop_RT_Async) {
-				Property->SetValue(PropertyCtx, Value);
+				Property->SetValue(PropertyCtx, Value.GetValue());
 			} else if (PropFlags & FIN_Prop_RT_Parallel) {
 				[[maybe_unused]] FLuaSyncCall SyncCall(L);
-				Property->SetValue(PropertyCtx, Value);
+				Property->SetValue(PropertyCtx, Value.GetValue());
 			} else {
 				luaFuture(L, FFINFutureReflection(Property, PropertyCtx));
 			}

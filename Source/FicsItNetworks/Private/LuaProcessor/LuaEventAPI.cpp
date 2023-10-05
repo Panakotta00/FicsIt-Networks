@@ -1,7 +1,7 @@
 #include "LuaProcessor/LuaEventAPI.h"
 #include "LuaProcessor/LuaProcessor.h"
-#include "LuaProcessor/LuaInstance.h"
 #include "FicsItKernel/FicsItKernel.h"
+#include "LuaProcessor/LuaObject.h"
 #include "Network/FINNetworkCircuit.h"
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
@@ -22,9 +22,8 @@ namespace FINLua {
 		const int args = lua_gettop(L);
 
 		for (int i = 1; i <= args; ++i) {
-			FFINNetworkTrace trace;
-			UObject* o = getObjInstance<UObject>(L, i, &trace);
-			luaListen(L, trace / o);
+			FFINNetworkTrace trace = luaFIN_checkObject(L, i, nullptr);
+			luaListen(L, trace);
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
@@ -39,7 +38,7 @@ namespace FINLua {
 		int i = 0;
 		lua_newtable(L);
 		for (UObject* Obj : Listening) {
-			newInstance(L, FFINNetworkTrace(netComp) / Obj);
+			luaFIN_pushObject(L, FFINNetworkTrace(netComp) / Obj);
 			lua_seti(L, -2, ++i);
 		}
 		return 1;
@@ -86,9 +85,8 @@ namespace FINLua {
 		const int args = lua_gettop(L);
 
 		for (int i = 1; i <= args; ++i) {
-			FFINNetworkTrace trace;
-			UObject* o = getObjInstance<UObject>(L, i, &trace);
-			luaIgnore(L, trace / o);
+			FFINNetworkTrace Trace = luaFIN_checkObject(L, i, nullptr);
+			luaIgnore(L, Trace);
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}

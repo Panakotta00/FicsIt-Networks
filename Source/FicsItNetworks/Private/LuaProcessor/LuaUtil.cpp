@@ -3,7 +3,7 @@
 #include "LuaProcessor/LuaFileSystemAPI.h"
 #include "LuaProcessor/LuaFuture.h"
 #include "LuaProcessor/LuaClass.h"
-#include "LuaProcessor/LuaInstance.h"
+#include "LuaProcessor/LuaObject.h"
 #include "LuaProcessor/LuaStruct.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINClassProperty.h"
@@ -32,13 +32,13 @@ namespace FINLua {
 			luaFIN_pushFString(L, Val.GetString());
 			break;
 		} case FIN_OBJ:
-			newInstance(L, Trace / Val.GetObj().Get());
+			luaFIN_pushObject(L, Trace / Val.GetObj().Get());
 			break;
 		case FIN_CLASS:
 			luaFIN_pushClass(L, Val.GetClass());
 			break;
 		case FIN_TRACE:
-			newInstance(L, Val.GetTrace());
+			luaFIN_pushObject(L, Val.GetTrace());
 			break;
 		case FIN_STRUCT: {
 			const FINStruct& Struct = Val.GetStruct();
@@ -80,13 +80,14 @@ namespace FINLua {
 		case LUA_TSTRING:
 			return FIN_STR;
 		case LUA_TUSERDATA:
-			if (luaFIN_toLuaStruct(L, Index)) return FIN_STRUCT;
-			if (luaFIN_getObjectType(L, Index)) return FIN_TRACE;
+			if (luaFIN_toLuaStruct(L, Index, nullptr)) return FIN_STRUCT;
+			if (luaFIN_toLuaObject(L, Index, nullptr)) return FIN_TRACE;
 			if (luaFIN_toLuaClass(L, Index)) return FIN_CLASS;
 		default: return TOptional<EFINNetworkValueType>();
 		}
 	}
 
+#pragma optimize("", off)
 	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
 		int LuaType = lua_type(L, Index);
 		
@@ -106,34 +107,35 @@ namespace FINLua {
 			if (!bImplicitConversion && LuaType != LUA_TSTRING) return TOptional<FINAny>();
 			return FINAny(luaFIN_toFinString(L, Index));
 		} case FIN_OBJ: {
-			// TODO: Refactored getObjInstance function
-			if (LuaType == LUA_TNIL || LuaType == LUA_TNONE) return FINAny(FINObj());
-			// TODO: Expect LuaObj type, otherwise return None (right now it returns nullptr Obj)
-			UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Property);
-			if (ObjProp && ObjProp->GetSubclass()) {
-				return FINAny(static_cast<FINObj>(getObjInstance(L, Index, ObjProp->GetSubclass()).Get()));
+			TOptional<FINTrace> Object;
+			UFINObjectProperty* ObjectProp = Cast<UFINObjectProperty>(Property);
+			if (ObjectProp && ObjectProp->GetSubclass()) {
+				Object = luaFIN_toObject(L, Index, FFINReflection::Get()->FindClass(ObjectProp->GetSubclass()));
+			} else {
+				Object = luaFIN_toObject(L, Index, nullptr);
 			}
-			return FINAny(static_cast<FINObj>(getObjInstance(L, Index).Get()));
+			if (Object.IsSet()) return FINAny(static_cast<FINObj>(Object.GetValue().Get()));
+			return TOptional<FINAny>();
 		} case FIN_CLASS: {
 			UClass* Class;
 			UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Property);
 			if (ClassProp && ClassProp->GetSubclass()) {
 				Class = luaFIN_toSubUClass(L, Index, ClassProp->GetSubclass());
 			} else {
-				Class = luaFIN_toUClass(L, Index);
+				Class = luaFIN_toUClass(L, Index, nullptr);
 			}
 			if (Class) return FINAny(static_cast<FINClass>(Class));
 			return TOptional<FINAny>();
 		} case FIN_TRACE: {
-			// TODO: Refactored getObjInstance function
-			if (LuaType == LUA_TNIL || LuaType == LUA_TNONE) return FINAny(FINTrace());
-			// TODO: Expect LuaObj type, otherwise return None (right now it returns nullptr Trace)
-			
+			TOptional<FINTrace> Trace;
 			UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Property);
 			if (TraceProp && TraceProp->GetSubclass()) {
-				return FINAny(static_cast<FINTrace>(getObjInstance(L, Index, TraceProp->GetSubclass())));
+				Trace = luaFIN_toObject(L, Index, FFINReflection::Get()->FindClass(TraceProp->GetSubclass()));
+			} else {
+				Trace = luaFIN_toObject(L, Index, nullptr);
 			}
-			return FINAny(static_cast<FINTrace>(getObjInstance(L, Index)));
+			if (Trace.IsSet()) return FINAny(Trace.GetValue());
+			return TOptional<FINAny>();
 		} case FIN_STRUCT: {
 			TSharedPtr<FINStruct> Struct;
 			UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property);
@@ -167,6 +169,7 @@ namespace FINLua {
 		}
 		return FINAny();
 	}
+#pragma optimize("", on)
 	
 	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
 		if (Property) return luaFIN_toNetworkValueByProp(L, Index, Property, bImplicitConversion, bImplicitConstruction);
@@ -200,11 +203,10 @@ namespace FINLua {
 			return FINAny(Array);
 		} default:
 			TSharedPtr<FINStruct> Struct = luaFIN_toStruct(L, Index, nullptr, false);
-			if (Struct.IsValid()) return FINAny(*Struct);
-			// TODO: Check optional Object
-			//FFINNetworkTrace Trace = getObjInstance(L, Index, UObject::StaticClass(), false);
-			//if (Trace.IsValid()) return FINAny(Trace);
-			UClass* Class = luaFIN_toUClass(L, Index);
+			if (Struct.IsValid()) return FINAny(static_cast<FINStruct>(*Struct));
+			TOptional<FFINNetworkTrace> Object = luaFIN_toObject(L, Index, nullptr);
+			if (Object.IsSet()) return FINAny(static_cast<FINObj>(Object.GetValue().Get()));
+			UClass* Class = luaFIN_toUClass(L, Index, nullptr);
 			if (Class) return FINAny(static_cast<FINClass>(Class));
 		}
 		return TOptional<FINAny>();

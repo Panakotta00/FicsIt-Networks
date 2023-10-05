@@ -58,19 +58,18 @@ namespace FINLua {
 	 * @brief Retrieves a LuaClass from the lua value with the given index in the lua stack. Causes an Lua Error if unable to get as LuaClass or is no child of given parent class
 	 * @param L teh lua stack
 	 * @param Index the index of the lua value you get as LuaClass
-	 * @param ParentClass the expected parent class of the value
 	 * @return The pointer to the LuaClass in the stack (attention to GC!)
 	 */
-	FLuaClass* luaFIN_checkLuaClass(lua_State* L, int Index, UFINClass* ParentClass);
+	FLuaClass* luaFIN_checkLuaClass(lua_State* L, int Index);
 
 	/**
 	 * @brief Tries to retrieve a Class from the lua value with the given index in the lua stack
 	 * @param L the lua state
 	 * @param Index the index of the lua value you try to get as class
-	 * @param OutFINClass if not nullptr, sets the FINClass Pointer to the FINClass retrieved
+	 * @param[out] OutFINClass if not nullptr, sets the FINClass Pointer to the FINClass retrieved
 	 * @return The Class from the stack, nullptr if unable to get as class
 	 */
-	FORCEINLINE UClass* luaFIN_toUClass(lua_State* L, int Index, UFINClass** OutFINClass = nullptr) {
+	FORCEINLINE UClass* luaFIN_toUClass(lua_State* L, int Index, UFINClass** OutFINClass) {
 		FLuaClass* luaClass = luaFIN_toLuaClass(L, Index);
 		if (luaClass) {
 			if (OutFINClass) *OutFINClass = luaClass->FINClass;
@@ -93,7 +92,7 @@ namespace FINLua {
 	 * @param[out] OutClass if not nullptr, sets the UClass Pointer to the UClass retrieved
 	 * @return The FINClass from the stack, nullptr if unable to get as FINClass
 	 */
-	FORCEINLINE UFINClass* luaFIN_toFINClass(lua_State* L, int Index, UClass** OutClass = nullptr) {
+	FORCEINLINE UFINClass* luaFIN_toFINClass(lua_State* L, int Index, UClass** OutClass) {
 		FLuaClass* luaClass = luaFIN_toLuaClass(L, Index);
 		if (luaClass) {
 			if (OutClass) *OutClass = luaClass->UClass;

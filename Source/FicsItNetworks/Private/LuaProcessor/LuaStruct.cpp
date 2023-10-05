@@ -3,7 +3,6 @@
 #include "LuaProcessor/LuaRef.h"
 #include "LuaProcessor/LuaUtil.h"
 #include "LuaProcessor/LuaProcessor.h"
-#include "LuaProcessor/LuaInstance.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "Reflection/FINReflection.h"
 #include "Reflection/FINStruct.h"
@@ -89,11 +88,9 @@ namespace FINLua {
 	int luaStructUnaryOperator(lua_State* L, const char* LuaOperator, const FString& OperatorName, bool bCauseError) {
 		int thisIndex = 1;
 		
-		FLuaStruct* thisStructLua;
-		const TSharedRef<FINStruct> ThisStruct = luaFIN_checkStruct(L, thisIndex, nullptr, &thisStructLua);
-		UFINStruct* StructType = thisStructLua->Type;
+		FLuaStruct* ThisLuaStruct = luaFIN_checkLuaStruct(L, thisIndex, nullptr);
 
-		return FMath::Max(0, luaStructExecuteOperator(L, ThisStruct, StructType, OperatorName, {}, bCauseError ? &thisIndex : nullptr));
+		return FMath::Max(0, luaStructExecuteOperator(L, ThisLuaStruct->Struct, ThisLuaStruct->Type, OperatorName, {}, bCauseError ? &thisIndex : nullptr));
 	}
 
 	/**
@@ -126,11 +123,9 @@ namespace FINLua {
 			return -1;
 		}
 		
-		FLuaStruct* thisStructLua;
-		const TSharedRef<FINStruct> ThisStruct = luaFIN_checkStruct(L, thisIndex, nullptr, &thisStructLua);
-		UFINStruct* StructType = thisStructLua->Type;
-		
-		int result = luaStructExecuteBinaryOperator(L, OperatorName, otherIndex, ThisStruct, StructType, nullptr);
+		FLuaStruct* ThisLuaStruct = luaFIN_checkLuaStruct(L, thisIndex, nullptr);
+				
+		int result = luaStructExecuteBinaryOperator(L, OperatorName, otherIndex, ThisLuaStruct->Struct, ThisLuaStruct->Type, nullptr);
 		if (result < 0) {
 			if (bCauseError) return luaL_error(L, "Invalid Operator for struct of type %s", lua_typename(L, thisIndex));
 			if (ErrorCause) *ErrorCause = -2;
@@ -260,37 +255,31 @@ namespace FINLua {
 		const int thisIndex = 1;
 		const int nameIndex = 2;
 		
-		FLuaStruct* StructLua;
-		const TSharedRef<FINStruct> Struct = luaFIN_checkStruct(L, thisIndex, nullptr, &StructLua);
-		UFINStruct* Type = StructLua->Type;
-		
-		const FString MemberName = luaFIN_toFString(L, nameIndex);
+		FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, thisIndex, nullptr);
+		FString MemberName = luaFIN_toFString(L, nameIndex);
 
-		FFINExecutionContext Context(Struct->GetData());
-		if (luaFIN_pushFunctionOrGetProperty(L, thisIndex, Type, MemberName, EFINFunctionFlags::FIN_Func_MemberFunc, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, false)) {
+		FFINExecutionContext Context(LuaStruct->Struct->GetData());
+		if (luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaStruct->Type, MemberName, EFINFunctionFlags::FIN_Func_MemberFunc, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, false)) {
 			return 1;
 		}
 		
-		return luaStructExecuteBinaryOperator(L, FIN_OP_TEXT(FIN_Operator_Index), 2, Struct, Type, &thisIndex);
+		return luaStructExecuteBinaryOperator(L, FIN_OP_TEXT(FIN_Operator_Index), 2, LuaStruct->Struct, LuaStruct->Type, &thisIndex);
 	}
 
 	int luaStructNewIndex(lua_State* L) {
 		const int thisIndex = 1;
 		const int nameIndex = 2;
-		const int operandIndex = 3;
+		const int valueIndex = 3;
 		
-		FLuaStruct* StructLua;
-		const TSharedRef<FINStruct> Struct = luaFIN_checkStruct(L, thisIndex, nullptr, &StructLua);
-		UFINStruct* Type = StructLua->Type;
-			
-		const FString MemberName = luaFIN_toFString(L, nameIndex);
+		FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, thisIndex, nullptr);
+		FString MemberName = luaFIN_toFString(L, nameIndex);
 
-		FFINExecutionContext Context(Struct->GetData());
-		if (luaFIN_tryExecuteSetProperty(L, thisIndex, Type, MemberName, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, operandIndex, false)) {
+		FFINExecutionContext Context(LuaStruct->Struct->GetData());
+		if (luaFIN_tryExecuteSetProperty(L, thisIndex, LuaStruct->Type, MemberName, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, valueIndex, false)) {
 			return 1;
 		}
 		
-		return luaStructExecuteOperator(L, Struct, Type, FIN_OP_TEXT(FIN_Operator_NewIndex), {nameIndex, operandIndex}, &thisIndex);
+		return luaStructExecuteOperator(L, LuaStruct->Struct, LuaStruct->Type, FIN_OP_TEXT(FIN_Operator_NewIndex), {nameIndex, valueIndex}, &thisIndex);
 	}
 
 	int luaStructCall(lua_State* L) {
@@ -299,25 +288,17 @@ namespace FINLua {
 
 		int top = lua_gettop(L);
 
-		FLuaStruct* StructLua;
-		const TSharedRef<FINStruct> Struct = luaFIN_checkStruct(L, thisIndex, nullptr, &StructLua);
-		UFINStruct* Type = StructLua->Type;
-
+		FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, thisIndex, nullptr);
+		
 		TArray<int> OperandIndices;
 		for (int i = operandsStartIndex; i <= top; ++i) {
 			OperandIndices.Add(i);
 		}
-		return luaStructExecuteOperator(L, Struct, Type, FIN_OP_TEXT(FIN_Operator_Call), OperandIndices, &thisIndex);
+		return luaStructExecuteOperator(L, LuaStruct->Struct, LuaStruct->Type, FIN_OP_TEXT(FIN_Operator_Call), OperandIndices, &thisIndex);
 	}
 
 	int luaStructToString(lua_State* L) {
-		FLuaStruct* LuaStruct;
-		const TSharedPtr<FINStruct> Struct = luaFIN_checkStruct(L, 1, nullptr, false, &LuaStruct);
-		if (!Struct->GetData()) {
-			lua_pushnil(L);
-			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		}
-		
+		FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, 1, nullptr);
 		luaFIN_pushFString(L, LuaStruct->Type->GetInternalName() + "-Struct");
 		return 1;
 	}
@@ -346,7 +327,7 @@ namespace FINLua {
 	}
 	
 	int luaStructGC(lua_State* L) {
-		FLuaStruct* Struct = static_cast<FLuaStruct*>(lua_touserdata(L, 1));
+		FLuaStruct* Struct = luaFIN_checkLuaStruct(L, 1, nullptr);
 		Struct->~FLuaStruct();
 		return 0;
 	}
@@ -394,16 +375,20 @@ namespace FINLua {
 		return true;
 	}
 
-	TSharedPtr<FINStruct> luaFIN_convertToStruct(lua_State* L, int i, UFINStruct* Type, bool bAllowImplicitConstruction) {
+	TSharedPtr<FINStruct> luaFIN_convertToStruct(lua_State* L, int Index, UFINStruct* Type, bool bAllowImplicitConstruction) {
 		if (!(Type->GetStructFlags() & FIN_Struct_Constructable)) return nullptr;
-
+		
 		TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(FFINReflection::Get()->FindScriptStruct(Type));
+		
+		int luaType = lua_type(L, Index);
+		if (luaType == LUA_TNIL) return Struct;
+		if (luaType != LUA_TTABLE) return nullptr;
 		
 		int j = 0;
 		for (UFINProperty* Prop : Type->GetProperties()) {
 			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
-			if (lua_getfield(L, i, TCHAR_TO_UTF8(*Prop->GetInternalName())) == LUA_TNIL) {
-				lua_geti(L, i, ++j);
+			if (lua_getfield(L, Index, TCHAR_TO_UTF8(*Prop->GetInternalName())) == LUA_TNIL) {
+				lua_geti(L, Index, ++j);
 			}
 			TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, -1, Prop, true, bAllowImplicitConstruction);
 			lua_pop(L, 1);
@@ -414,28 +399,34 @@ namespace FINLua {
 		return Struct;
 	}
 
-	FLuaStruct* luaFIN_toLuaStruct(lua_State* L, int Index, UFINStruct* Type) {
-		FLuaStruct* LuaStruct = (FLuaStruct*)luaL_testudata(L, Index, FIN_LUA_STRUCT_METATABLE_NAME);
-		if (LuaStruct && LuaStruct->Type->IsChildOf(Type)) {
+	FLuaStruct* luaFIN_toLuaStruct(lua_State* L, int Index, UFINStruct* ParentType) {
+		FLuaStruct* LuaStruct = static_cast<FLuaStruct*>(luaL_testudata(L, Index, FIN_LUA_STRUCT_METATABLE_NAME));
+		if (LuaStruct && LuaStruct->Type->IsChildOf(ParentType)) {
 			return LuaStruct;
 		}
 		return nullptr;
 	}
 
-	TSharedPtr<FINStruct> luaFIN_toStruct(lua_State* L, int Index, UFINStruct* Type, bool bAllowConstruction, FLuaStruct** OutLuaStruct) {
-		if (bAllowConstruction && lua_istable(L, Index) && Type) {
-			if (OutLuaStruct) *OutLuaStruct = nullptr;
-			return luaFIN_convertToStruct(L, Index, Type, bAllowConstruction);
-		}
-		
-		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, Type);
-		if (OutLuaStruct) *OutLuaStruct = LuaStruct;
-		return LuaStruct->Struct;
+	FLuaStruct* luaFIN_checkLuaStruct(lua_State* L, int Index, UFINStruct* ParentType) {
+		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, ParentType);
+		if (!LuaStruct) luaL_argerror(L, Index, "Not a struct"); // TODO: Improve error message with why struct conv not was working, template mismatch, general no struct etc.
+		return LuaStruct;
 	}
 
-	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int i, UFINStruct* Type, bool bAllowConstruction, FLuaStruct** luaStruct) {
-		TSharedPtr<FINStruct> Struct = luaFIN_toStruct(L, i, Type, bAllowConstruction, luaStruct);
-		if (!Struct.IsValid()) luaL_argerror(L, i, "Not a struct"); // TODO: Improve error message with why struct conv not was working, template mismatch, general no struct etc.
+	TSharedPtr<FINStruct> luaFIN_toStruct(lua_State* L, int Index, UFINStruct* ParentType, bool bAllowConstruction) {
+		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, ParentType);
+		if (LuaStruct) return LuaStruct->Struct;
+		
+		if (bAllowConstruction && ParentType) {
+			return luaFIN_convertToStruct(L, Index, ParentType, bAllowConstruction);
+		}
+		
+		return nullptr;
+	}
+
+	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int Index, UFINStruct* ParentType, bool bAllowConstruction) {
+		TSharedPtr<FINStruct> Struct = luaFIN_toStruct(L, Index, ParentType, bAllowConstruction);
+		if (!Struct.IsValid()) luaL_argerror(L, Index, "Not a struct"); // TODO: Improve error message with why struct conv not was working, template mismatch, general no struct etc.
 		return Struct.ToSharedRef();
 	}
 
@@ -445,7 +436,7 @@ namespace FINLua {
 		
 		luaL_argcheck(L, Struct->GetStructFlags() & FIN_Struct_Constructable, 1, "Can not be constructed.");
 
-		TSharedRef<FINStruct> Value = luaFIN_checkStruct(L, 2, Struct, true, nullptr);
+		TSharedRef<FINStruct> Value = luaFIN_checkStruct(L, 2, Struct, true);
 		luaFIN_pushStruct(L, *Value);
 
 		return 1;
@@ -516,6 +507,8 @@ namespace FINLua {
 		lua_setfield(L, -2, "__metatable");						// ..., StructMetatable
 		PersistTable(FIN_LUA_STRUCT_METATABLE_NAME, -1);
 		lua_pop(L, 1);												// ...
+		lua_pushcfunction(L, luaStructUnpersist);						// ..., StructUnpersist
+		PersistValue("StructUnpersist");							// ...
 
 		// Register & Persist StructType-Metatable
 		luaL_newmetatable(L, FIN_LUA_STRUCT_TYPE_METATABLE_NAME);	// ..., StructTypMetatable
@@ -524,6 +517,8 @@ namespace FINLua {
 		lua_setfield(L, -2, "__metatable");						// ..., StructTypeMetatable
 		PersistTable(FIN_LUA_STRUCT_TYPE_METATABLE_NAME, -1);
 		lua_pop(L, 1);												// ...
+		lua_pushcfunction(L, luaStructTypeUnpersist);					// ..., StructTypeUnpersist
+		PersistValue("StructTypeUnpersist");						// ...
 
 		// Add & Persist StructLib as global 'structs'
 		lua_newuserdata(L, 0);										// ..., StructLib

@@ -44,23 +44,32 @@ namespace FINLua {
 	}
 	
 	int luaClassIndex(lua_State* L) {
-		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1, nullptr);
-		FString MemberName = luaFIN_toFString(L, 2);
+		const int thisIndex = 1;
+		const int nameIndex = 2;
 		
-		luaFIN_pushFunctionOrGetProperty(L, 1, LuaClass->FINClass, MemberName, FIN_Func_ClassFunc, FIN_Prop_ClassProp, FFINExecutionContext(LuaClass->UClass), true);
+		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, thisIndex);
+		FString MemberName = luaFIN_toFString(L, nameIndex);
+
+		FFINExecutionContext Context(LuaClass->UClass);
+		luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaClass->FINClass, MemberName, FIN_Func_ClassFunc, FIN_Prop_ClassProp, Context, true);
 		return 1;
 	}
 
 	int luaClassNewIndex(lua_State* L) {
-		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1, nullptr);
-		FString MemberName = luaFIN_toFString(L, 2);
+		const int thisIndex = 1;
+		const int nameIndex = 2;
+		const int valueIndex = 3;
 		
-		luaFIN_tryExecuteSetProperty(L, 1, LuaClass->FINClass, MemberName, FIN_Prop_ClassProp, FFINExecutionContext(LuaClass->UClass), 3, true);
+		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, thisIndex);
+		FString MemberName = luaFIN_toFString(L, nameIndex);
+
+		FFINExecutionContext Context(LuaClass->UClass);
+		luaFIN_tryExecuteSetProperty(L, thisIndex, LuaClass->FINClass, MemberName, FIN_Prop_ClassProp, Context, valueIndex, true);
 		return 0;
 	}
 
 	int luaClassToString(lua_State* L) {
-		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1, nullptr);
+		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
 		luaFIN_pushFString(L, LuaClass->FINClass->GetInternalName());
 		return 1;
 	}
@@ -77,7 +86,7 @@ namespace FINLua {
 	}
 
 	int luaClassPersist(lua_State* L) {
-		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1, nullptr);
+		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
 		luaFIN_pushFString(L, LuaClass->FINClass->GetInternalName());
 		luaFIN_pushFString(L, LuaClass->UClass->GetClassPathName().ToString());
 		lua_pushcclosure(L, luaClassUnpersist, 2);
@@ -113,15 +122,9 @@ namespace FINLua {
 		return (FLuaClass*)luaL_testudata(L, Index, FIN_LUA_CLASS_METATABLE_NAME);
 	}
 
-	FLuaClass* luaFIN_checkLuaClass(lua_State* L, int Index, UFINClass* ParentClass) {
+	FLuaClass* luaFIN_checkLuaClass(lua_State* L, int Index) {
 		FLuaClass* LuaClass = luaFIN_toLuaClass(L, Index);
-		bool bCond = LuaClass != NULL;
-		if (ParentClass) {
-			bCond = bCond && (!ParentClass || LuaClass->FINClass->IsChildOf(ParentClass));
-			luaL_argexpected(L, bCond, Index, TCHAR_TO_UTF8(*ParentClass->GetInternalName()));
-		} else {
-			luaL_argexpected(L, bCond, Index, "Class");
-		}
+		if (!LuaClass) luaL_argerror(L, Index, "Not a class"); // TODO: Improve error message with why class conv not was working, template mismatch, general no class etc.
 		return LuaClass;
 	}
 
@@ -141,7 +144,6 @@ namespace FINLua {
 		{NULL, NULL}
 	};
 
-
 	void setupClassSystem(lua_State* L) {
 		PersistSetup("ClassSystem", -2);
 
@@ -152,6 +154,8 @@ namespace FINLua {
 		lua_setfield(L, -2, "__metatable");						// ..., ClassMetatable
 		PersistTable(FIN_LUA_CLASS_METATABLE_NAME, -1);
 		lua_pop(L, 1);												// ...
+		lua_pushcfunction(L, luaClassUnpersist);						// ..., ClassUnpersist
+		PersistValue("ClassUnpersist");							// ...
 
 		// Add & Persist ClassLib as global 'classes'
 		lua_newuserdata(L, 0);										// ..., ClassLib

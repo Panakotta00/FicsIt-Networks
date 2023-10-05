@@ -1,7 +1,7 @@
 #include "LuaProcessor/LuaProcessor.h"
 #include "LuaProcessor/FINStateEEPROMLua.h"
 #include "LuaProcessor/LuaGlobalLib.h"
-#include "LuaProcessor/LuaInstance.h"
+#include "LuaProcessor/LuaObject.h"
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINSignal.h"
@@ -678,7 +678,7 @@ int UFINLuaProcessor::DoSignal(lua_State* L) {
 	int props = 2;
 	if (signal.Signal) lua_pushstring(L, TCHAR_TO_UTF8(*signal.Signal->GetInternalName()));
 	else lua_pushnil(L);
-	FINLua::newInstance(L, UFINNetworkUtils::RedirectIfPossible(sender));
+	FINLua::luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(sender));
 	for (const FFINAnyNetworkValue& Value : signal.Data) {
 		FINLua::luaFIN_pushNetworkValue(L, Value, sender);
 		props++;

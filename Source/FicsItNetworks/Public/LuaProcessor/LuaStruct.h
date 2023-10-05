@@ -47,31 +47,38 @@ namespace FINLua {
 	 * @param L the lua state
 	 * @param Index the index of the lua value you want to get as struct
 	 * @param ParentType the struct type that will be used to convert the lua table to a struct if enabled, if its a struct already, allows to check the type to match or be child of the given type
-	 * @return the lua struct got from the lua value, otherwise nullptr
+	 * @return the lua struct got from the lua value (be aware of GC!), otherwise nullptr
 	 */
-	FLuaStruct* luaFIN_toLuaStruct(lua_State* L, int Index, UFINStruct* ParentType = nullptr);
+	FLuaStruct* luaFIN_toLuaStruct(lua_State* L, int Index, UFINStruct* ParentType);
+
+	/**
+	 * @brief Retrieves the lua value at the given index in the lua stack as Lua Struct. Causes a lua error if unable to get Lua Struct
+	 * @param L the lua state
+	 * @param Index the index of the lua value you want to get as struct
+	 * @param ParentType the struct type that will be used to convert the lua table to a struct if enabled, if its a struct already, allows to check the type to match or be child of the given type
+	 * @return the lua struct got from the lua value (be aware of GC!)
+	 */
+	FLuaStruct* luaFIN_checkLuaStruct(lua_State* L, int Index, UFINStruct* ParentType);
 	
 	/**
 	 * @brief Retrieves the lua value at the given index in the lua stack as FINStruct.
 	 * @param L the lua state
 	 * @param Index the index of the lua value you want to get as struct
-	 * @param TemplateType the struct type that will be used to convert the lua table to a struct if enabled, if its a struct already, allows to check the type to match or be child of the given type
+	 * @param ParentType the struct type that will be used to convert the lua table to a struct if enabled, if its a struct already, allows to check the type to match or be child of the given type
 	 * @param bAllowConstruction if set to true and the lua value is a table, it will try to convert the table to the given Struct Type, if no struct type is given, does nothing
-	 * @param LuaStruct if set, assigns it to the pointer to the LuaStruct within the lua stack (attention to GC!)
 	 * @return the struct got from the lua value, otherwise nullptr
 	 */
-	TSharedPtr<FINStruct> luaFIN_toStruct(lua_State* L, int Index, UFINStruct* TemplateType, bool bAllowConstruction, FLuaStruct** LuaStruct = nullptr);
+	TSharedPtr<FINStruct> luaFIN_toStruct(lua_State* L, int Index, UFINStruct* ParentType, bool bAllowConstruction);
 
 	/**
 	 * @brief Retrieves the lua value at the given index in the lua stack as FINStruct. Causes a lua type error if not able to get as struct of given type.
 	 * @param L the lua state
 	 * @param Index the index of the lua value you want to get as struct
-	 * @param TemplateType the struct type that will be used to convert the lua table to a struct if enabled, if its a struct already, allows to check the type to match or be child of the given type
+	 * @param ParentType the struct type that will be used to convert the lua table to a struct if enabled, if its a struct already, allows to check the type to match or be child of the given type
 	 * @param bAllowConstruction if set to true and the lua value is a table, it will try to convert the table to the given Struct Type, if no struct type is given, does nothing
-	 * @param LuaStruct if set, assigns it to the pointer to the LuaStruct within the lua stack (attention to GC!)
 	 * @return the struct got from the lua value
 	 */
-	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int Index, UFINStruct* TemplateType, bool bAllowConstruction, FLuaStruct** LuaStruct = nullptr);
+	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int Index, UFINStruct* ParentType, bool bAllowConstruction);
 
 	/**
 	 * @brief Pushes the given struct type onto the lua stack

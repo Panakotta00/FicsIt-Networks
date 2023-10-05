@@ -1,9 +1,10 @@
 #include "LuaProcessor/LuaComponentAPI.h"
 #include "LuaProcessor/LuaUtil.h"
 #include "LuaProcessor/LuaProcessor.h"
-#include "LuaProcessor/LuaInstance.h"
 #include "Network/FINNetworkComponent.h"
 #include "FicsItKernel/FicsItKernel.h"
+#include "LuaProcessor/LuaClass.h"
+#include "LuaProcessor/LuaObject.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINClass.h"
 
@@ -36,7 +37,7 @@ namespace FINLua {
 				FGuid UUID;
 				FGuid::Parse(FString(id.c_str()), UUID);
 				FFINNetworkTrace comp = Processor->GetKernel()->GetNetwork()->GetComponentByID(UUID);
-				newInstance(L, UFINNetworkUtils::RedirectIfPossible(comp));
+				luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(comp));
 				if (isT) lua_seti(L, -2, ++j);
 			}
 		}
@@ -55,12 +56,8 @@ namespace FINLua {
 				std::string nick = lua_tostring(L, i);
 				comps = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->GetComponentByNick(nick.c_str());
 			} else {
-				FFINNetworkTrace Obj = getObjInstance(L, i, UFINClass::StaticClass());
-				UFINClass* FINClass = Cast<UFINClass>(Obj.Get());
-				if (FINClass) {
-					UClass* Class = Cast<UClass>(FINClass->GetOuter());
-					comps = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->GetComponentByClass(Class, true);
-				}
+				UClass* Class = luaFIN_toUClass(L, i, nullptr);
+				comps = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->GetComponentByClass(Class, true);
 			}
 			int j = 0;
 			for (const FFINNetworkTrace& comp : comps) {

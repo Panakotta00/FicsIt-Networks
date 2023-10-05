@@ -1,7 +1,8 @@
 #include "LuaProcessor/LuaComputerAPI.h"
 #include "FGTimeSubsystem.h"
 #include "LuaProcessor/FINStateEEPROMLua.h"
-#include "LuaProcessor/LuaInstance.h"
+#include "LuaProcessor/LuaClass.h"
+#include "LuaProcessor/LuaObject.h"
 #include "LuaProcessor/LuaProcessor.h"
 #include "Network/FINDynamicStructHolder.h"
 #include "Network/FINNetworkUtils.h"
@@ -16,7 +17,7 @@ int funcName(lua_State* L) { \
 
 namespace FINLua {
 	LuaFunc(luaComputerGetInstance) {
-		newInstance(L, UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject())));
+		luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject())));
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
 	} LuaFuncEnd()
 
@@ -133,8 +134,7 @@ namespace FINLua {
 		int args = lua_gettop(L);
 		UFINClass* Type = nullptr;
 		if (args > 0) {
-			FFINNetworkTrace Obj = getObjInstance(L, 1, UFINClass::StaticClass());
-			Type = Cast<UFINClass>(Obj.Get());
+			Type = luaFIN_toFINClass(L, 1, nullptr);
 			if (!Type) {
 				return 1;
 			}
@@ -142,7 +142,7 @@ namespace FINLua {
 		int i = 1;
 		for (TScriptInterface<IFINPciDeviceInterface> Device : kernel->GetPCIDevices()) {
 			if (!Device || (Type && !Device.GetObject()->IsA(Cast<UClass>(Type->GetOuter())))) continue;
-			newInstance(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / Device.GetObject());
+			luaFIN_pushObject(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / Device.GetObject());
 			lua_seti(L, -2, i++);
 		}
 		return 1;

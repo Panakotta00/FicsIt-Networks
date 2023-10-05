@@ -11,7 +11,7 @@ class FICSITNETWORKS_API UFINObjectProperty : public UFINFuncProperty {
 public:
 	FObjectProperty* Property = nullptr;
 	UPROPERTY()
-	UClass* Subclass = nullptr;
+	UClass* Subclass = nullptr; // TODO: Change to UFINClass
 
 	// Begin UFINProperty
 	virtual FINAny GetValue(const FFINExecutionContext& Ctx) const override {
