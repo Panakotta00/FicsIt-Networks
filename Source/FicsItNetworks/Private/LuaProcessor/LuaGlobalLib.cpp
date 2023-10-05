@@ -255,9 +255,51 @@ namespace FINLua {
 		});
 		return 1;
 	}
+
+	[[deprecated]] int luaFindClass_DEPRECATED(lua_State* L) {
+		
+		luaFIN_warning(L, "Deprecated function call 'findClass', use 'classes' global library instead", false);
+		
+		const int args = lua_gettop(L);
+
+		for (int i = 1; i <= args; ++i) {
+			const bool isT = lua_istable(L, i);
+
+			TArray<FString> ClassNames;
+			if (isT) {
+				const auto count = lua_rawlen(L, i);
+				for (int j = 1; j <= count; ++j) {
+					lua_geti(L, i, j);
+					if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
+					ClassNames.Add(lua_tostring(L, -1));
+					lua_pop(L, 1);
+				}
+				lua_newtable(L);
+			} else {
+				if (!lua_isstring(L, i)) return luaL_argerror(L, i, "is not string");
+				ClassNames.Add(lua_tostring(L, i));
+			}
+			int j = 0;
+			TArray<UFINClass*> Classes;
+			FFINReflection::Get()->GetClasses().GenerateValueArray(Classes);
+			for (const FString& ClassName : ClassNames) {
+				UFINClass** Class = Classes.FindByPredicate([ClassName](UFINClass* Class) {
+					if (Class->GetInternalName() == ClassName) return true;
+					return false;
+				});
+				if (Class) luaFIN_pushObject(L, FINTrace(*Class));
+				else lua_pushnil(L);
+				if (isT) lua_seti(L, -2, ++j);
+			}
+		}
+		return UFINLuaProcessor::luaAPIReturn(L, args);
+	}
 	
 	void setupGlobals(lua_State* L) {
-		PersistSetup("LuaProcessor", -2); // TODO: Rename to LuaGlobals
+		PersistSetup("Globals", -2);
+
+		lua_register(L, "findClass", luaFindClass_DEPRECATED);
+		PersistGlobal("findClass");
 
 		luaL_requiref(L, "_G", luaopen_base, true);
 		lua_pushnil(L);
