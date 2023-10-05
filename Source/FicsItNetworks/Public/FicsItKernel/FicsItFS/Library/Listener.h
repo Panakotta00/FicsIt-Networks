@@ -15,7 +15,7 @@ namespace CodersFileSystem {
 		NT_Else
 	};
 
-	extern NodeType getTypeFromRef(SRef<Node> node);
+	NodeType getTypeFromRef(SRef<Node> node);
 
 	class Listener : virtual public ReferenceCounted {
 	public:

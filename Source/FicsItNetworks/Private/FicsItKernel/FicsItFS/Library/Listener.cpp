@@ -1,5 +1,7 @@
 #include "FicsItKernel/FicsItFS/Library/Listener.h"
 
+#include "FicsItKernel/FicsItFS/Library/Directory.h"
+
 using namespace CodersFileSystem;
 using namespace std;
 
