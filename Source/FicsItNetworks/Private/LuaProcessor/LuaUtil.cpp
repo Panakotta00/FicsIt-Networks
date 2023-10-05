@@ -291,6 +291,21 @@ namespace FINLua {
 		return FString(conv.Length(), conv.Get());
 	}
 
+	void luaFIN_warning(lua_State* L, const char* msg, int tocont) {
+		lua_Debug ar;
+		if (lua_getstack(L, 1, &ar)) {
+			lua_getinfo(L, "Sl", &ar);
+			if (ar.currentline > 0) {
+				lua_pushfstring(L, "%s:%d: %s", ar.short_src, ar.currentline, msg);
+				const char* warn = lua_tostring(L, -1);
+				lua_warning(L, warn, tocont);
+				lua_pop(L, 1);
+				return;
+			}
+		}
+		lua_warning(L, msg, tocont);
+	}
+
 	void setupUtilLib(lua_State* L) {
 		PersistSetup("UtilLib", -2);
 		

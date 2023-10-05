@@ -581,6 +581,18 @@ TSet<FINLua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
 	return FileStreams;
 }
 
+void luaWarnF(void* ud, const char* msg, int tocont) {
+	UFINLuaProcessor* Processor = static_cast<UFINLuaProcessor*>(ud);
+	
+	try {
+		CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = Processor->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
+		if (serial) {
+			*serial << "[Warning] " << msg << "\r\n";
+			serial->close();
+		}
+	} catch (std::exception ex) {}
+}
+
 void UFINLuaProcessor::Reset() {
 	UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Lua Processor Reset"), *DebugInfo);
 	tickHelper.stop();
@@ -600,6 +612,9 @@ void UFINLuaProcessor::Reset() {
 
 	// create new lua state
 	luaState = luaL_newstate();
+
+	// setup warning function
+	lua_setwarnf(luaState, luaWarnF, this);
 
 	// setup library and perm tables for persistence
 	lua_newtable(luaState); // perm

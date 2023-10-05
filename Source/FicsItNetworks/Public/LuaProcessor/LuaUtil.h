@@ -159,5 +159,7 @@ namespace FINLua {
 	FORCEINLINE FINFloat luaFIN_toFinFloat(lua_State* L, int index) { return static_cast<FINFloat>(lua_tonumber(L, index)); }
 	FORCEINLINE FINStr luaFIN_toFinString(lua_State* L, int index) { return static_cast<FINStr>(lua_tostring(L, index)); }
 
+	void luaFIN_warning(lua_State* L, const char* msg, int tocont);
+
 	void setupUtilLib(lua_State* L);
 }
