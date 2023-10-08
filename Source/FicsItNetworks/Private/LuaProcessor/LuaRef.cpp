@@ -182,11 +182,9 @@ namespace FINLua {
 		if (luaFIN_tryExecuteGetProperty(L, Struct, MemberName, PropertyFilterFlags, PropertyCtx)) return true;
 		if (luaFIN_tryExecuteFunction(L, Struct, MemberName, FunctionFilterFlags)) return true;
 
-		//if (bCauseError) luaL_argerror(L, Index, TCHAR_TO_UTF8(*("No property or function with name '" + MemberName + "' found")));
-		if (bCauseError) luaFIN_warning(L, TEXT("No property or function with name '" + MemberName + "' found. Nil return is deprecated and this will become an error."))
+		if (bCauseError) luaFIN_warning(L, TCHAR_TO_UTF8(*("No property or function with name '" + MemberName + "' found. Nil return is deprecated and this will become an error.")), true);
 		lua_pushnil(L);
-		return true;
-		return false;
+		return true; // TODO: Remove return val and bCauseError param
 	}
 
 	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError) {
