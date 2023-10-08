@@ -111,8 +111,16 @@ namespace FINLua {
 			UFINObjectProperty* ObjectProp = Cast<UFINObjectProperty>(Property);
 			if (ObjectProp && ObjectProp->GetSubclass()) {
 				Object = luaFIN_toObject(L, Index, FFINReflection::Get()->FindClass(ObjectProp->GetSubclass()));
+				if (bImplicitConversion && !Object.IsSet() && UFINClass::StaticClass()->IsChildOf(ObjectProp->GetSubclass())) {
+					UClass* Class = luaFIN_toUClass(L, Index, nullptr);
+					if (Class) Object = FINTrace(Class);
+				}
 			} else {
 				Object = luaFIN_toObject(L, Index, nullptr);
+				if (bImplicitConversion && !Object.IsSet()) {
+					UClass* Class = luaFIN_toUClass(L, Index, nullptr);
+					if (Class) Object = FINTrace(Class);
+				}
 			}
 			if (Object.IsSet()) return FINAny(static_cast<FINObj>(Object.GetValue().Get()));
 			return TOptional<FINAny>();
@@ -258,6 +266,11 @@ namespace FINLua {
 		default: ;
 		}
 		return TEXT("Unkown");
+	}
+	
+	int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property) {
+		FTCHARToUTF8 Convert(luaFIN_getPropertyTypeName(L, Property)); // TODO: Need to be better
+		return luaL_typeerror(L, Index, Convert.Get());
 	}
 
 	FString luaFIN_getUserDataMetaName(lua_State* L, int Index) {

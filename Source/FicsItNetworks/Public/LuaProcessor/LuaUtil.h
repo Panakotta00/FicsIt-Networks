@@ -137,10 +137,7 @@ namespace FINLua {
 	 * @param Index the index of the value that caused the error
 	 * @param Property the property of whom the value type name will be used
 	 */
-	FORCEINLINE int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property) {
-		FTCHARToUTF8 Convert(luaFIN_getPropertyTypeName(L, Property));
-		return luaL_typeerror(L, Index, Convert.Get());
-	}
+	int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property);
 
 	/**
 	 * @brief Retrieves the type name specified in the metatable of the lua value at the given index in the lua stack

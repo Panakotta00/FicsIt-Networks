@@ -614,6 +614,12 @@ BeginFunc(getType, "Get Type", "Returns the type (aka class) of this object.") {
 	Body()
 	if (self) type = (FINObj)FFINReflection::Get()->FindClass(self->GetClass());
 } EndFunc()
+BeginFunc(isA, "Is A", "Checks if this Object is a child of the given typen.") {
+	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this object is a child of.")
+	OutVal(1, RBool, isChild, "Is Child", "True if this object is a child of the given type.")
+	Body()
+	isChild = (FINBool)self->IsA(parent);
+} EndFunc()
 BeginClassProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
 	Return (int64)GetTypeHash(self);
 } EndProp()
@@ -632,6 +638,12 @@ BeginClassFunc(getType, "Get Type", "Returns the type (aka class) of this class 
 	OutVal(0, RObject<UFINClass>, type, "Type", "The type of this class instance");
 	Body()
     if (self) type = (FINObj)FFINReflection::Get()->FindClass(self);
+} EndFunc()
+BeginClassFunc(isChildOf, "Is Child Of", "Checks if this Type is a child of the given typen.", false) {
+	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this type is a child of.")
+	OutVal(1, RBool, isChild, "Is Child", "True if this type is a child of the given type.")
+	Body()
+	isChild = (FINBool)self->IsChildOf(parent);
 } EndFunc()
 EndClass()
 
