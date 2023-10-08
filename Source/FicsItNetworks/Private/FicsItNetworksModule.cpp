@@ -24,6 +24,7 @@
 #include "Patching/NativeHookManager.h"
 #include "Reflection/FINReflection.h"
 #include "Reflection/ReflectionHelper.h"
+#include "UI/FINStyle.h"
 #include "UObject/CoreRedirects.h"
 
 DEFINE_LOG_CATEGORY( LogGame );
@@ -181,6 +182,9 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 }
 
 void FFicsItNetworksModule::StartupModule(){
+	FSlateStyleRegistry::UnRegisterSlateStyle(FFINStyle::GetStyleSetName());
+	FFINStyle::Initialize();
+	
 	CodersFileSystem::Tests::TestPath();
 	
 	GameStart = FDateTime::Now();
@@ -344,6 +348,7 @@ void FFicsItNetworksModule::StartupModule(){
 }
 
 void FFicsItNetworksModule::ShutdownModule() {
+	FFINStyle::Shutdown();
 	FFINReflectionStyles::Shutdown();
 }
 

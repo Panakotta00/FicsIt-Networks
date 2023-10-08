@@ -28,6 +28,7 @@ struct FICSITNETWORKS_API FFINKernelCrash : public FFINException {
 };
 
 class UFINKernelSystem;
+class UFINLog;
 
 class FICSITNETWORKS_API FFINKernelListener : public CodersFileSystem::Listener {
 private:
@@ -56,6 +57,8 @@ private:
 	UFINKernelNetworkController* Network = nullptr;
 	UPROPERTY()
 	UFINKernelAudioController* Audio = nullptr;
+	UPROPERTY()
+	UFINLog* Log = nullptr;
 	TArray<TScriptInterface<IFINPciDeviceInterface>> PCIDevices;
 	FFINKernelFSRoot FileSystem;
 	FCriticalSection MutexDevDevice;
@@ -250,6 +253,17 @@ public:
 	 * @param	InCrash	the kernel crash which is the reason for the crash
 	 */
 	void Crash(const TSharedRef<FFINKernelCrash>& InCrash);
+
+	/**
+	 * Returns the currently used logging mechanism
+	 */
+	UFINLog* GetLog() const;
+
+	/**
+	 * Sets the currently used logging mechanism
+	 */
+	void SetLog(UFINLog* InLog);
+	
 
 	/**
 	 * Returns the currently used network controller.

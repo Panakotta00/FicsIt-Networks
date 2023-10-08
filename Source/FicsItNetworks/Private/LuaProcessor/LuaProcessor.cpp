@@ -1,4 +1,6 @@
 #include "LuaProcessor/LuaProcessor.h"
+
+#include "FicsItKernel/Logging.h"
 #include "LuaProcessor/FINStateEEPROMLua.h"
 #include "LuaProcessor/LuaGlobalLib.h"
 #include "LuaProcessor/LuaObject.h"
@@ -317,6 +319,7 @@ UFINLuaProcessor::UFINLuaProcessor() : tickHelper(this), FileSystemListener(new 
 }
 
 UFINLuaProcessor::~UFINLuaProcessor() {
+	tickHelper.demote();
 	FCoreUObjectDelegates::GetPreGarbageCollectDelegate().Remove(OnPreGarbageCollectionHandle);
 	FCoreUObjectDelegates::GetPostGarbageCollect().Remove(OnPostGarbageCollectionHandle);
 }
@@ -583,7 +586,9 @@ TSet<FINLua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
 
 void luaWarnF(void* ud, const char* msg, int tocont) {
 	UFINLuaProcessor* Processor = static_cast<UFINLuaProcessor*>(ud);
-	
+
+	Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Warning, FString(TEXT("[Warning] ")) + UTF8_TO_TCHAR(msg));
+
 	try {
 		CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = Processor->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
 		if (serial) {

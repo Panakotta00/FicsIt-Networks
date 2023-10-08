@@ -1,5 +1,6 @@
 #include "LuaProcessor/LuaGlobalLib.h"
 
+#include "FicsItKernel/Logging.h"
 #include "LuaProcessor/LuaClass.h"
 #include "LuaProcessor/LuaComponentAPI.h"
 #include "LuaProcessor/LuaComputerAPI.h"
@@ -31,8 +32,10 @@ namespace FINLua {
 		}
 		if (log.length() > 0) log = log.erase(log.length()-1);
 		
+		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+		Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Info, UTF8_TO_TCHAR(log.c_str()));
+		
 		try {
-			UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 			CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = Processor->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
 			if (serial) {
 				*serial << log << "\r\n";
@@ -257,7 +260,6 @@ namespace FINLua {
 	}
 
 	[[deprecated]] int luaFindClass_DEPRECATED(lua_State* L) {
-		
 		luaFIN_warning(L, "Deprecated function call 'findClass', use 'classes' global library instead", false);
 		
 		const int args = lua_gettop(L);
@@ -280,14 +282,9 @@ namespace FINLua {
 				ClassNames.Add(lua_tostring(L, i));
 			}
 			int j = 0;
-			TArray<UFINClass*> Classes;
-			FFINReflection::Get()->GetClasses().GenerateValueArray(Classes);
 			for (const FString& ClassName : ClassNames) {
-				UFINClass** Class = Classes.FindByPredicate([ClassName](UFINClass* Class) {
-					if (Class->GetInternalName() == ClassName) return true;
-					return false;
-				});
-				if (Class) luaFIN_pushObject(L, FINTrace(*Class));
+				UFINClass* Class = FFINReflection::Get()->FindClass(ClassName);
+				if (Class) luaFIN_pushClass(L, Class);
 				else lua_pushnil(L);
 				if (isT) lua_seti(L, -2, ++j);
 			}

@@ -1,5 +1,6 @@
 #include "FicsItKernel/FicsItKernel.h"
 #include "Computer/FINComputerCase.h"
+#include "FicsItKernel/Logging.h"
 #include "Network/FINFuture.h"
 #include "LuaProcessor/LuaProcessor.h"
 #include "Reflection/FINReflection.h"
@@ -289,7 +290,10 @@ void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
 	KernelCrash = InCrash;
 
 	if (Processor) Processor->Stop(true);
-	
+
+	if (GetLog()) {
+		GetLog()->PushLogEntry(EFINLogVerbosity::FIN_Log_Verbosity_Fatal, KernelCrash->GetMessage());
+	}
 	if (GetDevDevice()) try {
 		auto serial = GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
 		if (serial) {
@@ -316,6 +320,14 @@ bool UFINKernelSystem::RecalculateResources(ERecalc InComponents, bool bShouldCr
 	}
 	if (Device) Device->updateCapacity(MemoryCapacity - MemoryUsage);
 	return bFail;
+}
+
+UFINLog* UFINKernelSystem::GetLog() const {
+	return Log;
+}
+
+void UFINKernelSystem::SetLog(UFINLog* InLog) {
+	Log = InLog;
 }
 
 void UFINKernelSystem::SetNetwork(UFINKernelNetworkController* InController) {

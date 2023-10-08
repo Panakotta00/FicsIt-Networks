@@ -7,6 +7,7 @@
 #include "Computer/FINComputerMemory.h"
 #include "Computer/FINComputerProcessor.h"
 #include "FGInventoryComponent.h"
+#include "FicsItKernel/Logging.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -40,6 +41,8 @@ AFINComputerCase::AFINComputerCase() {
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
+	Log = CreateDefaultSubobject<UFINLog>("Log");
+
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
 	mFactoryTickFunction.bRunOnAnyThread = true;
@@ -59,6 +62,7 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AFINComputerCase, DataStorage);
 	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
 	DOREPLIFETIME(AFINComputerCase, SerialOutput);
+	DOREPLIFETIME(AFINComputerCase, Log);
 	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
 	DOREPLIFETIME(AFINComputerCase, Processors);
 	DOREPLIFETIME(AFINComputerCase, PCIDevices);
@@ -72,6 +76,7 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 	NetworkController = NewObject<UFINKernelNetworkController>(this, "NetworkController");
 	AudioController = NewObject<UFINKernelAudioController>(this, "AudioController");
 
+	Kernel->SetLog(Log);
 	NetworkController->SetComponent(NetworkConnector);
 	Kernel->SetNetwork(NetworkController);
 	AudioController->SetComponent(Speaker);
@@ -105,6 +110,8 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 	
 	if (HasAuthority()) {
+		Log->Tick();
+		
 		bool bNetUpdate = false;
 		if (Kernel) {
 			Kernel->HandleFutures();
@@ -336,11 +343,13 @@ void AFINComputerCase::Toggle() {
 		case FIN_KERNEL_SHUTOFF:
 			Kernel->Start(false);
 			SerialOutput = "";
+			Log->EmptyLog();
 			ForceNetUpdate();
 			break;
 		case FIN_KERNEL_CRASHED:
 			Kernel->Start(true);
 			SerialOutput = "";
+			Log->EmptyLog();
 			ForceNetUpdate();
 			break;
 		default:

@@ -12,6 +12,7 @@ class AFINComputerNetworkCard;
 class AFINComputerDriveHolder;
 class AFINComputerMemory;
 class AFINComputerProcessor;
+class UFINLog;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINStateEEPROM*, EEPROM);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
@@ -36,6 +37,9 @@ public:
 	UPROPERTY(SaveGame, Replicated)
 	FString SerialOutput = "";
 
+	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
+	UFINLog* Log = nullptr;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	int LastTabIndex = 0;
 	
