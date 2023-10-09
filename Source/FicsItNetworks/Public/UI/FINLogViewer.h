@@ -5,6 +5,8 @@
 #include "FINStyle.h"
 #include "SlateCore.h"
 #include "Components/Widget.h"
+#include "Framework/Text/IRichTextMarkupParser.h"
+#include "Framework/Text/SlateHyperlinkRun.h"
 #include "Widgets/Views/STableRow.h"
 #include "FINLogViewer.generated.h"
 
@@ -14,7 +16,8 @@ struct FFINLogViewerStyle : public FSlateWidgetStyle {
 	
 	FFINLogViewerStyle() :
 		RowStyle(FCoreStyle::Get().GetWidgetStyle<FTableRowStyle>("TableView.Row")),
-		TextBoxStyle(FCoreStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>("NormalEditableTextBox")) {}
+		TextBoxStyle(FCoreStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>("NormalEditableTextBox")),
+		TextBlockStyle(FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")) {}
 
 	virtual void GetResources(TArray<const FSlateBrush*>& OutBrushes) const override;
 
@@ -28,6 +31,9 @@ struct FFINLogViewerStyle : public FSlateWidgetStyle {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FEditableTextBoxStyle TextBoxStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle TextBlockStyle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FMargin IconBoxPadding;
@@ -94,6 +100,8 @@ public:
 	}
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINNavigateReflection, UFINBase*, ReflectionItem);
+
 UCLASS()
 class UFINLogViewer : public UWidget {
 	GENERATED_BODY()
@@ -113,6 +121,9 @@ class UFINLogViewer : public UWidget {
 	void UpdateLogEntries();
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FFINNavigateReflection OnNavigateReflection;
+	
 	UPROPERTY(EditAnywhere)
 	FFINLogViewerStyle Style;
 
@@ -122,9 +133,12 @@ public:
 
 class SFINLogViewer : public SCompoundWidget {
 public:
+	DECLARE_DELEGATE_OneParam(FOnNavigateReflection, UFINBase*)
+	
 	SLATE_BEGIN_ARGS(SFINLogViewer) :
 		_Style(&FFINStyle::Get().GetWidgetStyle<FFINLogViewerStyle>("LogViewer")) {}
 	SLATE_STYLE_ARGUMENT(FFINLogViewerStyle, Style)
+	SLATE_EVENT(SFINLogViewer::FOnNavigateReflection, OnNavigateReflection)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
@@ -137,6 +151,9 @@ public:
 	
 private:
 	TSharedRef<ITableRow> OnGenerateRow(TSharedRef<FFINLogEntry> Entry, const TSharedRef<class STableViewBase>& ListView);
+
+public:
+	FOnNavigateReflection OnNavigateReflectionDelegate;
 	
 private:
 	const FFINLogViewerStyle* Style = nullptr;
@@ -159,7 +176,38 @@ protected:
 	const FSlateColor& GetTextColor() const;
 	EVisibility GetTextVisibility() const;
 
+public:
+	SFINLogViewer::FOnNavigateReflection OnNavigateReflectionDelegate;
+
 private:
 	const FFINLogViewerStyle* Style = nullptr;
 	TSharedPtr<FFINLogEntry> Entry;
+};
+
+class FICSITNETWORKS_API FFINLogTextParser : public IRichTextMarkupParser
+{
+public:
+	FFINLogTextParser();
+	
+	virtual void Process(TArray<FTextLineParseResults>& Results, const FString& Input, FString& Output) override;
+
+private:
+	FRegexPattern ClassPattern;
+};
+
+class FICSITNETWORKS_API FFINReflectionReferenceDecorator : public ITextDecorator
+{
+public:
+	FFINReflectionReferenceDecorator(FString InId, const FSlateHyperlinkRun::FOnClick& InNavigateDelegate, const FSlateHyperlinkRun::FOnGetTooltipText& InToolTipTextDelegate = FSlateHyperlinkRun::FOnGetTooltipText(), const FSlateHyperlinkRun::FOnGenerateTooltip& InToolTipDelegate = FSlateHyperlinkRun::FOnGenerateTooltip());
+	
+	virtual bool Supports( const FTextRunParseResults& RunParseResult, const FString& Text ) const override;
+	virtual TSharedRef<ISlateRun> Create(const TSharedRef<FTextLayout>& TextLayout, const FTextRunParseResults& RunParseResult, const FString& OriginalText, const TSharedRef< FString >& InOutModelText, const ISlateStyle* Style) override;
+
+protected:
+	FSlateHyperlinkRun::FOnClick NavigateDelegate;
+
+protected:
+	FString Id;
+	FSlateHyperlinkRun::FOnGetTooltipText ToolTipTextDelegate;
+	FSlateHyperlinkRun::FOnGenerateTooltip ToolTipDelegate;
 };
