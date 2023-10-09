@@ -23,7 +23,13 @@ pipeline {
 	                ]],
 	                extensions: [[
 	                    $class: 'RelativeTargetDirectory',
-	                    relativeTargetDir: 'SatisfactoryModLoader'
+	                    relativeTargetDir: 'SatisfactoryModLoader',
+                   	],[
+	                    $class: 'CloneOption',
+	                    timeout: 20,
+	                ],[
+	                    $class: 'CheckoutOption',
+	                    timeout: 20,
 	                ]],
 	                userRemoteConfigs: [[
 	                    url: 'https://github.com/satisfactorymodding/SatisfactoryModLoader.git'
