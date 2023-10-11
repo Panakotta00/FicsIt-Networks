@@ -1,8 +1,18 @@
 #include "UI/FINLogViewer.h"
 
 #include "FicsItKernel/Logging.h"
+#include "Framework/Text/RichTextLayoutMarshaller.h"
+#include "Framework/Text/RichTextMarkupProcessing.h"
+#include "Misc/DefaultValueHelper.h"
 #include "Reflection/FINReflection.h"
+#include "UI/FINRichtTextUtils.h"
+#include "UI/FINTextDecorators.h"
+#include "Utils/FINUtils.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SEditableTextBox.h"
+#include "Widgets/Input/SMultiLineEditableTextBox.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
+#include "Widgets/Text/SMultiLineEditableText.h"
 #include "Widgets/Text/SRichTextBlock.h"
 #include "Widgets/Views/SListView.h"
 #include "Widgets/Views/STableViewBase.h"
@@ -38,6 +48,9 @@ TSharedRef<SWidget> UFINLogViewer::RebuildWidget() {
 	.Style(&Style)
 	.OnNavigateReflection_Lambda([this](UFINBase* ReflectionItem) {
 		OnNavigateReflection.Broadcast(ReflectionItem);
+	})
+	.OnNavigateEEPROM_Lambda([this](int64 LineNumber) {
+		OnNavigateEEPROM.Broadcast(LineNumber);
 	});
 }
 
@@ -122,22 +135,20 @@ void SFINLogViewer::UpdateEntries(UFINLog* Log) {
 #endif
 	
 	ListView->RebuildList();
-	
 	if (bBottom) ListView->ScrollToBottom();
 }
 
 TSharedRef<ITableRow> SFINLogViewer::OnGenerateRow(TSharedRef<FFINLogEntry> Entry, const TSharedRef<STableViewBase>& InListView) {
-	TSharedRef<SFINLogViewerRow> Row = SNew(SFINLogViewerRow, InListView, Style, Entry)
+	TSharedRef<SFINLogViewerRow> Row = SNew(SFINLogViewerRow, InListView, Style, Entry, NavigateReflectionDelegate, NavigateEEPROMDelegate)
 		.Style(&Style->RowStyle);
-	Row->OnNavigateReflectionDelegate.BindLambda([this](UFINBase* Base) {
-		OnNavigateReflectionDelegate.ExecuteIfBound(Base);
-	});
 	return Row;
 }
 
-void SFINLogViewerRow::Construct(const FTableRowArgs& InArgs, const TSharedRef<STableViewBase>& OwnerTable, const FFINLogViewerStyle* InStyle, const TSharedRef<FFINLogEntry>& LogEntry) {
+void SFINLogViewerRow::Construct(const FTableRowArgs& InArgs, const TSharedRef<STableViewBase>& OwnerTable, const FFINLogViewerStyle* InStyle, const TSharedRef<FFINLogEntry>& LogEntry, const SFINLogViewer::FOnNavigateReflection& InNavigateReflectionDelegate, const SFINLogViewer::FOnNavigateEEPROM& InNavigateEEPROMDelegate) {
 	Style = InStyle;
 	Entry = LogEntry;
+	NavigateReflectionDelegate = InNavigateReflectionDelegate;
+	NavigateEEPROMDelegate = InNavigateEEPROMDelegate;
 	FSuperRowType::Construct(InArgs, OwnerTable);
 }
 
@@ -175,44 +186,25 @@ TSharedRef<SWidget> SFINLogViewerRow::GenerateWidgetForColumn(const FName& Colum
 			.IsReadOnly(true)
 		];
 	} else if (ColumnName == FIN_LogViewer_Row_Name_Content) {
+		TArray<TSharedRef<ITextDecorator>> Decorators = {
+			MakeShared<FFINReflectionReferenceDecorator>(NavigateReflectionDelegate),
+			MakeShared<FFINEEPROMReferenceDecorator>(NavigateEEPROMDelegate)
+		};
+
+		TSharedRef<IRichTextMarkupParser> Parser = MakeShared<FFINLogTextParser>();
+		
+		TSharedRef<FRichTextLayoutMarshaller> Marshaller = FRichTextLayoutMarshaller::Create(Parser, MakeShared<FFINPureTextWriter>(), Decorators, &FCoreStyle::Get());
+		
 		return SNew(SBox)
 		.VAlign(VAlign_Top)[
-			SNew(SRichTextBlock)
-			.TextStyle(&Style->TextBlockStyle)
+			SNew(SMultiLineEditableTextBox)
+			.Style(&Style->TextBoxStyle)
 			.Text(FText::FromString(GetLogEntry()->Content))
+			.Font(GetFontInfo())
+			.ForegroundColor(GetTextColor())
 			.AutoWrapText(true)
 			.Visibility(this, &SFINLogViewerRow::GetTextVisibility)
-			.Parser(MakeShared<FFINLogTextParser>())
-			.Decorators({
-				MakeShared<FFINReflectionReferenceDecorator>(TEXT("Class"), FSlateHyperlinkRun::FOnClick::CreateLambda([this](const FSlateHyperlinkRun::FMetadata& Metadata) {
-					const FString* ClassName = Metadata.Find(TEXT("Class"));
-					if (ClassName) {
-						UFINClass* Class = FFINReflection::Get()->FindClass(*ClassName);
-						if (Class) OnNavigateReflectionDelegate.ExecuteIfBound(Class);
-					}
-				})),
-				MakeShared<FFINReflectionReferenceDecorator>(TEXT("Object"), FSlateHyperlinkRun::FOnClick::CreateLambda([this](const FSlateHyperlinkRun::FMetadata& Metadata) {
-					const FString* ClassName = Metadata.Find(TEXT("Object"));
-					if (ClassName) {
-						UFINClass* Class = FFINReflection::Get()->FindClass(*ClassName);
-						if (Class) OnNavigateReflectionDelegate.ExecuteIfBound(Class);
-					}
-				})),
-				MakeShared<FFINReflectionReferenceDecorator>(TEXT("Trace"), FSlateHyperlinkRun::FOnClick::CreateLambda([this](const FSlateHyperlinkRun::FMetadata& Metadata) {
-					const FString* ClassName = Metadata.Find(TEXT("Trace"));
-					if (ClassName) {
-						UFINClass* Class = FFINReflection::Get()->FindClass(*ClassName);
-						if (Class) OnNavigateReflectionDelegate.ExecuteIfBound(Class);
-					}
-				})),
-				MakeShared<FFINReflectionReferenceDecorator>(TEXT("Struct"), FSlateHyperlinkRun::FOnClick::CreateLambda([this](const FSlateHyperlinkRun::FMetadata& Metadata) {
-					const FString* StructName = Metadata.Find(TEXT("Struct"));
-					if (StructName) {
-						UFINStruct* Struct = FFINReflection::Get()->FindClass(*StructName);
-						if (Struct) OnNavigateReflectionDelegate.ExecuteIfBound(Struct);
-					}
-				}))
-			})
+			.Marshaller(Marshaller)
 		];
 	} else {
 		return SNew(SBorder);
@@ -260,7 +252,7 @@ EVisibility SFINLogViewerRow::GetTextVisibility() const {
 	}
 }
 
-FFINLogTextParser::FFINLogTextParser() : ClassPattern(TEXT("(\\w+)<([\\w<>]*)>")) {}
+const FRegexPattern FFINLogTextParser::Pattern(TEXT("((\\w+)<([\\w<>]*)>)|(EEPROM:(\\d+))"));
 
 void FFINLogTextParser::Process(TArray<FTextLineParseResults>& Results, const FString& Input, FString& Output) {
 	TArray<FTextRange> LineRanges;
@@ -272,7 +264,7 @@ void FFINLogTextParser::Process(TArray<FTextLineParseResults>& Results, const FS
 		
 		int BeginParseRange = LineRange.BeginIndex;
 
-		FRegexMatcher Matcher(ClassPattern, Input.Mid(LineRange.BeginIndex, LineRange.Len()));
+		FRegexMatcher Matcher(Pattern, Input.Mid(LineRange.BeginIndex, LineRange.Len()));
 		while (Matcher.FindNext()) {
 			FTextRange MatchRange(Matcher.GetMatchBeginning(), Matcher.GetMatchEnding());
 
@@ -282,11 +274,24 @@ void FFINLogTextParser::Process(TArray<FTextLineParseResults>& Results, const FS
 				LineParseResults.Runs.Add(NormalResult);
 			}
 
-			FString Type = Matcher.GetCaptureGroup(1);
-			FTextRunParseResults ClassResult(Type, MatchRange, MatchRange);
-			FTextRange TypeRange(Matcher.GetCaptureGroupBeginning(2), Matcher.GetCaptureGroupEnding(2));
-			ClassResult.MetaData.Add(Type, TypeRange);
-			LineParseResults.Runs.Add(ClassResult);
+			FString TypeVariant = Matcher.GetCaptureGroup(2);
+			if (!TypeVariant.IsEmpty()) {
+				FTextRange VariantRange(Matcher.GetCaptureGroupBeginning(2), Matcher.GetCaptureGroupEnding(2));
+				FTextRange TypeRange(Matcher.GetCaptureGroupBeginning(3), Matcher.GetCaptureGroupEnding(3));
+				FTextRunParseResults ClassResult(FFINReflectionReferenceDecorator::Id, MatchRange, MatchRange);
+				ClassResult.MetaData.Add(FFINReflectionReferenceDecorator::MetaDataVariantKey, VariantRange);
+				ClassResult.MetaData.Add(FFINReflectionReferenceDecorator::MetaDataTypeKey, TypeRange);
+				LineParseResults.Runs.Add(ClassResult);
+			}
+
+			FString EEPROMLocation = Matcher.GetCaptureGroup(4);
+			if (!EEPROMLocation.IsEmpty()) {
+				FTextRange LineNumberRange(Matcher.GetCaptureGroupBeginning(5), Matcher.GetCaptureGroupEnding(5));
+				FTextRunParseResults EEPROMResult(FFINEEPROMReferenceDecorator::Id, MatchRange, MatchRange);
+				EEPROMResult.MetaData.Add(FFINEEPROMReferenceDecorator::MetaDataLineNumberKey, LineNumberRange);
+				LineParseResults.Runs.Add(EEPROMResult);
+			}
+			
 			BeginParseRange = MatchRange.EndIndex;
 		}
 
@@ -300,41 +305,4 @@ void FFINLogTextParser::Process(TArray<FTextLineParseResults>& Results, const FS
 	}
 
 	Output = Input;
-}
-
-FFINReflectionReferenceDecorator::FFINReflectionReferenceDecorator(FString InId,
-	const FSlateHyperlinkRun::FOnClick& InNavigateDelegate,
-	const FSlateHyperlinkRun::FOnGetTooltipText& InToolTipTextDelegate,
-	const FSlateHyperlinkRun::FOnGenerateTooltip& InToolTipDelegate) : Id(InId), NavigateDelegate(InNavigateDelegate), ToolTipTextDelegate(InToolTipTextDelegate), ToolTipDelegate(ToolTipDelegate) {
-	
-}
-
-bool FFINReflectionReferenceDecorator::Supports(const FTextRunParseResults& RunParseResult, const FString& Text) const {
-	return RunParseResult.Name == Id;
-}
-
-TSharedRef<ISlateRun> FFINReflectionReferenceDecorator::Create(const TSharedRef<FTextLayout>& TextLayout, const FTextRunParseResults& RunParseResult, const FString& OriginalText, const TSharedRef<FString>& InOutModelText, const ISlateStyle* Style) {
-	FString StyleName = TEXT("Hyperlink");
-	FString TextStyleName = TEXT("");
-
-	FTextRange ModelRange;
-	ModelRange.BeginIndex = InOutModelText->Len();
-	*InOutModelText += OriginalText.Mid(RunParseResult.ContentRange.BeginIndex, RunParseResult.ContentRange.Len());
-	ModelRange.EndIndex = InOutModelText->Len();
-
-	if (!Style->HasWidgetStyle<FHyperlinkStyle>(FName(*StyleName)))	{
-		Style = &FCoreStyle::Get();
-	}
-
-	FRunInfo RunInfo( RunParseResult.Name );
-	for(const TPair<FString, FTextRange>& Pair : RunParseResult.MetaData) {
-		RunInfo.MetaData.Add(Pair.Key, OriginalText.Mid( Pair.Value.BeginIndex, Pair.Value.Len()));
-	}
-
-	FHyperlinkStyle HyperlinkStyle = Style->GetWidgetStyle<FHyperlinkStyle>(FName(*StyleName));
-	if (!TextStyleName.IsEmpty() && Style->HasWidgetStyle<FTextBlockStyle>(FName(*TextStyleName))) {
-		HyperlinkStyle.SetTextStyle(Style->GetWidgetStyle<FTextBlockStyle>(FName(*TextStyleName)));
-	}
-	
-	return FSlateHyperlinkRun::Create(RunInfo, InOutModelText, HyperlinkStyle, NavigateDelegate, ToolTipDelegate, ToolTipTextDelegate, ModelRange);
 }
