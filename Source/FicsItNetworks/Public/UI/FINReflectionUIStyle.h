@@ -125,11 +125,10 @@ public:
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Category=Appearance, EditAnywhere, BlueprintReadWrite, meta=( ShowOnlyInnerProperties ))
+	UPROPERTY(Category=Appearance, EditAnywhere, BlueprintReadWrite, meta=(ShowOnlyInnerProperties))
 	FFINReflectionUIStyleStruct ReflectionUIStyle;
 
-	virtual const struct FSlateWidgetStyle* const GetStyle() const override
-	{
-		return static_cast< const struct FSlateWidgetStyle* >( &ReflectionUIStyle );
+	virtual const FSlateWidgetStyle* const GetStyle() const override {
+		return &ReflectionUIStyle;
 	}
 };

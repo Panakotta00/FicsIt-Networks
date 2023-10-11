@@ -44,6 +44,8 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance", meta=( DisplayName="Style" ))
 	FFINReflectionUIStyleStruct Style;
+
+	UFINReflectionUI();
 	
 	// Begin UWidget
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;	

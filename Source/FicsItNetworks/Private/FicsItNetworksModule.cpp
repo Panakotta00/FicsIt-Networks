@@ -1,7 +1,6 @@
 #include "FicsItNetworksModule.h"
 
 #include "UI/FINCopyUUIDButton.h"
-#include "UI/FINReflectionStyles.h"
 #include "Computer/FINComputerRCO.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
@@ -349,7 +348,6 @@ void FFicsItNetworksModule::StartupModule(){
 
 void FFicsItNetworksModule::ShutdownModule() {
 	FFINStyle::Shutdown();
-	FFINReflectionStyles::Shutdown();
 }
 
 extern "C" DLLEXPORT void BootstrapModule(std::ofstream& logFile) {

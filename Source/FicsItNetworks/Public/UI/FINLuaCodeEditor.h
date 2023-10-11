@@ -81,11 +81,11 @@ public:
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Category=Appearance, EditAnywhere, BlueprintReadWrite, meta=( ShowOnlyInnerProperties ))
+	UPROPERTY(Category=Appearance, EditAnywhere, BlueprintReadWrite, meta=(ShowOnlyInnerProperties))
 	FFINLuaCodeEditorStyle Style;
 
-	virtual const struct FSlateWidgetStyle* const GetStyle() const override {
-		return static_cast< const struct FSlateWidgetStyle* >( &Style );
+	virtual const FSlateWidgetStyle* const GetStyle() const override {
+		return &Style;
 	}
 };
 
@@ -157,7 +157,8 @@ public:
 	TSharedPtr<SScrollBar> HScrollBar;
 	TSharedPtr<SScrollBar> VScrollBar;
 	
-	SLATE_BEGIN_ARGS(SFINLuaCodeEditor) {}
+	SLATE_BEGIN_ARGS(SFINLuaCodeEditor) :
+		_Style(&FFINStyle::Get().GetWidgetStyle<FFINLuaCodeEditorStyle>("LuaCodeEditor")) {}
 	SLATE_STYLE_ARGUMENT(FFINLuaCodeEditorStyle, Style)
 	SLATE_ATTRIBUTE( FMargin, Padding )
 	SLATE_EVENT( FOnTextChanged, OnTextChanged )
@@ -165,8 +166,6 @@ public:
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
-
-	SFINLuaCodeEditor();
 	
 	// Begin SWidget
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -202,6 +201,8 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FFINLuaCodeEditorStyle Style;
+
+	UFINLuaCodeEditor() : Style(FFINStyle::Get().GetWidgetStyle<FFINLuaCodeEditorStyle>("LuaCodeEditor")) {}
 
 	// Begin UWidget
 	virtual TSharedRef<SWidget> RebuildWidget() override;

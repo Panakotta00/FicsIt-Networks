@@ -172,6 +172,8 @@ void SFINReflectionUI::Tick(const FGeometry& AllottedGeometry, const double InCu
 	}
 }
 
+UFINReflectionUI::UFINReflectionUI() : Style(FFINStyle::Get().GetWidgetStyle<FFINReflectionUIStyleStruct>(TEXT("ReflectionViewer"))) {}
+
 void UFINReflectionUI::ReleaseSlateResources(bool bReleaseChildren) {
 	if (Container) Container.Reset();
 }

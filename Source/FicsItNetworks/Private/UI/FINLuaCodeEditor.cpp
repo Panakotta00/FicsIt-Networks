@@ -12,9 +12,8 @@ void FFINLuaCodeEditorStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes
 }
 
 const FFINLuaCodeEditorStyle& FFINLuaCodeEditorStyle::GetDefault() {
-	static FFINLuaCodeEditorStyle* Default = nullptr;
-	if (!Default) Default = new FFINLuaCodeEditorStyle();
-	return *Default;
+	static FFINLuaCodeEditorStyle Instance;
+	return Instance;
 }
 
 TSharedRef<FFINTabRun> FFINTabRun::Create(const FRunInfo& InRunInfo, const TSharedRef<const FString>& InText, const FTextBlockStyle& Style, const FTextRange& InRange, int32 InTabWidth) {
@@ -539,8 +538,6 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 		]
 	);
 }
-
-SFINLuaCodeEditor::SFINLuaCodeEditor() {}
 
 int32 SFINLuaCodeEditor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	FArrangedChildren ArrangedChildren(EVisibility::Visible);

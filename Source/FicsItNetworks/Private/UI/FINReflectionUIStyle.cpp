@@ -15,21 +15,29 @@ const FFINSplitterStyle& FFINSplitterStyle::GetDefault() {
 	return *Default;
 }
 
-FFINReflectionUIStyleStruct::FFINReflectionUIStyleStruct() {
-	
-}
+FFINReflectionUIStyleStruct::FFINReflectionUIStyleStruct() {}
 
 void FFINReflectionUIStyleStruct::GetResources(TArray<const FSlateBrush*>& OutBrushes) const {
-	OutBrushes.Add( &MemberFunc );
-	OutBrushes.Add( &ClassFunc );
-	OutBrushes.Add( &StaticFunc );
-	OutBrushes.Add( &MemberAttrib );
-	OutBrushes.Add( &ClassAttrib );
-	OutBrushes.Add( &Signal );
+	OutBrushes.Add(&MemberFunc);
+	OutBrushes.Add(&ClassFunc);
+	OutBrushes.Add(&StaticFunc);
+	OutBrushes.Add(&MemberAttrib);
+	OutBrushes.Add(&ClassAttrib);
+	OutBrushes.Add(&Signal);
+	InternalNameTextStyle.GetResources(OutBrushes);
+	DisplayNameTextStyle.GetResources(OutBrushes);
+	DescriptionTextStyle.GetResources(OutBrushes);
+	FlagsTextStyle.GetResources(OutBrushes);
+	ParameterListTextStyle.GetResources(OutBrushes);
+	DataTypeTextStyle.GetResources(OutBrushes);
+	SearchTreeRowStyle.GetResources(OutBrushes);
+	HirachyTreeRowStyle.GetResources(OutBrushes);
+	EntryListRowStyle.GetResources(OutBrushes);
+	SearchInputStyle.GetResources(OutBrushes);
+	SplitterStyle.GetResources(OutBrushes);
 }
 
 const FFINReflectionUIStyleStruct& FFINReflectionUIStyleStruct::GetDefault() {
-	static FFINReflectionUIStyleStruct* Default = nullptr;
-	if (!Default) Default = new FFINReflectionUIStyleStruct();
-	return *Default;
+	static FFINReflectionUIStyleStruct Instance;
+	return Instance;
 }
