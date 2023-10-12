@@ -252,7 +252,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 					LinkStyle.SetUnderlineStyle(bValid ? SyntaxTextStyle->UnderlineStyleValid : SyntaxTextStyle->UnderlineStyleInvalid);
 					LinkStyle.SetTextStyle(SyntaxTextStyle->NormalTextStyle);
 					
-					Run = FFINReflectionReferenceDecorator::CreateRun(RunInfo, ModelString, &LinkStyle, NavigateDelegate, Range);
+					Run = FFINReflectionReferenceDecorator::CreateRun(RunInfo, ModelString, &LinkStyle, NavigateDelegate, Range, true);
 					Runs.Add(Run.ToSharedRef());
 					return;
 				}
@@ -286,7 +286,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 					LinkStyle.SetUnderlineStyle(bValid ? SyntaxTextStyle->UnderlineStyleValid : SyntaxTextStyle->UnderlineStyleInvalid);
 					LinkStyle.SetTextStyle(SyntaxTextStyle->NormalTextStyle);
 
-					Run = FFINReflectionReferenceDecorator::CreateRun(RunInfo, ModelString, &LinkStyle, NavigateDelegate, Range);
+					Run = FFINReflectionReferenceDecorator::CreateRun(RunInfo, ModelString, &LinkStyle, NavigateDelegate, Range, true);
 					Runs.Add(Run.ToSharedRef());
 					
 					return;

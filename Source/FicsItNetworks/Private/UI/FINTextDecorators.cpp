@@ -1,5 +1,6 @@
 #include "UI/FINTextDecorators.h"
 
+#include "Framework/Application/SlateApplication.h"
 #include "Misc/DefaultValueHelper.h"
 #include "Reflection/FINReflection.h"
 #include "Styling/CoreStyle.h"
@@ -8,6 +9,19 @@
 const FString FFINReflectionReferenceDecorator::Id = TEXT("ReflectionReference");
 const FString FFINReflectionReferenceDecorator::MetaDataVariantKey = TEXT("Variant");
 const FString FFINReflectionReferenceDecorator::MetaDataTypeKey = TEXT("Type");
+
+TSharedRef<FFINHyperlinkRun> FFINHyperlinkRun::Create(const FRunInfo& InRunInfo, const TSharedRef<const FString>& InText, const FHyperlinkStyle& InStyle, FOnClick NavigateDelegate, FOnGenerateTooltip InTooltipDelegate, FOnGetTooltipText InTooltipTextDelegate, const FTextRange& InRange, bool bCtrlRequired) {
+	return MakeShareable(new FFINHyperlinkRun(InRunInfo, InText, InStyle, NavigateDelegate, InTooltipDelegate, InTooltipTextDelegate, InRange, bCtrlRequired));
+}
+
+TSharedRef<ILayoutBlock> FFINHyperlinkRun::CreateBlock(int32 StartIndex, int32 EndIndex, FVector2D Size, const FLayoutBlockTextContext& TextContext, const TSharedPtr<IRunRenderer>& Renderer) {
+	TSharedRef<ILayoutBlock> Block = FSlateHyperlinkRun::CreateBlock(StartIndex, EndIndex, Size, TextContext, Renderer);
+	/*if (bCtrlRequired) Children.Last()->SetEnabled(TAttribute<bool>::CreateLambda([] {
+		return FSlateApplication::Get().GetModifierKeys().IsControlDown();
+	}));*/
+	Children.Last()->SetVisibility(FSlateApplication::Get().GetModifierKeys().IsControlDown() ? EVisibility::Visible : EVisibility::HitTestInvisible);
+	return Block;
+}
 
 FFINReflectionReferenceDecorator::FFINReflectionReferenceDecorator(const FOnNavigate& InNavigateDelegate) : NavigateDelegate(InNavigateDelegate) {}
 
@@ -33,7 +47,7 @@ TSharedRef<ISlateRun> FFINReflectionReferenceDecorator::Create(const TSharedRef<
 	const FHyperlinkStyle* LinkStyle = nullptr;
 	if (Style) LinkStyle = &Style->GetWidgetStyle<FHyperlinkStyle>(TEXT("Hyperlink"));
 
-	return CreateRun(RunInfo, InOutModelText, LinkStyle, NavigateDelegate, ModelRange);
+	return CreateRun(RunInfo, InOutModelText, LinkStyle, NavigateDelegate, ModelRange, false);
 }
 
 UFINBase* FFINReflectionReferenceDecorator::ReflectionItemFromType(const FString& Variant, const FString& Type) {
@@ -48,7 +62,7 @@ UFINBase* FFINReflectionReferenceDecorator::ReflectionItemFromType(const FString
 	return nullptr;
 }
 
-TSharedRef<FSlateHyperlinkRun> FFINReflectionReferenceDecorator::CreateRun(const FRunInfo& RunInfo, const TSharedRef<FString>& InOutModelText, const FHyperlinkStyle* Style, FOnNavigate NavigateDelegate, FTextRange ModelRange) {
+TSharedRef<FSlateHyperlinkRun> FFINReflectionReferenceDecorator::CreateRun(const FRunInfo& RunInfo, const TSharedRef<FString>& InOutModelText, const FHyperlinkStyle* Style, FOnNavigate NavigateDelegate, FTextRange ModelRange, bool bCtrlRequired) {
 	if (!Style)	{
 		Style = &FCoreStyle::Get().GetWidgetStyle<FHyperlinkStyle>(TEXT("Hyperlink"));
 	}
@@ -57,7 +71,7 @@ TSharedRef<FSlateHyperlinkRun> FFINReflectionReferenceDecorator::CreateRun(const
 		UFINBase* Type = ReflectionItemFromType(Metadata[MetaDataVariantKey], Metadata[MetaDataTypeKey]);
 		bool _ = NavigateDelegate.ExecuteIfBound(Type);
 	});
-	return FSlateHyperlinkRun::Create(RunInfo, InOutModelText, *Style, ClickDelegate, FSlateHyperlinkRun::FOnGenerateTooltip(), FSlateHyperlinkRun::FOnGetTooltipText(), ModelRange);
+	return FFINHyperlinkRun::Create(RunInfo, InOutModelText, *Style, ClickDelegate, FSlateHyperlinkRun::FOnGenerateTooltip(), FSlateHyperlinkRun::FOnGetTooltipText(), ModelRange, bCtrlRequired);
 }
 
 const FString FFINEEPROMReferenceDecorator::Id = TEXT("EEPROMReference");
