@@ -1,12 +1,10 @@
 #pragma once
 
 #include "Library/Device.h"
-#include "Serial.h"
 
 class FICSITNETWORKS_API FFINKernelFSDevDevice : public CodersFileSystem::Device {
 private:
 	std::unordered_map<std::string, CodersFileSystem::SRef<CodersFileSystem::Device>> Devices;
-	CodersFileSystem::SRef<FFINKernelFSSerial> Serial;
 
 public:
 	FFINKernelFSDevDevice();
@@ -40,9 +38,4 @@ public:
 	 * Ticks all disk listeners
 	 */
 	void tickListeners();
-
-	/**
-	 * Returns the memory file used as standard input & output
-	 */
-	CodersFileSystem::SRef<FFINKernelFSSerial> getSerial() const;
 };

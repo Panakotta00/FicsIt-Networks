@@ -61,7 +61,6 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	
 	DOREPLIFETIME(AFINComputerCase, DataStorage);
 	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
-	DOREPLIFETIME(AFINComputerCase, SerialOutput);
 	DOREPLIFETIME(AFINComputerCase, Log);
 	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
 	DOREPLIFETIME(AFINComputerCase, Processors);
@@ -120,10 +119,6 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 				bNetUpdate = true;
 			}
 		}
-		if (OldSerialOutput != SerialOutput) {
-			OldSerialOutput = SerialOutput;
-			bNetUpdate = true;
-		}
 		if (bNetUpdate) {
 			ForceNetUpdate();
 		}
@@ -140,16 +135,7 @@ void AFINComputerCase::Factory_Tick(float dt) {
 
 		while (KernelTickTime > 1.0/KernelTicksPerSec) {
 			KernelTickTime -= 1.0/KernelTicksPerSec;
-			//auto n = std::chrono::high_resolution_clock::now();
 			Kernel->Tick(dt);
-			//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
-			//SML::Logging::debug("Computer tick: ", dur.count());
-		
-			CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = Kernel->GetDevDevice();
-			if (DevDevice && DevDevice->getSerial()) {
-				SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(DevDevice->getSerial()->readOutput().c_str()));
-				SerialOutput = SerialOutput.Right(1000);
-			}
 		}
 	}
 }
@@ -342,15 +328,11 @@ void AFINComputerCase::Toggle() {
 		switch (Kernel->GetState()) {
 		case FIN_KERNEL_SHUTOFF:
 			Kernel->Start(false);
-			SerialOutput = "";
 			Log->EmptyLog();
-			ForceNetUpdate();
 			break;
 		case FIN_KERNEL_CRASHED:
 			Kernel->Start(true);
-			SerialOutput = "";
 			Log->EmptyLog();
-			ForceNetUpdate();
 			break;
 		default:
 			Kernel->Stop();	
@@ -368,20 +350,9 @@ EFINKernelState AFINComputerCase::GetState() {
 	return InternalKernelState;
 }
 
-FString AFINComputerCase::GetSerialOutput() {
-	return SerialOutput;
-}
-
 AFINComputerProcessor* AFINComputerCase::GetProcessor() {
 	if (Processors.Num() != 1) return nullptr;
 	return Processors[0];
-}
-
-void AFINComputerCase::WriteSerialInput(const FString& str) {
-	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = Kernel->GetDevDevice();
-	if (DevDevice) {
-		DevDevice->getSerial()->write(TCHAR_TO_UTF8(*str));
-	}
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

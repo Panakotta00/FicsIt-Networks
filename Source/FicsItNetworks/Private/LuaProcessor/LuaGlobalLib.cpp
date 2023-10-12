@@ -35,16 +35,6 @@ namespace FINLua {
 		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 		Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Info, UTF8_TO_TCHAR(log.c_str()));
 		
-		try {
-			CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = Processor->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
-			if (serial) {
-				*serial << log << "\r\n";
-				serial->close();
-			}
-		} catch (std::exception ex) {
-			luaL_error(L, ex.what());
-		}
-		
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
 

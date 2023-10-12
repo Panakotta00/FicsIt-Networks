@@ -34,9 +34,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UAudioComponent* Speaker = nullptr;
 
-	UPROPERTY(SaveGame, Replicated)
-	FString SerialOutput = "";
-
 	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
 	UFINLog* Log = nullptr;
 	
@@ -76,8 +73,6 @@ public:
 
 	UPROPERTY(Replicated)
 	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
-
-	FString OldSerialOutput = "";
 
 	float KernelTickTime = 0.0;
 
@@ -155,12 +150,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	EFINKernelState GetState();
-
-	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-    void WriteSerialInput(const FString& str);
-	
-	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-	FString GetSerialOutput();
 	
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	AFINComputerProcessor* GetProcessor();

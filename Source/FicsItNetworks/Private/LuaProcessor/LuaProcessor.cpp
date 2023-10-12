@@ -591,14 +591,6 @@ void luaWarnF(void* ud, const char* msg, int tocont) {
 	UFINLuaProcessor* Processor = static_cast<UFINLuaProcessor*>(ud);
 
 	Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Warning, UTF8_TO_TCHAR(msg));
-
-	try {
-		CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = Processor->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
-		if (serial) {
-			*serial << "[Warning] " << msg << "\r\n";
-			serial->close();
-		}
-	} catch (std::exception ex) {}
 }
 
 void UFINLuaProcessor::Reset() {

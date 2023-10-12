@@ -1,14 +1,8 @@
 #include "FicsItKernel/FicsItFS/DevDevice.h"
 
-FFINKernelFSDevDevice::FFINKernelFSDevDevice() {
-	Serial = new FFINKernelFSSerial(CodersFileSystem::ListenerListRef(listeners, ""));
-}
+FFINKernelFSDevDevice::FFINKernelFSDevDevice() {}
 
 CodersFileSystem::SRef<CodersFileSystem::FileStream> FFINKernelFSDevDevice::open(CodersFileSystem::Path path, CodersFileSystem::FileMode mode) {
-	path = path.relative();
-	if (path.str() == "serial") {
-		return Serial->open(mode);
-	}
 	return nullptr;
 }
 
@@ -37,13 +31,12 @@ std::unordered_set<std::string> FFINKernelFSDevDevice::childs(CodersFileSystem::
 	for (auto device : Devices) {
 		list.insert(device.first);
 	}
-	list.insert("serial");
 	return list;
 }
 
 bool FFINKernelFSDevDevice::addDevice(CodersFileSystem::SRef<CodersFileSystem::Device> device, const std::string& name) {
 	const auto dev = Devices.find(name);
-	if (dev != Devices.end() || name == "serial") return false;
+	if (dev != Devices.end()) return false;
 	Devices[name] = device;
 	return true;
 }
@@ -76,8 +69,4 @@ void FFINKernelFSDevDevice::tickListeners() {
 			diskDev->tickWatcher();
 		}
 	}
-}
-
-CodersFileSystem::SRef<FFINKernelFSSerial> FFINKernelFSDevDevice::getSerial() const {
-	return Serial;
 }
