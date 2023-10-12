@@ -10,7 +10,7 @@
 
 namespace FINLua {
 	TArray<FINAny> luaFIN_callReflectionFunctionProcessInput(lua_State* L, UFINFunction* Function, int nArgs) {
-		int startArg = 1;
+		int startArg = 2;
 		TArray<FINAny> Input;
 		TArray<UFINProperty*> Parameters = Function->GetParameters();
 		for (UFINProperty* Parameter : Parameters) {
@@ -51,7 +51,7 @@ namespace FINLua {
 		try {
 			Output = Function->Execute(Ctx, Parameters);
 		} catch (const FFINFunctionBadArgumentException& Ex) {
-			return luaL_argerror(L, Ex.ArgumentIndex+2, TCHAR_TO_UTF8(*Ex.GetMessage())); // TODO: Change Argument Index Offset for C++ ArgumentException
+			return luaFIN_argError(L, Ex.ArgumentIndex+2, Ex.GetMessage()); // TODO: Change Argument Index Offset for C++ ArgumentException
 		} catch (const FFINReflectionException& Ex) {
 			return luaL_error(L, TCHAR_TO_UTF8(*Ex.GetMessage()));
 		}
@@ -192,7 +192,7 @@ namespace FINLua {
 		if (Property) {
 			TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, ValueIndex, Property, true, true);
 			if (!Value.IsSet()) {
-				luaL_argerror(L, ValueIndex, "Not of expected Network Value type!"); // TODO: Better error message!
+				luaFIN_propertyError(L, ValueIndex, Property);
 				return false;
 			}
 			

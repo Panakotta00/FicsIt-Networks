@@ -101,7 +101,7 @@ namespace FINLua {
 
 	int luaObjectToString(lua_State* L) {
 		FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
-		luaFIN_pushFString(L, LuaObject->Type->GetInternalName());
+		luaFIN_pushFString(L, FFINReflection::ObjectReferenceText(LuaObject->Type));
 		return 1;
 	}
 
@@ -163,7 +163,7 @@ namespace FINLua {
 
 	FLuaObject* luaFIN_checkLuaObject(lua_State* L, int Index, UFINClass* ParentClass) {
 		FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, ParentClass);
-		if (!LuaObject) luaL_argerror(L, Index, "Not a Object"); // TODO: Improve error message with why struct conv not was working, template mismatch, general no object etc.
+		if (!LuaObject) luaFIN_typeError(L, Index, FFINReflection::ObjectReferenceText(ParentClass));
 		return LuaObject;
 	}
 
@@ -175,7 +175,7 @@ namespace FINLua {
 	
 	FFINNetworkTrace luaFIN_checkObject(lua_State* L, int Index, UFINClass* ParentType) {
 		TOptional<FFINNetworkTrace> Object = luaFIN_toObject(L, Index, ParentType);
-		if (!Object.IsSet()) luaL_argerror(L, Index, "Not a Object"); // TODO: Improve error message with why struct conv not was working, template mismatch, general no object etc.
+		if (!Object.IsSet()) luaFIN_typeError(L, Index, FFINReflection::ObjectReferenceText(ParentType));
 		return *Object;
 	}
 	

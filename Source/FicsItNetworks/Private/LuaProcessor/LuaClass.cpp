@@ -70,7 +70,7 @@ namespace FINLua {
 
 	int luaClassToString(lua_State* L) {
 		FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
-		luaFIN_pushFString(L, LuaClass->FINClass->GetInternalName());
+		luaFIN_pushFString(L, FFINReflection::ClassReferenceText(LuaClass->FINClass));
 		return 1;
 	}
 
@@ -124,7 +124,7 @@ namespace FINLua {
 
 	FLuaClass* luaFIN_checkLuaClass(lua_State* L, int Index) {
 		FLuaClass* LuaClass = luaFIN_toLuaClass(L, Index);
-		if (!LuaClass) luaL_argerror(L, Index, "Not a class"); // TODO: Improve error message with why class conv not was working, template mismatch, general no class etc.
+		if (!LuaClass) luaFIN_typeError(L, Index, FFINReflection::ClassReferenceText(nullptr));
 		return LuaClass;
 	}
 

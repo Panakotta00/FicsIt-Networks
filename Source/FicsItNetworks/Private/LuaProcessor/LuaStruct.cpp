@@ -263,7 +263,7 @@ namespace FINLua {
 			return 1;
 		}
 		
-		return luaStructExecuteBinaryOperator(L, FIN_OP_TEXT(FIN_Operator_Index), 2, LuaStruct->Struct, LuaStruct->Type, &thisIndex);
+		return luaStructExecuteBinaryOperator(L, FIN_OP_TEXT(FIN_Operator_Index), 2, LuaStruct->Struct, LuaStruct->Type, nullptr);
 	}
 
 	int luaStructNewIndex(lua_State* L) {
@@ -299,7 +299,7 @@ namespace FINLua {
 
 	int luaStructToString(lua_State* L) {
 		FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, 1, nullptr);
-		luaFIN_pushFString(L, LuaStruct->Type->GetInternalName() + "-Struct");
+		luaFIN_pushFString(L, FFINReflection::StructReferenceText(LuaStruct->Type));
 		return 1;
 	}
 
@@ -409,7 +409,9 @@ namespace FINLua {
 
 	FLuaStruct* luaFIN_checkLuaStruct(lua_State* L, int Index, UFINStruct* ParentType) {
 		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, ParentType);
-		if (!LuaStruct) luaL_argerror(L, Index, "Not a struct"); // TODO: Improve error message with why struct conv not was working, template mismatch, general no struct etc.
+		if (!LuaStruct) {
+			luaFIN_typeError(L, Index, FFINReflection::StructReferenceText(ParentType));
+		}
 		return LuaStruct;
 	}
 
@@ -426,7 +428,7 @@ namespace FINLua {
 
 	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int Index, UFINStruct* ParentType, bool bAllowConstruction) {
 		TSharedPtr<FINStruct> Struct = luaFIN_toStruct(L, Index, ParentType, bAllowConstruction);
-		if (!Struct.IsValid()) luaL_argerror(L, Index, "Not a struct"); // TODO: Improve error message with why struct conv not was working, template mismatch, general no struct etc.
+		if (!Struct.IsValid()) luaFIN_typeError(L, Index, FFINReflection::StructReferenceText(ParentType));
 		return Struct.ToSharedRef();
 	}
 

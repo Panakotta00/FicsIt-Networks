@@ -45,6 +45,26 @@ public:
 
 	inline const TMap<UClass*, UFINClass*>& GetClasses() { return Classes; }
 	inline const TMap<UScriptStruct*, UFINStruct*>& GetStructs() { return Structs; }
+
+	FORCEINLINE static FString ObjectReferenceText(UFINClass* Class) {
+		if (!Class) Class = Get()->FindClass(UObject::StaticClass());
+		return FString::Printf(TEXT("Object<%s>"), *Class->GetInternalName());
+	}
+
+	FORCEINLINE static FString TraceReferenceText(UFINClass* Class) {
+		if (!Class) Class = Get()->FindClass(UObject::StaticClass());
+		return FString::Printf(TEXT("Trace<%s>"), *Class->GetInternalName());
+	}
+
+	FORCEINLINE static FString ClassReferenceText(UFINClass* Class) {
+		if (!Class) Class = Get()->FindClass(UObject::StaticClass());
+		return FString::Printf(TEXT("Class<%s>"), *Class->GetInternalName());
+	}
+
+	FORCEINLINE static FString StructReferenceText(UFINStruct* Type) {
+		if (!Type) return TEXT("Struct");
+		return FString::Printf(TEXT("Struct<%s>"), *Type->GetInternalName());
+	}
 };
 
 UFINProperty* FINCreateFINPropertyFromFProperty(FProperty* Property, FProperty* OverrideProperty, UObject* Outer);

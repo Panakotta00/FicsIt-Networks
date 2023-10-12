@@ -587,7 +587,7 @@ TSet<FINLua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
 void luaWarnF(void* ud, const char* msg, int tocont) {
 	UFINLuaProcessor* Processor = static_cast<UFINLuaProcessor*>(ud);
 
-	Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Warning, FString(TEXT("[Warning] ")) + UTF8_TO_TCHAR(msg));
+	Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Warning, UTF8_TO_TCHAR(msg));
 
 	try {
 		CodersFileSystem::SRef<CodersFileSystem::FileStream> serial = Processor->GetKernel()->GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);

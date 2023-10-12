@@ -229,32 +229,32 @@ namespace FINLua {
 		case FIN_STR: return UTF8_TO_TCHAR(lua_typename(L, LUA_TSTRING));
 		case FIN_OBJ: {
 			UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Property);
+			UFINClass* Class = nullptr;
 			if (ObjProp && ObjProp->GetSubclass()) {
-				UFINClass* Class = FFINReflection::Get()->FindClass(ObjProp->GetSubclass());
-				if (Class) return Class->GetInternalName();
+				Class = FFINReflection::Get()->FindClass(ObjProp->GetSubclass());
 			}
-			return TEXT("Object");
+			return FFINReflection::ObjectReferenceText(Class);
 		} case FIN_CLASS: {
 			UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Property);
+			UFINClass* Class = nullptr;
 			if (ClassProp && ClassProp->GetSubclass()) {
-				UFINClass* Class = FFINReflection::Get()->FindClass(ClassProp->GetSubclass());
-				if (Class) return Class->GetInternalName().Append(TEXT("-Class"));
+				Class = FFINReflection::Get()->FindClass(ClassProp->GetSubclass());
 			}
-			return TEXT("Class");
+			return FFINReflection::ClassReferenceText(Class);
 		} case FIN_TRACE: {
 			UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Property);
+			UFINClass* Class = nullptr;
 			if (TraceProp && TraceProp->GetSubclass()) {
-				UFINClass* Class = FFINReflection::Get()->FindClass(TraceProp->GetSubclass());
-				if (Class) return Class->GetInternalName().Append(TEXT("-Trace"));
+				Class = FFINReflection::Get()->FindClass(TraceProp->GetSubclass());
 			}
-			return TEXT("Trace");
+			return FFINReflection::TraceReferenceText(Class);
 		} case FIN_STRUCT: {
 			UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property);
+			UFINStruct* Type = nullptr;
 			if (StructProp && StructProp->GetInner()) {
-				UFINStruct* Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
-				if (Type) return Type->GetInternalName().Append(TEXT("-Struct"));
+				Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
 			}
-			return TEXT("Struct");
+			return FFINReflection::StructReferenceText(Type);
 		} case FIN_ARRAY: {
 			FString TypeName = TEXT("Array");
 			UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Property);
@@ -269,8 +269,47 @@ namespace FINLua {
 	}
 	
 	int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property) {
-		FTCHARToUTF8 Convert(luaFIN_getPropertyTypeName(L, Property)); // TODO: Need to be better
-		return luaL_typeerror(L, Index, Convert.Get());
+		return luaFIN_typeError(L, Index, luaFIN_getPropertyTypeName(L, Property));
+	}
+
+	int luaFIN_typeError(lua_State* L, int Index, const FString& ExpectedTypeName) {
+		FString ActualTypeName = luaFIN_typeName(L, Index);
+		return luaFIN_argError(L, Index, FString::Printf(TEXT("%s expected, got %s"), *ExpectedTypeName, *ActualTypeName));
+	}
+
+	int luaFIN_argError(lua_State* L, int Index, const FString& ExtraMessage) {
+		return luaL_argerror(L, Index, TCHAR_TO_UTF8(*ExtraMessage));
+	}
+
+	FString luaFIN_typeName(lua_State* L, int Index) {
+		const char *typearg;
+		if (luaL_getmetafield(L, Index, "__name") == LUA_TSTRING) {
+			typearg = lua_tostring(L, -1);
+		} else if (lua_type(L, Index) == LUA_TLIGHTUSERDATA) {
+			typearg = "light userdata";
+		} else {
+			typearg = luaL_typename(L, Index);
+		}
+		FString TypeName = UTF8_TO_TCHAR(typearg);
+		if (TypeName == FIN_LUA_OBJECT_METATABLE_NAME) {
+			FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, nullptr);
+			UFINClass* Type = nullptr;
+			if (LuaObject) Type = LuaObject->Type;
+			return FFINReflection::ObjectReferenceText(Type);
+		}
+		if (TypeName == FIN_LUA_CLASS_METATABLE_NAME) {
+			FLuaClass* LuaClass = luaFIN_toLuaClass(L, Index);
+			UFINClass* Type = nullptr;
+			if (LuaClass) Type = LuaClass->FINClass;
+			return FFINReflection::ClassReferenceText(Type);
+		}
+		if (TypeName == FIN_LUA_STRUCT_METATABLE_NAME) {
+			FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, nullptr);
+			UFINStruct* Type = nullptr;
+			if (LuaStruct) Type = LuaStruct->Type;
+			return FFINReflection::StructReferenceText(Type);
+		}
+		return TypeName;
 	}
 
 	FString luaFIN_getUserDataMetaName(lua_State* L, int Index) {

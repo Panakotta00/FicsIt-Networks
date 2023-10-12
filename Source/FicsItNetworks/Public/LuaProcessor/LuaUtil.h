@@ -139,6 +139,11 @@ namespace FINLua {
 	 */
 	int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property);
 
+	int luaFIN_typeError(lua_State* L, int Index, const FString& ExpectedTypeName);
+	int luaFIN_argError(lua_State* L, int Index, const FString& ExtraMessage);
+
+	FString luaFIN_typeName(lua_State* L, int Index);
+
 	/**
 	 * @brief Retrieves the type name specified in the metatable of the lua value at the given index in the lua stack
 	 * @param L the lua stack
