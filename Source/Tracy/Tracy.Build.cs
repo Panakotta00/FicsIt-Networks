@@ -20,9 +20,9 @@ public class Tracy : ModuleRules
 		
 		PublicIncludePaths.Add("Public");
 		
-		PublicDefinitions.Add("TRACY_ENABLE=1");
-		PublicDefinitions.Add("TRACY_EXPORTS=1");
-		PublicDefinitions.Add("TRACY_ON_DEMAND=1");
+		//PublicDefinitions.Add("TRACY_ENABLE=1");
+		//PublicDefinitions.Add("TRACY_EXPORTS=1");
+		//PublicDefinitions.Add("TRACY_ON_DEMAND=1");
 		//PublicDefinitions.Add("TRACY_CALLSTACK=1");
 		//PublicDefinitions.Add("TRACY_HAS_CALLSTACK=1");
     }
