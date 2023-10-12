@@ -8,6 +8,8 @@
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINSignal.h"
 
+#include "tracy/Tracy.hpp"
+
 void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
 	for (FINLua::LuaFile file : Parent->GetFileStreams()) {
 		if (file.isValid() && (!Parent->GetKernel()->GetFileSystem() || !Parent->GetKernel()->GetFileSystem()->checkUnpersistPath(file->path))) {
@@ -502,6 +504,7 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 }
 
 void UFINLuaProcessor::LuaTick() {
+	ZoneScoped;
 	try {
 		// reset out of time
 		lua_sethook(luaThread, UFINLuaProcessor::luaHook, LUA_MASKCOUNT, tickHelper.steps());

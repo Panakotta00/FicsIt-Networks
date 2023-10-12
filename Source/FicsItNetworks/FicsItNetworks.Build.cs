@@ -29,7 +29,8 @@ public class FicsItNetworks : ModuleRules
             "Vorbis",
             "Http",
             "OnlineSubsystemUtils",
-            "ReplicationGraph"
+            "ReplicationGraph",
+            "Tracy"
 		});
 	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 
