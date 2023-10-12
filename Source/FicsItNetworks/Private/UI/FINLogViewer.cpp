@@ -1,5 +1,7 @@
 #include "UI/FINLogViewer.h"
 
+#include "FINConfigurationStruct.h"
+#include "Configuration/Properties/ConfigPropertyBool.h"
 #include "FicsItKernel/Logging.h"
 #include "Framework/Text/RichTextLayoutMarshaller.h"
 #include "Framework/Text/RichTextMarkupProcessing.h"
@@ -25,6 +27,7 @@ const FName FIN_LogViewer_Row_Name_Content("Content");
 const FName FFINLogViewerStyle::TypeName(TEXT("LogViewerStyle"));
 
 void FFINLogViewerStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const {
+	TextLogStyle.GetResources(OutBrushes);
 	RowStyle.GetResources(OutBrushes);
 	TextBoxStyle.GetResources(OutBrushes);
 	
@@ -71,33 +74,82 @@ void UFINLogViewer::UpdateLogEntries() {
 
 void SFINLogViewer::Construct(const FArguments& InArgs) {
 	Style = InArgs._Style;
-	OnNavigateReflectionDelegate = InArgs._OnNavigateReflection;
-	
+	NavigateReflectionDelegate = InArgs._OnNavigateReflection;
+	NavigateEEPROMDelegate = InArgs._OnNavigateEEPROM;
+
+	FFINConfigurationStruct Config = FFINConfigurationStruct::GetActiveConfig();
+	bTextOutputEnabled = Config.LogViewer.TextLog;
+	TextTimestampEnabled = Config.LogViewer.TextLogTimestamp;
+	TextVerbosityEnabled = Config.LogViewer.TextLogVerbosity;
+	TextMultilineAlignEnabled = Config.LogViewer.TextLogMultilineAlign;
+
 	ChildSlot[
-		SAssignNew(ListView, SListView<TSharedRef<FFINLogEntry>>)
-		.ListItemsSource(&Entries)
-		.ItemHeight(Style->IconSize.Y + Style->IconBoxPadding.GetDesiredSize2f().Y)
-		.OnGenerateRow_Raw(this, &SFINLogViewer::OnGenerateRow)
-		.EnableAnimatedScrolling(true)
-		.HeaderRow(
-			SNew(SHeaderRow)
+		SNew(SOverlay)
+		+SOverlay::Slot()[
+			SNew(SWidgetSwitcher)
+			.WidgetIndex_Lambda([this]() {
+				return bTextOutputEnabled ? 1 : 0;
+			})
+			+SWidgetSwitcher::Slot()[
+				SAssignNew(ListView, SListView<TSharedRef<FFINLogEntry>>)
+				.ListItemsSource(&Entries)
+				.ItemHeight(Style->IconSize.Y + Style->IconBoxPadding.GetDesiredSize2f().Y)
+				.OnGenerateRow_Raw(this, &SFINLogViewer::OnGenerateRow)
+				.EnableAnimatedScrolling(true)
+				.HeaderRow(
+					SNew(SHeaderRow)
 
-			+SHeaderRow::Column(FIN_LogViewer_Row_Name_VerbosityIcon)
-			.DefaultLabel(FText::GetEmpty())
-			.FixedWidth(Style->IconSize.X + Style->IconBoxPadding.GetDesiredSize2f().X)
+					+SHeaderRow::Column(FIN_LogViewer_Row_Name_VerbosityIcon)
+					.DefaultLabel(FText::GetEmpty())
+					.FixedWidth(Style->IconSize.X + Style->IconBoxPadding.GetDesiredSize2f().X)
 
-			+SHeaderRow::Column(FIN_LogViewer_Row_Name_Time)
-			.DefaultLabel(LOCTEXT("ColumnTime", "Time"))
-			.ManualWidth(150.0f)
+					+SHeaderRow::Column(FIN_LogViewer_Row_Name_Time)
+					.DefaultLabel(LOCTEXT("ColumnTime", "Time"))
+					.ManualWidth(150.0f)
 
-			+SHeaderRow::Column(FIN_LogViewer_Row_Name_Verbosity)
-			.DefaultLabel(LOCTEXT("ColumnVerbosity", "Verbosity"))
-			.ManualWidth(100.0f)
+					+SHeaderRow::Column(FIN_LogViewer_Row_Name_Verbosity)
+					.DefaultLabel(LOCTEXT("ColumnVerbosity", "Verbosity"))
+					.ManualWidth(100.0f)
 
-			+SHeaderRow::Column(FIN_LogViewer_Row_Name_Content)
-			.DefaultLabel(LOCTEXT("ColumnContent", "Message"))
-			.FillWidth(1.0f)
-		)
+					+SHeaderRow::Column(FIN_LogViewer_Row_Name_Content)
+					.DefaultLabel(LOCTEXT("ColumnContent", "Message"))
+					.FillWidth(1.0f)
+				)
+			]
+			+SWidgetSwitcher::Slot().Padding(0, Style->IconSize.X + Style->IconBoxPadding.GetDesiredSize2f().X, 0, 0)[
+				SAssignNew(TextLog, SMultiLineEditableTextBox)
+				.Style(&Style->TextLogStyle)
+				.IsReadOnly(true)
+				// TODO: Add marshaller for color & references/links
+			]
+		]
+		+SOverlay::Slot()
+		.HAlign(HAlign_Left)
+		.VAlign(VAlign_Top)
+		.Padding(3, 4, 3, 3)[
+			SNew(SButton)
+			.ButtonStyle(&Style->TextLogButtonStyle)
+			.ContentPadding(0)
+			.OnClicked_Lambda([this]() {
+				bTextOutputEnabled = !bTextOutputEnabled;
+
+				FFINConfigurationStruct Config = FFINConfigurationStruct::GetActiveConfig();
+				Config.LogViewer.TextLog = bTextOutputEnabled;
+
+				FConfigId ConfigId{"FicsItNetworks", ""};
+				UConfigManager* ConfigManager = GEngine->GetEngineSubsystem<UConfigManager>();
+				UConfigPropertyBool* Prop = Cast<UConfigPropertyBool>(Cast<UConfigPropertySection>(ConfigManager->GetConfigurationRootSection(ConfigId)->SectionProperties[TEXT("LogViewer")])->SectionProperties[TEXT("TextLog")]);
+				Prop->Value = bTextOutputEnabled;
+				Prop->MarkDirty();
+				
+				return FReply::Handled();
+			})
+			.Content()[
+				SNew(SBox)
+				.HeightOverride(Style->IconSize.X + Style->IconBoxPadding.GetDesiredSize2f().X - 6)
+				.WidthOverride(Style->IconSize.X + Style->IconBoxPadding.GetDesiredSize2f().X - 6)
+			]
+		]
 	];
 }
 
@@ -118,9 +170,39 @@ void SFINLogViewer::UpdateEntries(UFINLog* Log) {
 	bool bBottom = ListView->GetScrollDistanceRemaining().IsNearlyZero() || !ListView->IsScrollbarNeeded();
 	
 	Entries.Empty();
+	FString Text;
 	if (Log) {
+		bool bTextTimestampEnabled = TextTimestampEnabled.Get();
+		bool bTextVerbosityEnabled = TextVerbosityEnabled.Get();
+		bool bTextMultilineAlignEnabled = TextMultilineAlignEnabled.Get();
+
+		int LineCount = 0;
 		for (const FFINLogEntry& Entry : Log->GetLogEntries()) {
+			LineCount += 1;
 			Entries.Add(MakeShared<FFINLogEntry>(Entry));
+
+			if (!Text.IsEmpty()) Text.AppendChar(L'\n');
+			FString Line;
+			if (bTextTimestampEnabled) Line.Append(Entry.Timestamp.ToString()).AppendChar(L' ');
+			if (bTextVerbosityEnabled) Line.Append(FString::Printf(TEXT("[%s] "), *Entry.GetVerbosityAsText().ToString()));
+			Text.Append(Line);
+			
+			if (bTextMultilineAlignEnabled) {
+				FString Spacer = TEXT("\n") + FString::ChrN(Line.Len(), L' ');
+				TArray<FTextRange> LineRanges;
+				FTextRange::CalculateLineRangesFromString(Entry.Content, LineRanges);
+				bool bFirstDone = false;
+				for (const FTextRange Range : LineRanges) {
+					if (bFirstDone) {
+						Text.Append(Spacer);
+						LineCount += 1;
+					}
+					bFirstDone = true;
+					Text.Append(FFINUtils::TextRange(Entry.Content, Range));
+				}
+			} else {
+				Text.Append(Entry.Content);
+			}
 		}
 	}
 #if WITH_EDITOR
@@ -133,6 +215,8 @@ void SFINLogViewer::UpdateEntries(UFINLog* Log) {
 	
 	ListView->RebuildList();
 	if (bBottom) ListView->ScrollToBottom();
+
+	TextLog->SetText(FText::FromString(Text));
 }
 
 TSharedRef<ITableRow> SFINLogViewer::OnGenerateRow(TSharedRef<FFINLogEntry> Entry, const TSharedRef<STableViewBase>& InListView) {

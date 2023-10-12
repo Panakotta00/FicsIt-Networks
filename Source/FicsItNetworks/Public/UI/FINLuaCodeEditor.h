@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FINLogViewer.h"
+#include "FINStyle.h"
 #include "FINTextDecorators.h"
 #include "Slate.h"
 #include "Components/Widget.h"

@@ -18,6 +18,8 @@ struct FFINLogViewerStyle : public FSlateWidgetStyle {
 	GENERATED_USTRUCT_BODY()
 	
 	FFINLogViewerStyle() :
+		TextLogStyle(FCoreStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>("NormalEditableTextBox")),
+		TextLogButtonStyle(FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("Button")),
 		RowStyle(FCoreStyle::Get().GetWidgetStyle<FTableRowStyle>("TableView.Row")),
 		TextBoxStyle(FCoreStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>("NormalEditableTextBox")),
 		TextBlockStyle(FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")) {}
@@ -28,6 +30,12 @@ struct FFINLogViewerStyle : public FSlateWidgetStyle {
 	virtual const FName GetTypeName() const override { return TypeName; };
 
 	static const FFINLogViewerStyle& GetDefault();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FEditableTextBoxStyle TextLogStyle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FButtonStyle TextLogButtonStyle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FTableRowStyle RowStyle;
@@ -172,7 +180,15 @@ private:
 	const FFINLogViewerStyle* Style = nullptr;
 
 	TArray<TSharedRef<FFINLogEntry>> Entries;
+
+	bool bTextOutputEnabled = false;
+	TAttribute<bool> TextTimestampEnabled = true;
+	TAttribute<bool> TextVerbosityEnabled = true;
+	TAttribute<bool> TextMultilineAlignEnabled = true;
+	
 	TSharedPtr<SListView<TSharedRef<FFINLogEntry>>> ListView;
+	TSharedPtr<SWidgetSwitcher> WidgetSwitcher;
+	TSharedPtr<SMultiLineEditableTextBox> TextLog;
 };
 
 class SFINLogViewerRow : public SMultiColumnTableRow<TSharedRef<FFINLogEntry>> {
