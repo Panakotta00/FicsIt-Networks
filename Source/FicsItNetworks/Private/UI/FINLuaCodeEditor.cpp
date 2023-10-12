@@ -657,7 +657,13 @@ void SFINLuaCodeEditor::OnArrangeChildren(const FGeometry& AllottedGeometry, FAr
 }
 
 void SFINLuaCodeEditor::NavigateToLine(int64 LineNumber) {
-	TextEdit->ScrollTo(FTextLocation(LineNumber));
+	FTimerHandle TimerHandle;
+	TSharedRef<SFINLuaCodeEditor> Ptr = SharedThis(this);
+	GWorld->GetTimerManager().SetTimerForNextTick([Ptr, LineNumber]() {
+		Ptr->TextEdit->ScrollTo(FTextLocation(LineNumber));
+		FSlateApplication::Get().SetAllUserFocus(Ptr->TextEdit);
+		Ptr->TextEdit->SelectText(FTextLocation(LineNumber), FTextLocation(LineNumber));
+	});
 }
 
 void UFINLuaCodeEditor::HandleOnTextChanged(const FText& InText) {

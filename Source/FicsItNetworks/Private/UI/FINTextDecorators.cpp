@@ -19,7 +19,9 @@ TSharedRef<ILayoutBlock> FFINHyperlinkRun::CreateBlock(int32 StartIndex, int32 E
 	/*if (bCtrlRequired) Children.Last()->SetEnabled(TAttribute<bool>::CreateLambda([] {
 		return FSlateApplication::Get().GetModifierKeys().IsControlDown();
 	}));*/
-	Children.Last()->SetVisibility(FSlateApplication::Get().GetModifierKeys().IsControlDown() ? EVisibility::Visible : EVisibility::HitTestInvisible);
+	if (bCtrlRequired) Children.Last()->SetVisibility(TAttribute<EVisibility>::CreateLambda([]() {
+		return FSlateApplication::Get().GetModifierKeys().IsControlDown() ? EVisibility::Visible : EVisibility::HitTestInvisible;
+	}));
 	return Block;
 }
 
