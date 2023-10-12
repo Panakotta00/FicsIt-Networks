@@ -49,6 +49,7 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 	UPROPERTY(SaveGame)
 	UFINProperty* Property = nullptr;
 
+	// TODO: Maybe do a LogScope snapshot?
 	FFINFutureReflection() = default;
 	FFINFutureReflection(UFINFunction* Function, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
 	FFINFutureReflection(UFINProperty* Property, const FFINExecutionContext& Context, const FFINAnyNetworkValue& Input) : Input({Input}), Context(Context), Property(Property) {}

@@ -358,9 +358,30 @@ namespace FINLua {
 		lua_warning(L, msg, tocont);
 	}
 
+	FString luaFIN_where(lua_State* L) {
+		lua_Debug ar;
+		if (lua_getstack(L, 1, &ar)) {
+			lua_getinfo(L, "Sl", &ar);
+			if (ar.currentline > 0) {
+				return FString::Printf(TEXT("%s:%d"), UTF8_TO_TCHAR(ar.short_src), ar.currentline);
+			}
+		}
+		return FString();
+	}
+
+	FString luaFIN_stack(lua_State* L) {
+		return FString();
+	}
+
 	void setupUtilLib(lua_State* L) {
 		PersistSetup("UtilLib", -2);
 		
 		
 	}
 }
+
+FFINLuaLogScope::FFINLuaLogScope(lua_State* L) : FFINLogScope(nullptr, FWhereFunction::CreateLambda([L]() {
+	return FINLua::luaFIN_where(L);
+}), FStackFunction::CreateLambda([L]() {
+	return FINLua::luaFIN_stack(L);
+})) {}

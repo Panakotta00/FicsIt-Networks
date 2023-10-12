@@ -76,3 +76,72 @@ private:
 	FCriticalSection LogEntriesToAddMutex;
 	bool bForceEntriesUpdate = false;
 };
+
+UENUM()
+enum EFINLogOptions {
+	FIN_Log_Option_None,
+	FIN_Log_Option_Where,
+	FIN_Log_Option_Stack,
+};
+
+UCLASS()
+class UFINLogLibrary : public UBlueprintFunctionLibrary {
+	GENERATED_BODY()
+public:
+	UFUNCTION(BlueprintCallable)
+	static void Log(TEnumAsByte<EFINLogVerbosity> Verbosity, FString Message, TEnumAsByte<EFINLogOptions> Options = FIN_Log_Option_Where);
+};
+
+class FFINLogScope {
+public:
+	DECLARE_DELEGATE_RetVal(FString, FWhereFunction);
+	DECLARE_DELEGATE_RetVal(FString, FStackFunction);
+	
+	FFINLogScope(UFINLog* Log, FWhereFunction WhereFunction = FWhereFunction(), FStackFunction StackFunction = FStackFunction()) {
+		PreviousLog = GetCurrentLog();
+		if (Log) GetCurrentLog() = Log;
+
+		if (WhereFunction.IsBound()) {
+			PreviousWhereFunction = GetCurrentWhereFunction();
+			GetCurrentWhereFunction() = WhereFunction;
+		}
+
+		if (StackFunction.IsBound()) {
+			PreviousStackFunction = GetCurrentStackFunction();
+			GetCurrentStackFunction() = WhereFunction;
+		}
+	}
+
+	~FFINLogScope() {
+		GetCurrentLog() = PreviousLog;
+
+		if (PreviousWhereFunction.IsSet()) {
+			GetCurrentWhereFunction() = PreviousWhereFunction.GetValue();
+		}
+
+		if (PreviousStackFunction.IsSet()) {
+			GetCurrentStackFunction() = PreviousStackFunction.GetValue();
+		}
+	}
+
+	FORCEINLINE static UFINLog* GetLog() { return GetCurrentLog(); }
+	FORCEINLINE static FString Where() {
+		FWhereFunction& Func = GetCurrentWhereFunction();
+		if (Func.IsBound()) return Func.Execute();
+		return FString();
+	}
+	FORCEINLINE static FString Stack() {
+		FStackFunction& Func = GetCurrentStackFunction();
+		if (Func.IsBound()) return Func.Execute();
+		return FString();
+	}
+	
+private:
+	static UFINLog*& GetCurrentLog();
+	static FWhereFunction& GetCurrentWhereFunction();
+	static FStackFunction& GetCurrentStackFunction();
+
+	UFINLog* PreviousLog;
+	TOptional<FWhereFunction> PreviousWhereFunction;
+	TOptional<FStackFunction> PreviousStackFunction;
+};

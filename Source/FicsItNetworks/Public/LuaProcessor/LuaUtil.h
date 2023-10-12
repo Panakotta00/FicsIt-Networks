@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LuaException.h"
+#include "FicsItKernel/Logging.h"
 #include "Network/FINAnyNetworkValue.h"
 #include "lua/lua.h"
 #include "lua/lualib.h"
@@ -163,5 +164,12 @@ namespace FINLua {
 
 	void luaFIN_warning(lua_State* L, const char* msg, int tocont);
 
+	FString luaFIN_where(lua_State* L);
+	FString luaFIN_stack(lua_State* L);
+
 	void setupUtilLib(lua_State* L);
 }
+
+struct FFINLuaLogScope : public FFINLogScope {
+	explicit FFINLuaLogScope(lua_State* L);
+};

@@ -37,6 +37,7 @@ void UFINLog::Tick() {
 }
 
 void UFINLog::PushLogEntry(TEnumAsByte<EFINLogVerbosity> Verbosity, const FString& Content) {
+	if (!this) return;
 	FScopeLock ScopeLock(&LogEntriesToAddMutex);
 	LogEntriesToAdd.Push(FFINLogEntry(FDateTime::UtcNow(), Verbosity, Content));
 }
@@ -60,4 +61,31 @@ FString UFINLog::GetLogAsRichText() {
 
 void UFINLog::OnRep_LogEntries() {
 	OnLogEntriesUpdated.Broadcast();
+}
+
+void UFINLogLibrary::Log(TEnumAsByte<EFINLogVerbosity> Verbosity, FString Message, TEnumAsByte<EFINLogOptions> Options) {
+	switch (Options) {
+	case FIN_Log_Option_Where: {
+		FString Where = FFINLogScope::Where();
+		if (!Where.IsEmpty()) Where.AppendChar(L' ');
+		FFINLogScope::GetLog()->PushLogEntry(Verbosity, Where.Append(Message));
+		break;
+	} default:
+		FFINLogScope::GetLog()->PushLogEntry(Verbosity, *Message);
+	}
+}
+
+UFINLog*& FFINLogScope::GetCurrentLog() {
+	thread_local UFINLog* CurrentLog = nullptr;
+	return CurrentLog;
+}
+
+FFINLogScope::FWhereFunction& FFINLogScope::GetCurrentWhereFunction() {
+	thread_local FWhereFunction WhereFunction;
+	return WhereFunction;
+}
+
+FFINLogScope::FStackFunction& FFINLogScope::GetCurrentStackFunction() {
+	thread_local FStackFunction StackFunction;
+	return StackFunction;
 }

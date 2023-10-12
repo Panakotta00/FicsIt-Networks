@@ -1,5 +1,6 @@
 ﻿#include "LuaProcessor/LuaRef.h"
 
+#include "FicsItKernel/Logging.h"
 #include "LuaProcessor/LuaClass.h"
 #include "LuaProcessor/LuaFuture.h"
 #include "LuaProcessor/LuaObject.h"
@@ -60,6 +61,7 @@ namespace FINLua {
 	}
 	
 	int luaFIN_callReflectionFunction(lua_State* L, UFINFunction* Function, const FFINExecutionContext& Ctx, int nArgs, int nResults) {
+		FFINLuaLogScope LogScope(L);
 		const EFINFunctionFlags FuncFlags = Function->GetFunctionFlags();
 		if (FuncFlags & FIN_Func_RT_Async) {
 			return luaFIN_callReflectionFunctionDirectly(L, Function, Ctx, nArgs, nResults);

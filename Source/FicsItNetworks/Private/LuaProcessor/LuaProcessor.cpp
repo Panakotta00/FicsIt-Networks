@@ -505,6 +505,7 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 
 void UFINLuaProcessor::LuaTick() {
 	ZoneScoped;
+	FFINLogScope LogScope(GetKernel()->GetLog());
 	try {
 		// reset out of time
 		lua_sethook(luaThread, UFINLuaProcessor::luaHook, LUA_MASKCOUNT, tickHelper.steps());
