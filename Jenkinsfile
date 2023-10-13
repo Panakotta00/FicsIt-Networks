@@ -47,7 +47,13 @@ pipeline {
 						extensions: [[
 							$class: 'RelativeTargetDirectory',
 							relativeTargetDir: "${MOD_NAME}"
-						]],
+						],[
+	                    $class: 'CloneOption',
+	                    timeout: 20,
+	                ],[
+	                    $class: 'CheckoutOption',
+	                    timeout: 20,
+	                ]],
 						submoduleCfg: scm.submoduleCfg,
 						doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
 						userRemoteConfigs: scm.userRemoteConfigs
