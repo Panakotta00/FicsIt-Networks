@@ -7,6 +7,7 @@
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINSignal.h"
+#include "LuaProcessor/LuaUtil.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -461,7 +462,7 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	if (ok != LUA_OK) {
 		// print error
 		if (lua_isstring(luaState, -1)) {
-			UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Unable to unpersit! '%s'"), *DebugInfo, *FString(lua_tostring(luaState, -1)));
+			UE_LOG(LogFicsItNetworks, Display, TEXT("%s: Unable to unpersit! '%s'"), *DebugInfo, *FINLua::luaFIN_toFString(luaState, -1));
 		}
 		
 		// cleanup
