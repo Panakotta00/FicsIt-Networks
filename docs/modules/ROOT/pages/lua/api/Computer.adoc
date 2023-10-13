@@ -50,6 +50,38 @@ Stops the current code execution immediately and queues the system to restart in
 This function is mainly used to allow switching to a higher tick runtime state.
 Usually you use this when you want to make your code run faster when using functions that can run in asynchronous environment.
 
+=== `promote()`
+
+This function is mainly used to allow switching to a higher tick runtime state.
+Usually you use this when you want to make your code run faster when using functions that can run in asynchronous environment.
+
+=== `demote()`
+
+This function is used to allow switching back to the normal tick rate.
+
+=== `int state()`
+
+Returns the tick state.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|describes if the tick rate is normal or higher +
+Tick Rates:
+[cols="1,10a"]
+!===
+!0
+!Has normal tick rate
+!1
+!Has higher tick rate
+!===
+|===
+
 === `string getEEPROM()`
 
 Returns the code the current eeprom contents.
@@ -151,6 +183,39 @@ Return Values::
 |An array containing instances for each xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device] built into the computer.
 |===
 
+=== `int, int getMemory()`
+
+Returns the used memory and memory capacity the computer has.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|The memory usage at the current time
+
+|int
+|int
+|The memory capacity the computer has
+|===
+
+=== `Computer_C getInstance()`
+
+Returns the computer case.
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|Computer_C
+|Computer_C
+|The computer case in which the current code is running.
+|===
 
 
 include::partial$api_footer.adoc[]

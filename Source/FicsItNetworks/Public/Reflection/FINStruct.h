@@ -4,6 +4,15 @@
 #include "FINFunction.h"
 #include "FINStruct.generated.h"
 
+UENUM()
+enum EFINStructFlags {
+	FIN_Struct_None				= 0,
+	FIN_Struct_StaticSource		= 0b01,
+	FIN_Struct_Constructable	= 0b10,
+};
+
+ENUM_CLASS_FLAGS(EFINStructFlags)
+
 UCLASS(BlueprintType)
 class FICSITNETWORKS_API UFINStruct : public UFINBase {
 	GENERATED_BODY()
@@ -15,6 +24,13 @@ public:
 	TArray<UFINFunction*> Functions;
 	UPROPERTY()
 	UFINStruct* Parent = nullptr;
+	
+	EFINStructFlags StructFlags = FIN_Struct_None;
+
+	/**
+	 * Returns the struct flags of this struct
+	 */
+	virtual EFINStructFlags GetStructFlags() const { return StructFlags; }
 	
 	/**
 	 * Returns a list of all available properties
@@ -49,6 +65,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
 	bool IsChildOf(const UFINStruct* Struct) const {
+		if (!Struct) return true;
 		const UFINStruct* Self = this;
 		while (Self) {
 			if (Self == Struct) return true;

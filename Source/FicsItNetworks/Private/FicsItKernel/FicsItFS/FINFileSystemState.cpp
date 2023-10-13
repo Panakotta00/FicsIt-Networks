@@ -1,8 +1,15 @@
 #include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+
+#include "Computer/FINComputerSubsystem.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Widgets/SViewport.h"
+#include "Widgets/Input/SCheckBox.h"
+
+#define KEEP_CHANGES 1
+#define OVERRIDE_CHANGES 0
 
 AFINFileSystemState::AFINFileSystemState() {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"RootComponent");
@@ -17,7 +24,16 @@ void AFINFileSystemState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 }
 
 int AskForDiskOrSave(FString Name) {
+	switch (AFINComputerSubsystem::GetFSAlways()) {
+	case FIN_FS_AlwaysOverride:
+		return OVERRIDE_CHANGES;
+	case FIN_FS_AlwaysKeep:
+		return KEEP_CHANGES;
+	default: ;
+	}
+	
 	int KeepDisk = 0;
+	bool bDontAskAgain = false;
 	TSharedRef<SWindow> Window = SNew(SWindow)
 		.HasCloseButton(false)
 		.ActivationPolicy(EWindowActivationPolicy::Always)
@@ -42,28 +58,57 @@ int AskForDiskOrSave(FString Name) {
 			.AutoHeight()[
 				SNew(SHorizontalBox)
 				+SHorizontalBox::Slot()
-				.FillWidth(1)
-				.HAlign(HAlign_Right)[
+				.AutoWidth()
+				.HAlign(HAlign_Left)[
 					SNew(SButton)
 					.Text(FText::FromString("Keep changes on disk"))
 					.OnClicked_Lambda([&KeepDisk, &Window]() {
-						KeepDisk = 1;
+						KeepDisk = KEEP_CHANGES;
 						Window->RequestDestroyWindow();
 						return FReply::Handled();
 					})]
 				+SHorizontalBox::Slot()
-				.AutoWidth()[
+				.AutoWidth()
+				.HAlign(HAlign_Left)[
 					SNew(SButton)
 					.Text(FText::FromString(TEXT("Overwrite with Save")))
 					.OnClicked_Lambda([&KeepDisk, &Window]() {
-						KeepDisk = 0;
+						KeepDisk = OVERRIDE_CHANGES;
 						Window->RequestDestroyWindow();
 						return FReply::Handled();
 					})
 				]
+				+SHorizontalBox::Slot()
+				.FillWidth(1)
+				.HAlign(HAlign_Right)[
+					SNew(SCheckBox)
+					.Content()[
+						SNew(STextBlock)
+						.Text(FText::FromString(TEXT("Don't ask again")))
+					]
+					.IsChecked_Lambda([&]() {
+						return bDontAskAgain ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+					})
+					.OnCheckStateChanged_Lambda([&](ECheckBoxState State) {
+						bDontAskAgain = State == ECheckBoxState::Checked;
+					})
+				]
 			]
 		];
-	FSlateApplication::Get().AddModalWindow(Window, FSlateApplication::Get().GetActiveTopLevelWindow());
+	FSlateApplication::Get().AddModalWindow(Window, GEngine->GetGameViewportWidget());
+
+	if (bDontAskAgain) {
+		switch (KeepDisk) {
+		case KEEP_CHANGES:
+			AFINComputerSubsystem::SetFSAlways(FIN_FS_AlwaysKeep);
+			break;
+		case OVERRIDE_CHANGES:
+			AFINComputerSubsystem::SetFSAlways(FIN_FS_AlwaysOverride);
+			break;
+		default: ;
+		}
+	}
+	
 	return KeepDisk;
 }
 

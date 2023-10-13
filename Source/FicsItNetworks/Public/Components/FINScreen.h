@@ -11,12 +11,9 @@ class AFINScreen : public AFGBuildable, public IFINScreenInterface {
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY()
 	FFINNetworkTrace GPU;
 
-	UPROPERTY(Replicated)
-	UObject* GPUPtr = nullptr;
-	
 public:
 	TSharedPtr<SWidget> Widget;
 	
@@ -44,17 +41,15 @@ public:
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Parts;
 
-	bool bGPUChanged = false;
-	
 	/**
-	* This event gets triggered when a new widget got set by the GPU
-	*/
+	 * This event gets triggered when a new widget got set by the GPU
+	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
 	FScreenWidgetUpdate OnWidgetUpdate;
 
 	/**
-	* This event gets triggered when a new GPU got bound
-	*/
+	 * This event gets triggered when a new GPU got bound
+	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintAssignable)
 	FScreenGPUUpdate OnGPUUpdate;
 	
@@ -63,7 +58,6 @@ public:
 	// Begin AActor
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& transform) override;
-	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type endPlayReason) override;
 	// End AActor
 
@@ -71,21 +65,14 @@ public:
 	virtual int32 GetDismantleRefundReturnsMultiplier() const override;
 	// End AFGBuildable
 
-	// Begin IFGSaveInterface
-	virtual bool ShouldSave_Implementation() const override;
-	// End IFGSaveInterface
-
 	// Begin IFINScreenInterface
 	void BindGPU(const FFINNetworkTrace& gpu) override;
 	FFINNetworkTrace GetGPU() const override;
 	void SetWidget(TSharedPtr<SWidget> widget) override;
 	TSharedPtr<SWidget> GetWidget() const override;
-	virtual void RequestNewWidget() override;
 	// End IFINScreenInterface
 
-	UFUNCTION(NetMulticast, Reliable)
-	void OnGPUValidChanged(bool bValid, UObject* newGPU);
-
+	// Begin FIN Reflection
 	UFUNCTION()
     void netClass_Meta(FString& InternalName, FText& DisplayName) {
 		InternalName = TEXT("Screen");
@@ -107,10 +94,8 @@ public:
 		ParameterDescriptions.Add(FText::FromString("The height of the screen."));
 		Runtime = 2;
 	}
+	// End FIN Reflection
 
-	UFUNCTION(NetMulticast, Reliable)
-	void NetMulti_OnGPUUpdate();
-	
 	static void SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts);
 	static void SpawnEdgeComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* EdgePartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);
 	static void SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int ScreenWidth, int ScreenHeight, TArray<UStaticMeshComponent*>& OutParts);

@@ -1,6 +1,7 @@
 ﻿#include "Components/FINScreen.h"
 
 #include "FGColoredInstanceMeshProxy.h"
+#include "Computer/FINComputerGPU.h"
 #include "Graphics/FINGPUInterface.h"
 #include "Network/FINNetworkCable.h"
 
@@ -18,8 +19,6 @@ AFINScreen::AFINScreen() {
 
 void AFINScreen::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AFINScreen, GPUPtr);
-	DOREPLIFETIME(AFINScreen, GPU);
 	DOREPLIFETIME(AFINScreen, ScreenWidth);
 	DOREPLIFETIME(AFINScreen, ScreenHeight);
 }
@@ -46,9 +45,6 @@ void AFINScreen::BeginPlay() {
 	WidgetComponent->AddRelativeLocation(WidgetOffset);
 	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
 
-	if (HasAuthority()) GPUPtr = GPU.Get();
-	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
-
 	//for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) Cable->RerunConstructionScripts(); TODO: Check if really needed
 }
 
@@ -56,29 +52,6 @@ void AFINScreen::OnConstruction(const FTransform& transform) {
 	ConstructParts();
 
 	Super::OnConstruction(transform);
-}
-
-void AFINScreen::Tick(float DeltaSeconds) {
-	Super::Tick(DeltaSeconds);
-	if (bGPUChanged) {
-		bGPUChanged = false;
-		
-		if (GPUPtr) {
-			Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
-		} else {
-			SetWidget(SNew(SScaleBox));
-		}
-
-		OnGPUUpdate.Broadcast();
-
-		NetMulti_OnGPUUpdate();
-	}
-	if (HasAuthority() && (((bool)GPUPtr) != GPU.IsValid())) {
-		if (!GPUPtr) GPUPtr = GPU.Get();
-		OnGPUValidChanged(GPU.IsValid(), GPUPtr);
-		GPUPtr = GPU.Get();
-	}
-	if (!Widget && GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
 }
 
 void AFINScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
@@ -90,23 +63,21 @@ int32 AFINScreen::GetDismantleRefundReturnsMultiplier() const {
 	return FMath::Abs(ScreenWidth) * FMath::Abs(ScreenHeight);
 }
 
-bool AFINScreen::ShouldSave_Implementation() const {
-	return true;
-}
-
 void AFINScreen::BindGPU(const FFINNetworkTrace& gpu) {
-	if (IsValid(gpu.GetUnderlyingPtr())) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
-	if (GPU != gpu) {
-		FFINNetworkTrace oldGPU = GPU;
-		GPU = FFINNetworkTrace();
-		if (IsValid(oldGPU.GetUnderlyingPtr())) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr())->BindScreen(FFINNetworkTrace());
-		GPU = gpu;
-		if (IsValid(gpu.GetUnderlyingPtr())) {
-			Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
-		}
-		bGPUChanged = true;
-		GPUPtr = GPU.Get();
-	}
+	if (gpu.IsValidPtr()) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
+	if (GPU == gpu) return;
+	
+	FFINNetworkTrace oldGPU = GPU;
+	GPU = FFINNetworkTrace();
+	if (oldGPU.IsValidPtr()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr())->BindScreen(FFINNetworkTrace());
+
+	GPU = gpu;
+	if (gpu.IsValidPtr()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
+	
+	OnGPUUpdate.Broadcast();
+
+	if (!gpu.IsValidPtr()) WidgetComponent->SetSlateWidget(nullptr);
+	else Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->RequestNewWidget();
 }
 
 FFINNetworkTrace AFINScreen::GetGPU() const {
@@ -114,18 +85,12 @@ FFINNetworkTrace AFINScreen::GetGPU() const {
 }
 
 void AFINScreen::SetWidget(TSharedPtr<SWidget> widget) {
-	if (Widget != widget) Widget = widget;
-	WidgetComponent->SetSlateWidget(
-		Widget.IsValid() ?
-			SNew(SScaleBox)
-			.Stretch(EStretch::ScaleToFit)
-			.Content()[
-				Widget.ToSharedRef()
-			]
-		:
-			SNew(SScaleBox)
-		);
-	WidgetComponent->RequestRedraw();
+	if (Widget == widget) return;
+
+	Widget = widget;
+
+	WidgetComponent->SetSlateWidget(widget);
+	
 	OnWidgetUpdate.Broadcast();
 }
 
@@ -133,24 +98,10 @@ TSharedPtr<SWidget> AFINScreen::GetWidget() const {
 	return Widget;
 }
 
-void AFINScreen::RequestNewWidget() {
-	if (GPUPtr) Cast<IFINGPUInterface>(GPUPtr)->RequestNewWidget();
-}
-
-void AFINScreen::OnGPUValidChanged_Implementation(bool bValid, UObject* newGPU) {
-	if (!bValid) {
-		if (newGPU) Cast<IFINGPUInterface>(newGPU)->DropWidget();
-	} else {
-		if (newGPU) Cast<IFINGPUInterface>(newGPU)->RequestNewWidget();
-	}
-}
-
 void AFINScreen::netFunc_getSize(int& w, int& h) {
 	w = FMath::Abs(ScreenWidth);
 	h = FMath::Abs(ScreenHeight);
 }
-
-void AFINScreen::NetMulti_OnGPUUpdate_Implementation() {}
 
 void AFINScreen::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int ScreenWidth, int ScreenHeight, UStaticMesh* MiddlePartMesh, UStaticMesh* EdgePartMesh, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, TArray<UStaticMeshComponent*>& OutParts) {
 	int xf = ScreenWidth/FMath::Abs(ScreenWidth);

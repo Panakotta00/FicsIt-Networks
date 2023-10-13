@@ -1,7 +1,6 @@
 #include "FicsItNetworksModule.h"
 
 #include "UI/FINCopyUUIDButton.h"
-#include "UI/FINReflectionStyles.h"
 #include "Computer/FINComputerRCO.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Network/FINNetworkAdapter.h"
@@ -10,8 +9,11 @@
 #include "FicsItKernel/FicsItFS/Library/Tests.h"
 #include "AssetRegistryModule.h"
 #include "FGCharacterPlayer.h"
+#include "FGFactoryConnectionComponent.h"
 #include "FGGameMode.h"
 #include "FGGameState.h"
+#include "FGRailroadTrackConnectionComponent.h"
+#include "FINGlobalRegisterHelper.h"
 #include "Buildables/FGPipeHyperStart.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Hologram/FGBuildableHologram.h"
@@ -19,7 +21,9 @@
 #include "Patching/BlueprintHookHelper.h"
 #include "Patching/BlueprintHookManager.h"
 #include "Patching/NativeHookManager.h"
+#include "Reflection/FINReflection.h"
 #include "Reflection/ReflectionHelper.h"
+#include "UI/FINStyle.h"
 #include "UObject/CoreRedirects.h"
 
 DEFINE_LOG_CATEGORY( LogGame );
@@ -105,7 +109,81 @@ void AddRedirects(FString FromParent, FString ToParent, const ClassChange& Chang
 	}
 }
 
+void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
+	UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
+	UObject* InventorySlot = HookHelper.GetContext();
+	TObjectPtr<UObject>* WidgetPtr = HookHelper.GetOutVariablePtr<FObjectProperty>();
+	UUserWidget* Widget = Cast<UUserWidget>(WidgetPtr->Get());
+	AFINFileSystemState* State = UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(self);
+	if (State) {
+		UVerticalBox* MenuList = Cast<UVerticalBox>(Widget->GetWidgetFromName("VerticalBox_0"));
+		UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
+		UUIDButton->InitSlotWidget(self);
+		MenuList->AddChildToVerticalBox(UUIDButton);
+	}
+}
+
+void UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,int32)>& Scope, UFGRailroadTrackConnectionComponent* self, int32 Index) {
+	FFINRailroadSwitchForce* ForcedTrack = AFINComputerSubsystem::GetComputerSubsystem(self)->GetForcedRailroadSwitch(self);
+	if (ForcedTrack) {
+		Scope(self, 0);
+	}
+}
+
+void UFGRailroadTrackConnectionComponent_AddConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
+	AFINComputerSubsystem::GetComputerSubsystem(self)->AddRailroadSwitchConnection(Scope, self, Connection);
+}
+
+void UFGRailroadTrackConnectionComponent_RemoveConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
+	AFINComputerSubsystem::GetComputerSubsystem(self)->RemoveRailroadSwitchConnection(Scope, self, Connection);
+}
+
+void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFactoryConnectionComponent*,TArray<FInventoryItem>&,TSubclassOf<UFGItemDescriptor>)>& Scope, const UFGFactoryConnectionComponent* const_self, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) {
+	UFGFactoryConnectionComponent* self = const_cast<UFGFactoryConnectionComponent*>(const_self);
+	TOptional<TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>> OptionalSettings = AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFINFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_items, Settings.AllowedItem ? Settings.AllowedItem : type);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
+}
+
+void UFGFactoryConnectionComponent_GrabOutput_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,float&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf<UFGItemDescriptor> type) {
+	TOptional<TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>> OptionalSettings = AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFINFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_item, out_OffsetBeyond, Settings.AllowedItem ? Settings.AllowedItem : type);
+			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
+}
+
+void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, TSubclassOf<UFGItemDescriptor> type) {
+	TOptional<TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>> OptionalSettings = AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFINFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_item, Settings.AllowedItem ? Settings.AllowedItem : type);
+			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
+}
+
 void FFicsItNetworksModule::StartupModule(){
+	FSlateStyleRegistry::UnRegisterSlateStyle(FFINStyle::GetStyleSetName());
+	FFINStyle::Initialize();
+	
 	CodersFileSystem::Tests::TestPath();
 	
 	GameStart = FDateTime::Now();
@@ -236,33 +314,40 @@ void FFicsItNetworksModule::StartupModule(){
 			}
 		});
 
-		// Copy FS UUID Item Context Menu Entry //
-		UClass* StackPlitter = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_StackSplitSlider.Widget_StackSplitSlider_C"));
-		check(StackPlitter);
-		UFunction* Function = StackPlitter->FindFunctionByName(TEXT("Construct"));
-		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
-		HookManager->HookBlueprintFunction(Function, [](FBlueprintHookHelper& HookHelper) {
-			UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
-			UUserWidget* SourceSlot = Cast<UUserWidget>(FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mSourceSlot")));
-			AFINFileSystemState* State = UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(SourceSlot);
-			if (State) {
-				UVerticalBox* MenuList = Cast<UVerticalBox>(self->GetWidgetFromName("VerticalBox_0"));
-				UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
-				UUIDButton->InitSlotWidget(SourceSlot);
-				MenuList->AddChildToVerticalBox(UUIDButton);
+		SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::SetSwitchPosition, UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook);
+		SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::AddConnection, UFGRailroadTrackConnectionComponent_AddConnection_Hook);
+		SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::RemoveConnection, UFGRailroadTrackConnectionComponent_RemoveConnection_Hook);
+
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGRailroadTrackConnectionComponent::EndPlay, (void*)GetDefault<UFGRailroadTrackConnectionComponent>(), [](UActorComponent* self, EEndPlayReason::Type Reason) {
+			if (Reason == EEndPlayReason::Destroyed && self->GetWorld()) {
+				AFINComputerSubsystem* Subsystem = AFINComputerSubsystem::GetComputerSubsystem(self);
+				if (Subsystem) Subsystem->ForceRailroadSwitch(Cast<UFGRailroadTrackConnectionComponent>(self), -1);
 			}
-		}, EPredefinedHookOffset::Start);
+		});
+
+		SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_PeekOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
+		SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_PeekOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
+		SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_GrabOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_GrabOutput_Hook);
+		SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook);
+
+		// Copy FS UUID Item Context Menu Entry //
+		UClass* Slot = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/InventorySlots/Widget_InventorySlot.Widget_InventorySlot_C"));
+		check(Slot);
+		UFunction* Function = Slot->FindFunctionByName(TEXT("CreateSplitSlider"));
+		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
+		HookManager->HookBlueprintFunction(Function, InventorSlot_CreateWidgetSlider_Hook, EPredefinedHookOffset::Return);
+		
 #else
-		/*FFINGlobalRegisterHelper::Register();
+		FFINGlobalRegisterHelper::Register();
 			
 		FFINReflection::Get()->PopulateSources();
-		FFINReflection::Get()->LoadAllTypes();*/
+		FFINReflection::Get()->LoadAllTypes();
 #endif
 	});
 }
 
 void FFicsItNetworksModule::ShutdownModule() {
-	FFINReflectionStyles::Shutdown();
+	FFINStyle::Shutdown();
 }
 
 extern "C" DLLEXPORT void BootstrapModule(std::ofstream& logFile) {

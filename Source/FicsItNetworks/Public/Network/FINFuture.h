@@ -49,9 +49,11 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 	UPROPERTY(SaveGame)
 	UFINProperty* Property = nullptr;
 
+	// TODO: Maybe do a LogScope snapshot?
 	FFINFutureReflection() = default;
 	FFINFutureReflection(UFINFunction* Function, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
-	FFINFutureReflection(UFINProperty* Property, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Property(Property) {}
+	FFINFutureReflection(UFINProperty* Property, const FFINExecutionContext& Context, const FFINAnyNetworkValue& Input) : Input({Input}), Context(Context), Property(Property) {}
+	FFINFutureReflection(UFINProperty* Property, const FFINExecutionContext& Context) : Context(Context), Property(Property) {}
 
 	virtual bool IsDone() const override { return bDone; }
 
@@ -60,7 +62,11 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 			Output = Function->Execute(Context, Input);
 			bDone = true;
 		} else if (Property) {
-			Property->SetValue(Context, Input[0]);
+			if (Input.Num() > 0) {
+				Property->SetValue(Context, Input[0]);
+			} else {
+				Output.Add(Property->GetValue(Context));
+			}
 		} else {
 			UE_LOG(LogFicsItNetworks, Error, TEXT("Future unable to get executed due to invalid function/property pointer!"));
 		}

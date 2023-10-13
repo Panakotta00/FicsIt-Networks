@@ -4,6 +4,12 @@
 #include "Subsystem/SubsystemActorManager.h"
 #include "FGCharacterPlayer.h"
 #include "FGInputSettings.h"
+#include "FGRailroadTrackConnectionComponent.h"
+#include "FGTrain.h"
+#include "Buildables/FGBuildableRailroadSignal.h"
+#include "Buildables/FGBuildableRailroadSwitchControl.h"
+#include "Computer/FINComputerGPU.h"
+#include "Patching/NativeHookManager.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input = CreateDefaultSubobject<UEnhancedInputComponent>("Input");
@@ -33,6 +39,11 @@ void AFINComputerSubsystem::BeginPlay() {
 	TArray<AActor*> FoundCharacters;
 	UGameplayStatics::GetAllActorsOfClass(this, AFGCharacterPlayer::StaticClass(), FoundCharacters);
 	for (AActor* Character : FoundCharacters) AttachWidgetInteractionToPlayer(Cast<AFGCharacterPlayer>(Character));
+
+	for (TTuple<UFGRailroadTrackConnectionComponent*, FFINRailroadSwitchForce>& Force : ForcedRailroadSwitches) {
+		ForcedRailroadSwitchCleanup(Force.Value, Force.Key);
+		UpdateRailroadSwitch(Force.Value, Force.Key);
+	}
 }
 
 void AFINComputerSubsystem::Tick(float dt) {
@@ -46,6 +57,10 @@ bool AFINComputerSubsystem::ShouldSave_Implementation() const {
 
 void AFINComputerSubsystem::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	Version = FINLatestVersion;
+}
+
+void AFINComputerSubsystem::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	SetFSAlways(FIN_FS_Ask);
 }
 
 void AFINComputerSubsystem::OnPrimaryFirePressed() {
@@ -122,4 +137,250 @@ void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 		(*Comp)->UnregisterComponent();
 		ScreenInteraction.Remove(character);
 	}
+}
+
+UFINGPUWidgetSign* AFINComputerSubsystem::AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign) {
+	UFINGPUWidgetSign* WidgetSign = NewObject<UFINGPUWidgetSign>(this);
+	GPU2WidgetSign.Add(GPU, WidgetSign);
+	WidgetSign2GPU.Add(WidgetSign, GPU);
+
+	FPrefabSignData Prefab;
+	Prefab.PrefabLayout = UFINGPUSignPrefabWidget::StaticClass();
+	BuildableSign->SetPrefabSignData(Prefab);
+	Cast<UFINGPUSignPrefabWidget>(BuildableSign->mPrefabLayout)->SetWidgetSign(WidgetSign);
+	WidgetSign->BuildableSign = BuildableSign;
+	
+	return WidgetSign;
+}
+
+void AFINComputerSubsystem::DeleteGPUWidgetSign(AFINComputerGPU* GPU) {
+	UFINGPUWidgetSign** WidgetSign = GPU2WidgetSign.Find(GPU);
+	if (WidgetSign) {
+		AFGBuildableWidgetSign* BuildableSign = (*WidgetSign)->BuildableSign;
+		FPrefabSignData Prefab;
+		BuildableSign->SetPrefabSignData(Prefab);
+		(*WidgetSign)->BuildableSign = nullptr;
+		GPU2WidgetSign.Remove(GPU);
+		WidgetSign2GPU.Remove(*WidgetSign);
+	}
+}
+
+void AFINComputerSubsystem::ForceRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch, int64 Track) {
+	FScopeLock ScopeLock(&ForcedRailroadSwitchesMutex);
+	
+	if (!IsValid(RailroadSwitch)) return;
+
+	FFINRailroadSwitchForce OldForce;
+	if (ForcedRailroadSwitches.RemoveAndCopyValue(RailroadSwitch, OldForce)) {
+		ForcedRailroadSwitchCleanup(OldForce, RailroadSwitch);
+	}
+	
+	if (Track >= 0) {
+		FFINRailroadSwitchForce& Force = ForcedRailroadSwitches.Add(RailroadSwitch, FFINRailroadSwitchForce{Track});
+		UpdateRailroadSwitch(Force, RailroadSwitch);
+	}
+}
+
+FFINRailroadSwitchForce* AFINComputerSubsystem::GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch) {
+	FScopeLock ScopeLock(&ForcedRailroadSwitchesMutex);
+	return ForcedRailroadSwitches.Find(RailroadSwitch);
+}
+
+
+void AFINComputerSubsystem::UpdateRailroadSwitch(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch) {
+	if (Force.ActualConnections.Num() == 0) {
+		Force.ActualConnections = Switch->mConnectedComponents;
+	}
+	TArray<UFGRailroadTrackConnectionComponent*> Components = Switch->mConnectedComponents;
+	for (UFGRailroadTrackConnectionComponent* Conn : Components) {
+		if (!Conn) continue;
+		Switch->RemoveConnectionInternal(Conn);
+		//Conn->RemoveConnectionInternal(Switch);
+	}
+	if (Force.ActualConnections.Num() > Force.ForcedPosition) {
+		UFGRailroadTrackConnectionComponent* ForcedTrack = Force.ActualConnections[Force.ForcedPosition];
+		if (ForcedTrack) {
+			Switch->AddConnectionInternal(ForcedTrack);
+			//ForcedTrack->AddConnectionInternal(Switch);
+		}
+	}
+
+	for (AFGRailroadVehicle* vehicle : Switch->GetTrack()->GetVehicles()) {
+		vehicle->GetTrain()->mAtcData.ClearPath();
+	}
+	
+	TWeakPtr<FFGRailroadSignalBlock> Block = Switch->GetConnections().Num() > 0 ? Switch->GetConnections()[0]->GetSignalBlock() : nullptr;
+	AFGRailroadSubsystem::Get(Switch)->RebuildSignalBlocks(Switch->GetTrack()->GetTrackGraphID());
+	if (AFGBuildableRailroadSignal* FacingSignal = Switch->GetFacingSignal()) {
+		//FacingSignal->SetObservedBlock(Block);
+		FacingSignal->UpdateConnections();
+	}
+}
+
+void AFINComputerSubsystem::AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection) {
+	FScopeLock ScopeLock(&ForcedRailroadSwitchesMutex);
+	FFINRailroadSwitchForce* ForcedTrack = GetForcedRailroadSwitch(Switch);
+	if (ForcedTrack) {
+		ForcedTrack->ActualConnections.Add(Connection);
+		Connection->RemoveConnectionInternal(Switch);
+	}
+}
+
+void AFINComputerSubsystem::RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*, UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection) {
+	FScopeLock ScopeLock(&ForcedRailroadSwitchesMutex);
+	FFINRailroadSwitchForce* ForcedTrack = GetForcedRailroadSwitch(Switch);
+	if (ForcedTrack) {
+		Switch->RemoveConnectionInternal(Connection);
+		ForcedTrack->ActualConnections.Remove(Connection);
+	}
+}
+
+static EFINFSAlways FSAlways = FIN_FS_Ask;
+static FCriticalSection FSAlwaysMutex;
+
+void AFINComputerSubsystem::SetFSAlways(EFINFSAlways InAlways) {
+	FScopeLock ScopeLock(&FSAlwaysMutex);
+	FSAlways = InAlways;
+}
+
+EFINFSAlways AFINComputerSubsystem::GetFSAlways() {
+	FScopeLock ScopeLock(&FSAlwaysMutex);
+	return FSAlways;
+}
+
+TOptional<TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>> AFINComputerSubsystem::GetFactoryConnectorSettings(UFGFactoryConnectionComponent* InConnector) {
+	FactoryConnectorSettingsMutex.Lock();
+	FFINFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
+	if (Settings) {
+		return TOptional(TTuple<FCriticalSection&, FFINFactoryConnectorSettings&>(FactoryConnectorSettingsMutex, *Settings));
+	} else {
+		FactoryConnectorSettingsMutex.Unlock();
+		return {};
+	}
+}
+
+void AFINComputerSubsystem::SetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector, TSubclassOf<UFGItemDescriptor> InAllowedItem) {
+	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FFINFactoryConnectorSettings* Settings = nullptr;
+	if (InAllowedItem != nullptr) {
+		Settings = &FactoryConnectorSettings.FindOrAdd(InConnector);
+	} else {
+		Settings = FactoryConnectorSettings.Find(InConnector);
+	}
+	if (Settings) {
+		Settings->AllowedItem = InAllowedItem;
+		FactoryConnectorCleanup(InConnector, *Settings);
+	}
+}
+
+TSubclassOf<UFGItemDescriptor> AFINComputerSubsystem::GetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector) {
+	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FFINFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
+	if (Settings) {
+		return Settings->AllowedItem;
+	} else {
+		return nullptr;
+	}
+}
+
+void AFINComputerSubsystem::SetFactoryConnectorBlocked(UFGFactoryConnectionComponent* InConnector, bool bInBlocked) {
+	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FFINFactoryConnectorSettings* Settings = nullptr;
+	if (bInBlocked) {
+		Settings = &FactoryConnectorSettings.FindOrAdd(InConnector);
+	} else {
+		Settings = FactoryConnectorSettings.Find(InConnector);
+	}
+	if (Settings) {
+		Settings->bBlocked = bInBlocked;
+		FactoryConnectorCleanup(InConnector, *Settings);
+	}
+}
+
+bool AFINComputerSubsystem::GetFactoryConnectorBlocked(UFGFactoryConnectionComponent* InConnector) {
+	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FFINFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
+	return Settings ? Settings->bBlocked : false;
+}
+
+int64 AFINComputerSubsystem::AddFactoryConnectorUnblockedTransfers(UFGFactoryConnectionComponent* InConnector, int64 InUnblockedTransfers) {
+	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FFINFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
+	if (Settings) {
+		Settings->UnblockedTransfers = FMath::Max(0, Settings->UnblockedTransfers + InUnblockedTransfers);
+		return Settings->UnblockedTransfers;
+	} else {
+		return 0;
+	}
+}
+
+int64 AFINComputerSubsystem::GetFactoryConnectorUnblockedTransfers(UFGFactoryConnectionComponent* InConnector) {
+	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FFINFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
+	if (Settings) {
+		return Settings->UnblockedTransfers;
+	} else {
+		return 0;
+	}
+}
+
+void AFINComputerSubsystem::ForcedRailroadSwitchCleanup(FFINRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch) {
+	TArray<UFGRailroadTrackConnectionComponent*> Components = Switch->mConnectedComponents;
+	for (UFGRailroadTrackConnectionComponent* Conn : Components) {
+		if (!Conn) continue;
+		Switch->RemoveConnectionInternal(Conn);
+		Conn->RemoveConnectionInternal(Switch);
+	}
+	for (UFGRailroadTrackConnectionComponent* Conn : Force.ActualConnections) {
+		if (!Conn) continue;
+		Switch->AddConnectionInternal(Conn);
+		Conn->AddConnectionInternal(Switch);
+	}
+	TWeakPtr<FFGRailroadSignalBlock> Block = Switch->GetConnections().Num() > 0 ? Switch->GetConnections()[0]->GetSignalBlock() : nullptr;
+	AFGRailroadSubsystem::Get(Switch)->RebuildSignalBlocks(Switch->GetTrack()->GetTrackGraphID());
+	if (AFGBuildableRailroadSignal* FacingSignal = Switch->GetFacingSignal()) {
+		//FacingSignal->SetObservedBlock(Block);
+		FacingSignal->UpdateConnections();
+	}
+}
+
+void AFINComputerSubsystem::FactoryConnectorCleanup(UFGFactoryConnectionComponent* InConnector, FFINFactoryConnectorSettings& Settings) {
+	if (Settings.bBlocked || Settings.AllowedItem != nullptr) return;
+	FactoryConnectorSettings.Remove(InConnector);
+}
+
+TSharedRef<SWidget> UFINGPUSignPrefabWidget::RebuildWidget() {
+	Container = SNew(SBox).HAlign(HAlign_Fill).VAlign(VAlign_Fill);
+	OnNewWidget();
+	return Container.ToSharedRef();
+}
+
+void UFINGPUSignPrefabWidget::OnNewWidget() {
+	if (Container.IsValid()) {
+		if (WidgetSign && WidgetSign->GetWidget().IsValid()) {
+			Container->SetContent(WidgetSign->GetWidget().ToSharedRef());
+		} else {
+			Container->SetContent(SNew(SBox));
+		}
+	}
+}
+
+void UFINGPUSignPrefabWidget::OnNewGPU() {
+	if (WidgetSign) {
+    		TScriptInterface<IFINGPUInterface> GPU = WidgetSign->GetGPU().GetUnderlyingPtr();
+    		if (GPU) {
+    			GPU->RequestNewWidget();
+    			return;
+    		}
+    	}
+    	if (Container.IsValid()) Container->SetContent(SNew(SBox));
+}
+
+void UFINGPUSignPrefabWidget::SetWidgetSign(UFINGPUWidgetSign* Sign) {
+	WidgetSign = Sign;
+
+	Sign->OnGPUUpdate.AddDynamic(this, &UFINGPUSignPrefabWidget::OnNewGPU);
+	Sign->OnWidgetUpdate.AddDynamic(this, &UFINGPUSignPrefabWidget::OnNewWidget);
+	
+	OnNewGPU();
 }

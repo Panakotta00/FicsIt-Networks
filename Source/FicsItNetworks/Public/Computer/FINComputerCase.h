@@ -12,6 +12,7 @@ class AFINComputerNetworkCard;
 class AFINComputerDriveHolder;
 class AFINComputerMemory;
 class AFINComputerProcessor;
+class UFINLog;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINStateEEPROM*, EEPROM);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
@@ -33,9 +34,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UAudioComponent* Speaker = nullptr;
 
-	UPROPERTY(SaveGame, Replicated)
-	FString SerialOutput = "";
-
+	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
+	UFINLog* Log = nullptr;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	int LastTabIndex = 0;
 	
@@ -72,8 +73,6 @@ public:
 
 	UPROPERTY(Replicated)
 	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
-
-	FString OldSerialOutput = "";
 
 	float KernelTickTime = 0.0;
 
@@ -151,12 +150,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	EFINKernelState GetState();
-
-	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-    void WriteSerialInput(const FString& str);
-	
-	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-	FString GetSerialOutput();
 	
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	AFINComputerProcessor* GetProcessor();

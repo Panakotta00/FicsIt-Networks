@@ -123,6 +123,11 @@ public:
 	UObject* GetUnderlyingPtr() const;
 
 	/**
+	 * returns true if the underlying weak object ptr is valid or not, without checking the trace
+	 */
+	bool IsValidPtr() const;
+
+	/**
 	 * returns the starting object of the trace
 	 */
 	UObject* GetStartPtr() const;

@@ -45,9 +45,9 @@ void FFINReflection::LoadAllTypes() {
 	Filter.bRecursivePaths = true;
 	Filter.bRecursiveClasses = true;
 	Filter.PackagePaths.Add("/");
-	Filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName()); // TODO: Check if ClassNamePaths could work and how
-	Filter.ClassNames.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
-	Filter.ClassNames.Add(UClass::StaticClass()->GetFName());
+	Filter.ClassPaths.Add(UBlueprint::StaticClass()->GetClassPathName());
+	Filter.ClassPaths.Add(UBlueprintGeneratedClass::StaticClass()->GetClassPathName());
+	Filter.ClassPaths.Add(UClass::StaticClass()->GetClassPathName());
 	AssetRegistryModule.Get().GetAssets(Filter, AssetData);
 
 	for (const FAssetData& Asset : AssetData) {
@@ -92,9 +92,11 @@ UFINClass* FFINReflection::FindClass(UClass* Clazz, bool bRecursive, bool bTryTo
 				Clazz->AddToRoot();
 				Class->AddToRoot();
 				Classes.Add(Clazz, Class);
+				ClassesReversed.Add(Class, Clazz);
 				for (const UFINReflectionSource* Source : Sources) {
 					Source->FillData(this, Class, Clazz);
 				}
+				ClassNames.Add(Class->GetInternalName(), Class);
 				return Class;
 			}
 		}
@@ -104,6 +106,18 @@ UFINClass* FFINReflection::FindClass(UClass* Clazz, bool bRecursive, bool bTryTo
 		else Clazz = Clazz->GetSuperClass();
 	} while (Clazz && bRecursive);
 	return nullptr;
+}
+
+UFINClass* FFINReflection::FindClass(const FString& ClassName) const {
+	UFINClass* const* Class = ClassNames.Find(ClassName);
+	if (Class) return *Class;
+	else return nullptr;
+}
+
+UClass* FFINReflection::FindUClass(UFINClass* Class) const {
+	UClass* const* UClass = ClassesReversed.Find(Class);
+	if (UClass) return *UClass;
+	else return nullptr;
 }
 
 UFINStruct* FFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive, bool bTryToReflect) {
@@ -128,9 +142,11 @@ UFINStruct* FFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive, b
 				Struct->AddToRoot();
 				FINStruct->AddToRoot();
 				Structs.Add(Struct, FINStruct);
+				StructsReversed.Add(FINStruct, Struct);
 				for (const UFINReflectionSource* Source : Sources) {
 					Source->FillData(this, FINStruct, Struct);
 				}
+				StructNames.Add(FINStruct->GetInternalName(), FINStruct);
 				return FINStruct;
 			}
 		}
@@ -139,6 +155,18 @@ UFINStruct* FFINReflection::FindStruct(UScriptStruct* Struct, bool bRecursive, b
 		Struct = Cast<UScriptStruct>(Struct->GetSuperStruct());
 	} while (Struct && bRecursive);
 	return nullptr;
+}
+
+UFINStruct* FFINReflection::FindStruct(const FString& StructName) const {
+	UFINStruct* const* Struct = StructNames.Find(StructName);
+	if (Struct) return *Struct;
+	else return nullptr;
+}
+
+UScriptStruct* FFINReflection::FindScriptStruct(UFINStruct* Struct) const {
+	UScriptStruct* const* ScriptStruct = StructsReversed.Find(Struct);
+	if (ScriptStruct) return *ScriptStruct;
+	else return nullptr;
 }
 
 void PrintProperty(FString Prefix, UFINProperty* Property) {
