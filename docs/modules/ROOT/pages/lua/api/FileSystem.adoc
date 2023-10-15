@@ -146,6 +146,32 @@ Parameters::
 |the path to the point were the device should get mounted to
 |===
 
+=== `bool unmount(string mountPoint)`
+
+This function unmounts if the device at the given mount point.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|mountPoint
+|string
+|the path the device is mounted to
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns true if it was able to unmount the device located at the mount point
+|===
+
 === `File open(string path, string mode)`
 
 Opens a file-stream and returns it as File-table.
@@ -204,7 +230,7 @@ Return Values::
 Nil if not able to open file in read only
 |===
 
-=== `bool createDir(string path)`
+=== `bool createDir(string path, bool all)`
 
 Creates the folder path.
 
@@ -217,6 +243,11 @@ Parameters::
 |path
 |string
 |folder path the function should create
+
+|all
+|bool
+|If false creates only the last folder of the path +
+If true creates all folders in the path
 |===
 
 Return Values::
@@ -230,7 +261,7 @@ Return Values::
 |returns if it was able to create the directory
 |===
 
-=== `bool remove(string path)`
+=== `bool remove(string path, bool all)`
 
 Removes the filesystem object at the given path.
 
@@ -243,6 +274,11 @@ Parameters::
 |path
 |string
 |path to the filesystem object
+
+|all
+|bool
+|If false only removes the given filesystem object +
+If true removes all childs of the filesystem object
 |===
 
 Return Values::
@@ -319,6 +355,32 @@ Return Values::
 |===
 
 === `array childs(string path)`
+
+Lists all children of this node. (f.e. items in a folder)
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path to the filesystem object you want to get the childs from
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|array
+|array
+|array of string which are the names of the childs
+|===
+
+=== `array children(string path)`
 
 Lists all children of this node. (f.e. items in a folder)
 

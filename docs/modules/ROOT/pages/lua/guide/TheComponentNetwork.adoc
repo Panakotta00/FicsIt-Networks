@@ -1,0 +1,171 @@
+= 2. The Component Network
+
+Now we could start coding with Lua.
+
+But we won't do a simple Hello World here.
+
+Okay fine if you seriously want to start with a Hello World, here it is:
+[source,Lua]
+----
+print("Hello World")
+----
+just add it into the code window and hit the power button.
+
+Everyone else who wants to start with something proper.
+We first have to learn about something very important first.
+
+== (Network) Components
+Computer Network Components are all things that can be connected
+to the computer component network and be discovered by it.
+
+Every such *component* has two major properties you want to be aware of.
+
+The first is the component id. This is a UUID that identifies a unique component and can not be changed.
+It should be unique in the universe (but real life won't allow that, for now we can view it as such).
+An analogy would be an IP-Address or better a MAC-Address. +
+The **UUID** is used to reference this specific component in and across networks. +
+Be aware that if you want to write good code, you don't want to reference such a component
+"hard coded" in your program.
+Instead, you often want to use config files or a different more dynamic way to reference your components. +
+You only want to handle such UUIDs directly if you are just trying stuff out,
+when you implement your own way of referencing components dynamically or when you debug a program.
+
+The second property you want to be aware of is the component **nick**. +
+Nick is actually a bit misleading, you could also call it "groups".
+At first sight the nick allows you to give your components a nickname, so you can understand more easily
+which component is which when you are presented with a list of network components. +
+On a second look tho, you can use the nick field for much more.
+The nick field is also designed as keyword list where each keyword resembles a group.
+You can f.e. give a component the nick `test north 1`
+and your component will be in the nick groups `test`, `north` and `1`.
+You can now use later on a "nick query" to search for all components in the network
+that are part of the `test` and the `north` group using the query `test north` query
+and your component will be matched.
+If you query for just `test`, then your component will still be matched.
+Tho if you query for something like `test meep`
+your component won't be matched because it is not part of the `meep` group as requested. +
+The nick allows for one more thing. Holding data.
+You can exploit the nick property to add data like configuration data to a component.
+But your program will have to figure out how to parse this data it-self.
+
+[WARNING]
+====
+In a component network there can be an infinite amount of network components,
+but large networks are not recommended as they can be slow the game down
+when in use or shown by a component network outliner. +
+Instead, it is recommended to split component networks using network routers
+into multiple smaller ones and use network messages to communicate between networks.
+We will talk about this in a later section.
+====
+
+== Network Expansion
+We have talked about network components, but how do we actually connect them to a network?
+For this we use network cables that can usually be attached somewhere on a component.
+These points are also called network connectors, and you already know one,
+the connector on top of the computer case. +
+Not every network component has to have such a connector,
+network cards f.e. are connected to the network via and internal connection inside the computer case.
+
+You can use the computer network cable from the build menu to build a network cable between two connectors
+just like you can connect power cables.
+It also allows you to start and end with network poles and wall plugs. +
+You can place network poles and wall plugs individually if you want.
+Wall plugs can be unlocked in the AWESOME-Shop.
+
+[WARNING]
+====
+When building a cable network, make sure you actually build on the connectors, poles and plugs. +
+You might target a pole or plug not correctly and
+that could cause you to build a plug or pole at the same place as you have already.
+Essentially two poles/plugs on top of each other which probably means
+the two circuits won't be connected with each other and that results in two separate networks. +
+You can find such places by using the network manager tool to check the network name.
+====
+
+These network connections won't travel through rails like power does.
+
+== Network Adapter
+You can also connect cables to machines and things that my not appear to be computer network components. +
+This is done using the network adapter. This is not a buildable or item.
+Instead, such adapter will be created and attached to a machine or other thing
+when you try to connect a cable to it.
+The Cable hologram won't be visible as long as it has not found a start and end component.
+That means you can simply try to create a cable connection from somewhere like a pole or computer, to a machine,
+and if the cable hologram appears, you know it would create an adapter for you.
+
+The adapter is just an attachment to a machine or other thing that allows you
+to connect a network cable to it and interact with the object. +
+Once attached it will stay attached till you disassemble the whole machine/thing.
+
+Any machine that has a power connector, can be connected to the computer network
+and hence is able to have a network adapter attached.
+The adapter and so the cable connection will be at the exact same location as the power connector.
+
+Other buildings like a storage container who doesn't have a power connector
+have to be manually configured by the mod to support a network adapter.
+When these get connected to the network,
+a little power connector mesh will appear somewhere on the building to represent the connection point.
+
+For our first program, you need to connect a storage container to the computer
+using network cables with at least one network pole in between
+(The network pole is not important, we just want to have one for later use to be able to expand the network more easily).
+
+== Network Manager
+The network manager is a hand-held tool that allows you to
+interact and debug a computer component network. +
+It additionally provides the data-workbench and a portable reflection viewer.
+
+You can craft the network manager in the equipment workbench. +
+
+When you now place the network manager into your active hand slot,
+you will be able to see an outline to appear around objects you are looking at. +
+A orange outline means the object is not a computer network component,
+but you can still interact with it to f.e. get access to its functions
+via the reflection viewer or get access to the data workbench.
+This is useful since some objects (f.e. trains) can not be attached
+to the computer component network, instead it can be referred indirectly
+by calling a function of a network component (f.e. train station). +
+If the outline is blue, this means you are looking at a computer network component
+or an object that has a network adapter attached.
+
+While looking at an object, pressing the primary fire button (left mouse click)
+will open the network manager's UI with the outlined objects context.
+
+If the object was a network component or had a network adapter attached,
+then the network manager will open into the component network outliner.
+This outliner is the same as inside the computer. +
+It provides a input field to change the network component's nick, +
+a read-only field containing its UUID, +
+a field showing the name of the connected network and +
+a list of all connected network components (including it-self). +
+Each entry of the component list shows the UUID of the component
+if no nick is set for that component, or it shows the nick instead. +
+Clicking on the list entry copies that components UUID into your clipboard,
+so you can easily copy & paste the UUID if necessary. +
+The icon at the right end of such an entry is clickable and
+opens the reflection viewer with focus on the type of the network component.
+
+Holding control while opening the UI of the network manager
+will cause the UI to open into the reflection viewer tab.
+
+The reflection viewer tab is the same as inside a computer.
+When you open the tab it will show initially the class (type)
+of the object you were looking at.
+
+While looking at network component or object with a network adapter attached
+you can press `ctrl + c` to copy the components UUID into your clipboard. +
+You can also press `ctrl + shift + c` to copy the components nick. +
+And you can also press `ctrl + shift + v` to paste your clipboard into the nick field of the component.
+
+The network manager has a third tab, the data-workbench. +
+The data-workbench allows you, as already mentioned, to copy contents
+of one data storage item to another on. +
+You can place the item you want to write to into the top slot.
+The item you want to copy the data from needs to be placed into the middle slot.
+At the point when you have both these slots filled with compatible items,
+the input item in the top slot will be written with the contents of the item in the middle slot
+and be moved into the bottom output slot. +
+This only works with compatible items.
+You can not copy the data from a EEPROM to a drive or vice versa,
+but you can copy the data from one EEPROM to another or
+copy the data from one Drive to another.

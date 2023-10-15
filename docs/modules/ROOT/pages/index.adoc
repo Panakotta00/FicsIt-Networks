@@ -1,11 +1,89 @@
 = FicsIt-Networks
-:description: FicsIt-Networks allows you to control, monitor, manage and automate each process of you Satisfactory-Factory.
+:description: FicsIt-Networks allows you to control, monitor, manage, and automate numerous aspects of your Satisfactory operations.
 
-FicsIt-Networks is a mod for Satisfactory, written in C++/BP using Unreal Engine and the Satisfactory Mod Loader, which allows you to control, monitor, manage and automate each process of your factory by providing a network system and programmable computers and other I/O.
+// FicsIt-Networks is a mod for Satisfactory that adds computers and computer networks to the game.
+
+Ficsit-Networks is a mod for Satisfactory that adds computer hardware, network connectors, modular interfaces, and software tools that enable you to control, monitor, and manage numerous aspects of your operations.
+
+_To use the mod, install it using https://ficsit.app/mod/FicsItNetworks[SMM and SMR]._
+
+== Description
+Ficsit-Networks introduces a powerful new layer of automation functionality to Satisfactory using a combination of networks and in-game computers running code that _you_ write! 
+With proper application, this mod can allow you to:
+
+- Perform detailed storage and power monitoring
+- Reconfigure production lines with the flip of a switch
+- Automate over/underclocking live with demand
+- Fully manage truck operations based on vehicle inventory
+- Create audio and visual signals in response to factory state
+- Any combination of these things and much more!
+
+== What this mod is (and isn't)
+If any of this sounds interesting to you, then *read the following carefully:*
+
+This mod is not designed with ready-made solutions out-of-the-box. 
+For example, you should _not_ expect to download FicsIt-Networks, plop down a "storage monitoring" buildable, and go on your merry way.
+
+Instead, FicsIt-Networks is designed as a set of open-ended tools that give you an entirely new "axis" on which to solve problems you encounter in your game... 
+
+*...as long as you're willing to learn to use the tools!*
+
+So, if you like a challenge AND want to take your Satisfactory operation(s) to the next level, then you are in the right place! 
+These docs will help to get you up-to-speed with the information necessary to use this mod to its fullest potential.
+
+If you have any questions--or just want to join a community of folks learning the mod right alongside you--then check out our https://discord.gg/xkVJ73E[Discord server] and get involved!
+
+== Coding in FicsIt-Networks
+This mod provides you with everything you need to connect components in your factory to a computer network for additional processing by one or more computers. 
+However, connecting components is only the start. 
+
+FicsIt-Networks enables you to interact with networked components using the *Lua programming language*. 
+Lua is a simple and easy-to-learn language for experienced coders and newbies alike.
+
+If you are new to coding, or simply want a quick lesson in Lua syntax, we highly recommend looking at a basic tutorial or the Lua documentation first. 
+The FicsIt-Networks docs are designed to build upon a rudimentary understanding of Lua, so you won't need a great deal of knowledge to get started.
+
+Once you feel that you have an understanding of how to write a basic script, head over to xref:lua/guide/index.adoc[Lua Getting Started Guide] to learn how to interact with components in your factory using the language.
+There are even xref:lua/examples/index.adoc[examples] that will help you get started.
+
+To ask questions, share scripts, or generally learn more about using the mod, check out our https://discord.gg/3VfZ6Da[Discord Server]!
+
+// *Don't be scared tho!* +
+// Lua is a fairly easy programming language and designed for absolute programming beginners. +
+// Important to note is, Lua is highly customizable by its embedding nature.
+// This means even if you already have some experience with Lua,
+// the API is quite different from application to application. +
+// This documentation doesn't focus on "how to code with Lua",
+// instead if focuses on how to adapt your Lua-Knowledge to the FicsIt-Networks environment. +
+// The Documentation will link to the official Lua guide often,
+// allowing you to read upon the needed aspects easily.
+
+== Documentation Structure
+
+This documentation is seperated into six sections:
+
+- The xref:BasicConcept.adoc[Basic Concept] section is a surface-level explanation of the mod's structure, e.g. elements of a network and an introduction to the Reflection System.
+- The xref:buildings/index.adoc[Buildings] section lists all constructable buildings you can place using the build gun.
+- The xref:items/index.adoc[Items] section lists all items the mod adds
+  which you can craft in a crafting bench.
+- The xref:lua/index.adoc[Lua] section contains everything related to using the Lua programming language with FicsIt-Networks.
+- The xref::Reflection.adoc[Reflection] section contains a reference for the *Reflection System*, including all the classes, functions, and properties that are used to interact with the game.
+- Additional pages (xref:NetworkTrace.adoc[Network Trace], xref:Reflection.adoc[Reflection], and xref:ModIntegration.adoc[Mod Integration]) provide a look into the deep technical aspects of the mod and how the different systems work.
+
+== Mod Development
+Currently, the mod implements the https://lua.org[Lua Programming Language].
+The mod is structured in such a way, it can be extended with other languages even by optional additional mods. 
+For now, however, the mod focuses on a good Lua implementation.
+
+The mod is still in development and endeavors to improve the ease of use.
+One such venture is FicsIt-OS.
+We try to create a system allowing players to easily reuse pre-made scripts from other users.
+But this is a venture for now. +
+Tho even right now there are ways to share scripts between players.
 
 == Source Code
 
-You can visit our https://github.com/CoderDE/FicsIt-Networks[GitHub-Repository] to view the source code.
+In order to view the source code (and/or contribute to its development), check out the https://github.com/Panakotta00/FicsIt-Networks[GitHub repo here].
 
 include::partial$items.adoc[]
 

@@ -1,0 +1,173 @@
+= 8. Using Reflection
+
+The Reflection System is a system that allows to get data about
+functions, classes, properties and structs.
+
+It contains information about their structure, parameters of functions and other
+technical and structural data as well as metadata like descriptions and
+localized display names of the different things.
+
+This data is heavily used internally and also can be accessed from within Lua code.
+
+== Reflection Data in Lua
+The mentioned `findClass` function allows you to search for a class by its name.
+It returns an instance of a class containing information about it.
+[source, lua]
+local class = findClass("NetworkCard")
+
+This instance contains functions and properties that allow you to get
+information about the class it represents. +
+It extends from Struct, and it extends from ReflectionBase, the base type of all reflection data classes. +
+xref::Reflection.adoc#Class-ReflectionBase[ReflectionBase]:
+
+* name (property) +
+ The internal name of the data object as a string. f.e. the function name you use in Lua.
+* displayName (property) +
+ A display name with better and more human-readable text of the object.
+* description (property) +
+ A human-readable description explaining what the data object does. +
+ (f.e. functionality of the function, uses of the class)
+
+The "Struct" Class provides functions and properties about a struct specifically.
+Like what properties and what functions the Struct it Represents has. +
+Check the xref::Reflection.adoc#Class-Struct[Reference] for more details.
+
+The "Class" Class provides the finally additionally information
+about signals a instance of this class might emit.
+Check the xref::Reflection.adoc#Class-Class[Reference] for more details.
+
+== Using Reflection Viewer and Reference
+As Reflection Viewer we mean the "Reflection" Tab in the computer case UI
+or the network manager tool, that shows all available types, functions, etc.
+
+As Reflection Reference we mean the xref::Reflection.adoc[Reflection] page
+in this web documentation.
+
+Both of these, list all the contents of the reflection system language independent. +
+That's why you won't find stuff like the component or event API in here,
+because this stuff is language (Lua) dependent.
+
+The reflection viewer can show all data of class and its inherited functions etc.
+all on one page, the reflection reference can not. +
+You can disable this behaviour of the reflection viewer in the bottom right corner.
+
+Let's try to read the reflection data.
+
+We want to first, read the Recipe of a Constructor and prints its name to the console,
+after that we want to get a signal whenever Item got outputted and print something.
+
+At first, lets search for a constructor in the reflection data. +
+You won't be able to find it in the online documentation,
+as it will unnecessarily bloat it, but you can find it in the in-game
+reflection viewer.
+
+On the left you can see of which classes the constructor extends from. +
+On of these is the "Manufacturer" Class. Let's have a look at it. +
+This time it is also available on the online documentation:
+====
+include::page$Reflection.adoc[tag=Class-Manufacturer__title,leveloffset=-10]
+====
+
+Since we first want to get a recipe lets search for a function or property,
+that could do that.
+====
+include::page$Reflection.adoc[tag=Class-Manufacturer-Funcs-getRecipe__title,leveloffset=-10]
+====
+
+You can read a description and other information. +
+The flags "RuntimeSync" and "RuntimeParallel" show that we can
+only use the function in the non-promoted Lua tick state. +
+What that exactly means will be discussed in a later section.
+
+The title consists of: +
+**Display Name** internalName (Parameter, List) +
+The display name is a human readable name of the function. +
+The internal name is used f.e. inside lua as function name. +
+The parameter list are all arguments and return values of the function. +
+Parameters with the `out` keyword are return values. +
+You can have multiple return values.
+
+Parameters are further down described in the `Parameter` and `Return Values` section.
+
+We can see that a instance of a manufacturer (which a instance of constructor is),
+has a member function `getRecipe` that returns a Class Instance of a Recipe.
+[source,lua]
+----
+local manufacturer = component.proxy(...)
+local recipe = manufacturer:getRecipe()
+----
+
+You can click on the link of the parameter type to get redirected
+to the reference of that type.
+
+====
+include::page$Reflection.adoc[tag=Class-Recipe__title,leveloffset=-10]
+====
+
+Here you can find a couple of functions and properties that have
+the `ClassFunc` or `ClassProp` flag. +
+This flag describes that it is available when you have a class instance of that type.
+
+We want the `name` property as it gives us the name of the recipe.
+
+[source,lua]
+print(recipe.name)
+
+Now we want to figure out how we can get a signal when an item gets outputted.
+
+Let's search further one of the parents of our Manufacturer.
+====
+include::page$Reflection.adoc[tag=Class-Actor__title,leveloffset=-10]
+====
+
+The actor class has an interesting function `getFactoryConnectors`. +
+Let's check the return type of it:
+====
+include::page$Reflection.adoc[tag=Class-FactoryConnection__title,leveloffset=-10]
+====
+
+Well, look at that, it has a `ItemTransfer` Signal. +
+And when looking at the description, it does exactly what we want.
+
+So lets use the information we got from the reflection and write some code
+that gets a factory connector, and then listen to it.
+
+We don't know which of the factory connectors the `getFactoriesConnector` returns. +
+They will always be in the same order on a per building type basis. +
+So we simply have to test which of the connectors is the output connector
+for all constructors, and listen to that one.
+
+[source,lua]
+----
+local connector = manufacturer:getFactoryConnectors()[1]
+event.listen(connector)
+----
+
+So, now we can pull events and print the `ItemTransfer` event to the console.
+
+[source,lua]
+while true do
+ e, s, i = event.pull()
+ if e == "ItemTransfer" then
+  print("Transfer!", i)
+ end
+end
+
+Our full code yet would be:
+[source,lua]
+----
+local manufacturer = component.proxy(...)
+local recipe = manufacturer:getRecipe()
+
+print(recipe.name)
+
+local connector = manufacturer:getFactoryConnectors()[1]
+event.listen(connector)
+
+while true do
+ e, s, i = event.pull()
+ if e == "ItemTransfer" then
+  print("Transfer!", i)
+ end
+end
+----

@@ -1,8 +1,20 @@
+diff --git a/Source/FactoryGame/Public/FGRailroadSignalBlock.h b/Source/FactoryGame/Public/FGRailroadSignalBlock.h
+index f2c03b79f..f825b3f49 100644
+--- a/Source/FactoryGame/Public/FGRailroadSignalBlock.h
++++ b/Source/FactoryGame/Public/FGRailroadSignalBlock.h
+@@ -276,6 +276,7 @@ public:
+ private:
+ 	friend struct FFGRailroadBlockReservation; // Access to the helper functions.
+ 	friend class AFGRailroadSubsystem; // Show debug command.
++	friend class FStaticReflectionSourceHelper;
+ 	
+ 	/** Vehicles currently occupying this block. */
+ 	TArray< TWeakObjectPtr< AFGRailroadVehicle > > mOccupiedBy;
 diff --git a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
-index c703d67a90..24303d3312 100644
+index 85d6f5720..9d8db4313 100644
 --- a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 +++ b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
-@@ -293,7 +293,7 @@ protected:
+@@ -305,7 +305,7 @@ protected:
  			return cdo;
  		}
  
