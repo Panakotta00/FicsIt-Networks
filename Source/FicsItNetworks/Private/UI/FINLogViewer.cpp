@@ -199,7 +199,7 @@ void SFINLogViewer::UpdateEntries(UFINLog* Log) {
 						LineCount += 1;
 					}
 					bFirstDone = true;
-					Text.Append(FFINUtils::TextRange(Entry.Content, Range));
+					Text.Append(UFINUtils::TextRange(Entry.Content, Range));
 				}
 			} else {
 				Text.Append(Entry.Content);
