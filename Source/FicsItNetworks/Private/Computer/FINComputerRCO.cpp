@@ -9,14 +9,6 @@ void UFINComputerRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(UFINComputerRCO, bDummy);
 }
 
-void UFINComputerRCO::SetLuaEEPROMCode_Implementation(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
-	LuaEEPROMState->SetCode(NewCode);
-}
-
-bool UFINComputerRCO::SetLuaEEPROMCode_Validate(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
-	return true;
-}
-
 void UFINComputerRCO::SetCaseLastTab_Implementation(AFINComputerCase* Case, int LastTab) {
 	Case->LastTabIndex = LastTab;
 	Case->ForceNetUpdate();

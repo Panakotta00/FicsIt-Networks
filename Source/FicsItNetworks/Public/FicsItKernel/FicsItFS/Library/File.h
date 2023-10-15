@@ -20,18 +20,18 @@ namespace CodersFileSystem {
 		BINARY	= 0b10000,
 	};
 
-	FileMode operator |(FileMode l, FileMode r);
-	FileMode operator &(FileMode l, FileMode r);
-	FileMode operator ~(FileMode m);
+	FICSITNETWORKS_API FileMode operator |(FileMode l, FileMode r);
+	FICSITNETWORKS_API FileMode operator &(FileMode l, FileMode r);
+	FICSITNETWORKS_API FileMode operator ~(FileMode m);
 
-	class File : public Node {
+	class FICSITNETWORKS_API File : public Node {
 	public:
 		File();
 
 		virtual std::unordered_set<std::string> getChilds() const override;
 	};
 
-	class MemFile : public File {
+	class FICSITNETWORKS_API MemFile : public File {
 	private:
 		std::string data;
 		WRef<MemFileStream> io;
@@ -52,7 +52,7 @@ namespace CodersFileSystem {
 		size_t getSize() const;
 	};
 
-	class DiskFile : public File {
+	class FICSITNETWORKS_API DiskFile : public File {
 	private:
 		std::filesystem::path realPath;
 		SizeCheckFunc sizeCheck;
@@ -64,7 +64,7 @@ namespace CodersFileSystem {
 		virtual bool isValid() const override;
 	};
 
-	class FileStream : public ReferenceCounted {
+	class FICSITNETWORKS_API FileStream : public ReferenceCounted {
 	protected:
 		FileMode mode;
 	
@@ -141,7 +141,7 @@ namespace CodersFileSystem {
 		static std::string readAll(SRef<FileStream> stream);
 	};
 
-	class MemFileStream : public FileStream {
+	class FICSITNETWORKS_API MemFileStream : public FileStream {
 	protected:
 		std::string* data;
 		uint64_t pos = 0;
@@ -162,7 +162,7 @@ namespace CodersFileSystem {
 		virtual bool isOpen() override;
 	};
 
-	class DiskFileStream : public FileStream {
+	class FICSITNETWORKS_API DiskFileStream : public FileStream {
 	protected:
 		std::filesystem::path path;
 		SizeCheckFunc sizeCheck;

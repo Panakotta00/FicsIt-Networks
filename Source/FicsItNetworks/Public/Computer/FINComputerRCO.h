@@ -2,7 +2,6 @@
 
 #include "FINComputerCase.h"
 #include "FINComputerGPUT1.h"
-#include "LuaProcessor/FINStateEEPROMLua.h"
 #include "FGRemoteCallObject.h"
 #include "FINComputerRCO.generated.h"
 
@@ -13,9 +12,6 @@ class FICSITNETWORKS_API UFINComputerRCO : public UFGRemoteCallObject {
 public:
 	UPROPERTY(Replicated)
 	bool bDummy = false;
-
-	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
-    void SetLuaEEPROMCode(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode);
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
 	void SetCaseLastTab(AFINComputerCase* Case, int LastTab);
