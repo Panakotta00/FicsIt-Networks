@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FINNetworkValues.h"
+#include "Misc/DefaultValueHelper.h"
 #include "FINAnyNetworkValue.generated.h"
 
 /**
@@ -9,6 +10,47 @@
 USTRUCT(BlueprintType)
 struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	GENERATED_BODY()
+
+	FORCEINLINE static FFINAnyNetworkValue DefaultValue(EFINNetworkValueType ValueType) {
+		FFINAnyNetworkValue Value;
+		Value.Type = ValueType;
+		auto& Data = Value.Data;
+		switch (ValueType) {
+		case FIN_NIL:
+			break;
+		case FIN_BOOL:
+			Data.BOOL = false;
+			break;
+		case FIN_INT:
+			Data.INT = 0;
+			break;
+		case FIN_FLOAT:
+			Data.FLOAT = 0.0f;
+			break;
+		case FIN_STR:
+			Data.STRING = new FINStr();
+			break;
+		case FIN_OBJ:
+			Data.OBJECT = new FINObj();
+			break;
+		case FIN_CLASS:
+			Data.CLASS = nullptr;
+			break;
+		case FIN_TRACE:
+			Data.TRACE = new FINTrace();
+			break;
+		case FIN_STRUCT:
+			Data.STRUCT = new FINStruct();
+			break;
+		case FIN_ARRAY:
+			Data.ARRAY = new FINArray();
+			break;
+		case FIN_ANY:
+			Data.ANY = new FINAny();
+			break;
+		}
+		return Value;
+	}
 	
 	FORCEINLINE FFINAnyNetworkValue() : Type(FIN_NIL), Data() {}
 
@@ -55,6 +97,24 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	FORCEINLINE FFINAnyNetworkValue(const FINArray& e) {
 		Data.ARRAY = new FINArray(e);
 		Type = FIN_ARRAY;
+	}
+
+	FORCEINLINE FFINAnyNetworkValue(FProperty* Property, void* ValuePtr) {
+		if (Property->IsA<FFloatProperty>()) {
+			Type = FIN_FLOAT;
+			Data.FLOAT = *(float*)ValuePtr;
+		} else if (Property->IsA<FIntProperty>()) {
+			Type = FIN_INT;
+			Data.INT = *(int*)ValuePtr;
+		} else if (Property->IsA<FInt64Property>()) {
+			Type = FIN_INT;
+			Data.INT = *(int64*)ValuePtr;
+		} else if (Property->IsA<FStrProperty>()) {
+			Type = FIN_STR;
+			Data.STRING = new FString(*(const FString*)ValuePtr);
+		} else {
+			Type = FIN_NIL;
+		}
 	}
 
 	FORCEINLINE FFINAnyNetworkValue(const FFINAnyNetworkValue& other) {
@@ -280,6 +340,37 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 		return *Data.ANY;
 	}
 
+	/**
+	 * Returns the pointer to the underlying data structure.
+	 * Mainly intended to do be able to direct data copy into UE Reflected Structs.
+	 */
+	FORCEINLINE void* GetData() {
+		return &Data;
+	}
+
+	void Copy(const FProperty* Prop, void* Dest) {
+		switch (Type) {
+		case FIN_FLOAT: {
+			float Value = Data.FLOAT;
+			Prop->CopyCompleteValue(Dest, &Value);
+			break;
+		} case FIN_INT: {
+			if (Prop->IsA<FIntProperty>()) {
+				int Value = Data.INT;
+				Prop->CopyCompleteValue(Dest, &Value);
+			} else if (Prop->IsA<FInt64Property>()) {
+				Prop->CopyCompleteValue(Dest, &Data.INT);
+			}
+			break;
+		} case FIN_STR:
+			Prop->CopyCompleteValue(Dest, Data.STRING);
+			break;
+			// TODO: Add more data types
+			default:
+				Prop->CopyCompleteValue(Dest, GetData());
+		}
+	}
+
 	bool Serialize(FArchive& Ar);
 
 private:
@@ -318,3 +409,146 @@ struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFI
 template<>
 struct TMoveSupportTraits<FFINAnyNetworkValue> : TMoveSupportTraitsBase<FFINAnyNetworkValue, const FFINAnyNetworkValue&> {
 };
+
+FICSITNETWORKS_API  FString FINObjectToString(UObject* InObj);
+
+FICSITNETWORKS_API FString FINClassToString(UClass* InClass);
+
+FICSITNETWORKS_API FORCEINLINE FFINAnyNetworkValue FINCastNetworkValue(const FFINAnyNetworkValue& Value, EFINNetworkValueType ToType) {
+	if (Value.GetType() == FIN_ANY) return FINCastNetworkValue(Value.GetAny(), ToType);
+	
+	switch (ToType) {
+	case FIN_BOOL:
+		switch (Value.GetType()) {
+		case FIN_NIL:
+			return false;
+		case FIN_BOOL:
+			return Value;
+		case FIN_INT:
+			return Value.GetInt() != 0;
+		case FIN_FLOAT:
+			return Value.GetFloat() != 0.0;
+		case FIN_STR:
+			return Value.GetString() == TEXT("true");
+		case FIN_OBJ:
+			return Value.GetObj().IsValid();
+		case FIN_CLASS:
+			return Value.GetClass() != nullptr;
+		case FIN_TRACE:
+			return Value.GetTrace().IsValid();
+		case FIN_ARRAY:
+			return Value.GetArray().Num() > 0;
+		default: ;
+		}
+		break;
+	case FIN_INT:
+		switch (Value.GetType()) {
+		case FIN_NIL:
+			return 1ll;
+		case FIN_BOOL:
+			return Value.GetBool() ? 1ll : 0ll;
+		case FIN_INT:
+			return Value;
+		case FIN_FLOAT:
+			return (FINInt)Value.GetFloat();
+		case FIN_STR: {
+			FINInt ValInt = 0;
+			FDefaultValueHelper::ParseInt64(Value.GetString(), ValInt);
+			return ValInt;
+		} default: ;
+		}
+		break;
+	case FIN_FLOAT:
+		switch (Value.GetType()) {
+		case FIN_NIL:
+			return 0.0;
+		case FIN_BOOL:
+			return Value.GetBool() ? 1.0 : 0.0;
+		case FIN_INT:
+			return (double)Value.GetInt();
+		case FIN_FLOAT:
+			return Value;
+		case FIN_STR: {
+			FINFloat ValFloat = 0.0f;
+			FDefaultValueHelper::ParseDouble(Value.GetString(), ValFloat);
+			return ValFloat;
+		} default: ;
+		}
+		break;
+	case FIN_STR:
+		switch (Value.GetType()) {
+		case FIN_NIL:
+			return FString(TEXT("Nil"));
+		case FIN_BOOL:
+			return FString(Value.GetBool() ? TEXT("true") : TEXT("false"));
+		case FIN_INT:
+			return FString::Printf(TEXT("%lld"), Value.GetInt());
+		case FIN_FLOAT:
+			return FString::Printf(TEXT("%lg"), Value.GetFloat());
+		case FIN_STR:
+			return Value;
+		case FIN_OBJ:
+			return FINObjectToString(Value.GetObj().Get());
+		case FIN_CLASS:
+			return FINClassToString(Value.GetClass());
+		case FIN_TRACE:
+			return FINObjectToString(*Value.GetTrace());
+		default: ;
+		}
+		break;
+	case FIN_OBJ:
+		switch (Value.GetType()) {
+		case FIN_OBJ:
+			return Value;
+		case FIN_NIL:
+			return FWeakObjectPtr((UObject*)nullptr);
+		case FIN_CLASS:
+			return FWeakObjectPtr((UObject*)Value.GetClass());
+		case FIN_TRACE:
+			return FWeakObjectPtr(*Value.GetTrace());
+		default: ;
+		}
+		break;
+	case FIN_CLASS:
+		switch (Value.GetType()) {
+		case FIN_NIL:
+			return (UClass*)nullptr;
+		case FIN_OBJ:
+			return Cast<UClass>(Value.GetObj().Get());
+		case FIN_CLASS:
+			return Value;
+		case FIN_TRACE:
+			return Cast<UClass>(*Value.GetTrace());
+		default: ;
+		}
+		break;
+	case FIN_TRACE:
+		switch (Value.GetType()) {
+		case FIN_NIL:
+			return FFINNetworkTrace();
+		case FIN_OBJ:
+			return FFINNetworkTrace(Value.GetObj().Get());
+		case FIN_CLASS:
+			return FFINNetworkTrace(Value.GetClass());
+		case FIN_TRACE:
+			return Value;
+		default: ;
+		}
+		break;
+	case FIN_STRUCT:
+		switch (Value.GetType()) {
+		case FIN_STRUCT:
+			return Value;
+		default: ;
+		}
+		break;
+	case FIN_ARRAY:
+		switch (Value.GetType()) {
+		case FIN_ARRAY:
+		default: ;
+		}
+		break;
+	default: ;
+	}
+	return FINAny();
+}

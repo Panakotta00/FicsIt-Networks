@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SlateBasics.h"
 #include "FINComputerGPU.h"
 #include "Async/ParallelFor.h"
 #include "FINComputerGPUT1.generated.h"

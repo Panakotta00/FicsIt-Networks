@@ -3,7 +3,6 @@
 #include "FINBase.h"
 #include "FINExecutionContext.h"
 #include "Network/FINAnyNetworkValue.h"
-#include "Network/FINNetworkValues.h"
 #include "FINProperty.generated.h"
 
 UENUM(BlueprintType)

@@ -4,7 +4,11 @@
 #include "Graphics/FINScreenInterface.h"
 #include "FGPlayerController.h"
 #include "Async/ParallelFor.h"
+#include "Engine/NetworkSettings.h"
+#include "Net/UnrealNetwork.h"
+#include "Slate/SlateBrushAsset.h"
 #include "Widgets/SInvalidationPanel.h"
+#include "Widgets/Layout/SScaleBox.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
 
 const FFINGPUT1BufferPixel FFINGPUT1BufferPixel::InvalidPixel;
@@ -225,7 +229,7 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AFINComputerGPUT1, FrontBuffer);
 }
 
-TSharedPtr<SWidget> AFINComputerGPUT1:: CreateWidget() {
+TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SNew(SScaleBox)

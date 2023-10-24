@@ -32,6 +32,16 @@
 			"LoadingPhase": "PostDefault"
 		},
 		{
+			"Name": "FicsItVisualScript",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItVisualScriptEditor",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
 			"Name": "Tracy",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
