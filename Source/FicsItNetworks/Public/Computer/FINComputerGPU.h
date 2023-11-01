@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "SlateBasics.h"
+#include "Widgets/SBoxPanel.h"
 #include "Network/FINNetworkTrace.h"
 #include "FINComputerModule.h"
 #include "FINComputerScreen.h"

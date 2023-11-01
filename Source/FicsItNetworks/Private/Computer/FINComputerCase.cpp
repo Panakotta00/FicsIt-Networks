@@ -7,6 +7,7 @@
 #include "Computer/FINComputerProcessor.h"
 #include "FGInventoryComponent.h"
 #include "FicsItKernel/Logging.h"
+#include "Net/UnrealNetwork.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");

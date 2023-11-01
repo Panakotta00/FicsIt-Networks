@@ -1,5 +1,6 @@
 #include "FINLuaProcessor.h"
 
+#include "FicsItNetworksLuaModule.h"
 #include "FicsItKernel/Logging.h"
 #include "FINStateEEPROMLua.h"
 #include "FINLua/LuaGlobalLib.h"
@@ -576,7 +577,7 @@ size_t luaLen(lua_State* L, int idx) {
 }
 
 void UFINLuaProcessor::ClearFileStreams() {
-	TSet<CodersFileSystem::SRef<FINLua::LuaFileContainer>> ToRemove;
+	TArray<CodersFileSystem::SRef<FINLua::LuaFileContainer>> ToRemove;
 	for (const CodersFileSystem::SRef<FINLua::LuaFileContainer>& fs : FileStreams) {
 		if (!fs.isValid()) ToRemove.Add(fs);
 	}
@@ -585,7 +586,7 @@ void UFINLuaProcessor::ClearFileStreams() {
 	}
 }
 
-TSet<FINLua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
+TArray<FINLua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
 	return FileStreams;
 }
 

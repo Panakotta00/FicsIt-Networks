@@ -2,6 +2,7 @@
 #include "Computer/FINComputerDriveHolder.h"
 #include "Computer/FINComputerEEPROMDesc.h"
 #include "Computer/FINComputerGPUT2.h"
+#include "Net/UnrealNetwork.h"
 
 void UFINComputerRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

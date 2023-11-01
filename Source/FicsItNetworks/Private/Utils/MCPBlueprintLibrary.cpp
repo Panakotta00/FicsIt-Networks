@@ -2,6 +2,11 @@
 #include "FGSaveSystem.h"
 #include <filesystem>
 
+#include "Engine/Font.h"
+#include "GenericPlatform/GenericPlatformFile.h"
+#include "HAL/PlatformFileManager.h"
+#include "Misc/Paths.h"
+
 FString UMCPBlueprintLibrary::ExpandPath(FString folder, FString fileName, FString extension){
 	FString fsp = UFGSaveSystem::GetSaveDirectoryPath();
 	extension = extension.ToLower();

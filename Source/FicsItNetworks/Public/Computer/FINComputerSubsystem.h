@@ -8,6 +8,7 @@
 #include "Components/WidgetInteractionComponent.h"
 #include "Patching/NativeHookManager.h"
 #include "FGRailroadTrackConnectionComponent.h"
+#include "Widgets/Layout/SBox.h"
 #include "FINComputerSubsystem.generated.h"
 
 class AFINComputerGPU;

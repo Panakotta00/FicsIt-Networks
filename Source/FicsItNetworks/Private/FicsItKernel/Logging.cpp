@@ -1,5 +1,7 @@
 #include "FicsItKernel/Logging.h"
 
+#include "Net/UnrealNetwork.h"
+
 #define LOCTEXT_NAMESPACE "Log"
 
 void UFINLog::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {

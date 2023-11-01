@@ -1,5 +1,6 @@
 ﻿#include "Components/FINModularIndicatorPole.h"
 #include "FGColoredInstanceMeshProxy.h"
+#include "Net/UnrealNetwork.h"
 #include "Network/FINMCPAdvConnector.h"
 
 #define BToS(b) b ? L"true" : L"false"

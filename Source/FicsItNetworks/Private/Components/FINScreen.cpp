@@ -3,6 +3,7 @@
 #include "FGColoredInstanceMeshProxy.h"
 #include "Computer/FINComputerGPU.h"
 #include "Graphics/FINGPUInterface.h"
+#include "Net/UnrealNetwork.h"
 #include "Network/FINNetworkCable.h"
 
 AFINScreen::AFINScreen() {

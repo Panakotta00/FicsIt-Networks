@@ -143,7 +143,7 @@ private:
 	uint64 PullStart = 0;
 
 	// filesystem handling
-	TSet<FINLua::LuaFile> FileStreams;
+	TArray<FINLua::LuaFile> FileStreams;
 	CodersFileSystem::SRef<LuaFileSystemListener> FileSystemListener;
 
 	bool bWasPriorToGCPromoted;
@@ -217,7 +217,7 @@ public:
 	int DoSignal(lua_State* L);
 	
 	void ClearFileStreams();
-	TSet<FINLua::LuaFile> GetFileStreams() const;
+	TArray<FINLua::LuaFile> GetFileStreams() const;
 
 	static void luaHook(lua_State* L, lua_Debug* ar);
 

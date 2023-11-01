@@ -1036,7 +1036,7 @@ FFINReflectionUIContext::FFINReflectionUIContext() {
 	}
 	for (const TPair<UFINStruct*, TSharedPtr<FFINReflectionUIStruct>>& Struct : Structs) Entries.Add(Struct.Value);
 
-	TSharedPtr<FFINReflectionUIStruct, ESPMode::Fast>* Struct = Structs.Find(FFINReflection::Get()->FindClass(UObject::StaticClass()));
+	TSharedPtr<FFINReflectionUIStruct>* Struct = Structs.Find(FFINReflection::Get()->FindClass(UObject::StaticClass()));
 	if (Struct) SetSelected(Struct->Get());
 }
 

@@ -4,6 +4,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include <algorithm>
 
+#include "Net/UnrealNetwork.h"
+
 DEFINE_LOG_CATEGORY(LogFicsItNetworks_DebugRoze);
 
 

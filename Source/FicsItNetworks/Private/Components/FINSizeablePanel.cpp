@@ -2,6 +2,7 @@
 #include "FGColoredInstanceMeshProxy.h"
 #include "FicsItNetworksModule.h"
 #include "Components/FINModuleBase.h"
+#include "Net/UnrealNetwork.h"
 #include "Network/FINMCPAdvConnector.h"
 #include "Network/FINNetworkCable.h"
 

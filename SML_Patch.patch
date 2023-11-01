@@ -1,3 +1,16 @@
+diff --git a/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h b/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
+index ef2df1187..d9dd4800f 100644
+--- a/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
++++ b/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
+@@ -7,6 +7,8 @@
+ #include "FGUseableInterface.h"
+ #include "FGBuildableRailroadSwitchControl.generated.h"
+ 
++class UFGRailroadTrackConnectionComponent;
++
+ /**
+  * Struct containing packaged switch data so we can get an OnRep for them as a group.
+  */
 diff --git a/Source/FactoryGame/Public/FGRailroadSignalBlock.h b/Source/FactoryGame/Public/FGRailroadSignalBlock.h
 index f2c03b79f..f825b3f49 100644
 --- a/Source/FactoryGame/Public/FGRailroadSignalBlock.h
@@ -11,7 +24,7 @@ index f2c03b79f..f825b3f49 100644
  	/** Vehicles currently occupying this block. */
  	TArray< TWeakObjectPtr< AFGRailroadVehicle > > mOccupiedBy;
 diff --git a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
-index 85d6f5720..9d8db4313 100644
+index b832ed909..740f2ef85 100644
 --- a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 +++ b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 @@ -305,7 +305,7 @@ protected:

@@ -15,6 +15,7 @@
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FINGlobalRegisterHelper.h"
 #include "Buildables/FGPipeHyperStart.h"
+#include "Components/VerticalBox.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Hologram/FGBuildableHologram.h"
 #include "Network/Wireless/FINWirelessRCO.h"
@@ -26,7 +27,6 @@
 #include "UI/FINStyle.h"
 #include "UObject/CoreRedirects.h"
 
-DEFINE_LOG_CATEGORY( LogGame );
 DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 

@@ -1,6 +1,7 @@
 ﻿#include "Components/FINVehicleScanner.h"
 #include "FGColoredInstanceMeshProxy.h"
 #include "FGVehicle.h"
+#include "Net/UnrealNetwork.h"
 
 AFINVehicleScanner::AFINVehicleScanner() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(TEXT("NetworkConnector"));
