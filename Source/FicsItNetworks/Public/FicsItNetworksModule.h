@@ -4,7 +4,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworks, Verbose, All);
 
-class FFicsItNetworksModule : public FDefaultGameModuleImpl
+class FICSITNETWORKS_API FFicsItNetworksModule : public FDefaultGameModuleImpl
 {
 public:
 	static FDateTime GameStart;

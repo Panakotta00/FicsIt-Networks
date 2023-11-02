@@ -3,6 +3,7 @@
 #include "FINConfigurationStruct.h"
 #include "Configuration/Properties/ConfigPropertyBool.h"
 #include "FicsItKernel/Logging.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Framework/Text/RichTextLayoutMarshaller.h"
 #include "Framework/Text/RichTextMarkupProcessing.h"
 #include "Reflection/FINReflection.h"
@@ -198,7 +199,7 @@ void SFINLogViewer::UpdateEntries(UFINLog* Log) {
 						LineCount += 1;
 					}
 					bFirstDone = true;
-					Text.Append(FFINUtils::TextRange(Entry.Content, Range));
+					Text.Append(UFINUtils::TextRange(Entry.Content, Range));
 				}
 			} else {
 				Text.Append(Entry.Content);
@@ -326,7 +327,7 @@ const FSlateColor& SFINLogViewerRow::GetTextColor() const {
 }
 
 EVisibility SFINLogViewerRow::GetTextVisibility() const {
-	if (IsSelected()) {
+	if (IsSelected() || FSlateApplication::Get().GetModifierKeys().IsControlDown()) {
 		return EVisibility::Visible;
 	} else {
 		return EVisibility::HitTestInvisible;

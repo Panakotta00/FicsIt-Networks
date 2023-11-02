@@ -14,7 +14,7 @@ enum EFINLogVerbosity {
 };
 
 USTRUCT(BlueprintType)
-struct FFINLogEntry {
+struct FICSITNETWORKS_API FFINLogEntry {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
@@ -36,7 +36,7 @@ struct FFINLogEntry {
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFINLogEntriesUpdatedDelegate);
 
 UCLASS()
-class UFINLog : public UObject, public IFGSaveInterface {
+class FICSITNETWORKS_API UFINLog : public UObject, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
 	// Begin IFGSaveInterface
@@ -85,14 +85,14 @@ enum EFINLogOptions {
 };
 
 UCLASS()
-class UFINLogLibrary : public UBlueprintFunctionLibrary {
+class FICSITNETWORKS_API UFINLogLibrary : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable)
 	static void Log(TEnumAsByte<EFINLogVerbosity> Verbosity, FString Message, TEnumAsByte<EFINLogOptions> Options = FIN_Log_Option_Where);
 };
 
-class FFINLogScope {
+class FICSITNETWORKS_API FFINLogScope {
 public:
 	DECLARE_DELEGATE_RetVal(FString, FWhereFunction);
 	DECLARE_DELEGATE_RetVal(FString, FStackFunction);

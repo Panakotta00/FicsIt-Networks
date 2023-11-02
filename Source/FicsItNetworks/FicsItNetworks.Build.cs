@@ -30,7 +30,6 @@ public class FicsItNetworks : ModuleRules
             "ReplicationGraph",
             "FactoryGame",
             "SML",
-            "Eris",
             "Tracy"
 		});
 	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });

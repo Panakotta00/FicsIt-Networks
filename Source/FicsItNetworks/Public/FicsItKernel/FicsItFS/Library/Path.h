@@ -4,7 +4,7 @@
 #include <string>
 
 namespace CodersFileSystem {
-	class Path {
+	class FICSITNETWORKS_API Path {
 	private:
 		static std::regex sepperatorPattern;
 		static std::regex nodePattern;

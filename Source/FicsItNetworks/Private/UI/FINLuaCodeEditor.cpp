@@ -1,7 +1,4 @@
 #include "UI/FINLuaCodeEditor.h"
-#include "Framework/Text/RunUtils.h"
-#include "Framework/Text/ShapedTextCache.h"
-#include "Input/HittestGrid.h"
 #include "UI/FINTextDecorators.h"
 #include "Utils/FINUtils.h"
 
@@ -240,8 +237,8 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 					FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.ReflectionReference"));
 					RunInfo.MetaData = Run->GetRunInfo().MetaData;
 					const FString& Variant = RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataVariantKey];
-					if (!bNew) RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataTypeKey] = FFINUtils::TextRange(*ModelString, FTextRange(Range.BeginIndex+8, Range.EndIndex));
-					else RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataTypeKey].Append(FFINUtils::TextRange(*ModelString, Range));
+					if (!bNew) RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataTypeKey] = UFINUtils::TextRange(*ModelString, FTextRange(Range.BeginIndex+8, Range.EndIndex));
+					else RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataTypeKey].Append(UFINUtils::TextRange(*ModelString, Range));
 
 					Range.BeginIndex = Run->GetTextRange().BeginIndex;
 					if (bNew) Runs.Pop();
@@ -265,13 +262,13 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 				
 				bool bReflectionReference = OpInfo.Name == TEXT("SyntaxHighlight.FINLua.Operator") && OpInfo.MetaData[TEXT("Operator")] == TEXT(".");
 				bReflectionReference = bReflectionReference && LibInfo.Name == TEXT("SyntaxHighlight.FINLua.Normal");
-				bool bLib = FFINUtils::TextRange(*ModelString, LibRun->GetTextRange()) == TEXT("classes");
-				bLib = bLib || FFINUtils::TextRange(*ModelString, LibRun->GetTextRange()) == TEXT("structs");
+				bool bLib = UFINUtils::TextRange(*ModelString, LibRun->GetTextRange()) == TEXT("classes");
+				bLib = bLib || UFINUtils::TextRange(*ModelString, LibRun->GetTextRange()) == TEXT("structs");
 				bReflectionReference = bReflectionReference && bLib;
 				if (bReflectionReference) {
 					FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.ReflectionReference"));
-					FString Variant = FFINUtils::TextRange(*ModelString, LibRun->GetTextRange());
-					FString Type = FFINUtils::TextRange(*ModelString, Range);
+					FString Variant = UFINUtils::TextRange(*ModelString, LibRun->GetTextRange());
+					FString Type = UFINUtils::TextRange(*ModelString, Range);
 					if (Variant == TEXT("structs")) Variant = TEXT("struct");
 					if (Variant == TEXT("classes")) Variant = TEXT("class");
 					RunInfo.MetaData.Add(FFINReflectionReferenceDecorator::MetaDataVariantKey, Variant);

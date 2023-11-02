@@ -1,7 +1,6 @@
 #include "Computer/FINComputerCase.h"
 #include "Computer/FINComputerEEPROMDesc.h"
 #include "Computer/FINComputerFloppyDesc.h"
-#include "LuaProcessor/LuaProcessor.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "Computer/FINComputerDriveHolder.h"
 #include "Computer/FINComputerMemory.h"

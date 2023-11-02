@@ -32,13 +32,13 @@ bool FFINReflectionReferenceDecorator::Supports(const FTextRunParseResults& RunP
 
 	const FTextRange& VariantRange = RunParseResult.MetaData[MetaDataVariantKey];
 	const FTextRange& TypeRange = RunParseResult.MetaData[MetaDataTypeKey];
-	return nullptr != ReflectionItemFromType(FFINUtils::TextRange(Text, VariantRange), FFINUtils::TextRange(Text, TypeRange));
+	return nullptr != ReflectionItemFromType(UFINUtils::TextRange(Text, VariantRange), UFINUtils::TextRange(Text, TypeRange));
 }
 
 TSharedRef<ISlateRun> FFINReflectionReferenceDecorator::Create(const TSharedRef<FTextLayout>& TextLayout, const FTextRunParseResults& RunParseResult, const FString& OriginalText, const TSharedRef<FString>& InOutModelText, const ISlateStyle* Style) {
 	FTextRange ModelRange;
 	ModelRange.BeginIndex = InOutModelText->Len();
-	*InOutModelText += FFINUtils::TextRange(OriginalText, RunParseResult.ContentRange);
+	*InOutModelText += UFINUtils::TextRange(OriginalText, RunParseResult.ContentRange);
 	ModelRange.EndIndex = InOutModelText->Len();
 
 	FRunInfo RunInfo(RunParseResult.Name);
@@ -84,7 +84,7 @@ FFINEEPROMReferenceDecorator::FFINEEPROMReferenceDecorator(const FOnNavigate& In
 bool FFINEEPROMReferenceDecorator::Supports(const FTextRunParseResults& RunParseResult, const FString& Text) const {
 	if (RunParseResult.Name != Id) return false;
 	int64 LineNumber;
-	return FDefaultValueHelper::ParseInt64(FFINUtils::TextRange(Text, RunParseResult.MetaData[MetaDataLineNumberKey]), LineNumber);
+	return FDefaultValueHelper::ParseInt64(UFINUtils::TextRange(Text, RunParseResult.MetaData[MetaDataLineNumberKey]), LineNumber);
 }
 
 TSharedRef<ISlateRun> FFINEEPROMReferenceDecorator::Create(const TSharedRef<FTextLayout>& TextLayout, const FTextRunParseResults& RunParseResult, const FString& OriginalText, const TSharedRef<FString>& InOutModelText, const ISlateStyle* Style) {

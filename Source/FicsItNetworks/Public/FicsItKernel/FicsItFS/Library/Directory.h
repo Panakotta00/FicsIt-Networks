@@ -9,7 +9,7 @@
 namespace CodersFileSystem {
 	typedef std::function<bool(long long, bool)> SizeCheckFunc;
 
-	class Directory : public Node {
+	class FICSITNETWORKS_API Directory : public Node {
 	public:
 		Directory();
 		virtual ~Directory();
@@ -50,7 +50,7 @@ namespace CodersFileSystem {
 		virtual bool rename(const std::string& entry, const std::string& name) = 0;
 	};
 
-	class MemDirectory : public Directory {
+	class FICSITNETWORKS_API MemDirectory : public Directory {
 	protected:
 		std::unordered_map<std::string, SRef<Node>> entries;
 		ListenerListRef listeners;
@@ -90,7 +90,7 @@ namespace CodersFileSystem {
 		bool add(const SRef<Node>& node, const std::string& name);
 	};
 
-	class DiskDirectory : public Directory {
+	class FICSITNETWORKS_API DiskDirectory : public Directory {
 	protected:
 		std::filesystem::path realPath;
 		SizeCheckFunc checkSize;

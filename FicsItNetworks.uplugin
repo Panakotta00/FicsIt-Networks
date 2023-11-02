@@ -27,6 +27,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "FicsItNetworksLua",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
 			"Name": "Tracy",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
