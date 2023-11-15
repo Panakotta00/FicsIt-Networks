@@ -1,5 +1,5 @@
 diff --git a/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h b/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
-index ef2df1187..d9dd4800f 100644
+index ef2df11876..e1283ca3fe 100644
 --- a/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
 +++ b/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
 @@ -7,6 +7,8 @@
@@ -11,8 +11,17 @@ index ef2df1187..d9dd4800f 100644
  /**
   * Struct containing packaged switch data so we can get an OnRep for them as a group.
   */
+@@ -100,7 +102,7 @@ protected:
+ private:
+ 	/** Connection we control, might become null if the track is removed but not the control (mods and save game editing). */
+ 	UPROPERTY( SaveGame, Replicated )
+-	class UFGRailroadTrackConnectionComponent* mControlledConnection;
++	UFGRailroadTrackConnectionComponent* mControlledConnection;
+ 
+ 	/** Current switch position read from the controlled connection. */
+ 	UPROPERTY( Replicated, Meta = (NoAutoJson = true) )
 diff --git a/Source/FactoryGame/Public/FGRailroadSignalBlock.h b/Source/FactoryGame/Public/FGRailroadSignalBlock.h
-index f2c03b79f..f825b3f49 100644
+index f2c03b79fe..f825b3f494 100644
 --- a/Source/FactoryGame/Public/FGRailroadSignalBlock.h
 +++ b/Source/FactoryGame/Public/FGRailroadSignalBlock.h
 @@ -276,6 +276,7 @@ public:
@@ -24,7 +33,7 @@ index f2c03b79f..f825b3f49 100644
  	/** Vehicles currently occupying this block. */
  	TArray< TWeakObjectPtr< AFGRailroadVehicle > > mOccupiedBy;
 diff --git a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
-index b832ed909..740f2ef85 100644
+index b832ed9095..740f2ef85d 100644
 --- a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 +++ b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 @@ -305,7 +305,7 @@ protected:
