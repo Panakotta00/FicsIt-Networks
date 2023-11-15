@@ -20,7 +20,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFi
 UCLASS(Blueprintable)
 class FICSITNETWORKS_API AFINComputerCase : public AFGBuildable {
 	GENERATED_BODY()
-
+private:
+	UPROPERTY(Replicated)
+	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
@@ -70,9 +73,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	TArray<UObject*> PCIDevices;
-
-	UPROPERTY(Replicated)
-	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
 
 	float KernelTickTime = 0.0;
 
@@ -166,8 +166,24 @@ public:
 		DisplayName = FText::FromString(TEXT("Computer Case"));
 	}
 
+	UFUNCTION(BlueprintNativeEvent)
+	void netSig_ComputerStateChanged(int64 PrevState, int64 NewState);
 	UFUNCTION()
-    void netSig_FileSystemUpdate(int Type, const FString& From, const FString& To) {}
+    void netSigMeta_ComputerStateChanged(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "ComputerStateChanged";
+		DisplayName = FText::FromString("Computer State Changed");
+		Description = FText::FromString("Triggers when the computers state changes.");
+		ParameterInternalNames.Add("prevState");
+		ParameterDisplayNames.Add(FText::FromString("Previous State"));
+		ParameterDescriptions.Add(FText::FromString("The previous computer state."));
+		ParameterInternalNames.Add("newState");
+		ParameterDisplayNames.Add(FText::FromString("New State"));
+		ParameterDescriptions.Add(FText::FromString("The new computer state."));
+		Runtime = 1;
+	}	
+
+	UFUNCTION(BlueprintNativeEvent)
+    void netSig_FileSystemUpdate(int Type, const FString& From, const FString& To);
 	UFUNCTION()
     void netSigMeta_FileSystemUpdate(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "FileSystemUpdate";
@@ -183,5 +199,38 @@ public:
 		ParameterDisplayNames.Add(FText::FromString("To"));
 		ParameterDescriptions.Add(FText::FromString("The new file path of the node if it has changed."));
 		Runtime = 1;
+	}
+
+	UFUNCTION()
+	int64 netFunc_getState();
+	UFUNCTION()
+	void netFuncMeta_getState(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getState";
+		DisplayName = FText::FromString("Get State");
+		Description = FText::FromString("Returns the internal kernel state of the computer.");
+		ParameterInternalNames.Add("result");
+		ParameterDisplayNames.Add(FText::FromString("Result"));
+		ParameterDescriptions.Add(FText::FromString("The current internal kernel state."));
+		Runtime = 1;
+	}
+
+	UFUNCTION()
+	void netFunc_startComputer();
+	UFUNCTION()
+	void netFuncMeta_startComputer(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "startComputer";
+		DisplayName = FText::FromString("Start Computer");
+		Description = FText::FromString("Starts the Computer (Processor).");
+		Runtime = 0;
+	}
+
+	UFUNCTION()
+	void netFunc_stopComputer();
+	UFUNCTION()
+	void netFuncMeta_stopComputer(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "stopComputer";
+		DisplayName = FText::FromString("Stop Computer");
+		Description = FText::FromString("Stops the Computer (Processor).");
+		Runtime = 0;
 	}
 };

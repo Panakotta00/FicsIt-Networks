@@ -111,16 +111,12 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 	if (HasAuthority()) {
 		Log->Tick();
 		
-		bool bNetUpdate = false;
 		if (Kernel) {
 			Kernel->HandleFutures();
 			if (Kernel->GetState() != InternalKernelState) {
+				netSig_ComputerStateChanged(InternalKernelState, Kernel->GetState());
 				InternalKernelState = Kernel->GetState();
-				bNetUpdate = true;
 			}
-		}
-		if (bNetUpdate) {
-			ForceNetUpdate();
 		}
 	}
 }
@@ -367,4 +363,21 @@ void AFINComputerCase::OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive
 	} else {
 		Kernel->AddDrive(drive);
 	}
+}
+
+void AFINComputerCase::netSig_ComputerStateChanged_Implementation(int64 PrevState, int64 NewState) {}
+
+void AFINComputerCase::netSig_FileSystemUpdate_Implementation(int Type, const FString& From, const FString& To) {}
+
+int64 AFINComputerCase::netFunc_getState() {
+	return InternalKernelState;
+}
+
+void AFINComputerCase::netFunc_startComputer() {
+	if (GetState() != EFINKernelState::FIN_KERNEL_RUNNING) Log->EmptyLog();
+	Kernel->Start(false);
+}
+
+void AFINComputerCase::netFunc_stopComputer() {
+	Kernel->Stop();
 }
