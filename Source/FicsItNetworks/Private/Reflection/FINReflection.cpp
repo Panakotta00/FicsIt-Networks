@@ -256,35 +256,35 @@ UFINProperty* FINCreateFINPropertyFromFProperty(FProperty* Property, FProperty* 
 	UFINProperty* FINProp = nullptr;
 	if (CastField<FStrProperty>(Property)) {
 		UFINStrProperty* FINStrProp = NewObject<UFINStrProperty>(Outer);
-		FINStrProp->Property = Cast<FStrProperty>(OverrideProperty);
+		FINStrProp->Property = CastField<FStrProperty>(OverrideProperty);
 		FINProp = FINStrProp;
 	} else if (CastField<FIntProperty>(Property)) {
 		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
-		FINIntProp->Property = Cast<FIntProperty>(OverrideProperty);
+		FINIntProp->Property = CastField<FIntProperty>(OverrideProperty);
 		FINProp = FINIntProp;
 	} else if (CastField<FInt64Property>(Property)) {
 		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
-		FINIntProp->Property64 = Cast<FInt64Property>(OverrideProperty);
+		FINIntProp->Property64 = CastField<FInt64Property>(OverrideProperty);
 		FINProp = FINIntProp;
 	} else if (CastField<FFloatProperty>(Property)) {
 		UFINFloatProperty* FINFloatProp = NewObject<UFINFloatProperty>(Outer);
-		FINFloatProp->FloatProperty = Cast<FFloatProperty>(OverrideProperty);
+		FINFloatProp->FloatProperty = CastField<FFloatProperty>(OverrideProperty);
 		FINProp = FINFloatProp;
 	} else if (CastField<FDoubleProperty>(Property)) {
 		UFINFloatProperty* FINFloatProp = NewObject<UFINFloatProperty>(Outer);
-		FINFloatProp->DoubleProperty = Cast<FDoubleProperty>(OverrideProperty);
+		FINFloatProp->DoubleProperty = CastField<FDoubleProperty>(OverrideProperty);
 		FINProp = FINFloatProp;
 	} else if (CastField<FBoolProperty>(Property)) {
 		UFINBoolProperty* FINBoolProp = NewObject<UFINBoolProperty>(Outer);
-		FINBoolProp->Property = Cast<FBoolProperty>(OverrideProperty);
+		FINBoolProp->Property = CastField<FBoolProperty>(OverrideProperty);
 		FINProp = FINBoolProp;
 	} else if (CastField<FClassProperty>(Property)) {
 		UFINClassProperty* FINClassProp = NewObject<UFINClassProperty>(Outer);
-		FINClassProp->Property = Cast<FClassProperty>(OverrideProperty);
+		FINClassProp->Property = CastField<FClassProperty>(OverrideProperty);
 		FINProp = FINClassProp;
 	} else if (CastField<FObjectProperty>(Property)) {
 		UFINObjectProperty* FINObjectProp = NewObject<UFINObjectProperty>(Outer);
-		FINObjectProp->Property = Cast<FObjectProperty>(OverrideProperty);
+		FINObjectProp->Property = CastField<FObjectProperty>(OverrideProperty);
 		FINProp = FINObjectProp;
 	} else  if (CastField<FStructProperty>(Property)) {
 		FStructProperty* StructProp = CastField<FStructProperty>(OverrideProperty);

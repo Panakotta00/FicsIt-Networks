@@ -22,7 +22,7 @@ void UFINCopyUUIDButton::InitSlotWidget(UWidget* InSlotWidget) {
 	Button->ProcessEvent(Button->FindFunction("SetText"), &params);
 	FScriptDelegate Delegate;
 	Delegate.BindUFunction(this, TEXT("OnCopyUUIDClicked"));
-	FMulticastDelegateProperty* MCDelegate = Cast<FMulticastDelegateProperty>(StandardButton->FindPropertyByName("OnClicked"));
+	FMulticastDelegateProperty* MCDelegate = CastField<FMulticastDelegateProperty>(StandardButton->FindPropertyByName("OnClicked"));
 	check(MCDelegate);
 	MCDelegate->AddDelegate(Delegate, Button);
 }

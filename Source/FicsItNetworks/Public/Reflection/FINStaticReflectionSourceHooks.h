@@ -219,8 +219,8 @@ private:
 	
 public:
 	void RegisterFuncHook() override {
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadTrack::OnVehicleEntered, (void*)GetDefault<AFGBuildableRailroadTrack>(), &VehicleEnter)
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadTrack::OnVehicleExited, (void*)GetDefault<AFGBuildableRailroadTrack>(), &VehicleExit)
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadTrack::OnVehicleEntered, (void*)GetDefault<AFGBuildableRailroadTrack>(), &VehicleEnter);
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadTrack::OnVehicleExited, (void*)GetDefault<AFGBuildableRailroadTrack>(), &VehicleExit);
 	}
 };
 
@@ -366,8 +366,8 @@ private:
 				
 public:
 	void RegisterFuncHook() override {
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGCharacterMovementComponent::EnterPipeHyper, (void*)GetDefault<UFGCharacterMovementComponent>(), &EnterHyperPipe)
-		SUBSCRIBE_METHOD_VIRTUAL(UFGCharacterMovementComponent::PipeHyperForceExit, (void*)GetDefault<UFGCharacterMovementComponent>(), &ExitHyperPipe)  
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGCharacterMovementComponent::EnterPipeHyper, (void*)GetDefault<UFGCharacterMovementComponent>(), &EnterHyperPipe);
+		SUBSCRIBE_METHOD_VIRTUAL(UFGCharacterMovementComponent::PipeHyperForceExit, (void*)GetDefault<UFGCharacterMovementComponent>(), &ExitHyperPipe); 
     }
 };
 
@@ -419,7 +419,7 @@ private:
 		if (!StaticSelf()->IsSender(c)) return;
 		LockFactoryGrab(c);
 		scope(c, item, offset, type);
-		if (UnlockFactoryGrab(c) && scope.getResult()) {
+		if (UnlockFactoryGrab(c) && scope.GetResult()) {
 			DoFactoryGrab(c, item);
 		}
 	}
@@ -428,7 +428,7 @@ private:
 		if (!StaticSelf()->IsSender(c)) return;
 		LockFactoryGrab(c);
 		scope(c, item, type);
-		if (UnlockFactoryGrab(c) && scope.getResult()) {
+		if (UnlockFactoryGrab(c) && scope.GetResult()) {
 			DoFactoryGrab(c, item);
 		}
 	}

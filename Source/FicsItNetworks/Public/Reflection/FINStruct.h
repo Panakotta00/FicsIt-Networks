@@ -2,6 +2,7 @@
 
 #include "FINBase.h"
 #include "FINFunction.h"
+#include "UObject/UObjectIterator.h"
 #include "FINStruct.generated.h"
 
 UENUM()

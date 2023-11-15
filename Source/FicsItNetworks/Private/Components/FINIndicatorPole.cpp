@@ -1,5 +1,6 @@
 ﻿#include "Components/FINIndicatorPole.h"
 #include "FGColoredInstanceMeshProxy.h"
+#include "Net/UnrealNetwork.h"
 
 AFINIndicatorPole::AFINIndicatorPole() {
 	Indicator = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>("Indicator");

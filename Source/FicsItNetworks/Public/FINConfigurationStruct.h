@@ -1,8 +1,8 @@
 #pragma once
-
 #include "CoreMinimal.h"
 #include "Configuration/ConfigManager.h"
 #include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "FINConfigurationStruct.generated.h"
 
 struct FFINConfigurationStruct_LogViewer;
@@ -12,32 +12,35 @@ struct FFINConfigurationStruct_LogViewer {
     GENERATED_BODY()
 public:
     UPROPERTY(BlueprintReadWrite)
-    bool TextLog;
+    bool TextLog{};
 
     UPROPERTY(BlueprintReadWrite)
-    bool TextLogTimestamp;
+    bool TextLogTimestamp{};
 
     UPROPERTY(BlueprintReadWrite)
-    bool TextLogVerbosity;
+    bool TextLogVerbosity{};
 
     UPROPERTY(BlueprintReadWrite)
-    bool TextLogMultilineAlign;
+    bool TextLogMultilineAlign{};
 };
 
-/* Struct generated from Mod Configuration Asset '/FicsItNetworks/FIN_Configuration' */
+/* Struct generated from Mod Configuration Asset '/FicsItNetworks/FINConfiguration' */
 USTRUCT(BlueprintType)
 struct FFINConfigurationStruct {
     GENERATED_BODY()
 public:
     UPROPERTY(BlueprintReadWrite)
-    FFINConfigurationStruct_LogViewer LogViewer;
+    FFINConfigurationStruct_LogViewer LogViewer{};
 
     /* Retrieves active configuration value and returns object of this struct containing it */
-    static FFINConfigurationStruct GetActiveConfig() {
+    static FFINConfigurationStruct GetActiveConfig(UObject* WorldContext) {
         FFINConfigurationStruct ConfigStruct{};
         FConfigId ConfigId{"FicsItNetworks", ""};
-        UConfigManager* ConfigManager = GEngine->GetEngineSubsystem<UConfigManager>();
-        ConfigManager->FillConfigurationStruct(ConfigId, FDynamicStructInfo{FFINConfigurationStruct::StaticStruct(), &ConfigStruct});
+        const UWorld* World = GEngine->GetWorldFromContextObject(WorldContext, EGetWorldErrorMode::ReturnNull);
+        if (World && World->GetGameInstance()) {
+            UConfigManager* ConfigManager = World->GetGameInstance()->GetSubsystem<UConfigManager>();
+            ConfigManager->FillConfigurationStruct(ConfigId, FDynamicStructInfo{FFINConfigurationStruct::StaticStruct(), &ConfigStruct});
+        }
         return ConfigStruct;
     }
 };

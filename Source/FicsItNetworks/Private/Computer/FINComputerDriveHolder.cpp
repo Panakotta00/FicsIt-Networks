@@ -1,5 +1,6 @@
 #include "Computer/FINComputerDriveHolder.h"
 #include "Computer/FINComputerDriveDesc.h"
+#include "Net/UnrealNetwork.h"
 
 AFINComputerDriveHolder::AFINComputerDriveHolder() {
 	DriveInventory = CreateDefaultSubobject<UFGInventoryComponent>("DriveInventory");

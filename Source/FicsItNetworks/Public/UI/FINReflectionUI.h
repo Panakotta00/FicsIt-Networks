@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "SlateBasics.h"
 #include "FINReflectionUIContext.h"
 #include "FINReflectionUIStyle.h"
 #include "Components/Widget.h"

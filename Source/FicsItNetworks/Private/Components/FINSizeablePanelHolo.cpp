@@ -1,6 +1,7 @@
 ﻿#include "Components/FINSizeablePanelHolo.h"
 #include "FGColoredInstanceMeshProxy.h"
 #include "Components/FINSizeablePanel.h"
+#include "Net/UnrealNetwork.h"
 
 AFINSizeablePanelHolo::AFINSizeablePanelHolo() {
 	PrimaryActorTick.bCanEverTick = true;

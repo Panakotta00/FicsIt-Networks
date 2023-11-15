@@ -4,7 +4,11 @@
 #include "Graphics/FINScreenInterface.h"
 #include "FGPlayerController.h"
 #include "Async/ParallelFor.h"
+#include "Engine/NetworkSettings.h"
+#include "Net/UnrealNetwork.h"
+#include "Slate/SlateBrushAsset.h"
 #include "Widgets/SInvalidationPanel.h"
+#include "Widgets/Layout/SScaleBox.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
 
 const FFINGPUT1BufferPixel FFINGPUT1BufferPixel::InvalidPixel;

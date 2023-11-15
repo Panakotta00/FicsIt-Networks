@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
+#include "SlateBasics.h"
+#include "UObject/Interface.h"
 #include "Network/FINNetworkTrace.h"
 #include "FINScreenInterface.generated.h"
 

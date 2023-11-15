@@ -3,6 +3,7 @@
 #include "FGDismantleInterface.h"
 #include "SaveCustomVersion.h"
 #include "ModuleSystem/FINModuleSystemModule.h"
+#include "Net/UnrealNetwork.h"
 
 void UFINModuleSystemPanel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
