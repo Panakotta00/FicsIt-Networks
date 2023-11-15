@@ -395,7 +395,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		} else {
 			// print error
 			if (lua_isstring(luaState, -1)) {
-				UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Unable to persit! '%s'"), *DebugInfo, *FString(lua_tostring(luaState, -1)));
+				UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Unable to persit! '%s'"), *DebugInfo, *FINLua::luaFIN_toFString(luaState, -1));
 			}
 
 			lua_pop(luaState, 1); // ..., perm, globals
@@ -494,10 +494,17 @@ void UFINLuaProcessor::SetKernel(UFINKernelSystem* InKernel) {
 	Kernel = InKernel;
 }
 
+//#include "FGPlayerController.h"
+//#include "UI/FGGameUI.h"
+//#include "UI/FINNotificationMessage.h"
 void UFINLuaProcessor::Tick(float InDelta) {
 	if (!luaState || !luaThread) return;
 
 	tickHelper.syncTick();
+
+	//AFGPlayerController* PlayerController = GetWorld()->GetFirstPlayerController<AFGPlayerController>();
+	//UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Pending Messages? %i"), PlayerController->GetGameUI()->CanReceiveMessageQueue());
+	//UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Pending Message? %i"), PlayerController->GetGameUI()->CanReceiveMessage(UFINNotificationMessage::StaticClass()));
 }
 
 void UFINLuaProcessor::Stop(bool bIsCrash) {

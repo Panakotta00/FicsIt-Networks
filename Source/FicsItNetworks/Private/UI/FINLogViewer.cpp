@@ -2,6 +2,7 @@
 
 #include "FINConfigurationStruct.h"
 #include "Configuration/Properties/ConfigPropertyBool.h"
+#include "Engine/GameInstance.h"
 #include "FicsItKernel/Logging.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Text/RichTextLayoutMarshaller.h"
@@ -45,7 +46,7 @@ const FFINLogViewerStyle& FFINLogViewerStyle::GetDefault() {
 }
 
 TSharedRef<SWidget> UFINLogViewer::RebuildWidget() {
-	return SNew(SFINLogViewer)
+	return SNew(SFINLogViewer, this)
 	.Style(&Style)
 	.OnNavigateReflection_Lambda([this](UFINBase* ReflectionItem) {
 		OnNavigateReflection.Broadcast(ReflectionItem);
@@ -73,12 +74,13 @@ void UFINLogViewer::UpdateLogEntries() {
 	}
 }
 
-void SFINLogViewer::Construct(const FArguments& InArgs) {
+void SFINLogViewer::Construct(const FArguments& InArgs, UObject* InWorldContext) {
+	WorldContext = InWorldContext;
 	Style = InArgs._Style;
 	NavigateReflectionDelegate = InArgs._OnNavigateReflection;
 	NavigateEEPROMDelegate = InArgs._OnNavigateEEPROM;
 
-	FFINConfigurationStruct Config = FFINConfigurationStruct::GetActiveConfig();
+	FFINConfigurationStruct Config = FFINConfigurationStruct::GetActiveConfig(WorldContext);
 	bTextOutputEnabled = Config.LogViewer.TextLog;
 	TextTimestampEnabled = Config.LogViewer.TextLogTimestamp;
 	TextVerbosityEnabled = Config.LogViewer.TextLogVerbosity;
@@ -134,14 +136,13 @@ void SFINLogViewer::Construct(const FArguments& InArgs) {
 			.OnClicked_Lambda([this]() {
 				bTextOutputEnabled = !bTextOutputEnabled;
 
-				FFINConfigurationStruct Config = FFINConfigurationStruct::GetActiveConfig();
-				Config.LogViewer.TextLog = bTextOutputEnabled;
-
 				FConfigId ConfigId{"FicsItNetworks", ""};
-				UConfigManager* ConfigManager = GEngine->GetEngineSubsystem<UConfigManager>();
-				UConfigPropertyBool* Prop = Cast<UConfigPropertyBool>(Cast<UConfigPropertySection>(ConfigManager->GetConfigurationRootSection(ConfigId)->SectionProperties[TEXT("LogViewer")])->SectionProperties[TEXT("TextLog")]);
-				Prop->Value = bTextOutputEnabled;
-				Prop->MarkDirty();
+				if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContext, EGetWorldErrorMode::ReturnNull)) {
+					UConfigManager* ConfigManager = WorldContext->GetWorld()->GetGameInstance()->GetSubsystem<UConfigManager>();
+					UConfigPropertyBool* Prop = Cast<UConfigPropertyBool>(Cast<UConfigPropertySection>(ConfigManager->GetConfigurationRootSection(ConfigId)->SectionProperties[TEXT("LogViewer")])->SectionProperties[TEXT("TextLog")]);
+					Prop->Value = bTextOutputEnabled;
+					Prop->MarkDirty();
+				}
 				
 				return FReply::Handled();
 			})

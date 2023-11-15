@@ -210,7 +210,7 @@ namespace FINLua {
 	int luaGetItems(lua_State* L) {
 		UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
 		UFINKernelSystem* kernel = processor->GetKernel();
-		AModContentRegistry* ContentRegistry = AModContentRegistry::Get(processor);
+		UModContentRegistry* ContentRegistry = UModContentRegistry::Get(processor);
 		int top = lua_gettop(L);
 		FString Filter;
 		int i = 1;
