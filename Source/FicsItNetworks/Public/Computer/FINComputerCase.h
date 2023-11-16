@@ -233,4 +233,26 @@ public:
 		Description = FText::FromString("Stops the Computer (Processor).");
 		Runtime = 0;
 	}
+
+	UFUNCTION()
+	void netFunc_getLog(int64 PageSize, int64 Page, TArray<FFINLogEntry>& OutLog, int64& OutLogSize);
+	UFUNCTION()
+	void netFuncMeta_getLog(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getLog";
+		DisplayName = FText::FromString("Get Log");
+		Description = FText::FromString("Returns the log of the computer. Output is paginated using the input parameters. A negative Page will indicate pagination from the bottom (latest log entry first).");
+		ParameterInternalNames.Add("pageSize");
+		ParameterDisplayNames.Add(FText::FromString("Page Size"));
+		ParameterDescriptions.Add(FText::FromString("The size of the returned page."));
+		ParameterInternalNames.Add("page");
+		ParameterDisplayNames.Add(FText::FromString("Page"));
+		ParameterDescriptions.Add(FText::FromString("The index of the page you want to return. Negative to start indexing at the bottom (latest entries first)."));
+		ParameterInternalNames.Add("log");
+		ParameterDisplayNames.Add(FText::FromString("Log"));
+		ParameterDescriptions.Add(FText::FromString("The Log page you wanted to retrieve."));
+		ParameterInternalNames.Add("logSize");
+		ParameterDisplayNames.Add(FText::FromString("Log Size"));
+		ParameterDescriptions.Add(FText::FromString("The size of the full log (not just the returned page)."));
+		Runtime = 0;
+	}
 };

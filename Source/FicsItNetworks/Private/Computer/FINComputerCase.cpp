@@ -381,3 +381,23 @@ void AFINComputerCase::netFunc_startComputer() {
 void AFINComputerCase::netFunc_stopComputer() {
 	Kernel->Stop();
 }
+
+void AFINComputerCase::netFunc_getLog(int64 PageSize, int64 Page, TArray<FFINLogEntry>& OutLog, int64& OutLogSize) {
+	FScopeLock Lock = Log->Lock();
+	const TArray<FFINLogEntry>& Entries = Log->GetLogEntries();
+	PageSize = FMath::Max(0, PageSize);
+	int64 Offset = Page*PageSize;
+	if (Offset < 0) Offset = Entries.Num() + Page*PageSize;
+	int64 Num = FMath::Min(PageSize, Entries.Num() - Offset);
+	if (Offset < 0) {
+		Num += Offset;
+		Offset = 0;
+	}
+	if (Offset < 0 || Num < 0) {
+		OutLog = TArray<FFINLogEntry>();
+	} else {
+		OutLog = TArray<FFINLogEntry>(Entries.GetData() + Offset, Num);
+		if (Page < 0) Algo::Reverse(OutLog);
+	}
+	OutLogSize = Entries.Num();
+}
