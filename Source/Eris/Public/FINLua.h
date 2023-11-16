@@ -16,12 +16,12 @@ THIRD_PARTY_INCLUDES_START
 #pragma warning(disable:4456)
 #endif
 
-extern "C" {
+//extern "C" {
 	#include "../../../ThirdParty/eris/src/lua.h"
 	#include "../../../ThirdParty/eris/src/lualib.h"
 	#include "../../../ThirdParty/eris/src/lauxlib.h"
 	#include "../../../ThirdParty/eris/src/eris.h"
-}
+//}
 
 #ifdef _MSC_VER
 #pragma warning(pop)
