@@ -19,38 +19,9 @@ This IO-Module allows the player to use a rotational movement as input for the c
 The player can rotate the knob indefinetly in any direction.
 Where every rotation emits a network signal.
 
-== Functions
+== Interface
+include::page$Reflection.adoc[tag=Class-ModulePotentiometer,leveloffset=-1]
 
-=== `rotate(bool anticlockwise)`
 
-Rotates the potentiometer.
-
-Params::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|anticlockwise
-|bool
-|true if the rotation should be anticlockwise
-|===
-
-== Signals
-
-=== `PotRotate(bool anticlockwise)`
-
-This signal gets emitted when the potentiometer gets rotated by the player or by code.
-
-Params::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|anticlockwise
-|bool
-|true if the rotation was anticlockwise
-|===
 
 include::partial$io_modules_footer.adoc[]

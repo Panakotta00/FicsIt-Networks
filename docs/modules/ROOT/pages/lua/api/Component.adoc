@@ -1,5 +1,5 @@
 = Component API
-:description: The Component API helps to interact with the computer network itself.
+:description: The Component API helps to interact with the component network itself.
 
 **Lua Lib: `component`**
 
@@ -9,7 +9,13 @@ The Component API provides structures, functions and signals for interacting wit
 
 === `Component | Component[] proxy(string ids... | string[] ids...)`
 
-Generates and returns the component representation of the network components with the given UUIDs.
+Generates and returns instances of the network components with the given UUIDs. +
+You can pass any amount of parameters and each parameter will then have a corresponding return value. +
+Each parameter can be either a string, or an array of strings.
+These strings should then contain just the UUID of a network component. +
+If a network component cannot be found for a given string, nil will be used for the return.
+Otherwise, an instance of the network component will be returned. +
+If a parameter is a string array, the return value will be an array of network component instances.
 
 Parameter::
 +
@@ -41,14 +47,15 @@ Nil if the network component with the given ID was not found.
 
 |Component[]
 |Component[]
-|A array of the lua table representation of the netowork component.
+|A array of the lua table representation of the network component.
 
 Entries are Nil if the network component with the given ID was not found.
 |===
 
-=== `string[]... findComponent((string nick | string[] nicks | Type type | Type[] types)...)`
+=== `string[]... findComponent((string query | Class type )...)`
 
-Searches the component network for components which pass the given nick filter or have the given type.
+Searches the component network for components with the given query or have the given type. +
+You can pass multiple parameters and each parameter will be handled separately and returns a corresponding return value.
 
 Parameters::
 +
@@ -56,21 +63,13 @@ Parameters::
 |===
 |Name |Type |Description
 
-|nick
+|query
 |string
-|nick filter as string used to get a list of component in the network.
-
-|nicks
-|string[]
-|nick filters as string array to get a list of components in the network.
+|A nick/group query as string used to get a list of component in the network.
 
 |type
-|Type
+|Class
 |The type of the components in the network you want to get.
-
-|types
-|Type[]
-|The types of the components in the network you want to get.
 |===
 
 Return 	Value::
@@ -81,7 +80,7 @@ Return 	Value::
 
 |string[]...
 |string[]...
-|list of netowrk component ids wich pass the given nick filter.
+|List of network component UUIDs which pass the given nick query or are of the given type.
 |===
 
 

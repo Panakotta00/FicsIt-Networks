@@ -1,0 +1,49 @@
+= Wireless Access Point
+:description: The Wireless Access Point allows you to send network messages over long distances without cables
+
+[cols="1,3a"]
+|===
+|Building Type
+|Buildable Network Component
+
+|Max Network Connections
+|1
+|===
+
+[cols="a,a"]
+|===
+|Build Gun |In Game
+
+|image::buildings/WAP_bg.png[300,300,role="left"]
+|image::buildings/WAP_ig.png[300,300,role="left"]
+|===
+
+The Wireless Access Point allows you to send network messages over long distances without placing cables.
+
+Each Wireless Access Point should be built on top of an existing **Radar Tower**, and it requires that the
+Radar Tower is powered in order to broadcast or receive network packets. 
+
+[WARNING]
+====
+The Wireless Access Point allows only network messages to pass through, using a Network Card.
+====
+
+Wireless communication requires that the signal between two towers is strong enough. 
+The maximum distance for each Access Point is the same as the in game Radar Tower discovery range,
+so a WAP attached to a tower built _higher_ in the map has a _wider_ reach. 
+
+Two WAPs can communicate between them if their range overlaps, or if there is a third tower in the middle
+acting as a _Repeater Tower_. Remember that each Radar Tower requires a Wireless Access Point.
+
+== Map
+
+You can interact with any Wireless Access Point, which shows a detailed map with all the radar towers
+and the connection state between them and the current WAP.
+
+Hovering each tower in the list you can highlight it on the map, plus a tooltip will show eventual problems.
+
+image::buildings/WAP_map.png[800]
+
+// TODO: Add interface
+
+include::partial$building_footer.adoc[]

@@ -1,7 +1,104 @@
 = Basic Types
 :description: All basic Lua data types all kind of apis and components use.
 
-Here are all basic types used by all kinds of apis and components listed.
+You can use all normal Lua data-types but FicsIt-Networks uses mainly userdata-types to have custom data types. +
+These datatype accomplish a variety of different things otherwise very annoying to implement as an API.
+
+== Reflection-System Types
+For each Type/Class or Struct registered in the xref:BasicConcept.adoc#_reflection_system[Reflection-System] there is its own type loaded (dynamically when actually used) that exposes the functions and properties of that type to the lua environment. +
+This is done by using metatables to provide some data-type functionality like a name and indexing.
+The overwritten indexing functionality is then used to search for functions and properties accordingly. +
+Such types are also known as `Classes` throughout this documentation.
+A value of such a type is also known as `Instance` or `Reference` to a object.
+
+You can access these functions and properties like you do in normal tables (a period `.` or array operator `[]`).
+
+=== Additional Fields
+Is a Instance additionally a network Component, which is not directly class, then it has some additional fields:
+
+==== Nick `nick`
+The `nick` field is a string field you can read and write to.
+It allows you to access the nick of a component which you could also set with the network manager.
+One of the main purposes is to read additional data like configurations settings per component from it.
+
+```lua
+local comp = component.proxy(component.findComponent("machine")[1])
+local fields = {}
+for key, value in string.gmatch(comp.nick, "(%w+)=([^%s]+)") do
+ fields[key] = value
+end
+-- if there is now a component with the nick "machine setting1=42 setting2=meep"
+-- then the fields table will look like {"setting1"="42", "setting2"="meep"}
+```
+
+==== ID `id`
+The `id` is a read-only string field allowing you to read the UUID of the component.
+Mainly intended allowing you to print or display the ID of a component.
+For comparing/identifying components,
+use the default way of comparing/identifying instances with the hash functions and properties.
+
+```lua
+local comp = component.proxy(component.findComponent("machine")[1])
+print(comp.id) -- prints the ID of the component with a nick group "machine"
+```
+
+=== Properties
+Properties can be used just normally.
+Tho read-only properties will cause a error when you try to assign a value to them
+with the assignment `=` operator.
+
+```Lua
+local constructor = ...
+print(constructor.standby) -- get the value of the "standby" property
+constructor.standby = true -- set the value of the "standby" property
+```
+
+=== Functions
+Functions are just values as we all know, so they don't have member awareness. +
+Tho, you could do this with so call up-values. These are simply values stored within the function value itself.
+This is also how f.e. OpenComputers does it.
+But this would mean we have to create a new function value every time you access such an instance
+and for every instance there is. +
+For optimization, mainly in terms of memory, FicsIt-Networks tries to reuse the function values,
+but that also means you as user have to tell the function about the instance, so it is aware of it.
+So it actually knows with which instance you want to interact with.
+
+You can call those functions now in two ways.
+
+The difficult way (can get optimized):
+```Lua
+local constructor = ...
+constructor.getRecipe(constructor) -- calling the function with first parameter beeing the instance explicitly
+
+-- allows for optimizations like this because other wise the system would try to find the function everytime and that takes valuable time
+local func = constructor.getRecipe
+for i=0,100,1 do
+    func(constructor) -- only function call, without the "search" of the function
+end
+```
+
+The easy way (can not get optimized):
+```Lua
+local constructor = ...
+constructor:getRecipe() -- calling the function with first parameter beeing the instance implicitly
+```
+
+If a function does only have the `runtime-synchronous`-flag,
+then there will only be one xref:lua/BasicTypes.adoc#_future[future-struct] as return value.
+The actual return values can then get retrieved from that future.
+
+=== Structs
+Structs work in nearly the same way tho they can be converted from and to "normal" tables.
+
+Usually (not all) structs can simply implicitly get converted from a table with string fields of the property name as keys and values of those properties.
+When converting from a table to a struct, you don't even have to have the keys, you can just make sure they are in the same order as shown in the reflection-viewer.
+
+```Lua
+local constuctor = ...
+local loc = constructor.location
+print(loc.x, loc.y, loc.z) -- prints the x, y and z properties
+funcThatNeedsVector({1, 2, 3}) -- array gets converted implicitly to a vector struct with x=1, y=2, z=3
+```
 
 == Future
 
@@ -65,5 +162,5 @@ Return Values::
 
 |Retvals...
 |...
-|All the differnt return values the underlying function returned.
+|All the different return values the underlying function returned.
 |===

@@ -1,6 +1,6 @@
 = Credits
 
-- https://twitch.tv/panakotta00[Panakotta00]
+- https://panakotta00.massivebytes.net[Panakotta00]
 +
 Management & Development
 
@@ -16,6 +16,10 @@ UI/UX
 +
 3D Modelling
 
+- https://github.com/RozeDoyanawa[Roze]
++
+Development
+
 - https://www.artstation.com/raysh[Raysh]
 +
 3D Concepts
@@ -23,3 +27,7 @@ UI/UX
 - Esper
 +
 Cost balancing
+
+- leonardfactory
++
+Development

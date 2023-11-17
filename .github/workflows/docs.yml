@@ -1,0 +1,18 @@
+name: Push
+
+on:
+  push:
+    paths:
+      - 'docs/**'
+
+jobs:
+  dispatch:
+    name: Dispatch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Documentation Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.DOCS_REPO_ACCESS_TOKEN }}
+          repository: satisfactorymodding/Documentation
+          event-type: mod-docs-update

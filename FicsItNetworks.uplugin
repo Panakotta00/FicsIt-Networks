@@ -1,16 +1,16 @@
 {
 	"FileVersion": 3,
 	"Version": 0,
-	"VersionName": "0.2",
-	"SemVersion": "0.2.2",
+	"VersionName": "0.3",
+	"SemVersion": "0.3.16",
 	"FriendlyName": "FicsIt-Networks",
 	"Description": "Adds a computer network and programmable computers to the Game.",
 	"Category": "Modding",
-	"CreatedBy": "Panakotta00",
-	"CreatedByURL": "https://twitch.tv/panakotta00",
-	"DocsURL": "https://docs.ficsit.app/ficsit-networks/0.0.1/index.html",
+	"CreatedBy": "Panakotta00, Roze, RosszEmber, Coffeediction, Deantendo, Raysh, Esper, leonardfactory",
+	"CreatedByURL": "",
+	"DocsURL": "https://docs.ficsit.app/ficsit-networks/latest/index.html",
 	"MarketplaceURL": "",
-	"SupportURL": "",
+	"SupportURL": "https://discord.gg/3VfZ6Da",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
@@ -20,13 +20,34 @@
 			"Name": "FicsItNetworks",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItNetworksEd",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "FicsItNetworksLua",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "Tracy",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
 		}
 	],
 	"Plugins": [
-        {
-            "Name": "SML",
-            "SemVersion": "^3.1.0",
-            "Enabled": true
-        }
-    ]
+		{
+			"Name": "SML",
+			"SemVersion": "^3.6.0",
+			"Enabled": true
+		}
+	],
+	"LocalizationTargets": [
+		{
+			"Name": "FicsItNetworks",
+			"LoadingPolicy": "Always"
+		}
+	]
 }

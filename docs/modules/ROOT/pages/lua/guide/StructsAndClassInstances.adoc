@@ -1,0 +1,241 @@
+= 5. Structs and Class Instances
+
+Okay, our program already can count the items of multiple container.
+
+Now we want to make it really fancy. We want to separate it by item-type.
+
+For this we have to learn about structures.
+
+== Structures
+
+Structures in FicsIt-Networks are essentially the same as Lua Tables.
+The structure system of FicsIt-Networks is not fully fleshed out,
+and you can expect some changes in the future.
+
+When a structure is returned by a function or property,
+it won't reference back to where it came from.
+
+Imagine you have a object `obj` and it has a struct property `struct`
+that has a property `field`.
+If you now change the value of `field`, it won't change the struct inside the `obj`.
+[source,lua]
+print(obj.struct.field) -- prints "meep"
+obj.struct.field = "nice"
+print(obj.struct.field) -- prints "meep"
+
+You can change it, when you explicitly reassign the `struct` to the `obj`.
+[source,lua]
+print(obj.struct.field) -- prints "meep"
+local struct = obj.struct
+struct.field = "nice"
+obj.struct = struct
+print(obj.struct.field) -- prints "nice"
+
+Structures that are returned can have methods you can call similar to instances,
+because they are special Lua types with metatable shenanigans.
+
+When you want to pass struct to a function,
+you can either use a struct you got previously from a function that matches the type,
+or you create table that has at least fields with exact same internal name
+as the attributes shown for the structure type in the reflection.
+These fields also have to have values that can be converted implicitly
+to the type as demanded in the reflection.
+
+f.e. a Vector structure consists of a `x`, `y` and `z` float attribute. +
+Imagine a function `setPosition` that expects a Vector as first parameter,
+then your code can look like that (multiple versions):
+[source,lua]
+----
+setPosition({x: 1, y: 2, z: 3})
+
+local pos1 = {x: 1, y: 2, z: 3}
+setPosition(pos1)
+
+local pos2 = {}
+pos.x = 1
+pos.y = 2
+pos.z = 3
+setPosition(pos2)
+
+local pos3 = {}
+pos3["x"] = 1
+pos3["y"] = 2
+pos3["z"] = 3
+setPosition(pos3)
+----
+If an attribute is missing from your passed structure,
+the system will try to use a default value for the missing attribute if possible.
+
+Field in the table that are not defined by the reflection system will simply be ignored.
+
+== Fancy Item Counter
+The section is called struct and _class instances_ not because we gonna talk about
+them, we did that already in "Interacting with Components",
+instead this will be the first time when we will properly have to use them.
+
+We will adapt our item-count code to the new way we want to count item based
+on the item types.
+
+For this we have to figure out what data type we want to use,
+for our sum variable that should hold the end result.
+
+My proposal is a table, with the time-type as key and the count integer as value.
+[source,lua]
+local sum = {}
+
+Next, inside our for loop body, we want to iterate over all slots
+of the storage containers inventory. +
+Using the `getStack(...)` function we can get the item-stack at a given slot
+based on the slots index. +
+Okay, we can now get individual stacks from an inventory component,
+be before that we need to know how many slots there actually are.
+For this we can use the `size` property of the inventory component. +
+That means in for loop body, that iterates of the container,
+we need to add another for-loop that iterates the slot indexes.
+[source,lua]
+for slotIndex = 0, inventory.size - 1, 1 do
+    ...
+end
+
+We need to subtract 1 from the inventory size since the for loop iterator iterates inclusive and the slot indexes start at 0 (As most programming languages do.
+This is an artefact since this is a reflected function and the reflection system
+is not Lua specific).
+
+In this second for-loop we now want to get the stack from the inventory
+based on the iterated slot index.
+[source,lua]
+local stack = inventory:getStack(slotIndex)
+
+The `getStack(...)` function is a variadic function and takes multiple slot indexes,
+and returns the corresponding the stack-structures.
+
+Such an item-stack structure has a `count` field that tells us
+how many items there are in the stack.
+And it has a `item` field is a item-struct that tells us what item is stored in this slot.
+
+The `item` field is a struct because "a item" does not only consist of the type,
+but also additional metadata (item-state) that could be accesses.
+FicsIt-Networks currently doesn't provide a way to access this metadata,
+but when that happens it can be stored and accessed using this struct. +
+This item-struct has a field "type" which has a "item-type" class instance.
+
+We can use this class instance to differentiate the different types of items.
+And so, this is what we want to store as key.
+
+That means in our code we now want to get the current item count of the item type,
+add the item-`count` of the stack to it, and store it again in the map. +
+For this we also need make sure an entry actually exists for the item,
+because when there is a new item we never put into the map, we need to create
+a map entry, or at least our calculation has to account for that.
+
+First we need to get the item-type of our stack.
+[source,lua]
+local type = stack.item.type
+
+If a slot is empty, you still can access the structs, because structs "can't be nil".
+Instead, the type field will be set to nil.
+So we want to make sure our counting code only runs if we actually have a time, otherwise using it for the map key won't work. +
+So we simply wrap it in an if.
+[source,lua]
+if type then
+    ...
+end
+
+In the if we need to get the map entry of that type (if it exists).
+[source,lua]
+local itemCount = sum[type.hash]
+
+[WARNING]
+====
+Notice the usage of the types `hash` property that returns a nearly unique integer
+value we can use to compare instances and use it as map key. +
+This was explained in the "Interacting with Components" section.
+====
+
+Next we make sure `itemCount` is a valid number we can calculate with.
+[source,lua]
+itemCount = itemCount or 0
+
+The above code is neat syntax possible with Lua where the `or` operator
+can be used for non-boolean values.
+It checks the first value if it is implicitly false (the case with `nil` or 0)
+and if that is the case, returns the other value, otherwise it returns the first value.
+
+Now we simply add our stack item count to the `itemCount`.
+[source,lua]
+itemCount = itemCount + stack.count
+
+Followed by setting/adding the map entry to the new itemCount.
+[source,lua]
+sum[type.hash] = itemCount
+
+With this we should have our "counting logic". +
+Last thing we need to do, is to iterate over our map,
+and print the info to the console.
+
+For this we first use the Lua `pair` function and a for each loop
+to iterate over the map.
+[source,lua]
+for typeHash, count in pairs(sum) do
+    ...
+end
+
+In the body we use the all well known `print` Function to print some text and the count.
+[source,lua]
+print("Item " .. count .. "x")
+
+This code works, but it doesn't really help, because we don't
+know how many items there of a given type. +
+For this we need to make second map, where we store the actual class instance
+as value and its hash as key.
+[source,lua]
+local types = {}
+
+And were we change the item-count map entry,
+we simply change/create the types map entry to the actual type.
+[source,lua]
+types[type.hash] = type
+
+Now we just need to additionally print the name of the type associated with the
+with item-count entry in the sum map. +
+We can rely on the hash for this, since the keys in the two maps are the same. +
+TO get the name of the type, we simply can now access the `name` field of the item-types class instance.
+
+[source,lua]
+print("Item '" .. types[typeHash].name .. "' " .. count .. "x")
+
+So our end-result should look something like:
+[source,lua]
+----
+local containerIDs = component.findComponent(findClass("FGBuildableStorage"))
+local containers = component.proxy(containerIDs)
+
+local sum = {}
+local types = {}
+for _, container in ipairs(containers) do
+    local inventory = container:getInventories()[1]
+    for slotIndex = 0, inventory.size - 1, 1 do
+        local stack = inventory:getStack(slotIndex)
+        local type = stack.item.type
+
+        if type then
+            local itemCount = sum[type.hash]
+            itemCount = itemCount or 0
+            itemCount = itemCount + stack.count
+            sum[type.hash] = itemCount
+            types[type.hash] = type
+        end
+    end
+end
+
+for typeHash, count in pairs(sum) do
+    print("Item \"" .. types[typeHash].name .. "\" " .. count .. "x")
+end
+----
+
+If we run this code now,
+we should be able to check our storage of items in the computer console easily.
+
+Be aware since this is already a fair bit of code,
+there are things you could do differently to get the same.
+It is also not the most optimized code, but its good enough for us.

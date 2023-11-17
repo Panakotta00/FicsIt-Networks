@@ -146,9 +146,35 @@ Parameters::
 |the path to the point were the device should get mounted to
 |===
 
+=== `bool unmount(string mountPoint)`
+
+This function unmounts if the device at the given mount point.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|mountPoint
+|string
+|the path the device is mounted to
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool
+|bool
+|returns true if it was able to unmount the device located at the mount point
+|===
+
 === `File open(string path, string mode)`
 
-Openes a file-stream and returns it as File-table.
+Opens a file-stream and returns it as File-table.
 
 Parameters::
 +
@@ -204,7 +230,7 @@ Return Values::
 Nil if not able to open file in read only
 |===
 
-=== `bool createDir(string path)`
+=== `bool createDir(string path, bool all)`
 
 Creates the folder path.
 
@@ -217,6 +243,11 @@ Parameters::
 |path
 |string
 |folder path the function should create
+
+|all
+|bool
+|If false creates only the last folder of the path +
+If true creates all folders in the path
 |===
 
 Return Values::
@@ -230,7 +261,7 @@ Return Values::
 |returns if it was able to create the directory
 |===
 
-=== `bool remove(string path)`
+=== `bool remove(string path, bool all)`
 
 Removes the filesystem object at the given path.
 
@@ -243,6 +274,11 @@ Parameters::
 |path
 |string
 |path to the filesystem object
+
+|all
+|bool
+|If false only removes the given filesystem object +
+If true removes all childs of the filesystem object
 |===
 
 Return Values::
@@ -319,6 +355,32 @@ Return Values::
 |===
 
 === `array childs(string path)`
+
+Lists all children of this node. (f.e. items in a folder)
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|path
+|string
+|path to the filesystem object you want to get the childs from
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|array
+|array
+|array of string which are the names of the childs
+|===
+
+=== `array children(string path)`
 
 Lists all children of this node. (f.e. items in a folder)
 
@@ -465,6 +527,127 @@ Return Values::
 |function
 |function
 |the file compiled as Lua function
+|===
+
+=== `string path([int,] string...)`
+
+Combines a variable amount of strings as paths together to one big path.
+
+Additionally, applies given conversion.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int
+|int
+|This optional parameter defines a conversion that should get applied to the output path. +
+Following Conversions are possible:
+[cols="1,10a"]
+!===
+!0
+!Normalize the path. +
+`/my/../weird/./path` -> `/weird/path`
+!1
+!Normalizes and converts the path to an absolute path. +
+`my/abs/path` -> `/my/abs/path`
+!2
+!Normalizes and converts the path to an relative path. +
+`/my/relative/path` -> `my/relative/path`
+!3
+!Returns the whole file/folder name. +
+`/path/to/file.txt` -> `file.txt`
+!4
+!Returns the stem of the filename. +
+`/path/to/file.txt` -> `file` +
+`/path/to/.file` -> `.file`
+!5
+!Returns the file-extension of the filename. +
+`/path/to/file.txt` -> `.txt` +
+`/path/to/.file` -> empty-str +
+`/path/to/file.` -> `.`
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string
+|string
+|the final combined and converted output path
+|===
+
+=== `int... analyzePath(string...)`
+
+Each string will be viewed as one filesystem-path and will be checked for lexical features.
+Each of those string will then have a integer return value which is a bit-flag-register describing those lexical features.
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string...
+|string...
+|filesystem-paths you want to get lexical features from.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|int...
+|int...
+|bit-registers describing the features of each path with following bit assignments:
+[cols="1,10a"]
+!===
+!1
+!Is filesystem root
+!2
+!Is Empty (includes if it is root-path)
+!3
+!Is absolute path
+!4
+!Is only a file/folder name
+!5
+!Filename has extension
+!6
+!Ends with a `/` -> refers a directory
+!===
+|===
+
+=== `bool.. isNode(string...)`
+
+For each given string, returns a bool to tell if string is a valid node (file/folder) name.
+
+
+Parameters::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|string...
+|string...
+|node-names you want to check.
+|===
+
+Return Values::
++
+[cols="1,1,4a"]
+|===
+|Name |Type |Description
+
+|bool...
+|bool...
+|True if the corresponding string is a valid node-name.
 |===
 
 == File

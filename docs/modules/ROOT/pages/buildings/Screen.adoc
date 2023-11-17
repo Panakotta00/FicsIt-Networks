@@ -28,26 +28,8 @@ to the screen for the gpu's bind function so you can bind the screen with a gpu.
 
 The maximum size of a screen is 10 x 10.
 
-== Functions
-
-=== `w, h getSize()`
-
-This function allows you to get the size of the placed screen programmatically.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|w
-|int
-|The width of the screen.
-
-|h
-|int
-|The height of the screen.
-|===
+== Interface
+include::page$Reflection.adoc[tag=Class-Screen,leveloffset=-1]
 
 
 

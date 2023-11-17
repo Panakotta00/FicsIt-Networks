@@ -1,58 +1,55 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 using UnrealBuildTool;
 using System.IO;
 using System;
-using Tools.DotNETCommon;
+using EpicGames.Core;
 
 public class FicsItNetworks : ModuleRules
 {
-    public FicsItNetworks(ReadOnlyTargetRules Target) : base(Target)
+    public FicsItNetworks(ReadOnlyTargetRules target) : base(target)
     {
-        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         bLegacyPublicIncludePaths = false;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject",
             "Engine",
             "InputCore",
-            "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemNULL",
-            "SignificanceManager",
-            "PhysX", "APEX", "PhysXVehicles", "ApexDestruction",
-            "AkAudio",
             "ReplicationGraph",
             "UMG",
-            "AIModule",
-            "NavigationSystem",
             "AssetRegistry",
-            "GameplayTasks",
             "AnimGraphRuntime",
             "Slate", "SlateCore",
-            "Json",
+            "AudioPlatformConfiguration",
+            "EnhancedInput",
+            "GameplayTags",
             "ApplicationCore",
+            "Json",
             "Vorbis",
-            "Http"
+            "Http",
+            "OnlineSubsystemUtils",
+            "ReplicationGraph",
+            "FactoryGame",
+            "SML",
+            "Tracy"
 		});
+	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 
-        if (Target.Type == TargetRules.TargetType.Editor) {
+        if (target.Type == TargetRules.TargetType.Editor) {
 			PublicDependencyModuleNames.AddRange(new string[] {"OnlineBlueprintSupport", "AnimGraph"});
 		}
-        PublicDependencyModuleNames.AddRange(new string[] {"FactoryGame", "SML"});
 
-        var thirdPartyFolder = Path.Combine(ModuleDirectory, "../../ThirdParty");
-        PublicIncludePaths.Add(Path.Combine(thirdPartyFolder, "include"));
-        
-        var platformName = Target.Platform.ToString();
-        var libraryFolder = Path.Combine(thirdPartyFolder, platformName);
-        
-        PublicAdditionalLibraries.Add(Path.Combine(libraryFolder, "eris.lib"));
-        
+        PublicIncludePaths.Add("Public");
+
         bEnableExceptions = true;
         bUseRTTI = true;
 		
         CppStandard = CppStandardVersion.Cpp17;
 
-        var factoryGamePchPath = new DirectoryReference(Path.Combine(Target.ProjectFile.Directory.ToString(), "Source", "FactoryGame", "Public", "FactoryGame.h"));
-        PrivatePCHHeaderFile = factoryGamePchPath.MakeRelativeTo(new DirectoryReference(ModuleDirectory));
+        if (target.ProjectFile != null)
+        {
+	        var factoryGamePchPath = new DirectoryReference(Path.Combine(target.ProjectFile.Directory.ToString(),
+		        "Source", "FactoryGame", "Public", "FactoryGame.h"));
+	        PrivatePCHHeaderFile = factoryGamePchPath.MakeRelativeTo(new DirectoryReference(ModuleDirectory));
+        }
     }
 }

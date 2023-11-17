@@ -1,0 +1,46 @@
+= Lua Internet Card Example
+
+First we should use the xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Interface] of the computer to get a reference to our xref:buildings/ComputerCase/InternetCard.adoc[Internet Card].
+You can use this snippet anytime when you have an Internet-Card installed.
+```Lua
+local card = computer.getPCIDevices(findClass("FINInternetCard"))[1]
+```
+
+This example downloads with a `GET` request some data from GitHub a json-serialization library and saves it into a file, so we can load the library from now on when we need it in this computer.
+
+```Lua
+-- get internet card
+local card = computer.getPCIDevices(findClass("FINInternetCard"))[1]
+
+-- get library from internet
+local req = card:request("https://raw.githubusercontent.com/rxi/json.lua/master/json.lua", "GET", "")
+local _, libdata = req:await()
+
+-- save library to filesystem
+filesystem.initFileSystem("/dev")
+filesystem.makeFileSystem("tmpfs", "tmp")
+filesystem.mount("/dev/tmp","/")
+local file = filesystem.open("json.lua", "w")
+file:write(libdata)
+file:close()
+
+-- load the library from the file system and use it
+local json = filesystem.doFile("json.lua")
+
+local data = {
+  somekey = "is stuff",
+  otherkey = 42
+}
+
+print(json.encode(data))
+```
+
+This is an example that sends with a `POST` request some data to a web server which will send this data back again.
+
+```Lua
+local card = computer.getPCIDevices(findClass("FINInternetCard"))[1]
+
+local req = card:request("https://httpbin.org/anything", "POST", "hey ho!!!", "Content-Type", "text")
+
+print(req:await())
+```
