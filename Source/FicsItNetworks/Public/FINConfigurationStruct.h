@@ -24,6 +24,17 @@ public:
     bool TextLogMultilineAlign{};
 };
 
+
+USTRUCT(BlueprintType)
+struct FFINConfigurationStruct_Blueprints {
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(BlueprintReadWrite)
+    bool EnableParametricBlueprints{false};
+    
+};
+
 /* Struct generated from Mod Configuration Asset '/FicsItNetworks/FINConfiguration' */
 USTRUCT(BlueprintType)
 struct FFINConfigurationStruct {
@@ -31,6 +42,9 @@ struct FFINConfigurationStruct {
 public:
     UPROPERTY(BlueprintReadWrite)
     FFINConfigurationStruct_LogViewer LogViewer{};
+
+    UPROPERTY(BlueprintReadWrite)
+    FFINConfigurationStruct_Blueprints Blueprints{};
 
     /* Retrieves active configuration value and returns object of this struct containing it */
     static FFINConfigurationStruct GetActiveConfig(UObject* WorldContext) {
