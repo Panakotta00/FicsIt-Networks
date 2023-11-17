@@ -45,3 +45,16 @@ index b832ed9095..740f2ef85d 100644
  		
  		ensure( false );
  
+diff --git a/Source/FactoryGame/Public/Hologram/FGHologram.h b/Source/FactoryGame/Public/Hologram/FGHologram.h
+index e7ac3e1b06..d997fcefed 100644
+--- a/Source/FactoryGame/Public/Hologram/FGHologram.h
++++ b/Source/FactoryGame/Public/Hologram/FGHologram.h
+@@ -63,6 +63,8 @@ UCLASS( hidecategories = ( "Actor", "Input", "Replication", "Rendering", "Actor
+ class FACTORYGAME_API AFGHologram : public AActor, public IFGConstructionMessageInterface
+ {
+ 	GENERATED_BODY()
++
++	friend class AFINBlueprintHologram;
+ public:
+ 	AFGHologram();
+ 

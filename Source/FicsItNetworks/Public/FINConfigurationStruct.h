@@ -2,10 +2,10 @@
 #include "CoreMinimal.h"
 #include "Configuration/ConfigManager.h"
 #include "Engine/Engine.h"
-#include "Engine/GameInstance.h"
 #include "FINConfigurationStruct.generated.h"
 
 struct FFINConfigurationStruct_LogViewer;
+struct FFINConfigurationStruct_Blueprints;
 
 USTRUCT(BlueprintType)
 struct FFINConfigurationStruct_LogViewer {
@@ -24,15 +24,12 @@ public:
     bool TextLogMultilineAlign{};
 };
 
-
 USTRUCT(BlueprintType)
 struct FFINConfigurationStruct_Blueprints {
     GENERATED_BODY()
-
 public:
     UPROPERTY(BlueprintReadWrite)
-    bool EnableParametricBlueprints{false};
-    
+    bool EnableParametricBlueprints{};
 };
 
 /* Struct generated from Mod Configuration Asset '/FicsItNetworks/FINConfiguration' */
@@ -50,8 +47,7 @@ public:
     static FFINConfigurationStruct GetActiveConfig(UObject* WorldContext) {
         FFINConfigurationStruct ConfigStruct{};
         FConfigId ConfigId{"FicsItNetworks", ""};
-        const UWorld* World = GEngine->GetWorldFromContextObject(WorldContext, EGetWorldErrorMode::ReturnNull);
-        if (World && World->GetGameInstance()) {
+        if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContext, EGetWorldErrorMode::ReturnNull)) {
             UConfigManager* ConfigManager = World->GetGameInstance()->GetSubsystem<UConfigManager>();
             ConfigManager->FillConfigurationStruct(ConfigId, FDynamicStructInfo{FFINConfigurationStruct::StaticStruct(), &ConfigStruct});
         }

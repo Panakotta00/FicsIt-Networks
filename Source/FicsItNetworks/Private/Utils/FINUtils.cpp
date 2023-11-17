@@ -1,22 +1,35 @@
 #include "Utils/FINUtils.h"
 
-const FRegexPattern UFINUtils::VariablePattern(TEXT("\\${(\\w+)(\\|(\\w+))?}"));
+#include "Internationalization/Regex.h"
 
-FString UFINUtils::InterpolateString(const FString& Text, TMap<FString, FString> Variables, bool bEmptyInvalidVariables) {
+const FRegexPattern UFINUtils::VariablePattern(TEXT("\\$\\{(\\w+)(\\|(\\w+))?\\}"));
+
+#pragma optimize("", off)
+FString UFINUtils::InterpolateString(const FString& Text, const TMap<FString, FString>& Variables, bool bEmptyInvalidVariables) {
 	FString OutText;
 	FRegexMatcher Matcher(VariablePattern, Text);
 	int CurrentIndex = 0;
 	while (Matcher.FindNext()) {
 		FString Variable = Matcher.GetCaptureGroup(1);
-		FString* Value = Variables.Find(Variable);
+		const FString* Value = Variables.Find(Variable);
 		if (Value || bEmptyInvalidVariables) {
-			OutText.Append(TextRange(Text, FTextRange(CurrentIndex, Matcher.GetBeginLimit())));
+			OutText.Append(TextRange(Text, FTextRange(CurrentIndex, Matcher.GetMatchBeginning())));
 			if (Value) OutText.Append(*Value);
 		} else {
-			OutText.Append(TextRange(Text, FTextRange(CurrentIndex, Matcher.GetEndLimit())));
+			OutText.Append(TextRange(Text, FTextRange(CurrentIndex, Matcher.GetMatchEnding())));
 		} 
-		CurrentIndex = Matcher.GetEndLimit();
+		CurrentIndex = Matcher.GetMatchEnding();
 	}
 	OutText.Append(Text.RightChop(CurrentIndex));
 	return OutText;
+}
+#pragma optimize("", on)
+
+void UFINUtils::VariablesFormString(const FString& Text, TMap<FString, FString>& OutVariables) {
+	FRegexMatcher Matcher(VariablePattern, Text);
+	while (Matcher.FindNext()) {
+		FString Variable = Matcher.GetCaptureGroup(1);
+		FString Default = Matcher.GetCaptureGroup(3);
+		OutVariables.Add(Variable, Default);
+	}
 }
