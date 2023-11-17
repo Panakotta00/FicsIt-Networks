@@ -194,9 +194,15 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
             } else if (Record.GetUnderlyingArchive().IsSaving()) {
             	CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY);
             	std::string RawData = CodersFileSystem::FileStream::readAll(Stream);
-            	Stream->close();
-            	TArray<uint8> Data((uint8*)RawData.c_str(), RawData.length());
-            	Content << Data;
+            	if (bUsePreBinarySupportSerialization) {
+            		FUTF8ToTCHAR Conv(RawData.c_str(), RawData.length());
+            		FString Data(Conv.Get(), Conv.Length());
+            		Content << Data;
+            	} else {
+            		Stream->close();
+            		TArray<uint8> Data((uint8*)RawData.c_str(), RawData.length());
+            		Content << Data;
+            	}
             }
 		} else if (Type == 2) {
 			CheckKeepDisk(!CodersFileSystem::SRef<CodersFileSystem::Directory>(SerializeDevice->get(Path / stdChildName)).isValid())

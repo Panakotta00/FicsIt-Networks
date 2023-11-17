@@ -13,7 +13,7 @@ private:
 	CodersFileSystem::SRef<CodersFileSystem::Device> Device;
 
 	bool bUseOldSerialization = false;
-	bool bUsePreBinarySupportSerialization = false;
+	bool bUsePreBinarySupportSerialization = true;
 	
 public:
 	void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk);
