@@ -128,8 +128,8 @@ pipeline {
 			}
 			
 			steps {
-				bat script: "rename .\\SatisfactoryModLoader\\Saved\\ArchivedPlugins\\${MOD_NAME}\\${MOD_NAME}_Windows.zip ${MOD_NAME}_Windows_${BRANCH_NAME}_${BUILD_NUMBER}.zip"
-				archiveArtifacts artifacts: "SatisfactoryModLoader\\Saved\\ArchivedPlugins\\${MOD_NAME}\\${MOD_NAME}_Windows_${BRANCH_NAME}_${BUILD_NUMBER}.zip", fingerprint: true, onlyIfSuccessful: true
+				bat script: "rename .\\SatisfactoryModLoader\\Saved\\ArchivedPlugins\\${MOD_NAME}\\${MOD_NAME}-Windows.zip ${MOD_NAME}-Windows_${BRANCH_NAME}_${BUILD_NUMBER}.zip"
+				archiveArtifacts artifacts: "SatisfactoryModLoader\\Saved\\ArchivedPlugins\\${MOD_NAME}\\${MOD_NAME}-Windows_${BRANCH_NAME}_${BUILD_NUMBER}.zip", fingerprint: true, onlyIfSuccessful: true
 			}
 		}
 	}
