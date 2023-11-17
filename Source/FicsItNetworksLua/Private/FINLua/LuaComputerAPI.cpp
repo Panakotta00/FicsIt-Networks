@@ -124,6 +124,14 @@ namespace FINLua {
 		return 1;
 	} LuaFuncEnd()
 
+	LuaFunc(luaComputerLog) {
+		int verbosity = luaL_checknumber(L, 1);
+		FString text = luaFIN_checkFString(L, 2);
+		verbosity = FMath::Clamp(verbosity, 0, EFINLogVerbosity::FIN_Log_Verbosity_Max);
+		kernel->GetLog()->PushLogEntry((EFINLogVerbosity)verbosity, text);
+		return 0;
+	} LuaFuncEnd()
+
 	LuaFunc(luaComputerTextNotification) {
 		FString Text = luaFIN_checkFString(L, 1);
 		TOptional<FString> Player;
@@ -218,6 +226,7 @@ namespace FINLua {
 		{"time", luaComputerTime},
 		{"millis", luaComputerMillis},
 		{"magicTime", luaComputerMagicTime},
+		{"log", luaComputerLog},
 		{"getPCIDevices", luaComputerPCIDevices},
 		{"textNotification", luaComputerTextNotification},
 		{"attentionPing", luaComputerAttentionPing},

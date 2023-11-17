@@ -51,6 +51,10 @@ void UFINLog::EmptyLog() {
 	bForceEntriesUpdate = true;
 }
 
+const TArray<FFINLogEntry>& UFINLog::GetLogEntries() {
+	return LogEntries;
+}
+
 FString UFINLog::GetLogAsRichText() {
 	FString Text;
 	for (FFINLogEntry Entry : LogEntries) {

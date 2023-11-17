@@ -10,11 +10,15 @@ namespace FINLua {
 			if ((*future)->IsDone()) {
 				TArray<FFINAnyNetworkValue> Data = future->Get<FFINFuture>().GetOutput();
 				FFINNetworkTrace Trace;
-				if (future->GetStruct() == FFINFutureReflection::StaticStruct()) Trace = future->Get<FFINFutureReflection>().Context.GetTrace();
+				if (future->GetStruct() == FFINFutureReflection::StaticStruct()) {
+					FScopeLock Lock(&future->Get<FFINFutureReflection>().Mutex);
+					Trace = future->Get<FFINFutureReflection>().Context.GetTrace();
+				}
 				for (const FFINAnyNetworkValue& Param : Data) luaFIN_pushNetworkValue(L, Param, Trace);
 				return Data.Num();
+			} else {
+				return lua_yieldk(L, LUA_MULTRET, NULL, luaFutureAwaitContinue);
 			}
-			return lua_yieldk(L, LUA_MULTRET, NULL, luaFutureAwaitContinue);
 		}
 		
 		int luaFutureAwait(lua_State* L) {
