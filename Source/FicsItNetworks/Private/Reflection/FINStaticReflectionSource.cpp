@@ -937,7 +937,7 @@ BeginProp(RInt, size, "Size", "The count of available item stack slots this inve
 } EndProp()
 BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click into a inventory)") {
 	Body()
-	UFINLogLibrary::Log(FIN_Log_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call swapStacks!"));
+	UFINLogLibrary::Log(FIN_Log_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call sort!"));
 	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
 		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
 		if (RepDetailActor) {
