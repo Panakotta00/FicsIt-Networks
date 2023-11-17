@@ -46,7 +46,7 @@ jobs:
           path: Mods/FicsItNetworks
 
       - name: Apply FG Patches
-        run: git apply git apply Mods\FicsItNetowrks\SML_Patch.patch -v
+        run: git apply git apply Mods\FicsItNetworks\SML_Patch.patch -v
 
       - name: Add Wwise
         run: |
