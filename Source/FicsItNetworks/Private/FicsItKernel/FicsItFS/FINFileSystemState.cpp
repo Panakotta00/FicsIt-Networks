@@ -243,6 +243,7 @@ void AFINFileSystemState::BeginPlay() {
 
 void AFINFileSystemState::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	bUseOldSerialization = gameVersion < 150216;
+	//bUsePreBinarySupportSerialization = gameVersion < 264901;
 }
 
 bool AFINFileSystemState::ShouldSave_Implementation() const {
