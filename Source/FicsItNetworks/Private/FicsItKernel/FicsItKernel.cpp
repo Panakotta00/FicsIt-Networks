@@ -297,19 +297,16 @@ void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
 	}
 }
 
-bool UFINKernelSystem::RecalculateResources(ERecalc InComponents, bool bShouldCrash) {
+TSharedPtr<FFINKernelCrash> UFINKernelSystem::RecalculateResources(ERecalc InComponents) {
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> Device = FileSystem.getDevDevice();
 
-	bool bFail = false;
 	MemoryUsage = Processor->GetMemoryUsage(InComponents & PROCESSOR);
 	MemoryUsage += FileSystem.getMemoryUsage(InComponents & FILESYSTEM);
 	if (MemoryUsage > MemoryCapacity) {
-		bFail = true;
-		KernelCrash = MakeShared<FFINKernelCrash>("out of memory");
-		if (bShouldCrash) Crash(KernelCrash.ToSharedRef());
+		return MakeShared<FFINKernelCrash>("out of memory");
 	}
 	if (Device) Device->updateCapacity(MemoryCapacity - MemoryUsage);
-	return bFail;
+	return nullptr;
 }
 
 UFINLog* UFINKernelSystem::GetLog() const {
