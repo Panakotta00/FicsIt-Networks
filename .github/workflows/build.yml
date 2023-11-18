@@ -46,6 +46,7 @@ jobs:
           path: Mods/FicsItNetworks
 
       - name: Apply FG Patches
+        working-directory: SatisfactoryModLoader
         run: git apply .\Mods\FicsItNetworks\SML_Patch.patch -v
 
       - name: Create UE directory
