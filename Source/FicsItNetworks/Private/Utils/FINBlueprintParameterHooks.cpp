@@ -99,13 +99,13 @@ void AFINBlueprintHologram::BeginPlay() {
 }
 
 void AFINBlueprintHologram::SetHologramLocationAndRotation(const FHitResult& hitResult) {
-	if(!(Parameters.Num() > 0) || !bConfigured) {
+	if(Parameters.Num() <= 0 || !bConfigured) {
 		Super::SetHologramLocationAndRotation(hitResult);	
 	}
 }
 
 bool AFINBlueprintHologram::TrySnapToActor(const FHitResult& hitResult) {
-	if(!(Parameters.Num() > 0) || !bConfigured) {
+	if(Parameters.Num() <= 0 || !bConfigured) {
 		return Super::TrySnapToActor(hitResult);
 	}
 	return false;
