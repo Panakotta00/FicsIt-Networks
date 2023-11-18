@@ -80,12 +80,14 @@ void SFINLogViewer::Construct(const FArguments& InArgs, UObject* InWorldContext)
 	NavigateReflectionDelegate = InArgs._OnNavigateReflection;
 	NavigateEEPROMDelegate = InArgs._OnNavigateEEPROM;
 
+#if !WITH_EDITOR
 	FFINConfigurationStruct Config = FFINConfigurationStruct::GetActiveConfig(WorldContext);
 	bTextOutputEnabled = Config.LogViewer.TextLog;
 	TextTimestampEnabled = Config.LogViewer.TextLogTimestamp;
 	TextVerbosityEnabled = Config.LogViewer.TextLogVerbosity;
 	TextMultilineAlignEnabled = Config.LogViewer.TextLogMultilineAlign;
-
+#endif
+	
 	ChildSlot[
 		SNew(SOverlay)
 		+SOverlay::Slot()[

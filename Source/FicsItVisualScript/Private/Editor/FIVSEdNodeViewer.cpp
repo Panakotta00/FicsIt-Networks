@@ -3,6 +3,7 @@
 #include "Editor/FIVSEdGraphViewer.h"
 #include "Script/FIVSScriptNode.h"
 #include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Layout/SScaleBox.h"
 
 void SFIVSEdPinViewer::Construct(const FArguments& InArgs, SFIVSEdNodeViewer* InNodeViewer, UFIVSPin* InPin) {
 	Style = InArgs._Style;

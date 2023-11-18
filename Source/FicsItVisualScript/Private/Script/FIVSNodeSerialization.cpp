@@ -1,5 +1,6 @@
 #include "Script/FIVSNodeSerialization.h"
 
+#include "FicsItVisualScriptModule.h"
 #include "Script/FIVSGraph.h"
 #include "Script/FIVSNode.h"
 #include "JsonObjectConverter.h"
@@ -102,7 +103,7 @@ FString UFIVSSerailizationUtils::FIVS_SerializePartial(TArray<UFIVSNode*> InNode
 
 	FJsonObjectConverter::CustomExportCallback ExportCallback;
 	ExportCallback.BindLambda([](FProperty* InProp, const void* InVal) -> TSharedPtr<FJsonValue> {
-		if (InProp->IsA<FStructProperty>() && ((void*)Cast<FStructProperty>(InProp)->Struct == (void*)FFIVSSerializedPin::StaticStruct())) {
+		if (InProp->IsA<FStructProperty>() && ((void*)CastField<FStructProperty>(InProp)->Struct == (void*)FFIVSSerializedPin::StaticStruct())) {
 			const FFIVSSerializedPin& SerializedPin = *static_cast<const FFIVSSerializedPin*>(InVal);
 			
 			if (SerializedPin.PinLiteralValue.IsValid()) {

@@ -2,6 +2,7 @@
 
 #include "FINNetworkTrace.h"
 #include "FINDynamicStructHolder.h"
+#include "Misc/EnumRange.h"
 #include "FINNetworkValues.generated.h"
 
 struct FFINAnyNetworkValue;
@@ -22,7 +23,7 @@ enum EFINNetworkValueType {
 	FIN_ARRAY,
 	FIN_ANY,
 };
-ENUM_RANGE_BY_COUNT(EFINNetworkValueType, FIN_ANY + 1)
+ENUM_RANGE_BY_COUNT(EFINNetworkValueType, FIN_ANY + 1);
 
 typedef bool FINBool;
 typedef int64 FINInt;
