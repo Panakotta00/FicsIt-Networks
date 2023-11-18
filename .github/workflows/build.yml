@@ -43,7 +43,7 @@ jobs:
 
       - uses: actions/checkout@v2
         with:
-          path: Mods/FicsItNetworks
+          path: SatisfactoryModLoader/Mods/FicsItNetworks
 
       - name: Apply FG Patches
         working-directory: SatisfactoryModLoader
