@@ -18,7 +18,7 @@ bool UFINUReflectionSource::ProvidesRequirements(UClass* Class) const {
 		if (Function->GetName().StartsWith("netPropGet_")) return true;
 		if (Function->GetName().StartsWith("netFunc_")) return true;
 		if (Function->GetName().StartsWith("netSig_")) return true;
-		if (Function->GetName() == "netDesc" && Cast<FTextProperty>(Function->GetReturnProperty()) && Function->ParmsSize == sizeof(FText)) return true;
+		if (Function->GetName() == "netDesc" && CastField<FTextProperty>(Function->GetReturnProperty()) && Function->ParmsSize == sizeof(FText)) return true;
 	}
 	return false;
 }
@@ -72,7 +72,7 @@ void UFINUReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFillClass
 			ToFillClass->Functions.Add(GenerateFunction(Ref, Class, *Func));
 		} else if (Func->GetName().StartsWith("netSig_")) {
 			ToFillClass->Signals.Add(GenerateSignal(Ref, Class, *Func));
-		} else if (Func->GetName() == "netDesc" && Cast<FTextProperty>(Func->GetReturnProperty()) && Func->ParmsSize == sizeof(FText)) {
+		} else if (Func->GetName() == "netDesc" && CastField<FTextProperty>(Func->GetReturnProperty()) && Func->ParmsSize == sizeof(FText)) {
 			FText Desc;
 			Class->GetDefaultObject()->ProcessEvent(*Func, &Desc);
 			ToFillClass->Description = Desc;
@@ -123,28 +123,28 @@ UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* 
 			Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
 
 			for (TFieldIterator<FProperty> Property(MetaFunc); Property; ++Property) {
-				FTextProperty* TextProp = Cast<FTextProperty>(*Property);
-				FStrProperty* StrProp = Cast<FStrProperty>(*Property);
-				FMapProperty* MapProp = Cast<FMapProperty>(*Property);
+				FTextProperty* TextProp = CastField<FTextProperty>(*Property);
+				FStrProperty* StrProp = CastField<FStrProperty>(*Property);
+				FMapProperty* MapProp = CastField<FMapProperty>(*Property);
 				if (StrProp && Property->GetName() == "InternalName") Meta.InternalName = StrProp->GetPropertyValue_InContainer(Params);
 				else if (TextProp && Property->GetName() == "DisplayName") Meta.DisplayName = TextProp->GetPropertyValue_InContainer(Params);
 				else if (TextProp && Property->GetName() == "Description") Meta.Description = TextProp->GetPropertyValue_InContainer(Params);
-				else if (MapProp && Cast<FStrProperty>(MapProp->KeyProp)) {
-					if (Cast<FStrProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyInternalNames") {
+				else if (MapProp && CastField<FStrProperty>(MapProp->KeyProp)) {
+					if (CastField<FStrProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyInternalNames") {
 						Meta.PropertyInternalNames = *MapProp->ContainerPtrToValuePtr<TMap<FString, FString>>(Params);
 						Meta.PropertyDisplayNames.Empty();
 						for (const TPair<FString, FString>& InternalName : Meta.PropertyInternalNames) {
 							Meta.PropertyDisplayNames.Add(InternalName.Key, FText::FromString(InternalName.Value));
 						}
-					} else if (Cast<FTextProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyDisplayNames") {
+					} else if (CastField<FTextProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyDisplayNames") {
 						for (const TPair<FString, FText>& DisplayName : *MapProp->ContainerPtrToValuePtr<TMap<FString, FText>>(Params)) {
 							Meta.PropertyDisplayNames.FindOrAdd(DisplayName.Key) = DisplayName.Value;
 						}
-					} else if (Cast<FTextProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyDescriptions") {
+					} else if (CastField<FTextProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyDescriptions") {
 						for (const TPair<FString, FText>& Description : *MapProp->ContainerPtrToValuePtr<TMap<FString, FText>>(Params)) {
 							Meta.PropertyDescriptions.FindOrAdd(Description.Key) = Description.Value;
 						}
-					} else if (Cast<FIntProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyRuntimes") {
+					} else if (CastField<FIntProperty>(MapProp->ValueProp) && Property->GetName() == "PropertyRuntimes") {
 						for (const TPair<FString, int32>& Runtime : *MapProp->ContainerPtrToValuePtr<TMap<FString, int32>>(Params)) {
 							Meta.PropertyRuntimes.FindOrAdd(Runtime.Key) = Runtime.Value;
 						}
@@ -184,27 +184,27 @@ UFINUReflectionSource::FFINFunctionMeta UFINUReflectionSource::GetFunctionMeta(U
 			Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
 
 			for (TFieldIterator<FProperty> Property(MetaFunc); Property; ++Property) {
-				FTextProperty* TextProp = Cast<FTextProperty>(*Property);
-				FStrProperty* StrProp = Cast<FStrProperty>(*Property);
-				FArrayProperty* ArrayProp = Cast<FArrayProperty>(*Property);
-				FIntProperty* IntProp = Cast<FIntProperty>(*Property);
+				FTextProperty* TextProp = CastField<FTextProperty>(*Property);
+				FStrProperty* StrProp = CastField<FStrProperty>(*Property);
+				FArrayProperty* ArrayProp = CastField<FArrayProperty>(*Property);
+				FIntProperty* IntProp = CastField<FIntProperty>(*Property);
 				if (StrProp && Property->GetName() == "InternalName") Meta.InternalName = StrProp->GetPropertyValue_InContainer(Params);
 				else if (TextProp && Property->GetName() == "DisplayName") Meta.DisplayName = TextProp->GetPropertyValue_InContainer(Params);
 				else if (TextProp && Property->GetName() == "Description") Meta.Description = TextProp->GetPropertyValue_InContainer(Params);
-				else if (ArrayProp && Cast<FStrProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterInternalNames") {
+				else if (ArrayProp && CastField<FStrProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterInternalNames") {
 					Meta.ParameterInternalNames = *ArrayProp->ContainerPtrToValuePtr<TArray<FString>>(Params);
 					Meta.ParameterDisplayNames.Empty();
 					for (const FString& InternalName : Meta.ParameterInternalNames) {
 						Meta.ParameterDisplayNames.Add(FText::FromString(InternalName));
 					}
-				} else if (ArrayProp && Cast<FTextProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterDisplayNames") {
+				} else if (ArrayProp && CastField<FTextProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterDisplayNames") {
 					int i = 0;
 					for (const FText& DisplayName : *ArrayProp->ContainerPtrToValuePtr<TArray<FText>>(Params)) {
 						if (Meta.ParameterDisplayNames.Num() > i) Meta.ParameterDisplayNames[i] = DisplayName;
 						else Meta.ParameterDisplayNames.Add(DisplayName);
 						++i;
 					}
-				} else if (ArrayProp && Cast<FTextProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterDescriptions") {
+				} else if (ArrayProp && CastField<FTextProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterDescriptions") {
 					int i = 0;
 					for (const FText& Description : *ArrayProp->ContainerPtrToValuePtr<TArray<FText>>(Params)) {
 						if (Meta.ParameterDescriptions.Num() > i) Meta.ParameterDescriptions[i] = Description;
@@ -246,26 +246,26 @@ UFINUReflectionSource::FFINSignalMeta UFINUReflectionSource::GetSignalMeta(UClas
 			Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
 
 			for (TFieldIterator<FProperty> Property(MetaFunc); Property; ++Property) {
-				FTextProperty* TextProp = Cast<FTextProperty>(*Property);
-				FStrProperty* StrProp = Cast<FStrProperty>(*Property);
-				FArrayProperty* ArrayProp = Cast<FArrayProperty>(*Property);
+				FTextProperty* TextProp = CastField<FTextProperty>(*Property);
+				FStrProperty* StrProp = CastField<FStrProperty>(*Property);
+				FArrayProperty* ArrayProp = CastField<FArrayProperty>(*Property);
 				if (StrProp && Property->GetName() == "InternalName") Meta.InternalName = StrProp->GetPropertyValue_InContainer(Params);
 				else if (TextProp && Property->GetName() == "DisplayName") Meta.DisplayName = TextProp->GetPropertyValue_InContainer(Params);
 				else if (TextProp && Property->GetName() == "Description") Meta.Description = TextProp->GetPropertyValue_InContainer(Params);
-				else if (ArrayProp && Cast<FStrProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterInternalNames") {
+				else if (ArrayProp && CastField<FStrProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterInternalNames") {
 					Meta.ParameterInternalNames = *ArrayProp->ContainerPtrToValuePtr<TArray<FString>>(Params);
 					Meta.ParameterDisplayNames.Empty();
 					for (const FString& InternalName : Meta.ParameterInternalNames) {
 						Meta.ParameterDisplayNames.Add(FText::FromString(InternalName));
 					}
-				} else if (ArrayProp && Cast<FTextProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterDisplayNames") {
+				} else if (ArrayProp && CastField<FTextProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterDisplayNames") {
 					int i = 0;
 					for (const FText& DisplayName : *ArrayProp->ContainerPtrToValuePtr<TArray<FText>>(Params)) {
 						if (Meta.ParameterDisplayNames.Num() > i) Meta.ParameterDisplayNames[i] = DisplayName;
 						else Meta.ParameterDisplayNames.Add(DisplayName);
 						++i;
 					}
-				} else if (ArrayProp && Cast<FTextProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterDescriptions") {
+				} else if (ArrayProp && CastField<FTextProperty>(ArrayProp->Inner) && Property->GetName() == "ParameterDescriptions") {
 					int i = 0;
 					for (const FText& Description : *ArrayProp->ContainerPtrToValuePtr<TArray<FText>>(Params)) {
 						if (Meta.ParameterDescriptions.Num() > i) Meta.ParameterDescriptions[i] = Description;

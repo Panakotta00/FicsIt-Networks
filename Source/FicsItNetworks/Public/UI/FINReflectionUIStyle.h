@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Components/FINCodeableSplitter.h"
+#include "SlateBasics.h"
 #include "FINReflectionUIStyle.generated.h"
 
 USTRUCT(BlueprintType)

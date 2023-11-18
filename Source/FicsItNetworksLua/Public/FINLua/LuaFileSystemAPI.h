@@ -35,3 +35,7 @@ namespace FINLua {
 	*/
 	void setupFileSystemAPI(lua_State* ctx);
 }
+
+inline uint32 GetTypeHash(const FINLua::LuaFile& File) {
+	return GetTypeHash(File.get());
+}

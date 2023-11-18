@@ -78,6 +78,11 @@ namespace FINLua {
 	 * @return the struct got from the lua value
 	 */
 	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int Index, UFINStruct* ParentType, bool bAllowConstruction);
+	template<typename T>
+	T& luaFIN_checkStruct(lua_State* L, int Index, bool bAllowConstruction) {
+		UFINStruct* Type = FFINReflection::Get()->FindStruct(TBaseStructure<FVector>::Get());
+		return luaFIN_checkStruct(L, Index, Type, true)->Get<T>();
+	}
 
 	/**
 	 * @brief Pushes the given struct type onto the lua stack

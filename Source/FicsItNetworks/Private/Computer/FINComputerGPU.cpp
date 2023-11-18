@@ -3,6 +3,7 @@
 #include "Buildables/FGBuildableWidgetSign.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Graphics/FINScreenInterface.h"
+#include "Net/UnrealNetwork.h"
 
 AFINComputerGPU::AFINComputerGPU() {
 	SetActorTickEnabled(true);

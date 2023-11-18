@@ -11,6 +11,7 @@ enum EFINLogVerbosity {
 	FIN_Log_Verbosity_Warning,
 	FIN_Log_Verbosity_Error,
 	FIN_Log_Verbosity_Fatal,
+	FIN_Log_Verbosity_Max = FIN_Log_Verbosity_Fatal,
 };
 
 USTRUCT(BlueprintType)
@@ -52,7 +53,7 @@ public:
 	void EmptyLog();
 
 	UFUNCTION(BlueprintCallable)
-	const TArray<FFINLogEntry>& GetLogEntries() { return LogEntries; }
+	const TArray<FFINLogEntry>& GetLogEntries();
 
 	UFUNCTION(BlueprintCallable)
 	FString GetLogAsRichText();
@@ -67,6 +68,8 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 	FFINLogEntriesUpdatedDelegate OnLogEntriesUpdated;
+
+	FScopeLock Lock() { return FScopeLock(&LogEntriesToAddMutex); }
 
 private:
 	UPROPERTY(SaveGame, ReplicatedUsing=OnRep_LogEntries)

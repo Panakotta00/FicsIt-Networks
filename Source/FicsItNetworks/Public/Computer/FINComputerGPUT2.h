@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SlateBasics.h"
 #include "FINComputerGPU.h"
 #include "Network/FINDynamicStructHolder.h"
 #include "FINComputerGPUT2.generated.h"
-
 
 USTRUCT(BlueprintType)
 struct FFINGPUT2WidgetStyle : public FSlateWidgetStyle {

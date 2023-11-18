@@ -2,6 +2,7 @@
 
 #include "Computer/FINComputerSubsystem.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Net/UnrealNetwork.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
@@ -173,10 +174,17 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
 			if (Record.GetUnderlyingArchive().IsLoading()) {
 				std::string diskData;
 				if (KeepDisk == -1) diskData = CodersFileSystem::FileStream::readAll(SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY));
-				FString Data;
-				Content << Data;
-				FTCHARToUTF8 Convert(*Data, Data.Len());
-				std::string stdData = std::string(Convert.Get(), Convert.Length());
+				std::string stdData;
+				if (bUsePreBinarySupportSerialization) {
+					FString Data;
+					Content << Data;
+					FTCHARToUTF8 Conv(Data);
+					stdData = std::string(Conv.Get(), Conv.Length());
+				} else {
+					TArray<uint8> Data;
+					Content << Data;
+					stdData = std::string((char*)Data.GetData(), Data.Num());
+				}
 				CheckKeepDisk(diskData != stdData)
 				if (KeepDisk == 0) {
 					CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC | CodersFileSystem::BINARY);
@@ -186,10 +194,15 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
             } else if (Record.GetUnderlyingArchive().IsSaving()) {
             	CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY);
             	std::string RawData = CodersFileSystem::FileStream::readAll(Stream);
-            	Stream->close();
-            	FUTF8ToTCHAR Convert(RawData.c_str(), RawData.length());
-            	FString Data(Convert.Length(), Convert.Get());
-            	Content << Data;
+            	if (bUsePreBinarySupportSerialization) {
+            		FUTF8ToTCHAR Conv(RawData.c_str(), RawData.length());
+            		FString Data(Conv.Get(), Conv.Length());
+            		Content << Data;
+            	} else {
+            		Stream->close();
+            		TArray<uint8> Data((uint8*)RawData.c_str(), RawData.length());
+            		Content << Data;
+            	}
             }
 		} else if (Type == 2) {
 			CheckKeepDisk(!CodersFileSystem::SRef<CodersFileSystem::Directory>(SerializeDevice->get(Path / stdChildName)).isValid())
@@ -236,6 +249,7 @@ void AFINFileSystemState::BeginPlay() {
 
 void AFINFileSystemState::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	bUseOldSerialization = gameVersion < 150216;
+	//bUsePreBinarySupportSerialization = gameVersion < 264901;
 }
 
 bool AFINFileSystemState::ShouldSave_Implementation() const {

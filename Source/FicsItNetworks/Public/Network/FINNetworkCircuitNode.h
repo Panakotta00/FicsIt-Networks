@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/Interface.h"
 #include "FINNetworkCircuitNode.generated.h"
 
 class AFINNetworkCircuit;

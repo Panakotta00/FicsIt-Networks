@@ -3,6 +3,7 @@
 #include "SlateBasics.h"
 #include "FINComputerGPU.h"
 #include "Async/ParallelFor.h"
+#include "Widgets/SLeafWidget.h"
 #include "FINComputerGPUT1.generated.h"
 
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);

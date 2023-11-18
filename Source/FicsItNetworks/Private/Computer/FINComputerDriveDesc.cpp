@@ -3,6 +3,7 @@
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"
 #include "Components/TextBlock.h"
+#include "Net/UnrealNetwork.h"
 
 UFINComputerDriveDesc::UFINComputerDriveDesc() {
 	mStackSize = EStackSize::SS_ONE;
@@ -45,7 +46,7 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 		float start, end, time;
 	} params = {0.0, usage, 0.1};
 	ProgressBar->ProcessEvent(ProgressBar->FindFunction("LerpBar"), &params);
-	FLinearColor& color = *Cast<FStructProperty>(progressBar->FindPropertyByName("mBarTint"))->ContainerPtrToValuePtr<FLinearColor>(ProgressBar);
+	FLinearColor& color = *CastField<FStructProperty>(progressBar->FindPropertyByName("mBarTint"))->ContainerPtrToValuePtr<FLinearColor>(ProgressBar);
 	color = FLinearColor(1,1,1);
 	UGridSlot* ProgressSlot = Grid->AddChildToGrid(ProgressBar);
 	ProgressSlot->SetRow(0);

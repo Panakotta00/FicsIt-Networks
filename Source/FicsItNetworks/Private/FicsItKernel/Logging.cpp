@@ -1,5 +1,7 @@
 #include "FicsItKernel/Logging.h"
 
+#include "Net/UnrealNetwork.h"
+
 #define LOCTEXT_NAMESPACE "Log"
 
 void UFINLog::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -47,6 +49,10 @@ void UFINLog::EmptyLog() {
 	LogEntriesToAdd.Empty();
 	LogEntries.Empty();
 	bForceEntriesUpdate = true;
+}
+
+const TArray<FFINLogEntry>& UFINLog::GetLogEntries() {
+	return LogEntries;
 }
 
 FString UFINLog::GetLogAsRichText() {

@@ -937,7 +937,7 @@ BeginProp(RInt, size, "Size", "The count of available item stack slots this inve
 } EndProp()
 BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click into a inventory)") {
 	Body()
-	UFINLogLibrary::Log(FIN_Log_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call swapStacks!"));
+	UFINLogLibrary::Log(FIN_Log_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call sort!"));
 	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
 		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
 		if (RepDetailActor) {
@@ -2595,11 +2595,17 @@ BeginProp(RFloat, y, "Y", "The Y coordinate component") {
 } PropSet() {
 	self->Y = Val;
 } EndProp()
-BeginOp(FIN_Operator_Add, 0, "Operator Add", "The Add (+) operator for this struct.") {
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.") {
 	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector that should be added to this vector")
 	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector addition")
 	Body()
 	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.") {
+	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector that should be subtracted from this vector")
+	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector subtraction")
+	Body()
+	result = (FINStruct)(*self - other);
 } EndFunc()
 BeginOp(FIN_Operator_Neg, 0, "Operator Neg", "The Negation operator for this struct.") {
 	OutVal(0, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector negation")
@@ -2636,6 +2642,35 @@ BeginProp(RFloat, z, "Z", "The Z coordinate component") {
 } PropSet() {
 	self->Z = Val;
 } EndProp()
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.") {
+	InVal(0, RStruct<FVector>, other, "Other", "The other vector that should be added to this vector")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting vector of the vector addition")
+	Body()
+	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.") {
+	InVal(0, RStruct<FVector>, other, "Other", "The other vector that should be subtracted from this vector")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting vector of the vector subtraction")
+	Body()
+	result = (FINStruct)(*self - other);
+} EndFunc()
+BeginOp(FIN_Operator_Neg, 0, "Operator Neg", "The Negation operator for this struct.") {
+	OutVal(0, RStruct<FVector>, result, "Result", "The resulting vector of the vector negation")
+	Body()
+	result = (FINStruct)(-*self);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 0, "Scalar Product", "") {
+	InVal(0, RStruct<FVector>, other, "Other", "The other vector to calculate the scalar product with.")
+	OutVal(1, RFloat, result, "Result", "The resulting scalar product.")
+	Body()
+	result = (FINStruct)(*self * other);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 1, "Vector Factor Scaling", "") {
+	InVal(0, RFloat, factor, "Factor", "The factor with which this vector should be scaled with.")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting scaled vector.")
+	Body()
+	result = (FINStruct)(*self * factor);
+} EndFunc()
 EndStruct()
 
 BeginStructConstructable(FRotator, "Rotator", "Rotator", "Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.")
@@ -2654,6 +2689,18 @@ BeginProp(RFloat, roll, "Roll", "The roll component") {
 } PropSet() {
 	self->Roll = Val;
 } EndProp()
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.") {
+	InVal(0, RStruct<FRotator>, other, "Other", "The other rotator that should be added to this rotator")
+	OutVal(1, RStruct<FRotator>, result, "Result", "The resulting rotator of the vector addition")
+	Body()
+	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.") {
+	InVal(0, RStruct<FRotator>, other, "Other", "The other rotator that should be subtracted from this rotator")
+	OutVal(1, RStruct<FRotator>, result, "Result", "The resulting rotator of the vector subtraction")
+	Body()
+	result = (FINStruct)(*self - other);
+} EndFunc()
 EndStruct()
 
 BeginStructConstructable(FFINTimeTableStop, "TimeTableStop", "Time Table Stop", "Information about a train stop in a time table.")
@@ -2897,6 +2944,35 @@ BeginProp(RFloat, a, "Alpha", "The alpha (opacity) portion of the color.") {
 } PropSet() {
 	self->A = Val;
 } EndProp()
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.") {
+	InVal(0, RStruct<FLinearColor>, other, "Other", "The other color that should be added to this color")
+	OutVal(1, RStruct<FLinearColor>, result, "Result", "The resulting color of the color addition")
+	Body()
+	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Neg, 1, "Operator Neg", "The Negation operator for this struct. Does NOT make the color negative. Calculates 1 - this.") {
+	OutVal(0, RStruct<FLinearColor>, result, "Result", "The resulting color of the color addition")
+	Body()
+	result = (FINStruct)(FLinearColor::White - *self);
+} EndFunc()
+BeginOp(FIN_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.") {
+	InVal(0, RStruct<FLinearColor>, other, "Other", "The other color that should be subtracted from this color")
+	OutVal(1, RStruct<FLinearColor>, result, "Result", "The resulting color of the color subtraction")
+	Body()
+	result = (FINStruct)(*self - other);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 1, "Color Factor Scaling", "") {
+	InVal(0, RFloat, factor, "Factor", "The factor with which this color should be scaled with.")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting scaled color.")
+	Body()
+	result = (FINStruct)(*self * factor);
+} EndFunc()
+BeginOp(FIN_Operator_Div, 1, "Color Inverse Factor Scaling", "") {
+	InVal(0, RFloat, factor, "Factor", "The factor with which this color should be scaled inversly with.")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting inverse scaled color.")
+	Body()
+	result = (FINStruct)(*self / factor);
+} EndFunc()
 EndStruct()
 
 BeginStructConstructable(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A structure that can hold a buffer of characters and colors that can be displayed with a gpu")
@@ -3012,8 +3088,25 @@ BeginFunc(setRaw, "Set Raw", "Allows to set the internal data of the buffer more
 	}
 } EndFunc()
 BeginFunc(clone, "Clone", "Clones this buffer into a new struct") {
-	OutVal(1, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The clone of this buffer")
+	OutVal(0, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The clone of this buffer")
 	Body()
 	buffer = (FINStruct) *self;
+} EndFunc()
+EndStruct()
+
+BeginStruct(FFINLogEntry, "LogEntry", "Log Entry", "An entry in the Computer Log.")
+BeginProp(RString, content, "Content", "The Message-Content contained within the log entry.") {
+	Return self->Content;
+} EndProp()
+BeginProp(RString, timestamp, "Timestamp", "The timestamp at which the log entry got logged.") {
+	Return self->Timestamp.ToString();
+} EndProp()
+BeginProp(RInt, verbosity, "Verbosity", "The verbosity of the log entry.") {
+	Return (FINInt)self->Verbosity;
+} EndProp()
+BeginFunc(format, "Format", "Creates a formatted string representation of this log entry.") {
+	OutVal(0, RString, result, "Result", "The resulting formatted string")
+	Body()
+	result = self->ToClipboardText();
 } EndFunc()
 EndStruct()

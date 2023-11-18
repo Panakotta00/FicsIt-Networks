@@ -161,7 +161,7 @@ public:
 	SLATE_EVENT(FOnNavigateEEPROM, OnNavigateEEPROM)
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, UObject* WorldContext);
 
 	// Begin SWidget
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
@@ -179,6 +179,7 @@ public:
 private:
 	const FFINLogViewerStyle* Style = nullptr;
 
+	UObject* WorldContext = nullptr;
 	TArray<TSharedRef<FFINLogEntry>> Entries;
 
 	bool bTextOutputEnabled = false;

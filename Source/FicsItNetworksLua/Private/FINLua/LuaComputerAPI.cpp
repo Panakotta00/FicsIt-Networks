@@ -1,11 +1,17 @@
 #include "FINLua/LuaComputerAPI.h"
 
+#include "FGAttentionPingActor.h"
+#include "FGPlayerController.h"
 #include "FINLua/LuaClass.h"
 #include "FINLua/LuaObject.h"
 #include "FINLuaProcessor.h"
 #include "FINStateEEPROMLua.h"
 #include "Network/FINNetworkUtils.h"
 #include "FGTimeSubsystem.h"
+#include "FicsItNetworksLuaModule.h"
+#include "FINLua/LuaStruct.h"
+#include "UI/FGGameUI.h"
+#include "UI/FINNotificationMessage.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
@@ -118,6 +124,54 @@ namespace FINLua {
 		return 1;
 	} LuaFuncEnd()
 
+	LuaFunc(luaComputerLog) {
+		int verbosity = luaL_checknumber(L, 1);
+		FString text = luaFIN_checkFString(L, 2);
+		verbosity = FMath::Clamp(verbosity, 0, EFINLogVerbosity::FIN_Log_Verbosity_Max);
+		kernel->GetLog()->PushLogEntry((EFINLogVerbosity)verbosity, text);
+		return 0;
+	} LuaFuncEnd()
+
+	LuaFunc(luaComputerTextNotification) {
+		FString Text = luaFIN_checkFString(L, 1);
+		TOptional<FString> Player;
+		if (lua_isstring(L, 2)) Player = luaFIN_checkFString(L, 2);
+		for (auto players = kernel->GetWorld()->GetPlayerControllerIterator(); players; ++players) {
+			AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
+			if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
+			kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Text]() {
+				PlayerController->GetGameUI()->ShowTextNotification(FText::FromString(Text));
+			})));
+			/*kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Text]() {
+				UFINNotificationMessage* Message = NewObject<UFINNotificationMessage>();
+				Message->NotificationText = FText::FromString(Text);
+				PlayerController->GetGameUI()->AddPendingMessage(Message);
+				UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Pending Messages? %i"), PlayerController->GetGameUI()->CanReceiveMessageQueue());
+				UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Pending Message? %i"), PlayerController->GetGameUI()->CanReceiveMessage(UFINNotificationMessage::StaticClass()));
+			})));*/
+			break;
+		}
+		return 0;
+	} LuaFuncEnd()
+	
+	LuaFunc(luaComputerAttentionPing) {
+		FVector Position = luaFIN_checkStruct<FVector>(L, 1, true);
+		TOptional<FString> Player;
+		if (lua_isstring(L, 2)) Player = luaFIN_checkFString(L, 2);
+		for (auto players = kernel->GetWorld()->GetPlayerControllerIterator(); players; players++) {
+			AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
+			if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
+			kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Position]() {
+				UClass* Class = LoadObject<UClass>(nullptr, TEXT("/Game/FactoryGame/Character/Player/BP_AttentionPingActor.BP_AttentionPingActor_C"));
+				AFGAttentionPingActor* PingActor = PlayerController->GetWorld()->SpawnActorDeferred<AFGAttentionPingActor>(Class, FTransform(Position));
+				PingActor->SetOwningPlayerState(PlayerController->GetPlayerState<AFGPlayerState>());
+				PingActor->FinishSpawning(FTransform(Position));
+			})));
+			break;
+		}
+		return 0;
+	} LuaFuncEnd()
+
 	LuaFunc(luaComputerMagicTime) {
 		FDateTime Now = FDateTime::UtcNow();
 		lua_pushinteger(L, Now.ToUnixTimestamp());
@@ -172,7 +226,10 @@ namespace FINLua {
 		{"time", luaComputerTime},
 		{"millis", luaComputerMillis},
 		{"magicTime", luaComputerMagicTime},
+		{"log", luaComputerLog},
 		{"getPCIDevices", luaComputerPCIDevices},
+		{"textNotification", luaComputerTextNotification},
+		{"attentionPing", luaComputerAttentionPing},
 		{nullptr, nullptr}
 	};
 	

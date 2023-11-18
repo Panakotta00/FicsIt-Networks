@@ -1,5 +1,27 @@
+diff --git a/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h b/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
+index ef2df11876..e1283ca3fe 100644
+--- a/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
++++ b/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
+@@ -7,6 +7,8 @@
+ #include "FGUseableInterface.h"
+ #include "FGBuildableRailroadSwitchControl.generated.h"
+ 
++class UFGRailroadTrackConnectionComponent;
++
+ /**
+  * Struct containing packaged switch data so we can get an OnRep for them as a group.
+  */
+@@ -100,7 +102,7 @@ protected:
+ private:
+ 	/** Connection we control, might become null if the track is removed but not the control (mods and save game editing). */
+ 	UPROPERTY( SaveGame, Replicated )
+-	class UFGRailroadTrackConnectionComponent* mControlledConnection;
++	UFGRailroadTrackConnectionComponent* mControlledConnection;
+ 
+ 	/** Current switch position read from the controlled connection. */
+ 	UPROPERTY( Replicated, Meta = (NoAutoJson = true) )
 diff --git a/Source/FactoryGame/Public/FGRailroadSignalBlock.h b/Source/FactoryGame/Public/FGRailroadSignalBlock.h
-index f2c03b79f..f825b3f49 100644
+index f2c03b79fe..f825b3f494 100644
 --- a/Source/FactoryGame/Public/FGRailroadSignalBlock.h
 +++ b/Source/FactoryGame/Public/FGRailroadSignalBlock.h
 @@ -276,6 +276,7 @@ public:
@@ -11,7 +33,7 @@ index f2c03b79f..f825b3f49 100644
  	/** Vehicles currently occupying this block. */
  	TArray< TWeakObjectPtr< AFGRailroadVehicle > > mOccupiedBy;
 diff --git a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
-index 85d6f5720..9d8db4313 100644
+index b832ed9095..740f2ef85d 100644
 --- a/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 +++ b/Source/FactoryGame/Public/Hologram/FGBuildableHologram.h
 @@ -305,7 +305,7 @@ protected:
@@ -22,4 +44,17 @@ index 85d6f5720..9d8db4313 100644
 +		//UE_LOG( LogBuilding, Warning, TEXT( "\"%s\": Tried to GetDefaultBuildable of class \"%s\" but was not able to. BuildClass is \"%s\"" ), *GetName(), *TBuildableClass::StaticClass()->GetName(), *mBuildClass->GetName() );
  		
  		ensure( false );
+ 
+diff --git a/Source/FactoryGame/Public/Hologram/FGHologram.h b/Source/FactoryGame/Public/Hologram/FGHologram.h
+index e7ac3e1b06..d997fcefed 100644
+--- a/Source/FactoryGame/Public/Hologram/FGHologram.h
++++ b/Source/FactoryGame/Public/Hologram/FGHologram.h
+@@ -63,6 +63,8 @@ UCLASS( hidecategories = ( "Actor", "Input", "Replication", "Rendering", "Actor
+ class FACTORYGAME_API AFGHologram : public AActor, public IFGConstructionMessageInterface
+ {
+ 	GENERATED_BODY()
++
++	friend class AFINBlueprintHologram;
+ public:
+ 	AFGHologram();
  

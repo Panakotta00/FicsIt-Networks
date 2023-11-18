@@ -35,7 +35,7 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 			self->file->close(); \
 		} \
 		lua_getfield(L, LUA_REGISTRYINDEX, "FileStreamStorage"); \
-        TSet<LuaFile>& streams = *static_cast<TSet<LuaFile>*>(lua_touserdata(L, -1)); \
+        TArray<LuaFile>& streams = *static_cast<TArray<LuaFile>*>(lua_touserdata(L, -1)); \
 		streams.Add(self); \
 	} \
 	CodersFileSystem::SRef<CodersFileSystem::FileStream>& file = self->file; \
@@ -468,7 +468,7 @@ namespace FINLua {
 		f->get()->path = path;
 		lua_getfield(L, LUA_REGISTRYINDEX, "FileStreamStorage");
 		if (file.isValid()) {
-			TSet<LuaFile>& streams = *static_cast<TSet<LuaFile>*>(lua_touserdata(L, -1));
+			TArray<LuaFile>& streams = *static_cast<TArray<LuaFile>*>(lua_touserdata(L, -1));
 			streams.Add(*f);
 		}
 		lua_pop(L, 1);

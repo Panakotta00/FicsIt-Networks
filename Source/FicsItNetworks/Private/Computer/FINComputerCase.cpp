@@ -7,6 +7,7 @@
 #include "Computer/FINComputerProcessor.h"
 #include "FGInventoryComponent.h"
 #include "FicsItKernel/Logging.h"
+#include "Net/UnrealNetwork.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -110,16 +111,12 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 	if (HasAuthority()) {
 		Log->Tick();
 		
-		bool bNetUpdate = false;
 		if (Kernel) {
 			Kernel->HandleFutures();
 			if (Kernel->GetState() != InternalKernelState) {
+				netSig_ComputerStateChanged(InternalKernelState, Kernel->GetState());
 				InternalKernelState = Kernel->GetState();
-				bNetUpdate = true;
 			}
-		}
-		if (bNetUpdate) {
-			ForceNetUpdate();
 		}
 	}
 }
@@ -366,4 +363,41 @@ void AFINComputerCase::OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive
 	} else {
 		Kernel->AddDrive(drive);
 	}
+}
+
+void AFINComputerCase::netSig_ComputerStateChanged_Implementation(int64 PrevState, int64 NewState) {}
+
+void AFINComputerCase::netSig_FileSystemUpdate_Implementation(int Type, const FString& From, const FString& To) {}
+
+int64 AFINComputerCase::netFunc_getState() {
+	return InternalKernelState;
+}
+
+void AFINComputerCase::netFunc_startComputer() {
+	if (GetState() != EFINKernelState::FIN_KERNEL_RUNNING) Log->EmptyLog();
+	Kernel->Start(false);
+}
+
+void AFINComputerCase::netFunc_stopComputer() {
+	Kernel->Stop();
+}
+
+void AFINComputerCase::netFunc_getLog(int64 PageSize, int64 Page, TArray<FFINLogEntry>& OutLog, int64& OutLogSize) {
+	FScopeLock Lock = Log->Lock();
+	const TArray<FFINLogEntry>& Entries = Log->GetLogEntries();
+	PageSize = FMath::Max(0, PageSize);
+	int64 Offset = Page*PageSize;
+	if (Offset < 0) Offset = Entries.Num() + Page*PageSize;
+	int64 Num = FMath::Min(PageSize, Entries.Num() - Offset);
+	if (Offset < 0) {
+		Num += Offset;
+		Offset = 0;
+	}
+	if (Offset < 0 || Num < 0) {
+		OutLog = TArray<FFINLogEntry>();
+	} else {
+		OutLog = TArray<FFINLogEntry>(Entries.GetData() + Offset, Num);
+		if (Page < 0) Algo::Reverse(OutLog);
+	}
+	OutLogSize = Entries.Num();
 }

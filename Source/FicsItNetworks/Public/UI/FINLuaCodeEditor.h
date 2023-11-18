@@ -106,7 +106,7 @@ protected:
 	FTextRange Range;
 	int32 TabWidthInSpaces;
 
-	int32 CharsTillTabStep;
+	int32 CharsTillTabStep = 0;
 	
 public:
 	static TSharedRef<FFINTabRun> Create(const FRunInfo& InRunInfo, const TSharedRef<const FString>& InText, const FTextBlockStyle& Style, const FTextRange& InRange, int32 InTabWith);
