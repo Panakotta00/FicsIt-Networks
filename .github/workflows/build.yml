@@ -92,11 +92,11 @@ jobs:
       - name: Build for Shipping/Client
         run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'Games\FactoryGame' -m
 
-      - name: Build for Win64 Dedicated Server
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+#      - name: Build for Win64 Dedicated Server
+#        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
 
-      - name: Build for Linux Dedicated Server
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
+#      - name: Build for Linux Dedicated Server
+#        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
 
       - name: Package FicsItNetworks Mod
         run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -platform=Win64 -nocompileeditor -installed
