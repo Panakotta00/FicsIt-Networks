@@ -4,6 +4,7 @@
 #include "Network/Wireless/FINWirelessRCO.h"
 #include "FGPlayerController.h"
 #include "FGPowerInfoComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AFINWirelessAccessPoint::AFINWirelessAccessPoint() {
 	NetworkConnector1 = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector1");

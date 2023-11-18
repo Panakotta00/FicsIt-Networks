@@ -57,10 +57,11 @@
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
 #include "Buildables/FGBuildableResourceSink.h"
 #include "Buildables/FGBuildableSignBase.h"
-#include "Buildables/FGBuildableSpeedSign.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
 #include "Buildables/FGBuildableWidgetSign.h"
+#include "Computer/FINComputerSubsystem.h"
+#include "FicsItKernel/Logging.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
 #include "WheeledVehicles/FGWheeledVehicle.h"
 
@@ -82,6 +83,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 	ToFillClass->DisplayName = ClassReg->DisplayName;
 	ToFillClass->Description = ClassReg->Description;
 	ToFillClass->Parent = Ref->FindClass(Class->GetSuperClass());
+	ToFillClass->StructFlags |= FIN_Struct_StaticSource;
 	if (ToFillClass->Parent == ToFillClass) ToFillClass->Parent = nullptr;
 
 	for (const TPair<int, FFINStaticFuncReg>& KVFunc : ClassReg->Functions) {
@@ -90,6 +92,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		FINFunc->InternalName = Func.InternalName;
 		FINFunc->DisplayName = Func.DisplayName;
 		FINFunc->Description = Func.Description;
+		FINFunc->FunctionFlags |= FIN_Func_StaticSource;
 		if (Func.VarArgs) FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_VarArgs;
 		switch (Func.Runtime) {
 		case 0:
@@ -125,7 +128,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			FINProp->InternalName = Param.InternalName;
 			FINProp->DisplayName = Param.DisplayName;
 			FINProp->Description = Param.Description;
-			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param;
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param | FIN_Prop_StaticSource;
 			switch (Param.ParamType) {
 				case 2:
 					FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_RetVal;
@@ -176,7 +179,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		FINProp->InternalName = Prop.InternalName;
 		FINProp->DisplayName = Prop.DisplayName;
 		FINProp->Description = Prop.Description;
-		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
+		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib | FIN_Prop_StaticSource;
 		if (UFINFuncProperty* FINFuncProp = Cast<UFINFuncProperty>(FINProp)) {
 			FINFuncProp->GetterFunc.GetterFunc = Prop.Get;
 			if ((bool)Prop.Set) FINFuncProp->SetterFunc.SetterFunc = Prop.Set;
@@ -212,6 +215,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		FINSignal->DisplayName = Signal.DisplayName;
 		FINSignal->Description = Signal.Description;
 		FINSignal->bIsVarArgs = Signal.bIsVarArgs;
+		FINSignal->SignalFlags = FIN_Signal_StaticSource;
 
 		TArray<int> ParamPos;
 		Signal.Parameters.GetKeys(ParamPos);
@@ -236,6 +240,8 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 	ToFillStruct->DisplayName = StructReg->DisplayName;
 	ToFillStruct->Description = StructReg->Description;
 	ToFillStruct->Parent = Ref->FindStruct(Cast<UScriptStruct>(Struct->GetSuperStruct()));
+	ToFillStruct->StructFlags |= FIN_Struct_StaticSource;
+	if (StructReg->bConstructable) ToFillStruct->StructFlags |= FIN_Struct_Constructable;
 	if (ToFillStruct->Parent == ToFillStruct) ToFillStruct->Parent = nullptr;
 
 	for (const TPair<int, FFINStaticFuncReg>& KVFunc : StructReg->Functions) {
@@ -244,6 +250,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		FINFunc->InternalName = Func.InternalName;
 		FINFunc->DisplayName = Func.DisplayName;
 		FINFunc->Description = Func.Description;
+		FINFunc->FunctionFlags |= FIN_Func_StaticSource;
 		if (Func.VarArgs) FINFunc->FunctionFlags = FINFunc->FunctionFlags | FIN_Func_VarArgs;
 		switch (Func.Runtime) {
 		case 0:
@@ -279,7 +286,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 			FINProp->InternalName = Param.InternalName;
 			FINProp->DisplayName = Param.DisplayName;
 			FINProp->Description = Param.Description;
-			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param;
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Param | FIN_Prop_StaticSource;
 			switch (Param.ParamType) {
 				case 2:
 					FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_RetVal;
@@ -327,7 +334,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		FINProp->InternalName = Prop.InternalName;
 		FINProp->DisplayName = Prop.DisplayName;
 		FINProp->Description = Prop.Description;
-		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
+		FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib | FIN_Prop_StaticSource;
 		if (UFINFuncProperty* FINFuncProp = Cast<UFINFuncProperty>(FINProp)) {
 			FINFuncProp->GetterFunc.GetterFunc = Prop.Get;
 			if ((bool)Prop.Set) FINFuncProp->SetterFunc.SetterFunc = Prop.Set;
@@ -359,13 +366,13 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 
 
 #define TypeClassName(Type) FIN_StaticRef_ ## Type
-#define NSName "FIN_StaticReflection"
+#define NSName "FicsItNetworks-StaticReflection"
 #define FINRefLocText(KeyName, Value) FInternationalization::ForUseOnlyByLocMacroAndGraphNodeTextLiterals_CreateText(Value, TEXT(NSName), KeyName)
 #define FINRefTypeLocText(KeyName, Value) FINRefLocText(*(FString(TName) + TEXT("_") + TEXT(KeyName)), TEXT(Value))
 #define BeginClass(Type, InternalName, DisplayName, Description) \
 	namespace TypeClassName(Type) { \
 		using T = Type; \
-		constexpr auto TName = TEXT(#Type) ; \
+		constexpr auto TName = TEXT(InternalName) ; \
 		UClass* GetUType() { return T::StaticClass(); } \
 		FORCEINLINE T* GetFromCtx(const FFINExecutionContext& Ctx) { return Cast<T>(Ctx.GetObject()); } \
 		FFINStaticGlobalRegisterFunc RegClass([](){ \
@@ -373,15 +380,17 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		});
 #define EndClass() };
 #define TypeStructName(Type) FIN_StaticRef_ ## Type
-#define BeginStruct(Type, InternalName, DisplayName, Description) \
+#define _BeginStruct(Type, InternalName, DisplayName, Description, bConstructable) \
 	namespace TypeStructName(Type) { \
 		using T = Type; \
-		constexpr auto TName = TEXT(#Type) ; \
+		constexpr auto TName = TEXT(InternalName) ; \
 		UScriptStruct* GetUType() { return TBaseStructure<T>::Get(); } \
 		FORCEINLINE T* GetFromCtx(const FFINExecutionContext& Ctx) { return static_cast<T*>(Ctx.GetGeneric()); } \
 		FFINStaticGlobalRegisterFunc RegStruct([](){ \
-			UFINStaticReflectionSource::AddStruct(GetUType(), FFINStaticStructReg{TEXT(InternalName), FINRefTypeLocText("DisplayName", DisplayName), FINRefTypeLocText("Description", Description)}); \
+			UFINStaticReflectionSource::AddStruct(GetUType(), FFINStaticStructReg(TEXT(InternalName), FINRefTypeLocText("DisplayName", DisplayName), FINRefTypeLocText("Description", Description), bConstructable)); \
 		});
+#define BeginStruct(Type, InternalName, DisplayName, Description) _BeginStruct(Type, InternalName, DisplayName, Description, false)
+#define BeginStructConstructable(Type, InternalName, DisplayName, Description) _BeginStruct(Type, InternalName, DisplayName, Description, true)
 #define EndStruct() };
 #define GetClassFunc [](){ return T::StaticClass(); }
 #define FuncClassName(Prefix, Func) FIN_StaticRefFunc_ ## Prefix ## _ ## Func
@@ -400,6 +409,8 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		static bool _bGotReg = false;
 #define GET_MACRO(_0, VAL,...) VAL
 #define BeginFunc(InternalName, DisplayName, Description, ...) BeginFuncRT(Member, InternalName, DisplayName, Description, false, 0, GET_MACRO(0 , ##__VA_ARGS__, 1) ) \
+		T* self = GetFromCtx(Ctx);
+#define BeginOp(InternalName, OperatorNum, DisplayName, Description, ...) BeginFuncRT(Member, InternalName ## _ ## OperatorNum, DisplayName, Description, false, 0, GET_MACRO(0 , ##__VA_ARGS__, 1) ) \
 		T* self = GetFromCtx(Ctx);
 #define BeginFuncVA(InternalName, DisplayName, Description, ...) BeginFuncRT(Member, InternalName, DisplayName, Description, true, 0, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 		T* self = GetFromCtx(Ctx);
@@ -458,7 +469,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 
 #define FINRefSignalLocText(KeyName, Value) FINRefLocText(*(FString(TName) + TEXT("_") + FString(SName) + TEXT("_") + TEXT(KeyName)), TEXT(Value))
 #define FINRefSignalParamLocText(ParamName, KeyName, Value) FINRefLocText(*(FString(TName) + TEXT("_") + FString(SName) + TEXT("_") + TEXT(ParamName) + TEXT("_") + TEXT(KeyName)), TEXT(Value))
-#define SignalClassName(Prop) FIN_StaticRefSignal_ ## Prefix
+#define SignalClassName(Prop) FIN_StaticRefSignal_ ## Prop
 #define BeginSignal(InternalName, DisplayName, Description, ...) \
 	namespace SignalClassName(InternalName) { \
 		const int S = __COUNTER__; \
@@ -570,6 +581,18 @@ public:
 	static void AFGBuildableDoor_Update(AFGBuildableDoor* InDoor, EDoorConfiguration InConfig) {
 		InDoor->OnRep_DoorConfiguration();
 	}
+
+	static TArray<TWeakObjectPtr<AFGRailroadVehicle>> FFGRailroadSignalBlock_GetOccupiedBy(const FFGRailroadSignalBlock& Block) {
+		return Block.mOccupiedBy;
+	}
+
+	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetQueuedReservations(const FFGRailroadSignalBlock& Block) {
+		return Block.mQueuedReservations;
+	}
+	
+	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
+		return Block.mApprovedReservations;
+	}
 };
 
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
@@ -592,6 +615,12 @@ BeginFunc(getType, "Get Type", "Returns the type (aka class) of this object.") {
 	Body()
 	if (self) type = (FINObj)FFINReflection::Get()->FindClass(self->GetClass());
 } EndFunc()
+BeginFunc(isA, "Is A", "Checks if this Object is a child of the given typen.") {
+	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this object is a child of.")
+	OutVal(1, RBool, isChild, "Is Child", "True if this object is a child of the given type.")
+	Body()
+	isChild = (FINBool)self->IsA(parent);
+} EndFunc()
 BeginClassProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
 	Return (int64)GetTypeHash(self);
 } EndProp()
@@ -611,6 +640,12 @@ BeginClassFunc(getType, "Get Type", "Returns the type (aka class) of this class 
 	Body()
     if (self) type = (FINObj)FFINReflection::Get()->FindClass(self);
 } EndFunc()
+BeginClassFunc(isChildOf, "Is Child Of", "Checks if this Type is a child of the given typen.", false) {
+	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this type is a child of.")
+	OutVal(1, RBool, isChild, "Is Child", "True if this type is a child of the given type.")
+	Body()
+	isChild = (FINBool)self->IsChildOf(parent);
+} EndFunc()
 EndClass()
 
 BeginClass(UFINBase, "ReflectionBase", "Reflection Base", "The base class for all things of the reflection system.")
@@ -626,6 +661,9 @@ BeginProp(RString, description, "Description", "The description of this base.") 
 EndClass()
 
 BeginClass(UFINStruct, "Struct", "Struct", "Reflection Object that holds information about structures.")
+BeginProp(RBool, isConstructable, "Is Constructable", "True if this struct can be constructed by the user directly.") {
+	Return (FINBool)(self->GetStructFlags() & FIN_Struct_Constructable);
+} EndProp()
 BeginFunc(getParent, "Get Parent", "Returns the parent type of this type.", false) {
 	OutVal(0, RObject<UFINClass>, parent, "Parent", "The parent type of this type.");
 	Body()
@@ -859,7 +897,7 @@ BeginProp(RTrace<AActor>, owner, "Owner", "The parent actor of which this compon
 } EndProp()
 EndClass()
 
-BeginClass(UFGInventoryComponent, "Inventory", "Inventory", "A actor component that can hold multiple item stacks.")
+BeginClass(UFGInventoryComponent, "Inventory", "Inventory", "A actor component that can hold multiple item stacks.\nWARNING! Be aware of container inventories, and never open their UI, otherwise these function will not work as expected.")
 BeginFuncVA(getStack, "Get Stack", "Returns the item stack at the given index.\nTakes integers as input and returns the corresponding stacks.") {
 	Body()
 	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
@@ -899,6 +937,7 @@ BeginProp(RInt, size, "Size", "The count of available item stack slots this inve
 } EndProp()
 BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click into a inventory)") {
 	Body()
+	UFINLogLibrary::Log(FIN_Log_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call sort!"));
 	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
 		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
 		if (RepDetailActor) {
@@ -906,6 +945,14 @@ BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click
 		}
 	}
 	if (!self->IsLocked() && self->GetCanBeRearranged()) self->SortInventory();
+} EndFunc()
+BeginFunc(swapStacks, "Swap Stacks", "Swaps two given stacks inside the inventory.", 1) {
+	InVal(0, RInt, index1, "Index 1", "The index of the first stack in the inventory.")
+	InVal(1, RInt, index2, "Index 2", "The index of the second stack in the inventory.")
+	OutVal(2, RBool, successful, "Successful", "True if the swap was successful.")
+	Body()
+	UFINLogLibrary::Log(FIN_Log_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call swapStacks!"));
+	successful = UFGInventoryLibrary::MoveInventoryItem(self, index1, self, index2);
 } EndFunc()
 BeginFunc(flush, "Flush", "Removes all discardable items from the inventory completely. They will be gone! No way to get them back!", 0) {
 	Body()
@@ -1099,32 +1146,47 @@ BeginProp(RInt, direction, "Direction", "The direction in which the items/fluids
 BeginProp(RBool, isConnected, "Is Connected", "True if something is connected to this connection.") {
 	Return self->IsConnected();
 } EndProp()
+BeginProp(RClass<UFGItemDescriptor>, allowedItem, "Allowed Item", "This item type defines which items are the only ones this connector can transfer. Null allows all items to be transfered.") {
+	Return (FINClass)AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorAllowedItem(self);
+} PropSet() {
+	AFINComputerSubsystem::GetComputerSubsystem(self)->SetFactoryConnectorAllowedItem(self, Val);
+} EndProp()
+BeginProp(RBool, blocked, "Blocked", "True if this connector doesn't transfer any items except the 'Unblocked Transfers'.") {
+	Return AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorBlocked(self);
+} PropSet() {
+	AFINComputerSubsystem::GetComputerSubsystem(self)->SetFactoryConnectorBlocked(self, Val);
+} EndProp()
+BeginProp(RInt, unblockedTransfers, "Unblocked Transfers", "The count of transfers that can still happen even if the connector is blocked. Use the 'AddUnblockedTransfers' function to change this. The count decreases by one when an item gets transfered.") {
+	Return AFINComputerSubsystem::GetComputerSubsystem(self)->GetFactoryConnectorUnblockedTransfers(self);
+} EndProp()
+BeginFunc(addUnblockedTransfers, "Add Unblocked Transfers", "Adds the given count to the unblocked transfers counter. The resulting value gets clamped to >= 0. Negative values allow to decrease the counter manually. The returning int is the now set count.") {
+	InVal(0, RInt, unblockedTransfers, "Unblocked Transfers", "The count of unblocked transfers to add.")
+	OutVal(1, RInt, newUnblockedTransfers, "New Unblocked Transfers", "The new count of unblocked transfers.")
+	Body()
+	newUnblockedTransfers = (FINInt) AFINComputerSubsystem::GetComputerSubsystem(self)->AddFactoryConnectorUnblockedTransfers(self, unblockedTransfers);
+} EndFunc()
 BeginFunc(getInventory, "Get Inventory", "Returns the internal inventory of the connection component.") {
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The internal inventory of the connection component.")
 	Body()
 	inventory = Ctx.GetTrace() / self->GetInventory();
 } EndFunc()
 BeginFunc(getConnected, "Get Connected", "Returns the connected factory connection component.") {
-	OutVal(0, RTrace<UFGInventoryComponent>, connected, "Connected", "The connected factory connection component.")
+	OutVal(0, RTrace<UFGFactoryConnectionComponent>, connected, "Connected", "The connected factory connection component.")
 	Body()
 	connected = Ctx.GetTrace() / self->GetConnection();
 } EndFunc()
 EndClass()
 
 BeginClass(AFGPipeHyperStart, "PipeHyperStart", "Pipe Hyper Start", "A actor that is a hypertube entrance buildable")
-Hook(UFINAFGPipeHyperStartHook)
-BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube connection.")
-	SignalParam(0, RBool, success, "Sucess", "True if the transfer was sucessfull")
-	SignalParam(1, RTrace<UFGPipeConnectionComponentBase>, throughConnector, "Through Connector", "The connector we entered through, can be nil if we transfered from outside world (like and entrance)")
+Hook(UFINPipeHyperStartHook)
+BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube entrance.")
+	SignalParam(1, RBool, success, "Sucess", "True if the transfer was sucessfull")
+EndSignal()
+BeginSignal(PlayerExited, "Player Exited", "Triggers when a players leaves through this hypertube entrance.")
 EndSignal()
 EndClass()
 
 BeginClass(AFGBuildablePipeHyper, "BuildablePipeHyper", "Buildable Pipe Hyper", "A hypertube pipe")
-Hook(UFINAFGPipeHyperStartHook)
-BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube connection.")
-	SignalParam(0, RBool, success, "Sucess", "True if the transfer was sucessfull")
-	SignalParam(1, RTrace<UFGPipeConnectionComponentBase>, throughConnector, "Through Connector", "The connector we entered through, can be nil if we transfered from outside world (like and entrance)")
-EndSignal()
 EndClass()
 
 BeginClass(UFGPipeConnectionComponentBase, "PipeConnectionBase", "Pipe Connection Base", "A actor component base that is a connection point to which a pipe for fluid or hyper can get attached to.")
@@ -1180,6 +1242,22 @@ BeginFunc(flushPipeNetwork, "Flush Pipe Network", "Flush the associated pipe net
     auto subsystem = AFGPipeSubsystem::GetPipeSubsystem(self->GetWorld());
 	subsystem->FlushPipeNetwork(networkID);
 } EndFunc()
+EndClass()
+
+BeginClass(AFGBuildable, "Buildable", "Buildable", "The base class of all buildables.")
+Hook(UFINBuildableHook)
+BeginSignal(ProductionChanged, "Production Changed", "Triggers when the production state of the buildable changes.")
+	SignalParam(0, RInt, state, "State", "The new production state.")
+EndSignal()
+BeginProp(RInt, numPowerConnections, "Num Power Connection", "The count of available power connections this building has.") {
+	Return (FINInt)self->GetNumPowerConnections();
+} EndProp()
+BeginProp(RInt, numFactoryConnections, "Num Factory Connection", "The cound of available factory connections this building has.") {
+	Return (FINInt)self->GetNumFactoryConnections();
+} EndProp()
+BeginProp(RInt, numFactoryOutputConnections, "Num Factory Output Connection", "The count of available factory output connections this building has.") {
+	Return (FINInt)self->GetNumFactoryOuputConnections();
+} EndProp()
 EndClass()
 
 BeginClass(AFGBuildableFactory, "Factory", "Factory", "The base class of most machines you can build.")
@@ -1241,9 +1319,10 @@ BeginFunc(setRecipe, "Set Recipe", "Sets the currently producing recipe of this 
 	if (recipes.Contains(recipe)) {
 		TArray<FInventoryStack> stacks;
 		self->GetInputInventory()->GetInventoryStacks(stacks);
+		self->GetInputInventory()->Empty();
 		self->GetOutputInventory()->AddStacks(stacks);
 		self->SetRecipe(recipe);
-		gotSet = true;
+		gotSet = self->GetCurrentRecipe() == recipe;
 	} else {
 		gotSet = false;
 	}
@@ -1449,6 +1528,16 @@ BeginProp(RBool, isReversed, "Is Reversed", "True if the orientation of the plat
 EndClass()
 
 BeginClass(AFGBuildableRailroadStation, "RailroadStation", "Railroad Station", "The train station master platform. This platform holds the name and manages docking of trains.")
+Hook(UFINRailroadStationHook)
+BeginSignal(StartDocking, "Start Docking", "Triggers when a train tries to dock onto the station.")
+	SignalParam(0, RBool, successful, "Successful", "True if the train successfully docked.")
+	SignalParam(0, RTrace<AFGLocomotive>, locomotive, "Locomotive", "The locomotive that tries to dock onto the station.")
+	SignalParam(0, RFloat, offset, "Offset", "The offset at witch the train tried to dock.")
+EndSignal()
+BeginSignal(FinishDocking, "Finish Docking", "Triggers when a train finished the docking procedure and is ready to depart the station.")
+EndSignal()
+BeginSignal(CancelDocking, "Cancel Docking", "Triggers when a train cancels the docking procedure.")
+EndSignal()
 BeginProp(RString, name, "Name", "The name of the railroad station.") {
 	Return self->GetStationIdentifier()->GetStationName().ToString();
 } PropSet() {
@@ -1462,8 +1551,10 @@ EndClass()
 BeginClass(AFGBuildableTrainPlatformCargo, "TrainPlatformCargo", "Train Platform Cargo", "A train platform that allows for loading and unloading cargo cars.")
 BeginProp(RBool, isLoading, "Is Loading", "True if the cargo platform is currently loading the docked cargo vehicle.") {
 	Return self->GetIsInLoadMode();
+} PropSet() {
+	self->SetIsInLoadMode(Val);
 } EndProp()
-BeginProp(RBool, isUnloading, "Is Unloading", "True if the cargo platform is currently unloading the docked cargo vehicle.") {
+BeginProp(RBool, isUnloading, "Is Unloading", "True if the cargo platform is currently loading or unloading the docked cargo vehicle.") {
 	Return self->IsLoadUnloading();
 } EndProp()
 BeginProp(RFloat, dockedOffset, "Docked Offset", "The offset to the track start of the platform at were the vehicle docked.") {
@@ -1792,6 +1883,21 @@ BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
 		stop = FINAny();
 	}
 } EndFunc()
+BeginFunc(setStop, "Set Stop", "Allows to override a stop already in the time table.") {
+	InVal(0, RInt, index, "Index", "The index of the stop you want to override.")
+	InVal(1, RStruct<FFINTimeTableStop>, stop, "Stop", "The time table stop you want to override with.")
+	OutVal(2, RBool, success, "Success", "True if setting was successful, false if not, f.e. invalid index.")
+	Body()
+	TArray<FTimeTableStop> Stops;
+	self->GetStops(Stops);
+	if (index < Stops.Num()) {
+		Stops[index] = stop;
+		self->SetStops(Stops);
+		success = true;
+	} else {
+		success = false;
+	}
+} EndFunc()
 BeginFunc(setCurrentStop, "Set Current Stop", "Sets the stop, to which the train trys to drive to right now.") {
 	InVal(0, RInt, index, "Index", "The index of the stop the train should drive to right now.")
 	Body()
@@ -1812,6 +1918,13 @@ BeginProp(RInt, numStops, "Num Stops", "The current number of stops in the time 
 EndClass()
 
 BeginClass(AFGBuildableRailroadTrack, "RailroadTrack", "Railroad Track", "A peice of railroad track over which trains can drive.")
+Hook(UFINRailroadTrackHook)
+BeginSignal(VehicleEnter, "VehicleEnter", "Triggered when a vehicle enters the track.")
+	SignalParam(0, RTrace<AFGRailroadVehicle>, Vehicle, "Vehicle", "The vehicle that entered the track.")
+EndSignal()
+BeginSignal(VehicleExit, "VehicleExit", "Triggered when a vehcile exists the track.")
+	SignalParam(0, RTrace<AFGRailroadVehicle>, Vehicle, "Vehicle", "The vehicle that exited the track.")
+EndSignal()
 BeginFunc(getClosestTrackPosition, "Get Closeset Track Position", "Returns the closes track position from the given world position") {
 	InVal(0, RStruct<FVector>, worldPos, "World Pos", "The world position form which you want to get the closest track position.")
 	OutVal(1, RTrace<AFGBuildableRailroadTrack>, track, "Track", "The track the track pos points to.")
@@ -1848,6 +1961,15 @@ BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which th
 	OutVal(0, RStruct<FFINTrackGraph>, track, "Track", "The track graph of which this track is part of.")
     Body()
     track = (FINAny)FFINTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
+} EndFunc()
+BeginFunc(getVehciles, "Get Vehicles", "Returns a list of Railroad Vehicles on the Track") {
+	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "THe list of vehciles on the track.")
+	Body()
+	TArray<FINAny> Vehicles;
+	for (AFGRailroadVehicle* vehicle : self->GetVehicles()) {
+		Vehicles.Add(Ctx.GetTrace() / vehicle);
+	}
+	vehicles = Vehicles;
 } EndFunc()
 BeginProp(RFloat, length, "Length", "The length of the track.") {
 	Return self->GetLength();
@@ -1935,6 +2057,12 @@ BeginFunc(getSwitchPosition, "Get Switch Position", "Returns the current switch 
     Body()
     index = (int64)self->GetSwitchPosition();
 } EndFunc()
+BeginFunc(forceSwitchPosition, "Force Switch Position", "Forces the switch position to a given location. Even autopilot will be forced to use this track. A negative number can be used to remove the forced track.", 0) {
+	InVal(0, RInt, index, "Index", "The connection index to whcih the switch should be force to point to. Negative number to remove the lock.")
+	Body()
+	self->SetSwitchPosition(index);
+	AFINComputerSubsystem::GetComputerSubsystem(self)->ForceRailroadSwitch(self, index);
+} EndFunc()
 BeginProp(RBool, isConnected, "Is Connected", "True if the connection has any connection to other connections.") {
 	Return self->IsConnected();
 } EndProp()
@@ -1990,6 +2118,24 @@ BeginFunc(getObservedBlock, "Get Observed Block", "Returns the track block this 
 	OutVal(0, RStruct<FFINRailroadSignalBlock>, block, "Block", "The railroad signal block this signal is observing.")
 	Body()
 	block = FINStruct(FFINRailroadSignalBlock(self->GetObservedBlock()));
+} EndFunc()
+BeginFunc(getGuardedConnnections, "Get Guarded Connections", "Returns a list of the guarded connections. (incoming connections)") {
+	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, guardedConnections, "GuardedConnections", "The guarded connections.")
+	Body()
+	TArray<FINAny> GuardedConnections;
+	for (UFGRailroadTrackConnectionComponent* Connection : self->GetGuardedConnections()) {
+		GuardedConnections.Add(Ctx.GetTrace() / Connection);
+	}
+	guardedConnections = GuardedConnections;
+} EndFunc()
+BeginFunc(getObservedConnections, "Get Observed Connections", "Returns a list of the observed connections. (outgoing connections)") {
+	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, observedConnections, "ObservedConnections", "The observed connections.")
+	Body()
+	TArray<FINAny> ObservedConnections;
+	for (UFGRailroadTrackConnectionComponent* Connection : self->GetObservedConnections()) {
+		ObservedConnections.Add(Ctx.GetTrace() / Connection);
+	}
+	observedConnections = ObservedConnections;
 } EndFunc()
 EndClass()
 
@@ -2272,7 +2418,7 @@ EndClass()
 BeginClass(UFGSignPrefabWidget, "SignPrefab", "Sign Prefab", "Descibes a layout of a sign.")
 EndClass()
 
-BeginStruct(FPrefabSignData, "PrefabSignData", "Prefab Sign Data", "This structure stores all data that defines what a sign displays.")
+BeginStructConstructable(FPrefabSignData, "PrefabSignData", "Prefab Sign Data", "This structure stores all data that defines what a sign displays.")
 BeginProp(RClass<UObject>, layout, "Layout", "The object that actually displayes the layout") {
 	Return (FINClass)self->PrefabLayout;
 } PropSet() {
@@ -2438,7 +2584,7 @@ EndClass()
 BeginStruct(FFINFuture, "Future", "Future", "A Future struct MAY BE HANDLED BY CPU IMPLEMENTATION differently, generaly, this is used to make resources available on a later point in time. Like if data won't be avaialble right away and you have to wait for it to process first. Like when you do a HTTP Request, then it takes some time to get the data from the web server. And since we don't want to halt the game and wait for the data, you can use a future to check if the data is available, or let just the Lua Code wait, till the data becomes available.")
 EndStruct()
 
-BeginStruct(FVector2D, "Vector2D", "Vector 2D", "Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space")
+BeginStructConstructable(FVector2D, "Vector2D", "Vector 2D", "Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
 	Return self->X;
 } PropSet() {
@@ -2449,9 +2595,38 @@ BeginProp(RFloat, y, "Y", "The Y coordinate component") {
 } PropSet() {
 	self->Y = Val;
 } EndProp()
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.") {
+	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector that should be added to this vector")
+	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector addition")
+	Body()
+	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.") {
+	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector that should be subtracted from this vector")
+	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector subtraction")
+	Body()
+	result = (FINStruct)(*self - other);
+} EndFunc()
+BeginOp(FIN_Operator_Neg, 0, "Operator Neg", "The Negation operator for this struct.") {
+	OutVal(0, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector negation")
+	Body()
+	result = (FINStruct)(-*self);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 0, "Scalar Product", "") {
+	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector to calculate the scalar product with.")
+	OutVal(1, RFloat, result, "Result", "The resulting scalar product.")
+	Body()
+	result = (FINStruct)(*self * other);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 1, "Vector Factor Scaling", "") {
+	InVal(0, RFloat, factor, "Factor", "The factor with which this vector should be scaled with.")
+	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting scaled vector.")
+	Body()
+	result = (FINStruct)(*self * factor);
+} EndFunc()
 EndStruct()
 
-BeginStruct(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")
+BeginStructConstructable(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
 	Return self->X;
 } PropSet() {
@@ -2467,9 +2642,38 @@ BeginProp(RFloat, z, "Z", "The Z coordinate component") {
 } PropSet() {
 	self->Z = Val;
 } EndProp()
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.") {
+	InVal(0, RStruct<FVector>, other, "Other", "The other vector that should be added to this vector")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting vector of the vector addition")
+	Body()
+	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.") {
+	InVal(0, RStruct<FVector>, other, "Other", "The other vector that should be subtracted from this vector")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting vector of the vector subtraction")
+	Body()
+	result = (FINStruct)(*self - other);
+} EndFunc()
+BeginOp(FIN_Operator_Neg, 0, "Operator Neg", "The Negation operator for this struct.") {
+	OutVal(0, RStruct<FVector>, result, "Result", "The resulting vector of the vector negation")
+	Body()
+	result = (FINStruct)(-*self);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 0, "Scalar Product", "") {
+	InVal(0, RStruct<FVector>, other, "Other", "The other vector to calculate the scalar product with.")
+	OutVal(1, RFloat, result, "Result", "The resulting scalar product.")
+	Body()
+	result = (FINStruct)(*self * other);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 1, "Vector Factor Scaling", "") {
+	InVal(0, RFloat, factor, "Factor", "The factor with which this vector should be scaled with.")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting scaled vector.")
+	Body()
+	result = (FINStruct)(*self * factor);
+} EndFunc()
 EndStruct()
 
-BeginStruct(FRotator, "Rotator", "Rotator", "Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.")
+BeginStructConstructable(FRotator, "Rotator", "Rotator", "Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.")
 BeginProp(RFloat, pitch, "Pitch", "The pitch component") {
 	Return self->Pitch;
 } PropSet() {
@@ -2485,9 +2689,21 @@ BeginProp(RFloat, roll, "Roll", "The roll component") {
 } PropSet() {
 	self->Roll = Val;
 } EndProp()
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.") {
+	InVal(0, RStruct<FRotator>, other, "Other", "The other rotator that should be added to this rotator")
+	OutVal(1, RStruct<FRotator>, result, "Result", "The resulting rotator of the vector addition")
+	Body()
+	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.") {
+	InVal(0, RStruct<FRotator>, other, "Other", "The other rotator that should be subtracted from this rotator")
+	OutVal(1, RStruct<FRotator>, result, "Result", "The resulting rotator of the vector subtraction")
+	Body()
+	result = (FINStruct)(*self - other);
+} EndFunc()
 EndStruct()
 
-BeginStruct(FFINTimeTableStop, "TimeTableStop", "Time Table Stop", "Information about a train stop in a time table.")
+BeginStructConstructable(FFINTimeTableStop, "TimeTableStop", "Time Table Stop", "Information about a train stop in a time table.")
 BeginProp(RTrace<AFGBuildableRailroadStation>, station, "Station", "The station at which the train should stop") {
 	Return self->Station;
 } PropSet() {
@@ -2499,13 +2715,13 @@ BeginFunc(getRuleSet, "Get Rule Set", "Returns The rule set wich describe when t
 	ruleset = FINStruct(self->RuleSet);
 } EndFunc()
 BeginFunc(setRuleSet, "Set Rule Set", "Allows you to change the Rule Set of this time table stop.") {
-	InVal(1, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set you want to use instead.")
+	InVal(0, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set you want to use instead.")
 	Body()
 	self->RuleSet = ruleset;
 } EndFunc()
 EndStruct()
 
-BeginStruct(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
+BeginStructConstructable(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
 BeginProp(RInt, definition, "Defintion", "0 = Load/Unload Once, 1 = Fully Load/Unload") {
 	Return (FINInt)self->DockingDefinition;
 } PropSet() {
@@ -2521,32 +2737,42 @@ BeginProp(RBool, isDurationAndRule, "Is Duration and Rule", "True if the duratio
 } PropSet() {
 	self->IsDurationAndRule = Val;
 } EndProp()
-BeginProp(RArray<RClass<UFGItemDescriptor>>, loadFilters, "Load Filters", "The types of items that will be loaded.") {
+BeginFunc(getLoadFilters, "Get Load Filters", "Returns the types of items that will be loaded.") {
+	OutVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
+	Body()
 	TArray<FINAny> Filters;
 	for (TSubclassOf<UFGItemDescriptor> Filter : self->LoadFilterDescriptors) {
 		Filters.Add((FINClass)Filter);
 	}
-	Return Filters;
-} PropSet() {
+	filters = Filters;
+} EndFunc()
+BeginFunc(setLoadFilters, "Set Load Filters", "Sets the types of items that will be loaded.") {
+	InVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
+	Body()
 	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
-	for (const FINAny& Filter : Val) {
+	for (const FINAny& Filter : filters) {
 		Filters.Add(Filter.GetClass());
 	}
 	self->LoadFilterDescriptors = Filters;
-} EndProp()
-BeginProp(RArray<RClass<UFGItemDescriptor>>, unloadFilters, "Unload Filters", "The types of items that will be unloaded.") {
+} EndFunc()
+BeginFunc(getUnloadFilters, "Get Unload Filters", "Returns the types of items that will be unloaded.") {
+	OutVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
+	Body()
 	TArray<FINAny> Filters;
 	for (TSubclassOf<UFGItemDescriptor> Filter : self->UnloadFilterDescriptors) {
 		Filters.Add((FINClass)Filter);
 	}
-	Return Filters;
-} PropSet() {
+	filters = Filters;
+} EndFunc()
+BeginFunc(setUnloadFilters, "Set Unload Filters", "Sets the types of items that will be loaded.") {
+	InVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
+	Body()
 	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
-	for (const FINAny& Filter : Val) {
+	for (const FINAny& Filter : filters) {
 		Filters.Add(Filter.GetClass());
 	}
 	self->UnloadFilterDescriptors = Filters;
-} EndProp()
+} EndFunc()
 EndStruct()
 
 BeginStruct(FFINTrackGraph, "TrackGraph", "Track Graph", "Struct that holds a cache of a whole train/rail network.")
@@ -2579,34 +2805,68 @@ BeginProp(RBool, isValid, "Is Valid", "Is true if this signal block reference is
 	Return self->Block.IsValid();
 } EndProp()
 BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The block reference is invalid"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->IsOccupied();
 } EndProp()
 BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->HaveReservations();
 } EndProp()
 BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->IsPathBlock();
 } PropSet() {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	self->Block.Pin()->SetIsPathBlock(Val);
 } EndProp()
 BeginProp(RInt, blockValidation, "Block Validation", "Returns the blocks validation status.") {
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	Return (int64)self->Block.Pin()->GetBlockValidation();
 } EndProp()
 BeginFunc(isOccupiedBy, "Is Occupied By", "Allows you to check if this block is occupied by a given train.") {
 	InVal(0, RObject<AFGTrain>, train, "Train", "The train you want to check if it occupies this block")
 	OutVal(1, RBool, isOccupied, "Is Occupied", "True if the given train occupies this block.")
 	Body()
-	if (!self->Block.IsValid()) throw FFINException(TEXT("The signal is not observing any block"));
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
 	isOccupied = self->Block.Pin()->IsOccupiedBy(train.Get());
+} EndFunc()
+BeginFunc(getOccupation, "Get Occupation", "Returns a list of trains that currently occupate the block.") {
+	OutVal(0, RArray<RTrace<AFGTrain>>, occupation, "Occupation", "A list of trains occupying the block.")
+	Body()
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
+	TArray<FINAny> Occupation;
+	for (TWeakObjectPtr<AFGRailroadVehicle> train : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetOccupiedBy(*self->Block.Pin())) {
+		if (train.IsValid()) Occupation.Add(Ctx.GetTrace() / train.Get());
+	}
+	occupation = Occupation;
+} EndFunc()
+BeginFunc(getQueuedReservations, "Get Queued Reservations", "Returns a list of trains that try to reserve this block and wait for approval.") {
+	OutVal(0, RArray<RTrace<AFGTrain>>, reservations, "Reservations", "A list of trains that try to reserve this block and wait for approval.")
+	Body()
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
+	TArray<FINAny> Reservations;
+	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetQueuedReservations(*self->Block.Pin())) {
+		if (!Reservation.IsValid()) continue;
+		AFGTrain* Train = Reservation->Train.Get();
+		if (Train) Reservations.Add(Ctx.GetTrace() / Train);
+	}
+	reservations = Reservations;
+} EndFunc()
+BeginFunc(getApprovedReservations, "Get Approved Reservations", "Returns a list of trains that are approved by this block.") {
+	OutVal(0, RArray<RTrace<AFGTrain>>, reservations, "Reservations", "A list of trains that are approved by this block.")
+	Body()
+	if (!self->Block.IsValid()) throw FFINException(TEXT("Signalblock is invalid"));
+	TArray<FINAny> Reservations;
+	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetApprovedReservations(*self->Block.Pin())) {
+		if (!Reservation.IsValid()) continue;
+		AFGTrain* Train = Reservation->Train.Get();
+		if (Train) Reservations.Add(Ctx.GetTrace() / Train);
+	}
+	reservations = Reservations;
 } EndFunc()
 EndStruct()
 
-BeginStruct(FFINTargetPoint, "TargetPoint", "Target Point", "Target Point in the waypoint list of a wheeled vehicle.")
+BeginStructConstructable(FFINTargetPoint, "TargetPoint", "Target Point", "Target Point in the waypoint list of a wheeled vehicle.")
 BeginProp(RStruct<FVector>, pos, "Pos", "The position of the target point in the world.") {
 	Return self->Pos;
 } PropSet() {
@@ -2629,7 +2889,7 @@ BeginProp(RFloat, wait, "Wait", "The amount of time which needs to pass till the
 } EndProp()
 EndStruct()
 
-BeginStruct(FItemAmount, "ItemAmount", "Item Amount", "A struct that holds a pair of amount and item type.")
+BeginStructConstructable(FItemAmount, "ItemAmount", "Item Amount", "A struct that holds a pair of amount and item type.")
 BeginProp(RInt, amount, "Amount", "The amount of items.") {
 	Return (int64) self->Amount;
 } PropSet() {
@@ -2642,7 +2902,7 @@ BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the items.") {
 } EndProp()
 EndStruct()
 
-BeginStruct(FInventoryStack, "ItemStack", "Item Stack", "A structure that holds item information and item amount to represent an item stack.")
+BeginStructConstructable(FInventoryStack, "ItemStack", "Item Stack", "A structure that holds item information and item amount to represent an item stack.")
 BeginProp(RInt, count, "Count", "The count of items.") {
 	Return (int64) self->NumItems;
 } PropSet() {
@@ -2655,7 +2915,7 @@ BeginProp(RStruct<FInventoryItem>, item, "Item", "The item information of this s
 } EndProp()
 EndStruct()
 
-BeginStruct(FInventoryItem, "Item", "Item", "A structure that holds item information.")
+BeginStructConstructable(FInventoryItem, "Item", "Item", "A structure that holds item information.")
 BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the item.") {
 	Return (UClass*)self->GetItemClass();
 } PropSet() {
@@ -2663,7 +2923,7 @@ BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the item.") {
 } EndProp()
 EndStruct()
 
-BeginStruct(FLinearColor, "Color", "Color", "A structure that holds a rgba color value")
+BeginStructConstructable(FLinearColor, "Color", "Color", "A structure that holds a rgba color value")
 BeginProp(RFloat, r, "Red", "The red portion of the color.") {
 	Return (FINFloat) self->R;
 } PropSet() {
@@ -2684,9 +2944,38 @@ BeginProp(RFloat, a, "Alpha", "The alpha (opacity) portion of the color.") {
 } PropSet() {
 	self->A = Val;
 } EndProp()
+BeginOp(FIN_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.") {
+	InVal(0, RStruct<FLinearColor>, other, "Other", "The other color that should be added to this color")
+	OutVal(1, RStruct<FLinearColor>, result, "Result", "The resulting color of the color addition")
+	Body()
+	result = (FINStruct)(*self + other);
+} EndFunc()
+BeginOp(FIN_Operator_Neg, 1, "Operator Neg", "The Negation operator for this struct. Does NOT make the color negative. Calculates 1 - this.") {
+	OutVal(0, RStruct<FLinearColor>, result, "Result", "The resulting color of the color addition")
+	Body()
+	result = (FINStruct)(FLinearColor::White - *self);
+} EndFunc()
+BeginOp(FIN_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.") {
+	InVal(0, RStruct<FLinearColor>, other, "Other", "The other color that should be subtracted from this color")
+	OutVal(1, RStruct<FLinearColor>, result, "Result", "The resulting color of the color subtraction")
+	Body()
+	result = (FINStruct)(*self - other);
+} EndFunc()
+BeginOp(FIN_Operator_Mul, 1, "Color Factor Scaling", "") {
+	InVal(0, RFloat, factor, "Factor", "The factor with which this color should be scaled with.")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting scaled color.")
+	Body()
+	result = (FINStruct)(*self * factor);
+} EndFunc()
+BeginOp(FIN_Operator_Div, 1, "Color Inverse Factor Scaling", "") {
+	InVal(0, RFloat, factor, "Factor", "The factor with which this color should be scaled inversly with.")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting inverse scaled color.")
+	Body()
+	result = (FINStruct)(*self / factor);
+} EndFunc()
 EndStruct()
 
-BeginStruct(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A structure that can hold a buffer of characters and colors that can be displayed with a gpu")
+BeginStructConstructable(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A structure that can hold a buffer of characters and colors that can be displayed with a gpu")
 BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.", 2) {
 	OutVal(0, RFloat, width, "Width", "The width of this buffer")
 	OutVal(1, RFloat, height, "Height", "The height of this buffer")
@@ -2799,8 +3088,25 @@ BeginFunc(setRaw, "Set Raw", "Allows to set the internal data of the buffer more
 	}
 } EndFunc()
 BeginFunc(clone, "Clone", "Clones this buffer into a new struct") {
-	OutVal(1, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The clone of this buffer")
+	OutVal(0, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The clone of this buffer")
 	Body()
 	buffer = (FINStruct) *self;
+} EndFunc()
+EndStruct()
+
+BeginStruct(FFINLogEntry, "LogEntry", "Log Entry", "An entry in the Computer Log.")
+BeginProp(RString, content, "Content", "The Message-Content contained within the log entry.") {
+	Return self->Content;
+} EndProp()
+BeginProp(RString, timestamp, "Timestamp", "The timestamp at which the log entry got logged.") {
+	Return self->Timestamp.ToString();
+} EndProp()
+BeginProp(RInt, verbosity, "Verbosity", "The verbosity of the log entry.") {
+	Return (FINInt)self->Verbosity;
+} EndProp()
+BeginFunc(format, "Format", "Creates a formatted string representation of this log entry.") {
+	OutVal(0, RString, result, "Result", "The resulting formatted string")
+	Body()
+	result = self->ToClipboardText();
 } EndFunc()
 EndStruct()

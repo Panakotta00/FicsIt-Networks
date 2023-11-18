@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FINFuncProperty.h"
+#include "UObject/UnrealType.h"
 #include "FINStrProperty.generated.h"
 
 UCLASS(BlueprintType)

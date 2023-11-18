@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "SlateBasics.h"
 #include "FINReflectionUIContext.h"
 #include "FINReflectionUIStyle.h"
 #include "Components/Widget.h"
@@ -44,6 +45,8 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance", meta=( DisplayName="Style" ))
 	FFINReflectionUIStyleStruct Style;
+
+	UFINReflectionUI();
 	
 	// Begin UWidget
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;	

@@ -33,6 +33,7 @@ public:
 	static FFINDynamicStructHolder Copy(UScriptStruct* Struct, const void* Data);
 	
 	bool Serialize(FArchive& Ar);
+	bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 
 	/**
@@ -47,6 +48,12 @@ public:
 	template<typename T>
     T& Get() const {
 		return *static_cast<T*>(GetData());
+	}
+
+	template<typename T>
+	T* GetPtr() const {
+		if (!Struct->IsChildOf(TBaseStructure<T>::Get())) return nullptr;
+		return &Get<T>();
 	}
 
 	template<typename T>
@@ -72,6 +79,7 @@ struct TStructOpsTypeTraits<FFINDynamicStructHolder> : public TStructOpsTypeTrai
 	enum
 	{
 		WithSerializer = true,
+		WithNetSerializer = true,
 		WithAddStructReferencedObjects = true,
         WithCopy = true,
     };

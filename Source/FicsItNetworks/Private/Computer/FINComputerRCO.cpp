@@ -1,19 +1,13 @@
 ﻿#include "Computer/FINComputerRCO.h"
 #include "Computer/FINComputerDriveHolder.h"
 #include "Computer/FINComputerEEPROMDesc.h"
+#include "Computer/FINComputerGPUT2.h"
+#include "Net/UnrealNetwork.h"
 
 void UFINComputerRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(UFINComputerRCO, bDummy);
-}
-
-void UFINComputerRCO::SetLuaEEPROMCode_Implementation(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
-	LuaEEPROMState->SetCode(NewCode);
-}
-
-bool UFINComputerRCO::SetLuaEEPROMCode_Validate(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
-	return true;
 }
 
 void UFINComputerRCO::SetCaseLastTab_Implementation(AFINComputerCase* Case, int LastTab) {
@@ -60,6 +54,7 @@ void UFINComputerRCO::GPUMouseEvent_Implementation(AFINComputerGPUT1* GPU, int t
 	case 2:
 		GPU->netSig_OnMouseMove(x, y, btn);
 		break;
+	default: break;
 	}
 }
 
@@ -75,6 +70,7 @@ void UFINComputerRCO::GPUKeyEvent_Implementation(AFINComputerGPUT1* GPU, int typ
 	case 1:
 		GPU->netSig_OnKeyUp(c, code, btn);
 		break;
+	default: break;
 	}
 }
 
@@ -127,5 +123,54 @@ void UFINComputerRCO::CopyDataItem_Implementation(UFGInventoryComponent* InProvi
 }
 
 bool UFINComputerRCO::CopyDataItem_Validate(UFGInventoryComponent* InProviderInc, int InProviderIdx, UFGInventoryComponent* InFromInv, int InFromIdx, UFGInventoryComponent* InToInv, int InToIdx) {
+	return true;
+}
+
+void UFINComputerRCO::GPUT2MouseEvent_Implementation(AFINComputerGPUT2* GPU, int Type, FVector2D Position, int Modifiers) {
+	switch (Type) {
+	case 0:
+		GPU->netSig_OnMouseDown(Position, Modifiers);
+		break;
+	case 1:
+		GPU->netSig_OnMouseUp(Position, Modifiers);
+		break;
+	case 2:
+		GPU->netSig_OnMouseMove(Position, Modifiers);
+		break;
+	case 3:
+		GPU->netSig_OnMouseEnter(Position, Modifiers);
+		break;
+	case 4:
+		GPU->netSig_OnMouseLeave(Position, Modifiers);
+		break;
+	default: break;
+	}
+}
+
+bool UFINComputerRCO::GPUT2MouseEvent_Validate(AFINComputerGPUT2* GPU, int Type, FVector2D Position, int Modifiers) {
+	return true;
+}
+
+void UFINComputerRCO::GPUT2KeyEvent_Implementation(AFINComputerGPUT2* GPU, int Type, int64 C, int64 Code, int Modifiers) {
+	switch (Type) {
+	case 0:
+		GPU->netSig_OnKeyDown(C, Code, Modifiers);
+		break;
+	case 1:
+		GPU->netSig_OnKeyUp(C, Code, Modifiers);
+		break;
+	default: break;
+	}
+}
+
+bool UFINComputerRCO::GPUT2KeyEvent_Validate(AFINComputerGPUT2* GPU, int Type, int64 C, int64 Code, int Modifiers) {
+	return true;
+}
+
+void UFINComputerRCO::GPUT2KeyCharEvent_Implementation(AFINComputerGPUT2* GPU, const FString& C, int Modifiers) {
+	GPU->netSig_OnKeyChar(C, Modifiers);
+}
+
+bool UFINComputerRCO::GPUT2KeyCharEvent_Validate(AFINComputerGPUT2* GPU, const FString& C, int Modifiers) {
 	return true;
 }

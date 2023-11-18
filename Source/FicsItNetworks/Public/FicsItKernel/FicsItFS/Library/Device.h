@@ -12,7 +12,7 @@ namespace CodersFileSystem {
 
 	typedef std::function<bool(long long, bool)> SizeCheckFunc;
 
-	class Device : virtual public ReferenceCounted {
+	class FICSITNETWORKS_API Device : virtual public ReferenceCounted {
 	protected:
 		ListenerList listeners;
 
@@ -89,7 +89,7 @@ namespace CodersFileSystem {
 		virtual void removeListener(WRef<Listener> listener);
 	};
 
-	class ByteCountedDevice : public Device {
+	class FICSITNETWORKS_API ByteCountedDevice : public Device {
 	private:
 		class ByteCountedDeviceListener : public Listener {
 		private:
@@ -131,7 +131,7 @@ namespace CodersFileSystem {
 		size_t getUsed();
 	};
 
-	class MemDevice : public ByteCountedDevice {
+	class FICSITNETWORKS_API MemDevice : public ByteCountedDevice {
 	protected:
 		SRef<MemDirectory> root;
 
@@ -150,7 +150,7 @@ namespace CodersFileSystem {
 
 	struct DiskDeviceWatcher;
 
-	class DiskDevice : public ByteCountedDevice {
+	class FICSITNETWORKS_API DiskDevice : public ByteCountedDevice {
 	private:
 		std::filesystem::path realPath;
 		WindowsFileWatcher watcher;
@@ -181,7 +181,7 @@ namespace CodersFileSystem {
 		std::filesystem::path getRealPath() const;
 	};
 
-	class DeviceNode : public Node {
+	class FICSITNETWORKS_API DeviceNode : public Node {
 	protected:
 		SRef<Device> device;
 

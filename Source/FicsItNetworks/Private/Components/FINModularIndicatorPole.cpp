@@ -1,5 +1,6 @@
 ﻿#include "Components/FINModularIndicatorPole.h"
 #include "FGColoredInstanceMeshProxy.h"
+#include "Net/UnrealNetwork.h"
 #include "Network/FINMCPAdvConnector.h"
 
 #define BToS(b) b ? L"true" : L"false"
@@ -81,6 +82,12 @@ AActor* AFINModularIndicatorPole::netFunc_getModule(int Index) {
 }
 
 void AFINModularIndicatorPole::ConstructParts() {
+	// Clear Components
+	for (UStaticMeshComponent* comp : Parts) {
+		comp->UnregisterComponent();
+		comp->SetActive(false);
+		comp->DestroyComponent();
+	}
 	Parts.Empty();
 	if(IsValid(Connector)) {
 		Connector->SetMobility(EComponentMobility::Movable);

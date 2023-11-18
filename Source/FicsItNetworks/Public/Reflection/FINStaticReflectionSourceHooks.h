@@ -12,6 +12,10 @@
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGPipeHyperStart.h"
 #include "Patching/NativeHookManager.h"
+#include "FGCharacterMovementComponent.h"
+#include "FGCharacterPlayer.h"
+#include "FGLocomotive.h"
+#include "Buildables/FGBuildableRailroadStation.h"
 #include "FINStaticReflectionSourceHooks.generated.h"
 
 UCLASS()
@@ -50,7 +54,7 @@ private:
 	bool bIsRegistered;
 
 	UPROPERTY()
-	UFINSignal* Signal = nullptr;
+	TMap<FString, UFINSignal*> Signals;
 
 protected:
 	UPROPERTY()
@@ -63,12 +67,14 @@ protected:
 	}
 	
 	void Send(UObject* Obj, const FString& SignalName, const TArray<FFINAnyNetworkValue>& Data) {
+		UFINSignal** Signal = Signals.Find(SignalName);
 		if (!Signal) {
 			UFINClass* Class = FFINReflection::Get()->FindClass(Obj->GetClass());
-			Signal = Class->FindFINSignal(SignalName);
-			if (!Signal) UE_LOG(LogFicsItNetworks, Error, TEXT("Signal with name '%s' not found for object '%s' of FINClass '%s'"), *SignalName, *Obj->GetName(), *Class->GetInternalName());
+			UFINSignal* NewSignal = Class->FindFINSignal(SignalName);
+			if (!NewSignal) UE_LOG(LogFicsItNetworks, Error, TEXT("Signal with name '%s' not found for object '%s' of FINClass '%s'"), *SignalName, *Obj->GetName(), *Class->GetInternalName());
+			Signal = &Signals.Add(SignalName, NewSignal);
 		}
-		if (Signal) Signal->Trigger(Obj, Data);
+		if (Signal) (*Signal)->Trigger(Obj, Data);
 	}
 
 	virtual void RegisterFuncHook() {}
@@ -95,10 +101,134 @@ public:
 };
 
 UCLASS()
+class FICSITNETWORKS_API UFINMultiFunctionHook : public UFINHook {
+	GENERATED_BODY()
+
+private:
+	UPROPERTY()
+	UObject* Sender;
+	
+	bool bIsRegistered;
+
+	UPROPERTY()
+	TMap<FString, UFINSignal*> Signals;
+
+protected:
+	UPROPERTY()
+	TSet<TWeakObjectPtr<UObject>> Senders;
+	FCriticalSection Mutex;
+	
+	bool IsSender(UObject* Obj) {
+		FScopeLock Lock(&Mutex);
+		return Senders.Contains(Obj);
+	}
+	
+	void Send(UObject* Obj, const FString& SignalName, const TArray<FFINAnyNetworkValue>& Data) {
+		UFINSignal* Signal;
+		if (Signals.Contains(SignalName)) {
+			Signal = Signals[SignalName];
+		}else{
+			UFINClass* Class = FFINReflection::Get()->FindClass(Obj->GetClass());
+			Signal = Class->FindFINSignal(SignalName);
+			if (!Signal) UE_LOG(LogFicsItNetworks, Error, TEXT("Signal with name '%s' not found for object '%s' of FINClass '%s'"), *SignalName, *Obj->GetName(), *Class->GetInternalName());
+			Signals.Add(SignalName, Signal);
+		}
+		if (Signal) Signal->Trigger(Obj, Data);
+	}
+
+	virtual void RegisterFuncHook() {}
+
+	virtual UFINMultiFunctionHook* Self() { return nullptr; }
+
+public:		
+	void Register(UObject* sender) override {
+		Super::Register(sender);
+		
+		FScopeLock Lock(&Self()->Mutex);
+    	Self()->Senders.Add(Sender = sender);
+
+		if (!Self()->bIsRegistered) {
+			Self()->bIsRegistered = true;
+			Self()->RegisterFuncHook();
+		}
+    }
+		
+	void Unregister() override {
+		FScopeLock Lock(&Self()->Mutex);
+    	Self()->Senders.Remove(Sender);
+    }
+};
+
+UCLASS()
+class UFINBuildableHook : public UFINStaticReflectionHook {
+	GENERATED_BODY()
+private:
+	FDelegateHandle Handle;
+	
+public:
+	UFUNCTION()
+	void ProductionStateChanged(EProductionStatus status) {
+		Send({(int64)status});
+	}
+
+	void Register(UObject* sender) override {
+		Super::Register(sender);
+
+		UFINClass* Class = FFINReflection::Get()->FindClass(Sender->GetClass());
+		Signal = Class->FindFINSignal(TEXT("ProductionChanged"));
+
+		Handle = Cast<AFGBuildable>(sender)->mOnProductionStatusChanged.AddUObject(this, &UFINBuildableHook::ProductionStateChanged);
+	}
+
+	void Unregister() override {
+		Cast<AFGBuildable>(Sender)->mOnProductionStatusChanged.Remove(Handle);
+	}
+};
+
+UCLASS()
+class UFINRailroadTrackHook : public UFINFunctionHook {
+	GENERATED_BODY()
+private:
+	UPROPERTY()
+	UFINSignal* VehicleEnterSignal;
+
+	UPROPERTY()
+	UFINSignal* VehicleExitSignal;
+	
+protected:
+	static UFINRailroadTrackHook* StaticSelf() {
+		static UFINRailroadTrackHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINRailroadTrackHook*>(GetDefault<UFINRailroadTrackHook>());
+		return Hook; 
+	}
+
+	// Begin UFINFunctionHook
+	virtual UFINFunctionHook* Self() override {
+		return StaticSelf();
+	}
+	// End UFINFunctionHook
+	
+private:
+	static void VehicleEnter(AFGBuildableRailroadTrack* Track, AFGRailroadVehicle* Vehicle) {
+		StaticSelf()->Send(Track, TEXT("VehicleEnter"), {(FINTrace)Vehicle});
+	}
+
+	static void VehicleExit(AFGBuildableRailroadTrack* Track, AFGRailroadVehicle* Vehicle) {
+		StaticSelf()->Send(Track, TEXT("VehicleExit"), {(FINTrace)Vehicle});
+	}
+	
+public:
+	void RegisterFuncHook() override {
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadTrack::OnVehicleEntered, (void*)GetDefault<AFGBuildableRailroadTrack>(), &VehicleEnter);
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadTrack::OnVehicleExited, (void*)GetDefault<AFGBuildableRailroadTrack>(), &VehicleExit);
+	}
+};
+
+UCLASS()
 class UFINTrainHook : public UFINStaticReflectionHook {
 	GENERATED_BODY()
 			
-public:	
+public:
 	UFUNCTION()
 	void SelfDrvingUpdate(bool enabled) {
 		Send({enabled});
@@ -106,6 +236,9 @@ public:
 			
 	void Register(UObject* sender) override {
 		Super::Register(sender);
+
+		UFINClass* Class = FFINReflection::Get()->FindClass(Sender->GetClass());
+		Signal = Class->FindFINSignal(TEXT("SelfDrvingUpdate"));
 		
 		Cast<AFGTrain>(sender)->mOnSelfDrivingChanged.AddDynamic(this, &UFINTrainHook::SelfDrvingUpdate);
 	}
@@ -116,13 +249,65 @@ public:
 };
 
 UCLASS()
+class UFINRailroadStationHook : public UFINFunctionHook {
+	GENERATED_BODY()
+private:
+	UPROPERTY()
+	UFINSignal* VehicleEnterSignal;
+
+	UPROPERTY()
+	UFINSignal* VehicleExitSignal;
+	
+protected:
+	static UFINRailroadStationHook* StaticSelf() {
+		static UFINRailroadStationHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINRailroadStationHook*>(GetDefault<UFINRailroadStationHook>());
+		return Hook; 
+	}
+
+	// Begin UFINFunctionHook
+	virtual UFINFunctionHook* Self() override {
+		return StaticSelf();
+	}
+	// End UFINFunctionHook
+	
+private:
+	static void StartDocking(bool RetVal, AFGBuildableRailroadStation* Self, AFGLocomotive* Locomotive, float Offset) {
+		StaticSelf()->Send(Self, TEXT("StartDocking"), {RetVal, (FINTrace)Locomotive, Offset});
+	}
+	
+	static void FinishDocking(AFGBuildableRailroadStation* Self) {
+		StaticSelf()->Send(Self, TEXT("FinishDocking"), {});
+	}
+
+	static void CancelDocking(AFGBuildableRailroadStation* Self) {
+		StaticSelf()->Send(Self, TEXT("CancelDocking"), {});
+	}
+	
+public:
+	void RegisterFuncHook() override {
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadStation::StartDocking, GetDefault<AFGBuildableRailroadStation>(), &UFINRailroadStationHook::StartDocking);
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadStation::FinishDockingSequence, GetDefault<AFGBuildableRailroadStation>(), &UFINRailroadStationHook::FinishDocking);
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadStation::CancelDockingSequence, GetDefault<AFGBuildableRailroadStation>(), &UFINRailroadStationHook::CancelDocking);
+	}
+};
+
+UCLASS()
 class UFINRailroadSignalHook : public UFINStaticReflectionHook {
 	GENERATED_BODY()
+
+	UPROPERTY()
+	UFINSignal* ValidationChangedSignal;
 			
 public:
 	UFUNCTION()
 	void AspectChanged(ERailroadSignalAspect Aspect) {
 		Send({(int64)Aspect});
+	}
+
+	UFUNCTION()
+	void ValidationChanged(ERailroadBlockValidation Validation) {
+		ValidationChangedSignal->Trigger(Sender, {(int64)Validation});
 	}
 	
 	void Register(UObject* sender) override {
@@ -130,50 +315,59 @@ public:
 		
 		UFINClass* Class = FFINReflection::Get()->FindClass(Sender->GetClass());
 		Signal = Class->FindFINSignal(TEXT("AspectChanged"));
+
+		ValidationChangedSignal = Class->FindFINSignal(TEXT("ValidationChanged"));
 		
 		Cast<AFGBuildableRailroadSignal>(sender)->mOnAspectChangedDelegate.AddDynamic(this, &UFINRailroadSignalHook::AspectChanged);
+		Cast<AFGBuildableRailroadSignal>(sender)->mOnBlockValidationChangedDelegate.AddDynamic(this, &UFINRailroadSignalHook::ValidationChanged);
 	}
 		
 	void Unregister() override {
 		Cast<AFGBuildableRailroadSignal>(Sender)->mOnAspectChangedDelegate.RemoveDynamic(this, &UFINRailroadSignalHook::AspectChanged);
+		Cast<AFGBuildableRailroadSignal>(Sender)->mOnBlockValidationChangedDelegate.RemoveDynamic(this, &UFINRailroadSignalHook::ValidationChanged);
 	}
 };
 
 UCLASS()
-class UFINAFGPipeHyperStartHook : public UFINFunctionHook {
+class UFINPipeHyperStartHook : public UFINMultiFunctionHook {
 	GENERATED_BODY()
 
 	protected:
-	static UFINAFGPipeHyperStartHook* StaticSelf() {
-		static UFINAFGPipeHyperStartHook* Hook = nullptr;
-		if (!Hook) Hook = const_cast<UFINAFGPipeHyperStartHook*>(GetDefault<UFINAFGPipeHyperStartHook>());
+	static UFINPipeHyperStartHook* StaticSelf() {
+		static UFINPipeHyperStartHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFINPipeHyperStartHook*>(GetDefault<UFINPipeHyperStartHook>());
 		return Hook; 
 	}
-
+	
 	// Begin UFINFunctionHook
-	virtual UFINFunctionHook* Self() {
+	virtual UFINMultiFunctionHook* Self() {
 		return StaticSelf();
 	}
 	// End UFINFunctionHook
 
 private:
-	
-	static void OnPipeEnterHook(const EPipeHyperEnterResult& retVal, IFGPipeHyperInterface* self_r, AFGCharacterPlayer* character, UFGPipeConnectionComponentBase* enteredThrough, TStructOnScope<FFGPipeHyperBasePipeData>& outPipeData) {
-		AFGBuildablePipeHyperPart* part = dynamic_cast<AFGBuildablePipeHyperPart*>(self_r);
-		if(IsValid(part)) {
-			StaticSelf()->Send(part, "PlayerEntered", {FINAny((FINInt)retVal), FINTrace((UObject*)enteredThrough)});
-		}
-		AFGBuildablePipeHyper* pipe = dynamic_cast<AFGBuildablePipeHyper*>(self_r);
-		if(IsValid(pipe)) {
-			StaticSelf()->Send(pipe, "PlayerEntered", {FINAny((FINInt)retVal), FINTrace((UObject*)enteredThrough)});
+
+	static void EnterHyperPipe(const bool& retVal, UFGCharacterMovementComponent* CharacterMovementConstants, AFGPipeHyperStart* HyperStart) {
+		if(retVal && IsValid(HyperStart)) {
+			StaticSelf()->Send(HyperStart, "PlayerEntered", { FINBool(retVal)});
 		}
 	}
-
-			
-public:		
+	static void ExitHyperPipe(CallScope<void(*)(UFGCharacterMovementComponent*, bool)>& call, UFGCharacterMovementComponent* charMove, bool bRagdoll){
+		AActor* actor = charMove->GetTravelingPipeHyperActor();
+		UObject* obj = dynamic_cast<UObject*>(actor);
+		auto v = charMove->mPipeData.mConnectionToEjectThrough;
+		if(IsValid(v)) {
+			UFGPipeConnectionComponentBase* connection = v->mConnectedComponent;
+			if(IsValid(connection)) {
+				StaticSelf()->Send(connection->GetOwner(), "PlayerExited", {});
+			}
+		}
+	} 
+				
+public:
 	void RegisterFuncHook() override {
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnterReal, (void*)GetDefault<AFGPipeHyperStart>(), &OnPipeEnterHook)
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(IFGPipeHyperInterface::OnPipeEnterReal, (void*)GetDefault<AFGBuildablePipeHyper>(), &OnPipeEnterHook)
+		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGCharacterMovementComponent::EnterPipeHyper, (void*)GetDefault<UFGCharacterMovementComponent>(), &EnterHyperPipe);
+		SUBSCRIBE_METHOD_VIRTUAL(UFGCharacterMovementComponent::PipeHyperForceExit, (void*)GetDefault<UFGCharacterMovementComponent>(), &ExitHyperPipe); 
     }
 };
 
@@ -225,7 +419,7 @@ private:
 		if (!StaticSelf()->IsSender(c)) return;
 		LockFactoryGrab(c);
 		scope(c, item, offset, type);
-		if (UnlockFactoryGrab(c) && scope.getResult()) {
+		if (UnlockFactoryGrab(c) && scope.GetResult()) {
 			DoFactoryGrab(c, item);
 		}
 	}
@@ -234,7 +428,7 @@ private:
 		if (!StaticSelf()->IsSender(c)) return;
 		LockFactoryGrab(c);
 		scope(c, item, type);
-		if (UnlockFactoryGrab(c) && scope.getResult()) {
+		if (UnlockFactoryGrab(c) && scope.GetResult()) {
 			DoFactoryGrab(c, item);
 		}
 	}

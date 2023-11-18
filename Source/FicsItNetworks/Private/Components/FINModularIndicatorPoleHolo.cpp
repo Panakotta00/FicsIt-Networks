@@ -4,6 +4,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include <algorithm>
 
+#include "Net/UnrealNetwork.h"
+
 DEFINE_LOG_CATEGORY(LogFicsItNetworks_DebugRoze);
 
 
@@ -70,7 +72,7 @@ void AFINModularIndicatorPoleHolo::EndPlay(const EEndPlayReason::Type EndPlayRea
 }
 
 bool AFINModularIndicatorPoleHolo::DoMultiStepPlacement(bool isInputFromARelease) {
-	if (bSnapped) {
+	if (bSnapped || !CanExtend) {
 		return true;
 	} else {
 		bSnapped = true;
@@ -142,6 +144,10 @@ void AFINModularIndicatorPoleHolo::ConstructParts() {
 	// Create Components
 	if (mBuildClass) {
 		const AFINModularIndicatorPole* Pole = Cast<AFINModularIndicatorPole>(mBuildClass->GetDefaultObject());
+		CanExtend = Pole->CanExtend;
+		if(!CanExtend) {
+			Extension = 0;
+		}
 		if(Vertical) {
 			AFINModularIndicatorPole::SpawnComponents(UStaticMeshComponent::StaticClass(), Extension, Vertical, Pole->VerticalBaseMesh, Pole->VerticalExtensionMesh, Pole->VerticalAttachmentMesh, Pole->ConnectorMesh, this, RootComponent, Parts,
 													  Pole->VerticalBaseOffset, Pole->VerticalExtensionOffset, Pole->VerticalExtensionMultiplier, Pole->VerticalAttachmentOffset,
@@ -160,7 +166,7 @@ void AFINModularIndicatorPoleHolo::ConstructParts() {
 }
 
 void AFINModularIndicatorPoleHolo::SetHologramLocationAndRotation(const FHitResult& HitResult) {
-	if (bSnapped) {
+	if (bSnapped && CanExtend) {
 		float horizontalDistance = FVector::DistXY(HitResult.TraceStart, SnappedLoc);
 		float angleOfTrace = FMath::DegreesToRadians((HitResult.TraceEnd - HitResult.TraceStart).Rotation().Pitch);
 		Extension = FMath::Clamp(GetScrollRotateValue() / 10 + 1, 1, 10);

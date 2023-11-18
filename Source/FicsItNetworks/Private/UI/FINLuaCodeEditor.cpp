@@ -1,20 +1,34 @@
 #include "UI/FINLuaCodeEditor.h"
-#include "Framework/Text/RunUtils.h"
-#include "Framework/Text/ShapedTextCache.h"
-#include "Input/HittestGrid.h"
+#include "UI/FINTextDecorators.h"
+#include "Utils/FINUtils.h"
 
 const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
 
-FFINLuaCodeEditorStyle::FFINLuaCodeEditorStyle() {}
+FFINLuaCodeEditorStyle::FFINLuaCodeEditorStyle() :
+	UnderlineStyleInvalid(FCoreStyle::Get().GetWidgetStyle<FHyperlinkStyle>(TEXT("Hyperlink")).UnderlineStyle),
+	UnderlineStyleValid(FCoreStyle::Get().GetWidgetStyle<FHyperlinkStyle>(TEXT("Hyperlink")).UnderlineStyle) {}
 
 void FFINLuaCodeEditorStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const {
-	Super::GetResources(OutBrushes);
+	UnderlineStyleValid.GetResources(OutBrushes);
+	UnderlineStyleValid.GetResources(OutBrushes);
+	LineNumberStyle.GetResources(OutBrushes);
+	NormalTextStyle.GetResources(OutBrushes);
+	StringTextStyle.GetResources(OutBrushes);
+	NumberTextStyle.GetResources(OutBrushes);
+	KeywordTextStyle.GetResources(OutBrushes);
+	BoolTrueTextStyle.GetResources(OutBrushes);
+	BoolFalseTextStyle.GetResources(OutBrushes);
+	CommentTextStyle.GetResources(OutBrushes);
+	OperatorTextStyle.GetResources(OutBrushes);
+	FunctionCallTextStyle.GetResources(OutBrushes);
+	FunctionDeclarationTextStyle.GetResources(OutBrushes);
+	ScrollBarStyle.GetResources(OutBrushes);
+	OutBrushes.Add(&BorderImage);
 }
 
 const FFINLuaCodeEditorStyle& FFINLuaCodeEditorStyle::GetDefault() {
-	static FFINLuaCodeEditorStyle* Default = nullptr;
-	if (!Default) Default = new FFINLuaCodeEditorStyle();
-	return *Default;
+	static FFINLuaCodeEditorStyle Instance;
+	return Instance;
 }
 
 TSharedRef<FFINTabRun> FFINTabRun::Create(const FRunInfo& InRunInfo, const TSharedRef<const FString>& InText, const FTextBlockStyle& Style, const FTextRange& InRange, int32 InTabWidth) {
@@ -68,7 +82,7 @@ int32 FFINTabRun::GetTextIndexAt(const TSharedRef<ILayoutBlock>& Block, const FV
 		return INDEX_NONE;
 	}
 	int32 Index = (Location.X < Offset) ? Range.BeginIndex : Range.EndIndex;
-	*OutHitPoint = Index == Range.BeginIndex ? ETextHitPoint::LeftGutter : ETextHitPoint::WithinText;
+	if (OutHitPoint) *OutHitPoint = Index == Range.BeginIndex ? ETextHitPoint::LeftGutter : ETextHitPoint::WithinText;
 	return Index;
 }
 
@@ -181,12 +195,9 @@ bool FFINLuaSyntaxHighlighterTextLayoutMarshaller::RequiresLiveUpdate() const {
 	return true;
 }
 
-FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayoutMarshaller(const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle) : SyntaxTextStyle(InLuaSyntaxTextStyle) {
-
-}
-
-TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle) {
-	TArray<FSyntaxTokenizer::FRule> TokenizerRules;
+FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayoutMarshaller(const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle, FFINReflectionReferenceDecorator::FOnNavigate InNavigateDelegate)
+	: SyntaxTextStyle(InLuaSyntaxTextStyle), NavigateDelegate(InNavigateDelegate){
+	/*TArray<FSyntaxTokenizer::FRule> TokenizerRules;
 	for (FString Token : TArray<FString>({
 		" ", "\t", ".", ":", "\"", "\'", "\\", ",", "(", ")", "for", "in", "while", "do", "if", "then", "elseif", "else",
 		"end", "local", "true", "false", "not", "and", "or", "function", "return", "--[[", "]]--", "--", "+", "-", "/",
@@ -196,9 +207,7 @@ TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> FFINLuaSyntaxHighlighte
 
 	TokenizerRules.Sort([](const FSyntaxTokenizer::FRule& A, const FSyntaxTokenizer::FRule& B) {
 		return A.MatchText.Len() > B.MatchText.Len();
-	});
-	
-	return MakeShareable(new FFINLuaSyntaxHighlighterTextLayoutMarshaller(LuaSyntaxTextStyle));
+	});*/
 }
 
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) {
@@ -215,11 +224,72 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 		TArray<TSharedRef<IRun>> Runs;
 
 		auto DoNormal = [&](FTextRange Range) {
-			if (Runs.Num() > 0 && Runs[Runs.Num()-1]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Normal") {
-				Range.BeginIndex = Runs[Runs.Num()-1]->GetTextRange().BeginIndex;
-				Runs.Pop();
-			}
 			FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
+			
+			if (Runs.Num() > 0) {
+				bool bNew = Runs.Last() == Run;
+				const FString& Name = Run->GetRunInfo().Name;
+				if (Name == "SyntaxHighlight.FINLua.Normal") {
+					Range.BeginIndex = Run->GetTextRange().BeginIndex;
+					if (bNew) Runs.Pop();
+				} else if (Name == TEXT("SyntaxHighlight.FINLua.ReflectionReference")) {
+
+					FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.ReflectionReference"));
+					RunInfo.MetaData = Run->GetRunInfo().MetaData;
+					const FString& Variant = RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataVariantKey];
+					if (!bNew) RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataTypeKey] = UFINUtils::TextRange(*ModelString, FTextRange(Range.BeginIndex+8, Range.EndIndex));
+					else RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataTypeKey].Append(UFINUtils::TextRange(*ModelString, Range));
+
+					Range.BeginIndex = Run->GetTextRange().BeginIndex;
+					if (bNew) Runs.Pop();
+
+					const FString& Type = RunInfo.MetaData[FFINReflectionReferenceDecorator::MetaDataTypeKey];
+					bool bValid = nullptr != FFINReflectionReferenceDecorator::ReflectionItemFromType(Variant, Type);
+					FHyperlinkStyle LinkStyle;
+					LinkStyle.SetUnderlineStyle(bValid ? SyntaxTextStyle->UnderlineStyleValid : SyntaxTextStyle->UnderlineStyleInvalid);
+					LinkStyle.SetTextStyle(SyntaxTextStyle->NormalTextStyle);
+					
+					Run = FFINReflectionReferenceDecorator::CreateRun(RunInfo, ModelString, &LinkStyle, NavigateDelegate, Range, true);
+					Runs.Add(Run.ToSharedRef());
+					return;
+				}
+			}
+
+			if (Runs.Num() >= 2) {
+				const FRunInfo& OpInfo = Runs[Runs.Num()-1]->GetRunInfo();
+				const TSharedRef<IRun>& LibRun = Runs[Runs.Num()-2];
+				const FRunInfo& LibInfo = LibRun->GetRunInfo();
+				
+				bool bReflectionReference = OpInfo.Name == TEXT("SyntaxHighlight.FINLua.Operator") && OpInfo.MetaData[TEXT("Operator")] == TEXT(".");
+				bReflectionReference = bReflectionReference && LibInfo.Name == TEXT("SyntaxHighlight.FINLua.Normal");
+				bool bLib = UFINUtils::TextRange(*ModelString, LibRun->GetTextRange()) == TEXT("classes");
+				bLib = bLib || UFINUtils::TextRange(*ModelString, LibRun->GetTextRange()) == TEXT("structs");
+				bReflectionReference = bReflectionReference && bLib;
+				if (bReflectionReference) {
+					FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.ReflectionReference"));
+					FString Variant = UFINUtils::TextRange(*ModelString, LibRun->GetTextRange());
+					FString Type = UFINUtils::TextRange(*ModelString, Range);
+					if (Variant == TEXT("structs")) Variant = TEXT("struct");
+					if (Variant == TEXT("classes")) Variant = TEXT("class");
+					RunInfo.MetaData.Add(FFINReflectionReferenceDecorator::MetaDataVariantKey, Variant);
+					RunInfo.MetaData.Add(FFINReflectionReferenceDecorator::MetaDataTypeKey, Type);
+
+					Runs.Pop();
+					Range.BeginIndex = Runs[Runs.Num()-1]->GetTextRange().BeginIndex;
+					Runs.Pop();
+
+					bool bValid = nullptr != FFINReflectionReferenceDecorator::ReflectionItemFromType(Variant, Type);
+					FHyperlinkStyle LinkStyle;
+					LinkStyle.SetUnderlineStyle(bValid ? SyntaxTextStyle->UnderlineStyleValid : SyntaxTextStyle->UnderlineStyleInvalid);
+					LinkStyle.SetTextStyle(SyntaxTextStyle->NormalTextStyle);
+
+					Run = FFINReflectionReferenceDecorator::CreateRun(RunInfo, ModelString, &LinkStyle, NavigateDelegate, Range, true);
+					Runs.Add(Run.ToSharedRef());
+					
+					return;
+				}
+			}
+			
 			FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Normal"));
 			Run = FSlateTextRun::Create(RunInfo, ModelString, Style, Range);
 			Runs.Add(Run.ToSharedRef());
@@ -403,7 +473,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 				}
 				if (TokenString == "(") {
 					int Index = FindPrevNoWhitespaceRun();
-					if (Index >= 0 && Runs[Index]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Normal") {
+					if (Index >= 0 && (Runs[Index]->GetRunInfo().Name == "SyntaxHighlight.FINLua.Normal")) {
 						FTextRange OldRange = Runs[Index]->GetTextRange();
 						Runs.RemoveAt(Index);
 						int KeywordIndex = FindPrevNoWhitespaceRun(Index-1);
@@ -460,7 +530,7 @@ void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& So
 }
 
 void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
-	SyntaxHighlighter = FFINLuaSyntaxHighlighterTextLayoutMarshaller::Create(InArgs._Style);
+	SyntaxHighlighter = MakeShared<FFINLuaSyntaxHighlighterTextLayoutMarshaller>(InArgs._Style, InArgs._OnNavigateReflection);
 	Style = InArgs._Style;
 
 	HScrollBar = SNew(SScrollBar)
@@ -540,8 +610,6 @@ void SFINLuaCodeEditor::Construct(const FArguments& InArgs) {
 	);
 }
 
-SFINLuaCodeEditor::SFINLuaCodeEditor() {}
-
 int32 SFINLuaCodeEditor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	FArrangedChildren ArrangedChildren(EVisibility::Visible);
 	this->ArrangeChildren(AllottedGeometry, ArrangedChildren);
@@ -585,6 +653,16 @@ void SFINLuaCodeEditor::OnArrangeChildren(const FGeometry& AllottedGeometry, FAr
 	ArrangeSingleChild(GSlateFlowDirection, CodeGeo, ArrangedChildren, ChildSlot, FVector2D(1));
 }
 
+void SFINLuaCodeEditor::NavigateToLine(int64 LineNumber) {
+	FTimerHandle TimerHandle;
+	TSharedRef<SFINLuaCodeEditor> Ptr = SharedThis(this);
+	GWorld->GetTimerManager().SetTimerForNextTick([Ptr, LineNumber]() {
+		Ptr->TextEdit->ScrollTo(FTextLocation(LineNumber));
+		FSlateApplication::Get().SetAllUserFocus(Ptr->TextEdit);
+		Ptr->TextEdit->SelectText(FTextLocation(LineNumber), FTextLocation(LineNumber));
+	});
+}
+
 void UFINLuaCodeEditor::HandleOnTextChanged(const FText& InText) {
 	Text = InText;
 	OnTextChanged.Broadcast(InText);
@@ -599,7 +677,10 @@ TSharedRef<SWidget> UFINLuaCodeEditor::RebuildWidget() {
 	return SAssignNew(CodeEditor, SFINLuaCodeEditor)
 		.Style(&Style)
 		.OnTextChanged(BIND_UOBJECT_DELEGATE(FOnTextChanged, HandleOnTextChanged))
-		.OnTextCommitted(BIND_UOBJECT_DELEGATE(FOnTextCommitted, HandleOnTextCommitted));
+		.OnTextCommitted(BIND_UOBJECT_DELEGATE(FOnTextCommitted, HandleOnTextCommitted))
+	.OnNavigateReflection_Lambda([this](UFINBase* Type) {
+		OnNavigateReflection.Broadcast(Type);
+	});
 }
 
 void UFINLuaCodeEditor::ReleaseSlateResources(bool bReleaseChildren) {
@@ -618,5 +699,9 @@ void UFINLuaCodeEditor::SetText(FText InText) {
 
 FText UFINLuaCodeEditor::GetText() const {
 	return Text;
+}
+
+void UFINLuaCodeEditor::NavigateToLine(int64 LineNumber) {
+	if (CodeEditor) CodeEditor->NavigateToLine(LineNumber);
 }
 

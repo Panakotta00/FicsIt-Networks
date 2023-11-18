@@ -1,5 +1,8 @@
 #pragma once
 
+#include "FINLogViewer.h"
+#include "FINStyle.h"
+#include "FINTextDecorators.h"
 #include "Slate.h"
 #include "Components/Widget.h"
 #include "Framework/Text/SyntaxHighlighterTextLayoutMarshaller.h"
@@ -19,6 +22,12 @@ struct FFINLuaCodeEditorStyle : public FSlateWidgetStyle {
 	virtual const FName GetTypeName() const override { return TypeName; };
 
 	static const FFINLuaCodeEditorStyle& GetDefault();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FButtonStyle UnderlineStyleValid;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FButtonStyle UnderlineStyleInvalid;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FTextBlockStyle LineNumberStyle;
@@ -81,11 +90,11 @@ public:
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Category=Appearance, EditAnywhere, BlueprintReadWrite, meta=( ShowOnlyInnerProperties ))
+	UPROPERTY(Category=Appearance, EditAnywhere, BlueprintReadWrite, meta=(ShowOnlyInnerProperties))
 	FFINLuaCodeEditorStyle Style;
 
-	virtual const struct FSlateWidgetStyle* const GetStyle() const override {
-		return static_cast< const struct FSlateWidgetStyle* >( &Style );
+	virtual const FSlateWidgetStyle* const GetStyle() const override {
+		return &Style;
 	}
 };
 
@@ -97,7 +106,7 @@ protected:
 	FTextRange Range;
 	int32 TabWidthInSpaces;
 
-	int32 CharsTillTabStep;
+	int32 CharsTillTabStep = 0;
 	
 public:
 	static TSharedRef<FFINTabRun> Create(const FRunInfo& InRunInfo, const TSharedRef<const FString>& InText, const FTextBlockStyle& Style, const FTextRange& InRange, int32 InTabWith);
@@ -133,18 +142,19 @@ public:
 	virtual void SetText(const FString& SourceString, FTextLayout& TargetTextLayout) override;
 	virtual bool RequiresLiveUpdate() const override;
 
-	FFINLuaSyntaxHighlighterTextLayoutMarshaller(const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle);
-
-	static TSharedRef<FFINLuaSyntaxHighlighterTextLayoutMarshaller> Create(const FFINLuaCodeEditorStyle* LuaSyntaxTextStyle);
+	FFINLuaSyntaxHighlighterTextLayoutMarshaller(const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle, FFINReflectionReferenceDecorator::FOnNavigate NavigateDelegate);
 
 protected:
 	void ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines);
 
 	const FFINLuaCodeEditorStyle* SyntaxTextStyle;
+	FFINReflectionReferenceDecorator::FOnNavigate NavigateDelegate;
 };
 
 class SFINLuaCodeEditor : public SBorder {
 public:
+	typedef FFINReflectionReferenceDecorator::FOnNavigate FOnNavigateReflection;
+	
 private:
 	TSharedPtr<FFINLuaSyntaxHighlighterTextLayoutMarshaller> SyntaxHighlighter;
 
@@ -157,21 +167,23 @@ public:
 	TSharedPtr<SScrollBar> HScrollBar;
 	TSharedPtr<SScrollBar> VScrollBar;
 	
-	SLATE_BEGIN_ARGS(SFINLuaCodeEditor) {}
+	SLATE_BEGIN_ARGS(SFINLuaCodeEditor) :
+		_Style(&FFINStyle::Get().GetWidgetStyle<FFINLuaCodeEditorStyle>("LuaCodeEditor")) {}
 	SLATE_STYLE_ARGUMENT(FFINLuaCodeEditorStyle, Style)
-	SLATE_ATTRIBUTE( FMargin, Padding )
-	SLATE_EVENT( FOnTextChanged, OnTextChanged )
-    SLATE_EVENT( FOnTextCommitted, OnTextCommitted )
+	SLATE_ATTRIBUTE(FMargin, Padding)
+	SLATE_EVENT(FOnTextChanged, OnTextChanged)
+    SLATE_EVENT(FOnTextCommitted, OnTextCommitted)
+    SLATE_EVENT(FOnNavigateReflection, OnNavigateReflection)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
-
-	SFINLuaCodeEditor();
 	
 	// Begin SWidget
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 	virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
 	// End SWidget
+
+	void NavigateToLine(int64 LineNumber);
 };
 
 UCLASS()
@@ -199,9 +211,14 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFINCodeEditorCommittedEvent OnTextCommitted;
+
+	UPROPERTY(BlueprintAssignable)
+	FFINNavigateReflection OnNavigateReflection;
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FFINLuaCodeEditorStyle Style;
+
+	UFINLuaCodeEditor() : Style(FFINStyle::Get().GetWidgetStyle<FFINLuaCodeEditorStyle>("LuaCodeEditor")) {}
 
 	// Begin UWidget
 	virtual TSharedRef<SWidget> RebuildWidget() override;
@@ -216,4 +233,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FText GetText() const;
+
+	UFUNCTION(BlueprintCallable)
+	void NavigateToLine(int64 LineNumber);
 };

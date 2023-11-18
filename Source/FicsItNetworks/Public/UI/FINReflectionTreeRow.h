@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINReflectionStyles.h"
+#include "FINStyle.h"
 
 template<typename ItemType>
 class SFINReflectionTreeRow : public STableRow<ItemType> {
@@ -14,7 +14,7 @@ public:
 	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView) {
 		typename STableRow<ItemType>::FArguments SuperArgs;
 		SuperArgs._Content = InArgs._Content;
-		SuperArgs._ExpanderStyleSet = &FFINReflectionStyles::Get();
+		SuperArgs._ExpanderStyleSet = &FFINStyle::Get();
 		SuperArgs._Style = InArgs._Style;
 		STableRow<ItemType>::Construct(SuperArgs, InOwnerTableView);
 	}

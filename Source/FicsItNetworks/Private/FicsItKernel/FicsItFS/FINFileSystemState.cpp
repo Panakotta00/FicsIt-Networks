@@ -1,8 +1,16 @@
 #include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+
+#include "Computer/FINComputerSubsystem.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Net/UnrealNetwork.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Widgets/SViewport.h"
+#include "Widgets/Input/SCheckBox.h"
+
+#define KEEP_CHANGES 1
+#define OVERRIDE_CHANGES 0
 
 AFINFileSystemState::AFINFileSystemState() {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"RootComponent");
@@ -17,7 +25,16 @@ void AFINFileSystemState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 }
 
 int AskForDiskOrSave(FString Name) {
+	switch (AFINComputerSubsystem::GetFSAlways()) {
+	case FIN_FS_AlwaysOverride:
+		return OVERRIDE_CHANGES;
+	case FIN_FS_AlwaysKeep:
+		return KEEP_CHANGES;
+	default: ;
+	}
+	
 	int KeepDisk = 0;
+	bool bDontAskAgain = false;
 	TSharedRef<SWindow> Window = SNew(SWindow)
 		.HasCloseButton(false)
 		.ActivationPolicy(EWindowActivationPolicy::Always)
@@ -42,28 +59,57 @@ int AskForDiskOrSave(FString Name) {
 			.AutoHeight()[
 				SNew(SHorizontalBox)
 				+SHorizontalBox::Slot()
-				.FillWidth(1)
-				.HAlign(HAlign_Right)[
+				.AutoWidth()
+				.HAlign(HAlign_Left)[
 					SNew(SButton)
 					.Text(FText::FromString("Keep changes on disk"))
 					.OnClicked_Lambda([&KeepDisk, &Window]() {
-						KeepDisk = 1;
+						KeepDisk = KEEP_CHANGES;
 						Window->RequestDestroyWindow();
 						return FReply::Handled();
 					})]
 				+SHorizontalBox::Slot()
-				.AutoWidth()[
+				.AutoWidth()
+				.HAlign(HAlign_Left)[
 					SNew(SButton)
 					.Text(FText::FromString(TEXT("Overwrite with Save")))
 					.OnClicked_Lambda([&KeepDisk, &Window]() {
-						KeepDisk = 0;
+						KeepDisk = OVERRIDE_CHANGES;
 						Window->RequestDestroyWindow();
 						return FReply::Handled();
 					})
 				]
+				+SHorizontalBox::Slot()
+				.FillWidth(1)
+				.HAlign(HAlign_Right)[
+					SNew(SCheckBox)
+					.Content()[
+						SNew(STextBlock)
+						.Text(FText::FromString(TEXT("Don't ask again")))
+					]
+					.IsChecked_Lambda([&]() {
+						return bDontAskAgain ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+					})
+					.OnCheckStateChanged_Lambda([&](ECheckBoxState State) {
+						bDontAskAgain = State == ECheckBoxState::Checked;
+					})
+				]
 			]
 		];
-	FSlateApplication::Get().AddModalWindow(Window, FSlateApplication::Get().GetActiveTopLevelWindow());
+	FSlateApplication::Get().AddModalWindow(Window, GEngine->GetGameViewportWidget());
+
+	if (bDontAskAgain) {
+		switch (KeepDisk) {
+		case KEEP_CHANGES:
+			AFINComputerSubsystem::SetFSAlways(FIN_FS_AlwaysKeep);
+			break;
+		case OVERRIDE_CHANGES:
+			AFINComputerSubsystem::SetFSAlways(FIN_FS_AlwaysOverride);
+			break;
+		default: ;
+		}
+	}
+	
 	return KeepDisk;
 }
 
@@ -128,10 +174,17 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
 			if (Record.GetUnderlyingArchive().IsLoading()) {
 				std::string diskData;
 				if (KeepDisk == -1) diskData = CodersFileSystem::FileStream::readAll(SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY));
-				FString Data;
-				Content << Data;
-				FTCHARToUTF8 Convert(*Data, Data.Len());
-				std::string stdData = std::string(Convert.Get(), Convert.Length());
+				std::string stdData;
+				if (bUsePreBinarySupportSerialization) {
+					FString Data;
+					Content << Data;
+					FTCHARToUTF8 Conv(Data);
+					stdData = std::string(Conv.Get(), Conv.Length());
+				} else {
+					TArray<uint8> Data;
+					Content << Data;
+					stdData = std::string((char*)Data.GetData(), Data.Num());
+				}
 				CheckKeepDisk(diskData != stdData)
 				if (KeepDisk == 0) {
 					CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC | CodersFileSystem::BINARY);
@@ -141,10 +194,15 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
             } else if (Record.GetUnderlyingArchive().IsSaving()) {
             	CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY);
             	std::string RawData = CodersFileSystem::FileStream::readAll(Stream);
-            	Stream->close();
-            	FUTF8ToTCHAR Convert(RawData.c_str(), RawData.length());
-            	FString Data(Convert.Length(), Convert.Get());
-            	Content << Data;
+            	if (bUsePreBinarySupportSerialization) {
+            		FUTF8ToTCHAR Conv(RawData.c_str(), RawData.length());
+            		FString Data(Conv.Get(), Conv.Length());
+            		Content << Data;
+            	} else {
+            		Stream->close();
+            		TArray<uint8> Data((uint8*)RawData.c_str(), RawData.length());
+            		Content << Data;
+            	}
             }
 		} else if (Type == 2) {
 			CheckKeepDisk(!CodersFileSystem::SRef<CodersFileSystem::Directory>(SerializeDevice->get(Path / stdChildName)).isValid())
@@ -191,6 +249,7 @@ void AFINFileSystemState::BeginPlay() {
 
 void AFINFileSystemState::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	bUseOldSerialization = gameVersion < 150216;
+	//bUsePreBinarySupportSerialization = gameVersion < 264901;
 }
 
 bool AFINFileSystemState::ShouldSave_Implementation() const {

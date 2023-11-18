@@ -12,6 +12,7 @@ class AFINComputerNetworkCard;
 class AFINComputerDriveHolder;
 class AFINComputerMemory;
 class AFINComputerProcessor;
+class UFINLog;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINStateEEPROM*, EEPROM);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
@@ -19,7 +20,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFi
 UCLASS(Blueprintable)
 class FICSITNETWORKS_API AFINComputerCase : public AFGBuildable {
 	GENERATED_BODY()
-
+private:
+	UPROPERTY(Replicated)
+	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
@@ -33,9 +37,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UAudioComponent* Speaker = nullptr;
 
-	UPROPERTY(SaveGame, Replicated)
-	FString SerialOutput = "";
-
+	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
+	UFINLog* Log = nullptr;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	int LastTabIndex = 0;
 	
@@ -69,11 +73,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	TArray<UObject*> PCIDevices;
-
-	UPROPERTY(Replicated)
-	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
-
-	FString OldSerialOutput = "";
 
 	float KernelTickTime = 0.0;
 
@@ -151,12 +150,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	EFINKernelState GetState();
-
-	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-    void WriteSerialInput(const FString& str);
-	
-	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-	FString GetSerialOutput();
 	
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	AFINComputerProcessor* GetProcessor();
@@ -173,8 +166,24 @@ public:
 		DisplayName = FText::FromString(TEXT("Computer Case"));
 	}
 
+	UFUNCTION(BlueprintNativeEvent)
+	void netSig_ComputerStateChanged(int64 PrevState, int64 NewState);
 	UFUNCTION()
-    void netSig_FileSystemUpdate(int Type, const FString& From, const FString& To) {}
+    void netSigMeta_ComputerStateChanged(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "ComputerStateChanged";
+		DisplayName = FText::FromString("Computer State Changed");
+		Description = FText::FromString("Triggers when the computers state changes.");
+		ParameterInternalNames.Add("prevState");
+		ParameterDisplayNames.Add(FText::FromString("Previous State"));
+		ParameterDescriptions.Add(FText::FromString("The previous computer state."));
+		ParameterInternalNames.Add("newState");
+		ParameterDisplayNames.Add(FText::FromString("New State"));
+		ParameterDescriptions.Add(FText::FromString("The new computer state."));
+		Runtime = 1;
+	}	
+
+	UFUNCTION(BlueprintNativeEvent)
+    void netSig_FileSystemUpdate(int Type, const FString& From, const FString& To);
 	UFUNCTION()
     void netSigMeta_FileSystemUpdate(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "FileSystemUpdate";
@@ -190,5 +199,60 @@ public:
 		ParameterDisplayNames.Add(FText::FromString("To"));
 		ParameterDescriptions.Add(FText::FromString("The new file path of the node if it has changed."));
 		Runtime = 1;
+	}
+
+	UFUNCTION()
+	int64 netFunc_getState();
+	UFUNCTION()
+	void netFuncMeta_getState(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getState";
+		DisplayName = FText::FromString("Get State");
+		Description = FText::FromString("Returns the internal kernel state of the computer.");
+		ParameterInternalNames.Add("result");
+		ParameterDisplayNames.Add(FText::FromString("Result"));
+		ParameterDescriptions.Add(FText::FromString("The current internal kernel state."));
+		Runtime = 1;
+	}
+
+	UFUNCTION()
+	void netFunc_startComputer();
+	UFUNCTION()
+	void netFuncMeta_startComputer(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "startComputer";
+		DisplayName = FText::FromString("Start Computer");
+		Description = FText::FromString("Starts the Computer (Processor).");
+		Runtime = 0;
+	}
+
+	UFUNCTION()
+	void netFunc_stopComputer();
+	UFUNCTION()
+	void netFuncMeta_stopComputer(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "stopComputer";
+		DisplayName = FText::FromString("Stop Computer");
+		Description = FText::FromString("Stops the Computer (Processor).");
+		Runtime = 0;
+	}
+
+	UFUNCTION()
+	void netFunc_getLog(int64 PageSize, int64 Page, TArray<FFINLogEntry>& OutLog, int64& OutLogSize);
+	UFUNCTION()
+	void netFuncMeta_getLog(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getLog";
+		DisplayName = FText::FromString("Get Log");
+		Description = FText::FromString("Returns the log of the computer. Output is paginated using the input parameters. A negative Page will indicate pagination from the bottom (latest log entry first).");
+		ParameterInternalNames.Add("pageSize");
+		ParameterDisplayNames.Add(FText::FromString("Page Size"));
+		ParameterDescriptions.Add(FText::FromString("The size of the returned page."));
+		ParameterInternalNames.Add("page");
+		ParameterDisplayNames.Add(FText::FromString("Page"));
+		ParameterDescriptions.Add(FText::FromString("The index of the page you want to return. Negative to start indexing at the bottom (latest entries first)."));
+		ParameterInternalNames.Add("log");
+		ParameterDisplayNames.Add(FText::FromString("Log"));
+		ParameterDescriptions.Add(FText::FromString("The Log page you wanted to retrieve."));
+		ParameterInternalNames.Add("logSize");
+		ParameterDisplayNames.Add(FText::FromString("Log Size"));
+		ParameterDescriptions.Add(FText::FromString("The size of the full log (not just the returned page)."));
+		Runtime = 0;
 	}
 };

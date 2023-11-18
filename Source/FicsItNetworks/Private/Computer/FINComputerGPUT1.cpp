@@ -4,7 +4,11 @@
 #include "Graphics/FINScreenInterface.h"
 #include "FGPlayerController.h"
 #include "Async/ParallelFor.h"
+#include "Engine/NetworkSettings.h"
+#include "Net/UnrealNetwork.h"
+#include "Slate/SlateBrushAsset.h"
 #include "Widgets/SInvalidationPanel.h"
+#include "Widgets/Layout/SScaleBox.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
 
 const FFINGPUT1BufferPixel FFINGPUT1BufferPixel::InvalidPixel;
@@ -37,26 +41,6 @@ FVector2D SScreenMonitor::GetCharSize() const {
 
 FVector2D SScreenMonitor::LocalToCharPos(FVector2D Pos) const {
 	return Pos / GetCharSize();
-}
-
-int SScreenMonitor::MouseToInt(const FPointerEvent& MouseEvent) {
-	int mouseEvent = 0;
-	if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))	mouseEvent |= 0b0000000001;
-	if (MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))	mouseEvent |= 0b0000000010;
-	if (MouseEvent.IsControlDown())								mouseEvent |= 0b0000000100;
-	if (MouseEvent.IsShiftDown())								mouseEvent |= 0b0000001000;
-	if (MouseEvent.IsAltDown())									mouseEvent |= 0b0000010000;
-	if (MouseEvent.IsCommandDown())								mouseEvent |= 0b0000100000;
-	return mouseEvent;
-}
-
-int SScreenMonitor::InputToInt(const FInputEvent& KeyEvent) {
-	int mouseEvent = 0;
-	if (KeyEvent.IsControlDown())								mouseEvent |= 0b0000000100;
-	if (KeyEvent.IsShiftDown())									mouseEvent |= 0b0000001000;
-	if (KeyEvent.IsAltDown())									mouseEvent |= 0b0000010000;
-	if (KeyEvent.IsCommandDown())								mouseEvent |= 0b0000100000;
-	return mouseEvent;
 }
 
 FVector2D SScreenMonitor::ComputeDesiredSize(float f) const {
@@ -103,13 +87,13 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 FReply SScreenMonitor::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	FVector2D CharPos = LocalToCharPos(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()));
 	
-	if (OnMouseDownEvent.IsBound()) return OnMouseDownEvent.Execute(CharPos.X, CharPos.Y, MouseToInt(MouseEvent));
+	if (OnMouseDownEvent.IsBound()) return OnMouseDownEvent.Execute(CharPos.X, CharPos.Y, AFINComputerGPU::MouseToInt(MouseEvent));
 	return FReply::Unhandled();
 }
 
 FReply SScreenMonitor::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	FVector2D CharPos = LocalToCharPos(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()));
-	if (OnMouseUpEvent.IsBound()) return OnMouseUpEvent.Execute(CharPos.X, CharPos.Y, MouseToInt(MouseEvent));
+	if (OnMouseUpEvent.IsBound()) return OnMouseUpEvent.Execute(CharPos.X, CharPos.Y, AFINComputerGPU::MouseToInt(MouseEvent));
 	return FReply::Unhandled(); 
 }
 
@@ -120,23 +104,23 @@ FReply SScreenMonitor::OnMouseMove(const FGeometry& MyGeometry, const FPointerEv
 	if (lastMoveX == x && lastMoveY == y) return FReply::Unhandled();
 	lastMoveX = x;
 	lastMoveY = y;
-	if (OnMouseMoveEvent.IsBound()) return OnMouseMoveEvent.Execute(x, y, MouseToInt(MouseEvent));
+	if (OnMouseMoveEvent.IsBound()) return OnMouseMoveEvent.Execute(x, y, AFINComputerGPU::MouseToInt(MouseEvent));
 	return FReply::Unhandled();
 }
 
 FReply SScreenMonitor::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	if (HandleShortCut(InKeyEvent)) return FReply::Handled();
-	if (OnKeyDownEvent.IsBound()) return OnKeyDownEvent.Execute(InKeyEvent.GetCharacter(), InKeyEvent.GetKeyCode(), InputToInt(InKeyEvent));
+	if (OnKeyDownEvent.IsBound()) return OnKeyDownEvent.Execute(InKeyEvent.GetCharacter(), InKeyEvent.GetKeyCode(), AFINComputerGPU::InputToInt(InKeyEvent));
 	return FReply::Unhandled();
 }
 
 FReply SScreenMonitor::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
-	if (OnKeyUpEvent.IsBound()) return OnKeyUpEvent.Execute(InKeyEvent.GetCharacter(), InKeyEvent.GetKeyCode(), InputToInt(InKeyEvent));
+	if (OnKeyUpEvent.IsBound()) return OnKeyUpEvent.Execute(InKeyEvent.GetCharacter(), InKeyEvent.GetKeyCode(), AFINComputerGPU::InputToInt(InKeyEvent));
 	return FReply::Unhandled();
 }
 
 FReply SScreenMonitor::OnKeyChar(const FGeometry& MyGeometry, const FCharacterEvent& InCharacterEvent) {
-	if (OnKeyCharEvent.IsBound()) return OnKeyCharEvent.Execute(InCharacterEvent.GetCharacter(), InputToInt(InCharacterEvent));
+	if (OnKeyCharEvent.IsBound()) return OnKeyCharEvent.Execute(InCharacterEvent.GetCharacter(), AFINComputerGPU::InputToInt(InCharacterEvent));
 	return FReply::Unhandled();
 }
 
@@ -245,41 +229,45 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AFINComputerGPUT1, FrontBuffer);
 }
 
-TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
+TSharedPtr<SWidget> AFINComputerGPUT1:: CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
-	return SAssignNew(CachedInvalidation, SInvalidationPanel)
-	.Content()[
-		SNew(SScreenMonitor,(UObject*)GetWorld())
-		.Buffer_Lambda([this]() {
-			FScopeLock Lock(&DrawingMutex);
-            return &FrontBuffer;
-		})
-		.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/UI/FiraCode.FiraCode'")), 12, "FiraCode-Regular"))
-		.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
-			RCO->GPUMouseEvent(this, 0, x, y, btn);
-			return FReply::Handled();
-		})
-		.OnMouseUp_Lambda([this, RCO](int x, int y, int btn) {
-			RCO->GPUMouseEvent(this, 1, x, y, btn);
-            return FReply::Handled();
-        })
-        .OnMouseMove_Lambda([this, RCO](int x, int y, int btn) {
-			RCO->GPUMouseEvent(this, 2, x, y, btn);
-            return FReply::Handled();
-        })
-		.OnKeyDown_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
-			RCO->GPUKeyEvent(this, 0,  c, key, btn);
-			return FReply::Handled();
-		})
-		.OnKeyUp_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
-			RCO->GPUKeyEvent(this, 1,  c, key, btn);
-			return FReply::Handled();
-        })
-        .OnKeyChar_Lambda([this, RCO](TCHAR c, int btn) {
-	        RCO->GPUKeyCharEvent(this, FString::Chr(c), btn);
-        	return FReply::Handled();
-        })
+	return SNew(SScaleBox)
+	.HAlign(HAlign_Center)
+	.VAlign(VAlign_Center)[
+		SAssignNew(CachedInvalidation, SInvalidationPanel)
+		.Content()[
+			SNew(SScreenMonitor,(UObject*)GetWorld())
+			.Buffer_Lambda([this]() {
+				FScopeLock Lock(&DrawingMutex);
+	            return &FrontBuffer;
+			})
+			.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/UI/FiraCode.FiraCode'")), 12, "FiraCode-Regular"))
+			.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
+				RCO->GPUMouseEvent(this, 0, x, y, btn);
+				return FReply::Handled();
+			})
+			.OnMouseUp_Lambda([this, RCO](int x, int y, int btn) {
+				RCO->GPUMouseEvent(this, 1, x, y, btn);
+	            return FReply::Handled();
+	        })
+	        .OnMouseMove_Lambda([this, RCO](int x, int y, int btn) {
+				RCO->GPUMouseEvent(this, 2, x, y, btn);
+	            return FReply::Handled();
+	        })
+			.OnKeyDown_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
+				RCO->GPUKeyEvent(this, 0,  c, key, btn);
+				return FReply::Handled();
+			})
+			.OnKeyUp_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
+				RCO->GPUKeyEvent(this, 1,  c, key, btn);
+				return FReply::Handled();
+	        })
+	        .OnKeyChar_Lambda([this, RCO](TCHAR c, int btn) {
+		        RCO->GPUKeyCharEvent(this, FString::Chr(c), btn);
+        		return FReply::Handled();
+	        })
+	    ]
     ];
 }
 
@@ -312,10 +300,6 @@ void AFINComputerGPUT1::netSig_ScreenSizeChanged_Implementation(int oldW, int ol
 void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int btn) {}
 void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
 void AFINComputerGPUT1::netSig_OnKeyChar_Implementation(const FString& c, int btn) {}
-
-void AFINComputerGPUT1::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
-	if (Cast<IFINScreenInterface>(NewScreen.GetUnderlyingPtr())) BindScreen(NewScreen);
-}
 
 UObject* AFINComputerGPUT1::netFunc_getScreen() {
 	return Screen.Get();

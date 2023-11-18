@@ -1,12 +1,13 @@
 #include "Computer/FINComputerCase.h"
 #include "Computer/FINComputerEEPROMDesc.h"
 #include "Computer/FINComputerFloppyDesc.h"
-#include "FicsItKernel/Processor/Lua/LuaProcessor.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "Computer/FINComputerDriveHolder.h"
 #include "Computer/FINComputerMemory.h"
 #include "Computer/FINComputerProcessor.h"
 #include "FGInventoryComponent.h"
+#include "FicsItKernel/Logging.h"
+#include "Net/UnrealNetwork.h"
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -40,6 +41,8 @@ AFINComputerCase::AFINComputerCase() {
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
+	Log = CreateDefaultSubobject<UFINLog>("Log");
+
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
 	mFactoryTickFunction.bRunOnAnyThread = true;
@@ -58,7 +61,7 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	
 	DOREPLIFETIME(AFINComputerCase, DataStorage);
 	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
-	DOREPLIFETIME(AFINComputerCase, SerialOutput);
+	DOREPLIFETIME(AFINComputerCase, Log);
 	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
 	DOREPLIFETIME(AFINComputerCase, Processors);
 	DOREPLIFETIME(AFINComputerCase, PCIDevices);
@@ -72,6 +75,7 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 	NetworkController = NewObject<UFINKernelNetworkController>(this, "NetworkController");
 	AudioController = NewObject<UFINKernelAudioController>(this, "AudioController");
 
+	Kernel->SetLog(Log);
 	NetworkController->SetComponent(NetworkConnector);
 	Kernel->SetNetwork(NetworkController);
 	AudioController->SetComponent(Speaker);
@@ -105,20 +109,14 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 	
 	if (HasAuthority()) {
-		bool bNetUpdate = false;
+		Log->Tick();
+		
 		if (Kernel) {
 			Kernel->HandleFutures();
 			if (Kernel->GetState() != InternalKernelState) {
+				netSig_ComputerStateChanged(InternalKernelState, Kernel->GetState());
 				InternalKernelState = Kernel->GetState();
-				bNetUpdate = true;
 			}
-		}
-		if (OldSerialOutput != SerialOutput) {
-			OldSerialOutput = SerialOutput;
-			bNetUpdate = true;
-		}
-		if (bNetUpdate) {
-			ForceNetUpdate();
 		}
 	}
 }
@@ -133,16 +131,7 @@ void AFINComputerCase::Factory_Tick(float dt) {
 
 		while (KernelTickTime > 1.0/KernelTicksPerSec) {
 			KernelTickTime -= 1.0/KernelTicksPerSec;
-			//auto n = std::chrono::high_resolution_clock::now();
 			Kernel->Tick(dt);
-			//auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - n);
-			//SML::Logging::debug("Computer tick: ", dur.count());
-		
-			CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = Kernel->GetDevDevice();
-			if (DevDevice && DevDevice->getSerial()) {
-				SerialOutput = SerialOutput.Append(UTF8_TO_TCHAR(DevDevice->getSerial()->readOutput().c_str()));
-				SerialOutput = SerialOutput.Right(1000);
-			}
 		}
 	}
 }
@@ -335,13 +324,11 @@ void AFINComputerCase::Toggle() {
 		switch (Kernel->GetState()) {
 		case FIN_KERNEL_SHUTOFF:
 			Kernel->Start(false);
-			SerialOutput = "";
-			ForceNetUpdate();
+			Log->EmptyLog();
 			break;
 		case FIN_KERNEL_CRASHED:
 			Kernel->Start(true);
-			SerialOutput = "";
-			ForceNetUpdate();
+			Log->EmptyLog();
 			break;
 		default:
 			Kernel->Stop();	
@@ -359,20 +346,9 @@ EFINKernelState AFINComputerCase::GetState() {
 	return InternalKernelState;
 }
 
-FString AFINComputerCase::GetSerialOutput() {
-	return SerialOutput;
-}
-
 AFINComputerProcessor* AFINComputerCase::GetProcessor() {
 	if (Processors.Num() != 1) return nullptr;
 	return Processors[0];
-}
-
-void AFINComputerCase::WriteSerialInput(const FString& str) {
-	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = Kernel->GetDevDevice();
-	if (DevDevice) {
-		DevDevice->getSerial()->write(TCHAR_TO_UTF8(*str));
-	}
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
@@ -387,4 +363,41 @@ void AFINComputerCase::OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive
 	} else {
 		Kernel->AddDrive(drive);
 	}
+}
+
+void AFINComputerCase::netSig_ComputerStateChanged_Implementation(int64 PrevState, int64 NewState) {}
+
+void AFINComputerCase::netSig_FileSystemUpdate_Implementation(int Type, const FString& From, const FString& To) {}
+
+int64 AFINComputerCase::netFunc_getState() {
+	return InternalKernelState;
+}
+
+void AFINComputerCase::netFunc_startComputer() {
+	if (GetState() != EFINKernelState::FIN_KERNEL_RUNNING) Log->EmptyLog();
+	Kernel->Start(false);
+}
+
+void AFINComputerCase::netFunc_stopComputer() {
+	Kernel->Stop();
+}
+
+void AFINComputerCase::netFunc_getLog(int64 PageSize, int64 Page, TArray<FFINLogEntry>& OutLog, int64& OutLogSize) {
+	FScopeLock Lock = Log->Lock();
+	const TArray<FFINLogEntry>& Entries = Log->GetLogEntries();
+	PageSize = FMath::Max(0, PageSize);
+	int64 Offset = Page*PageSize;
+	if (Offset < 0) Offset = Entries.Num() + Page*PageSize;
+	int64 Num = FMath::Min(PageSize, Entries.Num() - Offset);
+	if (Offset < 0) {
+		Num += Offset;
+		Offset = 0;
+	}
+	if (Offset < 0 || Num < 0) {
+		OutLog = TArray<FFINLogEntry>();
+	} else {
+		OutLog = TArray<FFINLogEntry>(Entries.GetData() + Offset, Num);
+		if (Page < 0) Algo::Reverse(OutLog);
+	}
+	OutLogSize = Entries.Num();
 }

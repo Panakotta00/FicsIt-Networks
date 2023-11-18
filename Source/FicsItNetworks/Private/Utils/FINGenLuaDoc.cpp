@@ -1,5 +1,4 @@
 #include "Utils/FINGenLuaDoc.h"
-#include "FicsItKernel/Processor/Lua/LuaInstance.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINClassProperty.h"
 #include "Reflection/FINObjectProperty.h"
@@ -33,8 +32,8 @@ FString FINGenLuaGetType(FFINReflection& Ref, UFINProperty* Prop) {
 	} case FIN_CLASS: {
 		UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Prop);
 		UFINClass* Class = Ref.FindClass(ClassProp->GetSubclass());
-		if (!Class) return "Object" CLASS_INSTANCE_META_SUFFIX;
-		return Class->GetInternalName() + CLASS_INSTANCE_META_SUFFIX;
+		if (!Class) return "Object-Class";
+		return Class->GetInternalName() + "-Class";
 	} case FIN_STRUCT: {
 		UFINStructProperty* StructProp = Cast<UFINStructProperty>(Prop);
 		UFINStruct* Struct = Ref.FindStruct(StructProp->GetInner());

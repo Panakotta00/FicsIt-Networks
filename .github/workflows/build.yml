@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+    paths:
+      - "FicsItNetworks.uplugin"
+      - "Content/**"
+      - "Source/**"
+      - "ThirdParty/**"
+  pull_request:
+    branches:
+      - "master"
+      - "development"
+    paths:
+      - "Content/**"
+      - "Source/**"
+      - "ThirdParty/**"
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      WWISE_EMAIL:
+        required: true
+      WWISE_PASSWORD:
+        required: true
+      GH_TOKEN:
+        required: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Cleanup
+        run: Remove-Item C:\workspace\SatisfactoryModLoader -Recurse -Force -Confirm:$false -ErrorAction Ignore
+
+      - uses: actions/checkout@master
+        with:
+          repository: satisfactorymodding/SatisfactoryModLoader
+          ref: refs/heads/dev
+          path: SatisfactoryModLoader
+
+      - uses: actions/checkout@v2
+        with:
+          path: Mods/FicsItNetworks
+
+      - name: Apply FG Patches
+        run: git apply .\Mods\FicsItNetworks\SML_Patch.patch -v
+
+      - name: Create UE directory
+        run: mkdir ue
+
+      - name: Download, Extract and Setup UE
+        working-directory: ue
+        run: |
+          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.*"
+          7z x UnrealEngine-CSS-Editor-Win64.7z.001
+          rm UnrealEngine-CSS-Editor-Win64.7z*
+          .\\SetupScripts\\Register.bat
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Add Wwise
+        run: |
+          gh release download --repo mircearoata/wwise-cli -p "wwise-cli.exe"
+          ./wwise-cli.exe download     --sdk-version "2022.1.5.8242"          --filter Packages=SDK --filter DeploymentPlatforms=Windows_vc140 --filter DeploymentPlatforms=Windows_vc150 --filter DeploymentPlatforms=Windows_vc160 --filter DeploymentPlatforms=Windows_vc170 --filter DeploymentPlatforms=Linux --filter DeploymentPlatforms=
+          ./wwise-cli.exe integrate-ue --integration-version "2022.1.5.2714"  --project "${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          WWISE_EMAIL: ${{ secrets.WWISE_EMAIL }}
+          WWISE_PASSWORD: ${{ secrets.WWISE_PASSWORD }}
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Generate VS project files
+        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\Build.bat -projectfiles -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -game -rocket -progres
+
+      - name: Build for Development Editor
+        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Development Editor' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+
+      - name: Build for Shipping/Client
+        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+
+      - name: Build for Win64 Dedicated Server
+        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+
+      - name: Build for Linux Dedicated Server
+        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
+
+      - name: Package FicsItNetworks Mod
+        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -platform=Win64 -nocompileeditor -installed
+
+      - name: List Artifacts
+        run: |
+          dir ${{ github.workspace }}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: FicsItNetworks-Windows
+          path: ${{ github.workspace }}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks-Windows.zip

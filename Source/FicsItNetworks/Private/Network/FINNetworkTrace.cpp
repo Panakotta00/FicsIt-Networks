@@ -282,6 +282,10 @@ UObject* FFINNetworkTrace::GetUnderlyingPtr() const {
 	return Obj;
 }
 
+bool FFINNetworkTrace::IsValidPtr() const {
+	return ::IsValid(GetUnderlyingPtr());
+}
+
 UObject* FFINNetworkTrace::GetStartPtr() const {
 	const FFINNetworkTrace* Trace = this;
 	while (Trace->Prev) Trace = Trace->Prev.Get();
@@ -319,7 +323,8 @@ Step(UFGPowerConnectionComponent, UFGPowerInfoComponent, {
 })
 
 Step(UFINNetworkComponent, UFINNetworkComponent, {
-	return IFINNetworkCircuitNode::Execute_GetCircuit(oA)->HasNode(oB);
+	AFINNetworkCircuit* Circuit = IFINNetworkCircuitNode::Execute_GetCircuit(oA);
+	return Circuit && oB && Circuit->HasNode(oB);
 })
 
 Step(UFINNetworkComponent, AFINNetworkCircuit, {

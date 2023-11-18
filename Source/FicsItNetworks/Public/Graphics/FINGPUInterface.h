@@ -43,15 +43,4 @@ public:
 	*/
 	UFUNCTION()
     virtual void RequestNewWidget() = 0;
-
-	/**
-	* This gets called by the bound screen if it is okay with destruction of the widget.
-	* F.e. when the widget goes out of view.
-	* Calls SetWidget of the screen with nullptr.
-	* GPU doesn't need to respond to the request.
-	*
-	* Client Only
-	*/
-	UFUNCTION()
-    virtual void DropWidget() = 0;
 };

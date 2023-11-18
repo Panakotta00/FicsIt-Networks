@@ -1,7 +1,8 @@
 #include "FicsItKernel/FicsItKernel.h"
 #include "Computer/FINComputerCase.h"
+#include "FicsItKernel/Logging.h"
+#include "FicsItKernel/Processor/Processor.h"
 #include "Network/FINFuture.h"
-#include "FicsItKernel/Processor/Lua/LuaProcessor.h"
 #include "Reflection/FINReflection.h"
 
 FFINKernelListener::FFINKernelListener(UFINKernelSystem* parent) : parent(parent) {}
@@ -117,6 +118,7 @@ void UFINKernelSystem::GatherDependencies_Implementation(TArray<UObject*>& out_d
 }
 
 void UFINKernelSystem::Tick(float InDeltaSeconds) {
+	FFINLogScope LogScope(Log);
 	if (GetState() == FIN_KERNEL_RESET) if (!Start(true)) return;
 	if (GetState() == FIN_KERNEL_RUNNING) {
 		if (DevDevice) DevDevice->tickListeners();
@@ -289,15 +291,9 @@ void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
 	KernelCrash = InCrash;
 
 	if (Processor) Processor->Stop(true);
-	
-	if (GetDevDevice()) try {
-		auto serial = GetDevDevice()->getSerial()->open(CodersFileSystem::OUTPUT);
-		if (serial) {
-			*serial << "\r\n" << TCHAR_TO_UTF8(*KernelCrash->GetMessage()) << "\r\n";
-			serial->close();
-		}
-	} catch (std::exception ex) {
-		UE_LOG(LogFicsItNetworks, Error, TEXT("%s"), *FString(ex.what()));
+
+	if (GetLog()) {
+		GetLog()->PushLogEntry(EFINLogVerbosity::FIN_Log_Verbosity_Fatal, KernelCrash->GetMessage());
 	}
 }
 
@@ -307,15 +303,21 @@ bool UFINKernelSystem::RecalculateResources(ERecalc InComponents, bool bShouldCr
 	bool bFail = false;
 	MemoryUsage = Processor->GetMemoryUsage(InComponents & PROCESSOR);
 	MemoryUsage += FileSystem.getMemoryUsage(InComponents & FILESYSTEM);
-	if (Device && Device->getSerial().isValid()) MemoryUsage += Device->getSerial()->getSize();
 	if (MemoryUsage > MemoryCapacity) {
 		bFail = true;
 		KernelCrash = MakeShared<FFINKernelCrash>("out of memory");
 		if (bShouldCrash) Crash(KernelCrash.ToSharedRef());
-		
 	}
 	if (Device) Device->updateCapacity(MemoryCapacity - MemoryUsage);
 	return bFail;
+}
+
+UFINLog* UFINKernelSystem::GetLog() const {
+	return Log;
+}
+
+void UFINKernelSystem::SetLog(UFINLog* InLog) {
+	Log = InLog;
 }
 
 void UFINKernelSystem::SetNetwork(UFINKernelNetworkController* InController) {
