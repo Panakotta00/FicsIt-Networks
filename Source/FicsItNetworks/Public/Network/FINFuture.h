@@ -72,6 +72,7 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 				Property->SetValue(Context, Input[0]);
 			} else {
 				Output.Add(Property->GetValue(Context));
+				bDone = true;
 			}
 		} else {
 			UE_LOG(LogFicsItNetworks, Error, TEXT("Future unable to get executed due to invalid function/property pointer!"));

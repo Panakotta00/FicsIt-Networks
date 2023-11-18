@@ -203,7 +203,7 @@ namespace FINLua {
 				[[maybe_unused]] FLuaSyncCall SyncCall(L);
 				Property->SetValue(PropertyCtx, Value.GetValue());
 			} else {
-				luaFuture(L, FFINFutureReflection(Property, PropertyCtx));
+				luaFuture(L, FFINFutureReflection(Property, PropertyCtx, Value.GetValue()));
 			}
 			return true;
 		}
