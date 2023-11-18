@@ -46,6 +46,13 @@ jobs:
           path: SatisfactoryModLoader/Mods/FicsItNetworks
           submodules: recursive
 
+      - name: List Stuff
+        run: |
+          dir SatisfactoryModLoader/Mods/FicsItNetworks
+          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty
+          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty/eris
+          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty/eris/src
+
       - name: Apply FG Patches
         working-directory: SatisfactoryModLoader
         run: git apply .\Mods\FicsItNetworks\SML_Patch.patch -v
