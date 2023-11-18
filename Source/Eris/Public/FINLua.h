@@ -17,10 +17,10 @@ THIRD_PARTY_INCLUDES_START
 #endif
 
 //extern "C" {
-	#include "../../../ThirdParty/eris/src/lua.h"
-	#include "../../../ThirdParty/eris/src/lualib.h"
-	#include "../../../ThirdParty/eris/src/lauxlib.h"
-	#include "../../../ThirdParty/eris/src/eris.h"
+	#include "lua.h"
+	#include "lualib.h"
+	#include "lauxlib.h"
+	#include "eris.h"
 //}
 
 #ifdef _MSC_VER
