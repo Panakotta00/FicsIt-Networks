@@ -77,19 +77,17 @@ namespace FINLua {
 		// copy passed arguments to coroutine so it can return these arguments from the yield function
 		// but don't move the passed coroutine and then resume the coroutine
 		lua_xmove(L, thread, args);
-		int argCount = 0;
-		const int status = lua_resume(thread, L, args, &argCount);
+		int results = 0;
+		const int status = lua_resume(thread, L, args, &results);
 
-		if (status == LUA_OK || status == LUA_YIELD) {
+		if (status == LUA_YIELD) {
+			return lua_yieldk(L, 0, NULL, &luaResumeResum)
+		}
 
-			// ?
-			if (argCount == 0) {
-				// A hook yielded the thread
-				return lua_yieldk(L, 0, NULL, &luaResumeResume);
-			}
+		if (status == LUA_OK) {
 
-			if (!lua_checkstack(L, argCount + 1)) {
-				lua_pop(thread, argCount);
+			if (!lua_checkstack(L, results + 1)) {
+				lua_pop(thread, results);
 
 				// return success false and error reason
 				lua_pushboolean(L, false);
@@ -99,8 +97,8 @@ namespace FINLua {
 
 			// return success true and results
 			lua_pushboolean(L, true);
-			lua_xmove(thread, L, argCount);
-			return UFINLuaProcessor::luaAPIReturn(L, argCount + 1);
+			lua_xmove(thread, L, results);
+			return UFINLuaProcessor::luaAPIReturn(L, results + 1);
 		}
 
 		// return success false and error reason expected
