@@ -1119,9 +1119,12 @@ EndClass()
 BeginClass(AFGBuildableCircuitSwitch, "CircuitSwitch", "Circuit Switch", "A circuit bridge that can be activated and deactivate by the player.")
 BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are connected to each other and act as one entity.", 0) {
 	Return self->IsSwitchOn();
-} PropSet() {
-	self->SetSwitchOn(Val);
 } EndProp()
+BeginFunc(setIsSwitchOn, "Set Is Switch On", "Changes the circuit switch state.", 0) {
+	InVal(0, RBool, state, "State", "The new switch state.")
+	Body()
+	self->SetSwitchOn(state);
+} EndFunc()
 EndClass()
 
 BeginClass(AFGBuildablePriorityPowerSwitch, "CircuitSwitchPriority", "Circuit Priority Switch", "A circuit power switch that can be activated and deactivated based on a priority to prevent a full factory power shutdown.")
