@@ -59,14 +59,16 @@ namespace FINLua {
 	}
 
 	int luaResume(lua_State* L) {
-		const int args = lua_gettop(L);
+		const int args = lua_gettop(L) - 1;
 		if (!lua_isthread(L, 1)) return luaL_argerror(L, 1, "is no thread");
 		lua_State* thread = lua_tothread(L, 1);
 
-		if (!lua_checkstack(thread, args - 1)) {
+		if (!lua_checkstack(thread, args)) {
+
+			// return success false and error reason
 			lua_pushboolean(L, false);
 			lua_pushliteral(L, "too many arguments to resume");
-			return -1;
+			return UFINLuaProcessor::luaAPIReturn(L, 2);
 		}
 
 		// attach hook for out-of-time exception if thread got loaded from save and hook is not applied
@@ -74,11 +76,13 @@ namespace FINLua {
 
 		// copy passed arguments to coroutine so it can return these arguments from the yield function
 		// but don't move the passed coroutine and then resume the coroutine
-		lua_xmove(L, thread, args - 1);
+		lua_xmove(L, thread, args);
 		int argCount = 0;
-		const int status = lua_resume(thread, L, args - 1, &argCount);
+		const int status = lua_resume(thread, L, args, &argCount);
 
 		if (status == LUA_OK || status == LUA_YIELD) {
+
+			// ?
 			if (argCount == 0) {
 				// A hook yielded the thread
 				return lua_yieldk(L, 0, NULL, &luaResumeResume);
@@ -86,15 +90,23 @@ namespace FINLua {
 
 			if (!lua_checkstack(L, argCount + 1)) {
 				lua_pop(thread, argCount);
+
+				// return success false and error reason
+				lua_pushboolean(L, false);
 				lua_pushliteral(L, "too many results to resume");
-				return -1;
+				return UFINLuaProcessor::luaAPIReturn(L, 2);
 			}
-			lua_xmove(thread, L, argCount-1);
-			return argCount-1;
-		} else {
-			lua_xmove(thread, L, 1);
-			return -1;
+
+			// return success true and results
+			lua_pushboolean(L, true);
+			lua_xmove(thread, L, argCount);
+			return UFINLuaProcessor::luaAPIReturn(L, argCount + 1);
 		}
+
+		// return success false and error reason expected
+		lua_pushboolean(L, false);
+		lua_xmove(thread, L, 1);
+		return UFINLuaProcessor::luaAPIReturn(L, 2);
 	}
 
 		
