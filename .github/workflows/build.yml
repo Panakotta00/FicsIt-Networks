@@ -103,7 +103,7 @@ jobs:
 
       - name: Show Package Log
         if: always()
-        run: more "C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Log.txt"
+        run: more "C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\*"
       
       - name: List Artifacts
         run: |
