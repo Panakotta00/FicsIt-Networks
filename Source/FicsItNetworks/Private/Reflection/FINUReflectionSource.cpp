@@ -116,7 +116,10 @@ UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* 
 		bool bInvalidDeclaration = false;
 		for (FProperty* LocalProp = MetaFunc->FirstPropertyToInit; LocalProp != NULL; LocalProp = (FProperty*)LocalProp->Next) {
 			LocalProp->InitializeValue_InContainer(Params);
-			if (!(LocalProp->PropertyFlags & CPF_OutParm)) bInvalidDeclaration = true;
+			FMapProperty* MapProp = CastField<FMapProperty>(LocalProp);
+			if (!(LocalProp->PropertyFlags & CPF_OutParm) && !MapProp) {
+				bInvalidDeclaration = true;
+			}
 		}
 
 		if (!bInvalidDeclaration) {
