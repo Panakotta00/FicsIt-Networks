@@ -414,7 +414,7 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 		}
 	}
 	UFINProperty* FINProp = FINCreateFINPropertyFromFProperty(GetProp, nullptr, Ref->FindClass(Class, false, false));
-	FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
+	FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib | FIN_Prop_RT_Parallel;
 	FINProp->InternalName = GetPropertyNameFromUFunction(Get);
 	if (UFINFuncProperty* FINSProp = Cast<UFINFuncProperty>(FINProp)) {
 		FINSProp->GetterFunc.Function = Get;
