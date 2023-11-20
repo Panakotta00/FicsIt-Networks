@@ -44,6 +44,14 @@ jobs:
       - uses: actions/checkout@v2
         with:
           path: SatisfactoryModLoader/Mods/FicsItNetworks
+          submodules: recursive
+
+      - name: List Stuff
+        run: |
+          dir SatisfactoryModLoader/Mods/FicsItNetworks
+          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty
+          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty/eris
+          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty/eris/src
 
       - name: Apply FG Patches
         working-directory: SatisfactoryModLoader
@@ -84,15 +92,19 @@ jobs:
       - name: Build for Shipping/Client
         run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'Games\FactoryGame' -m
 
-      - name: Build for Win64 Dedicated Server
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+#      - name: Build for Win64 Dedicated Server
+#        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
 
-      - name: Build for Linux Dedicated Server
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
+#      - name: Build for Linux Dedicated Server
+#        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
 
       - name: Package FicsItNetworks Mod
-        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -platform=Win64 -nocompileeditor -installed
+        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -utf8output -platform=Win64 -nocompileeditor -installed -abslog="C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Log.txt"
 
+      - name: Show Package Log
+        if: always()
+        run: more "C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Cook-*"
+      
       - name: List Artifacts
         run: |
           dir ${{ github.workspace }}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\

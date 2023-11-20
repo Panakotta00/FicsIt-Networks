@@ -66,7 +66,7 @@ namespace FINLua {
 		if (!lua_checkstack(thread, args - 1)) {
 			lua_pushboolean(L, false);
 			lua_pushliteral(L, "too many arguments to resume");
-			return -1;
+			return 1;
 		}
 
 		// attach hook for out-of-time exception if thread got loaded from save and hook is not applied
@@ -79,21 +79,25 @@ namespace FINLua {
 		const int status = lua_resume(thread, L, args - 1, &argCount);
 
 		if (status == LUA_OK || status == LUA_YIELD) {
-			if (argCount == 0) {
+			if (argCount == 0 && status == LUA_YIELD) {
 				// A hook yielded the thread
 				return lua_yieldk(L, 0, NULL, &luaResumeResume);
 			}
+			
+			if (status == LUA_YIELD) argCount = argCount-1; 
 
-			if (!lua_checkstack(L, argCount + 1)) {
+			if (!lua_checkstack(L, argCount)) {
 				lua_pop(thread, argCount);
 				lua_pushliteral(L, "too many results to resume");
-				return -1;
+				return lua_error(L);
 			}
-			lua_xmove(thread, L, argCount-1);
-			return argCount-1;
+			lua_pushboolean(L, true);
+			lua_xmove(thread, L, argCount);
+			return argCount + 1;
 		} else {
+			lua_pushboolean(L, false);
 			lua_xmove(thread, L, 1);
-			return -1;
+			return 2;
 		}
 	}
 

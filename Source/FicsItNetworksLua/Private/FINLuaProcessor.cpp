@@ -551,7 +551,12 @@ void UFINLuaProcessor::LuaTick() {
 		if (Status == LUA_YIELD) {
 			// system yielded and waits for next tick
 			lua_gc(luaState, LUA_GCCOLLECT, 0);
-			if (GetKernel()) GetKernel()->RecalculateResources(UFINKernelSystem::PROCESSOR);
+			if (GetKernel()) {
+				TSharedPtr<FFINKernelCrash> Crash = GetKernel()->RecalculateResources(UFINKernelSystem::PROCESSOR);
+				if (Crash) {
+					tickHelper.shouldCrash(Crash.ToSharedRef());
+				}
+			}
 		} else if (Status == LUA_OK) {
 			// runtime finished execution -> stop system normally
 			tickHelper.shouldStop();

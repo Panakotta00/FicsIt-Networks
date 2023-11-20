@@ -116,7 +116,10 @@ UFINUReflectionSource::FFINTypeMeta UFINUReflectionSource::GetClassMeta(UClass* 
 		bool bInvalidDeclaration = false;
 		for (FProperty* LocalProp = MetaFunc->FirstPropertyToInit; LocalProp != NULL; LocalProp = (FProperty*)LocalProp->Next) {
 			LocalProp->InitializeValue_InContainer(Params);
-			if (!(LocalProp->PropertyFlags & CPF_OutParm)) bInvalidDeclaration = true;
+			FMapProperty* MapProp = CastField<FMapProperty>(LocalProp);
+			if (!(LocalProp->PropertyFlags & CPF_OutParm) && !MapProp) {
+				bInvalidDeclaration = true;
+			}
 		}
 
 		if (!bInvalidDeclaration) {
@@ -411,7 +414,7 @@ UFINProperty* UFINUReflectionSource::GenerateProperty(FFINReflection* Ref, const
 		}
 	}
 	UFINProperty* FINProp = FINCreateFINPropertyFromFProperty(GetProp, nullptr, Ref->FindClass(Class, false, false));
-	FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib;
+	FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_Attrib | FIN_Prop_RT_Parallel;
 	FINProp->InternalName = GetPropertyNameFromUFunction(Get);
 	if (UFINFuncProperty* FINSProp = Cast<UFINFuncProperty>(FINProp)) {
 		FINSProp->GetterFunc.Function = Get;

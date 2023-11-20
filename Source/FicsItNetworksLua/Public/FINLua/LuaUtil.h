@@ -162,6 +162,8 @@ namespace FINLua {
 	FString luaFIN_where(lua_State* L);
 	FString luaFIN_stack(lua_State* L);
 
+	void luaFINDebug_dumpStack(lua_State* L);
+
 	void setupUtilLib(lua_State* L);
 }
 

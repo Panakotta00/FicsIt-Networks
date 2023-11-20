@@ -328,10 +328,9 @@ public:
 	 * Tries to use cached memory usages for the components not set.
 	 *
 	 * @param	InComponents	the registry of system components you want to recalculate.
-	 * @param	bShouldCrash	due to the fact that the processor may need to run this, it may also not be good for it to cause a system crash. If this is set to false, it wont cause a crash.
-	 * @return	returns true if resources are not enough and essentially "failed" (f.e. out of memory)
+	 * @return	returns the kernel crash this calculation expects to be triggered (f.e. out of memory)
 	 */
-	bool RecalculateResources(ERecalc InComponents, bool bShouldCrash = true);
+	TSharedPtr<FFINKernelCrash> RecalculateResources(ERecalc InComponents);
 
 	/**
 	 * Adds a new referencer to the referencer storage
