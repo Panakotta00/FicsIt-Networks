@@ -89,13 +89,15 @@ namespace FINLua {
 			if (!lua_checkstack(L, argCount)) {
 				lua_pop(thread, argCount);
 				lua_pushliteral(L, "too many results to resume");
-				return 1;
+				return lua_error(L);
 			}
+			lua_pushboolean(L, true);
 			lua_xmove(thread, L, argCount);
-			return argCount;
+			return argCount + 1;
 		} else {
+			lua_pushboolean(L, false);
 			lua_xmove(thread, L, 1);
-			return 1;
+			return 2;
 		}
 	}
 
