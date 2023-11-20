@@ -1,5 +1,6 @@
 #include "FINLua/LuaUtil.h"
 
+#include "FicsItNetworksLuaModule.h"
 #include "FINLua/LuaClass.h"
 #include "FINLua/LuaFuture.h"
 #include "FINLua/LuaObject.h"
@@ -368,6 +369,14 @@ namespace FINLua {
 
 	FString luaFIN_stack(lua_State* L) {
 		return FString();
+	}
+
+	void luaFINDebug_dumpStack(lua_State* L) {
+		int args = lua_gettop(L);
+		int negative = 0;
+		for (; args > 0; --args) {
+			UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Lua Stack: [%i/%i] %s"), args, --negative, *luaFIN_typeName(L, args));
+		}
 	}
 
 	void setupUtilLib(lua_State* L) {
