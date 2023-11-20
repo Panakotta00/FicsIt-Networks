@@ -85,7 +85,6 @@ namespace FINLua {
 		}
 	}
 
-#pragma optimize("", off)
 	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
 		int LuaType = lua_type(L, Index);
 		
@@ -136,7 +135,7 @@ namespace FINLua {
 			TOptional<FINTrace> Trace;
 			UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Property);
 			if (TraceProp && TraceProp->GetSubclass()) {
-				Trace = luaFIN_toObject(L, Index, FFINReflection::Get()->FindClass(TraceProp->GetSubclass()));
+				Trace = luaFIN_checkObject(L, Index, FFINReflection::Get()->FindClass(TraceProp->GetSubclass()));
 			} else {
 				Trace = luaFIN_toObject(L, Index, nullptr);
 			}
@@ -147,7 +146,7 @@ namespace FINLua {
 			UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property);
 			if (StructProp && StructProp->GetInner()) {
 				UFINStruct* Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
-				Struct = luaFIN_toStruct(L, Index, Type, bImplicitConstruction);
+				Struct = luaFIN_checkStruct(L, Index, Type, bImplicitConstruction);
 			} else {
 				Struct = luaFIN_toStruct(L, Index, nullptr, false);
 			}
@@ -175,7 +174,6 @@ namespace FINLua {
 		}
 		return FINAny();
 	}
-#pragma optimize("", on)
 	
 	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
 		if (Property) return luaFIN_toNetworkValueByProp(L, Index, Property, bImplicitConversion, bImplicitConstruction);
