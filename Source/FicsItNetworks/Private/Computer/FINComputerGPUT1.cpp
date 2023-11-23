@@ -354,5 +354,5 @@ void AFINComputerGPUT1::netFunc_flush() {
 	FScopeLock Lock(&DrawingMutex);
 	FrontBuffer = BackBuffer;
 	bShouldReplicate = true;
-	CachedInvalidation->InvalidateRootChildOrder();
+	if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
 }
