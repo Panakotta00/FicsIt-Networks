@@ -164,7 +164,10 @@ namespace FINLua {
 
 	TOptional<FFINNetworkTrace> luaFIN_toObject(lua_State* L, int Index, UFINClass* ParentType) {
 		FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, ParentType);
-		if (!LuaObject) return TOptional<FFINNetworkTrace>();
+		if (!LuaObject) {
+			if (lua_isnil(L, Index)) return FFINNetworkTrace();
+			return TOptional<FFINNetworkTrace>();
+		}
 		return LuaObject->Object;
 	}
 	
