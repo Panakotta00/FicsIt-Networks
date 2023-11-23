@@ -48,4 +48,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable)
 	void CopyDataItem(UFGInventoryComponent* InProviderInc, int InProviderIdx, UFGInventoryComponent* InFromInv, int InFromIdx, UFGInventoryComponent* InToInv, int InToIdx);
+
+	UFUNCTION(Server, Reliable)
+	void LogRehandleAllEntries(UFINLog* Log);
 };
