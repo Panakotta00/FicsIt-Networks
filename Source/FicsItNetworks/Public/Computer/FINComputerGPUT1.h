@@ -168,6 +168,9 @@ public:
 		OutWidth = Width;
 		OutHeight = Height;
 	}
+	FORCEINLINE FIntPoint GetSize() const {
+		return FIntPoint(Width, Height);
+	}
 
 	/**
 	 * Allows to resize the buffer, data that was already inside the buffer will be positioned the at the same location.
@@ -571,7 +574,7 @@ UCLASS()
 class AFINComputerGPUT1 : public AFINComputerGPU {
 	GENERATED_BODY()
 private:
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY(SaveGame, ReplicatedUsing=OnRep_FrontBuffer)
 	FFINGPUT1Buffer FrontBuffer;
 
 	UPROPERTY(SaveGame)
@@ -586,20 +589,21 @@ private:
 	UPROPERTY()
 	FSlateBrush boxBrush;
 
-	UPROPERTY()
-	float FlushTime = 0.0f;
-
-	TSharedPtr<SInvalidationPanel> CachedInvalidation;
-	bool bNetFlushed = false;
-	bool bFlushed = false;
 	FCriticalSection DrawingMutex;
 
-	UFUNCTION(NetMulticast, Client, Unreliable)
-	void SetFrontBufferChunk(int InOffset, const TArray<FFINGPUT1BufferPixel>& InPixels);
-	UFUNCTION(NetMulticast, Client, Unreliable)
-	void SetFrontBuffer(const FFINGPUT1Buffer& Buffer);
-	
-	void ReplicateFrontBuffer();
+	TSharedPtr<SInvalidationPanel> CachedInvalidation;
+
+	const int64 CHUNK_SIZE = 100;
+	int64 Offset = 0;
+	TArray<FFINGPUT1BufferPixel> ToReplicate;
+	bool bShouldReplicate = false;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_BeginBackBufferReplication(FIntPoint Size);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AddBackBufferChunk(int64 InOffset, const TArray<FFINGPUT1BufferPixel>& Chunk);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_EndBackBufferReplication();
 	
 public:
 	AFINComputerGPUT1();
@@ -622,14 +626,8 @@ public:
 	*/
 	void SetScreenSize(int Width, int Height);
 
-	/**
-	 * Validates the screen widget on all clients and server
-	 */
-	UFUNCTION(NetMulticast, Reliable)
-	void Flush();
-
 	UFUNCTION()
-	void FlushBackToFront();
+	void OnRep_FrontBuffer();
 	
 	UFUNCTION()
     void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes) {

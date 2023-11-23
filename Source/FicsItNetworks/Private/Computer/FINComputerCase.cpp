@@ -6,8 +6,13 @@
 #include "Computer/FINComputerMemory.h"
 #include "Computer/FINComputerProcessor.h"
 #include "FGInventoryComponent.h"
+#include "FGPlayerController.h"
+#include "Computer/FINComputerRCO.h"
+#include "Engine/ActorChannel.h"
 #include "FicsItKernel/Logging.h"
 #include "Net/UnrealNetwork.h"
+
+class UFINComputerRCO;
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -42,6 +47,9 @@ AFINComputerCase::AFINComputerCase() {
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
 	Log = CreateDefaultSubobject<UFINLog>("Log");
+	SetReplicates(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+	AddReplicatedSubObject(Log);
 
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
@@ -323,12 +331,12 @@ void AFINComputerCase::Toggle() {
 		if (Processor) Processor->SetEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
 		switch (Kernel->GetState()) {
 		case FIN_KERNEL_SHUTOFF:
-			Kernel->Start(false);
 			Log->EmptyLog();
+			Kernel->Start(false);
 			break;
 		case FIN_KERNEL_CRASHED:
-			Kernel->Start(true);
 			Log->EmptyLog();
+			Kernel->Start(true);
 			break;
 		default:
 			Kernel->Stop();	

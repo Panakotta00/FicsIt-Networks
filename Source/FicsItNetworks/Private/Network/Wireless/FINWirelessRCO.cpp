@@ -1,5 +1,7 @@
 ﻿#include "Network/Wireless/FINWirelessRCO.h"
 
+#include "Net/UnrealNetwork.h"
+
 void UFINWirelessRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UFINWirelessRCO, bDummy);

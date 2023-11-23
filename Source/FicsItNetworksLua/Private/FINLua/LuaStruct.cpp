@@ -384,6 +384,7 @@ namespace FINLua {
 		for (UFINProperty* Prop : Type->GetProperties()) {
 			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
 			if (lua_getfield(L, Index, TCHAR_TO_UTF8(*Prop->GetInternalName())) == LUA_TNIL) {
+				lua_pop(L, 1);
 				lua_geti(L, Index, ++j);
 			}
 			TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, -1, Prop, true, bAllowImplicitConstruction);

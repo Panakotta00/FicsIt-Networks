@@ -1,5 +1,8 @@
 #include "Network/FINNetworkCircuit.h"
 
+#include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
+
 void AFINNetworkCircuit::AddNodeRecursive(TArray<TScriptInterface<IFINNetworkCircuitNode>>& Added, TScriptInterface<IFINNetworkCircuitNode> Add) {
 	if (Add.GetObject() && !Added.Contains(Add)) {
 		Added.Add(Add);
