@@ -7,6 +7,7 @@
 #include "FGOutlineComponent.h"
 #include "Buildables/FGBuildableWall.h"
 #include "Buildables/FGBuildableFoundation.h"
+#include "Net/UnrealNetwork.h"
 
 FVector FFINCablePlacementStepInfo::GetConnectorPos() const {
 	switch (SnapType) {
