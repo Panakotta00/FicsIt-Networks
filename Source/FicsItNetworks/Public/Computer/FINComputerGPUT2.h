@@ -53,12 +53,13 @@ USTRUCT()
 struct FFINGPUT2DrawContext {
 	GENERATED_BODY()
 
+	UObject* WorldContext = nullptr;
 	const FFINGPUT2WidgetStyle* Style = nullptr;
 	TArray<FGeometry> GeometryStack;
 	TArray<FSlateClippingZone> ClippingStack;
 
 	FFINGPUT2DrawContext() = default;
-	FFINGPUT2DrawContext(const FFINGPUT2WidgetStyle* Style) : Style(Style) {}
+	FFINGPUT2DrawContext(UObject* WorldContext, const FFINGPUT2WidgetStyle* Style) : WorldContext(WorldContext), Style(Style) {}
 };
 
 USTRUCT()
@@ -276,6 +277,9 @@ struct FFINGPUT2DC_Box : public FFINGPUT2DrawCall {
 
 	UPROPERTY(SaveGame)
 	FColor Color;
+
+	UPROPERTY(SaveGame)
+	FString Image;
 	
 	UPROPERTY(SaveGame)
 	bool bHasCenteredOrigin = false;
@@ -320,7 +324,7 @@ struct FFINGPUT2DC_Box : public FFINGPUT2DrawCall {
 	FColor OutlineColor = FColor::Transparent;
 
 	FFINGPUT2DC_Box() = default;
-	FFINGPUT2DC_Box(FVector2D Position, FVector2D Size, double Rotation, FColor Color) : Position(Position), Size(Size), Rotation(Rotation), Color(Color) {}
+	FFINGPUT2DC_Box(FVector2D Position, FVector2D Size, double Rotation, FColor Color, FString Image) : Position(Position), Size(Size), Rotation(Rotation), Color(Color), Image(Image) {}
 
 	virtual int32 OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const override;
 };
@@ -346,7 +350,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseEnter)
 	SLATE_END_ARGS()
 	
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, UObject* WorldContext);
 
 	// Begin SWidget
 	virtual FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override;
@@ -364,6 +368,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 	// End SWidget
 
 private:
+	UObject* WorldContext = nullptr;
 	const FFINGPUT2WidgetStyle* Style = nullptr;
 	
 	TAttribute<TArray<FFINDynamicStructHolder>> DrawCalls;
@@ -612,7 +617,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color, bool hasCenteredOrigin, bool isBorder, double marginLeft, double marginRight, double marginTop, double marginBottom, bool isRounded, double radiusTopLeft, double radiusTopRight, double radiusBottomRight, double radiusBottomLeft, bool hasOutline, double outlineThickness, FLinearColor outlineColor);
+	void netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color, FString image, bool hasCenteredOrigin, bool isBorder, double marginLeft, double marginRight, double marginTop, double marginBottom, bool isRounded, double radiusTopLeft, double radiusTopRight, double radiusBottomRight, double radiusBottomLeft, bool hasOutline, double outlineThickness, FLinearColor outlineColor);
 	UFUNCTION()
 	void netFuncMeta_drawBox(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "drawBox";
@@ -630,6 +635,9 @@ public:
 		ParameterInternalNames.Add("color");
 		ParameterDisplayNames.Add(FText::FromString("Color"));
 		ParameterDescriptions.Add(FText::FromString("The color of the rectangle."));
+		ParameterInternalNames.Add("image");
+		ParameterDisplayNames.Add(FText::FromString("Image"));
+		ParameterDescriptions.Add(FText::FromString("If not empty string, should be image reference that should be placed inside the rectangle."));
 		ParameterInternalNames.Add("hasCenteredOrigin");
 		ParameterDisplayNames.Add(FText::FromString("Has Centered Origin"));
 		ParameterDescriptions.Add(FText::FromString("If set to false, the position will give the left upper corner of the box and rotation will happen around this point. If set to true, the position will give the center point of box and the rotation will happen around this center point."));
@@ -676,7 +684,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, double rotation);
+	void netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, FString image, double rotation);
 	UFUNCTION()
 	void netFuncMeta_drawRect(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "drawRect";
@@ -691,6 +699,9 @@ public:
 		ParameterInternalNames.Add("color");
 		ParameterDisplayNames.Add(FText::FromString("Color"));
 		ParameterDescriptions.Add(FText::FromString("The color of the rectangle."));
+		ParameterInternalNames.Add("image");
+		ParameterDisplayNames.Add(FText::FromString("Image"));
+		ParameterDescriptions.Add(FText::FromString("If not empty string, should be image reference that should be placed inside the rectangle."));
 		ParameterInternalNames.Add("rotation");
 		ParameterDisplayNames.Add(FText::FromString("Rotation"));
 		ParameterDescriptions.Add(FText::FromString("The rotation of the rectangle around the upper left corner in degrees."));
