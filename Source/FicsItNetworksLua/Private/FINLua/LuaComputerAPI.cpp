@@ -12,6 +12,7 @@
 #include "FINLua/LuaStruct.h"
 #include "UI/FGGameUI.h"
 #include "UI/FINNotificationMessage.h"
+#include "Utils/FINMediaSubsystem.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
@@ -234,9 +235,12 @@ namespace FINLua {
 	};
 	
 	void setupComputerAPI(lua_State* L) {
+		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 		PersistSetup("Computer", -2);
 		luaL_newlibtable(L, luaComputerLib);
 		luaL_setfuncs(L, luaComputerLib, 0);
+		luaFIN_pushObject(L, FINTrace(AFINMediaSubsystem::GetMediaSubsystem(Processor)));
+		lua_setfield(L, -2, "media");
 		PersistTable("Lib", -1);
 		lua_setglobal(L, "computer");
 	}

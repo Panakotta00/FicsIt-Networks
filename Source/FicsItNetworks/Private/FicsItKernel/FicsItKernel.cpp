@@ -202,7 +202,11 @@ void UFINKernelSystem::HandleFutures() {
 		TSharedPtr<TFINDynamicStruct<FFINFuture>> Future;
 		FutureQueue.Peek(Future);
 		FutureQueue.Pop();
-		(*Future)->Execute();
+		try {
+			(*Future)->Execute();
+		} catch (FFINException e) {
+			Crash(MakeShared<FFINKernelCrash>(e.GetMessage()));
+		}
 	}
 }
 

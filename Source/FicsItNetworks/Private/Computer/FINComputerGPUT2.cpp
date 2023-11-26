@@ -3,6 +3,7 @@
 #include "FGPlayerController.h"
 #include "Computer/FINComputerRCO.h"
 #include "Interfaces/ISlateNullRendererModule.h"
+#include "Utils/FINMediaSubsystem.h"
 
 const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINGPUT2WidgetStyle"));
 
@@ -73,6 +74,13 @@ int32 FFINGPUT2DC_Bezier::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArg
 
 int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
 	FSlateBrush Brush = Context.Style->FilledBox;
+
+	if (!Image.IsEmpty()) {
+		UObject* Texture = AFINMediaSubsystem::GetMediaSubsystem(Context.WorldContext)->GetOrLoadTexture(Image);
+		if (!Texture) return LayerId;
+		Brush.SetResourceObject(Texture);
+	}
+	
 	if (bIsBorder) {
 		Brush.Margin = FMargin(MarginLeft, MarginTop, MarginRight, MarginBottom);
 	}
@@ -121,7 +129,8 @@ const FFINGPUT2WidgetStyle& FFINGPUT2WidgetStyle::GetDefault() {
 	return *Default;
 }
 
-void SFINGPUT2Widget::Construct(const FArguments& InArgs) {
+void SFINGPUT2Widget::Construct(const FArguments& InArgs, UObject* InWorldContext) {
+	WorldContext = InWorldContext;
 	Style = InArgs._Style;
 	DrawCalls = InArgs._DrawCalls;
 	OnMouseDownEvent = InArgs._OnMouseDown;
@@ -139,7 +148,7 @@ FVector2D SFINGPUT2Widget::ComputeDesiredSize(float LayoutScaleMultiplier) const
 }
 
 int32 SFINGPUT2Widget::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
-	FFINGPUT2DrawContext Context(Style);
+	FFINGPUT2DrawContext Context(WorldContext, Style);
 	Context.GeometryStack.Add(AllottedGeometry);
 	for (const FFINDynamicStructHolder& DrawCallBase : DrawCalls.Get()) {
 		FFINGPUT2DrawCall* DrawCall = DrawCallBase.GetPtr<FFINGPUT2DrawCall>();
@@ -228,7 +237,7 @@ void AFINComputerGPUT2::Tick(float DeltaSeconds) {
 
 TSharedPtr<SWidget> AFINComputerGPUT2::CreateWidget() {
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
-	return SNew(SFINGPUT2Widget)
+	return SNew(SFINGPUT2Widget, this)
 	.Style(&Style)
 	.OnMouseDown_Lambda([this, RCO](FVector2D position, int modifiers) {
 		RCO->GPUT2MouseEvent(this, 0, position, modifiers);
@@ -314,11 +323,11 @@ void AFINComputerGPUT2::netFunc_drawBezier(FVector2D p1, FVector2D p2, FVector2D
 	AddDrawCall(FFINGPUT2DC_Bezier(p1, p2, p3, p4, thickness, color.QuantizeRound()));
 }
 
-void AFINComputerGPUT2::netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color,
+void AFINComputerGPUT2::netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color, FString image,
 										bool hasCenteredOrigin, bool isBorder, double marginLeft, double marginRight, double marginTop,
 										double marginBottom, bool isRounded, double radiusTopLeft, double radiusTopRight, double radiusBottomRight,
 										double radiusBottomLeft, bool hasOutline, double outlineThickness, FLinearColor outlineColor) {
-	FFINGPUT2DC_Box DC(position, size, rotation, color.QuantizeRound());
+	FFINGPUT2DC_Box DC(position, size, rotation, color.QuantizeRound(), image);
 	DC.bHasCenteredOrigin = hasCenteredOrigin;
 	DC.bIsBorder = isBorder;
 	DC.MarginLeft = marginLeft;
@@ -336,8 +345,8 @@ void AFINComputerGPUT2::netFunc_drawBox(FVector2D position, FVector2D size, doub
 	DrawCalls.Add(DC);
 }
 
-void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, double rotation) {
-	DrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound()));
+void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, FString image, double rotation) {
+	DrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound(), image));
 }
 
 FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool bMonospace) {

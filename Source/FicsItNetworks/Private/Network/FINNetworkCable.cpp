@@ -1,4 +1,6 @@
 #include "Network/FINNetworkCable.h"
+
+#include "Net/UnrealNetwork.h"
 #include "Network/FINNetworkConnectionComponent.h"
 
 AFINNetworkCable::AFINNetworkCable() {

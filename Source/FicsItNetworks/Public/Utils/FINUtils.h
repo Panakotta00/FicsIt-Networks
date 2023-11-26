@@ -17,85 +17,23 @@ public:
 		return Text.Mid(Range.BeginIndex, Range.Len());
 	}
 
+	template<typename T>
+	static TArrayView<T> PaginateArray(const TArrayView<T>& Array, int64 PageSize, int64 Page) {
+		PageSize = FMath::Max(0, PageSize);
+		int64 Offset = Page*PageSize;
+		if (Offset < 0) Offset = Array.Num() + Page*PageSize;
+		int64 Num = FMath::Min(PageSize, Array.Num() - Offset);
+		if (Offset < 0) {
+			Num += Offset;
+			Offset = 0;
+		}
+		if (Offset < 0 || Num < 0) {
+			return TArrayView<T>();
+		} else {
+			return TArrayView<T>(Array.GetData() + Offset, Num);
+		}
+	}
+
 private:
 	static const FRegexPattern VariablePattern;
 };
-
-
-UENUM(Blueprintable)
-enum EFINMetaRuntimeState {
-	Synchronous = 0,
-	Parallel = 1,
-	Asynchronous = 2,
-};
-
-
-USTRUCT(Blueprintable)
-struct FFINBlueprintPropertyMeta {
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite)
-	FString InternalName;
-	
-	UPROPERTY(BlueprintReadWrite)
-	FText DisplayName;
-
-	UPROPERTY(BlueprintReadWrite)
-	FText Description;
-
-	UPROPERTY(BlueprintReadWrite)
-	TEnumAsByte<EFINMetaRuntimeState> RuntimeState = Parallel;
-};
-
-
-USTRUCT(Blueprintable)
-struct FFINBlueprintFunctionMetaParameter {
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite)
-	FString InternalName;
-	
-	UPROPERTY(BlueprintReadWrite)
-	FText DisplayName;
-
-	UPROPERTY(BlueprintReadWrite)
-	FText Description;
-};
-
-USTRUCT(Blueprintable)
-struct FFINBlueprintFunctionMeta {
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite)
-	FString InternalName;
-
-	UPROPERTY(BlueprintReadWrite)
-	FText DisplayName;
-
-	UPROPERTY(BlueprintReadWrite)
-	FText Description;
-
-	UPROPERTY(BlueprintReadWrite)
-	TArray<FFINBlueprintFunctionMetaParameter> Parameters;
-
-	UPROPERTY(BlueprintReadWrite)
-	TEnumAsByte<EFINMetaRuntimeState> RuntimeState;
-};
-
-USTRUCT(Blueprintable)
-struct FFINBlueprintSignalMeta {
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite)
-	FString InternalName;
-	
-	UPROPERTY(BlueprintReadWrite)
-	FText DisplayName;
-
-	UPROPERTY(BlueprintReadWrite)
-	FText Description;
-	
-	UPROPERTY(BlueprintReadWrite)
-	TArray<FFINBlueprintFunctionMetaParameter> Parameters;
-};
-

@@ -4,6 +4,7 @@
 #include "FGPowerConnectionComponent.h"
 #include "FGItemPickup_Spawnable.h"
 #include "Components/SceneComponent.h"
+#include "Net/UnrealNetwork.h"
 
 TArray<TPair<UClass*, FFINAdapterSettings>> AFINNetworkAdapter::settings = TArray<TPair<UClass*, FFINAdapterSettings>>();
 

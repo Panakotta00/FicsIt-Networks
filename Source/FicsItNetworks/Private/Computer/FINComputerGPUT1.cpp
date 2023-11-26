@@ -190,7 +190,7 @@ void AFINComputerGPUT1::Multicast_AddBackBufferChunk_Implementation(int64 InOffs
 void AFINComputerGPUT1::Multicast_EndBackBufferReplication_Implementation() {
 	if (HasAuthority()) {
 		FrontBuffer = BackBuffer;
-		CachedInvalidation->InvalidateRootChildOrder();
+		if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
 	}
 }
 

@@ -28,6 +28,7 @@
 #include "FGPipeConnectionComponent.h"
 #include "FGGameState.h"
 #include "FGHealthComponent.h"
+#include "FGIconLibrary.h"
 #include "FGItemCategory.h"
 #include "FGLocomotive.h"
 #include "FGPipeSubsystem.h"
@@ -3112,4 +3113,31 @@ BeginFunc(format, "Format", "Creates a formatted string representation of this l
 	Body()
 	result = self->ToClipboardText();
 } EndFunc()
+EndStruct()
+
+BeginStruct(FIconData, "IconData", "Icon Data", "A struct containing information about a game icon (used in f.e. signs).")
+BeginProp(RBool, isValid, "Is Valid", "True if the icon data refers to an valid icon") {
+	Return FINBool(self->ID >= 0);
+} EndProp()
+BeginProp(RInt, id, "ID", "The icon ID.") {
+	Return (FINInt)self->ID;
+} EndProp()
+BeginProp(RString, ref, "Ref", "The media reference of this icon.") {
+	Return FString::Printf(TEXT("icon:%i"), self->ID);
+} EndProp()
+BeginProp(RBool, animated, "Animated", "True if the icon is animated.") {
+	Return self->Animated;
+} EndProp()
+BeginProp(RString, iconName, "Icon Name", "The name of the icon.") {
+	Return self->IconName.ToString();
+} EndProp()
+BeginProp(RString, iconType, "Icon Type", "The type of the icon.\n0 = Building\n1 = Part\n2 = Equipment\n3 = Monochrome\n4 = Material\n5 = Custom\n6 = Map Stamp") {
+	Return (FINInt)self->IconType;
+} EndProp()
+BeginProp(RBool, hidden, "Hidden", "True if the icon is hidden in the selection.") {
+	Return self->Hidden;
+} EndProp()
+BeginProp(RBool, searchOnly, "Search Only", "True if the icon will be shown in selection only if searched for directly by name.") {
+	Return self->SearchOnly;
+} EndProp()
 EndStruct()
