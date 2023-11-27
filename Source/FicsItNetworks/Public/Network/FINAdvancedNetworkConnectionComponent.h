@@ -47,7 +47,7 @@ public:
 	 * The object used as redirect object for network instancing of this component.
 	 */
 	UPROPERTY()
-	UObject* RedirectionObject = nullptr;
+	UObject* RedirectionObject;
 	
 	/**
 	 * If set to true, connector will add it's owner as
@@ -65,6 +65,8 @@ public:
 	FFINHandleNetworkMessage OnNetworkMessageRecieved;
 	FFINIsNetworkRouter OnIsNetworkRouter;
 	FFINIsNetworkPortOpen OnIsNetworkPortOpen;
+
+	UFINAdvancedNetworkConnectionComponent() : RedirectionObject(this) {}
 
 	// Begin UActorComponent
 	virtual void BeginPlay() override;
@@ -85,7 +87,7 @@ public:
 	virtual FString GetNick_Implementation() const override;
 	virtual void SetNick_Implementation(const FString& Nick) override;
 	virtual bool HasNick_Implementation(const FString& Nick) override;
-	virtual UObject* GetInstanceRedirect_Implementation() const override;
+	virtual UObject* GetInstanceRedirect_Implementation() override;
 	virtual bool AccessPermitted_Implementation(FGuid ID) const override;
 	// End IFINNetworkComponent
 

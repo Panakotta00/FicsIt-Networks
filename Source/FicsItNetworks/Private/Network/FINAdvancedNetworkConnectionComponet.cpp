@@ -70,7 +70,7 @@ bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FStrin
 	return HasNickByNick(inNick, Execute_GetNick(this));
 }
 
-UObject* UFINAdvancedNetworkConnectionComponent::GetInstanceRedirect_Implementation() const {
+UObject* UFINAdvancedNetworkConnectionComponent::GetInstanceRedirect_Implementation() {
 	return RedirectionObject;
 }
 

@@ -53,7 +53,7 @@ public:
 	 * @return	returns the object that is alternatively used for this network component when instanced over the network
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Component")
-	UObject* GetInstanceRedirect() const;
+	UObject* GetInstanceRedirect();
 
 	/**
 	 * Allows the implementer to decided if the given network component by id
