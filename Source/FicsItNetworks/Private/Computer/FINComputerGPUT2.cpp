@@ -82,7 +82,7 @@ int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& 
 	}
 	
 	if (bIsBorder) {
-		Brush.Margin = FMargin(MarginLeft, MarginTop, MarginRight, MarginBottom);
+		Brush.Margin = Margin;
 	}
 
 	if (bIsRounded || bHasOutline) {
@@ -91,7 +91,7 @@ int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& 
 	}
 
 	if (bIsRounded) {
-		Brush.OutlineSettings.CornerRadii = FVector4d(RadiusTopLeft, RadiusTopRight, RadiusBottomRight, RadiusBottomLeft);
+		Brush.OutlineSettings.CornerRadii = BorderRadii;
 	} else {
 		Brush.OutlineSettings.CornerRadii = FVector4d(0);
 	}
@@ -323,26 +323,8 @@ void AFINComputerGPUT2::netFunc_drawBezier(FVector2D p1, FVector2D p2, FVector2D
 	AddDrawCall(FFINGPUT2DC_Bezier(p1, p2, p3, p4, thickness, color.QuantizeRound()));
 }
 
-void AFINComputerGPUT2::netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color, FString image,
-										bool hasCenteredOrigin, bool isBorder, double marginLeft, double marginRight, double marginTop,
-										double marginBottom, bool isRounded, double radiusTopLeft, double radiusTopRight, double radiusBottomRight,
-										double radiusBottomLeft, bool hasOutline, double outlineThickness, FLinearColor outlineColor) {
-	FFINGPUT2DC_Box DC(position, size, rotation, color.QuantizeRound(), image);
-	DC.bHasCenteredOrigin = hasCenteredOrigin;
-	DC.bIsBorder = isBorder;
-	DC.MarginLeft = marginLeft;
-	DC.MarginRight = marginRight;
-	DC.MarginTop = marginTop;
-	DC.MarginBottom = marginBottom;
-	DC.bIsRounded = isRounded;
-	DC.RadiusTopLeft = radiusTopLeft;
-	DC.RadiusTopRight = radiusTopRight;
-	DC.RadiusBottomRight = radiusBottomRight;
-	DC.RadiusBottomLeft = radiusBottomLeft;
-	DC.bHasOutline = hasOutline;
-	DC.OutlineThickness = outlineThickness;
-	DC.OutlineColor = outlineColor.QuantizeRound();
-	DrawCalls.Add(DC);
+void AFINComputerGPUT2::netFunc_drawBox(FFINGPUT2DC_Box BoxSettings) {
+	DrawCalls.Add(BoxSettings);
 }
 
 void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, FString image, double rotation) {

@@ -288,32 +288,14 @@ struct FFINGPUT2DC_Box : public FFINGPUT2DrawCall {
 	bool bIsBorder = false;
 
 	UPROPERTY(SaveGame)
-	double MarginLeft = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double MarginRight = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double MarginTop = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double MarginBottom = 0.0f;
-
+	FMargin Margin;
+	
 	UPROPERTY(SaveGame)
 	bool bIsRounded = false;
 
 	UPROPERTY(SaveGame)
-	double RadiusTopLeft = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double RadiusTopRight = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double RadiusBottomLeft = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double RadiusBottomRight = 0.0f;
-
+	FVector4 BorderRadii;
+	
 	UPROPERTY(SaveGame)
 	bool bHasOutline = false;
 
@@ -617,69 +599,15 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color, FString image, bool hasCenteredOrigin, bool isBorder, double marginLeft, double marginRight, double marginTop, double marginBottom, bool isRounded, double radiusTopLeft, double radiusTopRight, double radiusBottomRight, double radiusBottomLeft, bool hasOutline, double outlineThickness, FLinearColor outlineColor);
+	void netFunc_drawBox(FFINGPUT2DC_Box boxSettings);
 	UFUNCTION()
 	void netFuncMeta_drawBox(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "drawBox";
 		DisplayName = FText::FromString("Draw Box");
-		Description = FText::FromString("Draws a box. (check the description of the parameters to make a more detailed description)");
-		ParameterInternalNames.Add("position");
-		ParameterDisplayNames.Add(FText::FromString("Position"));
-		ParameterDescriptions.Add(FText::FromString("The local position of the rectangle."));
-		ParameterInternalNames.Add("size");
-		ParameterDisplayNames.Add(FText::FromString("Size"));
-		ParameterDescriptions.Add(FText::FromString("The size of the rectangle."));
-		ParameterInternalNames.Add("rotation");
-		ParameterDisplayNames.Add(FText::FromString("Rotation"));
-		ParameterDescriptions.Add(FText::FromString("The rotation of the rectangle."));
-		ParameterInternalNames.Add("color");
-		ParameterDisplayNames.Add(FText::FromString("Color"));
-		ParameterDescriptions.Add(FText::FromString("The color of the rectangle."));
-		ParameterInternalNames.Add("image");
-		ParameterDisplayNames.Add(FText::FromString("Image"));
-		ParameterDescriptions.Add(FText::FromString("If not empty string, should be image reference that should be placed inside the rectangle."));
-		ParameterInternalNames.Add("hasCenteredOrigin");
-		ParameterDisplayNames.Add(FText::FromString("Has Centered Origin"));
-		ParameterDescriptions.Add(FText::FromString("If set to false, the position will give the left upper corner of the box and rotation will happen around this point. If set to true, the position will give the center point of box and the rotation will happen around this center point."));
-		ParameterInternalNames.Add("isBorder");
-		ParameterDisplayNames.Add(FText::FromString("Is Border"));
-		ParameterDescriptions.Add(FText::FromString("If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use (use the image as 9-patch)."));
-		ParameterInternalNames.Add("marginLeft");
-		ParameterDisplayNames.Add(FText::FromString("Margin Left"));
-		ParameterDescriptions.Add(FText::FromString("The left margin of the 9-patch."));
-		ParameterInternalNames.Add("marginRight");
-		ParameterDisplayNames.Add(FText::FromString("Margin Right"));
-		ParameterDescriptions.Add(FText::FromString("The right margin of the 9-patch."));
-		ParameterInternalNames.Add("marginTop");
-		ParameterDisplayNames.Add(FText::FromString("Margin Top"));
-		ParameterDescriptions.Add(FText::FromString("The top margin of the 9-patch."));
-		ParameterInternalNames.Add("marginBottom");
-		ParameterDisplayNames.Add(FText::FromString("Margin Bottom"));
-		ParameterDescriptions.Add(FText::FromString("The bottom margin of the 9-patch."));
-		ParameterInternalNames.Add("isRounded");
-		ParameterDisplayNames.Add(FText::FromString("Is Rounded"));
-		ParameterDescriptions.Add(FText::FromString("True if the box can have rounded borders."));
-		ParameterInternalNames.Add("radiusTopLeft");
-		ParameterDisplayNames.Add(FText::FromString("Radius Top Left"));
-		ParameterDescriptions.Add(FText::FromString("The rounded border radius of the top left corner."));
-		ParameterInternalNames.Add("radiusTopRight");
-		ParameterDisplayNames.Add(FText::FromString("Radius Top Right"));
-		ParameterDescriptions.Add(FText::FromString("The rounded border radius of the top right corner."));
-		ParameterInternalNames.Add("radiusBottomRight");
-		ParameterDisplayNames.Add(FText::FromString("Radius Bottom Right"));
-		ParameterDescriptions.Add(FText::FromString("The rounded border radius of the bottom right corner."));
-		ParameterInternalNames.Add("radiusBottomLeft");
-		ParameterDisplayNames.Add(FText::FromString("Radius Bottom Left"));
-		ParameterDescriptions.Add(FText::FromString("The rounded border radius of the bottom left corner."));
-		ParameterInternalNames.Add("hasOutline");
-		ParameterDisplayNames.Add(FText::FromString("Has Outline"));
-		ParameterDescriptions.Add(FText::FromString("True if the box has a colorful (inward) outline."));
-		ParameterInternalNames.Add("outlineThickness");
-		ParameterDisplayNames.Add(FText::FromString("Outline Thickness"));
-		ParameterDescriptions.Add(FText::FromString("The uniform thickness of the outline around the box."));
-		ParameterInternalNames.Add("outlineColor");
-		ParameterDisplayNames.Add(FText::FromString("Outline Color"));
-		ParameterDescriptions.Add(FText::FromString("The color of the outline around the box."));
+		Description = FText::FromString("Draws a box.");
+		ParameterInternalNames.Add("boxSettings");
+		ParameterDisplayNames.Add(FText::FromString("Box Settings"));
+		ParameterDescriptions.Add(FText::FromString("The settings of the box you want to draw."));
 		Runtime = 2;
 	}
 
