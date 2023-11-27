@@ -10,7 +10,7 @@ void UFINLuaRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 }
 
 void UFINLuaRCO::SetLuaEEPROMCode_Implementation(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
-	LuaEEPROMState->SetCode(NewCode);
+	if (LuaEEPROMState) LuaEEPROMState->SetCode(NewCode);
 }
 
 bool UFINLuaRCO::SetLuaEEPROMCode_Validate(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
