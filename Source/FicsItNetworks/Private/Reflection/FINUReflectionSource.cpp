@@ -118,8 +118,7 @@ FFINReflectionClassMeta UFINUReflectionSource::GetClassMeta(UClass* Class) const
 		TMap<FString, FFINReflectionFunctionMeta> funcMetas;
 		TMap<FString, FFINReflectionPropertyMeta> propMetas;
 		// allocate parameter space
-		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->PropertiesSize);
-		FMemory::Memzero(Params + MetaFunc->ParmsSize, MetaFunc->PropertiesSize - MetaFunc->ParmsSize);
+		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->GetStructureSize());
 		MetaFunc->InitializeStruct(Params);
 		ON_SCOPE_EXIT {
 			MetaFunc->DestroyStruct(Params);
@@ -180,8 +179,7 @@ FFINReflectionFunctionMeta UFINUReflectionSource::GetFunctionMeta(UClass* Class,
 	UFunction* MetaFunc = Class->FindFunctionByName(*(FString("netFuncMeta_") + GetFunctionNameFromUFunction(Func)));
 	if (MetaFunc) {
 		// allocate parameter space
-		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->PropertiesSize);
-		FMemory::Memzero(Params + MetaFunc->ParmsSize, MetaFunc->PropertiesSize - MetaFunc->ParmsSize);
+		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->GetStructureSize());
 		MetaFunc->InitializeStruct(Params);
 		ON_SCOPE_EXIT {
 			MetaFunc->DestroyStruct(Params);
@@ -217,8 +215,7 @@ FFINReflectionSignalMeta UFINUReflectionSource::GetSignalMeta(UClass* Class, UFu
 	UFunction* MetaFunc = Class->FindFunctionByName(*(FString("netSigMeta_") + GetSignalNameFromUFunction(Func)));
 	if (MetaFunc) {
 		// allocate parameter space
-		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->PropertiesSize);
-		FMemory::Memzero(Params + MetaFunc->ParmsSize, MetaFunc->PropertiesSize - MetaFunc->ParmsSize);
+		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->GetStructureSize());
 		MetaFunc->InitializeStruct(Params);
 		ON_SCOPE_EXIT {
 			MetaFunc->DestroyStruct(Params);
@@ -516,12 +513,11 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 	}
 
 	// allocate signal data storage and copy data
-	void* ParamStruct = FMemory::Malloc(Stack.CurrentNativeFunction->PropertiesSize);
-	FMemory::Memzero(((uint8*)ParamStruct) + Stack.CurrentNativeFunction->ParmsSize, Stack.CurrentNativeFunction->PropertiesSize - Stack.CurrentNativeFunction->ParmsSize);
+	void* ParamStruct = FMemory_Alloca(Stack.CurrentNativeFunction->GetStructureSize());
 	Stack.CurrentNativeFunction->InitializeStruct(ParamStruct);
-	for (FProperty* LocalProp = Stack.CurrentNativeFunction->FirstPropertyToInit; LocalProp != NULL; LocalProp = (FProperty*)LocalProp->Next) {
-		LocalProp->InitializeValue_InContainer(ParamStruct);
-	}
+	ON_SCOPE_EXIT{
+		Stack.CurrentNativeFunction->DestroyStruct(ParamStruct);
+	};
 
 	for (auto p = TFieldIterator<FProperty>(Stack.CurrentNativeFunction); p; ++p) {
 		auto dp = p->ContainerPtrToValuePtr<void>(ParamStruct);
@@ -543,14 +539,6 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 		Parameters.Pop();
 		Parameters.Append(Array.GetArray());
 	}
-
-	// destroy parameter struct
-	for (FProperty* P = Stack.CurrentNativeFunction->DestructorLink; P; P = P->DestructorLinkNext) {
-		if (!P->IsInContainer(Stack.CurrentNativeFunction->ParmsSize)) {
-			P->DestroyValue_InContainer(ParamStruct);
-		}
-	}
-	FMemory::Free(ParamStruct);
 
 	FINSignal->Trigger(Context, Parameters);
 
