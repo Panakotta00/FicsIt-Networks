@@ -65,6 +65,7 @@ public:
 		case TRACE:
 			Trace = new FFINNetworkTrace(*Other.Trace);
 			break;
+		default: ;
 		}
 		
 		return *this;
@@ -107,6 +108,19 @@ public:
 		default: ;
 		}
 		return FFINNetworkTrace();
+	}
+
+	FORCEINLINE bool IsValid() const {
+		switch (Type) {
+		case GENERIC:
+			return Generic != nullptr;
+		case OBJECT:
+			return Obj != nullptr;
+		case TRACE:
+			return Trace->IsValid();
+		default: ;
+		}
+		return false;
 	}
 
 	FORCEINLINE bool Serialize(FStructuredArchive::FSlot Slot) {

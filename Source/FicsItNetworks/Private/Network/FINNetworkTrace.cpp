@@ -199,20 +199,15 @@ FFINNetworkTrace FFINNetworkTrace::operator/(UObject* other) const {
 }
 
 UObject* FFINNetworkTrace::operator*() const {
-	UObject* B = Obj;
-	if (IsValid() && ::IsValid(B)) {
-		return B;
-	} else {
-		return nullptr;
-	}
+	return Obj;
 }
 
 UObject* FFINNetworkTrace::Get() const {
-	return **this;
+	return Obj;
 }
 
 UObject* FFINNetworkTrace::operator->() const {
-	return **this;
+	return Obj;
 }
 
 FFINNetworkTrace FFINNetworkTrace::operator()(UObject* other) const {
@@ -232,10 +227,6 @@ FFINNetworkTrace FFINNetworkTrace::operator()(UObject* other) const {
 
 bool FFINNetworkTrace::operator==(const FFINNetworkTrace& other) const {
 	return Obj == other.Obj;
-}
-
-void FFINNetworkTrace::CheckTrace() const {
-	if (!**this) throw std::exception("Object is not reachable");
 }
 
 FFINNetworkTrace FFINNetworkTrace::Reverse() const {
