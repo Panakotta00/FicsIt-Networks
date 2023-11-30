@@ -182,8 +182,7 @@ void AFINComputerGPUT1::Multicast_BeginBackBufferReplication_Implementation(FInt
 
 void AFINComputerGPUT1::Multicast_AddBackBufferChunk_Implementation(int64 InOffset, const TArray<FFINGPUT1BufferPixel>& Chunk) {
 	if (HasAuthority()) {
-		TArray<FFINGPUT1BufferPixel>& Buffer = BackBuffer.GetData();
-		FMemory::Memswap((void*)(Buffer.GetData() + InOffset), (void*)Chunk.GetData(), Chunk.Num() + sizeof(FFINGPUT1BufferPixel));
+		BackBuffer.SetChunk(InOffset, Chunk);
 	}
 }
 
