@@ -255,10 +255,8 @@ namespace FINLua {
 		FString MemberName = luaFIN_toFString(L, nameIndex);
 
 		FFINExecutionContext Context(LuaStruct->Struct->GetData());
-		if (luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaStruct->Type, MemberName, EFINFunctionFlags::FIN_Func_MemberFunc, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, false)) {
-			return 1;
-		}
-		
+		int arg = luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaStruct->Type, MemberName, EFINFunctionFlags::FIN_Func_MemberFunc, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, false);
+		if (arg > 0) return arg;
 		return luaStructExecuteBinaryOperator(L, FIN_OP_TEXT(FIN_Operator_Index), 2, LuaStruct->Struct, LuaStruct->Type, nullptr);
 	}
 

@@ -77,8 +77,7 @@ namespace FINLua {
 		}
 
 		FFINExecutionContext Context(LuaObject->Object);
-		luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
-		return 1;
+		return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
 	}
 	
 	int luaObjectNewIndex(lua_State* L) {

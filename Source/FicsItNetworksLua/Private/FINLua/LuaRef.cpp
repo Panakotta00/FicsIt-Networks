@@ -43,6 +43,10 @@ namespace FINLua {
 	}
 	
 	int luaFIN_callReflectionFunctionDirectly(lua_State* L, UFINFunction* Function, const FFINExecutionContext& Ctx, int nArgs, int nResults) {
+		if (!Ctx.IsValid()) {
+			return luaFIN_argError(L, 1, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, 1)));
+		} 
+		
 		TArray<FINAny> Parameters = luaFIN_callReflectionFunctionProcessInput(L, Function, nArgs);
 		
 		TArray<FINAny> Output;
@@ -149,9 +153,13 @@ namespace FINLua {
 		return *static_cast<UFINFunction**>(luaL_checkudata(L, Index, LUA_REFLECTION_FUNCTION_METATABLE_NAME));
 	}
 
-	bool luaFIN_tryExecuteGetProperty(lua_State* L, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx) {
+	int luaFIN_tryIndexGetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx) {
 		UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags);
 		if (Property) {
+			if (!PropertyCtx.IsValid()) {
+				return luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));
+			}
+			
 			EFINRepPropertyFlags PropFlags = Property->GetPropertyFlags();
 			// TODO: Add C++ try catch block to GetProperty Execution
 			if (PropFlags & FIN_Prop_RT_Async) {
@@ -162,37 +170,43 @@ namespace FINLua {
 			} else {
 				luaFuture(L, FFINFutureReflection(Property, PropertyCtx));
 			}
-			return true;
+			return 1;
 		}
-		return false;
+		return 0;
 	}
 
-	bool luaFIN_tryExecuteFunction(lua_State* L, UFINStruct* Struct, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags) {
+	int luaFIN_tryIndexFunction(lua_State* L, UFINStruct* Struct, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags) {
 		UFINFunction* Function = Struct->FindFINFunction(MemberName, FunctionFilterFlags);
 		if (Function) {
 			// TODO: Add caching
 			luaFIN_pushReflectionFunction(L, Function);
-			return true;
+			return 1;
 		}
-		return false;
+		return 0;
 	}
 
-	bool luaFIN_pushFunctionOrGetProperty(lua_State* L, int Index, UFINStruct* Struct, const FString& MemberName,  EFINFunctionFlags FunctionFilterFlags, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, bool bCauseError) {
-		if (luaFIN_tryExecuteGetProperty(L, Struct, MemberName, PropertyFilterFlags, PropertyCtx)) return true;
-		if (luaFIN_tryExecuteFunction(L, Struct, MemberName, FunctionFilterFlags)) return true;
+	int luaFIN_pushFunctionOrGetProperty(lua_State* L, int Index, UFINStruct* Struct, const FString& MemberName,  EFINFunctionFlags FunctionFilterFlags, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, bool bCauseError) {
+		int arg = luaFIN_tryIndexGetProperty(L, Index, Struct, MemberName, PropertyFilterFlags, PropertyCtx);
+		if (arg == 0) arg = luaFIN_tryIndexFunction(L, Struct, MemberName, FunctionFilterFlags);
+		if (arg > 0) return arg;
 
 		if (bCauseError) luaFIN_warning(L, TCHAR_TO_UTF8(*("No property or function with name '" + MemberName + "' found. Nil return is deprecated and this will become an error.")), true);
 		lua_pushnil(L);
-		return true; // TODO: Remove return val and bCauseError param
+		return 1; // TODO: Remove return val and bCauseError param
 	}
 
 	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError) {
 		UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags);
 		if (Property) {
+			if (!PropertyCtx.IsValid()) {
+				luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));
+				return true;
+			}
+			
 			TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, ValueIndex, Property, true, true);
 			if (!Value.IsSet()) {
 				luaFIN_propertyError(L, ValueIndex, Property);
-				return false;
+				return true;
 			}
 			
 			// TODO: Add C++ try catch block to SetProperty Execution
@@ -205,7 +219,7 @@ namespace FINLua {
 			} else {
 				luaFuture(L, FFINFutureReflection(Property, PropertyCtx, Value.GetValue()));
 			}
-			return true;
+			return 1;
 		}
 		if (bCauseError) luaL_argerror(L, Index, TCHAR_TO_UTF8(*("No property or function with name '" + MemberName + "' found")));
 		return false;

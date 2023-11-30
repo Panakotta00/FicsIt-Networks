@@ -46,15 +46,16 @@ namespace FINLua {
 	UFINFunction* luaFIN_checkReflectionFunction(lua_State* L, int Index);
 
 	/**
-	 * @brief Pushes the value returned by the Property with the given settings onto the lua stack, if no GetProperty was found, pushes nothing
+	 * @brief Pushes the value returned by the Property with the given settings onto the lua stack, if no GetProperty was found, pushes nothing. If the context is invalid, causes Lua error
 	 * @param L the lua state
+	 * @param Index the index of the lua value used for the property context
 	 * @param Type the Reflection Type in which to search for a property with the given name
 	 * @param MemberName the name of the property that gets searched for
 	 * @param PropertyFilterFlags property flags that will be used as filter when searching for the member
 	 * @param PropertyCtx the call context that will be used if the property gets found
-	 * @return true if a property was found and the value of it got pushed onto the lua stack, otherwise false
+	 * @return the amount of return values, 0 if no property was found, guaranteed to be 1 if property found and valid
 	 */
-	bool luaFIN_tryExecuteGetProperty(lua_State* L, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags,  const FFINExecutionContext& PropertyCtx);
+	int luaFIN_tryIndexGetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags,  const FFINExecutionContext& PropertyCtx);
 
 	/**
 	 * @brief Pushes the return values of a function call with the given name onto the lua stack, if no function was found, pushes nothing
@@ -62,12 +63,12 @@ namespace FINLua {
 	 * @param Type the Reflection Type in which to search for a function with the given name
 	 * @param MemberName the name of the function that gets searched for
 	 * @param FunctionFilterFlags function flags that will be used as filter when searching for the member
-	 * @return true if a function was found and executed, otherwise false
+	 * @return 1 if a function was found and executed, otherwise 0
 	 */
-	bool luaFIN_tryExecuteFunction(lua_State* L, UFINStruct* Type, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags);
+	int luaFIN_tryIndexFunction(lua_State* L, UFINStruct* Type, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags);
 	
 	/**
-	 * @brief Pushes the value of the get property, or a Reflection Function with the given member name onto the stack
+	 * @brief Pushes the value of the get property, or a Reflection Function with the given member name onto the stack, If property executed failed, causes a lua error.
 	 * @param L the lua state
 	 * @param Index the argument index used for the optional lua arg error
 	 * @param Type the Reflection Type that will be used to search the property or function
@@ -76,12 +77,12 @@ namespace FINLua {
 	 * @param PropertyFilterFlags property flags that will be used as filter when searching for a property
 	 * @param PropertyCtx the execution context that will be used for the get property, if such property got found
 	 * @param bCauseError if true, causes a lua error
-	 * @return false if unable to find a property or function with the given name, otherwise true. Always true if bCauseError is true (cuz lua error)
+	 * @return 0 if unable to find a property or function with the given name, otherwise 1.
 	 */
-	bool luaFIN_pushFunctionOrGetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, bool bCauseError = true);
+	int luaFIN_pushFunctionOrGetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, bool bCauseError = true);
 
 	/**
-	 * @brief Tries to execute the SetProperty with the value at the given index in the lua stack, if no SetProperty was found, pushes nothing
+	 * @brief Tries to execute the SetProperty with the value at the given index in the lua stack, if no SetProperty was found, pushes nothing. Causes a lua error if property execution failed.
 	 * @param L the lua state
 	 * @param Index the argument index used for the optional lua arg error
 	 * @param Type the Reflection Type in which to search for a property with the given name
@@ -90,7 +91,7 @@ namespace FINLua {
 	 * @param PropertyCtx the call context that will be used if the property gets found
 	 * @param ValueIndex the index of the lua value that should get used for the set operation
 	 * @param bCauseError if true, causes a lua error
-	 * @return true if a property was found and the value of it got pushed onto the lua stack, otherwise false
+	 * @return 1 if a property was found and executed, 0 if no property was found
 	 */
 	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError);
 
