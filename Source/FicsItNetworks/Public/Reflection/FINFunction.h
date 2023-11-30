@@ -84,8 +84,5 @@ public:
 	/**
 	 * Executes the function with the given properties and the given Ctx
 	 */
-	virtual TArray<FFINAnyNetworkValue> Execute(const FFINExecutionContext& Ctx, const TArray<FFINAnyNetworkValue>& Params) const {
-		if (NativeFunction) return NativeFunction(Ctx, Params);
-		return TArray<FFINAnyNetworkValue>();
-	}
+	virtual TArray<FFINAnyNetworkValue> Execute(const FFINExecutionContext& Ctx, const TArray<FFINAnyNetworkValue>& Params) const;
 };
