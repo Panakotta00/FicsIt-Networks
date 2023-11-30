@@ -387,9 +387,11 @@ namespace FINLua {
 				lua_pop(L, 1);
 				lua_geti(L, Index, ++j);
 			}
-			TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, -1, Prop, true, bAllowImplicitConstruction);
+			if (!lua_isnil(L, -1)) {
+				TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, -1, Prop, true, bAllowImplicitConstruction);
+				if (Value.IsSet()) Prop->SetValue(Struct->GetData(), Value.GetValue());
+			}
 			lua_pop(L, 1);
-			if (Value.IsSet()) Prop->SetValue(Struct->GetData(), Value.GetValue());
 		}
 
 		return Struct;
