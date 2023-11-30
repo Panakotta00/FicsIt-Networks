@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
 	void GPUT2MouseEvent(AFINComputerGPUT2* GPU, int Type, FVector2D Position, int Modifiers);
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category="Computer|RCO")
+	void GPUT2MouseWheelEvent(AFINComputerGPUT2* GPU, FVector2D Position, float Delta, int Modifiers);
+
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category="Computer|RCO")
 	void GPUT2KeyEvent(AFINComputerGPUT2* GPU, int Type, int64 C, int64 Code, int Modifiers);
 

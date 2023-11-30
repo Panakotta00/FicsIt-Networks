@@ -80,6 +80,18 @@ int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& 
 		if (!Texture) return LayerId;
 		Brush.SetResourceObject(Texture);
 	}
+
+	if (!ImageSize.IsZero()) {
+		Brush.ImageSize = ImageSize;
+		Brush.DrawAs = ESlateBrushDrawType::Image;
+	}
+
+	if (bVerticalTiling) {
+		if (bHorizontalTiling) Brush.Tiling = ESlateBrushTileType::Both;
+		else Brush.Tiling = ESlateBrushTileType::Vertical;
+	} else if (bHorizontalTiling) {
+		Brush.Tiling = ESlateBrushTileType::Horizontal;
+	}
 	
 	if (bIsBorder) {
 		Brush.Margin = Margin;
@@ -138,6 +150,7 @@ void SFINGPUT2Widget::Construct(const FArguments& InArgs, UObject* InWorldContex
 	OnMouseMoveEvent = InArgs._OnMouseMove;
 	OnMouseEnterEvent = InArgs._OnMouseEnter;
 	OnMouseLeaveEvent = InArgs._OnMouseLeave;
+	OnMouseWheelEvent = InArgs._OnMouseWheel;
 	OnKeyDownEvent = InArgs._OnKeyDown;
 	OnKeyUpEvent = InArgs._OnKeyUp;
 	OnKeyCharEvent = InArgs._OnKeyChar;
@@ -174,6 +187,12 @@ FReply SFINGPUT2Widget::OnMouseMove(const FGeometry& MyGeometry, const FPointerE
 	FVector2D Position = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
 	OnMouseMoveEvent.ExecuteIfBound(Position, AFINComputerGPU::MouseToInt(MouseEvent));
 	return FReply::Handled();
+}
+
+FReply SFINGPUT2Widget::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	FVector2D Position = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
+	OnMouseWheelEvent.ExecuteIfBound(Position, MouseEvent.GetWheelDelta(), AFINComputerGPU::MouseToInt(MouseEvent));
+	return FReply::Handled().ReleaseMouseCapture();
 }
 
 void SFINGPUT2Widget::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
@@ -247,6 +266,9 @@ TSharedPtr<SWidget> AFINComputerGPUT2::CreateWidget() {
 	})
 	.OnMouseMove_Lambda([this, RCO](FVector2D position, int modifiers) {
 		RCO->GPUT2MouseEvent(this, 2, position, modifiers);
+	})
+	.OnMouseWheel_Lambda([this, RCO](FVector2D position, float delta, int modifiers) {
+		RCO->GPUT2MouseWheelEvent(this, position, delta, modifiers);
 	})
 	.OnMouseEnter_Lambda([this, RCO](FVector2D position, int modifiers) {
 		RCO->GPUT2MouseEvent(this, 3, position, modifiers);
@@ -347,6 +369,7 @@ FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool 
 void AFINComputerGPUT2::netSig_OnMouseDown_Implementation(FVector2D position, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnMouseUp_Implementation(FVector2D position, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnMouseMove_Implementation(FVector2D position, int modifiers) {}
+void AFINComputerGPUT2::netSig_OnMouseWheel_Implementation(FVector2D position, float wheelDelta, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnKeyDown_Implementation(int64 c, int64 code, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnKeyUp_Implementation(int64 c, int64 code, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnKeyChar_Implementation(const FString& c, int modifiers) {}

@@ -3215,10 +3215,25 @@ BeginProp(RString, image, "Image", "If not empty, should be a image reference to
 } PropSet() {
 	self->Image = Val;
 } EndProp()
+BeginProp(RStruct<FVector2D>, imageSize, "Image Size", "The size of the internal image drawn, necessary for proper scaling, antialising and tiling.") {
+	Return FINStruct(self->ImageSize);
+} PropSet() {
+	self->ImageSize = Val;
+} EndProp()
 BeginProp(RBool, hasCenteredOrigin, "Has Centered Origin", "If set to false, the position will give the left upper corner of the box and rotation will happen around this point. If set to true, the position will give the center point of box and the rotation will happen around this center point.") {
 	Return FINBool(self->bHasCenteredOrigin);
 } PropSet() {
 	self->bHasCenteredOrigin = Val;
+} EndProp()
+BeginProp(RBool, horizontalTiling, "Horizontal Tiling", "True if the image should be tiled horizontally.") {
+	Return FINBool(self->bHorizontalTiling);
+} PropSet() {
+	self->bHorizontalTiling = Val;
+} EndProp()
+BeginProp(RBool, verticalTiling, "Vertical Tiling", "True if the image should be tiled vertically.") {
+	Return FINBool(self->bVerticalTiling);
+} PropSet() {
+	self->bVerticalTiling = Val;
 } EndProp()
 BeginProp(RBool, isBorder, "Is Border", "If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use (use the image as 9-patch).") {
 	Return FINBool(self->bIsBorder);

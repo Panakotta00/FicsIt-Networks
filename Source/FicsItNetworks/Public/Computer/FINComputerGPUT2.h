@@ -267,34 +267,43 @@ struct FFINGPUT2DC_Box : public FFINGPUT2DrawCall {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector2D Position;
+	FVector2D Position = FVector2D::Zero();
 
 	UPROPERTY(SaveGame)
-	FVector2D Size;
+	FVector2D Size = FVector2D(100);
 
 	UPROPERTY(SaveGame)
-	double Rotation;
+	double Rotation = 0.0;
 
 	UPROPERTY(SaveGame)
-	FColor Color;
+	FColor Color = FColor::White;
 
 	UPROPERTY(SaveGame)
 	FString Image;
+
+	UPROPERTY(SaveGame)
+	FVector2D ImageSize = FVector2D::Zero();
 	
 	UPROPERTY(SaveGame)
 	bool bHasCenteredOrigin = false;
 	
 	UPROPERTY(SaveGame)
+	bool bHorizontalTiling = false;
+
+	UPROPERTY(SaveGame)
+	bool bVerticalTiling = false;
+	
+	UPROPERTY(SaveGame)
 	bool bIsBorder = false;
 
 	UPROPERTY(SaveGame)
-	FMargin Margin;
+	FMargin Margin = FMargin(0);
 	
 	UPROPERTY(SaveGame)
 	bool bIsRounded = false;
 
 	UPROPERTY(SaveGame)
-	FVector4 BorderRadii;
+	FVector4 BorderRadii = FVector4::Zero();
 	
 	UPROPERTY(SaveGame)
 	bool bHasOutline = false;
@@ -312,6 +321,7 @@ struct FFINGPUT2DC_Box : public FFINGPUT2DrawCall {
 };
 
 DECLARE_DELEGATE_TwoParams(FFINGPUT2CursorEvent, FVector2D, int);
+DECLARE_DELEGATE_ThreeParams(FFINGPUT2WheelEvent, FVector2D, float, int);
 DECLARE_DELEGATE_ThreeParams(FFINGPUT2KeyEvent, uint32, uint32, int);
 DECLARE_DELEGATE_TwoParams(FFINGPUT2KeyCharEvent, TCHAR, int);
 
@@ -325,6 +335,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseDown)
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseUp)
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseMove)
+		SLATE_EVENT(FFINGPUT2WheelEvent, OnMouseWheel)
 		SLATE_EVENT(FFINGPUT2KeyEvent, OnKeyDown)
 		SLATE_EVENT(FFINGPUT2KeyEvent, OnKeyUp)
 		SLATE_EVENT(FFINGPUT2KeyCharEvent, OnKeyChar)
@@ -340,6 +351,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual void OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
@@ -358,6 +370,7 @@ private:
 	FFINGPUT2CursorEvent OnMouseDownEvent;
 	FFINGPUT2CursorEvent OnMouseUpEvent;
 	FFINGPUT2CursorEvent OnMouseMoveEvent;
+	FFINGPUT2WheelEvent OnMouseWheelEvent;
 	FFINGPUT2CursorEvent OnMouseEnterEvent;
 	FFINGPUT2CursorEvent OnMouseLeaveEvent;
 	FFINGPUT2KeyEvent OnKeyDownEvent;
@@ -685,6 +698,25 @@ public:
 		ParameterInternalNames.Add("position");
 		ParameterDisplayNames.Add(FText::FromString("Position"));
 		ParameterDescriptions.Add(FText::FromString("The position of the cursor."));
+		ParameterInternalNames.Add("modifiers");
+		ParameterDisplayNames.Add(FText::FromString("Modifiers"));
+		ParameterDescriptions.Add(FText::FromString("The Modifiers-Bit-Field providing information about the move event.\nBits:\n1th left mouse pressed\n2th right mouse button pressed\n3th ctrl key pressed\n4th shift key pressed\n5th alt key pressed\n6th cmd key pressed"));
+		Runtime = 1;
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void netSig_OnMouseWheel(FVector2D position, float wheelDelta, int modifiers);
+	UFUNCTION()
+	void netSigMeta_OnMouseWheel(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "OnMouseMove";
+		DisplayName = FText::FromString("On Mouse Move");
+		Description = FText::FromString("Triggers when the mouse cursor moves on the screen.");
+		ParameterInternalNames.Add("position");
+		ParameterDisplayNames.Add(FText::FromString("Position"));
+		ParameterDescriptions.Add(FText::FromString("The position of the cursor."));
+		ParameterInternalNames.Add("wheelDelta");
+		ParameterDisplayNames.Add(FText::FromString("Wheel Delta"));
+		ParameterDescriptions.Add(FText::FromString("The delta value of how much the mouse wheel got moved."));
 		ParameterInternalNames.Add("modifiers");
 		ParameterDisplayNames.Add(FText::FromString("Modifiers"));
 		ParameterDescriptions.Add(FText::FromString("The Modifiers-Bit-Field providing information about the move event.\nBits:\n1th left mouse pressed\n2th right mouse button pressed\n3th ctrl key pressed\n4th shift key pressed\n5th alt key pressed\n6th cmd key pressed"));
