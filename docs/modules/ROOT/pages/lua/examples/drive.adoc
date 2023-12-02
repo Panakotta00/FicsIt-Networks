@@ -42,6 +42,22 @@ disk_uuid = "7A4324704A53821154104A87BE5688AC"
 fs.mount("/dev/"..disk_uuid, "/")
 ----
 
-== Accessing Drives with Windows Explorer
+== Access Drive Folders
+
+=== Windows
 
 All drives are located at `%LocalAppData%\FactoryGame\Saved\SaveGames\Computers`
+
+=== Linux
+
+Locate your Steam library folder(s)
+
+Steam > Settings > Storage > Drive Dropdown
+
+Navigate to the virtual `%LocalAppData%` directory
+
+`<Steam Library>/steamapps/compatdata/526870/pfx/drive_c/users/steamuser/Local Settings/Application Data/`
+
+Navigate to the drives folder
+
+`<AppData>/FactoryGame/Saved/SaveGames/Computers/`
