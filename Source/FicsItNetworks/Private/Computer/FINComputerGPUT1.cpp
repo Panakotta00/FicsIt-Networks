@@ -175,19 +175,19 @@ SScreenMonitor::SScreenMonitor() {
 }
 
 void AFINComputerGPUT1::Multicast_BeginBackBufferReplication_Implementation(FIntPoint Size) {
-	if (HasAuthority()) {
+	if (!HasAuthority()) {
 		BackBuffer.SetSize(Size.X, Size.Y);
 	}
 }
 
 void AFINComputerGPUT1::Multicast_AddBackBufferChunk_Implementation(int64 InOffset, const TArray<FFINGPUT1BufferPixel>& Chunk) {
-	if (HasAuthority()) {
+	if (!HasAuthority()) {
 		BackBuffer.SetChunk(InOffset, Chunk);
 	}
 }
 
 void AFINComputerGPUT1::Multicast_EndBackBufferReplication_Implementation() {
-	if (HasAuthority()) {
+	if (!HasAuthority()) {
 		FrontBuffer = BackBuffer;
 		if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
 	}
