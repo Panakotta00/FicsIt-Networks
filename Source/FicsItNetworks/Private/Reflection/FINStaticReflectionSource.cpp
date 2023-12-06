@@ -2104,6 +2104,9 @@ Hook(UFINRailroadSignalHook)
 BeginSignal(AspectChanged, "Aspect Changed", "Triggers when the aspect of this signal changes.")
 	SignalParam(0, RInt, aspect, "Aspect", "The new aspect of the signal (see 'Get Aspect' for more information)")
 EndSignal()
+BeginSignal(ValidationChanged, "Validation Changed", "Triggers when the validation of this signal changes.")
+	SignalParam(0, RInt, validation, "Validation", "The new validation of the signal (see 'Block Validation' for more information)")
+EndSignal()
 BeginProp(RBool, isPathSignal, "Is Path Signal", "True if this signal is a path-signal.") {
 	Return self->IsPathSignal();
 } EndProp()
