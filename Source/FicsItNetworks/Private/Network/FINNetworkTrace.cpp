@@ -167,7 +167,10 @@ bool FFINNetworkTrace::Serialize(FStructuredArchive::FSlot Slot) {
 			FString StepName;
 			if (Step.IsValid()) StepName = inverseTraceStepRegistry[Step];
 			StepSlot.GetValue() << StepName;
-			Step = traceStepRegistry[StepName];
+			TSharedPtr<FFINTraceStep>* StepPtr = traceStepRegistry.Find(StepName);
+			if (StepPtr) {
+				Step = *StepPtr;
+			}
 		} else {
 			Step.Reset();
 		}
@@ -362,35 +365,28 @@ Step(UFGRailroadVehicleMovementComponent, AFGRailroadVehicle, {
 });
 
 Step(AFGBuildableRailroadTrack, UFGRailroadTrackConnectionComponent, {
-	return A == B->GetTrack();
+	return A->GetTrackGraphID() == B->GetTrack()->GetTrackGraphID();
 })
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadTrack, {
-    return A->GetTrack() == B;
+    return  B->GetConnection(0) && A->GetTrack()->GetTrackGraphID() == B->GetConnection(0)->GetTrack()->GetTrackGraphID();
 })
 
 Step(UFGRailroadTrackConnectionComponent, UFGRailroadTrackConnectionComponent, {
-	return A->GetConnections().Contains(B) || A->GetOpposite() == B;
-})
-
-Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadSwitchControl, {
-	return A->GetSwitchControl() == B;
-})
-Step(AFGBuildableRailroadSwitchControl, UFGRailroadTrackConnectionComponent, {
-    return A == B->GetSwitchControl();
+	return A->GetTrack()->GetTrackGraphID() == B->GetTrack()->GetTrackGraphID();
 })
 
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadSignal, {
-    return A->GetFacingSignal() == B || A->GetTrailingSignal() == B;
+    return B->GetGuardedConnections().Num() > 0 && A->GetTrack()->GetTrackGraphID() == B->GetGuardedConnections()[0]->GetTrack()->GetTrackGraphID();
 })
 Step(AFGBuildableRailroadSignal, UFGRailroadTrackConnectionComponent, {
-    return A == B->GetFacingSignal() || A == B->GetTrailingSignal();
+    return A->GetGuardedConnections().Num() > 0 && A->GetGuardedConnections()[0]->GetTrack()->GetTrackGraphID() == B->GetTrack()->GetTrackGraphID();
 })
 
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadStation, {
-    return A->GetStation() == B;
+    return A->GetTrack()->GetTrackGraphID() == B->GetTrackGraphID();
 })
 Step(AFGBuildableRailroadStation, UFGRailroadTrackConnectionComponent, {
-    return A == B->GetStation();
+    return A->GetTrackGraphID() == B->GetTrack()->GetTrackGraphID();
 })
 
 Step(AFGVehicle, AFGBuildableDockingStation, {
