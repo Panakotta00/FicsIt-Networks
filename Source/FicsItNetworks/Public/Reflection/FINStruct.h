@@ -97,4 +97,14 @@ public:
 	 * Trys to find a function with the given name
 	 */
 	UFINFunction* FindFINFunction(const FString& Name, EFINFunctionFlags FilterFlags = FIN_Func_MemberFunc);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void InvalidateCache() {
+		Name2Property.Empty();
+		Name2Function.Empty();
+	}
+
+private:
+	TMap<FString, TArray<UFINProperty*>> Name2Property;
+	TMap<FString, TArray<UFINFunction*>> Name2Function;
 };
