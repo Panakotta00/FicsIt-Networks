@@ -5,6 +5,7 @@
 #include "FINLua/LuaObject.h"
 #include "FINLua/LuaStruct.h"
 #include "FINLuaProcessor.h"
+#include "tracy/Tracy.hpp"
 
 namespace FINLua {
 	TArray<FINAny> luaFIN_callReflectionFunctionProcessInput(lua_State* L, UFINFunction* Function, int nArgs) {
@@ -77,6 +78,8 @@ namespace FINLua {
 	}
 	
 	int luaReflectionFunctionCall(lua_State* L) {
+		ZoneScoped;
+		
 		UFINFunction* Function = luaFIN_checkReflectionFunction(L, 1);
 		UFINStruct* Type = Function->GetTypedOuter<UFINStruct>();
 		lua_remove(L, 1);
@@ -154,6 +157,7 @@ namespace FINLua {
 	}
 
 	int luaFIN_tryIndexGetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx) {
+		ZoneScoped;
 		UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags);
 		if (Property) {
 			if (!PropertyCtx.IsValid()) {
@@ -163,10 +167,15 @@ namespace FINLua {
 			EFINRepPropertyFlags PropFlags = Property->GetPropertyFlags();
 			// TODO: Add C++ try catch block to GetProperty Execution
 			if (PropFlags & FIN_Prop_RT_Async) {
+				ZoneScopedN("Lua Get Property");
 				luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
 			} else if (PropFlags & FIN_Prop_RT_Parallel) {
+				ZoneScopedN("Lua Get Property SyncCall");
 				[[maybe_unused]] FLuaSyncCall SyncCall(L);
-				luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
+				{
+					ZoneScopedN("Lua Get Property");
+					luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
+				}
 			} else {
 				luaFuture(L, FFINFutureReflection(Property, PropertyCtx));
 			}
@@ -186,6 +195,7 @@ namespace FINLua {
 	}
 
 	int luaFIN_pushFunctionOrGetProperty(lua_State* L, int Index, UFINStruct* Struct, const FString& MemberName,  EFINFunctionFlags FunctionFilterFlags, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, bool bCauseError) {
+		ZoneScoped;
 		int arg = luaFIN_tryIndexGetProperty(L, Index, Struct, MemberName, PropertyFilterFlags, PropertyCtx);
 		if (arg == 0) arg = luaFIN_tryIndexFunction(L, Struct, MemberName, FunctionFilterFlags);
 		if (arg > 0) return arg;

@@ -2,6 +2,7 @@
 
 #include "FINLua/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "tracy/Tracy.hpp"
 
 #define PersistParams \
 	const std::string& _persist_namespace, \
@@ -33,6 +34,8 @@ namespace FINLua {
 	 * If CauseErrorForIndex is not nullptr, causes an lua error instead, guaranteeing a non-nullptr return value.
 	 */
 	UFINFunction* luaStructFindOperator(lua_State* L, UFINStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, TArray<FINAny>& Operands, const int* CauseErrorForIndex) {
+		ZoneScoped;
+		
 		UFINFunction* func;
 		int funcIndex = 0;
 		while (true) {
@@ -69,6 +72,8 @@ namespace FINLua {
 	 * If CauseErroForIndex is not nullptr, causes an lua error instead, guaranteeing a return value of >= 0
 	 */
 	int luaStructExecuteOperator(lua_State* L, const TSharedRef<FINStruct>& Struct, UFINStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, const int* CauseErrorForIndex) {
+		ZoneScoped;
+		
 		TArray<FINAny> parameters;
 		UFINFunction* func = luaStructFindOperator(L, Type, OperatorName, OperandIndices, parameters, CauseErrorForIndex);
 		if (!func) return -2;
@@ -248,6 +253,8 @@ namespace FINLua {
 	}
 	
 	int luaStructIndex(lua_State* L) {
+		ZoneScoped;
+		
 		const int thisIndex = 1;
 		const int nameIndex = 2;
 		
@@ -261,6 +268,8 @@ namespace FINLua {
 	}
 
 	int luaStructNewIndex(lua_State* L) {
+		ZoneScoped;
+		
 		const int thisIndex = 1;
 		const int nameIndex = 2;
 		const int valueIndex = 3;
@@ -277,6 +286,8 @@ namespace FINLua {
 	}
 
 	int luaStructCall(lua_State* L) {
+		ZoneScoped;
+		
 		const int thisIndex = 1;
 		const int operandsStartIndex = 2;
 

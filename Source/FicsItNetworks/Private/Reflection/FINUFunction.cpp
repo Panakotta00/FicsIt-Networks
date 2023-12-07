@@ -2,10 +2,10 @@
 
 #include "Misc/ScopeExit.h"
 
-//#include "tracy/Tracy.hpp"
+#include "tracy/Tracy.hpp"
 
 TArray<FFINAnyNetworkValue> UFINUFunction::Execute(const FFINExecutionContext& Ctx,	const TArray<FFINAnyNetworkValue>& Params) const {
-//	ZoneScopedN("FINFunction Execute");
+	ZoneScopedN("FINFunction Execute");
 	
 	if (RefFunction) {
 		UObject* Obj = Ctx.GetObject();
@@ -36,7 +36,7 @@ TArray<FFINAnyNetworkValue> UFINUFunction::Execute(const FFINExecutionContext& C
 		}
 
 		{
-//			ZoneScopedN("UFunction Execute");
+			ZoneScopedN("UFunction Execute");
 			Obj->ProcessEvent(RefFunction, ParamStruct);
 		}
 
