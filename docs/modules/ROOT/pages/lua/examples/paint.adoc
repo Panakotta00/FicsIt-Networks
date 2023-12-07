@@ -103,18 +103,18 @@ gpu:fill(0,0,width,height,' ',' ')
 -- [ Palette ]
 
 colors = {
-	{ 1 , 0 , 0 , 1 } ,	{ 1 , 0 , 0 , 1 } , -- Red
-	{ 0 , 1 , 0 , 1 } ,	{ 0 , 1 , 0 , 1 } , -- Green
-	{ 0 , 0 , 1 , 1 } ,	{ 0 , 0 , 1 , 1 } , -- Blue
-	{ 1 , 1 , 1 , 1 } ,	{ 1 , 1 , 1 , 1 }   -- White
+    { 1 , 0 , 0 , 1 } , { 1 , 0 , 0 , 1 } , -- Red
+    { 0 , 1 , 0 , 1 } , { 0 , 1 , 0 , 1 } , -- Green
+    { 0 , 0 , 1 , 1 } , { 0 , 0 , 1 , 1 } , -- Blue
+    { 1 , 1 , 1 , 1 } , { 1 , 1 , 1 , 1 }   -- White
 }
 
 
 -- [ Draw Palette ]
 
 for x , color in ipairs(colors) do
-	gpu:setBackground(table.unpack(color))
-	gpu:setText(x - 1,height - 1,' ')
+    gpu:setBackground(table.unpack(color))
+    gpu:setText(x - 1,height - 1,' ')
 end
 
 gpu:setBackground(1,1,1,1)
@@ -123,70 +123,70 @@ gpu:setBackground(1,1,1,1)
 local isDown = false
 
 --
---	If over palette try to select 
---	color or fallback to transparent
+--  If over palette try to select 
+--  color or fallback to transparent
 --
---	Otherwise start mouse holding
+--  Otherwise start mouse holding
 --
 
 local function onMouseDown ( x , y )
 
-	if y == height - 1 then
-		
-		color = colors[ x + 1 ] or { 0 , 0 , 0 , 0 }
-		gpu:setBackground(table.unpack(color))
-		
-	else
-		isDown = true
-	end
+    if y == height - 1 then
+  
+        color = colors[ x + 1 ] or { 0 , 0 , 0 , 0 }
+        gpu:setBackground(table.unpack(color))
+    
+    else
+        isDown = true
+    end
 end
 
 
 --
---	End mouse holding on release
+--  End mouse holding on release
 --
 
 local function onMouseUp ()
-	isDown = false
+    isDown = false
 end
 
 
 --
---	Draw pixel with selected color
---	if primary mouse button is held
---	and not hovered over palette row
+--  Draw pixel with selected color
+--  if primary mouse button is held
+--  and not hovered over palette row
 --
 
 local function onMouseMove ( x , y )
 
-	if not isDown then
-		return
-	end
-	
-	if y == height - 1 then
-		return
-	end
-	
-	gpu:setText(x,y,' ')
+    if not isDown then
+        return
+    end
+    
+    if y == height - 1 then
+        return
+    end
+    
+    gpu:setText(x,y,' ')
 end
 
 
 local events = {
-	OnMouseMove = onMouseMove ,
-	OnMouseDown = onMouseDown ,
-	OnMouseUp = onMouseUp 
+    OnMouseMove = onMouseMove ,
+    OnMouseDown = onMouseDown ,
+    OnMouseUp = onMouseUp 
 }
 
 
 while true do
-	
-	local event , target , x , y = event.pull()
-	
-	if events[ event ] then
-		events[ event ](x,y)
-	end
-	
- 	gpu:flush()
+ 
+    local event , target , x , y = event.pull()
+    
+    if events[ event ] then
+        events[ event ](x,y)
+    end
+    
+    gpu:flush()
 end
 ----
 
