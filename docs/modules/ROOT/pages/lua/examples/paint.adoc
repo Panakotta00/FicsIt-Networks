@@ -2,7 +2,7 @@
 = Paint Example
 :hardbreaks-option:
 
-image::buildings/Example_Paint_Internal-Screen_Editor.png[ width = 300 , height = 300 , role=right ]
+image::lua/examples/Example_Paint_Internal-Screen_Editor.png[ width = 300 , height = 300 , role=right ]
 
 A small paint program utilizing the GPU & Screen.
 
@@ -16,7 +16,7 @@ button and moving your mouse around.
 
 == Large Screen Setup
 
-image::buildings/Example_Paint_Large-Screen_Hardware.png[ width = 300 , height = 300 , role=right ]
+image::lua/examples/Example_Paint_Large-Screen_Hardware.png[ width = 300 , height = 300 , role=right ]
 
 1. Place a computer case with:
     - Tier 1 CPU 
@@ -51,7 +51,7 @@ assert(screen,'Failed to proxy <Screen> component')
 
 == Internal Screen Setup
 
-image::buildings/Example_Paint_Internal-Screen_Hardware.png[ width = 300 , height = 300 , role = right ]
+image::lua/examples/Example_Paint_Internal-Screen_Hardware.png[ width = 300 , height = 300 , role = right ]
 
 1. Place a computer case with:
     - Tier 1 CPU 
