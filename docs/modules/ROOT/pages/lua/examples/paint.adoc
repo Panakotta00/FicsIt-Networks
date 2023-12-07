@@ -128,9 +128,7 @@ local isDown = false
 --
 --  Otherwise start mouse holding
 --
-
 local function onMouseDown ( x , y )
-
     if y == height - 1 then
   
         color = colors[ x + 1 ] or { 0 , 0 , 0 , 0 }
@@ -145,7 +143,6 @@ end
 --
 --  End mouse holding on release
 --
-
 local function onMouseUp ()
     isDown = false
 end
@@ -156,9 +153,7 @@ end
 --  if primary mouse button is held
 --  and not hovered over palette row
 --
-
 local function onMouseMove ( x , y )
-
     if not isDown then
         return
     end
