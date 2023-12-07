@@ -1,77 +1,192 @@
+
 = Paint Example
+:hardbreaks-option:
 
-This small program uses a GPU and a Screen to make a small paint program ingame.
+image::buildings/Example_Paint_Internal-Screen_Editor.png[ width = 300 , height = 300 , role=right ]
 
-In the lower left corner you can choose between five different colors (clear, red, green, blue and white)
-by simply clicking with your mouse onto one.
+A small paint program utilizing the GPU & Screen.
 
-After that you can begin to draw on the screen with that selected color, by click and holding the mouse button
-and then moving the mouse around. To stop drawing simply release the mouse button.
+In the lower left corner you can choose 
+between 5 different colors by clicking them. 
+( Red , Green , Blue , White , Transparent )
 
-== Setup
+You can draw on the screen with the selected  
+color by holding down your primary mouse  
+button and moving your mouse around.
 
-You need small computer with a Lua CPU, a little bit RAM, a Screen Driver and GPU T1.
-Then just plug in a Lua EEPROM and fill it with the code below.
-Then just run it and switch to the computer screen and have some fun ^^
+== Large Screen Setup
 
-== Code
+image::buildings/Example_Paint_Large-Screen_Hardware.png[ width = 300 , height = 300 , role=right ]
+
+1. Place a computer case with:
+    - Tier 1 CPU 
+    - 1 stick of RAM 
+    - Tier 1 GPU
+
+2. Place & connect a large screen
+
+3. Plug in an EEPROM
+
+4. Paste the setup code + program code
+
+5. Start the computer
 
 [source,Lua]
 ----
--- get first T1 GPU avialable from PCI-Interface
-local gpu = computer.getPCIDevices(findClass("GPUT1"))[1]
-if not gpu then
- error("No GPU T1 found!")
-end
+local gpu = computer.getPCIDevices(classes.GPU_T1_C)[1]
 
--- get first Screen-Driver available from PCI-Interface
-local screen = computer.getPCIDevices(findClass("FINComputerScreen"))[1]
--- if no scren found, try to find large screen from component network
-if not screen then
- local comp = component.findComponent(findClass("Screen"))[1]
- if not comp then
-  error("No Screen found!")
- end
- screen = component.proxy(comp)
-end
+assert(gpu,'No <GPU_T1_C> PCI device found')
 
--- setup gpu
+
+local comp_screen = component.findComponent(classes.Screen)[1]
+
+assert(comp_screen,'No <Screen> component found')
+
+
+local screen = component.proxy(comp_screen)
+
+assert(screen,'Failed to proxy <Screen> component')
+----
+
+
+== Internal Screen Setup
+
+image::buildings/Example_Paint_Internal-Screen_Hardware.png[ width = 300 , height = 300 , role = right ]
+
+1. Place a computer case with:
+    - Tier 1 CPU 
+    - 1 stick of RAM 
+    - Screen Driver 
+    - Tier 1 GPU
+
+2. Plug in an EEPROM
+
+3. Paste the setup code + program code
+
+4. Start the computer
+
+5. Switch to the screen tab
+
+[source,Lua]
+----
+local gpu = computer.getPCIDevices(classes.GPU_T1_C)[1]
+
+assert(gpu,'No <GPU_T1_C> PCI device found')
+
+
+local screen = computer.getPCIDevices(classes.FINComputerScreen)[1]
+
+assert(screen,'No <FINComputerScreen> PCI device found')
+----
+
+== Program Code
+
+
+[source,Lua]
+----
+-- [ GPU Setup ]
+
 event.listen(gpu)
 gpu:bindScreen(screen)
-w, h = gpu:getSize()
 
--- clear background
+local width , height = gpu:getSize()
+
+print('Screen Size',width,'x',height)
+
+
+-- [ Clear Screen ]
+
 gpu:setBackground(0,0,0,0)
-gpu:fill(0, 0, w, h, " ", " ")
+gpu:fill(0,0,width,height,' ',' ')
 
--- setup color palette
-colors = {{0,0,0,0},{0,0,0,0},{1,0,0,1},{1,0,0,1},{0,1,0,1},{0,1,0,1},{0,0,1,1},{0,0,1,1},{1,1,1,1},{1,1,1,1}}
 
--- draw color palette
-for i, color in ipairs(colors) do
- gpu:setBackground(color[1], color[2], color[3], color[4])
- gpu:setText(i - 1, h - 1, " ")
+-- [ Palette ]
+
+colors = {
+	{ 1 , 0 , 0 , 1 } ,	{ 1 , 0 , 0 , 1 } , -- Red
+	{ 0 , 1 , 0 , 1 } ,	{ 0 , 1 , 0 , 1 } , -- Green
+	{ 0 , 0 , 1 , 1 } ,	{ 0 , 0 , 1 , 1 } , -- Blue
+	{ 1 , 1 , 1 , 1 } ,	{ 1 , 1 , 1 , 1 }   -- White
+}
+
+
+-- [ Draw Palette ]
+
+for x , color in ipairs(colors) do
+	gpu:setBackground(table.unpack(color))
+	gpu:setText(x - 1,height - 1,' ')
 end
 
 gpu:setBackground(1,1,1,1)
 
--- draw loop
-isDown = false
+
+local isDown = false
+
+--
+--	If over palette try to select 
+--	color or fallback to transparent
+--
+--	Otherwise start mouse holding
+--
+
+local function onMouseDown ( x , y )
+
+	if y == height - 1 then
+		
+		color = colors[ x + 1 ] or { 0 , 0 , 0 , 0 }
+		gpu:setBackground(table.unpack(color))
+		
+	else
+		isDown = true
+	end
+end
+
+
+--
+--	End mouse holding on release
+--
+
+local function onMouseUp ()
+	isDown = false
+end
+
+
+--
+--	Draw pixel with selected color
+--	if primary mouse button is held
+--	and not hovered over palette row
+--
+
+local function onMouseMove ( x , y )
+
+	if not isDown then
+		return
+	end
+	
+	if y == height - 1 then
+		return
+	end
+	
+	gpu:setText(x,y,' ')
+end
+
+
+local events = {
+	OnMouseMove = onMouseMove ,
+	OnMouseDown = onMouseDown ,
+	OnMouseUp = onMouseUp 
+}
+
+
 while true do
- e, s, x, y = event.pull()
- if e == "OnMouseDown" then
-  isDown = true
-  -- is press on color palette, select color
-  if y == h - 1 and x < #colors then
-   color = colors[x + 1]
-   gpu:setBackground(color[1], color[2], color[3], color[4])
-  end
- elseif e == "OnMouseUp" then
-  isDown = false
- elseif e == "OnMouseMove" and not (y == h - 1 and x < #colors) and isDown then
-  gpu:setText(x, y, " ")
- end
- gpu:flush()
+	
+	local event , target , x , y = event.pull()
+	
+	if events[ event ] then
+		events[ event ](x,y)
+	end
+	
+ 	gpu:flush()
 end
 ----
 
