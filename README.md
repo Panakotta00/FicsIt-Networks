@@ -23,7 +23,10 @@ we would reccomend you to join the [FicsIt-Networks Discord Server](https://disc
 Testing means, it would not be a good idea to use the mod in your normal game state,
 testing means testing the mod in its own world to make sure every features works as intended.
 
-You can download the latest build version [here](https://jenkins.massivebytes.net/job/FicsIt-Networks/job/master).
+You can download the latest builds:
+
+[ [Latest Stable Version](https://jenkins.massivebytes.net/job/FicsIt-Networks/job/master/) ] 
+[ [Development Version](https://jenkins.massivebytes.net/job/FicsIt-Networks/job/development/) ]
 
 To install it, simply download the .zip artifact and extract the contents of it into the `<sf installation>/FactoryGame/Mods/FicsItNetworks` folder.
 It has to be this exact path and folder name! Extract it in a way, so the `.uplugin`-File is located within this folder.
