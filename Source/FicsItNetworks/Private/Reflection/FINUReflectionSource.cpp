@@ -119,9 +119,9 @@ FFINReflectionClassMeta UFINUReflectionSource::GetClassMeta(UClass* Class) const
 		TMap<FString, FFINReflectionPropertyMeta> propMetas;
 		// allocate parameter space
 		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->GetStructureSize());
-		MetaFunc->InitializeStruct(Params);
+		if (Params) MetaFunc->InitializeStruct(Params);
 		ON_SCOPE_EXIT {
-			MetaFunc->DestroyStruct(Params);
+			if (Params) MetaFunc->DestroyStruct(Params);
 		};
 
 		Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
@@ -180,9 +180,9 @@ FFINReflectionFunctionMeta UFINUReflectionSource::GetFunctionMeta(UClass* Class,
 	if (MetaFunc) {
 		// allocate parameter space
 		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->GetStructureSize());
-		MetaFunc->InitializeStruct(Params);
+		if (Params) MetaFunc->InitializeStruct(Params);
 		ON_SCOPE_EXIT {
-			MetaFunc->DestroyStruct(Params);
+			if (Params) MetaFunc->DestroyStruct(Params);
 		};
 
 		Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
@@ -216,9 +216,9 @@ FFINReflectionSignalMeta UFINUReflectionSource::GetSignalMeta(UClass* Class, UFu
 	if (MetaFunc) {
 		// allocate parameter space
 		uint8* Params = (uint8*)FMemory_Alloca(MetaFunc->GetStructureSize());
-		MetaFunc->InitializeStruct(Params);
+		if (Params) MetaFunc->InitializeStruct(Params);
 		ON_SCOPE_EXIT {
-			MetaFunc->DestroyStruct(Params);
+			if (Params) MetaFunc->DestroyStruct(Params);
 		};
 		
 		Class->GetDefaultObject()->ProcessEvent(MetaFunc, Params);
@@ -514,9 +514,9 @@ void FINUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 
 	// allocate signal data storage and copy data
 	void* ParamStruct = FMemory_Alloca(Stack.CurrentNativeFunction->GetStructureSize());
-	Stack.CurrentNativeFunction->InitializeStruct(ParamStruct);
+	if (ParamStruct) Stack.CurrentNativeFunction->InitializeStruct(ParamStruct);
 	ON_SCOPE_EXIT{
-		Stack.CurrentNativeFunction->DestroyStruct(ParamStruct);
+		if (ParamStruct) Stack.CurrentNativeFunction->DestroyStruct(ParamStruct);
 	};
 
 	for (auto p = TFieldIterator<FProperty>(Stack.CurrentNativeFunction); p; ++p) {

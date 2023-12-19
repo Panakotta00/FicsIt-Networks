@@ -9,9 +9,9 @@ FINAny FFINPropertyGetterFunc::operator()(const FFINExecutionContext& Ctx, bool*
 		check(Property != nullptr);
 		check(Obj != nullptr);
 		uint8* Params = (uint8*)FMemory_Alloca(Function->GetStructureSize());
-		Function->InitializeStruct(Params);
+		if (Params) Function->InitializeStruct(Params);
 		ON_SCOPE_EXIT {
-			Function->DestroyStruct(Params);
+			if (Params) Function->DestroyStruct(Params);
 		};
 		
 		Obj->ProcessEvent(Function, Params);
@@ -33,9 +33,9 @@ bool FFINPropertySetterFunc::operator()(const FFINExecutionContext& Ctx, const F
 		check(Obj != nullptr);
 		check(Property != nullptr);
 		uint8* Params = (uint8*)FMemory_Alloca(Function->GetStructureSize());
-		Function->InitializeStruct(Params);
+		if (Params) Function->InitializeStruct(Params);
 		ON_SCOPE_EXIT{
-			Function->DestroyStruct(Params);
+			if (Params) Function->DestroyStruct(Params);
 		};
 		
 		Property->SetValue(FFINExecutionContext(Params), Any);
