@@ -1,4 +1,4 @@
-﻿#include "Reflection/FINUReflectionSource.h"
+#include "Reflection/FINUReflectionSource.h"
 #include "FicsItNetworksModule.h"
 #include "Buildables/FGBuildable.h"
 #include "Reflection/FINReflection.h"
@@ -470,9 +470,9 @@ UFINSignal* UFINUReflectionSource::GenerateSignal(FFINReflection* Ref, const FFI
 
 		if (Meta.Parameters.Num() > ParameterIndex) {
 			const FFINReflectionFunctionParameterMeta& ParamMeta = Meta.Parameters[ParameterIndex];
-			if (!ParamMeta.InternalName.IsEmpty()) FINProp->InternalName = Meta.InternalName;
-			if (!ParamMeta.DisplayName.IsEmpty()) FINProp->DisplayName = Meta.DisplayName;
-			if (!ParamMeta.Description.IsEmpty()) FINProp->Description = Meta.Description;
+			if (!ParamMeta.InternalName.IsEmpty()) FINProp->InternalName = ParamMeta.InternalName;
+			if (!ParamMeta.DisplayName.IsEmpty()) FINProp->DisplayName = ParamMeta.DisplayName;
+			if (!ParamMeta.Description.IsEmpty()) FINProp->Description = ParamMeta.Description;
 		}
 		
 		FINSignal->Parameters.Add(FINProp);
