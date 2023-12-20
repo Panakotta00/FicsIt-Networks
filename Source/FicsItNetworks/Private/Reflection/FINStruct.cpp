@@ -4,6 +4,7 @@
 
 UFINProperty* UFINStruct::FindFINProperty(const FString& Name, EFINRepPropertyFlags FilterFlags) {
 	ZoneScoped;
+	FScopeLock nameCacheLock(&NameCacheMutex);
 	if (Name2Property.IsEmpty()) {
 		for (UFINProperty* Property : GetProperties()) {
 			Name2Property.FindOrAdd(Property->GetInternalName()).Add(Property);
@@ -18,6 +19,7 @@ UFINProperty* UFINStruct::FindFINProperty(const FString& Name, EFINRepPropertyFl
 
 UFINFunction* UFINStruct::FindFINFunction(const FString& Name, EFINFunctionFlags FilterFlags) {
 	ZoneScoped;
+	FScopeLock nameCacheLock(&NameCacheMutex);
 	if (Name2Function.IsEmpty()) {
 		for (UFINFunction* Function : GetFunctions()) {
 			Name2Function.FindOrAdd(Function->GetInternalName()).Add(Function);
