@@ -31,8 +31,8 @@ public:
 	FFINDynamicStructHolder(const T& Struct) : FFINDynamicStructHolder(Copy(TBaseStructure<T>::Get(), &Struct)) {}
 
 	static FFINDynamicStructHolder Copy(UScriptStruct* Struct, const void* Data);
-	
-	bool Serialize(FArchive& Ar);
+
+	bool Serialize(FStructuredArchive::FSlot Slot);
 	bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 
@@ -78,7 +78,7 @@ struct TStructOpsTypeTraits<FFINDynamicStructHolder> : public TStructOpsTypeTrai
 {
 	enum
 	{
-		WithSerializer = true,
+		WithStructuredSerializer = true,
 		WithNetSerializer = true,
 		WithAddStructReferencedObjects = true,
         WithCopy = true,

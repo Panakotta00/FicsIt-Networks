@@ -233,7 +233,6 @@ struct FFINGPUT2DC_Spline : public FFINGPUT2DrawCall {
 	virtual int32 OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const override;
 };
 
-
 USTRUCT()
 struct FFINGPUT2DC_Bezier : public FFINGPUT2DrawCall {
 	GENERATED_BODY()
@@ -297,7 +296,7 @@ struct FFINGPUT2DC_Box : public FFINGPUT2DrawCall {
 	bool bIsBorder = false;
 
 	UPROPERTY(SaveGame)
-	FMargin Margin = FMargin(0);
+	FVector4 Margin = FVector4::Zero();
 	
 	UPROPERTY(SaveGame)
 	bool bIsRounded = false;
@@ -311,7 +310,7 @@ struct FFINGPUT2DC_Box : public FFINGPUT2DrawCall {
 	UPROPERTY(SaveGame)
 	double OutlineThickness = 0.0f;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	FColor OutlineColor = FColor::Transparent;
 
 	FFINGPUT2DC_Box() = default;
@@ -814,7 +813,7 @@ private:
 	FCriticalSection DrawingMutex;
 	
 	UPROPERTY(SaveGame)
-	TArray<FFINDynamicStructHolder> DrawCalls;
+	TArray<FFINDynamicStructHolder> CurrentDrawCalls;
 
 	UPROPERTY(SaveGame)
 	TArray<FFINDynamicStructHolder> FlushedDrawCalls;

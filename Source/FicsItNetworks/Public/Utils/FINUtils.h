@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Util/SemVersion.h"
 #include "FINUtils.generated.h"
 
 UCLASS()
@@ -33,6 +34,8 @@ public:
 			return TArrayView<T>(Array.GetData() + Offset, Num);
 		}
 	}
+
+	static FVersion GetFINSaveVersion(UObject* WorldContext);
 
 private:
 	static const FRegexPattern VariablePattern;

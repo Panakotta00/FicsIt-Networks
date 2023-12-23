@@ -291,13 +291,13 @@ TSharedPtr<SWidget> AFINComputerGPUT2::CreateWidget() {
 }
 
 void AFINComputerGPUT2::FlushDrawCalls() {
-	FlushedDrawCalls = DrawCalls;
-	DrawCalls.Empty();
+	FlushedDrawCalls = CurrentDrawCalls;
+	CurrentDrawCalls.Empty();
 }
 
 void AFINComputerGPUT2::AddDrawCall(TFINDynamicStruct<FFINGPUT2DrawCall> DrawCall) {
 	FScopeLock Lock(&DrawingMutex);
-	DrawCalls.Add(DrawCall);
+	CurrentDrawCalls.Add(DrawCall);
 }
 
 void AFINComputerGPUT2::netFunc_flush() {
@@ -346,11 +346,11 @@ void AFINComputerGPUT2::netFunc_drawBezier(FVector2D p1, FVector2D p2, FVector2D
 }
 
 void AFINComputerGPUT2::netFunc_drawBox(FFINGPUT2DC_Box BoxSettings) {
-	DrawCalls.Add(BoxSettings);
+	CurrentDrawCalls.Add(BoxSettings);
 }
 
 void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, FString image, double rotation) {
-	DrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound(), image));
+	CurrentDrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound(), image));
 }
 
 FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool bMonospace) {
@@ -378,12 +378,12 @@ void AFINComputerGPUT2::netSig_OnMouseLeave_Implementation(FVector2D position, i
 
 void AFINComputerGPUT2::Client_CleanDrawCalls_Implementation() {
 	if (HasAuthority()) return;
-	DrawCalls.Empty();
+	CurrentDrawCalls.Empty();
 }
 
 void AFINComputerGPUT2::Client_AddDrawCallChunk_Implementation(const TArray<FFINDynamicStructHolder>& Chunk) {
 	if (HasAuthority()) return;
-	DrawCalls.Append(Chunk);
+	CurrentDrawCalls.Append(Chunk);
 }
 
 void AFINComputerGPUT2::Client_FlushDrawCalls_Implementation() {
