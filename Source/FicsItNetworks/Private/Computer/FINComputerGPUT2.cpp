@@ -248,7 +248,7 @@ void AFINComputerGPUT2::Tick(float DeltaSeconds) {
 	} else if (bFlushOverNetwork) {
 		Client_CleanDrawCalls();
 		bFlushOverNetwork = false;
-		for (const FFINDynamicStructHolder& DrawCall : FlushedDrawCalls) {
+		for (const FFINDynamicStructHolder& DrawCall : FrontBufferDrawCalls) {
 			DrawCalls2Send.Enqueue(DrawCall);
 		}
 	}
@@ -286,18 +286,18 @@ TSharedPtr<SWidget> AFINComputerGPUT2::CreateWidget() {
 		RCO->GPUT2KeyCharEvent(this, FString::Chr(c), modifiers);
 	})
 	.DrawCalls_Lambda([this]() {
-		return FlushedDrawCalls;
+		return FrontBufferDrawCalls;
 	});
 }
 
 void AFINComputerGPUT2::FlushDrawCalls() {
-	FlushedDrawCalls = CurrentDrawCalls;
-	CurrentDrawCalls.Empty();
+	FrontBufferDrawCalls = BackBufferDrawCalls;
+	BackBufferDrawCalls.Empty();
 }
 
 void AFINComputerGPUT2::AddDrawCall(TFINDynamicStruct<FFINGPUT2DrawCall> DrawCall) {
 	FScopeLock Lock(&DrawingMutex);
-	CurrentDrawCalls.Add(DrawCall);
+	BackBufferDrawCalls.Add(DrawCall);
 }
 
 void AFINComputerGPUT2::netFunc_flush() {
@@ -346,11 +346,11 @@ void AFINComputerGPUT2::netFunc_drawBezier(FVector2D p1, FVector2D p2, FVector2D
 }
 
 void AFINComputerGPUT2::netFunc_drawBox(FFINGPUT2DC_Box BoxSettings) {
-	CurrentDrawCalls.Add(BoxSettings);
+	BackBufferDrawCalls.Add(BoxSettings);
 }
 
 void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, FString image, double rotation) {
-	CurrentDrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound(), image));
+	BackBufferDrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound(), image));
 }
 
 FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool bMonospace) {
@@ -378,12 +378,12 @@ void AFINComputerGPUT2::netSig_OnMouseLeave_Implementation(FVector2D position, i
 
 void AFINComputerGPUT2::Client_CleanDrawCalls_Implementation() {
 	if (HasAuthority()) return;
-	CurrentDrawCalls.Empty();
+	BackBufferDrawCalls.Empty();
 }
 
 void AFINComputerGPUT2::Client_AddDrawCallChunk_Implementation(const TArray<FFINDynamicStructHolder>& Chunk) {
 	if (HasAuthority()) return;
-	CurrentDrawCalls.Append(Chunk);
+	BackBufferDrawCalls.Append(Chunk);
 }
 
 void AFINComputerGPUT2::Client_FlushDrawCalls_Implementation() {

@@ -813,10 +813,10 @@ private:
 	FCriticalSection DrawingMutex;
 	
 	UPROPERTY(SaveGame)
-	TArray<FFINDynamicStructHolder> CurrentDrawCalls;
+	TArray<FFINDynamicStructHolder> BackBufferDrawCalls;
 
 	UPROPERTY(SaveGame)
-	TArray<FFINDynamicStructHolder> FlushedDrawCalls;
+	TArray<FFINDynamicStructHolder> FrontBufferDrawCalls;
 
 	TQueue<FFINDynamicStructHolder> DrawCalls2Send;
 
