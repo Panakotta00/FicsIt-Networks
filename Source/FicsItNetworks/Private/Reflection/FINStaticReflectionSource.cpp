@@ -3243,7 +3243,7 @@ BeginProp(RBool, isBorder, "Is Border", "If true, the margin values provide a wa
 } PropSet() {
 	self->bIsBorder = Val;
 } EndProp()
-BeginProp(RStruct<FMargin>, margin, "Margin", "The margin values of the 9-patch (border).") {
+BeginProp(RStruct<FVector4>, margin, "Margin", "The margin values of the 9-patch (border).") {
 	Return FINStruct(self->Margin);
 } PropSet() {
 	self->Margin = Val;
