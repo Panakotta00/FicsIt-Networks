@@ -33,7 +33,7 @@ public:
 	static FFINDynamicStructHolder Copy(UScriptStruct* Struct, const void* Data);
 
 	bool Serialize(FStructuredArchive::FSlot Slot);
-	bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
+	//bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 
 	/**
@@ -73,21 +73,21 @@ public:
 	}
 };
 
+FORCEINLINE void operator<<(FStructuredArchive::FSlot Slot, FFINDynamicStructHolder& DynamicStruct) {
+	DynamicStruct.Serialize(Slot);
+}
+
 template<>
 struct TStructOpsTypeTraits<FFINDynamicStructHolder> : public TStructOpsTypeTraitsBase2<FFINDynamicStructHolder>
 {
 	enum
 	{
 		WithStructuredSerializer = true,
-		WithNetSerializer = true,
+		//WithNetSerializer = true,
 		WithAddStructReferencedObjects = true,
         WithCopy = true,
     };
 };
-
-inline void operator<<(FArchive& Ar, FFINDynamicStructHolder& Struct) {
-	Struct.Serialize(Ar);
-}
 
 template<typename T>
 class TFINDynamicStruct : public FFINDynamicStructHolder {

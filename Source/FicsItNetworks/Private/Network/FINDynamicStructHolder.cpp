@@ -83,10 +83,10 @@ bool FFINDynamicStructHolder::Serialize(FStructuredArchive::FSlot Slot) {
 	return true;
 }
 
-bool FFINDynamicStructHolder::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) {
+/*bool FFINDynamicStructHolder::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) {
 	bOutSuccess = Serialize(Ar);
 	return bOutSuccess;
-}
+}*/
 
 void FFINDynamicStructHolder::AddStructReferencedObjects(FReferenceCollector& Collector) const {
 	UScriptStruct* ThisStruct = Struct;
