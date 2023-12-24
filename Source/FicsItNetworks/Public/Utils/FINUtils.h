@@ -6,7 +6,7 @@
 #include "FINUtils.generated.h"
 
 UCLASS()
-class UFINUtils : public UBlueprintFunctionLibrary {
+class FICSITNETWORKS_API UFINUtils : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable)
