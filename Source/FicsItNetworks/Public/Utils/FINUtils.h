@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Internationalization/Regex.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Util/SemVersion.h"
 #include "FINUtils.generated.h"
