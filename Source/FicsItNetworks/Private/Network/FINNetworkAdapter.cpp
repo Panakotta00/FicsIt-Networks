@@ -55,11 +55,14 @@ bool AFINNetworkAdapter::FindConnection(AActor* Actor, FVector HitLocation, FTra
 			bool bMesh = false;
 
 			UFGPowerConnectionComponent* Power = Cast<UFGPowerConnectionComponent>(Component);
+			UFINNetworkConnectionComponent* NetConn = Cast<UFINNetworkConnectionComponent>(Component);
 			if (Power) {
 				bShouldSnap = !(Power->GetMaxNumConnections() < 1 || Power->IsHidden());
 			} else if (Cast<USceneComponent>(Component)->GetName().EndsWith("FINConnector")) {
 				bShouldSnap = true;
 				bMesh = Cast<USceneComponent>(Component)->GetName().EndsWith("Visible_FINConnector");
+			} else if(NetConn){
+				bShouldSnap = NetConn->MaxCables >= 1;
 			}
 			
 			if (bShouldSnap) {
@@ -73,6 +76,12 @@ bool AFINNetworkAdapter::FindConnection(AActor* Actor, FVector HitLocation, FTra
 		}
 		if (FoundComponent) {
 			OutTransform = FoundComponent->GetComponentTransform();
+			auto Connector = Cast<UFINNetworkConnectionComponent>(FoundComponent);
+			if(IsValid(Connector)) {
+				OutMaxCables = Connector->MaxCables;
+			}else {
+				OutMaxCables = 1;
+			}
 			return true;
 		}
 
