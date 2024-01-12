@@ -426,6 +426,10 @@ void UFINLuaProcessor::BeginDestroy() {
 	GEngine->ForceGarbageCollection(true);
 }
 
+void UFINLuaProcessor::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(Kernel);
+}
+
 void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {}
 
 void UFINLuaProcessor::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {}

@@ -82,12 +82,13 @@ CodersFileSystem::Path FFINKernelFSRoot::unpersistPath(std::string path) {
 	CodersFileSystem::SRef<CodersFileSystem::Device> dev;
 	if (pos == 0) {
 		dev = devDev;
-    } else if(devDev.isValid()) for (std::pair<const std::string, CodersFileSystem::SRef<CodersFileSystem::Device>>& device : devDev->getDevices()) {
+	} else if (!devDev) {
+		throw std::invalid_argument("Invalid mount point. Unable to persist path");
+	} else for (std::pair<const std::string, CodersFileSystem::SRef<CodersFileSystem::Device>>& device : devDev->getDevices()) {
 		if (device.first == name) {
 			dev = device.second;
 			break;
 		}
-    	throw std::invalid_argument("Invalid mount point. Unable to persist path");
 	}
 	if (dev.isValid()) for (auto& mount : mounts) {
 		if (mount.second.first == dev) {
