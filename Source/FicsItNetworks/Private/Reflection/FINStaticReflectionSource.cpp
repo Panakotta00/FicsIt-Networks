@@ -3243,10 +3243,10 @@ BeginProp(RBool, isBorder, "Is Border", "If true, the margin values provide a wa
 } PropSet() {
 	self->bIsBorder = Val;
 } EndProp()
-BeginProp(RStruct<FVector4>, margin, "Margin", "The margin values of the 9-patch (border).") {
+BeginProp(RStruct<FMargin>, margin, "Margin", "The margin values of the 9-patch (border).") {
 	Return FINStruct(self->Margin);
 } PropSet() {
-	self->Margin = Val;
+	self->Margin = FVector4(Val.Left, Val.Top, Val.Right, Val.Bottom);
 } EndProp()
 BeginProp(RBool, isRounded, "Is Rounded", "True if the box can have rounded borders.") {
 	Return FINBool(self->bIsRounded);
