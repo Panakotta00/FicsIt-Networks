@@ -53,12 +53,13 @@ USTRUCT()
 struct FFINGPUT2DrawContext {
 	GENERATED_BODY()
 
+	UObject* WorldContext = nullptr;
 	const FFINGPUT2WidgetStyle* Style = nullptr;
 	TArray<FGeometry> GeometryStack;
 	TArray<FSlateClippingZone> ClippingStack;
 
 	FFINGPUT2DrawContext() = default;
-	FFINGPUT2DrawContext(const FFINGPUT2WidgetStyle* Style) : Style(Style) {}
+	FFINGPUT2DrawContext(UObject* WorldContext, const FFINGPUT2WidgetStyle* Style) : WorldContext(WorldContext), Style(Style) {}
 };
 
 USTRUCT()
@@ -232,7 +233,6 @@ struct FFINGPUT2DC_Spline : public FFINGPUT2DrawCall {
 	virtual int32 OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const override;
 };
 
-
 USTRUCT()
 struct FFINGPUT2DC_Bezier : public FFINGPUT2DrawCall {
 	GENERATED_BODY()
@@ -266,66 +266,61 @@ struct FFINGPUT2DC_Box : public FFINGPUT2DrawCall {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector2D Position;
+	FVector2D Position = FVector2D::Zero();
 
 	UPROPERTY(SaveGame)
-	FVector2D Size;
+	FVector2D Size = FVector2D(100);
 
 	UPROPERTY(SaveGame)
-	double Rotation;
+	double Rotation = 0.0;
 
 	UPROPERTY(SaveGame)
-	FColor Color;
+	FColor Color = FColor::White;
+
+	UPROPERTY(SaveGame)
+	FString Image;
+
+	UPROPERTY(SaveGame)
+	FVector2D ImageSize = FVector2D::Zero();
 	
 	UPROPERTY(SaveGame)
 	bool bHasCenteredOrigin = false;
 	
 	UPROPERTY(SaveGame)
+	bool bHorizontalTiling = false;
+
+	UPROPERTY(SaveGame)
+	bool bVerticalTiling = false;
+	
+	UPROPERTY(SaveGame)
 	bool bIsBorder = false;
 
 	UPROPERTY(SaveGame)
-	double MarginLeft = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double MarginRight = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double MarginTop = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double MarginBottom = 0.0f;
-
+	FVector4 Margin = FVector4::Zero();
+	
 	UPROPERTY(SaveGame)
 	bool bIsRounded = false;
 
 	UPROPERTY(SaveGame)
-	double RadiusTopLeft = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double RadiusTopRight = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double RadiusBottomLeft = 0.0f;
-
-	UPROPERTY(SaveGame)
-	double RadiusBottomRight = 0.0f;
-
+	FVector4 BorderRadii = FVector4::Zero();
+	
 	UPROPERTY(SaveGame)
 	bool bHasOutline = false;
 
 	UPROPERTY(SaveGame)
 	double OutlineThickness = 0.0f;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	FColor OutlineColor = FColor::Transparent;
 
 	FFINGPUT2DC_Box() = default;
-	FFINGPUT2DC_Box(FVector2D Position, FVector2D Size, double Rotation, FColor Color) : Position(Position), Size(Size), Rotation(Rotation), Color(Color) {}
+	FFINGPUT2DC_Box(FVector2D Position, FVector2D Size, double Rotation, FColor Color, FString Image) : Position(Position), Size(Size), Rotation(Rotation), Color(Color), Image(Image) {}
 
 	virtual int32 OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const override;
 };
 
 DECLARE_DELEGATE_TwoParams(FFINGPUT2CursorEvent, FVector2D, int);
+DECLARE_DELEGATE_ThreeParams(FFINGPUT2WheelEvent, FVector2D, float, int);
 DECLARE_DELEGATE_ThreeParams(FFINGPUT2KeyEvent, uint32, uint32, int);
 DECLARE_DELEGATE_TwoParams(FFINGPUT2KeyCharEvent, TCHAR, int);
 
@@ -339,6 +334,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseDown)
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseUp)
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseMove)
+		SLATE_EVENT(FFINGPUT2WheelEvent, OnMouseWheel)
 		SLATE_EVENT(FFINGPUT2KeyEvent, OnKeyDown)
 		SLATE_EVENT(FFINGPUT2KeyEvent, OnKeyUp)
 		SLATE_EVENT(FFINGPUT2KeyCharEvent, OnKeyChar)
@@ -346,7 +342,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseEnter)
 	SLATE_END_ARGS()
 	
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, UObject* WorldContext);
 
 	// Begin SWidget
 	virtual FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override;
@@ -354,6 +350,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual void OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
@@ -364,6 +361,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 	// End SWidget
 
 private:
+	UObject* WorldContext = nullptr;
 	const FFINGPUT2WidgetStyle* Style = nullptr;
 	
 	TAttribute<TArray<FFINDynamicStructHolder>> DrawCalls;
@@ -371,6 +369,7 @@ private:
 	FFINGPUT2CursorEvent OnMouseDownEvent;
 	FFINGPUT2CursorEvent OnMouseUpEvent;
 	FFINGPUT2CursorEvent OnMouseMoveEvent;
+	FFINGPUT2WheelEvent OnMouseWheelEvent;
 	FFINGPUT2CursorEvent OnMouseEnterEvent;
 	FFINGPUT2CursorEvent OnMouseLeaveEvent;
 	FFINGPUT2KeyEvent OnKeyDownEvent;
@@ -612,71 +611,20 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color, bool hasCenteredOrigin, bool isBorder, double marginLeft, double marginRight, double marginTop, double marginBottom, bool isRounded, double radiusTopLeft, double radiusTopRight, double radiusBottomRight, double radiusBottomLeft, bool hasOutline, double outlineThickness, FLinearColor outlineColor);
+	void netFunc_drawBox(FFINGPUT2DC_Box boxSettings);
 	UFUNCTION()
 	void netFuncMeta_drawBox(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "drawBox";
 		DisplayName = FText::FromString("Draw Box");
-		Description = FText::FromString("Draws a box. (check the description of the parameters to make a more detailed description)");
-		ParameterInternalNames.Add("position");
-		ParameterDisplayNames.Add(FText::FromString("Position"));
-		ParameterDescriptions.Add(FText::FromString("The local position of the rectangle."));
-		ParameterInternalNames.Add("size");
-		ParameterDisplayNames.Add(FText::FromString("Size"));
-		ParameterDescriptions.Add(FText::FromString("The size of the rectangle."));
-		ParameterInternalNames.Add("rotation");
-		ParameterDisplayNames.Add(FText::FromString("Rotation"));
-		ParameterDescriptions.Add(FText::FromString("The rotation of the rectangle."));
-		ParameterInternalNames.Add("color");
-		ParameterDisplayNames.Add(FText::FromString("Color"));
-		ParameterDescriptions.Add(FText::FromString("The color of the rectangle."));
-		ParameterInternalNames.Add("hasCenteredOrigin");
-		ParameterDisplayNames.Add(FText::FromString("Has Centered Origin"));
-		ParameterDescriptions.Add(FText::FromString("If set to false, the position will give the left upper corner of the box and rotation will happen around this point. If set to true, the position will give the center point of box and the rotation will happen around this center point."));
-		ParameterInternalNames.Add("isBorder");
-		ParameterDisplayNames.Add(FText::FromString("Is Border"));
-		ParameterDescriptions.Add(FText::FromString("If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use (use the image as 9-patch)."));
-		ParameterInternalNames.Add("marginLeft");
-		ParameterDisplayNames.Add(FText::FromString("Margin Left"));
-		ParameterDescriptions.Add(FText::FromString("The left margin of the 9-patch."));
-		ParameterInternalNames.Add("marginRight");
-		ParameterDisplayNames.Add(FText::FromString("Margin Right"));
-		ParameterDescriptions.Add(FText::FromString("The right margin of the 9-patch."));
-		ParameterInternalNames.Add("marginTop");
-		ParameterDisplayNames.Add(FText::FromString("Margin Top"));
-		ParameterDescriptions.Add(FText::FromString("The top margin of the 9-patch."));
-		ParameterInternalNames.Add("marginBottom");
-		ParameterDisplayNames.Add(FText::FromString("Margin Bottom"));
-		ParameterDescriptions.Add(FText::FromString("The bottom margin of the 9-patch."));
-		ParameterInternalNames.Add("isRounded");
-		ParameterDisplayNames.Add(FText::FromString("Is Rounded"));
-		ParameterDescriptions.Add(FText::FromString("True if the box can have rounded borders."));
-		ParameterInternalNames.Add("radiusTopLeft");
-		ParameterDisplayNames.Add(FText::FromString("Radius Top Left"));
-		ParameterDescriptions.Add(FText::FromString("The rounded border radius of the top left corner."));
-		ParameterInternalNames.Add("radiusTopRight");
-		ParameterDisplayNames.Add(FText::FromString("Radius Top Right"));
-		ParameterDescriptions.Add(FText::FromString("The rounded border radius of the top right corner."));
-		ParameterInternalNames.Add("radiusBottomRight");
-		ParameterDisplayNames.Add(FText::FromString("Radius Bottom Right"));
-		ParameterDescriptions.Add(FText::FromString("The rounded border radius of the bottom right corner."));
-		ParameterInternalNames.Add("radiusBottomLeft");
-		ParameterDisplayNames.Add(FText::FromString("Radius Bottom Left"));
-		ParameterDescriptions.Add(FText::FromString("The rounded border radius of the bottom left corner."));
-		ParameterInternalNames.Add("hasOutline");
-		ParameterDisplayNames.Add(FText::FromString("Has Outline"));
-		ParameterDescriptions.Add(FText::FromString("True if the box has a colorful (inward) outline."));
-		ParameterInternalNames.Add("outlineThickness");
-		ParameterDisplayNames.Add(FText::FromString("Outline Thickness"));
-		ParameterDescriptions.Add(FText::FromString("The uniform thickness of the outline around the box."));
-		ParameterInternalNames.Add("outlineColor");
-		ParameterDisplayNames.Add(FText::FromString("Outline Color"));
-		ParameterDescriptions.Add(FText::FromString("The color of the outline around the box."));
+		Description = FText::FromString("Draws a box.");
+		ParameterInternalNames.Add("boxSettings");
+		ParameterDisplayNames.Add(FText::FromString("Box Settings"));
+		ParameterDescriptions.Add(FText::FromString("The settings of the box you want to draw."));
 		Runtime = 2;
 	}
 
 	UFUNCTION()
-	void netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, double rotation);
+	void netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, FString image, double rotation);
 	UFUNCTION()
 	void netFuncMeta_drawRect(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "drawRect";
@@ -691,6 +639,9 @@ public:
 		ParameterInternalNames.Add("color");
 		ParameterDisplayNames.Add(FText::FromString("Color"));
 		ParameterDescriptions.Add(FText::FromString("The color of the rectangle."));
+		ParameterInternalNames.Add("image");
+		ParameterDisplayNames.Add(FText::FromString("Image"));
+		ParameterDescriptions.Add(FText::FromString("If not empty string, should be image reference that should be placed inside the rectangle."));
 		ParameterInternalNames.Add("rotation");
 		ParameterDisplayNames.Add(FText::FromString("Rotation"));
 		ParameterDescriptions.Add(FText::FromString("The rotation of the rectangle around the upper left corner in degrees."));
@@ -746,6 +697,25 @@ public:
 		ParameterInternalNames.Add("position");
 		ParameterDisplayNames.Add(FText::FromString("Position"));
 		ParameterDescriptions.Add(FText::FromString("The position of the cursor."));
+		ParameterInternalNames.Add("modifiers");
+		ParameterDisplayNames.Add(FText::FromString("Modifiers"));
+		ParameterDescriptions.Add(FText::FromString("The Modifiers-Bit-Field providing information about the move event.\nBits:\n1th left mouse pressed\n2th right mouse button pressed\n3th ctrl key pressed\n4th shift key pressed\n5th alt key pressed\n6th cmd key pressed"));
+		Runtime = 1;
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void netSig_OnMouseWheel(FVector2D position, float wheelDelta, int modifiers);
+	UFUNCTION()
+	void netSigMeta_OnMouseWheel(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "OnMouseMove";
+		DisplayName = FText::FromString("On Mouse Move");
+		Description = FText::FromString("Triggers when the mouse cursor moves on the screen.");
+		ParameterInternalNames.Add("position");
+		ParameterDisplayNames.Add(FText::FromString("Position"));
+		ParameterDescriptions.Add(FText::FromString("The position of the cursor."));
+		ParameterInternalNames.Add("wheelDelta");
+		ParameterDisplayNames.Add(FText::FromString("Wheel Delta"));
+		ParameterDescriptions.Add(FText::FromString("The delta value of how much the mouse wheel got moved."));
 		ParameterInternalNames.Add("modifiers");
 		ParameterDisplayNames.Add(FText::FromString("Modifiers"));
 		ParameterDescriptions.Add(FText::FromString("The Modifiers-Bit-Field providing information about the move event.\nBits:\n1th left mouse pressed\n2th right mouse button pressed\n3th ctrl key pressed\n4th shift key pressed\n5th alt key pressed\n6th cmd key pressed"));
@@ -843,10 +813,10 @@ private:
 	FCriticalSection DrawingMutex;
 	
 	UPROPERTY(SaveGame)
-	TArray<FFINDynamicStructHolder> DrawCalls;
+	TArray<FFINDynamicStructHolder> BackBufferDrawCalls;
 
 	UPROPERTY(SaveGame)
-	TArray<FFINDynamicStructHolder> FlushedDrawCalls;
+	TArray<FFINDynamicStructHolder> FrontBufferDrawCalls;
 
 	TQueue<FFINDynamicStructHolder> DrawCalls2Send;
 

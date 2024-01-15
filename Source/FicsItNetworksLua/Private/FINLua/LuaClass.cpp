@@ -50,8 +50,7 @@ namespace FINLua {
 		FString MemberName = luaFIN_toFString(L, nameIndex);
 
 		FFINExecutionContext Context(LuaClass->UClass);
-		luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaClass->FINClass, MemberName, FIN_Func_ClassFunc, FIN_Prop_ClassProp, Context, true);
-		return 1;
+		return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaClass->FINClass, MemberName, FIN_Func_ClassFunc, FIN_Prop_ClassProp, Context, true);
 	}
 
 	int luaClassNewIndex(lua_State* L) {

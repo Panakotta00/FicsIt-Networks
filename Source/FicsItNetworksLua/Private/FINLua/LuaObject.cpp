@@ -2,6 +2,8 @@
 
 #include "FINLua/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "Network/FINNetworkUtils.h"
+#include "tracy/Tracy.hpp"
 
 namespace FINLua {
 	FLuaObject::FLuaObject(const FFINNetworkTrace& Object, UFINKernelSystem* Kernel) : Object(Object), Kernel(Kernel) {
@@ -58,6 +60,7 @@ namespace FINLua {
 	}
 
 	int luaObjectIndex(lua_State* L) {
+		ZoneScoped;
 		const int thisIndex = 1;
 		const int nameIndex = 2;
 		
@@ -77,11 +80,12 @@ namespace FINLua {
 		}
 
 		FFINExecutionContext Context(LuaObject->Object);
-		luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
-		return 1;
+		return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
 	}
 	
 	int luaObjectNewIndex(lua_State* L) {
+		ZoneScoped;
+		
 		const int thisIndex = 1;
 		const int nameIndex = 2;
 		const int valueIndex = 3;

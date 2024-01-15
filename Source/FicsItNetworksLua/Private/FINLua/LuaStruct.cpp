@@ -2,6 +2,7 @@
 
 #include "FINLua/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "tracy/Tracy.hpp"
 
 #define PersistParams \
 	const std::string& _persist_namespace, \
@@ -33,6 +34,8 @@ namespace FINLua {
 	 * If CauseErrorForIndex is not nullptr, causes an lua error instead, guaranteeing a non-nullptr return value.
 	 */
 	UFINFunction* luaStructFindOperator(lua_State* L, UFINStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, TArray<FINAny>& Operands, const int* CauseErrorForIndex) {
+		ZoneScoped;
+		
 		UFINFunction* func;
 		int funcIndex = 0;
 		while (true) {
@@ -69,6 +72,8 @@ namespace FINLua {
 	 * If CauseErroForIndex is not nullptr, causes an lua error instead, guaranteeing a return value of >= 0
 	 */
 	int luaStructExecuteOperator(lua_State* L, const TSharedRef<FINStruct>& Struct, UFINStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, const int* CauseErrorForIndex) {
+		ZoneScoped;
+		
 		TArray<FINAny> parameters;
 		UFINFunction* func = luaStructFindOperator(L, Type, OperatorName, OperandIndices, parameters, CauseErrorForIndex);
 		if (!func) return -2;
@@ -248,6 +253,8 @@ namespace FINLua {
 	}
 	
 	int luaStructIndex(lua_State* L) {
+		ZoneScoped;
+		
 		const int thisIndex = 1;
 		const int nameIndex = 2;
 		
@@ -255,14 +262,14 @@ namespace FINLua {
 		FString MemberName = luaFIN_toFString(L, nameIndex);
 
 		FFINExecutionContext Context(LuaStruct->Struct->GetData());
-		if (luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaStruct->Type, MemberName, EFINFunctionFlags::FIN_Func_MemberFunc, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, false)) {
-			return 1;
-		}
-		
+		int arg = luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaStruct->Type, MemberName, EFINFunctionFlags::FIN_Func_MemberFunc, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, false);
+		if (arg > 0) return arg;
 		return luaStructExecuteBinaryOperator(L, FIN_OP_TEXT(FIN_Operator_Index), 2, LuaStruct->Struct, LuaStruct->Type, nullptr);
 	}
 
 	int luaStructNewIndex(lua_State* L) {
+		ZoneScoped;
+		
 		const int thisIndex = 1;
 		const int nameIndex = 2;
 		const int valueIndex = 3;
@@ -279,6 +286,8 @@ namespace FINLua {
 	}
 
 	int luaStructCall(lua_State* L) {
+		ZoneScoped;
+		
 		const int thisIndex = 1;
 		const int operandsStartIndex = 2;
 
@@ -387,10 +396,11 @@ namespace FINLua {
 				lua_pop(L, 1);
 				lua_geti(L, Index, ++j);
 			}
-			TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, -1, Prop, true, bAllowImplicitConstruction);
+			if (!lua_isnil(L, -1)) {
+				TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, -1, Prop, true, bAllowImplicitConstruction);
+				if (Value.IsSet()) Prop->SetValue(Struct->GetData(), Value.GetValue());
+			}
 			lua_pop(L, 1);
-			if (!Value.IsSet()) return nullptr;
-			Prop->SetValue(Struct->GetData(), Value.GetValue());
 		}
 
 		return Struct;

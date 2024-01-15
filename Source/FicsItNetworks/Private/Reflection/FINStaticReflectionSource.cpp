@@ -28,6 +28,7 @@
 #include "FGPipeConnectionComponent.h"
 #include "FGGameState.h"
 #include "FGHealthComponent.h"
+#include "FGIconLibrary.h"
 #include "FGItemCategory.h"
 #include "FGLocomotive.h"
 #include "FGPipeSubsystem.h"
@@ -60,6 +61,7 @@
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
 #include "Buildables/FGBuildableWidgetSign.h"
+#include "Computer/FINComputerGPUT2.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "FicsItKernel/Logging.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
@@ -2102,6 +2104,9 @@ Hook(UFINRailroadSignalHook)
 BeginSignal(AspectChanged, "Aspect Changed", "Triggers when the aspect of this signal changes.")
 	SignalParam(0, RInt, aspect, "Aspect", "The new aspect of the signal (see 'Get Aspect' for more information)")
 EndSignal()
+BeginSignal(ValidationChanged, "Validation Changed", "Triggers when the validation of this signal changes.")
+	SignalParam(0, RInt, validation, "Validation", "The new validation of the signal (see 'Block Validation' for more information)")
+EndSignal()
 BeginProp(RBool, isPathSignal, "Is Path Signal", "True if this signal is a path-signal.") {
 	Return self->IsPathSignal();
 } EndProp()
@@ -3112,4 +3117,160 @@ BeginFunc(format, "Format", "Creates a formatted string representation of this l
 	Body()
 	result = self->ToClipboardText();
 } EndFunc()
+EndStruct()
+
+BeginStruct(FIconData, "IconData", "Icon Data", "A struct containing information about a game icon (used in f.e. signs).")
+BeginProp(RBool, isValid, "Is Valid", "True if the icon data refers to an valid icon") {
+	Return FINBool(self->ID >= 0);
+} EndProp()
+BeginProp(RInt, id, "ID", "The icon ID.") {
+	Return (FINInt)self->ID;
+} EndProp()
+BeginProp(RString, ref, "Ref", "The media reference of this icon.") {
+	Return FString::Printf(TEXT("icon:%i"), self->ID);
+} EndProp()
+BeginProp(RBool, animated, "Animated", "True if the icon is animated.") {
+	Return self->Animated;
+} EndProp()
+BeginProp(RString, iconName, "Icon Name", "The name of the icon.") {
+	Return self->IconName.ToString();
+} EndProp()
+BeginProp(RString, iconType, "Icon Type", "The type of the icon.\n0 = Building\n1 = Part\n2 = Equipment\n3 = Monochrome\n4 = Material\n5 = Custom\n6 = Map Stamp") {
+	Return (FINInt)self->IconType;
+} EndProp()
+BeginProp(RBool, hidden, "Hidden", "True if the icon is hidden in the selection.") {
+	Return self->Hidden;
+} EndProp()
+BeginProp(RBool, searchOnly, "Search Only", "True if the icon will be shown in selection only if searched for directly by name.") {
+	Return self->SearchOnly;
+} EndProp()
+EndStruct()
+
+BeginStructConstructable(FMargin, "Margin", "Margin", "A struct containing four floats that describe a margin around a box (like a 9-patch).")
+BeginProp(RFloat, left, "Left", "The left edge of the rectangle.") {
+	Return FINFloat(self->Left);
+} PropSet() {
+	self->Left = Val;
+} EndProp()
+BeginProp(RFloat, right, "Right", "The right edge of the rectangle.") {
+	Return FINFloat(self->Right);
+} PropSet() {
+	self->Right = Val;
+} EndProp()
+BeginProp(RFloat, top, "Top", "The top edge of the rectangle.") {
+	Return FINFloat(self->Top);
+} PropSet() {
+	self->Top = Val;
+} EndProp()
+BeginProp(RFloat, bottom, "Bottom", "The bottom edge of the rectangle.") {
+	Return FINFloat(self->Left);
+} PropSet() {
+	self->Bottom = Val;
+} EndProp()
+EndStruct()
+
+BeginStructConstructable(FVector4, "Vector4", "Vector4", "A Vector containing four values.")
+BeginProp(RFloat, x, "X", "The first value in the Vector4.") {
+	Return self->X;
+} PropSet() {
+	self->X = Val;
+} EndProp()
+BeginProp(RFloat, y, "Y", "The second value in the Vector4.") {
+	Return self->Y;
+} PropSet() {
+	self->Y = Val;
+} EndProp()
+BeginProp(RFloat, z, "Z", "The third value in the Vector4.") {
+	Return self->Z;
+} PropSet() {
+	self->Z = Val;
+} EndProp()
+BeginProp(RFloat, w, "W", "The fourth value in the Vector4.") {
+	Return self->W;
+} PropSet() {
+	self->W = Val;
+} EndProp()
+EndStruct()
+
+BeginStructConstructable(FFINGPUT2DC_Box, "GPUT2DrawCallBox", "GPU T2 Box Draw Call", "This struct contains the necessary information to draw a box onto the GPU T2.")
+BeginProp(RStruct<FVector2D>, position, "Position", "The drawn local position of the rectangle.") {
+	Return FINStruct(self->Position);
+} PropSet() {
+	self->Position = Val;
+} EndProp()
+BeginProp(RStruct<FVector2D>, size, "Size", "The drawn size of the rectangle.") {
+	Return FINStruct(self->Size);
+} PropSet() {
+	self->Size = Val;
+} EndProp()
+BeginProp(RFloat, rotation, "Rotation", "The draw rotation of the rectangle.") {
+	Return FINFloat(self->Rotation);
+} PropSet() {
+	self->Rotation = Val;
+} EndProp()
+BeginProp(RStruct<FLinearColor>, color, "Color", "The fill color of the rectangle, or the tint of the image drawn.") {
+	Return FINStruct(self->Color.ReinterpretAsLinear());
+} PropSet() {
+	self->Color = Val.QuantizeRound();
+} EndProp()
+BeginProp(RString, image, "Image", "If not empty, should be a image reference to the image that should be drawn inside the rectangle.") {
+	Return FINStr(self->Image);
+} PropSet() {
+	self->Image = Val;
+} EndProp()
+BeginProp(RStruct<FVector2D>, imageSize, "Image Size", "The size of the internal image drawn, necessary for proper scaling, antialising and tiling.") {
+	Return FINStruct(self->ImageSize);
+} PropSet() {
+	self->ImageSize = Val;
+} EndProp()
+BeginProp(RBool, hasCenteredOrigin, "Has Centered Origin", "If set to false, the position will give the left upper corner of the box and rotation will happen around this point. If set to true, the position will give the center point of box and the rotation will happen around this center point.") {
+	Return FINBool(self->bHasCenteredOrigin);
+} PropSet() {
+	self->bHasCenteredOrigin = Val;
+} EndProp()
+BeginProp(RBool, horizontalTiling, "Horizontal Tiling", "True if the image should be tiled horizontally.") {
+	Return FINBool(self->bHorizontalTiling);
+} PropSet() {
+	self->bHorizontalTiling = Val;
+} EndProp()
+BeginProp(RBool, verticalTiling, "Vertical Tiling", "True if the image should be tiled vertically.") {
+	Return FINBool(self->bVerticalTiling);
+} PropSet() {
+	self->bVerticalTiling = Val;
+} EndProp()
+BeginProp(RBool, isBorder, "Is Border", "If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use (use the image as 9-patch).") {
+	Return FINBool(self->bIsBorder);
+} PropSet() {
+	self->bIsBorder = Val;
+} EndProp()
+BeginProp(RStruct<FMargin>, margin, "Margin", "The margin values of the 9-patch (border).") {
+	Return FINStruct(self->Margin);
+} PropSet() {
+	self->Margin = FVector4(Val.Left, Val.Top, Val.Right, Val.Bottom);
+} EndProp()
+BeginProp(RBool, isRounded, "Is Rounded", "True if the box can have rounded borders.") {
+	Return FINBool(self->bIsRounded);
+} PropSet() {
+	self->bIsRounded = Val;
+} EndProp()
+BeginProp(RStruct<FVector4>, radii, "Radii", "The rounded border radii used if isRounded is set to true.\nThe Vector4 corner mapping in order: Top Left, Top Right, Bottom Right & Bottom Left.") {
+	Return FINStruct(self->BorderRadii);
+} PropSet() {
+	self->BorderRadii = Val;
+} EndProp()
+BeginProp(RBool, hasOutline, "Has Outline", "True if the box has a colorful (inward) outline.") {
+	Return FINBool(self->bHasOutline);
+} PropSet() {
+	self->bHasOutline = Val;
+} EndProp()
+BeginProp(RFloat, outlineThickness, "Outline Thickness", "The uniform thickness of the outline around the box.") {
+	Return FINFloat(self->OutlineThickness);
+} PropSet() {
+	self->OutlineThickness = Val;
+} EndProp()
+BeginProp(RStruct<FLinearColor>, outlineColor, "Outline Color", "The color of the outline around the box.") {
+	Return FINStruct(self->OutlineColor.ReinterpretAsLinear());
+} PropSet() {
+	self->OutlineColor = Val.QuantizeRound();
+} EndProp()
 EndStruct()

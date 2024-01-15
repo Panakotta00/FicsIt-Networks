@@ -171,6 +171,7 @@ void AFINNetworkCircuit::ConnectNodes(UObject* WorldContext, const TScriptInterf
 }
 
 bool AFINNetworkCircuit::IsNodeConnected_Internal(const TScriptInterface<IFINNetworkCircuitNode>& Self, const TScriptInterface<IFINNetworkCircuitNode>& Node, TSet<UObject*>& Searched) {
+	if (!Self.GetObject()) return false;
 	if (Searched.Contains(Self.GetObject())) return false;
 	Searched.Add(Self.GetObject());
 

@@ -179,3 +179,7 @@ bool UFINComputerRCO::GPUT2KeyCharEvent_Validate(AFINComputerGPUT2* GPU, const F
 void UFINComputerRCO::LogRehandleAllEntries_Implementation(UFINLog* Log) {
 	Log->RehandleAllEntries();
 }
+
+void UFINComputerRCO::GPUT2MouseWheelEvent_Implementation(AFINComputerGPUT2* GPU, FVector2D Position, float Delta, int Modifiers) {
+	GPU->netSig_OnMouseWheel(Position, Delta, Modifiers);
+}

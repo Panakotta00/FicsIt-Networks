@@ -1,6 +1,11 @@
 #include "Utils/FINUtils.h"
 
+#include "FGSaveSession.h"
+#include "AssetRegistry/IAssetRegistry.h"
+#include "Dom/JsonObject.h"
 #include "Internationalization/Regex.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 const FRegexPattern UFINUtils::VariablePattern(TEXT("\\$\\{(\\w+)(\\|(\\w+))?\\}"));
 
@@ -32,4 +37,36 @@ void UFINUtils::VariablesFormString(const FString& Text, TMap<FString, FString>&
 		FString Default = Matcher.GetCaptureGroup(3);
 		OutVariables.Add(Variable, Default);
 	}
+}
+
+FVersion UFINUtils::GetFINSaveVersion(UObject* WorldContext) {
+	UFGSaveSession* Session = UFGSaveSession::Get(WorldContext);
+	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Session->GetModMetadata());
+	TSharedPtr<FJsonObject> Metadata = nullptr;
+	FJsonSerializer::Deserialize(Reader, Metadata);
+
+	if (!Metadata.IsValid()) {
+		return FVersion();
+	}
+
+	const TArray<TSharedPtr<FJsonValue>>* Mods;
+	if (Metadata->TryGetArrayField(TEXT("Mods"), Mods)) {
+		for (const TSharedPtr<FJsonValue>& Mod : *Mods) {
+			TSharedPtr<FJsonObject>* ModObj;
+			if (!Mod->TryGetObject(ModObj)) continue;
+			
+			FString Reference;
+			if (!ModObj->Get()->TryGetStringField(TEXT("Reference"), Reference) || Reference != TEXT("FicsItNetworks")) continue;
+			FString VersionString;
+			if (!ModObj->Get()->TryGetStringField(TEXT("Version"), VersionString)) continue;
+
+			FVersion VersionStruct;
+			FString ParseError;
+			if(!VersionStruct.ParseVersion(VersionString, ParseError)) continue;
+
+			return VersionStruct;
+		}
+	}
+
+	return FVersion();
 }

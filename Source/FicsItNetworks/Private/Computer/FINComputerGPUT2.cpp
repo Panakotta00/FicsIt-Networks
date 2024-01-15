@@ -3,6 +3,7 @@
 #include "FGPlayerController.h"
 #include "Computer/FINComputerRCO.h"
 #include "Interfaces/ISlateNullRendererModule.h"
+#include "Utils/FINMediaSubsystem.h"
 
 const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINGPUT2WidgetStyle"));
 
@@ -73,8 +74,27 @@ int32 FFINGPUT2DC_Bezier::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArg
 
 int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
 	FSlateBrush Brush = Context.Style->FilledBox;
+
+	if (!Image.IsEmpty()) {
+		UObject* Texture = AFINMediaSubsystem::GetMediaSubsystem(Context.WorldContext)->GetOrLoadTexture(Image);
+		if (!Texture) return LayerId;
+		Brush.SetResourceObject(Texture);
+	}
+
+	if (!ImageSize.IsZero()) {
+		Brush.ImageSize = ImageSize;
+		Brush.DrawAs = ESlateBrushDrawType::Image;
+	}
+
+	if (bVerticalTiling) {
+		if (bHorizontalTiling) Brush.Tiling = ESlateBrushTileType::Both;
+		else Brush.Tiling = ESlateBrushTileType::Vertical;
+	} else if (bHorizontalTiling) {
+		Brush.Tiling = ESlateBrushTileType::Horizontal;
+	}
+	
 	if (bIsBorder) {
-		Brush.Margin = FMargin(MarginLeft, MarginTop, MarginRight, MarginBottom);
+		Brush.Margin = Margin;
 	}
 
 	if (bIsRounded || bHasOutline) {
@@ -83,7 +103,7 @@ int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& 
 	}
 
 	if (bIsRounded) {
-		Brush.OutlineSettings.CornerRadii = FVector4d(RadiusTopLeft, RadiusTopRight, RadiusBottomRight, RadiusBottomLeft);
+		Brush.OutlineSettings.CornerRadii = BorderRadii;
 	} else {
 		Brush.OutlineSettings.CornerRadii = FVector4d(0);
 	}
@@ -121,7 +141,8 @@ const FFINGPUT2WidgetStyle& FFINGPUT2WidgetStyle::GetDefault() {
 	return *Default;
 }
 
-void SFINGPUT2Widget::Construct(const FArguments& InArgs) {
+void SFINGPUT2Widget::Construct(const FArguments& InArgs, UObject* InWorldContext) {
+	WorldContext = InWorldContext;
 	Style = InArgs._Style;
 	DrawCalls = InArgs._DrawCalls;
 	OnMouseDownEvent = InArgs._OnMouseDown;
@@ -129,6 +150,7 @@ void SFINGPUT2Widget::Construct(const FArguments& InArgs) {
 	OnMouseMoveEvent = InArgs._OnMouseMove;
 	OnMouseEnterEvent = InArgs._OnMouseEnter;
 	OnMouseLeaveEvent = InArgs._OnMouseLeave;
+	OnMouseWheelEvent = InArgs._OnMouseWheel;
 	OnKeyDownEvent = InArgs._OnKeyDown;
 	OnKeyUpEvent = InArgs._OnKeyUp;
 	OnKeyCharEvent = InArgs._OnKeyChar;
@@ -139,7 +161,7 @@ FVector2D SFINGPUT2Widget::ComputeDesiredSize(float LayoutScaleMultiplier) const
 }
 
 int32 SFINGPUT2Widget::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
-	FFINGPUT2DrawContext Context(Style);
+	FFINGPUT2DrawContext Context(WorldContext, Style);
 	Context.GeometryStack.Add(AllottedGeometry);
 	for (const FFINDynamicStructHolder& DrawCallBase : DrawCalls.Get()) {
 		FFINGPUT2DrawCall* DrawCall = DrawCallBase.GetPtr<FFINGPUT2DrawCall>();
@@ -165,6 +187,12 @@ FReply SFINGPUT2Widget::OnMouseMove(const FGeometry& MyGeometry, const FPointerE
 	FVector2D Position = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
 	OnMouseMoveEvent.ExecuteIfBound(Position, AFINComputerGPU::MouseToInt(MouseEvent));
 	return FReply::Handled();
+}
+
+FReply SFINGPUT2Widget::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	FVector2D Position = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
+	OnMouseWheelEvent.ExecuteIfBound(Position, MouseEvent.GetWheelDelta(), AFINComputerGPU::MouseToInt(MouseEvent));
+	return FReply::Handled().ReleaseMouseCapture();
 }
 
 void SFINGPUT2Widget::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
@@ -220,7 +248,7 @@ void AFINComputerGPUT2::Tick(float DeltaSeconds) {
 	} else if (bFlushOverNetwork) {
 		Client_CleanDrawCalls();
 		bFlushOverNetwork = false;
-		for (const FFINDynamicStructHolder& DrawCall : FlushedDrawCalls) {
+		for (const FFINDynamicStructHolder& DrawCall : FrontBufferDrawCalls) {
 			DrawCalls2Send.Enqueue(DrawCall);
 		}
 	}
@@ -228,7 +256,7 @@ void AFINComputerGPUT2::Tick(float DeltaSeconds) {
 
 TSharedPtr<SWidget> AFINComputerGPUT2::CreateWidget() {
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
-	return SNew(SFINGPUT2Widget)
+	return SNew(SFINGPUT2Widget, this)
 	.Style(&Style)
 	.OnMouseDown_Lambda([this, RCO](FVector2D position, int modifiers) {
 		RCO->GPUT2MouseEvent(this, 0, position, modifiers);
@@ -238,6 +266,9 @@ TSharedPtr<SWidget> AFINComputerGPUT2::CreateWidget() {
 	})
 	.OnMouseMove_Lambda([this, RCO](FVector2D position, int modifiers) {
 		RCO->GPUT2MouseEvent(this, 2, position, modifiers);
+	})
+	.OnMouseWheel_Lambda([this, RCO](FVector2D position, float delta, int modifiers) {
+		RCO->GPUT2MouseWheelEvent(this, position, delta, modifiers);
 	})
 	.OnMouseEnter_Lambda([this, RCO](FVector2D position, int modifiers) {
 		RCO->GPUT2MouseEvent(this, 3, position, modifiers);
@@ -255,18 +286,18 @@ TSharedPtr<SWidget> AFINComputerGPUT2::CreateWidget() {
 		RCO->GPUT2KeyCharEvent(this, FString::Chr(c), modifiers);
 	})
 	.DrawCalls_Lambda([this]() {
-		return FlushedDrawCalls;
+		return FrontBufferDrawCalls;
 	});
 }
 
 void AFINComputerGPUT2::FlushDrawCalls() {
-	FlushedDrawCalls = DrawCalls;
-	DrawCalls.Empty();
+	FrontBufferDrawCalls = BackBufferDrawCalls;
+	BackBufferDrawCalls.Empty();
 }
 
 void AFINComputerGPUT2::AddDrawCall(TFINDynamicStruct<FFINGPUT2DrawCall> DrawCall) {
 	FScopeLock Lock(&DrawingMutex);
-	DrawCalls.Add(DrawCall);
+	BackBufferDrawCalls.Add(DrawCall);
 }
 
 void AFINComputerGPUT2::netFunc_flush() {
@@ -314,30 +345,12 @@ void AFINComputerGPUT2::netFunc_drawBezier(FVector2D p1, FVector2D p2, FVector2D
 	AddDrawCall(FFINGPUT2DC_Bezier(p1, p2, p3, p4, thickness, color.QuantizeRound()));
 }
 
-void AFINComputerGPUT2::netFunc_drawBox(FVector2D position, FVector2D size, double rotation, FLinearColor color,
-										bool hasCenteredOrigin, bool isBorder, double marginLeft, double marginRight, double marginTop,
-										double marginBottom, bool isRounded, double radiusTopLeft, double radiusTopRight, double radiusBottomRight,
-										double radiusBottomLeft, bool hasOutline, double outlineThickness, FLinearColor outlineColor) {
-	FFINGPUT2DC_Box DC(position, size, rotation, color.QuantizeRound());
-	DC.bHasCenteredOrigin = hasCenteredOrigin;
-	DC.bIsBorder = isBorder;
-	DC.MarginLeft = marginLeft;
-	DC.MarginRight = marginRight;
-	DC.MarginTop = marginTop;
-	DC.MarginBottom = marginBottom;
-	DC.bIsRounded = isRounded;
-	DC.RadiusTopLeft = radiusTopLeft;
-	DC.RadiusTopRight = radiusTopRight;
-	DC.RadiusBottomRight = radiusBottomRight;
-	DC.RadiusBottomLeft = radiusBottomLeft;
-	DC.bHasOutline = hasOutline;
-	DC.OutlineThickness = outlineThickness;
-	DC.OutlineColor = outlineColor.QuantizeRound();
-	DrawCalls.Add(DC);
+void AFINComputerGPUT2::netFunc_drawBox(FFINGPUT2DC_Box BoxSettings) {
+	BackBufferDrawCalls.Add(BoxSettings);
 }
 
-void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, double rotation) {
-	DrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound()));
+void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLinearColor color, FString image, double rotation) {
+	BackBufferDrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound(), image));
 }
 
 FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool bMonospace) {
@@ -356,6 +369,7 @@ FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool 
 void AFINComputerGPUT2::netSig_OnMouseDown_Implementation(FVector2D position, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnMouseUp_Implementation(FVector2D position, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnMouseMove_Implementation(FVector2D position, int modifiers) {}
+void AFINComputerGPUT2::netSig_OnMouseWheel_Implementation(FVector2D position, float wheelDelta, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnKeyDown_Implementation(int64 c, int64 code, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnKeyUp_Implementation(int64 c, int64 code, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnKeyChar_Implementation(const FString& c, int modifiers) {}
@@ -364,12 +378,12 @@ void AFINComputerGPUT2::netSig_OnMouseLeave_Implementation(FVector2D position, i
 
 void AFINComputerGPUT2::Client_CleanDrawCalls_Implementation() {
 	if (HasAuthority()) return;
-	DrawCalls.Empty();
+	BackBufferDrawCalls.Empty();
 }
 
 void AFINComputerGPUT2::Client_AddDrawCallChunk_Implementation(const TArray<FFINDynamicStructHolder>& Chunk) {
 	if (HasAuthority()) return;
-	DrawCalls.Append(Chunk);
+	BackBufferDrawCalls.Append(Chunk);
 }
 
 void AFINComputerGPUT2::Client_FlushDrawCalls_Implementation() {
