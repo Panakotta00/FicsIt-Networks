@@ -14,6 +14,7 @@ You can draw on the screen with the selected
 color by holding down your primary mouse  
 button and moving your mouse around.
 
+
 == Large Screen Setup
 
 image::lua/examples/Example_Paint_Large-Screen_Hardware.png[ width = 300 , height = 300 , role=right ]
@@ -84,6 +85,26 @@ assert(screen,'No <FINComputerScreen> PCI device found')
 
 [source,Lua]
 ----
+local gpu = computer.getPCIDevices(classes.GPU_T1_C)[1]
+
+assert(gpu,'No <GPU_T1_C> PCI device found')
+
+
+local screen = computer.getPCIDevices(classes.FINComputerScreen)[1]
+
+local comp_screen = component.findComponent(classes.Screen)[1]
+
+if comp_screen then
+
+    screen = component.proxy(comp_screen)
+
+    assert(screen,'Failed to proxy <Screen> component')
+
+end
+
+assert(screen,'No <Screen> nor <FinComputerScreen> component found')
+
+
 -- [ GPU Setup ]
 
 event.listen(gpu)
