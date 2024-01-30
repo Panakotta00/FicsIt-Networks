@@ -1,6 +1,9 @@
 #include "FINLuaProcessorStateStorage.h"
+
+#include "FicsItNetworksLuaModule.h"
 #include "FicsItNetworksModule.h"
 #include "Network/FINDynamicStructHolder.h"
+#include "Utils/FINUtils.h"
 
 bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
 	if (!Slot.GetUnderlyingArchive().IsSaveGame()) return false;
@@ -11,23 +14,21 @@ bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
 	FString Str;
 	Record.EnterField(SA_FIELD_NAME(TEXT("Globals"))) << Str;
 
-	FStructuredArchive::FSlot Ar = Record.EnterField(SA_FIELD_NAME(TEXT("Structs")));
+	FVersion version = UFINUtils::GetFINSaveVersion(GWorld);
+	if (FVersion(0, 3, 19).Compare(version) == 1) return false;
+
+	int32 StructNum = Structs.Num();
+	FStructuredArchiveArray Array = Record.EnterArray(SA_FIELD_NAME(TEXT("Structs")), StructNum);
 	
-	int StructNum = Structs.Num();
-	Ar << StructNum;
 	if (Record.GetUnderlyingArchive().IsLoading()) Structs.Empty();
 	for (int i = 0; i < StructNum; ++i) {
-		int j = i;
-		if (Record.GetUnderlyingArchive().IsLoading()) j = Structs.Add(MakeShared<FFINDynamicStructHolder>());
-		TSharedPtr<FFINDynamicStructHolder> holder = Structs[j];
-		if (holder.IsValid() && holder.Get()) Ar.GetUnderlyingArchive() << *holder.Get();
-		else {
-			FFINDynamicStructHolder h;
-			Ar.GetUnderlyingArchive() << h;
+		if (Record.GetUnderlyingArchive().IsLoading()) Structs.Add(MakeShared<FFINDynamicStructHolder>());
+		TSharedPtr<FFINDynamicStructHolder> holder = Structs[i];
+		if (holder) {
+			holder->Serialize(Array.EnterElement());
+		} else {
+			FFINDynamicStructHolder().Serialize(Array.EnterElement());
 		}
-	}
-	for (UObject* r : References) {
-		if (r && r->GetClass()->IsChildOf(UClass::StaticClass())) r->AddToRoot();
 	}
 	return true;
 }

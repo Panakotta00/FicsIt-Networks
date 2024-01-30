@@ -1,4 +1,6 @@
 #include "UI/FINLuaCodeEditor.h"
+
+#include "TracyLib/public/tracy/Tracy.hpp"
 #include "UI/FINTextDecorators.h"
 #include "Utils/FINUtils.h"
 
@@ -211,6 +213,8 @@ FFINLuaSyntaxHighlighterTextLayoutMarshaller::FFINLuaSyntaxHighlighterTextLayout
 }
 
 void FFINLuaSyntaxHighlighterTextLayoutMarshaller::ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines) {
+	ZoneScoped;
+	
 	TArray<FTextLayout::FNewLineData> LinesToAdd;
 	LinesToAdd.Reserve(TokenizedLines.Num());
 

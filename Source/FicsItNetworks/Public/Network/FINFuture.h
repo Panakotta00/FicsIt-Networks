@@ -64,6 +64,11 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 
 	virtual void Execute() override {
 		FScopeLock Lock(&Mutex);
+
+		if (!Context.IsValid()) {
+			throw FFINException(TEXT("Execution context of future is invalid."));
+		}
+		
 		if (Function) {
 			Output = Function->Execute(Context, Input);
 			bDone = true;

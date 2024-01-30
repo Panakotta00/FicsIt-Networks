@@ -9,6 +9,7 @@
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
 #include "Computer/FINComputerGPU.h"
+#include "Engine/Engine.h"
 #include "Patching/NativeHookManager.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {

@@ -82,6 +82,7 @@ bool UFINKernelSystem::ShouldSave_Implementation() const {
 }
 
 void UFINKernelSystem::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	HandleFutures(); // TODO: Add notices and remove serialization for Future Context, to support generic context... solved by handling all futures prior to save game, and the guarantee a future has to be finished using the execution context once called for execution, otherwise it MUST handle serialization
 	SystemResetTimePoint = (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - SystemResetTimePoint;
 }
 
@@ -202,7 +203,11 @@ void UFINKernelSystem::HandleFutures() {
 		TSharedPtr<TFINDynamicStruct<FFINFuture>> Future;
 		FutureQueue.Peek(Future);
 		FutureQueue.Pop();
-		(*Future)->Execute();
+		try {
+			(*Future)->Execute();
+		} catch (FFINException e) {
+			Crash(MakeShared<FFINKernelCrash>(e.GetMessage())); // TODO: Maybe add a way to make these future crashes catchable in f.e. Lua using protected calls
+		}
 	}
 }
 

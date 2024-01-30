@@ -1,4 +1,6 @@
 ﻿#include "Network/FINNetworkConnectionComponent.h"
+
+#include "Net/UnrealNetwork.h"
 #include "Network/FINNetworkCable.h"
 #include "Network/FINNetworkCircuit.h"
 #include "Resources/FGBuildingDescriptor.h"

@@ -4,6 +4,7 @@
 #include "Network/Signals/FINSignalSubsystem.h"
 #include "Network/Wireless/FINWirelessSubsystem.h"
 #include "Utils/FINBlueprintParameterHooks.h"
+#include "Utils/FINMediaSubsystem.h"
 
 UFINGameWorldModule::UFINGameWorldModule() {
 	ModSubsystems.Add(AFINComputerSubsystem::StaticClass());
@@ -11,4 +12,5 @@ UFINGameWorldModule::UFINGameWorldModule() {
 	ModSubsystems.Add(AFINHookSubsystem::StaticClass());
 	ModSubsystems.Add(AFINWirelessSubsystem::StaticClass());
 	ModSubsystems.Add(AFINBlueprintParameterHooks::StaticClass());
+	ModSubsystems.Add(AFINMediaSubsystem::StaticClass());
 }

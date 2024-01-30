@@ -280,7 +280,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 		return *Data.ANY;
 	}
 
-	bool Serialize(FArchive& Ar);
+	bool Serialize(FStructuredArchive::FSlot Slot);
 
 private:
 	TEnumAsByte<EFINNetworkValueType> Type = FIN_NIL;
@@ -299,18 +299,14 @@ private:
 	} Data;
 };
 
-inline bool operator<<(FArchive& Ar, FFINAnyNetworkValue& Val) {
-	return Val.Serialize(Ar);
-}
-
-inline bool operator<<(FStructuredArchive::FSlot Slot, FFINAnyNetworkValue& Val) {
-	return Val.Serialize(Slot.GetUnderlyingArchive());
+FORCEINLINE void operator<<(FStructuredArchive::FSlot Slot, FFINAnyNetworkValue& AnyValue) {
+	AnyValue.Serialize(Slot);
 }
 
 template<>
 struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFINAnyNetworkValue> {
 	enum {
-		WithSerializer = true,
+		WithStructuredSerializer = true,
 		WithCopy = true,
 	};
 };

@@ -61,19 +61,16 @@ public:
 
 	/**
 	 * Returns the referenced object.
-	 * nullptr if trace is invalid
 	 */
 	UObject* operator*() const;
 
 	/**
 	 * Returns the reference object.
-	 * nullptr if trace is invalid
 	 */
 	UObject* Get() const;
 
 	/**
 	 * Accesses the referenced object.
-	 * nullptr if trace is invalid
 	 */
 	UObject* operator->() const;
 

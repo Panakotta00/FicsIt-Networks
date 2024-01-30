@@ -161,7 +161,10 @@ void FFINLuaProcessorTick::syncTick() {
 			asyncTask.Reset();
 		}
 		TickMutex.Lock();
-		Processor->LuaTick();
+		{
+			ZoneScoped;
+			Processor->LuaTick();
+		}
 		TickMutex.Unlock();
 		if (bShouldPromote) {
 			promote();
@@ -199,7 +202,10 @@ void FFINLuaProcessorTick::syncTick() {
 bool FFINLuaProcessorTick::asyncTick() {
 	if (State & LUA_ASYNC) {
 		TickMutex.Lock();
-		Processor->LuaTick();
+		{
+			ZoneScoped;
+			Processor->LuaTick();
+		}
 		TickMutex.Unlock();
 		AsyncSyncMutex.Lock();
 		if (bDoSync) {
@@ -417,6 +423,11 @@ void UFINLuaProcessor::Serialize(FArchive& Ar) {
 void UFINLuaProcessor::BeginDestroy() {
 	Super::BeginDestroy();
 	tickHelper.stop();
+	GEngine->ForceGarbageCollection(true);
+}
+
+void UFINLuaProcessor::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(Kernel);
 }
 
 void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {}

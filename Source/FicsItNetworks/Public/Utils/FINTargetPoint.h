@@ -1,6 +1,9 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
 #include "WheeledVehicles/FGTargetPoint.h"
+#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 #include "FINTargetPoint.generated.h"
 
 USTRUCT()

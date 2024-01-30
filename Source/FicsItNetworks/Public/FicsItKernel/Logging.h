@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FGSaveInterface.h"
+#include "Components/ActorComponent.h"
 #include "Logging.generated.h"
 
 UENUM()
@@ -37,9 +38,15 @@ struct FICSITNETWORKS_API FFINLogEntry {
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFINLogEntriesUpdatedDelegate);
 
 UCLASS()
-class FICSITNETWORKS_API UFINLog : public UObject, public IFGSaveInterface {
+class FICSITNETWORKS_API UFINLog : public UActorComponent, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
+	UFINLog();
+
+	// Begin UActorComponent
+	virtual void BeginPlay() override;
+	// End UActorComponent
+
 	// Begin IFGSaveInterface
 	virtual bool ShouldSave_Implementation() const override { return true; }
 	// End IFGSaveInterface
@@ -57,10 +64,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FString GetLogAsRichText();
+
+	UFUNCTION()
+	void RehandleAllEntries();
 	
 private:
-	UFUNCTION()
-	void OnRep_LogEntries();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AddLogEntries(const TArray<FFINLogEntry>& InLogEntries);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_EmptyLog();
 	
 public:
 	UPROPERTY()
@@ -72,7 +84,7 @@ public:
 	FScopeLock Lock() { return FScopeLock(&LogEntriesToAddMutex); }
 
 private:
-	UPROPERTY(SaveGame, ReplicatedUsing=OnRep_LogEntries)
+	UPROPERTY(SaveGame)
 	TArray<FFINLogEntry> LogEntries;
 
 	TArray<FFINLogEntry> LogEntriesToAdd;
