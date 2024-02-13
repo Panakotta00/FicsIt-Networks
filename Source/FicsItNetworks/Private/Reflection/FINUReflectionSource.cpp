@@ -151,7 +151,7 @@ FFINReflectionClassMeta UFINUReflectionSource::GetClassMeta(UClass* Class) const
 					Meta.Signals.Add(SignalName, *SignalMeta);
 				} else if(StructProp->Struct == FFINReflectionPropertyMeta::StaticStruct()) {
 					FString PropName = StructProp->GetName(); 
-					check(PropName.StartsWith(TEXT("netPropMeta_")));
+					check(PropName.RemoveFromStart(TEXT("netPropMeta_")));
 					FFINReflectionPropertyMeta* PropMeta = StructProp->ContainerPtrToValuePtr<FFINReflectionPropertyMeta>(Params);
 					Meta.Properties.Add(PropName, *PropMeta);
 				}
