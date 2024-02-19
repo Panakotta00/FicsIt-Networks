@@ -13,6 +13,9 @@
 #include "Reflection/FINUReflectionSource.h"
 #include "FicsItNetworksModule.h"
 #include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetData.h"
+#include "Engine/Blueprint.h"
+#include "Engine/BlueprintGeneratedClass.h"
 
 UFINClass* UFINReflection::FindClass(UClass* Clazz, bool bRecursive) {
 	return FFINReflection::Get()->FindClass(Clazz, bRecursive);
