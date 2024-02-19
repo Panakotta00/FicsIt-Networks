@@ -262,6 +262,10 @@ UFINProperty* FINCreateFINPropertyFromFProperty(FProperty* Property, FProperty* 
 		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
 		FINIntProp->Property = CastField<FIntProperty>(OverrideProperty);
 		FINProp = FINIntProp;
+	} else if (CastField<FByteProperty>(Property)) {
+		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
+		FINIntProp->Property8 = CastField<FByteProperty>(OverrideProperty);
+		FINProp = FINIntProp;
 	} else if (CastField<FInt64Property>(Property)) {
 		UFINIntProperty* FINIntProp = NewObject<UFINIntProperty>(Outer);
 		FINIntProp->Property64 = CastField<FInt64Property>(OverrideProperty);
