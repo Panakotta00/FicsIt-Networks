@@ -67,6 +67,7 @@ jobs:
           7z x UnrealEngine-CSS-Editor-Win64.7z.001
           rm UnrealEngine-CSS-Editor-Win64.7z*
           .\\SetupScripts\\Register.bat
+          .\\Engine\\Extras\\Redist\\en-us\\UEPrereqSetup_x64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
@@ -103,7 +104,9 @@ jobs:
 
       - name: Show Package Log
         if: always()
-        run: more "C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Cook-*"
+        run: |
+          more "C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Cook-*"
+          more "C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Log.txt"
       
       - name: List Artifacts
         run: |
