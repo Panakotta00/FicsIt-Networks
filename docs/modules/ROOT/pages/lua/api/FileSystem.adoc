@@ -503,9 +503,9 @@ Parameters::
 
 === `function loadFile(string path)`
 
-Loads the file refered by the given path as a Lua function and returns it.
+Loads the file referred to by the given path and returns it as a Lua function.
 
-Functions fails if path doesn't exist or path doesn't reger to a file.
+The functions fails if the path doesn't exist or the path doesn't refer to a file.
 
 Parameters::
 +
