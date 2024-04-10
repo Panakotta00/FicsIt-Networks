@@ -3,7 +3,7 @@
 The xref:lua/api/Computer.adoc[Computer API] provides the `getPCIDevices` function.
 It allows us to search for currently installed xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Devices] of a given type.
 
-For this we first have to get the type of xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device] we want to reference with the `findClass` function.
+For this we first have to get the type of xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device] we want to reference with the `classes` table.
 
 TIP: When you want to get all installed xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Devices], you can try to use the class for `Actor` or even `Object` since all xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Devices] should be of that type.
 
@@ -11,18 +11,18 @@ TIP: When you want to get all installed xref:buildings/ComputerCase/index.adoc#_
 This example gives all xref:buildings/ComputerCase/GPUT1.adoc[GPU T1] installed. +
 You can see it as replacement for the `getGPUs` function of older mod versions.
 ```Lua
-local GPUs = computer.getPCIDevices(findClass("FIN_GPU_T1"))
+local GPUs = computer.getPCIDevices(classes["FIN_GPU_T1"])
 ```
 
 == Get Network Card
 This example gives the first xref:buildings/ComputerCase/NetworkCard.adoc[Network Cards] installed.
 ```Lua
-local NetworkCard = computer.getPCIDevices(findClass("NetworkCard"))[1]
+local NetworkCard = computer.getPCIDevices(classes["NetworkCard"])[1]
 ```
 
 == Get Screen Drivers
 This example gives all xref:buildings/ComputerCase/ScreenDriver.adoc[Screen Drivers] installed. +
 You can see it as replacement for the `getScreens` function of older mod versions.
 ```Lua
-local Screens = computer.getPCIDevices(findClass("FINComputerScreen"))
+local Screens = computer.getPCIDevices(classes["FINComputerScreen"])
 ```

@@ -21,7 +21,7 @@ It takes an Instance of a Class that represents the type of the PCI devices you 
 and returns an array of PCI devices that match the given class.
 
 [source,lua]
-local net = computer.getPCIDevices(findClass("NetworkCard"))[1]
+local net = computer.getPCIDevices(classes["NetworkCard"])[1]
 
 [WARNING]
 ====
@@ -140,7 +140,7 @@ refer to the xref::Reflection.adoc#Class-NetworkRouter[reflection].
 Computer A
 [source,Lua]
 ----
-local net = computer.getPCIDevices(findClass("NetworkCard"))[1]
+local net = computer.getPCIDevices(classes["NetworkCard"])[1]
 
 event.ignoreAll()
 event.listen(net)
@@ -183,7 +183,7 @@ you can do this for everything besides signal name and signal sender.
 Computer B
 [source,lua]
 ----
-local net = computer.getPCIDevices(findClass("NetworkCard"))[1]
+local net = computer.getPCIDevices(classes["NetworkCard"])[1]
 local netTarget = "43056D41451AB496D40FAAB2BED7F75A" -- address of the network card in Computer A
 
 net:send(netTarget, 42, "ping")
