@@ -20,7 +20,7 @@ end
 
 -- get first Screen-Driver available from PCI-Interface
 local screen = computer.getPCIDevices(classes["FINComputerScreen"])[1]
--- if no scren found, try to find large screen from component network
+-- if no screen found, try to find large screen from component network
 if not screen then
  local comp = component.findComponent(classes.Screen)[1]
  if not comp then
