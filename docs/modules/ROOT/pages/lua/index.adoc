@@ -27,13 +27,13 @@ The following list contains all available standard Lua libraries, non-standard l
 - string
 - debug (parts of it for error handling)
 
-== Additional Runtime Functions (besides APIs)
+== Additional Runtime Functions and Tables (besides APIs)
 
 The lua runtime additionally has a couple of functions allowing you to search for different things of the reflection system and the game itself.
 
-=== `Class findClass(string name)`
+=== `Table classes`
 
-Tries to find an object type with the given name, and returns the found type.
+Contains the object types, or classes. This table contains the FicsIt Networks object types and is indexed by class name.
 
 === `Class findStruct(string name)`
 
