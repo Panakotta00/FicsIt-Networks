@@ -11,18 +11,18 @@ TIP: When you want to get all installed xref:buildings/ComputerCase/index.adoc#_
 This example gives all xref:buildings/ComputerCase/GPUT1.adoc[GPU T1] installed. +
 You can see it as replacement for the `getGPUs` function of older mod versions.
 ```Lua
-local GPUs = computer.getPCIDevices(classes["FIN_GPU_T1"])
+local GPUs = computer.getPCIDevices(classes.FIN_GPU_T1)
 ```
 
 == Get Network Card
 This example gives the first xref:buildings/ComputerCase/NetworkCard.adoc[Network Cards] installed.
 ```Lua
-local NetworkCard = computer.getPCIDevices(classes["NetworkCard"])[1]
+local NetworkCard = computer.getPCIDevices(classes.NetworkCard)[1]
 ```
 
 == Get Screen Drivers
 This example gives all xref:buildings/ComputerCase/ScreenDriver.adoc[Screen Drivers] installed. +
 You can see it as replacement for the `getScreens` function of older mod versions.
 ```Lua
-local Screens = computer.getPCIDevices(classes["FINComputerScreen"])
+local Screens = computer.getPCIDevices(classes.FINComputerScreen)
 ```

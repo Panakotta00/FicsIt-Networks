@@ -505,7 +505,7 @@ Parameters::
 
 Loads the file referred to by the given path and returns it as a Lua function. When run, the function will return the file's contents.
 
-The functions fails if the path doesn't exist or the path doesn't refer to a file.
+The function fails if the path doesn't exist or the path doesn't refer to a file.
 
 Parameters::
 +

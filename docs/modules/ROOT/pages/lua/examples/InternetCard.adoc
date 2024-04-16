@@ -3,14 +3,14 @@
 First we should use the xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Interface] of the computer to get a reference to our xref:buildings/ComputerCase/InternetCard.adoc[Internet Card].
 You can use this snippet anytime when you have an Internet-Card installed.
 ```Lua
-local card = computer.getPCIDevices(classes["FINInternetCard"])[1]
+local card = computer.getPCIDevices(classes.FINInternetCard)[1]
 ```
 
 This example downloads with a `GET` request some data from GitHub a json-serialization library and saves it into a file, so we can load the library from now on when we need it in this computer.
 
 ```Lua
 -- get internet card
-local card = computer.getPCIDevices(classes["FINInternetCard"])[1]
+local card = computer.getPCIDevices(classes.FINInternetCard)[1]
 
 -- get library from internet
 local req = card:request("https://raw.githubusercontent.com/rxi/json.lua/master/json.lua", "GET", "")
@@ -38,7 +38,7 @@ print(json.encode(data))
 This is an example that sends with a `POST` request some data to a web server which will send this data back again.
 
 ```Lua
-local card = computer.getPCIDevices(clases["FINInternetCard"])[1]
+local card = computer.getPCIDevices(classes.FINInternetCard)[1]
 
 local req = card:request("https://httpbin.org/anything", "POST", "hey ho!!!", "Content-Type", "text")
 

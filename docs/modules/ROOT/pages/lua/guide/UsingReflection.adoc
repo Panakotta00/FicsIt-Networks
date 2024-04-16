@@ -13,7 +13,7 @@ This data is heavily used internally and also can be accessed from within Lua co
 The mentioned `classes` table allows you to search for a class by its name.
 It returns an instance of a class containing information about it.
 [source, lua]
-local class = classes["NetworkCard"]
+local class = classes.NetworkCard
 
 This instance contains functions and properties that allow you to get
 information about the class it represents. +
