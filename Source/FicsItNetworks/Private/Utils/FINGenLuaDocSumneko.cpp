@@ -8,8 +8,39 @@
 #include "Reflection/FINReflection.h"
 #include "Reflection/FINStructProperty.h"
 #include "Reflection/FINTraceProperty.h"
+#include "UObject/Package.h"
 
 #pragma optimize("", off)
+FString FINGenLuaGetTypeNameSumneko(const UFINBase *Base) {
+	TArray<FString> SplitBasePackageName;
+	Base->GetPackage()->GetName().ParseIntoArray(SplitBasePackageName, TEXT("/"), true);
+
+	FString BasePackageName;
+	for (auto BasePackageNamePart : SplitBasePackageName) {
+
+		// get rid of unnecessary names
+		if (BasePackageNamePart.Equals(TEXT("Script"))
+			|| BasePackageNamePart.Equals(TEXT("Game"))
+			|| BasePackageNamePart.Equals(TEXT("Engine"))
+			|| BasePackageNamePart.Equals(TEXT("CoreUObject"))) {
+			continue;
+		}
+
+		// making it easier and smaller to use types
+		if (BasePackageNamePart.Equals(TEXT("FactoryGame"))) {
+			BasePackageName += TEXT("Satis.");
+			continue;
+		} else if (BasePackageNamePart.Equals(TEXT("FicsItNetworks"))) {
+			BasePackageName += TEXT("FIN.");
+			continue;
+		}
+
+		BasePackageName += BasePackageNamePart + TEXT(".");
+	}
+
+	return BasePackageName + Base->GetInternalName();
+}
+
 FString FINGenLuaGetTypeSumneko(FFINReflection& Ref, const UFINProperty* Prop) {
 	if (!Prop) {
 		return "any";
@@ -29,25 +60,25 @@ FString FINGenLuaGetTypeSumneko(FFINReflection& Ref, const UFINProperty* Prop) {
 			const UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Prop);
 			const UFINClass* Class = Ref.FindClass(ObjProp->GetSubclass());
 			if (!Class) return "Object";
-			return Class->GetInternalName();
+			return FINGenLuaGetTypeNameSumneko(Class);
 		}
 		case FIN_TRACE: {
 			const UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Prop);
 			const UFINClass* Class = Ref.FindClass(TraceProp->GetSubclass());
 			if (!Class) return "Object";
-			return Class->GetInternalName();
+			return FINGenLuaGetTypeNameSumneko(Class);
 		}
 		case FIN_CLASS: {
 			const UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Prop);
 			const UFINClass* Class = Ref.FindClass(ClassProp->GetSubclass());
 			if (!Class) return "Object";
-			return Class->GetInternalName();
+			return FINGenLuaGetTypeNameSumneko(Class);
 		}
 		case FIN_STRUCT: {
 			const UFINStructProperty* StructProp = Cast<UFINStructProperty>(Prop);
 			const UFINStruct* Struct = Ref.FindStruct(StructProp->GetInner());
 			if (!Struct) return "any";
-			return Struct->GetInternalName();
+			return FINGenLuaGetTypeNameSumneko(Struct);
 		}
 		case FIN_ARRAY: {
 			const UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Prop);
@@ -77,22 +108,22 @@ void FINGenLuaDescriptionSumneko(FString& Documentation, FString Description) {
 void FINGenLuaPropertySumneko(FString& Documentation, FFINReflection& Ref, const FString& Parent, const UFINProperty* Prop) {
 	Documentation.Append(TEXT("\n"));
 	
-	const EFINRepPropertyFlags propFlags = Prop->GetPropertyFlags();
+	const EFINRepPropertyFlags PropFlags = Prop->GetPropertyFlags();
 	FINGenLuaDescriptionSumneko(Documentation, TEXT("### Flags:"));
 	
-	if (propFlags & FIN_Prop_RT_Sync) {
+	if (PropFlags & FIN_Prop_RT_Sync) {
 		FINGenLuaDescriptionSumneko(Documentation, TEXT("* Runtime Synchronous - Can be called/changed in Game Tick."));
 	}
 	
-	if (propFlags & FIN_Prop_RT_Parallel) {
+	if (PropFlags & FIN_Prop_RT_Parallel) {
 		FINGenLuaDescriptionSumneko(Documentation, TEXT("* Runtime Parallel - Can be called/changed in Satisfactory Factory Tick."));
 	}
 	
-	if (propFlags & FIN_Prop_RT_Async) {
+	if (PropFlags & FIN_Prop_RT_Async) {
 		FINGenLuaDescriptionSumneko(Documentation, TEXT("* Runtime Asynchronous - Can be changed anytime."));
 	}
 	
-	if (propFlags & FIN_Prop_ReadOnly) {
+	if (PropFlags & FIN_Prop_ReadOnly) {
 		FINGenLuaDescriptionSumneko(Documentation, TEXT("* Read Only - The value of this property can not be changed by code."));
 	}
 
@@ -187,7 +218,8 @@ void FINGenLuaSignalSumneko(FString& Documentation, FFINReflection& Ref, const F
 		));
 	}
 
-	Documentation.Append(FString::Printf(TEXT("---@deprecated\n---@type Signal\n")));
+	// hard coding the type is maybe not the best choice
+	Documentation.Append(TEXT("---@deprecated\n---@type FIN.Signal\n")); //TODO: keep up to date
 	Documentation.Append(FString::Printf(
 		TEXT("%s.%s = { isVarArgs = %s }\n"),
 		*Parent,
@@ -198,12 +230,12 @@ void FINGenLuaSignalSumneko(FString& Documentation, FFINReflection& Ref, const F
 
 void FINGenLuaClassSumneko(FString& Documentation, FFINReflection& Ref, const UFINClass* Class) {
 	Documentation.Append(TEXT("\n"));
-
+	
 	FINGenLuaDescriptionSumneko(Documentation, Class->GetDescription().ToString());
 	Documentation.Append(FString::Printf(
 		TEXT("---@class %s%s\nlocal %s\n"),
-		*Class->GetInternalName(),
-		Class->GetParent() ? *(TEXT(" : ") + Class->GetParent()->GetInternalName()) : TEXT(""),
+		*FINGenLuaGetTypeNameSumneko(Class),
+		Class->GetParent() ? *(TEXT(" : ") + FINGenLuaGetTypeNameSumneko(Class->GetParent())) : TEXT(""),
 		*Class->GetInternalName()
 	));
 	
@@ -231,7 +263,7 @@ void FINGenLuaStructSumneko(FString& Documentation, FFINReflection& Ref, const U
 	FINGenLuaDescriptionSumneko(Documentation, Struct->GetDescription().ToString());
 	Documentation.Append(FString::Printf(
 		TEXT("---@class %s\nlocal %s\n"),
-		*Struct->GetInternalName(),
+		*FINGenLuaGetTypeNameSumneko(Struct),
 		*Struct->GetInternalName()
 	));
 	

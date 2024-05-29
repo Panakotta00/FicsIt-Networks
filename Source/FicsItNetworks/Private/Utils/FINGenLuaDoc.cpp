@@ -22,35 +22,35 @@ FString FINGenLuaGetType(FFINReflection& Ref, UFINProperty* Prop) {
 		return "number";
 	case FIN_STR:
 		return "string";
-	case FIN_OBJ:
-	{
+	case FIN_OBJ: {
 		UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Prop);
 		UFINClass* Class = Ref.FindClass(ObjProp->GetSubclass());
 		if (!Class) return "Object";
 		return Class->GetInternalName();
-	} case FIN_TRACE:
-	{
+	}
+	case FIN_TRACE: {
 		UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Prop);
 		UFINClass* Class = Ref.FindClass(TraceProp->GetSubclass());
 		if (!Class) return "Object";
 		return Class->GetInternalName();
-	} case FIN_CLASS:
-	{
+	}
+	case FIN_CLASS: {
 		UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Prop);
 		UFINClass* Class = Ref.FindClass(ClassProp->GetSubclass());
 		if (!Class) return "Object-Class";
 		return Class->GetInternalName() + TEXT("-Class");
-	} case FIN_STRUCT:
-	{
+	}
+	case FIN_STRUCT: {
 		UFINStructProperty* StructProp = Cast<UFINStructProperty>(Prop);
 		UFINStruct* Struct = Ref.FindStruct(StructProp->GetInner());
 		if (!Struct) return "any";
 		return Struct->GetInternalName();
-	} case FIN_ARRAY:
-	{
+	}
+	case FIN_ARRAY: {
 		UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Prop);
 		return FINGenLuaGetType(Ref, ArrayProp->GetInnerType()) + "[]";
-	} default:
+	}
+	default:
 		return "any";
 	}
 }
@@ -72,7 +72,9 @@ void FINGenLuaDescription(FString& Documentation, FString Description) {
 }
 
 void FINGenLuaProperty(FString& Documentation, FFINReflection& Ref, UFINProperty* Prop) {
-	Documentation.Append(FString::Printf(TEXT("---@field public %s %s @%s\n"), *Prop->GetInternalName(), *FINGenLuaGetType(Ref, Prop), *FINGenLuaDescription(Prop->GetDescription().ToString())));
+	Documentation.Append(FString::Printf(
+		TEXT("---@field public %s %s @%s\n"), *Prop->GetInternalName(), *FINGenLuaGetType(Ref, Prop),
+		*FINGenLuaDescription(Prop->GetDescription().ToString())));
 }
 
 void FINGenLuaFunction(FString& Documentation, FFINReflection& Ref, const FString& Parent, const UFINFunction* Func) {
@@ -88,24 +90,31 @@ void FINGenLuaFunction(FString& Documentation, FFINReflection& Ref, const FStrin
 			ReturnValues.Append(*FINGenLuaGetType(Ref, Prop));
 		}
 		else {
-			Documentation.Append(FString::Printf(TEXT("---@param %s %s @%s\n"), *Prop->GetInternalName(), *FINGenLuaGetType(Ref, Prop), *FINGenLuaDescription(Prop->GetDescription().ToString())));
+			Documentation.Append(FString::Printf(
+				TEXT("---@param %s %s @%s\n"), *Prop->GetInternalName(), *FINGenLuaGetType(Ref, Prop),
+				*FINGenLuaDescription(Prop->GetDescription().ToString())));
 			if (ParamList.Len() > 0) ParamList.Append(", ");
 			ParamList.Append(Prop->GetInternalName());
 		}
 	}
 	if (ReturnValues.Len() > 0) Documentation.Append(FString::Printf(TEXT("---@return %s\n"), *ReturnValues));
-	Documentation.Append(FString::Printf(TEXT("function %s:%s(%s) end\n"), *Parent, *Func->GetInternalName(), *ParamList));
+	Documentation.Append(
+		FString::Printf(TEXT("function %s:%s(%s) end\n"), *Parent, *Func->GetInternalName(), *ParamList));
 }
 
 void FINGenLuaClass(FString& Documentation, FFINReflection& Ref, UFINClass* Class) {
 	FINGenLuaDescription(Documentation, Class->GetDescription().ToString());
-	Documentation.Append(FString::Printf(TEXT("---@class %s%s\n"), *Class->GetInternalName(), Class->GetParent() ? *(TEXT(":") + Class->GetParent()->GetInternalName()) : TEXT("")));
+	Documentation.Append(FString::Printf(TEXT("---@class %s%s\n"), *Class->GetInternalName(),
+	                                     Class->GetParent()
+		                                     ? *(TEXT(":") + Class->GetParent()->GetInternalName())
+		                                     : TEXT("")));
 	for (UFINProperty* Prop : Class->GetProperties(false)) {
-		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib)	FINGenLuaProperty(Documentation, Ref, Prop);
+		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib) FINGenLuaProperty(Documentation, Ref, Prop);
 	}
 	Documentation.Append(FString::Printf(TEXT("local %s\n"), *Class->GetInternalName()));
 	for (UFINFunction* Func : Class->GetFunctions(false)) {
-		if (Func->GetFunctionFlags() & FIN_Func_MemberFunc) FINGenLuaFunction(Documentation, Ref, Class->GetInternalName(), Func);
+		if (Func->GetFunctionFlags() & FIN_Func_MemberFunc) FINGenLuaFunction(
+			Documentation, Ref, Class->GetInternalName(), Func);
 	}
 	Documentation.Append(TEXT("\n"));
 }
@@ -114,11 +123,12 @@ void FINGenLuaStruct(FString& Documentation, FFINReflection& Ref, const UFINStru
 	FINGenLuaDescription(Documentation, Struct->GetDescription().ToString());
 	Documentation.Append(FString::Printf(TEXT("---@class %s\n"), *Struct->GetInternalName()));
 	for (UFINProperty* Prop : Struct->GetProperties(false)) {
-		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib)	FINGenLuaProperty(Documentation, Ref, Prop);
+		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib) FINGenLuaProperty(Documentation, Ref, Prop);
 	}
 	Documentation.Append(FString::Printf(TEXT("local %s\n"), *Struct->GetInternalName()));
 	for (UFINFunction* Func : Struct->GetFunctions(false)) {
-		if (Func->GetFunctionFlags() & FIN_Func_MemberFunc) FINGenLuaFunction(Documentation, Ref, Struct->GetInternalName(), Func);
+		if (Func->GetFunctionFlags() & FIN_Func_MemberFunc) FINGenLuaFunction(
+			Documentation, Ref, Struct->GetInternalName(), Func);
 	}
 	Documentation.Append(TEXT("\n"));
 }
