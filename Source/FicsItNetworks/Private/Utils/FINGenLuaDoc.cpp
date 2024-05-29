@@ -1,7 +1,5 @@
 #include "Utils/FINGenLuaDoc.h"
 
-#include "Misc/App.h"
-#include "Misc/FileHelper.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINClassProperty.h"
 #include "Reflection/FINObjectProperty.h"
@@ -27,30 +25,25 @@ FString FINGenLuaGetType(FFINReflection& Ref, UFINProperty* Prop) {
 		UFINClass* Class = Ref.FindClass(ObjProp->GetSubclass());
 		if (!Class) return "Object";
 		return Class->GetInternalName();
-	}
-	case FIN_TRACE: {
+	} case FIN_TRACE: {
 		UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Prop);
 		UFINClass* Class = Ref.FindClass(TraceProp->GetSubclass());
 		if (!Class) return "Object";
 		return Class->GetInternalName();
-	}
-	case FIN_CLASS: {
+	} case FIN_CLASS: {
 		UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Prop);
 		UFINClass* Class = Ref.FindClass(ClassProp->GetSubclass());
 		if (!Class) return "Object-Class";
 		return Class->GetInternalName() + TEXT("-Class");
-	}
-	case FIN_STRUCT: {
+	} case FIN_STRUCT: {
 		UFINStructProperty* StructProp = Cast<UFINStructProperty>(Prop);
 		UFINStruct* Struct = Ref.FindStruct(StructProp->GetInner());
 		if (!Struct) return "any";
 		return Struct->GetInternalName();
-	}
-	case FIN_ARRAY: {
+	} case FIN_ARRAY: {
 		UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Prop);
 		return FINGenLuaGetType(Ref, ArrayProp->GetInnerType()) + "[]";
-	}
-	default:
+	} default:
 		return "any";
 	}
 }

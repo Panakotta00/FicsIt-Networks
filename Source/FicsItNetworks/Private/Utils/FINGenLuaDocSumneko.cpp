@@ -1,7 +1,5 @@
 ﻿#include "Utils/FINGenLuaDocSumneko.h"
 
-#include "Misc/App.h"
-#include "Misc/FileHelper.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINClassProperty.h"
 #include "Reflection/FINObjectProperty.h"
