@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "FGSaveInterface.h"
 #include "Components/ActorComponent.h"
-
 #include "Logging.generated.h"
 
 UENUM()
