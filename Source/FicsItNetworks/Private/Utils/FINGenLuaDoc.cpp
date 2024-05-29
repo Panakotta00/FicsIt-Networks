@@ -125,7 +125,7 @@ bool FINGenLuaDoc(UWorld* World, const TCHAR* Command, FOutputDevice& Ar) {
 		for (TPair<UScriptStruct*, UFINStruct*> Struct : Ref.GetStructs()) {
 			FINGenLuaStruct(Documentation, Ref, Struct.Value);
 		}
-
+		
 		FString Path = FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT("Saved/"));
 		Path = FPaths::Combine(Path, TEXT("FINLuaDocumentation.lua"));
 		FFileHelper::SaveStringToFile(Documentation, *Path);
