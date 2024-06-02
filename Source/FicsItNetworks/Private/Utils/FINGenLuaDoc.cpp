@@ -91,7 +91,7 @@ void FINGenLuaClass(FString& Documentation, FFINReflection& Ref, UFINClass* Clas
 	FINGenLuaDescription(Documentation,  Class->GetDescription().ToString());
 	Documentation.Append(FString::Printf(TEXT("---@class %s%s\n"), *Class->GetInternalName(), Class->GetParent() ? *(TEXT(":") + Class->GetParent()->GetInternalName()) : TEXT("")));
 	for (UFINProperty* Prop : Class->GetProperties(false)) {
-		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib) FINGenLuaProperty(Documentation, Ref, Prop);
+		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib)	FINGenLuaProperty(Documentation, Ref, Prop);
 	}
 	Documentation.Append(FString::Printf(TEXT("local %s\n"), *Class->GetInternalName()));
 	for (UFINFunction* Func : Class->GetFunctions(false)) {
@@ -104,7 +104,7 @@ void FINGenLuaStruct(FString& Documentation, FFINReflection& Ref, UFINStruct* St
 	FINGenLuaDescription(Documentation, Struct->GetDescription().ToString());
 	Documentation.Append(FString::Printf(TEXT("---@class %s\n"), *Struct->GetInternalName()));
 	for (UFINProperty* Prop : Struct->GetProperties(false)) {
-		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib) FINGenLuaProperty(Documentation, Ref, Prop);
+		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib)	FINGenLuaProperty(Documentation, Ref, Prop);
 	}
 	Documentation.Append(FString::Printf(TEXT("local %s\n"), *Struct->GetInternalName()));
 	for (UFINFunction* Func : Struct->GetFunctions(false)) {
