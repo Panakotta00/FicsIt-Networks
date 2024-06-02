@@ -1,17 +1,12 @@
 ﻿#pragma once
 
-#include "Reflection/FINReflection.h"
-
-void FINGenLuaSumnekoClass(FString& Documentation, FFINReflection& Ref, const UFINClass* Class);
-bool FINGenLuaDocSumneko(UWorld* World, const TCHAR* Command, FOutputDevice& Ar);
-
 // this is a terible way of doing documentation but currently only way without modifing any additional code for documentation.
-inline const auto FINGenLuaSumnekoDocumentationStart = TEXT(R"(error("I don't know what your misson is. But is file is not meant to be executed in any way. It's a meta file.\")
+inline const auto FINGenLuaSumnekoDocumentationStart = TEXT(R"(error("I don't know what your misson is. But is file is not meant to be executed in any way. It's a meta file.")
 ---@meta
 ---@diagnostic disable
 )");
 
-	inline const auto MiscDocumentation = TEXT(R"(
+inline const auto MiscDocumentation = TEXT(R"(
 -- some more FicsIt-Networks things to support more type specific things and also adds documentation for `computer`, `component`, `event` and `filesystem` libraries in FicsIt-Networks (keep in mind this is all written by hand and can maybe not represent all features available)
 
 --- # Not in FicsIt-Networks available #
@@ -76,7 +71,34 @@ function findItem(name) end
 function getItems(...) end
 )");
 
-	inline const auto EventApiDocumentation = TEXT(R"(
+inline const auto FutureApiDocumentation = TEXT(R"(
+---@class FIN.Future
+local Future = {}
+
+--- Waits for the future to finish processing and returns the result.
+--- ### Flags:
+--- * Unknown
+---@async
+---@return any ...
+function Future:await()
+end
+
+--- Gets the data.
+--- ### Flags:
+--- * Unknown
+---@return any ...
+function Future:get()
+end
+
+--- Checks if the Future is done processing.
+--- ### Flags:
+--- * Unknown
+---@return boolean isDone
+function Future:canGet()
+end
+)");
+
+inline const auto EventApiDocumentation = TEXT(R"(
 --- **FicsIt-Networks Lua Lib:** `event`
 ---
 --- The Event API provides classes, functions and variables for interacting with the component network.
@@ -110,7 +132,7 @@ function event.ignoreAll() end
 function event.clear() end
 )");
 	
-	inline const auto ComponentApiDocumentation = TEXT(R"(
+inline const auto ComponentApiDocumentation = TEXT(R"(
 --- **FicsIt-Networks Lua Lib:** `component`
 ---
 --- The Component API provides structures, functions and signals for interacting with the network itself like returning network components.
@@ -172,7 +194,7 @@ function component.findComponent(type) end
 function component.findComponent(...) end
 )");
 	
-	inline const auto ComputerApiDocumentation = TEXT(R"(
+inline const auto ComputerApiDocumentation = TEXT(R"(
 --- **FicsIt-Networks Lua Lib:** `computer`
 ---
 --- The Computer API provides a interface to the computer owns functionalities.
@@ -264,7 +286,7 @@ function computer.textNotification(text, playerName) end
 function computer.attentionPing(position, playerName) end
 )");
 	
-	inline const auto FileSystemApiDocumentation = TEXT(R"(
+inline const auto FileSystemApiDocumentationPart1 = TEXT(R"(
 --- **FicsIt-Networks Lua Lib:** `filesystem`
 ---
 --- The filesystem api provides structures, functions and variables for interacting with the virtual file systems.
@@ -353,7 +375,9 @@ function filesystem.children(path) end
 ---@param path string - path you want to check if it refers to a file
 ---@return boolean isFile - true if path refers to a file
 function filesystem.isFile(path) end
+)");
 
+inline const auto FileSystemApiDocumentationPart2 = TEXT(R"(
 --- Checks if given path refers to a directory.
 ---@param path string - path you want to check if it refers to a directory
 ---@return boolean isDir - returns true if path refers to a directory
@@ -410,7 +434,7 @@ function filesystem.path(parameter, ...) end
 
 --- Will be checked for lexical features.
 --- Return value which is a bit-flag-register describing those lexical features.
----@param path string - filesystem-path you want to get lexical features from.
+---@param path string - filesystem-path you want to get lexical features from. 
 ---@return FIN.Filesystem.PathRegister BitRegister - bit-register describing the features of each path
 function filesystem.analyzePath(path) end
 
@@ -430,6 +454,29 @@ function filesystem.isNode(node) end
 ---@return boolean ... - True if the corresponding string is a valid node-name.
 function filesystem.isNode(...) end
 )");
-	
-	const FString FINGenLuaSumnekoDocumentationEnd = FString::Printf(TEXT("%s\n%s\n%s\n%s\n%s\n"),
-		MiscDocumentation, EventApiDocumentation, ComponentApiDocumentation, ComputerApiDocumentation, FileSystemApiDocumentation);
+
+inline const auto FileApiDocumentation = TEXT(R"(
+---@class FIN.Filesystem.File
+local File = {}
+
+---@param data string
+function File:write(data) end
+
+---@param length integer
+function File:read(length) end
+
+---@alias FIN.Filesystem.File.SeekMode
+---|"set" # Base is beginning of the file.
+---|"cur" # Base is current position.
+---|"end" # Base is end of file.
+
+---@param mode FIN.Filesystem.File.SeekMode
+---@param offset integer
+---@return integer offset
+function File:seek(mode, offset) end
+
+function File:close() end
+)");
+
+const FString FINGenLuaSumnekoDocumentationEnd = FString::Printf(TEXT("%s\n%s\n%s\n%s\n%s\n%s%s\n%s"),
+	MiscDocumentation, FutureApiDocumentation, EventApiDocumentation, ComponentApiDocumentation, ComputerApiDocumentation, FileSystemApiDocumentationPart1, FileSystemApiDocumentationPart2, FileApiDocumentation);

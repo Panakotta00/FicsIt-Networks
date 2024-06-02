@@ -18,28 +18,28 @@ FString FINGenLuaSumnekoGetTypeName(const UFINBase *Base) {
 	FString BasePackageName;
 	for (auto &NamePart : SplitBasePackageName) {
 		if (NamePart.Equals(TEXT("Script"))) {
-			continue;
+			continue; // check next name part
 		}
 
 		// we only want the the first not filtered out name should be the mod name
 		if (NamePart.Equals(TEXT("CoreUObject"))) {
 			BasePackageName += TEXT("Engine.");
-			break;
+			break; // got one name part
 		}
 
 		// replace mod and Satisfactory name to make type names smaller
-		else if (NamePart.Equals(TEXT("FactoryGame"))
+		if (NamePart.Equals(TEXT("FactoryGame"))
 			|| NamePart.Equals(TEXT("Game"))) {
 			BasePackageName += TEXT("Satis.");
-			break;
+			break; // got one name part
 		} else if (NamePart.Equals(TEXT("FicsItNetworks"))
 			|| NamePart.Equals(TEXT("FicsItNetworksLua"))) {
 			BasePackageName += TEXT("FIN.");
-			break;
+			break; // got one name part
 		}
 
 		BasePackageName += NamePart + TEXT(".");
-		break;
+		break; // got one name part
 	}
 
 	return BasePackageName + Base->GetInternalName();
@@ -51,49 +51,49 @@ FString FINGenLuaSumnekoGetType(FFINReflection &Ref, const UFINProperty *Prop) {
 	}
 
 	switch (Prop->GetType()) {
-	case FIN_NIL:
-		return "nil";
-	case FIN_BOOL:
-		return "boolean";
-	case FIN_INT:
-	case FIN_FLOAT:
-		return "number";
-	case FIN_STR:
-		return "string";
-	case FIN_OBJ: {
-		const UFINObjectProperty *ObjProp = Cast<UFINObjectProperty>(Prop);
-		const UFINClass *Class = Ref.FindClass(ObjProp->GetSubclass());
-		if (!Class)
-			return "Engine.Object";
-		return FINGenLuaSumnekoGetTypeName(Class);
-	}
-	case FIN_TRACE: {
-		const UFINTraceProperty *TraceProp = Cast<UFINTraceProperty>(Prop);
-		const UFINClass *Class = Ref.FindClass(TraceProp->GetSubclass());
-		if (!Class)
-			return "Engine.Object";
-		return FINGenLuaSumnekoGetTypeName(Class);
-	}
-	case FIN_CLASS: {
-		const UFINClassProperty *ClassProp = Cast<UFINClassProperty>(Prop);
-		const UFINClass *Class = Ref.FindClass(ClassProp->GetSubclass());
-		if (!Class)
-			return "Engine.Object";
-		return FINGenLuaSumnekoGetTypeName(Class);
-	}
-	case FIN_STRUCT: {
-		const UFINStructProperty *StructProp = Cast<UFINStructProperty>(Prop);
-		const UFINStruct *Struct = Ref.FindStruct(StructProp->GetInner());
-		if (!Struct)
+		case FIN_NIL:
+			return "nil";
+		case FIN_BOOL:
+			return "boolean";
+		case FIN_INT:
+		case FIN_FLOAT:
+			return "number";
+		case FIN_STR:
+			return "string";
+		case FIN_OBJ: {
+			const UFINObjectProperty *ObjProp = Cast<UFINObjectProperty>(Prop);
+			const UFINClass *Class = Ref.FindClass(ObjProp->GetSubclass());
+			if (!Class)
+				return "Engine.Object";
+			return FINGenLuaSumnekoGetTypeName(Class);
+		}
+		case FIN_TRACE: {
+			const UFINTraceProperty *TraceProp = Cast<UFINTraceProperty>(Prop);
+			const UFINClass *Class = Ref.FindClass(TraceProp->GetSubclass());
+			if (!Class)
+				return "Engine.Object";
+			return FINGenLuaSumnekoGetTypeName(Class);
+		}
+		case FIN_CLASS: {
+			const UFINClassProperty *ClassProp = Cast<UFINClassProperty>(Prop);
+			const UFINClass *Class = Ref.FindClass(ClassProp->GetSubclass());
+			if (!Class)
+				return "Engine.Object";
+			return FINGenLuaSumnekoGetTypeName(Class);
+		}
+		case FIN_STRUCT: {
+			const UFINStructProperty *StructProp = Cast<UFINStructProperty>(Prop);
+			const UFINStruct *Struct = Ref.FindStruct(StructProp->GetInner());
+			if (!Struct)
+				return "any";
+			return FINGenLuaSumnekoGetTypeName(Struct);
+		}
+		case FIN_ARRAY: {
+			const UFINArrayProperty *ArrayProp = Cast<UFINArrayProperty>(Prop);
+			return FINGenLuaSumnekoGetType(Ref, ArrayProp->GetInnerType()) + "[]";
+		}
+		default:
 			return "any";
-		return FINGenLuaSumnekoGetTypeName(Struct);
-	}
-	case FIN_ARRAY: {
-		const UFINArrayProperty *ArrayProp = Cast<UFINArrayProperty>(Prop);
-		return FINGenLuaSumnekoGetType(Ref, ArrayProp->GetInnerType()) + "[]";
-	}
-	default:
-		return "any";
 	}
 }
 
@@ -145,6 +145,92 @@ FString FINGenLuaSumnekoProperty(FFINReflection &Ref, const FString &Parent,
 	return PropertyDocumentation;
 }
 
+FString FINGenLuaSumnekoOperator(FFINReflection &Ref, const UFINFunction *Op) {
+	FString OpName = Op->GetInternalName();
+	FString OpTypeSumneko;
+	
+	if (OpName.Contains(TEXT("Add"))) {
+		OpTypeSumneko = "add";
+	} else if (OpName.Contains(TEXT("Sub"))) {
+		OpTypeSumneko = "sub";
+	} else if (OpName.Contains(TEXT("Mul"))) {
+		OpTypeSumneko = "mul";
+	} else if (OpName.Contains(TEXT("Div"))) {
+		OpTypeSumneko = "div";
+	} else if (OpName.Contains(TEXT("Mod"))) {
+		OpTypeSumneko = "mod";
+	} else if (OpName.Contains(TEXT("Pow"))) {
+		OpTypeSumneko = "pow";
+	} else if (OpName.Contains(TEXT("Neg"))) {
+		OpTypeSumneko = "unm";
+	} else if (OpName.Contains(TEXT("FDiv"))) {
+		OpTypeSumneko = "idiv";
+	} else if (OpName.Contains(TEXT("BitAND"))) {
+		OpTypeSumneko = "band";
+	} else if (OpName.Contains(TEXT("BitOR"))) {
+		OpTypeSumneko = "bor";
+	} else if (OpName.Contains(TEXT("BitXOR"))) {
+		OpTypeSumneko = "bxor";
+	} else if (OpName.Contains(TEXT("BitNot"))) {
+		OpTypeSumneko = "bnot";
+	} else if (OpName.Contains(TEXT("ShiftL"))) {
+		OpTypeSumneko = "shl";
+	} else if (OpName.Contains(TEXT("ShiftR"))) {
+		OpTypeSumneko = "shr";
+	} else if (OpName.Contains(TEXT("Concat"))) {
+		OpTypeSumneko = "concat";
+	} else if (OpName.Contains(TEXT("Len"))) {
+		OpTypeSumneko = "len";
+	} else if (OpName.Contains(TEXT("Call"))) {
+		OpTypeSumneko = "call";
+	}
+
+	// are defined but not used and don't have a sunmeko equivalent
+	// else if (OpName.Contains(TEXT("Equals"))) {
+	// 	OpTypeSumneko = "";
+	// } else if (OpName.Contains(TEXT("LessThan"))) {
+	// 	OpTypeSumneko = "";
+	// } else if (OpName.Contains(TEXT("LessOrEqualThen"))) {
+	// 	OpTypeSumneko = "";
+	// } else if (OpName.Contains(TEXT("Index"))) {
+	// 	OpTypeSumneko = "";
+	// } else if (OpName.Contains(TEXT("NewIndex"))) {
+	// 	OpTypeSumneko = "";
+	// }
+
+	else {
+		// this is not the best way to handle the issue but will get reported on github
+		throw new FFINException(TEXT("unsupported FIN_Operator: ") + OpName);
+	}
+
+	FString OpParameter;
+	FString OpReturn;
+	for (const UFINProperty *Prop : Op->GetParameters()) {
+		const EFINRepPropertyFlags Flags = Prop->GetPropertyFlags();
+
+		if (!(Flags & FIN_Prop_Param)) {
+			continue; // skip prop
+		}
+
+		if (Flags & FIN_Prop_OutParam && OpReturn.Len() == 0) {
+			OpReturn.Append(FINGenLuaSumnekoGetType(Ref, Prop));
+			continue; // found return
+		} else if (OpParameter.Len() == 0) {
+			OpParameter.Append(FINGenLuaSumnekoGetType(Ref, Prop));
+			continue; // found parameter
+		}
+
+		break; // already found parameter and return
+	}
+
+	return FString::Printf(TEXT("\n---@operator %s%s : %s"),
+	                       *OpTypeSumneko,
+	                       *(OpParameter.Len() > 0
+							? TEXT("(") + OpParameter + TEXT(")")
+							: TEXT("")),
+	                       *OpReturn);
+}
+
 FString FINGenLuaSumnekoFunction(FFINReflection &Ref, const FString &Parent,
                                  const UFINFunction *Func) {
 	FString FunctionDocumentation = "\n";
@@ -175,17 +261,17 @@ FString FINGenLuaSumnekoFunction(FFINReflection &Ref, const FString &Parent,
 		const EFINRepPropertyFlags Flags = Prop->GetPropertyFlags();
 
 		if (!(Flags & FIN_Prop_Param)) {
-			continue;
+			continue; // skip prop
 		}
 
 		if (Flags & FIN_Prop_OutParam) {
-			ReturnDocumentation.Append(FString::Printf(TEXT("---@return %s %s @%s\n"),
+			ReturnDocumentation.Append(FString::Printf(TEXT("---@return %s %s %s\n"),
 			                                           *FINGenLuaSumnekoGetType(Ref, Prop),
 			                                           *Prop->GetInternalName(),
 			                                           *FormatDescription(Prop->GetDescription().ToString())));
 		} else {
 			ParamDocumentation.Append(FString::Printf(
-				TEXT("---@param %s %s @%s\n"),
+				TEXT("---@param %s %s %s\n"),
 				*Prop->GetInternalName(),
 				*FINGenLuaSumnekoGetType(Ref, Prop),
 				*FormatDescription(Prop->GetDescription().ToString())
@@ -266,59 +352,78 @@ FString FINGenLuaSumnekoSignal(FFINReflection &Ref, const FString &Parent,
 	return SignalDocumentation;
 }
 
-void FINGenLuaSumnekoClass(FString &Documentation, FFINReflection &Ref, const UFINClass *Class) {
-	Documentation.Append(TEXT("\n"));
-
-	FINGenLuaSumnekoDescription(Documentation, Class->GetDescription().ToString());
-	Documentation.Append(FString::Printf(
-		TEXT("---@class %s%s\nlocal %s\n"),
-		*FINGenLuaSumnekoGetTypeName(Class),
-		*(Class->GetParent()
-			  ? TEXT(" : ") + FINGenLuaSumnekoGetTypeName(Class->GetParent())
-			  : TEXT("")),
-		*Class->GetInternalName()
-	));
+FString FINGenLuaSumnekoClass(FFINReflection &Ref, const UFINClass *Class) {
+	FString OperatorDocumentation;
+	FString MembersDocumentation;
 
 	for (const UFINProperty *Prop : Class->GetProperties(false)) {
 		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib) {
-			Documentation.Append(FINGenLuaSumnekoProperty(Ref, Class->GetInternalName(), Prop));
+			MembersDocumentation.Append(FINGenLuaSumnekoProperty(Ref, Class->GetInternalName(), Prop));
 		}
 	}
 
 	for (const UFINFunction *Func : Class->GetFunctions(false)) {
-		//TODO: filter FIN_Operators
 		if (Func->GetFunctionFlags() & FIN_Func_MemberFunc) {
-			Documentation.Append(FINGenLuaSumnekoFunction(Ref, Class->GetInternalName(), Func));
+			if (Func->GetInternalName().Contains("FIN_Operator")) {
+				OperatorDocumentation.Append(FINGenLuaSumnekoOperator(Ref, Func));
+				continue; // to next function
+			}
+
+			MembersDocumentation.Append(FINGenLuaSumnekoFunction(Ref, Class->GetInternalName(), Func));
 		}
 	}
 
 	for (const UFINSignal *Signal : Class->GetSignals(false)) {
-		Documentation.Append(FINGenLuaSumnekoSignal(Ref, Class->GetInternalName(), Signal));
+		MembersDocumentation.Append(FINGenLuaSumnekoSignal(Ref, Class->GetInternalName(), Signal));
 	}
+
+	FString ClassDocumentation = "\n";
+
+	FINGenLuaSumnekoDescription(ClassDocumentation, Class->GetDescription().ToString());
+	ClassDocumentation.Append(FString::Printf(
+		TEXT("\n---@class %s%s%s\n"),
+		*FINGenLuaSumnekoGetTypeName(Class),
+		*(Class->GetParent()
+			  ? TEXT(" : ") + FINGenLuaSumnekoGetTypeName(Class->GetParent())
+			  : TEXT("")),
+		*OperatorDocumentation
+	));
+
+	return FString::Printf(TEXT("%slocal %s\n%s"),
+	                       *ClassDocumentation, *Class->GetInternalName(), *MembersDocumentation);
 }
 
-void FINGenLuaSumnekoStruct(FString &Documentation, FFINReflection &Ref, const UFINStruct *Struct) {
-	Documentation.Append(TEXT("\n"));
-
-	FINGenLuaSumnekoDescription(Documentation, Struct->GetDescription().ToString());
-	Documentation.Append(FString::Printf(
-		TEXT("---@class %s\nlocal %s\n"),
-		*FINGenLuaSumnekoGetTypeName(Struct),
-		*Struct->GetInternalName()
-	));
+FString FINGenLuaSumnekoStruct(FFINReflection &Ref, const UFINStruct *Struct) {
+	FString OperatorDocumentation;
+	FString MembersDocumentation;
 
 	for (const UFINProperty *Prop : Struct->GetProperties(false)) {
 		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib) {
-			Documentation.Append(FINGenLuaSumnekoProperty(Ref, Struct->GetInternalName(), Prop));
+			MembersDocumentation.Append(FINGenLuaSumnekoProperty(Ref, Struct->GetInternalName(), Prop));
 		}
 	}
 
 	for (const UFINFunction *Func : Struct->GetFunctions(false)) {
-		//TODO: filter FIN_Operators
 		if (Func->GetFunctionFlags() & FIN_Func_MemberFunc) {
-			Documentation.Append(FINGenLuaSumnekoFunction(Ref, Struct->GetInternalName(), Func));
+			if (Func->GetInternalName().Contains("FIN_Operator")) {
+				OperatorDocumentation.Append(FINGenLuaSumnekoOperator(Ref, Func));
+				continue; // to next function
+			}
+
+			MembersDocumentation.Append(FINGenLuaSumnekoFunction(Ref, Struct->GetInternalName(), Func));
 		}
 	}
+
+	FString StructDocumentation = "\n";
+	FINGenLuaSumnekoDescription(StructDocumentation, Struct->GetDescription().ToString());
+	StructDocumentation.Append(FString::Printf(
+		TEXT("---@class %s%s\n"),
+		*FINGenLuaSumnekoGetTypeName(Struct),
+		*OperatorDocumentation
+	));
+
+	return FString::Printf(TEXT("%slocal %s\n%s"),
+	                       *StructDocumentation, *Struct->GetInternalName(), *MembersDocumentation);
 }
 
 bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar) {
@@ -326,7 +431,7 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 		FFINReflection &Ref = *FFINReflection::Get();
 		FString Documentation;
 		Documentation.Append(FINGenLuaSumnekoDocumentationStart);
-		
+
 		FString ClassesString = "---@class FIN.classes\n";
 		FString StructsString = "---@class FIN.structs\n";
 
@@ -338,7 +443,7 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 					Documentation.Append("do\n");
 				}
 
-				FINGenLuaSumnekoClass(Documentation, Ref, Class.Value);
+				Documentation.Append(FINGenLuaSumnekoClass(Ref, Class.Value));
 				ClassesString.Append(FString::Printf(
 					TEXT("---@field %s %s\n"),
 					*Class.Value->GetInternalName(),
@@ -356,7 +461,7 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 					Documentation.Append("do\n");
 				}
 
-				FINGenLuaSumnekoStruct(Documentation, Ref, Struct.Value);
+				Documentation.Append(FINGenLuaSumnekoStruct(Ref, Struct.Value));
 				StructsString.Append(FString::Printf(
 					TEXT("---@field %s %s\n"),
 					*Struct.Value->GetInternalName(),
