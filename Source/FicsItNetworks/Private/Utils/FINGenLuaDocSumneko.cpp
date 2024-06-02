@@ -381,7 +381,7 @@ FString FINGenLuaSumnekoClass(FFINReflection &Ref, const UFINClass *Class) {
 
 	FINGenLuaSumnekoDescription(ClassDocumentation, Class->GetDescription().ToString());
 	ClassDocumentation.Append(FString::Printf(
-		TEXT("\n---@class %s%s%s\n"),
+		TEXT("---@class %s%s%s\n"),
 		*FINGenLuaSumnekoGetTypeName(Class),
 		*(Class->GetParent()
 			  ? TEXT(" : ") + FINGenLuaSumnekoGetTypeName(Class->GetParent())
@@ -413,7 +413,7 @@ FString FINGenLuaSumnekoStruct(FFINReflection &Ref, const UFINStruct *Struct) {
 			MembersDocumentation.Append(FINGenLuaSumnekoFunction(Ref, Struct->GetInternalName(), Func));
 		}
 	}
-
+	
 	FString StructDocumentation = "\n";
 	FINGenLuaSumnekoDescription(StructDocumentation, Struct->GetDescription().ToString());
 	StructDocumentation.Append(FString::Printf(
