@@ -200,7 +200,7 @@ FString FINGenLuaSumnekoOperator(FFINReflection &Ref, const UFINFunction *Op) {
 
 	else {
 		// this is not the best way to handle the issue but will get reported on github
-		throw new FFINException(TEXT("unsupported FIN_Operator: ") + OpName);
+		throw new FFINException(TEXT("trying to map unsupported FIN_Operator: ") + OpName + TEXT(" to sumneko operator annotation"));
 	}
 
 	FString OpParameter;
