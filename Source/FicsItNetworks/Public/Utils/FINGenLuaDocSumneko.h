@@ -201,6 +201,10 @@ inline const auto ComputerApiDocumentation = TEXT(R"(
 ---@class FIN.Computer.Api
 computer = {}
 
+--- Media Subsystem
+---@type FIN.FINMediaSubsystem
+computer.media = nil
+
 --- Returns the current memory usage
 ---@return integer usage
 ---@return integer capacity
