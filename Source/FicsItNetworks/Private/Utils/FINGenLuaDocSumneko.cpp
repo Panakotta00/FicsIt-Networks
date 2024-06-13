@@ -432,8 +432,8 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 		FString Documentation;
 		Documentation.Append(FINGenLuaSumnekoDocumentationStart);
 
-		FString ClassesString = "---@class FIN.classes\n";
-		FString StructsString = "---@class FIN.structs\n";
+		FString ClassesString = "---@class FIN.classes";
+		FString StructsString = "---@class FIN.structs";
 
 		{
 			// adding "do" and "end" to get rid of local maximum variables reached
@@ -445,7 +445,7 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 
 				Documentation.Append(FINGenLuaSumnekoClass(Ref, Class.Value));
 				ClassesString.Append(FString::Printf(
-					TEXT("---@field %s %s\n"),
+					TEXT("\n---@field %s %s"),
 					*Class.Value->GetInternalName(),
 					*FINGenLuaSumnekoGetTypeName(Class.Value)
 				));
@@ -463,7 +463,7 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 
 				Documentation.Append(FINGenLuaSumnekoStruct(Ref, Struct.Value));
 				StructsString.Append(FString::Printf(
-					TEXT("---@field %s %s\n"),
+					TEXT("\n---@field %s %s"),
 					*Struct.Value->GetInternalName(),
 					*FINGenLuaSumnekoGetTypeName(Struct.Value)
 				));
@@ -486,7 +486,7 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 classes = {}
 
 %s
-strcuts = {}
+structs = {}
 )"), *ClassesString, *StructsString));
 
 		Documentation.Append(FINGenLuaSumnekoDocumentationEnd);
