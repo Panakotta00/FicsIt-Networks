@@ -4,6 +4,13 @@
 inline const auto FINGenLuaSumnekoDocumentationStart = TEXT(R"(error("I don't know what your misson is. But is file is not meant to be executed in any way. It's a meta file.")
 ---@meta
 ---@diagnostic disable
+
+---@class FIN.classes
+local classes = {}
+
+---@class FIN.structs
+local structs = {}
+
 )");
 
 inline const auto MiscDocumentation = TEXT(R"(

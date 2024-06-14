@@ -139,8 +139,8 @@ FString FINGenLuaSumnekoProperty(FFINReflection &Ref, const FString &Parent,
 		                            TEXT("* Read Only - The value of this property can not be changed by code."));
 	}
 
-	PropertyDocumentation.Append(FString::Printf(
-		TEXT("---@type %s\n%s.%s = nil\n"), *FINGenLuaSumnekoGetType(Ref, Prop), *Parent, *Prop->GetInternalName()));
+	PropertyDocumentation.Appendf(
+		TEXT("---@type %s\n%s.%s = nil\n"), *FINGenLuaSumnekoGetType(Ref, Prop), *Parent, *Prop->GetInternalName());
 
 	return PropertyDocumentation;
 }
@@ -148,7 +148,7 @@ FString FINGenLuaSumnekoProperty(FFINReflection &Ref, const FString &Parent,
 FString FINGenLuaSumnekoOperator(FFINReflection &Ref, const UFINFunction *Op) {
 	FString OpName = Op->GetInternalName();
 	FString OpTypeSumneko;
-	
+
 	if (OpName.Contains(TEXT("Add"))) {
 		OpTypeSumneko = "add";
 	} else if (OpName.Contains(TEXT("Sub"))) {
@@ -200,7 +200,8 @@ FString FINGenLuaSumnekoOperator(FFINReflection &Ref, const UFINFunction *Op) {
 
 	else {
 		// this is not the best way to handle the issue but will get reported on github
-		throw new FFINException(TEXT("trying to map unsupported FIN_Operator: ") + OpName + TEXT(" to sumneko operator annotation"));
+		throw new FFINException(
+			TEXT("trying to map unsupported FIN_Operator: ") + OpName + TEXT(" to sumneko operator annotation"));
 	}
 
 	FString OpParameter;
@@ -226,8 +227,8 @@ FString FINGenLuaSumnekoOperator(FFINReflection &Ref, const UFINFunction *Op) {
 	return FString::Printf(TEXT("\n---@operator %s%s : %s"),
 	                       *OpTypeSumneko,
 	                       *(OpParameter.Len() > 0
-							? TEXT("(") + OpParameter + TEXT(")")
-							: TEXT("")),
+		                         ? TEXT("(") + OpParameter + TEXT(")")
+		                         : TEXT("")),
 	                       *OpReturn);
 }
 
@@ -265,17 +266,17 @@ FString FINGenLuaSumnekoFunction(FFINReflection &Ref, const FString &Parent,
 		}
 
 		if (Flags & FIN_Prop_OutParam) {
-			ReturnDocumentation.Append(FString::Printf(TEXT("---@return %s %s %s\n"),
-			                                           *FINGenLuaSumnekoGetType(Ref, Prop),
-			                                           *Prop->GetInternalName(),
-			                                           *FormatDescription(Prop->GetDescription().ToString())));
+			ReturnDocumentation.Appendf(TEXT("---@return %s %s %s\n"),
+			                            *FINGenLuaSumnekoGetType(Ref, Prop),
+			                            *Prop->GetInternalName(),
+			                            *FormatDescription(Prop->GetDescription().ToString()));
 		} else {
-			ParamDocumentation.Append(FString::Printf(
+			ParamDocumentation.Appendf(
 				TEXT("---@param %s %s %s\n"),
 				*Prop->GetInternalName(),
 				*FINGenLuaSumnekoGetType(Ref, Prop),
 				*FormatDescription(Prop->GetDescription().ToString())
-			));
+			);
 
 			if (ParamList.Len() > 0) {
 				ParamList.Append(", ");
@@ -340,19 +341,21 @@ FString FINGenLuaSumnekoSignal(FFINReflection &Ref, const FString &Parent,
 
 	// hard coding the type is maybe not the best choice
 	SignalDocumentation.Append(TEXT("---@deprecated\n---@type FIN.Signal\n"));
-	SignalDocumentation.Append(FString::Printf(
+	SignalDocumentation.Appendf(
 		TEXT("%s.%s = { isVarArgs = %s }\n"),
 		*Parent,
 		*Signal->GetInternalName(),
 		Signal->IsVarArgs()
 			? TEXT("true")
 			: TEXT("false")
-	));
+	);
 
 	return SignalDocumentation;
 }
 
 FString FINGenLuaSumnekoClass(FFINReflection &Ref, const UFINClass *Class) {
+	FString ClassTypeName = FINGenLuaSumnekoGetTypeName(Class);
+
 	FString OperatorDocumentation;
 	FString MembersDocumentation;
 
@@ -380,26 +383,38 @@ FString FINGenLuaSumnekoClass(FFINReflection &Ref, const UFINClass *Class) {
 	FString ClassDocumentation = "\n";
 
 	FINGenLuaSumnekoDescription(ClassDocumentation, Class->GetDescription().ToString());
-	ClassDocumentation.Append(FString::Printf(
+	ClassDocumentation.Appendf(
 		TEXT("---@class %s%s%s\n"),
-		*FINGenLuaSumnekoGetTypeName(Class),
+		*ClassTypeName,
 		*(Class->GetParent()
 			  ? TEXT(" : ") + FINGenLuaSumnekoGetTypeName(Class->GetParent())
 			  : TEXT("")),
 		*OperatorDocumentation
-	));
+	);
 
-	return FString::Printf(TEXT("%slocal %s\n%s"),
-	                       *ClassDocumentation, *Class->GetInternalName(), *MembersDocumentation);
+	FString ClassGlobalClassesDocumentation = FString::Printf(
+		TEXT("---@class %s.classes : %s\nclasses.%s = nil\n"),
+		*ClassTypeName,
+		*ClassTypeName,
+		*Class->GetInternalName()
+	);
+
+	return FString::Printf(TEXT("%slocal %s\n\n%s%s"),
+	                       *ClassDocumentation, *Class->GetInternalName(), *ClassGlobalClassesDocumentation,
+	                       *MembersDocumentation);
 }
 
 FString FINGenLuaSumnekoStruct(FFINReflection &Ref, const UFINStruct *Struct) {
+	FString StructTypeName = FINGenLuaSumnekoGetTypeName(Struct);
+
 	FString OperatorDocumentation;
 	FString MembersDocumentation;
+	TArray<FString> PropertyTypes;
 
 	for (const UFINProperty *Prop : Struct->GetProperties(false)) {
 		if (Prop->GetPropertyFlags() & FIN_Prop_Attrib) {
 			MembersDocumentation.Append(FINGenLuaSumnekoProperty(Ref, Struct->GetInternalName(), Prop));
+			PropertyTypes.Add(FINGenLuaSumnekoGetType(Ref, Prop));
 		}
 	}
 
@@ -413,17 +428,40 @@ FString FINGenLuaSumnekoStruct(FFINReflection &Ref, const UFINStruct *Struct) {
 			MembersDocumentation.Append(FINGenLuaSumnekoFunction(Ref, Struct->GetInternalName(), Func));
 		}
 	}
-	
+
 	FString StructDocumentation = "\n";
 	FINGenLuaSumnekoDescription(StructDocumentation, Struct->GetDescription().ToString());
-	StructDocumentation.Append(FString::Printf(
+	StructDocumentation.Appendf(
 		TEXT("---@class %s%s\n"),
-		*FINGenLuaSumnekoGetTypeName(Struct),
+		*StructTypeName,
 		*OperatorDocumentation
-	));
+	);
 
-	return FString::Printf(TEXT("%slocal %s\n%s"),
-	                       *StructDocumentation, *Struct->GetInternalName(), *MembersDocumentation);
+	FString StructGlobalStructsDocumentation = FString::Printf(TEXT("---@class %s.structs : %s\n"), *StructTypeName, *StructTypeName);
+	if (Struct->GetStructFlags() & FIN_Struct_Constructable) {
+		FString ConstructorCallSignature = TEXT("{");
+		for (int i = 0; i < PropertyTypes.Num(); ++i) {
+			ConstructorCallSignature.Appendf(TEXT("%s [%d]: %s"),
+			                                 i > 0
+				                                 ? TEXT(",")
+				                                 : TEXT(""),
+			                                 i + 1, // offset because lua starts arrays at 1
+			                                 *PropertyTypes[i]
+			);
+		}
+		ConstructorCallSignature.Append(TEXT(" }"));
+
+		StructGlobalStructsDocumentation.Appendf(
+			TEXT("---@overload fun(%s) : %s\n"),
+			*StructTypeName,
+			*ConstructorCallSignature
+		);
+	}
+	StructGlobalStructsDocumentation.Appendf(TEXT("structs.%s = nil\n"), *Struct->GetInternalName());
+
+	return FString::Printf(TEXT("%slocal %s\n\n%s%s"),
+	                       *StructDocumentation, *Struct->GetInternalName(), *StructGlobalStructsDocumentation,
+	                       *MembersDocumentation);
 }
 
 bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar) {
@@ -431,9 +469,6 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 		FFINReflection &Ref = *FFINReflection::Get();
 		FString Documentation;
 		Documentation.Append(FINGenLuaSumnekoDocumentationStart);
-
-		FString ClassesString = "---@class FIN.classes";
-		FString StructsString = "---@class FIN.structs";
 
 		{
 			// adding "do" and "end" to get rid of local maximum variables reached
@@ -444,11 +479,6 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 				}
 
 				Documentation.Append(FINGenLuaSumnekoClass(Ref, Class.Value));
-				ClassesString.Append(FString::Printf(
-					TEXT("\n---@field %s %s"),
-					*Class.Value->GetInternalName(),
-					*FINGenLuaSumnekoGetTypeName(Class.Value)
-				));
 				count++;
 
 				if (count == 180) {
@@ -462,11 +492,6 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 				}
 
 				Documentation.Append(FINGenLuaSumnekoStruct(Ref, Struct.Value));
-				StructsString.Append(FString::Printf(
-					TEXT("\n---@field %s %s"),
-					*Struct.Value->GetInternalName(),
-					*FINGenLuaSumnekoGetTypeName(Struct.Value)
-				));
 				count++;
 
 				if (count == 180) {
@@ -480,20 +505,11 @@ bool FINGenLuaDocSumneko(UWorld *World, const TCHAR *Command, FOutputDevice &Ar)
 			}
 		}
 
-		// this looks wierd, but gets indented this way by my formatting settings
-		Documentation.Append(FString::Printf(TEXT(R"(
-%s
-classes = {}
-
-%s
-structs = {}
-)"), *ClassesString, *StructsString));
-
 		Documentation.Append(FINGenLuaSumnekoDocumentationEnd);
 
 		FString Path = FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT("Saved/"));
 		Path = FPaths::Combine(Path, TEXT("FINLuaDocumentationSumneko.lua"));
-		FFileHelper::SaveStringToFile(Documentation, *Path);
+		FFileHelper::SaveStringToFile(Documentation, *Path, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
 
 		return true;
 	}
