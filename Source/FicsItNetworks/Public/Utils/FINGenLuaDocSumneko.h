@@ -6,10 +6,10 @@ inline const auto FINGenLuaSumnekoDocumentationStart = TEXT(R"(error("I don't kn
 ---@diagnostic disable
 
 ---@class FIN.classes
-local classes = {}
+classes = {}
 
 ---@class FIN.structs
-local structs = {}
+structs = {}
 
 )");
 
