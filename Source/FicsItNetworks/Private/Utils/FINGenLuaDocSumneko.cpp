@@ -452,9 +452,9 @@ FString FINGenLuaSumnekoStruct(FFINReflection &Ref, const UFINStruct *Struct) {
 		ConstructorCallSignature.Append(TEXT(" }"));
 
 		StructGlobalStructsDocumentation.Appendf(
-			TEXT("---@overload fun(%s) : %s\n"),
-			*StructTypeName,
-			*ConstructorCallSignature
+			TEXT("---@overload fun(data: %s ) : %s\n"),
+			*ConstructorCallSignature,
+			*StructTypeName
 		);
 	}
 	StructGlobalStructsDocumentation.Appendf(TEXT("structs.%s = nil\n"), *Struct->GetInternalName());
