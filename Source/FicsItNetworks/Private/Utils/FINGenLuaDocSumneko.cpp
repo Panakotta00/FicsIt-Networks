@@ -393,7 +393,7 @@ FString FINGenLuaSumnekoClass(FFINReflection &Ref, const UFINClass *Class) {
 	);
 
 	FString ClassGlobalClassesDocumentation = FString::Printf(
-		TEXT("---@class %s.classes : %s\nclasses.%s = nil\n"),
+		TEXT("---@class FIN.classes.%s : %s\nclasses.%s = nil\n"),
 		*ClassTypeName,
 		*ClassTypeName,
 		*Class->GetInternalName()
@@ -437,7 +437,7 @@ FString FINGenLuaSumnekoStruct(FFINReflection &Ref, const UFINStruct *Struct) {
 		*OperatorDocumentation
 	);
 
-	FString StructGlobalStructsDocumentation = FString::Printf(TEXT("---@class %s.structs : %s\n"), *StructTypeName, *StructTypeName);
+	FString StructGlobalStructsDocumentation = FString::Printf(TEXT("---@class FIN.structs.%s : %s\n"), *StructTypeName, *StructTypeName);
 	if (Struct->GetStructFlags() & FIN_Struct_Constructable) {
 		FString ConstructorCallSignature = TEXT("{");
 		for (int i = 0; i < PropertyTypes.Num(); ++i) {
@@ -452,9 +452,9 @@ FString FINGenLuaSumnekoStruct(FFINReflection &Ref, const UFINStruct *Struct) {
 		ConstructorCallSignature.Append(TEXT(" }"));
 
 		StructGlobalStructsDocumentation.Appendf(
-			TEXT("---@overload fun(%s) : %s\n"),
-			*StructTypeName,
-			*ConstructorCallSignature
+			TEXT("---@overload fun(data: %s ) : %s\n"),
+			*ConstructorCallSignature,
+			*StructTypeName
 		);
 	}
 	StructGlobalStructsDocumentation.Appendf(TEXT("structs.%s = nil\n"), *Struct->GetInternalName());
