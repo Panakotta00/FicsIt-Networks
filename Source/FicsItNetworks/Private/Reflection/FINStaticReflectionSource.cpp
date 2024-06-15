@@ -1785,7 +1785,7 @@ BeginFunc(getTimeTable, "Get Time Table", "Returns the timetable of this train."
 	Body()
 	timeTable = Ctx.GetTrace() / self->GetTimeTable();
 } EndFunc()
-BeginFunc(newTimeTable, "New Time Table", "Creates and returns a new timetable for this train.") {
+BeginFunc(newTimeTable, "New Time Table", "Creates and returns a new timetable for this train.", 0) {
 	OutVal(0, RTrace<AFGRailroadTimeTable>, timeTable, "Time Table", "The new timetable for this train.")
 	Body()
 	timeTable = Ctx.GetTrace() / self->NewTimeTable();
