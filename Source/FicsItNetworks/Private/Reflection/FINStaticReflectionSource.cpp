@@ -1359,7 +1359,7 @@ BeginFunc(setConfiguration, "Set Configuration", "Sets the Door Mode/Configurati
 } EndFunc()
 EndClass()
 
-BeginClass(AFGVehicle, "Vehicle", "Vehicle", "A base class for all vehciles.")
+BeginClass(AFGVehicle, "Vehicle", "Vehicle", "A base class for all vehicles.")
 BeginProp(RFloat, health, "Health", "The health of the vehicle.") {
 	Return self->GetHealthComponent()->GetCurrentHealth();
 } EndProp()
@@ -1715,7 +1715,7 @@ BeginProp(RFloat, maxTractiveEffort, "Max Tractive Effort", "The maximum tractiv
 BeginProp(RFloat, maxDynamicBrakingEffort, "Max Dynamic Braking Effort", "The maximum dynamic braking effort of this vehicle.") {
 	Return self->GetMaxDynamicBrakingEffort();
 } EndProp()
-BeginProp(RFloat, maxAirBrakingEffort, "Max Air Braking Effort", "The maximum air braking effort of this vehcile.") {
+BeginProp(RFloat, maxAirBrakingEffort, "Max Air Braking Effort", "The maximum air braking effort of this vehicle.") {
 	Return self->GetMaxAirBrakingEffort();
 } EndProp()
 BeginProp(RFloat, trackGrade, "Track Grade", "The current track grade of this vehicle.") {
@@ -1927,7 +1927,7 @@ Hook(UFINRailroadTrackHook)
 BeginSignal(VehicleEnter, "VehicleEnter", "Triggered when a vehicle enters the track.")
 	SignalParam(0, RTrace<AFGRailroadVehicle>, Vehicle, "Vehicle", "The vehicle that entered the track.")
 EndSignal()
-BeginSignal(VehicleExit, "VehicleExit", "Triggered when a vehcile exists the track.")
+BeginSignal(VehicleExit, "VehicleExit", "Triggered when a vehicle exists the track.")
 	SignalParam(0, RTrace<AFGRailroadVehicle>, Vehicle, "Vehicle", "The vehicle that exited the track.")
 EndSignal()
 BeginFunc(getClosestTrackPosition, "Get Closeset Track Position", "Returns the closes track position from the given world position") {
@@ -1967,8 +1967,8 @@ BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which th
     Body()
     track = (FINAny)FFINTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
 } EndFunc()
-BeginFunc(getVehciles, "Get Vehicles", "Returns a list of Railroad Vehicles on the Track") {
-	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "THe list of vehciles on the track.")
+BeginFunc(getVehicles, "Get Vehicles", "Returns a list of Railroad Vehicles on the Track") {
+	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "THe list of vehicles on the track.")
 	Body()
 	TArray<FINAny> Vehicles;
 	for (AFGRailroadVehicle* vehicle : self->GetVehicles()) {
