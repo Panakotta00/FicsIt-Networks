@@ -159,7 +159,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			}
 			for (; j < InValues.Num(); j++) Parameters.Add(InValues[j]);
 			Func.Function(Ctx, Parameters);
-			
+
 			TArray<FINAny> OutValues;
 			if (Pos.Num() > 0) for (int i = 0; i <= Pos[Pos.Num()-1]; ++i) {
 				const FFINStaticFuncParamReg* Reg = Func.Parameters.Find(i);
@@ -171,7 +171,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			for (; j < Parameters.Num();) OutValues.Add(Parameters[j++]);
 			return OutValues;
 		};
-		
+
 		ToFillClass->Functions.Add(FINFunc);
 	}
 
@@ -326,7 +326,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 			}
 			return OutValues;
 		};
-		
+
 		ToFillStruct->Functions.Add(FINFunc);
 	}
 
@@ -555,7 +555,7 @@ struct RTrace {
 		return Prop;
 	}
 };
- 
+
 template<typename T>
 struct RStruct {
 	typedef T CppType;
@@ -591,7 +591,7 @@ public:
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetQueuedReservations(const FFGRailroadSignalBlock& Block) {
 		return Block.mQueuedReservations;
 	}
-	
+
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
 		return Block.mApprovedReservations;
 	}
@@ -1236,12 +1236,12 @@ BeginFunc(getFluidDescriptor, "Get Fluid Descriptor", "?") {  /* TODO: Write DOC
 	Body()
 	fluidDescriptor = Ctx.GetTrace() / self->GetFluidDescriptor();
 } EndFunc()
-/*BeginFunc(getFluidIntegrant, "Get Fluid Integrant", "?") {  
+/*BeginFunc(getFluidIntegrant, "Get Fluid Integrant", "?") {
 	OutVal(0, RObject<IFGFluidIntegrantInterface>, fluidIntegrant, "Fluid Descriptor", "?")
     Body()
     fluidIntegrant = Ctx.GetTrace() / self->GetFluidIntegrant();
 } EndFunc()*/
-BeginFunc(flushPipeNetwork, "Flush Pipe Network", "Flush the associated pipe network") {  
+BeginFunc(flushPipeNetwork, "Flush Pipe Network", "Flush the associated pipe network") {
     Body()
 	auto networkID = self->GetPipeNetworkID();
     auto subsystem = AFGPipeSubsystem::GetPipeSubsystem(self->GetWorld());
@@ -1370,7 +1370,7 @@ BeginProp(RBool, isSelfDriving, "Is Self Driving", "True if the vehicle is curre
 	Return self->IsSelfDriving();
 } PropSet() {
 	FReflectionHelper::SetPropertyValue<FBoolProperty>(self, TEXT("mIsSelfDriving"), Val);
-} EndProp() 
+} EndProp()
 EndClass()
 
 BeginClass(AFGWheeledVehicle, "WheeledVehicle", "Wheeled Vehicle", "The base class for all vehicles that used wheels for movement.")
@@ -1835,7 +1835,7 @@ EndClass()
 
 BeginClass(AFGRailroadTimeTable, "TimeTable", "Time Table", "Contains the time table information of train.")
 BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
-	InVal(0, RInt, index, "Index", "The index at which the stop should get added.")
+	InVal(0, RInt, index, "Index", "The zero-based index at which the stop should get added.")
 	InVal(1, RTrace<AFGBuildableRailroadStation>, station, "Station", "The railroad station at which the stop should happen.")
 	InVal(2, RStruct<FTrainDockingRuleSet>, ruleSet, "Rule Set", "The docking rule set that descibes when the train will depart from the station.")
 	OutVal(3, RBool, added, "Added", "True if the stop got sucessfully added to the time table.")
@@ -1846,7 +1846,7 @@ BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
 	added = self->AddStop(index, stop);
 } EndFunc()
 BeginFunc(removeStop, "Remove Stop", "Removes the stop with the given index from the time table.") {
-	InVal(0, RInt, index, "Index", "The index at which the stop should get added.")
+	InVal(0, RInt, index, "Index", "The zero-based index at which the stop should get added.")
 	Body()
 	self->RemoveStop(index);
 } EndFunc()
@@ -1872,13 +1872,13 @@ BeginFunc(setStops, "Set Stops", "Allows to empty and fill the stops of this tim
 	gotSet = self->SetStops(Stops);
 } EndFunc()
 BeginFunc(isValidStop, "Is Valid Stop", "Allows to check if the given stop index is valid.") {
-	InVal(0, RInt, index, "Index", "The stop index you want to check its validity.")
+	InVal(0, RInt, index, "Index", "The zero-based stop index you want to check its validity.")
 	OutVal(1, RBool, valid, "Valid", "True if the stop index is valid.")
 	Body()
 	valid = self->IsValidStop(index);
 } EndFunc()
 BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
-	InVal(0, RInt, index, "Index", "The index of the stop you want to get.")
+	InVal(0, RInt, index, "Index", "The zero-based index of the stop you want to get.")
 	OutVal(1, RStruct<FFINTimeTableStop>, stop, "Stop", "The time table stop at the given index.")
 	Body()
 	FTimeTableStop Stop = self->GetStop(index);
@@ -1889,7 +1889,7 @@ BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
 	}
 } EndFunc()
 BeginFunc(setStop, "Set Stop", "Allows to override a stop already in the time table.") {
-	InVal(0, RInt, index, "Index", "The index of the stop you want to override.")
+	InVal(0, RInt, index, "Index", "The zero-based index of the stop you want to override.")
 	InVal(1, RStruct<FFINTimeTableStop>, stop, "Stop", "The time table stop you want to override with.")
 	OutVal(2, RBool, success, "Success", "True if setting was successful, false if not, f.e. invalid index.")
 	Body()
@@ -1904,7 +1904,7 @@ BeginFunc(setStop, "Set Stop", "Allows to override a stop already in the time ta
 	}
 } EndFunc()
 BeginFunc(setCurrentStop, "Set Current Stop", "Sets the stop, to which the train trys to drive to right now.") {
-	InVal(0, RInt, index, "Index", "The index of the stop the train should drive to right now.")
+	InVal(0, RInt, index, "Index", "The zero-based index of the stop the train should drive to right now.")
 	Body()
 	self->SetCurrentStop(index);
 } EndFunc()
@@ -1913,7 +1913,7 @@ BeginFunc(incrementCurrentStop, "Increment Current Stop", "Sets the current stop
 	self->IncrementCurrentStop();
 } EndFunc()
 BeginFunc(getCurrentStop, "Get Current Stop", "Returns the index of the stop the train drives to right now.") {
-	OutVal(0, RInt, index, "Index", "The index of the stop the train tries to drive to right now.")
+	OutVal(0, RInt, index, "Index", "The zero-based index of the stop the train tries to drive to right now.")
     Body()
     index = (int64) self->GetCurrentStop();
 } EndFunc()
