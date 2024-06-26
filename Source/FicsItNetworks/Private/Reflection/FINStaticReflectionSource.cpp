@@ -1185,7 +1185,7 @@ EndClass()
 BeginClass(AFGPipeHyperStart, "PipeHyperStart", "Pipe Hyper Start", "A actor that is a hypertube entrance buildable")
 Hook(UFINPipeHyperStartHook)
 BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube entrance.")
-	SignalParam(1, RBool, success, "Sucess", "True if the transfer was sucessfull")
+	SignalParam(0, RBool, success, "Sucess", "True if the transfer was sucessfull")
 EndSignal()
 BeginSignal(PlayerExited, "Player Exited", "Triggers when a players leaves through this hypertube entrance.")
 EndSignal()
@@ -1536,8 +1536,8 @@ BeginClass(AFGBuildableRailroadStation, "RailroadStation", "Railroad Station", "
 Hook(UFINRailroadStationHook)
 BeginSignal(StartDocking, "Start Docking", "Triggers when a train tries to dock onto the station.")
 	SignalParam(0, RBool, successful, "Successful", "True if the train successfully docked.")
-	SignalParam(0, RTrace<AFGLocomotive>, locomotive, "Locomotive", "The locomotive that tries to dock onto the station.")
-	SignalParam(0, RFloat, offset, "Offset", "The offset at witch the train tried to dock.")
+	SignalParam(1, RTrace<AFGLocomotive>, locomotive, "Locomotive", "The locomotive that tries to dock onto the station.")
+	SignalParam(2, RFloat, offset, "Offset", "The offset at witch the train tried to dock.")
 EndSignal()
 BeginSignal(FinishDocking, "Finish Docking", "Triggers when a train finished the docking procedure and is ready to depart the station.")
 EndSignal()
@@ -1863,7 +1863,7 @@ BeginFunc(getStops, "Get Stops", "Returns a list of all the stops this time tabl
 } EndFunc()
 BeginFunc(setStops, "Set Stops", "Allows to empty and fill the stops of this time table with the given list of new stops.") {
 	InVal(0, RArray<RStruct<FFINTimeTableStop>>, stops, "Stops", "The new time table stops.")
-	OutVal(0, RBool, gotSet, "Got Set", "True if the stops got sucessfully set.")
+	OutVal(1, RBool, gotSet, "Got Set", "True if the stops got sucessfully set.")
 	Body()
 	TArray<FTimeTableStop> Stops;
 	for (const FINAny& Any : stops) {
