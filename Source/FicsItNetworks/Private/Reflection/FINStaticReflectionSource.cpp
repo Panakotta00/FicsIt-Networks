@@ -2437,7 +2437,7 @@ BeginProp(RStruct<FLinearColor>, foreground, "Foreground", "The foreground Color
 } PropSet() {
 	self->ForegroundColor = Val;
 } EndProp()
-BeginProp(RStruct<FLinearColor>, background, "Bckground", "The background Color.") {
+BeginProp(RStruct<FLinearColor>, background, "Background", "The background Color.") {
 	Return (FINStruct)self->BackgroundColor;
 } PropSet() {
 	self->BackgroundColor = Val;
