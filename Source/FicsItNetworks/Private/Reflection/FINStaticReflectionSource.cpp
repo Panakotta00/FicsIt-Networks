@@ -2437,10 +2437,15 @@ BeginProp(RStruct<FLinearColor>, foreground, "Foreground", "The foreground Color
 } PropSet() {
 	self->ForegroundColor = Val;
 } EndProp()
-BeginProp(RStruct<FLinearColor>, background, "bBckground", "The background Color.") {
+BeginProp(RStruct<FLinearColor>, background, "Background", "The background Color.") {
 	Return (FINStruct)self->BackgroundColor;
 } PropSet() {
 	self->BackgroundColor = Val;
+} EndProp()
+BeginProp(RFloat, emissive, "Emissive", "The emissiveness of the sign.") {
+	Return self->Emissive;
+} PropSet() {
+	self->Emissive = Val;
 } EndProp()
 BeginProp(RStruct<FLinearColor>, auxiliary, "Auxiliary", "The auxiliary Color.") {
 	Return (FINStruct)self->AuxiliaryColor;
