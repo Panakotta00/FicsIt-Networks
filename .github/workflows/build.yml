@@ -125,6 +125,8 @@ jobs:
           filename: "discord-webhook.json"
           json: >
             {
+              "username": "GitHub",
+              "avatar_url": "https://cdn.discordapp.com/avatars/735904925900472323/df91181b3f1cf0ef1592fbe18e0962d7.webp?size=128",
               "embeds": [{
                 "title": "${{ github.ref_name }}",
                 "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
@@ -144,6 +146,8 @@ jobs:
           filename: "discord-webhook.json"
           json: >
             {
+              "username": "GitHub",
+              "avatar_url": "https://cdn.discordapp.com/avatars/735904925900472323/df91181b3f1cf0ef1592fbe18e0962d7.webp?size=128",
               "embeds": [{
                 "title": "${{ github.ref_name }}",
                 "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
@@ -158,6 +162,8 @@ jobs:
           filename: "discord-webhook.json"
           json: >
             {
+              "username": "GitHub",
+              "avatar_url": "https://cdn.discordapp.com/avatars/735904925900472323/df91181b3f1cf0ef1592fbe18e0962d7.webp?size=128",
               "embeds": [{
                 "title": "${{ github.ref_name }}",
                 "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
@@ -172,6 +178,8 @@ jobs:
           filename: "discord-webhook.json"
           json: >
             {
+              "username": "GitHub",
+              "avatar_url": "https://cdn.discordapp.com/avatars/735904925900472323/df91181b3f1cf0ef1592fbe18e0962d7.webp?size=128",
               "embeds": [{
                 "title": "${{ github.ref_name }}",
                 "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
