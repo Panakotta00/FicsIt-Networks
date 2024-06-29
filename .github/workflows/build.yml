@@ -128,8 +128,8 @@ jobs:
               "embeds": [{
                 "title": "${{ github.ref_name }}",
                 "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                "description": "Build ${{ success() && 'Successful' || cancelled() && 'Cancelled' || failure() && 'Failed' || 'Done' }}!",
-                "color": ${{ success() && '65280' || cancelled() && '13158580' || failure() && '16711680' || '6579300' }},
+                "description": "Build Successful!",
+                "color": 65280,
                 "fields": [{
                   "name": "[FicsIt-Networks.zip](${{ steps.upload-artifacts.output.artifact-url }})",
                   "value": "",
@@ -139,7 +139,7 @@ jobs:
             }
       - name: Create Discord Webhook Action
         uses: devops-actions/json-to-file@v1.0.4
-        if: ${{ !success() }}
+        if: cancelled()
         with:
           filename: "discord-webhook.json"
           json: >
@@ -147,8 +147,36 @@ jobs:
               "embeds": [{
                 "title": "${{ github.ref_name }}",
                 "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                "description": "Build ${{ success() && 'Successful' || cancelled() && 'Cancelled' || failure() && 'Failed' || 'Done' }}!",
-                "color": ${{ success() && '65280' || cancelled() && '13158580' || failure() && '16711680' || '6579300' }}
+                "description": "Build Cancelled!",
+                "color": 13158580
+              }]
+            }
+      - name: Create Discord Webhook Action
+        uses: devops-actions/json-to-file@v1.0.4
+        if: failure()
+        with:
+          filename: "discord-webhook.json"
+          json: >
+            {
+              "embeds": [{
+                "title": "${{ github.ref_name }}",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Build Failed",
+                "color": 16711680
+              }]
+            }
+      - name: Create Discord Webhook Action
+        uses: devops-actions/json-to-file@v1.0.4
+        if: ${{ !success() && !failure() && !cancelled() }}
+        with:
+          filename: "discord-webhook.json"
+          json: >
+            {
+              "embeds": [{
+                "title": "${{ github.ref_name }}",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Build Done!",
+                "color": 6579300
               }]
             }
 
