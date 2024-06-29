@@ -26,7 +26,9 @@ on:
       WWISE_PASSWORD:
         required: true
       GH_TOKEN:
-        required: false
+        required: true
+      WEBHOOK_URL:
+        required: true
 
 jobs:
   build:
@@ -109,7 +111,56 @@ jobs:
 #        run: |
 #          dir ${{ github.workspace }}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifacts
+        id: upload-artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: FicsItNetworks-Windows
           path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks-Windows.zip
+
+      - name: Create Discord Webhook Action
+        uses: devops-actions/json-to-file@v1.0.4
+        if: success()
+        with:
+          filename: "discord-webhook.json"
+          json: >
+            {
+              "embeds": [{
+                "title": "${{ github.ref_name }}",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Build ${{ success() && 'Successful' || cancelled() && 'Cancelled' || failure() && 'Failed' || 'Done' }}!",
+                "color": ${{ success() && '65280' || cancelled() && '13158580' || failure() && '16711680' || '6579300' }},
+                "fields": [{
+                  "name": "[FicsIt-Networks.zip](${{ steps.upload-artifacts.output.artifact-url }})",
+                  "value": "",
+                  "inline": true
+                }]
+              }]
+            }
+      - name: Create Discord Webhook Action
+        uses: devops-actions/json-to-file@v1.0.4
+        if: ${{ !success() }}
+        with:
+          filename: "discord-webhook.json"
+          json: >
+            {
+              "embeds": [{
+                "title": "${{ github.ref_name }}",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Build ${{ success() && 'Successful' || cancelled() && 'Cancelled' || failure() && 'Failed' || 'Done' }}!",
+                "color": ${{ success() && '65280' || cancelled() && '13158580' || failure() && '16711680' || '6579300' }}
+              }]
+            }
+
+      - name: Discord Webhook Action
+        uses: tsickert/discord-webhook@v6.0.0
+        if: always()
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          raw-data: discord-webhook.json
+#          embed-title: ${{ github.ref_name }}
+#          embed-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#          embed-description: Build ${{ success() && 'Successful' || cancelled() && 'Cancelled' || failure() && 'Failed' || 'Done' }}!
+#          embed-color: ${{ success() && '65280' || cancelled() && '13158580' || failure() && '16711680' || '6579300' }}
+
+
