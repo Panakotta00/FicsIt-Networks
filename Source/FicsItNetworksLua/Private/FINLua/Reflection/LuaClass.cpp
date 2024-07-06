@@ -1,5 +1,6 @@
 #include "FINLua/Reflection/LuaClass.h"
 
+#include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaRef.h"
 
 namespace FINLua {
@@ -143,7 +144,7 @@ namespace FINLua {
 	};
 
 	void setupClassSystem(lua_State* L) {
-		PersistSetup("ClassSystem", -2);
+		PersistenceNamespace("ClassSystem");
 
 		// Register & Persist Class-Metatable
 		luaL_newmetatable(L, FIN_LUA_CLASS_METATABLE_NAME);		// ..., ClassMetatable

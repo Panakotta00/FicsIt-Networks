@@ -1,6 +1,7 @@
 ﻿#include "FINLua/LuaFuture.h"
 
 #include "FINLuaProcessor.h"
+#include "FINLua/LuaPersistence.h"
 
 namespace FINLua {
 		typedef TSharedPtr<TFINDynamicStruct<FFINFuture>> LuaFuture;
@@ -105,7 +106,7 @@ namespace FINLua {
 	}
 
 	void setupFutureAPI(lua_State* L) {
-		PersistSetup("FutureAPI", -2);
+		PersistenceNamespace("FutureAPI");
 
 		luaL_newmetatable(L, "Future");
 		lua_pushboolean(L, true);

@@ -10,6 +10,7 @@
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLua/Reflection/LuaStruct.h"
 #include "FINLuaProcessor.h"
+#include "FINLua/LuaPersistence.h"
 #include "Registry/ModContentRegistry.h"
 //#include "tracy/Tracy.hpp"
 //#include "tracy/TracyLua.hpp"
@@ -288,7 +289,7 @@ namespace FINLua {
 	}
 	
 	void setupGlobals(lua_State* L) {
-		PersistSetup("Globals", -2);
+		PersistenceNamespace("Globals");
 
 		lua_register(L, "findClass", luaFindClass_DEPRECATED);
 		PersistGlobal("findClass");

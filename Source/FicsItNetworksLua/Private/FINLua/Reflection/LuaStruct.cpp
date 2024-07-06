@@ -2,6 +2,7 @@
 
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "FINLua/LuaPersistence.h"
 #include "tracy/Tracy.hpp"
 
 #define PersistParams \
@@ -507,7 +508,7 @@ namespace FINLua {
 	};
 
 	void setupStructSystem(lua_State* L) {
-		PersistSetup("StructSystem", -2);
+		PersistenceNamespace("StructSystem");
 
 		// Register & Persist Struct-Metatable
 		luaL_newmetatable(L, FIN_LUA_STRUCT_METATABLE_NAME);		// ..., StructMetatable

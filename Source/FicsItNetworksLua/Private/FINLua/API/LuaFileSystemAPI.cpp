@@ -1,6 +1,7 @@
 #include "FINLua/API/LuaFileSystemAPI.h"
 
 #include "FINLuaProcessor.h"
+#include "FINLua/LuaPersistence.h"
 
 #define LuaFunc(funcName) \
 int funcName(lua_State* L) { \
@@ -475,7 +476,7 @@ namespace FINLua {
 	}
 
 	void setupFileSystemAPI(lua_State * L) {
-		PersistSetup("FileSystem", -2);
+		PersistenceNamespace("FileSystem");
 		
 		luaL_newlibtable(L, luaFileSystemLib);
 		luaL_setfuncs(L, luaFileSystemLib, 0);

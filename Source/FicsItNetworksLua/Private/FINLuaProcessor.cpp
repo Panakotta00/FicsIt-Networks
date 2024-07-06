@@ -3,6 +3,7 @@
 #include "FicsItNetworksLuaModule.h"
 #include "FicsItKernel/Logging.h"
 #include "FINStateEEPROMLua.h"
+#include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "Network/FINNetworkTrace.h"
@@ -303,10 +304,7 @@ int FFINLuaProcessorTick::steps() const {
 }
 
 UFINLuaProcessor* UFINLuaProcessor::luaGetProcessor(lua_State* L) {
-	lua_getfield(L, LUA_REGISTRYINDEX, "LuaProcessorPtr");
-	UFINLuaProcessor* p = *static_cast<UFINLuaProcessor**>(luaL_checkudata(L, -1, "LuaProcessor"));
-	lua_pop(L, 1);
-	return p;
+	return FINLua::luaFIN_getExtraSpace(L).Processor;
 }
 
 void UFINLuaProcessor::OnPreGarbageCollection() {
@@ -633,39 +631,31 @@ void UFINLuaProcessor::Reset() {
 
 	// clear existing lua state
 	if (luaState) {
+		FINLua::luaFIN_destroyExtraSpace(luaState);
+
 		lua_close(luaState);
 	}
 
 	// create new lua state
 	luaState = luaL_newstate();
 
+	FINLua::luaFIN_createExtraSpace(luaState);
+	FINLua::luaFIN_getExtraSpace(luaState).Processor = this;
+
 	// setup warning function
 	lua_setwarnf(luaState, luaWarnF, this);
 
-	// setup library and perm tables for persistence
+	// setup tables for persistence
 	lua_newtable(luaState); // perm
-	lua_newtable(luaState); // perm, uperm 
+	lua_newtable(luaState); // perm, uperm
+	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
+	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); //
 
-	// register pointer to this Lua Processor in c registry, filestream list & perm table
-	luaL_newmetatable(luaState, "LuaProcessor"); // perm, uperm, mt-LuaProcessor
-	lua_pop(luaState, 1); // perm, uperm
-	UFINLuaProcessor*& luaProcessor = *static_cast<UFINLuaProcessor**>(lua_newuserdata(luaState, sizeof(UFINLuaProcessor*))); // perm, uperm, proc
-	luaL_setmetatable(luaState, "LuaProcessor");
-	luaProcessor = this;
-	lua_pushvalue(luaState, -1); // perm, uperm, proc, proc
-	lua_setfield(luaState, LUA_REGISTRYINDEX, "LuaProcessorPtr"); // perm, uperm, proc
-	lua_pushvalue(luaState, -1); // perm, uperm, proc, proc
-	lua_setfield(luaState, -3, "LuaProcessor"); // perm, uperm, proc
-	lua_pushstring(luaState, "LuaProcessor"); // perm, uperm, proc, "LuaProcessorPtr"
-	lua_settable(luaState, -4); // perm, uperm
+	// register pointer filestream list
 	FINLua::setupGlobals(luaState); // perm, uperm
 	lua_pushlightuserdata(luaState, &FileStreams);
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "FileStreamStorage");
-	
-	// finish perm tables
-	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
-	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); //
-	
+
 	// create new thread for user code chunk
 	luaThread = lua_newthread(luaState);
 	luaThreadIndex = lua_gettop(luaState);

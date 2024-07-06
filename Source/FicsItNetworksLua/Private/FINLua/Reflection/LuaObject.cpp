@@ -3,6 +3,7 @@
 #include "FicsItNetworksLuaModule.h"
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "FINLua/LuaPersistence.h"
 #include "Logging/StructuredLog.h"
 #include "Network/FINNetworkUtils.h"
 #include "tracy/Tracy.hpp"
@@ -203,7 +204,7 @@ namespace FINLua {
 	}
 
 	void setupObjectSystem(lua_State* L) {
-		PersistSetup("ObjectSystem", -2);
+		PersistenceNamespace("ObjectSystem");
 
 		// Register & Persist Class-Metatable
 		luaL_newmetatable(L, FIN_LUA_OBJECT_METATABLE_NAME);	// ..., ObjectMetatable

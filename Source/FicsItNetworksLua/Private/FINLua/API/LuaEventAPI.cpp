@@ -3,6 +3,7 @@
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
 #include "FicsItKernel/Network/NetworkController.h"
+#include "FINLua/LuaPersistence.h"
 #include "Network/FINNetworkCircuit.h"
 #include "Network/FINNetworkUtils.h"
 #include "Network/Signals/FINSignalSubsystem.h"
@@ -128,7 +129,7 @@ namespace FINLua {
 	};
 
 	void setupEventAPI(lua_State* L) {
-		PersistSetup("Event", -2);
+		PersistenceNamespace("Event");
 		lua_newtable(L);
 		luaL_setfuncs(L, luaEventLib, 0);
 		lua_newtable(L);

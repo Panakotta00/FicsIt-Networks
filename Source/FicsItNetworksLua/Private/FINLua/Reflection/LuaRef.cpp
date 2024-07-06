@@ -5,6 +5,7 @@
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLua/Reflection/LuaStruct.h"
 #include "FINLuaProcessor.h"
+#include "FINLua/LuaPersistence.h"
 #include "tracy/Tracy.hpp"
 
 namespace FINLua {
@@ -236,7 +237,7 @@ namespace FINLua {
 	}
 
 	void setupRefUtils(lua_State* L) {
-		PersistSetup("ReflectionUtils", -2);
+		PersistenceNamespace("ReflectionUtils");
 
 		// Register & Persist ReflectionFunction-Metatable
 		luaL_newmetatable(L, LUA_REFLECTION_FUNCTION_METATABLE_NAME);		// ..., ReflectionFunctionMetatable

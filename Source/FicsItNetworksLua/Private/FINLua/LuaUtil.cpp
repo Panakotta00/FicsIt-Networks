@@ -3,6 +3,7 @@
 #include "FicsItNetworksLuaModule.h"
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/LuaFuture.h"
+#include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLua/Reflection/LuaStruct.h"
 #include "Reflection/FINArrayProperty.h"
@@ -378,7 +379,7 @@ namespace FINLua {
 	}
 
 	void setupUtilLib(lua_State* L) {
-		PersistSetup("UtilLib", -2);
+		PersistenceNamespace("UtilLib");
 		
 		
 	}

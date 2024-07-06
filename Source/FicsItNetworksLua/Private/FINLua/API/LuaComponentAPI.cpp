@@ -1,6 +1,7 @@
 #include "FINLua/API/LuaComponentAPI.h"
 
 #include "FINLuaProcessor.h"
+#include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "Network/FINNetworkUtils.h"
@@ -77,7 +78,7 @@ namespace FINLua {
 	};
 
 	void setupComponentAPI(lua_State* L) {
-		PersistSetup("Component", -2);
+		PersistenceNamespace("Component");
 		lua_newtable(L);
 		luaL_setfuncs(L, luaComponentLib, 0);
 		PersistTable("Lib", -1);

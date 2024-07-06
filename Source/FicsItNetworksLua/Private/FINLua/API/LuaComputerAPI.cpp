@@ -8,6 +8,7 @@
 #include "FINStateEEPROMLua.h"
 #include "Network/FINNetworkUtils.h"
 #include "FGTimeSubsystem.h"
+#include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaStruct.h"
 #include "UI/FGGameUI.h"
 #include "Utils/FINMediaSubsystem.h"
@@ -234,7 +235,7 @@ namespace FINLua {
 	
 	void setupComputerAPI(lua_State* L) {
 		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-		PersistSetup("Computer", -2);
+		PersistenceNamespace("Computer");
 		luaL_newlibtable(L, luaComputerLib);
 		luaL_setfuncs(L, luaComputerLib, 0);
 		luaFIN_pushObject(L, FINTrace(AFINMediaSubsystem::GetMediaSubsystem(Processor)));

@@ -1,6 +1,7 @@
 ﻿#include "FINLua/API/LuaDebugAPI.h"
 
 #include "FicsItNetworksLuaModule.h"
+#include "FINLua/LuaPersistence.h"
 
 namespace FINLua {
 	int luaLog(lua_State* L) {
@@ -14,7 +15,7 @@ namespace FINLua {
 	}
 	
 	void setupDebugAPI(lua_State* L) {
-		PersistSetup("Debug", -2);
+		PersistenceNamespace("Debug");
 		lua_newtable(L);
 		lua_pushcfunction(L, luaopen_debug);
 		lua_call(L, 0, 1);
