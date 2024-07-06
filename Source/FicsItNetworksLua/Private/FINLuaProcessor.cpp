@@ -639,8 +639,10 @@ void UFINLuaProcessor::Reset() {
 	// create new lua state
 	luaState = luaL_newstate();
 
-	FINLua::luaFIN_createExtraSpace(luaState);
-	FINLua::luaFIN_getExtraSpace(luaState).Processor = this;
+	FINLua::luaFIN_createExtraSpace(luaState, {
+		.Processor = this,
+		.FileStreams = FileStreams,
+	});
 
 	// setup warning function
 	lua_setwarnf(luaState, luaWarnF, this);
@@ -650,11 +652,6 @@ void UFINLuaProcessor::Reset() {
 	lua_newtable(luaState); // perm, uperm
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); //
-
-	// register pointer filestream list
-	FINLua::setupGlobals(luaState); // perm, uperm
-	lua_pushlightuserdata(luaState, &FileStreams);
-	lua_setfield(luaState, LUA_REGISTRYINDEX, "FileStreamStorage");
 
 	// create new thread for user code chunk
 	luaThread = lua_newthread(luaState);

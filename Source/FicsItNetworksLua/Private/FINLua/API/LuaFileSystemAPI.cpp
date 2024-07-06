@@ -1,6 +1,7 @@
 #include "FINLua/API/LuaFileSystemAPI.h"
 
 #include "FINLuaProcessor.h"
+#include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaPersistence.h"
 
 #define LuaFunc(funcName) \
@@ -35,8 +36,7 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 		} else { \
 			self->file->close(); \
 		} \
-		lua_getfield(L, LUA_REGISTRYINDEX, "FileStreamStorage"); \
-        TArray<LuaFile>& streams = *static_cast<TArray<LuaFile>*>(lua_touserdata(L, -1)); \
+        TArray<LuaFile>& streams = FINLua::luaFIN_getExtraSpace(L).FileStreams; \
 		streams.Add(self); \
 	} \
 	CodersFileSystem::SRef<CodersFileSystem::FileStream>& file = self->file; \
@@ -467,9 +467,8 @@ namespace FINLua {
 		new (f) LuaFile(new LuaFileContainer());
 		f->get()->file = file;
 		f->get()->path = path;
-		lua_getfield(L, LUA_REGISTRYINDEX, "FileStreamStorage");
 		if (file.isValid()) {
-			TArray<LuaFile>& streams = *static_cast<TArray<LuaFile>*>(lua_touserdata(L, -1));
+			TArray<LuaFile>& streams = FINLua::luaFIN_getExtraSpace(L).FileStreams;
 			streams.Add(*f);
 		}
 		lua_pop(L, 1);
