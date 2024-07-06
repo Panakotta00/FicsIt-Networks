@@ -4,7 +4,7 @@
 #include "FicsItKernel/Logging.h"
 #include "FINStateEEPROMLua.h"
 #include "FINLua/LuaGlobalLib.h"
-#include "FINLua/LuaObject.h"
+#include "FINLua/Reflection/LuaObject.h"
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINSignal.h"

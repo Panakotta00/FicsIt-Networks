@@ -1,6 +1,6 @@
-#include "FINLua/LuaClass.h"
+#include "FINLua/Reflection/LuaClass.h"
 
-#include "FINLua/LuaRef.h"
+#include "FINLua/Reflection/LuaRef.h"
 
 namespace FINLua {
 	int luaClassEq(lua_State* L) {

@@ -1,12 +1,12 @@
-#include "FINLua/LuaComponentAPI.h"
+#include "FINLua/API/LuaComponentAPI.h"
 
 #include "FINLuaProcessor.h"
-#include "FINLua/LuaClass.h"
-#include "FINLua/LuaObject.h"
+#include "FINLua/Reflection/LuaClass.h"
+#include "FINLua/Reflection/LuaObject.h"
 #include "Network/FINNetworkUtils.h"
 
 namespace FINLua {
-			int luaComponentProxy(lua_State* L) {
+	int luaComponentProxy(lua_State* L) {
 		// ReSharper disable once CppDeclaratorNeverUsed
 		FLuaSyncCall SyncCall(L);
 		const int args = lua_gettop(L);

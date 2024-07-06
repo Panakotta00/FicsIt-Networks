@@ -3,6 +3,7 @@
 #include "FINLua.h"
 #include "FicsItKernel/Logging.h"
 #include "Network/FINNetworkValues.h"
+#include "Serialization/CompactBinaryWriter.h"
 
 class UFINProperty;
 class UFINStruct;
@@ -170,3 +171,5 @@ namespace FINLua {
 struct FFINLuaLogScope : public FFINLogScope {
 	explicit FFINLuaLogScope(lua_State* L);
 };
+
+FCbWriter& operator<<(FCbWriter& Writer, lua_State* const& L);

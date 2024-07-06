@@ -5,6 +5,8 @@
 #include "Patching/NativeHookManager.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworksLua);
+DEFINE_LOG_CATEGORY(LogFicsItNetworksLuaReflection);
+
 IMPLEMENT_GAME_MODULE(FFicsItNetworksLuaModule, FicsItNetworksLua);
 
 void FFicsItNetworksLuaModule::StartupModule() {

@@ -1,10 +1,10 @@
 #include "FINLua/LuaUtil.h"
 
 #include "FicsItNetworksLuaModule.h"
-#include "FINLua/LuaClass.h"
+#include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/LuaFuture.h"
-#include "FINLua/LuaObject.h"
-#include "FINLua/LuaStruct.h"
+#include "FINLua/Reflection/LuaObject.h"
+#include "FINLua/Reflection/LuaStruct.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINClassProperty.h"
 #include "Reflection/FINObjectProperty.h"
@@ -389,3 +389,8 @@ FFINLuaLogScope::FFINLuaLogScope(lua_State* L) : FFINLogScope(nullptr, FWhereFun
 }), FStackFunction::CreateLambda([L]() {
 	return FINLua::luaFIN_stack(L);
 })) {}
+
+FCbWriter& operator<<(FCbWriter& Writer, lua_State* const& L) {
+	Writer.AddString(FINLua::luaFIN_where(L));
+	return Writer;
+}

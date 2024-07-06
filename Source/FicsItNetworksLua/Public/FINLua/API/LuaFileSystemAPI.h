@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LuaUtil.h"
+#include "FINLua/LuaUtil.h"
 #include "FicsItKernel/FicsItKernel.h"
 
 namespace FINLua {

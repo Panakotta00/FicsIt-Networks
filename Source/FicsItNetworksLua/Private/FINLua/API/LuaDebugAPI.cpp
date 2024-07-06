@@ -1,6 +1,6 @@
-﻿#include "FINLua/LuaDebugAPI.h"
+﻿#include "FINLua/API/LuaDebugAPI.h"
 
-#include "FicsItNetworksModule.h"
+#include "FicsItNetworksLuaModule.h"
 
 namespace FINLua {
 	int luaLog(lua_State* L) {

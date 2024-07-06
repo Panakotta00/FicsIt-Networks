@@ -1,6 +1,6 @@
-#include "FINLua/LuaStruct.h"
+#include "FINLua/Reflection/LuaStruct.h"
 
-#include "FINLua/LuaRef.h"
+#include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
 #include "tracy/Tracy.hpp"
 

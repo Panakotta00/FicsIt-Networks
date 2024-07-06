@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LuaUtil.h"
+#include "FINLua/LuaUtil.h"
 #include "Reflection/FINReflection.h"
 
 #define FIN_LUA_CLASS_LIB_METATABLE_NAME "ClassLib"

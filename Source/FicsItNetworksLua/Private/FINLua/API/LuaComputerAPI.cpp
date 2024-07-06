@@ -1,17 +1,15 @@
-#include "FINLua/LuaComputerAPI.h"
+#include "FINLua/API/LuaComputerAPI.h"
 
 #include "FGAttentionPingActor.h"
 #include "FGPlayerController.h"
-#include "FINLua/LuaClass.h"
-#include "FINLua/LuaObject.h"
+#include "FINLua/Reflection/LuaClass.h"
+#include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
 #include "FINStateEEPROMLua.h"
 #include "Network/FINNetworkUtils.h"
 #include "FGTimeSubsystem.h"
-#include "FicsItNetworksLuaModule.h"
-#include "FINLua/LuaStruct.h"
+#include "FINLua/Reflection/LuaStruct.h"
 #include "UI/FGGameUI.h"
-#include "UI/FINNotificationMessage.h"
 #include "Utils/FINMediaSubsystem.h"
 
 #define LuaFunc(funcName) \

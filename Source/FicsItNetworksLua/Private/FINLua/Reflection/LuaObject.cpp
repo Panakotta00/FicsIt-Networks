@@ -1,7 +1,9 @@
-#include "FINLua/LuaObject.h"
+#include "FINLua/Reflection/LuaObject.h"
 
-#include "FINLua/LuaRef.h"
+#include "FicsItNetworksLuaModule.h"
+#include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "Logging/StructuredLog.h"
 #include "Network/FINNetworkUtils.h"
 #include "tracy/Tracy.hpp"
 
@@ -156,16 +158,26 @@ namespace FINLua {
 	void luaFIN_pushObject(lua_State* L, const FFINNetworkTrace& Object) {
 		if (!Object.GetUnderlyingPtr()) {
 			lua_pushnil(L);
+			UE_LOGFMT(LogFicsItNetworksLuaReflection, Verbose, "[{Runtime}] Tried to push invalid/null Object to Lua-Stack ({Index})", L, lua_gettop(L));
 			return;
 		}
 		FLuaObject* LuaObject = static_cast<FLuaObject*>(lua_newuserdata(L, sizeof(FLuaObject)));
 		new(LuaObject) FLuaObject(Object, UFINLuaProcessor::luaGetProcessor(L)->GetKernel());
 		luaL_setmetatable(L, FIN_LUA_OBJECT_METATABLE_NAME);
+		UE_LOGFMT(LogFicsItNetworksLuaReflection, VeryVerbose, "[{Runtime}] Pushed Object '{Object}' to Lua-Stack ({Index})", L, Object->GetFullName(), lua_gettop(L));
 	}
 
 	FLuaObject* luaFIN_toLuaObject(lua_State* L, int Index, UFINClass* ParentClass) {
 		FLuaObject* LuaObject = static_cast<FLuaObject*>(luaL_testudata(L, Index, FIN_LUA_OBJECT_METATABLE_NAME));
-		if (LuaObject && LuaObject->Type->IsChildOf(ParentClass)) return LuaObject;
+		if (LuaObject && LuaObject->Object.IsValidPtr()) {
+			if (LuaObject->Type->IsChildOf(ParentClass)) {
+				UE_LOGFMT(LogFicsItNetworksLuaReflection, VeryVerbose, "[{Runtime}] Got Object '{Object}' from Lua-Stack ({Index}/{AbsIndex})", L, LuaObject->Object->GetFullName(), Index, lua_absindex(L, Index));
+				return LuaObject;
+			}
+			UE_LOGFMT(LogFicsItNetworksLuaReflection, Verbose, "[{Runtime}] Got Object '{Object}' from Lua-Stack ({Index}/{AbsIndex}) but is not of valid Type '{Class}'", L, LuaObject->Object->GetFullName(), Index, lua_absindex(L, Index), ParentClass ? ParentClass->GetInternalName() : "");
+			return nullptr;
+		}
+		UE_LOGFMT(LogFicsItNetworksLuaReflection, Verbose, "[{Runtime}] Failed to get Object of Type '{Class}' from Lua-Stack ({Index}/{AbsIndex})", L, ParentClass ? ParentClass->GetInternalName() : "", Index, lua_absindex(L, Index));
 		return nullptr;
 	}
 

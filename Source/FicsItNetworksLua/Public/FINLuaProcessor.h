@@ -4,7 +4,7 @@
 #include "FINLuaProcessorStateStorage.h"
 #include "FicsItKernel/FicsItFS/Library/Listener.h"
 #include "FicsItKernel/Processor/Processor.h"
-#include "FINLua/LuaFileSystemAPI.h"
+#include "FINLua/API/LuaFileSystemAPI.h"
 #include "FINLuaProcessor.generated.h"
 
 class AFINStateEEPROMLua;

@@ -1,6 +1,6 @@
-#include "FINLua/LuaEventAPI.h"
+#include "FINLua/API/LuaEventAPI.h"
 
-#include "FINLua/LuaObject.h"
+#include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
 #include "FicsItKernel/Network/NetworkController.h"
 #include "Network/FINNetworkCircuit.h"

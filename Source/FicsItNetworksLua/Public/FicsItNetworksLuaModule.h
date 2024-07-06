@@ -3,6 +3,7 @@
 #include "Modules/ModuleManager.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworksLua, Verbose, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworksLuaReflection, Fatal, All);
 
 class FFicsItNetworksLuaModule : public FDefaultGameModuleImpl
 {
