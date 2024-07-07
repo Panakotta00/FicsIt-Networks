@@ -1,15 +1,12 @@
 #include "FINLua/LuaGlobalLib.h"
 
 #include "FINLua/Reflection/LuaClass.h"
-#include "FINLua/API/LuaComponentAPI.h"
-#include "FINLua/API/LuaComputerAPI.h"
-#include "FINLua/API/LuaDebugAPI.h"
-#include "FINLua/API/LuaEventAPI.h"
 #include "FINLua/LuaFuture.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLua/Reflection/LuaStruct.h"
 #include "FINLuaProcessor.h"
+#include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "Registry/ModContentRegistry.h"
 //#include "tracy/Tracy.hpp"
@@ -350,11 +347,10 @@ namespace FINLua {
 		setupStructSystem(L);
 		setupObjectSystem(L);
 		setupClassSystem(L);
-		setupComponentAPI(L);
-		setupEventAPI(L);
-		setupFileSystemAPI(L);
-		setupComputerAPI(L);
-		setupDebugAPI(L);
 		setupFutureAPI(L);
+
+		for (const TSharedRef<FFINLuaModule>& module : FFINLuaModuleRegistry::GetInstance().Modules) {
+			module->SetupModule(L);
+		}
 	}
 }

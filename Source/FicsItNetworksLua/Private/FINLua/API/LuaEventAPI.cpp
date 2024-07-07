@@ -1,14 +1,17 @@
-#include "FINLua/API/LuaEventAPI.h"
-
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
 #include "FicsItKernel/Network/NetworkController.h"
+#include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
-#include "Network/FINNetworkCircuit.h"
 #include "Network/FINNetworkUtils.h"
 #include "Network/Signals/FINSignalSubsystem.h"
 
 namespace FINLua {
+#define LOCTEXT_NAMESPACE "EventModule"
+	BeginLuaModule(Event, LOCTEXT("DisplayName", "Event Module"), LOCTEXT("Description", ""))
+#define LOCTEXT_NAMESPACE "EventLibrary"
+	BeginLibrary(event, LOCTEXT("DisplayName", "Event"), LOCTEXT("Description", ""))
+
 	void luaListen(lua_State* L, FFINNetworkTrace o) {
 		const UFINKernelNetworkController* net = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork();
 		UObject* obj = *o;
@@ -17,7 +20,7 @@ namespace FINLua {
 		SigSubSys->Listen(obj, o.Reverse() / net->GetComponent().GetObject());
 	}
 
-	int luaListen(lua_State* L) {
+	FieldFunction(listen, LOCTEXT("listen_DisplayName", "Listen"), LOCTEXT("listen_Description", "")) {
 		// ReSharper disable once CppDeclaratorNeverUsed
 		FLuaSyncCall SyncCall(L);
 		const int args = lua_gettop(L);
@@ -29,7 +32,7 @@ namespace FINLua {
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
 
-	int luaListening(lua_State* L) {
+	FieldFunction(listening, LOCTEXT("listening_DisplayName", "Listening"), LOCTEXT("listening_Description", "")) {
 		// ReSharper disable once CppDeclaratorNeverUsed
 		FLuaSyncCall SyncCall(L);
 
@@ -52,7 +55,7 @@ namespace FINLua {
 		return args - ctx;
 	}
 
-	int luaPull(lua_State* L) {
+	FieldFunction(pull, LOCTEXT("pull_DisplayName", "Pull"), LOCTEXT("pull_Description", "")) {
 		const int args = lua_gettop(L);
 		double t = 0.0;
 		if (args > 0) t = lua_tonumber(L, 1);
@@ -80,7 +83,7 @@ namespace FINLua {
 		SigSubSys->Ignore(obj, *o.Reverse());
 	}
 
-	int luaIgnore(lua_State* L) {
+	FieldFunction(ignore, LOCTEXT("ignore_DisplayName", "Ignore"), LOCTEXT("ignore_Description", "")) {
 		// ReSharper disable once CppDeclaratorNeverUsed
 		FLuaSyncCall SyncCall(L);
 		const int args = lua_gettop(L);
@@ -92,7 +95,7 @@ namespace FINLua {
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
 
-	int luaIgnoreAll(lua_State* L) {
+	FieldFunction(ignoreAll, LOCTEXT("ignoreAll_DisplayName", "Ignore All"), LOCTEXT("ignoreAll_Description", "")) {
 		// ReSharper disable once CppDeclaratorNeverUsed
 		FLuaSyncCall SyncCall(L);
 		UFINKernelNetworkController* net = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork();
@@ -106,41 +109,13 @@ namespace FINLua {
 		return 0;
 	}
 
-	int luaKaito(lua_State* L) {
-		TScriptInterface<IFINNetworkComponent> Component = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->GetComponent();
-		if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return 0;
-		AFINSignalSubsystem* SubSys = AFINSignalSubsystem::GetSignalSubsystem(Component.GetObject());
-		TSet<UObject*> Components = IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->GetComponents();
-		for (UObject* Comp : Components) {
-			FFINNetworkTrace Sender = UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(Comp));
-			SubSys->Listen(*Sender, Sender / Component.GetObject());
-		}
-		return 0;
+	EndLibrary()
+
+	ModulePostSetup() {
+		lua_pushcfunction(L, (int(*)(lua_State*))eventLibrary::luaPullContinue);
+		luaFIN_persistValue(L, -1, "Event-luaPullContinue");
+		lua_pop(L, 1);
 	}
 
-	static const luaL_Reg luaEventLib[] = {
-		{"listen", luaListen},
-		{"listening", luaListening},
-		{"pull", luaPull},
-		{"ignore", luaIgnore},
-		{"ignoreAll", luaIgnoreAll},
-		{"clear", luaClear},
-		{nullptr, nullptr}
-	};
-
-	void setupEventAPI(lua_State* L) {
-		PersistenceNamespace("Event");
-		lua_newtable(L);
-		luaL_setfuncs(L, luaEventLib, 0);
-		lua_newtable(L);
-		lua_newtable(L);
-		lua_pushcfunction(L, &luaKaito);
-		lua_setfield(L, -2, "kaito");
-		lua_setfield(L, -2, "__index");
-		lua_setmetatable(L, -2);
-		PersistTable("Lib", -1);
-		lua_setglobal(L, "event");
-		lua_pushcfunction(L, (int(*)(lua_State*))luaPullContinue);
-		PersistValue("pullContinue");
-	}
+	EndLuaModule()
 }

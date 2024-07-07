@@ -1,13 +1,17 @@
-#include "FINLua/API/LuaComponentAPI.h"
-
+#include "FGConstructDisqualifier.h"
 #include "FINLuaProcessor.h"
+#include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "Network/FINNetworkUtils.h"
 
 namespace FINLua {
-	int luaComponentProxy(lua_State* L) {
+#define LOCTEXT_NAMESPACE "ComponentModule"
+	BeginLuaModule(component, LOCTEXT("DisplayName", "Component Module"), LOCTEXT("Description", "The Component Module contains the component Library."))
+#define LOCTEXT_NAMESPACE "ComponentLibrary"
+	BeginLibrary(component, LOCTEXT("DisplayName", "Component Library"), LOCTEXT("Description", "The component library contains functions that allow interaction with the component network."))
+	FieldFunction(proxy, LOCTEXT("Proxy_DisplayName", "Proxy"), LOCTEXT("Proxy_Description", "")) {
 		// ReSharper disable once CppDeclaratorNeverUsed
 		FLuaSyncCall SyncCall(L);
 		const int args = lua_gettop(L);
@@ -41,8 +45,7 @@ namespace FINLua {
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, args);
 	}
-	
-	int luaFindComponent(lua_State* L) {
+	FieldFunction(findComponent, LOCTEXT("findComponent_DisplayName", "Find Component"), LOCTEXT("findComponent_Description", "")) {
 		// ReSharper disable once CppDeclaratorNeverUsed
 		FLuaSyncCall SyncCall(L);
 		const int args = lua_gettop(L);
@@ -70,18 +73,6 @@ namespace FINLua {
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, args);
 	}
-
-	static const luaL_Reg luaComponentLib[] = {
-		{"proxy", luaComponentProxy},
-		{"findComponent", luaFindComponent},
-		{nullptr, nullptr}
-	};
-
-	void setupComponentAPI(lua_State* L) {
-		PersistenceNamespace("Component");
-		lua_newtable(L);
-		luaL_setfuncs(L, luaComponentLib, 0);
-		PersistTable("Lib", -1);
-		lua_setglobal(L, "component");
-	}
+	EndLibrary()
+	EndLuaModule()
 }

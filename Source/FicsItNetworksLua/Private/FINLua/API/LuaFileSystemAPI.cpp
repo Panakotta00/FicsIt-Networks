@@ -1,22 +1,18 @@
 #include "FINLua/API/LuaFileSystemAPI.h"
 
 #include "FINLuaProcessor.h"
+#include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaPersistence.h"
 
-#define LuaFunc(funcName) \
-int funcName(lua_State* L) { \
+#define LuaFunc() \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
 	FLuaSyncCall SyncCall(L); \
 	UFINKernelSystem* kernel = processor->GetKernel(); \
 	FFINKernelFSRoot* self = kernel->GetFileSystem(); \
 	if (!self) return luaL_error(L, "component is invalid");
-#define LuaFuncEnd() \
-}
 
-#define LuaFileFuncName(funcName) luaFile ## funcName
-#define LuaFileFunc(funcName) \
-int LuaFileFuncName(funcName) (lua_State* L) { \
+#define LuaFileFunc() \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
 	FLuaSyncCall SyncCall(L); \
 	UFINKernelSystem* kernel = processor->GetKernel(); \
@@ -51,7 +47,14 @@ int LuaFileFuncName(funcName) (lua_State* L) { \
 	}
 
 namespace FINLua {
-	LuaFunc(makeFileSystem) {
+#define LOCTEXT_NAMESPACE "FileSystemModule"
+	BeginLuaModule(FileSystem, LOCTEXT("DisplayName", "File-System Module"), LOCTEXT("Description", ""))
+#define LOCTEXT_NAMESPACE "FileSystemLibrary"
+	BeginLibrary(filesystem, LOCTEXT("DisplayName", "File-System Library"), LOCTEXT("Description", ""))
+
+	FieldFunction(makeFileSystem, LOCTEXT("makeFileSystem_DisplayName", "Make File-System"), LOCTEXT("makeFileSystem_Description", "")) {
+		LuaFunc()
+
 		const std::string type = luaL_checkstring(L, 1);
 		const std::string name = luaL_checkstring(L, 2);
 		CodersFileSystem::SRef<CodersFileSystem::Device> device;
@@ -64,9 +67,11 @@ namespace FINLua {
 			lua_pushboolean(L, dev.isValid() ? dev->addDevice(device, name) : false);
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(removeFileSystem) {
+	FieldFunction(removeFileSystem, LOCTEXT("removeFileSystem_DisplayName", "Remove File-System"), LOCTEXT("removeFileSystem_Description", "")) {
+		LuaFunc();
+
 		const std::string name = luaL_checkstring(L, 1);
 		const CodersFileSystem::SRef<FFINKernelFSDevDevice> dev = self->getDevDevice();
 		if (dev.isValid()) {
@@ -81,15 +86,19 @@ namespace FINLua {
 		}
 		lua_pushboolean(L, false);
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(initFileSystem) {
+	FieldFunction(initFileSystem, LOCTEXT("initFileSystem_DisplayName", "Init File-System"), LOCTEXT("initFileSystem_Description", "")) {
+		LuaFunc();
+
 		const std::string path = luaL_checkstring(L, 1);
 		lua_pushboolean(L, kernel->InitFileSystem(CodersFileSystem::Path(path)));
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(open) {
+	FieldFunction(open, LOCTEXT("open_DisplayName", "Open"), LOCTEXT("open_Description", "")) {
+		LuaFunc();
+
 		FString Mode = "r";
 		if (lua_isstring(L, 2)) Mode = FString(lua_tostring(L, 2));
 		CodersFileSystem::FileMode m;
@@ -104,56 +113,68 @@ namespace FINLua {
 		try {
 			const CodersFileSystem::Path path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 			const CodersFileSystem::SRef<CodersFileSystem::FileStream> stream = self->open(path, m);
-			luaFile(L, stream, stream ? self->persistPath(path) : "");
+			luaFIN_pushFile(L, stream, stream ? self->persistPath(path) : "");
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(createDir) {
+	FieldFunction(createDir, LOCTEXT("createDir_DisplayName", ""), LOCTEXT("createDir_Description", "")) {
+		LuaFunc();
+
 		const std::string path = luaL_checkstring(L, 1);
 		const bool all = (bool)lua_toboolean(L, 2);
 		try {
 			lua_pushboolean(L, self->createDir(CodersFileSystem::Path(path), all).isValid());
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(remove) {
+	FieldFunction(remove, LOCTEXT("remove_DisplayName", "Remove"), LOCTEXT("remove_Description", "")) {
+		LuaFunc();
+
 		const CodersFileSystem::Path path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		const bool all = (bool)lua_toboolean(L, 2);
 		try {
 			lua_pushboolean(L, self->remove(path, all));
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(move) {
+	FieldFunction(move, LOCTEXT("move_DisplayName", "Move"), LOCTEXT("move_Description", "")) {
+		LuaFunc();
+
 		const auto from = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		const auto to = CodersFileSystem::Path(luaL_checkstring(L, 2));
 		try {
 			lua_pushboolean(L, self->move(from, to) == 0);
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(rename) {
+	FieldFunction(rename, LOCTEXT("rename_DisplayName", "Rename"), LOCTEXT("rename_Description", "")) {
+		LuaFunc();
+
 		const auto from = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		const auto to = std::string(luaL_checkstring(L, 2));
 		try {
 			lua_pushboolean(L, self->rename(from, to));
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(exists) {
+	FieldFunction(exists, LOCTEXT("exists_DisplayName", "Exists"), LOCTEXT("exists_Description", "")) {
+		LuaFunc();
+
 		const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		try {
 			lua_pushboolean(L, self->get(path).isValid());
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(children) {
+	FieldFunction(children, LOCTEXT("children_DisplayName", "Children"), LOCTEXT("children_Description", "")) {
+		LuaFunc();
+
 		const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		std::unordered_set<std::string> childs;
 		try {
@@ -166,46 +187,52 @@ namespace FINLua {
 			lua_seti(L, -2, i++);
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(isFile) {
+	FieldFunction(isFile, LOCTEXT("isFile_DisplayName", "Is File"), LOCTEXT("isFile_Description", "")) {
+		LuaFunc();
 		const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		try {
 			lua_pushboolean(L, !!dynamic_cast<CodersFileSystem::File*>(self->get(path).get()));
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(isDir) {
+	FieldFunction(isDir, LOCTEXT("isDir_DisplayName", "Is Dir"), LOCTEXT("isDir_Description", "")) {
+		LuaFunc();
 		const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		try {
 			lua_pushboolean(L, !!dynamic_cast<CodersFileSystem::Directory*>(self->get(path).get()));
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(mount) {
+	FieldFunction(mount, LOCTEXT("mount_DisplayName", "Mount"), LOCTEXT("mount_Description", "")) {
+		LuaFunc();
 		const auto devPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		const auto mountPath = CodersFileSystem::Path(luaL_checkstring(L, 2));
 		try {
 			lua_pushboolean(L, CodersFileSystem::DeviceNode::mount(*self, devPath, mountPath));
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(unmount) {
+	FieldFunction(unmount, LOCTEXT("unmount_DisplayName", "Un-Mount"), LOCTEXT("unmount_Description", "")) {
+		LuaFunc();
 		const auto mountPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
 		try {
 			lua_pushboolean(L, self->unmount(mountPath));
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 	
 	static int luaDoFileCont(lua_State *L, int d1, lua_KContext d2) {
 		return lua_gettop(L) - 1;
 	}
 
-	LuaFunc(doFile) {
+	FieldFunction(doFile, LOCTEXT("doFile_DisplayName", "Do File"), LOCTEXT("doFile_Description", "")) {
+		LuaFunc();
+
 		const CodersFileSystem::Path path(luaL_checkstring(L, 1));
 		CodersFileSystem::SRef<CodersFileSystem::FileStream> file;
 		try {
@@ -222,9 +249,11 @@ namespace FINLua {
 		luaL_loadbufferx(L, code.c_str(), code.size(), ("@" + path.str()).c_str(), "t");
 		lua_callk(L, 0, LUA_MULTRET, 0, luaDoFileCont);
 		return luaDoFileCont(L, 0, 0);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(loadFile) {
+	FieldFunction(loadFile, LOCTEXT("loadFile_DisplayName", "Load File"), LOCTEXT("loadFile_Description", "")) {
+		LuaFunc();
+
 		const CodersFileSystem::Path path = luaL_checkstring(L, 1);
 		CodersFileSystem::SRef<CodersFileSystem::FileStream> file;
 		try {
@@ -241,8 +270,11 @@ namespace FINLua {
 		
 		luaL_loadbufferx(L, code.c_str(), code.size(), ("@" + path.str()).c_str(), "t");
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
-	LuaFunc(path) {
+	}
+
+	FieldFunction(path, LOCTEXT("path_DisplayName", "Path"), LOCTEXT("path_Description", "")) {
+		LuaFunc();
+
 		int args = lua_gettop(L);
 		int start = 1;
 		int conversion = -1;
@@ -276,8 +308,11 @@ namespace FINLua {
 		}
 		if (!custom) lua_pushstring(L,out.c_str());
 		return UFINLuaProcessor::luaAPIReturn(L, retargs);
-	} LuaFuncEnd()
-	LuaFunc(analyzePath) {
+	}
+
+	FieldFunction(analyzePath, LOCTEXT("analyzePath_DisplayName", "Analyze Path"), LOCTEXT("analyzePath_Description", "")) {
+		LuaFunc();
+
 		int args = lua_gettop(L);
 		for (int i = 1; i <= args; ++i) {
 			CodersFileSystem::Path path = lua_tostring(L, i);
@@ -291,16 +326,20 @@ namespace FINLua {
 			lua_pushinteger(L, flags);
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, args);
-	} LuaFuncEnd()
-	LuaFunc(isNode) {
+	}
+
+	FieldFunction(isNode, LOCTEXT("isNode_DisplayName", "Is Node"), LOCTEXT("isNode_Description", "")) {
+		LuaFunc();
 		int args = lua_gettop(L);
 		for (int i = 1; i <= args; ++i) {
 			lua_pushboolean(L, CodersFileSystem::Path::isNode(lua_tostring(L, i)));
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, args);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(meta) {
+	FieldFunction(meta, LOCTEXT("meta_DisplayName", "Meta"), LOCTEXT("meta_Description", "")) {
+		LuaFunc();
+
 		int args = lua_gettop(L);
 		for (int i = 1; i <= args; ++i) {
 			CodersFileSystem::Path Path = lua_tostring(L, i);
@@ -322,40 +361,25 @@ namespace FINLua {
 			lua_setfield(L, -2, "type");
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, args);
-	} LuaFuncEnd()
+	}
 
-	static const luaL_Reg luaFileSystemLib[] = {
-		{"makeFileSystem", makeFileSystem},
-		{"removeFileSystem", removeFileSystem},
-		{"initFileSystem", initFileSystem},
-		{"open", open},
-		{"createDir", createDir},
-		{"remove", remove},
-		{"move", move},
-		{"rename", rename},
-		{"exists", exists},
-		{"childs", children},
-		{"children", children},
-		{"isFile", isFile},
-		{"isDir", isDir},
-		{"mount", mount},
-		{"unmount", unmount},
-		{"doFile", doFile},
-		{"loadFile", loadFile},
-		{"path", path},
-		{"analyzePath", analyzePath},
-		{"isNode", isNode},
-		{nullptr, nullptr}
-	};
+	EndLibrary()
 
-	LuaFileFunc(Close) {
+#define LOCTEXT_NAMESPACE "FileSystem-File"
+	BeginMetatable(File, LOCTEXT("DisplayName", "File"), LOCTEXT("Description", ""))
+
+	FieldFunction(close, LOCTEXT("close_DisplayName", "Close"), LOCTEXT("close_Description", "")) {
+		LuaFileFunc();
+
 		try {
 			file->close();
 		} CatchExceptionLua
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
-	} LuaFuncEnd()
+	}
 
-	LuaFileFunc(Write) {
+	FieldFunction(write, LOCTEXT("write_DisplayName", "Write"), LOCTEXT("write_Description", "")) {
+		LuaFileFunc();
+
 		const auto s = lua_gettop(L);
 		for (int i = 2; i <= s; ++i) {
 			size_t str_len = 0;
@@ -365,9 +389,11 @@ namespace FINLua {
 			} CatchExceptionLua
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
-	} LuaFuncEnd()
+	}
 
-	LuaFileFunc(Read) {
+	FieldFunction(read, LOCTEXT("read_DisplayName", "Read"), LOCTEXT("read_Description", "")) {
+		LuaFileFunc();
+
 		const auto args = lua_gettop(L);
 		for (int i = 2; i <= args; ++i) {
 			try {
@@ -380,9 +406,11 @@ namespace FINLua {
 			}
 		}
 		return UFINLuaProcessor::luaAPIReturn(L, args - 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFileFunc(Seek) {
+	FieldFunction(seek, LOCTEXT("seek_DisplayName", "Seek"), LOCTEXT("seek_Description", "")) {
+		LuaFileFunc();
+
 		LuaFile& f = *static_cast<LuaFile*>(luaL_checkudata(L, 1, "File"));
 		std::string w = "cur";
 		std::int64_t off = 0;
@@ -394,12 +422,14 @@ namespace FINLua {
 		} CatchExceptionLua
 		lua_pushinteger(L, seek);
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFileFunc(String) {
+	FieldFunction(__tostring, LOCTEXT("string_DisplayName", "To String"), LOCTEXT("string_Description", "")) {
+		LuaFileFunc();
+
 		lua_pushstring(L, self->path.c_str());
 		return 1;
-	} LuaFuncEnd()
+	}
 
 	int luaFileUnpersist(lua_State* L) {
 		UFINKernelSystem* kernel = UFINLuaProcessor::luaGetProcessor(L)->GetKernel();
@@ -419,12 +449,12 @@ namespace FINLua {
 				path = "";
 				stream = nullptr;
 			}
-			luaFile(L, stream, path);
-		} else luaFile(L, nullptr, path);
+			luaFIN_pushFile(L, stream, path);
+		} else luaFIN_pushFile(L, nullptr, path);
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
 	}
 
-	int luaFilePersist(lua_State* L) {
+	FieldFunction(__persist, LOCTEXT("persist_DisplayName", "Persist"), LOCTEXT("persist_Description", "")) {
 		LuaFile& f = *static_cast<LuaFile*>(luaL_checkudata(L, -1, "File"));
 		if (f->transfer) {
 			lua_pushboolean(L, true);
@@ -441,7 +471,7 @@ namespace FINLua {
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
 	}
 	
-	int luaFileGC(lua_State * L) {
+	FieldFunction(__gc, LOCTEXT("gc_DisplayName", "GC"), LOCTEXT("gc_Description", "")) {
 		LuaFile& f = *static_cast<LuaFile*>(luaL_checkudata(L, 1, "File"));
 		try {
 			if (f->file) f->file->close();
@@ -450,18 +480,26 @@ namespace FINLua {
 		return 0;
 	}
 
-	static const luaL_Reg luaFileLib[] = {
-		{"close", luaFileClose},
-		{"write", luaFileWrite},
-		{"read", luaFileRead},
-		{"seek", luaFileSeek},
-		{"__tostring", luaFileString},
-		{"__persist", luaFilePersist},
-		{"__gc", luaFileGC},
-		{nullptr, nullptr}
-	};
+	EndMetatable()
 
-	void luaFile(lua_State* L, CodersFileSystem::SRef<CodersFileSystem::FileStream> file, const std::string& path) {
+	ModulePostSetup() {
+		PersistenceNamespace("FileSystem");
+
+		lua_pushcfunction(L, reinterpret_cast<int(*)(lua_State*)>(filesystemLibrary::luaDoFileCont));
+		PersistValue("doFileCont");
+
+		luaL_getmetatable(L, "File");
+		lua_pushvalue(L, -1);
+		lua_setfield(L, -2, "__index");
+		lua_pop(L, 1);
+
+		lua_pushcfunction(L, FileMetatable::luaFileUnpersist);
+		PersistValue("FileUnpersist");
+	}
+
+	EndLuaModule()
+
+	void luaFIN_pushFile(lua_State* L, CodersFileSystem::SRef<CodersFileSystem::FileStream> file, const std::string& path) {
 		LuaFile* f = static_cast<LuaFile*>(lua_newuserdata(L, sizeof(LuaFile)));
 		luaL_setmetatable(L, "File");
 		new (f) LuaFile(new LuaFileContainer());
@@ -472,25 +510,5 @@ namespace FINLua {
 			streams.Add(*f);
 		}
 		lua_pop(L, 1);
-	}
-
-	void setupFileSystemAPI(lua_State * L) {
-		PersistenceNamespace("FileSystem");
-		
-		luaL_newlibtable(L, luaFileSystemLib);
-		luaL_setfuncs(L, luaFileSystemLib, 0);
-		PersistTable("Lib", -1);
-		lua_setglobal(L, "filesystem");
-		lua_pushcfunction(L, (int(*)(lua_State*))luaDoFileCont);
-		PersistValue("doFileCont");
-
-		luaL_newmetatable(L, "File");
-		lua_pushvalue(L, -1);
-		lua_setfield(L, -2, "__index");
-		luaL_setfuncs(L, luaFileLib, 0);
-		PersistTable("File", -1);
-		lua_pop(L, 1);
-		lua_pushcfunction(L, luaFileUnpersist);
-		PersistValue("FileUnpersist");
 	}
 }

@@ -25,15 +25,7 @@ namespace FINLua {
 	 * @param file	- the file stream you want to add to the Lua stack
 	 * @param path	- the path to the file opened by the filestream (needed for persistency)
 	 */
-	void luaFile(lua_State* L, CodersFileSystem::SRef<CodersFileSystem::FileStream> file, const std::string& path);
-
-	/**
-	* Adds the FileSystem API to the top stack entry if it is a table in the given Lua state.
-	* 
-	* @param[in]	filesystem	The filesystem you want to bind the api with.
-	* @param[in]	ctx			The lua state you want to add the FileSystem API to. Make sure the top stack entry is a table.
-	*/
-	void setupFileSystemAPI(lua_State* ctx);
+	void luaFIN_pushFile(lua_State* L, CodersFileSystem::SRef<CodersFileSystem::FileStream> file, const std::string& path);
 }
 
 inline uint32 GetTypeHash(const FINLua::LuaFile& File) {

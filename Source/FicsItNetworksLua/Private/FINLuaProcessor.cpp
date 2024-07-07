@@ -653,6 +653,8 @@ void UFINLuaProcessor::Reset() {
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); //
 
+	FINLua::setupGlobals(luaState);
+
 	// create new thread for user code chunk
 	luaThread = lua_newthread(luaState);
 	luaThreadIndex = lua_gettop(luaState);

@@ -2,10 +2,13 @@
 
 #include "LuaUtil.h"
 
+struct FFINLuaModule;
+
 namespace FINLua {
 	struct FLuaExtraSpace {
-		UFINLuaProcessor* Processor = nullptr;
+		UFINLuaProcessor* Processor;
 		TArray<LuaFile>& FileStreams;
+		TArray<TSharedRef<FFINLuaModule>> LoadedModules;
 	};
 
 	[[nodiscard]] inline FLuaExtraSpace& luaFIN_getExtraSpace(lua_State* L) {

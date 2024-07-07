@@ -69,7 +69,7 @@ namespace FINLua {
 		lua_pop(L, 1);
 	}
 
-	#define PersistTable(Name, Idx) _PersistTable(L, _persist_namespace, Name, Idx)
+	#define PersistTable(Name, Idx) FINLua::_PersistTable(L, _persist_namespace, Name, Idx)
 	inline void _PersistTable(lua_State* L, const FString& _persist_namespace, const FString& name, int idx) {
 		idx = lua_absindex(L, idx);
 		lua_pushnil(L);

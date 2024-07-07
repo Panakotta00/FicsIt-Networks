@@ -1,5 +1,3 @@
-#include "FINLua/API/LuaComputerAPI.h"
-
 #include "FGAttentionPingActor.h"
 #include "FGPlayerController.h"
 #include "FINLua/Reflection/LuaClass.h"
@@ -8,74 +6,92 @@
 #include "FINStateEEPROMLua.h"
 #include "Network/FINNetworkUtils.h"
 #include "FGTimeSubsystem.h"
+#include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaStruct.h"
 #include "UI/FGGameUI.h"
 #include "Utils/FINMediaSubsystem.h"
 
-#define LuaFunc(funcName) \
-int funcName(lua_State* L) { \
+#define LuaFunc() \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
 	UFINKernelSystem* kernel = processor->GetKernel(); \
 	FLuaSyncCall SyncCall(L);
-#define LuaFuncEnd() }
 
 namespace FINLua {
-	LuaFunc(luaComputerGetInstance) {
+#define LOCTEXT_NAMESPACE "ComputerModule"
+	BeginLuaModule(Computer, LOCTEXT("DisplayName", "Computer Module"), LOCTEXT("Description", "The Computer Module provides the Computer Library."))
+#define LOCTEXT_NAMESPACE "ComputerLibrary"
+	BeginLibrary(computer, LOCTEXT("DisplayName", "Computer Library"), LOCTEXT("Description", "The Computer Library provides functions for interaction with the computer and especially the Lua Runtime."))
+
+	FieldFunction(getMemory, LOCTEXT("getMemory_DisplayName", "Get Memory"), LOCTEXT("getMemory_Description", "")) {
+		LuaFunc()
+
+		int64 Usage = kernel->GetMemoryUsage();
+		int64 Capacity = kernel->GetCapacity();
+		lua_pushinteger(L, Usage);
+		lua_pushinteger(L, Capacity);
+		return 2;
+	}
+
+	FieldFunction(getInstance, LOCTEXT("getInstance_DisplayName", "Get Instance"), LOCTEXT("getInstance_Description", "")) {
+		LuaFunc()
+
 		luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject())));
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerReset) {
+	FieldFunction(reset, LOCTEXT("reset_DisplayName", "Reset"), LOCTEXT("reset_Description", "")) {
+		LuaFunc();
+
 		processor->GetTickHelper().shouldReset();
 		lua_yield(L, 0);
 		return 0;
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerStop) {
+	FieldFunction(stop, LOCTEXT("stop_DisplayName", "Stop"), LOCTEXT("stop_Description", "")) {
+		LuaFunc();
+
 		processor->GetTickHelper().shouldStop();
 		lua_yield(L, 0);
 		return 0;
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerPanic) {
+	FieldFunction(panic, LOCTEXT("panic_DisplayName", "Panic"), LOCTEXT("panic_Description", "")) {
+		LuaFunc();
+
 	    processor->GetTickHelper().shouldCrash(MakeShared<FFINKernelCrash>(FString("PANIC! '") + luaL_checkstring(L, 1) + "'"));
 		kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
 			kernel->GetAudio()->Beep();
 		})));
 		lua_yield(L, 0);
 		return 0;
-	} LuaFuncEnd()
-
-	int luaComputerSkipContinue(lua_State* L, int status, lua_KContext ctx) {
-		return 0;
 	}
 
-	int luaComputerSkip(lua_State* L) {
+	FieldFunction(skip, LOCTEXT("skip_DisplayName", "Skip"), LOCTEXT("skip_Description", "")) {
 		UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
 		processor->GetTickHelper().shouldPromote();
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
 
-	int luaComputerPromote(lua_State* L) {
+	FieldFunction(promote, LOCTEXT("promote_DisplayName", "Promote"), LOCTEXT("promote_Description", "")) {
 		UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
 		processor->GetTickHelper().shouldPromote();
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
-	
-	int luaComputerDemote(lua_State* L) {
+
+	FieldFunction(demote, LOCTEXT("demote_DisplayName", "Demote"), LOCTEXT("demote_Description", "")) {
 		FLuaSyncCall Sync(L);
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
 
-	int luaComputerIsPromoted(lua_State* L) {
+	FieldFunction(isPromoted, LOCTEXT("isPromoted_DisplayName", "Is Promoted"), LOCTEXT("isPromoted_Description", "")) {
 		UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
 		bool bPromoted = (bool)(processor->GetTickHelper().getState() & LUA_ASYNC);
 		lua_pushboolean(L, bPromoted);
 		return 1;
 	}
 
-	int luaComputerState(lua_State* L) {
+	FieldFunction(state, LOCTEXT("state_DisplayName", "State"), LOCTEXT("state_Description", "")) {
 		UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
 		int state = 0;
 		if (processor->GetTickHelper().getState() & LUA_ASYNC) {
@@ -84,17 +100,21 @@ namespace FINLua {
 		lua_pushinteger(L, state);
 		return UFINLuaProcessor::luaAPIReturn(L, 1);
 	}
-	
-	LuaFunc(luaComputerBeep) {
+
+	FieldFunction(beep, LOCTEXT("beep_DisplayName", "Beep"), LOCTEXT("beep_Description", "")) {
+		LuaFunc();
+
 		float pitch = 1;
 		if (lua_isnumber(L, 1)) pitch = lua_tonumber(L, 1);
 		kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
 		    kernel->GetAudio()->Beep(pitch);
 		})));
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerSetEEPROM) {
+	FieldFunction(setEEPROM, LOCTEXT("setEEPROM_DisplayName", "Set EEPROM"), LOCTEXT("setEEPROM_Description", "")) {
+		LuaFunc();
+
 		AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 		if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
 		size_t len;
@@ -102,37 +122,47 @@ namespace FINLua {
 		FUTF8ToTCHAR Conv(str, len);
 		eeprom->SetCode(FString(Conv.Length(), Conv.Get()));
 		return 0;
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerGetEEPROM) {
+	FieldFunction(getEEPROM, LOCTEXT("getEEPROM_DisplayName", "Get EEPROM"), LOCTEXT("getEEPROM_Description", "")) {
+		LuaFunc();
+
         const AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 		if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
 		FString Code = eeprom->GetCode();
 		FTCHARToUTF8 Conv(*Code, Code.Len());
 		lua_pushlstring(L, Conv.Get(), Conv.Length());
 		return 1;
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerTime) {
+	FieldFunction(time, LOCTEXT("time_DisplayName", "Time"), LOCTEXT("time_Description", "")) {
+		LuaFunc();
+
 		const AFGTimeOfDaySubsystem* Subsystem = AFGTimeOfDaySubsystem::Get(kernel);
 		lua_pushnumber(L, Subsystem->GetPassedDays() * 86400 + Subsystem->GetDaySeconds());
 		return 1;
-	} LuaFuncEnd()
-	
-	LuaFunc(luaComputerMillis) {
+	}
+
+	FieldFunction(millis, LOCTEXT("millis_DisplayName", "Millis"), LOCTEXT("millis_Description", "")) {
+		LuaFunc();
+
 		lua_pushinteger(L, kernel->GetTimeSinceStart());
 		return 1;
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerLog) {
+	FieldFunction(log, LOCTEXT("log_DisplayName", "Log"), LOCTEXT("log_Description", "")) {
+		LuaFunc();
+
 		int verbosity = luaL_checknumber(L, 1);
 		FString text = luaFIN_checkFString(L, 2);
 		verbosity = FMath::Clamp(verbosity, 0, EFINLogVerbosity::FIN_Log_Verbosity_Max);
 		kernel->GetLog()->PushLogEntry((EFINLogVerbosity)verbosity, text);
 		return 0;
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerTextNotification) {
+	FieldFunction(textNotification, LOCTEXT("textNotification_DisplayName", "Text Notification"), LOCTEXT("textNotification_Description", "")) {
+		LuaFunc();
+
 		FString Text = luaFIN_checkFString(L, 1);
 		TOptional<FString> Player;
 		if (lua_isstring(L, 2)) Player = luaFIN_checkFString(L, 2);
@@ -152,9 +182,11 @@ namespace FINLua {
 			break;
 		}
 		return 0;
-	} LuaFuncEnd()
-	
-	LuaFunc(luaComputerAttentionPing) {
+	}
+
+	FieldFunction(attentionPing, LOCTEXT("attentionPing_DisplayName", "Attention Ping"), LOCTEXT("attentionPing_Description", "")) {
+		LuaFunc();
+
 		FVector Position = luaFIN_checkStruct<FVector>(L, 1, true);
 		TOptional<FString> Player;
 		if (lua_isstring(L, 2)) Player = luaFIN_checkFString(L, 2);
@@ -170,9 +202,9 @@ namespace FINLua {
 			break;
 		}
 		return 0;
-	} LuaFuncEnd()
+	}
 
-	LuaFunc(luaComputerMagicTime) {
+	FieldFunction(magicTime, LOCTEXT("magicTime_DisplayName", "Magic Time"), LOCTEXT("magicTime_Description", "")) {
 		FDateTime Now = FDateTime::UtcNow();
 		lua_pushinteger(L, Now.ToUnixTimestamp());
 		FTCHARToUTF8 ConvertStr(*Now.ToString());
@@ -180,9 +212,11 @@ namespace FINLua {
 		FTCHARToUTF8 ConvertIso(*Now.ToIso8601());
 		lua_pushlstring(L, ConvertIso.Get(), ConvertIso.Length());
 		return 3;
-	} LuaFuncEnd()
-	
-	LuaFunc(luaComputerPCIDevices) {
+	}
+
+	FieldFunction(getPCIDevices, LOCTEXT("getPCIDevices_DisplayName", "Get PCI-Devices"), LOCTEXT("getPCIDevices_Description", "")) {
+		LuaFunc();
+
 		lua_newtable(L);
 		int args = lua_gettop(L);
 		UFINClass* Type = nullptr;
@@ -199,48 +233,14 @@ namespace FINLua {
 			lua_seti(L, -2, i++);
 		}
 		return 1;
-	} LuaFuncEnd()
-
-	LuaFunc(luaComputerMemory) {
-		int64 Usage = kernel->GetMemoryUsage();
-		int64 Capacity = kernel->GetCapacity();
-		lua_pushinteger(L, Usage);
-		lua_pushinteger(L, Capacity);
-		return 2;
-	} LuaFuncEnd()
-
-	static const luaL_Reg luaComputerLib[] = {
-		{"getMemory", luaComputerMemory},
-		{"getInstance", luaComputerGetInstance},
-		{"reset", luaComputerReset},
-		{"stop", luaComputerStop},
-		{"panic", luaComputerPanic},
-		{"skip", luaComputerSkip},
-		{"promote", luaComputerPromote},
-		{"demote", luaComputerDemote},
-		{"isPromoted", luaComputerIsPromoted},
-		{"state", luaComputerState},
-		{"beep", luaComputerBeep},
-		{"setEEPROM", luaComputerSetEEPROM},
-		{"getEEPROM", luaComputerGetEEPROM},
-		{"time", luaComputerTime},
-		{"millis", luaComputerMillis},
-		{"magicTime", luaComputerMagicTime},
-		{"log", luaComputerLog},
-		{"getPCIDevices", luaComputerPCIDevices},
-		{"textNotification", luaComputerTextNotification},
-		{"attentionPing", luaComputerAttentionPing},
-		{nullptr, nullptr}
-	};
-	
-	void setupComputerAPI(lua_State* L) {
-		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-		PersistenceNamespace("Computer");
-		luaL_newlibtable(L, luaComputerLib);
-		luaL_setfuncs(L, luaComputerLib, 0);
-		luaFIN_pushObject(L, FINTrace(AFINMediaSubsystem::GetMediaSubsystem(Processor)));
-		lua_setfield(L, -2, "media");
-		PersistTable("Lib", -1);
-		lua_setglobal(L, "computer");
 	}
+
+	FieldBare(media, LOCTEXT("media_DisplayName", "Media"), LOCTEXT("media_Description", "")) {
+		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+		luaFIN_pushObject(L, FINTrace(AFINMediaSubsystem::GetMediaSubsystem(Processor)));
+	}
+
+	EndLibrary()
+
+	EndLuaModule()
 }
