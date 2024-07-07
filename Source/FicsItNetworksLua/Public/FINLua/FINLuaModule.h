@@ -48,6 +48,19 @@ struct FFINLuaModuleBareValue : FFINLuaModuleValue {
 };
 
 /**
+ * Represents a Lua Module Function Parameter or Returnvalue
+ */
+struct FFINLuaFunctionParameter {
+	FString InternalName;
+
+	FString Type;
+
+	FText DisplayName;
+
+	FText Description;
+};
+
+/**
  * Represents a Lua Module Function
  */
 struct FFINLuaFunction : FFINLuaModuleValue {
@@ -57,7 +70,27 @@ struct FFINLuaFunction : FFINLuaModuleValue {
 
 	lua_CFunction Function;
 
+	FString ParameterSignature;
+	FString ReturnValueSignature;
+
+	TArray<FFINLuaFunctionParameter> Parameters;
+	TArray<FFINLuaFunctionParameter> ReturnValues;
+
 	virtual void PushLuaValue(lua_State* L, const FString& PersistName) override;
+
+	void AddParameter(int Pos, const FFINLuaFunctionParameter& Parameter) {
+		if (Parameters.Num() <= Pos) Parameters.SetNum(Pos+1);
+		Parameters.Insert(Parameter, Pos);
+	}
+
+	void AddReturnValue(int Pos, const FFINLuaFunctionParameter& ReturnValue) {
+		if (ReturnValues.Num() <= Pos) ReturnValues.SetNum(Pos+1);
+		ReturnValues.Insert(ReturnValue, Pos);
+	}
+
+	FString GetSignature(const FString& Name) const {
+		return FString::Printf(TEXT("%ls %ls(%ls)"), *ReturnValueSignature, *Name, *ParameterSignature);
+	}
 };
 
 /**
@@ -82,6 +115,15 @@ struct FFINLuaTable : FFINLuaModuleValue {
 	TArray<FFINLuaTableField> Fields;
 
 	virtual void PushLuaValue(lua_State* L, const FString& PersistName) override;
+
+	FFINLuaTableField* FieldByName(const FString& Name) {
+		for (FFINLuaTableField& field : Fields) {
+			if (field.Key == Name) {
+				return &field;
+			}
+		}
+		return nullptr;
+	}
 };
 
 /**
@@ -215,6 +257,32 @@ public:
 				}); \
 			}, 2); \
 			int luaFunc_ ## _InternalName (lua_State* L)
+#define LuaParameterSignature(_Function, _Signature) \
+				static FFINStaticGlobalRegisterFunc Register ## _Function ## SignatureParameter([]() { \
+					StaticCastSharedPtr<FFINLuaFunction>(Table->FieldByName(TEXT(#_Function))->Value)->ParameterSignature = TEXT(_Signature); \
+				}, 1);
+#define LuaReturnSignature(_Function, _Signature) \
+				static FFINStaticGlobalRegisterFunc Register ## _Function ## SignatureReturn([]() { \
+					StaticCastSharedPtr<FFINLuaFunction>(Table->FieldByName(TEXT(#_Function))->Value)->ReturnValueSignature = TEXT(_Signature); \
+				}, 1);
+#define LuaParameter(_Function, Pos, _InternalName, _Type, _DisplayName, _Description) \
+				static FFINStaticGlobalRegisterFunc Register ## _Function ## Parameter ## _InternalName ([]() { \
+					StaticCastSharedPtr<FFINLuaFunction>(Table->FieldByName(TEXT(#_Function))->Value)->AddParameter(Pos, FFINLuaFunctionParameter{ \
+						.InternalName = TEXT(#_InternalName), \
+						.Type = TEXT(_Type), \
+						.DisplayName = _DisplayName, \
+						.Description = _Description, \
+					}); \
+				}, 1);
+#define LuaReturnValue(_Function, Pos, _InternalName, _Type, _DisplayName, _Description) \
+				static FFINStaticGlobalRegisterFunc Register ## _Function ## ReturnValue ## _InternalName ([]() { \
+					StaticCastSharedPtr<FFINLuaFunction>(Table->FieldByName(TEXT(#_Function))->Value)->AddReturnValue(Pos, FFINLuaFunctionParameter{ \
+						.InternalName = TEXT(#_InternalName), \
+						.Type = TEXT(_Type), \
+						.DisplayName = _DisplayName, \
+						.Description = _Description, \
+					}); \
+				}, 1);
 #define BeginFieldTable(_InternalName, _DisplayName, _Description) \
 			static FFINStaticGlobalRegisterFunc RegisterField ## _InternalName ([]() { \
 				Table->Fields.Add(FFINLuaTableField{ \

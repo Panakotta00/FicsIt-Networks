@@ -104,6 +104,9 @@ namespace FINLua {
 	BeginMetatable(ModuleTableFunction, LOCTEXT("DisplayName", "Module Table-Function"), LOCTEXT("Description", ""))
 
 	FieldBare(name, LOCTEXT("name_DisplayName", "Name"), LOCTEXT("name_Description", "")) { lua_pushnil(L); }
+	FieldBare(displayName, LOCTEXT("displayName_DisplayName", "Display Name"), LOCTEXT("displayName_Description", "")) { lua_pushnil(L); }
+	FieldBare(description, LOCTEXT("description_DisplayName", "Description"), LOCTEXT("description_Description", "")) { lua_pushnil(L); }
+	FieldBare(quickRef, LOCTEXT("quickRef_DisplayName", "Quick Reference"), LOCTEXT("quickRef_Description", "")) { lua_pushnil(L); }
 
 	FieldFunction(__index, LOCTEXT("index_DisplayName", "Index"), LOCTEXT("index_Description", "")) {
 		lua_getupvalue(L, 1, 1);
@@ -115,10 +118,35 @@ namespace FINLua {
 		FString key = luaFIN_checkFString(L, 2);
 		if (key == TEXT("name")) {
 			luaFIN_pushFString(L, field->Key);
+		} else if (key == TEXT("quickRef")) {
+			FString head = field->Key;
+			if (field->Value->TypeID() == FINTypeId<FFINLuaFunction>::ID()) {
+				auto func = StaticCastSharedPtr<FFINLuaFunction>(field->Value);
+				head = func->GetSignature(field->Key);
+			}
+
+			FString str = FString::Printf(TEXT("# %ls\n%ls"), *head, *field->Description.ToString());
+
+			luaFIN_pushFString(L, str);
 		} else {
 			return 0;
 		}
 
+		return 1;
+	}
+
+	FieldFunction(__tostring, LOCTEXT("tostring_DisplayName", "To String"), LOCTEXT("tostring_Description", "")) {
+		lua_getupvalue(L, 1, 1);
+		if (!lua_isuserdata(L, -1)) {
+			return 0;
+		}
+		FFINLuaTableField* field = static_cast<FFINLuaTableField*>(lua_touserdata(L, -1));
+		FString head = field->Key;
+		if (field->Value->TypeID() == FINTypeId<FFINLuaFunction>::ID()) {
+			auto func = StaticCastSharedPtr<FFINLuaFunction>(field->Value);
+			head = func->GetSignature(field->Key);
+		}
+		luaFIN_pushFString(L, FString::Printf(TEXT("function: %ls"), *head));
 		return 1;
 	}
 
