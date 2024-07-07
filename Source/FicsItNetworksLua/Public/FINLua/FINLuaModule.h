@@ -124,6 +124,9 @@ struct FFINLuaTable : FFINLuaModuleValue {
 		}
 		return nullptr;
 	}
+
+	void AddFunctionFieldByDocumentationComment(lua_CFunction Function, const FString& Comment, const TCHAR* InternalName);
+	void AddBareFieldByDocumentationComment(TFunction<void(lua_State* L, const FString&)> Function, const FString& Comment, const TCHAR* InternalName);
 };
 
 /**
@@ -160,6 +163,7 @@ struct FFINLuaMetatable {
  * A module can also be just a wrapper around a simple Lua library, but providing documentation.
  */
 struct FFINLuaModule : TSharedFromThis<FFINLuaModule> {
+	FFINLuaModule() = default;
 	FFINLuaModule(const FString& InternalName, const FText& DisplayName, const FText& Description) : InternalName(InternalName), DisplayName(DisplayName), Description(Description) {}
 
 	FString InternalName;
@@ -176,7 +180,10 @@ struct FFINLuaModule : TSharedFromThis<FFINLuaModule> {
 
 	void SetupModule(lua_State* L);
 
-	static void AddLuaFunctionsToTable(lua_State* L, int index, const TArray<FFINLuaFunction>& Functions);
+	void ParseDocumentationComment(const FString& Comment, const TCHAR* InternalName);
+
+	void AddLibraryByDocumentationComment(const TSharedRef<FFINLuaTable>& Table, const FString& Comment, const TCHAR* InternalName);
+	void AddMetatableByDocumentationComment(const TSharedRef<FFINLuaTable>& Table, const FString& Comment, const TCHAR* InternalName);
 };
 
 /**
@@ -200,114 +207,52 @@ public:
 	}
 };
 
-#define BeginLuaModule(_InternalName, _DisplayName, _Description) \
-	namespace _InternalName ## Module { \
-		static TSharedRef<FFINLuaModule> Module = MakeShared<FFINLuaModule>( \
-			TEXT(#_InternalName), \
-			_DisplayName, \
-			_Description \
-		); \
+#define LuaModule(Documentation, _NameSpace) \
+	namespace _NameSpace { \
+		static TSharedRef<FFINLuaModule> Module = MakeShared<FFINLuaModule>(); \
 		static FFINStaticGlobalRegisterFunc RegisterModule([]() { \
-				FFINLuaModuleRegistry::GetInstance().AddModule(Module); \
-		}, 0);
-#define ModulePreSetup() \
-		void PreSetup(FFINLuaModule&, lua_State*); \
-		static FFINStaticGlobalRegisterFunc RegisterPreSetup([]() { \
-			Module->PreSetup.BindStatic(&PreSetup); \
-		}); \
-		void PreSetup(FFINLuaModule& InModule, lua_State* L)
-#define ModulePostSetup() \
-		void PostSetup(FFINLuaModule&, lua_State*); \
-		static FFINStaticGlobalRegisterFunc RegisterPostSetup([]() { \
-			Module->PostSetup.BindStatic(&PostSetup); \
-		}); \
-		void PostSetup(FFINLuaModule& InModule, lua_State* L)
-#define BeginMetatable(_InternalName, _DisplayName, _Description) \
-		namespace _InternalName ## Metatable { \
-			static TSharedRef<FFINLuaTable> Table = MakeShared<FFINLuaTable>(); \
-			static FFINStaticGlobalRegisterFunc RegisterMetatable([]() { \
-				Module->Metatables.Add(FFINLuaMetatable{ \
-					.InternalName = TEXT(#_InternalName), \
-					.DisplayName = _DisplayName, \
-					.Description = _Description, \
-					.Table = Table, \
-				}); \
-			}, 1);
-#define EndMetatable() \
-		}
-#define BeginLibrary(_InternalName, _DisplayName, _Description) \
-		namespace _InternalName ## Library { \
-			static TSharedRef<FFINLuaTable> Table = MakeShared<FFINLuaTable>(); \
-			static FFINStaticGlobalRegisterFunc RegisterLibrary([]() { \
-				Module->Globals.Add(FFINLuaGlobal{ \
-					.InternalName = TEXT(#_InternalName), \
-					.DisplayName = _DisplayName, \
-					.Description = _Description, \
-					.Value = Table, \
-				}); \
-			}, 1);
-#define FieldFunction(_InternalName, _DisplayName, _Description) \
-			int luaFunc_ ## _InternalName (lua_State* L); \
-			static FFINStaticGlobalRegisterFunc RegisterField ## _InternalName ([]() { \
-				Table->Fields.Add(FFINLuaTableField{ \
-					.Key = TEXT(#_InternalName), \
-					.DisplayName = _DisplayName, \
-					.Description = _Description, \
-					.Value = MakeShared<FFINLuaFunction>(&luaFunc_ ## _InternalName), \
-				}); \
-			}, 2); \
-			int luaFunc_ ## _InternalName (lua_State* L)
-#define LuaParameterSignature(_Function, _Signature) \
-				static FFINStaticGlobalRegisterFunc Register ## _Function ## SignatureParameter([]() { \
-					StaticCastSharedPtr<FFINLuaFunction>(Table->FieldByName(TEXT(#_Function))->Value)->ParameterSignature = TEXT(_Signature); \
-				}, 1);
-#define LuaReturnSignature(_Function, _Signature) \
-				static FFINStaticGlobalRegisterFunc Register ## _Function ## SignatureReturn([]() { \
-					StaticCastSharedPtr<FFINLuaFunction>(Table->FieldByName(TEXT(#_Function))->Value)->ReturnValueSignature = TEXT(_Signature); \
-				}, 1);
-#define LuaParameter(_Function, Pos, _InternalName, _Type, _DisplayName, _Description) \
-				static FFINStaticGlobalRegisterFunc Register ## _Function ## Parameter ## _InternalName ([]() { \
-					StaticCastSharedPtr<FFINLuaFunction>(Table->FieldByName(TEXT(#_Function))->Value)->AddParameter(Pos, FFINLuaFunctionParameter{ \
-						.InternalName = TEXT(#_InternalName), \
-						.Type = TEXT(_Type), \
-						.DisplayName = _DisplayName, \
-						.Description = _Description, \
-					}); \
-				}, 1);
-#define LuaReturnValue(_Function, Pos, _InternalName, _Type, _DisplayName, _Description) \
-				static FFINStaticGlobalRegisterFunc Register ## _Function ## ReturnValue ## _InternalName ([]() { \
-					StaticCastSharedPtr<FFINLuaFunction>(Table->FieldByName(TEXT(#_Function))->Value)->AddReturnValue(Pos, FFINLuaFunctionParameter{ \
-						.InternalName = TEXT(#_InternalName), \
-						.Type = TEXT(_Type), \
-						.DisplayName = _DisplayName, \
-						.Description = _Description, \
-					}); \
-				}, 1);
-#define BeginFieldTable(_InternalName, _DisplayName, _Description) \
-			static FFINStaticGlobalRegisterFunc RegisterField ## _InternalName ([]() { \
-				Table->Fields.Add(FFINLuaTableField{ \
-					.Key = TEXT(#_InternalName), \
-					.DisplayName = _DisplayName, \
-					.Description = _Description, \
-					.Value = _InternalName::Table, \
-				}); \
-			}, 2); \
-			namespace _InternalName { \
-				static TSharedRef<FFINLuaTable> Table = MakeShared<FFINLuaTable>();
-#define EndFieldTable \
-			}
-#define FieldBare(_InternalName, _DisplayName, _Description) \
-			void lua_ ## _InternalName (lua_State*, const FString&); \
-			static FFINStaticGlobalRegisterFunc RegisterField ## _InternalName ([]() { \
-				Table->Fields.Add(FFINLuaTableField{ \
-					.Key = TEXT(#_InternalName), \
-					.DisplayName = _DisplayName, \
-					.Description = _Description, \
-					.Value = MakeShared<FFINLuaModuleBareValue>(lua_ ## _InternalName), \
-				}); \
-			}, 2); \
-			void lua_ ## _InternalName (lua_State* L, const FString& PersistName)
-#define EndLibrary() \
-		}
-#define EndLuaModule() \
-	}
+			Module->ParseDocumentationComment(TEXT(Documentation), TEXT(#_NameSpace)); \
+			FFINLuaModuleRegistry::GetInstance().AddModule(Module); \
+		}, 0); \
+	} \
+	namespace _NameSpace
+#define LuaModulePostSetup() \
+	void PreSetup(FFINLuaModule&, lua_State*); \
+	static FFINStaticGlobalRegisterFunc RegisterPreSetup([]() { \
+		Module->PreSetup.BindStatic(&PreSetup); \
+	}); \
+	void PreSetup(FFINLuaModule& InModule, lua_State* L)
+#define LuaModulePostSetup() \
+	void PostSetup(FFINLuaModule&, lua_State*); \
+	static FFINStaticGlobalRegisterFunc RegisterPostSetup([]() { \
+		Module->PostSetup.BindStatic(&PostSetup); \
+	}); \
+	void PostSetup(FFINLuaModule& InModule, lua_State* L)
+#define LuaModuleLibrary(Documentation, _NameSpace) \
+	namespace _NameSpace { \
+		static TSharedRef<FFINLuaTable> Table = MakeShared<FFINLuaTable>(); \
+		static FFINStaticGlobalRegisterFunc RegisterLibrary([]() { \
+			Module->AddLibraryByDocumentationComment(Table, Documentation, TEXT(#_NameSpace)); \
+		}, 1); \
+	} \
+	namespace _NameSpace
+#define LuaModuleMetatable(Documentation, _NameSpace) \
+	namespace _NameSpace { \
+		static TSharedRef<FFINLuaTable> Table = MakeShared<FFINLuaTable>(); \
+		static FFINStaticGlobalRegisterFunc RegisterMetatable([]() { \
+			Module->AddMetatableByDocumentationComment(Table, Documentation, TEXT(#_NameSpace)); \
+		}, 1); \
+	} \
+	namespace _NameSpace
+#define LuaModuleTableFunction(Documentation, _FunctionName) \
+	int _FunctionName (lua_State* L); \
+	static FFINStaticGlobalRegisterFunc RegisterField_ ## _FunctionName ([]() { \
+		Table->AddFunctionFieldByDocumentationComment(&_FunctionName, Documentation, TEXT(#_FunctionName)); \
+	}, 2); \
+	int _FunctionName (lua_State* L)
+#define LuaModuleTableBareField(Documentation, _FieldName) \
+	void _FieldName (lua_State*, const FString&); \
+	static FFINStaticGlobalRegisterFunc RegisterField_ ## _FieldName ([]() { \
+		Table->AddBareFieldByDocumentationComment(&_FieldName, Documentation, TEXT(#_FieldName)); \
+	}, 2); \
+	void _FieldName (lua_State* L, const FString& PersistName)
