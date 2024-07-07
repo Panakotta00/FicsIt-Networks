@@ -14,6 +14,8 @@ namespace FINLua {
 		LuaModuleLibrary(R"(/**
 		 * @LuaLibrary		event
 		 * @DisplayName		Event Library
+		 *
+		 * The Event API provides classes, functions and variables for interacting with the component network.
 		 */)", event) {
 			void luaListen(lua_State* L, FFINNetworkTrace o) {
 				const UFINKernelNetworkController* net = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork();
@@ -24,8 +26,10 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		listen
+			 * @LuaFunction		listen(Object<Object>...)
 			 * @DisplayName		Listen
+			 *
+			 * Adds the running lua context to the listen queue of the given components.
 			 */)", listen) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);
@@ -39,8 +43,10 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		listening
+			 * @LuaFunction		Object<Object>	listening()
 			 * @DisplayName		Listening
+			 *
+			 * Returns all signal senders this computer is listening to.
 			 */)", listening) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);
@@ -65,8 +71,16 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		pull
+			 * @LuaFunction		string|nil, Object<Object>, ...		pull([timeout: number])
 			 * @DisplayName		Pull
+			 *
+			 * Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached. +
+			 * Returns directly if there is already a signal in the queue (the tick doesn’t get yielded).
+			 *
+			 * @parameter	timeout		number			Timeout		The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue.
+			 * @return		event		string|nil		Event		The name of the returned signal. Nil when timeout got reached.
+			 * @return		sender		Object<Object>	Sender		The component representation of the signal sender. Not set when timeout got reached.
+			 * @return		parameters	any...				Parameters	The parameters passed to the signal. Not set when timeout got reached.
 			 */)", pull) {
 				const int args = lua_gettop(L);
 				double t = 0.0;
@@ -96,8 +110,10 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		ignore
+			 * @LuaFunction		ignore(Object<Object>...)
 			 * @DisplayName		Ignore
+			 *
+			 * Removes the running lua context from the listen queue of the given components. Basically the opposite of listen.
 			 */)", ignore) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);
@@ -111,8 +127,10 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		ignoreAll
+			 * @LuaFunction		ignoreAll()
 			 * @DisplayName		Ignore All
+			 *
+			 * Stops listening to any signal sender. If afterwards there are still coming signals in, it might be the system itself or caching bug.
 			 */)", ignoreAll) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);
@@ -122,7 +140,12 @@ namespace FINLua {
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 
-			int luaClear(lua_State* L) {
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		clear()
+			 * @DisplayName		Clear
+			 *
+			 * Clears every signal from the signal queue.
+			 */)", clear) {
 				UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->ClearSignals();
 				return 0;
 			}

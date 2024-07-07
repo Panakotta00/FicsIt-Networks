@@ -14,8 +14,10 @@ namespace FINLua {
 		 * @DisplayName		Debug Library
 		 */)", debug) {
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		log
+			 * @LuaFunction		log(string...)
 			 * @DisplayName		Log
+			 *
+			 * Allows to log the given strings to the Game Log
 			 */)", log) {
 				int args = lua_gettop(L);
 				FString Msg;
