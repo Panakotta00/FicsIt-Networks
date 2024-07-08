@@ -40,6 +40,32 @@ void FFINReflection::LoadAllTypes() {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(FName("AssetRegistry"));
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
+#if WITH_EDITOR
+	TArray<FString> PathsToScan;
+	PathsToScan.Add(TEXT("/FicsItNetworks/"));
+	AssetRegistry.ScanPathsSynchronous(PathsToScan, true);
+
+	TArray<FAssetData> AssetData;
+	FARFilter Filter;
+	Filter.bRecursivePaths = true;
+	Filter.bRecursiveClasses = true;
+	Filter.PackagePaths.Add("/");
+	Filter.ClassPaths.Add(UBlueprint::StaticClass()->GetClassPathName());
+	Filter.ClassPaths.Add(UBlueprintGeneratedClass::StaticClass()->GetClassPathName());
+	Filter.ClassPaths.Add(UClass::StaticClass()->GetClassPathName());
+	AssetRegistry.GetAssets(Filter, AssetData);
+
+	for (const FAssetData& Asset : AssetData) {
+		FString Path = Asset.GetObjectPathString();
+		if (!Path.EndsWith("_C")) Path += "_C";
+		UClass* Class = LoadClass<UObject>(NULL, *Path);
+		if (!Class) {
+			Class = LoadClass<UObject>(NULL, *Path);
+		}
+		if (!Class) continue;
+		FindClass(Class);
+	}
+#else
 	TArray<FTopLevelAssetPath> BaseNames;
 	BaseNames.Add(UObject::StaticClass()->GetClassPathName());
 	TSet<FTopLevelAssetPath> Excluded;
@@ -51,6 +77,7 @@ void FFINReflection::LoadAllTypes() {
 		if (Class->GetClassFlags() & (CLASS_Abstract | CLASS_Hidden) || Class->GetName().StartsWith("SKEL_")) continue;
 		FindClass(Class);
 	}
+#endif
 
 	for (TObjectIterator<UClass> Class; Class; ++Class) {
 		if (!Class->GetName().StartsWith("SKEL_") && !Class->GetName().StartsWith("REINST_")) FindClass(*Class);
