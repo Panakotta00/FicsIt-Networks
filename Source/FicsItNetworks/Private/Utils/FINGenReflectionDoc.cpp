@@ -11,6 +11,9 @@
 #include "Reflection/FINStructProperty.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "Logging/StructuredLog.h"
+#include "Misc/App.h"
+#include "Misc/FileHelper.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 
@@ -151,6 +154,7 @@ void FINGenClasses(TArray<TSharedPtr<FJsonValue>>& Array, UFINClass* Class) {
 
 bool FINGenReflectionDoc(UWorld* World, const TCHAR* Command, FOutputDevice& Ar) {
 	if (FParse::Command(&Command, TEXT("FINGenRefDoc"))) {
+		UE_LOG(LogFicsItNetworks, Display, TEXT("Generating FicsIt-Networks Reflection Documentation..."));
 		FFINReflection& Ref = *FFINReflection::Get();
 
 		TArray<TSharedPtr<FJsonValue>> Classes;
@@ -179,9 +183,17 @@ bool FINGenReflectionDoc(UWorld* World, const TCHAR* Command, FOutputDevice& Ar)
 		TSharedRef<TJsonWriter<>> Json = TJsonWriterFactory<>::Create(&JsonString);
 		FJsonSerializer::Serialize(MainObj, Json);
 
+		UE_LOG(LogFicsItNetworks, Display, TEXT("FicsIt-Networks Reflection Documentation generated!"));
+
 		FString Path = FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT("Saved/"));
 		Path = FPaths::Combine(Path, TEXT("FINReflectionDocumentation.json"));
+
+		UE_LOGFMT(LogFicsItNetworks, Display, "Saving FicsIt-Networks Reflection Documentation under: {Path}", Path);
+
 		FFileHelper::SaveStringToFile(JsonString, *Path);
+
+		UE_LOGFMT(LogFicsItNetworks, Display, "FicsIt-Networks Reflection Documentation Saved!");
+
 		return true;
 	}
 	return false;

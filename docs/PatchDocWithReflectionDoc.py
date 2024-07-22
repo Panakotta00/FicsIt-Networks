@@ -33,7 +33,10 @@ def get_adoc_files():
 
 def load_reflection_doc(path=""):
     if len(path) < 1:
-        path = os.path.join(os.getenv('LOCALAPPDATA'), "FactoryGame/Saved/FINReflectionDocumentation.json")
+        if len(sys.argv) > 1:
+            path = sys.argv[1]
+        else:
+            path = os.path.join(os.getenv('LOCALAPPDATA'), "FactoryGame/Saved/FINReflectionDocumentation.json")
     f = open(path, "r", encoding='utf16')
     refdoc = json.loads(f.read())
     f.close()

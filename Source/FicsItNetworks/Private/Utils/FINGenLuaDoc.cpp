@@ -1,4 +1,8 @@
 #include "Utils/FINGenLuaDoc.h"
+
+#include "Logging/StructuredLog.h"
+#include "Misc/App.h"
+#include "Misc/FileHelper.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINClassProperty.h"
 #include "Reflection/FINObjectProperty.h"
@@ -115,6 +119,8 @@ void FINGenLuaStruct(FString& Documentation, FFINReflection& Ref, UFINStruct* St
 
 bool FINGenLuaDoc(UWorld* World, const TCHAR* Command, FOutputDevice& Ar) {
 	if (FParse::Command(&Command, TEXT("FINGenLuaDoc"))) {
+		UE_LOG(LogFicsItNetworks, Display, TEXT("Generating FicsIt-Networks Lua Documentation..."));
+
 		FString Documentation;
 
 		FFINReflection& Ref = *FFINReflection::Get();
@@ -125,10 +131,17 @@ bool FINGenLuaDoc(UWorld* World, const TCHAR* Command, FOutputDevice& Ar) {
 		for (TPair<UScriptStruct*, UFINStruct*> Struct : Ref.GetStructs()) {
 			FINGenLuaStruct(Documentation, Ref, Struct.Value);
 		}
+
+		UE_LOG(LogFicsItNetworks, Display, TEXT("FicsIt-Networks Lua Documentation generated!"));
 		
 		FString Path = FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT("Saved/"));
 		Path = FPaths::Combine(Path, TEXT("FINLuaDocumentation.lua"));
+
+		UE_LOGFMT(LogFicsItNetworks, Display, "Saving FicsIt-Networks Lua Documentation under: {Path}", Path);
+
 		FFileHelper::SaveStringToFile(Documentation, *Path);
+
+		UE_LOGFMT(LogFicsItNetworks, Display, "FicsIt-Networks Lua Documentation Saved!");
 
 		return true;
 	}
