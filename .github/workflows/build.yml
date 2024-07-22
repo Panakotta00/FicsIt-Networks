@@ -116,14 +116,14 @@ jobs:
 #          dir ${{ github.workspace }}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\
 
       - name: Upload FicsItNetworks-Windows.zip
-        id: upload-artifacts
+        id: upload-win64
         uses: actions/upload-artifact@v4
         with:
           name: FicsItNetworks-Windows
           path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks-Windows.zip
 
       - name: Upload Documentation
-        id: upload-artifacts
+        id: upload-documentation
         uses: actions/upload-artifact@v4
         with:
           name: Documentation
