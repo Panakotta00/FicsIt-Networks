@@ -3,9 +3,6 @@
 #include "FINLua/LuaUtil.h"
 #include "Reflection/FINReflection.h"
 
-#define FIN_LUA_CLASS_LIB_METATABLE_NAME "ClassLib"
-#define FIN_LUA_CLASS_METATABLE_NAME "Class"
-
 namespace FINLua {
 	/**
 	 * Could be only one type, but then when the other is needed, always would have to ask Reflection System
@@ -102,11 +99,9 @@ namespace FINLua {
 			return nullptr;
 		}
 	}
-	
 
 	/**
-	 * @brief Registers globals, metatables, registries and persistence data relevant to the Lua Object System
-	 * @param L the lua state
+	 * @return The Lua Metatable/Type-Name of Class
 	 */
-	void setupClassSystem(lua_State* L);
+	FString luaFIN_getLuaClassTypeName();
 }

@@ -21,6 +21,7 @@ namespace FINLua {
 	LuaModule(R"(/**
 	 * @LuaModule		Computer
 	 * @DisplayName		Computer Module
+	 * @Dependency		ReflectionSystemObjectModule
 	 *
 	 * The Computer Module provides the Computer Library.
 	 */)", Computer) {

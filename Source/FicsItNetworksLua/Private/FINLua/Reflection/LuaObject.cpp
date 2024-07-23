@@ -3,6 +3,7 @@
 #include "FicsItNetworksLuaModule.h"
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "Logging/StructuredLog.h"
 #include "Network/FINNetworkUtils.h"
@@ -26,135 +27,168 @@ namespace FINLua {
 		static_cast<FLuaObject*>(Obj)->Object.AddStructReferencedObjects(Collector);
 	}
 
-	int luaObjectEQ(lua_State* L) {
-		FLuaObject* LuaObject1 = luaFIN_toLuaObject(L, 1, nullptr);
-		FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
-		if (!LuaObject1 || !LuaObject2) {
-			lua_pushboolean(L, false);
-			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		}
+	LuaModule(R"(/**
+	 * @LuaModule		ReflectionSystemObjectModule
+	 * @DisplayName		Reflection-System Object Module
+	 * @Dependency		ReflectionSystemBaseModule
+	 *
+	 * This module provides all the functionallity for the usage of objects from the reflection system in Lua.
+	 */)", ReflectionSystemObject) {
+		LuaModuleMetatable(R"(/**
+		 * @LuaMetatable	Object
+		 * @DisplayName		Object
+		 */)", Object) {
 
-		lua_pushboolean(L, GetTypeHash(LuaObject1->Object) == GetTypeHash(LuaObject2->Object));
-		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__eq
+			 * @DisplayName		Equal
+			 */)", __eq) {
+				FLuaObject* LuaObject1 = luaFIN_toLuaObject(L, 1, nullptr);
+				FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
+				if (!LuaObject1 || !LuaObject2) {
+					lua_pushboolean(L, false);
+					return UFINLuaProcessor::luaAPIReturn(L, 1);
+				}
 
-	int luaObjectLt(lua_State* L) {
-		FLuaObject* LuaObject1 = luaFIN_toLuaObject(L, 1, nullptr);
-		FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
-		if (!LuaObject1 || !LuaObject2) {
-			lua_pushboolean(L, false);
-			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		}
+				lua_pushboolean(L, GetTypeHash(LuaObject1->Object) == GetTypeHash(LuaObject2->Object));
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
+			}
 
-		lua_pushboolean(L, GetTypeHash(LuaObject1->Object) < GetTypeHash(LuaObject2->Object));
-		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__lt
+			 * @DisplayName		Less Than
+			 */)", __lt) {
+				FLuaObject* LuaObject1 = luaFIN_toLuaObject(L, 1, nullptr);
+				FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
+				if (!LuaObject1 || !LuaObject2) {
+					lua_pushboolean(L, false);
+					return UFINLuaProcessor::luaAPIReturn(L, 1);
+				}
 
-	int luaObjectLe(lua_State* L) {
-		FLuaObject* LuaObject1 = luaFIN_toLuaObject(L, 1, nullptr);
-		FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
-		if (!LuaObject1 || !LuaObject2) {
-			lua_pushboolean(L, false);
-			return UFINLuaProcessor::luaAPIReturn(L, 1);
-		}
+				lua_pushboolean(L, GetTypeHash(LuaObject1->Object) < GetTypeHash(LuaObject2->Object));
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
+			}
 
-		lua_pushboolean(L, GetTypeHash(LuaObject1->Object) <= GetTypeHash(LuaObject2->Object));
-		return UFINLuaProcessor::luaAPIReturn(L, 1);
-	}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__le
+			 * @DisplayName		Less or Equal Than
+			 */)", __le) {
+				FLuaObject* LuaObject1 = luaFIN_toLuaObject(L, 1, nullptr);
+				FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
+				if (!LuaObject1 || !LuaObject2) {
+					lua_pushboolean(L, false);
+					return UFINLuaProcessor::luaAPIReturn(L, 1);
+				}
 
-	int luaObjectIndex(lua_State* L) {
-		ZoneScoped;
-		const int thisIndex = 1;
-		const int nameIndex = 2;
+				lua_pushboolean(L, GetTypeHash(LuaObject1->Object) <= GetTypeHash(LuaObject2->Object));
+				return UFINLuaProcessor::luaAPIReturn(L, 1);
+			}
 
-		FLuaObject* LuaObject = luaFIN_checkLuaObject(L, thisIndex, nullptr);
-		FString MemberName = luaFIN_toFString(L, nameIndex);
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__index
+			 * @DisplayName		Index
+			 */)", __index) {
+				ZoneScoped;
+				const int thisIndex = 1;
+				const int nameIndex = 2;
 
-		UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(*LuaObject->Object);
-		if (NetworkHandler) {
-			if (MemberName == "id") {
-				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString()));
+				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, thisIndex, nullptr);
+				FString MemberName = luaFIN_toFString(L, nameIndex);
+
+				UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(*LuaObject->Object);
+				if (NetworkHandler) {
+					if (MemberName == "id") {
+						lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString()));
+						return 1;
+					}
+					if (MemberName == "nick") {
+						lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetNick(NetworkHandler)));
+						return 1;
+					}
+				}
+
+				FFINExecutionContext Context(LuaObject->Object);
+				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
+			}
+
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__newindex
+			 * @DisplayName		New Index
+			 */)", __newindex) {
+				ZoneScoped;
+
+				const int thisIndex = 1;
+				const int nameIndex = 2;
+				const int valueIndex = 3;
+
+				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, thisIndex, nullptr);
+				FString MemberName = luaFIN_toFString(L, nameIndex);
+
+				UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(*LuaObject->Object);
+				if (NetworkHandler) {
+					if (MemberName == "nick") {
+						FString nick = luaFIN_toFString(L, valueIndex);
+						IFINNetworkComponent::Execute_SetNick(NetworkHandler, nick);
+						return 0;
+					}
+				}
+
+				FFINExecutionContext Context(LuaObject->Object);
+				luaFIN_tryExecuteSetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Prop_Attrib, Context, valueIndex, true);
+				return 0;
+			}
+
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__tostring
+			 * @DisplayName		To String
+			 */)", __tostring) {
+				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
+				luaFIN_pushFString(L, FFINReflection::ObjectReferenceText(LuaObject->Type));
 				return 1;
 			}
-			if (MemberName == "nick") {
-				lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetNick(NetworkHandler)));
+
+			int luaObjectUnpersist(lua_State* L) {
+				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+				FFINNetworkTrace Object = Storage.GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
+
+				luaFIN_pushObject(L, Object);
+
 				return 1;
 			}
-		}
 
-		FFINExecutionContext Context(LuaObject->Object);
-		return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
-	}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__persist
+			 * @DisplayName		Persist
+			 */)", __persist) {
+				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
 
-	int luaObjectNewIndex(lua_State* L) {
-		ZoneScoped;
+				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+				lua_pushinteger(L, Storage.Add(LuaObject->Object));
 
-		const int thisIndex = 1;
-		const int nameIndex = 2;
-		const int valueIndex = 3;
+				lua_pushcclosure(L, &luaObjectUnpersist, 1);
 
-		FLuaObject* LuaObject = luaFIN_checkLuaObject(L, thisIndex, nullptr);
-		FString MemberName = luaFIN_toFString(L, nameIndex);
+				return 1;
+			}
 
-		UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(*LuaObject->Object);
-		if (NetworkHandler) {
-			if (MemberName == "nick") {
-				FString nick = luaFIN_toFString(L, valueIndex);
-				IFINNetworkComponent::Execute_SetNick(NetworkHandler, nick);
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__gc
+			 * @DisplayName		Garbage Collect
+			 */)", __gc) {
+				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
+				LuaObject->~FLuaObject();
 				return 0;
 			}
 		}
 
-		FFINExecutionContext Context(LuaObject->Object);
-		luaFIN_tryExecuteSetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Prop_Attrib, Context, valueIndex, true);
-		return 0;
+		LuaModulePostSetup() {
+			PersistenceNamespace("ReflectionObject");
+
+			lua_pushcfunction(L, Object::luaObjectUnpersist);
+			PersistValue("ObjectUnpersist");
+		}
 	}
-
-	int luaObjectToString(lua_State* L) {
-		FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
-		luaFIN_pushFString(L, FFINReflection::ObjectReferenceText(LuaObject->Type));
-		return 1;
-	}
-
-	int luaObjectUnpersist(lua_State* L) {
-		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-		FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
-		FFINNetworkTrace Object = Storage.GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
-
-		luaFIN_pushObject(L, Object);
-
-		return 1;
-	}
-
-	int luaObjectPersist(lua_State* L) {
-		FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
-
-		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-		FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
-		lua_pushinteger(L, Storage.Add(LuaObject->Object));
-
-		lua_pushcclosure(L, &luaObjectUnpersist, 1);
-
-		return 1;
-	}
-
-	int luaObjectGC(lua_State* L) {
-		FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
-		LuaObject->~FLuaObject();
-		return 0;
-	}
-
-	static const luaL_Reg luaObjectMetatable[] = {
-		{"__eq", luaObjectEQ},
-		{"__lt", luaObjectLt},
-		{"__le", luaObjectLe},
-		{"__index", luaObjectIndex},
-		{"__newindex", luaObjectNewIndex},
-		{"__tostring", luaObjectToString},
-		{"__persist", luaObjectPersist},
-		{"__gc", luaObjectGC},
-		{nullptr, nullptr}
-	};
 
 	void luaFIN_pushObject(lua_State* L, const FFINNetworkTrace& Object) {
 		if (!Object.GetUnderlyingPtr()) {
@@ -164,12 +198,12 @@ namespace FINLua {
 		}
 		FLuaObject* LuaObject = static_cast<FLuaObject*>(lua_newuserdata(L, sizeof(FLuaObject)));
 		new(LuaObject) FLuaObject(Object, UFINLuaProcessor::luaGetProcessor(L)->GetKernel());
-		luaL_setmetatable(L, FIN_LUA_OBJECT_METATABLE_NAME);
+		luaL_setmetatable(L, ReflectionSystemObject::Object::_Name);
 		UE_LOGFMT(LogFicsItNetworksLuaReflection, VeryVerbose, "[{Runtime}] Pushed Object '{Object}' to Lua-Stack ({Index})", L, Object->GetFullName(), lua_gettop(L));
 	}
 
 	FLuaObject* luaFIN_toLuaObject(lua_State* L, int Index, UFINClass* ParentClass) {
-		FLuaObject* LuaObject = static_cast<FLuaObject*>(luaL_testudata(L, Index, FIN_LUA_OBJECT_METATABLE_NAME));
+		FLuaObject* LuaObject = static_cast<FLuaObject*>(luaL_testudata(L, Index, ReflectionSystemObject::Object::_Name));
 		if (LuaObject && LuaObject->Object.IsValidPtr()) {
 			if (LuaObject->Type->IsChildOf(ParentClass)) {
 				UE_LOGFMT(LogFicsItNetworksLuaReflection, VeryVerbose, "[{Runtime}] Got Object '{Object}' from Lua-Stack ({Index}/{AbsIndex})", L, LuaObject->Object->GetFullName(), Index, lua_absindex(L, Index));
@@ -203,17 +237,7 @@ namespace FINLua {
 		return *Object;
 	}
 
-	void setupObjectSystem(lua_State* L) {
-		PersistenceNamespace("ObjectSystem");
-
-		// Register & Persist Class-Metatable
-		luaL_newmetatable(L, FIN_LUA_OBJECT_METATABLE_NAME);	// ..., ObjectMetatable
-		luaL_setfuncs(L, luaObjectMetatable, 0);
-		lua_pushstring(L, FIN_LUA_OBJECT_METATABLE_NAME);			// ..., ObjectMetatable, string
-		lua_setfield(L, -2, "__metatable");					// ..., ObjectMetatable
-		PersistTable(FIN_LUA_OBJECT_METATABLE_NAME, -1);
-		lua_pop(L, 1);											// ...
-		lua_pushcfunction(L, luaObjectUnpersist);					// ..., ObjectUnpersist
-		PersistValue("ObjectUnpersist");						// ...
+	FString luaFIN_getLuaObjectTypeName() {
+		return UTF8_TO_TCHAR(ReflectionSystemObject::Object::_Name);
 	}
 }

@@ -5,8 +5,6 @@
 
 class UFINKernelSystem;
 
-#define FIN_LUA_OBJECT_METATABLE_NAME "Object"
-
 namespace FINLua {
 	/**
 	 * Structure used in the userdata representing a instance.
@@ -63,11 +61,9 @@ namespace FINLua {
 	 * @return the trace/object of the lua object in the lua stack, None if type check failed
 	 */
 	FFINNetworkTrace luaFIN_checkObject(lua_State* L, int Index, UFINClass* ParentType);
-	
+
 	/**
-	 * Registers globals, metatables, registries and persistence data relevant to the Lua Object System
-	 *
-	 * @param[in]	L	the lua stack
+	 * @return The Lua Metatable/Type-Name of Object
 	 */
-	void setupObjectSystem(lua_State* L);
+	FString luaFIN_getLuaObjectTypeName();
 }

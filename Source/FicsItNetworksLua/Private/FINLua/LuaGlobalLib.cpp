@@ -3,8 +3,6 @@
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/LuaFuture.h"
 #include "FINLua/Reflection/LuaObject.h"
-#include "FINLua/Reflection/LuaRef.h"
-#include "FINLua/Reflection/LuaStruct.h"
 #include "FINLuaProcessor.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
@@ -343,10 +341,6 @@ namespace FINLua {
 #endif*/
 		
 		setupUtilLib(L);
-		setupRefUtils(L);
-		setupStructSystem(L);
-		setupObjectSystem(L);
-		setupClassSystem(L);
 		setupFutureAPI(L);
 
 		TMap<FString, TSharedRef<FFINLuaModule>> modules;

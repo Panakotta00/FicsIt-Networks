@@ -287,20 +287,21 @@ namespace FINLua {
 		} else {
 			typearg = luaL_typename(L, Index);
 		}
+
 		FString TypeName = UTF8_TO_TCHAR(typearg);
-		if (TypeName == FIN_LUA_OBJECT_METATABLE_NAME) {
+		if (TypeName == luaFIN_getLuaObjectTypeName()) {
 			FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, nullptr);
 			UFINClass* Type = nullptr;
 			if (LuaObject) Type = LuaObject->Type;
 			return FFINReflection::ObjectReferenceText(Type);
 		}
-		if (TypeName == FIN_LUA_CLASS_METATABLE_NAME) {
+		if (TypeName == luaFIN_getLuaClassTypeName()) {
 			FLuaClass* LuaClass = luaFIN_toLuaClass(L, Index);
 			UFINClass* Type = nullptr;
 			if (LuaClass) Type = LuaClass->FINClass;
 			return FFINReflection::ClassReferenceText(Type);
 		}
-		if (TypeName == FIN_LUA_STRUCT_METATABLE_NAME) {
+		if (TypeName == luaFIN_getLuaStructTypeName()) {
 			FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, nullptr);
 			UFINStruct* Type = nullptr;
 			if (LuaStruct) Type = LuaStruct->Type;

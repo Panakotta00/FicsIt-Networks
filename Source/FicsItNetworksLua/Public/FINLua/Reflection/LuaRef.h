@@ -5,7 +5,6 @@
 #include "Reflection/FINProperty.h"
 
 #define LUA_REF_CACHE "FINRefCache"
-#define LUA_REFLECTION_FUNCTION_METATABLE_NAME "FINRefFuncData"
 
 namespace FINLua {
 	/**
@@ -94,10 +93,4 @@ namespace FINLua {
 	 * @return 1 if a property was found and executed, 0 if no property was found
 	 */
 	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError);
-
-	/**
-	 * @brief Registers globals, metatables, registries and persistence data relevant to the Lua Reflection System
-	 * @param L the lua state
-	 */
-	void setupRefUtils(lua_State* L);
 }

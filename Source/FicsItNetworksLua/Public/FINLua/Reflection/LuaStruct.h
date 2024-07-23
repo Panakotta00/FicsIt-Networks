@@ -5,10 +5,6 @@
 
 class UFINKernelSystem;
 
-#define FIN_LUA_STRUCT_LIB_METATABLE_NAME "StructLib"
-#define FIN_LUA_STRUCT_TYPE_METATABLE_NAME "StructType"
-#define FIN_LUA_STRUCT_METATABLE_NAME "Struct"
-
 namespace FINLua {
 	/**
 	 * Contains all information about the struct
@@ -108,8 +104,7 @@ namespace FINLua {
 	UFINStruct* luaFIN_checkStructType(lua_State* L, int Index);
 
 	/**
-	 * @brief Registers globals, metatables, registries and persistence data relevant to the Lua Struct System
-	 * @param L the lua state
+	 * @return The Lua Metatable/Type-Name of Struct
 	 */
-	void setupStructSystem(lua_State* L);
+	FString luaFIN_getLuaStructTypeName();
 }
