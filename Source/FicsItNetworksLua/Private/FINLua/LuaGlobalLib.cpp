@@ -1,11 +1,13 @@
 #include "FINLua/LuaGlobalLib.h"
 
+#include "FicsItNetworksLuaModule.h"
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/LuaFuture.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
+#include "Logging/StructuredLog.h"
 #include "Registry/ModContentRegistry.h"
 //#include "tracy/Tracy.hpp"
 //#include "tracy/TracyLua.hpp"
