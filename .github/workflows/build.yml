@@ -48,13 +48,6 @@ jobs:
           path: SatisfactoryModLoader/Mods/FicsItNetworks
           submodules: recursive
 
-#      - name: List Stuff
-#        run: |
-#          dir SatisfactoryModLoader/Mods/FicsItNetworks
-#          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty
-#          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty/eris
-#          dir SatisfactoryModLoader/Mods/FicsItNetworks/ThirdParty/eris/src
-
       - name: Apply FG Patches
         working-directory: SatisfactoryModLoader
         run: git apply .\Mods\FicsItNetworks\SML_Patch.patch -v
@@ -103,16 +96,8 @@ jobs:
       - name: Package FicsItNetworks Mod
         run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -utf8output -platform=Win64 -nocompileeditor -installed -abslog="C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Log.txt"
       
-      - name: Generate Reflection & Lua Documentation
-        run: ${{ github.workspace }}\ue\\Engine\Binaries\Win64\UnrealEditor-Cmd.exe "${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject" -skipcompile -Log "-ExecCmds=FINGenRefDoc,FINGenLuaDoc,quit_editor"
-
-#      - name: Show Package Log
-#        if: always()
-#        run: more "C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Cook-*"
-      
-#      - name: List Artifacts
-#        run: |
-#          dir ${{ github.workspace }}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\
+#      - name: Generate Reflection & Lua Documentation
+#        run: ${{ github.workspace }}\ue\\Engine\Binaries\Win64\UnrealEditor-Cmd.exe "${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject" -skipcompile -Unattended -NoPause -AllowSoftwareRendering "-ExecCmds=FINGenRefDoc,FINGenLuaDoc,quit_editor"
 
       - name: Upload FicsItNetworks-Windows.zip
         id: upload-win64
@@ -121,14 +106,14 @@ jobs:
           name: FicsItNetworks-Windows
           path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks-Windows.zip
 
-      - name: Upload Documentation
-        id: upload-documentation
-        uses: actions/upload-artifact@v4
-        with:
-          name: Documentation
-          path: |
-            %LocalAppData%\FactoryGame\Saved\FINReflectionDocumentation.json
-            %LocalAppData%\FactoryGame\Saved\FINLuaDocumentation.lua
+ #     - name: Upload Documentation
+ #       id: upload-documentation
+ #       uses: actions/upload-artifact@v4
+ #       with:
+ #         name: Documentation
+ #         path: |
+ #           %LocalAppData%\FactoryGame\Saved\FINReflectionDocumentation.json
+ #           %LocalAppData%\FactoryGame\Saved\FINLuaDocumentation.lua
 
       - name: Create Discord Webhook Action
         uses: devops-actions/json-to-file@v1.0.4
@@ -214,30 +199,30 @@ jobs:
         if: ${{ !failure() }}
         run: Remove-Item C:\actions-runner\_work\FicsIt-Networks\FicsIt-Networks\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
 
-  documentation:
-    needs: build
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
-    name: Update Documentation
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download Reflection Documentation
-        uses: actions/download-artifact@v4
-        with:
-          name: Documentation
-          path: ./docs
-      - name: Rewrite ASCIIDOC with new Documentation
-        run: python ./docs/PatchDocWithReflectionDoc.py FINReflectionDocumentation.json
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-      - name: Commit
-        run: |
-          git add index.zip
-          git commit -m "Update Reflection Documentation"
-      - name: Push
-        run: |
-          git push
+#  documentation:
+#    needs: build
+#    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+#    name: Update Documentation
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: write
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Download Reflection Documentation
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: Documentation
+#          path: ./docs
+#      - name: Rewrite ASCIIDOC with new Documentation
+#        run: python ./docs/PatchDocWithReflectionDoc.py FINReflectionDocumentation.json
+#      - name: Configure Git
+#        run: |
+#          git config user.name "$GITHUB_ACTOR"
+#          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+#      - name: Commit
+#        run: |
+#          git add index.zip
+#          git commit -m "Update Reflection Documentation"
+#      - name: Push
+#        run: |
+#          git push
