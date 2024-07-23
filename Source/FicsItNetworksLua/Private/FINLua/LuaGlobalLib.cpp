@@ -349,8 +349,65 @@ namespace FINLua {
 		setupClassSystem(L);
 		setupFutureAPI(L);
 
+		TMap<FString, TSharedRef<FFINLuaModule>> modules;
 		for (const TSharedRef<FFINLuaModule>& module : FFINLuaModuleRegistry::GetInstance().Modules) {
-			module->SetupModule(L);
+			modules.Add(module->InternalName, module);
+		}
+		TSet<FString> loadedModules;
+		while (modules.Num() > 0) {
+			FString FailedToLoadPrev;
+			TArray<FString> modulesToLoad = { modules.begin().Key() };
+			while (modulesToLoad.Num() > 0) {
+				FString moduleName = modulesToLoad.Top();
+
+				if (!modules.Contains(moduleName)) {
+					if (FailedToLoadPrev.IsEmpty()) {
+						UE_LOGFMT(LogFicsItNetworksLua, Error, "Failed to load Lua Module '{module}': Module not found!", moduleName);
+						FailedToLoadPrev = moduleName;
+					}
+					modulesToLoad.Pop();
+					continue;
+				}
+
+				TSharedRef<FFINLuaModule> module = modules[moduleName];
+
+				if (!FailedToLoadPrev.IsEmpty()) {
+					if (module->Dependencies.Contains(FailedToLoadPrev)) {
+						UE_LOGFMT(LogFicsItNetworksLua, Error, "Failed to load Lua Module '{module}': Failed to load a dependency due to previous error.", moduleName);
+						modules.Remove(moduleName);
+						FailedToLoadPrev = moduleName;
+					}
+					modulesToLoad.Pop();
+					continue;
+				}
+
+				bool bLoadDependenciesFirst = false;
+				for (const FString& dependency : module->Dependencies) {
+					if (!loadedModules.Contains(dependency)) {
+						bLoadDependenciesFirst = true;
+						if (modulesToLoad.Contains(dependency)) {
+							FString chain = dependency;
+							for (int i = modulesToLoad.Num(); i > 0; --i) {
+								chain = modulesToLoad[i-1] + " -> " + chain;
+								if (modulesToLoad[i-1] == dependency) break;
+							}
+							UE_LOGFMT(LogFicsItNetworksLua, Error, "Failed to load Lua Module '{dependency}': Circular dependency '{chain}' found!", dependency, chain);
+							FailedToLoadPrev = moduleName;
+							break;
+						}
+						modulesToLoad.Add(dependency);
+					}
+				}
+				if (bLoadDependenciesFirst) continue;
+
+				module->SetupModule(L);
+
+				modulesToLoad.Pop();
+				modules.Remove(moduleName);
+				loadedModules.Add(moduleName);
+
+				UE_LOGFMT(LogFicsItNetworksLua, Display, "Lua Module '{module}' loaded!", moduleName);
+			}
 		}
 	}
 }

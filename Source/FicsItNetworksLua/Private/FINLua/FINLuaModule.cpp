@@ -199,7 +199,7 @@ void FFINLuaModule::SetupModule(lua_State* L) {
 		lua_pushvalue(L, -2); // string, Metatable, string
 		lua_pushvalue(L, -2); // string, Metatable, string, Metatable
 		lua_settable(L, LUA_REGISTRYINDEX); // string, Metatable
-
+		
 		//FINLua::luaFIN_pushFString(L, Metatable.InternalName);
 		//lua_setfield(L, -2, "__metatable);
 
@@ -247,6 +247,8 @@ void FFINLuaModule::ParseDocumentationComment(const FString& Comment, const TCHA
 			}
 		} else if (option.Equals(TEXT("DisplayName"), ESearchCase::IgnoreCase)) {
 			DisplayName = FText::FromString(parameters[0]);
+		} else if (option.Equals(TEXT("Dependency"), ESearchCase::IgnoreCase)) {
+			Dependencies.Add(parameters[0]);
 		}
 	}
 
@@ -305,6 +307,34 @@ void FFINLuaModule::AddMetatableByDocumentationComment(const TSharedRef<FFINLuaT
 	metatable.Description = FText::FromString(block);
 }
 
+void FFINLuaModule::AddGlobalBareValueByDocumentationComment(TFunction<void(lua_State* L, const FString&)> Function, const FString& Comment, const TCHAR* _InternalName) {
+	FFINLuaGlobal& global = Globals.Emplace_GetRef();
+
+	auto bare = MakeShared<FFINLuaModuleBareValue>(Function);
+	global.Value = bare;
+
+	global.InternalName = _InternalName;
+
+	auto [block, options] = PreprocessDocumentationComment(Comment);
+
+	for (auto [option, parameters] : options) {
+		if (option.Equals(TEXT("LuaGlobal"), ESearchCase::IgnoreCase)) {
+			global.InternalName = parameters[0];
+			if (global.DisplayName.IsEmpty()) {
+				if (parameters.Num() > 1) {
+					global.DisplayName = FText::FromString(parameters[1]);
+				} else {
+					global.DisplayName = FText::FromString(global.InternalName);
+				}
+			}
+		} else if (option.Equals(TEXT("DisplayName"), ESearchCase::IgnoreCase)) {
+			global.DisplayName = FText::FromString(parameters[0]);
+		}
+	}
+
+	global.Description = FText::FromString(block);
+}
+
 FFINLuaModuleRegistry& FFINLuaModuleRegistry::GetInstance() {
 	static FFINLuaModuleRegistry registry;
 	return registry;
@@ -317,7 +347,8 @@ namespace FINLua {
 	 */)", ModuleSystem) {
 		LuaModuleMetatable(R"(/**
 		 * @LuaMetatable	ModuleTableFunction
-		 * @DisplayName		Module Table-Function)", ModuleTableFunction) {
+		 * @DisplayName		Module Table-Function
+		 */)", ModuleTableFunction) {
 			LuaModuleTableBareField(R"(/**
 			 * @LuaBareField	name
 			 * @DisplayName		Name
