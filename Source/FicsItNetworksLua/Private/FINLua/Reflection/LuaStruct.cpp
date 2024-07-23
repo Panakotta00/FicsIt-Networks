@@ -3,6 +3,7 @@
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
 #include "FINLua/FINLuaModule.h"
+#include "FINLua/LuaFuture.h"
 #include "FINLua/LuaPersistence.h"
 #include "tracy/Tracy.hpp"
 
@@ -513,6 +514,12 @@ namespace FINLua {
 	}
 
 	bool luaFIN_pushStruct(lua_State* L, const FINStruct& Struct) {
+		// TODO: Check if required & if it is, also add similar behaviour for getters/coverters/etc including "any lua value to network value" system in LuaUtil
+		if (Struct.GetStruct()->IsChildOf(FFINFuture::StaticStruct())) {
+			luaFIN_pushFuture(L, Struct);
+			return true;
+		}
+
 		UFINStruct* Type = FFINReflection::Get()->FindStruct(Struct.GetStruct());
 		if (!Type) {
 			lua_pushnil(L);

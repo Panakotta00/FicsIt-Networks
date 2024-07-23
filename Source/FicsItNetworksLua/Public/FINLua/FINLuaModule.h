@@ -130,6 +130,7 @@ struct FFINLuaTable : FFINLuaModuleValue {
 
 	void AddFunctionFieldByDocumentationComment(lua_CFunction Function, const FString& Comment, const TCHAR* InternalName);
 	void AddBareFieldByDocumentationComment(TFunction<void(lua_State* L, const FString&)> Function, const FString& Comment, const TCHAR* InternalName);
+	void AddTableFieldByDocumentationComment(TSharedRef<FFINLuaTable> Table, const FString& Comment, const TCHAR* InternalName);
 };
 
 /**
@@ -263,6 +264,15 @@ public:
 		Table->AddBareFieldByDocumentationComment(&_FieldName, Documentation, TEXT(#_FieldName)); \
 	}, 2); \
 	void _FieldName (lua_State* L, const FString& PersistName)
+#define LuaModuleTableTable(Documentation, _TableName) \
+	namespace _TableName { \
+		static TSharedRef<FFINLuaTable> _TableName = MakeShared<FFINLuaTable>(); \
+		static FFINStaticGlobalRegisterFunc RegisterTable ([]() { \
+			Table->AddTableFieldByDocumentationComment(_TableName, Documentation, TEXT(#_TableName)); \
+		}, 2); \
+		static TSharedRef<FFINLuaTable>& Table = _TableName; \
+	} \
+	namespace _TableName
 #define LuaModuleGlobalBareValue(Documentation, _GlobalName) \
 	void _GlobalName (lua_State*, const FString&); \
 	static FFINStaticGlobalRegisterFunc RegisterGlobal_ ## _GlobalName ([]() { \

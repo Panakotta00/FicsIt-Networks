@@ -343,7 +343,6 @@ namespace FINLua {
 #endif*/
 		
 		setupUtilLib(L);
-		setupFutureAPI(L);
 
 		TMap<FString, TSharedRef<FFINLuaModule>> modules;
 		for (const TSharedRef<FFINLuaModule>& module : FFINLuaModuleRegistry::GetInstance().Modules) {

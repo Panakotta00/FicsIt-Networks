@@ -177,6 +177,31 @@ void FFINLuaTable::AddBareFieldByDocumentationComment(TFunction<void(lua_State* 
 	field.Description = FText::FromString(TEXT("Description"));
 }
 
+void FFINLuaTable::AddTableFieldByDocumentationComment(TSharedRef<FFINLuaTable> Table, const FString& Comment, const TCHAR* _InternalName) {
+	FFINLuaTableField& field = Fields.Emplace_GetRef();
+	field.Value = Table;
+	field.Key = _InternalName;
+
+	auto [block, options] = PreprocessDocumentationComment(Comment);
+
+	for (auto [option, parameters] : options) {
+		if (option.Equals(TEXT("LuaTable"), ESearchCase::IgnoreCase)) {
+			field.Key = parameters[0];
+			if (field.DisplayName.IsEmpty()) {
+				if (parameters.Num() > 1) {
+					field.DisplayName = FText::FromString(parameters[1]);
+				} else {
+					field.DisplayName = FText::FromString(field.Key);
+				}
+			}
+		} else if (option.Equals(TEXT("DisplayName"), ESearchCase::IgnoreCase)) {
+			field.DisplayName = FText::FromString(parameters[0]);
+		}
+	}
+
+	field.Description = FText::FromString(block);
+}
+
 void FFINLuaModule::SetupModule(lua_State* L) {
 	PreSetup.ExecuteIfBound(*this, L);
 
@@ -199,7 +224,7 @@ void FFINLuaModule::SetupModule(lua_State* L) {
 		lua_pushvalue(L, -2); // string, Metatable, string
 		lua_pushvalue(L, -2); // string, Metatable, string, Metatable
 		lua_settable(L, LUA_REGISTRYINDEX); // string, Metatable
-		
+
 		//FINLua::luaFIN_pushFString(L, Metatable.InternalName);
 		//lua_setfield(L, -2, "__metatable);
 

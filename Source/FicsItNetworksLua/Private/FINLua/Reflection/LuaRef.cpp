@@ -159,7 +159,7 @@ namespace FINLua {
 			return luaFIN_callReflectionFunctionDirectly(L, Function, Ctx, nArgs, nResults);
 		} else {
 			TArray<FINAny> Input = luaFIN_callReflectionFunctionProcessInput(L, Function, nArgs);
-			luaFuture(L, FFINFutureReflection(Function, Ctx, Input));
+			luaFIN_pushFuture(L, FFINFutureReflection(Function, Ctx, Input));
 			return 1;
 		}
 	}
@@ -199,7 +199,7 @@ namespace FINLua {
 					luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
 				}
 			} else {
-				luaFuture(L, FFINFutureReflection(Property, PropertyCtx));
+				luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx));
 			}
 			return 1;
 		}
@@ -249,7 +249,7 @@ namespace FINLua {
 				[[maybe_unused]] FLuaSyncCall SyncCall(L);
 				Property->SetValue(PropertyCtx, Value.GetValue());
 			} else {
-				luaFuture(L, FFINFutureReflection(Property, PropertyCtx, Value.GetValue()));
+				luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx, Value.GetValue()));
 			}
 			return 1;
 		}

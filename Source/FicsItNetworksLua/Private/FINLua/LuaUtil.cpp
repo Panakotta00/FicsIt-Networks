@@ -41,11 +41,7 @@ namespace FINLua {
 			break;
 		case FIN_STRUCT: {
 			const FINStruct& Struct = Val.GetStruct();
-			if (Struct.GetStruct()->IsChildOf(FFINFuture::StaticStruct())) {
-				luaFuture(L, Struct);
-			} else {
-				luaFIN_pushStruct(L, Val.GetStruct());
-			}
+			luaFIN_pushStruct(L, Val.GetStruct());
 			break;
 		} case FIN_ARRAY: {
 			lua_newtable(L);
