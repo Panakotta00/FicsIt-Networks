@@ -17,7 +17,7 @@ namespace FINLua {
 		 * The component library contains functions that allow interaction with the component network.
 		 */)", ComponentLibrary) {
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		(Component | Component[])...	proxy((id: string | ids: string[])...)
+			 * @LuaFunction		(Object | Object[])...	proxy((id: string | ids: string[])...)
 			 * @DisplayName		Proxy
 			 *
 			 * Generates and returns instances of the network components with the given UUIDs. +
@@ -28,10 +28,8 @@ namespace FINLua {
 			 * Otherwise, an instance of the network component will be returned. +
 			 * If a parameter is a string array, the return value will be an array of network component instances.
 			 *
-			 * @parameter	id			string		ID			The UUID of the network component.
-			 * @parameter	ids			string[]	IDs			A array of UUIDs of the networks components.
-			 * @return		Component	Component	Component	The lua table representation of the network component.
-			 * @return		Component[]	Component[]	Component[]	A array of the lua table representation of the network component.
+			 * @parameter	...		string | string[]			ID[s]		The UUID[-Arrays] of the network component[s].
+			 * @return		...		Object | Object[] | nil		Object[s]	The Network-Component[-Array]s associated with the UUIDs, nil if the UUID was not found.
 			 */)", proxy) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);
@@ -74,9 +72,8 @@ namespace FINLua {
 			 * Searches the component network for components with the given query or have the given type. +
 			 * You can pass multiple parameters and each parameter will be handled separately and returns a corresponding return value.
 			 *
-			 * @parameter	query	string		Query	A nick/group query as string used to get a list of component in the network.
-			 * @parameter	type	Class		Type	The type of the components in the network you want to get.
-			 * @return		uuids	string[]	UUIDs	List of network component UUIDs which pass the given nick query or are of the given type.
+			 * @parameter	...		string | Object-Class	Query	A nick/group query as string or a class for the components in the network you try to find.
+			 * @return		...		string[]				UUIDs	List of network component UUIDs which pass the given nick query or are of the given type.
 			 */)", findComponent) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);
