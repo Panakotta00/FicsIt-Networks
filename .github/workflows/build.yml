@@ -130,7 +130,7 @@ jobs:
                 "description": "Build Successful!",
                 "color": 65280,
                 "fields": [{
-                  "value": "[FicsIt-Networks.zip](${{ steps.upload-artifacts.outputs.artifact-url }})",
+                  "value": "[FicsIt-Networks.zip](${{ steps.upload-win64.outputs.artifact-url }})",
                   "name": "",
                   "inline": true
                 }]
