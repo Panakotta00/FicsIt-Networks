@@ -1,3 +1,4 @@
+#include "FicsItNetworksLuaModule.h"
 #include "FINLua/FINLuaModule.h"
 #include "Logging/StructuredLog.h"
 #include "Misc/App.h"
@@ -66,9 +67,9 @@ namespace FINGenLuaDoc {
 
 		FString Line;
 		while (Description.Split(TEXT("\n"), &Line, &Description)) {
-			Str.Append(TEXT("--- ") + Line + TEXT("\n"));
+			Str.Appendf(TEXT("--- %s\n"), *Line);
 		}
-		Str.Append(TEXT("--- ") + Description + TEXT("\n"));
+		Str.Appendf(TEXT("--- %s\n"), *Description);
 	}
 
 	void WriteProperty(FStringBuilderBase& Documentation, FFINReflection& Ref, UFINProperty* Prop) {
@@ -107,32 +108,147 @@ namespace FINGenLuaDoc {
 	void WriteStruct(FStringBuilderBase& Str, FFINReflection& Ref, UFINStruct* Struct) {
 		WriteMultiLineDescription(Str,  Struct->GetDescription().ToString());
 
-		FString ClassDeclaration = Struct->GetInternalName();
-		if (UFINStruct* parent = Struct->GetParent()) {
-			ClassDeclaration += TEXT(" : ") + Struct->GetParent()->GetInternalName();
+		{
+			FString ClassDeclaration = Struct->GetInternalName();
+			if (UFINStruct* parent = Struct->GetParent()) {
+				ClassDeclaration += TEXT(" : ") + Struct->GetParent()->GetInternalName();
+			}
+			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
+
+			for (UFINProperty* Prop : Struct->GetProperties(false)) {
+				if ((Prop->GetPropertyFlags() & FIN_Prop_Attrib) && !(Prop->GetPropertyFlags() & FIN_Prop_ClassProp)) {
+					WriteProperty(Str, Ref, Prop);
+				}
+			}
+
+			Str.Appendf(TEXT("%s = {}\n"), *Struct->GetInternalName());
+
+			for (UFINFunction* Func : Struct->GetFunctions(false)) {
+				if ((Func->GetFunctionFlags() & FIN_Func_MemberFunc) && !(Func->GetFunctionFlags() & FIN_Func_ClassFunc)) {
+					WriteFunction(Str, Ref, Struct->GetInternalName(), Func);
+				}
+			}
 		}
-		Str.Appendf(TEXT("---@class %s\n"), ClassDeclaration);
 
-		for (UFINProperty* Prop : Struct->GetProperties(false)) {
-			if (Prop->GetPropertyFlags() & FIN_Prop_Attrib)	WriteProperty(Str, Ref, Prop);
-		}
+		{
+			WriteMultiLineDescription(Str, Struct->GetDescription().ToString());
 
-		Str.Appendf(TEXT("local %s\n"), *Struct->GetInternalName());
+			FString ClassDeclaration = Struct->GetInternalName();
+			if (UFINStruct* parent = Struct->GetParent()) {
+				ClassDeclaration += TEXT("-Class : ") + Struct->GetParent()->GetInternalName() + TEXT("-Class");
+			}
+			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
 
-		for (UFINFunction* Func : Struct->GetFunctions(false)) {
-			if (Func->GetFunctionFlags() & FIN_Func_MemberFunc) WriteFunction(Str, Ref, Struct->GetInternalName(), Func);
+			for (UFINProperty* Prop : Struct->GetProperties(false)) {
+				if ((Prop->GetPropertyFlags() & FIN_Prop_Attrib) && (Prop->GetPropertyFlags() & FIN_Prop_ClassProp)) {
+					WriteProperty(Str, Ref, Prop);
+				}
+			}
+
+			Str.Appendf(TEXT("%s_Class = {}\n"), *Struct->GetInternalName());
+
+			for (UFINFunction* Func : Struct->GetFunctions(false)) {
+				if ((Func->GetFunctionFlags() & FIN_Func_MemberFunc) && (Func->GetFunctionFlags() & FIN_Func_ClassFunc)) {
+					WriteFunction(Str, Ref, Struct->GetInternalName(), Func);
+				}
+			}
 		}
 
 		Str.Append(TEXT("\n"));
 	}
 
+	void WriteLuaValue(FStringBuilderBase& Str, const TSharedPtr<FFINLuaModuleValue>& Value, const FString& Identifier);
+
+	void WriteLuaTable(FStringBuilderBase& Str, const FFINLuaTable& Table, const FString& Identifier) {
+		Str.Append(TEXT("---@type table\n"));
+		Str.Appendf(TEXT("%s = {}\n"), *Identifier);
+
+		for (const FFINLuaTableField& field : Table.Fields) {
+			WriteMultiLineDescription(Str, field.Description.ToString());
+			WriteLuaValue(Str, field.Value, Identifier + TEXT(".") + field.Key);
+			Str.Append(TEXT("\n"));
+		}
+	}
+
+	void WriteLuaFunction(FStringBuilderBase& Str, const FFINLuaFunction& Function, const FString& Identifier) {
+		FString parameterList;
+		for (const auto& parameter : Function.Parameters) {
+			Str.Appendf(TEXT("---@param %s %s %s\n"), *parameter.InternalName, *parameter.Type, *parameter.Description.ToString());
+			if (parameterList.Len() > 0) {
+				parameterList.Append(TEXT(", "));
+			}
+			parameterList.Append(parameter.InternalName);
+		}
+		for (const auto& returnValue : Function.ReturnValues) {
+			Str.Appendf(TEXT("---@return %s %s %s\n"), *returnValue.Type, *returnValue.InternalName, *returnValue.Description.ToString());
+		}
+		Str.Appendf(TEXT("function %s(%s) end\n"), *Identifier, *parameterList);
+	}
+
+	void WriteLuaValue(FStringBuilderBase& Str, const TSharedPtr<FFINLuaModuleValue>& Value, const FString& Identifier) {
+		auto typeID = Value->TypeID();
+		if (typeID == FINTypeId<FFINLuaFunction>::ID()) {
+			WriteLuaFunction(Str, *StaticCastSharedPtr<FFINLuaFunction>(Value), Identifier);
+		} else if (typeID == FINTypeId<FFINLuaTable>::ID()) {
+			WriteLuaTable(Str, *StaticCastSharedPtr<FFINLuaTable>(Value), Identifier);
+		} else {
+			Str.Appendf(TEXT("%s = nil\n"), *Identifier);
+		}
+		Str.Append(TEXT("\n"));
+	}
+
+	void WriteMetatable(FStringBuilderBase& Str, const FFINLuaMetatable& Metatable) {
+		WriteMultiLineDescription(Str, Metatable.Description.ToString());
+
+		Str.Appendf(TEXT("---@class %s\n"), *Metatable.InternalName);
+
+		const FFINLuaTableField* index = nullptr;
+		for (const FFINLuaTableField& field : Metatable.Table->Fields) {
+			if (field.Key == TEXT("__index") && field.Value->TypeID() == FINTypeId<FFINLuaTable>::ID()) {
+				index = &field;
+			}
+			if (field.Key.StartsWith(TEXT("__"))) {
+				// TODO: Add operator definition
+			}
+			// TODO: Add overloads for call operator
+		}
+
+		Str.Appendf(TEXT("%s = {}\n\n"), *Metatable.InternalName);
+
+		if (index) {
+			const FFINLuaTable& table = *StaticCastSharedPtr<FFINLuaTable>(index->Value);
+			for (const FFINLuaTableField& field : table.Fields) {
+				WriteMultiLineDescription(Str, field.Description.ToString());
+				WriteLuaValue(Str, field.Value, Metatable.InternalName + TEXT(".") + field.Key);
+				Str.Append(TEXT("\n"));
+			}
+		}
+	}
+
+	void WriteGlobal(FStringBuilderBase& Str, const FFINLuaGlobal& Global) {
+		WriteMultiLineDescription(Str, Global.Description.ToString());
+
+		WriteLuaValue(Str, Global.Value, Global.InternalName);
+
+		Str.Append(TEXT("\n"));
+	}
+
+	void WriteModule(FStringBuilderBase& Str, const TSharedRef<FFINLuaModule>& Module) {
+		for (const FFINLuaMetatable& metatable : Module->Metatables) {
+			WriteMetatable(Str, metatable);
+		}
+		for (const FFINLuaGlobal& global : Module->Globals) {
+			WriteGlobal(Str, global);
+		}
+	}
+
 	bool FINGenLuaDoc(UWorld* World, const TCHAR* Command, FOutputDevice& Ar) {
 		if (FParse::Command(&Command, TEXT("FINGenLuaDoc"))) {
-			UE_LOG(LogFicsItNetworks, Display, TEXT("Generating FicsIt-Networks Lua Documentation..."));
+			UE_LOG(LogFicsItNetworksLua, Display, TEXT("Generating FicsIt-Networks Lua Documentation..."));
 
 			FStringBuilderBase str;
 
-			str.Append(TEXT("@meta\n\n"));
+			str.Append(TEXT("---@meta\n\n"));
 
 			FFINReflection& reflection = *FFINReflection::Get();
 			for (TPair<UClass*, UFINClass*> Class : reflection.GetClasses()) {
@@ -142,16 +258,21 @@ namespace FINGenLuaDoc {
 				WriteStruct(str, reflection, Struct.Value);
 			}
 
-			UE_LOG(LogFicsItNetworks, Display, TEXT("FicsIt-Networks Lua Documentation generated!"));
+			auto& moduleRegistry = FFINLuaModuleRegistry::GetInstance();
+			for (const TSharedRef<FFINLuaModule>& module : moduleRegistry.Modules) {
+				WriteModule(str, module);
+			}
+
+			UE_LOG(LogFicsItNetworksLua, Display, TEXT("FicsIt-Networks Lua Documentation generated!"));
 
 			FString Path = FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT("Saved/"));
 			Path = FPaths::Combine(Path, TEXT("FINLuaDocumentation.lua"));
 
-			UE_LOGFMT(LogFicsItNetworks, Display, "Saving FicsIt-Networks Lua Documentation under: {Path}", Path);
+			UE_LOGFMT(LogFicsItNetworksLua, Display, "Saving FicsIt-Networks Lua Documentation under: {Path}", Path);
 
 			FFileHelper::SaveStringToFile(str, *Path);
 
-			UE_LOGFMT(LogFicsItNetworks, Display, "FicsIt-Networks Lua Documentation Saved!");
+			UE_LOGFMT(LogFicsItNetworksLua, Display, "FicsIt-Networks Lua Documentation Saved!");
 
 			return true;
 		}
