@@ -16,6 +16,7 @@
 #include "FINGlobalRegisterHelper.h"
 
 #include "Computer/FINComputerGPUT1.h"
+#include "Network/FINNetworkUtils.h"
 #include "Network/FINFuture.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Utils/FINTargetPoint.h"
@@ -64,6 +65,7 @@
 #include "Computer/FINComputerGPUT2.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "FicsItKernel/Logging.h"
+#include "Network/FINNetworkComponent.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
 #include "WheeledVehicles/FGWheeledVehicle.h"
 
@@ -598,6 +600,29 @@ public:
 };
 
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
+BeginProp(RString, nick, "Nick", "**Only available for Network Components!** Allows access to the Network Components Nick.") {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		Return IFINNetworkComponent::Execute_GetNick(NetworkHandler);
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} PropSet() {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		IFINNetworkComponent::Execute_SetNick(NetworkHandler, Val);
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} EndProp()
+BeginProp(RString, id, "ID", "**Only available for Network Components!** Allows access to the Network Components UUID.") {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		Return IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString();
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} EndProp()
 BeginProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
 	Return (int64)GetTypeHash(self);
 } EndProp()

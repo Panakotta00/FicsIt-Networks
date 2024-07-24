@@ -95,18 +95,6 @@ namespace FINLua {
 				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, thisIndex, nullptr);
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
-				UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(*LuaObject->Object);
-				if (NetworkHandler) {
-					if (MemberName == "id") {
-						lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString()));
-						return 1;
-					}
-					if (MemberName == "nick") {
-						lua_pushstring(L, TCHAR_TO_UTF8(*IFINNetworkComponent::Execute_GetNick(NetworkHandler)));
-						return 1;
-					}
-				}
-
 				FFINExecutionContext Context(LuaObject->Object);
 				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
 			}
@@ -123,15 +111,6 @@ namespace FINLua {
 
 				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, thisIndex, nullptr);
 				FString MemberName = luaFIN_toFString(L, nameIndex);
-
-				UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(*LuaObject->Object);
-				if (NetworkHandler) {
-					if (MemberName == "nick") {
-						FString nick = luaFIN_toFString(L, valueIndex);
-						IFINNetworkComponent::Execute_SetNick(NetworkHandler, nick);
-						return 0;
-					}
-				}
 
 				FFINExecutionContext Context(LuaObject->Object);
 				luaFIN_tryExecuteSetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Prop_Attrib, Context, valueIndex, true);
