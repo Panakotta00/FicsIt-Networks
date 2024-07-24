@@ -125,6 +125,26 @@ namespace FINGenLuaDoc {
 		Str.Appendf(TEXT("--- %s\n"), *Description);
 	}
 
+	void WriteFuture(FStringBuilderBase& Str, FString TypeIdentifier, FString FunctionName, FString TypedParameterList) {
+		FString identifier = FString::Printf(TEXT("Future_%s_%s"), *TypeIdentifier, *FunctionName);
+		Str.Appendf(TEXT("---@class %s : Future\n"), *identifier);
+		Str.Appendf(TEXT("%s = {}\n"), *identifier);
+
+		FString returnValues;
+		if (!TypedParameterList.IsEmpty()) {
+			returnValues = FString::Printf(TEXT(":(%s)"), *TypedParameterList);
+		}
+
+		Str.Appendf(TEXT("---@type fun(self:%s)%s\n"), *identifier, *returnValues);
+		Str.Appendf(TEXT("function %s:await() end\n"), *identifier);
+
+		Str.Appendf(TEXT("---@type fun(self:%s)%s\n"), *identifier, *returnValues);
+		Str.Appendf(TEXT("function %s:get() end\n"), *identifier);
+
+		Str.Appendf(TEXT("---@type fun(self:%s):boolean\n"), *identifier);
+		Str.Appendf(TEXT("function %s:canGet() end\n"), *identifier);
+	}
+
 	void WriteProperty(FStringBuilderBase& Documentation, FFINReflection& Ref, UFINProperty* Prop) {
 		Documentation.Appendf(TEXT("---@field public %s %s %s\n"), *Prop->GetInternalName(), *GetType(Ref, Prop), *GetInlineDescription(Prop->GetDescription().ToString()));
 	}
@@ -160,24 +180,42 @@ namespace FINGenLuaDoc {
 			Str.Append(TEXT("---@param ... any\n"));
 		}
 
+		bool bFuture = !bool(Func->GetFunctionFlags() & FIN_Func_RT_Parallel);
+
 		TArray<FString> returnValueList;
 		for (UFINProperty* returnValue : returnValues) {
 			returnValueList.Add(returnValue->GetInternalName() + TEXT(":") + GetType(Ref, returnValue));
-			Str.Appendf(TEXT("---@return %s %s %s\n"), *GetType(Ref, returnValue), *returnValue->GetInternalName(), *GetInlineDescription(returnValue->GetDescription().ToString()));
+			if (!bFuture) {
+				Str.Appendf(TEXT("---@return %s %s %s\n"), *GetType(Ref, returnValue), *returnValue->GetInternalName(), *GetInlineDescription(returnValue->GetDescription().ToString()));
+			}
 		}
 		if (Func->FunctionFlags & FIN_Func_VarRets) {
 			returnValueList.Add(TEXT("...:any"));
-			Str.Append(TEXT("---@return ... any\n"));
+			if (!bFuture) {
+				Str.Append(TEXT("---@return ... any\n"));
+			}
+		}
+		FString joinedReturnValueList = FString::Join(returnValueList, TEXT(","));
+		FString futureParameterList;
+		if (bFuture) {
+			FString futureTypeIdentifier = FString::Printf(TEXT("Future_%s_%s"), *Type, *Func->GetInternalName());
+			futureParameterList = joinedReturnValueList;
+			joinedReturnValueList = futureTypeIdentifier;
+			Str.Appendf(TEXT("---@return %s\n"), *futureTypeIdentifier);
 		}
 
 		FString functionTypedReturn;
 		if (!returnValueList.IsEmpty()) {
-			functionTypedReturn = FString::Printf(TEXT(":(%s)"), *FString::Join(returnValueList, TEXT(",")));
+			functionTypedReturn = FString::Printf(TEXT(":(%s)"), *joinedReturnValueList);
 		}
 
 		Str.Appendf(TEXT("---@type (fun(%s)%s)|ReflectionFunction\n"), *FString::Join(typedParameterList, TEXT(",")), *functionTypedReturn);
 
 		Str.Appendf(TEXT("function %s:%s(%s) end\n"), *Parent, *Func->GetInternalName(), *FString::Join(paramList, TEXT(", ")));
+
+		if (bFuture) {
+			WriteFuture(Str, Type, Func->GetInternalName(), futureParameterList);
+		}
 
 		// TODO: Add support for Operator Overloading
 	}
@@ -311,18 +349,21 @@ namespace FINGenLuaDoc {
 
 		Str.Appendf(TEXT("---@class %s\n"), *Metatable.InternalName);
 
+		Str.Appendf(TEXT("%s = {}\n\n"), *Metatable.InternalName);
+
 		const FFINLuaTableField* index = nullptr;
 		for (const FFINLuaTableField& field : Metatable.Table->Fields) {
 			if (field.Key == TEXT("__index") && field.Value->TypeID() == FINTypeId<FFINLuaTable>::ID()) {
 				index = &field;
 			}
-			if (field.Key.StartsWith(TEXT("__"))) {
-				// TODO: Add operator definition
+			if (!field.Key.StartsWith(TEXT("__"))) {
+				WriteMultiLineDescription(Str, field.Description.ToString());
+				WriteLuaValue(Str, field.Value, Metatable.InternalName + TEXT(".") + field.Key);
+				Str.Append(TEXT("\n"));
 			}
+			// TODO: Add operator definition
 			// TODO: Add overloads for call operator
 		}
-
-		Str.Appendf(TEXT("%s = {}\n\n"), *Metatable.InternalName);
 
 		if (index) {
 			const FFINLuaTable& table = *StaticCastSharedPtr<FFINLuaTable>(index->Value);
