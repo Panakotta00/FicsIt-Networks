@@ -1,4 +1,4 @@
-#include "FicsItNetworksLuaModule.h"
+#include "FicsItNetworksDocumentation.h"
 #include "FINLua/FINLuaModule.h"
 #include "Logging/StructuredLog.h"
 #include "Misc/App.h"
@@ -125,7 +125,7 @@ namespace FINGenLuaDoc {
 		Str.Appendf(TEXT("--- %s\n"), *Description);
 	}
 
-	void WriteFuture(FStringBuilderBase& Str, FString TypeIdentifier, FString FunctionName, FString TypedParameterList) {
+	void WriteFuture(FStringBuilderBase& Str, const FString& TypeIdentifier, const FString& FunctionName, const FString& TypedParameterList) {
 		FString identifier = FString::Printf(TEXT("Future_%s_%s"), *TypeIdentifier, *FunctionName);
 		Str.Appendf(TEXT("---@class %s : Future\n"), *identifier);
 		Str.Appendf(TEXT("%s = {}\n"), *identifier);
@@ -149,7 +149,7 @@ namespace FINGenLuaDoc {
 		Documentation.Appendf(TEXT("---@field public %s %s %s\n"), *Prop->GetInternalName(), *GetType(Ref, Prop), *GetInlineDescription(Prop->GetDescription().ToString()));
 	}
 
-	void WriteFunction(FStringBuilderBase& Str, FFINReflection& Ref, FString Parent, FString Type, UFINFunction* Func) {
+	void WriteFunction(FStringBuilderBase& Str, FFINReflection& Ref, const FString& Parent, const FString& Type, UFINFunction* Func) {
 		if (MatchLuaOperator(Func)) return;
 
 		WriteMultiLineDescription(Str, Func->GetDescription().ToString());
@@ -180,7 +180,7 @@ namespace FINGenLuaDoc {
 			Str.Append(TEXT("---@param ... any\n"));
 		}
 
-		bool bFuture = !bool(Func->GetFunctionFlags() & FIN_Func_RT_Parallel);
+		bool bFuture = !(Func->GetFunctionFlags() & FIN_Func_RT_Parallel);
 
 		TArray<FString> returnValueList;
 		for (UFINProperty* returnValue : returnValues) {
@@ -220,7 +220,7 @@ namespace FINGenLuaDoc {
 		// TODO: Add support for Operator Overloading
 	}
 
-	void WriteStruct(FStringBuilderBase& Str, FFINReflection& Ref, UFINStruct* Struct) {
+	void WriteStruct(FStringBuilderBase& Str, FFINReflection& Ref, const UFINStruct* Struct) {
 		if (Struct->GetInternalName() == TEXT("Future")) return;
 
 		WriteMultiLineDescription(Str,  Struct->GetDescription().ToString());
@@ -229,7 +229,7 @@ namespace FINGenLuaDoc {
 			FString ClassIdentifier = Struct->GetInternalName();
 			FString ClassDeclaration = ClassIdentifier;
 			if (UFINStruct* parent = Struct->GetParent()) {
-				ClassDeclaration += TEXT(" : ") + Struct->GetParent()->GetInternalName();
+				ClassDeclaration += TEXT(" : ") + parent->GetInternalName();
 			}
 			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
 
@@ -273,7 +273,7 @@ namespace FINGenLuaDoc {
 			FString ClassIdentifier = Struct->GetInternalName() + TEXT("-Class");
 			FString ClassDeclaration = ClassIdentifier;
 			if (UFINStruct* parent = Struct->GetParent()) {
-				ClassDeclaration += TEXT(" : ") + Struct->GetParent()->GetInternalName() + TEXT("-Class");
+				ClassDeclaration += TEXT(" : ") + parent->GetInternalName() + TEXT("-Class");
 			}
 			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
 
@@ -415,47 +415,53 @@ namespace FINGenLuaDoc {
 		}
 	}
 
-	bool FINGenLuaDoc(UWorld* World, const TCHAR* Command, FOutputDevice& Ar) {
+	FString GenDocumentation() {
+		FStringBuilderBase str;
+
+		str.Append(TEXT("---@meta\n\n"));
+
+		const auto& moduleRegistry = FFINLuaModuleRegistry::GetInstance();
+		for (const TSharedRef<FFINLuaModule>& module : moduleRegistry.Modules) {
+			WriteModule(str, module);
+		}
+
+		FFINReflection& reflection = *FFINReflection::Get();
+		for (TPair<UClass*, UFINClass*> Class : reflection.GetClasses()) {
+			WriteStruct(str, reflection, Class.Value);
+		}
+		for (TPair<UScriptStruct*, UFINStruct*> Struct : reflection.GetStructs()) {
+			WriteStruct(str, reflection, Struct.Value);
+		}
+
+		return str.ToString();
+	}
+
+	bool ExecCMD(UWorld* World, const TCHAR* Command, FOutputDevice& Ar) {
 		if (FParse::Command(&Command, TEXT("FINGenLuaDoc"))) {
-			UE_LOG(LogFicsItNetworksLua, Display, TEXT("Generating FicsIt-Networks Lua Documentation..."));
+			UE_LOG(LogFicsItNetworksDocumentation, Display, TEXT("Generating FicsIt-Networks Lua Documentation..."));
 
-			FStringBuilderBase str;
+			FString documentation = GenDocumentation();
 
-			str.Append(TEXT("---@meta\n\n"));
+			UE_LOG(LogFicsItNetworksDocumentation, Display, TEXT("FicsIt-Networks Lua Documentation generated!"));
 
-			auto& moduleRegistry = FFINLuaModuleRegistry::GetInstance();
-			for (const TSharedRef<FFINLuaModule>& module : moduleRegistry.Modules) {
-				WriteModule(str, module);
+			FString path;
+			if (!FParse::Value(Command, TEXT("Path"), path)) {
+				path = FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT("Saved/"));
+				path = FPaths::Combine(path, TEXT("FINLuaDocumentation.lua"));
 			}
 
-			FFINReflection& reflection = *FFINReflection::Get();
-			for (TPair<UClass*, UFINClass*> Class : reflection.GetClasses()) {
-				WriteStruct(str, reflection, Class.Value);
-			}
-			for (TPair<UScriptStruct*, UFINStruct*> Struct : reflection.GetStructs()) {
-				WriteStruct(str, reflection, Struct.Value);
-			}
+			UE_LOGFMT(LogFicsItNetworksDocumentation, Display, "Saving FicsIt-Networks Lua Documentation under: {Path}", path);
 
-			UE_LOG(LogFicsItNetworksLua, Display, TEXT("FicsIt-Networks Lua Documentation generated!"));
+			FFileHelper::SaveStringToFile(documentation, *path);
 
-			FString Path;
-			if (!FParse::Value(Command, TEXT("Path"), Path)) {
-				Path = FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT("Saved/"));
-				Path = FPaths::Combine(Path, TEXT("FINLuaDocumentation.lua"));
-			}
-
-			UE_LOGFMT(LogFicsItNetworksLua, Display, "Saving FicsIt-Networks Lua Documentation under: {Path}", Path);
-
-			FFileHelper::SaveStringToFile(str, *Path);
-
-			UE_LOGFMT(LogFicsItNetworksLua, Display, "FicsIt-Networks Lua Documentation Saved!");
+			UE_LOGFMT(LogFicsItNetworksDocumentation, Display, "FicsIt-Networks Lua Documentation Saved!");
 
 			return true;
 		}
 		return false;
 	}
 
-	static FStaticSelfRegisteringExec FINGenLuaDocStaticExec(&FINGenLuaDoc);
+	[[maybe_unused]] static FStaticSelfRegisteringExec SelfRegisterCMD(&ExecCMD);
 }
 UE_ENABLE_OPTIMIZATION_SHIP
 

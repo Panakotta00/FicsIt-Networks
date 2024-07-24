@@ -18,7 +18,7 @@
 #endif
 
 template<typename T>
-class FINTypeId {
+class FICSITNETWORKSLUA_API FINTypeId {
 public:
 	static int ID() {
 		static uint32 id = GetTypeHash(UNIQUE_FUNCTION_ID);
@@ -29,7 +29,7 @@ public:
 /**
  * Represents a Lua Module Value
  */
-struct FFINLuaModuleValue : TSharedFromThis<FFINLuaModuleValue> {
+struct FICSITNETWORKSLUA_API FFINLuaModuleValue : TSharedFromThis<FFINLuaModuleValue> {
 	virtual ~FFINLuaModuleValue() = default;
 
 	virtual uint32 TypeID() const = 0;
@@ -40,7 +40,7 @@ struct FFINLuaModuleValue : TSharedFromThis<FFINLuaModuleValue> {
 /**
  * Represents any C++ Code as a Lua Module Value
  */
-struct FFINLuaModuleBareValue : FFINLuaModuleValue {
+struct FICSITNETWORKSLUA_API FFINLuaModuleBareValue : FFINLuaModuleValue {
 	virtual uint32 TypeID() const { return FINTypeId<FFINLuaModuleBareValue>::ID(); }
 
 	FFINLuaModuleBareValue(const TFunction<void(lua_State* L, const FString&)>& Function) : Function(Function) {}
@@ -55,7 +55,7 @@ struct FFINLuaModuleBareValue : FFINLuaModuleValue {
 /**
  * Represents a Lua Module Function Parameter or Returnvalue
  */
-struct FFINLuaFunctionParameter {
+struct FICSITNETWORKSLUA_API FFINLuaFunctionParameter {
 	FString InternalName;
 
 	FString Type;
@@ -68,7 +68,7 @@ struct FFINLuaFunctionParameter {
 /**
  * Represents a Lua Module Function
  */
-struct FFINLuaFunction : FFINLuaModuleValue {
+struct FICSITNETWORKSLUA_API FFINLuaFunction : FFINLuaModuleValue {
 	virtual uint32 TypeID() const { return FINTypeId<FFINLuaFunction>::ID(); }
 
 	FFINLuaFunction(lua_CFunction Function) : Function(Function) {}
@@ -101,7 +101,7 @@ struct FFINLuaFunction : FFINLuaModuleValue {
 /**
  * Represents a Lua Module Table Field
  */
-struct FFINLuaTableField {
+struct FICSITNETWORKSLUA_API FFINLuaTableField {
 	FString Key;
 
     FText DisplayName;
@@ -114,7 +114,7 @@ struct FFINLuaTableField {
 /**
  * Represents a Lua Module Table
  */
-struct FFINLuaTable : FFINLuaModuleValue {
+struct FICSITNETWORKSLUA_API FFINLuaTable : FFINLuaModuleValue {
 	virtual uint32 TypeID() const { return FINTypeId<FFINLuaTable>::ID(); }
 
 	TArray<FFINLuaTableField> Fields;
@@ -138,7 +138,7 @@ struct FFINLuaTable : FFINLuaModuleValue {
 /**
  * Represents a Lua Module Global Value
  */
-struct FFINLuaGlobal {
+struct FICSITNETWORKSLUA_API FFINLuaGlobal {
 	FString InternalName;
 
 	FText DisplayName;
@@ -151,7 +151,7 @@ struct FFINLuaGlobal {
 /**
  * Represents a Lua Module Metatable
  */
-struct FFINLuaMetatable {
+struct FICSITNETWORKSLUA_API FFINLuaMetatable {
 	FString InternalName;
 
 	FText DisplayName;
@@ -168,7 +168,7 @@ struct FFINLuaMetatable {
  * Another main purpose is to provide documentation for the different functions etc. to be usable within the game.
  * A module can also be just a wrapper around a simple Lua library, but providing documentation.
  */
-struct FFINLuaModule : TSharedFromThis<FFINLuaModule> {
+struct FICSITNETWORKSLUA_API FFINLuaModule : TSharedFromThis<FFINLuaModule> {
 	FFINLuaModule() = default;
 	FFINLuaModule(const FString& InternalName, const FText& DisplayName, const FText& Description) : InternalName(InternalName), DisplayName(DisplayName), Description(Description) {}
 
@@ -198,9 +198,10 @@ struct FFINLuaModule : TSharedFromThis<FFINLuaModule> {
 /**
  * This singleton is used to register statically defined Lua modules
  */
-struct FFINLuaModuleRegistry {
+struct FICSITNETWORKSLUA_API FFINLuaModuleRegistry {
 private:
 	FFINLuaModuleRegistry() = default;
+	FFINLuaModuleRegistry(const FFINLuaModuleRegistry&) = delete;
 
 public:
 	[[nodiscard]] static FFINLuaModuleRegistry& GetInstance();
