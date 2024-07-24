@@ -47,6 +47,8 @@ struct FFINLuaModuleBareValue : FFINLuaModuleValue {
 
 	TFunction<void(lua_State* L, const FString&)> Function;
 
+	FString Type;
+
 	virtual void PushLuaValue(lua_State* L, const FString& PersistName) override;
 };
 

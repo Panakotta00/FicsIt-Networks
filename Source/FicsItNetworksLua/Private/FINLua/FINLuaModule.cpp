@@ -163,11 +163,10 @@ void FFINLuaTable::AddBareFieldByDocumentationComment(TFunction<void(lua_State* 
 		if (option.Equals(TEXT("LuaBareField"), ESearchCase::IgnoreCase)) {
 			field.Key = parameters[0];
 			if (field.DisplayName.IsEmpty()) {
-				if (parameters.Num() > 1) {
-					field.DisplayName = FText::FromString(parameters[1]);
-				} else {
-					field.DisplayName = FText::FromString(InternalName);
-				}
+				field.DisplayName = FText::FromString(InternalName);
+			}
+			if (parameters.Num() > 1) {
+				bare->Type = parameters[1];
 			}
 		} else if (option.Equals(TEXT("DisplayName"), ESearchCase::IgnoreCase)) {
 			field.DisplayName = FText::FromString(parameters[0]);
@@ -346,11 +345,10 @@ void FFINLuaModule::AddGlobalBareValueByDocumentationComment(TFunction<void(lua_
 		if (option.Equals(TEXT("LuaGlobal"), ESearchCase::IgnoreCase)) {
 			global.InternalName = parameters[0];
 			if (global.DisplayName.IsEmpty()) {
-				if (parameters.Num() > 1) {
-					global.DisplayName = FText::FromString(parameters[1]);
-				} else {
-					global.DisplayName = FText::FromString(global.InternalName);
-				}
+				global.DisplayName = FText::FromString(global.InternalName);
+			}
+			if (parameters.Num() > 1) {
+				bare->Type = parameters[1];
 			}
 		} else if (option.Equals(TEXT("DisplayName"), ESearchCase::IgnoreCase)) {
 			global.DisplayName = FText::FromString(parameters[0]);
@@ -375,19 +373,19 @@ namespace FINLua {
 		 * @DisplayName		Module Table-Function
 		 */)", ModuleTableFunction) {
 			LuaModuleTableBareField(R"(/**
-			 * @LuaBareField	name
+			 * @LuaBareField	name	string
 			 * @DisplayName		Name
 			 */)", name) { lua_pushnil(L); }
 			LuaModuleTableBareField(R"(/**
-			 * @LuaBareField	displayName
+			 * @LuaBareField	displayName		string
 			 * @DisplayName		Display Name
 			 */)", displayName) { lua_pushnil(L); }
 			LuaModuleTableBareField(R"(/**
-			 * @LuaBareField	description
+			 * @LuaBareField	description		string
 			 * @DisplayName		Description
 			 */)", description) { lua_pushnil(L); }
 			LuaModuleTableBareField(R"(/**
-			 * @LuaBareField	quickRef
+			 * @LuaBareField	quickRef	string
 			 * @DisplayName		Quick Reference
 			 */)", quickRef) { lua_pushnil(L); }
 

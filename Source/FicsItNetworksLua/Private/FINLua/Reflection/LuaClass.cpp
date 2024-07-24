@@ -146,7 +146,7 @@ namespace FINLua {
 		}
 
 		LuaModuleGlobalBareValue(R"(/**
-		 * @LuaGlobal		classes
+		 * @LuaGlobal		classes		ClassLib
 		 * @DisplayName		Classes
 		 *
 		 * A peseudo table that can be used to look up classes/types.

@@ -328,8 +328,15 @@ namespace FINGenLuaDoc {
 			functionReturn = FString::Printf(TEXT(":(%s)"), *FString::Join(typedReturnValueList, TEXT(",")));
 		}
 
-		Str.Appendf(TEXT("---@type (fun(%s)%s):ModuleTableFunction\n"), *FString::Join(typedParameterList, TEXT(",")), *functionReturn);
+		Str.Appendf(TEXT("---@type (fun(%s)%s)|ModuleTableFunction\n"), *FString::Join(typedParameterList, TEXT(",")), *functionReturn);
 		Str.Appendf(TEXT("function %s(%s) end\n"), *Identifier, *FString::Join(parameterList, TEXT(", ")));
+	}
+
+	void WriteLuaBareValue(FStringBuilderBase& Str, const FFINLuaModuleBareValue& BareValue, const FString& Identifier) {
+		if (!BareValue.Type.IsEmpty()) {
+			Str.Appendf(TEXT("---@type %s\n"), *BareValue.Type);
+		}
+		Str.Appendf(TEXT("%s = nil\n"), *Identifier);
 	}
 
 	void WriteLuaValue(FStringBuilderBase& Str, const TSharedPtr<FFINLuaModuleValue>& Value, const FString& Identifier) {
@@ -338,6 +345,8 @@ namespace FINGenLuaDoc {
 			WriteLuaFunction(Str, *StaticCastSharedPtr<FFINLuaFunction>(Value), Identifier);
 		} else if (typeID == FINTypeId<FFINLuaTable>::ID()) {
 			WriteLuaTable(Str, *StaticCastSharedPtr<FFINLuaTable>(Value), Identifier);
+		} else if (typeID == FINTypeId<FFINLuaModuleBareValue>::ID()) {
+			WriteLuaBareValue(Str, *StaticCastSharedPtr<FFINLuaModuleBareValue>(Value), Identifier);
 		} else {
 			Str.Appendf(TEXT("%s = nil\n"), *Identifier);
 		}
@@ -371,6 +380,20 @@ namespace FINGenLuaDoc {
 				WriteMultiLineDescription(Str, field.Description.ToString());
 				WriteLuaValue(Str, field.Value, Metatable.InternalName + TEXT(".") + field.Key);
 				Str.Append(TEXT("\n"));
+			}
+		}
+
+		if (Metatable.InternalName == TEXT("ClassLib")) {
+			FFINReflection& reflection = *FFINReflection::Get();
+			for (auto[Class, FINClass] : reflection.GetClasses()) {
+				Str.Appendf(TEXT("---@type %s-Class\n"), *FINClass->GetInternalName());
+				Str.Appendf(TEXT("ClassLib.%s = {}\n"), *FINClass->GetInternalName());
+			}
+		} else if (Metatable.InternalName == TEXT("StructLib")) {
+			FFINReflection& reflection = *FFINReflection::Get();
+			for (auto[Struct, FINStruct] : reflection.GetStructs()) {
+				Str.Appendf(TEXT("---@type fun(table):%s\n"), *FINStruct->GetInternalName());
+				Str.Appendf(TEXT("function StructLib.%s(t) end\n"), *FINStruct->GetInternalName());
 			}
 		}
 	}

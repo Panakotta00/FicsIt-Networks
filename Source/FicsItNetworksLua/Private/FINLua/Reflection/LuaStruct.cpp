@@ -485,7 +485,7 @@ namespace FINLua {
 		}
 
 		LuaModuleGlobalBareValue(R"(/**
-		 * @LuaGlobal		structs
+		 * @LuaGlobal		structs		StructLib
 		 * @DisplayName		Structs
 		 *
 		 * A peseudo table that can be used to look up struct types (which can then be used to easily construct a struct of that type).
