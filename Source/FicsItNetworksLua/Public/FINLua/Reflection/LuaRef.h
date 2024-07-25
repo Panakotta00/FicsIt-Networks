@@ -11,7 +11,7 @@ namespace FINLua {
 	 * See \link luaFIN_callReflectionFunction \endlink for more details.
 	 * Difference: Allowed Runtime States have been taken care of.
 	 */
-	int luaFIN_callReflectionFunctionDirectly(lua_State* L, UFINFunction* Function, const FFINExecutionContext& Ctx, int nArgs, int nResults);
+	int luaFIN_callReflectionFunctionDirectly(lua_State* L, const UFINFunction* Function, const FFINExecutionContext& Ctx, int nArgs, int nResults);
 
 	/**
 	 * Call the given FINFunction with the given Execution Context and follows the Lua Calling Convention.

@@ -19,7 +19,53 @@ namespace FINLua {
 		LuaModuleMetatable(R"(/**
 		 * @LuaMetatable	ReflectionFunction
 		 * @DisplayName		Reflection-Function
+		 *
+		 * Functions of the reflection system are not directly Lua Functions, instead they are this type.
+		 * This has various reason, but one neat thing it allows us to do, is to provide documentation capabilities.
+		 * Instead of just calling it, you can also ask for information about the function it self.
+		 * And it makes debugging a bit easier.
 		 */)", ReflectionFunction) {
+
+			LuaModuleTableBareField(R"(/**
+			 * @LuaBareField	asFunctionObject	Function
+			 * @DisplayName		As Function Object
+			 *
+			 * Returns the Reflection-System Object that represents this Reflected Function.
+			 * This way you can deeply inspect the function and its associations.
+			 */)", asFunctionObject) {
+				lua_pushnil(L);
+			}
+			LuaModuleTableBareField(R"(/**
+			 * @LuaBareField	quickRef	string
+			 * @DisplayName		Quick Reference
+			 *
+			 * A stirng containing the signature and description of the function for quick way to get info one the function within code.
+			 */)", quickRef) {
+				lua_pushnil(L);
+			}
+
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__index
+			 * @DisplayName		Index
+			 */)", __index) {
+				UFINFunction* function = luaFIN_checkReflectionFunction(L, 1);
+
+				FString key = luaFIN_checkFString(L, 2);
+				if (key == asFunctionObject_Name) {
+					luaFIN_pushObject(L, FFINNetworkTrace(function));
+				} else if (key == quickRef_Name) {
+					FString signature = luaFIN_getFunctionSignature(L, function);
+					FString description = function->GetDescription().ToString();
+
+					FString str = FString::Printf(TEXT("# %ls\n%ls"), *signature, *description);
+
+					luaFIN_pushFString(L, str);
+				} else {
+					return 0;
+				}
+
+				return 1;
+			}
 
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		__call
@@ -49,13 +95,21 @@ namespace FINLua {
 				return luaFIN_callReflectionFunction(L, Function, Context, lua_gettop(L)-1, LUA_MULTRET);
 			}
 
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__tostring
+			 * @DisplayName		To String
+			 */)", __tostring) {
+				UFINFunction* function = luaFIN_checkReflectionFunction(L, 1);
+				luaFIN_pushFString(L, FString::Printf(TEXT("function: %s"), *luaFIN_getFunctionSignature(L, function)));
+				return 1;
+			}
+
 			int luaReflectionFunctionUnpersist(lua_State* L) {
 				FString TypeName = luaFIN_checkFString(L, lua_upvalueindex(1));
 				FString FunctionName = luaFIN_checkFString(L, lua_upvalueindex(2));
 
 				UFINStruct* Type;
-				bool bClass = TypeName.RemoveFromEnd(TEXT("-Class"));
-				if (bClass) {
+				if (TypeName.RemoveFromEnd(TEXT("-Class"))) {
 					Type = FFINReflection::Get()->FindClass(TypeName);
 				} else {
 					Type = FFINReflection::Get()->FindStruct(TypeName);
@@ -95,8 +149,9 @@ namespace FINLua {
 		}
 	}
 
-	TArray<FINAny> luaFIN_callReflectionFunctionProcessInput(lua_State* L, UFINFunction* Function, int nArgs) {
-		int startArg = 2;
+	TArray<FINAny> luaFIN_callReflectionFunctionProcessInput(lua_State* L, const UFINFunction* Function, int nArgs) {
+		// ReSharper disable once CppTooWideScope
+		constexpr int startArg = 2;
 		TArray<FINAny> Input;
 		TArray<UFINProperty*> Parameters = Function->GetParameters();
 		for (UFINProperty* Parameter : Parameters) {
@@ -130,7 +185,7 @@ namespace FINLua {
 		return pushed;
 	}
 
-	int luaFIN_callReflectionFunctionDirectly(lua_State* L, UFINFunction* Function, const FFINExecutionContext& Ctx, int nArgs, int nResults) {
+	int luaFIN_callReflectionFunctionDirectly(lua_State* L, const UFINFunction* Function, const FFINExecutionContext& Ctx, int nArgs, int nResults) {
 		if (!Ctx.IsValid()) {
 			return luaFIN_argError(L, 1, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, 1)));
 		}
@@ -180,8 +235,7 @@ namespace FINLua {
 
 	int luaFIN_tryIndexGetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx) {
 		ZoneScoped;
-		UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags);
-		if (Property) {
+		if (UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags)) {
 			if (!PropertyCtx.IsValid()) {
 				return luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));
 			}
@@ -207,8 +261,7 @@ namespace FINLua {
 	}
 
 	int luaFIN_tryIndexFunction(lua_State* L, UFINStruct* Struct, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags) {
-		UFINFunction* Function = Struct->FindFINFunction(MemberName, FunctionFilterFlags);
-		if (Function) {
+		if (UFINFunction* Function = Struct->FindFINFunction(MemberName, FunctionFilterFlags)) {
 			// TODO: Add caching
 			luaFIN_pushReflectionFunction(L, Function);
 			return 1;
@@ -228,8 +281,7 @@ namespace FINLua {
 	}
 
 	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError) {
-		UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags);
-		if (Property) {
+		if (UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags)) {
 			if (!PropertyCtx.IsValid()) {
 				luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));
 				return true;
@@ -251,7 +303,7 @@ namespace FINLua {
 			} else {
 				luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx, Value.GetValue()));
 			}
-			return 1;
+			return true;
 		}
 		if (bCauseError) luaL_argerror(L, Index, TCHAR_TO_UTF8(*("No property or function with name '" + MemberName + "' found")));
 		return false;

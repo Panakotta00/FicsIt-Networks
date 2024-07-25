@@ -260,7 +260,28 @@ namespace FINLua {
 		}
 		return TEXT("Unkown");
 	}
-	
+
+	FString luaFIN_getFunctionSignature(lua_State* L, UFINFunction* Function) {
+		TArray<FString> parameters;
+		TArray<FString> returnValues;
+
+		if (true) { // TODO: Once Static function are added, add check to disable self
+			parameters.Add(FString::Printf(TEXT("self : %s"), *FFINReflection::TraceReferenceText(Function->GetTypedOuter<UFINClass>())));
+		}
+
+		for (UFINProperty* parameter : Function->GetParameters()) {
+			EFINRepPropertyFlags flags = parameter->GetPropertyFlags();
+			if (!(flags & FIN_Prop_Param)) continue;
+			TArray<FString>& list = (flags & FIN_Prop_OutParam) ? returnValues : parameters;
+			list.Add(FString::Printf(TEXT("%s : %s"), *parameter->GetInternalName(), *luaFIN_getPropertyTypeName(L, parameter)));
+		}
+
+		FString joinedParameters = FString::Join(parameters, TEXT(", "));
+		FString joinedReturnValues = FString::Join(returnValues, TEXT(", "));
+
+		return FString::Printf(TEXT("(%s) %s(%s)"), *joinedParameters, *Function->GetInternalName(), *joinedReturnValues);
+	}
+
 	int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property) {
 		return luaFIN_typeError(L, Index, luaFIN_getPropertyTypeName(L, Property));
 	}

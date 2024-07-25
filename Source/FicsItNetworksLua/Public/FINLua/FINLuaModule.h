@@ -262,7 +262,8 @@ public:
 	}, 2); \
 	int _FunctionName (lua_State* L)
 #define LuaModuleTableBareField(Documentation, _FieldName) \
-	void _FieldName (lua_State*, const FString&); \
+	const char* _FieldName ## _Name = #_FieldName; \
+	void _FieldName (lua_State*, const FString&); /* TODO: Maybe update to correct updated internal name within the function. Because Comment Documentation can change internal name. */ \
 	static FFINStaticGlobalRegisterFunc RegisterField_ ## _FieldName ([]() { \
 		Table->AddBareFieldByDocumentationComment(&_FieldName, Documentation, TEXT(#_FieldName)); \
 	}, 2); \

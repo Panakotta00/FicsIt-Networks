@@ -56,11 +56,19 @@ namespace FINLua {
 
 	/**
 	 * @brief Returns the name of the value represented by the given property
-	 * @param L the lua state
+	 * @param L the lua state, just needed to get lua type names
 	 * @param Property the property of witch the lua value name should get found
 	 * @return the lua value name of the given property
 	 */
 	FString luaFIN_getPropertyTypeName(lua_State* L, UFINProperty* Property);
+
+	/**
+	 * @brief Returns the signature of a given function
+	 * @param L the lua state, just needed to get lua type names
+	 * @param Function the function of witch the signature should get generated
+	 * @return the signature of the given function
+	 */
+	FString luaFIN_getFunctionSignature(lua_State* L, UFINFunction* Function);
 
 	/**
 	 * @breif Causes a lua type error with the expected type derived from the given property
