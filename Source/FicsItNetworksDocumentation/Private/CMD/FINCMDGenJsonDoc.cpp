@@ -213,6 +213,7 @@ namespace FINGenJsonDoc {
 		for (const FFINLuaFunctionParameter& returnValue : Function.ReturnValues) {
 			returnValues->SetObjectField(returnValue.InternalName, GenLuaFunctionParameter(returnValue));
 		}
+		doc->SetObjectField(TEXT("returnValues"), returnValues);
 
 		return doc;
 	}
