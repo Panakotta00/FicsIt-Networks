@@ -51,7 +51,7 @@ namespace FINGenJsonDoc {
 
 	void FINGenRefBase(const TSharedPtr<FJsonObject>& Obj, const UFINBase* Base) {
 		Obj->SetStringField(TEXT("internalName"), Base->GetInternalName());
-		Obj->SetStringField(TEXT("displayName"), Base->GetDisplayName().ToString());
+		if (!Base->GetDisplayName().IsEmpty()) Obj->SetStringField(TEXT("displayName"), Base->GetDisplayName().ToString());
 		Obj->SetStringField(TEXT("description"), Base->GetDescription().ToString());
 	}
 
@@ -188,7 +188,7 @@ namespace FINGenJsonDoc {
 	TSharedRef<FJsonObject> GenLuaFunctionParameter(const FFINLuaFunctionParameter& Parameter) {
 		TSharedRef<FJsonObject> doc = MakeShared<FJsonObject>();
 
-		doc->SetStringField(TEXT("displayName"), Parameter.DisplayName.ToString());
+		if (!Parameter.DisplayName.IsEmpty()) doc->SetStringField(TEXT("displayName"), Parameter.DisplayName.ToString());
 		doc->SetStringField(TEXT("description"), Parameter.Description.ToString());
 
 		doc->SetStringField(TEXT("type"), Parameter.Type);
@@ -227,7 +227,7 @@ namespace FINGenJsonDoc {
 		for (const FFINLuaTableField& field : Table.Fields) {
 			if (!field.Value.IsValid()) continue;
 			TSharedRef<FJsonObject> obj = GenLuaValue(field.Value.ToSharedRef());
-			obj->SetStringField(TEXT("displayName"), field.DisplayName.ToString());
+			if (!field.DisplayName.IsEmpty()) obj->SetStringField(TEXT("displayName"), field.DisplayName.ToString());
 			obj->SetStringField(TEXT("description"), field.Description.ToString());
 			fields->SetObjectField(field.Key, obj);
 		}
@@ -261,7 +261,7 @@ namespace FINGenJsonDoc {
 	TSharedRef<FJsonObject> GenLuaMetatable(const FFINLuaMetatable& Metatable) {
 		TSharedRef<FJsonObject> doc = GenLuaTable(*Metatable.Table);
 
-		doc->SetStringField(TEXT("displayName"), Metatable.DisplayName.ToString());
+		if (!Metatable.DisplayName.IsEmpty()) doc->SetStringField(TEXT("displayName"), Metatable.DisplayName.ToString());
 		doc->SetStringField(TEXT("description"), Metatable.Description.ToString());
 
 		return doc;
@@ -270,7 +270,7 @@ namespace FINGenJsonDoc {
 	TSharedRef<FJsonObject> GenLuaGlobal(const FFINLuaGlobal& Global) {
 		TSharedRef<FJsonObject> doc = GenLuaValue(Global.Value.ToSharedRef());
 
-		doc->SetStringField(TEXT("displayName"), Global.DisplayName.ToString());
+		if (!Global.DisplayName.IsEmpty()) doc->SetStringField(TEXT("displayName"), Global.DisplayName.ToString());
 		doc->SetStringField(TEXT("description"), Global.Description.ToString());
 
 		return doc;
@@ -279,8 +279,8 @@ namespace FINGenJsonDoc {
 	TSharedRef<FJsonObject> GenLuaModule(const TSharedRef<FFINLuaModule>& Module) {
 		TSharedRef<FJsonObject> doc = MakeShared<FJsonObject>();
 
+		if (!Module->DisplayName.IsEmpty()) doc->SetStringField(TEXT("displayName"), Module->DisplayName.ToString());
 		doc->SetStringField(TEXT("description"), Module->Description.ToString());
-		doc->SetStringField(TEXT("displayName"), Module->DisplayName.ToString());
 
 		TArray<TSharedPtr<FJsonValue>> dependencies;
 		for (const FString& dependency : Module->Dependencies) {
