@@ -10,8 +10,8 @@ FText CreateLocalizedYAY(FStringView NameSpace, FStringView Key, FStringView Tex
 }
 
 TTuple<FString, TArray<TTuple<FString, TArray<FString>>>> PreprocessDocumentationComment(FStringView Comment) {
-	FString block;
 	TArray<TTuple<FString, TArray<FString>>> options;
+	TArray<FStringView> freeLines;
 
 	while (Comment.Len() > 0) {
 		FStringView line;
@@ -26,13 +26,9 @@ TTuple<FString, TArray<TTuple<FString, TArray<FString>>>> PreprocessDocumentatio
 
 		line.TrimStartAndEndInline();
 		while (line.StartsWith('*') || line.StartsWith('/')) line.RightChopInline(1);
-		line.TrimStartAndEndInline();
+		if (line.StartsWith(' ')) line.RightChopInline(1);
 
-		if (line.IsEmpty()) {
-			continue;
-		}
-
-		static FRegexPattern OptionPattern(TEXT("@(\\w+)((\\t+([^\\t]+))+)"));
+		static FRegexPattern OptionPattern(TEXT("\\s*@(\\w+)((\\t+([^\\t]+))+)"));
 		FRegexMatcher matchOption(OptionPattern, FString(line));
 		if (matchOption.FindNext()) {
 			FString option = matchOption.GetCaptureGroup(1);
@@ -46,9 +42,21 @@ TTuple<FString, TArray<TTuple<FString, TArray<FString>>>> PreprocessDocumentatio
 				parameters.Add(parameter.TrimStartAndEnd());
 			}
 		} else {
-			if (block.Len() > 0) block += '\n';
-			block += line;
+			freeLines.Add(line);
 		}
+	}
+
+	while (!freeLines.IsEmpty() && freeLines[0].IsEmpty()) {
+		freeLines.RemoveAt(0);
+	}
+	while (!freeLines.IsEmpty() && freeLines.Last().IsEmpty()) {
+		freeLines.Pop();
+	}
+
+	FString block;
+	for (FStringView lineView : freeLines) {
+		if (block.Len() > 0) block += '\n';
+		block += lineView;
 	}
 
 	return {block, options};
