@@ -62,7 +62,7 @@ namespace FINLua {
 		 * @DisplayName		File-System Library
 		 *
 		 * The filesystem api provides structures, functions and variables for interacting with the virtual file systems.
-		 * You can’t access files outside the virtual filesystem. If you try to do so, the Lua runtime crashes.
+		 * You can't access files outside the virtual filesystem. If you try to do so, the Lua runtime crashes.
 		 */)", filesystem) {
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		bool	makeFileSystem(type: string, name: string)
@@ -70,10 +70,14 @@ namespace FINLua {
 			 *
 			 * Trys to create a new file system of the given type with the given name.
 			 * The created filesystem will be added to the system DevDevice.
-			 * Possible Types:
+			 *
+			 * .Possible Types:
+			 * [%collapsible]
+			 * ====
 			 * * `tmpfs`
 			 * +
 			 * A temporary filesystem only existing at runtime in the memory of your computer. All data will be lost when the system stops.
+			 * ====
 			 *
 			 * @parameter	type		string	Type		the type of the new filesystem
 			 * @parameter	name		string	Name		the name of the new filesystem you want to create
@@ -146,26 +150,28 @@ namespace FINLua {
 			 *
 			 * Opens a file-stream and returns it as File-table.
 			 *
-			 * Possible Modes:
-			 * * `r` read only
-			 * +
-			 * File-Stream can just read from file.
-			 * If file doesn’t exist, open will return nil
-			 * * `w` write
-			 * +
-			 * File-Stream can read and write.
-			 * Creates the file if it doesn’t exist
-			 * * `a` end of file
-			 * +
-			 * File-Stream can read and write.
-			 * Cursor is set to the end of file.
-			 * * `+r` truncate
-			 * +
-			 * File-Stream can read and write.
-			 * All previous data in file gets dropped
-			 * * `+a` append
-			 * +
-			 * File-Stream can read the full file but can only write to the end of the existing file.
+			 * .Possible Modes
+			 * [%collapsible]
+			 * ====
+			 * [cols="1,1,4a"]
+			 * |===
+			 * | `r` | read only
+			 * | File-Stream can just read from file. +
+			 *   If file doesn’t exist, open will return nil
+			 * | `w` | write
+			 * | File-Stream can read and write. +
+			 *   Creates the file if it doesn’t exist
+			 * | `a` | end of file
+			 * | File-Stream can read and write. +
+			 *   Cursor is set to the end of file.
+			 * | `+r` | truncate
+			 * | File-Stream can read and write. +
+			 *   All previous data in file gets dropped
+			 * | `+a` | append
+			 * | File-Stream can read the full file, +
+			 *   but can only write to the end of the existing file.
+			 * |===
+			 * ====
 			 *
 			 * @parameter	path	string	Path	the path to the file you want to open a file-stream for
 			 * @parameter	mode	string	Mode	The mode for the file stream
@@ -444,31 +450,28 @@ namespace FINLua {
 			 *
 			 * Additionally, applies given conversion. Defined by the optionally given integer.
 			 *
-			 * Possible Conversions:
+			 * .Possible Conversions
+			 * [%collapsible]
+			 * ====
 			 * [cols="1,10a"]
-			 * !===
-			 * !0
-			 * !Normalize the path. +
-			 * `/my/../weird/./path` -> `/weird/path`
-			 * !1
-			 * !Normalizes and converts the path to an absolute path. +
-			 * `my/abs/path` -> `/my/abs/path`
-			 * !2
-			 * !Normalizes and converts the path to an relative path. +
-			 * `/my/relative/path` -> `my/relative/path`
-			 * !3
-			 * !Returns the whole file/folder name. +
-			 * `/path/to/file.txt` -> `file.txt`
-			 * !4
-			 * !Returns the stem of the filename. +
-			 * `/path/to/file.txt` -> `file` +
-			 * `/path/to/.file` -> `.file`
-			 * !5
-			 * !Returns the file-extension of the filename. +
-			 * `/path/to/file.txt` -> `.txt` +
-			 * `/path/to/.file` -> empty-str +
-			 * `/path/to/file.` -> `.`
-			 * !===
+			 * |===
+			 * | 0 | Normalize the path. +
+			 *       `/my/../weird/./path` -> `/weird/path`
+			 * | 1 | Normalizes and converts the path to an absolute path. +
+			 *       `my/abs/path` -> `/my/abs/path`
+			 * | 2 | Normalizes and converts the path to an relative path. +
+			 *       `/my/relative/path` -> `my/relative/path`
+			 * | 3 | Returns the whole file/folder name. +
+			 *       `/path/to/file.txt` -> `file.txt`
+			 * | 4 | Returns the stem of the filename. +
+			 *       `/path/to/file.txt` -> `file` +
+			 *       `/path/to/.file` -> `.file`
+			 * | 5 | Returns the file-extension of the filename. +
+			 *       `/path/to/file.txt` -> `.txt` +
+			 *       `/path/to/.file` -> empty-str +
+			 *       `/path/to/file.` -> `.`
+			 * |===
+			 * ====
 			 */)", path) {
 				LuaFunc();
 
@@ -514,22 +517,19 @@ namespace FINLua {
 			 * Each provided string will be viewed as one filesystem-path and will be checked for lexical features. +
 			 * Each of those string will then have a integer return value which is a bit-flag-register describing those lexical features.
 			 *
-			 * Bit-Flags:
+			 * .Bit-Flags
+			 * [%collapsible]
+			 * ====
 			 * [cols="1,10a"]
-			 * !===
-			 * !1
-			 * !Is filesystem root
-			 * !2
-			 * !Is Empty (includes if it is root-path)
-			 * !3
-			 * !Is absolute path
-			 * !4
-			 * !Is only a file/folder name
-			 * !5
-			 * !Filename has extension
-			 * !6
-			 * !Ends with a `/` -> refers a directory
-			 * !===
+			 * |===
+			 * | 1 | Is filesystem root
+			 * | 2 | Is Empty (includes if it is root-path)
+			 * | 3 | Is absolute path
+			 * | 4 | Is only a file/folder name
+			 * | 5 | Filename has extension
+			 * | 6 | Ends with a `/` -> refers a directory
+			 * |===
+			 * ====
 			 */)", analyzePath) {
 				LuaFunc();
 
@@ -568,18 +568,17 @@ namespace FINLua {
 			 *
 			 * Returns for each given string path, a table that defines contains some meta information about node the string references.
 			 *
-			 * `type`-Field can contain one of the following strings, defining the "Type" of the node:
+			 * .Possible `type`-Field strings
+			 * [%collapsible]
+			 * ====
 			 * [cols="1,10a"]
-			 * !===
-			 * !`File`
-			 * !A normal File
-			 * !`Directory`
-			 * !A directory or folder that can hold multiple nodes.
-			 * !`Device`
-			 * !A special type of Node that represents a filesystem and can be mounted.
-			 * !`Unknown`
-			 * !The node type is not known to this utility function.
-			 * !===
+			 * | ===
+			 * | `File`			| A normal File
+			 * | `Directory`	| A directory or folder that can hold multiple nodes.
+			 * | `Device`		| A special type of Node that represents a filesystem and can be mounted.
+			 * | `Unknown`		| The node type is not known to this utility function.
+			 * | ===
+			 * ====
 			 */)", meta) {
 				LuaFunc();
 
@@ -673,10 +672,13 @@ namespace FINLua {
 			 *
 			 * Moves the File-Streams pointer to a position defined by the offset and from what starting location.
 			 *
-			 * Where can have the following values:
+			 * .Possble `where` values
+			 * [%collapsible]
+			 * ====
 			 * * `cur` Offset is relative to the current location
 			 * * `set` Offset is relative to the beginning of the file
 			 * * `end` Offset is relative to the end of the file
+			 * ====
 			 */)", seek) {
 				LuaFileFunc();
 
