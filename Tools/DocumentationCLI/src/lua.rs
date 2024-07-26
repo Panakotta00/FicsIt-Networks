@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::util::prefix_string_lines;
+use crate::util::{escape_for_adoc_table, prefix_string_lines};
 use regex::{Captures, Regex};
 use serde::Deserialize;
 use serde_with::{serde_as, KeyValueMap};
@@ -144,23 +144,31 @@ impl<'a> LuaContext<'a> {
 		file: &mut File,
 		parameters: I,
 	) -> Result<()> {
-		writeln!(file, r#"[%header,cols="1,1,4a"]"#)?;
-		writeln!(file, r#"|==="#)?;
-		writeln!(file, r#"|Name |Type |Description"#)?;
+		writeln!(file, r#"[%header,cols="1,1,4a",separator="!"]"#)?;
+		writeln!(file, r#"!==="#)?;
+		writeln!(file, r#"!Name !Type !Description"#)?;
 		writeln!(file)?;
 
 		for parameter in parameters {
-			writeln!(file, "| {}", parameter.base.name_adoc())?;
-			writeln!(file, "| {}", self.patch_lua_types(&parameter.lua_type))?;
 			writeln!(
 				file,
-				"| {}",
-				prefix_string_lines("  ", &parameter.base.description)
+				"! {}",
+				escape_for_adoc_table(&parameter.base.name_adoc())
+			)?;
+			writeln!(
+				file,
+				"! {}",
+				escape_for_adoc_table(&self.patch_lua_types(&parameter.lua_type))
+			)?;
+			writeln!(
+				file,
+				"! {}",
+				prefix_string_lines("  ", &&parameter.base.description)
 			)?;
 			writeln!(file)?;
 		}
 
-		writeln!(file, r#"|==="#)?;
+		writeln!(file, r#"!==="#)?;
 
 		Ok(())
 	}
@@ -216,11 +224,14 @@ impl<'a> LuaContext<'a> {
 		writeln!(file, "{}", base.description)?;
 		writeln!(file)?;
 
-		let header = format!("{header}=");
+		let header = format!("{header}");
 		let identifier = format!("{identifier}{}", base.internal_name);
 
 		match value {
 			LuaValue::Table { fields } => {
+				let mut fields: Vec<_> = fields.iter().collect();
+				fields.sort_by(|p1, p2| p1.base.display_name().cmp(p2.base.display_name()));
+
 				for field in fields {
 					self.write_value(file, &header, &identifier, &field.base, &field.value)?;
 				}
@@ -231,14 +242,18 @@ impl<'a> LuaContext<'a> {
 				parameter_signature: _,
 				return_value_signature: _,
 			} => {
-				if !parameters.is_empty() {
-					writeln!(file, "Parameters::")?;
-					self.write_function_parameter_table(file, parameters.iter())?;
-					writeln!(file)?;
-				}
-				if !return_values.is_empty() {
-					writeln!(file, "Return Values::")?;
-					self.write_function_parameter_table(file, return_values.iter())?;
+				if !parameters.is_empty() || !return_values.is_empty() {
+					writeln!(file, "[%collapsible]")?;
+					writeln!(file, "====")?;
+					if !parameters.is_empty() {
+						writeln!(file, ".Parameters")?;
+						self.write_function_parameter_table(file, parameters.iter())?;
+					}
+					if !return_values.is_empty() {
+						writeln!(file, ".Return Values")?;
+						self.write_function_parameter_table(file, return_values.iter())?;
+					}
+					writeln!(file, "====")?;
 					writeln!(file)?;
 				}
 			}
@@ -258,9 +273,11 @@ impl<'a> LuaContext<'a> {
 
 	pub fn write_module(&self, file: &mut File, module: &LuaModule) -> Result<()> {
 		writeln!(file, "= {}", module.base.display_name())?;
+		writeln!(file, ":table-caption!:")?;
+		writeln!(file)?;
 		writeln!(file, "{}", module.base.description)?;
 		writeln!(file)?;
-		
+
 		if !module.dependencies.is_empty() {
 			let dependencies: String = module
 				.dependencies
@@ -268,29 +285,35 @@ impl<'a> LuaContext<'a> {
 				.map(|s| self.ctx.xref_lua_module(s.as_str()))
 				.intersperse(", ".to_string())
 				.collect();
-			
-			writeln!(file, r#"[cols="1,5a"]"#)?;
-			writeln!(file, "|===")?;
-			writeln!(file, "|Dependencies")?;
-			writeln!(file, "| {dependencies}")?;
-			writeln!(file, "|===")?;
+
+			writeln!(file, r#"[cols="1,5a",separator="!"]"#)?;
+			writeln!(file, "!===")?;
+			writeln!(file, "!Dependencies")?;
+			writeln!(file, "! {dependencies}")?;
+			writeln!(file, "!===")?;
 			writeln!(file)?;
 		}
 
 		if !module.globals.is_empty() {
+			let mut globals: Vec<_> = module.globals.iter().collect();
+			globals.sort_by(|p1, p2| p1.base.display_name().cmp(p2.base.display_name()));
+
 			writeln!(file, "== Globals")?;
 			writeln!(file)?;
 
-			for global in &module.globals {
+			for global in &globals {
 				self.write_global(file, global)?;
 			}
 		}
 
 		if !module.metatables.is_empty() {
+			let mut metatables: Vec<_> = module.metatables.iter().collect();
+			metatables.sort_by(|p1, p2| p1.base.display_name().cmp(p2.base.display_name()));
+
 			writeln!(file, "== Types")?;
 			writeln!(file)?;
 
-			for metatable in &module.metatables {
+			for metatable in &metatables {
 				self.write_metatable(file, metatable)?;
 			}
 		}

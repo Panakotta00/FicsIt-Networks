@@ -132,16 +132,20 @@ fn update_navigation_file(context: &Context) {
 					writeln!(&mut new_contents, "{line}").unwrap();
 				} else if let Some(prefix) = reflection_prefix {
 					writeln!(&mut new_contents, "{prefix} Classes").unwrap();
+					let mut classes: Vec<_> = context.class_pages.iter().collect();
+					classes.sort_by(|(c1, _), (c2, _)| c1.cmp(c2));
 					write_doc_files_to_nav(
 						&mut new_contents,
 						&(prefix.clone() + "*"),
-						context.class_pages.iter(),
+						classes.iter().cloned(),
 					);
+					let mut structs: Vec<_> = context.struct_pages.iter().collect();
+					structs.sort_by(|(s1, _), (s2, _)| s1.cmp(s2));
 					writeln!(&mut new_contents, "{prefix} Structs").unwrap();
 					write_doc_files_to_nav(
 						&mut new_contents,
 						&(prefix + "*"),
-						context.struct_pages.iter(),
+						structs.iter().cloned(),
 					);
 					reflection_prefix = None;
 				}
@@ -150,7 +154,9 @@ fn update_navigation_file(context: &Context) {
 					lua_prefix = Some(capture.as_str().to_string());
 					writeln!(&mut new_contents, "{line}").unwrap();
 				} else if let Some(prefix) = lua_prefix {
-					write_doc_files_to_nav(&mut new_contents, &prefix, context.lua_pages.iter());
+					let mut lua_pages: Vec<_> = context.lua_pages.iter().collect();
+					lua_pages.sort_by(|(p1, _), (p2, _)| p1.cmp(p2));
+					write_doc_files_to_nav(&mut new_contents, &prefix, lua_pages.iter().cloned());
 					lua_prefix = None;
 				}
 			}

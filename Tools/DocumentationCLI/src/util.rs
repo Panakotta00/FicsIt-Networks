@@ -14,3 +14,7 @@ pub fn path_to_forward_slash(path: &Path) -> Option<String> {
 		.map(|s| s.to_str())
 		.collect()
 }
+
+pub fn escape_for_adoc_table(str: &str) -> String {
+	str.replace("!", "\\!")
+}

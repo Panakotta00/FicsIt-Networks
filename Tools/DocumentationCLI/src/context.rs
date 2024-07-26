@@ -35,7 +35,7 @@ impl Context {
 			.parent()
 			.unwrap()
 			.join(&config.reflection_folder)
-			.join("classes");
+			.join("structs");
 		let abs_lua_path = config
 			.config_path
 			.parent()

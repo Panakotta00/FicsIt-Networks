@@ -1,7 +1,8 @@
 use crate::context::Context;
-use crate::util::prefix_string_lines;
+use crate::util::{escape_for_adoc_table, prefix_string_lines};
 use serde::Deserialize;
 use std::borrow::Borrow;
+use std::cmp::Ordering;
 use std::fs::File;
 use std::io::{Result, Write};
 
@@ -46,7 +47,7 @@ pub enum ReflectionPropertyFlag {
 	StaticProp,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialOrd, Eq)]
 pub struct ReflectionBase {
 	#[serde(alias = "internalName")]
 	pub internal_name: String,
@@ -70,6 +71,18 @@ impl ReflectionBase {
 
 	pub fn header_name_adoc(&self) -> String {
 		format!("`{}`", self.internal_name)
+	}
+}
+
+impl PartialEq<Self> for ReflectionBase {
+	fn eq(&self, other: &Self) -> bool {
+		self.internal_name.eq(&other.internal_name)
+	}
+}
+
+impl Ord for ReflectionBase {
+	fn cmp(&self, other: &Self) -> Ordering {
+		self.internal_name.cmp(&other.internal_name)
 	}
 }
 
@@ -207,32 +220,28 @@ impl<'a> ReflectionContext<'a> {
 			.collect();
 
 		let display_name_table = if let Some(display_name) = &property.base.display_name {
-			format!("\n| Display Name\n| {display_name}")
+			format!("\n! Display Name ! {display_name}")
 		} else {
 			"".to_string()
 		};
 
-		file.write(
-			indoc::formatdoc!(
-				r#"
-        === {} : {}
-
-        {}
-
-        [cols="1,5a"]
-        |===
-        | Flags
-        | +++{flags}+++
-        {display_name_table}
-        |===
-
-    "#,
-				property.base.header_name_adoc(),
-				self.get_value_type(&property.value_type),
-				property.base.description
-			)
-			.as_bytes(),
+		writeln!(
+			file,
+			"=== {} : {}",
+			property.base.header_name_adoc(),
+			self.get_value_type(&property.value_type)
 		)?;
+		writeln!(file)?;
+		writeln!(file, "{}", property.base.description)?;
+		writeln!(file)?;
+		writeln!(file, "[%collapsible]")?;
+		writeln!(file, "====")?;
+		writeln!(file, r#"[cols="1,5a",separator="!"]"#)?;
+		writeln!(file, "!===")?;
+		writeln!(file, "! Flags ! +++{flags}+++")?;
+		writeln!(file, "{display_name_table}")?;
+		writeln!(file, "!===")?;
+		writeln!(file, "====")?;
 
 		Ok(())
 	}
@@ -242,24 +251,27 @@ impl<'a> ReflectionContext<'a> {
 		file: &mut File,
 		properties: &[P],
 	) -> Result<()> {
-		writeln!(file, r#"[%header,cols="1,1,4a"]"#)?;
-		writeln!(file, r#"|==="#)?;
-		writeln!(file, r#"|Name |Type |Description"#)?;
-		writeln!(file)?;
+		writeln!(file, r#"[%header,cols="1,1,4a",separator="!"]"#)?;
+		writeln!(file, r#"!==="#)?;
+		writeln!(file, r#"!Name !Type !Description"#)?;
 
 		for property in properties {
 			let property = property.borrow();
-			writeln!(file, "| {}", property.base.name_adoc())?;
-			writeln!(file, "| {}", self.get_value_type(&property.value_type))?;
+			writeln!(file)?;
+			writeln!(file, "! {}", property.base.name_adoc())?;
 			writeln!(
 				file,
-				"| {}",
-				prefix_string_lines("  ", &property.base.description)
+				"! {}",
+				escape_for_adoc_table(&self.get_value_type(&property.value_type))
 			)?;
-			writeln!(file)?;
+			writeln!(
+				file,
+				"! {}",
+				prefix_string_lines("  ", &escape_for_adoc_table(&property.base.description))
+			)?;
 		}
 
-		writeln!(file, r"|===")?;
+		writeln!(file, r"!===")?;
 
 		Ok(())
 	}
@@ -273,7 +285,7 @@ impl<'a> ReflectionContext<'a> {
 					p,
 					format!(
 						"{} : {}",
-						p.base.name_adoc(),
+						p.base.header_name_adoc(),
 						self.get_value_type(&p.value_type)
 					),
 				)
@@ -329,43 +341,42 @@ impl<'a> ReflectionContext<'a> {
 			.collect();
 
 		let display_name_table = if let Some(display_name) = &function.base.display_name {
-			format!("\n| Display Name\n| {display_name}")
+			format!("\n! Display Name ! {display_name}\n")
 		} else {
 			"".to_string()
 		};
 
-		file.write(
-			indoc::formatdoc!(
-				r#"
-				=== {} ({parameters}){return_values}
-		
-				{}
-		
-				[cols="1,5a"]
-				|===
-				| Flags
-				| +++{flags}+++
-				{display_name_table}
-				|===
-		
-			"#,
-				function.base.header_name_adoc(),
-				function.base.description,
-			)
-			.as_bytes(),
+		writeln!(
+			file,
+			"=== {} ({parameters}){return_values}",
+			function.base.header_name_adoc()
 		)?;
+		writeln!(file)?;
+		writeln!(file, "{}", function.base.description)?;
+		writeln!(file)?;
+		writeln!(file, "[%collapsible]")?;
+		writeln!(file, "====")?;
+		writeln!(file, r#"[cols="1,5a",separator="!"]"#)?;
+		writeln!(file, "!===")?;
+		writeln!(file, "! Flags")?;
+		writeln!(file, "! +++{flags}+++")?;
+		write!(file, "{display_name_table}")?;
+		writeln!(file, "!===")?;
+		writeln!(file)?;
 
 		if !parameter_props.is_empty() {
-			writeln!(file, "Parameters::")?;
+			writeln!(file, ".Parameters")?;
 			self.write_property_table(file, &parameter_props)?;
 			writeln!(file)?;
 		}
 
 		if !return_value_props.is_empty() {
-			writeln!(file, "Return Values::")?;
+			writeln!(file, ".Return Values")?;
 			self.write_property_table(file, &return_value_props)?;
 			writeln!(file)?;
 		}
+
+		writeln!(file, "====")?;
 
 		Ok(())
 	}
@@ -374,17 +385,11 @@ impl<'a> ReflectionContext<'a> {
 		let title = base.display_name();
 		let description = &base.description;
 
-		file.write(
-			indoc::formatdoc!(
-				r"
-        = {title}
-
-        {description}
-
-    	"
-			)
-			.as_bytes(),
-		)?;
+		writeln!(file, "= {title}")?;
+		writeln!(file, ":table-caption!:")?;
+		writeln!(file)?;
+		writeln!(file, "{description}")?;
+		writeln!(file)?;
 
 		Ok(())
 	}
@@ -397,10 +402,13 @@ impl<'a> ReflectionContext<'a> {
 		self.write_file_base(file, &ref_struct.base)?;
 
 		if !ref_struct.properties.is_empty() {
+			let mut properties: Vec<_> = ref_struct.properties.iter().collect();
+			properties.sort_by(|p1, p2| p1.base.display_name().cmp(p2.base.display_name()));
+
 			writeln!(file, "== Properties")?;
 			writeln!(file)?;
 
-			for property in &ref_struct.properties {
+			for property in &properties {
 				self.write_property(file, property)?;
 			}
 
@@ -408,10 +416,13 @@ impl<'a> ReflectionContext<'a> {
 		}
 
 		if !ref_struct.functions.is_empty() {
+			let mut functions: Vec<_> = ref_struct.functions.iter().collect();
+			functions.sort_by(|p1, p2| p1.base.display_name().cmp(p2.base.display_name()));
+
 			writeln!(file, "== Functions")?;
 			writeln!(file)?;
 
-			for function in &ref_struct.functions {
+			for function in &functions {
 				self.write_function(file, function)?;
 			}
 
@@ -441,20 +452,13 @@ impl<'a> ReflectionContext<'a> {
 		let name = signal.base.header_name_adoc();
 		let description = &signal.base.description;
 
-		file.write(
-			indoc::formatdoc!(
-				r"
-        === {name} ({parameters})
-
-        {description}
-
-    "
-			)
-			.as_bytes(),
-		)?;
+		writeln!(file, "=== {name} ({parameters})")?;
+		writeln!(file)?;
+		writeln!(file, "{description}")?;
+		writeln!(file)?;
 
 		if !signal.parameters.is_empty() {
-			writeln!(file, "Parameters::")?;
+			writeln!(file, ".Parameters")?;
 			self.write_property_table(file, &signal.parameters)?;
 			writeln!(file)?;
 		}
@@ -469,10 +473,13 @@ impl<'a> ReflectionContext<'a> {
 		writeln!(file)?;
 
 		if !ref_class.reflection_struct.properties.is_empty() {
+			let mut properties: Vec<_> = ref_class.reflection_struct.properties.iter().collect();
+			properties.sort_by(|p1, p2| p1.base.display_name().cmp(p2.base.display_name()));
+
 			writeln!(file, "== Properties")?;
 			writeln!(file)?;
 
-			for property in &ref_class.reflection_struct.properties {
+			for property in &properties {
 				self.write_property(file, property)?;
 			}
 
@@ -480,10 +487,13 @@ impl<'a> ReflectionContext<'a> {
 		}
 
 		if !ref_class.reflection_struct.functions.is_empty() {
+			let mut functions: Vec<_> = ref_class.reflection_struct.functions.iter().collect();
+			functions.sort_by(|p1, p2| p1.base.display_name().cmp(p2.base.display_name()));
+
 			writeln!(file, "== Functions")?;
 			writeln!(file)?;
 
-			for function in &ref_class.reflection_struct.functions {
+			for function in &functions {
 				self.write_function(file, function)?;
 			}
 
@@ -491,10 +501,13 @@ impl<'a> ReflectionContext<'a> {
 		}
 
 		if !ref_class.signals.is_empty() {
+			let mut signals: Vec<_> = ref_class.signals.iter().collect();
+			signals.sort_by(|p1, p2| p1.base.display_name().cmp(p2.base.display_name()));
+
 			writeln!(file, "== Signals")?;
 			writeln!(file)?;
 
-			for signal in &ref_class.signals {
+			for signal in &signals {
 				self.write_signal(file, &signal)?;
 			}
 
