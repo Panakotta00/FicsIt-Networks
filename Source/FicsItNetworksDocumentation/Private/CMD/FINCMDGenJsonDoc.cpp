@@ -345,7 +345,7 @@ namespace FINGenJsonDoc {
 
 			UE_LOGFMT(LogFicsItNetworksDocumentation, Display, "Saving FicsIt-Networks JSON Documentation under: {Path}", path);
 
-			FFileHelper::SaveStringToFile(documentation, *path);
+			FFileHelper::SaveStringToFile(documentation, *path, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
 
 			UE_LOGFMT(LogFicsItNetworksDocumentation, Display, "FicsIt-Networks JSON Documentation Saved!");
 

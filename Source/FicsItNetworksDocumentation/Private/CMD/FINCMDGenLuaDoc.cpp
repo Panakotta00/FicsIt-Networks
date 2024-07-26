@@ -452,7 +452,7 @@ namespace FINGenLuaDoc {
 
 			UE_LOGFMT(LogFicsItNetworksDocumentation, Display, "Saving FicsIt-Networks Lua Documentation under: {Path}", path);
 
-			FFileHelper::SaveStringToFile(documentation, *path);
+			FFileHelper::SaveStringToFile(documentation, *path, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
 
 			UE_LOGFMT(LogFicsItNetworksDocumentation, Display, "FicsIt-Networks Lua Documentation Saved!");
 
