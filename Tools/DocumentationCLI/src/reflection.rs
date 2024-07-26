@@ -458,8 +458,11 @@ impl<'a> ReflectionContext<'a> {
 		writeln!(file)?;
 
 		if !signal.parameters.is_empty() {
+			writeln!(file, "[%collapsible]")?;
+			writeln!(file, "====")?;
 			writeln!(file, ".Parameters")?;
 			self.write_property_table(file, &signal.parameters)?;
+			writeln!(file, "====")?;
 			writeln!(file)?;
 		}
 
