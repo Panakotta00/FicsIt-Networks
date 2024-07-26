@@ -70,6 +70,7 @@ namespace FINGenJsonDoc {
 		if (Flags & FIN_Prop_RT_Parallel) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Parallel")));
 		if (Flags & FIN_Prop_RT_Async) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Async")));
 		if (Flags & FIN_Prop_ClassProp) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("ClassProp")));
+		if (Flags & FIN_Prop_StaticProp) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("StaticProp")));
 		Obj->SetArrayField(TEXT("flags"), FlagArray);
 	}
 

@@ -75,7 +75,7 @@ namespace FINLua {
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
 				FFINExecutionContext Context(LuaClass->UClass);
-				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaClass->FINClass, MemberName, FIN_Func_ClassFunc, FIN_Prop_ClassProp, Context, true);
+				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaClass->FINClass, MemberName, FIN_Func_ClassFunc | FIN_Func_StaticFunc, FIN_Prop_ClassProp | FIN_Prop_StaticProp, Context, true);
 			}
 
 			LuaModuleTableFunction(R"(/**

@@ -206,6 +206,9 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		case 1:
 			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ClassProp;
 			break;
+		case 2:
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_StaticProp;
+			break;
 		default:
 			break;
 		}
@@ -361,6 +364,9 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		case 1:
 			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ClassProp;
 			break;
+		case 2:
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_StaticProp;
+			break;
 		default:
 			break;
 		}
@@ -420,7 +426,8 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		T* self = GetFromCtx(Ctx);
 #define BeginClassFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Class, InternalName, DisplayName, Description, VA, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 		TSubclassOf<T> self = Cast<UClass>(Ctx.GetObject());
-#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) )
+#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+		void* self = Ctx.GetGeneric();
 #define Body() \
 			if (self && _bGotReg) {
 #define EndFunc() \
@@ -444,6 +451,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 	T* self = GetFromCtx(Ctx);
 #define BeginClassProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 	TSubclassOf<T> self = Cast<UClass>(Ctx.GetObject());
+#define BeginStaticProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 2, GET_MACRO(0, ##__VA_ARGS__, 1) )
 #define Return \
 		return (FINAny)
 #define PropSet() \

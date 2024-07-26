@@ -146,7 +146,11 @@ namespace FINGenLuaDoc {
 	}
 
 	void WriteProperty(FStringBuilderBase& Documentation, FFINReflection& Ref, UFINProperty* Prop) {
-		Documentation.Appendf(TEXT("---@field public %s %s %s\n"), *Prop->GetInternalName(), *GetType(Ref, Prop), *GetInlineDescription(Prop->GetDescription().ToString()));
+		FString Identifier = Prop->GetInternalName();
+		if (Prop->GetPropertyFlags() & (FIN_Prop_ClassProp | FIN_Prop_StaticProp)) {
+			Identifier += TEXT("-Class");
+		}
+		Documentation.Appendf(TEXT("---@field public %s %s %s\n"), *Identifier, *GetType(Ref, Prop), *GetInlineDescription(Prop->GetDescription().ToString()));
 	}
 
 	void WriteFunction(FStringBuilderBase& Str, FFINReflection& Ref, const FString& Parent, const FString& Type, UFINFunction* Func) {
@@ -211,7 +215,12 @@ namespace FINGenLuaDoc {
 
 		Str.Appendf(TEXT("---@type (fun(%s)%s)|ReflectionFunction\n"), *FString::Join(typedParameterList, TEXT(",")), *functionTypedReturn);
 
-		Str.Appendf(TEXT("function %s:%s(%s) end\n"), *Parent, *Func->GetInternalName(), *FString::Join(paramList, TEXT(", ")));
+		FString Identifier = Func->GetInternalName();
+		if (Func->GetFunctionFlags() & (FIN_Func_ClassFunc | FIN_Func_StaticFunc)) {
+			Identifier += TEXT("-Class");
+		}
+
+		Str.Appendf(TEXT("function %s:%s(%s) end\n"), *Parent, *Identifier, *FString::Join(paramList, TEXT(", ")));
 
 		if (bFuture) {
 			WriteFuture(Str, Type, Func->GetInternalName(), futureParameterList);

@@ -78,7 +78,9 @@ namespace FINLua {
 				lua_remove(L, 1);
 
 				FFINExecutionContext Context;
-				if (UFINClass* Class = Cast<UFINClass>(Type)) {
+				if (Function->GetFunctionFlags() & FIN_Func_StaticFunc) {
+					Context = FFINExecutionContext(Function->GetOuter());
+				} else if (UFINClass* Class = Cast<UFINClass>(Type)) {
 					if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
 						FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
 						if (!LuaClass->FINClass->IsChildOf(Class)) luaL_argerror(L, 1, "Expected Class");

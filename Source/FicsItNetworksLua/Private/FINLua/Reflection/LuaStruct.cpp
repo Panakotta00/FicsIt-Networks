@@ -447,6 +447,22 @@ namespace FINLua {
 				return 1;
 			}
 
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__index
+			 * @DisplayName		Index
+			 */)", __index) {
+				const int thisIndex = 1;
+				const int nameIndex = 2;
+
+				UFINStruct* Struct = luaFIN_toStructType(L, thisIndex);
+				if (!Struct) return 0;
+
+				FString MemberName = luaFIN_toFString(L, nameIndex);
+
+				FFINExecutionContext Context(Struct);
+				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, Struct, MemberName, FIN_Func_StaticFunc, FIN_Prop_StaticProp, Context, true);
+			}
+
 			int luaStructTypeUnpersist(lua_State* L) {
 				FString StructName = luaFIN_checkFString(L, lua_upvalueindex(1));
 				UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
