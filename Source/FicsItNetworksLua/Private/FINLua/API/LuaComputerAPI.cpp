@@ -32,7 +32,7 @@ namespace FINLua {
 		 * The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
 		 */)", computer) {
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		int, int	getMemory()
+			 * @LuaFunction		(usage: int, capacity: int)	getMemory()
 			 * @DisplayName		Get Memory
 			 *
 			 * Returns the used memory and memory capacity the computer has.
@@ -49,10 +49,12 @@ namespace FINLua {
 				return 2;
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Object<ComputerCase>	getInstance()
+			 * @LuaFunction		ComputerCase	getInstance()
 			 * @DisplayName		Get Instance
 			 *
 			 * Returns a reference to the computer case in which the current code is running.
+			 *
+			 * @return	case	ComputerCase	The computer case this lua runtime is running in.
 			 */)", getInstance) {
 				LuaFunc()
 
@@ -141,7 +143,10 @@ namespace FINLua {
 			 * @LuaFunction		bool	isPromoted()
 			 * @DisplayName		Is Promoted
 			 *
-			 * Returns true if the Lua runtime is currently promoted.
+			 * Returns true if the Lua runtime is currently promoted/elevated.
+			 * Which means its running in an seperate game thread allowing for fast bulk calculations.
+			 *
+			 * @return	isPromoted	bool	True if the currenty runtime is running in promoted/elevated tick state.
 			 */)", isPromoted) {
 				UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
 				bool bPromoted = (bool)(processor->GetTickHelper().getState() & LUA_ASYNC);
@@ -170,6 +175,8 @@ namespace FINLua {
 			 * @DisplayName		Beep
 			 *
 			 * Lets the computer emit a simple beep sound with the given pitch.
+			 *
+			 * @param	pitch	number	a multiplier for the pitch adjustment of the beep sound.
 			 */)", beep) {
 				LuaFunc();
 
@@ -186,6 +193,8 @@ namespace FINLua {
 			 * @DisplayName		Set EEPROM
 			 *
 			 * Sets the code of the current eeprom. Doesn’t cause a system reset.
+			 *
+			 * @param	code	string	The new EEPROM Code as string.
 			 */)", setEEPROM) {
 				LuaFunc();
 
@@ -203,6 +212,8 @@ namespace FINLua {
 			 * @DisplayName		Get EEPROM
 			 *
 			 * Returns the current eeprom contents.
+			 *
+			 * @return	code	string	The EEPROM Code as string.
 			 */)", getEEPROM) {
 				LuaFunc();
 
@@ -219,6 +230,8 @@ namespace FINLua {
 			 * @DisplayName		Time
 			 *
 			 * Returns the number of game seconds passed since the save got created. A game day consists of 24 game hours, a game hour consists of 60 game minutes, a game minute consists of 60 game seconds.
+			 *
+			 * @return	time	number	The current number of game seconds passed since the creation of the save.
 			 */)", time) {
 				LuaFunc();
 
@@ -232,6 +245,8 @@ namespace FINLua {
 			 * @DisplayName		Millis
 			 *
 			 * Returns the amount of milliseconds passed since the system started.
+			 *
+			 * @return	millis	int		The amount of real milliseconds sinde the ingame-computer started.
 			 */)", millis) {
 				LuaFunc();
 
@@ -290,7 +305,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		attentionPing(position: Struct<FVector>, [username: string])
+			 * @LuaFunction		attentionPing(position: Vector, [username: string])
 			 * @DisplayName		Attention Ping
 			 *
 			 * Allows to send a World Marker/Attention Ping for all or the given user.
@@ -318,7 +333,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		int, string, string		magicTime()
+			 * @LuaFunction		(int, string, string)		magicTime()
 			 * @DisplayName		Magic Time
 			 *
 			 * Returns some kind of strange/mysterious time data from a unknown place (the real life).
@@ -337,14 +352,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Object<Object>[]	getPCIDevices([type: Class])
+			 * @LuaFunction		Object[]	getPCIDevices([type: Class])
 			 * @DisplayName		Get PCI-Devices
 			 *
 			 * This function allows you to get all installed https://docs.ficsit.app/ficsit-networks/latest/buildings/ComputerCase/index.html#_pci_interface[PCI-Devices] in a computer of a given type.
 			 * Have a look at https://docs.ficsit.app/ficsit-networks/latest/lua/examples/PCIDevices.html[this] example to fully understand how it works.
 			 *
-			 * @parameter	type		Class				Type		Optional type which will be used to filter all PCI-Devices. If not provided, will return all PCI-Devices.
-			 * @return		objects		Object<Object>[]	Objects		An array containing instances for each PCI-Device built into the computer.
+			 * @parameter	type		Class		Type		Optional type which will be used to filter all PCI-Devices. If not provided, will return all PCI-Devices.
+			 * @return		objects		Object[]	Objects		An array containing instances for each PCI-Device built into the computer.
 			 */)", getPCIDevices) {
 				LuaFunc();
 
@@ -367,10 +382,10 @@ namespace FINLua {
 			}
 
 			LuaModuleTableBareField(R"(/**
-			 * @LuaBareField	media
+			 * @LuaBareField	media	FINMediaSubsystem
 			 * @DisplayName		Media
 			 *
-			 * Field containing a reference to the Media Subsystem
+			 * Field containing a reference to the Media Subsystem.
 			 */)", media) {
 				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 				luaFIN_pushObject(L, FINTrace(AFINMediaSubsystem::GetMediaSubsystem(Processor)));

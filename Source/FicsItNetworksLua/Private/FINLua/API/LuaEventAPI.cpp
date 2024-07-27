@@ -26,10 +26,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		listen(Object<Object>...)
+			 * @LuaFunction		listen(Object...)
 			 * @DisplayName		Listen
 			 *
 			 * Adds the running lua context to the listen queue of the given components.
+			 *
+			 * @param	objects		Object...	A list of objects the computer should start listening to.
 			 */)", listen) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);
@@ -43,10 +45,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Object<Object>	listening()
+			 * @LuaFunction		Object[]	listening()
 			 * @DisplayName		Listening
 			 *
 			 * Returns all signal senders this computer is listening to.
+			 *
+			 * @return	listening	Object[]	An array containing all objects this computer is currently listening to.
 			 */)", listening) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);
@@ -71,7 +75,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		string|nil, Object<Object>, ...		pull([timeout: number])
+			 * @LuaFunction		(string|nil, Object, ...)	pull([timeout: number])
 			 * @DisplayName		Pull
 			 *
 			 * Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached. +
@@ -79,8 +83,8 @@ namespace FINLua {
 			 *
 			 * @parameter	timeout		number			Timeout		The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue.
 			 * @return		event		string|nil		Event		The name of the returned signal. Nil when timeout got reached.
-			 * @return		sender		Object<Object>	Sender		The component representation of the signal sender. Not set when timeout got reached.
-			 * @return		parameters	any...				Parameters	The parameters passed to the signal. Not set when timeout got reached.
+			 * @return		sender		Object			Sender		The component representation of the signal sender. Not set when timeout got reached.
+			 * @return		parameters	any...			Parameters	The parameters passed to the signal. Not set when timeout got reached.
 			 */)", pull) {
 				const int args = lua_gettop(L);
 				double t = 0.0;
@@ -110,10 +114,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		ignore(Object<Object>...)
+			 * @LuaFunction		ignore(Object...)
 			 * @DisplayName		Ignore
 			 *
 			 * Removes the running lua context from the listen queue of the given components. Basically the opposite of listen.
+			 *
+			 * @param	objects		Object...	A list of objects this computer should stop listening to.
 			 */)", ignore) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSyncCall SyncCall(L);

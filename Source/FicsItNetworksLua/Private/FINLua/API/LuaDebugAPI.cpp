@@ -17,7 +17,9 @@ namespace FINLua {
 			 * @LuaFunction		log(string...)
 			 * @DisplayName		Log
 			 *
-			 * Allows to log the given strings to the Game Log
+			 * Allows to log the given strings to the Game Log.
+			 *
+			 * @param	msgs	string...	A list of log messages that should get printed to the game console.
 			 */)", log) {
 				int args = lua_gettop(L);
 				FString Msg;
@@ -31,10 +33,14 @@ namespace FINLua {
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		getinfo
 			 * @DisplayName		Get Info
+			 *
+			 * Check https://www.lua.org/manual/5.4/manual.html#pdf-debug.getinfo[the Lua Manual] for more information.
 			 */)", getinfo) { return 0; }
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		traceback
 			 * @DisplayName		Traceback
+			 *
+			 * Check https://www.lua.org/manual/5.4/manual.html#pdf-debug.traceback[the Lua Manual] for more information.
 			 */)", traceback) { return 0; }
 		}
 
