@@ -225,12 +225,14 @@ impl<'a> ReflectionContext<'a> {
 			"".to_string()
 		};
 
+		writeln!(file, "// tag::func-{}-title[]", property.base.internal_name)?;
 		writeln!(
 			file,
 			"=== {} : {}",
 			property.base.header_name_adoc(),
 			self.get_value_type(&property.value_type)
 		)?;
+		writeln!(file, "// tag::func-{}[]", property.base.internal_name)?;
 		writeln!(file)?;
 		writeln!(file, "{}", property.base.description)?;
 		writeln!(file)?;
@@ -242,6 +244,8 @@ impl<'a> ReflectionContext<'a> {
 		writeln!(file, "{display_name_table}")?;
 		writeln!(file, "!===")?;
 		writeln!(file, "====")?;
+		writeln!(file, "// end::func-{}[]", property.base.internal_name)?;
+		writeln!(file, "// end::func-{}-title[]", property.base.internal_name)?;
 
 		Ok(())
 	}
@@ -346,11 +350,13 @@ impl<'a> ReflectionContext<'a> {
 			"".to_string()
 		};
 
+		writeln!(file, "// tag::func-{}-title[]", function.base.internal_name)?;
 		writeln!(
 			file,
 			"=== {} ({parameters}){return_values}",
 			function.base.header_name_adoc()
 		)?;
+		writeln!(file, "// tag::func-{}[]", function.base.internal_name)?;
 		writeln!(file)?;
 		writeln!(file, "{}", function.base.description)?;
 		writeln!(file)?;
@@ -377,6 +383,8 @@ impl<'a> ReflectionContext<'a> {
 		}
 
 		writeln!(file, "====")?;
+		writeln!(file, "// end::func-{}[]", function.base.internal_name)?;
+		writeln!(file, "// end::func-{}-title[]", function.base.internal_name)?;
 
 		Ok(())
 	}
