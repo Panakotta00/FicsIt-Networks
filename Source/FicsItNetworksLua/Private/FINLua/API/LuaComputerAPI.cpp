@@ -109,12 +109,11 @@ namespace FINLua {
 			 * @LuaFunction		skip()
 			 * @DisplayName		Skip
 			 *
-			 * This function is mainly used to allow switching to a higher tick runtime state.
-			 * Usually you use this when you want to make your code run faster when using functions that can run in asynchronous environment.
+			 * This function can be used to skip the current lua tick prematurely.
+			 * Mostly for people who want to optimize their games runtime performance.
 			 */)", skip) {
-				UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
-				processor->GetTickHelper().shouldPromote();
-				return UFINLuaProcessor::luaAPIReturn(L, 0);
+				lua_yield(L, 0);
+				return 0;
 			}
 
 			LuaModuleTableFunction(R"(/**
