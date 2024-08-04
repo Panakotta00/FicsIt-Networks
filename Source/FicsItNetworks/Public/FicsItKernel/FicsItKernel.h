@@ -81,6 +81,7 @@ private:
 	// Cache
 	TSharedPtr<FJsonObject> ReadyToUnpersist = nullptr;
 	TQueue<TSharedPtr<TFINDynamicStruct<FFINFuture>>> FutureQueue;
+	FCriticalSection ReferenceObjectMutex;
 	TMap<void*, TFunction<void(void*, FReferenceCollector&)>> ReferencedObjects;
 	FFileSystemSerializationInfo FileSystemSerializationInfo;
 	

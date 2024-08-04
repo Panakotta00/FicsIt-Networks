@@ -16,6 +16,7 @@
 #include "FINGlobalRegisterHelper.h"
 
 #include "Computer/FINComputerGPUT1.h"
+#include "Network/FINNetworkUtils.h"
 #include "Network/FINFuture.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Utils/FINTargetPoint.h"
@@ -64,6 +65,7 @@
 #include "Computer/FINComputerGPUT2.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "FicsItKernel/Logging.h"
+#include "Network/FINNetworkComponent.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
 #include "WheeledVehicles/FGWheeledVehicle.h"
 
@@ -203,6 +205,9 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		switch (Prop.PropType) {
 		case 1:
 			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ClassProp;
+			break;
+		case 2:
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_StaticProp;
 			break;
 		default:
 			break;
@@ -359,6 +364,9 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		case 1:
 			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ClassProp;
 			break;
+		case 2:
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_StaticProp;
+			break;
 		default:
 			break;
 		}
@@ -418,7 +426,8 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		T* self = GetFromCtx(Ctx);
 #define BeginClassFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Class, InternalName, DisplayName, Description, VA, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 		TSubclassOf<T> self = Cast<UClass>(Ctx.GetObject());
-#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) )
+#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+		void* self = Ctx.GetGeneric();
 #define Body() \
 			if (self && _bGotReg) {
 #define EndFunc() \
@@ -442,6 +451,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 	T* self = GetFromCtx(Ctx);
 #define BeginClassProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 	TSubclassOf<T> self = Cast<UClass>(Ctx.GetObject());
+#define BeginStaticProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 2, GET_MACRO(0, ##__VA_ARGS__, 1) )
 #define Return \
 		return (FINAny)
 #define PropSet() \
@@ -598,6 +608,29 @@ public:
 };
 
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
+BeginProp(RString, nick, "Nick", "**Only available for Network Components!** Allows access to the Network Components Nick.") {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		Return IFINNetworkComponent::Execute_GetNick(NetworkHandler);
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} PropSet() {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		IFINNetworkComponent::Execute_SetNick(NetworkHandler, Val);
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} EndProp()
+BeginProp(RString, id, "ID", "**Only available for Network Components!** Allows access to the Network Components UUID.") {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		Return IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString();
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} EndProp()
 BeginProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
 	Return (int64)GetTypeHash(self);
 } EndProp()

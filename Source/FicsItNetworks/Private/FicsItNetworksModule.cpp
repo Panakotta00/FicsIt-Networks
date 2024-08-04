@@ -28,6 +28,8 @@
 #include "UObject/CoreRedirects.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworks);
+DEFINE_LOG_CATEGORY(LogFicsItNetworksNet);
+
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
 FDateTime FFicsItNetworksModule::GameStart;

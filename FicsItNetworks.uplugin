@@ -32,6 +32,11 @@
 			"LoadingPhase": "PostDefault"
 		},
 		{
+			"Name": "FicsItNetworksDocumentation",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "Tracy",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
