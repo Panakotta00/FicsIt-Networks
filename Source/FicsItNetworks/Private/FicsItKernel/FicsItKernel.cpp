@@ -359,9 +359,11 @@ int64 UFINKernelSystem::GetTimeSinceStart() const {
 }
 
 void UFINKernelSystem::AddReferencer(void* Referencer, const TFunction<void(void*, FReferenceCollector&)>& CollectorFunc) {
+	UE::TScopeLock Lock(ReferenceObjectMutex);
 	ReferencedObjects.FindOrAdd(Referencer) = CollectorFunc;
 }
 
 void UFINKernelSystem::RemoveReferencer(void* Referencer) {
+	UE::TScopeLock Lock(ReferenceObjectMutex);
 	ReferencedObjects.Remove(Referencer);
 }

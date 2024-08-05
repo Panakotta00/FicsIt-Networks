@@ -1,52 +1,126 @@
-= Mod Integration
+= Mod Integration & FIN Reflection System
+:description: A detailed explanation on how the reflection system of FicsIt-Networks works and how you can use it to add mod-integration.
 
-This pages describes for other mod developers how they can integrate FicsIt-Networks into their own mod.
+Generally a reflection system is use in usually a programming language to allow the code base dynamically adapt and analyze it's own and additional structure and functionallity.
+With it, you can f.e. figure out which kind of classes you can use, what functions there are and how to call them,
+and sometimes you even get a meta data like documentation in terms of descriptions about those.
 
-== Ability to connect network cables
+== What is it technically?
+It is just like the whole https://www.unrealengine.com/en-US/blog/unreal-property-system-reflection?sessionInvalidated=true["UClass"] thing of unreal. +
+It gathers information about all the different classes, functions, attributes and signals on game boot,
+so that you can then very quickly and easily browse this data set.
+It additionally adds a abstract interface to make interacting with the data way more easily,
+espetially since the underlying data sources differ heavily. +
+It also contains a lot of meta data so you can give localized names and discriptions to all the differnt things.
+Thanks to the abstract system, things like read only attributes and variable argument counts are possible,
+even tho unreal engines own system doesn't support/have those.
 
-For you to be able to connect a network cable to your machine you need to have at least one
-power connector attached to the actor you want to be able to connect to the network directly.
+== Why is it useful? / Why a custom one?
+One of the most important things is, it only contains data about functions and attributes the user should actualy be able to interact with by them self,
+so that you can't f.e. change the position of an actor which would be the case if I just expose unreal's system. +
+It provides a centeral interface for interaction with any functionality the game has with which a user can interact,
+even tho the underlying sources vary heavily,
+so declaring metadata, adding such functions, attributes and even signals is extremely easy in c++ as well as BP,
+even without the need of having FIN as a dependency.
+And thanks to the abstraction, will be from now on very easy to use these concepts,
+like when I would add a new language support or something ^^
 
-This power connector can also have just 0 allowed connections, we dont care about that.
+In terms of BP integration, it's basically the same as it was before, just that you can do way more things,
+like exposing attributes directly (also as just Read Only),
+have one or two functions acting like attributes (like C' properties),
+having functions and signals, +
+and all of them can have one additional function, that returns the metadata so you can describe everything to every detail.
 
-If you then attach a network cable to it, a adapter will automatically get created
-which also manages for you the UUID and Nicks as well as signal sending.
+You can also have "varargs" functions, but then you sadly need to have FIN as dependency
+because FIN provides a "Any" struct, which can hold any kind of value supported by the reflection system.
+And if your last parameter of a function is of type TArray<FFINAnyNetworkValue> and called "varargs",
+all additional values the user might put into the calling parameterlist goes in there ^^
 
-This attached adapter will also provide a basic API (all "Actor" members of the adapter api).
+== How to integrate it?
+You simply have to have a power connection component in your actor.
+The actor it self can then have additional functions and properties with special names.
 
-== Adding Functions
+Alternatively you can have a simple Scene Component with the name `FINConnector` or `Visible_FINConnector` (if you want to have the network adapter mesh visible).
 
-If you want to provide your own functions for allowing the users to interact from the network
-with your machine, you just need to provide your functions by following some simple rules.
+=== Data Types
+FIN supports a handful of normal unreal engine types, and a handful of custom ones:
 
-1. The function name needs to start with `netFunc_` followed with your function name without any spaces.
-+
-f.e. `netFunc_testFunction`. You should also follow the naming scheme of function by using lower case caml case.
-2. The function needs to be reflected (any BP function is this),
-means in C++ it needs to have a UFUNCTION macro.
-3. Only these types of input and output parameters are allowed:
- - bool
- - int
- - int64
- - float
- - string
- - Object (any type)
- - Class (any type)
- - Array (only these listed sallowed types)
+* nil/null
+* Booleans
+* Integers (+ Int64)
+* Floats (+ Doubles)
+* Strings
+* Structs (pre defined types)
+* Objects
+* Classes
+* Arrays
+* Traces (special kind of objects you can https://docs.ficsit.app/ficsit-networks/latest/NetworkTrace.html[learn more about here])
+* "Any" (place holder for any kind of supported data type, especially useful with arrays)
 
-If you follow these rules, the function will be available as member of the lua instance
-of your object.
+=== Functions
+You can declare a custom function by simply calling it in any way but with the `netFunc_` Prefix f.e. `netFunc_myFunc` will allow you
+then to call in lua code the function `myFunc()` which will then call that function (BP or C++ doesn't matter).
+You can have multiple input and output values but they have to be one of the valid data types.
 
-Object paramters are in Lua handled as instances, that also means when you return a object,
-a lua instance of that object will get created, and if it has any functions following these
-rules, they will also get exposed. That means to be able to provide functions,
-the object is not required to be attachable to the network.
+https://blueprintue.com/render/5xjih16c/[This example] is a function that will be called in lua `getModule` and has the name `netFunc_getModule` within the class/blueprint it
+should be part of:
 
-[WARNING]
-====
-Don't do things you are not allowed to do in a parallel thread!
-Only do things you can safely do in a factory tick.
-If not, create a wrapper for it.
+=== Properties
+You can declare a custom property in two way, via one or two functions, of via a property.
 
-There is no future/promise ability for these kind of functions yet.
-====
+If you have a property, just call the property with teh `netProp_` prefix, just like you do with functions and it will be exposed for read and write. +
+f.e. create a string varaible `netProp_myString` and the class/blueprint will have now a `myString` variable and you can use the
+class variable to get/set the value.
+
+WARNING: Replicated varaibles are not allowed and MIGHT cause crashes, it doesn't have to be directly visible to you that it doesn't work.
+
+Or you call a function `netPropGet_` + property name, this will add a read only property with that name, and when you try to get the value
+of the property in code, this function will be called. +
+https://blueprintue.com/blueprint/nt4b4ob_/[This example] shows the `netPropGet_text` function which returns a single string parameter, this creates the `text` property
+now within the reflected class in FIN.
+
+You can now optionally add a `netPropSet_` + property name, this will mike the property now alse writeable and this function will be called when you try to set the value.
+
+NOTE: You can not have a write only property
+
+https://blueprintue.com/blueprint/osnlgprf/[This example] shows the additional `netFuncSet_text` function for the `text` property we added earlier.
+
+=== Signals
+
+If you want to create your own signals, you just again have to declare a function without any actual content and only input values
+with a prefix `netSig_`. +
+The reflection system will detect it, and effectively replace it's function body with code by FIN that will then trigger the corresponding
+signal when you now simply call this function in your own code anywere. +
+Just use it in your code as any other function when you want to trigger the signal, don't give it output values nor a function body.
+
+=== Meta-Data
+Metadata can be added to all these different things via adding a new function for each of those types and even the class which will return specific properties...
+
+Top add dd metadata to a function, you need to add a new function called `netFuncMeta_` with the same function name
+f.e. `netFuncMeta_myFunc`, that takes no input values and can provided specific output parameters
+(you can decide which ones you want and also in which order, the system doesnt care).
+Same counts for properties and signals and they have the same parameters you can provide,
+just call the functions then `netFuncProp_` (even when you use one or two functions to create the prop) and `netFuncSig_`:
+
+* A FString with the name "InternalName" which is basically a override for the usual function name which is used the in Lua etc. so with that you can make the function netFunc_BloodyHellFunction to be called completely differently like niceFunction instead of BloodyHellFunction
+* A FText with the localized name of the function with the name "DisplayName", mainly intended for the ingame documentation feature and the visual scripting (lua will use the internalName)... means... display name can be any text you want (with special chars and spaces)... notice that you can localize it (hence FText)
+* A FText with the localized description of the function called "Description", should be self explainatory
+* A TArray<FString> called "ParameterInternalNames" same as "InternalName" just for each property of the netFunc_ (order is important as you can imagine)
+* A TArray<FText> called "ParameterDisplayNames" same as "DisplayName" just for each property of the netFunc_ (order is important as you can imagine)
+* A TArray<FText> called "ParameterDescriptions" same as "Description" just for each proeprty of the netFunc_ (order is important as you can imagine)
+* An integer called `Runtime` that can be 0 = Synchronus, 1 = Parallel or 2 = Asynchronus used to define in which runtime state the function can run directly.
+
+You will also be able to add a function to your class with the name netClass_Meta which works like the netFuncMeta_ function,
+but you have just the InternalName, DisplayName and Description which apply to the class it self,
+so with that you can f.e. get rid of those prefixes like the computer is actually "FINComputerCase"
+and through that meta thing you can change it to "ComputerCase" and obviously also give it a description.
+
+Most of that stuff will try to use default data it can get from the FGBuildable Class if it inherits from it. +
+It's still usefull espetially for non FGBuildable classes ^^
+
+NOTE: Those functions can be implemented also in BP but be aware that they are called onto the default object.
+
+https://blueprintue.com/render/x3vj1r39/[This example] shows the meta-data function `netFuncMeta_getModule` of the `getModule` function we have defined previously: +
+++++
+<iframe title="netFuncMeta_getModule Example" src="https://blueprintue.com/render/x3vj1r39/" scrolling="no" allowfullscreen style='width: 100%;min-height: 50rem'></iframe>
+++++
