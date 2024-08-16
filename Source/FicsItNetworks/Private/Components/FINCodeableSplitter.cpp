@@ -117,8 +117,8 @@ bool AFINCodeableSplitter::netFunc_canOutput(int output) {
 	return outputQueue.Num() < 2;
 }
 
-void AFINCodeableSplitter::netSig_ItemRequest_Implementation(const FInventoryItem& item) {}
-void AFINCodeableSplitter::netSig_ItemOutputted_Implementation(int output, const FInventoryItem& item) {}
+void AFINCodeableSplitter::netSig_ItemRequest_Implementation(FInventoryItem item) {}
+void AFINCodeableSplitter::netSig_ItemOutputted_Implementation(int output, FInventoryItem item) {}
 
 TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(int output) {
 	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);
