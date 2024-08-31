@@ -1,10 +1,10 @@
-name: CI
+name: Build
 
 on:
   push:
     branches:
       - master
-      - dev
+      - development
     paths:
       - "FicsItNetworks.uplugin"
       - "Content/**"
@@ -26,24 +26,27 @@ on:
       WWISE_PASSWORD:
         required: true
       GH_TOKEN:
-        required: false
+        required: true
+      WEBHOOK_URL:
+        required: true
 
 jobs:
   build:
-    runs-on: windows-latest
+    name: Build FicsIt-Networks
+    runs-on: Windows2019-selfhosted
     steps:
-      - name: Cleanup
-        run: Remove-Item C:\workspace\SatisfactoryModLoader -Recurse -Force -Confirm:$false -ErrorAction Ignore
-
-      - uses: actions/checkout@master
+      - name: Pre Cleanup
+        run: Remove-Item C:\actions-runner\_work\FicsIt-Networks\FicsIt-Networks\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
+      - uses: actions/checkout@v4
         with:
           repository: satisfactorymodding/SatisfactoryModLoader
           ref: refs/heads/dev
           path: SatisfactoryModLoader
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           path: SatisfactoryModLoader/Mods/FicsItNetworks
+          submodules: recursive
 
       - name: Apply FG Patches
         working-directory: SatisfactoryModLoader
@@ -60,7 +63,7 @@ jobs:
           rm UnrealEngine-CSS-Editor-Win64.7z*
           .\\SetupScripts\\Register.bat
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Add Wwise
         run: |
@@ -73,7 +76,7 @@ jobs:
           WWISE_PASSWORD: ${{ secrets.WWISE_PASSWORD }}
 
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1
+        uses: microsoft/setup-msbuild@v2
 
       - name: Generate VS project files
         run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\Build.bat -projectfiles -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -game -rocket -progres
@@ -84,20 +87,142 @@ jobs:
       - name: Build for Shipping/Client
         run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'Games\FactoryGame' -m
 
-      - name: Build for Win64 Dedicated Server
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+#      - name: Build for Win64 Dedicated Server
+#        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
 
-      - name: Build for Linux Dedicated Server
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
-
+#      - name: Build for Linux Dedicated Server
+#        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
+      
       - name: Package FicsItNetworks Mod
-        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -platform=Win64 -nocompileeditor -installed
+        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -utf8output -platform=Win64 -nocompileeditor -installed -abslog="C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Log.txt"
+      
+#      - name: Generate Reflection & Lua Documentation
+#        run: ${{ github.workspace }}\ue\\Engine\Binaries\Win64\UnrealEditor-Cmd.exe "${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject" -skipcompile -Unattended -NoPause -AllowSoftwareRendering "-ExecCmds=FINGenRefDoc,FINGenLuaDoc,quit_editor"
 
-      - name: List Artifacts
-        run: |
-          dir ${{ github.workspace }}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\
-
-      - uses: actions/upload-artifact@v3
+      - name: Upload FicsItNetworks-Windows.zip
+        id: upload-win64
+        uses: actions/upload-artifact@v4
         with:
           name: FicsItNetworks-Windows
-          path: ${{ github.workspace }}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks-Windows.zip
+          path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks-Windows.zip
+
+ #     - name: Upload Documentation
+ #       id: upload-documentation
+ #       uses: actions/upload-artifact@v4
+ #       with:
+ #         name: Documentation
+ #         path: |
+ #           %LocalAppData%\FactoryGame\Saved\FINReflectionDocumentation.json
+ #           %LocalAppData%\FactoryGame\Saved\FINLuaDocumentation.lua
+
+      - name: Create Discord Webhook Action
+        uses: devops-actions/json-to-file@v1.0.4
+        if: success()
+        with:
+          filename: "discord-webhook.json"
+          json: >
+            {
+              "username": "GitHub",
+              "avatar_url": "https://cdn.discordapp.com/avatars/735904925900472323/df91181b3f1cf0ef1592fbe18e0962d7.webp?size=128",
+              "embeds": [{
+                "title": "${{ github.ref_name }}",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Build Successful!",
+                "color": 65280,
+                "fields": [{
+                  "value": "[FicsIt-Networks.zip](${{ steps.upload-win64.outputs.artifact-url }})",
+                  "name": "",
+                  "inline": true
+                }]
+              }]
+            }
+      - name: Create Discord Webhook Action
+        uses: devops-actions/json-to-file@v1.0.4
+        if: cancelled()
+        with:
+          filename: "discord-webhook.json"
+          json: >
+            {
+              "username": "GitHub",
+              "avatar_url": "https://cdn.discordapp.com/avatars/735904925900472323/df91181b3f1cf0ef1592fbe18e0962d7.webp?size=128",
+              "embeds": [{
+                "title": "${{ github.ref_name }}",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Build Cancelled!",
+                "color": 13158580
+              }]
+            }
+      - name: Create Discord Webhook Action
+        uses: devops-actions/json-to-file@v1.0.4
+        if: failure()
+        with:
+          filename: "discord-webhook.json"
+          json: >
+            {
+              "username": "GitHub",
+              "avatar_url": "https://cdn.discordapp.com/avatars/735904925900472323/df91181b3f1cf0ef1592fbe18e0962d7.webp?size=128",
+              "embeds": [{
+                "title": "${{ github.ref_name }}",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Build Failed",
+                "color": 16711680
+              }]
+            }
+      - name: Create Discord Webhook Action
+        uses: devops-actions/json-to-file@v1.0.4
+        if: ${{ !success() && !failure() && !cancelled() }}
+        with:
+          filename: "discord-webhook.json"
+          json: >
+            {
+              "username": "GitHub",
+              "avatar_url": "https://cdn.discordapp.com/avatars/735904925900472323/df91181b3f1cf0ef1592fbe18e0962d7.webp?size=128",
+              "embeds": [{
+                "title": "${{ github.ref_name }}",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Build Done!",
+                "color": 6579300
+              }]
+            }
+
+      - name: Discord Webhook Action
+        uses: tsickert/discord-webhook@v6.0.0
+        if: always()
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          raw-data: discord-webhook.json
+#          embed-title: ${{ github.ref_name }}
+#          embed-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#          embed-description: Build ${{ success() && 'Successful' || cancelled() && 'Cancelled' || failure() && 'Failed' || 'Done' }}!
+#          embed-color: ${{ success() && '65280' || cancelled() && '13158580' || failure() && '16711680' || '6579300' }}
+      - name: Post Cleanup
+        if: ${{ !failure() }}
+        run: Remove-Item C:\actions-runner\_work\FicsIt-Networks\FicsIt-Networks\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
+
+#  documentation:
+#    needs: build
+#    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+#    name: Update Documentation
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: write
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Download Reflection Documentation
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: Documentation
+#          path: ./docs
+#      - name: Rewrite ASCIIDOC with new Documentation
+#        run: python ./docs/PatchDocWithReflectionDoc.py FINReflectionDocumentation.json
+#      - name: Configure Git
+#        run: |
+#          git config user.name "$GITHUB_ACTOR"
+#          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+#      - name: Commit
+#        run: |
+#          git add index.zip
+#          git commit -m "Update Reflection Documentation"
+#      - name: Push
+#        run: |
+#          git push

@@ -1,4 +1,6 @@
 #include "Network/FINHookSubsystem.h"
+
+#include "Engine/Engine.h"
 #include "Subsystem/SubsystemActorManager.h"
 
 TMap<UClass*, TSet<TSubclassOf<UFINHook>>> AFINHookSubsystem::HookRegistry;

@@ -60,14 +60,14 @@ Additionally, you can use an instance of a class instead of the nick-query-strin
 This allows you to get all components in the network that are of the given type
 represented by the instance of the class (and all components their type extends the given one, "recursive")
 
-You can use the global `findClass` function to get a instance of a class
-based on classes name. +
+You can use the global `classes` table to get an instance of a class
+based on class's name. +
 You can get the class names using the reflection viewer.
 We will talk about that in more detail later.
 
 Here an example that gets all storage containers in the network:
 [source,lua]
-local containerIDs = component.findComponent(findClass("FGBuildableStorage"))
+local containerIDs = component.findComponent(classes.FGBuildableStorage)
 
 == Using findComponent
 Let's expand our Item-Count program to sum the Item Count of all storage containers
@@ -76,7 +76,7 @@ in the network.
 First we need to get all containers.
 
 [source,lua]
-local containerIDs = component.findComponent(findClass("FGBuildableStorage"))
+local containerIDs = component.findComponent(classes.FGBuildableStorage)
 local containers = component.proxy(containerIDs)
 
 After that we need to iterate our containers
@@ -104,7 +104,7 @@ print("Item-Count:", sum)
 We should now have a combined code like this:
 [source,lua]
 ----
-local containerIDs = component.findComponent(findClass("FGBuildableStorage"))
+local containerIDs = component.findComponent(classes.FGBuildableStorage)
 local containers = component.proxy(containerIDs)
 
 local sum = 0

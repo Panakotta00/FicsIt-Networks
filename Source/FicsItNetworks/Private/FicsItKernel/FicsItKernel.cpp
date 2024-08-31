@@ -82,6 +82,7 @@ bool UFINKernelSystem::ShouldSave_Implementation() const {
 }
 
 void UFINKernelSystem::PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {
+	HandleFutures(); // TODO: Add notices and remove serialization for Future Context, to support generic context... solved by handling all futures prior to save game, and the guarantee a future has to be finished using the execution context once called for execution, otherwise it MUST handle serialization
 	SystemResetTimePoint = (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - SystemResetTimePoint;
 }
 
@@ -202,7 +203,11 @@ void UFINKernelSystem::HandleFutures() {
 		TSharedPtr<TFINDynamicStruct<FFINFuture>> Future;
 		FutureQueue.Peek(Future);
 		FutureQueue.Pop();
-		(*Future)->Execute();
+		try {
+			(*Future)->Execute();
+		} catch (FFINException e) {
+			Crash(MakeShared<FFINKernelCrash>(e.GetMessage())); // TODO: Maybe add a way to make these future crashes catchable in f.e. Lua using protected calls
+		}
 	}
 }
 
@@ -297,19 +302,16 @@ void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
 	}
 }
 
-bool UFINKernelSystem::RecalculateResources(ERecalc InComponents, bool bShouldCrash) {
+TSharedPtr<FFINKernelCrash> UFINKernelSystem::RecalculateResources(ERecalc InComponents) {
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> Device = FileSystem.getDevDevice();
 
-	bool bFail = false;
 	MemoryUsage = Processor->GetMemoryUsage(InComponents & PROCESSOR);
 	MemoryUsage += FileSystem.getMemoryUsage(InComponents & FILESYSTEM);
 	if (MemoryUsage > MemoryCapacity) {
-		bFail = true;
-		KernelCrash = MakeShared<FFINKernelCrash>("out of memory");
-		if (bShouldCrash) Crash(KernelCrash.ToSharedRef());
+		return MakeShared<FFINKernelCrash>("out of memory");
 	}
 	if (Device) Device->updateCapacity(MemoryCapacity - MemoryUsage);
-	return bFail;
+	return nullptr;
 }
 
 UFINLog* UFINKernelSystem::GetLog() const {
@@ -357,9 +359,11 @@ int64 UFINKernelSystem::GetTimeSinceStart() const {
 }
 
 void UFINKernelSystem::AddReferencer(void* Referencer, const TFunction<void(void*, FReferenceCollector&)>& CollectorFunc) {
+	UE::TScopeLock Lock(ReferenceObjectMutex);
 	ReferencedObjects.FindOrAdd(Referencer) = CollectorFunc;
 }
 
 void UFINKernelSystem::RemoveReferencer(void* Referencer) {
+	UE::TScopeLock Lock(ReferenceObjectMutex);
 	ReferencedObjects.Remove(Referencer);
 }

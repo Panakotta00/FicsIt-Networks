@@ -49,6 +49,75 @@ enum EFINFunctionFlags {
 
 ENUM_CLASS_FLAGS(EFINFunctionFlags)
 
+UENUM()
+enum EFINOperator {
+	// Addition
+	FIN_Op_Add,
+
+	// Subtraction
+	FIN_Op_Sub,
+
+	// Multiplication
+	FIN_Op_Mul,
+
+	// Division
+	FIN_Op_Div,
+
+	// Modulo
+	FIN_Op_Mod,
+
+	// Power/Exponent
+	FIN_Op_Pow,
+
+	// Negation / Unary Minus
+	FIN_Op_Neg,
+
+	// Floot Division
+	FIN_Op_FDiv,
+
+	// Bitwise AND
+	FIN_Op_BitAND,
+
+	// Bitwise OR
+	FIN_Op_BitOR,
+
+	// Bitwise XOR
+	FIN_Op_BitXOR,
+
+	// Bitwise NOT/Negation
+	FIN_Op_BitNOT,
+
+	// Left Shift
+	FIN_Op_ShiftL,
+
+	// Right Shift
+	FIN_Op_ShiftR,
+
+	// Concat
+	FIN_Op_Concat,
+
+	// Length
+	FIN_Op_Len,
+
+	// Equal
+	FIN_Op_Equals,
+
+	// Less Than
+	FIN_Op_LessThan,
+
+	// Less Than Or Equal To
+	FIN_Op_LessOrEqualThan,
+
+	// Index `[]`
+	FIN_Op_Index,
+
+	// New Index `[] =`
+	FIN_Op_NewIndex,
+
+	// Call `()`
+	FIN_Op_Call,
+};
+
 USTRUCT()
 struct FICSITNETWORKS_API FFINFunctionBadArgumentException : public FFINReflectionException {
 	GENERATED_BODY()
@@ -84,8 +153,14 @@ public:
 	/**
 	 * Executes the function with the given properties and the given Ctx
 	 */
-	virtual TArray<FFINAnyNetworkValue> Execute(const FFINExecutionContext& Ctx, const TArray<FFINAnyNetworkValue>& Params) const {
-		if (NativeFunction) return NativeFunction(Ctx, Params);
-		return TArray<FFINAnyNetworkValue>();
+	virtual TArray<FFINAnyNetworkValue> Execute(const FFINExecutionContext& Ctx, const TArray<FFINAnyNetworkValue>& Params) const;
+
+	TOptional<EFINOperator> IsOperator() {
+		return ParseOperatorName(InternalName);
 	}
+
+	UFUNCTION()
+	static FString ToOperatorName(EFINOperator Operator);
+
+	static TOptional<EFINOperator> ParseOperatorName(FStringView Name);
 };

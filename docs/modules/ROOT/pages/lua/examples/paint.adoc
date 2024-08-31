@@ -19,16 +19,16 @@ Then just run it and switch to the computer screen and have some fun ^^
 [source,Lua]
 ----
 -- get first T1 GPU avialable from PCI-Interface
-local gpu = computer.getPCIDevices(findClass("GPUT1"))[1]
+local gpu = computer.getPCIDevices(classes.GPUT1)[1]
 if not gpu then
  error("No GPU T1 found!")
 end
 
 -- get first Screen-Driver available from PCI-Interface
-local screen = computer.getPCIDevices(findClass("FINComputerScreen"))[1]
--- if no scren found, try to find large screen from component network
+local screen = computer.getPCIDevices(classes.FINComputerScreen)[1]
+-- if no screen found, try to find large screen from component network
 if not screen then
- local comp = component.findComponent(findClass("Screen"))[1]
+ local comp = component.findComponent(classes.Screen)[1]
  if not comp then
   error("No Screen found!")
  end

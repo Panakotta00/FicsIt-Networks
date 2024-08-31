@@ -27,18 +27,50 @@ The following list contains all available standard Lua libraries, non-standard l
 - string
 - debug (parts of it for error handling)
 
-== Additional Runtime Functions (besides APIs)
+== Additional Global Functions (Besides APIs)
 
-The lua runtime additionally has a couple of functions allowing you to search for different things of the reflection system and the game itself.
-
-=== `Class findClass(string name)`
-
-Tries to find an object type with the given name, and returns the found type.
-
-=== `Class findStruct(string name)`
-
-Tries to find a structure type with the given name, and returns the found type.
+Find provides some additional functions that should improve quality of life.
 
 === `ItemType findItem(string name)`
 
 Tries to find an item type with the given name, and returns the found item type.
+
+== Reflection API
+
+The Reflection System of FicsIt-Networks is the main way how objects like machines are exposed to the runtime.
+
+=== Classes (Class-Library)
+
+Because you may need to get Object Types without first an object (e.g. when using `component.findComponent` with a type),
+FIN provides the `classes`-Library.
+You can get access to classes by indexing the library with the exact class name of the class you want to get.
+
+[source,lua]
+----
+classes.GPUT1
+classes["StorageContainer"]
+local someClassName = "Assembler"
+classes[someClassName]
+----
+
+You can use them directly in functions that take in class types.
+
+[source,lua]
+----
+local gpu = computer.getPCIDevices(classes.GPUT1)
+local containerIDs = component.findComponent(classes.StorageContainer)
+----
+
+When using the syntax without the Subsequence/Index-Operator, the In-Game editor automatically checks if the class type is found & valid and underlines it with green or red. Additionally you can double-click onto that text to directly open the reflection viewer.
+
+=== Structs (Structs-Library)
+
+Similar to classes, structs are exposed using the `structs` library. +
+But this library does not provide the Struct-Types, instead you can index a function that allows the construction of that type.
+
+[source,lua]
+----
+local vec1 = structs.Vector(0,1,2)
+local vec2 = structs.Vector{z = 5, x = 3, y = 4}
+local vec3 = vec1 + vec2
+----

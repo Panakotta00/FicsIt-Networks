@@ -1,16 +1,16 @@
 #include "FINLua/LuaGlobalLib.h"
 
-#include "FINLua/LuaClass.h"
-#include "FINLua/LuaComponentAPI.h"
-#include "FINLua/LuaComputerAPI.h"
-#include "FINLua/LuaDebugAPI.h"
-#include "FINLua/LuaEventAPI.h"
+#include "FicsItNetworksLuaModule.h"
+#include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/LuaFuture.h"
-#include "FINLua/LuaObject.h"
-#include "FINLua/LuaRef.h"
-#include "FINLua/LuaStruct.h"
+#include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
+#include "FINLua/FINLuaModule.h"
+#include "FINLua/LuaPersistence.h"
+#include "Logging/StructuredLog.h"
 #include "Registry/ModContentRegistry.h"
+//#include "tracy/Tracy.hpp"
+//#include "tracy/TracyLua.hpp"
 
 namespace FINLua {
 	int luaReYield(lua_State* L) {
@@ -66,7 +66,7 @@ namespace FINLua {
 		if (!lua_checkstack(thread, args - 1)) {
 			lua_pushboolean(L, false);
 			lua_pushliteral(L, "too many arguments to resume");
-			return -1;
+			return 1;
 		}
 
 		// attach hook for out-of-time exception if thread got loaded from save and hook is not applied
@@ -79,21 +79,25 @@ namespace FINLua {
 		const int status = lua_resume(thread, L, args - 1, &argCount);
 
 		if (status == LUA_OK || status == LUA_YIELD) {
-			if (argCount == 0) {
+			if (argCount == 0 && status == LUA_YIELD) {
 				// A hook yielded the thread
 				return lua_yieldk(L, 0, NULL, &luaResumeResume);
 			}
+			
+			if (status == LUA_YIELD) argCount = argCount-1; 
 
-			if (!lua_checkstack(L, argCount + 1)) {
+			if (!lua_checkstack(L, argCount)) {
 				lua_pop(thread, argCount);
 				lua_pushliteral(L, "too many results to resume");
-				return -1;
+				return lua_error(L);
 			}
-			lua_xmove(thread, L, argCount-1);
-			return argCount-1;
+			lua_pushboolean(L, true);
+			lua_xmove(thread, L, argCount);
+			return argCount + 1;
 		} else {
+			lua_pushboolean(L, false);
 			lua_xmove(thread, L, 1);
-			return -1;
+			return 2;
 		}
 	}
 
@@ -282,7 +286,7 @@ namespace FINLua {
 	}
 	
 	void setupGlobals(lua_State* L) {
-		PersistSetup("Globals", -2);
+		PersistenceNamespace("Globals");
 
 		lua_register(L, "findClass", luaFindClass_DEPRECATED);
 		PersistGlobal("findClass");
@@ -333,16 +337,72 @@ namespace FINLua {
 		lua_register(L, "getItems", luaGetItems);
 		PersistGlobal("getItems");
 
+/*#ifdef TRACY_ENABLE
+		tracy::LuaRegister(L);
+		PersistGlobal("tracy");
+#endif*/
+		
 		setupUtilLib(L);
-		setupRefUtils(L);
-		setupStructSystem(L);
-		setupObjectSystem(L);
-		setupClassSystem(L);
-		setupComponentAPI(L);
-		setupEventAPI(L);
-		setupFileSystemAPI(L);
-		setupComputerAPI(L);
-		setupDebugAPI(L);
-		setupFutureAPI(L);
+
+		TMap<FString, TSharedRef<FFINLuaModule>> modules;
+		for (const TSharedRef<FFINLuaModule>& module : FFINLuaModuleRegistry::GetInstance().Modules) {
+			modules.Add(module->InternalName, module);
+		}
+		TSet<FString> loadedModules;
+		while (modules.Num() > 0) {
+			FString FailedToLoadPrev;
+			TArray<FString> modulesToLoad = { modules.begin().Key() };
+			while (modulesToLoad.Num() > 0) {
+				FString moduleName = modulesToLoad.Top();
+
+				if (!modules.Contains(moduleName)) {
+					if (FailedToLoadPrev.IsEmpty()) {
+						UE_LOGFMT(LogFicsItNetworksLua, Error, "Failed to load Lua Module '{module}': Module not found!", moduleName);
+						FailedToLoadPrev = moduleName;
+					}
+					modulesToLoad.Pop();
+					continue;
+				}
+
+				TSharedRef<FFINLuaModule> module = modules[moduleName];
+
+				if (!FailedToLoadPrev.IsEmpty()) {
+					if (module->Dependencies.Contains(FailedToLoadPrev)) {
+						UE_LOGFMT(LogFicsItNetworksLua, Error, "Failed to load Lua Module '{module}': Failed to load a dependency due to previous error.", moduleName);
+						modules.Remove(moduleName);
+						FailedToLoadPrev = moduleName;
+					}
+					modulesToLoad.Pop();
+					continue;
+				}
+
+				bool bLoadDependenciesFirst = false;
+				for (const FString& dependency : module->Dependencies) {
+					if (!loadedModules.Contains(dependency)) {
+						bLoadDependenciesFirst = true;
+						if (modulesToLoad.Contains(dependency)) {
+							FString chain = dependency;
+							for (int i = modulesToLoad.Num(); i > 0; --i) {
+								chain = modulesToLoad[i-1] + " -> " + chain;
+								if (modulesToLoad[i-1] == dependency) break;
+							}
+							UE_LOGFMT(LogFicsItNetworksLua, Error, "Failed to load Lua Module '{dependency}': Circular dependency '{chain}' found!", dependency, chain);
+							FailedToLoadPrev = moduleName;
+							break;
+						}
+						modulesToLoad.Add(dependency);
+					}
+				}
+				if (bLoadDependenciesFirst) continue;
+
+				module->SetupModule(L);
+
+				modulesToLoad.Pop();
+				modules.Remove(moduleName);
+				loadedModules.Add(moduleName);
+
+				UE_LOGFMT(LogFicsItNetworksLua, Display, "Lua Module '{module}' loaded!", moduleName);
+			}
+		}
 	}
 }

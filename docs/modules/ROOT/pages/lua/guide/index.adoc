@@ -1,4 +1,5 @@
 = Lua Getting Started
+:description: Getting Started with FicsIt-Networks and Lua Coding in FicsIt-Networks.
 
 == Introduction
 This section of the documentation tries to slowly introduce you to FicsIt-Networks.

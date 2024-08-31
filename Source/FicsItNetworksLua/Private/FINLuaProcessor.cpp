@@ -3,8 +3,9 @@
 #include "FicsItNetworksLuaModule.h"
 #include "FicsItKernel/Logging.h"
 #include "FINStateEEPROMLua.h"
+#include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaGlobalLib.h"
-#include "FINLua/LuaObject.h"
+#include "FINLua/Reflection/LuaObject.h"
 #include "Network/FINNetworkTrace.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINSignal.h"
@@ -161,7 +162,10 @@ void FFINLuaProcessorTick::syncTick() {
 			asyncTask.Reset();
 		}
 		TickMutex.Lock();
-		Processor->LuaTick();
+		{
+			ZoneScoped;
+			Processor->LuaTick();
+		}
 		TickMutex.Unlock();
 		if (bShouldPromote) {
 			promote();
@@ -199,7 +203,10 @@ void FFINLuaProcessorTick::syncTick() {
 bool FFINLuaProcessorTick::asyncTick() {
 	if (State & LUA_ASYNC) {
 		TickMutex.Lock();
-		Processor->LuaTick();
+		{
+			ZoneScoped;
+			Processor->LuaTick();
+		}
 		TickMutex.Unlock();
 		AsyncSyncMutex.Lock();
 		if (bDoSync) {
@@ -297,10 +304,7 @@ int FFINLuaProcessorTick::steps() const {
 }
 
 UFINLuaProcessor* UFINLuaProcessor::luaGetProcessor(lua_State* L) {
-	lua_getfield(L, LUA_REGISTRYINDEX, "LuaProcessorPtr");
-	UFINLuaProcessor* p = *static_cast<UFINLuaProcessor**>(luaL_checkudata(L, -1, "LuaProcessor"));
-	lua_pop(L, 1);
-	return p;
+	return FINLua::luaFIN_getExtraSpace(L).Processor;
 }
 
 void UFINLuaProcessor::OnPreGarbageCollection() {
@@ -417,6 +421,11 @@ void UFINLuaProcessor::Serialize(FArchive& Ar) {
 void UFINLuaProcessor::BeginDestroy() {
 	Super::BeginDestroy();
 	tickHelper.stop();
+	GEngine->ForceGarbageCollection(true);
+}
+
+void UFINLuaProcessor::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
+	out_dependentObjects.Add(Kernel);
 }
 
 void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {}
@@ -551,7 +560,12 @@ void UFINLuaProcessor::LuaTick() {
 		if (Status == LUA_YIELD) {
 			// system yielded and waits for next tick
 			lua_gc(luaState, LUA_GCCOLLECT, 0);
-			if (GetKernel()) GetKernel()->RecalculateResources(UFINKernelSystem::PROCESSOR);
+			if (GetKernel()) {
+				TSharedPtr<FFINKernelCrash> Crash = GetKernel()->RecalculateResources(UFINKernelSystem::PROCESSOR);
+				if (Crash) {
+					tickHelper.shouldCrash(Crash.ToSharedRef());
+				}
+			}
 		} else if (Status == LUA_OK) {
 			// runtime finished execution -> stop system normally
 			tickHelper.shouldStop();
@@ -617,39 +631,30 @@ void UFINLuaProcessor::Reset() {
 
 	// clear existing lua state
 	if (luaState) {
+		FINLua::luaFIN_destroyExtraSpace(luaState);
+
 		lua_close(luaState);
 	}
 
 	// create new lua state
 	luaState = luaL_newstate();
 
+	FINLua::luaFIN_createExtraSpace(luaState, {
+		.Processor = this,
+		.FileStreams = FileStreams,
+	});
+
 	// setup warning function
 	lua_setwarnf(luaState, luaWarnF, this);
 
-	// setup library and perm tables for persistence
+	// setup tables for persistence
 	lua_newtable(luaState); // perm
-	lua_newtable(luaState); // perm, uperm 
-
-	// register pointer to this Lua Processor in c registry, filestream list & perm table
-	luaL_newmetatable(luaState, "LuaProcessor"); // perm, uperm, mt-LuaProcessor
-	lua_pop(luaState, 1); // perm, uperm
-	UFINLuaProcessor*& luaProcessor = *static_cast<UFINLuaProcessor**>(lua_newuserdata(luaState, sizeof(UFINLuaProcessor*))); // perm, uperm, proc
-	luaL_setmetatable(luaState, "LuaProcessor");
-	luaProcessor = this;
-	lua_pushvalue(luaState, -1); // perm, uperm, proc, proc
-	lua_setfield(luaState, LUA_REGISTRYINDEX, "LuaProcessorPtr"); // perm, uperm, proc
-	lua_pushvalue(luaState, -1); // perm, uperm, proc, proc
-	lua_setfield(luaState, -3, "LuaProcessor"); // perm, uperm, proc
-	lua_pushstring(luaState, "LuaProcessor"); // perm, uperm, proc, "LuaProcessorPtr"
-	lua_settable(luaState, -4); // perm, uperm
-	FINLua::setupGlobals(luaState); // perm, uperm
-	lua_pushlightuserdata(luaState, &FileStreams);
-	lua_setfield(luaState, LUA_REGISTRYINDEX, "FileStreamStorage");
-	
-	// finish perm tables
+	lua_newtable(luaState); // perm, uperm
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); //
-	
+
+	FINLua::setupGlobals(luaState);
+
 	// create new thread for user code chunk
 	luaThread = lua_newthread(luaState);
 	luaThreadIndex = lua_gettop(luaState);

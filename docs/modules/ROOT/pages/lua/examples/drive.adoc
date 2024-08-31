@@ -10,8 +10,6 @@ All you need is a basic computer (had Lua Processor, RAM and EEPROM in it) and a
 
 The code below should print all UUIDs of installed drives.
 
-=== Code
-
 [source,Lua]
 ----
 -- Shorten name
@@ -23,30 +21,6 @@ end
 -- List all the drives
 for _, drive in pairs(fs.childs("/dev")) do
     print(drive)
-end
-----
-
-You might notice there is a "serial" beside your drives, it is the console under the code editor. We recommend you just ignoring it, or you can filtering it out as the code shown below.
-
-[source, Lua]
-----
--- Shorten name
-fs = filesystem
--- Initialize /dev
-if fs.initFileSystem("/dev") == false then
-    computer.panic("Cannot initialize /dev")
-end
-
-drives = fs.childs("/dev")
-
--- Filtering out "serial"
-for idx, drive in pairs(drives) do
-    if drive == "serial" then table.remove(drives, idx) end
-end
-
--- List all the drives
-for i = 1, #drives do
-    print(drives[i])
 end
 ----
 
@@ -68,6 +42,22 @@ disk_uuid = "7A4324704A53821154104A87BE5688AC"
 fs.mount("/dev/"..disk_uuid, "/")
 ----
 
-== Accessing Drives with Windows Explorer
+== Access Drive Folders
+
+=== Windows
 
 All drives are located at `%LocalAppData%\FactoryGame\Saved\SaveGames\Computers`
+
+=== Linux
+
+Locate your Steam library folder(s)
+
+Steam > Settings > Storage > Drive Dropdown
+
+Navigate to the virtual `%LocalAppData%` directory
+
+`<Steam Library>/steamapps/compatdata/526870/pfx/drive_c/users/steamuser/Local Settings/Application Data/`
+
+Navigate to the drives folder
+
+`<AppData>/FactoryGame/Saved/SaveGames/Computers/`

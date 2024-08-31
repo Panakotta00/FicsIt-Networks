@@ -1,0 +1,3 @@
+nav_file_path = "modules/ROOT/nav.adoc"
+reflection_folder = "modules/ROOT/pages/reflection"
+lua_folder = "modules/ROOT/pages/lua/api"

@@ -3,6 +3,7 @@
 #include "Modules/ModuleManager.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworks, Verbose, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworksNet, Warning, All);
 
 class FICSITNETWORKS_API FFicsItNetworksModule : public FDefaultGameModuleImpl
 {

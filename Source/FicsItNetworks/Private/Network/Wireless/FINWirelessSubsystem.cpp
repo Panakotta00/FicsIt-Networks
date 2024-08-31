@@ -1,10 +1,11 @@
 ﻿#include "Network/Wireless/FINWirelessSubsystem.h"
 #include "FicsItNetworksModule.h"
 #include "Components/FINWirelessAccessPoint.h"
+#include "Net/UnrealNetwork.h"
 #include "Subsystem/SubsystemActorManager.h"
 
 AFINWirelessSubsystem::AFINWirelessSubsystem() {
-	SetReplicates(true);
+	bReplicates = true;
 	bAlwaysRelevant = true;
 }
 

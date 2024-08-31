@@ -6,8 +6,14 @@
 #include "Computer/FINComputerMemory.h"
 #include "Computer/FINComputerProcessor.h"
 #include "FGInventoryComponent.h"
+#include "FGPlayerController.h"
+#include "Computer/FINComputerRCO.h"
+#include "Engine/ActorChannel.h"
 #include "FicsItKernel/Logging.h"
 #include "Net/UnrealNetwork.h"
+#include "Utils/FINUtils.h"
+
+class UFINComputerRCO;
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -42,6 +48,9 @@ AFINComputerCase::AFINComputerCase() {
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
 	Log = CreateDefaultSubobject<UFINLog>("Log");
+	SetReplicates(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+	AddReplicatedSubObject(Log);
 
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
@@ -323,12 +332,12 @@ void AFINComputerCase::Toggle() {
 		if (Processor) Processor->SetEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
 		switch (Kernel->GetState()) {
 		case FIN_KERNEL_SHUTOFF:
-			Kernel->Start(false);
 			Log->EmptyLog();
+			Kernel->Start(false);
 			break;
 		case FIN_KERNEL_CRASHED:
-			Kernel->Start(true);
 			Log->EmptyLog();
+			Kernel->Start(true);
 			break;
 		default:
 			Kernel->Stop();	
@@ -385,19 +394,7 @@ void AFINComputerCase::netFunc_stopComputer() {
 void AFINComputerCase::netFunc_getLog(int64 PageSize, int64 Page, TArray<FFINLogEntry>& OutLog, int64& OutLogSize) {
 	FScopeLock Lock = Log->Lock();
 	const TArray<FFINLogEntry>& Entries = Log->GetLogEntries();
-	PageSize = FMath::Max(0, PageSize);
-	int64 Offset = Page*PageSize;
-	if (Offset < 0) Offset = Entries.Num() + Page*PageSize;
-	int64 Num = FMath::Min(PageSize, Entries.Num() - Offset);
-	if (Offset < 0) {
-		Num += Offset;
-		Offset = 0;
-	}
-	if (Offset < 0 || Num < 0) {
-		OutLog = TArray<FFINLogEntry>();
-	} else {
-		OutLog = TArray<FFINLogEntry>(Entries.GetData() + Offset, Num);
-		if (Page < 0) Algo::Reverse(OutLog);
-	}
+	OutLog = UFINUtils::PaginateArray(TArrayView<const FFINLogEntry>(Entries), PageSize, Page);
+	if (Page < 0) Algo::Reverse(OutLog);
 	OutLogSize = Entries.Num();
 }

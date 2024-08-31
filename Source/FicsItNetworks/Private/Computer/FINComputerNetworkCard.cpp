@@ -53,8 +53,8 @@ bool AFINComputerNetworkCard::HasNick_Implementation(const FString& nick) {
 	return HasNickByNick(nick, Execute_GetNick(this));
 }
 
-UObject* AFINComputerNetworkCard::GetInstanceRedirect_Implementation() const {
-	return nullptr;
+UObject* AFINComputerNetworkCard::GetInstanceRedirect_Implementation() {
+	return this;
 }
 
 bool AFINComputerNetworkCard::AccessPermitted_Implementation(FGuid NewID) const {

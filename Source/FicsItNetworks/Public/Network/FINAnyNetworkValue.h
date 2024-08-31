@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "FINNetworkValues.h"
 #include "Misc/DefaultValueHelper.h"
@@ -340,38 +340,7 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 		return *Data.ANY;
 	}
 
-	/**
-	 * Returns the pointer to the underlying data structure.
-	 * Mainly intended to do be able to direct data copy into UE Reflected Structs.
-	 */
-	FORCEINLINE void* GetData() {
-		return &Data;
-	}
-
-	void Copy(const FProperty* Prop, void* Dest) {
-		switch (Type) {
-		case FIN_FLOAT: {
-			float Value = Data.FLOAT;
-			Prop->CopyCompleteValue(Dest, &Value);
-			break;
-		} case FIN_INT: {
-			if (Prop->IsA<FIntProperty>()) {
-				int Value = Data.INT;
-				Prop->CopyCompleteValue(Dest, &Value);
-			} else if (Prop->IsA<FInt64Property>()) {
-				Prop->CopyCompleteValue(Dest, &Data.INT);
-			}
-			break;
-		} case FIN_STR:
-			Prop->CopyCompleteValue(Dest, Data.STRING);
-			break;
-			// TODO: Add more data types
-			default:
-				Prop->CopyCompleteValue(Dest, GetData());
-		}
-	}
-
-	bool Serialize(FArchive& Ar);
+	bool Serialize(FStructuredArchive::FSlot Slot);
 
 private:
 	TEnumAsByte<EFINNetworkValueType> Type = FIN_NIL;
@@ -390,18 +359,14 @@ private:
 	} Data;
 };
 
-inline bool operator<<(FArchive& Ar, FFINAnyNetworkValue& Val) {
-	return Val.Serialize(Ar);
-}
-
-inline bool operator<<(FStructuredArchive::FSlot Slot, FFINAnyNetworkValue& Val) {
-	return Val.Serialize(Slot.GetUnderlyingArchive());
+FORCEINLINE void operator<<(FStructuredArchive::FSlot Slot, FFINAnyNetworkValue& AnyValue) {
+	AnyValue.Serialize(Slot);
 }
 
 template<>
 struct TStructOpsTypeTraits<FFINAnyNetworkValue> : TStructOpsTypeTraitsBase2<FFINAnyNetworkValue> {
 	enum {
-		WithSerializer = true,
+		WithStructuredSerializer = true,
 		WithCopy = true,
 	};
 };

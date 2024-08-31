@@ -79,7 +79,7 @@ public:
 	virtual FString GetNick_Implementation() const override;
 	virtual void SetNick_Implementation(const FString& Nick) override;
 	virtual bool HasNick_Implementation(const FString& Nick) override;
-	virtual UObject* GetInstanceRedirect_Implementation() const override;
+	virtual UObject* GetInstanceRedirect_Implementation() override;
 	virtual bool AccessPermitted_Implementation(FGuid ID) const override;
 	// End IFINNetworkComponent
 

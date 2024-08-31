@@ -1,5 +1,6 @@
 ﻿#include "Components/FINModularIndicatorPoleHolo.h"
 #include "FGBuildableBeam.h"
+#include "Buildables/FGBuildableWall.h"
 #include "Buildables/FGBuildableFactoryBuilding.h"
 #include "Kismet/KismetMathLibrary.h"
 #include <algorithm>
