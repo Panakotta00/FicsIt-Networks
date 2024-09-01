@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Styling/SlateStyle.h"
 
-class FICSITNETWORKS_API FFINStyle {
+class FICSITNETWORKSREPOSITORY_API FFINRepoStyle {
 public:
 	static void Initialize();
 	static void Shutdown();
@@ -12,7 +12,7 @@ public:
 	static FName GetStyleSetName();
 
 private:
-	static TSharedRef<FSlateStyleSet> Create(); 
+	static TSharedRef<FSlateStyleSet> Create();
 
 	static TSharedPtr<FSlateStyleSet> Instance;
 };
