@@ -4,6 +4,7 @@
 #include "Components/GridSlot.h"
 #include "Components/TextBlock.h"
 #include "Net/UnrealNetwork.h"
+#include "Utils/FINLabelContainerInterface.h"
 
 UFINComputerDriveDesc::UFINComputerDriveDesc() {
 	mStackSize = EStackSize::SS_ONE;
@@ -16,7 +17,14 @@ void UFINComputerDriveDesc::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 }
 
 FText UFINComputerDriveDesc::GetOverridenItemName_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
-	return UFGItemDescriptor::GetItemName(InventoryStack.Item.GetItemClass());
+	FText Name = UFGItemDescriptor::GetItemName(InventoryStack.Item.GetItemClass());
+	if (InventoryStack.Item.ItemState.IsValid() && InventoryStack.Item.ItemState.Get()->Implements<UFINLabelContainerInterface>()) {
+		FString Label = IFINLabelContainerInterface::Execute_GetLabel(InventoryStack.Item.ItemState.Get());
+		if (!Label.IsEmpty()) {
+			return FText::FromString(FString::Printf(TEXT("%s - \"%s\""), *Name.ToString(), *Label));
+		}
+	}
+	return Name;
 }
 
 FText UFINComputerDriveDesc::GetOverridenItemDescription_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {

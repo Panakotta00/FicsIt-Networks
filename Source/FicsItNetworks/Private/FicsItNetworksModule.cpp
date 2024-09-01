@@ -24,6 +24,7 @@
 #include "Patching/NativeHookManager.h"
 #include "Reflection/FINReflection.h"
 #include "Reflection/ReflectionHelper.h"
+#include "UI/FINEditLabel.h"
 #include "UI/FINStyle.h"
 #include "UObject/CoreRedirects.h"
 
@@ -116,12 +117,18 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 	UObject* InventorySlot = HookHelper.GetContext();
 	TObjectPtr<UObject>* WidgetPtr = HookHelper.GetOutVariablePtr<FObjectProperty>();
 	UUserWidget* Widget = Cast<UUserWidget>(WidgetPtr->Get());
-	AFINFileSystemState* State = UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(self);
-	if (State) {
-		UVerticalBox* MenuList = Cast<UVerticalBox>(Widget->GetWidgetFromName("VerticalBox_0"));
-		UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList);
+	UVerticalBox* MenuList = Cast<UVerticalBox>(Widget->GetWidgetFromName("VerticalBox_0"));
+
+	if (IsValid(UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(self))) {
+		UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList->GetOuter());
 		UUIDButton->InitSlotWidget(self);
 		MenuList->AddChildToVerticalBox(UUIDButton);
+	}
+
+	if (IsValid(UFINEditLabel::GetLabelContainerFromSlot(self).GetObject())) {
+		UFINEditLabel* EditLabel = NewObject<UFINEditLabel>(MenuList->GetOuter());
+		EditLabel->InitSlotWidget(self);
+		MenuList->AddChildToVerticalBox(EditLabel);
 	}
 }
 
@@ -185,7 +192,7 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 void FFicsItNetworksModule::StartupModule(){
 	FSlateStyleRegistry::UnRegisterSlateStyle(FFINStyle::GetStyleSetName());
 	FFINStyle::Initialize();
-	
+
 	CodersFileSystem::Tests::TestPath();
 	
 	GameStart = FDateTime::Now();

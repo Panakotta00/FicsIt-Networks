@@ -54,4 +54,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void LogRehandleAllEntries(UFINLog* Log);
+
+	UFUNCTION(Server, Reliable)
+	void SetLabel(UObject* Container, const FString& Label);
 };
