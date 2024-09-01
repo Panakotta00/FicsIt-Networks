@@ -1,12 +1,14 @@
 ﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
 
+#include "Reflection/Source/Static/FIRSourceStaticHooks.h"
+
 #include "FGFactoryConnectionComponent.h"
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableFactory.h"
 #include "Buildables/FGBuildableManufacturer.h"
 
 BeginClass(AFGBuildable, "Buildable", "Buildable", "The base class of all buildables.")
-Hook(UFIRBuildableHook)
+	Hook(UFIRBuildableHook)
 BeginSignal(ProductionChanged, "Production Changed", "Triggers when the production state of the buildable changes.")
 	SignalParam(0, RInt, state, "State", "The new production state.")
 EndSignal()

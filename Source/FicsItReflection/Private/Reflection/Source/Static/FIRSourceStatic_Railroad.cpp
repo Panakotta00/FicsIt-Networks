@@ -1,11 +1,18 @@
 ﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
 
 #include "Reflection/ReflectionHelper.h"
+#include "Reflection/Source/Static/FIRTrackGraph.h"
+#include "Reflection/Source/Static/FIRRailroadSignalBlock.h"
+#include "Reflection/Source/Static/FIRSourceStaticHooks.h"
+#include "Reflection/Source/Static/FIRTargetPoint.h"
+#include "Reflection/Source/Static/FIRTimeTableStop.h"
 
 #include "FGRailroadTimeTable.h"
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FGRailroadVehicleMovementComponent.h"
+#include "FGLocomotive.h"
 #include "FGTrain.h"
+#include "FGTrainStationIdentifier.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadStation.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
@@ -36,7 +43,7 @@ BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this tra
 	OutVal(2, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
 	Body()
 	FRailroadTrackPosition pos = self->GetTrackPosition();
-	if (!pos.IsValid()) throw FFIRReflectionException("Railroad track position of self is invalid");
+	if (!pos.IsValid()) throw FFIRException("Railroad track position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
 	offset = pos.Offset;
 	forward = pos.Forward;
@@ -146,7 +153,7 @@ BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this veh
     OutVal(2, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
     Body()
     FRailroadTrackPosition pos = self->GetTrackPosition();
-	if (!pos.IsValid()) throw FFIRReflectionException("Railroad Track Position of self is invalid");
+	if (!pos.IsValid()) throw FFIRException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
 	offset = pos.Offset;
 	forward = pos.Forward;
@@ -475,7 +482,7 @@ BeginFunc(getClosestTrackPosition, "Get Closeset Track Position", "Returns the c
     OutVal(3, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
     Body()
 	FRailroadTrackPosition pos = self->FindTrackPositionClosestToWorldLocation(worldPos);
-	if (!pos.IsValid()) throw FFIRReflectionException("Railroad Track Position of self is invalid");
+	if (!pos.IsValid()) throw FFIRException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
 	offset = pos.Offset;
 	forward = pos.Forward;
@@ -550,7 +557,7 @@ BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this con
     OutVal(2, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
     Body()
     FRailroadTrackPosition pos = self->GetTrackPosition();
-	if (!pos.IsValid()) throw FFIRReflectionException("Railroad Track Position of self is invalid");
+	if (!pos.IsValid()) throw FFIRException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
 	offset = pos.Offset;
 	forward = pos.Forward;
@@ -787,37 +794,37 @@ BeginProp(RBool, isValid, "Is Valid", "Is true if this signal block reference is
 	Return self->Block.IsValid();
 } EndProp()
 BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->IsOccupied();
 } EndProp()
 BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->HaveReservations();
 } EndProp()
 BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->IsPathBlock();
 } PropSet() {
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	self->Block.Pin()->SetIsPathBlock(Val);
 } EndProp()
 BeginProp(RInt, blockValidation, "Block Validation", "Returns the blocks validation status.") {
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	Return (int64)self->Block.Pin()->GetBlockValidation();
 } EndProp()
 BeginFunc(isOccupiedBy, "Is Occupied By", "Allows you to check if this block is occupied by a given train.") {
 	InVal(0, RObject<AFGTrain>, train, "Train", "The train you want to check if it occupies this block")
 	OutVal(1, RBool, isOccupied, "Is Occupied", "True if the given train occupies this block.")
 	Body()
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	isOccupied = self->Block.Pin()->IsOccupiedBy(train.Get());
 } EndFunc()
 BeginFunc(getOccupation, "Get Occupation", "Returns a list of trains that currently occupate the block.") {
 	OutVal(0, RArray<RTrace<AFGTrain>>, occupation, "Occupation", "A list of trains occupying the block.")
 	Body()
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Occupation;
-	for (TWeakObjectPtr<AFGRailroadVehicle> train : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetOccupiedBy(*self->Block.Pin())) {
+	for (TWeakObjectPtr<AFGRailroadVehicle> train : FFGRailroadSignalBlock_GetOccupiedBy(*self->Block.Pin())) {
 		if (train.IsValid()) Occupation.Add(Ctx.GetTrace() / train.Get());
 	}
 	occupation = Occupation;
@@ -825,9 +832,9 @@ BeginFunc(getOccupation, "Get Occupation", "Returns a list of trains that curren
 BeginFunc(getQueuedReservations, "Get Queued Reservations", "Returns a list of trains that try to reserve this block and wait for approval.") {
 	OutVal(0, RArray<RTrace<AFGTrain>>, reservations, "Reservations", "A list of trains that try to reserve this block and wait for approval.")
 	Body()
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Reservations;
-	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetQueuedReservations(*self->Block.Pin())) {
+	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FFGRailroadSignalBlock_GetQueuedReservations(*self->Block.Pin())) {
 		if (!Reservation.IsValid()) continue;
 		AFGTrain* Train = Reservation->Train.Get();
 		if (Train) Reservations.Add(Ctx.GetTrace() / Train);
@@ -837,9 +844,9 @@ BeginFunc(getQueuedReservations, "Get Queued Reservations", "Returns a list of t
 BeginFunc(getApprovedReservations, "Get Approved Reservations", "Returns a list of trains that are approved by this block.") {
 	OutVal(0, RArray<RTrace<AFGTrain>>, reservations, "Reservations", "A list of trains that are approved by this block.")
 	Body()
-	if (!self->Block.IsValid()) throw FFIRReflectionException(TEXT("Signalblock is invalid"));
+	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Reservations;
-	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FStaticReflectionSourceHelper::FFGRailroadSignalBlock_GetApprovedReservations(*self->Block.Pin())) {
+	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FFGRailroadSignalBlock_GetApprovedReservations(*self->Block.Pin())) {
 		if (!Reservation.IsValid()) continue;
 		AFGTrain* Train = Reservation->Train.Get();
 		if (Train) Reservations.Add(Ctx.GetTrace() / Train);

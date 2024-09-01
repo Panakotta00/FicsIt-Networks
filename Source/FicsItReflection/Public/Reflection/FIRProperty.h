@@ -8,7 +8,7 @@
 #include "FIRProperty.generated.h"
 
 UENUM(BlueprintType)
-enum EFIRRepPropertyFlags {
+enum EFIRPropertyFlags {
 	FIR_Prop_None			= 0,
 	FIR_Prop_Attrib			= 0b00000000001,
 	FIR_Prop_ReadOnly		= 0b00000000010,
@@ -27,7 +27,7 @@ enum EFIRRepPropertyFlags {
 	FIR_Prop_StaticProp		= 0b10000000000,
 };
 
-ENUM_CLASS_FLAGS(EFIRRepPropertyFlags)
+ENUM_CLASS_FLAGS(EFIRPropertyFlags)
 
 class UFIRProperty;
 
@@ -61,7 +61,7 @@ UCLASS(BlueprintType)
 class FICSITREFLECTION_API UFIRProperty : public UFIRBase {
 	GENERATED_BODY()
 public:
-	EFIRRepPropertyFlags PropertyFlags = FIR_Prop_Sync;
+	EFIRPropertyFlags PropertyFlags = FIR_Prop_Sync;
 	
 	/**
 	 * Returns the data type of the property
@@ -72,7 +72,7 @@ public:
 	/**
 	 * Returns the property type
 	 */
-	virtual EFIRRepPropertyFlags GetPropertyFlags() const { return PropertyFlags; }
+	virtual EFIRPropertyFlags GetPropertyFlags() const { return PropertyFlags; }
 
 	/**
 	 * Sets the property value in the given container.

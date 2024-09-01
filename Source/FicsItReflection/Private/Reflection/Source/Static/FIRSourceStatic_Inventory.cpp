@@ -1,6 +1,7 @@
 ﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
 
 #include "FGInventoryComponent.h"
+#include "FGInventoryLibrary.h"
 #include "FGItemCategory.h"
 #include "ItemAmount.h"
 #include "Replication/FGReplicationDetailActorOwnerInterface.h"

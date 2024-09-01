@@ -1,5 +1,7 @@
 ﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
 
+#include "Reflection/Source/Static/FIRSourceStaticHooks.h"
+
 #include "FGPipeConnectionComponent.h"
 #include "FGPipeSubsystem.h"
 #include "Buildables/FGBuildablePipeHyper.h"
@@ -8,7 +10,7 @@
 #include "Buildables/FGPipeHyperStart.h"
 
 BeginClass(AFGPipeHyperStart, "PipeHyperStart", "Pipe Hyper Start", "A actor that is a hypertube entrance buildable")
-Hook(UFIRPipeHyperStartHook)
+	Hook(UFIRPipeHyperStartHook)
 BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube entrance.")
 	SignalParam(0, RBool, success, "Sucess", "True if the transfer was sucessfull")
 EndSignal()

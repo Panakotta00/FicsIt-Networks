@@ -2,6 +2,7 @@
 
 #include "FGBuildableDoor.h"
 #include "FGGameState.h"
+#include "FGIconLibrary.h"
 #include "FGResourceSinkSubsystem.h"
 #include "Buildables/FGBuildableLightsControlPanel.h"
 #include "Buildables/FGBuildableLightSource.h"

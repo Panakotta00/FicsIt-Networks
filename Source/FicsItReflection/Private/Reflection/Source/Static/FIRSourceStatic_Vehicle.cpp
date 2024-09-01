@@ -4,6 +4,7 @@
 
 #include "FGHealthComponent.h"
 #include "Buildables/FGBuildableDockingStation.h"
+#include "Reflection/Source/Static/FIRTargetPoint.h"
 #include "WheeledVehicles/FGTargetPoint.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
 #include "WheeledVehicles/FGWheeledVehicle.h"
@@ -55,7 +56,7 @@ BeginFunc(setCurrentTarget, "Set Current Target", "Sets the target with the give
 	Body()
 	AFGDrivingTargetList* List = self->GetTargetList();
 	AFGTargetPoint* Target = List->FindTargetByIndex(index);
-	if (!Target) throw FFIRReflectionException("index out of range");
+	if (!Target) throw FFIRException("index out of range");
 	List->mCurrentTarget = Target;
 } EndFunc()
 BeginFunc(getTargetList, "Get Target List", "Returns the list of targets/path waypoints.") {
@@ -80,14 +81,14 @@ BeginFunc(getTarget, "Get Target", "Returns the target struct at with the given 
 	OutVal(0, RStruct<FFIRTargetPoint>, target, "Target", "The TargetPoint-Struct with the given index in the target list.")
 	Body()
 	AFGTargetPoint* Target = self->FindTargetByIndex(index);
-	if (!Target) throw FFIRReflectionException("index out of range");
+	if (!Target) throw FFIRException("index out of range");
 	target = (FIRAny)FFIRTargetPoint(Target);
 } EndFunc()
 BeginFunc(removeTarget, "Remove Target", "Removes the target with the given index from the target list.") {
 	InVal(0, RInt, index, "Index", "The index of the target point you want to remove from the target list.")
 	Body()
 	AFGTargetPoint* Target = self->FindTargetByIndex(index);
-	if (!Target) throw FFIRReflectionException( "index out of range");
+	if (!Target) throw FFIRException( "index out of range");
 	self->RemoveItem(Target);
 	Target->Destroy();
 } EndFunc()
@@ -95,7 +96,7 @@ BeginFunc(addTarget, "Add Target", "Adds the given target point struct at the en
 	InVal(0, RStruct<FFIRTargetPoint>, target, "Target", "The target point you want to add.")
 	Body()
 	AFGTargetPoint* Target = target.ToWheeledTargetPoint(self);
-	if (!Target) throw FFIRReflectionException("failed to create target");
+	if (!Target) throw FFIRException("failed to create target");
 	self->InsertItem(Target, self->mLast);
 } EndFunc()
 BeginFunc(setTarget, "Set Target", "Allows to set the target at the given index to the given target point struct.") {
@@ -103,7 +104,7 @@ BeginFunc(setTarget, "Set Target", "Allows to set the target at the given index 
 	InVal(1, RStruct<FFIRTargetPoint>, target, "Target", "The new target point struct for the given index.")
 	Body()
 	AFGTargetPoint* Target = self->FindTargetByIndex(index);
-	if (!Target) throw FFIRReflectionException("index out of range");
+	if (!Target) throw FFIRException("index out of range");
 	Target->SetActorLocation(target.Pos);
 	Target->SetActorRotation(target.Rot);
 	Target->SetTargetSpeed(target.Speed);

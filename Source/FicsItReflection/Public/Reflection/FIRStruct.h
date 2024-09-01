@@ -90,7 +90,7 @@ public:
 	/**
 	 * Trys to find a property with the given name
 	 */
-	UFIRProperty* FindFIRProperty(const FString& Name, EFIRRepPropertyFlags FilterFlags = FIR_Prop_Attrib);
+	UFIRProperty* FindFIRProperty(const FString& Name, EFIRPropertyFlags FilterFlags = FIR_Prop_Attrib);
 
 	/**
 	 * Trys to find a function with the given name

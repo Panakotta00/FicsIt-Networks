@@ -2,7 +2,7 @@
 
 #include "tracy/Tracy.hpp"
 
-UFIRProperty* UFIRStruct::FindFIRProperty(const FString& Name, EFIRRepPropertyFlags FilterFlags) {
+UFIRProperty* UFIRStruct::FindFIRProperty(const FString& Name, EFIRPropertyFlags FilterFlags) {
 	ZoneScoped;
 	FScopeLock nameCacheLock(&NameCacheMutex);
 	if (Name2Property.IsEmpty()) {

@@ -1,5 +1,7 @@
 ﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
 
+#include "Reflection/Source/Static/FIRSourceStaticHooks.h"
+
 #include "FGPowerCircuit.h"
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"

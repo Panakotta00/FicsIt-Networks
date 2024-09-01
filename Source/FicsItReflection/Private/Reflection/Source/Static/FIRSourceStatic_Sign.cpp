@@ -147,7 +147,7 @@ BeginFunc(setTextElements, "Set Text Elements", "Sets all text elements and thei
 	InVal(0, RArray<RString>, textElements, "Text Elements", "The element names for all text elements.")
 	InVal(1, RArray<RString>, textElementValues, "Text Element Values", "The values for all text elements.")
 	Body()
-	if (textElements.Num() != textElementValues.Num()) throw FFIRReflectionException(TEXT("Count of element names and element values are not the same."));
+	if (textElements.Num() != textElementValues.Num()) throw FFIRException(TEXT("Count of element names and element values are not the same."));
 	self->TextElementData.Empty();
 	for (int i = 0; i < textElements.Num(); ++i) {
 		self->TextElementData.Add(textElements[i].GetString(), textElementValues[i].GetString());
@@ -157,7 +157,7 @@ BeginFunc(setIconElements, "Set Icon Elements", "Sets all icon elements and thei
 	InVal(0, RArray<RString>, iconElements, "Icon Elements", "The element names for all icon elements.")
 	InVal(1, RArray<RInt>, iconElementValues, "Icon Element Values", "The values for all icon elements.")
 	Body()
-	if (iconElements.Num() != iconElementValues.Num()) throw FFIRReflectionException(TEXT("Count of element names and element values are not the same."));
+	if (iconElements.Num() != iconElementValues.Num()) throw FFIRException(TEXT("Count of element names and element values are not the same."));
 	self->IconElementData.Empty();
 	for (int i = 0; i < iconElements.Num(); ++i) {
 		self->IconElementData.Add(iconElements[i].GetString(), iconElementValues[i].GetInt());
@@ -180,7 +180,7 @@ BeginFunc(getTextElement, "Get Text Element", "Gets a text element with the give
 	OutVal(1, RInt, value, "Value", "The value of the text element")
 	Body()
 	FString* Element = self->TextElementData.Find(elementName);
-	if (!Element) throw FFIRReflectionException(TEXT("No element with the given name found"));
+	if (!Element) throw FFIRException(TEXT("No element with the given name found"));
 	value = *Element;
 } EndFunc()
 BeginFunc(getIconElement, "Get Icon Element", "Gets a icon element with the given element name.") {
@@ -188,7 +188,7 @@ BeginFunc(getIconElement, "Get Icon Element", "Gets a icon element with the give
 	OutVal(1, RInt, value, "Value", "The value of the icon element")
 	Body()
 	int* Element = self->IconElementData.Find(elementName);
-	if (!Element) throw FFIRReflectionException(TEXT("No element with the given name found"));
+	if (!Element) throw FFIRException(TEXT("No element with the given name found"));
 	value = (FIRInt)*Element;
 } EndFunc()
 EndStruct()
