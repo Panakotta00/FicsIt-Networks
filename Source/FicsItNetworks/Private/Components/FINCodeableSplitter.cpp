@@ -117,6 +117,17 @@ bool AFINCodeableSplitter::netFunc_canOutput(int output) {
 	return outputQueue.Num() < 2;
 }
 
+UFGFactoryConnectionComponent* AFINCodeableSplitter::netFunc_getConnectorByIndex(int outputIndex) {
+	switch (FMath::Abs(outputIndex) % 3) {
+		case 0:
+			return Output2;
+		case 1:
+			return Output1;
+		default:
+			return Output3;
+	}
+}
+
 void AFINCodeableSplitter::netSig_ItemRequest_Implementation(FInventoryItem item) {}
 void AFINCodeableSplitter::netSig_ItemOutputted_Implementation(int output, FInventoryItem item) {}
 
