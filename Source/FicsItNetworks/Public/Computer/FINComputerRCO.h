@@ -53,7 +53,7 @@ public:
 	void CopyDataItem(UFGInventoryComponent* InProviderInc, int InProviderIdx, UFGInventoryComponent* InFromInv, int InFromIdx, UFGInventoryComponent* InToInv, int InToIdx);
 
 	UFUNCTION(Server, Reliable)
-	void LogRehandleAllEntries(UFINLog* Log);
+	void LogRehandleAllEntries(UFILLogContainer* Log);
 
 	UFUNCTION(Server, Reliable)
 	void SetLabel(UObject* Container, const FString& Label);

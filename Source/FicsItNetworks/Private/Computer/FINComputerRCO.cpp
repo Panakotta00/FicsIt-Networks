@@ -176,7 +176,7 @@ bool UFINComputerRCO::GPUT2KeyCharEvent_Validate(AFINComputerGPUT2* GPU, const F
 	return true;
 }
 
-void UFINComputerRCO::LogRehandleAllEntries_Implementation(UFINLog* Log) {
+void UFINComputerRCO::LogRehandleAllEntries_Implementation(UFILLogContainer* Log) {
 	Log->RehandleAllEntries();
 }
 

@@ -1,8 +1,8 @@
 ﻿using UnrealBuildTool;
 
-public class FicsItReflection : ModuleRules
+public class FicsItLogLibrary : ModuleRules
 {
-    public FicsItReflection(ReadOnlyTargetRules Target) : base(Target)
+    public FicsItLogLibrary(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -10,9 +10,7 @@ public class FicsItReflection : ModuleRules
             new string[]
             {
                 "Core",
-                "Slate",
-                "SlateCore",
-                "SML",
+                "FactoryGame",
             }
         );
 
@@ -21,8 +19,8 @@ public class FicsItReflection : ModuleRules
             {
                 "CoreUObject",
                 "Engine",
-                "FactoryGame",
-                "FicsItLogLibrary",
+                "Slate",
+                "SlateCore"
             }
         );
     }

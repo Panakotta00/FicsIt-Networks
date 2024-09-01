@@ -28,7 +28,7 @@ struct FICSITNETWORKS_API FFINKernelCrash : public FFINException {
 };
 
 class UFINKernelSystem;
-class UFINLog;
+class UFILLogContainer;
 
 class FICSITNETWORKS_API FFINKernelListener : public CodersFileSystem::Listener {
 private:
@@ -58,7 +58,7 @@ private:
 	UPROPERTY()
 	UFINKernelAudioController* Audio = nullptr;
 	UPROPERTY()
-	UFINLog* Log = nullptr;
+	UFILLogContainer* Log = nullptr;
 	TArray<TScriptInterface<IFINPciDeviceInterface>> PCIDevices;
 	FFINKernelFSRoot FileSystem;
 	FCriticalSection MutexDevDevice;
@@ -258,12 +258,12 @@ public:
 	/**
 	 * Returns the currently used logging mechanism
 	 */
-	UFINLog* GetLog() const;
+	UFILLogContainer* GetLog() const;
 
 	/**
 	 * Sets the currently used logging mechanism
 	 */
-	void SetLog(UFINLog* InLog);
+	void SetLog(UFILLogContainer* InLog);
 	
 
 	/**

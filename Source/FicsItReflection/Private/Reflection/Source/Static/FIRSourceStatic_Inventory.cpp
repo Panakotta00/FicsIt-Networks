@@ -3,6 +3,7 @@
 #include "FGInventoryComponent.h"
 #include "FGInventoryLibrary.h"
 #include "FGItemCategory.h"
+#include "FicsItLogLibrary.h"
 #include "ItemAmount.h"
 #include "Replication/FGReplicationDetailActorOwnerInterface.h"
 
@@ -82,7 +83,7 @@ BeginProp(RInt, size, "Size", "The count of available item stack slots this inve
 } EndProp()
 BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click into a inventory)") {
 	Body()
-	UFIRLogLibrary::Log(FIR_Log_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call sort!"));
+	UFILogLibrary::Log(FIL_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call sort!"));
 	if (self->GetOwner()->Implements<UFGReplicationDetailActorOwnerInterface>()) {
 		AFGReplicationDetailActor* RepDetailActor = Cast<IFGReplicationDetailActorOwnerInterface>(self->GetOwner())->GetReplicationDetailActor();
 		if (RepDetailActor) {
@@ -96,7 +97,7 @@ BeginFunc(swapStacks, "Swap Stacks", "Swaps two given stacks inside the inventor
 	InVal(1, RInt, index2, "Index 2", "The index of the second stack in the inventory.")
 	OutVal(2, RBool, successful, "Successful", "True if the swap was successful.")
 	Body()
-	UFIRLogLibrary::Log(FIR_Log_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call swapStacks!"));
+	UFILogLibrary::Log(FIL_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call swapStacks!"));
 	successful = UFGInventoryLibrary::MoveInventoryItem(self, index1, self, index2);
 } EndFunc()
 BeginFunc(flush, "Flush", "Removes all discardable items from the inventory completely. They will be gone! No way to get them back!", 0) {

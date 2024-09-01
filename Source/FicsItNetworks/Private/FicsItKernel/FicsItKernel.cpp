@@ -298,7 +298,7 @@ void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
 	if (Processor) Processor->Stop(true);
 
 	if (GetLog()) {
-		GetLog()->PushLogEntry(EFINLogVerbosity::FIN_Log_Verbosity_Fatal, KernelCrash->GetMessage());
+		GetLog()->PushLogEntry(EFILLogVerbosity::FIN_Log_Verbosity_Fatal, KernelCrash->GetMessage());
 	}
 }
 
@@ -314,11 +314,11 @@ TSharedPtr<FFINKernelCrash> UFINKernelSystem::RecalculateResources(ERecalc InCom
 	return nullptr;
 }
 
-UFINLog* UFINKernelSystem::GetLog() const {
+UFILLogContainer* UFINKernelSystem::GetLog() const {
 	return Log;
 }
 
-void UFINKernelSystem::SetLog(UFINLog* InLog) {
+void UFINKernelSystem::SetLog(UFILLogContainer* InLog) {
 	Log = InLog;
 }
 

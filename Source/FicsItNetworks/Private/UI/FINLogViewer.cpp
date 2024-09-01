@@ -60,7 +60,7 @@ UFINLogViewer::UFINLogViewer(const FObjectInitializer& ObjectInitializer) : Supe
 	Style = FFINStyle::Get().GetWidgetStyle<FFINLogViewerStyle>("LogViewer");
 }
 
-void UFINLogViewer::SetLog(UFINLog* InLog) {
+void UFINLogViewer::SetLog(UFILLogContainer* InLog) {
 	if (Log) Log->OnLogEntriesUpdated.RemoveDynamic(this, &UFINLogViewer::UpdateLogEntries);
 	Log = InLog;
 	if (Log) Log->OnLogEntriesUpdated.AddDynamic(this, &UFINLogViewer::UpdateLogEntries);
@@ -170,7 +170,7 @@ FReply SFINLogViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& In
 	return FReply::Unhandled();
 }
 
-void SFINLogViewer::UpdateEntries(UFINLog* Log) {
+void SFINLogViewer::UpdateEntries(UFILLogContainer* Log) {
 	bool bBottom = ListView->GetScrollDistanceRemaining().IsNearlyZero() || !ListView->IsScrollbarNeeded();
 	
 	Entries.Empty();

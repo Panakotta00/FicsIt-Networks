@@ -125,9 +125,9 @@ class UFINLogViewer : public UWidget {
 	UFINLogViewer(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
-	void SetLog(UFINLog* InLog);
+	void SetLog(UFILLogContainer* InLog);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FORCEINLINE UFINLog* GetLog() { return Log; }
+	FORCEINLINE UFILLogContainer* GetLog() { return Log; }
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateLogEntries();
@@ -142,7 +142,7 @@ public:
 	FFINLogViewerStyle Style;
 
 	UPROPERTY()
-	UFINLog* Log = nullptr;
+	UFILLogContainer* Log = nullptr;
 };
 
 class SFINLogViewer : public SCompoundWidget {
@@ -167,7 +167,7 @@ public:
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	// End SWidget
 
-	void UpdateEntries(UFINLog* InLog);
+	void UpdateEntries(UFILLogContainer* InLog);
 	
 private:
 	TSharedRef<ITableRow> OnGenerateRow(TSharedRef<FFINLogEntry> Entry, const TSharedRef<class STableViewBase>& ListView);

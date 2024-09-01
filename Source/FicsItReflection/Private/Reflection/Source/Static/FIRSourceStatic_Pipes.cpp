@@ -32,7 +32,6 @@ BeginFunc(getConnection, "Get Connection", "Returns the connected pipe connectio
 } EndFunc()
 EndClass()
 
-
 BeginClass(UFGPipeConnectionComponent, "PipeConnection", "Pipe Connection", "A actor component that is a connection point to which a fluid pipe can get attached to.")
 //Hook(UFIRFactoryConnectorHook)
 BeginProp(RFloat, fluidBoxContent, "Fluid Box Content", "Returns the amount of fluid this fluid container contains") {

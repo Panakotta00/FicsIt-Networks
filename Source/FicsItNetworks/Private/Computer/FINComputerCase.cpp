@@ -47,7 +47,7 @@ AFINComputerCase::AFINComputerCase() {
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
-	Log = CreateDefaultSubobject<UFINLog>("Log");
+	Log = CreateDefaultSubobject<UFILLogContainer>("Log");
 	SetReplicates(true);
 	bReplicateUsingRegisteredSubObjectList = true;
 	AddReplicatedSubObject(Log);

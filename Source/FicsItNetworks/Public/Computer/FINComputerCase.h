@@ -12,7 +12,7 @@ class AFINComputerNetworkCard;
 class AFINComputerDriveHolder;
 class AFINComputerMemory;
 class AFINComputerProcessor;
-class UFINLog;
+class UFILLogContainer;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINStateEEPROM*, EEPROM);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
@@ -38,7 +38,7 @@ public:
 	UAudioComponent* Speaker = nullptr;
 
 	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
-	UFINLog* Log = nullptr;
+	UFILLogContainer* Log = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
 	int LastTabIndex = 0;

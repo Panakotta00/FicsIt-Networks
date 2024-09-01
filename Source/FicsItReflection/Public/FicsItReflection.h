@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIRAnyValue.h"
+#include "Reflection/FIRClass.h"
 #include "Modules/ModuleManager.h"
 #include "FicsItReflection.generated.h"
 

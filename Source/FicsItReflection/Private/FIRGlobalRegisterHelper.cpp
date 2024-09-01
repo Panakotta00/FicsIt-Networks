@@ -1,8 +1,8 @@
-﻿#include "FINGlobalRegisterHelper.h"
+﻿#include "FIRGlobalRegisterHelper.h"
 
-FFINGlobalRegisterHelper FFINGlobalRegisterHelper::Instance;
+FFIRGlobalRegisterHelper FFIRGlobalRegisterHelper::Instance;
 
-void FFINGlobalRegisterHelper::Register() {
+void FFIRGlobalRegisterHelper::Register() {
 	TArray<int> priorities;
 	Get().FunctionsToCall.GetKeys(priorities);
 	priorities.Sort();
@@ -15,6 +15,6 @@ void FFINGlobalRegisterHelper::Register() {
 	Get().FunctionsToCall.Empty();
 }
 
-void FFINGlobalRegisterHelper::AddFunction(const RegisterFunction& Func, int Priority) {
+void FFIRGlobalRegisterHelper::AddFunction(const RegisterFunction& Func, int Priority) {
 	Get().FunctionsToCall.FindOrAdd(Priority).Add(Func);
 }

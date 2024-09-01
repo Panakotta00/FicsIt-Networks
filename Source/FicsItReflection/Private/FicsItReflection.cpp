@@ -82,6 +82,8 @@ void FFicsItReflectionModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINFactoryConnectorHook"), TEXT("/Script/FicsItReflection.UFIRFactoryConnectorHook")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINPipeConnectorHook"), TEXT("/Script/FicsItReflection.UFIRPipeConnectorHook")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINPowerCircuitHook"), TEXT("/Script/FicsItReflection.UFIRPowerCircuitHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINRailroadSwitchForce"), TEXT("/Script/FicsItReflection.FFIRRailroadSwitchForce")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINFactoryConnectorSettings"), TEXT("/Script/FicsItReflection.FFIRFactoryConnectorSettings")});
 
 	FCoreRedirects::AddRedirectList(redirects, "FicsIt-Reflection");
 }

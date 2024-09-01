@@ -266,8 +266,8 @@ namespace FINLua {
 
 				int verbosity = luaL_checknumber(L, 1);
 				FString text = luaFIN_checkFString(L, 2);
-				verbosity = FMath::Clamp(verbosity, 0, EFINLogVerbosity::FIN_Log_Verbosity_Max);
-				kernel->GetLog()->PushLogEntry((EFINLogVerbosity)verbosity, text);
+				verbosity = FMath::Clamp(verbosity, 0, EFILLogVerbosity::FIN_Log_Verbosity_Max);
+				kernel->GetLog()->PushLogEntry((EFILLogVerbosity)verbosity, text);
 				return 0;
 			}
 
