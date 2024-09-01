@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Network/Signals/FINSignalData.h"
-#include "Network/FINNetworkTrace.h"
+#include "FIRTrace.h"
 #include "FINSignalListener.generated.h"
 
 /**

@@ -1,6 +1,8 @@
 ﻿#pragma once
 
-#include "Network/FINNetworkTrace.h"
+#include "CoreMinimal.h"
+#include "FIRTrace.h"
+#include "UObject/Interface.h"
 #include "FINGPUInterface.generated.h"
 
 UINTERFACE(Blueprintable)

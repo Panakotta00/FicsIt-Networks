@@ -9,7 +9,7 @@
 #include "HAL/PlatformFileManager.h"
 #include "Misc/DefaultValueHelper.h"
 #include "Misc/Paths.h"
-#include "Reflection/FINUReflectionSource.h"
+#include "Reflection/Source/FIRSourceUObject.h"
 #include "Subsystem/SubsystemActorManager.h"
 #include "Utils/FINUtils.h"
 

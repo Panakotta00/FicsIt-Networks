@@ -1,6 +1,7 @@
 ﻿#include "FILLogContainer.h"
 
 #include "FGPlayerController.h"
+#include "FicsItLogLibrary.h"
 
 UFILLogContainer::UFILLogContainer() {
 	SetIsReplicatedByDefault(true);
@@ -10,14 +11,14 @@ void UFILLogContainer::BeginPlay() {
 	Super::BeginPlay();
 
 	if (!GetOwner()->HasAuthority()) {
-		GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFINComputerRCO>()->LogRehandleAllEntries(this);
+		GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFILRCO>()->LogRehandleAllEntries(this);
 	}
 }
 
 void UFILLogContainer::Tick() {
 	FScopeLock ScopeLock(&LogEntriesToAddMutex);
 	if (!LogEntriesToAdd.IsEmpty()) {
-		TArray<FFILLogEntry> Chunk(LogEntriesToAdd.GetData(), FMath::Min(10, LogEntriesToAdd.Num()));
+		TArray<FFILEntry> Chunk(LogEntriesToAdd.GetData(), FMath::Min(10, LogEntriesToAdd.Num()));
 		LogEntriesToAdd.RemoveAt(0, Chunk.Num());
 		Multicast_AddLogEntries(Chunk);
 	} else if (bForceEntriesUpdate) {
@@ -31,7 +32,7 @@ void UFILLogContainer::Tick() {
 void UFILLogContainer::PushLogEntry(TEnumAsByte<EFILLogVerbosity> Verbosity, const FString& Content) {
 	if (!this) return;
 	FScopeLock ScopeLock(&LogEntriesToAddMutex);
-	LogEntriesToAdd.Push(FFILLogEntry(FDateTime::UtcNow(), Verbosity, Content));
+	LogEntriesToAdd.Push(FFILEntry(FDateTime::UtcNow(), Verbosity, Content));
 }
 
 void UFILLogContainer::EmptyLog() {
@@ -41,13 +42,13 @@ void UFILLogContainer::EmptyLog() {
 	bForceEntriesUpdate = true;
 }
 
-const TArray<FFILLogEntry>& UFILLogContainer::GetLogEntries() {
+const TArray<FFILEntry>& UFILLogContainer::GetLogEntries() {
 	return LogEntries;
 }
 
 FString UFILLogContainer::GetLogAsRichText() {
 	FString Text;
-	for (FFILLogEntry Entry : LogEntries) {
+	for (FFILEntry Entry : LogEntries) {
 		FString TimestampText = Entry.Timestamp.ToString();
 		FString VerbosityText = Entry.GetVerbosityAsText().ToString();
 		Text.Append(FString::Printf(TEXT("<%s>%s [%s] %s</>\n"), *VerbosityText, *TimestampText, *VerbosityText, *Entry.Content));
@@ -64,7 +65,7 @@ void UFILLogContainer::Multicast_EmptyLog_Implementation() {
 	OnLogEntriesUpdated.Broadcast();
 }
 
-void UFILLogContainer::Multicast_AddLogEntries_Implementation(const TArray<FFILLogEntry>& InLogEntries) {
+void UFILLogContainer::Multicast_AddLogEntries_Implementation(const TArray<FFILEntry>& InLogEntries) {
 	LogEntries.Append(InLogEntries);
 	if (LogEntries.Num() > MaxLogEntries) LogEntries.RemoveAt(0, LogEntries.Num() - MaxLogEntries);
 	OnLogEntriesUpdated.Broadcast();

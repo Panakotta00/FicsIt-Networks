@@ -95,7 +95,7 @@ BeginClass(UFIRObjectProperty, "ObjectProperty", "Object Property", "A reflectio
 BeginFunc(getSubclass, "Get Subclass", "Returns the subclass type of this object. Meaning, the stored objects need to be of this type.") {
 	OutVal(0, RObject<UFIRClass>, subclass, "Subclass", "The subclass of this object.")
     Body()
-    subclass = (FIRObj) FFicsItReflectionModule::Get()->FindClass(self->GetSubclass());
+    subclass = (FIRObj) FFicsItReflectionModule::Get().FindClass(self->GetSubclass());
 } EndFunc()
 EndClass()
 
@@ -103,7 +103,7 @@ BeginClass(UFIRTraceProperty, "TraceProperty", "Trace Property", "A reflection o
 BeginFunc(getSubclass, "Get Subclass", "Returns the subclass type of this trace. Meaning, the stored traces need to be of this type.") {
 	OutVal(0, RObject<UFIRClass>, subclass, "Subclass", "The subclass of this trace.")
     Body()
-    subclass = (FIRObj) FFicsItReflectionModule::Get()->FindClass(self->GetSubclass());
+    subclass = (FIRObj) FFicsItReflectionModule::Get().FindClass(self->GetSubclass());
 } EndFunc()
 EndClass()
 
@@ -111,7 +111,7 @@ BeginClass(UFIRClassProperty, "ClassProperty", "Class Property", "A reflection o
 BeginFunc(getSubclass, "Get Subclass", "Returns the subclass type of this class. Meaning, the stored classes need to be of this type.") {
 	OutVal(0, RObject<UFIRClass>, subclass, "Subclass", "The subclass of this class property.")
     Body()
-    subclass = (FIRObj) FFicsItReflectionModule::Get()->FindClass(self->GetSubclass());
+    subclass = (FIRObj) FFicsItReflectionModule::Get().FindClass(self->GetSubclass());
 } EndFunc()
 EndClass()
 
@@ -119,7 +119,7 @@ BeginClass(UFIRStructProperty, "StructProperty", "Struct Property", "A reflectio
 BeginFunc(getSubclass, "Get Subclass", "Returns the subclass type of this struct. Meaning, the stored structs need to be of this type.") {
 	OutVal(0, RObject<UFIRStruct>, subclass, "Subclass", "The subclass of this struct.")
     Body()
-    subclass = (FIRObj) FFicsItReflectionModule::Get()->FindStruct(self->GetInner());
+    subclass = (FIRObj) FFicsItReflectionModule::Get().FindStruct(self->GetInner());
 } EndFunc()
 EndClass()
 

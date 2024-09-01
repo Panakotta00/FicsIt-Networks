@@ -6,7 +6,7 @@ class FFINReflectionUIContext;
 class UFIRSignal;
 class UFIRClass;
 class UFIRStruct;
-class UFINFunction;
+class UFIRFunction;
 class UFIRProperty;
 
 enum EFINReflectionFilterState {
@@ -17,7 +17,7 @@ enum EFINReflectionFilterState {
 
 TSharedRef<SWidget> GenerateDataTypeIcon(UFIRProperty* Prop, FFINReflectionUIContext* Context);
 TSharedRef<SWidget> GeneratePropTypeIcon(UFIRProperty* Prop, FFINReflectionUIContext* Context);
-TSharedRef<SWidget> GenerateFuncTypeIcon(UFINFunction* Func, FFINReflectionUIContext* Context);
+TSharedRef<SWidget> GenerateFuncTypeIcon(UFIRFunction* Func, FFINReflectionUIContext* Context);
 
 class FFINReflectionUIEntry;
 
@@ -108,7 +108,7 @@ public:
 
 class FFINReflectionUIFunction : public FFINReflectionUIEntry {
 private:
-	UFINFunction* Function;
+	UFIRFunction* Function;
 
 protected:
 	virtual void LoadChildren() override;
@@ -116,7 +116,7 @@ protected:
 public:
 	TArray<TSharedPtr<FFINReflectionUIEntry>> Parameters;
 	
-	FFINReflectionUIFunction(const TWeakPtr<FFINReflectionUIEntry>& Parent, UFINFunction* Function, FFINReflectionUIContext* Context) : FFINReflectionUIEntry(Parent, Context), Function(Function) {}
+	FFINReflectionUIFunction(const TWeakPtr<FFINReflectionUIEntry>& Parent, UFIRFunction* Function, FFINReflectionUIContext* Context) : FFINReflectionUIEntry(Parent, Context), Function(Function) {}
 
 	virtual TSharedRef<SWidget> GetDetailsWidget() override;
 	virtual TSharedRef<SWidget> GetShortPreview() override;

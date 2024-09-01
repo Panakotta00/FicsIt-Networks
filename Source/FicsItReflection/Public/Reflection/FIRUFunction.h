@@ -13,6 +13,6 @@ public:
 	UPROPERTY()
 	UFIRArrayProperty* VarArgsProperty = nullptr;
 
-	// Begin UFINFunction
+	// Begin UFIRFunction
 	virtual TArray<FFIRAnyValue> Execute(const FFIRExecutionContext& Ctx, const TArray<FFIRAnyValue>& Params) const override;
 };

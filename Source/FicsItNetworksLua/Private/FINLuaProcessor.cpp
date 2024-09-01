@@ -1,14 +1,13 @@
 #include "FINLuaProcessor.h"
 
 #include "FicsItNetworksLuaModule.h"
-#include "FicsItKernel/Logging.h"
+#include "FILLogContainer.h"
 #include "FINStateEEPROMLua.h"
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
-#include "Network/FINNetworkTrace.h"
+#include "FIRTrace.h"
 #include "Network/FINNetworkUtils.h"
-#include "Reflection/FINSignal.h"
 #include "FINLua/LuaUtil.h"
 
 #include "tracy/Tracy.hpp"
@@ -523,7 +522,7 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 
 void UFINLuaProcessor::LuaTick() {
 	ZoneScoped;
-	FFINLogScope LogScope(GetKernel()->GetLog());
+	FFILLogScope LogScope(GetKernel()->GetLog());
 	try {
 		// reset out of time
 		lua_sethook(luaThread, UFINLuaProcessor::luaHook, LUA_MASKCOUNT, tickHelper.steps());
@@ -614,7 +613,7 @@ TArray<FINLua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
 void luaWarnF(void* ud, const char* msg, int tocont) {
 	UFINLuaProcessor* Processor = static_cast<UFINLuaProcessor*>(ud);
 
-	Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Warning, UTF8_TO_TCHAR(msg));
+	Processor->GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, UTF8_TO_TCHAR(msg));
 }
 
 void UFINLuaProcessor::Reset() {
@@ -709,7 +708,7 @@ int UFINLuaProcessor::DoSignal(lua_State* L) {
 	if (signal.Signal) lua_pushstring(L, TCHAR_TO_UTF8(*signal.Signal->GetInternalName()));
 	else lua_pushnil(L);
 	FINLua::luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(sender));
-	for (const FFINAnyNetworkValue& Value : signal.Data) {
+	for (const FFIRAnyValue& Value : signal.Data) {
 		FINLua::luaFIN_pushNetworkValue(L, Value, sender);
 		props++;
 	}

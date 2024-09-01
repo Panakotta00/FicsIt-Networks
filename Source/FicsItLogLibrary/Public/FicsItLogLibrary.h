@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FILLogEntry.h"
+#include "Module/GameInstanceModule.h"
 #include "Modules/ModuleManager.h"
 #include "FicsItLogLibrary.generated.h"
 
@@ -24,4 +25,21 @@ class FFicsItLogLibraryModule : public IModuleInterface {
 public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
+};
+
+UCLASS()
+class FICSITLOGLIBRARY_API UFILRCO : public UFGRemoteCallObject {
+    GENERATED_BODY()
+public:
+    UFUNCTION(Server, Reliable)
+    void LogRehandleAllEntries(UFILLogContainer* Log);
+};
+
+UCLASS()
+class FICSITLOGLIBRARY_API UFILGameInstanceModule : public UGameInstanceModule {
+    GENERATED_BODY()
+
+    UFILGameInstanceModule() {
+        RemoteCallObjects.Add(UFILRCO::StaticClass());
+    }
 };

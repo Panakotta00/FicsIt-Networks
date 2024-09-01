@@ -21,7 +21,9 @@ public class FicsItNetworksLua : ModuleRules
 			"SML",
             "FicsItNetworks",
             "Eris",
-            "Tracy"
+            "Tracy",
+            "FicsItLogLibrary",
+            "FicsItReflection",
 		});
 
         PublicIncludePaths.Add("Public");

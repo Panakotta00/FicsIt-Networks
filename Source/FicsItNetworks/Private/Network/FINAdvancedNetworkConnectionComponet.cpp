@@ -93,7 +93,7 @@ bool UFINAdvancedNetworkConnectionComponent::IsPortOpen(int Port) {
 	return false;
 }
 
-void UFINAdvancedNetworkConnectionComponent::HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+void UFINAdvancedNetworkConnectionComponent::HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFIRAnyValue>& Data) {
 	OnNetworkMessageRecieved.Broadcast(InID, Sender, Receiver, Port, Data);
 }
 

@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "FIRInstancedStruct.generated.h"
 
-#define MakeDynamicStruct(Type, ...) MakeShared<FFINDynamicStructHolder>(TBaseStructure<Type>::Get(), new Type{__VA_ARGS__})
+#define MakeDynamicStruct(Type, ...) MakeShared<FFIRInstancedStruct>(TBaseStructure<Type>::Get(), new Type{__VA_ARGS__})
 
 template<typename T>
-class TFINDynamicStruct;
+class TFIRInstancedStruct;
 
 /**
  * This structure allows you to store any kind of UStruct
@@ -68,8 +68,8 @@ public:
 	}
 
 	template<typename T>
-	operator TFINDynamicStruct<T>() const {
-		return TFINDynamicStruct<T>(*this);
+	operator TFIRInstancedStruct<T>() const {
+		return TFIRInstancedStruct<T>(*this);
 	}
 };
 
@@ -90,31 +90,31 @@ struct TStructOpsTypeTraits<FFIRInstancedStruct> : public TStructOpsTypeTraitsBa
 };
 
 template<typename T>
-class TFINDynamicStruct : public FFIRInstancedStruct {
+class TFIRInstancedStruct : public FFIRInstancedStruct {
 public:
-	TFINDynamicStruct() : FFIRInstancedStruct(TBaseStructure<T>::Get()) {}
-	TFINDynamicStruct(UScriptStruct* Struct) : FFIRInstancedStruct(Struct) { check(Struct->IsChildOf(TBaseStructure<T>::Get())) }
-	TFINDynamicStruct(UScriptStruct* Struct, void* Data) : FFIRInstancedStruct(Struct, Data) { check(Struct->IsChildOf(TBaseStructure<T>::Get())) }
+	TFIRInstancedStruct() : FFIRInstancedStruct(TBaseStructure<T>::Get()) {}
+	TFIRInstancedStruct(UScriptStruct* Struct) : FFIRInstancedStruct(Struct) { check(Struct->IsChildOf(TBaseStructure<T>::Get())) }
+	TFIRInstancedStruct(UScriptStruct* Struct, void* Data) : FFIRInstancedStruct(Struct, Data) { check(Struct->IsChildOf(TBaseStructure<T>::Get())) }
 	template<typename K>
-	TFINDynamicStruct(const TFINDynamicStruct<K>& Other) : FFIRInstancedStruct(FFIRInstancedStruct::Copy(Other.GetStruct(), Other.GetData())) {
+	TFIRInstancedStruct(const TFIRInstancedStruct<K>& Other) : FFIRInstancedStruct(FFIRInstancedStruct::Copy(Other.GetStruct(), Other.GetData())) {
 		check(Other.GetStruct()->IsChildOf(TBaseStructure<T>::Get()));
 	}
-	TFINDynamicStruct(const FFIRInstancedStruct& Other) : FFIRInstancedStruct(FFIRInstancedStruct::Copy(Other.GetStruct(), Other.GetData())) {
+	TFIRInstancedStruct(const FFIRInstancedStruct& Other) : FFIRInstancedStruct(FFIRInstancedStruct::Copy(Other.GetStruct(), Other.GetData())) {
 		check(Other.GetStruct()->IsChildOf(TBaseStructure<T>::Get()));
 	}
 	template<typename K>
-    TFINDynamicStruct(const K& Other) : FFIRInstancedStruct(FFIRInstancedStruct::Copy(TBaseStructure<K>::Get(), &Other)) {
+    TFIRInstancedStruct(const K& Other) : FFIRInstancedStruct(FFIRInstancedStruct::Copy(TBaseStructure<K>::Get(), &Other)) {
 		check(TBaseStructure<K>::Get()->IsChildOf(TBaseStructure<T>::Get()));
 	}
 
 	template<typename K>
-	TFINDynamicStruct<T>& operator=(const TFINDynamicStruct<K>& Other) {
+	TFIRInstancedStruct<T>& operator=(const TFIRInstancedStruct<K>& Other) {
 		check(Other.GetStruct()->IsChildOf(TBaseStructure<T>::Get()));
 		FFIRInstancedStruct::operator=(Other);
 		return *this;
 	}
 	
-	TFINDynamicStruct<T>& operator=(const FFIRInstancedStruct& Other) {
+	TFIRInstancedStruct<T>& operator=(const FFIRInstancedStruct& Other) {
 		check(Other.GetStruct()->IsChildOf(TBaseStructure<T>::Get()));
 		FFIRInstancedStruct::operator=(Other);
 		return *this;

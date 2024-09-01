@@ -5,7 +5,7 @@
 #include "FINLua/LuaPersistence.h"
 
 namespace FINLua {
-	typedef TSharedRef<TFINDynamicStruct<FFINFuture>> FLuaFuture;
+	typedef TSharedRef<TFIRInstancedStruct<FFINFuture>> FLuaFuture;
 
 	LuaModule(R"(/**
 	 * @LuaModule		FutureModule
@@ -26,16 +26,16 @@ namespace FINLua {
 					return luaFutureAwait(L, 1);
 				}
 				int luaFutureAwait(lua_State* L, int Index) {
-					const TFINDynamicStruct<FFINFuture>& future = luaFIN_checkFuture(L, Index);
+					const TFIRInstancedStruct<FFINFuture>& future = luaFIN_checkFuture(L, Index);
 					if ((*future)->IsDone()) {
-						TArray<FFINAnyNetworkValue> Data = future->GetOutput();
+						TArray<FFIRAnyValue> Data = future->GetOutput();
 						FFIRTrace Trace;
 						if (future.GetStruct() == FFINFutureReflection::StaticStruct()) {
 							FFINFutureReflection& refFuture = future.Get<FFINFutureReflection>();
 							FScopeLock Lock(&refFuture.Mutex);
 							Trace = refFuture.Context.GetTrace();
 						}
-						for (const FFINAnyNetworkValue& Param : Data) luaFIN_pushNetworkValue(L, Param, Trace);
+						for (const FFIRAnyValue& Param : Data) luaFIN_pushNetworkValue(L, Param, Trace);
 						return Data.Num();
 					} else {
 						return lua_yieldk(L, LUA_MULTRET, NULL, luaFutureAwaitContinue);
@@ -53,12 +53,12 @@ namespace FINLua {
 				 * @LuaFunction		get
 				 * @DisplayName		Get
 				 */)", get) {
-					const TFINDynamicStruct<FFINFuture>& future = luaFIN_checkFuture(L, 1);
+					const TFIRInstancedStruct<FFINFuture>& future = luaFIN_checkFuture(L, 1);
 					if (!future->IsDone()) luaFIN_argError(L, 1, "Future is not ready");
-					const TArray<FFINAnyNetworkValue>& Data = future->GetOutput();
+					const TArray<FFIRAnyValue>& Data = future->GetOutput();
 					FFIRTrace Trace;
 					if (future.GetStruct() == FFINFutureReflection::StaticStruct()) Trace = future.Get<FFINFutureReflection>().Context.GetTrace();
-					for (const FFINAnyNetworkValue& Param : Data) luaFIN_pushNetworkValue(L, Param, Trace);
+					for (const FFIRAnyValue& Param : Data) luaFIN_pushNetworkValue(L, Param, Trace);
 					return Data.Num();
 				}
 
@@ -66,7 +66,7 @@ namespace FINLua {
 				 * @LuaFunction		canGet
 				 * @DisplayName		Can Get
 				 */)", canGet) {
-					const TFINDynamicStruct<FFINFuture>& future = luaFIN_checkFuture(L, 1);
+					const TFIRInstancedStruct<FFINFuture>& future = luaFIN_checkFuture(L, 1);
 					lua_pushboolean(L, future->IsDone());
 					return 1;
 				}
@@ -97,7 +97,7 @@ namespace FINLua {
 				luaFIN_pushFuture(L, *storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1))));
 
 				FLuaFuture* future = static_cast<FLuaFuture*>(lua_newuserdata(L, sizeof(FLuaFuture)));
-				new (future) FLuaFuture(new TFINDynamicStruct<FFINFuture>(*storage.GetStruct(lua_tointeger(L, lua_upvalueindex(1)))));
+				new (future) FLuaFuture(new TFIRInstancedStruct<FFINFuture>(*storage.GetStruct(lua_tointeger(L, lua_upvalueindex(1)))));
 				if (!(**future)->IsDone()) {
 					UFINKernelSystem* kernel = processor->GetKernel();
 					kernel->PushFuture(*future);
@@ -133,9 +133,9 @@ namespace FINLua {
 		}
 	}
 
-	void luaFIN_pushFuture(lua_State* L, const TFINDynamicStruct<FFINFuture>& Future) {
+	void luaFIN_pushFuture(lua_State* L, const TFIRInstancedStruct<FFINFuture>& Future) {
 		FLuaFuture* future = static_cast<FLuaFuture*>(lua_newuserdata(L, sizeof(FLuaFuture)));
-		new (future) FLuaFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(Future));
+		new (future) FLuaFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(Future));
 		if (!(**future)->IsDone()) {
 			UFINKernelSystem* kernel = UFINLuaProcessor::luaGetProcessor(L)->GetKernel();
 			kernel->PushFuture(*future);
@@ -143,7 +143,7 @@ namespace FINLua {
 		luaL_setmetatable(L, FutureModule::Future::_Name);
 	}
 
-	const TSharedRef<TFINDynamicStruct<FFINFuture>>& luaFIN_checkLuaFuture(lua_State* L, int Index) {
+	const TSharedRef<TFIRInstancedStruct<FFINFuture>>& luaFIN_checkLuaFuture(lua_State* L, int Index) {
 		FLuaFuture& future = *static_cast<FLuaFuture*>(luaL_checkudata(L, Index, FutureModule::Future::_Name));
 		return future;
 	}

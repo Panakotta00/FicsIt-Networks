@@ -1,8 +1,8 @@
 #include "UI/FINTextDecorators.h"
 
+#include "FicsItReflection.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/DefaultValueHelper.h"
-#include "Reflection/FINReflection.h"
 #include "Styling/CoreStyle.h"
 #include "Utils/FINUtils.h"
 
@@ -54,11 +54,11 @@ TSharedRef<ISlateRun> FFINReflectionReferenceDecorator::Create(const TSharedRef<
 
 UFIRBase* FFINReflectionReferenceDecorator::ReflectionItemFromType(const FString& Variant, const FString& Type) {
 	if (Variant.ToLower().Equals(TEXT("class")) || Variant.ToLower().Equals(TEXT("object")) || Variant.ToLower().Equals(TEXT("trace"))) {
-		return FFINReflection::Get()->FindClass(Type);
+		return FFicsItReflectionModule::Get().FindClass(Type);
 	}
 
 	if (Variant.ToLower().Equals(TEXT("struct"))) {
-		return FFINReflection::Get()->FindStruct(Type);
+		return FFicsItReflectionModule::Get().FindStruct(Type);
 	}
 
 	return nullptr;

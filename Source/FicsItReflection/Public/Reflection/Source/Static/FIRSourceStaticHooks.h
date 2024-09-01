@@ -69,7 +69,7 @@ protected:
 	void Send(UObject* Obj, const FString& SignalName, const TArray<FFIRAnyValue>& Data) {
 		UFIRSignal** Signal = Signals.Find(SignalName);
 		if (!Signal) {
-			UFIRClass* Class = FFicsItReflectionModule::Get()->FindClass(Obj->GetClass());
+			UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Obj->GetClass());
 			UFIRSignal* NewSignal = Class->FindFIRSignal(SignalName);
 			if (!NewSignal) UE_LOG(LogFicsItReflection, Error, TEXT("Signal with name '%s' not found for object '%s' of FIRClass '%s'"), *SignalName, *Obj->GetName(), *Class->GetInternalName());
 			Signal = &Signals.Add(SignalName, NewSignal);
@@ -128,7 +128,7 @@ protected:
 		if (Signals.Contains(SignalName)) {
 			Signal = Signals[SignalName];
 		}else{
-			UFIRClass* Class = FFicsItReflectionModule::Get()->FindClass(Obj->GetClass());
+			UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Obj->GetClass());
 			Signal = Class->FindFIRSignal(SignalName);
 			if (!Signal) UE_LOG(LogFicsItReflection, Error, TEXT("Signal with name '%s' not found for object '%s' of FIRClass '%s'"), *SignalName, *Obj->GetName(), *Class->GetInternalName());
 			Signals.Add(SignalName, Signal);
@@ -174,7 +174,7 @@ public:
 	void Register(UObject* sender) override {
 		Super::Register(sender);
 
-		UFIRClass* Class = FFicsItReflectionModule::Get()->FindClass(Sender->GetClass());
+		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Sender->GetClass());
 		Signal = Class->FindFIRSignal(TEXT("ProductionChanged"));
 
 		Handle = Cast<AFGBuildable>(sender)->mOnProductionStatusChanged.AddUObject(this, &UFIRBuildableHook::ProductionStateChanged);
@@ -237,7 +237,7 @@ public:
 	void Register(UObject* sender) override {
 		Super::Register(sender);
 
-		UFIRClass* Class = FFicsItReflectionModule::Get()->FindClass(Sender->GetClass());
+		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Sender->GetClass());
 		Signal = Class->FindFIRSignal(TEXT("SelfDrvingUpdate"));
 		
 		Cast<AFGTrain>(sender)->mOnSelfDrivingChanged.AddDynamic(this, &UFIRTrainHook::SelfDrvingUpdate);
@@ -313,7 +313,7 @@ public:
 	void Register(UObject* sender) override {
 		Super::Register(sender);
 		
-		UFIRClass* Class = FFicsItReflectionModule::Get()->FindClass(Sender->GetClass());
+		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Sender->GetClass());
 		Signal = Class->FindFIRSignal(TEXT("AspectChanged"));
 
 		ValidationChangedSignal = Class->FindFIRSignal(TEXT("ValidationChanged"));

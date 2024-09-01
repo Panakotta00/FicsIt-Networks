@@ -1,55 +1,55 @@
 #include "FicsItNetworksDocumentation.h"
-#include "Reflection/FINArrayProperty.h"
-#include "Reflection/FINBoolProperty.h"
-#include "Reflection/FINClassProperty.h"
-#include "Reflection/FINFloatProperty.h"
-#include "Reflection/FINIntProperty.h"
-#include "Reflection/FINObjectProperty.h"
-#include "Reflection/FINReflection.h"
-#include "Reflection/FINStrProperty.h"
-#include "Reflection/FINTraceProperty.h"
-#include "Reflection/FINStructProperty.h"
+#include "FicsItReflection.h"
+#include "Reflection/FIRArrayProperty.h"
+#include "Reflection/FIRBoolProperty.h"
+#include "Reflection/FIRClassProperty.h"
+#include "Reflection/FIRFloatProperty.h"
+#include "Reflection/FIRIntProperty.h"
+#include "Reflection/FIRObjectProperty.h"
+#include "Reflection/FIRStrProperty.h"
+#include "Reflection/FIRTraceProperty.h"
+#include "Reflection/FIRStructProperty.h"
+#include "Reflection/FIRProperty.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "FINLua/FINLuaModule.h"
 #include "Logging/StructuredLog.h"
 #include "Misc/App.h"
 #include "Misc/FileHelper.h"
-#include "Reflection/FINProperty.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 
 UE_DISABLE_OPTIMIZATION
 namespace FINGenJsonDoc {
 	TSharedRef<FJsonObject> GenReflectionDataType(UFIRProperty* Property, TSharedRef<FJsonObject> Obj = MakeShared<FJsonObject>()) {
-		if (Property->IsA<UFINBoolProperty>()) {
+		if (Property->IsA<UFIRBoolProperty>()) {
 			Obj->SetStringField("type", "Bool");
-		} else if (Property->IsA<UFINIntProperty>()) {
+		} else if (Property->IsA<UFIRIntProperty>()) {
 			Obj->SetStringField("type", "Int");
-		} else if (Property->IsA<UFINFloatProperty>()) {
+		} else if (Property->IsA<UFIRFloatProperty>()) {
 			Obj->SetStringField("type", "Float");
-		} else if (Property->IsA<UFINStrProperty>()) {
+		} else if (Property->IsA<UFIRStrProperty>()) {
 			Obj->SetStringField("type", "String");
-		} else if (UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Property)) {
+		} else if (UFIRObjectProperty* ObjProp = Cast<UFIRObjectProperty>(Property)) {
 			Obj->SetStringField("type", "Object");
-			if (UFINClass* subclass = FFINReflection::Get()->FindClass(ObjProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
-		} else if (UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Property)) {
+			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(ObjProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
+		} else if (UFIRTraceProperty* TraceProp = Cast<UFIRTraceProperty>(Property)) {
 			Obj->SetStringField("type", "Trace");
-			if (UFINClass* subclass = FFINReflection::Get()->FindClass(TraceProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
-		} else if (UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property)) {
+			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(TraceProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
+		} else if (UFIRStructProperty* StructProp = Cast<UFIRStructProperty>(Property)) {
 			Obj->SetStringField("type", "Struct");
-			if (UFIRStruct* inner = FFINReflection::Get()->FindStruct(StructProp->GetInner())) Obj->SetStringField("inner", inner->GetInternalName());
-		} else if (UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Property)) {
+			if (UFIRStruct* inner = FFicsItReflectionModule::Get().FindStruct(StructProp->GetInner())) Obj->SetStringField("inner", inner->GetInternalName());
+		} else if (UFIRClassProperty* ClassProp = Cast<UFIRClassProperty>(Property)) {
 			Obj->SetStringField("type", "Class");
-			if (UFINClass* subclass = FFINReflection::Get()->FindClass(ClassProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
-		} else if (UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Property)) {
+			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(ClassProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
+		} else if (UFIRArrayProperty* ArrayProp = Cast<UFIRArrayProperty>(Property)) {
 			Obj->SetStringField("type", "Array");
 			if (ArrayProp->GetInnerType()) Obj->SetObjectField("inner", GenReflectionDataType(ArrayProp->GetInnerType()));
 		}
 		return Obj;
 	}
 
-	void FINGenRefBase(const TSharedPtr<FJsonObject>& Obj, const UFINBase* Base) {
+	void FINGenRefBase(const TSharedPtr<FJsonObject>& Obj, const UFIRBase* Base) {
 		Obj->SetStringField(TEXT("internalName"), Base->GetInternalName());
 		if (!Base->GetDisplayName().IsEmpty()) Obj->SetStringField(TEXT("displayName"), Base->GetDisplayName().ToString());
 		Obj->SetStringField(TEXT("description"), Base->GetDescription().ToString());
@@ -59,22 +59,22 @@ namespace FINGenJsonDoc {
 		FINGenRefBase(Obj, Prop);
 		Obj->SetObjectField(TEXT("type"), GenReflectionDataType(Prop));
 
-		EFINRepPropertyFlags Flags = Prop->GetPropertyFlags();
+		EFIRPropertyFlags Flags = Prop->GetPropertyFlags();
 		TArray<TSharedPtr<FJsonValue>> FlagArray;
-		if (Flags & FIN_Prop_Attrib) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("Attrib")));
-		if (Flags & FIN_Prop_ReadOnly) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("ReadOnly")));
-		if (Flags & FIN_Prop_Param) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("Param")));
-		if (Flags & FIN_Prop_OutParam) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("OutParam")));
-		if (Flags & FIN_Prop_RetVal) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RetVal")));
-		if (Flags & FIN_Prop_RT_Sync) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Sync")));
-		if (Flags & FIN_Prop_RT_Parallel) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Parallel")));
-		if (Flags & FIN_Prop_RT_Async) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Async")));
-		if (Flags & FIN_Prop_ClassProp) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("ClassProp")));
-		if (Flags & FIN_Prop_StaticProp) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("StaticProp")));
+		if (Flags & FIR_Prop_Attrib) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("Attrib")));
+		if (Flags & FIR_Prop_ReadOnly) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("ReadOnly")));
+		if (Flags & FIR_Prop_Param) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("Param")));
+		if (Flags & FIR_Prop_OutParam) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("OutParam")));
+		if (Flags & FIR_Prop_RetVal) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RetVal")));
+		if (Flags & FIR_Prop_RT_Sync) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Sync")));
+		if (Flags & FIR_Prop_RT_Parallel) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Parallel")));
+		if (Flags & FIR_Prop_RT_Async) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Async")));
+		if (Flags & FIR_Prop_ClassProp) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("ClassProp")));
+		if (Flags & FIR_Prop_StaticProp) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("StaticProp")));
 		Obj->SetArrayField(TEXT("flags"), FlagArray);
 	}
 
-	void FINGenRefFunc(const TSharedPtr<FJsonObject>& Obj, const UFINFunction* Func) {
+	void FINGenRefFunc(const TSharedPtr<FJsonObject>& Obj, const UFIRFunction* Func) {
 		FINGenRefBase(Obj, Func);
 		TArray<TSharedPtr<FJsonValue>> parameters;
 		for (UFIRProperty* parameter : Func->GetParameters()) {
@@ -84,16 +84,16 @@ namespace FINGenJsonDoc {
 		}
 		Obj->SetArrayField(TEXT("parameters"), parameters);
 
-		EFINFunctionFlags Flags = Func->GetFunctionFlags();
+		EFIRFunctionFlags Flags = Func->GetFunctionFlags();
 		TArray<TSharedPtr<FJsonValue>> FlagArray;
-		if (Flags & FIN_Func_VarArgs) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("VarArgs")));
-		if (Flags & FIN_Func_RT_Sync) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Sync")));
-		if (Flags & FIN_Func_RT_Parallel) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Parallel")));
-		if (Flags & FIN_Func_RT_Async) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Async")));
-		if (Flags & FIN_Func_MemberFunc) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("MemberFunc")));
-		if (Flags & FIN_Func_ClassFunc) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("ClassFunc")));
-		if (Flags & FIN_Func_StaticFunc) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("StaticFunc")));
-		if (Flags & FIN_Func_VarRets) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("VarRets")));
+		if (Flags & FIR_Func_VarArgs) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("VarArgs")));
+		if (Flags & FIR_Func_RT_Sync) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Sync")));
+		if (Flags & FIR_Func_RT_Parallel) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Parallel")));
+		if (Flags & FIR_Func_RT_Async) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("RT_Async")));
+		if (Flags & FIR_Func_MemberFunc) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("MemberFunc")));
+		if (Flags & FIR_Func_ClassFunc) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("ClassFunc")));
+		if (Flags & FIR_Func_StaticFunc) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("StaticFunc")));
+		if (Flags & FIR_Func_VarRets) FlagArray.Add(MakeShared<FJsonValueString>(TEXT("VarRets")));
 		Obj->SetArrayField(TEXT("flags"), FlagArray);
 	}
 
@@ -108,7 +108,7 @@ namespace FINGenJsonDoc {
 		}
 		Obj->SetArrayField(TEXT("properties"), Properties);
 		TArray<TSharedPtr<FJsonValue>> Functions;
-		for (UFINFunction* Function : Struct->GetFunctions(false)) {
+		for (UFIRFunction* Function : Struct->GetFunctions(false)) {
 			TSharedPtr<FJsonObject> FunctionObj = MakeShared<FJsonObject>();
 			FINGenRefFunc(FunctionObj, Function);
 			Functions.Add(MakeShared<FJsonValueObject>(FunctionObj));
@@ -116,7 +116,7 @@ namespace FINGenJsonDoc {
 		Obj->SetArrayField(TEXT("functions"), Functions);
 	}
 
-	void FINGenRefSignal(const TSharedPtr<FJsonObject>& Obj, const UFINSignal* Signal) {
+	void FINGenRefSignal(const TSharedPtr<FJsonObject>& Obj, const UFIRSignal* Signal) {
 		FINGenRefBase(Obj, Signal);
 		TArray<TSharedPtr<FJsonValue>> parameters;
 		for (UFIRProperty* parameter : Signal->GetParameters()) {
@@ -128,10 +128,10 @@ namespace FINGenJsonDoc {
 		Obj->SetBoolField(TEXT("isVarArgs"), Signal->IsVarArgs());
 	}
 
-	void FINGenRefClass(const TSharedPtr<FJsonObject>& Obj, const UFINClass* Class) {
+	void FINGenRefClass(const TSharedPtr<FJsonObject>& Obj, const UFIRClass* Class) {
 		FINGenRefStruct(Obj, Class);
 		TArray<TSharedPtr<FJsonValue>> Signals;
-		for (UFINSignal* Signal : Class->GetSignals(false)) {
+		for (UFIRSignal* Signal : Class->GetSignals(false)) {
 			TSharedPtr<FJsonObject> SignalObj = MakeShared<FJsonObject>();
 			FINGenRefSignal(SignalObj, Signal);
 			Signals.Add(MakeShared<FJsonValueObject>(SignalObj));
@@ -139,14 +139,14 @@ namespace FINGenJsonDoc {
 		Obj->SetArrayField(TEXT("signals"), Signals);
 	}
 
-	void FINGenClasses(TArray<TSharedPtr<FJsonValue>>& Array, const UFINClass* Class) {
+	void FINGenClasses(TArray<TSharedPtr<FJsonValue>>& Array, const UFIRClass* Class) {
 		TSharedPtr<FJsonObject> ClassObj = MakeShared<FJsonObject>();
 		FINGenRefClass(ClassObj, Class);
 		Array.Add(MakeShared<FJsonValueObject>(ClassObj));
 
 		TArray<FString> Names;
-		TMap<FString, UFINClass*> NamesToClasses;
-		for (UFINClass* ChildClass : Class->GetChildClasses()) {
+		TMap<FString, UFIRClass*> NamesToClasses;
+		for (UFIRClass* ChildClass : Class->GetChildClasses()) {
 			Names.Add(ChildClass->GetInternalName());
 			NamesToClasses.Add(ChildClass->GetInternalName(), ChildClass);
 		}
@@ -157,7 +157,7 @@ namespace FINGenJsonDoc {
 	}
 
 	TSharedPtr<FJsonObject> GenReflectionDoc() {
-		FFINReflection& Ref = *FFINReflection::Get();
+		auto Ref = FFicsItReflectionModule::Get();
 
 		TArray<TSharedPtr<FJsonValue>> Classes;
 		TArray<TSharedPtr<FJsonValue>> Structs;

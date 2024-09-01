@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "FIRAnyValue.h"
-#include "Reflection/FIRClass.h"
 #include "Modules/ModuleManager.h"
+#include "Reflection/FIRClass.h"
 #include "FicsItReflection.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogFicsItReflection, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogFicsItReflection, Warning, All);
 
 UCLASS(BlueprintType)
-class FICSITNETWORKS_API UFicsItReflection : public UObject {
+class FICSITREFLECTION_API UFicsItReflection : public UObject {
 	GENERATED_BODY()
 private:
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
@@ -19,12 +19,14 @@ private:
 	static UFIRStruct* FindStruct(UScriptStruct* Struct, bool bRecursive = true);
 };
 
-struct FICSITNETWORKS_API FFicsItReflectionModule : public IModuleInterface {
+class UFIRSource;
+
+struct FICSITREFLECTION_API FFicsItReflectionModule : public IModuleInterface {
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	
-	static FFicsItReflectionModule* Get();
+	static FFicsItReflectionModule& Get();
 
 	TMulticastDelegate<void(UObject*, class UFIRSignal*, const TArray<FFIRAnyValue>&)> OnSignalTriggered;
 	
@@ -44,17 +46,17 @@ public:
 	inline const TMap<UScriptStruct*, UFIRStruct*>& GetStructs() { return Structs; }
 
 	FORCEINLINE static FString ObjectReferenceText(UFIRClass* Class) {
-		if (!Class) Class = Get()->FindClass(UObject::StaticClass());
+		if (!Class) Class = Get().FindClass(UObject::StaticClass());
 		return FString::Printf(TEXT("Object<%s>"), *Class->GetInternalName());
 	}
 
 	FORCEINLINE static FString TraceReferenceText(UFIRClass* Class) {
-		if (!Class) Class = Get()->FindClass(UObject::StaticClass());
+		if (!Class) Class = Get().FindClass(UObject::StaticClass());
 		return FString::Printf(TEXT("Trace<%s>"), *Class->GetInternalName());
 	}
 
 	FORCEINLINE static FString ClassReferenceText(UFIRClass* Class) {
-		if (!Class) Class = Get()->FindClass(UObject::StaticClass());
+		if (!Class) Class = Get().FindClass(UObject::StaticClass());
 		return FString::Printf(TEXT("Class<%s>"), *Class->GetInternalName());
 	}
 
@@ -72,5 +74,5 @@ private:
 	TMap<UFIRStruct*, UScriptStruct*> StructsReversed;
 	TMap<FString, UFIRStruct*> StructNames;
 
-	TArray<const UFIRSource*> Sources;
+	TArray<UFIRSource*> Sources;
 };

@@ -125,7 +125,7 @@ struct FICSITREFLECTION_API FFIRFunctionBadArgumentException : public FFIRReflec
 	int ArgumentIndex = 0;
 
 	FFIRFunctionBadArgumentException() = default;
-	FFIRFunctionBadArgumentException(UFINFunction* Func, int ArgumentIndex, const FString& Message) : FFIRReflectionException(Cast<UFIRBase>(Func), Message), ArgumentIndex(ArgumentIndex) {}
+	FFIRFunctionBadArgumentException(UFIRFunction* Func, int ArgumentIndex, const FString& Message) : FFIRReflectionException(Cast<UFIRBase>(Func), Message), ArgumentIndex(ArgumentIndex) {}
 };
 
 UCLASS(BlueprintType)

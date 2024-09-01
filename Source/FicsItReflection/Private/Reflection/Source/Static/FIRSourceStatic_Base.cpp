@@ -22,7 +22,7 @@ BeginFunc(getHash, "Get Hash", "Returns a hash of this object. This is a value t
 BeginFunc(getType, "Get Type", "Returns the type (aka class) of this object.") {
 	OutVal(0, RObject<UFIRClass>, type, "Type", "The type of this object");
 	Body()
-	if (self) type = (FIRObj)FFicsItReflectionModule::Get()->FindClass(self->GetClass());
+	if (self) type = (FIRObj)FFicsItReflectionModule::Get().FindClass(self->GetClass());
 } EndFunc()
 BeginFunc(isA, "Is A", "Checks if this Object is a child of the given typen.") {
 	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this object is a child of.")
@@ -47,7 +47,7 @@ BeginClassFunc(getHash, "Get Hash", "Returns the hash of this class. This is a v
 BeginClassFunc(getType, "Get Type", "Returns the type (aka class) of this class instance.", false) {
 	OutVal(0, RObject<UFIRClass>, type, "Type", "The type of this class instance");
 	Body()
-    if (self) type = (FIRObj)FFicsItReflectionModule::Get()->FindClass(self);
+    if (self) type = (FIRObj)FFicsItReflectionModule::Get().FindClass(self);
 } EndFunc()
 BeginClassFunc(isChildOf, "Is Child Of", "Checks if this Type is a child of the given typen.", false) {
 	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this type is a child of.")

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINNetworkValues.h"
+#include "FIRTypes.h"
 #include "UObject/Interface.h"
 #include "FINNetworkMessageInterface.generated.h"
 
@@ -34,7 +34,7 @@ public:
 	 * @param[in]	Port			The port on which the message got sent
 	 * @param[in]	Data			The data frame of the message
 	 */
-	virtual void HandleMessage(const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const FINArray& Data) {};
+	virtual void HandleMessage(const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const FIRArray& Data) {};
 
 	/**
 	 * Allows to check if this network message handler is capable

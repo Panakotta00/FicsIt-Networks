@@ -1,8 +1,6 @@
 #include "FINLuaProcessorStateStorage.h"
 
 #include "FicsItNetworksLuaModule.h"
-#include "FicsItNetworksModule.h"
-#include "Network/FINDynamicStructHolder.h"
 #include "Utils/FINUtils.h"
 
 bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
@@ -33,7 +31,7 @@ bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
 	return true;
 }
 
-int32 FFINLuaProcessorStateStorage::Add(const FFINNetworkTrace& Trace) {
+int32 FFINLuaProcessorStateStorage::Add(const FFIRTrace& Trace) {
 	return Traces.AddUnique(Trace);
 }
 
@@ -45,7 +43,7 @@ int32 FFINLuaProcessorStateStorage::Add(TSharedPtr<FFIRInstancedStruct> Struct) 
 	return Structs.Add(Struct);
 }
 
-FFINNetworkTrace FFINLuaProcessorStateStorage::GetTrace(int32 id) {
+FFIRTrace FFINLuaProcessorStateStorage::GetTrace(int32 id) {
 	return Traces[id];
 }
 

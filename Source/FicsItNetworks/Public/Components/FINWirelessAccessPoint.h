@@ -108,5 +108,5 @@ private:
 	 */
 	bool CanHandleMessages();
 	
-	bool HandleMessage(EFINWirelessDirection Direction, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data);
+	bool HandleMessage(EFINWirelessDirection Direction, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFIRAnyValue>& Data);
 };

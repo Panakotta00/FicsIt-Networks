@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Network/FINNetworkTrace.h"
+#include "FIRTrace.h"
 #include "FINSignalSender.generated.h"
 
 /**

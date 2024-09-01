@@ -4,31 +4,92 @@
 #include "Reflection/Source/FIRSourceStatic.h"
 #include "Reflection/Source/FIRSourceUObject.h"
 #include "AssetRegistryModule.h"
+#include "FGFactoryConnectionComponent.h"
+#include "FGRailroadTrackConnectionComponent.h"
+#include "FIRSubsystem.h"
 #include "AssetRegistry/AssetData.h"
 #include "Engine/Blueprint.h"
 #include "Engine/BlueprintGeneratedClass.h"
+#include "Patching/NativeHookManager.h"
 #include "UObject/CoreRedirects.h"
 
-DEFINE_LOG_CATEGORY(LogFicsItReflection, Log, All);
+DEFINE_LOG_CATEGORY(LogFicsItReflection);
 
 UFIRClass* UFicsItReflection::FindClass(UClass* Clazz, bool bRecursive) {
-	return FFicsItReflectionModule::Get()->FindClass(Clazz, bRecursive);
+	return FFicsItReflectionModule::Get().FindClass(Clazz, bRecursive);
 }
 
 UFIRStruct* UFicsItReflection::FindStruct(UScriptStruct* Struct, bool bRecursive) {
-	return FFicsItReflectionModule::Get()->FindStruct(Struct, bRecursive);
+	return FFicsItReflectionModule::Get().FindStruct(Struct, bRecursive);
+}
+
+void UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,int32)>& Scope, UFGRailroadTrackConnectionComponent* self, int32 Index) {
+	FFIRRailroadSwitchForce* ForcedTrack = AFIRSubsystem::GetReflectionSubsystem(self)->GetForcedRailroadSwitch(self);
+	if (ForcedTrack) {
+		Scope(self, 0);
+	}
+}
+
+void UFGRailroadTrackConnectionComponent_AddConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
+	AFIRSubsystem::GetReflectionSubsystem(self)->AddRailroadSwitchConnection(Scope, self, Connection);
+}
+
+void UFGRailroadTrackConnectionComponent_RemoveConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
+	AFIRSubsystem::GetReflectionSubsystem(self)->RemoveRailroadSwitchConnection(Scope, self, Connection);
+}
+
+void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFactoryConnectionComponent*,TArray<FInventoryItem>&,TSubclassOf<UFGItemDescriptor>)>& Scope, const UFGFactoryConnectionComponent* const_self, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) {
+	UFGFactoryConnectionComponent* self = const_cast<UFGFactoryConnectionComponent*>(const_self);
+	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_items, Settings.AllowedItem ? Settings.AllowedItem : type);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
+}
+
+void UFGFactoryConnectionComponent_GrabOutput_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,float&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf<UFGItemDescriptor> type) {
+	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_item, out_OffsetBeyond, Settings.AllowedItem ? Settings.AllowedItem : type);
+			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
+}
+
+void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, TSubclassOf<UFGItemDescriptor> type) {
+	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
+	if (OptionalSettings.IsSet()) {
+		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
+		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
+			Scope.Override(false);
+		} else {
+			bool bSuccess = Scope(self, out_item, Settings.AllowedItem ? Settings.AllowedItem : type);
+			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
+		}
+		OptionalSettings.GetValue().Key.Unlock();
+	}
 }
 
 void FFicsItReflectionModule::StartupModule() {
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINNetworkTrace"), TEXT("/Script/FicsItReflection.FFIRTrace")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINDynamicStructHolder"), TEXT("/Script/FicsItReflection.FFIRInstancedStruct")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINInstancedStruct"), TEXT("/Script/FicsItReflection.FFIRInstancedStruct")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINHook"), TEXT("/Script/FicsItReflection.UFIRHook")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINHookData"), TEXT("/Script/FicsItReflection.FFIRHookData")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.AFINHookSubsystem"), TEXT("/Script/FicsItReflection.AFIRHookSubsystem")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINException"), TEXT("/Script/FicsItReflection.FFIRException")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionException"), TEXT("/Script/FicsItReflection.FFIRReflectionException")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINAnyNetworkValue"), TEXT("/Script/FicsItReflection.FFIRAnyValue")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINAnyValue"), TEXT("/Script/FicsItReflection.FFIRAnyValue")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINNetworkValueType"), TEXT("/Script/FicsItReflection.EFIRValueType")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINUFunction"), TEXT("/Script/FicsItReflection.UFIRUFunction")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINTraceProperty"), TEXT("/Script/FicsItReflection.UFIRTraceProperty")});
@@ -86,19 +147,37 @@ void FFicsItReflectionModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINFactoryConnectorSettings"), TEXT("/Script/FicsItReflection.FFIRFactoryConnectorSettings")});
 
 	FCoreRedirects::AddRedirectList(redirects, "FicsIt-Reflection");
+
+	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
+#if !WITH_EDITOR
+	SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::SetSwitchPosition, UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook);
+	SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::AddConnection, UFGRailroadTrackConnectionComponent_AddConnection_Hook);
+	SUBSCRIBE_METHOD(UFGRailroadTrackConnectionComponent::RemoveConnection, UFGRailroadTrackConnectionComponent_RemoveConnection_Hook);
+
+	SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGRailroadTrackConnectionComponent::EndPlay, (void*)GetDefault<UFGRailroadTrackConnectionComponent>(), [](UActorComponent* self, EEndPlayReason::Type Reason) {
+		if (Reason == EEndPlayReason::Destroyed && self->GetWorld()) {
+			AFIRSubsystem* Subsystem = AFIRSubsystem::GetReflectionSubsystem(self);
+			if (Subsystem) Subsystem->ForceRailroadSwitch(Cast<UFGRailroadTrackConnectionComponent>(self), -1);
+		}
+	});
+
+	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_PeekOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
+	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_PeekOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
+	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_GrabOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_GrabOutput_Hook);
+	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook);
+#endif
+	});
 }
 
 void FFicsItReflectionModule::ShutdownModule() {}
 
-FFicsItReflectionModule* FFicsItReflectionModule::Get() {
-	static FFicsItReflectionModule* Self = nullptr;
-	if (!Self) Self = new FFicsItReflectionModule();
-	return Self;
+FFicsItReflectionModule& FFicsItReflectionModule::Get() {
+	return FModuleManager::LoadModuleChecked<FFicsItReflectionModule>("FicsItReflection");
 }
 
 void FFicsItReflectionModule::PopulateSources() {
-	Sources.Add(GetDefault<UFIRSourceUObject>());
-	Sources.Add(GetDefault<UFIRSourceStatic>());
+	Sources.Add(const_cast<UFIRSourceUObject*>(GetDefault<UFIRSourceUObject>()));
+	Sources.Add(const_cast<UFIRSourceStatic*>(GetDefault<UFIRSourceStatic>()));
 }
 
 void FFicsItReflectionModule::LoadAllTypes() {

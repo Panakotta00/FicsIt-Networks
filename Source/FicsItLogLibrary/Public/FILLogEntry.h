@@ -14,7 +14,7 @@ enum EFILLogVerbosity {
 };
 
 USTRUCT(BlueprintType)
-struct FICSITLOGLIBRARY_API FFILLogEntry {
+struct FICSITLOGLIBRARY_API FFILEntry {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
@@ -26,8 +26,8 @@ struct FICSITLOGLIBRARY_API FFILLogEntry {
 	UPROPERTY(SaveGame)
 	FString Content;
 
-	FFILLogEntry() = default;
-	FFILLogEntry(FDateTime Timestamp, TEnumAsByte<EFILLogVerbosity> Verbosity, const FString& Content) : Timestamp(Timestamp), Verbosity(Verbosity), Content(Content) {}
+	FFILEntry() = default;
+	FFILEntry(FDateTime Timestamp, TEnumAsByte<EFILLogVerbosity> Verbosity, const FString& Content) : Timestamp(Timestamp), Verbosity(Verbosity), Content(Content) {}
 
 	FText GetVerbosityAsText() const;
 	FString ToClipboardText() const;

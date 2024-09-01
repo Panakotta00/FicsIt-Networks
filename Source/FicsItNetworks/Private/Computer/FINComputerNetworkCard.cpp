@@ -1,6 +1,8 @@
 ﻿#include "Computer/FINComputerNetworkCard.h"
+
+#include "FicsItReflection.h"
+#include "Net/UnrealNetwork.h"
 #include "Network/FINNetworkCircuit.h"
-#include "Reflection/FINReflection.h"
 
 void AFINComputerNetworkCard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -81,9 +83,9 @@ bool AFINComputerNetworkCard::IsPortOpen(int Port) {
 	return OpenPorts.Contains(Port);
 }
 
-void AFINComputerNetworkCard::HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+void AFINComputerNetworkCard::HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFIRAnyValue>& Data) {
 	static UFIRSignal* Signal = nullptr;
-	if (!Signal) Signal = FFINReflection::Get()->FindClass(StaticClass())->FindFINSignal("NetworkMessage");
+	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(StaticClass())->FindFIRSignal("NetworkMessage");
 	{
 		FScopeLock Lock(&HandledMessagesMutex);
 		if (HandledMessages.Contains(InID) || !Signal) return;
@@ -91,7 +93,7 @@ void AFINComputerNetworkCard::HandleMessage(const FGuid& InID, const FGuid& Send
 	}
 	if (!IsPortOpen(Port)) return;
 	if (Receiver.IsValid() && Receiver != ID) return;
-	TArray<FFINAnyNetworkValue> Parameters = { Sender.ToString(), (FINInt)Port };
+	TArray<FFIRAnyValue> Parameters = { Sender.ToString(), (FIRInt)Port };
 	Parameters.Append(Data);
 	Signal->Trigger(this, Parameters);
 }
@@ -100,21 +102,21 @@ void AFINComputerNetworkCard::SetPCINetworkConnection_Implementation(const TScri
 	ConnectedComponent = InNode.GetObject();
 }
 
-bool AFINComputerNetworkCard::CheckNetMessageData(const TArray<FFINAnyNetworkValue>& Data) {
+bool AFINComputerNetworkCard::CheckNetMessageData(const TArray<FFIRAnyValue>& Data) {
 	if (Data.Num() > 7) return false;
-	for (const FFINAnyNetworkValue& Value : Data) {
+	for (const FFIRAnyValue& Value : Data) {
 		switch (Value.GetType()) {
-		case FIN_OBJ:
+		case FIR_OBJ:
 			return false;
-		case FIN_CLASS:
+		case FIR_CLASS:
 			return false;
-		case FIN_TRACE:
+		case FIR_TRACE:
 			return false;
-		case FIN_STRUCT:
+		case FIR_STRUCT:
 			return false;
-		case FIN_ARRAY:
+		case FIR_ARRAY:
 			return false;
-		case FIN_ANY:
+		case FIR_ANY:
 			return false;
 		default: ;
 		}
@@ -135,7 +137,7 @@ void AFINComputerNetworkCard::netFunc_closeAll() {
 	OpenPorts.Empty();
 }
 
-void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, TArray<FFINAnyNetworkValue> args) {
+void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, TArray<FFIRAnyValue> args) {
 	if (!CheckNetMessageData(args) || port < 0 || port > 10000) return;
 	FGuid receiverID;
 	FGuid::Parse(receiver, receiverID);
@@ -157,7 +159,7 @@ void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, TArray<FF
 	}
 }
 
-void AFINComputerNetworkCard::netFunc_broadcast(int port, TArray<FFINAnyNetworkValue> args) {
+void AFINComputerNetworkCard::netFunc_broadcast(int port, TArray<FFIRAnyValue> args) {
  	if (!CheckNetMessageData(args) || port < 0 || port > 10000) return;
 	FGuid MsgID = FGuid::NewGuid();
 	FGuid SenderID = Execute_GetID(this);

@@ -1,8 +1,8 @@
 #include "Network/Signals/FINSignalSubsystem.h"
 #include "Subsystem/SubsystemActorManager.h"
 #include "Engine/Engine.h"
-#include "Network/FINHookSubsystem.h"
 #include "FicsItNetworksModule.h"
+#include "FIRHookSubsystem.h"
 #include "Network/Signals/FINSignalListener.h"
 
 void FFINSignalListeners::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
@@ -24,13 +24,13 @@ void AFINSignalSubsystem::PostLoadGame_Implementation(int32 saveVersion, int32 g
 }
 
 void AFINSignalSubsystem::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
-	out_dependentObjects.Add(AFINHookSubsystem::GetHookSubsystem(this));
+	out_dependentObjects.Add(AFIRHookSubsystem::GetHookSubsystem(this));
 }
 
 void AFINSignalSubsystem::BeginPlay() {
 	Super::BeginPlay();
 
-	AFINHookSubsystem* HookSubsystem = AFINHookSubsystem::GetHookSubsystem(this);
+	AFIRHookSubsystem* HookSubsystem = AFIRHookSubsystem::GetHookSubsystem(this);
 	if (HookSubsystem) for (const TPair<UObject*, FFINSignalListeners>& Sender : Listeners) {
 		HookSubsystem->AttachHooks(Sender.Key);
 	} else {
@@ -84,7 +84,7 @@ void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData&
 void AFINSignalSubsystem::Listen(UObject* Sender, const FFIRTrace& Receiver) {
 	TArray<FFIRTrace>& ListenerList = Listeners.FindOrAdd(Sender).Listeners;
 	ListenerList.AddUnique(Receiver);
-	AFINHookSubsystem::GetHookSubsystem(Sender)->AttachHooks(Sender);
+	AFIRHookSubsystem::GetHookSubsystem(Sender)->AttachHooks(Sender);
 }
 
 void AFINSignalSubsystem::Ignore(UObject* Sender, UObject* Receiver) {
@@ -97,7 +97,7 @@ void AFINSignalSubsystem::Ignore(UObject* Sender, UObject* Receiver) {
 		}
 	}
 	if (!Sender) return;
-	AFINHookSubsystem* HookSubsystem = AFINHookSubsystem::GetHookSubsystem(Sender);
+	AFIRHookSubsystem* HookSubsystem = AFIRHookSubsystem::GetHookSubsystem(Sender);
 	if (ListenerList->Listeners.Num() < 1 && HookSubsystem) HookSubsystem->ClearHooks(Sender);
 }
 

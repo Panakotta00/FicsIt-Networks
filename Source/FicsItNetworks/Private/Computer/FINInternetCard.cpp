@@ -14,12 +14,12 @@ bool FFINInternetCardHttpRequestFuture::IsDone() const {
 	return !Request.IsValid() || !(Request->GetStatus() == EHttpRequestStatus::Processing || Request->GetStatus() == EHttpRequestStatus::NotStarted);
 }
 
-TArray<FFINAnyNetworkValue> FFINInternetCardHttpRequestFuture::GetOutput() const {
-	TArray<FFINAnyNetworkValue> Response;
+TArray<FFIRAnyValue> FFINInternetCardHttpRequestFuture::GetOutput() const {
+	TArray<FFIRAnyValue> Response;
 	if (!Request.IsValid() || !Request->GetResponse().IsValid()) return Response;
-	Response.Add((FINInt)Request->GetResponse()->GetResponseCode());
+	Response.Add((FIRInt)Request->GetResponse()->GetResponseCode());
 	Response.Add(Request->GetResponse()->GetContentAsString());
-	TArray<FINAny> Headers;
+	TArray<FIRAny> Headers;
 	for (FString Header : Request->GetResponse()->GetAllHeaders()) {
 		FString Name;
 		FString Value;
@@ -31,7 +31,7 @@ TArray<FFINAnyNetworkValue> FFINInternetCardHttpRequestFuture::GetOutput() const
 	return Response;
 }
 
-FFINInternetCardHttpRequestFuture AFINInternetCard::netFunc_request(const FString& InURL, const FString& InMethod, const FString& InData, TArray<FFINAnyNetworkValue> varargs) {
+FFINInternetCardHttpRequestFuture AFINInternetCard::netFunc_request(const FString& InURL, const FString& InMethod, const FString& InData, TArray<FFIRAnyValue> varargs) {
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(InURL);
 	Request->SetVerb(InMethod);

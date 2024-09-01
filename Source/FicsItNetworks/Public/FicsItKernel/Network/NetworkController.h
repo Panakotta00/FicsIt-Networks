@@ -2,7 +2,7 @@
 
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkTrace.h"
+#include "FIRTrace.h"
 #include "Network/Signals/FINSignalData.h"
 #include "NetworkController.generated.h"
 

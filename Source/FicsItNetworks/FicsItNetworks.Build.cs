@@ -32,6 +32,7 @@ public class FicsItNetworks : ModuleRules
             "SML",
             "Tracy",
             "FicsItReflection",
+            "FicsItLogLibrary",
 		});
 	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 

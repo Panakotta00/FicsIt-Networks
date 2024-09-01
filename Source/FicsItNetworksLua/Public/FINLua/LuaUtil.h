@@ -1,13 +1,13 @@
 #pragma once
 
+#include "FILLogScope.h"
 #include "FINLua.h"
-#include "FicsItKernel/Logging.h"
-#include "Network/FINNetworkValues.h"
+#include "FIRTypes.h"
 #include "Serialization/CompactBinaryWriter.h"
 
 class UFIRProperty;
 class UFIRStruct;
-class UFINFunction;
+class UFIRFunction;
 
 namespace FINLua {
 	/**
@@ -16,13 +16,13 @@ namespace FINLua {
 	 * @param Value the network value you want to push
 	 * @param ObjectPrefixTrace if the value is a FINObj then it gets appended to this trace because lua only stores traces
 	 */
-	void luaFIN_pushNetworkValue(lua_State* L, const FINAny& Value, const FFINNetworkTrace& ObjectPrefixTrace = FFINNetworkTrace());
+	void luaFIN_pushNetworkValue(lua_State* L, const FIRAny& Value, const FFIRTrace& ObjectPrefixTrace = FFIRTrace());
 
 	/**
 	 * Tries to estimate the Network Value Type from a lua value.
 	 * Convertibles like tables as structs or arrays are not considered an result in None.
 	 */
-	TOptional<EFINNetworkValueType> luaFIN_getNetworkValueType(lua_State* L, int Index);
+	TOptional<EFIRValueType> luaFIN_getNetworkValueType(lua_State* L, int Index);
 
 	/**
 	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index.
@@ -33,7 +33,7 @@ namespace FINLua {
 	 * @param bImplicitConstruction if set to true, tables can be converted to the struct specified by Property, if false tables will result in None
 	 * @return The retrieved value or None if not able to retrieve
 	 */
-	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFIRProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
+	TOptional<FIRAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFIRProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
 
 	/**
 	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index.
@@ -44,7 +44,7 @@ namespace FINLua {
 	 * @param bImplicitConstruction if set to true, tables can be converted to the struct specified by Property, if false tables will result in None if property was specified, otherwise they get interpreted as arrays
 	 * @return The retrieved value or None if not able to retrieve
 	 */
-	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFIRProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
+	TOptional<FIRAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFIRProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
 	
 	/**
 	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index. Tables will be interpreted as None. Unknown UserData will be interpreted as none.
@@ -52,7 +52,7 @@ namespace FINLua {
 	 * @param Index the index on the stack of the lua value you want to retrieve
 	 * @return The retrieved value or None if not able to retrieve
 	 */
-	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index);
+	TOptional<FIRAny> luaFIN_toNetworkValue(lua_State* L, int Index);
 
 	/**
 	 * @brief Returns the name of the value represented by the given property
@@ -68,7 +68,7 @@ namespace FINLua {
 	 * @param Function the function of witch the signature should get generated
 	 * @return the signature of the given function
 	 */
-	FString luaFIN_getFunctionSignature(lua_State* L, UFINFunction* Function);
+	FString luaFIN_getFunctionSignature(lua_State* L, UFIRFunction* Function);
 
 	/**
 	 * @breif Causes a lua type error with the expected type derived from the given property
@@ -95,10 +95,10 @@ namespace FINLua {
 	FString luaFIN_checkFString(lua_State* L, int index);
 	FString luaFIN_toFString(lua_State* L, int index);
 
-	FORCEINLINE FINBool luaFIN_toFinBool(lua_State* L, int index) { return static_cast<FINBool>(lua_toboolean(L, index)); }
-	FORCEINLINE FINInt luaFIN_toFinInt(lua_State* L, int index) { return static_cast<FINInt>(lua_tointeger(L, index)); }
-	FORCEINLINE FINFloat luaFIN_toFinFloat(lua_State* L, int index) { return static_cast<FINFloat>(lua_tonumber(L, index)); }
-	FORCEINLINE FINStr luaFIN_toFinString(lua_State* L, int index) { return static_cast<FINStr>(luaFIN_toFString(L, index)); }
+	FORCEINLINE FIRBool luaFIN_toFinBool(lua_State* L, int index) { return static_cast<FIRBool>(lua_toboolean(L, index)); }
+	FORCEINLINE FIRInt luaFIN_toFinInt(lua_State* L, int index) { return static_cast<FIRInt>(lua_tointeger(L, index)); }
+	FORCEINLINE FIRFloat luaFIN_toFinFloat(lua_State* L, int index) { return static_cast<FIRFloat>(lua_tonumber(L, index)); }
+	FORCEINLINE FIRStr luaFIN_toFinString(lua_State* L, int index) { return static_cast<FIRStr>(luaFIN_toFString(L, index)); }
 
 	void luaFIN_warning(lua_State* L, const char* msg, int tocont);
 
@@ -110,7 +110,7 @@ namespace FINLua {
 	void setupUtilLib(lua_State* L);
 }
 
-struct FFINLuaLogScope : public FFINLogScope {
+struct FFINLuaLogScope : public FFILLogScope {
 	explicit FFINLuaLogScope(lua_State* L);
 };
 

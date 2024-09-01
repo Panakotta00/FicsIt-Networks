@@ -1,14 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FicsItKernel/Logging.h"
+#include "FILLogEntry.h"
 #include "FINStyle.h"
 #include "FINTextDecorators.h"
 #include "SlateCore.h"
 #include "Components/Widget.h"
 #include "Framework/Text/IRichTextMarkupParser.h"
-#include "Framework/Text/IRichTextMarkupWriter.h"
-#include "Framework/Text/SlateHyperlinkRun.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
 #include "Widgets/Views/STableRow.h"
 #include "FINLogViewer.generated.h"
@@ -170,7 +168,7 @@ public:
 	void UpdateEntries(UFILLogContainer* InLog);
 	
 private:
-	TSharedRef<ITableRow> OnGenerateRow(TSharedRef<FFINLogEntry> Entry, const TSharedRef<class STableViewBase>& ListView);
+	TSharedRef<ITableRow> OnGenerateRow(TSharedRef<FFILEntry> Entry, const TSharedRef<class STableViewBase>& ListView);
 
 public:
 	FOnNavigateReflection NavigateReflectionDelegate;
@@ -180,23 +178,23 @@ private:
 	const FFINLogViewerStyle* Style = nullptr;
 
 	UObject* WorldContext = nullptr;
-	TArray<TSharedRef<FFINLogEntry>> Entries;
+	TArray<TSharedRef<FFILEntry>> Entries;
 
 	bool bTextOutputEnabled = false;
 	TAttribute<bool> TextTimestampEnabled = true;
 	TAttribute<bool> TextVerbosityEnabled = true;
 	TAttribute<bool> TextMultilineAlignEnabled = true;
 	
-	TSharedPtr<SListView<TSharedRef<FFINLogEntry>>> ListView;
+	TSharedPtr<SListView<TSharedRef<FFILEntry>>> ListView;
 	TSharedPtr<SWidgetSwitcher> WidgetSwitcher;
 	TSharedPtr<SMultiLineEditableTextBox> TextLog;
 };
 
-class SFINLogViewerRow : public SMultiColumnTableRow<TSharedRef<FFINLogEntry>> {
+class SFINLogViewerRow : public SMultiColumnTableRow<TSharedRef<FFILEntry>> {
 public:
-	void Construct(const FTableRowArgs& InArgs, const TSharedRef<STableViewBase>& OwnerTable, const FFINLogViewerStyle* Style, const TSharedRef<FFINLogEntry>& LogEntry, const SFINLogViewer::FOnNavigateReflection& NavigateReflectionDelegate, const SFINLogViewer::FOnNavigateEEPROM& NavigateEEPROMDelegate);
+	void Construct(const FTableRowArgs& InArgs, const TSharedRef<STableViewBase>& OwnerTable, const FFINLogViewerStyle* Style, const TSharedRef<FFILEntry>& LogEntry, const SFINLogViewer::FOnNavigateReflection& NavigateReflectionDelegate, const SFINLogViewer::FOnNavigateEEPROM& NavigateEEPROMDelegate);
 
-	TSharedPtr<FFINLogEntry> GetLogEntry() const { return Entry; }
+	TSharedPtr<FFILEntry> GetLogEntry() const { return Entry; }
 	
 protected:
 	virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override;
@@ -212,7 +210,7 @@ public:
 
 private:
 	const FFINLogViewerStyle* Style = nullptr;
-	TSharedPtr<FFINLogEntry> Entry;
+	TSharedPtr<FFILEntry> Entry;
 };
 
 class FICSITNETWORKS_API FFINLogTextParser : public IRichTextMarkupParser {

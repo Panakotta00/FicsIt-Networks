@@ -1,5 +1,6 @@
 ﻿#include "UI/FINReflectionClassHirachyViewer.h"
-#include "Reflection/FINStruct.h"
+
+#include "Reflection/FIRStruct.h"
 #include "UI/FINReflectionTreeRow.h"
 
 void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const TSharedPtr<FFINReflectionUIStruct>& InSearchStruct, FFINReflectionUIContext* InContext) {

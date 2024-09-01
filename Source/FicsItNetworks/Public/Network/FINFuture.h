@@ -1,7 +1,9 @@
 ﻿#pragma once
 
-#include "Reflection/FINFunction.h"
+#include "Reflection/FIRFunction.h"
 #include "FicsItNetworksModule.h"
+#include "Reflection/FIRExecutionContext.h"
+#include "Utils/FINException.h"
 #include "FINFuture.generated.h"
 
 USTRUCT(BlueprintType)
@@ -24,7 +26,7 @@ struct FICSITNETWORKS_API FFINFuture {
 	/**
 	 * Returns the output data of the future
 	 */
-	virtual TArray<FFINAnyNetworkValue> GetOutput() const { return {}; }
+	virtual TArray<FFIRAnyValue> GetOutput() const { return {}; }
 };
 
 USTRUCT()
@@ -35,16 +37,16 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 	bool bDone = false;
 
 	UPROPERTY(SaveGame)
-	TArray<FFINAnyNetworkValue> Input;
+	TArray<FFIRAnyValue> Input;
 
 	UPROPERTY(SaveGame)
-	TArray<FFINAnyNetworkValue> Output;
+	TArray<FFIRAnyValue> Output;
 
 	UPROPERTY(SaveGame)
 	FFIRExecutionContext Context;
 
 	UPROPERTY(SaveGame)
-	UFINFunction* Function = nullptr;
+	UFIRFunction* Function = nullptr;
 
 	UPROPERTY(SaveGame)
 	UFIRProperty* Property = nullptr;
@@ -53,8 +55,8 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 
 	// TODO: Maybe do a LogScope snapshot?
 	FFINFutureReflection() = default;
-	FFINFutureReflection(UFINFunction* Function, const FFIRExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
-	FFINFutureReflection(UFIRProperty* Property, const FFIRExecutionContext& Context, const FFINAnyNetworkValue& Input) : Input({Input}), Context(Context), Property(Property) {}
+	FFINFutureReflection(UFIRFunction* Function, const FFIRExecutionContext& Context, const TArray<FFIRAnyValue>& Input) : Input(Input), Context(Context), Function(Function) {}
+	FFINFutureReflection(UFIRProperty* Property, const FFIRExecutionContext& Context, const FFIRAnyValue& Input) : Input({Input}), Context(Context), Property(Property) {}
 	FFINFutureReflection(UFIRProperty* Property, const FFIRExecutionContext& Context) : Context(Context), Property(Property) {}
 
 	virtual bool IsDone() const override {
@@ -84,7 +86,7 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 		}
 	}
 
-	virtual TArray<FFINAnyNetworkValue> GetOutput() const override {
+	virtual TArray<FFIRAnyValue> GetOutput() const override {
 		FScopeLock Lock(const_cast<FCriticalSection*>(&Mutex));
 		return Output;
 	}

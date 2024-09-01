@@ -44,7 +44,7 @@ void AFINWirelessAccessPoint::BeginPlay() {
 		return true;
 	});
 	// TODO: Add LED indicators
-	NetworkConnector1->OnNetworkMessageRecieved.AddLambda([this](const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+	NetworkConnector1->OnNetworkMessageRecieved.AddLambda([this](const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFIRAnyValue>& Data) {
 		// this->LampFlags |= FIN_NetRouter_Con1_Tx;
 		if (HandleMessage(EFINWirelessDirection::FromCircuit, ID, Sender, Reciever, Port, Data)) {
 			// this->LampFlags |= FIN_NetRouter_Con2_Rx;
@@ -123,7 +123,7 @@ bool AFINWirelessAccessPoint::CanHandleMessages() {
  * The wireless direction specifies if this message is "internal" (from the current circuit) or "external" (from wireless
  * network). If it's coming from the inside, we don't need to propagate it to the components of the circuit.
  */
-bool AFINWirelessAccessPoint::HandleMessage(EFINWirelessDirection Direction, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+bool AFINWirelessAccessPoint::HandleMessage(EFINWirelessDirection Direction, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFIRAnyValue>& Data) {
 	if (!CanHandleMessages()) return false;
 
 	const auto SendingCircuit = IFINNetworkCircuitNode::Execute_GetCircuit(NetworkConnector1);

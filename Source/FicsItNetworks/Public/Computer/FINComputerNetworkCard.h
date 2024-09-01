@@ -85,7 +85,7 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
+	virtual void HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFIRAnyValue>& Data) override;
 	// End IFINNetworkMessageInterface
 
 	// Begin IFINPciDeviceInterface
@@ -93,7 +93,7 @@ public:
 	virtual void SetPCINetworkConnection_Implementation(const TScriptInterface<IFINNetworkCircuitNode>& InNode) override;
 	// End IFINPciDeviceInterface
 	
-	static bool CheckNetMessageData(const TArray<FFINAnyNetworkValue>& Data);
+	static bool CheckNetMessageData(const TArray<FFIRAnyValue>& Data);
 
 	UFUNCTION()
     void netClass_Meta(FString& InternalName, FText& DisplayName) {
@@ -138,7 +138,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_send(FString receiver, int port, TArray<FFINAnyNetworkValue> varargs);
+	void netFunc_send(FString receiver, int port, TArray<FFIRAnyValue> varargs);
 	UFUNCTION()
 	void netFuncMeta_send(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "send";
@@ -154,7 +154,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_broadcast(int port, TArray<FFINAnyNetworkValue> varargs);
+	void netFunc_broadcast(int port, TArray<FFIRAnyValue> varargs);
 	UFUNCTION()
 	void netFuncMeta_broadcast(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "broadcast";
@@ -167,7 +167,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netSig_NetworkMessage(const FString& sender, int port, TArray<FFINAnyNetworkValue> varargs) {}
+	void netSig_NetworkMessage(const FString& sender, int port, TArray<FFIRAnyValue> varargs) {}
 	UFUNCTION()
     void netSigMeta_NetworkMessage(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "NetworkMessage";

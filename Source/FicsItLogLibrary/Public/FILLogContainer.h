@@ -9,7 +9,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFINLogEntriesUpdatedDelegate);
 
 UCLASS()
-class FICSITNETWORKS_API UFILLogContainer : public UActorComponent, public IFGSaveInterface {
+class FICSITLOGLIBRARY_API UFILLogContainer : public UActorComponent, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
 	UFILLogContainer();
@@ -31,7 +31,7 @@ public:
 	void EmptyLog();
 
 	UFUNCTION(BlueprintCallable)
-	const TArray<FFILLogEntry>& GetLogEntries();
+	const TArray<FFILEntry>& GetLogEntries();
 
 	UFUNCTION(BlueprintCallable)
 	FString GetLogAsRichText();
@@ -41,7 +41,7 @@ public:
 
 private:
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_AddLogEntries(const TArray<FFILLogEntry>& InLogEntries);
+	void Multicast_AddLogEntries(const TArray<FFILEntry>& InLogEntries);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EmptyLog();
 
@@ -56,9 +56,9 @@ public:
 
 private:
 	UPROPERTY(SaveGame)
-	TArray<FFILLogEntry> LogEntries;
+	TArray<FFILEntry> LogEntries;
 
-	TArray<FFILLogEntry> LogEntriesToAdd;
+	TArray<FFILEntry> LogEntriesToAdd;
 	FCriticalSection LogEntriesToAddMutex;
 	bool bForceEntriesUpdate = false;
 };

@@ -1,6 +1,7 @@
 #include "FINLua/Reflection/LuaObject.h"
 
 #include "FicsItNetworksLuaModule.h"
+#include "FicsItReflection.h"
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
 #include "FINLua/FINLuaModule.h"
@@ -11,7 +12,7 @@
 
 namespace FINLua {
 	FLuaObject::FLuaObject(const FFIRTrace& Object, UFINKernelSystem* Kernel) : Object(Object), Kernel(Kernel) {
-		Type = FFINReflection::Get()->FindClass(Object.GetUnderlyingPtr()->GetClass());
+		Type = FFicsItReflectionModule::Get().FindClass(Object.GetUnderlyingPtr()->GetClass());
 		Kernel->AddReferencer(this, &CollectReferences);
 	}
 
@@ -96,7 +97,7 @@ namespace FINLua {
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
 				FFIRExecutionContext Context(LuaObject->Object);
-				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
+				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIR_Func_MemberFunc, FIR_Prop_Attrib, Context, true);
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -113,7 +114,7 @@ namespace FINLua {
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
 				FFIRExecutionContext Context(LuaObject->Object);
-				luaFIN_tryExecuteSetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Prop_Attrib, Context, valueIndex, true);
+				luaFIN_tryExecuteSetProperty(L, thisIndex, LuaObject->Type, MemberName, FIR_Prop_Attrib, Context, valueIndex, true);
 				return 0;
 			}
 
@@ -122,7 +123,7 @@ namespace FINLua {
 			 * @DisplayName		To String
 			 */)", __tostring) {
 				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
-				luaFIN_pushFString(L, FFINReflection::ObjectReferenceText(LuaObject->Type));
+				luaFIN_pushFString(L, FFicsItReflectionModule::ObjectReferenceText(LuaObject->Type));
 				return 1;
 			}
 
@@ -181,7 +182,7 @@ namespace FINLua {
 		UE_LOGFMT(LogFicsItNetworksLuaReflection, VeryVerbose, "[{Runtime}] Pushed Object '{Object}' to Lua-Stack ({Index})", L, Object->GetFullName(), lua_gettop(L));
 	}
 
-	FLuaObject* luaFIN_toLuaObject(lua_State* L, int Index, UFINClass* ParentClass) {
+	FLuaObject* luaFIN_toLuaObject(lua_State* L, int Index, UFIRClass* ParentClass) {
 		FLuaObject* LuaObject = static_cast<FLuaObject*>(luaL_testudata(L, Index, ReflectionSystemObject::Object::_Name));
 		if (LuaObject && LuaObject->Object.IsValidPtr()) {
 			if (LuaObject->Type->IsChildOf(ParentClass)) {
@@ -195,13 +196,13 @@ namespace FINLua {
 		return nullptr;
 	}
 
-	FLuaObject* luaFIN_checkLuaObject(lua_State* L, int Index, UFINClass* ParentClass) {
+	FLuaObject* luaFIN_checkLuaObject(lua_State* L, int Index, UFIRClass* ParentClass) {
 		FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, ParentClass);
-		if (!LuaObject) luaFIN_typeError(L, Index, FFINReflection::ObjectReferenceText(ParentClass));
+		if (!LuaObject) luaFIN_typeError(L, Index, FFicsItReflectionModule::ObjectReferenceText(ParentClass));
 		return LuaObject;
 	}
 
-	TOptional<FFIRTrace> luaFIN_toObject(lua_State* L, int Index, UFINClass* ParentType) {
+	TOptional<FFIRTrace> luaFIN_toObject(lua_State* L, int Index, UFIRClass* ParentType) {
 		FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, ParentType);
 		if (!LuaObject) {
 			if (lua_isnil(L, Index)) return FFIRTrace();
@@ -210,9 +211,9 @@ namespace FINLua {
 		return LuaObject->Object;
 	}
 
-	FFIRTrace luaFIN_checkObject(lua_State* L, int Index, UFINClass* ParentType) {
+	FFIRTrace luaFIN_checkObject(lua_State* L, int Index, UFIRClass* ParentType) {
 		TOptional<FFIRTrace> Object = luaFIN_toObject(L, Index, ParentType);
-		if (!Object.IsSet()) luaFIN_typeError(L, Index, FFINReflection::ObjectReferenceText(ParentType));
+		if (!Object.IsSet()) luaFIN_typeError(L, Index, FFicsItReflectionModule::ObjectReferenceText(ParentType));
 		return *Object;
 	}
 

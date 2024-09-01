@@ -1,7 +1,7 @@
 #pragma once
 
+#include "FicsItReflection.h"
 #include "FINLua/LuaUtil.h"
-#include "Reflection/FINReflection.h"
 
 class UFINKernelSystem;
 
@@ -11,9 +11,9 @@ namespace FINLua {
 	 */
 	struct FLuaStruct {
 		UFIRStruct* Type = nullptr;
-		TSharedRef<FFINDynamicStructHolder> Struct;
+		TSharedRef<FFIRInstancedStruct> Struct;
 		UFINKernelSystem* Kernel;
-		FLuaStruct(UFIRStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel);
+		FLuaStruct(UFIRStruct* Type, const FFIRInstancedStruct& Struct, UFINKernelSystem* Kernel);
 		FLuaStruct(const FLuaStruct& Other);
 		~FLuaStruct();
 		static void CollectReferences(void* Obj, FReferenceCollector& Collector);
@@ -25,7 +25,7 @@ namespace FINLua {
 	 * @param Struct the struct you want to push
 	 * @return false if no FIN Reflection Type got found for the struct
 	 */
-	bool luaFIN_pushStruct(lua_State* L, const FINStruct& Struct);
+	bool luaFIN_pushStruct(lua_State* L, const FIRStruct& Struct);
 
 	/**
 	 * @brief Tries to convert a table at the given index to a struct of the given template type.
@@ -35,7 +35,7 @@ namespace FINLua {
 	 * @param bAllowImplicitConstruction if true, construction arguments that are structs can be constructed implicitly 
 	 * @return the Constructed FINStruct, otherwise nullptr
 	 */
-	TSharedPtr<FINStruct> luaFIN_convertToStruct(lua_State* L, int Index, UFIRStruct* TemplateType, bool bAllowImplicitConstruction);
+	TSharedPtr<FIRStruct> luaFIN_convertToStruct(lua_State* L, int Index, UFIRStruct* TemplateType, bool bAllowImplicitConstruction);
 
 	/**
 	 * @brief Retrieves the lua value at the given index in the lua stack as Lua Struct.
@@ -63,7 +63,7 @@ namespace FINLua {
 	 * @param bAllowConstruction if set to true and the lua value is a table, it will try to convert the table to the given Struct Type, if no struct type is given, does nothing
 	 * @return the struct got from the lua value, otherwise nullptr
 	 */
-	TSharedPtr<FINStruct> luaFIN_toStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction);
+	TSharedPtr<FIRStruct> luaFIN_toStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction);
 
 	/**
 	 * @brief Retrieves the lua value at the given index in the lua stack as FINStruct. Causes a lua type error if not able to get as struct of given type.
@@ -73,10 +73,10 @@ namespace FINLua {
 	 * @param bAllowConstruction if set to true and the lua value is a table, it will try to convert the table to the given Struct Type, if no struct type is given, does nothing
 	 * @return the struct got from the lua value
 	 */
-	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction);
+	TSharedRef<FIRStruct> luaFIN_checkStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction);
 	template<typename T>
 	T& luaFIN_checkStruct(lua_State* L, int Index, bool bAllowConstruction) {
-		UFIRStruct* Type = FFINReflection::Get()->FindStruct(TBaseStructure<FVector>::Get());
+		UFIRStruct* Type = FFicsItReflectionModule::Get().FindStruct(TBaseStructure<FVector>::Get());
 		return luaFIN_checkStruct(L, Index, Type, true)->Get<T>();
 	}
 

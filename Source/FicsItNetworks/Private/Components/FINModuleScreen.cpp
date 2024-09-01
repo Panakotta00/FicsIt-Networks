@@ -13,16 +13,16 @@ AFINModuleScreen::AFINModuleScreen() {
 
 void AFINModuleScreen::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	Super::EndPlay(endPlayReason);
-	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(FFINNetworkTrace());
+	if (endPlayReason == EEndPlayReason::Destroyed) BindGPU(FFIRTrace());
 }
 
-void AFINModuleScreen::BindGPU(const FFINNetworkTrace& gpu) {
+void AFINModuleScreen::BindGPU(const FFIRTrace& gpu) {
 	if (gpu.IsValidPtr()) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
 	if (GPU == gpu) return;
 	
-	FFINNetworkTrace oldGPU = GPU;
-	GPU = FFINNetworkTrace();
-	if (oldGPU.IsValidPtr()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr())->BindScreen(FFINNetworkTrace());
+	FFIRTrace oldGPU = GPU;
+	GPU = FFIRTrace();
+	if (oldGPU.IsValidPtr()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr())->BindScreen(FFIRTrace());
 
 	GPU = gpu;
 	if (gpu.IsValidPtr()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
@@ -30,7 +30,7 @@ void AFINModuleScreen::BindGPU(const FFINNetworkTrace& gpu) {
 	OnGPUUpdate.Broadcast();
 }
 
-FFINNetworkTrace AFINModuleScreen::GetGPU() const {
+FFIRTrace AFINModuleScreen::GetGPU() const {
 	return GPU;
 }
 

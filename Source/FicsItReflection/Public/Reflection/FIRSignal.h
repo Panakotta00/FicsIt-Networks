@@ -1,14 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FicsItReflection.h"
 #include "FIRProperty.h"
 #include "FIRSignal.generated.h"
 
 UENUM()
 enum EFIRSignalFlags {
-	FIN_Signal_None			= 0,
-	FIN_Signal_StaticSource	= 0b1,
+	FIR_Signal_None			= 0,
+	FIR_Signal_StaticSource	= 0b1,
 };
 
 ENUM_CLASS_FLAGS(EFIRSignalFlags)
@@ -22,7 +21,7 @@ public:
 	UPROPERTY()
 	TArray<UFIRProperty*> Parameters;
 
-	EFIRSignalFlags SignalFlags = FIN_Signal_None;
+	EFIRSignalFlags SignalFlags = FIR_Signal_None;
 
 	/**
 	 * Returns the signal flags of this struct
@@ -45,14 +44,5 @@ public:
 	 * Triggers the Signal
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Reflection")
-	virtual void Trigger(UObject* Context, const TArray<FFIRAnyValue>& Data) {
-		FFicsItReflectionModule::Get()->OnSignalTriggered.Broadcast(Context, this, Data);
-
-		AFIRSignalSubsystem* SubSys = AFIRSignalSubsystem::GetSignalSubsystem(Context);
-		if (!SubSys) {
-			UE_LOG(LogFicsItReflection, Error, TEXT("Unable to get signal subsystem for executing signal '%s'"), *GetInternalName())
-			return;
-		}
-		SubSys->BroadcastSignal(Context, FFIRSignalData(this, Data));
-	}
+	virtual void Trigger(UObject* Context, const TArray<FFIRAnyValue>& Data);
 };

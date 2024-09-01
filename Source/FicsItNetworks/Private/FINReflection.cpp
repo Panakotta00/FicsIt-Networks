@@ -1,6 +1,6 @@
-﻿#include "Computer/FINComputerGPUT1.h"
+﻿#include "FILLogEntry.h"
+#include "Computer/FINComputerGPUT1.h"
 #include "Computer/FINComputerGPUT2.h"
-#include "FicsItKernel/Logging.h"
 #include "GameFramework/Actor.h"
 #include "Network/FINFuture.h"
 #include "Reflection/Source/FIRSourceStaticMacros.h"
@@ -174,7 +174,7 @@ BeginFunc(clone, "Clone", "Clones this buffer into a new struct") {
 } EndFunc()
 EndStruct()
 
-BeginStruct(FFINLogEntry, "LogEntry", "Log Entry", "An entry in the Computer Log.")
+BeginStruct(FFILEntry, "LogEntry", "Log Entry", "An entry in the Computer Log.")
 BeginProp(RString, content, "Content", "The Message-Content contained within the log entry.") {
 	Return self->Content;
 } EndProp()

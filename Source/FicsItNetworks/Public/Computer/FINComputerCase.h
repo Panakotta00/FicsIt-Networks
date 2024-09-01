@@ -235,7 +235,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_getLog(int64 PageSize, int64 Page, TArray<FFINLogEntry>& OutLog, int64& OutLogSize);
+	void netFunc_getLog(int64 PageSize, int64 Page, TArray<FFILEntry>& OutLog, int64& OutLogSize);
 	UFUNCTION()
 	void netFuncMeta_getLog(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "getLog";

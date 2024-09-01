@@ -13,23 +13,27 @@
 #include "FGLocomotive.h"
 #include "FGTrain.h"
 #include "FGTrainStationIdentifier.h"
+#include "FIRSubsystem.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadStation.h"
 #include "Buildables/FGBuildableRailroadSwitchControl.h"
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
 
-static TArray<TWeakObjectPtr<AFGRailroadVehicle>> FFGRailroadSignalBlock_GetOccupiedBy(const FFGRailroadSignalBlock& Block) {
-	return Block.mOccupiedBy;
-}
+class FIRRailroadHelper {
+public:
+	static TArray<TWeakObjectPtr<AFGRailroadVehicle>> FFGRailroadSignalBlock_GetOccupiedBy(const FFGRailroadSignalBlock& Block) {
+		return Block.mOccupiedBy;
+	}
 
-static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetQueuedReservations(const FFGRailroadSignalBlock& Block) {
-	return Block.mQueuedReservations;
-}
+	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetQueuedReservations(const FFGRailroadSignalBlock& Block) {
+		return Block.mQueuedReservations;
+	}
 
-static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
-	return Block.mApprovedReservations;
-}
+	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
+		return Block.mApprovedReservations;
+	}
+};
 
 BeginClass(AFGBuildableTrainPlatform, "TrainPlatform", "Train Platform", "The base class for all train station parts.")
 BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which this platform is part of.") {
@@ -611,7 +615,7 @@ BeginFunc(forceSwitchPosition, "Force Switch Position", "Forces the switch posit
 	InVal(0, RInt, index, "Index", "The connection index to whcih the switch should be force to point to. Negative number to remove the lock.")
 	Body()
 	self->SetSwitchPosition(index);
-	AFIRComputerSubsystem::GetComputerSubsystem(self)->ForceRailroadSwitch(self, index);
+	AFIRSubsystem::GetReflectionSubsystem(self)->ForceRailroadSwitch(self, index);
 } EndFunc()
 BeginProp(RBool, isConnected, "Is Connected", "True if the connection has any connection to other connections.") {
 	Return self->IsConnected();
@@ -824,7 +828,7 @@ BeginFunc(getOccupation, "Get Occupation", "Returns a list of trains that curren
 	Body()
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Occupation;
-	for (TWeakObjectPtr<AFGRailroadVehicle> train : FFGRailroadSignalBlock_GetOccupiedBy(*self->Block.Pin())) {
+	for (TWeakObjectPtr<AFGRailroadVehicle> train : FIRRailroadHelper::FFGRailroadSignalBlock_GetOccupiedBy(*self->Block.Pin())) {
 		if (train.IsValid()) Occupation.Add(Ctx.GetTrace() / train.Get());
 	}
 	occupation = Occupation;
@@ -834,7 +838,7 @@ BeginFunc(getQueuedReservations, "Get Queued Reservations", "Returns a list of t
 	Body()
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Reservations;
-	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FFGRailroadSignalBlock_GetQueuedReservations(*self->Block.Pin())) {
+	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FIRRailroadHelper::FFGRailroadSignalBlock_GetQueuedReservations(*self->Block.Pin())) {
 		if (!Reservation.IsValid()) continue;
 		AFGTrain* Train = Reservation->Train.Get();
 		if (Train) Reservations.Add(Ctx.GetTrace() / Train);
@@ -846,7 +850,7 @@ BeginFunc(getApprovedReservations, "Get Approved Reservations", "Returns a list 
 	Body()
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Reservations;
-	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FFGRailroadSignalBlock_GetApprovedReservations(*self->Block.Pin())) {
+	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FIRRailroadHelper::FFGRailroadSignalBlock_GetApprovedReservations(*self->Block.Pin())) {
 		if (!Reservation.IsValid()) continue;
 		AFGTrain* Train = Reservation->Train.Get();
 		if (Train) Reservations.Add(Ctx.GetTrace() / Train);

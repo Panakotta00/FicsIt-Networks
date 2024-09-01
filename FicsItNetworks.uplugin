@@ -24,7 +24,7 @@
 		{
 			"Name": "FicsItNetworksEd",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostDefault"
 		},
 		{
 			"Name": "FicsItNetworksLua",
@@ -34,7 +34,7 @@
 		{
 			"Name": "FicsItNetworksDocumentation",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostDefault"
 		},
 		{
 			"Name": "Tracy",
@@ -49,12 +49,12 @@
 		{
 			"Name": "FicsItReflection",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostDefault"
 		},
 		{
 			"Name": "FicsItLogLibrary",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostDefault"
 		}
 	],
 	"Plugins": [

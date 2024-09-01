@@ -8,9 +8,12 @@
 #include "Buildables/FGBuildableLightSource.h"
 #include "Buildables/FGBuildableResourceSink.h"
 
-static void AFGBuildableDoor_Update(AFGBuildableDoor* InDoor, EDoorConfiguration InConfig) {
-	InDoor->OnRep_DoorConfiguration();
-}
+class FFIRDoorHelper {
+public:
+	static void AFGBuildableDoor_Update(AFGBuildableDoor* InDoor, EDoorConfiguration InConfig) {
+		InDoor->OnRep_DoorConfiguration();
+	}
+};
 
 BeginClass(AFGBuildableResourceSink, "ResourceSink", "Resource Sink", "The resource sink, also known a A.W.E.S.O.M.E Sink")
 BeginProp(RInt, numPoints, "Num Points", "The number of available points.") {
@@ -38,7 +41,7 @@ BeginFunc(setConfiguration, "Set Configuration", "Sets the Door Mode/Configurati
 	Body()
 	EDoorConfiguration Config = (EDoorConfiguration)FMath::Clamp(configuration, 0, 2);
 	self->SetmDoorConfiguration(Config);
-	AFGBuildableDoor_Update(self, Config);
+	FFIRDoorHelper::AFGBuildableDoor_Update(self, Config);
 } EndFunc()
 EndClass()
 

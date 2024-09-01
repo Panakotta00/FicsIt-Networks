@@ -1,6 +1,7 @@
 #include "FINLua/LuaGlobalLib.h"
 
 #include "FicsItNetworksLuaModule.h"
+#include "FILLogContainer.h"
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/LuaFuture.h"
 #include "FINLua/Reflection/LuaObject.h"
@@ -32,7 +33,7 @@ namespace FINLua {
 		if (log.length() > 0) log = log.erase(log.length()-1);
 		
 		UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-		Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Info, UTF8_TO_TCHAR(log.c_str()));
+		Processor->GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Info, UTF8_TO_TCHAR(log.c_str()));
 		
 		return UFINLuaProcessor::luaAPIReturn(L, 0);
 	}
@@ -276,7 +277,7 @@ namespace FINLua {
 			}
 			int j = 0;
 			for (const FString& ClassName : ClassNames) {
-				UFINClass* Class = FFINReflection::Get()->FindClass(ClassName);
+				UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(ClassName);
 				if (Class) luaFIN_pushClass(L, Class);
 				else lua_pushnil(L);
 				if (isT) lua_seti(L, -2, ++j);

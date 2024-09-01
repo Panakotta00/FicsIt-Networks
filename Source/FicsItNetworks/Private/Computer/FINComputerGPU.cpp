@@ -32,10 +32,10 @@ void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTick
 
 void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	Super::EndPlay(endPlayReason);
-	if (endPlayReason == EEndPlayReason::Destroyed) BindScreen(FFINNetworkTrace());
+	if (endPlayReason == EEndPlayReason::Destroyed) BindScreen(FFIRTrace());
 }
 
-void AFINComputerGPU::BindScreen(const FFINNetworkTrace& screen) {
+void AFINComputerGPU::BindScreen(const FFIRTrace& screen) {
 	if (screen.IsValidPtr()) check(screen->GetClass()->ImplementsInterface(UFINScreenInterface::StaticClass()))
 	if (Screen == screen) return;
 
@@ -43,7 +43,7 @@ void AFINComputerGPU::BindScreen(const FFINNetworkTrace& screen) {
 	UpdateScreen();
 }
 
-FFINNetworkTrace AFINComputerGPU::GetScreen() const {
+FFIRTrace AFINComputerGPU::GetScreen() const {
 	return Screen;
 }
 
@@ -85,10 +85,10 @@ void AFINComputerGPU::OnRep_Screen() {
 }
 
 void AFINComputerGPU::UpdateScreen() {
-	FFINNetworkTrace newScreen = Screen;
-	Screen = FFINNetworkTrace();
-	if (OldScreenCache.IsValidPtr()) Cast<IFINScreenInterface>(OldScreenCache.Get())->BindGPU(FFINNetworkTrace());
-	FFINNetworkTrace oldScreen = OldScreenCache;
+	FFIRTrace newScreen = Screen;
+	Screen = FFIRTrace();
+	if (OldScreenCache.IsValidPtr()) Cast<IFINScreenInterface>(OldScreenCache.Get())->BindGPU(FFIRTrace());
+	FFIRTrace oldScreen = OldScreenCache;
 	OldScreenCache = Screen = newScreen;
 	
 	if (Screen.IsValidPtr()) Cast<IFINScreenInterface>(Screen.Get())->BindGPU(Screen / this);
@@ -96,7 +96,7 @@ void AFINComputerGPU::UpdateScreen() {
 	if (HasAuthority()) netSig_ScreenBound(oldScreen);
 }
 
-void AFINComputerGPU::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
+void AFINComputerGPU::netFunc_bindScreen(FFIRTrace NewScreen) {
 	if (AFGBuildableWidgetSign* BuildableWidget = Cast<AFGBuildableWidgetSign>(*NewScreen)) {
 		UFINGPUWidgetSign* WidgetSign = AFINComputerSubsystem::GetComputerSubsystem(this)->AddGPUWidgetSign(this, BuildableWidget);
 		BindScreen(NewScreen / WidgetSign);
@@ -106,7 +106,7 @@ void AFINComputerGPU::netFunc_bindScreen(FFINNetworkTrace NewScreen) {
 		BindScreen(NewScreen);
 		return;
 	}
-	BindScreen(FFINNetworkTrace());
+	BindScreen(FFIRTrace());
 	AFINComputerSubsystem::GetComputerSubsystem(this)->DeleteGPUWidgetSign(this);
 }
 
@@ -119,7 +119,7 @@ FVector2D AFINComputerGPU::netFunc_getScreenSize() {
 	}
 }
 
-void AFINComputerGPU::netSig_ScreenBound_Implementation(const FFINNetworkTrace& oldScreen) {}
+void AFINComputerGPU::netSig_ScreenBound_Implementation(const FFIRTrace& oldScreen) {}
 
 void UFINScreenWidget::OnNewWidget() {
 	if (Container.IsValid()) {
@@ -179,13 +179,13 @@ TSharedRef<SWidget> UFINScreenWidget::RebuildWidget() {
 	return Container.ToSharedRef();
 }
 
-void UFINGPUWidgetSign::BindGPU(const FFINNetworkTrace& gpu) {
+void UFINGPUWidgetSign::BindGPU(const FFIRTrace& gpu) {
 	if (gpu.IsValidPtr()) check(gpu->GetClass()->ImplementsInterface(UFINGPUInterface::StaticClass()))
 	if (GPU == gpu) return;
 	
-	FFINNetworkTrace oldGPU = GPU;
-	GPU = FFINNetworkTrace();
-	if (oldGPU.IsValidPtr()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr())->BindScreen(FFINNetworkTrace());
+	FFIRTrace oldGPU = GPU;
+	GPU = FFIRTrace();
+	if (oldGPU.IsValidPtr()) Cast<IFINGPUInterface>(oldGPU.GetUnderlyingPtr())->BindScreen(FFIRTrace());
 
 	GPU = gpu;
 	if (gpu.IsValidPtr()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
@@ -193,7 +193,7 @@ void UFINGPUWidgetSign::BindGPU(const FFINNetworkTrace& gpu) {
 	OnGPUUpdate.Broadcast();
 }
 
-FFINNetworkTrace UFINGPUWidgetSign::GetGPU() const {
+FFIRTrace UFINGPUWidgetSign::GetGPU() const {
 	return GPU;
 }
 

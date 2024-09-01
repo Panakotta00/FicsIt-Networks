@@ -1,46 +1,47 @@
 #include "FicsItKernel/FicsItKernel.h"
 #include "Computer/FINComputerCase.h"
-#include "FicsItKernel/Logging.h"
 #include "FicsItKernel/Processor/Processor.h"
 #include "Network/FINFuture.h"
-#include "Reflection/FINReflection.h"
+#include "FicsItReflection.h"
+#include "FILLogContainer.h"
+#include "FILLogScope.h"
 
 FFINKernelListener::FFINKernelListener(UFINKernelSystem* parent) : parent(parent) {}
 
 void FFINKernelListener::onMounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
 	static UFIRSignal* Signal = nullptr;
-	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(AFINComputerCase::StaticClass())->FindFIRSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {4ll, FString(path.str().c_str())});
 }
 
 void FFINKernelListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
 	static UFIRSignal* Signal = nullptr;
-	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
+	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(AFINComputerCase::StaticClass())->FindFIRSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {5ll, FString(path.str().c_str())});
 }
 
 void FFINKernelListener::onNodeAdded(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
 	static UFIRSignal* Signal = nullptr;
-	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-	Signal->Trigger(parent->GetOuter(), {0ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
+	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(AFINComputerCase::StaticClass())->FindFIRSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {0ll, FString(path.str().c_str()), static_cast<FIRInt>(type)});
 }
 
 void FFINKernelListener::onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
 	static UFIRSignal* Signal = nullptr;
-	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-	Signal->Trigger(parent->GetOuter(), {1ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
+	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(AFINComputerCase::StaticClass())->FindFIRSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {1ll, FString(path.str().c_str()), static_cast<FIRInt>(type)});
 }
 
 void FFINKernelListener::onNodeChanged(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
 	static UFIRSignal* Signal = nullptr;
-	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-	Signal->Trigger(parent->GetOuter(), {2ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
+	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(AFINComputerCase::StaticClass())->FindFIRSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {2ll, FString(path.str().c_str()), static_cast<FIRInt>(type)});
 }
 
 void FFINKernelListener::onNodeRenamed(CodersFileSystem::Path newPath, CodersFileSystem::Path oldPath, CodersFileSystem::NodeType type) {
 	static UFIRSignal* Signal = nullptr;
-	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
-	Signal->Trigger(parent->GetOuter(), {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FINInt>(type)});
+	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(AFINComputerCase::StaticClass())->FindFIRSignal("FileSystemUpdate");
+	Signal->Trigger(parent->GetOuter(), {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FIRInt>(type)});
 }
 
 UFINKernelSystem::UFINKernelSystem() {
@@ -119,7 +120,7 @@ void UFINKernelSystem::GatherDependencies_Implementation(TArray<UObject*>& out_d
 }
 
 void UFINKernelSystem::Tick(float InDeltaSeconds) {
-	FFINLogScope LogScope(Log);
+	FFILLogScope LogScope(Log);
 	if (GetState() == FIN_KERNEL_RESET) if (!Start(true)) return;
 	if (GetState() == FIN_KERNEL_RUNNING) {
 		if (DevDevice) DevDevice->tickListeners();
@@ -194,13 +195,13 @@ void UFINKernelSystem::RemoveDrive(AFINFileSystemState* InDrive) {
 	Drives.Remove(InDrive);
 }
 
-void UFINKernelSystem::PushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> InFuture) {
+void UFINKernelSystem::PushFuture(TSharedPtr<TFIRInstancedStruct<FFINFuture>> InFuture) {
 	FutureQueue.Enqueue(InFuture);
 }
 
 void UFINKernelSystem::HandleFutures() {
 	while (!FutureQueue.IsEmpty()) {
-		TSharedPtr<TFINDynamicStruct<FFINFuture>> Future;
+		TSharedPtr<TFIRInstancedStruct<FFINFuture>> Future;
 		FutureQueue.Peek(Future);
 		FutureQueue.Pop();
 		try {
@@ -298,7 +299,7 @@ void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
 	if (Processor) Processor->Stop(true);
 
 	if (GetLog()) {
-		GetLog()->PushLogEntry(EFILLogVerbosity::FIN_Log_Verbosity_Fatal, KernelCrash->GetMessage());
+		GetLog()->PushLogEntry(FIL_Verbosity_Fatal, KernelCrash->GetMessage());
 	}
 }
 

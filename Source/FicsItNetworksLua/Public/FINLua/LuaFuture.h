@@ -9,7 +9,7 @@ namespace FINLua {
 	 * @param L the lua state
 	 * @param Future the Future Struct you want to push onto the lua stack
 	 */
-	void luaFIN_pushFuture(lua_State* L, const TFINDynamicStruct<FFINFuture>& Future);
+	void luaFIN_pushFuture(lua_State* L, const TFIRInstancedStruct<FFINFuture>& Future);
 
 	/**
 	 * @brief Tries to retrieve a dynamic Future Struct from the lua value at the given index in the lua stack.
@@ -17,9 +17,9 @@ namespace FINLua {
 	 * @param Index the index of the lua value you try to get as dynamic Future Struct
 	 * @return a shared pointer to the dynamic Future Struct of the lua future in the lua stack. Will error if lua value is not future.
 	 */
-	[[nodiscard]] const TSharedRef<TFINDynamicStruct<FFINFuture>>& luaFIN_checkLuaFuture(lua_State* L, int Index);
-	[[nodiscard]] FORCEINLINE const TFINDynamicStruct<FFINFuture>& luaFIN_checkFuture(lua_State* L, int Index) {
-		TSharedRef<TFINDynamicStruct<FFINFuture>> future = luaFIN_checkLuaFuture(L, Index);
+	[[nodiscard]] const TSharedRef<TFIRInstancedStruct<FFINFuture>>& luaFIN_checkLuaFuture(lua_State* L, int Index);
+	[[nodiscard]] FORCEINLINE const TFIRInstancedStruct<FFINFuture>& luaFIN_checkFuture(lua_State* L, int Index) {
+		TSharedRef<TFIRInstancedStruct<FFINFuture>> future = luaFIN_checkLuaFuture(L, Index);
 		return *future;
 	}
 }

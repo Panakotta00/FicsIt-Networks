@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINGlobalRegisterHelper.h"
+#include "FIRGlobalRegisterHelper.h"
 #include "LuaUtil.h"
 
 // TODO: Make Comment Documentation Parsing more Unified and DRY, so field names etc all have same parsing rules
@@ -220,7 +220,7 @@ public:
 #define LuaModule(Documentation, InternalName) \
 	namespace InternalName { \
 		static TSharedRef<FFINLuaModule> Module = MakeShared<FFINLuaModule>(); \
-		static FFINStaticGlobalRegisterFunc RegisterModule([]() { \
+		static FFIRStaticGlobalRegisterFunc RegisterModule([]() { \
 			Module->ParseDocumentationComment(TEXT(Documentation), TEXT(#InternalName)); \
 			FFINLuaModuleRegistry::GetInstance().AddModule(Module); \
 		}, 0); \
@@ -228,20 +228,20 @@ public:
 	namespace InternalName
 #define LuaModulePostSetup() \
 	void PreSetup(FFINLuaModule&, lua_State*); \
-	static FFINStaticGlobalRegisterFunc RegisterPreSetup([]() { \
+	static FFIRStaticGlobalRegisterFunc RegisterPreSetup([]() { \
 		Module->PreSetup.BindStatic(&PreSetup); \
 	}); \
 	void PreSetup(FFINLuaModule& InModule, lua_State* L)
 #define LuaModulePostSetup() \
 	void PostSetup(FFINLuaModule&, lua_State*); \
-	static FFINStaticGlobalRegisterFunc RegisterPostSetup([]() { \
+	static FFIRStaticGlobalRegisterFunc RegisterPostSetup([]() { \
 		Module->PostSetup.BindStatic(&PostSetup); \
 	}); \
 	void PostSetup(FFINLuaModule& InModule, lua_State* L)
 #define LuaModuleLibrary(Documentation, InternalName) \
 	namespace InternalName { \
 		static TSharedRef<FFINLuaTable> Table = MakeShared<FFINLuaTable>(); \
-		static FFINStaticGlobalRegisterFunc RegisterLibrary([]() { \
+		static FFIRStaticGlobalRegisterFunc RegisterLibrary([]() { \
 			Module->AddLibraryByDocumentationComment(Table, Documentation, TEXT(#InternalName)); \
 		}, 1); \
 	} \
@@ -250,28 +250,28 @@ public:
 	namespace InternalName { \
 		const char* _Name = #InternalName; \
 		static TSharedRef<FFINLuaTable> Table = MakeShared<FFINLuaTable>(); /* TODO: Maybe update to correct updated internal name within the function. Because Comment Documentation can change internal name. */ \
-		static FFINStaticGlobalRegisterFunc RegisterMetatable([]() { \
+		static FFIRStaticGlobalRegisterFunc RegisterMetatable([]() { \
 			Module->AddMetatableByDocumentationComment(Table, Documentation, TEXT(#InternalName)); \
 		}, 1); \
 	} \
 	namespace InternalName
 #define LuaModuleTableFunction(Documentation, _FunctionName) \
 	int _FunctionName (lua_State* L); \
-	static FFINStaticGlobalRegisterFunc RegisterField_ ## _FunctionName ([]() { \
+	static FFIRStaticGlobalRegisterFunc RegisterField_ ## _FunctionName ([]() { \
 		Table->AddFunctionFieldByDocumentationComment(&_FunctionName, Documentation, TEXT(#_FunctionName)); \
 	}, 2); \
 	int _FunctionName (lua_State* L)
 #define LuaModuleTableBareField(Documentation, _FieldName) \
 	const char* _FieldName ## _Name = #_FieldName; \
 	void _FieldName (lua_State*, const FString&); /* TODO: Maybe update to correct updated internal name within the function. Because Comment Documentation can change internal name. */ \
-	static FFINStaticGlobalRegisterFunc RegisterField_ ## _FieldName ([]() { \
+	static FFIRStaticGlobalRegisterFunc RegisterField_ ## _FieldName ([]() { \
 		Table->AddBareFieldByDocumentationComment(&_FieldName, Documentation, TEXT(#_FieldName)); \
 	}, 2); \
 	void _FieldName (lua_State* L, const FString& PersistName)
 #define LuaModuleTableTable(Documentation, _TableName) \
 	namespace _TableName { \
 		static TSharedRef<FFINLuaTable> _TableName = MakeShared<FFINLuaTable>(); \
-		static FFINStaticGlobalRegisterFunc RegisterTable ([]() { \
+		static FFIRStaticGlobalRegisterFunc RegisterTable ([]() { \
 			Table->AddTableFieldByDocumentationComment(_TableName, Documentation, TEXT(#_TableName)); \
 		}, 2); \
 		static TSharedRef<FFINLuaTable>& Table = _TableName; \
@@ -279,7 +279,7 @@ public:
 	namespace _TableName
 #define LuaModuleGlobalBareValue(Documentation, _GlobalName) \
 	void _GlobalName (lua_State*, const FString&); \
-	static FFINStaticGlobalRegisterFunc RegisterGlobal_ ## _GlobalName ([]() { \
+	static FFIRStaticGlobalRegisterFunc RegisterGlobal_ ## _GlobalName ([]() { \
 		Module->AddGlobalBareValueByDocumentationComment(&_GlobalName, Documentation, TEXT(#_GlobalName)); \
 	}, 1); \
 	void _GlobalName (lua_State* L, const FString& PersistName)

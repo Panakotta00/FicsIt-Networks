@@ -15,7 +15,7 @@ typedef TFunction<bool(UObject*, UObject*)> FFINTraceStep;
  * Allows a later check if the object is still reachable
  */
 USTRUCT(BlueprintType)
-struct FICSITNETWORKS_API FFIRTrace {
+struct FICSITREFLECTION_API FFIRTrace {
 	GENERATED_BODY()
 
 	friend uint32 GetTypeHash(const FFIRTrace&);

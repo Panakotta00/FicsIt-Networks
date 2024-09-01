@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "SlateBasics.h"
 #include "FINComputerGPU.h"
-#include "Network/FINDynamicStructHolder.h"
+#include "FIRInstancedStruct.h"
 #include "FINComputerGPUT2.generated.h"
 
 USTRUCT(BlueprintType)
@@ -328,7 +328,7 @@ class SFINGPUT2Widget : public SLeafWidget {
 	SLATE_BEGIN_ARGS(SFINGPUT2Widget) {}
 		SLATE_STYLE_ARGUMENT(FFINGPUT2WidgetStyle, Style)
 		
-		SLATE_ATTRIBUTE(TArray<FFINDynamicStructHolder>, DrawCalls)
+		SLATE_ATTRIBUTE(TArray<FFIRInstancedStruct>, DrawCalls)
 		SLATE_ATTRIBUTE(bool, CaptureMouseOnPress)
 
 		SLATE_EVENT(FFINGPUT2CursorEvent, OnMouseDown)
@@ -364,7 +364,7 @@ private:
 	UObject* WorldContext = nullptr;
 	const FFINGPUT2WidgetStyle* Style = nullptr;
 	
-	TAttribute<TArray<FFINDynamicStructHolder>> DrawCalls;
+	TAttribute<TArray<FFIRInstancedStruct>> DrawCalls;
 	
 	FFINGPUT2CursorEvent OnMouseDownEvent;
 	FFINGPUT2CursorEvent OnMouseUpEvent;
@@ -395,12 +395,12 @@ public:
 	UFUNCTION()
 	void FlushDrawCalls();
 	
-	void AddDrawCall(TFINDynamicStruct<FFINGPUT2DrawCall> DrawCall);
+	void AddDrawCall(TFIRInstancedStruct<FFINGPUT2DrawCall> DrawCall);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Client_CleanDrawCalls();
 	UFUNCTION(NetMulticast, Reliable)
-	void Client_AddDrawCallChunk(const TArray<FFINDynamicStructHolder>& Chunk);
+	void Client_AddDrawCallChunk(const TArray<FFIRInstancedStruct>& Chunk);
 	UFUNCTION(NetMulticast, Reliable)
 	void Client_FlushDrawCalls();
 
@@ -813,12 +813,12 @@ private:
 	FCriticalSection DrawingMutex;
 	
 	UPROPERTY(SaveGame)
-	TArray<FFINDynamicStructHolder> BackBufferDrawCalls;
+	TArray<FFIRInstancedStruct> BackBufferDrawCalls;
 
 	UPROPERTY(SaveGame)
-	TArray<FFINDynamicStructHolder> FrontBufferDrawCalls;
+	TArray<FFIRInstancedStruct> FrontBufferDrawCalls;
 
-	TQueue<FFINDynamicStructHolder> DrawCalls2Send;
+	TQueue<FFIRInstancedStruct> DrawCalls2Send;
 
 	UPROPERTY()
 	bool bFlushOverNetwork = true;

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Network/FINAnyNetworkValue.h"
+#include "FIRAnyValue.h"
 #include "FINSignalData.generated.h"
 
 class UFIRSignal;
@@ -13,10 +13,10 @@ struct FICSITNETWORKS_API FFINSignalData {
 	UFIRSignal* Signal = nullptr;
 
 	UPROPERTY()
-	TArray<FFINAnyNetworkValue> Data;
+	TArray<FFIRAnyValue> Data;
 
 	FFINSignalData() = default;
-	FFINSignalData(UFIRSignal* Signal, const FINArray& Data) : Signal(Signal), Data(Data) {}
+	FFINSignalData(UFIRSignal* Signal, const FIRArray& Data) : Signal(Signal), Data(Data) {}
 
 	bool Serialize(FStructuredArchive::FSlot Slot);
 };

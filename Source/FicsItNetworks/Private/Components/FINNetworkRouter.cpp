@@ -26,7 +26,7 @@ void AFINNetworkRouter::BeginPlay() {
 	NetworkConnector1->OnIsNetworkPortOpen.BindLambda([this](int Port) {
         return PortList.Contains(Port) == bIsPortWhitelist;
     });
-	NetworkConnector1->OnNetworkMessageRecieved.AddLambda([this](const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+	NetworkConnector1->OnNetworkMessageRecieved.AddLambda([this](const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFIRAnyValue>& Data) {
         this->LampFlags |= FIN_NetRouter_Con1_Tx;
         if (HandleMessage(IFINNetworkCircuitNode::Execute_GetCircuit(NetworkConnector2), ID, Sender, Reciever, Port, Data))
         	this->LampFlags |= FIN_NetRouter_Con2_Rx;
@@ -37,7 +37,7 @@ void AFINNetworkRouter::BeginPlay() {
 	NetworkConnector2->OnIsNetworkPortOpen.BindLambda([this](int Port) {
         return PortList.Contains(Port) == bIsPortWhitelist;
     });
-	NetworkConnector2->OnNetworkMessageRecieved.AddLambda([this](const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+	NetworkConnector2->OnNetworkMessageRecieved.AddLambda([this](const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFIRAnyValue>& Data) {
         this->LampFlags |= FIN_NetRouter_Con2_Tx;
         if (HandleMessage(IFINNetworkCircuitNode::Execute_GetCircuit(NetworkConnector1), ID, Sender, Reciever, Port, Data))
 	        this->LampFlags |= FIN_NetRouter_Con1_Rx;
@@ -55,7 +55,7 @@ void AFINNetworkRouter::Tick(float DeltaSeconds) {
 	}
 }
 
-bool AFINNetworkRouter::HandleMessage(AFINNetworkCircuit* SendingCircuit, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
+bool AFINNetworkRouter::HandleMessage(AFINNetworkCircuit* SendingCircuit, const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFIRAnyValue>& Data) {
 	{
 		FScopeLock Lock(&HandleMessageMutex);
 		if (HandledMessages.Contains(ID) || !SendingCircuit) return false;

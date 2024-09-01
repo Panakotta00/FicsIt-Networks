@@ -1,12 +1,12 @@
 ﻿#include "UI/FINReflectionUIContext.h"
 
-#include "Network/FINNetworkValues.h"
-#include "Reflection/FINArrayProperty.h"
-#include "Reflection/FINClassProperty.h"
-#include "Reflection/FINObjectProperty.h"
-#include "Reflection/FINReflection.h"
-#include "Reflection/FINStructProperty.h"
-#include "Reflection/FINTraceProperty.h"
+#include "FicsItReflection.h"
+#include "FIRTypes.h"
+#include "Reflection/FIRArrayProperty.h"
+#include "Reflection/FIRClassProperty.h"
+#include "Reflection/FIRObjectProperty.h"
+#include "Reflection/FIRStructProperty.h"
+#include "Reflection/FIRTraceProperty.h"
 #include "UI/FINReflectionClassHirachyViewer.h"
 #include "UI/FINReflectionEntryListViewer.h"
 #include "UI/FINSplitter.h"
@@ -15,40 +15,40 @@
 FString GetText(UFIRProperty* Prop) {
 	if (!Prop) return FString();
 	switch (Prop->GetType()) {
-	case FIN_ANY:
+	case FIR_ANY:
 		return "Any";
-	case FIN_NIL:
+	case FIR_NIL:
 		return "Nil";
-	case FIN_BOOL:
+	case FIR_BOOL:
 		return "Bool";
-	case FIN_INT:
+	case FIR_INT:
 		return "Int";
-	case FIN_FLOAT:
+	case FIR_FLOAT:
 		return "Float";
-	case FIN_STR:
+	case FIR_STR:
 		return "Str";
-	case FIN_OBJ:
-		if (Cast<UFINObjectProperty>(Prop)->GetSubclass()) {
-			return FString("Obj(") + FFINReflection::Get()->FindClass(Cast<UFINObjectProperty>(Prop)->GetSubclass())->GetDisplayName().ToString() + ")";
+	case FIR_OBJ:
+		if (Cast<UFIRObjectProperty>(Prop)->GetSubclass()) {
+			return FString("Obj(") + FFicsItReflectionModule::Get().FindClass(Cast<UFIRObjectProperty>(Prop)->GetSubclass())->GetDisplayName().ToString() + ")";
 		}
 		return "Obj";
-	case FIN_CLASS:
-		if (Cast<UFINClassProperty>(Prop)->GetSubclass()) {
-			return FString("Class(") + FFINReflection::Get()->FindClass(Cast<UFINClassProperty>(Prop)->GetSubclass())->GetDisplayName().ToString() + ")";
+	case FIR_CLASS:
+		if (Cast<UFIRClassProperty>(Prop)->GetSubclass()) {
+			return FString("Class(") + FFicsItReflectionModule::Get().FindClass(Cast<UFIRClassProperty>(Prop)->GetSubclass())->GetDisplayName().ToString() + ")";
 		}
 		return "Class";
-	case FIN_STRUCT:
-		if (Cast<UFINStructProperty>(Prop)->Struct) {
-			return FString("Struct(") +  FFINReflection::Get()->FindStruct(Cast<UFINStructProperty>(Prop)->Struct)->GetDisplayName().ToString() + ")";
+	case FIR_STRUCT:
+		if (Cast<UFIRStructProperty>(Prop)->Struct) {
+			return FString("Struct(") +  FFicsItReflectionModule::Get().FindStruct(Cast<UFIRStructProperty>(Prop)->Struct)->GetDisplayName().ToString() + ")";
 		}
 		return "Struct";
-	case FIN_TRACE:
-		if (Cast<UFINTraceProperty>(Prop)->GetSubclass()) {
-			return FString("Trace(") + FFINReflection::Get()->FindClass(Cast<UFINTraceProperty>(Prop)->GetSubclass())->GetDisplayName().ToString() + ")";
+	case FIR_TRACE:
+		if (Cast<UFIRTraceProperty>(Prop)->GetSubclass()) {
+			return FString("Trace(") + FFicsItReflectionModule::Get().FindClass(Cast<UFIRTraceProperty>(Prop)->GetSubclass())->GetDisplayName().ToString() + ")";
 		}
 		return "Trace";
-	case FIN_ARRAY:
-		return FString("Array(") + GetText(Cast<UFINArrayProperty>(Prop)->GetInnerType()) + ")";
+	case FIR_ARRAY:
+		return FString("Array(") + GetText(Cast<UFIRArrayProperty>(Prop)->GetInnerType()) + ")";
 	default:
 		return FString();
 	}
@@ -59,8 +59,8 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFIRProperty* Prop, FFINReflectionUICon
 	check(Style != nullptr);
 	TSharedPtr<SWidget> Widget;
 	switch (Prop->GetType()) {
-	case FIN_OBJ: {
-		UFIRClass* Class = FFINReflection::Get()->FindClass(Cast<UFINObjectProperty>(Prop)->GetSubclass());
+	case FIR_OBJ: {
+		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Cast<UFIRObjectProperty>(Prop)->GetSubclass());
 		if (Class) SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
@@ -83,8 +83,8 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFIRProperty* Prop, FFINReflectionUICon
             .Text(FText::FromString(")"))
         ]];
 		break;
-	} case FIN_CLASS: {
-		UFIRClass* Class = FFINReflection::Get()->FindClass(Cast<UFINClassProperty>(Prop)->GetSubclass());
+	} case FIR_CLASS: {
+		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Cast<UFIRClassProperty>(Prop)->GetSubclass());
 		if (Class) SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
@@ -107,8 +107,8 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFIRProperty* Prop, FFINReflectionUICon
             .Text(FText::FromString(")"))
         ]];
 		break;
-	} case FIN_TRACE: {
-		UFIRClass* Class = FFINReflection::Get()->FindClass(Cast<UFINTraceProperty>(Prop)->GetSubclass());
+	} case FIR_TRACE: {
+		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Cast<UFIRTraceProperty>(Prop)->GetSubclass());
 		if (Class) SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
@@ -131,8 +131,8 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFIRProperty* Prop, FFINReflectionUICon
             .Text(FText::FromString(")"))
         ]];
 		break;
-	} case FIN_STRUCT: {
-		UFIRStruct* Struct = FFINReflection::Get()->FindStruct(Cast<UFINStructProperty>(Prop)->GetInner());
+	} case FIR_STRUCT: {
+		UFIRStruct* Struct = FFicsItReflectionModule::Get().FindStruct(Cast<UFIRStructProperty>(Prop)->GetInner());
 		if (Struct) SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
@@ -155,7 +155,7 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFIRProperty* Prop, FFINReflectionUICon
             .Text(FText::FromString(")"))
         ]];
 		break;
-	} case FIN_ARRAY: {
+	} case FIR_ARRAY: {
 		SAssignNew(Widget, SBox).Content()[SNew(SHorizontalBox)
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
@@ -163,7 +163,7 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFIRProperty* Prop, FFINReflectionUICon
             .Text(FText::FromString("Array("))
         ]
         +SHorizontalBox::Slot().AutoWidth()[
-			GenerateDataTypeIcon(Cast<UFINArrayProperty>(Prop)->GetInnerType(), Context)
+			GenerateDataTypeIcon(Cast<UFIRArrayProperty>(Prop)->GetInnerType(), Context)
 		]
         +SHorizontalBox::Slot().AutoWidth()[
             SNew(STextBlock)
@@ -176,7 +176,7 @@ TSharedRef<SWidget> GenerateDataTypeIcon(UFIRProperty* Prop, FFINReflectionUICon
 	FString Text = GetText(Prop);
 	if (!Widget.IsValid()) SAssignNew(Widget, STextBlock).Text(FText::FromString(Text)).TextStyle(&Context->Style.Get()->DataTypeTextStyle);
 	
-	if (Prop->GetPropertyFlags() & FIN_Prop_OutParam || Prop->GetPropertyFlags() & FIN_Prop_RetVal) {
+	if (Prop->GetPropertyFlags() & FIR_Prop_OutParam || Prop->GetPropertyFlags() & FIR_Prop_RetVal) {
 		return SNew(SHorizontalBox)
 		+SHorizontalBox::Slot().VAlign(VAlign_Center).AutoWidth().Padding(0,0,5,0)[
 			SNew(STextBlock)
@@ -200,14 +200,14 @@ TSharedRef<SWidget> GeneratePropTypeIcon(UFIRProperty* Prop, FFINReflectionUICon
 	.Text(FText::FromString("mp"))
 	.ToolTipText(FText::FromString("Member Property - A property that can only be changed on an instance."))
 	.ColorAndOpacity(Context->Style.Get()->PropertyColor);
-	if (Prop->GetPropertyFlags() & FIN_Prop_ClassProp) {
+	if (Prop->GetPropertyFlags() & FIR_Prop_ClassProp) {
 		Text->SetText(FText::FromString("cp"));
 		Text->SetToolTipText(FText::FromString("Class Property - A property that can only be changed on a class."));
 	}
 	return SNew(SBox).WidthOverride(30).Content()[Text];
 }
 
-TSharedRef<SWidget> GenerateFuncTypeIcon(UFINFunction* Func, FFINReflectionUIContext* Context) {
+TSharedRef<SWidget> GenerateFuncTypeIcon(UFIRFunction* Func, FFINReflectionUIContext* Context) {
 	const FFINReflectionUIStyleStruct* Style = Context->Style.Get();
 	check(Style != nullptr);
 	TSharedRef<STextBlock> Text = SNew(STextBlock)
@@ -215,11 +215,11 @@ TSharedRef<SWidget> GenerateFuncTypeIcon(UFINFunction* Func, FFINReflectionUICon
 	.Text(FText::FromString("mf"))
 	.ToolTipText(FText::FromString("Member Function - A function that can only be called on an instance."))
 	.ColorAndOpacity(Context->Style.Get()->FunctionColor);
-	if (Func->GetFunctionFlags() & FIN_Func_ClassFunc) {
+	if (Func->GetFunctionFlags() & FIR_Func_ClassFunc) {
 		Text->SetText(FText::FromString("cf"));
 		Text->SetToolTipText(FText::FromString("Class Function - A function that can only be called on the class."));
 	}
-	if (Func->GetFunctionFlags() & FIN_Func_StaticFunc) {
+	if (Func->GetFunctionFlags() & FIR_Func_StaticFunc) {
 		Text->SetText(FText::FromString("sf"));
 		Text->SetToolTipText(FText::FromString("Static Function - A function that can be called anytime."));
 	}
@@ -265,9 +265,9 @@ TSharedRef<SWidget> GenerateRuntimeFlag(int Runtime, FFINReflectionUIContext* Co
 	return Text;
 }
 
-TSharedRef<SWidget> GenerateFuncFlags(UFINFunction* Func, FFINReflectionUIContext* Context) {
+TSharedRef<SWidget> GenerateFuncFlags(UFIRFunction* Func, FFINReflectionUIContext* Context) {
 	TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox);
-	if (Func->GetFunctionFlags() & FIN_Func_RT_Sync) {
+	if (Func->GetFunctionFlags() & FIR_Func_RT_Sync) {
 		Box->AddSlot()
 		.VAlign(VAlign_Center)
 		.AutoWidth()
@@ -275,7 +275,7 @@ TSharedRef<SWidget> GenerateFuncFlags(UFINFunction* Func, FFINReflectionUIContex
 			GenerateRuntimeFlag(0, Context)
 		];
 	}
-	if (Func->GetFunctionFlags() & FIN_Func_RT_Parallel) {
+	if (Func->GetFunctionFlags() & FIR_Func_RT_Parallel) {
 		Box->AddSlot()
         .VAlign(VAlign_Center)
         .AutoWidth()
@@ -283,7 +283,7 @@ TSharedRef<SWidget> GenerateFuncFlags(UFINFunction* Func, FFINReflectionUIContex
             GenerateRuntimeFlag(1, Context)
         ];
 	}
-	if (Func->GetFunctionFlags() & FIN_Func_RT_Async) {
+	if (Func->GetFunctionFlags() & FIR_Func_RT_Async) {
 		Box->AddSlot()
         .VAlign(VAlign_Center)
         .AutoWidth()
@@ -291,7 +291,7 @@ TSharedRef<SWidget> GenerateFuncFlags(UFINFunction* Func, FFINReflectionUIContex
             GenerateRuntimeFlag(2, Context)
         ];
 	}
-	if (Func->GetFunctionFlags() & FIN_Func_VarArgs) {
+	if (Func->GetFunctionFlags() & FIR_Func_VarArgs) {
 		Box->AddSlot()
         .VAlign(VAlign_Center)
         .AutoWidth()
@@ -303,7 +303,7 @@ TSharedRef<SWidget> GenerateFuncFlags(UFINFunction* Func, FFINReflectionUIContex
 			.ColorAndOpacity(Context->Style.Get()->VarArgsFlagColor.GetSpecifiedColor())
         ];
 	}
-	if (Func->GetFunctionFlags() & FIN_Func_VarRets) {
+	if (Func->GetFunctionFlags() & FIR_Func_VarRets) {
 		Box->AddSlot()
         .VAlign(VAlign_Center)
         .AutoWidth()
@@ -321,7 +321,7 @@ TSharedRef<SWidget> GenerateFuncFlags(UFINFunction* Func, FFINReflectionUIContex
 
 TSharedRef<SWidget> GeneratePropFlags(UFIRProperty* Prop, FFINReflectionUIContext* Context) {
 	TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox);
-	if (Prop->GetPropertyFlags() & FIN_Func_RT_Sync) {
+	if (Prop->GetPropertyFlags() & FIR_Func_RT_Sync) {
 		Box->AddSlot()
         .VAlign(VAlign_Center)
         .AutoWidth()
@@ -329,7 +329,7 @@ TSharedRef<SWidget> GeneratePropFlags(UFIRProperty* Prop, FFINReflectionUIContex
             GenerateRuntimeFlag(0, Context)
         ];
 	}
-	if (Prop->GetPropertyFlags() & FIN_Prop_RT_Parallel) {
+	if (Prop->GetPropertyFlags() & FIR_Prop_RT_Parallel) {
 		Box->AddSlot()
         .VAlign(VAlign_Center)
         .AutoWidth()
@@ -337,7 +337,7 @@ TSharedRef<SWidget> GeneratePropFlags(UFIRProperty* Prop, FFINReflectionUIContex
             GenerateRuntimeFlag(1, Context)
         ];
 	}
-	if (Prop->GetPropertyFlags() & FIN_Prop_RT_Async) {
+	if (Prop->GetPropertyFlags() & FIR_Prop_RT_Async) {
 		Box->AddSlot()
         .VAlign(VAlign_Center)
         .AutoWidth()
@@ -345,7 +345,7 @@ TSharedRef<SWidget> GeneratePropFlags(UFIRProperty* Prop, FFINReflectionUIContex
             GenerateRuntimeFlag(2, Context)
         ];
 	}
-	if (Prop->GetPropertyFlags() & FIN_Prop_ReadOnly) {
+	if (Prop->GetPropertyFlags() & FIR_Prop_ReadOnly) {
 		Box->AddSlot()
         .VAlign(VAlign_Center)
         .AutoWidth()
@@ -402,7 +402,7 @@ void FFINReflectionUIStruct::LoadChildren() {
 	for (UFIRProperty* Prop : Struct->GetProperties(Context->GetShowRecursive())) {
 		Attributes.Add(MakeShared<FFINReflectionUIProperty>(SharedThis(this), Prop, Context));
 	}
-	for (UFINFunction* Func : Struct->GetFunctions(Context->GetShowRecursive())) {
+	for (UFIRFunction* Func : Struct->GetFunctions(Context->GetShowRecursive())) {
 		Functions.Add(MakeShared<FFINReflectionUIFunction>(SharedThis(this), Func, Context));
 	}
 }
@@ -1028,15 +1028,15 @@ void FFINReflectionUIContext::SetSelected(FFINReflectionUIEntry* Entry) {
 FFINReflectionUIContext::FFINReflectionUIContext() {
 	Entries.Empty();
 	Structs.Empty();
-	for (const TPair<UClass*, UFIRClass*>& Class : FFINReflection::Get()->GetClasses()) {
+	for (const TPair<UClass*, UFIRClass*>& Class : FFicsItReflectionModule::Get().GetClasses()) {
 		Structs.Add(Class.Value, MakeShared<FFINReflectionUIClass>(nullptr, Class.Value, this));
 	}
-	for (const TPair<UScriptStruct*, UFIRStruct*>& Struct : FFINReflection::Get()->GetStructs()) {
+	for (const TPair<UScriptStruct*, UFIRStruct*>& Struct : FFicsItReflectionModule::Get().GetStructs()) {
 		Structs.Add(Struct.Value, MakeShared<FFINReflectionUIStruct>(nullptr, Struct.Value, this));
 	}
 	for (const TPair<UFIRStruct*, TSharedPtr<FFINReflectionUIStruct>>& Struct : Structs) Entries.Add(Struct.Value);
 
-	TSharedPtr<FFINReflectionUIStruct>* Struct = Structs.Find(FFINReflection::Get()->FindClass(UObject::StaticClass()));
+	TSharedPtr<FFINReflectionUIStruct>* Struct = Structs.Find(FFicsItReflectionModule::Get().FindClass(UObject::StaticClass()));
 	if (Struct) SetSelected(Struct->Get());
 }
 

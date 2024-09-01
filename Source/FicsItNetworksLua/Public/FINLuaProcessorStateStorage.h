@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Network/FINNetworkTrace.h"
-#include "Network/FINDynamicStructHolder.h"
+#include "FIRTrace.h"
+#include "FIRInstancedStruct.h"
 #include "FINLuaProcessorStateStorage.generated.h"
 
 /**

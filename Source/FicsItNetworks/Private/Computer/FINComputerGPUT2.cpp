@@ -163,7 +163,7 @@ FVector2D SFINGPUT2Widget::ComputeDesiredSize(float LayoutScaleMultiplier) const
 int32 SFINGPUT2Widget::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	FFINGPUT2DrawContext Context(WorldContext, Style);
 	Context.GeometryStack.Add(AllottedGeometry);
-	for (const FFINDynamicStructHolder& DrawCallBase : DrawCalls.Get()) {
+	for (const FFIRInstancedStruct& DrawCallBase : DrawCalls.Get()) {
 		FFINGPUT2DrawCall* DrawCall = DrawCallBase.GetPtr<FFINGPUT2DrawCall>();
 		if (DrawCall) LayerId = DrawCall->OnPaint(Context, Args, Context.GeometryStack.Last(), OutDrawElements, LayerId, InWidgetStyle);
 	}
@@ -234,9 +234,9 @@ void AFINComputerGPUT2::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
 	if (!DrawCalls2Send.IsEmpty()) {
-		TArray<FFINDynamicStructHolder> Chunk;
+		TArray<FFIRInstancedStruct> Chunk;
 		for (int i = 0; i < 10; ++i) {
-			FFINDynamicStructHolder* DrawCall = DrawCalls2Send.Peek();
+			FFIRInstancedStruct* DrawCall = DrawCalls2Send.Peek();
 			if (!DrawCall) break;
 			Chunk.Add(*DrawCall);
 			DrawCalls2Send.Pop();
@@ -248,7 +248,7 @@ void AFINComputerGPUT2::Tick(float DeltaSeconds) {
 	} else if (bFlushOverNetwork) {
 		Client_CleanDrawCalls();
 		bFlushOverNetwork = false;
-		for (const FFINDynamicStructHolder& DrawCall : FrontBufferDrawCalls) {
+		for (const FFIRInstancedStruct& DrawCall : FrontBufferDrawCalls) {
 			DrawCalls2Send.Enqueue(DrawCall);
 		}
 	}
@@ -295,7 +295,7 @@ void AFINComputerGPUT2::FlushDrawCalls() {
 	BackBufferDrawCalls.Empty();
 }
 
-void AFINComputerGPUT2::AddDrawCall(TFINDynamicStruct<FFINGPUT2DrawCall> DrawCall) {
+void AFINComputerGPUT2::AddDrawCall(TFIRInstancedStruct<FFINGPUT2DrawCall> DrawCall) {
 	FScopeLock Lock(&DrawingMutex);
 	BackBufferDrawCalls.Add(DrawCall);
 }
@@ -381,7 +381,7 @@ void AFINComputerGPUT2::Client_CleanDrawCalls_Implementation() {
 	BackBufferDrawCalls.Empty();
 }
 
-void AFINComputerGPUT2::Client_AddDrawCallChunk_Implementation(const TArray<FFINDynamicStructHolder>& Chunk) {
+void AFINComputerGPUT2::Client_AddDrawCallChunk_Implementation(const TArray<FFIRInstancedStruct>& Chunk) {
 	if (HasAuthority()) return;
 	BackBufferDrawCalls.Append(Chunk);
 }

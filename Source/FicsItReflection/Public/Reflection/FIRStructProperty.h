@@ -33,7 +33,7 @@ public:
 	virtual void SetValue(const FFIRExecutionContext& Ctx, const FIRAny& InValue) const override {
 		FIRAny Value = InValue;
 		if (Struct == FFIRAnyValue::StaticStruct()) {
-			Value = FIRAny(TFINDynamicStruct<FFIRAnyValue>(InValue));
+			Value = FIRAny(TFIRInstancedStruct<FFIRAnyValue>(InValue));
 		}
 		if (Value.GetType() != FIR_STRUCT) return;
 		if (Property) {

@@ -6,6 +6,8 @@ public class FicsItReflection : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        bEnableExceptions = true;
+
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
@@ -19,10 +21,13 @@ public class FicsItReflection : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
+                "FactoryGame",
                 "CoreUObject",
                 "Engine",
                 "FactoryGame",
                 "FicsItLogLibrary",
+                "TracyLib",
+                "UMG",
             }
         );
     }

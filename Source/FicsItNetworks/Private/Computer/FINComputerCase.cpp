@@ -7,9 +7,9 @@
 #include "Computer/FINComputerProcessor.h"
 #include "FGInventoryComponent.h"
 #include "FGPlayerController.h"
+#include "FILLogContainer.h"
 #include "Computer/FINComputerRCO.h"
 #include "Engine/ActorChannel.h"
-#include "FicsItKernel/Logging.h"
 #include "Net/UnrealNetwork.h"
 #include "Utils/FINUtils.h"
 
@@ -391,10 +391,10 @@ void AFINComputerCase::netFunc_stopComputer() {
 	Kernel->Stop();
 }
 
-void AFINComputerCase::netFunc_getLog(int64 PageSize, int64 Page, TArray<FFINLogEntry>& OutLog, int64& OutLogSize) {
+void AFINComputerCase::netFunc_getLog(int64 PageSize, int64 Page, TArray<FFILEntry>& OutLog, int64& OutLogSize) {
 	FScopeLock Lock = Log->Lock();
-	const TArray<FFINLogEntry>& Entries = Log->GetLogEntries();
-	OutLog = UFINUtils::PaginateArray(TArrayView<const FFINLogEntry>(Entries), PageSize, Page);
+	const TArray<FFILEntry>& Entries = Log->GetLogEntries();
+	OutLog = UFINUtils::PaginateArray(TArrayView<const FFILEntry>(Entries), PageSize, Page);
 	if (Page < 0) Algo::Reverse(OutLog);
 	OutLogSize = Entries.Num();
 }

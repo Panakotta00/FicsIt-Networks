@@ -33,7 +33,3 @@ struct FICSITREFLECTION_API FFIRStaticGlobalRegisterFunc {
 		FFIRGlobalRegisterHelper::AddFunction(Func, Priority);
 	}
 };
-
-FORCEINLINE bool operator==(const FFIRGlobalRegisterHelper::RegisterFunction& A, const FFIRGlobalRegisterHelper::RegisterFunction& B) {
-	return TFunction<void()>(A) == TFunction<void()>(B);
-}

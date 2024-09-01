@@ -34,7 +34,7 @@ void UFINGatherTextFromReflectionCommandlet::GatherStruct(UFIRStruct* Struct) {
 	for (UFIRProperty* prop : Struct->GetProperties(false)) {
 		GatherProperty(prop);
 	}
-	for (UFINFunction* func : Struct->GetFunctions(false)) {
+	for (UFIRFunction* func : Struct->GetFunctions(false)) {
 		GatherFunction(func);
 	}
 }
@@ -57,7 +57,7 @@ void UFINGatherTextFromReflectionCommandlet::GatherProperty(UFIRProperty* Proper
 	GatherBase(Property);
 }
 
-void UFINGatherTextFromReflectionCommandlet::GatherFunction(UFINFunction* Function) {
+void UFINGatherTextFromReflectionCommandlet::GatherFunction(UFIRFunction* Function) {
 	if (!(Function->GetFunctionFlags() & FIN_Func_StaticSource)) return;
 	GatherBase(Function);
 	for (UFIRProperty* param : Function->GetParameters()) {

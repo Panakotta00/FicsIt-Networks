@@ -80,7 +80,7 @@ private:
 
 	// Cache
 	TSharedPtr<FJsonObject> ReadyToUnpersist = nullptr;
-	TQueue<TSharedPtr<TFINDynamicStruct<FFINFuture>>> FutureQueue;
+	TQueue<TSharedPtr<TFIRInstancedStruct<FFINFuture>>> FutureQueue;
 	FCriticalSection ReferenceObjectMutex;
 	TMap<void*, TFunction<void(void*, FReferenceCollector&)>> ReferencedObjects;
 	FFileSystemSerializationInfo FileSystemSerializationInfo;
@@ -192,7 +192,7 @@ public:
 	 *
 	 * @param[in]	Future	shared ptr to the future you want to resolve
 	 */
-	void PushFuture(TSharedPtr<TFINDynamicStruct<FFINFuture>> Future);
+	void PushFuture(TSharedPtr<TFIRInstancedStruct<FFINFuture>> Future);
 
 	/**
 	 * This function should get executed every main thread tick.

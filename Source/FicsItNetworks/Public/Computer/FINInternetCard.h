@@ -19,7 +19,7 @@ public:
 	// Begin FFINFuture
 	virtual void Execute() override;
 	virtual bool IsDone() const override;
-	virtual TArray<FFINAnyNetworkValue> GetOutput() const override;
+	virtual TArray<FFIRAnyValue> GetOutput() const override;
 	// End FFINFuture
 };
 
@@ -28,7 +28,7 @@ class AFINInternetCard : public AFINComputerModule, public IFINPciDeviceInterfac
 	GENERATED_BODY()
 public:
 	UFUNCTION()
-	FFINInternetCardHttpRequestFuture netFunc_request(const FString& InURL, const FString& InMethod, const FString& InData, TArray<FFINAnyNetworkValue> varargs);
+	FFINInternetCardHttpRequestFuture netFunc_request(const FString& InURL, const FString& InMethod, const FString& InData, TArray<FFIRAnyValue> varargs);
 	UFUNCTION()
 	void netFuncMeta_request(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "request";

@@ -3,7 +3,7 @@
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
-#include "Reflection/FINUReflectionSource.h"
+#include "Reflection/Source/FIRSourceUObject.h"
 #include "FINCodeableSplitter.generated.h"
 
 UCLASS()
@@ -70,7 +70,7 @@ public:
 		InternalName = TEXT("CodeableSplitter");
 		DisplayName = FText::FromString(TEXT("Codeable Splitter"));
 
-		FFINReflectionFunctionParameterMeta getConnectorByIndex_outputIndex;
+		FFIRFunctionParameterMeta getConnectorByIndex_outputIndex;
 		getConnectorByIndex_outputIndex.InternalName = TEXT("outputIndex");
 		getConnectorByIndex_outputIndex.DisplayName = FText::FromString(TEXT("Output Index"));
 		getConnectorByIndex_outputIndex.Description = FText::FromString(TEXT("The integer used in TransferItem and ItemOutputted to reference a specific output. Valid Values: 0-3"));

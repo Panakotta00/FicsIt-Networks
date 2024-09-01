@@ -80,7 +80,7 @@ struct FFIRClassMeta : public FFIRTypeMeta {
 class UFicsItReflection;
 
 UCLASS()
-class FICSITNETWORKS_API UFIRSourceUObject : public UFIRSource {
+class FICSITREFLECTION_API UFIRSourceUObject : public UFIRSource {
 	GENERATED_BODY()
 protected:
 	FFIRClassMeta GetClassMeta(UClass* Class) const;

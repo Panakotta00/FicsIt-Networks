@@ -8,7 +8,7 @@
 #include "FINAdvancedNetworkConnectionComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINHandleSignal, const FFINSignalData&, Signal, const FFIRTrace&, Sender);
-DECLARE_MULTICAST_DELEGATE_FiveParams(FFINHandleNetworkMessage, FGuid, FGuid, FGuid, int, const TArray<FFINAnyNetworkValue>&);
+DECLARE_MULTICAST_DELEGATE_FiveParams(FFINHandleNetworkMessage, FGuid, FGuid, FGuid, int, const TArray<FFIRAnyValue>&);
 DECLARE_DELEGATE_RetVal(bool, FFINIsNetworkRouter);
 DECLARE_DELEGATE_RetVal_OneParam(bool, FFINIsNetworkPortOpen, int);
 
@@ -101,7 +101,7 @@ public:
 
 	// Begin IFINNetworkMessageInterface
 	virtual bool IsPortOpen(int Port) override;
-	virtual void HandleMessage(const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) override;
+	virtual void HandleMessage(const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFIRAnyValue>& Data) override;
 	virtual bool IsNetworkMessageRouter() const override;
 	// End IFINNetworkMessageInterface
 

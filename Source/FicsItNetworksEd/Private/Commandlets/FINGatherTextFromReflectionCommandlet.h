@@ -8,7 +8,7 @@ class UFIRBase;
 class UFIRStruct;
 class UFIRClass;
 class UFIRProperty;
-class UFINFunction;
+class UFIRFunction;
 class UFIRSignal;
 
 UCLASS()
@@ -32,6 +32,6 @@ public:
 	void GatherStruct(UFIRStruct* Struct);
 	void GatherClass(UFIRClass* Class);
 	void GatherProperty(UFIRProperty* Property);
-	void GatherFunction(UFINFunction* Function);
+	void GatherFunction(UFIRFunction* Function);
 	void GatherSignal(UFIRSignal* Signal);
 };

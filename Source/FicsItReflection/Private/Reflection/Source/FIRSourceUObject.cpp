@@ -1,4 +1,6 @@
 #include "Reflection/Source/FIRSourceUObject.h"
+
+#include "FicsItReflection.h"
 #include "Buildables/FGBuildable.h"
 #include "FIRUtils.h"
 #include "Reflection/FIRArrayProperty.h"
@@ -10,7 +12,7 @@ TMap<UFunction*, UFIRSignal*> UFIRSourceUObject::FuncSignalMap;
 template<typename T3, typename T1, typename T2, typename ProjectionType>
 void FieldMapToMetaMap(TMap<FString, T1>& To, ProjectionType Projection, const TMap<FString, T2>& From) {
 	for (const TPair<FString, T2>& Entry : From) {
-		Invoke(Projection, To.FIRdOrAdd(Entry.Key)) = T3(Entry.Value);
+		Invoke(Projection, To.FindOrAdd(Entry.Key)) = T3(Entry.Value);
 	}
 }
 
@@ -505,7 +507,7 @@ void FIRUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 	if (!FIRSignal || !Context) {
 		UE_LOG(LogFicsItReflection, Display, TEXT("Invalid Unreal Reflection Signal Execution '%s'"), *Stack.CurrentNativeFunction->GetName());
 
-		P_FIRISH;
+		P_FINISH;
 		
 		return;
 	}
@@ -540,7 +542,7 @@ void FIRUFunctionBasedSignalExecute(UObject* Context, FFrame& Stack, RESULT_DECL
 
 	FIRSignal->Trigger(Context, Parameters);
 
-	P_FIRISH;
+	P_FINISH;
 }
 
 void UFIRSourceUObject::SetupFunctionAsSignal(FFicsItReflectionModule* Ref, UFunction* Func) const {

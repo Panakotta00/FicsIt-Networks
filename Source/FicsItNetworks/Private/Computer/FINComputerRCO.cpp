@@ -2,7 +2,6 @@
 #include "Computer/FINComputerDriveHolder.h"
 #include "Computer/FINComputerEEPROMDesc.h"
 #include "Computer/FINComputerGPUT2.h"
-#include "FicsItKernel/Logging.h"
 #include "Net/UnrealNetwork.h"
 
 void UFINComputerRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -174,10 +173,6 @@ void UFINComputerRCO::GPUT2KeyCharEvent_Implementation(AFINComputerGPUT2* GPU, c
 
 bool UFINComputerRCO::GPUT2KeyCharEvent_Validate(AFINComputerGPUT2* GPU, const FString& C, int Modifiers) {
 	return true;
-}
-
-void UFINComputerRCO::LogRehandleAllEntries_Implementation(UFILLogContainer* Log) {
-	Log->RehandleAllEntries();
 }
 
 void UFINComputerRCO::GPUT2MouseWheelEvent_Implementation(AFINComputerGPUT2* GPU, FVector2D Position, float Delta, int Modifiers) {

@@ -11,6 +11,7 @@ public class FicsItLogLibrary : ModuleRules
             {
                 "Core",
                 "FactoryGame",
+                "SML",
             }
         );
 

@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "SlateBasics.h"
 #include "UObject/Interface.h"
-#include "Network/FINNetworkTrace.h"
+#include "FIRTrace.h"
 #include "FINScreenInterface.generated.h"
 
 UINTERFACE(Blueprintable)

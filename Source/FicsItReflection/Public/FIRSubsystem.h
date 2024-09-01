@@ -5,6 +5,9 @@
 #include "Subsystem/ModSubsystem.h"
 #include "FIRSubsystem.generated.h"
 
+class UFGRailroadTrackConnectionComponent;
+class UFGItemDescriptor;
+class UFGFactoryConnectionComponent;
 
 USTRUCT()
 struct FICSITREFLECTION_API FFIRRailroadSwitchForce {

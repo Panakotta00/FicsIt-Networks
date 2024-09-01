@@ -20,7 +20,7 @@ void UFILogLibrary::Log(TEnumAsByte<EFILLogVerbosity> Verbosity, FString Message
 
 void FFicsItLogLibraryModule::StartupModule() {
 	TArray<FCoreRedirect> redirects;
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINLogEntry"), TEXT("/Script/FicsItLogLibrary.FFILLogEntry")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINLogEntry"), TEXT("/Script/FicsItLogLibrary.FFILEntry")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.EFINLogVerbosity"), TEXT("/Script/FicsItLogLibrary.EFILLogVerbosity")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINLog"), TEXT("/Script/FicsItLogLibrary.UFILLogContainer")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINLogScope"), TEXT("/Script/FicsItLogLibrary.FFILLogScope")});
@@ -32,6 +32,10 @@ void FFicsItLogLibraryModule::StartupModule() {
 
 void FFicsItLogLibraryModule::ShutdownModule() {
     
+}
+
+void UFILRCO::LogRehandleAllEntries_Implementation(UFILLogContainer* Log) {
+	Log->RehandleAllEntries();
 }
 
 #undef LOCTEXT_NAMESPACE
