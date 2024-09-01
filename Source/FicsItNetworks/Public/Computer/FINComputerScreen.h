@@ -14,7 +14,7 @@ class FICSITNETWORKS_API AFINComputerScreen : public AFINComputerModule, public 
 	
 protected:
 	UPROPERTY()
-	FFINNetworkTrace GPU;
+	FFIRTrace GPU;
 
 public:
 	TSharedPtr<SWidget> Widget;
@@ -38,8 +38,8 @@ public:
 	// End AActor
 	
     // Begin IFINScreen
-    virtual void BindGPU(const FFINNetworkTrace& gpu) override;
-	virtual FFINNetworkTrace GetGPU() const override;
+    virtual void BindGPU(const FFIRTrace& gpu) override;
+	virtual FFIRTrace GetGPU() const override;
 	virtual void SetWidget(TSharedPtr<SWidget> widget) override;
 	virtual TSharedPtr<SWidget> GetWidget() const override;
 	// End IFINScreen

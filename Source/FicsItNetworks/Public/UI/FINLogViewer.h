@@ -111,7 +111,7 @@ public:
 	}
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINNavigateReflection, UFINBase*, ReflectionItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINNavigateReflection, UFIRBase*, ReflectionItem);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINNavigateEEPROM, int64, LineNumber);
 
 UCLASS()

@@ -5,8 +5,8 @@
 #include "Network/FINNetworkValues.h"
 #include "Serialization/CompactBinaryWriter.h"
 
-class UFINProperty;
-class UFINStruct;
+class UFIRProperty;
+class UFIRStruct;
 class UFINFunction;
 
 namespace FINLua {
@@ -33,7 +33,7 @@ namespace FINLua {
 	 * @param bImplicitConstruction if set to true, tables can be converted to the struct specified by Property, if false tables will result in None
 	 * @return The retrieved value or None if not able to retrieve
 	 */
-	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
+	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFIRProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
 
 	/**
 	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index.
@@ -44,7 +44,7 @@ namespace FINLua {
 	 * @param bImplicitConstruction if set to true, tables can be converted to the struct specified by Property, if false tables will result in None if property was specified, otherwise they get interpreted as arrays
 	 * @return The retrieved value or None if not able to retrieve
 	 */
-	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
+	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFIRProperty* Property, bool bImplicitConversion, bool bImplicitConstruction);
 	
 	/**
 	 * @brief Tries to retrieve a network value from the lua value at the given lua stack index. Tables will be interpreted as None. Unknown UserData will be interpreted as none.
@@ -60,7 +60,7 @@ namespace FINLua {
 	 * @param Property the property of witch the lua value name should get found
 	 * @return the lua value name of the given property
 	 */
-	FString luaFIN_getPropertyTypeName(lua_State* L, UFINProperty* Property);
+	FString luaFIN_getPropertyTypeName(lua_State* L, UFIRProperty* Property);
 
 	/**
 	 * @brief Returns the signature of a given function
@@ -76,7 +76,7 @@ namespace FINLua {
 	 * @param Index the index of the value that caused the error
 	 * @param Property the property of whom the value type name will be used
 	 */
-	int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property);
+	int luaFIN_propertyError(lua_State* L, int Index, UFIRProperty* Property);
 
 	int luaFIN_typeError(lua_State* L, int Index, const FString& ExpectedTypeName);
 	int luaFIN_argError(lua_State* L, int Index, const FString& ExtraMessage);

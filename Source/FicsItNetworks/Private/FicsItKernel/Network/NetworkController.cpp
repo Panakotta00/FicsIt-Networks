@@ -21,9 +21,9 @@ void UFINKernelNetworkController::Serialize(FStructuredArchive::FRecord Record) 
 		FStructuredArchive::FRecord SignalRecord = SignalListRecord.EnterElement().EnterRecord();
 		
 		FFINSignalData Signal;
-		FFINNetworkTrace Trace;
+		FFIRTrace Trace;
 		if (SignalRecord.GetUnderlyingArchive().IsSaving()) {
-			const TTuple<FFINSignalData, FFINNetworkTrace>& SignalData = SignalQueue[i];
+			const TTuple<FFINSignalData, FFIRTrace>& SignalData = SignalQueue[i];
 			Signal = SignalData.Key;
 			Trace = SignalData.Value;
 		}
@@ -32,7 +32,7 @@ void UFINKernelNetworkController::Serialize(FStructuredArchive::FRecord Record) 
 		SignalRecord.EnterField(SA_FIELD_NAME(TEXT("Trace"))) << Trace;
 		
 		if (SignalRecord.GetUnderlyingArchive().IsLoading()) {
-			SignalQueue.Add(TPair<FFINSignalData, FFINNetworkTrace>{Signal, Trace});
+			SignalQueue.Add(TPair<FFINSignalData, FFIRTrace>{Signal, Trace});
 		}
 	}
 }
@@ -61,23 +61,23 @@ TScriptInterface<IFINNetworkComponent> UFINKernelNetworkController::GetComponent
 	return Component;
 }
 
-void UFINKernelNetworkController::HandleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
+void UFINKernelNetworkController::HandleSignal(const FFINSignalData& signal, const FFIRTrace& sender) {
 	PushSignal(signal, sender);
 }
 
-FFINSignalData UFINKernelNetworkController::PopSignal(FFINNetworkTrace& OutSender) {
+FFINSignalData UFINKernelNetworkController::PopSignal(FFIRTrace& OutSender) {
 	if (GetSignalCount() < 1) return FFINSignalData();
 	FScopeLock Lock(&MutexSignals);
-	const TTuple<FFINSignalData, FFINNetworkTrace> Signal = SignalQueue[0];
+	const TTuple<FFINSignalData, FFIRTrace> Signal = SignalQueue[0];
 	SignalQueue.RemoveAt(0);
 	OutSender = Signal.Value;
 	return Signal.Key;
 }
 
-void UFINKernelNetworkController::PushSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
+void UFINKernelNetworkController::PushSignal(const FFINSignalData& signal, const FFIRTrace& sender) {
 	FScopeLock Lock(&MutexSignals);
 	if (GetSignalCount() >= MaxSignalCount || bLockSignalReceiving) return;
-	SignalQueue.Add(TPair<FFINSignalData, FFINNetworkTrace>{signal, sender});
+	SignalQueue.Add(TPair<FFINSignalData, FFIRTrace>{signal, sender});
 }
 
 void UFINKernelNetworkController::ClearSignals() {
@@ -90,32 +90,32 @@ size_t UFINKernelNetworkController::GetSignalCount() {
 	return SignalQueue.Num();
 }
 
-FFINNetworkTrace UFINKernelNetworkController::GetComponentByID(const FGuid& InID) const {
-	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return FFINNetworkTrace();
-	return FFINNetworkTrace(Component.GetObject()) / IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->FindComponent(InID, Component).GetObject();
+FFIRTrace UFINKernelNetworkController::GetComponentByID(const FGuid& InID) const {
+	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return FFIRTrace();
+	return FFIRTrace(Component.GetObject()) / IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->FindComponent(InID, Component).GetObject();
 }
 
-TSet<FFINNetworkTrace> UFINKernelNetworkController::GetComponentByNick(const FString& InNick) const {
-	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return TSet<FFINNetworkTrace>();
-	TSet<FFINNetworkTrace> OutComponents;
+TSet<FFIRTrace> UFINKernelNetworkController::GetComponentByNick(const FString& InNick) const {
+	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return TSet<FFIRTrace>();
+	TSet<FFIRTrace> OutComponents;
 	TSet<UObject*> Components = IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->FindComponentsByNick(InNick, Component);
 	for (UObject* Comp : Components) {
-		OutComponents.Add(FFINNetworkTrace(Component.GetObject()) / Comp);
+		OutComponents.Add(FFIRTrace(Component.GetObject()) / Comp);
 	}
 	return OutComponents;
 }
 
-TSet<FFINNetworkTrace> UFINKernelNetworkController::GetComponentByClass(UClass* InClass, bool bRedirect) const {
-	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return TSet<FFINNetworkTrace>();
-	TSet<FFINNetworkTrace> outComps;
+TSet<FFIRTrace> UFINKernelNetworkController::GetComponentByClass(UClass* InClass, bool bRedirect) const {
+	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return TSet<FFIRTrace>();
+	TSet<FFIRTrace> outComps;
 	TSet<UObject*> Comps = IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->GetComponents();
 	for (UObject* Comp : Comps) {
 		if (bRedirect) {
-			UObject* RedirectedComp = UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(Comp)).Get();
+			UObject* RedirectedComp = UFINNetworkUtils::RedirectIfPossible(FFIRTrace(Comp)).Get();
 			if (!RedirectedComp->IsA(InClass)) continue;
 		} else if (!Comp->IsA(InClass)) continue;
 		if (!IFINNetworkComponent::Execute_AccessPermitted(Comp, IFINNetworkComponent::Execute_GetID(Component.GetObject()))) continue;
-		outComps.Add(FFINNetworkTrace(Component.GetObject()) / Comp);
+		outComps.Add(FFIRTrace(Component.GetObject()) / Comp);
 	}
 	return outComps;
 }

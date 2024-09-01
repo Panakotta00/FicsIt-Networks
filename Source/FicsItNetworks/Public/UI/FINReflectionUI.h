@@ -57,7 +57,7 @@ public:
 	 * Sets the currently selected typer of the reflection viewer
 	 */
 	UFUNCTION(BlueprintCallable, Category="Reflection|UI")
-	void NavigateTo(UFINStruct* InStruct);
+	void NavigateTo(UFIRStruct* InStruct);
 
 	/**
 	 * Sets if entry lists should also show the entries of super structs/classes

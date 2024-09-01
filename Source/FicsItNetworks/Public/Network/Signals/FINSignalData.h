@@ -3,20 +3,20 @@
 #include "Network/FINAnyNetworkValue.h"
 #include "FINSignalData.generated.h"
 
-class UFINSignal;
+class UFIRSignal;
 
 USTRUCT()
 struct FICSITNETWORKS_API FFINSignalData {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	UFINSignal* Signal = nullptr;
+	UFIRSignal* Signal = nullptr;
 
 	UPROPERTY()
 	TArray<FFINAnyNetworkValue> Data;
 
 	FFINSignalData() = default;
-	FFINSignalData(UFINSignal* Signal, const FINArray& Data) : Signal(Signal), Data(Data) {}
+	FFINSignalData(UFIRSignal* Signal, const FINArray& Data) : Signal(Signal), Data(Data) {}
 
 	bool Serialize(FStructuredArchive::FSlot Slot);
 };

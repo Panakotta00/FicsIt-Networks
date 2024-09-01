@@ -176,7 +176,7 @@ void AFINMediaSubsystem::HandleTextureDownload(UTexture2DDynamic* Texture) {
 	DownloadNextTexture();
 }
 
-void AFINMediaSubsystem::netClass_Meta(FFINReflectionFunctionMeta& netFuncMeta_findGameIcon) {
+void AFINMediaSubsystem::netClass_Meta(FFIRFunctionMeta& netFuncMeta_findGameIcon) {
 	netFuncMeta_findGameIcon.InternalName = TEXT("findGameIcon");
 	netFuncMeta_findGameIcon.DisplayName = FText::FromString(TEXT("Find Game Icon"));
 	netFuncMeta_findGameIcon.Description = FText::FromString(TEXT("Tries to find an game icon like the ones you use for signs."));

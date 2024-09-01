@@ -22,12 +22,12 @@ bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
 	
 	if (Record.GetUnderlyingArchive().IsLoading()) Structs.Empty();
 	for (int i = 0; i < StructNum; ++i) {
-		if (Record.GetUnderlyingArchive().IsLoading()) Structs.Add(MakeShared<FFINDynamicStructHolder>());
-		TSharedPtr<FFINDynamicStructHolder> holder = Structs[i];
+		if (Record.GetUnderlyingArchive().IsLoading()) Structs.Add(MakeShared<FFIRInstancedStruct>());
+		TSharedPtr<FFIRInstancedStruct> holder = Structs[i];
 		if (holder) {
 			holder->Serialize(Array.EnterElement());
 		} else {
-			FFINDynamicStructHolder().Serialize(Array.EnterElement());
+			FFIRInstancedStruct().Serialize(Array.EnterElement());
 		}
 	}
 	return true;
@@ -41,7 +41,7 @@ int32 FFINLuaProcessorStateStorage::Add(UObject* Ref) {
 	return References.AddUnique(Ref);
 }
 
-int32 FFINLuaProcessorStateStorage::Add(TSharedPtr<FFINDynamicStructHolder> Struct) {
+int32 FFINLuaProcessorStateStorage::Add(TSharedPtr<FFIRInstancedStruct> Struct) {
 	return Structs.Add(Struct);
 }
 
@@ -53,10 +53,10 @@ UObject* FFINLuaProcessorStateStorage::GetRef(int32 id) {
 	return References[id];
 }
 
-TSharedPtr<FFINDynamicStructHolder> FFINLuaProcessorStateStorage::GetStruct(int32 id) {
+TSharedPtr<FFIRInstancedStruct> FFINLuaProcessorStateStorage::GetStruct(int32 id) {
 	if (id >= Structs.Num()) {
 		UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Unable to find struct in lua processor state storage with id %i"), id);
-		return MakeShared<FFINDynamicStructHolder>();
+		return MakeShared<FFIRInstancedStruct>();
 	}
 	return Structs[id];
 }

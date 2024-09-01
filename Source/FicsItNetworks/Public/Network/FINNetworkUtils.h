@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FINNetworkTrace.h"
+#include "FIRTrace.h"
 #include "FINNetworkUtils.generated.h"
 
 UCLASS()
@@ -18,5 +18,5 @@ public:
 	static UObject* FindNetworkComponentFromObject(UObject* Obj);
 
 	UFUNCTION(BlueprintCallable, Category="Network|Utils")
-	static FFINNetworkTrace RedirectIfPossible(const FFINNetworkTrace& Trace);
+	static FFIRTrace RedirectIfPossible(const FFIRTrace& Trace);
 };

@@ -23,5 +23,5 @@ public:
 	* @param	Signal	the signal you want to handle
 	* @param	Sender	the sender of the signal
 	*/
-	virtual void HandleSignal(const FFINSignalData& Signal, const FFINNetworkTrace& Sender) = 0;
+	virtual void HandleSignal(const FFINSignalData& Signal, const FFIRTrace& Sender) = 0;
 };

@@ -82,7 +82,7 @@ namespace FINLua {
 		}
 	}
 
-	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
+	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFIRProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
 		int LuaType = lua_type(L, Index);
 		
 		switch (Property->GetType()) {
@@ -142,7 +142,7 @@ namespace FINLua {
 			TSharedPtr<FINStruct> Struct;
 			UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property);
 			if (StructProp && StructProp->GetInner()) {
-				UFINStruct* Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
+				UFIRStruct* Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
 				Struct = luaFIN_checkStruct(L, Index, Type, bImplicitConstruction);
 			} else {
 				Struct = luaFIN_toStruct(L, Index, nullptr, false);
@@ -172,7 +172,7 @@ namespace FINLua {
 		return FINAny();
 	}
 	
-	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
+	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFIRProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
 		if (Property) return luaFIN_toNetworkValueByProp(L, Index, Property, bImplicitConversion, bImplicitConstruction);
 		else return luaFIN_toNetworkValue(L, Index);
 	}
@@ -213,7 +213,7 @@ namespace FINLua {
 		return TOptional<FINAny>();
 	}
 
-	FString luaFIN_getPropertyTypeName(lua_State* L, UFINProperty* Property) {
+	FString luaFIN_getPropertyTypeName(lua_State* L, UFIRProperty* Property) {
 		switch (Property->GetType()) {
 		case FIN_NIL: return UTF8_TO_TCHAR(lua_typename(L, LUA_TNIL));
 		case FIN_BOOL: return UTF8_TO_TCHAR(lua_typename(L, LUA_TBOOLEAN));
@@ -243,7 +243,7 @@ namespace FINLua {
 			return FFINReflection::TraceReferenceText(Class);
 		} case FIN_STRUCT: {
 			UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property);
-			UFINStruct* Type = nullptr;
+			UFIRStruct* Type = nullptr;
 			if (StructProp && StructProp->GetInner()) {
 				Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
 			}
@@ -269,7 +269,7 @@ namespace FINLua {
 			parameters.Add(FString::Printf(TEXT("self : %s"), *FFINReflection::TraceReferenceText(Function->GetTypedOuter<UFINClass>())));
 		}
 
-		for (UFINProperty* parameter : Function->GetParameters()) {
+		for (UFIRProperty* parameter : Function->GetParameters()) {
 			EFINRepPropertyFlags flags = parameter->GetPropertyFlags();
 			if (!(flags & FIN_Prop_Param)) continue;
 			TArray<FString>& list = (flags & FIN_Prop_OutParam) ? returnValues : parameters;
@@ -282,7 +282,7 @@ namespace FINLua {
 		return FString::Printf(TEXT("(%s) %s(%s)"), *joinedParameters, *Function->GetInternalName(), *joinedReturnValues);
 	}
 
-	int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property) {
+	int luaFIN_propertyError(lua_State* L, int Index, UFIRProperty* Property) {
 		return luaFIN_typeError(L, Index, luaFIN_getPropertyTypeName(L, Property));
 	}
 
@@ -320,7 +320,7 @@ namespace FINLua {
 		}
 		if (TypeName == luaFIN_getLuaStructTypeName()) {
 			FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, nullptr);
-			UFINStruct* Type = nullptr;
+			UFIRStruct* Type = nullptr;
 			if (LuaStruct) Type = LuaStruct->Type;
 			return FFINReflection::StructReferenceText(Type);
 		}

@@ -21,7 +21,7 @@
 
 UE_DISABLE_OPTIMIZATION
 namespace FINGenJsonDoc {
-	TSharedRef<FJsonObject> GenReflectionDataType(UFINProperty* Property, TSharedRef<FJsonObject> Obj = MakeShared<FJsonObject>()) {
+	TSharedRef<FJsonObject> GenReflectionDataType(UFIRProperty* Property, TSharedRef<FJsonObject> Obj = MakeShared<FJsonObject>()) {
 		if (Property->IsA<UFINBoolProperty>()) {
 			Obj->SetStringField("type", "Bool");
 		} else if (Property->IsA<UFINIntProperty>()) {
@@ -38,7 +38,7 @@ namespace FINGenJsonDoc {
 			if (UFINClass* subclass = FFINReflection::Get()->FindClass(TraceProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
 		} else if (UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property)) {
 			Obj->SetStringField("type", "Struct");
-			if (UFINStruct* inner = FFINReflection::Get()->FindStruct(StructProp->GetInner())) Obj->SetStringField("inner", inner->GetInternalName());
+			if (UFIRStruct* inner = FFINReflection::Get()->FindStruct(StructProp->GetInner())) Obj->SetStringField("inner", inner->GetInternalName());
 		} else if (UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Property)) {
 			Obj->SetStringField("type", "Class");
 			if (UFINClass* subclass = FFINReflection::Get()->FindClass(ClassProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
@@ -55,7 +55,7 @@ namespace FINGenJsonDoc {
 		Obj->SetStringField(TEXT("description"), Base->GetDescription().ToString());
 	}
 
-	void FINGenRefProp(const TSharedPtr<FJsonObject>& Obj, UFINProperty* Prop) {
+	void FINGenRefProp(const TSharedPtr<FJsonObject>& Obj, UFIRProperty* Prop) {
 		FINGenRefBase(Obj, Prop);
 		Obj->SetObjectField(TEXT("type"), GenReflectionDataType(Prop));
 
@@ -77,7 +77,7 @@ namespace FINGenJsonDoc {
 	void FINGenRefFunc(const TSharedPtr<FJsonObject>& Obj, const UFINFunction* Func) {
 		FINGenRefBase(Obj, Func);
 		TArray<TSharedPtr<FJsonValue>> parameters;
-		for (UFINProperty* parameter : Func->GetParameters()) {
+		for (UFIRProperty* parameter : Func->GetParameters()) {
 			TSharedPtr<FJsonObject> parameterObject = MakeShared<FJsonObject>();
 			FINGenRefProp(parameterObject, parameter);
 			parameters.Add(MakeShared<FJsonValueObject>(parameterObject));
@@ -97,11 +97,11 @@ namespace FINGenJsonDoc {
 		Obj->SetArrayField(TEXT("flags"), FlagArray);
 	}
 
-	void FINGenRefStruct(const TSharedPtr<FJsonObject>& Obj, const UFINStruct* Struct) {
+	void FINGenRefStruct(const TSharedPtr<FJsonObject>& Obj, const UFIRStruct* Struct) {
 		FINGenRefBase(Obj, Struct);
 		if (Struct->GetParent()) Obj->SetStringField(TEXT("parent"), Struct->GetParent()->GetInternalName());
 		TArray<TSharedPtr<FJsonValue>> Properties;
-		for (UFINProperty* Property : Struct->GetProperties(false)) {
+		for (UFIRProperty* Property : Struct->GetProperties(false)) {
 			TSharedPtr<FJsonObject> PropertyObj = MakeShared<FJsonObject>();
 			FINGenRefProp(PropertyObj, Property);
 			Properties.Add(MakeShared<FJsonValueObject>(PropertyObj));
@@ -119,7 +119,7 @@ namespace FINGenJsonDoc {
 	void FINGenRefSignal(const TSharedPtr<FJsonObject>& Obj, const UFINSignal* Signal) {
 		FINGenRefBase(Obj, Signal);
 		TArray<TSharedPtr<FJsonValue>> parameters;
-		for (UFINProperty* parameter : Signal->GetParameters()) {
+		for (UFIRProperty* parameter : Signal->GetParameters()) {
 			TSharedPtr<FJsonObject> parameterObject = MakeShared<FJsonObject>();
 			FINGenRefProp(parameterObject, parameter);
 			parameters.Add(MakeShared<FJsonValueObject>(parameterObject));
@@ -165,8 +165,8 @@ namespace FINGenJsonDoc {
 		FINGenClasses(Classes, Ref.FindClass(UObject::StaticClass()));
 
 		TArray<FString> Names;
-		TMap<FString, UFINStruct*> NamesToStructs;
-		for (TPair<UScriptStruct*, UFINStruct*> Struct : Ref.GetStructs()) {
+		TMap<FString, UFIRStruct*> NamesToStructs;
+		for (TPair<UScriptStruct*, UFIRStruct*> Struct : Ref.GetStructs()) {
 			Names.Add(Struct.Value->GetInternalName());
 			NamesToStructs.Add(Struct.Value->GetInternalName(), Struct.Value);
 		}

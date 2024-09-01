@@ -48,7 +48,7 @@ const FFINLogViewerStyle& FFINLogViewerStyle::GetDefault() {
 TSharedRef<SWidget> UFINLogViewer::RebuildWidget() {
 	return SNew(SFINLogViewer, this)
 	.Style(&Style)
-	.OnNavigateReflection_Lambda([this](UFINBase* ReflectionItem) {
+	.OnNavigateReflection_Lambda([this](UFIRBase* ReflectionItem) {
 		OnNavigateReflection.Broadcast(ReflectionItem);
 	})
 	.OnNavigateEEPROM_Lambda([this](int64 LineNumber) {

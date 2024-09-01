@@ -8,37 +8,37 @@
 FFINKernelListener::FFINKernelListener(UFINKernelSystem* parent) : parent(parent) {}
 
 void FFINKernelListener::onMounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
-	static UFINSignal* Signal = nullptr;
+	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {4ll, FString(path.str().c_str())});
 }
 
 void FFINKernelListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
-	static UFINSignal* Signal = nullptr;
+	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {5ll, FString(path.str().c_str())});
 }
 
 void FFINKernelListener::onNodeAdded(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
-	static UFINSignal* Signal = nullptr;
+	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {0ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 }
 
 void FFINKernelListener::onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
-	static UFINSignal* Signal = nullptr;
+	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {1ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 }
 
 void FFINKernelListener::onNodeChanged(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
-	static UFINSignal* Signal = nullptr;
+	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {2ll, FString(path.str().c_str()), static_cast<FINInt>(type)});
 }
 
 void FFINKernelListener::onNodeRenamed(CodersFileSystem::Path newPath, CodersFileSystem::Path oldPath, CodersFileSystem::NodeType type) {
-	static UFINSignal* Signal = nullptr;
+	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFINReflection::Get()->FindClass(AFINComputerCase::StaticClass())->FindFINSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {3ll, FString(newPath.str().c_str()), FString(oldPath.str().c_str()), static_cast<FINInt>(type)});
 }

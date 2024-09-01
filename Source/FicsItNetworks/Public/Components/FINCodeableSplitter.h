@@ -66,7 +66,7 @@ public:
 	// End IFINSignalSender
 
 	UFUNCTION()
-    void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes, FFINReflectionFunctionMeta& netFuncMeta_getConnectorByIndex) {
+    void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes, FFIRFunctionMeta& netFuncMeta_getConnectorByIndex) {
 		InternalName = TEXT("CodeableSplitter");
 		DisplayName = FText::FromString(TEXT("Codeable Splitter"));
 

@@ -10,7 +10,7 @@
 #include "tracy/Tracy.hpp"
 
 namespace FINLua {
-	FLuaObject::FLuaObject(const FFINNetworkTrace& Object, UFINKernelSystem* Kernel) : Object(Object), Kernel(Kernel) {
+	FLuaObject::FLuaObject(const FFIRTrace& Object, UFINKernelSystem* Kernel) : Object(Object), Kernel(Kernel) {
 		Type = FFINReflection::Get()->FindClass(Object.GetUnderlyingPtr()->GetClass());
 		Kernel->AddReferencer(this, &CollectReferences);
 	}
@@ -95,7 +95,7 @@ namespace FINLua {
 				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, thisIndex, nullptr);
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
-				FFINExecutionContext Context(LuaObject->Object);
+				FFIRExecutionContext Context(LuaObject->Object);
 				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Func_MemberFunc, FIN_Prop_Attrib, Context, true);
 			}
 
@@ -112,7 +112,7 @@ namespace FINLua {
 				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, thisIndex, nullptr);
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
-				FFINExecutionContext Context(LuaObject->Object);
+				FFIRExecutionContext Context(LuaObject->Object);
 				luaFIN_tryExecuteSetProperty(L, thisIndex, LuaObject->Type, MemberName, FIN_Prop_Attrib, Context, valueIndex, true);
 				return 0;
 			}
@@ -129,7 +129,7 @@ namespace FINLua {
 			int luaObjectUnpersist(lua_State* L) {
 				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
-				FFINNetworkTrace Object = Storage.GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
+				FFIRTrace Object = Storage.GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
 
 				luaFIN_pushObject(L, Object);
 
@@ -169,7 +169,7 @@ namespace FINLua {
 		}
 	}
 
-	void luaFIN_pushObject(lua_State* L, const FFINNetworkTrace& Object) {
+	void luaFIN_pushObject(lua_State* L, const FFIRTrace& Object) {
 		if (!Object.GetUnderlyingPtr()) {
 			lua_pushnil(L);
 			UE_LOGFMT(LogFicsItNetworksLuaReflection, Verbose, "[{Runtime}] Tried to push invalid/null Object to Lua-Stack ({Index})", L, lua_gettop(L));
@@ -201,17 +201,17 @@ namespace FINLua {
 		return LuaObject;
 	}
 
-	TOptional<FFINNetworkTrace> luaFIN_toObject(lua_State* L, int Index, UFINClass* ParentType) {
+	TOptional<FFIRTrace> luaFIN_toObject(lua_State* L, int Index, UFINClass* ParentType) {
 		FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, ParentType);
 		if (!LuaObject) {
-			if (lua_isnil(L, Index)) return FFINNetworkTrace();
-			return TOptional<FFINNetworkTrace>();
+			if (lua_isnil(L, Index)) return FFIRTrace();
+			return TOptional<FFIRTrace>();
 		}
 		return LuaObject->Object;
 	}
 
-	FFINNetworkTrace luaFIN_checkObject(lua_State* L, int Index, UFINClass* ParentType) {
-		TOptional<FFINNetworkTrace> Object = luaFIN_toObject(L, Index, ParentType);
+	FFIRTrace luaFIN_checkObject(lua_State* L, int Index, UFINClass* ParentType) {
+		TOptional<FFIRTrace> Object = luaFIN_toObject(L, Index, ParentType);
 		if (!Object.IsSet()) luaFIN_typeError(L, Index, FFINReflection::ObjectReferenceText(ParentType));
 		return *Object;
 	}

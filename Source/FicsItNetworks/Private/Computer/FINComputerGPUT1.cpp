@@ -227,7 +227,7 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	}
 }
 
-void AFINComputerGPUT1::BindScreen(const FFINNetworkTrace& screen) {
+void AFINComputerGPUT1::BindScreen(const FFIRTrace& screen) {
 	Super::BindScreen(screen);
 }
 

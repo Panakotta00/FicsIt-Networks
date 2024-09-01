@@ -155,7 +155,7 @@ public:
 	AFINComputerProcessor* GetProcessor();
 
 	UFUNCTION()
-	void HandleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender);
+	void HandleSignal(const FFINSignalData& signal, const FFIRTrace& sender);
 
 	UFUNCTION()
 	void OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive);

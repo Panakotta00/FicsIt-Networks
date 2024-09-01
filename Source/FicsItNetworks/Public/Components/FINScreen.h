@@ -12,7 +12,7 @@ class AFINScreen : public AFGBuildable, public IFINScreenInterface {
 	
 private:
 	UPROPERTY()
-	FFINNetworkTrace GPU;
+	FFIRTrace GPU;
 
 public:
 	TSharedPtr<SWidget> Widget;
@@ -66,8 +66,8 @@ public:
 	// End AFGBuildable
 
 	// Begin IFINScreenInterface
-	void BindGPU(const FFINNetworkTrace& gpu) override;
-	FFINNetworkTrace GetGPU() const override;
+	void BindGPU(const FFIRTrace& gpu) override;
+	FFIRTrace GetGPU() const override;
 	void SetWidget(TSharedPtr<SWidget> widget) override;
 	TSharedPtr<SWidget> GetWidget() const override;
 	// End IFINScreenInterface

@@ -23,7 +23,7 @@ public:
 	 * @param[in]	gpu		the new gpu this screen should bind to.
 	 */
 	UFUNCTION()
-	virtual void BindGPU(const FFINNetworkTrace& gpu) = 0;
+	virtual void BindGPU(const FFIRTrace& gpu) = 0;
 
 	/**
 	 * Returns the currently bound GPU.
@@ -32,7 +32,7 @@ public:
 	 * @return	the currently bound gpu.
 	 */
 	UFUNCTION()
-	virtual FFINNetworkTrace GetGPU() const = 0;
+	virtual FFIRTrace GetGPU() const = 0;
 
 	/**
 	 * Gets called by the GPU and forces the Screen to now use the given widget.

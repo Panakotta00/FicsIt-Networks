@@ -15,7 +15,7 @@ class FICSITNETWORKS_API UFINKernelNetworkController : public UObject, public IF
 	GENERATED_BODY()
 protected:
 	FCriticalSection MutexSignals;
-	TArray<TPair<FFINSignalData, FFINNetworkTrace>> SignalQueue;
+	TArray<TPair<FFINSignalData, FFIRTrace>> SignalQueue;
 	bool bLockSignalReceiving = false;
 
 	/**
@@ -57,7 +57,7 @@ public:
 	/**
 	 * Should get called by the network component so the signal gets added to the signal queue
 	 */
-	void HandleSignal(const FFINSignalData& InSignal, const FFINNetworkTrace& InSender);
+	void HandleSignal(const FFINSignalData& InSignal, const FFIRTrace& InSender);
 
 	/**
 	 * pops a signal form the queue.
@@ -66,7 +66,7 @@ public:
 	 * @param[out]	OutSender	output-parameter for the sender of the signal
 	 * @return	signal from the queue
 	 */
-	FFINSignalData PopSignal(FFINNetworkTrace& OutSender);
+	FFINSignalData PopSignal(FFIRTrace& OutSender);
 
 	/**
 	 * pushes a signal to the queue.
@@ -75,7 +75,7 @@ public:
 	 * @param[in]	InSignal	the signal you want to push
 	 * @param[in]	InSender	the signal sender of signal you try to push
 	 */
-	void PushSignal(const FFINSignalData& InSignal, const FFINNetworkTrace& InSender);
+	void PushSignal(const FFINSignalData& InSignal, const FFIRTrace& InSender);
 
 	/**
 	 * Removes all signals from the signal queue.
@@ -94,15 +94,15 @@ public:
 	 *
 	 * @return	the component you searched for, nullptr if it was not able to find the component
 	 */
-	FFINNetworkTrace GetComponentByID(const FGuid& InID) const;
+	FFIRTrace GetComponentByID(const FGuid& InID) const;
 
 	/**
 	 * returns the components in the network with the given nick.
 	 */
-	TSet<FFINNetworkTrace> GetComponentByNick(const FString& InNick) const;
+	TSet<FFIRTrace> GetComponentByNick(const FString& InNick) const;
 
 	/**
 	 * returns the components in the network with of the given type.
 	 */
-	TSet<FFINNetworkTrace> GetComponentByClass(UClass* InClass, bool bInRedirect) const;
+	TSet<FFIRTrace> GetComponentByClass(UClass* InClass, bool bInRedirect) const;
 };

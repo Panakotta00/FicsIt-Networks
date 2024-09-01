@@ -613,7 +613,7 @@ public:
 	// End AActor
 
 	// Begin IFINGraphicsPorcessingUnit
-	virtual void BindScreen(const FFINNetworkTrace& Screen) override;
+	virtual void BindScreen(const FFIRTrace& Screen) override;
 	// End IFINGraphicsProcessingUnit
 
 	virtual TSharedPtr<SWidget> CreateWidget() override;

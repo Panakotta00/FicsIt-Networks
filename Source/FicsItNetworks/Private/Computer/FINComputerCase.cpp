@@ -361,7 +361,7 @@ AFINComputerProcessor* AFINComputerCase::GetProcessor() {
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void AFINComputerCase::HandleSignal(const FFINSignalData& signal, const FFINNetworkTrace& sender) {
+void AFINComputerCase::HandleSignal(const FFINSignalData& signal, const FFIRTrace& sender) {
 	if (Kernel) Kernel->GetNetwork()->PushSignal(signal, sender);
 }
 

@@ -17,7 +17,7 @@ namespace FINLua {
 		 *
 		 * The Event API provides classes, functions and variables for interacting with the component network.
 		 */)", event) {
-			void luaListen(lua_State* L, FFINNetworkTrace o) {
+			void luaListen(lua_State* L, FFIRTrace o) {
 				const UFINKernelNetworkController* net = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork();
 				UObject* obj = *o;
 				if (!IsValid(obj)) luaL_error(L, "object is not valid");
@@ -38,7 +38,7 @@ namespace FINLua {
 				const int args = lua_gettop(L);
 
 				for (int i = 1; i <= args; ++i) {
-					FFINNetworkTrace trace = luaFIN_checkObject(L, i, nullptr);
+					FFIRTrace trace = luaFIN_checkObject(L, i, nullptr);
 					luaListen(L, trace);
 				}
 				return UFINLuaProcessor::luaAPIReturn(L, 0);
@@ -61,7 +61,7 @@ namespace FINLua {
 				int i = 0;
 				lua_newtable(L);
 				for (UObject* Obj : Listening) {
-					luaFIN_pushObject(L, FFINNetworkTrace(netComp) / Obj);
+					luaFIN_pushObject(L, FFIRTrace(netComp) / Obj);
 					lua_seti(L, -2, ++i);
 				}
 				return 1;
@@ -106,7 +106,7 @@ namespace FINLua {
 				return UFINLuaProcessor::luaAPIReturn(L, a);
 			}
 
-			void luaIgnore(lua_State* L, FFINNetworkTrace o) {
+			void luaIgnore(lua_State* L, FFIRTrace o) {
 				UObject* obj = *o;
 				if (!IsValid(obj)) luaL_error(L, "object is not valid");
 				AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(obj);
@@ -126,7 +126,7 @@ namespace FINLua {
 				const int args = lua_gettop(L);
 
 				for (int i = 1; i <= args; ++i) {
-					FFINNetworkTrace Trace = luaFIN_checkObject(L, i, nullptr);
+					FFIRTrace Trace = luaFIN_checkObject(L, i, nullptr);
 					luaIgnore(L, Trace);
 				}
 				return UFINLuaProcessor::luaAPIReturn(L, 0);

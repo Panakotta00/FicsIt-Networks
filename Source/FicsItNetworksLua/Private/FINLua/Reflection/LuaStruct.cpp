@@ -13,7 +13,7 @@
 	const int _persist_upermTableIdx
 
 namespace FINLua {
-	FLuaStruct::FLuaStruct(UFINStruct* Type, const FFINDynamicStructHolder& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(MakeShared<FFINDynamicStructHolder>(Struct)), Kernel(Kernel) {
+	FLuaStruct::FLuaStruct(UFIRStruct* Type, const FFIRInstancedStruct& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(MakeShared<FFIRInstancedStruct>(Struct)), Kernel(Kernel) {
 		Kernel->AddReferencer(this, &CollectReferences);
 	}
 
@@ -37,7 +37,7 @@ UE_DISABLE_OPTIMIZATION_SHIP
 	 * If none is found returns nullptr.
 	 * If CauseErrorForIndex is not nullptr, causes an lua error instead, guaranteeing a non-nullptr return value.
 	 */
-	UFINFunction* luaStructFindOperator(lua_State* L, UFINStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, TArray<FINAny>& Operands, const int* CauseErrorForIndex) {
+	UFINFunction* luaStructFindOperator(lua_State* L, UFIRStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, TArray<FINAny>& Operands, const int* CauseErrorForIndex) {
 		ZoneScoped;
 		
 		UFINFunction* func;
@@ -51,7 +51,7 @@ UE_DISABLE_OPTIMIZATION_SHIP
 
 			int ParameterIndex = 0;
 			for (int OperandIndex : OperandIndices) {
-				UFINProperty* param1 = func->GetParameters()[ParameterIndex++];
+				UFIRProperty* param1 = func->GetParameters()[ParameterIndex++];
 				TOptional<FINAny> otherValue = luaFIN_toNetworkValueByProp(L, OperandIndex, param1, true, false);
 				if (!otherValue.IsSet()) break;
 				Operands.Add(*otherValue);
@@ -77,17 +77,17 @@ UE_DISABLE_OPTIMIZATION_SHIP
 	 * If unable to find or execute any matching operator, returns a negative error value.
 	 * If CauseErroForIndex is not nullptr, causes an lua error instead, guaranteeing a return value of >= 0
 	 */
-	int luaStructExecuteOperator(lua_State* L, const TSharedRef<FINStruct>& Struct, UFINStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, const int* CauseErrorForIndex) {
+	int luaStructExecuteOperator(lua_State* L, const TSharedRef<FINStruct>& Struct, UFIRStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, const int* CauseErrorForIndex) {
 		ZoneScoped;
 		
 		TArray<FINAny> parameters;
 		UFINFunction* func = luaStructFindOperator(L, Type, OperatorName, OperandIndices, parameters, CauseErrorForIndex);
 		if (!func) return -2;
 		
-		FFINExecutionContext Ctx(Struct->GetData());
+		FFIRExecutionContext Ctx(Struct->GetData());
 		TArray<FINAny> result = func->Execute(Ctx, parameters);
 		for (const FINAny& val : result) {
-			luaFIN_pushNetworkValue(L, val, FFINNetworkTrace());
+			luaFIN_pushNetworkValue(L, val, FFIRTrace());
 		} 
 		return result.Num();
 	}
@@ -118,7 +118,7 @@ UE_DISABLE_OPTIMIZATION_SHIP
 		return true;
 	}
 
-	int luaStructExecuteBinaryOperator(lua_State* L, const FString& OperatorName, int OtherIndex, const TSharedRef<FINStruct>& Struct, UFINStruct* Type, const int* CauseErrorForIndex) {
+	int luaStructExecuteBinaryOperator(lua_State* L, const FString& OperatorName, int OtherIndex, const TSharedRef<FINStruct>& Struct, UFIRStruct* Type, const int* CauseErrorForIndex) {
 		return luaStructExecuteOperator(L, Struct, Type, OperatorName, {OtherIndex}, CauseErrorForIndex);
 	}
 
@@ -339,7 +339,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, thisIndex, nullptr);
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
-				FFINExecutionContext Context(LuaStruct->Struct->GetData());
+				FFIRExecutionContext Context(LuaStruct->Struct->GetData());
 				int arg = luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaStruct->Type, MemberName, EFINFunctionFlags::FIN_Func_MemberFunc, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, false);
 				if (arg > 0) return arg;
 				return luaStructExecuteBinaryOperator(L, FIN_OP_TEXT(FIN_Operator_Index), 2, LuaStruct->Struct, LuaStruct->Type, nullptr);
@@ -358,7 +358,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, thisIndex, nullptr);
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
-				FFINExecutionContext Context(LuaStruct->Struct->GetData());
+				FFIRExecutionContext Context(LuaStruct->Struct->GetData());
 				if (luaFIN_tryExecuteSetProperty(L, thisIndex, LuaStruct->Type, MemberName, EFINRepPropertyFlags::FIN_Prop_Attrib, Context, valueIndex, false)) {
 					return 1;
 				}
@@ -399,7 +399,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 
-				const FFINDynamicStructHolder& Struct = *Storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1)));
+				const FFIRInstancedStruct& Struct = *Storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1)));
 
 				luaFIN_pushStruct(L, Struct);
 
@@ -440,7 +440,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			 * @LuaFunction		__call
 			 * @DisplayName		Call
 			 */)", __call) {
-				UFINStruct* Struct = luaFIN_toStructType(L, 1);
+				UFIRStruct* Struct = luaFIN_toStructType(L, 1);
 				if (!Struct) return 0;
 
 				luaL_argcheck(L, Struct->GetStructFlags() & FIN_Struct_Constructable, 1, "Can not be constructed.");
@@ -458,18 +458,18 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				const int thisIndex = 1;
 				const int nameIndex = 2;
 
-				UFINStruct* Struct = luaFIN_toStructType(L, thisIndex);
+				UFIRStruct* Struct = luaFIN_toStructType(L, thisIndex);
 				if (!Struct) return 0;
 
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
-				FFINExecutionContext Context(Struct);
+				FFIRExecutionContext Context(Struct);
 				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, Struct, MemberName, FIN_Func_StaticFunc, FIN_Prop_StaticProp, Context, true);
 			}
 
 			int luaStructTypeUnpersist(lua_State* L) {
 				FString StructName = luaFIN_checkFString(L, lua_upvalueindex(1));
-				UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
+				UFIRStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
 				luaFIN_pushStructType(L, Struct);
 				return 1;
 			}
@@ -478,7 +478,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			 * @LuaFunction		__persist
 			 * @DisplayName		Persist
 			 */)", __persist) {
-				UFINStruct* Type = *(UFINStruct**)lua_touserdata(L, 1);
+				UFIRStruct* Type = *(UFIRStruct**)lua_touserdata(L, 1);
 				luaFIN_pushFString(L, Type->GetInternalName());
 				lua_pushcclosure(L, &luaStructTypeUnpersist, 1);
 				return 1;
@@ -494,7 +494,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			 * @DisplayName		Index
 			 */)", __index) {
 				FString StructName = luaFIN_checkFString(L, 2);
-				UFINStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
+				UFIRStruct* Struct = FFINReflection::Get()->FindStruct(StructName);
 				if (Struct) {
 					luaFIN_pushStructType(L, Struct);
 				} else {
@@ -540,7 +540,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			return true;
 		}
 
-		UFINStruct* Type = FFINReflection::Get()->FindStruct(Struct.GetStruct());
+		UFIRStruct* Type = FFINReflection::Get()->FindStruct(Struct.GetStruct());
 		if (!Type) {
 			lua_pushnil(L);
 			return false;
@@ -553,7 +553,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		return true;
 	}
 
-	TSharedPtr<FINStruct> luaFIN_convertToStruct(lua_State* L, int Index, UFINStruct* Type, bool bAllowImplicitConstruction) {
+	TSharedPtr<FINStruct> luaFIN_convertToStruct(lua_State* L, int Index, UFIRStruct* Type, bool bAllowImplicitConstruction) {
 		if (!(Type->GetStructFlags() & FIN_Struct_Constructable)) return nullptr;
 
 		TSharedRef<FINStruct> Struct = MakeShared<FINStruct>(FFINReflection::Get()->FindScriptStruct(Type));
@@ -563,7 +563,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		if (luaType != LUA_TTABLE) return nullptr;
 
 		int j = 0;
-		for (UFINProperty* Prop : Type->GetProperties()) {
+		for (UFIRProperty* Prop : Type->GetProperties()) {
 			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
 			if (lua_getfield(L, Index, TCHAR_TO_UTF8(*Prop->GetInternalName())) == LUA_TNIL) {
 				lua_pop(L, 1);
@@ -579,7 +579,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		return Struct;
 	}
 
-	FLuaStruct* luaFIN_toLuaStruct(lua_State* L, int Index, UFINStruct* ParentType) {
+	FLuaStruct* luaFIN_toLuaStruct(lua_State* L, int Index, UFIRStruct* ParentType) {
 		FLuaStruct* LuaStruct = static_cast<FLuaStruct*>(luaL_testudata(L, Index, ReflectionSystemStruct::Struct::_Name));
 		if (LuaStruct && LuaStruct->Type->IsChildOf(ParentType)) {
 			return LuaStruct;
@@ -587,7 +587,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		return nullptr;
 	}
 
-	FLuaStruct* luaFIN_checkLuaStruct(lua_State* L, int Index, UFINStruct* ParentType) {
+	FLuaStruct* luaFIN_checkLuaStruct(lua_State* L, int Index, UFIRStruct* ParentType) {
 		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, ParentType);
 		if (!LuaStruct) {
 			luaFIN_typeError(L, Index, FFINReflection::StructReferenceText(ParentType));
@@ -595,7 +595,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		return LuaStruct;
 	}
 
-	TSharedPtr<FINStruct> luaFIN_toStruct(lua_State* L, int Index, UFINStruct* ParentType, bool bAllowConstruction) {
+	TSharedPtr<FINStruct> luaFIN_toStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction) {
 		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, ParentType);
 		if (LuaStruct) return LuaStruct->Struct;
 
@@ -606,28 +606,28 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		return nullptr;
 	}
 
-	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int Index, UFINStruct* ParentType, bool bAllowConstruction) {
+	TSharedRef<FINStruct> luaFIN_checkStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction) {
 		TSharedPtr<FINStruct> Struct = luaFIN_toStruct(L, Index, ParentType, bAllowConstruction);
 		if (!Struct.IsValid()) luaFIN_typeError(L, Index, FFINReflection::StructReferenceText(ParentType));
 		return Struct.ToSharedRef();
 	}
 
-	void luaFIN_pushStructType(lua_State* L, UFINStruct* Struct) {
+	void luaFIN_pushStructType(lua_State* L, UFIRStruct* Struct) {
 		if (Struct) {
-			*(UFINStruct**)lua_newuserdata(L, sizeof(UFINStruct*)) = Struct;
+			*(UFIRStruct**)lua_newuserdata(L, sizeof(UFIRStruct*)) = Struct;
 			luaL_setmetatable(L, ReflectionSystemStruct::StructType::_Name);
 		} else {
 			lua_pushnil(L);
 		}
 	}
 
-	UFINStruct* luaFIN_toStructType(lua_State* L, int index) {
+	UFIRStruct* luaFIN_toStructType(lua_State* L, int index) {
 		if (lua_isnil(L, index)) return nullptr;
 		return luaFIN_checkStructType(L, index);
 	}
 
-	UFINStruct* luaFIN_checkStructType(lua_State* L, int index) {
-		UFINStruct* Struct = *(UFINStruct**)luaL_checkudata(L, index, ReflectionSystemStruct::StructType::_Name);
+	UFIRStruct* luaFIN_checkStructType(lua_State* L, int index) {
+		UFIRStruct* Struct = *(UFIRStruct**)luaL_checkudata(L, index, ReflectionSystemStruct::StructType::_Name);
 		return Struct;
 	}
 

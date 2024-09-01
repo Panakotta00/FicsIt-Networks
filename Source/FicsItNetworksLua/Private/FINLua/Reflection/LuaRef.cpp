@@ -52,7 +52,7 @@ namespace FINLua {
 
 				FString key = luaFIN_checkFString(L, 2);
 				if (key == asFunctionObject_Name) {
-					luaFIN_pushObject(L, FFINNetworkTrace(function));
+					luaFIN_pushObject(L, FFIRTrace(function));
 				} else if (key == quickRef_Name) {
 					FString signature = luaFIN_getFunctionSignature(L, function);
 					FString description = function->GetDescription().ToString();
@@ -74,24 +74,24 @@ namespace FINLua {
 				ZoneScoped;
 
 				UFINFunction* Function = luaFIN_checkReflectionFunction(L, 1);
-				UFINStruct* Type = Function->GetTypedOuter<UFINStruct>();
+				UFIRStruct* Type = Function->GetTypedOuter<UFIRStruct>();
 				lua_remove(L, 1);
 
-				FFINExecutionContext Context;
+				FFIRExecutionContext Context;
 				if (Function->GetFunctionFlags() & FIN_Func_StaticFunc) {
-					Context = FFINExecutionContext(Function->GetOuter());
+					Context = FFIRExecutionContext(Function->GetOuter());
 				} else if (UFINClass* Class = Cast<UFINClass>(Type)) {
 					if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
 						FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
 						if (!LuaClass->FINClass->IsChildOf(Class)) luaL_argerror(L, 1, "Expected Class");
-						Context = FFINExecutionContext(LuaClass->UClass);
+						Context = FFIRExecutionContext(LuaClass->UClass);
 					} else {
 						FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, Class);
-						Context = FFINExecutionContext(LuaObject->Object);
+						Context = FFIRExecutionContext(LuaObject->Object);
 					}
 				} else {
 					FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, 1, Type);
-					Context = FFINExecutionContext(LuaStruct->Struct->GetData()); // TODO: Add wrapper to Execution Context ot be able to hold a TSharedRef to the FINStruct, in Sync call, GC may collect struct!
+					Context = FFIRExecutionContext(LuaStruct->Struct->GetData()); // TODO: Add wrapper to Execution Context ot be able to hold a TSharedRef to the FINStruct, in Sync call, GC may collect struct!
 				}
 
 				return luaFIN_callReflectionFunction(L, Function, Context, lua_gettop(L)-1, LUA_MULTRET);
@@ -110,7 +110,7 @@ namespace FINLua {
 				FString TypeName = luaFIN_checkFString(L, lua_upvalueindex(1));
 				FString FunctionName = luaFIN_checkFString(L, lua_upvalueindex(2));
 
-				UFINStruct* Type;
+				UFIRStruct* Type;
 				if (TypeName.RemoveFromEnd(TEXT("-Class"))) {
 					Type = FFINReflection::Get()->FindClass(TypeName);
 				} else {
@@ -128,7 +128,7 @@ namespace FINLua {
 			 * @DisplayName		Persist
 			 */)", __persist) {
 				UFINFunction* Function = luaFIN_checkReflectionFunction(L, 1);
-				UFINStruct* Type = Function->GetTypedOuter<UFINStruct>();
+				UFIRStruct* Type = Function->GetTypedOuter<UFIRStruct>();
 
 				FString TypeName = Type->GetInternalName();
 				if (Type->IsA<UFINClass>()) TypeName.Append(TEXT("-Class"));
@@ -155,8 +155,8 @@ namespace FINLua {
 		// ReSharper disable once CppTooWideScope
 		constexpr int startArg = 2;
 		TArray<FINAny> Input;
-		TArray<UFINProperty*> Parameters = Function->GetParameters();
-		for (UFINProperty* Parameter : Parameters) {
+		TArray<UFIRProperty*> Parameters = Function->GetParameters();
+		for (UFIRProperty* Parameter : Parameters) {
 			if (Parameter->GetPropertyFlags() & FIN_Prop_Param && !(Parameter->GetPropertyFlags() & (FIN_Prop_OutParam | FIN_Prop_RetVal))) {
 				int index = lua_absindex(L, -nArgs);
 				TOptional<FINAny> Value = luaFIN_toNetworkValueByProp(L, index, Parameter, true, true);
@@ -177,7 +177,7 @@ namespace FINLua {
 		return Input;
 	}
 
-	int luaFIN_callReflectionFunctionProcessOutput(lua_State* L, const TArray<FINAny>& Output, const FFINNetworkTrace& PrefixTrace, int nResults) {
+	int luaFIN_callReflectionFunctionProcessOutput(lua_State* L, const TArray<FINAny>& Output, const FFIRTrace& PrefixTrace, int nResults) {
 		int pushed = 0;
 		for (const FINAny& Value : Output) {
 			if (pushed >= nResults && nResults != LUA_MULTRET) break;
@@ -187,7 +187,7 @@ namespace FINLua {
 		return pushed;
 	}
 
-	int luaFIN_callReflectionFunctionDirectly(lua_State* L, const UFINFunction* Function, const FFINExecutionContext& Ctx, int nArgs, int nResults) {
+	int luaFIN_callReflectionFunctionDirectly(lua_State* L, const UFINFunction* Function, const FFIRExecutionContext& Ctx, int nArgs, int nResults) {
 		if (!Ctx.IsValid()) {
 			return luaFIN_argError(L, 1, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, 1)));
 		}
@@ -206,7 +206,7 @@ namespace FINLua {
 		return luaFIN_callReflectionFunctionProcessOutput(L, Output, Ctx.GetTrace(), nResults);
 	}
 
-	int luaFIN_callReflectionFunction(lua_State* L, UFINFunction* Function, const FFINExecutionContext& Ctx, int nArgs, int nResults) {
+	int luaFIN_callReflectionFunction(lua_State* L, UFINFunction* Function, const FFIRExecutionContext& Ctx, int nArgs, int nResults) {
 		FFINLuaLogScope LogScope(L);
 		const EFINFunctionFlags FuncFlags = Function->GetFunctionFlags();
 		if (FuncFlags & FIN_Func_RT_Async) {
@@ -235,9 +235,9 @@ namespace FINLua {
 		return *static_cast<UFINFunction**>(luaL_checkudata(L, Index, ReflectionSystemBase::ReflectionFunction::_Name));
 	}
 
-	int luaFIN_tryIndexGetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx) {
+	int luaFIN_tryIndexGetProperty(lua_State* L, int Index, UFIRStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFIRExecutionContext& PropertyCtx) {
 		ZoneScoped;
-		if (UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags)) {
+		if (UFIRProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags)) {
 			if (!PropertyCtx.IsValid()) {
 				return luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));
 			}
@@ -262,7 +262,7 @@ namespace FINLua {
 		return 0;
 	}
 
-	int luaFIN_tryIndexFunction(lua_State* L, UFINStruct* Struct, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags) {
+	int luaFIN_tryIndexFunction(lua_State* L, UFIRStruct* Struct, const FString& MemberName, EFINFunctionFlags FunctionFilterFlags) {
 		if (UFINFunction* Function = Struct->FindFINFunction(MemberName, FunctionFilterFlags)) {
 			// TODO: Add caching
 			luaFIN_pushReflectionFunction(L, Function);
@@ -271,7 +271,7 @@ namespace FINLua {
 		return 0;
 	}
 
-	int luaFIN_pushFunctionOrGetProperty(lua_State* L, int Index, UFINStruct* Struct, const FString& MemberName,  EFINFunctionFlags FunctionFilterFlags, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, bool bCauseError) {
+	int luaFIN_pushFunctionOrGetProperty(lua_State* L, int Index, UFIRStruct* Struct, const FString& MemberName,  EFINFunctionFlags FunctionFilterFlags, EFINRepPropertyFlags PropertyFilterFlags, const FFIRExecutionContext& PropertyCtx, bool bCauseError) {
 		ZoneScoped;
 		int arg = luaFIN_tryIndexGetProperty(L, Index, Struct, MemberName, PropertyFilterFlags, PropertyCtx);
 		if (arg == 0) arg = luaFIN_tryIndexFunction(L, Struct, MemberName, FunctionFilterFlags);
@@ -282,8 +282,8 @@ namespace FINLua {
 		return 1; // TODO: Remove return val and bCauseError param
 	}
 
-	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFINStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFINExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError) {
-		if (UFINProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags)) {
+	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFIRStruct* Type, const FString& MemberName, EFINRepPropertyFlags PropertyFilterFlags, const FFIRExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError) {
+		if (UFIRProperty* Property = Type->FindFINProperty(MemberName, PropertyFilterFlags)) {
 			if (!PropertyCtx.IsValid()) {
 				luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));
 				return true;

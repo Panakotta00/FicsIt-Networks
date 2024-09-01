@@ -10,7 +10,7 @@ struct FICSITNETWORKS_API FFINSignalListeners {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	TArray<FFINNetworkTrace> Listeners;
+	TArray<FFIRTrace> Listeners;
 
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 };
@@ -73,7 +73,7 @@ public:
 	 * the Receiver Trace should point from sender to the receiver
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Network|Signals")
-	void Listen(UObject* Sender, const FFINNetworkTrace& Receiver);
+	void Listen(UObject* Sender, const FFIRTrace& Receiver);
 
 	/**
 	 * Removes the given listener from the listener list of the given sender

@@ -108,7 +108,7 @@ private:
 public:
 	// Begin FIN Reflection
 	UFUNCTION()
-	void netClass_Meta(FFINReflectionFunctionMeta& netFuncMeta_findGameIcon);
+	void netClass_Meta(FFIRFunctionMeta& netFuncMeta_findGameIcon);
 	
 	UFUNCTION()
 	FIconData netFunc_findGameIcon(const FString& IconName);

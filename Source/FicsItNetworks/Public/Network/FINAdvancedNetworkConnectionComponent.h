@@ -7,7 +7,7 @@
 #include "FINNetworkMessageInterface.h"
 #include "FINAdvancedNetworkConnectionComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINHandleSignal, const FFINSignalData&, Signal, const FFINNetworkTrace&, Sender);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINHandleSignal, const FFINSignalData&, Signal, const FFIRTrace&, Sender);
 DECLARE_MULTICAST_DELEGATE_FiveParams(FFINHandleNetworkMessage, FGuid, FGuid, FGuid, int, const TArray<FFINAnyNetworkValue>&);
 DECLARE_DELEGATE_RetVal(bool, FFINIsNetworkRouter);
 DECLARE_DELEGATE_RetVal_OneParam(bool, FFINIsNetworkPortOpen, int);
@@ -96,7 +96,7 @@ public:
 	// End IFINSignalSender
 
 	// Begin IFINSignalListener
-	virtual void HandleSignal(const FFINSignalData& Signal, const FFINNetworkTrace& Sender) override;
+	virtual void HandleSignal(const FFINSignalData& Signal, const FFIRTrace& Sender) override;
 	// End IFINSignalListener
 
 	// Begin IFINNetworkMessageInterface

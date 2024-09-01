@@ -703,7 +703,7 @@ bool UFINLuaProcessor::PullTimeoutReached() {
 int UFINLuaProcessor::DoSignal(lua_State* L) {
 	UFINKernelNetworkController* net = GetKernel()->GetNetwork();
 	if (!net || net->GetSignalCount() < 1) return 0;
-	FFINNetworkTrace sender;
+	FFIRTrace sender;
 	FFINSignalData signal = net->PopSignal(sender); 
 	int props = 2;
 	if (signal.Signal) lua_pushstring(L, TCHAR_TO_UTF8(*signal.Signal->GetInternalName()));

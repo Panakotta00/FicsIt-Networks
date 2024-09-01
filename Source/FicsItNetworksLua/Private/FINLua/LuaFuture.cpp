@@ -29,7 +29,7 @@ namespace FINLua {
 					const TFINDynamicStruct<FFINFuture>& future = luaFIN_checkFuture(L, Index);
 					if ((*future)->IsDone()) {
 						TArray<FFINAnyNetworkValue> Data = future->GetOutput();
-						FFINNetworkTrace Trace;
+						FFIRTrace Trace;
 						if (future.GetStruct() == FFINFutureReflection::StaticStruct()) {
 							FFINFutureReflection& refFuture = future.Get<FFINFutureReflection>();
 							FScopeLock Lock(&refFuture.Mutex);
@@ -56,7 +56,7 @@ namespace FINLua {
 					const TFINDynamicStruct<FFINFuture>& future = luaFIN_checkFuture(L, 1);
 					if (!future->IsDone()) luaFIN_argError(L, 1, "Future is not ready");
 					const TArray<FFINAnyNetworkValue>& Data = future->GetOutput();
-					FFINNetworkTrace Trace;
+					FFIRTrace Trace;
 					if (future.GetStruct() == FFINFutureReflection::StaticStruct()) Trace = future.Get<FFINFutureReflection>().Context.GetTrace();
 					for (const FFINAnyNetworkValue& Param : Data) luaFIN_pushNetworkValue(L, Param, Trace);
 					return Data.Num();

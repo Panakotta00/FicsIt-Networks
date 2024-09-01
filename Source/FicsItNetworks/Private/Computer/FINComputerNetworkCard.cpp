@@ -82,7 +82,7 @@ bool AFINComputerNetworkCard::IsPortOpen(int Port) {
 }
 
 void AFINComputerNetworkCard::HandleMessage(const FGuid& InID, const FGuid& Sender, const FGuid& Receiver, int Port, const TArray<FFINAnyNetworkValue>& Data) {
-	static UFINSignal* Signal = nullptr;
+	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFINReflection::Get()->FindClass(StaticClass())->FindFINSignal("NetworkMessage");
 	{
 		FScopeLock Lock(&HandledMessagesMutex);

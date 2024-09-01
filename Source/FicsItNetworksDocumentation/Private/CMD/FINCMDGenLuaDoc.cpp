@@ -12,7 +12,7 @@
 
 UE_DISABLE_OPTIMIZATION_SHIP
 namespace FINGenLuaDoc {
-	FString GetType(FFINReflection& Ref, UFINProperty* Prop) {
+	FString GetType(FFINReflection& Ref, UFIRProperty* Prop) {
 		if (!Prop) return TEXT("any");
 		switch (Prop->GetType()) {
 			case FIN_NIL:
@@ -42,7 +42,7 @@ namespace FINGenLuaDoc {
 				return Class->GetInternalName() + TEXT("-Class");
 			} case FIN_STRUCT: {
 				UFINStructProperty* StructProp = Cast<UFINStructProperty>(Prop);
-				UFINStruct* Struct = Ref.FindStruct(StructProp->GetInner());
+				UFIRStruct* Struct = Ref.FindStruct(StructProp->GetInner());
 				if (!Struct) return TEXT("any");
 				return Struct->GetInternalName();
 			} case FIN_ARRAY: {
@@ -145,7 +145,7 @@ namespace FINGenLuaDoc {
 		Str.Appendf(TEXT("function %s:canGet() end\n"), *identifier);
 	}
 
-	void WriteProperty(FStringBuilderBase& Documentation, FFINReflection& Ref, UFINProperty* Prop) {
+	void WriteProperty(FStringBuilderBase& Documentation, FFINReflection& Ref, UFIRProperty* Prop) {
 		FString Identifier = Prop->GetInternalName();
 		if (Prop->GetPropertyFlags() & (FIN_Prop_ClassProp | FIN_Prop_StaticProp)) {
 			Identifier += TEXT("-Class");
@@ -158,9 +158,9 @@ namespace FINGenLuaDoc {
 
 		WriteMultiLineDescription(Str, Func->GetDescription().ToString());
 
-		TArray<UFINProperty*> parameters;
-		TArray<UFINProperty*> returnValues;
-		for (UFINProperty* Prop : Func->GetParameters()) {
+		TArray<UFIRProperty*> parameters;
+		TArray<UFIRProperty*> returnValues;
+		for (UFIRProperty* Prop : Func->GetParameters()) {
 			EFINRepPropertyFlags Flags = Prop->GetPropertyFlags();
 			if (!(Flags & FIN_Prop_Param)) continue;
 			if (Flags & FIN_Prop_OutParam) {
@@ -173,7 +173,7 @@ namespace FINGenLuaDoc {
 		TArray<FString> paramList;
 		TArray<FString> typedParameterList;
 		typedParameterList.Add(TEXT("self:") + Type);
-		for (UFINProperty* parameter : parameters) {
+		for (UFIRProperty* parameter : parameters) {
 			paramList.Add(parameter->GetInternalName());
 			typedParameterList.Add(parameter->GetInternalName() + TEXT(":") + GetType(Ref, parameter));
 			Str.Appendf(TEXT("---@param %s %s %s\n"), *parameter->GetInternalName(), *GetType(Ref, parameter), *GetInlineDescription(parameter->GetDescription().ToString()));
@@ -187,7 +187,7 @@ namespace FINGenLuaDoc {
 		bool bFuture = !(Func->GetFunctionFlags() & FIN_Func_RT_Parallel);
 
 		TArray<FString> returnValueList;
-		for (UFINProperty* returnValue : returnValues) {
+		for (UFIRProperty* returnValue : returnValues) {
 			returnValueList.Add(returnValue->GetInternalName() + TEXT(":") + GetType(Ref, returnValue));
 			if (!bFuture) {
 				Str.Appendf(TEXT("---@return %s %s %s\n"), *GetType(Ref, returnValue), *returnValue->GetInternalName(), *GetInlineDescription(returnValue->GetDescription().ToString()));
@@ -229,7 +229,7 @@ namespace FINGenLuaDoc {
 		// TODO: Add support for Operator Overloading
 	}
 
-	void WriteStruct(FStringBuilderBase& Str, FFINReflection& Ref, const UFINStruct* Struct) {
+	void WriteStruct(FStringBuilderBase& Str, FFINReflection& Ref, const UFIRStruct* Struct) {
 		if (Struct->GetInternalName() == TEXT("Future")) return;
 
 		WriteMultiLineDescription(Str,  Struct->GetDescription().ToString());
@@ -237,12 +237,12 @@ namespace FINGenLuaDoc {
 		{
 			FString ClassIdentifier = Struct->GetInternalName();
 			FString ClassDeclaration = ClassIdentifier;
-			if (UFINStruct* parent = Struct->GetParent()) {
+			if (UFIRStruct* parent = Struct->GetParent()) {
 				ClassDeclaration += TEXT(" : ") + parent->GetInternalName();
 			}
 			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
 
-			for (UFINProperty* Prop : Struct->GetProperties(false)) {
+			for (UFIRProperty* Prop : Struct->GetProperties(false)) {
 				if ((Prop->GetPropertyFlags() & FIN_Prop_Attrib) && !(Prop->GetPropertyFlags() & FIN_Prop_ClassProp)) {
 					WriteProperty(Str, Ref, Prop);
 				}
@@ -254,7 +254,7 @@ namespace FINGenLuaDoc {
 				if (!op) continue;
 				FString parameter;
 				FString returnValue;
-				for (UFINProperty* prop : Func->GetParameters()) {
+				for (UFIRProperty* prop : Func->GetParameters()) {
 					if (prop->GetPropertyFlags() & FIN_Prop_Param){
 						if (prop->GetPropertyFlags() & FIN_Prop_OutParam) {
 							returnValue = GetType(Ref, prop);
@@ -281,12 +281,12 @@ namespace FINGenLuaDoc {
 
 			FString ClassIdentifier = Struct->GetInternalName() + TEXT("-Class");
 			FString ClassDeclaration = ClassIdentifier;
-			if (UFINStruct* parent = Struct->GetParent()) {
+			if (UFIRStruct* parent = Struct->GetParent()) {
 				ClassDeclaration += TEXT(" : ") + parent->GetInternalName() + TEXT("-Class");
 			}
 			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
 
-			for (UFINProperty* Prop : Struct->GetProperties(false)) {
+			for (UFIRProperty* Prop : Struct->GetProperties(false)) {
 				if ((Prop->GetPropertyFlags() & FIN_Prop_Attrib) && (Prop->GetPropertyFlags() & FIN_Prop_ClassProp)) {
 					WriteProperty(Str, Ref, Prop);
 				}
@@ -438,7 +438,7 @@ namespace FINGenLuaDoc {
 		for (TPair<UClass*, UFINClass*> Class : reflection.GetClasses()) {
 			WriteStruct(str, reflection, Class.Value);
 		}
-		for (TPair<UScriptStruct*, UFINStruct*> Struct : reflection.GetStructs()) {
+		for (TPair<UScriptStruct*, UFIRStruct*> Struct : reflection.GetStructs()) {
 			WriteStruct(str, reflection, Struct.Value);
 		}
 

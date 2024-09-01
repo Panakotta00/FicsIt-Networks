@@ -82,7 +82,7 @@ UObject* UFINAdvancedNetworkConnectionComponent::GetSignalSenderOverride_Impleme
 	return this;
 }
 
-void UFINAdvancedNetworkConnectionComponent::HandleSignal(const FFINSignalData& Signal, const FFINNetworkTrace& Sender) {
+void UFINAdvancedNetworkConnectionComponent::HandleSignal(const FFINSignalData& Signal, const FFIRTrace& Sender) {
 	OnNetworkSignal.Broadcast(Signal, Sender);
 }
 

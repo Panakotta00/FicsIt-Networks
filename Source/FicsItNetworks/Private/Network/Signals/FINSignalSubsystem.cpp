@@ -6,7 +6,7 @@
 #include "Network/Signals/FINSignalListener.h"
 
 void FFINSignalListeners::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
-	for (const FFINNetworkTrace& Trace : Listeners) {
+	for (const FFIRTrace& Trace : Listeners) {
 		Trace.AddStructReferencedObjects(ReferenceCollector);
 	}
 }
@@ -45,9 +45,9 @@ void AFINSignalSubsystem::Cleanup() {
 		if (!IsValid(Sender)) {
 			Listeners.Remove(Sender);
 		} else {
-			TArray<FFINNetworkTrace>& Listen = Listeners[Sender].Listeners;
+			TArray<FFIRTrace>& Listen = Listeners[Sender].Listeners;
 			for (int i = 0; i < Listen.Num(); ++i) {
-				const FFINNetworkTrace& Listener = Listen[i];
+				const FFIRTrace& Listener = Listen[i];
 				if (!IsValid(Listener.GetUnderlyingPtr())) {
 					Listen.RemoveAt(i--);
 				}
@@ -69,7 +69,7 @@ AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldConte
 void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData& Signal) {
 	FFINSignalListeners* ListenerList = Listeners.Find(Sender);
 	if (!ListenerList) return;
-	for (const FFINNetworkTrace& ReceiverTrace : ListenerList->Listeners) {
+	for (const FFIRTrace& ReceiverTrace : ListenerList->Listeners) {
 		if (&ReceiverTrace == nullptr) {
 			UE_LOG(LogFicsItNetworks, Warning, TEXT("SignalSubsystem: Invalid receiver trave. Sender: %s, ListenerList: %p, Listeners.Num(): %i"), *Sender->GetName(), ListenerList, ListenerList->Listeners.Num());
 			continue;
@@ -81,8 +81,8 @@ void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData&
 	}
 }
 
-void AFINSignalSubsystem::Listen(UObject* Sender, const FFINNetworkTrace& Receiver) {
-	TArray<FFINNetworkTrace>& ListenerList = Listeners.FindOrAdd(Sender).Listeners;
+void AFINSignalSubsystem::Listen(UObject* Sender, const FFIRTrace& Receiver) {
+	TArray<FFIRTrace>& ListenerList = Listeners.FindOrAdd(Sender).Listeners;
 	ListenerList.AddUnique(Receiver);
 	AFINHookSubsystem::GetHookSubsystem(Sender)->AttachHooks(Sender);
 }
@@ -112,7 +112,7 @@ void AFINSignalSubsystem::IgnoreAll(UObject* Receiver) {
 TArray<UObject*> AFINSignalSubsystem::GetListening(UObject* Reciever) {
 	TArray<UObject*> Listening;
 	for (TPair<UObject*, FFINSignalListeners> Sender : Listeners) {
-		if (Sender.Value.Listeners.Contains(FFINNetworkTrace(Reciever))) {
+		if (Sender.Value.Listeners.Contains(FFIRTrace(Reciever))) {
 			Listening.Add(Sender.Key);
 		}
 	}

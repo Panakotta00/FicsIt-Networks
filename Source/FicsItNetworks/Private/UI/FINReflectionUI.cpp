@@ -183,7 +183,7 @@ TSharedRef<SWidget> UFINReflectionUI::RebuildWidget() {
 	return Container.ToSharedRef();
 }
 
-void UFINReflectionUI::NavigateTo(UFINStruct* InStruct) {
+void UFINReflectionUI::NavigateTo(UFIRStruct* InStruct) {
 	if (Container) {
 		TSharedPtr<FFINReflectionUIStruct>* Entry = Container->Context.Structs.Find(InStruct);
 		if (Entry) Container->Context.NavigateTo(Entry->Get());

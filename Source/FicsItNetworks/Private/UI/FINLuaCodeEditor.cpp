@@ -682,7 +682,7 @@ TSharedRef<SWidget> UFINLuaCodeEditor::RebuildWidget() {
 		.Style(&Style)
 		.OnTextChanged(BIND_UOBJECT_DELEGATE(FOnTextChanged, HandleOnTextChanged))
 		.OnTextCommitted(BIND_UOBJECT_DELEGATE(FOnTextCommitted, HandleOnTextCommitted))
-	.OnNavigateReflection_Lambda([this](UFINBase* Type) {
+	.OnNavigateReflection_Lambda([this](UFIRBase* Type) {
 		OnNavigateReflection.Broadcast(Type);
 	});
 }

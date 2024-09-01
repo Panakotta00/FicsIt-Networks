@@ -8,30 +8,30 @@ UFINGatherTextFromReflectionCommandlet::UFINGatherTextFromReflectionCommandlet()
 }
 
 int32 UFINGatherTextFromReflectionCommandlet::Main(const FString& Params) {
-	for (const TTuple<UClass*, UFINClass*>& Entry : FFINReflection::Get()->GetClasses()) {
+	for (const TTuple<UClass*, UFIRClass*>& Entry : FFINReflection::Get()->GetClasses()) {
 		GatherClass(Entry.Value);
 	}
-	for (const TTuple<UScriptStruct*, UFINStruct*>& Entry : FFINReflection::Get()->GetStructs()) {
+	for (const TTuple<UScriptStruct*, UFIRStruct*>& Entry : FFINReflection::Get()->GetStructs()) {
 		GatherStruct(Entry.Value);
 	}
 	
 	return 0;
 }
 
-FManifestContext BaseField(UFINBase* Base, FString Field) {
+FManifestContext BaseField(UFIRBase* Base, FString Field) {
 	while (Base) {
 		Field = Base->GetInternalName() + TEXT("_") + Field;
-		Base = Cast<UFINBase>(Base->GetOuter());
+		Base = Cast<UFIRBase>(Base->GetOuter());
 	}
 	FManifestContext Context;
 	Context.Key = FLocKey(Field);
 	return Context;
 }
 
-void UFINGatherTextFromReflectionCommandlet::GatherStruct(UFINStruct* Struct) {
+void UFINGatherTextFromReflectionCommandlet::GatherStruct(UFIRStruct* Struct) {
 	if (!(Struct->GetStructFlags() & FIN_Struct_StaticSource)) return;
 	GatherBase(Struct);
-	for (UFINProperty* prop : Struct->GetProperties(false)) {
+	for (UFIRProperty* prop : Struct->GetProperties(false)) {
 		GatherProperty(prop);
 	}
 	for (UFINFunction* func : Struct->GetFunctions(false)) {
@@ -39,20 +39,20 @@ void UFINGatherTextFromReflectionCommandlet::GatherStruct(UFINStruct* Struct) {
 	}
 }
 
-void UFINGatherTextFromReflectionCommandlet::GatherClass(UFINClass* Class) {
+void UFINGatherTextFromReflectionCommandlet::GatherClass(UFIRClass* Class) {
 	if (!(Class->GetStructFlags() & FIN_Struct_StaticSource)) return;
 	GatherStruct(Class);
-	for (UFINSignal* sig : Class->GetSignals(false)) {
+	for (UFIRSignal* sig : Class->GetSignals(false)) {
 		GatherSignal(sig);
 	}
 }
 
-void UFINGatherTextFromReflectionCommandlet::GatherBase(UFINBase* Base) {
+void UFINGatherTextFromReflectionCommandlet::GatherBase(UFIRBase* Base) {
 	GatherManifestHelper->AddSourceText(Namespace, FLocItem(Base->GetDisplayName().ToString()), BaseField(Base, TEXT("DisplayName")));
 	GatherManifestHelper->AddSourceText(Namespace, FLocItem(Base->GetDescription().ToString()), BaseField(Base, TEXT("Description")));
 }
 
-void UFINGatherTextFromReflectionCommandlet::GatherProperty(UFINProperty* Property) {
+void UFINGatherTextFromReflectionCommandlet::GatherProperty(UFIRProperty* Property) {
 	if (!(Property->GetPropertyFlags() & FIN_Prop_StaticSource)) return;
 	GatherBase(Property);
 }
@@ -60,15 +60,15 @@ void UFINGatherTextFromReflectionCommandlet::GatherProperty(UFINProperty* Proper
 void UFINGatherTextFromReflectionCommandlet::GatherFunction(UFINFunction* Function) {
 	if (!(Function->GetFunctionFlags() & FIN_Func_StaticSource)) return;
 	GatherBase(Function);
-	for (UFINProperty* param : Function->GetParameters()) {
+	for (UFIRProperty* param : Function->GetParameters()) {
 		GatherProperty(param);
 	}
 }
 
-void UFINGatherTextFromReflectionCommandlet::GatherSignal(UFINSignal* Signal) {
+void UFINGatherTextFromReflectionCommandlet::GatherSignal(UFIRSignal* Signal) {
 	if (!(Signal->GetSignalFlags() & FIN_Signal_StaticSource)) return;
 	GatherBase(Signal);
-	for (UFINProperty* param : Signal->GetParameters()) {
+	for (UFIRProperty* param : Signal->GetParameters()) {
 		GatherProperty(param);
 	}
 }

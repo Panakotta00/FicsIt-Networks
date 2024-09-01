@@ -17,7 +17,7 @@ class FICSITNETWORKS_API AFINComputerGPU : public AFINComputerModule, public IFI
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintReadWrite, SaveGame, Replicated, ReplicatedUsing=OnRep_Screen)
-    FFINNetworkTrace Screen;
+    FFIRTrace Screen;
 
 	AFINComputerGPU();
 
@@ -28,8 +28,8 @@ public:
 	// End AActor
 
 	// Begin IFINGraphicsProcessor
-	virtual void BindScreen(const FFINNetworkTrace& screen) override;
-	virtual FFINNetworkTrace GetScreen() const override;
+	virtual void BindScreen(const FFIRTrace& screen) override;
+	virtual FFIRTrace GetScreen() const override;
 	virtual void RequestNewWidget() override;
 	// End IFINGraphicsProcessor
 
@@ -82,12 +82,12 @@ private:
 	void UpdateScreen();
 
 	UPROPERTY()
-	FFINNetworkTrace OldScreenCache;
+	FFIRTrace OldScreenCache;
 	
 public:
 	// Begin FIN Reflection
 	UFUNCTION()
-	void netFunc_bindScreen(FFINNetworkTrace NewScreen);
+	void netFunc_bindScreen(FFIRTrace NewScreen);
 	UFUNCTION()
 	void netFuncMeta_bindScreen(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "bindScreen";
@@ -103,7 +103,7 @@ public:
 	FVector2D netFunc_getScreenSize();
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-    void netSig_ScreenBound(const FFINNetworkTrace& oldScreen);
+    void netSig_ScreenBound(const FFIRTrace& oldScreen);
 	// End FIN Reflection
 };
 
@@ -166,7 +166,7 @@ class UFINGPUWidgetSign : public UObject, public IFINScreenInterface {
 	GENERATED_BODY()
 public:
 	UPROPERTY()
-	FFINNetworkTrace GPU;
+	FFIRTrace GPU;
 
 	UPROPERTY()
 	AFGBuildableWidgetSign* BuildableSign;
@@ -180,8 +180,8 @@ public:
 	FScreenGPUUpdate OnGPUUpdate;
 
 	// Begin IFINScreenInterface
-	virtual void BindGPU(const FFINNetworkTrace& gpu) override;
-	virtual FFINNetworkTrace GetGPU() const override;
+	virtual void BindGPU(const FFIRTrace& gpu) override;
+	virtual FFIRTrace GetGPU() const override;
 	virtual void SetWidget(TSharedPtr<SWidget> widget) override;
 	virtual TSharedPtr<SWidget> GetWidget() const override;
 	// End IFINScreenInterface

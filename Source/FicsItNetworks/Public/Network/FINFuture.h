@@ -41,21 +41,21 @@ struct FICSITNETWORKS_API FFINFutureReflection : public FFINFuture {
 	TArray<FFINAnyNetworkValue> Output;
 
 	UPROPERTY(SaveGame)
-	FFINExecutionContext Context;
+	FFIRExecutionContext Context;
 
 	UPROPERTY(SaveGame)
 	UFINFunction* Function = nullptr;
 
 	UPROPERTY(SaveGame)
-	UFINProperty* Property = nullptr;
+	UFIRProperty* Property = nullptr;
 
 	static FCriticalSection Mutex;
 
 	// TODO: Maybe do a LogScope snapshot?
 	FFINFutureReflection() = default;
-	FFINFutureReflection(UFINFunction* Function, const FFINExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
-	FFINFutureReflection(UFINProperty* Property, const FFINExecutionContext& Context, const FFINAnyNetworkValue& Input) : Input({Input}), Context(Context), Property(Property) {}
-	FFINFutureReflection(UFINProperty* Property, const FFINExecutionContext& Context) : Context(Context), Property(Property) {}
+	FFINFutureReflection(UFINFunction* Function, const FFIRExecutionContext& Context, const TArray<FFINAnyNetworkValue>& Input) : Input(Input), Context(Context), Function(Function) {}
+	FFINFutureReflection(UFIRProperty* Property, const FFIRExecutionContext& Context, const FFINAnyNetworkValue& Input) : Input({Input}), Context(Context), Property(Property) {}
+	FFINFutureReflection(UFIRProperty* Property, const FFIRExecutionContext& Context) : Context(Context), Property(Property) {}
 
 	virtual bool IsDone() const override {
 		FScopeLock Lock(const_cast<FCriticalSection*>(&Mutex));

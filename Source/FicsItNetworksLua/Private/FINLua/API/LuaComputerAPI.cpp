@@ -58,7 +58,7 @@ namespace FINLua {
 			 */)", getInstance) {
 				LuaFunc()
 
-				luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject())));
+				luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(FFIRTrace(kernel->GetNetwork()->GetComponent().GetObject())));
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 
@@ -374,7 +374,7 @@ namespace FINLua {
 				int i = 1;
 				for (TScriptInterface<IFINPciDeviceInterface> Device : kernel->GetPCIDevices()) {
 					if (!Device || (Type && !Device.GetObject()->IsA(Cast<UClass>(Type->GetOuter())))) continue;
-					luaFIN_pushObject(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / Device.GetObject());
+					luaFIN_pushObject(L, FFIRTrace(kernel->GetNetwork()->GetComponent().GetObject()) / Device.GetObject());
 					lua_seti(L, -2, i++);
 				}
 				return 1;
