@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "FIRStruct.h"
 #include "FIRSignal.h"
+#include "UObject/UObjectIterator.h"
 #include "FIRClass.generated.h"
 
 UCLASS(BlueprintType)

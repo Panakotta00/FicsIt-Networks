@@ -291,12 +291,7 @@ void FFicsItNetworksModule::StartupModule(){
 		UFunction* Function = Slot->FindFunctionByName(TEXT("CreateSplitSlider"));
 		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
 		HookManager->HookBlueprintFunction(Function, InventorSlot_CreateWidgetSlider_Hook, EPredefinedHookOffset::Return);
-		
-#else
-		FFINGlobalRegisterHelper::Register();
-			
-		FFINReflection::Get()->PopulateSources();
-		FFINReflection::Get()->LoadAllTypes();
+
 #endif
 	});
 }

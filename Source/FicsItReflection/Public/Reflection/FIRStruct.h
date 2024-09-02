@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/UObjectIterator.h"
 #include "FIRFunction.h"
 #include "FIRStruct.generated.h"
 

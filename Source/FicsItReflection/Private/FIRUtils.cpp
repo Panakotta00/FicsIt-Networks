@@ -1,4 +1,6 @@
 ﻿#include "FIRUtils.h"
+
+#include "FicsItReflection.h"
 #include "Reflection/FIRArrayProperty.h"
 #include "Reflection/FIRBoolProperty.h"
 #include "Reflection/FIRClassProperty.h"
@@ -72,7 +74,7 @@ UFIRProperty* FIRCreateFIRPropertyFromFProperty(FProperty* Property, FProperty* 
 			FIRProp = FIRTraceProp;
 		} else {
 			UFIRStructProperty* FIRStructProp = NewObject<UFIRStructProperty>(Outer);
-			checkf(StructProp->Struct == FFIRAnyNetworkValue::StaticStruct() || FFicsItReflectionModule::Get().FindStruct(StructProp->Struct) != nullptr, TEXT("Struct Property '%s' of reflection-base '%s' uses non-reflectable struct '%s'"), *Property->GetFullName(), *Outer->GetName(), *StructProp->Struct->GetName());
+			checkf(StructProp->Struct == FFIRAnyValue::StaticStruct() || FFicsItReflectionModule::Get().FindStruct(StructProp->Struct) != nullptr, TEXT("Struct Property '%s' of reflection-base '%s' uses non-reflectable struct '%s'"), *Property->GetFullName(), *Outer->GetName(), *StructProp->Struct->GetName());
 			FIRStructProp->Property = StructProp;
 			FIRStructProp->Struct = StructProp->Struct;
 			FIRProp = FIRStructProp;

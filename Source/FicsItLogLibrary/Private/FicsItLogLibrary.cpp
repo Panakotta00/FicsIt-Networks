@@ -20,12 +20,12 @@ void UFILogLibrary::Log(TEnumAsByte<EFILLogVerbosity> Verbosity, FString Message
 
 void FFicsItLogLibraryModule::StartupModule() {
 	TArray<FCoreRedirect> redirects;
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINLogEntry"), TEXT("/Script/FicsItLogLibrary.FFILEntry")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.EFINLogVerbosity"), TEXT("/Script/FicsItLogLibrary.EFILLogVerbosity")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINLog"), TEXT("/Script/FicsItLogLibrary.UFILLogContainer")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINLogScope"), TEXT("/Script/FicsItLogLibrary.FFILLogScope")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINLogLibrary"), TEXT("/Script/FicsItLogLibrary.UFILogLibrary")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINLogOptions"), TEXT("/Script/FicsItLogLibrary.EFILLogOptions")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINLogEntry"), TEXT("/Script/FicsItLogLibrary.FILEntry")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINLogVerbosity"), TEXT("/Script/FicsItLogLibrary.FILLogVerbosity")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINLog"), TEXT("/Script/FicsItLogLibrary.FILLogContainer")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINLogScope"), TEXT("/Script/FicsItLogLibrary.FILLogScope")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINLogLibrary"), TEXT("/Script/FicsItLogLibrary.FILogLibrary")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINLogOptions"), TEXT("/Script/FicsItLogLibrary.FILLogOptions")});
 
 	FCoreRedirects::AddRedirectList(redirects, "FicsIt-Log-Library");
 }

@@ -6,6 +6,7 @@
 #include "AssetRegistryModule.h"
 #include "FGFactoryConnectionComponent.h"
 #include "FGRailroadTrackConnectionComponent.h"
+#include "FIRGlobalRegisterHelper.h"
 #include "FIRSubsystem.h"
 #include "AssetRegistry/AssetData.h"
 #include "Engine/Blueprint.h"
@@ -82,69 +83,69 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 
 void FFicsItReflectionModule::StartupModule() {
 	TArray<FCoreRedirect> redirects;
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINNetworkTrace"), TEXT("/Script/FicsItReflection.FFIRTrace")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINInstancedStruct"), TEXT("/Script/FicsItReflection.FFIRInstancedStruct")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINHook"), TEXT("/Script/FicsItReflection.UFIRHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINHookData"), TEXT("/Script/FicsItReflection.FFIRHookData")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.AFINHookSubsystem"), TEXT("/Script/FicsItReflection.AFIRHookSubsystem")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINException"), TEXT("/Script/FicsItReflection.FFIRException")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionException"), TEXT("/Script/FicsItReflection.FFIRReflectionException")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINAnyValue"), TEXT("/Script/FicsItReflection.FFIRAnyValue")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINNetworkValueType"), TEXT("/Script/FicsItReflection.EFIRValueType")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINUFunction"), TEXT("/Script/FicsItReflection.UFIRUFunction")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINTraceProperty"), TEXT("/Script/FicsItReflection.UFIRTraceProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINStructProperty"), TEXT("/Script/FicsItReflection.UFIRStructProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINStructFlags"), TEXT("/Script/FicsItReflection.EFIRStructFlags")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINStruct"), TEXT("/Script/FicsItReflection.UFIRStruct")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINStrProperty"), TEXT("/Script/FicsItReflection.UFIRStrProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINSignalFlags"), TEXT("/Script/FicsItReflection.EFIRSignalFlags")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINSignal"), TEXT("/Script/FicsItReflection.UFIRSignal")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINRepPropertyFlags"), TEXT("/Script/FicsItReflection.EFIRPropertyFlags")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINPropertyGetterFunc"), TEXT("/Script/FicsItReflection.FFIRPropertyGetterFunc")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINPropertySetterFunc"), TEXT("/Script/FicsItReflection.FFIRPropertySetterFunc")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINProperty"), TEXT("/Script/FicsItReflection.UFIRProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINObjectProperty"), TEXT("/Script/FicsItReflection.UFIRObjectProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINIntProperty"), TEXT("/Script/FicsItReflection.UFIRIntProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINOperator"), TEXT("/Script/FicsItReflection.EFIROperator")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINFunctionBadArgumentException"), TEXT("/Script/FicsItReflection.FFIRFunctionBadArgumentException")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINFunction"), TEXT("/Script/FicsItReflection.UFIRFunction")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINFuncProperty"), TEXT("/Script/FicsItReflection.UFIRFuncProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINFloatProperty"), TEXT("/Script/FicsItReflection.UFIRFloatProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINExecutionContext"), TEXT("/Script/FicsItReflection.FFIRExecutionContext")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINClassProperty"), TEXT("/Script/FicsItReflection.UFIRClassProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINClass"), TEXT("/Script/FicsItReflection.UFIRClass")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINBoolProperty"), TEXT("/Script/FicsItReflection.UFIRBoolProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINBase"), TEXT("/Script/FicsItReflection.UFIRBase")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINArrayProperty"), TEXT("/Script/FicsItReflection.UFIRArrayProperty")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINReflectionSource"), TEXT("/Script/FicsItReflection.UFIRSource")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINStaticReflectionSource"), TEXT("/Script/FicsItReflection.UFIRSourceStatic")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINReflectionMetaRuntimeState "), TEXT("/Script/FicsItReflection.EFIRMetaRuntimeState")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionBaseMeta"), TEXT("/Script/FicsItReflection.FFIRBaseMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionPropertyMeta"), TEXT("/Script/FicsItReflection.FFIRPropertyMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionFunctionParameterMeta"), TEXT("/Script/FicsItReflection.FFIRFunctionParameterMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionFunctionMeta"), TEXT("/Script/FicsItReflection.FFIRFunctionMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionSignalMeta"), TEXT("/Script/FicsItReflection.FFIRSignalMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionTypeMeta"), TEXT("/Script/FicsItReflection.FFIRTypeMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINReflectionClassMeta"), TEXT("/Script/FicsItReflection.FFIRClassMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINUReflectionSource"), TEXT("/Script/FicsItReflection.UFIRSourceUObject")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINRailroadSignalBlock"), TEXT("/Script/FicsItReflection.FFIRRailroadSignalBlock")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINTargetPoint"), TEXT("/Script/FicsItReflection.FFIRTargetPoint")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINTimeTableStop"), TEXT("/Script/FicsItReflection.FFIRTimeTableStop")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINTrackGraph"), TEXT("/Script/FicsItReflection.FFIRTrackGraph")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINStaticReflectionHook"), TEXT("/Script/FicsItReflection.UFIRStaticHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINFunctionHook"), TEXT("/Script/FicsItReflection.UFIRFunctionHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINMultiFunctionHook"), TEXT("/Script/FicsItReflection.UFIRMultiFunctionHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINBuildableHook"), TEXT("/Script/FicsItReflection.UFIRBuildableHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINRailroadTrackHook"), TEXT("/Script/FicsItReflection.UFIRRailroadTrackHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINTrainHook"), TEXT("/Script/FicsItReflection.UFIRTrainHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINRailroadStationHook"), TEXT("/Script/FicsItReflection.UFIRRailroadStationHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINRailroadSignalHook"), TEXT("/Script/FicsItReflection.UFIRRailroadSignalHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINPipeHyperStartHook"), TEXT("/Script/FicsItReflection.UFIRPipeHyperStartHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINFactoryConnectorHook"), TEXT("/Script/FicsItReflection.UFIRFactoryConnectorHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINPipeConnectorHook"), TEXT("/Script/FicsItReflection.UFIRPipeConnectorHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.UFINPowerCircuitHook"), TEXT("/Script/FicsItReflection.UFIRPowerCircuitHook")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINRailroadSwitchForce"), TEXT("/Script/FicsItReflection.FFIRRailroadSwitchForce")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FFINFactoryConnectorSettings"), TEXT("/Script/FicsItReflection.FFIRFactoryConnectorSettings")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINNetworkTrace"), TEXT("/Script/FicsItReflection.FIRTrace")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINInstancedStruct"), TEXT("/Script/FicsItReflection.FIRInstancedStruct")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINHook"), TEXT("/Script/FicsItReflection.FIRHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINHookData"), TEXT("/Script/FicsItReflection.FIRHookData")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINHookSubsystem"), TEXT("/Script/FicsItReflection.AFIRHookSubsystem")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINException"), TEXT("/Script/FicsItReflection.FIRException")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionException"), TEXT("/Script/FicsItReflection.FIRReflectionException")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINAnyValue"), TEXT("/Script/FicsItReflection.FIRAnyValue")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINNetworkValueType"), TEXT("/Script/FicsItReflection.FIRValueType")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINUFunction"), TEXT("/Script/FicsItReflection.FIRUFunction")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINTraceProperty"), TEXT("/Script/FicsItReflection.FIRTraceProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINStructProperty"), TEXT("/Script/FicsItReflection.FIRStructProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINStructFlags"), TEXT("/Script/FicsItReflection.FIRStructFlags")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINStruct"), TEXT("/Script/FicsItReflection.FIRStruct")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINStrProperty"), TEXT("/Script/FicsItReflection.FIRStrProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINSignalFlags"), TEXT("/Script/FicsItReflection.FIRSignalFlags")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINSignal"), TEXT("/Script/FicsItReflection.FIRSignal")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINRepPropertyFlags"), TEXT("/Script/FicsItReflection.FIRPropertyFlags")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINPropertyGetterFunc"), TEXT("/Script/FicsItReflection.FIRPropertyGetterFunc")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINPropertySetterFunc"), TEXT("/Script/FicsItReflection.FIRPropertySetterFunc")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINProperty"), TEXT("/Script/FicsItReflection.FIRProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINObjectProperty"), TEXT("/Script/FicsItReflection.FIRObjectProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINIntProperty"), TEXT("/Script/FicsItReflection.FIRIntProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINOperator"), TEXT("/Script/FicsItReflection.FIROperator")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINFunctionBadArgumentException"), TEXT("/Script/FicsItReflection.FIRFunctionBadArgumentException")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINFunction"), TEXT("/Script/FicsItReflection.FIRFunction")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINFuncProperty"), TEXT("/Script/FicsItReflection.FIRFuncProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINFloatProperty"), TEXT("/Script/FicsItReflection.FIRFloatProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINExecutionContext"), TEXT("/Script/FicsItReflection.FIRExecutionContext")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINClassProperty"), TEXT("/Script/FicsItReflection.FIRClassProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINClass"), TEXT("/Script/FicsItReflection.FIRClass")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINBoolProperty"), TEXT("/Script/FicsItReflection.FIRBoolProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINBase"), TEXT("/Script/FicsItReflection.FIRBase")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINArrayProperty"), TEXT("/Script/FicsItReflection.FIRArrayProperty")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINReflectionSource"), TEXT("/Script/FicsItReflection.FIRSource")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINStaticReflectionSource"), TEXT("/Script/FicsItReflection.FIRSourceStatic")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINReflectionMetaRuntimeState "), TEXT("/Script/FicsItReflection.FIRMetaRuntimeState")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionBaseMeta"), TEXT("/Script/FicsItReflection.FIRBaseMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionPropertyMeta"), TEXT("/Script/FicsItReflection.FIRPropertyMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionFunctionParameterMeta"), TEXT("/Script/FicsItReflection.FIRFunctionParameterMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionFunctionMeta"), TEXT("/Script/FicsItReflection.FIRFunctionMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionSignalMeta"), TEXT("/Script/FicsItReflection.FIRSignalMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionTypeMeta"), TEXT("/Script/FicsItReflection.FIRTypeMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionClassMeta"), TEXT("/Script/FicsItReflection.FIRClassMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINUReflectionSource"), TEXT("/Script/FicsItReflection.FIRSourceUObject")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINRailroadSignalBlock"), TEXT("/Script/FicsItReflection.FIRRailroadSignalBlock")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINTargetPoint"), TEXT("/Script/FicsItReflection.FIRTargetPoint")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINTimeTableStop"), TEXT("/Script/FicsItReflection.FIRTimeTableStop")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINTrackGraph"), TEXT("/Script/FicsItReflection.FIRTrackGraph")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINStaticReflectionHook"), TEXT("/Script/FicsItReflection.FIRStaticHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINFunctionHook"), TEXT("/Script/FicsItReflection.FIRFunctionHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINMultiFunctionHook"), TEXT("/Script/FicsItReflection.FIRMultiFunctionHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINBuildableHook"), TEXT("/Script/FicsItReflection.FIRBuildableHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINRailroadTrackHook"), TEXT("/Script/FicsItReflection.FIRRailroadTrackHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINTrainHook"), TEXT("/Script/FicsItReflection.FIRTrainHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINRailroadStationHook"), TEXT("/Script/FicsItReflection.FIRRailroadStationHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINRailroadSignalHook"), TEXT("/Script/FicsItReflection.FIRRailroadSignalHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINPipeHyperStartHook"), TEXT("/Script/FicsItReflection.FIRPipeHyperStartHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINFactoryConnectorHook"), TEXT("/Script/FicsItReflection.FIRFactoryConnectorHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINPipeConnectorHook"), TEXT("/Script/FicsItReflection.FIRPipeConnectorHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINPowerCircuitHook"), TEXT("/Script/FicsItReflection.FIRPowerCircuitHook")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINRailroadSwitchForce"), TEXT("/Script/FicsItReflection.FIRRailroadSwitchForce")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINFactoryConnectorSettings"), TEXT("/Script/FicsItReflection.FIRFactoryConnectorSettings")});
 
 	FCoreRedirects::AddRedirectList(redirects, "FicsIt-Reflection");
 
@@ -165,6 +166,10 @@ void FFicsItReflectionModule::StartupModule() {
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_PeekOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_GrabOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_GrabOutput_Hook);
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook);
+#else
+		FFIRGlobalRegisterHelper::Register();
+		FFicsItReflectionModule::Get().PopulateSources();
+		FFicsItReflectionModule::Get().LoadAllTypes();
 #endif
 	});
 }
@@ -413,3 +418,7 @@ void FFicsItReflectionModule::PrintReflection() {
 		UE_LOG(LogFicsItReflection, Display, TEXT("Class: %s"), *Log);
 	}
 }
+
+#undef LOCTEXT_NAMESPACE
+
+IMPLEMENT_MODULE(FFicsItReflectionModule, FicsItReflection)

@@ -209,11 +209,11 @@ void SFINLogViewer::UpdateEntries(UFILLogContainer* Log) {
 		}
 	}
 #if WITH_EDITOR
-	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIN_Log_Verbosity_Debug, "Sample Debug?"));
-	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIN_Log_Verbosity_Info, "Sample Info."));
-	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIN_Log_Verbosity_Warning, "Sample Warning!"));
-	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIN_Log_Verbosity_Error, "Sample Error!!"));
-	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIN_Log_Verbosity_Fatal, "Sample Fatal!!!"));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Debug, "Sample Debug?"));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Info, "Sample Info."));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Warning, "Sample Warning!"));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Error, "Sample Error!!"));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Fatal, "Sample Fatal!!!"));
 #endif
 	
 	ListView->RebuildList();

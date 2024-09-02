@@ -1,6 +1,6 @@
 #include "FINGatherTextFromReflectionCommandlet.h"
 
-#include "FicsItNetworks/Public/Reflection/FINReflection.h"
+#include "FicsItReflection.h"
 #include "Internationalization/InternationalizationManifest.h"
 
 UFINGatherTextFromReflectionCommandlet::UFINGatherTextFromReflectionCommandlet() {
@@ -8,10 +8,10 @@ UFINGatherTextFromReflectionCommandlet::UFINGatherTextFromReflectionCommandlet()
 }
 
 int32 UFINGatherTextFromReflectionCommandlet::Main(const FString& Params) {
-	for (const TTuple<UClass*, UFIRClass*>& Entry : FFINReflection::Get()->GetClasses()) {
+	for (const TTuple<UClass*, UFIRClass*>& Entry : FFicsItReflectionModule::Get().GetClasses()) {
 		GatherClass(Entry.Value);
 	}
-	for (const TTuple<UScriptStruct*, UFIRStruct*>& Entry : FFINReflection::Get()->GetStructs()) {
+	for (const TTuple<UScriptStruct*, UFIRStruct*>& Entry : FFicsItReflectionModule::Get().GetStructs()) {
 		GatherStruct(Entry.Value);
 	}
 	
@@ -29,7 +29,7 @@ FManifestContext BaseField(UFIRBase* Base, FString Field) {
 }
 
 void UFINGatherTextFromReflectionCommandlet::GatherStruct(UFIRStruct* Struct) {
-	if (!(Struct->GetStructFlags() & FIN_Struct_StaticSource)) return;
+	if (!(Struct->GetStructFlags() & FIR_Struct_StaticSource)) return;
 	GatherBase(Struct);
 	for (UFIRProperty* prop : Struct->GetProperties(false)) {
 		GatherProperty(prop);
@@ -40,7 +40,7 @@ void UFINGatherTextFromReflectionCommandlet::GatherStruct(UFIRStruct* Struct) {
 }
 
 void UFINGatherTextFromReflectionCommandlet::GatherClass(UFIRClass* Class) {
-	if (!(Class->GetStructFlags() & FIN_Struct_StaticSource)) return;
+	if (!(Class->GetStructFlags() & FIR_Struct_StaticSource)) return;
 	GatherStruct(Class);
 	for (UFIRSignal* sig : Class->GetSignals(false)) {
 		GatherSignal(sig);
@@ -53,12 +53,12 @@ void UFINGatherTextFromReflectionCommandlet::GatherBase(UFIRBase* Base) {
 }
 
 void UFINGatherTextFromReflectionCommandlet::GatherProperty(UFIRProperty* Property) {
-	if (!(Property->GetPropertyFlags() & FIN_Prop_StaticSource)) return;
+	if (!(Property->GetPropertyFlags() & FIR_Prop_StaticSource)) return;
 	GatherBase(Property);
 }
 
 void UFINGatherTextFromReflectionCommandlet::GatherFunction(UFIRFunction* Function) {
-	if (!(Function->GetFunctionFlags() & FIN_Func_StaticSource)) return;
+	if (!(Function->GetFunctionFlags() & FIR_Func_StaticSource)) return;
 	GatherBase(Function);
 	for (UFIRProperty* param : Function->GetParameters()) {
 		GatherProperty(param);
@@ -66,7 +66,7 @@ void UFINGatherTextFromReflectionCommandlet::GatherFunction(UFIRFunction* Functi
 }
 
 void UFINGatherTextFromReflectionCommandlet::GatherSignal(UFIRSignal* Signal) {
-	if (!(Signal->GetSignalFlags() & FIN_Signal_StaticSource)) return;
+	if (!(Signal->GetSignalFlags() & FIR_Signal_StaticSource)) return;
 	GatherBase(Signal);
 	for (UFIRProperty* param : Signal->GetParameters()) {
 		GatherProperty(param);
