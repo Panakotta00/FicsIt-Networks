@@ -1,11 +1,9 @@
 ﻿#pragma once
 
 #include "FINComputerModule.h"
+#include "FINNetworkComponent.h"
+#include "FINNetworkMessageInterface.h"
 #include "FINPciDeviceInterface.h"
-#include "Network/FINNetworkCircuitNode.h"
-#include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkMessageInterface.h"
-#include "Network/Signals/FINSignalData.h"
 #include "FINComputerNetworkCard.generated.h"
 
 class AFINComputerCase;

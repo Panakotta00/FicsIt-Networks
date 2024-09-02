@@ -33,6 +33,7 @@ public class FicsItNetworks : ModuleRules
             "Tracy",
             "FicsItReflection",
             "FicsItLogLibrary",
+            "FicsItNetworksCircuit",
 		});
 	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 

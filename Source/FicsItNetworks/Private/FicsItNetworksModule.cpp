@@ -2,29 +2,18 @@
 
 #include "UI/FINCopyUUIDButton.h"
 #include "Computer/FINComputerRCO.h"
-#include "Network/FINNetworkConnectionComponent.h"
-#include "Network/FINNetworkAdapter.h"
-#include "Network/FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "FicsItKernel/FicsItFS/Library/Tests.h"
 #include "AssetRegistryModule.h"
 #include "FGCharacterPlayer.h"
-#include "FGFactoryConnectionComponent.h"
 #include "FGGameMode.h"
 #include "FGGameState.h"
-#include "FGRailroadTrackConnectionComponent.h"
 #include "FicsItReflection.h"
-#include "FIRGlobalRegisterHelper.h"
-#include "Buildables/FGPipeHyperStart.h"
 #include "Components/VerticalBox.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "Hologram/FGBuildableHologram.h"
-#include "Network/Signals/FINSignalSubsystem.h"
-#include "Network/Wireless/FINWirelessRCO.h"
 #include "Patching/BlueprintHookHelper.h"
 #include "Patching/BlueprintHookManager.h"
-#include "Patching/NativeHookManager.h"
-#include "Reflection/ReflectionHelper.h"
 #include "UI/FINEditLabel.h"
 #include "UI/FINStyle.h"
 #include "UObject/CoreRedirects.h"
@@ -38,27 +27,8 @@ FDateTime FFicsItNetworksModule::GameStart;
 
 void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterface*)>& scope, IFGDismantleInterface* self_r) {
 	AFGBuildable* self = dynamic_cast<AFGBuildable*>(self_r);
-	TInlineComponentArray<UFINNetworkConnectionComponent*> connectors;
-	self->GetComponents(connectors);
-	TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
-	self->GetComponents(adapters);
 	TInlineComponentArray<UFINModuleSystemPanel*> panels;
 	self->GetComponents(panels);
-	for (UFINNetworkAdapterReference* adapter_ref : adapters) {
-		if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
-			connectors.Add(adapter->Connector);
-		}
-	}
-	for (UFINNetworkConnectionComponent* connector : connectors) {
-		for (AFINNetworkCable* cable : connector->ConnectedCables) {
-			cable->Execute_Dismantle(cable);
-		}
-	}
-	for (UFINNetworkAdapterReference* adapter_ref : adapters) {
-		if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
-			adapter->Destroy();
-		}
-	}
 	for (UFINModuleSystemPanel* panel : panels) {
 		TArray<AActor*> modules;
 		panel->GetModules(modules);
@@ -70,26 +40,10 @@ void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterfa
 
 void AFGBuildable_GetDismantleRefund_Implementation(CallScope<void(*)(const IFGDismantleInterface*, TArray<FInventoryStack>&, bool)>& scope, const IFGDismantleInterface* self_r, TArray<FInventoryStack>& refund, bool noCost) {
 	const AFGBuildable* self = dynamic_cast<const AFGBuildable*>(self_r);
-	if (!self->IsA<AFINNetworkCable>()) {
-		TInlineComponentArray<UFINNetworkConnectionComponent*> components;
-		self->GetComponents(components);
-		TInlineComponentArray<UFINNetworkAdapterReference*> adapters;
-		self->GetComponents(adapters);
-		TInlineComponentArray<UFINModuleSystemPanel*> panels;
-		self->GetComponents(panels);
-		for (UFINNetworkAdapterReference* adapter_ref : adapters) {
-			if (AFINNetworkAdapter* adapter = adapter_ref->Ref) {
-				components.Add(adapter->Connector);
-			}
-		}
-		for (UFINNetworkConnectionComponent* connector : components) {
-			for (AFINNetworkCable* cable : connector->ConnectedCables) {
-				cable->Execute_GetDismantleRefund(cable, refund, noCost);
-			}
-		}
-		for (UFINModuleSystemPanel* panel : panels) {
-			panel->GetDismantleRefund(refund, noCost);
-		}
+	TInlineComponentArray<UFINModuleSystemPanel*> panels;
+	self->GetComponents(panels);
+	for (UFINModuleSystemPanel* panel : panels) {
+		panel->GetDismantleRefund(refund, noCost);
 	}
 }
 
@@ -132,7 +86,7 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 		MenuList->AddChildToVerticalBox(EditLabel);
 	}
 }
-
+UE_DISABLE_OPTIMIZATION_SHIP
 void FFicsItNetworksModule::StartupModule(){
 	FSlateStyleRegistry::UnRegisterSlateStyle(FFINStyle::GetStyleSetName());
 	FFINStyle::Initialize();
@@ -213,33 +167,9 @@ void FFicsItNetworksModule::StartupModule(){
 	}
 
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
-
-	FFicsItReflectionModule::Get().OnSignalTriggered.AddLambda([](UObject* Context, UFIRSignal* Signal, const TArray<FFIRAnyValue>& Data) {
-		AFINSignalSubsystem* SubSys = AFINSignalSubsystem::GetSignalSubsystem(Context);
-		if (!SubSys) {
-			UE_LOG(LogFicsItNetworks, Error, TEXT("Unable to get signal subsystem for executing signal '%s'"), *Signal->GetInternalName())
-			return;
-		}
-		SubSys->BroadcastSignal(Context, FFINSignalData(Signal, Data));
-	});
 	
 	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
 #if !WITH_EDITOR
-		SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName, const FName& socketName) {
-			UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
-			if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
-				auto comp = NewObject<UStaticMeshComponent>(attachParent);
-				comp->RegisterComponent();
-				comp->SetMobility(EComponentMobility::Movable);
-				comp->SetStaticMesh(networkConnectorHoloMesh);
-				comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
-				comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
-				comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-					
-				scope.Override(comp);
-			}
-		});
-
 		SUBSCRIBE_METHOD_VIRTUAL(IFGDismantleInterface::Dismantle_Implementation, (void*)static_cast<const IFGDismantleInterface*>(GetDefault<AFGBuildable>()), &AFGBuildable_Dismantle_Implementation);
 		SUBSCRIBE_METHOD_VIRTUAL(IFGDismantleInterface::GetDismantleRefund_Implementation, (void*)static_cast<const IFGDismantleInterface*>(GetDefault<AFGBuildable>()), &AFGBuildable_GetDismantleRefund_Implementation);
 		
@@ -262,26 +192,10 @@ void FFicsItNetworksModule::StartupModule(){
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
 			if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
 				gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
-				gm->RegisterRemoteCallObjectClass(UFINWirelessRCO::StaticClass());
 
 				UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 				check(ModuleRCO);
 				gm->RegisterRemoteCallObjectClass(ModuleRCO);
-			}
-		});
-
-		// Wireless - Recalculate network topology when radar tower is created or destroyed
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRadarTower::BeginPlay, (void*)GetDefault<AFGBuildableRadarTower>(), [](AActor* self) {
-			if (self->HasAuthority()) {
-				UE_LOG(LogFicsItNetworks, Display, TEXT("[Wireless] Radar tower Created, recalculating network topology"));
-				AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
-			}
-		});
-		
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRadarTower::EndPlay, (void*)GetDefault<AFGBuildableRadarTower>(), [](AActor* self, EEndPlayReason::Type Reason) {
-			if (Reason == EEndPlayReason::Destroyed && self->HasAuthority()) {
-				UE_LOG(LogFicsItNetworks, Display, TEXT("[Wireless] Radar tower Destroyed, recalculating network topology"));
-				AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
 			}
 		});
 
@@ -295,6 +209,7 @@ void FFicsItNetworksModule::StartupModule(){
 #endif
 	});
 }
+UE_ENABLE_OPTIMIZATION_SHIP
 
 void FFicsItNetworksModule::ShutdownModule() {
 	FFINStyle::Shutdown();

@@ -1,11 +1,10 @@
 #include "FicsItKernel/Network/NetworkController.h"
 
 #include "FicsItNetworksCustomVersion.h"
+#include "FINNetworkCircuit.h"
+#include "FINNetworkCircuitNode.h"
+#include "FINNetworkUtils.h"
 #include "Computer/FINComputerSubsystem.h"
-#include "Network/FINNetworkComponent.h"
-#include "Network/FINNetworkCircuit.h"
-#include "Network/FINNetworkCircuitNode.h"
-#include "Network/FINNetworkUtils.h"
 
 void UFINKernelNetworkController::Serialize(FStructuredArchive::FRecord Record) {
 	Super::Serialize(Record);

@@ -6,7 +6,6 @@
 #include "AssetRegistryModule.h"
 #include "FGFactoryConnectionComponent.h"
 #include "FGRailroadTrackConnectionComponent.h"
-#include "FIRGlobalRegisterHelper.h"
 #include "FIRSubsystem.h"
 #include "AssetRegistry/AssetData.h"
 #include "Engine/Blueprint.h"

@@ -2,13 +2,14 @@
 
 #include "FicsItNetworksLuaModule.h"
 #include "FILLogContainer.h"
+#include "FINNetworkUtils.h"
 #include "FINStateEEPROMLua.h"
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FIRTrace.h"
-#include "Network/FINNetworkUtils.h"
 #include "FINLua/LuaUtil.h"
+#include "Signals/FINSignalData.h"
 
 #include "tracy/Tracy.hpp"
 

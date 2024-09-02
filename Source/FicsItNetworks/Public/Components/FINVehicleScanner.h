@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
+#include "Signals/FINSignalSender.h"
 #include "FINVehicleScanner.generated.h"
 
 class AFGVehicle;
@@ -11,7 +12,7 @@ class AFINVehicleScanner : public AFGBuildable, public IFINSignalSender {
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere)
-	UFINAdvancedNetworkConnectionComponent* NetworkConnector;
+	class UFINAdvancedNetworkConnectionComponent* NetworkConnector;
 	
 	UPROPERTY(EditAnywhere)
 	UFGColoredInstanceMeshProxy* StaticMesh;

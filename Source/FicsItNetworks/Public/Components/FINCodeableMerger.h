@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
+#include "Signals/FINSignalSender.h"
 #include "FINCodeableMerger.generated.h"
 
 UCLASS()
@@ -12,7 +12,7 @@ class AFINCodeableMerger : public AFGBuildableConveyorAttachment, public IFINSig
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
+	class UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGFactoryConnectionComponent* Input2 = nullptr;

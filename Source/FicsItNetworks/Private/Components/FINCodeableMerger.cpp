@@ -1,5 +1,7 @@
 ﻿#include "Components/FINCodeableMerger.h"
 
+#include "FINAdvancedNetworkConnectionComponent.h"
+
 AFINCodeableMerger::AFINCodeableMerger() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);

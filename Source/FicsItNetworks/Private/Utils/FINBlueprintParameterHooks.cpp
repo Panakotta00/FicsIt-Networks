@@ -2,9 +2,8 @@
 
 #include "FGPlayerController.h"
 #include "FINConfigurationStruct.h"
+#include "FINNetworkComponent.h"
 #include "Components/OverlaySlot.h"
-#include "Components/VerticalBoxSlot.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "UI/FGGameUI.h"
 #include "Utils/FINUtils.h"
 #include "Widgets/Input/SEditableTextBox.h"

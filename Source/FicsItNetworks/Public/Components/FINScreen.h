@@ -2,7 +2,6 @@
 
 #include "Computer/FINComputerScreen.h"
 #include "Graphics/FINScreenInterface.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Components/WidgetComponent.h"
 #include "FINScreen.generated.h"
 
@@ -18,7 +17,7 @@ public:
 	TSharedPtr<SWidget> Widget;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
+	class UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UWidgetComponent* WidgetComponent = nullptr;

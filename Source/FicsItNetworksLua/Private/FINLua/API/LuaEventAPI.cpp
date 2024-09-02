@@ -3,8 +3,7 @@
 #include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
-#include "Network/FINNetworkUtils.h"
-#include "Network/Signals/FINSignalSubsystem.h"
+#include "Signals/FINSignalSubsystem.h"
 
 namespace FINLua {
 	LuaModule(R"(/**

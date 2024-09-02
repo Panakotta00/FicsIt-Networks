@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "FGPopupWidgetContent.h"
 #include "Hologram/FGBlueprintHologram.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Subsystem/ModSubsystem.h"
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/SListView.h"

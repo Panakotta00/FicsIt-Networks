@@ -1,8 +1,8 @@
 #include "FINGameInstanceModule.h"
 
 #include "FicsItLogLibrary.h"
+#include "FicsItNetworksCircuit.h"
 #include "FIRModModule.h"
-#include "Network/FINNetworkAdapter.h"
 
 UFINGameInstanceModule::UFINGameInstanceModule() {}
 
@@ -13,9 +13,7 @@ void UFINGameInstanceModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {
 	case ELifecyclePhase::CONSTRUCTION:
 		SpawnChildModule(TEXT("FicsItReflection"), UFIRGameInstanceModule::StaticClass());
 		SpawnChildModule(TEXT("FicsItLogLibrary"), UFILGameInstanceModule::StaticClass());
-		break;
-	case ELifecyclePhase::POST_INITIALIZATION:
-		AFINNetworkAdapter::RegisterAdapterSettings();
+		SpawnChildModule(TEXT("FicsItNetworksCircuit"), UFINCircuitGameInstanceModule::StaticClass());
 		break;
 	default: break;
 	}

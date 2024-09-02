@@ -3,7 +3,6 @@
 #include "FINPciDeviceInterface.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FicsItKernel/Processor/FINStateEEPROM.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Buildables/FGBuildable.h"
 #include "FINComputerCase.generated.h"
@@ -26,7 +25,7 @@ private:
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
-	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
+	class UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
 	UFINModuleSystemPanel* Panel = nullptr;

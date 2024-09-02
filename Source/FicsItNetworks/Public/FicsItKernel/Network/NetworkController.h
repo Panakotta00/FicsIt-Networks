@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
-#include "Network/FINNetworkComponent.h"
+#include "CoreMinimal.h"
+#include "FGSaveInterface.h"
+#include "FINNetworkComponent.h"
 #include "FIRTrace.h"
-#include "Network/Signals/FINSignalData.h"
+#include "Signals/FINSignalData.h"
 #include "NetworkController.generated.h"
 
 /**

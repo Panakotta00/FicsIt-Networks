@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "FINSizeablePanelHolo.h"
+#include "CoreMinimal.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Buildables/FGBuildable.h"
 #include "FINSizeablePanel.generated.h"
 

@@ -22,6 +22,11 @@
 			"LoadingPhase": "PostDefault"
 		},
 		{
+			"Name": "FicsItNetworksCircuit",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
 			"Name": "FicsItNetworksEd",
 			"Type": "Editor",
 			"LoadingPhase": "PostDefault"

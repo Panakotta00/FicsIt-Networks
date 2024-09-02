@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "CoreMinimal.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
 #include "Reflection/Source/FIRSourceUObject.h"
+#include "Signals/FINSignalSender.h"
 #include "FINCodeableSplitter.generated.h"
 
 UCLASS()

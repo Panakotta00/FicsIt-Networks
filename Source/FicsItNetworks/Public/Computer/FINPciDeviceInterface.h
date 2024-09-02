@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Network/FINNetworkCircuitNode.h"
+#include "CoreMinimal.h"
 #include "Components/Widget.h"
+#include "FINNetworkCircuitNode.h"
 #include "FINPciDeviceInterface.generated.h"
 
 UINTERFACE(Blueprintable)

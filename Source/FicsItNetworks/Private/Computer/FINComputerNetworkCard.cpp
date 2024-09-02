@@ -1,8 +1,8 @@
 ﻿#include "Computer/FINComputerNetworkCard.h"
 
 #include "FicsItReflection.h"
+#include "FINNetworkCircuit.h"
 #include "Net/UnrealNetwork.h"
-#include "Network/FINNetworkCircuit.h"
 
 void AFINComputerNetworkCard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

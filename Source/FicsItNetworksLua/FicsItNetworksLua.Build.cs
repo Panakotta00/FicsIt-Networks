@@ -24,6 +24,7 @@ public class FicsItNetworksLua : ModuleRules
             "Tracy",
             "FicsItLogLibrary",
             "FicsItReflection",
+            "FicsItNetworksCircuit",
 		});
 
         PublicIncludePaths.Add("Public");
