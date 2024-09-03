@@ -1,0 +1,512 @@
+= Railroad Track Connection
+:table-caption!:
+
+This is a actor component for railroad tracks that allows to connecto to other track connections and so to connection multiple tracks with each eather so you can build a train network.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-connectorLocation-title[]
+=== `connectorLocation` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-connectorLocation[]
+
+The world location of the the connection.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Connector Location
+!===
+====
+// end::func-connectorLocation[]
+// end::func-connectorLocation-title[]
+// tag::func-connectorNormal-title[]
+=== `connectorNormal` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-connectorNormal[]
+
+The normal vecotr of the connector.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Connector Normal
+!===
+====
+// end::func-connectorNormal[]
+// end::func-connectorNormal-title[]
+// tag::func-isConnected-title[]
+=== `isConnected` : Bool
+// tag::func-isConnected[]
+
+True if the connection has any connection to other connections.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Connected
+!===
+====
+// end::func-isConnected[]
+// end::func-isConnected-title[]
+// tag::func-isFacingSwitch-title[]
+=== `isFacingSwitch` : Bool
+// tag::func-isFacingSwitch[]
+
+True if this connection is pointing to the merge/spread point of the switch.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Facing Switch
+!===
+====
+// end::func-isFacingSwitch[]
+// end::func-isFacingSwitch-title[]
+// tag::func-isTrailingSwitch-title[]
+=== `isTrailingSwitch` : Bool
+// tag::func-isTrailingSwitch[]
+
+True if this connection is pointing away from the merge/spread point of a switch.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Trailing Switch
+!===
+====
+// end::func-isTrailingSwitch[]
+// end::func-isTrailingSwitch-title[]
+// tag::func-numSwitchPositions-title[]
+=== `numSwitchPositions` : Int
+// tag::func-numSwitchPositions[]
+
+Returns the number of different switch poisitions this switch can have.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Num Switch Positions
+!===
+====
+// end::func-numSwitchPositions[]
+// end::func-numSwitchPositions-title[]
+
+== Functions
+
+// tag::func-forceSwitchPosition-title[]
+=== `forceSwitchPosition` (`index` : Int)
+// tag::func-forceSwitchPosition[]
+
+Forces the switch position to a given location. Even autopilot will be forced to use this track. A negative number can be used to remove the forced track.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Force Switch Position
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The connection index to whcih the switch should be force to point to. Negative number to remove the lock.
+!===
+
+====
+// end::func-forceSwitchPosition[]
+// end::func-forceSwitchPosition-title[]
+// tag::func-getConnection-title[]
+=== `getConnection` (`index` : Int) -> `connection` : Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+// tag::func-getConnection[]
+
+Returns the connected connection with the given index.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Connection
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The index of the connected connection you want to get.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connection* `connection`
+! Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+! The connected connection at the given index.
+!===
+
+====
+// end::func-getConnection[]
+// end::func-getConnection-title[]
+// tag::func-getConnections-title[]
+=== `getConnections` () -> `connections` : Array<Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>>
+// tag::func-getConnections[]
+
+Returns a list of all connected connections.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Connections
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connections* `connections`
+! Array<Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>>
+! A list of all connected connections.
+!===
+
+====
+// end::func-getConnections[]
+// end::func-getConnections-title[]
+// tag::func-getFacingSignal-title[]
+=== `getFacingSignal` () -> `signal` : Trace<xref:/reflection/classes/RailroadSignal.adoc[RailroadSignal]>
+// tag::func-getFacingSignal[]
+
+Returns the signal this connection is facing to.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Facing Signal
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Signal* `signal`
+! Trace<xref:/reflection/classes/RailroadSignal.adoc[RailroadSignal]>
+! The signal this connection is facing.
+!===
+
+====
+// end::func-getFacingSignal[]
+// end::func-getFacingSignal-title[]
+// tag::func-getNext-title[]
+=== `getNext` () -> `next` : Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+// tag::func-getNext[]
+
+Returns the next connection in the direction of the track. (used the correct path switched point to)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Next
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Next* `next`
+! Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+! The next connection in the direction of the track.
+!===
+
+====
+// end::func-getNext[]
+// end::func-getNext-title[]
+// tag::func-getOpposite-title[]
+=== `getOpposite` () -> `opposite` : Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+// tag::func-getOpposite[]
+
+Returns the opposite connection of the track this connection is part of.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Opposite
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Opposite* `opposite`
+! Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+! The opposite connection of the track this connection is part of.
+!===
+
+====
+// end::func-getOpposite[]
+// end::func-getOpposite-title[]
+// tag::func-getStation-title[]
+=== `getStation` () -> `station` : Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>
+// tag::func-getStation[]
+
+Returns the station of which this connection is part of.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Station
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Station* `station`
+! Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>
+! The station of which this connection is part of.
+!===
+
+====
+// end::func-getStation[]
+// end::func-getStation-title[]
+// tag::func-getSwitchControl-title[]
+=== `getSwitchControl` () -> `switchControl` : Trace<xref:/reflection/classes/RailroadSwitchControl.adoc[RailroadSwitchControl]>
+// tag::func-getSwitchControl[]
+
+Returns the switch control of this connection.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Switch Control
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Switch* `switchControl`
+! Trace<xref:/reflection/classes/RailroadSwitchControl.adoc[RailroadSwitchControl]>
+! The switch control of this connection.
+!===
+
+====
+// end::func-getSwitchControl[]
+// end::func-getSwitchControl-title[]
+// tag::func-getSwitchPosition-title[]
+=== `getSwitchPosition` () -> `index` : Int
+// tag::func-getSwitchPosition[]
+
+Returns the current switch position.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Switch Position
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The index of the connection connection the switch currently points to.
+!===
+
+====
+// end::func-getSwitchPosition[]
+// end::func-getSwitchPosition-title[]
+// tag::func-getTrack-title[]
+=== `getTrack` () -> `track` : Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
+// tag::func-getTrack[]
+
+Returns the track of which this connection is part of.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Track
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
+! The track of which this connection is part of.
+!===
+
+====
+// end::func-getTrack[]
+// end::func-getTrack-title[]
+// tag::func-getTrackPos-title[]
+=== `getTrackPos` () -> (`track` : Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>, `offset` : Float, `forward` : Float)
+// tag::func-getTrackPos[]
+
+Returns the track pos at which this connection is.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Track Pos
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
+! The track the track pos points to.
+
+! *Offset* `offset`
+! Float
+! The offset of the track pos.
+
+! *Forward* `forward`
+! Float
+! The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+!===
+
+====
+// end::func-getTrackPos[]
+// end::func-getTrackPos-title[]
+// tag::func-getTrailingSignal-title[]
+=== `getTrailingSignal` () -> `signal` : Trace<xref:/reflection/classes/RailroadSignal.adoc[RailroadSignal]>
+// tag::func-getTrailingSignal[]
+
+Returns the signal this connection is trailing from.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Trailing Signal
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Signal* `signal`
+! Trace<xref:/reflection/classes/RailroadSignal.adoc[RailroadSignal]>
+! The signal this connection is trailing.
+!===
+
+====
+// end::func-getTrailingSignal[]
+// end::func-getTrailingSignal-title[]
+// tag::func-setSwitchPosition-title[]
+=== `setSwitchPosition` (`index` : Int)
+// tag::func-setSwitchPosition[]
+
+Sets the position (connection index) to which the track switch points to.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Switch Position
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The connection index to which the switch should point to.
+!===
+
+====
+// end::func-setSwitchPosition[]
+// end::func-setSwitchPosition-title[]
+
+// end::interface[]
+

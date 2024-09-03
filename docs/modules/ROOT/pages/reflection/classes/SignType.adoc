@@ -1,0 +1,156 @@
+= Sign Type
+:table-caption!:
+
+Describes the type of a sign.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-dimensions-title[]
+=== `dimensions` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-dimensions[]
+
+The canvas dimensions of this sign.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassProp</i></span>+++
+
+! Display Name ! Dimensions
+!===
+====
+// end::func-dimensions[]
+// end::func-dimensions-title[]
+
+== Functions
+
+// tag::func-getColors-title[]
+=== `getColors` () -> (`foreground` : Struct<xref:/reflection/structs/Color.adoc[Color]>, `background` : Struct<xref:/reflection/structs/Color.adoc[Color]>, `auxiliary` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+// tag::func-getColors[]
+
+Returns the default foreground/background/auxiliary colors of this sign type.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Get Colors
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Foreground* `foreground`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The foreground color
+
+! *Background* `background`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The background color
+
+! *Auxiliary* `auxiliary`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The auxiliary color
+!===
+
+====
+// end::func-getColors[]
+// end::func-getColors-title[]
+// tag::func-getIconElements-title[]
+=== `getIconElements` () -> `iconElementsDefaultValues` : Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
+// tag::func-getIconElements[]
+
+Returns a list of element names and their default icon values.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Get Icon Elements
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Icon Elements Default Values* `iconElementsDefaultValues`
+! Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
+! A list of default values for the icon elements of this type.
+!===
+
+====
+// end::func-getIconElements[]
+// end::func-getIconElements-title[]
+// tag::func-getPrefabs-title[]
+=== `getPrefabs` () -> `prefabs` : Array<Class<xref:/reflection/classes/Object.adoc[SignPrefab]>>
+// tag::func-getPrefabs[]
+
+Returns a list of all sign prefabs this sign can use.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Get Prefabs
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Prefabs* `prefabs`
+! Array<Class<xref:/reflection/classes/Object.adoc[SignPrefab]>>
+! The sign prefabs this sign can use
+!===
+
+====
+// end::func-getPrefabs[]
+// end::func-getPrefabs-title[]
+// tag::func-getTextElements-title[]
+=== `getTextElements` () -> `textElementsDefaultValues` : Array<String>
+// tag::func-getTextElements[]
+
+Returns a list of element names and their default text values.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Get Text Elements
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Text Elements Default Values* `textElementsDefaultValues`
+! Array<String>
+! A list of default values for the text elements of this type.
+!===
+
+====
+// end::func-getTextElements[]
+// end::func-getTextElements-title[]
+
+// end::interface[]
+

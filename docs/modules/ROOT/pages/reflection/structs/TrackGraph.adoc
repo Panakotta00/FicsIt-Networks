@@ -1,0 +1,66 @@
+= Track Graph
+:table-caption!:
+
+Struct that holds a cache of a whole train/rail network.
+
+== Functions
+
+// tag::func-getStations-title[]
+=== `getStations` () -> `stations` : Array<Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>>
+// tag::func-getStations[]
+
+Returns a list of all trainstations in the network.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Stations
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Stations* `stations`
+! Array<Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>>
+! The list of trainstations in the network.
+!===
+
+====
+// end::func-getStations[]
+// end::func-getStations-title[]
+// tag::func-getTrains-title[]
+=== `getTrains` () -> `trains` : Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
+// tag::func-getTrains[]
+
+Returns a list of all trains in the network.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Trains
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Trains* `trains`
+! Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
+! The list of trains in the network.
+!===
+
+====
+// end::func-getTrains[]
+// end::func-getTrains-title[]
+

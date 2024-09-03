@@ -1,0 +1,82 @@
+= Railroad Station
+:table-caption!:
+
+The train station master platform. This platform holds the name and manages docking of trains.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-dockedOffset-title[]
+=== `dockedOffset` : Int
+// tag::func-dockedOffset[]
+
+The Offset to the beginning of the station at which trains dock.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Docked Offset
+!===
+====
+// end::func-dockedOffset[]
+// end::func-dockedOffset-title[]
+// tag::func-name-title[]
+=== `name` : String
+// tag::func-name[]
+
+The name of the railroad station.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Name
+!===
+====
+// end::func-name[]
+// end::func-name-title[]
+
+== Signals
+
+=== `CancelDocking` ()
+
+Triggers when a train cancels the docking procedure.
+
+=== `FinishDocking` ()
+
+Triggers when a train finished the docking procedure and is ready to depart the station.
+
+=== `StartDocking` (_Bool_ *Successful* `successful`, _Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>_ *Locomotive* `locomotive`, _Float_ *Offset* `offset`)
+
+Triggers when a train tries to dock onto the station.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Successful* `successful`
+! Bool
+! True if the train successfully docked.
+
+! *Locomotive* `locomotive`
+! Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+! The locomotive that tries to dock onto the station.
+
+! *Offset* `offset`
+! Float
+! The offset at witch the train tried to dock.
+!===
+====
+
+
+// end::interface[]
+

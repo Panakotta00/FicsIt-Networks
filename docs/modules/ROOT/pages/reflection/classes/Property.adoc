@@ -1,0 +1,58 @@
+= Property
+:table-caption!:
+
+A Reflection object that holds information about properties and parameters.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-dataType-title[]
+=== `dataType` : Int
+// tag::func-dataType[]
+
+The data type of this property.
+0: nil, 1: bool, 2: int, 3: float, 4: str, 5: object, 6: class, 7: trace, 8: struct, 9: array, 10: anything
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Data Type
+!===
+====
+// end::func-dataType[]
+// end::func-dataType-title[]
+// tag::func-flags-title[]
+=== `flags` : Int
+// tag::func-flags[]
+
+The property bit flag register defining some behaviour of it.
+
+Bits and their meaing (least significant bit first):
+Is this property a member attribute.
+Is this property read only.
+Is this property a parameter.
+Is this property a output paramter.
+Is this property a return value.
+Can this property get accessed in syncrounus runtime.
+Can this property can get accessed in parallel runtime.
+Can this property get accessed in asynchronus runtime.
+This property is a class attribute.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Flags
+!===
+====
+// end::func-flags[]
+// end::func-flags-title[]
+
+// end::interface[]
+

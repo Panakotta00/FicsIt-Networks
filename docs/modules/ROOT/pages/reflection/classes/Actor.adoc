@@ -1,0 +1,250 @@
+= Actor
+:table-caption!:
+
+This is the base class of all things that can exist within the world by them self.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-location-title[]
+=== `location` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-location[]
+
+The location of the actor in the world.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Location
+!===
+====
+// end::func-location[]
+// end::func-location-title[]
+// tag::func-rotation-title[]
+=== `rotation` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+// tag::func-rotation[]
+
+The rotation of the actor in the world.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Rotation
+!===
+====
+// end::func-rotation[]
+// end::func-rotation-title[]
+// tag::func-scale-title[]
+=== `scale` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-scale[]
+
+The scale of the actor in the world.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Scale
+!===
+====
+// end::func-scale[]
+// end::func-scale-title[]
+
+== Functions
+
+// tag::func-getComponents-title[]
+=== `getComponents` (`componentType` : Class<xref:/reflection/classes/ActorComponent.adoc[ActorComponent]>) -> `components` : Array<Trace<xref:/reflection/classes/ActorComponent.adoc[ActorComponent]>>
+// tag::func-getComponents[]
+
+Returns the components that make-up this actor.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Components
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Component Type* `componentType`
+! Class<xref:/reflection/classes/ActorComponent.adoc[ActorComponent]>
+! The class will be used as filter.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Components* `components`
+! Array<Trace<xref:/reflection/classes/ActorComponent.adoc[ActorComponent]>>
+! The components of this actor.
+!===
+
+====
+// end::func-getComponents[]
+// end::func-getComponents-title[]
+// tag::func-getFactoryConnectors-title[]
+=== `getFactoryConnectors` () -> `connectors` : Array<Trace<xref:/reflection/classes/FactoryConnection.adoc[FactoryConnection]>>
+// tag::func-getFactoryConnectors[]
+
+Returns a list of factory connectors this actor might have.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Factory Connectors
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connectors* `connectors`
+! Array<Trace<xref:/reflection/classes/FactoryConnection.adoc[FactoryConnection]>>
+! The factory connectors this actor has.
+!===
+
+====
+// end::func-getFactoryConnectors[]
+// end::func-getFactoryConnectors-title[]
+// tag::func-getInventories-title[]
+=== `getInventories` () -> `inventories` : Array<Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>>
+// tag::func-getInventories[]
+
+Returns a list of inventories this actor might have.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Inventories
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inventories* `inventories`
+! Array<Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>>
+! The inventories this actor has.
+!===
+
+====
+// end::func-getInventories[]
+// end::func-getInventories-title[]
+// tag::func-getNetworkConnectors-title[]
+=== `getNetworkConnectors` () -> `connectors` : Array<Trace<xref:/reflection/classes/ActorComponent.adoc[ActorComponent]>>
+// tag::func-getNetworkConnectors[]
+
+Returns the name of network connectors this actor might have.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Network Connectors
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connectors* `connectors`
+! Array<Trace<xref:/reflection/classes/ActorComponent.adoc[ActorComponent]>>
+! The factory connectors this actor has.
+!===
+
+====
+// end::func-getNetworkConnectors[]
+// end::func-getNetworkConnectors-title[]
+// tag::func-getPipeConnectors-title[]
+=== `getPipeConnectors` () -> `connectors` : Array<Trace<xref:/reflection/classes/PipeConnectionBase.adoc[PipeConnectionBase]>>
+// tag::func-getPipeConnectors[]
+
+Returns a list of pipe (fluid & hyper) connectors this actor might have.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Pipe Connectors
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connectors* `connectors`
+! Array<Trace<xref:/reflection/classes/PipeConnectionBase.adoc[PipeConnectionBase]>>
+! The pipe connectors this actor has.
+!===
+
+====
+// end::func-getPipeConnectors[]
+// end::func-getPipeConnectors-title[]
+// tag::func-getPowerConnectors-title[]
+=== `getPowerConnectors` () -> `connectors` : Array<Trace<xref:/reflection/classes/PowerConnection.adoc[PowerConnection]>>
+// tag::func-getPowerConnectors[]
+
+Returns a list of power connectors this actor might have.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Power Connectors
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connectors* `connectors`
+! Array<Trace<xref:/reflection/classes/PowerConnection.adoc[PowerConnection]>>
+! The power connectors this actor has.
+!===
+
+====
+// end::func-getPowerConnectors[]
+// end::func-getPowerConnectors-title[]
+
+// end::interface[]
+

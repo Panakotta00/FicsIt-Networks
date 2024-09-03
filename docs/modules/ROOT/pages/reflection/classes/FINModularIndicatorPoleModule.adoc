@@ -1,0 +1,70 @@
+= FINModularIndicatorPoleModule
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getNext-title[]
+=== `getNext` () -> `next` : Object<xref:/reflection/classes/FINModularIndicatorPoleModule.adoc[FINModularIndicatorPoleModule]>
+// tag::func-getNext[]
+
+Returns the next pole module if any.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Next
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Next module* `next`
+! Object<xref:/reflection/classes/FINModularIndicatorPoleModule.adoc[FINModularIndicatorPoleModule]>
+! The next module in this chain.
+!===
+
+====
+// end::func-getNext[]
+// end::func-getNext-title[]
+// tag::func-getPrevious-title[]
+=== `getPrevious` () -> `previous` : Object<xref:/reflection/classes/Buildable.adoc[Buildable]>
+// tag::func-getPrevious[]
+
+Gets the previous module or the base mount if this called from the last module.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Previous
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Previous module* `previous`
+! Object<xref:/reflection/classes/Buildable.adoc[Buildable]>
+! The previous module or base mount.
+!===
+
+====
+// end::func-getPrevious[]
+// end::func-getPrevious-title[]
+
+// end::interface[]
+

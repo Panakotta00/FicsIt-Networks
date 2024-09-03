@@ -1,0 +1,41 @@
+= Array Property
+:table-caption!:
+
+A reflection object representing a array property.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getInner-title[]
+=== `getInner` () -> `inner` : Object<xref:/reflection/classes/Property.adoc[Property]>
+// tag::func-getInner[]
+
+Returns the inner type of this array.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Inner
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inner* `inner`
+! Object<xref:/reflection/classes/Property.adoc[Property]>
+! The inner type of this array.
+!===
+
+====
+// end::func-getInner[]
+// end::func-getInner-title[]
+
+// end::interface[]
+

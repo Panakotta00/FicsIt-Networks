@@ -1,0 +1,33 @@
+= Pipe Hyper Start
+:table-caption!:
+
+A actor that is a hypertube entrance buildable
+
+// tag::interface[]
+
+== Signals
+
+=== `PlayerEntered` (_Bool_ *Sucess* `success`)
+
+Triggers when a players enters into this hypertube entrance.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Sucess* `success`
+! Bool
+! True if the transfer was sucessfull
+!===
+====
+
+=== `PlayerExited` ()
+
+Triggers when a players leaves through this hypertube entrance.
+
+
+// end::interface[]
+

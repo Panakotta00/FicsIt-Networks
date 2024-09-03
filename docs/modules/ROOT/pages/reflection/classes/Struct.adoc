@@ -1,0 +1,216 @@
+= Struct
+:table-caption!:
+
+Reflection Object that holds information about structures.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isConstructable-title[]
+=== `isConstructable` : Bool
+// tag::func-isConstructable[]
+
+True if this struct can be constructed by the user directly.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Constructable
+!===
+====
+// end::func-isConstructable[]
+// end::func-isConstructable-title[]
+
+== Functions
+
+// tag::func-getAllFunctions-title[]
+=== `getAllFunctions` () -> `functions` : Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+// tag::func-getAllFunctions[]
+
+Returns all the functions of this and parent types.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get All Functions
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Functions* `functions`
+! Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+! The functions this type implements including functions from parent types.
+!===
+
+====
+// end::func-getAllFunctions[]
+// end::func-getAllFunctions-title[]
+// tag::func-getAllProperties-title[]
+=== `getAllProperties` () -> `properties` : Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+// tag::func-getAllProperties[]
+
+Returns all the properties of this and parent types.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get All Properties
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Properties* `properties`
+! Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+! The properties this type implements including properties from parent types.
+!===
+
+====
+// end::func-getAllProperties[]
+// end::func-getAllProperties-title[]
+// tag::func-getFunctions-title[]
+=== `getFunctions` () -> `functions` : Array<Object<xref:/reflection/classes/Function.adoc[Function]>>
+// tag::func-getFunctions[]
+
+Returns all the functions of this type.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Functions
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Functions* `functions`
+! Array<Object<xref:/reflection/classes/Function.adoc[Function]>>
+! The functions this specific type implements (excluding properties from parent types).
+!===
+
+====
+// end::func-getFunctions[]
+// end::func-getFunctions-title[]
+// tag::func-getParent-title[]
+=== `getParent` () -> `parent` : Object<xref:/reflection/classes/Class.adoc[Class]>
+// tag::func-getParent[]
+
+Returns the parent type of this type.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Parent
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Parent* `parent`
+! Object<xref:/reflection/classes/Class.adoc[Class]>
+! The parent type of this type.
+!===
+
+====
+// end::func-getParent[]
+// end::func-getParent-title[]
+// tag::func-getProperties-title[]
+=== `getProperties` () -> `properties` : Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+// tag::func-getProperties[]
+
+Returns all the properties of this type.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Properties
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Properties* `properties`
+! Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+! The properties this specific type implements (excluding properties from parent types).
+!===
+
+====
+// end::func-getProperties[]
+// end::func-getProperties-title[]
+// tag::func-isChildOf-title[]
+=== `isChildOf` (`parent` : Object<xref:/reflection/classes/Struct.adoc[Struct]>) -> `isChild` : Bool
+// tag::func-isChildOf[]
+
+Allows to check if this struct is a child struct of the given struct or the given struct it self.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Is Child Of
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Parent* `parent`
+! Object<xref:/reflection/classes/Struct.adoc[Struct]>
+! The parent struct you want to check if this struct is a child of.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Is Child* `isChild`
+! Bool
+! True if this struct is a child of parent.
+!===
+
+====
+// end::func-isChildOf[]
+// end::func-isChildOf-title[]
+
+// end::interface[]
+

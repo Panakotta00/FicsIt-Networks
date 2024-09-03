@@ -1,221 +1,272 @@
-= Computer API
-:description: The Computer API allows you to manage the computer itself.
+= Computer Module
+:table-caption!:
 
-The Computer API provides a interface to the computer owns functionalities.
+Description
 
-== Functions
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/ReflectionSystemObjectModule.adoc[ReflectionSystemObjectModule]
+!===
 
-=== `beep(number pitch)`
+== Globals
 
+=== **computer**
+The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
+
+=== __computer.__**attentionPing** (position: xref:/reflection/structs/Vector.adoc[Vector], [username: string])
+Allows to send a World Marker/Attention Ping for all or the given user.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! xref:/reflection/classes/Struct.adoc[Struct]<FVector>
+! The position in the world where the ping should occur
+
+! *Username* `username`
+! string
+! The username of the user you want to ping.
+
+!===
+====
+
+=== __computer.__**beep** (pitch: number)
 Lets the computer emit a simple beep sound with the given pitch.
 
-Parameter::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|pitch
-|number
-|The pitch of the beep sound you want to play.
-|===
-
-=== `stop()`
-
-Stops the current code execution.
-
-Basically kills the PC runtime immediately.
-
-=== `panic(string error)`
-
-Crashes the computer with the given error message.
-
-Parameter::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|error
-|string
-|The crash error message you want to use
-|===
-
-=== `reset()`
-
-Stops the current code execution immediately and queues the system to restart in the next tick.
-
-=== `skip()`
-
-This function is mainly used to allow switching to a higher tick runtime state.
-Usually you use this when you want to make your code run faster when using functions that can run in asynchronous environment.
-
-=== `promote()`
-
-This function is mainly used to allow switching to a higher tick runtime state.
-Usually you use this when you want to make your code run faster when using functions that can run in asynchronous environment.
-
-=== `demote()`
-
+=== __computer.__**demote** ()
 This function is used to allow switching back to the normal tick rate.
 
-=== `int state()`
+=== __computer.__**getEEPROM** () -> string
+Returns the current eeprom contents.
 
-Returns the tick state.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|describes if the tick rate is normal or higher +
-Tick Rates:
-[cols="1,10a"]
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
 !===
-!0
-!Has normal tick rate
-!1
-!Has higher tick rate
+!Name !Type !Description
+
+! *The EEPROM Code as string.* `code`
+! string
+! 
+
 !===
-|===
+====
 
-=== `string getEEPROM()`
+=== __computer.__**getInstance** () -> xref:/reflection/classes/ComputerCase.adoc[ComputerCase]
+Returns a reference to the computer case in which the current code is running.
 
-Returns the code the current eeprom contents.
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+! *The computer case this lua runtime is running in.* `case`
+! xref:/reflection/classes/ComputerCase.adoc[ComputerCase]
+! 
 
-|string
-|string
-|The code in the EEPROM
-|===
+!===
+====
 
-=== `setEEPROM(string code)`
-
-Sets the code of the current eeprom. Doesn't cause a system reset.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|code
-|string
-|The code you want to place into the eeprom.
-|===
-
-=== `number time()`
-
-Returns the number of game seconds passed since the save got created.
-A game day consists of 24 game hours, a game hour consists of 60 game minutes, a game minute consists of 60 game seconds.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|number
-|number
-|The number of game seconds passed since the save got created.
-|===
-
-=== `int millis()`
-
-Returns the amount of milliseconds passed since the system started.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|Amount of milliseconds since system start
-|===
-
-=== `int, string, string magicTime()`
-
-Returns some kind of strange/mysterious time data from a unknown place (the real life).
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|int
-|int
-|Unix Timestamp
-
-|string
-|string
-|Serverside Formated Date-Time-Stamp
-
-|string
-|string
-|Date-Time-Stamp after ISO 8601
-|===
-
-=== `Object[] getPCIDevices(Class type)`
-
-This function allows you to get all installed xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Devices] in a computer of a given type.
-
-Have a look at xref:lua/examples/PCIDevices.adoc[this] example to fully understand how it works.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|Object[]
-|Object[]
-|An array containing instances for each xref:buildings/ComputerCase/index.adoc#_pci_interface[PCI-Device] built into the computer.
-|===
-
-=== `int, int getMemory()`
-
+=== __computer.__**getMemory** () -> (usage: int, capacity: int)
 Returns the used memory and memory capacity the computer has.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-|int
-|int
-|The memory usage at the current time
+! *Usage* `usage`
+! int
+! The memory usage at the current time
 
-|int
-|int
-|The memory capacity the computer has
-|===
+! *Capacity* `capacity`
+! int
+! The memory capacity the computer has
 
-=== `Computer_C getInstance()`
+!===
+====
 
-Returns the computer case.
+=== __computer.__**getPCIDevices** ([type: xref:/reflection/classes/Class.adoc[Class]]) -> xref:/reflection/classes/Object.adoc[Object][]
+This function allows you to get all installed https://docs.ficsit.app/ficsit-networks/latest/buildings/ComputerCase/index.html#_pci_interface[PCI-Devices] in a computer of a given type.
+Have a look at https://docs.ficsit.app/ficsit-networks/latest/lua/examples/PCIDevices.html[this] example to fully understand how it works.
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-|Computer_C
-|Computer_C
-|The computer case in which the current code is running.
-|===
+! *Type* `type`
+! xref:/reflection/classes/Class.adoc[Class]
+! Optional type which will be used to filter all PCI-Devices. If not provided, will return all PCI-Devices.
 
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-include::partial$api_footer.adoc[]
+! *Objects* `objects`
+! xref:/reflection/classes/Object.adoc[Object][]
+! An array containing instances for each PCI-Device built into the computer.
+
+!===
+====
+
+=== __computer.__**isPromoted** () -> bool
+Returns true if the Lua runtime is currently promoted/elevated.
+Which means its running in an seperate game thread allowing for fast bulk calculations.
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *True if the currenty runtime is running in promoted/elevated tick state.* `isPromoted`
+! bool
+! 
+
+!===
+====
+
+=== __computer.__**log** (message: string, verbosity: int)
+Allows you to print a log message to the computers log with the given log verbosity.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Message* `message`
+! string
+! The log message you want to print
+
+! *Verbosity* `verbosity`
+! int
+! The log-level/verbosity of the message you want to log. 0 = Debug, 1 = Info, 2 = Warning, 3 = Error & 4 = Fatal
+
+!===
+====
+
+=== __computer.__**magicTime** () -> (int, string, string)
+Returns some kind of strange/mysterious time data from a unknown place (the real life).
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Unix* `unix`
+! int
+! Unix Timestamp
+
+! *Culture Time* `cultureTime`
+! string
+! The time as text with the culture format used by the Host
+
+! *ISO 8601* `iso8601`
+! string
+! The time as a Date-Time-Stamp after ISO 8601
+
+!===
+====
+
+=== __computer.__**media** : xref:/reflection/classes/FINMediaSubsystem.adoc[FINMediaSubsystem]
+Description
+
+=== __computer.__**millis** () -> int
+Returns the amount of milliseconds passed since the system started.
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *The amount of real milliseconds sinde the ingame-computer started.* `millis`
+! int
+! 
+
+!===
+====
+
+=== __computer.__**panic** (error: string)
+Crashes the computer with the given error message.
+
+=== __computer.__**promote** ()
+This function is mainly used to allow switching to a higher tick runtime state.
+Usually you use this when you want to make your code run faster when using functions that can run in asynchronous environment.
+
+=== __computer.__**reset** ()
+Stops the current code execution immediately and queues the system to restart in the next tick.
+
+=== __computer.__**setEEPROM** (code: string)
+Sets the code of the current eeprom. Doesn￢ﾀﾙt cause a system reset.
+
+=== __computer.__**skip** ()
+This function can be used to skip the current lua tick prematurely.
+Mostly for people who want to optimize their games runtime performance.
+
+=== __computer.__**state** () -> int
+DEPRECATED! Please use `isPromoted()` instead
+
+=== __computer.__**stop** ()
+Stops the current code execution. +
+Basically kills the PC runtime immediately.
+
+=== __computer.__**textNotification** (text: string, username: string)
+This function allows you to prompt a user with the given username, with a text message.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Text* `text`
+! string
+! The Text you want to send as Notification to the user
+
+! *Username* `username`
+! string
+! The username of the user you want to send the notification to
+
+!===
+====
+
+=== __computer.__**time** () -> number
+Returns the number of game seconds passed since the save got created. A game day consists of 24 game hours, a game hour consists of 60 game minutes, a game minute consists of 60 game seconds.
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *The current number of game seconds passed since the creation of the save.* `time`
+! number
+! 
+
+!===
+====
+

@@ -1,0 +1,151 @@
+= Codeable Merger
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-canOutput-title[]
+=== `canOutput` : Bool
+// tag::func-canOutput[]
+
+Is true if the output queue has a slot available for an item from one of the input queues.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Can Output
+!===
+====
+// end::func-canOutput[]
+// end::func-canOutput-title[]
+
+== Functions
+
+// tag::func-getInput-title[]
+=== `getInput` (`input` : Int) -> `item` : Struct<xref:/reflection/structs/Item.adoc[Item]>
+// tag::func-getInput[]
+
+Returns the next item in the given input queue.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Input
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Input* `input`
+! Int
+! The index of the input queue you want to check (0 = right, 1 = middle, 2 = left)
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item* `item`
+! Struct<xref:/reflection/structs/Item.adoc[Item]>
+! The next item in the input queue.
+!===
+
+====
+// end::func-getInput[]
+// end::func-getInput-title[]
+// tag::func-transferItem-title[]
+=== `transferItem` (`input` : Int) -> `transfered` : Bool
+// tag::func-transferItem[]
+
+Allows to transfer an item from the given input queue to the output queue if possible.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Transfer Item
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Input* `input`
+! Int
+! The index of the input queue you want to transfer the next item to the output queue. (0 = right, 1 = middle, 2 = left)
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Transfered* `transfered`
+! Bool
+! true if it was able to transfer the item.
+!===
+
+====
+// end::func-transferItem[]
+// end::func-transferItem-title[]
+
+== Signals
+
+=== `ItemOutputted` (_Struct<xref:/reflection/structs/Item.adoc[Item]>_ *Item* `item`)
+
+Triggers when an item is popped from the output queue (aka it got transferred to a conveyor).
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item* `item`
+! Struct<xref:/reflection/structs/Item.adoc[Item]>
+! The item removed from the output queue.
+!===
+====
+
+=== `ItemRequest` (_Int_ *Input* `input`, _Struct<xref:/reflection/structs/Item.adoc[Item]>_ *Item* `item`)
+
+Triggers when a new item is ready in one of the input queues.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Input* `input`
+! Int
+! The index of the input queue at which the item is ready.
+
+! *Item* `item`
+! Struct<xref:/reflection/structs/Item.adoc[Item]>
+! The new item in the input queue.
+!===
+====
+
+
+// end::interface[]
+

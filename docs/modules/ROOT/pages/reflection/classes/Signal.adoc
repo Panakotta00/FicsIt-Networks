@@ -1,0 +1,61 @@
+= Signal
+:table-caption!:
+
+A reflection object representing a signal.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isVarArgs-title[]
+=== `isVarArgs` : Bool
+// tag::func-isVarArgs[]
+
+True if this signal has a variable amount of arguments.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is VarArgs
+!===
+====
+// end::func-isVarArgs[]
+// end::func-isVarArgs-title[]
+
+== Functions
+
+// tag::func-getParameters-title[]
+=== `getParameters` () -> `parameters` : Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+// tag::func-getParameters[]
+
+Returns all the parameters of this signal.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Parameters
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Parameters* `parameters`
+! Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+! The parameters this signal.
+!===
+
+====
+// end::func-getParameters[]
+// end::func-getParameters-title[]
+
+// end::interface[]
+

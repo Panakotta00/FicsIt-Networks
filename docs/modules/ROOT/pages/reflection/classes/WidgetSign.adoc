@@ -1,0 +1,70 @@
+= Widget Sign
+:table-caption!:
+
+The type of sign that allows you to define layouts, images, texts and colors manually.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getPrefabSignData-title[]
+=== `getPrefabSignData` () -> `prefabSignData` : Struct<xref:/reflection/structs/PrefabSignData.adoc[PrefabSignData]>
+// tag::func-getPrefabSignData[]
+
+Returns the prefabg sign data e.g. the user settings like colo and more to define the signs content.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Prefab Sign Data
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Prefab Sign Data* `prefabSignData`
+! Struct<xref:/reflection/structs/PrefabSignData.adoc[PrefabSignData]>
+! The new prefab sign data for this sign.
+!===
+
+====
+// end::func-getPrefabSignData[]
+// end::func-getPrefabSignData-title[]
+// tag::func-setPrefabSignData-title[]
+=== `setPrefabSignData` (`prefabSignData` : Struct<xref:/reflection/structs/PrefabSignData.adoc[PrefabSignData]>)
+// tag::func-setPrefabSignData[]
+
+Sets the prefabg sign data e.g. the user settings like colo and more to define the signs content.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Prefab Sign Data
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Prefab Sign Data* `prefabSignData`
+! Struct<xref:/reflection/structs/PrefabSignData.adoc[PrefabSignData]>
+! The new prefab sign data for this sign.
+!===
+
+====
+// end::func-setPrefabSignData[]
+// end::func-setPrefabSignData-title[]
+
+// end::interface[]
+

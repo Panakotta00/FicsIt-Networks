@@ -1,0 +1,10 @@
+= Future Module
+:table-caption!:
+
+Description
+
+== Types
+
+=== **Future**
+
+

@@ -1,0 +1,41 @@
+= Sign Base
+:table-caption!:
+
+The base class for all signs in the game.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getSignType-title[]
+=== `getSignType` () -> `descriptor` : Class<xref:/reflection/classes/SignType.adoc[SignType]>
+// tag::func-getSignType[]
+
+Returns the sign type descriptor
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Sign Type
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Descriptor* `descriptor`
+! Class<xref:/reflection/classes/SignType.adoc[SignType]>
+! The sign type descriptor
+!===
+
+====
+// end::func-getSignType[]
+// end::func-getSignType-title[]
+
+// end::interface[]
+

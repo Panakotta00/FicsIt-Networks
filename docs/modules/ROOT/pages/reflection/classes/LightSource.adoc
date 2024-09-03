@@ -1,0 +1,155 @@
+= Light Source
+:table-caption!:
+
+The base class for all light you can build.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-colorSlot-title[]
+=== `colorSlot` : Int
+// tag::func-colorSlot[]
+
+The color slot the light uses.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Color Slot
+!===
+====
+// end::func-colorSlot[]
+// end::func-colorSlot-title[]
+// tag::func-intensity-title[]
+=== `intensity` : Float
+// tag::func-intensity[]
+
+The intensity of the light.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Intensity
+!===
+====
+// end::func-intensity[]
+// end::func-intensity-title[]
+// tag::func-isLightEnabled-title[]
+=== `isLightEnabled` : Bool
+// tag::func-isLightEnabled[]
+
+True if the light is enabled
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Light Enabled
+!===
+====
+// end::func-isLightEnabled[]
+// end::func-isLightEnabled-title[]
+// tag::func-isTimeOfDayAware-title[]
+=== `isTimeOfDayAware` : Bool
+// tag::func-isTimeOfDayAware[]
+
+True if the light should automatically turn on and off depending on the time of the day.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Time of Day Aware
+!===
+====
+// end::func-isTimeOfDayAware[]
+// end::func-isTimeOfDayAware-title[]
+
+== Functions
+
+// tag::func-getColorFromSlot-title[]
+=== `getColorFromSlot` (`slot` : Int) -> `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-getColorFromSlot[]
+
+Returns the light color that is referenced by the given slot.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Color from Slot
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Slot* `slot`
+! Int
+! The slot you want to get the referencing color from.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Color* `color`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The color this slot references.
+!===
+
+====
+// end::func-getColorFromSlot[]
+// end::func-getColorFromSlot-title[]
+// tag::func-setColorFromSlot-title[]
+=== `setColorFromSlot` (`slot` : Int, `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+// tag::func-setColorFromSlot[]
+
+Allows to update the light color that is referenced by the given slot.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Color from Slot
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Slot* `slot`
+! Int
+! The slot you want to update the referencing color for.
+
+! *Color* `color`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The color this slot should now reference.
+!===
+
+====
+// end::func-setColorFromSlot[]
+// end::func-setColorFromSlot-title[]
+
+// end::interface[]
+

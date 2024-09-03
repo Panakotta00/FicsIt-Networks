@@ -1,0 +1,155 @@
+= Docking Station
+:table-caption!:
+
+A docking station for wheeled vehicles to transfer cargo.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isLoadMode-title[]
+=== `isLoadMode` : Bool
+// tag::func-isLoadMode[]
+
+True if the docking station loads docked vehicles, flase if it unloads them.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Load Mode
+!===
+====
+// end::func-isLoadMode[]
+// end::func-isLoadMode-title[]
+// tag::func-isLoadUnloading-title[]
+=== `isLoadUnloading` : Bool
+// tag::func-isLoadUnloading[]
+
+True if the docking station is currently loading or unloading a docked vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Load Unloading
+!===
+====
+// end::func-isLoadUnloading[]
+// end::func-isLoadUnloading-title[]
+
+== Functions
+
+// tag::func-getDocked-title[]
+=== `getDocked` () -> `docked` : Trace<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getDocked[]
+
+Returns the currently docked actor.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Docked
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Docked* `docked`
+! Trace<xref:/reflection/classes/Actor.adoc[Actor]>
+! The currently docked actor.
+!===
+
+====
+// end::func-getDocked[]
+// end::func-getDocked-title[]
+// tag::func-getFuelInv-title[]
+=== `getFuelInv` () -> `inventory` : Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+// tag::func-getFuelInv[]
+
+Returns the fuel inventory of the docking station.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Fueld Inventory
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inventory* `inventory`
+! Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+! The fuel inventory of the docking station.
+!===
+
+====
+// end::func-getFuelInv[]
+// end::func-getFuelInv-title[]
+// tag::func-getInv-title[]
+=== `getInv` () -> `inventory` : Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+// tag::func-getInv[]
+
+Returns the cargo inventory of the docking staiton.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Inventory
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inventory* `inventory`
+! Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+! The cargo inventory of this docking station.
+!===
+
+====
+// end::func-getInv[]
+// end::func-getInv-title[]
+// tag::func-undock-title[]
+=== `undock` ()
+// tag::func-undock[]
+
+Undocked the currently docked vehicle from this docking station.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Undock
+!===
+
+====
+// end::func-undock[]
+// end::func-undock-title[]
+
+// end::interface[]
+

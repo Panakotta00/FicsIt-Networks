@@ -1,0 +1,80 @@
+= Modular Indicator Pole
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getModule-title[]
+=== `getModule` (`module` : Int) -> `index` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getModule[]
+
+Gets the module at the given position in the stack
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Module
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Module* `module`
+! Int
+! The module at the given offset in the stack or nil if none
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Module Offset* `index`
+! Object<xref:/reflection/classes/Actor.adoc[Actor]>
+! The index in the stack, 0 being the first module
+!===
+
+====
+// end::func-getModule[]
+// end::func-getModule-title[]
+// tag::func-getNext-title[]
+=== `getNext` () -> `next` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getNext[]
+
+Returns the next pole module if any.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Next
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Next module* `next`
+! Object<xref:/reflection/classes/Actor.adoc[Actor]>
+! The next module in this chain.
+!===
+
+====
+// end::func-getNext[]
+// end::func-getNext-title[]
+
+// end::interface[]
+

@@ -1,0 +1,281 @@
+= Network Router
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isAddrWhitelist-title[]
+=== `isAddrWhitelist` : Bool
+// tag::func-isAddrWhitelist[]
+
+True if the address filter list is used as whitelist.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Address Whitelist
+!===
+====
+// end::func-isAddrWhitelist[]
+// end::func-isAddrWhitelist-title[]
+// tag::func-isWhitelist-title[]
+=== `isWhitelist` : Bool
+// tag::func-isWhitelist[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! isWhitelist
+!===
+====
+// end::func-isWhitelist[]
+// end::func-isWhitelist-title[]
+
+== Functions
+
+// tag::func-addPortList-title[]
+=== `addPortList` (`port` : Int)
+// tag::func-addPortList[]
+
+Adds a given port to the port filter list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Add Port to List
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Port* `port`
+! Int
+! The port you want to add to the list.
+!===
+
+====
+// end::func-addPortList[]
+// end::func-addPortList-title[]
+// tag::func-getAddrList-title[]
+=== `getAddrList` () -> `addresses` : Array<String>
+// tag::func-getAddrList[]
+
+Allows to get all the addresses of the address filter list as array.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Address List
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Addresses* `addresses`
+! Array<String>
+! The address array of the filter list.
+!===
+
+====
+// end::func-getAddrList[]
+// end::func-getAddrList-title[]
+// tag::func-getPortList-title[]
+=== `getPortList` () -> `ports` : Array<Int>
+// tag::func-getPortList[]
+
+Allows to get all the ports of the port filter list as array.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Port List
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Ports* `ports`
+! Array<Int>
+! The port array of the filter list.
+!===
+
+====
+// end::func-getPortList[]
+// end::func-getPortList-title[]
+// tag::func-removeAddrList-title[]
+=== `removeAddrList` (`addr` : String)
+// tag::func-removeAddrList[]
+
+Removes the given address from the address filter list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Remove Address from List
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Address* `addr`
+! String
+! The address you want to remove from the list.
+!===
+
+====
+// end::func-removeAddrList[]
+// end::func-removeAddrList-title[]
+// tag::func-removePortList-title[]
+=== `removePortList` (`port` : Int)
+// tag::func-removePortList[]
+
+Removes the given port from the port filter list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Remove Port from List
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Port* `port`
+! Int
+! The port you want to remove from the list.
+!===
+
+====
+// end::func-removePortList[]
+// end::func-removePortList-title[]
+// tag::func-setAddrList-title[]
+=== `setAddrList` () -> `addresses` : Array<String>
+// tag::func-setAddrList[]
+
+Overrides the address filter list with the given array.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Address List
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Addresses* `addresses`
+! Array<String>
+! The address array you want to override the filter list with.
+!===
+
+====
+// end::func-setAddrList[]
+// end::func-setAddrList-title[]
+// tag::func-setPortList-title[]
+=== `setPortList` () -> `ports` : Array<Int>
+// tag::func-setPortList[]
+
+Overrides the port filter list with the given array.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Port List
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Ports* `ports`
+! Array<Int>
+! The port array you want to override the filter list with.
+!===
+
+====
+// end::func-setPortList[]
+// end::func-setPortList-title[]
+// tag::func-addAddrList-title[]
+=== `addAddrList` (`addr` : String)
+// tag::func-addAddrList[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! addAddrList
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *addr* `addr`
+! String
+! 
+!===
+
+====
+// end::func-addAddrList[]
+// end::func-addAddrList-title[]
+
+// end::interface[]
+

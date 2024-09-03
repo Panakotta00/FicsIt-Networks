@@ -1,0 +1,86 @@
+= Time Table Stop
+:table-caption!:
+
+Information about a train stop in a time table.
+
+== Properties
+
+// tag::func-station-title[]
+=== `station` : Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>
+// tag::func-station[]
+
+The station at which the train should stop
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Station
+!===
+====
+// end::func-station[]
+// end::func-station-title[]
+
+== Functions
+
+// tag::func-getRuleSet-title[]
+=== `getRuleSet` () -> `ruleset` : Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>
+// tag::func-getRuleSet[]
+
+Returns The rule set wich describe when the train will depart from the train station.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Rule Set
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Rule Set* `ruleset`
+! Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>
+! The rule set of this time table stop.
+!===
+
+====
+// end::func-getRuleSet[]
+// end::func-getRuleSet-title[]
+// tag::func-setRuleSet-title[]
+=== `setRuleSet` (`ruleset` : Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>)
+// tag::func-setRuleSet[]
+
+Allows you to change the Rule Set of this time table stop.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Rule Set
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Rule Set* `ruleset`
+! Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>
+! The rule set you want to use instead.
+!===
+
+====
+// end::func-setRuleSet[]
+// end::func-setRuleSet-title[]
+

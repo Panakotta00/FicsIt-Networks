@@ -1,0 +1,175 @@
+= Network Card
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-broadcast-title[]
+=== `broadcast` (`port` : Int, ...)
+// tag::func-broadcast[]
+
+Sends a network message to all components in the network message network (including networks sepperated by network routers) on the given port. The data you want to add can be passed as additional parameters. Max amount of such parameters is 7 and they can only be nil, booleans, numbers and strings.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#e59445'><i>VarArgs</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Broadcast Message
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Port* `port`
+! Int
+! The port on which the network message should get sent. For outgoing network messages a port does not need to be opened.
+!===
+
+====
+// end::func-broadcast[]
+// end::func-broadcast-title[]
+// tag::func-closeAll-title[]
+=== `closeAll` ()
+// tag::func-closeAll[]
+
+Closes all ports of the network card so no further messages are able to get received
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Close All Ports
+!===
+
+====
+// end::func-closeAll[]
+// end::func-closeAll-title[]
+// tag::func-close-title[]
+=== `close` (`port` : Int)
+// tag::func-close[]
+
+Closes the given port so the network card wont receive network messages on the given port.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Close Port
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Port* `port`
+! Int
+! The port you want to close.
+!===
+
+====
+// end::func-close[]
+// end::func-close-title[]
+// tag::func-open-title[]
+=== `open` (`port` : Int)
+// tag::func-open[]
+
+Opens the given port so the network card is able to receive network messages on the given port.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Open Port
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Port* `port`
+! Int
+! The port you want to open.
+!===
+
+====
+// end::func-open[]
+// end::func-open-title[]
+// tag::func-send-title[]
+=== `send` (`receiver` : String, `port` : Int, ...)
+// tag::func-send[]
+
+Sends a network message to the receiver with the given address on the given port. The data you want to add can be passed as additional parameters. Max amount of such parameters is 7 and they can only be nil, booleans, numbers and strings.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#e59445'><i>VarArgs</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Send Message
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Receiver* `receiver`
+! String
+! The component ID as string of the component you want to send the network message to.
+
+! *Port* `port`
+! Int
+! The port on which the network message should get sent. For outgoing network messages a port does not need to be opened.
+!===
+
+====
+// end::func-send[]
+// end::func-send-title[]
+
+== Signals
+
+=== `NetworkMessage` (_String_ *Sender* `sender`, _Int_ *Port* `port`, ...)
+
+Triggers when the network card receives a network message on one of its opened ports. The additional arguments are the data that is contained within the network message.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Sender* `sender`
+! String
+! The component id of the sender of the network message.
+
+! *Port* `port`
+! Int
+! The port on which the network message got sent.
+!===
+====
+
+
+// end::interface[]
+

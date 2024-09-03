@@ -1,0 +1,88 @@
+= Speaker Pole
+:table-caption!:
+
+This speaker pole allows to play custom sound files, In-Game
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-playSound-title[]
+=== `playSound` (`sound` : String, `startPoint` : Float)
+// tag::func-playSound[]
+
+Plays a custom sound file ingame
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Play Sound
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Sound* `sound`
+! String
+! The sound file (without the file ending) you want to play
+
+! *Start Point* `startPoint`
+! Float
+! The start point in seconds at which the system should start playing
+!===
+
+====
+// end::func-playSound[]
+// end::func-playSound-title[]
+// tag::func-stopSound-title[]
+=== `stopSound` ()
+// tag::func-stopSound[]
+
+Stops the currently playing sound file.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Stop Sound
+!===
+
+====
+// end::func-stopSound[]
+// end::func-stopSound-title[]
+
+== Signals
+
+=== `SpeakerSound` (_Int_ *Type* `type`, _String_ *Sound* `sound`)
+
+Triggers when the sound play state of the speaker pole changes.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Type* `type`
+! Int
+! The type of the speaker pole event.
+
+! *Sound* `sound`
+! String
+! The sound file including in the event.
+!===
+====
+
+
+// end::interface[]
+

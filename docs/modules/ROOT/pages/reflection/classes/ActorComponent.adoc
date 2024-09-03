@@ -1,0 +1,29 @@
+= Actor Component
+:table-caption!:
+
+A component/part of an actor in the world.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-owner-title[]
+=== `owner` : Trace<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-owner[]
+
+The parent actor of which this component is part of
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Owner
+!===
+====
+// end::func-owner[]
+// end::func-owner-title[]
+
+// end::interface[]
+

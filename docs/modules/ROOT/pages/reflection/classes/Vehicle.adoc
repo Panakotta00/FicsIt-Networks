@@ -1,0 +1,63 @@
+= Vehicle
+:table-caption!:
+
+A base class for all vehicles.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-health-title[]
+=== `health` : Float
+// tag::func-health[]
+
+The health of the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Health
+!===
+====
+// end::func-health[]
+// end::func-health-title[]
+// tag::func-isSelfDriving-title[]
+=== `isSelfDriving` : Bool
+// tag::func-isSelfDriving[]
+
+True if the vehicle is currently self driving.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Self Driving
+!===
+====
+// end::func-isSelfDriving[]
+// end::func-isSelfDriving-title[]
+// tag::func-maxHealth-title[]
+=== `maxHealth` : Float
+// tag::func-maxHealth[]
+
+The maximum amount of health this vehicle can have.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Health
+!===
+====
+// end::func-maxHealth[]
+// end::func-maxHealth-title[]
+
+// end::interface[]
+

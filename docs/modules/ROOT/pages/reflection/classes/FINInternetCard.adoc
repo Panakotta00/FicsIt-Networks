@@ -1,0 +1,59 @@
+= FINInternetCard
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-request-title[]
+=== `request` (`url` : String, `method` : String, `data` : String, ...) -> `ReturnValue` : Struct<xref:/reflection/structs/Future.adoc[Future]>
+// tag::func-request[]
+
+Does an HTTP-Request. If a payload is given, the Content-Type header has to be set. All additional parameters have to be strings and in pairs of two for defining the http headers and values.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#e59445'><i>VarArgs</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Request
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *URL* `url`
+! String
+! The URL for which you want to make an HTTP Request.
+
+! *Method* `method`
+! String
+! The http request method/verb you want to make the request. f.e. 'GET', 'POST'
+
+! *Data* `data`
+! String
+! The http request payload you want to sent.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Struct<xref:/reflection/structs/Future.adoc[Future]>
+! 
+!===
+
+====
+// end::func-request[]
+// end::func-request-title[]
+
+// end::interface[]
+

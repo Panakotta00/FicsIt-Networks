@@ -1,0 +1,172 @@
+= Buzzer Module
+:table-caption!:
+
+A small buzzer for panel mounting capable of playing single frequency beeps
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-attackCurve-title[]
+=== `attackCurve` : Float
+// tag::func-attackCurve[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Attack Curve
+!===
+====
+// end::func-attackCurve[]
+// end::func-attackCurve-title[]
+// tag::func-attackTime-title[]
+=== `attackTime` : Float
+// tag::func-attackTime[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Attack Time
+!===
+====
+// end::func-attackTime[]
+// end::func-attackTime-title[]
+// tag::func-decayCurve-title[]
+=== `decayCurve` : Float
+// tag::func-decayCurve[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Decay Curve
+!===
+====
+// end::func-decayCurve[]
+// end::func-decayCurve-title[]
+// tag::func-decayTime-title[]
+=== `decayTime` : Float
+// tag::func-decayTime[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Decay Time
+!===
+====
+// end::func-decayTime[]
+// end::func-decayTime-title[]
+// tag::func-frequency-title[]
+=== `frequency` : Float
+// tag::func-frequency[]
+
+Sets the frequency for this buzzer
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Frequency
+!===
+====
+// end::func-frequency[]
+// end::func-frequency-title[]
+// tag::func-volume-title[]
+=== `volume` : Float
+// tag::func-volume[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Volume
+!===
+====
+// end::func-volume[]
+// end::func-volume-title[]
+// tag::func-isPlaying-title[]
+=== `isPlaying` : Bool
+// tag::func-isPlaying[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! isPlaying
+!===
+====
+// end::func-isPlaying[]
+// end::func-isPlaying-title[]
+
+== Functions
+
+// tag::func-beep-title[]
+=== `beep` ()
+// tag::func-beep[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Beep
+!===
+
+====
+// end::func-beep[]
+// end::func-beep-title[]
+// tag::func-stop-title[]
+=== `stop` ()
+// tag::func-stop[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Stop
+!===
+
+====
+// end::func-stop[]
+// end::func-stop-title[]
+
+// end::interface[]
+

@@ -1,0 +1,89 @@
+= Railroad Switch Control
+:table-caption!:
+
+The controler object for a railroad switch.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getControlledConnection-title[]
+=== `getControlledConnection` () -> `connection` : Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+// tag::func-getControlledConnection[]
+
+Returns the Railroad Connection this switch is controlling.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Controlled Connection
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connection* `connection`
+! Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+! The controlled connectino.
+!===
+
+====
+// end::func-getControlledConnection[]
+// end::func-getControlledConnection-title[]
+// tag::func-switchPosition-title[]
+=== `switchPosition` () -> `position` : Int
+// tag::func-switchPosition[]
+
+Returns the current switch position of this switch.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Switch Position
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Int
+! The current switch position of this switch.
+!===
+
+====
+// end::func-switchPosition[]
+// end::func-switchPosition-title[]
+// tag::func-toggleSwitch-title[]
+=== `toggleSwitch` ()
+// tag::func-toggleSwitch[]
+
+Toggles the railroad switch like if you interact with it.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Toggle Switch
+!===
+
+====
+// end::func-toggleSwitch[]
+// end::func-toggleSwitch-title[]
+
+// end::interface[]
+

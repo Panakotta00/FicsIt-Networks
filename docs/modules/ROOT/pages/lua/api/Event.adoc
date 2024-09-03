@@ -1,112 +1,75 @@
-= Event API
-:description: The Event API helps to interact with the singal system of the connected computer network itself.
+= Event Module
+:table-caption!:
 
-**Lua Lib: `event`**
+Description
 
+== Globals
+
+=== **event**
 The Event API provides classes, functions and variables for interacting with the component network.
 
-== Functions
-
-=== `listen(Component)`
-
-Adds the running lua context to the listen queue of the given component.
-
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|Component
-|Component
-|The network component lua representation the computer should now listen to.
-|===
-
-=== `Object[] listening()`
-
-Returns all signal senders this computer is listening to.
-
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|Object[]
-|Object[]
-|An array containing instances to all sginal senders this computer is listening too.
-|===
-
-=== `ignore(Component...)`
-
-Removes the running lua context from the listen queue of the given components.
-Basically the opposite of listen.
-
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|Component...
-|Component...
-|The network component lua representations the computer should stop listening to.
-|===
-
-=== `ignoreAll()`
-
-Stops listening to any signal sender.
-If afterwards there are still coming signals in, it might be the system itself or caching bug.
-
-=== `clear()`
-
+=== __event.__**clear** ()
 Clears every signal from the signal queue.
 
-=== `string e, Component s, ... pull([number timeout])`
+=== __event.__**ignore** (xref:/reflection/classes/Object.adoc[Object]...)
+Removes the running lua context from the listen queue of the given components. Basically the opposite of listen.
 
-Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached.
+=== __event.__**ignoreAll** ()
+Stops listening to any signal sender. If afterwards there are still coming signals in, it might be the system itself or caching bug.
 
-Returns directly if there is already a signal in the queue (the tick doesn't get yielded).
+=== __event.__**listen** (xref:/reflection/classes/Object.adoc[Object]...)
+Adds the running lua context to the listen queue of the given components.
 
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+=== __event.__**listening** () -> xref:/reflection/classes/Object.adoc[Object][]
+Returns all signal senders this computer is listening to.
 
-|timeout
-|number
-|The amount of time needs to pass until pull unblocks when no signal got pushed.
- If not set, the function will block indefinitely until a signal gets pushed.
- If set to `0` (int), will not yield the tick and directly return with
- the signal data or nil if no signal was in the queue.
-|===
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-Return Values::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+! *An array containing all objects this computer is currently listening to.* `listening`
+! xref:/reflection/classes/Object.adoc[Object][]
+! 
 
-|e
-|string
-|The name of the returned signal.
+!===
+====
 
-Nil when timeout got reached.
+=== __event.__**pull** ([timeout: number]) -> (string|nil, xref:/reflection/classes/Object.adoc[Object], ...)
+Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached. +
+Returns directly if there is already a signal in the queue (the tick doesn￢ﾀﾙt get yielded).
 
-|s
-|Component
-|The component representation of the signal sender.
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-Not set when timeout got reached.
+! *Timeout* `timeout`
+! number
+! The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue.
 
-|...
-|...
-|The parameters passed to the signal.
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-Not set when timeout got reached.
-|===
+! *Event* `event`
+! string|nil
+! The name of the returned signal. Nil when timeout got reached.
 
+! *Sender* `sender`
+! xref:/reflection/classes/Object.adoc[Object]
+! The component representation of the signal sender. Not set when timeout got reached.
 
+! *Parameters* `parameters`
+! any...
+! The parameters passed to the signal. Not set when timeout got reached.
 
-include::partial$api_footer.adoc[]
+!===
+====
+
