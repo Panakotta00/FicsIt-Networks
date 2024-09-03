@@ -1,0 +1,640 @@
+= Railroad Vehicle Movement
+:table-caption!:
+
+This actor component contains all the infomation about the movement of a railroad vehicle.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-airBrakingForce-title[]
+=== `airBrakingForce` : Float
+// tag::func-airBrakingForce[]
+
+The air braking force currently acting on the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Air Braking Force
+!===
+====
+// end::func-airBrakingForce[]
+// end::func-airBrakingForce-title[]
+// tag::func-airResistance-title[]
+=== `airResistance` : Float
+// tag::func-airResistance[]
+
+The current air resistance of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Air Resistance
+!===
+====
+// end::func-airResistance[]
+// end::func-airResistance-title[]
+// tag::func-brakingForce-title[]
+=== `brakingForce` : Float
+// tag::func-brakingForce[]
+
+The braking force currently acting on the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Braking Force
+!===
+====
+// end::func-brakingForce[]
+// end::func-brakingForce-title[]
+// tag::func-curvatureResistance-title[]
+=== `curvatureResistance` : Float
+// tag::func-curvatureResistance[]
+
+The current curvature resistance of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Curvature Resistance
+!===
+====
+// end::func-curvatureResistance[]
+// end::func-curvatureResistance-title[]
+// tag::func-dynamicBrakingForce-title[]
+=== `dynamicBrakingForce` : Float
+// tag::func-dynamicBrakingForce[]
+
+The dynamic braking force currently acting on the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Dynamic Braking Force
+!===
+====
+// end::func-dynamicBrakingForce[]
+// end::func-dynamicBrakingForce-title[]
+// tag::func-gradientForce-title[]
+=== `gradientForce` : Float
+// tag::func-gradientForce[]
+
+The gradient force currently acting on the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Gradient Force
+!===
+====
+// end::func-gradientForce[]
+// end::func-gradientForce-title[]
+// tag::func-gradientResistance-title[]
+=== `gradientResistance` : Float
+// tag::func-gradientResistance[]
+
+The current gardient resistance of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Gradient Resistance
+!===
+====
+// end::func-gradientResistance[]
+// end::func-gradientResistance-title[]
+// tag::func-gravitationalForce-title[]
+=== `gravitationalForce` : Float
+// tag::func-gravitationalForce[]
+
+The current gravitational force acting on the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Gravitationl Force
+!===
+====
+// end::func-gravitationalForce[]
+// end::func-gravitationalForce-title[]
+// tag::func-isMoving-title[]
+=== `isMoving` : Bool
+// tag::func-isMoving[]
+
+True if this vehicle is currently moving.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Moving
+!===
+====
+// end::func-isMoving[]
+// end::func-isMoving-title[]
+// tag::func-mass-title[]
+=== `mass` : Float
+// tag::func-mass[]
+
+The current mass of the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Mass
+!===
+====
+// end::func-mass[]
+// end::func-mass-title[]
+// tag::func-maxAirBrakingEffort-title[]
+=== `maxAirBrakingEffort` : Float
+// tag::func-maxAirBrakingEffort[]
+
+The maximum air braking effort of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Air Braking Effort
+!===
+====
+// end::func-maxAirBrakingEffort[]
+// end::func-maxAirBrakingEffort-title[]
+// tag::func-maxDynamicBrakingEffort-title[]
+=== `maxDynamicBrakingEffort` : Float
+// tag::func-maxDynamicBrakingEffort[]
+
+The maximum dynamic braking effort of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Dynamic Braking Effort
+!===
+====
+// end::func-maxDynamicBrakingEffort[]
+// end::func-maxDynamicBrakingEffort-title[]
+// tag::func-maxSpeed-title[]
+=== `maxSpeed` : Float
+// tag::func-maxSpeed[]
+
+The maximum forward speed the vehicle can reach.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Speed
+!===
+====
+// end::func-maxSpeed[]
+// end::func-maxSpeed-title[]
+// tag::func-maxTractiveEffort-title[]
+=== `maxTractiveEffort` : Float
+// tag::func-maxTractiveEffort[]
+
+The maximum tractive effort of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Tractive Effort
+!===
+====
+// end::func-maxTractiveEffort[]
+// end::func-maxTractiveEffort-title[]
+// tag::func-numWheelsets-title[]
+=== `numWheelsets` : Int
+// tag::func-numWheelsets[]
+
+The number of wheelsets this vehicle has.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Num Wheelsets
+!===
+====
+// end::func-numWheelsets[]
+// end::func-numWheelsets-title[]
+// tag::func-orientation-title[]
+=== `orientation` : Float
+// tag::func-orientation[]
+
+The orientation of the vehicle
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Orientation
+!===
+====
+// end::func-orientation[]
+// end::func-orientation-title[]
+// tag::func-payloadMass-title[]
+=== `payloadMass` : Float
+// tag::func-payloadMass[]
+
+The mass of the payload of the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Payload Mass
+!===
+====
+// end::func-payloadMass[]
+// end::func-payloadMass-title[]
+// tag::func-relativeSpeed-title[]
+=== `relativeSpeed` : Float
+// tag::func-relativeSpeed[]
+
+The current relative forward speed to the ground.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Relative Speed
+!===
+====
+// end::func-relativeSpeed[]
+// end::func-relativeSpeed-title[]
+// tag::func-resistiveForce-title[]
+=== `resistiveForce` : Float
+// tag::func-resistiveForce[]
+
+The resistive force currently acting on the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Resistive Froce
+!===
+====
+// end::func-resistiveForce[]
+// end::func-resistiveForce-title[]
+// tag::func-rollingResistance-title[]
+=== `rollingResistance` : Float
+// tag::func-rollingResistance[]
+
+The current rolling resistance of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Rolling Resistance
+!===
+====
+// end::func-rollingResistance[]
+// end::func-rollingResistance-title[]
+// tag::func-speed-title[]
+=== `speed` : Float
+// tag::func-speed[]
+
+The current forward speed of the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Speed
+!===
+====
+// end::func-speed[]
+// end::func-speed-title[]
+// tag::func-tareMass-title[]
+=== `tareMass` : Float
+// tag::func-tareMass[]
+
+The tare mass of the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Tare Mass
+!===
+====
+// end::func-tareMass[]
+// end::func-tareMass-title[]
+// tag::func-trackCurvature-title[]
+=== `trackCurvature` : Float
+// tag::func-trackCurvature[]
+
+The current track curvature of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Track Curvature
+!===
+====
+// end::func-trackCurvature[]
+// end::func-trackCurvature-title[]
+// tag::func-trackGrade-title[]
+=== `trackGrade` : Float
+// tag::func-trackGrade[]
+
+The current track grade of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Track Grade
+!===
+====
+// end::func-trackGrade[]
+// end::func-trackGrade-title[]
+// tag::func-tractiveForce-title[]
+=== `tractiveForce` : Float
+// tag::func-tractiveForce[]
+
+The current tractive force acting on the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Tractive Force
+!===
+====
+// end::func-tractiveForce[]
+// end::func-tractiveForce-title[]
+// tag::func-wheelRotation-title[]
+=== `wheelRotation` : Float
+// tag::func-wheelRotation[]
+
+The current wheel rotation of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Wheel Rotation
+!===
+====
+// end::func-wheelRotation[]
+// end::func-wheelRotation-title[]
+// tag::func-wheelsetAngle-title[]
+=== `wheelsetAngle` : Float
+// tag::func-wheelsetAngle[]
+
+The wheelset angle of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Wheelset Angle
+!===
+====
+// end::func-wheelsetAngle[]
+// end::func-wheelsetAngle-title[]
+
+== Functions
+
+// tag::func-getCouplerRotationAndExtention-title[]
+=== `getCouplerRotationAndExtention` (`coupler` : Int) -> (`x` : Float, `y` : Float, `z` : Float, `extention` : Float)
+// tag::func-getCouplerRotationAndExtention[]
+
+Returns the normal vector and the extention of the coupler with the given index.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Coupler Rotation And Extention
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Coupler* `coupler`
+! Int
+! The index of which you want to get the normal and extention of.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Float
+! The X component of the coupler normal.
+
+! *Y* `y`
+! Float
+! The Y component of the coupler normal.
+
+! *Z* `z`
+! Float
+! The Z component of the coupler normal.
+
+! *Extention* `extention`
+! Float
+! The extention of the coupler.
+!===
+
+====
+// end::func-getCouplerRotationAndExtention[]
+// end::func-getCouplerRotationAndExtention-title[]
+// tag::func-getVehicle-title[]
+=== `getVehicle` () -> `vehicle` : Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+// tag::func-getVehicle[]
+
+Returns the vehicle this movement component holds the movement information of.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Vehicle
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Vehicle* `vehicle`
+! Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+! The vehicle this movement component holds the movement information of.
+!===
+
+====
+// end::func-getVehicle[]
+// end::func-getVehicle-title[]
+// tag::func-getWheelsetOffset-title[]
+=== `getWheelsetOffset` (`wheelset` : Int) -> `offset` : Float
+// tag::func-getWheelsetOffset[]
+
+Returns the offset of the wheelset with the given index from the start of the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Wheelset Offset
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Wheelset* `wheelset`
+! Int
+! The index of the wheelset you want to get the offset of.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Offset* `offset`
+! Float
+! The offset of the wheelset.
+!===
+
+====
+// end::func-getWheelsetOffset[]
+// end::func-getWheelsetOffset-title[]
+// tag::func-getWheelsetRotation-title[]
+=== `getWheelsetRotation` (`wheelset` : Int) -> (`x` : Float, `y` : Float, `z` : Float)
+// tag::func-getWheelsetRotation[]
+
+Returns the current rotation of the given wheelset.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Wheelset Rotation
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Wheelset* `wheelset`
+! Int
+! The index of the wheelset you want to get the rotation of.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Float
+! The wheelset's rotation X component.
+
+! *Y* `y`
+! Float
+! The wheelset's rotation Y component.
+
+! *Z* `z`
+! Float
+! The wheelset's rotation Z component.
+!===
+
+====
+// end::func-getWheelsetRotation[]
+// end::func-getWheelsetRotation-title[]
+
+// end::interface[]
+

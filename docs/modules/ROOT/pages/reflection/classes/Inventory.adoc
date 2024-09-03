@@ -1,0 +1,151 @@
+= Inventory
+:table-caption!:
+
+A actor component that can hold multiple item stacks.
+WARNING! Be aware of container inventories, and never open their UI, otherwise these function will not work as expected.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-itemCount-title[]
+=== `itemCount` : Int
+// tag::func-itemCount[]
+
+The absolute amount of items in the whole inventory.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Item Count
+!===
+====
+// end::func-itemCount[]
+// end::func-itemCount-title[]
+// tag::func-size-title[]
+=== `size` : Int
+// tag::func-size[]
+
+The count of available item stack slots this inventory has.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Size
+!===
+====
+// end::func-size[]
+// end::func-size-title[]
+
+== Functions
+
+// tag::func-flush-title[]
+=== `flush` ()
+// tag::func-flush[]
+
+Removes all discardable items from the inventory completely. They will be gone! No way to get them back!
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Flush
+!===
+
+====
+// end::func-flush[]
+// end::func-flush-title[]
+// tag::func-getStack-title[]
+=== `getStack` (...)
+// tag::func-getStack[]
+
+Returns the item stack at the given index.
+Takes integers as input and returns the corresponding stacks.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#e59445'><i>VarArgs</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Stack
+!===
+
+====
+// end::func-getStack[]
+// end::func-getStack-title[]
+// tag::func-sort-title[]
+=== `sort` ()
+// tag::func-sort[]
+
+Sorts the whole inventory. (like the middle mouse click into a inventory)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Sort
+!===
+
+====
+// end::func-sort[]
+// end::func-sort-title[]
+// tag::func-swapStacks-title[]
+=== `swapStacks` (`index1` : Int, `index2` : Int) -> `successful` : Bool
+// tag::func-swapStacks[]
+
+Swaps two given stacks inside the inventory.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Swap Stacks
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index 1* `index1`
+! Int
+! The index of the first stack in the inventory.
+
+! *Index 2* `index2`
+! Int
+! The index of the second stack in the inventory.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Successful* `successful`
+! Bool
+! True if the swap was successful.
+!===
+
+====
+// end::func-swapStacks[]
+// end::func-swapStacks-title[]
+
+// end::interface[]
+

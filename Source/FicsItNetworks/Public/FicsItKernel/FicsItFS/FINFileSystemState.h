@@ -3,10 +3,11 @@
 #include "FicsItKernel/FicsItFS/FileSystem.h"
 #include "FGInventoryComponent.h"
 #include "GameFramework/Actor.h"
+#include "Utils/FINLabelContainerInterface.h"
 #include "FINFileSystemState.generated.h"
 
 UCLASS()
-class FICSITNETWORKS_API AFINFileSystemState : public AActor, public IFGSaveInterface {
+class FICSITNETWORKS_API AFINFileSystemState : public AActor, public IFGSaveInterface, public IFINLabelContainerInterface {
 	GENERATED_BODY()
 
 private:
@@ -18,14 +19,17 @@ private:
 public:
 	void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk);
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	FGuid ID;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, Replicated)
 	bool IdCreated = false;
 
-	UPROPERTY(SaveGame, EditDefaultsOnly)
+	UPROPERTY(SaveGame, Replicated, EditDefaultsOnly)
 	int32 Capacity = 0;
+
+	UPROPERTY(SaveGame, Replicated)
+	FString Label;
 
 	UPROPERTY(Replicated)
 	float Usage = 0.0f;
@@ -47,6 +51,11 @@ public:
 	virtual void PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	virtual bool ShouldSave_Implementation() const override;
 	// End IFGSaveInterface
+
+	// Begin IFINLabelContainerInterface
+	virtual FString GetLabel_Implementation() override;
+	virtual void SetLabel_Implementation(const FString& InLabel) override;
+	// End IFINLabelContainerInterface
 	
 	CodersFileSystem::SRef<CodersFileSystem::Device> GetDevice(bool bInForceUpdate = false, bool bInForeCreate = false);
 

@@ -1,0 +1,41 @@
+= Trace Property
+:table-caption!:
+
+A reflection object representing a trace property.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getSubclass-title[]
+=== `getSubclass` () -> `subclass` : Object<xref:/reflection/classes/Class.adoc[Class]>
+// tag::func-getSubclass[]
+
+Returns the subclass type of this trace. Meaning, the stored traces need to be of this type.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Subclass
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Subclass* `subclass`
+! Object<xref:/reflection/classes/Class.adoc[Class]>
+! The subclass of this trace.
+!===
+
+====
+// end::func-getSubclass[]
+// end::func-getSubclass-title[]
+
+// end::interface[]
+

@@ -1,8 +1,0 @@
-= APIs
-The different APIs provide interfaces for interacting with components and systems through Lua. Most Components have their own API.
-
-A network component can contain multiple APIs and other special variations.
-
-
-
-include::partial$api_footer.adoc[]

@@ -1,0 +1,140 @@
+= Rotator
+:table-caption!:
+
+Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.
+
+== Properties
+
+// tag::func-pitch-title[]
+=== `pitch` : Float
+// tag::func-pitch[]
+
+The pitch component
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Pitch
+!===
+====
+// end::func-pitch[]
+// end::func-pitch-title[]
+// tag::func-roll-title[]
+=== `roll` : Float
+// tag::func-roll[]
+
+The roll component
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Roll
+!===
+====
+// end::func-roll[]
+// end::func-roll-title[]
+// tag::func-yaw-title[]
+=== `yaw` : Float
+// tag::func-yaw[]
+
+The yaw component
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Yaw
+!===
+====
+// end::func-yaw[]
+// end::func-yaw-title[]
+
+== Functions
+
+// tag::func-FIN_Operator_Add-title[]
+=== `FIN_Operator_Add` (`other` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>) -> `result` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+// tag::func-FIN_Operator_Add[]
+
+The addition (+) operator for this struct.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Operator Add
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Other* `other`
+! Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+! The other rotator that should be added to this rotator
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+! The resulting rotator of the vector addition
+!===
+
+====
+// end::func-FIN_Operator_Add[]
+// end::func-FIN_Operator_Add-title[]
+// tag::func-FIN_Operator_Sub-title[]
+=== `FIN_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>) -> `result` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+// tag::func-FIN_Operator_Sub[]
+
+The subtraction (-) operator for this struct.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Operator Sub
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Other* `other`
+! Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+! The other rotator that should be subtracted from this rotator
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+! The resulting rotator of the vector subtraction
+!===
+
+====
+// end::func-FIN_Operator_Sub[]
+// end::func-FIN_Operator_Sub-title[]
+

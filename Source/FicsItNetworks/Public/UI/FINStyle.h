@@ -2,7 +2,7 @@
 
 #include "Styling/SlateStyle.h"
 
-class FFINStyle {
+class FICSITNETWORKS_API FFINStyle {
 public:
 	static void Initialize();
 	static void Shutdown();

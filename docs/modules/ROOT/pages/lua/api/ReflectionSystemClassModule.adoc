@@ -1,0 +1,27 @@
+= Reflection-System Class Module
+:table-caption!:
+
+Description
+
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/ReflectionSystemBaseModule.adoc[ReflectionSystemBaseModule]
+!===
+
+== Globals
+
+=== **classes** : xref:/lua/api/ReflectionSystemClassModule.adoc#_classlib[ClassLib]
+A peseudo table that can be used to look up classes/types.
+Ideal usage of it is `classes.Inventory`.
+Since the type lookup occurs in the metatable-function, you can still use the []-Operator in the case
+you want to look up something based on a dynamic string e.g. `structs[myStringVar]` works just fine.
+
+== Types
+
+=== **Class**
+
+
+=== **ClassLib**
+
+

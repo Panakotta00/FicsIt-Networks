@@ -1,0 +1,560 @@
+= Computer GPU T1
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-fill-title[]
+=== `fill` (`x` : Int, `y` : Int, `dx` : Int, `dy` : Int, `str` : String)
+// tag::func-fill[]
+
+Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Fill
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x coordinate at which the rectangle should get drawn. (upper-left corner)
+
+! *Y* `y`
+! Int
+! The y coordinate at which the rectangle should get drawn. (upper-left corner)
+
+! *DX* `dx`
+! Int
+! The width of the rectangle.
+
+! *DY* `dy`
+! Int
+! The height of the rectangle.
+
+! *String* `str`
+! String
+! The character you want to use for the rectangle. (first char in the given string)
+!===
+
+====
+// end::func-fill[]
+// end::func-fill-title[]
+// tag::func-flush-title[]
+=== `flush` ()
+// tag::func-flush[]
+
+Flushes the hidden screen buffer to the visible screen buffer and so makes the draw calls visible.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Flush
+!===
+
+====
+// end::func-flush[]
+// end::func-flush-title[]
+// tag::func-getBuffer-title[]
+=== `getBuffer` () -> `buffer` : Struct<xref:/reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]>
+// tag::func-getBuffer[]
+
+Returns the back buffer as struct to be able to use advanced buffer handling functions. (struct is a copy)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Buffer
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Buffer* `buffer`
+! Struct<xref:/reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]>
+! The Buffer that is currently the back buffer.
+!===
+
+====
+// end::func-getBuffer[]
+// end::func-getBuffer-title[]
+// tag::func-getScreen-title[]
+=== `getScreen` () -> `screen` : Object<xref:/reflection/classes/Object.adoc[Object]>
+// tag::func-getScreen[]
+
+Returns the currently bound screen.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Screen
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Screen* `screen`
+! Object<xref:/reflection/classes/Object.adoc[Object]>
+! The currently bound screen.
+!===
+
+====
+// end::func-getScreen[]
+// end::func-getScreen-title[]
+// tag::func-getSize-title[]
+=== `getSize` () -> (`w` : Int, `h` : Int)
+// tag::func-getSize[]
+
+Returns the size of the text-grid (and buffer).
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Size
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Width* `w`
+! Int
+! The width of the text-gird.
+
+! *Height* `h`
+! Int
+! The height of the text-grid.
+!===
+
+====
+// end::func-getSize[]
+// end::func-getSize-title[]
+// tag::func-setBackground-title[]
+=== `setBackground` (`r` : Float, `g` : Float, `b` : Float, `a` : Float)
+// tag::func-setBackground[]
+
+Changes the background color that is used for the next draw calls.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Background Color
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Red* `r`
+! Float
+! The red portion of the background color. (0.0 - 1.0)
+
+! *Green* `g`
+! Float
+! The green portion of the background color. (0.0 - 1.0)
+
+! *Blue* `b`
+! Float
+! The blue portion of the background color. (0.0 - 1.0)
+
+! *Alpha* `a`
+! Float
+! The opacity of the background color. (0.0 - 1.0)
+!===
+
+====
+// end::func-setBackground[]
+// end::func-setBackground-title[]
+// tag::func-setBuffer-title[]
+=== `setBuffer` (`buffer` : Struct<xref:/reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]>)
+// tag::func-setBuffer[]
+
+Allows to change the back buffer of the GPU to the given buffer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Buffer
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Buffer* `buffer`
+! Struct<xref:/reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]>
+! The Buffer you want to now use as back buffer.
+!===
+
+====
+// end::func-setBuffer[]
+// end::func-setBuffer-title[]
+// tag::func-setForeground-title[]
+=== `setForeground` (`r` : Float, `g` : Float, `b` : Float, `a` : Float)
+// tag::func-setForeground[]
+
+Changes the foreground color that is used for the next draw calls.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Foreground Color
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Red* `r`
+! Float
+! The red portion of the foreground color. (0.0 - 1.0)
+
+! *Green* `g`
+! Float
+! The green portion of the foreground color. (0.0 - 1.0)
+
+! *Blue* `b`
+! Float
+! The blue portion of the foreground color. (0.0 - 1.0)
+
+! *Alpha* `a`
+! Float
+! The opacity of the foreground color. (0.0 - 1.0)
+!===
+
+====
+// end::func-setForeground[]
+// end::func-setForeground-title[]
+// tag::func-setSize-title[]
+=== `setSize` (`w` : Int, `h` : Int)
+// tag::func-setSize[]
+
+Changes the size of the text-grid (and buffer).
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Size
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Width* `w`
+! Int
+! The width of the text-gird.
+
+! *Height* `h`
+! Int
+! The height of the text-grid.
+!===
+
+====
+// end::func-setSize[]
+// end::func-setSize-title[]
+// tag::func-setText-title[]
+=== `setText` (`x` : Int, `y` : Int, `str` : String)
+// tag::func-setText[]
+
+Draws the given text at the given position to the hidden screen buffer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Text
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x coordinate at which the text should get drawn.
+
+! *Y* `y`
+! Int
+! The y coordinate at which the text should get drawn.
+
+! *String* `str`
+! String
+! The text you want to draw on-to the buffer.
+!===
+
+====
+// end::func-setText[]
+// end::func-setText-title[]
+
+== Signals
+
+=== `OnKeyChar` (_String_ *Character* `c`, _Int_ *Button* `btn`)
+
+Triggers when a character key got 'clicked' and essentially a character got typed in, usful for text input.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Character* `c`
+! String
+! The character that got typed in as string.
+
+! *Button* `btn`
+! Int
+! The Button-Bit-Field providing information about the key release event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnKeyDown` (_Int_ *C* `c`, _Int_ *Code* `code`, _Int_ *Button* `btn`)
+
+Triggers when a key got pressed.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *C* `c`
+! Int
+! The ASCII number of the character typed in.
+
+! *Code* `code`
+! Int
+! The number code of the pressed key.
+
+! *Button* `btn`
+! Int
+! The Button-Bit-Field providing information about the key press event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnKeyUp` (_Int_ *C* `c`, _Int_ *Code* `code`, _Int_ *Button* `btn`)
+
+Triggers when a key got released.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *C* `c`
+! Int
+! The ASCII number of the character typed in.
+
+! *Code* `code`
+! Int
+! The number code of the pressed key.
+
+! *Button* `btn`
+! Int
+! The Button-Bit-Field providing information about the key release event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseDown` (_Int_ *X* `x`, _Int_ *Y* `y`, _Int_ *Button* `btn`)
+
+Triggers when a mouse button got pressed.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x position of the cursor.
+
+! *Y* `y`
+! Int
+! The y position of the cursor.
+
+! *Button* `btn`
+! Int
+! The Button-Bit-Field providing information about the pressed button event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseMove` (_Int_ *X* `x`, _Int_ *Y* `y`, _Int_ *Button* `btn`)
+
+Triggers when the mouse cursor moves on the screen.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x position of the cursor.
+
+! *Y* `y`
+! Int
+! The y position of the cursor.
+
+! *Button* `btn`
+! Int
+! The Button-Bit-Field providing information about the move event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseUp` (_Int_ *X* `x`, _Int_ *Y* `y`, _Int_ *Button* `btn`)
+
+Triggers when a mouse button got released.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x position of the cursor.
+
+! *Y* `y`
+! Int
+! The y position of the cursor.
+
+! *Button* `btn`
+! Int
+! The Button-Bit-Field providing information about the released button event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `ScreenSizeChanged` (_Int_ *old Width* `oldW`, _Int_ *old Height* `oldH`)
+
+Triggers when the size of the text grid changed.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *old Width* `oldW`
+! Int
+! The old width of the screen.
+
+! *old Height* `oldH`
+! Int
+! The old height of the screen.
+!===
+====
+
+
+// end::interface[]
+

@@ -1,0 +1,61 @@
+= Circuit Switch
+:table-caption!:
+
+A circuit bridge that can be activated and deactivate by the player.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isSwitchOn-title[]
+=== `isSwitchOn` : Bool
+// tag::func-isSwitchOn[]
+
+True if the two circuits are connected to each other and act as one entity.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span>+++
+
+! Display Name ! Is Switch On
+!===
+====
+// end::func-isSwitchOn[]
+// end::func-isSwitchOn-title[]
+
+== Functions
+
+// tag::func-setIsSwitchOn-title[]
+=== `setIsSwitchOn` (`state` : Bool)
+// tag::func-setIsSwitchOn[]
+
+Changes the circuit switch state.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Is Switch On
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *State* `state`
+! Bool
+! The new switch state.
+!===
+
+====
+// end::func-setIsSwitchOn[]
+// end::func-setIsSwitchOn-title[]
+
+// end::interface[]
+

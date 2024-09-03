@@ -1,0 +1,71 @@
+= Function
+:table-caption!:
+
+A reflection object representing a function.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-flags-title[]
+=== `flags` : Int
+// tag::func-flags[]
+
+The function bit flag register defining some behaviour of it.
+
+Bits and their meaing (least significant bit first):
+Is this function has a variable amount of input parameters.
+Can this function get called in syncrounus runtime.
+Can this function can get called in parallel runtime.
+Can this function get called in asynchronus runtime.
+Is this function a member function.
+The function is a class function.
+The function is a static function.
+The function has a variable amount of return values.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Flags
+!===
+====
+// end::func-flags[]
+// end::func-flags-title[]
+
+== Functions
+
+// tag::func-getParameters-title[]
+=== `getParameters` () -> `parameters` : Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+// tag::func-getParameters[]
+
+Returns all the parameters of this function.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Parameters
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Parameters* `parameters`
+! Array<Object<xref:/reflection/classes/Property.adoc[Property]>>
+! The parameters this function.
+!===
+
+====
+// end::func-getParameters[]
+// end::func-getParameters-title[]
+
+// end::interface[]
+

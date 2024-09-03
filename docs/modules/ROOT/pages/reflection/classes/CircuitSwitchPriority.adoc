@@ -1,0 +1,29 @@
+= Circuit Priority Switch
+:table-caption!:
+
+A circuit power switch that can be activated and deactivated based on a priority to prevent a full factory power shutdown.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-priority-title[]
+=== `priority` : Int
+// tag::func-priority[]
+
+The priority group of which this switch is part of.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Priority
+!===
+====
+// end::func-priority[]
+// end::func-priority-title[]
+
+// end::interface[]
+

@@ -1,0 +1,166 @@
+= Power Storage
+:table-caption!:
+
+A building that can store power for later usage.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-batteryStatus-title[]
+=== `batteryStatus` : Int
+// tag::func-batteryStatus[]
+
+The current status of the battery.
+0 = Idle, 1 = Idle Empty, 2 = Idle Full, 3 = Power In, 4 = Power Out
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Status
+!===
+====
+// end::func-batteryStatus[]
+// end::func-batteryStatus-title[]
+// tag::func-batteryMaxIndicatorLevel-title[]
+=== `batteryMaxIndicatorLevel` : Int
+// tag::func-batteryMaxIndicatorLevel[]
+
+The maximum count of Level lights that are shown.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Indicator Level
+!===
+====
+// end::func-batteryMaxIndicatorLevel[]
+// end::func-batteryMaxIndicatorLevel-title[]
+// tag::func-powerCapacity-title[]
+=== `powerCapacity` : Float
+// tag::func-powerCapacity[]
+
+The amount of energy the storage can hold max.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Power Capacity
+!===
+====
+// end::func-powerCapacity[]
+// end::func-powerCapacity-title[]
+// tag::func-powerIn-title[]
+=== `powerIn` : Float
+// tag::func-powerIn[]
+
+The amount of power coming into the storage.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Power Input
+!===
+====
+// end::func-powerIn[]
+// end::func-powerIn-title[]
+// tag::func-powerOut-title[]
+=== `powerOut` : Float
+// tag::func-powerOut[]
+
+The amount of power going out from the storage.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Power Output
+!===
+====
+// end::func-powerOut[]
+// end::func-powerOut-title[]
+// tag::func-powerStore-title[]
+=== `powerStore` : Float
+// tag::func-powerStore[]
+
+The current amount of energy stored in the storage.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Power Store
+!===
+====
+// end::func-powerStore[]
+// end::func-powerStore-title[]
+// tag::func-powerStorePercent-title[]
+=== `powerStorePercent` : Float
+// tag::func-powerStorePercent[]
+
+The current power store in percent.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Power Store Percent
+!===
+====
+// end::func-powerStorePercent[]
+// end::func-powerStorePercent-title[]
+// tag::func-timeUntilEmpty-title[]
+=== `timeUntilEmpty` : Float
+// tag::func-timeUntilEmpty[]
+
+The time in seconds until the storage is empty.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Time until Empty
+!===
+====
+// end::func-timeUntilEmpty[]
+// end::func-timeUntilEmpty-title[]
+// tag::func-timeUntilFull-title[]
+=== `timeUntilFull` : Float
+// tag::func-timeUntilFull[]
+
+The time in seconds until the storage is filled.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Time until Full
+!===
+====
+// end::func-timeUntilFull[]
+// end::func-timeUntilFull-title[]
+
+// end::interface[]
+

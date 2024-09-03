@@ -3,6 +3,7 @@
 #include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
+#include "Reflection/FINUReflectionSource.h"
 #include "FINCodeableSplitter.generated.h"
 
 UCLASS()
@@ -65,9 +66,19 @@ public:
 	// End IFINSignalSender
 
 	UFUNCTION()
-    void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes) {
+    void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes, FFINReflectionFunctionMeta& netFuncMeta_getConnectorByIndex) {
 		InternalName = TEXT("CodeableSplitter");
 		DisplayName = FText::FromString(TEXT("Codeable Splitter"));
+
+		FFINReflectionFunctionParameterMeta getConnectorByIndex_outputIndex;
+		getConnectorByIndex_outputIndex.InternalName = TEXT("outputIndex");
+		getConnectorByIndex_outputIndex.DisplayName = FText::FromString(TEXT("Output Index"));
+		getConnectorByIndex_outputIndex.Description = FText::FromString(TEXT("The integer used in TransferItem and ItemOutputted to reference a specific output. Valid Values: 0-3"));
+
+		netFuncMeta_getConnectorByIndex.InternalName = TEXT("getConnectorByIndex");
+		netFuncMeta_getConnectorByIndex.DisplayName = FText::FromString(TEXT("Get Connector by Index"));
+		netFuncMeta_getConnectorByIndex.Description = FText::FromString(TEXT("Returns the factory connector associated with the given index."));
+		netFuncMeta_getConnectorByIndex.Parameters.Add(getConnectorByIndex_outputIndex);
 	}
 	
 	/**
@@ -125,10 +136,16 @@ public:
 	}
 
 	/**
+	 * Returns the associated Factory Connector based on the Index.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Network|Components|CodeableSplitter")
+	UFGFactoryConnectionComponent* netFunc_getConnectorByIndex(int outputIndex);
+
+	/**
 	 * This signal gets emit when a new item got pushed to the input queue.
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
-	void netSig_ItemRequest(const FInventoryItem& Item);
+	void netSig_ItemRequest(FInventoryItem Item);
 	UFUNCTION()
     void netSigMeta_ItemRequest(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions) {
 		InternalName = "ItemRequest";
@@ -143,7 +160,7 @@ public:
 	 * This signal gets emitted when a item is popped from one of the output queues (aka it got outputted to an conveyor)
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Network|Components|CodeableSplitter")
-    void netSig_ItemOutputted(int output, const FInventoryItem& item);
+    void netSig_ItemOutputted(int output, FInventoryItem item);
 	UFUNCTION()
     void netSigMeta_ItemOutputted(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions) {
 		InternalName = "ItemOutputted";

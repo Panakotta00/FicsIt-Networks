@@ -1,0 +1,63 @@
+= Reflection Base
+:table-caption!:
+
+The base class for all things of the reflection system.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-description-title[]
+=== `description` : String
+// tag::func-description[]
+
+The description of this base.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Description
+!===
+====
+// end::func-description[]
+// end::func-description-title[]
+// tag::func-displayName-title[]
+=== `displayName` : String
+// tag::func-displayName[]
+
+The display name used in UI which might be localized.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Display Name
+!===
+====
+// end::func-displayName[]
+// end::func-displayName-title[]
+// tag::func-name-title[]
+=== `name` : String
+// tag::func-name[]
+
+The internal name.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Name
+!===
+====
+// end::func-name[]
+// end::func-name-title[]
+
+// end::interface[]
+

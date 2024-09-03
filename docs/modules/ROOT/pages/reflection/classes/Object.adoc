@@ -1,0 +1,345 @@
+= Object
+:table-caption!:
+
+The base class of every object.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-hash-title[]
+=== `hash` : Int
+// tag::func-hash[]
+
+A Hash of this object. This is a value that nearly uniquely identifies this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Hash
+!===
+====
+// end::func-hash[]
+// end::func-hash-title[]
+// tag::func-hash-title[]
+=== `hash` : Int
+// tag::func-hash[]
+
+A Hash of this object. This is a value that nearly uniquely identifies this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassProp</i></span>+++
+
+! Display Name ! Hash
+!===
+====
+// end::func-hash[]
+// end::func-hash-title[]
+// tag::func-id-title[]
+=== `id` : String
+// tag::func-id[]
+
+**Only available for Network Components!** Allows access to the Network Components UUID.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! ID
+!===
+====
+// end::func-id[]
+// end::func-id-title[]
+// tag::func-nick-title[]
+=== `nick` : String
+// tag::func-nick[]
+
+**Only available for Network Components!** Allows access to the Network Components Nick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Nick
+!===
+====
+// end::func-nick[]
+// end::func-nick-title[]
+// tag::func-internalName-title[]
+=== `internalName` : String
+// tag::func-internalName[]
+
+The unreal engine internal name of this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! internalName
+!===
+====
+// end::func-internalName[]
+// end::func-internalName-title[]
+// tag::func-internalName-title[]
+=== `internalName` : String
+// tag::func-internalName[]
+
+The unreal engine internal name of this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassProp</i></span>+++
+
+! Display Name ! internalName
+!===
+====
+// end::func-internalName[]
+// end::func-internalName-title[]
+// tag::func-internalPath-title[]
+=== `internalPath` : String
+// tag::func-internalPath[]
+
+The unreal engine internal path name of this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! internalPath
+!===
+====
+// end::func-internalPath[]
+// end::func-internalPath-title[]
+// tag::func-internalPath-title[]
+=== `internalPath` : String
+// tag::func-internalPath[]
+
+The unreal engine internal path name of this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassProp</i></span>+++
+
+! Display Name ! internalPath
+!===
+====
+// end::func-internalPath[]
+// end::func-internalPath-title[]
+
+== Functions
+
+// tag::func-getHash-title[]
+=== `getHash` () -> `hash` : Int
+// tag::func-getHash[]
+
+Returns a hash of this object. This is a value that nearly uniquely identifies this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Hash
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Hash* `hash`
+! Int
+! The hash of this object.
+!===
+
+====
+// end::func-getHash[]
+// end::func-getHash-title[]
+// tag::func-getHash-title[]
+=== `getHash` () -> `hash` : Int
+// tag::func-getHash[]
+
+Returns the hash of this class. This is a value that nearly uniquely idenfies this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Get Hash
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Hash* `hash`
+! Int
+! The hash of this class.
+!===
+
+====
+// end::func-getHash[]
+// end::func-getHash-title[]
+// tag::func-getType-title[]
+=== `getType` () -> `type` : Object<xref:/reflection/classes/Class.adoc[Class]>
+// tag::func-getType[]
+
+Returns the type (aka class) of this object.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Type
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Type* `type`
+! Object<xref:/reflection/classes/Class.adoc[Class]>
+! The type of this object
+!===
+
+====
+// end::func-getType[]
+// end::func-getType-title[]
+// tag::func-getType-title[]
+=== `getType` () -> `type` : Object<xref:/reflection/classes/Class.adoc[Class]>
+// tag::func-getType[]
+
+Returns the type (aka class) of this class instance.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Get Type
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Type* `type`
+! Object<xref:/reflection/classes/Class.adoc[Class]>
+! The type of this class instance
+!===
+
+====
+// end::func-getType[]
+// end::func-getType-title[]
+// tag::func-isA-title[]
+=== `isA` (`parent` : Class<xref:/reflection/classes/Object.adoc[Object]>) -> `isChild` : Bool
+// tag::func-isA[]
+
+Checks if this Object is a child of the given typen.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Is A
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Parent* `parent`
+! Class<xref:/reflection/classes/Object.adoc[Object]>
+! The parent we check if this object is a child of.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Is Child* `isChild`
+! Bool
+! True if this object is a child of the given type.
+!===
+
+====
+// end::func-isA[]
+// end::func-isA-title[]
+// tag::func-isChildOf-title[]
+=== `isChildOf` (`parent` : Class<xref:/reflection/classes/Object.adoc[Object]>) -> `isChild` : Bool
+// tag::func-isChildOf[]
+
+Checks if this Type is a child of the given typen.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Is Child Of
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Parent* `parent`
+! Class<xref:/reflection/classes/Object.adoc[Object]>
+! The parent we check if this type is a child of.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Is Child* `isChild`
+! Bool
+! True if this type is a child of the given type.
+!===
+
+====
+// end::func-isChildOf[]
+// end::func-isChildOf-title[]
+
+// end::interface[]
+

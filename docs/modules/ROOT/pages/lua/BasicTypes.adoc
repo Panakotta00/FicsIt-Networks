@@ -21,7 +21,8 @@ The `nick` field is a string field you can read and write to.
 It allows you to access the nick of a component which you could also set with the network manager.
 One of the main purposes is to read additional data like configurations settings per component from it.
 
-```lua
+[source,lua]
+----
 local comp = component.proxy(component.findComponent("machine")[1])
 local fields = {}
 for key, value in string.gmatch(comp.nick, "(%w+)=([^%s]+)") do
@@ -29,7 +30,7 @@ for key, value in string.gmatch(comp.nick, "(%w+)=([^%s]+)") do
 end
 -- if there is now a component with the nick "machine setting1=42 setting2=meep"
 -- then the fields table will look like {"setting1"="42", "setting2"="meep"}
-```
+----
 
 ==== ID `id`
 The `id` is a read-only string field allowing you to read the UUID of the component.
@@ -37,21 +38,49 @@ Mainly intended allowing you to print or display the ID of a component.
 For comparing/identifying components,
 use the default way of comparing/identifying instances with the hash functions and properties.
 
-```lua
+[source,lua]
+----
 local comp = component.proxy(component.findComponent("machine")[1])
 print(comp.id) -- prints the ID of the component with a nick group "machine"
-```
+----
 
 === Properties
 Properties can be used just normally.
 Tho read-only properties will cause a error when you try to assign a value to them
 with the assignment `=` operator.
 
-```Lua
+[source,Lua]
+----
 local constructor = ...
 print(constructor.standby) -- get the value of the "standby" property
 constructor.standby = true -- set the value of the "standby" property
-```
+----
+
+[WARNING]
+====
+Using Properties that return structs can lead to some common pitfalls.
+Structs are returned internally by value, not by reference. This means that if you change the property of a struct you got through a property, you are not changing the struct within the object.
+
+[source,Lua]
+----
+print(myObj.someStruct.someAttribute) -- Prints: "meep"
+myObj.someStruct.someAttribute = "nice"
+print(myObj.someStruct.someAttribute) -- Prints: "meep"
+----
+
+To prevent this, you store the struct in a variable and then assign it back to the object. Only if the property that returns the struct, is writeable that is.
+
+[source,Lua]
+----
+print(myObj.someStruct.someAttribute) -- Prints: "meep"
+local struct = myObj.someStruct
+struct.someAttribute = "nice"
+myObj.someStruct = struct
+print(myObj.someStruct.someAttribute) -- Prints: "nice"
+----
+
+In the future, we intend to remove all struct properties and replace them with getter & setter Functions.
+====
 
 === Functions
 Functions are just values as we all know, so they don't have member awareness. +
@@ -66,7 +95,9 @@ So it actually knows with which instance you want to interact with.
 You can call those functions now in two ways.
 
 The difficult way (can get optimized):
-```Lua
+
+[source,Lua]
+----
 local constructor = ...
 constructor.getRecipe(constructor) -- calling the function with first parameter beeing the instance explicitly
 
@@ -75,13 +106,15 @@ local func = constructor.getRecipe
 for i=0,100,1 do
     func(constructor) -- only function call, without the "search" of the function
 end
-```
+----
 
 The easy way (can not get optimized):
-```Lua
+
+[source,Lua]
+----
 local constructor = ...
 constructor:getRecipe() -- calling the function with first parameter beeing the instance implicitly
-```
+----
 
 If a function does only have the `runtime-synchronous`-flag,
 then there will only be one xref:lua/BasicTypes.adoc#_future[future-struct] as return value.
@@ -93,12 +126,13 @@ Structs work in nearly the same way tho they can be converted from and to "norma
 Usually (not all) structs can simply implicitly get converted from a table with string fields of the property name as keys and values of those properties.
 When converting from a table to a struct, you don't even have to have the keys, you can just make sure they are in the same order as shown in the reflection-viewer.
 
-```Lua
+[source,Lua]
+----
 local constuctor = ...
 local loc = constructor.location
 print(loc.x, loc.y, loc.z) -- prints the x, y and z properties
 funcThatNeedsVector({1, 2, 3}) -- array gets converted implicitly to a vector struct with x=1, y=2, z=3
-```
+----
 
 == Future
 

@@ -1,0 +1,151 @@
+= Icon Data
+:table-caption!:
+
+A struct containing information about a game icon (used in f.e. signs).
+
+== Properties
+
+// tag::func-animated-title[]
+=== `animated` : Bool
+// tag::func-animated[]
+
+True if the icon is animated.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Animated
+!===
+====
+// end::func-animated[]
+// end::func-animated-title[]
+// tag::func-hidden-title[]
+=== `hidden` : Bool
+// tag::func-hidden[]
+
+True if the icon is hidden in the selection.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Hidden
+!===
+====
+// end::func-hidden[]
+// end::func-hidden-title[]
+// tag::func-id-title[]
+=== `id` : Int
+// tag::func-id[]
+
+The icon ID.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! ID
+!===
+====
+// end::func-id[]
+// end::func-id-title[]
+// tag::func-iconName-title[]
+=== `iconName` : String
+// tag::func-iconName[]
+
+The name of the icon.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Icon Name
+!===
+====
+// end::func-iconName[]
+// end::func-iconName-title[]
+// tag::func-iconType-title[]
+=== `iconType` : String
+// tag::func-iconType[]
+
+The type of the icon.
+0 = Building
+1 = Part
+2 = Equipment
+3 = Monochrome
+4 = Material
+5 = Custom
+6 = Map Stamp
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Icon Type
+!===
+====
+// end::func-iconType[]
+// end::func-iconType-title[]
+// tag::func-isValid-title[]
+=== `isValid` : Bool
+// tag::func-isValid[]
+
+True if the icon data refers to an valid icon
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Valid
+!===
+====
+// end::func-isValid[]
+// end::func-isValid-title[]
+// tag::func-ref-title[]
+=== `ref` : String
+// tag::func-ref[]
+
+The media reference of this icon.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Ref
+!===
+====
+// end::func-ref[]
+// end::func-ref-title[]
+// tag::func-searchOnly-title[]
+=== `searchOnly` : Bool
+// tag::func-searchOnly[]
+
+True if the icon will be shown in selection only if searched for directly by name.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Search Only
+!===
+====
+// end::func-searchOnly[]
+// end::func-searchOnly-title[]
+

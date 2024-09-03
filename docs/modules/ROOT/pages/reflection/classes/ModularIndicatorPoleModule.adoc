@@ -1,0 +1,82 @@
+= Modular Indicator Pole Module
+:table-caption!:
+
+FicsIt Indicator Module for FicsIt Modular Indicator Poles provides pioneers with the most fundamental indicator. The new and improved incandecent RGB bulb provides versatility to the industrious. Each modules color and intensity can be set via the network by a computer.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-setColor-title[]
+=== `setColor` (`r` : Float, `g` : Float, `b` : Float, `e` : Float)
+// tag::func-setColor[]
+
+Sets the color of this module
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Color
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Red* `r`
+! Float
+! The red part of the color in which the light glows. (0.0 - 1.0)
+
+! *Green* `g`
+! Float
+! The green part of the color in which the light glows. (0.0 - 1.0)
+
+! *Blue* `b`
+! Float
+! The blue part of the color in which the light glows. (0.0 - 1.0)
+
+! *Emit* `e`
+! Float
+! The light intensity of the pole. (>=0.0)
+!===
+
+====
+// end::func-setColor[]
+// end::func-setColor-title[]
+// tag::func-getColor-title[]
+=== `getColor` () -> `FLinearColor` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-getColor[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! getColor
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *FLinearColor* `FLinearColor`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! 
+!===
+
+====
+// end::func-getColor[]
+// end::func-getColor-title[]
+
+// end::interface[]
+

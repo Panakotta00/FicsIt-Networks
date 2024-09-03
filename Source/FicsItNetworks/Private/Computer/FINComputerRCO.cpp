@@ -183,3 +183,9 @@ void UFINComputerRCO::LogRehandleAllEntries_Implementation(UFINLog* Log) {
 void UFINComputerRCO::GPUT2MouseWheelEvent_Implementation(AFINComputerGPUT2* GPU, FVector2D Position, float Delta, int Modifiers) {
 	GPU->netSig_OnMouseWheel(Position, Delta, Modifiers);
 }
+
+void UFINComputerRCO::SetLabel_Implementation(UObject* Container, const FString& Label) {
+	if (IsValid(Container) && Container->Implements<UFINLabelContainerInterface>()) {
+		IFINLabelContainerInterface::Execute_SetLabel(Container, Label);
+	}
+}

@@ -1,0 +1,201 @@
+= FINMediaSubsystem
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-findGameIcon-title[]
+=== `findGameIcon` (`IconName` : String) -> `ReturnValue` : Struct<xref:/reflection/structs/IconData.adoc[IconData]>
+// tag::func-findGameIcon[]
+
+Tries to find an game icon like the ones you use for signs.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Find Game Icon
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *IconName* `IconName`
+! String
+! 
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Struct<xref:/reflection/structs/IconData.adoc[IconData]>
+! 
+!===
+
+====
+// end::func-findGameIcon[]
+// end::func-findGameIcon-title[]
+// tag::func-getGameIcons-title[]
+=== `getGameIcons` (`PageSize` : Int, `Page` : Int) -> `ReturnValue` : Array<Struct<xref:/reflection/structs/IconData.adoc[IconData]>>
+// tag::func-getGameIcons[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! getGameIcons
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *PageSize* `PageSize`
+! Int
+! 
+
+! *Page* `Page`
+! Int
+! 
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Array<Struct<xref:/reflection/structs/IconData.adoc[IconData]>>
+! 
+!===
+
+====
+// end::func-getGameIcons[]
+// end::func-getGameIcons-title[]
+// tag::func-isTextureLoaded-title[]
+=== `isTextureLoaded` (`TextureReference` : String) -> `ReturnValue` : Bool
+// tag::func-isTextureLoaded[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! isTextureLoaded
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *TextureReference* `TextureReference`
+! String
+! 
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Bool
+! 
+!===
+
+====
+// end::func-isTextureLoaded[]
+// end::func-isTextureLoaded-title[]
+// tag::func-isTextureLoading-title[]
+=== `isTextureLoading` (`TextureReference` : String) -> `ReturnValue` : Bool
+// tag::func-isTextureLoading[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! isTextureLoading
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *TextureReference* `TextureReference`
+! String
+! 
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Bool
+! 
+!===
+
+====
+// end::func-isTextureLoading[]
+// end::func-isTextureLoading-title[]
+// tag::func-loadTexture-title[]
+=== `loadTexture` (`TextureReference` : String)
+// tag::func-loadTexture[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! loadTexture
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *TextureReference* `TextureReference`
+! String
+! 
+!===
+
+====
+// end::func-loadTexture[]
+// end::func-loadTexture-title[]
+
+// end::interface[]
+

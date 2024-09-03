@@ -4,14 +4,14 @@
 #include "FINLuaProcessorStateStorage.h"
 #include "FicsItKernel/FicsItFS/Library/Listener.h"
 #include "FicsItKernel/Processor/Processor.h"
-#include "FINLua/LuaFileSystemAPI.h"
+#include "FINLua/API/LuaFileSystemAPI.h"
 #include "FINLuaProcessor.generated.h"
 
 class AFINStateEEPROMLua;
 struct lua_State;
 struct lua_Debug;
-namespace FINLua {
-	int luaPull(lua_State*);
+namespace FINLua::Event::event {
+	int pull(lua_State*);
 }
 
 class FICSITNETWORKSLUA_API LuaFileSystemListener : public CodersFileSystem::Listener {
@@ -117,7 +117,7 @@ UCLASS()
 class FICSITNETWORKSLUA_API UFINLuaProcessor : public UFINKernelProcessor {
 	GENERATED_BODY()
 
-	friend int FINLua::luaPull(lua_State* L);
+	friend int FINLua::Event::event::pull(lua_State* L);
 	friend int luaComputerSkip(lua_State* L);
 	friend FLuaTickRunnable;
 	friend struct FLuaSyncCall;

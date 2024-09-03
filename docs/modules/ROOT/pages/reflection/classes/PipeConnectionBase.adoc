@@ -1,0 +1,61 @@
+= Pipe Connection Base
+:table-caption!:
+
+A actor component base that is a connection point to which a pipe for fluid or hyper can get attached to.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isConnected-title[]
+=== `isConnected` : Bool
+// tag::func-isConnected[]
+
+True if something is connected to this connection.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Connected
+!===
+====
+// end::func-isConnected[]
+// end::func-isConnected-title[]
+
+== Functions
+
+// tag::func-getConnection-title[]
+=== `getConnection` () -> `connected` : Trace<xref:/reflection/classes/PipeConnectionBase.adoc[PipeConnectionBase]>
+// tag::func-getConnection[]
+
+Returns the connected pipe connection component.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Connection
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connected* `connected`
+! Trace<xref:/reflection/classes/PipeConnectionBase.adoc[PipeConnectionBase]>
+! The connected pipe connection component.
+!===
+
+====
+// end::func-getConnection[]
+// end::func-getConnection-title[]
+
+// end::interface[]
+

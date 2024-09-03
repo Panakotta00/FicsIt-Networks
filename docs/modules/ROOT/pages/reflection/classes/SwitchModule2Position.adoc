@@ -1,0 +1,110 @@
+= Switch Module 2 Position
+:table-caption!:
+
+This Switch Module for modular I/O Panels is used to toggle between a true and false value. It has an illuminable spot on the knob and you can use them to trigger specific programmed events.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-enabled-title[]
+=== `enabled` : Bool
+// tag::func-enabled[]
+
+Sets wheter to accept input on this encoder or not. True means accept input, false means to igore input
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Enabled
+!===
+====
+// end::func-enabled[]
+// end::func-enabled-title[]
+// tag::func-state-title[]
+=== `state` : Bool
+// tag::func-state[]
+
+Returns the current state of this switch
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! State
+!===
+====
+// end::func-state[]
+// end::func-state-title[]
+
+== Functions
+
+// tag::func-setColor-title[]
+=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+// tag::func-setColor[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! setColor
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *red* `red`
+! Float
+! 
+
+! *green* `green`
+! Float
+! 
+
+! *blue* `blue`
+! Float
+! 
+
+! *Emit* `Emit`
+! Float
+! 
+!===
+
+====
+// end::func-setColor[]
+// end::func-setColor-title[]
+
+== Signals
+
+=== `ChangeState` (_Bool_ *New Value* `newValue`)
+
+Fired when this switch changes its state
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *New Value* `newValue`
+! Bool
+! The new value this switch has taken
+!===
+====
+
+
+// end::interface[]
+

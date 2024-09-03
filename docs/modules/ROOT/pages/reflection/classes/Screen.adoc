@@ -1,0 +1,45 @@
+= Screen
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getSize-title[]
+=== `getSize` () -> (`width` : Int, `height` : Int)
+// tag::func-getSize[]
+
+Returns the size of the screen in 'panels'.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Size
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Width* `width`
+! Int
+! The width of the screen.
+
+! *Height* `height`
+! Int
+! The height of the screen.
+!===
+
+====
+// end::func-getSize[]
+// end::func-getSize-title[]
+
+// end::interface[]
+

@@ -1,0 +1,63 @@
+= Module Potentiometer
+:table-caption!:
+
+The Potentiometer Module for the Modular I/O Control Panel allows you to have rotation input value for you programs.
+
+You can rotate it indefinetly into any direction where every rotation triggers a computer network signal.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-rotate-title[]
+=== `rotate` (`anticlockwise` : Bool)
+// tag::func-rotate[]
+
+Rotates the potentiometer into the given direction.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Rotate
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Anticlockwise* `anticlockwise`
+! Bool
+! True if the potentiometer should be rotated anticlockwise.
+!===
+
+====
+// end::func-rotate[]
+// end::func-rotate-title[]
+
+== Signals
+
+=== `PotRotate` (_Bool_ *anticlockwise* `anticlockwise`)
+
+Triggers if the potentiometer gets rotated by a player or by code.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *anticlockwise* `anticlockwise`
+! Bool
+! 
+!===
+====
+
+
+// end::interface[]
+

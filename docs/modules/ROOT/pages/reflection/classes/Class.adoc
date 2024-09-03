@@ -1,0 +1,70 @@
+= Class
+:table-caption!:
+
+Object that contains all information about a type.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getAllSignals-title[]
+=== `getAllSignals` () -> `signals` : Array<Object<xref:/reflection/classes/Signal.adoc[Signal]>>
+// tag::func-getAllSignals[]
+
+Returns all the signals of this and its parent types.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get All Signals
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Signals* `signals`
+! Array<Object<xref:/reflection/classes/Signal.adoc[Signal]>>
+! The signals this type and all it parents implement.
+!===
+
+====
+// end::func-getAllSignals[]
+// end::func-getAllSignals-title[]
+// tag::func-getSignals-title[]
+=== `getSignals` () -> `signals` : Array<Object<xref:/reflection/classes/Signal.adoc[Signal]>>
+// tag::func-getSignals[]
+
+Returns all the signals of this type.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Signals
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Signals* `signals`
+! Array<Object<xref:/reflection/classes/Signal.adoc[Signal]>>
+! The signals this specific type implements (excluding properties from parent types).
+!===
+
+====
+// end::func-getSignals[]
+// end::func-getSignals-title[]
+
+// end::interface[]
+

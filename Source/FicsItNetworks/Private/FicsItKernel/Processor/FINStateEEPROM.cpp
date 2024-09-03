@@ -1,5 +1,7 @@
 ﻿#include "FicsItKernel/Processor/FINStateEEPROM.h"
 
+#include "Net/UnrealNetwork.h"
+
 AFINStateEEPROM::AFINStateEEPROM() {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"RootComponent");
 
@@ -8,6 +10,12 @@ AFINStateEEPROM::AFINStateEEPROM() {
 
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
+}
+
+void AFINStateEEPROM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFINStateEEPROM, Label);
 }
 
 void AFINStateEEPROM::Tick(float DeltaSeconds) {
