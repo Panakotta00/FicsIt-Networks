@@ -1,9 +1,11 @@
 #include "FINLua/LuaUtil.h"
 
-#include "FINLua/LuaClass.h"
+#include "FicsItNetworksLuaModule.h"
+#include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/LuaFuture.h"
-#include "FINLua/LuaObject.h"
-#include "FINLua/LuaStruct.h"
+#include "FINLua/LuaPersistence.h"
+#include "FINLua/Reflection/LuaObject.h"
+#include "FINLua/Reflection/LuaStruct.h"
 #include "Reflection/FINArrayProperty.h"
 #include "Reflection/FINClassProperty.h"
 #include "Reflection/FINObjectProperty.h"
@@ -39,11 +41,7 @@ namespace FINLua {
 			break;
 		case FIN_STRUCT: {
 			const FINStruct& Struct = Val.GetStruct();
-			if (Struct.GetStruct()->IsChildOf(FFINFuture::StaticStruct())) {
-				luaFuture(L, Struct);
-			} else {
-				luaFIN_pushStruct(L, Val.GetStruct());
-			}
+			luaFIN_pushStruct(L, Val.GetStruct());
 			break;
 		} case FIN_ARRAY: {
 			lua_newtable(L);
@@ -84,7 +82,6 @@ namespace FINLua {
 		}
 	}
 
-#pragma optimize("", off)
 	TOptional<FINAny> luaFIN_toNetworkValueByProp(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
 		int LuaType = lua_type(L, Index);
 		
@@ -135,7 +132,7 @@ namespace FINLua {
 			TOptional<FINTrace> Trace;
 			UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Property);
 			if (TraceProp && TraceProp->GetSubclass()) {
-				Trace = luaFIN_toObject(L, Index, FFINReflection::Get()->FindClass(TraceProp->GetSubclass()));
+				Trace = luaFIN_checkObject(L, Index, FFINReflection::Get()->FindClass(TraceProp->GetSubclass()));
 			} else {
 				Trace = luaFIN_toObject(L, Index, nullptr);
 			}
@@ -146,7 +143,7 @@ namespace FINLua {
 			UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property);
 			if (StructProp && StructProp->GetInner()) {
 				UFINStruct* Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
-				Struct = luaFIN_toStruct(L, Index, Type, bImplicitConstruction);
+				Struct = luaFIN_checkStruct(L, Index, Type, bImplicitConstruction);
 			} else {
 				Struct = luaFIN_toStruct(L, Index, nullptr, false);
 			}
@@ -174,7 +171,6 @@ namespace FINLua {
 		}
 		return FINAny();
 	}
-#pragma optimize("", on)
 	
 	TOptional<FINAny> luaFIN_toNetworkValue(lua_State* L, int Index, UFINProperty* Property, bool bImplicitConversion, bool bImplicitConstruction) {
 		if (Property) return luaFIN_toNetworkValueByProp(L, Index, Property, bImplicitConversion, bImplicitConstruction);
@@ -264,7 +260,28 @@ namespace FINLua {
 		}
 		return TEXT("Unkown");
 	}
-	
+
+	FString luaFIN_getFunctionSignature(lua_State* L, UFINFunction* Function) {
+		TArray<FString> parameters;
+		TArray<FString> returnValues;
+
+		if (true) { // TODO: Once Static function are added, add check to disable self
+			parameters.Add(FString::Printf(TEXT("self : %s"), *FFINReflection::TraceReferenceText(Function->GetTypedOuter<UFINClass>())));
+		}
+
+		for (UFINProperty* parameter : Function->GetParameters()) {
+			EFINRepPropertyFlags flags = parameter->GetPropertyFlags();
+			if (!(flags & FIN_Prop_Param)) continue;
+			TArray<FString>& list = (flags & FIN_Prop_OutParam) ? returnValues : parameters;
+			list.Add(FString::Printf(TEXT("%s : %s"), *parameter->GetInternalName(), *luaFIN_getPropertyTypeName(L, parameter)));
+		}
+
+		FString joinedParameters = FString::Join(parameters, TEXT(", "));
+		FString joinedReturnValues = FString::Join(returnValues, TEXT(", "));
+
+		return FString::Printf(TEXT("(%s) %s(%s)"), *joinedParameters, *Function->GetInternalName(), *joinedReturnValues);
+	}
+
 	int luaFIN_propertyError(lua_State* L, int Index, UFINProperty* Property) {
 		return luaFIN_typeError(L, Index, luaFIN_getPropertyTypeName(L, Property));
 	}
@@ -287,20 +304,21 @@ namespace FINLua {
 		} else {
 			typearg = luaL_typename(L, Index);
 		}
+
 		FString TypeName = UTF8_TO_TCHAR(typearg);
-		if (TypeName == FIN_LUA_OBJECT_METATABLE_NAME) {
+		if (TypeName == luaFIN_getLuaObjectTypeName()) {
 			FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, nullptr);
 			UFINClass* Type = nullptr;
 			if (LuaObject) Type = LuaObject->Type;
 			return FFINReflection::ObjectReferenceText(Type);
 		}
-		if (TypeName == FIN_LUA_CLASS_METATABLE_NAME) {
+		if (TypeName == luaFIN_getLuaClassTypeName()) {
 			FLuaClass* LuaClass = luaFIN_toLuaClass(L, Index);
 			UFINClass* Type = nullptr;
 			if (LuaClass) Type = LuaClass->FINClass;
 			return FFINReflection::ClassReferenceText(Type);
 		}
-		if (TypeName == FIN_LUA_STRUCT_METATABLE_NAME) {
+		if (TypeName == luaFIN_getLuaStructTypeName()) {
 			FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, nullptr);
 			UFINStruct* Type = nullptr;
 			if (LuaStruct) Type = LuaStruct->Type;
@@ -335,7 +353,7 @@ namespace FINLua {
 
 	FString luaFIN_toFString(lua_State* L, int index) {
 		size_t len;
-		const char* str = luaL_tolstring(L, index, &len);
+		const char* str = lua_tolstring(L, index, &len);
 		FUTF8ToTCHAR conv(str, len);
 		return FString(conv.Length(), conv.Get());
 	}
@@ -370,8 +388,16 @@ namespace FINLua {
 		return FString();
 	}
 
+	void luaFINDebug_dumpStack(lua_State* L) {
+		int args = lua_gettop(L);
+		int negative = 0;
+		for (; args > 0; --args) {
+			UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Lua Stack: [%i/%i] %s"), args, --negative, *luaFIN_typeName(L, args));
+		}
+	}
+
 	void setupUtilLib(lua_State* L) {
-		PersistSetup("UtilLib", -2);
+		PersistenceNamespace("UtilLib");
 		
 		
 	}
@@ -382,3 +408,8 @@ FFINLuaLogScope::FFINLuaLogScope(lua_State* L) : FFINLogScope(nullptr, FWhereFun
 }), FStackFunction::CreateLambda([L]() {
 	return FINLua::luaFIN_stack(L);
 })) {}
+
+FCbWriter& operator<<(FCbWriter& Writer, lua_State* const& L) {
+	Writer.AddString(FINLua::luaFIN_where(L));
+	return Writer;
+}

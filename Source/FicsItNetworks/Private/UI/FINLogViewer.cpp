@@ -87,7 +87,7 @@ void SFINLogViewer::Construct(const FArguments& InArgs, UObject* InWorldContext)
 	TextVerbosityEnabled = Config.LogViewer.TextLogVerbosity;
 	TextMultilineAlignEnabled = Config.LogViewer.TextLogMultilineAlign;
 #endif
-	
+
 	ChildSlot[
 		SNew(SOverlay)
 		+SOverlay::Slot()[
@@ -288,6 +288,7 @@ TSharedRef<SWidget> SFINLogViewerRow::GenerateWidgetForColumn(const FName& Colum
 			.Font(GetFontInfo())
 			.ForegroundColor(GetTextColor())
 			.AutoWrapText(true)
+			.IsReadOnly(true)
 			.Visibility(this, &SFINLogViewerRow::GetTextVisibility)
 			.Marshaller(Marshaller)
 		];
@@ -352,6 +353,7 @@ void FFINLogTextParser::Process(TArray<FTextLineParseResults>& Results, const FS
 		FRegexMatcher Matcher(Pattern, Input.Mid(LineRange.BeginIndex, LineRange.Len()));
 		while (Matcher.FindNext()) {
 			FTextRange MatchRange(Matcher.GetMatchBeginning(), Matcher.GetMatchEnding());
+			MatchRange.Offset(LineRange.BeginIndex);
 
 			FTextRange Prefix(BeginParseRange, MatchRange.BeginIndex);
 			if (!Prefix.IsEmpty()) {
@@ -362,7 +364,9 @@ void FFINLogTextParser::Process(TArray<FTextLineParseResults>& Results, const FS
 			FString TypeVariant = Matcher.GetCaptureGroup(2);
 			if (!TypeVariant.IsEmpty()) {
 				FTextRange VariantRange(Matcher.GetCaptureGroupBeginning(2), Matcher.GetCaptureGroupEnding(2));
+				VariantRange.Offset(LineRange.BeginIndex);
 				FTextRange TypeRange(Matcher.GetCaptureGroupBeginning(3), Matcher.GetCaptureGroupEnding(3));
+				TypeRange.Offset(LineRange.BeginIndex);
 				FTextRunParseResults ClassResult(FFINReflectionReferenceDecorator::Id, MatchRange, MatchRange);
 				ClassResult.MetaData.Add(FFINReflectionReferenceDecorator::MetaDataVariantKey, VariantRange);
 				ClassResult.MetaData.Add(FFINReflectionReferenceDecorator::MetaDataTypeKey, TypeRange);
@@ -372,6 +376,7 @@ void FFINLogTextParser::Process(TArray<FTextLineParseResults>& Results, const FS
 			FString EEPROMLocation = Matcher.GetCaptureGroup(4);
 			if (!EEPROMLocation.IsEmpty()) {
 				FTextRange LineNumberRange(Matcher.GetCaptureGroupBeginning(5), Matcher.GetCaptureGroupEnding(5));
+				LineNumberRange.Offset(LineRange.BeginIndex);
 				FTextRunParseResults EEPROMResult(FFINEEPROMReferenceDecorator::Id, MatchRange, MatchRange);
 				EEPROMResult.MetaData.Add(FFINEEPROMReferenceDecorator::MetaDataLineNumberKey, LineNumberRange);
 				LineParseResults.Runs.Add(EEPROMResult);

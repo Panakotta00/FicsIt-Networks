@@ -6,7 +6,7 @@ class FICSITNETWORKS_API FFINGlobalRegisterHelper {
 public:
 	typedef TFunction<void()> RegisterFunction;
 private:
-	TArray<RegisterFunction> FunctionsToCall;
+ 	TMap<int, TArray<RegisterFunction>> FunctionsToCall;
 
 	FFINGlobalRegisterHelper() = default;
 
@@ -25,12 +25,12 @@ public:
 	 *
 	 * @param[in]	Func	the function you want to add to the list
 	 */
-	static void AddFunction(const RegisterFunction& Func);
+	static void AddFunction(const RegisterFunction& Func, int Priority);
 };
 
 struct FICSITNETWORKS_API FFINStaticGlobalRegisterFunc {
-	FFINStaticGlobalRegisterFunc(const FFINGlobalRegisterHelper::RegisterFunction& Func) {
-		FFINGlobalRegisterHelper::AddFunction(Func);
+	FFINStaticGlobalRegisterFunc(const FFINGlobalRegisterHelper::RegisterFunction& Func, int Priority = 0) {
+		FFINGlobalRegisterHelper::AddFunction(Func, Priority);
 	}
 };
 

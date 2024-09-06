@@ -1,5 +1,8 @@
 ﻿#include "Network/FINDynamicStructHolder.h"
 
+#include "Engine/World.h"
+#include "Utils/FINUtils.h"
+
 FFINDynamicStructHolder::FFINDynamicStructHolder() {}
 
 FFINDynamicStructHolder::FFINDynamicStructHolder(UScriptStruct* Struct) : Struct(Struct) {
@@ -50,12 +53,16 @@ FFINDynamicStructHolder FFINDynamicStructHolder::Copy(UScriptStruct* Struct, con
 	return holder;
 }
 
-bool FFINDynamicStructHolder::Serialize(FArchive& Ar) {
-	UScriptStruct* OldStruct = Struct;
-	// TODO: TObjectPtr<UObject> ObjectPtr; ????
-	Ar << Struct;
+bool FFINDynamicStructHolder::Serialize(FStructuredArchive::FSlot Slot) {
+	FVersion version = UFINUtils::GetFINSaveVersion(GWorld);
+	if (FVersion(0, 3, 19).Compare(version) == 1) return false;
 	
-	if (Ar.IsLoading()) {
+	UScriptStruct* OldStruct = Struct;
+	
+	FStructuredArchive::FRecord Record = Slot.EnterRecord();
+	Record.EnterField(SA_FIELD_NAME(TEXT("Type"))) << Struct;
+
+	if (Slot.GetUnderlyingArchive().IsLoading()) {
 		if (Data) {
 			if (OldStruct) OldStruct->DestroyStruct(Data);
 			if (Struct) {
@@ -70,15 +77,16 @@ bool FFINDynamicStructHolder::Serialize(FArchive& Ar) {
 		if (Struct) Struct->InitializeStruct(Data);
 	}
 	if (Struct) {
-		Struct->SerializeBin(Ar, Data);
+		auto field = Record.EnterField(SA_FIELD_NAME(TEXT("End")));
+		Struct->SerializeItem(field, Data, nullptr);
 	}
 	return true;
 }
 
-bool FFINDynamicStructHolder::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) {
+/*bool FFINDynamicStructHolder::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) {
 	bOutSuccess = Serialize(Ar);
 	return bOutSuccess;
-}
+}*/
 
 void FFINDynamicStructHolder::AddStructReferencedObjects(FReferenceCollector& Collector) const {
 	UScriptStruct* ThisStruct = Struct;

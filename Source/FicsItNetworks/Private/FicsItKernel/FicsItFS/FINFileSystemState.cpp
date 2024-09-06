@@ -196,7 +196,7 @@ void AFINFileSystemState::SerializePath(CodersFileSystem::SRef<CodersFileSystem:
             	std::string RawData = CodersFileSystem::FileStream::readAll(Stream);
             	if (bUsePreBinarySupportSerialization) {
             		FUTF8ToTCHAR Conv(RawData.c_str(), RawData.length());
-            		FString Data(Conv.Get(), Conv.Length());
+            		FString Data(Conv.Length(), Conv.Get());
             		Content << Data;
             	} else {
             		Stream->close();

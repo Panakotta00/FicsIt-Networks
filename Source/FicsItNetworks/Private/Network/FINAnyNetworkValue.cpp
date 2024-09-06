@@ -1,10 +1,14 @@
-﻿#include "Network/FINAnyNetworkValue.h"
+#include "Network/FINAnyNetworkValue.h"
 
-#include "Network/FINNetworkComponent.h"
-#include "Reflection/FINReflection.h"
+#include "Engine/World.h"
+#include "Utils/FINUtils.h"
 
-bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
-	if (Ar.IsLoading()) {
+bool FFINAnyNetworkValue::Serialize(FStructuredArchive::FSlot Slot) {
+	FVersion version = UFINUtils::GetFINSaveVersion(GWorld);
+	if (FVersion(0, 3, 19).Compare(version) == 1) return false;
+	
+	FStructuredArchive::FRecord Record = Slot.EnterRecord();
+	if (Slot.GetUnderlyingArchive().IsLoading()) {
 		switch (Type) {
 		case FIN_STR:
 			delete Data.STRING;
@@ -28,8 +32,8 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 			break;
 		}
 	}
-	Ar << Type;
-	if (Ar.IsLoading()) {
+	Record.EnterField(SA_FIELD_NAME(TEXT("Type"))) << Type;
+	if (Slot.GetUnderlyingArchive().IsLoading()) {
 		switch (Type) {
 		case FIN_STR:
 			Data.STRING = new FINStr();
@@ -55,34 +59,34 @@ bool FFINAnyNetworkValue::Serialize(FArchive& Ar) {
 
 	switch (Type) {
 	case FIN_INT:
-		Ar << Data.INT;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_INT"))) << Data.INT;
 		break;
 	case FIN_FLOAT:
-		Ar << Data.FLOAT;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_FLOAT"))) << Data.FLOAT;
 		break;
 	case FIN_BOOL:
-		Ar << Data.BOOL;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_BOOL"))) << Data.BOOL;
 		break;
 	case FIN_STR:
-		Ar << *Data.STRING;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_STR"))) << *Data.STRING;
 		break;
 	case FIN_OBJ:
-		Ar << *Data.OBJECT;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_OBJ"))) << *Data.OBJECT;
 		break;
 	case FIN_CLASS:
-		Ar << Data.CLASS;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_CLASS"))) << Data.CLASS;
 		break;
 	case FIN_TRACE:
-		Ar << *Data.TRACE;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_TRACE"))) << *Data.TRACE;
 		break;
 	case FIN_STRUCT:
-		Ar << *Data.STRUCT;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_STRUCT"))) << *Data.STRUCT;
 		break;
 	case FIN_ARRAY:
-		Ar << *Data.ARRAY;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_ARRAY"))) << *Data.ARRAY;
 		break;
 	case FIN_ANY:
-		Ar << *Data.ANY;
+		Record.EnterField(SA_FIELD_NAME(TEXT("FIN_ANY"))) << *Data.ANY;
 		break;
 	default:
 		break;

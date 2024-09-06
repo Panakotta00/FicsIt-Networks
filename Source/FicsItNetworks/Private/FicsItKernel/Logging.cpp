@@ -1,12 +1,11 @@
 #include "FicsItKernel/Logging.h"
 
+#include "FGPlayerController.h"
+#include "Computer/FINComputerRCO.h"
+#include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 
 #define LOCTEXT_NAMESPACE "Log"
-
-void UFINLog::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
-	DOREPLIFETIME(UFINLog, LogEntries);
-}
 
 FText FFINLogEntry::GetVerbosityAsText() const {
 	switch (Verbosity) {
@@ -25,16 +24,29 @@ FString FFINLogEntry::ToClipboardText() const {
 	return FString::Printf(TEXT("%s [%s] %s"), *TimestampText, *VerbosityText, *Content);
 }
 
+UFINLog::UFINLog() {
+	SetIsReplicatedByDefault(true);
+}
+
+void UFINLog::BeginPlay() {
+	Super::BeginPlay();
+
+	if (!GetOwner()->HasAuthority()) {
+		GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFINComputerRCO>()->LogRehandleAllEntries(this);
+	}
+}
+
 void UFINLog::Tick() {
 	FScopeLock ScopeLock(&LogEntriesToAddMutex);
 	if (!LogEntriesToAdd.IsEmpty()) {
-		LogEntries.Append(LogEntriesToAdd);
-		if (LogEntries.Num() > MaxLogEntries) LogEntries.RemoveAt(0, LogEntries.Num() - MaxLogEntries);
-		LogEntriesToAdd.Empty();
-		OnLogEntriesUpdated.Broadcast();
+		TArray<FFINLogEntry> Chunk(LogEntriesToAdd.GetData(), FMath::Min(10, LogEntriesToAdd.Num()));
+		LogEntriesToAdd.RemoveAt(0, Chunk.Num());
+		Multicast_AddLogEntries(Chunk);
 	} else if (bForceEntriesUpdate) {
 		bForceEntriesUpdate = false;
-		OnLogEntriesUpdated.Broadcast();
+		LogEntriesToAdd = LogEntries;
+		LogEntries.Empty();
+		Multicast_EmptyLog();
 	}
 }
 
@@ -65,7 +77,18 @@ FString UFINLog::GetLogAsRichText() {
 	return Text;
 }
 
-void UFINLog::OnRep_LogEntries() {
+void UFINLog::RehandleAllEntries() {
+	bForceEntriesUpdate = true;
+}
+
+void UFINLog::Multicast_EmptyLog_Implementation() {
+	LogEntries.Empty();
+	OnLogEntriesUpdated.Broadcast();
+}
+
+void UFINLog::Multicast_AddLogEntries_Implementation(const TArray<FFINLogEntry>& InLogEntries) {
+	LogEntries.Append(InLogEntries);
+	if (LogEntries.Num() > MaxLogEntries) LogEntries.RemoveAt(0, LogEntries.Num() - MaxLogEntries);
 	OnLogEntriesUpdated.Broadcast();
 }
 

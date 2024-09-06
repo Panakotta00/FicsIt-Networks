@@ -16,6 +16,7 @@
 #include "FINGlobalRegisterHelper.h"
 
 #include "Computer/FINComputerGPUT1.h"
+#include "Network/FINNetworkUtils.h"
 #include "Network/FINFuture.h"
 #include "Network/FINNetworkConnectionComponent.h"
 #include "Utils/FINTargetPoint.h"
@@ -28,6 +29,7 @@
 #include "FGPipeConnectionComponent.h"
 #include "FGGameState.h"
 #include "FGHealthComponent.h"
+#include "FGIconLibrary.h"
 #include "FGItemCategory.h"
 #include "FGLocomotive.h"
 #include "FGPipeSubsystem.h"
@@ -60,8 +62,10 @@
 #include "Buildables/FGBuildableTrainPlatform.h"
 #include "Buildables/FGBuildableTrainPlatformCargo.h"
 #include "Buildables/FGBuildableWidgetSign.h"
+#include "Computer/FINComputerGPUT2.h"
 #include "Computer/FINComputerSubsystem.h"
 #include "FicsItKernel/Logging.h"
+#include "Network/FINNetworkComponent.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
 #include "WheeledVehicles/FGWheeledVehicle.h"
 
@@ -157,7 +161,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			}
 			for (; j < InValues.Num(); j++) Parameters.Add(InValues[j]);
 			Func.Function(Ctx, Parameters);
-			
+
 			TArray<FINAny> OutValues;
 			if (Pos.Num() > 0) for (int i = 0; i <= Pos[Pos.Num()-1]; ++i) {
 				const FFINStaticFuncParamReg* Reg = Func.Parameters.Find(i);
@@ -169,7 +173,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 			for (; j < Parameters.Num();) OutValues.Add(Parameters[j++]);
 			return OutValues;
 		};
-		
+
 		ToFillClass->Functions.Add(FINFunc);
 	}
 
@@ -201,6 +205,9 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINClass* ToFill
 		switch (Prop.PropType) {
 		case 1:
 			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ClassProp;
+			break;
+		case 2:
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_StaticProp;
 			break;
 		default:
 			break;
@@ -324,7 +331,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 			}
 			return OutValues;
 		};
-		
+
 		ToFillStruct->Functions.Add(FINFunc);
 	}
 
@@ -356,6 +363,9 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		switch (Prop.PropType) {
 		case 1:
 			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_ClassProp;
+			break;
+		case 2:
+			FINProp->PropertyFlags = FINProp->PropertyFlags | FIN_Prop_StaticProp;
 			break;
 		default:
 			break;
@@ -416,7 +426,8 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 		T* self = GetFromCtx(Ctx);
 #define BeginClassFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Class, InternalName, DisplayName, Description, VA, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 		TSubclassOf<T> self = Cast<UClass>(Ctx.GetObject());
-#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) )
+#define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
+		void* self = Ctx.GetGeneric();
 #define Body() \
 			if (self && _bGotReg) {
 #define EndFunc() \
@@ -440,6 +451,7 @@ void UFINStaticReflectionSource::FillData(FFINReflection* Ref, UFINStruct* ToFil
 	T* self = GetFromCtx(Ctx);
 #define BeginClassProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 	TSubclassOf<T> self = Cast<UClass>(Ctx.GetObject());
+#define BeginStaticProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 2, GET_MACRO(0, ##__VA_ARGS__, 1) )
 #define Return \
 		return (FINAny)
 #define PropSet() \
@@ -553,7 +565,7 @@ struct RTrace {
 		return Prop;
 	}
 };
- 
+
 template<typename T>
 struct RStruct {
 	typedef T CppType;
@@ -589,13 +601,36 @@ public:
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetQueuedReservations(const FFGRailroadSignalBlock& Block) {
 		return Block.mQueuedReservations;
 	}
-	
+
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
 		return Block.mApprovedReservations;
 	}
 };
 
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
+BeginProp(RString, nick, "Nick", "**Only available for Network Components!** Allows access to the Network Components Nick.") {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		Return IFINNetworkComponent::Execute_GetNick(NetworkHandler);
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} PropSet() {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		IFINNetworkComponent::Execute_SetNick(NetworkHandler, Val);
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} EndProp()
+BeginProp(RString, id, "ID", "**Only available for Network Components!** Allows access to the Network Components UUID.") {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	if (NetworkHandler) {
+		Return IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString();
+	} else {
+		throw FFINException("Not a network component!");
+	}
+} EndProp()
 BeginProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
 	Return (int64)GetTypeHash(self);
 } EndProp()
@@ -1119,9 +1154,12 @@ EndClass()
 BeginClass(AFGBuildableCircuitSwitch, "CircuitSwitch", "Circuit Switch", "A circuit bridge that can be activated and deactivate by the player.")
 BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are connected to each other and act as one entity.", 0) {
 	Return self->IsSwitchOn();
-} PropSet() {
-	self->SetSwitchOn(Val);
 } EndProp()
+BeginFunc(setIsSwitchOn, "Set Is Switch On", "Changes the circuit switch state.", 0) {
+	InVal(0, RBool, state, "State", "The new switch state.")
+	Body()
+	self->SetSwitchOn(state);
+} EndFunc()
 EndClass()
 
 BeginClass(AFGBuildablePriorityPowerSwitch, "CircuitSwitchPriority", "Circuit Priority Switch", "A circuit power switch that can be activated and deactivated based on a priority to prevent a full factory power shutdown.")
@@ -1180,7 +1218,7 @@ EndClass()
 BeginClass(AFGPipeHyperStart, "PipeHyperStart", "Pipe Hyper Start", "A actor that is a hypertube entrance buildable")
 Hook(UFINPipeHyperStartHook)
 BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube entrance.")
-	SignalParam(1, RBool, success, "Sucess", "True if the transfer was sucessfull")
+	SignalParam(0, RBool, success, "Sucess", "True if the transfer was sucessfull")
 EndSignal()
 BeginSignal(PlayerExited, "Player Exited", "Triggers when a players leaves through this hypertube entrance.")
 EndSignal()
@@ -1231,12 +1269,12 @@ BeginFunc(getFluidDescriptor, "Get Fluid Descriptor", "?") {  /* TODO: Write DOC
 	Body()
 	fluidDescriptor = Ctx.GetTrace() / self->GetFluidDescriptor();
 } EndFunc()
-/*BeginFunc(getFluidIntegrant, "Get Fluid Integrant", "?") {  
+/*BeginFunc(getFluidIntegrant, "Get Fluid Integrant", "?") {
 	OutVal(0, RObject<IFGFluidIntegrantInterface>, fluidIntegrant, "Fluid Descriptor", "?")
     Body()
     fluidIntegrant = Ctx.GetTrace() / self->GetFluidIntegrant();
 } EndFunc()*/
-BeginFunc(flushPipeNetwork, "Flush Pipe Network", "Flush the associated pipe network") {  
+BeginFunc(flushPipeNetwork, "Flush Pipe Network", "Flush the associated pipe network") {
     Body()
 	auto networkID = self->GetPipeNetworkID();
     auto subsystem = AFGPipeSubsystem::GetPipeSubsystem(self->GetWorld());
@@ -1354,7 +1392,7 @@ BeginFunc(setConfiguration, "Set Configuration", "Sets the Door Mode/Configurati
 } EndFunc()
 EndClass()
 
-BeginClass(AFGVehicle, "Vehicle", "Vehicle", "A base class for all vehciles.")
+BeginClass(AFGVehicle, "Vehicle", "Vehicle", "A base class for all vehicles.")
 BeginProp(RFloat, health, "Health", "The health of the vehicle.") {
 	Return self->GetHealthComponent()->GetCurrentHealth();
 } EndProp()
@@ -1365,7 +1403,7 @@ BeginProp(RBool, isSelfDriving, "Is Self Driving", "True if the vehicle is curre
 	Return self->IsSelfDriving();
 } PropSet() {
 	FReflectionHelper::SetPropertyValue<FBoolProperty>(self, TEXT("mIsSelfDriving"), Val);
-} EndProp() 
+} EndProp()
 EndClass()
 
 BeginClass(AFGWheeledVehicle, "WheeledVehicle", "Wheeled Vehicle", "The base class for all vehicles that used wheels for movement.")
@@ -1531,8 +1569,8 @@ BeginClass(AFGBuildableRailroadStation, "RailroadStation", "Railroad Station", "
 Hook(UFINRailroadStationHook)
 BeginSignal(StartDocking, "Start Docking", "Triggers when a train tries to dock onto the station.")
 	SignalParam(0, RBool, successful, "Successful", "True if the train successfully docked.")
-	SignalParam(0, RTrace<AFGLocomotive>, locomotive, "Locomotive", "The locomotive that tries to dock onto the station.")
-	SignalParam(0, RFloat, offset, "Offset", "The offset at witch the train tried to dock.")
+	SignalParam(1, RTrace<AFGLocomotive>, locomotive, "Locomotive", "The locomotive that tries to dock onto the station.")
+	SignalParam(2, RFloat, offset, "Offset", "The offset at witch the train tried to dock.")
 EndSignal()
 BeginSignal(FinishDocking, "Finish Docking", "Triggers when a train finished the docking procedure and is ready to depart the station.")
 EndSignal()
@@ -1710,7 +1748,7 @@ BeginProp(RFloat, maxTractiveEffort, "Max Tractive Effort", "The maximum tractiv
 BeginProp(RFloat, maxDynamicBrakingEffort, "Max Dynamic Braking Effort", "The maximum dynamic braking effort of this vehicle.") {
 	Return self->GetMaxDynamicBrakingEffort();
 } EndProp()
-BeginProp(RFloat, maxAirBrakingEffort, "Max Air Braking Effort", "The maximum air braking effort of this vehcile.") {
+BeginProp(RFloat, maxAirBrakingEffort, "Max Air Braking Effort", "The maximum air braking effort of this vehicle.") {
 	Return self->GetMaxAirBrakingEffort();
 } EndProp()
 BeginProp(RFloat, trackGrade, "Track Grade", "The current track grade of this vehicle.") {
@@ -1780,7 +1818,7 @@ BeginFunc(getTimeTable, "Get Time Table", "Returns the timetable of this train."
 	Body()
 	timeTable = Ctx.GetTrace() / self->GetTimeTable();
 } EndFunc()
-BeginFunc(newTimeTable, "New Time Table", "Creates and returns a new timetable for this train.") {
+BeginFunc(newTimeTable, "New Time Table", "Creates and returns a new timetable for this train.", 0) {
 	OutVal(0, RTrace<AFGRailroadTimeTable>, timeTable, "Time Table", "The new timetable for this train.")
 	Body()
 	timeTable = Ctx.GetTrace() / self->NewTimeTable();
@@ -1830,7 +1868,7 @@ EndClass()
 
 BeginClass(AFGRailroadTimeTable, "TimeTable", "Time Table", "Contains the time table information of train.")
 BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
-	InVal(0, RInt, index, "Index", "The index at which the stop should get added.")
+	InVal(0, RInt, index, "Index", "The zero-based index at which the stop should get added.")
 	InVal(1, RTrace<AFGBuildableRailroadStation>, station, "Station", "The railroad station at which the stop should happen.")
 	InVal(2, RStruct<FTrainDockingRuleSet>, ruleSet, "Rule Set", "The docking rule set that descibes when the train will depart from the station.")
 	OutVal(3, RBool, added, "Added", "True if the stop got sucessfully added to the time table.")
@@ -1841,7 +1879,7 @@ BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
 	added = self->AddStop(index, stop);
 } EndFunc()
 BeginFunc(removeStop, "Remove Stop", "Removes the stop with the given index from the time table.") {
-	InVal(0, RInt, index, "Index", "The index at which the stop should get added.")
+	InVal(0, RInt, index, "Index", "The zero-based index at which the stop should get added.")
 	Body()
 	self->RemoveStop(index);
 } EndFunc()
@@ -1858,7 +1896,7 @@ BeginFunc(getStops, "Get Stops", "Returns a list of all the stops this time tabl
 } EndFunc()
 BeginFunc(setStops, "Set Stops", "Allows to empty and fill the stops of this time table with the given list of new stops.") {
 	InVal(0, RArray<RStruct<FFINTimeTableStop>>, stops, "Stops", "The new time table stops.")
-	OutVal(0, RBool, gotSet, "Got Set", "True if the stops got sucessfully set.")
+	OutVal(1, RBool, gotSet, "Got Set", "True if the stops got sucessfully set.")
 	Body()
 	TArray<FTimeTableStop> Stops;
 	for (const FINAny& Any : stops) {
@@ -1867,13 +1905,13 @@ BeginFunc(setStops, "Set Stops", "Allows to empty and fill the stops of this tim
 	gotSet = self->SetStops(Stops);
 } EndFunc()
 BeginFunc(isValidStop, "Is Valid Stop", "Allows to check if the given stop index is valid.") {
-	InVal(0, RInt, index, "Index", "The stop index you want to check its validity.")
+	InVal(0, RInt, index, "Index", "The zero-based stop index you want to check its validity.")
 	OutVal(1, RBool, valid, "Valid", "True if the stop index is valid.")
 	Body()
 	valid = self->IsValidStop(index);
 } EndFunc()
 BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
-	InVal(0, RInt, index, "Index", "The index of the stop you want to get.")
+	InVal(0, RInt, index, "Index", "The zero-based index of the stop you want to get.")
 	OutVal(1, RStruct<FFINTimeTableStop>, stop, "Stop", "The time table stop at the given index.")
 	Body()
 	FTimeTableStop Stop = self->GetStop(index);
@@ -1884,7 +1922,7 @@ BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
 	}
 } EndFunc()
 BeginFunc(setStop, "Set Stop", "Allows to override a stop already in the time table.") {
-	InVal(0, RInt, index, "Index", "The index of the stop you want to override.")
+	InVal(0, RInt, index, "Index", "The zero-based index of the stop you want to override.")
 	InVal(1, RStruct<FFINTimeTableStop>, stop, "Stop", "The time table stop you want to override with.")
 	OutVal(2, RBool, success, "Success", "True if setting was successful, false if not, f.e. invalid index.")
 	Body()
@@ -1899,7 +1937,7 @@ BeginFunc(setStop, "Set Stop", "Allows to override a stop already in the time ta
 	}
 } EndFunc()
 BeginFunc(setCurrentStop, "Set Current Stop", "Sets the stop, to which the train trys to drive to right now.") {
-	InVal(0, RInt, index, "Index", "The index of the stop the train should drive to right now.")
+	InVal(0, RInt, index, "Index", "The zero-based index of the stop the train should drive to right now.")
 	Body()
 	self->SetCurrentStop(index);
 } EndFunc()
@@ -1908,7 +1946,7 @@ BeginFunc(incrementCurrentStop, "Increment Current Stop", "Sets the current stop
 	self->IncrementCurrentStop();
 } EndFunc()
 BeginFunc(getCurrentStop, "Get Current Stop", "Returns the index of the stop the train drives to right now.") {
-	OutVal(0, RInt, index, "Index", "The index of the stop the train tries to drive to right now.")
+	OutVal(0, RInt, index, "Index", "The zero-based index of the stop the train tries to drive to right now.")
     Body()
     index = (int64) self->GetCurrentStop();
 } EndFunc()
@@ -1922,7 +1960,7 @@ Hook(UFINRailroadTrackHook)
 BeginSignal(VehicleEnter, "VehicleEnter", "Triggered when a vehicle enters the track.")
 	SignalParam(0, RTrace<AFGRailroadVehicle>, Vehicle, "Vehicle", "The vehicle that entered the track.")
 EndSignal()
-BeginSignal(VehicleExit, "VehicleExit", "Triggered when a vehcile exists the track.")
+BeginSignal(VehicleExit, "VehicleExit", "Triggered when a vehicle exists the track.")
 	SignalParam(0, RTrace<AFGRailroadVehicle>, Vehicle, "Vehicle", "The vehicle that exited the track.")
 EndSignal()
 BeginFunc(getClosestTrackPosition, "Get Closeset Track Position", "Returns the closes track position from the given world position") {
@@ -1962,8 +2000,8 @@ BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which th
     Body()
     track = (FINAny)FFINTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
 } EndFunc()
-BeginFunc(getVehciles, "Get Vehicles", "Returns a list of Railroad Vehicles on the Track") {
-	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "THe list of vehciles on the track.")
+BeginFunc(getVehicles, "Get Vehicles", "Returns a list of Railroad Vehicles on the Track") {
+	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "THe list of vehicles on the track.")
 	Body()
 	TArray<FINAny> Vehicles;
 	for (AFGRailroadVehicle* vehicle : self->GetVehicles()) {
@@ -2098,6 +2136,9 @@ BeginClass(AFGBuildableRailroadSignal, "RailroadSignal", "Railroad Signal", "A t
 Hook(UFINRailroadSignalHook)
 BeginSignal(AspectChanged, "Aspect Changed", "Triggers when the aspect of this signal changes.")
 	SignalParam(0, RInt, aspect, "Aspect", "The new aspect of the signal (see 'Get Aspect' for more information)")
+EndSignal()
+BeginSignal(ValidationChanged, "Validation Changed", "Triggers when the validation of this signal changes.")
+	SignalParam(0, RInt, validation, "Validation", "The new validation of the signal (see 'Block Validation' for more information)")
 EndSignal()
 BeginProp(RBool, isPathSignal, "Is Path Signal", "True if this signal is a path-signal.") {
 	Return self->IsPathSignal();
@@ -2429,10 +2470,15 @@ BeginProp(RStruct<FLinearColor>, foreground, "Foreground", "The foreground Color
 } PropSet() {
 	self->ForegroundColor = Val;
 } EndProp()
-BeginProp(RStruct<FLinearColor>, background, "bBckground", "The background Color.") {
+BeginProp(RStruct<FLinearColor>, background, "Background", "The background Color.") {
 	Return (FINStruct)self->BackgroundColor;
 } PropSet() {
 	self->BackgroundColor = Val;
+} EndProp()
+BeginProp(RFloat, emissive, "Emissive", "The emissiveness of the sign.") {
+	Return self->Emissive;
+} PropSet() {
+	self->Emissive = Val;
 } EndProp()
 BeginProp(RStruct<FLinearColor>, auxiliary, "Auxiliary", "The auxiliary Color.") {
 	Return (FINStruct)self->AuxiliaryColor;
@@ -3109,4 +3155,160 @@ BeginFunc(format, "Format", "Creates a formatted string representation of this l
 	Body()
 	result = self->ToClipboardText();
 } EndFunc()
+EndStruct()
+
+BeginStruct(FIconData, "IconData", "Icon Data", "A struct containing information about a game icon (used in f.e. signs).")
+BeginProp(RBool, isValid, "Is Valid", "True if the icon data refers to an valid icon") {
+	Return FINBool(self->ID >= 0);
+} EndProp()
+BeginProp(RInt, id, "ID", "The icon ID.") {
+	Return (FINInt)self->ID;
+} EndProp()
+BeginProp(RString, ref, "Ref", "The media reference of this icon.") {
+	Return FString::Printf(TEXT("icon:%i"), self->ID);
+} EndProp()
+BeginProp(RBool, animated, "Animated", "True if the icon is animated.") {
+	Return self->Animated;
+} EndProp()
+BeginProp(RString, iconName, "Icon Name", "The name of the icon.") {
+	Return self->IconName.ToString();
+} EndProp()
+BeginProp(RString, iconType, "Icon Type", "The type of the icon.\n0 = Building\n1 = Part\n2 = Equipment\n3 = Monochrome\n4 = Material\n5 = Custom\n6 = Map Stamp") {
+	Return (FINInt)self->IconType;
+} EndProp()
+BeginProp(RBool, hidden, "Hidden", "True if the icon is hidden in the selection.") {
+	Return self->Hidden;
+} EndProp()
+BeginProp(RBool, searchOnly, "Search Only", "True if the icon will be shown in selection only if searched for directly by name.") {
+	Return self->SearchOnly;
+} EndProp()
+EndStruct()
+
+BeginStructConstructable(FMargin, "Margin", "Margin", "A struct containing four floats that describe a margin around a box (like a 9-patch).")
+BeginProp(RFloat, left, "Left", "The left edge of the rectangle.") {
+	Return FINFloat(self->Left);
+} PropSet() {
+	self->Left = Val;
+} EndProp()
+BeginProp(RFloat, right, "Right", "The right edge of the rectangle.") {
+	Return FINFloat(self->Right);
+} PropSet() {
+	self->Right = Val;
+} EndProp()
+BeginProp(RFloat, top, "Top", "The top edge of the rectangle.") {
+	Return FINFloat(self->Top);
+} PropSet() {
+	self->Top = Val;
+} EndProp()
+BeginProp(RFloat, bottom, "Bottom", "The bottom edge of the rectangle.") {
+	Return FINFloat(self->Left);
+} PropSet() {
+	self->Bottom = Val;
+} EndProp()
+EndStruct()
+
+BeginStructConstructable(FVector4, "Vector4", "Vector4", "A Vector containing four values.")
+BeginProp(RFloat, x, "X", "The first value in the Vector4.") {
+	Return self->X;
+} PropSet() {
+	self->X = Val;
+} EndProp()
+BeginProp(RFloat, y, "Y", "The second value in the Vector4.") {
+	Return self->Y;
+} PropSet() {
+	self->Y = Val;
+} EndProp()
+BeginProp(RFloat, z, "Z", "The third value in the Vector4.") {
+	Return self->Z;
+} PropSet() {
+	self->Z = Val;
+} EndProp()
+BeginProp(RFloat, w, "W", "The fourth value in the Vector4.") {
+	Return self->W;
+} PropSet() {
+	self->W = Val;
+} EndProp()
+EndStruct()
+
+BeginStructConstructable(FFINGPUT2DC_Box, "GPUT2DrawCallBox", "GPU T2 Box Draw Call", "This struct contains the necessary information to draw a box onto the GPU T2.")
+BeginProp(RStruct<FVector2D>, position, "Position", "The drawn local position of the rectangle.") {
+	Return FINStruct(self->Position);
+} PropSet() {
+	self->Position = Val;
+} EndProp()
+BeginProp(RStruct<FVector2D>, size, "Size", "The drawn size of the rectangle.") {
+	Return FINStruct(self->Size);
+} PropSet() {
+	self->Size = Val;
+} EndProp()
+BeginProp(RFloat, rotation, "Rotation", "The draw rotation of the rectangle.") {
+	Return FINFloat(self->Rotation);
+} PropSet() {
+	self->Rotation = Val;
+} EndProp()
+BeginProp(RStruct<FLinearColor>, color, "Color", "The fill color of the rectangle, or the tint of the image drawn.") {
+	Return FINStruct(self->Color.ReinterpretAsLinear());
+} PropSet() {
+	self->Color = Val.QuantizeRound();
+} EndProp()
+BeginProp(RString, image, "Image", "If not empty, should be a image reference to the image that should be drawn inside the rectangle.") {
+	Return FINStr(self->Image);
+} PropSet() {
+	self->Image = Val;
+} EndProp()
+BeginProp(RStruct<FVector2D>, imageSize, "Image Size", "The size of the internal image drawn, necessary for proper scaling, antialising and tiling.") {
+	Return FINStruct(self->ImageSize);
+} PropSet() {
+	self->ImageSize = Val;
+} EndProp()
+BeginProp(RBool, hasCenteredOrigin, "Has Centered Origin", "If set to false, the position will give the left upper corner of the box and rotation will happen around this point. If set to true, the position will give the center point of box and the rotation will happen around this center point.") {
+	Return FINBool(self->bHasCenteredOrigin);
+} PropSet() {
+	self->bHasCenteredOrigin = Val;
+} EndProp()
+BeginProp(RBool, horizontalTiling, "Horizontal Tiling", "True if the image should be tiled horizontally.") {
+	Return FINBool(self->bHorizontalTiling);
+} PropSet() {
+	self->bHorizontalTiling = Val;
+} EndProp()
+BeginProp(RBool, verticalTiling, "Vertical Tiling", "True if the image should be tiled vertically.") {
+	Return FINBool(self->bVerticalTiling);
+} PropSet() {
+	self->bVerticalTiling = Val;
+} EndProp()
+BeginProp(RBool, isBorder, "Is Border", "If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use (use the image as 9-patch).") {
+	Return FINBool(self->bIsBorder);
+} PropSet() {
+	self->bIsBorder = Val;
+} EndProp()
+BeginProp(RStruct<FMargin>, margin, "Margin", "The margin values of the 9-patch (border).") {
+	Return FINStruct(self->Margin);
+} PropSet() {
+	self->Margin = FVector4(Val.Left, Val.Top, Val.Right, Val.Bottom);
+} EndProp()
+BeginProp(RBool, isRounded, "Is Rounded", "True if the box can have rounded borders.") {
+	Return FINBool(self->bIsRounded);
+} PropSet() {
+	self->bIsRounded = Val;
+} EndProp()
+BeginProp(RStruct<FVector4>, radii, "Radii", "The rounded border radii used if isRounded is set to true.\nThe Vector4 corner mapping in order: Top Left, Top Right, Bottom Right & Bottom Left.") {
+	Return FINStruct(self->BorderRadii);
+} PropSet() {
+	self->BorderRadii = Val;
+} EndProp()
+BeginProp(RBool, hasOutline, "Has Outline", "True if the box has a colorful (inward) outline.") {
+	Return FINBool(self->bHasOutline);
+} PropSet() {
+	self->bHasOutline = Val;
+} EndProp()
+BeginProp(RFloat, outlineThickness, "Outline Thickness", "The uniform thickness of the outline around the box.") {
+	Return FINFloat(self->OutlineThickness);
+} PropSet() {
+	self->OutlineThickness = Val;
+} EndProp()
+BeginProp(RStruct<FLinearColor>, outlineColor, "Outline Color", "The color of the outline around the box.") {
+	Return FINStruct(self->OutlineColor.ReinterpretAsLinear());
+} PropSet() {
+	self->OutlineColor = Val.QuantizeRound();
+} EndProp()
 EndStruct()

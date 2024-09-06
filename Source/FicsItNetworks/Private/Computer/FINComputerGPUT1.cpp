@@ -174,20 +174,22 @@ SScreenMonitor::SScreenMonitor() {
 	
 }
 
-void AFINComputerGPUT1::SetFrontBufferChunk_Implementation(int InOffset, const TArray<FFINGPUT1BufferPixel>& InPixels) {
-	FrontBuffer.SetChunk(InOffset, InPixels);
+void AFINComputerGPUT1::Multicast_BeginBackBufferReplication_Implementation(FIntPoint Size) {
+	if (!HasAuthority()) {
+		BackBuffer.SetSize(Size.X, Size.Y);
+	}
 }
 
-void AFINComputerGPUT1::SetFrontBuffer_Implementation(const FFINGPUT1Buffer& Buffer) {
-	FrontBuffer = Buffer;
+void AFINComputerGPUT1::Multicast_AddBackBufferChunk_Implementation(int64 InOffset, const TArray<FFINGPUT1BufferPixel>& Chunk) {
+	if (!HasAuthority()) {
+		BackBuffer.SetChunk(InOffset, Chunk);
+	}
 }
 
-void AFINComputerGPUT1::ReplicateFrontBuffer() {
-	//SetFrontBuffer(FrontBuffer);
-	for (int i = 0; i < FrontBuffer.GetData().Num(); i += UNetworkSettings::DefaultMaxRepArraySize/2) {
-		int Count = FMath::Min(FrontBuffer.GetData().Num() - i, UNetworkSettings::DefaultMaxRepArraySize/2);
-		TArray<FFINGPUT1BufferPixel> Chunk(FrontBuffer.GetData().GetData() + i, Count);
-		SetFrontBufferChunk(i, Chunk);
+void AFINComputerGPUT1::Multicast_EndBackBufferReplication_Implementation() {
+	if (!HasAuthority()) {
+		FrontBuffer = BackBuffer;
+		if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
 	}
 }
 
@@ -204,18 +206,24 @@ AFINComputerGPUT1::AFINComputerGPUT1() {
 
 void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
-	if (FlushTime > 0.0) FlushTime -= DeltaSeconds;
-	if (bFlushed) {
-		bFlushed = false;
-		FlushBackToFront();
-		bNetFlushed = true;
-	}
-	if (HasAuthority() && bNetFlushed && FlushTime <= 0.0) {
-		bNetFlushed = false;
-		Flush();
-		//ForceNetUpdate();
-		ReplicateFrontBuffer();
-		FlushTime = 1.0;
+
+	if (HasAuthority()) {
+		if (ToReplicate.Num() > 0) {
+			int64 ChunkSize = FMath::Min(CHUNK_SIZE, ToReplicate.Num());
+			TArray<FFINGPUT1BufferPixel> Chunk(ToReplicate.GetData(), ChunkSize);
+			ToReplicate.RemoveAt(0, ChunkSize);
+			Multicast_AddBackBufferChunk(Offset, Chunk);
+			Offset += ChunkSize;
+
+			if (ToReplicate.Num() <= 0) {
+				Multicast_EndBackBufferReplication();
+			}
+		} else if (bShouldReplicate) {
+			bShouldReplicate = false;
+			Multicast_BeginBackBufferReplication(BackBuffer.GetSize());
+			ToReplicate = FrontBuffer.GetData();
+			Offset = 0;
+		}
 	}
 }
 
@@ -233,6 +241,7 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SNew(SScaleBox)
+	.Stretch(EStretch::ScaleToFit)
 	.HAlign(HAlign_Center)
 	.VAlign(VAlign_Center)[
 		SAssignNew(CachedInvalidation, SInvalidationPanel)
@@ -242,7 +251,7 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 				FScopeLock Lock(&DrawingMutex);
 	            return &FrontBuffer;
 			})
-			.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/UI/FiraCode.FiraCode'")), 12, "FiraCode-Regular"))
+			.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/UI/Assets/FiraCode.FiraCode'")), 12, "FiraCode-Regular"))
 			.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
 				RCO->GPUMouseEvent(this, 0, x, y, btn);
 				return FReply::Handled();
@@ -281,15 +290,10 @@ void AFINComputerGPUT1::SetScreenSize(int Width, int Height) {
 	ForceNetUpdate();
 }
 
-void AFINComputerGPUT1::Flush_Implementation() {
-	FlushBackToFront();
-}
-
-void AFINComputerGPUT1::FlushBackToFront() {
+void AFINComputerGPUT1::OnRep_FrontBuffer() {
 	if (CachedInvalidation) {
-		CachedInvalidation->InvalidateRoot();
+		CachedInvalidation->InvalidateRootChildOrder();
 		CachedInvalidation->InvalidateScreenPosition();
-		CachedInvalidation->InvalidatePrepass();
 	}
 }
 
@@ -348,5 +352,6 @@ FFINGPUT1Buffer AFINComputerGPUT1::netFunc_getBuffer() {
 void AFINComputerGPUT1::netFunc_flush() {
 	FScopeLock Lock(&DrawingMutex);
 	FrontBuffer = BackBuffer;
-	bFlushed = true;
+	bShouldReplicate = true;
+	if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
 }
