@@ -1,6 +1,12 @@
 = Gauge Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 A small analogue Gauge for use on Micro Enclosures. The red portion and needle position can be changed through FIN
 
 // tag::interface[]

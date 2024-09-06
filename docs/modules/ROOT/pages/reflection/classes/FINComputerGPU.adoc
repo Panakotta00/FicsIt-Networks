@@ -1,6 +1,12 @@
 = FINComputerGPU
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINComputerModule]
+!===
+
 
 
 // tag::interface[]

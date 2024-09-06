@@ -1,6 +1,12 @@
 = Light Source
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 The base class for all light you can build.
 
 // tag::interface[]

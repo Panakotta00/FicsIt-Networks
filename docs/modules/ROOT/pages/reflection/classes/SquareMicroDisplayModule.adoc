@@ -1,6 +1,12 @@
 = Square Large Micro Display Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 Provides a relatively small text only display for Control Panels. 
 Text height is fixed, but text is squeezed to fit horizontally.
 

@@ -42,9 +42,9 @@ The Y coordinate component
 
 == Functions
 
-// tag::func-FIN_Operator_Add-title[]
-=== `FIN_Operator_Add` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
-// tag::func-FIN_Operator_Add[]
+// tag::func-FIR_Operator_Add-title[]
+=== `FIR_Operator_Add` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-FIR_Operator_Add[]
 
 The addition (+) operator for this struct.
 
@@ -79,11 +79,11 @@ The addition (+) operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Add[]
-// end::func-FIN_Operator_Add-title[]
-// tag::func-FIN_Operator_Neg-title[]
-=== `FIN_Operator_Neg` () -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
-// tag::func-FIN_Operator_Neg[]
+// end::func-FIR_Operator_Add[]
+// end::func-FIR_Operator_Add-title[]
+// tag::func-FIR_Operator_Neg-title[]
+=== `FIR_Operator_Neg` () -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-FIR_Operator_Neg[]
 
 The Negation operator for this struct.
 
@@ -108,11 +108,11 @@ The Negation operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Neg[]
-// end::func-FIN_Operator_Neg-title[]
-// tag::func-FIN_Operator_Sub-title[]
-=== `FIN_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
-// tag::func-FIN_Operator_Sub[]
+// end::func-FIR_Operator_Neg[]
+// end::func-FIR_Operator_Neg-title[]
+// tag::func-FIR_Operator_Sub-title[]
+=== `FIR_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-FIR_Operator_Sub[]
 
 The subtraction (-) operator for this struct.
 
@@ -147,11 +147,11 @@ The subtraction (-) operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Sub[]
-// end::func-FIN_Operator_Sub-title[]
-// tag::func-FIN_Operator_Mul-title[]
-=== `FIN_Operator_Mul` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Float
-// tag::func-FIN_Operator_Mul[]
+// end::func-FIR_Operator_Sub[]
+// end::func-FIR_Operator_Sub-title[]
+// tag::func-FIR_Operator_Mul-title[]
+=== `FIR_Operator_Mul` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Float
+// tag::func-FIR_Operator_Mul[]
 
 
 
@@ -186,11 +186,11 @@ The subtraction (-) operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Mul[]
-// end::func-FIN_Operator_Mul-title[]
-// tag::func-FIN_Operator_Mul_1-title[]
-=== `FIN_Operator_Mul_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
-// tag::func-FIN_Operator_Mul_1[]
+// end::func-FIR_Operator_Mul[]
+// end::func-FIR_Operator_Mul-title[]
+// tag::func-FIR_Operator_Mul_1-title[]
+=== `FIR_Operator_Mul_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-FIR_Operator_Mul_1[]
 
 
 
@@ -225,6 +225,6 @@ The subtraction (-) operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Mul_1[]
-// end::func-FIN_Operator_Mul_1-title[]
+// end::func-FIR_Operator_Mul_1[]
+// end::func-FIR_Operator_Mul_1-title[]
 

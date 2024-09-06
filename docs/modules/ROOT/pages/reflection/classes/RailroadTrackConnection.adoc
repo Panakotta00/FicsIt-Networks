@@ -1,6 +1,12 @@
 = Railroad Track Connection
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
 This is a actor component for railroad tracks that allows to connecto to other track connections and so to connection multiple tracks with each eather so you can build a train network.
 
 // tag::interface[]

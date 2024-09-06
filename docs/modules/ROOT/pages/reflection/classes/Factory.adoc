@@ -1,6 +1,12 @@
 = Factory
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 The base class of most machines you can build.
 
 // tag::interface[]

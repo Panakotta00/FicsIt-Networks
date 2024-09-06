@@ -1,6 +1,12 @@
 = Indicator Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 Indicator Module for panels
 
 // tag::interface[]

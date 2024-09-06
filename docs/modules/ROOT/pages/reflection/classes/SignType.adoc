@@ -1,6 +1,12 @@
 = Sign Type
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Object.adoc[Object]
+!===
+
 Describes the type of a sign.
 
 // tag::interface[]

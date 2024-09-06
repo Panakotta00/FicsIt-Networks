@@ -1,6 +1,12 @@
 = Resource Sink
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[Factory]
+!===
+
 The resource sink, also known a A.W.E.S.O.M.E Sink
 
 // tag::interface[]

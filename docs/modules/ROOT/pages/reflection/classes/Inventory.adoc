@@ -1,6 +1,12 @@
 = Inventory
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
 A actor component that can hold multiple item stacks.
 WARNING! Be aware of container inventories, and never open their UI, otherwise these function will not work as expected.
 

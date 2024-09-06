@@ -1,7 +1,7 @@
 = Reflection-System Base Module
 :table-caption!:
 
-Description
+This Module provides common functionallity required by further reflection related modules.
 
 == Types
 
@@ -12,8 +12,9 @@ Instead of just calling it, you can also ask for information about the function 
 And it makes debugging a bit easier.
 
 === __ReflectionFunction.__**asFunctionObject** : xref:/reflection/classes/Function.adoc[Function]
-Description
+Returns the Reflection-System Object that represents this Reflected Function.
+This way you can deeply inspect the function and its associations.
 
 === __ReflectionFunction.__**quickRef** : string
-Description
+A stirng containing the signature and description of the function for quick way to get info one the function within code.
 

@@ -1,6 +1,12 @@
 = Circuit Priority Switch
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/CircuitSwitch.adoc[CircuitSwitch]
+!===
+
 A circuit power switch that can be activated and deactivated based on a priority to prevent a full factory power shutdown.
 
 // tag::interface[]

@@ -1,6 +1,12 @@
 = PipelinePump
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[FGBuildablePipelineAttachment]
+!===
+
 A building that can pump fluids to a higher level within a pipeline.
 
 // tag::interface[]

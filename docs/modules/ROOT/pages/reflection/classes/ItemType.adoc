@@ -1,6 +1,12 @@
 = Item Type
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Object.adoc[Object]
+!===
+
 The type of an item (iron plate, iron rod, leaves)
 
 // tag::interface[]

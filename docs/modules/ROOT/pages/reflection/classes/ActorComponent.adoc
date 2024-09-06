@@ -1,6 +1,12 @@
 = Actor Component
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Object.adoc[Object]
+!===
+
 A component/part of an actor in the world.
 
 // tag::interface[]

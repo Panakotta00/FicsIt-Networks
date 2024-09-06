@@ -1,7 +1,7 @@
 = Future Module
 :table-caption!:
 
-Description
+This Module provides the Future type and all its necessary functionallity.
 
 == Types
 

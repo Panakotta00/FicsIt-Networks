@@ -1,6 +1,12 @@
 = Railroad Switch Control
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[Factory]
+!===
+
 The controler object for a railroad switch.
 
 // tag::interface[]

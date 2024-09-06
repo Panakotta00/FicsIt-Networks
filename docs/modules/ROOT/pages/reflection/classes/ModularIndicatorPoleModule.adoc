@@ -1,6 +1,12 @@
 = Modular Indicator Pole Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/FINModularIndicatorPoleModule.adoc[FINModularIndicatorPoleModule]
+!===
+
 FicsIt Indicator Module for FicsIt Modular Indicator Poles provides pioneers with the most fundamental indicator. The new and improved incandecent RGB bulb provides versatility to the industrious. Each modules color and intensity can be set via the network by a computer.
 
 // tag::interface[]

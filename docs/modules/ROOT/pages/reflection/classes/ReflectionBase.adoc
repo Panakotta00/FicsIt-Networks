@@ -1,6 +1,12 @@
 = Reflection Base
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Object.adoc[Object]
+!===
+
 The base class for all things of the reflection system.
 
 // tag::interface[]

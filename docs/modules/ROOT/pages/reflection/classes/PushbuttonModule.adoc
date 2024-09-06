@@ -1,6 +1,12 @@
 = Pushbutton Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 This Button Module for modular I/O Panels can have different knob color and brightnesses and you can use them to trigger specific programmed events.
 
 // tag::interface[]

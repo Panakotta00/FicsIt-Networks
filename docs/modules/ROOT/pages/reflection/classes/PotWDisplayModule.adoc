@@ -1,6 +1,12 @@
 = Potentiometer With Display Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 This Potentiometer Module allows for input of a fixed value range and fires a signal with the new value each time the internal counter changes. This version has a readout display on it.
 
 // tag::interface[]

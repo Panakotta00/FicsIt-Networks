@@ -1,6 +1,12 @@
 = Speaker Pole
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 This speaker pole allows to play custom sound files, In-Game
 
 // tag::interface[]

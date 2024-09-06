@@ -1,6 +1,12 @@
 = Power Storage
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[Factory]
+!===
+
 A building that can store power for later usage.
 
 // tag::interface[]

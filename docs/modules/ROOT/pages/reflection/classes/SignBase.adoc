@@ -1,6 +1,12 @@
 = Sign Base
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 The base class for all signs in the game.
 
 // tag::interface[]

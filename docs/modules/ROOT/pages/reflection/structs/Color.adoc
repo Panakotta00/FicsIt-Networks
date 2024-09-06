@@ -76,9 +76,9 @@ The red portion of the color.
 
 == Functions
 
-// tag::func-FIN_Operator_Mul_1-title[]
-=== `FIN_Operator_Mul_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
-// tag::func-FIN_Operator_Mul_1[]
+// tag::func-FIR_Operator_Mul_1-title[]
+=== `FIR_Operator_Mul_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-FIR_Operator_Mul_1[]
 
 
 
@@ -113,11 +113,11 @@ The red portion of the color.
 !===
 
 ====
-// end::func-FIN_Operator_Mul_1[]
-// end::func-FIN_Operator_Mul_1-title[]
-// tag::func-FIN_Operator_Div_1-title[]
-=== `FIN_Operator_Div_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
-// tag::func-FIN_Operator_Div_1[]
+// end::func-FIR_Operator_Mul_1[]
+// end::func-FIR_Operator_Mul_1-title[]
+// tag::func-FIR_Operator_Div_1-title[]
+=== `FIR_Operator_Div_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-FIR_Operator_Div_1[]
 
 
 
@@ -152,11 +152,11 @@ The red portion of the color.
 !===
 
 ====
-// end::func-FIN_Operator_Div_1[]
-// end::func-FIN_Operator_Div_1-title[]
-// tag::func-FIN_Operator_Add-title[]
-=== `FIN_Operator_Add` (`other` : Struct<xref:/reflection/structs/Color.adoc[Color]>) -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
-// tag::func-FIN_Operator_Add[]
+// end::func-FIR_Operator_Div_1[]
+// end::func-FIR_Operator_Div_1-title[]
+// tag::func-FIR_Operator_Add-title[]
+=== `FIR_Operator_Add` (`other` : Struct<xref:/reflection/structs/Color.adoc[Color]>) -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-FIR_Operator_Add[]
 
 The addition (+) operator for this struct.
 
@@ -191,11 +191,11 @@ The addition (+) operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Add[]
-// end::func-FIN_Operator_Add-title[]
-// tag::func-FIN_Operator_Neg_1-title[]
-=== `FIN_Operator_Neg_1` () -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
-// tag::func-FIN_Operator_Neg_1[]
+// end::func-FIR_Operator_Add[]
+// end::func-FIR_Operator_Add-title[]
+// tag::func-FIR_Operator_Neg_1-title[]
+=== `FIR_Operator_Neg_1` () -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-FIR_Operator_Neg_1[]
 
 The Negation operator for this struct. Does NOT make the color negative. Calculates 1 - this.
 
@@ -220,11 +220,11 @@ The Negation operator for this struct. Does NOT make the color negative. Calcula
 !===
 
 ====
-// end::func-FIN_Operator_Neg_1[]
-// end::func-FIN_Operator_Neg_1-title[]
-// tag::func-FIN_Operator_Sub-title[]
-=== `FIN_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Color.adoc[Color]>) -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
-// tag::func-FIN_Operator_Sub[]
+// end::func-FIR_Operator_Neg_1[]
+// end::func-FIR_Operator_Neg_1-title[]
+// tag::func-FIR_Operator_Sub-title[]
+=== `FIR_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Color.adoc[Color]>) -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-FIR_Operator_Sub[]
 
 The subtraction (-) operator for this struct.
 
@@ -259,6 +259,6 @@ The subtraction (-) operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Sub[]
-// end::func-FIN_Operator_Sub-title[]
+// end::func-FIR_Operator_Sub[]
+// end::func-FIR_Operator_Sub-title[]
 

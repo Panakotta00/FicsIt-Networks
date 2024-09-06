@@ -1,6 +1,12 @@
 = Actor
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Object.adoc[Object]
+!===
+
 This is the base class of all things that can exist within the world by them self.
 
 // tag::interface[]

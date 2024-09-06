@@ -1,7 +1,7 @@
 = Module-System Module
 :table-caption!:
 
-Description
+
 
 == Types
 
@@ -9,14 +9,14 @@ Description
 
 
 === __ModuleTableFunction.__**description** : string
-Description
+
 
 === __ModuleTableFunction.__**displayName** : string
-Description
+
 
 === __ModuleTableFunction.__**name** : string
-Description
+
 
 === __ModuleTableFunction.__**quickRef** : string
-Description
+
 

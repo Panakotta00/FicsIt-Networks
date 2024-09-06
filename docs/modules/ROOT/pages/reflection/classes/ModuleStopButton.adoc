@@ -1,6 +1,12 @@
 = Module Stop Button
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 This Stop Button Module for the modular I/O Panel is used to trigger important programmable events.
 
 // tag::interface[]

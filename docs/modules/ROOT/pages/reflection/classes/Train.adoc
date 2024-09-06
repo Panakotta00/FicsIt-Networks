@@ -1,6 +1,12 @@
 = Train
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Actor.adoc[Actor]
+!===
+
 This class holds information and references about a trains (a collection of multiple railroad vehicles) and its timetable f.e.
 
 // tag::interface[]

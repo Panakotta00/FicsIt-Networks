@@ -1,6 +1,12 @@
 = Railroad Station
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/TrainPlatform.adoc[TrainPlatform]
+!===
+
 The train station master platform. This platform holds the name and manages docking of trains.
 
 // tag::interface[]

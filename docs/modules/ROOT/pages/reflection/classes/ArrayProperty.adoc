@@ -1,6 +1,12 @@
 = Array Property
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Property.adoc[Property]
+!===
+
 A reflection object representing a array property.
 
 // tag::interface[]

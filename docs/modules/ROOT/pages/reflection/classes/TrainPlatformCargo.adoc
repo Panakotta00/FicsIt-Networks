@@ -1,6 +1,12 @@
 = Train Platform Cargo
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/TrainPlatform.adoc[TrainPlatform]
+!===
+
 A train platform that allows for loading and unloading cargo cars.
 
 // tag::interface[]

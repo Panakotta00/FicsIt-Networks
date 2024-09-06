@@ -1,6 +1,12 @@
 = Module Potentiometer
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 The Potentiometer Module for the Modular I/O Control Panel allows you to have rotation input value for you programs.
 
 You can rotate it indefinetly into any direction where every rotation triggers a computer network signal.
