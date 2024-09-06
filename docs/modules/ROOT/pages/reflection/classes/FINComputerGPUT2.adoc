@@ -1,0 +1,785 @@
+= FINComputerGPUT2
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-drawBezier-title[]
+=== `drawBezier` (`p0` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `p1` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `p2` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `p3` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `thickness` : Float, `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+// tag::func-drawBezier[]
+
+Draws a Cubic Bezier Spline from one position to another with given control points, thickness and color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Draw Bezier
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *P0* `p0`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the start point of the spline.
+
+! *P1* `p1`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the first control point.
+
+! *P2* `p2`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the second control point.
+
+! *P3* `p3`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the end point of the spline.
+
+! *Thickness* `thickness`
+! Float
+! The thickness of the line drawn.
+
+! *Color* `color`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The color of the line drawn.
+!===
+
+====
+// end::func-drawBezier[]
+// end::func-drawBezier-title[]
+// tag::func-drawBox-title[]
+=== `drawBox` (`boxSettings` : Struct<xref:/reflection/structs/GPUT2DrawCallBox.adoc[GPUT2DrawCallBox]>)
+// tag::func-drawBox[]
+
+Draws a box.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Draw Box
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Box Settings* `boxSettings`
+! Struct<xref:/reflection/structs/GPUT2DrawCallBox.adoc[GPUT2DrawCallBox]>
+! The settings of the box you want to draw.
+!===
+
+====
+// end::func-drawBox[]
+// end::func-drawBox-title[]
+// tag::func-drawLines-title[]
+=== `drawLines` (`points` : Array<Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>>, `thickness` : Float, `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+// tag::func-drawLines[]
+
+Draws connected lines through all given points with the given thickness and color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Draw Lines
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Points* `points`
+! Array<Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>>
+! The local points that get connected by lines one after the other.
+
+! *thickness* `thickness`
+! Float
+! The thickness of the lines.
+
+! *Color* `color`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The color of the lines.
+!===
+
+====
+// end::func-drawLines[]
+// end::func-drawLines-title[]
+// tag::func-drawRect-title[]
+=== `drawRect` (`position` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `size` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>, `image` : String, `rotation` : Float)
+// tag::func-drawRect[]
+
+Draws a Rectangle with the upper left corner at the given local position, size, color and rotation around the upper left corner.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Draw Rectangle
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the upper left corner of the rectangle.
+
+! *Size* `size`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The size of the rectangle.
+
+! *Color* `color`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The color of the rectangle.
+
+! *Image* `image`
+! String
+! If not empty string, should be image reference that should be placed inside the rectangle.
+
+! *Rotation* `rotation`
+! Float
+! The rotation of the rectangle around the upper left corner in degrees.
+!===
+
+====
+// end::func-drawRect[]
+// end::func-drawRect-title[]
+// tag::func-drawSpline-title[]
+=== `drawSpline` (`start` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `startDirections` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `end` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `endDirection` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `thickness` : Float, `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+// tag::func-drawSpline[]
+
+Draws a Spline from one position to another with given directions, thickness and color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Draw Spline
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Start* `start`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the start point of the spline.
+
+! *Start Direction* `startDirections`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The direction of the spline of how it exists the start point.
+
+! *End* `end`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the end point of the spline.
+
+! *End Directions* `endDirection`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The direction of how the spline enters the end position.
+
+! *Thickness* `thickness`
+! Float
+! The thickness of the line drawn.
+
+! *Color* `color`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The color of the line drawn.
+!===
+
+====
+// end::func-drawSpline[]
+// end::func-drawSpline-title[]
+// tag::func-drawText-title[]
+=== `drawText` (`position` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `text` : String, `size` : Int, `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>, `monospace` : Bool)
+// tag::func-drawText[]
+
+Draws some Text at the given position (top left corner of the text), text, size, color and rotation.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Draw Text
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The position of the top left corner of the text.
+
+! *Text* `text`
+! String
+! The text to draw.
+
+! *Size* `size`
+! Int
+! The font size used.
+
+! *Color* `color`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The color of the text.
+
+! *Monospace* `monospace`
+! Bool
+! True if a monospace font should be used.
+!===
+
+====
+// end::func-drawText[]
+// end::func-drawText-title[]
+// tag::func-flush-title[]
+=== `flush` ()
+// tag::func-flush[]
+
+Flushes all draw calls to the visible draw call buffer to show all changes at once. The draw buffer gets cleared afterwards.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Flush
+!===
+
+====
+// end::func-flush[]
+// end::func-flush-title[]
+// tag::func-popClip-title[]
+=== `popClip` ()
+// tag::func-popClip[]
+
+Pops the top most clipping zone from the clipping stack. The latest clipping zone on the stack gets removed first. (Last In, First Out)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Pop Clipping Zone
+!===
+
+====
+// end::func-popClip[]
+// end::func-popClip-title[]
+// tag::func-popGeometry-title[]
+=== `popGeometry` ()
+// tag::func-popGeometry[]
+
+Pops the top most geometry from the geometry stack. The latest geometry on the stack gets removed first. (Last In, First Out)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Pop Geometry
+!===
+
+====
+// end::func-popGeometry[]
+// end::func-popGeometry-title[]
+// tag::func-pushClipRect-title[]
+=== `pushClipRect` (`position` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `size` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>)
+// tag::func-pushClipRect[]
+
+Pushes a rectangle to the clipping stack. All subsequent drawcalls will be clipped to only be visible within this clipping zone and all previously pushed clipping zones. Be aware, only all draw calls, till this clipping zone gets pop'ed are getting clipped by it, previous draw calls (and draw calls after the pop) are unaffected by this.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Push Clip Rectangle
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the upper left corner of the clipping rectangle.
+
+! *Size* `size`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The size of the clipping rectangle.
+!===
+
+====
+// end::func-pushClipRect[]
+// end::func-pushClipRect-title[]
+// tag::func-pushClipPolygon-title[]
+=== `pushClipPolygon` (`topLeft` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `topRight` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `bottomLeft` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `bottomRight` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>)
+// tag::func-pushClipPolygon[]
+
+Pushes a 4 pointed polygon to the clipping stack. All subsequent drawcalls will be clipped to only be visible within this clipping zone and all previously pushed clipping zones. Be aware, only all draw calls, till this clipping zone gets pop'ed are getting clipped by it, previous draw calls (and draw calls after the pop) are unaffected by this.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Push Clipping Polygon
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Top Left* `topLeft`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the top left point.
+
+! *Top Right* `topRight`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the top right point.
+
+! *Bottom Left* `bottomLeft`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the top right point.
+
+! *Bottom Right* `bottomRight`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local position of the bottom right point.
+!===
+
+====
+// end::func-pushClipPolygon[]
+// end::func-pushClipPolygon-title[]
+// tag::func-pushLayout-title[]
+=== `pushLayout` (`offset` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `size` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `scale` : Float)
+// tag::func-pushLayout[]
+
+Pushes a layout to the geometry stack. All subsequent drawcalls will be transformed through all previously pushed geometries and this one. Be aware, only all draw calls, till this geometry gets pop'ed are transformed, previous draw calls (and draw calls after the pop) are unaffected by this.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Push Layout
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Offset* `offset`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local translation (or offset) that is supposed to happen to all further drawcalls. Translation can be also thought as 'repositioning'.
+
+! *Size* `size`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The scale that gets applied to the whole screen localy along both axis. No change in scale is 1.
+
+! *Scale* `scale`
+! Float
+! 
+!===
+
+====
+// end::func-pushLayout[]
+// end::func-pushLayout-title[]
+// tag::func-pushTransform-title[]
+=== `pushTransform` (`translation` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `rotation` : Float, `scale` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>)
+// tag::func-pushTransform[]
+
+Pushes a transformation to the geometry stack. All subsequent drawcalls will be transformed through all previously pushed geometries and this one. Be aware, only all draw calls till, this geometry gets pop'ed are transformed, previous draw calls (and draw calls after the pop) are unaffected by this.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Push Transform
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Translation* `translation`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The local translation that is supposed to happen to all further drawcalls. Translation can be also thought as 'repositioning'.
+
+! *Rotation* `rotation`
+! Float
+! The local rotation that gets applied to all subsequent draw calls. The origin of the rotation is the whole screens center point. The value is in degrees.
+
+! *Scale* `scale`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The scale that gets applied to the whole screen localy along the (rotated) axis. No change in scale is (1,1).
+!===
+
+====
+// end::func-pushTransform[]
+// end::func-pushTransform-title[]
+// tag::func-measureText-title[]
+=== `measureText` (`Text` : String, `Size` : Int, `bMonospace` : Bool) -> `ReturnValue` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-measureText[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! measureText
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Text* `Text`
+! String
+! 
+
+! *Size* `Size`
+! Int
+! 
+
+! *bMonospace* `bMonospace`
+! Bool
+! 
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! 
+!===
+
+====
+// end::func-measureText[]
+// end::func-measureText-title[]
+
+== Signals
+
+=== `OnKeyChar` (_String_ *Character* `c`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when a character key got 'clicked' and essentially a character got typed in, usful for text input.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Character* `c`
+! String
+! The character that got typed in as string.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the key release event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnKeyDown` (_Int_ *C* `c`, _Int_ *Code* `code`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when a key got pressed.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *C* `c`
+! Int
+! The ASCII number of the character typed in.
+
+! *Code* `code`
+! Int
+! The number code of the pressed key.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the key press event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnKeyUp` (_Int_ *C* `c`, _Int_ *Code* `code`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when a key got released.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *C* `c`
+! Int
+! The ASCII number of the character typed in.
+
+! *Code* `code`
+! Int
+! The number code of the pressed key.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the key release event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseDown` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when a mouse button got pressed.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The position of the cursor.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifier-Bit-Field providing information about the pressed button event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseEnter` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when the mouse cursor enters the screen area.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The position of the cursor.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the move event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseLeave` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when the mouse cursor leaves the screen area.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The position of the cursor.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the move event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseMove` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Float_ *Wheel Delta* `wheelDelta`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when the mouse cursor moves on the screen.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The position of the cursor.
+
+! *Wheel Delta* `wheelDelta`
+! Float
+! The delta value of how much the mouse wheel got moved.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the move event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseMove` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when the mouse cursor moves on the screen.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The position of the cursor.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the move event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseUp` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when a mouse button got released.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The position of the cursor.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the released button event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+
+// end::interface[]
+

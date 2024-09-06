@@ -1,0 +1,49 @@
+= Module Switch
+:table-caption!:
+
+The Lever Module for the modular I/O Panel is used to switch a programm state between two different value (on or off).
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-state-title[]
+=== `state` : Bool
+// tag::func-state[]
+
+The current state in which the switch is in
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! State
+!===
+====
+// end::func-state[]
+// end::func-state-title[]
+
+== Signals
+
+=== `ChangeState` (_Bool_ *State* `State`)
+
+
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *State* `State`
+! Bool
+! 
+!===
+====
+
+
+// end::interface[]
+

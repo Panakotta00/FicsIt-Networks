@@ -31,6 +31,7 @@ namespace FINLua {
 		Self->Struct->AddStructReferencedObjects(Collector);
 	}
 
+UE_DISABLE_OPTIMIZATION_SHIP
 	/**
 	 * Tries to find a UFINFunction* Operator for the given data.
 	 * If none is found returns nullptr.
@@ -45,10 +46,7 @@ namespace FINLua {
 			FString FuncName = OperatorName;
 			if (funcIndex > 0) FuncName.AppendChar('_').AppendInt(funcIndex);
 			func = Type->FindFINFunction(FuncName);
-			if (!func) {
-				if (CauseErrorForIndex) luaL_error(L, "Invalid Operator for struct of type %s", lua_typename(L, *CauseErrorForIndex));
-				return nullptr;
-			}
+			if (!func) break;
 			funcIndex += 1;
 
 			int ParameterIndex = 0;
@@ -63,6 +61,11 @@ namespace FINLua {
 				continue;
 			}
 			break;
+		}
+
+		if (!func) {
+			if (CauseErrorForIndex) luaL_error(L, "Invalid Operator for struct of type %s", lua_typename(L, *CauseErrorForIndex));
+			return nullptr;
 		}
 				
 		return func;
@@ -122,16 +125,16 @@ namespace FINLua {
 	int luaStructTryBinaryOperator(lua_State* L, const char* LuaOperator, const FString& OperatorName, bool bCommutative, bool bCauseError, int* ErrorCause = nullptr) {
 		int thisIndex, otherIndex;
 		if (!luaStructBinaryOperatorGetOperands(L, LuaOperator, bCommutative, thisIndex, otherIndex)) {
-			if (bCauseError) return luaL_error(L, "Invalid Operator for types %s and %s", lua_typename(L, 1), lua_typename(L, 2));
+			if (bCauseError) return luaL_error(L, "Invalid Operator for types %s and %s", TCHAR_TO_UTF8(*luaFIN_typeName(L, 1)), TCHAR_TO_UTF8(*luaFIN_typeName(L, 2)));
 			if (ErrorCause) *ErrorCause = -1;
 			return -1;
 		}
-		
+
 		FLuaStruct* ThisLuaStruct = luaFIN_checkLuaStruct(L, thisIndex, nullptr);
-				
+
 		int result = luaStructExecuteBinaryOperator(L, OperatorName, otherIndex, ThisLuaStruct->Struct, ThisLuaStruct->Type, nullptr);
 		if (result < 0) {
-			if (bCauseError) return luaL_error(L, "Invalid Operator for struct of type %s", lua_typename(L, thisIndex));
+			if (bCauseError) return luaL_error(L, "Invalid Operator for struct of type %s", TCHAR_TO_UTF8(*luaFIN_typeName(L, thisIndex)));
 			if (ErrorCause) *ErrorCause = -2;
 			return -2;
 		}
@@ -141,6 +144,7 @@ namespace FINLua {
 	int luaStructBinaryOperator(lua_State* L, const char* LuaOperator, const FString& OperatorName, bool bCommutative = false) {
 		return luaStructTryBinaryOperator(L, LuaOperator, OperatorName, bCommutative, true);
 	}
+UE_ENABLE_OPTIMIZATION_SHIP
 
 	LuaModule(R"(/**
 	 * @LuaModule		ReflectionSystemStructModule

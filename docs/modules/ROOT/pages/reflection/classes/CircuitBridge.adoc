@@ -1,0 +1,46 @@
+= Circuite Bridget
+:table-caption!:
+
+A building that can connect two circuit networks together.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isBridgeActive-title[]
+=== `isBridgeActive` : Bool
+// tag::func-isBridgeActive[]
+
+True if the two circuits are connected to each other and act as one entity.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Bridge Active
+!===
+====
+// end::func-isBridgeActive[]
+// end::func-isBridgeActive-title[]
+// tag::func-isBridgeConnected-title[]
+=== `isBridgeConnected` : Bool
+// tag::func-isBridgeConnected[]
+
+True if the bridge is connected to two circuits.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Bridge Connected
+!===
+====
+// end::func-isBridgeConnected[]
+// end::func-isBridgeConnected-title[]
+
+// end::interface[]
+

@@ -1,0 +1,175 @@
+= Computer Case
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getLog-title[]
+=== `getLog` (`pageSize` : Int, `page` : Int) -> (`log` : Array<Struct<xref:/reflection/structs/LogEntry.adoc[LogEntry]>>, `logSize` : Int)
+// tag::func-getLog[]
+
+Returns the log of the computer. Output is paginated using the input parameters. A negative Page will indicate pagination from the bottom (latest log entry first).
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Log
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Page Size* `pageSize`
+! Int
+! The size of the returned page.
+
+! *Page* `page`
+! Int
+! The index of the page you want to return. Negative to start indexing at the bottom (latest entries first).
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Log* `log`
+! Array<Struct<xref:/reflection/structs/LogEntry.adoc[LogEntry]>>
+! The Log page you wanted to retrieve.
+
+! *Log Size* `logSize`
+! Int
+! The size of the full log (not just the returned page).
+!===
+
+====
+// end::func-getLog[]
+// end::func-getLog-title[]
+// tag::func-getState-title[]
+=== `getState` () -> `result` : Int
+// tag::func-getState[]
+
+Returns the internal kernel state of the computer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get State
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Int
+! The current internal kernel state.
+!===
+
+====
+// end::func-getState[]
+// end::func-getState-title[]
+// tag::func-startComputer-title[]
+=== `startComputer` ()
+// tag::func-startComputer[]
+
+Starts the Computer (Processor).
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Start Computer
+!===
+
+====
+// end::func-startComputer[]
+// end::func-startComputer-title[]
+// tag::func-stopComputer-title[]
+=== `stopComputer` ()
+// tag::func-stopComputer[]
+
+Stops the Computer (Processor).
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Stop Computer
+!===
+
+====
+// end::func-stopComputer[]
+// end::func-stopComputer-title[]
+
+== Signals
+
+=== `ComputerStateChanged` (_Int_ *Previous State* `prevState`, _Int_ *New State* `newState`)
+
+Triggers when the computers state changes.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Previous State* `prevState`
+! Int
+! The previous computer state.
+
+! *New State* `newState`
+! Int
+! The new computer state.
+!===
+====
+
+=== `FileSystemUpdate` (_Int_ *Type* `type`, _String_ *From* `from`, _String_ *To* `to`)
+
+Triggers when something in the filesystem changes.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Type* `type`
+! Int
+! The type of the change.
+
+! *From* `from`
+! String
+! The file path to the FS node that has changed.
+
+! *To* `to`
+! String
+! The new file path of the node if it has changed.
+!===
+====
+
+
+// end::interface[]
+

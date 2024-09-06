@@ -1,0 +1,199 @@
+= Codeable Splitter
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-canOutput-title[]
+=== `canOutput` (`output` : Int) -> `canTransfer` : Bool
+// tag::func-canOutput[]
+
+Allows to check if we can transfer an item to the given output queue.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Can Output
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Output* `output`
+! Int
+! The index of the output queue you want to check (0 = left, 1 = middle, 2 = right)
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Can Transfer* `canTransfer`
+! Bool
+! True if you could transfer an item to the given output queue.
+!===
+
+====
+// end::func-canOutput[]
+// end::func-canOutput-title[]
+// tag::func-getConnectorByIndex-title[]
+=== `getConnectorByIndex` (`outputIndex` : Int) -> `ReturnValue` : Object<xref:/reflection/classes/FactoryConnection.adoc[FactoryConnection]>
+// tag::func-getConnectorByIndex[]
+
+Returns the factory connector associated with the given index.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Connector by Index
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Output Index* `outputIndex`
+! Int
+! The integer used in TransferItem and ItemOutputted to reference a specific output. Valid Values: 0-3
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Object<xref:/reflection/classes/FactoryConnection.adoc[FactoryConnection]>
+! 
+!===
+
+====
+// end::func-getConnectorByIndex[]
+// end::func-getConnectorByIndex-title[]
+// tag::func-getInput-title[]
+=== `getInput` () -> `item` : Struct<xref:/reflection/structs/Item.adoc[Item]>
+// tag::func-getInput[]
+
+Returns the next item in the input queue.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Input
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item* `item`
+! Struct<xref:/reflection/structs/Item.adoc[Item]>
+! The next item in the input queue.
+!===
+
+====
+// end::func-getInput[]
+// end::func-getInput-title[]
+// tag::func-transferItem-title[]
+=== `transferItem` (`output` : Int) -> `transfered` : Bool
+// tag::func-transferItem[]
+
+Allows to transfer an item from the input queue to the given output queue if possible.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Transfer Item
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Output* `output`
+! Int
+! The index of the output queue you want to transfer the next item to (0 = left, 1 = middle, 2 = right)
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Transfered* `transfered`
+! Bool
+! true if it was able to transfer the item.
+!===
+
+====
+// end::func-transferItem[]
+// end::func-transferItem-title[]
+
+== Signals
+
+=== `ItemOutputted` (_Int_ *Output* `output`, _Struct<xref:/reflection/structs/Item.adoc[Item]>_ *Item* `item`)
+
+Triggers when an item is popped from on of the output queues (aka it got transferred to a conveyor).
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Output* `output`
+! Int
+! The index of the output queue from which the item got removed.
+
+! *Item* `item`
+! Struct<xref:/reflection/structs/Item.adoc[Item]>
+! The item removed from the output queue.
+!===
+====
+
+=== `ItemRequest` (_Struct<xref:/reflection/structs/Item.adoc[Item]>_ *Item* `item`)
+
+Triggers when a new item is ready in the input queue.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item* `item`
+! Struct<xref:/reflection/structs/Item.adoc[Item]>
+! The new item in the input queue.
+!===
+====
+
+
+// end::interface[]
+

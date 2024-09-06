@@ -2705,9 +2705,9 @@ BeginOp(FIN_Operator_Neg, 0, "Operator Neg", "The Negation operator for this str
 	Body()
 	result = (FINStruct)(-*self);
 } EndFunc()
-BeginOp(FIN_Operator_Mul, 0, "Scalar Product", "") {
-	InVal(0, RStruct<FVector>, other, "Other", "The other vector to calculate the scalar product with.")
-	OutVal(1, RFloat, result, "Result", "The resulting scalar product.")
+BeginOp(FIN_Operator_Mul, 0, "Operator Mul", "") {
+	InVal(0, RStruct<FVector>, other, "Other", "The multiplication (*) operator for this struct. (Each component gets multiplied with the component of the other vector)")
+	OutVal(1, RStruct<FVector>, result, "Result", "The resulting vector of the vector multiplication.")
 	Body()
 	result = (FINStruct)(*self * other);
 } EndFunc()

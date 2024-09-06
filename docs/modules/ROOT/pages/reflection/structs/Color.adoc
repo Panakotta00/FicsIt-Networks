@@ -1,0 +1,264 @@
+= Color
+:table-caption!:
+
+A structure that holds a rgba color value
+
+== Properties
+
+// tag::func-a-title[]
+=== `a` : Float
+// tag::func-a[]
+
+The alpha (opacity) portion of the color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Alpha
+!===
+====
+// end::func-a[]
+// end::func-a-title[]
+// tag::func-b-title[]
+=== `b` : Float
+// tag::func-b[]
+
+The blue portion of the color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Blue
+!===
+====
+// end::func-b[]
+// end::func-b-title[]
+// tag::func-g-title[]
+=== `g` : Float
+// tag::func-g[]
+
+The green portion of the color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Green
+!===
+====
+// end::func-g[]
+// end::func-g-title[]
+// tag::func-r-title[]
+=== `r` : Float
+// tag::func-r[]
+
+The red portion of the color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Red
+!===
+====
+// end::func-r[]
+// end::func-r-title[]
+
+== Functions
+
+// tag::func-FIN_Operator_Mul_1-title[]
+=== `FIN_Operator_Mul_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-FIN_Operator_Mul_1[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Color Factor Scaling
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Factor* `factor`
+! Float
+! The factor with which this color should be scaled with.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+! The resulting scaled color.
+!===
+
+====
+// end::func-FIN_Operator_Mul_1[]
+// end::func-FIN_Operator_Mul_1-title[]
+// tag::func-FIN_Operator_Div_1-title[]
+=== `FIN_Operator_Div_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-FIN_Operator_Div_1[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Color Inverse Factor Scaling
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Factor* `factor`
+! Float
+! The factor with which this color should be scaled inversly with.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+! The resulting inverse scaled color.
+!===
+
+====
+// end::func-FIN_Operator_Div_1[]
+// end::func-FIN_Operator_Div_1-title[]
+// tag::func-FIN_Operator_Add-title[]
+=== `FIN_Operator_Add` (`other` : Struct<xref:/reflection/structs/Color.adoc[Color]>) -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-FIN_Operator_Add[]
+
+The addition (+) operator for this struct.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Operator Add
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Other* `other`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The other color that should be added to this color
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The resulting color of the color addition
+!===
+
+====
+// end::func-FIN_Operator_Add[]
+// end::func-FIN_Operator_Add-title[]
+// tag::func-FIN_Operator_Neg_1-title[]
+=== `FIN_Operator_Neg_1` () -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-FIN_Operator_Neg_1[]
+
+The Negation operator for this struct. Does NOT make the color negative. Calculates 1 - this.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Operator Neg
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The resulting color of the color addition
+!===
+
+====
+// end::func-FIN_Operator_Neg_1[]
+// end::func-FIN_Operator_Neg_1-title[]
+// tag::func-FIN_Operator_Sub-title[]
+=== `FIN_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Color.adoc[Color]>) -> `result` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-FIN_Operator_Sub[]
+
+The subtraction (-) operator for this struct.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Operator Sub
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Other* `other`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The other color that should be subtracted from this color
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The resulting color of the color subtraction
+!===
+
+====
+// end::func-FIN_Operator_Sub[]
+// end::func-FIN_Operator_Sub-title[]
+

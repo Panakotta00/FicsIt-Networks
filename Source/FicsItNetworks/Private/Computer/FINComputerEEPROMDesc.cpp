@@ -22,6 +22,17 @@ bool UFINComputerEEPROMDesc::CopyData_Implementation(UObject* WorldContext, cons
 	return From->CopyDataTo(To);
 }
 
+FText UFINComputerEEPROMDesc::GetOverridenItemName_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
+	FText Name = UFGItemDescriptor::GetItemName(InventoryStack.Item.GetItemClass());
+	if (InventoryStack.Item.ItemState.IsValid() && InventoryStack.Item.ItemState.Get()->Implements<UFINLabelContainerInterface>()) {
+		FString Label = IFINLabelContainerInterface::Execute_GetLabel(InventoryStack.Item.ItemState.Get());
+		if (!Label.IsEmpty()) {
+			return FText::FromString(FString::Printf(TEXT("%s - \"%s\""), *Name.ToString(), *Label));
+		}
+	}
+	return Name;
+}
+
 AFINStateEEPROM* UFINComputerEEPROMDesc::GetEEPROM(UFGInventoryComponent* Inv, int SlotIdx) {
 	FInventoryStack stack;
 	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.GetItemClass())) return nullptr;

@@ -1,0 +1,107 @@
+= Recipe
+:table-caption!:
+
+A struct that holds information about a recipe in its class. Means don't use it as object, use it as class type!
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-duration-title[]
+=== `duration` : Float
+// tag::func-duration[]
+
+The duration how much time it takes to cycle the recipe once.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassProp</i></span>+++
+
+! Display Name ! Duration
+!===
+====
+// end::func-duration[]
+// end::func-duration-title[]
+// tag::func-name-title[]
+=== `name` : String
+// tag::func-name[]
+
+The name of this recipe.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassProp</i></span>+++
+
+! Display Name ! Name
+!===
+====
+// end::func-name[]
+// end::func-name-title[]
+
+== Functions
+
+// tag::func-getIngredients-title[]
+=== `getIngredients` () -> `ingredients` : Array<Struct<xref:/reflection/structs/ItemAmount.adoc[ItemAmount]>>
+// tag::func-getIngredients[]
+
+Returns a array of item amounts, this recipe needs (input) so the recipe can be processed.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Get Ingredients
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Ingredients* `ingredients`
+! Array<Struct<xref:/reflection/structs/ItemAmount.adoc[ItemAmount]>>
+! The ingredients of this recipe.
+!===
+
+====
+// end::func-getIngredients[]
+// end::func-getIngredients-title[]
+// tag::func-getProducts-title[]
+=== `getProducts` () -> `products` : Array<Struct<xref:/reflection/structs/ItemAmount.adoc[ItemAmount]>>
+// tag::func-getProducts[]
+
+Returns a array of item amounts, this recipe returns (outputs) when the recipe is processed once.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassFunc</i></span>+++
+
+! Display Name ! Get Products
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Products* `products`
+! Array<Struct<xref:/reflection/structs/ItemAmount.adoc[ItemAmount]>>
+! The products of this recipe.
+!===
+
+====
+// end::func-getProducts[]
+// end::func-getProducts-title[]
+
+// end::interface[]
+

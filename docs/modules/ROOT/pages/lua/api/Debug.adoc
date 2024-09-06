@@ -1,0 +1,19 @@
+= Debug Module
+:table-caption!:
+
+Description
+
+== Globals
+
+=== **debug**
+
+
+=== __debug.__**getinfo** ()
+Check https://www.lua.org/manual/5.4/manual.html#pdf-debug.getinfo[the Lua Manual] for more information.
+
+=== __debug.__**log** (string...)
+Allows to log the given strings to the Game Log.
+
+=== __debug.__**traceback** ()
+Check https://www.lua.org/manual/5.4/manual.html#pdf-debug.traceback[the Lua Manual] for more information.
+

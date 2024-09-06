@@ -1,0 +1,25 @@
+= Item
+:table-caption!:
+
+A structure that holds item information.
+
+== Properties
+
+// tag::func-type-title[]
+=== `type` : Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+// tag::func-type[]
+
+The type of the item.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Type
+!===
+====
+// end::func-type[]
+// end::func-type-title[]
+

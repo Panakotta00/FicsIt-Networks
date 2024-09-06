@@ -132,7 +132,7 @@ namespace FINLua {
 			TOptional<FINTrace> Trace;
 			UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Property);
 			if (TraceProp && TraceProp->GetSubclass()) {
-				Trace = luaFIN_checkObject(L, Index, FFINReflection::Get()->FindClass(TraceProp->GetSubclass()));
+				Trace = luaFIN_toObject(L, Index, FFINReflection::Get()->FindClass(TraceProp->GetSubclass()));
 			} else {
 				Trace = luaFIN_toObject(L, Index, nullptr);
 			}
@@ -143,7 +143,7 @@ namespace FINLua {
 			UFINStructProperty* StructProp = Cast<UFINStructProperty>(Property);
 			if (StructProp && StructProp->GetInner()) {
 				UFINStruct* Type = FFINReflection::Get()->FindStruct(StructProp->GetInner());
-				Struct = luaFIN_checkStruct(L, Index, Type, bImplicitConstruction);
+				Struct = luaFIN_toStruct(L, Index, Type, bImplicitConstruction);
 			} else {
 				Struct = luaFIN_toStruct(L, Index, nullptr, false);
 			}

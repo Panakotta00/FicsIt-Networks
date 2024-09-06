@@ -1,0 +1,127 @@
+= Gauge Module
+:table-caption!:
+
+A small analogue Gauge for use on Micro Enclosures. The red portion and needle position can be changed through FIN
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-limit-title[]
+=== `limit` : Float
+// tag::func-limit[]
+
+The colored limit region of this gauge. Value is a float, 0 to 1
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Limit
+!===
+====
+// end::func-limit[]
+// end::func-limit-title[]
+// tag::func-percent-title[]
+=== `percent` : Float
+// tag::func-percent[]
+
+The needle position of this gauge. Value is a float between 0 and 1
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Percent
+!===
+====
+// end::func-percent[]
+// end::func-percent-title[]
+
+== Functions
+
+// tag::func-setBackgroundColor-title[]
+=== `setBackgroundColor` (`r` : Float, `g` : Float, `b` : Float)
+// tag::func-setBackgroundColor[]
+
+Sets the color of the limit region of the gauge
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Background Color
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Red* `r`
+! Float
+! Red Color Value. Float between 0 and 1
+
+! *Green* `g`
+! Float
+! Green Color Value. Float between 0 and 1
+
+! *Blue* `b`
+! Float
+! Blue Color Value. Float between 0 and 1
+!===
+
+====
+// end::func-setBackgroundColor[]
+// end::func-setBackgroundColor-title[]
+// tag::func-setColor-title[]
+=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+// tag::func-setColor[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! setColor
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *red* `red`
+! Float
+! 
+
+! *green* `green`
+! Float
+! 
+
+! *blue* `blue`
+! Float
+! 
+
+! *Emit* `Emit`
+! Float
+! 
+!===
+
+====
+// end::func-setColor[]
+// end::func-setColor-title[]
+
+// end::interface[]
+

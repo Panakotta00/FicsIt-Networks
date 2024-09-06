@@ -1,0 +1,281 @@
+= Railroad Track
+:table-caption!:
+
+A peice of railroad track over which trains can drive.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isOwnedByPlatform-title[]
+=== `isOwnedByPlatform` : Bool
+// tag::func-isOwnedByPlatform[]
+
+True if the track is part of/owned by a railroad platform.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Owned By Platform
+!===
+====
+// end::func-isOwnedByPlatform[]
+// end::func-isOwnedByPlatform-title[]
+// tag::func-length-title[]
+=== `length` : Float
+// tag::func-length[]
+
+The length of the track.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Length
+!===
+====
+// end::func-length[]
+// end::func-length-title[]
+
+== Functions
+
+// tag::func-getClosestTrackPosition-title[]
+=== `getClosestTrackPosition` (`worldPos` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>) -> (`track` : Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>, `offset` : Float, `forward` : Float)
+// tag::func-getClosestTrackPosition[]
+
+Returns the closes track position from the given world position
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Closeset Track Position
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *World Pos* `worldPos`
+! Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+! The world position form which you want to get the closest track position.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
+! The track the track pos points to.
+
+! *Offset* `offset`
+! Float
+! The offset of the track pos.
+
+! *Forward* `forward`
+! Float
+! The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+!===
+
+====
+// end::func-getClosestTrackPosition[]
+// end::func-getClosestTrackPosition-title[]
+// tag::func-getConnection-title[]
+=== `getConnection` (`direction` : Int) -> `connection` : Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+// tag::func-getConnection[]
+
+Returns the railroad track connection at the given direction.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Connection
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Direction* `direction`
+! Int
+! The direction of which you want to get the connector from. 0 = front, 1 = back
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connection* `connection`
+! Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+! The connection component in the given direction.
+!===
+
+====
+// end::func-getConnection[]
+// end::func-getConnection-title[]
+// tag::func-getTrackGraph-title[]
+=== `getTrackGraph` () -> `track` : Struct<xref:/reflection/structs/TrackGraph.adoc[TrackGraph]>
+// tag::func-getTrackGraph[]
+
+Returns the track graph of which this track is part of.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Track Graph
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Struct<xref:/reflection/structs/TrackGraph.adoc[TrackGraph]>
+! The track graph of which this track is part of.
+!===
+
+====
+// end::func-getTrackGraph[]
+// end::func-getTrackGraph-title[]
+// tag::func-getVehicles-title[]
+=== `getVehicles` () -> `vehicles` : Array<Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>>
+// tag::func-getVehicles[]
+
+Returns a list of Railroad Vehicles on the Track
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Vehicles
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Vehicles* `vehicles`
+! Array<Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>>
+! THe list of vehicles on the track.
+!===
+
+====
+// end::func-getVehicles[]
+// end::func-getVehicles-title[]
+// tag::func-getWorldLocAndRotAtPos-title[]
+=== `getWorldLocAndRotAtPos` (`track` : Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>, `offset` : Float, `forward` : Float) -> (`location` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>, `rotation` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>)
+// tag::func-getWorldLocAndRotAtPos[]
+
+Returns the world location and world rotation of the track position from the given track position.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get World Location And Rotation At Position
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
+! The track the track pos points to.
+
+! *Offset* `offset`
+! Float
+! The offset of the track pos.
+
+! *Forward* `forward`
+! Float
+! The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Location* `location`
+! Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+! The location at the given track position
+
+! *Rotation* `rotation`
+! Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+! The rotation at the given track position (forward vector)
+!===
+
+====
+// end::func-getWorldLocAndRotAtPos[]
+// end::func-getWorldLocAndRotAtPos-title[]
+
+== Signals
+
+=== `VehicleEnter` (_Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>_ *Vehicle* `Vehicle`)
+
+Triggered when a vehicle enters the track.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Vehicle* `Vehicle`
+! Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+! The vehicle that entered the track.
+!===
+====
+
+=== `VehicleExit` (_Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>_ *Vehicle* `Vehicle`)
+
+Triggered when a vehicle exists the track.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Vehicle* `Vehicle`
+! Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+! The vehicle that exited the track.
+!===
+====
+
+
+// end::interface[]
+

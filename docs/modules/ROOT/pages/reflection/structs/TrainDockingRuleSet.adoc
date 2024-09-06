@@ -1,0 +1,178 @@
+= Train Docking Rule Set
+:table-caption!:
+
+Contains infromation about the rules that descibe when a trian should depart from a station
+
+== Properties
+
+// tag::func-definition-title[]
+=== `definition` : Int
+// tag::func-definition[]
+
+0 = Load/Unload Once, 1 = Fully Load/Unload
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Defintion
+!===
+====
+// end::func-definition[]
+// end::func-definition-title[]
+// tag::func-duration-title[]
+=== `duration` : Float
+// tag::func-duration[]
+
+The amount of time the train will dock at least.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Duration
+!===
+====
+// end::func-duration[]
+// end::func-duration-title[]
+// tag::func-isDurationAndRule-title[]
+=== `isDurationAndRule` : Bool
+// tag::func-isDurationAndRule[]
+
+True if the duration of the train stop and the other rules have to be applied.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Duration and Rule
+!===
+====
+// end::func-isDurationAndRule[]
+// end::func-isDurationAndRule-title[]
+
+== Functions
+
+// tag::func-getLoadFilters-title[]
+=== `getLoadFilters` () -> `filters` : Array<Class<xref:/reflection/classes/ItemType.adoc[ItemType]>>
+// tag::func-getLoadFilters[]
+
+Returns the types of items that will be loaded.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Load Filters
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Filters* `filters`
+! Array<Class<xref:/reflection/classes/ItemType.adoc[ItemType]>>
+! The item filter array
+!===
+
+====
+// end::func-getLoadFilters[]
+// end::func-getLoadFilters-title[]
+// tag::func-getUnloadFilters-title[]
+=== `getUnloadFilters` () -> `filters` : Array<Class<xref:/reflection/classes/ItemType.adoc[ItemType]>>
+// tag::func-getUnloadFilters[]
+
+Returns the types of items that will be unloaded.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Unload Filters
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Filters* `filters`
+! Array<Class<xref:/reflection/classes/ItemType.adoc[ItemType]>>
+! The item filter array
+!===
+
+====
+// end::func-getUnloadFilters[]
+// end::func-getUnloadFilters-title[]
+// tag::func-setLoadFilters-title[]
+=== `setLoadFilters` (`filters` : Array<Class<xref:/reflection/classes/ItemType.adoc[ItemType]>>)
+// tag::func-setLoadFilters[]
+
+Sets the types of items that will be loaded.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Load Filters
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Filters* `filters`
+! Array<Class<xref:/reflection/classes/ItemType.adoc[ItemType]>>
+! The item filter array
+!===
+
+====
+// end::func-setLoadFilters[]
+// end::func-setLoadFilters-title[]
+// tag::func-setUnloadFilters-title[]
+=== `setUnloadFilters` (`filters` : Array<Class<xref:/reflection/classes/ItemType.adoc[ItemType]>>)
+// tag::func-setUnloadFilters[]
+
+Sets the types of items that will be loaded.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Unload Filters
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Filters* `filters`
+! Array<Class<xref:/reflection/classes/ItemType.adoc[ItemType]>>
+! The item filter array
+!===
+
+====
+// end::func-setUnloadFilters[]
+// end::func-setUnloadFilters-title[]
+

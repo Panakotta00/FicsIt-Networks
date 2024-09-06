@@ -1,0 +1,76 @@
+= Target Point
+:table-caption!:
+
+Target Point in the waypoint list of a wheeled vehicle.
+
+== Properties
+
+// tag::func-pos-title[]
+=== `pos` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
+// tag::func-pos[]
+
+The position of the target point in the world.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Pos
+!===
+====
+// end::func-pos[]
+// end::func-pos-title[]
+// tag::func-rot-title[]
+=== `rot` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+// tag::func-rot[]
+
+The rotation of the target point in the world.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Rot
+!===
+====
+// end::func-rot[]
+// end::func-rot-title[]
+// tag::func-speed-title[]
+=== `speed` : Float
+// tag::func-speed[]
+
+The speed at which the vehicle should pass the target point.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Speed
+!===
+====
+// end::func-speed[]
+// end::func-speed-title[]
+// tag::func-wait-title[]
+=== `wait` : Float
+// tag::func-wait[]
+
+The amount of time which needs to pass till the vehicle will continue to the next target point.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Wait
+!===
+====
+// end::func-wait[]
+// end::func-wait-title[]
+

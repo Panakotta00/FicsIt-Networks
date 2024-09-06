@@ -21,7 +21,11 @@ AFINFileSystemState::~AFINFileSystemState() {}
 void AFINFileSystemState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
+	DOREPLIFETIME(AFINFileSystemState, ID);
+	DOREPLIFETIME(AFINFileSystemState, IdCreated);
 	DOREPLIFETIME(AFINFileSystemState, Usage);
+	DOREPLIFETIME(AFINFileSystemState, Label);
+	DOREPLIFETIME(AFINFileSystemState, Capacity);
 }
 
 int AskForDiskOrSave(FString Name) {
@@ -254,6 +258,14 @@ void AFINFileSystemState::PreLoadGame_Implementation(int32 saveVersion, int32 ga
 
 bool AFINFileSystemState::ShouldSave_Implementation() const {
 	return true;
+}
+
+FString AFINFileSystemState::GetLabel_Implementation() {
+	return Label;
+}
+
+void AFINFileSystemState::SetLabel_Implementation(const FString& InLabel) {
+	Label = InLabel;
 }
 
 CodersFileSystem::SRef<CodersFileSystem::Device> AFINFileSystemState::GetDevice(bool bInForceUpdate, bool bInForceCreate) {

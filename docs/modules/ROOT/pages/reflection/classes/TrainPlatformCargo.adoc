@@ -1,0 +1,131 @@
+= Train Platform Cargo
+:table-caption!:
+
+A train platform that allows for loading and unloading cargo cars.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-dockedOffset-title[]
+=== `dockedOffset` : Float
+// tag::func-dockedOffset[]
+
+The offset to the track start of the platform at were the vehicle docked.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Docked Offset
+!===
+====
+// end::func-dockedOffset[]
+// end::func-dockedOffset-title[]
+// tag::func-fullLoad-title[]
+=== `fullLoad` : Bool
+// tag::func-fullLoad[]
+
+True if the docked cargo vehicle is fully loaded.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Full Load
+!===
+====
+// end::func-fullLoad[]
+// end::func-fullLoad-title[]
+// tag::func-fullUnload-title[]
+=== `fullUnload` : Bool
+// tag::func-fullUnload[]
+
+Ture if the docked cargo vehicle is fully unloaded.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Full Unload
+!===
+====
+// end::func-fullUnload[]
+// end::func-fullUnload-title[]
+// tag::func-inputFlow-title[]
+=== `inputFlow` : Float
+// tag::func-inputFlow[]
+
+The current input flow rate.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Input Flow
+!===
+====
+// end::func-inputFlow[]
+// end::func-inputFlow-title[]
+// tag::func-isLoading-title[]
+=== `isLoading` : Bool
+// tag::func-isLoading[]
+
+True if the cargo platform is currently loading the docked cargo vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Loading
+!===
+====
+// end::func-isLoading[]
+// end::func-isLoading-title[]
+// tag::func-isUnloading-title[]
+=== `isUnloading` : Bool
+// tag::func-isUnloading[]
+
+True if the cargo platform is currently loading or unloading the docked cargo vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Unloading
+!===
+====
+// end::func-isUnloading[]
+// end::func-isUnloading-title[]
+// tag::func-outputFlow-title[]
+=== `outputFlow` : Float
+// tag::func-outputFlow[]
+
+The current output flow rate.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Output Flow
+!===
+====
+// end::func-outputFlow[]
+// end::func-outputFlow-title[]
+
+// end::interface[]
+

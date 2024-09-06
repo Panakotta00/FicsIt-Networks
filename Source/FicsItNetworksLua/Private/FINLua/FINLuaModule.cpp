@@ -181,7 +181,7 @@ void FFINLuaTable::AddBareFieldByDocumentationComment(TFunction<void(lua_State* 
 		}
 	}
 
-	field.Description = FText::FromString(TEXT("Description"));
+	field.Description = FText::FromString(block);
 }
 
 void FFINLuaTable::AddTableFieldByDocumentationComment(TSharedRef<FFINLuaTable> Table, const FString& Comment, const TCHAR* _InternalName) {
@@ -284,7 +284,7 @@ void FFINLuaModule::ParseDocumentationComment(const FString& Comment, const TCHA
 		}
 	}
 
-	Description = FText::FromString(TEXT("Description"));
+	Description = FText::FromString(block);
 }
 
 void FFINLuaModule::AddLibraryByDocumentationComment(const TSharedRef<FFINLuaTable>& Table, const FString& Comment, const TCHAR* _InternalName) {

@@ -1,0 +1,374 @@
+= Time Table
+:table-caption!:
+
+Contains the time table information of train.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-numStops-title[]
+=== `numStops` : Int
+// tag::func-numStops[]
+
+The current number of stops in the time table.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Num Stops
+!===
+====
+// end::func-numStops[]
+// end::func-numStops-title[]
+
+== Functions
+
+// tag::func-addStop-title[]
+=== `addStop` (`index` : Int, `station` : Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>, `ruleSet` : Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>) -> `added` : Bool
+// tag::func-addStop[]
+
+Adds a stop to the time table.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Add Stop
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The zero-based index at which the stop should get added.
+
+! *Station* `station`
+! Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>
+! The railroad station at which the stop should happen.
+
+! *Rule Set* `ruleSet`
+! Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>
+! The docking rule set that descibes when the train will depart from the station.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Added* `added`
+! Bool
+! True if the stop got sucessfully added to the time table.
+!===
+
+====
+// end::func-addStop[]
+// end::func-addStop-title[]
+// tag::func-getCurrentStop-title[]
+=== `getCurrentStop` () -> `index` : Int
+// tag::func-getCurrentStop[]
+
+Returns the index of the stop the train drives to right now.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Current Stop
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The zero-based index of the stop the train tries to drive to right now.
+!===
+
+====
+// end::func-getCurrentStop[]
+// end::func-getCurrentStop-title[]
+// tag::func-getStop-title[]
+=== `getStop` (`index` : Int) -> `stop` : Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>
+// tag::func-getStop[]
+
+Returns the stop at the given index.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Stop
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The zero-based index of the stop you want to get.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Stop* `stop`
+! Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>
+! The time table stop at the given index.
+!===
+
+====
+// end::func-getStop[]
+// end::func-getStop-title[]
+// tag::func-getStops-title[]
+=== `getStops` () -> `stops` : Array<Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>>
+// tag::func-getStops[]
+
+Returns a list of all the stops this time table has
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Stops
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Stops* `stops`
+! Array<Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>>
+! A list of time table stops this time table has.
+!===
+
+====
+// end::func-getStops[]
+// end::func-getStops-title[]
+// tag::func-incrementCurrentStop-title[]
+=== `incrementCurrentStop` ()
+// tag::func-incrementCurrentStop[]
+
+Sets the current stop to the next stop in the time table.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Increment Current Stop
+!===
+
+====
+// end::func-incrementCurrentStop[]
+// end::func-incrementCurrentStop-title[]
+// tag::func-isValidStop-title[]
+=== `isValidStop` (`index` : Int) -> `valid` : Bool
+// tag::func-isValidStop[]
+
+Allows to check if the given stop index is valid.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Is Valid Stop
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The zero-based stop index you want to check its validity.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Valid* `valid`
+! Bool
+! True if the stop index is valid.
+!===
+
+====
+// end::func-isValidStop[]
+// end::func-isValidStop-title[]
+// tag::func-removeStop-title[]
+=== `removeStop` (`index` : Int)
+// tag::func-removeStop[]
+
+Removes the stop with the given index from the time table.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Remove Stop
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The zero-based index at which the stop should get added.
+!===
+
+====
+// end::func-removeStop[]
+// end::func-removeStop-title[]
+// tag::func-setCurrentStop-title[]
+=== `setCurrentStop` (`index` : Int)
+// tag::func-setCurrentStop[]
+
+Sets the stop, to which the train trys to drive to right now.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Current Stop
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The zero-based index of the stop the train should drive to right now.
+!===
+
+====
+// end::func-setCurrentStop[]
+// end::func-setCurrentStop-title[]
+// tag::func-setStop-title[]
+=== `setStop` (`index` : Int, `stop` : Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>) -> `success` : Bool
+// tag::func-setStop[]
+
+Allows to override a stop already in the time table.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Stop
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The zero-based index of the stop you want to override.
+
+! *Stop* `stop`
+! Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>
+! The time table stop you want to override with.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Success* `success`
+! Bool
+! True if setting was successful, false if not, f.e. invalid index.
+!===
+
+====
+// end::func-setStop[]
+// end::func-setStop-title[]
+// tag::func-setStops-title[]
+=== `setStops` (`stops` : Array<Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>>) -> `gotSet` : Bool
+// tag::func-setStops[]
+
+Allows to empty and fill the stops of this time table with the given list of new stops.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Stops
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Stops* `stops`
+! Array<Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>>
+! The new time table stops.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Got Set* `gotSet`
+! Bool
+! True if the stops got sucessfully set.
+!===
+
+====
+// end::func-setStops[]
+// end::func-setStops-title[]
+
+// end::interface[]
+

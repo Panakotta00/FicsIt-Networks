@@ -1,0 +1,16 @@
+= Reflection-System Object Module
+:table-caption!:
+
+Description
+
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/ReflectionSystemBaseModule.adoc[ReflectionSystemBaseModule]
+!===
+
+== Types
+
+=== **Object**
+
+

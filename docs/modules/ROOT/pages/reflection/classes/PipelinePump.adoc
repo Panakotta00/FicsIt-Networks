@@ -1,0 +1,165 @@
+= PipelinePump
+:table-caption!:
+
+A building that can pump fluids to a higher level within a pipeline.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-designedHeadlift-title[]
+=== `designedHeadlift` : Float
+// tag::func-designedHeadlift[]
+
+The amomunt of headlift this pump is designed for.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Designed Headlift
+!===
+====
+// end::func-designedHeadlift[]
+// end::func-designedHeadlift-title[]
+// tag::func-flowPct-title[]
+=== `flowPct` : Float
+// tag::func-flowPct[]
+
+The current flow amount. (in percent)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Float Pct
+!===
+====
+// end::func-flowPct[]
+// end::func-flowPct-title[]
+// tag::func-flow-title[]
+=== `flow` : Float
+// tag::func-flow[]
+
+The current flow amount. (in m^3/s)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Flow
+!===
+====
+// end::func-flow[]
+// end::func-flow-title[]
+// tag::func-flowLimit-title[]
+=== `flowLimit` : Float
+// tag::func-flowLimit[]
+
+The overal flow limit of this pump. (in m^3/s)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Flow Limit
+!===
+====
+// end::func-flowLimit[]
+// end::func-flowLimit-title[]
+// tag::func-flowLimitPct-title[]
+=== `flowLimitPct` : Float
+// tag::func-flowLimitPct[]
+
+The overal flow limit of this pump. (in percent)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Flow Limit Pct
+!===
+====
+// end::func-flowLimitPct[]
+// end::func-flowLimitPct-title[]
+// tag::func-indicatorHeadlift-title[]
+=== `indicatorHeadlift` : Float
+// tag::func-indicatorHeadlift[]
+
+The amount of headlift the indicator shows.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Indicator Headlift
+!===
+====
+// end::func-indicatorHeadlift[]
+// end::func-indicatorHeadlift-title[]
+// tag::func-indicatorHeadliftPct-title[]
+=== `indicatorHeadliftPct` : Float
+// tag::func-indicatorHeadliftPct[]
+
+The amount of headlift the indicator shows as percantage from max.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Indicator Headlift Percent
+!===
+====
+// end::func-indicatorHeadliftPct[]
+// end::func-indicatorHeadliftPct-title[]
+// tag::func-maxHeadlift-title[]
+=== `maxHeadlift` : Float
+// tag::func-maxHeadlift[]
+
+The maximum amount of headlift this pump can provide.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Headlift
+!===
+====
+// end::func-maxHeadlift[]
+// end::func-maxHeadlift-title[]
+// tag::func-userFlowLimit-title[]
+=== `userFlowLimit` : Float
+// tag::func-userFlowLimit[]
+
+The flow limit of this pump the user can specifiy. Use -1 for now user set limit. (in m^3/s)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! User Flow Limit
+!===
+====
+// end::func-userFlowLimit[]
+// end::func-userFlowLimit-title[]
+
+// end::interface[]
+

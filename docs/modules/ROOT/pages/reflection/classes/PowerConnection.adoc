@@ -1,0 +1,107 @@
+= Power Connection
+:table-caption!:
+
+A actor component that allows for a connection point to the power network. Basically a point were a power cable can get attached to.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-connections-title[]
+=== `connections` : Int
+// tag::func-connections[]
+
+The amount of connections this power connection has.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Connections
+!===
+====
+// end::func-connections[]
+// end::func-connections-title[]
+// tag::func-maxConnections-title[]
+=== `maxConnections` : Int
+// tag::func-maxConnections[]
+
+The maximum amount of connections this power connection can handle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Connections
+!===
+====
+// end::func-maxConnections[]
+// end::func-maxConnections-title[]
+
+== Functions
+
+// tag::func-getCircuit-title[]
+=== `getCircuit` () -> `circuit` : Trace<xref:/reflection/classes/PowerCircuit.adoc[PowerCircuit]>
+// tag::func-getCircuit[]
+
+Returns the power circuit to which this connection component is attached to.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Circuit
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Circuit* `circuit`
+! Trace<xref:/reflection/classes/PowerCircuit.adoc[PowerCircuit]>
+! The Power Circuit this connection component is attached to.
+!===
+
+====
+// end::func-getCircuit[]
+// end::func-getCircuit-title[]
+// tag::func-getPower-title[]
+=== `getPower` () -> `power` : Trace<xref:/reflection/classes/PowerInfo.adoc[PowerInfo]>
+// tag::func-getPower[]
+
+Returns the power info component of this power connection.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Power
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Power* `power`
+! Trace<xref:/reflection/classes/PowerInfo.adoc[PowerInfo]>
+! The power info compoent this power connection uses.
+!===
+
+====
+// end::func-getPower[]
+// end::func-getPower-title[]
+
+// end::interface[]
+

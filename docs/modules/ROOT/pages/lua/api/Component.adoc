@@ -1,14 +1,42 @@
-= Component API
-:description: The Component API helps to interact with the component network itself.
+= Component Module
+:table-caption!:
 
-**Lua Lib: `component`**
+Description
 
-The Component API provides structures, functions and signals for interacting with the network itself like returning network components.
+== Globals
 
-== Functions
+=== **component**
+The component library contains functions that allow interaction with the component network.
 
-=== `Component | Component[] proxy(string ids... | string[] ids...)`
+=== __component.__**findComponent** ((string query | xref:/reflection/classes/Class.adoc[Class] type)...) -> string[]...
+Searches the component network for components with the given query or have the given type. +
+You can pass multiple parameters and each parameter will be handled separately and returns a corresponding return value.
 
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Query* `...`
+! string | Object-Class
+! A nick/group query as string or a class for the components in the network you try to find.
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *UUIDs* `...`
+! string[]
+! List of network component UUIDs which pass the given nick query or are of the given type.
+
+!===
+====
+
+=== __component.__**proxy** ((id: string | ids: string[])...) -> (xref:/reflection/classes/Object.adoc[Object] | xref:/reflection/classes/Object.adoc[Object][])...
 Generates and returns instances of the network components with the given UUIDs. +
 You can pass any amount of parameters and each parameter will then have a corresponding return value. +
 Each parameter can be either a string, or an array of strings.
@@ -17,72 +45,27 @@ If a network component cannot be found for a given string, nil will be used for 
 Otherwise, an instance of the network component will be returned. +
 If a parameter is a string array, the return value will be an array of network component instances.
 
-Parameter::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-|ids
-|string
-|The UUID of the network component.
+! *ID[s]* `...`
+! string | string[]
+! The UUID[-Arrays] of the network component[s].
 
-|ids
-|string[]
-|A array of UUIDs of the networks components.
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-|===
+! *Object[s]* `...`
+! xref:/reflection/classes/Object.adoc[Object] | xref:/reflection/classes/Object.adoc[Object][] | nil
+! The Network-Component[-Array]s associated with the UUIDs, nil if the UUID was not found.
 
-Return 	Value::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
+!===
+====
 
-|Component
-|Component
-|The lua table representation of the network component.
-
-Nil if the network component with the given ID was not found.
-
-|Component[]
-|Component[]
-|A array of the lua table representation of the network component.
-
-Entries are Nil if the network component with the given ID was not found.
-|===
-
-=== `string[]... findComponent((string query | Class type )...)`
-
-Searches the component network for components with the given query or have the given type. +
-You can pass multiple parameters and each parameter will be handled separately and returns a corresponding return value.
-
-Parameters::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|query
-|string
-|A nick/group query as string used to get a list of component in the network.
-
-|type
-|Class
-|The type of the components in the network you want to get.
-|===
-
-Return 	Value::
-+
-[cols="1,1,4a"]
-|===
-|Name |Type |Description
-
-|string[]...
-|string[]...
-|List of network component UUIDs which pass the given nick query or are of the given type.
-|===
-
-
-
-include::partial$api_footer.adoc[]

@@ -1,0 +1,83 @@
+= Buildable
+:table-caption!:
+
+The base class of all buildables.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-numFactoryConnections-title[]
+=== `numFactoryConnections` : Int
+// tag::func-numFactoryConnections[]
+
+The cound of available factory connections this building has.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Num Factory Connection
+!===
+====
+// end::func-numFactoryConnections[]
+// end::func-numFactoryConnections-title[]
+// tag::func-numFactoryOutputConnections-title[]
+=== `numFactoryOutputConnections` : Int
+// tag::func-numFactoryOutputConnections[]
+
+The count of available factory output connections this building has.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Num Factory Output Connection
+!===
+====
+// end::func-numFactoryOutputConnections[]
+// end::func-numFactoryOutputConnections-title[]
+// tag::func-numPowerConnections-title[]
+=== `numPowerConnections` : Int
+// tag::func-numPowerConnections[]
+
+The count of available power connections this building has.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Num Power Connection
+!===
+====
+// end::func-numPowerConnections[]
+// end::func-numPowerConnections-title[]
+
+== Signals
+
+=== `ProductionChanged` (_Int_ *State* `state`)
+
+Triggers when the production state of the buildable changes.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *State* `state`
+! Int
+! The new production state.
+!===
+====
+
+
+// end::interface[]
+

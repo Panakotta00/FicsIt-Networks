@@ -1,0 +1,190 @@
+= Target List
+:table-caption!:
+
+The list of targets/path-waypoints a autonomous vehicle can drive
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-addTarget-title[]
+=== `addTarget` (`target` : Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>)
+// tag::func-addTarget[]
+
+Adds the given target point struct at the end of the target list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Add Target
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Target* `target`
+! Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>
+! The target point you want to add.
+!===
+
+====
+// end::func-addTarget[]
+// end::func-addTarget-title[]
+// tag::func-getTarget-title[]
+=== `getTarget` () -> `target` : Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>
+// tag::func-getTarget[]
+
+Returns the target struct at with the given index in the target list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Target
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Target* `target`
+! Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>
+! The TargetPoint-Struct with the given index in the target list.
+!===
+
+====
+// end::func-getTarget[]
+// end::func-getTarget-title[]
+// tag::func-getTargets-title[]
+=== `getTargets` () -> `targets` : Array<Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>>
+// tag::func-getTargets[]
+
+Returns a list of target point structs of all the targets in the target point list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Targets
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Targets* `targets`
+! Array<Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>>
+! A list of target point structs containing all the targets of the target point list.
+!===
+
+====
+// end::func-getTargets[]
+// end::func-getTargets-title[]
+// tag::func-removeTarget-title[]
+=== `removeTarget` (`index` : Int)
+// tag::func-removeTarget[]
+
+Removes the target with the given index from the target list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Remove Target
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The index of the target point you want to remove from the target list.
+!===
+
+====
+// end::func-removeTarget[]
+// end::func-removeTarget-title[]
+// tag::func-setTarget-title[]
+=== `setTarget` (`index` : Int, `target` : Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>)
+// tag::func-setTarget[]
+
+Allows to set the target at the given index to the given target point struct.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Target
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The index of the target point you want to update with the given target point struct.
+
+! *Target* `target`
+! Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>
+! The new target point struct for the given index.
+!===
+
+====
+// end::func-setTarget[]
+// end::func-setTarget-title[]
+// tag::func-setTargets-title[]
+=== `setTargets` (`targets` : Array<Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>>)
+// tag::func-setTargets[]
+
+Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Targets
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Targets* `targets`
+! Array<Struct<xref:/reflection/structs/TargetPoint.adoc[TargetPoint]>>
+! A list of target point structs you want to place into the empty target point list.
+!===
+
+====
+// end::func-setTargets[]
+// end::func-setTargets-title[]
+
+// end::interface[]
+

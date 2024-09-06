@@ -1,0 +1,269 @@
+= Wheeled Vehicle
+:table-caption!:
+
+The base class for all vehicles that used wheels for movement.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-burnRatio-title[]
+=== `burnRatio` : Float
+// tag::func-burnRatio[]
+
+The amount of fuel this vehicle burns.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Burn Ratio
+!===
+====
+// end::func-burnRatio[]
+// end::func-burnRatio-title[]
+// tag::func-hasFuel-title[]
+=== `hasFuel` : Bool
+// tag::func-hasFuel[]
+
+True if the vehicle has currently fuel to drive.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Has Fuel
+!===
+====
+// end::func-hasFuel[]
+// end::func-hasFuel-title[]
+// tag::func-speed-title[]
+=== `speed` : Float
+// tag::func-speed[]
+
+The current forward speed of this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Speed
+!===
+====
+// end::func-speed[]
+// end::func-speed-title[]
+
+== Functions
+
+// tag::func-getCurrentTarget-title[]
+=== `getCurrentTarget` () -> `index` : Int
+// tag::func-getCurrentTarget[]
+
+Returns the index of the target that the vehicle tries to move to right now.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Current Target
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The index of the current target.
+!===
+
+====
+// end::func-getCurrentTarget[]
+// end::func-getCurrentTarget-title[]
+// tag::func-getFuelInv-title[]
+=== `getFuelInv` () -> `inventory` : Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+// tag::func-getFuelInv[]
+
+Returns the inventory that contains the fuel of the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Fuel Inventory
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inventory* `inventory`
+! Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+! The fuel inventory of the vehicle.
+!===
+
+====
+// end::func-getFuelInv[]
+// end::func-getFuelInv-title[]
+// tag::func-getStorageInv-title[]
+=== `getStorageInv` () -> `inventory` : Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+// tag::func-getStorageInv[]
+
+Returns the inventory that contains the storage of the vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Storage Inventory
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inventory* `inventory`
+! Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+! The storage inventory of the vehicle.
+!===
+
+====
+// end::func-getStorageInv[]
+// end::func-getStorageInv-title[]
+// tag::func-getTargetList-title[]
+=== `getTargetList` () -> `targetList` : Trace<xref:/reflection/classes/TargetList.adoc[TargetList]>
+// tag::func-getTargetList[]
+
+Returns the list of targets/path waypoints.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Target List
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Target List* `targetList`
+! Trace<xref:/reflection/classes/TargetList.adoc[TargetList]>
+! The list of targets/path-waypoints.
+!===
+
+====
+// end::func-getTargetList[]
+// end::func-getTargetList-title[]
+// tag::func-isValidFuel-title[]
+=== `isValidFuel` (`item` : Class<xref:/reflection/classes/ItemType.adoc[ItemType]>) -> `isValid` : Bool
+// tag::func-isValidFuel[]
+
+Allows to check if the given item type is a valid fuel for this vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Is Valid Fuel
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item* `item`
+! Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! The item type you want to check.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Is Valid* `isValid`
+! Bool
+! True if the given item type is a valid fuel for this vehicle.
+!===
+
+====
+// end::func-isValidFuel[]
+// end::func-isValidFuel-title[]
+// tag::func-nextTarget-title[]
+=== `nextTarget` ()
+// tag::func-nextTarget[]
+
+Sets the current target to the next target in the list.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Next Target
+!===
+
+====
+// end::func-nextTarget[]
+// end::func-nextTarget-title[]
+// tag::func-setCurrentTarget-title[]
+=== `setCurrentTarget` (`index` : Int)
+// tag::func-setCurrentTarget[]
+
+Sets the target with the given index as the target this vehicle tries to move to right now.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Current Target
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The index of the target this vehicle should move to now.
+!===
+
+====
+// end::func-setCurrentTarget[]
+// end::func-setCurrentTarget-title[]
+
+// end::interface[]
+
