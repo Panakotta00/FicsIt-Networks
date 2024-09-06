@@ -1,10 +1,12 @@
 #include "FINGameWorldModule.h"
 
 #include "FicsItNetworksCircuit.h"
+#include "FicsItNetworksComputer.h"
+#include "FicsItNetworksMisc.h"
+#include "FINComputerSubsystem.h"
+#include "FINMediaSubsystem.h"
 #include "FIRModModule.h"
-#include "Computer/FINComputerSubsystem.h"
 #include "Utils/FINBlueprintParameterHooks.h"
-#include "Utils/FINMediaSubsystem.h"
 
 UFINGameWorldModule::UFINGameWorldModule() {
 	ModSubsystems.Add(AFINComputerSubsystem::StaticClass());
@@ -18,7 +20,9 @@ void UFINGameWorldModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {
 	switch (Phase) {
 	case ELifecyclePhase::CONSTRUCTION:
 		SpawnChildModule(TEXT("FicsItReflection"), UFIRGameWorldModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksMisc"), UFINMiscGameWorldModule::StaticClass());
 		SpawnChildModule(TEXT("FicsItNetworksCircuit"), UFINCircuitGameWorldModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksComputer"), UFINComputerGameWorldModule::StaticClass());
 		break;
 	default: break;
 	}

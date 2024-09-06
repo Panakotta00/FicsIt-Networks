@@ -113,7 +113,7 @@ void AFINNetworkAdapter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 AFINNetworkAdapter::AFINNetworkAdapter() {
 	bAlwaysRelevant = true;
-	SetReplicates(true);
+	bReplicates = true;
 	
 	RootComponent = CreateDefaultSubobject<USceneComponent>(L"Root");
 	RootComponent->SetMobility(EComponentMobility::Type::Static);

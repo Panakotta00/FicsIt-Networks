@@ -1,10 +1,10 @@
 #include "UI/FINTextDecorators.h"
 
 #include "FicsItReflection.h"
+#include "FINUtils.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/DefaultValueHelper.h"
 #include "Styling/CoreStyle.h"
-#include "Utils/FINUtils.h"
 
 const FString FFINReflectionReferenceDecorator::Id = TEXT("ReflectionReference");
 const FString FFINReflectionReferenceDecorator::MetaDataVariantKey = TEXT("Variant");

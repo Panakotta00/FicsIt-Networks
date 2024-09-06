@@ -1,8 +1,9 @@
 ﻿#include "FILLogEntry.h"
-#include "Computer/FINComputerGPUT1.h"
-#include "Computer/FINComputerGPUT2.h"
+#include "FINFuture.h"
+#include "Async/ParallelFor.h"
+#include "ComputerModules/PCI/FINComputerGPUT1.h"
+#include "ComputerModules/PCI/FINComputerGPUT2.h"
 #include "GameFramework/Actor.h"
-#include "Network/FINFuture.h"
 #include "Reflection/Source/FIRSourceStaticMacros.h"
 
 BeginStruct(FFINFuture, "Future", "Future", "A Future struct MAY BE HANDLED BY CPU IMPLEMENTATION differently, generaly, this is used to make resources available on a later point in time. Like if data won't be avaialble right away and you have to wait for it to process first. Like when you do a HTTP Request, then it takes some time to get the data from the web server. And since we don't want to halt the game and wait for the data, you can use a future to check if the data is available, or let just the Lua Code wait, till the data becomes available.")

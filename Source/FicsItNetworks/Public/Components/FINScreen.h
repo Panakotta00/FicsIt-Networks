@@ -1,8 +1,11 @@
 ﻿#pragma once
 
-#include "Computer/FINComputerScreen.h"
+#include "CoreMinimal.h"
+#include "FIRTrace.h"
+#include "Buildables/FGBuildable.h"
 #include "Graphics/FINScreenInterface.h"
 #include "Components/WidgetComponent.h"
+#include "ComputerModules/PCI/FINComputerScreen.h"
 #include "FINScreen.generated.h"
 
 UCLASS()

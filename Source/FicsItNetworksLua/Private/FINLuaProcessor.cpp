@@ -1,5 +1,6 @@
 #include "FINLuaProcessor.h"
 
+#include "FicsItNetworksComputer.h"
 #include "FicsItNetworksLuaModule.h"
 #include "FILLogContainer.h"
 #include "FINNetworkUtils.h"
@@ -8,6 +9,7 @@
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FIRTrace.h"
+#include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/LuaUtil.h"
 #include "Signals/FINSignalData.h"
 
@@ -697,7 +699,7 @@ FFINLuaProcessorTick& UFINLuaProcessor::GetTickHelper() {
 }
 
 bool UFINLuaProcessor::PullTimeoutReached() {
-	return Timeout <= (static_cast<double>((FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0);
+	return Timeout <= (static_cast<double>((FDateTime::Now() - FFicsItNetworksComputerModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0);
 }
 
 int UFINLuaProcessor::DoSignal(lua_State* L) {

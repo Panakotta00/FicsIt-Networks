@@ -19,12 +19,13 @@ public class FicsItNetworksLua : ModuleRules
 			"Engine",
 			"FactoryGame",
 			"SML",
-            "FicsItNetworks",
             "Eris",
             "Tracy",
             "FicsItLogLibrary",
             "FicsItReflection",
             "FicsItNetworksCircuit",
+			"FicsItNetworksComputer",
+			"FicsItNetworksMisc",
 		});
 
         PublicIncludePaths.Add("Public");

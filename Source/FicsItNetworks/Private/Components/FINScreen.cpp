@@ -2,7 +2,6 @@
 
 #include "FGColoredInstanceMeshProxy.h"
 #include "FINAdvancedNetworkConnectionComponent.h"
-#include "Computer/FINComputerGPU.h"
 #include "Graphics/FINGPUInterface.h"
 #include "Net/UnrealNetwork.h"
 

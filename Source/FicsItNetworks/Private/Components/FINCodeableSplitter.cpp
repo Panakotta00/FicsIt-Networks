@@ -1,5 +1,8 @@
 #include "Components/FINCodeableSplitter.h"
-#include "Computer/FINComputerSubsystem.h"
+
+#include "FINAdvancedNetworkConnectionComponent.h"
+#include "FINComputerSubsystem.h"
+#include "FINComputerSubsystem.h"
 
 AFINCodeableSplitter::AFINCodeableSplitter() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");

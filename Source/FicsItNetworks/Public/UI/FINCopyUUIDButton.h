@@ -2,8 +2,9 @@
 
 #include "Components/ContentWidget.h"
 #include "Components/PanelWidget.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 #include "FINCopyUUIDButton.generated.h"
+
+class AFINFileSystemState;
 
 UCLASS()
 class UFINCopyUUIDButton : public UContentWidget {

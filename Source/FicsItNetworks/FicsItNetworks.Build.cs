@@ -34,6 +34,8 @@ public class FicsItNetworks : ModuleRules
             "FicsItReflection",
             "FicsItLogLibrary",
             "FicsItNetworksCircuit",
+            "FicsItNetworksMisc",
+            "FicsItNetworksComputer",
 		});
 	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 

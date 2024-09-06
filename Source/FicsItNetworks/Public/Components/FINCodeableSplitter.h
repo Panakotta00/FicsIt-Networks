@@ -7,6 +7,8 @@
 #include "Signals/FINSignalSender.h"
 #include "FINCodeableSplitter.generated.h"
 
+class UFINAdvancedNetworkConnectionComponent;
+
 UCLASS()
 class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINSignalSender {
 	GENERATED_BODY()

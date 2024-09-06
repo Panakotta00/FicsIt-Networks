@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "FINModuleBase.h"
-#include "Computer/FINComputerScreen.h"
 #include "Components/WidgetComponent.h"
 #include "FIRTrace.h"
+#include "ComputerModules/PCI/FINComputerScreen.h"
+#include "Graphics/FINScreenInterface.h"
 #include "FINModuleScreen.generated.h"
 
 UCLASS()

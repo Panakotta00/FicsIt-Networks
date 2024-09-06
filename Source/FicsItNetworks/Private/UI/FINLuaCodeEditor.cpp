@@ -1,8 +1,10 @@
 #include "UI/FINLuaCodeEditor.h"
 
+#include "FINUtils.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
 #include "TracyLib/public/tracy/Tracy.hpp"
 #include "UI/FINTextDecorators.h"
-#include "Utils/FINUtils.h"
 
 const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
 

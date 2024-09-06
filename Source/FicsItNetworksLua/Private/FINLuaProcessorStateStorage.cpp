@@ -1,7 +1,8 @@
 #include "FINLuaProcessorStateStorage.h"
 
 #include "FicsItNetworksLuaModule.h"
-#include "Utils/FINUtils.h"
+#include "FINUtils.h"
+#include "Util/SemVersion.h"
 
 bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
 	if (!Slot.GetUnderlyingArchive().IsSaveGame()) return false;

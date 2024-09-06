@@ -7,12 +7,13 @@
 #include "FGTimeSubsystem.h"
 #include "FILLogContainer.h"
 #include "FILLogEntry.h"
+#include "FINMediaSubsystem.h"
 #include "FINNetworkUtils.h"
+#include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaStruct.h"
 #include "UI/FGGameUI.h"
-#include "Utils/FINMediaSubsystem.h"
 
 #define LuaFunc() \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \

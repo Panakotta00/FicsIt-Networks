@@ -1,6 +1,7 @@
 #include "UI/FINLogViewer.h"
 
 #include "FINConfigurationStruct.h"
+#include "FINUtils.h"
 #include "Configuration/Properties/ConfigPropertyBool.h"
 #include "Engine/GameInstance.h"
 #include "FicsItLogLibrary/Public/FILLogContainer.h"
@@ -9,7 +10,6 @@
 #include "Framework/Text/RichTextMarkupProcessing.h"
 #include "UI/FINRichtTextUtils.h"
 #include "UI/FINTextDecorators.h"
-#include "Utils/FINUtils.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"

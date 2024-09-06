@@ -1,5 +1,6 @@
 #include "Components/FINSpeakerPole.h"
 #include "AudioCompressionSettingsUtils.h"
+#include "FicsItNetworksMisc.h"
 #include "FicsItNetworksModule.h"
 #include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
 #include "VorbisAudioInfo.h"

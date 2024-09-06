@@ -1,8 +1,10 @@
 #include "Components/FINSizeablePanel.h"
 #include "FGColoredInstanceMeshProxy.h"
+#include "FicsItNetworksMisc.h"
 #include "FicsItNetworksModule.h"
 #include "FINMCPAdvConnector.h"
 #include "Components/FINModuleBase.h"
+#include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Net/UnrealNetwork.h"
 
 AFINSizeablePanel::AFINSizeablePanel() {

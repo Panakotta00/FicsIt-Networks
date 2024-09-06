@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "FINFuture.h"
 #include "LuaUtil.h"
-#include "Network/FINFuture.h"
 
 namespace FINLua {
 	/**

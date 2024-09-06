@@ -1,12 +1,11 @@
 ﻿#include "UI/FINEditLabel.h"
 
 #include "FGPlayerController.h"
+#include "FINComputerRCO.h"
+#include "FINLabelContainerInterface.h"
 #include "Components/EditableTextBox.h"
-#include "Computer/FINComputerEEPROMDesc.h"
-#include "Computer/FINComputerRCO.h"
 #include "Reflection/ReflectionHelper.h"
 #include "UI/FINCopyUUIDButton.h"
-#include "Utils/FINLabelContainerInterface.h"
 
 TSharedRef<SWidget> UFINEditLabel::RebuildWidget() {
 	return GetContent()->TakeWidget();

@@ -2,6 +2,7 @@
 
 #include "FicsItLogLibrary.h"
 #include "FicsItNetworksCircuit.h"
+#include "FicsItNetworksComputer.h"
 #include "FIRModModule.h"
 
 UFINGameInstanceModule::UFINGameInstanceModule() {}
@@ -14,6 +15,7 @@ void UFINGameInstanceModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {
 		SpawnChildModule(TEXT("FicsItReflection"), UFIRGameInstanceModule::StaticClass());
 		SpawnChildModule(TEXT("FicsItLogLibrary"), UFILGameInstanceModule::StaticClass());
 		SpawnChildModule(TEXT("FicsItNetworksCircuit"), UFINCircuitGameInstanceModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksComputer"), UFINComputerGameInstanceModule::StaticClass());
 		break;
 	default: break;
 	}

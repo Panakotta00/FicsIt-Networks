@@ -2,14 +2,10 @@
 
 #include "Modules/ModuleManager.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworks, Verbose, All);
-DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworksNet, Warning, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworks, Log, All);
 
-class FICSITNETWORKS_API FFicsItNetworksModule : public FDefaultGameModuleImpl
-{
+class FICSITNETWORKS_API FFicsItNetworksModule : public FDefaultGameModuleImpl {
 public:
-	static FDateTime GameStart;
-	
 	/**
 	* Called when the module is loaded into memory
 	**/

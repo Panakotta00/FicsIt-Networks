@@ -60,6 +60,16 @@
 			"Name": "FicsItLogLibrary",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItNetworksComputer",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItNetworksMisc",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
 		}
 	],
 	"Plugins": [

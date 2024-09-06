@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FIRBase.h"
 #include "FIRException.generated.h"
+
+class UFIRBase;
 
 USTRUCT()
 struct FICSITREFLECTION_API FFIRException {

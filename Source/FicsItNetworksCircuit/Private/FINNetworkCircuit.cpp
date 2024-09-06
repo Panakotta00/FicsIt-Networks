@@ -18,7 +18,6 @@ void AFINNetworkCircuit::AddNodeRecursive(TArray<TScriptInterface<IFINNetworkCir
 AFINNetworkCircuit::AFINNetworkCircuit() {
 	bReplicates = true;
 	bAlwaysRelevant = true;
-	SetReplicates(true);
 }
 
 AFINNetworkCircuit::~AFINNetworkCircuit() {}

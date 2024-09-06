@@ -1,51 +1,27 @@
 #include "FicsItNetworksModule.h"
 
 #include "UI/FINCopyUUIDButton.h"
-#include "Computer/FINComputerRCO.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-#include "FicsItKernel/FicsItFS/Library/Tests.h"
 #include "AssetRegistryModule.h"
 #include "FGCharacterPlayer.h"
 #include "FGGameMode.h"
 #include "FGGameState.h"
+#include "FicsItNetworksMisc.h"
 #include "FicsItReflection.h"
 #include "Components/VerticalBox.h"
-#include "Computer/FINComputerSubsystem.h"
+#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 #include "Hologram/FGBuildableHologram.h"
 #include "Patching/BlueprintHookHelper.h"
 #include "Patching/BlueprintHookManager.h"
+#include "Patching/NativeHookManager.h"
+#include "Styling/SlateStyleRegistry.h"
 #include "UI/FINEditLabel.h"
 #include "UI/FINStyle.h"
 #include "UObject/CoreRedirects.h"
 
-DEFINE_LOG_CATEGORY(LogFicsItNetworks);
-DEFINE_LOG_CATEGORY(LogFicsItNetworksNet);
-
 IMPLEMENT_GAME_MODULE(FFicsItNetworksModule, FicsItNetworks);
 
-FDateTime FFicsItNetworksModule::GameStart;
-
-void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterface*)>& scope, IFGDismantleInterface* self_r) {
-	AFGBuildable* self = dynamic_cast<AFGBuildable*>(self_r);
-	TInlineComponentArray<UFINModuleSystemPanel*> panels;
-	self->GetComponents(panels);
-	for (UFINModuleSystemPanel* panel : panels) {
-		TArray<AActor*> modules;
-		panel->GetModules(modules);
-		for (AActor* module : modules) {
-			module->Destroy();
-		}
-	}
-}
-
-void AFGBuildable_GetDismantleRefund_Implementation(CallScope<void(*)(const IFGDismantleInterface*, TArray<FInventoryStack>&, bool)>& scope, const IFGDismantleInterface* self_r, TArray<FInventoryStack>& refund, bool noCost) {
-	const AFGBuildable* self = dynamic_cast<const AFGBuildable*>(self_r);
-	TInlineComponentArray<UFINModuleSystemPanel*> panels;
-	self->GetComponents(panels);
-	for (UFINModuleSystemPanel* panel : panels) {
-		panel->GetDismantleRefund(refund, noCost);
-	}
-}
+DEFINE_LOG_CATEGORY(LogFicsItNetworks);
 
 struct ClassChange {
 	FString From;
@@ -86,15 +62,12 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 		MenuList->AddChildToVerticalBox(EditLabel);
 	}
 }
+
 UE_DISABLE_OPTIMIZATION_SHIP
 void FFicsItNetworksModule::StartupModule(){
 	FSlateStyleRegistry::UnRegisterSlateStyle(FFINStyle::GetStyleSetName());
 	FFINStyle::Initialize();
 
-	CodersFileSystem::Tests::TestPath();
-	
-	GameStart = FDateTime::Now();
-	
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
@@ -170,29 +143,8 @@ void FFicsItNetworksModule::StartupModule(){
 	
 	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
 #if !WITH_EDITOR
-		SUBSCRIBE_METHOD_VIRTUAL(IFGDismantleInterface::Dismantle_Implementation, (void*)static_cast<const IFGDismantleInterface*>(GetDefault<AFGBuildable>()), &AFGBuildable_Dismantle_Implementation);
-		SUBSCRIBE_METHOD_VIRTUAL(IFGDismantleInterface::GetDismantleRefund_Implementation, (void*)static_cast<const IFGDismantleInterface*>(GetDefault<AFGBuildable>()), &AFGBuildable_GetDismantleRefund_Implementation);
-		
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::BeginPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self) {
-			AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
-			if (character) {
-				AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
-				if (SubSys) SubSys->AttachWidgetInteractionToPlayer(character);
-			}
-		});
-
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::EndPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self, EEndPlayReason::Type Reason) {
-			AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
-			if (character) {
-				AFINComputerSubsystem* SubSys = AFINComputerSubsystem::GetComputerSubsystem(self->GetWorld());
-				if (SubSys) SubSys->DetachWidgetInteractionToPlayer(character);
-			}
-		});
-
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
 			if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
-				gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
-
 				UClass* ModuleRCO = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/Components/ModularPanel/Modules/Module_RCO.Module_RCO_C"));
 				check(ModuleRCO);
 				gm->RegisterRemoteCallObjectClass(ModuleRCO);

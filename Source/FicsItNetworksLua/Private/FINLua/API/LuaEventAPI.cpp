@@ -1,3 +1,4 @@
+#include "FicsItNetworksComputer.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
 #include "FicsItKernel/Network/NetworkController.h"
@@ -94,7 +95,7 @@ namespace FINLua {
 				const int a = luaProc->DoSignal(L);
 				if (!a && !(args > 0 && lua_isinteger(L, 1) && lua_tointeger(L, 1) == 0)) {
 					luaProc->Timeout = t;
-					luaProc->PullStart =  (FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds();
+					luaProc->PullStart =  (FDateTime::Now() - FFicsItNetworksComputerModule::GameStart).GetTotalMilliseconds();
 					luaProc->PullState = (args > 0) ? 1 : 2;
 
 					luaProc->GetTickHelper().shouldWaitForSignal();

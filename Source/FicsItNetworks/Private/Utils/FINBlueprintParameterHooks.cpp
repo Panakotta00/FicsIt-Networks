@@ -3,9 +3,9 @@
 #include "FGPlayerController.h"
 #include "FINConfigurationStruct.h"
 #include "FINNetworkComponent.h"
+#include "FINUtils.h"
 #include "Components/OverlaySlot.h"
 #include "UI/FGGameUI.h"
-#include "Utils/FINUtils.h"
 #include "Widgets/Input/SEditableTextBox.h"
 
 const FName AFINBlueprintHologram_List_NameColumn = FName("Name");	
