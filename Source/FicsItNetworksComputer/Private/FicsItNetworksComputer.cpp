@@ -89,7 +89,7 @@ void FFicsItNetworksComputerModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FileSystemSerializationInfo"), TEXT("/Script/FicsItNetworksComputer.FileSystemSerializationInfo")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINKernelAudioController"), TEXT("/Script/FicsItNetworksComputer.FINKernelAudioController")});
 
-	FCoreRedirects::AddRedirectList(redirects, "FicsItNetworksCircuit");
+	FCoreRedirects::AddRedirectList(redirects, "FicsItNetworksComputer");
 
 	CodersFileSystem::Tests::TestPath();
 

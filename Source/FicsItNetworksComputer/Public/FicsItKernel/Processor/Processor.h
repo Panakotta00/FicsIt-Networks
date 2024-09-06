@@ -11,7 +11,7 @@ class UFINKernelSystem;
  * A Processor handles the whole execution of a program and also makes sure that resource overuse causes a crash.
  */
 UCLASS()
-class FICSITNETWORKS_API UFINKernelProcessor : public UObject, public IFGSaveInterface {
+class FICSITNETWORKSCOMPUTER_API UFINKernelProcessor : public UObject, public IFGSaveInterface {
 	GENERATED_BODY()
 	
 protected:

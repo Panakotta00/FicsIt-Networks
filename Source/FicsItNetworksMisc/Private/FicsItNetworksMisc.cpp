@@ -47,7 +47,7 @@ void FFicsItNetworksMiscModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINCustomVersion"), TEXT("/Script/FicsItNetworksMisc.FINCustomVersion")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINUtils"), TEXT("/Script/FicsItNetworksMisc.FINUtils")});
 
-	FCoreRedirects::AddRedirectList(redirects, "FicsItNetworksCircuit");
+	FCoreRedirects::AddRedirectList(redirects, "FicsItNetworksMisc");
 
 	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
 #if !WITH_EDITOR

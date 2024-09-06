@@ -12,7 +12,7 @@ class FArchive;
  * - preventing DevDevices to get unmounted
  * - preventing a second DevDevice to get mounted
  */
-class FICSITNETWORKS_API FFINKernelFSRoot : public CodersFileSystem::FileSystemRoot {
+class FICSITNETWORKSCOMPUTER_API FFINKernelFSRoot : public CodersFileSystem::FileSystemRoot {
 public:
 	// Begin FileSystemRoot
 	virtual bool mount(CodersFileSystem::SRef<CodersFileSystem::Device> device, CodersFileSystem::Path path) override;

@@ -7,12 +7,12 @@
 #include "Device.h"
 
 namespace CodersFileSystem {
-	class FileSystemException : public std::exception {
+	class FICSITNETWORKSCOMPUTER_API FileSystemException : public std::exception {
 	public:
 		FileSystemException(std::string what);
 	};
 
-	class FileSystemRoot {
+	class FICSITNETWORKSCOMPUTER_API FileSystemRoot {
 	protected:
 		class RootListener : public Listener {
 			friend FileSystemRoot;

@@ -1,6 +1,6 @@
 #include "FicsItKernel/FicsItFS/FileSystem.h"
 
-#include "FicsItNetworksModule.h"
+#include "FicsItNetworksComputer.h"
 
 bool FFINKernelFSRoot::mount(CodersFileSystem::SRef<CodersFileSystem::Device> device, CodersFileSystem::Path path) {
 	// if device is DevDevice, search for existing DevDevice in mounts & prevent mount if found
@@ -154,7 +154,7 @@ void FFINKernelFSRoot::PostLoad(const FFileSystemSerializationInfo& info) {
 		if (device.Value.NodeType == 3) {
 			const CodersFileSystem::SRef<CodersFileSystem::Device> dev = new CodersFileSystem::MemDevice();
 			if (!devDev->addDevice(dev, deviceName)) {
-				UE_LOG(LogFicsItNetworks, Error, TEXT("Unable to unpersist tmpfs '%s'"), *FString(deviceName.c_str()));
+				UE_LOG(LogFicsItNetworksComputer, Error, TEXT("Unable to unpersist tmpfs '%s'"), *FString(deviceName.c_str()));
 				continue;
 			}
 			device.Value.Deserialize(dev, deviceName);
