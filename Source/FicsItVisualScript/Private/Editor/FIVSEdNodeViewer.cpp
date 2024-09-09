@@ -5,176 +5,153 @@
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SScaleBox.h"
 
-void SFIVSEdPinViewer::Construct(const FArguments& InArgs, SFIVSEdNodeViewer* InNodeViewer, UFIVSPin* InPin) {
+void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdNodeViewer>& InNodeViewer, UFIVSPin* InPin) {
 	Style = InArgs._Style;
 	NodeViewer = InNodeViewer;
 	Pin = InPin;
 	
-	PinIconWidget = SNew(SBox)
-	.HeightOverride(16)
-	.WidthOverride(16)
-	.Content()[
-		SNew(SImage)
+	PinIconWidget = SNew(SImage)
 		.Image_Lambda([this]() {
 			if (Pin->GetConnections().Num() > 0) {
-				return &Style->DataPinConnectedIcon;
+				return &Style->DataInputPinStyle.ConnectionIconConnected;
 			} else {
-				return &Style->DataPinIcon;
+				return &Style->DataInputPinStyle.ConnectionIcon;
 			}
 		})
-		.ColorAndOpacity_Raw(this, &SFIVSEdPinViewer::GetPinColor)
-	];
-	if (Pin->GetDisplayName().ToString().Len() == 0) {
-		ChildSlot[
-			SNew(SBorder)
-	        .BorderBackgroundColor_Lambda([this]() {
-	            return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
-	        })
-	        .Content()[
-	            PinIconWidget.ToSharedRef()
-	        ]
-	    ];
-	} else if (Pin->GetPinType() & FIVS_PIN_INPUT) {
-		TSharedRef<SBox> LiteralBox = SNew(SBox)
-		.Visibility_Lambda([this]() {
-			return Pin->GetConnections().Num() < 1 ? EVisibility::Visible : EVisibility::Collapsed;
-		});
-		SGridPanel::FSlot* Slot1;
-		SGridPanel::FSlot* Slot2;
-		ChildSlot[
-			SNew(SBorder)
-			.BorderBackgroundColor_Lambda([this]() {
-	            return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
-	        })
-			.Content()[
-	            SNew(SGridPanel)
-	            .FillColumn(1, 1)
-	            +SGridPanel::Slot(0, 0)
-	            .Padding(1)
-	            .VAlign(VAlign_Center)
-	            .HAlign(HAlign_Center)[
-	                PinIconWidget.ToSharedRef()
-	            ]
-	            +SGridPanel::Slot(1, 0)
-				.Padding(5)
+		.ColorAndOpacity_Raw(this, &SFIVSEdPinViewer::GetPinColor);
+
+	TSharedPtr<SWidget> Content;
+	if (Pin->GetDisplayName().IsEmpty()) {
+		Content =  PinIconWidget.ToSharedRef();
+	} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
+		SHorizontalBox::FSlot* NameSlot;
+		Content = SNew(SHorizontalBox)
+			+SHorizontalBox::Slot()
+				.HAlign(HAlign_Right)
+				.AutoWidth()
+				.Expose(NameSlot)
+			+SHorizontalBox::Slot()
+				.HAlign(HAlign_Center)
 				.VAlign(VAlign_Center)
-				.HAlign(HAlign_Left)
-				.Expose(Slot1)
-	            +SGridPanel::Slot(1, 1)
-                .VAlign(VAlign_Center)
-                .HAlign(HAlign_Fill)
-                .Expose(Slot2)
-            ]
-		];
+				.AutoWidth()[
+					PinIconWidget.ToSharedRef()
+				];
 		if (InArgs._ShowName) {
-			(*Slot1)[
+			(*NameSlot)[
 				SNew(STextBlock)
-				.Clipping(EWidgetClipping::Inherit)
+				.TextStyle(&Style->PinTextStyle)
+				.Margin(Style->PinTextMargin)
 				.Text_Lambda([this]() {
 					return Pin->GetDisplayName();
 				})
 			];
-			(*Slot2)[
-				LiteralBox
-			];
-		} else {
-			(*Slot1)[
-				LiteralBox
-			];
 		}
-		
-		TSharedPtr<SWidget> LiteralWidget;
+	} else if (Pin->GetPinType() & FIVS_PIN_INPUT) {
+		TSharedPtr<SWidget> Literal;
+		TSharedPtr<SWidget> InlineLiteral;
+
 		switch (Pin->GetPinDataType().GetType()) {
-		case FIN_BOOL:
-			LiteralBox->SetContent(SNew(SCheckBox)
-			.OnCheckStateChanged_Lambda([this](ECheckBoxState InState) {
-				if (InState == ECheckBoxState::Checked) {
-					Pin->SetLiteral(true);
-				} else {
-					Pin->SetLiteral(false);
-				}
-			})
-			.IsChecked_Lambda([this]() {
-				return Pin->GetLiteral().GetBool() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-			}));
+			case FIN_BOOL:
+				InlineLiteral = SNew(SCheckBox)
+				.OnCheckStateChanged_Lambda([this](ECheckBoxState InState) {
+					if (InState == ECheckBoxState::Checked) {
+						Pin->SetLiteral(true);
+					} else {
+						Pin->SetLiteral(false);
+					}
+				})
+				.IsChecked_Lambda([this]() {
+					return Pin->GetLiteral().GetBool() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+				});
 			break;
-		case FIN_INT:
-			LiteralWidget = SNew(SNumericEntryBox<int>)
-			.OnValueChanged_Lambda([this](int Value) {
-				Pin->SetLiteral((FINInt)Value);
-			})
-			.Value_Lambda([this]() {
-				return Pin->GetLiteral().GetInt();
-			});
+			case FIN_INT:
+				Literal = SNew(SNumericEntryBox<int>)
+				.OnValueChanged_Lambda([this](int Value) {
+					Pin->SetLiteral((FINInt)Value);
+				})
+				.Value_Lambda([this]() {
+					return Pin->GetLiteral().GetInt();
+				});
 			break;
-		case FIN_FLOAT:
-			LiteralWidget = SNew(SNumericEntryBox<double>)
-			.OnValueChanged_Lambda([this](double Value) {
-				Pin->SetLiteral((FINFloat)Value);
-			})
-			.Value_Lambda([this]() {
-				return Pin->GetLiteral().GetFloat();
-			});
+			case FIN_FLOAT:
+				Literal = SNew(SNumericEntryBox<double>)
+				.OnValueChanged_Lambda([this](double Value) {
+					Pin->SetLiteral((FINFloat)Value);
+				})
+				.Value_Lambda([this]() {
+					return Pin->GetLiteral().GetFloat();
+				});
 			break;
-		case FIN_STR:
-			LiteralWidget = SNew(SEditableTextBox)
-			.OnTextCommitted_Lambda([this](FText Value, ETextCommit::Type) {
-				Pin->SetLiteral(Value.ToString());
-			})
-			.Text_Lambda([this]() {
-				return FText::FromString(Pin->GetLiteral().GetString());
-			})
-			.MinDesiredWidth(100);
+			case FIN_STR:
+				Literal = SNew(SEditableTextBox)
+				.OnTextCommitted_Lambda([this](FText Value, ETextCommit::Type) {
+					Pin->SetLiteral(Value.ToString());
+				})
+				.Text_Lambda([this]() {
+					return FText::FromString(Pin->GetLiteral().GetString());
+				})
+				.MinDesiredWidth(100);
 			break;
-		case FIN_OBJ:
-			break;
-		case FIN_CLASS:
-			break;
-		case FIN_TRACE:
-			break;
-		case FIN_STRUCT:
-			break;
-		case FIN_ARRAY:
-			break;
-		case FIN_ANY:
-			break;
-		default: ;
+			case FIN_OBJ:
+				break;
+			case FIN_CLASS:
+				break;
+			case FIN_TRACE:
+				break;
+			case FIN_STRUCT:
+				break;
+			case FIN_ARRAY:
+				break;
+			case FIN_ANY:
+				break;
+			default: ;
 		}
-		if (LiteralWidget) {
-			LiteralBox->SetPadding(5);
-			LiteralBox->SetContent(LiteralWidget.ToSharedRef());
-		}
-	} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
-		SHorizontalBox::FSlot* Slot;
-		ChildSlot[
-            SNew(SBorder)
-            .BorderBackgroundColor_Lambda([this]() {
-                return (IsHovered() && !FSlateApplication::Get().GetModifierKeys().IsControlDown()) ? FLinearColor(FColor::White) : FColor::Transparent;
-            })
-            .Content()[SNew(SHorizontalBox)
-                +SHorizontalBox::Slot()
-                .FillWidth(1)
-                .Padding(5)
-                .VAlign(VAlign_Center)
-                .HAlign(HAlign_Right)
-                .Expose(Slot)
-                +SHorizontalBox::Slot()
-				.AutoWidth()
-                .Padding(1)
-                .VAlign(VAlign_Center)
-                .HAlign(HAlign_Center)[
-                    PinIconWidget.ToSharedRef()
-                ]
+
+		SGridPanel::FSlot* NameSlot;
+		SGridPanel::FSlot* InlineLiteralSlot;
+		SGridPanel::FSlot* LiteralSlot;
+		Content = SNew(SGridPanel)
+			+SGridPanel::Slot(0, 0)
+			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Center)[
+				PinIconWidget.ToSharedRef()
 			]
-		];
-		if (InArgs._ShowName) (*Slot)[
-			SNew(STextBlock)
-			.Clipping(EWidgetClipping::Inherit)
-			.Text_Lambda([this]() {
-				return Pin->GetDisplayName();
-			})
-		];
+			+SGridPanel::Slot(1, 0).Expose(NameSlot)
+			+SGridPanel::Slot(2, 0).Expose(InlineLiteralSlot)
+			+SGridPanel::Slot(1, 1).Expose(LiteralSlot);
+
+		if (InArgs._ShowName) {
+			(*NameSlot)[
+				SNew(STextBlock)
+				.Margin(Style->PinTextMargin)
+				.TextStyle(&Style->PinTextStyle)
+				.Text_Lambda([this]() {
+					return Pin->GetDisplayName();
+				})
+			];
+		}
+		if (InlineLiteral) {
+			(*InlineLiteralSlot)[
+				InlineLiteral.ToSharedRef()
+			];
+		}
+		if (Literal) {
+			(*LiteralSlot)[
+				Literal.ToSharedRef()
+			];
+		}
 	}
+
+	ChildSlot[
+		SNew(SBorder)
+		.Padding(Style->PinPadding)
+		.BorderImage_Lambda([this]() {
+			return IsHovered() ? &Style->PinOutline : nullptr;
+		})
+		.Content()[
+			Content.ToSharedRef()
+		]
+	];
 }
 
 SFIVSEdPinViewer::SFIVSEdPinViewer() {}
@@ -248,12 +225,23 @@ void FFIVSEdPinConnectDragDrop::OnDrop(bool bDropWasHandled, const FPointerEvent
 	Pin->GetNodeViewer()->GetGraphViewer()->EndDragPin(Pin);
 }
 
-void SFIVSEdNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraphViewer* InGraphViewer, UFIVSNode* InNode) {
+TSharedRef<SBorder> SFIVSEdNodeViewer::Construct(const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode, const FFIVSEdNodeStyle* InStyle) {
 	Node = InNode;
 	GraphViewer = InGraphViewer;
+	Style = InStyle;
 	OnPinChangeHandle = Node->OnPinChanged.AddLambda([this](EFIVSNodePinChange, UFIVSPin*) {
 		ReconstructPins();
 	});
+
+	TSharedPtr<SBorder> contentContainer;
+	ChildSlot[
+		SAssignNew(contentContainer, SBorder)
+		.Padding(Style->OutlinePadding)
+		.BorderImage_Lambda([this]() {
+			return bSelected ? &Style->Outline : nullptr;
+		})
+	];
+	return contentContainer.ToSharedRef();
 }
 
 SFIVSEdNodeViewer::~SFIVSEdNodeViewer() {
@@ -299,78 +287,60 @@ TSharedRef<SFIVSEdPinViewer> SFIVSEdNodeViewer::GetPinWidget(UFIVSPin* Pin) cons
 	return PinToWidget[Pin];
 }
 
-void SFIVSEdRerouteNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraphViewer* InGraphViewer, UFIVSNode* InNode) {
-	SFIVSEdNodeViewer::Construct(SFIVSEdNodeViewer::FArguments(), InGraphViewer, InNode);
-	Style = InArgs._Style;
-	OutlineBrush = FSlateColorBrush(InArgs._OutlineColor);
-	NodeBrush = FSlateColorBrush(InArgs._BackgroundColor);
-	
+void SFIVSEdRerouteNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {
+	TSharedRef<SBorder> content = SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
+
 	TSharedPtr<SFIVSEdPinViewer> PinWidget;
 	UFIVSPin* Pin = GetNode()->GetNodePins()[0];
-	ChildSlot[
+
+	content->SetContent(
 		SNew(SBorder)
-		.Padding(1)
-		.BorderImage_Lambda([this]() {
-			return bSelected ? &OutlineBrush : nullptr;
-		})
+		.BorderImage(&Style->Background)
+		.Padding(Style->Padding)
 		.Content()[
-			SNew(SBorder)
-			.BorderImage(&NodeBrush)
-			.Padding(5)
-			.Content()[
-				SAssignNew(PinWidget, SFIVSEdPinViewer, this, Pin)
-				.Style(Style)
-			]
+			SAssignNew(PinWidget, SFIVSEdPinViewer, SharedThis(this), Pin)
+			.Style(Style)
 		]
-	];
+	);
 	PinWidgets.Add(PinWidget.ToSharedRef());
 	PinToWidget.Add(Pin, PinWidget.ToSharedRef());
 }
 
-void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraphViewer* InGraphViewer, UFIVSNode* InNode) {
-	SFIVSEdNodeViewer::Construct(SFIVSEdNodeViewer::FArguments(), InGraphViewer, InNode);
-	Style = InArgs._Style;
-	OutlineBrush = FSlateColorBrush(InArgs._OutlineColor);
-	NodeBrush = FSlateColorBrush(InArgs._BackgroundColor);
-	HeaderBrush = FSlateColorBrush(InArgs._HeaderColor);
-	
-	ChildSlot[
-        SNew(SBorder)
-        .Padding(1)
-        .BorderImage_Lambda([this]() {
-            return bSelected ? &OutlineBrush : nullptr;
-        })
-        .Content()[
+void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {
+	TSharedRef<SBorder> content = SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
+
+	content->SetContent(
+        SNew(SVerticalBox)
+        +SVerticalBox::Slot().AutoHeight()[
             SNew(SBorder)
-            .BorderImage(&NodeBrush)
-            .Padding(0)
-            .Content()
-            [
-                SNew(SGridPanel)
-                +SGridPanel::Slot(0, 0).ColumnSpan(3)[
-                    SNew(SBorder)
-                    .BorderImage(&HeaderBrush)
-                    .Padding(1)
-                    .Content()
-                    [
-                        SNew(STextBlock)
-                        .Text_Lambda([this]() {
-                            return FText::FromString(Cast<UFIVSScriptNode>(GetNode())->GetNodeName());
-                        })
-                    ]
-                ]
-                +SGridPanel::Slot(0, 1)[
-                    SAssignNew(InputPinBox, SVerticalBox)
-                ]
-                +SGridPanel::Slot(1, 1)[
-                    SNew(SSpacer).Size(FVector2D(20, 20))
-                ]
-                +SGridPanel::Slot(2, 1)[
-                    SAssignNew(OutputPinBox, SVerticalBox)
-                ]
+            .BorderImage(&Style->Header)
+            .Padding(Style->HeaderPadding)
+            .Content()[
+                SNew(STextBlock)
+	            .TextStyle(&Style->HeaderTextStyle)
+                .Text_Lambda([this]() {
+                    return FText::FromString(Cast<UFIVSScriptNode>(GetNode())->GetNodeName());
+                })
             ]
         ]
-    ];
+        +SVerticalBox::Slot().AutoHeight()[
+	        SNew(SBorder)
+	        .Padding(Style->Padding)
+	        .BorderImage(&Style->Background)
+	        .Content()[
+		        SNew(SHorizontalBox)
+		        +SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Left)[
+		            SAssignNew(InputPinBox, SVerticalBox)
+		        ]
+		        +SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Fill)[
+		            SNew(SSpacer).Size(Style->CenterSpace)
+		        ]
+		        +SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Right)[
+		            SAssignNew(OutputPinBox, SVerticalBox)
+		        ]
+		    ]
+	    ]
+    );
 
 	ReconstructPins();
 }
@@ -383,67 +353,62 @@ void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 	
 	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
 		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
-			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)
-			.Style(Style);
+			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
+				.Style(Style);
 			PinWidgets.Add(PinWidget);
 			PinToWidget.Add(Pin, PinWidget);
-			InputPinBox->AddSlot()
-			.AutoHeight()[
-				PinWidget
+			InputPinBox->AddSlot().AutoHeight().HAlign(HAlign_Left)[
+				SNew(SBox)
+				.Padding(Style->PinMargin)
+				.Content()[
+					PinWidget
+				]
 			];
 		} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
-			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)
-			.Style(Style);
+			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
+				.Style(Style);
 			PinWidgets.Add(PinWidget);
 			PinToWidget.Add(Pin, PinWidget);
-			OutputPinBox->AddSlot()
-			.AutoHeight()[
-				PinWidget
+			OutputPinBox->AddSlot().AutoHeight().HAlign(HAlign_Right)[
+				SNew(SBox)
+				.Padding(Style->PinMargin)
+				.Content()[
+					PinWidget
+				]
 			];
 		}
 	}
 }
 
-void SFIVSEdOperatorNodeViewer::Construct(const FArguments& InArgs, SFIVSEdGraphViewer* InGraphViewer, UFIVSNode* InNode) {
-	SFIVSEdNodeViewer::Construct(SFIVSEdNodeViewer::FArguments(), InGraphViewer, InNode);
-	Style = InArgs._Style;
-	OutlineBrush = FSlateColorBrush(InArgs._OutlineColor);
-	NodeBrush = FSlateColorBrush(InArgs._BackgroundColor);
-	
+void SFIVSEdOperatorNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {
+	SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
+
 	ChildSlot[
 		SNew(SBorder)
-		.Padding(1)
-		.BorderImage_Lambda([this]() {
-			return bSelected ? &OutlineBrush : nullptr;
-		})
+		.BorderImage(&Style->Background)
+		.Padding(Style->Padding)
 		.Content()[
-			SNew(SBorder)
-			.BorderImage(&NodeBrush)
-			.Padding(0)
-			.Content()
-			[
-				SNew(SOverlay)
-				+SOverlay::Slot()
-				.Padding(10)[
-					SNew(SScaleBox)
-					.Stretch(EStretch::ScaleToFit)
-					.Content()[
-						SNew(STextBlock)
-						.Text(FText::FromString(InArgs._Symbol))
-						.ColorAndOpacity(FLinearColor(1, 1, 1, 0.2))
-					]
+			SNew(SOverlay)
+			+SOverlay::Slot()
+			.Padding(10)[
+				SNew(SScaleBox)
+				.Stretch(EStretch::ScaleToFit)
+				.Content()[
+					SNew(STextBlock)
+					.TextStyle(&Style->OperatorTextStyle)
+					.Text(FText::FromString(InArgs._Symbol))
 				]
-				+SOverlay::Slot()[
-					SNew(SGridPanel)
-					+SGridPanel::Slot(0, 1)[
-						SAssignNew(InputPinBox, SVerticalBox)
-					]
-					+SGridPanel::Slot(1, 1)[
-						SNew(SSpacer).Size(FVector2D(20, 20))
-					]
-					+SGridPanel::Slot(2, 1)[
-						SAssignNew(OutputPinBox, SVerticalBox)
-					]
+			]
+			+SOverlay::Slot()[
+				SNew(SGridPanel)
+				+SGridPanel::Slot(0, 1)[
+					SAssignNew(InputPinBox, SVerticalBox)
+				]
+				+SGridPanel::Slot(1, 1)[
+					SNew(SSpacer).Size(Style->CenterSpace)
+				]
+				+SGridPanel::Slot(2, 1)[
+					SAssignNew(OutputPinBox, SVerticalBox)
 				]
 			]
 		]
@@ -460,7 +425,7 @@ void SFIVSEdOperatorNodeViewer::ReconstructPins() {
 	
 	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
 		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
-			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)
+			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
 			.Style(Style)
 			.ShowName(false);
 			PinWidgets.Add(PinWidget);
@@ -470,7 +435,7 @@ void SFIVSEdOperatorNodeViewer::ReconstructPins() {
 				PinWidget
 			];
 		} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
-			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, this, Pin)
+			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
 			.Style(Style)
 			.ShowName(false);
 			PinWidgets.Add(PinWidget);
@@ -486,7 +451,7 @@ void SFIVSEdOperatorNodeViewer::ReconstructPins() {
 FFIVSEdNodeDragDrop::FFIVSEdNodeDragDrop(TSharedRef<SFIVSEdNodeViewer> InNodeViewer) : NodeViewer(InNodeViewer) {}
 
 void FFIVSEdNodeDragDrop::OnDragged(const FDragDropEvent& DragDropEvent) {
-	SFIVSEdGraphViewer* GraphViewer = NodeViewer->GetGraphViewer();
+	TSharedPtr<SFIVSEdGraphViewer> GraphViewer = NodeViewer->GetGraphViewer();
 	FVector2D StartPos = GraphViewer->LocalToGraph(GraphViewer->GetCachedGeometry().AbsoluteToLocal(DragDropEvent.GetLastScreenSpacePosition()));
 	FVector2D EndPos = GraphViewer->LocalToGraph(GraphViewer->GetCachedGeometry().AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition()));
 	FVector2D Offset = EndPos - StartPos;

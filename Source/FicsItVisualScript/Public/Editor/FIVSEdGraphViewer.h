@@ -4,6 +4,7 @@
 #include "FIVSEdActionSelection.h"
 #include "FIVSEdNodeViewer.h"
 #include "SlateBasics.h"
+#include "Script/FIVSGraph.h"
 
 class SFIVSEdGraphViewer;
 
@@ -111,9 +112,11 @@ public:
 		return bIsActive;
 	}
 
-	void GetRect(FVector2D& OutStartPos, FVector2D& OutEndPos) const {
-		OutStartPos = StartPos;
-		OutEndPos = EndPos;
+	FBox2D GetRect() const {
+		return FBox2D(
+			FVector2D::Min(StartPos, EndPos),
+			FVector2D::Max(StartPos, EndPos)
+		);
 	}
 
 private:
@@ -126,8 +129,8 @@ DECLARE_DELEGATE_TwoParams(FFIVSEdSelectionChanged, UFIVSNode*, bool);
 
 class SFIVSEdGraphViewer : public SPanel {
 	SLATE_BEGIN_ARGS(SFIVSEdGraphViewer) :
-		_Style(&FFIVSEdStyle::GetDefault()) {}
-	SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+		_Style(&FFIVSEdGraphViewerStyle::GetDefault()) {}
+	SLATE_STYLE_ARGUMENT(FFIVSEdGraphViewerStyle, Style)
 	SLATE_ARGUMENT(UFIVSGraph*, Graph)
 	SLATE_EVENT(FFIVSEdSelectionChanged, OnSelectionChanged)
 	SLATE_END_ARGS()
@@ -136,40 +139,33 @@ public:
 	void Construct( const FArguments& InArgs );
 
 private:
-	const FFIVSEdStyle* Style = nullptr;
+	const FFIVSEdGraphViewerStyle* Style = nullptr;
 	UFIVSGraph* Graph = nullptr;
 	FFIVSEdSelectionChanged SelectionChanged;
+
 	TSlotlessChildren<SFIVSEdNodeViewer> Children;
 	TMap<UFIVSNode*, TSharedRef<SFIVSEdNodeViewer>> NodeToChild;
 
-	bool bIsGraphDrag = false;
-	float GraphDragDelta = 0;
-
 	TArray<TSharedRef<SFIVSEdPinViewer>> DraggingPins;
 	FVector2D DraggingPinsEndpoint;
-	
+
 	TSharedPtr<FFIVSEdConnectionDrawer> ConnectionDrawer;
 
 	TSharedPtr<SFIVSEdActionSelection> ActiveActionSelection;
 
-	FSlateColorBrush BackgroundBrush = FSlateColorBrush(FColor::FromHex("040404"));
-	FLinearColor GridColor = FColor::FromHex("0A0A0A");
-	FSlateColorBrush SelectionBrush = FSlateColorBrush(FLinearColor(1,1,1,0.1));
-
-	void OnSelectionChanged(UFIVSNode* InNode, bool bIsSelected);
-
 public:
 	FFIVSEdSelectionManager SelectionManager;
 	FFIVSEdSelectionBoxHandler SelectionBoxHandler;
-	
+
 	FVector2D Offset = FVector2D(0,0);
 	float Zoom = 2;
-	
+
 	SFIVSEdGraphViewer();
 	~SFIVSEdGraphViewer();
 
 	// Begin SWidget
 	virtual FVector2D ComputeDesiredSize(float) const override;
+	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
@@ -195,18 +191,25 @@ public:
 		DraggingPins.Remove(PinViewer);
 	}
 
-	FDelegateHandle OnNodeChangedHandle;
-	void OnNodeChanged(int change, UFIVSNode* Node);
-
 	float GetZoom() const {
 		return exp(Zoom)/10;
 	}
-	
+
 	/**
 	 * Creates an action selection menu with the given context
 	 */
 	TSharedPtr<IMenu> CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFIVSEdActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& Context);
-	
+
+	/**
+	 * Converts the given local position to the position in the graph
+	 */
+	FVector2D LocalToGraph(const FVector2D& Local) const;
+
+	/**
+	 * Converts the given graph position to the local position
+	 */
+	FVector2D GraphToLocal(const FVector2D& InGraph) const;
+
 	/**
 	 * Sets the currently displayed Graph.
 	 * Causes all child widgets to get regenerated.
@@ -214,7 +217,11 @@ public:
 	 * @param[in]	NewGraph	the new graph to display
 	 */
 	void SetGraph(UFIVSGraph* NewGraph);
+	UFIVSGraph* GetGraph() { return Graph; }
 
+	void UpdateSelection(const FPointerEvent& Event);
+
+private:
 	/**
 	 * Adds the node at the given index in the graph
 	 * as widget to children.
@@ -223,24 +230,40 @@ public:
 	 */
 	void CreateNodeAsChild(UFIVSNode* Node);
 
-	/**
-	 * Converts the given local position to the position in the graph
-	 */
-	FVector2D LocalToGraph(const FVector2D Local);
+	void OnNodeChanged(EFIVSNodeChange change, UFIVSNode* Node);
+	void OnSelectionChanged(UFIVSNode* InNode, bool bIsSelected);
+
+	void DrawGrid(uint32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, const FWidgetStyle& InWidgetStyle) const;
+	void DrawConnections(uint32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, const FWidgetStyle& InWidgetStyle) const;
+	void DrawNewConnection(uint32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, const FWidgetStyle& InWidgetStyle) const;
+	void DrawSelectionBox(uint32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, const FWidgetStyle& InWidgetStyle) const;
 };
 
-class FFIVSEdSelectionBoxDragDrop : public FDragDropOperation {
+class FFIVSEdGraphPanDragDrop : public FDragDropOperation {
+public:
+	DRAG_DROP_OPERATOR_TYPE(FFIVSEdGraphPanDragDrop, FDragDropOperation)
+
+	FFIVSEdGraphPanDragDrop(TSharedRef<SFIVSEdGraphViewer> GraphViewer);
+
+	virtual FCursorReply OnCursorQuery() override;
+	virtual void OnDragged(const FDragDropEvent& DragDropEvent) override;
+
+private:
+	TSharedRef<SFIVSEdGraphViewer> GraphViewer;
+	TOptional<FVector2D> prevScreenPos;
+};
+
+class FFIVSEdGraphSelectionDragDrop : public FDragDropOperation {
 public:
 	DRAG_DROP_OPERATOR_TYPE(FFIVSEdSelectionBoxDragDrop, FDragDropOperation)
 	
-	FFIVSEdSelectionBoxDragDrop(FFIVSEdSelectionBoxHandler& SelectionBoxHandler, FVector2D StartPos) : SelectionBoxHandler(SelectionBoxHandler) {
-		SelectionBoxHandler.BeginDrag(StartPos);
-	}
+	FFIVSEdGraphSelectionDragDrop(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, FVector2D StartPos);
 
+	virtual void OnDragged(const class FDragDropEvent& DragDropEvent) override;
 	virtual void OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent) override;
 
-	FFIVSEdSelectionBoxHandler& GetSelectionBoxHandler() { return SelectionBoxHandler; }
-	
+	TSharedRef<SFIVSEdGraphViewer> GetGraphViewer() const { return GraphViewer; }
+
 private:
-	FFIVSEdSelectionBoxHandler& SelectionBoxHandler;
+	TSharedRef<SFIVSEdGraphViewer> GraphViewer;
 };

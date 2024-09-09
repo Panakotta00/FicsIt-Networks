@@ -94,7 +94,7 @@ FString UFIVSNode_UFunctionCall::GetNodeName() const {
 	return Function->GetName();
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSNode_UFunctionCall::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) {
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode_UFunctionCall::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
 	return SNew(SFIVSEdOperatorNodeViewer, GraphViewer, this)
 	.Style(Style)
 	.Symbol(Symbol);

@@ -41,6 +41,7 @@ void UFINUtils::VariablesFormString(const FString& Text, TMap<FString, FString>&
 
 FVersion UFINUtils::GetFINSaveVersion(UObject* WorldContext) {
 	UFGSaveSession* Session = UFGSaveSession::Get(WorldContext);
+	if (!IsValid(Session)) return FVersion();
 	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Session->GetModMetadata());
 	TSharedPtr<FJsonObject> Metadata = nullptr;
 	FJsonSerializer::Deserialize(Reader, Metadata);

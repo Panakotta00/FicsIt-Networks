@@ -1,6 +1,11 @@
 ﻿#include "Editor/FIVSEdEditor.h"
 
 #include "Editor/FIVSEdGraphViewer.h"
+#include "Script/FIVSGraph.h"
+#include "Script/FIVSMathLib.h"
+#include "Script/FIVSNode_Branch.h"
+#include "Script/FIVSNode_OnTick.h"
+#include "Script/FIVSNode_UFunctionCall.h"
 
 void UFIVSEdEditor::ReleaseSlateResources(bool bReleaseChildren) {
 	Super::ReleaseSlateResources(bReleaseChildren);
@@ -9,6 +14,31 @@ void UFIVSEdEditor::ReleaseSlateResources(bool bReleaseChildren) {
 }
 
 TSharedRef<SWidget> UFIVSEdEditor::RebuildWidget() {
+	if (!IsValid(Graph)) {
+		Graph = NewObject<UFIVSGraph>();
+
+		UFIVSNode_OnTick* OnTick = NewObject<UFIVSNode_OnTick>();
+		OnTick->Pos = FVector2D(300.0, 300.0);
+		OnTick->InitPins();
+		Graph->AddNode(OnTick);
+		UFIVSRerouteNode* Reroute = NewObject<UFIVSRerouteNode>();
+		Reroute->Pos = FVector2D(500.0, 350.0);
+		Reroute->InitPins();
+		Graph->AddNode(Reroute);
+		UFIVSNode_Branch* Branch = NewObject<UFIVSNode_Branch>();
+		Branch->Pos = FVector2D(800.0, 300.0);
+		Branch->InitPins();
+		Graph->AddNode(Branch);
+		UFIVSNode_UFunctionCall* OpAdd = NewObject<UFIVSNode_UFunctionCall>();
+		OpAdd->Pos = FVector2D(500.0, 600.0);
+		OpAdd->SetFunction(UFIVSMathLib::StaticClass()->FindFunctionByName(TEXT("FIVSFunc_Float_Addition")), TEXT("+"));
+		OpAdd->InitPins();
+		Graph->AddNode(OpAdd);
+
+		OnTick->GetNodePins()[0]->AddConnection(Reroute->GetNodePins()[0]);
+		Reroute->GetNodePins()[0]->AddConnection(Branch->GetNodePins()[0]);
+	}
+
 	return SNew(SOverlay)
 	+SOverlay::Slot()[
 		SNew(SImage)

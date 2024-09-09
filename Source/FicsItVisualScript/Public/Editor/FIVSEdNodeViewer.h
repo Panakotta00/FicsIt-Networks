@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FIVSEdStyle.h"
+#include "FIVSEdGraphViewerStyle.h"
 #include "SlateBasics.h"
 
 class UFIVSNode;
@@ -10,19 +10,19 @@ class SFIVSEdNodeViewer;
 
 class SFIVSEdPinViewer : public SCompoundWidget {
 	SLATE_BEGIN_ARGS(SFIVSEdPinViewer) :
-		_Style(&FFIVSEdStyle::GetDefault()) {}
-	SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
+		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
+	SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
 	SLATE_ARGUMENT_DEFAULT(bool, ShowName) = true;
 	SLATE_END_ARGS()
 	
 public:
-	void Construct(const FArguments& InArgs, SFIVSEdNodeViewer* NodeViewer, UFIVSPin* Pin);
+	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdNodeViewer>& NodeViewer, UFIVSPin* Pin);
 	
 private:
-	UFIVSPin* Pin;
-	SFIVSEdNodeViewer* NodeViewer;
+	UFIVSPin* Pin = nullptr;
+	TWeakPtr<SFIVSEdNodeViewer> NodeViewer;
 	TSharedPtr<SWidget> PinIconWidget;
-	const FFIVSEdStyle* Style = nullptr;
+	const FFIVSEdNodeStyle* Style = nullptr;
 	
 public:
 	SFIVSEdPinViewer();
@@ -35,7 +35,7 @@ public:
 	
 	FSlateColor GetPinColor() const;
 
-	SFIVSEdNodeViewer* GetNodeViewer() { return NodeViewer; }
+	TSharedPtr<SFIVSEdNodeViewer> GetNodeViewer() { return NodeViewer.Pin(); }
 	
 	/**
 	 * Sets the representating pin
@@ -70,15 +70,13 @@ private:
 };
 
 class SFIVSEdNodeViewer : public SCompoundWidget {
-	SLATE_BEGIN_ARGS(SFIVSEdNodeViewer) {}
-	SLATE_END_ARGS()
+protected:
+	TSharedRef<SBorder> Construct(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node, const FFIVSEdNodeStyle* InStyle);
 	
-public:
-	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
-	
-private:
+protected:
 	UFIVSNode* Node = nullptr;
-	SFIVSEdGraphViewer* GraphViewer = nullptr;
+	TWeakPtr<SFIVSEdGraphViewer> GraphViewer;
+	const FFIVSEdNodeStyle* Style = nullptr;
 	FDelegateHandle OnPinChangeHandle;
 	
 protected:
@@ -103,7 +101,7 @@ public:
 	 */
 	virtual void ReconstructPins() = 0;
 
-	SFIVSEdGraphViewer* GetGraphViewer() { return GraphViewer; }
+	TSharedPtr<SFIVSEdGraphViewer> GetGraphViewer() { return GraphViewer.Pin(); }
 	
 	/**
 	 * Returns the node we representate.
@@ -125,66 +123,45 @@ public:
 
 class SFIVSEdRerouteNodeViewer : public SFIVSEdNodeViewer {
 	SLATE_BEGIN_ARGS(SFIVSEdRerouteNodeViewer) :
-		_Style(&FFIVSEdStyle::GetDefault()) {}
-		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("333333");
+		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
+		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
 	SLATE_END_ARGS()
 	
-	const FFIVSEdStyle* Style;
-	
+	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
+
 public:
-	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
-
 	virtual void ReconstructPins() override {}
-
-	FSlateColorBrush OutlineBrush = FSlateColorBrush(FColor::White);
-	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::Black);
 };
 
 class SFIVSEdFunctionNodeViewer : public SFIVSEdNodeViewer {
 	SLATE_BEGIN_ARGS(SFIVSEdFunctionNodeViewer) :
-		_Style(&FFIVSEdStyle::GetDefault()) {}
-		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("333333");
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, HeaderColor) = FColor::FromHex("b04600");
+		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
+		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
 	SLATE_END_ARGS()
 
-	const FFIVSEdStyle* Style;
-	
+	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
+
 public:
-	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
 	virtual void ReconstructPins() override;
 	
 	TSharedPtr<SVerticalBox> InputPinBox;
 	TSharedPtr<SVerticalBox> OutputPinBox;
-
-	FSlateColorBrush OutlineBrush = FSlateColorBrush(FColor::White);
-	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::Black);
-	FSlateColorBrush HeaderBrush = FSlateColorBrush(FColor::Orange);
 };
 
 class SFIVSEdOperatorNodeViewer : public SFIVSEdNodeViewer {
 	SLATE_BEGIN_ARGS(SFIVSEdOperatorNodeViewer) :
-		_Style(&FFIVSEdStyle::GetDefault()) {}
-		SLATE_STYLE_ARGUMENT(FFIVSEdStyle, Style)
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, OutlineColor) = FLinearColor(1, 1, 1);
-		SLATE_ARGUMENT_DEFAULT(FLinearColor, BackgroundColor) = FColor::FromHex("333333");
+		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
+		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
 		SLATE_ARGUMENT(FString, Symbol)
 	SLATE_END_ARGS()
 
-	const FFIVSEdStyle* Style;
-	
+	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
+
 public:
-	void Construct(const FArguments& InArgs, SFIVSEdGraphViewer* GraphViewer, UFIVSNode* Node);
 	virtual void ReconstructPins() override;
 	
 	TSharedPtr<SVerticalBox> InputPinBox;
 	TSharedPtr<SVerticalBox> OutputPinBox;
-
-	FSlateColorBrush OutlineBrush = FSlateColorBrush(FColor::White);
-	FSlateColorBrush NodeBrush = FSlateColorBrush(FColor::Black);
 };
 
 class FFIVSEdNodeDragDrop : public FDragDropOperation {

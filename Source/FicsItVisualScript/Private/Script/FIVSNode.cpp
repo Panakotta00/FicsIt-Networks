@@ -191,7 +191,11 @@ bool UFIVSWildcardPin::CanConnect(UFIVSPin* Pin) {
 	return UFIVSPin::CanConnect(Pin);
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) {
+FString UFIVSWildcardPin::GetName() {
+	return Name;
+}
+
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
 	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
 	.Style(Style);
 }
@@ -212,6 +216,7 @@ void UFIVSNode::ReconstructPins() {
 
 UFIVSRerouteNode::UFIVSRerouteNode() {
 	Pin = CreateDefaultSubobject<UFIVSWildcardPin>("Pin");
+	Cast<UFIVSWildcardPin>(Pin)->Name = TEXT("");
 	Pin->ParentNode = this;
 }
 
@@ -231,7 +236,7 @@ void UFIVSRerouteNode::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	});
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSRerouteNode::CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) {
+TSharedRef<SFIVSEdNodeViewer> UFIVSRerouteNode::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
 	return SNew(SFIVSEdRerouteNodeViewer, GraphViewer, this)
 	.Style(Style);
 }

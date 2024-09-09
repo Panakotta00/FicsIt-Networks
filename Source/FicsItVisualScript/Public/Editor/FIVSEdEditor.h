@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "FIVSEdGraphViewer.h"
-#include "FIVSEdStyle.h"
+#include "FIVSEdGraphViewerStyle.h"
 #include "Components/Widget.h"
 #include "Script/FIVSScriptContext.h"
 #include "Reflection/FINReflection.h"
@@ -35,7 +35,7 @@ public:
 	//~ End UVisual Interface
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance", meta=( DisplayName="Style" ))
-	FFIVSEdStyle Style;
+	FFIVSEdGraphViewerStyle Style;
 	
 	UFUNCTION(BlueprintCallable)
 	void SetGraph(UFIVSGraph* InGraph);

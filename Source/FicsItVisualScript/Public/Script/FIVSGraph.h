@@ -6,12 +6,18 @@
 
 class UFIVSNode;
 
+UENUM()
+enum EFIVSNodeChange {
+	FIVS_Node_Added,
+	FIVS_Node_Removed,
+};
+
 /**
  * Notifies if the node list of the graph has changed.
  * Param1: type of change (0 = node added, 1 = node removed)
  * Param2: the changed node
  */
-DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphNodeChanged, int, UFIVSNode*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphNodeChanged, EFIVSNodeChange, UFIVSNode*);
 
 UCLASS(BlueprintType)
 class UFIVSGraph : public UObject {

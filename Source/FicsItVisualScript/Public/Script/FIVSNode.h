@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIVSNodeSerialization.h"
+#include "Editor/FIVSEdGraphViewerStyle.h"
 #include "Network/FINNetworkValues.h"
 #include "Reflection/FINProperty.h"
 #include "Templates/SubclassOf.h"
@@ -9,7 +10,7 @@
 
 class IFIVSScriptContext_Interface;
 class SFIVSEdGraphViewer;
-struct FFIVSEdStyle;
+struct FFIVSEdGraphViewerStyle;
 class UFIVSGraph;
 class SFIVSEdNodeViewer;
 class UFIVSNode;
@@ -210,10 +211,14 @@ protected:
 	EFIVSPinType PinType;
 	
 public:
+	FString Name = TEXT("Unnamed");
+	FText DisplayName = FText::FromString("Unnamed");
+
 	// Begin UFINScriptPin
 	virtual EFIVSPinType GetPinType() override;
 	virtual FFIVSPinDataType GetPinDataType() override;
 	virtual bool CanConnect(UFIVSPin* Pin) override;
+	virtual FString GetName() override;
 	// End UFINScriptPin
 };
 
@@ -301,7 +306,7 @@ public:
 	/**
 	 * Returns a SFIVSEdNodeViewer that is used to display this node in a graph editor.
 	 */
-	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style);
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style);
 
 	/**
 	 * Creates and returns a new widget that can be used to change detailed information of this node.
@@ -376,6 +381,6 @@ public:
 	// Begin UFINScriptNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override;
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
-	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) override;
 	// End UFINScriptNode
 };

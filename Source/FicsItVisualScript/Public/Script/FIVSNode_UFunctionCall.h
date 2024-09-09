@@ -33,7 +33,7 @@ public:
 	virtual void InitPins() override;
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	virtual FString GetNodeName() const override;
-	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(SFIVSEdGraphViewer* GraphViewer, const FFIVSEdStyle* Style) override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) override;
 	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
 	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
 	// End UFIVSNode
@@ -42,6 +42,11 @@ public:
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
+
+	void SetFunction(UFunction* InFunction, const FString& InSymbol) {
+		Function = InFunction;
+		Symbol = InSymbol;
+	}
 };
 
 #define CAT(a,b) CAT2(a,b)
