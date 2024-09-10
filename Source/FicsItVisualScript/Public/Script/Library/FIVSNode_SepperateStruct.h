@@ -1,31 +1,29 @@
-#pragma once
+﻿#pragma once
 
-#include "FIVSScriptNode.h"
-#include "FIVSNode_Variable.generated.h"
+#include "CoreMinimal.h"
+#include "Script/FIVSScriptNode.h"
+#include "FIVSNode_SepperateStruct.generated.h"
 
 UCLASS()
-class UFIVSNode_Variable : public UFIVSScriptNode {
+class UFIVSNode_SepperateStruct : public UFIVSScriptNode {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	FFIVSPinDataType Type;
+	UFINStruct* Struct = nullptr;
+	UPROPERTY()
+	bool bBreak = true;
 
 	UPROPERTY()
-	bool bAssignment = false;
-
+	TMap<FString, UFIVSPin*> InputPins;
 	UPROPERTY()
-	UFIVSPin* VarPin;
+	TMap<FString, UFIVSPin*> OutputPins;
 	
-	UPROPERTY()
-	UFIVSPin* ExecOutput = nullptr;
-
-	UPROPERTY()
-	UFIVSPin* DataInput;
-
 public:
 	// Begin UFIVSNode
 	virtual void InitPins() override;
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
+	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
+	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
 	virtual FString GetNodeName() const override;
 	// End UFIVSNode
 

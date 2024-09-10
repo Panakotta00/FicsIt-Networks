@@ -1,25 +1,21 @@
 #pragma once
 
-#include "FIVSScriptNode.h"
-#include "FIVSNode_GetProperty.generated.h"
+#include "CoreMinimal.h"
+#include "Script/FIVSScriptNode.h"
+#include "FIVSNode_Convert.generated.h"
 
 UCLASS()
-class UFIVSNode_GetProperty : public UFIVSScriptNode {
+class UFIVSNode_Convert : public UFIVSScriptNode {
 	GENERATED_BODY()
 private:
 	UPROPERTY()
-	UFIVSPin* InstanceIn = nullptr;
+	UFIVSPin* Input = nullptr;
 	UPROPERTY()
-	UFIVSPin* DataOut = nullptr;
-
-	UPROPERTY()
-	UFINProperty* Property = nullptr;
+	UFIVSPin* Output = nullptr;
 
 public:
-	void SetProperty(UFINProperty* InProperty) {
-		check(InstanceIn == nullptr);
-		Property = InProperty;
-	}
+	EFINNetworkValueType FromType = FIN_NIL;
+	EFINNetworkValueType ToType = FIN_NIL;
 
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
@@ -30,13 +26,7 @@ public:
 	// Begin UFIVSGenericNode
 	virtual void InitPins() override;
 
-	virtual FString GetNodeName() const override {
-		if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) {
-			return TEXT("Get ") + Property->GetInternalName() + TEXT(" (Class)");
-		} else {
-			return TEXT("Get ") + Property->GetInternalName();
-		}
-	}
+	virtual FString GetNodeName() const override { return TEXT("Convert ") + FINGetNetworkValueTypeName(FromType) + TEXT(" to ") + FINGetNetworkValueTypeName(ToType); }
 
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 

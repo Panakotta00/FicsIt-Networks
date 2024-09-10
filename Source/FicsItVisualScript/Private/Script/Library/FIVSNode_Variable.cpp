@@ -1,4 +1,4 @@
-#include "Script/FIVSNode_Variable.h"
+#include "Script/Library/FIVSNode_Variable.h"
 
 void UFIVSNode_Variable::InitPins() {
 	if (bAssignment) {

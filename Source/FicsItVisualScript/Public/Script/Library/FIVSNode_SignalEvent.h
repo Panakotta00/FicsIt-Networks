@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
 #include "FIVSNode_Event.h"
 #include "FIVSNode_SignalEvent.generated.h"
 

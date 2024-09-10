@@ -1,4 +1,4 @@
-#include "Script/FIVSNode_GetProperty.h"
+#include "Script/Library/FIVSNode_GetProperty.h"
 
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINReflection.h"

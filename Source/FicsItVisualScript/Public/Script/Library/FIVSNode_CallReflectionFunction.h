@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FIVSScriptNode.h"
+#include "Script/FIVSScriptNode.h"
 #include "FIVSNode_CallReflectionFunction.generated.h"
 
 

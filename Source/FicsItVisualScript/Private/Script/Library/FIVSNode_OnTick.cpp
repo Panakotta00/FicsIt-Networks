@@ -1,4 +1,4 @@
-#include "Script/FIVSNode_OnTick.h"
+#include "Script/Library/FIVSNode_OnTick.h"
 
 void UFIVSNode_OnTick::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	Actions.Add(

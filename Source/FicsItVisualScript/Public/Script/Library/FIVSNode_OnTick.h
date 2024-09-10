@@ -1,6 +1,7 @@
 #pragma once
 
-#include "FIVSScriptNode.h"
+#include "CoreMinimal.h"
+#include "Script/FIVSScriptNode.h"
 #include "FIVSNode_OnTick.generated.h"
 
 UCLASS()

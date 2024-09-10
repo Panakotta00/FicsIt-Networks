@@ -1,6 +1,7 @@
 #pragma once
 
-#include "FIVSScriptNode.h"
+#include "CoreMinimal.h"
+#include "Script/FIVSScriptNode.h"
 #include "FINGlobalRegisterHelper.h"
 #include "FIVSNode_UFunctionCall.generated.h"
 
