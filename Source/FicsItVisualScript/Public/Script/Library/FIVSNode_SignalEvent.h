@@ -18,15 +18,18 @@ class UFIVSNode_SignalEvent : public UFIVSNode_Event {
 	UFIVSPin* SenderOut;
 
 	UPROPERTY()
+	TArray<UFIVSPin*> Parameters;
+
+	UPROPERTY()
 	FFINNetworkTrace Sender;
 
 public:
+	UFIVSNode_SignalEvent();
+
 	// Begin UFIVSNode
-	virtual void InitPins() override;
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
 	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
-	virtual FString GetNodeName() const override;
 	virtual TSharedPtr<SWidget> CreateDetailsWidget(TScriptInterface<IFIVSScriptContext_Interface> Context) override;
 	// End UFIVSNode
 
@@ -35,6 +38,8 @@ public:
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
 
-	UFINSignal* GetSignal() { return Signal; }
-	const FFINNetworkTrace& GetSender() { return Sender; }
+	void SetSignal(UFINSignal* InSignal);
+	UFINSignal* GetSignal() const { return Signal; }
+
+	FFINNetworkTrace GetSender() const { return Sender; }
 };

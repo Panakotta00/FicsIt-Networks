@@ -18,15 +18,13 @@ private:
 	UFIVSPin* Condition = nullptr;
 
 public:
+	UFIVSNode_Branch();
+
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	// End UFIVSNode
 	
 	// Begin UFIVSScriptNode
-	virtual void InitPins() override;
-
-	virtual FString GetNodeName() const override { return "Branch"; }
-	
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override {
 		return TArray<UFIVSPin*>{ Condition };
 	}

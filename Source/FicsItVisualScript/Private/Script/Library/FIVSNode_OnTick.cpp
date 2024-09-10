@@ -1,5 +1,11 @@
 #include "Script/Library/FIVSNode_OnTick.h"
 
+UFIVSNode_OnTick::UFIVSNode_OnTick() {
+	DisplayName = FText::FromString(TEXT("Event Tick"));
+
+	ExecOut = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("Run"), FText::FromString("Run"));
+}
+
 void UFIVSNode_OnTick::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	Actions.Add(
 {
@@ -12,10 +18,6 @@ void UFIVSNode_OnTick::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 			}
 		}
 	);
-}
-
-void UFIVSNode_OnTick::InitPins() {
-	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Run"), FText::FromString("Run"));
 }
 
 UFIVSPin* UFIVSNode_OnTick::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {

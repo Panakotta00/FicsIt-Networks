@@ -2,6 +2,14 @@
 
 #include "FicsItKernel/Logging.h"
 
+UFIVSNode_Print::UFIVSNode_Print() {
+	DisplayName = FText::FromString(TEXT("Print"));
+
+	ExecIn = CreateDefaultPin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString("Exec"));
+	ExecOut = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("Out"), FText::FromString("Out"));
+	MessageIn = CreateDefaultPin(FIVS_PIN_DATA_INPUT, TEXT("Message"), FText::FromString("Message"), FFIVSPinDataType(FIN_STR));
+}
+
 void UFIVSNode_Print::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	Actions.Add(
 		{
@@ -16,12 +24,6 @@ void UFIVSNode_Print::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 			}
 		}
 	);
-}
-
-void UFIVSNode_Print::InitPins() {
-	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString("Exec"));
-	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Out"), FText::FromString("Out"));
-	MessageIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Message"), FText::FromString("Message"), FFIVSPinDataType(FIN_STR));
 }
 
 TArray<UFIVSPin*> UFIVSNode_Print::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {

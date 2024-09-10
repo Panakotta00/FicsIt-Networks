@@ -16,15 +16,13 @@ private:
 	UFIVSPin* MessageIn = nullptr;
 
 public:
+	UFIVSNode_Print();
+
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	// End UFIVSNodes
 	
 	// Begin UFIVSGenericNode
-	virtual void InitPins() override;
-
-	virtual FString GetNodeName() const override { return "Print"; }
-
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;

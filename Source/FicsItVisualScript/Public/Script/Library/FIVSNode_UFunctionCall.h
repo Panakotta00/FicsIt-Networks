@@ -19,7 +19,18 @@ class UFIVSNode_UFunctionCall : public UFIVSScriptNode {
 private:
 	UPROPERTY()
 	UFunction* Function = nullptr;
+
+	UPROPERTY()
 	FString Symbol;
+
+	UPROPERTY()
+	UFIVSPin* ExecIn = nullptr;
+
+	UPROPERTY()
+	UFIVSPin* ExecOut = nullptr;
+
+	UPROPERTY()
+	TArray<UFIVSPin*> Parameters;
 
 	TMap<FProperty*, UFIVSPin*> PropertyToPin;
 
@@ -31,9 +42,7 @@ public:
 	}
 	
 	// Begin UFIVSNode
-	virtual void InitPins() override;
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
-	virtual FString GetNodeName() const override;
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) override;
 	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
 	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
@@ -44,10 +53,7 @@ public:
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
 
-	void SetFunction(UFunction* InFunction, const FString& InSymbol) {
-		Function = InFunction;
-		Symbol = InSymbol;
-	}
+	void SetFunction(UFunction* InFunction, const FString& InSymbol);
 };
 
 #define CAT(a,b) CAT2(a,b)

@@ -183,7 +183,6 @@ void UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString I
 		UFIVSNode* Node = NewObject<UFIVSNode>(Graph, SerializedNode.NodeType);
 		Node->Pos = SerializedNode.NodePos + InOffset;
 		Node->DeserializeNodeProperties(SerializedNode.Properties);
-		Node->InitPins();
 		NodeIDs.Add(SerializedNode.NodeID, Node);
 		TArray<UFIVSPin*> Pins = Node->GetNodePins();
 		for (const FFIVSSerializedPin& SerializedPin : SerializedNode.Pins) {

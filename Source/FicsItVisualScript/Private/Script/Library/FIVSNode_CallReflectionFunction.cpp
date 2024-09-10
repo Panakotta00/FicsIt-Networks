@@ -3,6 +3,11 @@
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINReflection.h"
 
+UFIVSNode_CallReflectionFunction::UFIVSNode_CallReflectionFunction() {
+	ExecIn = CreateDefaultPin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
+	ExecOut = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("Run"), FText::FromString(TEXT("Run")));
+}
+
 void UFIVSNode_CallReflectionFunction::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
 		for (UFINFunction* CallFunction : Class.Value->GetFunctions(false)) {
@@ -34,25 +39,7 @@ void UFIVSNode_CallReflectionFunction::SerializeNodeProperties(FFIVSNodeProperti
 }
 
 void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	Function = Cast<UFINFunction>(FSoftObjectPath(Properties.Properties["Function"]).TryLoad());
-}
-
-void UFIVSNode_CallReflectionFunction::InitPins() {
-	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
-	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Run"), FText::FromString(TEXT("Run")));
-	Self = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Run"), FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIN_Func_ClassFunc ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Function->GetOuter())));
-	for (UFINProperty* Param : Function->GetParameters()) {
-		EFINRepPropertyFlags Flags = Param->GetPropertyFlags();
-		if (Flags & FIN_Prop_Param) {
-			FFIVSPinDataType Type = FFINExpandedNetworkValueType(Param);
-			if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
-			if (Flags & FIN_Prop_OutParam) {
-				OutputPins.Add(CreatePin(FIVS_PIN_DATA_OUTPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
-			} else {
-				InputPins.Add(CreatePin(FIVS_PIN_DATA_INPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
-			}
-		}
-	}
+	SetFunction(Cast<UFINFunction>(FSoftObjectPath(Properties.Properties["Function"]).TryLoad()));
 }
 
 TArray<UFIVSPin*> UFIVSNode_CallReflectionFunction::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
@@ -74,4 +61,33 @@ UFIVSPin* UFIVSNode_CallReflectionFunction::ExecPin(UFIVSPin* ExecPin, FFIVSRunt
 		Context.SetValue(OutputPins[i], OutputValues[i]);
 	}
 	return ExecOut;
+}
+
+void UFIVSNode_CallReflectionFunction::SetFunction(UFINFunction* InFunction) {
+	check(ExecIn == nullptr);
+	Function = InFunction;
+
+	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
+		DisplayName = FText::FromString(Function->GetDisplayName().ToString() + TEXT(" (Class)"));
+	} else {
+		DisplayName = FText::FromString(Function->GetDisplayName().ToString());
+	}
+
+	DeletePin(Self);
+	DeletePins(OutputPins);
+	DeletePins(InputPins);
+
+	Self = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Run"), FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIN_Func_ClassFunc ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Function->GetOuter())));
+	for (UFINProperty* Param : Function->GetParameters()) {
+		EFINRepPropertyFlags Flags = Param->GetPropertyFlags();
+		if (Flags & FIN_Prop_Param) {
+			FFIVSPinDataType Type = FFINExpandedNetworkValueType(Param);
+			if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
+			if (Flags & FIN_Prop_OutParam) {
+				OutputPins.Add(CreatePin(FIVS_PIN_DATA_OUTPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
+			} else {
+				InputPins.Add(CreatePin(FIVS_PIN_DATA_INPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
+			}
+		}
+	}
 }

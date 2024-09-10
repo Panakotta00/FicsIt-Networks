@@ -18,6 +18,9 @@ class UFIVSNode_Variable : public UFIVSScriptNode {
 	UFIVSPin* VarPin;
 	
 	UPROPERTY()
+	UFIVSPin* ExecInput = nullptr;
+
+	UPROPERTY()
 	UFIVSPin* ExecOutput = nullptr;
 
 	UPROPERTY()
@@ -25,13 +28,13 @@ class UFIVSNode_Variable : public UFIVSScriptNode {
 
 public:
 	// Begin UFIVSNode
-	virtual void InitPins() override;
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
-	virtual FString GetNodeName() const override;
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
+
+	void SetType(const FFIVSPinDataType& InType, bool bIsAssignment);
 };

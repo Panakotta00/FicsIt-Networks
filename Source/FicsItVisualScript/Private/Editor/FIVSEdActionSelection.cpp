@@ -94,7 +94,6 @@ void FFIVSEdActionSelectionNodeAction::ExecuteAction() {
 	UFIVSNode* Node = NewObject<UFIVSNode>(Context.Graph, NodeAction.NodeType);
 	Node->Pos = Context.CreationLocation;
 	NodeAction.OnExecute.ExecuteIfBound(Node);
-	Node->InitPins();
 	Context.Graph->AddNode(Node);
 
 	for (UFIVSPin* Pin : Node->GetNodePins()) {

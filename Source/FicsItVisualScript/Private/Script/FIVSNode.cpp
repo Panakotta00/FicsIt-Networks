@@ -18,10 +18,6 @@ TSharedRef<SFIVSEdNodeViewer> UFIVSNode::CreateNodeViewer(const TSharedRef<SFIVS
 		.Style(Style);
 }
 
-void UFIVSNode::ReconstructPins() {
-	InitPins();
-}
-
 UFIVSRerouteNode::UFIVSRerouteNode() {
 	Pin = CreateDefaultSubobject<UFIVSWildcardPin>("Pin");
 	Cast<UFIVSWildcardPin>(Pin)->DisplayName = FText();

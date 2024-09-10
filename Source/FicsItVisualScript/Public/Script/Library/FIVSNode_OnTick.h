@@ -12,15 +12,13 @@ private:
 	UFIVSPin* ExecOut = nullptr;
 	
 public:
+	UFIVSNode_OnTick();
+
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	// End UFIVSNodes
 	
 	// Begin UFIVSGenericNode
-	virtual void InitPins() override;
-
-	virtual FString GetNodeName() const override { return "Event Tick"; }
-	
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
 };

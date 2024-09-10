@@ -37,15 +37,6 @@ void UFIVSNode_SetProperty::DeserializeNodeProperties(const FFIVSNodeProperties&
 	Property = Cast<UFINProperty>(FSoftObjectPath(Properties.Properties[TEXT("Property")]).TryLoad());
 }
 
-void UFIVSNode_SetProperty::InitPins() {
-	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString("Exec"));
-	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Out"), FText::FromString("Out"));
-	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Instance"), FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())));
-	FFIVSPinDataType Type(Property);
-	if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
-	DataIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Value"), FText::FromString("Value"), Type);
-}
-
 TArray<UFIVSPin*> UFIVSNode_SetProperty::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	return TArray<UFIVSPin*>{InstanceIn, DataIn};
 }
@@ -58,4 +49,26 @@ UFIVSPin* UFIVSNode_SetProperty::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext&
 	else ExecContext = UFINNetworkUtils::RedirectIfPossible(Instance->GetTrace());
 	Property->SetValue(ExecContext, *Data);
 	return ExecOut;
+}
+
+void UFIVSNode_SetProperty::SetProperty(UFINProperty* InProperty) {
+	Property = InProperty;
+
+	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) {
+		DisplayName = FText::FromString(TEXT("Set ") + Property->GetInternalName() + TEXT(" (Class)"));
+	} else {
+		DisplayName = FText::FromString(TEXT("Set ") + Property->GetInternalName());
+	}
+
+	DeletePin(ExecIn);
+	DeletePin(ExecOut);
+	DeletePin(InstanceIn);
+	DeletePin(DataIn);
+
+	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString("Exec"));
+	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Out"), FText::FromString("Out"));
+	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Instance"), FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())));
+	FFIVSPinDataType Type(Property);
+	if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
+	DataIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Value"), FText::FromString("Value"), Type);
 }

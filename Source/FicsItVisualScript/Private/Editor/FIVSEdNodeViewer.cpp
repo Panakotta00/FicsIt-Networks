@@ -320,7 +320,7 @@ void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, const TShare
 	            .TextStyle(&Style->HeaderTextStyle)
                 .Text_Lambda([this]() {
                 	if (auto node = Cast<UFIVSScriptNode>(GetNode())) {
-                		return FText::FromString(node->GetNodeName());
+                		return node->DisplayName;
                 	} else {
                 		return FText::FromString("Unnamed");
                 	}

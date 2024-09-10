@@ -24,6 +24,8 @@ private:
 	UFINFunction* Function = nullptr;
 	
 public:
+	UFIVSNode_CallReflectionFunction();
+
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
@@ -31,23 +33,10 @@ public:
 	// End UFIVSNodes
 	
 	// Begin UFIVSScriptNode
-	virtual void InitPins() override;
-
-	virtual FString GetNodeName() const override {
-		if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
-			return Function->GetDisplayName().ToString() + TEXT(" (Class)");
-		} else {
-			return Function->GetDisplayName().ToString();
-		}
-	}
-
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
 
-	void SetFunction(UFINFunction* InFunction) {
-		check(ExecIn == nullptr);
-		Function = InFunction;
-	}
+	void SetFunction(UFINFunction* InFunction);
 };

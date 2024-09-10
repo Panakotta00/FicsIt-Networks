@@ -73,14 +73,12 @@ class UFIVSNode : public UObject {
 public:
 	UPROPERTY(SaveGame)
 	FVector2D Pos;
-	
+
+	UPROPERTY(SaveGame)
+	FText DisplayName = FText::FromString(TEXT("Unnamed"));
+
 	FFINScriptGraphPinChanged OnPinChanged;
 
-	/**
-	 * Should create all pins of this node
-	 */
-	virtual void InitPins() {}
-	
 	/**
 	 * Returns the list of pins of this node
 	 */
@@ -102,11 +100,6 @@ public:
 	 */
 	virtual TSharedPtr<SWidget> CreateDetailsWidget(TScriptInterface<IFIVSScriptContext_Interface> Context) { return nullptr; }
 	
-	/**
-	 * Removed all Pins and calls InitPins again, may cause the UI to update its rendering.
-	 */
-	virtual void ReconstructPins();
-
 	/**
 	 * Called if this nodes gets serialized.
 	 * Is supposed to store additional node properties to the serialization data that will be used on deserialization

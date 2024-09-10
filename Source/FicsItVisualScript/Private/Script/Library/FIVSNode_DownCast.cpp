@@ -16,17 +16,9 @@ void UFIVSNode_DownCast::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const 
 			{FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(FIN_BOOL)}
 		};
 		Action.OnExecute.BindLambda([FromClass, Class](UFIVSNode* Node) {
-			Cast<UFIVSNode_DownCast>(Node)->ToClass = Class.Value;
+			Cast<UFIVSNode_DownCast>(Node)->SetClass(Class.Value);
 		});
 		Actions.Add(Action);
-	}
-}
-
-void UFIVSNode_DownCast::InitPins() {
-	if (bPure) {
-		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("From"), FText::FromString(TEXT("From")), FFIVSPinDataType(FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass())));
-		DataOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("To"), FText::FromString(TEXT("To")), FFIVSPinDataType(FIN_TRACE, ToClass));
-		SuccessOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Success"), FText::FromString(TEXT("Success")), FFIVSPinDataType(FIN_BOOL));
 	}
 }
 
@@ -36,10 +28,6 @@ void UFIVSNode_DownCast::SerializeNodeProperties(FFIVSNodeProperties& Properties
 
 void UFIVSNode_DownCast::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
 	ToClass = Cast<UFINClass>(FSoftObjectPath(Properties.Properties[TEXT("ToClass")]).TryLoad());
-}
-
-FString UFIVSNode_DownCast::GetNodeName() const {
-	return TEXT("Cast to ") + ToClass->GetDisplayName().ToString();
 }
 
 TArray<UFIVSPin*> UFIVSNode_DownCast::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
@@ -56,4 +44,16 @@ UFIVSPin* UFIVSNode_DownCast::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Co
 		Context.SetValue(DataOutput, Value);
 	}
 	return nullptr;
+}
+
+void UFIVSNode_DownCast::SetClass(UFINClass* InToClass) {
+	ToClass = InToClass;
+
+	DisplayName = FText::FromString(TEXT("Cast to ") + ToClass->GetDisplayName().ToString());
+
+	if (bPure) {
+		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("From"), FText::FromString(TEXT("From")), FFIVSPinDataType(FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass())));
+		DataOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("To"), FText::FromString(TEXT("To")), FFIVSPinDataType(FIN_TRACE, ToClass));
+		SuccessOutput = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Success"), FText::FromString(TEXT("Success")), FFIVSPinDataType(FIN_BOOL));
+	}
 }

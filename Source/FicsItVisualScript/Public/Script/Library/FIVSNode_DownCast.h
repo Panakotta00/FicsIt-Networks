@@ -27,14 +27,14 @@ private:
 public:
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
-	virtual void InitPins() override;
 	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
 	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
 	// End UFIVSNode
 	
 	// Begin UFIVSScriptNode
-	virtual FString GetNodeName() const override;
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
+
+	void SetClass(UFINClass* ToClass);
 };

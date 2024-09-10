@@ -18,15 +18,13 @@ private:
 	UFIVSPin* CompOut = nullptr;
 
 public:
+	UFIVSNode_Proxy();
+
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	// End UFIVSNodes
 	
 	// Begin UFIVSGenericNode
-	virtual void InitPins() override;
-
-	virtual FString GetNodeName() const override { return "Proxy"; }
-
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override {
 		return TArray<UFIVSPin*>{AddrIn};
 	}

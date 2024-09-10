@@ -6,36 +6,6 @@
 
 TMap<UClass*, TMap<FString, FFIVSNodeUFunctionCallMeta>> UFIVSNode_UFunctionCall::FunctionMetaData;
 
-void UFIVSNode_UFunctionCall::InitPins() {
-	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
-		auto Flags = Prop->GetPropertyFlags();
-		UFIVSPin* Pin = nullptr;
-		EFIVSPinType PinType = FIVS_PIN_DATA;
-		EFINNetworkValueType PinDataType = FIN_NIL;
-		if (Flags & CPF_Parm) {
-			if (Flags & CPF_OutParm) {
-				PinType |= FIVS_PIN_OUTPUT;
-			} else {
-				PinType |= FIVS_PIN_INPUT;
-			}
-			
-			if (Prop->IsA<FFloatProperty>()) {
-				PinDataType = FIN_FLOAT;
-			} else if (Prop->IsA<FIntProperty>() || Prop->IsA<FInt64Property>()) {
-				PinDataType = FIN_INT;
-			} else if (Prop->IsA<FBoolProperty>()) {
-				PinDataType = FIN_BOOL;
-			} else if (Prop->IsA<FStrProperty>()) {
-				PinDataType = FIN_STR;
-			}
-			Pin = CreatePin(PinType, Prop->GetName(), FText::FromString(Prop->GetName()), FFIVSPinDataType(PinDataType));
-		}
-		if (Pin) {
-			PropertyToPin.Add(*Prop, Pin);
-		}
-	}
-}
-
 void UFIVSNode_UFunctionCall::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for(TObjectIterator<UClass> It; It; ++It) {
 		UClass* Class = *It;
@@ -82,16 +52,11 @@ void UFIVSNode_UFunctionCall::GetNodeActions(TArray<FFIVSNodeAction>& Actions) c
 			}
 			UFunction* F = *Func;
 			Action.OnExecute.BindLambda([F, MetaSymbol](UFIVSNode* Node) {
-				Cast<UFIVSNode_UFunctionCall>(Node)->Function = F;
-				Cast<UFIVSNode_UFunctionCall>(Node)->Symbol = MetaSymbol;
+				Cast<UFIVSNode_UFunctionCall>(Node)->SetFunction(F, MetaSymbol);
 			});
 			Actions.Add(Action);
 		}
 	}
-}
-
-FString UFIVSNode_UFunctionCall::GetNodeName() const {
-	return Function->GetName();
 }
 
 TSharedRef<SFIVSEdNodeViewer> UFIVSNode_UFunctionCall::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
@@ -151,4 +116,44 @@ UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContex
 	}
 			
 	return nullptr;
+}
+
+void UFIVSNode_UFunctionCall::SetFunction(UFunction* InFunction, const FString& InSymbol) {
+	Function = InFunction;
+	Symbol = InSymbol;
+
+	DisplayName = FText::FromString(Function->GetName());
+
+	DeletePin(ExecIn);
+	DeletePin(ExecOut);
+	DeletePins(Parameters);
+
+	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
+		auto Flags = Prop->GetPropertyFlags();
+		UFIVSPin* Pin = nullptr;
+		EFIVSPinType PinType = FIVS_PIN_DATA;
+		EFINNetworkValueType PinDataType = FIN_NIL;
+		if (Flags & CPF_Parm) {
+			if (Flags & CPF_OutParm) {
+				PinType |= FIVS_PIN_OUTPUT;
+			} else {
+				PinType |= FIVS_PIN_INPUT;
+			}
+
+			if (Prop->IsA<FFloatProperty>()) {
+				PinDataType = FIN_FLOAT;
+			} else if (Prop->IsA<FIntProperty>() || Prop->IsA<FInt64Property>()) {
+				PinDataType = FIN_INT;
+			} else if (Prop->IsA<FBoolProperty>()) {
+				PinDataType = FIN_BOOL;
+			} else if (Prop->IsA<FStrProperty>()) {
+				PinDataType = FIN_STR;
+			}
+			Pin = CreatePin(PinType, Prop->GetName(), FText::FromString(Prop->GetName()), FFIVSPinDataType(PinDataType));
+		}
+		if (Pin) {
+			Parameters.Add(Pin);
+			PropertyToPin.Add(*Prop, Pin);
+		}
+	}
 }

@@ -1,33 +1,40 @@
 #include "Script/FIVSScriptNode.h"
 
-UFIVSPin* UFIVSScriptNode::CreatePin(EFIVSPinType PinType, const FString& InternalName, const FText& DisplayName, FFIVSPinDataType DataType) {
+UFIVSPin* UFIVSScriptNode::CreatePin(EFIVSPinType PinType, const FString& InternalName, const FText& InDisplayName, FFIVSPinDataType DataType) {
 	UFIVSGenericPin* Pin = NewObject<UFIVSGenericPin>();
 	Pin->ParentNode = this;
 	Pin->PinType = PinType;
 	Pin->Name = InternalName;
-	Pin->DisplayName = DisplayName;
+	Pin->DisplayName = InDisplayName;
 	Pin->PinDataType = DataType;
-		
+
 	Pins.Add(Pin);
 	OnPinChanged.Broadcast(FIVS_PinChange_Added, Pin);
-	
+
 	return Pin;
 }
 
-void UFIVSScriptNode::ReconstructPins() {
-	TMap<FString, TArray<UFIVSPin*>> Connected;
-	for (UFIVSPin* Pin : Pins) {
-		TArray<UFIVSPin*>& Connections = Connected.FindOrAdd(Pin->GetName());
-		for (UFIVSPin* Connection : Pin->GetConnections()) Connections.Add(Connection);
-		Pin->RemoveAllConnections();
+UFIVSPin* UFIVSScriptNode::CreateDefaultPin(EFIVSPinType PinType, const FName& Name, const FText& InDisplayName, FFIVSPinDataType DataType) {
+	UFIVSGenericPin* Pin = CreateDefaultSubobject<UFIVSGenericPin>(Name);
+	Pin->ParentNode = this;
+	Pin->PinType = PinType;
+	Pin->Name = Name.ToString();
+	Pin->DisplayName = InDisplayName;
+	Pin->PinDataType = DataType;
+
+	Pins.Add(Pin);
+
+	return Pin;
+}
+
+void UFIVSScriptNode::DeletePin(UFIVSPin* Pin) {
+	if (Pins.Remove(Pin) > 0) {
 		OnPinChanged.Broadcast(FIVS_PinChange_Removed, Pin);
 	}
-	Pins.Empty();
-	Super::ReconstructPins();
-	for (TPair<FString, TArray<UFIVSPin*>> Connection : Connected) {
-		UFIVSPin* From = FindPinByName(Connection.Key);
-		if (From) for (UFIVSPin* To : Connection.Value) {
-			From->AddConnection(To);
-		}
+}
+
+void UFIVSScriptNode::DeletePins(TArrayView<UFIVSPin*> InPins) {
+	for (UFIVSPin* Pin : InPins) {
+		DeletePin(Pin);
 	}
 }

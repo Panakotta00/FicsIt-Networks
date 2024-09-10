@@ -16,18 +16,16 @@ protected:
 	/**
 	 * Creates a new pin with the given info, adds it to the pin list and returns the pin.
 	 */
-	UFIVSPin* CreatePin(EFIVSPinType PinType, const FString& Name, const FText& DisplayName, FFIVSPinDataType DataType = FFIVSPinDataType(FIN_ANY));
+	UFIVSPin* CreatePin(EFIVSPinType PinType, const FString& Name, const FText& InDisplayName, FFIVSPinDataType DataType = FFIVSPinDataType(FIN_ANY));
+	UFIVSPin* CreateDefaultPin(EFIVSPinType PinType, const FName& Name, const FText& InDisplayName, FFIVSPinDataType DataType = FFIVSPinDataType(FIN_ANY));
+
+	void DeletePin(UFIVSPin* Pin);
+	void DeletePins(TArrayView<UFIVSPin*> Pins);
 
 public:
 	// Begin UFIVSNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override { return Pins; }
-	virtual void ReconstructPins() override;
 	// End UFIVSNode
-	
-	/**
-	 * Returns the name of this node.
-	 */
-	virtual FString GetNodeName() const { return TEXT("Unnamed Node"); }
 	
 	/**
 	 * This function will be called ahead of the main node execution code and is mainly intended to decide

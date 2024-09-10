@@ -6,14 +6,8 @@
 #include "Editor/FIVSEdSignalSelection.h"
 #include "Reflection/FINReflection.h"
 
-void UFIVSNode_SignalEvent::InitPins() {
-	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
-	if (Signal) {
-		SenderOut = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Sender"), FText::FromString(TEXT("Sender")), FFIVSPinDataType(FIN_TRACE, Cast<UFINClass>(Signal->GetOuter())));
-		for (UFINProperty* Property : Signal->GetParameters()) {
-			CreatePin(FIVS_PIN_DATA_OUTPUT, Property->GetInternalName(), Property->GetDisplayName(), FFIVSPinDataType(Property));
-		}
-	}
+UFIVSNode_SignalEvent::UFIVSNode_SignalEvent() {
+	ExecOut = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
 }
 
 void UFIVSNode_SignalEvent::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
@@ -47,11 +41,6 @@ void UFIVSNode_SignalEvent::DeserializeNodeProperties(const FFIVSNodeProperties&
 	if (Properties.Properties.Contains(TEXT("Sender"))) Sender = UFIVSUtils::StringToNetworkTrace(Properties.Properties[TEXT("Sender")]);
 }
 
-FString UFIVSNode_SignalEvent::GetNodeName() const {
-	if (Signal)	return TEXT("Signal Event (") + Signal->GetDisplayName().ToString() + TEXT(")");
-	return TEXT("Signal Event");
-}
-
 TSharedPtr<SWidget> UFIVSNode_SignalEvent::CreateDetailsWidget(TScriptInterface<IFIVSScriptContext_Interface> Context) {
 	TArray<FFINNetworkTrace> Objs;
 	Context->GetRelevantObjects_Implementation(Objs);
@@ -61,8 +50,7 @@ TSharedPtr<SWidget> UFIVSNode_SignalEvent::CreateDetailsWidget(TScriptInterface<
 		SNew(SFIVSEdSignalSelection)
 		.InitSelection(Signal)
 		.OnSelectionChanged_Lambda([this](UFINSignal* InSignal) {
-			Signal = InSignal;
-			ReconstructPins();
+			SetSignal(Signal);
 		})
 	]
 	+SVerticalBox::Slot()
@@ -81,4 +69,21 @@ TArray<UFIVSPin*> UFIVSNode_SignalEvent::PreExecPin(UFIVSPin* ExecPin, FFIVSRunt
 
 UFIVSPin* UFIVSNode_SignalEvent::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	return ExecOut;
+}
+
+void UFIVSNode_SignalEvent::SetSignal(UFINSignal* InSignal) {
+	Signal = InSignal;
+
+	if (Signal)	DisplayName = FText::FromString(TEXT("Signal Event (") + Signal->GetDisplayName().ToString() + TEXT(")"));
+	else DisplayName = FText::FromString(TEXT("Signal Event"));
+
+	DeletePin(SenderOut);
+	DeletePins(Parameters);
+
+	if (Signal) {
+		SenderOut = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Sender"), FText::FromString(TEXT("Sender")), FFIVSPinDataType(FIN_TRACE, Cast<UFINClass>(Signal->GetOuter())));
+		for (UFINProperty* Property : Signal->GetParameters()) {
+			Parameters.Add(CreatePin(FIVS_PIN_DATA_OUTPUT, Property->GetInternalName(), Property->GetDisplayName(), FFIVSPinDataType(Property)));
+		}
+	}
 }
