@@ -212,9 +212,12 @@ FReply SFIVSEdGraphViewer::OnMouseWheel(const FGeometry& MyGeometry, const FPoin
 }
 
 FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
-	if (InKeyEvent.GetKey() == EKeys::Delete) {
+	if (InKeyEvent.GetKey() == EKeys::Home) {
+		Offset = FVector2D(0, 0);
+	} else if (InKeyEvent.GetKey() == EKeys::Delete) {
 		if (SelectionManager.GetSelection().Num() > 0) {
-			for (UFIVSNode* Node : SelectionManager.GetSelection()) {
+			TArray<UFIVSNode*> Selection = SelectionManager.GetSelection();
+			for (UFIVSNode* Node : Selection) {
 				Graph->RemoveNode(Node);
 			}
 		} else if (ConnectionDrawer && ConnectionDrawer->ConnectionUnderMouse.Key) {
