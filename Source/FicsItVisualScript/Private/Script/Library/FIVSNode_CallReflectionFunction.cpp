@@ -64,7 +64,6 @@ UFIVSPin* UFIVSNode_CallReflectionFunction::ExecPin(UFIVSPin* ExecPin, FFIVSRunt
 }
 
 void UFIVSNode_CallReflectionFunction::SetFunction(UFINFunction* InFunction) {
-	check(ExecIn == nullptr);
 	Function = InFunction;
 
 	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
