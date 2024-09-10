@@ -1,12 +1,14 @@
 ﻿#pragma once
 
-#include "SlateBasics.h"
+#include "CoreMinimal.h"
+#include "Slate.h"
 #include "Script/FIVSNode.h"
-#include "Widgets/Input/SSearchBox.h"
+#include "Script/FIVSPin.h"
 
+class UFIVSGraph;
 class UFIVSScriptNode;
-
 struct FFIVSEdActionSelectionAction;
+
 DECLARE_DELEGATE_OneParam(FFINScriptActionSelectionOnActionExecuted, const TSharedPtr<FFIVSEdActionSelectionAction>&);
 
 struct FFINScriptNodeCreationContext {

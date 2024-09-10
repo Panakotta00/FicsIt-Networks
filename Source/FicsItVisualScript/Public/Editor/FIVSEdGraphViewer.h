@@ -2,11 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "FIVSEdActionSelection.h"
-#include "FIVSEdNodeViewer.h"
-#include "SlateBasics.h"
+#include "FIVSEdGraphViewerStyle.h"
 #include "Script/FIVSGraph.h"
 
+struct FFIVSEdActionSelectionAction;
+class SFIVSEdActionSelection;
+class SFIVSEdPinViewer;
 class SFIVSEdGraphViewer;
+class SFIVSEdNodeViewer;
 
 struct FFIVSEdConnectionDrawer {
 public:

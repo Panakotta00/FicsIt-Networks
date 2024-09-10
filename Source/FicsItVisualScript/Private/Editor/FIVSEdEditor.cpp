@@ -6,6 +6,8 @@
 #include "Script/FIVSNode_Branch.h"
 #include "Script/FIVSNode_OnTick.h"
 #include "Script/FIVSNode_UFunctionCall.h"
+#include "Widgets/Layout/SGridPanel.h"
+#include "Widgets/Layout/SSpacer.h"
 
 void UFIVSEdEditor::ReleaseSlateResources(bool bReleaseChildren) {
 	Super::ReleaseSlateResources(bReleaseChildren);

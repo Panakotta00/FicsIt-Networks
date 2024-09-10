@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
 #include "FIVSEdGraphViewerStyle.h"
 #include "SlateBasics.h"
 
@@ -141,14 +142,17 @@ class SFIVSEdFunctionNodeViewer : public SFIVSEdNodeViewer {
 
 	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
 
-public:
-	virtual void ReconstructPins() override;
-	
+protected:
 	TSharedPtr<SVerticalBox> InputPinBox;
 	TSharedPtr<SVerticalBox> OutputPinBox;
+
+	virtual bool ShowName() const;
+
+public:
+	virtual void ReconstructPins() override;
 };
 
-class SFIVSEdOperatorNodeViewer : public SFIVSEdNodeViewer {
+class SFIVSEdOperatorNodeViewer : public SFIVSEdFunctionNodeViewer {
 	SLATE_BEGIN_ARGS(SFIVSEdOperatorNodeViewer) :
 		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
@@ -157,11 +161,8 @@ class SFIVSEdOperatorNodeViewer : public SFIVSEdNodeViewer {
 
 	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
 
-public:
-	virtual void ReconstructPins() override;
-	
-	TSharedPtr<SVerticalBox> InputPinBox;
-	TSharedPtr<SVerticalBox> OutputPinBox;
+protected:
+	virtual bool ShowName() const override;
 };
 
 class FFIVSEdNodeDragDrop : public FDragDropOperation {
@@ -176,4 +177,8 @@ public:
 	
 private:
 	TSharedRef<SFIVSEdNodeViewer> NodeViewer;
+	TOptional<FVector2D> PreviousGraphPos;
+	FVector2D Delta;
+	TArray<UFIVSNode*> Nodes;
+	TArray<FVector2D> NodeStartPos;
 };

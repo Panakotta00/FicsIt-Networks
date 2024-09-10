@@ -46,9 +46,6 @@ struct FFIVSEdNodeStyle : public FSlateWidgetStyle {
 	FTextBlockStyle HeaderTextStyle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
-	FTextBlockStyle OperatorTextStyle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FSlateBrush Background;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
@@ -56,6 +53,12 @@ struct FFIVSEdNodeStyle : public FSlateWidgetStyle {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FVector2D CenterSpace;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FTextBlockStyle OperatorTextStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FMargin OperatorPadding;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
     FFIVSEdPinStyle ExecInputPinStyle;

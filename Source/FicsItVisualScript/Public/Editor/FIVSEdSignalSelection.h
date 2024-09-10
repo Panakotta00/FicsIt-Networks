@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "FIVSEdSearchListView.h"
-#include "Reflection/FINClass.h"
-#include "Reflection/FINReflection.h"
-#include "Reflection/FINSignal.h"
+#include "CoreMinimal.h"
+#include "Slate.h"
+
+class UFINSignal;
 
 class SFIVSEdSignalSelection : public SCompoundWidget {
 	DECLARE_DELEGATE_OneParam(FSelectionChanged, UFINSignal*)
@@ -13,71 +13,18 @@ class SFIVSEdSignalSelection : public SCompoundWidget {
 	SLATE_ARGUMENT(UFINSignal*, InitSelection)
 	SLATE_END_ARGS()
 
+	void Construct(const FArguments& InArgs);
+
+private:
 	TSharedPtr<SBox> SignalWidgetHolder;
 	FSelectionChanged OnSelectionChanged;
-	
+
 public:
-	void Construct(const FArguments& InArgs) {
-		OnSelectionChanged = InArgs._OnSelectionChanged;
-		
-		ChildSlot[
-			SNew(SBorder)
-			.BorderImage(FCoreStyle::Get().GetBrush("Border"))
-			.Content()[
-				SAssignNew(SignalWidgetHolder, SBox)
-			]
-		];
+	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
-		SelectObject(InArgs._InitSelection);
-	}
+	void SelectObject(UFINSignal* Signal);
 
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override {
-		TSharedRef<SWidget> MenuWidget = SNew(SBox)
-		.WidthOverride(MyGeometry.GetAbsoluteSize().X)
-		.Content()[
-			CreateSignalSearch()
-		];
-		TSharedPtr<IMenu> Menu = FSlateApplication::Get().PushMenu(SharedThis(this), FWidgetPath(), MenuWidget, (FVector2D)MyGeometry.AbsolutePosition, FPopupTransitionEffect::None);
-		return FReply::Handled();
-	}
+	TSharedRef<SWidget> CreateSmallSignalWidget(UFINSignal* InSignal);
 
-	void SelectObject(UFINSignal* Signal) {
-		SignalWidgetHolder->SetContent(CreateSmallSignalWidget(Signal));
-		OnSelectionChanged.ExecuteIfBound(Signal);
-	}
-
-	TSharedRef<SWidget> CreateSmallSignalWidget(UFINSignal* InSignal) {
-		if (InSignal)
-			return SNew(SHorizontalBox)
-			+SHorizontalBox::Slot()[
-				SNew(STextBlock)
-				.Text(InSignal->GetDisplayName())
-			];
-		else
-			return SNew(STextBlock)
-			.Text(FText::FromString(TEXT("(None)")));
-	}
-
-	TSharedRef<SWidget> CreateSignalSearch() {
-		TArray<UFINSignal*> Elements;
-		for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
-			for (UFINSignal* Signal : Class.Value->GetSignals(false)) {
-				Elements.Add(Signal);
-			}
-		}
-		Elements.Add(nullptr);
-
-		return SNew(SFIVSEdSearchListView<UFINSignal*>, Elements)
-		.OnGetSearchableText_Lambda([](UFINSignal* InSignal) -> FString {
-			if (!InSignal) return TEXT("None");
-			return InSignal->GetDisplayName().ToString() + TEXT(" ") + Cast<UFINClass>(InSignal->GetOuter())->GetDisplayName().ToString();
-		})
-		.OnGetElementWidget_Lambda([this](UFINSignal* InSignal) {
-			return CreateSmallSignalWidget(InSignal);
-		})
-		.OnCommited_Lambda([this](UFINSignal* InSignal) {
-			SelectObject(InSignal);
-			FSlateApplication::Get().DismissAllMenus();
-		});
-	}
+	TSharedRef<SWidget> CreateSignalSearch();
 };

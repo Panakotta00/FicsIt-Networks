@@ -1,6 +1,8 @@
 ﻿#include "Editor/FIVSEdGraphViewer.h"
 
 #include "FicsItVisualScriptModule.h"
+#include "Editor/FIVSEdActionSelection.h"
+#include "Editor/FIVSEdNodeViewer.h"
 #include "Script/FIVSGraph.h"
 #include "Reflection/FINReflection.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
@@ -443,31 +445,34 @@ void SFIVSEdGraphViewer::OnSelectionChanged(UFIVSNode* InNode, bool bIsSelected)
 }
 
 void SFIVSEdGraphViewer::DrawGrid(uint32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, const FWidgetStyle& InWidgetStyle) const {
-	FVector2D Distance = FVector2D(10,10);
-	FVector2D Start = Offset / Distance;
-	FVector2D RenderOffset = FVector2D(FMath::Fractional(Start.X) * Distance.X, FMath::Fractional(Start.Y) * Distance.Y);
-	int GridOffsetX = FMath::FloorToInt(Start.X) * FMath::RoundToInt(Distance.X);
-	int GridOffsetY = FMath::FloorToInt(Start.Y) * FMath::RoundToInt(Distance.Y);
-	Distance *= GetZoom();
-	Start *= GetZoom();
-	RenderOffset *= GetZoom();
-	for (float x = 0; x <= AllottedGeometry.GetLocalSize().X; x += Distance.X) {
-		bool bIsMajor = (FMath::RoundToInt(x/GetZoom()) - GridOffsetX) % 100 == 0;
+	FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+
+	FVector2D GraphMin = LocalToGraph({0.0,0.0});
+	FVector2D GraphMax = LocalToGraph(LocalSize);
+	FVector2D VisibleGraphSize = GraphMax - GraphMin;
+
+	double GraphStep = 10;
+	GraphStep = FMath::Pow(10, FMath::Floor(FMath::LogX(10.0, VisibleGraphSize.X / 10)));
+	GraphStep = FMath::Min(GraphStep, FMath::Pow(10, FMath::Floor(FMath::LogX(10.0, VisibleGraphSize.Y / 10))));
+
+
+	for (float x = FMath::RoundUpToClosestMultiple(GraphMin.X, GraphStep); x <= GraphMax.X; x += GraphStep) {
+		bool bIsMajor = FMath::IsNearlyZero(FMath::Fmod(x, GraphStep * 10));
 		FSlateDrawElement::MakeLines(OutDrawElements,
 			LayerId,
 			AllottedGeometry.ToPaintGeometry(),
-			{FVector2D(x + RenderOffset.X, 0), FVector2D(x + RenderOffset.X, AllottedGeometry.GetLocalSize().Y)},
+			{GraphToLocal({x, GraphMin.Y}), GraphToLocal({x, GraphMax.Y})},
 			ESlateDrawEffect::None,
 			(bIsMajor ? Style->GridMajorColor : Style->GridMinorColor).GetSpecifiedColor(),
 			true,
 			bIsMajor ? 1.0 : 0.05);
 	}
-	for (float y = 0; y <= AllottedGeometry.GetLocalSize().Y; y += Distance.Y) {
-		bool bIsMajor = (FMath::RoundToInt(y/GetZoom()) - GridOffsetY) % 100 == 0;
+	for (float y = FMath::RoundUpToClosestMultiple(GraphMin.Y, GraphStep); y <= GraphMax.Y; y += GraphStep) {
+		bool bIsMajor = FMath::IsNearlyZero(FMath::Fmod(y, GraphStep * 10));
 		FSlateDrawElement::MakeLines(OutDrawElements,
 			LayerId,
 			AllottedGeometry.ToPaintGeometry(),
-			{FVector2D(0, y + RenderOffset.Y), FVector2D(AllottedGeometry.GetLocalSize().X, y + RenderOffset.Y)},
+			{GraphToLocal({GraphMin.X, y}), GraphToLocal({GraphMax.X, y})},
 			ESlateDrawEffect::None,
 			(bIsMajor ? Style->GridMajorColor : Style->GridMinorColor).GetSpecifiedColor(),
 			true,

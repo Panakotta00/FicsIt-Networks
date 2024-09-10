@@ -1,13 +1,15 @@
 ﻿#pragma once
 
-#include "FIVSEdGraphViewer.h"
+#include "CoreMinimal.h"
 #include "FIVSEdGraphViewerStyle.h"
+#include "Brushes/SlateColorBrush.h"
 #include "Components/Widget.h"
-#include "Script/FIVSScriptContext.h"
 #include "Reflection/FINReflection.h"
+#include "Script/FIVSScriptContext.h"
 #include "FIVSEdEditor.generated.h"
 
 class UFIVSGraph;
+class SFIVSEdGraphViewer;
 
 UCLASS()
 class UFIVSEdEditor : public UWidget {

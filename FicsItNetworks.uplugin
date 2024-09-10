@@ -37,11 +37,6 @@
 			"LoadingPhase": "PostDefault"
 		},
 		{
-			"Name": "FicsItVisualScriptEditor",
-			"Type": "Runtime",
-			"LoadingPhase": "PostDefault"
-		},
-		{
 			"Name": "FicsItNetworksDocumentation",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"

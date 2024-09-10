@@ -65,7 +65,7 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIV
 				});
 			break;
 			case FIN_INT:
-				Literal = SNew(SNumericEntryBox<int>)
+				InlineLiteral = SNew(SNumericEntryBox<int>)
 				.OnValueChanged_Lambda([this](int Value) {
 					Pin->SetLiteral((FINInt)Value);
 				})
@@ -74,7 +74,7 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIV
 				});
 			break;
 			case FIN_FLOAT:
-				Literal = SNew(SNumericEntryBox<double>)
+				InlineLiteral = SNew(SNumericEntryBox<double>)
 				.OnValueChanged_Lambda([this](double Value) {
 					Pin->SetLiteral((FINFloat)Value);
 				})
@@ -276,7 +276,7 @@ UFIVSNode* SFIVSEdNodeViewer::GetNode() const {
 }
 
 FVector2D SFIVSEdNodeViewer::GetPosition() const {
-	return Node->Pos;
+	return Node->Pos - Style->OutlinePadding.GetTopLeft();
 }
 
 const TArray<TSharedRef<SFIVSEdPinViewer>>& SFIVSEdNodeViewer::GetPinWidgets() const {
@@ -319,7 +319,11 @@ void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, const TShare
                 SNew(STextBlock)
 	            .TextStyle(&Style->HeaderTextStyle)
                 .Text_Lambda([this]() {
-                    return FText::FromString(Cast<UFIVSScriptNode>(GetNode())->GetNodeName());
+                	if (auto node = Cast<UFIVSScriptNode>(GetNode())) {
+                		return FText::FromString(node->GetNodeName());
+                	} else {
+                		return FText::FromString("Unnamed");
+                	}
                 })
             ]
         ]
@@ -345,6 +349,10 @@ void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, const TShare
 	ReconstructPins();
 }
 
+bool SFIVSEdFunctionNodeViewer::ShowName() const {
+	return true;
+}
+
 void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 	InputPinBox->ClearChildren(); 
 	OutputPinBox->ClearChildren();
@@ -354,7 +362,8 @@ void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
 		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
 			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
-				.Style(Style);
+				.Style(Style)
+				.ShowName(ShowName());
 			PinWidgets.Add(PinWidget);
 			PinToWidget.Add(Pin, PinWidget);
 			InputPinBox->AddSlot().AutoHeight().HAlign(HAlign_Left)[
@@ -366,7 +375,8 @@ void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 			];
 		} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
 			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
-				.Style(Style);
+				.Style(Style)
+				.ShowName(ShowName());
 			PinWidgets.Add(PinWidget);
 			PinToWidget.Add(Pin, PinWidget);
 			OutputPinBox->AddSlot().AutoHeight().HAlign(HAlign_Right)[
@@ -381,16 +391,16 @@ void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 }
 
 void SFIVSEdOperatorNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {
-	SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
+	TSharedRef<SBorder> content = SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
 
-	ChildSlot[
+	content->SetContent(
 		SNew(SBorder)
 		.BorderImage(&Style->Background)
 		.Padding(Style->Padding)
 		.Content()[
 			SNew(SOverlay)
 			+SOverlay::Slot()
-			.Padding(10)[
+			.Padding(Style->OperatorPadding)[
 				SNew(SScaleBox)
 				.Stretch(EStretch::ScaleToFit)
 				.Content()[
@@ -401,61 +411,48 @@ void SFIVSEdOperatorNodeViewer::Construct(const FArguments& InArgs, const TShare
 			]
 			+SOverlay::Slot()[
 				SNew(SGridPanel)
-				+SGridPanel::Slot(0, 1)[
+				+SGridPanel::Slot(0, 1).HAlign(HAlign_Left).VAlign(VAlign_Center)[
 					SAssignNew(InputPinBox, SVerticalBox)
 				]
-				+SGridPanel::Slot(1, 1)[
+				+SGridPanel::Slot(1, 1).HAlign(HAlign_Center)[
 					SNew(SSpacer).Size(Style->CenterSpace)
 				]
-				+SGridPanel::Slot(2, 1)[
+				+SGridPanel::Slot(2, 1).HAlign(HAlign_Right).VAlign(VAlign_Center)[
 					SAssignNew(OutputPinBox, SVerticalBox)
 				]
 			]
 		]
-	];
+	);
 
 	ReconstructPins();
 }
 
-void SFIVSEdOperatorNodeViewer::ReconstructPins() {
-	InputPinBox->ClearChildren();
-	OutputPinBox->ClearChildren();
-	PinWidgets.Empty();
-	PinToWidget.Empty();
-	
-	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
-		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
-			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
-			.Style(Style)
-			.ShowName(false);
-			PinWidgets.Add(PinWidget);
-			PinToWidget.Add(Pin, PinWidget);
-			InputPinBox->AddSlot()
-			.VAlign(VAlign_Center)[
-				PinWidget
-			];
-		} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
-			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
-			.Style(Style)
-			.ShowName(false);
-			PinWidgets.Add(PinWidget);
-			PinToWidget.Add(Pin, PinWidget);
-			OutputPinBox->AddSlot()
-			.VAlign(VAlign_Center)[
-				PinWidget
-			];
-		}
+bool SFIVSEdOperatorNodeViewer::ShowName() const {
+	return false;
+}
+
+FFIVSEdNodeDragDrop::FFIVSEdNodeDragDrop(TSharedRef<SFIVSEdNodeViewer> InNodeViewer) : NodeViewer(InNodeViewer) {
+	TSharedPtr<SFIVSEdGraphViewer> GraphViewer = NodeViewer->GetGraphViewer();
+	Nodes = GraphViewer->SelectionManager.GetSelection();
+	for (UFIVSNode* node : Nodes) {
+		NodeStartPos.Add(node->Pos);
 	}
 }
 
-FFIVSEdNodeDragDrop::FFIVSEdNodeDragDrop(TSharedRef<SFIVSEdNodeViewer> InNodeViewer) : NodeViewer(InNodeViewer) {}
-
 void FFIVSEdNodeDragDrop::OnDragged(const FDragDropEvent& DragDropEvent) {
 	TSharedPtr<SFIVSEdGraphViewer> GraphViewer = NodeViewer->GetGraphViewer();
-	FVector2D StartPos = GraphViewer->LocalToGraph(GraphViewer->GetCachedGeometry().AbsoluteToLocal(DragDropEvent.GetLastScreenSpacePosition()));
-	FVector2D EndPos = GraphViewer->LocalToGraph(GraphViewer->GetCachedGeometry().AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition()));
-	FVector2D Offset = EndPos - StartPos;
-	for (UFIVSNode* Node : GraphViewer->SelectionManager.GetSelection()) {
-		Node->Pos += Offset;
+	FVector2D graphPos = GraphViewer->LocalToGraph(GraphViewer->GetCachedGeometry().AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition()));
+	if (PreviousGraphPos) {
+		Delta += graphPos - *PreviousGraphPos;
+
+		for (int32 i = 0; i < Nodes.Num(); ++i) {
+			UFIVSNode* Node = Nodes[i];
+			FVector2D startPos = NodeStartPos[i];
+			Node->Pos = startPos + Delta;
+			if (!DragDropEvent.IsShiftDown()) {
+				Node->Pos = (Node->Pos / 10).RoundToVector() * 10;
+			}
+		}
 	}
+	PreviousGraphPos = graphPos;
  }

@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "SlateBasics.h"
+#include "CoreMinimal.h"
 #include "FIVSEdTextSearch.h"
+#include "SlateBasics.h"
 #include "Widgets/Input/SSearchBox.h"
 
 /**
@@ -32,29 +33,29 @@ private:
 
 	const static inline FSlateColorBrush DefaultBackgroundBrush = FSlateColorBrush(FColor::FromHex(TEXT("0F0F0F")));
 
-	TArray<T> Elements; 
+	TArray<T> Elements;
 	TArray<TSharedPtr<FEntry>> FilteredEntries;
 	TAttribute<const FSlateBrush*> BackgroundBrush;
 
 	FFIVSEdTextSearch Search;
 	TSharedPtr<SListView<TSharedPtr<FEntry>>> ListView;
 	TSharedPtr<SSearchBox> SearchBox;
-	
+
 public:
 	FGetSearchableText OnGetSearchableText;
 	FGetElementWidget OnGetElementWidget;
 	FSelectionChanged OnSelectionChanged;
 	FCommited OnCommited;
-	
+
 	void Construct(const FArguments& InArgs, TArray<T> InElements) {
 		Elements = InElements;
-		
+
 		OnGetSearchableText = InArgs._OnGetSearchableText;
 		OnGetElementWidget = InArgs._OnGetElementWidget;
 		OnSelectionChanged = InArgs._OnSelectionChanged;
 		OnCommited = InArgs._OnCommited;
 		BackgroundBrush = InArgs._BackgroundBrush;
-		
+
 		ChildSlot[
 			SNew(SBorder)
 			.BorderImage(BackgroundBrush)
@@ -118,7 +119,7 @@ public:
 		}
 		return FReply::Unhandled();
 	}
-	
+
 	void FilterEntries() {
 		FilteredEntries.Empty();
 		TSharedPtr<FEntry> MostRelevantEntry;

@@ -1,5 +1,7 @@
 ﻿#include "Editor/FIVSEdActionSelection.h"
 
+#include "Script/FIVSGraph.h"
+
 void FFIVSEdActionSelectionTextFilter::CallFilterValid(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entries, TFunction<void(FFIVSEdActionSelectionFilter*, const TSharedPtr<FFIVSEdActionSelectionEntry>&, bool)> OnFiltered) {
 	OnFiltered(this, Entries, true);
 	for (const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry : Entries->GetChildren()) {
