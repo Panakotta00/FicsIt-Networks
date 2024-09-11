@@ -184,6 +184,7 @@ public:
 	virtual bool SupportsKeyboardFocus() const override;
 	virtual FChildren* GetChildren() override;
 	virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
+	virtual float GetRelativeLayoutScale(const int32 ChildIndex, float LayoutScaleMultiplier) const override;
 	// End SWidget
 
 	void BeginDragPin(TSharedRef<SFIVSEdPinViewer> PinViewer) {

@@ -86,6 +86,7 @@ void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 }
 
 SFIVSEdGraphViewer::SFIVSEdGraphViewer() : Children(this) {
+	bHasRelativeLayoutScale = true;
 	ConnectionDrawer = MakeShared<FFIVSEdConnectionDrawer>();
 	SetCanTick(true);
 }
@@ -224,15 +225,31 @@ FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEven
 			ConnectionDrawer->ConnectionUnderMouse.Key->GetPin()->RemoveConnection(ConnectionDrawer->ConnectionUnderMouse.Value->GetPin());
 		}
 	} else if (InKeyEvent.GetKey() == EKeys::C && InKeyEvent.IsControlDown()) {
-		FWindowsPlatformApplicationMisc::ClipboardCopy(*UFIVSSerailizationUtils::FIVS_SerializePartial(SelectionManager.GetSelection(), true));
+		FString Serialized = UFIVSSerailizationUtils::FIVS_SerializePartial(SelectionManager.GetSelection(), true);
+
+		/*TArray<uint8> Data;
+		FMemoryWriter Archive(Data);
+		FFIVSGraphProxy Proxy(Archive);
+		//FJsonArchiveOutputFormatter Formatter(Proxy);
+		//FStructuredArchive StructuredArchive(Formatter);
+		//FStructuredArchiveSlot Slot = StructuredArchive.Open();
+		//Graph->Serialize(Slot.EnterRecord());
+		//StructuredArchive.Close();
+		Graph->Serialize(Proxy);
+		Serialized = UTF8_TO_TCHAR(Data.GetData());*/
+
+		FPlatformApplicationMisc::ClipboardCopy(*Serialized);
 	} else if (InKeyEvent.GetKey() == EKeys::V && InKeyEvent.IsControlDown()) {
 		FString Paste;
-		FWindowsPlatformApplicationMisc::ClipboardPaste(Paste);
+		FPlatformApplicationMisc::ClipboardPaste(Paste);
+
 		UFIVSSerailizationUtils::FIVS_DeserializeGraph(Graph, Paste, LocalToGraph(MyGeometry.AbsoluteToLocal(FSlateApplication::Get().GetCursorPos())));
 	}
 
 	return SPanel::OnKeyDown(MyGeometry, InKeyEvent);
 }
+UE_ENABLE_OPTIMIZATION_SHIP
+
 FReply SFIVSEdGraphViewer::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	return SPanel::OnKeyUp(MyGeometry, InKeyEvent);
 }
@@ -289,8 +306,12 @@ FChildren* SFIVSEdGraphViewer::GetChildren() {
 void SFIVSEdGraphViewer::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const {
 	for (int32 NodeIndex = 0; NodeIndex < Children.Num(); ++NodeIndex) {
 		const TSharedRef<SFIVSEdNodeViewer>& Node = Children[NodeIndex];
-		ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Node, Node->GetPosition() + Offset, Node->GetDesiredSize(), GetZoom()));
+		ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(Node, FLayoutGeometry(FSlateLayoutTransform(GetZoom(), GraphToLocal(Node->GetPosition())), Node->GetDesiredSize())));
 	}
+}
+
+float SFIVSEdGraphViewer::GetRelativeLayoutScale(const int32 ChildIndex, float LayoutScaleMultiplier) const {
+	return GetZoom();
 }
 
 #pragma optimize("", off)
