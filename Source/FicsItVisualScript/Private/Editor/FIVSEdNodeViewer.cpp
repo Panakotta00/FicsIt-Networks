@@ -130,15 +130,26 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIV
 				})
 			];
 		}
+
+		auto visibility = TAttribute<EVisibility>::CreateLambda([this]() {
+			if (Pin->GetConnections().Num() > 0) {
+				return EVisibility::Collapsed;
+			} else {
+				return EVisibility::Visible;
+			}
+		});
+
 		if (InlineLiteral) {
 			(*InlineLiteralSlot)[
 				InlineLiteral.ToSharedRef()
 			];
+			InlineLiteral->SetVisibility(visibility);
 		}
 		if (Literal) {
 			(*LiteralSlot)[
 				Literal.ToSharedRef()
 			];
+			Literal->SetVisibility(visibility);
 		}
 	}
 
