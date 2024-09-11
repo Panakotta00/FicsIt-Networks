@@ -535,13 +535,16 @@ void SFIVSEdGraphViewer::DrawGrid(uint32 LayerId, const FGeometry& AllottedGeome
 	FVector2D GraphMax = LocalToGraph(LocalSize);
 	FVector2D VisibleGraphSize = GraphMax - GraphMin;
 
-	double GraphStep = 10;
-	GraphStep = FMath::Pow(10, FMath::Floor(FMath::LogX(10.0, VisibleGraphSize.X / 10)));
-	GraphStep = FMath::Min(GraphStep, FMath::Pow(10, FMath::Floor(FMath::LogX(10.0, VisibleGraphSize.Y / 10))));
+	double minGraphStep = 10;
+	double base = 5;
+	double majorStep = 10;
+	double GraphStep;
+	GraphStep = FMath::Pow(base, FMath::Floor(FMath::LogX(base, VisibleGraphSize.X / minGraphStep)));
+	GraphStep = FMath::Min(GraphStep, FMath::Pow(base, FMath::Floor(FMath::LogX(base, VisibleGraphSize.Y / minGraphStep))));
 
 
 	for (float x = FMath::RoundUpToClosestMultiple(GraphMin.X, GraphStep); x <= GraphMax.X; x += GraphStep) {
-		bool bIsMajor = FMath::IsNearlyZero(FMath::Fmod(x, GraphStep * 10));
+		bool bIsMajor = FMath::IsNearlyZero(FMath::Fmod(x, GraphStep * majorStep));
 		FSlateDrawElement::MakeLines(OutDrawElements,
 			LayerId,
 			AllottedGeometry.ToPaintGeometry(),
@@ -552,7 +555,7 @@ void SFIVSEdGraphViewer::DrawGrid(uint32 LayerId, const FGeometry& AllottedGeome
 			bIsMajor ? 1.0 : 0.05);
 	}
 	for (float y = FMath::RoundUpToClosestMultiple(GraphMin.Y, GraphStep); y <= GraphMax.Y; y += GraphStep) {
-		bool bIsMajor = FMath::IsNearlyZero(FMath::Fmod(y, GraphStep * 10));
+		bool bIsMajor = FMath::IsNearlyZero(FMath::Fmod(y, GraphStep * majorStep));
 		FSlateDrawElement::MakeLines(OutDrawElements,
 			LayerId,
 			AllottedGeometry.ToPaintGeometry(),
