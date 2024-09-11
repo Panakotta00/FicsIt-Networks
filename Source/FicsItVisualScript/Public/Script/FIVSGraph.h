@@ -23,7 +23,7 @@ UCLASS(BlueprintType)
 class UFIVSGraph : public UObject {
 	GENERATED_BODY()
 private:
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	TArray<UFIVSNode*> Nodes;
 
 	TMap<UFIVSNode*, FDelegateHandle> NodeDelegateHandles;

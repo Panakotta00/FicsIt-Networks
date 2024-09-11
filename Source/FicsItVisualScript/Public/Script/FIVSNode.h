@@ -71,10 +71,10 @@ class UFIVSNode : public UObject {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	FVector2D Pos;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	FText DisplayName = FText::FromString(TEXT("Unnamed"));
 
 	FFINScriptGraphPinChanged OnPinChanged;
@@ -154,7 +154,7 @@ class UFIVSRerouteNode : public UFIVSNode {
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(SaveGame)
+	UPROPERTY(Instanced)
 	UFIVSPin* Pin = nullptr;
 
 public:
