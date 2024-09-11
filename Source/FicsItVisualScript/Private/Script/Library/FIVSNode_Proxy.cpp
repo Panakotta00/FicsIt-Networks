@@ -28,17 +28,18 @@ void UFIVSNode_Proxy::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	);
 }
 
-UFIVSPin* UFIVSNode_Proxy::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_Proxy::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	FString Addr = Context.GetValue(AddrIn)->GetString();
 	FGuid Guid;
 	if (!FGuid::Parse(Addr, Guid)) {
 		Context.GetKernelContext()->Crash(MakeShared<FFINKernelCrash>(TEXT("Address not valid!")));
-		return nullptr;
+		return {};
 	}
 	FFINNetworkTrace Component = Context.GetKernelContext()->GetNetwork()->GetComponentByID(Guid);
 	if (!Component.IsValid()) {
 		Context.GetKernelContext()->Crash(MakeShared<FFINKernelCrash>(TEXT("Component not found!")));
+		return {};
 	}
 	Context.SetValue(CompOut, Component);
-	return ExecOut;
+	return {ExecOut};
 }

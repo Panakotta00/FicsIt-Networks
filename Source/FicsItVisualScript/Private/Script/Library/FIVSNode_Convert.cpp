@@ -42,16 +42,17 @@ void UFIVSNode_Convert::SerializeNodeProperties(FFIVSNodeProperties& Properties)
 void UFIVSNode_Convert::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
 	FDefaultValueHelper::ParseInt(Properties.Properties[TEXT("From")], (int&)FromType);
 	FDefaultValueHelper::ParseInt(Properties.Properties[TEXT("To")], (int&)ToType);
+	SetConversion(FromType, ToType);
 }
 
 TArray<UFIVSPin*> UFIVSNode_Convert::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	return TArray<UFIVSPin*>{Input};
 }
 
-UFIVSPin* UFIVSNode_Convert::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_Convert::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	FFINAnyNetworkValue InputVal = *Context.GetValue(Input);
 	Context.SetValue(Output, FINCastNetworkValue(InputVal, ToType));
-	return nullptr;
+	return {};
 }
 
 void UFIVSNode_Convert::SetConversion(EFINNetworkValueType InFromType, EFINNetworkValueType InToType) {

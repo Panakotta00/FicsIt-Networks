@@ -27,14 +27,14 @@ void UFIVSNode_DownCast::SerializeNodeProperties(FFIVSNodeProperties& Properties
 }
 
 void UFIVSNode_DownCast::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	ToClass = Cast<UFINClass>(FSoftObjectPath(Properties.Properties[TEXT("ToClass")]).TryLoad());
+	SetClass(Cast<UFINClass>(FSoftObjectPath(Properties.Properties[TEXT("ToClass")]).TryLoad()));
 }
 
 TArray<UFIVSPin*> UFIVSNode_DownCast::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	return {DataInput};
 }
 
-UFIVSPin* UFIVSNode_DownCast::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_DownCast::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	FFIVSValue Value = Context.GetValue(DataInput);
 	FFINNetworkTrace Trace = Value->GetTrace();
 	UObject* Obj = *Trace;
@@ -43,7 +43,7 @@ UFIVSPin* UFIVSNode_DownCast::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Co
 		Context.SetValue(SuccessOutput, bSuccess);
 		Context.SetValue(DataOutput, Value);
 	}
-	return nullptr;
+	return {};
 }
 
 void UFIVSNode_DownCast::SetClass(UFINClass* InToClass) {

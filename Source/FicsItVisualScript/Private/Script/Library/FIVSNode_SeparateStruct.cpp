@@ -51,7 +51,7 @@ TArray<UFIVSPin*> UFIVSNode_SeparateStruct::PreExecPin(UFIVSPin* ExecPin, FFIVSR
 	return ValidatePins;
 }
 
-UFIVSPin* UFIVSNode_SeparateStruct::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_SeparateStruct::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	if (bBreak) {
 		FFINDynamicStructHolder StructObj = Context.GetValue(InputPins[TEXT("Struct")])->GetStruct();
 		FFINExecutionContext Ctx(StructObj.GetData());
@@ -70,7 +70,7 @@ UFIVSPin* UFIVSNode_SeparateStruct::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeConte
 		}
 		Context.SetValue(OutputPins[TEXT("Struct")], StructObj);
 	}
-	return nullptr;
+	return {};
 }
 
 void UFIVSNode_SeparateStruct::SetStruct(UFINStruct* InStruct) {

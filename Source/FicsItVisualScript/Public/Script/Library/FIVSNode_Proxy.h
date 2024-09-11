@@ -29,6 +29,6 @@ public:
 		return TArray<UFIVSPin*>{AddrIn};
 	}
 
-	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
+	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSGenericNode
 };

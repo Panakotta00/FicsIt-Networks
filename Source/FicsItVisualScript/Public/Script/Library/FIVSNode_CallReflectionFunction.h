@@ -35,7 +35,7 @@ public:
 	// Begin UFIVSScriptNode
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 
-	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
+	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
 
 	void SetFunction(UFINFunction* InFunction);

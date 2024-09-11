@@ -19,6 +19,6 @@ public:
 	// End UFIVSNodes
 	
 	// Begin UFIVSGenericNode
-	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
+	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
 };

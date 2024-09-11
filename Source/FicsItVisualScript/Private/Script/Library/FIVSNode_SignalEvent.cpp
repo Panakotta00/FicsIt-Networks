@@ -67,8 +67,8 @@ TArray<UFIVSPin*> UFIVSNode_SignalEvent::PreExecPin(UFIVSPin* ExecPin, FFIVSRunt
 	return Super::PreExecPin(ExecPin, Context);
 }
 
-UFIVSPin* UFIVSNode_SignalEvent::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	return ExecOut;
+TArray<UFIVSPin*> UFIVSNode_SignalEvent::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+	return {ExecOut};
 }
 
 void UFIVSNode_SignalEvent::SetSignal(UFINSignal* InSignal) {

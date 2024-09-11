@@ -30,7 +30,7 @@ public:
 	// Begin UFIVSGenericNode
 	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 
-	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
+	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSGenericNode
 
 	void SetProperty(UFINProperty* InProperty);

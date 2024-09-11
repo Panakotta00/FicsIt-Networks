@@ -71,8 +71,7 @@ void UFIVSNode_UFunctionCall::SerializeNodeProperties(FFIVSNodeProperties& Prope
 }
 
 void UFIVSNode_UFunctionCall::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	Function = Cast<UFunction>(FSoftObjectPath(Properties.Properties[TEXT("Function")]).TryLoad());
-	Symbol = Properties.Properties[TEXT("Symbol")];
+	SetFunction(Cast<UFunction>(FSoftObjectPath(Properties.Properties[TEXT("Function")]).TryLoad()), Properties.Properties[TEXT("Symbol")]);
 }
 
 TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
@@ -83,7 +82,7 @@ TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRu
 	});
 }
 
-UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	TArray<FFINAnyNetworkValue> Output;
 	
 	// allocate & initialize parameter struct
@@ -115,7 +114,7 @@ UFIVSPin* UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContex
 		}
 	}
 			
-	return nullptr;
+	return {};
 }
 
 void UFIVSNode_UFunctionCall::SetFunction(UFunction* InFunction, const FString& InSymbol) {

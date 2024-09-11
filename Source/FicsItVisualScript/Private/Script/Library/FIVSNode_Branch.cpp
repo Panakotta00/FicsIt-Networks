@@ -26,7 +26,7 @@ void UFIVSNode_Branch::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	);
 }
 
-UFIVSPin* UFIVSNode_Branch::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_Branch::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	bool bCondition = Context.GetValue(Condition)->GetBool();
-	return bCondition ? ExecTrue : ExecFalse;
+	return {bCondition ? ExecTrue : ExecFalse};
 }

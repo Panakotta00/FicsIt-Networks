@@ -29,6 +29,6 @@ public:
 		return TArray<UFIVSPin*>{ Condition };
 	}
 
-	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
+	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSScriptNode
 };

@@ -30,8 +30,8 @@ TArray<UFIVSPin*> UFIVSNode_Print::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeCon
 	return TArray<UFIVSPin*>{MessageIn};
 }
 
-UFIVSPin* UFIVSNode_Print::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_Print::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	FString Message = Context.GetValue(MessageIn)->GetString();
 	Context.GetKernelContext()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Info, Message);
-	return ExecOut;
+	return {ExecOut};
 }

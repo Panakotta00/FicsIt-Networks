@@ -20,6 +20,6 @@ void UFIVSNode_OnTick::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	);
 }
 
-UFIVSPin* UFIVSNode_OnTick::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	return ExecOut;
+TArray<UFIVSPin*> UFIVSNode_OnTick::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+	return {ExecOut};
 }

@@ -32,21 +32,21 @@ void UFIVSNode_GetProperty::SerializeNodeProperties(FFIVSNodeProperties& Propert
 }
 
 void UFIVSNode_GetProperty::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	Property = Cast<UFINProperty>(FSoftObjectPath(Properties.Properties[TEXT("Property")]).TryLoad());
+	SetProperty(Cast<UFINProperty>(FSoftObjectPath(Properties.Properties[TEXT("Property")]).TryLoad()));
 }
 
 TArray<UFIVSPin*> UFIVSNode_GetProperty::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	return TArray<UFIVSPin*>{InstanceIn};
 }
 
-UFIVSPin* UFIVSNode_GetProperty::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_GetProperty::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	FFIVSValue Instance = Context.GetValue(InstanceIn);
 	FFINExecutionContext ExecContext;
 	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) ExecContext = Instance->GetClass();
 	else ExecContext = UFINNetworkUtils::RedirectIfPossible(Instance->GetTrace());
 	FFINAnyNetworkValue Value = Property->GetValue(ExecContext);
 	Context.SetValue(DataOut, Value);
-	return nullptr;
+	return {};
 }
 
 void UFIVSNode_GetProperty::SetProperty(UFINProperty* InProperty) {

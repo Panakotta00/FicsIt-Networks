@@ -47,5 +47,5 @@ public:
 	 * @param[out]	Context		The runtime context for this script, which also includes temporary variables for this node.
 	 * @returns The execution-pin which will continue the script execution. May be null if script-sequence should stop or node has no exec-output-pins. (like pure nodes)
 	 */
-	virtual UFIVSPin* ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) { return nullptr; }
+	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) { return {}; }
 };

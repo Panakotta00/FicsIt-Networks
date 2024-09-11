@@ -38,12 +38,12 @@ TArray<UFIVSPin*> UFIVSNode_Variable::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntime
 	return InputPins;
 }
 
-UFIVSPin* UFIVSNode_Variable::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_Variable::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	if (bAssignment) {
 		FFIVSValue Variable = Context.GetValue(VarPin);
 		FFIVSValue Value = Context.GetValue(DataInput);
 		*Variable = *Value;
-		return ExecOutput;
+		return {ExecOutput};
 	} else {
 		FFINAnyNetworkValue* Value = Context.GetLocalVariable(GetFullName());
 		if (!Value) {
@@ -51,7 +51,7 @@ UFIVSPin* UFIVSNode_Variable::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Co
 			Value = &Context.SetLocalVariable(GetFullName(), *InitValue); // TODO: Use different var name, current one is not persistable since Object it self doesnt get persisted but recreated
 		}
 		Context.SetValue(VarPin, FFIVSValue(Value));
-		return nullptr;
+		return {};
 	}
 }
 

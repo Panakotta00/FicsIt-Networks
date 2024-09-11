@@ -48,7 +48,7 @@ TArray<UFIVSPin*> UFIVSNode_CallReflectionFunction::PreExecPin(UFIVSPin* ExecPin
 	return EvalPins;
 }
 
-UFIVSPin* UFIVSNode_CallReflectionFunction::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+TArray<UFIVSPin*> UFIVSNode_CallReflectionFunction::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
 	TArray<FFINAnyNetworkValue> InputValues;
 	FFINExecutionContext ExecContext;
 	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) ExecContext = Context.GetValue(Self)->GetClass();
@@ -60,7 +60,7 @@ UFIVSPin* UFIVSNode_CallReflectionFunction::ExecPin(UFIVSPin* ExecPin, FFIVSRunt
 	for (int i = 0; i < FMath::Min(OutputValues.Num(), OutputPins.Num()); ++i) {
 		Context.SetValue(OutputPins[i], OutputValues[i]);
 	}
-	return ExecOut;
+	return {ExecOut};
 }
 
 void UFIVSNode_CallReflectionFunction::SetFunction(UFINFunction* InFunction) {

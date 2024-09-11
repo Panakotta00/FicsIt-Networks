@@ -79,21 +79,22 @@ public:
 			TArray<UFIVSPin*> ToEvaluate = Cast<UFIVSScriptNode>(Step.NodeOrPin)->PreExecPin(Cast<UFIVSPin>(Step.Callee), *RuntimeContext.Get());
 			MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_NODE, Step.NodeOrPin, Step.Callee));
 			for (UFIVSPin* Eval : ToEvaluate) {
-				if (Eval->GetConnections().Num() > 0) MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_EVAL, Eval, nullptr));
-			}
-			break;
-		} case FIVS_STEP_EVAL: {
-			UFIVSPin* Connected = Cast<UFIVSPin>(Step.NodeOrPin)->FindConnected();
-			check(Connected); // TODO: FIVS Exception Handling
-			if (Connected->ParentNode->IsPure()) {
-				MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_PRENODE, Connected->ParentNode, nullptr));
+				if (!Eval) continue;
+				UFIVSPin* Connected = Eval->FindConnected();
+				if (!Connected) continue;
+				if (Connected->ParentNode->IsPure()) {
+					MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_PRENODE, Connected->ParentNode, nullptr));
+				}
 			}
 			break;
 		} case FIVS_STEP_NODE: {
-			UFIVSPin* OutPin = Cast<UFIVSScriptNode>(Step.NodeOrPin)->ExecPin(Cast<UFIVSPin>(Step.Callee), *RuntimeContext.Get());
-			if (OutPin) {
+			TArray<UFIVSPin*> OutPins = Cast<UFIVSScriptNode>(Step.NodeOrPin)->ExecPin(Cast<UFIVSPin>(Step.Callee), *RuntimeContext.Get());
+			for (int32 i = OutPins.Num() - 1; i >= 0; i--) {
+				UFIVSPin* OutPin = OutPins[i];
+				if (!OutPin) continue;
 				UFIVSPin* NextPin = OutPin->FindConnected();
-				if (NextPin) MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_PRENODE, NextPin->ParentNode, nullptr));
+				if (!NextPin) continue;
+				MicroSteps.Push(FFIVSMicroStep(FIVS_STEP_PRENODE, NextPin->ParentNode, nullptr));
 			}
 			break;
 		} default: ;
