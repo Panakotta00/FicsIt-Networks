@@ -343,15 +343,21 @@ void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, const TShare
 	        .Padding(Style->Padding)
 	        .BorderImage(&Style->Background)
 	        .Content()[
-		        SNew(SHorizontalBox)
-		        +SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Left)[
-		            SAssignNew(InputPinBox, SVerticalBox)
-		        ]
-		        +SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Fill)[
-		            SNew(SSpacer).Size(Style->CenterSpace)
-		        ]
-		        +SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Right)[
-		            SAssignNew(OutputPinBox, SVerticalBox)
+		        SNew(SVerticalBox)
+		        +SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Fill)[
+			        SNew(SHorizontalBox)
+			        +SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Left)[
+			            SAssignNew(InputPinBox, SVerticalBox)
+			        ]
+			        +SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Fill)[
+			            SNew(SSpacer).Size(Style->CenterSpace)
+			        ]
+			        +SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Right)[
+			            SAssignNew(OutputPinBox, SVerticalBox)
+			        ]
+			    ]
+		        +SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Fill)[
+			        InArgs._Footer.Widget
 		        ]
 		    ]
 	    ]

@@ -12,8 +12,8 @@ class SFIVSEdNodeViewer;
 class SFIVSEdPinViewer : public SCompoundWidget {
 	SLATE_BEGIN_ARGS(SFIVSEdPinViewer) :
 		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
-	SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
-	SLATE_ARGUMENT_DEFAULT(bool, ShowName) = true;
+		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
+		SLATE_ARGUMENT_DEFAULT(bool, ShowName) = true;
 	SLATE_END_ARGS()
 	
 public:
@@ -138,6 +138,7 @@ class SFIVSEdFunctionNodeViewer : public SFIVSEdNodeViewer {
 	SLATE_BEGIN_ARGS(SFIVSEdFunctionNodeViewer) :
 		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
+		SLATE_DEFAULT_SLOT(FArguments, Footer)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
