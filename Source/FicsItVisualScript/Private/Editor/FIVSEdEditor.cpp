@@ -19,16 +19,16 @@ TSharedRef<SWidget> UFIVSEdEditor::RebuildWidget() {
 	if (!IsValid(Graph)) {
 		Graph = NewObject<UFIVSGraph>();
 
-		UFIVSNode_OnTick* OnTick = NewObject<UFIVSNode_OnTick>();
+		UFIVSNode_OnTick* OnTick = NewObject<UFIVSNode_OnTick>(Graph);
 		OnTick->Pos = FVector2D(300.0, 300.0);
 		Graph->AddNode(OnTick);
-		UFIVSRerouteNode* Reroute = NewObject<UFIVSRerouteNode>();
+		UFIVSRerouteNode* Reroute = NewObject<UFIVSRerouteNode>(Graph);
 		Reroute->Pos = FVector2D(500.0, 350.0);
 		Graph->AddNode(Reroute);
-		UFIVSNode_Branch* Branch = NewObject<UFIVSNode_Branch>();
+		UFIVSNode_Branch* Branch = NewObject<UFIVSNode_Branch>(Graph);
 		Branch->Pos = FVector2D(800.0, 300.0);
 		Graph->AddNode(Branch);
-		UFIVSNode_UFunctionCall* OpAdd = NewObject<UFIVSNode_UFunctionCall>();
+		UFIVSNode_UFunctionCall* OpAdd = NewObject<UFIVSNode_UFunctionCall>(Graph);
 		OpAdd->Pos = FVector2D(500.0, 600.0);
 		OpAdd->SetFunction(UFIVSMathLib::StaticClass()->FindFunctionByName(TEXT("FIVSFunc_Float_Addition")), TEXT("+"));
 		Graph->AddNode(OpAdd);
