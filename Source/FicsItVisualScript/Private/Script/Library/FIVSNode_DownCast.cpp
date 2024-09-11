@@ -49,7 +49,15 @@ UFIVSPin* UFIVSNode_DownCast::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Co
 void UFIVSNode_DownCast::SetClass(UFINClass* InToClass) {
 	ToClass = InToClass;
 
-	DisplayName = FText::FromString(TEXT("Cast to ") + ToClass->GetDisplayName().ToString());
+	if (ToClass->GetDisplayName().IsEmpty()) {
+		DisplayName = FText::FromString(TEXT("Cast to ") + ToClass->GetInternalName());
+	} else {
+		DisplayName = FText::FromString(TEXT("Cast to ") + ToClass->GetDisplayName().ToString());
+	}
+
+	DeletePin(DataInput);
+	DeletePin(DataOutput);
+	DeletePin(SuccessOutput);
 
 	if (bPure) {
 		DataInput = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("From"), FText::FromString(TEXT("From")), FFIVSPinDataType(FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass())));
