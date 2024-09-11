@@ -426,15 +426,15 @@ void SFIVSEdOperatorNodeViewer::Construct(const FArguments& InArgs, const TShare
 					.Text(FText::FromString(InArgs._Symbol))
 				]
 			]
-			+SOverlay::Slot()[
-				SNew(SGridPanel)
-				+SGridPanel::Slot(0, 1).HAlign(HAlign_Left).VAlign(VAlign_Center)[
+			+SOverlay::Slot().VAlign(VAlign_Fill).HAlign(HAlign_Fill)[
+				SNew(SHorizontalBox)
+				+SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Left).VAlign(VAlign_Center)[
 					SAssignNew(InputPinBox, SVerticalBox)
 				]
-				+SGridPanel::Slot(1, 1).HAlign(HAlign_Center)[
+				+SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Center)[
 					SNew(SSpacer).Size(Style->CenterSpace)
 				]
-				+SGridPanel::Slot(2, 1).HAlign(HAlign_Right).VAlign(VAlign_Center)[
+				+SHorizontalBox::Slot().AutoWidth().HAlign(HAlign_Right).VAlign(VAlign_Center)[
 					SAssignNew(OutputPinBox, SVerticalBox)
 				]
 			]
