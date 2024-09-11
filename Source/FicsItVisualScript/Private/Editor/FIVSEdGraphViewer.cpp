@@ -212,6 +212,65 @@ FReply SFIVSEdGraphViewer::OnMouseWheel(const FGeometry& MyGeometry, const FPoin
 	return FReply::Handled();
 }
 
+class FFIVSGraphProxy : public FArchiveProxy {
+public:
+	FFIVSGraphProxy(FArchive& Inner) : FArchiveProxy(Inner) {}
+
+	virtual FArchive& operator<<(UObject*& Value) override {
+		if (!IsValid(Value)) return *this;
+
+		if (!Objects.IsEmpty()) {
+			int32 index = Objects.Find(Value);
+			if (index != INDEX_NONE) {
+				InnerArchive << index;
+				return *this;
+			} else if (!Objects.Contains(Value->GetOuter())) {
+				return *this;
+			}
+		}
+
+		Objects.Add(Value);
+		Value->Serialize(*this);
+
+		return *this;
+	}
+
+	virtual FArchive& operator<<(FObjectPtr& Value) override {
+		UObject* Ptr = Value.Get();
+		*this << Ptr;
+		return *this;
+	}
+
+	virtual FArchive& operator<<(FLazyObjectPtr& Value) override {
+		UObject* Ptr = Value.Get();
+		*this << Ptr;
+		return *this;
+	}
+
+	virtual FArchive& operator<<(FSoftObjectPath& Value) override
+	{
+		UObject* Ptr = Value.ResolveObject();
+		*this << Ptr;
+		return *this;
+	}
+
+	virtual FArchive& operator<<(FSoftObjectPtr& Value) override {
+		UObject* Ptr = Value.Get();
+		*this << Ptr;
+		return *this;
+	}
+
+	virtual FArchive& operator<<(FWeakObjectPtr& Value) override {
+		UObject* Ptr = Value.Get();
+		*this << Ptr;
+		return *this;
+	}
+
+private:
+	TArray<UObject*> Objects;
+};
+
+UE_DISABLE_OPTIMIZATION_SHIP
 FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	if (InKeyEvent.GetKey() == EKeys::Home) {
 		Offset = FVector2D(0, 0);
