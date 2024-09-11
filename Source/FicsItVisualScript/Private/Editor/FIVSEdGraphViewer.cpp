@@ -302,7 +302,8 @@ FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEven
 		FString Paste;
 		FPlatformApplicationMisc::ClipboardPaste(Paste);
 
-		UFIVSSerailizationUtils::FIVS_DeserializeGraph(Graph, Paste, LocalToGraph(MyGeometry.AbsoluteToLocal(FSlateApplication::Get().GetCursorPos())));
+		TArray<UFIVSNode*> Nodes = UFIVSSerailizationUtils::FIVS_DeserializeGraph(Graph, Paste, LocalToGraph(MyGeometry.AbsoluteToLocal(FSlateApplication::Get().GetCursorPos())));
+		SelectionManager.SetSelection(Nodes);
 	}
 
 	return SPanel::OnKeyDown(MyGeometry, InKeyEvent);

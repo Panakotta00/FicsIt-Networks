@@ -89,5 +89,5 @@ public:
 	static FString FIVS_SerailizeGraph(UFIVSGraph* Graph);
 
 	UFUNCTION(BlueprintCallable)
-	static void FIVS_DeserializeGraph(UFIVSGraph* Graph, FString InStr, FVector2D InOffset = FVector2D::ZeroVector);
+	static TArray<UFIVSNode*> FIVS_DeserializeGraph(UFIVSGraph* Graph, FString InStr, FVector2D InOffset = FVector2D::ZeroVector);
 };

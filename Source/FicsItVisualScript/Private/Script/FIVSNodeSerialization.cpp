@@ -129,7 +129,7 @@ FString UFIVSSerailizationUtils::FIVS_SerailizeGraph(UFIVSGraph* Graph) {
 }
 
 #pragma optimize("", off)
-void UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString InStr, FVector2D InOffset) {
+TArray<UFIVSNode*> UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString InStr, FVector2D InOffset) {
 	FFIVSSerializedGraph SerializedGraph;
 	TMap<int, UFIVSNode*> NodeIDs;
 
@@ -179,6 +179,7 @@ void UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString I
 		}
 	}
 
+	TArray<UFIVSNode*> Nodes;
 	for (const FFIVSSerializedNode& SerializedNode : SerializedGraph.Nodes) {
 		UFIVSNode* Node = NewObject<UFIVSNode>(Graph, SerializedNode.NodeType);
 		Node->Pos = SerializedNode.NodePos + InOffset;
@@ -194,6 +195,7 @@ void UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString I
 			}
 		}
 		Graph->AddNode(Node);
+		Nodes.Add(Node);
 	}
 
 	for (const FFIVSSerializedPinConnection& SerializedPinConnection : SerializedGraph.PinConnections) {
@@ -211,6 +213,8 @@ void UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString I
 		if (!Pin1 || !Pin2 || !*Pin1 || !*Pin2) continue;
 		(*Pin1)->AddConnection(*Pin2);
 	}
+
+	return Nodes;
 }
 #pragma optimize("", on)
 
