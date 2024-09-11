@@ -18,6 +18,7 @@ public:
 
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
+	virtual void ExtendPinContextMenu(UFIVSPin* InPin, FMenuBuilder& MenuBuilder) override;
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode

@@ -23,6 +23,21 @@ void UFIVSNode_Sequence::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const 
 	Actions.Add(action);
 }
 
+void UFIVSNode_Sequence::ExtendPinContextMenu(UFIVSPin* InPin, FMenuBuilder& MenuBuilder) {
+	if (!ExecOut.Contains(InPin)) return;
+
+	MenuBuilder.AddSeparator();
+	MenuBuilder.AddMenuEntry(
+			FText::FromString("Remove Pin"),
+			FText(),
+			FSlateIcon(),
+			FUIAction(FExecuteAction::CreateLambda([this, InPin]() {
+				ExecOut.Remove(InPin);
+				DeletePin(InPin);
+				SetOutputNum(ExecOut.Num());
+			})));
+}
+
 TSharedRef<SFIVSEdNodeViewer> UFIVSNode_Sequence::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
 	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
 		.Style(Style)
@@ -45,11 +60,13 @@ TArray<UFIVSPin*> UFIVSNode_Sequence::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeCon
 }
 
 void UFIVSNode_Sequence::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Super::SerializeNodeProperties(Properties);
+	Properties.Properties.Add(TEXT("PinCount"), FString::FromInt(ExecOut.Num()));
 }
 
 void UFIVSNode_Sequence::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	Super::DeserializeNodeProperties(Properties);
+	if (const FString* pinCountStr = Properties.Properties.Find(TEXT("PinCount"))) {
+		SetOutputNum(FCString::Atoi(**pinCountStr));
+	}
 }
 
 void UFIVSNode_Sequence::SetOutputNum(int32 OutputNum) {
@@ -59,5 +76,8 @@ void UFIVSNode_Sequence::SetOutputNum(int32 OutputNum) {
 	while (ExecOut.Num() < OutputNum) {
 		int32 i = ExecOut.Num() + 1;
 		ExecOut.Add(CreatePin(FIVS_PIN_EXEC_OUTPUT, FString::Printf(TEXT("Then%i"), i), FText::FromString(FString::Printf(TEXT("Then %i"), i))));
+	}
+	for (int i = 0; i < OutputNum; ++i) {
+		ExecOut[i]->DisplayName = FText::FromString(FString::Printf(TEXT("Then %i"), i+1));
 	}
 }

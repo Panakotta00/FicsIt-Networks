@@ -99,7 +99,17 @@ public:
 	 * Creates and returns a new widget that can be used to change detailed information of this node.
 	 */
 	virtual TSharedPtr<SWidget> CreateDetailsWidget(TScriptInterface<IFIVSScriptContext_Interface> Context) { return nullptr; }
-	
+
+	/**
+	 * Return a FUICommandList used for the Context Menu of a given Pin
+	 */
+	virtual TSharedPtr<FUICommandList> GetPinCommands(UFIVSPin* InPin) { return nullptr; }
+
+	/**
+	 * Extend the context menu of a given Pin
+	 */
+	virtual void ExtendPinContextMenu(UFIVSPin* InPin, FMenuBuilder& MenuBuilder) {}
+
 	/**
 	 * Called if this nodes gets serialized.
 	 * Is supposed to store additional node properties to the serialization data that will be used on deserialization
@@ -114,8 +124,8 @@ public:
 	 * this should happen here, so that directly after this function got called, the InitPins() function can be called normally,
 	 * to create all Pins like it was before serialization.
 	 */
-	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {};
-	
+	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {}
+
 	/**
 	 * Removes all connections of all pins
 	 */
@@ -127,7 +137,7 @@ public:
 	 */
 	bool IsPure() {
 		for (UFIVSPin* Pin : GetNodePins()) {
-			if (Pin->GetPinType() & FIVS_PIN_EXEC) return false; 
+			if (Pin->GetPinType() & FIVS_PIN_EXEC) return false;
 		}
 		return true;
 	}

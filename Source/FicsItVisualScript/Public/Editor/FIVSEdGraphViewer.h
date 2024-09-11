@@ -38,6 +38,11 @@ public:
 	* @param[in]	End		the end point (inputs)
 	*/
 	void DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
+
+	FVector2D GetAndCachePinPosition(const TSharedRef<SFIVSEdPinViewer>& Pin, const TSharedRef<const SFIVSEdGraphViewer>& Graph, const FGeometry& AllottedGeometry);
+
+private:
+	TMap<TWeakPtr<SFIVSEdPinViewer>, FVector2D> PinPositions;
 };
 
 
@@ -131,6 +136,18 @@ private:
 DECLARE_DELEGATE_TwoParams(FFIVSEdSelectionChanged, UFIVSNode*, bool);
 
 class SFIVSEdGraphViewer : public SPanel {
+	class FCommands : public TCommands<FCommands> {
+	public:
+		FCommands();
+
+		virtual void RegisterCommands() override;
+
+		TSharedPtr<FUICommandInfo> CopySelection;
+		TSharedPtr<FUICommandInfo> PasteSelection;
+		TSharedPtr<FUICommandInfo> DeleteSelection;
+		TSharedPtr<FUICommandInfo> CenterGraph;
+	};
+
 	SLATE_BEGIN_ARGS(SFIVSEdGraphViewer) :
 		_Style(&FFIVSEdGraphViewerStyle::GetDefault()) {}
 	SLATE_STYLE_ARGUMENT(FFIVSEdGraphViewerStyle, Style)
@@ -145,6 +162,7 @@ private:
 	const FFIVSEdGraphViewerStyle* Style = nullptr;
 	UFIVSGraph* Graph = nullptr;
 	FFIVSEdSelectionChanged SelectionChanged;
+	TSharedPtr<FUICommandList> CommandList;
 
 	TSlotlessChildren<SFIVSEdNodeViewer> Children;
 	TMap<UFIVSNode*, TSharedRef<SFIVSEdNodeViewer>> NodeToChild;
@@ -224,6 +242,9 @@ public:
 	UFIVSGraph* GetGraph() { return Graph; }
 
 	void UpdateSelection(const FPointerEvent& Event);
+
+	FSlateClippingZone GetClipRect(const FGeometry& AllottedGeometry) const;
+	bool IsNodeCulled(const TSharedRef<SFIVSEdNodeViewer>& Node, const FGeometry& AllottedGeometry) const;
 
 private:
 	/**

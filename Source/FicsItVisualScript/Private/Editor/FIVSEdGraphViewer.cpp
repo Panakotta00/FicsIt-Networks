@@ -7,6 +7,8 @@
 #include "Reflection/FINReflection.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
 
+#define LOCTEXT_NAMESPACE "FIVSEdGraphViewerModule"
+
 void FFIVSEdConnectionDrawer::Reset() {
 	ConnectionUnderMouse = TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>>(nullptr, nullptr);
 	LastConnectionDistance = FLT_MAX;
@@ -42,8 +44,10 @@ void FFIVSEdConnectionDrawer::DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, 
 		Pin1 = Pin2;
 		Pin2 = Pin;
 	}
-	FVector2D StartLoc = Graph->GetCachedGeometry().AbsoluteToLocal(Pin1->GetConnectionPoint());
-	FVector2D EndLoc = Graph->GetCachedGeometry().AbsoluteToLocal(Pin2->GetConnectionPoint());
+
+	FVector2D StartLoc = Graph->GraphToLocal(GetAndCachePinPosition(Pin1, Graph, AllottedGeometry));
+	FVector2D EndLoc = Graph->GraphToLocal(GetAndCachePinPosition(Pin2, Graph, AllottedGeometry));
+
 	DrawConnection(StartLoc, EndLoc, Pin1->GetPinColor().GetSpecifiedColor(), Graph, AllottedGeometry, OutDrawElements, LayerId);
 
 	// Find the closest approach to the spline
@@ -75,7 +79,31 @@ void FFIVSEdConnectionDrawer::DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, 
 
 void FFIVSEdConnectionDrawer::DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
 	//FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start, FVector2D(300 * Graph->Zoom,0), End, FVector2D(300 * Graph->Zoom,0), 2 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
-	FSlateDrawElement::MakeLines(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, ConnectionColor, true, 2 * Graph->GetZoom());
+	FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, ConnectionColor, true, 2 * Graph->GetZoom());
+}
+
+FVector2D FFIVSEdConnectionDrawer::GetAndCachePinPosition(const TSharedRef<SFIVSEdPinViewer>& Pin, const TSharedRef<const SFIVSEdGraphViewer>& Graph, const FGeometry& AllottedGeometry) {
+	if (Graph->IsNodeCulled(Pin->GetNodeViewer().ToSharedRef(), AllottedGeometry)) {
+		FVector2D* position = PinPositions.Find(Pin);
+		if (position) {
+			return *position;
+		} else {
+			return Pin->GetNodeViewer()->GetPosition();
+		}
+	} else {
+		FVector2D position = Graph->LocalToGraph(Graph->GetCachedGeometry().AbsoluteToLocal(Pin->GetConnectionPoint()));
+		PinPositions.Add(Pin, position);
+		return position;
+	}
+}
+
+SFIVSEdGraphViewer::FCommands::FCommands() : TCommands<FCommands>( TEXT("GraphView"), LOCTEXT("Context", "Graph View"), NAME_None, FAppStyle::GetAppStyleSetName()) {}
+
+void SFIVSEdGraphViewer::FCommands::RegisterCommands() {
+	UI_COMMAND(CopySelection, "Copy Selection", "Copies the currently selected nodes and connections to the clipboard.", EUserInterfaceActionType::Button, FInputChord(EKeys::C, EModifierKey::Control))
+	UI_COMMAND(PasteSelection, "Paste", "Pastes the Clipboard as Nodes into the graph at the current cursor location.", EUserInterfaceActionType::Button, FInputChord(EKeys::V, EModifierKey::Control))
+	UI_COMMAND(DeleteSelection, "Delete Selection", "Deletes the currently selected nodes.", EUserInterfaceActionType::Button, FInputChord(EKeys::Delete))
+	UI_COMMAND(CenterGraph, "Center Graph", "Centers the graph view back to the origin.", EUserInterfaceActionType::Button, FInputChord(EKeys::Home))
 }
 
 void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
@@ -83,6 +111,47 @@ void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 	SetGraph(InArgs._Graph);
 	SelectionChanged = InArgs._OnSelectionChanged;
 	SelectionManager.OnSelectionChanged.BindRaw(this, &SFIVSEdGraphViewer::OnSelectionChanged);
+
+	FCommands::Register();
+
+	CommandList = MakeShared<FUICommandList>();
+
+	CommandList->MapAction(FCommands::Get().CopySelection, FExecuteAction::CreateLambda([this]() {
+		FString Serialized = UFIVSSerailizationUtils::FIVS_SerializePartial(SelectionManager.GetSelection(), true);
+
+		/*TArray<uint8> Data;
+		FMemoryWriter Archive(Data);
+		FFIVSGraphProxy Proxy(Archive);
+		//FJsonArchiveOutputFormatter Formatter(Proxy);
+		//FStructuredArchive StructuredArchive(Formatter);
+		//FStructuredArchiveSlot Slot = StructuredArchive.Open();
+		//Graph->Serialize(Slot.EnterRecord());
+		//StructuredArchive.Close();
+		Graph->Serialize(Proxy);
+		Serialized = UTF8_TO_TCHAR(Data.GetData());*/
+
+		FPlatformApplicationMisc::ClipboardCopy(*Serialized);
+	}));
+	CommandList->MapAction(FCommands::Get().PasteSelection, FExecuteAction::CreateLambda([this]() {
+		FString Paste;
+		FPlatformApplicationMisc::ClipboardPaste(Paste);
+
+		TArray<UFIVSNode*> Nodes = UFIVSSerailizationUtils::FIVS_DeserializeGraph(Graph, Paste, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(FSlateApplication::Get().GetCursorPos())));
+		SelectionManager.SetSelection(Nodes);
+	}));
+	CommandList->MapAction(FCommands::Get().DeleteSelection, FExecuteAction::CreateLambda([this]() {
+		if (SelectionManager.GetSelection().Num() > 0) {
+			TArray<UFIVSNode*> Selection = SelectionManager.GetSelection();
+			for (UFIVSNode* Node : Selection) {
+				Graph->RemoveNode(Node);
+			}
+		} else if (ConnectionDrawer && ConnectionDrawer->ConnectionUnderMouse.Key) {
+			ConnectionDrawer->ConnectionUnderMouse.Key->GetPin()->RemoveConnection(ConnectionDrawer->ConnectionUnderMouse.Value->GetPin());
+		}
+	}));
+	CommandList->MapAction(FCommands::Get().CenterGraph, FExecuteAction::CreateLambda([this]() {
+		Offset = FVector2D(0, 0);
+	}));
 }
 
 SFIVSEdGraphViewer::SFIVSEdGraphViewer() : Children(this) {
@@ -121,7 +190,7 @@ void SFIVSEdGraphViewer::Tick(const FGeometry& AllottedGeometry, const double In
 }
 
 int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
-	OutDrawElements.PushClip(FSlateClippingZone(AllottedGeometry));
+	OutDrawElements.PushClip(GetClipRect(AllottedGeometry));
 	
 	ConnectionDrawer->Reset();
 
@@ -129,9 +198,9 @@ int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 
 	DrawGrid(LayerId, AllottedGeometry, OutDrawElements, InWidgetStyle);
 
-	int ret = SPanel::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId+1, InWidgetStyle, bParentEnabled);
+	int ret = SPanel::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId+25, InWidgetStyle, bParentEnabled);
 
-	DrawConnections(LayerId+25, AllottedGeometry, OutDrawElements, InWidgetStyle);
+	DrawConnections(LayerId+1, AllottedGeometry, OutDrawElements, InWidgetStyle);
 	DrawNewConnection(LayerId+100, AllottedGeometry, OutDrawElements, InWidgetStyle);
 	DrawSelectionBox(LayerId+200, AllottedGeometry, OutDrawElements, InWidgetStyle);
 
@@ -272,38 +341,8 @@ private:
 
 UE_DISABLE_OPTIMIZATION_SHIP
 FReply SFIVSEdGraphViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
-	if (InKeyEvent.GetKey() == EKeys::Home) {
-		Offset = FVector2D(0, 0);
-	} else if (InKeyEvent.GetKey() == EKeys::Delete) {
-		if (SelectionManager.GetSelection().Num() > 0) {
-			TArray<UFIVSNode*> Selection = SelectionManager.GetSelection();
-			for (UFIVSNode* Node : Selection) {
-				Graph->RemoveNode(Node);
-			}
-		} else if (ConnectionDrawer && ConnectionDrawer->ConnectionUnderMouse.Key) {
-			ConnectionDrawer->ConnectionUnderMouse.Key->GetPin()->RemoveConnection(ConnectionDrawer->ConnectionUnderMouse.Value->GetPin());
-		}
-	} else if (InKeyEvent.GetKey() == EKeys::C && InKeyEvent.IsControlDown()) {
-		FString Serialized = UFIVSSerailizationUtils::FIVS_SerializePartial(SelectionManager.GetSelection(), true);
-
-		/*TArray<uint8> Data;
-		FMemoryWriter Archive(Data);
-		FFIVSGraphProxy Proxy(Archive);
-		//FJsonArchiveOutputFormatter Formatter(Proxy);
-		//FStructuredArchive StructuredArchive(Formatter);
-		//FStructuredArchiveSlot Slot = StructuredArchive.Open();
-		//Graph->Serialize(Slot.EnterRecord());
-		//StructuredArchive.Close();
-		Graph->Serialize(Proxy);
-		Serialized = UTF8_TO_TCHAR(Data.GetData());*/
-
-		FPlatformApplicationMisc::ClipboardCopy(*Serialized);
-	} else if (InKeyEvent.GetKey() == EKeys::V && InKeyEvent.IsControlDown()) {
-		FString Paste;
-		FPlatformApplicationMisc::ClipboardPaste(Paste);
-
-		TArray<UFIVSNode*> Nodes = UFIVSSerailizationUtils::FIVS_DeserializeGraph(Graph, Paste, LocalToGraph(MyGeometry.AbsoluteToLocal(FSlateApplication::Get().GetCursorPos())));
-		SelectionManager.SetSelection(Nodes);
+	if (CommandList->ProcessCommandBindings(InKeyEvent)) {
+		return FReply::Handled();
 	}
 
 	return SPanel::OnKeyDown(MyGeometry, InKeyEvent);
@@ -528,6 +567,17 @@ void SFIVSEdGraphViewer::OnSelectionChanged(UFIVSNode* InNode, bool bIsSelected)
 	SelectionChanged.ExecuteIfBound(InNode, bIsSelected);
 }
 
+FSlateClippingZone SFIVSEdGraphViewer::GetClipRect(const FGeometry& AllottedGeometry) const {
+	return FSlateClippingZone(AllottedGeometry);
+}
+
+bool SFIVSEdGraphViewer::IsNodeCulled(const TSharedRef<SFIVSEdNodeViewer>& Node, const FGeometry& AllottedGeometry) const {
+	FBox2D NodeBox(Node->GetPosition(), Node->GetPosition() + Node->GetDesiredSize());
+	FBox2D GraphBox(LocalToGraph({0.0,0.0}), LocalToGraph(AllottedGeometry.GetLocalSize()));
+
+	return !NodeBox.Intersect(GraphBox);
+}
+
 void SFIVSEdGraphViewer::DrawGrid(uint32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, const FWidgetStyle& InWidgetStyle) const {
 	FVector2D LocalSize = AllottedGeometry.GetLocalSize();
 
@@ -541,7 +591,6 @@ void SFIVSEdGraphViewer::DrawGrid(uint32 LayerId, const FGeometry& AllottedGeome
 	double GraphStep;
 	GraphStep = FMath::Pow(base, FMath::Floor(FMath::LogX(base, VisibleGraphSize.X / minGraphStep)));
 	GraphStep = FMath::Min(GraphStep, FMath::Pow(base, FMath::Floor(FMath::LogX(base, VisibleGraphSize.Y / minGraphStep))));
-
 
 	for (float x = FMath::RoundUpToClosestMultiple(GraphMin.X, GraphStep); x <= GraphMax.X; x += GraphStep) {
 		bool bIsMajor = FMath::IsNearlyZero(FMath::Fmod(x, GraphStep * majorStep));
@@ -568,29 +617,15 @@ void SFIVSEdGraphViewer::DrawGrid(uint32 LayerId, const FGeometry& AllottedGeome
 }
 
 void SFIVSEdGraphViewer::DrawConnections(uint32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, const FWidgetStyle& InWidgetStyle) const {
-	TMap<TSharedRef<SFIVSEdPinViewer>, FVector2D> ConnectionLocations;
-	TMap<UFIVSPin*, TSharedRef<SFIVSEdPinViewer>> PinMap;
-
-	for (int i = 0; i < Children.Num(); ++i) {
-		TSharedRef<SFIVSEdNodeViewer> Node = Children[i];
-		for (int j = 0; j < Node->GetPinWidgets().Num(); ++j) {
-			TSharedRef<SFIVSEdPinViewer> Pin = Node->GetPinWidgets()[j];
-			ConnectionLocations.Add(Pin, Pin->GetConnectionPoint());
-			PinMap.Add(Pin->GetPin(), Pin);
-		}
-	}
-
 	TSet<TPair<UFIVSPin*, UFIVSPin*>> DrawnPins;
 	for (int i = 0; i < Children.Num(); ++i) {
 		TSharedRef<SFIVSEdNodeViewer> Node = Children[i];
 		for (const TSharedRef<SFIVSEdPinViewer>& Pin : Node->GetPinWidgets()) {
-			if (Pin->GetPin()->IsValidLowLevel()) for (UFIVSPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
-				if (!DrawnPins.Contains(TPair<UFIVSPin*, UFIVSPin*>(Pin->GetPin(), ConnectionPin)) && !DrawnPins.Contains(TPair<UFIVSPin*, UFIVSPin*>(ConnectionPin, Pin->GetPin()))) {
+			for (UFIVSPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
+				if (!DrawnPins.Contains({Pin->GetPin(), ConnectionPin}) && !DrawnPins.Contains({ConnectionPin, Pin->GetPin()})) {
 					DrawnPins.Add(TPair<UFIVSPin*, UFIVSPin*>(Pin->GetPin(), ConnectionPin));
 					ConnectionDrawer->DrawConnection(Pin, NodeToChild[ConnectionPin->ParentNode]->GetPinWidget(ConnectionPin), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId);
 				}
-			} else {
-				UE_LOG(LogFicsItVisualScript, Warning, TEXT("WTF"));
 			}
 		}
 	}

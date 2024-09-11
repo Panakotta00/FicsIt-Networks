@@ -169,8 +169,8 @@ SFIVSEdPinViewer::SFIVSEdPinViewer() {}
 
 FReply SFIVSEdPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
 	if (!MouseEvent.GetModifierKeys().IsControlDown() && MouseEvent.GetEffectingButton() == EKeys::RightMouseButton) {
-		TSharedPtr<IMenu> MenuHandle;
-		FMenuBuilder MenuBuilder(true, NULL);
+
+		FMenuBuilder MenuBuilder(true, GetNodeViewer()->GetNode()->GetPinCommands(GetPin()));
 		MenuBuilder.AddMenuEntry(
 			FText::FromString("Remove Connections"),
             FText(),
@@ -179,8 +179,9 @@ FReply SFIVSEdPinViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FP
 				TArray<UFIVSPin*> Pins = Pin->GetConnections();
 	            for (UFIVSPin* Pin : Pins) Pin->RemoveConnection(GetPin());
 			})));
-		
+		GetNodeViewer()->GetNode()->ExtendPinContextMenu(GetPin(), MenuBuilder);
 		FSlateApplication::Get().PushMenu(SharedThis(this), *MouseEvent.GetEventPath(), MenuBuilder.MakeWidget(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
+
 		return FReply::Handled();
 	}
 	return FReply::Handled().DetectDrag(SharedThis(this), MouseEvent.GetEffectingButton());
