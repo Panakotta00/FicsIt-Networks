@@ -43,7 +43,7 @@ TSharedRef<SFIVSEdNodeViewer> UFIVSNode_Sequence::CreateNodeViewer(const TShared
 		.Style(Style)
 		.Footer()[
 			SNew(SHorizontalBox)
-			+SHorizontalBox::Slot().HAlign(HAlign_Right)[
+			+SHorizontalBox::Slot().HAlign(HAlign_Right).Padding(10)[
 				SNew(SButton)
 				.Text(FText::FromString(TEXT("Add Pin")))
 				.OnClicked_Lambda([this]() {
