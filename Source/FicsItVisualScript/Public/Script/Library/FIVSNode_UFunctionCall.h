@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Script/FIVSScriptNode.h"
 #include "FINGlobalRegisterHelper.h"
+#include "FIVSUtils.h"
 #include "FIVSNode_UFunctionCall.generated.h"
 
 struct FFIVSNodeUFunctionCallMeta {
@@ -11,6 +12,40 @@ struct FFIVSNodeUFunctionCallMeta {
 	FText Description;
 	FText Categrory;
 	FText SearchableText;
+};
+
+USTRUCT()
+struct FFIVSNodeStatement_UFunctionCall : public FFIVSNodeStatement {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FGuid ExecIn;
+	UPROPERTY(SaveGame)
+	FGuid ExecOut;
+	UPROPERTY(SaveGame)
+	TArray<FGuid> InputPins;
+	UPROPERTY(SaveGame)
+	TArray<FGuid> OutputPins;
+	UPROPERTY(SaveGame)
+	UFunction* Function = nullptr;
+	UPROPERTY(SaveGame)
+	TMap<FName, FGuid> PropertyToPin;
+
+	FFIVSNodeStatement_UFunctionCall() = default;
+	FFIVSNodeStatement_UFunctionCall(FGuid Node, FGuid ExecIn, FGuid ExecOut, const TArray<FGuid>& InputPins, const TArray<FGuid>& OutputPins, UFunction* Function, const TMap<FName, FGuid>& PropertyToPin) :
+		FFIVSNodeStatement(Node),
+		ExecIn(ExecIn),
+		ExecOut(ExecOut),
+		InputPins(InputPins),
+		OutputPins(OutputPins),
+		Function(Function),
+		PropertyToPin(PropertyToPin) {}
+
+	// Begin FFIVSNodeStatement
+	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
+	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
+	virtual bool IsVolatile() const override { return true; }
+	// End FFIVSNodeStatement
 };
 
 UCLASS()
@@ -30,7 +65,9 @@ private:
 	UFIVSPin* ExecOut = nullptr;
 
 	UPROPERTY()
-	TArray<UFIVSPin*> Parameters;
+	TArray<UFIVSPin*> Input;
+	UPROPERTY()
+	TArray<UFIVSPin*> Output;
 
 	TMap<FProperty*, UFIVSPin*> PropertyToPin;
 
@@ -44,13 +81,28 @@ public:
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) override;
-	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
-	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
+	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const override;
+	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode
-	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
-	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
+	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+		TMap<FName, FGuid> propToGuid;
+
+		for (auto [prop, pin] : PropertyToPin) {
+			propToGuid.Add(prop->GetFName(), pin->PinId);
+		}
+
+		return FFIVSNodeStatement_UFunctionCall{
+			NodeId,
+			ExecIn ? ExecIn->PinId : FGuid(),
+			ExecOut ? ExecOut->PinId : FGuid(),
+			UFIVSUtils::GuidsFromPins(Input),
+			UFIVSUtils::GuidsFromPins(Output),
+			Function,
+			propToGuid
+		};
+	}
 	// End UFIVSScriptNode
 
 	void SetFunction(UFunction* InFunction, const FString& InSymbol);

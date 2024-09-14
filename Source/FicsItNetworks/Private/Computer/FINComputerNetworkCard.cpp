@@ -1,4 +1,6 @@
 ﻿#include "Computer/FINComputerNetworkCard.h"
+
+#include "Net/UnrealNetwork.h"
 #include "Network/FINNetworkCircuit.h"
 #include "Reflection/FINReflection.h"
 

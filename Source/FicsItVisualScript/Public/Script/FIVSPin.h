@@ -23,6 +23,7 @@ USTRUCT()
 struct FFIVSPinDataType : public FFINExpandedNetworkValueType {
 	GENERATED_BODY()
 private:
+	UPROPERTY(SaveGame)
 	bool bReference = false;
 
 public:
@@ -87,13 +88,15 @@ UCLASS(Abstract)
 class UFIVSPin : public UObject {
 	GENERATED_BODY()
 protected:
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	TArray<UFIVSPin*> ConnectedPins;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY()
 	FFINAnyNetworkValue Literal;
 
 public:
+	UPROPERTY()
+	FGuid PinId = FGuid::NewGuid();
 	UPROPERTY()
 	UFIVSNode* ParentNode = nullptr;
 	UPROPERTY()

@@ -5,7 +5,7 @@
 #include "Editor/FIVSEdObjectSelection.h"
 #include "Editor/FIVSEdSignalSelection.h"
 #include "Reflection/FINReflection.h"
-
+/*
 UFIVSNode_SignalEvent::UFIVSNode_SignalEvent() {
 	ExecOut = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
 }
@@ -87,3 +87,4 @@ void UFIVSNode_SignalEvent::SetSignal(UFINSignal* InSignal) {
 		}
 	}
 }
+*/

@@ -4,12 +4,12 @@
 #include "FIVSEdActionSelection.h"
 #include "FIVSEdGraphViewerStyle.h"
 #include "Script/FIVSGraph.h"
+#include "FIVSEdNodeViewer.h"
 
 struct FFIVSEdActionSelectionAction;
 class SFIVSEdActionSelection;
 class SFIVSEdPinViewer;
 class SFIVSEdGraphViewer;
-class SFIVSEdNodeViewer;
 
 struct FFIVSEdConnectionDrawer {
 public:

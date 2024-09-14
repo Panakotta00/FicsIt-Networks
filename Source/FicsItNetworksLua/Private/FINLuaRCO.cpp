@@ -1,6 +1,6 @@
 #include "FINLuaRCO.h"
 
-#include "FINStateEEPROMLua.h"
+#include "FicsItKernel/Processor/FINStateEEPROMText.h"
 #include "Net/UnrealNetwork.h"
 
 void UFINLuaRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -9,10 +9,10 @@ void UFINLuaRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(UFINLuaRCO, bDummy);
 }
 
-void UFINLuaRCO::SetLuaEEPROMCode_Implementation(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
+void UFINLuaRCO::SetLuaEEPROMCode_Implementation(AFINStateEEPROMText* LuaEEPROMState, const FString& NewCode) {
 	if (LuaEEPROMState) LuaEEPROMState->SetCode(NewCode);
 }
 
-bool UFINLuaRCO::SetLuaEEPROMCode_Validate(AFINStateEEPROMLua* LuaEEPROMState, const FString& NewCode) {
+bool UFINLuaRCO::SetLuaEEPROMCode_Validate(AFINStateEEPROMText* LuaEEPROMState, const FString& NewCode) {
 	return true;
 }

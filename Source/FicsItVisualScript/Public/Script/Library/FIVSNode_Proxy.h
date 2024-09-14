@@ -4,6 +4,33 @@
 #include "Script/FIVSScriptNode.h"
 #include "FIVSNode_Proxy.generated.h"
 
+USTRUCT()
+struct FFIVSNodeStatement_Proxy : public FFIVSNodeStatement {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FGuid ExecIn;
+	UPROPERTY(SaveGame)
+	FGuid ExecOut;
+	UPROPERTY(SaveGame)
+	FGuid AddrIn;
+	UPROPERTY(SaveGame)
+	FGuid CompOut;
+
+	FFIVSNodeStatement_Proxy() = default;
+	FFIVSNodeStatement_Proxy(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid AddrIn, FGuid CompOut) :
+		FFIVSNodeStatement(Node),
+		ExecIn(ExecIn),
+		ExecOut(ExecOut),
+		AddrIn(AddrIn),
+		CompOut(CompOut) {}
+
+	// Begin FFIVSNodeStatement
+	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
+	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
+	// End FFIVSNodeStatement
+};
+
 UCLASS()
 class UFIVSNode_Proxy : public UFIVSScriptNode {
 	GENERATED_BODY()
@@ -25,10 +52,14 @@ public:
 	// End UFIVSNodes
 	
 	// Begin UFIVSGenericNode
-	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override {
-		return TArray<UFIVSPin*>{AddrIn};
+	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+		return FFIVSNodeStatement_Proxy{
+			NodeId,
+			ExecIn->PinId,
+			ExecOut->PinId,
+			AddrIn->PinId,
+			CompOut->PinId
+		};
 	}
-
-	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
 	// End UFIVSGenericNode
 };

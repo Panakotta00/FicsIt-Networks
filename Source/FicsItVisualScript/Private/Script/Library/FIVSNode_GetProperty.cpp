@@ -1,7 +1,26 @@
 #include "Script/Library/FIVSNode_GetProperty.h"
 
+#include "Kernel/FIVSRuntimeContext.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINReflection.h"
+
+void FFIVSNodeStatement_GetProperty::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_EvaluatePin(DataIn);
+}
+
+void FFIVSNodeStatement_GetProperty::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	const FFINAnyNetworkValue* Instance = Context.TryGetRValue(DataIn);
+
+	if (!Instance) return;
+
+	FFINExecutionContext ExecContext;
+	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) ExecContext = Instance->GetClass();
+	else ExecContext = UFINNetworkUtils::RedirectIfPossible(Instance->GetTrace());
+
+	FFINAnyNetworkValue Value = Property->GetValue(ExecContext);
+
+	Context.SetValue(DataOut, Value);
+}
 
 void UFIVSNode_GetProperty::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
@@ -27,26 +46,12 @@ void UFIVSNode_GetProperty::GetNodeActions(TArray<FFIVSNodeAction>& Actions) con
 	}
 }
 
-void UFIVSNode_GetProperty::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Properties.Properties.Add(TEXT("Property"), Property->GetPathName());
+void UFIVSNode_GetProperty::SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const {
+	Properties->SetStringField(TEXT("Property"), Property->GetPathName());
 }
 
-void UFIVSNode_GetProperty::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	SetProperty(Cast<UFINProperty>(FSoftObjectPath(Properties.Properties[TEXT("Property")]).TryLoad()));
-}
-
-TArray<UFIVSPin*> UFIVSNode_GetProperty::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	return TArray<UFIVSPin*>{InstanceIn};
-}
-
-TArray<UFIVSPin*> UFIVSNode_GetProperty::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FFIVSValue Instance = Context.GetValue(InstanceIn);
-	FFINExecutionContext ExecContext;
-	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) ExecContext = Instance->GetClass();
-	else ExecContext = UFINNetworkUtils::RedirectIfPossible(Instance->GetTrace());
-	FFINAnyNetworkValue Value = Property->GetValue(ExecContext);
-	Context.SetValue(DataOut, Value);
-	return {};
+void UFIVSNode_GetProperty::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
+	SetProperty(Cast<UFINProperty>(FSoftObjectPath(Properties->GetStringField(TEXT("Property"))).TryLoad()));
 }
 
 void UFIVSNode_GetProperty::SetProperty(UFINProperty* InProperty) {

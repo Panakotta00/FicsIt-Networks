@@ -1,5 +1,35 @@
 #include "Script/Library/FIVSNode_Variable.h"
 
+#include "JsonObjectConverter.h"
+#include "Kernel/FIVSRuntimeContext.h"
+#include "Kernel/FIVSValue.h"
+
+void FFIVSNodeStatement_DeclareVariable::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_EvaluatePin(InitialValue);
+}
+
+void FFIVSNodeStatement_DeclareVariable::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	const FFINAnyNetworkValue* Value = Context.TryGetRValue(InitialValue);
+	Context.SetValue(VarOut, FFIVSValue::MakeLValue(VarOut, *Value));
+}
+
+void FFIVSNodeStatement_Assign::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_EvaluatePin(ValIn);
+	Context.Push_EvaluatePin(VarIn);
+}
+
+void FFIVSNodeStatement_Assign::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	FFINAnyNetworkValue* variable = Context.TryGetLValue(VarIn);
+	if (!variable) return;
+
+	const FFINAnyNetworkValue* value = Context.TryGetRValue(ValIn);
+	if (!value) return;
+
+	*variable = *value;
+
+	Context.Push_ExecPin(ExecOut);
+}
+
 void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (EFINNetworkValueType DataType : TEnumRange<EFINNetworkValueType>()) {
 		// Input FIN_ANY is excluded from conversion because it may fail or not and needs its own node
@@ -8,6 +38,7 @@ void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const 
 		
 		FFIVSNodeAction Action;
 		Action.NodeType = UFIVSNode_Variable::StaticClass();
+
 		Action.Title = FText::FromString(TEXT("Declare Local Variable (") + Name + TEXT(")"));
 		Action.Category = FText::FromString(TEXT("General|Local"));
 		Action.SearchableText = Action.Title;
@@ -32,26 +63,37 @@ void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const 
 	}
 }
 
-TArray<UFIVSPin*> UFIVSNode_Variable::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	TArray<UFIVSPin*> InputPins;
-	if (DataInput) InputPins.Add(DataInput);
-	return InputPins;
+void UFIVSNode_Variable::SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const {
+	Properties->SetBoolField(TEXT("Assignment"), bAssignment);
+	TSharedRef<FJsonObject> typeObj = MakeShared<FJsonObject>();
+	FJsonObjectConverter::UStructToJsonObject(FFIVSPinDataType::StaticStruct(), &Type, typeObj);
+	Properties->SetObjectField(TEXT("Type"), typeObj);
 }
 
-TArray<UFIVSPin*> UFIVSNode_Variable::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
+void UFIVSNode_Variable::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
+	bAssignment = Properties->GetBoolField(TEXT("Assignment"));
+	const TSharedPtr<FJsonObject>& typeObj = Properties->GetObjectField(TEXT("Type"));
+	if (typeObj) {
+		FJsonObjectConverter::JsonObjectToUStruct(typeObj.ToSharedRef(), FFIVSPinDataType::StaticStruct(), &Type);
+		SetType(Type, bAssignment);
+	}
+}
+
+TFINDynamicStruct<FFIVSNodeStatement> UFIVSNode_Variable::CreateNodeStatement() {
 	if (bAssignment) {
-		FFIVSValue Variable = Context.GetValue(VarPin);
-		FFIVSValue Value = Context.GetValue(DataInput);
-		*Variable = *Value;
-		return {ExecOutput};
+		return FFIVSNodeStatement_Assign{
+			NodeId,
+			ExecInput->PinId,
+			ExecOutput->PinId,
+			VarPin->PinId,
+			DataInput->PinId,
+		};
 	} else {
-		FFINAnyNetworkValue* Value = Context.GetLocalVariable(GetFullName());
-		if (!Value) {
-			FFIVSValue InitValue = Context.GetValue(DataInput);
-			Value = &Context.SetLocalVariable(GetFullName(), *InitValue); // TODO: Use different var name, current one is not persistable since Object it self doesnt get persisted but recreated
-		}
-		Context.SetValue(VarPin, FFIVSValue(Value));
-		return {};
+		return FFIVSNodeStatement_DeclareVariable{
+			NodeId,
+			VarPin->PinId,
+			DataInput->PinId,
+		};
 	}
 }
 

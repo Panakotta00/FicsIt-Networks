@@ -4,6 +4,38 @@
 #include "Script/FIVSScriptNode.h"
 #include "FIVSNode_CallReflectionFunction.generated.h"
 
+USTRUCT()
+struct FFIVSNodeStatement_CallReflectionFunction : public FFIVSNodeStatement {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FGuid ExecIn;
+	UPROPERTY(SaveGame)
+	FGuid ExecOut;
+	UPROPERTY(SaveGame)
+	FGuid Self;
+	UPROPERTY(SaveGame)
+	TArray<FGuid> InputPins;
+	UPROPERTY(SaveGame)
+	TArray<FGuid> OutputPins;
+	UPROPERTY(SaveGame)
+	UFINFunction* Function;
+
+	FFIVSNodeStatement_CallReflectionFunction() = default;
+	FFIVSNodeStatement_CallReflectionFunction(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid Self, const TArray<FGuid>& InputPins, const TArray<FGuid>& OutputPins, UFINFunction* Function) :
+		FFIVSNodeStatement(Node),
+		ExecIn(ExecIn),
+		ExecOut(ExecOut),
+		Self(Self),
+		InputPins(InputPins),
+		OutputPins(OutputPins),
+		Function(Function) {}
+
+	// Begin FFIVSNodeStatement
+	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
+	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
+	// End FFIVSNodeStatement
+};
 
 UCLASS()
 class UFIVSNode_CallReflectionFunction : public UFIVSScriptNode {
@@ -28,14 +60,12 @@ public:
 
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
-	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
-	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
+	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const override;
+	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
 	// End UFIVSNodes
 	
 	// Begin UFIVSScriptNode
-	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
-
-	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
+	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override;
 	// End UFIVSScriptNode
 
 	void SetFunction(UFINFunction* InFunction);

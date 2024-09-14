@@ -40,16 +40,19 @@ USTRUCT()
 struct FICSITNETWORKS_API FFINExpandedNetworkValueType {
 	GENERATED_BODY()
 private:
-	EFINNetworkValueType Type;
-	union {
-		UFINStruct* RefSubType;
-		FFINExpandedNetworkValueType* SubType;
-	};
+	UPROPERTY(SaveGame)
+	TEnumAsByte<EFINNetworkValueType> Type;
+
+	UPROPERTY(SaveGame)
+	UFINStruct* RefSubType = nullptr;
+
+	UPROPERTY(SaveGame)
+	FFINDynamicStructHolder SubType;
 
 public:
-	FFINExpandedNetworkValueType() : Type(FIN_NIL), SubType(nullptr) {}
+	FFINExpandedNetworkValueType() : Type(FIN_NIL) {}
 
-	FFINExpandedNetworkValueType(EFINNetworkValueType InType) : Type(InType), SubType(nullptr) {
+	FFINExpandedNetworkValueType(EFINNetworkValueType InType) : Type(InType) {
 		check(InType < FIN_OBJ || InType == FIN_ANY);
 	}
 
@@ -57,7 +60,7 @@ public:
 		check(InType != FIN_ARRAY);
 	}
 
-	FFINExpandedNetworkValueType(EFINNetworkValueType InType, const FFINExpandedNetworkValueType& InSubType) : Type(FIN_ARRAY), SubType(new FFINExpandedNetworkValueType(InSubType)) {
+	FFINExpandedNetworkValueType(EFINNetworkValueType InType, const FFINExpandedNetworkValueType& InSubType) : Type(FIN_ARRAY), SubType(InSubType) {
 		check(InType == FIN_ARRAY);
 	}
 
@@ -65,24 +68,18 @@ public:
 
 	FFINExpandedNetworkValueType(const FFINExpandedNetworkValueType& Other) : Type(Other.Type) {
 		if (Type == FIN_ARRAY) {
-			SubType = new FFINExpandedNetworkValueType(*Other.SubType);
+			SubType = Other.SubType;
 		} else {
 			RefSubType = Other.RefSubType;
 		}
 	}
 
-	~FFINExpandedNetworkValueType() {
-		if (Type == FIN_ARRAY) {
-			delete SubType;
-		}
-	}
-
 	FFINExpandedNetworkValueType& operator=(const FFINExpandedNetworkValueType& Other) {
 		if (Other.Type == FIN_ARRAY) {
-			if (Type == FIN_ARRAY) *SubType = *Other.SubType;
-			else SubType = new FFINExpandedNetworkValueType(*Other.SubType);
+			if (Type != FIN_ARRAY) RefSubType = nullptr;
+			SubType = Other.SubType;
 		} else {
-			if (Type == FIN_ARRAY) delete SubType;
+			if (Type == FIN_ARRAY) SubType = FFINDynamicStructHolder();
 			RefSubType = Other.RefSubType;
 		}
 		Type = Other.Type;
@@ -91,7 +88,7 @@ public:
 
 	bool Equals(const FFINExpandedNetworkValueType& Other) {
 		if (Type != Other.Type) return false;
-		if (Type == FIN_ARRAY) return SubType->Equals(*Other.SubType);
+		if (Type == FIN_ARRAY) return SubType.Get<FFINExpandedNetworkValueType>().Equals(Other.SubType.Get<FFINExpandedNetworkValueType>());
 		if (Type >= FIN_OBJ && Type != FIN_ANY) return RefSubType == Other.RefSubType;
 		return true;
 	}
@@ -107,7 +104,7 @@ public:
 
 	FFINExpandedNetworkValueType GetSubType() const {
 		check(Type == FIN_ARRAY);
-		return *SubType;
+		return SubType.Get<FFINExpandedNetworkValueType>();
 	}
 };
 

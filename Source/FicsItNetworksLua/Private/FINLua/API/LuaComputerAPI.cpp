@@ -3,9 +3,9 @@
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
-#include "FINStateEEPROMLua.h"
 #include "Network/FINNetworkUtils.h"
 #include "FGTimeSubsystem.h"
+#include "FicsItKernel/Processor/FINStateEEPROMText.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaStruct.h"
@@ -197,7 +197,7 @@ namespace FINLua {
 			 */)", setEEPROM) {
 				LuaFunc();
 
-				AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
+				AFINStateEEPROMText* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 				if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
 				size_t len;
 				const char* str = luaL_checklstring(L, 1, &len);
@@ -216,7 +216,7 @@ namespace FINLua {
 			 */)", getEEPROM) {
 				LuaFunc();
 
-				const AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
+				const AFINStateEEPROMText* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
 				if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
 				FString Code = eeprom->GetCode();
 				FTCHARToUTF8 Conv(*Code, Code.Len());

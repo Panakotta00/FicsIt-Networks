@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "FicsItKernel/Processor/FINStateEEPROM.h"
-#include "FINStateEEPROMLua.generated.h"
+#include "FINStateEEPROMText.generated.h"
 
 UCLASS()
-class FICSITNETWORKSLUA_API AFINStateEEPROMLua : public AFINStateEEPROM {
+class FICSITNETWORKS_API AFINStateEEPROMText : public AFINStateEEPROM {
 	GENERATED_BODY()
 	
 protected:

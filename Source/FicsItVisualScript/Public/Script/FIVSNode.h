@@ -10,6 +10,8 @@ class IFIVSScriptContext_Interface;
 class UFIVSGraph;
 class UFIVSNode;
 class SFIVSEdNodeViewer;
+class SFIVSEdGraphViewer;
+struct FFIVSEdNodeStyle;
 
 DECLARE_DELEGATE_RetVal(TSharedRef<SWidget>, FFIVSNodeActionCreateTooltip)
 DECLARE_DELEGATE_OneParam(FFIVSNodeActionExecute, UFIVSNode*)
@@ -69,8 +71,10 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FFINScriptGraphPinChanged, EFIVSNodePinChan
 UCLASS(Abstract)
 class UFIVSNode : public UObject {
 	GENERATED_BODY()
-
 public:
+	UPROPERTY()
+	FGuid NodeId = FGuid::NewGuid();
+
 	UPROPERTY()
 	FVector2D Pos;
 
@@ -115,7 +119,7 @@ public:
 	 * Is supposed to store additional node properties to the serialization data that will be used on deserialization
 	 * for initializing the node so it can successfully recreate the Node name, Pins, functionality, etc.
 	 */
-	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const {}
+	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const { }
 
 	/**
 	 * Called when the node gets deserialized.
@@ -124,7 +128,7 @@ public:
 	 * this should happen here, so that directly after this function got called, the InitPins() function can be called normally,
 	 * to create all Pins like it was before serialization.
 	 */
-	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {}
+	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) {}
 
 	/**
 	 * Removes all connections of all pins
@@ -157,6 +161,27 @@ public:
 	 * Retruns the outer/parent graph of this node
 	 */
 	UFIVSGraph* GetOuterGraph() const;
+
+	bool IsStartNode() {
+		bool bHasExecOut = false;
+		for (UFIVSPin* Pin : GetNodePins()) {
+			EFIVSPinType type = Pin->GetPinType();
+			if (!(type & FIVS_PIN_EXEC)) {
+				continue;
+			}
+
+			if (type & FIVS_PIN_INPUT) {
+				return false;
+			}
+			if (type & FIVS_PIN_OUTPUT) {
+				if (bHasExecOut) {
+					return false;
+				}
+				bHasExecOut = true;
+			}
+		}
+		return bHasExecOut;
+	}
 };
 
 UCLASS()

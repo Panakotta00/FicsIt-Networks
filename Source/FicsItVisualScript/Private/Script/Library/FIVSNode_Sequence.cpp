@@ -1,6 +1,15 @@
 ﻿#include "Script/Library/FIVSNode_Sequence.h"
 
 #include "Editor/FIVSEdNodeViewer.h"
+#include "Kernel/FIVSRuntimeContext.h"
+
+void FFIVSNodeStatement_Sequence::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	FFIVSNodeStatement::PreExecPin(Context, ExecPin);
+}
+
+void FFIVSNodeStatement_Sequence::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_ExecPin(ExecOut);
+}
 
 UFIVSNode_Sequence::UFIVSNode_Sequence() {
 	DisplayName = FText::FromString(TEXT("Sequence"));
@@ -55,18 +64,12 @@ TSharedRef<SFIVSEdNodeViewer> UFIVSNode_Sequence::CreateNodeViewer(const TShared
 		];
 }
 
-TArray<UFIVSPin*> UFIVSNode_Sequence::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	return ExecOut;
+void UFIVSNode_Sequence::SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const {
+	Properties->SetNumberField(TEXT("PinCount"), ExecOut.Num());
 }
 
-void UFIVSNode_Sequence::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Properties.Properties.Add(TEXT("PinCount"), FString::FromInt(ExecOut.Num()));
-}
-
-void UFIVSNode_Sequence::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	if (const FString* pinCountStr = Properties.Properties.Find(TEXT("PinCount"))) {
-		SetOutputNum(FCString::Atoi(**pinCountStr));
-	}
+void UFIVSNode_Sequence::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
+	SetOutputNum(Properties->GetNumberField(TEXT("PinCount")));
 }
 
 void UFIVSNode_Sequence::SetOutputNum(int32 OutputNum) {

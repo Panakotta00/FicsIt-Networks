@@ -12,6 +12,8 @@ public class FicsItVisualScript : ModuleRules
         //bLegacyPublicIncludePaths = false;
 	    PCHUsage = PCHUsageMode.Default;
 
+	    OptimizeCode = CodeOptimization.Never;
+
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",
 			"CoreUObject",

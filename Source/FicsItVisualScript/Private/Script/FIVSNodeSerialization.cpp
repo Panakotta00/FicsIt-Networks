@@ -4,6 +4,7 @@
 #include "Script/FIVSGraph.h"
 #include "Script/FIVSNode.h"
 #include "JsonObjectConverter.h"
+#include "Logging/StructuredLog.h"
 
 TSharedPtr<FJsonValue> FIVS_GetPinLiteralAsJson(UFIVSPin* InPin) {
 	if (InPin->GetPinType() & FIVS_PIN_EXEC) return nullptr;
@@ -65,156 +66,216 @@ void FIVS_SetPinLiteralFromJson(UFIVSPin* InPin, TSharedPtr<FJsonValue> InValue)
 }
 
 FString UFIVSSerailizationUtils::FIVS_SerializePartial(TArray<UFIVSNode*> InNodes, bool bZeroOffset) {
-	FFIVSSerializedGraph Graph;
-	TMap<UFIVSNode*, int> SerializedNodes;
-	FVector2D LargestOffset = FVector2D(TNumericLimits<float>::Max(), TNumericLimits<float>::Max());
-	for (UFIVSNode* Node : InNodes) {
-		LargestOffset.X = FMath::Min(LargestOffset.X, Node->Pos.X);
-		LargestOffset.Y = FMath::Min(LargestOffset.Y, Node->Pos.Y);
-		FFIVSSerializedNode SerializedNode;
-		SerializedNode.NodeType = Node->GetClass();
-		SerializedNode.NodePos = Node->Pos;
-		Node->SerializeNodeProperties(SerializedNode.Properties);
-		SerializedNode.NodeID = Graph.Nodes.Num();
-		for (UFIVSPin* Pin : Node->GetNodePins()) {
-			FFIVSSerializedPin SerializedPin;
-			SerializedPin.PinName = Pin->GetName();
-			SerializedPin.PinLiteralValue = FIVS_GetPinLiteralAsJson(Pin);
+	TSharedRef<FJsonObject> graph = MakeShared<FJsonObject>();
+	TArray<TSharedPtr<FJsonValue>> nodes;
+	TArray<TSharedPtr<FJsonValue>> pinConnections;
+	TSet<TPair<UFIVSPin*,UFIVSPin*>> serializedPinConnections;
+
+	for (UFIVSNode* node : InNodes) {
+		TSharedRef<FJsonObject> nodeObject = MakeShared<FJsonObject>();
+
+		nodeObject->SetStringField(TEXT("type"), node->GetClass()->GetPathName());
+
+		nodeObject->SetStringField(TEXT("id"), node->NodeId.ToString());
+
+		TSharedRef<FJsonObject> pos = MakeShared<FJsonObject>();
+		FJsonObjectConverter::UStructToJsonObject(TBaseStructure<FVector2D>::Get(), &node->Pos, pos);
+		nodeObject->SetObjectField(TEXT("pos"), pos);
+
+		TSharedRef<FJsonObject> properties = MakeShared<FJsonObject>();
+		node->SerializeNodeProperties(properties);
+		nodeObject->SetObjectField(TEXT("props"), properties);
+
+		TArray<TSharedPtr<FJsonValue>> pins;
+		for (UFIVSPin* Pin : node->GetNodePins()) {
+			TSharedRef<FJsonObject> pinObject = MakeShared<FJsonObject>();
+
+			pinObject->SetStringField(TEXT("id"), Pin->PinId.ToString());
+			pinObject->SetStringField(TEXT("name"), Pin->GetName());
+			TSharedPtr<FJsonValue> literal = FIVS_GetPinLiteralAsJson(Pin);
+			if (literal) {
+				pinObject->SetField(TEXT("literal"), literal);
+			}
+
+			pins.Add(MakeShared<FJsonValueObject>(pinObject));
+
 			for (UFIVSPin* Connected : Pin->GetConnections()) {
-				int* ConnectedNodeRef = SerializedNodes.Find(Connected->ParentNode);
-				if (ConnectedNodeRef) {
-					FFIVSSerializedPinConnection Connection;
-					Connection.Pin1.NodeID = *ConnectedNodeRef;
-					Connection.Pin1.PinName = Connected->GetName();
-					Connection.Pin2.NodeID = SerializedNode.NodeID;
-					Connection.Pin2.PinName = Pin->GetName();
-					Graph.PinConnections.Add(MoveTemp(Connection));
-				}
+				if (serializedPinConnections.Contains(TPair<UFIVSPin*,UFIVSPin*>(Connected, Pin))) continue;
+
+				serializedPinConnections.Add({Connected, Pin});
+				serializedPinConnections.Add({Pin, Connected});
+
+				TSharedRef<FJsonObject> pinConnection = MakeShared<FJsonObject>();
+				pinConnection->SetStringField(TEXT("from"), Pin->PinId.ToString());
+				pinConnection->SetStringField(TEXT("to"), Connected->PinId.ToString());
+
+				pinConnections.Add(MakeShared<FJsonValueObject>(pinConnection));
 			}
-			SerializedNode.Pins.Add(MoveTemp(SerializedPin));
 		}
-		int Index = Graph.Nodes.Add(MoveTemp(SerializedNode));
-		SerializedNodes.Add(Node, Index);
+		nodeObject->SetArrayField(TEXT("pins"), pins);
+
+		nodes.Add(MakeShared<FJsonValueObject>(nodeObject));
 	}
 
-	for (FFIVSSerializedNode& Node : Graph.Nodes) {
-		Node.NodePos -= LargestOffset;
-	}
+	graph->SetArrayField(TEXT("nodes"), nodes);
+	graph->SetArrayField(TEXT("connections"), pinConnections);
 
-	FJsonObjectConverter::CustomExportCallback ExportCallback;
-	ExportCallback.BindLambda([](FProperty* InProp, const void* InVal) -> TSharedPtr<FJsonValue> {
-		if (InProp->IsA<FStructProperty>() && ((void*)CastField<FStructProperty>(InProp)->Struct == (void*)FFIVSSerializedPin::StaticStruct())) {
-			const FFIVSSerializedPin& SerializedPin = *static_cast<const FFIVSSerializedPin*>(InVal);
-			
-			if (SerializedPin.PinLiteralValue.IsValid()) {
-				TSharedPtr<FJsonObject> Obj = MakeShared<FJsonObject>();
-				Obj->SetStringField(TEXT("pinName"), SerializedPin.PinName);
-				Obj->SetField(TEXT("pinLiteral"), SerializedPin.PinLiteralValue);
-				return MakeShared<FJsonValueObject>(Obj);
-			}
-			return nullptr;
-		}
-		return nullptr;
-	});
 	FString JsonString;
-	FJsonObjectConverter::UStructToFormattedJsonObjectString<TCHAR, TPrettyJsonPrintPolicy>(FFIVSSerializedGraph::StaticStruct(), &Graph, JsonString, 0, 0, 0, &ExportCallback);
+	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> jsonWriter = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create(&JsonString);
 
-	return JsonString;
+	if (FJsonSerializer::Serialize(graph, jsonWriter)) {
+		jsonWriter->Close();
+		return JsonString;
+	} else {
+		UE_LOG(LogFicsItVisualScript, Warning, TEXT("Unable to serialize graph!"));
+		jsonWriter->Close();
+	}
+
+	return TEXT("");
 }
 
 FString UFIVSSerailizationUtils::FIVS_SerailizeGraph(UFIVSGraph* Graph) {
 	FString Str = FIVS_SerializePartial(Graph->GetNodes(), false);
-	UE_LOG(LogFicsItVisualScript, Warning, TEXT("%s"), *Str);
 	return Str;
 }
 
-#pragma optimize("", off)
-TArray<UFIVSNode*> UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString InStr, FVector2D InOffset) {
-	FFIVSSerializedGraph SerializedGraph;
-	TMap<int, UFIVSNode*> NodeIDs;
+TArray<UFIVSNode*> UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Graph, FString InStr, bool bCreateNewGuids) {
+	TSharedRef<FJsonStringReader> jsonReader = FJsonStringReader::Create(InStr);
+	TSharedPtr<FJsonObject> graphObject;
+	if (!FJsonSerializer::Deserialize<TCHAR>(jsonReader, graphObject)) {
+		UE_LOG(LogFicsItVisualScript, Warning, TEXT("Unable to deserialize graph: %s"), *jsonReader->GetErrorMessage());
+		return {};
+	}
 
-	TSharedPtr<FJsonObject> JsonObject;
-	TSharedRef<TJsonReader<> > JsonReader = TJsonReaderFactory<>::Create(InStr);
-	if (FJsonSerializer::Deserialize(JsonReader, JsonObject) && JsonObject.IsValid()) {
-		const TArray<TSharedPtr<FJsonValue>>* PinConnections;
-		if (JsonObject->TryGetArrayField(TEXT("pinConnections"), PinConnections)) {
-			FJsonObjectConverter::JsonArrayToUStruct(*PinConnections, &SerializedGraph.PinConnections, 0, 0);
-		}
-		const TArray<TSharedPtr<FJsonValue>>* Nodes;
-		if (JsonObject->TryGetArrayField(TEXT("nodes"), Nodes)) {
-			for (const TSharedPtr<FJsonValue>& JsonNode : *Nodes) {
-				const TSharedPtr<FJsonObject>* Node;
-				if (JsonNode->TryGetObject(Node)) {
-					FFIVSSerializedNode SerializedNode;
-					(*Node)->TryGetNumberField(TEXT("nodeID"), SerializedNode.NodeID);
-					const TSharedPtr<FJsonObject>* NodePos;
-					if ((*Node)->TryGetObjectField(TEXT("nodePos"), NodePos)) {
-						double x = 0, y = 0;
-						(*NodePos)->TryGetNumberField(TEXT("x"), x);
-						(*NodePos)->TryGetNumberField(TEXT("y"), y);
-						SerializedNode.NodePos = FVector2D(x, y);
-					}
-					TSharedPtr<FJsonValue> NodeType = (*Node)->TryGetField(TEXT("nodeType"));
-					if (!FJsonObjectConverter::JsonValueToUProperty(NodeType, FindFProperty<FClassProperty>(FFIVSSerializedNode::StaticStruct(), TEXT("NodeType")), &SerializedNode.NodeType, 0, 0)) {
+	TArray<UFIVSNode*> deserializedNodes;
+	TMap<FGuid, UFIVSPin*> deserializedPins;
+
+	const TArray<TSharedPtr<FJsonValue>>* nodes = nullptr;
+	if (graphObject->TryGetArrayField(TEXT("nodes"), nodes)) {
+		for (const TSharedPtr<FJsonValue>& nodeValue : *nodes) {
+			const TSharedPtr<FJsonObject>* nodeObjectPtr = nullptr;
+			if (!nodeValue->TryGetObject(nodeObjectPtr)) {
+				continue;
+			}
+			const FJsonObject* nodeObject = nodeObjectPtr->Get();
+
+			FString typeStr;
+			if (!nodeObject->TryGetStringField(TEXT("type"), typeStr)) {
+				// TODO: Create fake Node to prevent data-loss
+				continue;
+			}
+
+			TSubclassOf<UFIVSNode> type = Cast<UClass>(FSoftObjectPath(typeStr).TryLoad());
+			if (!type) {
+				// TODO: Create fake Node to prevent data-loss
+				continue;
+			}
+
+			UFIVSNode* node = NewObject<UFIVSNode>(Graph, type);
+
+			FString idStr;
+			if (!bCreateNewGuids && nodeObject->TryGetStringField(TEXT("id"), idStr)) {
+				FGuid::Parse(idStr, node->NodeId);
+			}
+			deserializedNodes.Add(node);
+
+			const TSharedPtr<FJsonObject>* posObj;
+			if (nodeObject->TryGetObjectField(TEXT("pos"), posObj)) {
+				FJsonObjectConverter::JsonObjectToUStruct(posObj->ToSharedRef(), TBaseStructure<FVector2D>::Get(), &node->Pos);
+			}
+
+			const TSharedPtr<FJsonObject>& props = nodeObject->GetObjectField(TEXT("props"));
+			node->DeserializeNodeProperties(props);
+
+			const TArray<TSharedPtr<FJsonValue>>* pins;
+			if (nodeObject->TryGetArrayField(TEXT("pins"), pins)) {
+				for (const TSharedPtr<FJsonValue>& pinValue : *pins) {
+					const TSharedPtr<FJsonObject>* pinObjPtr = nullptr;
+					if (!pinValue->TryGetObject(pinObjPtr)) {
 						continue;
 					}
-					const TSharedPtr<FJsonObject>* Properties;
-					if ((*Node)->TryGetObjectField(TEXT("properties"), Properties)) {
-						FJsonObjectConverter::JsonObjectToUStruct(Properties->ToSharedRef(), FFIVSNodeProperties::StaticStruct(), &SerializedNode.Properties, 0, 0);
+					const FJsonObject* pinObj = pinObjPtr->Get();
+
+					FString name;
+					if (!pinObj->TryGetStringField(TEXT("name"), name)) {
+						continue;
 					}
-					const TArray<TSharedPtr<FJsonValue>>* Pins;
-					if ((*Node)->TryGetArrayField(TEXT("pins"), Pins)) {
-						for (const TSharedPtr<FJsonValue>& Pin : *Pins) {
-							const TSharedPtr<FJsonObject>* Obj;
-							if (!Pin->TryGetObject(Obj)) continue;
-							FFIVSSerializedPin SerializedPin;
-							(*Obj)->TryGetStringField(TEXT("pinName"), SerializedPin.PinName); 
-							SerializedPin.PinLiteralValue = (*Obj)->TryGetField(TEXT("pinLiteral"));
-							SerializedNode.Pins.Add(MoveTemp(SerializedPin));
+
+					UFIVSPin* pin = node->FindPinByName(name);
+					if (!pin) {
+						// TODO: Add pin that was not found anymore (prevent data loss)
+						continue;
+					}
+
+					FGuid id;
+					if (pinObj->TryGetStringField(TEXT("id"), idStr) && FGuid::Parse(idStr, id)) {
+						deserializedPins.Add(id, pin);
+						if (!bCreateNewGuids) {
+							pin->PinId = id;
 						}
 					}
-					SerializedGraph.Nodes.Add(MoveTemp(SerializedNode));
+
+					TSharedPtr<FJsonValue> literal = pinObj->TryGetField(TEXT("literal"));
+					if (literal) {
+						FIVS_SetPinLiteralFromJson(pin, literal);
+					}
 				}
 			}
+
+			Graph->AddNode(node);
 		}
 	}
 
-	TArray<UFIVSNode*> Nodes;
-	for (const FFIVSSerializedNode& SerializedNode : SerializedGraph.Nodes) {
-		UFIVSNode* Node = NewObject<UFIVSNode>(Graph, SerializedNode.NodeType);
-		Node->Pos = SerializedNode.NodePos + InOffset;
-		Node->DeserializeNodeProperties(SerializedNode.Properties);
-		NodeIDs.Add(SerializedNode.NodeID, Node);
-		TArray<UFIVSPin*> Pins = Node->GetNodePins();
-		for (const FFIVSSerializedPin& SerializedPin : SerializedNode.Pins) {
-			UFIVSPin** Pin = Pins.FindByPredicate([&SerializedPin](UFIVSPin* Pin) {
-				return Pin->GetName() == SerializedPin.PinName;
-			});
-			if (Pin) {
-				FIVS_SetPinLiteralFromJson(*Pin, SerializedPin.PinLiteralValue);
+	const TArray<TSharedPtr<FJsonValue>>* pinConnections = nullptr;
+	if (graphObject->TryGetArrayField(TEXT("connections"), pinConnections)) {
+		for (const TSharedPtr<FJsonValue>& connection : *pinConnections) {
+			const TSharedPtr<FJsonObject>* connObjPtr = nullptr;
+			if (!connection->TryGetObject(connObjPtr)) {
+				continue;
 			}
+			const FJsonObject* pinObj = connObjPtr->Get();
+
+			FString fromStr;
+			FGuid fromId;
+			if (!pinObj->TryGetStringField(TEXT("from"), fromStr) || !FGuid::Parse(fromStr, fromId)) {
+				continue;
+			}
+
+			FString toStr;
+			FGuid toId;
+			if (!pinObj->TryGetStringField(TEXT("to"), toStr) || !FGuid::Parse(toStr, toId)) {
+				continue;
+			}
+
+			UFIVSPin** from = deserializedPins.Find(fromId);
+			UFIVSPin** to = deserializedPins.Find(toId);
+			if (!from || !to || !*from || !*to) {
+				continue;
+			}
+
+			(*from)->AddConnection(*to);
 		}
-		Graph->AddNode(Node);
-		Nodes.Add(Node);
 	}
 
-	for (const FFIVSSerializedPinConnection& SerializedPinConnection : SerializedGraph.PinConnections) {
-		UFIVSNode** Node1 = NodeIDs.Find(SerializedPinConnection.Pin1.NodeID);
-		UFIVSNode** Node2 = NodeIDs.Find(SerializedPinConnection.Pin2.NodeID);
-		if (!Node1 || !Node2) continue;
-		TArray<UFIVSPin*> Pins1 = (*Node1)->GetNodePins();
-		UFIVSPin** Pin1 = Pins1.FindByPredicate([&SerializedPinConnection](UFIVSPin* Pin) {
-			return Pin->GetName() == SerializedPinConnection.Pin1.PinName;
-		});
-		TArray<UFIVSPin*> Pins2 = (*Node2)->GetNodePins();
-		UFIVSPin** Pin2 = Pins2.FindByPredicate([&SerializedPinConnection](UFIVSPin* Pin) {
-			return Pin->GetName() == SerializedPinConnection.Pin2.PinName;
-		});
-		if (!Pin1 || !Pin2 || !*Pin1 || !*Pin2) continue;
-		(*Pin1)->AddConnection(*Pin2);
-	}
-
-	return Nodes;
+	return deserializedNodes;
 }
-#pragma optimize("", on)
+
+void UFIVSSerailizationUtils::FIVS_AdjustNodesOffset(const TArray<UFIVSNode*>& InNodes, FVector2D Offset, bool bRelativeToCenter) {
+	FVector2D MaxPos = FVector2D(TNumericLimits<double>::Min());
+	FVector2D MinPos = FVector2D(TNumericLimits<double>::Max());
+
+	for (UFIVSNode* node : InNodes) {
+		MaxPos = FVector2D::Max(MaxPos, node->Pos);
+		MinPos = FVector2D::Min(MinPos, node->Pos);
+	}
+
+	FVector2D delta = -MinPos + Offset;
+	if (bRelativeToCenter) {
+		delta -= (MaxPos-MinPos)/2;
+	}
+
+	for (UFIVSNode* node : InNodes) {
+		node->Pos += delta;
+	}
+}
 

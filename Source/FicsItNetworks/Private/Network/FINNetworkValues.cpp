@@ -11,7 +11,7 @@ FFINExpandedNetworkValueType::FFINExpandedNetworkValueType(UFINProperty* Propert
 	Type = Property->GetType();
 	switch (Type) {
 	case FIN_ARRAY:
-		SubType = new FFINExpandedNetworkValueType(Cast<UFINArrayProperty>(Property)->GetInnerType());
+		SubType = FFINExpandedNetworkValueType(Cast<UFINArrayProperty>(Property)->GetInnerType());
 		break;
 	case FIN_OBJ:
 		RefSubType = FFINReflection::Get()->FindClass(Cast<UFINObjectProperty>(Property)->GetSubclass());
@@ -33,7 +33,7 @@ FFINExpandedNetworkValueType::FFINExpandedNetworkValueType(UFINProperty* Propert
 bool FFINExpandedNetworkValueType::IsA(const FFINExpandedNetworkValueType& Other) const {
 	if (Other.Type == FIN_ANY) return true;
 	if (Type != Other.Type) return false;
-	if (Type == FIN_ARRAY) return SubType->IsA(*Other.SubType);
+	if (Type == FIN_ARRAY) return SubType.Get<FFINExpandedNetworkValueType>().IsA(Other.SubType.Get<FFINExpandedNetworkValueType>());
 	if (Type >= FIN_OBJ && Type != FIN_ANY) return RefSubType->IsChildOf(Other.RefSubType);
 	return true;
 }

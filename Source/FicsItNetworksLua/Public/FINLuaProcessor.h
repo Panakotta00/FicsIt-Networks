@@ -7,7 +7,7 @@
 #include "FINLua/API/LuaFileSystemAPI.h"
 #include "FINLuaProcessor.generated.h"
 
-class AFINStateEEPROMLua;
+class AFINStateEEPROMText;
 struct lua_State;
 struct lua_Debug;
 namespace FINLua::Event::event {
@@ -126,7 +126,7 @@ class FICSITNETWORKSLUA_API UFINLuaProcessor : public UFINKernelProcessor {
 private:
 	// Processor cache
 	UPROPERTY()
-	TWeakObjectPtr<AFINStateEEPROMLua> EEPROM;
+	TWeakObjectPtr<AFINStateEEPROMText> EEPROM;
 
 	// Lua runtime
 	lua_State* luaState = nullptr;
@@ -206,7 +206,7 @@ public:
 	 *
 	 * @return	the eeprom used by the processor.
 	 */
-	AFINStateEEPROMLua* GetEEPROM() const;
+	AFINStateEEPROMText* GetEEPROM() const;
 
 	/**
 	 * Tries to pop a signal from the signal queue in the network controller

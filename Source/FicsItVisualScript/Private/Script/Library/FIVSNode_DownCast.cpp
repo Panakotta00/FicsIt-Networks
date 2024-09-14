@@ -1,6 +1,30 @@
 #include "Script/Library/FIVSNode_DownCast.h"
 
+#include "Kernel/FIVSRuntimeContext.h"
 #include "Reflection/FINReflection.h"
+
+void FFIVSNodeStatement_Cast::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_EvaluatePin(DataIn);
+}
+
+void FFIVSNodeStatement_Cast::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	const FFINAnyNetworkValue* value = Context.TryGetRValue(DataIn);
+	FFINNetworkTrace Trace = value->GetTrace();
+	UObject* Obj = *Trace;
+	bool bSuccess = Obj && Obj->IsA(Cast<UClass>(ToClass->GetOuter()));
+	if (bSuccess) {
+		Context.SetValue(DataOut, *value);
+	}
+	if (FailureOut.IsValid()) {
+		if (bSuccess) {
+			Context.Push_ExecPin(SuccessOut);
+		} else {
+			Context.Push_ExecPin(FailureOut);
+		}
+	} else {
+		Context.SetValue(SuccessOut, bSuccess);
+	}
+}
 
 void UFIVSNode_DownCast::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	UFINClass* FromClass = FFINReflection::Get()->FindClass(UObject::StaticClass());
@@ -22,28 +46,14 @@ void UFIVSNode_DownCast::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const 
 	}
 }
 
-void UFIVSNode_DownCast::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Properties.Properties.Add(TEXT("ToClass"), ToClass->GetPathName());
+void UFIVSNode_DownCast::SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const {
+	Properties->SetStringField(TEXT("ToClass"), ToClass->GetPathName());
 }
 
-void UFIVSNode_DownCast::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	SetClass(Cast<UFINClass>(FSoftObjectPath(Properties.Properties[TEXT("ToClass")]).TryLoad()));
-}
+void UFIVSNode_DownCast::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
+	if (!Properties) return;
 
-TArray<UFIVSPin*> UFIVSNode_DownCast::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	return {DataInput};
-}
-
-TArray<UFIVSPin*> UFIVSNode_DownCast::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FFIVSValue Value = Context.GetValue(DataInput);
-	FFINNetworkTrace Trace = Value->GetTrace();
-	UObject* Obj = *Trace;
-	bool bSuccess = Obj && Obj->IsA(Cast<UClass>(ToClass->GetOuter()));
-	if (bPure) {
-		Context.SetValue(SuccessOutput, bSuccess);
-		Context.SetValue(DataOutput, Value);
-	}
-	return {};
+	SetClass(Cast<UFINClass>(FSoftObjectPath(Properties->GetStringField(TEXT("ToClass"))).TryLoad()));
 }
 
 void UFIVSNode_DownCast::SetClass(UFINClass* InToClass) {

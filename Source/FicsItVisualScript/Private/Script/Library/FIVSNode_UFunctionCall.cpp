@@ -1,10 +1,45 @@
 #include "Script/Library/FIVSNode_UFunctionCall.h"
 
 #include "Editor/FIVSEdNodeViewer.h"
-#include "Reflection/FINClassProperty.h"
-#include "UObject/PropertyIterator.h"
+#include "Kernel/FIVSRuntimeContext.h"
 
 TMap<UClass*, TMap<FString, FFIVSNodeUFunctionCallMeta>> UFIVSNode_UFunctionCall::FunctionMetaData;
+
+void FFIVSNodeStatement_UFunctionCall::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_EvaluatePin(InputPins);
+}
+
+void FFIVSNodeStatement_UFunctionCall::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	TArray<FFINAnyNetworkValue> Output;
+
+	// allocate & initialize parameter struct
+	uint8* ParamStruct = (uint8*)FMemory_Alloca(Function->PropertiesSize);
+	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
+		if (Prop->GetPropertyFlags() & CPF_Parm) {
+			if (Prop->IsInContainer(Function->ParmsSize)) {
+				Prop->InitializeValue_InContainer(ParamStruct);
+				if (!(Prop->GetPropertyFlags() & CPF_OutParm)) {
+					const FFINAnyNetworkValue* Value = Context.TryGetRValue(PropertyToPin[Prop->GetFName()]);
+					Value->Copy(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct));
+				}
+			}
+		}
+	}
+
+	UObject* Obj = const_cast<UObject*>(GetDefault<UObject>(Function->GetOuterUClass()));
+	Obj->ProcessEvent(Function, ParamStruct);
+
+	// destroy parameter struct
+	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
+		EPropertyFlags Flags = Prop->GetPropertyFlags();
+		if (Flags & CPF_Parm) {
+			if (Flags & CPF_OutParm) {
+				Context.SetValue(PropertyToPin[Prop->GetFName()], FFINAnyNetworkValue(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct)));
+			}
+			if (Prop->IsInContainer(Function->ParmsSize)) Prop->DestroyValue_InContainer(ParamStruct);
+		}
+	}
+}
 
 void UFIVSNode_UFunctionCall::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for(TObjectIterator<UClass> It; It; ++It) {
@@ -28,7 +63,6 @@ void UFIVSNode_UFunctionCall::GetNodeActions(TArray<FFIVSNodeAction>& Actions) c
 			}
 			for (TFieldIterator<FProperty> Prop(*Func); Prop; ++Prop) {
 				auto Flags = Prop->GetPropertyFlags();
-				UFIVSPin* Pin = nullptr;
 				EFIVSPinType PinType = FIVS_PIN_DATA;
 				EFINNetworkValueType PinDataType = FIN_NIL;
 				if (Flags & CPF_Parm) {
@@ -65,56 +99,13 @@ TSharedRef<SFIVSEdNodeViewer> UFIVSNode_UFunctionCall::CreateNodeViewer(const TS
 	.Symbol(Symbol);
 }
 
-void UFIVSNode_UFunctionCall::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Properties.Properties.Add(TEXT("Function"), Function->GetPathName());
-	Properties.Properties.Add(TEXT("Symbol"), Symbol);
+void UFIVSNode_UFunctionCall::SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const {
+	Properties->SetStringField(TEXT("Function"), Function->GetPathName());
+	Properties->SetStringField(TEXT("Symbol"), Symbol);
 }
 
-void UFIVSNode_UFunctionCall::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	SetFunction(Cast<UFunction>(FSoftObjectPath(Properties.Properties[TEXT("Function")]).TryLoad()), Properties.Properties[TEXT("Symbol")]);
-}
-
-TArray<UFIVSPin*> UFIVSNode_UFunctionCall::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	TArray<UFIVSPin*> InputPins;
-	PropertyToPin.GenerateValueArray(InputPins);
-	return InputPins.FilterByPredicate([](UFIVSPin* Pin) {
-		return Pin->GetPinType() == FIVS_PIN_DATA_INPUT;
-	});
-}
-
-TArray<UFIVSPin*> UFIVSNode_UFunctionCall::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	TArray<FFINAnyNetworkValue> Output;
-	
-	// allocate & initialize parameter struct
-	uint8* ParamStruct = (uint8*)FMemory_Alloca(Function->PropertiesSize);
-	FFIVSValue Value;
-	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
-		if (Prop->GetPropertyFlags() & CPF_Parm) {
-			if (Prop->IsInContainer(Function->ParmsSize)) {
-				Prop->InitializeValue_InContainer(ParamStruct);
-				if (!(Prop->GetPropertyFlags() & CPF_OutParm)) {
-					Value = Context.GetValue(PropertyToPin[*Prop]);
-					Value->Copy(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct));
-				}
-			}
-		}
-	}
-	
-	UObject* Obj = const_cast<UObject*>(GetDefault<UObject>(Function->GetOuterUClass()));
-	Obj->ProcessEvent(Function, ParamStruct);
-
-	// destroy parameter struct
-	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
-		EPropertyFlags Flags = Prop->GetPropertyFlags();
-		if (Flags & CPF_Parm) {
-			if (Flags & CPF_OutParm) {
-				Context.SetValue(PropertyToPin[*Prop], FFINAnyNetworkValue(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct)));
-			}
-			if (Prop->IsInContainer(Function->ParmsSize)) Prop->DestroyValue_InContainer(ParamStruct);
-		}
-	}
-			
-	return {};
+void UFIVSNode_UFunctionCall::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
+	SetFunction(Cast<UFunction>(FSoftObjectPath(Properties->GetStringField(TEXT("Function"))).TryLoad()), Properties->GetStringField(TEXT("Symbol")));
 }
 
 void UFIVSNode_UFunctionCall::SetFunction(UFunction* InFunction, const FString& InSymbol) {
@@ -125,7 +116,8 @@ void UFIVSNode_UFunctionCall::SetFunction(UFunction* InFunction, const FString& 
 
 	DeletePin(ExecIn);
 	DeletePin(ExecOut);
-	DeletePins(Parameters);
+	DeletePins(Input);
+	DeletePins(Output);
 
 	for (TFieldIterator<FProperty> Prop(Function); Prop; ++Prop) {
 		auto Flags = Prop->GetPropertyFlags();
@@ -151,8 +143,12 @@ void UFIVSNode_UFunctionCall::SetFunction(UFunction* InFunction, const FString& 
 			Pin = CreatePin(PinType, Prop->GetName(), FText::FromString(Prop->GetName()), FFIVSPinDataType(PinDataType));
 		}
 		if (Pin) {
-			Parameters.Add(Pin);
 			PropertyToPin.Add(*Prop, Pin);
+			if (Flags & CPF_OutParm) {
+				Output.Add(Pin);
+			} else {
+				Input.Add(Pin);
+			}
 		}
 	}
 }

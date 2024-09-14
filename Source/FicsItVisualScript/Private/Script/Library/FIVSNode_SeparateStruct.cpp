@@ -1,6 +1,36 @@
 ﻿#include "Script/Library/FIVSNode_SeparateStruct.h"
 
+#include "Kernel/FIVSRuntimeContext.h"
 #include "Reflection/FINReflection.h"
+
+void FFIVSNodeStatement_SeparateStruct::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	TArray<FGuid> inputs;
+	InputPins.GenerateValueArray(inputs);
+	Context.Push_EvaluatePin(inputs);
+}
+
+void FFIVSNodeStatement_SeparateStruct::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	if (bBreak) {
+		const FFINAnyNetworkValue* value = Context.TryGetRValue(InputPins[TEXT("Struct")]);
+		if (!value) return;
+		FFINDynamicStructHolder StructObj = value->GetStruct();
+		FFINExecutionContext Ctx(StructObj.GetData());
+		for (UFINProperty* Prop : Struct->GetProperties()) {
+			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
+			const FGuid* Pin = OutputPins.Find(Prop->GetInternalName());
+			if (Pin) Context.SetValue(*Pin, Prop->GetValue(Ctx));
+		}
+	} else {
+		FFINDynamicStructHolder StructObj(Cast<UScriptStruct>(Struct->GetOuter()));
+		FFINExecutionContext Ctx(StructObj.GetData());
+		for (UFINProperty* Prop : Struct->GetProperties()) {
+			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
+			const FGuid* Pin = InputPins.Find(Prop->GetInternalName());
+			if (Pin) Prop->SetValue(Ctx, *Context.TryGetRValue(*Pin));
+		}
+		Context.SetValue(OutputPins[TEXT("Struct")], StructObj);
+	}
+}
 
 void UFIVSNode_SeparateStruct::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TTuple<UScriptStruct*, UFINStruct*> StructPair : FFINReflection::Get()->GetStructs()) {
@@ -16,7 +46,7 @@ void UFIVSNode_SeparateStruct::GetNodeActions(TArray<FFIVSNodeAction>& Actions) 
 		BreakAction.SearchableText = BreakAction.Title;
 		BreakAction.OnExecute.BindLambda([StructPair](UFIVSNode* Node) {
 			Cast<UFIVSNode_SeparateStruct>(Node)->bBreak = true;
-			Cast<UFIVSNode_SeparateStruct>(Node)->Struct = StructPair.Value;
+			Cast<UFIVSNode_SeparateStruct>(Node)->SetStruct(StructPair.Value);
 		});
 		FFIVSNodeAction MakeAction(BreakAction);
 		
@@ -29,48 +59,20 @@ void UFIVSNode_SeparateStruct::GetNodeActions(TArray<FFIVSNodeAction>& Actions) 
 		MakeAction.SearchableText = MakeAction.Title;
 		MakeAction.OnExecute.BindLambda([StructPair](UFIVSNode* Node) {
 			Cast<UFIVSNode_SeparateStruct>(Node)->bBreak = false;
-			Cast<UFIVSNode_SeparateStruct>(Node)->Struct = StructPair.Value;
+			Cast<UFIVSNode_SeparateStruct>(Node)->SetStruct(StructPair.Value);
 		});
 		Actions.Add(MakeAction);
 	}
 }
 
-void UFIVSNode_SeparateStruct::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Properties.Properties.Add("Struct", Struct->GetPathName());
-	Properties.Properties.Add("What", bBreak ? TEXT("break") : TEXT("split"));
+void UFIVSNode_SeparateStruct::SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const {
+	Properties->SetStringField("Struct", Struct->GetPathName());
+	Properties->SetBoolField("Break", bBreak);
 }
 
-void UFIVSNode_SeparateStruct::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	Struct = Cast<UFINStruct>(FSoftObjectPath(Properties.Properties[TEXT("Struct")]).TryLoad());
-	bBreak = Properties.Properties[TEXT("What")] == TEXT("break");
-}
-
-TArray<UFIVSPin*> UFIVSNode_SeparateStruct::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	TArray<UFIVSPin*> ValidatePins;
-	InputPins.GenerateValueArray(ValidatePins);
-	return ValidatePins;
-}
-
-TArray<UFIVSPin*> UFIVSNode_SeparateStruct::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	if (bBreak) {
-		FFINDynamicStructHolder StructObj = Context.GetValue(InputPins[TEXT("Struct")])->GetStruct();
-		FFINExecutionContext Ctx(StructObj.GetData());
-		for (UFINProperty* Prop : Struct->GetProperties()) {
-			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
-			UFIVSPin** Pin = OutputPins.Find(Prop->GetInternalName());
-			if (Pin) Context.SetValue(*Pin, Prop->GetValue(Ctx));
-		}
-	} else {
-		FFINDynamicStructHolder StructObj(Cast<UScriptStruct>(Struct->GetOuter()));
-		FFINExecutionContext Ctx(StructObj.GetData());
-		for (UFINProperty* Prop : Struct->GetProperties()) {
-			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
-			UFIVSPin** Pin = InputPins.Find(Prop->GetInternalName());
-			if (Pin) Prop->SetValue(Ctx, *Context.GetValue(*Pin));
-		}
-		Context.SetValue(OutputPins[TEXT("Struct")], StructObj);
-	}
-	return {};
+void UFIVSNode_SeparateStruct::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
+	bBreak = Properties->GetBoolField("Break");
+	SetStruct(Cast<UFINStruct>(FSoftObjectPath(Properties->GetStringField(TEXT("Struct"))).TryLoad()));
 }
 
 void UFIVSNode_SeparateStruct::SetStruct(UFINStruct* InStruct) {

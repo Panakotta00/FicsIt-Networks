@@ -1,7 +1,35 @@
 #include "Script/Library/FIVSNode_CallReflectionFunction.h"
 
+#include "FIVSUtils.h"
+#include "Kernel/FIVSRuntimeContext.h"
 #include "Network/FINNetworkUtils.h"
 #include "Reflection/FINReflection.h"
+
+void FFIVSNodeStatement_CallReflectionFunction::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_EvaluatePin(InputPins);
+}
+
+void FFIVSNodeStatement_CallReflectionFunction::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	TArray<FFINAnyNetworkValue> InputValues;
+	FFINExecutionContext ExecContext;
+	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {
+		ExecContext = Context.TryGetRValue(Self)->GetClass();
+	} else {
+		ExecContext = (UFINNetworkUtils::RedirectIfPossible(Context.TryGetRValue(Self)->GetTrace()));
+	}
+
+	for (FGuid inputPin : InputPins) {
+		InputValues.Add(*Context.TryGetRValue(inputPin));
+	}
+
+	TArray<FFINAnyNetworkValue> OutputValues = Function->Execute(ExecContext, InputValues);
+
+	for (int i = 0; i < FMath::Min(OutputValues.Num(), OutputPins.Num()); ++i) {
+		Context.SetValue(OutputPins[i], OutputValues[i]);
+	}
+
+	Context.Push_ExecPin(ExecOut);
+}
 
 UFIVSNode_CallReflectionFunction::UFIVSNode_CallReflectionFunction() {
 	ExecIn = CreateDefaultPin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
@@ -34,36 +62,34 @@ void UFIVSNode_CallReflectionFunction::GetNodeActions(TArray<FFIVSNodeAction>& A
 	}
 }
 
-void UFIVSNode_CallReflectionFunction::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Properties.Properties.Add(TEXT("Function"), Function->GetPathName());
+void UFIVSNode_CallReflectionFunction::SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const {
+	Value->SetStringField(TEXT("function"), Function->GetPathName());
 }
 
-void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	SetFunction(Cast<UFINFunction>(FSoftObjectPath(Properties.Properties["Function"]).TryLoad()));
-}
+void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) {
+	if (!Value) return;
 
-TArray<UFIVSPin*> UFIVSNode_CallReflectionFunction::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	TArray<UFIVSPin*> EvalPins = InputPins;
-	EvalPins.Add(Self);
-	return EvalPins;
-}
-
-TArray<UFIVSPin*> UFIVSNode_CallReflectionFunction::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	TArray<FFINAnyNetworkValue> InputValues;
-	FFINExecutionContext ExecContext;
-	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) ExecContext = Context.GetValue(Self)->GetClass();
-	else ExecContext = (UFINNetworkUtils::RedirectIfPossible(Context.GetValue(Self)->GetTrace()));
-	for (UFIVSPin* InputPin : InputPins) {
-		InputValues.Add(*Context.GetValue(InputPin));
+	FString functionStr;
+	if (Value->TryGetStringField(TEXT("function"), functionStr)) {
+		SetFunction(Cast<UFINFunction>(FSoftObjectPath(functionStr).TryLoad()));
 	}
-	TArray<FFINAnyNetworkValue> OutputValues = Function->Execute(ExecContext, InputValues);
-	for (int i = 0; i < FMath::Min(OutputValues.Num(), OutputPins.Num()); ++i) {
-		Context.SetValue(OutputPins[i], OutputValues[i]);
-	}
-	return {ExecOut};
+}
+
+TFINDynamicStruct<FFIVSNodeStatement> UFIVSNode_CallReflectionFunction::CreateNodeStatement() {
+	return FFIVSNodeStatement_CallReflectionFunction{
+		NodeId,
+		ExecIn->PinId,
+		ExecOut->PinId,
+		Self->PinId,
+		UFIVSUtils::GuidsFromPins(InputPins),
+		UFIVSUtils::GuidsFromPins(OutputPins),
+		Function,
+	};
 }
 
 void UFIVSNode_CallReflectionFunction::SetFunction(UFINFunction* InFunction) {
+	if (InFunction == nullptr) return;
+
 	Function = InFunction;
 
 	if (Function->GetFunctionFlags() & FIN_Func_ClassFunc) {

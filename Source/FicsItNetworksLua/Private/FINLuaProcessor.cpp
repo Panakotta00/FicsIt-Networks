@@ -2,7 +2,7 @@
 
 #include "FicsItNetworksLuaModule.h"
 #include "FicsItKernel/Logging.h"
-#include "FINStateEEPROMLua.h"
+#include "FicsItKernel/Processor/FINStateEEPROMText.h"
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
@@ -685,10 +685,10 @@ int64 UFINLuaProcessor::GetMemoryUsage(bool bInRecalc) {
 }
 
 void UFINLuaProcessor::SetEEPROM(AFINStateEEPROM* InEEPROM) {
-	EEPROM = Cast<AFINStateEEPROMLua>(InEEPROM);
+	EEPROM = Cast<AFINStateEEPROMText>(InEEPROM);
 }
 
-AFINStateEEPROMLua* UFINLuaProcessor::GetEEPROM() const {
+AFINStateEEPROMText* UFINLuaProcessor::GetEEPROM() const {
 	return EEPROM.Get();
 }
 

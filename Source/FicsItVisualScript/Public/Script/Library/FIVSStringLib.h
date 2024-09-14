@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FIVSNode_UFunctionCall.h"
 #include "FIVSStringLib.generated.h"
-
+/*
 UCLASS()
 class UFIVSStringLib : public UObject {
 	GENERATED_BODY()
@@ -44,3 +44,4 @@ public:
 		return A.Len();
 	}
 };
+*/

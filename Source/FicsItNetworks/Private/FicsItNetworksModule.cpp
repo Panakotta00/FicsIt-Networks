@@ -213,7 +213,8 @@ void FFicsItNetworksModule::StartupModule(){
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINScriptProcessor"), TEXT("/Script/FicsItVisualScript.FINScriptProcessor")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FIVSStateEEPROM"), TEXT("/Script/FicsItVisualScript.FIVSStateEEPROM")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FIVSGraph"), TEXT("/Script/FicsItVisualScript.FIVSGraph")});
-	
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworksLua.FINStateEEPROMLua"), TEXT("/Script/FicsItNetworks.FINStateEEPROMText")});
+
 	AddRedirects(TEXT(""), TEXT(""),
 		{	TEXT("FicsItNetworks/Components/RozeModularSystem"), TEXT("FicsItNetworks/Components/MicroControlPanels"),{
 			{TEXT("Enclosures"), TEXT("MicroControlPanels"), {

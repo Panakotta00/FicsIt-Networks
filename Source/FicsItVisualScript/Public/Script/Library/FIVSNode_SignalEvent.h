@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIVSNode_Event.h"
-#include "FIVSNode_SignalEvent.generated.h"
+/*#include "FIVSNode_SignalEvent.generated.h"
 
 UCLASS()
 class UFIVSNode_SignalEvent : public UFIVSNode_Event {
@@ -43,3 +43,4 @@ public:
 
 	FFINNetworkTrace GetSender() const { return Sender; }
 };
+*/

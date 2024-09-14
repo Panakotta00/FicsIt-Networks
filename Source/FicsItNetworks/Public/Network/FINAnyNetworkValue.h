@@ -343,11 +343,11 @@ struct FICSITNETWORKS_API FFINAnyNetworkValue {
 	 * Returns the pointer to the underlying data structure.
 	 * Mainly intended to do be able to direct data copy into UE Reflected Structs.
 	 */
-	FORCEINLINE void* GetData() {
+	FORCEINLINE const void* GetData() const {
 		return &Data;
 	}
 
-	void Copy(const FProperty* Prop, void* Dest) {
+	void Copy(const FProperty* Prop, void* Dest) const {
 		switch (Type) {
 			case FIN_FLOAT: {
 				float Value = Data.FLOAT;

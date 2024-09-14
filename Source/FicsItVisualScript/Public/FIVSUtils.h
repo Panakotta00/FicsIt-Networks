@@ -40,4 +40,12 @@ public:
 		}
 		return Trace.Reverse();
 	}
+
+	static TArray<FGuid> GuidsFromPins(TArrayView<UFIVSPin*> Pins) {
+		TArray<FGuid> Guids;
+		for (UFIVSPin* Pin : Pins) {
+			Guids.Add(Pin->PinId);
+		}
+		return Guids;
+	}
 };

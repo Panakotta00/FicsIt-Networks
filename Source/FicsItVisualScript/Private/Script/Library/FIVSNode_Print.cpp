@@ -1,6 +1,17 @@
 #include "Script/Library/FIVSNode_Print.h"
 
 #include "FicsItKernel/Logging.h"
+#include "Kernel/FIVSRuntimeContext.h"
+
+void FFIVSNodeStatement_Print::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_EvaluatePin(MessageIn);
+}
+
+void FFIVSNodeStatement_Print::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	FString Message = Context.TryGetRValue(MessageIn)->GetString();
+	Context.GetKernelContext()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Info, Message);
+	Context.Push_ExecPin(ExecOut);
+}
 
 UFIVSNode_Print::UFIVSNode_Print() {
 	DisplayName = FText::FromString(TEXT("Print"));
@@ -24,14 +35,4 @@ void UFIVSNode_Print::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 			}
 		}
 	);
-}
-
-TArray<UFIVSPin*> UFIVSNode_Print::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	return TArray<UFIVSPin*>{MessageIn};
-}
-
-TArray<UFIVSPin*> UFIVSNode_Print::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FString Message = Context.GetValue(MessageIn)->GetString();
-	Context.GetKernelContext()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Info, Message);
-	return {ExecOut};
 }

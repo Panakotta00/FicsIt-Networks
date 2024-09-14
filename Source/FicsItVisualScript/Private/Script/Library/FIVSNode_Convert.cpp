@@ -1,6 +1,16 @@
 #include "Script/Library/FIVSNode_Convert.h"
 
+#include "Kernel/FIVSRuntimeContext.h"
 #include "Reflection/FINReflection.h"
+
+void FFIVSNodeStatement_Convert::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	Context.Push_EvaluatePin(Input);
+}
+
+void FFIVSNodeStatement_Convert::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
+	const FFINAnyNetworkValue* inputVal = Context.TryGetRValue(Input);
+	Context.SetValue(Output, FINCastNetworkValue(*inputVal, ToType));
+}
 
 void UFIVSNode_Convert::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (EFINNetworkValueType ConvertFromType : TEnumRange<EFINNetworkValueType>()) {
@@ -34,25 +44,18 @@ void UFIVSNode_Convert::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	}
 }
 
-void UFIVSNode_Convert::SerializeNodeProperties(FFIVSNodeProperties& Properties) const {
-	Properties.Properties.Add(TEXT("From"), FString::FromInt(FromType));
-	Properties.Properties.Add(TEXT("To"), FString::FromInt(ToType));
+void UFIVSNode_Convert::SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const {
+	Properties->SetStringField(TEXT("From"), FString::FromInt(FromType));
+	Properties->SetStringField(TEXT("To"), FString::FromInt(ToType));
 }
 
-void UFIVSNode_Convert::DeserializeNodeProperties(const FFIVSNodeProperties& Properties) {
-	FDefaultValueHelper::ParseInt(Properties.Properties[TEXT("From")], (int&)FromType);
-	FDefaultValueHelper::ParseInt(Properties.Properties[TEXT("To")], (int&)ToType);
+void UFIVSNode_Convert::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
+	if (!Properties) return;
+
+	FDefaultValueHelper::ParseInt(Properties->GetStringField(TEXT("From")), (int&)FromType);
+	FDefaultValueHelper::ParseInt(Properties->GetStringField(TEXT("To")), (int&)ToType);
+
 	SetConversion(FromType, ToType);
-}
-
-TArray<UFIVSPin*> UFIVSNode_Convert::PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	return TArray<UFIVSPin*>{Input};
-}
-
-TArray<UFIVSPin*> UFIVSNode_Convert::ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) {
-	FFINAnyNetworkValue InputVal = *Context.GetValue(Input);
-	Context.SetValue(Output, FINCastNetworkValue(InputVal, ToType));
-	return {};
 }
 
 void UFIVSNode_Convert::SetConversion(EFINNetworkValueType InFromType, EFINNetworkValueType InToType) {

@@ -136,7 +136,8 @@ void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 		FString Paste;
 		FPlatformApplicationMisc::ClipboardPaste(Paste);
 
-		TArray<UFIVSNode*> Nodes = UFIVSSerailizationUtils::FIVS_DeserializeGraph(Graph, Paste, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(FSlateApplication::Get().GetCursorPos())));
+		TArray<UFIVSNode*> Nodes = UFIVSSerailizationUtils::FIVS_DeserializeGraph(Graph, Paste, true);
+		UFIVSSerailizationUtils::FIVS_AdjustNodesOffset(Nodes, LocalToGraph(GetCachedGeometry().AbsoluteToLocal(FSlateApplication::Get().GetCursorPos())), true);
 		SelectionManager.SetSelection(Nodes);
 	}));
 	CommandList->MapAction(FCommands::Get().DeleteSelection, FExecuteAction::CreateLambda([this]() {

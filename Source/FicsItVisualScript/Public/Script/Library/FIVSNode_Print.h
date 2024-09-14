@@ -4,6 +4,30 @@
 #include "Script/FIVSScriptNode.h"
 #include "FIVSNode_Print.generated.h"
 
+USTRUCT()
+struct FFIVSNodeStatement_Print : public FFIVSNodeStatement {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FGuid ExecIn;
+	UPROPERTY(SaveGame)
+	FGuid ExecOut;
+	UPROPERTY(SaveGame)
+	FGuid MessageIn;
+
+	FFIVSNodeStatement_Print() = default;
+	FFIVSNodeStatement_Print(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid MessageIn) :
+		FFIVSNodeStatement(Node),
+		ExecIn(ExecIn),
+		ExecOut(ExecOut),
+		MessageIn(MessageIn) {}
+
+	// Begin FFIVSNodeStatement
+	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
+	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
+	// End FFIVSNodeStatement
+};
+
 UCLASS()
 class UFIVSNode_Print : public UFIVSScriptNode {
 	GENERATED_BODY()
@@ -23,8 +47,13 @@ public:
 	// End UFIVSNodes
 	
 	// Begin UFIVSGenericNode
-	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
-
-	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
+	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+		return FFIVSNodeStatement_Print{
+			NodeId,
+			ExecIn->PinId,
+			ExecOut->PinId,
+			MessageIn->PinId,
+		};
+	}
 	// End UFIVSGenericNode
 };
