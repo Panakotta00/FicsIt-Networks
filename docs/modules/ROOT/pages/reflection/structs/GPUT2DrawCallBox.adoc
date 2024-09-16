@@ -1,0 +1,281 @@
+= GPU T2 Box Draw Call
+:table-caption!:
+
+This struct contains the necessary information to draw a box onto the GPU T2.
+
+== Properties
+
+// tag::func-color-title[]
+=== `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-color[]
+
+The fill color of the rectangle, or the tint of the image drawn.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Color
+!===
+====
+// end::func-color[]
+// end::func-color-title[]
+// tag::func-hasCenteredOrigin-title[]
+=== `hasCenteredOrigin` : Bool
+// tag::func-hasCenteredOrigin[]
+
+If set to false, the position will give the left upper corner of the box and rotation will happen around this point. If set to true, the position will give the center point of box and the rotation will happen around this center point.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Has Centered Origin
+!===
+====
+// end::func-hasCenteredOrigin[]
+// end::func-hasCenteredOrigin-title[]
+// tag::func-hasOutline-title[]
+=== `hasOutline` : Bool
+// tag::func-hasOutline[]
+
+True if the box has a colorful (inward) outline.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Has Outline
+!===
+====
+// end::func-hasOutline[]
+// end::func-hasOutline-title[]
+// tag::func-horizontalTiling-title[]
+=== `horizontalTiling` : Bool
+// tag::func-horizontalTiling[]
+
+True if the image should be tiled horizontally.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Horizontal Tiling
+!===
+====
+// end::func-horizontalTiling[]
+// end::func-horizontalTiling-title[]
+// tag::func-image-title[]
+=== `image` : String
+// tag::func-image[]
+
+If not empty, should be a image reference to the image that should be drawn inside the rectangle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Image
+!===
+====
+// end::func-image[]
+// end::func-image-title[]
+// tag::func-imageSize-title[]
+=== `imageSize` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-imageSize[]
+
+The size of the internal image drawn, necessary for proper scaling, antialising and tiling.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Image Size
+!===
+====
+// end::func-imageSize[]
+// end::func-imageSize-title[]
+// tag::func-isBorder-title[]
+=== `isBorder` : Bool
+// tag::func-isBorder[]
+
+If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use (use the image as 9-patch).
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Border
+!===
+====
+// end::func-isBorder[]
+// end::func-isBorder-title[]
+// tag::func-isRounded-title[]
+=== `isRounded` : Bool
+// tag::func-isRounded[]
+
+True if the box can have rounded borders.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Rounded
+!===
+====
+// end::func-isRounded[]
+// end::func-isRounded-title[]
+// tag::func-margin-title[]
+=== `margin` : Struct<xref:/reflection/structs/Margin.adoc[Margin]>
+// tag::func-margin[]
+
+The margin values of the 9-patch (border).
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Margin
+!===
+====
+// end::func-margin[]
+// end::func-margin-title[]
+// tag::func-outlineColor-title[]
+=== `outlineColor` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-outlineColor[]
+
+The color of the outline around the box.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Outline Color
+!===
+====
+// end::func-outlineColor[]
+// end::func-outlineColor-title[]
+// tag::func-outlineThickness-title[]
+=== `outlineThickness` : Float
+// tag::func-outlineThickness[]
+
+The uniform thickness of the outline around the box.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Outline Thickness
+!===
+====
+// end::func-outlineThickness[]
+// end::func-outlineThickness-title[]
+// tag::func-position-title[]
+=== `position` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-position[]
+
+The drawn local position of the rectangle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Position
+!===
+====
+// end::func-position[]
+// end::func-position-title[]
+// tag::func-radii-title[]
+=== `radii` : Struct<xref:/reflection/structs/Vector4.adoc[Vector4]>
+// tag::func-radii[]
+
+The rounded border radii used if isRounded is set to true.
+The Vector4 corner mapping in order: Top Left, Top Right, Bottom Right & Bottom Left.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Radii
+!===
+====
+// end::func-radii[]
+// end::func-radii-title[]
+// tag::func-rotation-title[]
+=== `rotation` : Float
+// tag::func-rotation[]
+
+The draw rotation of the rectangle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Rotation
+!===
+====
+// end::func-rotation[]
+// end::func-rotation-title[]
+// tag::func-size-title[]
+=== `size` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-size[]
+
+The drawn size of the rectangle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Size
+!===
+====
+// end::func-size[]
+// end::func-size-title[]
+// tag::func-verticalTiling-title[]
+=== `verticalTiling` : Bool
+// tag::func-verticalTiling[]
+
+True if the image should be tiled vertically.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Vertical Tiling
+!===
+====
+// end::func-verticalTiling[]
+// end::func-verticalTiling-title[]
+

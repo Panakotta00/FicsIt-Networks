@@ -1,0 +1,76 @@
+= Vector4
+:table-caption!:
+
+A Vector containing four values.
+
+== Properties
+
+// tag::func-w-title[]
+=== `w` : Float
+// tag::func-w[]
+
+The fourth value in the Vector4.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! W
+!===
+====
+// end::func-w[]
+// end::func-w-title[]
+// tag::func-x-title[]
+=== `x` : Float
+// tag::func-x[]
+
+The first value in the Vector4.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! X
+!===
+====
+// end::func-x[]
+// end::func-x-title[]
+// tag::func-y-title[]
+=== `y` : Float
+// tag::func-y[]
+
+The second value in the Vector4.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Y
+!===
+====
+// end::func-y[]
+// end::func-y-title[]
+// tag::func-z-title[]
+=== `z` : Float
+// tag::func-z[]
+
+The third value in the Vector4.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Z
+!===
+====
+// end::func-z[]
+// end::func-z-title[]
+

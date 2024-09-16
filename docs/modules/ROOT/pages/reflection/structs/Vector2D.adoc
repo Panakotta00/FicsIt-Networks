@@ -1,0 +1,230 @@
+= Vector 2D
+:table-caption!:
+
+Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space
+
+== Properties
+
+// tag::func-x-title[]
+=== `x` : Float
+// tag::func-x[]
+
+The X coordinate component
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! X
+!===
+====
+// end::func-x[]
+// end::func-x-title[]
+// tag::func-y-title[]
+=== `y` : Float
+// tag::func-y[]
+
+The Y coordinate component
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Y
+!===
+====
+// end::func-y[]
+// end::func-y-title[]
+
+== Functions
+
+// tag::func-FIN_Operator_Add-title[]
+=== `FIN_Operator_Add` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-FIN_Operator_Add[]
+
+The addition (+) operator for this struct.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Operator Add
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Other* `other`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The other vector that should be added to this vector
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The resulting vector of the vector addition
+!===
+
+====
+// end::func-FIN_Operator_Add[]
+// end::func-FIN_Operator_Add-title[]
+// tag::func-FIN_Operator_Neg-title[]
+=== `FIN_Operator_Neg` () -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-FIN_Operator_Neg[]
+
+The Negation operator for this struct.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Operator Neg
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The resulting vector of the vector negation
+!===
+
+====
+// end::func-FIN_Operator_Neg[]
+// end::func-FIN_Operator_Neg-title[]
+// tag::func-FIN_Operator_Sub-title[]
+=== `FIN_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-FIN_Operator_Sub[]
+
+The subtraction (-) operator for this struct.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Operator Sub
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Other* `other`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The other vector that should be subtracted from this vector
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The resulting vector of the vector subtraction
+!===
+
+====
+// end::func-FIN_Operator_Sub[]
+// end::func-FIN_Operator_Sub-title[]
+// tag::func-FIN_Operator_Mul-title[]
+=== `FIN_Operator_Mul` (`other` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>) -> `result` : Float
+// tag::func-FIN_Operator_Mul[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Scalar Product
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Other* `other`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The other vector to calculate the scalar product with.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Float
+! The resulting scalar product.
+!===
+
+====
+// end::func-FIN_Operator_Mul[]
+// end::func-FIN_Operator_Mul-title[]
+// tag::func-FIN_Operator_Mul_1-title[]
+=== `FIN_Operator_Mul_1` (`factor` : Float) -> `result` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-FIN_Operator_Mul_1[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Vector Factor Scaling
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Factor* `factor`
+! Float
+! The factor with which this vector should be scaled with.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The resulting scaled vector.
+!===
+
+====
+// end::func-FIN_Operator_Mul_1[]
+// end::func-FIN_Operator_Mul_1-title[]
+

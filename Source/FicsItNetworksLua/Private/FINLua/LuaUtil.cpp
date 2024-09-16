@@ -132,7 +132,7 @@ namespace FINLua {
 			TOptional<FIRTrace> Trace;
 			UFIRTraceProperty* TraceProp = Cast<UFIRTraceProperty>(Property);
 			if (TraceProp && TraceProp->GetSubclass()) {
-				Trace = luaFIN_checkObject(L, Index, FFicsItReflectionModule::Get().FindClass(TraceProp->GetSubclass()));
+				Trace = luaFIN_toObject(L, Index, FFicsItReflectionModule::Get().FindClass(TraceProp->GetSubclass()));
 			} else {
 				Trace = luaFIN_toObject(L, Index, nullptr);
 			}
@@ -143,7 +143,7 @@ namespace FINLua {
 			UFIRStructProperty* StructProp = Cast<UFIRStructProperty>(Property);
 			if (StructProp && StructProp->GetInner()) {
 				UFIRStruct* Type = FFicsItReflectionModule::Get().FindStruct(StructProp->GetInner());
-				Struct = luaFIN_checkStruct(L, Index, Type, bImplicitConstruction);
+				Struct = luaFIN_toStruct(L, Index, Type, bImplicitConstruction);
 			} else {
 				Struct = luaFIN_toStruct(L, Index, nullptr, false);
 			}

@@ -1,0 +1,148 @@
+= Pipe Reservoir
+:table-caption!:
+
+The base class for all fluid tanks.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-flowDrain-title[]
+=== `flowDrain` : Float
+// tag::func-flowDrain[]
+
+The current outflow rate of fluid.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Float Drain
+!===
+====
+// end::func-flowDrain[]
+// end::func-flowDrain-title[]
+// tag::func-flowFill-title[]
+=== `flowFill` : Float
+// tag::func-flowFill[]
+
+The currentl inflow rate of fluid.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Flow Fill
+!===
+====
+// end::func-flowFill[]
+// end::func-flowFill-title[]
+// tag::func-flowLimit-title[]
+=== `flowLimit` : Float
+// tag::func-flowLimit[]
+
+The maximum flow rate of fluid this tank can handle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Flow Limit
+!===
+====
+// end::func-flowLimit[]
+// end::func-flowLimit-title[]
+// tag::func-fluidContent-title[]
+=== `fluidContent` : Float
+// tag::func-fluidContent[]
+
+The amount of fluid in the tank.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Fluid Content
+!===
+====
+// end::func-fluidContent[]
+// end::func-fluidContent-title[]
+// tag::func-maxFluidContent-title[]
+=== `maxFluidContent` : Float
+// tag::func-maxFluidContent[]
+
+The maximum amount of fluid this tank can hold.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Fluid Content
+!===
+====
+// end::func-maxFluidContent[]
+// end::func-maxFluidContent-title[]
+
+== Functions
+
+// tag::func-flush-title[]
+=== `flush` ()
+// tag::func-flush[]
+
+Emptys the whole fluid container.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Flush
+!===
+
+====
+// end::func-flush[]
+// end::func-flush-title[]
+// tag::func-getFluidType-title[]
+=== `getFluidType` () -> `type` : Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+// tag::func-getFluidType[]
+
+Returns the type of the fluid.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Fluid Type
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Type* `type`
+! Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! The type of the fluid the tank contains.
+!===
+
+====
+// end::func-getFluidType[]
+// end::func-getFluidType-title[]
+
+// end::interface[]
+

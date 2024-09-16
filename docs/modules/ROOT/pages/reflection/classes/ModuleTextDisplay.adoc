@@ -1,0 +1,67 @@
+= Module Text Display
+:table-caption!:
+
+The FicsIt-Networks Text-Display Module for the Modular Control Panel is a simple GPU and Screen combined!
+
+It allows you to display any kind of text with differnt font sizes and you can even switch between two fonts!
+
+But you can't interact with it, nor change the background/foreground color as you can do with a GPU.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-monospace-title[]
+=== `monospace` : Bool
+// tag::func-monospace[]
+
+True if the text should be displayed in monospace.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
+
+! Display Name ! Monospace
+!===
+====
+// end::func-monospace[]
+// end::func-monospace-title[]
+// tag::func-size-title[]
+=== `size` : Int
+// tag::func-size[]
+
+The size of the text that is displayed.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
+
+! Display Name ! Size
+!===
+====
+// end::func-size[]
+// end::func-size-title[]
+// tag::func-text-title[]
+=== `text` : String
+// tag::func-text[]
+
+The text that is displayed on the screen.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
+
+! Display Name ! Text
+!===
+====
+// end::func-text[]
+// end::func-text-title[]
+
+// end::interface[]
+

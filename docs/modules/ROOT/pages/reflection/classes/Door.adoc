@@ -1,0 +1,76 @@
+= Door
+:table-caption!:
+
+The base class of all doors.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getConfiguration-title[]
+=== `getConfiguration` () -> `configuration` : Int
+// tag::func-getConfiguration[]
+
+Returns the Door Mode/Configuration.
+0 = Automatic
+1 = Always Closed
+2 = Always Open
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Configuration
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Configuration* `configuration`
+! Int
+! The current door mode/configuration.
+!===
+
+====
+// end::func-getConfiguration[]
+// end::func-getConfiguration-title[]
+// tag::func-setConfiguration-title[]
+=== `setConfiguration` (`configuration` : Int)
+// tag::func-setConfiguration[]
+
+Sets the Door Mode/Configuration, only some modes are allowed, if the mod you try to set is invalid, nothing changes.
+0 = Automatic
+1 = Always Closed
+2 = Always Open
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Configuration
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Configuration* `configuration`
+! Int
+! The new configuration for the door.
+!===
+
+====
+// end::func-setConfiguration[]
+// end::func-setConfiguration-title[]
+
+// end::interface[]
+

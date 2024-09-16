@@ -1,0 +1,257 @@
+= Power Circuit
+:table-caption!:
+
+A Object that represents a whole power circuit.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-batteryCapacity-title[]
+=== `batteryCapacity` : Float
+// tag::func-batteryCapacity[]
+
+The energy capacity all batteries of the network combined provide.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Capacity
+!===
+====
+// end::func-batteryCapacity[]
+// end::func-batteryCapacity-title[]
+// tag::func-batteryInput-title[]
+=== `batteryInput` : Float
+// tag::func-batteryInput[]
+
+The power that gone into batteries in the last tick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Input
+!===
+====
+// end::func-batteryInput[]
+// end::func-batteryInput-title[]
+// tag::func-batteryIn-title[]
+=== `batteryIn` : Float
+// tag::func-batteryIn[]
+
+The amount of energy that currently gets stored in every battery of the whole network.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Input
+!===
+====
+// end::func-batteryIn[]
+// end::func-batteryIn-title[]
+// tag::func-batteryOut-title[]
+=== `batteryOut` : Float
+// tag::func-batteryOut[]
+
+The amount of energy that currently discharges from every battery in the whole network.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Output
+!===
+====
+// end::func-batteryOut[]
+// end::func-batteryOut-title[]
+// tag::func-batteryStore-title[]
+=== `batteryStore` : Float
+// tag::func-batteryStore[]
+
+The amount of energy currently stored in all battereies of the network combined.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Store
+!===
+====
+// end::func-batteryStore[]
+// end::func-batteryStore-title[]
+// tag::func-batteryStorePercent-title[]
+=== `batteryStorePercent` : Float
+// tag::func-batteryStorePercent[]
+
+The fill status in percent of all battereies of the network combined.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Store Percentage
+!===
+====
+// end::func-batteryStorePercent[]
+// end::func-batteryStorePercent-title[]
+// tag::func-batteryTimeUntilEmpty-title[]
+=== `batteryTimeUntilEmpty` : Float
+// tag::func-batteryTimeUntilEmpty[]
+
+The time in seconds until every battery in the network is empty.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Time until Empty
+!===
+====
+// end::func-batteryTimeUntilEmpty[]
+// end::func-batteryTimeUntilEmpty-title[]
+// tag::func-batteryTimeUntilFull-title[]
+=== `batteryTimeUntilFull` : Float
+// tag::func-batteryTimeUntilFull[]
+
+The time in seconds until every battery in the network is filled.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Battery Time until Full
+!===
+====
+// end::func-batteryTimeUntilFull[]
+// end::func-batteryTimeUntilFull-title[]
+// tag::func-capacity-title[]
+=== `capacity` : Float
+// tag::func-capacity[]
+
+The power capacity of the whole network in the last tick. (The max amount of power available in the last tick)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Capacity
+!===
+====
+// end::func-capacity[]
+// end::func-capacity-title[]
+// tag::func-consumption-title[]
+=== `consumption` : Float
+// tag::func-consumption[]
+
+The power consumption of the whole circuit in thge last tick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Consumption
+!===
+====
+// end::func-consumption[]
+// end::func-consumption-title[]
+// tag::func-hasBatteries-title[]
+=== `hasBatteries` : Bool
+// tag::func-hasBatteries[]
+
+True if the power circuit has batteries connected to it.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Has Batteries
+!===
+====
+// end::func-hasBatteries[]
+// end::func-hasBatteries-title[]
+// tag::func-isFuesed-title[]
+=== `isFuesed` : Bool
+// tag::func-isFuesed[]
+
+True if the fuse in the network triggered.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Fuesed
+!===
+====
+// end::func-isFuesed[]
+// end::func-isFuesed-title[]
+// tag::func-maxPowerConsumption-title[]
+=== `maxPowerConsumption` : Float
+// tag::func-maxPowerConsumption[]
+
+The maximum consumption of power in the last tick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Power Consumption
+!===
+====
+// end::func-maxPowerConsumption[]
+// end::func-maxPowerConsumption-title[]
+// tag::func-production-title[]
+=== `production` : Float
+// tag::func-production[]
+
+The amount of power produced by the whole circuit in the last tick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Production
+!===
+====
+// end::func-production[]
+// end::func-production-title[]
+
+== Signals
+
+=== `PowerFuseChanged` ()
+
+Get Triggered when the fuse state of the power circuit changes.
+
+
+// end::interface[]
+

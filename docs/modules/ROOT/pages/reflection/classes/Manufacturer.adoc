@@ -1,0 +1,167 @@
+= Manufacturer
+:table-caption!:
+
+The base class of every machine that uses a recipe to produce something automatically.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getInputInv-title[]
+=== `getInputInv` () -> `inventory` : Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+// tag::func-getInputInv[]
+
+Returns the input inventory of this manufacturer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Input Inventory
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inventory* `inventory`
+! Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+! The input inventory of this manufacturer
+!===
+
+====
+// end::func-getInputInv[]
+// end::func-getInputInv-title[]
+// tag::func-getOutputInv-title[]
+=== `getOutputInv` () -> `inventory` : Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+// tag::func-getOutputInv[]
+
+Returns the output inventory of this manufacturer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Output Inventory
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inventory* `inventory`
+! Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+! The output inventory of this manufacturer.
+!===
+
+====
+// end::func-getOutputInv[]
+// end::func-getOutputInv-title[]
+// tag::func-getRecipe-title[]
+=== `getRecipe` () -> `recipe` : Class<xref:/reflection/classes/Recipe.adoc[Recipe]>
+// tag::func-getRecipe[]
+
+Returns the currently set recipe of the manufacturer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Recipe
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Recipe* `recipe`
+! Class<xref:/reflection/classes/Recipe.adoc[Recipe]>
+! The currently set recipe.
+!===
+
+====
+// end::func-getRecipe[]
+// end::func-getRecipe-title[]
+// tag::func-getRecipes-title[]
+=== `getRecipes` () -> `recipes` : Array<Class<xref:/reflection/classes/Recipe.adoc[Recipe]>>
+// tag::func-getRecipes[]
+
+Returns the list of recipes this manufacturer can get set to and process.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Recipes
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Recipes* `recipes`
+! Array<Class<xref:/reflection/classes/Recipe.adoc[Recipe]>>
+! The list of avalible recipes.
+!===
+
+====
+// end::func-getRecipes[]
+// end::func-getRecipes-title[]
+// tag::func-setRecipe-title[]
+=== `setRecipe` (`recipe` : Class<xref:/reflection/classes/Recipe.adoc[Recipe]>) -> `gotSet` : Bool
+// tag::func-setRecipe[]
+
+Sets the currently producing recipe of this manufacturer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Recipe
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Recipe* `recipe`
+! Class<xref:/reflection/classes/Recipe.adoc[Recipe]>
+! The recipe this manufacturer should produce.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Got Set* `gotSet`
+! Bool
+! True if the current recipe got successfully set to the new recipe.
+!===
+
+====
+// end::func-setRecipe[]
+// end::func-setRecipe-title[]
+
+// end::interface[]
+

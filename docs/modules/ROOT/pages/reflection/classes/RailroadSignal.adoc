@@ -1,0 +1,233 @@
+= Railroad Signal
+:table-caption!:
+
+A train signal to control trains on a track.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-aspect-title[]
+=== `aspect` : Int
+// tag::func-aspect[]
+
+The aspect of the signal. The aspect shows if a train is allowed to pass (clear) or not and if it should dock.
+0 = Unknown
+1 = The track is clear and the train is allowed to pass.
+2 = The next track is Occupied and the train should stop
+3 = The train should dock.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Aspect
+!===
+====
+// end::func-aspect[]
+// end::func-aspect-title[]
+// tag::func-blockValidation-title[]
+=== `blockValidation` : Int
+// tag::func-blockValidation[]
+
+Any error states of the block.
+0 = Unknown
+1 = No Error
+2 = No Exit Signal
+3 = Contains Loop
+4 = Contains Mixed Entry Signals
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Block Validation
+!===
+====
+// end::func-blockValidation[]
+// end::func-blockValidation-title[]
+// tag::func-hasObservedBlock-title[]
+=== `hasObservedBlock` : Bool
+// tag::func-hasObservedBlock[]
+
+True if this signal is currently observing at least one block.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Has Observed Block
+!===
+====
+// end::func-hasObservedBlock[]
+// end::func-hasObservedBlock-title[]
+// tag::func-isBiDirectional-title[]
+=== `isBiDirectional` : Bool
+// tag::func-isBiDirectional[]
+
+True if this signal is bi-directional. (trains can pass into both directions)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Bi-Directional
+!===
+====
+// end::func-isBiDirectional[]
+// end::func-isBiDirectional-title[]
+// tag::func-isPathSignal-title[]
+=== `isPathSignal` : Bool
+// tag::func-isPathSignal[]
+
+True if this signal is a path-signal.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Path Signal
+!===
+====
+// end::func-isPathSignal[]
+// end::func-isPathSignal-title[]
+
+== Functions
+
+// tag::func-getGuardedConnnections-title[]
+=== `getGuardedConnnections` () -> `guardedConnections` : Array<Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>>
+// tag::func-getGuardedConnnections[]
+
+Returns a list of the guarded connections. (incoming connections)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Guarded Connections
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *GuardedConnections* `guardedConnections`
+! Array<Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>>
+! The guarded connections.
+!===
+
+====
+// end::func-getGuardedConnnections[]
+// end::func-getGuardedConnnections-title[]
+// tag::func-getObservedBlock-title[]
+=== `getObservedBlock` () -> `block` : Struct<xref:/reflection/structs/RailroadSignalBlock.adoc[RailroadSignalBlock]>
+// tag::func-getObservedBlock[]
+
+Returns the track block this signals observes.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Observed Block
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Block* `block`
+! Struct<xref:/reflection/structs/RailroadSignalBlock.adoc[RailroadSignalBlock]>
+! The railroad signal block this signal is observing.
+!===
+
+====
+// end::func-getObservedBlock[]
+// end::func-getObservedBlock-title[]
+// tag::func-getObservedConnections-title[]
+=== `getObservedConnections` () -> `observedConnections` : Array<Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>>
+// tag::func-getObservedConnections[]
+
+Returns a list of the observed connections. (outgoing connections)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Observed Connections
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ObservedConnections* `observedConnections`
+! Array<Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>>
+! The observed connections.
+!===
+
+====
+// end::func-getObservedConnections[]
+// end::func-getObservedConnections-title[]
+
+== Signals
+
+=== `AspectChanged` (_Int_ *Aspect* `aspect`)
+
+Triggers when the aspect of this signal changes.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Aspect* `aspect`
+! Int
+! The new aspect of the signal (see 'Get Aspect' for more information)
+!===
+====
+
+=== `ValidationChanged` (_Int_ *Validation* `validation`)
+
+Triggers when the validation of this signal changes.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Validation* `validation`
+! Int
+! The new validation of the signal (see 'Block Validation' for more information)
+!===
+====
+
+
+// end::interface[]
+

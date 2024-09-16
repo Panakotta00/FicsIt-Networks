@@ -1,0 +1,90 @@
+= FINComputerGPU
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-bindScreen-title[]
+=== `bindScreen` (`newScreen` : Trace<xref:/reflection/classes/Object.adoc[Object]>)
+// tag::func-bindScreen[]
+
+Binds this GPU to the given screen. Unbinds the already bound screen.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Bind Screen
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *New Screen* `newScreen`
+! Trace<xref:/reflection/classes/Object.adoc[Object]>
+! The screen you want to bind this GPU to. Null if you want to unbind the screen.
+!===
+
+====
+// end::func-bindScreen[]
+// end::func-bindScreen-title[]
+// tag::func-getScreenSize-title[]
+=== `getScreenSize` () -> `ReturnValue` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-getScreenSize[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! getScreenSize
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! 
+!===
+
+====
+// end::func-getScreenSize[]
+// end::func-getScreenSize-title[]
+
+== Signals
+
+=== `ScreenBound` (_Trace<xref:/reflection/classes/Object.adoc[Object]>_ *oldScreen* `oldScreen`)
+
+
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *oldScreen* `oldScreen`
+! Trace<xref:/reflection/classes/Object.adoc[Object]>
+! 
+!===
+====
+
+
+// end::interface[]
+

@@ -1,0 +1,222 @@
+= Railroad Signal Block
+:table-caption!:
+
+A track section that combines the area between multiple signals.
+
+== Properties
+
+// tag::func-blockValidation-title[]
+=== `blockValidation` : Int
+// tag::func-blockValidation[]
+
+Returns the blocks validation status.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Block Validation
+!===
+====
+// end::func-blockValidation[]
+// end::func-blockValidation-title[]
+// tag::func-hasBlockReservation-title[]
+=== `hasBlockReservation` : Bool
+// tag::func-hasBlockReservation[]
+
+True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Has Block Reservation
+!===
+====
+// end::func-hasBlockReservation[]
+// end::func-hasBlockReservation-title[]
+// tag::func-isBlockOccupied-title[]
+=== `isBlockOccupied` : Bool
+// tag::func-isBlockOccupied[]
+
+True if the block this signal is observing is currently occupied by a vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Block Occupied
+!===
+====
+// end::func-isBlockOccupied[]
+// end::func-isBlockOccupied-title[]
+// tag::func-isPathBlock-title[]
+=== `isPathBlock` : Bool
+// tag::func-isPathBlock[]
+
+True if the block this signal is observing is a path-block.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Path Block
+!===
+====
+// end::func-isPathBlock[]
+// end::func-isPathBlock-title[]
+// tag::func-isValid-title[]
+=== `isValid` : Bool
+// tag::func-isValid[]
+
+Is true if this signal block reference is valid.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Valid
+!===
+====
+// end::func-isValid[]
+// end::func-isValid-title[]
+
+== Functions
+
+// tag::func-getApprovedReservations-title[]
+=== `getApprovedReservations` () -> `reservations` : Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
+// tag::func-getApprovedReservations[]
+
+Returns a list of trains that are approved by this block.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Approved Reservations
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Reservations* `reservations`
+! Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
+! A list of trains that are approved by this block.
+!===
+
+====
+// end::func-getApprovedReservations[]
+// end::func-getApprovedReservations-title[]
+// tag::func-getOccupation-title[]
+=== `getOccupation` () -> `occupation` : Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
+// tag::func-getOccupation[]
+
+Returns a list of trains that currently occupate the block.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Occupation
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Occupation* `occupation`
+! Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
+! A list of trains occupying the block.
+!===
+
+====
+// end::func-getOccupation[]
+// end::func-getOccupation-title[]
+// tag::func-getQueuedReservations-title[]
+=== `getQueuedReservations` () -> `reservations` : Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
+// tag::func-getQueuedReservations[]
+
+Returns a list of trains that try to reserve this block and wait for approval.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Queued Reservations
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Reservations* `reservations`
+! Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
+! A list of trains that try to reserve this block and wait for approval.
+!===
+
+====
+// end::func-getQueuedReservations[]
+// end::func-getQueuedReservations-title[]
+// tag::func-isOccupiedBy-title[]
+=== `isOccupiedBy` (`train` : Object<xref:/reflection/classes/Train.adoc[Train]>) -> `isOccupied` : Bool
+// tag::func-isOccupiedBy[]
+
+Allows you to check if this block is occupied by a given train.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Is Occupied By
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Train* `train`
+! Object<xref:/reflection/classes/Train.adoc[Train]>
+! The train you want to check if it occupies this block
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Is Occupied* `isOccupied`
+! Bool
+! True if the given train occupies this block.
+!===
+
+====
+// end::func-isOccupiedBy[]
+// end::func-isOccupiedBy-title[]
+

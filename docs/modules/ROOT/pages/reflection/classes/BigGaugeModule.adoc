@@ -1,0 +1,131 @@
+= Big Gauge Module
+:table-caption!:
+
+A medium analogue Gauge for use on Large Panels. The red portion and needle position can be changed through FIN
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-limit-title[]
+=== `limit` : Float
+// tag::func-limit[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! limit
+!===
+====
+// end::func-limit[]
+// end::func-limit-title[]
+// tag::func-percent-title[]
+=== `percent` : Float
+// tag::func-percent[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! percent
+!===
+====
+// end::func-percent[]
+// end::func-percent-title[]
+
+== Functions
+
+// tag::func-setBackgroundColor-title[]
+=== `setBackgroundColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+// tag::func-setBackgroundColor[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! setBackgroundColor
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *red* `red`
+! Float
+! 
+
+! *green* `green`
+! Float
+! 
+
+! *blue* `blue`
+! Float
+! 
+
+! *Emit* `Emit`
+! Float
+! 
+!===
+
+====
+// end::func-setBackgroundColor[]
+// end::func-setBackgroundColor-title[]
+// tag::func-setColor-title[]
+=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+// tag::func-setColor[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! setColor
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *red* `red`
+! Float
+! 
+
+! *green* `green`
+! Float
+! 
+
+! *blue* `blue`
+! Float
+! 
+
+! *Emit* `Emit`
+! Float
+! 
+!===
+
+====
+// end::func-setColor[]
+// end::func-setColor-title[]
+
+// end::interface[]
+

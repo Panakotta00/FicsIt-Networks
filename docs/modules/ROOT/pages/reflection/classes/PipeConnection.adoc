@@ -1,0 +1,199 @@
+= Pipe Connection
+:table-caption!:
+
+A actor component that is a connection point to which a fluid pipe can get attached to.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-fluidBoxContent-title[]
+=== `fluidBoxContent` : Float
+// tag::func-fluidBoxContent[]
+
+Returns the amount of fluid this fluid container contains
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Fluid Box Content
+!===
+====
+// end::func-fluidBoxContent[]
+// end::func-fluidBoxContent-title[]
+// tag::func-fluidBoxFlowDrain-title[]
+=== `fluidBoxFlowDrain` : Float
+// tag::func-fluidBoxFlowDrain[]
+
+Returns the drain rate of this fluid container
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Fluid Box Flow Drain
+!===
+====
+// end::func-fluidBoxFlowDrain[]
+// end::func-fluidBoxFlowDrain-title[]
+// tag::func-fluidBoxFlowFill-title[]
+=== `fluidBoxFlowFill` : Float
+// tag::func-fluidBoxFlowFill[]
+
+Returns the fill rate of this fluid container
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Fluid Box Flow Fill
+!===
+====
+// end::func-fluidBoxFlowFill[]
+// end::func-fluidBoxFlowFill-title[]
+// tag::func-fluidBoxFlowLimit-title[]
+=== `fluidBoxFlowLimit` : Float
+// tag::func-fluidBoxFlowLimit[]
+
+Returns the the maximum flow limit of this fluid container
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Fluid Box Flow Limit
+!===
+====
+// end::func-fluidBoxFlowLimit[]
+// end::func-fluidBoxFlowLimit-title[]
+// tag::func-fluidBoxFlowThrough-title[]
+=== `fluidBoxFlowThrough` : Float
+// tag::func-fluidBoxFlowThrough[]
+
+Returns the amount of fluid flowing through this fluid container
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Fluid Box Flow Through
+!===
+====
+// end::func-fluidBoxFlowThrough[]
+// end::func-fluidBoxFlowThrough-title[]
+// tag::func-fluidBoxHeight-title[]
+=== `fluidBoxHeight` : Float
+// tag::func-fluidBoxHeight[]
+
+Returns the height of this fluid container
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Fluid Box Height
+!===
+====
+// end::func-fluidBoxHeight[]
+// end::func-fluidBoxHeight-title[]
+// tag::func-fluidBoxLaminarHeight-title[]
+=== `fluidBoxLaminarHeight` : Float
+// tag::func-fluidBoxLaminarHeight[]
+
+Returns the laminar height of this fluid container
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Fluid Box Laminar Height
+!===
+====
+// end::func-fluidBoxLaminarHeight[]
+// end::func-fluidBoxLaminarHeight-title[]
+// tag::func-networkID-title[]
+=== `networkID` : Int
+// tag::func-networkID[]
+
+Returns the network ID of the pipe network this connection is associated with
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Get Network ID
+!===
+====
+// end::func-networkID[]
+// end::func-networkID-title[]
+
+== Functions
+
+// tag::func-flushPipeNetwork-title[]
+=== `flushPipeNetwork` ()
+// tag::func-flushPipeNetwork[]
+
+Flush the associated pipe network
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Flush Pipe Network
+!===
+
+====
+// end::func-flushPipeNetwork[]
+// end::func-flushPipeNetwork-title[]
+// tag::func-getFluidDescriptor-title[]
+=== `getFluidDescriptor` () -> `fluidDescriptor` : Trace<xref:/reflection/classes/ItemType.adoc[ItemType]>
+// tag::func-getFluidDescriptor[]
+
+?
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Fluid Descriptor
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Fluid Descriptor* `fluidDescriptor`
+! Trace<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! ?
+!===
+
+====
+// end::func-getFluidDescriptor[]
+// end::func-getFluidDescriptor-title[]
+
+// end::interface[]
+

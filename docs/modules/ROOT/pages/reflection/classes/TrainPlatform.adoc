@@ -1,0 +1,241 @@
+= Train Platform
+:table-caption!:
+
+The base class for all train station parts.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-isReversed-title[]
+=== `isReversed` : Bool
+// tag::func-isReversed[]
+
+True if the orientation of the platform is reversed relative to the track/station.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Reversed
+!===
+====
+// end::func-isReversed[]
+// end::func-isReversed-title[]
+// tag::func-status-title[]
+=== `status` : Int
+// tag::func-status[]
+
+The current docking status of the platform.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Status
+!===
+====
+// end::func-status[]
+// end::func-status-title[]
+
+== Functions
+
+// tag::func-getConnectedPlatform-title[]
+=== `getConnectedPlatform` (`direction` : Int) -> `platform` : Trace<xref:/reflection/classes/TrainPlatform.adoc[TrainPlatform]>
+// tag::func-getConnectedPlatform[]
+
+Returns the connected platform in the given direction.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Connected Platform
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Direction* `direction`
+! Int
+! The direction in which you want to get the connected platform.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Platform* `platform`
+! Trace<xref:/reflection/classes/TrainPlatform.adoc[TrainPlatform]>
+! The platform connected to this platform in the given direction.
+!===
+
+====
+// end::func-getConnectedPlatform[]
+// end::func-getConnectedPlatform-title[]
+// tag::func-getDockedLocomotive-title[]
+=== `getDockedLocomotive` () -> `locomotive` : Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+// tag::func-getDockedLocomotive[]
+
+Returns the currently docked locomotive at the train station.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Docked Locomotive
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Locomotive* `locomotive`
+! Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+! The currently docked locomotive at the train station.
+!===
+
+====
+// end::func-getDockedLocomotive[]
+// end::func-getDockedLocomotive-title[]
+// tag::func-getDockedVehicle-title[]
+=== `getDockedVehicle` () -> `vehicle` : Trace<xref:/reflection/classes/Vehicle.adoc[Vehicle]>
+// tag::func-getDockedVehicle[]
+
+Returns the currently docked vehicle.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Docked Vehicle
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Vehicle* `vehicle`
+! Trace<xref:/reflection/classes/Vehicle.adoc[Vehicle]>
+! The currently docked vehicle
+!===
+
+====
+// end::func-getDockedVehicle[]
+// end::func-getDockedVehicle-title[]
+// tag::func-getMaster-title[]
+=== `getMaster` () -> `master` : Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+// tag::func-getMaster[]
+
+Returns the master platform of this train station.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Master
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Master* `master`
+! Trace<xref:/reflection/classes/RailroadVehicle.adoc[RailroadVehicle]>
+! The master platform of this train station.
+!===
+
+====
+// end::func-getMaster[]
+// end::func-getMaster-title[]
+// tag::func-getTrackGraph-title[]
+=== `getTrackGraph` () -> `graph` : Struct<xref:/reflection/structs/TrackGraph.adoc[TrackGraph]>
+// tag::func-getTrackGraph[]
+
+Returns the track graph of which this platform is part of.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Track Graph
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Graph* `graph`
+! Struct<xref:/reflection/structs/TrackGraph.adoc[TrackGraph]>
+! The track graph of which this platform is part of.
+!===
+
+====
+// end::func-getTrackGraph[]
+// end::func-getTrackGraph-title[]
+// tag::func-getTrackPos-title[]
+=== `getTrackPos` () -> (`track` : Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>, `offset` : Float, `forward` : Float)
+// tag::func-getTrackPos[]
+
+Returns the track pos at which this train platform is placed.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Track Pos
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
+! The track the track pos points to.
+
+! *Offset* `offset`
+! Float
+! The offset of the track pos.
+
+! *Forward* `forward`
+! Float
+! The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction
+!===
+
+====
+// end::func-getTrackPos[]
+// end::func-getTrackPos-title[]
+
+// end::interface[]
+

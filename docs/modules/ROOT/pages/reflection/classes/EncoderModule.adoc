@@ -1,0 +1,93 @@
+= Encoder Module
+:table-caption!:
+
+This Potentiometer Module allows for input of a value with infinite range, this because it only fires how much the value changed since last, not how much it is at.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-enabled-title[]
+=== `enabled` : Bool
+// tag::func-enabled[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! enabled
+!===
+====
+// end::func-enabled[]
+// end::func-enabled-title[]
+
+== Functions
+
+// tag::func-setColor-title[]
+=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+// tag::func-setColor[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! setColor
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *red* `red`
+! Float
+! 
+
+! *green* `green`
+! Float
+! 
+
+! *blue* `blue`
+! Float
+! 
+
+! *Emit* `Emit`
+! Float
+! 
+!===
+
+====
+// end::func-setColor[]
+// end::func-setColor-title[]
+
+== Signals
+
+=== `valueChanged` (_Int_ *Value* `Value`)
+
+
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Value* `Value`
+! Int
+! 
+!===
+====
+
+
+// end::interface[]
+

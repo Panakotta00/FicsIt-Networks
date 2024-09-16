@@ -1,0 +1,29 @@
+= Item Category
+:table-caption!:
+
+The category of some items.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-name-title[]
+=== `name` : String
+// tag::func-name[]
+
+The name of the category.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>ClassProp</i></span>+++
+
+! Display Name ! Name
+!===
+====
+// end::func-name[]
+// end::func-name-title[]
+
+// end::interface[]
+

@@ -1,0 +1,389 @@
+= Prefab Sign Data
+:table-caption!:
+
+This structure stores all data that defines what a sign displays.
+
+== Properties
+
+// tag::func-auxiliary-title[]
+=== `auxiliary` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-auxiliary[]
+
+The auxiliary Color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Auxiliary
+!===
+====
+// end::func-auxiliary[]
+// end::func-auxiliary-title[]
+// tag::func-background-title[]
+=== `background` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-background[]
+
+The background Color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Background
+!===
+====
+// end::func-background[]
+// end::func-background-title[]
+// tag::func-emissive-title[]
+=== `emissive` : Float
+// tag::func-emissive[]
+
+The emissiveness of the sign.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Emissive
+!===
+====
+// end::func-emissive[]
+// end::func-emissive-title[]
+// tag::func-foreground-title[]
+=== `foreground` : Struct<xref:/reflection/structs/Color.adoc[Color]>
+// tag::func-foreground[]
+
+The foreground Color.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Foreground
+!===
+====
+// end::func-foreground[]
+// end::func-foreground-title[]
+// tag::func-layout-title[]
+=== `layout` : Class<xref:/reflection/classes/Object.adoc[Object]>
+// tag::func-layout[]
+
+The object that actually displayes the layout
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Layout
+!===
+====
+// end::func-layout[]
+// end::func-layout-title[]
+// tag::func-signType-title[]
+=== `signType` : Class<xref:/reflection/classes/SignType.adoc[SignType]>
+// tag::func-signType[]
+
+The type of sign this prefab fits to.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Sign Type
+!===
+====
+// end::func-signType[]
+// end::func-signType-title[]
+
+== Functions
+
+// tag::func-getIconElement-title[]
+=== `getIconElement` (`elementName` : String) -> `value` : Int
+// tag::func-getIconElement[]
+
+Gets a icon element with the given element name.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Icon Element
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Element Name* `elementName`
+! String
+! The name of the icon element
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Value* `value`
+! Int
+! The value of the icon element
+!===
+
+====
+// end::func-getIconElement[]
+// end::func-getIconElement-title[]
+// tag::func-getIconElements-title[]
+=== `getIconElements` () -> (`iconElements` : Array<String>, `iconElementValues` : Array<Int>)
+// tag::func-getIconElements[]
+
+Returns all icon elements and their values.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Icon Elements
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Icon Elements* `iconElements`
+! Array<String>
+! The element names for all icon elements.
+
+! *Icon Element Values* `iconElementValues`
+! Array<Int>
+! The values for all icon elements.
+!===
+
+====
+// end::func-getIconElements[]
+// end::func-getIconElements-title[]
+// tag::func-getTextElement-title[]
+=== `getTextElement` (`elementName` : String) -> `value` : Int
+// tag::func-getTextElement[]
+
+Gets a text element with the given element name.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Text Element
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Element Name* `elementName`
+! String
+! The name of the text element
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Value* `value`
+! Int
+! The value of the text element
+!===
+
+====
+// end::func-getTextElement[]
+// end::func-getTextElement-title[]
+// tag::func-getTextElements-title[]
+=== `getTextElements` () -> (`textElements` : Array<String>, `textElementValues` : Array<String>)
+// tag::func-getTextElements[]
+
+Returns all text elements and their values.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Text Elements
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Text Elements* `textElements`
+! Array<String>
+! The element names for all text elements.
+
+! *Text Element Values* `textElementValues`
+! Array<String>
+! The values for all text elements.
+!===
+
+====
+// end::func-getTextElements[]
+// end::func-getTextElements-title[]
+// tag::func-setIconElement-title[]
+=== `setIconElement` (`elementName` : String, `value` : Int)
+// tag::func-setIconElement[]
+
+Sets a icon element with the given element name.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Icon Element
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Element Name* `elementName`
+! String
+! The name of the icon element
+
+! *Value* `value`
+! Int
+! The value of the icon element
+!===
+
+====
+// end::func-setIconElement[]
+// end::func-setIconElement-title[]
+// tag::func-setIconElements-title[]
+=== `setIconElements` (`iconElements` : Array<String>, `iconElementValues` : Array<Int>)
+// tag::func-setIconElements[]
+
+Sets all icon elements and their values.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Icon Elements
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Icon Elements* `iconElements`
+! Array<String>
+! The element names for all icon elements.
+
+! *Icon Element Values* `iconElementValues`
+! Array<Int>
+! The values for all icon elements.
+!===
+
+====
+// end::func-setIconElements[]
+// end::func-setIconElements-title[]
+// tag::func-setTextElement-title[]
+=== `setTextElement` (`elementName` : String, `value` : String)
+// tag::func-setTextElement[]
+
+Sets a text element with the given element name.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Text Element
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Element Name* `elementName`
+! String
+! The name of the text element
+
+! *Value* `value`
+! String
+! The value of the text element
+!===
+
+====
+// end::func-setTextElement[]
+// end::func-setTextElement-title[]
+// tag::func-setTextElements-title[]
+=== `setTextElements` (`textElements` : Array<String>, `textElementValues` : Array<String>)
+// tag::func-setTextElements[]
+
+Sets all text elements and their values.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Text Elements
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Text Elements* `textElements`
+! Array<String>
+! The element names for all text elements.
+
+! *Text Element Values* `textElementValues`
+! Array<String>
+! The values for all text elements.
+!===
+
+====
+// end::func-setTextElements[]
+// end::func-setTextElements-title[]
+

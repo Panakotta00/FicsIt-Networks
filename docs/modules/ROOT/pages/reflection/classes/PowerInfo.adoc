@@ -1,0 +1,146 @@
+= Power Info
+:table-caption!:
+
+A actor component that provides information and mainly statistics about the power connection it is attached to.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-baseProduction-title[]
+=== `baseProduction` : Float
+// tag::func-baseProduction[]
+
+The base production capactiy this connection always provides.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Base Production
+!===
+====
+// end::func-baseProduction[]
+// end::func-baseProduction-title[]
+// tag::func-consumption-title[]
+=== `consumption` : Float
+// tag::func-consumption[]
+
+The amount of energy the connection actually consumed in the last tick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Consumption
+!===
+====
+// end::func-consumption[]
+// end::func-consumption-title[]
+// tag::func-dynProduction-title[]
+=== `dynProduction` : Float
+// tag::func-dynProduction[]
+
+The production cpacity this connection provided last tick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Dynamic Production
+!===
+====
+// end::func-dynProduction[]
+// end::func-dynProduction-title[]
+// tag::func-hasPower-title[]
+=== `hasPower` : Bool
+// tag::func-hasPower[]
+
+True if the connection has satisfied power values and counts as beeing powered. (True if it has power)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Has Power
+!===
+====
+// end::func-hasPower[]
+// end::func-hasPower-title[]
+// tag::func-maxDynProduction-title[]
+=== `maxDynProduction` : Float
+// tag::func-maxDynProduction[]
+
+The maximum production capactiy this connection could have provided to the circuit in the last tick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Dynamic Production
+!===
+====
+// end::func-maxDynProduction[]
+// end::func-maxDynProduction-title[]
+// tag::func-targetConsumption-title[]
+=== `targetConsumption` : Float
+// tag::func-targetConsumption[]
+
+The amount of energy the connection wanted to consume from the circuit in the last tick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Target Consumption
+!===
+====
+// end::func-targetConsumption[]
+// end::func-targetConsumption-title[]
+
+== Functions
+
+// tag::func-getCircuit-title[]
+=== `getCircuit` () -> `circuit` : Trace<xref:/reflection/classes/PowerCircuit.adoc[PowerCircuit]>
+// tag::func-getCircuit[]
+
+Returns the power circuit this info component is part of.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Circuit
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Circuit* `circuit`
+! Trace<xref:/reflection/classes/PowerCircuit.adoc[PowerCircuit]>
+! The Power Circuit this info component is attached to.
+!===
+
+====
+// end::func-getCircuit[]
+// end::func-getCircuit-title[]
+
+// end::interface[]
+

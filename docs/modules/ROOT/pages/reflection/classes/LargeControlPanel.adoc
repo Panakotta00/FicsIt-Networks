@@ -1,0 +1,88 @@
+= Large Control Panel
+:table-caption!:
+
+This large modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programms.
+
+You can connect it to the FicsIt-Network.
+
+Important to note is that every module is it's own component, that means if you want to listen to the signals, you will need to listen to each of them individually.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getModules-title[]
+=== `getModules` () -> `modules` : Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
+// tag::func-getModules[]
+
+Returns all modules placed on the panel.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get All Modules
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Modules* `modules`
+! Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
+! All the modules placed on the panel.
+!===
+
+====
+// end::func-getModules[]
+// end::func-getModules-title[]
+// tag::func-getModule-title[]
+=== `getModule` (`x` : Int, `y` : Int) -> `module` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getModule[]
+
+Returns the module placed at the given location on the panel.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Module
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x location of the module on the panel. (0 = left)
+
+! *Y* `y`
+! Int
+! The y location of the module on the panel. (0 = bottom)
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Module* `module`
+! Object<xref:/reflection/classes/Actor.adoc[Actor]>
+! The module you want to get. Null if no module was placed.
+!===
+
+====
+// end::func-getModule[]
+// end::func-getModule-title[]
+
+// end::interface[]
+

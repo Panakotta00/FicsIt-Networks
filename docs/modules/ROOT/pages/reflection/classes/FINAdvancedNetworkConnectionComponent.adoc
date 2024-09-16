@@ -1,0 +1,33 @@
+= FINAdvancedNetworkConnectionComponent
+:table-caption!:
+
+
+
+// tag::interface[]
+
+== Signals
+
+=== `NetworkUpdate` (_Int_ *changeType* `changeType`, _String_ *ChangedComponent* `ChangedComponent`)
+
+
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *changeType* `changeType`
+! Int
+! 
+
+! *ChangedComponent* `ChangedComponent`
+! String
+! 
+!===
+====
+
+
+// end::interface[]
+

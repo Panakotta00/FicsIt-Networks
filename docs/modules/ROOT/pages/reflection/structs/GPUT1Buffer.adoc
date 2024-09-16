@@ -1,0 +1,427 @@
+= GPU T1 Buffer
+:table-caption!:
+
+A structure that can hold a buffer of characters and colors that can be displayed with a gpu
+
+== Functions
+
+// tag::func-clone-title[]
+=== `clone` () -> `buffer` : Struct<xref:/reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]>
+// tag::func-clone[]
+
+Clones this buffer into a new struct
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Clone
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Buffer* `buffer`
+! Struct<xref:/reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]>
+! The clone of this buffer
+!===
+
+====
+// end::func-clone[]
+// end::func-clone-title[]
+// tag::func-copy-title[]
+=== `copy` (`x` : Int, `y` : Int, `buffer` : Struct<xref:/reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]>, `textBlendMode` : Int, `foregroundBlendMode` : Int, `backgroundBlendMode` : Int)
+// tag::func-copy[]
+
+Copies the given buffer at the given offset of the upper left corner into this buffer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Copy
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x offset of the upper left corner of the buffer relative to this buffer
+
+! *Y* `y`
+! Int
+! The y offset of the upper left corener of the buffer relative to this buffer
+
+! *Buffer* `buffer`
+! Struct<xref:/reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]>
+! The buffer from wich you want to copy from
+
+! *Text Blend Mode* `textBlendMode`
+! Int
+! The blend mode that is used for the text.
+  0 = Overwrite this with the content of the given buffer
+  1 = Overwrite with only characters that are not ' '
+  2 = Overwrite only were this characters are ' '
+  3 = Keep this buffer
+
+! *Foreground Color Blend Mode* `foregroundBlendMode`
+! Int
+! The blend mode that is used for the foreground color.
+  0 = Overwrite with the given color
+  1 = Normal alpha composition
+  2 = Multiply
+  3 = Divide
+  4 = Addition
+  5 = Subtraction
+  6 = Difference
+  7 = Darken Only
+  8 = Lighten Only
+  9 = None
+
+! *Background Color Blend Mode* `backgroundBlendMode`
+! Int
+! The blend mode that is used for the background color.
+  0 = Overwrite with the given color
+  1 = Normal alpha composition
+  2 = Multiply
+  3 = Divide
+  4 = Addition
+  5 = Subtraction
+  6 = Difference
+  7 = Darken Only
+  8 = Lighten Only
+  9 = None
+!===
+
+====
+// end::func-copy[]
+// end::func-copy-title[]
+// tag::func-fill-title[]
+=== `fill` (`x` : Int, `y` : Int, `width` : Int, `height` : Int, `character` : String, `foreground` : Struct<xref:/reflection/structs/Color.adoc[Color]>, `background` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+// tag::func-fill[]
+
+Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Fill
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x coordinate at which the rectangle should get drawn. (upper-left corner)
+
+! *Y* `y`
+! Int
+! The y coordinate at which the rectangle should get drawn. (upper-left corner)
+
+! *Width* `width`
+! Int
+! The width of the rectangle.
+
+! *Height* `height`
+! Int
+! The height of the rectangle.
+
+! *Character* `character`
+! String
+! A string with a single character that will be used for each pixel in the range you want to fill.
+
+! *Foreground* `foreground`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The foreground color which will be used to fill the rectangle.
+
+! *Background* `background`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The background color which will be used to fill the rectangle.
+!===
+
+====
+// end::func-fill[]
+// end::func-fill-title[]
+// tag::func-get-title[]
+=== `get` (`x` : Int, `y` : Int) -> (`c` : String, `foreground` : Struct<xref:/reflection/structs/Color.adoc[Color]>, `background` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+// tag::func-get[]
+
+Allows to get a single pixel from the buffer at the given position
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x position of the character you want to get
+
+! *Y* `y`
+! Int
+! The y position of the character you want to get
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Char* `c`
+! String
+! The character at the given position
+
+! *Foreground Color* `foreground`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The foreground color of the pixel at the given position
+
+! *Background Color* `background`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The background color of the pixel at the given position
+!===
+
+====
+// end::func-get[]
+// end::func-get-title[]
+// tag::func-getSize-title[]
+=== `getSize` () -> (`width` : Float, `height` : Float)
+// tag::func-getSize[]
+
+Allows to get the dimensions of the buffer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Size
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Width* `width`
+! Float
+! The width of this buffer
+
+! *Height* `height`
+! Float
+! The height of this buffer
+!===
+
+====
+// end::func-getSize[]
+// end::func-getSize-title[]
+// tag::func-set-title[]
+=== `set` (`x` : Int, `y` : Int, `c` : String, `foreground` : Struct<xref:/reflection/structs/Color.adoc[Color]>, `background` : Struct<xref:/reflection/structs/Color.adoc[Color]>) -> `done` : Bool
+// tag::func-set[]
+
+Allows to set a single pixel of the buffer at the given position
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x position of the character you want to set
+
+! *Y* `y`
+! Int
+! The y position of the character you want to set
+
+! *Char* `c`
+! String
+! The character the pixel should have
+
+! *Foreground Color* `foreground`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The foreground color the pixel at the given position should have
+
+! *Background Color* `background`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The background color the pixel at the given position should have
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Done* `done`
+! Bool
+! True if the pixel got set successfully
+!===
+
+====
+// end::func-set[]
+// end::func-set-title[]
+// tag::func-setRaw-title[]
+=== `setRaw` (`characters` : String, `foreground` : Array<Float>, `background` : Array<Float>) -> `success` : Bool
+// tag::func-setRaw[]
+
+Allows to set the internal data of the buffer more directly.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Raw
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Characters* `characters`
+! String
+! The characters you want to draw with a length of exactly width*height.
+
+! *Foreground Color* `foreground`
+! Array<Float>
+! The values of the foreground color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.
+
+! *Background Color* `background`
+! Array<Float>
+! The values of the background color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Success* `success`
+! Bool
+! True if the raw data was successfully written
+!===
+
+====
+// end::func-setRaw[]
+// end::func-setRaw-title[]
+// tag::func-setSize-title[]
+=== `setSize` (`width` : Float, `height` : Float)
+// tag::func-setSize[]
+
+Allows to set the dimensions of the buffer.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Size
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Width* `width`
+! Float
+! The width this buffer should now have
+
+! *Height* `height`
+! Float
+! The height this buffer now have
+!===
+
+====
+// end::func-setSize[]
+// end::func-setSize-title[]
+// tag::func-setText-title[]
+=== `setText` (`x` : Int, `y` : Int, `text` : String, `foreground` : Struct<xref:/reflection/structs/Color.adoc[Color]>, `background` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+// tag::func-setText[]
+
+Allows to write the given text onto the buffer and with the given offset.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Text
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The X Position at which the text should begin to get written.
+
+! *Y* `y`
+! Int
+! The Y Position at which the text should begin to get written.
+
+! *Text* `text`
+! String
+! The text that should get written.
+
+! *Foreground* `foreground`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The foreground color which will be used to write the text.
+
+! *Background* `background`
+! Struct<xref:/reflection/structs/Color.adoc[Color]>
+! The background color which will be used to write the text.
+!===
+
+====
+// end::func-setText[]
+// end::func-setText-title[]
+

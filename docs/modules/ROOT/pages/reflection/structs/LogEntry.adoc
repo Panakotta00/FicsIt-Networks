@@ -1,0 +1,91 @@
+= Log Entry
+:table-caption!:
+
+An entry in the Computer Log.
+
+== Properties
+
+// tag::func-content-title[]
+=== `content` : String
+// tag::func-content[]
+
+The Message-Content contained within the log entry.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Content
+!===
+====
+// end::func-content[]
+// end::func-content-title[]
+// tag::func-timestamp-title[]
+=== `timestamp` : String
+// tag::func-timestamp[]
+
+The timestamp at which the log entry got logged.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Timestamp
+!===
+====
+// end::func-timestamp[]
+// end::func-timestamp-title[]
+// tag::func-verbosity-title[]
+=== `verbosity` : Int
+// tag::func-verbosity[]
+
+The verbosity of the log entry.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Verbosity
+!===
+====
+// end::func-verbosity[]
+// end::func-verbosity-title[]
+
+== Functions
+
+// tag::func-format-title[]
+=== `format` () -> `result` : String
+// tag::func-format[]
+
+Creates a formatted string representation of this log entry.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Format
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! String
+! The resulting formatted string
+!===
+
+====
+// end::func-format[]
+// end::func-format-title[]
+

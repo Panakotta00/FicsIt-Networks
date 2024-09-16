@@ -1,0 +1,234 @@
+= Factory Connection
+:table-caption!:
+
+A actor component that is a connection point to which a conveyor or pipe can get attached to.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-allowedItem-title[]
+=== `allowedItem` : Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+// tag::func-allowedItem[]
+
+This item type defines which items are the only ones this connector can transfer. Null allows all items to be transfered.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Allowed Item
+!===
+====
+// end::func-allowedItem[]
+// end::func-allowedItem-title[]
+// tag::func-blocked-title[]
+=== `blocked` : Bool
+// tag::func-blocked[]
+
+True if this connector doesn't transfer any items except the 'Unblocked Transfers'.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Blocked
+!===
+====
+// end::func-blocked[]
+// end::func-blocked-title[]
+// tag::func-direction-title[]
+=== `direction` : Int
+// tag::func-direction[]
+
+The direction in which the items/fluids flow. 0 = Input, 1 = Output, 2 = Any, 3 = Used just as snap point
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Direction
+!===
+====
+// end::func-direction[]
+// end::func-direction-title[]
+// tag::func-isConnected-title[]
+=== `isConnected` : Bool
+// tag::func-isConnected[]
+
+True if something is connected to this connection.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Connected
+!===
+====
+// end::func-isConnected[]
+// end::func-isConnected-title[]
+// tag::func-type-title[]
+=== `type` : Int
+// tag::func-type[]
+
+Returns the type of the connection. 0 = Conveyor, 1 = Pipe
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Type
+!===
+====
+// end::func-type[]
+// end::func-type-title[]
+// tag::func-unblockedTransfers-title[]
+=== `unblockedTransfers` : Int
+// tag::func-unblockedTransfers[]
+
+The count of transfers that can still happen even if the connector is blocked. Use the 'AddUnblockedTransfers' function to change this. The count decreases by one when an item gets transfered.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Unblocked Transfers
+!===
+====
+// end::func-unblockedTransfers[]
+// end::func-unblockedTransfers-title[]
+
+== Functions
+
+// tag::func-addUnblockedTransfers-title[]
+=== `addUnblockedTransfers` (`unblockedTransfers` : Int) -> `newUnblockedTransfers` : Int
+// tag::func-addUnblockedTransfers[]
+
+Adds the given count to the unblocked transfers counter. The resulting value gets clamped to >= 0. Negative values allow to decrease the counter manually. The returning int is the now set count.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Add Unblocked Transfers
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Unblocked Transfers* `unblockedTransfers`
+! Int
+! The count of unblocked transfers to add.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *New Unblocked Transfers* `newUnblockedTransfers`
+! Int
+! The new count of unblocked transfers.
+!===
+
+====
+// end::func-addUnblockedTransfers[]
+// end::func-addUnblockedTransfers-title[]
+// tag::func-getConnected-title[]
+=== `getConnected` () -> `connected` : Trace<xref:/reflection/classes/FactoryConnection.adoc[FactoryConnection]>
+// tag::func-getConnected[]
+
+Returns the connected factory connection component.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Connected
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Connected* `connected`
+! Trace<xref:/reflection/classes/FactoryConnection.adoc[FactoryConnection]>
+! The connected factory connection component.
+!===
+
+====
+// end::func-getConnected[]
+// end::func-getConnected-title[]
+// tag::func-getInventory-title[]
+=== `getInventory` () -> `inventory` : Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+// tag::func-getInventory[]
+
+Returns the internal inventory of the connection component.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Inventory
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Inventory* `inventory`
+! Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+! The internal inventory of the connection component.
+!===
+
+====
+// end::func-getInventory[]
+// end::func-getInventory-title[]
+
+== Signals
+
+=== `ItemTransfer` (_Struct<xref:/reflection/structs/Item.adoc[Item]>_ *Item* `item`)
+
+Triggers when the factory connection component transfers an item.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item* `item`
+! Struct<xref:/reflection/structs/Item.adoc[Item]>
+! The transfered item
+!===
+====
+
+
+// end::interface[]
+
