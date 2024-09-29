@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
+#include "FINLabelContainerInterface.h"
 #include "Components/ContentWidget.h"
 #include "Components/PanelWidget.h"
 #include "FINEditLabel.generated.h"
@@ -22,6 +24,5 @@ public:
 	UFUNCTION()
 	void OnLabelChanged(const FText& Text, ETextCommit::Type CommitMethod);
 
-	UFUNCTION()
-	static TScriptInterface<IFINLabelContainerInterface> GetLabelContainerFromSlot(UWidget* InSlot);
+	static FFINLabelContainerInterface* GetLabelContainerFromSlot(UWidget* InSlot);
 };

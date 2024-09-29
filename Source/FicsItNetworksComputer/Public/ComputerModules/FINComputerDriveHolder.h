@@ -2,10 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "FINComputerModule.h"
+#include "FINFileSystemState.h"
 #include "FINComputerDriveHolder.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINDriveHolderDriveUpdate, AFINFileSystemState*, Drive);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINDriveHolderLockedUpdateDelegate, bool, bOldLocked, AFINFileSystemState*, NewOrOldDrive);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINDriveHolderDriveUpdate, const FGuid&, Drive);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINDriveHolderLockedUpdateDelegate, bool, bOldLocked, const FGuid&, NewOrOldDrive);
 
 UCLASS()
 class FICSITNETWORKSCOMPUTER_API AFINComputerDriveHolder : public AFINComputerModule {
@@ -13,7 +14,7 @@ class FICSITNETWORKSCOMPUTER_API AFINComputerDriveHolder : public AFINComputerMo
 
 protected:
 	UPROPERTY(SaveGame)
-	AFINFileSystemState* PrevFSState = nullptr;
+	FGuid PrevFSState;
 
 	UPROPERTY(SaveGame, Replicated)
 	bool bLocked = false;
@@ -35,7 +36,7 @@ public:
 	virtual void EndPlay(EEndPlayReason::Type reason) override;
 	// End AActor
 
-	AFINFileSystemState* GetDrive();
+	const FGuid& GetDrive();
 
 	UFUNCTION(BlueprintGetter)
 	bool GetLocked() const;
@@ -44,12 +45,12 @@ public:
 	bool SetLocked(bool NewLocked);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void NetMulti_OnDriveUpdate(AFINFileSystemState* Drive);
+	void NetMulti_OnDriveUpdate(const FGuid& Drive);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void NetMulti_OnLockedUpdate(bool bOldLocked, AFINFileSystemState* NewOrOldDrive);
+	void NetMulti_OnLockedUpdate(bool bOldLocked, const FGuid& NewOrOldDrive);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category="Computer|Drive")
-	void OnDriveInventoryUpdate(TSubclassOf<UFGItemDescriptor> drive, int32 count);
+	void OnDriveInventoryUpdate(TSubclassOf<UFGItemDescriptor> drive, int32 count, UFGInventoryComponent* sourceInventory);
 };

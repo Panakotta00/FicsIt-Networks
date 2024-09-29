@@ -1,6 +1,5 @@
 ﻿#include "Components/FINModuleScreen.h"
 #include "Graphics/FINGPUInterface.h"
-#include "SlateBasics.h"
 #include "Widgets/Layout/SScaleBox.h"
 
 AFINModuleScreen::AFINModuleScreen() {

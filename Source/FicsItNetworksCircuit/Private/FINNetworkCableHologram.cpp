@@ -346,28 +346,28 @@ USceneComponent* AFINNetworkCableHologram::SetupComponent(USceneComponent* attac
 
 void AFINNetworkCableHologram::SpawnChildren(AActor* hologramOwner, FVector spawnLocation, APawn* hologramInstigator) {
 	if (RecipePole) {
-		PoleHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipePole, hologramOwner, spawnLocation, hologramInstigator));
+		PoleHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, TEXT("PoleHologram1"), RecipePole, hologramOwner, spawnLocation));
 		PoleHologram1->SetDisabled(true);
 	}
 	if (RecipePlug) {
-		PlugHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipePlug, hologramOwner, spawnLocation, hologramInstigator));
+		PlugHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, TEXT("PlugHologram1"), RecipePlug, hologramOwner, spawnLocation));
 		PlugHologram1->SetDisabled(true);
 	}
 	if (RecipeAdapter) {
-		AdapterHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipeAdapter, hologramOwner, spawnLocation, hologramInstigator));
+		AdapterHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, TEXT("AdapterHologram1"), RecipeAdapter, hologramOwner, spawnLocation));
 		AdapterHologram1->SetDisabled(true);
 	}
 	// First The Holograms for the first step, then for the next step. Order needed for later child construction and ordering in construction.
 	if (RecipePole) {
-		PoleHologram2 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipePole, hologramOwner, spawnLocation, hologramInstigator));
+		PoleHologram2 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, TEXT("PoleHologram2"), RecipePole, hologramOwner, spawnLocation));
 		PoleHologram2->SetDisabled(true);
 	}
 	if (RecipePlug) {
-		PlugHologram2 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipePlug, hologramOwner, spawnLocation, hologramInstigator));
+		PlugHologram2 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, TEXT("PlugHologram2"), RecipePlug, hologramOwner, spawnLocation));
 		PlugHologram2->SetDisabled(true);
 	}
 	if (RecipeAdapter) {
-		AdapterHologram2 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, RecipeAdapter, hologramOwner, spawnLocation, hologramInstigator));
+		AdapterHologram2 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, TEXT("AdapterHologram2"), RecipeAdapter, hologramOwner, spawnLocation));
 		AdapterHologram2->SetDisabled(true);
 	}
 }
@@ -417,7 +417,7 @@ void AFINNetworkCableHologram::OnEndSnap(FFINCablePlacementStepInfo a) {
 		AActor* o = a.GetActor();
 		if (o) {
 			UFGOutlineComponent* Outline = UFGOutlineComponent::Get(this->GetWorld());
-			Outline->HideOutline();
+			Outline->HideOutline(o);
 		}
 	}
 }

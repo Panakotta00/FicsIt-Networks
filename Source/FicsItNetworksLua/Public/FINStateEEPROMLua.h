@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FicsItKernel/Processor/FINStateEEPROM.h"
+#include "FicsItKernel/Processor/FINStateEEPROM_Legacy.h"
 #include "FINStateEEPROMLua.generated.h"
 
 UCLASS()
-class FICSITNETWORKSLUA_API AFINStateEEPROMLua : public AFINStateEEPROM {
+class FICSITNETWORKSLUA_API AFINStateEEPROMLua : public AFINStateEEPROM_Legacy {
 	GENERATED_BODY()
 	
 protected:
@@ -18,6 +18,4 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Computer")
 	void SetCode(const FString& NewCode);
-
-	virtual bool CopyDataTo(AFINStateEEPROM* InFrom) override;
 };

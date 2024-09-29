@@ -111,7 +111,7 @@ bool AFINBlueprintHologram::TrySnapToActor(const FHitResult& hitResult) {
 }
 
 void AFINBlueprintHologram::PlaceHologram() {
-	auto cp = static_cast<AFGCharacterPlayer*>(mConstructionInstigator);
+	auto cp = static_cast<AFGCharacterPlayer*>(GetConstructionInstigator());
 	cp->GetBuildGun()->Server_PrimaryFire_Implementation();
 	cp->GetBuildGun()->Server_PrimaryFire_Implementation();
 }

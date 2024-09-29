@@ -69,8 +69,7 @@ private:
 	FCriticalSection MutexDevDevice;
 	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = nullptr;
 	int64 MemoryCapacity = 0;
-	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> Drives;
+	TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> Drives;
 
 	// Runtime Environment/State
 	UPROPERTY(SaveGame)
@@ -180,16 +179,16 @@ public:
 	/**
 	 * Adds the given drive to the system.
 	 *
-	 * @param	Drive	the drive you want to add
+	 * @param	Drive	the FileSystem-ID of the drive you want to add
 	 */
-	void AddDrive(AFINFileSystemState* Drive);
+	void AddDrive(const FGuid& Drive);
 
 	/**
 	 * Removes the given drive from the system.
 	 *
-	 * @param	Drive	the drive you want to remove
+	 * @param	Drive	the FileSystem-ID of the drive you want to remove
 	 */
-	void RemoveDrive(AFINFileSystemState* Drive);
+	void RemoveDrive(const FGuid& Drive);
 
 	/**
 	 * Adds a future to resolve to the future queue.
@@ -210,7 +209,7 @@ public:
 	 *
 	 * @return	the drives
 	 */
-	TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> GetDrives() const;
+	TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> GetDrives() const;
 
 	/**
 	 * Gets the internally used DevDevice

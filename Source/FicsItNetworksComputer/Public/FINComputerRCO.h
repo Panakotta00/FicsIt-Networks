@@ -55,5 +55,5 @@ public:
 	void CopyDataItem(UFGInventoryComponent* InProviderInc, int InProviderIdx, UFGInventoryComponent* InFromInv, int InFromIdx, UFGInventoryComponent* InToInv, int InToIdx);
 
 	UFUNCTION(Server, Reliable)
-	void SetLabel(UObject* Container, const FString& Label);
+	void SetLabel(UFGInventoryComponent* Inventory, int32 Index, const FString& Label);
 };

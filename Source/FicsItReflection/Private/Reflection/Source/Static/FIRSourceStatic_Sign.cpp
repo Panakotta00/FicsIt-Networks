@@ -48,10 +48,10 @@ BeginClassFunc(getPrefabs, "Get Prefabs", "Returns a list of all sign prefabs th
 	OutVal(0, RArray<RClass<UFGSignPrefabWidget>>, prefabs, "Prefabs", "The sign prefabs this sign can use")
 	Body()
 	TArray<FIRAny> PrefabsArray;
-	TArray<TSubclassOf<UFGSignPrefabWidget>> PrefabList;
+	TArray<TSoftClassPtr<UFGSignPrefabWidget>> PrefabList;
 	UFGSignLibrary::GetPrefabLayoutsFromSignDescriptor(self, PrefabList);
-	for (TSubclassOf<UFGSignPrefabWidget> Prefab : PrefabList) {
-		PrefabsArray.Add((FIRClass)Prefab);
+	for (TSoftClassPtr<UFGSignPrefabWidget> Prefab : PrefabList) {
+		PrefabsArray.Add((FIRClass)Prefab.Get());
 	}
 	prefabs = PrefabsArray;
 } EndFunc()
@@ -90,7 +90,7 @@ EndClass()
 
 BeginStructConstructable(FPrefabSignData, "PrefabSignData", "Prefab Sign Data", "This structure stores all data that defines what a sign displays.")
 BeginProp(RClass<UObject>, layout, "Layout", "The object that actually displayes the layout") {
-	Return (FIRClass)self->PrefabLayout;
+	Return (FIRClass)self->PrefabLayout.Get();
 } PropSet() {
 	self->PrefabLayout = Val;
 } EndProp()

@@ -27,18 +27,21 @@ void UFINCopyUUIDButton::InitSlotWidget(UWidget* InSlotWidget) {
 	MCDelegate->AddDelegate(Delegate, Button);
 }
 
-AFINFileSystemState* UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(UWidget* InSlot) {
+FGuid UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(UWidget* InSlot) {
 	struct {
 		FInventoryStack Stack;
 	} Params;
 	FReflectionHelper::CallScriptFunction(InSlot, TEXT("GetStack"), &Params);
-	AFINFileSystemState* State = Cast<AFINFileSystemState>(Params.Stack.Item.ItemState.Get());
-	return State;
+	const FFINFileSystemState* State = Params.Stack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
+	if (State) {
+		return State->ID;
+	}
+	return FGuid();
 }
 
 void UFINCopyUUIDButton::OnCopyUUIDClicked() {
-	AFINFileSystemState* State = GetFileSystemStateFromSlotWidget(SlotWidget);
-	if (State) {
-		UFINComponentUtility::ClipboardCopy(State->ID.ToString());
+	FGuid ID = GetFileSystemStateFromSlotWidget(SlotWidget);
+	if (ID.IsValid()) {
+		UFINComponentUtility::ClipboardCopy(ID.ToString());
 	}
 }

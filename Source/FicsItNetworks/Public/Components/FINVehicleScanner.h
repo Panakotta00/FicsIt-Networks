@@ -21,7 +21,7 @@ public:
 	UStaticMeshComponent* LampMesh;
 
 	UPROPERTY(EditAnywhere)
-	UBoxComponent* VehicleCollision;
+	class UBoxComponent* VehicleCollision;
 
 	UPROPERTY(BlueprintReadOnly, SaveGame, Replicated)
 	FLinearColor ScanColor = FLinearColor(0,0,1);

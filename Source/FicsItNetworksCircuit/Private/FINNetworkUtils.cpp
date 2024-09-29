@@ -7,12 +7,14 @@ UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
 	if (!Obj) return nullptr;
 	if (Obj->Implements<UFINNetworkComponent>()) return Obj;
 	if (Obj->IsA<AActor>()) {
-		TArray<UActorComponent*> Connectors = Cast<AActor>(Obj)->GetComponentsByClass(UFINAdvancedNetworkConnectionComponent::StaticClass());
-		for (UActorComponent* Connector : Connectors) {
-			if (Connector->Implements<UFINNetworkComponent>()) return Connector;
+		TArray<UFINAdvancedNetworkConnectionComponent*> Connectors;
+		Cast<AActor>(Obj)->GetComponents<UFINAdvancedNetworkConnectionComponent>(Connectors);
+		for (UFINAdvancedNetworkConnectionComponent* Connector : Connectors) {
+			return Connector;
 		}
-		TArray<UActorComponent*> Adapters = Cast<AActor>(Obj)->GetComponentsByClass(UFINNetworkAdapterReference::StaticClass());
-		if (Adapters.Num() > 0) return Cast<UFINNetworkAdapterReference>(Adapters[0])->Ref->Connector;
+		TArray<UFINNetworkAdapterReference*> Adapters;
+		Cast<AActor>(Obj)->GetComponents<UFINNetworkAdapterReference>(Adapters);
+		if (Adapters.Num() > 0) return Adapters[0]->Ref->Connector;
 	}
 	return nullptr;
 }
@@ -50,15 +52,16 @@ UFINNetworkConnectionComponent* UFINNetworkUtils::GetNetworkConnectorFromHit(FHi
 
 	if (connector) return connector;
 
-	TArray<UActorComponent*> adapters = hit.GetActor()->GetComponentsByClass(UFINNetworkAdapterReference::StaticClass());
+	TArray<UFINNetworkAdapterReference*> adapters;
+	hit.GetActor()->GetComponents<UFINNetworkAdapterReference>(adapters);
 
-	for (UActorComponent* adapterref : adapters) {
-		if (!adapterref || !static_cast<UFINNetworkAdapterReference*>(adapterref)->Ref) continue;
+	for (UFINNetworkAdapterReference* adapterref : adapters) {
+		if (!adapterref || !adapterref->Ref) continue;
 
-		FVector npos = static_cast<UFINNetworkAdapterReference*>(adapterref)->Ref->GetActorLocation();
+		FVector npos = adapterref->Ref->GetActorLocation();
 		if (!connector || (pos - hit.ImpactPoint).Size() > (npos - hit.ImpactPoint).Size()) {
 			pos = npos;
-			connector = static_cast<UFINNetworkAdapterReference*>(adapterref)->Ref->Connector;
+			connector = adapterref->Ref->Connector;
 		}
 	}
 

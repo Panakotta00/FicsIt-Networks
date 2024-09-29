@@ -1,5 +1,6 @@
 #include "ComputerModules/FINComputerDriveDesc.h"
 
+#include "FINFileSystemSubsystem.h"
 #include "FINLabelContainerInterface.h"
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"
@@ -20,10 +21,12 @@ void UFINComputerDriveDesc::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 FText UFINComputerDriveDesc::GetOverridenItemName_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
 	FText Name = UFGItemDescriptor::GetItemName(InventoryStack.Item.GetItemClass());
-	if (InventoryStack.Item.ItemState.IsValid() && InventoryStack.Item.ItemState.Get()->Implements<UFINLabelContainerInterface>()) {
-		FString Label = IFINLabelContainerInterface::Execute_GetLabel(InventoryStack.Item.ItemState.Get());
-		if (!Label.IsEmpty()) {
-			return FText::FromString(FString::Printf(TEXT("%s - \"%s\""), *Name.ToString(), *Label));
+	if (InventoryStack.Item.HasState()) {
+		if (FFINLabelContainerInterface* interface = FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(InventoryStack.Item.GetItemState())) {
+			FString Label = interface->GetLabel();
+			if (!Label.IsEmpty()) {
+				return FText::FromString(FString::Printf(TEXT("%s - \"%s\""), *Name.ToString(), *Label));
+			}
 		}
 	}
 	return Name;
@@ -36,10 +39,12 @@ FText UFINComputerDriveDesc::GetOverridenItemDescription_Implementation(APlayerC
 UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
 	UClass* progressBar = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/-Shared/Widget_ProgressBar.Widget_ProgressBar_C"));
 
-	if (!InventoryStack.Item.ItemState.IsValid()) return nullptr;
-	float usage = Cast<AFINFileSystemState>(InventoryStack.Item.ItemState.Get())->Usage;
-	FGuid DriveID = Cast<AFINFileSystemState>(InventoryStack.Item.ItemState.Get())->ID;
-	
+	if (!InventoryStack.Item.HasState()) return nullptr;
+	auto state = InventoryStack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
+	if (!state) return nullptr;
+	FGuid DriveID = state->ID;
+	float usage = AFINFileSystemSubsystem::GetFileSystemSubsystem(this)->GetUsage(DriveID);
+
 	UGridPanel* Grid = NewObject<UGridPanel>(OwningPlayer);
 	Grid->SetColumnFill(1, 1);
 	
@@ -105,18 +110,21 @@ bool UFINComputerDriveDesc::CopyData_Implementation(UObject* WorldContext, const
 	TSubclassOf<UFINComputerDriveDesc> DriveClass;
 	DriveClass = InTo.GetItemClass();
 	if (!IsValid(DriveClass)) return false;
-	AFINFileSystemState* From = Cast<AFINFileSystemState>(InFrom.ItemState.Get());
-	AFINFileSystemState* To = Cast<AFINFileSystemState>(InTo.ItemState.Get());
+
+	auto fromState = InFrom.GetItemState().GetValuePtr<FFINFileSystemState>();
+	auto toState = InTo.GetItemState().GetValuePtr<FFINFileSystemState>();
+
+	if (!fromState) return false;
+	FGuid fromID = fromState->ID;
+	FGuid toID;
+
 	OutItem = InTo;
-	if (!To) {
-		To = WorldContext->GetWorld()->SpawnActor<AFINFileSystemState>();
-		To->Capacity = GetStorageCapacity(DriveClass);
-		if (!IsValid(To)) return false;
-		OutItem.ItemState = FSharedInventoryStatePtr::MakeShared(To);
+	if (!toState) {
+		toID = AFINFileSystemSubsystem::CreateState(GetStorageCapacity(DriveClass), OutItem);
 	}
-	if (!From || !To) return false;
-	CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice = From->GetDevice();
-	CodersFileSystem::SRef<CodersFileSystem::Device> ToDevice = To->GetDevice();
+
+	CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice = AFINFileSystemSubsystem::GetDevice(fromID);
+	CodersFileSystem::SRef<CodersFileSystem::Device> ToDevice = AFINFileSystemSubsystem::GetDevice(toID);
 
 	// delete all data in ToDevice
 	for (std::string Child : ToDevice->childs("/")) {

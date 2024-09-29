@@ -20,7 +20,7 @@ public:
 	
 	void InitSlotWidget(UWidget* SlotIndex);
 
-	static AFINFileSystemState* GetFileSystemStateFromSlotWidget(UWidget* InSlot);
+	static FGuid GetFileSystemStateFromSlotWidget(UWidget* InSlot);
 	
 	UFUNCTION()
 	void OnCopyUUIDClicked();

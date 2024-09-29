@@ -181,7 +181,7 @@ public:
 	virtual void Stop(bool bInIsCrash) override;
 	virtual void Reset() override;
 	virtual int64 GetMemoryUsage(bool bInRecalc = false) override;
-	virtual void SetEEPROM(AFINStateEEPROM* InEEPROM) override;
+	virtual void SetEEPROM(AFINStateEEPROM_Legacy* InEEPROM) override;
 	// End Processor
 
 	/**

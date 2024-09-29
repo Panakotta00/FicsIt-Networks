@@ -686,7 +686,7 @@ int64 UFINLuaProcessor::GetMemoryUsage(bool bInRecalc) {
 	return lua_gc(luaState, LUA_GCCOUNT, 0) * 100;
 }
 
-void UFINLuaProcessor::SetEEPROM(AFINStateEEPROM* InEEPROM) {
+void UFINLuaProcessor::SetEEPROM(AFINStateEEPROM_Legacy* InEEPROM) {
 	EEPROM = Cast<AFINStateEEPROMLua>(InEEPROM);
 }
 

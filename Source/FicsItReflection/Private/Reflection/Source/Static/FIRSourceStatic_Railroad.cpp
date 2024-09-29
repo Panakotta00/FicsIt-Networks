@@ -27,7 +27,7 @@ public:
 	}
 
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetQueuedReservations(const FFGRailroadSignalBlock& Block) {
-		return Block.mQueuedReservations;
+		return Block.mPendingReservations;
 	}
 
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
@@ -793,6 +793,7 @@ BeginFunc(getStations, "Get Stations", "Returns a list of all trainstations in t
 } EndFunc()
 EndStruct()
 
+// TODO: 1.0: Redo Railroad Signal Blocks
 BeginStruct(FFIRRailroadSignalBlock, "RailroadSignalBlock", "Railroad Signal Block", "A track section that combines the area between multiple signals.")
 BeginProp(RBool, isValid, "Is Valid", "Is true if this signal block reference is valid.") {
 	Return self->Block.IsValid();
@@ -800,10 +801,6 @@ BeginProp(RBool, isValid, "Is Valid", "Is true if this signal block reference is
 BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	Return self->Block.Pin()->IsOccupied();
-} EndProp()
-BeginProp(RBool, hasBlockReservation, "Has Block Reservation", "True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.") {
-	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
-	Return self->Block.Pin()->HaveReservations();
 } EndProp()
 BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));

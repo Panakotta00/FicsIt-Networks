@@ -22,32 +22,28 @@ void UFINEditLabel::InitSlotWidget(UWidget* InSlotWidget) {
 	UEditableTextBox* TextBox = Cast<UEditableTextBox>(TextBoxWidget);
 	TextBox->OnTextCommitted.AddDynamic(this, &UFINEditLabel::OnLabelChanged);
 
-	TScriptInterface<IFINLabelContainerInterface> LabelContainer = GetLabelContainerFromSlot(SlotWidget);
+	FFINLabelContainerInterface* LabelContainer = GetLabelContainerFromSlot(SlotWidget);
 	if (LabelContainer) {
-		TextBox->SetText(FText::FromString(IFINLabelContainerInterface::Execute_GetLabel(LabelContainer.GetObject())));
+		TextBox->SetText(FText::FromString(LabelContainer->GetLabel()));
 	}
 }
 
-UE_DISABLE_OPTIMIZATION_SHIP
 void UFINEditLabel::OnLabelChanged(const FText& Text, ETextCommit::Type CommitMethod) {
-	TScriptInterface<IFINLabelContainerInterface> LabelContainer = GetLabelContainerFromSlot(SlotWidget);
+	FFINLabelContainerInterface* LabelContainer = GetLabelContainerFromSlot(SlotWidget);
 	if (LabelContainer) {
 		auto player = GetOwningPlayer<AFGPlayerController>();
 		auto rco = Cast<UFINComputerRCO>(player->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
-		rco->SetLabel(LabelContainer.GetObject(), Text.ToString());
+		// TODO: 1.0: rco->SetLabel(LabelContainer.GetObject(), Text.ToString());
 	}
 }
-UE_ENABLE_OPTIMIZATION_SHIP
 
-TScriptInterface<IFINLabelContainerInterface> UFINEditLabel::GetLabelContainerFromSlot(UWidget* InSlot) {
+FFINLabelContainerInterface* UFINEditLabel::GetLabelContainerFromSlot(UWidget* InSlot) {
 	struct {
 		FInventoryStack Stack;
 	} Params;
 	FReflectionHelper::CallScriptFunction(InSlot, TEXT("GetStack"), &Params);
-	if (!Params.Stack.Item.ItemState.IsValid()) return nullptr;
-	UObject* State = Params.Stack.Item.ItemState.Get();
-	if (State->Implements<UFINLabelContainerInterface>()) {
-		return State;
-	}
-	return nullptr;
+
+	if (!Params.Stack.Item.HasState()) return nullptr;
+
+	return FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(Params.Stack.Item.GetItemState());
 }

@@ -6,7 +6,7 @@
 #include "ComputerModules/FINComputerDriveHolder.h"
 #include "ComputerModules/PCI/FINComputerGPUT1.h"
 #include "ComputerModules/PCI/FINComputerGPUT2.h"
-#include "FicsItKernel/Processor/FINStateEEPROM.h"
+#include "FicsItKernel/Processor/FINStateEEPROM_Legacy.h"
 #include "Net/UnrealNetwork.h"
 
 void UFINComputerRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -102,7 +102,7 @@ void UFINComputerRCO::CreateEEPROMState_Implementation(UFGInventoryComponent* In
 	FRotator rot = FRotator::ZeroRotator;
 	FActorSpawnParameters params;
 	params.bNoFail = true;
-	AFINStateEEPROM* eeprom = Inv->GetWorld()->SpawnActor<AFINStateEEPROM>(clazz, loc, rot, params);
+	AFINStateEEPROM_Legacy* eeprom = Inv->GetWorld()->SpawnActor<AFINStateEEPROM_Legacy>(clazz, loc, rot, params);
 	if (!IsValid(eeprom)) return;
 	Inv->SetStateOnIndex(SlotIdx, FSharedInventoryStatePtr::MakeShared((AActor*)eeprom));
 }
@@ -184,8 +184,12 @@ void UFINComputerRCO::GPUT2MouseWheelEvent_Implementation(AFINComputerGPUT2* GPU
 	GPU->netSig_OnMouseWheel(Position, Delta, Modifiers);
 }
 
-void UFINComputerRCO::SetLabel_Implementation(UObject* Container, const FString& Label) {
-	if (IsValid(Container) && Container->Implements<UFINLabelContainerInterface>()) {
-		IFINLabelContainerInterface::Execute_SetLabel(Container, Label);
+void UFINComputerRCO::SetLabel_Implementation(UFGInventoryComponent* Inventory, int32 Index, const FString& Label) {
+	FInventoryStack stack;
+	Inventory->GetStackFromIndex(Index, stack);
+	FFGDynamicStruct state = stack.Item.GetItemState();
+	if (auto labelContainer = FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(state)) {
+		labelContainer->SetLabel(Label);
+		Inventory->SetStateOnIndex(Index, state);
 	}
 }

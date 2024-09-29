@@ -14,10 +14,9 @@ FString AFINStateEEPROMLua::GetCode() const {
 
 void AFINStateEEPROMLua::SetCode(const FString& NewCode) {
 	Code = NewCode;
-	bShouldUpdate = true;
 }
 
-bool AFINStateEEPROMLua::CopyDataTo(AFINStateEEPROM* InTo) {
+bool AFINStateEEPROMLua::CopyDataTo(AFINStateEEPROM_Legacy* InTo) {
 	AFINStateEEPROMLua* To = Cast<AFINStateEEPROMLua>(InTo);
 	if (!To) return false;
 	To->SetCode(GetCode());

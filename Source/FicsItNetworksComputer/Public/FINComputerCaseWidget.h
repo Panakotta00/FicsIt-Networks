@@ -17,5 +17,5 @@ public:
 	UUserWidget* ComputerCaseInteractionWidget = nullptr;
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void OnEEPROMUpdate(AFINStateEEPROM* EEPROM);
+	void OnEEPROMUpdate(AFINStateEEPROM_Legacy* EEPROM);
 };

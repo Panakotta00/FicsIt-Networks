@@ -2,9 +2,14 @@
 #include "AudioCompressionSettingsUtils.h"
 #include "FicsItNetworksMisc.h"
 #include "FicsItNetworksModule.h"
-#include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
+#include "FINAdvancedNetworkConnectionComponent.h"
 #include "VorbisAudioInfo.h"
+#include "Components/AudioComponent.h"
+#include "HAL/PlatformFileManager.h"
+#include "Interfaces/IAudioFormat.h"
+#include "Misc/FileHelper.h"
 #include "Sound/SoundWaveProcedural.h"
+#include "Wwise/WwiseRetriggerableAsyncTask.h"
 
 AFINSpeakerPole::AFINSpeakerPole() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");

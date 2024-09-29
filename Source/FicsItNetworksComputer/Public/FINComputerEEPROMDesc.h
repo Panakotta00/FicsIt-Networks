@@ -10,9 +10,6 @@ UCLASS()
 class FICSITNETWORKSCOMPUTER_API UFINComputerEEPROMDesc : public UFGItemDescriptor, public ISMLItemDisplayInterface, public IFINCopyableItemInterface {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AFINStateEEPROM> EEPROMStateClass = nullptr;
-
 	// Begin UFINCopyableItemInterface
 	virtual bool CopyData_Implementation(UObject* WorldContext, const FInventoryItem& InFrom, const FInventoryItem& InTo, FInventoryItem& OutItem) override;
 	// End UFINCopyableItemInterface
@@ -24,5 +21,8 @@ public:
 	// End ISMLItemDisplayInterface
 	
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
-	static AFINStateEEPROM* GetEEPROM(UFGInventoryComponent* Inv, int SlotIdx);
+	static FFGDynamicStruct GetEEPROM(UFGInventoryComponent* Inv, int SlotIdx);
+
+	UFUNCTION(BlueprintNativeEvent)
+	FFGDynamicStruct CreateEEPROMState();
 };

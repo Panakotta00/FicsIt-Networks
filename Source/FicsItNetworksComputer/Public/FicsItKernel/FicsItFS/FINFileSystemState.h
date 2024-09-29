@@ -1,74 +1,35 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FGSaveInterface.h"
+#include "FGLegacyItemStateActorInterface.h"
 #include "FINLabelContainerInterface.h"
 #include "Library/Device.h"
-#include "Library/Path.h"
-#include "Library/ReferenceCount.h"
 #include "FINFileSystemState.generated.h"
 
-UCLASS()
-class FICSITNETWORKSCOMPUTER_API AFINFileSystemState : public AActor, public IFGSaveInterface, public IFINLabelContainerInterface {
+USTRUCT(BlueprintType)
+struct FFINFileSystemState : public FFINLabelContainerInterface {
 	GENERATED_BODY()
 
-private:
-	CodersFileSystem::SRef<CodersFileSystem::Device> Device;
-
-	bool bUseOldSerialization = false;
-	bool bUsePreBinarySupportSerialization = true;
-	
-public:
-	void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk);
-
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY(SaveGame)
 	FGuid ID;
 
-	UPROPERTY(SaveGame, Replicated)
-	bool IdCreated = false;
-
-	UPROPERTY(SaveGame, Replicated, EditDefaultsOnly)
+	UPROPERTY(SaveGame, EditDefaultsOnly)
 	int32 Capacity = 0;
 
-	UPROPERTY(SaveGame, Replicated)
+	UPROPERTY(SaveGame)
 	FString Label;
 
-	UPROPERTY(Replicated)
-	float Usage = 0.0f;
+	// Begin FFINLabelContainerInterface
+	virtual FString GetLabel() const { return Label; }
+	virtual void SetLabel(const FString& value) { Label = value; }
+	// End FFINLabelContainerInterface
 
-	FTimerHandle UsageUpdateHandler;
-	
-	AFINFileSystemState();
-	~AFINFileSystemState();
+	bool Serialize(FStructuredArchive::FSlot Slot);
+};
 
-	// Begin UObject
-	virtual void Serialize(FStructuredArchive::FRecord Record) override;
-	// End UObject
-	
-	// Begin AActor
-	virtual void BeginPlay() override;
-	// End AActor
-
-	// Begin IFGSaveInterface
-	virtual void PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
-	virtual bool ShouldSave_Implementation() const override;
-	// End IFGSaveInterface
-
-	// Begin IFINLabelContainerInterface
-	virtual FString GetLabel_Implementation() override;
-	virtual void SetLabel_Implementation(const FString& InLabel) override;
-	// End IFINLabelContainerInterface
-	
-	CodersFileSystem::SRef<CodersFileSystem::Device> GetDevice(bool bInForceUpdate = false, bool bInForeCreate = false);
-
-	/**
-	 * Creates a new item state object wich holds information and functions about a save game saved filesystem.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "FileSystem")
-	static AFINFileSystemState* CreateState(UObject* WorldContextObject, int32 inCapacity, class UFGInventoryComponent* inInventory, int32 inSlot);
-
-	UFUNCTION()
-	void UpdateUsage();
-
-	void Serialize_DEPRECATED(FArchive& Ar);
+template<>
+struct TStructOpsTypeTraits<FFINFileSystemState> : TStructOpsTypeTraitsBase2<FFINFileSystemState> {
+	enum {
+		WithStructuredSerializer = true,
+	};
 };

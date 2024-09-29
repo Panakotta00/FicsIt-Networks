@@ -6,6 +6,7 @@
 #include "Components/FINModuleBase.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Net/UnrealNetwork.h"
+#include "UObject/ConstructorHelpers.h"
 
 AFINSizeablePanel::AFINSizeablePanel() {
 	ModularPanel = CreateDefaultSubobject<UFINModuleSystemPanel>("Panel");
@@ -274,7 +275,6 @@ void AFINSizeablePanel::SetPanelSize(int width, int height) {
 	ModularPanel->PanelWidth = abs(PanelWidth = width);
 	ModularPanel->PanelHeight = abs(PanelHeight = height);
 
-	
 	int x = 5;
 	int y = -5;
 	auto InY = 5 + (PanelWidth < 0?0:FMath::Abs(PanelWidth) - 1) * 10;

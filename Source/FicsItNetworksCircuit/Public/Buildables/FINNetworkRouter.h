@@ -22,10 +22,10 @@ class AFINNetworkRouter : public AFGBuildable {
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* NetworkConnector1;
+	class UFINAdvancedNetworkConnectionComponent* NetworkConnector1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* NetworkConnector2;
+	class UFINAdvancedNetworkConnectionComponent* NetworkConnector2;
 
 	UPROPERTY(SaveGame)
 	bool bIsPortWhitelist = false;
@@ -182,7 +182,7 @@ public:
     void OnMessageHandled(bool bCon1or2, bool bSendOrReceive);
 	
 private:
-	bool HandleMessage(AFINNetworkCircuit* SendingCircuit, const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFIRAnyValue>& Data);
+	bool HandleMessage(class AFINNetworkCircuit* SendingCircuit, const FGuid& ID, const FGuid& Sender, const FGuid& Reciever, int Port, const TArray<FFIRAnyValue>& Data);
 
 	UFUNCTION(NetMulticast, Unreliable)
     void NetMulti_OnMessageHandled(EFINNetworkRouterLampFlags Flags);

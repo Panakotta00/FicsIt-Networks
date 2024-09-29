@@ -1,20 +1,16 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Interface.h"
+#include "FINStructInterfaces.h"
 #include "FINLabelContainerInterface.generated.h"
 
-UINTERFACE()
-class FICSITNETWORKSMISC_API UFINLabelContainerInterface : public UInterface {
+USTRUCT()
+struct FICSITNETWORKSMISC_API FFINLabelContainerInterface {
 	GENERATED_BODY()
-};
 
-class FICSITNETWORKSMISC_API IFINLabelContainerInterface {
-	GENERATED_BODY()
-public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	FString GetLabel();
+	FIN_STRUCT_INTERFACE(FFINLabelContainerInterface)
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SetLabel(const FString& InLabel);
+	virtual FString GetLabel() const { return FString(); }
+
+	virtual void SetLabel(const FString& InLabel) {}
 };

@@ -7,6 +7,8 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
+#include "FINFileSystemSubsystem.h"
+#include "Components/AudioComponent.h"
 #include "ComputerModules/FINComputerDriveHolder.h"
 #include "ComputerModules/FINComputerMemory.h"
 #include "ComputerModules/FINComputerProcessor.h"
@@ -104,15 +106,18 @@ void AFINComputerCase::BeginPlay() {
 		FInventoryStack stack;
 		if (DataStorage->GetStackFromIndex(1, stack)) {
 			const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
-			AFINFileSystemState* FileSystemState = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+			auto FileSystemState = stack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
+			FGuid fileSystemID;
 			if (IsValid(DriveDesc)) {
-				if (!IsValid(FileSystemState)) {
-					FileSystemState = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+				if (FileSystemState) {
+					fileSystemID = FileSystemState->ID;
+				} else {
+					fileSystemID = AFINFileSystemSubsystem::CreateState(UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
 				}
 			}
-			if (Floppy) Kernel->RemoveDrive(Floppy);
-			Floppy = FileSystemState;
-			if (Floppy) Kernel->AddDrive(Floppy);
+			if (Floppy.IsValid()) Kernel->RemoveDrive(Floppy);
+			Floppy = fileSystemID;
+			if (Floppy.IsValid()) Kernel->AddDrive(Floppy);
 		}
 	}
 }
@@ -162,11 +167,11 @@ void AFINComputerCase::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	AddModules(modules);
 }
 
-void AFINComputerCase::NetMulti_OnEEPROMChanged_Implementation(AFINStateEEPROM* EEPROM) {
+void AFINComputerCase::NetMulti_OnEEPROMChanged_Implementation(const FFGDynamicStruct& EEPROM) {
 	OnEEPROMUpdate.Broadcast(EEPROM);
 }
 
-void AFINComputerCase::NetMulti_OnFloppyChanged_Implementation(AFINFileSystemState* NewFloppy) {
+void AFINComputerCase::NetMulti_OnFloppyChanged_Implementation(const FGuid& NewFloppy) {
 	OnFloppyUpdate.Broadcast(NewFloppy);
 }
 
@@ -226,15 +231,15 @@ void AFINComputerCase::AddDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (DriveHolders.Contains(DriveHolder)) return;
 	DriveHolders.Add(DriveHolder);
 	DriveHolder->OnLockedUpdate.AddDynamic(this, &AFINComputerCase::OnDriveUpdate);
-	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
-	if (FileSystemState) Kernel->AddDrive(FileSystemState);
+	FGuid FileSystemID = DriveHolder->GetDrive();
+	if (FileSystemID.IsValid()) Kernel->AddDrive(FileSystemID);
 }
 
 void AFINComputerCase::RemoveDrive(AFINComputerDriveHolder* DriveHolder) {
 	if (DriveHolders.Remove(DriveHolder) <= 0) return;
 	DriveHolder->OnLockedUpdate.RemoveDynamic(this, &AFINComputerCase::OnDriveUpdate);
-	AFINFileSystemState* FileSystemState = DriveHolder->GetDrive();
-	if (FileSystemState) Kernel->RemoveDrive(FileSystemState);
+	FGuid FileSystemID = DriveHolder->GetDrive();
+	if (FileSystemID.IsValid()) Kernel->RemoveDrive(FileSystemID);
 }
 
 void AFINComputerCase::AddPCIDevice(TScriptInterface<IFINPciDeviceInterface> InPCIDevice) {
@@ -297,31 +302,33 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 	}
 }
 
-void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num) {
+void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num, UFGInventoryComponent* changedInventory) {
 	if (HasAuthority() && Kernel) {
 		if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
 			UFINKernelProcessor* Processor = Kernel->GetProcessor();
-			AFINStateEEPROM* EEPROM = UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0);
+			AFINStateEEPROM_Legacy* EEPROM = UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0);
 			if (Processor) Processor->SetEEPROM(EEPROM);
 			NetMulti_OnEEPROMChanged(EEPROM);
 		} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
-			AFINFileSystemState* state = nullptr;
 			FInventoryStack stack;
+			FGuid fileSystemID;
 			if (DataStorage->GetStackFromIndex(1, stack)) {
 				const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
-				state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+				auto state = stack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
 				if (IsValid(DriveDesc)) {
-					if (!IsValid(state)) {
-						state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+					if (state) {
+						fileSystemID = state->ID;
+					} else {
+						fileSystemID = AFINFileSystemSubsystem::CreateState(UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
 					}
 				}
 			}
-			if (IsValid(Floppy)) {
+			if (Floppy.IsValid()) {
 				Kernel->RemoveDrive(Floppy);
-				Floppy = nullptr;
+				Floppy = FGuid();
 			}
-			if (IsValid(state)) {
-				Floppy = state;
+			if (fileSystemID.IsValid()) {
+				Floppy = fileSystemID;
 				Kernel->AddDrive(Floppy);
 			}
 			NetMulti_OnFloppyChanged(Floppy);
@@ -369,7 +376,7 @@ void AFINComputerCase::HandleSignal(const FFINSignalData& signal, const FFIRTrac
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void AFINComputerCase::OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive) {
+void AFINComputerCase::OnDriveUpdate(bool bOldLocked, const FGuid& drive) {
 	if (bOldLocked) {
 		Kernel->RemoveDrive(drive);
 	} else {

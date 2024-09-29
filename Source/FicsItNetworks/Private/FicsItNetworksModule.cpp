@@ -2,7 +2,6 @@
 
 #include "UI/FINCopyUUIDButton.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
-#include "AssetRegistryModule.h"
 #include "FGCharacterPlayer.h"
 #include "FGGameMode.h"
 #include "FGGameState.h"
@@ -50,13 +49,13 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 	UUserWidget* Widget = Cast<UUserWidget>(WidgetPtr->Get());
 	UVerticalBox* MenuList = Cast<UVerticalBox>(Widget->GetWidgetFromName("VerticalBox_0"));
 
-	if (IsValid(UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(self))) {
+	if (UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(self).IsValid()) {
 		UFINCopyUUIDButton* UUIDButton = NewObject<UFINCopyUUIDButton>(MenuList->GetOuter());
 		UUIDButton->InitSlotWidget(self);
 		MenuList->AddChildToVerticalBox(UUIDButton);
 	}
 
-	if (IsValid(UFINEditLabel::GetLabelContainerFromSlot(self).GetObject())) {
+	if (UFINEditLabel::GetLabelContainerFromSlot(self)) {
 		UFINEditLabel* EditLabel = NewObject<UFINEditLabel>(MenuList->GetOuter());
 		EditLabel->InitSlotWidget(self);
 		MenuList->AddChildToVerticalBox(EditLabel);

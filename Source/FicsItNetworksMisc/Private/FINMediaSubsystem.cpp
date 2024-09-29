@@ -1,5 +1,6 @@
 #include "FINMediaSubsystem.h"
 
+#include "FGIconDatabaseSubsystem.h"
 #include "FGIconLibrary.h"
 #include "ImageUtils.h"
 #include "Engine/Engine.h"
@@ -26,7 +27,8 @@ AFINMediaSubsystem::AFINMediaSubsystem() {
 void AFINMediaSubsystem::BeginPlay() {
 	Super::BeginPlay();
 
-	TArray<FIconData>& Data = UFGIconLibrary::Get()->GetIconData();
+	TArray<FIconData> Data;
+	AFGIconDatabaseSubsystem::Get(this)->GetIconData(Data);
 	for (const FIconData& Icon : Data) {
 		GameIconFindCache.Add(Icon.IconName.ToString(), Icon);
 	}
@@ -69,7 +71,7 @@ FString AFINMediaSubsystem::GetTextureReference(UObject* Texture) {
 	FString* Reference = Texture2Reference.Find(Texture);
 	if (Reference) return *Reference;
 
-	int32 IconID = UFGIconLibrary::Get()->GetIconIDForTexture(Texture);
+	int32 IconID = AFGIconDatabaseSubsystem::Get(this)->GetIconIDForTexture(Texture);
 	if (IconID >= 0) {
 		return FString::Printf(TEXT("icon:%i"), IconID);
 	}
@@ -140,7 +142,7 @@ UObject* AFINMediaSubsystem::LoadGameTexture(const FString& TextureReference) {
 	int32 ID;
 	UObject* Texture = nullptr;
 	if (FDefaultValueHelper::ParseInt(IconName, ID)) {
-		Texture = UFGIconLibrary::Get()->GetTextureFromIconID(ID);
+		Texture = AFGIconDatabaseSubsystem::Get(this)->GetIconTextureFromIconID(ID);
 	} else {
 		FIconData* IconData = GameIconFindCache.Find(IconName);
 		if (IconData) Texture = IconData->Texture.Get();
@@ -188,7 +190,8 @@ FIconData AFINMediaSubsystem::netFunc_findGameIcon(const FString& IconName) {
 }
 
 TArray<FIconData> AFINMediaSubsystem::netFunc_getGameIcons(int64 PageSize, int64 Page) {
-	const TArray<FIconData>& Icons = UFGIconLibrary::Get()->GetIconData();
+	TArray<FIconData> Icons;
+	AFGIconDatabaseSubsystem::Get(this)->GetIconData(Icons);
 	TArray<FIconData> Data;
 	Data = UFINUtils::PaginateArray(TArrayView<const FIconData>(Icons), PageSize, Page);
 	if (Page < 0) Algo::Reverse(Data);

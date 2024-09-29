@@ -7,6 +7,7 @@
 #include "FILLogEntry.h"
 #include "FILLogScope.h"
 #include "FINComputerCase.h"
+#include "FINFileSystemSubsystem.h"
 #include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 
 FFINKernelListener::FFINKernelListener(UFINKernelSystem* parent) : parent(parent) {}
@@ -106,8 +107,8 @@ void UFINKernelSystem::PostLoadGame_Implementation(int32 saveVersion, int32 game
 
 		// create & init devDevice
 		DevDevice = new FFINKernelFSDevDevice();
-		for (const TPair<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
-			DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key->ID.ToString()));
+		for (const TPair<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
+			DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key.ToString()));
 		}
 		
 		if (DevDeviceMountPoint.Len() > 0) FileSystem.mount(DevDevice, TCHAR_TO_UTF8(*DevDeviceMountPoint));
@@ -168,20 +169,24 @@ EFINKernelState UFINKernelSystem::GetState() const {
 	return State;
 }
 
-void UFINKernelSystem::AddDrive(AFINFileSystemState* InDrive) {
+void UFINKernelSystem::AddDrive(const FGuid& InDrive) {
+	if (!InDrive.IsValid()) return;
+
 	// check if drive is added & return if found
 	if (Drives.Contains(InDrive)) return;
 
 	// create & assign device from drive
-	Drives.Add(InDrive) = InDrive->GetDevice();
+	Drives.Add(InDrive) = AFINFileSystemSubsystem::GetDevice(InDrive);
 
 	// add drive to devDevice
 	if (DevDevice.isValid()) {
-		if (!DevDevice->addDevice(Drives[InDrive], TCHAR_TO_UTF8(*InDrive->ID.ToString()))) Drives.Remove(InDrive);
+		if (!DevDevice->addDevice(Drives[InDrive], TCHAR_TO_UTF8(*InDrive.ToString()))) Drives.Remove(InDrive);
 	}
 }
 
-void UFINKernelSystem::RemoveDrive(AFINFileSystemState* InDrive) {
+void UFINKernelSystem::RemoveDrive(const FGuid& InDrive) {
+	if (!InDrive.IsValid()) return;
+
 	// try to find location of drive
 	CodersFileSystem::SRef<CodersFileSystem::Device>* FSDevice = Drives.Find(InDrive);
 	if (!FSDevice) return;
@@ -215,7 +220,7 @@ void UFINKernelSystem::HandleFutures() {
 	}
 }
 
-TMap<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>> UFINKernelSystem::GetDrives() const {
+TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> UFINKernelSystem::GetDrives() const {
 	return Drives;
 }
 
@@ -252,8 +257,8 @@ bool UFINKernelSystem::Start(bool InReset) {
 	{
 		FScopeLock Lock(&MutexDevDevice);
 		DevDevice = new FFINKernelFSDevDevice();
-		for (const TPair<AFINFileSystemState*, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
-			DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key->ID.ToString()));
+		for (const TPair<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
+			DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key.ToString()));
 		}
 	}
 

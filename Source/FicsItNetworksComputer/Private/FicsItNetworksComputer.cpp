@@ -5,6 +5,7 @@
 #include "FGGameMode.h"
 #include "FINComputerRCO.h"
 #include "FINComputerSubsystem.h"
+#include "Tests.h"
 #include "Patching/NativeHookManager.h"
 #include "UObject/CoreRedirects.h"
 
@@ -88,6 +89,9 @@ void FFicsItNetworksComputerModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FileSystemNode"), TEXT("/Script/FicsItNetworksComputer.FileSystemNode")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FileSystemSerializationInfo"), TEXT("/Script/FicsItNetworksComputer.FileSystemSerializationInfo")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINKernelAudioController"), TEXT("/Script/FicsItNetworksComputer.FINKernelAudioController")});
+
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworksComputer.FINFileSystemState"), TEXT("/Script/FicsItNetworksComputer.FINFileSystemState_Legacy")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworksComputer.FINStateEEPROM_Legacy"), TEXT("/Script/FicsItNetworksComputer.FINStateEEPROM_Legacy")});
 
 	FCoreRedirects::AddRedirectList(redirects, "FicsItNetworksComputer");
 

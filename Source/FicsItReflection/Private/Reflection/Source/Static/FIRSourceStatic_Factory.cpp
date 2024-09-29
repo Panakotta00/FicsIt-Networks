@@ -37,23 +37,57 @@ BeginProp(RFloat, productivity,	"Productivity", "The productivity of this factor
 BeginProp(RFloat, cycleTime, "Cycle Time", "The time that passes till one production cycle is finsihed.") {
 	Return self->GetProductionCycleTime();
 } EndProp()
-BeginProp(RFloat, maxPotential, "Max Potential", "The maximum potential this factory can be set to.") {
-	Return self->GetMaxPossiblePotential();
+BeginProp(RBool, canChangePotential, "Can Change Potential", "True if the factory can change its potential.") {
+	Return self->GetCanChangePotential();
+} EndProp()
+BeginProp(RFloat, maxPotential, "Max Potential", "The maximum potential this factory can be set to (depending on the number of crystals).") {
+	Return self->GetCurrentMaxPotential();
 } EndProp()
 BeginProp(RFloat, minPotential, "Min Potential", "The minimum potential this factory needs to be set to.") {
-	Return self->GetMinPotential();
+	Return self->GetCurrentMinPotential();
+} EndProp()
+BeginProp(RFloat, maxDefaultPotential, "Max Default Potential", "The default maximum potential this factory can be set to.") {
+	Return self->GetMaxPotential();
+} EndProp()
+BeginProp(RFloat, currentPotential, "Current Potential", "The potential this factory is currently using.") {
+	Return self->GetCurrentPotential();
+} EndProp()
+BeginProp(RFloat, potential, "Potential", "The potential this factory is currently set to and 'should'  use. (the overclock value)\n 0 = 0%, 1 = 100%") {
+	Return self->GetPendingPotential();
+} PropSet() {
+	float min = self->GetCurrentMinPotential();
+	float max = self->GetCurrentMaxPotential();
+	self->SetPendingPotential(FMath::Clamp((float)Val, min, max));
+} EndProp()
+BeginProp(RTrace<UFGInventoryComponent>, potentialInventory, "Potential Inventory", "The Inventory that holds the crystals used for potential.") {
+	Return (Ctx.GetTrace() / self->GetPotentialInventory());
+} EndProp()
+BeginProp(RBool, canChangeProductionBoost, "Can Change Production Boost", "True if the factory can change its production boost.") {
+	Return self->CanChangeProductionBoost();
+} EndProp()
+BeginProp(RFloat, maxProductionBoost, "Max Production Boost", "The maximum production boost this factory can be set to (depending on the number of shards).") {
+	Return self->GetCurrentMaxProductionBoost();
+} EndProp()
+BeginProp(RFloat, maxDefaultProductionBoost, "Max Default Production Boost", "The maximum production boost this factory can be set to.") {
+	Return self->GetMaxProductionBoost();
+} EndProp()
+BeginProp(RFloat, minDefaultProductionBoost, "Min Default Production Boost", "The minimum production boost this factory has to be set to.") {
+	Return self->GetMinProductionBoost();
+} EndProp()
+BeginProp(RFloat, currentProductionBoost, "Current Production Boost", "The current production boost this factory uses.") {
+	Return self->GetCurrentProductionBoost();
+} EndProp()
+BeginProp(RFloat, productionBoost, "Production Boost", "The current production boost this factory should use.") {
+	Return self->GetPendingProductionBoost();
+} PropSet() {
+	float min = self->GetMinProductionBoost();
+	float max = self->GetCurrentMaxProductionBoost();
+	self->SetPendingProductionBoost(FMath::Clamp((float)Val, min, max));
 } EndProp()
 BeginProp(RBool, standby, "Standby", "True if the factory is in standby.") {
 	Return self->IsProductionPaused();
 } PropSet() {
 	self->SetIsProductionPaused(Val);
-} EndProp()
-BeginProp(RFloat, potential, "Potential", "The potential this factory is currently set to. (the overclock value)\n 0 = 0%, 1 = 100%") {
-	Return self->GetPendingPotential();
-} PropSet() {
-	float min = self->GetMinPotential();
-	float max = self->GetMaxPossiblePotential();
-	self->SetPendingPotential(FMath::Clamp((float)Val, self->GetMinPotential(), self->GetMaxPossiblePotential()));
 } EndProp()
 EndClass()
 

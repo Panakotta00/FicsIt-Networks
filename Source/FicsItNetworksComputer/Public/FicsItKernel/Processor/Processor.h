@@ -3,7 +3,7 @@
 #include "FGSaveInterface.h"
 #include "Processor.generated.h"
 
-class AFINStateEEPROM;
+class AFINStateEEPROM_Legacy;
 
 class UFINKernelSystem;
 
@@ -76,5 +76,5 @@ public:
 	 * Sets the BIOS code of the processor.
 	 * Usage and events depend on implementation (f.e. reset on set)
 	 */
-	virtual void SetEEPROM(AFINStateEEPROM* InEEPROM) {}
+	virtual void SetEEPROM(AFINStateEEPROM_Legacy* InEEPROM) {}
 };

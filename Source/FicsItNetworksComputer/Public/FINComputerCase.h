@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FicsItKernel.h"
 #include "Buildables/FGBuildable.h"
 #include "FINComputerCase.generated.h"
 
@@ -11,8 +12,8 @@ class AFINComputerProcessor;
 class UFILLogContainer;
 class UFINModuleSystemPanel;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, AFINStateEEPROM*, EEPROM);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, AFINFileSystemState*, Floppy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseEEPROMUpdateDelegate, const FFGDynamicStruct&, EEPROM);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINCaseFloppyUpdateDelegate, const FGuid&, Floppy);
 
 UCLASS(Blueprintable)
 class FICSITNETWORKSCOMPUTER_API AFINComputerCase : public AFGBuildable {
@@ -60,7 +61,7 @@ public:
     TSet<AFINComputerDriveHolder*> DriveHolders;
 
 	UPROPERTY()
-	AFINFileSystemState* Floppy = nullptr;
+	FGuid Floppy;
 
 	UPROPERTY(BlueprintAssignable)
 	FFINCaseEEPROMUpdateDelegate OnEEPROMUpdate;
@@ -92,10 +93,10 @@ public:
 	// End IFGSaveInterface
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void NetMulti_OnEEPROMChanged(AFINStateEEPROM* ChangedEEPROM);
+	void NetMulti_OnEEPROMChanged(const FFGDynamicStruct& ChangedEEPROM);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void NetMulti_OnFloppyChanged(AFINFileSystemState* ChangedFloppy);
+	void NetMulti_OnFloppyChanged(const FGuid& ChangedFloppy);
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddProcessor(AFINComputerProcessor* processor);
@@ -137,7 +138,7 @@ public:
 	void OnModuleChanged(UObject* module, bool added);
 
 	UFUNCTION()
-	void OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num);
+	void OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num, UFGInventoryComponent* changedInventory);
 
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	void Toggle();
@@ -155,7 +156,7 @@ public:
 	void HandleSignal(const FFINSignalData& signal, const FFIRTrace& sender);
 
 	UFUNCTION()
-	void OnDriveUpdate(bool bOldLocked, AFINFileSystemState* drive);
+	void OnDriveUpdate(bool bOldLocked, const FGuid& drive);
 
 	UFUNCTION()
     void netClass_Meta(FString& InternalName, FText& DisplayName) {

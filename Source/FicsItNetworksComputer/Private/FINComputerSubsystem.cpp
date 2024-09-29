@@ -5,9 +5,11 @@
 #include "FGCharacterPlayer.h"
 #include "FGInputSettings.h"
 #include "Buildables/FGBuildableWidgetSign.h"
+#include "Camera/CameraComponent.h"
 #include "Components/WidgetInteractionComponent.h"
 #include "ComputerModules/PCI/FINComputerGPU.h"
 #include "Engine/Engine.h"
+#include "Kismet/GameplayStatics.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input = CreateDefaultSubobject<UEnhancedInputComponent>("Input");

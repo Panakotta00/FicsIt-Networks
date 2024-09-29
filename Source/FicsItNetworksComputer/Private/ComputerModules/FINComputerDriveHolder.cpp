@@ -1,5 +1,7 @@
 #include "ComputerModules/FINComputerDriveHolder.h"
 
+#include "FGPlayerController.h"
+#include "FINFileSystemSubsystem.h"
 #include "ComputerModules/FINComputerDriveDesc.h"
 #include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 #include "Net/UnrealNetwork.h"
@@ -26,19 +28,21 @@ void AFINComputerDriveHolder::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	DOREPLIFETIME(AFINComputerDriveHolder, bLocked);
 }
 
-AFINFileSystemState* AFINComputerDriveHolder::GetDrive() {
+const FGuid& AFINComputerDriveHolder::GetDrive() {
 	FInventoryStack stack;
 	if (DriveInventory->GetStackFromIndex(0, stack)) {
 		TSubclassOf<UFINComputerDriveDesc> driveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
-		AFINFileSystemState* state = Cast<AFINFileSystemState>(stack.Item.ItemState.Get());
+		const FFINFileSystemState* state = stack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
 		if (IsValid(driveDesc)) {
-			if (!IsValid(state)) {
-				state = AFINFileSystemState::CreateState(this, UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DriveInventory, 0);
+			if (state) {
+				return state->ID;
+			} else {
+				return AFINFileSystemSubsystem::GetFileSystemSubsystem(this)->CreateState(UFINComputerDriveDesc::GetStorageCapacity(driveDesc), DriveInventory, 0);
 			}
-			return state;
 		}
 	}
-	return nullptr;
+	static FGuid invalidGuid;
+	return invalidGuid;
 }
 
 bool AFINComputerDriveHolder::GetLocked() const {
@@ -47,26 +51,26 @@ bool AFINComputerDriveHolder::GetLocked() const {
 
 bool AFINComputerDriveHolder::SetLocked(bool NewLocked) {
 	if (!HasAuthority()) return false;
-	AFINFileSystemState* newState = GetDrive();
-	if (bLocked == NewLocked || (!IsValid(newState) && NewLocked)) return false;
+	FGuid newState = GetDrive();
+	if (bLocked == NewLocked || (!newState.IsValid() && NewLocked)) return false;
 
 	bLocked = NewLocked;
 	
-	NetMulti_OnLockedUpdate(!bLocked, IsValid(newState) ? newState : PrevFSState);
+	NetMulti_OnLockedUpdate(!bLocked, newState.IsValid() ? newState : PrevFSState);
 	PrevFSState = newState;
 
 	return true;
 }
 
-void AFINComputerDriveHolder::NetMulti_OnDriveUpdate_Implementation(AFINFileSystemState* Drive) {
+void AFINComputerDriveHolder::NetMulti_OnDriveUpdate_Implementation(const FGuid& Drive) {
 	OnDriveUpdate.Broadcast(Drive);
 }
 
-void AFINComputerDriveHolder::NetMulti_OnLockedUpdate_Implementation(bool bOldLocked, AFINFileSystemState* NewOrOldDrive) {
+void AFINComputerDriveHolder::NetMulti_OnLockedUpdate_Implementation(bool bOldLocked, const FGuid& NewOrOldDrive) {
 	OnLockedUpdate.Broadcast(bOldLocked, NewOrOldDrive);
 }
 
-void AFINComputerDriveHolder::OnDriveInventoryUpdate_Implementation(TSubclassOf<UFGItemDescriptor> drive, int32 count) {
+void AFINComputerDriveHolder::OnDriveInventoryUpdate_Implementation(TSubclassOf<UFGItemDescriptor> drive, int32 count, UFGInventoryComponent* sourceInventory) {
 	if (HasAuthority()) {
 		NetMulti_OnDriveUpdate(GetDrive());
 		if (!IsValid(drive)) SetLocked(false);

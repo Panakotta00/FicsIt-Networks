@@ -27,10 +27,10 @@ class FICSITNETWORKSCIRCUIT_API AFINWirelessAccessPoint : public AFGBuildable
 
 public:
 	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
-	AFGBuildableRadarTower* AttachedTower = nullptr;
+	class AFGBuildableRadarTower* AttachedTower = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* NetworkConnector1;
+	class UFINAdvancedNetworkConnectionComponent* NetworkConnector1;
 	
 	AFINWirelessAccessPoint();
 	~AFINWirelessAccessPoint();
