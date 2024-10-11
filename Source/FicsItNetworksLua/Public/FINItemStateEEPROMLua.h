@@ -4,10 +4,10 @@
 #include "FINComputerEEPROMDesc.h"
 #include "FINItemStateEEPROM.h"
 #include "FicsItKernel/Processor/FINStateEEPROM_Legacy.h"
-#include "FINStateEEPROMLua.generated.h"
+#include "FINItemStateEEPROMLua.generated.h"
 
 USTRUCT(BlueprintType)
-struct FICSITNETWORKSLUA_API FFINStateEEPROMLua : public FFINItemStateEEPROM {
+struct FICSITNETWORKSLUA_API FFINItemStateEEPROMLua : public FFINItemStateEEPROM {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame, BlueprintReadWrite)

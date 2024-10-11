@@ -1,7 +1,10 @@
-﻿#include "FINStateEEPROMLua.h"
+﻿#include "FINItemStateEEPROMLua.h"
+
+#include "FicsItNetworksLuaModule.h"
 
 FFGDynamicStruct AFINStateEEPROMLua_Legacy::ConvertToItemState(TSubclassOf<UFGItemDescriptor> itemDescriptor) const {
-	FFINStateEEPROMLua state;
+	FFINItemStateEEPROMLua state;
+	state.Label = Label;
 	state.Code = Code;
 	return FFGDynamicStruct(state);
 }

@@ -320,9 +320,7 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num, UFGInventoryComponent* changedInventory) {
 	if (HasAuthority() && Kernel) {
 		if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
-			FInventoryStack stack;
-			DataStorage->GetStackFromIndex(0, stack);
-			NetMulti_OnEEPROMChanged(stack.Item.GetItemState());
+			NetMulti_OnEEPROMChanged(GetEEPROM());
 		} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
 			FInventoryStack stack;
 			FGuid fileSystemID;
@@ -351,9 +349,7 @@ void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int3
 }
 
 FFGDynamicStruct AFINComputerCase::GetEEPROM() {
-	FInventoryStack stack;
-	DataStorage->GetStackFromIndex(0, stack);
-	return stack.Item.GetItemState();
+	return UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0);
 }
 
 void AFINComputerCase::Toggle() {

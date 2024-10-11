@@ -43,7 +43,7 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 	auto state = InventoryStack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
 	if (!state) return nullptr;
 	FGuid DriveID = state->ID;
-	float usage = AFINFileSystemSubsystem::GetFileSystemSubsystem(this)->GetUsage(DriveID);
+	float usage = AFINFileSystemSubsystem::GetFileSystemSubsystem(OwningPlayer)->GetUsage(DriveID);
 
 	UGridPanel* Grid = NewObject<UGridPanel>(OwningPlayer);
 	Grid->SetColumnFill(1, 1);

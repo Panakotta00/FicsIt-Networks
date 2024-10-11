@@ -21,7 +21,9 @@ void UFILogLibrary::Log(TEnumAsByte<EFILLogVerbosity> Verbosity, FString Message
 void FFicsItLogLibraryModule::StartupModule() {
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINLogEntry"), TEXT("/Script/FicsItLogLibrary.FILEntry")});
-	auto redirectFINLogVerbosity = FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINLogVerbosity"), TEXT("/Script/FicsItLogLibrary.FILLogVerbosity")};
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINLogVerbosity"), TEXT("/Script/FicsItNetworks.FILLogVerbosity")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FILLogVerbosity"), TEXT("/Script/FicsItLogLibrary.FILLogVerbosity")});
+	auto redirectFINLogVerbosity = FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItLogLibrary.EFILLogVerbosity"), TEXT("/Script/FicsItLogLibrary.EFILLogVerbosity")};
 	redirectFINLogVerbosity.ValueChanges = {
 		{TEXT("FIN_Log_Verbosity_Debug"), "FIL_Verbosity_Debug"},
 		{TEXT("FIN_Log_Verbosity_Info"), "FIL_Verbosity_Info"},

@@ -3,7 +3,7 @@
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
-#include "FINStateEEPROMLua.h"
+#include "FINItemStateEEPROMLua.h"
 #include "FGTimeSubsystem.h"
 #include "FILLogContainer.h"
 #include "FILLogEntry.h"

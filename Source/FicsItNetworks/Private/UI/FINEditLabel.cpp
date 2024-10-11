@@ -33,7 +33,9 @@ void UFINEditLabel::OnLabelChanged(const FText& Text, ETextCommit::Type CommitMe
 	if (Label.IsSet()) {
 		auto player = GetOwningPlayer<AFGPlayerController>();
 		auto rco = Cast<UFINComputerRCO>(player->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
-		// TODO: 1.0: rco->SetLabel(LabelContainer.GetObject(), Text.ToString());
+		auto inventory = FReflectionHelper::GetObjectPropertyValue<UFGInventoryComponent>(SlotWidget, TEXT("mCachedInventoryComponent"));
+		auto slotIndex = FReflectionHelper::GetPropertyValue<FIntProperty>(SlotWidget, TEXT("mSlotIdx"));
+		rco->SetLabel(inventory, slotIndex, Text.ToString());
 	}
 }
 

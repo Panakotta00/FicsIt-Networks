@@ -2,7 +2,7 @@
 
 #include "FGInventoryComponent.h"
 #include "FINComputerEEPROMDesc.h"
-#include "FINStateEEPROMLua.h"
+#include "FINItemStateEEPROMLua.h"
 #include "Net/UnrealNetwork.h"
 
 void UFINLuaRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -15,8 +15,8 @@ void UFINLuaRCO::SetLuaEEPROMCode_Implementation(UFGInventoryComponent* Inventor
 	FInventoryStack stack;
 	if (!Inventory->GetStackFromIndex(Index, stack)) return;
 	UFINComputerEEPROMDesc::CreateEEPROMStateInItem(stack.Item);
-	if (const FFINStateEEPROMLua* luaState = stack.Item.GetItemState().GetValuePtr<FFINStateEEPROMLua>()) {
-		FFINStateEEPROMLua state = *luaState;
+	if (const FFINItemStateEEPROMLua* luaState = stack.Item.GetItemState().GetValuePtr<FFINItemStateEEPROMLua>()) {
+		FFINItemStateEEPROMLua state = *luaState;
 		state.Code = NewCode;
 		Inventory->SetStateOnIndex(Index, FFGDynamicStruct(state));
 	}
