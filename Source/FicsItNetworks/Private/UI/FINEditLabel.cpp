@@ -22,28 +22,30 @@ void UFINEditLabel::InitSlotWidget(UWidget* InSlotWidget) {
 	UEditableTextBox* TextBox = Cast<UEditableTextBox>(TextBoxWidget);
 	TextBox->OnTextCommitted.AddDynamic(this, &UFINEditLabel::OnLabelChanged);
 
-	FFINLabelContainerInterface* LabelContainer = GetLabelContainerFromSlot(SlotWidget);
-	if (LabelContainer) {
-		TextBox->SetText(FText::FromString(LabelContainer->GetLabel()));
+	TOptional<FString> Label = GetLabelFromSlot(SlotWidget);
+	if (Label.IsSet()) {
+		TextBox->SetText(FText::FromString(*Label));
 	}
 }
 
 void UFINEditLabel::OnLabelChanged(const FText& Text, ETextCommit::Type CommitMethod) {
-	FFINLabelContainerInterface* LabelContainer = GetLabelContainerFromSlot(SlotWidget);
-	if (LabelContainer) {
+	TOptional<FString> Label = GetLabelFromSlot(SlotWidget);
+	if (Label.IsSet()) {
 		auto player = GetOwningPlayer<AFGPlayerController>();
 		auto rco = Cast<UFINComputerRCO>(player->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 		// TODO: 1.0: rco->SetLabel(LabelContainer.GetObject(), Text.ToString());
 	}
 }
 
-FFINLabelContainerInterface* UFINEditLabel::GetLabelContainerFromSlot(UWidget* InSlot) {
+TOptional<FString> UFINEditLabel::GetLabelFromSlot(UWidget* InSlot) {
 	struct {
 		FInventoryStack Stack;
 	} Params;
 	FReflectionHelper::CallScriptFunction(InSlot, TEXT("GetStack"), &Params);
 
-	if (!Params.Stack.Item.HasState()) return nullptr;
+	if (!Params.Stack.Item.HasState()) return {};
 
-	return FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(Params.Stack.Item.GetItemState());
+	const FFINLabelContainerInterface* container = FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(Params.Stack.Item.GetItemState());
+	if (container) return container->GetLabel();
+	return {};
 }

@@ -6,13 +6,13 @@
 
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
 	BeginProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
-	Return (int64)GetTypeHash(self);
+	FIRReturn (int64)GetTypeHash(self);
 } EndProp()
 BeginProp(RString, internalName, "internalName", "The unreal engine internal name of this object.") {
-	Return (FIRStr) self->GetName();
+	FIRReturn (FIRStr) self->GetName();
 } EndProp()
 BeginProp(RString, internalPath, "internalPath", "The unreal engine internal path name of this object.") {
-	Return (FIRStr) self->GetPathName();
+	FIRReturn (FIRStr) self->GetPathName();
 } EndProp()
 BeginFunc(getHash, "Get Hash", "Returns a hash of this object. This is a value that nearly uniquely identifies this object.") {
 	OutVal(0, RInt, hash, "Hash", "The hash of this object.");
@@ -31,13 +31,13 @@ BeginFunc(isA, "Is A", "Checks if this Object is a child of the given typen.") {
 	isChild = (FIRBool)self->IsA(parent);
 } EndFunc()
 BeginClassProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
-	Return (int64)GetTypeHash(self);
+	FIRReturn (int64)GetTypeHash(self);
 } EndProp()
 BeginClassProp(RString, internalName, "internalName", "The unreal engine internal name of this object.") {
-	Return (FIRStr) self->GetName();
+	FIRReturn (FIRStr) self->GetName();
 } EndProp()
 BeginClassProp(RString, internalPath, "internalPath", "The unreal engine internal path name of this object.") {
-	Return (FIRStr) self->GetPathName();
+	FIRReturn (FIRStr) self->GetPathName();
 } EndProp()
 BeginClassFunc(getHash, "Get Hash", "Returns the hash of this class. This is a value that nearly uniquely idenfies this object.", false) {
 	OutVal(0, RInt, hash, "Hash", "The hash of this class.");
@@ -59,13 +59,13 @@ EndClass()
 
 BeginClass(AActor, "Actor", "Actor", "This is the base class of all things that can exist within the world by them self.")
 BeginProp(RStruct<FVector>, location, "Location", "The location of the actor in the world.") {
-	Return self->GetActorLocation();
+	FIRReturn self->GetActorLocation();
 } EndProp()
 BeginProp(RStruct<FVector>, scale, "Scale", "The scale of the actor in the world.") {
-	Return self->GetActorScale();
+	FIRReturn self->GetActorScale();
 } EndProp()
 BeginProp(RStruct<FRotator>, rotation, "Rotation", "The rotation of the actor in the world.") {
-	Return self->GetActorRotation();
+	FIRReturn self->GetActorRotation();
 } EndProp()
 BeginFunc(getPowerConnectors, "Get Power Connectors", "Returns a list of power connectors this actor might have.") {
 	OutVal(0, RArray<RTrace<UFGPowerConnectionComponent>>, connectors, "Connectors", "The power connectors this actor has.");
@@ -146,12 +146,12 @@ EndClass()
 
 BeginStructConstructable(FVector2D, "Vector2D", "Vector 2D", "Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
-	Return self->X;
+	FIRReturn self->X;
 } PropSet() {
 	self->X = Val;
 } EndProp()
 BeginProp(RFloat, y, "Y", "The Y coordinate component") {
-	Return self->Y;
+	FIRReturn self->Y;
 } PropSet() {
 	self->Y = Val;
 } EndProp()
@@ -188,17 +188,17 @@ EndStruct()
 
 BeginStructConstructable(FVector, "Vector", "Vector", "Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space")
 BeginProp(RFloat, x, "X", "The X coordinate component") {
-	Return self->X;
+	FIRReturn self->X;
 } PropSet() {
 	self->X = Val;
 } EndProp()
 BeginProp(RFloat, y, "Y", "The Y coordinate component") {
-	Return self->Y;
+	FIRReturn self->Y;
 } PropSet() {
 	self->Y = Val;
 } EndProp()
 BeginProp(RFloat, z, "Z", "The Z coordinate component") {
-	Return self->Z;
+	FIRReturn self->Z;
 } PropSet() {
 	self->Z = Val;
 } EndProp()
@@ -235,17 +235,17 @@ EndStruct()
 
 BeginStructConstructable(FRotator, "Rotator", "Rotator", "Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.")
 BeginProp(RFloat, pitch, "Pitch", "The pitch component") {
-	Return self->Pitch;
+	FIRReturn self->Pitch;
 } PropSet() {
 	self->Pitch = Val;
 } EndProp()
 BeginProp(RFloat, yaw, "Yaw", "The yaw component") {
-	Return self->Yaw;
+	FIRReturn self->Yaw;
 } PropSet() {
 	self->Yaw = Val;
 } EndProp()
 BeginProp(RFloat, roll, "Roll", "The roll component") {
-	Return self->Roll;
+	FIRReturn self->Roll;
 } PropSet() {
 	self->Roll = Val;
 } EndProp()
@@ -265,22 +265,22 @@ EndStruct()
 
 BeginStructConstructable(FLinearColor, "Color", "Color", "A structure that holds a rgba color value")
 BeginProp(RFloat, r, "Red", "The red portion of the color.") {
-	Return (FIRFloat) self->R;
+	FIRReturn (FIRFloat) self->R;
 } PropSet() {
 	self->R = Val;
 } EndProp()
 BeginProp(RFloat, g, "Green", "The green portion of the color.") {
-	Return (FIRFloat) self->G;
+	FIRReturn (FIRFloat) self->G;
 } PropSet() {
 	self->G = Val;
 } EndProp()
 BeginProp(RFloat, b, "Blue", "The blue portion of the color.") {
-	Return (FIRFloat) self->B;
+	FIRReturn (FIRFloat) self->B;
 } PropSet() {
 	self->B = Val;
 } EndProp()
 BeginProp(RFloat, a, "Alpha", "The alpha (opacity) portion of the color.") {
-	Return (FIRFloat) self->A;
+	FIRReturn (FIRFloat) self->A;
 } PropSet() {
 	self->A = Val;
 } EndProp()
@@ -317,22 +317,22 @@ EndStruct()
 
 BeginStructConstructable(FMargin, "Margin", "Margin", "A struct containing four floats that describe a margin around a box (like a 9-patch).")
 BeginProp(RFloat, left, "Left", "The left edge of the rectangle.") {
-	Return FIRFloat(self->Left);
+	FIRReturn FIRFloat(self->Left);
 } PropSet() {
 	self->Left = Val;
 } EndProp()
 BeginProp(RFloat, right, "Right", "The right edge of the rectangle.") {
-	Return FIRFloat(self->Right);
+	FIRReturn FIRFloat(self->Right);
 } PropSet() {
 	self->Right = Val;
 } EndProp()
 BeginProp(RFloat, top, "Top", "The top edge of the rectangle.") {
-	Return FIRFloat(self->Top);
+	FIRReturn FIRFloat(self->Top);
 } PropSet() {
 	self->Top = Val;
 } EndProp()
 BeginProp(RFloat, bottom, "Bottom", "The bottom edge of the rectangle.") {
-	Return FIRFloat(self->Left);
+	FIRReturn FIRFloat(self->Left);
 } PropSet() {
 	self->Bottom = Val;
 } EndProp()
@@ -340,22 +340,22 @@ EndStruct()
 
 BeginStructConstructable(FVector4, "Vector4", "Vector4", "A Vector containing four values.")
 BeginProp(RFloat, x, "X", "The first value in the Vector4.") {
-	Return self->X;
+	FIRReturn self->X;
 } PropSet() {
 	self->X = Val;
 } EndProp()
 BeginProp(RFloat, y, "Y", "The second value in the Vector4.") {
-	Return self->Y;
+	FIRReturn self->Y;
 } PropSet() {
 	self->Y = Val;
 } EndProp()
 BeginProp(RFloat, z, "Z", "The third value in the Vector4.") {
-	Return self->Z;
+	FIRReturn self->Z;
 } PropSet() {
 	self->Z = Val;
 } EndProp()
 BeginProp(RFloat, w, "W", "The fourth value in the Vector4.") {
-	Return self->W;
+	FIRReturn self->W;
 } PropSet() {
 	self->W = Val;
 } EndProp()

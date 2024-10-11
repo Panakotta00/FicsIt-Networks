@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FINComputerModule.h"
-#include "FINFileSystemState.h"
+#include "FINItemStateFileSystem.h"
 #include "FINComputerDriveHolder.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINDriveHolderDriveUpdate, const FGuid&, Drive);

@@ -71,10 +71,4 @@ public:
 	 * f.e. resets the code counter
 	 */
 	virtual void Reset() {}
-
-	/**
-	 * Sets the BIOS code of the processor.
-	 * Usage and events depend on implementation (f.e. reset on set)
-	 */
-	virtual void SetEEPROM(AFINStateEEPROM_Legacy* InEEPROM) {}
 };

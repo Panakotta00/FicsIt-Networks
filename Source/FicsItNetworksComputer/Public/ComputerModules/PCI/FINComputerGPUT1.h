@@ -29,10 +29,10 @@ public:
 	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) {
 		bOutSuccess = true;
 		Ar << Character;
-		FColor Color = ForegroundColor.Quantize();
+		FColor Color = ForegroundColor.QuantizeRound();
 		Ar << Color;
 		ForegroundColor = Color;
-		Color = BackgroundColor.Quantize();
+		Color = BackgroundColor.QuantizeRound();
 		Ar << Color;
 		BackgroundColor = Color;
 		return true;

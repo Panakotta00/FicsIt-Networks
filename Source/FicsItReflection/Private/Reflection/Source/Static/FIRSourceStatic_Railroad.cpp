@@ -74,10 +74,10 @@ BeginFunc(getDockedLocomotive, "Get Docked Locomotive", "Returns the currently d
 	locomotive = Ctx.GetTrace() / FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mDockingLocomotive"));
 } EndFunc()
 BeginProp(RInt, status, "Status", "The current docking status of the platform.") {
-	Return (int64)self->GetDockingStatus();
+	FIRReturn (int64)self->GetDockingStatus();
 } EndProp()
 BeginProp(RBool, isReversed, "Is Reversed", "True if the orientation of the platform is reversed relative to the track/station.") {
-	Return self->IsOrientationReversed();
+	FIRReturn self->IsOrientationReversed();
 } EndProp()
 EndClass()
 
@@ -93,38 +93,38 @@ EndSignal()
 BeginSignal(CancelDocking, "Cancel Docking", "Triggers when a train cancels the docking procedure.")
 EndSignal()
 BeginProp(RString, name, "Name", "The name of the railroad station.") {
-	Return self->GetStationIdentifier()->GetStationName().ToString();
+	FIRReturn self->GetStationIdentifier()->GetStationName().ToString();
 } PropSet() {
 	self->GetStationIdentifier()->SetStationName(FText::FromString(Val));
 } EndProp()
 BeginProp(RInt, dockedOffset, "Docked Offset", "The Offset to the beginning of the station at which trains dock.") {
-	Return self->GetDockedVehicleOffset();
+	FIRReturn self->GetDockedVehicleOffset();
 } EndProp()
 EndClass()
 
 BeginClass(AFGBuildableTrainPlatformCargo, "TrainPlatformCargo", "Train Platform Cargo", "A train platform that allows for loading and unloading cargo cars.")
 BeginProp(RBool, isLoading, "Is Loading", "True if the cargo platform is currently loading the docked cargo vehicle.") {
-	Return self->GetIsInLoadMode();
+	FIRReturn self->GetIsInLoadMode();
 } PropSet() {
 	self->SetIsInLoadMode(Val);
 } EndProp()
 BeginProp(RBool, isUnloading, "Is Unloading", "True if the cargo platform is currently loading or unloading the docked cargo vehicle.") {
-	Return self->IsLoadUnloading();
+	FIRReturn self->IsLoadUnloading();
 } EndProp()
 BeginProp(RFloat, dockedOffset, "Docked Offset", "The offset to the track start of the platform at were the vehicle docked.") {
-	Return self->GetDockedVehicleOffset();
+	FIRReturn self->GetDockedVehicleOffset();
 } EndProp()
 BeginProp(RFloat, outputFlow, "Output Flow", "The current output flow rate.") {
-	Return self->GetOutflowRate();
+	FIRReturn self->GetOutflowRate();
 } EndProp()
 BeginProp(RFloat, inputFlow, "Input Flow", "The current input flow rate.") {
-	Return self->GetInflowRate();
+	FIRReturn self->GetInflowRate();
 } EndProp()
 BeginProp(RBool, fullLoad, "Full Load", "True if the docked cargo vehicle is fully loaded.") {
-	Return (bool)self->IsFullLoad();
+	FIRReturn (bool)self->IsFullLoad();
 } EndProp()
 BeginProp(RBool, fullUnload, "Full Unload", "Ture if the docked cargo vehicle is fully unloaded.") {
-	Return (bool)self->IsFullUnload();
+	FIRReturn (bool)self->IsFullUnload();
 } EndProp()
 EndClass()
 
@@ -168,13 +168,13 @@ BeginFunc(getMovement, "Get Movement", "Returns the vehicle movement of this veh
 	movement = Ctx.GetTrace() / self->GetRailroadVehicleMovementComponent();
 } EndFunc()
 BeginProp(RFloat, length, "Length", "The length of this vehicle on the track.") {
-	Return self->GetLength();
+	FIRReturn self->GetLength();
 } EndProp()
 BeginProp(RBool, isDocked, "Is Docked", "True if this vehicle is currently docked to a platform.") {
-	Return self->IsDocked();
+	FIRReturn self->IsDocked();
 } EndProp()
 BeginProp(RBool, isReversed, "Is Reversed", "True if the vheicle is placed reversed on the track.") {
-	Return self->IsOrientationReversed();
+	FIRReturn self->IsOrientationReversed();
 } EndProp()
 EndClass()
 
@@ -217,85 +217,85 @@ BeginFunc(getCouplerRotationAndExtention, "Get Coupler Rotation And Extention", 
 } EndFunc()
 
 BeginProp(RFloat, orientation, "Orientation", "The orientation of the vehicle") {
-	Return self->GetOrientation();
+	FIRReturn self->GetOrientation();
 } EndProp()
 BeginProp(RFloat, mass, "Mass", "The current mass of the vehicle.") {
-	Return self->GetMass();
+	FIRReturn self->GetMass();
 } EndProp()
 BeginProp(RFloat, tareMass, "Tare Mass", "The tare mass of the vehicle.") {
-	Return self->GetTareMass();
+	FIRReturn self->GetTareMass();
 } EndProp()
 BeginProp(RFloat, payloadMass, "Payload Mass", "The mass of the payload of the vehicle.") {
-	Return self->GetPayloadMass();
+	FIRReturn self->GetPayloadMass();
 } EndProp()
 BeginProp(RFloat, speed, "Speed", "The current forward speed of the vehicle.") {
-	Return self->GetForwardSpeed();
+	FIRReturn self->GetForwardSpeed();
 } EndProp()
 BeginProp(RFloat, relativeSpeed, "Relative Speed", "The current relative forward speed to the ground.") {
-	Return self->GetRelativeForwardSpeed();
+	FIRReturn self->GetRelativeForwardSpeed();
 } EndProp()
 BeginProp(RFloat, maxSpeed, "Max Speed", "The maximum forward speed the vehicle can reach.") {
-	Return self->GetMaxForwardSpeed();
+	FIRReturn self->GetMaxForwardSpeed();
 } EndProp()
 BeginProp(RFloat, gravitationalForce, "Gravitationl Force", "The current gravitational force acting on the vehicle.") {
-	Return self->GetGravitationalForce();
+	FIRReturn self->GetGravitationalForce();
 } EndProp()
 BeginProp(RFloat, tractiveForce, "Tractive Force", "The current tractive force acting on the vehicle.") {
-	Return self->GetTractiveForce();
+	FIRReturn self->GetTractiveForce();
 } EndProp()
 BeginProp(RFloat, resistiveForce, "Resistive Froce", "The resistive force currently acting on the vehicle.") {
-	Return self->GetResistiveForce();
+	FIRReturn self->GetResistiveForce();
 } EndProp()
 BeginProp(RFloat, gradientForce, "Gradient Force", "The gradient force currently acting on the vehicle.") {
-	Return self->GetGradientForce();
+	FIRReturn self->GetGradientForce();
 } EndProp()
 BeginProp(RFloat, brakingForce, "Braking Force", "The braking force currently acting on the vehicle.") {
-	Return self->GetBrakingForce();
+	FIRReturn self->GetBrakingForce();
 } EndProp()
 BeginProp(RFloat, airBrakingForce, "Air Braking Force", "The air braking force currently acting on the vehicle.") {
-	Return self->GetAirBrakingForce();
+	FIRReturn self->GetAirBrakingForce();
 } EndProp()
 BeginProp(RFloat, dynamicBrakingForce, "Dynamic Braking Force", "The dynamic braking force currently acting on the vehicle.") {
-	Return self->GetDynamicBrakingForce();
+	FIRReturn self->GetDynamicBrakingForce();
 } EndProp()
 BeginProp(RFloat, maxTractiveEffort, "Max Tractive Effort", "The maximum tractive effort of this vehicle.") {
-	Return self->GetMaxTractiveEffort();
+	FIRReturn self->GetMaxTractiveEffort();
 } EndProp()
 BeginProp(RFloat, maxDynamicBrakingEffort, "Max Dynamic Braking Effort", "The maximum dynamic braking effort of this vehicle.") {
-	Return self->GetMaxDynamicBrakingEffort();
+	FIRReturn self->GetMaxDynamicBrakingEffort();
 } EndProp()
 BeginProp(RFloat, maxAirBrakingEffort, "Max Air Braking Effort", "The maximum air braking effort of this vehicle.") {
-	Return self->GetMaxAirBrakingEffort();
+	FIRReturn self->GetMaxAirBrakingEffort();
 } EndProp()
 BeginProp(RFloat, trackGrade, "Track Grade", "The current track grade of this vehicle.") {
-	Return self->GetTrackGrade();
+	FIRReturn self->GetTrackGrade();
 } EndProp()
 BeginProp(RFloat, trackCurvature, "Track Curvature", "The current track curvature of this vehicle.") {
-	Return self->GetTrackCurvature();
+	FIRReturn self->GetTrackCurvature();
 } EndProp()
 BeginProp(RFloat, wheelsetAngle, "Wheelset Angle", "The wheelset angle of this vehicle.") {
-	Return self->GetWheelsetAngle();
+	FIRReturn self->GetWheelsetAngle();
 } EndProp()
 BeginProp(RFloat, rollingResistance, "Rolling Resistance", "The current rolling resistance of this vehicle.") {
-	Return self->GetRollingResistance();
+	FIRReturn self->GetRollingResistance();
 } EndProp()
 BeginProp(RFloat, curvatureResistance, "Curvature Resistance", "The current curvature resistance of this vehicle.") {
-	Return self->GetCurvatureResistance();
+	FIRReturn self->GetCurvatureResistance();
 } EndProp()
 BeginProp(RFloat, airResistance, "Air Resistance", "The current air resistance of this vehicle.") {
-	Return self->GetAirResistance();
+	FIRReturn self->GetAirResistance();
 } EndProp()
 BeginProp(RFloat, gradientResistance, "Gradient Resistance", "The current gardient resistance of this vehicle.") {
-	Return self->GetGradientResistance();
+	FIRReturn self->GetGradientResistance();
 } EndProp()
 BeginProp(RFloat, wheelRotation, "Wheel Rotation", "The current wheel rotation of this vehicle.") {
-	Return self->GetWheelRotation();
+	FIRReturn self->GetWheelRotation();
 } EndProp()
 BeginProp(RInt, numWheelsets, "Num Wheelsets", "The number of wheelsets this vehicle has.") {
-	Return (int64)self->GetNumWheelsets();
+	FIRReturn (int64)self->GetNumWheelsets();
 } EndProp()
 BeginProp(RBool, isMoving, "Is Moving", "True if this vehicle is currently moving.") {
-	Return self->IsMoving();
+	FIRReturn self->IsMoving();
 } EndProp()
 EndClass()
 
@@ -363,22 +363,22 @@ BeginFunc(getVehicles, "Get Vehicles", "Returns a list of all the vehicles this 
 	vehicles = Vehicles;
 } EndFunc()
 BeginProp(RBool, isPlayerDriven, "Is Player Driven", "True if the train is currently player driven.") {
-	Return self->IsPlayerDriven();
+	FIRReturn self->IsPlayerDriven();
 } EndProp()
 BeginProp(RBool, isSelfDriving, "Is Self Driving", "True if the train is currently self driving.") {
-	Return self->IsSelfDrivingEnabled();
+	FIRReturn self->IsSelfDrivingEnabled();
 } EndProp()
 BeginProp(RInt, selfDrivingError, "Self Driving Error", "The last self driving error.\n0 = No Error\n1 = No Power\n2 = No Time Table\n3 = Invalid Next Stop\n4 = Invalid Locomotive Placement\n5 = No Path") {
-	Return (int64)self->GetSelfDrivingError();
+	FIRReturn (int64)self->GetSelfDrivingError();
 } EndProp()
 BeginProp(RBool, hasTimeTable, "Has Time Table", "True if the train has currently a time table.") {
-	Return self->HasTimeTable();
+	FIRReturn self->HasTimeTable();
 } EndProp()
 BeginProp(RInt, dockState, "Dock State", "The current docking state of the train.") {
-	Return (int64)self->GetDockingState();
+	FIRReturn (int64)self->GetDockingState();
 } EndProp()
 BeginProp(RBool, isDocked, "Is Docked", "True if the train is currently docked.") {
-	Return self->IsDocked();
+	FIRReturn self->IsDocked();
 } EndProp()
 EndClass()
 
@@ -467,7 +467,7 @@ BeginFunc(getCurrentStop, "Get Current Stop", "Returns the index of the stop the
     index = (int64) self->GetCurrentStop();
 } EndFunc()
 BeginProp(RInt, numStops, "Num Stops", "The current number of stops in the time table.") {
-	Return (int64)self->GetNumStops();
+	FIRReturn (int64)self->GetNumStops();
 } EndProp()
 EndClass()
 
@@ -526,19 +526,19 @@ BeginFunc(getVehicles, "Get Vehicles", "Returns a list of Railroad Vehicles on t
 	vehicles = Vehicles;
 } EndFunc()
 BeginProp(RFloat, length, "Length", "The length of the track.") {
-	Return self->GetLength();
+	FIRReturn self->GetLength();
 } EndProp()
 BeginProp(RBool, isOwnedByPlatform, "Is Owned By Platform", "True if the track is part of/owned by a railroad platform.") {
-	Return self->GetIsOwnedByPlatform();
+	FIRReturn self->GetIsOwnedByPlatform();
 } EndProp()
 EndClass()
 
 BeginClass(UFGRailroadTrackConnectionComponent, "RailroadTrackConnection", "Railroad Track Connection", "This is a actor component for railroad tracks that allows to connecto to other track connections and so to connection multiple tracks with each eather so you can build a train network.")
 BeginProp(RStruct<FVector>, connectorLocation, "Connector Location", "The world location of the the connection.") {
-	Return self->GetConnectorLocation();
+	FIRReturn self->GetConnectorLocation();
 } EndProp()
 BeginProp(RStruct<FVector>, connectorNormal, "Connector Normal", "The normal vecotr of the connector.") {
-	Return self->GetConnectorNormal();
+	FIRReturn self->GetConnectorNormal();
 } EndProp()
 BeginFunc(getConnection, "Get Connection", "Returns the connected connection with the given index.") {
 	InVal(1, RInt, index, "Index", "The index of the connected connection you want to get.")
@@ -618,16 +618,16 @@ BeginFunc(forceSwitchPosition, "Force Switch Position", "Forces the switch posit
 	AFIRSubsystem::GetReflectionSubsystem(self)->ForceRailroadSwitch(self, index);
 } EndFunc()
 BeginProp(RBool, isConnected, "Is Connected", "True if the connection has any connection to other connections.") {
-	Return self->IsConnected();
+	FIRReturn self->IsConnected();
 } EndProp()
 BeginProp(RBool, isFacingSwitch, "Is Facing Switch", "True if this connection is pointing to the merge/spread point of the switch.") {
-	Return self->IsFacingSwitch();
+	FIRReturn self->IsFacingSwitch();
 } EndProp()
 BeginProp(RBool, isTrailingSwitch, "Is Trailing Switch", "True if this connection is pointing away from the merge/spread point of a switch.") {
-	Return self->IsTrailingSwitch();
+	FIRReturn self->IsTrailingSwitch();
 } EndProp()
 BeginProp(RInt, numSwitchPositions, "Num Switch Positions", "Returns the number of different switch poisitions this switch can have.") {
-	Return (int64)self->GetNumSwitchPositions();
+	FIRReturn (int64)self->GetNumSwitchPositions();
 } EndProp()
 EndClass()
 
@@ -657,19 +657,19 @@ BeginSignal(ValidationChanged, "Validation Changed", "Triggers when the validati
 	SignalParam(0, RInt, validation, "Validation", "The new validation of the signal (see 'Block Validation' for more information)")
 EndSignal()
 BeginProp(RBool, isPathSignal, "Is Path Signal", "True if this signal is a path-signal.") {
-	Return self->IsPathSignal();
+	FIRReturn self->IsPathSignal();
 } EndProp()
 BeginProp(RBool, isBiDirectional, "Is Bi-Directional", "True if this signal is bi-directional. (trains can pass into both directions)") {
-	Return self->IsBiDirectional();
+	FIRReturn self->IsBiDirectional();
 } EndProp()
 BeginProp(RBool, hasObservedBlock, "Has Observed Block", "True if this signal is currently observing at least one block.") {
-	Return self->HasObservedBlock();
+	FIRReturn self->HasObservedBlock();
 } EndProp()
 BeginProp(RInt, blockValidation, "Block Validation", "Any error states of the block.\n0 = Unknown\n1 = No Error\n2 = No Exit Signal\n3 = Contains Loop\n4 = Contains Mixed Entry Signals") {
-	Return (int64)self->GetBlockValidation();
+	FIRReturn (int64)self->GetBlockValidation();
 } EndProp()
 BeginProp(RInt, aspect, "Aspect", "The aspect of the signal. The aspect shows if a train is allowed to pass (clear) or not and if it should dock.\n0 = Unknown\n1 = The track is clear and the train is allowed to pass.\n2 = The next track is Occupied and the train should stop\n3 = The train should dock.") {
-	Return (int64)self->GetAspect();
+	FIRReturn (int64)self->GetAspect();
 } EndProp()
 BeginFunc(getObservedBlock, "Get Observed Block", "Returns the track block this signals observes.") {
 	OutVal(0, RStruct<FFIRRailroadSignalBlock>, block, "Block", "The railroad signal block this signal is observing.")
@@ -698,17 +698,17 @@ EndClass()
 
 BeginStructConstructable(FTrainDockingRuleSet, "TrainDockingRuleSet", "Train Docking Rule Set", "Contains infromation about the rules that descibe when a trian should depart from a station")
 BeginProp(RInt, definition, "Defintion", "0 = Load/Unload Once, 1 = Fully Load/Unload") {
-	Return (FIRInt)self->DockingDefinition;
+	FIRReturn (FIRInt)self->DockingDefinition;
 } PropSet() {
 	self->DockingDefinition = (ETrainDockingDefinition)Val;
 } EndProp()
 BeginProp(RFloat, duration, "Duration", "The amount of time the train will dock at least.") {
-	Return self->DockForDuration;
+	FIRReturn self->DockForDuration;
 } PropSet() {
 	self->DockForDuration = Val;
 } EndProp()
 BeginProp(RBool, isDurationAndRule, "Is Duration and Rule", "True if the duration of the train stop and the other rules have to be applied.") {
-	Return self->IsDurationAndRule;
+	FIRReturn self->IsDurationAndRule;
 } PropSet() {
 	self->IsDurationAndRule = Val;
 } EndProp()
@@ -752,7 +752,7 @@ EndStruct()
 
 BeginStructConstructable(FFIRTimeTableStop, "TimeTableStop", "Time Table Stop", "Information about a train stop in a time table.")
 BeginProp(RTrace<AFGBuildableRailroadStation>, station, "Station", "The station at which the train should stop") {
-	Return self->Station;
+	FIRReturn self->Station;
 } PropSet() {
 	self->Station = Val;
 } EndProp()
@@ -796,22 +796,22 @@ EndStruct()
 // TODO: 1.0: Redo Railroad Signal Blocks
 BeginStruct(FFIRRailroadSignalBlock, "RailroadSignalBlock", "Railroad Signal Block", "A track section that combines the area between multiple signals.")
 BeginProp(RBool, isValid, "Is Valid", "Is true if this signal block reference is valid.") {
-	Return self->Block.IsValid();
+	FIRReturn self->Block.IsValid();
 } EndProp()
 BeginProp(RBool, isBlockOccupied, "Is Block Occupied", "True if the block this signal is observing is currently occupied by a vehicle.") {
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
-	Return self->Block.Pin()->IsOccupied();
+	FIRReturn self->Block.Pin()->IsOccupied();
 } EndProp()
 BeginProp(RBool, isPathBlock, "Is Path Block", "True if the block this signal is observing is a path-block.") {
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
-	Return self->Block.Pin()->IsPathBlock();
+	FIRReturn self->Block.Pin()->IsPathBlock();
 } PropSet() {
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	self->Block.Pin()->SetIsPathBlock(Val);
 } EndProp()
 BeginProp(RInt, blockValidation, "Block Validation", "Returns the blocks validation status.") {
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
-	Return (int64)self->Block.Pin()->GetBlockValidation();
+	FIRReturn (int64)self->Block.Pin()->GetBlockValidation();
 } EndProp()
 BeginFunc(isOccupiedBy, "Is Occupied By", "Allows you to check if this block is occupied by a given train.") {
 	InVal(0, RObject<AFGTrain>, train, "Train", "The train you want to check if it occupies this block")
@@ -858,22 +858,22 @@ EndStruct()
 
 BeginStructConstructable(FFIRTargetPoint, "TargetPoint", "Target Point", "Target Point in the waypoint list of a wheeled vehicle.")
 BeginProp(RStruct<FVector>, pos, "Pos", "The position of the target point in the world.") {
-	Return self->Pos;
+	FIRReturn self->Pos;
 } PropSet() {
 	self->Pos = Val;
 } EndProp()
 BeginProp(RStruct<FRotator>, rot, "Rot", "The rotation of the target point in the world.") {
-	Return self->Rot;
+	FIRReturn self->Rot;
 } PropSet() {
 	self->Rot = Val;
 } EndProp()
 BeginProp(RFloat, speed, "Speed", "The speed at which the vehicle should pass the target point.") {
-	Return self->Speed;
+	FIRReturn self->Speed;
 } PropSet() {
 	self->Speed = Val;
 } EndProp()
 BeginProp(RFloat, wait, "Wait", "The amount of time which needs to pass till the vehicle will continue to the next target point.") {
-	Return self->Wait;
+	FIRReturn self->Wait;
 } PropSet() {
 	self->Wait = Val;
 } EndProp()

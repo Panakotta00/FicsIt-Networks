@@ -14,78 +14,78 @@ BeginSignal(ProductionChanged, "Production Changed", "Triggers when the producti
 	SignalParam(0, RInt, state, "State", "The new production state.")
 EndSignal()
 BeginProp(RInt, numPowerConnections, "Num Power Connection", "The count of available power connections this building has.") {
-	Return (FIRInt)self->GetNumPowerConnections();
+	FIRReturn (FIRInt)self->GetNumPowerConnections();
 } EndProp()
 BeginProp(RInt, numFactoryConnections, "Num Factory Connection", "The cound of available factory connections this building has.") {
-	Return (FIRInt)self->GetNumFactoryConnections();
+	FIRReturn (FIRInt)self->GetNumFactoryConnections();
 } EndProp()
 BeginProp(RInt, numFactoryOutputConnections, "Num Factory Output Connection", "The count of available factory output connections this building has.") {
-	Return (FIRInt)self->GetNumFactoryOuputConnections();
+	FIRReturn (FIRInt)self->GetNumFactoryOuputConnections();
 } EndProp()
 EndClass()
 
 BeginClass(AFGBuildableFactory, "Factory", "Factory", "The base class of most machines you can build.")
 BeginProp(RFloat, progress, "Progress", "The current production progress of the current production cycle.") {
-	Return self->GetProductionProgress();
+	FIRReturn self->GetProductionProgress();
 } EndProp()
 BeginProp(RFloat, powerConsumProducing,	"Producing Power Consumption", "The power consumption when producing.") {
-	Return self->GetProducingPowerConsumption();
+	FIRReturn self->GetProducingPowerConsumption();
 } EndProp()
 BeginProp(RFloat, productivity,	"Productivity", "The productivity of this factory.") {
-	Return self->GetProductivity();
+	FIRReturn self->GetProductivity();
 } EndProp()
 BeginProp(RFloat, cycleTime, "Cycle Time", "The time that passes till one production cycle is finsihed.") {
-	Return self->GetProductionCycleTime();
+	FIRReturn self->GetProductionCycleTime();
 } EndProp()
 BeginProp(RBool, canChangePotential, "Can Change Potential", "True if the factory can change its potential.") {
-	Return self->GetCanChangePotential();
+	FIRReturn self->GetCanChangePotential();
 } EndProp()
 BeginProp(RFloat, maxPotential, "Max Potential", "The maximum potential this factory can be set to (depending on the number of crystals).") {
-	Return self->GetCurrentMaxPotential();
+	FIRReturn self->GetCurrentMaxPotential();
 } EndProp()
 BeginProp(RFloat, minPotential, "Min Potential", "The minimum potential this factory needs to be set to.") {
-	Return self->GetCurrentMinPotential();
+	FIRReturn self->GetCurrentMinPotential();
 } EndProp()
 BeginProp(RFloat, maxDefaultPotential, "Max Default Potential", "The default maximum potential this factory can be set to.") {
-	Return self->GetMaxPotential();
+	FIRReturn self->GetMaxPotential();
 } EndProp()
 BeginProp(RFloat, currentPotential, "Current Potential", "The potential this factory is currently using.") {
-	Return self->GetCurrentPotential();
+	FIRReturn self->GetCurrentPotential();
 } EndProp()
 BeginProp(RFloat, potential, "Potential", "The potential this factory is currently set to and 'should'  use. (the overclock value)\n 0 = 0%, 1 = 100%") {
-	Return self->GetPendingPotential();
+	FIRReturn self->GetPendingPotential();
 } PropSet() {
 	float min = self->GetCurrentMinPotential();
 	float max = self->GetCurrentMaxPotential();
 	self->SetPendingPotential(FMath::Clamp((float)Val, min, max));
 } EndProp()
 BeginProp(RTrace<UFGInventoryComponent>, potentialInventory, "Potential Inventory", "The Inventory that holds the crystals used for potential.") {
-	Return (Ctx.GetTrace() / self->GetPotentialInventory());
+	FIRReturn (Ctx.GetTrace() / self->GetPotentialInventory());
 } EndProp()
 BeginProp(RBool, canChangeProductionBoost, "Can Change Production Boost", "True if the factory can change its production boost.") {
-	Return self->CanChangeProductionBoost();
+	FIRReturn self->CanChangeProductionBoost();
 } EndProp()
 BeginProp(RFloat, maxProductionBoost, "Max Production Boost", "The maximum production boost this factory can be set to (depending on the number of shards).") {
-	Return self->GetCurrentMaxProductionBoost();
+	FIRReturn self->GetCurrentMaxProductionBoost();
 } EndProp()
 BeginProp(RFloat, maxDefaultProductionBoost, "Max Default Production Boost", "The maximum production boost this factory can be set to.") {
-	Return self->GetMaxProductionBoost();
+	FIRReturn self->GetMaxProductionBoost();
 } EndProp()
 BeginProp(RFloat, minDefaultProductionBoost, "Min Default Production Boost", "The minimum production boost this factory has to be set to.") {
-	Return self->GetMinProductionBoost();
+	FIRReturn self->GetMinProductionBoost();
 } EndProp()
 BeginProp(RFloat, currentProductionBoost, "Current Production Boost", "The current production boost this factory uses.") {
-	Return self->GetCurrentProductionBoost();
+	FIRReturn self->GetCurrentProductionBoost();
 } EndProp()
 BeginProp(RFloat, productionBoost, "Production Boost", "The current production boost this factory should use.") {
-	Return self->GetPendingProductionBoost();
+	FIRReturn self->GetPendingProductionBoost();
 } PropSet() {
 	float min = self->GetMinProductionBoost();
 	float max = self->GetCurrentMaxProductionBoost();
 	self->SetPendingProductionBoost(FMath::Clamp((float)Val, min, max));
 } EndProp()
 BeginProp(RBool, standby, "Standby", "True if the factory is in standby.") {
-	Return self->IsProductionPaused();
+	FIRReturn self->IsProductionPaused();
 } PropSet() {
 	self->SetIsProductionPaused(Val);
 } EndProp()
@@ -143,26 +143,26 @@ BeginSignal(ItemTransfer, "Item Transfer", "Triggers when the factory connection
 	SignalParam(0, RStruct<FInventoryItem>, item, "Item", "The transfered item")
 EndSignal()
 BeginProp(RInt, type, "Type", "Returns the type of the connection. 0 = Conveyor, 1 = Pipe") {
-	Return (int64)self->GetConnector();
+	FIRReturn (int64)self->GetConnector();
 } EndProp()
 BeginProp(RInt, direction, "Direction", "The direction in which the items/fluids flow. 0 = Input, 1 = Output, 2 = Any, 3 = Used just as snap point") {
-	Return (int64)self->GetDirection();
+	FIRReturn (int64)self->GetDirection();
 } EndProp()
 BeginProp(RBool, isConnected, "Is Connected", "True if something is connected to this connection.") {
-	Return self->IsConnected();
+	FIRReturn self->IsConnected();
 } EndProp()
 BeginProp(RClass<UFGItemDescriptor>, allowedItem, "Allowed Item", "This item type defines which items are the only ones this connector can transfer. Null allows all items to be transfered.") {
-	Return (FIRClass)AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorAllowedItem(self);
+	FIRReturn (FIRClass)AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorAllowedItem(self);
 } PropSet() {
 	AFIRSubsystem::GetReflectionSubsystem(self)->SetFactoryConnectorAllowedItem(self, Val);
 } EndProp()
 BeginProp(RBool, blocked, "Blocked", "True if this connector doesn't transfer any items except the 'Unblocked Transfers'.") {
-	Return AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorBlocked(self);
+	FIRReturn AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorBlocked(self);
 } PropSet() {
 	AFIRSubsystem::GetReflectionSubsystem(self)->SetFactoryConnectorBlocked(self, Val);
 } EndProp()
 BeginProp(RInt, unblockedTransfers, "Unblocked Transfers", "The count of transfers that can still happen even if the connector is blocked. Use the 'AddUnblockedTransfers' function to change this. The count decreases by one when an item gets transfered.") {
-	Return AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorUnblockedTransfers(self);
+	FIRReturn AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorUnblockedTransfers(self);
 } EndProp()
 BeginFunc(addUnblockedTransfers, "Add Unblocked Transfers", "Adds the given count to the unblocked transfers counter. The resulting value gets clamped to >= 0. Negative values allow to decrease the counter manually. The returning int is the now set count.") {
 	InVal(0, RInt, unblockedTransfers, "Unblocked Transfers", "The count of unblocked transfers to add.")
@@ -184,10 +184,10 @@ EndClass()
 
 BeginClass(UFGRecipe, "Recipe", "Recipe", "A struct that holds information about a recipe in its class. Means don't use it as object, use it as class type!")
 BeginClassProp(RString, name, "Name", "The name of this recipe.") {
-	Return (FIRStr)UFGRecipe::GetRecipeName(self).ToString();
+	FIRReturn (FIRStr)UFGRecipe::GetRecipeName(self).ToString();
 } EndProp()
 BeginClassProp(RFloat, duration, "Duration", "The duration how much time it takes to cycle the recipe once.") {
-	Return UFGRecipe::GetManufacturingDuration(self);
+	FIRReturn UFGRecipe::GetManufacturingDuration(self);
 } EndProp()
 BeginClassFunc(getProducts, "Get Products", "Returns a array of item amounts, this recipe returns (outputs) when the recipe is processed once.", false) {
 	OutVal(0, RArray<RStruct<FItemAmount>>, products, "Products", "The products of this recipe.")

@@ -130,13 +130,13 @@ EndStruct()
 
 BeginStruct(FFILEntry, "LogEntry", "Log Entry", "An entry in the Computer Log.")
 BeginProp(RString, content, "Content", "The Message-Content contained within the log entry.") {
-	Return self->Content;
+	FIRReturn self->Content;
 } EndProp()
 BeginProp(RString, timestamp, "Timestamp", "The timestamp at which the log entry got logged.") {
-	Return self->Timestamp.ToString();
+	FIRReturn self->Timestamp.ToString();
 } EndProp()
 BeginProp(RInt, verbosity, "Verbosity", "The verbosity of the log entry.") {
-	Return (FIRInt)self->Verbosity;
+	FIRReturn (FIRInt)self->Verbosity;
 } EndProp()
 BeginFunc(format, "Format", "Creates a formatted string representation of this log entry.") {
 	OutVal(0, RString, result, "Result", "The resulting formatted string")
@@ -147,82 +147,82 @@ EndStruct()
 
 BeginStructConstructable(FFINGPUT2DC_Box, "GPUT2DrawCallBox", "GPU T2 Box Draw Call", "This struct contains the necessary information to draw a box onto the GPU T2.")
 BeginProp(RStruct<FVector2D>, position, "Position", "The drawn local position of the rectangle.") {
-	Return FIRStruct(self->Position);
+	FIRReturn FIRStruct(self->Position);
 } PropSet() {
 	self->Position = Val;
 } EndProp()
 BeginProp(RStruct<FVector2D>, size, "Size", "The drawn size of the rectangle.") {
-	Return FIRStruct(self->Size);
+	FIRReturn FIRStruct(self->Size);
 } PropSet() {
 	self->Size = Val;
 } EndProp()
 BeginProp(RFloat, rotation, "Rotation", "The draw rotation of the rectangle.") {
-	Return FIRFloat(self->Rotation);
+	FIRReturn FIRFloat(self->Rotation);
 } PropSet() {
 	self->Rotation = Val;
 } EndProp()
 BeginProp(RStruct<FLinearColor>, color, "Color", "The fill color of the rectangle, or the tint of the image drawn.") {
-	Return FIRStruct(self->Color.ReinterpretAsLinear());
+	FIRReturn FIRStruct(self->Color.ReinterpretAsLinear());
 } PropSet() {
 	self->Color = Val.QuantizeRound();
 } EndProp()
 BeginProp(RString, image, "Image", "If not empty, should be a image reference to the image that should be drawn inside the rectangle.") {
-	Return FIRStr(self->Image);
+	FIRReturn FIRStr(self->Image);
 } PropSet() {
 	self->Image = Val;
 } EndProp()
 BeginProp(RStruct<FVector2D>, imageSize, "Image Size", "The size of the internal image drawn, necessary for proper scaling, antialising and tiling.") {
-	Return FIRStruct(self->ImageSize);
+	FIRReturn FIRStruct(self->ImageSize);
 } PropSet() {
 	self->ImageSize = Val;
 } EndProp()
 BeginProp(RBool, hasCenteredOrigin, "Has Centered Origin", "If set to false, the position will give the left upper corner of the box and rotation will happen around this point. If set to true, the position will give the center point of box and the rotation will happen around this center point.") {
-	Return FIRBool(self->bHasCenteredOrigin);
+	FIRReturn FIRBool(self->bHasCenteredOrigin);
 } PropSet() {
 	self->bHasCenteredOrigin = Val;
 } EndProp()
 BeginProp(RBool, horizontalTiling, "Horizontal Tiling", "True if the image should be tiled horizontally.") {
-	Return FIRBool(self->bHorizontalTiling);
+	FIRReturn FIRBool(self->bHorizontalTiling);
 } PropSet() {
 	self->bHorizontalTiling = Val;
 } EndProp()
 BeginProp(RBool, verticalTiling, "Vertical Tiling", "True if the image should be tiled vertically.") {
-	Return FIRBool(self->bVerticalTiling);
+	FIRReturn FIRBool(self->bVerticalTiling);
 } PropSet() {
 	self->bVerticalTiling = Val;
 } EndProp()
 BeginProp(RBool, isBorder, "Is Border", "If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use (use the image as 9-patch).") {
-	Return FIRBool(self->bIsBorder);
+	FIRReturn FIRBool(self->bIsBorder);
 } PropSet() {
 	self->bIsBorder = Val;
 } EndProp()
 BeginProp(RStruct<FMargin>, margin, "Margin", "The margin values of the 9-patch (border).") {
-	Return FIRStruct(self->Margin);
+	FIRReturn FIRStruct(self->Margin);
 } PropSet() {
 	self->Margin = FVector4(Val.Left, Val.Top, Val.Right, Val.Bottom);
 } EndProp()
 BeginProp(RBool, isRounded, "Is Rounded", "True if the box can have rounded borders.") {
-	Return FIRBool(self->bIsRounded);
+	FIRReturn FIRBool(self->bIsRounded);
 } PropSet() {
 	self->bIsRounded = Val;
 } EndProp()
 BeginProp(RStruct<FVector4>, radii, "Radii", "The rounded border radii used if isRounded is set to true.\nThe Vector4 corner mapping in order: Top Left, Top Right, Bottom Right & Bottom Left.") {
-	Return FIRStruct(self->BorderRadii);
+	FIRReturn FIRStruct(self->BorderRadii);
 } PropSet() {
 	self->BorderRadii = Val;
 } EndProp()
 BeginProp(RBool, hasOutline, "Has Outline", "True if the box has a colorful (inward) outline.") {
-	Return FIRBool(self->bHasOutline);
+	FIRReturn FIRBool(self->bHasOutline);
 } PropSet() {
 	self->bHasOutline = Val;
 } EndProp()
 BeginProp(RFloat, outlineThickness, "Outline Thickness", "The uniform thickness of the outline around the box.") {
-	Return FIRFloat(self->OutlineThickness);
+	FIRReturn FIRFloat(self->OutlineThickness);
 } PropSet() {
 	self->OutlineThickness = Val;
 } EndProp()
 BeginProp(RStruct<FLinearColor>, outlineColor, "Outline Color", "The color of the outline around the box.") {
-	Return FIRStruct(self->OutlineColor.ReinterpretAsLinear());
+	FIRReturn FIRStruct(self->OutlineColor.ReinterpretAsLinear());
 } PropSet() {
 	self->OutlineColor = Val.QuantizeRound();
 } EndProp()

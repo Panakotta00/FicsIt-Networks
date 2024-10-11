@@ -7,8 +7,9 @@
 #include "FGGameState.h"
 #include "FicsItNetworksMisc.h"
 #include "FicsItReflection.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Components/VerticalBox.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "Hologram/FGBuildableHologram.h"
 #include "Patching/BlueprintHookHelper.h"
 #include "Patching/BlueprintHookManager.h"
@@ -55,7 +56,7 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 		MenuList->AddChildToVerticalBox(UUIDButton);
 	}
 
-	if (UFINEditLabel::GetLabelContainerFromSlot(self)) {
+	if (UFINEditLabel::GetLabelFromSlot(self).IsSet()) {
 		UFINEditLabel* EditLabel = NewObject<UFINEditLabel>(MenuList->GetOuter());
 		EditLabel->InitSlotWidget(self);
 		MenuList->AddChildToVerticalBox(EditLabel);
@@ -71,16 +72,7 @@ void FFicsItNetworksModule::StartupModule(){
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINNetworkConnector"), TEXT("/Script/FicsItNetworks.FINAdvancedNetworkConnectionComponent")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Splitter/Splitter.Splitter_C"), TEXT("/FicsItNetworks/Components/CodeableSplitter/CodeableSplitter.CodeableSplitter_C")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Game/FicsItNetworks/Components/Merger/Merger.Merger_C"), TEXT("/FicsItNetworks/Components/CodeableMerger/CodeableMerger.CodeableMerger_C")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINStateEEPROMLua"), TEXT("/Script/FicsItNetworksLua.FINStateEEPROMLua")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINComputerProcessorLua"), TEXT("/Script/FicsItNetworksLua.FINComputerProcessorLua")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINLuaProcessor"), TEXT("/Script/FicsItNetworksLua.FINLuaProcessor")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINLuaProcessorStateStorage"), TEXT("/Script/FicsItNetworksLua.FINLuaProcessorStateStorage")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.EFINMetaRuntimeState"), TEXT("/Script/FicsItNetworksLua.EFINReflectionMetaRuntimeState")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FFINBlueprintPropertyMeta"), TEXT("/Script/FicsItNetworksLua.FFINReflectionPropertyMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FFINBlueprintFunctionMetaParameter"), TEXT("/Script/FicsItNetworksLua.FFINReflectionFunctionParameterMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FFINBlueprintFunctionMeta"), TEXT("/Script/FicsItNetworksLua.FFINReflectionFunctionMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FFINBlueprintSignalMeta"), TEXT("/Script/FicsItNetworksLua.FFINReflectionSignalMeta")});
-	
+
 	AddRedirects(TEXT(""), TEXT(""),
 		{	TEXT("FicsItNetworks/Components/RozeModularSystem"), TEXT("FicsItNetworks/Components/MicroControlPanels"),{
 			{TEXT("Enclosures"), TEXT("MicroControlPanels"), {
@@ -156,7 +148,6 @@ void FFicsItNetworksModule::StartupModule(){
 		UFunction* Function = Slot->FindFunctionByName(TEXT("CreateSplitSlider"));
 		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
 		HookManager->HookBlueprintFunction(Function, InventorSlot_CreateWidgetSlider_Hook, EPredefinedHookOffset::Return);
-
 #endif
 	});
 }

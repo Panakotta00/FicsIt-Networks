@@ -9,13 +9,13 @@
 	virtual ~Interface() = default; \
 	static constexpr const TCHAR* InterfaceName = TEXT(#Interface);
 
-#define FIN_STRUCT_INTERFACE_REGISTER_NAME(Interface) RegisterInterface ## Interface
+#define FIN_STRUCT_INTERFACE_REGISTER_NAME(Struct, Interface) RegisterInterface_ ## Struct ## _ ## Interface
 #define FIN_STRUCT_IMPLEMENT_INTERFACE(Struct, Interface) \
-	FFIRStaticGlobalRegisterFunc FIN_STRUCT_INTERFACE_REGISTER_NAME(Interface) ([](){ \
+	FFIRStaticGlobalRegisterFunc FIN_STRUCT_INTERFACE_REGISTER_NAME(Struct,Interface) ([](){ \
 		FFINStructInterfaces::Get().RegisterInterface<Struct, Interface>(); \
 	});
 
-struct FFINStructInterfaces {
+struct FICSITNETWORKSMISC_API FFINStructInterfaces {
 private:
 	FFINStructInterfaces() = default;
 
@@ -60,21 +60,27 @@ public:
 		return nullptr;
 	}
 
-	template<typename I>
-	I* GetInterface(const UStruct* StructType, void* Struct) const {
+	template<typename I, typename T>
+	std::conditional_t<std::is_const<T>::value, const I, I>* GetInterface(const UStruct* StructType, T* Struct) const {
 		auto structs = Offsets.Find(I::InterfaceName);
-		for (const auto& [ possibleStructType, offset ] : structs) {
+		if (structs == nullptr) return nullptr;
+		for (const auto& [ possibleStructType, offset ] : *structs) {
 			if (StructType->IsChildOf(possibleStructType)) {
 				uint64 structPtr64 = reinterpret_cast<uint64>(Struct);
 				uint64 interfacePtr64 = structPtr64 + offset;
-				return reinterpret_cast<I>(interfacePtr64);
+				return reinterpret_cast<std::conditional_t<std::is_const<T>::value, const I, I>*>(interfacePtr64);
 			}
 		}
 		return nullptr;
 	}
 
 	template<typename I>
-	I* GetInterface(const FFGDynamicStruct& Struct) const {
+	I* GetInterface(FFGDynamicStruct& Struct) const {
+		return GetInterface<I>(Struct.GetStruct(), Struct.GetStructValueRaw());
+	}
+
+	template<typename I>
+	const I* GetInterface(const FFGDynamicStruct& Struct) const {
 		return GetInterface<I>(Struct.GetStruct(), Struct.GetStructValueRaw());
 	}
 };

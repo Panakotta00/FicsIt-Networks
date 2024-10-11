@@ -7,7 +7,7 @@ public class FicsItNetworksLua : ModuleRules
 {
     public FicsItNetworksLua(ReadOnlyTargetRules target) : base(target)
     {
-        CppStandard = CppStandardVersion.Cpp17;
+        CppStandard = CppStandardVersion.Cpp20;
         bEnableExceptions = true;
         bUseRTTI = true;
         //bLegacyPublicIncludePaths = false;

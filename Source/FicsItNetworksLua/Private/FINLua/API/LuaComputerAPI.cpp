@@ -200,12 +200,12 @@ namespace FINLua {
 			 */)", setEEPROM) {
 				LuaFunc();
 
-				AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
-				if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
-				size_t len;
-				const char* str = luaL_checklstring(L, 1, &len);
-				FUTF8ToTCHAR Conv(str, len);
-				eeprom->SetCode(FString(Conv.Length(), Conv.Get()));
+				FString code = luaFIN_checkFString(L, 1);
+
+				if (Cast<UFINLuaProcessor>(kernel->GetProcessor())->SetEEPROM(code)) {
+					return luaL_error(L, "no eeprom set");
+				}
+
 				return 0;
 			}
 
@@ -219,11 +219,9 @@ namespace FINLua {
 			 */)", getEEPROM) {
 				LuaFunc();
 
-				const AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
-				if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
-				FString Code = eeprom->GetCode();
-				FTCHARToUTF8 Conv(*Code, Code.Len());
-				lua_pushlstring(L, Conv.Get(), Conv.Length());
+				TOptional<FString> Code = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
+				if (Code.IsSet() == false) return luaL_error(L, "no eeprom set");
+				luaFIN_pushFString(L, *Code);
 				return 1;
 			}
 

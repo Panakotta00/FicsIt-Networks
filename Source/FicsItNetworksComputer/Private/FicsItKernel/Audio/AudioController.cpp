@@ -1,5 +1,7 @@
 ﻿#include "FicsItKernel/Audio/AudioController.h"
 
+#include "Components/AudioComponent.h"
+
 void UFINKernelAudioController::ExecBeep_Implementation(float Pitch) {
 	if (IsValid(AudioComponent)) {
 		AudioComponent->SetPitchMultiplier(Pitch);

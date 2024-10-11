@@ -10,7 +10,7 @@ namespace CodersFileSystem {
 	class Device;
 }
 
-struct FFINFileSystemState;
+struct FFINItemStateFileSystem;
 
 UCLASS()
 class FICSITNETWORKSCOMPUTER_API AFINFileSystemSubsystem : public AFGSubsystem {

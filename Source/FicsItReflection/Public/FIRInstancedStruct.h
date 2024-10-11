@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FIRInstancedStruct.generated.h"
 
-#define MakeDynamicStruct(Type, ...) MakeShared<FFIRInstancedStruct>(TBaseStructure<Type>::Get(), new Type{__VA_ARGS__})
+#define FINMakeDynamicStruct(Type, ...) MakeShared<FFIRInstancedStruct>(TBaseStructure<Type>::Get(), new Type{__VA_ARGS__})
 
 template<typename T>
 class TFIRInstancedStruct;

@@ -24,5 +24,5 @@ public:
 	UFUNCTION()
 	void OnLabelChanged(const FText& Text, ETextCommit::Type CommitMethod);
 
-	static FFINLabelContainerInterface* GetLabelContainerFromSlot(UWidget* InSlot);
+	static TOptional<FString> GetLabelFromSlot(UWidget* InSlot);
 };

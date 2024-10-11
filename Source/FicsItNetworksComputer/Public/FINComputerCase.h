@@ -140,6 +140,9 @@ public:
 	UFUNCTION()
 	void OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num, UFGInventoryComponent* changedInventory);
 
+	UFUNCTION(BlueprintCallable)
+	FFGDynamicStruct GetEEPROM();
+
 	UFUNCTION(BlueprintCallable, Category="Network|Computer")
 	void Toggle();
 

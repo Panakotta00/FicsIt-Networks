@@ -8,7 +8,7 @@ ExtendClass(UObject)
 BeginProp(RString, nick, "Nick", "**Only available for Network Components!** Allows access to the Network Components Nick.") {
 	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
 	if (NetworkHandler) {
-		Return IFINNetworkComponent::Execute_GetNick(NetworkHandler);
+		FIRReturn IFINNetworkComponent::Execute_GetNick(NetworkHandler);
 	} else {
 		throw FFIRException("Not a network component!");
 	}
@@ -23,7 +23,7 @@ BeginProp(RString, nick, "Nick", "**Only available for Network Components!** All
 BeginProp(RString, id, "ID", "**Only available for Network Components!** Allows access to the Network Components UUID.") {
 	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
 	if (NetworkHandler) {
-		Return IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString();
+		FIRReturn IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString();
 	} else {
 		throw FFIRException("Not a network component!");
 	}

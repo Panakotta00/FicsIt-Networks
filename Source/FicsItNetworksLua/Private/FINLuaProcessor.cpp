@@ -1,5 +1,8 @@
 #include "FINLuaProcessor.h"
 
+#include "AsyncWork.h"
+#include "Base64.h"
+#include "FGInventoryComponent.h"
 #include "FicsItNetworksComputer.h"
 #include "FicsItNetworksLuaModule.h"
 #include "FILLogContainer.h"
@@ -662,11 +665,12 @@ void UFINLuaProcessor::Reset() {
 	luaThreadIndex = lua_gettop(luaState);
 
 	// setup thread with code
-	if (!EEPROM.IsValid()) {
+	TOptional<FString> eepromCode = GetEEPROM();
+	if (eepromCode.IsSet() == false) {
 		Kernel->Crash(MakeShared<FFINKernelCrash>("No Valid EEPROM set"));
 		return;
 	}
-	const FTCHARToUTF8 CodeConv(*EEPROM->GetCode(), EEPROM->GetCode().Len());
+	const FTCHARToUTF8 CodeConv(**eepromCode, eepromCode->Len());
 	const std::string code = std::string(CodeConv.Get(), CodeConv.Length());
 	luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
 	if (lua_isstring(luaThread, -1)) {
@@ -686,12 +690,25 @@ int64 UFINLuaProcessor::GetMemoryUsage(bool bInRecalc) {
 	return lua_gc(luaState, LUA_GCCOUNT, 0) * 100;
 }
 
-void UFINLuaProcessor::SetEEPROM(AFINStateEEPROM_Legacy* InEEPROM) {
-	EEPROM = Cast<AFINStateEEPROMLua>(InEEPROM);
+TOptional<FString> UFINLuaProcessor::GetEEPROM() const {
+	FInventoryItem eeprom = Kernel->GetEEPROM();
+	if (const FFINStateEEPROMLua* state = eeprom.GetItemState().GetValuePtr<FFINStateEEPROMLua>()) {
+		return state->Code;
+	}
+	return {};
 }
 
-AFINStateEEPROMLua* UFINLuaProcessor::GetEEPROM() const {
-	return EEPROM.Get();
+bool UFINLuaProcessor::SetEEPROM(const FString& Code) {
+	FInventoryItem eeprom = Kernel->GetEEPROM();
+	UFINComputerEEPROMDesc::CreateEEPROMStateInItem(eeprom);
+
+	if (const FFINStateEEPROMLua* stateLua = eeprom.GetItemState().GetValuePtr<FFINStateEEPROMLua>()) {
+		FFINStateEEPROMLua state = *stateLua;
+		state.Code = Code;
+		return Kernel->SetEEPROM(FFGDynamicStruct(state));
+	}
+
+	return false;
 }
 
 FFINLuaProcessorTick& UFINLuaProcessor::GetTickHelper() {

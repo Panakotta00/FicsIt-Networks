@@ -95,7 +95,7 @@
 #define BeginClassProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 1, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 	TSubclassOf<T> self = Cast<UClass>(Ctx.GetObject());
 #define BeginStaticProp(Type, InternalName, DisplayName, Description, ...) BeginPropRT(Class, Type, InternalName, DisplayName, Description, 2, GET_MACRO(0, ##__VA_ARGS__, 1) )
-#define Return \
+#define FIRReturn \
 		return (FIRAny)
 #define PropSet() \
 		} \

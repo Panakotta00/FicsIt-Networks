@@ -41,6 +41,7 @@ void FFicsItNetworksComputerModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINInternetCardHttpRequestFuture"), TEXT("/Script/FicsItNetworksComputer.FINInternetCardHttpRequestFuture")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINInternetCard"), TEXT("/Script/FicsItNetworksComputer.FINInternetCard")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.ScreenWidgetUpdate"), TEXT("/Script/FicsItNetworksComputer.ScreenWidgetUpdate")});
+
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.ScreenGPUUpdate"), TEXT("/Script/FicsItNetworksComputer.ScreenGPUUpdate")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINComputerScreen"), TEXT("/Script/FicsItNetworksComputer.FINComputerScreen")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINComputerNetworkCard"), TEXT("/Script/FicsItNetworksComputer.FINComputerNetworkCard")});
@@ -58,6 +59,7 @@ void FFicsItNetworksComputerModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUT2DC_Lines"), TEXT("/Script/FicsItNetworksComputer.FINGPUT2DC_Lines")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUT2DC_Text"), TEXT("/Script/FicsItNetworksComputer.FINGPUT2DC_Text")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUT2DC_Spline"), TEXT("/Script/FicsItNetworksComputer.FINGPUT2DC_Spline")});
+
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUT2DC_Bezier"), TEXT("/Script/FicsItNetworksComputer.FINGPUT2DC_Bezier")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUT2DC_Box"), TEXT("/Script/FicsItNetworksComputer.FINGPUT2DC_Box")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUT2CursorEvent"), TEXT("/Script/FicsItNetworksComputer.FINGPUT2CursorEvent")});
@@ -73,6 +75,7 @@ void FFicsItNetworksComputerModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUT1ColorBlendingMethod"), TEXT("/Script/FicsItNetworksComputer.FINGPUT1ColorBlendingMethod")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUT1Buffer"), TEXT("/Script/FicsItNetworksComputer.FINGPUT1Buffer")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINComputerGPUT1"), TEXT("/Script/FicsItNetworksComputer.FINComputerGPUT1")});
+
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINComputerGPU"), TEXT("/Script/FicsItNetworksComputer.FINComputerGPU")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINScreenWidget"), TEXT("/Script/FicsItNetworksComputer.FINScreenWidget")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINGPUWidgetSign"), TEXT("/Script/FicsItNetworksComputer.FINGPUWidgetSign")});
@@ -81,17 +84,15 @@ void FFicsItNetworksComputerModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINKernelListener"), TEXT("/Script/FicsItNetworksComputer.FINKernelListener")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINKernelSystem"), TEXT("/Script/FicsItNetworksComputer.FINKernelSystem")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINKernelProcessor"), TEXT("/Script/FicsItNetworksComputer.FINKernelProcessor")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINStateEEPROM"), TEXT("/Script/FicsItNetworksComputer.FINStateEEPROM")});
+
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINEEPROMUpdateDelegate"), TEXT("/Script/FicsItNetworksComputer.FINEEPROMUpdateDelegate")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINKernelNetworkController"), TEXT("/Script/FicsItNetworksComputer.FINKernelNetworkController")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINFileSystemState"), TEXT("/Script/FicsItNetworksComputer.FINFileSystemState")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINStateEEPROM"), TEXT("/Script/FicsItNetworksComputer.FINStateEEPROM_Legacy")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINFileSystemState"), TEXT("/Script/FicsItNetworksComputer.FINFileSystemState_Legacy")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FileSystemNodeIndex"), TEXT("/Script/FicsItNetworksComputer.FileSystemNodeIndex")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FileSystemNode"), TEXT("/Script/FicsItNetworksComputer.FileSystemNode")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FileSystemSerializationInfo"), TEXT("/Script/FicsItNetworksComputer.FileSystemSerializationInfo")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworks.FINKernelAudioController"), TEXT("/Script/FicsItNetworksComputer.FINKernelAudioController")});
-
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworksComputer.FINFileSystemState"), TEXT("/Script/FicsItNetworksComputer.FINFileSystemState_Legacy")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworksComputer.FINStateEEPROM_Legacy"), TEXT("/Script/FicsItNetworksComputer.FINStateEEPROM_Legacy")});
 
 	FCoreRedirects::AddRedirectList(redirects, "FicsItNetworksComputer");
 

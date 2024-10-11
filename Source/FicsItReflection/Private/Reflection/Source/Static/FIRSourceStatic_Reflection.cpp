@@ -2,19 +2,19 @@
 
 BeginClass(UFIRBase, "ReflectionBase", "Reflection Base", "The base class for all things of the reflection system.")
 BeginProp(RString, name, "Name", "The internal name.") {
-	Return self->GetInternalName();
+	FIRReturn self->GetInternalName();
 } EndProp()
 BeginProp(RString, displayName, "Display Name", "The display name used in UI which might be localized.") {
-	Return self->GetDisplayName().ToString();
+	FIRReturn self->GetDisplayName().ToString();
 } EndProp()
 BeginProp(RString, description, "Description", "The description of this base.") {
-	Return self->GetDescription().ToString();
+	FIRReturn  self->GetDescription().ToString();
 } EndProp()
 EndClass()
 
 BeginClass(UFIRStruct, "Struct", "Struct", "Reflection Object that holds information about structures.")
 BeginProp(RBool, isConstructable, "Is Constructable", "True if this struct can be constructed by the user directly.") {
-	Return (FIRBool)(self->GetStructFlags() & FIR_Struct_Constructable);
+	FIRReturn  (FIRBool)(self->GetStructFlags() & FIR_Struct_Constructable);
 } EndProp()
 BeginFunc(getParent, "Get Parent", "Returns the parent type of this type.", false) {
 	OutVal(0, RObject<UFIRClass>, parent, "Parent", "The parent type of this type.");
@@ -76,10 +76,10 @@ EndClass()
 
 BeginClass(UFIRProperty, "Property", "Property", "A Reflection object that holds information about properties and parameters.")
 BeginProp(RInt, dataType, "Data Type", "The data type of this property.\n0: nil, 1: bool, 2: int, 3: float, 4: str, 5: object, 6: class, 7: trace, 8: struct, 9: array, 10: anything") {
-	Return (FIRInt)self->GetType().GetValue();
+	FIRReturn  (FIRInt)self->GetType().GetValue();
 } EndProp()
 BeginProp(RInt, flags, "Flags", "The property bit flag register defining some behaviour of it.\n\nBits and their meaing (least significant bit first):\nIs this property a member attribute.\nIs this property read only.\nIs this property a parameter.\nIs this property a output paramter.\nIs this property a return value.\nCan this property get accessed in syncrounus runtime.\nCan this property can get accessed in parallel runtime.\nCan this property get accessed in asynchronus runtime.\nThis property is a class attribute.") {
-	Return (FIRInt) self->GetPropertyFlags();
+	FIRReturn  (FIRInt) self->GetPropertyFlags();
 } EndProp()
 EndClass()
 
@@ -132,7 +132,7 @@ BeginFunc(getParameters, "Get Parameters", "Returns all the parameters of this f
 	parameters = ParamArray;
 } EndFunc()
 BeginProp(RInt, flags, "Flags", "The function bit flag register defining some behaviour of it.\n\nBits and their meaing (least significant bit first):\nIs this function has a variable amount of input parameters.\nCan this function get called in syncrounus runtime.\nCan this function can get called in parallel runtime.\nCan this function get called in asynchronus runtime.\nIs this function a member function.\nThe function is a class function.\nThe function is a static function.\nThe function has a variable amount of return values.") {
-	Return (FIRInt) self->GetFunctionFlags();
+	FIRReturn  (FIRInt) self->GetFunctionFlags();
 } EndProp()
 EndClass()
 
@@ -145,6 +145,6 @@ BeginFunc(getParameters, "Get Parameters", "Returns all the parameters of this s
 	parameters = ParamArray;
 } EndFunc()
 BeginProp(RBool, isVarArgs, "Is VarArgs", "True if this signal has a variable amount of arguments.") {
-	Return (FIRBool) self->IsVarArgs();
+	FIRReturn  (FIRBool) self->IsVarArgs();
 } EndProp()
 EndClass()

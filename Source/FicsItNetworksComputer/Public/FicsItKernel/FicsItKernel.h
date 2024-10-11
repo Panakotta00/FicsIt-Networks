@@ -1,10 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FGDynamicStruct.h"
 #include "FGSaveInterface.h"
 #include "FINFuture.h"
 #include "FIRException.h"
 #include "FIRInstancedStruct.h"
+#include "Queue.h"
 #include "Audio/AudioController.h"
 #include "ComputerModules/PCI/FINPciDeviceInterface.h"
 #include "FicsItFS/DevDevice.h"
@@ -18,6 +20,7 @@ class UFILLogContainer;
 class UFINKernelProcessor;
 class UFINKernelNetworkController;
 class AFINFileSystemState;
+struct FInventoryItem;
 
 UENUM()
 enum EFINKernelState {
@@ -101,6 +104,9 @@ public:
 	};
 
 	UFINKernelSystem();
+
+	TDelegate<FInventoryItem()> OnGetEEPROM;
+	TDelegate<bool(const FFGDynamicStruct&)> OnSetEEPROM;
 
 	// Begin UObject
 	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
@@ -346,4 +352,16 @@ public:
 	 * Removes teh given referencer from the referencer storage
 	 */
 	void RemoveReferencer(void* Referencer);
+
+	/**
+	 * Returns the current Item that is used as EEPROM.
+	 */
+	FInventoryItem GetEEPROM();
+
+	/**
+	 * Changes the EEPROM State of the EEPROM Item.
+	 * Important: It does not do any form of validation. It is up on the caller to ensure it doesn't change the state type of another type of EEPROM.
+	 * @returns false if no EEPROM item is available
+	 */
+	bool SetEEPROM(const FFGDynamicStruct& EEPROM);
 };

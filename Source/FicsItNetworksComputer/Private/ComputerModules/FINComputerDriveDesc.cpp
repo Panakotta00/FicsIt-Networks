@@ -5,7 +5,7 @@
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"
 #include "Components/TextBlock.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "FicsItKernel/FicsItFS/Library/Device.h"
 #include "Net/UnrealNetwork.h"
 
@@ -22,7 +22,7 @@ void UFINComputerDriveDesc::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 FText UFINComputerDriveDesc::GetOverridenItemName_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
 	FText Name = UFGItemDescriptor::GetItemName(InventoryStack.Item.GetItemClass());
 	if (InventoryStack.Item.HasState()) {
-		if (FFINLabelContainerInterface* interface = FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(InventoryStack.Item.GetItemState())) {
+		if (const FFINLabelContainerInterface* interface = FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(InventoryStack.Item.GetItemState())) {
 			FString Label = interface->GetLabel();
 			if (!Label.IsEmpty()) {
 				return FText::FromString(FString::Printf(TEXT("%s - \"%s\""), *Name.ToString(), *Label));
@@ -40,7 +40,7 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 	UClass* progressBar = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/-Shared/Widget_ProgressBar.Widget_ProgressBar_C"));
 
 	if (!InventoryStack.Item.HasState()) return nullptr;
-	auto state = InventoryStack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
+	auto state = InventoryStack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
 	if (!state) return nullptr;
 	FGuid DriveID = state->ID;
 	float usage = AFINFileSystemSubsystem::GetFileSystemSubsystem(this)->GetUsage(DriveID);
@@ -49,7 +49,9 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 	Grid->SetColumnFill(1, 1);
 	
 	UTextBlock* ProgressPrefix = NewObject<UTextBlock>(OwningPlayer);
-	ProgressPrefix->Font.Size = 8;
+	FSlateFontInfo font = ProgressPrefix->GetFont();
+	font.Size = 8;
+	ProgressPrefix->SetFont(font);
 	ProgressPrefix->SetText(FText::FromString("Usage:"));
 	UGridSlot* ProgressPrefixSlot = Grid->AddChildToGrid(ProgressPrefix);
 	ProgressPrefixSlot->SetRow(0);
@@ -70,7 +72,9 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 	ProgressSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
 
 	UTextBlock* UUIDPrefix = NewObject<UTextBlock>(OwningPlayer);
-	UUIDPrefix->Font.Size = 8;
+	font = UUIDPrefix->GetFont();
+	font.Size = 8;
+	UUIDPrefix->SetFont(font);
 	UUIDPrefix->SetText(FText::FromString("UUID:"));
 	UGridSlot* UUIDPrefixSlot = Grid->AddChildToGrid(UUIDPrefix);
 	UUIDPrefixSlot->SetRow(1);
@@ -78,7 +82,9 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 	UUIDPrefixSlot->SetVerticalAlignment(VAlign_Center);
 
 	UTextBlock* UUID = NewObject<UTextBlock>(OwningPlayer);
-	UUID->Font.Size = 8;
+	font = UUID->GetFont();
+	font.Size = 8;
+	UUID->SetFont(font);
 	UUID->SetText(FText::FromString(DriveID.ToString()));
 	UGridSlot* UUIDSlot = Grid->AddChildToGrid(UUID);
 	UUIDSlot->SetRow(1);
@@ -111,8 +117,8 @@ bool UFINComputerDriveDesc::CopyData_Implementation(UObject* WorldContext, const
 	DriveClass = InTo.GetItemClass();
 	if (!IsValid(DriveClass)) return false;
 
-	auto fromState = InFrom.GetItemState().GetValuePtr<FFINFileSystemState>();
-	auto toState = InTo.GetItemState().GetValuePtr<FFINFileSystemState>();
+	auto fromState = InFrom.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
+	auto toState = InTo.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
 
 	if (!fromState) return false;
 	FGuid fromID = fromState->ID;

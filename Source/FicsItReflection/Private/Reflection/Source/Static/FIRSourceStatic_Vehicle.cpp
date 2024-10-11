@@ -11,13 +11,13 @@
 
 BeginClass(AFGVehicle, "Vehicle", "Vehicle", "A base class for all vehicles.")
 	BeginProp(RFloat, health, "Health", "The health of the vehicle.") {
-	Return self->GetHealthComponent()->GetCurrentHealth();
+	FIRReturn self->GetHealthComponent()->GetCurrentHealth();
 } EndProp()
 BeginProp(RFloat, maxHealth, "Max Health", "The maximum amount of health this vehicle can have.") {
-	Return self->GetHealthComponent()->GetMaxHealth();
+	FIRReturn self->GetHealthComponent()->GetMaxHealth();
 } EndProp()
 BeginProp(RBool, isSelfDriving, "Is Self Driving", "True if the vehicle is currently self driving.") {
-	Return self->IsSelfDriving();
+	FIRReturn self->IsSelfDriving();
 } PropSet() {
 	FReflectionHelper::SetPropertyValue<FBoolProperty>(self, TEXT("mIsSelfDriving"), Val);
 } EndProp()
@@ -65,13 +65,13 @@ BeginFunc(getTargetList, "Get Target List", "Returns the list of targets/path wa
 	targetList = Ctx.GetTrace() / self->GetTargetList();
 } EndFunc()
 BeginProp(RFloat, speed, "Speed", "The current forward speed of this vehicle.") {
-	Return self->GetForwardSpeed();
+	FIRReturn self->GetForwardSpeed();
 } EndProp()
 BeginProp(RFloat, burnRatio, "Burn Ratio", "The amount of fuel this vehicle burns.") {
-	Return self->GetFuelBurnRatio();
+	FIRReturn self->GetFuelBurnRatio();
 } EndProp()
 BeginProp(RBool, hasFuel, "Has Fuel", "True if the vehicle has currently fuel to drive.") {
-	Return self->HasFuel();
+	FIRReturn self->HasFuel();
 } EndProp()
 EndClass()
 
@@ -157,11 +157,11 @@ BeginFunc(undock, "Undock", "Undocked the currently docked vehicle from this doc
 	self->Undock(true);
 } EndFunc()
 BeginProp(RBool, isLoadMode, "Is Load Mode", "True if the docking station loads docked vehicles, flase if it unloads them.") {
-	Return self->GetIsInLoadMode();
+	FIRReturn self->GetIsInLoadMode();
 } PropSet() {
 	self->SetIsInLoadMode(Val);
 } EndProp()
 BeginProp(RBool, isLoadUnloading, "Is Load Unloading", "True if the docking station is currently loading or unloading a docked vehicle.") {
-	Return self->IsLoadUnloading();
+	FIRReturn self->IsLoadUnloading();
 } EndProp()
 EndClass()

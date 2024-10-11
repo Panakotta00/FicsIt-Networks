@@ -221,7 +221,7 @@ void FFicsItReflectionModule::LoadAllTypes() {
 	AssetRegistry.GetDerivedClassNames(BaseNames, Excluded, DerivedNames);
 
 	for (const FTopLevelAssetPath& ClassName : DerivedNames) {
-		UClass* Class = TAssetSubclassOf(FSoftObjectPath(ClassName)).LoadSynchronous();
+		UClass* Class = TSoftClassPtr(FSoftObjectPath(ClassName)).LoadSynchronous();
 		if (Class->GetClassFlags() & (CLASS_Abstract | CLASS_Hidden) || Class->GetName().StartsWith("SKEL_")) continue;
 		FindClass(Class);
 	}

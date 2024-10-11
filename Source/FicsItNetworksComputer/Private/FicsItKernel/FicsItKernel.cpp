@@ -8,7 +8,7 @@
 #include "FILLogScope.h"
 #include "FINComputerCase.h"
 #include "FINFileSystemSubsystem.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 
 FFINKernelListener::FFINKernelListener(UFINKernelSystem* parent) : parent(parent) {}
 
@@ -375,4 +375,18 @@ void UFINKernelSystem::AddReferencer(void* Referencer, const TFunction<void(void
 void UFINKernelSystem::RemoveReferencer(void* Referencer) {
 	UE::TScopeLock Lock(ReferenceObjectMutex);
 	ReferencedObjects.Remove(Referencer);
+}
+
+FInventoryItem UFINKernelSystem::GetEEPROM() {
+	if (OnGetEEPROM.IsBound()) {
+		return OnGetEEPROM.Execute();
+	}
+	return FInventoryItem();
+}
+
+bool UFINKernelSystem::SetEEPROM(const FFGDynamicStruct& EEPROM) {
+	if (OnSetEEPROM.IsBound()) {
+		return OnSetEEPROM.Execute(EEPROM);
+	}
+	return false;
 }

@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FGLegacyItemStateActorInterface.h"
 #include "FGSaveInterface.h"
-#include "FINFileSystemState.h"
+#include "FINItemStateFileSystem.h"
 #include "Library/Device.h"
 #include "Library/Path.h"
 #include "Library/ReferenceCount.h"
@@ -46,7 +46,7 @@ public:
 	// End IFGSaveInterface
 
 	virtual FFGDynamicStruct ConvertToItemState( TSubclassOf<UFGItemDescriptor> itemDescriptor ) const {
-		FFINFileSystemState state;
+		FFINItemStateFileSystem state;
 
 		state.ID = ID;
 		state.Capacity = Capacity;

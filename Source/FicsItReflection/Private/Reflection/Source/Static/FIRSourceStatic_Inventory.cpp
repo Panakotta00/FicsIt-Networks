@@ -8,37 +8,37 @@
 
 BeginClass(UFGItemDescriptor, "ItemType", "Item Type", "The type of an item (iron plate, iron rod, leaves)")
 BeginClassProp(RInt, form, "Form", "The matter state of this resource.\n1: Solid\n2: Liquid\n3: Gas\n4: Heat") {
-	Return (FIRInt)UFGItemDescriptor::GetForm(self);
+	FIRReturn (FIRInt)UFGItemDescriptor::GetForm(self);
 } EndProp()
 BeginClassProp(RFloat, energy, "Energy", "How much energy this resource provides if used as fuel.") {
-	Return (FIRFloat)UFGItemDescriptor::GetForm(self);
+	FIRReturn (FIRFloat)UFGItemDescriptor::GetForm(self);
 } EndProp()
 BeginClassProp(RFloat, radioactiveDecay, "Radioactive Decay", "The amount of radiation this item radiates.") {
-	Return (FIRFloat)UFGItemDescriptor::GetForm(self);
+	FIRReturn (FIRFloat)UFGItemDescriptor::GetForm(self);
 } EndProp()
 BeginClassProp(RString, name, "Name", "The name of the item.") {
-	Return (FIRStr)UFGItemDescriptor::GetItemName(self).ToString();
+	FIRReturn (FIRStr)UFGItemDescriptor::GetItemName(self).ToString();
 } EndProp()
 BeginClassProp(RString, description, "Description", "The description of this item.") {
-	Return (FIRStr)UFGItemDescriptor::GetItemDescription(self).ToString();
+	FIRReturn (FIRStr)UFGItemDescriptor::GetItemDescription(self).ToString();
 } EndProp()
 BeginClassProp(RInt, max, "Max", "The maximum stack size of this item.") {
-	Return (FIRInt)UFGItemDescriptor::GetStackSize(self);
+	FIRReturn (FIRInt)UFGItemDescriptor::GetStackSize(self);
 } EndProp()
 BeginClassProp(RBool, canBeDiscarded, "Can be Discarded", "True if this item can be discarded.") {
-	Return (FIRBool)UFGItemDescriptor::CanBeDiscarded(self);
+	FIRReturn (FIRBool)UFGItemDescriptor::CanBeDiscarded(self);
 } EndProp()
 BeginClassProp(RClass<UFGItemCategory>, category, "Category", "The category in which this item is in.") {
-	Return (FIRClass)UFGItemDescriptor::GetCategory(self);
+	FIRReturn (FIRClass)UFGItemDescriptor::GetCategory(self);
 } EndProp()
 BeginClassProp(RStruct<FLinearColor>, fluidColor, "Fluid Color", "The color of this fluid.") {
-	Return (FIRStruct)(FLinearColor)UFGItemDescriptor::GetFluidColor(self);
+	FIRReturn (FIRStruct)(FLinearColor)UFGItemDescriptor::GetFluidColor(self);
 } EndProp()
 EndClass()
 
 BeginClass(UFGItemCategory, "ItemCategory", "Item Category", "The category of some items.")
 BeginClassProp(RString, name, "Name", "The name of the category.") {
-	Return (FIRStr)UFGItemCategory::GetCategoryName(self).ToString();
+	FIRReturn (FIRStr)UFGItemCategory::GetCategoryName(self).ToString();
 } EndProp()
 EndClass()
 
@@ -57,10 +57,10 @@ BeginFuncVA(getStack, "Get Stack", "Returns the item stack at the given index.\n
 	}
 } EndFunc()
 BeginProp(RInt, itemCount, "Item Count", "The absolute amount of items in the whole inventory.") {
-	Return (int64)self->GetNumItems(nullptr);
+	FIRReturn (int64)self->GetNumItems(nullptr);
 } EndProp()
 BeginProp(RInt, size, "Size", "The count of available item stack slots this inventory has.") {
-	Return (int64)self->GetSizeLinear();
+	FIRReturn (int64)self->GetSizeLinear();
 } EndProp()
 BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click into a inventory)") {
 	Body()
@@ -90,12 +90,12 @@ EndClass()
 
 BeginStructConstructable(FItemAmount, "ItemAmount", "Item Amount", "A struct that holds a pair of amount and item type.")
 BeginProp(RInt, amount, "Amount", "The amount of items.") {
-	Return (int64) self->Amount;
+	FIRReturn (int64) self->Amount;
 } PropSet() {
 	self->Amount = Val;
 } EndProp()
 BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the items.") {
-	Return (UClass*)self->ItemClass;
+	FIRReturn (UClass*)self->ItemClass;
 } PropSet() {
 	self->ItemClass = Val;
 } EndProp()
@@ -103,12 +103,12 @@ EndStruct()
 
 BeginStructConstructable(FInventoryStack, "ItemStack", "Item Stack", "A structure that holds item information and item amount to represent an item stack.")
 BeginProp(RInt, count, "Count", "The count of items.") {
-	Return (int64) self->NumItems;
+	FIRReturn (int64) self->NumItems;
 } PropSet() {
 	self->NumItems = Val;
 } EndProp()
 BeginProp(RStruct<FInventoryItem>, item, "Item", "The item information of this stack.") {
-	Return self->Item;
+	FIRReturn self->Item;
 } PropSet() {
 	self->Item = Val;
 } EndProp()
@@ -116,7 +116,7 @@ EndStruct()
 
 BeginStructConstructable(FInventoryItem, "Item", "Item", "A structure that holds item information.")
 BeginProp(RClass<UFGItemDescriptor>, type, "Type", "The type of the item.") {
-	Return (UClass*)self->GetItemClass();
+	FIRReturn (UClass*)self->GetItemClass();
 } PropSet() {
 	self->SetItemClass(Val);
 } EndProp()

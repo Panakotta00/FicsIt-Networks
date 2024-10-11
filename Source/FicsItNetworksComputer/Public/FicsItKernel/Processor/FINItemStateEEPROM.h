@@ -2,13 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "FINLabelContainerInterface.h"
-#include "FINStateEEPROM.generated.h"
+#include "FINItemStateEEPROM.generated.h"
 
-USTRUCT()
-struct FICSITNETWORKSCOMPUTER_API FFINStateEEPROM : public FFINLabelContainerInterface {
+USTRUCT(BlueprintType)
+struct FICSITNETWORKSCOMPUTER_API FFINItemStateEEPROM : public FFINLabelContainerInterface {
 	GENERATED_BODY()
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, BlueprintReadWrite)
 	FString Label;
 
 	// Begin FFINLabelContainerInterface

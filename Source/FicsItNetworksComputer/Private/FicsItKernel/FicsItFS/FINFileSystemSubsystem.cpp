@@ -1,5 +1,11 @@
 ﻿#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
-#include "FicsItkernel/FicsItFS/FINFileSystemState.h"
+
+#include "FGInventoryComponent.h"
+#include "Paths.h"
+#include "SubsystemActorManager.h"
+#include "FicsItkernel/FicsItFS/FINItemStateFileSystem.h"
+
+TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> AFINFileSystemSubsystem::Devices;
 
 CodersFileSystem::SRef<CodersFileSystem::Device> AFINFileSystemSubsystem::GetDevice(const FGuid& FileSystemID, bool bInForceUpdate, bool bInForceCreate) {
 	if (!FileSystemID.IsValid()) return nullptr;
@@ -44,7 +50,7 @@ AFINFileSystemSubsystem* AFINFileSystemSubsystem::GetFileSystemSubsystem(UObject
 }
 
 FGuid AFINFileSystemSubsystem::CreateState(int32 inCapacity, class UFGInventoryComponent* inInventory, int32 inSlot) {
-	FFINFileSystemState state;
+	FFINItemStateFileSystem state;
 	state.Capacity = inCapacity;
 	state.ID = FGuid::NewGuid();
 
@@ -53,10 +59,12 @@ FGuid AFINFileSystemSubsystem::CreateState(int32 inCapacity, class UFGInventoryC
 	return state.ID;
 }
 
-static FGuid CreateState(int32 inCapacity, FInventoryItem& inItem) {
-	FFINFileSystemState state;
+FGuid AFINFileSystemSubsystem::CreateState(int32 inCapacity, FInventoryItem& inItem) {
+	FFINItemStateFileSystem state;
 	state.Capacity = inCapacity;
 	state.ID = FGuid::NewGuid();
 
-	inItem.SetItemState(state);
+	inItem.SetItemState(FFGDynamicStruct(state));
+
+	return state.ID;
 }

@@ -3,7 +3,7 @@
 #include "FGPlayerController.h"
 #include "FINFileSystemSubsystem.h"
 #include "ComputerModules/FINComputerDriveDesc.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "Net/UnrealNetwork.h"
 
 AFINComputerDriveHolder::AFINComputerDriveHolder() {
@@ -32,7 +32,7 @@ const FGuid& AFINComputerDriveHolder::GetDrive() {
 	FInventoryStack stack;
 	if (DriveInventory->GetStackFromIndex(0, stack)) {
 		TSubclassOf<UFINComputerDriveDesc> driveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
-		const FFINFileSystemState* state = stack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
+		const FFINItemStateFileSystem* state = stack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
 		if (IsValid(driveDesc)) {
 			if (state) {
 				return state->ID;

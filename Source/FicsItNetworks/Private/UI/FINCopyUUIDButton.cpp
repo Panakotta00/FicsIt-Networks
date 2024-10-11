@@ -1,6 +1,6 @@
 #include "UI/FINCopyUUIDButton.h"
 #include "FINComponentUtility.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "Reflection/ReflectionHelper.h"
 #include "FGInventoryComponent.h"
 
@@ -32,7 +32,7 @@ FGuid UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(UWidget* InSlot) {
 		FInventoryStack Stack;
 	} Params;
 	FReflectionHelper::CallScriptFunction(InSlot, TEXT("GetStack"), &Params);
-	const FFINFileSystemState* State = Params.Stack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
+	const FFINItemStateFileSystem* State = Params.Stack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
 	if (State) {
 		return State->ID;
 	}

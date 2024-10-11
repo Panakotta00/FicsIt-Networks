@@ -17,16 +17,16 @@ public:
 
 BeginClass(AFGBuildableResourceSink, "ResourceSink", "Resource Sink", "The resource sink, also known a A.W.E.S.O.M.E Sink")
 BeginProp(RInt, numPoints, "Num Points", "The number of available points.") {
-	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumTotalPoints(EResourceSinkTrack::RST_Default);
+	FIRReturn (int64)AFGResourceSinkSubsystem::Get(self)->GetNumTotalPoints(EResourceSinkTrack::RST_Default);
 } EndProp()
 BeginProp(RInt, numCoupons, "Num Coupons", "The number of available coupons to print.") {
-	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumCoupons();
+	FIRReturn (int64)AFGResourceSinkSubsystem::Get(self)->GetNumCoupons();
 } EndProp()
 BeginProp(RInt, numPointsToNextCoupon, "Num Points To Next Coupon", "The number of needed points for the next coupon.") {
-	Return (int64)AFGResourceSinkSubsystem::Get(self)->GetNumPointsToNextCoupon(EResourceSinkTrack::RST_Default);
+	FIRReturn (int64)AFGResourceSinkSubsystem::Get(self)->GetNumPointsToNextCoupon(EResourceSinkTrack::RST_Default);
 } EndProp()
 BeginProp(RFloat, couponProgress, "Coupon Progress", "The percentage of the progress for the next coupon.") {
-	Return AFGResourceSinkSubsystem::Get(self)->GetProgressionTowardsNextCoupon(EResourceSinkTrack::RST_Default);
+	FIRReturn AFGResourceSinkSubsystem::Get(self)->GetProgressionTowardsNextCoupon(EResourceSinkTrack::RST_Default);
 } EndProp()
 EndClass()
 
@@ -47,12 +47,12 @@ EndClass()
 
 BeginClass(AFGBuildableLightSource, "LightSource", "Light Source", "The base class for all light you can build.")
 BeginProp(RBool, isLightEnabled, "Is Light Enabled", "True if the light is enabled") {
-	return self->IsLightEnabled();
+	FIRReturn self->IsLightEnabled();
 } PropSet() {
 	self->SetLightEnabled(Val);
 } EndProp()
 BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the light should automatically turn on and off depending on the time of the day.") {
-	return self->GetLightControlData().IsTimeOfDayAware;
+	FIRReturn self->GetLightControlData().IsTimeOfDayAware;
 } PropSet() {
 	FLightSourceControlData data = self->GetLightControlData();
 	data.IsTimeOfDayAware = Val;
@@ -66,7 +66,7 @@ BeginProp(RFloat, intensity, "Intensity", "The intensity of the light.") {
 	self->SetLightControlData(data);
 } EndProp()
 BeginProp(RInt, colorSlot, "Color Slot", "The color slot the light uses.") {
-	return (int64) self->GetLightControlData().ColorSlotIndex;
+	FIRReturn (int64) self->GetLightControlData().ColorSlotIndex;
 } PropSet() {
 	FLightSourceControlData data = self->GetLightControlData();
 	data.ColorSlotIndex = Val;
@@ -90,7 +90,7 @@ EndClass()
 
 BeginClass(AFGBuildableLightsControlPanel, "LightsControlPanel", "Light Source", "A control panel to configure multiple lights at once.")
 BeginProp(RBool, isLightEnabled, "Is Light Enabled", "True if the lights should be enabled") {
-	return self->IsLightEnabled();
+	FIRReturn self->IsLightEnabled();
 } PropSet() {
 	self->SetLightEnabled(Val);
 	for (AFGBuildable* Light : self->GetControlledBuildables(AFGBuildableLightSource::StaticClass())) {
@@ -98,7 +98,7 @@ BeginProp(RBool, isLightEnabled, "Is Light Enabled", "True if the lights should 
 	}
 } EndProp()
 BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the lights should automatically turn on and off depending on the time of the day.") {
-	return self->GetLightControlData().IsTimeOfDayAware;
+	FIRReturn self->GetLightControlData().IsTimeOfDayAware;
 } PropSet() {
 	FLightSourceControlData data = self->GetLightControlData();
 	data.IsTimeOfDayAware = Val;
@@ -108,7 +108,7 @@ BeginProp(RBool, isTimeOfDayAware, "Is Time of Day Aware", "True if the lights s
 	}
 } EndProp()
 BeginProp(RFloat, intensity, "Intensity", "The intensity of the lights.") {
-	return self->GetLightControlData().Intensity;
+	FIRReturn self->GetLightControlData().Intensity;
 } PropSet() {
 	FLightSourceControlData data = self->GetLightControlData();
 	data.Intensity = Val;
@@ -138,27 +138,27 @@ EndClass()
 
 BeginStruct(FIconData, "IconData", "Icon Data", "A struct containing information about a game icon (used in f.e. signs).")
 BeginProp(RBool, isValid, "Is Valid", "True if the icon data refers to an valid icon") {
-	Return FIRBool(self->ID >= 0);
+	FIRReturn FIRBool(self->ID >= 0);
 } EndProp()
 BeginProp(RInt, id, "ID", "The icon ID.") {
-	Return (FIRInt)self->ID;
+	FIRReturn (FIRInt)self->ID;
 } EndProp()
 BeginProp(RString, ref, "Ref", "The media reference of this icon.") {
-	Return FString::Printf(TEXT("icon:%i"), self->ID);
+	FIRReturn FString::Printf(TEXT("icon:%i"), self->ID);
 } EndProp()
 BeginProp(RBool, animated, "Animated", "True if the icon is animated.") {
-	Return self->Animated;
+	FIRReturn self->Animated;
 } EndProp()
 BeginProp(RString, iconName, "Icon Name", "The name of the icon.") {
-	Return self->IconName.ToString();
+	FIRReturn self->IconName.ToString();
 } EndProp()
 BeginProp(RString, iconType, "Icon Type", "The type of the icon.\n0 = Building\n1 = Part\n2 = Equipment\n3 = Monochrome\n4 = Material\n5 = Custom\n6 = Map Stamp") {
-	Return (FIRInt)self->IconType;
+	FIRReturn (FIRInt)self->IconType;
 } EndProp()
 BeginProp(RBool, hidden, "Hidden", "True if the icon is hidden in the selection.") {
-	Return self->Hidden;
+	FIRReturn self->Hidden;
 } EndProp()
 BeginProp(RBool, searchOnly, "Search Only", "True if the icon will be shown in selection only if searched for directly by name.") {
-	Return self->SearchOnly;
+	FIRReturn self->SearchOnly;
 } EndProp()
 EndStruct()

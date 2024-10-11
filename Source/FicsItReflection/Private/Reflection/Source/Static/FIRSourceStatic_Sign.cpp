@@ -31,7 +31,7 @@ BeginClass(UFGSignTypeDescriptor, "SignType", "Sign Type", "Describes the type o
 BeginClassProp(RStruct<FVector2D>, dimensions, "Dimensions", "The canvas dimensions of this sign.") {
 	FVector2D dimensions;
 	UFGSignLibrary::GetCanvasDimensionsFromSignDescriptor(self, dimensions);
-	Return dimensions;
+	FIRReturn dimensions;
 } EndProp()
 BeginClassFunc(getColors, "Get Colors", "Returns the default foreground/background/auxiliary colors of this sign type.", false) {
 	OutVal(0, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color")
@@ -90,32 +90,32 @@ EndClass()
 
 BeginStructConstructable(FPrefabSignData, "PrefabSignData", "Prefab Sign Data", "This structure stores all data that defines what a sign displays.")
 BeginProp(RClass<UObject>, layout, "Layout", "The object that actually displayes the layout") {
-	Return (FIRClass)self->PrefabLayout.Get();
+	FIRReturn (FIRClass)self->PrefabLayout.Get();
 } PropSet() {
 	self->PrefabLayout = Val;
 } EndProp()
 BeginProp(RStruct<FLinearColor>, foreground, "Foreground", "The foreground Color.") {
-	Return (FIRStruct)self->ForegroundColor;
+	FIRReturn (FIRStruct)self->ForegroundColor;
 } PropSet() {
 	self->ForegroundColor = Val;
 } EndProp()
 BeginProp(RStruct<FLinearColor>, background, "Background", "The background Color.") {
-	Return (FIRStruct)self->BackgroundColor;
+	FIRReturn (FIRStruct)self->BackgroundColor;
 } PropSet() {
 	self->BackgroundColor = Val;
 } EndProp()
 BeginProp(RFloat, emissive, "Emissive", "The emissiveness of the sign.") {
-	Return self->Emissive;
+	FIRReturn self->Emissive;
 } PropSet() {
 	self->Emissive = Val;
 } EndProp()
 BeginProp(RStruct<FLinearColor>, auxiliary, "Auxiliary", "The auxiliary Color.") {
-	Return (FIRStruct)self->AuxiliaryColor;
+	FIRReturn (FIRStruct)self->AuxiliaryColor;
 } PropSet() {
 	self->AuxiliaryColor = Val;
 } EndProp()
 BeginProp(RClass<UFGSignTypeDescriptor>, signType, "Sign Type", "The type of sign this prefab fits to.") {
-	Return (FIRClass)self->SignTypeDesc;
+	FIRReturn (FIRClass)self->SignTypeDesc;
 } PropSet() {
 	self->SignTypeDesc = Val;
 } EndProp()

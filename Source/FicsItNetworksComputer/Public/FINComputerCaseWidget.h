@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FGDynamicStruct.h"
 #include "Blueprint/UserWidget.h"
 #include "FINComputerCaseWidget.generated.h"
 
@@ -17,5 +18,5 @@ public:
 	UUserWidget* ComputerCaseInteractionWidget = nullptr;
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void OnEEPROMUpdate(AFINStateEEPROM_Legacy* EEPROM);
+	void OnEEPROMUpdate(const FFGDynamicStruct& EEPROM);
 };

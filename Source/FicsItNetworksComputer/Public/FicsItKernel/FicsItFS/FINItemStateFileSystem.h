@@ -1,13 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FGLegacyItemStateActorInterface.h"
 #include "FINLabelContainerInterface.h"
-#include "Library/Device.h"
-#include "FINFileSystemState.generated.h"
+#include "FINItemStateFileSystem.generated.h"
 
 USTRUCT(BlueprintType)
-struct FFINFileSystemState : public FFINLabelContainerInterface {
+struct FICSITNETWORKSCOMPUTER_API FFINItemStateFileSystem : public FFINLabelContainerInterface {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
@@ -28,7 +26,7 @@ struct FFINFileSystemState : public FFINLabelContainerInterface {
 };
 
 template<>
-struct TStructOpsTypeTraits<FFINFileSystemState> : TStructOpsTypeTraitsBase2<FFINFileSystemState> {
+struct TStructOpsTypeTraits<FFINItemStateFileSystem> : TStructOpsTypeTraitsBase2<FFINItemStateFileSystem> {
 	enum {
 		WithStructuredSerializer = true,
 	};

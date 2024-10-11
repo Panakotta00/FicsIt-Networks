@@ -7,7 +7,7 @@
 	"Description": "Adds a computer network and programmable computers to the Game.",
 	"Category": "Modding",
 	"CreatedBy": "Panakotta00, Roze, RosszEmber, Coffeediction, Deantendo, Raysh, Esper, leonardfactory",
-	"CreatedByURL": "",
+	"CreatedByURL": "https://panakotta00.dev/",
 	"DocsURL": "https://docs.ficsit.app/ficsit-networks/latest/index.html",
 	"MarketplaceURL": "",
 	"SupportURL": "https://discord.gg/3VfZ6Da",
@@ -84,5 +84,6 @@
 			"Name": "FicsItNetworks",
 			"LoadingPolicy": "Always"
 		}
-	]
+	],
+	"GameVersion": ">=365306"
 }

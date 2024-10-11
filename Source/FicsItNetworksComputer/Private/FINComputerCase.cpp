@@ -8,11 +8,12 @@
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
 #include "FINFileSystemSubsystem.h"
+#include "FINUtils.h"
 #include "Components/AudioComponent.h"
 #include "ComputerModules/FINComputerDriveHolder.h"
 #include "ComputerModules/FINComputerMemory.h"
 #include "ComputerModules/FINComputerProcessor.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "FicsItKernel/Network/NetworkController.h"
 #include "FicsItKernel/Processor/Processor.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
@@ -84,16 +85,31 @@ void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 void AFINComputerCase::OnConstruction(const FTransform& transform) {
 	Super::OnConstruction(transform);
-	
-	Kernel = NewObject<UFINKernelSystem>(this, "Kernel");
-	NetworkController = NewObject<UFINKernelNetworkController>(this, "NetworkController");
-	AudioController = NewObject<UFINKernelAudioController>(this, "AudioController");
 
-	Kernel->SetLog(Log);
-	NetworkController->SetComponent(NetworkConnector);
-	Kernel->SetNetwork(NetworkController);
-	AudioController->SetComponent(Speaker);
-	Kernel->SetAudio(AudioController);
+	if (HasAuthority()) {
+		Kernel = NewObject<UFINKernelSystem>(this, "Kernel");
+		NetworkController = NewObject<UFINKernelNetworkController>(this, "NetworkController");
+		AudioController = NewObject<UFINKernelAudioController>(this, "AudioController");
+
+		Kernel->SetLog(Log);
+		NetworkController->SetComponent(NetworkConnector);
+		Kernel->SetNetwork(NetworkController);
+		AudioController->SetComponent(Speaker);
+		Kernel->SetAudio(AudioController);
+		Kernel->OnGetEEPROM.BindWeakLambda(this, [this]() {
+			FInventoryStack stack;
+			DataStorage->GetStackFromIndex(0, stack);
+			return stack.Item;
+		});
+		Kernel->OnSetEEPROM.BindWeakLambda(this, [this](const FFGDynamicStruct& state) {
+			FInventoryStack stack;
+			if (DataStorage->GetStackFromIndex(0, stack) || stack.HasItems()) {
+				DataStorage->SetStateOnIndex(0, state);
+				return true;
+			}
+			return false;
+		});
+	}
 }
 
 void AFINComputerCase::BeginPlay() {
@@ -106,7 +122,7 @@ void AFINComputerCase::BeginPlay() {
 		FInventoryStack stack;
 		if (DataStorage->GetStackFromIndex(1, stack)) {
 			const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
-			auto FileSystemState = stack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
+			auto FileSystemState = stack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
 			FGuid fileSystemID;
 			if (IsValid(DriveDesc)) {
 				if (FileSystemState) {
@@ -184,7 +200,6 @@ void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
 		if (!Kernel->GetProcessor() || Kernel->GetProcessor()->GetClass() != NewProcessor->GetClass()) {
 			Kernel->SetProcessor(NewProcessor);
 		}
-		Kernel->GetProcessor()->SetEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
 		Kernel->GetProcessor()->DebugInfo = GetName();
 	} else {
 		// processor already added
@@ -305,16 +320,15 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num, UFGInventoryComponent* changedInventory) {
 	if (HasAuthority() && Kernel) {
 		if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
-			UFINKernelProcessor* Processor = Kernel->GetProcessor();
-			AFINStateEEPROM_Legacy* EEPROM = UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0);
-			if (Processor) Processor->SetEEPROM(EEPROM);
-			NetMulti_OnEEPROMChanged(EEPROM);
+			FInventoryStack stack;
+			DataStorage->GetStackFromIndex(0, stack);
+			NetMulti_OnEEPROMChanged(stack.Item.GetItemState());
 		} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
 			FInventoryStack stack;
 			FGuid fileSystemID;
 			if (DataStorage->GetStackFromIndex(1, stack)) {
 				const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
-				auto state = stack.Item.GetItemState().GetValuePtr<FFINFileSystemState>();
+				auto state = stack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
 				if (IsValid(DriveDesc)) {
 					if (state) {
 						fileSystemID = state->ID;
@@ -336,10 +350,15 @@ void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int3
 	}
 }
 
+FFGDynamicStruct AFINComputerCase::GetEEPROM() {
+	FInventoryStack stack;
+	DataStorage->GetStackFromIndex(0, stack);
+	return stack.Item.GetItemState();
+}
+
 void AFINComputerCase::Toggle() {
 	if (HasAuthority()) {
 		UFINKernelProcessor* Processor = Kernel->GetProcessor();
-		if (Processor) Processor->SetEEPROM(UFINComputerEEPROMDesc::GetEEPROM(DataStorage, 0));
 		switch (Kernel->GetState()) {
 		case FIN_KERNEL_SHUTOFF:
 			Log->EmptyLog();

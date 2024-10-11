@@ -1,4 +1,4 @@
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 
 #include "FINComputerSubsystem.h"
 #include "FINFileSystemSubsystem.h"
@@ -10,7 +10,7 @@
 #include "Widgets/Input/SCheckBox.h"
 #include "SViewport.h"
 
-FIN_STRUCT_IMPLEMENT_INTERFACE(FFINFileSystemState, FFINLabelContainerInterface)
+FIN_STRUCT_IMPLEMENT_INTERFACE(FFINItemStateFileSystem, FFINLabelContainerInterface)
 
 #define KEEP_CHANGES 1
 #define OVERRIDE_CHANGES 0
@@ -197,7 +197,7 @@ void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDev
 	}
 }
 
-bool FFINFileSystemState::Serialize(FStructuredArchive::FSlot Slot) {
+bool FFINItemStateFileSystem::Serialize(FStructuredArchive::FSlot Slot) {
 	StaticStruct()->SerializeBin(Slot, this);
 
 	if (!Slot.GetUnderlyingArchive().IsSaveGame()) return true;

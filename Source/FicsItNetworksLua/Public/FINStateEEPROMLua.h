@@ -1,21 +1,29 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FINComputerEEPROMDesc.h"
+#include "FINItemStateEEPROM.h"
 #include "FicsItKernel/Processor/FINStateEEPROM_Legacy.h"
 #include "FINStateEEPROMLua.generated.h"
 
-UCLASS()
-class FICSITNETWORKSLUA_API AFINStateEEPROMLua : public AFINStateEEPROM_Legacy {
+USTRUCT(BlueprintType)
+struct FICSITNETWORKSLUA_API FFINStateEEPROMLua : public FFINItemStateEEPROM {
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame, BlueprintReadWrite)
+	FString Code;
+};
+
+UCLASS(BlueprintType)
+class FICSITNETWORKSLUA_API AFINStateEEPROMLua_Legacy : public AFINStateEEPROM_Legacy, public IFGLegacyItemStateActorInterface {
 	GENERATED_BODY()
 	
 protected:
-	UPROPERTY(BlueprintReadWrite, SaveGame, Replicated)
+	UPROPERTY(BlueprintReadWrite, SaveGame)
 	FString Code;
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Computer")
-	FString GetCode() const;
-
-	UFUNCTION(BlueprintCallable, Category="Computer")
-	void SetCode(const FString& NewCode);
+	// Begin IFGLegacyItemStateActorInterface
+	virtual FFGDynamicStruct ConvertToItemState(TSubclassOf<UFGItemDescriptor> itemDescriptor) const override;
+	// End IFGLegacyItemStateActorInterface
 };
