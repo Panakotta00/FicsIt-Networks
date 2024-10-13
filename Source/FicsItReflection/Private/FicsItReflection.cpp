@@ -40,7 +40,9 @@ void UFGRailroadTrackConnectionComponent_RemoveConnection_Hook(CallScope<void(*)
 
 void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFactoryConnectionComponent*,TArray<FInventoryItem>&,TSubclassOf<UFGItemDescriptor>)>& Scope, const UFGFactoryConnectionComponent* const_self, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) {
 	UFGFactoryConnectionComponent* self = const_cast<UFGFactoryConnectionComponent*>(const_self);
-	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
+	auto reflectionSubsystem = AFIRSubsystem::GetReflectionSubsystem(self);
+	fgcheck(reflectionSubsystem);
+	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = reflectionSubsystem->GetFactoryConnectorSettings(self);
 	if (OptionalSettings.IsSet()) {
 		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
 		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && Settings.AllowedItem != type)) {
