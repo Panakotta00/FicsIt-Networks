@@ -113,6 +113,7 @@ public:
 	virtual bool IsChanged() const override;
 	virtual USceneComponent* SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName, const FName& socketName) override;
 	virtual void SpawnChildren(AActor* hologramOwner, FVector spawnLocation, APawn* hologramInstigator) override;
+	virtual void CheckValidPlacement() override;
 	// End FGBuildableHologram
 
 	AFINNetworkCableHologram();

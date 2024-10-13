@@ -139,6 +139,12 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 	return FinishedCable;
 }
 
+UE_DISABLE_OPTIMIZATION_SHIP
+USceneComponent* AFINNetworkCableHologram::SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName, const FName& socketName) {
+	return nullptr;
+}
+UE_ENABLE_OPTIMIZATION_SHIP
+
 void AFINNetworkCableHologram::ConfigureActor(AFGBuildable* inBuildable) const {
 	Super::ConfigureActor(inBuildable);
 }
@@ -340,10 +346,6 @@ bool AFINNetworkCableHologram::IsChanged() const {
 	return Snapped.SnapType != FIN_NOT_SNAPPED;
 }
 
-USceneComponent* AFINNetworkCableHologram::SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName, const FName& socketName) {
-	return nullptr;
-}
-
 void AFINNetworkCableHologram::SpawnChildren(AActor* hologramOwner, FVector spawnLocation, APawn* hologramInstigator) {
 	if (RecipePole) {
 		PoleHologram1 = Cast<AFGBuildableHologram>(AFGHologram::SpawnChildHologramFromRecipe(this, TEXT("PoleHologram1"), RecipePole, hologramOwner, spawnLocation));
@@ -371,6 +373,8 @@ void AFINNetworkCableHologram::SpawnChildren(AActor* hologramOwner, FVector spaw
 		AdapterHologram2->SetDisabled(true);
 	}
 }
+
+void AFINNetworkCableHologram::CheckValidPlacement() {}
 
 void AFINNetworkCableHologram::OnInvalidHitResult() {
 	OnEndSnap(Snapped);
