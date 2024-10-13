@@ -54,11 +54,14 @@ BeginProp(RFloat, currentPotential, "Current Potential", "The potential this fac
 } EndProp()
 BeginProp(RFloat, potential, "Potential", "The potential this factory is currently set to and 'should'  use. (the overclock value)\n 0 = 0%, 1 = 100%") {
 	FIRReturn self->GetPendingPotential();
-} PropSet() {
+} EndProp()
+BeginFunc(setPotential, "Set Potential", "Changes the potential this factory is currently set to and 'should' use. (the overclock value)", 0) {
+	InVal(0, RFloat, potential, "Potential", "The potential that should be used.\n0 = 0%, 1 = 100%")
+	Body()
 	float min = self->GetCurrentMinPotential();
 	float max = self->GetCurrentMaxPotential();
-	self->SetPendingPotential(FMath::Clamp((float)Val, min, max));
-} EndProp()
+	self->SetPendingPotential(FMath::Clamp(potential, min, max));
+} EndFunc()
 BeginProp(RTrace<UFGInventoryComponent>, potentialInventory, "Potential Inventory", "The Inventory that holds the crystals used for potential.") {
 	FIRReturn (Ctx.GetTrace() / self->GetPotentialInventory());
 } EndProp()
@@ -79,11 +82,14 @@ BeginProp(RFloat, currentProductionBoost, "Current Production Boost", "The curre
 } EndProp()
 BeginProp(RFloat, productionBoost, "Production Boost", "The current production boost this factory should use.") {
 	FIRReturn self->GetPendingProductionBoost();
-} PropSet() {
+} EndProp()
+BeginFunc(setProductionBoost, "Set Production Boost", "Changes the production boost this factory is currently set to and 'should' use.", 0) {
+	InVal(0, RFloat, productionBoost, "Production Boost", "The production boost that should be used.\n0 = 0%, 1 = 100%")
+	Body()
 	float min = self->GetMinProductionBoost();
 	float max = self->GetCurrentMaxProductionBoost();
-	self->SetPendingProductionBoost(FMath::Clamp((float)Val, min, max));
-} EndProp()
+	self->SetPendingProductionBoost(FMath::Clamp(productionBoost, min, max));
+} EndFunc()
 BeginProp(RBool, standby, "Standby", "True if the factory is in standby.") {
 	FIRReturn self->IsProductionPaused();
 } PropSet() {

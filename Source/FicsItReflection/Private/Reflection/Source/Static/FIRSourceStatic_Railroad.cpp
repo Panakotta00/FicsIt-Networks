@@ -390,7 +390,11 @@ BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
 	OutVal(3, RBool, added, "Added", "True if the stop got sucessfully added to the time table.")
 	Body()
 	FTimeTableStop stop;
-	stop.Station = Cast<AFGBuildableRailroadStation>(station.Get())->GetStationIdentifier();
+	auto railroadStation = Cast<AFGBuildableRailroadStation>(station.Get());
+	if (!IsValid(railroadStation)) {
+		throw FFIRException(TEXT("Invalid railroad station"));
+	}
+	stop.Station = railroadStation->GetStationIdentifier();
 	stop.DockingRuleSet = ruleSet;
 	added = self->AddStop(index, stop);
 } EndFunc()
