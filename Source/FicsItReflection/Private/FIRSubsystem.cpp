@@ -4,6 +4,7 @@
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FGTrain.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
+#include "Engine/Engine.h"
 #include "Subsystem/SubsystemActorManager.h"
 
 AFIRSubsystem* AFIRSubsystem::GetReflectionSubsystem(UObject* WorldContext) {
