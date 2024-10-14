@@ -67,7 +67,7 @@ jobs:
 
       - name: Add Wwise
         run: |
-           7z x -aoa C:\\Jenkins\\Wwise.7z -o '${{ github.workspace }}\SatisfactoryModLoader\Plugins\'
+           7z x -aoa C:\\Jenkins\\Wwise.7z -o'${{ github.workspace }}\SatisfactoryModLoader\Plugins\'
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           WWISE_EMAIL: ${{ secrets.WWISE_EMAIL }}
