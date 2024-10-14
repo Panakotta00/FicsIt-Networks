@@ -36,6 +36,7 @@ public class FicsItNetworks : ModuleRules
             "FicsItNetworksCircuit",
             "FicsItNetworksMisc",
             "FicsItNetworksComputer",
+            "FicsItNetworksLua",
 		});
 	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 

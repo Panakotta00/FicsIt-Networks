@@ -42,6 +42,10 @@ void FFicsItNetworksLuaModule::StartupModule() {
 void FFicsItNetworksLuaModule::ShutdownModule() {
 }
 
+UFINLuaGameInstanceModule::UFINLuaGameInstanceModule() {
+	RemoteCallObjects.Add(UFINLuaRCO::StaticClass());
+}
+
 bool UFINLuaUtils::TryGetLuaEEPROM(const FFGDynamicStruct& Struct, FFINItemStateEEPROMLua& LuaEEPROM) {
 	auto ptr = Struct.GetValuePtr<FFINItemStateEEPROMLua>();
 

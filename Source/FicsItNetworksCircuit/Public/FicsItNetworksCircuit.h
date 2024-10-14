@@ -25,5 +25,7 @@ UCLASS()
 class FICSITNETWORKSCIRCUIT_API UFINCircuitGameInstanceModule : public UGameInstanceModule {
     GENERATED_BODY()
 
+    UFINCircuitGameInstanceModule();
+
     virtual void DispatchLifecycleEvent(ELifecyclePhase Phase) override;
 };

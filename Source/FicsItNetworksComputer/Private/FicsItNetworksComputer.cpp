@@ -134,7 +134,7 @@ UFINComputerGameWorldModule::UFINComputerGameWorldModule() {
 }
 
 UFINComputerGameInstanceModule::UFINComputerGameInstanceModule() {
-	//RemoteCallObjects.Add(UFINComputerRCO::StaticClass());
+	RemoteCallObjects.Add(UFINComputerRCO::StaticClass());
 }
 
 #undef LOCTEXT_NAMESPACE

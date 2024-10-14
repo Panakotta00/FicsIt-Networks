@@ -14,7 +14,7 @@ TSharedRef<SWidget> UFINEditLabel::RebuildWidget() {
 void UFINEditLabel::InitSlotWidget(UWidget* InSlotWidget) {
 	SlotWidget = InSlotWidget;
 
-	UClass* EditLabel = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/UI/Widget_FIN_EditLabel.Widget_FIN_EditLabel_C"));
+	UClass* EditLabel = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/UI/Misc/Widget_FIN_EditLabel.Widget_FIN_EditLabel_C"));
 	UUserWidget* Widget = NewObject<UUserWidget>(this, EditLabel);
 	SetContent(Widget);
 	Widget->Initialize();

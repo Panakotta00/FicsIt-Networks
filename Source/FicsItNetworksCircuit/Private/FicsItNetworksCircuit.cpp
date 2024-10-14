@@ -122,7 +122,7 @@ void FFicsItNetworksCircuitModule::StartupModule() {
 		SUBSCRIBE_METHOD_VIRTUAL(IFGDismantleInterface::GetDismantleRefund_Implementation, (void*)static_cast<const IFGDismantleInterface*>(GetDefault<AFGBuildable>()), &AFGBuildable_GetDismantleRefund_Implementation);
 
 		SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName, const FName& socketName) {
-			UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Network/Mesh_NetworkConnector.Mesh_NetworkConnector"), NULL, LOAD_None, NULL);
+			UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Buildings/Network/-Shared/SM_NetworkConnector.SM_NetworkConnector"), NULL, LOAD_None, NULL);
 			if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
 				auto comp = NewObject<UStaticMeshComponent>(attachParent);
 				comp->RegisterComponent();
@@ -165,6 +165,10 @@ void FFicsItNetworksCircuitModule::ShutdownModule() {}
 UFINCircuitGameWorldModule::UFINCircuitGameWorldModule() {
 	ModSubsystems.Add(AFINSignalSubsystem::StaticClass());
 	ModSubsystems.Add(AFINWirelessSubsystem::StaticClass());
+}
+
+UFINCircuitGameInstanceModule::UFINCircuitGameInstanceModule() {
+	RemoteCallObjects.Add(UFINWirelessRCO::StaticClass());
 }
 
 void UFINCircuitGameInstanceModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {
