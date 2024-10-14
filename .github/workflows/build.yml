@@ -80,10 +80,12 @@ jobs:
         run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\Build.bat -projectfiles -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -game -rocket -progres
 
       - name: Build for Development Editor
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Development Editor' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Development Editor' /p:Platform='Win64' /t:'FactoryGame' -m
 
-      - name: Build for Shipping/Client
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+      - name: Build for Shipping/Client EGS
+        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'FactoryGameEGS' -m
+      - name: Build for Shipping/Client Steam
+        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'FactoryGameSteam' -m
 
 #      - name: Build for Win64 Dedicated Server
 #        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
@@ -92,7 +94,7 @@ jobs:
 #        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
       
       - name: Package FicsItNetworks Mod
-        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -utf8output -platform=Win64 -nocompileeditor -installed -abslog="C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Log.txt"
+        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -utf8output -platform=Win64 -nocompileeditor -installed -merge -abslog="C:\Users\runneradmin\AppData\Roaming\Unreal Engine\AutomationTool\Logs\D+a+FicsIt-Networks+FicsIt-Networks+ue\Log.txt"
       
 #      - name: Generate Reflection & Lua Documentation
 #        run: ${{ github.workspace }}\ue\\Engine\Binaries\Win64\UnrealEditor-Cmd.exe "${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject" -skipcompile -Unattended -NoPause -AllowSoftwareRendering "-ExecCmds=FINGenRefDoc,FINGenLuaDoc,quit_editor"
