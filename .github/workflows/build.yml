@@ -36,7 +36,7 @@ jobs:
     runs-on: Windows2019-selfhosted
     steps:
       - name: Pre Cleanup
-        run: Remove-Item C:\actions-runner\_work\FicsIt-Networks\FicsIt-Networks\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
+        run: Remove-Item C:\Jenkins\actions-runner\_work\FicsIt-Networks\FicsIt-Networks\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
       - uses: actions/checkout@v4
         with:
           repository: satisfactorymodding/SatisfactoryModLoader
