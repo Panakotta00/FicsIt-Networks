@@ -52,7 +52,7 @@ public:
 
 	template<typename T>
 	T* GetPtr() const {
-		if (!Struct && !Struct->IsChildOf(TBaseStructure<T>::Get())) return nullptr;
+		if (!Struct || !Struct->IsChildOf(TBaseStructure<T>::Get())) return nullptr;
 		return &Get<T>();
 	}
 
