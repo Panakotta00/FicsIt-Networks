@@ -176,7 +176,7 @@ void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
 		CompassRose->RegisterComponent();
 		CompassRose->SetMobility(EComponentMobility::Movable);
 		if(CompassMesh == nullptr || !IsValid(CompassMesh)) {
-			UStaticMesh* ArrowMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Components/Helpers/Arrow2.Arrow2"), NULL, LOAD_None, NULL);
+			UStaticMesh* ArrowMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Buildings/-Shared/Arrow2.Arrow2"), NULL, LOAD_None, NULL);
 			CompassRose->SetStaticMesh(ArrowMesh);
 		}else {
 			CompassRose->SetStaticMesh(CompassMesh);

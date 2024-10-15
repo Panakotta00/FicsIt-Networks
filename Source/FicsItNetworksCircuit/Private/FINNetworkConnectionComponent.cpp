@@ -112,5 +112,5 @@ bool UFINNetworkConnectionComponent::IsConnected(const TScriptInterface<IFINNetw
 
 void UFINNetworkConnectionComponent::GetAllowedCableConnections(TArray<TSubclassOf<UFGBuildingDescriptor>>& OutAllowedConnections) const {
 	OutAllowedConnections.Append(AllowedCableConnections);
-	if (AllowedCableConnections.Num() < 1) OutAllowedConnections.Add(LoadClass<UFGBuildingDescriptor>(NULL, TEXT("/FicsItNetworks/Network/NetworkCable/BD_NetworkCable.BD_NetworkCable_C")));
+	if (AllowedCableConnections.Num() < 1) OutAllowedConnections.Add(LoadClass<UFGBuildingDescriptor>(NULL, TEXT("/FicsItNetworks/Buildings/Network/NetworkCable/Desc_NetworkCable.Desc_NetworkCable_C")));
 }

@@ -237,7 +237,7 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 }
 
 TSharedPtr<SWidget> AFINComputerGPUT1:: CreateWidget() {
-	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Computer/UI/ComputerCaseBorder.ComputerCaseBorder'"))->Brush;
+	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Buildings/Computer/ComputerCase/UI/SB_ComputerCaseBorder.SB_ComputerCaseBorder'"))->Brush;
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SNew(SScaleBox)
 	.Stretch(EStretch::ScaleToFit)
