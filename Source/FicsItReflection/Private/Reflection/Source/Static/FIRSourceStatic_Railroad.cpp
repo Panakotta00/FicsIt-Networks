@@ -12,6 +12,7 @@
 #include "FGRailroadVehicleMovementComponent.h"
 #include "FGLocomotive.h"
 #include "FGTrain.h"
+#include "FGTrainPlatformConnection.h"
 #include "FGTrainStationIdentifier.h"
 #include "FIRSubsystem.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
@@ -53,10 +54,10 @@ BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this tra
 	forward = pos.Forward;
 } EndFunc()
 BeginFunc(getConnectedPlatform, "Get Connected Platform", "Returns the connected platform in the given direction.") {
-	InVal(0, RInt, direction, "Direction", "The direction in which you want to get the connected platform.")
-	OutVal(1, RTrace<AFGBuildableTrainPlatform>, platform, "Platform", "The platform connected to this platform in the given direction.")
+	InVal(0, RObject<UFGTrainPlatformConnection>, platformConnection, "Platform Connection", "The platform connection of which you want to find the opposite connection of.")
+	OutVal(1, RTrace<UFGTrainPlatformConnection>, oppositeConnection, "Opposite Connection", "The platform connection at the opposite side.")
 	Body()
-	platform = Ctx.GetTrace() / self->GetConnectedPlatformInDirectionOf(direction);
+	oppositeConnection = Ctx.GetTrace() / self->GetConnectionInOppositeDirection(platformConnection.Get());
 } EndFunc()
 BeginFunc(getDockedVehicle, "Get Docked Vehicle", "Returns the currently docked vehicle.") {
 	OutVal(0, RTrace<AFGVehicle>, vehicle, "Vehicle", "The currently docked vehicle")
@@ -78,6 +79,21 @@ BeginProp(RInt, status, "Status", "The current docking status of the platform.")
 } EndProp()
 BeginProp(RBool, isReversed, "Is Reversed", "True if the orientation of the platform is reversed relative to the track/station.") {
 	FIRReturn self->IsOrientationReversed();
+} EndProp()
+EndClass()
+
+BeginClass(UFGTrainPlatformConnection, "TrainPlatformConnection", "Train Platform Connection", "A component that is used to connect two Train Platforms together.")
+BeginProp(RTrace<UFGTrainPlatformConnection>, connected, "Connected", "The connected train platform connection.") {
+	FIRReturn (Ctx.GetTrace() / self->GetConnectedTo());
+} EndProp()
+BeginProp(RTrace<UFGRailroadTrackConnectionComponent>, trackConnection, "Track Connected", "The associated railroad track connection.") {
+	FIRReturn (Ctx.GetTrace() / self->GetRailroadConnectionReference());
+} EndProp()
+BeginProp(RTrace<AFGBuildableTrainPlatform>, platformOwner, "Platform Owner", "The train platform that owns this platform connection component.") {
+	FIRReturn (Ctx.GetTrace() / self->GetPlatformOwner());
+} EndProp()
+BeginProp(RInt, connectionType, "Connection Type", "The type of this train platform connection.\n0 = Out\n1 = In\n2 = Neutral") {
+	FIRReturn (Ctx.GetTrace() / self->GetPlatformOwner());
 } EndProp()
 EndClass()
 
