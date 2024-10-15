@@ -13,7 +13,7 @@ AFIRSubsystem* AFIRSubsystem::GetReflectionSubsystem(UObject* WorldContext) {
 #endif
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
-	check(SubsystemActorManager);
+	fgcheck(SubsystemActorManager);
 	return SubsystemActorManager->GetSubsystemActor<AFIRSubsystem>();
 }
 

@@ -6,6 +6,7 @@
 #include "FINUtils.h"
 #include "Components/OverlaySlot.h"
 #include "UI/FGGameUI.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Widgets/Input/SEditableTextBox.h"
 
 const FName AFINBlueprintHologram_List_NameColumn = FName("Name");	
@@ -13,7 +14,7 @@ const FName AFINBlueprintHologram_List_ValueColumn = FName("Value");
 
 AFINBlueprintHologram::AFINBlueprintHologram() {
 	PopupClass = ConstructorHelpers::FClassFinder<UFGPopupWidget>(TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_Popup.Widget_Popup_C")).Class;
-	PopupContentClass = ConstructorHelpers::FClassFinder<UFINBlueprintParameterPopup>(TEXT("/FicsItNetworks/UI/Widget_FIN_BlueprintParameterPopup.Widget_FIN_BlueprintParameterPopup_C")).Class;
+	PopupContentClass = ConstructorHelpers::FClassFinder<UFINBlueprintParameterPopup>(TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_BlueprintParameterPopup.BPW_FIN_BlueprintParameterPopup_C")).Class;
 }
 
 void AFINBlueprintHologram::ShowPropertyDialog() {

@@ -120,7 +120,7 @@ void FFicsItReflectionModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINArrayProperty"), TEXT("/Script/FicsItReflection.FIRArrayProperty")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINReflectionSource"), TEXT("/Script/FicsItReflection.FIRSource")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINStaticReflectionSource"), TEXT("/Script/FicsItReflection.FIRSourceStatic")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.FINReflectionMetaRuntimeState "), TEXT("/Script/FicsItReflection.FIRMetaRuntimeState")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Enum, TEXT("/Script/FicsItNetworks.EFINReflectionMetaRuntimeState "), TEXT("/Script/FicsItReflection.EFIRMetaRuntimeState")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionBaseMeta"), TEXT("/Script/FicsItReflection.FIRBaseMeta")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionPropertyMeta"), TEXT("/Script/FicsItReflection.FIRPropertyMeta")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINReflectionFunctionParameterMeta"), TEXT("/Script/FicsItReflection.FIRFunctionParameterMeta")});

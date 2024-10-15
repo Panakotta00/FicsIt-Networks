@@ -27,10 +27,12 @@ class FICSITREFLECTION_API UFIRGameInstanceModule : public UGameInstanceModule {
 	virtual void DispatchLifecycleEvent(ELifecyclePhase Phase) override {
 		Super::DispatchLifecycleEvent(Phase);
 
-		FFIRGlobalRegisterHelper::Register();
+		if (Phase == ELifecyclePhase::CONSTRUCTION) {
+			FFIRGlobalRegisterHelper::Register();
 
-		FFicsItReflectionModule::Get().PopulateSources();
-		FFicsItReflectionModule::Get().LoadAllTypes();
+			FFicsItReflectionModule::Get().PopulateSources();
+			FFicsItReflectionModule::Get().LoadAllTypes();
+		}
 	}
 	// End UGameInstanceModule
 };
