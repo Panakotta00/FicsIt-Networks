@@ -83,9 +83,9 @@ jobs:
         run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryEditor Win64 Development -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
 
       - name: Build for Shipping/Client EGS
-        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryGameEGS Win64 Development -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
+        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryGameEGS Win64 Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
       - name: Build for Shipping/Client Steam
-        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryGameSteam Win64 Development -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'Games\FactoryGame\FactoryGameSteam' -m
+        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryGameSteam Win64 Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping' /p:Platform='Win64' /t:'Games\FactoryGame\FactoryGameSteam' -m
 
 #      - name: Build for Win64 Dedicated Server
 #        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
