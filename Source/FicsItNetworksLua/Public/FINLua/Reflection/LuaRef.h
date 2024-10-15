@@ -26,9 +26,23 @@ namespace FINLua {
 	 * @param Ctx the execution context the function will get executed with
 	 * @param nArgs the count of input parameters on top of the stack that get passed to the function
 	 * @param nResults the max count of output parameters that can get pushed to the stack, LUA_MULTRET for any count
+	 * @param bForceSync if set to true, will always create a future that calls the function instead of directly calling
 	 * @return the count of return values
 	 */
-	int luaFIN_callReflectionFunction(lua_State* L, UFIRFunction* Function, const FFIRExecutionContext& Ctx, int nArgs, int nResults);
+	int luaFIN_callReflectionFunction(lua_State* L, UFIRFunction* Function, const FFIRExecutionContext& Ctx, int nArgs, int nResults, bool bForceSync);
+
+	/**
+	 * Tires to create the right execution context and retrieve further information from the Lua runtime
+	 * to successfully call the given FINFunction.
+	 *
+	 * Mainly intended to be used by simple Lua Functions that wrap a FIN-Function call.
+	 *
+	 * @param L the lua state
+	 * @param Function the FINFunction that should get executed
+	 * @param bForceSync if set to true, will always create a future that calls the function instead of directly calling
+	 * @return the count of return values
+	 */
+	int luaFIN_callReflectionFunction(lua_State* L, UFIRFunction* Function, bool bForceSync);
 
 	/**
 	 * @brief pushes a Reflection Function value onto the lua stack

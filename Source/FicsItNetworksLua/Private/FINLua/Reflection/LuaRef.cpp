@@ -35,12 +35,28 @@ namespace FINLua {
 			 */)", asFunctionObject) {
 				lua_pushnil(L);
 			}
+
 			LuaModuleTableBareField(R"(/**
 			 * @LuaBareField	quickRef	string
 			 * @DisplayName		Quick Reference
 			 *
-			 * A stirng containing the signature and description of the function for quick way to get info one the function within code.
+			 * A string containing the signature and description of the function for quick way to get info one the function within code.
 			 */)", quickRef) {
+				lua_pushnil(L);
+			}
+
+			int lua_callDeferred(lua_State* L) {
+				UFIRFunction* function = luaFIN_checkReflectionFunction(L, lua_upvalueindex(1));
+
+				return luaFIN_callReflectionFunction(L, function, true);
+			}
+
+			LuaModuleTableBareField(R"(/**
+			 * @LuaBareField	callDeferred	function
+			 * @DisplayName		Call Deferred
+			 *
+			 * Calls the function deferred in the next tick. Returns a Future to allow check for execution and get the return parameters.
+			 */)", callDeferred) {
 				lua_pushnil(L);
 			}
 
@@ -60,6 +76,10 @@ namespace FINLua {
 					FString str = FString::Printf(TEXT("# %ls\n%ls"), *signature, *description);
 
 					luaFIN_pushFString(L, str);
+				} else if (key == callDeferred_Name) {
+					luaFIN_pushReflectionFunction(L, function);
+					lua_pushcclosure(L, &lua_callDeferred, 1);
+					return 1;
 				} else {
 					return 0;
 				}
@@ -74,27 +94,9 @@ namespace FINLua {
 				ZoneScoped;
 
 				UFIRFunction* Function = luaFIN_checkReflectionFunction(L, 1);
-				UFIRStruct* Type = Function->GetTypedOuter<UFIRStruct>();
 				lua_remove(L, 1);
 
-				FFIRExecutionContext Context;
-				if (Function->GetFunctionFlags() & FIR_Func_StaticFunc) {
-					Context = FFIRExecutionContext(Function->GetOuter());
-				} else if (UFIRClass* Class = Cast<UFIRClass>(Type)) {
-					if (Function->GetFunctionFlags() & FIR_Func_ClassFunc) {
-						FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
-						if (!LuaClass->FIRClass->IsChildOf(Class)) luaL_argerror(L, 1, "Expected Class");
-						Context = FFIRExecutionContext(LuaClass->UClass);
-					} else {
-						FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, Class);
-						Context = FFIRExecutionContext(LuaObject->Object);
-					}
-				} else {
-					FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, 1, Type);
-					Context = FFIRExecutionContext(LuaStruct->Struct->GetData()); // TODO: Add wrapper to Execution Context ot be able to hold a TSharedRef to the FINStruct, in Sync call, GC may collect struct!
-				}
-
-				return luaFIN_callReflectionFunction(L, Function, Context, lua_gettop(L)-1, LUA_MULTRET);
+				return luaFIN_callReflectionFunction(L, Function, false);
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -206,12 +208,12 @@ namespace FINLua {
 		return luaFIN_callReflectionFunctionProcessOutput(L, Output, Ctx.GetTrace(), nResults);
 	}
 
-	int luaFIN_callReflectionFunction(lua_State* L, UFIRFunction* Function, const FFIRExecutionContext& Ctx, int nArgs, int nResults) {
+	int luaFIN_callReflectionFunction(lua_State* L, UFIRFunction* Function, const FFIRExecutionContext& Ctx, int nArgs, int nResults, bool bForceSync) {
 		FFINLuaLogScope LogScope(L);
 		const EFIRFunctionFlags FuncFlags = Function->GetFunctionFlags();
-		if (FuncFlags & FIR_Func_RT_Async) {
+		if (FuncFlags & FIR_Func_RT_Async && !bForceSync) {
 			return luaFIN_callReflectionFunctionDirectly(L, Function, Ctx, nArgs, nResults);
-		} else if (FuncFlags & FIR_Func_RT_Parallel) {
+		} else if (FuncFlags & FIR_Func_RT_Parallel && !bForceSync) {
 			[[maybe_unused]] FLuaSyncCall SyncCall(L);
 			return luaFIN_callReflectionFunctionDirectly(L, Function, Ctx, nArgs, nResults);
 		} else {
@@ -219,6 +221,29 @@ namespace FINLua {
 			luaFIN_pushFuture(L, FFINFutureReflection(Function, Ctx, Input));
 			return 1;
 		}
+	}
+
+	int luaFIN_callReflectionFunction(lua_State* L, UFIRFunction* Function, bool bForceSync) {
+		UFIRStruct* Type = Function->GetTypedOuter<UFIRStruct>();
+
+		FFIRExecutionContext Context;
+		if (Function->GetFunctionFlags() & FIR_Func_StaticFunc) {
+			Context = FFIRExecutionContext(Function->GetOuter());
+		} else if (UFIRClass* Class = Cast<UFIRClass>(Type)) {
+			if (Function->GetFunctionFlags() & FIR_Func_ClassFunc) {
+				FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
+				if (!LuaClass->FIRClass->IsChildOf(Class)) luaL_argerror(L, 1, "Expected Class");
+				Context = FFIRExecutionContext(LuaClass->UClass);
+			} else {
+				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, Class);
+				Context = FFIRExecutionContext(LuaObject->Object);
+			}
+		} else {
+			FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, 1, Type);
+			Context = FFIRExecutionContext(LuaStruct->Struct->GetData()); // TODO: Add wrapper to Execution Context ot be able to hold a TSharedRef to the FINStruct, in Sync call, GC may collect struct!
+		}
+
+		return luaFIN_callReflectionFunction(L, Function, Context, lua_gettop(L)-1, LUA_MULTRET, bForceSync);
 	}
 
 	void luaFIN_pushReflectionFunction(lua_State* L, UFIRFunction* Function) {
