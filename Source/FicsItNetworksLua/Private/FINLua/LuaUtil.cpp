@@ -297,12 +297,16 @@ namespace FINLua {
 
 	FString luaFIN_typeName(lua_State* L, int Index) {
 		const char *typearg;
-		if (luaL_getmetafield(L, Index, "__name") == LUA_TSTRING) {
+		int metaNameType = luaL_getmetafield(L, Index, "__name");
+		if (metaNameType == LUA_TSTRING) {
 			typearg = lua_tostring(L, -1);
 		} else if (lua_type(L, Index) == LUA_TLIGHTUSERDATA) {
 			typearg = "light userdata";
 		} else {
 			typearg = luaL_typename(L, Index);
+		}
+		if (metaNameType != LUA_TNIL) {
+			lua_pop(L, 1);
 		}
 
 		FString TypeName = UTF8_TO_TCHAR(typearg);
