@@ -4,6 +4,7 @@
 #include "Containers/Queue.h"
 #include "Subsystem/ModSubsystem.h"
 #include "FGIconLibrary.h"
+#include "FGSaveInterface.h"
 #include "FINUtils.h"
 #include "FINMediaSubsystem.generated.h"
 
@@ -41,7 +42,7 @@ class UAsyncTaskDownloadImage;
  * TODO: Add Replication
  */
 UCLASS()
-class FICSITNETWORKSMISC_API AFINMediaSubsystem : public AModSubsystem {
+class FICSITNETWORKSMISC_API AFINMediaSubsystem : public AModSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -55,6 +56,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	// End AActor
+
+	virtual bool ShouldSave_Implementation() const override { return true; }
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext))
 	static AFINMediaSubsystem* GetMediaSubsystem(UObject* WorldContext);
