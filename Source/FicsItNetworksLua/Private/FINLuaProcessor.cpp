@@ -8,6 +8,7 @@
 #include "FILLogContainer.h"
 #include "FINNetworkUtils.h"
 #include "FINItemStateEEPROMLua.h"
+#include "FINMediaSubsystem.h"
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
@@ -386,7 +387,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		lua_setfield(luaState, -2, "globals");						// ..., perm, globals, perm, data
 		lua_pushvalue(luaState, luaThreadIndex);						// ..., perm, globals, perm, data, thread
 		lua_setfield(luaState, -2, "thread");						// ..., perm, globals, perm, data
-		
+		FINLua::luaFINDebug_dumpTable(luaState, -2);
 
 		lua_pushcfunction(luaState, luaPersist);					// ..., perm, globals, perm, data, persist-func
 		lua_insert(luaState, -3);									// ..., perm, globals, persist-func, perm, data
@@ -431,6 +432,7 @@ void UFINLuaProcessor::BeginDestroy() {
 
 void UFINLuaProcessor::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
 	out_dependentObjects.Add(Kernel);
+	out_dependentObjects.Add(AFINMediaSubsystem::GetMediaSubsystem(this));
 }
 
 void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {}

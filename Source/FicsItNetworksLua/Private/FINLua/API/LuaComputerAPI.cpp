@@ -389,6 +389,7 @@ namespace FINLua {
 			 */)", media) {
 				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 				luaFIN_pushObject(L, FIRTrace(AFINMediaSubsystem::GetMediaSubsystem(Processor)));
+				//luaFIN_persistValue(L, -1, PersistName);
 			}
 		}
 	}

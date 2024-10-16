@@ -292,7 +292,7 @@ namespace FINLua {
 		lua_register(L, "findClass", luaFindClass_DEPRECATED);
 		PersistGlobal("findClass");
 
-		luaL_requiref(L, "_G", luaopen_base, true);
+		luaopen_base(L);
 		lua_pushnil(L);
 		lua_setfield(L, -2, "collectgarbage");
 		lua_pushnil(L);
