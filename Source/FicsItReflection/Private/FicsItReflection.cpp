@@ -12,6 +12,7 @@
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Patching/NativeHookManager.h"
 #include "UObject/CoreRedirects.h"
+#include "FIRGlobalRegisterHelper.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItReflection);
 
