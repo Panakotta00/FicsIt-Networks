@@ -43,10 +43,30 @@ void AFINCodeableMerger::GetDismantleRefund_Implementation(TArray<FInventoryStac
 	out_refund.Append(InputQueue1);
 	out_refund.Append(InputQueue2);
 	out_refund.Append(InputQueue3);
+
+	for (uint64 i = 0; i < out_refund.Num(); ++i) {
+		if (!out_refund[i].HasItems() || out_refund[i].Item.IsValid()) {
+			out_refund.RemoveAt(i);
+			--i;
+		}
+	}
 }
 
 UObject* AFINCodeableMerger::GetSignalSenderOverride_Implementation() {
 	return NetworkConnector;
+}
+
+void AFINCodeableMerger::BeginPlay() {
+	Super::BeginPlay();
+
+	for (TArray<FInventoryItem>* list : { &InputQueue1, &InputQueue2, &InputQueue3, &OutputQueue }) {
+		for (size_t i = 0; i < list->Num(); ++i) {
+			if (!(*list)[i].IsValid()) {
+				list->RemoveAt(i);
+				--i;
+			}
+		}
+	}
 }
 
 void AFINCodeableMerger::TickInput(UFGFactoryConnectionComponent* Connector, int InputId) {
@@ -72,7 +92,7 @@ void AFINCodeableMerger::Factory_Tick(float dt) {
 }
 
 bool AFINCodeableMerger::Factory_PeekOutput_Implementation(const UFGFactoryConnectionComponent* connection, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) const {
-	if (OutputQueue.Num() > 0) {
+	if (OutputQueue.Num() > 0 || OutputQueue[0].IsValid()) {
 		out_items.Add(OutputQueue[0]);
 		return true;
 	}
@@ -82,9 +102,11 @@ bool AFINCodeableMerger::Factory_PeekOutput_Implementation(const UFGFactoryConne
 bool AFINCodeableMerger::Factory_GrabOutput_Implementation(UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf<UFGItemDescriptor> type) {
 	if (OutputQueue.Num() > 0) {
 		out_item = OutputQueue[0];
-		OutputQueue.RemoveAt(0);
-		netSig_ItemOutputted(out_item);
-		return true;
+		if (out_item.IsValid()) {
+			OutputQueue.RemoveAt(0);
+			netSig_ItemOutputted(out_item);
+			return true;
+		}
 	}
 	return false;
 }

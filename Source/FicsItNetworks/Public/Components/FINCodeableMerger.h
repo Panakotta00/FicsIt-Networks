@@ -49,6 +49,10 @@ public:
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINSignalSender
 
+	// Begin AActor
+	virtual void BeginPlay() override;
+	// End AActor
+
 	// Begin AFGBuildable
 	virtual void Factory_Tick(float dt) override;
 	virtual bool Factory_PeekOutput_Implementation(const class UFGFactoryConnectionComponent* connection, TArray< FInventoryItem >& out_items, TSubclassOf< UFGItemDescriptor > type) const override;
