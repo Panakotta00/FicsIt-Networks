@@ -41,6 +41,14 @@ private:
 	static TMap<UClass*, TSet<TSubclassOf<UFIRHook>>> HookRegistry;
 
 public:
+	// Begin UObject
+	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
+	// End UObject
+
+	// Begin AActor
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	// End AActor
+
 	/**
 	 * Gets the loaded hook subsystem in the given world.
 	 *

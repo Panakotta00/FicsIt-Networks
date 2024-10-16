@@ -5,6 +5,25 @@
 
 TMap<UClass*, TSet<TSubclassOf<UFIRHook>>> AFIRHookSubsystem::HookRegistry;
 
+void AFIRHookSubsystem::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) {
+	FScopeLock Lock(&Cast<AFIRHookSubsystem>(InThis)->DataLock);
+
+	Super::AddReferencedObjects(InThis, Collector);
+}
+
+void AFIRHookSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+
+	TArray<UObject*> Keys;
+	{
+		FScopeLock Lock(&DataLock);
+		Data.GetKeys(Keys);
+	}
+	for (UObject* obj : Keys) {
+		ClearHooks(obj);
+	}
+}
+
 AFIRHookSubsystem* AFIRHookSubsystem::GetHookSubsystem(UObject* WorldContext) {
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
@@ -26,6 +45,7 @@ void AFIRHookSubsystem::AttachHooks(UObject* object) {
 		TSet<TSubclassOf<UFIRHook>>* hookClasses = HookRegistry.Find(clazz);
 		if (hookClasses) for (TSubclassOf<UFIRHook> hookClass : *hookClasses) {
 			UFIRHook* hook = NewObject<UFIRHook>(this, hookClass);
+			hook->ClearInternalFlags(EInternalObjectFlags::Async);
 			HookData.Hooks.Add(hook);
 		}
 		
@@ -39,10 +59,9 @@ void AFIRHookSubsystem::AttachHooks(UObject* object) {
 
 void AFIRHookSubsystem::ClearHooks(UObject* object) {
 	FScopeLock Lock(&DataLock);
-	FFIRHookData* data = Data.Find(object);
-	if (!data) return;
-	for (UFIRHook* hook : data->Hooks) {
+	FFIRHookData data;
+	if (!Data.RemoveAndCopyValue(object, data)) return;
+	for (UFIRHook* hook : data.Hooks) {
 		if (hook) hook->Unregister();
 	}
-	data->Hooks.Empty();
 }
