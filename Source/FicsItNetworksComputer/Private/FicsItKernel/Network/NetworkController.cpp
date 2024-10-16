@@ -105,7 +105,7 @@ TSet<FFIRTrace> UFINKernelNetworkController::GetComponentByNick(const FString& I
 }
 
 TSet<FFIRTrace> UFINKernelNetworkController::GetComponentByClass(UClass* InClass, bool bRedirect) const {
-	if (!Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return TSet<FFIRTrace>();
+	if (!IsValid(InClass) || !Component.GetObject()->Implements<UFINNetworkCircuitNode>()) return TSet<FFIRTrace>();
 	TSet<FFIRTrace> outComps;
 	TSet<UObject*> Comps = IFINNetworkCircuitNode::Execute_GetCircuit(Component.GetObject())->GetComponents();
 	for (UObject* Comp : Comps) {
