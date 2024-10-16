@@ -4,6 +4,7 @@
 #include "Subsystem/SubsystemActorManager.h"
 #include "FGCharacterPlayer.h"
 #include "FGInputSettings.h"
+#include "FGPlayerController.h"
 #include "Buildables/FGBuildableWidgetSign.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetInteractionComponent.h"
@@ -39,6 +40,13 @@ void AFINComputerSubsystem::BeginPlay() {
 	TArray<AActor*> FoundCharacters;
 	UGameplayStatics::GetAllActorsOfClass(this, AFGCharacterPlayer::StaticClass(), FoundCharacters);
 	for (AActor* Character : FoundCharacters) AttachWidgetInteractionToPlayer(Cast<AFGCharacterPlayer>(Character));
+}
+
+void AFINComputerSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	TMap<AFGCharacterPlayer*, UWidgetInteractionComponent*> interactions = ScreenInteraction;
+	for (auto [character, _] : interactions) {
+		DetachWidgetInteractionToPlayer(character);
+	}
 }
 
 void AFINComputerSubsystem::Tick(float dt) {
@@ -115,13 +123,14 @@ AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* Worl
 void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
 	if (!IsValid(character) || !character->GetController() || !character->GetController()->IsLocalPlayerController()) return;
 	DetachWidgetInteractionToPlayer(character);
-	UWidgetInteractionComponent* Comp = NewObject<UWidgetInteractionComponent>(character);
-	Comp->InteractionSource = EWidgetInteractionSource::World;
 	UCameraComponent* cam = Cast<UCameraComponent>(character->GetComponentByClass(UCameraComponent::StaticClass()));
+	UWidgetInteractionComponent* Comp = NewObject<UWidgetInteractionComponent>(cam);
+	Comp->InteractionSource = EWidgetInteractionSource::World;
 	Comp->InteractionDistance = 10000.0;
-	Comp->VirtualUserIndex = VirtualUserNum++;
-	Comp->RegisterComponent();
+	Comp->VirtualUserIndex = 0;
 	Comp->AttachToComponent(cam, FAttachmentTransformRules::KeepRelativeTransform);
+	Comp->RegisterComponent();
+	Comp->Activate();
 	ScreenInteraction.Add(character, Comp);
 }
 
@@ -129,7 +138,8 @@ void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 	if (!IsValid(character)) return;
 	UWidgetInteractionComponent** Comp = ScreenInteraction.Find(character);
 	if (Comp) {
-		(*Comp)->UnregisterComponent();
+		(*Comp)->Deactivate();
+		(*Comp)->DestroyComponent();
 		ScreenInteraction.Remove(character);
 	}
 }
