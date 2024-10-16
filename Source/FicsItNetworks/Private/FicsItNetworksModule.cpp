@@ -234,7 +234,7 @@ void FFicsItNetworksModule::StartupModule(){
 		"/FicsItNetworks/Network/NetworkManager/Equip_NetworkManager.Equip_NetworkManager_C",
 		"/FicsItNetworks/Equipment/NetworkManager/Equip_NetworkManager.Equip_NetworkManager_C");
 	FIN_CoreRedirect(Type_Class,
-		"/FicsItNetworks/Network/NetworkManager/Desc_NetworkMng.Desc_NetworkMng_C",
+		"/FicsItNetworks/Network/NetworkManager/ED_NetworkMng.ED_NetworkMng_C",
 		"/FicsItNetworks/Equipment/NetworkManager/Desc_NetworkManager.Desc_NetworkManager_C");
 	FIN_CoreRedirect(Type_Class,
 		"/FicsItNetworks/Schematics/AdvancedNetworking.AdvancedNetworking_C",
