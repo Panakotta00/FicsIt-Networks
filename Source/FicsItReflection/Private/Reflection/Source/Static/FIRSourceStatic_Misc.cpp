@@ -1,9 +1,12 @@
 ﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
 
 #include "FGBuildableDoor.h"
+#include "FGCentralStorageContainer.h"
+#include "FGCentralStorageSubsystem.h"
 #include "FGGameState.h"
 #include "FGIconLibrary.h"
 #include "FGResourceSinkSubsystem.h"
+#include "FIRSourceStaticHooks.h"
 #include "Buildables/FGBuildableLightsControlPanel.h"
 #include "Buildables/FGBuildableLightSource.h"
 #include "Buildables/FGBuildableResourceSink.h"
@@ -162,3 +165,68 @@ BeginProp(RBool, searchOnly, "Search Only", "True if the icon will be shown in s
 	FIRReturn self->SearchOnly;
 } EndProp()
 EndStruct()
+
+BeginClass(AFGCentralStorageContainer, "DimensionalDepotUploader", "Dimensional Depot Uploader", "The container that allows you to upload items to the dimensional depot. The dimensional depot is also known as central storage.")
+BeginProp(RBool, isUploadingToCentralStorage, "Is Uploading To Central Storage", "True if the uploader is currently uploading items to the dimensional depot.") {
+	FIRReturn self->IsUploadingToCentralStorage();
+} EndProp()
+BeginProp(RFloat, centralStorageUploadProgress, "Central Storage Upload Progress", "The upload progress of the item that currently gets uploaded.") {
+	FIRReturn self->GetCentralStorageUploadProgress();
+} EndProp()
+BeginProp(RBool, isUploadInventoryEmpty, "Is Upload Inventory Empty", "True if the inventory of items to upload is empty.") {
+	FIRReturn self->IsUploadInventoryEmpty();
+} EndProp()
+BeginProp(RTrace<AFGCentralStorageSubsystem>, centralStorage, "Central Storage", "The central stroage it self.") {
+	FIRReturn (FIRAny)(Ctx.GetTrace() / AFGCentralStorageSubsystem::Get(self));
+} EndProp()
+EndClass()
+
+BeginClass(AFGCentralStorageSubsystem, "DimensionalDepot", "Dimensional Depot", "The dimensional depot, remote storage or also known as central storage.")
+Hook(UFIRDimensionalDepotHook)
+BeginProp(RInt, centralStorageItemStackLimit, "Central Storage Item Stack Limit", "The stack limit of the central storage.") {
+	FIRReturn (FIRInt)self->GetCentralStorageItemStackLimit();
+} EndProp()
+BeginProp(RFloat, centralStorageTimeToUpload, "Central Storage Time to Upload", "The amount of time it takes to upload an item to the central storage.") {
+	FIRReturn (FIRInt)self->GetCentralStorageTimeToUpload();
+} EndProp()
+BeginFunc(getItemCountFromCentralStorage, "Get Item Count from Central Storage", "Returns the number of items of a given type that is stored within the central storage.") {
+	InVal(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item you want to get the number of items in the central storage from.")
+	OutVal(1, RInt, number, "Number", "The number of items in the central storage.")
+	Body()
+	number = (FIRInt) self->GetNumItemsFromCentralStorage(itemType);
+} EndFunc()
+BeginFunc(getAllItemsFromCentralStorage, "Get all Items from Cental Stroage", "Return a list of all items the central storage currently contains.") {
+	OutVal(0, RArray<RStruct<FItemAmount>>, items, "Items", "The list of items that the central storage currently contains.")
+	Body()
+	TArray<FItemAmount> itemAmounts;
+	self->GetAllItemsFromCentralStorage(itemAmounts);
+	FIRArray itemsAny;
+	for (const FItemAmount& item : itemAmounts) {
+		itemsAny.Add((FIRStruct)item);
+	}
+	items = itemsAny;
+} EndFunc()
+BeginFunc(canUploadItemsToCentralStorage, "Can upload Items to Central Storage", "Returns true if any items of the given type can be uploaded to the central storage.") {
+	InVal(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item you want to check if it can be uploaded.")
+	OutVal(1, RBool, canUpload, "Can Upload", "True if the given item type can be uploaded to the central storage.")
+	Body()
+	canUpload = self->CanUploadItemsToCentralStorage(itemType);
+} EndFunc()
+BeginFunc(getCentralStorageItemLimit, "Get Central Storage Item Limit", "Returns the maxiumum number of items of a given type you can upload to the central storage.") {
+	InVal(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item you want to check if it can be uploaded.")
+	OutVal(1, RInt, number, "Number", "The maximum number of items you can upload.")
+	Body()
+	number = (FIRInt) self->GetCentralStorageItemLimit(itemType);
+} EndFunc()
+BeginSignal(NewItemAdded, "New Item Added", "Gets triggered when a new item gets uploaded to the central storage.") {
+	SignalParam(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item that got uploaded.")
+} EndSignal()
+BeginSignal(ItemAmountUpdated, "Item Amount Updated", "Gets triggered when the amount of item in the central storage changes.") {
+	SignalParam(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item that got uploaded.")
+	SignalParam(1, RInt, itemAmount, "Item Amount", "The new amount of items of the given type.")
+} EndSignal()
+BeginSignal(ItemLimitReachedUpdated, "Item Limit Reached Updated", "Gets triggered when an item type reached maximum capacity, or when it now has again available space for new items.") {
+	SignalParam(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item which changed if it has reached the limit or not.")
+	SignalParam(1, RBool, reached, "Reached", "True if the given item type has reached the limit or not.")
+} EndSignal()
+EndClass()

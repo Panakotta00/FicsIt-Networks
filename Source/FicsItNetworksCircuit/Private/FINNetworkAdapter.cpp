@@ -41,6 +41,7 @@ void AFINNetworkAdapter::RegisterAdapterSettings() {
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Building/Doors/Build_Gate_Automated_8x4.Build_Gate_Automated_8x4_C")), FFINAdapterSettings{FVector(75, 300, 350), FRotator(0, -90, 0), true, 2});
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Building/Doors/BUILD_SingleDoor_Base_01.BUILD_SingleDoor_Base_01_C")), FFINAdapterSettings{FVector(75, 0, 350), FRotator(0, -90, 0), true, 2});
 	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/Train/SwitchControl/Build_RailroadSwitchControl.Build_RailroadSwitchControl_C")), FFINAdapterSettings{FVector(-200, 400, 150), FRotator(), false, 1});
+	RegistererAdapterSetting(FString(TEXT("/Game/FactoryGame/Buildable/Factory/CentralStorage/Build_CentralStorage.Build_CentralStorage_C")), FFINAdapterSettings{FVector(290,0,400), FRotator(0,-90,0), true, 2});
 }
 
 bool AFINNetworkAdapter::FindConnection(AActor* Actor, FVector HitLocation, FTransform& OutTransform, bool& OutMesh, int& OutMaxCables) {

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "FGCentralStorageSubsystem.h"
 #include "FicsItReflection.h"
 #include "FIRHookSubsystem.h"
 #include "Reflection/FIRClass.h"
@@ -50,7 +51,7 @@ class FICSITREFLECTION_API UFIRFunctionHook : public UFIRHook {
 private:
 	UPROPERTY()
 	UObject* Sender;
-	
+
 	bool bIsRegistered;
 
 	UPROPERTY()
@@ -60,12 +61,12 @@ protected:
 	UPROPERTY()
 	TSet<TWeakObjectPtr<UObject>> Senders;
 	FCriticalSection Mutex;
-	
+
 	bool IsSender(UObject* Obj) {
 		FScopeLock Lock(&Mutex);
 		return Senders.Contains(Obj);
 	}
-	
+
 	void Send(UObject* Obj, const FString& SignalName, const TArray<FFIRAnyValue>& Data) {
 		UFIRSignal** Signal = Signals.Find(SignalName);
 		if (!Signal) {
@@ -81,10 +82,10 @@ protected:
 
 	virtual UFIRFunctionHook* Self() { return nullptr; }
 
-public:		
+public:
 	void Register(UObject* sender) override {
 		Super::Register(sender);
-		
+
 		FScopeLock Lock(&Self()->Mutex);
     	Self()->Senders.Add(Sender = sender);
 
@@ -93,7 +94,7 @@ public:
 			Self()->RegisterFuncHook();
 		}
     }
-		
+
 	void Unregister() override {
 		FScopeLock Lock(&Self()->Mutex);
     	Self()->Senders.Remove(Sender);
@@ -107,7 +108,7 @@ class FICSITREFLECTION_API UFIRMultiFunctionHook : public UFIRHook {
 private:
 	UPROPERTY()
 	UObject* Sender;
-	
+
 	bool bIsRegistered;
 
 	UPROPERTY()
@@ -117,12 +118,12 @@ protected:
 	UPROPERTY()
 	TSet<TWeakObjectPtr<UObject>> Senders;
 	FCriticalSection Mutex;
-	
+
 	bool IsSender(UObject* Obj) {
 		FScopeLock Lock(&Mutex);
 		return Senders.Contains(Obj);
 	}
-	
+
 	void Send(UObject* Obj, const FString& SignalName, const TArray<FFIRAnyValue>& Data) {
 		UFIRSignal* Signal;
 		if (Signals.Contains(SignalName)) {
@@ -140,10 +141,10 @@ protected:
 
 	virtual UFIRMultiFunctionHook* Self() { return nullptr; }
 
-public:		
+public:
 	void Register(UObject* sender) override {
 		Super::Register(sender);
-		
+
 		FScopeLock Lock(&Self()->Mutex);
     	Self()->Senders.Add(Sender = sender);
 
@@ -152,7 +153,7 @@ public:
 			Self()->RegisterFuncHook();
 		}
     }
-		
+
 	void Unregister() override {
 		FScopeLock Lock(&Self()->Mutex);
     	Self()->Senders.Remove(Sender);
@@ -164,7 +165,7 @@ class UFIRBuildableHook : public UFIRStaticHook {
 	GENERATED_BODY()
 private:
 	FDelegateHandle Handle;
-	
+
 public:
 	UFUNCTION()
 	void ProductionStateChanged(EProductionStatus status) {
@@ -194,12 +195,12 @@ private:
 
 	UPROPERTY()
 	UFIRSignal* VehicleExitSignal;
-	
+
 protected:
 	static UFIRRailroadTrackHook* StaticSelf() {
 		static UFIRRailroadTrackHook* Hook = nullptr;
 		if (!Hook) Hook = const_cast<UFIRRailroadTrackHook*>(GetDefault<UFIRRailroadTrackHook>());
-		return Hook; 
+		return Hook;
 	}
 
 	// Begin UFIRFunctionHook
@@ -207,7 +208,7 @@ protected:
 		return StaticSelf();
 	}
 	// End UFIRFunctionHook
-	
+
 private:
 	static void VehicleEnter(AFGBuildableRailroadTrack* Track, AFGRailroadVehicle* Vehicle) {
 		StaticSelf()->Send(Track, TEXT("VehicleEnter"), {(FIRTrace)Vehicle});
@@ -216,7 +217,7 @@ private:
 	static void VehicleExit(AFGBuildableRailroadTrack* Track, AFGRailroadVehicle* Vehicle) {
 		StaticSelf()->Send(Track, TEXT("VehicleExit"), {(FIRTrace)Vehicle});
 	}
-	
+
 public:
 	void RegisterFuncHook() override {
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadTrack::OnVehicleEntered, (void*)GetDefault<AFGBuildableRailroadTrack>(), &VehicleEnter);
@@ -227,22 +228,22 @@ public:
 UCLASS()
 class UFIRTrainHook : public UFIRStaticHook {
 	GENERATED_BODY()
-			
+
 public:
 	UFUNCTION()
 	void SelfDrvingUpdate(bool enabled) {
 		Send({enabled});
 	}
-			
+
 	void Register(UObject* sender) override {
 		Super::Register(sender);
 
 		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Sender->GetClass());
 		Signal = Class->FindFIRSignal(TEXT("SelfDrvingUpdate"));
-		
+
 		Cast<AFGTrain>(sender)->mOnSelfDrivingChanged.AddDynamic(this, &UFIRTrainHook::SelfDrvingUpdate);
 	}
-		
+
 	void Unregister() override {
 		Cast<AFGTrain>(Sender)->mOnSelfDrivingChanged.RemoveDynamic(this, &UFIRTrainHook::SelfDrvingUpdate);
 	}
@@ -257,12 +258,12 @@ private:
 
 	UPROPERTY()
 	UFIRSignal* VehicleExitSignal;
-	
+
 protected:
 	static UFIRRailroadStationHook* StaticSelf() {
 		static UFIRRailroadStationHook* Hook = nullptr;
 		if (!Hook) Hook = const_cast<UFIRRailroadStationHook*>(GetDefault<UFIRRailroadStationHook>());
-		return Hook; 
+		return Hook;
 	}
 
 	// Begin UFIRFunctionHook
@@ -270,12 +271,12 @@ protected:
 		return StaticSelf();
 	}
 	// End UFIRFunctionHook
-	
+
 private:
 	static void StartDocking(bool RetVal, AFGBuildableRailroadStation* Self, AFGLocomotive* Locomotive, float Offset) {
 		StaticSelf()->Send(Self, TEXT("StartDocking"), {RetVal, (FIRTrace)(UObject*)Locomotive, Offset});
 	}
-	
+
 	static void FinishDocking(AFGBuildableRailroadStation* Self) {
 		StaticSelf()->Send(Self, TEXT("FinishDocking"), {});
 	}
@@ -283,7 +284,7 @@ private:
 	static void CancelDocking(AFGBuildableRailroadStation* Self) {
 		StaticSelf()->Send(Self, TEXT("CancelDocking"), {});
 	}
-	
+
 public:
 	void RegisterFuncHook() override {
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRailroadStation::StartDocking, GetDefault<AFGBuildableRailroadStation>(), &UFIRRailroadStationHook::StartDocking);
@@ -298,7 +299,7 @@ class UFIRRailroadSignalHook : public UFIRStaticHook {
 
 	UPROPERTY()
 	UFIRSignal* ValidationChangedSignal;
-			
+
 public:
 	UFUNCTION()
 	void AspectChanged(ERailroadSignalAspect Aspect) {
@@ -309,19 +310,19 @@ public:
 	void ValidationChanged(ERailroadBlockValidation Validation) {
 		ValidationChangedSignal->Trigger(Sender, {(int64)Validation});
 	}
-	
+
 	void Register(UObject* sender) override {
 		Super::Register(sender);
-		
+
 		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Sender->GetClass());
 		Signal = Class->FindFIRSignal(TEXT("AspectChanged"));
 
 		ValidationChangedSignal = Class->FindFIRSignal(TEXT("ValidationChanged"));
-		
+
 		Cast<AFGBuildableRailroadSignal>(sender)->mOnAspectChangedDelegate.AddDynamic(this, &UFIRRailroadSignalHook::AspectChanged);
 		Cast<AFGBuildableRailroadSignal>(sender)->mOnBlockValidationChangedDelegate.AddDynamic(this, &UFIRRailroadSignalHook::ValidationChanged);
 	}
-		
+
 	void Unregister() override {
 		Cast<AFGBuildableRailroadSignal>(Sender)->mOnAspectChangedDelegate.RemoveDynamic(this, &UFIRRailroadSignalHook::AspectChanged);
 		Cast<AFGBuildableRailroadSignal>(Sender)->mOnBlockValidationChangedDelegate.RemoveDynamic(this, &UFIRRailroadSignalHook::ValidationChanged);
@@ -336,9 +337,9 @@ class UFIRPipeHyperStartHook : public UFIRMultiFunctionHook {
 	static UFIRPipeHyperStartHook* StaticSelf() {
 		static UFIRPipeHyperStartHook* Hook = nullptr;
 		if (!Hook) Hook = const_cast<UFIRPipeHyperStartHook*>(GetDefault<UFIRPipeHyperStartHook>());
-		return Hook; 
+		return Hook;
 	}
-	
+
 	// Begin UFIRFunctionHook
 	virtual UFIRMultiFunctionHook* Self() {
 		return StaticSelf();
@@ -362,12 +363,12 @@ private:
 				StaticSelf()->Send(connection->GetOwner(), "PlayerExited", {});
 			}
 		}
-	} 
-				
+	}
+
 public:
 	void RegisterFuncHook() override {
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGCharacterMovementComponent::EnterPipeHyper, (void*)GetDefault<UFGCharacterMovementComponent>(), &EnterHyperPipe);
-		SUBSCRIBE_METHOD_VIRTUAL(UFGCharacterMovementComponent::PipeHyperForceExit, (void*)GetDefault<UFGCharacterMovementComponent>(), &ExitHyperPipe); 
+		SUBSCRIBE_METHOD_VIRTUAL(UFGCharacterMovementComponent::PipeHyperForceExit, (void*)GetDefault<UFGCharacterMovementComponent>(), &ExitHyperPipe);
     }
 };
 
@@ -379,7 +380,7 @@ protected:
 	static UFIRFactoryConnectorHook* StaticSelf() {
 		static UFIRFactoryConnectorHook* Hook = nullptr;
 		if (!Hook) Hook = const_cast<UFIRFactoryConnectorHook*>(GetDefault<UFIRFactoryConnectorHook>());
-		return Hook; 
+		return Hook;
 	}
 
 	// Begin UFIRFunctionHook
@@ -391,7 +392,7 @@ protected:
 private:
 	static FCriticalSection MutexFactoryGrab;
 	static TMap<TWeakObjectPtr<UFGFactoryConnectionComponent>, int8> FactoryGrabsRunning;
-	
+
 	static void LockFactoryGrab(UFGFactoryConnectionComponent* comp) {
 		MutexFactoryGrab.Lock();
 		++FactoryGrabsRunning.FindOrAdd(comp);
@@ -432,8 +433,8 @@ private:
 			DoFactoryGrab(c, item);
 		}
 	}
-			
-public:		
+
+public:
 	void RegisterFuncHook() override {
 		// TODO: Check if this works now
 		// SUBSCRIBE_METHOD_MANUAL("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_GrabOutput, &FactoryGrabHook);
@@ -450,7 +451,7 @@ protected:
 	static UFIRPipeConnectorHook* StaticSelf() {
 		static UFIRPipeConnectorHook* Hook = nullptr;
 		if (!Hook) Hook = const_cast<UFIRPipeConnectorHook*>(GetDefault<UFIRPipeConnectorHook>());
-		return Hook; 
+		return Hook;
 	}
 
 	// Begin UFIRFunctionHook
@@ -458,8 +459,8 @@ protected:
 		return StaticSelf();
 	}
 	// End UFIRFunctionHook
-			
-public:		
+
+public:
 	void RegisterFuncHook() override {
 		// TODO: Check if this works now
 		// SUBSCRIBE_METHOD_MANUAL("?Factory_GrabOutput@UFGFactoryConnectionComponent@@QEAA_NAEAUFInventoryItem@@AEAMV?$TSubclassOf@VUFGItemDescriptor@@@@@Z", UFGFactoryConnectionComponent::Factory_GrabOutput, &FactoryGrabHook);
@@ -474,7 +475,7 @@ protected:
 	static UFIRPowerCircuitHook* StaticSelf() {
 		static UFIRPowerCircuitHook* Hook = nullptr;
 		if (!Hook) Hook = const_cast<UFIRPowerCircuitHook*>(GetDefault<UFIRPowerCircuitHook>());
-		return Hook; 
+		return Hook;
 	}
 
 	// Begin UFIRFunctionHook
@@ -482,7 +483,7 @@ protected:
 		return StaticSelf();
 	}
 	// End UFIRFunctionHook
-			
+
 private:
 	static void TickCircuitHook_Decl(UFGPowerCircuit*, float);
 	static void TickCircuitHook(CallScope<void(*)(UFGPowerCircuit*, float)>& scope, UFGPowerCircuit* circuit, float dt) {
@@ -499,11 +500,60 @@ private:
 			}
 		} catch (...) {}
 	}
-			
+
 public:
 	void RegisterFuncHook() override {
 		// TODO: Check if this works now
 		//SUBSCRIBE_METHOD_MANUAL("?TickCircuit@UFGPowerCircuit@@MEAAXM@Z", TickCircuitHook_Decl, &TickCircuitHook);
 		//SUBSCRIBE_METHOD(UFGPowerCircuit::TickCircuit, &TickCircuitHook);
     }
+};
+
+UCLASS()
+class UFIRDimensionalDepotHook : public UFIRStaticHook {
+	GENERATED_BODY()
+
+	UPROPERTY()
+	UFIRSignal* NewItemAddedSignal;
+
+	UPROPERTY()
+	UFIRSignal* ItemAmountUpdatedSignal;
+
+	UPROPERTY()
+	UFIRSignal* ItemLimitReachedUpdatedSignal;
+
+public:
+	UFUNCTION()
+	void NewItem(TSubclassOf<UFGItemDescriptor> Item) {
+		NewItemAddedSignal->Trigger(Sender, {(FIRClass)Item});
+	}
+
+	UFUNCTION()
+	void AmountUpdated(TSubclassOf<UFGItemDescriptor> Item, int32 Amount) {
+		ItemAmountUpdatedSignal->Trigger(Sender, {(FIRClass)Item, (FIRInt)Amount});
+	}
+
+	UFUNCTION()
+	void LimitedReachedUpdated(TSubclassOf<UFGItemDescriptor> Item, bool Reached) {
+		ItemLimitReachedUpdatedSignal->Trigger(Sender, {(FIRClass)Item, Reached});
+	}
+
+	void Register(UObject* sender) override {
+		Super::Register(sender);
+
+		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(Sender->GetClass());
+		NewItemAddedSignal = Class->FindFIRSignal(TEXT("NewItemAdded"));
+		ItemAmountUpdatedSignal = Class->FindFIRSignal(TEXT("ItemAmountUpdated"));
+		ItemLimitReachedUpdatedSignal = Class->FindFIRSignal(TEXT("ItemLimitReachedUpdated"));
+
+		Cast<AFGCentralStorageSubsystem>(sender)->mOnCentralStorageNewItemAddedDelegate.AddDynamic(this, &UFIRDimensionalDepotHook::NewItem);
+		Cast<AFGCentralStorageSubsystem>(sender)->mOnCentralStorageItemAmountUpdatedDelegate.AddDynamic(this, &UFIRDimensionalDepotHook::AmountUpdated);
+		Cast<AFGCentralStorageSubsystem>(sender)->mOnCentralStorageItemLimitReachedUpdated.AddDynamic(this, &UFIRDimensionalDepotHook::LimitedReachedUpdated);
+	}
+
+	void Unregister() override {
+		Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageNewItemAddedDelegate.RemoveDynamic(this, &UFIRDimensionalDepotHook::NewItem);
+		Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageItemAmountUpdatedDelegate.RemoveDynamic(this, &UFIRDimensionalDepotHook::AmountUpdated);
+		Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageItemLimitReachedUpdated.RemoveDynamic(this, &UFIRDimensionalDepotHook::LimitedReachedUpdated);
+	}
 };

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FIRArrayProperty.h"
 #include "FIRFunction.h"
 #include "FIRUFunction.generated.h"
 
