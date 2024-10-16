@@ -400,6 +400,19 @@ namespace FINLua {
 		}
 	}
 
+	void luaFINDebug_dumpTable(lua_State* L, int index) {
+		lua_pushvalue(L, index);
+		lua_pushnil(L);
+		while (lua_next(L, -2)) {
+			lua_pushvalue(L, -2);
+			FString key = luaFIN_toFString(L, -1);
+			FString type = luaFIN_toFString(L, -2);
+			UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Lua Table: [%s] = %s"), *key, *type);
+			lua_pop(L, 2);
+		}
+		lua_pop(L, 1);
+	}
+
 	void setupUtilLib(lua_State* L) {
 		PersistenceNamespace("UtilLib");
 		
