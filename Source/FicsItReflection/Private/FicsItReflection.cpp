@@ -277,15 +277,25 @@ UFIRClass* FFicsItReflectionModule::FindClass(UClass* Clazz, bool bRecursive, bo
 }
 
 UFIRClass* FFicsItReflectionModule::FindClass(const FString& ClassName) const {
-	UFIRClass* const* Class = ClassNames.Find(ClassName);
-	if (Class) return *Class;
-	else return nullptr;
+	const FString* TryClass = &ClassName;
+	TSet<const FString*> TriedClassNames;
+	while (TryClass) {
+		UFIRClass* const* Class = ClassNames.Find(*TryClass);
+		if (Class) return *Class;
+
+		TriedClassNames.Add(TryClass);
+		TryClass = ClassRedirects.Find(*TryClass);
+		if (TriedClassNames.Contains(TryClass)) {
+			return nullptr;
+		}
+	}
+	return nullptr;
 }
 
 UClass* FFicsItReflectionModule::FindUClass(UFIRClass* Class) const {
 	UClass* const* UClass = ClassesReversed.Find(Class);
 	if (UClass) return *UClass;
-	else return nullptr;
+	return nullptr;
 }
 
 UFIRStruct* FFicsItReflectionModule::FindStruct(UScriptStruct* Struct, bool bRecursive, bool bTryToReflect) {
@@ -326,15 +336,33 @@ UFIRStruct* FFicsItReflectionModule::FindStruct(UScriptStruct* Struct, bool bRec
 }
 
 UFIRStruct* FFicsItReflectionModule::FindStruct(const FString& StructName) const {
-	UFIRStruct* const* Struct = StructNames.Find(StructName);
-	if (Struct) return *Struct;
-	else return nullptr;
+	const FString* TryStruct = &StructName;
+	TSet<const FString*> TriedStructNames;
+	while (TryStruct) {
+		UFIRStruct* const* Struct = StructNames.Find(StructName);
+		if (Struct) return *Struct;
+
+		TriedStructNames.Add(TryStruct);
+		TryStruct = StructRedirects.Find(*TryStruct);
+		if (TriedStructNames.Contains(TryStruct)) {
+			return nullptr;
+		}
+	}
+	return nullptr;
 }
 
 UScriptStruct* FFicsItReflectionModule::FindScriptStruct(UFIRStruct* Struct) const {
 	UScriptStruct* const* ScriptStruct = StructsReversed.Find(Struct);
 	if (ScriptStruct) return *ScriptStruct;
 	else return nullptr;
+}
+
+void FFicsItReflectionModule::AddClassRedirect(const FString& From, const FString& To) {
+	ClassRedirects.Add(From, To);
+}
+
+void FFicsItReflectionModule::AddStructRedirect(const FString& From, const FString& To) {
+	StructRedirects.Add(From, To);
 }
 
 void PrintProperty(FString Prefix, UFIRProperty* Property) {

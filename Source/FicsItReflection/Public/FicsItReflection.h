@@ -40,6 +40,13 @@ public:
 	UFIRStruct* FindStruct(const FString& StructName) const;
 	UScriptStruct* FindScriptStruct(UFIRStruct* Struct) const;
 
+	void AddClassRedirect(const FString& From, const FString& To);
+	void AddStructRedirect(const FString& From, const FString& To);
+	void AddRedirect(const FString& From, const FString& To) {
+		AddClassRedirect(From, To);
+		AddStructRedirect(From, To);
+	}
+
 	void PrintReflection();
 
 	inline const TMap<UClass*, UFIRClass*>& GetClasses() { return Classes; }
@@ -69,10 +76,12 @@ private:
 	TMap<UClass*, UFIRClass*> Classes;
 	TMap<UFIRClass*, UClass*> ClassesReversed;
 	TMap<FString, UFIRClass*> ClassNames;
+	TMap<FString, FString> ClassRedirects;
 
 	TMap<UScriptStruct*, UFIRStruct*> Structs;
 	TMap<UFIRStruct*, UScriptStruct*> StructsReversed;
 	TMap<FString, UFIRStruct*> StructNames;
+	TMap<FString, FString> StructRedirects;
 
 	TArray<UFIRSource*> Sources;
 };
