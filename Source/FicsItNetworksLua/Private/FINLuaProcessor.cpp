@@ -6,8 +6,9 @@
 #include "FicsItNetworksComputer.h"
 #include "FicsItNetworksLuaModule.h"
 #include "FILLogContainer.h"
+#include "FINComputerEEPROMDesc.h"
 #include "FINNetworkUtils.h"
-#include "FINItemStateEEPROMLua.h"
+#include "FINItemStateEEPROMText.h"
 #include "FINMediaSubsystem.h"
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaGlobalLib.h"
@@ -694,7 +695,7 @@ int64 UFINLuaProcessor::GetMemoryUsage(bool bInRecalc) {
 
 TOptional<FString> UFINLuaProcessor::GetEEPROM() const {
 	FInventoryItem eeprom = Kernel->GetEEPROM();
-	if (const FFINItemStateEEPROMLua* state = eeprom.GetItemState().GetValuePtr<FFINItemStateEEPROMLua>()) {
+	if (const FFINItemStateEEPROMText* state = eeprom.GetItemState().GetValuePtr<FFINItemStateEEPROMText>()) {
 		return state->Code;
 	}
 	return {};
@@ -704,8 +705,8 @@ bool UFINLuaProcessor::SetEEPROM(const FString& Code) {
 	FInventoryItem eeprom = Kernel->GetEEPROM();
 	UFINComputerEEPROMDesc::CreateEEPROMStateInItem(eeprom);
 
-	if (const FFINItemStateEEPROMLua* stateLua = eeprom.GetItemState().GetValuePtr<FFINItemStateEEPROMLua>()) {
-		FFINItemStateEEPROMLua state = *stateLua;
+	if (const FFINItemStateEEPROMText* stateLua = eeprom.GetItemState().GetValuePtr<FFINItemStateEEPROMText>()) {
+		FFINItemStateEEPROMText state = *stateLua;
 		state.Code = Code;
 		return Kernel->SetEEPROM(FFGDynamicStruct(state));
 	}

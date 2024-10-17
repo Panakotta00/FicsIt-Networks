@@ -271,7 +271,10 @@ void FFicsItNetworksModule::StartupModule(){
 		"/FicsItNetworks/Items/Floppy/Desc_FloppyDisk.Desc_FloppyDisk_C");
 	FIN_CoreRedirect(Type_Class,
 		"/FicsItNetworks/Computer/EEPROM/EEPROM_Lua_Desc.EEPROM_Lua_Desc_C",
-		"/FicsItNetworks/Items/EEPROM/Desc_EEPROM_Lua.Desc_EEPROM_Lua_C");
+		"/FicsItNetworks/Items/EEPROM/Desc_EEPROM_Text.Desc_EEPROM_Text_C");
+	FIN_CoreRedirect(Type_Class,
+		"/FicsItNetworks/Items/EEPROM/Desc_EEPROM_Lua.Desc_EEPROM_Lua_C",
+		"/FicsItNetworks/Items/EEPROM/Desc_EEPROM_Text.Desc_EEPROM_Text_C");
 	FIN_CoreRedirect(Type_Class,
 		"/FicsItNetworks/Computer/Modules/RAM/RAM_T1.RAM_T1_C",
 		"/FicsItNetworks/Buildings/Computer/Modules/RAM/Build_RAM_T1.Build_RAM_T1_C");

@@ -30,7 +30,7 @@ class UFINLuaUtils : public UObject {
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable)
-	static bool TryGetLuaEEPROM(const FFGDynamicStruct& Struct, FFINItemStateEEPROMLua& LuaEEPROM);
+	static bool TryGetLuaEEPROM(const FFGDynamicStruct& Struct, FFINItemStateEEPROMText& LuaEEPROM);
 
 	UFUNCTION( BlueprintPure, CustomThunk, Category = "Utilities|Dynamic Struct", meta = (NativeBreakFunc, CustomStructureParam = "out_structureValue" ) )
 	static bool BreakFINDynamicStruct( const FFGDynamicStruct& inDynamicStruct, int32& out_structureValue );
