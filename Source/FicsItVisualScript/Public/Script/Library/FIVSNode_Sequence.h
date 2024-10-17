@@ -48,7 +48,7 @@ public:
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) override;
 	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const override;
 	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
 		return FFIVSNodeStatement_Sequence{
 			NodeId,
 			ExecIn->PinId,

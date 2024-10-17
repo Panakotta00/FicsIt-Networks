@@ -70,7 +70,7 @@ void FFIVSEdActionSelectionTextFilter::SetFilterText(const FString& FilterText) 
 }
 
 bool FFIVSEdActionSelectionPinFilter::Filter(TSharedPtr<FFIVSEdActionSelectionEntry> ToFilter, bool bForce) {
-	if (FilterPinType.DataType.GetType() == FIN_NIL) return false;
+	if (FilterPinType.DataType.GetType() == FIR_NIL) return false;
 	for (const FFIVSFullPinType& Pin : ToFilter->GetSignature().Pins) {
 		if (FilterPinType.CanConnect(Pin)) {
 			return true;
@@ -194,7 +194,7 @@ void SFIVSEdActionSelection::SetFocus() {
 
 SFIVSEdActionSelection::SFIVSEdActionSelection() {
 	TextFilter = MakeShared<FFIVSEdActionSelectionTextFilter>(TEXT(""));
-	PinFilter = MakeShared<FFIVSEdActionSelectionPinFilter>(FFIVSFullPinType(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIN_NIL)));
+	PinFilter = MakeShared<FFIVSEdActionSelectionPinFilter>(FFIVSFullPinType(FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIR_NIL)));
 	Filters.Add(TextFilter);
 	Filters.Add(PinFilter);
 }

@@ -19,10 +19,10 @@ struct FFIVSNodeStatement_CallReflectionFunction : public FFIVSNodeStatement {
 	UPROPERTY(SaveGame)
 	TArray<FGuid> OutputPins;
 	UPROPERTY(SaveGame)
-	UFINFunction* Function;
+	UFIRFunction* Function;
 
 	FFIVSNodeStatement_CallReflectionFunction() = default;
-	FFIVSNodeStatement_CallReflectionFunction(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid Self, const TArray<FGuid>& InputPins, const TArray<FGuid>& OutputPins, UFINFunction* Function) :
+	FFIVSNodeStatement_CallReflectionFunction(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid Self, const TArray<FGuid>& InputPins, const TArray<FGuid>& OutputPins, UFIRFunction* Function) :
 		FFIVSNodeStatement(Node),
 		ExecIn(ExecIn),
 		ExecOut(ExecOut),
@@ -53,7 +53,7 @@ private:
 	TArray<UFIVSPin*> OutputPins;
 
 	UPROPERTY()
-	UFINFunction* Function = nullptr;
+	UFIRFunction* Function = nullptr;
 	
 public:
 	UFIVSNode_CallReflectionFunction();
@@ -65,8 +65,8 @@ public:
 	// End UFIVSNodes
 	
 	// Begin UFIVSScriptNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override;
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override;
 	// End UFIVSScriptNode
 
-	void SetFunction(UFINFunction* InFunction);
+	void SetFunction(UFIRFunction* InFunction);
 };

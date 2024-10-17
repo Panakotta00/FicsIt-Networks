@@ -56,7 +56,7 @@ EFIVSPinType UFIVSPin::GetPinType() {
 }
 
 FFIVSPinDataType UFIVSPin::GetPinDataType() {
-	return FFIVSPinDataType(FIN_NIL);
+	return FFIVSPinDataType(FIR_NIL);
 }
 
 const TArray<UFIVSPin*>& UFIVSPin::GetConnections() {
@@ -168,7 +168,7 @@ EFIVSPinType UFIVSWildcardPin::GetPinType() {
 FFIVSPinDataType UFIVSWildcardPin::GetPinDataType() {
 	TArray<UFIVSPin*> Connected;
 	GetAllConnected(Connected);
-	FFIVSPinDataType Type = FFIVSPinDataType(FFINExpandedNetworkValueType(FIN_ANY));
+	FFIVSPinDataType Type = FFIVSPinDataType(FFIRExtendedValueType(FIR_ANY));
 	for (UFIVSPin* Pin : Connected) {
 		if (Cast<UFIVSWildcardPin>(Pin)) continue;
 		Type = Pin->GetPinDataType();

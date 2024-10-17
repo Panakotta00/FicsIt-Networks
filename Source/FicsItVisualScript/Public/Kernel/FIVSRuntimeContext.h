@@ -110,14 +110,14 @@ public:
 			Value = PinValues.Find(*connected);
 			if (Value) return Value;
 		}
-		const FFINAnyNetworkValue* NetValue = Script->PinLiterals.Find(Pin);
+		const FFIRAnyValue* NetValue = Script->PinLiterals.Find(Pin);
 		if (NetValue) {
 			return &PinValues.Add(Pin, FFIVSValue::MakeRValue(*NetValue));
 		}
 		return nullptr;
 	}
 
-	const FFINAnyNetworkValue* TryGetRValue(FGuid Pin) {
+	const FFIRAnyValue* TryGetRValue(FGuid Pin) {
 		FFIVSValue* value = GetValue(Pin);
 		if (!value) return {};
 		if (!value->bIsLValue || value->LValuePin == Pin) {
@@ -127,7 +127,7 @@ public:
 		}
 	}
 
-	FFINAnyNetworkValue* TryGetLValue(FGuid Pin) {
+	FFIRAnyValue* TryGetLValue(FGuid Pin) {
 		FFIVSValue* value = GetValue(Pin);
 		if (!value) return {};
 		if (!value->bIsLValue) return {};
@@ -144,7 +144,7 @@ public:
 		PinValues.FindOrAdd(Pin, MoveTemp(Value));
 	}
 
-	void SetValue(FGuid Pin, const FFINAnyNetworkValue& Value) {
+	void SetValue(FGuid Pin, const FFIRAnyValue& Value) {
 		SetValue(Pin, FFIVSValue::MakeRValue(Value));
 	}
 

@@ -13,12 +13,12 @@ struct FFIVSNodeStatement_Convert : public FFIVSNodeStatement {
 	UPROPERTY(SaveGame)
 	FGuid Output;
 	UPROPERTY(SaveGame)
-	TEnumAsByte<EFINNetworkValueType> FromType;
+	TEnumAsByte<EFIRValueType> FromType;
 	UPROPERTY(SaveGame)
-	TEnumAsByte<EFINNetworkValueType> ToType;
+	TEnumAsByte<EFIRValueType> ToType;
 
 	FFIVSNodeStatement_Convert() = default;
-	FFIVSNodeStatement_Convert(FGuid Node, FGuid Input, FGuid Output, EFINNetworkValueType FromType, EFINNetworkValueType ToType) :
+	FFIVSNodeStatement_Convert(FGuid Node, FGuid Input, FGuid Output, EFIRValueType FromType, EFIRValueType ToType) :
 		FFIVSNodeStatement(Node),
 		Input(Input),
 		Output(Output),
@@ -42,9 +42,9 @@ private:
 	UFIVSPin* Output = nullptr;
 
 	UPROPERTY()
-	TEnumAsByte<EFINNetworkValueType> FromType = FIN_NIL;
+	TEnumAsByte<EFIRValueType> FromType = FIR_NIL;
 	UPROPERTY()
-	TEnumAsByte<EFINNetworkValueType> ToType = FIN_NIL;
+	TEnumAsByte<EFIRValueType> ToType = FIR_NIL;
 
 public:
 	// Begin UFIVSNode
@@ -54,7 +54,7 @@ public:
 	// End UFIVSNodes
 
 	// Begin UFIVSGenericNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
 		return FFIVSNodeStatement_Convert{
 			NodeId,
 			Input->PinId,
@@ -65,5 +65,5 @@ public:
 	}
 	// End UFIVSGenericNode
 
-	void SetConversion(EFINNetworkValueType FromType, EFINNetworkValueType ToType);
+	void SetConversion(EFIRValueType FromType, EFIRValueType ToType);
 };

@@ -52,7 +52,7 @@ public:
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
 		return FFIVSNodeStatement_Branch{
 			NodeId,
 			ExecIn->PinId,

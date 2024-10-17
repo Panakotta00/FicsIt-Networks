@@ -82,7 +82,7 @@ public:
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override;
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override;
 	// End UFIVSScriptNode
 
 	void SetType(const FFIVSPinDataType& InType, bool bIsAssignment);

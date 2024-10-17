@@ -1,8 +1,6 @@
 ﻿#include "Editor/FIVSEdSignalSelection.h"
 
-#include "Reflection/FINClass.h"
-#include "Reflection/FINReflection.h"
-#include "Reflection/FINSignal.h"
+#include "FicsItReflection.h"
 #include "Editor/FIVSEdSearchListView.h"
 
 void SFIVSEdSignalSelection::Construct(const FArguments& InArgs) {
@@ -29,12 +27,12 @@ FReply SFIVSEdSignalSelection::OnMouseButtonDown(const FGeometry& MyGeometry, co
 	return FReply::Handled();
 }
 
-void SFIVSEdSignalSelection::SelectObject(UFINSignal* Signal) {
+void SFIVSEdSignalSelection::SelectObject(UFIRSignal* Signal) {
 	SignalWidgetHolder->SetContent(CreateSmallSignalWidget(Signal));
 	OnSelectionChanged.ExecuteIfBound(Signal);
 }
 
-TSharedRef<SWidget> SFIVSEdSignalSelection::CreateSmallSignalWidget(UFINSignal* InSignal) {
+TSharedRef<SWidget> SFIVSEdSignalSelection::CreateSmallSignalWidget(UFIRSignal* InSignal) {
 	if (InSignal)
 	return SNew(SHorizontalBox)
 			+SHorizontalBox::Slot()[
@@ -47,23 +45,23 @@ TSharedRef<SWidget> SFIVSEdSignalSelection::CreateSmallSignalWidget(UFINSignal* 
 }
 
 TSharedRef<SWidget> SFIVSEdSignalSelection::CreateSignalSearch() {
-	TArray<UFINSignal*> Elements;
-	for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
-		for (UFINSignal* Signal : Class.Value->GetSignals(false)) {
+	TArray<UFIRSignal*> Elements;
+	for (TPair<UClass*, UFIRClass*> Class : FFicsItReflectionModule::Get().GetClasses()) {
+		for (UFIRSignal* Signal : Class.Value->GetSignals(false)) {
 			Elements.Add(Signal);
 		}
 	}
 	Elements.Add(nullptr);
 
-	return SNew(SFIVSEdSearchListView<UFINSignal*>, Elements)
-		.OnGetSearchableText_Lambda([](UFINSignal* InSignal) -> FString {
+	return SNew(SFIVSEdSearchListView<UFIRSignal*>, Elements)
+		.OnGetSearchableText_Lambda([](UFIRSignal* InSignal) -> FString {
 			if (!InSignal) return TEXT("None");
-			return InSignal->GetDisplayName().ToString() + TEXT(" ") + Cast<UFINClass>(InSignal->GetOuter())->GetDisplayName().ToString();
+			return InSignal->GetDisplayName().ToString() + TEXT(" ") + Cast<UFIRClass>(InSignal->GetOuter())->GetDisplayName().ToString();
 		})
-		.OnGetElementWidget_Lambda([this](UFINSignal* InSignal) {
+		.OnGetElementWidget_Lambda([this](UFIRSignal* InSignal) {
 			return CreateSmallSignalWidget(InSignal);
 		})
-		.OnCommited_Lambda([this](UFINSignal* InSignal) {
+		.OnCommited_Lambda([this](UFIRSignal* InSignal) {
 			SelectObject(InSignal);
 			FSlateApplication::Get().DismissAllMenus();
 		});

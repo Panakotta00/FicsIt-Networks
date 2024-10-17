@@ -22,7 +22,7 @@ struct FICSITREFLECTION_API FFIRTrace {
 
 private:
 	TSharedPtr<FFIRTrace> Prev = nullptr;
-	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
+	TSharedPtr<FFINTraceStep> Step = nullptr;
 
 	UPROPERTY()
 	UObject* Obj = nullptr;
@@ -39,7 +39,7 @@ public:
 	 * Trys to find the most suitable trace step of for both given classes
 	 */
 	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> findTraceStep(UClass* A, UClass* B);
-	
+
 	FFIRTrace(const FFIRTrace& trace);
 	FFIRTrace& operator=(const FFIRTrace& trace);
 
@@ -58,6 +58,16 @@ public:
 	 * @return the copied and expanded network trace
 	 */
 	FFIRTrace operator/(UObject* other) const;
+	FFIRTrace Append(UObject* other, TSharedPtr<FFINTraceStep> InStep = nullptr) {
+		if (!InStep.IsValid()) return *this / other;
+		FFIRTrace trace(other);
+
+		UObject* A = Obj;
+		if (!::IsValid(A) || !other) return FFIRTrace(nullptr); // if A is not valid, the network trace will always be not invalid
+		trace.Prev = MakeShared<FFIRTrace>(*this);
+		trace.Step = InStep;
+		return trace;
+	}
 
 	/**
 	 * Returns the referenced object.
@@ -133,6 +143,14 @@ public:
 	 * returns if the trace is valid or not
 	 */
 	operator bool() const;
+
+	TSharedPtr<FFIRTrace> GetPrev() const {
+		return Prev;
+	}
+
+	TSharedPtr<FFINTraceStep> GetStep() const {
+		return Step;
+	}
 };
 
 inline FArchive& operator<<(FArchive& Ar, FFIRTrace& trace) {

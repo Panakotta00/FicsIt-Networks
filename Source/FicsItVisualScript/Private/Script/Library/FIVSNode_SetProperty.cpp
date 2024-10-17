@@ -1,8 +1,8 @@
 #include "Script/Library/FIVSNode_SetProperty.h"
 
+#include "FicsItReflection.h"
+#include "FINNetworkUtils.h"
 #include "Kernel/FIVSRuntimeContext.h"
-#include "Network/FINNetworkUtils.h"
-#include "Reflection/FINReflection.h"
 
 void FFIVSNodeStatement_SetProperty::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
 	Context.Push_EvaluatePin(DataIn);
@@ -10,10 +10,10 @@ void FFIVSNodeStatement_SetProperty::PreExecPin(FFIVSRuntimeContext& Context, FG
 }
 
 void FFIVSNodeStatement_SetProperty::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	const FFINAnyNetworkValue* Instance = Context.TryGetRValue(InstanceIn);
-	const FFINAnyNetworkValue* Data = Context.TryGetRValue(DataIn);
-	FFINExecutionContext ExecContext;
-	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) {
+	const FFIRAnyValue* Instance = Context.TryGetRValue(InstanceIn);
+	const FFIRAnyValue* Data = Context.TryGetRValue(DataIn);
+	FFIRExecutionContext ExecContext;
+	if (Property->GetPropertyFlags() & FIR_Prop_ClassProp) {
 		ExecContext = Instance->GetClass();
 	} else {
 		ExecContext = UFINNetworkUtils::RedirectIfPossible(Instance->GetTrace());
@@ -23,11 +23,11 @@ void FFIVSNodeStatement_SetProperty::ExecPin(FFIVSRuntimeContext& Context, FGuid
 }
 
 void UFIVSNode_SetProperty::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
-	for (TPair<UClass*, UFINClass*> Class : FFINReflection::Get()->GetClasses()) {
-		for (UFINProperty* SetProperty : Class.Value->GetProperties(false)) {
+	for (TPair<UClass*, UFIRClass*> Class : FFicsItReflectionModule::Get().GetClasses()) {
+		for (UFIRProperty* SetProperty : Class.Value->GetProperties(false)) {
 			FFIVSNodeAction Action;
 			Action.NodeType = UFIVSNode_SetProperty::StaticClass();
-			if (SetProperty->GetPropertyFlags() & FIN_Prop_ClassProp) {
+			if (SetProperty->GetPropertyFlags() & FIR_Prop_ClassProp) {
 				Action.Title = FText::FromString(TEXT("Set ") + SetProperty->GetDisplayName().ToString() + TEXT(" (Class)"));
 			} else {
 				Action.Title = FText::FromString(TEXT("Set ") + SetProperty->GetDisplayName().ToString());
@@ -35,7 +35,7 @@ void UFIVSNode_SetProperty::GetNodeActions(TArray<FFIVSNodeAction>& Actions) con
 			Action.SearchableText = Action.Title;
 			Action.Category = FText::FromString(Class.Value->GetDisplayName().ToString() + TEXT("|Properties"));
 			Action.Pins.Add(FIVS_PIN_EXEC_INPUT);
-			Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFINExpandedNetworkValueType(SetProperty->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Class.Value)));
+			Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFIRExtendedValueType(SetProperty->GetPropertyFlags() & FIR_Prop_ClassProp ? FIR_CLASS : FIR_TRACE, Class.Value)));
 			FFIVSFullPinType PinType(SetProperty);
 			PinType.PinType |= FIVS_PIN_INPUT;
 			Action.Pins.Add(PinType);
@@ -53,13 +53,13 @@ void UFIVSNode_SetProperty::SerializeNodeProperties(const TSharedRef<FJsonObject
 }
 
 void UFIVSNode_SetProperty::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
-	SetProperty(Cast<UFINProperty>(FSoftObjectPath(Properties->GetStringField(TEXT("Property"))).TryLoad()));
+	SetProperty(Cast<UFIRProperty>(FSoftObjectPath(Properties->GetStringField(TEXT("Property"))).TryLoad()));
 }
 
-void UFIVSNode_SetProperty::SetProperty(UFINProperty* InProperty) {
+void UFIVSNode_SetProperty::SetProperty(UFIRProperty* InProperty) {
 	Property = InProperty;
 
-	if (Property->GetPropertyFlags() & FIN_Prop_ClassProp) {
+	if (Property->GetPropertyFlags() & FIR_Prop_ClassProp) {
 		DisplayName = FText::FromString(TEXT("Set ") + Property->GetInternalName() + TEXT(" (Class)"));
 	} else {
 		DisplayName = FText::FromString(TEXT("Set ") + Property->GetInternalName());
@@ -72,8 +72,8 @@ void UFIVSNode_SetProperty::SetProperty(UFINProperty* InProperty) {
 
 	ExecIn = CreatePin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString("Exec"));
 	ExecOut = CreatePin(FIVS_PIN_EXEC_OUTPUT, TEXT("Out"), FText::FromString("Out"));
-	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Instance"), FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIN_Prop_ClassProp ? FIN_CLASS : FIN_TRACE, Cast<UFINClass>(Property->GetOuter())));
+	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Instance"), FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIR_Prop_ClassProp ? FIR_CLASS : FIR_TRACE, Cast<UFIRClass>(Property->GetOuter())));
 	FFIVSPinDataType Type(Property);
-	if (Type.GetType() == FIN_OBJ) Type = FFIVSPinDataType(FIN_TRACE, Type.GetRefSubType());
+	if (Type.GetType() == FIR_OBJ) Type = FFIVSPinDataType(FIR_TRACE, Type.GetRefSubType());
 	DataIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Value"), FText::FromString("Value"), Type);
 }

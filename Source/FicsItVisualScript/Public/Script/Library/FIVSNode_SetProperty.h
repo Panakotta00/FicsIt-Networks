@@ -17,10 +17,10 @@ struct FFIVSNodeStatement_SetProperty : public FFIVSNodeStatement {
 	UPROPERTY(SaveGame)
 	FGuid DataIn;
 	UPROPERTY(SaveGame)
-	UFINProperty* Property = nullptr;
+	UFIRProperty* Property = nullptr;
 
 	FFIVSNodeStatement_SetProperty() = default;
-	FFIVSNodeStatement_SetProperty(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid InstanceIn, FGuid DataIn, UFINProperty* Property) :
+	FFIVSNodeStatement_SetProperty(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid InstanceIn, FGuid DataIn, UFIRProperty* Property) :
 		FFIVSNodeStatement(Node),
 		ExecIn(ExecIn),
 		ExecOut(ExecOut),
@@ -48,7 +48,7 @@ private:
 	UFIVSPin* DataIn = nullptr;
 
 	UPROPERTY()
-	UFINProperty* Property = nullptr;
+	UFIRProperty* Property = nullptr;
 
 public:
 	// Begin UFIVSNode
@@ -58,7 +58,7 @@ public:
 	// End UFIVSNodes
 
 	// Begin UFIVSGenericNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
 		return FFIVSNodeStatement_SetProperty{
 			NodeId,
 			ExecIn->PinId,
@@ -70,5 +70,5 @@ public:
 	}
 	// End UFIVSGenericNode
 
-	void SetProperty(UFINProperty* InProperty);
+	void SetProperty(UFIRProperty* InProperty);
 };

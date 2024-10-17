@@ -1,7 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Network/FINDynamicStructHolder.h"
+#include "FIRInstancedStruct.h"
+#include "FIRAnyValue.h"
 #include "FIVSScript.generated.h"
 
 struct FFIVSNodeStatement;
@@ -14,20 +15,20 @@ public:
 	FGuid StartNode;
 
 	UPROPERTY(SaveGame)
-	TMap<FGuid, FFINDynamicStructHolder> Nodes;
+	TMap<FGuid, FFIRInstancedStruct> Nodes;
 
 	UPROPERTY(SaveGame)
 	TMap<FGuid, FGuid> PinConnections;
 
 	UPROPERTY(SaveGame)
-	TMap<FGuid, FFINAnyNetworkValue> PinLiterals;
+	TMap<FGuid, FFIRAnyValue> PinLiterals;
 
 	UPROPERTY()
 	TMap<FGuid, FGuid> PinToNode;
 
-	TOptional<TFINDynamicStruct<const FFIVSNodeStatement>> FindNode(FGuid NodeId) const {
-		const FFINDynamicStructHolder* holder = Nodes.Find(NodeId);
+	TOptional<TFIRInstancedStruct<const FFIVSNodeStatement>> FindNode(FGuid NodeId) const {
+		const FFIRInstancedStruct* holder = Nodes.Find(NodeId);
 		if (!holder) return {};
-		return TFINDynamicStruct<const FFIVSNodeStatement>(*holder);
+		return TFIRInstancedStruct<const FFIVSNodeStatement>(*holder);
 	}
 };

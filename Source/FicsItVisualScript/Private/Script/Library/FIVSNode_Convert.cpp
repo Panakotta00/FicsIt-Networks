@@ -1,38 +1,39 @@
 #include "Script/Library/FIVSNode_Convert.h"
 
+#include "DefaultValueHelper.h"
+#include "FicsItReflection.h"
 #include "Kernel/FIVSRuntimeContext.h"
-#include "Reflection/FINReflection.h"
 
 void FFIVSNodeStatement_Convert::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
 	Context.Push_EvaluatePin(Input);
 }
 
 void FFIVSNodeStatement_Convert::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	const FFINAnyNetworkValue* inputVal = Context.TryGetRValue(Input);
-	Context.SetValue(Output, FINCastNetworkValue(*inputVal, ToType));
+	const FFIRAnyValue* inputVal = Context.TryGetRValue(Input);
+	Context.SetValue(Output, FIRCastValue(*inputVal, ToType));
 }
 
 void UFIVSNode_Convert::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
-	for (EFINNetworkValueType ConvertFromType : TEnumRange<EFINNetworkValueType>()) {
+	for (EFIRValueType ConvertFromType : TEnumRange<EFIRValueType>()) {
 		// Input FIN_ANY is excluded from conversion because it may fail or not and needs its own node
-		if (ConvertFromType == FIN_ARRAY || ConvertFromType == FIN_NIL || ConvertFromType == FIN_ANY || ConvertFromType == FIN_STRUCT) continue;
-		for (EFINNetworkValueType ConvertToType : TEnumRange<EFINNetworkValueType>()) {
+		if (ConvertFromType == FIR_ARRAY || ConvertFromType == FIR_NIL || ConvertFromType == FIR_ANY || ConvertFromType == FIR_STRUCT) continue;
+		for (EFIRValueType ConvertToType : TEnumRange<EFIRValueType>()) {
 			// Output FIN_ANY is excluded from conversion because it can be casted implicitly and expanded network type allows everything to implicitly convert to any
-			if (ConvertToType == FIN_ARRAY || ConvertToType == FIN_NIL || ConvertToType == FIN_STRUCT || ConvertToType == FIN_ANY) continue;
+			if (ConvertToType == FIR_ARRAY || ConvertToType == FIR_NIL || ConvertToType == FIR_STRUCT || ConvertToType == FIR_ANY) continue;
 			if (ConvertFromType == ConvertToType) continue;
 			// Checks if default conversion of input and output type works
-			if (FINCastNetworkValue(FFINAnyNetworkValue::DefaultValue(ConvertFromType), ConvertToType).GetType() != FIN_NIL) {
+			if (FIRCastValue(FFIRAnyValue::DefaultValue(ConvertFromType), ConvertToType).GetType() != FIR_NIL) {
 				FFIVSNodeAction Action;
 				Action.NodeType = UFIVSNode_Convert::StaticClass();
-				Action.Title = FText::FromString(TEXT("Convert ") + FINGetNetworkValueTypeName(ConvertFromType) + TEXT(" to ") + FINGetNetworkValueTypeName(ConvertToType));
+				Action.Title = FText::FromString(TEXT("Convert ") + FIRGetNetworkValueTypeName(ConvertFromType) + TEXT(" to ") + FIRGetNetworkValueTypeName(ConvertToType));
 				Action.SearchableText = Action.Title;
 				Action.Category = FText::FromString(TEXT("Conversions"));
-				if (ConvertFromType == FIN_TRACE || ConvertFromType == FIN_OBJ || ConvertFromType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
-					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFINExpandedNetworkValueType(ConvertFromType, FFINReflection::Get()->FindClass(UObject::StaticClass()))));
+				if (ConvertFromType == FIR_TRACE || ConvertFromType == FIR_OBJ || ConvertFromType == FIR_CLASS) // TODO: Maybe have to work a bit more on the expanded types
+					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFIRExtendedValueType(ConvertFromType, FFicsItReflectionModule::Get().FindClass(UObject::StaticClass()))));
 				else
 					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFIVSPinDataType(ConvertFromType)));
-				if (ConvertToType == FIN_TRACE || ConvertToType == FIN_OBJ || ConvertToType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
-					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_OUTPUT, FFINExpandedNetworkValueType(ConvertToType, FFINReflection::Get()->FindClass(UObject::StaticClass()))));
+				if (ConvertToType == FIR_TRACE || ConvertToType == FIR_OBJ || ConvertToType == FIR_CLASS) // TODO: Maybe have to work a bit more on the expanded types
+					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_OUTPUT, FFIRExtendedValueType(ConvertToType, FFicsItReflectionModule::Get().FindClass(UObject::StaticClass()))));
 				else
 					Action.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(ConvertToType)));
 				Action.OnExecute.BindLambda([ConvertFromType, ConvertToType](UFIVSNode* Node) {
@@ -58,21 +59,21 @@ void UFIVSNode_Convert::DeserializeNodeProperties(const TSharedPtr<FJsonObject>&
 	SetConversion(FromType, ToType);
 }
 
-void UFIVSNode_Convert::SetConversion(EFINNetworkValueType InFromType, EFINNetworkValueType InToType) {
+void UFIVSNode_Convert::SetConversion(EFIRValueType InFromType, EFIRValueType InToType) {
 	FromType = InFromType;
 	ToType = InToType;
 
-	DisplayName = FText::FromString(TEXT("Convert ") + FINGetNetworkValueTypeName(FromType) + TEXT(" to ") + FINGetNetworkValueTypeName(ToType));
+	DisplayName = FText::FromString(TEXT("Convert ") + FIRGetNetworkValueTypeName(FromType) + TEXT(" to ") + FIRGetNetworkValueTypeName(ToType));
 
 	DeletePin(Input);
 	DeletePin(Output);
 
-	if (FromType == FIN_TRACE || FromType == FIN_OBJ || FromType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
-		Input = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Input"), FText::FromString(TEXT("Input")), FFINExpandedNetworkValueType(FromType, FFINReflection::Get()->FindClass(UObject::StaticClass())));
+	if (FromType == FIR_TRACE || FromType == FIR_OBJ || FromType == FIR_CLASS) // TODO: Maybe have to work a bit more on the expanded types
+		Input = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Input"), FText::FromString(TEXT("Input")), FFIRExtendedValueType(FromType, FFicsItReflectionModule::Get().FindClass(UObject::StaticClass())));
 	else
-		Input = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Input"), FText::FromString(TEXT("Input")), FFINExpandedNetworkValueType(FromType));
-	if (ToType == FIN_TRACE || ToType == FIN_OBJ || ToType == FIN_CLASS) // TODO: Maybe have to work a bit more on the expanded types
-		Output = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Output"), FText::FromString(TEXT("Output")), FFINExpandedNetworkValueType(ToType, FFINReflection::Get()->FindClass(UObject::StaticClass())));
+		Input = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Input"), FText::FromString(TEXT("Input")), FFIRExtendedValueType(FromType));
+	if (ToType == FIR_TRACE || ToType == FIR_OBJ || ToType == FIR_CLASS) // TODO: Maybe have to work a bit more on the expanded types
+		Output = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Output"), FText::FromString(TEXT("Output")), FFIRExtendedValueType(ToType, FFicsItReflectionModule::Get().FindClass(UObject::StaticClass())));
 	else
-		Output = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Output"), FText::FromString(TEXT("Output")), FFINExpandedNetworkValueType(ToType));
+		Output = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Output"), FText::FromString(TEXT("Output")), FFIRExtendedValueType(ToType));
 }

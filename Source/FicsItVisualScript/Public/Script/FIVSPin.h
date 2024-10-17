@@ -1,9 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Network/FINNetworkValues.h"
-#include "Reflection/FINProperty.h"
+#include "FIRExtendedValueType.h"
+#include "FIRProperty.h"
 #include "FIVSPin.generated.h"
+
+class UFIRStruct;
 
 UENUM()
 enum EFIVSPinType {
@@ -20,7 +22,7 @@ enum EFIVSPinType {
 ENUM_CLASS_FLAGS(EFIVSPinType)
 
 USTRUCT()
-struct FFIVSPinDataType : public FFINExpandedNetworkValueType {
+struct FFIVSPinDataType : public FFIRExtendedValueType {
 	GENERATED_BODY()
 private:
 	UPROPERTY(SaveGame)
@@ -29,8 +31,8 @@ private:
 public:
 	FFIVSPinDataType() = default;
 	FFIVSPinDataType(const FFIVSPinDataType&) = default;
-	FFIVSPinDataType(const FFINExpandedNetworkValueType& Other) : FFINExpandedNetworkValueType(Other) {}
-	FFIVSPinDataType(EFINNetworkValueType InType, UFINStruct* InRefType) : FFINExpandedNetworkValueType(InType, InRefType) {}
+	FFIVSPinDataType(const FFIRExtendedValueType& Other) : FFIRExtendedValueType(Other) {}
+	FFIVSPinDataType(EFIRValueType InType, UFIRStruct* InRefType) : FFIRExtendedValueType(InType, InRefType) {}
 
 	bool IsReference() const { return bReference; }
 
@@ -67,15 +69,15 @@ struct FFIVSFullPinType {
 	FFIVSFullPinType() = default;
 	FFIVSFullPinType(EFIVSPinType PinType) : PinType(PinType) {}
 	FFIVSFullPinType(EFIVSPinType PinType, FFIVSPinDataType DataType) : PinType(PinType), DataType(DataType) {}
-	FFIVSFullPinType(UFINProperty* Property) {
-		EFINRepPropertyFlags Flags = Property->GetPropertyFlags();
-		if (Flags & FIN_Prop_Param) {
-			if (Flags & FIN_Prop_OutParam) {
+	FFIVSFullPinType(UFIRProperty* Property) {
+		EFIRPropertyFlags Flags = Property->GetPropertyFlags();
+		if (Flags & FIR_Prop_Param) {
+			if (Flags & FIR_Prop_OutParam) {
 				PinType = FIVS_PIN_DATA_OUTPUT;
 			} else {
 				PinType = FIVS_PIN_DATA_INPUT;
 			}
-		} else if (Flags & FIN_Prop_Attrib) {
+		} else if (Flags & FIR_Prop_Attrib) {
 			PinType = FIVS_PIN_DATA;
 		}
 		DataType = FFIVSPinDataType(Property);
@@ -92,7 +94,7 @@ protected:
 	TArray<UFIVSPin*> ConnectedPins;
 
 	UPROPERTY()
-	FFINAnyNetworkValue Literal;
+	FFIRAnyValue Literal;
 
 public:
 	UPROPERTY()
@@ -108,9 +110,9 @@ public:
 	 * Returns the literal value of the given pin.
 	 * The literal value will be used if pin has no connection to any other pins.
 	 */
-	FFINAnyNetworkValue GetLiteral() {
+	FFIRAnyValue GetLiteral() {
 		if (Literal.GetType() != GetPinDataType().GetType()) {
-			SetLiteral(FFINAnyNetworkValue::DefaultValue(GetPinDataType().GetType()));
+			SetLiteral(FFIRAnyValue::DefaultValue(GetPinDataType().GetType()));
 		}
 		return Literal;
 	}
@@ -119,7 +121,7 @@ public:
 	 * Allows to set/change the literal of the pin.
 	 * For more info on literals, see GetLiteral()
 	 */
-	void SetLiteral(FFINAnyNetworkValue InLiteral) {
+	void SetLiteral(FFIRAnyValue InLiteral) {
 		if (InLiteral.GetType() == GetPinDataType().GetType()) Literal = InLiteral;
 	}
 
@@ -187,7 +189,7 @@ class UFIVSGenericPin : public UFIVSPin {
 	GENERATED_BODY()
 public:
 	EFIVSPinType PinType = FIVS_PIN_NONE;
-	FFIVSPinDataType PinDataType = FFINExpandedNetworkValueType(FIN_NIL);
+	FFIVSPinDataType PinDataType = FFIRExtendedValueType(FIR_NIL);
 
 	// Begin UFINScriptPin
 	virtual EFIVSPinType GetPinType() override;

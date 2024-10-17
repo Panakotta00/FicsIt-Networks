@@ -35,7 +35,7 @@ void UFIVSRerouteNode::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 		FText::FromString(""),
 		FText::FromString("Create Reroute Node"),
 		{
-			{FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIN_ANY)}
+			{FIVS_PIN_DATA_INPUT | FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIR_ANY)}
 		}
 	});
 }

@@ -1,8 +1,11 @@
 ﻿#include "Kernel/FIVSProcessor.h"
 
-#include "FicsItKernel/Processor/FINStateEEPROMText.h"
+#include "FicsItReflection.h"
+#include "FINNetworkCircuit.h"
+#include "FINNetworkCircuitNode.h"
+#include "FINSignalSubsystem.h"
+#include "NetworkController.h"
 #include "Kernel/FIVSCompiler.h"
-#include "Network/FINNetworkCircuit.h"
 #include "Script/FIVSGraph.h"
 #include "Script/Library/FIVSNode_OnTick.h"
 
@@ -65,21 +68,21 @@ void UFIVSProcessor::SetEEPROM(AFINStateEEPROM* InEEPROM) {
 	}
 }
 
-void UFIVSProcessor::GetRelevantObjects_Implementation(TArray<FFINNetworkTrace>& OutObjects) {
+void UFIVSProcessor::GetRelevantObjects_Implementation(TArray<FFIRTrace>& OutObjects) {
 	UObject* Component = GetKernel()->GetNetwork()->GetComponent().GetObject();
 	for (UObject* Object : IFINNetworkCircuitNode::Execute_GetCircuit(Component)->GetComponents()) {
-		OutObjects.Add(FFINNetworkTrace(Component) / Object);
+		OutObjects.Add(FFIRTrace(Component) / Object);
 	}
 }
 
-void UFIVSProcessor::GetRelevantClasses_Implementation(TArray<UFINClass*>& OutClasses) {
-	for (const TPair<UClass*, UFINClass*>& Class : FFINReflection::Get()->GetClasses()) {
+void UFIVSProcessor::GetRelevantClasses_Implementation(TArray<UFIRClass*>& OutClasses) {
+	for (const TPair<UClass*, UFIRClass*>& Class : FFicsItReflectionModule::Get().GetClasses()) {
 		OutClasses.Add(Class.Value);
 	}
 }
 
-void UFIVSProcessor::GetRelevantStructs_Implementation(TArray<UFINStruct*>& OutStructs) {
-	for (const TPair<UScriptStruct*, UFINStruct*>& Struct : FFINReflection::Get()->GetStructs()) {
+void UFIVSProcessor::GetRelevantStructs_Implementation(TArray<UFIRStruct*>& OutStructs) {
+	for (const TPair<UScriptStruct*, UFIRStruct*>& Struct : FFicsItReflectionModule::Get().GetStructs()) {
 		OutStructs.Add(Struct.Value);
 	}
 }

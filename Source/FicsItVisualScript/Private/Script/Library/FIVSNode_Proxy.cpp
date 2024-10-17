@@ -1,8 +1,9 @@
 #include "Script/Library/FIVSNode_Proxy.h"
 
+#include "FicsItReflection.h"
+#include "FINNetworkUtils.h"
+#include "NetworkController.h"
 #include "Kernel/FIVSRuntimeContext.h"
-#include "Network/FINNetworkUtils.h"
-#include "Reflection/FINReflection.h"
 
 void FFIVSNodeStatement_Proxy::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
 	Context.Push_EvaluatePin(AddrIn);
@@ -15,12 +16,12 @@ void FFIVSNodeStatement_Proxy::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecP
 		Context.GetKernelContext()->Crash(MakeShared<FFINKernelCrash>(TEXT("Address not valid!")));
 		return;
 	}
-	FFINNetworkTrace Component = Context.GetKernelContext()->GetNetwork()->GetComponentByID(Guid);
+	FFIRTrace Component = Context.GetKernelContext()->GetNetwork()->GetComponentByID(Guid);
 	if (!Component.IsValid()) {
 		Context.GetKernelContext()->Crash(MakeShared<FFINKernelCrash>(TEXT("Component not found!")));
 		return;
 	}
-	FFINNetworkTrace instance = UFINNetworkUtils::RedirectIfPossible(Component);
+	FFIRTrace instance = UFINNetworkUtils::RedirectIfPossible(Component);
 	Context.SetValue(CompOut, instance);
 	Context.Push_ExecPin(ExecOut);
 }
@@ -30,8 +31,8 @@ UFIVSNode_Proxy::UFIVSNode_Proxy() {
 
 	ExecIn = CreateDefaultPin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString("Exec"));
 	ExecOut = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("Out"), FText::FromString("Out"));
-	AddrIn = CreateDefaultPin(FIVS_PIN_DATA_INPUT, TEXT("Address"), FText::FromString("Address"), FFIVSPinDataType(FIN_STR));
-	CompOut = CreateDefaultPin(FIVS_PIN_DATA_OUTPUT, TEXT("Component"), FText::FromString("Component"), FFIVSPinDataType(FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass())));
+	AddrIn = CreateDefaultPin(FIVS_PIN_DATA_INPUT, TEXT("Address"), FText::FromString("Address"), FFIVSPinDataType(FIR_STR));
+	CompOut = CreateDefaultPin(FIVS_PIN_DATA_OUTPUT, TEXT("Component"), FText::FromString("Component"), FFIVSPinDataType(FIR_TRACE, FFicsItReflectionModule::Get().FindClass(UObject::StaticClass())));
 }
 
 void UFIVSNode_Proxy::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
@@ -43,9 +44,9 @@ void UFIVSNode_Proxy::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 			FText::FromString(TEXT("Proxy")),
 			{
 				FIVS_PIN_EXEC_INPUT,
-				{FIVS_PIN_DATA_INPUT, FFIVSPinDataType(FIN_STR)},
+				{FIVS_PIN_DATA_INPUT, FFIVSPinDataType(FIR_STR)},
 				FIVS_PIN_EXEC_OUTPUT,
-				{FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(FIN_TRACE, FFINReflection::Get()->FindClass(UObject::StaticClass()))}
+				{FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(FIR_TRACE, FFicsItReflectionModule::Get().FindClass(UObject::StaticClass()))}
 			}
 		}
 	);

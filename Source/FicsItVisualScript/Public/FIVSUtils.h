@@ -1,29 +1,29 @@
 #pragma once
 
+#include "FIRTrace.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Network/FINNetworkTrace.h"
 #include "FIVSUtils.generated.h"
 
 UCLASS()
 class UFIVSUtils : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 public:
-	static FString NetworkTraceToString(const FFINNetworkTrace& Trace) {
+	static FString NetworkTraceToString(const FFIRTrace& Trace) {
 		FString Str;
-		const FFINNetworkTrace* CurrentTrace = &Trace;
+		const FFIRTrace* CurrentTrace = &Trace;
 		while (CurrentTrace) {
 			Str += CurrentTrace->GetUnderlyingPtr()->GetPathName();
 			Str += TEXT(";");
-			if (CurrentTrace->GetStep()) Str += FFINNetworkTrace::inverseTraceStepRegistry[CurrentTrace->GetStep()];
+			if (CurrentTrace->GetStep()) Str += FFIRTrace::inverseTraceStepRegistry[CurrentTrace->GetStep()];
 			Str += TEXT(";");
 			CurrentTrace = CurrentTrace->GetPrev().Get();
 		}
 		return Str;
 	}
 
-	static FFINNetworkTrace StringToNetworkTrace(FString Str) {
+	static FFIRTrace StringToNetworkTrace(FString Str) {
 		FString Obj, Step;
-		FFINNetworkTrace Trace;
+		FFIRTrace Trace;
 		while (Str.Len() > 0) {
 			if (!Str.Split(TEXT(";"), &Obj, &Str)) {
 				Obj = Str;
@@ -34,9 +34,9 @@ public:
 				Str.Empty();
 			}
 			UObject* ObjPtr = FSoftObjectPath(Obj).TryLoad();
-			TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe>* StepPtr = FFINNetworkTrace::traceStepRegistry.Find(Step);
+			TSharedPtr<FFINTraceStep>* StepPtr = FFIRTrace::traceStepRegistry.Find(Step);
 			if (Step.IsEmpty() || !StepPtr) Trace = Trace / ObjPtr;
-			else Trace = Trace.append(ObjPtr, *StepPtr);
+			else Trace = Trace.Append(ObjPtr, *StepPtr);
 		}
 		return Trace.Reverse();
 	}

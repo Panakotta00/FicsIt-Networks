@@ -51,7 +51,7 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIV
 		TSharedPtr<SWidget> InlineLiteral;
 
 		switch (Pin->GetPinDataType().GetType()) {
-			case FIN_BOOL:
+			case FIR_BOOL:
 				InlineLiteral = SNew(SCheckBox)
 				.OnCheckStateChanged_Lambda([this](ECheckBoxState InState) {
 					if (InState == ECheckBoxState::Checked) {
@@ -64,25 +64,25 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIV
 					return Pin->GetLiteral().GetBool() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 				});
 			break;
-			case FIN_INT:
+			case FIR_INT:
 				InlineLiteral = SNew(SNumericEntryBox<int>)
 				.OnValueChanged_Lambda([this](int Value) {
-					Pin->SetLiteral((FINInt)Value);
+					Pin->SetLiteral((FIRInt)Value);
 				})
 				.Value_Lambda([this]() {
 					return Pin->GetLiteral().GetInt();
 				});
 			break;
-			case FIN_FLOAT:
+			case FIR_FLOAT:
 				InlineLiteral = SNew(SNumericEntryBox<double>)
 				.OnValueChanged_Lambda([this](double Value) {
-					Pin->SetLiteral((FINFloat)Value);
+					Pin->SetLiteral((FIRFloat)Value);
 				})
 				.Value_Lambda([this]() {
 					return Pin->GetLiteral().GetFloat();
 				});
 			break;
-			case FIN_STR:
+			case FIR_STR:
 				Literal = SNew(SEditableTextBox)
 				.OnTextCommitted_Lambda([this](FText Value, ETextCommit::Type) {
 					Pin->SetLiteral(Value.ToString());
@@ -92,17 +92,17 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIV
 				})
 				.MinDesiredWidth(100);
 			break;
-			case FIN_OBJ:
+			case FIR_OBJ:
 				break;
-			case FIN_CLASS:
+			case FIR_CLASS:
 				break;
-			case FIN_TRACE:
+			case FIR_TRACE:
 				break;
-			case FIN_STRUCT:
+			case FIR_STRUCT:
 				break;
-			case FIN_ARRAY:
+			case FIR_ARRAY:
 				break;
-			case FIN_ANY:
+			case FIR_ANY:
 				break;
 			default: ;
 		}
@@ -204,14 +204,14 @@ FReply SFIVSEdPinViewer::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
 FSlateColor SFIVSEdPinViewer::GetPinColor() const {
 	if (Pin->GetPinType() & FIVS_PIN_DATA) {
 		switch (Pin->GetPinDataType().GetType()) {
-		case FIN_BOOL:		return FLinearColor(FColor::FromHex("FF0000"));
-		case FIN_CLASS:		return FLinearColor(FColor::FromHex("AA00AA"));
-		case FIN_FLOAT:		return FLinearColor(FColor::FromHex("00FF00"));
-		case FIN_INT:		return FLinearColor(FColor::FromHex("77FF77"));
-		case FIN_OBJ:		return FLinearColor(FColor::FromHex("0000FF"));
-		case FIN_STR:		return FLinearColor(FColor::FromHex("FFAA00"));
-		case FIN_STRUCT:	return FLinearColor(FColor::FromHex("000077"));
-		case FIN_TRACE:		return FLinearColor(FColor::FromHex("FF4400"));
+		case FIR_BOOL:		return FLinearColor(FColor::FromHex("FF0000"));
+		case FIR_CLASS:		return FLinearColor(FColor::FromHex("AA00AA"));
+		case FIR_FLOAT:		return FLinearColor(FColor::FromHex("00FF00"));
+		case FIR_INT:		return FLinearColor(FColor::FromHex("77FF77"));
+		case FIR_OBJ:		return FLinearColor(FColor::FromHex("0000FF"));
+		case FIR_STR:		return FLinearColor(FColor::FromHex("FFAA00"));
+		case FIR_STRUCT:	return FLinearColor(FColor::FromHex("000077"));
+		case FIR_TRACE:		return FLinearColor(FColor::FromHex("FF4400"));
 		default:
 			break;
 		};

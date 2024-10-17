@@ -37,7 +37,7 @@ public:
 	// End UFIVSNodes
 	
 	// Begin UFIVSGenericNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
 		return FFIVSNodeStatement_OnTick{
 			NodeId,
 			ExecOut->PinId,

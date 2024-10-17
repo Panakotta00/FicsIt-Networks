@@ -4,7 +4,7 @@
 #include "Script/FIVSScriptNode.h"
 #include "FIVSNode_DownCast.generated.h"
 
-class UFINClass;
+class UFIRClass;
 
 USTRUCT()
 struct FFIVSNodeStatement_Cast : public FFIVSNodeStatement {
@@ -21,10 +21,10 @@ struct FFIVSNodeStatement_Cast : public FFIVSNodeStatement {
 	UPROPERTY(SaveGame)
 	FGuid DataOut;
 	UPROPERTY(SaveGame)
-	UFINClass* ToClass;
+	UFIRClass* ToClass;
 
 	FFIVSNodeStatement_Cast() = default;
-	FFIVSNodeStatement_Cast(FGuid Node, FGuid ExecIn, FGuid SuccessOut, FGuid FailureOut, FGuid DataIn, FGuid DataOut, UFINClass* ToClass) :
+	FFIVSNodeStatement_Cast(FGuid Node, FGuid ExecIn, FGuid SuccessOut, FGuid FailureOut, FGuid DataIn, FGuid DataOut, UFIRClass* ToClass) :
 		FFIVSNodeStatement(Node),
 		ExecIn(ExecIn),
 		SuccessOut(SuccessOut),
@@ -58,7 +58,7 @@ private:
 	bool bPure = true;
 
 	UPROPERTY()
-	UFINClass* ToClass = nullptr;
+	UFIRClass* ToClass = nullptr;
 	
 public:
 	// Begin UFIVSNode
@@ -68,7 +68,7 @@ public:
 	// End UFIVSNode
 	
 	// Begin UFIVSScriptNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
 		return FFIVSNodeStatement_Cast{
 			NodeId,
 			ExecInput ? ExecInput->PinId : FGuid(),
@@ -81,5 +81,5 @@ public:
 	}
 	// End UFIVSScriptNode
 
-	void SetClass(UFINClass* ToClass);
+	void SetClass(UFIRClass* ToClass);
 };

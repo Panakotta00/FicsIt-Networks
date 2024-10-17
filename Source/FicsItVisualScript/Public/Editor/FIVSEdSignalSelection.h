@@ -3,14 +3,14 @@
 #include "CoreMinimal.h"
 #include "Slate.h"
 
-class UFINSignal;
+class UFIRSignal;
 
 class SFIVSEdSignalSelection : public SCompoundWidget {
-	DECLARE_DELEGATE_OneParam(FSelectionChanged, UFINSignal*)
+	DECLARE_DELEGATE_OneParam(FSelectionChanged, UFIRSignal*)
 	
 	SLATE_BEGIN_ARGS(SFIVSEdSignalSelection) : _InitSelection(nullptr) {}
 	SLATE_EVENT(FSelectionChanged, OnSelectionChanged)
-	SLATE_ARGUMENT(UFINSignal*, InitSelection)
+	SLATE_ARGUMENT(UFIRSignal*, InitSelection)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
@@ -22,9 +22,9 @@ private:
 public:
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
-	void SelectObject(UFINSignal* Signal);
+	void SelectObject(UFIRSignal* Signal);
 
-	TSharedRef<SWidget> CreateSmallSignalWidget(UFINSignal* InSignal);
+	TSharedRef<SWidget> CreateSmallSignalWidget(UFIRSignal* InSignal);
 
 	TSharedRef<SWidget> CreateSignalSearch();
 };

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FicsItReflection.h"
 #include "FIVSEdGraphViewerStyle.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Components/Widget.h"
-#include "Reflection/FINReflection.h"
 #include "Script/FIVSScriptContext.h"
 #include "FIVSEdEditor.generated.h"
 
@@ -63,16 +63,16 @@ class UFIVSEditorContextMock : public UObject, public IFIVSScriptContext_Interfa
 
 public:
 	// Begin IFIVSScriptContext_Interface
-	virtual void GetRelevantObjects_Implementation(TArray<FFINNetworkTrace>& OutObjects) override {}
+	virtual void GetRelevantObjects_Implementation(TArray<FFIRTrace>& OutObjects) override {}
 
-	virtual void GetRelevantClasses_Implementation(TArray<UFINClass*>& OutClasses) override {
-		for (const TPair<UClass*, UFINClass*>& Class : FFINReflection::Get()->GetClasses()) {
+	virtual void GetRelevantClasses_Implementation(TArray<UFIRClass*>& OutClasses) override {
+		for (const TPair<UClass*, UFIRClass*>& Class : FFicsItReflectionModule::Get().GetClasses()) {
 			OutClasses.Add(Class.Value);
 		}
 	}
 
-	virtual void GetRelevantStructs_Implementation(TArray<UFINStruct*>& OutStructs) override {
-		for (const TPair<UScriptStruct*, UFINStruct*>& Struct : FFINReflection::Get()->GetStructs()) {
+	virtual void GetRelevantStructs_Implementation(TArray<UFIRStruct*>& OutStructs) override {
+		for (const TPair<UScriptStruct*, UFIRStruct*>& Struct : FFicsItReflectionModule::Get().GetStructs()) {
 			OutStructs.Add(Struct.Value);
 		}
 	}

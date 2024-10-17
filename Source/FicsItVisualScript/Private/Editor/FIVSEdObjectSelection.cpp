@@ -1,15 +1,15 @@
 ﻿#include "Editor/FIVSEdObjectSelection.h"
 
-#include "Network/FINNetworkComponent.h"
+#include "FINNetworkComponent.h"
 #include "Editor/FIVSEdSearchListView.h"
 
-void SFIVSEdObjectSelection::Construct(const FArguments& InArgs, const TArray<FFINNetworkTrace>& InComponents) {
+void SFIVSEdObjectSelection::Construct(const FArguments& InArgs, const TArray<FFIRTrace>& InComponents) {
 	OnSelectionChanged = InArgs._OnSelectionChanged;
 	PrimaryFont = InArgs._PrimaryFont;
 	SecondaryFont = InArgs._SecondaryFont;
 
 	Components = InComponents;
-	Components.Add(FFINNetworkTrace());
+	Components.Add(FFIRTrace());
 
 	ChildSlot[
 		SNew(SBorder)
@@ -32,13 +32,13 @@ FReply SFIVSEdObjectSelection::OnMouseButtonDown(const FGeometry& MyGeometry, co
 	return FReply::Handled();
 }
 
-void SFIVSEdObjectSelection::SelectObject(const FFINNetworkTrace& Component) {
+void SFIVSEdObjectSelection::SelectObject(const FFIRTrace& Component) {
 	WidgetHolder->SetContent(CreateComponentWidget(Component));
 	if (!Component.IsValid()) return;
 	bool _ = OnSelectionChanged.ExecuteIfBound(Component);
 }
 
-TSharedRef<SWidget> SFIVSEdObjectSelection::CreateComponentWidget(const FFINNetworkTrace& Component) {
+TSharedRef<SWidget> SFIVSEdObjectSelection::CreateComponentWidget(const FFIRTrace& Component) {
 	if (Component.GetUnderlyingPtr())
 	return SNew(SHorizontalBox)
 			+SHorizontalBox::Slot()[
@@ -55,7 +55,7 @@ TSharedRef<SWidget> SFIVSEdObjectSelection::CreateComponentWidget(const FFINNetw
 			.Text(FText::FromString(TEXT("(None)")));
 }
 
-TSharedRef<SWidget> SFIVSEdObjectSelection::CreateLargeComponentWidget(const FFINNetworkTrace& Component) {
+TSharedRef<SWidget> SFIVSEdObjectSelection::CreateLargeComponentWidget(const FFIRTrace& Component) {
 	if (Component.GetUnderlyingPtr()) {
 		TSharedRef<SVerticalBox> Box = SNew(SVerticalBox);
 		FString Nick = IFINNetworkComponent::Execute_GetNick(*Component);
@@ -84,15 +84,15 @@ TSharedRef<SWidget> SFIVSEdObjectSelection::CreateLargeComponentWidget(const FFI
 }
 
 TSharedRef<SWidget> SFIVSEdObjectSelection::CreateSignalSearch() {
-	return SNew(SFIVSEdSearchListView<FFINNetworkTrace>, Components)
-		.OnGetSearchableText_Lambda([](FFINNetworkTrace Trace) -> FString {
+	return SNew(SFIVSEdSearchListView<FFIRTrace>, Components)
+		.OnGetSearchableText_Lambda([](FFIRTrace Trace) -> FString {
 			if (!Trace.GetUnderlyingPtr()) return TEXT("None");
 			return IFINNetworkComponent::Execute_GetID(*Trace).ToString() + TEXT(" ") + IFINNetworkComponent::Execute_GetNick(*Trace);
 		})
-		.OnGetElementWidget_Lambda([this](FFINNetworkTrace Trace) -> TSharedRef<SWidget> {
+		.OnGetElementWidget_Lambda([this](FFIRTrace Trace) -> TSharedRef<SWidget> {
 			return CreateComponentWidget(Trace);
 		})
-		.OnCommited_Lambda([this](FFINNetworkTrace Trace) {
+		.OnCommited_Lambda([this](FFIRTrace Trace) {
 			SelectObject(Trace);
 			FSlateApplication::Get().DismissAllMenus();
 		});

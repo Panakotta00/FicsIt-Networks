@@ -18,7 +18,7 @@ void FFIVSRuntimeContext::NextStep() {
 
 			PushStackEntry(FFIVSStackEntry(FIVS_Stack_Node, entry.Node, entry.Pin, entry.bExec));
 
-			TOptional<TFINDynamicStruct<const FFIVSNodeStatement>> node = GetScript()->FindNode(entry.Node);
+			TOptional<TFIRInstancedStruct<const FFIVSNodeStatement>> node = GetScript()->FindNode(entry.Node);
 			if (!node.IsSet()) {
 				break;
 			}
@@ -31,7 +31,7 @@ void FFIVSRuntimeContext::NextStep() {
 
 			break;
 		} case FIVS_Stack_Node: {
-			TFINDynamicStruct<const FFIVSNodeStatement> node = GetScript()->FindNode(entry.Node).GetValue();
+			TFIRInstancedStruct<const FFIVSNodeStatement> node = GetScript()->FindNode(entry.Node).GetValue();
 
 			node->ExecPin(*this, entry.Pin);
 

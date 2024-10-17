@@ -1,7 +1,8 @@
 ﻿#include "Script/Library/FIVSNode_SeparateStruct.h"
 
+#include "FicsItReflection.h"
+#include "FIRStruct.h"
 #include "Kernel/FIVSRuntimeContext.h"
-#include "Reflection/FINReflection.h"
 
 void FFIVSNodeStatement_SeparateStruct::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
 	TArray<FGuid> inputs;
@@ -11,20 +12,20 @@ void FFIVSNodeStatement_SeparateStruct::PreExecPin(FFIVSRuntimeContext& Context,
 
 void FFIVSNodeStatement_SeparateStruct::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
 	if (bBreak) {
-		const FFINAnyNetworkValue* value = Context.TryGetRValue(InputPins[TEXT("Struct")]);
+		const FFIRAnyValue* value = Context.TryGetRValue(InputPins[TEXT("Struct")]);
 		if (!value) return;
-		FFINDynamicStructHolder StructObj = value->GetStruct();
-		FFINExecutionContext Ctx(StructObj.GetData());
-		for (UFINProperty* Prop : Struct->GetProperties()) {
-			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
+		FFIRInstancedStruct StructObj = value->GetStruct();
+		FFIRExecutionContext Ctx(StructObj.GetData());
+		for (UFIRProperty* Prop : Struct->GetProperties()) {
+			if (!(Prop->GetPropertyFlags() & FIR_Prop_Attrib)) continue;
 			const FGuid* Pin = OutputPins.Find(Prop->GetInternalName());
 			if (Pin) Context.SetValue(*Pin, Prop->GetValue(Ctx));
 		}
 	} else {
-		FFINDynamicStructHolder StructObj(Cast<UScriptStruct>(Struct->GetOuter()));
-		FFINExecutionContext Ctx(StructObj.GetData());
-		for (UFINProperty* Prop : Struct->GetProperties()) {
-			if (!(Prop->GetPropertyFlags() & FIN_Prop_Attrib)) continue;
+		FFIRInstancedStruct StructObj(Cast<UScriptStruct>(Struct->GetOuter()));
+		FFIRExecutionContext Ctx(StructObj.GetData());
+		for (UFIRProperty* Prop : Struct->GetProperties()) {
+			if (!(Prop->GetPropertyFlags() & FIR_Prop_Attrib)) continue;
 			const FGuid* Pin = InputPins.Find(Prop->GetInternalName());
 			if (Pin) Prop->SetValue(Ctx, *Context.TryGetRValue(*Pin));
 		}
@@ -33,12 +34,12 @@ void FFIVSNodeStatement_SeparateStruct::ExecPin(FFIVSRuntimeContext& Context, FG
 }
 
 void UFIVSNode_SeparateStruct::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
-	for (TTuple<UScriptStruct*, UFINStruct*> StructPair : FFINReflection::Get()->GetStructs()) {
+	for (TTuple<UScriptStruct*, UFIRStruct*> StructPair : FFicsItReflectionModule::Get().GetStructs()) {
 		FFIVSNodeAction BreakAction;
 		BreakAction.NodeType = UFIVSNode_SeparateStruct::StaticClass();
 		BreakAction.Category = FText::FromString(TEXT("Struct"));
 		BreakAction.Title = FText::FromString(TEXT("Break ") + StructPair.Value->GetDisplayName().ToString());
-		for (UFINProperty* Prop : StructPair.Value->GetProperties()) {
+		for (UFIRProperty* Prop : StructPair.Value->GetProperties()) {
 			FFIVSFullPinType FullPinType(Prop);
 			FullPinType.PinType = FIVS_PIN_DATA_OUTPUT;
 			BreakAction.Pins.Add(FullPinType);
@@ -50,12 +51,12 @@ void UFIVSNode_SeparateStruct::GetNodeActions(TArray<FFIVSNodeAction>& Actions) 
 		});
 		FFIVSNodeAction MakeAction(BreakAction);
 		
-		BreakAction.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFIVSPinDataType(FIN_STRUCT, StructPair.Value)));
+		BreakAction.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_INPUT, FFIVSPinDataType(FIR_STRUCT, StructPair.Value)));
 		Actions.Add(BreakAction);
 
 		for (FFIVSFullPinType& Pin : MakeAction.Pins) Pin.PinType = FIVS_PIN_DATA_INPUT;
 		MakeAction.Title = FText::FromString(TEXT("Make ") + StructPair.Value->GetDisplayName().ToString());
-		MakeAction.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(FIN_STRUCT, StructPair.Value)));
+		MakeAction.Pins.Add(FFIVSFullPinType(FIVS_PIN_DATA_OUTPUT, FFIVSPinDataType(FIR_STRUCT, StructPair.Value)));
 		MakeAction.SearchableText = MakeAction.Title;
 		MakeAction.OnExecute.BindLambda([StructPair](UFIVSNode* Node) {
 			Cast<UFIVSNode_SeparateStruct>(Node)->bBreak = false;
@@ -72,10 +73,10 @@ void UFIVSNode_SeparateStruct::SerializeNodeProperties(const TSharedRef<FJsonObj
 
 void UFIVSNode_SeparateStruct::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
 	bBreak = Properties->GetBoolField("Break");
-	SetStruct(Cast<UFINStruct>(FSoftObjectPath(Properties->GetStringField(TEXT("Struct"))).TryLoad()));
+	SetStruct(Cast<UFIRStruct>(FSoftObjectPath(Properties->GetStringField(TEXT("Struct"))).TryLoad()));
 }
 
-void UFIVSNode_SeparateStruct::SetStruct(UFINStruct* InStruct) {
+void UFIVSNode_SeparateStruct::SetStruct(UFIRStruct* InStruct) {
 	Struct = InStruct;
 
 	if (bBreak) DisplayName = FText::FromString(TEXT("Break ") + Struct->GetDisplayName().ToString());
@@ -85,10 +86,10 @@ void UFIVSNode_SeparateStruct::SetStruct(UFINStruct* InStruct) {
 	for (auto [_, pin] : OutputPins) DeletePin(pin);
 
 	EFIVSPinType PinType = bBreak ? FIVS_PIN_DATA_OUTPUT : FIVS_PIN_DATA_INPUT;
-	for (UFINProperty* Prop : Struct->GetProperties()) {
+	for (UFIRProperty* Prop : Struct->GetProperties()) {
 		UFIVSPin* Pin = CreatePin(PinType, Prop->GetInternalName(), Prop->GetDisplayName(), FFIVSPinDataType(Prop));
 		(bBreak ? OutputPins : InputPins).Add(Prop->GetInternalName(), Pin);
 	}
-	UFIVSPin* Pin = CreatePin(bBreak ? FIVS_PIN_DATA_INPUT : FIVS_PIN_DATA_OUTPUT, TEXT("Struct"), FText::FromString(TEXT("Struct")), FFIVSPinDataType(FIN_STRUCT, Struct));
+	UFIVSPin* Pin = CreatePin(bBreak ? FIVS_PIN_DATA_INPUT : FIVS_PIN_DATA_OUTPUT, TEXT("Struct"), FText::FromString(TEXT("Struct")), FFIVSPinDataType(FIR_STRUCT, Struct));
 	(bBreak ? InputPins : OutputPins).Add(TEXT("Struct"), Pin);
 }

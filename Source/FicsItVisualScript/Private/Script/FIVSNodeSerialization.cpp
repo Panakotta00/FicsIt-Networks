@@ -9,28 +9,28 @@
 TSharedPtr<FJsonValue> FIVS_GetPinLiteralAsJson(UFIVSPin* InPin) {
 	if (InPin->GetPinType() & FIVS_PIN_EXEC) return nullptr;
 	switch (InPin->GetPinDataType().GetType()) {
-	case FIN_NIL:
+	case FIR_NIL:
 		return nullptr;
-	case FIN_BOOL:
+	case FIR_BOOL:
 		return MakeShared<FJsonValueBoolean>(InPin->GetLiteral().GetBool());
-	case FIN_INT:
+	case FIR_INT:
 		return MakeShared<FJsonValueNumber>(InPin->GetLiteral().GetInt());
-	case FIN_FLOAT:
+	case FIR_FLOAT:
 		return MakeShared<FJsonValueNumber>(InPin->GetLiteral().GetFloat());
-	case FIN_STR:
+	case FIR_STR:
 		return MakeShared<FJsonValueString>(InPin->GetLiteral().GetString());
-	case FIN_OBJ:
+	case FIR_OBJ:
 		return MakeShared<FJsonValueString>(InPin->GetLiteral().GetObj().Get()->GetPathName());
-	case FIN_CLASS:
+	case FIR_CLASS:
 		return MakeShared<FJsonValueString>(InPin->GetLiteral().GetClass()->GetPathName());
-	case FIN_TRACE:
+	case FIR_TRACE:
 		return nullptr; // TODO: Trace to JSON
-	case FIN_STRUCT:
+	case FIR_STRUCT:
 		return nullptr; // TODO: Maybe add Struct serialization here, but maybe this is broken up before hand and pins can't have struct literals, instead the pins may have to be split up into individual pins which can then have a literal
-	case FIN_ARRAY:
+	case FIR_ARRAY:
 		return nullptr; // TODO: Maybe add Array serialization, but pins would actually have to support it
-	case FIN_ANY:
-		return nullptr; // TODO: Pins with FINAny... I have no clue, is that even possible?
+	case FIR_ANY:
+		return nullptr; // TODO: Pins with FIRAny... I have no clue, is that even possible?
 	default: ;
 	}
 	return nullptr;
@@ -39,28 +39,28 @@ TSharedPtr<FJsonValue> FIVS_GetPinLiteralAsJson(UFIVSPin* InPin) {
 void FIVS_SetPinLiteralFromJson(UFIVSPin* InPin, TSharedPtr<FJsonValue> InValue) {
 	if (InPin->GetPinType() & FIVS_PIN_EXEC) return;
 	switch (InPin->GetPinDataType().GetType()) {
-	case FIN_NIL:
+	case FIR_NIL:
 		return;
-	case FIN_BOOL:
+	case FIR_BOOL:
 		return InPin->SetLiteral(InValue->AsBool());
-	case FIN_INT:
-		return InPin->SetLiteral((FINInt)InValue->AsNumber());
-	case FIN_FLOAT:
+	case FIR_INT:
+		return InPin->SetLiteral((FIRInt)InValue->AsNumber());
+	case FIR_FLOAT:
 		return InPin->SetLiteral(InValue->AsNumber());
-	case FIN_STR:
+	case FIR_STR:
 		return InPin->SetLiteral(InValue->AsString());
-	case FIN_OBJ:
-		return InPin->SetLiteral((FINObj)FSoftObjectPath(InValue->AsString()).TryLoad());
-	case FIN_CLASS:
+	case FIR_OBJ:
+		return InPin->SetLiteral((FIRObj)FSoftObjectPath(InValue->AsString()).TryLoad());
+	case FIR_CLASS:
 		return InPin->SetLiteral(Cast<UClass>(FSoftObjectPath(InValue->AsString()).TryLoad()));
-	case FIN_TRACE:
+	case FIR_TRACE:
 		// TODO: Trace to JSON
-	case FIN_STRUCT:
+	case FIR_STRUCT:
 		// TODO: Maybe add Struct serialization here, but maybe this is broken up before hand and pins can't have struct literals, instead the pins may have to be split up into individual pins which can then have a literal
-	case FIN_ARRAY:
+	case FIR_ARRAY:
 		// TODO: Maybe add Array serialization, but pins would actually have to support it
-	case FIN_ANY:
-		// TODO: Pins with FINAny... I have no clue, is that even possible?
+	case FIR_ANY:
+		// TODO: Pins with FIRAny... I have no clue, is that even possible?
 	default: ;
 	}
 }

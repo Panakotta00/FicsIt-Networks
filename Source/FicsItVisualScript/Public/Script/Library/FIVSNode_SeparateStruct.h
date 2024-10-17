@@ -14,12 +14,12 @@ struct FFIVSNodeStatement_SeparateStruct : public FFIVSNodeStatement {
 	UPROPERTY(SaveGame)
 	TMap<FString, FGuid> OutputPins;
 	UPROPERTY(SaveGame)
-	UFINStruct* Struct = nullptr;
+	UFIRStruct* Struct = nullptr;
 	UPROPERTY(SaveGame)
 	bool bBreak = false;
 
 	FFIVSNodeStatement_SeparateStruct() = default;
-	FFIVSNodeStatement_SeparateStruct(FGuid Node, TMap<FString, FGuid> InputPins, TMap<FString, FGuid> OutputPins, UFINStruct* Struct, bool bBreak) :
+	FFIVSNodeStatement_SeparateStruct(FGuid Node, TMap<FString, FGuid> InputPins, TMap<FString, FGuid> OutputPins, UFIRStruct* Struct, bool bBreak) :
 		FFIVSNodeStatement(Node),
 		InputPins(InputPins),
 		OutputPins(OutputPins),
@@ -38,7 +38,7 @@ class UFIVSNode_SeparateStruct : public UFIVSScriptNode {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	UFINStruct* Struct = nullptr;
+	UFIRStruct* Struct = nullptr;
 	UPROPERTY()
 	bool bBreak = true;
 
@@ -55,7 +55,7 @@ public:
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
 		TMap<FString, FGuid> inputs;
 		for (const auto& [key, pin] : InputPins) { inputs.Add(key, pin->PinId); }
 		TMap<FString, FGuid> outputs;
@@ -70,5 +70,5 @@ public:
 	}
 	// End UFIVSScriptNode
 
-	void SetStruct(UFINStruct* InStruct);
+	void SetStruct(UFIRStruct* InStruct);
 };

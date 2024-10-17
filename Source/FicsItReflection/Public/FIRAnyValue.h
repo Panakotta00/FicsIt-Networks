@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/DefaultValueHelper.h"
 #include "FIRTypes.h"
 #include "FIRAnyValue.generated.h"
 
@@ -10,6 +11,47 @@
 USTRUCT(BlueprintType)
 struct FICSITREFLECTION_API FFIRAnyValue {
 	GENERATED_BODY()
+
+	FORCEINLINE static FFIRAnyValue DefaultValue(EFIRValueType ValueType) {
+		FFIRAnyValue Value;
+		Value.Type = ValueType;
+		auto& Data = Value.Data;
+		switch (ValueType) {
+			case FIR_NIL:
+				break;
+			case FIR_BOOL:
+				Data.BOOL = false;
+			break;
+			case FIR_INT:
+				Data.INT = 0;
+			break;
+			case FIR_FLOAT:
+				Data.FLOAT = 0.0f;
+			break;
+			case FIR_STR:
+				Data.STRING = new FIRStr();
+			break;
+			case FIR_OBJ:
+				Data.OBJECT = new FIRObj();
+			break;
+			case FIR_CLASS:
+				Data.CLASS = nullptr;
+			break;
+			case FIR_TRACE:
+				Data.TRACE = new FIRTrace();
+			break;
+			case FIR_STRUCT:
+				Data.STRUCT = new FIRStruct();
+			break;
+			case FIR_ARRAY:
+				Data.ARRAY = new FIRArray();
+			break;
+			case FIR_ANY:
+				Data.ANY = new FIRAny();
+			break;
+		}
+		return Value;
+	}
 	
 	FORCEINLINE FFIRAnyValue() : Type(FIR_NIL), Data() {}
 
@@ -315,3 +357,146 @@ struct TStructOpsTypeTraits<FFIRAnyValue> : TStructOpsTypeTraitsBase2<FFIRAnyVal
 template<>
 struct TMoveSupportTraits<FFIRAnyValue> : TMoveSupportTraitsBase<FFIRAnyValue, const FFIRAnyValue&> {
 };
+
+FICSITREFLECTION_API FString FIRObjectToString(UObject* InObj);
+
+FICSITREFLECTION_API FString FIRClassToString(UClass* InClass);
+
+FICSITREFLECTION_API FORCEINLINE FFIRAnyValue FIRCastValue(const FFIRAnyValue& Value, EFIRValueType ToType) {
+	if (Value.GetType() == FIR_ANY) return FIRCastValue(Value.GetAny(), ToType);
+
+	switch (ToType) {
+	case FIR_BOOL:
+		switch (Value.GetType()) {
+		case FIR_NIL:
+			return false;
+		case FIR_BOOL:
+			return Value;
+		case FIR_INT:
+			return Value.GetInt() != 0;
+		case FIR_FLOAT:
+			return Value.GetFloat() != 0.0;
+		case FIR_STR:
+			return Value.GetString() == TEXT("true");
+		case FIR_OBJ:
+			return Value.GetObj().IsValid();
+		case FIR_CLASS:
+			return Value.GetClass() != nullptr;
+		case FIR_TRACE:
+			return Value.GetTrace().IsValid();
+		case FIR_ARRAY:
+			return Value.GetArray().Num() > 0;
+		default: ;
+		}
+		break;
+	case FIR_INT:
+		switch (Value.GetType()) {
+		case FIR_NIL:
+			return 1ll;
+		case FIR_BOOL:
+			return Value.GetBool() ? 1ll : 0ll;
+		case FIR_INT:
+			return Value;
+		case FIR_FLOAT:
+			return (FIRInt)Value.GetFloat();
+		case FIR_STR: {
+			FIRInt ValInt = 0;
+			FDefaultValueHelper::ParseInt64(Value.GetString(), ValInt);
+			return ValInt;
+		} default: ;
+		}
+		break;
+	case FIR_FLOAT:
+		switch (Value.GetType()) {
+		case FIR_NIL:
+			return 0.0;
+		case FIR_BOOL:
+			return Value.GetBool() ? 1.0 : 0.0;
+		case FIR_INT:
+			return (double)Value.GetInt();
+		case FIR_FLOAT:
+			return Value;
+		case FIR_STR: {
+			FIRFloat ValFloat = 0.0f;
+			FDefaultValueHelper::ParseDouble(Value.GetString(), ValFloat);
+			return ValFloat;
+		} default: ;
+		}
+		break;
+	case FIR_STR:
+		switch (Value.GetType()) {
+		case FIR_NIL:
+			return FString(TEXT("Nil"));
+		case FIR_BOOL:
+			return FString(Value.GetBool() ? TEXT("true") : TEXT("false"));
+		case FIR_INT:
+			return FString::Printf(TEXT("%lld"), Value.GetInt());
+		case FIR_FLOAT:
+			return FString::Printf(TEXT("%lg"), Value.GetFloat());
+		case FIR_STR:
+			return Value;
+		case FIR_OBJ:
+			return FIRObjectToString(Value.GetObj().Get());
+		case FIR_CLASS:
+			return FIRClassToString(Value.GetClass());
+		case FIR_TRACE:
+			return FIRObjectToString(*Value.GetTrace());
+		default: ;
+		}
+		break;
+	case FIR_OBJ:
+		switch (Value.GetType()) {
+		case FIR_OBJ:
+			return Value;
+		case FIR_NIL:
+			return FWeakObjectPtr((UObject*)nullptr);
+		case FIR_CLASS:
+			return FWeakObjectPtr((UObject*)Value.GetClass());
+		case FIR_TRACE:
+			return FWeakObjectPtr(*Value.GetTrace());
+		default: ;
+		}
+		break;
+	case FIR_CLASS:
+		switch (Value.GetType()) {
+		case FIR_NIL:
+			return (UClass*)nullptr;
+		case FIR_OBJ:
+			return Cast<UClass>(Value.GetObj().Get());
+		case FIR_CLASS:
+			return Value;
+		case FIR_TRACE:
+			return Cast<UClass>(*Value.GetTrace());
+		default: ;
+		}
+		break;
+	case FIR_TRACE:
+		switch (Value.GetType()) {
+		case FIR_NIL:
+			return FFIRTrace();
+		case FIR_OBJ:
+			return FFIRTrace(Value.GetObj().Get());
+		case FIR_CLASS:
+			return FFIRTrace(Value.GetClass());
+		case FIR_TRACE:
+			return Value;
+		default: ;
+		}
+		break;
+	case FIR_STRUCT:
+		switch (Value.GetType()) {
+		case FIR_STRUCT:
+			return Value;
+		default: ;
+		}
+		break;
+	case FIR_ARRAY:
+		switch (Value.GetType()) {
+		case FIR_ARRAY:
+		default: ;
+		}
+		break;
+	default: ;
+	}
+	return FIRAny();
+}

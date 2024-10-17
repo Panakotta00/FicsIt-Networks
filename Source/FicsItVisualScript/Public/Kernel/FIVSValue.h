@@ -1,6 +1,6 @@
 ﻿#pragma once
+#include "FIRAnyValue.h"
 
-#include "Network/FINAnyNetworkValue.h"
 #include "FIVSValue.generated.h"
 
 USTRUCT()
@@ -11,7 +11,7 @@ public:
 	bool bIsLValue = false;
 
 	UPROPERTY(SaveGame)
-	FFINAnyNetworkValue RValue;
+	FFIRAnyValue RValue;
 
 	UPROPERTY(SaveGame)
 	FGuid LValuePin;
@@ -39,14 +39,14 @@ public:
 		return *this;
 	}
 	
-	static FFIVSValue MakeRValue(FFINAnyNetworkValue InValue) {
+	static FFIVSValue MakeRValue(FFIRAnyValue InValue) {
 		FFIVSValue value;
 		value.bIsLValue = false;
 		value.RValue = InValue;
 		return value;
 	}
 
-	static FFIVSValue MakeLValue(FGuid Pin, FFINAnyNetworkValue InValue) {
+	static FFIVSValue MakeLValue(FGuid Pin, FFIRAnyValue InValue) {
 		FFIVSValue value;
 		value.bIsLValue = true;
 		value.RValue = InValue;

@@ -4,7 +4,6 @@
 #include "Editor/FIVSEdActionSelection.h"
 #include "Editor/FIVSEdNodeViewer.h"
 #include "Script/FIVSGraph.h"
-#include "Reflection/FINReflection.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
 
 #define LOCTEXT_NAMESPACE "FIVSEdGraphViewerModule"
@@ -463,7 +462,7 @@ TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPat
 		}
 	}
 	
-    TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection, Context.Pin ? FFIVSFullPinType(Context.Pin->GetPinType(), Context.Pin->GetPinDataType()) : FFIVSFullPinType(FIVS_PIN_DATA_INPUT & FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIN_NIL)))
+    TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection, Context.Pin ? FFIVSFullPinType(Context.Pin->GetPinType(), Context.Pin->GetPinDataType()) : FFIVSFullPinType(FIVS_PIN_DATA_INPUT & FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIR_NIL)))
 		.OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFIVSEdActionSelectionAction>& Action) {
 		OnExecute(Action);
     	ActiveActionSelection = nullptr;

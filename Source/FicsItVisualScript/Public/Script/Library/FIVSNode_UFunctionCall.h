@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Script/FIVSScriptNode.h"
-#include "FINGlobalRegisterHelper.h"
+#include "FIRGlobalRegisterHelper.h"
 #include "FIVSUtils.h"
 #include "FIVSNode_UFunctionCall.generated.h"
 
@@ -86,7 +86,7 @@ public:
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode
-	virtual TFINDynamicStruct<FFIVSNodeStatement> CreateNodeStatement() override {
+	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
 		TMap<FName, FGuid> propToGuid;
 
 		for (auto [prop, pin] : PropertyToPin) {
@@ -111,6 +111,6 @@ public:
 #define CAT(a,b) CAT2(a,b)
 #define CAT2(a,b) a##b
 #define FIVSNode_UFunctionOperatorMeta(FunctionName, Title, Symbol, Description, Category) \
-	FFINStaticGlobalRegisterFunc CAT(FIVSNode_UFunctionOperatorMeta, __COUNTER__) = FFINStaticGlobalRegisterFunc([]() { \
+	FFIRStaticGlobalRegisterFunc CAT(FIVSNode_UFunctionOperatorMeta, __COUNTER__) = FFIRStaticGlobalRegisterFunc([]() { \
 		UFIVSNode_UFunctionCall::RegisterMetaData(StaticClass(), TEXT(#FunctionName), {FText::FromString(TEXT(Title)), TEXT(Symbol), FText::FromString(TEXT(Description)), FText::FromString(TEXT(Category)), FText::FromString(TEXT(Title ## Symbol))}); \
 	})

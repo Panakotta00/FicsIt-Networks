@@ -21,7 +21,7 @@ UFIVSNode_Branch::UFIVSNode_Branch() {
 	ExecIn = CreateDefaultPin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString("Exec"));
 	ExecTrue = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("True"), FText::FromString("True"));
 	ExecFalse = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("False"), FText::FromString("False"));
-	Condition = CreateDefaultPin(FIVS_PIN_DATA_INPUT, TEXT("Condition"), FText::FromString("Condition"), FFIVSPinDataType(FIN_BOOL));
+	Condition = CreateDefaultPin(FIVS_PIN_DATA_INPUT, TEXT("Condition"), FText::FromString("Condition"), FFIVSPinDataType(FIR_BOOL));
 }
 
 void UFIVSNode_Branch::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
@@ -33,7 +33,7 @@ void UFIVSNode_Branch::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 			FText::FromString(TEXT("Branch")),
 			{
 				FIVS_PIN_EXEC_INPUT,
-				{FIVS_PIN_DATA_INPUT, FFIVSPinDataType(FIN_BOOL)},
+				{FIVS_PIN_DATA_INPUT, FFIVSPinDataType(FIR_BOOL)},
 				FIVS_PIN_EXEC_OUTPUT,
 				FIVS_PIN_EXEC_OUTPUT
 			}

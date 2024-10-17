@@ -1,6 +1,6 @@
 ﻿#pragma once
+#include "FINComputerProcessor.h"
 
-#include "Computer/FINComputerProcessor.h"
 #include "FIVSComputerProcessor.generated.h"
 
 UCLASS(Blueprintable)
