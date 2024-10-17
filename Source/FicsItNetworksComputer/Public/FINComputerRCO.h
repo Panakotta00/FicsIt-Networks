@@ -57,6 +57,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void SetLabel(UFGInventoryComponent* Inventory, int32 Index, const FString& Label);
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category="FINLua|RCO")
+	void SetTextEEPROMCode(class UFGInventoryComponent* Inventory, int32 Index, const FString& NewCode);
+
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_ItemStateUpdated(class UFGInventoryComponent* Inventory, TSubclassOf<UFGItemDescriptor> Item);
 };

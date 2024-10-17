@@ -2,6 +2,7 @@
 
 #include "FINComputerCase.h"
 #include "FINComputerEEPROMDesc.h"
+#include "FINItemStateEEPROMText.h"
 #include "FINNetworkComponent.h"
 #include "ComputerModules/FINComputerDriveHolder.h"
 #include "ComputerModules/PCI/FINComputerGPUT1.h"
@@ -136,6 +137,18 @@ void UFINComputerRCO::SetLabel_Implementation(UFGInventoryComponent* Inventory, 
 	if (auto labelContainer = FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(state)) {
 		labelContainer->SetLabel(Label);
 		Inventory->SetStateOnIndex(Index, state);
+	}
+}
+
+void UFINComputerRCO::SetTextEEPROMCode_Implementation(UFGInventoryComponent* Inventory, int32 Index, const FString& NewCode) {
+	FInventoryStack stack;
+	if (!Inventory->GetStackFromIndex(Index, stack)) return;
+	UFINComputerEEPROMDesc::CreateEEPROMStateInItem(stack.Item);
+	if (const FFINItemStateEEPROMText* luaState = stack.Item.GetItemState().GetValuePtr<FFINItemStateEEPROMText>()) {
+		FFINItemStateEEPROMText state = *luaState;
+		state.Code = NewCode;
+		Inventory->SetStateOnIndex(Index, FFGDynamicStruct(state));
+		Multicast_ItemStateUpdated(Inventory, stack.Item.GetItemClass());
 	}
 }
 

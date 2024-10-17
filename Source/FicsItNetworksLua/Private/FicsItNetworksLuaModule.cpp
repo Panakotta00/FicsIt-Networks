@@ -5,7 +5,7 @@
 #include "FGGameMode.h"
 #include "FINLuaRCO.h"
 #include "Patching/NativeHookManager.h"
-#include "FINItemStateEEPROMLua.h"
+#include "FINItemStateEEPROMText.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworksLua);
 DEFINE_LOG_CATEGORY(LogFicsItNetworksLuaReflection);
@@ -21,10 +21,11 @@ void FFicsItNetworksLuaModule::StartupModule() {
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINLuaProcessor"), TEXT("/Script/FicsItNetworksLua.FINLuaProcessor")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FINLuaProcessorStateStorage"), TEXT("/Script/FicsItNetworksLua.FINLuaProcessorStateStorage")});
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.EFINMetaRuntimeState"), TEXT("/Script/FicsItNetworksLua.EFINReflectionMetaRuntimeState")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FFINBlueprintPropertyMeta"), TEXT("/Script/FicsItNetworksLua.FFINReflectionPropertyMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FFINBlueprintFunctionMetaParameter"), TEXT("/Script/FicsItNetworksLua.FFINReflectionFunctionParameterMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FFINBlueprintFunctionMeta"), TEXT("/Script/FicsItNetworksLua.FFINReflectionFunctionMeta")});
-	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Class, TEXT("/Script/FicsItNetworks.FFINBlueprintSignalMeta"), TEXT("/Script/FicsItNetworksLua.FFINReflectionSignalMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINBlueprintPropertyMeta"), TEXT("/Script/FicsItNetworksLua.FINReflectionPropertyMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINBlueprintFunctionMetaParameter"), TEXT("/Script/FicsItNetworksLua.FINReflectionFunctionParameterMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINBlueprintFunctionMeta"), TEXT("/Script/FicsItNetworksLua.FINReflectionFunctionMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINBlueprintSignalMeta"), TEXT("/Script/FicsItNetworksLua.FINReflectionSignalMeta")});
+	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_AllMask, TEXT("/Script/FicsItNetworksLua.FINItemStateEEPROMLua"), TEXT("/Script/FicsItNetworksComputer.FINItemStateEEPROMText")});
 
 	FCoreRedirects::AddRedirectList(redirects, "FicsItNetworksLua");
 
@@ -46,8 +47,8 @@ UFINLuaGameInstanceModule::UFINLuaGameInstanceModule() {
 	RemoteCallObjects.Add(UFINLuaRCO::StaticClass());
 }
 
-bool UFINLuaUtils::TryGetLuaEEPROM(const FFGDynamicStruct& Struct, FFINItemStateEEPROMLua& LuaEEPROM) {
-	auto ptr = Struct.GetValuePtr<FFINItemStateEEPROMLua>();
+bool UFINLuaUtils::TryGetLuaEEPROM(const FFGDynamicStruct& Struct, FFINItemStateEEPROMText& LuaEEPROM) {
+	auto ptr = Struct.GetValuePtr<FFINItemStateEEPROMText>();
 
 	if (ptr == nullptr) {
 		return false;
