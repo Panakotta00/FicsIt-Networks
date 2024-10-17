@@ -74,8 +74,8 @@ namespace FINLua {
 				FLuaClass* LuaClass = luaFIN_checkLuaClass(L, thisIndex);
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
-				FFINExecutionContext Context(LuaClass->UClass);
-				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaClass->FINClass, MemberName, FIN_Func_ClassFunc | FIN_Func_StaticFunc, FIN_Prop_ClassProp | FIN_Prop_StaticProp, Context, true);
+				FFIRExecutionContext Context(LuaClass->UClass);
+				return luaFIN_pushFunctionOrGetProperty(L, thisIndex, LuaClass->FIRClass, MemberName, FIR_Func_ClassFunc | FIR_Func_StaticFunc, FIR_Prop_ClassProp | FIR_Prop_StaticProp, Context, true);
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -89,8 +89,8 @@ namespace FINLua {
 				FLuaClass* LuaClass = luaFIN_checkLuaClass(L, thisIndex);
 				FString MemberName = luaFIN_toFString(L, nameIndex);
 
-				FFINExecutionContext Context(LuaClass->UClass);
-				luaFIN_tryExecuteSetProperty(L, thisIndex, LuaClass->FINClass, MemberName, FIN_Prop_ClassProp, Context, valueIndex, true);
+				FFIRExecutionContext Context(LuaClass->UClass);
+				luaFIN_tryExecuteSetProperty(L, thisIndex, LuaClass->FIRClass, MemberName, FIR_Prop_ClassProp, Context, valueIndex, true);
 				return 0;
 			}
 
@@ -99,7 +99,7 @@ namespace FINLua {
 			 * @DisplayName		To String
 			 */)", __tostring) {
 				FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
-				luaFIN_pushFString(L, FFINReflection::ClassReferenceText(LuaClass->FINClass));
+				luaFIN_pushFString(L, FFicsItReflectionModule::ClassReferenceText(LuaClass->FIRClass));
 				return 1;
 			}
 
@@ -107,7 +107,7 @@ namespace FINLua {
 				FString FINClassInternalName = luaFIN_checkFString(L, lua_upvalueindex(1));
 				FString UClassPath = luaFIN_checkFString(L, lua_upvalueindex(2));
 
-				UFINClass* FINClass = FFINReflection::Get()->FindClass(FINClassInternalName);
+				UFIRClass* FINClass = FFicsItReflectionModule::Get().FindClass(FINClassInternalName);
 				UClass* Class = Cast<UClass>(FSoftObjectPath(UClassPath).TryLoad());
 
 				luaFIN_pushClass(L, Class, FINClass);
@@ -119,7 +119,7 @@ namespace FINLua {
 			 * @DisplayName		Persist
 			 */)", __persist) {
 				FLuaClass* LuaClass = luaFIN_checkLuaClass(L, 1);
-				luaFIN_pushFString(L, LuaClass->FINClass->GetInternalName());
+				luaFIN_pushFString(L, LuaClass->FIRClass->GetInternalName());
 				luaFIN_pushFString(L, LuaClass->UClass->GetClassPathName().ToString());
 				lua_pushcclosure(L, luaClassUnpersist, 2);
 				return 1;
@@ -135,7 +135,7 @@ namespace FINLua {
 			 * @DisplayName		Index
 			 */)", __index) {
 				FString ClassName = luaFIN_checkFString(L, 2);
-				UFINClass* Class = FFINReflection::Get()->FindClass(ClassName);
+				UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(ClassName);
 				if (Class) {
 					luaFIN_pushClass(L, Class);
 				} else {
@@ -170,7 +170,7 @@ namespace FINLua {
 		}
 	}
 
-	bool luaFIN_pushClass(lua_State* L, UClass* Class, UFINClass* FINClass) {
+	bool luaFIN_pushClass(lua_State* L, UClass* Class, UFIRClass* FINClass) {
 		if (!Class || !FINClass) {
 			lua_pushnil(L);
 			return false;
@@ -178,7 +178,7 @@ namespace FINLua {
 
 		FLuaClass* LuaClass = (FLuaClass*)lua_newuserdata(L, sizeof(FLuaClass));
 		LuaClass->UClass = Class;
-		LuaClass->FINClass = FINClass;
+		LuaClass->FIRClass = FINClass;
 		luaL_setmetatable(L, ReflectionSystemClass::Class::_Name);
 
 		return true;
@@ -190,7 +190,7 @@ namespace FINLua {
 
 	FLuaClass* luaFIN_checkLuaClass(lua_State* L, int Index) {
 		FLuaClass* LuaClass = luaFIN_toLuaClass(L, Index);
-		if (!LuaClass) luaFIN_typeError(L, Index, FFINReflection::ClassReferenceText(nullptr));
+		if (!LuaClass) luaFIN_typeError(L, Index, FFicsItReflectionModule::ClassReferenceText(nullptr));
 		return LuaClass;
 	}
 

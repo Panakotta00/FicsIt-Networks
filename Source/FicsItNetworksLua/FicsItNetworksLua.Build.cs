@@ -7,7 +7,7 @@ public class FicsItNetworksLua : ModuleRules
 {
     public FicsItNetworksLua(ReadOnlyTargetRules target) : base(target)
     {
-        CppStandard = CppStandardVersion.Cpp17;
+        CppStandard = CppStandardVersion.Cpp20;
         bEnableExceptions = true;
         bUseRTTI = true;
         //bLegacyPublicIncludePaths = false;
@@ -19,9 +19,13 @@ public class FicsItNetworksLua : ModuleRules
 			"Engine",
 			"FactoryGame",
 			"SML",
-            "FicsItNetworks",
             "Eris",
-            "Tracy"
+            "Tracy",
+            "FicsItLogLibrary",
+            "FicsItReflection",
+            "FicsItNetworksCircuit",
+			"FicsItNetworksComputer",
+			"FicsItNetworksMisc",
 		});
 
         PublicIncludePaths.Add("Public");

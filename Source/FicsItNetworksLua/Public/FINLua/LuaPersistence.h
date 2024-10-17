@@ -26,7 +26,7 @@ namespace FINLua {
 	 * @param[in]	Idx		the index of the value
 	 */
 	#define PersistIndex(Name, Idx) \
-		FINLua::luaFIN_persistValue(L, -1, PersistName(Name));
+		FINLua::luaFIN_persistValue(L, Idx, PersistName(Name));
 
 	/**
 	 * Adds the value at the top of the stack to both perm-tables.
@@ -56,15 +56,20 @@ namespace FINLua {
 	 * @param name The associated name of the value
 	 */
 	inline void luaFIN_persistValue(lua_State* L, int index, const FString& name) {
+		if (lua_isnil(L, index)) {
+			return;
+		}
+
+		int absIndex = lua_absindex(L, index);
 		lua_getfield(L, LUA_REGISTRYINDEX, "PersistPerm");
+		lua_pushvalue(L, absIndex);
 		luaFIN_pushFString(L, name);
-		lua_pushvalue(L, index);
 		lua_settable(L, -3);
 		lua_pop(L, 1);
 
 		lua_getfield(L, LUA_REGISTRYINDEX, "PersistUperm");
 		luaFIN_pushFString(L, name);
-		lua_pushvalue(L, index);
+		lua_pushvalue(L, absIndex);
 		lua_settable(L, -3);
 		lua_pop(L, 1);
 	}

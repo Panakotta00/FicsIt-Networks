@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "SlateBasics.h"
 #include "FINReflectionUIStyle.generated.h"
 
 USTRUCT(BlueprintType)

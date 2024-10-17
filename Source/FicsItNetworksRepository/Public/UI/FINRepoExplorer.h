@@ -3,6 +3,10 @@
 #include "CoreMinimal.h"
 #include "FINRepoPackageSearch.h"
 #include "FINRepoPackageView.h"
+#include "SCompoundWidget.h"
+#include "SlateWidgetStyle.h"
+#include "SlateWidgetStyleAsset.h"
+#include "SlateWidgetStyleContainerBase.h"
 #include "FINRepoExplorer.generated.h"
 
 USTRUCT(BlueprintType)

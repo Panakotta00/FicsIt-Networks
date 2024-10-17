@@ -1,13 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AsyncWork.h"
 #include "FINLuaProcessorStateStorage.h"
 #include "FicsItKernel/FicsItFS/Library/Listener.h"
 #include "FicsItKernel/Processor/Processor.h"
 #include "FINLua/API/LuaFileSystemAPI.h"
 #include "FINLuaProcessor.generated.h"
 
-class AFINStateEEPROMText;
+class AFINStateEEPROMLua;
 struct lua_State;
 struct lua_Debug;
 namespace FINLua::Event::event {
@@ -124,10 +125,6 @@ class FICSITNETWORKSLUA_API UFINLuaProcessor : public UFINKernelProcessor {
 	friend FFINLuaProcessorTick;
 
 private:
-	// Processor cache
-	UPROPERTY()
-	TWeakObjectPtr<AFINStateEEPROMText> EEPROM;
-
 	// Lua runtime
 	lua_State* luaState = nullptr;
 	lua_State* luaThread = nullptr;
@@ -181,7 +178,6 @@ public:
 	virtual void Stop(bool bInIsCrash) override;
 	virtual void Reset() override;
 	virtual int64 GetMemoryUsage(bool bInRecalc = false) override;
-	virtual void SetEEPROM(AFINStateEEPROM* InEEPROM) override;
 	// End Processor
 
 	/**
@@ -201,12 +197,19 @@ public:
 	void LuaTick();
 
 	/**
-	 * Allows to access the the eeprom used by the processor.
-	 * Nullptr if no eeprom is currently set.
+	 * Allows to access the eeprom code used by the processor.
+	 * None if no eeprom is currently set.
 	 *
-	 * @return	the eeprom used by the processor.
+	 * @return the eeprom code used by the processor.
 	 */
-	AFINStateEEPROMText* GetEEPROM() const;
+	TOptional<FString> GetEEPROM() const;
+
+	/**
+	 * Allows to change the EEPROMs Code.
+	 *
+	 * @return true if a compatible eeprom is available to store the given code.
+	 */
+	bool SetEEPROM(const FString& Code);
 
 	/**
 	 * Tries to pop a signal from the signal queue in the network controller

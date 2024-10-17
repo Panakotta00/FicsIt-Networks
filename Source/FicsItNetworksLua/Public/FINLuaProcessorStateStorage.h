@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Network/FINNetworkTrace.h"
-#include "Network/FINDynamicStructHolder.h"
+#include "FIRTrace.h"
+#include "FIRInstancedStruct.h"
 #include "FINLuaProcessorStateStorage.generated.h"
 
 /**
@@ -13,12 +13,12 @@ struct FICSITNETWORKSLUA_API FFINLuaProcessorStateStorage {
 	GENERATED_BODY()
 private:
 	UPROPERTY(SaveGame)
-	TArray<FFINNetworkTrace> Traces;
+	TArray<FFIRTrace> Traces;
 
 	UPROPERTY(SaveGame)
 	TArray<UObject*> References;
 
-	TArray<TSharedPtr<FFINDynamicStructHolder>> Structs;
+	TArray<TSharedPtr<FFIRInstancedStruct>> Structs;
 
 public:
 	UPROPERTY(SaveGame)
@@ -28,17 +28,17 @@ public:
 	bool Serialize(FStructuredArchive::FSlot Slot);
 	// End Struct
 			
-	int32 Add(const FFINNetworkTrace& Trace);
+	int32 Add(const FFIRTrace& Trace);
 
 	int32 Add(UObject* Ref);
 
-	int32 Add(TSharedPtr<FFINDynamicStructHolder> Struct);
+	int32 Add(TSharedPtr<FFIRInstancedStruct> Struct);
 
-	FFINNetworkTrace GetTrace(int32 id);
+	FFIRTrace GetTrace(int32 id);
 
 	UObject* GetRef(int32 id);
 
-	TSharedPtr<FFINDynamicStructHolder> GetStruct(int32 id);
+	TSharedPtr<FFIRInstancedStruct> GetStruct(int32 id);
 
 	void Clear();
 };

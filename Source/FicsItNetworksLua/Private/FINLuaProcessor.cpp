@@ -1,15 +1,21 @@
 #include "FINLuaProcessor.h"
 
+#include "AsyncWork.h"
+#include "Base64.h"
+#include "FGInventoryComponent.h"
+#include "FicsItNetworksComputer.h"
 #include "FicsItNetworksLuaModule.h"
-#include "FicsItKernel/Logging.h"
-#include "FicsItKernel/Processor/FINStateEEPROMText.h"
+#include "FILLogContainer.h"
+#include "FINNetworkUtils.h"
+#include "FINItemStateEEPROMLua.h"
+#include "FINMediaSubsystem.h"
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
-#include "Network/FINNetworkTrace.h"
-#include "Network/FINNetworkUtils.h"
-#include "Reflection/FINSignal.h"
+#include "FIRTrace.h"
+#include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/LuaUtil.h"
+#include "Signals/FINSignalData.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -381,7 +387,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		lua_setfield(luaState, -2, "globals");						// ..., perm, globals, perm, data
 		lua_pushvalue(luaState, luaThreadIndex);						// ..., perm, globals, perm, data, thread
 		lua_setfield(luaState, -2, "thread");						// ..., perm, globals, perm, data
-		
+		FINLua::luaFINDebug_dumpTable(luaState, -2);
 
 		lua_pushcfunction(luaState, luaPersist);					// ..., perm, globals, perm, data, persist-func
 		lua_insert(luaState, -3);									// ..., perm, globals, persist-func, perm, data
@@ -426,6 +432,7 @@ void UFINLuaProcessor::BeginDestroy() {
 
 void UFINLuaProcessor::GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) {
 	out_dependentObjects.Add(Kernel);
+	out_dependentObjects.Add(AFINMediaSubsystem::GetMediaSubsystem(this));
 }
 
 void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {}
@@ -523,7 +530,7 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 
 void UFINLuaProcessor::LuaTick() {
 	ZoneScoped;
-	FFINLogScope LogScope(GetKernel()->GetLog());
+	FFILLogScope LogScope(GetKernel()->GetLog());
 	try {
 		// reset out of time
 		lua_sethook(luaThread, UFINLuaProcessor::luaHook, LUA_MASKCOUNT, tickHelper.steps());
@@ -614,7 +621,7 @@ TArray<FINLua::LuaFile> UFINLuaProcessor::GetFileStreams() const {
 void luaWarnF(void* ud, const char* msg, int tocont) {
 	UFINLuaProcessor* Processor = static_cast<UFINLuaProcessor*>(ud);
 
-	Processor->GetKernel()->GetLog()->PushLogEntry(FIN_Log_Verbosity_Warning, UTF8_TO_TCHAR(msg));
+	Processor->GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, UTF8_TO_TCHAR(msg));
 }
 
 void UFINLuaProcessor::Reset() {
@@ -660,11 +667,12 @@ void UFINLuaProcessor::Reset() {
 	luaThreadIndex = lua_gettop(luaState);
 
 	// setup thread with code
-	if (!EEPROM.IsValid()) {
+	TOptional<FString> eepromCode = GetEEPROM();
+	if (eepromCode.IsSet() == false) {
 		Kernel->Crash(MakeShared<FFINKernelCrash>("No Valid EEPROM set"));
 		return;
 	}
-	const FTCHARToUTF8 CodeConv(*EEPROM->GetCode(), EEPROM->GetCode().Len());
+	const FTCHARToUTF8 CodeConv(**eepromCode, eepromCode->Len());
 	const std::string code = std::string(CodeConv.Get(), CodeConv.Length());
 	luaL_loadbuffer(luaThread, code.c_str(), code.size(), "=EEPROM");
 	if (lua_isstring(luaThread, -1)) {
@@ -684,12 +692,25 @@ int64 UFINLuaProcessor::GetMemoryUsage(bool bInRecalc) {
 	return lua_gc(luaState, LUA_GCCOUNT, 0) * 100;
 }
 
-void UFINLuaProcessor::SetEEPROM(AFINStateEEPROM* InEEPROM) {
-	EEPROM = Cast<AFINStateEEPROMText>(InEEPROM);
+TOptional<FString> UFINLuaProcessor::GetEEPROM() const {
+	FInventoryItem eeprom = Kernel->GetEEPROM();
+	if (const FFINItemStateEEPROMLua* state = eeprom.GetItemState().GetValuePtr<FFINItemStateEEPROMLua>()) {
+		return state->Code;
+	}
+	return {};
 }
 
-AFINStateEEPROMText* UFINLuaProcessor::GetEEPROM() const {
-	return EEPROM.Get();
+bool UFINLuaProcessor::SetEEPROM(const FString& Code) {
+	FInventoryItem eeprom = Kernel->GetEEPROM();
+	UFINComputerEEPROMDesc::CreateEEPROMStateInItem(eeprom);
+
+	if (const FFINItemStateEEPROMLua* stateLua = eeprom.GetItemState().GetValuePtr<FFINItemStateEEPROMLua>()) {
+		FFINItemStateEEPROMLua state = *stateLua;
+		state.Code = Code;
+		return Kernel->SetEEPROM(FFGDynamicStruct(state));
+	}
+
+	return false;
 }
 
 FFINLuaProcessorTick& UFINLuaProcessor::GetTickHelper() {
@@ -697,19 +718,19 @@ FFINLuaProcessorTick& UFINLuaProcessor::GetTickHelper() {
 }
 
 bool UFINLuaProcessor::PullTimeoutReached() {
-	return Timeout <= (static_cast<double>((FDateTime::Now() - FFicsItNetworksModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0);
+	return Timeout <= (static_cast<double>((FDateTime::Now() - FFicsItNetworksComputerModule::GameStart).GetTotalMilliseconds() - PullStart) / 1000.0);
 }
 
 int UFINLuaProcessor::DoSignal(lua_State* L) {
 	UFINKernelNetworkController* net = GetKernel()->GetNetwork();
 	if (!net || net->GetSignalCount() < 1) return 0;
-	FFINNetworkTrace sender;
+	FFIRTrace sender;
 	FFINSignalData signal = net->PopSignal(sender); 
 	int props = 2;
 	if (signal.Signal) lua_pushstring(L, TCHAR_TO_UTF8(*signal.Signal->GetInternalName()));
 	else lua_pushnil(L);
 	FINLua::luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(sender));
-	for (const FFINAnyNetworkValue& Value : signal.Data) {
+	for (const FFIRAnyValue& Value : signal.Data) {
 		FINLua::luaFIN_pushNetworkValue(L, Value, sender);
 		props++;
 	}

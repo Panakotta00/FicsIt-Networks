@@ -2,11 +2,11 @@
 
 #include "FGPlayerController.h"
 #include "FINConfigurationStruct.h"
+#include "FINNetworkComponent.h"
+#include "FINUtils.h"
 #include "Components/OverlaySlot.h"
-#include "Components/VerticalBoxSlot.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "UI/FGGameUI.h"
-#include "Utils/FINUtils.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Widgets/Input/SEditableTextBox.h"
 
 const FName AFINBlueprintHologram_List_NameColumn = FName("Name");	
@@ -14,7 +14,7 @@ const FName AFINBlueprintHologram_List_ValueColumn = FName("Value");
 
 AFINBlueprintHologram::AFINBlueprintHologram() {
 	PopupClass = ConstructorHelpers::FClassFinder<UFGPopupWidget>(TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_Popup.Widget_Popup_C")).Class;
-	PopupContentClass = ConstructorHelpers::FClassFinder<UFINBlueprintParameterPopup>(TEXT("/FicsItNetworks/UI/Widget_FIN_BlueprintParameterPopup.Widget_FIN_BlueprintParameterPopup_C")).Class;
+	PopupContentClass = ConstructorHelpers::FClassFinder<UFINBlueprintParameterPopup>(TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_BlueprintParameterPopup.BPW_FIN_BlueprintParameterPopup_C")).Class;
 }
 
 void AFINBlueprintHologram::ShowPropertyDialog() {
@@ -112,7 +112,7 @@ bool AFINBlueprintHologram::TrySnapToActor(const FHitResult& hitResult) {
 }
 
 void AFINBlueprintHologram::PlaceHologram() {
-	auto cp = static_cast<AFGCharacterPlayer*>(mConstructionInstigator);
+	auto cp = static_cast<AFGCharacterPlayer*>(GetConstructionInstigator());
 	cp->GetBuildGun()->Server_PrimaryFire_Implementation();
 	cp->GetBuildGun()->Server_PrimaryFire_Implementation();
 }

@@ -1,8 +1,10 @@
 #include "UI/FINLuaCodeEditor.h"
 
+#include "FINUtils.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
 #include "TracyLib/public/tracy/Tracy.hpp"
 #include "UI/FINTextDecorators.h"
-#include "Utils/FINUtils.h"
 
 const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
 
@@ -682,7 +684,7 @@ TSharedRef<SWidget> UFINLuaCodeEditor::RebuildWidget() {
 		.Style(&Style)
 		.OnTextChanged(BIND_UOBJECT_DELEGATE(FOnTextChanged, HandleOnTextChanged))
 		.OnTextCommitted(BIND_UOBJECT_DELEGATE(FOnTextCommitted, HandleOnTextCommitted))
-	.OnNavigateReflection_Lambda([this](UFINBase* Type) {
+	.OnNavigateReflection_Lambda([this](UFIRBase* Type) {
 		OnNavigateReflection.Broadcast(Type);
 	});
 }

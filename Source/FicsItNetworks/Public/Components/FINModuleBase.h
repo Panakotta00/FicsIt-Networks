@@ -1,9 +1,8 @@
 ﻿#pragma once
 
-#include "ModuleSystem/FINModuleSystemModule.h"
-#include "ModuleSystem/FINModuleSystemPanel.h"
-#include "Network/Signals/FINSignalSender.h"
 #include "Buildables/FGBuildable.h"
+#include "ModuleSystem/FINModuleSystemModule.h"
+#include "Signals/FINSignalSender.h"
 #include "FINModuleBase.generated.h"
 
 UCLASS()
