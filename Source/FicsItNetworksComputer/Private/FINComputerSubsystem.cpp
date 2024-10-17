@@ -15,7 +15,7 @@
 AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input = CreateDefaultSubobject<UEnhancedInputComponent>("Input");
 	const UFGInputSettings* Settings = UFGInputSettings::Get();
-	
+
 	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnPrimaryFirePressed);
 	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnPrimaryFireReleased);
 	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnSecondaryFirePressed);

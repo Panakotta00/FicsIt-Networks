@@ -120,6 +120,12 @@ EndClass()
 
 BeginClass(AFGBuildableTrainPlatformCargo, "TrainPlatformCargo", "Train Platform Cargo", "A train platform that allows for loading and unloading cargo cars.")
 BeginProp(RBool, isLoading, "Is Loading", "True if the cargo platform is currently loading the docked cargo vehicle.") {
+	UFILogLibrary::Log(FIL_Verbosity_Warning, TEXT("TrainPlatformCargo's `isLoading` property is Deprecated! Please use `isInLoadMode` instead."));
+	FIRReturn self->GetIsInLoadMode();
+} PropSet() {
+	self->SetIsInLoadMode(Val);
+} EndProp()
+BeginProp(RBool, isInLoadMode, "Is in Load Mode", "True if the cargo platform is set to load cargo, false if it should unload the cargo.") {
 	FIRReturn self->GetIsInLoadMode();
 } PropSet() {
 	self->SetIsInLoadMode(Val);
