@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
+#include "Signals/FINSignalSender.h"
 #include "FINSpeakerPole.generated.h"
 
 UCLASS(Blueprintable)
@@ -10,10 +11,10 @@ class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
-	UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
+	class UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
-	UAudioComponent* AudioComponent = nullptr;
+	class UAudioComponent* AudioComponent = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category="SpeakerPole")
 	FString CurrentSound;
@@ -80,5 +81,5 @@ public:
 	 * without the file extension.
 	 * If it was unable to load the sound file, return nullptr.
 	 */
-	USoundWave* LoadSoundFromFile(const FString& InSound);
+	class USoundWave* LoadSoundFromFile(const FString& InSound);
 };

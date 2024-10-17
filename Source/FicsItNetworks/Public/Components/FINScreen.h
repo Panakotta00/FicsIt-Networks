@@ -1,9 +1,11 @@
 ﻿#pragma once
 
-#include "Computer/FINComputerScreen.h"
+#include "CoreMinimal.h"
+#include "FIRTrace.h"
+#include "Buildables/FGBuildable.h"
 #include "Graphics/FINScreenInterface.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Components/WidgetComponent.h"
+#include "ComputerModules/PCI/FINComputerScreen.h"
 #include "FINScreen.generated.h"
 
 UCLASS()
@@ -12,13 +14,13 @@ class AFINScreen : public AFGBuildable, public IFINScreenInterface {
 	
 private:
 	UPROPERTY()
-	FFINNetworkTrace GPU;
+	FFIRTrace GPU;
 
 public:
 	TSharedPtr<SWidget> Widget;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
+	class UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UWidgetComponent* WidgetComponent = nullptr;
@@ -66,8 +68,8 @@ public:
 	// End AFGBuildable
 
 	// Begin IFINScreenInterface
-	void BindGPU(const FFINNetworkTrace& gpu) override;
-	FFINNetworkTrace GetGPU() const override;
+	void BindGPU(const FFIRTrace& gpu) override;
+	FFIRTrace GetGPU() const override;
 	void SetWidget(TSharedPtr<SWidget> widget) override;
 	TSharedPtr<SWidget> GetWidget() const override;
 	// End IFINScreenInterface

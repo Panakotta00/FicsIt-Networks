@@ -1,6 +1,9 @@
 ﻿#include "Components/FINVehicleScanner.h"
 #include "FGColoredInstanceMeshProxy.h"
 #include "FGVehicle.h"
+#include "FINAdvancedNetworkConnectionComponent.h"
+#include "Components/BoxComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Net/UnrealNetwork.h"
 
 AFINVehicleScanner::AFINVehicleScanner() {

@@ -1,7 +1,8 @@
 #pragma once
 
+#include "FicsItReflection.h"
 #include "FINLua/LuaUtil.h"
-#include "Reflection/FINReflection.h"
+#include "Reflection/FIRClass.h"
 
 namespace FINLua {
 	/**
@@ -11,17 +12,17 @@ namespace FINLua {
 	 */
 	struct FLuaClass {
 		UClass* UClass;
-		UFINClass* FINClass;
+		UFIRClass* FIRClass;
 	};
 
 	/**
 	 * @brief Pushes a Class and FINClass onto the lua stack (used for optimization purposes)
 	 * @param L the lua stack
 	 * @param Class the Class to push onto the stack
-	 * @param FINClass the FINClass to push onto the stack
+	 * @param FIRClass the FINClass to push onto the stack
 	 * @return true if successfully able to push
 	 */
-	bool luaFIN_pushClass(lua_State* L, UClass* Class, UFINClass* FINClass);
+	bool luaFIN_pushClass(lua_State* L, UClass* Class, UFIRClass* FIRClass);
 
 	/**
 	 * @brief Pushes a Class onto the lua stack
@@ -29,18 +30,18 @@ namespace FINLua {
 	 * @param Class the class to push onto the stack
 	 */
 	FORCEINLINE void luaFIN_pushClass(lua_State* L, UClass* Class) {
-		UFINClass* FINClass = FFINReflection::Get()->FindClass(Class, true, false);
+		UFIRClass* FINClass = FFicsItReflectionModule::Get().FindClass(Class, true, false);
 		luaFIN_pushClass(L, Class, FINClass);
 	}
 
 	/**
 	 * @brief Pushes a FINClass onto the lua stack
 	 * @param L the lua stack
-	 * @param FINClass the FINClass to push onto the stack
+	 * @param FIRClass the FINClass to push onto the stack
 	 */
-	FORCEINLINE void luaFIN_pushClass(lua_State* L, UFINClass* FINClass) {
-		UClass* Class = FFINReflection::Get()->FindUClass(FINClass);
-		luaFIN_pushClass(L, Class, FINClass);
+	FORCEINLINE void luaFIN_pushClass(lua_State* L, UFIRClass* FIRClass) {
+		UClass* Class = FFicsItReflectionModule::Get().FindUClass(FIRClass);
+		luaFIN_pushClass(L, Class, FIRClass);
 	}
 
 	/**
@@ -66,10 +67,10 @@ namespace FINLua {
 	 * @param[out] OutFINClass if not nullptr, sets the FINClass Pointer to the FINClass retrieved
 	 * @return The Class from the stack, nullptr if unable to get as class
 	 */
-	FORCEINLINE UClass* luaFIN_toUClass(lua_State* L, int Index, UFINClass** OutFINClass) {
+	FORCEINLINE UClass* luaFIN_toUClass(lua_State* L, int Index, UFIRClass** OutFINClass) {
 		FLuaClass* luaClass = luaFIN_toLuaClass(L, Index);
 		if (luaClass) {
-			if (OutFINClass) *OutFINClass = luaClass->FINClass;
+			if (OutFINClass) *OutFINClass = luaClass->FIRClass;
 			return luaClass->UClass;
 		} else {
 			if (OutFINClass) *OutFINClass = nullptr;
@@ -89,11 +90,11 @@ namespace FINLua {
 	 * @param[out] OutClass if not nullptr, sets the UClass Pointer to the UClass retrieved
 	 * @return The FINClass from the stack, nullptr if unable to get as FINClass
 	 */
-	FORCEINLINE UFINClass* luaFIN_toFINClass(lua_State* L, int Index, UClass** OutClass) {
+	FORCEINLINE UFIRClass* luaFIN_toFINClass(lua_State* L, int Index, UClass** OutClass) {
 		FLuaClass* luaClass = luaFIN_toLuaClass(L, Index);
 		if (luaClass) {
 			if (OutClass) *OutClass = luaClass->UClass;
-			return luaClass->FINClass;
+			return luaClass->FIRClass;
 		} else {
 			if (OutClass) *OutClass = nullptr;
 			return nullptr;

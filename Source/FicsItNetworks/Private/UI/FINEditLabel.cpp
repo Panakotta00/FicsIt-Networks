@@ -1,12 +1,11 @@
 ﻿#include "UI/FINEditLabel.h"
 
 #include "FGPlayerController.h"
+#include "FINComputerRCO.h"
+#include "FINLabelContainerInterface.h"
 #include "Components/EditableTextBox.h"
-#include "Computer/FINComputerEEPROMDesc.h"
-#include "Computer/FINComputerRCO.h"
 #include "Reflection/ReflectionHelper.h"
 #include "UI/FINCopyUUIDButton.h"
-#include "Utils/FINLabelContainerInterface.h"
 
 TSharedRef<SWidget> UFINEditLabel::RebuildWidget() {
 	return GetContent()->TakeWidget();
@@ -15,7 +14,7 @@ TSharedRef<SWidget> UFINEditLabel::RebuildWidget() {
 void UFINEditLabel::InitSlotWidget(UWidget* InSlotWidget) {
 	SlotWidget = InSlotWidget;
 
-	UClass* EditLabel = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/UI/Widget_FIN_EditLabel.Widget_FIN_EditLabel_C"));
+	UClass* EditLabel = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/UI/Misc/Widget_FIN_EditLabel.Widget_FIN_EditLabel_C"));
 	UUserWidget* Widget = NewObject<UUserWidget>(this, EditLabel);
 	SetContent(Widget);
 	Widget->Initialize();
@@ -23,32 +22,32 @@ void UFINEditLabel::InitSlotWidget(UWidget* InSlotWidget) {
 	UEditableTextBox* TextBox = Cast<UEditableTextBox>(TextBoxWidget);
 	TextBox->OnTextCommitted.AddDynamic(this, &UFINEditLabel::OnLabelChanged);
 
-	TScriptInterface<IFINLabelContainerInterface> LabelContainer = GetLabelContainerFromSlot(SlotWidget);
-	if (LabelContainer) {
-		TextBox->SetText(FText::FromString(IFINLabelContainerInterface::Execute_GetLabel(LabelContainer.GetObject())));
+	TOptional<FString> Label = GetLabelFromSlot(SlotWidget);
+	if (Label.IsSet()) {
+		TextBox->SetText(FText::FromString(*Label));
 	}
 }
 
-UE_DISABLE_OPTIMIZATION_SHIP
 void UFINEditLabel::OnLabelChanged(const FText& Text, ETextCommit::Type CommitMethod) {
-	TScriptInterface<IFINLabelContainerInterface> LabelContainer = GetLabelContainerFromSlot(SlotWidget);
-	if (LabelContainer) {
+	TOptional<FString> Label = GetLabelFromSlot(SlotWidget);
+	if (Label.IsSet()) {
 		auto player = GetOwningPlayer<AFGPlayerController>();
 		auto rco = Cast<UFINComputerRCO>(player->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
-		rco->SetLabel(LabelContainer.GetObject(), Text.ToString());
+		auto inventory = FReflectionHelper::GetObjectPropertyValue<UFGInventoryComponent>(SlotWidget, TEXT("mCachedInventoryComponent"));
+		auto slotIndex = FReflectionHelper::GetPropertyValue<FIntProperty>(SlotWidget, TEXT("mSlotIdx"));
+		rco->SetLabel(inventory, slotIndex, Text.ToString());
 	}
 }
-UE_ENABLE_OPTIMIZATION_SHIP
 
-TScriptInterface<IFINLabelContainerInterface> UFINEditLabel::GetLabelContainerFromSlot(UWidget* InSlot) {
+TOptional<FString> UFINEditLabel::GetLabelFromSlot(UWidget* InSlot) {
 	struct {
 		FInventoryStack Stack;
 	} Params;
 	FReflectionHelper::CallScriptFunction(InSlot, TEXT("GetStack"), &Params);
-	if (!Params.Stack.Item.ItemState.IsValid()) return nullptr;
-	UObject* State = Params.Stack.Item.ItemState.Get();
-	if (State->Implements<UFINLabelContainerInterface>()) {
-		return State;
-	}
-	return nullptr;
+
+	if (!Params.Stack.Item.HasState()) return {};
+
+	const FFINLabelContainerInterface* container = FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(Params.Stack.Item.GetItemState());
+	if (container) return container->GetLabel();
+	return {};
 }

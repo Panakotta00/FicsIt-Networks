@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "FINModularIndicatorPoleModule.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Buildables/FGBuildable.h"
 #include "FINModularIndicatorPole.generated.h"
 
@@ -10,7 +9,6 @@ class AFINModularIndicatorPole : public AFGBuildable {
 	GENERATED_BODY()
 	
 public:
-
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* NormalBaseMesh = nullptr;
 	UPROPERTY(EditDefaultsOnly)
@@ -33,11 +31,10 @@ public:
 	int Extension = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* Connector;
+	class UFINAdvancedNetworkConnectionComponent* Connector;
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Parts;
-	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FVector ModuleConnectionPoint;

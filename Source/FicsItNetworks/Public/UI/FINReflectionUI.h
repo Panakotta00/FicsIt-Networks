@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "SlateBasics.h"
 #include "FINReflectionUIContext.h"
 #include "FINReflectionUIStyle.h"
 #include "Components/Widget.h"
@@ -57,7 +56,7 @@ public:
 	 * Sets the currently selected typer of the reflection viewer
 	 */
 	UFUNCTION(BlueprintCallable, Category="Reflection|UI")
-	void NavigateTo(UFINStruct* InStruct);
+	void NavigateTo(UFIRStruct* InStruct);
 
 	/**
 	 * Sets if entry lists should also show the entries of super structs/classes

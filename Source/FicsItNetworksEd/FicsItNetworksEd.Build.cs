@@ -19,6 +19,10 @@ public class FicsItNetworksEd : ModuleRules
             "UnrealEd",
             "Localization",
 		});
+
+		PrivateDependencyModuleNames.AddRange(new string[] {
+			"FicsItReflection",
+		});
 		
 		CppStandard = CppStandardVersion.Cpp17;
 		

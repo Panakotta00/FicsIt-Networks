@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "FINSizeablePanelHolo.h"
-#include "ModuleSystem/FINModuleSystemPanel.h"
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
 #include "FINSizeablePanel.generated.h"
+
+class UFINModuleSystemPanel;
 
 UCLASS()
 class AFINSizeablePanel  : public AFGBuildable {
@@ -22,7 +22,6 @@ public:
 	
 	UPROPERTY(SaveGame, VisibleAnywhere, BlueprintReadWrite)
 	UFINModuleSystemPanel* ModularPanel = nullptr;
-
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFINAdvancedNetworkConnectionComponent* Connector = nullptr;

@@ -1,10 +1,13 @@
 #pragma once
 
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
+#include "CoreMinimal.h"
 #include "Buildables/FGBuildableAttachmentSplitter.h"
 #include "FGFactoryConnectionComponent.h"
-#include "Reflection/FINUReflectionSource.h"
+#include "Reflection/Source/FIRSourceUObject.h"
+#include "Signals/FINSignalSender.h"
 #include "FINCodeableSplitter.generated.h"
+
+class UFINAdvancedNetworkConnectionComponent;
 
 UCLASS()
 class AFINCodeableSplitter : public AFGBuildableConveyorAttachment, public IFINSignalSender {
@@ -66,11 +69,11 @@ public:
 	// End IFINSignalSender
 
 	UFUNCTION()
-    void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes, FFINReflectionFunctionMeta& netFuncMeta_getConnectorByIndex) {
+    void netClass_Meta(FString& InternalName, FText& DisplayName, TMap<FString, FString>& PropertyInternalNames, TMap<FString, FText>& PropertyDisplayNames, TMap<FString, FText>& PropertyDescriptions, TMap<FString, int32>& PropertyRuntimes, FFIRFunctionMeta& netFuncMeta_getConnectorByIndex) {
 		InternalName = TEXT("CodeableSplitter");
 		DisplayName = FText::FromString(TEXT("Codeable Splitter"));
 
-		FFINReflectionFunctionParameterMeta getConnectorByIndex_outputIndex;
+		FFIRFunctionParameterMeta getConnectorByIndex_outputIndex;
 		getConnectorByIndex_outputIndex.InternalName = TEXT("outputIndex");
 		getConnectorByIndex_outputIndex.DisplayName = FText::FromString(TEXT("Output Index"));
 		getConnectorByIndex_outputIndex.Description = FText::FromString(TEXT("The integer used in TransferItem and ItemOutputted to reference a specific output. Valid Values: 0-3"));
