@@ -7,6 +7,7 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
+#include "FINComputerRCO.h"
 #include "FINFileSystemSubsystem.h"
 #include "FINUtils.h"
 #include "Components/AudioComponent.h"
@@ -105,6 +106,7 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 			FInventoryStack stack;
 			if (DataStorage->GetStackFromIndex(0, stack) || stack.HasItems()) {
 				DataStorage->SetStateOnIndex(0, state);
+				GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFINComputerRCO>()->Multicast_ItemStateUpdated(DataStorage, stack.Item.GetItemClass());
 				return true;
 			}
 			return false;

@@ -202,7 +202,7 @@ namespace FINLua {
 
 				FString code = luaFIN_checkFString(L, 1);
 
-				if (Cast<UFINLuaProcessor>(kernel->GetProcessor())->SetEEPROM(code)) {
+				if (!Cast<UFINLuaProcessor>(kernel->GetProcessor())->SetEEPROM(code)) {
 					return luaL_error(L, "no eeprom set");
 				}
 

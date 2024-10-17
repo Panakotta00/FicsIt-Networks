@@ -138,3 +138,7 @@ void UFINComputerRCO::SetLabel_Implementation(UFGInventoryComponent* Inventory, 
 		Inventory->SetStateOnIndex(Index, state);
 	}
 }
+
+void UFINComputerRCO::Multicast_ItemStateUpdated_Implementation(class UFGInventoryComponent* Inventory, TSubclassOf<UFGItemDescriptor> Item) {
+	Inventory->OnItemAddedDelegate.Broadcast(Item, 0, Inventory);
+}

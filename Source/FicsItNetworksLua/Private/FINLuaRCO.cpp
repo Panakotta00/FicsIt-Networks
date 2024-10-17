@@ -1,8 +1,11 @@
 #include "FINLuaRCO.h"
 
 #include "FGInventoryComponent.h"
+#include "FGPlayerController.h"
 #include "FINComputerEEPROMDesc.h"
+#include "FINComputerRCO.h"
 #include "FINItemStateEEPROMLua.h"
+#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
 void UFINLuaRCO::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -19,5 +22,6 @@ void UFINLuaRCO::SetLuaEEPROMCode_Implementation(UFGInventoryComponent* Inventor
 		FFINItemStateEEPROMLua state = *luaState;
 		state.Code = NewCode;
 		Inventory->SetStateOnIndex(Index, FFGDynamicStruct(state));
+		GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFINComputerRCO>()->Multicast_ItemStateUpdated(Inventory, stack.Item.GetItemClass());
 	}
 }
