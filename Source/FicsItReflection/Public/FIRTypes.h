@@ -7,7 +7,7 @@
 struct FFIRAnyValue;
 
 UENUM(BlueprintType)
-enum EFIRValueType : uint8 {
+enum EFIRValueType : int {
 	FIR_NIL = 0,
 	FIR_BOOL,
 	FIR_INT,
@@ -20,7 +20,6 @@ enum EFIRValueType : uint8 {
 	FIR_ARRAY,
 	FIR_ANY,
 };
-ENUM_RANGE_BY_FIRST_AND_LAST(EFIRValueType, EFIRValueType::FIR_NIL, EFIRValueType::FIR_ANY);
 
 typedef bool FIRBool;
 typedef int64 FIRInt;

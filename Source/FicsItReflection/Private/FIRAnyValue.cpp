@@ -2,7 +2,6 @@
 
 #include "FicsItReflection.h"
 #include "Engine/World.h"
-#include "FicsItNetworksCircuit/Public/FINNetworkComponent.h"
 
 bool FFIRAnyValue::Serialize(FStructuredArchive::FSlot Slot) {
 	FStructuredArchive::FRecord Record = Slot.EnterRecord();
@@ -90,22 +89,4 @@ bool FFIRAnyValue::Serialize(FStructuredArchive::FSlot Slot) {
 		break;
 	}
 	return true;
-}
-
-FString FINObjectToString(UObject* InObj) {
-	if (!InObj) return TEXT("Nil");
-	FString Text = FFicsItReflectionModule::Get().FindClass(InObj->GetClass())->GetInternalName();
-	if (InObj->GetClass()->ImplementsInterface(UFINNetworkComponent::StaticClass())) {
-		Text += TEXT(" ") + IFINNetworkComponent::Execute_GetID(InObj).ToString();
-		FString Nick = IFINNetworkComponent::Execute_GetNick(InObj);
-		if (Nick.Len() > 0) {
-			Text += TEXT(" '") + Nick + TEXT("'");
-		}
-	}
-	return Text;
-}
-
-FString FINClassToString(UClass* InClass) {
-	if (!InClass) return TEXT("Nil");
-	return FFicsItReflectionModule::Get().FindClass(InClass)->GetInternalName() + TEXT("-Type");
 }

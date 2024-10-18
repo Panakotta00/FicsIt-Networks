@@ -142,7 +142,7 @@ void UFINComputerRCO::SetLabel_Implementation(UFGInventoryComponent* Inventory, 
 
 void UFINComputerRCO::SetTextEEPROMCode_Implementation(UFGInventoryComponent* Inventory, int32 Index, const FString& NewCode) {
 	FInventoryStack stack;
-	if (!Inventory->GetStackFromIndex(Index, stack)) return;
+	if (!Inventory->GetStackFromIndex(Index, stack) || !stack.HasItems() || !stack.Item.IsValid()) return;
 	UFINComputerEEPROMDesc::CreateEEPROMStateInItem(stack.Item);
 	if (const FFINItemStateEEPROMText* luaState = stack.Item.GetItemState().GetValuePtr<FFINItemStateEEPROMText>()) {
 		FFINItemStateEEPROMText state = *luaState;

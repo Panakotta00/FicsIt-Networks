@@ -1,6 +1,8 @@
 ﻿#include "Kernel/FIVSProcessor.h"
 
+#include "FGInventoryComponent.h"
 #include "FicsItReflection.h"
+#include "FINItemStateEEPROMText.h"
 #include "FINNetworkCircuit.h"
 #include "FINNetworkCircuitNode.h"
 #include "FINSignalSubsystem.h"
@@ -26,18 +28,21 @@ void UFIVSProcessor::Tick(float InDeltaTime) {
 void UFIVSProcessor::Reset() {
 	RuntimeContext.Reset();
 
-	if (!IsValid(EEPROM)) {
+	auto state = GetKernel()->GetEEPROM().GetItemState();
+	const FFINItemStateEEPROMText* eeprom = state.GetValuePtr<FFINItemStateEEPROMText>();
+
+	if (!eeprom) {
 		GetKernel()->Crash(MakeShared<FFINKernelCrash>(TEXT("No EEPROM Found")));
 		return;
 	}
 
-	uint32 hash = GetTypeHash(EEPROM->GetCode());
+	uint32 hash = GetTypeHash(eeprom->Code);
 	if (hash != GraphHash) {
 		GraphHash = hash;
 		TickScript.Reset();
 
 		UFIVSGraph* graph = NewObject<UFIVSGraph>();
-		UFIVSSerailizationUtils::FIVS_DeserializeGraph(graph, EEPROM->GetCode(), false);
+		UFIVSSerailizationUtils::FIVS_DeserializeGraph(graph, eeprom->Code, false);
 		TMap<UFIVSScriptNode*, FFIVSScript> scripts = FFIVSCompiler::CompileGraph(graph);
 		for (const auto& [node, script] : scripts) {
 			if (node->IsA<UFIVSNode_OnTick>()) {
@@ -59,13 +64,6 @@ void UFIVSProcessor::Reset() {
 void UFIVSProcessor::Stop(bool bCond) {
 	AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(this);
 	SigSubSys->IgnoreAll(this);
-}
-
-void UFIVSProcessor::SetEEPROM(AFINStateEEPROM* InEEPROM) {
-	EEPROM = Cast<AFINStateEEPROMText>(InEEPROM);
-	if (!EEPROM) {
-		GetKernel()->Crash(MakeShared<FFINKernelCrash>(TEXT("No EEPROM set!")));
-	}
 }
 
 void UFIVSProcessor::GetRelevantObjects_Implementation(TArray<FFIRTrace>& OutObjects) {

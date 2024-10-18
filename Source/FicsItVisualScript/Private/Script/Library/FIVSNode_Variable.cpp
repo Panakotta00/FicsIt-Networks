@@ -9,7 +9,7 @@ void FFIVSNodeStatement_DeclareVariable::PreExecPin(FFIVSRuntimeContext& Context
 }
 
 void FFIVSNodeStatement_DeclareVariable::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	const FFINAnyNetworkValue* Value = Context.TryGetRValue(InitialValue);
+	const FFIRAnyValue* Value = Context.TryGetRValue(InitialValue);
 	Context.SetValue(VarOut, FFIVSValue::MakeLValue(VarOut, *Value));
 }
 
@@ -19,10 +19,10 @@ void FFIVSNodeStatement_Assign::PreExecPin(FFIVSRuntimeContext& Context, FGuid E
 }
 
 void FFIVSNodeStatement_Assign::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	FFINAnyNetworkValue* variable = Context.TryGetLValue(VarIn);
+	FFIRAnyValue* variable = Context.TryGetLValue(VarIn);
 	if (!variable) return;
 
-	const FFINAnyNetworkValue* value = Context.TryGetRValue(ValIn);
+	const FFIRAnyValue* value = Context.TryGetRValue(ValIn);
 	if (!value) return;
 
 	*variable = *value;
@@ -31,10 +31,10 @@ void FFIVSNodeStatement_Assign::ExecPin(FFIVSRuntimeContext& Context, FGuid Exec
 }
 
 void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
-	for (EFINNetworkValueType DataType : TEnumRange<EFINNetworkValueType>()) {
+	for (EFIRValueType DataType = FIR_NIL; DataType <= FIR_ANY; DataType = EFIRValueType(DataType + 1)) {
 		// Input FIN_ANY is excluded from conversion because it may fail or not and needs its own node
-		if (DataType >= FIN_OBJ || DataType == FIN_NIL) continue;
-		FString Name = FINGetNetworkValueTypeName(DataType);
+		if (DataType >= FIR_OBJ || DataType == FIR_NIL) continue;
+		FString Name = FIRGetNetworkValueTypeName(DataType);
 		
 		FFIVSNodeAction Action;
 		Action.NodeType = UFIVSNode_Variable::StaticClass();
@@ -79,7 +79,7 @@ void UFIVSNode_Variable::DeserializeNodeProperties(const TSharedPtr<FJsonObject>
 	}
 }
 
-TFINDynamicStruct<FFIVSNodeStatement> UFIVSNode_Variable::CreateNodeStatement() {
+TFIRInstancedStruct<FFIVSNodeStatement> UFIVSNode_Variable::CreateNodeStatement() {
 	if (bAssignment) {
 		return FFIVSNodeStatement_Assign{
 			NodeId,

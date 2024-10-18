@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FicsItReflection.h"
 #include "FIRInstancedStruct.h"
 #include "FIRTypes.h"
 #include "FIRExtendedValueType.generated.h"

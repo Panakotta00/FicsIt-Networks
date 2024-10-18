@@ -26,7 +26,11 @@ public class FicsItVisualScript : ModuleRules
 			"ApplicationCore",
 			"InputCore",
 			"FactoryGame",
+			"FicsItLogLibrary",
             "FicsItNetworks",
+            "FicsItNetworksComputer",
+            "FicsItNetworksCircuit",
+            "FicsItReflection",
             "Tracy"
 		});
 

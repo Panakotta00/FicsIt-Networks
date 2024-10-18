@@ -10,7 +10,7 @@ void FFIVSNodeStatement_UFunctionCall::PreExecPin(FFIVSRuntimeContext& Context, 
 }
 
 void FFIVSNodeStatement_UFunctionCall::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	TArray<FFINAnyNetworkValue> Output;
+	TArray<FFIRAnyValue> Output;
 
 	// allocate & initialize parameter struct
 	uint8* ParamStruct = (uint8*)FMemory_Alloca(Function->PropertiesSize);
@@ -19,8 +19,8 @@ void FFIVSNodeStatement_UFunctionCall::ExecPin(FFIVSRuntimeContext& Context, FGu
 			if (Prop->IsInContainer(Function->ParmsSize)) {
 				Prop->InitializeValue_InContainer(ParamStruct);
 				if (!(Prop->GetPropertyFlags() & CPF_OutParm)) {
-					const FFINAnyNetworkValue* Value = Context.TryGetRValue(PropertyToPin[Prop->GetFName()]);
-					Value->Copy(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct));
+					const FFIRAnyValue* Value = Context.TryGetRValue(PropertyToPin[Prop->GetFName()]);
+					Value->CopyToProperty(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct));
 				}
 			}
 		}
@@ -34,7 +34,7 @@ void FFIVSNodeStatement_UFunctionCall::ExecPin(FFIVSRuntimeContext& Context, FGu
 		EPropertyFlags Flags = Prop->GetPropertyFlags();
 		if (Flags & CPF_Parm) {
 			if (Flags & CPF_OutParm) {
-				Context.SetValue(PropertyToPin[Prop->GetFName()], FFINAnyNetworkValue(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct)));
+				Context.SetValue(PropertyToPin[Prop->GetFName()], FFIRAnyValue::FromProperty(*Prop, Prop->ContainerPtrToValuePtr<void>(ParamStruct)));
 			}
 			if (Prop->IsInContainer(Function->ParmsSize)) Prop->DestroyValue_InContainer(ParamStruct);
 		}
@@ -64,7 +64,7 @@ void UFIVSNode_UFunctionCall::GetNodeActions(TArray<FFIVSNodeAction>& Actions) c
 			for (TFieldIterator<FProperty> Prop(*Func); Prop; ++Prop) {
 				auto Flags = Prop->GetPropertyFlags();
 				EFIVSPinType PinType = FIVS_PIN_DATA;
-				EFINNetworkValueType PinDataType = FIN_NIL;
+				EFIRValueType PinDataType = FIR_NIL;
 				if (Flags & CPF_Parm) {
 					if (Flags & CPF_OutParm) {
 						PinType |= FIVS_PIN_OUTPUT;
@@ -73,13 +73,13 @@ void UFIVSNode_UFunctionCall::GetNodeActions(TArray<FFIVSNodeAction>& Actions) c
 					}
 				
 					if (Prop->IsA<FFloatProperty>()) {
-						PinDataType = FIN_FLOAT;
+						PinDataType = FIR_FLOAT;
 					} else if (Prop->IsA<FIntProperty>() || Prop->IsA<FInt64Property>()) {
-						PinDataType = FIN_INT;
+						PinDataType = FIR_INT;
 					} else if (Prop->IsA<FBoolProperty>()) {
-						PinDataType = FIN_BOOL;
+						PinDataType = FIR_BOOL;
 					} else if (Prop->IsA<FStrProperty>()) {
-						PinDataType = FIN_STR;
+						PinDataType = FIR_STR;
 					}
 					Action.Pins.Add(FFIVSFullPinType(PinType, FFIVSPinDataType(PinDataType)));
 				}
@@ -123,7 +123,7 @@ void UFIVSNode_UFunctionCall::SetFunction(UFunction* InFunction, const FString& 
 		auto Flags = Prop->GetPropertyFlags();
 		UFIVSPin* Pin = nullptr;
 		EFIVSPinType PinType = FIVS_PIN_DATA;
-		EFINNetworkValueType PinDataType = FIN_NIL;
+		EFIRValueType PinDataType = FIR_NIL;
 		if (Flags & CPF_Parm) {
 			if (Flags & CPF_OutParm) {
 				PinType |= FIVS_PIN_OUTPUT;
@@ -132,13 +132,13 @@ void UFIVSNode_UFunctionCall::SetFunction(UFunction* InFunction, const FString& 
 			}
 
 			if (Prop->IsA<FFloatProperty>()) {
-				PinDataType = FIN_FLOAT;
+				PinDataType = FIR_FLOAT;
 			} else if (Prop->IsA<FIntProperty>() || Prop->IsA<FInt64Property>()) {
-				PinDataType = FIN_INT;
+				PinDataType = FIR_INT;
 			} else if (Prop->IsA<FBoolProperty>()) {
-				PinDataType = FIN_BOOL;
+				PinDataType = FIR_BOOL;
 			} else if (Prop->IsA<FStrProperty>()) {
-				PinDataType = FIN_STR;
+				PinDataType = FIR_STR;
 			}
 			Pin = CreatePin(PinType, Prop->GetName(), FText::FromString(Prop->GetName()), FFIVSPinDataType(PinDataType));
 		}

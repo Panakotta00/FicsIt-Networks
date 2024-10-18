@@ -2,6 +2,7 @@
 
 #include "DefaultValueHelper.h"
 #include "FicsItReflection.h"
+#include "FIVSUtils.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
 void FFIVSNodeStatement_Convert::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
@@ -14,10 +15,10 @@ void FFIVSNodeStatement_Convert::ExecPin(FFIVSRuntimeContext& Context, FGuid Exe
 }
 
 void UFIVSNode_Convert::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
-	for (EFIRValueType ConvertFromType : TEnumRange<EFIRValueType>()) {
+	for (EFIRValueType ConvertFromType = FIR_NIL; ConvertFromType <= FIR_ANY; ConvertFromType = EFIRValueType(ConvertFromType + 1)) {
 		// Input FIN_ANY is excluded from conversion because it may fail or not and needs its own node
 		if (ConvertFromType == FIR_ARRAY || ConvertFromType == FIR_NIL || ConvertFromType == FIR_ANY || ConvertFromType == FIR_STRUCT) continue;
-		for (EFIRValueType ConvertToType : TEnumRange<EFIRValueType>()) {
+		for (EFIRValueType ConvertToType = FIR_NIL; ConvertToType <= FIR_ANY; ConvertToType = EFIRValueType(ConvertToType + 1)) {
 			// Output FIN_ANY is excluded from conversion because it can be casted implicitly and expanded network type allows everything to implicitly convert to any
 			if (ConvertToType == FIR_ARRAY || ConvertToType == FIR_NIL || ConvertToType == FIR_STRUCT || ConvertToType == FIR_ANY) continue;
 			if (ConvertFromType == ConvertToType) continue;
