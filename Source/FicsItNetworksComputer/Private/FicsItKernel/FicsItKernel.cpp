@@ -56,6 +56,7 @@ void UFINKernelSystem::AddReferencedObjects(UObject* InThis, FReferenceCollector
 	Super::AddReferencedObjects(InThis, Collector);
 	
 	UFINKernelSystem* This = Cast<UFINKernelSystem>(InThis);
+	FScopeLock Lock(&This->ReferenceObjectMutex);
 	for (const TPair<void*, TFunction<void(void*, FReferenceCollector&)>>& Referencer : This->ReferencedObjects) {
 		Referencer.Value(Referencer.Key, Collector);
 	}
