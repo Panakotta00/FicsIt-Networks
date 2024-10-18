@@ -1,105 +1,106 @@
 #include "FicsItNetworksDocumentation.h"
+#include "FicsItReflection.h"
 #include "FINLua/FINLuaModule.h"
 #include "Logging/StructuredLog.h"
 #include "Misc/App.h"
 #include "Misc/FileHelper.h"
-#include "Reflection/FINArrayProperty.h"
-#include "Reflection/FINClassProperty.h"
-#include "Reflection/FINObjectProperty.h"
-#include "Reflection/FINReflection.h"
-#include "Reflection/FINStructProperty.h"
-#include "Reflection/FINTraceProperty.h"
+#include "Reflection/FIRArrayProperty.h"
+#include "Reflection/FIRClass.h"
+#include "Reflection/FIRClassProperty.h"
+#include "Reflection/FIRObjectProperty.h"
+#include "Reflection/FIRStructProperty.h"
+#include "Reflection/FIRTraceProperty.h"
 
 UE_DISABLE_OPTIMIZATION_SHIP
 namespace FINGenLuaDoc {
-	FString GetType(FFINReflection& Ref, UFINProperty* Prop) {
+	FString GetType(FFicsItReflectionModule& Ref, UFIRProperty* Prop) {
 		if (!Prop) return TEXT("any");
 		switch (Prop->GetType()) {
-			case FIN_NIL:
+			case FIR_NIL:
 				return TEXT("nil");
-			case FIN_BOOL:
+			case FIR_BOOL:
 				return TEXT("boolean");
-			case FIN_INT:
+			case FIR_INT:
 				return TEXT("integer");
-			case FIN_FLOAT:
+			case FIR_FLOAT:
 				return TEXT("number");
-			case FIN_STR:
+			case FIR_STR:
 				return TEXT("string");
-			case FIN_OBJ: {
-				UFINObjectProperty* ObjProp = Cast<UFINObjectProperty>(Prop);
-				UFINClass* Class = Ref.FindClass(ObjProp->GetSubclass());
+			case FIR_OBJ: {
+				UFIRObjectProperty* ObjProp = Cast<UFIRObjectProperty>(Prop);
+				UFIRClass* Class = Ref.FindClass(ObjProp->GetSubclass());
 				if (!Class) return TEXT("Object");
 				return Class->GetInternalName();
-			} case FIN_TRACE: {
-				UFINTraceProperty* TraceProp = Cast<UFINTraceProperty>(Prop);
-				UFINClass* Class = Ref.FindClass(TraceProp->GetSubclass());
+			} case FIR_TRACE: {
+				UFIRTraceProperty* TraceProp = Cast<UFIRTraceProperty>(Prop);
+				UFIRClass* Class = Ref.FindClass(TraceProp->GetSubclass());
 				if (!Class) return TEXT("Object");
 				return Class->GetInternalName();
-			} case FIN_CLASS: {
-				UFINClassProperty* ClassProp = Cast<UFINClassProperty>(Prop);
-				UFINClass* Class = Ref.FindClass(ClassProp->GetSubclass());
+			} case FIR_CLASS: {
+				UFIRClassProperty* ClassProp = Cast<UFIRClassProperty>(Prop);
+				UFIRClass* Class = Ref.FindClass(ClassProp->GetSubclass());
 				if (!Class) return TEXT("Object-Class");
 				return Class->GetInternalName() + TEXT("-Class");
-			} case FIN_STRUCT: {
-				UFINStructProperty* StructProp = Cast<UFINStructProperty>(Prop);
-				UFINStruct* Struct = Ref.FindStruct(StructProp->GetInner());
+			} case FIR_STRUCT: {
+				UFIRStructProperty* StructProp = Cast<UFIRStructProperty>(Prop);
+				UFIRStruct* Struct = Ref.FindStruct(StructProp->GetInner());
 				if (!Struct) return TEXT("any");
 				return Struct->GetInternalName();
-			} case FIN_ARRAY: {
-				UFINArrayProperty* ArrayProp = Cast<UFINArrayProperty>(Prop);
+			} case FIR_ARRAY: {
+				UFIRArrayProperty* ArrayProp = Cast<UFIRArrayProperty>(Prop);
 				return GetType(Ref, ArrayProp->GetInnerType()) + TEXT("[]");
 			} default:
 				return TEXT("any");
 		}
 	}
 
-	TOptional<FString> MatchLuaOperator(UFINFunction* Func) {
-		TOptional<EFINOperator> op = Func->IsOperator();
+	TOptional<FString> MatchLuaOperator(UFIRFunction* Func) {
+		TOptional<EFIROperator> op = Func->IsOperator();
 		if (!op.IsSet()) return {};
 		switch (*op) {
-			case FIN_Op_Add:
+			case FIR_Op_Add:
 				return FString(TEXT("add"));
-			case FIN_Op_Sub:
+			case FIR_Op_Sub:
 				return FString(TEXT("sub"));
-			case FIN_Op_Mul:
+			case FIR_Op_Mul:
 				return FString(TEXT("mul"));
-			case FIN_Op_Div:
+			case FIR_Op_Div:
 				return FString(TEXT("div"));
-			case FIN_Op_Mod:
+			case FIR_Op_Mod:
 				return FString(TEXT("mod"));
-			case FIN_Op_Pow:
+			case FIR_Op_Pow:
 				return FString(TEXT("pow"));
-			case FIN_Op_Neg:
+			case FIR_Op_Neg:
 				return FString(TEXT("unm"));
-			case FIN_Op_FDiv:
+			case FIR_Op_FDiv:
 				return FString(TEXT("idiv"));
-			case FIN_Op_BitAND:
+			case FIR_Op_BitAND:
 				return FString(TEXT("band"));
-			case FIN_Op_BitOR:
+			case FIR_Op_BitOR:
 				return FString(TEXT("bor"));
-			case FIN_Op_BitXOR:
+			case FIR_Op_BitXOR:
 				return FString(TEXT("bxor"));
-			case FIN_Op_BitNOT:
+			case FIR_Op_BitNOT:
 				return FString(TEXT("bnot"));
-			case FIN_Op_ShiftL:
+			case FIR_Op_ShiftL:
 				return FString(TEXT("shl"));
-			case FIN_Op_ShiftR:
+			case FIR_Op_ShiftR:
 				return FString(TEXT("shr"));
-			case FIN_Op_Concat:
+			case FIR_Op_Concat:
 				return FString(TEXT("concat"));
-			case FIN_Op_Len:
+			case FIR_Op_Len:
 				return FString(TEXT("len"));
-			case FIN_Op_Equals:
+			case FIR_Op_Equals:
 				return FString(TEXT("eq"));
-			case FIN_Op_LessThan:
+			case FIR_Op_LessThan:
 				return FString(TEXT("lt"));
-			case FIN_Op_LessOrEqualThan:
+			case FIR_Op_LessOrEqualThan:
 				return FString(TEXT("le"));
-			case FIN_Op_Index:
+			case FIR_Op_Index:
 				return FString(TEXT("index"));
-			case FIN_Op_NewIndex:
+			case FIR_Op_NewIndex:
 				return FString(TEXT("newindex"));
-			case FIN_Op_Call:
+			case FIR_Op_Call:
 				return FString(TEXT("call"));
 			default:
 				return {};
@@ -145,25 +146,25 @@ namespace FINGenLuaDoc {
 		Str.Appendf(TEXT("function %s:canGet() end\n"), *identifier);
 	}
 
-	void WriteProperty(FStringBuilderBase& Documentation, FFINReflection& Ref, UFINProperty* Prop) {
+	void WriteProperty(FStringBuilderBase& Documentation, FFicsItReflectionModule& Ref, UFIRProperty* Prop) {
 		FString Identifier = Prop->GetInternalName();
-		if (Prop->GetPropertyFlags() & (FIN_Prop_ClassProp | FIN_Prop_StaticProp)) {
+		if (Prop->GetPropertyFlags() & (FIR_Prop_ClassProp | FIR_Prop_StaticProp)) {
 			Identifier += TEXT("-Class");
 		}
 		Documentation.Appendf(TEXT("---@field public %s %s %s\n"), *Identifier, *GetType(Ref, Prop), *GetInlineDescription(Prop->GetDescription().ToString()));
 	}
 
-	void WriteFunction(FStringBuilderBase& Str, FFINReflection& Ref, const FString& Parent, const FString& Type, UFINFunction* Func) {
+	void WriteFunction(FStringBuilderBase& Str, FFicsItReflectionModule& Ref, const FString& Parent, const FString& Type, UFIRFunction* Func) {
 		if (MatchLuaOperator(Func)) return;
 
 		WriteMultiLineDescription(Str, Func->GetDescription().ToString());
 
-		TArray<UFINProperty*> parameters;
-		TArray<UFINProperty*> returnValues;
-		for (UFINProperty* Prop : Func->GetParameters()) {
-			EFINRepPropertyFlags Flags = Prop->GetPropertyFlags();
-			if (!(Flags & FIN_Prop_Param)) continue;
-			if (Flags & FIN_Prop_OutParam) {
+		TArray<UFIRProperty*> parameters;
+		TArray<UFIRProperty*> returnValues;
+		for (UFIRProperty* Prop : Func->GetParameters()) {
+			EFIRPropertyFlags Flags = Prop->GetPropertyFlags();
+			if (!(Flags & FIR_Prop_Param)) continue;
+			if (Flags & FIR_Prop_OutParam) {
 				returnValues.Add(Prop);
 			} else {
 				parameters.Add(Prop);
@@ -173,27 +174,27 @@ namespace FINGenLuaDoc {
 		TArray<FString> paramList;
 		TArray<FString> typedParameterList;
 		typedParameterList.Add(TEXT("self:") + Type);
-		for (UFINProperty* parameter : parameters) {
+		for (UFIRProperty* parameter : parameters) {
 			paramList.Add(parameter->GetInternalName());
 			typedParameterList.Add(parameter->GetInternalName() + TEXT(":") + GetType(Ref, parameter));
 			Str.Appendf(TEXT("---@param %s %s %s\n"), *parameter->GetInternalName(), *GetType(Ref, parameter), *GetInlineDescription(parameter->GetDescription().ToString()));
 		}
-		if (Func->FunctionFlags & FIN_Func_VarArgs) {
+		if (Func->FunctionFlags & FIR_Func_VarArgs) {
 			paramList.Add(TEXT("..."));
 			typedParameterList.Add(TEXT("...:any"));
 			Str.Append(TEXT("---@param ... any\n"));
 		}
 
-		bool bFuture = !(Func->GetFunctionFlags() & FIN_Func_RT_Parallel);
+		bool bFuture = !(Func->GetFunctionFlags() & FIR_Func_RT_Parallel);
 
 		TArray<FString> returnValueList;
-		for (UFINProperty* returnValue : returnValues) {
+		for (UFIRProperty* returnValue : returnValues) {
 			returnValueList.Add(returnValue->GetInternalName() + TEXT(":") + GetType(Ref, returnValue));
 			if (!bFuture) {
 				Str.Appendf(TEXT("---@return %s %s %s\n"), *GetType(Ref, returnValue), *returnValue->GetInternalName(), *GetInlineDescription(returnValue->GetDescription().ToString()));
 			}
 		}
-		if (Func->FunctionFlags & FIN_Func_VarRets) {
+		if (Func->FunctionFlags & FIR_Func_VarRets) {
 			returnValueList.Add(TEXT("...:any"));
 			if (!bFuture) {
 				Str.Append(TEXT("---@return ... any\n"));
@@ -216,7 +217,7 @@ namespace FINGenLuaDoc {
 		Str.Appendf(TEXT("---@type (fun(%s)%s)|ReflectionFunction\n"), *FString::Join(typedParameterList, TEXT(",")), *functionTypedReturn);
 
 		FString Identifier = Func->GetInternalName();
-		if (Func->GetFunctionFlags() & (FIN_Func_ClassFunc | FIN_Func_StaticFunc)) {
+		if (Func->GetFunctionFlags() & (FIR_Func_ClassFunc | FIR_Func_StaticFunc)) {
 			Identifier += TEXT("-Class");
 		}
 
@@ -229,7 +230,7 @@ namespace FINGenLuaDoc {
 		// TODO: Add support for Operator Overloading
 	}
 
-	void WriteStruct(FStringBuilderBase& Str, FFINReflection& Ref, const UFINStruct* Struct) {
+	void WriteStruct(FStringBuilderBase& Str, FFicsItReflectionModule& Ref, const UFIRStruct* Struct) {
 		if (Struct->GetInternalName() == TEXT("Future")) return;
 
 		WriteMultiLineDescription(Str,  Struct->GetDescription().ToString());
@@ -237,26 +238,26 @@ namespace FINGenLuaDoc {
 		{
 			FString ClassIdentifier = Struct->GetInternalName();
 			FString ClassDeclaration = ClassIdentifier;
-			if (UFINStruct* parent = Struct->GetParent()) {
+			if (UFIRStruct* parent = Struct->GetParent()) {
 				ClassDeclaration += TEXT(" : ") + parent->GetInternalName();
 			}
 			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
 
-			for (UFINProperty* Prop : Struct->GetProperties(false)) {
-				if ((Prop->GetPropertyFlags() & FIN_Prop_Attrib) && !(Prop->GetPropertyFlags() & FIN_Prop_ClassProp)) {
+			for (UFIRProperty* Prop : Struct->GetProperties(false)) {
+				if ((Prop->GetPropertyFlags() & FIR_Prop_Attrib) && !(Prop->GetPropertyFlags() & FIR_Prop_ClassProp)) {
 					WriteProperty(Str, Ref, Prop);
 				}
 			}
 
-			for (UFINFunction* Func : Struct->GetFunctions(false)) {
-				if (!((Func->GetFunctionFlags() & FIN_Func_MemberFunc) && !(Func->GetFunctionFlags() & FIN_Func_ClassFunc))) continue;
+			for (UFIRFunction* Func : Struct->GetFunctions(false)) {
+				if (!((Func->GetFunctionFlags() & FIR_Func_MemberFunc) && !(Func->GetFunctionFlags() & FIR_Func_ClassFunc))) continue;
 				TOptional<FString> op = MatchLuaOperator(Func);
 				if (!op) continue;
 				FString parameter;
 				FString returnValue;
-				for (UFINProperty* prop : Func->GetParameters()) {
-					if (prop->GetPropertyFlags() & FIN_Prop_Param){
-						if (prop->GetPropertyFlags() & FIN_Prop_OutParam) {
+				for (UFIRProperty* prop : Func->GetParameters()) {
+					if (prop->GetPropertyFlags() & FIR_Prop_Param){
+						if (prop->GetPropertyFlags() & FIR_Prop_OutParam) {
 							returnValue = GetType(Ref, prop);
 						} else {
 							parameter = GetType(Ref, prop);
@@ -269,8 +270,8 @@ namespace FINGenLuaDoc {
 
 			Str.Appendf(TEXT("%s = {}\n"), *Struct->GetInternalName());
 
-			for (UFINFunction* Func : Struct->GetFunctions(false)) {
-				if ((Func->GetFunctionFlags() & FIN_Func_MemberFunc) && !(Func->GetFunctionFlags() & FIN_Func_ClassFunc)) {
+			for (UFIRFunction* Func : Struct->GetFunctions(false)) {
+				if ((Func->GetFunctionFlags() & FIR_Func_MemberFunc) && !(Func->GetFunctionFlags() & FIR_Func_ClassFunc)) {
 					WriteFunction(Str, Ref, Struct->GetInternalName(), ClassIdentifier, Func);
 				}
 			}
@@ -281,21 +282,21 @@ namespace FINGenLuaDoc {
 
 			FString ClassIdentifier = Struct->GetInternalName() + TEXT("-Class");
 			FString ClassDeclaration = ClassIdentifier;
-			if (UFINStruct* parent = Struct->GetParent()) {
+			if (UFIRStruct* parent = Struct->GetParent()) {
 				ClassDeclaration += TEXT(" : ") + parent->GetInternalName() + TEXT("-Class");
 			}
 			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
 
-			for (UFINProperty* Prop : Struct->GetProperties(false)) {
-				if ((Prop->GetPropertyFlags() & FIN_Prop_Attrib) && (Prop->GetPropertyFlags() & FIN_Prop_ClassProp)) {
+			for (UFIRProperty* Prop : Struct->GetProperties(false)) {
+				if ((Prop->GetPropertyFlags() & FIR_Prop_Attrib) && (Prop->GetPropertyFlags() & FIR_Prop_ClassProp)) {
 					WriteProperty(Str, Ref, Prop);
 				}
 			}
 
 			Str.Appendf(TEXT("%s_Class = {}\n"), *Struct->GetInternalName());
 
-			for (UFINFunction* Func : Struct->GetFunctions(false)) {
-				if ((Func->GetFunctionFlags() & FIN_Func_MemberFunc) && (Func->GetFunctionFlags() & FIN_Func_ClassFunc)) {
+			for (UFIRFunction* Func : Struct->GetFunctions(false)) {
+				if ((Func->GetFunctionFlags() & FIR_Func_MemberFunc) && (Func->GetFunctionFlags() & FIR_Func_ClassFunc)) {
 					WriteFunction(Str, Ref, Struct->GetInternalName(), ClassIdentifier, Func);
 				}
 			}
@@ -393,13 +394,13 @@ namespace FINGenLuaDoc {
 		}
 
 		if (Metatable.InternalName == TEXT("ClassLib")) {
-			FFINReflection& reflection = *FFINReflection::Get();
+			FFicsItReflectionModule& reflection = FFicsItReflectionModule::Get();
 			for (auto[Class, FINClass] : reflection.GetClasses()) {
 				Str.Appendf(TEXT("---@type %s-Class\n"), *FINClass->GetInternalName());
 				Str.Appendf(TEXT("ClassLib.%s = {}\n"), *FINClass->GetInternalName());
 			}
 		} else if (Metatable.InternalName == TEXT("StructLib")) {
-			FFINReflection& reflection = *FFINReflection::Get();
+			FFicsItReflectionModule& reflection = FFicsItReflectionModule::Get();
 			for (auto[Struct, FINStruct] : reflection.GetStructs()) {
 				Str.Appendf(TEXT("---@type fun(table):%s\n"), *FINStruct->GetInternalName());
 				Str.Appendf(TEXT("function StructLib.%s(t) end\n"), *FINStruct->GetInternalName());
@@ -434,11 +435,11 @@ namespace FINGenLuaDoc {
 			WriteModule(str, module);
 		}
 
-		FFINReflection& reflection = *FFINReflection::Get();
-		for (TPair<UClass*, UFINClass*> Class : reflection.GetClasses()) {
+		FFicsItReflectionModule& reflection = FFicsItReflectionModule::Get();
+		for (TPair<UClass*, UFIRClass*> Class : reflection.GetClasses()) {
 			WriteStruct(str, reflection, Class.Value);
 		}
-		for (TPair<UScriptStruct*, UFINStruct*> Struct : reflection.GetStructs()) {
+		for (TPair<UScriptStruct*, UFIRStruct*> Struct : reflection.GetStructs()) {
 			WriteStruct(str, reflection, Struct.Value);
 		}
 
@@ -473,4 +474,3 @@ namespace FINGenLuaDoc {
 	[[maybe_unused]] static FStaticSelfRegisteringExec SelfRegisterCMD(&ExecCMD);
 }
 UE_ENABLE_OPTIMIZATION_SHIP
-

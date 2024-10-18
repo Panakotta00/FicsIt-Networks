@@ -3,7 +3,7 @@
 #include "Framework/Text/ITextDecorator.h"
 #include "Framework/Text/SlateHyperlinkRun.h"
 
-class UFINBase;
+class UFIRBase;
 
 class FICSITNETWORKS_API FFINHyperlinkRun : public FSlateHyperlinkRun {
 public:
@@ -25,7 +25,7 @@ public:
 
 class FICSITNETWORKS_API FFINReflectionReferenceDecorator : public ITextDecorator {
 public:
-	DECLARE_DELEGATE_OneParam(FOnNavigate, UFINBase*)
+	DECLARE_DELEGATE_OneParam(FOnNavigate, UFIRBase*)
 
 	static const FString Id;
 	static const FString MetaDataVariantKey;
@@ -36,7 +36,7 @@ public:
 	virtual bool Supports(const FTextRunParseResults& RunParseResult, const FString& Text) const override;
 	virtual TSharedRef<ISlateRun> Create(const TSharedRef<FTextLayout>& TextLayout, const FTextRunParseResults& RunParseResult, const FString& OriginalText, const TSharedRef<FString>& InOutModelText, const ISlateStyle* Style) override;
 
-	static UFINBase* ReflectionItemFromType(const FString& Variant, const FString& Type);
+	static UFIRBase* ReflectionItemFromType(const FString& Variant, const FString& Type);
 	static TSharedRef<FSlateHyperlinkRun> CreateRun(const FRunInfo& RunInfo, const TSharedRef<FString>& InOutModelText, const FHyperlinkStyle* Style, FOnNavigate NavigateDelegate, FTextRange ModelRange, bool bCtrlRequired);
 	
 protected:

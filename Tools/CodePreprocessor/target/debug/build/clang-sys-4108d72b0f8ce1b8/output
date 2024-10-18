@@ -1,0 +1,3 @@
+cargo:rustc-link-search=C:\Program Files\LLVM\bin
+cargo:rustc-link-search=C:\Program Files\LLVM\lib
+cargo:rustc-link-lib=dylib=libclang

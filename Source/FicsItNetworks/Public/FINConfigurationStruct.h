@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "Configuration/ConfigManager.h"
 #include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "FINConfigurationStruct.generated.h"
 
 struct FFINConfigurationStruct_LogViewer;

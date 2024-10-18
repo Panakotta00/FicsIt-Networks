@@ -1,16 +1,15 @@
 #include "UI/FINLogViewer.h"
 
 #include "FINConfigurationStruct.h"
+#include "FINUtils.h"
 #include "Configuration/Properties/ConfigPropertyBool.h"
 #include "Engine/GameInstance.h"
-#include "FicsItKernel/Logging.h"
+#include "FicsItLogLibrary/Public/FILLogContainer.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Text/RichTextLayoutMarshaller.h"
 #include "Framework/Text/RichTextMarkupProcessing.h"
-#include "Reflection/FINReflection.h"
 #include "UI/FINRichtTextUtils.h"
 #include "UI/FINTextDecorators.h"
-#include "Utils/FINUtils.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
@@ -48,7 +47,7 @@ const FFINLogViewerStyle& FFINLogViewerStyle::GetDefault() {
 TSharedRef<SWidget> UFINLogViewer::RebuildWidget() {
 	return SNew(SFINLogViewer, this)
 	.Style(&Style)
-	.OnNavigateReflection_Lambda([this](UFINBase* ReflectionItem) {
+	.OnNavigateReflection_Lambda([this](UFIRBase* ReflectionItem) {
 		OnNavigateReflection.Broadcast(ReflectionItem);
 	})
 	.OnNavigateEEPROM_Lambda([this](int64 LineNumber) {
@@ -60,7 +59,7 @@ UFINLogViewer::UFINLogViewer(const FObjectInitializer& ObjectInitializer) : Supe
 	Style = FFINStyle::Get().GetWidgetStyle<FFINLogViewerStyle>("LogViewer");
 }
 
-void UFINLogViewer::SetLog(UFINLog* InLog) {
+void UFINLogViewer::SetLog(UFILLogContainer* InLog) {
 	if (Log) Log->OnLogEntriesUpdated.RemoveDynamic(this, &UFINLogViewer::UpdateLogEntries);
 	Log = InLog;
 	if (Log) Log->OnLogEntriesUpdated.AddDynamic(this, &UFINLogViewer::UpdateLogEntries);
@@ -96,7 +95,7 @@ void SFINLogViewer::Construct(const FArguments& InArgs, UObject* InWorldContext)
 				return bTextOutputEnabled ? 1 : 0;
 			})
 			+SWidgetSwitcher::Slot()[
-				SAssignNew(ListView, SListView<TSharedRef<FFINLogEntry>>)
+				SAssignNew(ListView, SListView<TSharedRef<FFILEntry>>)
 				.ListItemsSource(&Entries)
 				.ItemHeight(Style->IconSize.Y + Style->IconBoxPadding.GetDesiredSize2f().Y)
 				.OnGenerateRow_Raw(this, &SFINLogViewer::OnGenerateRow)
@@ -160,7 +159,7 @@ void SFINLogViewer::Construct(const FArguments& InArgs, UObject* InWorldContext)
 FReply SFINLogViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) {
 	if (InKeyEvent.GetKey() == EKeys::C && InKeyEvent.GetModifierKeys().IsControlDown()) {
 		FString Text;
-		for (const TSharedRef<FFINLogEntry>& Entry : ListView->GetSelectedItems()) {
+		for (const TSharedRef<FFILEntry>& Entry : ListView->GetSelectedItems()) {
 			if (!Text.IsEmpty()) Text += TEXT("\n");
 			Text += Entry->ToClipboardText();
 		}
@@ -170,7 +169,7 @@ FReply SFINLogViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& In
 	return FReply::Unhandled();
 }
 
-void SFINLogViewer::UpdateEntries(UFINLog* Log) {
+void SFINLogViewer::UpdateEntries(UFILLogContainer* Log) {
 	bool bBottom = ListView->GetScrollDistanceRemaining().IsNearlyZero() || !ListView->IsScrollbarNeeded();
 	
 	Entries.Empty();
@@ -181,9 +180,9 @@ void SFINLogViewer::UpdateEntries(UFINLog* Log) {
 		bool bTextMultilineAlignEnabled = TextMultilineAlignEnabled.Get();
 
 		int LineCount = 0;
-		for (const FFINLogEntry& Entry : Log->GetLogEntries()) {
+		for (const FFILEntry& Entry : Log->GetLogEntries()) {
 			LineCount += 1;
-			Entries.Add(MakeShared<FFINLogEntry>(Entry));
+			Entries.Add(MakeShared<FFILEntry>(Entry));
 
 			if (!Text.IsEmpty()) Text.AppendChar(L'\n');
 			FString Line;
@@ -210,11 +209,11 @@ void SFINLogViewer::UpdateEntries(UFINLog* Log) {
 		}
 	}
 #if WITH_EDITOR
-	Entries.Add(MakeShared<FFINLogEntry>(FDateTime::Now(), FIN_Log_Verbosity_Debug, "Sample Debug?"));
-	Entries.Add(MakeShared<FFINLogEntry>(FDateTime::Now(), FIN_Log_Verbosity_Info, "Sample Info."));
-	Entries.Add(MakeShared<FFINLogEntry>(FDateTime::Now(), FIN_Log_Verbosity_Warning, "Sample Warning!"));
-	Entries.Add(MakeShared<FFINLogEntry>(FDateTime::Now(), FIN_Log_Verbosity_Error, "Sample Error!!"));
-	Entries.Add(MakeShared<FFINLogEntry>(FDateTime::Now(), FIN_Log_Verbosity_Fatal, "Sample Fatal!!!"));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Debug, "Sample Debug?"));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Info, "Sample Info."));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Warning, "Sample Warning!"));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Error, "Sample Error!!"));
+	Entries.Add(MakeShared<FFILEntry>(FDateTime::Now(), FIL_Verbosity_Fatal, "Sample Fatal!!!"));
 #endif
 	
 	ListView->RebuildList();
@@ -223,13 +222,13 @@ void SFINLogViewer::UpdateEntries(UFINLog* Log) {
 	TextLog->SetText(FText::FromString(Text));
 }
 
-TSharedRef<ITableRow> SFINLogViewer::OnGenerateRow(TSharedRef<FFINLogEntry> Entry, const TSharedRef<STableViewBase>& InListView) {
+TSharedRef<ITableRow> SFINLogViewer::OnGenerateRow(TSharedRef<FFILEntry> Entry, const TSharedRef<STableViewBase>& InListView) {
 	TSharedRef<SFINLogViewerRow> Row = SNew(SFINLogViewerRow, InListView, Style, Entry, NavigateReflectionDelegate, NavigateEEPROMDelegate)
 		.Style(&Style->RowStyle);
 	return Row;
 }
 
-void SFINLogViewerRow::Construct(const FTableRowArgs& InArgs, const TSharedRef<STableViewBase>& OwnerTable, const FFINLogViewerStyle* InStyle, const TSharedRef<FFINLogEntry>& LogEntry, const SFINLogViewer::FOnNavigateReflection& InNavigateReflectionDelegate, const SFINLogViewer::FOnNavigateEEPROM& InNavigateEEPROMDelegate) {
+void SFINLogViewerRow::Construct(const FTableRowArgs& InArgs, const TSharedRef<STableViewBase>& OwnerTable, const FFINLogViewerStyle* InStyle, const TSharedRef<FFILEntry>& LogEntry, const SFINLogViewer::FOnNavigateReflection& InNavigateReflectionDelegate, const SFINLogViewer::FOnNavigateEEPROM& InNavigateEEPROMDelegate) {
 	Style = InStyle;
 	Entry = LogEntry;
 	NavigateReflectionDelegate = InNavigateReflectionDelegate;
@@ -299,33 +298,33 @@ TSharedRef<SWidget> SFINLogViewerRow::GenerateWidgetForColumn(const FName& Colum
 
 const FSlateBrush* SFINLogViewerRow::GetVerbosityIcon() const {
 	switch (GetLogEntry()->Verbosity) {
-	case FIN_Log_Verbosity_Debug: return &Style->IconDebug;
-	case FIN_Log_Verbosity_Info: return &Style->IconInfo;
-	case FIN_Log_Verbosity_Warning: return &Style->IconWarning;
-	case FIN_Log_Verbosity_Error: return &Style->IconError;
-	case FIN_Log_Verbosity_Fatal: return &Style->IconFatal;
+	case FIL_Verbosity_Debug: return &Style->IconDebug;
+	case FIL_Verbosity_Info: return &Style->IconInfo;
+	case FIL_Verbosity_Warning: return &Style->IconWarning;
+	case FIL_Verbosity_Error: return &Style->IconError;
+	case FIL_Verbosity_Fatal: return &Style->IconFatal;
 	default: return &Style->IconInfo;
 	}
 }
 
 const FSlateFontInfo& SFINLogViewerRow::GetFontInfo() const {
 	switch (GetLogEntry()->Verbosity) {
-	case FIN_Log_Verbosity_Debug: return Style->DebugText;
-	case FIN_Log_Verbosity_Info: return Style->InfoText;
-	case FIN_Log_Verbosity_Warning: return Style->WarningText;
-	case FIN_Log_Verbosity_Error: return Style->ErrorText;
-	case FIN_Log_Verbosity_Fatal: return Style->FatalText;
+	case FIL_Verbosity_Debug: return Style->DebugText;
+	case FIL_Verbosity_Info: return Style->InfoText;
+	case FIL_Verbosity_Warning: return Style->WarningText;
+	case FIL_Verbosity_Error: return Style->ErrorText;
+	case FIL_Verbosity_Fatal: return Style->FatalText;
 	default: return Style->InfoText;
 	}
 }
 
 const FSlateColor& SFINLogViewerRow::GetTextColor() const {
 	switch (GetLogEntry()->Verbosity) {
-	case FIN_Log_Verbosity_Debug: return Style->ColorDebug;
-	case FIN_Log_Verbosity_Info: return Style->ColorInfo;
-	case FIN_Log_Verbosity_Warning: return Style->ColorWarning;
-	case FIN_Log_Verbosity_Error: return Style->ColorError;
-	case FIN_Log_Verbosity_Fatal: return Style->ColorFatal;
+	case FIL_Verbosity_Debug: return Style->ColorDebug;
+	case FIL_Verbosity_Info: return Style->ColorInfo;
+	case FIL_Verbosity_Warning: return Style->ColorWarning;
+	case FIL_Verbosity_Error: return Style->ColorError;
+	case FIL_Verbosity_Fatal: return Style->ColorFatal;
 	default: return Style->ColorInfo;
 	}
 }

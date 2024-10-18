@@ -4,12 +4,12 @@
 #include "Commandlets/GatherTextCommandletBase.h"
 #include "FINGatherTextFromReflectionCommandlet.generated.h"
 
-class UFINBase;
-class UFINStruct;
-class UFINClass;
-class UFINProperty;
-class UFINFunction;
-class UFINSignal;
+class UFIRBase;
+class UFIRStruct;
+class UFIRClass;
+class UFIRProperty;
+class UFIRFunction;
+class UFIRSignal;
 
 UCLASS()
 class FICSITNETWORKSED_API UFINGatherTextFromReflectionCommandlet : public UGatherTextCommandletBase {
@@ -28,10 +28,10 @@ public:
 	virtual bool ShouldRunInPreview(const TArray<FString>& Switches, const TMap<FString, FString>& ParamVals) const override;
 	//~ End UGatherTextCommandletBase  Interface
 
-	void GatherBase(UFINBase* Base);
-	void GatherStruct(UFINStruct* Struct);
-	void GatherClass(UFINClass* Class);
-	void GatherProperty(UFINProperty* Property);
-	void GatherFunction(UFINFunction* Function);
-	void GatherSignal(UFINSignal* Signal);
+	void GatherBase(UFIRBase* Base);
+	void GatherStruct(UFIRStruct* Struct);
+	void GatherClass(UFIRClass* Class);
+	void GatherProperty(UFIRProperty* Property);
+	void GatherFunction(UFIRFunction* Function);
+	void GatherSignal(UFIRSignal* Signal);
 };

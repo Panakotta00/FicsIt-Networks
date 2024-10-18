@@ -9,10 +9,10 @@ class SFINReflectionSignatureViewer : public SCompoundWidget {
 		SLATE_ATTRIBUTE(const FFINReflectionUIStyleStruct*, Style)
 	SLATE_END_ARGS()
 public:
-	void Construct(const FArguments& InArgs, TArray<UFINProperty*> InSource, FFINReflectionUIContext* InContext);
+	void Construct(const FArguments& InArgs, TArray<UFIRProperty*> InSource, FFINReflectionUIContext* InContext);
 private:
 	FFINReflectionUIContext* Context = nullptr;
 	TAttribute<const FFINReflectionUIStyleStruct*> Style;
-	TArray<TSharedPtr<UFINProperty*>> Source;
+	TArray<TSharedPtr<UFIRProperty*>> Source;
 };
 

@@ -787,6 +787,5 @@ namespace FINLua {
 			TArray<LuaFile>& streams = FINLua::luaFIN_getExtraSpace(L).FileStreams;
 			streams.Add(*f);
 		}
-		lua_pop(L, 1);
 	}
 }

@@ -389,13 +389,23 @@ impl<'a> ReflectionContext<'a> {
 		Ok(())
 	}
 
-	fn write_file_base(&self, file: &mut File, base: &ReflectionBase) -> Result<()> {
+	fn write_file_base(&self, file: &mut File, base: &ReflectionBase, parent: Option<String>) -> Result<()> {
 		let title = base.display_name();
 		let description = &base.description;
 
 		writeln!(file, "= {title}")?;
 		writeln!(file, ":table-caption!:")?;
 		writeln!(file)?;
+
+		if let Some(parent) = parent {
+			writeln!(file, r#"[cols="1,5a",separator="!"]"#)?;
+			writeln!(file, "!===")?;
+			writeln!(file, "! Parent")?;
+			writeln!(file, "! {parent}")?;
+			writeln!(file, "!===")?;
+			writeln!(file)?;
+		}
+
 		writeln!(file, "{description}")?;
 		writeln!(file)?;
 
@@ -407,7 +417,9 @@ impl<'a> ReflectionContext<'a> {
 		file: &mut File,
 		ref_struct: &ReflectionStruct,
 	) -> Result<()> {
-		self.write_file_base(file, &ref_struct.base)?;
+		let parent = ref_struct.parent.as_ref().map(|p| escape_for_adoc_table(&self.ctx.xref_struct(&Some(p.as_str()))));
+
+		self.write_file_base(file, &ref_struct.base, parent)?;
 
 		if !ref_struct.properties.is_empty() {
 			let mut properties: Vec<_> = ref_struct.properties.iter().collect();
@@ -478,7 +490,9 @@ impl<'a> ReflectionContext<'a> {
 	}
 
 	pub(crate) fn write_class(&self, file: &mut File, ref_class: &ReflectionClass) -> Result<()> {
-		self.write_file_base(file, &ref_class.reflection_struct.base)?;
+		let parent = ref_class.reflection_struct.parent.as_ref().map(|p| escape_for_adoc_table(&self.ctx.xref_class(&Some(p.as_str()))));
+
+		self.write_file_base(file, &ref_class.reflection_struct.base, parent)?;
 
 		writeln!(file, "// tag::interface[]")?;
 		writeln!(file)?;

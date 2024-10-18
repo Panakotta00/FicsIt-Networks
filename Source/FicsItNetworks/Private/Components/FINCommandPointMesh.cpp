@@ -4,6 +4,9 @@
 #include "Developer/TargetPlatform/Public/Interfaces/IAudioFormat.h"
 #include <filesystem>
 
+#include "Misc/FileHelper.h"
+#include "Modules/ModuleManager.h"
+
 UTexture2D* UFINCommandPointMesh::LoadTextureFromFile(FString str) {
 	FString fsp;
 	// TODO: Get UFGSaveSystem::GetSaveDirectoryPath() working
@@ -25,7 +28,6 @@ UTexture2D* UFINCommandPointMesh::LoadTextureFromFile(FString str) {
 	}
 
 	FString fstrPath = UTF8_TO_TCHAR(ps.c_str());
-
 
 	FString pngfile = "myimage.png";
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));

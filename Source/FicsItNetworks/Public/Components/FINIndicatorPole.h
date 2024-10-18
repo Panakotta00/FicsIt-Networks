@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Network/FINAdvancedNetworkConnectionComponent.h"
 #include "Buildables/FGBuildable.h"
 #include "FINIndicatorPole.generated.h"
 
@@ -19,7 +18,7 @@ public:
 	int Height = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	UFINAdvancedNetworkConnectionComponent* Connector;
+	class UFINAdvancedNetworkConnectionComponent* Connector;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UFGColoredInstanceMeshProxy* Indicator;

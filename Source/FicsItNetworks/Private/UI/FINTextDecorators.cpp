@@ -1,10 +1,10 @@
 #include "UI/FINTextDecorators.h"
 
+#include "FicsItReflection.h"
+#include "FINUtils.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/DefaultValueHelper.h"
-#include "Reflection/FINReflection.h"
 #include "Styling/CoreStyle.h"
-#include "Utils/FINUtils.h"
 
 const FString FFINReflectionReferenceDecorator::Id = TEXT("ReflectionReference");
 const FString FFINReflectionReferenceDecorator::MetaDataVariantKey = TEXT("Variant");
@@ -52,13 +52,13 @@ TSharedRef<ISlateRun> FFINReflectionReferenceDecorator::Create(const TSharedRef<
 	return CreateRun(RunInfo, InOutModelText, LinkStyle, NavigateDelegate, ModelRange, false);
 }
 
-UFINBase* FFINReflectionReferenceDecorator::ReflectionItemFromType(const FString& Variant, const FString& Type) {
+UFIRBase* FFINReflectionReferenceDecorator::ReflectionItemFromType(const FString& Variant, const FString& Type) {
 	if (Variant.ToLower().Equals(TEXT("class")) || Variant.ToLower().Equals(TEXT("object")) || Variant.ToLower().Equals(TEXT("trace"))) {
-		return FFINReflection::Get()->FindClass(Type);
+		return FFicsItReflectionModule::Get().FindClass(Type);
 	}
 
 	if (Variant.ToLower().Equals(TEXT("struct"))) {
-		return FFINReflection::Get()->FindStruct(Type);
+		return FFicsItReflectionModule::Get().FindStruct(Type);
 	}
 
 	return nullptr;
@@ -70,7 +70,7 @@ TSharedRef<FSlateHyperlinkRun> FFINReflectionReferenceDecorator::CreateRun(const
 	}
 
 	FSlateHyperlinkRun::FOnClick ClickDelegate = FSlateHyperlinkRun::FOnClick::CreateLambda([NavigateDelegate](const FSlateHyperlinkRun::FMetadata& Metadata) {
-		UFINBase* Type = ReflectionItemFromType(Metadata[MetaDataVariantKey], Metadata[MetaDataTypeKey]);
+		UFIRBase* Type = ReflectionItemFromType(Metadata[MetaDataVariantKey], Metadata[MetaDataTypeKey]);
 		bool _ = NavigateDelegate.ExecuteIfBound(Type);
 	});
 	return FFINHyperlinkRun::Create(RunInfo, InOutModelText, *Style, ClickDelegate, FSlateHyperlinkRun::FOnGenerateTooltip(), FSlateHyperlinkRun::FOnGetTooltipText(), ModelRange, bCtrlRequired);

@@ -1,16 +1,29 @@
 #include "FINGameWorldModule.h"
-#include "Computer/FINComputerSubsystem.h"
-#include "Network/FINHookSubsystem.h"
-#include "Network/Signals/FINSignalSubsystem.h"
-#include "Network/Wireless/FINWirelessSubsystem.h"
+
+#include "FicsItNetworksCircuit.h"
+#include "FicsItNetworksComputer.h"
+#include "FicsItNetworksMisc.h"
+#include "FINComputerSubsystem.h"
+#include "FINMediaSubsystem.h"
+#include "FIRModModule.h"
 #include "Utils/FINBlueprintParameterHooks.h"
-#include "Utils/FINMediaSubsystem.h"
 
 UFINGameWorldModule::UFINGameWorldModule() {
 	ModSubsystems.Add(AFINComputerSubsystem::StaticClass());
-	ModSubsystems.Add(AFINSignalSubsystem::StaticClass());
-	ModSubsystems.Add(AFINHookSubsystem::StaticClass());
-	ModSubsystems.Add(AFINWirelessSubsystem::StaticClass());
 	ModSubsystems.Add(AFINBlueprintParameterHooks::StaticClass());
 	ModSubsystems.Add(AFINMediaSubsystem::StaticClass());
+}
+
+void UFINGameWorldModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {
+	Super::DispatchLifecycleEvent(Phase);
+
+	switch (Phase) {
+	case ELifecyclePhase::CONSTRUCTION:
+		SpawnChildModule(TEXT("FicsItReflection"), UFIRGameWorldModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksMisc"), UFINMiscGameWorldModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksCircuit"), UFINCircuitGameWorldModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksComputer"), UFINComputerGameWorldModule::StaticClass());
+		break;
+	default: break;
+	}
 }
