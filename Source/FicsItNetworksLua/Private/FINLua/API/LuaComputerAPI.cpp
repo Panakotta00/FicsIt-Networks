@@ -3,14 +3,17 @@
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
-#include "FINStateEEPROMLua.h"
-#include "Network/FINNetworkUtils.h"
+#include "FINItemStateEEPROMText.h"
 #include "FGTimeSubsystem.h"
+#include "FILLogContainer.h"
+#include "FILLogEntry.h"
+#include "FINMediaSubsystem.h"
+#include "FINNetworkUtils.h"
+#include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "FINLua/Reflection/LuaStruct.h"
 #include "UI/FGGameUI.h"
-#include "Utils/FINMediaSubsystem.h"
 
 #define LuaFunc() \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
@@ -58,7 +61,7 @@ namespace FINLua {
 			 */)", getInstance) {
 				LuaFunc()
 
-				luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject())));
+				luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(FFIRTrace(kernel->GetNetwork()->GetComponent().GetObject())));
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
 
@@ -98,7 +101,7 @@ namespace FINLua {
 				LuaFunc();
 
 				processor->GetTickHelper().shouldCrash(MakeShared<FFINKernelCrash>(FString("PANIC! '") + luaL_checkstring(L, 1) + "'"));
-				kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
+				kernel->PushFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
 					kernel->GetAudio()->Beep();
 				})));
 				lua_yield(L, 0);
@@ -181,7 +184,7 @@ namespace FINLua {
 
 				float pitch = 1;
 				if (lua_isnumber(L, 1)) pitch = lua_tonumber(L, 1);
-				kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
+				kernel->PushFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(FFINFunctionFuture([kernel, pitch]() {
 					kernel->GetAudio()->Beep(pitch);
 				})));
 				return UFINLuaProcessor::luaAPIReturn(L, 0);
@@ -197,12 +200,12 @@ namespace FINLua {
 			 */)", setEEPROM) {
 				LuaFunc();
 
-				AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
-				if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
-				size_t len;
-				const char* str = luaL_checklstring(L, 1, &len);
-				FUTF8ToTCHAR Conv(str, len);
-				eeprom->SetCode(FString(Conv.Length(), Conv.Get()));
+				FString code = luaFIN_checkFString(L, 1);
+
+				if (!Cast<UFINLuaProcessor>(kernel->GetProcessor())->SetEEPROM(code)) {
+					return luaL_error(L, "no eeprom set");
+				}
+
 				return 0;
 			}
 
@@ -216,11 +219,9 @@ namespace FINLua {
 			 */)", getEEPROM) {
 				LuaFunc();
 
-				const AFINStateEEPROMLua* eeprom = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
-				if (!IsValid(eeprom)) return luaL_error(L, "no eeprom set");
-				FString Code = eeprom->GetCode();
-				FTCHARToUTF8 Conv(*Code, Code.Len());
-				lua_pushlstring(L, Conv.Get(), Conv.Length());
+				TOptional<FString> Code = Cast<UFINLuaProcessor>(kernel->GetProcessor())->GetEEPROM();
+				if (Code.IsSet() == false) return luaL_error(L, "no eeprom set");
+				luaFIN_pushFString(L, *Code);
 				return 1;
 			}
 
@@ -266,8 +267,8 @@ namespace FINLua {
 
 				int verbosity = luaL_checknumber(L, 1);
 				FString text = luaFIN_checkFString(L, 2);
-				verbosity = FMath::Clamp(verbosity, 0, EFINLogVerbosity::FIN_Log_Verbosity_Max);
-				kernel->GetLog()->PushLogEntry((EFINLogVerbosity)verbosity, text);
+				verbosity = FMath::Clamp(verbosity, 0, FIL_Verbosity_Max);
+				kernel->GetLog()->PushLogEntry((EFILLogVerbosity)verbosity, text);
 				return 0;
 			}
 
@@ -288,10 +289,10 @@ namespace FINLua {
 				for (auto players = kernel->GetWorld()->GetPlayerControllerIterator(); players; ++players) {
 					AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
 					if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
-					kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Text]() {
+					kernel->PushFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Text]() {
 						PlayerController->GetGameUI()->ShowTextNotification(FText::FromString(Text));
 					})));
-					/*kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Text]() {
+					/*kernel->PushFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Text]() {
 						UFINNotificationMessage* Message = NewObject<UFINNotificationMessage>();
 						Message->NotificationText = FText::FromString(Text);
 						PlayerController->GetGameUI()->AddPendingMessage(Message);
@@ -320,7 +321,7 @@ namespace FINLua {
 				for (auto players = kernel->GetWorld()->GetPlayerControllerIterator(); players; players++) {
 					AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
 					if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
-					kernel->PushFuture(MakeShared<TFINDynamicStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Position]() {
+					kernel->PushFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Position]() {
 						UClass* Class = LoadObject<UClass>(nullptr, TEXT("/Game/FactoryGame/Character/Player/BP_AttentionPingActor.BP_AttentionPingActor_C"));
 						AFGAttentionPingActor* PingActor = PlayerController->GetWorld()->SpawnActorDeferred<AFGAttentionPingActor>(Class, FTransform(Position));
 						PingActor->SetOwningPlayerState(PlayerController->GetPlayerState<AFGPlayerState>());
@@ -364,7 +365,7 @@ namespace FINLua {
 
 				lua_newtable(L);
 				int args = lua_gettop(L);
-				UFINClass* Type = nullptr;
+				UFIRClass* Type = nullptr;
 				if (args > 0) {
 					Type = luaFIN_toFINClass(L, 1, nullptr);
 					if (!Type) {
@@ -374,7 +375,7 @@ namespace FINLua {
 				int i = 1;
 				for (TScriptInterface<IFINPciDeviceInterface> Device : kernel->GetPCIDevices()) {
 					if (!Device || (Type && !Device.GetObject()->IsA(Cast<UClass>(Type->GetOuter())))) continue;
-					luaFIN_pushObject(L, FFINNetworkTrace(kernel->GetNetwork()->GetComponent().GetObject()) / Device.GetObject());
+					luaFIN_pushObject(L, FFIRTrace(kernel->GetNetwork()->GetComponent().GetObject()) / Device.GetObject());
 					lua_seti(L, -2, i++);
 				}
 				return 1;
@@ -387,7 +388,8 @@ namespace FINLua {
 			 * Field containing a reference to the Media Subsystem.
 			 */)", media) {
 				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-				luaFIN_pushObject(L, FINTrace(AFINMediaSubsystem::GetMediaSubsystem(Processor)));
+				luaFIN_pushObject(L, FIRTrace(AFINMediaSubsystem::GetMediaSubsystem(Processor)));
+				//luaFIN_persistValue(L, -1, PersistName);
 			}
 		}
 	}

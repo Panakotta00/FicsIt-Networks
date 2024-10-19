@@ -1,5 +1,8 @@
 #include "Components/FINCodeableSplitter.h"
-#include "Computer/FINComputerSubsystem.h"
+
+#include "FINAdvancedNetworkConnectionComponent.h"
+#include "FINComputerSubsystem.h"
+#include "FINComputerSubsystem.h"
 
 AFINCodeableSplitter::AFINCodeableSplitter() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -40,6 +43,15 @@ void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 
 void AFINCodeableSplitter::BeginPlay() {
 	Super::BeginPlay();
+
+	for (TArray<FInventoryItem>* list : { &InputQueue, &OutputQueue1, &OutputQueue2, &OutputQueue3 }) {
+		for (size_t i = 0; i < list->Num(); ++i) {
+			if (!(*list)[i].IsValid()) {
+				list->RemoveAt(i);
+				--i;
+			}
+		}
+	}
 }
 
 void AFINCodeableSplitter::Factory_Tick(float dt) {

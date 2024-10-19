@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Computer/FINComputerProcessor.h"
+#include "CoreMinimal.h"
+#include "ComputerModules/FINComputerProcessor.h"
 #include "FINComputerProcessorLua.generated.h"
 
 UCLASS(Blueprintable)

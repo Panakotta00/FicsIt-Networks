@@ -1,18 +1,24 @@
 #include "FINGameInstanceModule.h"
-#include "FINGlobalRegisterHelper.h"
-#include "Network/FINNetworkAdapter.h"
-#include "Reflection/FINReflection.h"
+
+#include "FicsItLogLibrary.h"
+#include "FicsItNetworksCircuit.h"
+#include "FicsItNetworksComputer.h"
+#include "FicsItNetworksLuaModule.h"
+#include "FIRModModule.h"
 
 UFINGameInstanceModule::UFINGameInstanceModule() {}
 
 void UFINGameInstanceModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {
 	Super::DispatchLifecycleEvent(Phase);
 
-	if (Phase == ELifecyclePhase::POST_INITIALIZATION) {
-		AFINNetworkAdapter::RegisterAdapterSettings();
-		FFINGlobalRegisterHelper::Register();
-			
-		FFINReflection::Get()->PopulateSources();
-		FFINReflection::Get()->LoadAllTypes();
+	switch (Phase) {
+	case ELifecyclePhase::CONSTRUCTION:
+		SpawnChildModule(TEXT("FicsItReflection"), UFIRGameInstanceModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItLogLibrary"), UFILGameInstanceModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksCircuit"), UFINCircuitGameInstanceModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksComputer"), UFINComputerGameInstanceModule::StaticClass());
+		SpawnChildModule(TEXT("FicsItNetworksLua"), UFINLuaGameInstanceModule::StaticClass());
+		break;
+	default: break;
 	}
 }

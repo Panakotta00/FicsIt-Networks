@@ -1,6 +1,6 @@
 #include "UI/FINCopyUUIDButton.h"
 #include "FINComponentUtility.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "Reflection/ReflectionHelper.h"
 #include "FGInventoryComponent.h"
 
@@ -27,18 +27,21 @@ void UFINCopyUUIDButton::InitSlotWidget(UWidget* InSlotWidget) {
 	MCDelegate->AddDelegate(Delegate, Button);
 }
 
-AFINFileSystemState* UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(UWidget* InSlot) {
+FGuid UFINCopyUUIDButton::GetFileSystemStateFromSlotWidget(UWidget* InSlot) {
 	struct {
 		FInventoryStack Stack;
 	} Params;
 	FReflectionHelper::CallScriptFunction(InSlot, TEXT("GetStack"), &Params);
-	AFINFileSystemState* State = Cast<AFINFileSystemState>(Params.Stack.Item.ItemState.Get());
-	return State;
+	const FFINItemStateFileSystem* State = Params.Stack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
+	if (State) {
+		return State->ID;
+	}
+	return FGuid();
 }
 
 void UFINCopyUUIDButton::OnCopyUUIDClicked() {
-	AFINFileSystemState* State = GetFileSystemStateFromSlotWidget(SlotWidget);
-	if (State) {
-		UFINComponentUtility::ClipboardCopy(State->ID.ToString());
+	FGuid ID = GetFileSystemStateFromSlotWidget(SlotWidget);
+	if (ID.IsValid()) {
+		UFINComponentUtility::ClipboardCopy(ID.ToString());
 	}
 }

@@ -1,0 +1,1 @@
+Map<Filter<Flatten<Map<Filter<std::vec::IntoIter<Entity<'_>>, {closure@src/main.rs:20:85: 20:88}>, {closure@src/main.rs:22:20: 22:23}>>, {closure@src/main.rs:22:59: 22:62}>, {closure@src/main.rs:24:20: 24:23}>

@@ -2,8 +2,9 @@
 
 #include "Components/ContentWidget.h"
 #include "Components/PanelWidget.h"
-#include "FicsItKernel/FicsItFS/FINFileSystemState.h"
 #include "FINCopyUUIDButton.generated.h"
+
+class AFINFileSystemState;
 
 UCLASS()
 class UFINCopyUUIDButton : public UContentWidget {
@@ -19,7 +20,7 @@ public:
 	
 	void InitSlotWidget(UWidget* SlotIndex);
 
-	static AFINFileSystemState* GetFileSystemStateFromSlotWidget(UWidget* InSlot);
+	static FGuid GetFileSystemStateFromSlotWidget(UWidget* InSlot);
 	
 	UFUNCTION()
 	void OnCopyUUIDClicked();

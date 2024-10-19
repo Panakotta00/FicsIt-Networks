@@ -1,5 +1,6 @@
 ﻿#include "UI/FINReflectionClassHirachyViewer.h"
-#include "Reflection/FINStruct.h"
+
+#include "Reflection/FIRStruct.h"
 #include "UI/FINReflectionTreeRow.h"
 
 void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const TSharedPtr<FFINReflectionUIStruct>& InSearchStruct, FFINReflectionUIContext* InContext) {
@@ -7,7 +8,7 @@ void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const
 	Context = InContext;
 	SearchStruct = InSearchStruct;
 	
-	UFINStruct* Outer = SearchStruct->GetStruct();
+	UFIRStruct* Outer = SearchStruct->GetStruct();
 	// Find upper most parent of struct
 	while (Outer->GetParent()) {
 		Outer = Outer->GetParent();
@@ -29,8 +30,8 @@ void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const
 		})
 		.OnGetChildren_Lambda([this](TSharedPtr<FFINReflectionUIStruct> InEntry, TArray<TSharedPtr<FFINReflectionUIStruct>>& OutArray) {
 			OutArray.Empty();
-			TArray<UFINStruct*> Children = InEntry->GetStruct()->GetChildren();
-			for (UFINStruct* Struct : Children) {
+			TArray<UFIRStruct*> Children = InEntry->GetStruct()->GetChildren();
+			for (UFIRStruct* Struct : Children) {
 				TSharedPtr<FFINReflectionUIStruct>* Child = Context->Structs.Find(Struct);
 				if (Child) {
 					if (InEntry != SearchStruct) {
@@ -44,7 +45,7 @@ void SFINReflectionClassHirachyViewer::Construct(const FArguments& InArgs, const
 			this->Context->NavigateTo(Entry.Get());
 		})
 	];
-	for (const TPair<UFINStruct*, TSharedPtr<FFINReflectionUIStruct>>& Entry : Context->Structs) {
+	for (const TPair<UFIRStruct*, TSharedPtr<FFINReflectionUIStruct>>& Entry : Context->Structs) {
 		Tree->SetItemExpansion(Entry.Value, true);
 	}
 	Tree->SetSelection(SearchStruct);

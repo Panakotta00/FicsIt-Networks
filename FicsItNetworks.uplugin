@@ -2,12 +2,12 @@
 	"FileVersion": 3,
 	"Version": 0,
 	"VersionName": "0.3",
-	"SemVersion": "0.3.20",
+	"SemVersion": "0.3.21",
 	"FriendlyName": "FicsIt-Networks",
 	"Description": "Adds a computer network and programmable computers to the Game.",
 	"Category": "Modding",
 	"CreatedBy": "Panakotta00, Roze, RosszEmber, Coffeediction, Deantendo, Raysh, Esper, leonardfactory",
-	"CreatedByURL": "",
+	"CreatedByURL": "https://panakotta00.dev/",
 	"DocsURL": "https://docs.ficsit.app/ficsit-networks/latest/index.html",
 	"MarketplaceURL": "",
 	"SupportURL": "https://discord.gg/3VfZ6Da",
@@ -22,9 +22,14 @@
 			"LoadingPhase": "PostDefault"
 		},
 		{
+			"Name": "FicsItNetworksCircuit",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
 			"Name": "FicsItNetworksEd",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostDefault"
 		},
 		{
 			"Name": "FicsItNetworksLua",
@@ -34,7 +39,7 @@
 		{
 			"Name": "FicsItNetworksDocumentation",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostDefault"
 		},
 		{
 			"Name": "Tracy",
@@ -45,12 +50,32 @@
 			"Name": "FicsItNetworksRepository",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItReflection",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItLogLibrary",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItNetworksComputer",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
+			"Name": "FicsItNetworksMisc",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "SML",
-			"SemVersion": "^3.6.0",
+			"SemVersion": "^3.8.0",
 			"Enabled": true
 		}
 	],
@@ -59,5 +84,6 @@
 			"Name": "FicsItNetworks",
 			"LoadingPolicy": "Always"
 		}
-	]
+	],
+	"GameVersion": ">=365306"
 }
