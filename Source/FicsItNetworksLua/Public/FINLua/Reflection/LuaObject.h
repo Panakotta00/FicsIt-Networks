@@ -27,6 +27,13 @@ namespace FINLua {
 	void luaFIN_pushObject(lua_State* L, const FFIRTrace& Object);
 
 	/**
+	 * @brief Tries to retrieve a Lua Object from the lua value at the givne index in the lua stack. No further checks except the metatable check are applied.
+	 * @param L the lua state
+	 * @param Index the index of the lua value you try to get as Lua Object
+	 */
+	FLuaObject* luaFIN_toRawLuaObject(lua_State* L, int Index);
+
+	/**
 	 * @brief Tries to retrieve a Lua Object from the lua value at the given index in the lua stack.
 	 * @param L the lua state
 	 * @param Index the index of the lua value you try to get as Lua Object
