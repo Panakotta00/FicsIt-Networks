@@ -4,6 +4,7 @@
 #include "FINConfigurationStruct.h"
 #include "FINNetworkComponent.h"
 #include "FINUtils.h"
+#include "Components/FINDefaultExtendedHolo.h"
 #include "Components/OverlaySlot.h"
 #include "UI/FGGameUI.h"
 #include "UObject/ConstructorHelpers.h"
@@ -15,6 +16,12 @@ const FName AFINBlueprintHologram_List_ValueColumn = FName("Value");
 AFINBlueprintHologram::AFINBlueprintHologram() {
 	PopupClass = ConstructorHelpers::FClassFinder<UFGPopupWidget>(TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_Popup.Widget_Popup_C")).Class;
 	PopupContentClass = ConstructorHelpers::FClassFinder<UFINBlueprintParameterPopup>(TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_BlueprintParameterPopup.BPW_FIN_BlueprintParameterPopup_C")).Class;
+
+	auto SnapMode = ConstructorHelpers::FClassFinder<UFGHologramBuildModeDescriptor>(TEXT("/Game/FactoryGame/Buildable/Factory/-Shared/BuildGunModes/BuildMode_BlueprintSnap.BuildMode_BlueprintSnap_C")).Class;
+	
+	mBlueprintSnapBuildMode = SnapMode;
+	mBuildModeCategory = EHologramBuildModeCategory::HBMC_ActorClass;
+	mDefaultBuildMode = UBuildMode_Default::StaticClass();
 }
 
 void AFINBlueprintHologram::ShowPropertyDialog() {
@@ -120,7 +127,12 @@ void AFINBlueprintHologram::PlaceHologram() {
 void AFINBlueprintHologram::PopupClosed(bool bConfirmed) {
 	bConfigured = true;
 	bAccepted = bConfirmed;
-	PlaceHologram();
+	if(bConfirmed) {
+		PlaceHologram();
+	}else {
+		auto cp = static_cast<AFGCharacterPlayer*>(GetConstructionInstigator());
+		cp->GetBuildGun()->Server_SecondaryFire_Implementation();
+	}
 }
 
 void AFINBlueprintParameterHooks::Init() {
