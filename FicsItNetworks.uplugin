@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 0,
 	"VersionName": "0.3",
-	"SemVersion": "0.3.20",
+	"SemVersion": "0.3.21",
 	"FriendlyName": "FicsIt-Networks",
 	"Description": "Adds a computer network and programmable computers to the Game.",
 	"Category": "Modding",
@@ -75,7 +75,7 @@
 	"Plugins": [
 		{
 			"Name": "SML",
-			"SemVersion": "^3.6.0",
+			"SemVersion": "^3.8.0",
 			"Enabled": true
 		}
 	],

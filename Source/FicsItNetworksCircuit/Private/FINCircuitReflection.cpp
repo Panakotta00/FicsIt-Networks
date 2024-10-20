@@ -28,6 +28,10 @@ BeginProp(RString, id, "ID", "**Only available for Network Components!** Allows 
 		throw FFIRException("Not a network component!");
 	}
 } EndProp()
+BeginProp(RBool, isNetworkComponent, "Is Network Component", "True if this object is a network component and has a id and nick.") {
+	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
+	FIRReturn (NetworkHandler != nullptr);
+} EndProp()
 EndClass()
 
 ExtendClass(AActor)
