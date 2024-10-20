@@ -18,7 +18,7 @@ private:
 
 public:
 	TSharedPtr<SWidget> Widget;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UFINAdvancedNetworkConnectionComponent* Connector = nullptr;
 

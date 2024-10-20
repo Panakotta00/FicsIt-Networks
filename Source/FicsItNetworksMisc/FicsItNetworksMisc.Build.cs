@@ -21,10 +21,8 @@ public class FicsItNetworksMisc : ModuleRules
             {
                 "CoreUObject",
                 "Engine",
-                "Slate",
-                "SlateCore",
                 "Json",
-                "UMG"
+                "UMG",
             }
         );
     }

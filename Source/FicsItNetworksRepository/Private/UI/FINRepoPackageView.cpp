@@ -3,11 +3,18 @@
 #include "FicsItNetworksRepository.h"
 #include "FINRepoEndpoint.h"
 #include "FINRepoModel.h"
-#include "SWebBrowserView.h"
+#include "SBox.h"
+#include "SButton.h"
+#include "STextBlock.h"
+#include "Engine/Engine.h"
 #include "GenericPlatform/GenericPlatformApplicationMisc.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
+
+#if UE_GAME
+#include "SWebBrowserView.h"
+#endif
 
 const FName FFINRepoEEPROMBoxStyle::TypeName(TEXT("FFINRepoEEPROMBoxStyle"));
 
@@ -141,6 +148,7 @@ const text = "%ls";
 						.InnerSlotPadding(FVector2D(5))
 					]
 					+SVerticalBox::Slot().FillHeight(1).Padding(0, 20)[
+#if UE_GAME
 						SNew(SWebBrowserView)
 						.InitialURL(endpoint->BaseURL)
 						.SupportsTransparency(true)
@@ -152,6 +160,9 @@ const text = "%ls";
 						.OnConsoleMessage_Lambda([](const FString& Message, const FString& Source, int32 Line, EWebBrowserConsoleLogSeverity Severity) {
 							UE_LOG(LogFicsItNetworksRepo, Warning, TEXT("Readme Viewer Console Message: %ls"), *Message);
 						})
+#else
+						SNew(SBox)
+#endif
 					]
 					+SVerticalBox::Slot().AutoHeight()[
 						SNew(STextBlock)

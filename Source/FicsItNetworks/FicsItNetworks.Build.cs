@@ -38,9 +38,8 @@ public class FicsItNetworks : ModuleRules
             "FicsItNetworksComputer",
             "FicsItNetworksLua",
 		});
-	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
 
-        if (target.Type == TargetRules.TargetType.Editor) {
+		if (target.Type == TargetRules.TargetType.Editor) {
 			PublicDependencyModuleNames.AddRange(new string[] {"OnlineBlueprintSupport", "AnimGraph"});
 		}
 

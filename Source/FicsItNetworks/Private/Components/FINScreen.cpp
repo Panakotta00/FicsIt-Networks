@@ -76,8 +76,10 @@ void AFINScreen::BindGPU(const FFIRTrace& gpu) {
 	
 	OnGPUUpdate.Broadcast();
 
+#if UE_GAME
 	if (!gpu.IsValidPtr()) WidgetComponent->SetSlateWidget(nullptr);
 	else Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->RequestNewWidget();
+#endif
 }
 
 FFIRTrace AFINScreen::GetGPU() const {

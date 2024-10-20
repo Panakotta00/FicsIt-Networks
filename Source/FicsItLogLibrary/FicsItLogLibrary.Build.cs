@@ -20,8 +20,6 @@ public class FicsItLogLibrary : ModuleRules
             {
                 "CoreUObject",
                 "Engine",
-                "Slate",
-                "SlateCore"
             }
         );
     }
