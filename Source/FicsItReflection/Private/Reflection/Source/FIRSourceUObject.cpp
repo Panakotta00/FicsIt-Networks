@@ -98,6 +98,7 @@ void UFIRSourceUObject::FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFil
 	ToFillStruct->Description = FText::FromString("");
 }
 
+#pragma optimize("", off)
 FFIRClassMeta UFIRSourceUObject::GetClassMeta(UClass* Class) const {
 	FFIRClassMeta Meta;
 
@@ -109,6 +110,10 @@ FFIRClassMeta UFIRSourceUObject::GetClassMeta(UClass* Class) const {
 		AFGBuildable* DefaultObj = Cast<AFGBuildable>(Class->GetDefaultObject());
 		Meta.Description = DefaultObj->mDescription;
 		Meta.DisplayName = DefaultObj->mDisplayName;
+	}
+
+	if(Class->GetName().Contains("Potentiometer")) {
+		__nop();
 	}
 
 	// try to get meta from function
@@ -171,6 +176,7 @@ FFIRClassMeta UFIRSourceUObject::GetClassMeta(UClass* Class) const {
 	
 	return Meta;
 }
+#pragma optimize("", on)
 
 FFIRFunctionMeta UFIRSourceUObject::GetFunctionMeta(UClass* Class, UFunction* Func) const {
 	FFIRFunctionMeta Meta;
@@ -378,9 +384,13 @@ UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, 
 	return FIRProp;
 }
 
+#pragma optimize("", off)
 UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& TypeMeta, UClass* Class, UFunction* Get) const {
 	FFIRPropertyMeta Meta;
 	
+	if(Class->GetName().Contains("Potentiometer")) {
+		__nop();
+	}
 	FProperty* GetProp = nullptr;
 	for (TFieldIterator<FProperty> Param(Get); Param; ++Param) {
 		if (Param->PropertyFlags & CPF_Parm) {
@@ -442,6 +452,7 @@ UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, 
 	
 	return FIRProp;
 }
+#pragma optimize("", on)
 
 UFIRSignal* UFIRSourceUObject::GenerateSignal(FFicsItReflectionModule* Ref, const FFIRClassMeta& ClassMeta, UClass* Class, UFunction* Func) const {
 	FFIRSignalMeta Meta;
