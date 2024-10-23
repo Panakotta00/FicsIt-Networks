@@ -578,8 +578,13 @@ void UFINLuaProcessor::LuaTick() {
 			tickHelper.shouldStop();
 		} else {
 			// runtime crashed -> crash system with runtime error message
-			luaL_traceback(luaThread, luaThread, lua_tostring(luaThread, -1), 0);
-			tickHelper.shouldCrash(MakeShared<FFINKernelCrash>(UTF8_TO_TCHAR(lua_tostring(luaThread, -1))));
+			const char* message = lua_tostring(luaThread, -1);
+			try {
+				luaL_traceback(luaThread, luaThread, message, 0);
+				tickHelper.shouldCrash(MakeShared<FFINKernelCrash>(FINLua::luaFIN_toFString(luaThread, -1)));
+			} catch (FString error) {
+				tickHelper.shouldCrash(MakeShared<FFINKernelCrash>(UTF8_TO_TCHAR(message)));
+			}
 		}
 		if (nres > -1) {
 			lua_pop(luaThread, nres);
@@ -624,6 +629,11 @@ void luaWarnF(void* ud, const char* msg, int tocont) {
 	Processor->GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, UTF8_TO_TCHAR(msg));
 }
 
+int luaPanicF(lua_State* L) {
+	throw FINLua::luaFIN_toFString(L, 1);
+	return 0;
+}
+
 void UFINLuaProcessor::Reset() {
 	UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Lua Processor Reset"), *DebugInfo);
 	tickHelper.stop();
@@ -651,8 +661,9 @@ void UFINLuaProcessor::Reset() {
 		.FileStreams = FileStreams,
 	});
 
-	// setup warning function
+	// setup error/warning function
 	lua_setwarnf(luaState, luaWarnF, this);
+	lua_atpanic(luaState, luaPanicF);
 
 	// setup tables for persistence
 	lua_newtable(luaState); // perm
