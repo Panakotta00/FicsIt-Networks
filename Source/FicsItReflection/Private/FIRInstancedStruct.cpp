@@ -79,10 +79,11 @@ bool FFIRInstancedStruct::Serialize(FStructuredArchive::FSlot Slot) {
 	return true;
 }
 
-/*bool FFIRInstancedStruct::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) {
-	bOutSuccess = Serialize(Ar);
+bool FFIRInstancedStruct::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) {
+	FStructuredArchiveFromArchive Structured(Ar);
+	bOutSuccess = Serialize(Structured.GetSlot());
 	return bOutSuccess;
-}*/
+}
 
 void FFIRInstancedStruct::AddStructReferencedObjects(FReferenceCollector& Collector) const {
 	UScriptStruct* ThisStruct = Struct;

@@ -33,7 +33,7 @@ public:
 	static FFIRInstancedStruct Copy(UScriptStruct* Struct, const void* Data);
 
 	bool Serialize(FStructuredArchive::FSlot Slot);
-	//bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
+	bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 
 	/**
@@ -83,7 +83,7 @@ struct TStructOpsTypeTraits<FFIRInstancedStruct> : public TStructOpsTypeTraitsBa
 	enum
 	{
 		WithStructuredSerializer = true,
-		//WithNetSerializer = true,
+		WithNetSerializer = true,
 		WithAddStructReferencedObjects = true,
         WithCopy = true,
     };
