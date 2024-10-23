@@ -3,6 +3,7 @@
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
 #include "FINMediaSubsystem.h"
+#include "SlateApplication.h"
 #include "Fonts/FontMeasure.h"
 
 const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINGPUT2WidgetStyle"));
@@ -291,6 +292,7 @@ TSharedPtr<SWidget> AFINComputerGPUT2::CreateWidget() {
 }
 
 void AFINComputerGPUT2::FlushDrawCalls() {
+	FScopeLock Lock(&DrawingMutex);
 	FrontBufferDrawCalls = BackBufferDrawCalls;
 	BackBufferDrawCalls.Empty();
 }

@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "FINComputerGPU.h"
+#include "Async/ParallelFor.h"
+#include "Widgets/SLeafWidget.h"
 #include "FINComputerGPUT1.generated.h"
 
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
@@ -496,8 +498,7 @@ struct TStructOpsTypeTraits<FFINGPUT1Buffer> : TStructOpsTypeTraitsBase2<FFINGPU
 };
 
 class FICSITNETWORKSCOMPUTER_API SScreenMonitor : public SLeafWidget {
-	SLATE_BEGIN_ARGS(SScreenMonitor) : _Font()
-		{
+	SLATE_BEGIN_ARGS(SScreenMonitor) : _Font() {
 			_Clipping = EWidgetClipping::OnDemand;
 		}
 		SLATE_ATTRIBUTE(FSlateFontInfo, Font)
