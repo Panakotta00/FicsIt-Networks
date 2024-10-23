@@ -388,7 +388,6 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		lua_setfield(luaState, -2, "globals");						// ..., perm, globals, perm, data
 		lua_pushvalue(luaState, luaThreadIndex);						// ..., perm, globals, perm, data, thread
 		lua_setfield(luaState, -2, "thread");						// ..., perm, globals, perm, data
-		FINLua::luaFINDebug_dumpTable(luaState, -2);
 
 		lua_pushcfunction(luaState, luaPersist);					// ..., perm, globals, perm, data, persist-func
 		lua_insert(luaState, -3);									// ..., perm, globals, persist-func, perm, data
