@@ -86,6 +86,18 @@ BeginFunc(flush, "Flush", "Removes all discardable items from the inventory comp
 		}
 	}
 } EndFunc()
+BeginFunc(canSplitAtIndex, "Can Split at Index", "Returns true if the item stack at the given index can be split.") {
+	InVal(0, RInt, index, "Index", "The slot index of which you want to check if the stack can be split.")
+	OutVal(1, RBool, canSplit, "Can Split", "True if the stack at the given index can be split.")
+	Body()
+	canSplit = self->CanSplitStackAtIdx(index);
+} EndFunc()
+BeginFunc(splitAtIndex, "Split At Index", "Tries to split the stack at the given index and puts the given amount of items into a free slot.") {
+	InVal(0, RInt, index, "Index", "The index of the stack you want to split.")
+	InVal(1, RInt, num, "Num", "The number of items you want to split off the stack at the given index.")
+	Body()
+	self->SplitStackAtIdx(index, num);
+} EndFunc()
 EndClass()
 
 BeginStructConstructable(FItemAmount, "ItemAmount", "Item Amount", "A struct that holds a pair of amount and item type.")
