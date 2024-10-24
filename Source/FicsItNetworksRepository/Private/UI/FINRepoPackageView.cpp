@@ -7,10 +7,9 @@
 #include "SButton.h"
 #include "STextBlock.h"
 #include "Engine/Engine.h"
-#include "GenericPlatform/GenericPlatformApplicationMisc.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SWrapBox.h"
-#include "Windows/WindowsPlatformApplicationMisc.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 #if UE_GAME
 #include "SWebBrowserView.h"

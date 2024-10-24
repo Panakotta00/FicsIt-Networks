@@ -13,7 +13,7 @@
 #include "Slate/SlateBrushAsset.h"
 #include "Widgets/SInvalidationPanel.h"
 #include "Widgets/Layout/SScaleBox.h"
-#include "Windows/WindowsPlatformApplicationMisc.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 const FFINGPUT1BufferPixel FFINGPUT1BufferPixel::InvalidPixel;
 
@@ -40,7 +40,7 @@ FVector2D SScreenMonitor::GetCharSize() const {
 	FSlateApplication& app = FSlateApplication::Get();
 	FSlateRenderer* renderer = app.GetRenderer();
 	TSharedRef<FSlateFontMeasure> measure = renderer->GetFontMeasureService();
-	return measure->Measure(L" ", Font.Get());
+	return measure->Measure(TEXT(" "), Font.Get());
 }
 
 FVector2D SScreenMonitor::LocalToCharPos(FVector2D Pos) const {
@@ -164,7 +164,7 @@ bool SScreenMonitor::HandleShortCut(const FKeyEvent& InKeyEvent) {
 		return true;
 	} else if (IsAction(WorldContext, InKeyEvent, TEXT("FicsItNetworks.PasteScreen"))) {
 		FString PasteText;
-		FWindowsPlatformApplicationMisc::ClipboardPaste(PasteText);
+		FPlatformApplicationMisc::ClipboardPaste(PasteText);
 		for (TCHAR CharKey : PasteText) {
 			FCharacterEvent CharacterEvent(CharKey, FModifierKeysState(), InKeyEvent.GetUserIndex(), false);
 			FSlateApplication::Get().ProcessKeyCharEvent(CharacterEvent);

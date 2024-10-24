@@ -7,9 +7,6 @@
 #include "FGFactoryConnectionComponent.h"
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FIRSubsystem.h"
-#include "AssetRegistry/AssetData.h"
-#include "Engine/Blueprint.h"
-#include "Engine/BlueprintGeneratedClass.h"
 #include "Patching/NativeHookManager.h"
 #include "UObject/CoreRedirects.h"
 #include "FIRGlobalRegisterHelper.h"
@@ -41,6 +38,11 @@ void UFGRailroadTrackConnectionComponent_RemoveConnection_Hook(CallScope<void(*)
 
 void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFactoryConnectionComponent*,TArray<FInventoryItem>&,TSubclassOf<UFGItemDescriptor>)>& Scope, const UFGFactoryConnectionComponent* const_self, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) {
 	UFGFactoryConnectionComponent* self = const_cast<UFGFactoryConnectionComponent*>(const_self);
+	if (!IsValid(self->GetOuterBuildable())) {
+		Scope(const_self, out_items, type);
+		return;
+	}
+
 	auto reflectionSubsystem = AFIRSubsystem::GetReflectionSubsystem(self);
 	fgcheck(reflectionSubsystem);
 	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = reflectionSubsystem->GetFactoryConnectorSettings(self);
@@ -56,6 +58,10 @@ void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFa
 }
 
 void UFGFactoryConnectionComponent_GrabOutput_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,float&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf<UFGItemDescriptor> type) {
+	if (!IsValid(self->GetOuterBuildable())) {
+		Scope(self, out_item, out_OffsetBeyond, type);
+		return;
+	}
 	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
 	if (OptionalSettings.IsSet()) {
 		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;

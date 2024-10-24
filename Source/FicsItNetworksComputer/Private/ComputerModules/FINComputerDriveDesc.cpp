@@ -37,7 +37,7 @@ FText UFINComputerDriveDesc::GetOverridenItemDescription_Implementation(APlayerC
 }
 
 UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
-	UClass* progressBar = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/-Shared/Widget_ProgressBar.Widget_ProgressBar_C"));
+	UClass* progressBar = LoadObject<UClass>(nullptr, TEXT("/Game/FactoryGame/Interface/UI/InGame/-Shared/Widget_ProgressBar.Widget_ProgressBar_C"));
 
 	if (!InventoryStack.Item.HasState()) return nullptr;
 	auto state = InventoryStack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();

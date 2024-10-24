@@ -36,7 +36,7 @@ public:
 	virtual void EndPlay(EEndPlayReason::Type reason) override;
 	// End AActor
 
-	const FGuid& GetDrive();
+	FGuid GetDrive();
 
 	UFUNCTION(BlueprintGetter)
 	bool GetLocked() const;

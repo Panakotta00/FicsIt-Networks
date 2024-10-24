@@ -1,5 +1,5 @@
 #include "FINNetworkAdapter.h"
-#include "FiNNetworkCable.h"
+#include "FINNetworkCable.h"
 #include "FGColoredInstanceMeshProxy.h"
 #include "FGPowerConnectionComponent.h"
 #include "FGItemPickup_Spawnable.h"
@@ -117,15 +117,15 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	bReplicates = true;
 	NetDormancy = DORM_Awake;
 	
-	RootComponent = CreateDefaultSubobject<USceneComponent>(L"Root");
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent->SetMobility(EComponentMobility::Type::Static);
 
-	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(L"Connector");
+	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>(TEXT("Connector"));
 	Connector->SetupAttachment(RootComponent);
 	Connector->bOuterAsRedirect = false;
 	Connector->SetIsReplicated(true);
 	
-	ConnectorMesh = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>(L"StaticMesh");
+	ConnectorMesh = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>(TEXT("StaticMesh"));
 	ConnectorMesh->SetupAttachment(RootComponent);
 	ConnectorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	

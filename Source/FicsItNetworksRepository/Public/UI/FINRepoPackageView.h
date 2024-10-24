@@ -51,9 +51,9 @@ struct FFINRepoPackageViewStyle : public FSlateWidgetStyle {
 	FFINRepoPackageViewStyle() :
 		TitleStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),
 		TitleVersionStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),
-		SidebarTitleTextStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),
 		TagHashtagTextStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),
 		TagTextStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),
+		SidebarTitleTextStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),
 		SidebarVersionTextStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),
 		SidebarVersionTextStyleThis(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),
 		SidebarAuthorTextStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText")),

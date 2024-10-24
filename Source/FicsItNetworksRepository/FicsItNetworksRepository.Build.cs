@@ -4,7 +4,9 @@ public class FicsItNetworksRepository : ModuleRules
 {
     public FicsItNetworksRepository(ReadOnlyTargetRules Target) : base(Target)
     {
-        PCHUsage = PCHUsageMode.Default;
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        CppStandard = CppStandardVersion.Cpp20;
 
         PublicDependencyModuleNames.AddRange(
             new string[]

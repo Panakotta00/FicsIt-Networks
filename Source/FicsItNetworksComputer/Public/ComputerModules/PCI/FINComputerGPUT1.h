@@ -6,6 +6,8 @@
 #include "Widgets/SLeafWidget.h"
 #include "FINComputerGPUT1.generated.h"
 
+class SInvalidationPanel;
+
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenKeyEventHandler, uint32, uint32, int);
 DECLARE_DELEGATE_RetVal_TwoParams(FReply, FScreenKeyCharEventHandler, TCHAR, int);
