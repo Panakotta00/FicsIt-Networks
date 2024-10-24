@@ -116,8 +116,9 @@ jobs:
  #           %LocalAppData%\FactoryGame\Saved\FINLuaDocumentation.lua
 
       - name: Discord Webhook Action
-        uses: Panakotta00/discord-build-status-with-artifact@v0.0.1
+        uses: Panakotta00/discord-build-status-with-artifact@v0.0.2
         with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
           artifact-url: ${{ steps.upload-win64.outputs.artifact-url }}
           artifact-name: 'FicsIt-Networks.zip'
           
