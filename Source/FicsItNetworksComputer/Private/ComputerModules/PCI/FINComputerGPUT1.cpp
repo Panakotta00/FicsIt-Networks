@@ -180,6 +180,7 @@ SScreenMonitor::SScreenMonitor() {
 
 void AFINComputerGPUT1::Multicast_BeginBackBufferReplication_Implementation(FIntPoint Size) {
 	if (!HasAuthority()) {
+		ReplicateStart = FPlatformTime::Seconds();
 		BackBuffer.SetSize(Size.X, Size.Y);
 	}
 }
@@ -194,6 +195,7 @@ void AFINComputerGPUT1::Multicast_EndBackBufferReplication_Implementation() {
 	if (!HasAuthority()) {
 		FrontBuffer = BackBuffer;
 		if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
+		UE_LOG(LogFicsItNetworksComputer, Warning, TEXT("GPU T1: Replication took %f"), FPlatformTime::Seconds() - ReplicateStart);
 	}
 }
 

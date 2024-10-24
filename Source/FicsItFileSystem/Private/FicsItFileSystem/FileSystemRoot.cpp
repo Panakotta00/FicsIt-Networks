@@ -1,34 +1,32 @@
-#include "FicsItKernel/FicsItFS/Library/FileSystemRoot.h"
+#include "FicsItFileSystem/FileSystemRoot.h"
+
+#include "FileSystemException.h"
 
 using namespace CodersFileSystem;
 using namespace std;
 
-FileSystemException::FileSystemException(std::string what) : std::exception(what.c_str()) {}
-
-SRef<Device> FileSystemRoot::getDevice(Path path, Path& pending) {
+TSharedPtr<Device> FileSystemRoot::getDevice(Path path, Path& pending) {
 	Path mountP = "";
 	path = path.absolute();
-	SRef<Device> mountD;
+	TSharedPtr<Device> mountD;
 	for (auto mount = mounts.begin(); mount != mounts.end(); mount++) {
-		if (!mount->second.first.isValid()) {
+		if (!mount->second.first.IsValid()) {
 			mounts.erase(mount--);
 			continue;
 		}
 		if (path.startsWith(mount->first) && mount->first.str().size() >= mountP.str().size()) {
 			mountP = mount->first;
-			mountD = mount->second.first;
+			mountD = mount->second.first.Pin();
 		}
 	}
-	if (mountD.isValid()) {
+	if (mountD.IsValid()) {
 		pending = path.str().erase(0, mountP.str().size());
 	}
 	pending = pending.relative();
 	return mountD;
 }
 
-CodersFileSystem::FileSystemRoot::FileSystemRoot() {
-	listener = new RootListener(this);
-}
+CodersFileSystem::FileSystemRoot::FileSystemRoot() : listener(MakeShared<RootListener>(this)) {}
 
 CodersFileSystem::FileSystemRoot::FileSystemRoot(FileSystemRoot&& other) {
 	*this = std::move(other);
@@ -38,25 +36,24 @@ CodersFileSystem::FileSystemRoot::~FileSystemRoot() {}
 
 FileSystemRoot& CodersFileSystem::FileSystemRoot::operator=(FileSystemRoot&& other) {
 	mounts = other.mounts;
-	cache = other.cache;
 	listeners = other.listeners;
 	listener = other.listener;
 	listener->root = this;
 	return *this;
 }
 
-SRef<FileStream> FileSystemRoot::open(Path path, FileMode mode) {
+TSharedPtr<FileStream> FileSystemRoot::open(Path path, FileMode mode) {
 	Path pending = "";
 	auto device = getDevice(path.absolute(), pending);
-	if (!device.isValid()) return nullptr;
+	if (!device.IsValid()) return nullptr;
 	return device->open(pending, mode);
 }
 
-SRef<Directory> FileSystemRoot::createDir(Path path, bool createTree) {
+bool FileSystemRoot::createDir(Path path, bool createTree) {
 	Path pending = "";
 	path = path.absolute();
 	auto device = getDevice(path / "..", pending);
-	if (!device.isValid()) return nullptr;
+	if (!device.IsValid()) return false;
 	return device->createDir(pending / path.fileName(), createTree);
 }
 
@@ -64,7 +61,7 @@ bool FileSystemRoot::remove(Path path, bool recursive) {
 	Path pending = "";
 	path = path.absolute();
 	auto device = getDevice(path / "..", pending);
-	if (!device.isValid()) return false;
+	if (!device.IsValid()) return false;
 	auto removed = device->remove(pending / path.fileName(), recursive);
 	if (removed) {
 		for (auto i = mounts.begin(); i != mounts.end(); i++) {
@@ -81,13 +78,13 @@ bool FileSystemRoot::rename(Path path, const std::string& name) {
 	path = path.absolute();
 	Path pending = "";
 	auto device = getDevice(path / "..", pending);
-	if (!device.isValid()) return false;
+	if (!device.IsValid()) return false;
 	auto renamed = device->rename(pending / path.fileName(), name);
 	if (renamed) {
 		for (auto i = mounts.begin(); i != mounts.end(); i++) {
 			if (i->first.startsWith(path)) {
 				auto newMountPathSub = i->first.relative().str().erase(0, path.relative().str().size());
-				mounts[path / ".." / name / newMountPathSub] = i->second;
+				mounts.emplace(path / ".." / name / newMountPathSub, i->second);
 				mounts.erase(i--);
 			}
 		}
@@ -96,25 +93,26 @@ bool FileSystemRoot::rename(Path path, const std::string& name) {
 }
 
 int FileSystemRoot::copy(Path from, Path to, bool recursive) {
-	from = from.absolute();
+	return 0;
+	/*from = from.absolute();
 	to = to.absolute();
 	Path pendingFrom = "";
 	Path pendingTo = "";
 	auto deviceFrom = getDevice(from, pendingFrom);
-	if (!deviceFrom.isValid()) return 1;
+	if (!deviceFrom.IsValid()) return 1;
 	auto deviceTo = getDevice(to, pendingTo);
-	if (!deviceTo.isValid()) return 1;
+	if (!deviceTo.IsValid()) return 1;
 	
-	auto f = deviceFrom->get(pendingFrom);
-	auto t = deviceTo->get(pendingTo);
+	TOptional<FileType> f = deviceFrom->fileType(pendingFrom);
+	TOptional<FileType> t = deviceTo->fileType(pendingTo);
 
-	if (!recursive && dynamic_cast<Directory*>(f.get())) return 1;
+	if (!recursive && f.IsSet() && *f == File_Directory) return 1;
 
-	if (!t.isValid()) {
-		SRef<Directory> prevT = deviceTo->get(pendingTo / "..");
-		if (!prevT.isValid()) return 1;
-		if (dynamic_cast<File*>(f.get())) {
-			t = prevT->createFile(pendingTo.fileName());
+	if (!t.IsSet()) {
+		TOptional<FileType> prevT = deviceTo->fileType(pendingTo / "..");
+		if (prevT != File_Directory) return 1;
+		if (f.IsSet() && *f == File_Regular) {
+			t = deviceTo->open(pendingTo.fileName());
 		} else if (dynamic_cast<Directory*>(f.get())) {
 			t = prevT->createSubdir(pendingTo.fileName());
 		}
@@ -144,11 +142,11 @@ int FileSystemRoot::copy(Path from, Path to, bool recursive) {
 		ofs->write(FileStream::readAll(ifs));
 		ofs->close();
 	}
-	return 1;
+	return 1;*/
 }
 
 int FileSystemRoot::moveInternal(Path from, Path to) {
-	Path pendingFrom = "";
+	/*Path pendingFrom = "";
 	Path pendingTo = "";
 	from = from.absolute();
 	to = to.absolute();
@@ -202,11 +200,12 @@ int FileSystemRoot::moveInternal(Path from, Path to) {
 		ifs->close();
 		return remove(from, false);
 	}
-	return 1;
+	return 1;*/
+	return 0;
 }
 
 int FileSystemRoot::move(Path from, Path to) {
-	from = from.absolute();
+	/*from = from.absolute();
 	if (from.isRoot()) return 1;
 	to = to.absolute();
 	Path pendingFrom = "";
@@ -214,33 +213,16 @@ int FileSystemRoot::move(Path from, Path to) {
 	if (!deviceFrom.isValid()) return 1;
 	auto prevFrom = deviceFrom->get(pendingFrom);
 	if (!prevFrom.isValid()) return 1;
-	return moveInternal(from, to);
+	return moveInternal(from, to);*/
+	return 1;
 }
 
-SRef<Node> FileSystemRoot::get(Path path) {
-	path = path.absolute();
-	auto cached_node = cache.find(path);
-	if (cached_node != cache.end()) {
-		if (!cached_node->second.isValid()) {
-			cache.erase(cached_node);
-		} else {
-			return cached_node->second;
-		}
-	}
-	Path pending = "";
-	auto device = getDevice(path, pending);
-	if (!device.isValid()) return nullptr;
-	auto node = device->get(pending);
-	if (!node.isValid()) return nullptr;
-	return cache[path] = node;
-}
-
-unordered_set<std::string> FileSystemRoot::childs(Path path) {
+unordered_set<std::string> FileSystemRoot::children(Path path) {
 	path = path.absolute();
 	Path pending = "";
 	auto device = getDevice(path, pending);
-	if (!device.isValid()) throw FileSystemException("no device at path found");
-	unordered_set<std::string> names = device->childs(pending);
+	if (!device.IsValid()) throw FileSystemException("no device at path found");
+	unordered_set<std::string> names = device->children(pending);
 	for (auto mount : mounts) {
 		Path mountPoint = mount.first;
 		if (!mountPoint.isRoot() && (mountPoint / "..") == path) names.insert(mountPoint.fileName());
@@ -248,12 +230,31 @@ unordered_set<std::string> FileSystemRoot::childs(Path path) {
 	return names;
 }
 
-bool FileSystemRoot::mount(SRef<Device> device, Path path) {
+TOptional<FileType> FileSystemRoot::fileType(Path path) {
+	Path pending = "";
+	auto device = getDevice(path.absolute(), pending);
+	if (!device.IsValid()) return {};
+	return device->fileType(pending);
+}
+
+TSharedPtr<Device> FileSystemRoot::getDevice(Path path) {
+	Path pending = "";
+	auto device = getDevice(path.absolute(), pending);
+	if (!device.IsValid()) return {};
+	return device->getDevice(pending);
+}
+
+bool FileSystemRoot::mount(TSharedRef<Device> device, Path path) {
 	path = path.absolute();
 	for (auto& mount : mounts) {
 		if (mount.first == path && mount.second.first == device) return false;
 	}
-	device->addListener((mounts[path] = {device, new PathBoundListener(listener, path)}).second);
+	TWeakPtr<Device> weakDevice(device);
+	TSharedRef<PathBoundListener> pathListener = MakeShared<PathBoundListener>(listener, path);
+	std::pair<TWeakPtr<Device>, TSharedRef<PathBoundListener>> pair(weakDevice, pathListener);
+	Path p(path);
+	mounts.emplace(p, pair);
+	device->addListener(pathListener);
 	listener->onMounted(path, device);
 	return true;
 }
@@ -262,31 +263,29 @@ bool FileSystemRoot::unmount(Path path) {
 	path = path.absolute();
 	auto p = mounts.find(path);
 	if (p == mounts.end()) return false;
-	p->second.first->removeListener(p->second.second);
-	listener->onUnmounted(path, p->second.first);
+	p->second.first.Pin()->removeListener(p->second.second);
+	listener->onUnmounted(path, p->second.first.Pin().ToSharedRef());
 	mounts.erase(p);
 	return true;
 }
 
-void FileSystemRoot::addListener(WRef<Listener> newListener) {
-	listeners.insert(newListener);
+void FileSystemRoot::addListener(TWeakPtr<Listener> newListener) {
+	listeners.Add(newListener);
 }
 
-void FileSystemRoot::removeListener(WRef<Listener> newListener) {
-	listeners.erase(newListener);
+void FileSystemRoot::removeListener(TWeakPtr<Listener> newListener) {
+	listeners.Remove(newListener);
 }
 
 FileSystemRoot::RootListener::RootListener(FileSystemRoot * root) : root(root) {}
 
 CodersFileSystem::FileSystemRoot::RootListener::~RootListener() {}
 
-void FileSystemRoot::RootListener::onMounted(Path path, SRef<Device> device) {
-	for (auto i = root->cache.begin(); i != root->cache.end(); i++) if (i->first.startsWith(path)) root->cache.erase(i--);
+void FileSystemRoot::RootListener::onMounted(Path path, TSharedRef<Device> device) {
 	root->listeners.onMounted(path, device);
 }
 
-void FileSystemRoot::RootListener::onUnmounted(Path path, SRef<Device> device) {
-	for (auto i = root->cache.begin(); i != root->cache.end(); i++) if (i->first.startsWith(path)) root->cache.erase(i--);
+void FileSystemRoot::RootListener::onUnmounted(Path path, TSharedRef<Device> device) {
 	root->listeners.onUnmounted(path, device);
 }
 
@@ -295,7 +294,6 @@ void FileSystemRoot::RootListener::onNodeAdded(Path path, NodeType type) {
 }
 
 void FileSystemRoot::RootListener::onNodeRemoved(Path path, NodeType type) {
-	root->cache.erase(path);
 	root->listeners.onNodeRemoved(path, type);
 }
 
@@ -304,9 +302,5 @@ void FileSystemRoot::RootListener::onNodeChanged(Path path, NodeType type) {
 }
 
 void CodersFileSystem::FileSystemRoot::RootListener::onNodeRenamed(Path newPath, Path oldPath, NodeType type) {
-	try {
-		root->cache[newPath] = root->cache.at(oldPath);
-		root->cache.erase(oldPath);
-	} catch (...) {}
 	root->listeners.onNodeRenamed(newPath, oldPath, type);
 }

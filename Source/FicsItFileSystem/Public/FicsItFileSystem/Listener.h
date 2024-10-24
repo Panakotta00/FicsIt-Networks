@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Path.h"
-#include "ReferenceCount.h"
+#include "SharedPointer.h"
 
 #include <unordered_set>
 
 namespace CodersFileSystem {
-	class Node;
 	class Device;
 
 	enum NodeType {
@@ -15,13 +14,11 @@ namespace CodersFileSystem {
 		NT_Else
 	};
 
-	NodeType getTypeFromRef(SRef<Node> node);
-
-	class Listener : virtual public ReferenceCounted {
+	class Listener {
 	public:
 		virtual ~Listener() {}
-		virtual void onMounted(Path path, SRef<Device> device) {};
-		virtual void onUnmounted(Path path, SRef<Device> device) {};
+		virtual void onMounted(Path path, TSharedRef<Device> device) {};
+		virtual void onUnmounted(Path path, TSharedRef<Device> device) {};
 		virtual void onNodeAdded(Path path, NodeType type) {};
 		virtual void onNodeRemoved(Path path, NodeType type) {};
 		virtual void onNodeChanged(Path  path, NodeType type) {};
@@ -31,13 +28,13 @@ namespace CodersFileSystem {
 	class PathBoundListener : public Listener {
 	protected:
 		Path additionalPath;
-		WRef<Listener> listener;
+		TWeakPtr<Listener> listener;
 
 	public:
-		PathBoundListener(WRef<Listener> listener, const Path& path);
+		PathBoundListener(TWeakPtr<Listener> listener, const Path& path);
 
-		virtual void onMounted(Path path, SRef<Device> device) override;
-		virtual void onUnmounted(Path path, SRef<Device> device) override;
+		virtual void onMounted(Path path, TSharedRef<Device> device) override;
+		virtual void onUnmounted(Path path, TSharedRef<Device> device) override;
 		virtual void onNodeAdded(Path path, NodeType type) override;
 		virtual void onNodeRemoved(Path path, NodeType type) override;
 		virtual void onNodeChanged(Path path, NodeType type) override;
@@ -45,10 +42,10 @@ namespace CodersFileSystem {
 	};
 
 
-	class ListenerList : public std::unordered_set<WRef<Listener>> {
+	class ListenerList : public TArray<TWeakPtr<Listener>> {
 	public:
-		void onMounted(Path path, SRef<Device> device);
-		void onUnmounted(Path path, SRef<Device> device);
+		void onMounted(Path path, TSharedRef<Device> device);
+		void onUnmounted(Path path, TSharedRef<Device> device);
 		void onNodeAdded(Path path, NodeType type);
 		void onNodeRemoved(Path path, NodeType type);
 		void onNodeChanged(Path  path, NodeType type);
@@ -63,8 +60,8 @@ namespace CodersFileSystem {
 		ListenerListRef(ListenerList& listeners, const Path& path);
 		ListenerListRef(ListenerListRef& listenersRef, const Path& additionalPath);
 
-		void onMounted(Path path, SRef<Device> device);
-		void onUnmounted(Path path, SRef<Device> device);
+		void onMounted(Path path, TSharedRef<Device> device);
+		void onUnmounted(Path path, TSharedRef<Device> device);
 		void onNodeAdded(Path path, NodeType type);
 		void onNodeRemoved(Path path, NodeType type);
 		void onNodeChanged(Path path, NodeType type);

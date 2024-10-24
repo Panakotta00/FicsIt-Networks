@@ -600,6 +600,8 @@ private:
 	TArray<FFINGPUT1BufferPixel> ToReplicate;
 	bool bShouldReplicate = false;
 
+	double ReplicateStart = 0.0;
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_BeginBackBufferReplication(FIntPoint Size);
 	UFUNCTION(NetMulticast, Reliable)

@@ -14,15 +14,15 @@
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FIRTrace.h"
+#include "Engine/Engine.h"
 #include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/LuaUtil.h"
 #include "Signals/FINSignalData.h"
-
 #include "tracy/Tracy.hpp"
 
-void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
+void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, TSharedRef<CodersFileSystem::Device> device) {
 	for (FINLua::LuaFile file : Parent->GetFileStreams()) {
-		if (file.isValid() && (!Parent->GetKernel()->GetFileSystem() || !Parent->GetKernel()->GetFileSystem()->checkUnpersistPath(file->path))) {
+		if (!Parent->GetKernel()->GetFileSystem()) {
 			file->file->close();
 		}
 	}
@@ -30,7 +30,7 @@ void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileS
 
 void LuaFileSystemListener::onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
 	for (FINLua::LuaFile file : Parent->GetFileStreams()) {
-		if (file.isValid() && file->path.length() > 0 && (!Parent->GetKernel()->GetFileSystem() || Parent->GetKernel()->GetFileSystem()->unpersistPath(file->path) == path)) {
+		if (file->path.length() > 0 && (!Parent->GetKernel()->GetFileSystem())) {
 			file->file->close();
 		}
 	}
@@ -360,7 +360,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 
 	for (FINLua::LuaFile file : FileStreams) {
 		if (file->file) {
-			file->transfer = CodersFileSystem::SRef<FINLua::LuaFilePersistTransfer>(new FINLua::LuaFilePersistTransfer());
+			file->transfer = MakeShared<FINLua::LuaFilePersistTransfer>();
 			file->transfer->open = file->file->isOpen();
 			if (file->transfer->open) {
 				file->transfer->mode = file->file->getMode();
@@ -610,11 +610,11 @@ size_t luaLen(lua_State* L, int idx) {
 }
 
 void UFINLuaProcessor::ClearFileStreams() {
-	TArray<CodersFileSystem::SRef<FINLua::LuaFileContainer>> ToRemove;
-	for (const CodersFileSystem::SRef<FINLua::LuaFileContainer>& fs : FileStreams) {
-		if (!fs.isValid()) ToRemove.Add(fs);
+	TArray<TSharedRef<FINLua::LuaFileContainer>> ToRemove;
+	for (const TSharedRef<FINLua::LuaFileContainer>& fs : FileStreams) {
+		ToRemove.Add(fs);
 	}
-	for (const CodersFileSystem::SRef<FINLua::LuaFileContainer>& fs : ToRemove) {
+	for (const TSharedRef<FINLua::LuaFileContainer>& fs : ToRemove) {
 		FileStreams.Remove(fs);
 	}
 }

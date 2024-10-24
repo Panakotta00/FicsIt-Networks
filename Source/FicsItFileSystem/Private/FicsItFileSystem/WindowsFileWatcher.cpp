@@ -1,6 +1,8 @@
-#include "FicsItKernel/FicsItFS/Library/WindowsFileWatcher.h"
-#include "FicsItKernel/FicsItFS/Library/Listener.h"
-#include "FicsItKernel/FicsItFS/Library/Path.h"
+#include "FicsItFileSystem/WindowsFileWatcher.h"
+#include "FicsItFileSystem/Listener.h"
+#include "FicsItFileSystem/Path.h"
+
+#if PLATFORM_WINDOWS
 
 #define WIN32_LEAN_AND_MEAN
 #include "Windows.h"
@@ -40,7 +42,7 @@ namespace CodersFileSystem {
 		DWORD status = WaitForSingleObject(watcherInfo->OverlappedIO.hEvent, 0);
 		if (status != WAIT_OBJECT_0) return;
 
-		FILE_NOTIFY_INFORMATION* Event = (FILE_NOTIFY_INFORMATION*)watcherInfo->Buffer;
+		::FILE_NOTIFY_INFORMATION* Event = (::FILE_NOTIFY_INFORMATION*)watcherInfo->Buffer;
 		
 		while (true) {
 			handleChangeEvent(Event);
@@ -90,3 +92,5 @@ namespace CodersFileSystem {
 		}
 	}
 }
+
+#endif

@@ -1,9 +1,13 @@
 #pragma once
 
+#if PLATFORM_WINDOWS
+
 #include <functional>
 
-#include "AkAcousticPortal.h"
 #include "FileSystem.h"
+
+struct _FILE_NOTIFY_INFORMATION;
+typedef _FILE_NOTIFY_INFORMATION FILE_NOTIFY_INFORMATION;
 
 namespace CodersFileSystem {
 	enum NodeType;
@@ -11,7 +15,7 @@ namespace CodersFileSystem {
 
 	struct DiskDeviceWatcher;
 	
-	class WindowsFileWatcher {
+	class FICSITFILESYSTEM_API WindowsFileWatcher {
 	public:
 		DiskDeviceWatcher* watcherInfo = nullptr;
 		std::function<void(int, NodeType, Path, Path)> eventFunc;
@@ -24,6 +28,10 @@ namespace CodersFileSystem {
 
 	private:
 		void tryReadChanges();
-		void handleChangeEvent(::FILE_NOTIFY_INFORMATION* changeEvent);
+		void handleChangeEvent(struct ::FILE_NOTIFY_INFORMATION* changeEvent);
 	};
+
+	typedef WindowsFileWatcher FileWatcher;
 }
+
+#endif

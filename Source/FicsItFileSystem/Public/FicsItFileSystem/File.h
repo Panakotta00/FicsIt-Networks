@@ -1,16 +1,20 @@
 #pragma once
 
-#include "Node.h"
 #include "Listener.h"
 
-#include "FileSystem.h"
 #include <sstream>
 #include <fstream>
+#include <functional>
+#include <filesystem>
 
 namespace CodersFileSystem {
-	class MemFileStream;
-
 	typedef std::function<bool(long long, bool)> SizeCheckFunc;
+
+	enum FileType : uint8_t {
+		File_Regular,
+		File_Directory,
+		File_Device,
+	};
 
 	enum FileMode : unsigned char {
 		INPUT	= 0b00001,
@@ -20,56 +24,17 @@ namespace CodersFileSystem {
 		BINARY	= 0b10000,
 	};
 
-	FICSITNETWORKSCOMPUTER_API FileMode operator |(FileMode l, FileMode r);
-	FICSITNETWORKSCOMPUTER_API FileMode operator &(FileMode l, FileMode r);
-	FICSITNETWORKSCOMPUTER_API FileMode operator ~(FileMode m);
+	FICSITFILESYSTEM_API FileMode operator |(FileMode l, FileMode r);
+	FICSITFILESYSTEM_API FileMode operator &(FileMode l, FileMode r);
+	FICSITFILESYSTEM_API FileMode operator ~(FileMode m);
 
-	class FICSITNETWORKSCOMPUTER_API File : public Node {
-	public:
-		File();
-
-		virtual std::unordered_set<std::string> getChilds() const override;
-	};
-
-	class FICSITNETWORKSCOMPUTER_API MemFile : public File {
-	private:
-		std::string data;
-		WRef<MemFileStream> io;
-		ListenerListRef listeners;
-		SizeCheckFunc sizeCheck;
-
-	public:
-		MemFile(ListenerListRef listeners, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
-
-		virtual SRef<FileStream> open(FileMode m) override;
-		virtual bool isValid() const override;
-
-		/*
-		* returns the size of the content of this file
-		*
-		* @return	size of the content
-		*/
-		size_t getSize() const;
-	};
-
-	class FICSITNETWORKSCOMPUTER_API DiskFile : public File {
-	private:
-		std::filesystem::path realPath;
-		SizeCheckFunc sizeCheck;
-
-	public:
-		DiskFile(const std::filesystem::path& realPath, SizeCheckFunc sizeCheck = [](auto,auto) { return true; });
-
-		virtual SRef<FileStream> open(FileMode m) override;
-		virtual bool isValid() const override;
-	};
-
-	class FICSITNETWORKSCOMPUTER_API FileStream : public ReferenceCounted {
+	class FICSITFILESYSTEM_API FileStream {
 	protected:
 		FileMode mode;
 	
 	public:
 		FileStream(FileMode mode);
+		virtual ~FileStream() = default;
 
 		/**
 		 * Returns the open mode of the file stream
@@ -138,31 +103,10 @@ namespace CodersFileSystem {
 		 * @param[in]	stream	the stream you want to read till EOF
 		 * @return all the content of the stream read til EOF
 		 */
-		static std::string readAll(SRef<FileStream> stream);
+		static std::string readAll(TSharedRef<FileStream> stream);
 	};
 
-	class FICSITNETWORKSCOMPUTER_API MemFileStream : public FileStream {
-	protected:
-		std::string* data;
-		uint64_t pos = 0;
-		ListenerListRef& listeners;
-		SizeCheckFunc sizeCheck;
-		bool open = false;
-		bool flagEOF = false;
-
-	public:
-		MemFileStream(std::string* data, FileMode mode, ListenerListRef& listeners, SizeCheckFunc sizeCheck = [](auto, auto) { return true; });
-		~MemFileStream();
-
-		virtual void write(std::string str) override;
-		virtual std::string read(size_t chars) override;
-		virtual bool isEOF() override;
-		virtual std::int64_t seek(std::string w, std::int64_t off) override;
-		virtual void close() override;
-		virtual bool isOpen() override;
-	};
-
-	class FICSITNETWORKSCOMPUTER_API DiskFileStream : public FileStream {
+	class FICSITFILESYSTEM_API DiskFileStream : public FileStream {
 	protected:
 		std::filesystem::path path;
 		SizeCheckFunc sizeCheck;
