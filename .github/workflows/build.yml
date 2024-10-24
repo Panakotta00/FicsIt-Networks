@@ -117,6 +117,7 @@ jobs:
 
       - name: Discord Webhook Action
         uses: Panakotta00/discord-build-status-with-artifact@v0.0.2
+        if: always()
         with:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           artifact-url: ${{ steps.upload-win64.outputs.artifact-url }}
