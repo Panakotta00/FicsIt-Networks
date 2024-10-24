@@ -1,8 +1,10 @@
 #include "FicsItKernel/FicsItFS/FINFileSystemState_Legacy.h"
 
+#include "App.h"
 #include "FGInventoryComponent.h"
 #include "FINComputerSubsystem.h"
-#include "FicsItKernel/FicsItFS/FileSystemSerializationInfo.h"
+#include "Engine/Engine.h"
+#include "FileSystemSerializationInfo.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Net/UnrealNetwork.h"
 #include "Widgets/Input/SButton.h"
@@ -15,7 +17,7 @@
 #define OVERRIDE_CHANGES 0
 
 AFINFileSystemState_Legacy::AFINFileSystemState_Legacy() {
-	RootComponent = CreateDefaultSubobject<USceneComponent>(L"RootComponent");
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 }
 
 int AskForDiskOrSave_Legacy(FString Name) {
@@ -113,7 +115,7 @@ int AskForDiskOrSave_Legacy(FString Name) {
 		if (KeepDisk == 1) return; \
 	}
 
-void AFINFileSystemState_Legacy::SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk) {
+void AFINFileSystemState_Legacy::SerializePath(TSharedRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk) {
 	std::unordered_set<std::string> childs;
 	std::unordered_set<std::string>::iterator childIterator;
 	int ChildNodeNum;
@@ -121,12 +123,12 @@ void AFINFileSystemState_Legacy::SerializePath(CodersFileSystem::SRef<CodersFile
 	bool bIsLoading = Record.GetUnderlyingArchive().IsLoading();
 
 	if (bIsSaving) {
-		childs = SerializeDevice->childs(Path);
+		childs = SerializeDevice->children(Path);
 		childIterator = childs.begin();
 		ChildNodeNum = childs.size();
 	}
 	FStructuredArchive::FArray ChildNodes = Record.EnterArray(SA_FIELD_NAME(TEXT("ChildNodes")), ChildNodeNum);
-	std::unordered_set<std::string> DiskChilds = SerializeDevice->childs(Path);
+	std::unordered_set<std::string> DiskChilds = SerializeDevice->children(Path);
 	CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
 	if (KeepDisk == 0) {
 		for (std::string DiskChild : DiskChilds) {
@@ -153,21 +155,22 @@ void AFINFileSystemState_Legacy::SerializePath(CodersFileSystem::SRef<CodersFile
 		} else if (KeepDisk == -1) {
 			DiskChilds.erase(stdChildName);
 		}
-		
-		CodersFileSystem::SRef<CodersFileSystem::Node> ChildNode = SerializeDevice->get(Path / stdChildName);
+
+		CodersFileSystem::FileType ChildType = *SerializeDevice->fileType(Path / stdChildName);
 		int Type = 0;
-		if (dynamic_cast<CodersFileSystem::File*>(ChildNode.get())) Type = 1;
-		if (dynamic_cast<CodersFileSystem::Directory*>(ChildNode.get())) Type = 2;
+		if (ChildType == CodersFileSystem::File_Regular) Type = 1;
+		if (ChildType == CodersFileSystem::File_Directory) Type = 2;
 		Child.EnterField(SA_FIELD_NAME(TEXT("Type"))) << Type;
+		TOptional<CodersFileSystem::FileType> existingType = SerializeDevice->fileType(Path / stdChildName);
 		if (Type == 1) {
-			CheckKeepDisk(!CodersFileSystem::SRef<CodersFileSystem::File>(SerializeDevice->get(Path / stdChildName)).isValid())
+			CheckKeepDisk(!existingType.IsSet() || *existingType != CodersFileSystem::File_Regular)
 			if (KeepDisk == 0) {
 				SerializeDevice->remove(Path / stdChildName, true);
 			}
 			FStructuredArchive::FSlot Content = Child.EnterField(SA_FIELD_NAME(TEXT("FileContent")));
 			if (Record.GetUnderlyingArchive().IsLoading()) {
 				std::string diskData;
-				if (KeepDisk == -1) diskData = CodersFileSystem::FileStream::readAll(SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY));
+				if (KeepDisk == -1) diskData = CodersFileSystem::FileStream::readAll(SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY).ToSharedRef());
 				std::string stdData;
 				if (bUsePreBinarySupportSerialization) {
 					FString Data;
@@ -181,13 +184,13 @@ void AFINFileSystemState_Legacy::SerializePath(CodersFileSystem::SRef<CodersFile
 				}
 				CheckKeepDisk(diskData != stdData)
 				if (KeepDisk == 0) {
-					CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC | CodersFileSystem::BINARY);
+					TSharedPtr<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC | CodersFileSystem::BINARY);
 					Stream->write(stdData);
 					Stream->close();
 				}
             } else if (Record.GetUnderlyingArchive().IsSaving()) {
-            	CodersFileSystem::SRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY);
-            	std::string RawData = CodersFileSystem::FileStream::readAll(Stream);
+            	TSharedPtr<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY);
+            	std::string RawData = CodersFileSystem::FileStream::readAll(Stream.ToSharedRef());
             	if (bUsePreBinarySupportSerialization) {
             		FUTF8ToTCHAR Conv(RawData.c_str(), RawData.length());
             		FString Data(Conv.Length(), Conv.Get());
@@ -199,7 +202,7 @@ void AFINFileSystemState_Legacy::SerializePath(CodersFileSystem::SRef<CodersFile
             	}
             }
 		} else if (Type == 2) {
-			CheckKeepDisk(!CodersFileSystem::SRef<CodersFileSystem::Directory>(SerializeDevice->get(Path / stdChildName)).isValid())
+			CheckKeepDisk(!existingType.IsSet() || *existingType != CodersFileSystem::File_Directory)
 			if (KeepDisk == 0) {
 				SerializeDevice->remove(Path / stdChildName, true);
 			}
@@ -217,7 +220,7 @@ void AFINFileSystemState_Legacy::Serialize(FStructuredArchive::FRecord Record) {
 
 	int32 OldCapacity = Capacity;
 	Capacity = 0;
-	CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice = GetDevice(false, true);
+	TSharedPtr<CodersFileSystem::Device> SerializeDevice = GetDevice(false, true);
 	Capacity = OldCapacity;
 
 	if (Record.GetUnderlyingArchive().IsLoading()) {
@@ -227,9 +230,8 @@ void AFINFileSystemState_Legacy::Serialize(FStructuredArchive::FRecord Record) {
 	FStructuredArchive::FSlot RootNode = Record.EnterField(SA_FIELD_NAME(TEXT("RootNode")));
 	if (!bUseOldSerialization) {
 		int KeepDisk = -1;
-		SerializePath(SerializeDevice, RootNode.EnterRecord(), "/", ID.ToString(), KeepDisk);
+		SerializePath(SerializeDevice.ToSharedRef(), RootNode.EnterRecord(), "/", ID.ToString(), KeepDisk);
 	} else {
-		Serialize_DEPRECATED(RootNode.GetUnderlyingArchive());
 		bUseOldSerialization = false;
 	}
 }
@@ -243,7 +245,7 @@ bool AFINFileSystemState_Legacy::ShouldSave_Implementation() const {
 	return true;
 }
 
-CodersFileSystem::SRef<CodersFileSystem::Device> AFINFileSystemState_Legacy::GetDevice(bool bInForceUpdate, bool bInForceCreate) {
+TSharedPtr<CodersFileSystem::Device> AFINFileSystemState_Legacy::GetDevice(bool bInForceUpdate, bool bInForceCreate) {
 	if (!HasAuthority()) return nullptr;
 	
 	if (!IdCreated) {
@@ -251,8 +253,8 @@ CodersFileSystem::SRef<CodersFileSystem::Device> AFINFileSystemState_Legacy::Get
 		ID = FGuid::NewGuid();
 	}
 
-	CodersFileSystem::SRef<CodersFileSystem::Device> NewDevice = Device;
-	if (!Device.isValid() || bInForceCreate || bInForceUpdate) {
+	TSharedPtr<CodersFileSystem::Device> NewDevice = Device;
+	if (!Device.IsValid() || bInForceCreate || bInForceUpdate) {
 		FString fsp;
 		// TODO: Get UFGSaveSystem::GetSaveDirectoryPath() working
 		if(fsp.IsEmpty()) {
@@ -265,39 +267,9 @@ CodersFileSystem::SRef<CodersFileSystem::Device> AFINFileSystemState_Legacy::Get
 
 		std::filesystem::create_directories(root);
 
-		NewDevice = new CodersFileSystem::DiskDevice(root, Capacity);
+		NewDevice = MakeShared<CodersFileSystem::DiskDevice>(root, Capacity);
 
-		if (!Device.isValid() || bInForceUpdate) Device = NewDevice;
+		if (!Device.IsValid() || bInForceUpdate) Device = NewDevice;
 	}
 	return NewDevice;
-}
-
-void AFINFileSystemState_Legacy::Serialize_DEPRECATED(FArchive& Ar) {
-	if (!Ar.IsSaveGame()) return;
-	
-	FFileSystemNode node;
-	node.NodeType = -1;
-
-	// serialize filesystem devices
-	if (Ar.IsSaving()) {
-		if (dynamic_cast<CodersFileSystem::MemDevice*>(Device.get())) node.NodeType = 3;
-		if (dynamic_cast<CodersFileSystem::DiskDevice*>(Device.get())) node.NodeType = 2;
-		if (node.NodeType == 2 || node.NodeType == 3) {
-			std::unordered_set<std::string> nodes = Device->childs("");
-			for (std::string newNode : nodes) {
-				TSharedPtr<FFileSystemNode> newSerializeNode = MakeShareable(new FFileSystemNode());
-				newSerializeNode->Serialize(Device, newNode.c_str());
-				node.ChildNodes.Add(FString(newNode.c_str()), newSerializeNode);
-			}
-		}
-	}
-	
-	Ar << node;
-	
-	// load devices
-	if (Ar.IsLoading()) {
-		GetDevice();
-		std::string deviceName = TCHAR_TO_UTF8(*ID.ToString());
-		node.Deserialize(Device, deviceName);
-	}
 }

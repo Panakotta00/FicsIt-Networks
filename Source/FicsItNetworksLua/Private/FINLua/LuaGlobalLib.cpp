@@ -1,5 +1,6 @@
 #include "FINLua/LuaGlobalLib.h"
 
+#include "FGBlueprintFunctionLibrary.h"
 #include "FicsItNetworksLuaModule.h"
 #include "FILLogContainer.h"
 #include "FINLua/Reflection/LuaClass.h"

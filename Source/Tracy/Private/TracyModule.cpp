@@ -1,6 +1,8 @@
 #include "TracyModule.h"
 
 #include "Misc/CoreDelegates.h"
+
+#undef TRACY_API
 #include "tracy/Tracy.hpp"
 
 DEFINE_LOG_CATEGORY(LogTracy);

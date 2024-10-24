@@ -4,9 +4,9 @@
 #include "FGLegacyItemStateActorInterface.h"
 #include "FGSaveInterface.h"
 #include "FINItemStateFileSystem.h"
-#include "Library/Device.h"
-#include "Library/Path.h"
-#include "Library/ReferenceCount.h"
+#include "GameFramework/Actor.h"
+#include "FicsItFileSystem/Device.h"
+#include "FicsItFileSystem/Path.h"
 #include "FINFileSystemState_Legacy.generated.h"
 
 UCLASS()
@@ -14,13 +14,13 @@ class FICSITNETWORKSCOMPUTER_API AFINFileSystemState_Legacy : public AActor, pub
 	GENERATED_BODY()
 
 private:
-	CodersFileSystem::SRef<CodersFileSystem::Device> Device;
+	TSharedPtr<CodersFileSystem::Device> Device;
 
 	bool bUseOldSerialization = false;
 	bool bUsePreBinarySupportSerialization = true;
 	
 public:
-	void SerializePath(CodersFileSystem::SRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk);
+	void SerializePath(TSharedRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk);
 
 	UPROPERTY(SaveGame)
 	FGuid ID;
@@ -55,7 +55,5 @@ public:
 		return FFGDynamicStruct(state);
 	}
 	
-	CodersFileSystem::SRef<CodersFileSystem::Device> GetDevice(bool bInForceUpdate = false, bool bInForeCreate = false);
-
-	void Serialize_DEPRECATED(FArchive& Ar);
+	TSharedPtr<CodersFileSystem::Device> GetDevice(bool bInForceUpdate = false, bool bInForeCreate = false);
 };

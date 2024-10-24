@@ -10,15 +10,13 @@ public class Tracy : ModuleRules
     public Tracy(ReadOnlyTargetRules target) : base(target)
     {
 		CppStandard = CppStandardVersion.Cpp17;
-		
-        bLegacyPublicIncludePaths = false;
+
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
             "Core",
             "TracyLib"
 		});
-		
-		PublicIncludePaths.Add("Public");
 		
 		//PublicDefinitions.Add("TRACY_ENABLE=1");
 		//PublicDefinitions.Add("TRACY_EXPORTS=1");

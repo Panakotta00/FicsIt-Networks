@@ -1,14 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Device.h"
 #include "FGSubsystem.h"
 #include "FINFileSystemSubsystem.generated.h"
-
-namespace CodersFileSystem {
-	template<typename>
-	class SRef;
-	class Device;
-}
 
 struct FFINItemStateFileSystem;
 
@@ -22,7 +17,7 @@ public:
 	 *
 	 * This function has to work on static because the devices are used for Serialization of the FileSystem.
 	 */
-	static CodersFileSystem::SRef<CodersFileSystem::Device> GetDevice(const FGuid& FileSystemID, bool bInForceUpdate = false, bool bInForeCreate = false);
+	static TSharedPtr<CodersFileSystem::Device> GetDevice(const FGuid& FileSystemID, bool bInForceUpdate = false, bool bInForeCreate = false);
 
 	UFUNCTION(BlueprintCallable, Category = "Computer", meta = (WorldContext = "WorldContext"))
 	static AFINFileSystemSubsystem* GetFileSystemSubsystem(UObject* WorldContext);
@@ -43,7 +38,7 @@ public:
 	}
 
 private:
-	static TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> Devices;
+	static TMap<FGuid, TSharedRef<CodersFileSystem::Device>> Devices;
 
 	// TODO: FileSystem Usage
 	TMap<FGuid, double> Usage;

@@ -67,12 +67,11 @@ public:
 	FFINIsNetworkRouter OnIsNetworkRouter;
 	FFINIsNetworkPortOpen OnIsNetworkPortOpen;
 
-	UFINAdvancedNetworkConnectionComponent() : RedirectionObject(this) {}
+	UFINAdvancedNetworkConnectionComponent();
 
 	// Begin UActorComponent
 	virtual void BeginPlay() override;
 	virtual void Serialize(FArchive& Ar) override;
-	virtual void InitializeComponent() override;
 	// End UActorComponent
 
 	// Begin IFGSaveInterface

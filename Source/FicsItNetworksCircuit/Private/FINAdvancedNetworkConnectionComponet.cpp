@@ -9,6 +9,10 @@ void UFINAdvancedNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<F
 	DOREPLIFETIME(UFINAdvancedNetworkConnectionComponent, Nick);
 }
 
+UFINAdvancedNetworkConnectionComponent::UFINAdvancedNetworkConnectionComponent() : RedirectionObject(this) {
+	SetIsReplicatedByDefault(true);
+}
+
 void UFINAdvancedNetworkConnectionComponent::BeginPlay() {
 	Super::BeginPlay();
 
@@ -36,12 +40,6 @@ void UFINAdvancedNetworkConnectionComponent::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
 }
 
-void UFINAdvancedNetworkConnectionComponent::InitializeComponent() {
-	Super::InitializeComponent();
-	SetIsReplicatedByDefault(true);
-	SetIsReplicated(true);
-}
-
 bool UFINAdvancedNetworkConnectionComponent::ShouldSave_Implementation() const {
 	return true;
 }
@@ -64,6 +62,7 @@ FString UFINAdvancedNetworkConnectionComponent::GetNick_Implementation() const {
 
 void UFINAdvancedNetworkConnectionComponent::SetNick_Implementation(const FString& NewNick) {
 	Nick = NewNick;
+	//GetOwner()->ForceNetUpdate();
 }
 
 bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FString& inNick) {

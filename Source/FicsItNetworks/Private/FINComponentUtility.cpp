@@ -1,6 +1,6 @@
 #include "FINComponentUtility.h"
-#include "Windows/WindowsPlatformApplicationMisc.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 void UFINComponentUtility::ClipboardCopy(FString str) {
-	FWindowsPlatformApplicationMisc::ClipboardCopy(*str);
+	FPlatformApplicationMisc::ClipboardCopy(*str);
 }

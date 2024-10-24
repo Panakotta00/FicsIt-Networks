@@ -1,6 +1,7 @@
 #ifndef __TRACYAPI_H__
 #define __TRACYAPI_H__
 
+#ifndef TRACY_API
 #if defined _WIN32
 #  if defined TRACY_EXPORTS
 #    define TRACY_API __declspec(dllexport)
@@ -11,6 +12,7 @@
 #  endif
 #else
 #  define TRACY_API __attribute__((visibility("default")))
+#endif
 #endif
 
 #endif    // __TRACYAPI_H__

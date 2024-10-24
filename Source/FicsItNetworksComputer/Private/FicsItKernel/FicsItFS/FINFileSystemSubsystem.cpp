@@ -1,22 +1,26 @@
 ﻿#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 
+#include "App.h"
+#include "Device.h"
 #include "FGInventoryComponent.h"
+#include "FicsItFileSystem.h"
 #include "Paths.h"
 #include "SubsystemActorManager.h"
-#include "FicsItkernel/FicsItFS/FINItemStateFileSystem.h"
+#include "Engine/Engine.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 
-TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> AFINFileSystemSubsystem::Devices;
+TMap<FGuid, TSharedRef<CodersFileSystem::Device>> AFINFileSystemSubsystem::Devices;
 
-CodersFileSystem::SRef<CodersFileSystem::Device> AFINFileSystemSubsystem::GetDevice(const FGuid& FileSystemID, bool bInForceUpdate, bool bInForceCreate) {
+TSharedPtr<CodersFileSystem::Device> AFINFileSystemSubsystem::GetDevice(const FGuid& FileSystemID, bool bInForceUpdate, bool bInForceCreate) {
 	if (!FileSystemID.IsValid()) return nullptr;
 
-	CodersFileSystem::SRef<CodersFileSystem::Device> Device;
-	CodersFileSystem::SRef<CodersFileSystem::Device>* DevicePtr = Devices.Find(FileSystemID);
+	TSharedPtr<CodersFileSystem::Device> Device;
+	TSharedRef<CodersFileSystem::Device>* DevicePtr = Devices.Find(FileSystemID);
 	if (DevicePtr) {
 		Device = *DevicePtr;
 	}
 
-	if (!Device.isValid() || bInForceCreate || bInForceUpdate) {
+	if (!Device.IsValid() || bInForceCreate || bInForceUpdate) {
 		FString fsp;
 		// TODO: Get UFGSaveSystem::GetSaveDirectoryPath() working
 		if(fsp.IsEmpty()) {
@@ -29,11 +33,9 @@ CodersFileSystem::SRef<CodersFileSystem::Device> AFINFileSystemSubsystem::GetDev
 
 		std::filesystem::create_directories(root);
 
-		Device = new CodersFileSystem::DiskDevice(root, 0); // TODO: 1.0: Get Capacity
+		Device = MakeShared<CodersFileSystem::DiskDevice>(root, 0); // TODO: 1.0: Get Capacity
 
-		if (!Device.isValid() || bInForceUpdate) {
-			Devices.Add(FileSystemID, Device);
-		}
+		Devices.Add(FileSystemID, Device.ToSharedRef());
 	}
 
 	return Device;

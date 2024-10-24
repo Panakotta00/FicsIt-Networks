@@ -28,7 +28,7 @@ void AFINComputerDriveHolder::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	DOREPLIFETIME(AFINComputerDriveHolder, bLocked);
 }
 
-const FGuid& AFINComputerDriveHolder::GetDrive() {
+FGuid AFINComputerDriveHolder::GetDrive() {
 	FInventoryStack stack;
 	if (DriveInventory->GetStackFromIndex(0, stack)) {
 		TSubclassOf<UFINComputerDriveDesc> driveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());

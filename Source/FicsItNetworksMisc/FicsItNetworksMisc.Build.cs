@@ -6,6 +6,8 @@ public class FicsItNetworksMisc : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        bEnableExceptions = true;
+
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
@@ -21,10 +23,8 @@ public class FicsItNetworksMisc : ModuleRules
             {
                 "CoreUObject",
                 "Engine",
-                "Slate",
-                "SlateCore",
                 "Json",
-                "UMG"
+                "UMG",
             }
         );
     }

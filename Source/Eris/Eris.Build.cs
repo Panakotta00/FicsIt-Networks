@@ -5,7 +5,6 @@ public class Eris : ModuleRules
 {
 	public Eris(ReadOnlyTargetRules target) : base(target)
 	{
-		bLegacyPublicIncludePaths = false;
 		CppStandard = CppStandardVersion.Cpp17;
 		bEnableExceptions = true;
 		bUseRTTI = true;
@@ -15,10 +14,15 @@ public class Eris : ModuleRules
 		});
 		
 		var thirdPartyFolder = Path.Combine(PluginDirectory, "ThirdParty");
-		PrivateIncludePaths.Add(Path.Combine(thirdPartyFolder, "eris/src"));
+		PublicIncludePaths.Add(Path.Combine(thirdPartyFolder, "eris/src"));
 
 		PublicIncludePaths.Add("Public");
 
-		PublicDefinitions.AddRange(new string[] { "LUA_BUILD_AS_DLL", "LUA_LIB" });
+		PublicDefinitions.AddRange(new string[] { "LUA_LIB", "LUA_API=ERIS_API" });
+
+		if (target.Platform == UnrealTargetPlatform.Win64)
+		{
+			PublicDefinitions.AddRange(new string[] { "LUA_BUILD_AS_DLL" });
+		}
 	}
 }

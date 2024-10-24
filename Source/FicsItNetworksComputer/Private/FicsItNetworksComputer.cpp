@@ -102,12 +102,6 @@ void FFicsItNetworksComputerModule::StartupModule() {
 
 	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
 #if !WITH_EDITOR
-		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
-			if (gm->HasAuthority() && !gm->IsMainMenuGameMode()) {
-				gm->RegisterRemoteCallObjectClass(UFINComputerRCO::StaticClass());
-			}
-		});
-
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGCharacterPlayer::BeginPlay, (void*)GetDefault<AFGCharacterPlayer>(), [](AActor* self) {
 			AFGCharacterPlayer* character = Cast<AFGCharacterPlayer>(self);
 			if (character) {

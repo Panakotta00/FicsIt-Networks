@@ -3,6 +3,10 @@
 #include "CoreMinimal.h"
 #include "FINComputerGPU.h"
 #include "FIRInstancedStruct.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleAsset.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Widgets/SLeafWidget.h"
 #include "FINComputerGPUT2.generated.h"
 
 USTRUCT(BlueprintType)

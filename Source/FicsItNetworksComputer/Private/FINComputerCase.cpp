@@ -3,6 +3,7 @@
 #include "FicsItKernel/FicsItKernel.h"
 #include "FGInventoryComponent.h"
 #include "FGPlayerController.h"
+#include "FicsItNetworksComputer.h"
 #include "FILLogContainer.h"
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINComputerEEPROMDesc.h"
@@ -19,6 +20,7 @@
 #include "FicsItKernel/Processor/Processor.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Net/UnrealNetwork.h"
+#include "Async/Async.h"
 
 class UFINComputerRCO;
 
@@ -26,8 +28,7 @@ AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
 	NetworkConnector->SetupAttachment(RootComponent);
 	NetworkConnector->OnNetworkSignal.AddDynamic(this, &AFINComputerCase::HandleSignal);
-	NetworkConnector->SetIsReplicated(true);
-	
+
 	Panel = CreateDefaultSubobject<UFINModuleSystemPanel>("Panel");
 	Panel->SetupAttachment(RootComponent);
 	Panel->OnModuleChanged.AddDynamic(this, &AFINComputerCase::OnModuleChanged);
@@ -35,29 +36,14 @@ AFINComputerCase::AFINComputerCase() {
 	DataStorage = CreateDefaultSubobject<UFGInventoryComponent>("DataStorage");
 	DataStorage->SetDefaultSize(2);
 	DataStorage->Resize(2);
-	DataStorage->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
-	DataStorage->OnItemAddedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
-	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> Item, int32 Index) {
-		switch (Index) {
-		case -1:
-			return Item->IsChildOf(UFINComputerEEPROMDesc::StaticClass()) || Item->IsChildOf(UFINComputerFloppyDesc::StaticClass());
-		case 0:
-			return Item->IsChildOf(UFINComputerEEPROMDesc::StaticClass());
-		case 1:
-			return Item->IsChildOf(UFINComputerFloppyDesc::StaticClass());
-		default:
-			return false;
-		}
-	});
-	DataStorage->SetIsReplicated(true);
 
 	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
 	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
+	AudioController = CreateDefaultSubobject<UFINKernelAudioController>("AudioController");
+	AudioController->SetComponent(Speaker);
+
 	Log = CreateDefaultSubobject<UFILLogContainer>("Log");
-	bReplicates = true;
-	bReplicateUsingRegisteredSubObjectList = true;
-	AddReplicatedSubObject(Log);
 
 	mFactoryTickFunction.bCanEverTick = true;
 	mFactoryTickFunction.bStartWithTickEnabled = true;
@@ -70,18 +56,21 @@ AFINComputerCase::AFINComputerCase() {
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	bReplicates = true;
+	bReplicateUsingRegisteredSubObjectList = true;
+	AddReplicatedSubObject(Log);
+	NetDormancy = DORM_Awake;
 }
 
 void AFINComputerCase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	DOREPLIFETIME(AFINComputerCase, DataStorage);
+
 	DOREPLIFETIME(AFINComputerCase, LastTabIndex);
 	DOREPLIFETIME(AFINComputerCase, Log);
 	DOREPLIFETIME(AFINComputerCase, InternalKernelState);
 	DOREPLIFETIME(AFINComputerCase, Processors);
 	DOREPLIFETIME(AFINComputerCase, PCIDevices);
-	DOREPLIFETIME(AFINComputerCase, NetworkConnector);
 }
 
 void AFINComputerCase::OnConstruction(const FTransform& transform) {
@@ -90,12 +79,10 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 	if (HasAuthority()) {
 		Kernel = NewObject<UFINKernelSystem>(this, "Kernel");
 		NetworkController = NewObject<UFINKernelNetworkController>(this, "NetworkController");
-		AudioController = NewObject<UFINKernelAudioController>(this, "AudioController");
 
 		Kernel->SetLog(Log);
 		NetworkController->SetComponent(NetworkConnector);
 		Kernel->SetNetwork(NetworkController);
-		AudioController->SetComponent(Speaker);
 		Kernel->SetAudio(AudioController);
 		Kernel->OnGetEEPROM.BindWeakLambda(this, [this]() {
 			FInventoryStack stack;
@@ -104,9 +91,11 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 		});
 		Kernel->OnSetEEPROM.BindWeakLambda(this, [this](const FFGDynamicStruct& state) {
 			FInventoryStack stack;
-			if (DataStorage->GetStackFromIndex(0, stack) || stack.HasItems()) {
-				DataStorage->SetStateOnIndex(0, state);
-				GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFINComputerRCO>()->Multicast_ItemStateUpdated(DataStorage, stack.Item.GetItemClass());
+			if (DataStorage->GetStackFromIndex(0, stack) && stack.HasItems()) {
+				AsyncTask(ENamedThreads::GameThread, [this, state]() {
+					DataStorage->SetStateOnIndex(0, state);
+					DataStorage->OnSlotUpdatedDelegate.Broadcast(0);
+				});
 				return true;
 			}
 			return false;
@@ -117,7 +106,23 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
 
+	DataStorage->OnSlotUpdatedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
+	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> Item, int32 Index) {
+		switch (Index) {
+		case -1:
+			return Item->IsChildOf(UFINComputerEEPROMDesc::StaticClass()) || Item->IsChildOf(UFINComputerFloppyDesc::StaticClass());
+		case 0:
+			return Item->IsChildOf(UFINComputerEEPROMDesc::StaticClass());
+		case 1:
+			return Item->IsChildOf(UFINComputerFloppyDesc::StaticClass());
+		default:
+			return false;
+		}
+	});
+
 	if (HasAuthority()) {
+		DataStorage->SetReplicationRelevancyOwner(this);
+
 		DataStorage->Resize(2);
 
 		// load floppy
@@ -185,12 +190,8 @@ void AFINComputerCase::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	AddModules(modules);
 }
 
-void AFINComputerCase::NetMulti_OnEEPROMChanged_Implementation(const FFGDynamicStruct& EEPROM) {
-	OnEEPROMUpdate.Broadcast(EEPROM);
-}
-
-void AFINComputerCase::NetMulti_OnFloppyChanged_Implementation(const FGuid& NewFloppy) {
-	OnFloppyUpdate.Broadcast(NewFloppy);
+void AFINComputerCase::Multicast_OnEEPROMChanged_Implementation(FFIRInstancedStruct state) {
+	OnEEPROMUpdate.Broadcast(state.ToDynamicStruct());
 }
 
 void AFINComputerCase::AddProcessor(AFINComputerProcessor* processor) {
@@ -319,34 +320,41 @@ void AFINComputerCase::OnModuleChanged(UObject* module, bool added) {
 	}
 }
 
-void AFINComputerCase::OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num, UFGInventoryComponent* changedInventory) {
-	if (HasAuthority() && Kernel) {
-		if (Item->IsChildOf<UFINComputerEEPROMDesc>()) {
-			NetMulti_OnEEPROMChanged(GetEEPROM());
-		} else if (Item->IsChildOf<UFINComputerDriveDesc>()) {
-			FInventoryStack stack;
-			FGuid fileSystemID;
-			if (DataStorage->GetStackFromIndex(1, stack)) {
-				const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
-				auto state = stack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
-				if (IsValid(DriveDesc)) {
-					if (state) {
-						fileSystemID = state->ID;
-					} else {
-						fileSystemID = AFINFileSystemSubsystem::CreateState(UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+void AFINComputerCase::OnEEPROMChanged(int32 Index) {
+	switch (Index) {
+		case 0: {
+			if (HasAuthority()) {
+				Multicast_OnEEPROMChanged(GetEEPROM());
+			}
+			break;
+		} case 1: {
+			if (HasAuthority() && Kernel != nullptr) {
+				FInventoryStack stack;
+				FGuid fileSystemID;
+				if (DataStorage->GetStackFromIndex(1, stack)) {
+					const TSubclassOf<UFINComputerDriveDesc> DriveDesc = TSubclassOf<UFINComputerDriveDesc>(stack.Item.GetItemClass());
+					auto state = stack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
+					if (IsValid(DriveDesc)) {
+						if (state) {
+							fileSystemID = state->ID;
+						} else {
+							fileSystemID = AFINFileSystemSubsystem::CreateState(UFINComputerDriveDesc::GetStorageCapacity(DriveDesc), DataStorage, 1);
+						}
 					}
 				}
+				if (Floppy.IsValid()) {
+					Kernel->RemoveDrive(Floppy);
+					Floppy = FGuid();
+				}
+				if (fileSystemID.IsValid()) {
+					Floppy = fileSystemID;
+					Kernel->AddDrive(Floppy);
+				}
 			}
-			if (Floppy.IsValid()) {
-				Kernel->RemoveDrive(Floppy);
-				Floppy = FGuid();
-			}
-			if (fileSystemID.IsValid()) {
-				Floppy = fileSystemID;
-				Kernel->AddDrive(Floppy);
-			}
-			NetMulti_OnFloppyChanged(Floppy);
+			OnFloppyUpdate.Broadcast(Floppy);
+			break;
 		}
+		default: ;
 	}
 }
 

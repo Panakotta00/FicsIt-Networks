@@ -1,8 +1,7 @@
 ﻿#include "UI/FINRepoExplorer.h"
 
-#include "SWebBrowser.h"
-#include "SWebBrowserView.h"
-#include "WebBrowserModule.h"
+#include "HorizontalBox.h"
+#include "SBox.h"
 
 const FName FFINRepoExplorerStyle::TypeName(TEXT("FFINRepoExplorerStyle"));
 
@@ -19,8 +18,6 @@ const FFINRepoExplorerStyle& FFINRepoExplorerStyle::GetDefault() {
 void SFINRepoExplorer::Construct(const FArguments& InArgs) {
 	Style = InArgs._Style;
 	OnLoadCode = InArgs._OnLoadCode;
-
-	FModuleManager::LoadModuleChecked<IWebBrowserModule>("WebBrowser");
 
 	ChildSlot[
 		SNew(SHorizontalBox)

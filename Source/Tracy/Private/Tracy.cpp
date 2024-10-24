@@ -1,15 +1,15 @@
+#if PLATFORM_UNIX
+#include "UnixPlatformCompilerPreSetup.h"
+#elif PLATFORM_WINDOWS
+#include "MSVCPlatformCompilerPreSetup.h"
+#endif
+
 THIRD_PARTY_INCLUDES_START
 
 #ifdef TRACY_ENABLE
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
 #include "Windows/WindowsHWrapper.h"
-
-#ifdef _MSC_VER
-#pragma warning(push, 0)
-#pragma warning(disable:4005)
-#pragma warning(disable:4777)
-#endif
 
 #include "TracyClient.cpp"
 

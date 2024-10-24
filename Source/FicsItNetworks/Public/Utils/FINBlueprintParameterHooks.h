@@ -15,6 +15,7 @@ public:
 	AFINBlueprintHologram();
 	
 	// Begin AActor
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	// End AActor
 
@@ -37,9 +38,9 @@ public:
 
 private:
 	UPROPERTY()
-	TSubclassOf<UFGPopupWidget> PopupClass;
+	TSoftClassPtr<UFGPopupWidget> PopupClass;
 	UPROPERTY()
-	TSubclassOf<UFINBlueprintParameterPopup> PopupContentClass;
+	TSoftClassPtr<UFINBlueprintParameterPopup> PopupContentClass;
 	
 	UPROPERTY()
 	bool bConfigured = false;

@@ -3,7 +3,8 @@
 #include "CoreMinimal.h"
 #include "AsyncWork.h"
 #include "FINLuaProcessorStateStorage.h"
-#include "FicsItKernel/FicsItFS/Library/Listener.h"
+#include "Future.h"
+#include "FicsItFileSystem/Listener.h"
 #include "FicsItKernel/Processor/Processor.h"
 #include "FINLua/API/LuaFileSystemAPI.h"
 #include "FINLuaProcessor.generated.h"
@@ -21,7 +22,7 @@ private:
 public:
 	LuaFileSystemListener(class UFINLuaProcessor* InParent) : Parent(InParent) {}
 	
-	virtual void onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) override;
+	virtual void onUnmounted(CodersFileSystem::Path path, TSharedRef<CodersFileSystem::Device> device) override;
 	virtual void onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
 };
 
@@ -141,7 +142,7 @@ private:
 
 	// filesystem handling
 	TArray<FINLua::LuaFile> FileStreams;
-	CodersFileSystem::SRef<LuaFileSystemListener> FileSystemListener;
+	TSharedPtr<LuaFileSystemListener> FileSystemListener;
 
 	bool bWasPriorToGCPromoted;
 	FDelegateHandle OnPreGarbageCollectionHandle;

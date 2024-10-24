@@ -435,7 +435,7 @@ AFINNetworkCableHologram::AFINNetworkCableHologram() {
 	this->mNeedsValidFloor = false;
 	SetSnapToGuideLines(false);
 
-	Cable = CreateDefaultSubobject<USplineMeshComponent>(L"Cable");
+	Cable = CreateDefaultSubobject<USplineMeshComponent>(TEXT("Cable"));
 	Cable->SetMobility(EComponentMobility::Movable);
 	Cable->SetupAttachment(RootComponent);
 	//Cable->SetStaticMesh(cableMesh);

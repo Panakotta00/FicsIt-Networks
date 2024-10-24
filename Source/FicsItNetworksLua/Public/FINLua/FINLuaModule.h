@@ -226,7 +226,7 @@ public:
 		}, 0); \
 	} \
 	namespace InternalName
-#define LuaModulePostSetup() \
+#define LuaModulePreSetup() \
 	void PreSetup(FFINLuaModule&, lua_State*); \
 	static FFIRStaticGlobalRegisterFunc RegisterPreSetup([]() { \
 		Module->PreSetup.BindStatic(&PreSetup); \

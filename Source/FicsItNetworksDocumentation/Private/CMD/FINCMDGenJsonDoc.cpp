@@ -1,5 +1,6 @@
 #include "FicsItNetworksDocumentation.h"
 #include "FicsItReflection.h"
+#include "Paths.h"
 #include "Reflection/FIRArrayProperty.h"
 #include "Reflection/FIRBoolProperty.h"
 #include "Reflection/FIRClassProperty.h"

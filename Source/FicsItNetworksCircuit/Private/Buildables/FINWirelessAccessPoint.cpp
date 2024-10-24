@@ -1,4 +1,4 @@
-﻿#include "Buildables/FiNWirelessAccessPoint.h"
+﻿#include "Buildables/FINWirelessAccessPoint.h"
 #include "Wireless/FINWirelessRCO.h"
 #include "FGPlayerController.h"
 #include "FicsItNetworksCircuit.h"

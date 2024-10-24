@@ -1,6 +1,16 @@
+#pragma once
+
+#if PLATFORM_UNIX
+#include "UnixPlatformCompilerPreSetup.h"
+#elif PLATFORM_WINDOWS
+#include "MSVCPlatformCompilerPreSetup.h"
+#endif
+
+#if PLATFORM_WINDOWS
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
 #include "Windows/WindowsHWrapper.h"
+#endif
 
 PRAGMA_PUSH_PLATFORM_DEFAULT_PACKING
 THIRD_PARTY_INCLUDES_START
@@ -17,10 +27,15 @@ THIRD_PARTY_INCLUDES_START
 #endif
 
 //extern "C" {
-	#include "../../../ThirdParty/eris/src/lua.h"
-	#include "../../../ThirdParty/eris/src/lualib.h"
-	#include "../../../ThirdParty/eris/src/lauxlib.h"
-	#include "../../../ThirdParty/eris/src/eris.h"
+#include "luaconf.h"
+
+#undef LUA_API
+#define LUA_API ERIS_API
+
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+#include "eris.h"
 //}
 
 #ifdef _MSC_VER
@@ -32,5 +47,7 @@ THIRD_PARTY_INCLUDES_START
 THIRD_PARTY_INCLUDES_END
 PRAGMA_POP_PLATFORM_DEFAULT_PACKING
 
+#if PLATFORM_WINDOWS
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
+#endif

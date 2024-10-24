@@ -12,9 +12,6 @@ public class FicsItReflection : ModuleRules
             new string[]
             {
                 "Core",
-                "Slate",
-                "SlateCore",
-                "SML",
             }
         );
 
@@ -24,10 +21,10 @@ public class FicsItReflection : ModuleRules
                 "FactoryGame",
                 "CoreUObject",
                 "Engine",
-                "FactoryGame",
+                "SML",
                 "FicsItLogLibrary",
                 "TracyLib",
-                "UMG",
+                "SlateCore",
             }
         );
     }

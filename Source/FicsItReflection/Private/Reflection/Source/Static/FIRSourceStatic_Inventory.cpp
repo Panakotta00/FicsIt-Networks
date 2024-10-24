@@ -64,7 +64,6 @@ BeginProp(RInt, size, "Size", "The count of available item stack slots this inve
 } EndProp()
 BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click into a inventory)") {
 	Body()
-	UFILogLibrary::Log(FIL_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call sort!"));
 	if (!self->IsLocked() && self->GetCanBeRearranged()) self->SortInventory();
 } EndFunc()
 BeginFunc(swapStacks, "Swap Stacks", "Swaps two given stacks inside the inventory.", 1) {
@@ -72,7 +71,6 @@ BeginFunc(swapStacks, "Swap Stacks", "Swaps two given stacks inside the inventor
 	InVal(1, RInt, index2, "Index 2", "The index of the second stack in the inventory.")
 	OutVal(2, RBool, successful, "Successful", "True if the swap was successful.")
 	Body()
-	UFILogLibrary::Log(FIL_Verbosity_Warning, TEXT("It is currently Unsafe/Buggy to call swapStacks!"));
 	successful = UFGInventoryLibrary::MoveInventoryItem(self, index1, self, index2);
 } EndFunc()
 BeginFunc(flush, "Flush", "Removes all discardable items from the inventory completely. They will be gone! No way to get them back!", 0) {
@@ -85,6 +83,18 @@ BeginFunc(flush, "Flush", "Removes all discardable items from the inventory comp
 			self->AddStack(stack);
 		}
 	}
+} EndFunc()
+BeginFunc(canSplitAtIndex, "Can Split at Index", "Returns true if the item stack at the given index can be split.") {
+	InVal(0, RInt, index, "Index", "The slot index of which you want to check if the stack can be split.")
+	OutVal(1, RBool, canSplit, "Can Split", "True if the stack at the given index can be split.")
+	Body()
+	canSplit = self->CanSplitStackAtIdx(index);
+} EndFunc()
+BeginFunc(splitAtIndex, "Split At Index", "Tries to split the stack at the given index and puts the given amount of items into a free slot.") {
+	InVal(0, RInt, index, "Index", "The index of the stack you want to split.")
+	InVal(1, RInt, num, "Num", "The number of items you want to split off the stack at the given index.")
+	Body()
+	self->SplitStackAtIdx(index, num);
 } EndFunc()
 EndClass()
 

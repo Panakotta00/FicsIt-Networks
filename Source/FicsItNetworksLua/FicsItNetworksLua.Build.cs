@@ -7,11 +7,9 @@ public class FicsItNetworksLua : ModuleRules
 {
     public FicsItNetworksLua(ReadOnlyTargetRules target) : base(target)
     {
+	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         CppStandard = CppStandardVersion.Cpp20;
         bEnableExceptions = true;
-        bUseRTTI = true;
-        //bLegacyPublicIncludePaths = false;
-	    PCHUsage = PCHUsageMode.Default;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",
@@ -21,6 +19,7 @@ public class FicsItNetworksLua : ModuleRules
 			"SML",
             "Eris",
             "Tracy",
+            "FicsItFileSystem",
             "FicsItLogLibrary",
             "FicsItReflection",
             "FicsItNetworksCircuit",

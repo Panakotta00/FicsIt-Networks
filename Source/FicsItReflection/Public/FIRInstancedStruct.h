@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "FIRInstancedStruct.generated.h"
 
+struct FFGDynamicStruct;
+
 #define FINMakeDynamicStruct(Type, ...) MakeShared<FFIRInstancedStruct>(TBaseStructure<Type>::Get(), new Type{__VA_ARGS__})
 
 template<typename T>
@@ -23,6 +25,7 @@ public:
 	FFIRInstancedStruct();
 	FFIRInstancedStruct(UScriptStruct* Struct);
 	FFIRInstancedStruct(UScriptStruct* Struct, void* Data);
+	FFIRInstancedStruct(const FFGDynamicStruct& DynamicStruct);
 	FFIRInstancedStruct(const FFIRInstancedStruct& Other);
 	~FFIRInstancedStruct();
 	FFIRInstancedStruct& operator=(const FFIRInstancedStruct& Other);
@@ -33,7 +36,7 @@ public:
 	static FFIRInstancedStruct Copy(UScriptStruct* Struct, const void* Data);
 
 	bool Serialize(FStructuredArchive::FSlot Slot);
-	//bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
+	bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 
 	/**
@@ -44,6 +47,8 @@ public:
 	UScriptStruct* GetStruct() const;
 	
 	void* GetData() const;
+
+	FFGDynamicStruct ToDynamicStruct() const;
 
 	template<typename T>
     T& Get() const {
@@ -83,7 +88,7 @@ struct TStructOpsTypeTraits<FFIRInstancedStruct> : public TStructOpsTypeTraitsBa
 	enum
 	{
 		WithStructuredSerializer = true,
-		//WithNetSerializer = true,
+		WithNetSerializer = true,
 		WithAddStructReferencedObjects = true,
         WithCopy = true,
     };
@@ -130,10 +135,6 @@ public:
 
     TSharedPtr<T> SharedCopy() {
 		return FFIRInstancedStruct::SharedCopy<T>();
-	}
-
-	operator FFIRInstancedStruct() const {
-		return FFIRInstancedStruct::Copy(Struct, Data);
 	}
 };
 

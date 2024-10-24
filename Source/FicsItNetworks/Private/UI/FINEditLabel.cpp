@@ -14,7 +14,8 @@ TSharedRef<SWidget> UFINEditLabel::RebuildWidget() {
 void UFINEditLabel::InitSlotWidget(UWidget* InSlotWidget) {
 	SlotWidget = InSlotWidget;
 
-	UClass* EditLabel = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/UI/Misc/Widget_FIN_EditLabel.Widget_FIN_EditLabel_C"));
+	UClass* EditLabel = LoadObject<UClass>(NULL, TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_EditLabel.BPW_FIN_EditLabel_C"));
+	fgcheck(IsValid(EditLabel));
 	UUserWidget* Widget = NewObject<UUserWidget>(this, EditLabel);
 	SetContent(Widget);
 	Widget->Initialize();
