@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "FIRInstancedStruct.generated.h"
 
+struct FFGDynamicStruct;
+
 #define FINMakeDynamicStruct(Type, ...) MakeShared<FFIRInstancedStruct>(TBaseStructure<Type>::Get(), new Type{__VA_ARGS__})
 
 template<typename T>
@@ -23,6 +25,7 @@ public:
 	FFIRInstancedStruct();
 	FFIRInstancedStruct(UScriptStruct* Struct);
 	FFIRInstancedStruct(UScriptStruct* Struct, void* Data);
+	FFIRInstancedStruct(const FFGDynamicStruct& DynamicStruct);
 	FFIRInstancedStruct(const FFIRInstancedStruct& Other);
 	~FFIRInstancedStruct();
 	FFIRInstancedStruct& operator=(const FFIRInstancedStruct& Other);
@@ -44,6 +47,8 @@ public:
 	UScriptStruct* GetStruct() const;
 	
 	void* GetData() const;
+
+	FFGDynamicStruct ToDynamicStruct() const;
 
 	template<typename T>
     T& Get() const {

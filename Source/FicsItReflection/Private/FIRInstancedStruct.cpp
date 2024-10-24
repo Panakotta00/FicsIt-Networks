@@ -1,5 +1,6 @@
 ﻿#include "FIRInstancedStruct.h"
 
+#include "FGDynamicStruct.h"
 #include "Engine/World.h"
 
 FFIRInstancedStruct::FFIRInstancedStruct() {}
@@ -10,6 +11,15 @@ FFIRInstancedStruct::FFIRInstancedStruct(UScriptStruct* Struct) : Struct(Struct)
 }
 
 FFIRInstancedStruct::FFIRInstancedStruct(UScriptStruct* Struct, void* Data) : Data(Data), Struct(Struct) {}
+
+FFIRInstancedStruct::FFIRInstancedStruct(const FFGDynamicStruct& DynamicStruct) {
+	Struct = DynamicStruct.GetStruct();
+	if (Struct) {
+		Data = FMemory::Malloc(Struct->GetStructureSize());
+		Struct->InitializeStruct(Data);
+		Struct->CopyScriptStruct(Data, DynamicStruct.GetStructValueRaw());
+	}
+}
 
 FFIRInstancedStruct::FFIRInstancedStruct(const FFIRInstancedStruct& Other) {
 	*this = Other;
@@ -99,4 +109,10 @@ UScriptStruct* FFIRInstancedStruct::GetStruct() const {
 
 void* FFIRInstancedStruct::GetData() const {
 	return Data;
+}
+
+FFGDynamicStruct FFIRInstancedStruct::ToDynamicStruct() const {
+	FFGDynamicStruct dynamicStruct;
+	dynamicStruct.InitializeAsRaw(Struct, Data);
+	return dynamicStruct;
 }
