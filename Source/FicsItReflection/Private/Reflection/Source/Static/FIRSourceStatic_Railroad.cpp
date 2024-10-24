@@ -14,6 +14,7 @@
 #include "FGTrain.h"
 #include "FGTrainPlatformConnection.h"
 #include "FGTrainStationIdentifier.h"
+#include "FicsItLogLibrary.h"
 #include "FIRSubsystem.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGBuildableRailroadStation.h"
@@ -33,6 +34,10 @@ public:
 
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
 		return Block.mApprovedReservations;
+	}
+
+	static UFGTrainPlatformConnection* AFGBuildableTrainPlatform_mPlatformConnection0(AFGBuildableTrainPlatform* self) {
+		return self->mPlatformConnection0;
 	}
 };
 
@@ -58,6 +63,32 @@ BeginFunc(getConnectedPlatform, "Get Connected Platform", "Returns the connected
 	OutVal(1, RTrace<UFGTrainPlatformConnection>, oppositeConnection, "Opposite Connection", "The platform connection at the opposite side.")
 	Body()
 	oppositeConnection = Ctx.GetTrace() / self->GetConnectionInOppositeDirection(platformConnection.Get());
+} EndFunc()
+BeginFunc(getAllConnectedPlatforms, "Get all connected Platforms", "Returns a list of all connected platforms in order.") {
+	OutVal(1, RArray<RTrace<UFGTrainPlatformConnection>>, platforms, "Platforms", "The list of connected platforms")
+	Body()
+	TArray<FIRAny> connectedPlatforms;
+	//UFGTrainPlatformConnection* firstConnection = self->GetComponentByClass<UFGTrainPlatformConnection>();
+	UFGTrainPlatformConnection* firstConnection = FIRRailroadHelper::AFGBuildableTrainPlatform_mPlatformConnection0(self);
+	UFGTrainPlatformConnection* otherConnection = self->GetConnectionInOppositeDirection(firstConnection);
+	UFGTrainPlatformConnection* connected = otherConnection->GetConnectedTo();
+	connectedPlatforms.Add(Ctx.GetTrace());
+	while (IsValid(connected)) {
+		AFGBuildableTrainPlatform* platform = connected->GetPlatformOwner();
+		connectedPlatforms.Insert(Ctx.GetTrace() / platform, 0);
+		connected = platform->GetConnectionInOppositeDirection(connected);
+		if (!IsValid(connected)) break;
+		connected = connected->GetConnectedTo();
+	}
+	connected = firstConnection->GetConnectedTo();
+	while (IsValid(connected)) {
+		AFGBuildableTrainPlatform* platform = connected->GetPlatformOwner();
+		connectedPlatforms.Add(Ctx.GetTrace() / platform);
+		connected = platform->GetConnectionInOppositeDirection(connected);
+		if (!IsValid(connected)) break;
+		connected = connected->GetConnectedTo();
+	}
+	platforms = connectedPlatforms;
 } EndFunc()
 BeginFunc(getDockedVehicle, "Get Docked Vehicle", "Returns the currently docked vehicle.") {
 	OutVal(0, RTrace<AFGVehicle>, vehicle, "Vehicle", "The currently docked vehicle")
