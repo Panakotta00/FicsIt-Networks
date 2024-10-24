@@ -88,7 +88,7 @@ jobs:
         run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryGameSteam Win64 Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
 
       - name: Build for Win64 Dedicated Server
-        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Win64' /t:'Games\FactoryGame' -m
+        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryServer Win64 Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
 
 #      - name: Build for Linux Dedicated Server
 #        run: MSBuild.exe '${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.sln' /p:Configuration='Shipping Server' /p:Platform='Linux' /t:'Games\FactoryGame' -m
@@ -120,7 +120,7 @@ jobs:
         if: always()
         with:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
-          artifact-url: ${{ steps.upload-win64.outputs.artifact-url }}
+          artifact-url: "${{ steps.upload-win64.outputs.artifact-url }}"
           artifact-name: 'FicsIt-Networks.zip'
           
       - name: Post Cleanup
