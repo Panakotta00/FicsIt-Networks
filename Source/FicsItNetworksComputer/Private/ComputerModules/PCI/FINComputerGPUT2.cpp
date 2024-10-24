@@ -4,6 +4,8 @@
 #include "FINComputerRCO.h"
 #include "FINMediaSubsystem.h"
 #include "SlateApplication.h"
+#include "Engine/ActorChannel.h"
+#include "Engine/NetConnection.h"
 #include "Fonts/FontMeasure.h"
 
 const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINGPUT2WidgetStyle"));
@@ -235,14 +237,16 @@ void AFINComputerGPUT2::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
 	if (!DrawCalls2Send.IsEmpty()) {
-		TArray<FFIRInstancedStruct> Chunk;
-		for (int i = 0; i < 10; ++i) {
-			FFIRInstancedStruct* DrawCall = DrawCalls2Send.Peek();
-			if (!DrawCall) break;
-			Chunk.Add(*DrawCall);
-			DrawCalls2Send.Pop();
+		for (int i = 0; i < 10 && !DrawCalls2Send.IsEmpty(); ++i) {
+			TArray<FFIRInstancedStruct> Chunk;
+			for (int i = 0; i < 10; ++i) {
+				FFIRInstancedStruct* DrawCall = DrawCalls2Send.Peek();
+				if (!DrawCall) break;
+				Chunk.Add(*DrawCall);
+				DrawCalls2Send.Pop();
+			}
+			Client_AddDrawCallChunk(Chunk);
 		}
-		Client_AddDrawCallChunk(Chunk);
 		if (DrawCalls2Send.IsEmpty()) {
 			Client_FlushDrawCalls();
 		}

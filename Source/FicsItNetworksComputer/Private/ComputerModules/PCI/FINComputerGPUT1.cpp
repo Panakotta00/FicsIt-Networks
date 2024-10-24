@@ -1,8 +1,13 @@
 #include "ComputerModules/PCI/FINComputerGPUT1.h"
 
 #include "FGPlayerController.h"
+#include "FicsItNetworksComputer.h"
 #include "FINComputerRCO.h"
+#include "Regex.h"
+#include "SlateApplication.h"
 #include "Async/ParallelFor.h"
+#include "Engine/ActorChannel.h"
+#include "Engine/NetConnection.h"
 #include "Fonts/FontMeasure.h"
 #include "Net/UnrealNetwork.h"
 #include "Slate/SlateBrushAsset.h"
@@ -208,12 +213,13 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 
 	if (HasAuthority()) {
 		if (ToReplicate.Num() > 0) {
-			int64 ChunkSize = FMath::Min(CHUNK_SIZE, ToReplicate.Num());
-			TArray<FFINGPUT1BufferPixel> Chunk(ToReplicate.GetData(), ChunkSize);
-			ToReplicate.RemoveAt(0, ChunkSize);
-			Multicast_AddBackBufferChunk(Offset, Chunk);
-			Offset += ChunkSize;
-
+			for (int i = 0; i < 50 && ToReplicate.Num() > 0; ++i) {
+				int64 ChunkSize = FMath::Min(CHUNK_SIZE, ToReplicate.Num());
+				TArray<FFINGPUT1BufferPixel> Chunk(ToReplicate.GetData(), ChunkSize);
+				ToReplicate.RemoveAt(0, ChunkSize);
+				Multicast_AddBackBufferChunk(Offset, Chunk);
+				Offset += ChunkSize;
+			}
 			if (ToReplicate.Num() <= 0) {
 				Multicast_EndBackBufferReplication();
 			}
