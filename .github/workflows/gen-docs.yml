@@ -23,5 +23,5 @@ jobs:
         run: |
           steamcmd +force_install_dir ./SatisfactoryDedicatedServer +login anonymous +app_update 1690800 validate +quit
       - name: Generate Documentation
-        working-directory: ./SatisfactoryDedicatedServer
+        working-directory: SatisfactoryDedicatedServer
         run: ./FactoryServer.sh "-ExecCmds=FINGenRefDoc,FINGenLuaDoc,quit_editor"
