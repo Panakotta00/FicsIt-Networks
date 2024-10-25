@@ -21,7 +21,9 @@ jobs:
 
       - name: Download Satisfactroy Dedicated Server
         run: |
-          steamcmd +force_install_dir ./SatisfactoryDedicatedServer +login anonymous +app_update 1690800 validate +quit
+          steamcmd +force_install_dir SatisfactoryDedicatedServer +login anonymous +app_update 1690800 validate +quit
+          ls .
+          ls ~
       - name: Generate Documentation
         working-directory: SatisfactoryDedicatedServer
         run: ./FactoryServer.sh "-ExecCmds=FINGenRefDoc,FINGenLuaDoc,quit_editor"
