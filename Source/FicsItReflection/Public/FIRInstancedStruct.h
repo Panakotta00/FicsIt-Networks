@@ -136,9 +136,5 @@ public:
     TSharedPtr<T> SharedCopy() {
 		return FFIRInstancedStruct::SharedCopy<T>();
 	}
-
-	operator FFIRInstancedStruct() const {
-		return FFIRInstancedStruct::Copy(Struct, Data);
-	}
 };
 

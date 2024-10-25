@@ -6,6 +6,8 @@ public class FicsItNetworksMisc : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        bEnableExceptions = true;
+
         PublicDependencyModuleNames.AddRange(
             new string[]
             {

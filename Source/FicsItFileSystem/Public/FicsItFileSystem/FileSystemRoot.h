@@ -3,16 +3,10 @@
 #include <map>
 #include <unordered_set>
 
-#include "Directory.h"
 #include "Device.h"
 
 namespace CodersFileSystem {
-	class FICSITNETWORKSCOMPUTER_API FileSystemException : public std::exception {
-	public:
-		FileSystemException(std::string what);
-	};
-
-	class FICSITNETWORKSCOMPUTER_API FileSystemRoot {
+	class FICSITFILESYSTEM_API FileSystemRoot {
 	protected:
 		class RootListener : public Listener {
 			friend FileSystemRoot;
@@ -24,18 +18,17 @@ namespace CodersFileSystem {
 			RootListener(FileSystemRoot* root);
 			virtual ~RootListener();
 
-			virtual void onMounted(Path path, SRef<Device> device) override;
-			virtual void onUnmounted(Path path, SRef<Device> device) override;
+			virtual void onMounted(Path path, TSharedRef<Device> device) override;
+			virtual void onUnmounted(Path path, TSharedRef<Device> device) override;
 			virtual void onNodeAdded(Path path, NodeType type) override;
 			virtual void onNodeRemoved(Path path, NodeType type) override;
 			virtual void onNodeChanged(Path path, NodeType type) override;
 			virtual void onNodeRenamed(Path newPath, Path oldPath, NodeType type) override;
 		};
 
-		std::map<Path, std::pair<WRef<Device>, SRef<PathBoundListener>>> mounts;
-		std::map<Path, SRef<Node>> cache;
+		std::map<Path, std::pair<TWeakPtr<Device>, TSharedRef<PathBoundListener>>> mounts;
 		ListenerList listeners;
-		SRef<RootListener> listener;
+		TSharedPtr<RootListener> listener;
 
 		/*
 		* gets the device managing the given path based on mounts
@@ -44,7 +37,7 @@ namespace CodersFileSystem {
 		* @param[out]	pending	the given path with the device path cutoff
 		* @return	the device at the path
 		*/
-		SRef<Device> getDevice(Path path, Path& pending);
+		TSharedPtr<Device> getDevice(Path path, Path& pending);
 
 		int moveInternal(Path from, Path to);
 
@@ -65,7 +58,7 @@ namespace CodersFileSystem {
 		* @param[in]	mode	the mode the filestream should be opened with
 		* @return	the opened filestream
 		*/
-		virtual SRef<FileStream> open(Path path, FileMode mode);
+		virtual TSharedPtr<FileStream> open(Path path, FileMode mode);
 
 		/*
 		* Trys to create a directory at the given path
@@ -74,7 +67,7 @@ namespace CodersFileSystem {
 		* @param[in]	createTree	true if you want also to create the tree to the given directory if it doesnt exist
 		* @return	the newly created directory
 		*/
-		virtual SRef<Directory> createDir(Path path, bool createTree = false);
+		virtual bool createDir(Path path, bool createTree = false);
 
 		/*
 		* removes the node at the given path
@@ -116,20 +109,16 @@ namespace CodersFileSystem {
 		virtual int move(Path from, Path to);
 
 		/*
-		* trys to get the node at the given path
-		*
-		* @param[in]	path	path to the node you want to get
-		* @return	node you want to get
-		*/
-		virtual SRef<Node> get(Path path);
-
-		/*
 		* gets the names of direct childs of the node at the given path
 		* 
 		* @param[in]	path	path to the node you want to get the childs form
 		* @return	returns a list of names
 		*/
-		virtual std::unordered_set<std::string> childs(Path path);
+		virtual std::unordered_set<std::string> children(Path path);
+
+		virtual TOptional<FileType> fileType(Path path);
+
+		virtual TSharedPtr<Device> getDevice(Path path);
 
 		/*
 		* trys to mount the given device at teh given path
@@ -138,7 +127,7 @@ namespace CodersFileSystem {
 		* @param[in]	path	the path were the device should get mounted to
 		* @return	returns true if it was able to mount the device
 		*/
-		virtual bool mount(SRef<Device> device, Path path);
+		virtual bool mount(TSharedRef<Device> device, Path path);
 
 		/*
 		* trys to umount the given mountpoint
@@ -156,13 +145,13 @@ namespace CodersFileSystem {
 		*
 		* @param[in]	listener	listener you want to add
 		*/
-		virtual void addListener(WRef<Listener> listener);
+		virtual void addListener(TWeakPtr<Listener> listener);
 
 		/*
 		* removes the given listener from the filesystem.
 		*
 		* @param[in]	listener	listener you want to remove
 		*/
-		virtual void removeListener(WRef<Listener> listener);
+		virtual void removeListener(TWeakPtr<Listener> listener);
 	};
 }

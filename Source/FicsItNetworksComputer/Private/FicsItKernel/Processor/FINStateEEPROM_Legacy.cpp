@@ -3,7 +3,7 @@
 #include "Net/UnrealNetwork.h"
 
 AFINStateEEPROM_Legacy::AFINStateEEPROM_Legacy() {
-	RootComponent = CreateDefaultSubobject<USceneComponent>(L"RootComponent");
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 }
 
 void AFINStateEEPROM_Legacy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {

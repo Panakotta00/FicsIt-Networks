@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Library/FileSystemRoot.h"
+#include "FicsItFileSystem/FileSystemRoot.h"
 #include "DevDevice.h"
 #include "FileSystemSerializationInfo.h"
 
@@ -12,10 +12,10 @@ class FArchive;
  * - preventing DevDevices to get unmounted
  * - preventing a second DevDevice to get mounted
  */
-class FICSITNETWORKSCOMPUTER_API FFINKernelFSRoot : public CodersFileSystem::FileSystemRoot {
+class FICSITFILESYSTEM_API FFINKernelFSRoot : public CodersFileSystem::FileSystemRoot {
 public:
 	// Begin FileSystemRoot
-	virtual bool mount(CodersFileSystem::SRef<CodersFileSystem::Device> device, CodersFileSystem::Path path) override;
+	virtual bool mount(TSharedRef<CodersFileSystem::Device> device, CodersFileSystem::Path path) override;
 	virtual bool unmount(CodersFileSystem::Path path) override;
 	// End FileSystemRoot
 
@@ -24,7 +24,7 @@ public:
 	 *
 	 * @param[in]	device	the device you want to unmounts
 	 */
-	bool unmount(CodersFileSystem::SRef<CodersFileSystem::Device> device);
+	bool unmount(TSharedRef<CodersFileSystem::Device> device);
 
 	/**
 	* Returns the memory consumption of the filesystem.
@@ -33,14 +33,7 @@ public:
 	* @param[in]	recalc	forces the filesystem to recalculate the memory consumption
 	* @return	returns the current memory consumption
 	*/
-	std::int64_t getMemoryUsage(bool recalc = false);
-
-	/**
-	 * Searchs in all mounts for a DevDevice mount
-	 *
-	 * @return	the found DevDevice, nullptr if not found
-	 */
-	CodersFileSystem::WRef<FFINKernelFSDevDevice> getDevDevice();
+	int64 getMemoryUsage(bool recalc = false);
 
 	/**
 	 * Gets the mountpoint from a device
@@ -48,31 +41,7 @@ public:
 	 * @param[in]	device	the device you want to get the path from
 	 * @return	the path of the device
 	 */
-	CodersFileSystem::Path getMountPoint(CodersFileSystem::SRef<FFINKernelFSDevDevice> device);
-
-	/**
-	 * Converts the given path into a string which is persistable.
-	 *
-	 * @param[in]	path	the path you want to convert
-	 * @return	the path converted to persistable string.
-	 */
-	std::string persistPath(CodersFileSystem::Path path);
-
-	/**
-	 * Converts a persisted path into a valid file system path.
-	 *
-	 * @param[in]	path	the persisted path as string
-	 * @return	the unpersisted path
-	 */
-	CodersFileSystem::Path unpersistPath(std::string path);
-
-	/**
-	 * Checks if the given path can get unpersisted
-	 *
-	 * @param[in]	path	the path you want to check
-	 * @return	true if able to unpersist
-	 */
-	bool checkUnpersistPath(std::string path);
+	CodersFileSystem::Path getMountPoint(TSharedRef<FFINKernelFSDevDevice> device);
 
 	/**
 	 * Serializes the filesystem to an archive.

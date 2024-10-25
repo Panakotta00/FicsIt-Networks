@@ -42,7 +42,7 @@ FFINInternetCardHttpRequestFuture AFINInternetCard::netFunc_request(const FStrin
 		FString Value = varargs[i+1].GetString();
 		Request->SetHeader(Name, Value);
 	}
-	if (!InData.IsEmpty() && Request->GetHeader(L"Content-Type").IsEmpty()) {
+	if (!InData.IsEmpty() && Request->GetHeader(TEXT("Content-Type")).IsEmpty()) {
 		throw FFIRException("Req-Payload given without Content-Type");
 	}
 	return FFINInternetCardHttpRequestFuture(Request);

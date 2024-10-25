@@ -1,5 +1,7 @@
-#include "FicsItKernel/FicsItFS/Library/Tests.h"
-#include "FicsItKernel/FicsItFS/Library/Path.h"
+#include "FicsItFileSystem/Tests.h"
+
+#include "AssertionMacros.h"
+#include "FicsItFileSystem/Path.h"
 
 using namespace CodersFileSystem;
 using namespace CodersFileSystem::Tests;

@@ -1,18 +1,20 @@
 #pragma once
 
 #include "File.h"
-#include "Directory.h"
 #include "Listener.h"
-#include "WindowsFileWatcher.h"
+#include "FileWatcher.h"
 
 #include <unordered_set>
+#include <cstdint>
+
+#include "SharedPointer.h"
 
 namespace CodersFileSystem {
 	class FileSystemRoot;
 
 	typedef std::function<bool(long long, bool)> SizeCheckFunc;
 
-	class FICSITNETWORKSCOMPUTER_API Device : virtual public ReferenceCounted {
+	class FICSITFILESYSTEM_API Device {
 	protected:
 		ListenerList listeners;
 
@@ -26,7 +28,7 @@ namespace CodersFileSystem {
 		* @param[in]	mode	the mode the filestream should be opened with
 		* @return	the opened filestream
 		*/
-		virtual SRef<FileStream> open(Path path, FileMode mode) = 0;
+		virtual TSharedPtr<FileStream> open(Path path, FileMode mode) = 0;
 
 		/*
 		* Trys to create a directory at the given path
@@ -35,7 +37,7 @@ namespace CodersFileSystem {
 		* @param[in]	createTree	true if you want also to create the tree to the given directory if it doesnt exist
 		* @return	the newly created directory
 		*/
-		virtual SRef<Directory> createDir(Path path, bool createTree = false) = 0;
+		virtual bool createDir(Path path, bool createTree = false) = 0;
 
 		/*
 		* removes the node at the given path
@@ -56,20 +58,19 @@ namespace CodersFileSystem {
 		virtual bool rename(Path path, const std::string& name) = 0;
 
 		/*
-		* trys to get the node at the given path
-		*
-		* @param[in]	path	path to the node you want to get
-		* @return	node you want to get
-		*/
-		virtual SRef<Node> get(Path path) = 0;
-
-		/*
 		* gets the names of direct childs of the node at the given path
 		*
 		* @param[in]	path	path to the node you want to get the childs form
 		* @return	returns a list of names
 		*/
-		virtual std::unordered_set<std::string> childs(Path path) = 0;
+		virtual std::unordered_set<std::string> children(Path path) = 0;
+
+		/*
+		 * Returns the type of a file
+		 */
+		virtual TOptional<FileType> fileType(Path path) = 0;
+
+		virtual TSharedPtr<Device> getDevice(Path path) { return nullptr; }
 
 		/*
 		* Adds the given FileSystem-Listener to the listeners list.
@@ -79,17 +80,19 @@ namespace CodersFileSystem {
 		*
 		* @param[in]	listener	the listener you want to add
 		*/
-		virtual void addListener(WRef<Listener> listener);
+		virtual void addListener(TWeakPtr<Listener> listener);
 
 		/*
 		* Removes the given FileSystem-Listener from the listeners list
 		*
 		* @param[in]	listener	the listener you want to remove
 		*/
-		virtual void removeListener(WRef<Listener> listener);
+		virtual void removeListener(TWeakPtr<Listener> listener);
+
+		virtual void tickListeners() {}
 	};
 
-	class FICSITNETWORKSCOMPUTER_API ByteCountedDevice : public Device {
+	class FICSITFILESYSTEM_API ByteCountedDevice : public Device {
 	private:
 		class ByteCountedDeviceListener : public Listener {
 		private:
@@ -98,8 +101,8 @@ namespace CodersFileSystem {
 		public:
 			ByteCountedDeviceListener(ByteCountedDevice* root);
 
-			virtual void onMounted(Path path, SRef<Device> device) override;
-			virtual void onUnmounted(Path path, SRef<Device> device) override;
+			virtual void onMounted(Path path, TSharedRef<Device> device) override;
+			virtual void onUnmounted(Path path, TSharedRef<Device> device) override;
 			virtual void onNodeAdded(Path path, NodeType type) override;
 			virtual void onNodeRemoved(Path path, NodeType type) override;
 			virtual void onNodeChanged(Path path, NodeType type) override;
@@ -108,7 +111,7 @@ namespace CodersFileSystem {
 
 		size_t used = 0;
 		bool usedValid = false;
-		SRef<ByteCountedDeviceListener> byteCountedDeviceListener;
+		TSharedPtr<ByteCountedDeviceListener> byteCountedDeviceListener;
 
 	protected:
 		bool checkSizeFunc(long long size, bool addIfAble);
@@ -131,29 +134,12 @@ namespace CodersFileSystem {
 		size_t getUsed();
 	};
 
-	class FICSITNETWORKSCOMPUTER_API MemDevice : public ByteCountedDevice {
-	protected:
-		SRef<MemDirectory> root;
-
-	public:
-		MemDevice(size_t capcity = 0);
-
-		virtual size_t getSize() const override;
-
-		virtual SRef<FileStream> open(Path path, FileMode mode) override;
-		virtual SRef<Directory> createDir(Path path, bool createTree = false) override;
-		virtual bool remove(Path path, bool recursive = false) override;
-		virtual bool rename(Path path, const std::string& name) override;
-		virtual SRef<Node> get(Path path) override;
-		virtual std::unordered_set<std::string> childs(Path path) override;
-	};
-
 	struct DiskDeviceWatcher;
 
-	class FICSITNETWORKSCOMPUTER_API DiskDevice : public ByteCountedDevice {
+	class FICSITFILESYSTEM_API DiskDevice : public ByteCountedDevice {
 	private:
 		std::filesystem::path realPath;
-		WindowsFileWatcher watcher;
+		FileWatcher watcher;
 
 	protected:
 		virtual size_t getSize() const override;
@@ -161,17 +147,13 @@ namespace CodersFileSystem {
 	public:
 		DiskDevice(std::filesystem::path realPath, size_t capacity = 0);
 
-		virtual SRef<FileStream> open(Path path, FileMode mode) override;
-		virtual SRef<Directory> createDir(Path path, bool createTree = false) override;
+		virtual TSharedPtr<FileStream> open(Path path, FileMode mode) override;
+		virtual bool createDir(Path path, bool createTree = false) override;
 		virtual bool remove(Path path, bool recursive = false) override;
 		virtual bool rename(Path path, const std::string& name) override;
-		virtual SRef<Node> get(Path path) override;
-		virtual std::unordered_set<std::string> childs(Path path) override;
-
-		/*
-		* calls all event changes since device creation or last call
-		*/
-		void tickWatcher();
+		virtual std::unordered_set<std::string> children(Path path) override;
+		virtual TOptional<FileType> fileType(Path path) override;
+		virtual void tickListeners() override;
 
 		/**
 		 * Gets the real path mapped to this disk device.
@@ -179,27 +161,5 @@ namespace CodersFileSystem {
 		 * @return the real path mapped
 		 */
 		std::filesystem::path getRealPath() const;
-	};
-
-	class FICSITNETWORKSCOMPUTER_API DeviceNode : public Node {
-	protected:
-		SRef<Device> device;
-
-	public:
-		DeviceNode(SRef<Device> device);
-
-		virtual SRef<FileStream> open(FileMode mode) override;
-		virtual std::unordered_set<std::string> getChilds() const override;
-		virtual bool isValid() const;
-
-		/*
-		* Trys to find the device node at the given path in the given filesystem and then
-		* trys to mount it at the given mountpoint in the given filesystem.
-		*
-		* @param[in]	fs					the filesystem you want to affect
-		* @param[in]	pathToDevice		the path to the device node you want to mount
-		* @param[in]	pathToMountpoint	the path to the mountpoint you want to mount the device in
-		*/
-		static bool mount(FileSystemRoot& fs, const Path& pathToDevice, const Path& pathToMountpoint);
 	};
 }

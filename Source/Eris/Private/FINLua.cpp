@@ -1,8 +1,10 @@
 #include "FINLua.h"
 
+#if PLATFORM_WINDOWS
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
 #include "Windows/WindowsHWrapper.h"
+#endif
 
 PRAGMA_PUSH_PLATFORM_DEFAULT_PACKING
 THIRD_PARTY_INCLUDES_START
@@ -64,5 +66,7 @@ THIRD_PARTY_INCLUDES_START
 THIRD_PARTY_INCLUDES_END
 PRAGMA_POP_PLATFORM_DEFAULT_PACKING
 
+#if PLATFORM_WINDOWS
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
+#endif

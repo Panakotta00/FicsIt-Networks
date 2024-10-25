@@ -2,6 +2,6 @@
 
 namespace CodersFileSystem {
 	namespace Tests {
-		void TestPath();
+		FICSITFILESYSTEM_API void TestPath();
 	}
 }

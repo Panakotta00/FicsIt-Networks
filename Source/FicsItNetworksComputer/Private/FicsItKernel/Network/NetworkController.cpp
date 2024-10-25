@@ -84,7 +84,7 @@ void UFINKernelNetworkController::ClearSignals() {
 	SignalQueue.Empty();
 }
 
-size_t UFINKernelNetworkController::GetSignalCount() {
+uint64 UFINKernelNetworkController::GetSignalCount() {
 	FScopeLock Lock(&MutexSignals);
 	return SignalQueue.Num();
 }

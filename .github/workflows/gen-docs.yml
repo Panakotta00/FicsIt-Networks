@@ -1,0 +1,29 @@
+name: Generate Documentation
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - ".github/workflows/gen-docs.yml"
+      - "FicsItNetworks.uplugin"
+      - "Content/**"
+      - "Source/**"
+      - "ThirdParty/**"
+
+jobs:
+  generate-docs:
+    name: Generate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup steamcmd
+        uses: CyberAndrii/setup-steamcmd@v1
+
+      - name: Download Satisfactroy Dedicated Server
+        run: |
+          steamcmd +force_install_dir "${{ github.workspace }}/SatisfactoryDedicatedServer" +login anonymous +app_update 1690800 validate +quit
+          ls .
+          ls ~
+      - name: Generate Documentation
+        working-directory: SatisfactoryDedicatedServer
+        run: ./FactoryServer.sh "-ExecCmds=FINGenRefDoc,FINGenLuaDoc,quit_editor"
