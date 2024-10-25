@@ -1,25 +1,13 @@
-name: Push
+name: Deploy Docs
 
 on:
   push:
     branches:
       - master
-      - development
     paths:
       - 'docs/**'
 
 jobs:
-  generate-docs:
-    name: Generate Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Satisfactroy Dedicated Server
-        run: |
-          steamcmd +force_install_dir ~/SatisfactoryDedicatedServer +login anonymous +app_update 1690800 validate +quit
-      - name: Generate Documentation
-        working-directory: ~/SatisfactoryDedicatedServer
-        run: ./FactoryServer.sh "-ExecCmds=FINGenRefDoc,FINGenLuaDoc,quit_editor"
-
   dispatch:
     name: Dispatch
     needs: generate-docs
