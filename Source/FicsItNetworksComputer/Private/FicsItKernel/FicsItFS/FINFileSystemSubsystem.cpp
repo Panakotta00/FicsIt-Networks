@@ -27,9 +27,10 @@ TSharedPtr<CodersFileSystem::Device> AFINFileSystemSubsystem::GetDevice(const FG
 			fsp = FPaths::Combine( FPlatformProcess::UserSettingsDir(), FApp::GetProjectName(), TEXT( "Saved/" ) TEXT( "SaveGames/" ) );
 		}
 
+		fsp = FPaths::Combine(fsp, "Computers", FileSystemID.ToString());
+
 		// get root fs path
 		std::filesystem::path root = std::filesystem::absolute(*fsp);
-		root = root / std::filesystem::path(std::string("Computers")) / std::filesystem::path(TCHAR_TO_UTF8(*FileSystemID.ToString()));
 
 		std::filesystem::create_directories(root);
 
