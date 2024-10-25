@@ -1,3 +1,16 @@
+diff --git a/Source/FactoryGame/Public/Buildables/FGBuildable.h b/Source/FactoryGame/Public/Buildables/FGBuildable.h
+index 2215e41afb..7935ac6089 100644
+--- a/Source/FactoryGame/Public/Buildables/FGBuildable.h
++++ b/Source/FactoryGame/Public/Buildables/FGBuildable.h
+@@ -504,7 +504,7 @@ public:
+ 	FORCEINLINE TArray<FBox> GetOcclusionBoxes() const  									{ return mOcclusionBoxInfo; }
+ 	FORCEINLINE float GetOcclusionShapeCustomScaleOffset() const 							{ return mScaleCustomOffset; }
+ 	FORCEINLINE EFGRainOcclusionShapeScaling GetOcclusionShapeCustomScalingMode() const		{ return mCustomScaleType; }
+-	FORCEINLINE virtual FSimpleBuildingInfo GetRainOcclusionShape()							{ return FSimpleBuildingInfo(this); }
++	FORCEINLINE virtual FSimpleBuildingInfo GetRainOcclusionShape()							{ return FSimpleBuildingInfo(); }
+ 
+ 	/* Not replicated! */
+ 	void ToggleInstanceVisibility( bool bNewState );
 diff --git a/Source/FactoryGame/Public/FGRailroadSignalBlock.h b/Source/FactoryGame/Public/FGRailroadSignalBlock.h
 index c00ac8d210..3bb40273cd 100644
 --- a/Source/FactoryGame/Public/FGRailroadSignalBlock.h
@@ -10,16 +23,3 @@ index c00ac8d210..3bb40273cd 100644
  public:
  	/**
  	 * Called bu the tracks when a vehicle enters and exits a section of track.
-diff --git a/Source/FactoryGame/Public/Buildables/FGBuildable.h b/Source/FactoryGame/Public/Buildables/FGBuildable.h
-index 2215e41afb..7935ac6089 100644
---- a/Source/FactoryGame/Public/Buildables/FGBuildable.h
-+++ b/Source/FactoryGame/Public/Buildables/FGBuildable.h
-@@ -504,7 +504,7 @@ public:
-  FORCEINLINE TArray<FBox> GetOcclusionBoxes() const                    { return mOcclusionBoxInfo; }
-  FORCEINLINE float GetOcclusionShapeCustomScaleOffset() const              { return mScaleCustomOffset; }
-  FORCEINLINE EFGRainOcclusionShapeScaling GetOcclusionShapeCustomScalingMode() const   { return mCustomScaleType; }
-- FORCEINLINE virtual FSimpleBuildingInfo GetRainOcclusionShape()             { return FSimpleBuildingInfo(this); }
-+ FORCEINLINE virtual FSimpleBuildingInfo GetRainOcclusionShape()             { return FSimpleBuildingInfo(); }
- 
-  /* Not replicated! */
-  void ToggleInstanceVisibility( bool bNewState );
