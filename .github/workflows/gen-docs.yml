@@ -5,6 +5,7 @@ on:
     branches:
       - development
     paths:
+      - ".github/workflows/gen-docs.yml"
       - "FicsItNetworks.uplugin"
       - "Content/**"
       - "Source/**"
@@ -15,12 +16,8 @@ jobs:
     name: Generate Documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Install SteamCMD
-        run: |
-          sudo add-apt-repository multiverse
-          sudo dpkg --add-architecture i386
-          sudo apt-get update -y
-          sudo apt-get install steamcmd -y
+      - name: Setup steamcmd
+        uses: CyberAndrii/setup-steamcmd@v1
 
       - name: Download Satisfactroy Dedicated Server
         run: |
