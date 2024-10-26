@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - development
-  worflow_dispatch:
+  workflow_dispatch:
   workflow_call:
     secrets:
       WWISE_EMAIL:
