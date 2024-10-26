@@ -1,0 +1,30 @@
+name: Generate Documentation
+
+on:
+  push:
+    branches:
+      - master
+      - development
+    paths:
+      - ".github/workflows/build-tools.yml"
+      - "Tools"
+
+jobs:
+  build-documentation-cli:
+    name: Build Documentation-CLI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: FicsItNetworks
+
+      - name: Build Documentation-CLI
+        working-directory: FicsItNetworks/Tools/DocumentationCLI
+        run: cargo build --release
+
+      - name: Upload Tools
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tools
+          path: |
+            FicsItNetworks/Tools/DocumentationCLI/target/release/FicsItNetworksDocumentationCLI
