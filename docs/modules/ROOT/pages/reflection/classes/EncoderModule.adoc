@@ -1,6 +1,12 @@
 = Encoder Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 This Potentiometer Module allows for input of a value with infinite range, this because it only fires how much the value changed since last, not how much it is at.
 
 // tag::interface[]
@@ -11,7 +17,7 @@ This Potentiometer Module allows for input of a value with infinite range, this 
 === `enabled` : Bool
 // tag::func-enabled[]
 
-
+Sets wheter to accept input on this encoder or not. True means accept input, false means to igore input
 
 [%collapsible]
 ====
@@ -19,7 +25,7 @@ This Potentiometer Module allows for input of a value with infinite range, this 
 !===
 ! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
 
-! Display Name ! enabled
+! Display Name ! Enabled
 !===
 ====
 // end::func-enabled[]
@@ -28,7 +34,7 @@ This Potentiometer Module allows for input of a value with infinite range, this 
 == Functions
 
 // tag::func-setColor-title[]
-=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+=== `setColor` (`Red` : Float, `Green` : Float, `Blue` : Float, `Emit` : Float)
 // tag::func-setColor[]
 
 
@@ -48,15 +54,15 @@ This Potentiometer Module allows for input of a value with infinite range, this 
 !===
 !Name !Type !Description
 
-! *red* `red`
+! *Red* `Red`
 ! Float
 ! 
 
-! *green* `green`
+! *Green* `Green`
 ! Float
 ! 
 
-! *blue* `blue`
+! *Blue* `Blue`
 ! Float
 ! 
 
@@ -71,9 +77,9 @@ This Potentiometer Module allows for input of a value with infinite range, this 
 
 == Signals
 
-=== `valueChanged` (_Int_ *Value* `Value`)
+=== `value` (_Int_ *Value* `value`)
 
-
+Signal fired when this potentiometers value changes by user interaction. 
 
 [%collapsible]
 ====
@@ -82,9 +88,9 @@ This Potentiometer Module allows for input of a value with infinite range, this 
 !===
 !Name !Type !Description
 
-! *Value* `Value`
+! *Value* `value`
 ! Int
-! 
+! The amount of which this potentiometer have changed since the last tick. 
 !===
 ====
 

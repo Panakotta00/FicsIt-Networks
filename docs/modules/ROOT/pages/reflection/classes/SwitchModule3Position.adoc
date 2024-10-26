@@ -1,6 +1,12 @@
 = Switch Module 3 Position
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 This Switch Module for modular I/O Panels is used to toggle between three different settings. It has an illuminable spot on the knob and you can use them to trigger specific programmed events.
 
 // tag::interface[]
@@ -45,7 +51,7 @@ Returns the current state of this switch
 == Functions
 
 // tag::func-setColor-title[]
-=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+=== `setColor` (`Red` : Float, `Green` : Float, `Blue` : Float, `Emit` : Float)
 // tag::func-setColor[]
 
 
@@ -65,15 +71,15 @@ Returns the current state of this switch
 !===
 !Name !Type !Description
 
-! *red* `red`
+! *Red* `Red`
 ! Float
 ! 
 
-! *green* `green`
+! *Green* `Green`
 ! Float
 ! 
 
-! *blue* `blue`
+! *Blue* `Blue`
 ! Float
 ! 
 

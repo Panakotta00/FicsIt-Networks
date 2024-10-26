@@ -1,6 +1,12 @@
 = Circuit Switch
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/CircuitBridge.adoc[CircuitBridge]
+!===
+
 A circuit bridge that can be activated and deactivate by the player.
 
 // tag::interface[]

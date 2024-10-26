@@ -1,0 +1,89 @@
+= Train Platform Connection
+:table-caption!:
+
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
+A component that is used to connect two Train Platforms together.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-connected-title[]
+=== `connected` : Trace<xref:/reflection/classes/TrainPlatformConnection.adoc[TrainPlatformConnection]>
+// tag::func-connected[]
+
+The connected train platform connection.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Connected
+!===
+====
+// end::func-connected[]
+// end::func-connected-title[]
+// tag::func-connectionType-title[]
+=== `connectionType` : Int
+// tag::func-connectionType[]
+
+The type of this train platform connection.
+0 = Out
+1 = In
+2 = Neutral
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Connection Type
+!===
+====
+// end::func-connectionType[]
+// end::func-connectionType-title[]
+// tag::func-platformOwner-title[]
+=== `platformOwner` : Trace<xref:/reflection/classes/TrainPlatform.adoc[TrainPlatform]>
+// tag::func-platformOwner[]
+
+The train platform that owns this platform connection component.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Platform Owner
+!===
+====
+// end::func-platformOwner[]
+// end::func-platformOwner-title[]
+// tag::func-trackConnection-title[]
+=== `trackConnection` : Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
+// tag::func-trackConnection[]
+
+The associated railroad track connection.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Track Connected
+!===
+====
+// end::func-trackConnection[]
+// end::func-trackConnection-title[]
+
+// end::interface[]
+

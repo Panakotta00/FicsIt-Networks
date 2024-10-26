@@ -1,7 +1,11 @@
 = File-System Module
 :table-caption!:
 
-Description
+FicsIt-Networks implements it’s own virtual filesystem for UNIX like experience using the FileSystem.
+The file system consists of nodes. Such a node can be a File, a Folder or something else. Each nodes is able to have child nodes and might be able to get opened with a file stream. A folder also delivers an abstract interface for adding and removing nodes. A Device implements lookup functions for searching for nodes in the filesystem structure. Such a device can be a temporary filesystem (tmpfs) which exists only in memory and which will get purged on a system reboot, or f.e. a disk filesystem (drives) which store the nodes on the real virtual filesystem in a folder. You can then mount such a device to a location in the root filesystem tree so when you now access a path, the filesystem looks first for the device and uses then the remaining path to get the node data from the device.
+There is also a DriveNode which simply holds a reference to a drive so you can access a drive via the filesystem. You can use then the mount function to mount the Drive of a DriveNode to the given location in the filesystem tree.
+Because you need at least one drive mounted to even be able to access any node, we provide the initFileSystem function which you can call only once in a system session. This functions will then mount the DevDevice to the given location.
+The DevDevice is a sepcial Device which holds all the DeviceNodes representing Device attached to the computer session, like hard drives, tempfs and the serial I/O.
 
 == Globals
 

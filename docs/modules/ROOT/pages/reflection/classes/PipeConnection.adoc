@@ -1,6 +1,12 @@
 = Pipe Connection
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/PipeConnectionBase.adoc[PipeConnectionBase]
+!===
+
 A actor component that is a connection point to which a fluid pipe can get attached to.
 
 // tag::interface[]

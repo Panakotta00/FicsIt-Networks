@@ -1,6 +1,12 @@
 = Module Switch
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 The Lever Module for the modular I/O Panel is used to switch a programm state between two different value (on or off).
 
 // tag::interface[]

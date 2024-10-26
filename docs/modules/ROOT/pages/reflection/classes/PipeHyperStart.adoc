@@ -1,6 +1,12 @@
 = Pipe Hyper Start
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[FGBuildablePipeHyperPart]
+!===
+
 A actor that is a hypertube entrance buildable
 
 // tag::interface[]

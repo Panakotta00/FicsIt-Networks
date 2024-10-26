@@ -1,6 +1,12 @@
 = Railroad Vehicle
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Vehicle.adoc[Vehicle]
+!===
+
 The base class for any vehicle that drives on train tracks.
 
 // tag::interface[]

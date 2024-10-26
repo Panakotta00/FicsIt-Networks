@@ -1,7 +1,7 @@
 = Computer Module
 :table-caption!:
 
-Description
+The Computer Module provides the Computer Library.
 
 [cols="1,5a",separator="!"]
 !===
@@ -189,7 +189,7 @@ Returns some kind of strange/mysterious time data from a unknown place (the real
 ====
 
 === __computer.__**media** : xref:/reflection/classes/FINMediaSubsystem.adoc[FINMediaSubsystem]
-Description
+Field containing a reference to the Media Subsystem.
 
 === __computer.__**millis** () -> int
 Returns the amount of milliseconds passed since the system started.

@@ -1,6 +1,12 @@
 = Struct
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ReflectionBase.adoc[ReflectionBase]
+!===
+
 Reflection Object that holds information about structures.
 
 // tag::interface[]

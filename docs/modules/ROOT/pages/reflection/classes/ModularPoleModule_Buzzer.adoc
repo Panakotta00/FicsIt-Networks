@@ -1,13 +1,13 @@
-= Buzzer Module
+= Modular Pole Module Buzzer
 :table-caption!:
 
 [cols="1,5a",separator="!"]
 !===
 ! Parent
-! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+! xref:/reflection/classes/FINModularIndicatorPoleModule.adoc[FINModularIndicatorPoleModule]
 !===
 
-A small buzzer for panel mounting capable of playing single frequency beeps
+FicsIt Buzzer Module for FicsIt Modular Indicator Poles provides pioneers with the most fundamental sound generator. 
 
 // tag::interface[]
 

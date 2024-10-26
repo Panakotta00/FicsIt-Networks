@@ -1,6 +1,12 @@
 = Light Source
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/CircuitBridge.adoc[FGBuildableControlPanelHost]
+!===
+
 A control panel to configure multiple lights at once.
 
 // tag::interface[]

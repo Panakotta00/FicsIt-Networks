@@ -1,6 +1,12 @@
 = Railroad Signal
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 A train signal to control trains on a track.
 
 // tag::interface[]

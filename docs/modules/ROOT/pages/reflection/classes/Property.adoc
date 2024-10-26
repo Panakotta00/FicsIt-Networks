@@ -1,6 +1,12 @@
 = Property
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ReflectionBase.adoc[ReflectionBase]
+!===
+
 A Reflection object that holds information about properties and parameters.
 
 // tag::interface[]

@@ -1,7 +1,7 @@
 = Component Module
 :table-caption!:
 
-Description
+The Component Module contains the component Library.
 
 == Globals
 

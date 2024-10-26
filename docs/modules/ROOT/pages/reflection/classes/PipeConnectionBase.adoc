@@ -1,6 +1,12 @@
 = Pipe Connection Base
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
 A actor component base that is a connection point to which a pipe for fluid or hyper can get attached to.
 
 // tag::interface[]

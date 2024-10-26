@@ -1,17 +1,15 @@
-= Large Vertical Control Panel
+= Basic Subplate 2x2
 :table-caption!:
 
 [cols="1,5a",separator="!"]
 !===
 ! Parent
-! xref:/reflection/classes/Buildable.adoc[Buildable]
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
 !===
 
-This large vertical modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control your programms.
+This subplate allows one to place a single module in the center of a 2x2 module grid.
 
-You can connect it to the FicsIt-Network.
 
-Important to note is that every module is it's own component, that means if you want to listen to the signals, you will need to listen to each of them individually.
 
 // tag::interface[]
 
@@ -21,7 +19,7 @@ Important to note is that every module is it's own component, that means if you 
 === `getModules` () -> `modules` : Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
 // tag::func-getModules[]
 
-Returns all modules placed on the panels.
+Returns all the modules on this subplate
 
 [%collapsible]
 ====
@@ -30,7 +28,7 @@ Returns all modules placed on the panels.
 ! Flags
 ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
-! Display Name ! Get All Modules
+! Display Name ! Get Modules
 !===
 
 .Return Values
@@ -38,19 +36,20 @@ Returns all modules placed on the panels.
 !===
 !Name !Type !Description
 
-! *Modules* `modules`
+! *modules* `modules`
 ! Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
-! All the modules placed on the panels.
+! 
 !===
 
 ====
 // end::func-getModules[]
 // end::func-getModules-title[]
-// tag::func-getModule-title[]
-=== `getModule` (`x` : Int, `y` : Int, `panel` : Int) -> `module` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
-// tag::func-getModule[]
+// tag::func-getSubModule-title[]
+=== `getSubModule` () -> `Module` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getSubModule[]
 
-Returns the module placed at the given location on the given panel.
+Returns the module associated with this subplate.
+This is effectively the same as calling getModule(0,0)
 
 [%collapsible]
 ====
@@ -59,7 +58,36 @@ Returns the module placed at the given location on the given panel.
 ! Flags
 ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
-! Display Name ! Get Module
+! Display Name ! Get Sub Module
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Module* `Module`
+! Object<xref:/reflection/classes/Actor.adoc[Actor]>
+! 
+!===
+
+====
+// end::func-getSubModule[]
+// end::func-getSubModule-title[]
+// tag::func-getModule-title[]
+=== `getModule` (`X` : Int, `Y` : Int) -> `Module` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getModule[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! getModule
 !===
 
 .Parameters
@@ -67,17 +95,13 @@ Returns the module placed at the given location on the given panel.
 !===
 !Name !Type !Description
 
-! *X* `x`
+! *X* `X`
 ! Int
-! The x location of the module on the panel. (0 = left)
+! 
 
-! *Y* `y`
+! *Y* `Y`
 ! Int
-! The y location of the module on the panel. (0 = bottom)
-
-! *Panel* `panel`
-! Int
-! The panel you want to get the module from.
+! 
 !===
 
 .Return Values
@@ -85,9 +109,9 @@ Returns the module placed at the given location on the given panel.
 !===
 !Name !Type !Description
 
-! *Module* `module`
+! *Module* `Module`
 ! Object<xref:/reflection/classes/Actor.adoc[Actor]>
-! The module you want to get. Null if no module was placed.
+! 
 !===
 
 ====

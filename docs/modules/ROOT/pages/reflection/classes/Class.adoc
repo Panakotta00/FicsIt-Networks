@@ -1,6 +1,12 @@
 = Class
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Struct.adoc[Struct]
+!===
+
 Object that contains all information about a type.
 
 // tag::interface[]

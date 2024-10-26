@@ -1,6 +1,12 @@
 = Docking Station
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[Factory]
+!===
+
 A docking station for wheeled vehicles to transfer cargo.
 
 // tag::interface[]

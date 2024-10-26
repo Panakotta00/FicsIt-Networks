@@ -58,6 +58,23 @@ A Hash of this object. This is a value that nearly uniquely identifies this obje
 ====
 // end::func-id[]
 // end::func-id-title[]
+// tag::func-isNetworkComponent-title[]
+=== `isNetworkComponent` : Bool
+// tag::func-isNetworkComponent[]
+
+True if this object is a network component and has a id and nick.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Network Component
+!===
+====
+// end::func-isNetworkComponent[]
+// end::func-isNetworkComponent-title[]
 // tag::func-nick-title[]
 === `nick` : String
 // tag::func-nick[]

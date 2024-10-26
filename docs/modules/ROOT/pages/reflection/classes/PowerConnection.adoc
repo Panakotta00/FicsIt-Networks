@@ -1,6 +1,12 @@
 = Power Connection
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
 A actor component that allows for a connection point to the power network. Basically a point were a power cable can get attached to.
 
 // tag::interface[]

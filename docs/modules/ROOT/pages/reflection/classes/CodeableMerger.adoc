@@ -1,6 +1,12 @@
 = Codeable Merger
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FGBuildableConveyorAttachment]
+!===
+
 
 
 // tag::interface[]

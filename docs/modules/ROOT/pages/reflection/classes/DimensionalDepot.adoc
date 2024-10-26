@@ -1,0 +1,263 @@
+= Dimensional Depot
+:table-caption!:
+
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Actor.adoc[Actor]
+!===
+
+The dimensional depot, remote storage or also known as central storage.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-centralStorageItemStackLimit-title[]
+=== `centralStorageItemStackLimit` : Int
+// tag::func-centralStorageItemStackLimit[]
+
+The stack limit of the central storage.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Central Storage Item Stack Limit
+!===
+====
+// end::func-centralStorageItemStackLimit[]
+// end::func-centralStorageItemStackLimit-title[]
+// tag::func-centralStorageTimeToUpload-title[]
+=== `centralStorageTimeToUpload` : Float
+// tag::func-centralStorageTimeToUpload[]
+
+The amount of time it takes to upload an item to the central storage.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Central Storage Time to Upload
+!===
+====
+// end::func-centralStorageTimeToUpload[]
+// end::func-centralStorageTimeToUpload-title[]
+
+== Functions
+
+// tag::func-canUploadItemsToCentralStorage-title[]
+=== `canUploadItemsToCentralStorage` (`itemType` : Class<xref:/reflection/classes/ItemType.adoc[ItemType]>) -> `canUpload` : Bool
+// tag::func-canUploadItemsToCentralStorage[]
+
+Returns true if any items of the given type can be uploaded to the central storage.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Can upload Items to Central Storage
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item Type* `itemType`
+! Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! The type of the item you want to check if it can be uploaded.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Can Upload* `canUpload`
+! Bool
+! True if the given item type can be uploaded to the central storage.
+!===
+
+====
+// end::func-canUploadItemsToCentralStorage[]
+// end::func-canUploadItemsToCentralStorage-title[]
+// tag::func-getCentralStorageItemLimit-title[]
+=== `getCentralStorageItemLimit` (`itemType` : Class<xref:/reflection/classes/ItemType.adoc[ItemType]>) -> `number` : Int
+// tag::func-getCentralStorageItemLimit[]
+
+Returns the maxiumum number of items of a given type you can upload to the central storage.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Central Storage Item Limit
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item Type* `itemType`
+! Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! The type of the item you want to check if it can be uploaded.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Number* `number`
+! Int
+! The maximum number of items you can upload.
+!===
+
+====
+// end::func-getCentralStorageItemLimit[]
+// end::func-getCentralStorageItemLimit-title[]
+// tag::func-getItemCountFromCentralStorage-title[]
+=== `getItemCountFromCentralStorage` (`itemType` : Class<xref:/reflection/classes/ItemType.adoc[ItemType]>) -> `number` : Int
+// tag::func-getItemCountFromCentralStorage[]
+
+Returns the number of items of a given type that is stored within the central storage.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Item Count from Central Storage
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item Type* `itemType`
+! Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! The type of the item you want to get the number of items in the central storage from.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Number* `number`
+! Int
+! The number of items in the central storage.
+!===
+
+====
+// end::func-getItemCountFromCentralStorage[]
+// end::func-getItemCountFromCentralStorage-title[]
+// tag::func-getAllItemsFromCentralStorage-title[]
+=== `getAllItemsFromCentralStorage` () -> `items` : Array<Struct<xref:/reflection/structs/ItemAmount.adoc[ItemAmount]>>
+// tag::func-getAllItemsFromCentralStorage[]
+
+Return a list of all items the central storage currently contains.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get all Items from Cental Stroage
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Items* `items`
+! Array<Struct<xref:/reflection/structs/ItemAmount.adoc[ItemAmount]>>
+! The list of items that the central storage currently contains.
+!===
+
+====
+// end::func-getAllItemsFromCentralStorage[]
+// end::func-getAllItemsFromCentralStorage-title[]
+
+== Signals
+
+=== `ItemAmountUpdated` (_Class<xref:/reflection/classes/ItemType.adoc[ItemType]>_ *Item Type* `itemType`, _Int_ *Item Amount* `itemAmount`)
+
+Gets triggered when the amount of item in the central storage changes.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item Type* `itemType`
+! Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! The type of the item that got uploaded.
+
+! *Item Amount* `itemAmount`
+! Int
+! The new amount of items of the given type.
+!===
+====
+
+=== `ItemLimitReachedUpdated` (_Class<xref:/reflection/classes/ItemType.adoc[ItemType]>_ *Item Type* `itemType`, _Bool_ *Reached* `reached`)
+
+Gets triggered when an item type reached maximum capacity, or when it now has again available space for new items.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item Type* `itemType`
+! Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! The type of the item which changed if it has reached the limit or not.
+
+! *Reached* `reached`
+! Bool
+! True if the given item type has reached the limit or not.
+!===
+====
+
+=== `NewItemAdded` (_Class<xref:/reflection/classes/ItemType.adoc[ItemType]>_ *Item Type* `itemType`)
+
+Gets triggered when a new item gets uploaded to the central storage.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Item Type* `itemType`
+! Class<xref:/reflection/classes/ItemType.adoc[ItemType]>
+! The type of the item that got uploaded.
+!===
+====
+
+
+// end::interface[]
+
