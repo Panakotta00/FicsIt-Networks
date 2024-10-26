@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   workflow_call:
     inputs:
       artifact_name:
@@ -93,8 +94,8 @@ jobs:
           status: ${{ job.status }}
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           artifact-url: "${{ steps.upload-win64.outputs.artifact-url }}"
-          artifact-name: 'FicsIt-Networks.zip'
+          artifact-name: '${{artifact_name}}.zip'
           
       - name: Post Cleanup
         if: ${{ !failure() }}
-        run: Remove-Item C:\actions-runner\_work\FicsIt-Networks\FicsIt-Networks\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
+        run: Remove-Item ${{ github.workspace }}\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
