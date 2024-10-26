@@ -16,9 +16,6 @@ on:
       WEBHOOK_URL:
         required: true
 
-environment:
-  artifact_name: FicsItNetworks
-
 jobs:
   build:
     name: Build FicsIt-Networks
