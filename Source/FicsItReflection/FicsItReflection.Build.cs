@@ -5,7 +5,7 @@ public class FicsItReflection : ModuleRules
     public FicsItReflection(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
+        bWarningsAsErrors = true;
         bEnableExceptions = true;
 
         PublicDependencyModuleNames.AddRange(

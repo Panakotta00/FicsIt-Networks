@@ -10,6 +10,7 @@ public class FicsItNetworksLua : ModuleRules
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         CppStandard = CppStandardVersion.Cpp20;
         bEnableExceptions = true;
+        bWarningsAsErrors = true;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",

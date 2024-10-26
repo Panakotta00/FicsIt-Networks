@@ -11,6 +11,7 @@ public class FicsItNetworksEd : ModuleRules
     {
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         bLegacyPublicIncludePaths = false;
+        bWarningsAsErrors = true;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject",

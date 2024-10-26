@@ -10,6 +10,7 @@ public class FicsItNetworks : ModuleRules
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
         bEnableExceptions = true;
+        bWarningsAsErrors = true;
 
         CppStandard = CppStandardVersion.Cpp20;
 

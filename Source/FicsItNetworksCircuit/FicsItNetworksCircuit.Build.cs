@@ -6,6 +6,7 @@ public class FicsItNetworksCircuit : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         bEnableExceptions = true;
+        bWarningsAsErrors = true;
 
         PublicDependencyModuleNames.AddRange(
             new string[]

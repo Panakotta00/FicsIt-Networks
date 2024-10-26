@@ -21,7 +21,7 @@ template<typename T>
 class FICSITNETWORKSLUA_API FINTypeId {
 public:
 	static int ID() {
-		static uint32 id = GetTypeHash(UNIQUE_FUNCTION_ID);
+		static uint32 id = PointerHash(UNIQUE_FUNCTION_ID);
 		return id;
 	}
 };

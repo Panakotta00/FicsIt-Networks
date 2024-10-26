@@ -5,7 +5,7 @@ public class FicsItNetworksRepository : ModuleRules
     public FicsItNetworksRepository(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-
+        bWarningsAsErrors = true;
         CppStandard = CppStandardVersion.Cpp20;
 
         PublicDependencyModuleNames.AddRange(

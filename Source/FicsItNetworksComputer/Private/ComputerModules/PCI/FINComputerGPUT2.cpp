@@ -239,7 +239,7 @@ void AFINComputerGPUT2::Tick(float DeltaSeconds) {
 	if (!DrawCalls2Send.IsEmpty()) {
 		for (int i = 0; i < 10 && !DrawCalls2Send.IsEmpty(); ++i) {
 			TArray<FFIRInstancedStruct> Chunk;
-			for (int i = 0; i < 10; ++i) {
+			for (int j = 0; j < 10; ++j) {
 				FFIRInstancedStruct* DrawCall = DrawCalls2Send.Peek();
 				if (!DrawCall) break;
 				Chunk.Add(*DrawCall);

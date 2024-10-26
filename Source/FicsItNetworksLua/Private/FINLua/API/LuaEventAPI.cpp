@@ -158,7 +158,7 @@ namespace FINLua {
 		}
 
 		LuaModulePostSetup() {
-			lua_pushcfunction(L, (int(*)(lua_State*))event::luaPullContinue);
+			lua_pushcfunction(L, static_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "Event-luaPullContinue");
 			lua_pop(L, 1);
 		}
