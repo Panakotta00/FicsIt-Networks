@@ -42,6 +42,7 @@ jobs:
           name: ${{ env.artifact_name }}
           run-id: ${{ steps.find-ficsit-networks.outputs.result }}
           path: ${{ github.workspace }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup steamcmd
         uses: CyberAndrii/setup-steamcmd@v1
