@@ -1,8 +1,10 @@
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 
+#include "CommandLine.h"
 #include "FINComputerSubsystem.h"
 #include "FINFileSystemSubsystem.h"
 #include "FileSystemSerializationInfo.h"
+#include "StructuredLog.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBox.h"
@@ -14,10 +16,18 @@
 FIN_STRUCT_IMPLEMENT_INTERFACE(FFINItemStateFileSystem, FFINLabelContainerInterface)
 
 int AskForDiskOrSave(FString Name) {
+	if (FParse::Param(FCommandLine::Get(), TEXT("FINOverwriteFS"))) {
+		return FIN_FS_AlwaysOverride;
+	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("FINKeepFS"))) {
+		return FIN_FS_AlwaysKeep;
+	}
 #if UE_SERVER
-	return FIN_FS_AlwaysOverride;
+	UE_LOGFMT(LogFicsItFileSystem, Fatal,
+		"A FileSystem Content difference between save file and host has been found for UUID: {uuid}!"
+		"Please add the '-FINOverwriteFS' or '-FINKeepFS' command line options to define what should happen in such case.",
+		Name);
 #endif
-
 
 	switch (AFINComputerSubsystem::GetFSAlways()) {
 		case FIN_FS_AlwaysOverride:
