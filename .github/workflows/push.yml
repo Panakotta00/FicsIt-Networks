@@ -57,6 +57,11 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       artifact_name: $ARTIFACT_NAME
+    secrets:
+      WWISE_EMAIL: ${{ secrets.WWISE_EMAIL }}
+      WWISE_PASSWORD: ${{ secrets.WWISE_PASSWORD }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
 
   generate-docs:
     needs: [filter, build]
