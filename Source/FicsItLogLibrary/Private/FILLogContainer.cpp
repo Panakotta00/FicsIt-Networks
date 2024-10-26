@@ -5,6 +5,7 @@
 
 UFILLogContainer::UFILLogContainer() {
 	SetIsReplicatedByDefault(true);
+	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
 }
 
