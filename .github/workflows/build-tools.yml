@@ -1,4 +1,4 @@
-name: Generate Documentation
+name: Build Tools
 
 on:
   push:
@@ -14,7 +14,13 @@ jobs:
     name: Build Documentation-CLI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Setup Build Environment
+        run: |
+          rustup toolchain install nightly
+          rustup default nightly
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
           path: FicsItNetworks
 
