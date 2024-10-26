@@ -183,7 +183,7 @@ namespace FINLua {
 				LuaFunc();
 
 				FString Mode = "r";
-				if (lua_isstring(L, 2)) Mode = FString(lua_tostring(L, 2));
+				if (lua_isstring(L, 2)) Mode = luaFIN_toFString(L, 2);
 				CodersFileSystem::FileMode m;
 				if (Mode.Contains("+r")) m = CodersFileSystem::INPUT | CodersFileSystem::OUTPUT;
 				else if (Mode.Contains("+w")) m = CodersFileSystem::INPUT | CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC;

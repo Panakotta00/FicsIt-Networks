@@ -3,8 +3,15 @@
 #include <iostream>
 #include <cstdint>
 
+#include "FicsItFileSystem.h"
+#include "FicsItLogLibrary.h"
+#include "StructuredLog.h"
+
 using namespace std;
 namespace fs = std::filesystem;
+
+// TODO: Add verbose FileSystem logging
+
 namespace CodersFileSystem {
 	ByteCountedDevice::ByteCountedDeviceListener::ByteCountedDeviceListener(ByteCountedDevice* root) : root(root) {}
 
@@ -102,33 +109,46 @@ namespace CodersFileSystem {
 
 	TSharedPtr<FileStream> DiskDevice::open(Path path, FileMode mode) {
 		std::filesystem::path spath = realPath / path.relative().str();
-		if (fs::exists(spath) && !fs::is_regular_file(spath)) return nullptr;
-		else if (!fs::is_directory(spath / "..")) return nullptr;
+		std::error_code code;
+		if (fs::exists(spath, code) && !fs::is_regular_file(spath, code)) {
+			if (!fs::is_directory(spath)) {
+				UFILogLibrary::Log(FIL_Verbosity_Warning, FString::Printf(TEXT("Tried to open mapped host path '%s' as regular file, but it is neither a regular file nor a directory."), UTF8_TO_TCHAR(spath.c_str())));
+				return nullptr;
+			}
+			UE_LOGFMT(LogFicsItFileSystem, Verbose, "Tried to open mapped host path '{path}' as regular file, but it is not a regular file: {error}", FString(UTF8_TO_TCHAR(spath.c_str())), FString(UTF8_TO_TCHAR(code.message().c_str())));
+			return nullptr;
+		}
+		if (!fs::is_directory(spath.parent_path(), code)) {
+			UE_LOGFMT(LogFicsItFileSystem, Verbose, "Tried to open mapped host path '{path}' as regular file, but its parent folder is not a directory: {error}", FString(UTF8_TO_TCHAR(spath.c_str())), FString(UTF8_TO_TCHAR(code.message().c_str())));
+			return nullptr;
+		}
 		return MakeShared<DiskFileStream>(spath, mode, checkSize);
 	}
 
 	bool DiskDevice::createDir(Path path, bool createTree) {
 		std::filesystem::path spath = realPath / path.relative().str();
-		if (fs::exists(spath)) {
-			if (fs::is_directory(spath)) return true;
+		std::error_code code;
+		if (fs::exists(spath, code)) {
+			if (fs::is_directory(spath, code)) return true;
 			else return false;
 		}
-		
+
 		if (createTree) {
-			fs::create_directories(spath);
-		} else if (fs::is_directory(spath / "..")) {
-			fs::create_directory(spath);
+			fs::create_directories(spath, code);
+		} else if (fs::is_directory(spath.parent_path(), code)) {
+			fs::create_directory(spath, code);
 		} else return false;
 		tickListeners();
 		return true;
 	}
 
 	bool DiskDevice::remove(Path path, bool recursive) {
+		std::error_code code;
 		if (path.isEmpty()) return false;
 		std::filesystem::path spath = realPath / path.relative().str();
 		try {
-			if (recursive) return fs::remove_all(spath) > 0;
-			else return fs::remove(spath);
+			if (recursive) return fs::remove_all(spath, code) > 0;
+			else return fs::remove(spath, code);
 			tickListeners();
 		} catch (...) {
 			return false;
@@ -136,11 +156,12 @@ namespace CodersFileSystem {
 	}
 
 	bool DiskDevice::rename(Path path, const std::string& name) {
+		std::error_code code;
 		if (path.isEmpty() || !Path::isNode(name)) return false;
 		path = path.relative();
 		std::filesystem::path spath = realPath / path.str();
-		if (!fs::exists(spath) || fs::exists(realPath / (path / ".." / name).str()) || path.isRoot()) return false;
-		fs::rename(spath, realPath / (path / ".." / name).str());
+		if (!fs::exists(spath, code) || fs::exists(realPath / (path / ".." / name).str(), code) || path.isRoot()) return false;
+		fs::rename(spath, realPath / (path / ".." / name).str(), code);
 		tickListeners();
 		return true;
 	}
@@ -157,10 +178,11 @@ namespace CodersFileSystem {
 	}
 
 	TOptional<FileType> DiskDevice::fileType(Path path) {
+		std::error_code code;
 		auto fspath = realPath / path.relative().str();
-		if (std::filesystem::is_directory(fspath)) {
+		if (std::filesystem::is_directory(fspath, code)) {
 			return File_Directory;
-		} else if (std::filesystem::is_regular_file(fspath)) {
+		} else if (std::filesystem::is_regular_file(fspath, code)) {
 			return File_Regular;
 		}
 		return {};

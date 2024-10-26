@@ -6,6 +6,7 @@ public class FicsItFileSystem : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         bEnableExceptions = true;
+        bWarningsAsErrors = true;
 
         PublicDependencyModuleNames.AddRange(
             new string[]
@@ -20,7 +21,8 @@ public class FicsItFileSystem : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "Slate",
-                "SlateCore"
+                "SlateCore",
+                "FicsItLogLibrary"
             }
         );
     }
