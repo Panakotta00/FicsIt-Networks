@@ -2,16 +2,7 @@ name: Generate Documentation
 
 on:
   workflow_dispatch:
-    inputs:
-      artifact_name:
-        required: true
-        type: string
-        default: "FicsItNetworks"
   workflow_call:
-    inputs:
-      artifact_name:
-        required: true
-        type: string
 
 permissions:
   actions: read
@@ -30,14 +21,14 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 1,
-              name: "${{ inputs.artifact_name }}"
+              name: "FicsItNetworks"
             });
             return response.data.artifacts[0].workflow_run.id;
 
       - name: Download FicsIt-Networks
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.artifact_name }}
+          name: FicsItNetworks
           run-id: ${{ steps.find-ficsit-networks.outputs.result }}
           path: ${{ github.workspace }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

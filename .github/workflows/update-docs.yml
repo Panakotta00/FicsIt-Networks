@@ -2,16 +2,7 @@ name: Update Documentation
 
 on:
   workflow_dispatch:
-    inputs:
-      artifact_name:
-        required: true
-        type: string
-        default: "FicsItNetworks"
   workflow_call:
-    inputs:
-      artifact_name:
-        required: true
-        type: string
 
 permissions:
   actions: read

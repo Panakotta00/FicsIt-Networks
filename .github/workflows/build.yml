@@ -2,16 +2,7 @@ name: Build
 
 on:
   workflow_dispatch:
-    inputs:
-      artifact_name:
-        required: true
-        type: string
-        default: "FicsItNetworks"
   workflow_call:
-    inputs:
-      artifact_name:
-        required: true
-        type: string
     secrets:
       WWISE_EMAIL:
         required: true
@@ -83,13 +74,13 @@ jobs:
         run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryServer Linux Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
       
       - name: Package FicsItNetworks Mod
-        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -clientconfig=Shipping -serverconfig=Shipping -DLCName='FicsItNetworks' -build -utf8output -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed
+        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -DLCName='FicsItNetworks' -build -server -clientconfig=Shipping -serverconfig=Shipping -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed -utf8output
 
       - name: Upload FicsItNetworks
         id: upload-win64
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.artifact_name }}
+          name: FicsItNetworks
           path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\*.zip
 
       - name: Discord Webhook Action
@@ -99,7 +90,7 @@ jobs:
           status: ${{ job.status }}
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           artifact-url: "${{ steps.upload-win64.outputs.artifact-url }}"
-          artifact-name: '${{ inputs.artifact_name }}.zip'
+          artifact-name: 'FicsItNetworks.zip'
           
       - name: Post Cleanup
         if: ${{ !failure() }}
