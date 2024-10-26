@@ -89,6 +89,8 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 	}
 }
 
+TMulticastDelegate<void()> FFicsItReflectionModule::OnReflectionInitialized;
+
 void FFicsItReflectionModule::StartupModule() {
 	TArray<FCoreRedirect> redirects;
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags::Type_Struct, TEXT("/Script/FicsItNetworks.FINNetworkTrace"), TEXT("/Script/FicsItReflection.FIRTrace")});
@@ -243,6 +245,8 @@ void FFicsItReflectionModule::LoadAllTypes() {
 	for (TObjectIterator<UScriptStruct> Struct; Struct; ++Struct) {
 		if (!Struct->GetName().StartsWith("SKEL_") && !Struct->GetName().StartsWith("REINST_")) FindStruct(*Struct);
 	}
+
+	OnReflectionInitialized.Broadcast();
 }
 
 UFIRClass* FFicsItReflectionModule::FindClass(UClass* Clazz, bool bRecursive, bool bTryToReflect) {

@@ -28,6 +28,7 @@ public:
 	
 	static FFicsItReflectionModule& Get();
 
+	static TMulticastDelegate<void()> OnReflectionInitialized;
 	TMulticastDelegate<void(UObject*, class UFIRSignal*, const TArray<FFIRAnyValue>&)> OnSignalTriggered;
 	
 	void PopulateSources();
