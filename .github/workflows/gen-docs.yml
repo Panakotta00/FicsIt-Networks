@@ -14,6 +14,9 @@ on:
 env:
   artifact_name: FicsItNetworks-Windows
 
+permissions:
+  actions: read
+
 jobs:
   generate-docs:
     name: Generate Documentation
