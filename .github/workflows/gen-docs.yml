@@ -11,6 +11,9 @@ on:
       - "Source/**"
       - "ThirdParty/**"
 
+env:
+  artifact_name: FicsItNetworks-Windows
+
 jobs:
   generate-docs:
     name: Generate Documentation
@@ -25,7 +28,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 1,
-              name: "FicsItNetworks-Windows"
+              name: "${{artifact_name}}"
             });
             console.log(response);
             return response.data.artifacts[0].workflow_run.id;
@@ -33,7 +36,7 @@ jobs:
       - name: Download FicsIt-Networks
         uses: actions/download-artifact@v4
         with:
-          name: FicsItNetworks
+          name: ${{artifact_name}}
           run-id: ${{ steps.find-ficsit-networks.outputs.result }}
           path: ${{ github.workspace }}
 
