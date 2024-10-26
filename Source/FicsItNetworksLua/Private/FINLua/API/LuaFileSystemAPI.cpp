@@ -775,7 +775,7 @@ namespace FINLua {
 		LuaModulePostSetup() {
 			PersistenceNamespace("FileSystem");
 
-			lua_pushcfunction(L, static_cast<lua_CFunction>(reinterpret_cast<void*>(filesystem::luaDoFileCont)));
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(filesystem::luaDoFileCont)));
 			PersistValue("doFileCont");
 
 			luaL_getmetatable(L, "File");

@@ -1,6 +1,7 @@
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 
 #include "CommandLine.h"
+#include "FicsItNetworksComputer.h"
 #include "FINComputerSubsystem.h"
 #include "FINFileSystemSubsystem.h"
 #include "FileSystemSerializationInfo.h"
@@ -23,7 +24,7 @@ int AskForDiskOrSave(FString Name) {
 		return FIN_FS_AlwaysKeep;
 	}
 #if UE_SERVER
-	UE_LOGFMT(LogFicsItFileSystem, Fatal,
+	UE_LOGFMT(LogFicsItNetworksComputer, Fatal,
 		"A FileSystem Content difference between save file and host has been found for UUID: {uuid}!"
 		"Please add the '-FINOverwriteFS' or '-FINKeepFS' command line options to define what should happen in such case.",
 		Name);

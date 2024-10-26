@@ -325,9 +325,9 @@ namespace FINLua {
 		PersistTable("coroutine", -1);
 		lua_pop(L, 1);
 
-		lua_pushcfunction(L, static_cast<lua_CFunction>(reinterpret_cast<void*>(luaYieldResume)));
+		lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaYieldResume)));
 		PersistValue("coroutineYieldContinue");
-		lua_pushcfunction(L, static_cast<lua_CFunction>(reinterpret_cast<void*>(luaResumeResume)));
+		lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaResumeResume)));
 		PersistValue("coroutineResumeContinue");
 	
 		luaL_requiref(L, "math", luaopen_math, true);
