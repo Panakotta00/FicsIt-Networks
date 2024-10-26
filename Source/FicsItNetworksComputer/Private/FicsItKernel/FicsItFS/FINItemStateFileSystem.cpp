@@ -25,7 +25,7 @@ int AskForDiskOrSave(FString Name) {
 	}
 #if UE_SERVER
 	UE_LOGFMT(LogFicsItNetworksComputer, Fatal,
-		"A FileSystem Content difference between save file and host has been found for UUID: {uuid}!"
+		"A FileSystem Content difference between save file and host has been found for UUID: {uuid}! \n"
 		"Please add the '-FINOverwriteFS' or '-FINKeepFS' command line options to define what should happen in such case.",
 		Name);
 #endif
