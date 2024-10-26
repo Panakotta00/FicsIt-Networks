@@ -17,7 +17,7 @@ on:
         required: true
 
 env:
-  artifact_name: FicsItNetworks
+  ARTIFACT_NAME: FicsItNetworks
 
 jobs:
   filter:
@@ -52,14 +52,14 @@ jobs:
     if: needs.filter.outputs.build-mod == 'true'
     uses: ./.github/workflows/build.yml
     with:
-      artifact_name: "${{ env.artifact_name }}"
+      artifact_name: $ARTIFACT_NAME
 
   generate-docs:
     needs: [filter, build]
     if: always() && (needs.build.result == 'success' || needs.filter.outputs.generate-docs == 'true')
     uses: ./.github/workflows/gen-docs.yml
     with:
-      artifact_name: "${{ env.artifact_name }}"
+      artifact_name: $ARTIFACT_NAME
 
   tools:
     needs: filter
@@ -71,4 +71,4 @@ jobs:
     if: always() && (needs.generate-docs.result == 'success' || needs.tools.result == 'success' ||  needs.filter.outputs.update-docs == 'true')
     uses: ./.github/workflows/update-docs.yml
     with:
-      artifact_name: "${{ env.artifact_name }}"
+      artifact_name: $ARTIFACT_NAME
