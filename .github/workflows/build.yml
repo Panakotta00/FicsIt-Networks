@@ -30,6 +30,9 @@ on:
       WEBHOOK_URL:
         required: true
 
+permissions:
+  actions: read
+
 jobs:
   build:
     name: Build FicsIt-Networks
