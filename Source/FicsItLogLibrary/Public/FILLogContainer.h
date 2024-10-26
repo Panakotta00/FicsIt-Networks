@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "FILLogEntry.h"
 #include "FGSaveInterface.h"
+#include "Components/ActorComponent.h"
 #include "FILLogContainer.generated.h"
 
 
@@ -22,8 +23,7 @@ public:
 	virtual bool ShouldSave_Implementation() const override { return true; }
 	// End IFGSaveInterface
 
-	UFUNCTION()
-	void Tick();
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
 	void PushLogEntry(TEnumAsByte<EFILLogVerbosity> Verbosity, const FString& Content);

@@ -149,8 +149,6 @@ void AFINComputerCase::TickActor(float DeltaTime, ELevelTick TickType, FActorTic
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 	
 	if (HasAuthority()) {
-		Log->Tick();
-		
 		if (Kernel) {
 			Kernel->HandleFutures();
 			if (Kernel->GetState() != InternalKernelState) {
