@@ -26,6 +26,10 @@ THIRD_PARTY_INCLUDES_START
 #pragma warning(disable:4456)
 #endif
 
+#ifndef NULL
+#define NULL (0)
+#endif
+
 //extern "C" {
 #include "luaconf.h"
 
