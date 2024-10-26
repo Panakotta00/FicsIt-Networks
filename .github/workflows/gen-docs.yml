@@ -1,18 +1,11 @@
 name: Generate Documentation
 
 on:
-  push:
-    branches:
-      - development
-    paths:
-      - ".github/workflows/gen-docs.yml"
-      - "FicsItNetworks.uplugin"
-      - "Content/**"
-      - "Source/**"
-      - "ThirdParty/**"
-
-env:
-  artifact_name: FicsItNetworks-Windows
+  workflow_call:
+    inputs:
+      artifact_name:
+        required: true
+        type: string
 
 permissions:
   actions: read
@@ -31,7 +24,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 1,
-              name: "${{ env.artifact_name }}"
+              name: "${{ inputs.artifact_name }}"
             });
             console.log(response);
             return response.data.artifacts[0].workflow_run.id;
@@ -39,7 +32,7 @@ jobs:
       - name: Download FicsIt-Networks
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.artifact_name }}
+          name: ${{ inputs.artifact_name }}
           run-id: ${{ steps.find-ficsit-networks.outputs.result }}
           path: ${{ github.workspace }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

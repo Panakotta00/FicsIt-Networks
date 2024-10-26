@@ -1,25 +1,11 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - master
-      - development
-    paths:
-      - ".github/workflows/build.yml"
-      - "FicsItNetworks.uplugin"
-      - "Content/**"
-      - "Source/**"
-      - "ThirdParty/**"
-  pull_request:
-    branches:
-      - "development"
-    paths:
-      - "Content/**"
-      - "Source/**"
-      - "ThirdParty/**"
-  workflow_dispatch:
   workflow_call:
+    inputs:
+      artifact_name:
+        required: true
+        type: string
     secrets:
       WWISE_EMAIL:
         required: true
@@ -29,9 +15,6 @@ on:
         required: true
       WEBHOOK_URL:
         required: true
-
-permissions:
-  actions: read
 
 jobs:
   build:
@@ -79,9 +62,6 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
 
-#      - name: Generate VS project files
-#        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\Build.bat -projectfiles -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -game -rocket -progres
-
       - name: Build for Development Editor
         run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryEditor Win64 Development -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
 
@@ -103,7 +83,7 @@ jobs:
         id: upload-win64
         uses: actions/upload-artifact@v4
         with:
-          name: FicsItNetworks
+          name: ${{ inputs.artifact_name }}
           path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\*.zip
 
       - name: Discord Webhook Action
@@ -118,37 +98,3 @@ jobs:
       - name: Post Cleanup
         if: ${{ !failure() }}
         run: Remove-Item C:\actions-runner\_work\FicsIt-Networks\FicsIt-Networks\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
-
-  generate-docs:
-    name: Generate Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup steamcmd
-        uses: CyberAndrii/setup-steamcmd@v1
-
-      - name: Download Satisfactroy Dedicated Server
-        run: |
-          steamcmd +force_install_dir "${{ github.workspace }}/SatisfactoryDedicatedServer" +login anonymous +app_update 1690800 validate +quit
-      
-      - name: Download FicsIt-Networks
-        uses: actions/download-artifact@master
-        with:
-          name: FicsItNetworks
-          path: ${{ github.workspace }}
-      
-      - name: Install FicsIt-Networks
-        run: |
-          unzip FicsItNetworks-LinuxServer.zip -d SatisfactoryDedicatedServer/FactoryGame/Mods/FicsItNetworks
-      
-      - name: Generate Documentation
-        working-directory: SatisfactoryDedicatedServer
-        run: ./FactoryServer.sh -FINGenDocAndQuit
-      
-      - name: Upload Documentation
-        id: upload-documentation
-        uses: actions/upload-artifact@v4
-        with:
-          name: Documentation
-          path: |
-            ~/.config/Epic/FactoryGame/Saved/FINReflectionDocumentation.json
-            ~/.config/Epic/FactoryGame/Saved/FINLuaDocumentation.lua

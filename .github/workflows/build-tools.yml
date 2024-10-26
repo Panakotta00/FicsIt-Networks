@@ -1,13 +1,7 @@
 name: Build Tools
 
 on:
-  push:
-    branches:
-      - master
-      - development
-    paths:
-      - ".github/workflows/build-tools.yml"
-      - "Tools"
+  workflow_call:
 
 jobs:
   build-documentation-cli:
@@ -28,9 +22,9 @@ jobs:
         working-directory: FicsItNetworks/Tools/DocumentationCLI
         run: cargo build --release
 
-      - name: Upload Tools
+      - name: Upload Documentation-CLI
         uses: actions/upload-artifact@v4
         with:
-          name: Tools
+          name: DocumentationCLI
           path: |
             FicsItNetworks/Tools/DocumentationCLI/target/release/FicsItNetworksDocumentationCLI
