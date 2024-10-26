@@ -16,13 +16,6 @@ jobs:
     name: Generate Documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Setup steamcmd
-        uses: CyberAndrii/setup-steamcmd@v1
-
-      - name: Download Satisfactroy Dedicated Server
-        run: |
-          steamcmd +force_install_dir "${{ github.workspace }}/SatisfactoryDedicatedServer" +login anonymous +app_update 1690800 validate +quit
-
       - name: Find FicsIt-Networks Binary
         uses: actions/github-script@v7
         id: find-ficsit-networks
@@ -33,8 +26,9 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 1,
-              name: "FicsItNetworks"
+              name: "FicsItNetworks-Windows"
             });
+            console.log(artifacts);
             return artifacts.artifacts[0].workflow_run.id;
 
       - name: Download FicsIt-Networks
@@ -43,6 +37,13 @@ jobs:
           name: FicsItNetworks
           run-id: ${{ steps.find-ficsit-networks.outputs.result }}
           path: ${{ github.workspace }}
+
+      - name: Setup steamcmd
+        uses: CyberAndrii/setup-steamcmd@v1
+
+      - name: Download Satisfactroy Dedicated Server
+        run: |
+          steamcmd +force_install_dir "${{ github.workspace }}/SatisfactoryDedicatedServer" +login anonymous +app_update 1690800 validate +quit
       
       - name: Install FicsIt-Networks
         run: |
