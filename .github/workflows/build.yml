@@ -99,7 +99,7 @@ jobs:
           status: ${{ job.status }}
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           artifact-url: "${{ steps.upload-win64.outputs.artifact-url }}"
-          artifact-name: '${{artifact_name}}.zip'
+          artifact-name: '${{ inputs.artifact_name }}.zip'
           
       - name: Post Cleanup
         if: ${{ !failure() }}
