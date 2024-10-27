@@ -35,4 +35,12 @@ namespace FINLua {
 	 * @param args the amount of parameters you want to pop from the top of the stack and push into the new thread
 	 */
 	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args);
+
+	/**
+	 * @brief Awaits the Future at the given index and pushes its results onto the stack.
+	 * @param L the lua state
+	 * @param index the index of the future
+	 * @paras kfunc if given, continues this function after the await returned
+	 */
+	int luaFIN_await(lua_State* L, int index);
 }

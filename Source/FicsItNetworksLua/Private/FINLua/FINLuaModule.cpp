@@ -68,7 +68,8 @@ void FFINLuaModuleBareValue::PushLuaValue(lua_State* L, const FString& PersistNa
 
 void FFINLuaFunction::PushLuaValue(lua_State* L, const FString& PersistName) {
 	lua_pushnil(L);
-	lua_pushcclosure(L, Function, 1);
+	lua_pushnil(L);
+	lua_pushcclosure(L, Function, 2);
 
 	FINLua::luaFIN_persistValue(L, -1, PersistName);
 }
@@ -85,6 +86,8 @@ void FFINLuaTable::PushLuaValue(lua_State* L, const FString& PersistName) {
 		if (field.Value->TypeID() == FINTypeId<FFINLuaFunction>::ID() && PersistName != TEXT("ModuleSystem-Metatable-ModuleTableFunction")) {
 			lua_pushlightuserdata(L, &field);
 			lua_setupvalue(L, -2, 1);
+			lua_pushvalue(L, -4);
+			lua_setupvalue(L, -2, 2);
 			luaL_setmetatable(L, "ModuleTableFunction");
 		}
 

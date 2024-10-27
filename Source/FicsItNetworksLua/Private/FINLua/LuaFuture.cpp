@@ -1,12 +1,14 @@
 ﻿#include "FINLua/LuaFuture.h"
 
 #include "FINLuaProcessor.h"
+#include "LuaExtraSpace.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 
 namespace FINLua {
 	int lua_futureStruct(lua_State* L);
 	int lua_futureStructContinue(lua_State* L, int, lua_KContext);
+	int awaitContinue(lua_State* L, int, lua_KContext);
 
 	LuaModule(R"(/**
 	 * @LuaModule		FutureModule
@@ -140,28 +142,11 @@ namespace FINLua {
 				return 1;
 			}
 
-			int awaitContinue(lua_State* L, int, lua_KContext);
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		await
 			 * @DisplayName		Await
 			 */)", await) {
-				lua_State* thread;
-				int status = pollInternal(L, 1, thread);
-				if (thread == nullptr) {
-					return luaL_error(L, "Tried to await on failed future");
-				}
-				switch (status) {
-					case LUA_OK:
-						return get(L);
-					case LUA_YIELD:
-						return luaFIN_yield(L, 0, NULL, &awaitContinue);
-					default: // error
-						lua_xmove(thread, L, 1);
-					return -1;
-				}
-			}
-			int awaitContinue(lua_State* L, int, lua_KContext) {
-				return await(L);
+				return luaFIN_await(L, 1);
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -255,6 +240,32 @@ namespace FINLua {
 				luaFIN_pushLuaFutureCFunction(L, luaJoin, lua_gettop(L));
 				return 1;
 			}
+
+			int luaSleepContinue(lua_State* L, int, lua_KContext) {
+				double timeout = lua_tonumber(L, 1);
+				double start = lua_tonumber(L, 2);
+				double millis = luaFIN_getExtraSpace(L).Processor->GetKernel()->GetTimeSinceStart();
+				if (millis - start < timeout*1000) {
+					return lua_yieldk(L, 0, NULL, luaSleepContinue);
+				}
+				return 0;
+			}
+			int luaSleep(lua_State* L) {
+				double millis = luaFIN_getExtraSpace(L).Processor->GetKernel()->GetTimeSinceStart();
+				lua_pushnumber(L, millis);
+				return luaSleepContinue(L, 0, NULL);
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		Future	sleep(seconds : number)
+			 * @DisplayName		Sleep
+			 *
+			 * Creates a future that returns after the given amount of seconds.
+			 */)", sleep) {
+				luaL_checktype(L, 1, LUA_TNUMBER);
+				lua_pop(L, lua_gettop(L)-1);
+				luaFIN_pushLuaFutureCFunction(L, luaSleep, 1);
+				return 1;
+			}
 		}
 
 		int luaAsync(lua_State* L) {
@@ -273,6 +284,22 @@ namespace FINLua {
 			luaFIN_persistValue(L, -1, PersistName);
 		}
 
+		int luaSleep(lua_State* L) {
+			luaL_checktype(L, 1, LUA_TNUMBER);
+			lua_pop(L, lua_gettop(L)-1);
+			luaFIN_pushLuaFutureCFunction(L, future::luaSleep, 1);
+			return luaFIN_await(L, 1);
+		}
+		LuaModuleGlobalBareValue(R"(/**
+		 * @LuaFunction		sleep(seconds : number)
+		 * @DisplayName		Sleep
+		 *
+		 * Blocks the current thread/future until the given amount of time passed
+		 */)", sleep) {
+			lua_pushcfunction(L, luaSleep);
+			luaFIN_persistValue(L, -1, PersistName);
+		}
+
 		LuaModulePostSetup() {
 			PersistenceNamespace("FutureModule");
 
@@ -281,7 +308,7 @@ namespace FINLua {
 			lua_pushcfunction(L, Future::unpersist);
 			PersistValue("FutureUnpersist");
 
-			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(Future::awaitContinue)));
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(awaitContinue)));
 			PersistValue("FutureAwaitContinue");
 
 			luaL_getmetatable(L, Future::_Name);
@@ -297,7 +324,12 @@ namespace FINLua {
 			lua_pushcfunction(L, lua_futureStruct);
 			PersistValue("LuaFutureStruct");
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(lua_futureStructContinue)));
-			PersistValue("LuaFutureStruct");
+			PersistValue("LuaFutureStructContinue");
+
+			lua_pushcfunction(L, future::luaSleep);
+			PersistValue("FutureSleep");
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(future::luaSleepContinue)));
+			PersistValue("FutureSleepContinue");
 		}
 	}
 
@@ -349,10 +381,33 @@ namespace FINLua {
 	}
 
 	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args) {
-		lua_State* thread = lua_newthread(L);
+		args = FMath::Min(args, lua_gettop(L));
+		lua_State* thread = lua_newthread(L); // ..., args, thread
 		lua_pushcfunction(thread, Func);
 		lua_insert(L, -args-1);
 		lua_xmove(L, thread, args);
 		luaFIN_pushLuaFuture(L, -1);
+		lua_remove(L, -2);
+	}
+
+	int awaitContinue(lua_State* L, int, lua_KContext index) {
+		return luaFIN_await(L, reinterpret_cast<uint64>(reinterpret_cast<void*>(index)));
+	}
+	int luaFIN_await(lua_State* L, int index) {
+		uint64 idx = lua_absindex(L, index);
+		lua_State* thread;
+		int status = FutureModule::Future::pollInternal(L, idx, thread);
+		if (thread == nullptr) {
+			return luaL_error(L, "Tried to await on failed future");
+		}
+		switch (status) {
+			case LUA_OK:
+				return FutureModule::Future::get(L);
+			case LUA_YIELD:
+				return luaFIN_yield(L, 0, reinterpret_cast<lua_KContext>(reinterpret_cast<void*>(idx)), &awaitContinue);
+			default: // error
+				lua_xmove(thread, L, 1);
+			return -1;
+		}
 	}
 }
