@@ -42,6 +42,7 @@ jobs:
       
       - name: Install FicsIt-Networks
         run: |
+          mkdir SatisfactoryDedicatedServer/FactoryGame/Mods
           unzip FicsItNetworks-LinuxServer.zip -d SatisfactoryDedicatedServer/FactoryGame/Mods/FicsItNetworks
       
       - name: Generate Documentation
