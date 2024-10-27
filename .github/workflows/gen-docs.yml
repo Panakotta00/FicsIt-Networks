@@ -25,6 +25,13 @@ jobs:
             });
             return response.data.artifacts[0].workflow_run.id;
 
+      - name: release-downloader
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: "satisfactorymodding/SatisfactoryModLoader"
+          latest: true
+          fileName: "SML-LinuxServer.zip"
+
       - name: Download FicsIt-Networks
         uses: actions/download-artifact@v4
         with:
@@ -40,10 +47,11 @@ jobs:
         run: |
           steamcmd +force_install_dir "${{ github.workspace }}/SatisfactoryDedicatedServer" +login anonymous +app_update 1690800 validate +quit
       
-      - name: Install FicsIt-Networks
+      - name: Install FicsIt-Networks & SML
         run: |
           mkdir SatisfactoryDedicatedServer/FactoryGame/Mods
           unzip FicsItNetworks-LinuxServer.zip -d SatisfactoryDedicatedServer/FactoryGame/Mods/FicsItNetworks
+          unzip SML-LinuxServer.zip -d SatisfactoryDedicatedServer/FactoryGame/Mods/SML
       
       - name: Generate Documentation
         working-directory: SatisfactoryDedicatedServer
