@@ -133,7 +133,9 @@ namespace FINLua {
 					} case LUA_YIELD:
 						lua_pop(thread, results);
 						break;
-					default: ;
+					default: // error
+						lua_xmove(thread, L, 1);
+						return lua_error(L);
 				}
 				return status;
 			}
@@ -411,8 +413,7 @@ namespace FINLua {
 			case LUA_YIELD:
 				return luaFIN_yield(L, 0, reinterpret_cast<lua_KContext>(reinterpret_cast<void*>(idx)), &awaitContinue);
 			default: // error
-				lua_xmove(thread, L, 1);
-			return -1;
+				return -1;
 		}
 	}
 }
