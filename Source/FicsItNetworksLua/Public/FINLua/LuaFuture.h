@@ -17,9 +17,20 @@ namespace FINLua {
 	 * @param Index the index of the lua value you try to get as dynamic Future Struct
 	 * @return a shared pointer to the dynamic Future Struct of the lua future in the lua stack. Will error if lua value is not future.
 	 */
-	[[nodiscard]] const TSharedRef<TFIRInstancedStruct<FFINFuture>>& luaFIN_checkLuaFuture(lua_State* L, int Index);
-	[[nodiscard]] FORCEINLINE const TFIRInstancedStruct<FFINFuture>& luaFIN_checkFuture(lua_State* L, int Index) {
-		TSharedRef<TFIRInstancedStruct<FFINFuture>> future = luaFIN_checkLuaFuture(L, Index);
-		return *future;
-	}
+	[[nodiscard]] const TSharedPtr<TFIRInstancedStruct<FFINFuture>>& luaFIN_checkFuture(lua_State* L, int Index);
+
+	/**
+	 * @brief Pushes a LuaFuture that wraps the thread/coroutine at the given index in the lua stack to the stack.
+	 * @param L the lua state
+	 * @param Thread the index of the thread/coroutine you want to wrap as future
+	 */
+	void luaFIN_pushLuaFuture(lua_State* L, int Thread);
+
+	/**
+	 * @brief Pushes a LuaFuture that wraps the given C-Function to the stack.
+	 * @param L the lua state
+	 * @param Func the C-Function you want to wrap as future
+	 * @param args the amount of parameters you want to pop from the top of the stack and push into the new thread
+	 */
+	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args);
 }

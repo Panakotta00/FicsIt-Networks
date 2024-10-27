@@ -90,6 +90,11 @@ namespace FINLua {
 	 * @return Empty String if no userdata or no name field, otherwise the content of the name field
 	 */
 	FString luaFIN_getUserDataMetaName(lua_State* L, int Index);
+
+	/**
+	 * @brief Yields in a way the caller is continue execution and the yield does NOT get propagated.
+	 */
+	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc);
 	
 	void luaFIN_pushFString(lua_State* L, const FString& str);
 	FString luaFIN_checkFString(lua_State* L, int index);
