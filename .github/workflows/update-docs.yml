@@ -6,10 +6,75 @@ on:
 
 permissions:
   actions: read
+  contents: write
 
 jobs:
   update-docs:
     name: Update Documentation
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hello World"
+      - name: Find DocumentationCLI Binary
+        uses: actions/github-script@v7
+        id: find-doc-cli
+        with:
+          script: |
+            const response = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 1,
+              name: "DocumentationCLI"
+            });
+            return response.data.artifacts[0].workflow_run.id;
+
+      - name: Find Documentation
+        uses: actions/github-script@v7
+        id: find-documentation
+        with:
+          script: |
+            const response = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 1,
+              name: "Documentation"
+            });
+            return response.data.artifacts[0].workflow_run.id;
+      
+      - name: Download DocumentationCLI
+        uses: actions/download-artifact@v4
+        with:
+          name: DocumentationCLI
+          run-id: ${{ steps.find-doc-cli.outputs.result }}
+          path: ${{ github.workspace }}
+
+      - name: Download Documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: DocumentationCLI
+          run-id: ${{ steps.find-documentation.outputs.result }}
+          path: ${{ github.workspace }}
+      
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          path: FicsItNetworks
+          ref: refs/heads/development
+
+      - name: Update Documentation
+        run: |
+          ./FicsItNetworksDocumentationCLI -i ./FicsItNetworks/docs/FINDocumentation.toml ./FINDocumentation.json
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Commit
+        working-directory: FicsItNetworks
+        run: |
+          git add docs
+          git commit -m "docs: Automatic Documentation Update"
+
+      - name: Push
+        working-directory: FicsItNetworks
+        run: |
+          git push
