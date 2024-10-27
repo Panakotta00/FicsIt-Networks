@@ -51,6 +51,45 @@ The count of available item stack slots this inventory has.
 
 == Functions
 
+// tag::func-canSplitAtIndex-title[]
+=== `canSplitAtIndex` (`index` : Int) -> `canSplit` : Bool
+// tag::func-canSplitAtIndex[]
+
+Returns true if the item stack at the given index can be split.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Can Split at Index
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The slot index of which you want to check if the stack can be split.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Can Split* `canSplit`
+! Bool
+! True if the stack at the given index can be split.
+!===
+
+====
+// end::func-canSplitAtIndex[]
+// end::func-canSplitAtIndex-title[]
 // tag::func-flush-title[]
 === `flush` ()
 // tag::func-flush[]
@@ -109,6 +148,39 @@ Sorts the whole inventory. (like the middle mouse click into a inventory)
 ====
 // end::func-sort[]
 // end::func-sort-title[]
+// tag::func-splitAtIndex-title[]
+=== `splitAtIndex` (`index` : Int, `num` : Int)
+// tag::func-splitAtIndex[]
+
+Tries to split the stack at the given index and puts the given amount of items into a free slot.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Split At Index
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Index* `index`
+! Int
+! The index of the stack you want to split.
+
+! *Num* `num`
+! Int
+! The number of items you want to split off the stack at the given index.
+!===
+
+====
+// end::func-splitAtIndex[]
+// end::func-splitAtIndex-title[]
 // tag::func-swapStacks-title[]
 === `swapStacks` (`index1` : Int, `index2` : Int) -> `successful` : Bool
 // tag::func-swapStacks[]

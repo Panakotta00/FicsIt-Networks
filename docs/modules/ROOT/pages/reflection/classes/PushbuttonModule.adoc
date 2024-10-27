@@ -9,6 +9,8 @@
 
 This Button Module for modular I/O Panels can have different knob color and brightnesses and you can use them to trigger specific programmed events.
 
+Use the Ficsit Label Marker to change the text and foreground color of the button.
+
 // tag::interface[]
 
 == Properties
@@ -53,7 +55,7 @@ Triggers a button press by code.
 // end::func-Trigger[]
 // end::func-Trigger-title[]
 // tag::func-setColor-title[]
-=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+=== `setColor` (`Red` : Float, `Green` : Float, `Blue` : Float, `Emit` : Float)
 // tag::func-setColor[]
 
 
@@ -73,15 +75,15 @@ Triggers a button press by code.
 !===
 !Name !Type !Description
 
-! *red* `red`
+! *Red* `Red`
 ! Float
 ! 
 
-! *green* `green`
+! *Green* `Green`
 ! Float
 ! 
 
-! *blue* `blue`
+! *Blue* `Blue`
 ! Float
 ! 
 

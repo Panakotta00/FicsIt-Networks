@@ -4,7 +4,7 @@
 [cols="1,5a",separator="!"]
 !===
 ! Parent
-! xref:/reflection/classes/Factory.adoc[Factory]
+! xref:/reflection/classes/Buildable.adoc[Buildable]
 !===
 
 The controler object for a railroad switch.

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 #include "AudioController.generated.h"
 
 class UAudioComponent;
@@ -13,7 +14,7 @@ private:
 	UPROPERTY()
 	UAudioComponent* AudioComponent = nullptr;
 	
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void ExecBeep(float InPitch);
 	
 public:

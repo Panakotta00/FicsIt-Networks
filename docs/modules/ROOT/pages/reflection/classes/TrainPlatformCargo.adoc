@@ -115,6 +115,23 @@ True if the cargo platform is currently loading or unloading the docked cargo ve
 ====
 // end::func-isUnloading[]
 // end::func-isUnloading-title[]
+// tag::func-isInLoadMode-title[]
+=== `isInLoadMode` : Bool
+// tag::func-isInLoadMode[]
+
+True if the cargo platform is set to load cargo, false if it should unload the cargo.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is in Load Mode
+!===
+====
+// end::func-isInLoadMode[]
+// end::func-isInLoadMode-title[]
 // tag::func-outputFlow-title[]
 === `outputFlow` : Float
 // tag::func-outputFlow[]

@@ -3,18 +3,18 @@
 #include "FINUtils.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
-#include "TracyLib/public/tracy/Tracy.hpp"
+#include "tracy/Tracy.hpp"
 #include "UI/FINTextDecorators.h"
 
 const FName FFINLuaCodeEditorStyle::TypeName(TEXT("FFINLuaCodeEditorStyle"));
 
 FFINLuaCodeEditorStyle::FFINLuaCodeEditorStyle() :
-	UnderlineStyleInvalid(FCoreStyle::Get().GetWidgetStyle<FHyperlinkStyle>(TEXT("Hyperlink")).UnderlineStyle),
-	UnderlineStyleValid(FCoreStyle::Get().GetWidgetStyle<FHyperlinkStyle>(TEXT("Hyperlink")).UnderlineStyle) {}
+	UnderlineStyleValid(FCoreStyle::Get().GetWidgetStyle<FHyperlinkStyle>(TEXT("Hyperlink")).UnderlineStyle),
+	UnderlineStyleInvalid(FCoreStyle::Get().GetWidgetStyle<FHyperlinkStyle>(TEXT("Hyperlink")).UnderlineStyle) {}
 
 void FFINLuaCodeEditorStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const {
 	UnderlineStyleValid.GetResources(OutBrushes);
-	UnderlineStyleValid.GetResources(OutBrushes);
+	UnderlineStyleInvalid.GetResources(OutBrushes);
 	LineNumberStyle.GetResources(OutBrushes);
 	NormalTextStyle.GetResources(OutBrushes);
 	StringTextStyle.GetResources(OutBrushes);

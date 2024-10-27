@@ -51,7 +51,7 @@ A medium analogue Gauge for use on Large Panels. The red portion and needle posi
 == Functions
 
 // tag::func-setBackgroundColor-title[]
-=== `setBackgroundColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+=== `setBackgroundColor` (`Red` : Float, `Green` : Float, `Blue` : Float, `Emit` : Float)
 // tag::func-setBackgroundColor[]
 
 
@@ -71,15 +71,15 @@ A medium analogue Gauge for use on Large Panels. The red portion and needle posi
 !===
 !Name !Type !Description
 
-! *red* `red`
+! *Red* `Red`
 ! Float
 ! 
 
-! *green* `green`
+! *Green* `Green`
 ! Float
 ! 
 
-! *blue* `blue`
+! *Blue* `Blue`
 ! Float
 ! 
 
@@ -92,7 +92,7 @@ A medium analogue Gauge for use on Large Panels. The red portion and needle posi
 // end::func-setBackgroundColor[]
 // end::func-setBackgroundColor-title[]
 // tag::func-setColor-title[]
-=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+=== `setColor` (`Red` : Float, `Green` : Float, `Blue` : Float, `Emit` : Float)
 // tag::func-setColor[]
 
 
@@ -112,15 +112,15 @@ A medium analogue Gauge for use on Large Panels. The red portion and needle posi
 !===
 !Name !Type !Description
 
-! *red* `red`
+! *Red* `Red`
 ! Float
 ! 
 
-! *green* `green`
+! *Green* `Green`
 ! Float
 ! 
 
-! *blue* `blue`
+! *Blue* `Blue`
 ! Float
 ! 
 

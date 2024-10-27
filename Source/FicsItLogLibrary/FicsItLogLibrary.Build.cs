@@ -5,6 +5,7 @@ public class FicsItLogLibrary : ModuleRules
     public FicsItLogLibrary(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        bWarningsAsErrors = true;
 
         PublicDependencyModuleNames.AddRange(
             new string[]
@@ -20,8 +21,6 @@ public class FicsItLogLibrary : ModuleRules
             {
                 "CoreUObject",
                 "Engine",
-                "Slate",
-                "SlateCore"
             }
         );
     }

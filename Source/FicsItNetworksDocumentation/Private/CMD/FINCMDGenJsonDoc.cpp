@@ -1,5 +1,6 @@
 #include "FicsItNetworksDocumentation.h"
 #include "FicsItReflection.h"
+#include "Paths.h"
 #include "Reflection/FIRArrayProperty.h"
 #include "Reflection/FIRBoolProperty.h"
 #include "Reflection/FIRClassProperty.h"
@@ -49,13 +50,14 @@ namespace FINGenJsonDoc {
 		return Obj;
 	}
 
-	void FINGenRefBase(const TSharedPtr<FJsonObject>& Obj, const UFIRBase* Base) {
+	void FINGenRefBase(const TSharedRef<FJsonObject>& Obj, const UFIRBase* Base) {
+		check(Base);
 		Obj->SetStringField(TEXT("internalName"), Base->GetInternalName());
 		if (!Base->GetDisplayName().IsEmpty()) Obj->SetStringField(TEXT("displayName"), Base->GetDisplayName().ToString());
 		Obj->SetStringField(TEXT("description"), Base->GetDescription().ToString());
 	}
 
-	void FINGenRefProp(const TSharedPtr<FJsonObject>& Obj, UFIRProperty* Prop) {
+	void FINGenRefProp(const TSharedRef<FJsonObject>& Obj, UFIRProperty* Prop) {
 		FINGenRefBase(Obj, Prop);
 		Obj->SetObjectField(TEXT("type"), GenReflectionDataType(Prop));
 
@@ -74,11 +76,11 @@ namespace FINGenJsonDoc {
 		Obj->SetArrayField(TEXT("flags"), FlagArray);
 	}
 
-	void FINGenRefFunc(const TSharedPtr<FJsonObject>& Obj, const UFIRFunction* Func) {
+	void FINGenRefFunc(const TSharedRef<FJsonObject>& Obj, const UFIRFunction* Func) {
 		FINGenRefBase(Obj, Func);
 		TArray<TSharedPtr<FJsonValue>> parameters;
 		for (UFIRProperty* parameter : Func->GetParameters()) {
-			TSharedPtr<FJsonObject> parameterObject = MakeShared<FJsonObject>();
+			TSharedRef<FJsonObject> parameterObject = MakeShared<FJsonObject>();
 			FINGenRefProp(parameterObject, parameter);
 			parameters.Add(MakeShared<FJsonValueObject>(parameterObject));
 		}
@@ -97,30 +99,30 @@ namespace FINGenJsonDoc {
 		Obj->SetArrayField(TEXT("flags"), FlagArray);
 	}
 
-	void FINGenRefStruct(const TSharedPtr<FJsonObject>& Obj, const UFIRStruct* Struct) {
+	void FINGenRefStruct(const TSharedRef<FJsonObject>& Obj, const UFIRStruct* Struct) {
 		FINGenRefBase(Obj, Struct);
 		if (Struct->GetParent()) Obj->SetStringField(TEXT("parent"), Struct->GetParent()->GetInternalName());
 		TArray<TSharedPtr<FJsonValue>> Properties;
 		for (UFIRProperty* Property : Struct->GetProperties(false)) {
-			TSharedPtr<FJsonObject> PropertyObj = MakeShared<FJsonObject>();
+			TSharedRef<FJsonObject> PropertyObj = MakeShared<FJsonObject>();
 			FINGenRefProp(PropertyObj, Property);
 			Properties.Add(MakeShared<FJsonValueObject>(PropertyObj));
 		}
 		Obj->SetArrayField(TEXT("properties"), Properties);
 		TArray<TSharedPtr<FJsonValue>> Functions;
 		for (UFIRFunction* Function : Struct->GetFunctions(false)) {
-			TSharedPtr<FJsonObject> FunctionObj = MakeShared<FJsonObject>();
+			TSharedRef<FJsonObject> FunctionObj = MakeShared<FJsonObject>();
 			FINGenRefFunc(FunctionObj, Function);
 			Functions.Add(MakeShared<FJsonValueObject>(FunctionObj));
 		}
 		Obj->SetArrayField(TEXT("functions"), Functions);
 	}
 
-	void FINGenRefSignal(const TSharedPtr<FJsonObject>& Obj, const UFIRSignal* Signal) {
+	void FINGenRefSignal(const TSharedRef<FJsonObject>& Obj, const UFIRSignal* Signal) {
 		FINGenRefBase(Obj, Signal);
 		TArray<TSharedPtr<FJsonValue>> parameters;
 		for (UFIRProperty* parameter : Signal->GetParameters()) {
-			TSharedPtr<FJsonObject> parameterObject = MakeShared<FJsonObject>();
+			TSharedRef<FJsonObject> parameterObject = MakeShared<FJsonObject>();
 			FINGenRefProp(parameterObject, parameter);
 			parameters.Add(MakeShared<FJsonValueObject>(parameterObject));
 		}
@@ -128,11 +130,11 @@ namespace FINGenJsonDoc {
 		Obj->SetBoolField(TEXT("isVarArgs"), Signal->IsVarArgs());
 	}
 
-	void FINGenRefClass(const TSharedPtr<FJsonObject>& Obj, const UFIRClass* Class) {
+	void FINGenRefClass(const TSharedRef<FJsonObject>& Obj, const UFIRClass* Class) {
 		FINGenRefStruct(Obj, Class);
 		TArray<TSharedPtr<FJsonValue>> Signals;
 		for (UFIRSignal* Signal : Class->GetSignals(false)) {
-			TSharedPtr<FJsonObject> SignalObj = MakeShared<FJsonObject>();
+			TSharedRef<FJsonObject> SignalObj = MakeShared<FJsonObject>();
 			FINGenRefSignal(SignalObj, Signal);
 			Signals.Add(MakeShared<FJsonValueObject>(SignalObj));
 		}
@@ -140,7 +142,7 @@ namespace FINGenJsonDoc {
 	}
 
 	void FINGenClasses(TArray<TSharedPtr<FJsonValue>>& Array, const UFIRClass* Class) {
-		TSharedPtr<FJsonObject> ClassObj = MakeShared<FJsonObject>();
+		TSharedRef<FJsonObject> ClassObj = MakeShared<FJsonObject>();
 		FINGenRefClass(ClassObj, Class);
 		Array.Add(MakeShared<FJsonValueObject>(ClassObj));
 
@@ -172,7 +174,7 @@ namespace FINGenJsonDoc {
 		}
 		Names.Sort();
 		for (FString Name : Names) {
-			TSharedPtr<FJsonObject> StructObj = MakeShared<FJsonObject>();
+			TSharedRef<FJsonObject> StructObj = MakeShared<FJsonObject>();
 			FINGenRefStruct(StructObj, NamesToStructs[Name]);
 			Structs.Add(MakeShared<FJsonValueObject>(StructObj));
 		}

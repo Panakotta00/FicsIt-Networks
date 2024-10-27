@@ -1,6 +1,7 @@
 ﻿#include "ComputerModules/PCI/FINComputerGPU.h"
 
 #include "FINComputerSubsystem.h"
+#include "SlateApplication.h"
 #include "Buildables/FGBuildableWidgetSign.h"
 #include "Graphics/FINScreenInterface.h"
 #include "Net/UnrealNetwork.h"
@@ -10,6 +11,8 @@ AFINComputerGPU::AFINComputerGPU() {
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	NetDormancy = DORM_Awake;
 }
 
 void AFINComputerGPU::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {

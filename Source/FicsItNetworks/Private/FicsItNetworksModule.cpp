@@ -337,31 +337,11 @@ void FFicsItNetworksModule::StartupModule(){
 			}}
 		},
 	}, redirects);
-		
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-
-	TArray<FString> PathsToScan;
-	PathsToScan.Add(TEXT("/FicsItNetworks"));
-	AssetRegistryModule.Get().ScanPathsSynchronous(PathsToScan, true);
-	
-	TArray<FAssetData> AssetData;
-	AssetRegistryModule.Get().GetAssetsByPath(TEXT("/FicsItNetworks"), AssetData, true);
-
-	for (const FAssetData& Asset : AssetData) {
-		FString NewPath = Asset.GetObjectPathString();
-		FString OldPath = TEXT("/Game") + Asset.GetObjectPathString();
-		if (Asset.AssetClass == TEXT("Blueprint") || Asset.AssetClass == TEXT("WidgetBlueprint")) { // TODO: Check if AssetClassPath works, and how?
-			NewPath += TEXT("_C");
-			OldPath += TEXT("_C");
-		}
-		// UE_LOG(LogFicsItNetworks, Warning, TEXT("FIN Redirect: '%s' -> '%s'"), *OldPath, *NewPath);
-		redirects.Add(FCoreRedirect(ECoreRedirectFlags::Type_AllMask, OldPath, NewPath));
-	}
 
 	FCoreRedirects::AddRedirectList(redirects, "FIN-Code");
 	
 	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
-#if !WITH_EDITOR
+#if !WITH_EDITOR && UE_GAME
 		// Copy FS UUID Item Context Menu Entry //
 		UClass* Slot = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/InventorySlots/Widget_InventorySlot.Widget_InventorySlot_C"));
 		check(Slot);

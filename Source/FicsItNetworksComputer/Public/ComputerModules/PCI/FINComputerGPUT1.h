@@ -2,7 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "FINComputerGPU.h"
+#include "Async/ParallelFor.h"
+#include "Widgets/SLeafWidget.h"
 #include "FINComputerGPUT1.generated.h"
+
+class SInvalidationPanel;
 
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenCursorEventHandler, int, int, int);
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FScreenKeyEventHandler, uint32, uint32, int);
@@ -496,8 +500,7 @@ struct TStructOpsTypeTraits<FFINGPUT1Buffer> : TStructOpsTypeTraitsBase2<FFINGPU
 };
 
 class FICSITNETWORKSCOMPUTER_API SScreenMonitor : public SLeafWidget {
-	SLATE_BEGIN_ARGS(SScreenMonitor) : _Font()
-		{
+	SLATE_BEGIN_ARGS(SScreenMonitor) : _Font() {
 			_Clipping = EWidgetClipping::OnDemand;
 		}
 		SLATE_ATTRIBUTE(FSlateFontInfo, Font)
@@ -596,6 +599,8 @@ private:
 	int64 Offset = 0;
 	TArray<FFINGPUT1BufferPixel> ToReplicate;
 	bool bShouldReplicate = false;
+
+	double ReplicateStart = 0.0;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_BeginBackBufferReplication(FIntPoint Size);

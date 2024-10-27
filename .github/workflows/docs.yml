@@ -1,8 +1,9 @@
-name: Push
+name: Deploy Docs
 
 on:
   push:
-    branches: master
+    branches:
+      - master
     paths:
       - 'docs/**'
 

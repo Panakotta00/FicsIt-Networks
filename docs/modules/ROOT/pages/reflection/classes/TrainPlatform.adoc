@@ -51,7 +51,7 @@ The current docking status of the platform.
 == Functions
 
 // tag::func-getConnectedPlatform-title[]
-=== `getConnectedPlatform` (`direction` : Int) -> `platform` : Trace<xref:/reflection/classes/TrainPlatform.adoc[TrainPlatform]>
+=== `getConnectedPlatform` (`platformConnection` : Object<xref:/reflection/classes/TrainPlatformConnection.adoc[TrainPlatformConnection]>) -> `oppositeConnection` : Trace<xref:/reflection/classes/TrainPlatformConnection.adoc[TrainPlatformConnection]>
 // tag::func-getConnectedPlatform[]
 
 Returns the connected platform in the given direction.
@@ -71,9 +71,9 @@ Returns the connected platform in the given direction.
 !===
 !Name !Type !Description
 
-! *Direction* `direction`
-! Int
-! The direction in which you want to get the connected platform.
+! *Platform Connection* `platformConnection`
+! Object<xref:/reflection/classes/TrainPlatformConnection.adoc[TrainPlatformConnection]>
+! The platform connection of which you want to find the opposite connection of.
 !===
 
 .Return Values
@@ -81,9 +81,9 @@ Returns the connected platform in the given direction.
 !===
 !Name !Type !Description
 
-! *Platform* `platform`
-! Trace<xref:/reflection/classes/TrainPlatform.adoc[TrainPlatform]>
-! The platform connected to this platform in the given direction.
+! *Opposite Connection* `oppositeConnection`
+! Trace<xref:/reflection/classes/TrainPlatformConnection.adoc[TrainPlatformConnection]>
+! The platform connection at the opposite side.
 !===
 
 ====
@@ -242,6 +242,35 @@ Returns the track pos at which this train platform is placed.
 ====
 // end::func-getTrackPos[]
 // end::func-getTrackPos-title[]
+// tag::func-getAllConnectedPlatforms-title[]
+=== `getAllConnectedPlatforms` () -> `platforms` : Array<Trace<xref:/reflection/classes/TrainPlatformConnection.adoc[TrainPlatformConnection]>>
+// tag::func-getAllConnectedPlatforms[]
+
+Returns a list of all connected platforms in order.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get all connected Platforms
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Platforms* `platforms`
+! Array<Trace<xref:/reflection/classes/TrainPlatformConnection.adoc[TrainPlatformConnection]>>
+! The list of connected platforms
+!===
+
+====
+// end::func-getAllConnectedPlatforms[]
+// end::func-getAllConnectedPlatforms-title[]
 
 // end::interface[]
 

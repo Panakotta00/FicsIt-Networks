@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Buildable.adoc[Buildable]
 !===
 
-This large verical modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programms.
+This large vertical modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control your programms.
 
 You can connect it to the FicsIt-Network.
 

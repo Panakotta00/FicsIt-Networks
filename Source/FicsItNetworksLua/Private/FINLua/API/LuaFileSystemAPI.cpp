@@ -5,6 +5,7 @@
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaPersistence.h"
 
+#undef LuaFunc
 #define LuaFunc() \
 	UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L); \
 	FLuaSyncCall SyncCall(L); \
@@ -25,7 +26,7 @@
 			mode = self->transfer->mode; \
 			mode = mode & ~CodersFileSystem::FileMode::TRUNC; \
 		} else mode = CodersFileSystem::INPUT; \
-		self->file = kernel->GetFileSystem()->open(kernel->GetFileSystem()->unpersistPath(self->path), mode); \
+		self->file = kernel->GetFileSystem()->open(self->path, mode); \
 		if (self->transfer->open) { \
 			self->file->seek("set", self->transfer->pos); \
 			self->transfer = nullptr; \
@@ -35,7 +36,7 @@
         TArray<LuaFile>& streams = FINLua::luaFIN_getExtraSpace(L).FileStreams; \
 		streams.Add(self); \
 	} \
-	CodersFileSystem::SRef<CodersFileSystem::FileStream>& file = self->file; \
+	TSharedPtr<CodersFileSystem::FileStream>& file = self->file; \
 	if (!file) { \
 		return luaL_error(L, "filestream not open"); \
 	}
@@ -87,16 +88,16 @@ namespace FINLua {
 
 				const std::string type = luaL_checkstring(L, 1);
 				const std::string name = luaL_checkstring(L, 2);
-				CodersFileSystem::SRef<CodersFileSystem::Device> device;
+				TSharedPtr<CodersFileSystem::Device> device;
 				if (type == "tmpfs") {
-					device = new CodersFileSystem::MemDevice();
+					return luaL_argerror(L, 1, "Temp Filesystems are not possible anymore till a complete FileSystem Overhaul.");
 				} else return luaL_argerror(L, 1, "No valid FileSystem Type");
-				if (!device.isValid()) luaL_argerror(L, 1, "Invalid Device");
-				CodersFileSystem::SRef<FFINKernelFSDevDevice> dev = self->getDevDevice();
+				/*if (!device.IsValid()) luaL_argerror(L, 1, "Invalid Device");
+				TSharedPtr<FFINKernelFSDevDevice> dev = kernel->GetDevDevice();
 				try {
-					lua_pushboolean(L, dev.isValid() ? dev->addDevice(device, name) : false);
+					lua_pushboolean(L, dev.IsValid() ? dev->addDevice(device, name) : false);
 				} CatchExceptionLua
-				return UFINLuaProcessor::luaAPIReturn(L, 1);
+				return UFINLuaProcessor::luaAPIReturn(L, 1);*/
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -111,16 +112,18 @@ namespace FINLua {
 			 */)", removeFileSystem) {
 				LuaFunc();
 
+				luaL_error(L, "Other FileSystems are not supported anymore until a complete FileSystem Overhaul");
+
 				const std::string name = luaL_checkstring(L, 1);
-				const CodersFileSystem::SRef<FFINKernelFSDevDevice> dev = self->getDevDevice();
-				if (dev.isValid()) {
+				TSharedPtr<FFINKernelFSDevDevice> dev = kernel->GetDevDevice();
+				if (dev.IsValid()) {
 					try {
 						const auto devices = dev->getDevices();
 						const auto device = devices.find(name);
-						if (device != devices.end() && dynamic_cast<CodersFileSystem::MemDevice*>(device->second.get())) {
+						/*if (device != devices.end() && dynamic_cast<CodersFileSystem::MemDevice*>(device->second.get())) {
 							lua_pushboolean(L, dev->removeDevice(device->second));
 							return UFINLuaProcessor::luaAPIReturn(L, 1);
-						}
+						}*/
 					} CatchExceptionLua
 				}
 				lua_pushboolean(L, false);
@@ -180,7 +183,7 @@ namespace FINLua {
 				LuaFunc();
 
 				FString Mode = "r";
-				if (lua_isstring(L, 2)) Mode = FString(lua_tostring(L, 2));
+				if (lua_isstring(L, 2)) Mode = luaFIN_toFString(L, 2);
 				CodersFileSystem::FileMode m;
 				if (Mode.Contains("+r")) m = CodersFileSystem::INPUT | CodersFileSystem::OUTPUT;
 				else if (Mode.Contains("+w")) m = CodersFileSystem::INPUT | CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC;
@@ -192,8 +195,8 @@ namespace FINLua {
 				if (Mode.Contains("b")) m = m | CodersFileSystem::BINARY;
 				try {
 					const CodersFileSystem::Path path = CodersFileSystem::Path(luaL_checkstring(L, 1));
-					const CodersFileSystem::SRef<CodersFileSystem::FileStream> stream = self->open(path, m);
-					luaFIN_pushFile(L, stream, stream ? self->persistPath(path) : "");
+					const TSharedPtr<CodersFileSystem::FileStream> stream = self->open(path, m);
+					luaFIN_pushFile(L, stream, path);
 				} CatchExceptionLua
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -213,7 +216,7 @@ namespace FINLua {
 				const std::string path = luaL_checkstring(L, 1);
 				const bool all = (bool)lua_toboolean(L, 2);
 				try {
-					lua_pushboolean(L, self->createDir(CodersFileSystem::Path(path), all).isValid());
+					lua_pushboolean(L, self->createDir(CodersFileSystem::Path(path), all));
 				} CatchExceptionLua
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -290,7 +293,7 @@ namespace FINLua {
 
 				const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 				try {
-					lua_pushboolean(L, self->get(path).isValid());
+					lua_pushboolean(L, self->fileType(path).IsSet());
 				} CatchExceptionLua
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -306,7 +309,7 @@ namespace FINLua {
 				const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 				std::unordered_set<std::string> childs;
 				try {
-					childs = self->childs(path);
+					childs = self->children(path);
 				} CatchExceptionLua
 				lua_newtable(L);
 				int i = 1;
@@ -326,7 +329,7 @@ namespace FINLua {
 				LuaFunc();
 				const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 				try {
-					lua_pushboolean(L, !!dynamic_cast<CodersFileSystem::File*>(self->get(path).get()));
+					lua_pushboolean(L, self->fileType(path) == CodersFileSystem::File_Regular);
 				} CatchExceptionLua
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -340,7 +343,7 @@ namespace FINLua {
 				LuaFunc();
 				const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
 				try {
-					lua_pushboolean(L, !!dynamic_cast<CodersFileSystem::Directory*>(self->get(path).get()));
+					lua_pushboolean(L, self->fileType(path) == CodersFileSystem::File_Directory);
 				} CatchExceptionLua
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -359,7 +362,12 @@ namespace FINLua {
 				const auto devPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
 				const auto mountPath = CodersFileSystem::Path(luaL_checkstring(L, 2));
 				try {
-					lua_pushboolean(L, CodersFileSystem::DeviceNode::mount(*self, devPath, mountPath));
+					TSharedPtr<CodersFileSystem::Device> device =  self->getDevice(devPath);
+					if (device) {
+						lua_pushboolean(L, self->mount(device.ToSharedRef(), mountPath));
+					} else {
+						lua_pushboolean(L, false);
+					}
 				} CatchExceptionLua
 				return UFINLuaProcessor::luaAPIReturn(L, 1);
 			}
@@ -398,14 +406,14 @@ namespace FINLua {
 				LuaFunc();
 
 				const CodersFileSystem::Path path(luaL_checkstring(L, 1));
-				CodersFileSystem::SRef<CodersFileSystem::FileStream> file;
+				TSharedPtr<CodersFileSystem::FileStream> file;
 				try {
 					file = self->open(path, CodersFileSystem::INPUT);
 				} CatchExceptionLua
-				if (!file.isValid()) return luaL_error(L, "not able to create filestream");
+				if (!file.IsValid()) return luaL_error(L, "not able to create filestream");
 				std::string code;
 				try {
-					code = CodersFileSystem::FileStream::readAll(file);
+					code = CodersFileSystem::FileStream::readAll(file.ToSharedRef());
 				} CatchExceptionLua
 				try {
 					file->close();
@@ -425,14 +433,14 @@ namespace FINLua {
 				LuaFunc();
 
 				const CodersFileSystem::Path path = luaL_checkstring(L, 1);
-				CodersFileSystem::SRef<CodersFileSystem::FileStream> file;
+				TSharedPtr<CodersFileSystem::FileStream> file;
 				try {
 					file = self->open(path, CodersFileSystem::INPUT);
 				} CatchExceptionLua
-				if (!file.isValid()) return luaL_error(L, "not able to create filestream");
+				if (!file.IsValid()) return luaL_error(L, "not able to create filestream");
 				std::string code;
 				try {
-					code = CodersFileSystem::FileStream::readAll(file);
+					code = CodersFileSystem::FileStream::readAll(file.ToSharedRef());
 				} CatchExceptionLua
 				try {
 					file->close();
@@ -585,18 +593,22 @@ namespace FINLua {
 				int args = lua_gettop(L);
 				for (int i = 1; i <= args; ++i) {
 					CodersFileSystem::Path Path = lua_tostring(L, i);
-					CodersFileSystem::SRef<CodersFileSystem::Node> Node = self->get(Path);
-					if (!Node.isValid()) {
-						lua_pushnil(L);
-						continue;
-					}
+					TOptional<CodersFileSystem::FileType> FileType = self->fileType(Path);
 					lua_newtable(L);
-					if (dynamic_cast<CodersFileSystem::File*>(Node.get())) {
-						lua_pushstring(L, "File");
-					} else if (dynamic_cast<CodersFileSystem::Directory*>(Node.get())) {
-						lua_pushstring(L, "Directory");
-					} else if (dynamic_cast<CodersFileSystem::DeviceNode*>(Node.get())) {
-						lua_pushstring(L, "Device");
+					if (FileType.IsSet()) {
+						switch (*FileType) {
+							case CodersFileSystem::File_Regular:
+								lua_pushstring(L, "File");
+							break;
+							case CodersFileSystem::File_Directory:
+								lua_pushstring(L, "Directory");
+							break;
+							case CodersFileSystem::File_Device:
+								lua_pushstring(L, "Device");
+							break;
+							default:
+								lua_pushstring(L, "Unknown");
+						}
 					} else {
 						lua_pushstring(L, "Unknown");
 					}
@@ -712,9 +724,8 @@ namespace FINLua {
 				if (valid) {
 					path = lua_tostring(L, lua_upvalueindex(2));
 					const bool open = (bool)lua_toboolean(L, lua_upvalueindex(3));
-					CodersFileSystem::SRef<CodersFileSystem::FileStream> stream;
+					TSharedPtr<CodersFileSystem::FileStream> stream;
 					if (open) {
-						path = kernel->GetFileSystem()->unpersistPath(path).str();
 						CodersFileSystem::FileMode mode = static_cast<CodersFileSystem::FileMode>(static_cast<int>(lua_tonumber(L, lua_upvalueindex(4))));
 						mode = mode & ~CodersFileSystem::FileMode::TRUNC;
 						stream = kernel->GetFileSystem()->open(CodersFileSystem::Path(path), mode);
@@ -764,7 +775,7 @@ namespace FINLua {
 		LuaModulePostSetup() {
 			PersistenceNamespace("FileSystem");
 
-			lua_pushcfunction(L, reinterpret_cast<int(*)(lua_State*)>(filesystem::luaDoFileCont));
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(filesystem::luaDoFileCont)));
 			PersistValue("doFileCont");
 
 			luaL_getmetatable(L, "File");
@@ -777,13 +788,13 @@ namespace FINLua {
 		}
 	}
 
-	void luaFIN_pushFile(lua_State* L, CodersFileSystem::SRef<CodersFileSystem::FileStream> file, const std::string& path) {
+	void luaFIN_pushFile(lua_State* L, TSharedPtr<CodersFileSystem::FileStream> file, const std::string& path) {
 		LuaFile* f = static_cast<LuaFile*>(lua_newuserdata(L, sizeof(LuaFile)));
 		luaL_setmetatable(L, "File");
 		new (f) LuaFile(new LuaFileContainer());
-		f->get()->file = file;
-		f->get()->path = path;
-		if (file.isValid()) {
+		f->Get().file = file;
+		f->Get().path = path;
+		if (file.IsValid()) {
 			TArray<LuaFile>& streams = FINLua::luaFIN_getExtraSpace(L).FileStreams;
 			streams.Add(*f);
 		}

@@ -14,15 +14,15 @@
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FIRTrace.h"
+#include "Engine/Engine.h"
 #include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/LuaUtil.h"
 #include "Signals/FINSignalData.h"
-
 #include "tracy/Tracy.hpp"
 
-void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
+void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, TSharedRef<CodersFileSystem::Device> device) {
 	for (FINLua::LuaFile file : Parent->GetFileStreams()) {
-		if (file.isValid() && (!Parent->GetKernel()->GetFileSystem() || !Parent->GetKernel()->GetFileSystem()->checkUnpersistPath(file->path))) {
+		if (!Parent->GetKernel()->GetFileSystem()) {
 			file->file->close();
 		}
 	}
@@ -30,7 +30,7 @@ void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, CodersFileS
 
 void LuaFileSystemListener::onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) {
 	for (FINLua::LuaFile file : Parent->GetFileStreams()) {
-		if (file.isValid() && file->path.length() > 0 && (!Parent->GetKernel()->GetFileSystem() || Parent->GetKernel()->GetFileSystem()->unpersistPath(file->path) == path)) {
+		if (file->path.length() > 0 && (!Parent->GetKernel()->GetFileSystem())) {
 			file->file->close();
 		}
 	}
@@ -360,7 +360,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 
 	for (FINLua::LuaFile file : FileStreams) {
 		if (file->file) {
-			file->transfer = CodersFileSystem::SRef<FINLua::LuaFilePersistTransfer>(new FINLua::LuaFilePersistTransfer());
+			file->transfer = MakeShared<FINLua::LuaFilePersistTransfer>();
 			file->transfer->open = file->file->isOpen();
 			if (file->transfer->open) {
 				file->transfer->mode = file->file->getMode();
@@ -388,7 +388,6 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		lua_setfield(luaState, -2, "globals");						// ..., perm, globals, perm, data
 		lua_pushvalue(luaState, luaThreadIndex);						// ..., perm, globals, perm, data, thread
 		lua_setfield(luaState, -2, "thread");						// ..., perm, globals, perm, data
-		FINLua::luaFINDebug_dumpTable(luaState, -2);
 
 		lua_pushcfunction(luaState, luaPersist);					// ..., perm, globals, perm, data, persist-func
 		lua_insert(luaState, -3);									// ..., perm, globals, persist-func, perm, data
@@ -579,8 +578,13 @@ void UFINLuaProcessor::LuaTick() {
 			tickHelper.shouldStop();
 		} else {
 			// runtime crashed -> crash system with runtime error message
-			luaL_traceback(luaThread, luaThread, lua_tostring(luaThread, -1), 0);
-			tickHelper.shouldCrash(MakeShared<FFINKernelCrash>(UTF8_TO_TCHAR(lua_tostring(luaThread, -1))));
+			const char* message = lua_tostring(luaThread, -1);
+			try {
+				luaL_traceback(luaThread, luaThread, message, 0);
+				tickHelper.shouldCrash(MakeShared<FFINKernelCrash>(FINLua::luaFIN_toFString(luaThread, -1)));
+			} catch (FString error) {
+				tickHelper.shouldCrash(MakeShared<FFINKernelCrash>(UTF8_TO_TCHAR(message)));
+			}
 		}
 		if (nres > -1) {
 			lua_pop(luaThread, nres);
@@ -606,11 +610,11 @@ size_t luaLen(lua_State* L, int idx) {
 }
 
 void UFINLuaProcessor::ClearFileStreams() {
-	TArray<CodersFileSystem::SRef<FINLua::LuaFileContainer>> ToRemove;
-	for (const CodersFileSystem::SRef<FINLua::LuaFileContainer>& fs : FileStreams) {
-		if (!fs.isValid()) ToRemove.Add(fs);
+	TArray<TSharedRef<FINLua::LuaFileContainer>> ToRemove;
+	for (const TSharedRef<FINLua::LuaFileContainer>& fs : FileStreams) {
+		ToRemove.Add(fs);
 	}
-	for (const CodersFileSystem::SRef<FINLua::LuaFileContainer>& fs : ToRemove) {
+	for (const TSharedRef<FINLua::LuaFileContainer>& fs : ToRemove) {
 		FileStreams.Remove(fs);
 	}
 }
@@ -623,6 +627,11 @@ void luaWarnF(void* ud, const char* msg, int tocont) {
 	UFINLuaProcessor* Processor = static_cast<UFINLuaProcessor*>(ud);
 
 	Processor->GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, UTF8_TO_TCHAR(msg));
+}
+
+int luaPanicF(lua_State* L) {
+	throw FINLua::luaFIN_toFString(L, 1);
+	return 0;
 }
 
 void UFINLuaProcessor::Reset() {
@@ -652,8 +661,9 @@ void UFINLuaProcessor::Reset() {
 		.FileStreams = FileStreams,
 	});
 
-	// setup warning function
+	// setup error/warning function
 	lua_setwarnf(luaState, luaWarnF, this);
+	lua_atpanic(luaState, luaPanicF);
 
 	// setup tables for persistence
 	lua_newtable(luaState); // perm

@@ -21,7 +21,7 @@ template<typename T>
 class FICSITNETWORKSLUA_API FINTypeId {
 public:
 	static int ID() {
-		static uint32 id = GetTypeHash(UNIQUE_FUNCTION_ID);
+		static uint32 id = PointerHash(UNIQUE_FUNCTION_ID);
 		return id;
 	}
 };
@@ -226,7 +226,7 @@ public:
 		}, 0); \
 	} \
 	namespace InternalName
-#define LuaModulePostSetup() \
+#define LuaModulePreSetup() \
 	void PreSetup(FFINLuaModule&, lua_State*); \
 	static FFIRStaticGlobalRegisterFunc RegisterPreSetup([]() { \
 		Module->PreSetup.BindStatic(&PreSetup); \

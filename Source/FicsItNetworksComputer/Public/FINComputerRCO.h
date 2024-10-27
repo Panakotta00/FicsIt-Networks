@@ -60,6 +60,6 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category="FINLua|RCO")
 	void SetTextEEPROMCode(class UFGInventoryComponent* Inventory, int32 Index, const FString& NewCode);
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_ItemStateUpdated(class UFGInventoryComponent* Inventory, TSubclassOf<UFGItemDescriptor> Item);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ItemStateUpdated(class UFGInventoryComponent* Inventory, int32 Index, FFIRInstancedStruct state);
 };

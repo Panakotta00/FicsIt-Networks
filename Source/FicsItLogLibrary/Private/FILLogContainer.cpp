@@ -5,6 +5,8 @@
 
 UFILLogContainer::UFILLogContainer() {
 	SetIsReplicatedByDefault(true);
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = true;
 }
 
 void UFILLogContainer::BeginPlay() {
@@ -15,7 +17,11 @@ void UFILLogContainer::BeginPlay() {
 	}
 }
 
-void UFILLogContainer::Tick() {
+void UFILLogContainer::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!GetOwner()->HasAuthority()) return;
+
 	FScopeLock ScopeLock(&LogEntriesToAddMutex);
 	if (!LogEntriesToAdd.IsEmpty()) {
 		TArray<FFILEntry> Chunk(LogEntriesToAdd.GetData(), FMath::Min(10, LogEntriesToAdd.Num()));
