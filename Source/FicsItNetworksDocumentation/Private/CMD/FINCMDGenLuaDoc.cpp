@@ -348,11 +348,11 @@ namespace FINGenLuaDoc {
 
 	void WriteLuaValue(FStringBuilderBase& Str, const TSharedPtr<FFINLuaModuleValue>& Value, const FString& Identifier) {
 		auto typeID = Value->TypeID();
-		if (typeID == FINTypeId<FFINLuaFunction>::ID()) {
+		if (typeID->IsChildOf(FFINLuaFunction::StaticStruct())) {
 			WriteLuaFunction(Str, *StaticCastSharedPtr<FFINLuaFunction>(Value), Identifier);
-		} else if (typeID == FINTypeId<FFINLuaTable>::ID()) {
+		} else if (typeID->IsChildOf(FFINLuaTable::StaticStruct())) {
 			WriteLuaTable(Str, *StaticCastSharedPtr<FFINLuaTable>(Value), Identifier);
-		} else if (typeID == FINTypeId<FFINLuaModuleBareValue>::ID()) {
+		} else if (typeID->IsChildOf(FFINLuaModuleBareValue::StaticStruct())) {
 			WriteLuaBareValue(Str, *StaticCastSharedPtr<FFINLuaModuleBareValue>(Value), Identifier);
 		} else {
 			Str.Appendf(TEXT("%s = nil\n"), *Identifier);
@@ -369,7 +369,7 @@ namespace FINGenLuaDoc {
 
 		const FFINLuaTableField* index = nullptr;
 		for (const FFINLuaTableField& field : Metatable.Table->Fields) {
-			if (field.Key == TEXT("__index") && field.Value->TypeID() == FINTypeId<FFINLuaTable>::ID()) {
+			if (field.Key == TEXT("__index") && field.Value->TypeID()->IsChildOf(FFINLuaTable::StaticStruct())) {
 				index = &field;
 			}
 			if (!field.Key.StartsWith(TEXT("__"))) {
