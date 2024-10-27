@@ -1,5 +1,6 @@
 ﻿#include "FINLua/LuaFuture.h"
 
+#include "FicsItNetworksLuaModule.h"
 #include "FINLuaProcessor.h"
 #include "LuaExtraSpace.h"
 #include "FINLua/FINLuaModule.h"
@@ -65,12 +66,9 @@ namespace FINLua {
 				lua_pushnil(L);
 			}
 
-			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		get
-			 * @DisplayName		Get
-			 */)", get) {
-				luaL_checkudata(L, 1, _Name);
-				lua_getiuservalue(L, 1, 1);
+			int getInternal(lua_State* L, int index) {
+				luaL_checkudata(L, index, _Name);
+				lua_getiuservalue(L, index, 1);
 				luaL_checktype(L, -1, LUA_TTHREAD);
 				lua_State* thread = lua_tothread(L, -1);
 				lua_pop(L, 1);
@@ -80,15 +78,22 @@ namespace FINLua {
 						return luaL_error(L, "Tried to get results of failed future");
 					case LUA_OK: // done or start
 						if (lua_gettop(thread) == 0) { // done
-							lua_getiuservalue(L, 1, 2);
-							int len = luaL_len(L, 2);
+							lua_getiuservalue(L, index, 2);
+							int len = luaL_len(L, -1);
 							for (int i = 1; i < len+1; ++i) {
-								lua_geti(L, 2, i);
+								lua_geti(L, -i, i);
 							}
 							return len;
 						}
 				}
 				return luaL_error(L, "Tried to get results of a future that is not ready");
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		get
+			 * @DisplayName		Get
+			 */)", get) {
+				return
+				getInternal(L, 1);
 			}
 
 			int pollInternal(lua_State* L, int idx, lua_State*& thread) {
@@ -402,7 +407,7 @@ namespace FINLua {
 		}
 		switch (status) {
 			case LUA_OK:
-				return FutureModule::Future::get(L);
+				return FutureModule::Future::getInternal(L, idx);
 			case LUA_YIELD:
 				return luaFIN_yield(L, 0, reinterpret_cast<lua_KContext>(reinterpret_cast<void*>(idx)), &awaitContinue);
 			default: // error
