@@ -63,6 +63,7 @@ jobs:
 
       - name: Update Documentation
         run: |
+          chmod +x ./FicsItNetworksDocumentationCLI
           ./FicsItNetworksDocumentationCLI -i ./FicsItNetworks/docs/FINDocumentation.toml ./FINDocumentation.json
 
       - name: Configure Git
