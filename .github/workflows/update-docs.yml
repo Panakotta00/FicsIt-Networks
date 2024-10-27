@@ -45,13 +45,15 @@ jobs:
           name: DocumentationCLI
           run-id: ${{ steps.find-doc-cli.outputs.result }}
           path: ${{ github.workspace }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download Documentation
         uses: actions/download-artifact@v4
         with:
-          name: DocumentationCLI
+          name: Documentation
           run-id: ${{ steps.find-documentation.outputs.result }}
           path: ${{ github.workspace }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Checkout Repository
         uses: actions/checkout@v4
