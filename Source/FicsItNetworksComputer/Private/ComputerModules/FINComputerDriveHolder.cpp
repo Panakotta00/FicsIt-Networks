@@ -12,6 +12,7 @@ AFINComputerDriveHolder::AFINComputerDriveHolder() {
 	DriveInventory->OnItemAddedDelegate.AddDynamic(this, &AFINComputerDriveHolder::OnDriveInventoryUpdate);
 	DriveInventory->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerDriveHolder::OnDriveInventoryUpdate);
 	DriveInventory->SetIsReplicated(true);
+	NetDormancy = DORM_Awake;
 }
 
 AFINComputerDriveHolder::~AFINComputerDriveHolder() {}
