@@ -33,7 +33,7 @@ jobs:
               core.setFailed('Found Release is a draft!');
               return;
             }
-            return {body: relase.body, body_encoded: btoa(release.body), tag_name: release.tag_name, name: release.name};
+            return {body: release.body, body_encoded: btoa(release.body), tag_name: release.tag_name, name: release.name};
       
       - name: Download FicsIt-Networks Version
         uses: robinraju/release-downloader@v1.11
