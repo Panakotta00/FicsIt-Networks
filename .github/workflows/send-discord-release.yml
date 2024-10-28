@@ -47,7 +47,8 @@ jobs:
           script: |
             let body = process.env.body;
             let version = process.env.version;
-            let split = body.split(/_(.*)/s);
+            console.log(body);
+            let split = body.split(/\n(.*)/s);
             split.splice(1, 0, `_(${version})_`);
             split.push("\n\n<@&1018202499678736446>");
             return split.join("");

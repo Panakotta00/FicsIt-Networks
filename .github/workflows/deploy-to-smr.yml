@@ -57,7 +57,7 @@ jobs:
                 body: '{getModByReference(modReference:"FicsItNetworks"){versions(filter:{order_by:created_at}){approved}}}'
               })
               if (!response.ok) {
-                console.log(`Checking Fetch: Response is not OK: ${response.status}`; 
+                console.log(`Checking Fetch: Response is not OK: ${response.status}`);
               } else {
                 const json = await response.json();
                 let mod = json.data.getModByReference[0];
