@@ -1,9 +1,6 @@
 name: Deploy to SMR
 
 on:
-  push:
-    branches:
-      - development
   workflow_dispatch:
   workflow_call:
     secrets:
@@ -76,4 +73,4 @@ jobs:
     needs: deploy-to-smr
     uses: ./.github/workflows/send-discord-release.yml
     secrets:
-      RELEASE_WEBHOOK_URL: ${{ secrets.RELEASE_WEBHOOK_URL }
+      RELEASE_WEBHOOK_URL: ${{ secrets.RELEASE_WEBHOOK_URL }}

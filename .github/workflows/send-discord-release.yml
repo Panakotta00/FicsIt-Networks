@@ -1,6 +1,9 @@
 name: Send Release Message
 
 on:
+  push:
+    branches:
+      - development
   workflow_dispatch:
   workflow_call:
     secrets:
