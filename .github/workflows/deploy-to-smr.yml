@@ -6,7 +6,7 @@ on:
     secrets:
       SMR_API_KEY:
         required: true
-      WEBHOOK_URL:
+      RELEASE_WEBHOOK_URL:
         required: true
 
 permissions:
@@ -69,3 +69,8 @@ jobs:
               }
               await sleep(5 * 1000);
             }
+  send-discord-release-message:
+    needs: deploy-to-smr
+    uses: ./.github/workflows/send-discord-release.yml
+    secrets:
+      RELEASE_WEBHOOK_URL: ${{ secrets.RELEASE_WEBHOOK_URL }
