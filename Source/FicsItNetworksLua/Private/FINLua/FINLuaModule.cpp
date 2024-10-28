@@ -87,7 +87,7 @@ void FFINLuaTable::PushLuaValue(lua_State* L, const FString& PersistName) {
 		if (field.Value->TypeID()->IsChildOf(FFINLuaFunction::StaticStruct()) && PersistName != TEXT("ModuleSystem-Metatable-ModuleTableFunction")) {
 			lua_pushlightuserdata(L, &field);
 			lua_setupvalue(L, -2, 1);
-			lua_pushvalue(L, -4);
+			lua_pushvalue(L, -3);
 			lua_setupvalue(L, -2, 2);
 			luaL_setmetatable(L, "ModuleTableFunction");
 		}

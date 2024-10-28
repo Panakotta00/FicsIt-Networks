@@ -275,6 +275,90 @@ namespace FINLua {
 				luaFIN_pushLuaFutureCFunction(L, luaSleep, 1);
 				return 1;
 			}
+
+
+			LuaModuleTableBareField(R"(/**
+			 * @LuaBareValue	tasks	Future[]
+			 * @DisplayName		Tasks
+			 *
+			 * A list of futures that are considered "Tasks".
+			 * Tasks could be seen as background threads. Effectively getting "joined" together.
+			 * Examples for tasks are callback invocations of timers and event listeners.
+			 */)", tasks) {
+				lua_newtable(L);
+			}
+
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		addTask(Future...)
+			 * @DisplayName		Add Task
+			 *
+			 * Adds the given futures to the tasks list.
+			 */)", addTask) {
+				int num = lua_gettop(L);
+				if (lua_getfield(L, lua_upvalueindex(2), "tasks") != LUA_TTABLE) {
+					return luaL_typeerror(L, -1, "table");
+				}
+				int len = luaL_len(L, -1);
+				for (int i = num; i > 0; --i) {
+					luaL_checkudata(L, i, Future::_Name);
+					lua_insert(L, -2);
+					lua_seti(L, -2, len+i);
+				}
+				return 0;
+			}
+
+			int luaRun(lua_State* L, int index) {
+				int num = lua_gettop(L);
+				if (lua_getfield(L, index, "tasks") != LUA_TTABLE) {
+					return luaL_typeerror(L, -1, "table");
+				}
+				int len = luaL_len(L, -1);
+				int shift = 0;
+				for (int i = 1; i <= len; ++i) {
+					lua_geti(L, -1, i);
+					lua_State* thread;
+					int status = Future::pollInternal(L, -1, thread);
+					lua_pop(L, 1);
+					if (status == LUA_OK) {
+						shift += 1;
+					} else if (shift > 0) {
+						lua_geti(L, -1, i);
+						lua_seti(L, -2, i-shift);
+					}
+					if (len - i < shift) {
+						lua_pushnil(L);
+						lua_seti(L, -2, i);
+					}
+				}
+				return len-shift;
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		run()
+			 * @DisplayName		Run
+			 *
+			 * Runs the default task scheduler once.
+			 */)", run) {
+				int numTasksLeft = luaRun(L, lua_upvalueindex(2));
+				lua_pushinteger(L, numTasksLeft);
+				return 1;
+			}
+
+			int luaLoopContinue(lua_State* L, int, lua_KContext) {
+				int numTasksLeft = luaRun(L, -1);
+				if (numTasksLeft > 0) {
+					return lua_yieldk(L, 0, NULL, &luaLoopContinue);
+				}
+				return 0;
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		loop()
+			 * @DisplayName		Loop
+			 *
+			 * Runs the default task scheduler indefinitely until no tasks are left.
+			 */)", loop) {
+				lua_pushvalue(L,lua_upvalueindex(2));
+				return luaLoopContinue(L, 0, NULL);
+			}
 		}
 
 		int luaAsync(lua_State* L) {
@@ -339,6 +423,9 @@ namespace FINLua {
 			PersistValue("FutureSleep");
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(future::luaSleepContinue)));
 			PersistValue("FutureSleepContinue");
+
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(future::luaLoopContinue)));
+			PersistValue("LoopContinue");
 		}
 	}
 
