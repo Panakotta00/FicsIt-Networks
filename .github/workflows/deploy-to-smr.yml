@@ -1,6 +1,9 @@
 name: Deploy to SMR
 
 on:
+  push:
+    branches:
+      - development
   workflow_dispatch:
   workflow_call:
     secrets:
