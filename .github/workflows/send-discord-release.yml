@@ -30,7 +30,7 @@ jobs:
               repo: context.repo.repo,
               per_page: 1,
             });
-            const release = response.data[0];
+            const release = response[0];
             /*if (release.draft) {
               core.setFailed('Found Release is a draft!');
               return;
