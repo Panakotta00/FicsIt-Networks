@@ -67,6 +67,7 @@ jobs:
           ./FicsItNetworksDocumentationCLI -i ./FicsItNetworks/docs/FINDocumentation.toml ./FINDocumentation.json
 
       - name: Configure Git
+        working-directory: FicsItNetworks
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
