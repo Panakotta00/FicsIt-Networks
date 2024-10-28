@@ -178,8 +178,10 @@ namespace FINLua {
 			int unpersist(lua_State* L) {
 				lua_newuserdatauv(L, 0, 2);
 				luaL_setmetatable(L, _Name);
-				lua_setiuservalue(L, lua_upvalueindex(1), 1);
-				lua_setiuservalue(L, lua_upvalueindex(2), 2);
+				lua_pushvalue(L, lua_upvalueindex(1));
+				lua_setiuservalue(L, -2, 1);
+				lua_pushvalue(L, lua_upvalueindex(2));
+				lua_setiuservalue(L, -2, 2);
 				return 1;
 			}
 			LuaModuleTableFunction(R"(/**
