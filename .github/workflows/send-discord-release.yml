@@ -5,7 +5,21 @@ on:
     branches:
       - development
   workflow_dispatch:
+    inputs:
+      ping:
+        type: boolean
+        default: false
+      verify-no-draft:
+        type: boolean
+        default: false
   workflow_call:
+    inputs:
+      verify-no-draft:
+        type: boolean
+        default: true
+      ping:
+        type: boolean
+        default: true
     secrets:
       SMR_API_KEY:
         required: true
@@ -31,10 +45,10 @@ jobs:
               per_page: 1,
             });
             const release = response.data[0];
-            /*if (release.draft) {
+            if (${{inputs.verify-no-draft}} && release.draft) {
               core.setFailed('Found Release is a draft!');
               return;
-            }*/
+            }
             core.setOutput('body', release.body);
             core.setOutput('tag_name', release.tag_name);
 
@@ -49,8 +63,10 @@ jobs:
             let body = process.env.body;
             let version = process.env.version;
             let split = body.split(/\n(.*)/s);
-            split.splice(1, 0, `_(${version})_`);
-            split.push("\n\n<@&1018202499678736446>");
+            split.splice(1, 0, `_(${version})_\n`);
+            if (${{inputs.ping}}) {
+              split.push("\n\n<@&1018202499678736446>");
+            }
             let msg = split.join("");
             core.setOutput('msg', msg);
 
