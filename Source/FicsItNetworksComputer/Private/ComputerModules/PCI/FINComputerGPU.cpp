@@ -1,6 +1,9 @@
 ﻿#include "ComputerModules/PCI/FINComputerGPU.h"
 
+#include "FGPlayerController.h"
+#include "FINComputerRCO.h"
 #include "FINComputerSubsystem.h"
+#include "SlateApplication.h"
 #include "Buildables/FGBuildableWidgetSign.h"
 #include "Graphics/FINScreenInterface.h"
 #include "Net/UnrealNetwork.h"
@@ -10,6 +13,8 @@ AFINComputerGPU::AFINComputerGPU() {
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	NetDormancy = DORM_Awake;
 }
 
 void AFINComputerGPU::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -23,12 +28,28 @@ void AFINComputerGPU::BeginPlay() {
 
 	UpdateScreen();
 }
-
+UE_DISABLE_OPTIMIZATION_SHIP
 void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
+	if (!bScreenSizeUpdated && Screen) {
+		if (auto widget = Cast<IFINScreenInterface>(Screen.GetUnderlyingPtr())->GetWidget()) {
+			auto rco = GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFINComputerRCO>();
+
+			TScriptInterface<IFINScreenInterface> screen = GetScreenInterface();
+			if (screen && screen->GetWidget()) {
+				FVector2D size = screen->GetWidget()->GetCachedGeometry().GetLocalSize();
+				if (!size.IsNearlyZero()) {
+					bScreenSizeUpdated = true;
+					rco->GPUUpdateScreenSize(this, size);
+				}
+			}
+		}
+	}
+
 	// TODO: Continuesly check for Trace Validity and udate widget accordingly
 }
+UE_ENABLE_OPTIMIZATION_SHIP
 
 void AFINComputerGPU::EndPlay(const EEndPlayReason::Type endPlayReason) {
 	Super::EndPlay(endPlayReason);
@@ -81,6 +102,7 @@ int AFINComputerGPU::InputToInt(const FInputEvent& KeyEvent) {
 }
 
 void AFINComputerGPU::OnRep_Screen() {
+	bScreenSizeUpdated = false;
 	UpdateScreen();
 }
 
@@ -97,6 +119,9 @@ void AFINComputerGPU::UpdateScreen() {
 }
 
 void AFINComputerGPU::netFunc_bindScreen(FFIRTrace NewScreen) {
+	if (IsValid(NewScreen.GetUnderlyingPtr())) {
+		bScreenSizeUpdated = false;
+	}
 	if (AFGBuildableWidgetSign* BuildableWidget = Cast<AFGBuildableWidgetSign>(*NewScreen)) {
 		UFINGPUWidgetSign* WidgetSign = AFINComputerSubsystem::GetComputerSubsystem(this)->AddGPUWidgetSign(this, BuildableWidget);
 		BindScreen(NewScreen / WidgetSign);
@@ -112,10 +137,11 @@ void AFINComputerGPU::netFunc_bindScreen(FFIRTrace NewScreen) {
 
 FVector2D AFINComputerGPU::netFunc_getScreenSize() {
 	TScriptInterface<IFINScreenInterface> screen = GetScreenInterface();
-	if (screen) {
+	if (screen && screen->GetWidget()) {
 		return screen->GetWidget()->GetCachedGeometry().GetLocalSize();
 	} else {
-		return FVector2D::Zero();
+		FScopeLock Lock(&MutexScreenSize);
+		return LastScreenSize;
 	}
 }
 

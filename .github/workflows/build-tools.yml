@@ -1,0 +1,36 @@
+name: Build Tools
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact_name:
+        required: true
+        type: string
+        default: "FicsItNetworks"
+  workflow_call:
+
+jobs:
+  build-documentation-cli:
+    name: Build Documentation-CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Build Environment
+        run: |
+          rustup toolchain install nightly
+          rustup default nightly
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          path: FicsItNetworks
+
+      - name: Build Documentation-CLI
+        working-directory: FicsItNetworks/Tools/DocumentationCLI
+        run: cargo build --release
+
+      - name: Upload Documentation-CLI
+        uses: actions/upload-artifact@v4
+        with:
+          name: DocumentationCLI
+          path: |
+            FicsItNetworks/Tools/DocumentationCLI/target/release/FicsItNetworksDocumentationCLI

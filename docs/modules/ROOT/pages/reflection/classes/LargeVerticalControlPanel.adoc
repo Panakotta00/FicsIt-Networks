@@ -1,7 +1,13 @@
 = Large Vertical Control Panel
 :table-caption!:
 
-This large verical modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programms.
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
+This large vertical modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control your programms.
 
 You can connect it to the FicsIt-Network.
 

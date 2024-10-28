@@ -28,6 +28,9 @@ public:
 	void SetNick(UObject* Component, const FString& Nick);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category="Computer|RCO")
+	void GPUUpdateScreenSize(AFINComputerGPU* GPU, FVector2D Size);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category="Computer|RCO")
 	void GPUMouseEvent(AFINComputerGPUT1* GPU, int type, int x, int y, int btn);
 	
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category="Computer|RCO")
@@ -60,6 +63,6 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category="FINLua|RCO")
 	void SetTextEEPROMCode(class UFGInventoryComponent* Inventory, int32 Index, const FString& NewCode);
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_ItemStateUpdated(class UFGInventoryComponent* Inventory, TSubclassOf<UFGItemDescriptor> Item);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ItemStateUpdated(class UFGInventoryComponent* Inventory, int32 Index, FFIRInstancedStruct state);
 };

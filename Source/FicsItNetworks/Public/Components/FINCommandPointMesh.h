@@ -17,8 +17,8 @@ USTRUCT(Blueprintable)
 struct FFINCommandLabelReferences {
 	GENERATED_BODY()
 
-	FFINCommandLabelReferences(UObject* reference, UObject* textReference, int index) : Reference(reference), TextObjectReference(textReference), Index(index) {}
-	FFINCommandLabelReferences() : Reference(nullptr), TextObjectReference(nullptr), Index(0)  {}
+	FFINCommandLabelReferences(UObject* reference, UObject* textReference, int index) :  Index(index), Reference(reference), TextObjectReference(textReference) {}
+	FFINCommandLabelReferences() : Index(0), Reference(nullptr), TextObjectReference(nullptr) {}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	int Index;
@@ -31,12 +31,17 @@ struct FFINCommandLabelReferences {
 	
 };
 
+UENUM(BlueprintType)
+enum EFINLabelPlacement {
+	North, South, East, West
+};
+
 USTRUCT(Blueprintable)
 struct FFINCommandLabelData  {
 	GENERATED_BODY()
 
-	FFINCommandLabelData() : ImagePath(""), Text(""), TextColor(0,0,0,1), Vertical(false){}
-	FFINCommandLabelData(FString imagePath, FString text, FLinearColor textColor, bool vertical) : ImagePath(imagePath), Text(text), TextColor(textColor), Vertical(vertical){}
+	FFINCommandLabelData() : ImagePath(""), Vertical(false), Text(""), TextColor(0,0,0,1){}
+	FFINCommandLabelData(FString imagePath, FString text, FLinearColor textColor, bool vertical) : ImagePath(imagePath), Vertical(vertical), Text(text), TextColor(textColor) {}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	FString ImagePath;
@@ -50,13 +55,22 @@ struct FFINCommandLabelData  {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	FLinearColor TextColor;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	TEnumAsByte<EFINLabelPlacement> placement = North;
+	
 };
+
 
 USTRUCT(Blueprintable)
 struct FFINCommandLabelStructure {
 	GENERATED_BODY()
 	
-	FFINCommandLabelStructure(UObject* reference, int index, FString path, bool vertical, bool doUpdate, bool doUpdateText, FString text, FLinearColor color) : reference(reference), path(path), index(index), vertical(vertical), doUpdate(doUpdate), doUpdateText(doUpdateText), text(text), textColor(color) {}
+	FFINCommandLabelStructure(UObject* reference, int index, FString path, bool doUpdate, bool doUpdateText, FString text, FLinearColor color, EFINLabelPlacement placement) : reference(reference), path(path), index(index), vertical(false), doUpdate(doUpdate), doUpdateText(doUpdateText), text(text), textColor(color), placement(placement) {}
+	FFINCommandLabelStructure(UObject* reference, int index, FString path, bool vertical, bool doUpdate, bool doUpdateText, FString text, FLinearColor color) : reference(reference), path(path), index(index), vertical(vertical), doUpdate(doUpdate), doUpdateText(doUpdateText), text(text), textColor(color) {
+		if(vertical) {
+			placement = West;
+		}
+	}
 	FFINCommandLabelStructure() : reference(0), path(""), index(0), vertical(false), doUpdate(false), doUpdateText(false), text(""), textColor(0,0,0, 1)  {}
  
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -85,4 +99,7 @@ struct FFINCommandLabelStructure {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	FLinearColor textColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	TEnumAsByte<EFINLabelPlacement> placement = North;
 };

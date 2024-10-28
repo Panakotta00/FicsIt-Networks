@@ -1,6 +1,12 @@
 = Railroad Track
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 A peice of railroad track over which trains can drive.
 
 // tag::interface[]

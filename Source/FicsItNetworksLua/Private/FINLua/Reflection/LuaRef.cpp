@@ -208,6 +208,7 @@ namespace FINLua {
 		return luaFIN_callReflectionFunctionProcessOutput(L, Output, Ctx.GetTrace(), nResults);
 	}
 
+UE_DISABLE_OPTIMIZATION_SHIP
 	int luaFIN_callReflectionFunction(lua_State* L, UFIRFunction* Function, const FFIRExecutionContext& Ctx, int nArgs, int nResults, bool bForceSync) {
 		FFINLuaLogScope LogScope(L);
 		const EFIRFunctionFlags FuncFlags = Function->GetFunctionFlags();
@@ -219,9 +220,13 @@ namespace FINLua {
 		} else {
 			TArray<FIRAny> Input = luaFIN_callReflectionFunctionProcessInput(L, Function, nArgs);
 			luaFIN_pushFuture(L, FFINFutureReflection(Function, Ctx, Input));
+			if (!bForceSync) {
+				return luaFIN_await(L, -1);
+			}
 			return 1;
 		}
 	}
+UE_ENABLE_OPTIMIZATION_SHIP
 
 	int luaFIN_callReflectionFunction(lua_State* L, UFIRFunction* Function, bool bForceSync) {
 		UFIRStruct* Type = Function->GetTypedOuter<UFIRStruct>();
@@ -281,6 +286,7 @@ namespace FINLua {
 				}
 			} else {
 				luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx));
+				luaFIN_await(L, -1);
 			}
 			return 1;
 		}
@@ -329,6 +335,7 @@ namespace FINLua {
 				Property->SetValue(PropertyCtx, Value.GetValue());
 			} else {
 				luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx, Value.GetValue()));
+				luaFIN_await(L, -1);
 			}
 			return true;
 		}

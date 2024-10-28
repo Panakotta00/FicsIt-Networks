@@ -1,12 +1,86 @@
 = Factory
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 The base class of most machines you can build.
 
 // tag::interface[]
 
 == Properties
 
+// tag::func-canChangePotential-title[]
+=== `canChangePotential` : Bool
+// tag::func-canChangePotential[]
+
+True if the factory can change its potential.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Can Change Potential
+!===
+====
+// end::func-canChangePotential[]
+// end::func-canChangePotential-title[]
+// tag::func-canChangeProductionBoost-title[]
+=== `canChangeProductionBoost` : Bool
+// tag::func-canChangeProductionBoost[]
+
+True if the factory can change its production boost.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Can Change Production Boost
+!===
+====
+// end::func-canChangeProductionBoost[]
+// end::func-canChangeProductionBoost-title[]
+// tag::func-currentPotential-title[]
+=== `currentPotential` : Float
+// tag::func-currentPotential[]
+
+The potential this factory is currently using.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Current Potential
+!===
+====
+// end::func-currentPotential[]
+// end::func-currentPotential-title[]
+// tag::func-currentProductionBoost-title[]
+=== `currentProductionBoost` : Float
+// tag::func-currentProductionBoost[]
+
+The current production boost this factory uses.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Current Production Boost
+!===
+====
+// end::func-currentProductionBoost[]
+// end::func-currentProductionBoost-title[]
 // tag::func-cycleTime-title[]
 === `cycleTime` : Float
 // tag::func-cycleTime[]
@@ -24,11 +98,45 @@ The time that passes till one production cycle is finsihed.
 ====
 // end::func-cycleTime[]
 // end::func-cycleTime-title[]
+// tag::func-maxDefaultPotential-title[]
+=== `maxDefaultPotential` : Float
+// tag::func-maxDefaultPotential[]
+
+The default maximum potential this factory can be set to.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Default Potential
+!===
+====
+// end::func-maxDefaultPotential[]
+// end::func-maxDefaultPotential-title[]
+// tag::func-maxDefaultProductionBoost-title[]
+=== `maxDefaultProductionBoost` : Float
+// tag::func-maxDefaultProductionBoost[]
+
+The maximum production boost this factory can be set to.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Default Production Boost
+!===
+====
+// end::func-maxDefaultProductionBoost[]
+// end::func-maxDefaultProductionBoost-title[]
 // tag::func-maxPotential-title[]
 === `maxPotential` : Float
 // tag::func-maxPotential[]
 
-The maximum potential this factory can be set to.
+The maximum potential this factory can be set to (depending on the number of crystals).
 
 [%collapsible]
 ====
@@ -41,6 +149,40 @@ The maximum potential this factory can be set to.
 ====
 // end::func-maxPotential[]
 // end::func-maxPotential-title[]
+// tag::func-maxProductionBoost-title[]
+=== `maxProductionBoost` : Float
+// tag::func-maxProductionBoost[]
+
+The maximum production boost this factory can be set to (depending on the number of shards).
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Max Production Boost
+!===
+====
+// end::func-maxProductionBoost[]
+// end::func-maxProductionBoost-title[]
+// tag::func-minDefaultProductionBoost-title[]
+=== `minDefaultProductionBoost` : Float
+// tag::func-minDefaultProductionBoost[]
+
+The minimum production boost this factory has to be set to.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Min Default Production Boost
+!===
+====
+// end::func-minDefaultProductionBoost[]
+// end::func-minDefaultProductionBoost-title[]
 // tag::func-minPotential-title[]
 === `minPotential` : Float
 // tag::func-minPotential[]
@@ -62,20 +204,37 @@ The minimum potential this factory needs to be set to.
 === `potential` : Float
 // tag::func-potential[]
 
-The potential this factory is currently set to. (the overclock value)
+The potential this factory is currently set to and 'should'  use. (the overclock value)
  0 = 0%, 1 = 100%
 
 [%collapsible]
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
 
 ! Display Name ! Potential
 !===
 ====
 // end::func-potential[]
 // end::func-potential-title[]
+// tag::func-potentialInventory-title[]
+=== `potentialInventory` : Trace<xref:/reflection/classes/Inventory.adoc[Inventory]>
+// tag::func-potentialInventory[]
+
+The Inventory that holds the crystals used for potential.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Potential Inventory
+!===
+====
+// end::func-potentialInventory[]
+// end::func-potentialInventory-title[]
 // tag::func-powerConsumProducing-title[]
 === `powerConsumProducing` : Float
 // tag::func-powerConsumProducing[]
@@ -93,6 +252,23 @@ The power consumption when producing.
 ====
 // end::func-powerConsumProducing[]
 // end::func-powerConsumProducing-title[]
+// tag::func-productionBoost-title[]
+=== `productionBoost` : Float
+// tag::func-productionBoost[]
+
+The current production boost this factory should use.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Production Boost
+!===
+====
+// end::func-productionBoost[]
+// end::func-productionBoost-title[]
 // tag::func-productivity-title[]
 === `productivity` : Float
 // tag::func-productivity[]
@@ -144,6 +320,69 @@ True if the factory is in standby.
 ====
 // end::func-standby[]
 // end::func-standby-title[]
+
+== Functions
+
+// tag::func-setPotential-title[]
+=== `setPotential` (`potential` : Float)
+// tag::func-setPotential[]
+
+Changes the potential this factory is currently set to and 'should' use. (the overclock value)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Potential
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Potential* `potential`
+! Float
+! The potential that should be used.
+  0 = 0%, 1 = 100%
+!===
+
+====
+// end::func-setPotential[]
+// end::func-setPotential-title[]
+// tag::func-setProductionBoost-title[]
+=== `setProductionBoost` (`productionBoost` : Float)
+// tag::func-setProductionBoost[]
+
+Changes the production boost this factory is currently set to and 'should' use.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Production Boost
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Production Boost* `productionBoost`
+! Float
+! The production boost that should be used.
+  0 = 0%, 1 = 100%
+!===
+
+====
+// end::func-setProductionBoost[]
+// end::func-setProductionBoost-title[]
 
 // end::interface[]
 

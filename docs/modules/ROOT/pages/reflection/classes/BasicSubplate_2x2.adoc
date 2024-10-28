@@ -1,0 +1,122 @@
+= Basic Subplate 2x2
+:table-caption!:
+
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
+This subplate allows one to place a single module in the center of a 2x2 module grid.
+
+
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getModules-title[]
+=== `getModules` () -> `modules` : Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
+// tag::func-getModules[]
+
+Returns all the modules on this subplate
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Modules
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *modules* `modules`
+! Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
+! 
+!===
+
+====
+// end::func-getModules[]
+// end::func-getModules-title[]
+// tag::func-getSubModule-title[]
+=== `getSubModule` () -> `Module` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getSubModule[]
+
+Returns the module associated with this subplate.
+This is effectively the same as calling getModule(0,0)
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Sub Module
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Module* `Module`
+! Object<xref:/reflection/classes/Actor.adoc[Actor]>
+! 
+!===
+
+====
+// end::func-getSubModule[]
+// end::func-getSubModule-title[]
+// tag::func-getModule-title[]
+=== `getModule` (`X` : Int, `Y` : Int) -> `Module` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getModule[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! getModule
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `X`
+! Int
+! 
+
+! *Y* `Y`
+! Int
+! 
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Module* `Module`
+! Object<xref:/reflection/classes/Actor.adoc[Actor]>
+! 
+!===
+
+====
+// end::func-getModule[]
+// end::func-getModule-title[]
+
+// end::interface[]
+

@@ -1,6 +1,12 @@
 = Factory Connection
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
 A actor component that is a connection point to which a conveyor or pipe can get attached to.
 
 // tag::interface[]

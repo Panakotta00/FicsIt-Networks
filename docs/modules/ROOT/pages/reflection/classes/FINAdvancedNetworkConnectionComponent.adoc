@@ -1,6 +1,12 @@
 = FINAdvancedNetworkConnectionComponent
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
 
 
 // tag::interface[]

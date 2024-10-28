@@ -1,6 +1,12 @@
 = Wheeled Vehicle
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Vehicle.adoc[Vehicle]
+!===
+
 The base class for all vehicles that used wheels for movement.
 
 // tag::interface[]

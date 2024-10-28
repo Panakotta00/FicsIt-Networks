@@ -6,7 +6,7 @@
 #include "Components/GridSlot.h"
 #include "Components/TextBlock.h"
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
-#include "FicsItKernel/FicsItFS/Library/Device.h"
+#include "FicsItFileSystem.h"
 #include "Net/UnrealNetwork.h"
 
 UFINComputerDriveDesc::UFINComputerDriveDesc() {
@@ -37,7 +37,7 @@ FText UFINComputerDriveDesc::GetOverridenItemDescription_Implementation(APlayerC
 }
 
 UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
-	UClass* progressBar = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/-Shared/Widget_ProgressBar.Widget_ProgressBar_C"));
+	UClass* progressBar = LoadObject<UClass>(nullptr, TEXT("/Game/FactoryGame/Interface/UI/InGame/-Shared/Widget_ProgressBar.Widget_ProgressBar_C"));
 
 	if (!InventoryStack.Item.HasState()) return nullptr;
 	auto state = InventoryStack.Item.GetItemState().GetValuePtr<FFINItemStateFileSystem>();
@@ -95,23 +95,6 @@ UWidget* UFINComputerDriveDesc::CreateDescriptionWidget_Implementation(APlayerCo
 	return Grid;
 }
 
-void CopyPath(CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice, CodersFileSystem::SRef<CodersFileSystem::Device> ToDevice, CodersFileSystem::Path Path) {
-	for (std::string Child : FromDevice->childs(Path)) {
-		CodersFileSystem::Path ChildPath = Path / Child;
-		CodersFileSystem::SRef<CodersFileSystem::Node> ChildNode = FromDevice->get(ChildPath);
-		if (CodersFileSystem::SRef<CodersFileSystem::File> File = ChildNode) {
-			CodersFileSystem::SRef<CodersFileSystem::FileStream> InputStream = FromDevice->open(ChildPath, CodersFileSystem::FileMode::INPUT | CodersFileSystem::FileMode::BINARY);
-			CodersFileSystem::SRef<CodersFileSystem::FileStream> OutputStream = ToDevice->open(ChildPath, CodersFileSystem::FileMode::OUTPUT | CodersFileSystem::FileMode::BINARY);
-			OutputStream->write(CodersFileSystem::FileStream::readAll(InputStream));
-			OutputStream->close();
-			InputStream->close();
-		} else if (CodersFileSystem::SRef<CodersFileSystem::Directory> Dir = ChildNode) {
-			ToDevice->createDir(ChildPath);
-			CopyPath(FromDevice, ToDevice, ChildPath);
-		}
-	}
-}
-
 bool UFINComputerDriveDesc::CopyData_Implementation(UObject* WorldContext, const FInventoryItem& InFrom, const FInventoryItem& InTo, FInventoryItem& OutItem) {
 	TSubclassOf<UFINComputerDriveDesc> DriveClass;
 	DriveClass = InTo.GetItemClass();
@@ -129,16 +112,14 @@ bool UFINComputerDriveDesc::CopyData_Implementation(UObject* WorldContext, const
 		toID = AFINFileSystemSubsystem::CreateState(GetStorageCapacity(DriveClass), OutItem);
 	}
 
-	CodersFileSystem::SRef<CodersFileSystem::Device> FromDevice = AFINFileSystemSubsystem::GetDevice(fromID);
-	CodersFileSystem::SRef<CodersFileSystem::Device> ToDevice = AFINFileSystemSubsystem::GetDevice(toID);
+	TSharedPtr<CodersFileSystem::Device> FromDevice = AFINFileSystemSubsystem::GetDevice(fromID);
+	TSharedPtr<CodersFileSystem::Device> ToDevice = AFINFileSystemSubsystem::GetDevice(toID);
 
 	// delete all data in ToDevice
-	for (std::string Child : ToDevice->childs("/")) {
-		ToDevice->remove(CodersFileSystem::Path(Child), true);
-	}
+	CodersFileSystem::DeleteEntries(ToDevice.ToSharedRef());
 
 	// copy all data
-	CopyPath(FromDevice, ToDevice, "/");
+	CodersFileSystem::CopyPath(FromDevice.ToSharedRef(), ToDevice.ToSharedRef(), "/");
 	
 	return true;
 }

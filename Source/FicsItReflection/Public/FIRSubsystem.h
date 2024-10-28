@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Patching/NativeHookManager.h"
 #include "Subsystem/ModSubsystem.h"
+#include "FGSaveInterface.h"
 #include "FIRSubsystem.generated.h"
 
 class UFGRailroadTrackConnectionComponent;
@@ -35,7 +36,7 @@ struct FICSITREFLECTION_API FFIRFactoryConnectorSettings {
 };
 
 UCLASS()
-class FICSITREFLECTION_API AFIRSubsystem : public AModSubsystem {
+class FICSITREFLECTION_API AFIRSubsystem : public AModSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, Category = "Computer", meta = (WorldContext = "WorldContext"))
@@ -44,6 +45,10 @@ public:
 	// Begin AActor
 	virtual void BeginPlay() override;
 	// End AActor
+
+	// Begin IFGSaveInterface
+	virtual bool ShouldSave_Implementation() const override { return true; }
+	// End IFGSaveInterface
 
 	void ForceRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch, int64 Track);
 	FFIRRailroadSwitchForce* GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch);

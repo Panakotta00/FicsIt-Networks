@@ -1,7 +1,7 @@
 = Event Module
 :table-caption!:
 
-Description
+
 
 == Globals
 

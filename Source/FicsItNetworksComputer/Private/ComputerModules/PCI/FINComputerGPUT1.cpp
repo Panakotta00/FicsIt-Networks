@@ -1,14 +1,19 @@
 #include "ComputerModules/PCI/FINComputerGPUT1.h"
 
 #include "FGPlayerController.h"
+#include "FicsItNetworksComputer.h"
 #include "FINComputerRCO.h"
+#include "Regex.h"
+#include "SlateApplication.h"
 #include "Async/ParallelFor.h"
+#include "Engine/ActorChannel.h"
+#include "Engine/NetConnection.h"
 #include "Fonts/FontMeasure.h"
 #include "Net/UnrealNetwork.h"
 #include "Slate/SlateBrushAsset.h"
 #include "Widgets/SInvalidationPanel.h"
 #include "Widgets/Layout/SScaleBox.h"
-#include "Windows/WindowsPlatformApplicationMisc.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 const FFINGPUT1BufferPixel FFINGPUT1BufferPixel::InvalidPixel;
 
@@ -35,7 +40,7 @@ FVector2D SScreenMonitor::GetCharSize() const {
 	FSlateApplication& app = FSlateApplication::Get();
 	FSlateRenderer* renderer = app.GetRenderer();
 	TSharedRef<FSlateFontMeasure> measure = renderer->GetFontMeasureService();
-	return measure->Measure(L" ", Font.Get());
+	return measure->Measure(TEXT(" "), Font.Get());
 }
 
 FVector2D SScreenMonitor::LocalToCharPos(FVector2D Pos) const {
@@ -74,7 +79,7 @@ int32 SScreenMonitor::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
 				LayerId,
-				AllottedGeometry.ToPaintGeometry(FVector2D(X, Y) * CharSize, (CharSize*1), 1),
+				AllottedGeometry.ToPaintGeometry(CharSize*1, FSlateLayoutTransform(1, FVector2D(X, Y) * CharSize)),
 				&boxBrush,
 				ESlateDrawEffect::None,
 				Pixel.BackgroundColor);
@@ -159,7 +164,7 @@ bool SScreenMonitor::HandleShortCut(const FKeyEvent& InKeyEvent) {
 		return true;
 	} else if (IsAction(WorldContext, InKeyEvent, TEXT("FicsItNetworks.PasteScreen"))) {
 		FString PasteText;
-		FWindowsPlatformApplicationMisc::ClipboardPaste(PasteText);
+		FPlatformApplicationMisc::ClipboardPaste(PasteText);
 		for (TCHAR CharKey : PasteText) {
 			FCharacterEvent CharacterEvent(CharKey, FModifierKeysState(), InKeyEvent.GetUserIndex(), false);
 			FSlateApplication::Get().ProcessKeyCharEvent(CharacterEvent);
@@ -175,6 +180,7 @@ SScreenMonitor::SScreenMonitor() {
 
 void AFINComputerGPUT1::Multicast_BeginBackBufferReplication_Implementation(FIntPoint Size) {
 	if (!HasAuthority()) {
+		ReplicateStart = FPlatformTime::Seconds();
 		BackBuffer.SetSize(Size.X, Size.Y);
 	}
 }
@@ -189,6 +195,7 @@ void AFINComputerGPUT1::Multicast_EndBackBufferReplication_Implementation() {
 	if (!HasAuthority()) {
 		FrontBuffer = BackBuffer;
 		if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
+		UE_LOG(LogFicsItNetworksComputer, Warning, TEXT("GPU T1: Replication took %f"), FPlatformTime::Seconds() - ReplicateStart);
 	}
 }
 
@@ -208,12 +215,13 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 
 	if (HasAuthority()) {
 		if (ToReplicate.Num() > 0) {
-			int64 ChunkSize = FMath::Min(CHUNK_SIZE, ToReplicate.Num());
-			TArray<FFINGPUT1BufferPixel> Chunk(ToReplicate.GetData(), ChunkSize);
-			ToReplicate.RemoveAt(0, ChunkSize);
-			Multicast_AddBackBufferChunk(Offset, Chunk);
-			Offset += ChunkSize;
-
+			for (int i = 0; i < 50 && ToReplicate.Num() > 0; ++i) {
+				int64 ChunkSize = FMath::Min(CHUNK_SIZE, ToReplicate.Num());
+				TArray<FFINGPUT1BufferPixel> Chunk(ToReplicate.GetData(), ChunkSize);
+				ToReplicate.RemoveAt(0, ChunkSize);
+				Multicast_AddBackBufferChunk(Offset, Chunk);
+				Offset += ChunkSize;
+			}
 			if (ToReplicate.Num() <= 0) {
 				Multicast_EndBackBufferReplication();
 			}
@@ -236,7 +244,7 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AFINComputerGPUT1, FrontBuffer);
 }
 
-TSharedPtr<SWidget> AFINComputerGPUT1:: CreateWidget() {
+TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Buildings/Computer/ComputerCase/UI/SB_ComputerCaseBorder.SB_ComputerCaseBorder'"))->Brush;
 	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SNew(SScaleBox)

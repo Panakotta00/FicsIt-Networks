@@ -66,7 +66,7 @@ void UFINComputerRCO::GPUKeyCharEvent_Implementation(AFINComputerGPUT1* GPU, con
 
 void UFINComputerRCO::CreateEEPROMState_Implementation(UFGInventoryComponent* Inv, int SlotIdx) {
 	FInventoryStack stack;
-	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.GetItemClass())) return;
+	if (!IsValid(Inv) || !Inv->GetStackFromIndex(SlotIdx, stack) || !IsValid(stack.Item.GetItemClass()) || stack.Item.HasState()) return;
 	UFINComputerEEPROMDesc* desc = Cast<UFINComputerEEPROMDesc>(stack.Item.GetItemClass()->GetDefaultObject());
 	if (!IsValid(desc)) return;
 	FFGDynamicStruct state = desc->CreateEEPROMState();
@@ -148,10 +148,16 @@ void UFINComputerRCO::SetTextEEPROMCode_Implementation(UFGInventoryComponent* In
 		FFINItemStateEEPROMText state = *luaState;
 		state.Code = NewCode;
 		Inventory->SetStateOnIndex(Index, FFGDynamicStruct(state));
-		Multicast_ItemStateUpdated(Inventory, stack.Item.GetItemClass());
+		Inventory->OnSlotUpdatedDelegate.Broadcast(Index);
 	}
 }
 
-void UFINComputerRCO::Multicast_ItemStateUpdated_Implementation(class UFGInventoryComponent* Inventory, TSubclassOf<UFGItemDescriptor> Item) {
-	Inventory->OnItemAddedDelegate.Broadcast(Item, 0, Inventory);
+void UFINComputerRCO::Multicast_ItemStateUpdated_Implementation(class UFGInventoryComponent* Inventory, int32 Index, FFIRInstancedStruct state) {
+	Inventory->OnSlotUpdatedDelegate.Broadcast(Index);
+}
+
+void UFINComputerRCO::GPUUpdateScreenSize_Implementation(AFINComputerGPU* GPU, FVector2D Size) {
+	FScopeLock Lock(&GPU->MutexScreenSize);
+	GPU->bScreenSizeUpdated = true;
+	GPU->LastScreenSize = Size;
 }

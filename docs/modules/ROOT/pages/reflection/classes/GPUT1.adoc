@@ -1,6 +1,12 @@
 = Computer GPU T1
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/FINComputerGPU.adoc[FINComputerGPU]
+!===
+
 
 
 // tag::interface[]

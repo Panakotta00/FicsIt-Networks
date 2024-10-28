@@ -1,6 +1,12 @@
 = ModulePanel
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 Enclosure for 1 command points
 
 // tag::interface[]

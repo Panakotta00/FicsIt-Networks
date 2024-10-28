@@ -1,6 +1,12 @@
 = Power Info
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
 A actor component that provides information and mainly statistics about the power connection it is attached to.
 
 // tag::interface[]

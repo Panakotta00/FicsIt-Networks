@@ -1,6 +1,12 @@
 = Indicator Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 Indicator Module for panels
 
 // tag::interface[]
@@ -8,7 +14,7 @@ Indicator Module for panels
 == Functions
 
 // tag::func-setColor-title[]
-=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+=== `setColor` (`Red` : Float, `Green` : Float, `Blue` : Float, `Emit` : Float)
 // tag::func-setColor[]
 
 
@@ -28,15 +34,15 @@ Indicator Module for panels
 !===
 !Name !Type !Description
 
-! *red* `red`
+! *Red* `Red`
 ! Float
 ! 
 
-! *green* `green`
+! *Green* `Green`
 ! Float
 ! 
 
-! *blue* `blue`
+! *Blue* `Blue`
 ! Float
 ! 
 

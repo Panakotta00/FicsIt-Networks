@@ -23,13 +23,13 @@ private:
 	TEnumAsByte<EFINKernelState> InternalKernelState = FIN_KERNEL_SHUTOFF;
 	
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame)
 	UFINModuleSystemPanel* Panel = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGInventoryComponent* DataStorage = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -92,11 +92,8 @@ public:
 	virtual void PostLoadGame_Implementation(int32 gameVersion, int32 engineVersion) override;
 	// End IFGSaveInterface
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void NetMulti_OnEEPROMChanged(const FFGDynamicStruct& ChangedEEPROM);
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void NetMulti_OnFloppyChanged(const FGuid& ChangedFloppy);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnEEPROMChanged(FFIRInstancedStruct state);
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Computer")
     void AddProcessor(AFINComputerProcessor* processor);
@@ -138,7 +135,7 @@ public:
 	void OnModuleChanged(UObject* module, bool added);
 
 	UFUNCTION()
-	void OnEEPROMChanged(TSubclassOf<UFGItemDescriptor> Item, int32 Num, UFGInventoryComponent* changedInventory);
+	void OnEEPROMChanged(int32 Index);
 
 	UFUNCTION(BlueprintCallable)
 	FFGDynamicStruct GetEEPROM();

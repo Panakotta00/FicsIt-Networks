@@ -1,5 +1,6 @@
 #include "FINLua/LuaGlobalLib.h"
 
+#include "FGBlueprintFunctionLibrary.h"
 #include "FicsItNetworksLuaModule.h"
 #include "FILLogContainer.h"
 #include "FINLua/Reflection/LuaClass.h"
@@ -45,12 +46,7 @@ namespace FINLua {
 
 	int luaYield(lua_State* L) {
 		const int args = lua_gettop(L);
-
-		// insert a boolean to indicate a user executed yield
-		lua_pushboolean(L, true);
-		lua_insert(L, 1);
-		
-		return lua_yieldk(L, args+1, NULL, &luaYieldResume);
+		return luaFIN_yield(L, args+1, NULL, &luaYieldResume);
 	}
 
 	int luaResume(lua_State* L); // pre-declare
@@ -253,7 +249,8 @@ namespace FINLua {
 		return 1;
 	}
 
-	[[deprecated]] int luaFindClass_DEPRECATED(lua_State* L) {
+	[[deprecated]]
+	int luaFindClass_DEPRECATED(lua_State* L) {
 		luaFIN_warning(L, "Deprecated function call 'findClass', use 'classes' global library instead", false);
 		
 		const int args = lua_gettop(L);
@@ -289,8 +286,11 @@ namespace FINLua {
 	void setupGlobals(lua_State* L) {
 		PersistenceNamespace("Globals");
 
+#pragma warning( push )
+#pragma warning( disable : 4996 )
 		lua_register(L, "findClass", luaFindClass_DEPRECATED);
 		PersistGlobal("findClass");
+#pragma warning( pop )
 
 		luaopen_base(L);
 		lua_pushnil(L);
@@ -320,9 +320,9 @@ namespace FINLua {
 		PersistTable("coroutine", -1);
 		lua_pop(L, 1);
 
-		lua_pushcfunction(L, (int(*)(lua_State*))luaYieldResume);
+		lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaYieldResume)));
 		PersistValue("coroutineYieldContinue");
-		lua_pushcfunction(L, (int(*)(lua_State*))luaResumeResume);
+		lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaResumeResume)));
 		PersistValue("coroutineResumeContinue");
 	
 		luaL_requiref(L, "math", luaopen_math, true);

@@ -1,6 +1,12 @@
 = Manufacturer
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[Factory]
+!===
+
 The base class of every machine that uses a recipe to produce something automatically.
 
 // tag::interface[]

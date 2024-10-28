@@ -1,18 +1,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DevDevice.h"
 #include "FGDynamicStruct.h"
 #include "FGSaveInterface.h"
+#include "FileSystemSerializationInfo.h"
 #include "FINFuture.h"
 #include "FIRException.h"
 #include "FIRInstancedStruct.h"
 #include "Queue.h"
 #include "Audio/AudioController.h"
 #include "ComputerModules/PCI/FINPciDeviceInterface.h"
-#include "FicsItFS/DevDevice.h"
-#include "FicsItFS/FileSystem.h"
-#include "FicsItFS/FileSystemSerializationInfo.h"
-#include "FicsItFS/Library/Listener.h"
+#include "FicsItFileSystem/Listener.h"
+#include "FileSystemRoot.h"
 #include "FicsItKernel.generated.h"
 
 class UFINKernelSystem;
@@ -45,8 +45,8 @@ private:
 public:
 	FFINKernelListener(UFINKernelSystem* parent);
 
-	virtual void onMounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) override;
-	virtual void onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) override;
+	virtual void onMounted(CodersFileSystem::Path path, TSharedRef<CodersFileSystem::Device> device) override;
+	virtual void onUnmounted(CodersFileSystem::Path path, TSharedRef<CodersFileSystem::Device> device) override;
 	virtual void onNodeAdded(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
 	virtual void onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
 	virtual void onNodeChanged(CodersFileSystem::Path  path, CodersFileSystem::NodeType type) override;
@@ -70,9 +70,9 @@ private:
 	TArray<TScriptInterface<IFINPciDeviceInterface>> PCIDevices;
 	FFINKernelFSRoot FileSystem;
 	FCriticalSection MutexDevDevice;
-	CodersFileSystem::SRef<FFINKernelFSDevDevice> DevDevice = nullptr;
+	TSharedPtr<FFINKernelFSDevDevice> DevDevice = nullptr;
 	int64 MemoryCapacity = 0;
-	TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> Drives;
+	TMap<FGuid, TSharedRef<CodersFileSystem::Device>> Drives;
 
 	// Runtime Environment/State
 	UPROPERTY(SaveGame)
@@ -83,7 +83,7 @@ private:
 	FString DevDeviceMountPoint;
 	TSharedPtr<FFINKernelCrash> KernelCrash;
 	int64 MemoryUsage = 0;
-	CodersFileSystem::SRef<FFINKernelListener> FileSystemListener;
+	TSharedPtr<FFINKernelListener> FileSystemListener;
 
 	// Cache
 	TSharedPtr<FJsonObject> ReadyToUnpersist = nullptr;
@@ -216,14 +216,14 @@ public:
 	 *
 	 * @return	the drives
 	 */
-	TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> GetDrives() const;
+	TMap<FGuid, TSharedRef<CodersFileSystem::Device>> GetDrives() const;
 
 	/**
 	 * Gets the internally used DevDevice
 	 *
 	 * @return	the used DevDevice
 	 */
-	CodersFileSystem::SRef<FFINKernelFSDevDevice> GetDevDevice() const;
+	TSharedPtr<FFINKernelFSDevDevice> GetDevDevice() const;
 
 	/**
 	 * Mounts the currently used devDevice to the given path in the currently used file system.

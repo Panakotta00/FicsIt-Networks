@@ -1,5 +1,6 @@
 #include "FicsItNetworksDocumentation.h"
 #include "FicsItReflection.h"
+#include "Paths.h"
 #include "FINLua/FINLuaModule.h"
 #include "Logging/StructuredLog.h"
 #include "Misc/App.h"
@@ -148,9 +149,6 @@ namespace FINGenLuaDoc {
 
 	void WriteProperty(FStringBuilderBase& Documentation, FFicsItReflectionModule& Ref, UFIRProperty* Prop) {
 		FString Identifier = Prop->GetInternalName();
-		if (Prop->GetPropertyFlags() & (FIR_Prop_ClassProp | FIR_Prop_StaticProp)) {
-			Identifier += TEXT("-Class");
-		}
 		Documentation.Appendf(TEXT("---@field public %s %s %s\n"), *Identifier, *GetType(Ref, Prop), *GetInlineDescription(Prop->GetDescription().ToString()));
 	}
 
@@ -217,9 +215,6 @@ namespace FINGenLuaDoc {
 		Str.Appendf(TEXT("---@type (fun(%s)%s)|ReflectionFunction\n"), *FString::Join(typedParameterList, TEXT(",")), *functionTypedReturn);
 
 		FString Identifier = Func->GetInternalName();
-		if (Func->GetFunctionFlags() & (FIR_Func_ClassFunc | FIR_Func_StaticFunc)) {
-			Identifier += TEXT("-Class");
-		}
 
 		Str.Appendf(TEXT("function %s:%s(%s) end\n"), *Parent, *Identifier, *FString::Join(paramList, TEXT(", ")));
 
@@ -288,16 +283,18 @@ namespace FINGenLuaDoc {
 			Str.Appendf(TEXT("---@class %s\n"), *ClassDeclaration);
 
 			for (UFIRProperty* Prop : Struct->GetProperties(false)) {
-				if ((Prop->GetPropertyFlags() & FIR_Prop_Attrib) && (Prop->GetPropertyFlags() & FIR_Prop_ClassProp)) {
+				if (Prop->GetPropertyFlags() & FIR_Prop_ClassProp) {
 					WriteProperty(Str, Ref, Prop);
 				}
 			}
 
-			Str.Appendf(TEXT("%s_Class = {}\n"), *Struct->GetInternalName());
+			FString ClassName = FString::Printf(TEXT("%s_Class"), *Struct->GetInternalName());
+
+			Str.Appendf(TEXT("% = {}\n"), *ClassName);
 
 			for (UFIRFunction* Func : Struct->GetFunctions(false)) {
-				if ((Func->GetFunctionFlags() & FIR_Func_MemberFunc) && (Func->GetFunctionFlags() & FIR_Func_ClassFunc)) {
-					WriteFunction(Str, Ref, Struct->GetInternalName(), ClassIdentifier, Func);
+				if (Func->GetFunctionFlags() & FIR_Func_ClassFunc) {
+					WriteFunction(Str, Ref, ClassName, ClassIdentifier, Func);
 				}
 			}
 		}
@@ -351,11 +348,11 @@ namespace FINGenLuaDoc {
 
 	void WriteLuaValue(FStringBuilderBase& Str, const TSharedPtr<FFINLuaModuleValue>& Value, const FString& Identifier) {
 		auto typeID = Value->TypeID();
-		if (typeID == FINTypeId<FFINLuaFunction>::ID()) {
+		if (typeID->IsChildOf(FFINLuaFunction::StaticStruct())) {
 			WriteLuaFunction(Str, *StaticCastSharedPtr<FFINLuaFunction>(Value), Identifier);
-		} else if (typeID == FINTypeId<FFINLuaTable>::ID()) {
+		} else if (typeID->IsChildOf(FFINLuaTable::StaticStruct())) {
 			WriteLuaTable(Str, *StaticCastSharedPtr<FFINLuaTable>(Value), Identifier);
-		} else if (typeID == FINTypeId<FFINLuaModuleBareValue>::ID()) {
+		} else if (typeID->IsChildOf(FFINLuaModuleBareValue::StaticStruct())) {
 			WriteLuaBareValue(Str, *StaticCastSharedPtr<FFINLuaModuleBareValue>(Value), Identifier);
 		} else {
 			Str.Appendf(TEXT("%s = nil\n"), *Identifier);
@@ -372,7 +369,7 @@ namespace FINGenLuaDoc {
 
 		const FFINLuaTableField* index = nullptr;
 		for (const FFINLuaTableField& field : Metatable.Table->Fields) {
-			if (field.Key == TEXT("__index") && field.Value->TypeID() == FINTypeId<FFINLuaTable>::ID()) {
+			if (field.Key == TEXT("__index") && field.Value->TypeID()->IsChildOf(FFINLuaTable::StaticStruct())) {
 				index = &field;
 			}
 			if (!field.Key.StartsWith(TEXT("__"))) {

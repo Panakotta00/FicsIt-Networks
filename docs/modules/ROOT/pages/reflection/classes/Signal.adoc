@@ -1,6 +1,12 @@
 = Signal
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ReflectionBase.adoc[ReflectionBase]
+!===
+
 A reflection object representing a signal.
 
 // tag::interface[]

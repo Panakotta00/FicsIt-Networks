@@ -4,7 +4,9 @@ public class FicsItNetworksRepository : ModuleRules
 {
     public FicsItNetworksRepository(ReadOnlyTargetRules Target) : base(Target)
     {
-        PCHUsage = PCHUsageMode.Default;
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        bWarningsAsErrors = true;
+        CppStandard = CppStandardVersion.Cpp20;
 
         PublicDependencyModuleNames.AddRange(
             new string[]
@@ -21,13 +23,20 @@ public class FicsItNetworksRepository : ModuleRules
             {
                 "CoreUObject",
                 "Engine",
-                "Slate",
-                "SlateCore",
                 "SML",
                 "InputCore",
-                "WebBrowser",
                 "ApplicationCore",
+                "Slate",
+                "SlateCore",
             }
         );
+
+        if (Target.Type == TargetType.Game)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[]
+            {
+                "WebBrowser",
+            });
+        }
     }
 }

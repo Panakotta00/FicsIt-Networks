@@ -1,7 +1,7 @@
 = Reflection-System Class Module
 :table-caption!:
 
-Description
+This module provides all the functionallity for the usage of Types/Classes from the reflection system in Lua.
 
 [cols="1,5a",separator="!"]
 !===

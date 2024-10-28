@@ -59,9 +59,9 @@ The yaw component
 
 == Functions
 
-// tag::func-FIN_Operator_Add-title[]
-=== `FIN_Operator_Add` (`other` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>) -> `result` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
-// tag::func-FIN_Operator_Add[]
+// tag::func-FIR_Operator_Add-title[]
+=== `FIR_Operator_Add` (`other` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>) -> `result` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+// tag::func-FIR_Operator_Add[]
 
 The addition (+) operator for this struct.
 
@@ -96,11 +96,11 @@ The addition (+) operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Add[]
-// end::func-FIN_Operator_Add-title[]
-// tag::func-FIN_Operator_Sub-title[]
-=== `FIN_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>) -> `result` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
-// tag::func-FIN_Operator_Sub[]
+// end::func-FIR_Operator_Add[]
+// end::func-FIR_Operator_Add-title[]
+// tag::func-FIR_Operator_Sub-title[]
+=== `FIR_Operator_Sub` (`other` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>) -> `result` : Struct<xref:/reflection/structs/Rotator.adoc[Rotator]>
+// tag::func-FIR_Operator_Sub[]
 
 The subtraction (-) operator for this struct.
 
@@ -135,6 +135,6 @@ The subtraction (-) operator for this struct.
 !===
 
 ====
-// end::func-FIN_Operator_Sub[]
-// end::func-FIN_Operator_Sub-title[]
+// end::func-FIR_Operator_Sub[]
+// end::func-FIR_Operator_Sub-title[]
 

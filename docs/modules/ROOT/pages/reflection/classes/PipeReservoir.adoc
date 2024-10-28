@@ -1,6 +1,12 @@
 = Pipe Reservoir
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[Factory]
+!===
+
 The base class for all fluid tanks.
 
 // tag::interface[]

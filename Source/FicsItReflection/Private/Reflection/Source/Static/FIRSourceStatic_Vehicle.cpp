@@ -114,13 +114,12 @@ BeginFunc(getTargets, "Get Targets", "Returns a list of target point structs of 
 	OutVal(0, RArray<RStruct<FFIRTargetPoint>>, targets, "Targets", "A list of target point structs containing all the targets of the target point list.")
 	Body()
 	TArray<FIRAny> Targets;
-	AFGTargetPoint* CurrentTarget = nullptr;
-	int i = 0;
-	do {
-		if (i++) CurrentTarget = CurrentTarget->GetNext();
-		else CurrentTarget = self->GetFirstTarget();
+	AFGTargetPoint* CurrentTarget = self->GetFirstTarget();
+	while (CurrentTarget) {
 		Targets.Add((FIRAny)FFIRTargetPoint(CurrentTarget));
-	} while (CurrentTarget && CurrentTarget != self->GetLastTarget());
+		if (CurrentTarget == self->GetLastTarget()) break;
+		CurrentTarget = CurrentTarget->GetNext();
+	}
 	targets = Targets;
 } EndFunc()
 BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point list and adds the given array of target point structs to the empty target point list.", 0) {

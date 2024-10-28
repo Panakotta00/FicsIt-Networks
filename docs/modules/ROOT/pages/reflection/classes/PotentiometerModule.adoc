@@ -1,6 +1,12 @@
 = Potentiometer Module
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 This Potentiometer Module allows for input of a fixed value range and fires a signal with the new value each time the internal counter changes.
 
 // tag::interface[]
@@ -79,7 +85,7 @@ The current value of this potentiometer. Setting this will change the internal v
 == Functions
 
 // tag::func-setColor-title[]
-=== `setColor` (`red` : Float, `green` : Float, `blue` : Float, `Emit` : Float)
+=== `setColor` (`Red` : Float, `Green` : Float, `Blue` : Float, `Emit` : Float)
 // tag::func-setColor[]
 
 
@@ -99,15 +105,15 @@ The current value of this potentiometer. Setting this will change the internal v
 !===
 !Name !Type !Description
 
-! *red* `red`
+! *Red* `Red`
 ! Float
 ! 
 
-! *green* `green`
+! *Green* `Green`
 ! Float
 ! 
 
-! *blue* `blue`
+! *Blue* `Blue`
 ! Float
 ! 
 

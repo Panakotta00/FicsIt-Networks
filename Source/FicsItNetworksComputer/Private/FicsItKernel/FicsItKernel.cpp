@@ -3,6 +3,7 @@
 #include "FicsItNetworksComputer.h"
 #include "FicsItKernel/Processor/Processor.h"
 #include "FicsItReflection.h"
+#include "FileSystemRoot.h"
 #include "FILLogContainer.h"
 #include "FILLogEntry.h"
 #include "FILLogScope.h"
@@ -12,13 +13,13 @@
 
 FFINKernelListener::FFINKernelListener(UFINKernelSystem* parent) : parent(parent) {}
 
-void FFINKernelListener::onMounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
+void FFINKernelListener::onMounted(CodersFileSystem::Path path, TSharedRef<CodersFileSystem::Device> device) {
 	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(AFINComputerCase::StaticClass())->FindFIRSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {4ll, FString(path.str().c_str())});
 }
 
-void FFINKernelListener::onUnmounted(CodersFileSystem::Path path, CodersFileSystem::SRef<CodersFileSystem::Device> device) {
+void FFINKernelListener::onUnmounted(CodersFileSystem::Path path, TSharedRef<CodersFileSystem::Device> device) {
 	static UFIRSignal* Signal = nullptr;
 	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(AFINComputerCase::StaticClass())->FindFIRSignal("FileSystemUpdate");
 	Signal->Trigger(parent->GetOuter(), {5ll, FString(path.str().c_str())});
@@ -49,13 +50,14 @@ void FFINKernelListener::onNodeRenamed(CodersFileSystem::Path newPath, CodersFil
 }
 
 UFINKernelSystem::UFINKernelSystem() {
-	FileSystemListener = new FFINKernelListener(this);
+	FileSystemListener = MakeShared<FFINKernelListener>(this);
 }
 
 void UFINKernelSystem::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) {
 	Super::AddReferencedObjects(InThis, Collector);
 	
 	UFINKernelSystem* This = Cast<UFINKernelSystem>(InThis);
+	FScopeLock Lock(&This->ReferenceObjectMutex);
 	for (const TPair<void*, TFunction<void(void*, FReferenceCollector&)>>& Referencer : This->ReferencedObjects) {
 		Referencer.Value(Referencer.Key, Collector);
 	}
@@ -106,12 +108,12 @@ void UFINKernelSystem::PostLoadGame_Implementation(int32 saveVersion, int32 game
 		MemoryUsage = 0;
 
 		// create & init devDevice
-		DevDevice = new FFINKernelFSDevDevice();
-		for (const TPair<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
+		DevDevice = MakeShared<FFINKernelFSDevDevice>();
+		for (const TPair<FGuid, TSharedRef<CodersFileSystem::Device>>& Drive : Drives) {
 			DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key.ToString()));
 		}
 		
-		if (DevDeviceMountPoint.Len() > 0) FileSystem.mount(DevDevice, TCHAR_TO_UTF8(*DevDeviceMountPoint));
+		if (DevDeviceMountPoint.Len() > 0) FileSystem.mount(DevDevice.ToSharedRef(), TCHAR_TO_UTF8(*DevDeviceMountPoint));
 		
 		FileSystem.PostLoad(FileSystemSerializationInfo);
 	}
@@ -176,10 +178,10 @@ void UFINKernelSystem::AddDrive(const FGuid& InDrive) {
 	if (Drives.Contains(InDrive)) return;
 
 	// create & assign device from drive
-	Drives.Add(InDrive) = AFINFileSystemSubsystem::GetDevice(InDrive);
+	Drives.Add(InDrive, AFINFileSystemSubsystem::GetDevice(InDrive).ToSharedRef());
 
 	// add drive to devDevice
-	if (DevDevice.isValid()) {
+	if (DevDevice.IsValid()) {
 		if (!DevDevice->addDevice(Drives[InDrive], TCHAR_TO_UTF8(*InDrive.ToString()))) Drives.Remove(InDrive);
 	}
 }
@@ -188,11 +190,11 @@ void UFINKernelSystem::RemoveDrive(const FGuid& InDrive) {
 	if (!InDrive.IsValid()) return;
 
 	// try to find location of drive
-	CodersFileSystem::SRef<CodersFileSystem::Device>* FSDevice = Drives.Find(InDrive);
+	TSharedRef<CodersFileSystem::Device>* FSDevice = Drives.Find(InDrive);
 	if (!FSDevice) return;
 
 	// remove drive from devDevice
-	if (DevDevice.isValid()) {
+	if (DevDevice.IsValid()) {
 		if (!DevDevice->removeDevice(*FSDevice)) return;
 	}
 
@@ -220,18 +222,18 @@ void UFINKernelSystem::HandleFutures() {
 	}
 }
 
-TMap<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>> UFINKernelSystem::GetDrives() const {
+TMap<FGuid, TSharedRef<CodersFileSystem::Device>> UFINKernelSystem::GetDrives() const {
 	return Drives;
 }
 
-CodersFileSystem::SRef<FFINKernelFSDevDevice> UFINKernelSystem::GetDevDevice() const {
+TSharedPtr<FFINKernelFSDevDevice> UFINKernelSystem::GetDevDevice() const {
 	FScopeLock lock(const_cast<FCriticalSection*>(&MutexDevDevice));
 	return DevDevice;
 }
 
 bool UFINKernelSystem::InitFileSystem(CodersFileSystem::Path InPath) {
 	if (GetState() == FIN_KERNEL_RUNNING) {
-		return FileSystem.mount(DevDevice, InPath);
+		return FileSystem.mount(DevDevice.ToSharedRef(), InPath);
 	}
 	return false;
 }
@@ -256,8 +258,8 @@ bool UFINKernelSystem::Start(bool InReset) {
 	// create & init devDevice
 	{
 		FScopeLock Lock(&MutexDevDevice);
-		DevDevice = new FFINKernelFSDevDevice();
-		for (const TPair<FGuid, CodersFileSystem::SRef<CodersFileSystem::Device>>& Drive : Drives) {
+		DevDevice = MakeShared<FFINKernelFSDevDevice>();
+		for (const TPair<FGuid, TSharedRef<CodersFileSystem::Device>>& Drive : Drives) {
 			DevDevice->addDevice(Drive.Value, TCHAR_TO_UTF8(*Drive.Key.ToString()));
 		}
 	}
@@ -312,7 +314,7 @@ void UFINKernelSystem::Crash(const TSharedRef<FFINKernelCrash>& InCrash) {
 }
 
 TSharedPtr<FFINKernelCrash> UFINKernelSystem::RecalculateResources(ERecalc InComponents) {
-	CodersFileSystem::SRef<FFINKernelFSDevDevice> Device = FileSystem.getDevDevice();
+	TSharedPtr<FFINKernelFSDevDevice> Device = GetDevDevice();
 
 	MemoryUsage = Processor->GetMemoryUsage(InComponents & PROCESSOR);
 	MemoryUsage += FileSystem.getMemoryUsage(InComponents & FILESYSTEM);

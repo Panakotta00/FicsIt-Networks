@@ -1,6 +1,12 @@
 = Sizeable Module Panel
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINSizeablePanel]
+!===
+
 This panel allows for dynamic sizeing. For placing on walls.
 
 // tag::interface[]

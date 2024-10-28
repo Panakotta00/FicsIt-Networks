@@ -1,6 +1,12 @@
 = Recipe
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Object.adoc[Object]
+!===
+
 A struct that holds information about a recipe in its class. Means don't use it as object, use it as class type!
 
 // tag::interface[]

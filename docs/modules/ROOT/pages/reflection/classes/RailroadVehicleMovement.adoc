@@ -1,6 +1,12 @@
 = Railroad Vehicle Movement
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
+!===
+
 This actor component contains all the infomation about the movement of a railroad vehicle.
 
 // tag::interface[]

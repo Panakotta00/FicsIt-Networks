@@ -22,23 +22,6 @@ Returns the blocks validation status.
 ====
 // end::func-blockValidation[]
 // end::func-blockValidation-title[]
-// tag::func-hasBlockReservation-title[]
-=== `hasBlockReservation` : Bool
-// tag::func-hasBlockReservation[]
-
-True if the block this signal is observing has a reservation of a train e.g. will be passed by a train soon.
-
-[%collapsible]
-====
-[cols="1,5a",separator="!"]
-!===
-! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
-
-! Display Name ! Has Block Reservation
-!===
-====
-// end::func-hasBlockReservation[]
-// end::func-hasBlockReservation-title[]
 // tag::func-isBlockOccupied-title[]
 === `isBlockOccupied` : Bool
 // tag::func-isBlockOccupied[]

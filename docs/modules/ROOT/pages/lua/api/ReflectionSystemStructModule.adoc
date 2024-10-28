@@ -1,7 +1,7 @@
 = Reflection-System Struct Module
 :table-caption!:
 
-Description
+This module provides all the functionallity for the usage of reflected structs in Lua.
 
 [cols="1,5a",separator="!"]
 !===

@@ -1,0 +1,86 @@
+= Dimensional Depot Uploader
+:table-caption!:
+
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Factory.adoc[FGBuildableStorage]
+!===
+
+The container that allows you to upload items to the dimensional depot. The dimensional depot is also known as central storage.
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-centralStorage-title[]
+=== `centralStorage` : Trace<xref:/reflection/classes/DimensionalDepot.adoc[DimensionalDepot]>
+// tag::func-centralStorage[]
+
+The central stroage it self.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Central Storage
+!===
+====
+// end::func-centralStorage[]
+// end::func-centralStorage-title[]
+// tag::func-centralStorageUploadProgress-title[]
+=== `centralStorageUploadProgress` : Float
+// tag::func-centralStorageUploadProgress[]
+
+The upload progress of the item that currently gets uploaded.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Central Storage Upload Progress
+!===
+====
+// end::func-centralStorageUploadProgress[]
+// end::func-centralStorageUploadProgress-title[]
+// tag::func-isUploadInventoryEmpty-title[]
+=== `isUploadInventoryEmpty` : Bool
+// tag::func-isUploadInventoryEmpty[]
+
+True if the inventory of items to upload is empty.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Upload Inventory Empty
+!===
+====
+// end::func-isUploadInventoryEmpty[]
+// end::func-isUploadInventoryEmpty-title[]
+// tag::func-isUploadingToCentralStorage-title[]
+=== `isUploadingToCentralStorage` : Bool
+// tag::func-isUploadingToCentralStorage[]
+
+True if the uploader is currently uploading items to the dimensional depot.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Is Uploading To Central Storage
+!===
+====
+// end::func-isUploadingToCentralStorage[]
+// end::func-isUploadingToCentralStorage-title[]
+
+// end::interface[]
+

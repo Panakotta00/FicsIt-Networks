@@ -155,8 +155,10 @@ namespace FINLua {
 			 * @LuaFunction		__gc
 			 * @DisplayName		Garbage Collect
 			 */)", __gc) {
-				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
-				LuaObject->~FLuaObject();
+				FLuaObject* LuaObject = luaFIN_toRawLuaObject(L, 1);
+				if (LuaObject) {
+					LuaObject->~FLuaObject();
+				}
 				return 0;
 			}
 		}
@@ -181,8 +183,12 @@ namespace FINLua {
 		UE_LOGFMT(LogFicsItNetworksLuaReflection, VeryVerbose, "[{Runtime}] Pushed Object '{Object}' to Lua-Stack ({Index})", L, Object->GetFullName(), lua_gettop(L));
 	}
 
+	FLuaObject* luaFIN_toRawLuaObject(lua_State* L, int Index) {
+		return static_cast<FLuaObject*>(luaL_testudata(L, Index, ReflectionSystemObject::Object::_Name));
+	}
+
 	FLuaObject* luaFIN_toLuaObject(lua_State* L, int Index, UFIRClass* ParentClass) {
-		FLuaObject* LuaObject = static_cast<FLuaObject*>(luaL_testudata(L, Index, ReflectionSystemObject::Object::_Name));
+		FLuaObject* LuaObject = luaFIN_toRawLuaObject(L, Index);
 		if (LuaObject && LuaObject->Object.IsValidPtr()) {
 			if (LuaObject->Type->IsChildOf(ParentClass)) {
 				UE_LOGFMT(LogFicsItNetworksLuaReflection, VeryVerbose, "[{Runtime}] Got Object '{Object}' from Lua-Stack ({Index}/{AbsIndex})", L, LuaObject->Object->GetFullName(), Index, lua_absindex(L, Index));

@@ -1,6 +1,12 @@
 = Item Category
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Object.adoc[Object]
+!===
+
 The category of some items.
 
 // tag::interface[]

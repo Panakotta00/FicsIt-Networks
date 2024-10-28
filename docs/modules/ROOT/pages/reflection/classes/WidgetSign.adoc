@@ -1,6 +1,12 @@
 = Widget Sign
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/SignBase.adoc[SignBase]
+!===
+
 The type of sign that allows you to define layouts, images, texts and colors manually.
 
 // tag::interface[]

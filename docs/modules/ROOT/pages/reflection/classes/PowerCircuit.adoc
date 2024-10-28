@@ -1,6 +1,12 @@
 = Power Circuit
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Object.adoc[Object]
+!===
+
 A Object that represents a whole power circuit.
 
 // tag::interface[]

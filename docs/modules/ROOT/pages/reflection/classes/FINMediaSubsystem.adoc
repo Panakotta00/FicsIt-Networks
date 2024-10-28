@@ -1,6 +1,12 @@
 = FINMediaSubsystem
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Actor.adoc[Actor]
+!===
+
 
 
 // tag::interface[]

@@ -8,7 +8,11 @@ public class FicsItNetworks : ModuleRules
     public FicsItNetworks(ReadOnlyTargetRules target) : base(target)
     {
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-        bLegacyPublicIncludePaths = false;
+
+        bEnableExceptions = true;
+        bWarningsAsErrors = true;
+
+        CppStandard = CppStandardVersion.Cpp20;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject",
@@ -38,24 +42,5 @@ public class FicsItNetworks : ModuleRules
             "FicsItNetworksComputer",
             "FicsItNetworksLua",
 		});
-	    PrivateDependencyModuleNames.AddRange(new string[] { "SlateNullRenderer" });
-
-        if (target.Type == TargetRules.TargetType.Editor) {
-			PublicDependencyModuleNames.AddRange(new string[] {"OnlineBlueprintSupport", "AnimGraph"});
-		}
-
-        PublicIncludePaths.Add("Public");
-
-        bEnableExceptions = true;
-        bUseRTTI = true;
-		
-        CppStandard = CppStandardVersion.Cpp17;
-
-        if (target.ProjectFile != null)
-        {
-	        var factoryGamePchPath = new DirectoryReference(Path.Combine(target.ProjectFile.Directory.ToString(),
-		        "Source", "FactoryGame", "Public", "FactoryGame.h"));
-	        PrivatePCHHeaderFile = factoryGamePchPath.MakeRelativeTo(new DirectoryReference(ModuleDirectory));
-        }
     }
 }

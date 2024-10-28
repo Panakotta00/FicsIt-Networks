@@ -1,6 +1,12 @@
 = Module Text Display
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
 The FicsIt-Networks Text-Display Module for the Modular Control Panel is a simple GPU and Screen combined!
 
 It allows you to display any kind of text with differnt font sizes and you can even switch between two fonts!

@@ -16,7 +16,7 @@
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/Views/SListView.h"
 #include "Widgets/Views/STableViewBase.h"
-#include "Windows/WindowsPlatformApplicationMisc.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 #define LOCTEXT_NAMESPACE "LogViewer"
 
@@ -163,7 +163,7 @@ FReply SFINLogViewer::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& In
 			if (!Text.IsEmpty()) Text += TEXT("\n");
 			Text += Entry->ToClipboardText();
 		}
-		FWindowsPlatformApplicationMisc::ClipboardCopy(*Text);
+		FPlatformApplicationMisc::ClipboardCopy(*Text);
 		return FReply::Handled();
 	}
 	return FReply::Unhandled();
@@ -395,3 +395,5 @@ void FFINLogTextParser::Process(TArray<FTextLineParseResults>& Results, const FS
 
 	Output = Input;
 }
+
+#undef LOCTEXT_NAMESPACE

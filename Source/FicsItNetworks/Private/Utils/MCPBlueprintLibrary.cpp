@@ -18,7 +18,7 @@ FString UMCPBlueprintLibrary::ExpandPath(FString folder, FString fileName, FStri
 	auto pathToFile = proot / file;
 	auto ps = FString(pathToFile);
 	if ( ps.Find(proot, ESearchCase::IgnoreCase, ESearchDir::FromEnd) != 0 || !FPlatformFileManager::Get().GetPlatformFile().FileExists(ToCStr(pathToFile))) {
-		return TCHAR_TO_UTF8("");
+		return TEXT("");
 	}
 	return ps;
 
@@ -27,7 +27,7 @@ FString UMCPBlueprintLibrary::ExpandPath(FString folder, FString fileName, FStri
 class MyVisitor : public IPlatformFile::FDirectoryVisitor{
 public:
 
-	MyVisitor(TArray<FString>* list, FString extensionMask, int maxDepth = 0, int depth = 0) : List(list), ExtensionMask(extensionMask), Depth(depth), MaxDepth(maxDepth) {	}
+	MyVisitor(TArray<FString>* list, FString extensionMask, int maxDepth = 0, int depth = 0) : ExtensionMask(extensionMask), List(list), MaxDepth(maxDepth), Depth(depth) {	}
 
 	FString ExtensionMask;
 	TArray<FString>* List;

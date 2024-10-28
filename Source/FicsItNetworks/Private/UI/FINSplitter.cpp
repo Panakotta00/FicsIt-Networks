@@ -1,5 +1,7 @@
 ﻿#include "UI/FINSplitter.h"
 
+#include "ArrangedChildren.h"
+
 void SFINSplitter::Construct(FArguments InArgs) {
 	SSplitter::FArguments Args;
 	Args._Clipping = InArgs._Clipping;
@@ -46,7 +48,7 @@ int32 SFINSplitter::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 		FSlateDrawElement::MakeBox(
             OutDrawElements,
             MaxLayerId,
-            GeometryAfterSplitter.ToPaintGeometry( HandlePosition, HandleSize, 1.0f ),
+            GeometryAfterSplitter.ToPaintGeometry( HandleSize, FSlateLayoutTransform(1.0f, HandlePosition)),
             &Style->HandleIconBrush,
             ShouldBeEnabled(bParentEnabled) ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect,
             InWidgetStyle.GetColorAndOpacityTint() * Style->HandleHighlightBrush.TintColor.GetSpecifiedColor()

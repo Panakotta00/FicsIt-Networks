@@ -5,8 +5,7 @@ public class FicsItNetworksComputer : ModuleRules
     public FicsItNetworksComputer(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-        bUseRTTI = true;
+        bWarningsAsErrors = true;
         bEnableExceptions = true;
 
         PublicDependencyModuleNames.AddRange(
@@ -18,6 +17,7 @@ public class FicsItNetworksComputer : ModuleRules
                 "FicsItNetworksMisc",
                 "FicsItNetworksCircuit",
                 "FicsItReflection",
+                "FicsItFileSystem"
             }
         );
 

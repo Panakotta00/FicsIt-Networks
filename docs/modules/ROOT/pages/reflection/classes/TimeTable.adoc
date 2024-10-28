@@ -1,6 +1,12 @@
 = Time Table
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Actor.adoc[Actor]
+!===
+
 Contains the time table information of train.
 
 // tag::interface[]

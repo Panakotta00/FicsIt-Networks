@@ -35,7 +35,7 @@ public:
 	TMap<UFINGPUWidgetSign*, AFINComputerGPU*> WidgetSign2GPU;
 
 	UPROPERTY()
-	class UEnhancedInputComponent* Input;
+	class UEnhancedInputComponent* Input = nullptr;
 
 	UPROPERTY(SaveGame, BlueprintReadOnly)
 	TEnumAsByte<EFINCustomVersion> Version = EFINCustomVersion::FINBeforeCustomVersionWasAdded;

@@ -1,6 +1,12 @@
 = Circuite Bridget
 :table-caption!:
 
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
 A building that can connect two circuit networks together.
 
 // tag::interface[]

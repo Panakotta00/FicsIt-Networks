@@ -4,6 +4,8 @@
 #include "FINConfigurationStruct.h"
 #include "FINNetworkComponent.h"
 #include "FINUtils.h"
+#include "TimerManager.h"
+#include "Components/FINDefaultExtendedHolo.h"
 #include "Components/OverlaySlot.h"
 #include "UI/FGGameUI.h"
 #include "UObject/ConstructorHelpers.h"
@@ -13,13 +15,22 @@ const FName AFINBlueprintHologram_List_NameColumn = FName("Name");
 const FName AFINBlueprintHologram_List_ValueColumn = FName("Value");
 
 AFINBlueprintHologram::AFINBlueprintHologram() {
-	PopupClass = ConstructorHelpers::FClassFinder<UFGPopupWidget>(TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_Popup.Widget_Popup_C")).Class;
-	PopupContentClass = ConstructorHelpers::FClassFinder<UFINBlueprintParameterPopup>(TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_BlueprintParameterPopup.BPW_FIN_BlueprintParameterPopup_C")).Class;
+	PopupClass = FSoftObjectPath(TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_Popup.Widget_Popup_C"));
+	PopupContentClass = FSoftObjectPath(TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_BlueprintParameterPopup.BPW_FIN_BlueprintParameterPopup_C"));
+
+	mBuildModeCategory = EHologramBuildModeCategory::HBMC_ActorClass;
+	mDefaultBuildMode = UBuildMode_Default::StaticClass();
+}
+
+void AFINBlueprintHologram::OnConstruction(const FTransform& Transform) {
+	if (!IsValid(mBlueprintSnapBuildMode)) mBlueprintSnapBuildMode = LoadClass<UFGHologramBuildModeDescriptor>(nullptr, TEXT("/Game/FactoryGame/Buildable/Factory/-Shared/BuildGunModes/BuildMode_BlueprintSnap.BuildMode_BlueprintSnap_C"));
+
+	Super::OnConstruction(Transform);
 }
 
 void AFINBlueprintHologram::ShowPropertyDialog() {
 	GetWorld()->GetTimerManager().SetTimerForNextTick([this]() {
-		UFINBlueprintParameterPopup* PopupContent = CreateWidget<UFINBlueprintParameterPopup>(GetWorld()->GetFirstPlayerController(), PopupContentClass);
+		UFINBlueprintParameterPopup* PopupContent = CreateWidget<UFINBlueprintParameterPopup>(GetWorld()->GetFirstPlayerController(), PopupContentClass.LoadSynchronous());
 		PopupContent->Hologram = this;
 
 		FPopupClosed PopupClosedDelegate;
@@ -120,7 +131,12 @@ void AFINBlueprintHologram::PlaceHologram() {
 void AFINBlueprintHologram::PopupClosed(bool bConfirmed) {
 	bConfigured = true;
 	bAccepted = bConfirmed;
-	PlaceHologram();
+	if(bConfirmed) {
+		PlaceHologram();
+	}else {
+		auto cp = static_cast<AFGCharacterPlayer*>(GetConstructionInstigator());
+		cp->GetBuildGun()->Server_SecondaryFire_Implementation();
+	}
 }
 
 void AFINBlueprintParameterHooks::Init() {

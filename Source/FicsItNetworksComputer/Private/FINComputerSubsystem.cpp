@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
+#if UE_GAME
 	Input = CreateDefaultSubobject<UEnhancedInputComponent>("Input");
 	const UFGInputSettings* Settings = UFGInputSettings::Get();
 
@@ -25,6 +26,7 @@ AFINComputerSubsystem::AFINComputerSubsystem() {
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+#endif
 
 	bReplicates = true;
 	bAlwaysRelevant = true;
@@ -51,7 +53,9 @@ void AFINComputerSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 
 void AFINComputerSubsystem::Tick(float dt) {
 	Super::Tick(dt);
+#if UE_GAME
 	this->GetWorld()->GetFirstPlayerController()->PushInputComponent(Input);
+#endif
 }
 
 bool AFINComputerSubsystem::ShouldSave_Implementation() const {
@@ -121,6 +125,7 @@ AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* Worl
 }
 
 void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
+#if UE_GAME
 	if (!IsValid(character) || !character->GetController() || !character->GetController()->IsLocalPlayerController()) return;
 	DetachWidgetInteractionToPlayer(character);
 	UCameraComponent* cam = Cast<UCameraComponent>(character->GetComponentByClass(UCameraComponent::StaticClass()));
@@ -132,9 +137,11 @@ void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 	Comp->RegisterComponent();
 	Comp->Activate();
 	ScreenInteraction.Add(character, Comp);
+#endif
 }
 
 void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {
+#if UE_GAME
 	if (!IsValid(character)) return;
 	UWidgetInteractionComponent** Comp = ScreenInteraction.Find(character);
 	if (Comp) {
@@ -142,6 +149,7 @@ void AFINComputerSubsystem::DetachWidgetInteractionToPlayer(AFGCharacterPlayer* 
 		(*Comp)->DestroyComponent();
 		ScreenInteraction.Remove(character);
 	}
+#endif
 }
 
 UFINGPUWidgetSign* AFINComputerSubsystem::AddGPUWidgetSign(AFINComputerGPU* GPU, AFGBuildableWidgetSign* BuildableSign) {
