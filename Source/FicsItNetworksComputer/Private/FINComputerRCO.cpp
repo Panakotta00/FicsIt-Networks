@@ -155,3 +155,9 @@ void UFINComputerRCO::SetTextEEPROMCode_Implementation(UFGInventoryComponent* In
 void UFINComputerRCO::Multicast_ItemStateUpdated_Implementation(class UFGInventoryComponent* Inventory, int32 Index, FFIRInstancedStruct state) {
 	Inventory->OnSlotUpdatedDelegate.Broadcast(Index);
 }
+
+void UFINComputerRCO::GPUUpdateScreenSize_Implementation(AFINComputerGPU* GPU, FVector2D Size) {
+	FScopeLock Lock(&GPU->MutexScreenSize);
+	GPU->bScreenSizeUpdated = true;
+	GPU->LastScreenSize = Size;
+}
