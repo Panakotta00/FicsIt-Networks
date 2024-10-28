@@ -33,7 +33,7 @@ jobs:
               core.setFailed('Found Release is a draft!');
               return;
             }
-            return {body: release.body, body_encoded: btoa(release.body), tag_name: release.tag_name, name: release.name};
+            core.setOutput('body', release.body);
       
       - name: Download FicsIt-Networks Version
         uses: robinraju/release-downloader@v1.11
@@ -42,10 +42,10 @@ jobs:
           fileName: "FicsItNetworks.zip"
 
       - name: Upload to SMR
+        env:
+          body: ${{steps.find-release.outputs.body}}
         run: |
-          VAR_ENCODED="${{ steps.find-release.outputs.result.body_encoded }}"
-          VAR=$(echo "$VAR_ENCODED" | base64 --decode)
-          ./ficsit-cli --api-key "${{secrets.SMR_API_KEY}}" smr upload FicsItNetworks FicsItNetworks.zip $VAR
+          ./ficsit-cli --api-key "${{secrets.SMR_API_KEY}}" smr upload FicsItNetworks FicsItNetworks.zip $body
 
       - name: Wait for Approval
         uses: actions/github-script@v7

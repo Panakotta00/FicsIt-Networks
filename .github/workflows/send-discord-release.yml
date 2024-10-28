@@ -35,10 +35,8 @@ jobs:
               core.setFailed('Found Release is a draft!');
               return;
             }*/
-            console.log(release.body);
             core.setOutput('body', release.body);
             core.setOutput('tag_name', release.tag_name);
-            return {body: release.body, body_encoded: btoa(release.body), tag_name: release.tag_name, name: release.name};
 
       - name: Prepare Discord Message
         uses: actions/github-script@v7
@@ -53,10 +51,11 @@ jobs:
             let split = body.split(/\n(.*)/s);
             split.splice(1, 0, `_(${version})_`);
             split.push("\n\n<@&1018202499678736446>");
-            return split.join("");
+            let msg = split.join("");
+            core.setOutput('msg', msg);
 
       - name: Send Discord Webhook
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.RELEASE_WEBHOOK_URL }}
-          content: ${{steps.prepare-msg.outputs.result}}
+          content: ${{steps.prepare-msg.outputs.msg}}
