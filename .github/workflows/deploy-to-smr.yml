@@ -77,7 +77,8 @@ jobs:
               } else {
                 const json = await response.json();
                 let mod = json.data.getModByReference.versions[0];
-                if (mod.approved && mod.virustotal_results.safe) {
+                let unsafe = virustotal_results.find(virus => !virus.safe);
+                if (mod.approved && !unsafe) {
                   console.log("Version got approved!");
                   return;
                 }
