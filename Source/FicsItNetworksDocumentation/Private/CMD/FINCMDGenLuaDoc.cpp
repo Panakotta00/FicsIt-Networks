@@ -290,7 +290,7 @@ namespace FINGenLuaDoc {
 
 			FString ClassName = FString::Printf(TEXT("%s_Class"), *Struct->GetInternalName());
 
-			Str.Appendf(TEXT("% = {}\n"), *ClassName);
+			Str.Appendf(TEXT("%s = {}\n"), *ClassName);
 
 			for (UFIRFunction* Func : Struct->GetFunctions(false)) {
 				if (Func->GetFunctionFlags() & FIR_Func_ClassFunc) {
