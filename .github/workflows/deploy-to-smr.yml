@@ -2,6 +2,10 @@ name: Deploy to SMR
 
 on:
   workflow_dispatch:
+    inputs:
+      should_upload:
+        type: boolean
+        default: true
   workflow_call:
     secrets:
       SMR_API_KEY:
@@ -19,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Find Release
+        if: ${{inputs.should_upload}}
         uses: actions/github-script@v7
         id: find-release
         with:
@@ -36,17 +41,20 @@ jobs:
             core.setOutput('body', release.body);
       
       - name: Download FicsIt-Networks Version
+        if: ${{inputs.should_upload}}
         uses: robinraju/release-downloader@v1.11
         with:
           latest: true
           fileName: "FicsItNetworks.zip"
 
       - name: Setup FicsIt-CLI
+        if: ${{inputs.should_upload}}
         run: |
           wget https://github.com/satisfactorymodding/ficsit-cli/releases/latest/download/ficsit_linux_amd64.deb
           sudo dpkg -i ficsit_linux_amd64.deb
 
       - name: Upload to SMR
+        if: ${{inputs.should_upload}}
         env:
           body: ${{steps.find-release.outputs.body}}
         run: |
@@ -58,6 +66,7 @@ jobs:
           script: |
             while (true) {
               let response = await fetch("https://api.ficsit.app/v2/query", {
+                method: "POST",
                 headers: {"Cookies": "token=${{secrets.SMR_API_TOKEN}}"},
                 body: '{getModByReference(modReference:"FicsItNetworks"){versions(filter:{order_by:created_at}){approved}}}'
               })
