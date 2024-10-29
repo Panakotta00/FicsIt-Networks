@@ -50,7 +50,7 @@ jobs:
         env:
           body: ${{steps.find-release.outputs.body}}
         run: |
-          ./ficsit-cli --api-key "${{secrets.SMR_API_KEY}}" smr upload FicsItNetworks FicsItNetworks.zip $body
+          ficsit-cli --api-key "${{secrets.SMR_API_KEY}}" smr upload FicsItNetworks FicsItNetworks.zip $body
 
       - name: Wait for Approval
         uses: actions/github-script@v7
