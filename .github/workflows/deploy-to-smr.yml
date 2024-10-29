@@ -76,7 +76,7 @@ jobs:
                 console.log(`Checking Fetch: Response is not OK: ${response.status}`);
               } else {
                 const json = await response.json();
-                let mod = json.data.getModByReference[0];
+                let mod = json.data.getModByReference.versions[0];
                 if (mod.approved && mod.virustotal_results.safe) {
                   console.log("Version got approved!");
                   return;
