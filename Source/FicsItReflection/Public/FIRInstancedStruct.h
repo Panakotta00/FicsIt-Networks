@@ -39,6 +39,11 @@ public:
 	bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
 
+	bool operator==(const FFIRInstancedStruct& Other) const {
+		if (GetStruct() != Other.GetStruct()) return false;
+		return GetStruct()->CompareScriptStruct(GetData(), Other.GetData(), 0);
+	}
+
 	/**
 	 * Returns the struct type stored in this holder.
 	 *
