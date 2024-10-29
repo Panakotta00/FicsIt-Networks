@@ -41,6 +41,11 @@ jobs:
           latest: true
           fileName: "FicsItNetworks.zip"
 
+      - name: Setup FicsIt-CLI
+        run: |
+          wget https://github.com/satisfactorymodding/ficsit-cli/releases/latest/download/ficsit_linux_amd64.deb
+          sudo dpkg -i ficsit_linux_amd64.deb
+
       - name: Upload to SMR
         env:
           body: ${{steps.find-release.outputs.body}}
