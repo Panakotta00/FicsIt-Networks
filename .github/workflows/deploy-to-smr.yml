@@ -81,7 +81,7 @@ jobs:
                 }
                 console.log("Version not approved yet");
               }
-              await sleep(5 * 1000);
+              await new Promise(resolve => setTimeout(resolve, 5000));
             }
   send-discord-release-message:
     needs: deploy-to-smr
