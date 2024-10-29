@@ -18,6 +18,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, SaveGame, Replicated, ReplicatedUsing=OnRep_Screen)
     FFIRTrace Screen;
 
+	UPROPERTY(SaveGame)
+	FVector2D LastScreenSize = FVector2D::ZeroVector;
+	bool bScreenSizeUpdated = false;
+	FCriticalSection MutexScreenSize;
+
 	AFINComputerGPU();
 
 	// Begin AActor

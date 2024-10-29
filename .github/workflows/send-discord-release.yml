@@ -1,0 +1,78 @@
+name: Send Release Message
+
+on:
+  workflow_dispatch:
+    inputs:
+      ping:
+        required: true
+        type: boolean
+        default: false
+      verify_no_draft:
+        required: true
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      verify_no_draft:
+        type: boolean
+        default: true
+      ping:
+        type: boolean
+        default: true
+    secrets:
+      SMR_API_KEY:
+        required: true
+      RELEASE_WEBHOOK_URL:
+        required: true
+
+permissions:
+  actions: read
+
+jobs:
+  send-release-message:
+    name: Deploy to SMR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find Release
+        uses: actions/github-script@v7
+        id: find-release
+        with:
+          script: |
+            const response = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 1,
+            });
+            const release = response.data[0];
+            var inputs = ${{ toJSON(inputs) }};
+            if (inputs.verify_no_draft && release.draft) {
+              core.setFailed('Found Release is a draft!');
+              return;
+            }
+            core.setOutput('body', release.body);
+            core.setOutput('tag_name', release.tag_name);
+
+      - name: Prepare Discord Message
+        uses: actions/github-script@v7
+        id: prepare-msg
+        env:
+          body: ${{steps.find-release.outputs.body}}
+          version: ${{steps.find-release.outputs.tag_name}}
+        with:
+          script: |
+            let body = process.env.body;
+            let version = process.env.version;
+            let split = body.split(/\n(.*)/s);
+            split.splice(1, 0, `_(${version})_\n`);
+            var inputs = ${{ toJSON(inputs) }};
+            if (inputs.ping) {
+              split.push("\n\n<@&1018202499678736446>");
+            }
+            let msg = split.join("");
+            core.setOutput('msg', msg);
+
+      - name: Send Discord Webhook
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.RELEASE_WEBHOOK_URL }}
+          content: ${{steps.prepare-msg.outputs.msg}}

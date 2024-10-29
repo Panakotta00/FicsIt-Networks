@@ -46,12 +46,7 @@ namespace FINLua {
 
 	int luaYield(lua_State* L) {
 		const int args = lua_gettop(L);
-
-		// insert a boolean to indicate a user executed yield
-		lua_pushboolean(L, true);
-		lua_insert(L, 1);
-		
-		return lua_yieldk(L, args+1, NULL, &luaYieldResume);
+		return luaFIN_yield(L, args+1, NULL, &luaYieldResume);
 	}
 
 	int luaResume(lua_State* L); // pre-declare

@@ -343,6 +343,14 @@ namespace FINLua {
 		return metaName;
 	}
 
+	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc) {
+		// insert a boolean to indicate a user executed yield
+		lua_pushboolean(L, true);
+		lua_insert(L, -nresults - 1);
+
+		return lua_yieldk(L, nresults+1, ctx, kfunc);
+	}
+
 	void luaFIN_pushFString(lua_State* L, const FString& Str) {
 		FTCHARToUTF8 conv(*Str, Str.Len());
 		lua_pushlstring(L, conv.Get(), conv.Length());

@@ -24,28 +24,28 @@ UE_DISABLE_OPTIMIZATION
 namespace FINGenJsonDoc {
 	TSharedRef<FJsonObject> GenReflectionDataType(UFIRProperty* Property, TSharedRef<FJsonObject> Obj = MakeShared<FJsonObject>()) {
 		if (Property->IsA<UFIRBoolProperty>()) {
-			Obj->SetStringField("type", "Bool");
+			Obj->SetStringField(TEXT("type"), TEXT("Bool"));
 		} else if (Property->IsA<UFIRIntProperty>()) {
-			Obj->SetStringField("type", "Int");
+			Obj->SetStringField(TEXT("type"), TEXT("Int"));
 		} else if (Property->IsA<UFIRFloatProperty>()) {
-			Obj->SetStringField("type", "Float");
+			Obj->SetStringField(TEXT("type"), TEXT("Float"));
 		} else if (Property->IsA<UFIRStrProperty>()) {
-			Obj->SetStringField("type", "String");
+			Obj->SetStringField(TEXT("type"), TEXT("String"));
 		} else if (UFIRObjectProperty* ObjProp = Cast<UFIRObjectProperty>(Property)) {
-			Obj->SetStringField("type", "Object");
-			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(ObjProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
+			Obj->SetStringField(TEXT("type"), TEXT("Object"));
+			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(ObjProp->GetSubclass())) Obj->SetStringField(TEXT("subclass"), subclass->GetInternalName());
 		} else if (UFIRTraceProperty* TraceProp = Cast<UFIRTraceProperty>(Property)) {
-			Obj->SetStringField("type", "Trace");
-			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(TraceProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
+			Obj->SetStringField(TEXT("type"), TEXT("Trace"));
+			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(TraceProp->GetSubclass())) Obj->SetStringField(TEXT("subclass"), subclass->GetInternalName());
 		} else if (UFIRStructProperty* StructProp = Cast<UFIRStructProperty>(Property)) {
-			Obj->SetStringField("type", "Struct");
-			if (UFIRStruct* inner = FFicsItReflectionModule::Get().FindStruct(StructProp->GetInner())) Obj->SetStringField("inner", inner->GetInternalName());
+			Obj->SetStringField(TEXT("type"), TEXT("Struct"));
+			if (UFIRStruct* inner = FFicsItReflectionModule::Get().FindStruct(StructProp->GetInner())) Obj->SetStringField(TEXT("inner"), inner->GetInternalName());
 		} else if (UFIRClassProperty* ClassProp = Cast<UFIRClassProperty>(Property)) {
-			Obj->SetStringField("type", "Class");
-			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(ClassProp->GetSubclass())) Obj->SetStringField("subclass", subclass->GetInternalName());
+			Obj->SetStringField(TEXT("type"), TEXT("Class"));
+			if (UFIRClass* subclass = FFicsItReflectionModule::Get().FindClass(ClassProp->GetSubclass())) Obj->SetStringField(TEXT("subclass"), subclass->GetInternalName());
 		} else if (UFIRArrayProperty* ArrayProp = Cast<UFIRArrayProperty>(Property)) {
-			Obj->SetStringField("type", "Array");
-			if (ArrayProp->GetInnerType()) Obj->SetObjectField("inner", GenReflectionDataType(ArrayProp->GetInnerType()));
+			Obj->SetStringField(TEXT("type"), TEXT("Array"));
+			if (ArrayProp->GetInnerType()) Obj->SetObjectField(TEXT("inner"), GenReflectionDataType(ArrayProp->GetInnerType()));
 		}
 		return Obj;
 	}
@@ -250,11 +250,11 @@ namespace FINGenJsonDoc {
 
 	TSharedRef<FJsonObject> GenLuaValue(const TSharedRef<FFINLuaModuleValue>& Value) {
 		auto typeID = Value->TypeID();
-		if (typeID == FINTypeId<FFINLuaFunction>::ID()) {
+		if (typeID->IsChildOf(FFINLuaFunction::StaticStruct())) {
 			return GenLuaFunction(*StaticCastSharedRef<FFINLuaFunction>(Value));
-		} else if (typeID == FINTypeId<FFINLuaTable>::ID()) {
+		} else if (typeID->IsChildOf(FFINLuaTable::StaticStruct())) {
 			return GenLuaTable(*StaticCastSharedRef<FFINLuaTable>(Value));
-		} else if (typeID == FINTypeId<FFINLuaModuleBareValue>::ID()) {
+		} else if (typeID->IsChildOf(FFINLuaModuleBareValue::StaticStruct())) {
 			return GenLuaBareValue(*StaticCastSharedRef<FFINLuaModuleBareValue>(Value));
 		} else {
 			return MakeShared<FJsonObject>();

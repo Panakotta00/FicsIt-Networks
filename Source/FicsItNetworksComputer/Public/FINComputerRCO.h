@@ -28,6 +28,9 @@ public:
 	void SetNick(UObject* Component, const FString& Nick);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category="Computer|RCO")
+	void GPUUpdateScreenSize(AFINComputerGPU* GPU, FVector2D Size);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category="Computer|RCO")
 	void GPUMouseEvent(AFINComputerGPUT1* GPU, int type, int x, int y, int btn);
 	
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category="Computer|RCO")

@@ -1,6 +1,7 @@
 ﻿#include "FINLua/FINLuaModule.h"
 
 #include "FicsItNetworksLuaModule.h"
+#include "Regex.h"
 #include "FINLua/LuaExtraSpace.h"
 #include "FINLua/LuaPersistence.h"
 #include "Logging/StructuredLog.h"
@@ -68,7 +69,8 @@ void FFINLuaModuleBareValue::PushLuaValue(lua_State* L, const FString& PersistNa
 
 void FFINLuaFunction::PushLuaValue(lua_State* L, const FString& PersistName) {
 	lua_pushnil(L);
-	lua_pushcclosure(L, Function, 1);
+	lua_pushnil(L);
+	lua_pushcclosure(L, Function, 2);
 
 	FINLua::luaFIN_persistValue(L, -1, PersistName);
 }
@@ -82,9 +84,11 @@ void FFINLuaTable::PushLuaValue(lua_State* L, const FString& PersistName) {
 		FINLua::luaFIN_pushFString(L, field.Key);	// table, string
 		field.Value->PushLuaValue(L, PersistName + TEXT("-") + field.Key);	// table, string, value
 
-		if (field.Value->TypeID() == FINTypeId<FFINLuaFunction>::ID() && PersistName != TEXT("ModuleSystem-Metatable-ModuleTableFunction")) {
+		if (field.Value->TypeID()->IsChildOf(FFINLuaFunction::StaticStruct()) && PersistName != TEXT("ModuleSystem-Metatable-ModuleTableFunction")) {
 			lua_pushlightuserdata(L, &field);
 			lua_setupvalue(L, -2, 1);
+			lua_pushvalue(L, -3);
+			lua_setupvalue(L, -2, 2);
 			luaL_setmetatable(L, "ModuleTableFunction");
 		}
 
@@ -412,7 +416,7 @@ namespace FINLua {
 					luaFIN_pushFString(L, field->Key);
 				} else if (key == TEXT("quickRef")) {
 					FString head = field->Key;
-					if (field->Value->TypeID() == FINTypeId<FFINLuaFunction>::ID()) {
+					if (field->Value->TypeID()->IsChildOf(FFINLuaFunction::StaticStruct())) {
 						auto func = StaticCastSharedPtr<FFINLuaFunction>(field->Value);
 						head = func->GetSignature(field->Key);
 					}
@@ -437,7 +441,7 @@ namespace FINLua {
 				}
 				FFINLuaTableField* field = static_cast<FFINLuaTableField*>(lua_touserdata(L, -1));
 				FString head = field->Key;
-				if (field->Value->TypeID() == FINTypeId<FFINLuaFunction>::ID()) {
+				if (field->Value->TypeID()->IsChildOf(FFINLuaFunction::StaticStruct())) {
 					auto func = StaticCastSharedPtr<FFINLuaFunction>(field->Value);
 					head = func->GetSignature(field->Key);
 				}

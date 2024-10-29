@@ -3,8 +3,85 @@
 
 This Module provides the Future type and all its necessary functionallity.
 
+== Globals
+
+=== **async** : 
+
+
+=== **future**
+The global Future Library provides functions to work more easily with futures.
+
+=== __future.__**addTask** (xref:/reflection/structs/Future.adoc[Future]...)
+Adds the given futures to the tasks list.
+
+=== __future.__**async** (thread) -> xref:/reflection/structs/Future.adoc[Future]
+Wraps the given thread/coroutine in a Lua-Future
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *The Future that wraps the given thread.* `future`
+! xref:/reflection/structs/Future.adoc[Future]
+! 
+
+!===
+====
+
+=== __future.__**join** (xref:/reflection/structs/Future.adoc[Future]...) -> xref:/reflection/structs/Future.adoc[Future]
+Creates a new Future that will only finish once all futures passed as parameters have finished.
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *The Future that will finish once all other futures finished.* `future`
+! xref:/reflection/structs/Future.adoc[Future]
+! 
+
+!===
+====
+
+=== __future.__**loop** ()
+Runs the default task scheduler indefinitely until no tasks are left.
+
+=== __future.__**run** ()
+Runs the default task scheduler once.
+
+=== __future.__**sleep** (seconds : number) -> xref:/reflection/structs/Future.adoc[Future]
+Creates a future that returns after the given amount of seconds.
+
+=== __future.__**tasks** : 
+A list of futures that are considered "Tasks".
+Tasks could be seen as background threads. Effectively getting "joined" together.
+Examples for tasks are callback invocations of timers and event listeners.
+
+=== **sleep** : 
+Blocks the current thread/future until the given amount of time passed
+
 == Types
 
 === **Future**
+
+
+=== __Future.__**await** ()
+
+
+=== __Future.__**canGet** ()
+
+
+=== __Future.__**get** ()
+
+
+=== __Future.__**poll** () -> bool
+
+
+=== **FutureStruct**
 
 

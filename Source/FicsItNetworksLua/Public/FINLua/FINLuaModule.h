@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "FIRGlobalRegisterHelper.h"
 #include "LuaUtil.h"
+#include "FINLuaModule.generated.h"
 
 // TODO: Make Comment Documentation Parsing more Unified and DRY, so field names etc all have same parsing rules
 // TODO: Setup bare value AFTER everything else has been setup (before post setup). So bare values can get access to metatables if needed. But still consider setup order. (generally a setup order for bare values is needed)
@@ -17,32 +18,33 @@
   #endif
 #endif
 
-template<typename T>
-class FICSITNETWORKSLUA_API FINTypeId {
-public:
-	static int ID() {
-		static uint32 id = PointerHash(UNIQUE_FUNCTION_ID);
-		return id;
-	}
-};
-
 /**
  * Represents a Lua Module Value
  */
-struct FICSITNETWORKSLUA_API FFINLuaModuleValue : TSharedFromThis<FFINLuaModuleValue> {
+USTRUCT()
+struct FICSITNETWORKSLUA_API FFINLuaModuleValue {
+	GENERATED_BODY()
+
+	FFINLuaModuleValue() = default;
 	virtual ~FFINLuaModuleValue() = default;
 
-	virtual uint32 TypeID() const = 0;
+	virtual UStruct* TypeID() const { return StaticStruct(); }
 
-	virtual void PushLuaValue(lua_State* L, const FString& PersistName) = 0;
+	virtual void PushLuaValue(lua_State* L, const FString& PersistName) {
+		lua_pushnil(L);
+	}
 };
 
 /**
  * Represents any C++ Code as a Lua Module Value
  */
-struct FICSITNETWORKSLUA_API FFINLuaModuleBareValue : FFINLuaModuleValue {
-	virtual uint32 TypeID() const { return FINTypeId<FFINLuaModuleBareValue>::ID(); }
+USTRUCT()
+struct FICSITNETWORKSLUA_API FFINLuaModuleBareValue : public FFINLuaModuleValue {
+	GENERATED_BODY()
 
+	virtual UStruct* TypeID() const { return StaticStruct(); }
+
+	FFINLuaModuleBareValue() = default;
 	FFINLuaModuleBareValue(const TFunction<void(lua_State* L, const FString&)>& Function) : Function(Function) {}
 
 	TFunction<void(lua_State* L, const FString&)> Function;
@@ -68,9 +70,13 @@ struct FICSITNETWORKSLUA_API FFINLuaFunctionParameter {
 /**
  * Represents a Lua Module Function
  */
-struct FICSITNETWORKSLUA_API FFINLuaFunction : FFINLuaModuleValue {
-	virtual uint32 TypeID() const { return FINTypeId<FFINLuaFunction>::ID(); }
+USTRUCT()
+struct FICSITNETWORKSLUA_API FFINLuaFunction : public FFINLuaModuleValue {
+	GENERATED_BODY()
 
+	virtual UStruct* TypeID() const { return StaticStruct(); }
+
+	FFINLuaFunction() = default;
 	FFINLuaFunction(lua_CFunction Function) : Function(Function) {}
 
 	lua_CFunction Function;
@@ -114,8 +120,11 @@ struct FICSITNETWORKSLUA_API FFINLuaTableField {
 /**
  * Represents a Lua Module Table
  */
-struct FICSITNETWORKSLUA_API FFINLuaTable : FFINLuaModuleValue {
-	virtual uint32 TypeID() const { return FINTypeId<FFINLuaTable>::ID(); }
+USTRUCT()
+struct FICSITNETWORKSLUA_API FFINLuaTable : public FFINLuaModuleValue {
+	GENERATED_BODY()
+
+	virtual UStruct* TypeID() const override { return StaticStruct(); }
 
 	TArray<FFINLuaTableField> Fields;
 

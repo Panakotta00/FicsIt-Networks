@@ -74,7 +74,7 @@ jobs:
         run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryServer Linux Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
       
       - name: Package FicsItNetworks Mod
-        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -DLCName='FicsItNetworks' -build -server -clientconfig=Shipping -serverconfig=Shipping -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed -utf8output
+        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -DLCName='FicsItNetworks' -build -server -clientconfig=Shipping -serverconfig=Shipping -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed -merge -utf8output
 
       - name: Upload FicsItNetworks
         id: upload-win64
