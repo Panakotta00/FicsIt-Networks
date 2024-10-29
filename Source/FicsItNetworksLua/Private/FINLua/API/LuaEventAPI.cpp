@@ -1,6 +1,9 @@
 #include "FicsItNetworksComputer.h"
+#include "FicsItReflection.h"
+#include "FINEventFilter.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
+#include "LuaStruct.h"
 #include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
@@ -154,6 +157,62 @@ namespace FINLua {
 			 */)", clear) {
 				UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->ClearSignals();
 				return 0;
+			}
+
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		EventFilter		filter(...)
+			 * @DisplayName		Filter
+			 *
+			 * Creates an Event filter expression.
+			 */)", filter) {
+				luaL_checktype(L, 1, LUA_TTABLE);
+				FFINEventFilter filter;
+				if (lua_getfield(L, 1, "event") != LUA_TNIL) {
+					if (lua_istable(L, -1)) {
+						int len = luaL_len(L, -1);
+						for (int i = 0; i < len; ++i) {
+							lua_geti(L, -1, i);
+							FString event = luaFIN_toFString(L, -1);
+							filter.Events.Add(event);
+							lua_pop(L, 1);
+						}
+					} else {
+						FString event = luaFIN_toFString(L, -1);
+						filter.Events.Add(event);
+					}
+					lua_pop(L, 1);
+				}
+				if (lua_getfield(L, 1, "sender") != LUA_TNIL) {
+					if (lua_istable(L, -1)) {
+						int len = luaL_len(L, -1);
+						for (int i = 0; i < len; ++i) {
+							lua_geti(L, -1, i);
+							UObject* sender = luaFIN_checkObject<UObject>(L, -1);
+							filter.Senders.Add(sender);
+							lua_pop(L, 1);
+						}
+					} else {
+						UObject* sender = luaFIN_checkObject<UObject>(L, -1);
+						filter.Senders.Add(sender);
+					}
+					lua_pop(L, 1);
+				}
+				if (lua_getfield(L, 1, "values") != LUA_TNIL) {
+					luaL_checktype(L, -1, LUA_TTABLE);
+					lua_pushnil(L);
+					while (lua_next(L, -2)) {
+						FString paramName = luaFIN_toFString(L, -2);
+						TOptional<FFIRAnyValue> value = luaFIN_toNetworkValue(L, -1);
+						if (value) {
+							filter.ValueFilters.Add(paramName, *value);
+						}
+						lua_pop(L, 1);
+					}
+					lua_pop(L, 2);
+				}
+				FFINEventFilterExpression expression(filter);
+				luaFIN_pushStruct(L, expression);
+				return 1;
 			}
 		}
 
