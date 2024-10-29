@@ -68,9 +68,9 @@ jobs:
               let response = await fetch("https://api.ficsit.app/v2/query", {
                 method: "POST",
                 headers: {"Cookies": "token=${{secrets.SMR_API_TOKEN}}"},
-                body: JSON.stringify({
+                body: {
                   query: '{getModByReference(modReference:"FicsItNetworks"){versions(filter:{order_by:created_at}){approved}}}'
-                })
+                }
               })
               if (!response.ok) {
                 console.log(`Checking Fetch: Response is not OK: ${response.status}`);
