@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FGSaveInterface.h"
+#include "Components/SceneComponent.h"
 #include "FINModuleSystemPanel.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINModuleDelegate, UObject*, module, bool, added);
@@ -22,7 +23,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "ModuleSystem|Panel")
 	TArray<UClass*> AllowedModules;
-	
+
 	UPROPERTY(BlueprintAssignable, Category = "ModuleSystem|Panel")
 	FFINModuleDelegate OnModuleChanged;
 
@@ -40,7 +41,7 @@ public:
 
 	// Begin IFGSaveInterface
 	bool ShouldSave_Implementation() const override;
-	virtual void GatherDependencies_Implementation(TArray< UObject* >& out_dependentObjects) override;
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
 	// End IFGSaveInterface
 
 	/**
