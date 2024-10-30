@@ -8,6 +8,17 @@
 AFINModuleSystemHolo::AFINModuleSystemHolo() {
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
+
+	InformationComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("InformationDisplay"));
+	InformationComponent->SetupAttachment(RootComponent);
+	InformationComponent->SetMobility(EComponentMobility::Movable);
+	InformationComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	if(EnableInformationDisplay) {
+		InformationComponent->SetVisibility(true);
+	}else{
+		InformationComponent->SetVisibility(false);
+	}
 }
 
 AFINModuleSystemHolo::~AFINModuleSystemHolo() {}
@@ -141,6 +152,19 @@ void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit)
 		ActorLocation += CompassSurfaceOffset;
 		//FVector ArrowLocation = {0, }
 		CompassRose->SetRelativeLocation(ActorLocation);
+	}
+	if(EnableInformationDisplay && IsValid(InformationComponent)) {
+		// Roze is having issues getting the Z position correct for the text.
+		const FVector ModuleSize = getModuleSize();
+		InformationComponent->SetMobility(EComponentMobility::Movable);
+		InformationComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		FVector ActorLocation = { (ModuleSize.X - 1) * 5,  (ModuleSize.Y - 1 ) * 5,0};
+		ActorLocation += InformationDisplayOffset;
+		if(ShowCompass && IsValid(CompassRose)) {
+			ActorLocation.Z = CompassRose->GetRelativeLocation().Z;   // Dunno why this works, but it does. 
+		}
+		InformationComponent->SetRelativeLocation(ActorLocation);
+		OnInformationUpdate(InformationComponent, hit, Snapped, SnappedLoc, SnappedRot);
 	}
 	
 	//if(IsValid(CompassComponent)) {
