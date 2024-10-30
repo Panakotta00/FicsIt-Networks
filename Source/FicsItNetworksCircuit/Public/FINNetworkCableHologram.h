@@ -130,11 +130,6 @@ public:
 	void UpdateMeshValidity(bool bValid);
 	bool IsInSecondStep();
 
-	/**
-	 * Checks if the currently snapped object is valid
-	 */
-	bool IsSnappedValid();
-
 protected:
 	template<typename T>
 	static T* GetDefaultBuildable_Static(AFGBuildableHologram* Holo) { return Holo->GetDefaultBuildable<T>(); }

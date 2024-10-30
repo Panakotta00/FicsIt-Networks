@@ -8,12 +8,16 @@
 void UFINNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UFINNetworkConnectionComponent, Circuit);
+	DOREPLIFETIME(UFINNetworkConnectionComponent, MaxCables);
+	DOREPLIFETIME(UFINNetworkConnectionComponent, CurrentCableConnections);
+}
+
+UFINNetworkConnectionComponent::UFINNetworkConnectionComponent() {
+	SetIsReplicatedByDefault(true);
 }
 
 void UFINNetworkConnectionComponent::InitializeComponent() {
 	Super::InitializeComponent();
-	SetIsReplicatedByDefault(true);
-	SetIsReplicated(true);
 }
 
 TSet<UObject*> UFINNetworkConnectionComponent::GetConnected_Implementation() const {
@@ -23,8 +27,9 @@ TSet<UObject*> UFINNetworkConnectionComponent::GetConnected_Implementation() con
 		if (Obj) Connected.Add(Obj);
 	}
 	for (AFINNetworkCable* Cable : ConnectedCables) {
-		Connected.Add(Cable->Connector1);
-		Connected.Add(Cable->Connector2);
+		auto [Connector1, Connector2] = Cable->GetConnections();
+		Connected.Add(Connector1);
+		Connected.Add(Connector2);
 	}
 	return Connected;
 }
@@ -76,9 +81,9 @@ bool UFINNetworkConnectionComponent::AddConnectedCable(AFINNetworkCable* Cable) 
 	if (ConnectedCables.Contains(Cable)) return true;
 	
 	ConnectedCables.Add(Cable);
+	CurrentCableConnections = ConnectedCables.Num();
 
-	UFINNetworkConnectionComponent* OtherConnector = (Cable->Connector1 == this) ? ((Cable->Connector2 == this) ? nullptr : Cable->Connector2) : Cable->Connector1;
-	if (OtherConnector) {
+	if (UFINNetworkConnectionComponent* OtherConnector = Cable->GetOtherConnector(this)) {
 		OtherConnector->AddConnectedCable(Cable);
 		AFINNetworkCircuit::ConnectNodes(this, this, OtherConnector);
 	}
@@ -92,12 +97,13 @@ void UFINNetworkConnectionComponent::RemoveConnectedCable(AFINNetworkCable* Cabl
 	if (!ConnectedCables.Contains(Cable)) return;
 
 	if (ConnectedCables.Remove(Cable) > 0) {
-		UFINNetworkConnectionComponent* OtherConnector = (Cable->Connector1 == this) ? Cable->Connector2 : Cable->Connector1;
-		if (OtherConnector) {
+		if (UFINNetworkConnectionComponent* OtherConnector = Cable->GetOtherConnector(this)) {
 			OtherConnector->ConnectedCables.Remove(Cable);
 			AFINNetworkCircuit::DisconnectNodes(OtherConnector->Circuit, this, OtherConnector);
 		}
 	}
+
+	CurrentCableConnections = ConnectedCables.Num();
 
 	GetOwner()->ForceNetUpdate();
 }
@@ -105,7 +111,8 @@ void UFINNetworkConnectionComponent::RemoveConnectedCable(AFINNetworkCable* Cabl
 bool UFINNetworkConnectionComponent::IsConnected(const TScriptInterface<IFINNetworkCircuitNode>& Node) const {
 	if (ConnectedNodes.Contains(Node.GetObject())) return true;
 	for (AFINNetworkCable* Cable : ConnectedCables) {
-		if (Cable->Connector1 == Node.GetObject() || Cable->Connector2 == Node.GetObject()) return true;
+		auto [Connector1, Connector2] = Cable->GetConnections();
+		if (Connector1 == Node.GetObject() || Connector2 == Node.GetObject()) return true;
 	}
 	return false;
 }

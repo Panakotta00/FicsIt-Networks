@@ -2,6 +2,7 @@
 
 #include "Net/UnrealNetwork.h"
 #include "FINNetworkConnectionComponent.h"
+#include "TimerManager.h"
 #include "Components/SplineMeshComponent.h"
 
 AFINNetworkCable::AFINNetworkCable() {
@@ -9,6 +10,8 @@ AFINNetworkCable::AFINNetworkCable() {
 	CableSpline->SetupAttachment(RootComponent);
 	CableSpline->SetForwardAxis(ESplineMeshAxis::Z);
 	CableSpline->SetMobility(EComponentMobility::Type::Movable);
+
+	bReplicates = true;
 }
 
 AFINNetworkCable::~AFINNetworkCable() {}
@@ -32,6 +35,13 @@ void AFINNetworkCable::BeginPlay() {
 	if (!Buildable || !Buildable->GetBlueprintDesigner()) {
 		ConnectConnectors();
 	}
+
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, FTimerDelegate::CreateWeakLambda(this, [this]() {
+		if (!IsValid(Connector1) || !IsValid(Connector2) || !Connector1->ConnectedCables.Contains(this) || !Connector2->ConnectedCables.Contains(this)) {
+			this->Execute_Dismantle(this);
+		}
+	}), 5000.0, false);
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
@@ -59,6 +69,19 @@ int32 AFINNetworkCable::GetDismantleRefundReturnsMultiplier() const {
 	FVector startPos = Connector1->GetComponentLocation();
 	FVector endPos = Connector2->GetComponentLocation();
 	return (startPos - endPos).Size() / 1000.0;
+}
+
+void AFINNetworkCable::SetConnection(UFINNetworkConnectionComponent* InConnector1, UFINNetworkConnectionComponent* InConnector2) {
+	Connector1 = InConnector1;
+	Connector2 = InConnector2;
+
+	ReconstructCable();
+
+	ForceNetUpdate();
+}
+
+TTuple<UFINNetworkConnectionComponent*, UFINNetworkConnectionComponent*> AFINNetworkCable::GetConnections() const {
+		return {Connector1, Connector2};
 }
 
 void AFINNetworkCable::ReconstructCable() {
