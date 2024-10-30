@@ -11,6 +11,9 @@ The Event API provides classes, functions and variables for interacting with the
 === __event.__**clear** ()
 Clears every signal from the signal queue.
 
+=== __event.__**filter** (...) -> xref:/reflection/structs/EventFilter.adoc[EventFilter]
+Creates an Event filter expression.
+
 === __event.__**ignore** (xref:/reflection/classes/Object.adoc[Object]...)
 Removes the running lua context from the listen queue of the given components. Basically the opposite of listen.
 

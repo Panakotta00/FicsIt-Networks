@@ -1,0 +1,265 @@
+= Event Filter
+:table-caption!:
+
+This struct contains filter settings so you can evaluate if a sent signal matches the filter or not.
+
+== Functions
+
+// tag::func-FIR_Operator_Mul-title[]
+=== `FIR_Operator_Mul` (`operand` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>) -> `result` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+// tag::func-FIR_Operator_Mul[]
+
+Creates a new Event Filter with an AND expression from two Event Filters
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! And
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Operand* `operand`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The other Operand.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The combined Expression.
+!===
+
+====
+// end::func-FIR_Operator_Mul[]
+// end::func-FIR_Operator_Mul-title[]
+// tag::func-FIR_Operator_BitAND-title[]
+=== `FIR_Operator_BitAND` (`operand` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>) -> `result` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+// tag::func-FIR_Operator_BitAND[]
+
+Creates a new Event Filter with an AND expression from two Event Filters
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! And
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Operand* `operand`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The other Operand.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The combined Expression.
+!===
+
+====
+// end::func-FIR_Operator_BitAND[]
+// end::func-FIR_Operator_BitAND-title[]
+// tag::func-matches-title[]
+=== `matches` (`name` : String, `sender` : Object<xref:/reflection/classes/Object.adoc[Object]>, ...) -> `matches` : Bool
+// tag::func-matches[]
+
+Returns true if the given signal data matches this event filter.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#e59445'><i>VarArgs</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Matches
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Name* `name`
+! String
+! The (internal) name of the signal.
+
+! *Sender* `sender`
+! Object<xref:/reflection/classes/Object.adoc[Object]>
+! The sender of the signal
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Matches* `matches`
+! Bool
+! True if the given signal matches the filter
+!===
+
+====
+// end::func-matches[]
+// end::func-matches-title[]
+// tag::func-FIR_Operator_Neg-title[]
+=== `FIR_Operator_Neg` () -> `result` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+// tag::func-FIR_Operator_Neg[]
+
+Creates a new Event Filter with an NOT expression from this Event Filter
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Not
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The output Expression.
+!===
+
+====
+// end::func-FIR_Operator_Neg[]
+// end::func-FIR_Operator_Neg-title[]
+// tag::func-FIR_Operator_BitNOT-title[]
+=== `FIR_Operator_BitNOT` () -> `result` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+// tag::func-FIR_Operator_BitNOT[]
+
+Creates a new Event Filter with an NOT expression from this Event Filter
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Not
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The output Expression.
+!===
+
+====
+// end::func-FIR_Operator_BitNOT[]
+// end::func-FIR_Operator_BitNOT-title[]
+// tag::func-FIR_Operator_Add-title[]
+=== `FIR_Operator_Add` (`operand` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>) -> `result` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+// tag::func-FIR_Operator_Add[]
+
+Creates a new Event Filter with an OR expression from two Event Filters
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Or
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Operand* `operand`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The other Operand.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The combined Expression.
+!===
+
+====
+// end::func-FIR_Operator_Add[]
+// end::func-FIR_Operator_Add-title[]
+// tag::func-FIR_Operator_BitOR-title[]
+=== `FIR_Operator_BitOR` (`operand` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>) -> `result` : Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+// tag::func-FIR_Operator_BitOR[]
+
+Creates a new Event Filter with an OR expression from two Event Filters
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Or
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Operand* `operand`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The other Operand.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! Struct<xref:/reflection/structs/EventFilter.adoc[EventFilter]>
+! The combined Expression.
+!===
+
+====
+// end::func-FIR_Operator_BitOR[]
+// end::func-FIR_Operator_BitOR-title[]
+

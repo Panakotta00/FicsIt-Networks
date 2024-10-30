@@ -176,6 +176,7 @@
 *** xref:reflection/classes/WidgetSign.adoc[WidgetSign]
 ** Structs
 *** xref:reflection/structs/Color.adoc[Color]
+*** xref:reflection/structs/EventFilter.adoc[EventFilter]
 *** xref:reflection/structs/Future.adoc[Future]
 *** xref:reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]
 *** xref:reflection/structs/GPUT2DrawCallBox.adoc[GPUT2DrawCallBox]
