@@ -1,6 +1,8 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkCircuit.h"
 #include "FGBlueprintSubsystem.h"
+#include "FGBuildable.h"
+#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
 void UFINAdvancedNetworkConnectionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -36,7 +38,6 @@ void UFINAdvancedNetworkConnectionComponent::BeginPlay() {
 }
 
 void UFINAdvancedNetworkConnectionComponent::Serialize(FArchive& Ar) {
-//	UE_LOG(LogFicsItNetworks, Warning, Ar.)
 	Super::Serialize(Ar);
 }
 
@@ -62,7 +63,7 @@ FString UFINAdvancedNetworkConnectionComponent::GetNick_Implementation() const {
 
 void UFINAdvancedNetworkConnectionComponent::SetNick_Implementation(const FString& NewNick) {
 	Nick = NewNick;
-	//GetOwner()->ForceNetUpdate();
+	GetOwner()->ForceNetUpdate();
 }
 
 bool UFINAdvancedNetworkConnectionComponent::HasNick_Implementation(const FString& inNick) {

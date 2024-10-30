@@ -1,7 +1,9 @@
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "FactoryGameCustomVersion.h"
 #include "FGDismantleInterface.h"
+#include "FortniteReleaseBranchCustomObjectVersion.h"
 #include "SaveCustomVersion.h"
+#include "GameFramework/Actor.h"
 #include "ModuleSystem/FINModuleSystemModule.h"
 #include "Net/UnrealNetwork.h"
 

@@ -330,6 +330,7 @@ namespace FINLua {
 						lua_seti(L, -2, i);
 					}
 				}
+				lua_pop(L, 1);
 				return len-shift;
 			}
 			LuaModuleTableFunction(R"(/**
@@ -356,7 +357,7 @@ namespace FINLua {
 			 *
 			 * Runs the default task scheduler indefinitely until no tasks are left.
 			 */)", loop) {
-				lua_pushvalue(L,lua_upvalueindex(2));
+				lua_pushvalue(L, lua_upvalueindex(2));
 				return luaLoopContinue(L, 0, NULL);
 			}
 		}

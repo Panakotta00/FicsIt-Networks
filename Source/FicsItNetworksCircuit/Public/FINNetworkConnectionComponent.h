@@ -26,7 +26,7 @@ public:
 	/**
 	 * The maximum amount of cables you can connect to this connector.
 	 */
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Replicated)
 	int MaxCables = -1;
 	
 	/**
@@ -46,6 +46,11 @@ public:
 	 */
 	UPROPERTY(Replicated)
 	AFINNetworkCircuit* Circuit = nullptr;
+
+	UPROPERTY(Replicated)
+	int CurrentCableConnections = 0;
+
+	UFINNetworkConnectionComponent();
 
 	// Begin UObject
 	virtual void InitializeComponent() override;

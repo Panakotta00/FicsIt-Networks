@@ -38,7 +38,7 @@ jobs:
               core.setFailed('Found Release is a draft!');
               return;
             }
-            core.setOutput('body', release.body);
+            core.setOutput('body_encoded', btoa(release.body));
       
       - name: Download FicsIt-Networks Version
         if: ${{inputs.should_upload}}
@@ -56,9 +56,10 @@ jobs:
       - name: Upload to SMR
         if: ${{inputs.should_upload}}
         env:
-          body: ${{steps.find-release.outputs.body}}
+          BODY_ENCODED: ${{steps.find-release.outputs.body_encoded}}
         run: |
-          ficsit --api-key "${{secrets.SMR_API_KEY}}" smr upload 8d8gk4imvFanRs FicsItNetworks.zip $body
+          BODY=$(echo "$BODY_ENCODED" | base64 --decode)
+          ficsit --api-key "${{secrets.SMR_API_KEY}}" smr upload 8d8gk4imvFanRs FicsItNetworks.zip $BODY
 
       - name: Wait for Approval
         uses: actions/github-script@v7

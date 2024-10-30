@@ -18,6 +18,7 @@ void AFINNetworkCircuit::AddNodeRecursive(TArray<TScriptInterface<IFINNetworkCir
 AFINNetworkCircuit::AFINNetworkCircuit() {
 	bReplicates = true;
 	bAlwaysRelevant = true;
+	NetDormancy = DORM_Awake;
 }
 
 AFINNetworkCircuit::~AFINNetworkCircuit() {}

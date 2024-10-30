@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FicsItReflection.h"
 #include "FINLua/LuaUtil.h"
 #include "Reflection/FIRClass.h"
 
@@ -68,6 +69,14 @@ namespace FINLua {
 	 * @return the trace/object of the lua object in the lua stack, None if type check failed
 	 */
 	FFIRTrace luaFIN_checkObject(lua_State* L, int Index, UFIRClass* ParentType);
+	template<class T>
+	FFIRTrace luaFIN_checkTrace(lua_State* L, int Index) {
+		return luaFIN_checkObject(L, Index, FFicsItReflectionModule::Get().FindClass(T::StaticClass()));
+	}
+	template<class T>
+	T* luaFIN_checkObject(lua_State* L, int Index) {
+		return Cast<T>(luaFIN_checkObject(L, Index, FFicsItReflectionModule::Get().FindClass(T::StaticClass())).Get());
+	}
 
 	/**
 	 * @return The Lua Metatable/Type-Name of Object
