@@ -138,11 +138,15 @@ void AFINComputerGPU::netFunc_bindScreen(FFIRTrace NewScreen) {
 FVector2D AFINComputerGPU::netFunc_getScreenSize() {
 	TScriptInterface<IFINScreenInterface> screen = GetScreenInterface();
 	if (screen && screen->GetWidget()) {
-		return screen->GetWidget()->GetCachedGeometry().GetLocalSize();
-	} else {
-		FScopeLock Lock(&MutexScreenSize);
-		return LastScreenSize;
+		FVector2D size = screen->GetWidget()->GetCachedGeometry().GetLocalSize();
+		if (!size.IsNearlyZero()) {
+			LastScreenSize = size;
+			return size;
+		}
 	}
+
+	FScopeLock Lock(&MutexScreenSize);
+	return LastScreenSize;
 }
 
 void AFINComputerGPU::netSig_ScreenBound_Implementation(const FFIRTrace& oldScreen) {}
