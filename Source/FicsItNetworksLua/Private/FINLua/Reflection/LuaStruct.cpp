@@ -28,7 +28,7 @@ namespace FINLua {
 	void FLuaStruct::CollectReferences(void* Obj, FReferenceCollector& Collector) {
 		FLuaStruct* Self = static_cast<FLuaStruct*>(Obj);
 		Collector.AddReferencedObject(Self->Type);
-		Self->Struct->AddStructReferencedObjects(Collector);
+		Collector.AddPropertyReferencesWithStructARO(FFIRInstancedStruct::StaticStruct(), &*Self->Struct);
 	}
 
 UE_DISABLE_OPTIMIZATION_SHIP
