@@ -57,6 +57,9 @@ struct FFINLuaEventRegistry {
 	UPROPERTY()
 	TMap<int64, FFINEventFilterExpression> EventQueues;
 
+	UPROPERTY()
+	TMap<int64, FFINEventFilterExpression> OneShots;
+
 	static int64 FindNextKey(const TMap<int64, FFINEventFilterExpression>& registry) {
 		int64 key = registry.Num();
 		while (registry.Contains(key)) {

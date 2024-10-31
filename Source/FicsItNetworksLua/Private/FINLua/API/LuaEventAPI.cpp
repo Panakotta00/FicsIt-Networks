@@ -83,6 +83,7 @@ namespace FINLua {
 				luaFIN_pushEventQueueInternal(L, MakeShared<FFINLuaEventQueue>(Struct.Get<FFINLuaEventQueue>()));
 				lua_pushvalue(L, lua_upvalueindex(2));
 				lua_setiuservalue(L, -2, 1);
+				lua_setiuservalue(L, -2, 2);
 
 				return 1;
 			}
@@ -95,6 +96,7 @@ namespace FINLua {
 				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 				lua_pushinteger(L, Storage.Add(MakeShared<FIRStruct>(*queue)));
 				lua_getiuservalue(L, 1, 1);
+				lua_getiuservalue(L, 1, 2);
 
 				lua_pushcclosure(L, &unpersist, 2);
 
@@ -247,58 +249,68 @@ namespace FINLua {
 				return 0;
 			}
 
+			FFINEventFilterExpression checkFilter(lua_State* L, int index) {
+				FFINEventFilterExpression filterExp;
+				if (FFINEventFilterExpression* filterPtr = luaFIN_toStruct<FFINEventFilterExpression>(L, index, false)) {
+					filterExp = *filterPtr;
+				} else {
+					luaL_checktype(L, 1, LUA_TTABLE);
+					FFINEventFilter filter;
+					if (lua_getfield(L, 1, "event") != LUA_TNIL) {
+						if (lua_istable(L, -1)) {
+							int len = luaL_len(L, -1);
+							for (int i = 0; i < len; ++i) {
+								lua_geti(L, -1, i);
+								FString event = luaFIN_toFString(L, -1);
+								filter.Events.Add(event);
+								lua_pop(L, 1);
+							}
+						} else {
+							FString event = luaFIN_toFString(L, -1);
+							filter.Events.Add(event);
+						}
+						lua_pop(L, 1);
+					}
+					if (lua_getfield(L, 1, "sender") != LUA_TNIL) {
+						if (lua_istable(L, -1)) {
+							int len = luaL_len(L, -1);
+							for (int i = 0; i < len; ++i) {
+								lua_geti(L, -1, i);
+								UObject* sender = luaFIN_checkObject<UObject>(L, -1);
+								filter.Senders.Add(sender);
+								lua_pop(L, 1);
+							}
+						} else {
+							UObject* sender = luaFIN_checkObject<UObject>(L, -1);
+							filter.Senders.Add(sender);
+						}
+						lua_pop(L, 1);
+					}
+					if (lua_getfield(L, 1, "values") != LUA_TNIL) {
+						luaL_checktype(L, -1, LUA_TTABLE);
+						lua_pushnil(L);
+						while (lua_next(L, -2)) {
+							FString paramName = luaFIN_toFString(L, -2);
+							TOptional<FFIRAnyValue> value = luaFIN_toNetworkValue(L, -1);
+							if (value) {
+								filter.ValueFilters.Add(paramName, *value);
+							}
+							lua_pop(L, 1);
+						}
+						lua_pop(L, 2);
+					}
+					filterExp = filter;
+				}
+				return filterExp;
+			}
+
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		EventFilter		filter(...)
 			 * @DisplayName		Filter
 			 *
 			 * Creates an Event filter expression.
 			 */)", filter) {
-				luaL_checktype(L, 1, LUA_TTABLE);
-				FFINEventFilter filter;
-				if (lua_getfield(L, 1, "event") != LUA_TNIL) {
-					if (lua_istable(L, -1)) {
-						int len = luaL_len(L, -1);
-						for (int i = 0; i < len; ++i) {
-							lua_geti(L, -1, i);
-							FString event = luaFIN_toFString(L, -1);
-							filter.Events.Add(event);
-							lua_pop(L, 1);
-						}
-					} else {
-						FString event = luaFIN_toFString(L, -1);
-						filter.Events.Add(event);
-					}
-					lua_pop(L, 1);
-				}
-				if (lua_getfield(L, 1, "sender") != LUA_TNIL) {
-					if (lua_istable(L, -1)) {
-						int len = luaL_len(L, -1);
-						for (int i = 0; i < len; ++i) {
-							lua_geti(L, -1, i);
-							UObject* sender = luaFIN_checkObject<UObject>(L, -1);
-							filter.Senders.Add(sender);
-							lua_pop(L, 1);
-						}
-					} else {
-						UObject* sender = luaFIN_checkObject<UObject>(L, -1);
-						filter.Senders.Add(sender);
-					}
-					lua_pop(L, 1);
-				}
-				if (lua_getfield(L, 1, "values") != LUA_TNIL) {
-					luaL_checktype(L, -1, LUA_TTABLE);
-					lua_pushnil(L);
-					while (lua_next(L, -2)) {
-						FString paramName = luaFIN_toFString(L, -2);
-						TOptional<FFIRAnyValue> value = luaFIN_toNetworkValue(L, -1);
-						if (value) {
-							filter.ValueFilters.Add(paramName, *value);
-						}
-						lua_pop(L, 1);
-					}
-					lua_pop(L, 2);
-				}
-				FFINEventFilterExpression expression(filter);
+				FFINEventFilterExpression expression = checkFilter(L, 1);
 				luaFIN_pushStruct(L, expression);
 				return 1;
 			}
@@ -312,7 +324,7 @@ namespace FINLua {
 			 * a Task will be created using the function and the signals parameters will be passed into the function.
 			 */)", registerListener) {
 				luaL_checktype(L, 2, LUA_TFUNCTION);
-				FFINEventFilterExpression filter = luaFIN_checkStruct<FFINEventFilterExpression>(L, 1, false);
+				FFINEventFilterExpression filter = checkFilter(L, 1);
 				FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
 				int64 key = registry.FindNextKey(registry.EventListeners);
 				registry.EventListeners.Add(key, filter);
@@ -324,16 +336,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		EventQueue		queue([EventFilter])
+			 * @LuaFunction		EventQueue		queue(EventFilter)
 			 * @DisplayName		queue
 			 *
 			 * Creates a new event queue.
 			 * When this variable closes or gets garbage collected, it will stop receiving signals.
 			 */)", queue) {
-				FFINEventFilterExpression filter;
-				if (FFINEventFilterExpression* filterPtr = luaFIN_toStruct<FFINEventFilterExpression>(L, 1, false)) {
-					filter = *filterPtr;
-				}
+				FFINEventFilterExpression filter = checkFilter(L, 1);
 				FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
 				int64 key = registry.FindNextKey(registry.EventQueues);
 				registry.EventQueues.Add(key, filter);
@@ -341,6 +350,40 @@ namespace FINLua {
 				luaFIN_pushEventQueue(L, key);
 				lua_pushvalue(L, -1);
 				lua_seti(L, -3, key+1);
+				return 1;
+			}
+
+			int luaWaitForContinue(lua_State* L, int, lua_KContext) {
+				int key = luaL_checkinteger(L, 2);
+				if (lua_geti(L, 1, key+1) == LUA_TNIL) {
+					lua_pop(L, 1);
+					return lua_yieldk(L, 0, NULL, luaWaitForContinue);
+				}
+				lua_pushnil(L);
+				lua_seti(L, 1, key+1);
+				luaL_checktype(L, 3, LUA_TTABLE);
+				int len = luaL_len(L, 3);
+				for (int i = 1; i <= len; ++i) {
+					lua_geti(L, 3, i);
+				}
+				return len;
+			}
+			int luaWaitFor(lua_State* L) {
+				return luaWaitForContinue(L, 0, NULL);
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		Future		waitFor(EventFilter)
+			 * @DisplayName		Wait For
+			 *
+			 * Returns a Future that resolves when a signal got polled that matches the given Event Filter.
+			 */)", waitFor) {
+				FFINEventFilterExpression filter = checkFilter(L, 1);
+				FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
+				int64 key = registry.FindNextKey(registry.OneShots);
+				registry.OneShots.Add(key, filter);
+				lua_getiuservalue(L, -1, 3);
+				lua_pushinteger(L, key);
+				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
 				return 1;
 			}
 		}
@@ -355,18 +398,26 @@ namespace FINLua {
 			lua_pop(L, 1);
 
 			lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals");
-			luaFIN_pushStruct(L, FFINLuaEventRegistry(), 2);
+			luaFIN_pushStruct(L, FFINLuaEventRegistry(), 3);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 1);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 2);
+			lua_newtable(L);
+			lua_setiuservalue(L, -2, 3);
 			lua_setfield(L, -2, "event-registry");
 			lua_pop(L, 1);
+
+			lua_pushcfunction(L, event::luaWaitFor);
+			luaFIN_persistValue(L, -1, "WaitFor");
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaWaitForContinue)));
+			luaFIN_persistValue(L, -1, "WaitForContinue");
+			lua_pop(L, 2);
 		}
 	}
 
 	void luaFIN_pushEventQueueInternal(lua_State* L, const FEventQueue& queueRef) {
-		FEventQueue* queue = static_cast<FEventQueue*>(lua_newuserdatauv(L, sizeof(FEventQueue), 1));
+		FEventQueue* queue = static_cast<FEventQueue*>(lua_newuserdatauv(L, sizeof(FEventQueue), 2));
 		new (queue) FEventQueue(queueRef);
 		luaL_setmetatable(L, Event::EventQueue::_Name);
 	}
@@ -376,6 +427,8 @@ namespace FINLua {
 		luaFIN_pushEventQueueInternal(L, queueRef);
 		lua_newtable(L);
 		lua_setiuservalue(L, -2, 1);
+		lua_newtable(L);
+		lua_setiuservalue(L, -2, 2);
 		return queueRef;
 	}
 
@@ -397,24 +450,28 @@ namespace FINLua {
 		return registry;
 	}
 
+	int luaFIN_pushEventData(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data) {
+		luaFIN_pushFString(L, data.Signal->GetInternalName());
+		luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(sender));
+		for (const FFIRAnyValue& Value : data.Data) {
+			luaFIN_pushNetworkValue(L, Value, sender);
+		}
+		return 2 + data.Data.Num();
+	}
+
 	void luaFIN_handleEvent(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data) {
 		FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
 		lua_getiuservalue(L, -1, 1);
 		for (const auto& [key, filter] : registry.EventListeners) {
 			if (filter.Matches(sender.GetUnderlyingPtr(), data)) {
 				lua_geti(L, -1, key+1);
-				luaFIN_pushFString(L, data.Signal->GetInternalName());
-				luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(sender));
-				for (const FFIRAnyValue& Value : data.Data) {
-					luaFIN_pushNetworkValue(L, Value, sender);
-				}
-				luaFIN_pushLuaFutureLuaFunction(L, 2 + data.Data.Num());
+				int num = luaFIN_pushEventData(L, sender, data);
+				luaFIN_pushLuaFutureLuaFunction(L, num);
 				luaFIN_addTask(L, -1);
 				lua_pop(L, 2);
 			}
 		}
 		lua_pop(L, 1);
-		luaFINDebug_dumpStack(L);
 		lua_getiuservalue(L, -1, 2);
 		for (const auto& [key, filter] : registry.EventQueues) {
 			if (filter.Matches(sender.GetUnderlyingPtr(), data)) {
@@ -422,6 +479,20 @@ namespace FINLua {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, -1);
 				queue->AddEvent(sender, data);
 				lua_pop(L, 1);
+			}
+		}
+		lua_pop(L, 1);
+		lua_getiuservalue(L, -1, 3);
+		for (const auto& [key, filter] : registry.OneShots) {
+			if (filter.Matches(sender.GetUnderlyingPtr(), data)) {
+				lua_newtable(L);
+				int table = lua_absindex(L, -1);
+				int num = luaFIN_pushEventData(L, sender, data);
+				for (int i = num; i > 0; --i) {
+					lua_seti(L, table, i);
+				}
+				lua_seti(L, -2, key+1);
+				registry.OneShots.Remove(key);
 			}
 		}
 		lua_pop(L, 1);
