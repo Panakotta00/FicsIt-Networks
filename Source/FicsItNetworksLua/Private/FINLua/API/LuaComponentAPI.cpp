@@ -1,5 +1,6 @@
 #include "FINLuaProcessor.h"
 #include "FINNetworkUtils.h"
+#include "NetworkController.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/Reflection/LuaObject.h"
