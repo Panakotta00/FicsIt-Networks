@@ -533,7 +533,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		}
 	}
 
-	bool luaFIN_pushStruct(lua_State* L, const FIRStruct& Struct) {
+	bool luaFIN_pushStruct(lua_State* L, const FIRStruct& Struct, int numUserValues) {
 		// TODO: Check if required & if it is, also add similar behaviour for getters/coverters/etc including "any lua value to network value" system in LuaUtil
 		if (Struct.GetStruct()->IsChildOf(FFINFuture::StaticStruct())) {
 			luaFIN_pushFuture(L, Struct);
@@ -541,12 +541,8 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		}
 
 		UFIRStruct* Type = FFicsItReflectionModule::Get().FindStruct(Struct.GetStruct());
-		if (!Type) {
-			lua_pushnil(L);
-			return false;
-		}
 
-		FLuaStruct* LuaStruct = static_cast<FLuaStruct*>(lua_newuserdata(L, sizeof(FLuaStruct)));
+		FLuaStruct* LuaStruct = static_cast<FLuaStruct*>(lua_newuserdatauv(L, sizeof(FLuaStruct), numUserValues));
 		new (LuaStruct) FLuaStruct(Type, Struct, UFINLuaProcessor::luaGetProcessor(L)->GetKernel());
 		luaL_setmetatable(L, ReflectionSystemStruct::Struct::_Name);
 
@@ -581,7 +577,10 @@ UE_ENABLE_OPTIMIZATION_SHIP
 
 	FLuaStruct* luaFIN_toLuaStruct(lua_State* L, int Index, UFIRStruct* ParentType) {
 		FLuaStruct* LuaStruct = static_cast<FLuaStruct*>(luaL_testudata(L, Index, ReflectionSystemStruct::Struct::_Name));
-		if (LuaStruct && LuaStruct->Type->IsChildOf(ParentType)) {
+		if (LuaStruct) {
+			if (ParentType && LuaStruct->Type && !LuaStruct->Type->IsChildOf(ParentType)) {
+				return nullptr;
+			}
 			return LuaStruct;
 		}
 		return nullptr;
@@ -605,6 +604,17 @@ UE_ENABLE_OPTIMIZATION_SHIP
 
 		return nullptr;
 	}
+UE_DISABLE_OPTIMIZATION_SHIP
+	TSharedPtr<FIRStruct> luaFIN_toUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction) {
+		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, nullptr);
+		if (LuaStruct) {
+			if (ParentType && LuaStruct->Struct->GetStruct() && !LuaStruct->Struct->GetStruct()->IsChildOf(ParentType)) {
+				return nullptr;
+			}
+			return LuaStruct->Struct;
+		}
+		return nullptr;
+	}
 
 	TSharedRef<FIRStruct> luaFIN_checkStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction) {
 		TSharedPtr<FIRStruct> Struct = luaFIN_toStruct(L, Index, ParentType, bAllowConstruction);
@@ -612,6 +622,12 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		return Struct.ToSharedRef();
 	}
 
+	TSharedRef<FIRStruct> luaFIN_checkUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction) {
+		TSharedPtr<FIRStruct> Struct = luaFIN_toUStruct(L, Index, ParentType, bAllowConstruction);
+		if (!Struct.IsValid()) luaFIN_typeError(L, Index, ParentType->GetName());
+		return Struct.ToSharedRef();
+	}
+UE_ENABLE_OPTIMIZATION_SHIP
 	void luaFIN_pushStructType(lua_State* L, UFIRStruct* Struct) {
 		if (Struct) {
 			*(UFIRStruct**)lua_newuserdata(L, sizeof(UFIRStruct*)) = Struct;
