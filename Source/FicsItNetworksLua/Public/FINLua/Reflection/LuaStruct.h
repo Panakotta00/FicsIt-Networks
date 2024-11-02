@@ -15,6 +15,7 @@ namespace FINLua {
 		UFINKernelSystem* Kernel;
 		FLuaStruct(UFIRStruct* Type, const FFIRInstancedStruct& Struct, UFINKernelSystem* Kernel);
 		FLuaStruct(const FLuaStruct& Other);
+		FLuaStruct& operator=(const FLuaStruct& Other);
 		~FLuaStruct();
 		static void CollectReferences(void* Obj, FReferenceCollector& Collector);
 	};
@@ -66,9 +67,9 @@ namespace FINLua {
 	TSharedPtr<FIRStruct> luaFIN_toStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction);
 	TSharedPtr<FIRStruct> luaFIN_toUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction);
 	template<typename T>
-	T* luaFIN_toStruct(lua_State* L, int Index, bool bAllowConstruction) {
+	TSharedPtr<T> luaFIN_toStruct(lua_State* L, int Index, bool bAllowConstruction) {
 		TSharedPtr<FIRStruct> val = luaFIN_toUStruct(L, Index, TBaseStructure<T>::Get(), bAllowConstruction);
-		if (val) return &val->Get<T>();
+		if (val) return TSharedPtr<T>(val, &val->Get<T>());
 		return nullptr;
 	}
 
@@ -83,8 +84,9 @@ namespace FINLua {
 	TSharedRef<FIRStruct> luaFIN_checkStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction);
 	TSharedRef<FIRStruct> luaFIN_checkUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction);
 	template<typename T>
-	T& luaFIN_checkStruct(lua_State* L, int Index, bool bAllowConstruction) {
-		return luaFIN_checkUStruct(L, Index, TBaseStructure<T>::Get(), bAllowConstruction)->Get<T>();
+	TSharedRef<T> luaFIN_checkStruct(lua_State* L, int Index, bool bAllowConstruction) {
+		auto Struct = luaFIN_checkUStruct(L, Index, TBaseStructure<T>::Get(), bAllowConstruction);
+		return TSharedRef<T>(Struct, &Struct->Get<T>());
 	}
 
 	/**

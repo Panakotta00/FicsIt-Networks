@@ -20,7 +20,16 @@ namespace FINLua {
 	FLuaStruct::FLuaStruct(const FLuaStruct& Other) : Type(Other.Type), Struct(Other.Struct), Kernel(Other.Kernel) {
 		Kernel->AddReferencer(this, &CollectReferences);
 	}
-	
+
+	FLuaStruct& FLuaStruct::operator=(const FLuaStruct& Other) {
+		if (Kernel) Kernel->RemoveReferencer(this);
+		Type = Other.Type;
+		Struct = Other.Struct;
+		Kernel = Other.Kernel;
+		if (Kernel) Kernel->AddReferencer(this, &CollectReferences);
+		return *this;
+	}
+
 	FLuaStruct::~FLuaStruct() {
 		Kernel->RemoveReferencer(this);
 	}
@@ -28,6 +37,7 @@ namespace FINLua {
 	void FLuaStruct::CollectReferences(void* Obj, FReferenceCollector& Collector) {
 		FLuaStruct* Self = static_cast<FLuaStruct*>(Obj);
 		Collector.AddReferencedObject(Self->Type);
+		Collector.AddReferencedObject(Self->Kernel );
 		Collector.AddPropertyReferencesWithStructARO(FFIRInstancedStruct::StaticStruct(), &*Self->Struct);
 	}
 
@@ -401,7 +411,14 @@ UE_ENABLE_OPTIMIZATION_SHIP
 
 				const FFIRInstancedStruct& Struct = *Storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1)));
 
-				luaFIN_pushStruct(L, Struct);
+				int num = luaL_checkinteger(L, lua_upvalueindex(2));
+
+				luaFIN_pushStruct(L, Struct, num);
+
+				for (int i = 1; i <= num; ++i) {
+					lua_pushvalue(L, lua_upvalueindex(2+i));
+					lua_setiuservalue(L, 1, i);
+				}
 
 				return 1;
 			}
@@ -415,8 +432,18 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
 				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
 				lua_pushinteger(L, Storage.Add(Struct));
+				int i = 0;
+				while (true) {
+					if (lua_getiuservalue(L, 1, i+1) == LUA_TNONE) {
+						lua_pop(L, 1);
+						break;
+					}
+					i += 1;
+				}
+				lua_pushinteger(L, i);
+				lua_insert(L, 3);
 
-				lua_pushcclosure(L, &luaStructUnpersist, 1);
+				lua_pushcclosure(L, &luaStructUnpersist, 2+i);
 
 				return 1;
 			}
@@ -608,7 +635,7 @@ UE_DISABLE_OPTIMIZATION_SHIP
 	TSharedPtr<FIRStruct> luaFIN_toUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction) {
 		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, nullptr);
 		if (LuaStruct) {
-			if (ParentType && LuaStruct->Struct->GetStruct() && !LuaStruct->Struct->GetStruct()->IsChildOf(ParentType)) {
+			if (!LuaStruct->Struct->GetStruct() || !LuaStruct->Struct->GetData() || ParentType && !LuaStruct->Struct->GetStruct()->IsChildOf(ParentType)) {
 				return nullptr;
 			}
 			return LuaStruct->Struct;
@@ -624,7 +651,7 @@ UE_DISABLE_OPTIMIZATION_SHIP
 
 	TSharedRef<FIRStruct> luaFIN_checkUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction) {
 		TSharedPtr<FIRStruct> Struct = luaFIN_toUStruct(L, Index, ParentType, bAllowConstruction);
-		if (!Struct.IsValid()) luaFIN_typeError(L, Index, ParentType->GetName());
+		if (!Struct.IsValid() || !Struct->GetStruct() || !Struct->GetData()) luaFIN_typeError(L, Index, ParentType->GetName());
 		return Struct.ToSharedRef();
 	}
 UE_ENABLE_OPTIMIZATION_SHIP

@@ -29,14 +29,15 @@ struct FFINLuaEventQueue {
 	FFINEventFilterExpression Filter;
 
 	UPROPERTY()
-	class UFINKernelSystem* Kernel = nullptr;
+	class UFINLuaProcessor* Processor = nullptr;
 
 	UPROPERTY()
 	int64 Key = 0;
 
 	FFINLuaEventQueue() = default;
-	FFINLuaEventQueue(class UFINKernelSystem* Kernel, int64 Key);
+	FFINLuaEventQueue(class UFINLuaProcessor* Processor, int64 Key);
 	FFINLuaEventQueue(const FFINLuaEventQueue& Other);
+	FFINLuaEventQueue& operator=(const FFINLuaEventQueue& Other);
 	~FFINLuaEventQueue();
 
 	void AddEvent(const FFIRTrace& Sender, const FFINSignalData& Data) {
@@ -51,13 +52,13 @@ USTRUCT()
 struct FFINLuaEventRegistry {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TMap<int64, FFINEventFilterExpression> EventListeners;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TMap<int64, FFINEventFilterExpression> EventQueues;
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TMap<int64, FFINEventFilterExpression> OneShots;
 
 	static int64 FindNextKey(const TMap<int64, FFINEventFilterExpression>& registry) {
@@ -81,7 +82,7 @@ namespace FINLua {
 	 * @param L the lua state
 	 * @return a reference to the registry
 	 */
-	FFINLuaEventRegistry& luaFIN_getEventRegistry(lua_State* L);
+	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L);
 
 	void luaFIN_handleEvent(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
 }

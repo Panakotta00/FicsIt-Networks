@@ -308,10 +308,13 @@ namespace FINLua {
 			}
 
 			int luaRun(lua_State* L, int index) {
+				//lua_getglobal(L, "future");
 				int num = lua_gettop(L);
 				if (lua_getfield(L, index, "tasks") != LUA_TTABLE) {
+				//	lua_remove(L, -1);
 					return luaL_typeerror(L, -1, "table");
 				}
+				//lua_remove(L, -2);
 				int len = luaL_len(L, -1);
 				int shift = 0;
 				for (int i = 1; i <= len; ++i) {

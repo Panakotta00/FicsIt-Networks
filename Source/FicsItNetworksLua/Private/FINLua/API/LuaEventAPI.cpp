@@ -18,16 +18,32 @@
 
 UE_DISABLE_OPTIMIZATION_SHIP
 
-FFINLuaEventQueue::FFINLuaEventQueue(UFINKernelSystem* Kernel, int64 Key): Kernel(Kernel), Key(Key) {
-	Kernel->AddReferencer(this, &CollectReferences);
+FFINLuaEventQueue::FFINLuaEventQueue(UFINLuaProcessor* Processor, int64 Key): Processor(Processor), Key(Key) {
+	fgcheck(IsValid(Processor) && IsValid(Processor->GetKernel()));
+	Processor->GetKernel()->AddReferencer(this, &CollectReferences);
 }
 
-FFINLuaEventQueue::FFINLuaEventQueue(const FFINLuaEventQueue& Other): Events(Other.Events), Filter(Other.Filter), Kernel(Other.Kernel), Key(Other.Key) {
-	Kernel->AddReferencer(this, &CollectReferences);
+
+FFINLuaEventQueue::FFINLuaEventQueue(const FFINLuaEventQueue& Other): Events(Other.Events), Filter(Other.Filter), Processor(Other.Processor), Key(Other.Key) {
+	fgcheck(IsValid(Processor) && IsValid(Processor->GetKernel()));
+	Processor->GetKernel()->AddReferencer(this, &CollectReferences);
+}
+
+FFINLuaEventQueue& FFINLuaEventQueue::operator=(const FFINLuaEventQueue& Other) {
+	if (IsValid(Processor) && IsValid(Processor->GetKernel())) {
+		Processor->GetKernel()->RemoveReferencer(this);
+	}
+	Events = Other.Events;
+	Filter = Other.Filter;
+	Processor = Other.Processor;
+	Key = Other.Key;
+	fgcheck(IsValid(Processor) && IsValid(Processor->GetKernel()));
+	Processor->GetKernel()->AddReferencer(this, &CollectReferences);
+	return *this;
 }
 
 FFINLuaEventQueue::~FFINLuaEventQueue() {
-	Kernel->RemoveReferencer(this);
+	if (IsValid(Processor) && IsValid(Processor->GetKernel())) Processor->GetKernel()->RemoveReferencer(this);
 }
 
 void FFINLuaEventQueue::CollectReferences(void* Obj, FReferenceCollector& Collector) {
@@ -50,12 +66,14 @@ namespace FINLua {
 			FEventQueue& close(lua_State* L) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 				if (queue->Key >= 0) {
-					FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
-					registry.EventQueues.Remove(queue->Key);
-					lua_getiuservalue(L, -1, 2);
-					lua_pushnil(L);
-					lua_seti(L, -2, queue->Key);
-					lua_pop(L, 2);
+					TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+					if (registry) {
+						registry->EventQueues.Remove(queue->Key);
+						if (lua_getiuservalue(L, -1, 2) == LUA_TTABLE) {
+							lua_pushnil(L);
+							lua_seti(L, -2, queue->Key);
+						}
+					}
 					queue->Key = -1;
 				}
 				return queue;
@@ -80,9 +98,12 @@ namespace FINLua {
 
 				const FFIRInstancedStruct& Struct = *Storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1)));
 
-				luaFIN_pushEventQueueInternal(L, MakeShared<FFINLuaEventQueue>(Struct.Get<FFINLuaEventQueue>()));
+				FFINLuaEventQueue& queue = Struct.Get<FFINLuaEventQueue>();
+				queue.Processor = Processor;
+				luaFIN_pushEventQueueInternal(L, MakeShared<FFINLuaEventQueue>(queue));
 				lua_pushvalue(L, lua_upvalueindex(2));
 				lua_setiuservalue(L, -2, 1);
+				lua_pushvalue(L, lua_upvalueindex(3));
 				lua_setiuservalue(L, -2, 2);
 
 				return 1;
@@ -98,7 +119,7 @@ namespace FINLua {
 				lua_getiuservalue(L, 1, 1);
 				lua_getiuservalue(L, 1, 2);
 
-				lua_pushcclosure(L, &unpersist, 2);
+				lua_pushcclosure(L, &unpersist, 3);
 
 				return 1;
 			}
@@ -251,7 +272,7 @@ namespace FINLua {
 
 			FFINEventFilterExpression checkFilter(lua_State* L, int index) {
 				FFINEventFilterExpression filterExp;
-				if (FFINEventFilterExpression* filterPtr = luaFIN_toStruct<FFINEventFilterExpression>(L, index, false)) {
+				if (TSharedPtr<FFINEventFilterExpression> filterPtr = luaFIN_toStruct<FFINEventFilterExpression>(L, index, false)) {
 					filterExp = *filterPtr;
 				} else {
 					luaL_checktype(L, 1, LUA_TTABLE);
@@ -325,9 +346,9 @@ namespace FINLua {
 			 */)", registerListener) {
 				luaL_checktype(L, 2, LUA_TFUNCTION);
 				FFINEventFilterExpression filter = checkFilter(L, 1);
-				FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
-				int64 key = registry.FindNextKey(registry.EventListeners);
-				registry.EventListeners.Add(key, filter);
+				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+				int64 key = FFINLuaEventRegistry::FindNextKey(registry->EventListeners);
+				registry->EventListeners.Add(key, filter);
 				lua_getiuservalue(L, -1, 1);
 				lua_pushvalue(L, 2);
 				lua_seti(L, -2, key+1);
@@ -343,9 +364,9 @@ namespace FINLua {
 			 * When this variable closes or gets garbage collected, it will stop receiving signals.
 			 */)", queue) {
 				FFINEventFilterExpression filter = checkFilter(L, 1);
-				FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
-				int64 key = registry.FindNextKey(registry.EventQueues);
-				registry.EventQueues.Add(key, filter);
+				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+				int64 key = FFINLuaEventRegistry::FindNextKey(registry->EventQueues);
+				registry->EventQueues.Add(key, filter);
 				lua_getiuservalue(L, -1, 2);
 				luaFIN_pushEventQueue(L, key);
 				lua_pushvalue(L, -1);
@@ -378,9 +399,9 @@ namespace FINLua {
 			 * Returns a Future that resolves when a signal got polled that matches the given Event Filter.
 			 */)", waitFor) {
 				FFINEventFilterExpression filter = checkFilter(L, 1);
-				FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
-				int64 key = registry.FindNextKey(registry.OneShots);
-				registry.OneShots.Add(key, filter);
+				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+				int64 key = FFINLuaEventRegistry::FindNextKey(registry->OneShots);
+				registry->OneShots.Add(key, filter);
 				lua_getiuservalue(L, -1, 3);
 				lua_pushinteger(L, key);
 				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
@@ -423,7 +444,7 @@ namespace FINLua {
 	}
 
 	FEventQueue luaFIN_pushEventQueue(lua_State* L, int64 key) {
-		TSharedRef<FFINLuaEventQueue> queueRef = MakeShared<FFINLuaEventQueue>(UFINLuaProcessor::luaGetProcessor(L)->GetKernel(), key);
+		TSharedRef<FFINLuaEventQueue> queueRef = MakeShared<FFINLuaEventQueue>(UFINLuaProcessor::luaGetProcessor(L), key);
 		luaFIN_pushEventQueueInternal(L, queueRef);
 		lua_newtable(L);
 		lua_setiuservalue(L, -2, 1);
@@ -442,10 +463,10 @@ namespace FINLua {
 		return *queue;
 	}
 
-	FFINLuaEventRegistry& luaFIN_getEventRegistry(lua_State* L) {
-		lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals");
-		lua_getfield(L, -1, "event-registry");
-		FFINLuaEventRegistry& registry = luaFIN_checkStruct<FFINLuaEventRegistry>(L, -1, false);
+	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L) {
+		if (lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals") == LUA_TNIL) return nullptr;
+		if (lua_getfield(L, -1, "event-registry") == LUA_TNIL) return nullptr;
+		TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_toStruct<FFINLuaEventRegistry>(L, -1, false);
 		lua_remove(L, -2);
 		return registry;
 	}
@@ -460,9 +481,10 @@ namespace FINLua {
 	}
 
 	void luaFIN_handleEvent(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data) {
-		FFINLuaEventRegistry& registry = luaFIN_getEventRegistry(L);
+		TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+		if (!registry) return;
 		lua_getiuservalue(L, -1, 1);
-		for (const auto& [key, filter] : registry.EventListeners) {
+		for (const auto& [key, filter] : registry->EventListeners) {
 			if (filter.Matches(sender.GetUnderlyingPtr(), data)) {
 				lua_geti(L, -1, key+1);
 				int num = luaFIN_pushEventData(L, sender, data);
@@ -473,7 +495,7 @@ namespace FINLua {
 		}
 		lua_pop(L, 1);
 		lua_getiuservalue(L, -1, 2);
-		for (const auto& [key, filter] : registry.EventQueues) {
+		for (const auto& [key, filter] : registry->EventQueues) {
 			if (filter.Matches(sender.GetUnderlyingPtr(), data)) {
 				lua_geti(L, -1, key+1);
 				FEventQueue& queue = luaFIN_checkEventQueue(L, -1);
@@ -483,7 +505,7 @@ namespace FINLua {
 		}
 		lua_pop(L, 1);
 		lua_getiuservalue(L, -1, 3);
-		for (const auto& [key, filter] : registry.OneShots) {
+		for (const auto& [key, filter] : registry->OneShots) {
 			if (filter.Matches(sender.GetUnderlyingPtr(), data)) {
 				lua_newtable(L);
 				int table = lua_absindex(L, -1);
@@ -492,7 +514,7 @@ namespace FINLua {
 					lua_seti(L, table, i);
 				}
 				lua_seti(L, -2, key+1);
-				registry.OneShots.Remove(key);
+				registry->OneShots.Remove(key);
 			}
 		}
 		lua_pop(L, 1);
