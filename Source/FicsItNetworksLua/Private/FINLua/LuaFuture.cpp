@@ -92,8 +92,7 @@ namespace FINLua {
 			 * @LuaFunction		get
 			 * @DisplayName		Get
 			 */)", get) {
-				return
-				getInternal(L, 1);
+				return getInternal(L, 1);
 			}
 
 			int pollInternal(lua_State* L, int idx, lua_State*& thread) {

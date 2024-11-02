@@ -84,5 +84,6 @@ namespace FINLua {
 	 */
 	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L);
 
+	int luaFIN_pushEventData(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
 	void luaFIN_handleEvent(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
 }
