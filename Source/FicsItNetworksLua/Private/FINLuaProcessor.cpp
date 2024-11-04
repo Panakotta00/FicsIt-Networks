@@ -636,8 +636,9 @@ void luaWarnF(void* ud, const char* msg, int tocont) {
 }
 
 int luaPanicF(lua_State* L) {
-	throw FINLua::luaFIN_toFString(L, 1);
-	return 0;
+	FString message = FINLua::luaFIN_toFString(L, 1);
+	UE_LOG(LogFicsItNetworksLua, Warning, TEXT("A Lua Runtime caused Panic with message: %s"), *message);
+	throw message;
 }
 
 void UFINLuaProcessor::Reset() {
