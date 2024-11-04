@@ -186,6 +186,32 @@ namespace FINLua {
 				lua_pushnil(L);
 			}
 
+			int luaPullContinue(lua_State* L, int, lua_KContext) {
+				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
+				double timeout = luaL_checknumber(L, 2);
+				if (!queue->Events.IsEmpty()) {
+					FFINLuaEvent event = queue->Events[0];
+					queue->Events.RemoveAt(0);
+					return luaFIN_pushEventData(L, event.Sender, event.Data);
+				}
+				double currentTime = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetTimeSinceStart();
+				if (timeout > currentTime) {
+					return lua_yieldk(L, 0, NULL, luaPullContinue);
+				}
+				return 0;
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		pull
+			 * @DisplayName		Pull
+			 */)", pull) {
+				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
+				double timeout = luaL_checknumber(L, 2)*1000;
+				timeout += UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetTimeSinceStart();
+				lua_pop(L, 1);
+				lua_pushnumber(L, timeout);
+				return luaPullContinue(L, 0, NULL);
+			}
+
 			int luaWaitForContinue(lua_State* L, int, lua_KContext) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 				TSharedRef<FFINEventFilterExpression> filter = luaFIN_checkStruct<FFINEventFilterExpression>(L, 2, false);
@@ -472,9 +498,19 @@ namespace FINLua {
 
 			lua_pushcfunction(L, event::luaWaitFor);
 			luaFIN_persistValue(L, -1, "WaitFor");
-			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaWaitForContinue)));
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaWaitForContinue)));
 			luaFIN_persistValue(L, -1, "WaitForContinue");
 			lua_pop(L, 2);
+
+			lua_pushcfunction(L, EventQueue::luaWaitFor);
+			luaFIN_persistValue(L, -1, "EventQueueWaitFor");
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaWaitForContinue)));
+			luaFIN_persistValue(L, -1, "EventQueueWaitForContinue");
+			lua_pop(L, 2);
+
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaPullContinue)));
+			luaFIN_persistValue(L, -1, "EventQueuePullContinue");
+			lua_pop(L, 1);
 		}
 	}
 
