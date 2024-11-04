@@ -18,7 +18,7 @@ namespace CodersFileSystem {
 	#define CheckKeepDisk(Condition) \
 	if (bIsLoading && KeepDisk == -1) { \
 		if (Condition) KeepDisk = AskForDiskOrSave(Name); \
-		if (KeepDisk == 1) return; \
+		if (KeepDisk == FIFS_KEEP_CHANGES) return; \
 	}
 
 	void SerializePath(TSharedRef<Device> SerializeDevice, FStructuredArchive::FRecord Record, Path Path, FString Name, int& KeepDisk, const TFunction<int(FString)>& AskForDiskOrSave) {
@@ -36,7 +36,7 @@ namespace CodersFileSystem {
 		FStructuredArchive::FArray ChildNodes = Record.EnterArray(SA_FIELD_NAME(TEXT("ChildNodes")), ChildNodeNum);
 		std::unordered_set<std::string> DiskChilds = SerializeDevice->children(Path);
 		CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
-		if (KeepDisk == 0) {
+		if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
 			for (std::string DiskChild : DiskChilds) {
 				SerializeDevice->remove(Path / DiskChild, true);
 			}
@@ -53,7 +53,7 @@ namespace CodersFileSystem {
 			std::string stdChildName = TCHAR_TO_UTF8(*UChildName);
 
 			CheckKeepDisk(DiskChilds.find(stdChildName) == DiskChilds.end())
-			if (DiskChilds.size() > 0 && KeepDisk == 0) {
+			if (DiskChilds.size() > 0 && KeepDisk == FIFS_OVERRIDE_CHANGES) {
 				for (std::string DiskChild : DiskChilds) {
 					SerializeDevice->remove(Path / DiskChild, true);
 				}
@@ -70,7 +70,7 @@ namespace CodersFileSystem {
 			TOptional<FileType> existingType = SerializeDevice->fileType(Path / stdChildName);
 			if (Type == 1) {
 				CheckKeepDisk(!existingType.IsSet() || *existingType != File_Regular)
-				if (KeepDisk == 0) {
+				if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
 					SerializeDevice->remove(Path / stdChildName, true);
 				}
 				FStructuredArchive::FSlot Content = Child.EnterField(SA_FIELD_NAME(TEXT("FileContent")));
@@ -84,7 +84,7 @@ namespace CodersFileSystem {
 					std::string stdData(reinterpret_cast<char*>(Data.GetData()), Data.Num());
 
 					CheckKeepDisk(diskData != stdData)
-					if (KeepDisk == 0) {
+					if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
 						TSharedRef<CodersFileSystem::FileStream> Stream = SerializeDevice->open(Path / stdChildName, CodersFileSystem::OUTPUT | CodersFileSystem::TRUNC | CodersFileSystem::BINARY).ToSharedRef();
 						Stream->write(stdData);
 						Stream->close();
@@ -99,7 +99,7 @@ namespace CodersFileSystem {
 				}
 			} else if (Type == 2) {
 				CheckKeepDisk(!existingType.IsSet() || *existingType != File_Directory)
-				if (KeepDisk == 0) {
+				if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
 					SerializeDevice->remove(Path / stdChildName, true);
 				}
 				SerializeDevice->createDir(Path / stdChildName);
