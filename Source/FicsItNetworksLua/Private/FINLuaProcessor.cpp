@@ -408,7 +408,10 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		} else {
 			// print error
 			if (lua_isstring(luaState, -1)) {
-				UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Unable to persit! '%s'"), *DebugInfo, *FINLua::luaFIN_toFString(luaState, -1));
+				FString error = FINLua::luaFIN_toFString(luaState, -1);
+				FString message = FString::Printf(TEXT("%s: Unable to persist (computer restarted automatically): %s"), *DebugInfo, *error);
+				UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *message);
+				GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
 			}
 
 			lua_pop(luaState, 1); // ..., perm, globals
@@ -482,7 +485,10 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	if (ok != LUA_OK) {
 		// print error
 		if (lua_isstring(luaState, -1)) {
-			UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Unable to unpersit! '%s'"), *DebugInfo, *FINLua::luaFIN_toFString(luaState, -1));
+			FString message = FINLua::luaFIN_toFString(luaState, -1);
+			FString formatted = FString::Printf(TEXT("%s: Unable to unpersist: %s"), *DebugInfo, *message);
+			UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *formatted);
+			GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, formatted);
 		}
 		
 		// cleanup
