@@ -39,6 +39,7 @@ jobs:
               return;
             }
             core.setOutput('body', btoa(release.body.replaceAll("*", "\\*")));
+            core.setOutput('name', release.name);
       
       - name: Download FicsIt-Networks Version
         if: ${{inputs.should_upload}}
@@ -64,11 +65,12 @@ jobs:
         with:
           script: |
             while (true) {
+              await new Promise(resolve => setTimeout(resolve, 5000));
               let response = await fetch("https://api.ficsit.app/v2/query", {
                 method: "POST",
                 headers: {"Cookies": "token=${{secrets.SMR_API_KEY}}", "Content-Type":"application/json"},
                 body: JSON.stringify({
-                  query: '{getModByReference(modReference:"FicsItNetworks"){versions(filter:{order_by:created_at}){approved virustotal_results{safe}}}}'
+                  query: '{getModByReference(modReference:"FicsItNetworks"){versions(filter:{order_by:created_at}){version approved virustotal_results{safe}}}}'
                 })
               })
               if (!response.ok) {
@@ -76,6 +78,10 @@ jobs:
               } else {
                 const json = await response.json();
                 let mod = json.data.getModByReference.versions[0];
+                if (mod.version != '${{steps.find-release.outputs.name}}') {
+                  console.log("Version not yet found...");
+                  continue;
+                }
                 let unsafe = mod.virustotal_results.find(virus => !virus.safe);
                 if (mod.approved && !unsafe) {
                   console.log("Version got approved!");
@@ -83,7 +89,6 @@ jobs:
                 }
                 console.log("Version not approved yet");
               }
-              await new Promise(resolve => setTimeout(resolve, 5000));
             }
   send-discord-release-message:
     needs: deploy-to-smr
