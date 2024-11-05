@@ -23,3 +23,16 @@ index c00ac8d210..3bb40273cd 100644
  public:
  	/**
  	 * Called bu the tracks when a vehicle enters and exits a section of track.
+diff --git a/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h b/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
+index 99025de9bf..13945dbd65 100644
+--- a/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
++++ b/Source/FactoryGame/Public/Buildables/FGBuildableRailroadSwitchControl.h
+@@ -7,6 +7,8 @@
+ #include "FGUseableInterface.h"
+ #include "FGBuildableRailroadSwitchControl.generated.h"
+ 
++class UFGRailroadTrackConnectionComponent;
++
+ /**
+  * Struct containing packaged switch data so we can get an OnRep for them as a group.
+  */

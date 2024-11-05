@@ -8,14 +8,27 @@
 
 AFINComputerDriveHolder::AFINComputerDriveHolder() {
 	DriveInventory = CreateDefaultSubobject<UFGInventoryComponent>("DriveInventory");
-	DriveInventory->Resize();
-	DriveInventory->OnItemAddedDelegate.AddDynamic(this, &AFINComputerDriveHolder::OnDriveInventoryUpdate);
-	DriveInventory->OnItemRemovedDelegate.AddDynamic(this, &AFINComputerDriveHolder::OnDriveInventoryUpdate);
-	DriveInventory->SetIsReplicated(true);
+	DriveInventory->SetDefaultSize(1);
+	DriveInventory->Resize(1);
+
+	bReplicates = true;
 	NetDormancy = DORM_Awake;
 }
 
-AFINComputerDriveHolder::~AFINComputerDriveHolder() {}
+void AFINComputerDriveHolder::BeginPlay() {
+	Super::BeginPlay();
+
+	DriveInventory->OnSlotUpdatedDelegate.AddDynamic(this, &AFINComputerDriveHolder::OnDriveSlotUpdate);
+
+	DriveInventory->mItemFilter.BindLambda([](TSubclassOf<UObject> Item, int32 Index) {
+		//return Item->IsChildOf(UFINComputerDriveDesc::StaticClass());
+		return true;
+	});
+	if (HasAuthority()) {
+		DriveInventory->SetReplicationRelevancyOwner(this);
+		DriveInventory->Resize(1);
+	}
+}
 
 void AFINComputerDriveHolder::EndPlay(EEndPlayReason::Type reason) {
 	SetLocked(false);
@@ -25,7 +38,6 @@ void AFINComputerDriveHolder::EndPlay(EEndPlayReason::Type reason) {
 void AFINComputerDriveHolder::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(AFINComputerDriveHolder, DriveInventory);
 	DOREPLIFETIME(AFINComputerDriveHolder, bLocked);
 }
 
@@ -63,17 +75,20 @@ bool AFINComputerDriveHolder::SetLocked(bool NewLocked) {
 	return true;
 }
 
+void AFINComputerDriveHolder::OnDriveSlotUpdate(int index) {
+	FGuid drive = GetDrive();
+	if (HasAuthority()) {
+		NetMulti_OnDriveUpdate(drive);
+		SetLocked(drive.IsValid());
+	} else {
+		OnDriveUpdate.Broadcast(drive);
+	}
+}
+
 void AFINComputerDriveHolder::NetMulti_OnDriveUpdate_Implementation(const FGuid& Drive) {
 	OnDriveUpdate.Broadcast(Drive);
 }
 
 void AFINComputerDriveHolder::NetMulti_OnLockedUpdate_Implementation(bool bOldLocked, const FGuid& NewOrOldDrive) {
 	OnLockedUpdate.Broadcast(bOldLocked, NewOrOldDrive);
-}
-
-void AFINComputerDriveHolder::OnDriveInventoryUpdate_Implementation(TSubclassOf<UFGItemDescriptor> drive, int32 count, UFGInventoryComponent* sourceInventory) {
-	if (HasAuthority()) {
-		NetMulti_OnDriveUpdate(GetDrive());
-		if (!IsValid(drive)) SetLocked(false);
-	}
 }

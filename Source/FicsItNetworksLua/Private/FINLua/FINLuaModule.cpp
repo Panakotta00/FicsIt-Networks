@@ -68,11 +68,13 @@ void FFINLuaModuleBareValue::PushLuaValue(lua_State* L, const FString& PersistNa
 }
 
 void FFINLuaFunction::PushLuaValue(lua_State* L, const FString& PersistName) {
+	lua_pushcfunction(L, Function);
+	FINLua::luaFIN_persistValue(L, -1, PersistName);
+	lua_pop(L, 1);
+
 	lua_pushnil(L);
 	lua_pushnil(L);
 	lua_pushcclosure(L, Function, 2);
-
-	FINLua::luaFIN_persistValue(L, -1, PersistName);
 }
 
 void FFINLuaTable::PushLuaValue(lua_State* L, const FString& PersistName) {

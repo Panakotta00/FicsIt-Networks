@@ -14,6 +14,7 @@
 #include "FINLua/LuaGlobalLib.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FIRTrace.h"
+#include "LuaEventAPI.h"
 #include "Engine/Engine.h"
 #include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/LuaUtil.h"
@@ -377,17 +378,19 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 	// check state & thread
 	if (luaState && luaThread && lua_status(luaThread) == LUA_YIELD) {
 		// prepare state data
-		lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm");	// ..., perm
-		lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);	// ..., perm, globals
-		lua_pushvalue(luaState, -1);									// ..., perm, globals, globals
-		lua_pushnil(luaState);											// ..., perm, globals, globals, nil
-		lua_settable(luaState, -4);									// ..., perm, globals
-		lua_pushvalue(luaState, -2);									// ..., perm, globals, perm
-		lua_newtable(luaState);										// ..., perm, globals, perm, data
-		lua_pushvalue(luaState, -3);									// ..., perm, globals, perm, data, globals
-		lua_setfield(luaState, -2, "globals");						// ..., perm, globals, perm, data
-		lua_pushvalue(luaState, luaThreadIndex);						// ..., perm, globals, perm, data, thread
-		lua_setfield(luaState, -2, "thread");						// ..., perm, globals, perm, data
+		lua_getfield(luaState, LUA_REGISTRYINDEX, "PersistPerm");		// ..., perm
+		lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);		// ..., perm, globals
+		lua_pushvalue(luaState, -1);										// ..., perm, globals, globals
+		lua_pushnil(luaState);												// ..., perm, globals, globals, nil
+		lua_settable(luaState, -4);										// ..., perm, globals
+		lua_pushvalue(luaState, -2);										// ..., perm, globals, perm
+		lua_newtable(luaState);											// ..., perm, globals, perm, data
+		lua_pushvalue(luaState, -3);										// ..., perm, globals, perm, data, globals
+		lua_setfield(luaState, -2, "globals");							// ..., perm, globals, perm, data
+		lua_pushvalue(luaState, luaThreadIndex);							// ..., perm, globals, perm, data, thread
+		lua_setfield(luaState, -2, "thread");							// ..., perm, globals, perm, data
+		lua_getfield(luaState, LUA_REGISTRYINDEX, "hidden-globals");	// ..., perm, globals, perm, data1, hidden-globals
+		lua_setfield(luaState, -2, "hidden-globals");					// ..., perm, globals, perm, data
 
 		lua_pushcfunction(luaState, luaPersist);					// ..., perm, globals, perm, data, persist-func
 		lua_insert(luaState, -3);									// ..., perm, globals, persist-func, perm, data
@@ -405,7 +408,10 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		} else {
 			// print error
 			if (lua_isstring(luaState, -1)) {
-				UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Unable to persit! '%s'"), *DebugInfo, *FINLua::luaFIN_toFString(luaState, -1));
+				FString error = FINLua::luaFIN_toFString(luaState, -1);
+				FString message = FString::Printf(TEXT("%s: Unable to persist (computer restarted automatically): %s"), *DebugInfo, *error);
+				UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *message);
+				GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
 			}
 
 			lua_pop(luaState, 1); // ..., perm, globals
@@ -479,7 +485,10 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 	if (ok != LUA_OK) {
 		// print error
 		if (lua_isstring(luaState, -1)) {
-			UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Unable to unpersit! '%s'"), *DebugInfo, *FINLua::luaFIN_toFString(luaState, -1));
+			FString message = FINLua::luaFIN_toFString(luaState, -1);
+			FString formatted = FString::Printf(TEXT("%s: Unable to unpersist: %s"), *DebugInfo, *message);
+			UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *formatted);
+			GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, formatted);
 		}
 		
 		// cleanup
@@ -500,6 +509,9 @@ void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 game
 		lua_replace(luaState, luaThreadIndex); // ..., uperm, data
 		lua_getfield(luaState, -1, "globals");
 		lua_seti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // ..., uperm, data
+		lua_getfield(luaState, -1, "hidden-globals");
+		lua_setfield(luaState, LUA_REGISTRYINDEX, "hidden-globals");
+
 		luaThread = lua_tothread(luaState, luaThreadIndex);
 		lua_pop(luaState, 2); // ...
 	}
@@ -630,8 +642,9 @@ void luaWarnF(void* ud, const char* msg, int tocont) {
 }
 
 int luaPanicF(lua_State* L) {
-	throw FINLua::luaFIN_toFString(L, 1);
-	return 0;
+	FString message = FINLua::luaFIN_toFString(L, 1);
+	UE_LOG(LogFicsItNetworksLua, Warning, TEXT("A Lua Runtime caused Panic with message: %s"), *message);
+	throw message;
 }
 
 void UFINLuaProcessor::Reset() {
@@ -670,6 +683,9 @@ void UFINLuaProcessor::Reset() {
 	lua_newtable(luaState); // perm, uperm
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistUperm"); // perm
 	lua_setfield(luaState, LUA_REGISTRYINDEX, "PersistPerm"); //
+
+	lua_newtable(luaState);
+	lua_setfield(luaState, LUA_REGISTRYINDEX, "hidden-globals");
 
 	FINLua::setupGlobals(luaState);
 
@@ -738,13 +754,14 @@ int UFINLuaProcessor::DoSignal(lua_State* L) {
 	FFIRTrace sender;
 	FFINSignalData signal = net->PopSignal(sender); 
 	int props = 2;
-	if (signal.Signal) lua_pushstring(L, TCHAR_TO_UTF8(*signal.Signal->GetInternalName()));
+	if (signal.Signal) FINLua::luaFIN_pushFString(L, signal.Signal->GetInternalName());
 	else lua_pushnil(L);
 	FINLua::luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(sender));
 	for (const FFIRAnyValue& Value : signal.Data) {
 		FINLua::luaFIN_pushNetworkValue(L, Value, sender);
 		props++;
 	}
+	FINLua::luaFIN_handleEvent(L, sender, signal);
 	return props;
 }
 

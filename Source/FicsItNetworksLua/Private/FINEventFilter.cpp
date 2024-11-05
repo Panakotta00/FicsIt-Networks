@@ -56,6 +56,7 @@ bool FFINEventFilter::Matches(UObject* Sender, const FFINSignalData& Signal) con
 bool FFINEventFilterExpression::Matches(UObject* Sender, const FFINSignalData& Signal) const {
 	switch (Operator) {
 		case FIN_EventFilter_None:
+			if (!IsValid(Operand1.GetStruct())) return true;
 			if (Operand1.GetStruct() != FFINEventFilter::StaticStruct()) return false;
 			return Operand1.Get<FFINEventFilter>().Matches(Sender, Signal);
 		case FIN_EventFilter_AND:

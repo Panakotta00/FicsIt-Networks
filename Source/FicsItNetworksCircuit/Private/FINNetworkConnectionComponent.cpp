@@ -98,7 +98,7 @@ void UFINNetworkConnectionComponent::RemoveConnectedCable(AFINNetworkCable* Cabl
 
 	if (ConnectedCables.Remove(Cable) > 0) {
 		if (UFINNetworkConnectionComponent* OtherConnector = Cable->GetOtherConnector(this)) {
-			OtherConnector->ConnectedCables.Remove(Cable);
+			OtherConnector->RemoveConnectedCable(Cable);
 			AFINNetworkCircuit::DisconnectNodes(OtherConnector->Circuit, this, OtherConnector);
 		}
 	}

@@ -29,6 +29,13 @@ namespace FINLua {
 	void luaFIN_pushLuaFuture(lua_State* L, int Thread);
 
 	/**
+	 * @brief Pushes a LuaFuture that wraps lua function call ontop of the stack. Follow the lua_call protocol.
+	 * @param L the lua state
+	 * @param args the amount of parameters you want to pop from the top of the stack and push into the new thread
+	 */
+	void luaFIN_pushLuaFutureLuaFunction(lua_State* L, int args);
+
+	/**
 	 * @brief Pushes a LuaFuture that wraps the given C-Function to the stack.
 	 * @param L the lua state
 	 * @param Func the C-Function you want to wrap as future
@@ -43,4 +50,11 @@ namespace FINLua {
 	 * @paras kfunc if given, continues this function after the await returned
 	 */
 	int luaFIN_await(lua_State* L, int index);
+
+	/**
+	 * Adds the Future ad the given index to the tasks list.
+	 * @param L the lua state
+	 * @param index the index of the future
+	 */
+	void luaFIN_addTask(lua_State* L, int index);
 }

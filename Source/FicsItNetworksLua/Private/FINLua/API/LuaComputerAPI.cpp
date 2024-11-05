@@ -319,7 +319,7 @@ namespace FINLua {
 			 */)", attentionPing) {
 				LuaFunc();
 
-				FVector Position = luaFIN_checkStruct<FVector>(L, 1, true);
+				FVector Position = *luaFIN_checkStruct<FVector>(L, 1, true);
 				TOptional<FString> Player;
 				if (lua_isstring(L, 2)) Player = luaFIN_checkFString(L, 2);
 				for (auto players = kernel->GetWorld()->GetPlayerControllerIterator(); players; players++) {
