@@ -86,7 +86,7 @@ namespace FINLua {
 	template<typename T>
 	TSharedRef<T> luaFIN_checkStruct(lua_State* L, int Index, bool bAllowConstruction) {
 		auto Struct = luaFIN_checkUStruct(L, Index, TBaseStructure<T>::Get(), bAllowConstruction);
-		return TSharedRef<T>(Struct, &Struct->Get<T>());
+		return TSharedRef<T>(Struct, &Struct->template Get<T>());
 	}
 
 	/**

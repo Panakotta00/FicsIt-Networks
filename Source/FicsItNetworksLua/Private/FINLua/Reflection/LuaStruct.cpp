@@ -635,7 +635,7 @@ UE_DISABLE_OPTIMIZATION_SHIP
 	TSharedPtr<FIRStruct> luaFIN_toUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction) {
 		FLuaStruct* LuaStruct = luaFIN_toLuaStruct(L, Index, nullptr);
 		if (LuaStruct) {
-			if (!LuaStruct->Struct->GetStruct() || !LuaStruct->Struct->GetData() || ParentType && !LuaStruct->Struct->GetStruct()->IsChildOf(ParentType)) {
+			if (!LuaStruct->Struct->GetStruct() || !LuaStruct->Struct->GetData() || (ParentType && !LuaStruct->Struct->GetStruct()->IsChildOf(ParentType))) {
 				return nullptr;
 			}
 			return LuaStruct->Struct;
