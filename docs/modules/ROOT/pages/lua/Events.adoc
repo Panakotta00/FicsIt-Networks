@@ -1,0 +1,153 @@
+= Events
+:description: Events are an advanced way of handling FIN Signals.
+
+Signals are essentially messages send by a network component to computers that listen to the component.
+This means every computer first has to listen to the network components from which he wants to receive signals from.
+
+A signal has a type and various associated values.
+
+The combination of a signal and the sender from which the signal originated from is also known as event.
+
+== Event Filters
+Event Filters are a new lua type that allow you to store a signal match condition and match signals against it.
+
+This allows you to more easily filter for specific signals/events.
+
+=== Matching
+
+You can then use the `matches(eventName, sender, ...)` member function, to easily match the return values of an `event.pull()` call against the conditions.
+
+=== Construction
+
+To construct a new EventFilter you have to use the global `event.filter(table)` function.
+You can then provide various optional fields in the table to specify on what you want to check.
+
+- `event : string|string[]`
+The event name has to match the given single string or has to be contained within the given array of strings.
+- `sender : Object|Object[]`
+The sender of the signals has to be the given single sender or must be one of the senders in the given array.
+- `values : table<string,any>
+A table with string keys and any value as value.
+For every table entry, the signal must have a parameter with the same name and the parameter value has to match the givne table value associated with the key.
+
+=== Operator Overloading
+
+The struct overloads a bunch of Lua operators allowing you to create more complex conditions.
+
+- *`+` `|`* - `OR` Operators
+- *`*` `&`* - `AND` Operators
+- *`-` `~`* - `NOT` Operators
+
+=== Example
+
+[source,Lua]
+----
+local f1 = event.filter{sender=someSender, event="SomeEvent", values={someParameterName="someExpectedValue"}}
+local f2 = event.fitler{sender=someOtherSender}
+local f3 = f1 * f2        -- an AND link (both filters have to match)
+local f4 = f1 + f2        -- an OR link (one of the filters has to match)
+local f5 = -f1            -- an  negation link (the filter is not allowed to match)
+local f5 = f3 + f4 * f5   -- you can essentially express complex conditions this way
+
+while true do
+  local e = {event.pull()}
+  if f1:matches(table.unpack(e)) then
+    print("The event matches f1")
+  end
+  if f5:matches(table.unpack(e)) then
+    print("The event matches the complex filter f5")
+  end
+end
+----
+
+== Event Duplication & Handling
+Events only get processed when you call `event.pull()` which pulls a _signal_ from the Singal Queue.
+That means when you want to use these new features, you have to let them be processed by looping and calling `event.pull()`.
+
+To make this easier when you dont need the low level access `event.pull()` provides (and further stuff like, main yielding and custom task scheduling),
+there is an helper function `event.loop()` which is the equivalent to:
+[source,Lua]
+----
+while true do
+    local e = event.pull(0)
+    future.run()
+    if not e then
+        computer.skip()
+    end
+end
+----
+
+== Event Listeners
+You can globally register Event Listeners.
+
+These are functions associated with an event filter.
+
+When the computer pulls a signal, it will check if the event matches the event filter.
+If this is the case, it will create a a new task based on the function you passed to the registration, and as function parameters you get the event parameters.
+
+To register an Event Listener you have to use the global `event.registerListener(EventListener, function)` function.
+[source,Lua]
+----
+local btn = ...
+local switch = ...
+
+event.registerListener({sender=btn}, function(event, sender, p1, p2, ...)
+    print("Event1: ", event, sender, p1, p2, ...)
+end)
+
+event.registerListener(event.filter{sender=switch} + event.filter{State=true}, function()
+    print("Event2")
+end)
+
+event.loop()
+----
+
+== Event One-Shots
+You can also create futures that resolve only once a signal that matches the given event filter is matched.
+
+This essentially allows you to easily halt program execution and wait for user input. The future it self will return the event parameters.
+
+You can use the `event.waitFor(EventFilter) -> Future` function to create such future.
+[source,Lua]
+----
+local okbtn = ...
+local cancelbtn = ...
+print("Are you sure you want to continue?")
+local ok, cancel = future.first(event.waitFor{sender=okbtn}, event.waitFor{sender=cancelbtn})
+if ok then
+    print("Then lets continue!")
+else
+    print("Cancel the continuation...")
+end
+----
+
+== Event Queues
+Event Queues allow you to record and filter events that occur in its life-time.
+
+You can create an Event Queue using the global `event.queue(EventFilter) -> EventQueu` function.
+
+The queue will from then on record all events that occur and that match the given filter.
+
+[TIP]
+====
+Its always best to use a filter that lets through as few events as your actually need. For memory and performance reasons. The queue is hard limited to 250 entries.
+====
+
+You can then use the `pull([timeout])` and `waitFor(EventFilter)` member functions.
+These functions operate similar to their global counter parts, but instead of operating on the global event system, these here operate on the event queue.
+
+[WARNING]
+====
+Its important to mention that `waitFor` will pull as many events as it can until it finds a event that matches its filter. So its not reccomended to run two or more `waitFor` or `pull` at the same time.
+====
+
+The `pull` function is essentially a shorthand for the following function:
+[source,Lua]
+----
+function queue:pull(timeout)
+    local _, e = future.first(self:waitFor{}, future.sleep(timeout)):await()
+    if e then
+        return table.unpack(e)
+    end
+end
+----
