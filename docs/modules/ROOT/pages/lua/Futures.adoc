@@ -1,0 +1,239 @@
+= Futures
+:description: FIN Lua Futures implement a rather modern way of asynchronous programming using an async/await style.
+
+When you call a function that will take some time to be processed you will get an Future as return value instead of having your Lua computer beeing blocked until the value becomes available.
+
+This can be the case whe you call a reflection function that only as the "Sync" flag or if the function explicitly returns a Future, like `event.waitFor` and the Internet-Cards `request` function.
+[source,Lua]
+----
+local f = event.waitFor{}
+print(f) -- Will print "Future: ..."
+----
+
+When you decide to wait for Future and retrieve its value, you can simply call its `await` member function.
+This however will yield the current coroutine and once it resumes will immediately if the value still is not available.
+Its also important to mention that the `await()` call will fail if the future it self errors or gets cancelled.
+[source,Lua]
+----
+local f = event.waitFor{}
+local e, s, ... = f:await()
+----
+
+This entire system is inspired by Rusts Futures, its async/await and JavaScripts Event-Loop.
+
+Why is then a specific value anyway when I still have to block the Lua Runtime? +
+First of all, it will only yield the current coroutine instead of the whole runtime,
+and secondly it will allow you to ignore the future in some cases or wait on multiple at once and so let multiple run in parallel.
+To wait for multiple futures at the same time you can use the `future.join(...) -> Future` function that takes any amount of futures.
+[source,Lua]
+----
+local f1 = comp1:someSyncFunc()
+local f2 = comp2:someOtherSyncFunc()
+local f1_retVals, someString, f2_retVals, ... = future.join(f1, "some string", f2, ...):await()
+----
+
+The `sleep` function is actually just a future internally that immediately gets awaited.
+You can create such future explicitly using the `future.sleep()` function.
+
+[WARNING]
+====
+It is important to note, that depending on the Future, you may have to `await()` (or repreadingly `poll()`) a future for it to actually do something.
+Some others may work just fine, and others may be "cancelled".
+As rule-of-thumb, dormant futures that exist but never get polled/awaited are a waste of memory and maybe CPU time.
+====
+
+== Creating Futures
+
+It can be useful to create your own futures from functions/coroutines if you want to have multiple sepparate sequences waiting for futures independently.
+Especially if you don't want to have them block each other.
+
+One way is to create them from functions using the global `async(function, ...)` function.
+The values passed after the function, will be passed as parameters to the function it self.
+This is useful for easy function reuse and calling existing functions.
+It in essence creates a new coroutine from the given function and wraps it as a future.
+[source,Lua]
+----
+function meep(p1, p2, ...)
+    print(p1, p2, ...)
+end
+
+local future1 = async(meep, "1", 2, ...)
+local future2 = async(meep, 42, 69)
+
+local future3 = async(function()
+    print("inline!")
+end)
+----
+
+If you want to create a future from an existing coroutine, you can use the `future.async(coroutine)` function.
+[source,Lua]
+----
+local co = coroutine.create(...)
+
+local f = future.async(co)
+----
+
+Your function will have all the time it wants, but to make actually use of the future you just created, you have to use its functionallity.
+
+You do this already by simply calling `await()` on other futures.
+This will cause this future (and so the coroutine it wraps) to yield.
+
+Another way is by simply yielding manually using the normal `coroutine.yield()`.
+
+To finally resolve the future, you just have to return in the function.
+The returned parameters will then be outputted by the `await()` and `get()` functions.
+
+[source,Lua]
+----
+local f = async(function()
+    while pollCheck() do    -- poll some external source
+        coroutine.yield()
+    end
+    return "success!", 42, 69
+end)
+
+local val1, val2, val3 = f:await()
+----
+
+=== Cancelling Futures
+
+It can happen that while some future is processing, the caller may not need the return value anymore.
+This can be relevant to some futures and they will do some special processing wheny they get "cancelled".
+
+Cancellation of a Future occurs when a variable referencing it closes or it gets garbage collected and it has not yet resolved.
+
+When the cancellation of a future occurs, the coroutine it self will be closed.
+
+[source,Lua]
+----
+function meep()
+    local f <close> = async(function()
+        local var <close> = defer(function()
+            print("future got closed!")
+        end)
+        ...
+    end)    -- the future "f" has not resolved yet, so "future got closed!" will be printed at this point
+end
+
+meep()
+----
+
+The global `defer(function)` allows you execute a function when the return value closes.
+
+== Tasks
+
+Tasks are a special usage of futures.
+You could view the Task System as a "global future.join() where futures can be dynamically added".
+It can also be viewed as an Event-Loop similar to JavaScript.
+
+This essentially allows for background processes to be executed.
+
+The `future.tasks` table is simply a global table of futures that get polled/awaited automatically.
+You can either `poll` them your self, and essentially create a custom scheduler, or use the `future.run()` function to execute a simple round-robin schedule iteration.
+This means every future gets polled once until the function returns. If the poll returns and the future resolves, it will be removed from the tasks list.
+
+You can also use the `future.loop()` function to indefinetly execute `future.run()`.
+It is just a shorthand for some code like this:
+[source,Lua]
+----
+while true do
+    future.run()
+    coroutine.yield()
+end
+----
+
+To create/add a new task, you can simply call the `future.addTask(function)` function.
+The provided function will then get wrapped as future and be executed as task.
+[source,Lua]
+----
+future.addTask(function()
+    local i = 0
+    while true do
+        print("i", i)
+        i = i + 1
+        sleep(3)
+    end
+end)
+
+function meep(prefix, timeout)
+    local i = 0
+    while true do
+        print(prefix, i)
+        i = i + 1
+        sleep(timeout)
+    end
+end
+
+future.addTask(meep, "j", 0.333)
+future.addTask(meep, "k", 30)
+
+future.loop()
+----
+
+[TIP]
+====
+There are even functions that will return a future, that will wait for a task to be finished.
+This is a case where you would not have to `poll` or `await` the future to ensure it actually gets processed.
+====
+
+== Futures In-Depth
+
+Futures are essentially just a fancy solution to polling.
+
+Instead of having to poll some source your self, you can just wait for the value you expect to arrive.
+Internally the future will still just poll.
+
+This behaviour is reflected in a futures interface.
+
+The `poll()` member function will execute the actuall behaviour (like resuming a coroutine or checking if the HTTP response finally got received).
+It returns true when the polling has completeted, the result values have been stored internall in the future and no further calls are necessary.
+If you still do, nothing would happen and it would just return true again.
+False would be returned if the values are not ready yet, and inturn the future has not resolved yet (like when the resumed coroutine yields instead of returns).
+In the case the "poll behaviour" (like the wrapped coroutine) causes an error, poll will simply forward this error down.
+
+This function allows you to more efficiently execute futures and schedule them however you want.
+A simplified implementation of the `future.join()` could then look something like this:
+[source,Lua]
+----
+function future.join(...)
+    local futures = {...}
+    local i = 0
+    while #futures > 0 do
+        i = (i % #futures) + 1
+        local t = futures[i]
+        if t:poll() then
+            table.remove(futures, i)
+            i = i - 1
+        end
+    end
+end
+----
+
+[WARNING]
+====
+It is important to understand that how poll is implemented, varies heavily between types of Futures.
+A future doesn't have to wrap a coroutine, this would be mostly the case for Futures created using the `async` functions.
+====
+
+If you want to just probe if a future has been resolved without polling, you can use the `canGet() -> bool` function.
+
+When the future has resolved, you can use the `get()` member function to retrieve its result values.
+You can call this function as often as you want, but calling it on a unresolved or cancelled future will cause an error.
+
+Last but not least the `await()` function is simply a wrapper around the `poll()` and `get()` function with extra stuff.
+This function will yield the current/calling coroutine if `poll()` returns false.
+And when the current/calling coroutine resumes, it will do the same thing again.
+It will repeat this until `poll()` returns true, which indicates the future has resolved.
+It will then return with the same values as returned by the `get()`.
+In the case of `poll()` causing an error, will simply forward the error down.
+
+This means a simplified implementation of `await()` could be:
+[source,Lua]
+----
+function Future:await()
+    while not self:poll() do
+        coroutine.yield()
+    end
+    return self:get()
+end
+----
