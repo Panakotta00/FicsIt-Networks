@@ -20,7 +20,7 @@ protected:
 	bool bLocked = false;
 	
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UFGInventoryComponent* DriveInventory = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, BlueprintAssignable)
@@ -30,9 +30,9 @@ public:
 	FFINDriveHolderLockedUpdateDelegate OnLockedUpdate;
 
 	AFINComputerDriveHolder();
-	~AFINComputerDriveHolder();
 
 	// Begin AActor
+	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type reason) override;
 	// End AActor
 
@@ -44,13 +44,16 @@ public:
 	UFUNCTION(BlueprintSetter)
 	bool SetLocked(bool NewLocked);
 
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_OnDriveUpdate(const FGuid& Drive);
 
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_OnLockedUpdate(bool bOldLocked, const FGuid& NewOrOldDrive);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category="Computer|Drive")
-	void OnDriveInventoryUpdate(TSubclassOf<UFGItemDescriptor> drive, int32 count, UFGInventoryComponent* sourceInventory);
+	UFUNCTION()
+	void OnDriveSlotUpdate(int index);
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Computer|Drive")
+	void OnDriveInventoryUpdate();
 };
