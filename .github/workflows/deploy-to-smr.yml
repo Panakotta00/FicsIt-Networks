@@ -6,10 +6,15 @@ on:
       should_upload:
         type: boolean
         default: true
+      dev_run:
+        type: boolean
+        default: false
   workflow_call:
     secrets:
       SMR_API_KEY:
         required: true
+      SMR_API_KEY_DEV:
+        required: false
       RELEASE_WEBHOOK_URL:
         required: true
 
@@ -34,11 +39,11 @@ jobs:
               per_page: 1,
             });
             const release = response.data[0];
-            if (release.draft) {
+            if (!${{inputs.dev_run == true}} && release.draft) {
               core.setFailed('Found Release is a draft!');
               return;
             }
-            core.setOutput('body', btoa(release.body.replaceAll("*", "\\*")));
+            core.setOutput('body', release.body.replaceAll("*", "*"));
             core.setOutput('name', release.name);
       
       - name: Download FicsIt-Networks Version
@@ -58,7 +63,8 @@ jobs:
         if: ${{inputs.should_upload}}
         env:
           BODY: ${{steps.find-release.outputs.body}}
-        run: ficsit --api-key "${{secrets.SMR_API_KEY}}" smr upload 8d8gk4imvFanRs FicsItNetworks.zip $BODY
+        run: |
+          ficsit ${{ inputs.dev_run && '--api-base https://api.ficsit.dev' || '' }} --api-key "${{ inputs.dev_run && secrets.SMR_API_KEY_DEV || secrets.SMR_API_KEY }}" smr upload ${{ inputs.dev_run && '27CoRS8wTsW1wD' || '8d8gk4imvFanRs'}} FicsItNetworks.zip "$BODY"
 
       - name: Wait for Approval
         uses: actions/github-script@v7
@@ -68,7 +74,7 @@ jobs:
               await new Promise(resolve => setTimeout(resolve, 5000));
               let response = await fetch("https://api.ficsit.app/v2/query", {
                 method: "POST",
-                headers: {"Cookies": "token=${{secrets.SMR_API_KEY}}", "Content-Type":"application/json"},
+                headers: {"Cookies": "token=${{ inputs.dev_run && secrets.SMR_API_KEY_DEV || secrets.SMR_API_KEY }}", "Content-Type":"application/json"},
                 body: JSON.stringify({
                   query: '{getModByReference(modReference:"FicsItNetworks"){versions(filter:{order_by:created_at}){version approved virustotal_results{safe}}}}'
                 })
@@ -92,6 +98,7 @@ jobs:
             }
   send-discord-release-message:
     needs: deploy-to-smr
+    if: ${{!inputs.dev_run}}
     uses: ./.github/workflows/send-discord-release.yml
     secrets:
       RELEASE_WEBHOOK_URL: ${{ secrets.RELEASE_WEBHOOK_URL }}

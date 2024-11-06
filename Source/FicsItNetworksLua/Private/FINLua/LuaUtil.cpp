@@ -401,6 +401,7 @@ namespace FINLua {
 	}
 
 	void luaFINDebug_dumpStack(lua_State* L) {
+		UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Dumping stack of thread %p:"), L);
 		int args = lua_gettop(L);
 		int negative = 0;
 		for (; args > 0; --args) {
