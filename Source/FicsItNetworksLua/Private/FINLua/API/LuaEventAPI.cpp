@@ -595,6 +595,7 @@ namespace FINLua {
 			}
 		}
 		lua_pop(L, 1);
+		lua_pop(L, 1);
 	}
 }
 UE_ENABLE_OPTIMIZATION_SHIP
