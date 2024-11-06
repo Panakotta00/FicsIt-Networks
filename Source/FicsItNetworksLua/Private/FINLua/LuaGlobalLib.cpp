@@ -252,9 +252,9 @@ namespace FINLua {
 
 	[[deprecated]]
 	int luaFindClass_DEPRECATED(lua_State* L) {
-		luaFIN_warning(L, "Deprecated function call 'findClass', use 'classes' global library instead", false);
-		
 		const int args = lua_gettop(L);
+
+		luaFIN_warning(L, "Deprecated function call 'findClass', use 'classes' global library instead", false);
 
 		for (int i = 1; i <= args; ++i) {
 			const bool isT = lua_istable(L, i);
@@ -279,8 +279,11 @@ namespace FINLua {
 				if (Class) luaFIN_pushClass(L, Class);
 				else lua_pushnil(L);
 				if (isT) lua_seti(L, -2, ++j);
+				UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, FString::Printf(TEXT("Instead of 'findClass(\"%s\")' use 'classes.%s'"), *ClassName, *ClassName));
 			}
 		}
+
+
 		return UFINLuaProcessor::luaAPIReturn(L, args);
 	}
 	
