@@ -43,7 +43,7 @@ jobs:
               core.setFailed('Found Release is a draft!');
               return;
             }
-            core.setOutput('body', btoa(release.body.replaceAll("*", "\\*")));
+            core.setOutput('body', btoa(release.body.replaceAll("*", "*")));
             core.setOutput('name', release.name);
       
       - name: Download FicsIt-Networks Version
@@ -99,6 +99,7 @@ jobs:
             }
   send-discord-release-message:
     needs: deploy-to-smr
+    if: ${{!inputs.dev_run}}
     uses: ./.github/workflows/send-discord-release.yml
     secrets:
       RELEASE_WEBHOOK_URL: ${{ secrets.RELEASE_WEBHOOK_URL }}
