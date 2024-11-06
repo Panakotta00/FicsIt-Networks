@@ -259,13 +259,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		log(message: string, verbosity: int)
+			 * @LuaFunction		log(verbosity: int, message: string)
 			 * @DisplayName		Log
 			 *
 			 * Allows you to print a log message to the computers log with the given log verbosity.
 			 *
-			 * @parameter	message		string	Message		The log message you want to print
 			 * @parameter	verbosity	int		Verbosity	The log-level/verbosity of the message you want to log. 0 = Debug, 1 = Info, 2 = Warning, 3 = Error & 4 = Fatal
+			 * @parameter	message		string	Message		The log message you want to print
 			 */)", log) {
 				LuaFunc();
 
