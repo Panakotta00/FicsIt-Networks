@@ -65,7 +65,7 @@ jobs:
           BODY_ENCODED: ${{steps.find-release.outputs.body}}
         run: |
           BODY=$(echo "$BODY_ENCODED" | base64 --decode)
-          ficsit ${{ inputs.dev_run && '--api-base https://api.ficsit.dev' || '' }} --api-key "${{ inputs.dev_run && secrets.SMR_API_KEY_DEV || secrets.SMR_API_KEY }}" smr upload ${{ inputs.dev_run && '27CoRS8wTsW1wD' || '8d8gk4imvFanRs'}} FicsItNetworks.zip $BODY
+          ficsit ${{ inputs.dev_run && '--api-base https://api.ficsit.dev' || '' }} --api-key "${{ inputs.dev_run && secrets.SMR_API_KEY_DEV || secrets.SMR_API_KEY }}" smr upload ${{ inputs.dev_run && '27CoRS8wTsW1wD' || '8d8gk4imvFanRs'}} FicsItNetworks.zip "$BODY"
 
       - name: Wait for Approval
         uses: actions/github-script@v7
