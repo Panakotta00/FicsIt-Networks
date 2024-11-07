@@ -409,7 +409,7 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 			// print error
 			if (lua_isstring(luaState, -1)) {
 				FString error = FINLua::luaFIN_toFString(luaState, -1);
-				FString message = FString::Printf(TEXT("%s: Unable to persist (computer restarted automatically): %s"), *DebugInfo, *error);
+				FString message = FString::Printf(TEXT("%s: Unable to save computer state into a save-file (computer will restart when loading the save-file): %s"), *DebugInfo, *error);
 				UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *message);
 				GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
 			}
@@ -750,19 +750,15 @@ bool UFINLuaProcessor::PullTimeoutReached() {
 
 int UFINLuaProcessor::DoSignal(lua_State* L) {
 	UFINKernelNetworkController* net = GetKernel()->GetNetwork();
+
 	if (!net || net->GetSignalCount() < 1) return 0;
+
 	FFIRTrace sender;
 	FFINSignalData signal = net->PopSignal(sender); 
-	int props = 2;
-	if (signal.Signal) FINLua::luaFIN_pushFString(L, signal.Signal->GetInternalName());
-	else lua_pushnil(L);
-	FINLua::luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(sender));
-	for (const FFIRAnyValue& Value : signal.Data) {
-		FINLua::luaFIN_pushNetworkValue(L, Value, sender);
-		props++;
-	}
+
 	FINLua::luaFIN_handleEvent(L, sender, signal);
-	return props;
+
+	return FINLua::luaFIN_pushEventData(L, sender, signal);
 }
 
 void UFINLuaProcessor::luaHook(lua_State* L, lua_Debug* ar) {

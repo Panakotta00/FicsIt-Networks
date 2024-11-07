@@ -541,8 +541,14 @@ namespace FINLua {
 	}
 
 	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L) {
-		if (lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals") == LUA_TNIL) return nullptr;
-		if (lua_getfield(L, -1, "event-registry") == LUA_TNIL) return nullptr;
+		if (lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals") == LUA_TNIL) {
+			lua_pop(L, 1);
+			return nullptr;
+		}
+		if (lua_getfield(L, -1, "event-registry") == LUA_TNIL) {
+			lua_pop(L, 2);
+			return nullptr;
+		}
 		TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_toStruct<FFINLuaEventRegistry>(L, -1, false);
 		lua_remove(L, -2);
 		return registry;
@@ -594,6 +600,7 @@ namespace FINLua {
 				registry->OneShots.Remove(key);
 			}
 		}
+		lua_pop(L, 1);
 		lua_pop(L, 1);
 	}
 }

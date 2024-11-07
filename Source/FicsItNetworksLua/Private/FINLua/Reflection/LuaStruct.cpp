@@ -89,6 +89,8 @@ UE_DISABLE_OPTIMIZATION_SHIP
 	 */
 	int luaStructExecuteOperator(lua_State* L, const TSharedRef<FIRStruct>& Struct, UFIRStruct* Type, const FString& OperatorName, const TArray<int>& OperandIndices, const int* CauseErrorForIndex) {
 		ZoneScoped;
+
+		if (!IsValid(Type)) return -3;
 		
 		TArray<FIRAny> parameters;
 		UFIRFunction* func = luaStructFindOperator(L, Type, OperatorName, OperandIndices, parameters, CauseErrorForIndex);
@@ -336,7 +338,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			int luaStructIndexOp(lua_State* L) {
 				return luaStructBinaryOperator(L, "__index", FIR_OP_TEXT(FIR_Operator_Index), false);
 			}
-
+UE_DISABLE_OPTIMIZATION_SHIP
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		__index
 			 * @DisplayName		Index
@@ -354,7 +356,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				if (arg > 0) return arg;
 				return luaStructExecuteBinaryOperator(L, FIR_OP_TEXT(FIR_Operator_Index), 2, LuaStruct->Struct, LuaStruct->Type, nullptr);
 			}
-
+UE_ENABLE_OPTIMIZATION_SHIP
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		__newindex
 			 * @DisplayName		New Index
