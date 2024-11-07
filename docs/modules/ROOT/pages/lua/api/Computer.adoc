@@ -142,7 +142,7 @@ Which means its running in an seperate game thread allowing for fast bulk calcul
 !===
 ====
 
-=== __computer.__**log** (message: string, verbosity: int)
+=== __computer.__**log** (verbosity: int, message: string)
 Allows you to print a log message to the computers log with the given log verbosity.
 
 [%collapsible]
@@ -152,13 +152,13 @@ Allows you to print a log message to the computers log with the given log verbos
 !===
 !Name !Type !Description
 
-! *Message* `message`
-! string
-! The log message you want to print
-
 ! *Verbosity* `verbosity`
 ! int
 ! The log-level/verbosity of the message you want to log. 0 = Debug, 1 = Info, 2 = Warning, 3 = Error & 4 = Fatal
+
+! *Message* `message`
+! string
+! The log message you want to print
 
 !===
 ====
