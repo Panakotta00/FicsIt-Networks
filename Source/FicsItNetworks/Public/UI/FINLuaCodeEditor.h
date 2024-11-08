@@ -137,26 +137,12 @@ public:
 	static int32 CalcCharacterTillNextTabStop(const FString& Text, int32 Offset, int32 TabWidth);
 };
 
-class FICSITNETWORKS_API FFINLuaSyntaxHighlighterTextLayoutMarshaller : public FPlainTextLayoutMarshaller {
-public:
-	virtual void SetText(const FString& SourceString, FTextLayout& TargetTextLayout) override;
-	virtual bool RequiresLiveUpdate() const override;
-
-	FFINLuaSyntaxHighlighterTextLayoutMarshaller(const FFINLuaCodeEditorStyle* InLuaSyntaxTextStyle, FFINReflectionReferenceDecorator::FOnNavigate NavigateDelegate);
-
-protected:
-	void ParseTokens(const FString& SourceString, FTextLayout& TargetTextLayout, TArray<FSyntaxTokenizer::FTokenizedLine> TokenizedLines);
-
-	const FFINLuaCodeEditorStyle* SyntaxTextStyle;
-	FFINReflectionReferenceDecorator::FOnNavigate NavigateDelegate;
-};
-
 class SFINLuaCodeEditor : public SBorder {
 public:
 	typedef FFINReflectionReferenceDecorator::FOnNavigate FOnNavigateReflection;
 	
 private:
-	TSharedPtr<FFINLuaSyntaxHighlighterTextLayoutMarshaller> SyntaxHighlighter;
+	TSharedPtr<ITextLayoutMarshaller> SyntaxHighlighter;
 
 	TSharedPtr<FSlateTextLayout> TextLayout;
 

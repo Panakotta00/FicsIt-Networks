@@ -15,6 +15,7 @@ namespace FINLua {
 		UFINKernelSystem* Kernel;
 		FLuaStruct(UFIRStruct* Type, const FFIRInstancedStruct& Struct, UFINKernelSystem* Kernel);
 		FLuaStruct(const FLuaStruct& Other);
+		FLuaStruct& operator=(const FLuaStruct& Other);
 		~FLuaStruct();
 		static void CollectReferences(void* Obj, FReferenceCollector& Collector);
 	};
@@ -25,7 +26,7 @@ namespace FINLua {
 	 * @param Struct the struct you want to push
 	 * @return false if no FIN Reflection Type got found for the struct
 	 */
-	bool luaFIN_pushStruct(lua_State* L, const FIRStruct& Struct);
+	bool luaFIN_pushStruct(lua_State* L, const FIRStruct& Struct, int numUserValues = 1);
 
 	/**
 	 * @brief Tries to convert a table at the given index to a struct of the given template type.
@@ -64,6 +65,13 @@ namespace FINLua {
 	 * @return the struct got from the lua value, otherwise nullptr
 	 */
 	TSharedPtr<FIRStruct> luaFIN_toStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction);
+	TSharedPtr<FIRStruct> luaFIN_toUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction);
+	template<typename T>
+	TSharedPtr<T> luaFIN_toStruct(lua_State* L, int Index, bool bAllowConstruction) {
+		TSharedPtr<FIRStruct> val = luaFIN_toUStruct(L, Index, TBaseStructure<T>::Get(), bAllowConstruction);
+		if (val) return TSharedPtr<T>(val, &val->Get<T>());
+		return nullptr;
+	}
 
 	/**
 	 * @brief Retrieves the lua value at the given index in the lua stack as FINStruct. Causes a lua type error if not able to get as struct of given type.
@@ -74,10 +82,11 @@ namespace FINLua {
 	 * @return the struct got from the lua value
 	 */
 	TSharedRef<FIRStruct> luaFIN_checkStruct(lua_State* L, int Index, UFIRStruct* ParentType, bool bAllowConstruction);
+	TSharedRef<FIRStruct> luaFIN_checkUStruct(lua_State* L, int Index, UStruct* ParentType, bool bAllowConstruction);
 	template<typename T>
-	T& luaFIN_checkStruct(lua_State* L, int Index, bool bAllowConstruction) {
-		UFIRStruct* Type = FFicsItReflectionModule::Get().FindStruct(TBaseStructure<FVector>::Get());
-		return luaFIN_checkStruct(L, Index, Type, true)->Get<T>();
+	TSharedRef<T> luaFIN_checkStruct(lua_State* L, int Index, bool bAllowConstruction) {
+		auto Struct = luaFIN_checkUStruct(L, Index, TBaseStructure<T>::Get(), bAllowConstruction);
+		return TSharedRef<T>(Struct, &Struct->template Get<T>());
 	}
 
 	/**

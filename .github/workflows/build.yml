@@ -76,12 +76,18 @@ jobs:
       - name: Package FicsItNetworks Mod
         run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -DLCName='FicsItNetworks' -build -server -clientconfig=Shipping -serverconfig=Shipping -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed -merge -utf8output
 
+      - name: Upload FicsItNetworks-Merged
+        id: upload-win64-merged
+        uses: actions/upload-artifact@v4
+        with:
+          name: FicsItNetworks-Merged
+          path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks.zip
       - name: Upload FicsItNetworks
         id: upload-win64
         uses: actions/upload-artifact@v4
         with:
           name: FicsItNetworks
-          path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\*.zip
+          path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks-*.zip
 
       - name: Discord Webhook Action
         uses: Panakotta00/discord-build-status-with-artifact@v0.0.4

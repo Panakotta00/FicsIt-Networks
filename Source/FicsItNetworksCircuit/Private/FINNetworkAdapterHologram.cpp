@@ -72,7 +72,8 @@ void AFINNetworkAdapterHologram::UpdateSnapped(AActor* NewSnappedActor) {
 void AFINNetworkAdapterHologram::OnBeginSnap(AActor* ActorSnapped) {
 	if (ActorSnapped) {
 		UFGOutlineComponent* Outline = UFGOutlineComponent::Get(this->GetWorld());
-		if (Outline) Outline->ShowOutline(ActorSnapped, EOutlineColor::OC_HOLOGRAM);
+		if (Outline) Outline->ShowOutline(ActorSnapped, EOutlineColor::OC_HOLOGRAMLINE);
+		OnSnap();
 	}
 }
 

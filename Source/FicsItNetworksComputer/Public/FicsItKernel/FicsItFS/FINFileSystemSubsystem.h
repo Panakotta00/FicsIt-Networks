@@ -38,9 +38,11 @@ public:
 	}
 
 private:
+	static FCriticalSection DevicesMutex;
 	static TMap<FGuid, TSharedRef<CodersFileSystem::Device>> Devices;
 
 	// TODO: FileSystem Usage
+	FCriticalSection UsageMutex;
 	TMap<FGuid, double> Usage;
 
 	FTimerHandle UsageUpdateHandler;

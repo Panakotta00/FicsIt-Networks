@@ -267,6 +267,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 
 	int luaFIN_tryIndexGetProperty(lua_State* L, int Index, UFIRStruct* Type, const FString& MemberName, EFIRPropertyFlags PropertyFilterFlags, const FFIRExecutionContext& PropertyCtx) {
 		ZoneScoped;
+		if (!IsValid(Type)) return 0;
 		if (UFIRProperty* Property = Type->FindFIRProperty(MemberName, PropertyFilterFlags)) {
 			if (!PropertyCtx.IsValid()) {
 				return luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));
@@ -294,6 +295,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 	}
 
 	int luaFIN_tryIndexFunction(lua_State* L, UFIRStruct* Struct, const FString& MemberName, EFIRFunctionFlags FunctionFilterFlags) {
+		if (!IsValid(Struct)) return 0;
 		if (UFIRFunction* Function = Struct->FindFIRFunction(MemberName, FunctionFilterFlags)) {
 			// TODO: Add caching
 			luaFIN_pushReflectionFunction(L, Function);
@@ -304,6 +306,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 
 	int luaFIN_pushFunctionOrGetProperty(lua_State* L, int Index, UFIRStruct* Struct, const FString& MemberName,  EFIRFunctionFlags FunctionFilterFlags, EFIRPropertyFlags PropertyFilterFlags, const FFIRExecutionContext& PropertyCtx, bool bCauseError) {
 		ZoneScoped;
+		if (!IsValid(Struct)) return 0;
 		int arg = luaFIN_tryIndexGetProperty(L, Index, Struct, MemberName, PropertyFilterFlags, PropertyCtx);
 		if (arg == 0) arg = luaFIN_tryIndexFunction(L, Struct, MemberName, FunctionFilterFlags);
 		if (arg > 0) return arg;
@@ -314,6 +317,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 	}
 
 	bool luaFIN_tryExecuteSetProperty(lua_State* L, int Index, UFIRStruct* Type, const FString& MemberName, EFIRPropertyFlags PropertyFilterFlags, const FFIRExecutionContext& PropertyCtx, int ValueIndex, bool bCauseError) {
+		if (!IsValid(Type)) return false;
 		if (UFIRProperty* Property = Type->FindFIRProperty(MemberName, PropertyFilterFlags)) {
 			if (!PropertyCtx.IsValid()) {
 				luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));

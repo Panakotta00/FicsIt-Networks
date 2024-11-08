@@ -92,8 +92,7 @@ namespace FINLua {
 			 * @LuaFunction		get
 			 * @DisplayName		Get
 			 */)", get) {
-				return
-				getInternal(L, 1);
+				return getInternal(L, 1);
 			}
 
 			int pollInternal(lua_State* L, int idx, lua_State*& thread) {
@@ -308,10 +307,13 @@ namespace FINLua {
 			}
 
 			int luaRun(lua_State* L, int index) {
+				//lua_getglobal(L, "future");
 				int num = lua_gettop(L);
 				if (lua_getfield(L, index, "tasks") != LUA_TTABLE) {
+				//	lua_remove(L, -1);
 					return luaL_typeerror(L, -1, "table");
 				}
+				//lua_remove(L, -2);
 				int len = luaL_len(L, -1);
 				int shift = 0;
 				for (int i = 1; i <= len; ++i) {
@@ -330,6 +332,7 @@ namespace FINLua {
 						lua_seti(L, -2, i);
 					}
 				}
+				lua_pop(L, 1);
 				return len-shift;
 			}
 			LuaModuleTableFunction(R"(/**
@@ -356,17 +359,14 @@ namespace FINLua {
 			 *
 			 * Runs the default task scheduler indefinitely until no tasks are left.
 			 */)", loop) {
-				lua_pushvalue(L,lua_upvalueindex(2));
+				lua_pushvalue(L, lua_upvalueindex(2));
 				return luaLoopContinue(L, 0, NULL);
 			}
 		}
 
 		int luaAsync(lua_State* L) {
-			luaL_checktype(L, 1, LUA_TFUNCTION);
-			lua_State* thread = lua_newthread(L);
-			lua_pushvalue(L, 1);
-			lua_xmove(L, thread, 1);
-			luaFIN_pushLuaFuture(L, -1);
+			int top = lua_gettop(L);
+			luaFIN_pushLuaFutureLuaFunction(L, top-1);
 			return 1;
 		}
 		LuaModuleGlobalBareValue(R"(/**
@@ -426,6 +426,8 @@ namespace FINLua {
 
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(future::luaLoopContinue)));
 			PersistValue("LoopContinue");
+
+
 		}
 	}
 
@@ -476,6 +478,14 @@ namespace FINLua {
 		lua_setiuservalue(L, -2, 1);
 	}
 
+	void luaFIN_pushLuaFutureLuaFunction(lua_State* L, int args) {
+		luaL_checktype(L, -args-1, LUA_TFUNCTION);
+		lua_State* thread = lua_newthread(L);
+		lua_insert(L, -args-2);
+		lua_xmove(L, thread, 1 + args);
+		luaFIN_pushLuaFuture(L, -1);
+	}
+
 	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args) {
 		args = FMath::Min(args, lua_gettop(L));
 		lua_State* thread = lua_newthread(L); // ..., args, thread
@@ -504,5 +514,16 @@ namespace FINLua {
 			default: // error
 				return -1;
 		}
+	}
+
+	void luaFIN_addTask(lua_State* L, int index) {
+		index = lua_absindex(L, index);
+		luaL_checkudata(L, index, FutureModule::Future::_Name);
+		lua_getglobal(L, "future");
+		lua_getfield(L, -1, "tasks");
+		int len = luaL_len(L, -1);
+		lua_pushvalue(L, index);
+		lua_seti(L, -2, len+1);
+		lua_pop(L, 2);
 	}
 }

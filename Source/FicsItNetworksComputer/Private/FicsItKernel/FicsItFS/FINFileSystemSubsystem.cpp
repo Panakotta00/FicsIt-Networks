@@ -9,10 +9,13 @@
 #include "Engine/Engine.h"
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 
+FCriticalSection AFINFileSystemSubsystem::DevicesMutex;
 TMap<FGuid, TSharedRef<CodersFileSystem::Device>> AFINFileSystemSubsystem::Devices;
 
 TSharedPtr<CodersFileSystem::Device> AFINFileSystemSubsystem::GetDevice(const FGuid& FileSystemID, bool bInForceUpdate, bool bInForceCreate) {
 	if (!FileSystemID.IsValid()) return nullptr;
+
+	FScopeLock Lock(&DevicesMutex);
 
 	TSharedPtr<CodersFileSystem::Device> Device;
 	TSharedRef<CodersFileSystem::Device>* DevicePtr = Devices.Find(FileSystemID);

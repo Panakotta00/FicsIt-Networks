@@ -20,8 +20,6 @@ on:
         type: boolean
         default: true
     secrets:
-      SMR_API_KEY:
-        required: true
       RELEASE_WEBHOOK_URL:
         required: true
 

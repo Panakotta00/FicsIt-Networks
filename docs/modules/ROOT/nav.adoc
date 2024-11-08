@@ -45,6 +45,8 @@
 *** xref:lua/guide/UsingReflection.adoc[7. Using Reflection]
 *** xref:lua/guide/InterComputerCommunication.adoc[8. Inter Computer Communication]
 ** xref:lua/BasicTypes.adoc[Basic Types]
+** xref:lua/Futures.adoc[Futures]
+** xref:lua/Events.adoc[Events]
 ** APIs
 // FINLuaDocumentationBegin *** //
 *** xref:lua/api/Component.adoc[Component]
@@ -176,6 +178,7 @@
 *** xref:reflection/classes/WidgetSign.adoc[WidgetSign]
 ** Structs
 *** xref:reflection/structs/Color.adoc[Color]
+*** xref:reflection/structs/EventFilter.adoc[EventFilter]
 *** xref:reflection/structs/Future.adoc[Future]
 *** xref:reflection/structs/GPUT1Buffer.adoc[GPUT1Buffer]
 *** xref:reflection/structs/GPUT2DrawCallBox.adoc[GPUT2DrawCallBox]
@@ -197,4 +200,3 @@
 *** xref:reflection/structs/Vector4.adoc[Vector4]
 // FINReflectionDocumentationEnd //
 * xref:ModIntegration.adoc[Mod Integration]
-* xref:credits.adoc[Credits]

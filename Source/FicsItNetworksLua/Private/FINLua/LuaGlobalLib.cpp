@@ -46,7 +46,7 @@ namespace FINLua {
 
 	int luaYield(lua_State* L) {
 		const int args = lua_gettop(L);
-		return luaFIN_yield(L, args+1, NULL, &luaYieldResume);
+		return luaFIN_yield(L, args, NULL, &luaYieldResume);
 	}
 
 	int luaResume(lua_State* L); // pre-declare
@@ -57,13 +57,13 @@ namespace FINLua {
 
 	int luaResume(lua_State* L) {
 		const int args = lua_gettop(L);
-		if (!lua_isthread(L, 1)) return luaL_argerror(L, 1, "is no thread");
+		luaL_checktype(L, 1, LUA_TTHREAD);
 		lua_State* thread = lua_tothread(L, 1);
 
 		if (!lua_checkstack(thread, args - 1)) {
 			lua_pushboolean(L, false);
 			lua_pushliteral(L, "too many arguments to resume");
-			return 1;
+			return 2;
 		}
 
 		// attach hook for out-of-time exception if thread got loaded from save and hook is not applied
@@ -76,12 +76,13 @@ namespace FINLua {
 		const int status = lua_resume(thread, L, args - 1, &argCount);
 
 		if (status == LUA_OK || status == LUA_YIELD) {
+			luaFINDebug_dumpStack(thread);
 			if (argCount == 0 && status == LUA_YIELD) {
 				// A hook yielded the thread
 				return lua_yieldk(L, 0, NULL, &luaResumeResume);
 			}
 			
-			if (status == LUA_YIELD) argCount = argCount-1; 
+			if (status == LUA_YIELD) argCount = argCount-1;
 
 			if (!lua_checkstack(L, argCount)) {
 				lua_pop(thread, argCount);
@@ -251,9 +252,9 @@ namespace FINLua {
 
 	[[deprecated]]
 	int luaFindClass_DEPRECATED(lua_State* L) {
-		luaFIN_warning(L, "Deprecated function call 'findClass', use 'classes' global library instead", false);
-		
 		const int args = lua_gettop(L);
+
+		luaFIN_warning(L, "Deprecated function call 'findClass', use 'classes' global library instead", false);
 
 		for (int i = 1; i <= args; ++i) {
 			const bool isT = lua_istable(L, i);
@@ -278,8 +279,11 @@ namespace FINLua {
 				if (Class) luaFIN_pushClass(L, Class);
 				else lua_pushnil(L);
 				if (isT) lua_seti(L, -2, ++j);
+				UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, FString::Printf(TEXT("Instead of 'findClass(\"%s\")' use 'classes.%s'"), *ClassName, *ClassName));
 			}
 		}
+
+
 		return UFINLuaProcessor::luaAPIReturn(L, args);
 	}
 	

@@ -304,6 +304,9 @@ void UFIRSourceStatic::FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFill
 					Parameters.Add(FIRAny());
 				}
 			}
+			for (; j < Params.Num(); ++j) {
+				Parameters.Add(Params[j]);
+			}
 			Func.Function(Ctx, Parameters);
 
 			TArray<FIRAny> OutValues;

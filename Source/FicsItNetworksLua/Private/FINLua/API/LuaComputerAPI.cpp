@@ -259,13 +259,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		log(message: string, verbosity: int)
+			 * @LuaFunction		log(verbosity: int, message: string)
 			 * @DisplayName		Log
 			 *
 			 * Allows you to print a log message to the computers log with the given log verbosity.
 			 *
-			 * @parameter	message		string	Message		The log message you want to print
 			 * @parameter	verbosity	int		Verbosity	The log-level/verbosity of the message you want to log. 0 = Debug, 1 = Info, 2 = Warning, 3 = Error & 4 = Fatal
+			 * @parameter	message		string	Message		The log message you want to print
 			 */)", log) {
 				LuaFunc();
 
@@ -319,7 +319,7 @@ namespace FINLua {
 			 */)", attentionPing) {
 				LuaFunc();
 
-				FVector Position = luaFIN_checkStruct<FVector>(L, 1, true);
+				FVector Position = *luaFIN_checkStruct<FVector>(L, 1, true);
 				TOptional<FString> Player;
 				if (lua_isstring(L, 2)) Player = luaFIN_checkFString(L, 2);
 				for (auto players = kernel->GetWorld()->GetPlayerControllerIterator(); players; players++) {
