@@ -7,40 +7,6 @@
 
 class UFIRClass;
 
-USTRUCT()
-struct FFIVSNodeStatement_Cast : public FFIVSNodeStatement {
-	GENERATED_BODY()
-
-	UPROPERTY(SaveGame)
-	FGuid ExecIn;
-	UPROPERTY(SaveGame)
-	FGuid SuccessOut;
-	UPROPERTY(SaveGame)
-	FGuid FailureOut;
-	UPROPERTY(SaveGame)
-	FGuid DataIn;
-	UPROPERTY(SaveGame)
-	FGuid DataOut;
-	UPROPERTY(SaveGame)
-	UFIRClass* ToClass;
-
-	FFIVSNodeStatement_Cast() = default;
-	FFIVSNodeStatement_Cast(FGuid Node, FGuid ExecIn, FGuid SuccessOut, FGuid FailureOut, FGuid DataIn, FGuid DataOut, UFIRClass* ToClass) :
-		FFIVSNodeStatement(Node),
-		ExecIn(ExecIn),
-		SuccessOut(SuccessOut),
-		FailureOut(FailureOut),
-		DataIn(DataIn),
-		DataOut(DataOut),
-		ToClass(ToClass) {}
-
-	// Begin FFIVSNodeStatement
-	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
-	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
-	virtual bool IsVolatile() const override { return true; }
-	// End FFIVSNodeStatement
-};
-
 UCLASS()
 class UFIVSNode_DownCast : public UFIVSScriptNode, public IFIVSCompileLuaInterface {
 	GENERATED_BODY()
@@ -68,20 +34,6 @@ public:
 	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
 	// End UFIVSNode
 	
-	// Begin UFIVSScriptNode
-	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
-		return FFIVSNodeStatement_Cast{
-			NodeId,
-			ExecInput ? ExecInput->PinId : FGuid(),
-			SuccessOutput ? SuccessOutput->PinId : FGuid(),
-			FailureOutput ? FailureOutput->PinId : FGuid(),
-			DataInput->PinId,
-			DataOutput->PinId,
-			ToClass,
-		};
-	}
-	// End UFIVSScriptNode
-
 	// Begin IFIVSCompileLuaInterface
 	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;
 	// End IFVISCompileLuaInterface

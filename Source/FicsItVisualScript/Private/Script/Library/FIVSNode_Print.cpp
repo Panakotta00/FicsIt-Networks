@@ -3,16 +3,6 @@
 #include "FILLogContainer.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
-void FFIVSNodeStatement_Print::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_EvaluatePin(MessageIn);
-}
-
-void FFIVSNodeStatement_Print::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	FString Message = Context.TryGetRValue(MessageIn)->GetString();
-	Context.GetKernelContext()->GetLog()->PushLogEntry(FIL_Verbosity_Info, Message);
-	Context.Push_ExecPin(ExecOut);
-}
-
 UFIVSNode_Print::UFIVSNode_Print() {
 	DisplayName = FText::FromString(TEXT("Print"));
 

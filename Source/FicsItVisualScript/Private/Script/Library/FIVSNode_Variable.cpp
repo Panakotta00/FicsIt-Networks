@@ -4,32 +4,6 @@
 #include "Kernel/FIVSRuntimeContext.h"
 #include "Kernel/FIVSValue.h"
 
-void FFIVSNodeStatement_DeclareVariable::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_EvaluatePin(InitialValue);
-}
-
-void FFIVSNodeStatement_DeclareVariable::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	const FFIRAnyValue* Value = Context.TryGetRValue(InitialValue);
-	Context.SetValue(VarOut, FFIVSValue::MakeLValue(VarOut, *Value));
-}
-
-void FFIVSNodeStatement_Assign::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_EvaluatePin(ValIn);
-	Context.Push_EvaluatePin(VarIn);
-}
-
-void FFIVSNodeStatement_Assign::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	FFIRAnyValue* variable = Context.TryGetLValue(VarIn);
-	if (!variable) return;
-
-	const FFIRAnyValue* value = Context.TryGetRValue(ValIn);
-	if (!value) return;
-
-	*variable = *value;
-
-	Context.Push_ExecPin(ExecOut);
-}
-
 void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (EFIRValueType DataType = FIR_NIL; DataType <= FIR_ANY; DataType = EFIRValueType(DataType + 1)) {
 		// Input FIN_ANY is excluded from conversion because it may fail or not and needs its own node
@@ -76,24 +50,6 @@ void UFIVSNode_Variable::DeserializeNodeProperties(const TSharedPtr<FJsonObject>
 	if (typeObj) {
 		FJsonObjectConverter::JsonObjectToUStruct(typeObj.ToSharedRef(), FFIVSPinDataType::StaticStruct(), &Type);
 		SetType(Type, bAssignment);
-	}
-}
-
-TFIRInstancedStruct<FFIVSNodeStatement> UFIVSNode_Variable::CreateNodeStatement() {
-	if (bAssignment) {
-		return FFIVSNodeStatement_Assign{
-			NodeId,
-			ExecInput->PinId,
-			ExecOutput->PinId,
-			VarPin->PinId,
-			DataInput->PinId,
-		};
-	} else {
-		return FFIVSNodeStatement_DeclareVariable{
-			NodeId,
-			VarPin->PinId,
-			DataInput->PinId,
-		};
 	}
 }
 

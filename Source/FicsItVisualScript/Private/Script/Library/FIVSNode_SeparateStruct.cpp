@@ -4,35 +4,6 @@
 #include "FIRStruct.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
-void FFIVSNodeStatement_SeparateStruct::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	TArray<FGuid> inputs;
-	InputPins.GenerateValueArray(inputs);
-	Context.Push_EvaluatePin(inputs);
-}
-
-void FFIVSNodeStatement_SeparateStruct::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	if (bBreak) {
-		const FFIRAnyValue* value = Context.TryGetRValue(InputPins[TEXT("Struct")]);
-		if (!value) return;
-		FFIRInstancedStruct StructObj = value->GetStruct();
-		FFIRExecutionContext Ctx(StructObj.GetData());
-		for (UFIRProperty* Prop : Struct->GetProperties()) {
-			if (!(Prop->GetPropertyFlags() & FIR_Prop_Attrib)) continue;
-			const FGuid* Pin = OutputPins.Find(Prop->GetInternalName());
-			if (Pin) Context.SetValue(*Pin, Prop->GetValue(Ctx));
-		}
-	} else {
-		FFIRInstancedStruct StructObj(Cast<UScriptStruct>(Struct->GetOuter()));
-		FFIRExecutionContext Ctx(StructObj.GetData());
-		for (UFIRProperty* Prop : Struct->GetProperties()) {
-			if (!(Prop->GetPropertyFlags() & FIR_Prop_Attrib)) continue;
-			const FGuid* Pin = InputPins.Find(Prop->GetInternalName());
-			if (Pin) Prop->SetValue(Ctx, *Context.TryGetRValue(*Pin));
-		}
-		Context.SetValue(OutputPins[TEXT("Struct")], StructObj);
-	}
-}
-
 void UFIVSNode_SeparateStruct::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TTuple<UScriptStruct*, UFIRStruct*> StructPair : FFicsItReflectionModule::Get().GetStructs()) {
 		FFIVSNodeAction BreakAction;

@@ -49,11 +49,3 @@ future.addTask(async(function()
 end))
 )"));
 }
-
-void FFIVSNodeStatement_OnTick::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	FFIVSNodeStatement::PreExecPin(Context, ExecPin);
-}
-
-void FFIVSNodeStatement_OnTick::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_ExecPin(ExecOut);
-}

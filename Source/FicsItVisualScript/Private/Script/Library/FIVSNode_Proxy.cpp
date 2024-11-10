@@ -5,27 +5,6 @@
 #include "NetworkController.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
-void FFIVSNodeStatement_Proxy::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_EvaluatePin(AddrIn);
-}
-
-void FFIVSNodeStatement_Proxy::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	FString Addr = Context.TryGetRValue(AddrIn)->GetString();
-	FGuid Guid;
-	if (!FGuid::Parse(Addr, Guid)) {
-		Context.GetKernelContext()->Crash(MakeShared<FFINKernelCrash>(TEXT("Address not valid!")));
-		return;
-	}
-	FFIRTrace Component = Context.GetKernelContext()->GetNetwork()->GetComponentByID(Guid);
-	if (!Component.IsValid()) {
-		Context.GetKernelContext()->Crash(MakeShared<FFINKernelCrash>(TEXT("Component not found!")));
-		return;
-	}
-	FFIRTrace instance = UFINNetworkUtils::RedirectIfPossible(Component);
-	Context.SetValue(CompOut, instance);
-	Context.Push_ExecPin(ExecOut);
-}
-
 UFIVSNode_Proxy::UFIVSNode_Proxy() {
 	DisplayName = FText::FromString(TEXT("Proxy"));
 

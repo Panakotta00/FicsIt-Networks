@@ -7,32 +7,6 @@
 #include "JsonObject.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
-void FFIVSNodeStatement_CallReflectionFunction::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_EvaluatePin(InputPins);
-}
-
-void FFIVSNodeStatement_CallReflectionFunction::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	TArray<FFIRAnyValue> InputValues;
-	FFIRExecutionContext ExecContext;
-	if (Function->GetFunctionFlags() & FIR_Func_ClassFunc) {
-		ExecContext = Context.TryGetRValue(Self)->GetClass();
-	} else {
-		ExecContext = (UFINNetworkUtils::RedirectIfPossible(Context.TryGetRValue(Self)->GetTrace()));
-	}
-
-	for (FGuid inputPin : InputPins) {
-		InputValues.Add(*Context.TryGetRValue(inputPin));
-	}
-
-	TArray<FFIRAnyValue> OutputValues = Function->Execute(ExecContext, InputValues);
-
-	for (int i = 0; i < FMath::Min(OutputValues.Num(), OutputPins.Num()); ++i) {
-		Context.SetValue(OutputPins[i], OutputValues[i]);
-	}
-
-	Context.Push_ExecPin(ExecOut);
-}
-
 UFIVSNode_CallReflectionFunction::UFIVSNode_CallReflectionFunction() {
 	ExecIn = CreateDefaultPin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
 	ExecOut = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("Run"), FText::FromString(TEXT("Run")));
@@ -75,18 +49,6 @@ void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const TSharedPt
 	if (Value->TryGetStringField(TEXT("function"), functionStr)) {
 		SetFunction(Cast<UFIRFunction>(FSoftObjectPath(functionStr).TryLoad()));
 	}
-}
-
-TFIRInstancedStruct<FFIVSNodeStatement> UFIVSNode_CallReflectionFunction::CreateNodeStatement() {
-	return FFIVSNodeStatement_CallReflectionFunction{
-		NodeId,
-		ExecIn->PinId,
-		ExecOut->PinId,
-		Self->PinId,
-		UFIVSUtils::GuidsFromPins(InputPins),
-		UFIVSUtils::GuidsFromPins(OutputPins),
-		Function,
-	};
 }
 
 void UFIVSNode_CallReflectionFunction::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {

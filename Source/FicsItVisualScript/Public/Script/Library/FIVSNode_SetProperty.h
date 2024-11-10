@@ -5,36 +5,6 @@
 #include "Script/FIVSScriptNode.h"
 #include "FIVSNode_SetProperty.generated.h"
 
-USTRUCT()
-struct FFIVSNodeStatement_SetProperty : public FFIVSNodeStatement {
-	GENERATED_BODY()
-
-	UPROPERTY(SaveGame)
-	FGuid ExecIn;
-	UPROPERTY(SaveGame)
-	FGuid ExecOut;
-	UPROPERTY(SaveGame)
-	FGuid InstanceIn;
-	UPROPERTY(SaveGame)
-	FGuid DataIn;
-	UPROPERTY(SaveGame)
-	UFIRProperty* Property = nullptr;
-
-	FFIVSNodeStatement_SetProperty() = default;
-	FFIVSNodeStatement_SetProperty(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid InstanceIn, FGuid DataIn, UFIRProperty* Property) :
-		FFIVSNodeStatement(Node),
-		ExecIn(ExecIn),
-		ExecOut(ExecOut),
-		InstanceIn(InstanceIn),
-		DataIn(DataIn),
-		Property(Property) {}
-
-	// Begin FFIVSNodeStatement
-	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
-	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
-	// End FFIVSNodeStatement
-};
-
 UCLASS()
 class UFIVSNode_SetProperty : public UFIVSScriptNode, public IFIVSCompileLuaInterface {
 	GENERATED_BODY()
@@ -57,19 +27,6 @@ public:
 	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const override;
 	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
 	// End UFIVSNodes
-
-	// Begin UFIVSGenericNode
-	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
-		return FFIVSNodeStatement_SetProperty{
-			NodeId,
-			ExecIn->PinId,
-			ExecOut->PinId,
-			InstanceIn->PinId,
-			DataIn->PinId,
-			Property,
-		};
-	}
-	// End UFIVSGenericNode
 
 	// Begin IFIVSCompileLuaInterface
 	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;

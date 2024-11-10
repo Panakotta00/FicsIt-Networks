@@ -4,29 +4,6 @@
 #include "JsonObject.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
-void FFIVSNodeStatement_Cast::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_EvaluatePin(DataIn);
-}
-
-void FFIVSNodeStatement_Cast::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	const FFIRAnyValue* value = Context.TryGetRValue(DataIn);
-	FFIRTrace Trace = value->GetTrace();
-	UObject* Obj = *Trace;
-	bool bSuccess = Obj && Obj->IsA(Cast<UClass>(ToClass->GetOuter()));
-	if (bSuccess) {
-		Context.SetValue(DataOut, *value);
-	}
-	if (FailureOut.IsValid()) {
-		if (bSuccess) {
-			Context.Push_ExecPin(SuccessOut);
-		} else {
-			Context.Push_ExecPin(FailureOut);
-		}
-	} else {
-		Context.SetValue(SuccessOut, bSuccess);
-	}
-}
-
 void UFIVSNode_DownCast::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	UFIRClass* FromClass = FFicsItReflectionModule::Get().FindClass(UObject::StaticClass());
 	for (TPair<UClass*, UFIRClass*> Class : FFicsItReflectionModule::Get().GetClasses()) {

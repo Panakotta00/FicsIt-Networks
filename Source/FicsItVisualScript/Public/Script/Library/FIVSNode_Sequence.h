@@ -6,28 +6,6 @@
 #include "Script/FIVSScriptNode.h"
 #include "FIVSNode_Sequence.generated.h"
 
-USTRUCT()
-struct FFIVSNodeStatement_Sequence : public FFIVSNodeStatement {
-	GENERATED_BODY()
-
-	UPROPERTY(SaveGame)
-	FGuid ExecIn;
-	UPROPERTY(SaveGame)
-	TArray<FGuid> ExecOut;
-
-	FFIVSNodeStatement_Sequence() = default;
-	FFIVSNodeStatement_Sequence(FGuid Node, FGuid ExecIn, const TArray<FGuid>& ExecOut) :
-		FFIVSNodeStatement(Node),
-		ExecIn(ExecIn),
-		ExecOut(ExecOut) {}
-
-	// Begin FFIVSNodeStatement
-	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
-	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
-	// End FFIVSNodeStatement
-};
-
-
 UCLASS()
 class UFIVSNode_Sequence : public UFIVSScriptNode, public IFIVSCompileLuaInterface {
 	GENERATED_BODY()
@@ -49,13 +27,6 @@ public:
 	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) override;
 	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const override;
 	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
-	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override {
-		return FFIVSNodeStatement_Sequence{
-			NodeId,
-			ExecIn->PinId,
-			UFIVSUtils::GuidsFromPins(ExecOut),
-		};
-	}
 	// End UFIVSScriptNode
 
 	// Begin IFIVSCompileLuaInterface

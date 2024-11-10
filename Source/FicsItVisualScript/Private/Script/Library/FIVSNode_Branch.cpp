@@ -2,19 +2,6 @@
 
 #include "Kernel/FIVSRuntimeContext.h"
 
-void FFIVSNodeStatement_Branch::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_EvaluatePin(Condition);
-}
-
-void FFIVSNodeStatement_Branch::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	bool bCondition = Context.TryGetRValue(Condition)->GetBool();
-	if (bCondition) {
-		Context.Push_ExecPin(ExecTrue);
-	} else {
-		Context.Push_ExecPin(ExecFalse);
-	}
-}
-
 UFIVSNode_Branch::UFIVSNode_Branch() {
 	DisplayName = FText::FromString(TEXT("Branch"));
 

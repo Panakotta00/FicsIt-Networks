@@ -5,24 +5,6 @@
 #include "JsonObject.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
-void FFIVSNodeStatement_GetProperty::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_EvaluatePin(DataIn);
-}
-
-void FFIVSNodeStatement_GetProperty::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	const FFIRAnyValue* Instance = Context.TryGetRValue(DataIn);
-
-	if (!Instance) return;
-
-	FFIRExecutionContext ExecContext;
-	if (Property->GetPropertyFlags() & FIR_Prop_ClassProp) ExecContext = Instance->GetClass();
-	else ExecContext = UFINNetworkUtils::RedirectIfPossible(Instance->GetTrace());
-
-	FFIRAnyValue Value = Property->GetValue(ExecContext);
-
-	Context.SetValue(DataOut, Value);
-}
-
 void UFIVSNode_GetProperty::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TPair<UClass*, UFIRClass*> Class : FFicsItReflectionModule::Get().GetClasses()) {
 		for (UFIRProperty* GetProperty : Class.Value->GetProperties(false)) {

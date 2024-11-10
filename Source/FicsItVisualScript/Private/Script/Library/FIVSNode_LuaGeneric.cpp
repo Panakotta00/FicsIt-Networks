@@ -91,6 +91,8 @@ void UFIVSNode_LuaGeneric::CompileNodeToLua(FFIVSLuaCompilerContext& Context) co
 }
 
 void UFIVSNode_LuaGeneric::SetFunction(UFunction* InFunction) {
+	if (!IsValid(InFunction)) return;
+
 	Function = InFunction;
 
 	TMap<FString, FFIVSNodeLuaGenericMeta>* FuncMeta = FunctionMetaData.Find(InFunction->GetOuterUClass());

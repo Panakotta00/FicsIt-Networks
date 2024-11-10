@@ -3,14 +3,6 @@
 #include "Editor/FIVSEdNodeViewer.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
-void FFIVSNodeStatement_Sequence::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	FFIVSNodeStatement::PreExecPin(Context, ExecPin);
-}
-
-void FFIVSNodeStatement_Sequence::ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
-	Context.Push_ExecPin(ExecOut);
-}
-
 UFIVSNode_Sequence::UFIVSNode_Sequence() {
 	DisplayName = FText::FromString(TEXT("Sequence"));
 	ExecIn = CreateDefaultPin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));

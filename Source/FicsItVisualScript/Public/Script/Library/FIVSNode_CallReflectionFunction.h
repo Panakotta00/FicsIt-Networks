@@ -5,39 +5,6 @@
 #include "Script/FIVSScriptNode.h"
 #include "FIVSNode_CallReflectionFunction.generated.h"
 
-USTRUCT()
-struct FFIVSNodeStatement_CallReflectionFunction : public FFIVSNodeStatement {
-	GENERATED_BODY()
-
-	UPROPERTY(SaveGame)
-	FGuid ExecIn;
-	UPROPERTY(SaveGame)
-	FGuid ExecOut;
-	UPROPERTY(SaveGame)
-	FGuid Self;
-	UPROPERTY(SaveGame)
-	TArray<FGuid> InputPins;
-	UPROPERTY(SaveGame)
-	TArray<FGuid> OutputPins;
-	UPROPERTY(SaveGame)
-	UFIRFunction* Function;
-
-	FFIVSNodeStatement_CallReflectionFunction() = default;
-	FFIVSNodeStatement_CallReflectionFunction(FGuid Node, FGuid ExecIn, FGuid ExecOut, FGuid Self, const TArray<FGuid>& InputPins, const TArray<FGuid>& OutputPins, UFIRFunction* Function) :
-		FFIVSNodeStatement(Node),
-		ExecIn(ExecIn),
-		ExecOut(ExecOut),
-		Self(Self),
-		InputPins(InputPins),
-		OutputPins(OutputPins),
-		Function(Function) {}
-
-	// Begin FFIVSNodeStatement
-	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
-	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const override;
-	// End FFIVSNodeStatement
-};
-
 UCLASS()
 class UFIVSNode_CallReflectionFunction : public UFIVSScriptNode, public IFIVSCompileLuaInterface {
 	GENERATED_BODY()
@@ -65,10 +32,6 @@ public:
 	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
 	// End UFIVSNodes
 	
-	// Begin UFIVSScriptNode
-	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() override;
-	// End UFIVSScriptNode
-
 	// Begin IFIVSCompileLuaInterface
 	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;
 	// End IFVISCompileLuaInterface
