@@ -2,6 +2,7 @@
 
 #include "FicsItReflection.h"
 #include "FINNetworkUtils.h"
+#include "JsonObject.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
 void FFIVSNodeStatement_SetProperty::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
@@ -54,6 +55,15 @@ void UFIVSNode_SetProperty::SerializeNodeProperties(const TSharedRef<FJsonObject
 
 void UFIVSNode_SetProperty::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
 	SetProperty(Cast<UFIRProperty>(FSoftObjectPath(Properties->GetStringField(TEXT("Property"))).TryLoad()));
+}
+
+void UFIVSNode_SetProperty::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+	Context.AddEntrance(ExecIn);
+	FString self = Context.GetRValueExpression(InstanceIn);
+	FString propName = Property->GetInternalName();
+	FString data = Context.GetRValueExpression(DataIn);
+	Context.AddPlain(FString::Printf(TEXT("%s.%s = %s\n"), *self, *propName, *data));
+	Context.ContinueCurrentSection(ExecOut);
 }
 
 void UFIVSNode_SetProperty::SetProperty(UFIRProperty* InProperty) {

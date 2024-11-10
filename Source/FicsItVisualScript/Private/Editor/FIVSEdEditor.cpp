@@ -5,7 +5,6 @@
 #include "Script/Library/FIVSMathLib.h"
 #include "Script/Library/FIVSNode_Branch.h"
 #include "Script/Library/FIVSNode_OnTick.h"
-#include "Script/Library/FIVSNode_UFunctionCall.h"
 #include "Widgets/Layout/SGridPanel.h"
 #include "Widgets/Layout/SSpacer.h"
 
@@ -28,9 +27,9 @@ TSharedRef<SWidget> UFIVSEdEditor::RebuildWidget() {
 		UFIVSNode_Branch* Branch = NewObject<UFIVSNode_Branch>(Graph);
 		Branch->Pos = FVector2D(800.0, 300.0);
 		Graph->AddNode(Branch);
-		UFIVSNode_UFunctionCall* OpAdd = NewObject<UFIVSNode_UFunctionCall>(Graph);
+		UFIVSNode_LuaGeneric* OpAdd = NewObject<UFIVSNode_LuaGeneric>(Graph);
 		OpAdd->Pos = FVector2D(500.0, 600.0);
-		OpAdd->SetFunction(UFIVSMathLib::StaticClass()->FindFunctionByName(TEXT("FIVSFunc_Float_Addition")), TEXT("+"));
+		OpAdd->SetFunction(UFIVSMathLib::StaticClass()->FindFunctionByName(TEXT("FIVSFunc_Float_Addition")));
 		Graph->AddNode(OpAdd);
 
 		OnTick->GetNodePins()[0]->AddConnection(Reroute->GetNodePins()[0]);

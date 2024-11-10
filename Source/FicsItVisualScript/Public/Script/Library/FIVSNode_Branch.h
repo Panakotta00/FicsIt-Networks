@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FIVSCompileLua.h"
 #include "Script/FIVSScriptNode.h"
 #include "FIVSNode_Branch.generated.h"
 
@@ -32,7 +33,7 @@ struct FFIVSNodeStatement_Branch : public FFIVSNodeStatement {
 };
 
 UCLASS()
-class UFIVSNode_Branch : public UFIVSScriptNode {
+class UFIVSNode_Branch : public UFIVSScriptNode, public IFIVSCompileLuaInterface {
 	GENERATED_BODY()
 private:
 	UPROPERTY()
@@ -62,4 +63,8 @@ public:
 		};
 	}
 	// End UFIVSScriptNode
+
+	// Begin IFIVSCompileLuaInterface
+	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;
+	// End IFVISCompileLuaInterface
 };

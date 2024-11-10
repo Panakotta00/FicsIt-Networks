@@ -1,6 +1,7 @@
 #include "Script/Library/FIVSNode_DownCast.h"
 
 #include "FIVSEdEditor.h"
+#include "JsonObject.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
 void FFIVSNodeStatement_Cast::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
@@ -53,7 +54,29 @@ void UFIVSNode_DownCast::SerializeNodeProperties(const TSharedRef<FJsonObject>& 
 void UFIVSNode_DownCast::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
 	if (!Properties) return;
 
-	SetClass(Cast<UFIRClass>(FSoftObjectPath(Properties->GetStringField(TEXT("ToClass"))).TryLoad()));
+	UFIRClass* Class = Cast<UFIRClass>(FSoftObjectPath(Properties->GetStringField(TEXT("ToClass"))).TryLoad());
+	if (Class) SetClass(Class);
+}
+
+void UFIVSNode_DownCast::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+	Context.AddEntrance(ExecInput);
+	FString input = Context.GetRValueExpression(DataInput);
+	Context.AddRValue(DataOutput, input);
+	FString className = ToClass->GetInternalName();
+	FString isAExpression = FString::Printf(TEXT("(%s and %s:isA(classes.%s))"), *input, *input, *className);
+	if (bPure) {
+		Context.AddRValue(SuccessOutput, isAExpression);
+	} else {
+		Context.AddPlain(FString::Printf(TEXT("if %s then\n"), *isAExpression));
+		Context.EnterNewSection();
+		Context.ContinueCurrentSection(SuccessOutput);
+		Context.LeaveSection();
+		Context.AddPlain(TEXT("else\n"));
+		Context.EnterNewSection();
+		Context.ContinueCurrentSection(FailureOutput);
+		Context.LeaveSection();
+;		Context.AddPlain(TEXT("end\n"));
+	}
 }
 
 void UFIVSNode_DownCast::SetClass(UFIRClass* InToClass) {

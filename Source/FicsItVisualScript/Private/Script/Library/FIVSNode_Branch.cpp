@@ -40,3 +40,28 @@ void UFIVSNode_Branch::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 		}
 	);
 }
+
+void UFIVSNode_Branch::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+	Context.AddEntrance(ExecIn);
+	FString varCondition = Context.GetRValueExpression(Condition);
+	bool bTrueBranch = IsValid(ExecTrue->FindConnected());
+	if (bTrueBranch) {
+		Context.AddPlain(FString::Printf(TEXT("if %s then\n"), *varCondition));
+		Context.EnterNewSection();
+		Context.ContinueCurrentSection(ExecTrue);
+		Context.LeaveSection();
+	}
+	if (ExecFalse->FindConnected()) {
+		if (bTrueBranch) {
+			Context.AddPlain(TEXT("else\n"));
+		} else {
+			Context.AddPlain(FString::Printf(TEXT("if not %s then\n"), *varCondition));
+		}
+		Context.EnterNewSection();
+		Context.ContinueCurrentSection(ExecFalse);
+		Context.LeaveSection();
+		Context.AddPlain(TEXT("end\n"));
+	} else if (bTrueBranch) {
+		Context.AddPlain(TEXT("end\n"));
+	}
+}

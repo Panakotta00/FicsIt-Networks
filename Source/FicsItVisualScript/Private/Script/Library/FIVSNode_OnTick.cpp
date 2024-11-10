@@ -22,6 +22,34 @@ void UFIVSNode_OnTick::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	);
 }
 
+void UFIVSNode_OnTick::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+	/*Context.AddPlain(TEXT(R"(
+future.addTask(function()
+	while true do
+		{EnterNewSection}
+		{0}
+		{LeaveNewSection}
+		coroutine.yield()
+	end
+end
+)"), ExecOut);*/
+
+	// Or without templating
+
+	Context.AddPlain(TEXT(R"(
+future.addTask(async(function()
+	while true do
+)"));
+	Context.EnterNewSection(2);
+	Context.ContinueCurrentSection(ExecOut);
+	Context.LeaveSection(-2);
+	Context.AddPlain(TEXT(R"(
+		coroutine.yield()
+	end
+end))
+)"));
+}
+
 void FFIVSNodeStatement_OnTick::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
 	FFIVSNodeStatement::PreExecPin(Context, ExecPin);
 }

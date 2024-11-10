@@ -50,6 +50,15 @@ void UFIVSProcessor::Reset() {
 				break;
 			}
 		}
+
+		FFIVSLuaCompilerContext luaContext;
+		for (UFIVSNode* node : graph->GetNodes()) {
+			if (!node->Implements<UFIVSCompileLuaInterface>()) continue;
+			if (!Cast<IFIVSCompileLuaInterface>(node)->IsLuaRootNode()) continue;
+			Cast<IFIVSCompileLuaInterface>(node)->CompileNodeToLua(luaContext);
+		}
+
+		UE_LOG(LogFicsItVisualScript, Warning, TEXT("Compiled Lua Code:\n%s"), *FString(luaContext.FinalizeCode()))
 	}
 
 	if (!TickScript) {

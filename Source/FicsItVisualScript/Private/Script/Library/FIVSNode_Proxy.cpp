@@ -51,3 +51,10 @@ void UFIVSNode_Proxy::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 		}
 	);
 }
+
+void UFIVSNode_Proxy::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+	Context.AddEntrance(ExecIn);
+	FString varAddress = Context.GetRValueExpression(AddrIn);
+	Context.AddOutputPinAsVariable(CompOut, FString::Printf(TEXT("component.proxy(%s)"), *varAddress));
+	Context.ContinueCurrentSection(ExecOut);
+}

@@ -97,6 +97,21 @@ TFIRInstancedStruct<FFIVSNodeStatement> UFIVSNode_Variable::CreateNodeStatement(
 	}
 }
 
+void UFIVSNode_Variable::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+	if (bAssignment) {
+		Context.AddEntrance(ExecInput);
+		TOptional<FString> lvalue = Context.GetLValueExpression(VarPin);
+		if (lvalue) {
+			FString rvalue = Context.GetRValueExpression(DataInput);
+			Context.AddPlain(FString::Printf(TEXT("%s = %s\n"), **lvalue, *rvalue));
+		}
+		Context.ContinueCurrentSection(ExecOutput);
+	} else {
+		FString data = Context.GetRValueExpression(DataInput);
+		Context.AddOutputPinAsVariable(VarPin, data);
+	}
+}
+
 void UFIVSNode_Variable::SetType(const FFIVSPinDataType& InType, bool bIsAssignment) {
 	Type = InType;
 	bAssignment = bIsAssignment;

@@ -4,6 +4,7 @@
 #include "FINNetworkUtils.h"
 #include "FIRClass.h"
 #include "FIVSUtils.h"
+#include "JsonObject.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
 void FFIVSNodeStatement_CallReflectionFunction::PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const {
@@ -88,6 +89,29 @@ TFIRInstancedStruct<FFIVSNodeStatement> UFIVSNode_CallReflectionFunction::Create
 	};
 }
 
+void UFIVSNode_CallReflectionFunction::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+	FString self = Context.GetRValueExpression(Self);
+	FString functionName = Function->GetInternalName();
+	TArray<FString> parameters;
+	for (UFIVSPin* pin : InputPins) {
+		parameters.Add(Context.GetRValueExpression(pin));
+	}
+	TArray<FString> returnValues;
+	for (UFIVSPin* pin : OutputPins) {
+		FString name = Context.FindAndClaimLocalName(pin->GetName());
+		returnValues.Add(name);
+		Context.AddLValue(pin, name);
+	}
+
+	if (returnValues.IsEmpty()) {
+		Context.AddPlain(FString::Printf(TEXT("%s:%s(%s)\n"), *self, *functionName, *FString::Join(parameters, TEXT(","))));
+	} else {
+		Context.AddPlain(FString::Printf(TEXT("local %s = %s:%s(%s)\n"), *FString::Join(returnValues, TEXT(",")), *self, *functionName, *FString::Join(parameters, TEXT(","))));
+	}
+
+	Context.ContinueCurrentSection(ExecOut);
+}
+
 void UFIVSNode_CallReflectionFunction::SetFunction(UFIRFunction* InFunction) {
 	if (InFunction == nullptr) return;
 
@@ -103,7 +127,7 @@ void UFIVSNode_CallReflectionFunction::SetFunction(UFIRFunction* InFunction) {
 	DeletePins(OutputPins);
 	DeletePins(InputPins);
 
-	Self = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Run"), FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIR_Func_ClassFunc ? FIR_CLASS : FIR_TRACE, Cast<UFIRClass>(Function->GetOuter())));
+	Self = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("self"), FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIR_Func_ClassFunc ? FIR_CLASS : FIR_TRACE, Cast<UFIRClass>(Function->GetOuter())));
 	for (UFIRProperty* Param : Function->GetParameters()) {
 		EFIRPropertyFlags Flags = Param->GetPropertyFlags();
 		if (Flags & FIR_Prop_Param) {
