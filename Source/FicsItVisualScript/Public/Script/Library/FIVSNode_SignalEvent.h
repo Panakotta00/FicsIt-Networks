@@ -1,15 +1,16 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FIVSCompileLua.h"
 #include "FIVSNode_Event.h"
-/*#include "FIVSNode_SignalEvent.generated.h"
+#include "FIVSNode_SignalEvent.generated.h"
 
 UCLASS()
-class UFIVSNode_SignalEvent : public UFIVSNode_Event {
+class UFIVSNode_SignalEvent : public UFIVSNode_Event, public IFIVSCompileLuaInterface {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	UFINSignal* Signal;
+	UFIRSignal* Signal;
 
 	UPROPERTY()
 	UFIVSPin* ExecOut;
@@ -21,26 +22,22 @@ class UFIVSNode_SignalEvent : public UFIVSNode_Event {
 	TArray<UFIVSPin*> Parameters;
 
 	UPROPERTY()
-	FFINNetworkTrace Sender;
+	FFIRTrace Sender;
 
 public:
 	UFIVSNode_SignalEvent();
 
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
-	virtual void SerializeNodeProperties(FFIVSNodeProperties& Properties) const override;
-	virtual void DeserializeNodeProperties(const FFIVSNodeProperties& Properties) override;
+	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const override;
+	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) override;
 	virtual TSharedPtr<SWidget> CreateDetailsWidget(TScriptInterface<IFIVSScriptContext_Interface> Context) override;
 	// End UFIVSNode
 
-	// Begin UFIVSScriptNode
-	virtual TArray<UFIVSPin*> PreExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
-	virtual TArray<UFIVSPin*> ExecPin(UFIVSPin* ExecPin, FFIVSRuntimeContext& Context) override;
-	// End UFIVSScriptNode
+	// Begin IFIVSCompileLuaInterface
+	virtual bool IsLuaRootNode() const override { return true; }
+	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;
+	// End IFVISCompileLuaInterface
 
-	void SetSignal(UFINSignal* InSignal);
-	UFINSignal* GetSignal() const { return Signal; }
-
-	FFINNetworkTrace GetSender() const { return Sender; }
+	void SetSignal(UFIRSignal* InSignal);
 };
-*/
