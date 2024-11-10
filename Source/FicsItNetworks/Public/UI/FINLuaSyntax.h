@@ -25,6 +25,7 @@ enum EFINLuaToken {
 	FIN_Lua_Token_Number,
 
 	FIN_Lua_Token_WhiteSpace,
+	FIN_Lua_Token_Tab,
 	FIN_Lua_Token_Identifier,
 
 	FIN_Lua_Token_String_Long,

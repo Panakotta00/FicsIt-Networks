@@ -112,6 +112,12 @@ void FFINLuaSyntaxHighlighter::SetText(const FString& SourceString, FTextLayout&
 						runs.Add(Run.ToSharedRef());
 						continue;
 					}
+					case FIN_Lua_Token_Tab: {
+						FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
+						FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Normal"));
+						runs.Add(FFINTabRun::Create(RunInfo, str, Style, textRange, 4));
+						continue;
+					}
 					default: break;
 				}
 			}
