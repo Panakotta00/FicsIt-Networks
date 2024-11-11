@@ -63,6 +63,12 @@ public:
 	bool GetFactoryConnectorBlocked(UFGFactoryConnectionComponent* InConnector);
 	int64 AddFactoryConnectorUnblockedTransfers(UFGFactoryConnectionComponent* InConnector, int64 InUnblockedTransfers);
 	int64 GetFactoryConnectorUnblockedTransfers(UFGFactoryConnectionComponent* InConnector);
+	bool IsAnyConnectorBlocked() const {
+		for (const auto& settings : FactoryConnectorSettings) {
+			if (settings.Value.bBlocked) return true;
+		}
+		return false;
+	}
 
 private:
 	void UpdateRailroadSwitch(FFIRRailroadSwitchForce& Force, UFGRailroadTrackConnectionComponent* Switch);
