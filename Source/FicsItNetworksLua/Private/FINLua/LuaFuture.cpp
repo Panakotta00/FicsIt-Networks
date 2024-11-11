@@ -10,6 +10,7 @@ namespace FINLua {
 	int lua_futureStruct(lua_State* L);
 	int lua_futureStructContinue(lua_State* L, int, lua_KContext);
 	int awaitContinue(lua_State* L, int, lua_KContext);
+	int luaFIN_futureRun(lua_State* L, int index);
 
 	LuaModule(R"(/**
 	 * @LuaModule		FutureModule
@@ -306,48 +307,19 @@ namespace FINLua {
 				return 0;
 			}
 
-			int luaRun(lua_State* L, int index) {
-				//lua_getglobal(L, "future");
-				int num = lua_gettop(L);
-				if (lua_getfield(L, index, "tasks") != LUA_TTABLE) {
-				//	lua_remove(L, -1);
-					return luaL_typeerror(L, -1, "table");
-				}
-				//lua_remove(L, -2);
-				int len = luaL_len(L, -1);
-				int shift = 0;
-				for (int i = 1; i <= len; ++i) {
-					lua_geti(L, -1, i);
-					lua_State* thread;
-					int status = Future::pollInternal(L, -1, thread);
-					lua_pop(L, 1);
-					if (status == LUA_OK) {
-						shift += 1;
-					} else if (shift > 0) {
-						lua_geti(L, -1, i);
-						lua_seti(L, -2, i-shift);
-					}
-					if (len - i < shift) {
-						lua_pushnil(L);
-						lua_seti(L, -2, i);
-					}
-				}
-				lua_pop(L, 1);
-				return len-shift;
-			}
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		run()
 			 * @DisplayName		Run
 			 *
 			 * Runs the default task scheduler once.
 			 */)", run) {
-				int numTasksLeft = luaRun(L, lua_upvalueindex(2));
+				int numTasksLeft = luaFIN_futureRun(L, lua_upvalueindex(2));
 				lua_pushinteger(L, numTasksLeft);
 				return 1;
 			}
 
 			int luaLoopContinue(lua_State* L, int, lua_KContext) {
-				int numTasksLeft = luaRun(L, -1);
+				int numTasksLeft = luaFIN_futureRun(L, -1);
 				if (numTasksLeft > 0) {
 					return lua_yieldk(L, 0, NULL, &luaLoopContinue);
 				}
@@ -525,5 +497,35 @@ namespace FINLua {
 		lua_pushvalue(L, index);
 		lua_seti(L, -2, len+1);
 		lua_pop(L, 2);
+	}
+
+	int luaFIN_futureRun(lua_State* L, int index) {
+		//lua_getglobal(L, "future");
+		int num = lua_gettop(L);
+		if (lua_getfield(L, index, "tasks") != LUA_TTABLE) {
+			//	lua_remove(L, -1);
+			return luaL_typeerror(L, -1, "table");
+		}
+		//lua_remove(L, -2);
+		int len = luaL_len(L, -1);
+		int shift = 0;
+		for (int i = 1; i <= len; ++i) {
+			lua_geti(L, -1, i);
+			lua_State* thread;
+			int status = FutureModule::Future::pollInternal(L, -1, thread);
+			lua_pop(L, 1);
+			if (status == LUA_OK) {
+				shift += 1;
+			} else if (shift > 0) {
+				lua_geti(L, -1, i);
+				lua_seti(L, -2, i-shift);
+			}
+			if (len - i < shift) {
+				lua_pushnil(L);
+				lua_seti(L, -2, i);
+			}
+		}
+		lua_pop(L, 1);
+		return len-shift;
 	}
 }

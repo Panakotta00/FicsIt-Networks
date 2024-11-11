@@ -469,6 +469,33 @@ namespace FINLua {
 				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
 				return 1;
 			}
+			int luaLoopContinue(lua_State* L, int, lua_KContext) {
+				while (true) {
+					UFINLuaProcessor* luaProc = UFINLuaProcessor::luaGetProcessor(L);
+					check(luaProc);
+					UFINKernelNetworkController* net = luaProc->GetKernel()->GetNetwork();
+					int bSignal = net && net->GetSignalCount() > 0;
+					if (bSignal) {
+						FFIRTrace sender;
+						FFINSignalData signal = net->PopSignal(sender);
+						luaFIN_handleEvent(L, sender, signal);
+					}
+					luaFIN_futureRun(L, 1);
+					if (!bSignal) {
+						return lua_yieldk(L, 0, 0, luaLoopContinue);
+					}
+				}
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		loop
+			 * @DisplayName		Loop
+			 *
+			 * Runs an infinite loop or `future.run()`, `event.pull(0)` and `coroutine.yield()`.
+			 */)", loop) {
+				lua_pop(L, lua_gettop(L));
+				lua_getglobal(L, "future");
+				return luaLoopContinue(L, 0, 0);
+			}
 		}
 
 		LuaModulePostSetup() {
@@ -510,6 +537,10 @@ namespace FINLua {
 
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "EventQueuePullContinue");
+			lua_pop(L, 1);
+
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaLoopContinue)));
+			luaFIN_persistValue(L, -1, "LoopContinue");
 			lua_pop(L, 1);
 		}
 	}
