@@ -46,6 +46,9 @@ Returns all signal senders this computer is listening to.
 !===
 ====
 
+=== __event.__**loop** ()
+Runs an infinite loop or `future.run()`, `event.pull(0)` and `coroutine.yield()`.
+
 === __event.__**pull** ([timeout: number]) -> (string|nil, xref:/reflection/classes/Object.adoc[Object], ...)
 Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached. +
 Returns directly if there is already a signal in the queue (the tick doesn￢ﾀﾙt get yielded).
