@@ -13,12 +13,6 @@ AFINModuleSystemHolo::AFINModuleSystemHolo() {
 	InformationComponent->SetupAttachment(RootComponent);
 	InformationComponent->SetMobility(EComponentMobility::Movable);
 	InformationComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
-	if(EnableInformationDisplay) {
-		InformationComponent->SetVisibility(true);
-	}else{
-		InformationComponent->SetVisibility(false);
-	}
 }
 
 AFINModuleSystemHolo::~AFINModuleSystemHolo() {}
@@ -215,5 +209,10 @@ void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
 		ActorLocation += CompassSurfaceOffset;
 
 		CompassRose->SetRelativeLocation(ActorLocation);
+	}
+	if(EnableInformationDisplay) {
+		InformationComponent->SetVisibility(true);
+	}else{
+		InformationComponent->SetVisibility(false);
 	}
 }
