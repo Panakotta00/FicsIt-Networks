@@ -35,6 +35,8 @@ public:
 	virtual void CheckValidPlacement() override;
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void Destroyed() override;
+	virtual void OnInvalidHitResult() override;
 	// End AFGHologram
 
 	UPROPERTY(EditAnywhere)
