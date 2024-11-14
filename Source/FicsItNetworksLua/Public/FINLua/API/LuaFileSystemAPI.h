@@ -26,4 +26,7 @@ namespace FINLua {
 	 * @param path	- the path to the file opened by the filestream (needed for persistency)
 	 */
 	void luaFIN_pushFile(lua_State* L, TSharedPtr<CodersFileSystem::FileStream> file, const std::string& path);
+
+	void luaFIN_setFileSystem(lua_State* L, CodersFileSystem::FileSystemRoot* FileSystem);
+	CodersFileSystem::FileSystemRoot* luaFIN_getFileSystem(lua_State* L);
 }

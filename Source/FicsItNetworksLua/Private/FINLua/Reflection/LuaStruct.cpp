@@ -2,6 +2,7 @@
 
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "FINLuaReferenceCollector.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaFuture.h"
 #include "FINLua/LuaPersistence.h"
@@ -13,35 +14,14 @@
 	const int _persist_upermTableIdx
 
 namespace FINLua {
-	FLuaStruct::FLuaStruct(UFIRStruct* Type, const FFIRInstancedStruct& Struct, UFINKernelSystem* Kernel) : Type(Type), Struct(MakeShared<FFIRInstancedStruct>(Struct)), Kernel(Kernel) {
-		Kernel->AddReferencer(this, &CollectReferences);
+	FLuaStruct::FLuaStruct(UFIRStruct* Type, const FFIRInstancedStruct& Struct, FFINLuaReferenceCollector* ReferenceCollector) : FFINLuaReferenceCollected(ReferenceCollector), Type(Type), Struct(MakeShared<FFIRInstancedStruct>(Struct)) {}
+
+	UE_DISABLE_OPTIMIZATION_SHIP
+	void FLuaStruct::CollectReferences(FReferenceCollector& Collector) {
+		Collector.AddReferencedObject(Type);
+		Collector.AddPropertyReferencesWithStructARO(FFIRInstancedStruct::StaticStruct(), &Struct.Get());
 	}
 
-	FLuaStruct::FLuaStruct(const FLuaStruct& Other) : Type(Other.Type), Struct(Other.Struct), Kernel(Other.Kernel) {
-		Kernel->AddReferencer(this, &CollectReferences);
-	}
-
-	FLuaStruct& FLuaStruct::operator=(const FLuaStruct& Other) {
-		if (Kernel) Kernel->RemoveReferencer(this);
-		Type = Other.Type;
-		Struct = Other.Struct;
-		Kernel = Other.Kernel;
-		if (Kernel) Kernel->AddReferencer(this, &CollectReferences);
-		return *this;
-	}
-
-	FLuaStruct::~FLuaStruct() {
-		Kernel->RemoveReferencer(this);
-	}
-
-	void FLuaStruct::CollectReferences(void* Obj, FReferenceCollector& Collector) {
-		FLuaStruct* Self = static_cast<FLuaStruct*>(Obj);
-		Collector.AddReferencedObject(Self->Type);
-		Collector.AddReferencedObject(Self->Kernel );
-		Collector.AddPropertyReferencesWithStructARO(FFIRInstancedStruct::StaticStruct(), &*Self->Struct);
-	}
-
-UE_DISABLE_OPTIMIZATION_SHIP
 	/**
 	 * Tries to find a UFIRFunction* Operator for the given data.
 	 * If none is found returns nullptr.
@@ -310,11 +290,11 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				const TSharedPtr<FIRStruct> Struct2 = luaFIN_toStruct(L, 2, nullptr, false);
 				if (!Struct1->GetData() || !Struct2->GetData() || Struct1->GetStruct() != Struct2->GetStruct()) {
 					lua_pushboolean(L, false);
-					return UFINLuaProcessor::luaAPIReturn(L, 1);
+					return 1;
 				}
 
 				lua_pushboolean(L, Struct1->GetStruct()->GetStructTypeHash(Struct1->GetData()) < Struct2->GetStruct()->GetStructTypeHash(Struct2->GetData()));
-				return UFINLuaProcessor::luaAPIReturn(L, 1);
+				return 1;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -328,11 +308,11 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				const TSharedPtr<FIRStruct> Struct2 = luaFIN_toStruct(L, 2, nullptr, false);
 				if (!Struct1->GetData() || !Struct2->GetData() || Struct1->GetStruct() != Struct2->GetStruct()) {
 					lua_pushboolean(L, false);
-					return UFINLuaProcessor::luaAPIReturn(L, 1);
+					return 1;
 				}
 
 				lua_pushboolean(L, Struct1->GetStruct()->GetStructTypeHash(Struct1->GetData()) <= Struct2->GetStruct()->GetStructTypeHash(Struct2->GetData()));
-				return UFINLuaProcessor::luaAPIReturn(L, 1);
+				return 1;
 			}
 
 			int luaStructIndexOp(lua_State* L) {
@@ -408,8 +388,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			}
 
 			int luaStructUnpersist(lua_State* L) {
-				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+				FFINLuaRuntimePersistenceState& Storage = luaFIN_getPersistence(L);
 
 				const FFIRInstancedStruct& Struct = *Storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1)));
 
@@ -431,8 +410,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			 */)", __persist) {
 				TSharedPtr<FIRStruct> Struct = luaFIN_checkStruct(L, 1, nullptr, false);
 
-				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+				FFINLuaRuntimePersistenceState& Storage = luaFIN_getPersistence(L);
 				lua_pushinteger(L, Storage.Add(Struct));
 				int i = 0;
 				while (true) {
@@ -449,7 +427,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 
 				return 1;
 			}
-
+UE_DISABLE_OPTIMIZATION_SHIP
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		__gc
 			 * @DisplayName		Garbage Collect
@@ -458,6 +436,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				Struct->~FLuaStruct();
 				return 0;
 			}
+UE_ENABLE_OPTIMIZATION_SHIP
 		}
 
 		LuaModuleMetatable(R"(/**
@@ -572,7 +551,8 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		UFIRStruct* Type = FFicsItReflectionModule::Get().FindStruct(Struct.GetStruct());
 
 		FLuaStruct* LuaStruct = static_cast<FLuaStruct*>(lua_newuserdatauv(L, sizeof(FLuaStruct), numUserValues));
-		new (LuaStruct) FLuaStruct(Type, Struct, UFINLuaProcessor::luaGetProcessor(L)->GetKernel());
+
+		new (LuaStruct) FLuaStruct(Type, Struct, luaFIN_getReferenceCollector(L));
 		luaL_setmetatable(L, ReflectionSystemStruct::Struct::_Name);
 
 		return true;

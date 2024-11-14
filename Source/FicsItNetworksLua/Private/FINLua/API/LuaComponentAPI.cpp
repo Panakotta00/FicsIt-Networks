@@ -1,4 +1,9 @@
-#include "FINLuaProcessor.h"
+#include "FINLua/API/LuaComponentAPI.h"
+
+#include <string>
+#include <vector>
+
+#include "FINLuaThreadedRuntime.h"
 #include "FINNetworkUtils.h"
 #include "NetworkController.h"
 #include "FINLua/FINLuaModule.h"
@@ -7,7 +12,9 @@
 
 namespace FINLua {
 	LuaModule(R"(/**
-	 * @LuaModule	Component	Component Module
+	 * @LuaModule		ComponentModule
+	 * @DisplayName		Component Module
+	 * @Dependency		FullReflectionModule
 	 *
 	 * The Component Module contains the component Library.
 	 */)", ComponentModule) {
@@ -33,7 +40,7 @@ namespace FINLua {
 			 * @return		...		Object | Object[] | nil		Object[s]	The Network-Component[-Array]s associated with the UUIDs, nil if the UUID was not found.
 			 */)", proxy) {
 				// ReSharper disable once CppDeclaratorNeverUsed
-				FLuaSyncCall SyncCall(L);
+				FLuaSync SyncCall(L);
 				const int args = lua_gettop(L);
 
 				for (int i = 1; i <= args; ++i) {
@@ -55,15 +62,15 @@ namespace FINLua {
 					}
 					int j = 0;
 					for (const auto& id : ids) {
-						UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
+						IFINLuaComponentNetworkAccessInterface* network = luaFIN_getComponentNetwork(L);
 						FGuid UUID;
 						FGuid::Parse(FString(id.c_str()), UUID);
-						FFIRTrace comp = Processor->GetKernel()->GetNetwork()->GetComponentByID(UUID);
+						FFIRTrace comp = network->GetComponentByID(UUID);
 						luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(comp));
 						if (isT) lua_seti(L, -2, ++j);
 					}
 				}
-				return UFINLuaProcessor::luaAPIReturn(L, args);
+				return args;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -77,18 +84,19 @@ namespace FINLua {
 			 * @return		...		string[]				UUIDs	List of network component UUIDs which pass the given nick query or are of the given type.
 			 */)", findComponent) {
 				// ReSharper disable once CppDeclaratorNeverUsed
-				FLuaSyncCall SyncCall(L);
+				FLuaSync SyncCall(L);
 				const int args = lua_gettop(L);
 
 				for (int i = 1; i <= args; ++i) {
 					lua_newtable(L);
 					TSet<FFIRTrace> comps;
+					IFINLuaComponentNetworkAccessInterface* network = luaFIN_getComponentNetwork(L);
 					if (lua_isstring(L, i)) {
 						std::string nick = lua_tostring(L, i);
-						comps = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->GetComponentByNick(nick.c_str());
+						comps = network->GetComponentByNick(nick.c_str());
 					} else {
 						UClass* Class = luaFIN_toUClass(L, i, nullptr);
-						comps = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->GetComponentByClass(Class, true);
+						comps = network->GetComponentByClass(Class, true);
 					}
 					int j = 0;
 					for (const FFIRTrace& comp : comps) {
@@ -101,8 +109,20 @@ namespace FINLua {
 						}
 					}
 				}
-				return UFINLuaProcessor::luaAPIReturn(L, args);
+				return args;
 			}
 		}
+	}
+
+	void luaFIN_setComponentNetwork(lua_State* L, IFINLuaComponentNetworkAccessInterface* ComponentNetwork) {
+		FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+		runtime.GlobalPointers.Add(TEXT("component-network"), ComponentNetwork);
+	}
+
+	IFINLuaComponentNetworkAccessInterface* luaFIN_getComponentNetwork(lua_State* L) {
+		FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+		IFINLuaComponentNetworkAccessInterface** value = reinterpret_cast<IFINLuaComponentNetworkAccessInterface**>(runtime.GlobalPointers.Find(TEXT("component-network")));
+		fgcheck(value != nullptr);
+		return *value;
 	}
 }

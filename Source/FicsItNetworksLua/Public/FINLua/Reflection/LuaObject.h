@@ -1,23 +1,23 @@
 #pragma once
 
 #include "FicsItReflection.h"
+#include "FINLuaReferenceCollector.h"
 #include "FINLua/LuaUtil.h"
 #include "Reflection/FIRClass.h"
 
-class UFINKernelSystem;
+struct FFINLuaReferenceCollector;
 
 namespace FINLua {
 	/**
 	 * Structure used in the userdata representing a instance.
 	 */
-	struct FLuaObject {
+	struct FLuaObject : FFINLuaReferenceCollected {
 		UFIRClass* Type;
 		FFIRTrace Object;
-		UFINKernelSystem* Kernel;
-		FLuaObject(const FFIRTrace& Trace, UFINKernelSystem* Kernel);
-		FLuaObject(const FLuaObject& Other);
-		~FLuaObject();
-		static void CollectReferences(void* Obj, FReferenceCollector& Collector);
+
+		FLuaObject(const FFIRTrace& Trace, FFINLuaReferenceCollector* ReferenceCollector);
+
+		virtual void CollectReferences(FReferenceCollector& Collector) override;
 	};
 
 	/**

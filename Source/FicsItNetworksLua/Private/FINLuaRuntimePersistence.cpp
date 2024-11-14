@@ -1,10 +1,11 @@
-#include "FINLuaProcessorStateStorage.h"
+#include "FINLuaRuntimePersistence.h"
 
 #include "FicsItNetworksLuaModule.h"
 #include "FINUtils.h"
+#include "Engine/World.h"
 #include "Util/SemVersion.h"
 
-bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
+bool FFINLuaRuntimePersistenceState::Serialize(FStructuredArchive::FSlot Slot) {
 	if (!Slot.GetUnderlyingArchive().IsSaveGame()) return false;
 	FStructuredArchive::FRecord Record = Slot.EnterRecord();
 	Record.EnterField(SA_FIELD_NAME(TEXT("Traces"))).GetUnderlyingArchive() << Traces;
@@ -32,27 +33,27 @@ bool FFINLuaProcessorStateStorage::Serialize(FStructuredArchive::FSlot Slot) {
 	return true;
 }
 
-int32 FFINLuaProcessorStateStorage::Add(const FFIRTrace& Trace) {
+int32 FFINLuaRuntimePersistenceState::Add(const FFIRTrace& Trace) {
 	return Traces.AddUnique(Trace);
 }
 
-int32 FFINLuaProcessorStateStorage::Add(UObject* Ref) {
+int32 FFINLuaRuntimePersistenceState::Add(UObject* Ref) {
 	return References.AddUnique(Ref);
 }
 
-int32 FFINLuaProcessorStateStorage::Add(TSharedPtr<FFIRInstancedStruct> Struct) {
+int32 FFINLuaRuntimePersistenceState::Add(TSharedPtr<FFIRInstancedStruct> Struct) {
 	return Structs.Add(Struct);
 }
 
-FFIRTrace FFINLuaProcessorStateStorage::GetTrace(int32 id) {
+FFIRTrace FFINLuaRuntimePersistenceState::GetTrace(int32 id) {
 	return Traces[id];
 }
 
-UObject* FFINLuaProcessorStateStorage::GetRef(int32 id) {
+UObject* FFINLuaRuntimePersistenceState::GetRef(int32 id) {
 	return References[id];
 }
 
-TSharedPtr<FFIRInstancedStruct> FFINLuaProcessorStateStorage::GetStruct(int32 id) {
+TSharedPtr<FFIRInstancedStruct> FFINLuaRuntimePersistenceState::GetStruct(int32 id) {
 	if (id >= Structs.Num()) {
 		UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Unable to find struct in lua processor state storage with id %i"), id);
 		return MakeShared<FFIRInstancedStruct>();
@@ -60,7 +61,7 @@ TSharedPtr<FFIRInstancedStruct> FFINLuaProcessorStateStorage::GetStruct(int32 id
 	return Structs[id];
 }
 
-void FFINLuaProcessorStateStorage::Clear() {
+void FFINLuaRuntimePersistenceState::Clear() {
 	Traces.Empty();
 	References.Empty();
 	Structs.Empty();

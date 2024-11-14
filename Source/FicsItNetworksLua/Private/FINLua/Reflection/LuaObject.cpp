@@ -4,27 +4,20 @@
 #include "FicsItReflection.h"
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
+#include "FINLuaReferenceCollector.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "Logging/StructuredLog.h"
 #include "tracy/Tracy.hpp"
+#include "FINLuaRuntime.h"
 
 namespace FINLua {
-	FLuaObject::FLuaObject(const FFIRTrace& Object, UFINKernelSystem* Kernel) : Object(Object), Kernel(Kernel) {
+	FLuaObject::FLuaObject(const FFIRTrace& Object, FFINLuaReferenceCollector* ReferenceCollector) : FFINLuaReferenceCollected(ReferenceCollector), Object(Object) {
 		Type = FFicsItReflectionModule::Get().FindClass(Object.GetUnderlyingPtr()->GetClass());
-		Kernel->AddReferencer(this, &CollectReferences);
 	}
 
-	FLuaObject::FLuaObject(const FLuaObject& Other) : Type(Other.Type), Object(Other.Object), Kernel(Other.Kernel) {
-		Kernel->AddReferencer(this, &CollectReferences);
-	}
-
-	FLuaObject::~FLuaObject() {
-		Kernel->RemoveReferencer(this);
-	}
-
-	void FLuaObject::CollectReferences(void* Obj, FReferenceCollector& Collector) {
-		static_cast<FLuaObject*>(Obj)->Object.AddStructReferencedObjects(Collector);
+	void FLuaObject::CollectReferences(FReferenceCollector& Collector) {
+		Object.AddStructReferencedObjects(Collector);
 	}
 
 	LuaModule(R"(/**
@@ -47,11 +40,11 @@ namespace FINLua {
 				FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
 				if (!LuaObject1 || !LuaObject2) {
 					lua_pushboolean(L, false);
-					return UFINLuaProcessor::luaAPIReturn(L, 1);
+					return 1;
 				}
 
 				lua_pushboolean(L, GetTypeHash(LuaObject1->Object) == GetTypeHash(LuaObject2->Object));
-				return UFINLuaProcessor::luaAPIReturn(L, 1);
+				return 1;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -62,11 +55,11 @@ namespace FINLua {
 				FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
 				if (!LuaObject1 || !LuaObject2) {
 					lua_pushboolean(L, false);
-					return UFINLuaProcessor::luaAPIReturn(L, 1);
+					return 1;
 				}
 
 				lua_pushboolean(L, GetTypeHash(LuaObject1->Object) < GetTypeHash(LuaObject2->Object));
-				return UFINLuaProcessor::luaAPIReturn(L, 1);
+				return 1;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -77,11 +70,11 @@ namespace FINLua {
 				FLuaObject* LuaObject2 = luaFIN_toLuaObject(L, 2, nullptr);
 				if (!LuaObject1 || !LuaObject2) {
 					lua_pushboolean(L, false);
-					return UFINLuaProcessor::luaAPIReturn(L, 1);
+					return 1;
 				}
 
 				lua_pushboolean(L, GetTypeHash(LuaObject1->Object) <= GetTypeHash(LuaObject2->Object));
-				return UFINLuaProcessor::luaAPIReturn(L, 1);
+				return 1;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -127,8 +120,7 @@ namespace FINLua {
 			}
 
 			int luaObjectUnpersist(lua_State* L) {
-				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+				FFINLuaRuntimePersistenceState& Storage = luaFIN_getPersistence(L);
 				FFIRTrace Object = Storage.GetTrace(luaL_checkinteger(L, lua_upvalueindex(1)));
 
 				luaFIN_pushObject(L, Object);
@@ -142,8 +134,7 @@ namespace FINLua {
 			 */)", __persist) {
 				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
 
-				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+				FFINLuaRuntimePersistenceState& Storage = luaFIN_getPersistence(L);
 				lua_pushinteger(L, Storage.Add(LuaObject->Object));
 
 				lua_pushcclosure(L, &luaObjectUnpersist, 1);
@@ -178,7 +169,7 @@ namespace FINLua {
 			return;
 		}
 		FLuaObject* LuaObject = static_cast<FLuaObject*>(lua_newuserdata(L, sizeof(FLuaObject)));
-		new(LuaObject) FLuaObject(Object, UFINLuaProcessor::luaGetProcessor(L)->GetKernel());
+		new(LuaObject) FLuaObject(Object, luaFIN_getReferenceCollector(L));
 		luaL_setmetatable(L, ReflectionSystemObject::Object::_Name);
 		UE_LOGFMT(LogFicsItNetworksLuaReflection, VeryVerbose, "[{Runtime}] Pushed Object '{Object}' to Lua-Stack ({Index})", L, Object->GetFullName(), lua_gettop(L));
 	}

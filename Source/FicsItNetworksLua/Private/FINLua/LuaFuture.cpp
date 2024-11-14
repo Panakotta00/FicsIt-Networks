@@ -2,7 +2,7 @@
 
 #include "FicsItNetworksLuaModule.h"
 #include "FINLuaProcessor.h"
-#include "LuaExtraSpace.h"
+#include "LuaKernelAPI.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 
@@ -15,6 +15,8 @@ namespace FINLua {
 	LuaModule(R"(/**
 	 * @LuaModule		FutureModule
 	 * @DisplayName		Future Module
+	 *
+	 * @Dependency		KernelModule
 	 *
 	 * This Module provides the Future type and all its necessary functionallity.
 	 */)", FutureModule) {
@@ -32,12 +34,9 @@ namespace FINLua {
 			}
 
 			int unpersist(lua_State* L) {
-				UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
+				FFINLuaRuntimePersistenceState& persistence = luaFIN_getPersistence(L);
 
-				// get persist storage
-				FFINLuaProcessorStateStorage& storage = processor->StateStorage;
-
-				luaFIN_pushFuture(L, *storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1))));
+				luaFIN_pushFuture(L, *persistence.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1))));
 
 				return 1;
 			}
@@ -47,8 +46,7 @@ namespace FINLua {
 			 */)", __persist) {
 				FLuaFuture future = luaFIN_checkFutureStruct(L, 1);
 
-				UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
-				FFINLuaProcessorStateStorage& storage = processor->StateStorage;
+				FFINLuaRuntimePersistenceState& storage = luaFIN_getPersistence(L);
 				lua_pushinteger(L, storage.Add(future));
 				lua_pushcclosure(L, unpersist, 1);
 
@@ -253,14 +251,14 @@ namespace FINLua {
 			int luaSleepContinue(lua_State* L, int, lua_KContext) {
 				double timeout = lua_tonumber(L, 1);
 				double start = lua_tonumber(L, 2);
-				double millis = luaFIN_getExtraSpace(L).Processor->GetKernel()->GetTimeSinceStart();
+				double millis = luaFIN_getKernel(L)->GetTimeSinceStart();
 				if (millis - start < timeout*1000) {
 					return lua_yieldk(L, 0, NULL, luaSleepContinue);
 				}
 				return 0;
 			}
 			int luaSleep(lua_State* L) {
-				double millis = luaFIN_getExtraSpace(L).Processor->GetKernel()->GetTimeSinceStart();
+				double millis = luaFIN_getKernel(L)->GetTimeSinceStart();
 				lua_pushnumber(L, millis);
 				return luaSleepContinue(L, 0, NULL);
 			}
@@ -398,8 +396,6 @@ namespace FINLua {
 
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(future::luaLoopContinue)));
 			PersistValue("LoopContinue");
-
-
 		}
 	}
 
@@ -408,7 +404,7 @@ namespace FINLua {
 		new (future) FLuaFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(Future));
 		luaL_setmetatable(L, FutureModule::FutureStruct::_Name);
 		if (!(**future)->IsDone()) {
-			UFINKernelSystem* kernel = UFINLuaProcessor::luaGetProcessor(L)->GetKernel();
+			UFINKernelSystem* kernel = luaFIN_getKernel(L);
 			kernel->PushFuture(*future);
 		}
 	}

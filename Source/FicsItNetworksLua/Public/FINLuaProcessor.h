@@ -2,19 +2,19 @@
 
 #include "CoreMinimal.h"
 #include "AsyncWork.h"
-#include "FINLuaProcessorStateStorage.h"
+#include "FINLuaReferenceCollector.h"
+#include "FINLuaRuntime.h"
+#include "FINLuaRuntimePersistence.h"
+#include "FINLuaThreadedRuntime.h"
 #include "Future.h"
+#include "LuaComponentAPI.h"
+#include "LuaEventAPI.h"
 #include "FicsItFileSystem/Listener.h"
 #include "FicsItKernel/Processor/Processor.h"
 #include "FINLua/API/LuaFileSystemAPI.h"
 #include "FINLuaProcessor.generated.h"
 
 class AFINStateEEPROMLua;
-struct lua_State;
-struct lua_Debug;
-namespace FINLua::Event::event {
-	int pull(lua_State*);
-}
 
 class FICSITNETWORKSLUA_API LuaFileSystemListener : public CodersFileSystem::Listener {
 private:
@@ -26,142 +26,24 @@ public:
 	virtual void onNodeRemoved(CodersFileSystem::Path path, CodersFileSystem::NodeType type) override;
 };
 
-enum LuaTickState {
-	LUA_SYNC		= 0b00001,
-	LUA_ASYNC		= 0b00010,
-	LUA_ERROR		= 0b00100,
-	LUA_END			= 0b01000,
-	LUA_BEGIN		= 0b10000,
-	LUA_SYNC_ERROR	= LUA_SYNC | LUA_ERROR,
-	LUA_SYNC_END	= LUA_SYNC | LUA_END,
-	LUA_ASYNC_BEGIN	= LUA_ASYNC | LUA_BEGIN,
-	LUA_ASYNC_ERROR	= LUA_ASYNC | LUA_ERROR,
-	LUA_ASYNC_END	= LUA_ASYNC | LUA_END,
-};
-ENUM_CLASS_FLAGS(LuaTickState);
-
-struct FICSITNETWORKSLUA_API FLuaTickRunnable : public FNonAbandonableTask {
-private:
-	class FFINLuaProcessorTick* Tick;
-	
-public:	
-	FLuaTickRunnable(class FFINLuaProcessorTick* Tick) : Tick(Tick) {}
-	
-	void DoWork();
-
-	// ReSharper disable once CppMemberFunctionMayBeStatic
-	FORCEINLINE TStatId GetStatId() const {
-		RETURN_QUICK_DECLARE_CYCLE_STAT(ExampleAsyncTask, STATGROUP_ThreadPoolAsyncTasks);
-	}
-};
-
-class FICSITNETWORKSLUA_API FFINLuaProcessorTick {
-	// Lua Tick state lua step lengths
-	int SyncLen = 2500;
-	int SyncErrorLen = 1250;
-	int SyncEndLen = 500;
-	int AsyncLen = 2500;
-	int AsyncErrorLen = 1200;
-	int AsyncEndLen = 500;
-	
-private:
-	class UFINLuaProcessor* Processor = nullptr;
-	LuaTickState State = LUA_SYNC;
-	FLuaTickRunnable Runnable;
-	TSharedPtr<FAsyncTask<FLuaTickRunnable>> asyncTask;
-	FCriticalSection StateMutex;
-	FCriticalSection TickMutex;
-	bool bShouldPromote = false;
-	bool bShouldDemote = false;
-	bool bShouldStop = false;
-	bool bShouldReset = false;
-	bool bShouldCrash = false;
-	bool bDoSync = false;
-	bool bWaitForSignal = false;
-	TSharedPtr<FFINKernelCrash> ToCrash;
-	TPromise<void> AsyncSync;
-	TPromise<void> SyncAsync;
-	FCriticalSection AsyncSyncMutex;
-	
-public:
-
-	FFINLuaProcessorTick();
-	FFINLuaProcessorTick(class UFINLuaProcessor* Processor);
-
-	~FFINLuaProcessorTick();
-
-	void reset();
-	void stop();
-	void promote();
-	void demote();
-	void demoteInAsync();
-	void shouldStop();
-	void shouldReset();
-	void shouldPromote();
-	void shouldDemote();
-	void shouldWaitForSignal();
-	void signalFound();
-	void shouldCrash(const TSharedRef<FFINKernelCrash>& Crash);
-	int steps() const;
-	
-	void syncTick();
-	bool asyncTick();
-	bool postTick();
-
-	void tickHook(lua_State* L);
-	int apiReturn(lua_State* L, int args);
-
-	LuaTickState getState() { return State; }
-	bool getShouldPromote() { return bShouldPromote; }
-};
-
 UCLASS()
 class FICSITNETWORKSLUA_API UFINLuaProcessor : public UFINKernelProcessor {
 	GENERATED_BODY()
-
-	friend int FINLua::Event::event::pull(lua_State* L);
-	friend int luaComputerSkip(lua_State* L);
-	friend FLuaTickRunnable;
-	friend struct FLuaSyncCall;
-	friend FFINLuaProcessorTick;
-
 private:
-	// Lua runtime
-	lua_State* luaState = nullptr;
-	lua_State* luaThread = nullptr;
-	int luaThreadIndex = 0;
-	FFINLuaProcessorTick tickHelper;
+	UPROPERTY()
+	FFINLuaThreadedRuntime Runtime;
+	UPROPERTY()
+	FFINLuaReferenceCollector ReferenceCollector;
+	FFINLuaComponentNetworkAccessDelegates ComponentNetwork;
+	FFINLuaEventSystem EventSystem;
 
-	// signal pulling
-	UPROPERTY(SaveGame)
-	int PullState = 0; // 0 = not pulling, 1 = pulling with timeout, 2 = pull indefinitely
-	UPROPERTY(SaveGame)
-	double Timeout = 0.0;
-	UPROPERTY(SaveGame)
-	uint64 PullStart = 0;
-
-	// filesystem handling
-	TArray<FINLua::LuaFile> FileStreams;
-	TSharedPtr<LuaFileSystemListener> FileSystemListener;
-
-	bool bWasPriorToGCPromoted;
-	FDelegateHandle OnPreGarbageCollectionHandle;
-	FDelegateHandle OnPostGarbageCollectionHandle;
-	
-	void OnPreGarbageCollection();
-	void OnPostGarbageCollection();
-	
 public:
 	UPROPERTY(SaveGame)
-	FFINLuaProcessorStateStorage StateStorage;
-	
-	static UFINLuaProcessor* luaGetProcessor(lua_State* L);
+	FFINLuaRuntimePersistenceState RuntimeState;
 	
 	UFINLuaProcessor();
-	~UFINLuaProcessor();
 
 	// Begin UObject
-	virtual void Serialize(FArchive& Ar) override;
 	virtual void BeginDestroy() override;
 	// End UObject
 	
@@ -178,24 +60,7 @@ public:
 	virtual void Tick(float InDelta) override;
 	virtual void Stop(bool bInIsCrash) override;
 	virtual void Reset() override;
-	virtual int64 GetMemoryUsage(bool bInRecalc = false) override;
 	// End Processor
-
-	/**
-	 * returns the tick helper
-	 */
-	FFINLuaProcessorTick& GetTickHelper();
-
-	/**
-	 * Checks if the pull timeout has been reached
-	 */
-	bool PullTimeoutReached();
-	
-	/**
-	 * Executes one lua tick sync or async.
-	 * Might set after tick cache which should get handled by tick.
-	 */
-	void LuaTick();
 
 	/**
 	 * Allows to access the eeprom code used by the processor.
@@ -220,53 +85,4 @@ public:
 	 * @return	the count of values we have pushed.
 	 */
 	int DoSignal(lua_State* L);
-	
-	void ClearFileStreams();
-	TArray<FINLua::LuaFile> GetFileStreams() const;
-
-	static void luaHook(lua_State* L, lua_Debug* ar);
-
-	/**
-	 * Access the lua processor in the given state registry and checks
-	 * if the tick process is in the second stage of execution.
-	 * If this is the case yields the runtime with a continuation function
-	 * which will return values of the count of args on top of the stack prior
-	 * to the yield.
-	 * If the tick is in the first stage, we just return.
-	 *
-	 * @param[in]	L		the lua state all of this should occur
-	 * @param[in]	args	the count of arguments we should copy and the continuation should return
-	 * @return	if it even returns, returns the same as args
-	 */
-	static int luaAPIReturn(lua_State* L, int args);
-
-	/**
-	 * Returns the lua state
-	 */
-	lua_State* GetLuaState() const;
-
-	/**
-	 * Returns the current lua thread
-	 */
-	lua_State* GetLuaThread() const;
-};
-
-struct FICSITNETWORKSLUA_API FLuaSyncCall {
-	UFINLuaProcessor* Processor;
-	bool bShouldPromote;
-
-	FLuaSyncCall(lua_State* L) {
-		Processor = UFINLuaProcessor::luaGetProcessor(L);
-		bShouldPromote = Processor->GetTickHelper().getShouldPromote();
-		if (Processor->GetTickHelper().getState() & LUA_ASYNC) {
-			bShouldPromote = true;
-			Processor->tickHelper.demoteInAsync();
-		}
-	}
-
-	~FLuaSyncCall() {
-		if (bShouldPromote) {
-			Processor->GetTickHelper().shouldPromote();
-		}
-	}
 };

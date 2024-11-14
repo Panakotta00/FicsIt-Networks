@@ -6,9 +6,9 @@
 
 namespace FINLua {
 	LuaModule(R"(/**
-	 * @LuaModule		Debug
+	 * @LuaModule		DebugModule
 	 * @DisplayName		Debug Module
-	 */)", Debug) {
+	 */)", DebugModule) {
 		LuaModuleLibrary(R"(/**
 		 * @LuaLibrary		debug
 		 * @DisplayName		Debug Library

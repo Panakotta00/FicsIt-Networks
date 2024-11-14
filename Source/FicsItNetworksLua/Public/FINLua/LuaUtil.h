@@ -110,10 +110,17 @@ namespace FINLua {
 	FString luaFIN_where(lua_State* L);
 	FString luaFIN_stack(lua_State* L);
 
+	/**
+	 * Tries to set the value on top of the stack as value of the table at the given index with the field key beeing the value right below the stack.
+	 * If the value is a table and the field already contains a table, will merge both tables.
+	 * In any other case will overwrite the field of the target with the value on-top of the stack.
+	 * Raises an error if the targetIndex is not a table.
+	 * Pops the table on-top of the stack.
+	 */
+	void luaFIN_setOrMergeField(lua_State* L, int targetIndex);
+
 	void luaFINDebug_dumpStack(lua_State* L);
 	void luaFINDebug_dumpTable(lua_State* L, int index);
-
-	void setupUtilLib(lua_State* L);
 }
 
 struct FFINLuaLogScope : public FFILLogScope {

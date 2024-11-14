@@ -1,4 +1,6 @@
 #include "Signals/FINSignalSubsystem.h"
+
+#include "FicsItNetworksCircuit.h"
 #include "Subsystem/SubsystemActorManager.h"
 #include "Engine/Engine.h"
 #include "FIRHookSubsystem.h"
@@ -30,7 +32,7 @@ void AFINSignalSubsystem::BeginPlay() {
 	Super::BeginPlay();
 
 	AFIRHookSubsystem* HookSubsystem = AFIRHookSubsystem::GetHookSubsystem(this);
-	if (HookSubsystem) for (const TPair<UObject*, FFINSignalListeners>& Sender : Listeners) {
+	if (HookSubsystem) for (const TPair<UObject*, FFINSignalListeners>& Sender : Senders) {
 		HookSubsystem->AttachHooks(Sender.Key);
 	} else {
 		UE_LOG(LogFicsItNetworksCircuit, Warning, TEXT("Hook Subsystem not found! Unable to reattach hooks!"));
@@ -39,12 +41,12 @@ void AFINSignalSubsystem::BeginPlay() {
 
 void AFINSignalSubsystem::Cleanup() {
 	TArray<UObject*> ListenerKeys;
-	Listeners.GetKeys(ListenerKeys);
+	Senders.GetKeys(ListenerKeys);
 	for (UObject* Sender : ListenerKeys) {
 		if (!IsValid(Sender)) {
-			Listeners.Remove(Sender);
+			Senders.Remove(Sender);
 		} else {
-			TArray<FFIRTrace>& Listen = Listeners[Sender].Listeners;
+			TArray<FFIRTrace>& Listen = Senders[Sender].Listeners;
 			for (int i = 0; i < Listen.Num(); ++i) {
 				const FFIRTrace& Listener = Listen[i];
 				if (!IsValid(Listener.GetUnderlyingPtr())) {
@@ -52,7 +54,7 @@ void AFINSignalSubsystem::Cleanup() {
 				}
 			}
 			if (Listen.Num() < 1) {
-				Listeners.Remove(Sender);
+				Senders.Remove(Sender);
 			}
 		}
 	}
@@ -66,7 +68,7 @@ AFINSignalSubsystem* AFINSignalSubsystem::GetSignalSubsystem(UObject* WorldConte
 }
 
 void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData& Signal) {
-	FFINSignalListeners* ListenerList = Listeners.Find(Sender);
+	FFINSignalListeners* ListenerList = Senders.Find(Sender);
 	if (!ListenerList) return;
 	for (const FFIRTrace& ReceiverTrace : ListenerList->Listeners) {
 		if (&ReceiverTrace == nullptr) {
@@ -81,13 +83,13 @@ void AFINSignalSubsystem::BroadcastSignal(UObject* Sender, const FFINSignalData&
 }
 
 void AFINSignalSubsystem::Listen(UObject* Sender, const FFIRTrace& Receiver) {
-	TArray<FFIRTrace>& ListenerList = Listeners.FindOrAdd(Sender).Listeners;
+	TArray<FFIRTrace>& ListenerList = Senders.FindOrAdd(Sender).Listeners;
 	ListenerList.AddUnique(Receiver);
 	AFIRHookSubsystem::GetHookSubsystem(Sender)->AttachHooks(Sender);
 }
 
 void AFINSignalSubsystem::Ignore(UObject* Sender, UObject* Receiver) {
-	FFINSignalListeners* ListenerList = Listeners.Find(Sender);
+	FFINSignalListeners* ListenerList = Senders.Find(Sender);
 	if (!ListenerList) return;
 	for (int i = 0; i < ListenerList->Listeners.Num(); ++i) {
 		if (ListenerList->Listeners[i].GetUnderlyingPtr() == Receiver) {
@@ -101,18 +103,19 @@ void AFINSignalSubsystem::Ignore(UObject* Sender, UObject* Receiver) {
 }
 
 void AFINSignalSubsystem::IgnoreAll(UObject* Receiver) {
-	TArray<UObject*> Senders;
-	Listeners.GetKeys(Senders);
-	for (UObject* Sender : Senders) {
+	TArray<UObject*> senders;
+	Senders.GetKeys(senders);
+	for (UObject* Sender : senders) {
 		Ignore(Sender, Receiver);
 	}
 }
 
-TArray<UObject*> AFINSignalSubsystem::GetListening(UObject* Reciever) {
-	TArray<UObject*> Listening;
-	for (TPair<UObject*, FFINSignalListeners> Sender : Listeners) {
-		if (Sender.Value.Listeners.Contains(FFIRTrace(Reciever))) {
-			Listening.Add(Sender.Key);
+TArray<FFIRTrace> AFINSignalSubsystem::GetListening(UObject* Reciever) {
+	TArray<FFIRTrace> Listening;
+	for (TPair<UObject*, FFINSignalListeners> Sender : Senders) {
+		size_t index = Sender.Value.Listeners.Find(FFIRTrace(Reciever));
+		if (index != INDEX_NONE) {
+			Listening.Add(Sender.Value.Listeners[index].Reverse() / Sender.Key);
 		}
 	}
 	return Listening;
