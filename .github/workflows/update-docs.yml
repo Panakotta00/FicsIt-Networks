@@ -74,11 +74,13 @@ jobs:
 
       - name: Commit
         working-directory: FicsItNetworks
+        continue-on-error: true
         run: |
           git add docs
           git commit -m "docs: Automatic Documentation Update"
 
       - name: Push
         working-directory: FicsItNetworks
+        continue-on-error: true
         run: |
           git push
