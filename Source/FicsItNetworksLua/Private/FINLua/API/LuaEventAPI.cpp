@@ -160,6 +160,15 @@ namespace FINLua {
 			}
 
 			int luaPullContinue(lua_State* L, int, lua_KContext) {
+				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+				if (runtime.GetLuaThread() == L) {
+					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+					TOptional<TTuple<FFIRTrace, FFINSignalData>> event = eventSystem.PullSignal();
+					if (event) {
+						luaFIN_handleEvent(L, event->Key, event->Value);
+					}
+				}
+
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 				double timeout = luaL_checknumber(L, 2);
 				if (!queue->Events.IsEmpty()) {
@@ -186,6 +195,14 @@ namespace FINLua {
 			}
 
 			int luaWaitForContinue(lua_State* L, int, lua_KContext) {
+				if (lua_toboolean(L, 3)) {
+					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+					TOptional<TTuple<FFIRTrace, FFINSignalData>> event = eventSystem.PullSignal();
+					if (event) {
+						luaFIN_handleEvent(L, event->Key, event->Value);
+					}
+				}
+
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 				TSharedRef<FFINEventFilterExpression> filter = luaFIN_checkStruct<FFINEventFilterExpression>(L, 2, false);
 				while (!queue->Events.IsEmpty()) {
@@ -206,11 +223,13 @@ namespace FINLua {
 			 *
 			 * Returns a Future that resolves when a signal got added to the queue that matches the given Event Filter.
 			 */)", waitFor) {
+				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 				FFINEventFilterExpression filter = checkFilter(L, 2);
 				lua_pushvalue(L, 1);
 				luaFIN_pushStruct(L, filter);
-				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
+				lua_pushboolean(L, runtime.GetLuaThread() == L);
+				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 3);
 				return 1;
 			}
 		}
@@ -416,8 +435,7 @@ namespace FINLua {
 			}
 
 			int luaWaitForContinue(lua_State* L, int, lua_KContext) {
-				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
-				if (runtime.GetLuaThread() == L) {
+				if (lua_toboolean(L, 3)) {
 					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
 					TOptional<TTuple<FFIRTrace, FFINSignalData>> event = eventSystem.PullSignal();
 					if (event) {
@@ -431,10 +449,10 @@ namespace FINLua {
 				}
 				lua_pushnil(L);
 				lua_seti(L, 1, key+1);
-				luaL_checktype(L, 3, LUA_TTABLE);
-				int len = luaL_len(L, 3);
+				luaL_checktype(L, 4, LUA_TTABLE);
+				int len = luaL_len(L, 4);
 				for (int i = 1; i <= len; ++i) {
-					lua_geti(L, 3, i);
+					lua_geti(L, 4, i);
 				}
 				return len;
 			}
@@ -448,12 +466,14 @@ namespace FINLua {
 			 * Returns a Future that resolves when a signal got polled that matches the given Event Filter.
 			 */)", waitFor) {
 				FFINEventFilterExpression filter = checkFilter(L, 1);
+				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
 				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
 				int64 key = FFINLuaEventRegistry::FindNextKey(registry->OneShots);
 				registry->OneShots.Add(key, filter);
 				lua_getiuservalue(L, -1, 3);
 				lua_pushinteger(L, key);
-				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
+				lua_pushboolean(L, runtime.GetLuaThread() == L);
+				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 3);
 				return 1;
 			}
 

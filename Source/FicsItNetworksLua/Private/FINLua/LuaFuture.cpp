@@ -130,8 +130,9 @@ namespace FINLua {
 						break;
 					} case LUA_YIELD:
 						if (results > 0) {
+							luaFINDebug_dumpStack(L);
 							if (lua_type(thread, -results) == LUA_TNUMBER) {
-								timeout = lua_tonumber(thread, results);
+								timeout = lua_tonumber(thread, -results);
 							}
 						}
 						lua_pop(thread, results);
