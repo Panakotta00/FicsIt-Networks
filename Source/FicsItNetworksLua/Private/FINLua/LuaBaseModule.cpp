@@ -241,42 +241,6 @@ namespace FINLua {
 		return 1;
 	}
 
-	[[deprecated]]
-	int luaFindClass_DEPRECATED(lua_State* L) {
-		const int args = lua_gettop(L);
-
-		luaFIN_warning(L, "Deprecated function call 'findClass', use 'classes' global library instead", false);
-
-		for (int i = 1; i <= args; ++i) {
-			const bool isT = lua_istable(L, i);
-
-			TArray<FString> ClassNames;
-			if (isT) {
-				const auto count = lua_rawlen(L, i);
-				for (int j = 1; j <= count; ++j) {
-					lua_geti(L, i, j);
-					if (!lua_isstring(L, -1)) return luaL_argerror(L, i, "array contains non-string");
-					ClassNames.Add(lua_tostring(L, -1));
-					lua_pop(L, 1);
-				}
-				lua_newtable(L);
-			} else {
-				if (!lua_isstring(L, i)) return luaL_argerror(L, i, "is not string");
-				ClassNames.Add(lua_tostring(L, i));
-			}
-			int j = 0;
-			for (const FString& ClassName : ClassNames) {
-				UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(ClassName);
-				if (Class) luaFIN_pushClass(L, Class);
-				else lua_pushnil(L);
-				if (isT) lua_seti(L, -2, ++j);
-				UFILogLibrary::Log(FIL_Verbosity_Warning, FString::Printf(TEXT("Instead of 'findClass(\"%s\")' use 'classes.%s'"), *ClassName, *ClassName));
-			}
-		}
-
-		return args;
-	}
-
 	LuaModule(R"(/**
 	 * @LuaModule		BaseModule
 	 * @DisplayName		Base Module
@@ -286,12 +250,6 @@ namespace FINLua {
 	 */)", BaseModule) {
 		LuaModulePostSetup() {
 			PersistenceNamespace("Base");
-
-	#pragma warning( push )
-	#pragma warning( disable : 4996 )
-			lua_register(L, "findClass", luaFindClass_DEPRECATED);
-			PersistGlobal("findClass");
-	#pragma warning( pop )
 
 			luaopen_base(L);
 			lua_pushnil(L);
