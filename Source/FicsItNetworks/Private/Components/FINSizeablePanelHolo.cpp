@@ -146,8 +146,9 @@ void AFINSizeablePanelHolo::ConstructParts() {
 		UStaticMesh* UL = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCornerMesh;
 		UStaticMesh* UC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelSideMesh;
 		UStaticMesh* CC = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCenterMesh;
+		UStaticMesh* CCN = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelCenterMeshNoConnector;
 		UStaticMesh* Con = Cast<AFINSizeablePanel>(mBuildClass->GetDefaultObject())->PanelConnectorMesh;
-		AFINSizeablePanel::SpawnComponents(UStaticMeshComponent::StaticClass(), PanelWidth, PanelHeight, UL, UC, CC, Con, this, RootComponent, Parts);
+		AFINSizeablePanel::SpawnComponents(UStaticMeshComponent::StaticClass(), PanelWidth, PanelHeight, UL, UC, CC, CCN, Con, this, RootComponent, Parts);
 		RootComponent->SetMobility(EComponentMobility::Movable);
 		for (UStaticMeshComponent* Part : Parts) {
 			Part->SetMobility(EComponentMobility::Movable);

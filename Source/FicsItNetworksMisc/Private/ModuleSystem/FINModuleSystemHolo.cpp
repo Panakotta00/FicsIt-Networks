@@ -60,6 +60,7 @@ FVector AFINModuleSystemHolo::getModuleSize() {
 	return FVector((float) w, (float) h, 0);
 }
 
+
 bool AFINModuleSystemHolo::IsValidHitResult(const FHitResult& hit) const {
 	auto r = GetScrollRotateValue();
 
@@ -75,12 +76,19 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 	UFINModuleSystemPanel* panel = Cast<UFINModuleSystemPanel>(panel_r);
 
 	if (!IsValid(panel)) {
+		if(IsValid(Snapped)) {
+			Snapped->HologramSnapped.Broadcast(false);
+		}
 		Snapped = nullptr;
 		return false;
 	}
+	UFINModuleSystemPanel* OldSnapped = Snapped;
 	Snapped = panel;
+	if(Snapped != OldSnapped) {
+		panel->HologramSnapped.Broadcast(true);
+	}
 
-	auto loc = Snapped->GetComponentToWorld().InverseTransformPosition(hitResult.Location);
+	FVector loc = Snapped->GetComponentToWorld().InverseTransformPosition(hitResult.Location);
 	SnappedLoc = loc;
 	SnappedLoc = SnappedLoc / 10.0;
 	SnappedLoc.X = floor(SnappedLoc.X);
@@ -108,9 +116,11 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 	bIsValid = checkSpace(min, max);
 	if (bIsValid) {
 		bIsValid = false;
-		for (auto& allowed : Snapped->AllowedModules)
-			if (mBuildClass->IsChildOf(allowed)) 
+		for (auto& allowed : Snapped->AllowedModules) {
+			if (mBuildClass->IsChildOf(allowed)) {
 				bIsValid = true;
+			}
+		}
 	}
 	SetHologramLocationAndRotation(hitResult);
 	return true;
@@ -118,7 +128,7 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 
 void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit) {
 	if (!IsValid(Snapped)) return;
-	auto loc = SnappedLoc;
+	FVector loc = SnappedLoc;
 	switch (SnappedRot) {
 	case 0:
 		break;
@@ -216,3 +226,20 @@ void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
 		InformationComponent->SetVisibility(false);
 	}
 }
+
+void AFINModuleSystemHolo::Destroyed() {
+	Super::Destroyed();
+	
+	if(IsValid(Snapped)) {
+		Snapped->HologramSnapped.Broadcast(false);
+	}
+}
+
+void AFINModuleSystemHolo::OnInvalidHitResult() {
+	Super::OnInvalidHitResult();
+	if(IsValid(Snapped)) {
+		Snapped->HologramSnapped.Broadcast(false);
+		Snapped = nullptr;
+	}
+}
+
