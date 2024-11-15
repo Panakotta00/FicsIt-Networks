@@ -8,6 +8,8 @@
 #include "FINLuaRuntime.h"
 #include "FINLuaThreadedRuntime.h"
 #include "LuaStruct.h"
+#include "TimerManager.h"
+#include "Async/Async.h"
 
 namespace FINLua {
 	LuaModule(R"(/**
@@ -74,10 +76,12 @@ namespace FINLua {
 					AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
 					if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
 					runtime.TickActions.Enqueue([PlayerController, Position]() {
-						UClass* Class = LoadObject<UClass>(nullptr, TEXT("/Game/FactoryGame/Character/Player/BP_AttentionPingActor.BP_AttentionPingActor_C"));
-						AFGAttentionPingActor* PingActor = PlayerController->GetWorld()->SpawnActorDeferred<AFGAttentionPingActor>(Class, FTransform(Position));
-						PingActor->SetOwningPlayerState(PlayerController->GetPlayerState<AFGPlayerState>());
-						PingActor->FinishSpawning(FTransform(Position));
+						AsyncTask(ENamedThreads::GameThread, [PlayerController, Position]() {
+							UClass* Class = LoadObject<UClass>(nullptr, TEXT("/Game/FactoryGame/Character/Player/BP_AttentionPingActor.BP_AttentionPingActor_C"));
+							AFGAttentionPingActor* PingActor = PlayerController->GetWorld()->SpawnActorDeferred<AFGAttentionPingActor>(Class, FTransform(Position));
+							PingActor->SetOwningPlayerState(PlayerController->GetPlayerState<AFGPlayerState>());
+							PingActor->FinishSpawning(FTransform(Position));
+						});
 					});
 					break;
 				}

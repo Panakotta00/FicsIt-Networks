@@ -142,6 +142,10 @@ void UFINLuaProcessor::SetKernel(UFINKernelSystem* InKernel) {
 	Kernel = InKernel;
 }
 void UFINLuaProcessor::Tick(float InDelta) {
+	if (GetKernel()->GetNetwork()->GetSignalCount() > 0) {
+		Runtime.Runtime.Timeout.Reset();
+	}
+
 	Runtime.Run();
 
 	switch (Runtime.GetStatus()) {

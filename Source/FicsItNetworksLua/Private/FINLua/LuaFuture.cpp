@@ -10,7 +10,7 @@ namespace FINLua {
 	int lua_futureStruct(lua_State* L);
 	int lua_futureStructContinue(lua_State* L, int, lua_KContext);
 	int awaitContinue(lua_State* L, int, lua_KContext);
-	int luaFIN_futureRun(lua_State* L, int index);
+	int luaFIN_futureRun(lua_State* L, int index, TOptional<double>& timeout);
 
 	LuaModule(R"(/**
 	 * @LuaModule		FutureModule
@@ -130,8 +130,8 @@ namespace FINLua {
 						break;
 					} case LUA_YIELD:
 						if (results > 0) {
-							if (lua_type(L, -results) == LUA_TNUMBER) {
-								timeout = lua_tonumber(L, results);
+							if (lua_type(thread, -results) == LUA_TNUMBER) {
+								timeout = lua_tonumber(thread, results);
 							}
 						}
 						lua_pop(thread, results);
@@ -143,7 +143,7 @@ namespace FINLua {
 				return status;
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	poll()
+			 * @LuaFunction		bool,nil|number		poll()
 			 * @DisplayName		Poll
 			 */)", poll) {
 				// TODO: Maybe return timeout
@@ -151,7 +151,12 @@ namespace FINLua {
 				lua_State* thread;
 				int status = pollInternal(L, 1, thread, timeout);
 				lua_pushboolean(L, status == LUA_OK);
-				return 1;
+				if (timeout) {
+					lua_pushnumber(L, *timeout);
+				} else {
+					lua_pushnil(L);
+				}
+				return 2;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -221,7 +226,7 @@ namespace FINLua {
 
 			int joinContinue(lua_State* L, int status, lua_KContext) {
 				bool done = true;
-				TOptional<double> finalTimeout;
+				TOptional<double> finalTimeout = TNumericLimits<double>::Max();
 				int num = lua_gettop(L);
 				for (int i = 1; i <= num; ++i) {
 					if (luaL_testudata(L, i, Future::_Name) == nullptr) continue;
@@ -233,10 +238,10 @@ namespace FINLua {
 						lua_replace(L, i);
 					} else {
 						done = false;
-						if (finalTimeout.IsSet()) {
+						if (timeout.IsSet() && finalTimeout.IsSet()) {
 							finalTimeout = FMath::Min(*finalTimeout, *timeout);
 						} else {
-							finalTimeout = timeout;
+							finalTimeout.Reset();
 						}
 					}
 				}
@@ -324,15 +329,22 @@ namespace FINLua {
 			 *
 			 * Runs the default task scheduler once.
 			 */)", run) {
-				int numTasksLeft = luaFIN_futureRun(L, lua_upvalueindex(2));
+				TOptional<double> timeout;
+				int numTasksLeft = luaFIN_futureRun(L, lua_upvalueindex(2), timeout);
 				lua_pushinteger(L, numTasksLeft);
-				return 1;
+				if (timeout) {
+					lua_pushnumber(L, *timeout);
+				} else {
+					lua_pushnil(L);
+				}
+				return 2;
 			}
 
 			int luaLoopContinue(lua_State* L, int, lua_KContext) {
-				int numTasksLeft = luaFIN_futureRun(L, -1);
+				TOptional<double> timeout = TNumericLimits<double>::Max();
+				int numTasksLeft = luaFIN_futureRun(L, -1, timeout);
 				if (numTasksLeft > 0) {
-					return lua_yieldk(L, 0, NULL, &luaLoopContinue);
+					return luaFIN_yield(L, 0, NULL, &luaLoopContinue, timeout);
 				}
 				return 0;
 			}
@@ -509,7 +521,7 @@ namespace FINLua {
 		lua_pop(L, 2);
 	}
 
-	int luaFIN_futureRun(lua_State* L, int index) {
+	int luaFIN_futureRun(lua_State* L, int index, TOptional<double>& timeout) {
 		//lua_getglobal(L, "future");
 		int num = lua_gettop(L);
 		if (lua_getfield(L, index, "tasks") != LUA_TTABLE) {
@@ -521,10 +533,15 @@ namespace FINLua {
 		int shift = 0;
 		for (int i = 1; i <= len; ++i) {
 			lua_geti(L, -1, i);
-			TOptional<double> timeout;
+			TOptional<double> timeoutResume;
 			lua_State* thread;
-			int status = FutureModule::Future::pollInternal(L, -1, thread, timeout);
+			int status = FutureModule::Future::pollInternal(L, -1, thread, timeoutResume);
 			lua_pop(L, 1);
+			if (timeoutResume.IsSet() && timeout.IsSet()) {
+				timeout = FMath::Min(*timeout, *timeoutResume);
+			} else {
+				timeout.Reset();
+			}
 			if (status == LUA_OK) {
 				shift += 1;
 			} else if (shift > 0) {

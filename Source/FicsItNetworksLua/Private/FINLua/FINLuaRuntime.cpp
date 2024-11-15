@@ -67,6 +67,7 @@ void FFINLuaRuntime::Destroy() {
 		lua_close(LuaState);
 	}
 
+	Timeout.Reset(),
 	LoadedModules.Empty();
 	GlobalData.Empty();
 	GlobalPointers.Empty();

@@ -167,10 +167,9 @@ namespace FINLua {
 					queue->Events.RemoveAt(0);
 					return luaFIN_pushEventData(L, event.Sender, event.Data);
 				}
-				IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
-				double currentTime = eventSystem.TimeSinceStart();
+				double currentTime = FPlatformTime::Seconds();
 				if (timeout > currentTime) {
-					return lua_yieldk(L, 0, NULL, luaPullContinue);
+					return luaFIN_yield(L, 0, NULL, luaPullContinue, timeout);
 				}
 				return 0;
 			}
@@ -179,9 +178,8 @@ namespace FINLua {
 			 * @DisplayName		Pull
 			 */)", pull) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
-				double timeout = luaL_checknumber(L, 2)*1000;
-				IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
-				timeout += eventSystem.TimeSinceStart();
+				double timeout = luaL_checknumber(L, 2);
+				timeout += FPlatformTime::Seconds();
 				lua_pop(L, 1);
 				lua_pushnumber(L, timeout);
 				return luaPullContinue(L, 0, NULL);
@@ -197,7 +195,7 @@ namespace FINLua {
 						return luaFIN_pushEventData(L, event.Sender, event.Data);
 					}
 				}
-				return lua_yieldk(L, 0, NULL, luaWaitForContinue);
+				return luaFIN_yield(L, 0, NULL, luaWaitForContinue, TNumericLimits<double>::Max());
 			}
 			int luaWaitFor(lua_State* L) {
 				return luaWaitForContinue(L, 0, NULL);
@@ -312,6 +310,8 @@ namespace FINLua {
 					timeout += FPlatformTime::Seconds();
 					lua_pop(L, args);
 					lua_pushnumber(L, timeout);
+				} else {
+					lua_pushnumber(L, TNumericLimits<double>::Max());
 				}
 				return luaPullContinue(L, 0, 0);
 			}
@@ -416,10 +416,18 @@ namespace FINLua {
 			}
 
 			int luaWaitForContinue(lua_State* L, int, lua_KContext) {
+				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+				if (runtime.GetLuaThread() == L) {
+					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+					TOptional<TTuple<FFIRTrace, FFINSignalData>> event = eventSystem.PullSignal();
+					if (event) {
+						luaFIN_handleEvent(L, event->Key, event->Value);
+					}
+				}
 				int key = luaL_checkinteger(L, 2);
 				if (lua_geti(L, 1, key+1) == LUA_TNIL) {
 					lua_pop(L, 1);
-					return lua_yieldk(L, 0, NULL, luaWaitForContinue);
+					return luaFIN_yield(L, 0, NULL, luaWaitForContinue, TNumericLimits<double>::Max());
 				}
 				lua_pushnil(L);
 				lua_seti(L, 1, key+1);
@@ -448,6 +456,7 @@ namespace FINLua {
 				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
 				return 1;
 			}
+
 			int luaLoopContinue(lua_State* L, int, lua_KContext) {
 				while (true) {
 					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
@@ -456,9 +465,10 @@ namespace FINLua {
 						const auto& [sender, signal] = *data;
 						luaFIN_handleEvent(L, sender, signal);
 					}
-					luaFIN_futureRun(L, 1);
+					TOptional<double> timeout = TNumericLimits<double>::Max();
+					luaFIN_futureRun(L, 1, timeout);
 					if (!data) {
-						return lua_yieldk(L, 0, 0, luaLoopContinue);
+						return luaFIN_yield(L, 0, 0, luaLoopContinue, timeout);
 					}
 				}
 			}
