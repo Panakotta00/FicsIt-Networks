@@ -343,9 +343,13 @@ namespace FINLua {
 		return metaName;
 	}
 
-	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc) {
-		// insert a boolean to indicate a user executed yield
-		lua_pushboolean(L, true);
+	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc, TOptional<double> timeout) {
+		// insert timeout to indicate normal (non-hook) yield
+		if (timeout) {
+			lua_pushnumber(L, timeout.GetValue());
+		} else {
+			lua_pushnil(L);
+		}
 		lua_insert(L, -nresults - 1);
 
 		return lua_yieldk(L, nresults+1, ctx, kfunc);

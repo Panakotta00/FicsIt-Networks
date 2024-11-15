@@ -58,3 +58,5 @@ namespace FINLua {
 		}
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

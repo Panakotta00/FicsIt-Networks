@@ -277,7 +277,15 @@ namespace FINLua {
 				IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
 				TOptional<TTuple<FFIRTrace, FFINSignalData>> data = eventSystem.PullSignal();
 				if (!data) {
-					return lua_yield(L, 0);
+					const int args = lua_gettop(L);
+					TOptional<double> timeout;
+					if (args > 0) {
+						timeout = luaL_checknumber(L, 1);
+					}
+					if (!timeout || *timeout <= FPlatformTime::Seconds()) {
+						return 0;
+					}
+					return luaFIN_yield(L, 0, 0, luaPullContinue, timeout);
 				}
 
 				const auto& [sender, signal] = *data;
@@ -299,9 +307,12 @@ namespace FINLua {
 			 * @return		parameters	any...			Parameters	The parameters passed to the signal. Not set when timeout got reached.
 			 */)", pull) {
 				const int args = lua_gettop(L);
-				double timeout = 0.0;
-				if (args > 0) timeout = lua_tonumber(L, 1);
-
+				if (args > 0) {
+					double timeout = luaL_checknumber(L, 1);
+					timeout += FPlatformTime::Seconds();
+					lua_pop(L, args);
+					lua_pushnumber(L, timeout);
+				}
 				return luaPullContinue(L, 0, 0);
 			}
 

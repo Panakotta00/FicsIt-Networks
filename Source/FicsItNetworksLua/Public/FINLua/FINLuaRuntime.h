@@ -65,6 +65,7 @@ public:
 	TMap<FString, FFIRAnyValue> LoadedModules;
 	TMap<FString, FFIRAnyValue> GlobalData;
 	TMap<FString, void*> GlobalPointers;
+	TOptional<double> Timeout;
 
 	FFINLuaRuntime();
 	~FFINLuaRuntime();

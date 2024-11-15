@@ -21,13 +21,13 @@ FFINLuaThreadedRuntime::~FFINLuaThreadedRuntime() {
 	FCoreUObjectDelegates::GetPreGarbageCollectDelegate().Remove(OnPreGarbageCollectionHandle);
 	PauseAndWait();
 }
-UE_DISABLE_OPTIMIZATION_SHIP
+
 void FFINLuaTickRunnable::DoWork() {
 	Runtime->bIsPromotedTick = true;
 	ON_SCOPE_EXIT {
 		Runtime->bIsPromotedTick = false;
 	};
-	while (Runtime->ShouldRunInThread.Load() && Runtime->Runtime.TickActions.IsEmpty()) {
+	while (Runtime->ShouldRunInThread.Load() && Runtime->Runtime.TickActions.IsEmpty() && !Runtime->Runtime.Timeout.IsSet()) {
 		TOptional<TTuple<int, int>> status = Runtime->Runtime.Tick();
 
 		if (Runtime->WaitForThread) {
@@ -41,7 +41,6 @@ void FFINLuaTickRunnable::DoWork() {
 		}
 	}
 }
-UE_ENABLE_OPTIMIZATION_SHIP
 
 void FFINLuaThreadedRuntime::HandleWaitForGame() {
 	if (WaitForGame) {
@@ -81,10 +80,10 @@ TOptional<TTuple<int, int>> FFINLuaThreadedRuntime::Run() {
 			func();
 		}
 	} else if (LuaTask.IsDone() && GetStatus() == FFINLuaRuntime::Running) {
-		if (ShouldRunInThread.Load() && Runtime.Hook_Tick.IsSet()) {
-			LuaTask.StartBackgroundTask(GThreadPool, EQueuedWorkPriority::Normal, EQueuedWorkFlags::DoNotRunInsideBusyWait, -1, TEXT("FINLuaThreadedRuntime"));
-		} else {
-			return Runtime.Tick();
+		if (Runtime.Tick().IsSet()) {
+			if (ShouldRunInThread.Load() && Runtime.Hook_Tick.IsSet() && !Runtime.Timeout.IsSet()) {
+				LuaTask.StartBackgroundTask(GThreadPool, EQueuedWorkPriority::Normal, EQueuedWorkFlags::DoNotRunInsideBusyWait, -1, TEXT("FINLuaThreadedRuntime"));
+			}
 		}
 	}
 	return {};

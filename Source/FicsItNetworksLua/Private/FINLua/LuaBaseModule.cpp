@@ -26,7 +26,7 @@ namespace FINLua {
 
 	int luaYield(lua_State* L) {
 		const int args = lua_gettop(L);
-		return luaFIN_yield(L, args, NULL, &luaYieldResume);
+		return luaFIN_yield(L, args, NULL, &luaYieldResume, {});
 	}
 
 	int luaResume(lua_State* L);
@@ -55,7 +55,6 @@ namespace FINLua {
 		const int status = lua_resume(thread, L, args - 1, &argCount);
 
 		if (status == LUA_OK || status == LUA_YIELD) {
-			luaFINDebug_dumpStack(thread);
 			if (argCount == 0 && status == LUA_YIELD) {
 				// A hook yielded the thread
 				return lua_yieldk(L, 0, NULL, &luaResumeResume);

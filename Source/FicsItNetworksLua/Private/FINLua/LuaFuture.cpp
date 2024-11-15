@@ -94,7 +94,7 @@ namespace FINLua {
 				return getInternal(L, 1);
 			}
 
-			int pollInternal(lua_State* L, int idx, lua_State*& thread) {
+			int pollInternal(lua_State* L, int idx, lua_State*& thread, TOptional<double>& timeout) {
 				idx = lua_absindex(L, idx);
 				luaL_checkudata(L, idx, _Name);
 				lua_getiuservalue(L, idx, 1);
@@ -129,6 +129,11 @@ namespace FINLua {
 						lua_setiuservalue(L, idx, 2);
 						break;
 					} case LUA_YIELD:
+						if (results > 0) {
+							if (lua_type(L, -results) == LUA_TNUMBER) {
+								timeout = lua_tonumber(L, results);
+							}
+						}
 						lua_pop(thread, results);
 						break;
 					default: // error
@@ -141,8 +146,10 @@ namespace FINLua {
 			 * @LuaFunction		bool	poll()
 			 * @DisplayName		Poll
 			 */)", poll) {
+				// TODO: Maybe return timeout
+				TOptional<double> timeout;
 				lua_State* thread;
-				int status = pollInternal(L, 1, thread);
+				int status = pollInternal(L, 1, thread, timeout);
 				lua_pushboolean(L, status == LUA_OK);
 				return 1;
 			}
@@ -214,20 +221,27 @@ namespace FINLua {
 
 			int joinContinue(lua_State* L, int status, lua_KContext) {
 				bool done = true;
+				TOptional<double> finalTimeout;
 				int num = lua_gettop(L);
 				for (int i = 1; i <= num; ++i) {
 					if (luaL_testudata(L, i, Future::_Name) == nullptr) continue;
+					TOptional<double> timeout;
 					lua_State* thread;
-					status = Future::pollInternal(L, i, thread);
+					status = Future::pollInternal(L, i, thread, timeout);
 					if (status == LUA_OK) {
 						lua_getiuservalue(L, i, 2);
 						lua_replace(L, i);
 					} else {
 						done = false;
+						if (finalTimeout.IsSet()) {
+							finalTimeout = FMath::Min(*finalTimeout, *timeout);
+						} else {
+							finalTimeout = timeout;
+						}
 					}
 				}
 				if (!done) {
-					return lua_yieldk(L, 0, NULL, joinContinue);
+					return luaFIN_yield(L, 0, NULL, joinContinue, finalTimeout);
 				}
 				return lua_gettop(L);
 			}
@@ -251,15 +265,14 @@ namespace FINLua {
 			int luaSleepContinue(lua_State* L, int, lua_KContext) {
 				double timeout = lua_tonumber(L, 1);
 				double start = lua_tonumber(L, 2);
-				double millis = luaFIN_getKernel(L)->GetTimeSinceStart();
-				if (millis - start < timeout*1000) {
-					return lua_yieldk(L, 0, NULL, luaSleepContinue);
+				double now = FPlatformTime::Seconds();
+				if (now - start < timeout) {
+					return luaFIN_yield(L, 0, NULL, luaSleepContinue, start+timeout);
 				}
 				return 0;
 			}
 			int luaSleep(lua_State* L) {
-				double millis = luaFIN_getKernel(L)->GetTimeSinceStart();
-				lua_pushnumber(L, millis);
+				lua_pushnumber(L, FPlatformTime::Seconds());
 				return luaSleepContinue(L, 0, NULL);
 			}
 			LuaModuleTableFunction(R"(/**
@@ -469,8 +482,9 @@ namespace FINLua {
 	}
 	int luaFIN_await(lua_State* L, int index) {
 		uint64 idx = lua_absindex(L, index);
+		TOptional<double> timeout;
 		lua_State* thread;
-		int status = FutureModule::Future::pollInternal(L, idx, thread);
+		int status = FutureModule::Future::pollInternal(L, idx, thread, timeout);
 		if (thread == nullptr) {
 			return luaL_error(L, "Tried to await on failed future");
 		}
@@ -478,7 +492,7 @@ namespace FINLua {
 			case LUA_OK:
 				return FutureModule::Future::getInternal(L, idx);
 			case LUA_YIELD:
-				return luaFIN_yield(L, 0, reinterpret_cast<lua_KContext>(reinterpret_cast<void*>(idx)), &awaitContinue);
+				return luaFIN_yield(L, 0, reinterpret_cast<lua_KContext>(reinterpret_cast<void*>(idx)), &awaitContinue, timeout);
 			default: // error
 				return -1;
 		}
@@ -507,8 +521,9 @@ namespace FINLua {
 		int shift = 0;
 		for (int i = 1; i <= len; ++i) {
 			lua_geti(L, -1, i);
+			TOptional<double> timeout;
 			lua_State* thread;
-			int status = FutureModule::Future::pollInternal(L, -1, thread);
+			int status = FutureModule::Future::pollInternal(L, -1, thread, timeout);
 			lua_pop(L, 1);
 			if (status == LUA_OK) {
 				shift += 1;

@@ -5,6 +5,7 @@
 #include "FicsItNetworksLuaModule.h"
 #include "FINLuaModule.h"
 #include "FINLuaRuntimePersistence.h"
+#include "OnlineErrorDefinitions.h"
 #include "ScopeExit.h"
 #include "Union.h"
 
@@ -112,7 +113,6 @@ TOptional<FString> FFINLuaRuntime::LoadState(FFINLuaRuntimePersistenceState& InS
 	PersistenceState = &InState;
 
 	try {
-		FINLua::luaFINDebug_dumpStack(LuaState);
 		eris_unpersist(LuaState, -1, -2);				// ..., data-str, uperm, data
 	} catch(const FFINLuaPanic& e) {
 		PersistenceState = nullptr;
@@ -158,7 +158,6 @@ TUnion<FFINLuaRuntimePersistenceState, FString> FFINLuaRuntime::SaveState() {
 
 	lua_pushcclosure(LuaState, &luaPersist, 2);
 	int stateCode = lua_pcall(LuaState, 0, 1, 0);							// ..., data-str|error
-	FINLua::luaFINDebug_dumpStack(LuaState);
 
 	PersistenceState = nullptr;
 
@@ -192,10 +191,17 @@ TOptional<TTuple<int, int>> FFINLuaRuntime::Tick() {
 		while (TickActions.Dequeue(func)) {
 			func();
 		}
-		return {};
 	} else {
-		return {LuaTick()};
+		if (Timeout) {
+			double now = FPlatformTime::Seconds();
+			if (*Timeout <= now) {
+				return  {LuaTick()};
+			}
+		} else {
+			return {LuaTick()};
+		}
 	}
+	return {};
 }
 
 TTuple<int, int> FFINLuaRuntime::LuaTick() {
@@ -211,11 +217,17 @@ TTuple<int, int> FFINLuaRuntime::LuaTick() {
 
 	OnPostLuaTick.Broadcast(status, results);
 
-	if (results > 0) {
-		lua_pop(LuaThread, results);
-	}
-
 	if (status == LUA_YIELD) {
+		Timeout.Reset();
+		if (results > 0) {
+			if (lua_type(LuaThread, -results) == LUA_TNUMBER) {
+				double timeout = lua_tonumber(LuaThread, -results);
+				Timeout = timeout;
+			}
+		}
+
+		lua_pop(LuaThread, results);
+
 		lua_gc(LuaState, LUA_GCCOLLECT, 0);
 	}
 
