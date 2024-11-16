@@ -182,8 +182,40 @@ FFINLuaRuntime& FINLua::luaFIN_getRuntime(lua_State* L) {
 	return **(FFINLuaRuntime**)lua_getextraspace(L);
 }
 
+void luaFIN_lastChanceTickHook(lua_State* L, lua_Debug*);
+
 void luaFIN_tickHook(lua_State* L, lua_Debug*) {
-	lua_yield(L, 0);
+	FFINLuaRuntime& runtime = FINLua::luaFIN_getRuntime(L);
+	bool bShouldYield = true;
+	runtime.OnTickHook.Broadcast(bShouldYield);
+	if (!bShouldYield) return;
+
+	if (lua_isyieldable(L)) {
+		lua_yield(L, 0);
+	} else {
+		if (!runtime.LastChance.IsSet()) {
+			runtime.LastChance = {{FPlatformTime::Seconds()+2, *runtime.Hook_Tick}};
+		}
+		lua_sethook(L, luaFIN_lastChanceTickHook, LUA_MASKCOUNT, 1);
+	}
+}
+
+void luaFIN_lastChanceTickHook(lua_State* L, lua_Debug*) {
+	FFINLuaRuntime& runtime = FINLua::luaFIN_getRuntime(L);
+	if (!runtime.LastChance.IsSet()) {
+		lua_sethook(L, luaFIN_tickHook, LUA_MASKCOUNT, runtime.Hook_Tick.Get(1));
+		return;
+	}
+	if (lua_isyieldable(L)) {
+		runtime.LastChance.Reset();
+		lua_yield(L, 0);
+	} else {
+		double now = FPlatformTime::Seconds();
+		if (now >= runtime.LastChance->Key && --runtime.LastChance->Value <= 0) {
+			runtime.LastChance.Reset();
+			luaL_error(L, "Timeout reached! Code took to long to leave un-yieldable C-Call Boundary.");
+		}
+	}
 }
 
 TOptional<TTuple<int, int>> FFINLuaRuntime::Tick() {
@@ -217,6 +249,8 @@ TTuple<int, int> FFINLuaRuntime::LuaTick() {
 	int status = lua_resume(LuaThread, LuaState, 0, &results);
 
 	OnPostLuaTick.Broadcast(status, results);
+
+	LastChance.Reset();
 
 	if (status == LUA_YIELD) {
 		Timeout.Reset();

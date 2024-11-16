@@ -15,6 +15,11 @@ FFINLuaThreadedRuntime::FFINLuaThreadedRuntime() : LuaTask(FAsyncTask<FFINLuaTic
 	Runtime.OnPreDestroy.AddLambda([this]() {
 		PauseAndWait();
 	});
+	Runtime.OnTickHook.AddLambda([this](bool& bShouldYield) {
+		if (bIsPromotedTick && ShouldThreadRun()) {
+			bShouldYield = false;
+		}
+	});
 }
 
 FFINLuaThreadedRuntime::~FFINLuaThreadedRuntime() {
@@ -27,7 +32,7 @@ void FFINLuaTickRunnable::DoWork() {
 	ON_SCOPE_EXIT {
 		Runtime->bIsPromotedTick = false;
 	};
-	while (Runtime->ShouldRunInThread.Load() && Runtime->Runtime.TickActions.IsEmpty() && !Runtime->Runtime.Timeout.IsSet()) {
+	while (Runtime->ShouldThreadRun()) {
 		TOptional<TTuple<int, int>> status = Runtime->Runtime.Tick();
 
 		if (Runtime->WaitForThread) {
@@ -40,6 +45,10 @@ void FFINLuaTickRunnable::DoWork() {
 			break;
 		}
 	}
+}
+
+bool FFINLuaThreadedRuntime::ShouldThreadRun() const {
+	return ShouldRunInThread.Load() && Runtime.TickActions.IsEmpty() && !Runtime.Timeout.IsSet() && !WaitForThread;
 }
 
 void FFINLuaThreadedRuntime::HandleWaitForGame() {

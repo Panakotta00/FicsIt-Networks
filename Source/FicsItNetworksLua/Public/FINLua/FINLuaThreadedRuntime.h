@@ -53,6 +53,7 @@ public:
 	// [Any Thread]
 	void SetShouldBePromoted(bool bInShouldBePromoted) { ShouldRunInThread.Store(bInShouldBePromoted); }
 	bool ShouldBePromoted() const { return ShouldRunInThread.Load(); }
+	bool ShouldThreadRun() const;
 
 	// [Main Thead]
 	void HandleWaitForGame();

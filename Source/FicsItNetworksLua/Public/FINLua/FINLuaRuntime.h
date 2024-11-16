@@ -51,6 +51,7 @@ public:
 	TMulticastDelegate<void()> OnPostReset;
 	TMulticastDelegate<void()> OnPreDestroy;
 	TMulticastDelegate<void(TArray<TSharedPtr<void>>&)> OnPreLuaTick;
+	TMulticastDelegate<void(bool&)> OnTickHook;
 	TMulticastDelegate<void(int, int)> OnPostLuaTick;
 	TMulticastDelegate<void(lua_State*)> PreLoadState;
 	TMulticastDelegate<void(lua_State*, lua_State*)> PostLoadState;
@@ -66,6 +67,7 @@ public:
 	TMap<FString, FFIRAnyValue> GlobalData;
 	TMap<FString, void*> GlobalPointers;
 	TOptional<double> Timeout;
+	TOptional<TTuple<double, int>> LastChance;
 
 	FFINLuaRuntime();
 	~FFINLuaRuntime();
