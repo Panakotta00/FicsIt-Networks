@@ -213,7 +213,7 @@ namespace FINLua {
 				FFINEventFilterExpression filter = checkFilter(L, 2);
 				lua_pushvalue(L, 1);
 				luaFIN_pushStruct(L, filter);
-				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 3);
+				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
 				return 1;
 			}
 		}
@@ -426,10 +426,10 @@ namespace FINLua {
 				}
 				lua_pushnil(L);
 				lua_seti(L, 1, key+1);
-				luaL_checktype(L, 4, LUA_TTABLE);
-				int len = luaL_len(L, 4);
+				luaL_checktype(L, 3, LUA_TTABLE);
+				int len = luaL_len(L, 3);
 				for (int i = 1; i <= len; ++i) {
-					lua_geti(L, 4, i);
+					lua_geti(L, 3, i);
 				}
 				return len;
 			}
@@ -448,7 +448,7 @@ namespace FINLua {
 				registry->OneShots.Add(key, filter);
 				lua_getiuservalue(L, -1, 3);
 				lua_pushinteger(L, key);
-				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 3);
+				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
 				return 1;
 			}
 
