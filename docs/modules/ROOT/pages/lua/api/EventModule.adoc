@@ -93,7 +93,7 @@ a Task will be created using the function and the signals parameters will be pas
 === __event.__**waitFor** (xref:/reflection/structs/EventFilter.adoc[EventFilter]) -> xref:/reflection/structs/Future.adoc[Future]
 Returns a Future that resolves when a signal got polled that matches the given Event Filter.
 
-=== __event.__**queue** (xref:/reflection/structs/EventFilter.adoc[EventFilter]) -> xref:/lua/api/Event.adoc#_eventqueue[EventQueue]
+=== __event.__**queue** (xref:/reflection/structs/EventFilter.adoc[EventFilter]) -> xref:/lua/api/EventModule.adoc#_eventqueue[EventQueue]
 Creates a new event queue.
 When this variable closes or gets garbage collected, it will stop receiving signals.
 

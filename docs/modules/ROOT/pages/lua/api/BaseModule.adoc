@@ -1,0 +1,6 @@
+= Base Module
+:table-caption!:
+
+This module provides based functionallity to the Lua runtime.
+Inluding base Lua Libraries (table, math, coroutine, etc).
+

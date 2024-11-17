@@ -3,6 +3,12 @@
 
 This Module provides the Future type and all its necessary functionallity.
 
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/KernelModule.adoc[KernelModule]
+!===
+
 == Globals
 
 === **async** : 
@@ -79,7 +85,7 @@ Blocks the current thread/future until the given amount of time passed
 === __Future.__**get** ()
 
 
-=== __Future.__**poll** () -> bool
+=== __Future.__**poll** () -> bool,nil|number
 
 
 === **FutureStruct**
