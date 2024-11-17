@@ -95,19 +95,18 @@ void AFIRSubsystem::RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroad
 	}
 }
 
-TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> AFIRSubsystem::GetFactoryConnectorSettings(UFGFactoryConnectionComponent* InConnector) {
-	FactoryConnectorSettingsMutex.Lock();
+TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> AFIRSubsystem::GetFactoryConnectorSettings(UFGFactoryConnectionComponent* InConnector) {
+	TSharedRef<FRWScopeLock> Lock = MakeShared<FRWScopeLock>(FactoryConnectorSettingsMutex, SLT_ReadOnly);
 	FFIRFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
 	if (Settings) {
-		return TOptional(TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>(FactoryConnectorSettingsMutex, *Settings));
+		return TOptional(TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>(Lock, *Settings));
 	} else {
-		FactoryConnectorSettingsMutex.Unlock();
 		return {};
 	}
 }
 
 void AFIRSubsystem::SetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector, TSubclassOf<UFGItemDescriptor> InAllowedItem) {
-	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FRWScopeLock ScopeLock(FactoryConnectorSettingsMutex, SLT_Write);
 	FFIRFactoryConnectorSettings* Settings = nullptr;
 	if (InAllowedItem != nullptr) {
 		Settings = &FactoryConnectorSettings.FindOrAdd(InConnector);
@@ -121,7 +120,7 @@ void AFIRSubsystem::SetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent
 }
 
 TSubclassOf<UFGItemDescriptor> AFIRSubsystem::GetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector) {
-	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FRWScopeLock ScopeLock(FactoryConnectorSettingsMutex, SLT_ReadOnly);
 	FFIRFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
 	if (Settings) {
 		return Settings->AllowedItem;
@@ -131,7 +130,7 @@ TSubclassOf<UFGItemDescriptor> AFIRSubsystem::GetFactoryConnectorAllowedItem(UFG
 }
 
 void AFIRSubsystem::SetFactoryConnectorBlocked(UFGFactoryConnectionComponent* InConnector, bool bInBlocked) {
-	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FRWScopeLock ScopeLock(FactoryConnectorSettingsMutex, SLT_Write);
 	FFIRFactoryConnectorSettings* Settings = nullptr;
 	if (bInBlocked) {
 		Settings = &FactoryConnectorSettings.FindOrAdd(InConnector);
@@ -145,13 +144,13 @@ void AFIRSubsystem::SetFactoryConnectorBlocked(UFGFactoryConnectionComponent* In
 }
 
 bool AFIRSubsystem::GetFactoryConnectorBlocked(UFGFactoryConnectionComponent* InConnector) {
-	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FRWScopeLock ScopeLock(FactoryConnectorSettingsMutex, SLT_ReadOnly);
 	FFIRFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
 	return Settings ? Settings->bBlocked : false;
 }
 
 int64 AFIRSubsystem::AddFactoryConnectorUnblockedTransfers(UFGFactoryConnectionComponent* InConnector, int64 InUnblockedTransfers) {
-	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FRWScopeLock ScopeLock(FactoryConnectorSettingsMutex, SLT_ReadOnly);
 	FFIRFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
 	if (Settings) {
 		Settings->UnblockedTransfers = FMath::Max(0, Settings->UnblockedTransfers + InUnblockedTransfers);
@@ -162,7 +161,7 @@ int64 AFIRSubsystem::AddFactoryConnectorUnblockedTransfers(UFGFactoryConnectionC
 }
 
 int64 AFIRSubsystem::GetFactoryConnectorUnblockedTransfers(UFGFactoryConnectionComponent* InConnector) {
-	FScopeLock ScopeLock(&FactoryConnectorSettingsMutex);
+	FRWScopeLock ScopeLock(FactoryConnectorSettingsMutex, SLT_ReadOnly);
 	FFIRFactoryConnectorSettings* Settings = FactoryConnectorSettings.Find(InConnector);
 	if (Settings) {
 		return Settings->UnblockedTransfers;

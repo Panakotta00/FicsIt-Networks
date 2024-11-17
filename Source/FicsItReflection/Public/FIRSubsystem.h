@@ -56,7 +56,7 @@ public:
 	void AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
 	void RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
 
-	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> GetFactoryConnectorSettings(UFGFactoryConnectionComponent* InConnector);
+	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> GetFactoryConnectorSettings(UFGFactoryConnectionComponent* InConnector);
 	void SetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector, TSubclassOf<UFGItemDescriptor> InAllowedItem);
 	TSubclassOf<UFGItemDescriptor> GetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector);
 	void SetFactoryConnectorBlocked(UFGFactoryConnectionComponent* InConnector, bool bInBlocked);
@@ -80,7 +80,7 @@ private:
 	UPROPERTY(SaveGame)
 	TMap<UFGRailroadTrackConnectionComponent*, FFIRRailroadSwitchForce> ForcedRailroadSwitches;
 
-	FCriticalSection FactoryConnectorSettingsMutex;
+	FRWLock FactoryConnectorSettingsMutex;
 	UPROPERTY(SaveGame)
 	TMap<UFGFactoryConnectionComponent*, FFIRFactoryConnectorSettings> FactoryConnectorSettings;
 };
