@@ -39,7 +39,13 @@ FString GetText(UFIRProperty* Prop) {
 		return "Class";
 	case FIR_STRUCT:
 		if (Cast<UFIRStructProperty>(Prop)->Struct) {
-			return FString("Struct(") +  FFicsItReflectionModule::Get().FindStruct(Cast<UFIRStructProperty>(Prop)->Struct)->GetDisplayName().ToString() + ")";
+			UFIRStructProperty* StructProperty = Cast<UFIRStructProperty>(Prop);
+			UFIRStruct* FirStruct = FFicsItReflectionModule::Get().FindStruct(StructProperty->Struct);
+			if(IsValid(FirStruct)) {
+				return FString("Struct(") +  FirStruct->GetDisplayName().ToString() + ")";
+			}else {
+				return FString("InvalidStruct(") + StructProperty->Struct->GetName() + ")";
+			}
 		}
 		return "Struct";
 	case FIR_TRACE:
