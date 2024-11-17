@@ -67,9 +67,17 @@ void FFINLuaSyntaxHighlighter::SetText(const FString& SourceString, FTextLayout&
 					}
 					case FIN_Lua_Token_Parenthesis:
 						if (text == TEXT("(")) {
-							TSharedRef<IRun>* prevRun = Algo::FindLastByPredicate(runs, [](const TSharedRef<IRun>& run) {
-								return run->GetRunInfo().Name == TEXT("SyntaxHighlight.FINLua.Identifier");
-							});
+							TSharedRef<IRun>* prevRun = nullptr;
+							for (int i = runs.Num(); i > 0; --i) {
+								TSharedRef<IRun>& run = runs[i-1];
+								if (run->GetRunInfo().Name == TEXT("SyntaxHighlight.FINLua.Identifier")) {
+									prevRun = &run;
+									break;
+								}
+								if (run->GetRunInfo().Name == TEXT("SyntaxHighlight.FINLua.Keyword")) {
+									break;
+								}
+							}
 							if (prevRun) {
 								TSharedRef<IRun>& run = *prevRun;
 								FTextBlockStyle style;
