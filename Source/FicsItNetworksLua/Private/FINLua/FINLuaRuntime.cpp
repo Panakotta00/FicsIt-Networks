@@ -5,8 +5,6 @@
 #include "FicsItNetworksLuaModule.h"
 #include "FINLuaModule.h"
 #include "FINLuaRuntimePersistence.h"
-#include "OnlineErrorDefinitions.h"
-#include "ScopeExit.h"
 #include "Union.h"
 
 void luaWarnF(void* ud, const char* msg, int tocont) {

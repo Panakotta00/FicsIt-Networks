@@ -1,5 +1,4 @@
-﻿#include "FindLast.h"
-#include "FINLuaSyntax.h"
+﻿#include "FINLuaSyntax.h"
 #include "FINLuaCodeEditor.h"
 #include "Framework/Text/IRun.h"
 #include "Framework/Text/TextLayout.h"

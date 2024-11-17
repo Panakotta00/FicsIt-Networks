@@ -3,7 +3,6 @@
 #include "FILLogScope.h"
 #include "FINLua.h"
 #include "FIRTypes.h"
-#include "Serialization/CompactBinaryWriter.h"
 
 class UFIRProperty;
 class UFIRStruct;

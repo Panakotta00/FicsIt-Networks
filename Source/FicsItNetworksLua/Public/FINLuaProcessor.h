@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "AsyncWork.h"
 #include "FINLuaReferenceCollector.h"
-#include "FINLuaRuntime.h"
 #include "FINLuaRuntimePersistence.h"
 #include "FINLuaThreadedRuntime.h"
 #include "Future.h"

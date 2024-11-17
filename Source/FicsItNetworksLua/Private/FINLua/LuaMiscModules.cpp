@@ -5,7 +5,6 @@
 #include "FINLuaThreadedRuntime.h"
 #include "FINNetworkUtils.h"
 #include "LuaFileSystemAPI.h"
-#include "LuaObject.h"
 #include "LuaPersistence.h"
 
 namespace FINLua {

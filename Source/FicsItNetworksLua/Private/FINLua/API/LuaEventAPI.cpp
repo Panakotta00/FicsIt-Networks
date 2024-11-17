@@ -1,8 +1,5 @@
 #include "LuaEventAPI.h"
 
-#include <csignal>
-#include <lstate.h>
-
 #include "FicsItNetworksComputer.h"
 #include "FicsItNetworksLuaModule.h"
 #include "FicsItReflection.h"
@@ -266,7 +263,7 @@ namespace FINLua {
 				TArray<FFIRTrace> Listening = eventSystem.Listening();
 				int i = 0;
 				lua_newtable(L);
-				for (const FFIRTrace Obj : Listening) {
+				for (const FFIRTrace& Obj : Listening) {
 					luaFIN_pushObject(L, Obj);
 					lua_seti(L, -2, ++i);
 				}
