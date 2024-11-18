@@ -54,7 +54,7 @@
 *** xref:lua/api/ComputerModule.adoc[ComputerModule]
 *** xref:lua/api/DebugModule.adoc[DebugModule]
 *** xref:lua/api/EventModule.adoc[EventModule]
-*** xref:lua/api/FileSystem.adoc[FileSystem]
+*** xref:lua/api/FileSystemModule.adoc[FileSystemModule]
 *** xref:lua/api/FullReflectionModule.adoc[FullReflectionModule]
 *** xref:lua/api/FutureModule.adoc[FutureModule]
 *** xref:lua/api/KernelModule.adoc[KernelModule]

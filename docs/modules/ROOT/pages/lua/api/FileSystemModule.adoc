@@ -167,7 +167,7 @@ Function fails if it is not able to move the object.
 !===
 ====
 
-=== __filesystem.__**open** (path: string, mode: string) -> xref:/lua/api/FileSystem.adoc#_file[File]
+=== __filesystem.__**open** (path: string, mode: string) -> xref:/lua/api/FileSystemModule.adoc#_file[File]
 Opens a file-stream and returns it as File-table.
 
 .Possible Modes
@@ -215,7 +215,7 @@ Opens a file-stream and returns it as File-table.
 !Name !Type !Description
 
 ! *File* `file`
-! xref:/lua/api/FileSystem.adoc#_file[File]
+! xref:/lua/api/FileSystemModule.adoc#_file[File]
 ! The File table of the file stream. Nil if not able to open file in read only.
 
 !===
