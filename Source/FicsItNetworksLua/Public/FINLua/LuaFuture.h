@@ -57,4 +57,6 @@ namespace FINLua {
 	 * @param index the index of the future
 	 */
 	void luaFIN_addTask(lua_State* L, int index);
+
+	int luaFIN_futureRun(lua_State* L, int index, TOptional<double>& timeout);
 }

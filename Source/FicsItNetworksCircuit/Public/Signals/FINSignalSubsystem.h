@@ -32,7 +32,7 @@ private:
 	 * Map of sender objects to array of receiver traces, traces point from sender to receiver
 	 */
 	UPROPERTY(SaveGame)
-	TMap<UObject*, FFINSignalListeners> Listeners;
+	TMap<UObject*, FFINSignalListeners> Senders;
 	
 public:
 	// Begin IFGSaveInterface
@@ -49,7 +49,7 @@ public:
 	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& ReferenceCollector) {
 		Super::AddReferencedObjects(InThis, ReferenceCollector);
 		AFINSignalSubsystem* SigSubSys = Cast<AFINSignalSubsystem>(InThis);
-		for (TPair<UObject*, FFINSignalListeners>& Listener : SigSubSys->Listeners) Listener.Value.AddStructReferencedObjects(ReferenceCollector);
+		for (TPair<UObject*, FFINSignalListeners>& Listener : SigSubSys->Senders) Listener.Value.AddStructReferencedObjects(ReferenceCollector);
 	}
 
 	/**
@@ -93,5 +93,5 @@ public:
 	 * Returns all the objects this object listens to
 	 */
 	UFUNCTION(BlueprintCallable, Category="Network|Signals")
-	TArray<UObject*> GetListening(UObject* Reciever);
+	TArray<FFIRTrace> GetListening(UObject* Reciever);
 };

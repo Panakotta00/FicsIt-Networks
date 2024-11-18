@@ -11,6 +11,15 @@
 
 namespace FINLua {
 	LuaModule(R"(/**
+	 * @LuaModule		FullReflectionModule
+	 * @DisplayName		Reflection-System Base Module
+	 * @Dependency		ReflectionSystemObjectModule
+	 * @Dependency		ReflectionSystemClassModule
+	 * @Dependency		ReflectionSystemStructModule
+	 *
+	 * This Module is used as dependency to depend on the entire Reflection System related stuff.
+	 */)", FullReflectionModule) {}
+	LuaModule(R"(/**
 	 * @LuaModule		ReflectionSystemBaseModule
 	 * @DisplayName		Reflection-System Base Module
 	 *
@@ -215,7 +224,7 @@ UE_DISABLE_OPTIMIZATION_SHIP
 		if (FuncFlags & FIR_Func_RT_Async && !bForceSync) {
 			return luaFIN_callReflectionFunctionDirectly(L, Function, Ctx, nArgs, nResults);
 		} else if (FuncFlags & FIR_Func_RT_Parallel && !bForceSync) {
-			[[maybe_unused]] FLuaSyncCall SyncCall(L);
+			[[maybe_unused]] FLuaSync SyncCall(L);
 			return luaFIN_callReflectionFunctionDirectly(L, Function, Ctx, nArgs, nResults);
 		} else {
 			TArray<FIRAny> Input = luaFIN_callReflectionFunctionProcessInput(L, Function, nArgs);
@@ -280,7 +289,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
 			} else if (PropFlags & FIR_Prop_RT_Parallel) {
 				ZoneScopedN("Lua Get Property SyncCall");
-				[[maybe_unused]] FLuaSyncCall SyncCall(L);
+				[[maybe_unused]] FLuaSync SyncCall(L);
 				{
 					ZoneScopedN("Lua Get Property");
 					luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
@@ -335,7 +344,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			if (PropFlags & FIR_Prop_RT_Async) {
 				Property->SetValue(PropertyCtx, Value.GetValue());
 			} else if (PropFlags & FIR_Prop_RT_Parallel) {
-				[[maybe_unused]] FLuaSyncCall SyncCall(L);
+				[[maybe_unused]] FLuaSync SyncCall(L);
 				Property->SetValue(PropertyCtx, Value.GetValue());
 			} else {
 				luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx, Value.GetValue()));

@@ -1,6 +1,6 @@
 ﻿#include "FicsItReflection.h"
 #include "FINEventFilter.h"
-#include "FicsItReflection/Public/Reflection/Source/FIRSourceStaticMacros.h"
+#include "Reflection/Source/FIRSourceStaticMacros.h"
 
 BeginStruct(FFINEventFilterExpression, "EventFilter", "Event Filter", "This struct contains filter settings so you can evaluate if a sent signal matches the filter or not.")
 BeginFuncVA(matches, "Matches", "Returns true if the given signal data matches this event filter.") {

@@ -80,8 +80,6 @@ bool AFINNetworkAdapter::FindConnection(AActor* Actor, FVector HitLocation, FTra
 			auto Connector = Cast<UFINNetworkConnectionComponent>(FoundComponent);
 			if(IsValid(Connector)) {
 				OutMaxCables = Connector->MaxCables;
-			}else {
-				OutMaxCables = 1;
 			}
 			return true;
 		}
@@ -128,7 +126,7 @@ AFINNetworkAdapter::AFINNetworkAdapter() {
 	ConnectorMesh = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>(TEXT("StaticMesh"));
 	ConnectorMesh->SetupAttachment(RootComponent);
 	ConnectorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
+
 	Connector->MaxCables = 1;
 }
 
@@ -166,10 +164,10 @@ void AFINNetworkAdapter::BeginPlay() {
 
 	FTransform ConnectorTransform;
 	bool bMesh;
-	int MaxCables;
-	if (FindConnection(Parent, GetActorLocation(), ConnectorTransform, bMesh, MaxCables)) {
+	int maxCables = Connector->MaxCables;
+	if (FindConnection(Parent, GetActorLocation(), ConnectorTransform, bMesh, maxCables)) {
 		SetActorTransform(ConnectorTransform);
-		Connector->MaxCables = MaxCables;
+		Connector->MaxCables = maxCables;
 		ConnectorMesh->SetHiddenInGame(!bMesh, true);
 		ConnectorMesh->SetInstanced(false);
 		ConnectorMesh->SetInstanced(true);

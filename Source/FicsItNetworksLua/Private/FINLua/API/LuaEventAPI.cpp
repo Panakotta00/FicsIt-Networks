@@ -1,12 +1,12 @@
 #include "LuaEventAPI.h"
 
-#include <csignal>
-
 #include "FicsItNetworksComputer.h"
+#include "FicsItNetworksLuaModule.h"
 #include "FicsItReflection.h"
 #include "FINEventFilter.h"
 #include "FINLua/Reflection/LuaObject.h"
 #include "FINLuaProcessor.h"
+#include "FINLuaThreadedRuntime.h"
 #include "FINNetworkUtils.h"
 #include "LuaFuture.h"
 #include "LuaStruct.h"
@@ -18,37 +18,10 @@
 
 UE_DISABLE_OPTIMIZATION_SHIP
 
-FFINLuaEventQueue::FFINLuaEventQueue(UFINLuaProcessor* Processor, int64 Key): Processor(Processor), Key(Key) {
-	fgcheck(IsValid(Processor) && IsValid(Processor->GetKernel()));
-	Processor->GetKernel()->AddReferencer(this, &CollectReferences);
-}
+FFINLuaEventQueue::FFINLuaEventQueue(FFINLuaReferenceCollector* ReferenceCollector, int64 Key): FFINLuaReferenceCollected(ReferenceCollector), Key(Key) {}
 
-
-FFINLuaEventQueue::FFINLuaEventQueue(const FFINLuaEventQueue& Other): Events(Other.Events), Filter(Other.Filter), Processor(Other.Processor), Key(Other.Key) {
-	fgcheck(IsValid(Processor) && IsValid(Processor->GetKernel()));
-	Processor->GetKernel()->AddReferencer(this, &CollectReferences);
-}
-
-FFINLuaEventQueue& FFINLuaEventQueue::operator=(const FFINLuaEventQueue& Other) {
-	if (IsValid(Processor) && IsValid(Processor->GetKernel())) {
-		Processor->GetKernel()->RemoveReferencer(this);
-	}
-	Events = Other.Events;
-	Filter = Other.Filter;
-	Processor = Other.Processor;
-	Key = Other.Key;
-	fgcheck(IsValid(Processor) && IsValid(Processor->GetKernel()));
-	Processor->GetKernel()->AddReferencer(this, &CollectReferences);
-	return *this;
-}
-
-FFINLuaEventQueue::~FFINLuaEventQueue() {
-	if (IsValid(Processor) && IsValid(Processor->GetKernel())) Processor->GetKernel()->RemoveReferencer(this);
-}
-
-void FFINLuaEventQueue::CollectReferences(void* Obj, FReferenceCollector& Collector) {
-	FFINLuaEventQueue* Self = static_cast<FFINLuaEventQueue*>(Obj);
-	Collector.AddPropertyReferencesWithStructARO(StaticStruct(), Self);
+void FFINLuaEventQueue::CollectReferences(FReferenceCollector& Collector) {
+	Collector.AddPropertyReferencesWithStructARO(StaticStruct(), this);
 }
 
 namespace FINLua {
@@ -110,10 +83,10 @@ namespace FINLua {
 	}
 
 	LuaModule(R"(/**
-	 * @LuaModule		Event
+	 * @LuaModule		EventModule
 	 * @DisplayName		Event Module
 	 * @Dependency		ReflectionSystemStructModule
-	 */)", Event) {
+	 */)", EventModule) {
 		LuaModuleMetatable(R"(/**
 		 * @LuaMetatable	EventQueue
 		 * @DisplayName		Event Queue
@@ -148,13 +121,13 @@ namespace FINLua {
 			}
 
 			int unpersist(lua_State* L) {
-				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+				FFINLuaRuntimePersistenceState& Storage = luaFIN_getPersistence(L);
 
 				const FFIRInstancedStruct& Struct = *Storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1)));
 
 				FFINLuaEventQueue& queue = Struct.Get<FFINLuaEventQueue>();
-				queue.Processor = Processor;
+				queue.ReferenceCollector = luaFIN_getReferenceCollector(L);
 				luaFIN_pushEventQueueInternal(L, MakeShared<FFINLuaEventQueue>(queue));
 				lua_pushvalue(L, lua_upvalueindex(2));
 				lua_setiuservalue(L, -2, 1);
@@ -168,8 +141,7 @@ namespace FINLua {
 			 */)", __persist) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 
-				UFINLuaProcessor* Processor = UFINLuaProcessor::luaGetProcessor(L);
-				FFINLuaProcessorStateStorage& Storage = Processor->StateStorage;
+				FFINLuaRuntimePersistenceState& Storage = luaFIN_getPersistence(L);
 				lua_pushinteger(L, Storage.Add(MakeShared<FIRStruct>(*queue)));
 				lua_getiuservalue(L, 1, 1);
 				lua_getiuservalue(L, 1, 2);
@@ -194,9 +166,9 @@ namespace FINLua {
 					queue->Events.RemoveAt(0);
 					return luaFIN_pushEventData(L, event.Sender, event.Data);
 				}
-				double currentTime = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetTimeSinceStart();
+				double currentTime = FPlatformTime::Seconds();
 				if (timeout > currentTime) {
-					return lua_yieldk(L, 0, NULL, luaPullContinue);
+					return luaFIN_yield(L, 0, NULL, luaPullContinue, timeout);
 				}
 				return 0;
 			}
@@ -205,8 +177,8 @@ namespace FINLua {
 			 * @DisplayName		Pull
 			 */)", pull) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
-				double timeout = luaL_checknumber(L, 2)*1000;
-				timeout += UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetTimeSinceStart();
+				double timeout = luaL_checknumber(L, 2);
+				timeout += FPlatformTime::Seconds();
 				lua_pop(L, 1);
 				lua_pushnumber(L, timeout);
 				return luaPullContinue(L, 0, NULL);
@@ -222,7 +194,7 @@ namespace FINLua {
 						return luaFIN_pushEventData(L, event.Sender, event.Data);
 					}
 				}
-				return lua_yieldk(L, 0, NULL, luaWaitForContinue);
+				return luaFIN_yield(L, 0, NULL, luaWaitForContinue, TNumericLimits<double>::Max());
 			}
 			int luaWaitFor(lua_State* L) {
 				return luaWaitForContinue(L, 0, NULL);
@@ -233,6 +205,7 @@ namespace FINLua {
 			 *
 			 * Returns a Future that resolves when a signal got added to the queue that matches the given Event Filter.
 			 */)", waitFor) {
+				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 				FFINEventFilterExpression filter = checkFilter(L, 2);
 				lua_pushvalue(L, 1);
@@ -249,11 +222,10 @@ namespace FINLua {
 		 * The Event API provides classes, functions and variables for interacting with the component network.
 		 */)", event) {
 			void luaListen(lua_State* L, FFIRTrace o) {
-				const UFINKernelNetworkController* net = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork();
+				IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);;
 				UObject* obj = *o;
 				if (!IsValid(obj)) luaL_error(L, "object is not valid");
-				AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(obj);
-				SigSubSys->Listen(obj, o.Reverse() / net->GetComponent().GetObject());
+				eventSystem.Listen(o);
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -265,14 +237,14 @@ namespace FINLua {
 			 * @param	objects		Object...	A list of objects the computer should start listening to.
 			 */)", listen) {
 				// ReSharper disable once CppDeclaratorNeverUsed
-				FLuaSyncCall SyncCall(L);
+				FLuaSync SyncCall(L);
 				const int args = lua_gettop(L);
 
 				for (int i = 1; i <= args; ++i) {
 					FFIRTrace trace = luaFIN_checkObject(L, i, nullptr);
 					luaListen(L, trace);
 				}
-				return UFINLuaProcessor::luaAPIReturn(L, 0);
+				return 0;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -284,15 +256,15 @@ namespace FINLua {
 			 * @return	listening	Object[]	An array containing all objects this computer is currently listening to.
 			 */)", listening) {
 				// ReSharper disable once CppDeclaratorNeverUsed
-				FLuaSyncCall SyncCall(L);
+				FLuaSync SyncCall(L);
 
-				UObject* netComp = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->GetComponent().GetObject();
+				IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
 
-				TArray<UObject*> Listening = AFINSignalSubsystem::GetSignalSubsystem(netComp)->GetListening(netComp);
+				TArray<FFIRTrace> Listening = eventSystem.Listening();
 				int i = 0;
 				lua_newtable(L);
-				for (UObject* Obj : Listening) {
-					luaFIN_pushObject(L, FFIRTrace(netComp) / Obj);
+				for (const FFIRTrace& Obj : Listening) {
+					luaFIN_pushObject(L, Obj);
 					lua_seti(L, -2, ++i);
 				}
 				return 1;
@@ -300,9 +272,24 @@ namespace FINLua {
 
 			// ReSharper disable once CppParameterNeverUsed
 			int luaPullContinue(lua_State* L, int status, lua_KContext ctx) {
-				const int args = lua_gettop(L);
+				IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+				TOptional<TTuple<FFIRTrace, FFINSignalData>> data = eventSystem.PullSignal();
+				if (!data) {
+					const int args = lua_gettop(L);
+					TOptional<double> timeout;
+					if (args > 0) {
+						timeout = luaL_checknumber(L, 1);
+					}
+					if (!timeout || *timeout <= FPlatformTime::Seconds()) {
+						return 0;
+					}
+					return luaFIN_yield(L, 0, 0, luaPullContinue, timeout);
+				}
 
-				return args - ctx;
+				const auto& [sender, signal] = *data;
+
+				luaFIN_handleEvent(L, sender, signal);
+				return luaFIN_pushEventData(L, sender, signal);
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -318,23 +305,15 @@ namespace FINLua {
 			 * @return		parameters	any...			Parameters	The parameters passed to the signal. Not set when timeout got reached.
 			 */)", pull) {
 				const int args = lua_gettop(L);
-				double t = 0.0;
-				if (args > 0) t = lua_tonumber(L, 1);
-
-				UFINLuaProcessor* luaProc = UFINLuaProcessor::luaGetProcessor(L);
-				check(luaProc);
-				const int a = luaProc->DoSignal(L);
-				if (!a && !(args > 0 && lua_isinteger(L, 1) && lua_tointeger(L, 1) == 0)) {
-					luaProc->Timeout = t;
-					luaProc->PullStart =  (FDateTime::Now() - FFicsItNetworksComputerModule::GameStart).GetTotalMilliseconds();
-					luaProc->PullState = (args > 0) ? 1 : 2;
-
-					luaProc->GetTickHelper().shouldWaitForSignal();
-
-					return lua_yieldk(L, 0, args, luaPullContinue);
+				if (args > 0) {
+					double timeout = luaL_checknumber(L, 1);
+					timeout += FPlatformTime::Seconds();
+					lua_pop(L, args);
+					lua_pushnumber(L, timeout);
+				} else {
+					lua_pushnumber(L, TNumericLimits<double>::Max());
 				}
-				luaProc->PullState = 0;
-				return UFINLuaProcessor::luaAPIReturn(L, a);
+				return luaPullContinue(L, 0, 0);
 			}
 
 			void luaIgnore(lua_State* L, FFIRTrace o) {
@@ -353,14 +332,14 @@ namespace FINLua {
 			 * @param	objects		Object...	A list of objects this computer should stop listening to.
 			 */)", ignore) {
 				// ReSharper disable once CppDeclaratorNeverUsed
-				FLuaSyncCall SyncCall(L);
+				FLuaSync SyncCall(L);
 				const int args = lua_gettop(L);
 
 				for (int i = 1; i <= args; ++i) {
 					FFIRTrace Trace = luaFIN_checkObject(L, i, nullptr);
 					luaIgnore(L, Trace);
 				}
-				return UFINLuaProcessor::luaAPIReturn(L, 0);
+				return 0;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -370,11 +349,10 @@ namespace FINLua {
 			 * Stops listening to any signal sender. If afterwards there are still coming signals in, it might be the system itself or caching bug.
 			 */)", ignoreAll) {
 				// ReSharper disable once CppDeclaratorNeverUsed
-				FLuaSyncCall SyncCall(L);
-				UFINKernelNetworkController* net = UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork();
-				AFINSignalSubsystem* SigSubSys = AFINSignalSubsystem::GetSignalSubsystem(net->GetComponent().GetObject());
-				SigSubSys->IgnoreAll(net->GetComponent().GetObject());
-				return UFINLuaProcessor::luaAPIReturn(L, 1);
+				FLuaSync SyncCall(L);
+				IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+				eventSystem.IgnoreAll();
+				return 1;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -383,7 +361,8 @@ namespace FINLua {
 			 *
 			 * Clears every signal from the signal queue.
 			 */)", clear) {
-				UFINLuaProcessor::luaGetProcessor(L)->GetKernel()->GetNetwork()->ClearSignals();
+				IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+				eventSystem.Clear();
 				return 0;
 			}
 
@@ -440,7 +419,7 @@ namespace FINLua {
 				int key = luaL_checkinteger(L, 2);
 				if (lua_geti(L, 1, key+1) == LUA_TNIL) {
 					lua_pop(L, 1);
-					return lua_yieldk(L, 0, NULL, luaWaitForContinue);
+					return luaFIN_yield(L, 0, NULL, luaWaitForContinue, TNumericLimits<double>::Max());
 				}
 				lua_pushnil(L);
 				lua_seti(L, 1, key+1);
@@ -468,6 +447,32 @@ namespace FINLua {
 				lua_pushinteger(L, key);
 				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
 				return 1;
+			}
+
+			int luaLoopContinue(lua_State* L, int, lua_KContext) {
+				while (true) {
+					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+					TOptional<TTuple<FFIRTrace, FFINSignalData>> data = eventSystem.PullSignal();
+					if (data) {
+						const auto& [sender, signal] = *data;
+						luaFIN_handleEvent(L, sender, signal);
+					}
+					TOptional<double> timeout = TNumericLimits<double>::Max();
+					luaFIN_futureRun(L, 1, timeout);
+					if (!data) {
+						return luaFIN_yield(L, 0, 0, luaLoopContinue, timeout);
+					}
+				}
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		loop
+			 * @DisplayName		Loop
+			 *
+			 * Runs an infinite loop or `future.run()`, `event.pull(0)` and `coroutine.yield()`.
+			 */)", loop) {
+				lua_pop(L, lua_gettop(L));
+				lua_getglobal(L, "future");
+				return luaLoopContinue(L, 0, 0);
 			}
 		}
 
@@ -511,17 +516,22 @@ namespace FINLua {
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "EventQueuePullContinue");
 			lua_pop(L, 1);
+
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaLoopContinue)));
+			luaFIN_persistValue(L, -1, "LoopContinue");
+			lua_pop(L, 1);
 		}
 	}
 
 	void luaFIN_pushEventQueueInternal(lua_State* L, const FEventQueue& queueRef) {
 		FEventQueue* queue = static_cast<FEventQueue*>(lua_newuserdatauv(L, sizeof(FEventQueue), 2));
 		new (queue) FEventQueue(queueRef);
-		luaL_setmetatable(L, Event::EventQueue::_Name);
+		luaL_setmetatable(L, EventModule::EventQueue::_Name);
 	}
 
 	FEventQueue luaFIN_pushEventQueue(lua_State* L, int64 key) {
-		TSharedRef<FFINLuaEventQueue> queueRef = MakeShared<FFINLuaEventQueue>(UFINLuaProcessor::luaGetProcessor(L), key);
+		FFINLuaReferenceCollector* referenceCollector = luaFIN_getReferenceCollector(L);
+		TSharedRef<FFINLuaEventQueue> queueRef = MakeShared<FFINLuaEventQueue>(referenceCollector, key);
 		luaFIN_pushEventQueueInternal(L, queueRef);
 		lua_newtable(L);
 		lua_setiuservalue(L, -2, 1);
@@ -531,12 +541,12 @@ namespace FINLua {
 	}
 
 	FEventQueue* luaFIN_toEventQueue(lua_State* L, int index) {
-		return static_cast<FEventQueue*>(luaL_testudata(L, index, Event::EventQueue::_Name));
+		return static_cast<FEventQueue*>(luaL_testudata(L, index, EventModule::EventQueue::_Name));
 	}
 
 	FEventQueue& luaFIN_checkEventQueue(lua_State* L, int index) {
 		FEventQueue* queue = luaFIN_toEventQueue(L, index);
-		if (!queue) luaFIN_typeError(L, index, Event::EventQueue::_Name);
+		if (!queue) luaFIN_typeError(L, index, EventModule::EventQueue::_Name);
 		return *queue;
 	}
 
@@ -602,6 +612,18 @@ namespace FINLua {
 		}
 		lua_pop(L, 1);
 		lua_pop(L, 1);
+	}
+
+	void luaFIN_setEventSystem(lua_State* L, IFINLuaEventSystem& EventSystem) {
+		FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+		runtime.GlobalPointers.Add(TEXT("EventSystem"), &EventSystem);
+	}
+
+	IFINLuaEventSystem& luaFIN_getEventSystem(lua_State* L) {
+		FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+		IFINLuaEventSystem** value = reinterpret_cast<IFINLuaEventSystem**>(runtime.GlobalPointers.Find(TEXT("EventSystem")));
+		fgcheck(value != nullptr);
+		return **value;
 	}
 }
 UE_ENABLE_OPTIMIZATION_SHIP

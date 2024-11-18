@@ -2,7 +2,7 @@
 
 #include "FicsItNetworksLuaModule.h"
 #include "FINLuaProcessor.h"
-#include "LuaExtraSpace.h"
+#include "LuaKernelAPI.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 
@@ -10,10 +10,13 @@ namespace FINLua {
 	int lua_futureStruct(lua_State* L);
 	int lua_futureStructContinue(lua_State* L, int, lua_KContext);
 	int awaitContinue(lua_State* L, int, lua_KContext);
+	int luaFIN_futureRun(lua_State* L, int index, TOptional<double>& timeout);
 
 	LuaModule(R"(/**
 	 * @LuaModule		FutureModule
 	 * @DisplayName		Future Module
+	 *
+	 * @Dependency		KernelModule
 	 *
 	 * This Module provides the Future type and all its necessary functionallity.
 	 */)", FutureModule) {
@@ -31,12 +34,9 @@ namespace FINLua {
 			}
 
 			int unpersist(lua_State* L) {
-				UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
+				FFINLuaRuntimePersistenceState& persistence = luaFIN_getPersistence(L);
 
-				// get persist storage
-				FFINLuaProcessorStateStorage& storage = processor->StateStorage;
-
-				luaFIN_pushFuture(L, *storage.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1))));
+				luaFIN_pushFuture(L, *persistence.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1))));
 
 				return 1;
 			}
@@ -46,8 +46,7 @@ namespace FINLua {
 			 */)", __persist) {
 				FLuaFuture future = luaFIN_checkFutureStruct(L, 1);
 
-				UFINLuaProcessor* processor = UFINLuaProcessor::luaGetProcessor(L);
-				FFINLuaProcessorStateStorage& storage = processor->StateStorage;
+				FFINLuaRuntimePersistenceState& storage = luaFIN_getPersistence(L);
 				lua_pushinteger(L, storage.Add(future));
 				lua_pushcclosure(L, unpersist, 1);
 
@@ -95,7 +94,7 @@ namespace FINLua {
 				return getInternal(L, 1);
 			}
 
-			int pollInternal(lua_State* L, int idx, lua_State*& thread) {
+			int pollInternal(lua_State* L, int idx, lua_State*& thread, TOptional<double>& timeout) {
 				idx = lua_absindex(L, idx);
 				luaL_checkudata(L, idx, _Name);
 				lua_getiuservalue(L, idx, 1);
@@ -130,6 +129,11 @@ namespace FINLua {
 						lua_setiuservalue(L, idx, 2);
 						break;
 					} case LUA_YIELD:
+						if (results > 0) {
+							if (lua_type(thread, -results) == LUA_TNUMBER) {
+								timeout = lua_tonumber(thread, -results);
+							}
+						}
 						lua_pop(thread, results);
 						break;
 					default: // error
@@ -139,13 +143,20 @@ namespace FINLua {
 				return status;
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	poll()
+			 * @LuaFunction		bool,nil|number		poll()
 			 * @DisplayName		Poll
 			 */)", poll) {
+				// TODO: Maybe return timeout
+				TOptional<double> timeout;
 				lua_State* thread;
-				int status = pollInternal(L, 1, thread);
+				int status = pollInternal(L, 1, thread, timeout);
 				lua_pushboolean(L, status == LUA_OK);
-				return 1;
+				if (timeout) {
+					lua_pushnumber(L, *timeout);
+				} else {
+					lua_pushnil(L);
+				}
+				return 2;
 			}
 
 			LuaModuleTableFunction(R"(/**
@@ -215,20 +226,27 @@ namespace FINLua {
 
 			int joinContinue(lua_State* L, int status, lua_KContext) {
 				bool done = true;
+				TOptional<double> finalTimeout = TNumericLimits<double>::Max();
 				int num = lua_gettop(L);
 				for (int i = 1; i <= num; ++i) {
 					if (luaL_testudata(L, i, Future::_Name) == nullptr) continue;
+					TOptional<double> timeout;
 					lua_State* thread;
-					status = Future::pollInternal(L, i, thread);
+					status = Future::pollInternal(L, i, thread, timeout);
 					if (status == LUA_OK) {
 						lua_getiuservalue(L, i, 2);
 						lua_replace(L, i);
 					} else {
 						done = false;
+						if (timeout.IsSet() && finalTimeout.IsSet()) {
+							finalTimeout = FMath::Min(*finalTimeout, *timeout);
+						} else {
+							finalTimeout.Reset();
+						}
 					}
 				}
 				if (!done) {
-					return lua_yieldk(L, 0, NULL, joinContinue);
+					return luaFIN_yield(L, 0, NULL, joinContinue, finalTimeout);
 				}
 				return lua_gettop(L);
 			}
@@ -252,15 +270,14 @@ namespace FINLua {
 			int luaSleepContinue(lua_State* L, int, lua_KContext) {
 				double timeout = lua_tonumber(L, 1);
 				double start = lua_tonumber(L, 2);
-				double millis = luaFIN_getExtraSpace(L).Processor->GetKernel()->GetTimeSinceStart();
-				if (millis - start < timeout*1000) {
-					return lua_yieldk(L, 0, NULL, luaSleepContinue);
+				double now = FPlatformTime::Seconds();
+				if (now - start < timeout) {
+					return luaFIN_yield(L, 0, NULL, luaSleepContinue, start+timeout);
 				}
 				return 0;
 			}
 			int luaSleep(lua_State* L) {
-				double millis = luaFIN_getExtraSpace(L).Processor->GetKernel()->GetTimeSinceStart();
-				lua_pushnumber(L, millis);
+				lua_pushnumber(L, FPlatformTime::Seconds());
 				return luaSleepContinue(L, 0, NULL);
 			}
 			LuaModuleTableFunction(R"(/**
@@ -306,50 +323,28 @@ namespace FINLua {
 				return 0;
 			}
 
-			int luaRun(lua_State* L, int index) {
-				//lua_getglobal(L, "future");
-				int num = lua_gettop(L);
-				if (lua_getfield(L, index, "tasks") != LUA_TTABLE) {
-				//	lua_remove(L, -1);
-					return luaL_typeerror(L, -1, "table");
-				}
-				//lua_remove(L, -2);
-				int len = luaL_len(L, -1);
-				int shift = 0;
-				for (int i = 1; i <= len; ++i) {
-					lua_geti(L, -1, i);
-					lua_State* thread;
-					int status = Future::pollInternal(L, -1, thread);
-					lua_pop(L, 1);
-					if (status == LUA_OK) {
-						shift += 1;
-					} else if (shift > 0) {
-						lua_geti(L, -1, i);
-						lua_seti(L, -2, i-shift);
-					}
-					if (len - i < shift) {
-						lua_pushnil(L);
-						lua_seti(L, -2, i);
-					}
-				}
-				lua_pop(L, 1);
-				return len-shift;
-			}
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		run()
 			 * @DisplayName		Run
 			 *
 			 * Runs the default task scheduler once.
 			 */)", run) {
-				int numTasksLeft = luaRun(L, lua_upvalueindex(2));
+				TOptional<double> timeout;
+				int numTasksLeft = luaFIN_futureRun(L, lua_upvalueindex(2), timeout);
 				lua_pushinteger(L, numTasksLeft);
-				return 1;
+				if (timeout) {
+					lua_pushnumber(L, *timeout);
+				} else {
+					lua_pushnil(L);
+				}
+				return 2;
 			}
 
 			int luaLoopContinue(lua_State* L, int, lua_KContext) {
-				int numTasksLeft = luaRun(L, -1);
+				TOptional<double> timeout = TNumericLimits<double>::Max();
+				int numTasksLeft = luaFIN_futureRun(L, -1, timeout);
 				if (numTasksLeft > 0) {
-					return lua_yieldk(L, 0, NULL, &luaLoopContinue);
+					return luaFIN_yield(L, 0, NULL, &luaLoopContinue, timeout);
 				}
 				return 0;
 			}
@@ -426,8 +421,6 @@ namespace FINLua {
 
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(future::luaLoopContinue)));
 			PersistValue("LoopContinue");
-
-
 		}
 	}
 
@@ -436,7 +429,7 @@ namespace FINLua {
 		new (future) FLuaFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(Future));
 		luaL_setmetatable(L, FutureModule::FutureStruct::_Name);
 		if (!(**future)->IsDone()) {
-			UFINKernelSystem* kernel = UFINLuaProcessor::luaGetProcessor(L)->GetKernel();
+			UFINKernelSystem* kernel = luaFIN_getKernel(L);
 			kernel->PushFuture(*future);
 		}
 	}
@@ -501,8 +494,9 @@ namespace FINLua {
 	}
 	int luaFIN_await(lua_State* L, int index) {
 		uint64 idx = lua_absindex(L, index);
+		TOptional<double> timeout;
 		lua_State* thread;
-		int status = FutureModule::Future::pollInternal(L, idx, thread);
+		int status = FutureModule::Future::pollInternal(L, idx, thread, timeout);
 		if (thread == nullptr) {
 			return luaL_error(L, "Tried to await on failed future");
 		}
@@ -510,7 +504,7 @@ namespace FINLua {
 			case LUA_OK:
 				return FutureModule::Future::getInternal(L, idx);
 			case LUA_YIELD:
-				return luaFIN_yield(L, 0, reinterpret_cast<lua_KContext>(reinterpret_cast<void*>(idx)), &awaitContinue);
+				return luaFIN_yield(L, 0, reinterpret_cast<lua_KContext>(reinterpret_cast<void*>(idx)), &awaitContinue, timeout);
 			default: // error
 				return -1;
 		}
@@ -525,5 +519,41 @@ namespace FINLua {
 		lua_pushvalue(L, index);
 		lua_seti(L, -2, len+1);
 		lua_pop(L, 2);
+	}
+
+	int luaFIN_futureRun(lua_State* L, int index, TOptional<double>& timeout) {
+		//lua_getglobal(L, "future");
+		int num = lua_gettop(L);
+		if (lua_getfield(L, index, "tasks") != LUA_TTABLE) {
+			//	lua_remove(L, -1);
+			return luaL_typeerror(L, -1, "table");
+		}
+		//lua_remove(L, -2);
+		int len = luaL_len(L, -1);
+		int shift = 0;
+		for (int i = 1; i <= len; ++i) {
+			lua_geti(L, -1, i);
+			TOptional<double> timeoutResume;
+			lua_State* thread;
+			int status = FutureModule::Future::pollInternal(L, -1, thread, timeoutResume);
+			lua_pop(L, 1);
+			if (timeoutResume.IsSet() && timeout.IsSet()) {
+				timeout = FMath::Min(*timeout, *timeoutResume);
+			} else {
+				timeout.Reset();
+			}
+			if (status == LUA_OK) {
+				shift += 1;
+			} else if (shift > 0) {
+				lua_geti(L, -1, i);
+				lua_seti(L, -2, i-shift);
+			}
+			if (len - i < shift) {
+				lua_pushnil(L);
+				lua_seti(L, -2, i);
+			}
+		}
+		lua_pop(L, 1);
+		return len-shift;
 	}
 }

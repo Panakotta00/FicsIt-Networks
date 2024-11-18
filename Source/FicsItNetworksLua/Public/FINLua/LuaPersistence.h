@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "LuaUtil.h"
+#include "FINLuaRuntimePersistence.h"
 
 namespace FINLua {
 	/**
@@ -88,5 +89,9 @@ namespace FINLua {
 		}
 		lua_pushvalue(L, idx);
 		PersistValue(name);
+	}
+
+	inline FFINLuaRuntimePersistenceState& luaFIN_getPersistence(lua_State* L) {
+		return *luaFIN_getRuntime(L).PersistenceState;
 	}
 }

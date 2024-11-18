@@ -1,0 +1,75 @@
+= World Module
+:table-caption!:
+
+
+
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/ReflectionSystemObjectModule.adoc[ReflectionSystemObjectModule]
+!===
+
+== Globals
+
+=== **computer**
+
+
+=== __computer.__**attentionPing** (position: xref:/reflection/structs/Vector.adoc[Vector], [username: string])
+Allows to send a World Marker/Attention Ping for all or the given user.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! xref:/reflection/classes/Struct.adoc[Struct]<FVector>
+! The position in the world where the ping should occur
+
+! *Username* `username`
+! string
+! The username of the user you want to ping.
+
+!===
+====
+
+=== __computer.__**textNotification** (text: string, username: string)
+This function allows you to prompt a user with the given username, with a text message.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Text* `text`
+! string
+! The Text you want to send as Notification to the user
+
+! *Username* `username`
+! string
+! The username of the user you want to send the notification to
+
+!===
+====
+
+=== __computer.__**time** () -> number
+Returns the number of game seconds passed since the save got created. A game day consists of 24 game hours, a game hour consists of 60 game minutes, a game minute consists of 60 game seconds.
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *The current number of game seconds passed since the creation of the save.* `time`
+! number
+! 
+
+!===
+====
+

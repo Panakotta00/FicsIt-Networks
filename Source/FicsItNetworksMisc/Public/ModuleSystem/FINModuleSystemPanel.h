@@ -6,6 +6,7 @@
 #include "FINModuleSystemPanel.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINModuleDelegate, UObject*, module, bool, added);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINHologramSnapped, bool, snapped);
 
 /**
  * This component manages a collection of modules you can place onto it via the build gun.
@@ -29,6 +30,9 @@ public:
 
 	UPROPERTY(Replicated)
 	TArray<UObject*> Grid;
+
+	UPROPERTY(BlueprintAssignable, Category = "ModuleSystem|Panel")
+	FFINHologramSnapped HologramSnapped;
 
 	// Begin UObject
 	void Serialize(FArchive& Ar) override;

@@ -428,7 +428,7 @@ namespace FINGenLuaDoc {
 		str.Append(TEXT("---@meta\n\n"));
 
 		const auto& moduleRegistry = FFINLuaModuleRegistry::GetInstance();
-		for (const TSharedRef<FFINLuaModule>& module : moduleRegistry.Modules) {
+		for (const auto& [_, module] : moduleRegistry.Modules) {
 			WriteModule(str, module);
 		}
 

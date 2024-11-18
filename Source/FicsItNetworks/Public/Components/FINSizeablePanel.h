@@ -18,6 +18,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* PanelCenterMesh = nullptr;
 	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* PanelCenterMeshNoConnector = nullptr;
+	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* PanelConnectorMesh = nullptr;
 	
 	UPROPERTY(SaveGame, VisibleAnywhere, BlueprintReadWrite)
@@ -60,6 +62,7 @@ public:
                                         UStaticMesh* ULMesh,
                                         UStaticMesh* UCMesh,
                                         UStaticMesh* CCMesh,
+                                        UStaticMesh* CCMesh_NoCon,
                                         UStaticMesh* ConnectorMesh,
                                         AActor* Parent, USceneComponent* Attach,
                                         TArray<UStaticMeshComponent*>& OutParts);

@@ -311,7 +311,7 @@ namespace FINGenJsonDoc {
 
 		TSharedRef<FJsonObject> modules = MakeShared<FJsonObject>();
 		const auto& moduleRegistry = FFINLuaModuleRegistry::GetInstance();
-		for (const TSharedRef<FFINLuaModule>& module : moduleRegistry.Modules) {
+		for (const auto& [_, module] : moduleRegistry.Modules) {
 			modules->SetObjectField(module->InternalName, GenLuaModule(module));
 		}
 		doc->SetObjectField(TEXT("modules"), modules);

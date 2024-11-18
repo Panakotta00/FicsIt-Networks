@@ -343,9 +343,13 @@ namespace FINLua {
 		return metaName;
 	}
 
-	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc) {
-		// insert a boolean to indicate a user executed yield
-		lua_pushboolean(L, true);
+	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc, TOptional<double> timeout) {
+		// insert timeout to indicate normal (non-hook) yield
+		if (timeout) {
+			lua_pushnumber(L, timeout.GetValue());
+		} else {
+			lua_pushnil(L);
+		}
 		lua_insert(L, -nresults - 1);
 
 		return lua_yieldk(L, nresults+1, ctx, kfunc);
@@ -400,6 +404,33 @@ namespace FINLua {
 		return FString();
 	}
 
+	void luaFIN_setOrMergeField(lua_State* L, int targetIndex) {					// ..., key, value
+		targetIndex = lua_absindex(L, targetIndex);
+		int fieldIndex = lua_absindex(L, -2);
+		int mergeIndex = lua_absindex(L, -1);
+
+		int top = lua_gettop(L);
+
+		luaL_checktype(L, targetIndex, LUA_TTABLE);
+
+		lua_pushvalue(L, fieldIndex);
+		int fieldType = lua_gettable(L, targetIndex);								// ..., key, value, field
+		if (fieldType != LUA_TTABLE) {
+			lua_pop(L, 1);
+			lua_settable(L, targetIndex);
+		} else {
+			lua_pushnil(L);
+			while (lua_next(L, mergeIndex) != 0) {									// ..., key, value, field, key2, value2
+				lua_pushvalue(L, -2);
+				lua_insert(L, -2);												// ..., key, value, field, key2, key2, value2
+				luaFIN_setOrMergeField(L, -4);								// ..., key, value, field, key2
+			}
+			lua_pop(L, 3);
+		}
+
+		fgcheck(lua_gettop(L) == top-2);
+	}
+
 	void luaFINDebug_dumpStack(lua_State* L) {
 		UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Dumping stack of thread %p:"), L);
 		int args = lua_gettop(L);
@@ -420,12 +451,6 @@ namespace FINLua {
 			lua_pop(L, 2);
 		}
 		lua_pop(L, 1);
-	}
-
-	void setupUtilLib(lua_State* L) {
-		PersistenceNamespace("UtilLib");
-		
-		
 	}
 }
 

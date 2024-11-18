@@ -75,34 +75,6 @@ Returns the result of the execute function or what ever it yielded
 === __filesystem.__**exists** (path: string) -> bool
 Returns true if the given path exists.
 
-=== __filesystem.__**initFileSystem** (path: string) -> bool
-Trys to mount the system DevDevice to the given location.
-The DevDevice is special Device holding DeviceNodes for all filesystems added to the system. (like TmpFS and drives). It is unmountable as well as getting mounted a seccond time.
-
-[%collapsible]
-====
-.Parameters
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Path* `path`
-! string
-! path to the mountpoint were the dev device should get mounted to
-
-!===
-.Return Values
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Success* `success`
-! bool
-! returns if it was able to mount the DevDevice
-
-!===
-====
-
 === __filesystem.__**isDir** (path: string) -> bool
 Returns true if the given path refers to directory.
 
@@ -115,46 +87,6 @@ For each given string, returns a bool to tell if string is a valid node (file/fo
 === __filesystem.__**loadFile** (path: string) -> function
 Loads the file refered by the given path as a Lua function and returns it.
 Functions fails if path doesn￢ﾀﾙt exist or path doesn￢ﾀﾙt reger to a file.
-
-=== __filesystem.__**makeFileSystem** (type: string, name: string) -> bool
-Trys to create a new file system of the given type with the given name.
-The created filesystem will be added to the system DevDevice.
-
-.Possible Types:
-[%collapsible]
-====
-* `tmpfs`
-+
-A temporary filesystem only existing at runtime in the memory of your computer. All data will be lost when the system stops.
-====
-
-[%collapsible]
-====
-.Parameters
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Type* `type`
-! string
-! the type of the new filesystem
-
-! *Name* `name`
-! string
-! the name of the new filesystem you want to create
-
-!===
-.Return Values
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Success* `success`
-! bool
-! returns true if it was able to create the new filesystem
-
-!===
-====
 
 === __filesystem.__**meta** (string...) -> string...
 Returns for each given string path, a table that defines contains some meta information about node the string references.
@@ -235,7 +167,7 @@ Function fails if it is not able to move the object.
 !===
 ====
 
-=== __filesystem.__**open** (path: string, mode: string) -> xref:/lua/api/FileSystem.adoc#_file[File]
+=== __filesystem.__**open** (path: string, mode: string) -> xref:/lua/api/FileSystemModule.adoc#_file[File]
 Opens a file-stream and returns it as File-table.
 
 .Possible Modes
@@ -283,7 +215,7 @@ Opens a file-stream and returns it as File-table.
 !Name !Type !Description
 
 ! *File* `file`
-! xref:/lua/api/FileSystem.adoc#_file[File]
+! xref:/lua/api/FileSystemModule.adoc#_file[File]
 ! The File table of the file stream. Nil if not able to open file in read only.
 
 !===
@@ -344,34 +276,6 @@ Removes the filesystem object at the given path.
 ! *Success* `success`
 ! bool
 ! Returns true if it was able to remove the node
-
-!===
-====
-
-=== __filesystem.__**removeFileSystem** (name: string) -> bool
-Tries to remove the filesystem with the given name from the system DevDevice.
-All mounts of the device will run invalid.
-
-[%collapsible]
-====
-.Parameters
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Name* `name`
-! string
-! the name of the new filesystem you want to remove
-
-!===
-.Return Values
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Success* `success`
-! bool
-! returns true if it was able to remove the new filesystem
 
 !===
 ====
