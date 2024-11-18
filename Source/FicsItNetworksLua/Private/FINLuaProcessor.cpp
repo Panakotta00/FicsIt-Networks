@@ -43,6 +43,7 @@ UFINLuaProcessor::UFINLuaProcessor() {
 	Runtime.Runtime.Modules.Add("WorldModule");
 	Runtime.Runtime.Modules.Add("EventModule");
 	Runtime.Runtime.Modules.Add("FutureModule");
+	Runtime.Runtime.Modules.Add("FileSystemModule");
 	Runtime.Runtime.OnPreLuaTick.AddWeakLambda(this, [this](TArray<TSharedPtr<void>>& TickStack) {
 		TickStack.Add(MakeShared<FFILLogScope>(GetKernel()->GetLog()));
 	});

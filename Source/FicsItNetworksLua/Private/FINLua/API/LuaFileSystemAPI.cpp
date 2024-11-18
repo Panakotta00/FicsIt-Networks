@@ -44,7 +44,7 @@
 
 namespace FINLua {
 	LuaModule(R"(/**
-	 * @LuaModule		FileSystem
+	 * @LuaModule		FileSystemModule
 	 * @DisplayName		File-System Module
 	 *
 	 * FicsIt-Networks implements it’s own virtual filesystem for UNIX like experience using the FileSystem.
@@ -52,7 +52,7 @@ namespace FINLua {
 	 * There is also a DriveNode which simply holds a reference to a drive so you can access a drive via the filesystem. You can use then the mount function to mount the Drive of a DriveNode to the given location in the filesystem tree.
 	 * Because you need at least one drive mounted to even be able to access any node, we provide the initFileSystem function which you can call only once in a system session. This functions will then mount the DevDevice to the given location.
 	 * The DevDevice is a sepcial Device which holds all the DeviceNodes representing Device attached to the computer session, like hard drives, tempfs and the serial I/O.
-	 */)", FileSystem) {
+	 */)", FileSystemModule) {
 		LuaModuleLibrary(R"(/**
 		 * @LuaLibrary		filesystem
 		 * @DisplayName		File-System Library
