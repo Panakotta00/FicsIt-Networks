@@ -294,7 +294,9 @@ namespace FINLua {
 				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
 				runtime.TickActions.Enqueue([kernel, message]() {
 					kernel->Crash(MakeShared<FFINKernelCrash>(FString("PANIC! '") + message + "'"));
-					kernel->GetAudio()->Beep();
+					kernel->PushFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(FFINFunctionFuture([kernel]() {
+						kernel->GetAudio()->Beep(0.5);
+					})));
 				});
 				lua_yield(L, 0);
 				return 0;
