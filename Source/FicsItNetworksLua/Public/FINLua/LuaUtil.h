@@ -98,6 +98,8 @@ namespace FINLua {
 	void luaFIN_pushFString(lua_State* L, const FString& str);
 	FString luaFIN_checkFString(lua_State* L, int index);
 	FString luaFIN_toFString(lua_State* L, int index);
+	// Pushes the converted string onto the stack
+	FString luaFIN_convToFString(lua_State* L, int index);
 
 	FORCEINLINE FIRBool luaFIN_toFinBool(lua_State* L, int index) { return static_cast<FIRBool>(lua_toboolean(L, index)); }
 	FORCEINLINE FIRInt luaFIN_toFinInt(lua_State* L, int index) { return static_cast<FIRInt>(lua_tointeger(L, index)); }
