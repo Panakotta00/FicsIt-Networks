@@ -33,12 +33,11 @@ private:
 
 	// Thread Handling
 	FAsyncTask<FFINLuaTickRunnable> LuaTask;
-	TAtomic<bool> ShouldRunInThread = false;
+	FRWLock ShouldRunInThreadMutex;
+	bool ShouldRunInThread = false;
 	FCriticalSection IsWaitingForCompletionMutex;
 	bool bIsWaitingForCompletion = false;
-	TSharedPtr<FEventRef> WaitForThread;
 	TSharedPtr<FEventRef> WaitForGame;
-	TSharedPtr<FEventRef> ContinueThread;
 	TSharedPtr<FEventRef> ContinueGame;
 	FCriticalSection LuaTickMutex;
 	bool bIsPromotedTick = false;
@@ -51,9 +50,15 @@ public:
 	~FFINLuaThreadedRuntime();
 
 	// [Any Thread]
-	void SetShouldBePromoted(bool bInShouldBePromoted) { ShouldRunInThread.Store(bInShouldBePromoted); }
-	bool ShouldBePromoted() const { return ShouldRunInThread.Load(); }
-	bool ShouldThreadRun() const;
+	void SetShouldBePromoted(bool bInShouldBePromoted) {
+		FRWScopeLock Lock(ShouldRunInThreadMutex, SLT_Write);
+		ShouldRunInThread = bInShouldBePromoted;
+	}
+	bool ShouldBePromoted() {
+		FRWScopeLock Lock(ShouldRunInThreadMutex, SLT_ReadOnly);
+		return ShouldRunInThread;
+	}
+	bool ShouldThreadRun();
 
 	// [Main Thead]
 	void HandleWaitForGame();

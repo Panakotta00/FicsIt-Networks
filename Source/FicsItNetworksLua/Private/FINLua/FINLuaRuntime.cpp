@@ -238,6 +238,7 @@ TOptional<TTuple<int, int>> FFINLuaRuntime::Tick() {
 TTuple<int, int> FFINLuaRuntime::LuaTick() {
 	TArray<TSharedPtr<void>> TickScope;
 	OnPreLuaTick.Broadcast(TickScope);
+	Timeout.Reset();
 
 	if (Hook_Tick) {
 		lua_sethook(LuaThread, luaFIN_tickHook, LUA_MASKCOUNT, *Hook_Tick);
