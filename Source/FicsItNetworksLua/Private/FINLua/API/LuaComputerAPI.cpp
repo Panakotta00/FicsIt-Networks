@@ -19,34 +19,6 @@ namespace FINLua {
 		 * The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
 		 */)", computer) {
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		reset()
-			 * @DisplayName		Reset
-			 *
-			 * Stops the current code execution immediately and queues the system to restart in the next tick.
-			 */)", reset) {
-				FFINLuaRuntime* runtime = &luaFIN_getRuntime(L);
-				runtime->TickActions.Enqueue([runtime]() {
-					runtime->Reset();
-				});
-				return lua_yield(L, 0);
-			}
-
-			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		stop()
-			 * @DisplayName		Stop
-			 *
-			 * Stops the current code execution. +
-			 * Basically kills the PC runtime immediately.
-			 */)", stop) {
-				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
-				runtime.TickActions.Enqueue([]() {
-					//kernel->Stop();
-					// TODO: Fix computer.stop()
-				});
-				return lua_yield(L, 0);
-			}
-
-			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		skip()
 			 * @DisplayName		Skip
 			 *
