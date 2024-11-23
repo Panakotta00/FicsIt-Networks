@@ -199,6 +199,7 @@ void AFINModuleSystemHolo::BeginPlay() {
 void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
 	Super::OnConstruction(MovieSceneBlends);
 
+#if UE_GAME
 	if(ShowCompass) {
 		CompassRose = NewObject<UStaticMeshComponent>(this);
 		CompassRose->RegisterComponent();
@@ -225,6 +226,7 @@ void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
 	}else{
 		InformationComponent->SetVisibility(false);
 	}
+#endif
 }
 
 void AFINModuleSystemHolo::Destroyed() {

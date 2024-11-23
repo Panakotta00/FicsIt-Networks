@@ -374,6 +374,13 @@ namespace FINLua {
 		return FString(conv.Length(), conv.Get());
 	}
 
+	FString luaFIN_convToFString(lua_State* L, int index) {
+		size_t len;
+		const char* str = luaL_tolstring(L, index, &len);
+		FUTF8ToTCHAR conv(str, len);
+		return FString(conv.Length(), conv.Get());
+	}
+
 	void luaFIN_warning(lua_State* L, const char* msg, int tocont) {
 		lua_Debug ar;
 		if (lua_getstack(L, 1, &ar)) {
@@ -445,10 +452,11 @@ namespace FINLua {
 		lua_pushnil(L);
 		while (lua_next(L, -2)) {
 			lua_pushvalue(L, -2);
-			FString key = luaFIN_toFString(L, -1);
-			FString type = luaFIN_toFString(L, -2);
+			FString key = luaFIN_convToFString(L, -1);
+			lua_pop(L, 1);
+			FString type = luaFIN_convToFString(L, -2);
 			UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Lua Table: [%s] = %s"), *key, *type);
-			lua_pop(L, 2);
+			lua_pop(L, 3);
 		}
 		lua_pop(L, 1);
 	}

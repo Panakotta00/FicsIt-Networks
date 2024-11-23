@@ -121,8 +121,8 @@ TOptional<FString> FFINLuaRuntime::LoadState(FFINLuaRuntimePersistenceState& InS
 
 	// place persisted data
 	lua_getfield(LuaState, -1, "thread");							// ..., data-str, uperm, data, thread
-	lua_replace(LuaState, LuaThreadIndex);							// ..., data-str, uperm, data
-	lua_getfield(LuaState, -1, "globals");							// ..., data-str, uperm, data, globals
+	lua_replace(LuaState, LuaThreadIndex);						// ..., data-str, uperm, data
+	lua_getfield(LuaState, -1, "globals");						// ..., data-str, uperm, data, globals
 	lua_seti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);		// ..., data-str, uperm, data
 	lua_getfield(LuaState, -1, "hidden-globals");					// ..., data-str, uperm, data, hidden-globals
 	lua_setfield(LuaState, LUA_REGISTRYINDEX, "hidden-globals");	// ..., data-str, uperm, data
@@ -151,7 +151,7 @@ TUnion<FFINLuaRuntimePersistenceState, FString> FFINLuaRuntime::SaveState() {
 	lua_pushvalue(LuaState, LuaThreadIndex);										// ..., perm, data, thread
 	lua_setfield(LuaState, -2, "thread");										// ..., perm, data
 	lua_getfield(LuaState, LUA_REGISTRYINDEX, "hidden-globals");				// ..., perm, data, hidden-globals
-	lua_setfield(LuaState, -2, "hidden-globals");								// ..., perm, data
+	lua_setfield(LuaState, -2, "hidden-globals");								// ..., perm, dat
 
 	PersistenceState = &State;
 
@@ -238,6 +238,7 @@ TOptional<TTuple<int, int>> FFINLuaRuntime::Tick() {
 TTuple<int, int> FFINLuaRuntime::LuaTick() {
 	TArray<TSharedPtr<void>> TickScope;
 	OnPreLuaTick.Broadcast(TickScope);
+	Timeout.Reset();
 
 	if (Hook_Tick) {
 		lua_sethook(LuaThread, luaFIN_tickHook, LUA_MASKCOUNT, *Hook_Tick);

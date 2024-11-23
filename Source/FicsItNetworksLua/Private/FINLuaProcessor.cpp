@@ -147,6 +147,7 @@ void UFINLuaProcessor::Tick(float InDelta) {
 		Runtime.Runtime.Timeout.Reset();
 	}
 
+	Runtime.Runtime.Hook_Tick = 2500;
 	Runtime.Run();
 
 	switch (Runtime.GetStatus()) {
@@ -166,7 +167,6 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 }
 
 void UFINLuaProcessor::Reset() {
-	Runtime.Runtime.Hook_Tick = {2500};
 	Runtime.Runtime.Reset();
 	TOptional<FString> Code = GetEEPROM();
 	if (Code) {

@@ -17,6 +17,10 @@ FFINLuaThreadedRuntime::FFINLuaThreadedRuntime() : LuaTask(FAsyncTask<FFINLuaTic
 	});
 	Runtime.OnTickHook.AddLambda([this](bool& bShouldYield) {
 		if (bIsPromotedTick && ShouldThreadRun()) {
+			WaitForGame.Reset();
+			if (TSharedPtr<FEventRef> continueGame = ContinueGame) {
+				continueGame->Get()->Trigger();
+			}
 			bShouldYield = false;
 		}
 	});
@@ -29,55 +33,53 @@ FFINLuaThreadedRuntime::~FFINLuaThreadedRuntime() {
 
 void FFINLuaTickRunnable::DoWork() {
 	Runtime->bIsPromotedTick = true;
-	ON_SCOPE_EXIT {
-		Runtime->bIsPromotedTick = false;
-	};
-	while (Runtime->ShouldThreadRun()) {
+	while (Runtime->bIsPromotedTick) {
+		Runtime->WaitForGame.Reset();
+		Runtime->ContinueGame = MakeShared<FEventRef>(EEventMode::ManualReset);
+
 		TOptional<TTuple<int, int>> status = Runtime->Runtime.Tick();
 
-		if (Runtime->WaitForThread) {
-			Runtime->ContinueThread = MakeShared<FEventRef>();
-			Runtime->WaitForThread->Get()->Trigger();
-			Runtime->ContinueThread->Get()->Wait();
+		if (!Runtime->ShouldThreadRun() || (status && status->Get<0>() != LUA_YIELD)) {
+			Runtime->bIsPromotedTick = false;
 		}
 
-		if (status && status->Get<0>() != LUA_YIELD) {
-			break;
-		}
+		Runtime->ContinueGame->Get()->Trigger();
 	}
 }
 
-bool FFINLuaThreadedRuntime::ShouldThreadRun() const {
-	return ShouldRunInThread.Load() && Runtime.TickActions.IsEmpty() && !Runtime.Timeout.IsSet() && !WaitForThread;
+bool FFINLuaThreadedRuntime::ShouldThreadRun() {
+	FRWScopeLock Lock(ShouldRunInThreadMutex, SLT_ReadOnly);
+	return ShouldRunInThread && Runtime.TickActions.IsEmpty() && !Runtime.Timeout.IsSet() && !bIsWaitingForCompletion;
 }
 
 void FFINLuaThreadedRuntime::HandleWaitForGame() {
-	if (WaitForGame) {
-		TSharedPtr<FEventRef> waitForGame = WaitForGame;
-		fgcheck(waitForGame.IsValid());
-		WaitForGame.Reset();
-		fgcheck(!ContinueGame.IsValid());
-		TSharedPtr<FEventRef> continueGame = ContinueGame = MakeShared<FEventRef>();
+	if (TSharedPtr<FEventRef> waitForGame = WaitForGame) {
 		waitForGame->Get()->Trigger();
-		continueGame->Get()->Wait();
+		ContinueGame->Get()->Wait();
 	}
 }
 
 TSharedPtr<FEventRef> FFINLuaThreadedRuntime::DoWaitForGame() {
 	if (!bIsPromotedTick) return nullptr;
+
 	IsWaitingForCompletionMutex.Lock();
 	if (bIsWaitingForCompletion) {
 		IsWaitingForCompletionMutex.Unlock();
 		return nullptr;
 	}
-	fgcheck(!WaitForGame.IsValid());
-	TSharedPtr<FEventRef> waitForGame = WaitForGame = MakeShared<FEventRef>();
+
+	if (WaitForGame) {
+		IsWaitingForCompletionMutex.Unlock();
+		return nullptr;
+	}
+
+	ContinueGame->Get()->Reset();
+	WaitForGame = MakeShared<FEventRef>(EEventMode::ManualReset);
 	IsWaitingForCompletionMutex.Unlock();
-	waitForGame->Get()->Wait();
-	TSharedPtr<FEventRef> continueGame = ContinueGame;
-	fgcheck(continueGame.IsValid());
-	ContinueGame.Reset();
-	return continueGame.ToSharedRef();
+
+	WaitForGame->Get()->Wait();
+
+	return nullptr;
 }
 
 TOptional<TTuple<int, int>> FFINLuaThreadedRuntime::Run() {
@@ -90,7 +92,7 @@ TOptional<TTuple<int, int>> FFINLuaThreadedRuntime::Run() {
 		}
 	} else if (LuaTask.IsDone() && GetStatus() == FFINLuaRuntime::Running) {
 		if (Runtime.Tick().IsSet()) {
-			if (ShouldRunInThread.Load() && Runtime.Hook_Tick.IsSet() && !Runtime.Timeout.IsSet()) {
+			if (ShouldBePromoted() && Runtime.Hook_Tick.IsSet() && !Runtime.Timeout.IsSet()) {
 				LuaTask.StartBackgroundTask(GThreadPool, EQueuedWorkPriority::Normal, EQueuedWorkFlags::DoNotRunInsideBusyWait, -1, TEXT("FINLuaThreadedRuntime"));
 			}
 		}
@@ -99,15 +101,14 @@ TOptional<TTuple<int, int>> FFINLuaThreadedRuntime::Run() {
 }
 
 void FFINLuaThreadedRuntime::PauseAndWait() {
-	bool bShouldThreadRun = ShouldRunInThread.Load();
-	ShouldRunInThread.Store(false);
 	IsWaitingForCompletionMutex.Lock();
 	bIsWaitingForCompletion = true;
 	IsWaitingForCompletionMutex.Unlock();
 	HandleWaitForGame();
 	LuaTask.EnsureCompletion(false);
+	IsWaitingForCompletionMutex.Lock();
 	bIsWaitingForCompletion = false;
-	ShouldRunInThread.Store(bShouldThreadRun);
+	IsWaitingForCompletionMutex.Unlock();
 
 	TFunction<void()> func;
 	while (Runtime.TickActions.Dequeue(func)) {

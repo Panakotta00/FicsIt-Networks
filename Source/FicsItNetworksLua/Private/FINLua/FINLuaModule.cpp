@@ -508,8 +508,9 @@ namespace FINLua {
 			 * @DisplayName		To String
 			 */)", __tostring) {
 				lua_getupvalue(L, 1, 1);
-				if (!lua_isuserdata(L, -1)) {
-					return 0;
+				if (!luaL_testudata(L, -1, "ModuleTableFunction")) {
+					luaFIN_pushFString(L, luaFIN_typeName(L, 1));
+					return 1;
 				}
 				FFINLuaTableField* field = static_cast<FFINLuaTableField*>(lua_touserdata(L, -1));
 				FString head = field->Key;
