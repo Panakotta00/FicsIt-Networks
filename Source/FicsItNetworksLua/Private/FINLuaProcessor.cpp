@@ -169,7 +169,14 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 }
 
 void UFINLuaProcessor::Reset() {
+	RuntimeState.LuaData = TEXT("");
+
 	Runtime.Runtime.Reset();
+
+	TOptional<FString> Code = GetEEPROM();
+	if (Code) {
+		Runtime.Runtime.LoadCode(*Code);
+	}
 }
 
 TOptional<FString> UFINLuaProcessor::GetEEPROM() const {

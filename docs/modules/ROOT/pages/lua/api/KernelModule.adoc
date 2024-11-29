@@ -123,8 +123,15 @@ Returns the amount of milliseconds passed since the system started.
 === __computer.__**panic** (error: string)
 Crashes the computer with the given error message.
 
+=== __computer.__**reset** ()
+Stops the current code execution immediately and queues the system to restart in the next tick.
+
 === __computer.__**setEEPROM** (code: string)
 Sets the code of the current eeprom. Doesn￢ﾀﾙt cause a system reset.
+
+=== __computer.__**stop** ()
+Stops the current code execution. +
+Basically kills the PC runtime immediately.
 
 === **filesystem**
 
