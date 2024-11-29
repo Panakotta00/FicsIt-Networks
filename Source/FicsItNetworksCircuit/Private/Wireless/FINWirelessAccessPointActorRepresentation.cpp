@@ -10,6 +10,7 @@ void UFINWirelessAccessPointActorRepresentation::Setup(UFINWirelessAccessPointCo
 	this->mRepresentationText =  Connection->GetRepresentationText();
 	this->mRepresentationColor = Connection->Data.IsConnected && Connection->Data.IsInRange ? Green : Connection->Data.IsInRange ? Orange : Red;
 	this->mRepresentationTexture = LoadObject<UTexture2D>(NULL, TEXT("/FicsItNetworks/Buildings/Network/WirelessAccessPoint/UI/Assets/TXUI_FIN_Wifi_MapCompassIcon.TXUI_FIN_Wifi_MapCompassIcon"));
+	this->mRepresentationCompassMaterial = LoadObject<UMaterialInterface>(NULL, TEXT("/FicsItNetworks/Buildings/Network/WirelessAccessPoint/UI/Assets/MI_CompassIcon_Wifi.MI_CompassIcon_Wifi"));
 	//this->mRealActor = Connection->RadarTower.Get();
 	this->mIsStatic = true;
 	this->mActorRotation = FRotator::ZeroRotator;
@@ -18,7 +19,7 @@ void UFINWirelessAccessPointActorRepresentation::Setup(UFINWirelessAccessPointCo
 
 	// We use RT_StartingPod since RT_Default destroys automatically the ActorRepresentation after 10 seconds
 	// Cannot use RT_MapMarker since it opens the marker editor when clicked.
-	this->mRepresentationType = ERepresentationType::RT_StartingPod;
+	this->mRepresentationType = ERepresentationType::RT_MapMarker;
 }
 
 void UFINWirelessAccessPointActorRepresentation::SetupActorRepresentation(AActor* realActor, bool isLocal, float lifeSpan) {}
