@@ -55,6 +55,15 @@ UFINLuaProcessor::UFINLuaProcessor() {
 		FINLua::luaFIN_setFileSystem(Runtime.Runtime.GetLuaState(), GetKernel()->GetFileSystem());
 		FINLua::luaFIN_setEventSystem(Runtime.Runtime.GetLuaState(), EventSystem);
 	});
+	Runtime.Runtime.OnPostReset.AddWeakLambda(this, [this]() {
+		TOptional<FString> error = Runtime.Runtime.LoadState(RuntimeState);
+		if (error) {
+			GetKernel()->Reset();
+			FString message = FString::Printf(TEXT("%s: Unable to load computer state from save-file (computer will restart): %s"), *DebugInfo, **error);
+			UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *message);
+			GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
+		}
+	});
 
 	ComponentNetwork.OnGetComponentByID.BindWeakLambda(this, [this](const FGuid& ID) {
 		return GetKernel()->GetNetwork()->GetComponentByID(ID);
@@ -129,13 +138,6 @@ void UFINLuaProcessor::PreLoadGame_Implementation(int32 saveVersion, int32 gameV
 
 void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
 	Runtime.Runtime.Reset();
-	TOptional<FString> error = Runtime.Runtime.LoadState(RuntimeState);
-	if (error) {
-		GetKernel()->Reset();
-		FString message = FString::Printf(TEXT("%s: Unable to load computer state from save-file (computer will restart): %s"), *DebugInfo, **error);
-		UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *message);
-		GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
-	}
 }
 
 void UFINLuaProcessor::SetKernel(UFINKernelSystem* InKernel) {
@@ -167,15 +169,13 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 }
 
 void UFINLuaProcessor::Reset() {
+	RuntimeState.LuaData = TEXT("");
+
 	Runtime.Runtime.Reset();
+
 	TOptional<FString> Code = GetEEPROM();
 	if (Code) {
-		TOptional<FString> error = Runtime.Runtime.LoadCode(*Code);
-		if (error) {
-			Kernel->Crash(MakeShared<FFINKernelCrash>(*error));
-		}
-	} else {
-		Kernel->Crash(MakeShared<FFINKernelCrash>(TEXT("Invalid EEPROM!")));
+		Runtime.Runtime.LoadCode(*Code);
 	}
 }
 

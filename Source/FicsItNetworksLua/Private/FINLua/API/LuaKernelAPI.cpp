@@ -219,6 +219,36 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		reset()
+			 * @DisplayName		Reset
+			 *
+			 * Stops the current code execution immediately and queues the system to restart in the next tick.
+			 */)", reset) {
+				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+				UFINKernelSystem* kernel = luaFIN_getKernel(L);
+				runtime.TickActions.Enqueue([kernel]() {
+					kernel->Reset();
+				});
+				return lua_yield(L, 0);
+			}
+
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		stop()
+			 * @DisplayName		Stop
+			 *
+			 * Stops the current code execution. +
+			 * Basically kills the PC runtime immediately.
+			 */)", stop) {
+				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+				UFINKernelSystem* kernel = luaFIN_getKernel(L);
+
+				runtime.TickActions.Enqueue([kernel]() {
+					kernel->Stop();
+				});
+				return lua_yield(L, 0);
+			}
+
+			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		setEEPROM(code: string)
 			 * @DisplayName		Set EEPROM
 			 *

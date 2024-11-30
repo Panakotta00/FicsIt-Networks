@@ -9,6 +9,7 @@ FFINLuaThreadedRuntime::FFINLuaThreadedRuntime() : LuaTask(FAsyncTask<FFINLuaTic
 		PauseAndWait();
 	});
 	Runtime.OnPostReset.AddLambda([this]() {
+		if (Runtime.GetLuaState() == nullptr) return;
 		SetShouldBePromoted(false);
 		FINLua::luaFIN_setThreadedRuntime(Runtime.GetLuaState(), *this);
 	});

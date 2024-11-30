@@ -33,14 +33,7 @@ Returns some kind of strange/mysterious time data from a unknown place (the real
 !===
 ====
 
-=== __computer.__**reset** ()
-Stops the current code execution immediately and queues the system to restart in the next tick.
-
 === __computer.__**skip** ()
 This function can be used to skip the current lua tick prematurely.
 Mostly for people who want to optimize their games runtime performance.
-
-=== __computer.__**stop** ()
-Stops the current code execution. +
-Basically kills the PC runtime immediately.
 
