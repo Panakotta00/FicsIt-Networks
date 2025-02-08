@@ -19,7 +19,7 @@ namespace FINLua {
 			 *
 			 * Allows to log the given strings to the Game Log.
 			 *
-			 * @param	msgs	string...	A list of log messages that should get printed to the game console.
+			 * @param		...			string		Messages	A list of log messages that should get printed to the game console.
 			 */)", log) {
 				int args = lua_gettop(L);
 				FString Msg;
@@ -43,6 +43,31 @@ namespace FINLua {
 			 * Check https://www.lua.org/manual/5.4/manual.html#pdf-debug.traceback[the Lua Manual] for more information.
 			 */)", traceback) { return 0; }
 		}
+
+		// TODO: how to properly document xpcall? Uncommenting this code crashes the game on loading a save.
+		//LuaModuleGlobalBareValue(R"(/**
+		// * @LuaGlobal		xpcall	fun(fn, ...): (ok: boolean, err: { message: any, trace: string }?)
+		// * @DisplayName		XPcall
+		// *
+		// * Ficsit networks ships with a slightly modifier version of `xpcall`. Like `pcall`, it accepts a function
+		// * and its arguments, calls it and checks whether an error has occurred.
+		// *
+		// * It returns a boolean indicating that the function call was successful.
+		// * If the call fails, it also returns a table with two fields: `message` is an error message
+		// * (or whatever was passed to an `error` call), and `trace` is a string with traceback.
+		// *
+		// * If the call was successful, our version of xpcall doesn't return its result.
+		// * To get it, pass in a closure that will set a local variable:
+		// *
+		// * [source,lua]
+		// * ---
+		// * local result
+		// * local ok, err = xpcall(function() result = doSomething() end)
+		// * ---
+		// */)", xpcall) {
+		//	// This function is here for documentation purposes only;
+		//	// The actual implementation is in LuaBaseModule.cpp
+		//}
 
 		LuaModulePostSetup() {
 			lua_getglobal(L, "debug");

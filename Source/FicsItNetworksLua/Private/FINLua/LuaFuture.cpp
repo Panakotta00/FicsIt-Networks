@@ -90,6 +90,12 @@ namespace FINLua {
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		get
 			 * @DisplayName		Get
+			 *
+			 * Get value from the future if one is available.
+			 * Causes error if future is not yet resolved.
+			 * 
+			 * @param		self		Future
+			 * @return		...			any			Value		Future's value
 			 */)", get) {
 				return getInternal(L, 1);
 			}
@@ -143,8 +149,12 @@ namespace FINLua {
 				return status;
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool,nil|number		poll()
+			 * @LuaFunction		boolean,number?			poll()
 			 * @DisplayName		Poll
+			 * 
+			 * @param		self		Future
+			 * @return		ready		boolean		Ready		Whether the future is ready or not
+			 * @return		timeout		number?		Timeout
 			 */)", poll) {
 				// TODO: Maybe return timeout
 				TOptional<double> timeout;
@@ -162,6 +172,11 @@ namespace FINLua {
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		await
 			 * @DisplayName		Await
+			 *
+			 * Wait for the future to complete and return its value.
+			 *
+			 * @param		self		Future
+			 * @return		...			any			Value		Future's value
 			 */)", await) {
 				return luaFIN_await(L, 1);
 			}
@@ -169,6 +184,11 @@ namespace FINLua {
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		canGet
 			 * @DisplayName		Can Get
+			 *
+			 * Check if the future's value is available without performing any additional logic.
+			 *
+			 * @param		self		Future
+			 * @return		canGet		boolean		Can Get		True if future is completed and a value is available
 			 */)", canGet) {
 				luaL_checkudata(L, 1, _Name);
 				lua_getiuservalue(L, 1, 1);
@@ -217,8 +237,8 @@ namespace FINLua {
 			 *
 			 * Wraps the given thread/coroutine in a Lua-Future
 			 *
-			 * @param	thread	thread	The thread you want to wrap in a future.
-			 * @return	future	Future	The Future that wraps the given thread.
+			 * @parameter	thread		thread		Thread		The thread you want to wrap in a future
+			 * @return		future		Future		Future		The Future that wraps the given thread
 			 */)", async) {
 				luaFIN_pushLuaFuture(L, 1);
 				return 1;
@@ -260,8 +280,8 @@ namespace FINLua {
 			 *
 			 * Creates a new Future that will only finish once all futures passed as parameters have finished.
 			 *
-			 * @param	futures	Future...	Futures		The futures you want to join.
-			 * @return	future	Future	The Future that will finish once all other futures finished.
+			 * @parameter	...			Future		Futures		The futures you want to join
+			 * @return		future		Future		Future		The Future that will finish once all other futures finished
 			 */)", join) {
 				luaFIN_pushLuaFutureCFunction(L, luaJoin, lua_gettop(L));
 				return 1;
@@ -281,10 +301,13 @@ namespace FINLua {
 				return luaSleepContinue(L, 0, NULL);
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Future	sleep(seconds : number)
+			 * @LuaFunction		Future	sleep(seconds: number)
 			 * @DisplayName		Sleep
 			 *
 			 * Creates a future that returns after the given amount of seconds.
+			 * 
+			 * @parameter	seconds		number		Seconds		Number of seconds to wait
+			 * @return		future		Future		Future		The future that will finish after the given amount of seconds
 			 */)", sleep) {
 				luaL_checktype(L, 1, LUA_TNUMBER);
 				lua_pop(L, lua_gettop(L)-1);
@@ -309,6 +332,8 @@ namespace FINLua {
 			 * @DisplayName		Add Task
 			 *
 			 * Adds the given futures to the tasks list.
+			 * 
+			 * @parameter	...			Future		Futures		The futures you want to add
 			 */)", addTask) {
 				int num = lua_gettop(L);
 				if (lua_getfield(L, lua_upvalueindex(2), "tasks") != LUA_TTABLE) {
@@ -365,8 +390,10 @@ namespace FINLua {
 			return 1;
 		}
 		LuaModuleGlobalBareValue(R"(/**
-		 * @LuaBareValue	async	function(function) -> LuaFuture
+		 * @LuaGlobal		async	fun(fn, ...): Future
 		 * @DisplayName		Async
+		 * 
+		 * Wraps a function into a future.
 		 */)", async) {
 			lua_pushcfunction(L, luaAsync);
 			luaFIN_persistValue(L, -1, PersistName);
@@ -379,7 +406,7 @@ namespace FINLua {
 			return luaFIN_await(L, 1);
 		}
 		LuaModuleGlobalBareValue(R"(/**
-		 * @LuaFunction		sleep(seconds : number)
+		 * @LuaGlobal		sleep	fun(seconds: number): Future
 		 * @DisplayName		Sleep
 		 *
 		 * Blocks the current thread/future until the given amount of time passed
