@@ -21,13 +21,13 @@ namespace FINLua {
 		 * @LuaLibrary		computer
 		 */)", computer) {
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		textNotification(text: string, username: string)
+			 * @LuaFunction		textNotification(text: string, username: string?)
 			 * @DisplayName		Text Notification
 			 *
 			 * This function allows you to prompt a user with the given username, with a text message.
 			 *
 			 * @parameter	text		string	Text		The Text you want to send as Notification to the user
-			 * @parameter	username	string	Username	The username of the user you want to send the notification to
+			 * @parameter	username	string?	Username	The username of the user you want to send the notification to
 			 */)", textNotification) {
 				FLuaSync sync(L);
 
@@ -56,13 +56,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		attentionPing(position: Vector, [username: string])
+			 * @LuaFunction		attentionPing(position: Vector, username: string?)
 			 * @DisplayName		Attention Ping
 			 *
 			 * Allows to send a World Marker/Attention Ping for all or the given user.
 			 *
-			 * @parameter	position	Struct<FVector>		Position	The position in the world where the ping should occur
-			 * @parameter	username	string				Username	The username of the user you want to ping.
+			 * @parameter	position	Vector			Position	The position in the world where the ping should occur
+			* @parameter	username	string?			Username	The username of the user you want to ping
 			 */)", attentionPing) {
 				FLuaSync sync(L);
 
@@ -94,7 +94,7 @@ namespace FINLua {
 			 *
 			 * Returns the number of game seconds passed since the save got created. A game day consists of 24 game hours, a game hour consists of 60 game minutes, a game minute consists of 60 game seconds.
 			 *
-			 * @return	time	number	The current number of game seconds passed since the creation of the save.
+			 * @return	time	number		Time	The current number of game seconds passed since the creation of the save.
 			 */)", time) {
 				FLuaSync sync(L);
 

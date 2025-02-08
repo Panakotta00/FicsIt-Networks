@@ -30,12 +30,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		(int, string, string)		magicTime()
+			 * @LuaFunction		(integer, string, string)		magicTime()
 			 * @DisplayName		Magic Time
 			 *
 			 * Returns some kind of strange/mysterious time data from a unknown place (the real life).
 			 *
-			 * @return	unix			int		Unix			Unix Timestamp
+			 * @return	unix			integer	Unix			Unix Timestamp
 			 * @return	cultureTime		string	Culture Time	The time as text with the culture format used by the Host
 			 * @return	iso8601			string	ISO 8601		The time as a Date-Time-Stamp after ISO 8601
 			 */)", magicTime) {

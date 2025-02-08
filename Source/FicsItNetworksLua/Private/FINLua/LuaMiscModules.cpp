@@ -44,13 +44,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	isPromoted()
+			 * @LuaFunction		boolean	isPromoted()
 			 * @DisplayName		Is Promoted
 			 *
 			 * Returns true if the Lua runtime is currently promoted/elevated.
 			 * Which means its running in an seperate game thread allowing for fast bulk calculations.
 			 *
-			 * @return	isPromoted	bool	True if the currenty runtime is running in promoted/elevated tick state.
+			 * @return		promoted	boolean		Promoted	True if the currenty runtime is running in promoted/elevated tick state.
 			 */)", isPromoted) {
 				FFINLuaThreadedRuntime& runtime = luaFIN_getThreadedRuntime(L);
 				lua_pushboolean(L, runtime.ShouldBePromoted());
@@ -79,7 +79,7 @@ namespace FINLua {
 			return 0;
 		}
 		LuaModuleGlobalBareValue(R"(/**
-		 * @LuaGlobal		print	function(string...)
+		 * @LuaGlobal		print	fun(...)
 		 * @DisplayName		Print
 		 */)", print) {
 			lua_pushcfunction(L, luaPrint);
@@ -93,13 +93,13 @@ namespace FINLua {
 		 * The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
 		 */)", computer) {
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		log(verbosity: int, message: string)
+			 * @LuaFunction		log(verbosity: integer, message: string)
 			 * @DisplayName		Log
 			 *
 			 * Allows you to print a log message to the computers log with the given log verbosity.
 			 *
-			 * @parameter	verbosity	int		Verbosity	The log-level/verbosity of the message you want to log. 0 = Debug, 1 = Info, 2 = Warning, 3 = Error & 4 = Fatal
-			 * @parameter	message		string	Message		The log message you want to print
+			 * @parameter	verbosity	integer		Verbosity	The log-level/verbosity of the message you want to log. 0 = Debug, 1 = Info, 2 = Warning, 3 = Error & 4 = Fatal
+			 * @parameter	message		string		Message		The log message you want to print
 			 */)", log) {
 				FLuaSync sync(L);
 
