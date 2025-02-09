@@ -127,23 +127,26 @@ namespace FINGenLuaDoc {
 		Str.Appendf(TEXT("--- %s\n"), *Description);
 	}
 
-	void WriteFuture(FStringBuilderBase& Str, const FString& TypeIdentifier, const FString& FunctionName, const FString& TypedParameterList) {
+	void WriteFuture(FStringBuilderBase& Str, FFicsItReflectionModule& Ref, const FString& TypeIdentifier, const FString& FunctionName, const TArray<UFIRProperty*>& ReturnValues, bool VariadicReturn) {
 		FString identifier = FString::Printf(TEXT("Future_%s_%s"), *TypeIdentifier, *FunctionName);
 		Str.Appendf(TEXT("---@class %s : Future\n"), *identifier);
 		Str.Appendf(TEXT("%s = {}\n"), *identifier);
 
-		FString returnValues;
-		if (!TypedParameterList.IsEmpty()) {
-			returnValues = FString::Printf(TEXT(":(%s)"), *TypedParameterList);
+		FString returnAnnotation;
+		for (UFIRProperty* returnValue : ReturnValues) {
+			returnAnnotation.Appendf(TEXT("---@return %s %s %s\n"), *GetType(Ref, returnValue), *returnValue->GetInternalName(), *GetInlineDescription(returnValue->GetDescription().ToString()));
+		}
+		if (VariadicReturn) {
+			returnAnnotation.Append(TEXT("---@return any ...\n"));
 		}
 
-		Str.Appendf(TEXT("---@type fun(self:%s)%s\n"), *identifier, *returnValues);
+		Str.Append(returnAnnotation);
 		Str.Appendf(TEXT("function %s:await() end\n"), *identifier);
 
-		Str.Appendf(TEXT("---@type fun(self:%s)%s\n"), *identifier, *returnValues);
+		Str.Append(returnAnnotation);
 		Str.Appendf(TEXT("function %s:get() end\n"), *identifier);
 
-		Str.Appendf(TEXT("---@type fun(self:%s):boolean\n"), *identifier);
+		Str.Appendf(TEXT("---@return boolean\n"), *identifier);
 		Str.Appendf(TEXT("function %s:canGet() end\n"), *identifier);
 	}
 
@@ -170,56 +173,37 @@ namespace FINGenLuaDoc {
 		}
 
 		TArray<FString> paramList;
-		TArray<FString> typedParameterList;
-		typedParameterList.Add(TEXT("self:") + Type);
 		for (UFIRProperty* parameter : parameters) {
 			paramList.Add(parameter->GetInternalName());
-			typedParameterList.Add(parameter->GetInternalName() + TEXT(":") + GetType(Ref, parameter));
 			Str.Appendf(TEXT("---@param %s %s %s\n"), *parameter->GetInternalName(), *GetType(Ref, parameter), *GetInlineDescription(parameter->GetDescription().ToString()));
 		}
 		if (Func->FunctionFlags & FIR_Func_VarArgs) {
 			paramList.Add(TEXT("..."));
-			typedParameterList.Add(TEXT("...:any"));
 			Str.Append(TEXT("---@param ... any\n"));
 		}
 
 		bool bFuture = !(Func->GetFunctionFlags() & FIR_Func_RT_Parallel);
+		bool bVariadicReturn = static_cast<bool>(Func->FunctionFlags & FIR_Func_VarRets);
 
-		TArray<FString> returnValueList;
-		for (UFIRProperty* returnValue : returnValues) {
-			returnValueList.Add(returnValue->GetInternalName() + TEXT(":") + GetType(Ref, returnValue));
-			if (!bFuture) {
+		if (!bFuture) {
+			for (UFIRProperty* returnValue : returnValues) {
 				Str.Appendf(TEXT("---@return %s %s %s\n"), *GetType(Ref, returnValue), *returnValue->GetInternalName(), *GetInlineDescription(returnValue->GetDescription().ToString()));
 			}
-		}
-		if (Func->FunctionFlags & FIR_Func_VarRets) {
-			returnValueList.Add(TEXT("...:any"));
-			if (!bFuture) {
-				Str.Append(TEXT("---@return ... any\n"));
+			if (bVariadicReturn) {
+				Str.Append(TEXT("---@return any ...\n"));
 			}
-		}
-		FString joinedReturnValueList = FString::Join(returnValueList, TEXT(","));
-		FString futureParameterList;
-		if (bFuture) {
+		} else {
 			FString futureTypeIdentifier = FString::Printf(TEXT("Future_%s_%s"), *Type, *Func->GetInternalName());
-			futureParameterList = joinedReturnValueList;
-			joinedReturnValueList = futureTypeIdentifier;
 			Str.Appendf(TEXT("---@return %s\n"), *futureTypeIdentifier);
+			Str.Append(TEXT("---@nodiscard\n"));
 		}
-
-		FString functionTypedReturn;
-		if (!returnValueList.IsEmpty()) {
-			functionTypedReturn = FString::Printf(TEXT(":(%s)"), *joinedReturnValueList);
-		}
-
-		Str.Appendf(TEXT("---@type (fun(%s)%s)|ReflectionFunction\n"), *FString::Join(typedParameterList, TEXT(",")), *functionTypedReturn);
 
 		FString Identifier = Func->GetInternalName();
 
 		Str.Appendf(TEXT("function %s:%s(%s) end\n"), *Parent, *Identifier, *FString::Join(paramList, TEXT(", ")));
 
 		if (bFuture) {
-			WriteFuture(Str, Type, Func->GetInternalName(), futureParameterList);
+			WriteFuture(Str, Ref, Type, Func->GetInternalName(), returnValues, bVariadicReturn);
 		}
 
 		// TODO: Add support for Operator Overloading
@@ -317,11 +301,9 @@ namespace FINGenLuaDoc {
 
 	void WriteLuaFunction(FStringBuilderBase& Str, const FFINLuaFunction& Function, const FString& Identifier) {
 		TArray<FString> parameterList;
-		TArray<FString> typedParameterList;
 		for (const auto& parameter : Function.Parameters) {
 			Str.Appendf(TEXT("---@param %s %s %s\n"), *parameter.InternalName, *parameter.Type, *parameter.Description.ToString());
 			parameterList.Add(parameter.InternalName);
-			typedParameterList.Add(parameter.InternalName + TEXT(":") + parameter.Type);
 		}
 
 		TArray<FString> typedReturnValueList;
@@ -330,12 +312,6 @@ namespace FINGenLuaDoc {
 			typedReturnValueList.Add(returnValue.InternalName + TEXT(":") + returnValue.Type);
 		}
 
-		FString functionReturn;
-		if (!typedReturnValueList.IsEmpty()) {
-			functionReturn = FString::Printf(TEXT(":(%s)"), *FString::Join(typedReturnValueList, TEXT(",")));
-		}
-
-		Str.Appendf(TEXT("---@type (fun(%s)%s)|ModuleTableFunction\n"), *FString::Join(typedParameterList, TEXT(",")), *functionReturn);
 		Str.Appendf(TEXT("function %s(%s) end\n"), *Identifier, *FString::Join(parameterList, TEXT(", ")));
 	}
 
@@ -399,7 +375,8 @@ namespace FINGenLuaDoc {
 		} else if (Metatable.InternalName == TEXT("StructLib")) {
 			FFicsItReflectionModule& reflection = FFicsItReflectionModule::Get();
 			for (auto[Struct, FINStruct] : reflection.GetStructs()) {
-				Str.Appendf(TEXT("---@type fun(table):%s\n"), *FINStruct->GetInternalName());
+				Str.Append(TEXT("---@param t table\n"));
+				Str.Appendf(TEXT("---@return %s\n"), *FINStruct->GetInternalName());
 				Str.Appendf(TEXT("function StructLib.%s(t) end\n"), *FINStruct->GetInternalName());
 			}
 		}
@@ -425,6 +402,7 @@ namespace FINGenLuaDoc {
 	FString GenDocumentation() {
 		FStringBuilderBase str;
 
+		str.Append(TEXT("---@diagnostic disable: missing-fields\n"));
 		str.Append(TEXT("---@meta\n\n"));
 
 		const auto& moduleRegistry = FFINLuaModuleRegistry::GetInstance();

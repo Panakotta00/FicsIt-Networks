@@ -173,8 +173,17 @@ namespace FINLua {
 				return 0;
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		pull
+			 * @LuaFunction		(string?, Object, ...)	pull(timeout: number?)
 			 * @DisplayName		Pull
+			 *
+			 * Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached.
+			 * Returns directly if there is already a signal in the queue (the tick doesn’t get yielded).
+			 *
+			 * @parameter	self		EventQueue
+			 * @parameter	timeout		number			Timeout		The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue
+			 * @return		event		string?			Event		The name of the returned signal. Nil when timeout got reached
+			 * @return		sender		Object			Sender		The component representation of the signal sender. Not set when timeout got reached
+			 * @return		...			any				Parameters	The parameters passed to the signal. Not set when timeout got reached
 			 */)", pull) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 				double timeout = luaL_checknumber(L, 2);
@@ -200,10 +209,16 @@ namespace FINLua {
 				return luaWaitForContinue(L, 0, NULL);
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		waitFor
+			 * @LuaFunction		(string?, Object, ...)	waitFor(filter: EventFilter)
 			 * @DisplayName		Wait For
 			 *
 			 * Returns a Future that resolves when a signal got added to the queue that matches the given Event Filter.
+			 *
+			 * @parameter	self		EventQueue
+			 * @parameter	filter		EventFilter|{event?:string|string[],sender?:Object|Object[],values?:table<string,any>}		Filter		Event filter
+			 * @return		event		string?			Event		The name of the returned signal
+			 * @return		sender		Object			Sender		The component representation of the signal sender
+			 * @return		...			any				Parameters	The parameters passed to the signal
 			 */)", waitFor) {
 				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
@@ -229,12 +244,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		listen(Object...)
+			 * @LuaFunction		listen(...: Object)
 			 * @DisplayName		Listen
 			 *
 			 * Adds the running lua context to the listen queue of the given components.
 			 *
-			 * @param	objects		Object...	A list of objects the computer should start listening to.
+			 * @parameter	...			Object			Objects		A list of objects the computer should start listening to
 			 */)", listen) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSync SyncCall(L);
@@ -253,7 +268,7 @@ namespace FINLua {
 			 *
 			 * Returns all signal senders this computer is listening to.
 			 *
-			 * @return	listening	Object[]	An array containing all objects this computer is currently listening to.
+			 * @return		listening	Object[]		Objects		An array containing all objects this computer is currently listening to
 			 */)", listening) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSync SyncCall(L);
@@ -293,16 +308,16 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		(string|nil, Object, ...)	pull([timeout: number])
+			 * @LuaFunction		(string?, Object, ...)	pull(timeout: number?)
 			 * @DisplayName		Pull
 			 *
 			 * Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached. +
 			 * Returns directly if there is already a signal in the queue (the tick doesn’t get yielded).
 			 *
-			 * @parameter	timeout		number			Timeout		The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue.
-			 * @return		event		string|nil		Event		The name of the returned signal. Nil when timeout got reached.
-			 * @return		sender		Object			Sender		The component representation of the signal sender. Not set when timeout got reached.
-			 * @return		parameters	any...			Parameters	The parameters passed to the signal. Not set when timeout got reached.
+			 * @parameter	timeout		number			Timeout		The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue
+			 * @return		event		string?			Event		The name of the returned signal. Nil when timeout got reached
+			 * @return		sender		Object			Sender		The component representation of the signal sender. Not set when timeout got reached
+			 * @return		...			any				Parameters	The parameters passed to the signal. Not set when timeout got reached
 			 */)", pull) {
 				const int args = lua_gettop(L);
 				if (args > 0) {
@@ -324,12 +339,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		ignore(Object...)
+			 * @LuaFunction		ignore(...: Object)
 			 * @DisplayName		Ignore
 			 *
 			 * Removes the running lua context from the listen queue of the given components. Basically the opposite of listen.
 			 *
-			 * @param	objects		Object...	A list of objects this computer should stop listening to.
+			 * @parameter	...			Object			Objects		A list of objects this computer should stop listening to
 			 */)", ignore) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSync SyncCall(L);
@@ -367,10 +382,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		EventFilter		filter(...)
+			 * @LuaFunction		EventFilter		filter(params: { event?: string|string[], sender?: Object|Object[], values?: table<string,any> })
 			 * @DisplayName		Filter
 			 *
 			 * Creates an Event filter expression.
+
+			 * @parameter	params		{ event?: string|string[], sender?: Object|Object[], values?: table<string,any> }	Params	Filter parameters
+			 * @return		filter		EventFilter		Filter		Event filter
 			 */)", filter) {
 				FFINEventFilterExpression expression = checkFilter(L, 1);
 				luaFIN_pushStruct(L, expression);
@@ -378,12 +396,15 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		integer		registerListener(EventFilter, function(event, sender, ...))
+			 * @LuaFunction		integer		registerListener(filter: EventFilter, cb: fun(event, sender, ...))
 			 * @DisplayName		Register Listener
 			 *
 			 * Registers the given function as a listener.
 			 * When `event.pull()` pulls a signal from the queue, that matches the given Event-Filter,
 			 * a Task will be created using the function and the signals parameters will be passed into the function.
+			 * 
+			 * @parameter	filter		EventFilter|{event?:string|string[],sender?:Object|Object[],values?:table<string,any>}		Filter		Event filter
+			 * @parameter	cb			fun(event, sender, ...)		Callback	Callback that will be called on every event that matches the filter
 			 */)", registerListener) {
 				luaL_checktype(L, 2, LUA_TFUNCTION);
 				FFINEventFilterExpression filter = checkFilter(L, 1);
@@ -398,11 +419,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		EventQueue		queue(EventFilter)
+			 * @LuaFunction		EventQueue		queue(filter: EventFilter)
 			 * @DisplayName		queue
 			 *
 			 * Creates a new event queue.
 			 * When this variable closes or gets garbage collected, it will stop receiving signals.
+			 *
+			 * @parameter	filter		EventFilter|{event?:string|string[],sender?:Object|Object[],values?:table<string,any>}		Filter		Event filter
+			 * @return		queue		EventQueue		Queue		Event queue
 			 */)", queue) {
 				FFINEventFilterExpression filter = checkFilter(L, 1);
 				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
@@ -434,10 +458,15 @@ namespace FINLua {
 				return luaWaitForContinue(L, 0, NULL);
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Future		waitFor(EventFilter)
+			 * @LuaFunction		Future		waitFor(filter: EventFilter)
 			 * @DisplayName		Wait For
 			 *
 			 * Returns a Future that resolves when a signal got polled that matches the given Event Filter.
+			 * 
+			 * @parameter	filter		EventFilter|{event?:string|string[],sender?:Object|Object[],values?:table<string,any>}		Filter		Event filter
+			 * @return		event		string?			Event		The name of the returned signal
+			 * @return		sender		Object			Sender		The component representation of the signal sender
+			 * @return		...			any				Parameters	The parameters passed to the signal
 			 */)", waitFor) {
 				FFINEventFilterExpression filter = checkFilter(L, 1);
 				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);

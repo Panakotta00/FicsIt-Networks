@@ -19,7 +19,7 @@ namespace FINLua {
 			 *
 			 * Allows to log the given strings to the Game Log.
 			 *
-			 * @param	msgs	string...	A list of log messages that should get printed to the game console.
+			 * @param		...			string		Messages	A list of log messages that should get printed to the game console.
 			 */)", log) {
 				int args = lua_gettop(L);
 				FString Msg;

@@ -570,7 +570,7 @@ public:
 		ParameterInternalNames.Add("startDirections");
 		ParameterDisplayNames.Add(FText::FromString("Start Direction"));
 		ParameterDescriptions.Add(FText::FromString("The direction of the spline of how it exists the start point."));
-		ParameterInternalNames.Add("end");
+		ParameterInternalNames.Add("end_");
 		ParameterDisplayNames.Add(FText::FromString("End"));
 		ParameterDescriptions.Add(FText::FromString("The local position of the end point of the spline."));
 		ParameterInternalNames.Add("endDirection");

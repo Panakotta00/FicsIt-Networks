@@ -1,6 +1,8 @@
 Lua Examples::
 +
 ====
+xref:lua/examples/lightSwitch.adoc[Light Switch]
+-
 xref:lua/examples/multiThreading.adoc[Multi Threading]
 -
 xref:lua/examples/PCIDevices.adoc[PCI-Devices]

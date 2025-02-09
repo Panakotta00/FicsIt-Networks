@@ -68,6 +68,7 @@
 *** xref:lua/api/WorldModule.adoc[WorldModule]
 // FINLuaDocumentationEnd //
 ** xref:lua/examples/index.adoc[Examples]
+*** xref:lua/examples/lightSwitch.adoc[Light Switch]
 *** xref:lua/examples/multiThreading.adoc[Multi Threading]
 *** xref:lua/examples/paint.adoc[Paint]
 *** xref:lua/examples/randomPlot.adoc[Random Plot]
