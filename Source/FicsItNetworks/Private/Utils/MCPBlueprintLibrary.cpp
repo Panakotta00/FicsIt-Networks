@@ -2,10 +2,13 @@
 #include "FGSaveSystem.h"
 #include <filesystem>
 
+#include "JsonObjectConverter.h"
+#include "JsonObjectWrapper.h"
 #include "Engine/Font.h"
 #include "GenericPlatform/GenericPlatformFile.h"
 #include "HAL/PlatformFileManager.h"
 #include "Misc/Paths.h"
+#include "PerfCounters/Public/PerfCountersModule.h"
 
 FString UMCPBlueprintLibrary::ExpandPath(FString folder, FString fileName, FString extension){
 	FString fsp = UFGSaveSystem::GetSaveDirectoryPath();
@@ -121,3 +124,31 @@ FVector2D UMCPBlueprintLibrary::MeasureStringRenderSize(UFont* Font, FString Tex
 	vector.Y = MHeight * Array.Num();
 	return vector;
 }
+
+UObject* UMCPBlueprintLibrary::LastUIHintObject = nullptr;
+
+void UMCPBlueprintLibrary::SetLastUIHintObject(UObject* actor) {
+	LastUIHintObject = actor;
+}
+const UObject* UMCPBlueprintLibrary::GetLastUIHintObject() {
+	return LastUIHintObject;
+}
+
+
+/*FString UMCPBlueprintLibrary::SerializeUStructToJSON(UScriptStruct* Struct) {
+	TSharedRef<FJsonObject> outObject(new FJsonObject());
+	TSharedPtr<FJsonObject> Obj = FJsonObjectConverter::UStructToJsonObject();
+	FString OutputString;
+	TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(Obj.ToSharedRef(), Writer);
+
+	return OutputString;
+}
+
+FFINCommandLabelData UMCPBlueprintLibrary::DeserializeJSONString(FString Data) {
+	TSharedPtr<FJsonObject> Obj;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Data);
+	FJsonSerializer::Deserialize(Reader, Obj);
+
+	//return *Obj.Get();
+}*/
