@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
+#include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINSizeablePanel.generated.h"
 
 class UFINModuleSystemPanel;

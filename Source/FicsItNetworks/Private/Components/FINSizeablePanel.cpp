@@ -1,9 +1,8 @@
 #include "Components/FINSizeablePanel.h"
-#include "FGColoredInstanceMeshProxy.h"
-#include "FicsItNetworksMisc.h"
 #include "FicsItNetworksModule.h"
 #include "FINMCPAdvConnector.h"
 #include "Components/FINModuleBase.h"
+#include "FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
@@ -44,7 +43,7 @@ void AFINSizeablePanel::BeginPlay() {
 	Super::BeginPlay();
 	
 	for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) {
-		//Cable->RerunConstructionScripts(); TODO: Check if really needed
+		Cable->ReconstructCable(); //TODO: Check if really needed
 	}
 }
 
@@ -95,9 +94,6 @@ void AFINSizeablePanel::ConstructParts() {
 	}else{
 		ConnectorOffset = {3.3, static_cast<float>((PanelWidth - 1) * 10), static_cast<float>(PanelHeight * 10 - 2)};
 	}
-	Connector->SetMobility(EComponentMobility::Movable);
-	Connector->SetRelativeLocation(ConnectorOffset);
-	Connector->SetMobility(EComponentMobility::Static);
 
 	ModularPanel->PanelWidth = abs(PanelWidth);
 	ModularPanel->PanelHeight = abs(PanelHeight);
@@ -106,6 +102,10 @@ void AFINSizeablePanel::ConstructParts() {
 	Plane->SetVisibility(false);
 
 	SetPanelSize(PanelWidth, PanelHeight);
+	
+	Connector->SetMobility(EComponentMobility::Movable);
+	Connector->SetRelativeLocation(ConnectorOffset);
+	Connector->SetMobility(EComponentMobility::Static);
 }
 
 void AFINSizeablePanel::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int PanelWidth, int PanelHeight,
