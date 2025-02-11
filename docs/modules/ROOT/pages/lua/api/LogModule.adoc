@@ -8,7 +8,7 @@
 === **computer**
 The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
 
-=== __computer.__**log** (verbosity: int, message: string)
+=== __computer.__**log** (verbosity: integer, message: string)
 Allows you to print a log message to the computers log with the given log verbosity.
 
 [%collapsible]
@@ -19,7 +19,7 @@ Allows you to print a log message to the computers log with the given log verbos
 !Name !Type !Description
 
 ! *Verbosity* `verbosity`
-! int
+! integer
 ! The log-level/verbosity of the message you want to log. 0 = Debug, 1 = Info, 2 = Warning, 3 = Error & 4 = Fatal
 
 ! *Message* `message`
@@ -29,6 +29,6 @@ Allows you to print a log message to the computers log with the given log verbos
 !===
 ====
 
-=== **print** : function(string...)
+=== **print** : fun(...)
 
 

@@ -174,7 +174,7 @@ Draws a Rectangle with the upper left corner at the given local position, size, 
 // end::func-drawRect[]
 // end::func-drawRect-title[]
 // tag::func-drawSpline-title[]
-=== `drawSpline` (`start` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `startDirections` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `end` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `endDirection` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `thickness` : Float, `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
+=== `drawSpline` (`start` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `startDirections` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `end_` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `endDirection` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>, `thickness` : Float, `color` : Struct<xref:/reflection/structs/Color.adoc[Color]>)
 // tag::func-drawSpline[]
 
 Draws a Spline from one position to another with given directions, thickness and color.
@@ -202,7 +202,7 @@ Draws a Spline from one position to another with given directions, thickness and
 ! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
 ! The direction of the spline of how it exists the start point.
 
-! *End* `end`
+! *End* `end_`
 ! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
 ! The local position of the end point of the spline.
 

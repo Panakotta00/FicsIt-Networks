@@ -11,7 +11,7 @@ The Computer Library provides functions for interaction with the computer and es
 === __computer.__**demote** ()
 This function is used to allow switching back to the normal tick rate.
 
-=== __computer.__**isPromoted** () -> bool
+=== __computer.__**isPromoted** () -> boolean
 Returns true if the Lua runtime is currently promoted/elevated.
 Which means its running in an seperate game thread allowing for fast bulk calculations.
 
@@ -22,9 +22,9 @@ Which means its running in an seperate game thread allowing for fast bulk calcul
 !===
 !Name !Type !Description
 
-! *True if the currenty runtime is running in promoted/elevated tick state.* `isPromoted`
-! bool
-! 
+! *Promoted* `promoted`
+! boolean
+! True if the currenty runtime is running in promoted/elevated tick state.
 
 !===
 ====

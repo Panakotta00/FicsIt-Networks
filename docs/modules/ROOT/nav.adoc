@@ -133,7 +133,6 @@
 *** xref:reflection/classes/ModuleStopButton.adoc[ModuleStopButton]
 *** xref:reflection/classes/ModuleSwitch.adoc[ModuleSwitch]
 *** xref:reflection/classes/ModuleTextDisplay.adoc[ModuleTextDisplay]
-*** xref:reflection/classes/MushroomPushbuttonModule.adoc[MushroomPushbuttonModule]
 *** xref:reflection/classes/NetworkCard.adoc[NetworkCard]
 *** xref:reflection/classes/NetworkRouter.adoc[NetworkRouter]
 *** xref:reflection/classes/Object.adoc[Object]
