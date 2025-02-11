@@ -8,7 +8,6 @@
 #include "GenericPlatform/GenericPlatformFile.h"
 #include "HAL/PlatformFileManager.h"
 #include "Misc/Paths.h"
-#include "PerfCounters/Public/PerfCountersModule.h"
 
 FString UMCPBlueprintLibrary::ExpandPath(FString folder, FString fileName, FString extension){
 	FString fsp = UFGSaveSystem::GetSaveDirectoryPath();
