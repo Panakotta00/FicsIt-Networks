@@ -14,7 +14,7 @@ bool FFINEventFilter::Matches(UObject* Sender, const FFINSignalData& Signal) con
 			const FFIRAnyValue* filter = ValueFilters.Find(param->GetInternalName());
 			if (!filter) continue;
 			numEvaluated += 1;
-			const FFIRAnyValue& value = Signal.Data[0];
+			const FFIRAnyValue& value = Signal.Data[i];
 
 			if (filter->GetType() != value.GetType()) return false;
 			switch (filter->GetType()) {
