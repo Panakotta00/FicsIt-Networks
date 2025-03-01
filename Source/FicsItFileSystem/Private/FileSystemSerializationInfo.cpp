@@ -30,11 +30,13 @@ namespace CodersFileSystem {
 
 		if (bIsSaving) {
 			childs = SerializeDevice->children(Path);
+			childs.erase(".git");
 			childIterator = childs.begin();
 			ChildNodeNum = childs.size();
 		}
 		FStructuredArchive::FArray ChildNodes = Record.EnterArray(SA_FIELD_NAME(TEXT("ChildNodes")), ChildNodeNum);
 		std::unordered_set<std::string> DiskChilds = SerializeDevice->children(Path);
+		DiskChilds.erase(".git");
 		CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
 		if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
 			for (std::string DiskChild : DiskChilds) {
@@ -104,7 +106,7 @@ namespace CodersFileSystem {
 				}
 				SerializeDevice->createDir(Path / stdChildName);
 				SerializePath(SerializeDevice, Child, Path / stdChildName, Name, KeepDisk, AskForDiskOrSave);
-				if (KeepDisk == 1) return;
+				if (KeepDisk == FIFS_KEEP_CHANGES) return;
 			}
 		}
 	}
