@@ -68,7 +68,7 @@ namespace CodersFileSystem {
 	}
 
 	void WindowsFileWatcher::handleChangeEvent(FILE_NOTIFY_INFORMATION* changeEvent) {
-		std::wstring fname = std::wstring((const wchar_t*)&changeEvent->FileName, changeEvent->FileNameLength);
+		std::wstring fname = std::wstring((const wchar_t*)&changeEvent->FileName, changeEvent->FileNameLength / sizeof(WCHAR));
 		std::replace(fname.begin(), fname.end(), L'\\', L'/');
 		Path path = fs::path(fname).string();
 		bool isDir = fs::is_directory(realPath / path.str());
