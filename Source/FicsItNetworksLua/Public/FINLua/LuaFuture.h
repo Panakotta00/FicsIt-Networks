@@ -4,6 +4,7 @@
 #include "LuaUtil.h"
 
 #define LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY "future-registry"
+#define LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY "timeout-registry"
 
 namespace FINLua {
 	typedef TSharedRef<TFIRInstancedStruct<FFINFuture>> FLuaFuture;

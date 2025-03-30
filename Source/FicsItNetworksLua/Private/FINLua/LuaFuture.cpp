@@ -596,8 +596,12 @@ namespace FINLua {
 			lua_newtable(L);
 			lua_pushstring(L, "kv");
 			lua_setfield(L, -2, "__mode");
+			lua_newtable(L);
+			lua_pushvalue(L, -2);
 			lua_setmetatable(L, -2);
-			lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
+			lua_setfield(L, -3, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
+			lua_setmetatable(L, -2);
+			lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY);
 		}
 	}
 
@@ -724,5 +728,77 @@ namespace FINLua {
 		lua_callk(L, 1, 0, NULL, futureRunFinish);
 
 		return futureRunFinish(L, 0, NULL);
+	}
+	int futureRunFinish(lua_State*L, int, lua_KContext) {
+		lua_getglobal(L, "future");
+		if (lua_getfield(L, -1, "tasks") != LUA_TTABLE) {
+			return luaL_typeerror(L, -1, "table");
+		}
+		int len = luaL_len(L, 1);
+		for (; len > 0; --len) {
+			lua_geti(L, 1, len);
+			lua_pushcclosure(L, &luaFIN_callbackPoll, 1);
+			luaFIN_pushCallback(L);
+		}
+		lua_pop(L, 1);
+
+		// TODO: Check for pending futures
+		lua_pushboolean(L, true);
+		return 1;
+	}
+
+	EFutureState luaFIN_getFutureState(lua_State* thread) {
+		int status = lua_status(thread);
+		switch (status) {
+			default:
+				return Future_Failed;
+			case LUA_OK:
+				if (lua_gettop(thread) == 0) {
+					return Future_Ready;
+				}
+			return Future_Pending;
+			case LUA_YIELD:
+				return Future_Pending;
+		}
+	}
+
+	int luaFIN_pushCallback(lua_State* L) {
+		luaL_checktype(L, -1, LUA_TFUNCTION);
+		lua_getglobal(L, "future");
+		if (lua_getfield(L, -1, "callbacks") != LUA_TTABLE) {
+			return luaL_typeerror(L, -1, "table");
+		}
+		lua_rotate(L, -3, -1),
+		lua_seti(L, -2, luaL_len(L, -2)+1);
+		lua_pop(L, 2);
+		return 0;
+	}
+
+	int luaFIN_callbackPoll(lua_State* L) {
+		lua_settop(L, 0);
+		lua_pushvalue(L, lua_upvalueindex(1));
+		return FutureModule::Future::poll(L);
+	}
+
+	void luaFIN_pushPollCallback(lua_State* L, int future) {
+		lua_pushvalue(L, future);
+		lua_pushcclosure(L, luaFIN_callbackPoll, 1);
+		luaFIN_pushCallback(L);
+	}
+
+	void luaFIN_futureDependsOn(lua_State* L, int dependency) {
+		dependency = lua_absindex(L, dependency);
+		lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);
+		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
+		lua_pushthread(L);
+		if (lua_gettable(L, -2) != LUA_TNIL) {
+			luaL_checkudata(L, dependency, FutureModule::Future::_Name);
+			lua_getiuservalue(L, dependency, 3);
+			lua_insert(L, -2);
+			lua_pushinteger(L, 0);
+			lua_settable(L, -3);
+		} else {
+			luaL_error(L, "calling await within non-async function");
+		}
 	}
 }

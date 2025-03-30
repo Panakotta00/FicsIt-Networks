@@ -112,6 +112,13 @@ namespace FINLua {
 	FString luaFIN_stack(lua_State* L);
 
 	/**
+	 * Executes the first function in ctx unless it is NULL
+	 * @param ctx A array of lua_KFunction's
+	 * @return 0 or the result of the function
+	 */
+	int luaFIN_sequence(lua_State* L, int, lua_KContext ctx);
+
+	/**
 	 * Tries to set the value on top of the stack as value of the table at the given index with the field key beeing the value right below the stack.
 	 * If the value is a table and the field already contains a table, will merge both tables.
 	 * In any other case will overwrite the field of the target with the value on-top of the stack.
