@@ -41,6 +41,85 @@ enum EFINButtonFunctionalMode {
 	FIN_ButtonMode_Simple, FIN_ButtonMode_Double, FIN_ButtonMode_DoubleLatched, FIN_ButtonMode_MAX
 };
 
+USTRUCT()
+struct FFINPanelArrowEndData {
+	GENERATED_BODY()
+	
+};
+
+UENUM(BlueprintType)
+enum EFINPanelArrowCrossingTypes {
+	FIN_PanelArrowCrossing_Lines,
+	FIN_PanelArrowCrossing_Dot,
+	FIN_PanelArrowCrossing_BridgeH,
+	FIN_PanelArrowCrossing_BridgeV,
+};
+
+UENUM(BlueprintType)
+enum EFINPanelTraceEndTypes {
+	FINPanelTraceEnd_None,
+	FINPanelTraceEnd_Straight,
+	FINPanelTraceEnd_RecessedBlockage,
+	FINPanelTraceEnd_Blockage,
+	FINPanelTraceEnd_ArrowOut,
+	FINPanelTraceEnd_ArrowIn,
+};
+
+UENUM(BlueprintType)
+enum EFINPanelTraceStartTypes {
+	FINPanelTraceStart_None,
+	FINPanelTraceStart_Half,
+	FINPanelTraceStart_CapSquare,
+	FINPanelTraceStart_CapRound,
+	FINPanelTraceStart_Miter,
+};
+
+USTRUCT(Blueprintable, BlueprintType)
+struct FFINPanelArrow {
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	double rotation = 0.0;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	TEnumAsByte<EFINPanelTraceEndTypes> OuterEnd = FINPanelTraceEnd_None;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	TEnumAsByte<EFINPanelTraceStartTypes> InnerEnd = FINPanelTraceStart_CapSquare;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	bool InheritColor = true;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	FLinearColor ArrowColor = FLinearColor(0,0,0,1);
+};
+
+USTRUCT(Blueprintable, BlueprintType)
+struct FFINPanelArrowAnchor {
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	FVector AnchorPosition = FVector(0,0,0);
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	FRotator AnchorRotation = FRotator(0,0,0);
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	TEnumAsByte<EFINPanelArrowCrossingTypes> Type = FIN_PanelArrowCrossing_Lines;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	TArray<FFINPanelArrow> Arrows;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	FLinearColor AnchorColor = FLinearColor(0,0,0,1);
+
+	/*static FString ToString(FFINPanelArrowAnchor Anchor) {
+		FString Ret = "";
+		Ret.Append(FString::Format(""))
+	}*/
+};
+
+
 USTRUCT(Blueprintable)
 struct FFINCommandLabelData  {
 	GENERATED_BODY()
