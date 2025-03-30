@@ -91,9 +91,9 @@ namespace FINLua {
 	FString luaFIN_getUserDataMetaName(lua_State* L, int Index);
 
 	/**
-	 * @brief Yields in a way the caller is continue execution and the yield does NOT get propagated.
+	 * @brief Yields in a way the caller is continued execution and the yield does NOT get propagated.
 	 */
-	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc, TOptional<double> timeout);
+	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc);
 	
 	void luaFIN_pushFString(lua_State* L, const FString& str);
 	FString luaFIN_checkFString(lua_State* L, int index);

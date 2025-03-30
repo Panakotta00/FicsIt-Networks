@@ -168,7 +168,7 @@ namespace FINLua {
 				}
 				double currentTime = FPlatformTime::Seconds();
 				if (timeout > currentTime) {
-					return luaFIN_yield(L, 0, NULL, luaPullContinue, timeout);
+					return luaFIN_yield(L, 0, NULL, luaPullContinue);
 				}
 				return 0;
 			}
@@ -195,7 +195,7 @@ namespace FINLua {
 
 			int luaWaitForContinue(lua_State* L, int, lua_KContext) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
-				TSharedRef<FFINEventFilterExpression> filter = luaFIN_checkStruct<FFINEventFilterExpression>(L, 2, false);
+ 				TSharedRef<FFINEventFilterExpression> filter = luaFIN_checkStruct<FFINEventFilterExpression>(L, 2, false);
 				while (!queue->Events.IsEmpty()) {
 					FFINLuaEvent event = queue->Events[0];
 					queue->Events.RemoveAt(0);
@@ -203,7 +203,7 @@ namespace FINLua {
 						return luaFIN_pushEventData(L, event.Sender, event.Data);
 					}
 				}
-				return luaFIN_yield(L, 0, NULL, luaWaitForContinue, TNumericLimits<double>::Max());
+				return luaFIN_yield(L, 0, NULL, luaWaitForContinue);
 			}
 			int luaWaitFor(lua_State* L) {
 				return luaWaitForContinue(L, 0, NULL);
@@ -298,7 +298,7 @@ namespace FINLua {
 					if (!timeout || *timeout <= FPlatformTime::Seconds()) {
 						return 0;
 					}
-					return luaFIN_yield(L, 0, 0, luaPullContinue, timeout);
+					return luaFIN_yield(L, 0, 0, luaPullContinue);
 				}
 
 				const auto& [sender, signal] = *data;
@@ -443,7 +443,7 @@ namespace FINLua {
 				int key = luaL_checkinteger(L, 2);
 				if (lua_geti(L, 1, key+1) == LUA_TNIL) {
 					lua_pop(L, 1);
-					return luaFIN_yield(L, 0, NULL, luaWaitForContinue, TNumericLimits<double>::Max());
+					return luaFIN_yield(L, 0, NULL, luaWaitForContinue);
 				}
 				lua_pushnil(L);
 				lua_seti(L, 1, key+1);
@@ -470,15 +470,25 @@ namespace FINLua {
 			 */)", waitFor) {
 				FFINEventFilterExpression filter = checkFilter(L, 1);
 				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+				int registry_index = lua_absindex(L, -1);
 				int64 key = FFINLuaEventRegistry::FindNextKey(registry->OneShots);
 				registry->OneShots.Add(key, filter);
 				lua_getiuservalue(L, -1, 3);
 				lua_pushinteger(L, key);
 				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
+
+				lua_getiuservalue(L, registry_index, 4);
+				lua_pushvalue(L, -2);
+				luaFINDebug_dumpStack(L);
+				int future_ref = luaL_ref(L, -2);
+				lua_pop(L, 1);
+				registry->OneShots_Futures.Add(key, future_ref);
+
 				return 1;
 			}
 
 			int luaLoopContinue(lua_State* L, int, lua_KContext) {
+				lua_settop(L, 0);
 				while (true) {
 					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
 					TOptional<TTuple<FFIRTrace, FFINSignalData>> data = eventSystem.PullSignal();
@@ -486,10 +496,11 @@ namespace FINLua {
 						const auto& [sender, signal] = *data;
 						luaFIN_handleEvent(L, sender, signal);
 					}
-					TOptional<double> timeout = TNumericLimits<double>::Max();
-					luaFIN_futureRun(L, 1, timeout);
+					lua_settop(L, 0);
+					lua_pushcfunction(L, luaFIN_futureRun);
+					lua_callk(L, 0, 0, NULL, luaLoopContinue);
 					if (!data) {
-						return luaFIN_yield(L, 0, 0, luaLoopContinue, timeout);
+						return luaFIN_yield(L, 0, 0, luaLoopContinue);
 					}
 				}
 			}
@@ -499,9 +510,8 @@ namespace FINLua {
 			 *
 			 * Runs an infinite loop or `future.run()`, `event.pull(0)` and `coroutine.yield()`.
 			 */)", loop) {
-				lua_pop(L, lua_gettop(L));
-				lua_getglobal(L, "future");
-				return luaLoopContinue(L, 0, 0);
+				lua_settop(L, 0);
+				return luaLoopContinue(L, 0, NULL);
 			}
 		}
 
@@ -519,36 +529,36 @@ namespace FINLua {
 			lua_setfield(L, -2, "__index");
 			lua_pop(L, 1);
 
-			lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals");
-			luaFIN_pushStruct(L, FFINLuaEventRegistry(), 3);
+			lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);
+			luaFIN_pushStruct(L, FFINLuaEventRegistry(), 4);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 1);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 2);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 3);
+			lua_newtable(L);
+			lua_setiuservalue(L, -2, 4);
 			lua_setfield(L, -2, "event-registry");
 			lua_pop(L, 1);
 
 			lua_pushcfunction(L, event::luaWaitFor);
 			luaFIN_persistValue(L, -1, "WaitFor");
-			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaWaitForContinue)));
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaWaitForContinue)));
 			luaFIN_persistValue(L, -1, "WaitForContinue");
-			lua_pop(L, 2);
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaLoopContinue)));
+			luaFIN_persistValue(L, -1, "LoopContinue");
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaPullContinue)));
+			luaFIN_persistValue(L, -1, "PullContinue");
+			lua_pop(L, 4);
 
 			lua_pushcfunction(L, EventQueue::luaWaitFor);
 			luaFIN_persistValue(L, -1, "EventQueueWaitFor");
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaWaitForContinue)));
 			luaFIN_persistValue(L, -1, "EventQueueWaitForContinue");
-			lua_pop(L, 2);
-
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "EventQueuePullContinue");
-			lua_pop(L, 1);
-
-			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaLoopContinue)));
-			luaFIN_persistValue(L, -1, "LoopContinue");
-			lua_pop(L, 1);
+			lua_pop(L, 3);
 		}
 	}
 
@@ -580,7 +590,7 @@ namespace FINLua {
 	}
 
 	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L) {
-		if (lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals") == LUA_TNIL) {
+		if (lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS) == LUA_TNIL) {
 			lua_pop(L, 1);
 			return nullptr;
 		}
@@ -626,7 +636,8 @@ namespace FINLua {
 			}
 		}
 		lua_pop(L, 1);
-		lua_getiuservalue(L, -1, 3);
+		lua_getiuservalue(L, -1, 4);
+		lua_getiuservalue(L, -2, 3);
 		for (const auto& [key, filter] : registry->OneShots) {
 			if (filter.Matches(sender.GetUnderlyingPtr(), data)) {
 				lua_newtable(L);
@@ -636,10 +647,19 @@ namespace FINLua {
 					lua_seti(L, table, i);
 				}
 				lua_seti(L, -2, key+1);
+
+				// Wake Future
+				int ref = registry->OneShots_Futures[key];
+				lua_geti(L, -2, ref);
+				lua_pushcclosure(L, &luaFIN_callbackPoll, 1);
+				luaFIN_pushCallback(L);
+				luaL_unref(L, -2, ref);
+				registry->OneShots_Futures.Remove(key);
+
 				registry->OneShots.Remove(key);
 			}
 		}
-		lua_pop(L, 1);
+		lua_pop(L, 2);
 		lua_pop(L, 1);
 	}
 

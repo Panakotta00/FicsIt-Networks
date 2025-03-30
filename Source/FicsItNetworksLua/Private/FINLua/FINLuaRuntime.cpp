@@ -124,7 +124,7 @@ TOptional<FString> FFINLuaRuntime::LoadState(FFINLuaRuntimePersistenceState& InS
 	lua_replace(LuaState, LuaThreadIndex);						// ..., data-str, uperm, data
 	lua_getfield(LuaState, -1, "globals");						// ..., data-str, uperm, data, globals
 	lua_seti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);		// ..., data-str, uperm, data
-	lua_getfield(LuaState, -1, "hidden-globals");					// ..., data-str, uperm, data, hidden-globals
+	lua_getfield(LuaState, -1, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);	// ..., data-str, uperm, data, hidden-globals
 	lua_setfield(LuaState, LUA_REGISTRYINDEX, "hidden-globals");	// ..., data-str, uperm, data
 
 	LuaThread = lua_tothread(LuaState, LuaThreadIndex);
@@ -144,14 +144,14 @@ TUnion<FFINLuaRuntimePersistenceState, FString> FFINLuaRuntime::SaveState() {
 	FFINLuaRuntimePersistenceState State;
 
 	// prepare state data
-	lua_getfield(LuaState, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_PERSIST);	// ..., perm
-	lua_newtable(LuaState);														// ..., perm, data
-	lua_geti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);					// ..., perm, data, globals
-	lua_setfield(LuaState, -2, "globals");									// ..., perm, data
-	lua_pushvalue(LuaState, LuaThreadIndex);										// ..., perm, data, thread
-	lua_setfield(LuaState, -2, "thread");										// ..., perm, data
-	lua_getfield(LuaState, LUA_REGISTRYINDEX, "hidden-globals");				// ..., perm, data, hidden-globals
-	lua_setfield(LuaState, -2, "hidden-globals");								// ..., perm, dat
+	lua_getfield(LuaState, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_PERSIST);		// ..., perm
+	lua_newtable(LuaState);															// ..., perm, data
+	lua_geti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);						// ..., perm, data, globals
+	lua_setfield(LuaState, -2, "globals");										// ..., perm, data
+	lua_pushvalue(LuaState, LuaThreadIndex);											// ..., perm, data, thread
+	lua_setfield(LuaState, -2, "thread");											// ..., perm, data
+	lua_getfield(LuaState, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);	// ..., perm, data, hidden-globals
+	lua_setfield(LuaState, -2, "hidden-globals");									// ..., perm, dat
 
 	PersistenceState = &State;
 

@@ -3,8 +3,16 @@
 #include "FINFuture.h"
 #include "LuaUtil.h"
 
+#define LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY "future-registry"
+
 namespace FINLua {
 	typedef TSharedRef<TFIRInstancedStruct<FFINFuture>> FLuaFuture;
+
+	enum EFutureState {
+		Future_Pending,
+		Future_Ready,
+		Future_Failed,
+	};
 
 	/**
 	 * @brief Pushes a FFINFuture on to the Lua Stack.
@@ -47,7 +55,6 @@ namespace FINLua {
 	 * @brief Awaits the Future at the given index and pushes its results onto the stack.
 	 * @param L the lua state
 	 * @param index the index of the future
-	 * @paras kfunc if given, continues this function after the await returned
 	 */
 	int luaFIN_await(lua_State* L, int index);
 
@@ -58,5 +65,38 @@ namespace FINLua {
 	 */
 	void luaFIN_addTask(lua_State* L, int index);
 
-	int luaFIN_futureRun(lua_State* L, int index, TOptional<double>& timeout);
+	/**
+	 * A yield able Lua Function
+	 * that executes one iteration of the future scheduler.
+	 *
+	 * Returns a boolean that is true if there are still pending futures or deferred callbacks.
+	 */
+	int luaFIN_futureRun(lua_State* L);
+
+	EFutureState luaFIN_getFutureState(lua_State* thread);
+
+	/**
+	 * Adds the function on top of the stack to the schedules callbacks.
+	 * Pops the function from the lua stack.
+	 */
+	int luaFIN_pushCallback(lua_State* L);
+
+	/**
+	 * A Lua Function.
+	 * Calls the poll function of the future stored as first up-value.
+	 * Useful as callback function to poll/continue a dependant future.
+	 */
+	int luaFIN_callbackPoll(lua_State* L);
+
+	void luaFIN_pushPollCallback(lua_State* L, int future);
+
+	/**
+	 * Adds this threads future as dependent to the future at the given index.
+	 * Lets the future at the given index know, the future of the thread L should be polled on finish.
+	 * May error if this thread is not associated with a thread.
+	 *
+	 * @param L          the lua state
+	 * @param dependency the index of the future this thread should be woken up by
+	 */
+	void luaFIN_futureDependsOn(lua_State* L, int dependency);
 }

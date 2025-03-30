@@ -57,6 +57,8 @@ struct FFINLuaEventRegistry {
 
 	UPROPERTY(SaveGame)
 	TMap<int64, FFINEventFilterExpression> OneShots;
+	UPROPERTY(SaveGame)
+	TMap<int64, int> OneShots_Futures;
 
 	static int64 FindNextKey(const TMap<int64, FFINEventFilterExpression>& registry) {
 		int64 key = registry.Num();
