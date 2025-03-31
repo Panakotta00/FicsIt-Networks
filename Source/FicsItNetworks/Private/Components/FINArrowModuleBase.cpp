@@ -1,6 +1,5 @@
 ﻿#include "Components/FINArrowModuleBase.h"
 #include "FicsItNetworksModule.h"
-#include "JsonPointer.h"
 #include "UnrealNetwork.h"
 
 
@@ -53,41 +52,33 @@ void AFINArrowModuleBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	return result;
 }*/
 
-FString AFINArrowModuleBase::DebugPrintArrow(const FFINPanelArrow& Arrow) {
-	FString res = "{";
-	res+= "Rotation = " + FString::Printf(TEXT("%f, "), Arrow.rotation);
-	res+= "Color = " + FString::Printf(TEXT("{%f,%f,%f}"), Arrow.ArrowColor.R, Arrow.ArrowColor.G, Arrow.ArrowColor.B) + ", ";
-	res+= "InheritColor = " + FString::Printf(TEXT("%d, "), Arrow.InheritColor);
-	res+= "InnerEnd = " + FString::Printf(TEXT("%d, "), Arrow.InnerEnd.GetValue());
-	res+= "OuterEnd = " + FString::Printf(TEXT("%d}"), Arrow.OuterEnd.GetValue());
-	return res;
-}
+//FString AFINArrowModuleBase::DebugPrintArrow(const FFINPanelArrow& Arrow) {
+//	FString res = "{";
+//	res+= "Rotation = " + FString::Printf(TEXT("%f, "), Arrow.rotation);
+//	res+= "Color = " + FString::Printf(TEXT("{%f,%f,%f}"), Arrow.ArrowColor.R, Arrow.ArrowColor.G, Arrow.ArrowColor.B) + ", ";
+//	res+= "InheritColor = " + FString::Printf(TEXT("%d, "), Arrow.InheritColor);
+//	res+= "InnerEnd = " + FString::Printf(TEXT("%d, "), Arrow.InnerEnd.GetValue());
+//	res+= "OuterEnd = " + FString::Printf(TEXT("%d}"), Arrow.OuterEnd.GetValue());
+//	return res;
+//}
+//
+//FString AFINArrowModuleBase::DebugPrintAnchor(FFINPanelArrowAnchor& Anchor) {
+//	FString res = "{";
+//	res+= "Type = " + FString::FromInt(Anchor.Type.GetValue()) + ", ";
+//	res+= "Color = " + FString::Printf(TEXT("{%f,%f,%f}"), Anchor.AnchorColor.R, Anchor.AnchorColor.G, Anchor.AnchorColor.B) + ", ";
+//	res+= "Position = " + FString::Printf(TEXT("{%f,%f,%f}"), Anchor.AnchorPosition.X, Anchor.AnchorPosition.Y, Anchor.AnchorPosition.Z) + ", ";
+//	res+= "Rotation = " + FString::Printf(TEXT("{%f,%f,%f}"), Anchor.AnchorRotation.Pitch, Anchor.AnchorRotation.Yaw, Anchor.AnchorRotation.Roll) + ", ";
+//	res+= "Arrows = {";
+//	for (auto Arrow : Anchor.Arrows) {
+//		res+= DebugPrintArrow(Arrow);
+//	}
+//	res+= "}";
+//	return res;
+//}
 
-FString AFINArrowModuleBase::DebugPrintAnchor(FFINPanelArrowAnchor& Anchor) {
-	FString res = "{";
-	res+= "Type = " + FString::FromInt(Anchor.Type.GetValue()) + ", ";
-	res+= "Color = " + FString::Printf(TEXT("{%f,%f,%f}"), Anchor.AnchorColor.R, Anchor.AnchorColor.G, Anchor.AnchorColor.B) + ", ";
-	res+= "Position = " + FString::Printf(TEXT("{%f,%f,%f}"), Anchor.AnchorPosition.X, Anchor.AnchorPosition.Y, Anchor.AnchorPosition.Z) + ", ";
-	res+= "Rotation = " + FString::Printf(TEXT("{%f,%f,%f}"), Anchor.AnchorRotation.Pitch, Anchor.AnchorRotation.Yaw, Anchor.AnchorRotation.Roll) + ", ";
-	res+= "Arrows = {";
-	for (auto Arrow : Anchor.Arrows) {
-		res+= DebugPrintArrow(Arrow);
-	}
-	res+= "}";
-	return res;
-}
-
-#pragma optimize("", off)
 void AFINArrowModuleBase::Serialize(FArchive& ar) {
-	if(Anchors.Num() > 0) {
-		UE_LOG(LogFicsItNetworks, Verbose, TEXT("Before serialize: %s"), *DebugPrintAnchor(Anchors[0]))
-	}
 	Super::Serialize(ar);
-	if(Anchors.Num() > 0) {
-		UE_LOG(LogFicsItNetworks, Verbose, TEXT("After serialize: %s"), *DebugPrintAnchor(Anchors[0]))
-	}
 }
-#pragma optimize("", on)
 
 void AFINArrowModuleBase::RebuildComponents(AActor* Parent, USceneComponent* Attach, TArray<FFINPanelArrowAnchor>& OutAnchors,  TArray<UStaticMeshComponent*>& OutParts) {
 	for (UStaticMeshComponent* comp : OutParts) {
