@@ -89,11 +89,11 @@ void AFINArrowModuleBase::RebuildComponents(AActor* Parent, USceneComponent* Att
 		}
 	}
 	
-	UE_LOG(LogFicsItNetworks, Verbose, L"RebuildComponents()");
+	//UE_LOG(LogFicsItNetworks, Verbose, TEXT("RebuildComponents()"));
 	OutParts.Empty();
 	int AnchorIDX = 0;
 	for (auto Anchor : OutAnchors) {
-		UE_LOG(LogFicsItNetworks, Verbose, L"Calculating Anchor %d", AnchorIDX++);
+		//UE_LOG(LogFicsItNetworks, Verbose, TEXT("Calculating Anchor %d"), AnchorIDX++);
 		FRotator TempRotation = Anchor.AnchorRotation;
 		UStaticMeshComponent* MeshComponent = nullptr;
 		bool hasArrows = false;
@@ -124,7 +124,7 @@ void AFINArrowModuleBase::RebuildComponents(AActor* Parent, USceneComponent* Att
 		TempRotation = Anchor.AnchorRotation;
 		int ArrowIDX = 0;
 		for (auto Arrow : Anchor.Arrows) {
-			UE_LOG(LogFicsItNetworks, Verbose, L"   Calculating Arrow %d", ArrowIDX++);
+			//UE_LOG(LogFicsItNetworks, Verbose, TEXT("   Calculating Arrow %d", ArrowIDX++));
 			FRotator ArrowRotation = TempRotation;
 			ArrowRotation+= FRotator(0,Arrow.rotation, 0);
 			FLinearColor ArrowColor = Arrow.ArrowColor;
@@ -134,22 +134,22 @@ void AFINArrowModuleBase::RebuildComponents(AActor* Parent, USceneComponent* Att
 			MeshComponent = nullptr;
 			switch(Arrow.OuterEnd) {
 				case FINPanelTraceEnd_Straight: {
-					UE_LOG(LogFicsItNetworks, Verbose, L"     --- FINPanelTraceEnd_Straight");
+					//UE_LOG(LogFicsItNetworks, Verbose, TEXT("     --- FINPanelTraceEnd_Straight"));
 					MeshComponent = CreateAndAddComponent(TipStraightMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
 					break;
 				}
 				case FINPanelTraceEnd_Blockage: {
-					UE_LOG(LogFicsItNetworks, Verbose, L"     --- FINPanelTraceEnd_Blockage");
+					//UE_LOG(LogFicsItNetworks, Verbose, TEXT("     --- FINPanelTraceEnd_Blockage"));
 					MeshComponent = CreateAndAddComponent(TipBlockedMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
 					break;
 				}
 				case FINPanelTraceEnd_RecessedBlockage: {
-					UE_LOG(LogFicsItNetworks, Verbose, L"     --- FINPanelTraceEnd_RecessedBlockage");
+					//UE_LOG(LogFicsItNetworks, Verbose, TEXT("     --- FINPanelTraceEnd_RecessedBlockage"));
 					MeshComponent = CreateAndAddComponent(TipRecessedBlockedMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
 					break;
 				}
 				case FINPanelTraceEnd_ArrowOut: {
-					UE_LOG(LogFicsItNetworks, Verbose, L"     --- FINPanelTraceEnd_ArrowOut");
+					//UE_LOG(LogFicsItNetworks, Verbose, TEXT("     --- FINPanelTraceEnd_ArrowOut"));
 					MeshComponent = CreateAndAddComponent(TipArrowMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
 					break;
 				}

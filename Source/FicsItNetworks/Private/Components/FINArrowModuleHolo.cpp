@@ -582,10 +582,10 @@ void UFINPanelTraceConfigPopup::SetTraceOuter(int Index, EFINPanelTraceEndTypes 
 			Hologram->Anchors[0].Arrows[Index].OuterEnd = Type;
 			Hologram->bNeedRebuild = true;
 		}else {
-			UE_LOG(LogFicsItNetworks, Error, L"Arrow is missing");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Arrow is missing"));
 		}
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 }
 
@@ -596,10 +596,10 @@ void UFINPanelTraceConfigPopup::SetTraceInner(int Index, EFINPanelTraceStartType
 			Hologram->Anchors[0].Arrows[Index].InnerEnd = Type;
 			Hologram->bNeedRebuild = true;
 		}else {
-			UE_LOG(LogFicsItNetworks, Error, L"Arrow is missing");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Arrow is missing"));
 		}
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 }
 
@@ -608,7 +608,7 @@ void UFINPanelTraceConfigPopup::SetCenter(EFINPanelArrowCrossingTypes Type) {
 		Hologram->Anchors[0].Type = Type;
 		Hologram->bNeedRebuild = true;
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 }
 void UFINPanelTraceConfigPopup::SetCenterColorText(FText ColorIn) {
@@ -616,7 +616,7 @@ void UFINPanelTraceConfigPopup::SetCenterColorText(FText ColorIn) {
 		Hologram->Anchors[0].AnchorColor = UMCPBlueprintLibrary::HexStringToLinearColor(ColorIn.ToString());
 		Hologram->bNeedColorUpdate = true;
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 }
 
@@ -630,10 +630,10 @@ FFINArrowOptionType UFINPanelTraceConfigPopup::GetTraceOuterItem(int Index, TArr
 				}
 			}
 		}else {
-			UE_LOG(LogFicsItNetworks, Error, L"Arrow is missing");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Arrow is missing"));
 		}
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 	return Source[0];
 }
@@ -648,10 +648,10 @@ FFINArrowOptionType UFINPanelTraceConfigPopup::GetTraceInnerItem(int Index, TArr
 				}
 			}
 		}else {
-			UE_LOG(LogFicsItNetworks, Error, L"Arrow is missing");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Arrow is missing"));
 		}
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 	return Source[0];
 }
@@ -665,7 +665,7 @@ FFINArrowOptionType UFINPanelTraceConfigPopup::GetCenterItem(TArray<FFINArrowOpt
 			}
 		}
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 	return Source[0];
 }
@@ -676,10 +676,10 @@ void UFINPanelTraceConfigPopup::SetTraceColorFromText(int Index, const FText& Te
 			Hologram->Anchors[0].Arrows[Index].ArrowColor = UMCPBlueprintLibrary::HexStringToLinearColor(Text.ToString());
 			Hologram->bNeedColorUpdate = true;
 		}else {
-			UE_LOG(LogFicsItNetworks, Error, L"Arrow is missing");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Arrow is missing"));
 		}
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 }
 
@@ -690,10 +690,10 @@ void UFINPanelTraceConfigPopup::SetTraceColorInherit(int Index, bool Value, TSha
 			BoundTextField->SetEnabled(!Value);
 			Hologram->bNeedColorUpdate = true;
 		}else {
-			UE_LOG(LogFicsItNetworks, Error, L"Arrow is missing");
+			UE_LOG(LogFicsItNetworks, Error, TEXT("Arrow is missing"));
 		}
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 }
 
@@ -702,9 +702,9 @@ bool UFINPanelTraceConfigPopup::IsTraceColorInherit(int Index) {
 		if(Hologram->Anchors[0].Arrows.Num() > Index) {
 			return Hologram->Anchors[0].Arrows[Index].InheritColor;
 		}
-		UE_LOG(LogFicsItNetworks, Error, L"Arrow is missing");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Arrow is missing"));
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
 	return true;
 }
@@ -715,11 +715,11 @@ FText UFINPanelTraceConfigPopup::GetTraceColorText(int Index) {
 			const FLinearColor V = Hologram->Anchors[0].Arrows[Index].ArrowColor;
 			return FText::FromString(UMCPBlueprintLibrary::ColorToHexString(V));
 		}
-		UE_LOG(LogFicsItNetworks, Error, L"Arrow is missing");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Arrow is missing"));
 	}else {
-		UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
+		UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
 	}
-	return FText::FromString(L"#000000");
+	return FText::FromString(TEXT("#000000"));
 }
 
 
@@ -744,8 +744,8 @@ FText UFINPanelTraceConfigPopup::GetCenterColor() {
 		FLinearColor V = Hologram->Anchors[0].AnchorColor;
 		return FText::FromString(UMCPBlueprintLibrary::ColorToHexString(V));
 	}
-	UE_LOG(LogFicsItNetworks, Error, L"Anchors is empty");
-	return FText::FromString(L"#000000");
+	UE_LOG(LogFicsItNetworks, Error, TEXT("Anchors is empty"));
+	return FText::FromString(TEXT("#000000"));
 }
 
 void UFINPanelTraceConfigPopup::NativeConstruct() {
