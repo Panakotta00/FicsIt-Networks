@@ -443,7 +443,8 @@ namespace FINLua {
 				int key = luaL_checkinteger(L, 2);
 				if (lua_geti(L, 1, key+1) == LUA_TNIL) {
 					lua_pop(L, 1);
-					return luaFIN_yield(L, 0, NULL, luaWaitForContinue);
+					lua_pushnil(L);
+					return luaFIN_yield(L, 1, NULL, luaWaitForContinue);
 				}
 				lua_pushnil(L);
 				lua_seti(L, 1, key+1);
@@ -498,9 +499,13 @@ namespace FINLua {
 					}
 					lua_settop(L, 0);
 					lua_pushcfunction(L, luaFIN_futureRun);
-					lua_callk(L, 0, 0, NULL, luaLoopContinue);
+					lua_callk(L, 0, 2, NULL, luaLoopContinue);
 					if (!data) {
-						return luaFIN_yield(L, 0, 0, luaLoopContinue);
+						if (lua_toboolean(L, -2)) {
+							return luaFIN_yield(L, 1, 0, luaLoopContinue);
+						} else {
+							return 0;
+						}
 					}
 				}
 			}

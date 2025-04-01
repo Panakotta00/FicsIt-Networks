@@ -254,8 +254,8 @@ TTuple<int, int> FFINLuaRuntime::LuaTick() {
 	if (status == LUA_YIELD) {
 		Timeout.Reset();
 		if (results > 0) {
-			if (lua_type(LuaThread, -results) == LUA_TNUMBER) {
-				double timeout = lua_tonumber(LuaThread, -results);
+			if (lua_type(LuaThread, -results+1) == LUA_TNUMBER) {
+				double timeout = lua_tonumber(LuaThread, -results+1);
 				Timeout = timeout;
 			}
 		}

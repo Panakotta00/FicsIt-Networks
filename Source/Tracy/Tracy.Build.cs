@@ -18,7 +18,7 @@ public class Tracy : ModuleRules
             "TracyLib"
 		});
 		
-		//PublicDefinitions.Add("TRACY_ENABLE=1");
+		///PublicDefinitions.Add("TRACY_ENABLE=1");
 		//PublicDefinitions.Add("TRACY_EXPORTS=1");
 		//PublicDefinitions.Add("TRACY_ON_DEMAND=1");
 		//PublicDefinitions.Add("TRACY_CALLSTACK=1");

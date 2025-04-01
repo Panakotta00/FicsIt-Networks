@@ -92,6 +92,15 @@ namespace FINLua {
 	void luaFIN_pushPollCallback(lua_State* L, int future);
 
 	/**
+	 * Tries to find and push the future the lua thread is associated with.
+	 * Pushes Nil if no future was found.
+	 * Returns true if it found a future.
+	 */
+	bool luaFIN_pushThisFuture(lua_State* L);
+
+void luaFIN_futureDependsOn(lua_State* L, int dependent, int dependency);
+
+	/**
 	 * Adds this threads future as dependent to the future at the given index.
 	 * Lets the future at the given index know, the future of the thread L should be polled on finish.
 	 * May error if this thread is not associated with a thread.
@@ -100,4 +109,18 @@ namespace FINLua {
 	 * @param dependency the index of the future this thread should be woken up by
 	 */
 	void luaFIN_futureDependsOn(lua_State* L, int dependency);
+
+	/**
+	 * Central Poll Functions that checks if registered timeouts have reached their timeout.
+	 * If they did, queues their functions as callback.
+	 *
+	 * Returns the next timeout timestamp. (Not duration!)
+	 */
+	double luaFIN_pollTimeouts(lua_State* L);
+
+	/**
+	 * Adds a Function on top of the lua stack to the timeout registry with the given timeout duration from now.
+	 * Pops the Function from the stack.
+	 */
+	void luaFIN_pushTimeout(lua_State* L, float timeout);
 }
