@@ -86,7 +86,8 @@ namespace FINLua {
 		 * and others require you to await/poll for them.
 		 *
 		 * Polling a future using the `poll` function allows you to drive its execution forward if necessary,
-		 * but most importantly, allows you to check if it finished execution.
+		 * but most importantly, allows you to check if it finished execution
+		 * You can always poll a future.
 		 *
 		 * To retrieve values that may be returned by the Future, use the `get` function which causes an error if the future is not ready.
 		 *
@@ -97,6 +98,17 @@ namespace FINLua {
 		 *
 		 * Some functions are aware when the get closed, allowing you to have more control over the cancellation of a future.
 		 * Every Future gets cancelled on garbage collection, but only some actually care about getting cancelled.
+		 *
+		 * A Future essentially wraps a thread/coroutine.
+		 * When a future yields, the future can be considered pending,
+		 * when it returns, the future is Finished,
+		 * when a future fails, the future failed.
+		 * A future can be actively polled by the runtime or may wait to be woken up by some other future or external system.
+		 * For this, the values a future yields are used to control its runtime.
+		 * - <nothing> indicates the future should be actively polled. This practically means it gets added as task.
+		 * - future    indicates the future is waiting for the given future. When the future gets polled using await or as task, this will make this future be woken up by the given future and be removed as task.
+		 * - number    indicates the future is waiting to be woken up by some external system, but if its a task, allows to indicate the runtime its fine to sleep for the given amount of seconds
+		 * - <any>     indicates the future is waiting to be woken up by some external system
 		 */)", Future) {
 			LuaModuleTableBareField(R"(/**
 			 * @LuaBareField	__index
@@ -695,11 +707,12 @@ namespace FINLua {
 		luaFIN_pushLuaFuture(L, -1);
 	}
 
-	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args) {
+	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args, int upvals) {
 		args = FMath::Min(args, lua_gettop(L));
-		lua_State* thread = lua_newthread(L); // ..., args, thread
-		lua_insert(L, -args-1);
-		lua_pushcfunction(thread, Func);
+		lua_State* thread = lua_newthread(L);   // ..., args, upvals, thread
+		lua_insert(L, -args-upvals-1);          // ..., thread, args, upvals
+		lua_xmove(L, thread, upvals);   // ..., thread, args
+		lua_pushcclosure(thread, Func, upvals);
 		lua_xmove(L, thread, args);
 		luaFIN_pushLuaFuture(L, -1);
 		lua_remove(L, -2);

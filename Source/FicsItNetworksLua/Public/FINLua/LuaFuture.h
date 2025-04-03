@@ -49,8 +49,9 @@ namespace FINLua {
 	 * @param L the lua state
 	 * @param Func the C-Function you want to wrap as future
 	 * @param args the amount of parameters you want to pop from the top of the stack and push into the new thread
+	 * @param upvals the amount of up values you want to pop from the top of the stack and use as upvalues for the function
 	 */
-	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args);
+	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args, int upvals = 0);
 
 	/**
 	 * @brief Awaits the Future at the given index and pushes its results onto the stack.
