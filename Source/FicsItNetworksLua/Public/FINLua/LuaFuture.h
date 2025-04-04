@@ -53,6 +53,33 @@ namespace FINLua {
 	 */
 	void luaFIN_pushLuaFutureCFunction(lua_State* L, lua_CFunction Func, int args, int upvals = 0);
 
+	EFutureState luaFIN_getFutureState(lua_State* thread);
+
+	/**
+	 * Tries to process the results of calling the poll function sensibly.
+	 * As the user should be able to specify the behaviour this is not part of the poll function itself.
+	 * It also is slightly depending on the execution scenario (within a future, as task, as callback or standalone).
+	 * There should be no additional values be on the stack above the return values.
+	 *
+	 * As the various return values define different processing routines,
+	 * the function return an integer allowing to identify what the polled future desires to do:
+	 * - 0 the future finished (if failure or success is not determined)
+	 * - 1 the future is pending and waiting for at least one future to finish
+	 * - 2 the future is pending and waiting to be woken up
+	 * - 3 the future is pending and desires to be polled actively
+	 * - 4 the future is pending and desires to be polled actively after a given timeout
+	 *
+	 * Additionally, boolean parameters allow to opt-in for specific default behaviour in various cases.
+	 * @param L the lua state containing the poll return values
+	 * @param index the index of the first poll return value (the boolean indicating pending or finished)
+	 * @param dependant if given, adds a dependency from the future at the given index to the futures returned by poll
+	 * @param setAsTask if given, sets the future at the given index as task when the poll desires so (polled actively with or without timeout)
+	 * @param unsetAsTask if given, unsets the future at the given index as task when the poll desires so (finished or waiting for anything)
+	 * @param timeout if given, updates the given double reference with the timeout value returned by the poll
+	 * @return an integer identifying the type of result poll returned
+	 */
+	int luaFIN_handlePollResults(lua_State* L, int index, TOptional<int> dependant = {}, TOptional<int> setAsTask = {}, TOptional<int> unsetAsTask = {}, double* timeout = {});
+
 	/**
 	 * @brief Awaits the Future at the given index and pushes its results onto the stack.
 	 * @param L the lua state
@@ -61,11 +88,14 @@ namespace FINLua {
 	int luaFIN_await(lua_State* L, int index);
 
 	/**
-	 * Adds the Future ad the given index to the tasks list.
-	 * @param L the lua state
-	 * @param index the index of the future
+	 * Adds the dependant future as dependant to the dependency future.
+	 * Lets the dependency future at the given index know, the dependant future should be polled on finish.
+	 *
+	 * @param L          the lua state
+	 * @param dependant the index of the future that has the dependency and should get woken up by it
+	 * @param dependency the index of the future this the dependant depends on and should wake up the dependant
 	 */
-	void luaFIN_addTask(lua_State* L, int index);
+	void luaFIN_futureDependsOn(lua_State* L, int dependant, int dependency);
 
 	/**
 	 * A yield able Lua Function
@@ -74,8 +104,6 @@ namespace FINLua {
 	 * Returns a boolean that is true if there are still pending futures or deferred callbacks.
 	 */
 	int luaFIN_futureRun(lua_State* L);
-
-	EFutureState luaFIN_getFutureState(lua_State* thread);
 
 	/**
 	 * Adds the function on top of the stack to the schedules callbacks.
@@ -90,38 +118,47 @@ namespace FINLua {
 	 */
 	int luaFIN_callbackPoll(lua_State* L);
 
+	/**
+	 * Creates and pushes a poll callback for the given future.
+	 */
 	void luaFIN_pushPollCallback(lua_State* L, int future);
 
 	/**
-	 * Tries to find and push the future the lua thread is associated with.
-	 * Pushes Nil if no future was found.
-	 * Returns true if it found a future.
+	 * A lua function that executes and removes all callbacks.
 	 */
-	bool luaFIN_pushThisFuture(lua_State* L);
-
-void luaFIN_futureDependsOn(lua_State* L, int dependent, int dependency);
+	int luaFIN_runCallbacks(lua_State* L);
 
 	/**
-	 * Adds this threads future as dependent to the future at the given index.
-	 * Lets the future at the given index know, the future of the thread L should be polled on finish.
-	 * May error if this thread is not associated with a thread.
-	 *
-	 * @param L          the lua state
-	 * @param dependency the index of the future this thread should be woken up by
+	 * Adds the Future at the given index to the tasks list.
+	 * @param L the lua state
+	 * @param index the index of the future
 	 */
-	void luaFIN_futureDependsOn(lua_State* L, int dependency);
+	void luaFIN_addTask(lua_State* L, int index);
 
 	/**
-	 * Central Poll Functions that checks if registered timeouts have reached their timeout.
-	 * If they did, queues their functions as callback.
-	 *
-	 * Returns the next timeout timestamp. (Not duration!)
+	 * Removes the Future at the given index from the tasks list.
+	 * @param L the lua state
+	 * @param index the index of the future
 	 */
-	double luaFIN_pollTimeouts(lua_State* L);
+	void luaFIN_removeTask(lua_State* L, int index);
+
+	/**
+	 * A Lua Function that polls every task once.
+	 * Returns the allowed timeout as number, nil if no timeout is allowed.
+	 */
+	int luaFIN_runTasks(lua_State* L);
 
 	/**
 	 * Adds a Function on top of the lua stack to the timeout registry with the given timeout duration from now.
 	 * Pops the Function from the stack.
 	 */
 	void luaFIN_pushTimeout(lua_State* L, float timeout);
+
+	/**
+	 * Central Poll Lua Function that checks if registered timeouts have reached their timeout.
+	 * If they did, queues their functions as callback.
+	 *
+	 * Returns the next timeout timestamp. (Not duration!)
+	 */
+	int luaFIN_timeoutTask(lua_State* L, int, lua_KContext);
 }
