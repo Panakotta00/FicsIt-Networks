@@ -471,6 +471,89 @@ namespace FINLua {
 				return 1;
 			}
 
+			void anyHandleResults(lua_State* L) {
+				int num = lua_tointeger(L, lua_upvalueindex(1));
+				int top = lua_gettop(L);
+				if (top > num) {
+					int future = lua_tointeger(L, lua_upvalueindex(2));
+					switch (luaFIN_handlePollResults(L, num+1, future, future, future)) {
+						case 0: {
+							lua_pushboolean(L, true);
+							lua_replace(L, lua_upvalueindex(3));
+
+							lua_settop(L, num);
+							lua_getiuservalue(L, future, 1);
+							lua_State* thread = lua_tothread(L, -1);
+							EFutureState state = luaFIN_getFutureState(thread);
+							switch (state) {
+								case Future_Failed:
+									lua_xmove(thread, L, 1);
+									lua_error(L);
+									break;
+								case Future_Ready: {
+									lua_getiuservalue(L, 1, 2);
+									lua_replace(L, future);
+									break;
+								}
+								default:
+									luaL_error(L, "poll reported finished, but future is not ready");
+							}
+							break;
+						}
+						default: break;
+					}
+				}
+				lua_settop(L, num);
+			}
+			int anyContinue(lua_State* L, int, lua_KContext) {
+				anyHandleResults(L);
+				int num = lua_gettop(L);
+				for (int i = lua_tointeger(L, lua_upvalueindex(2))+1; i <= num; ++i) {
+					if (luaL_testudata(L, i, Future::_Name) != nullptr) {
+						lua_pushinteger(L, i);
+						lua_replace(L, lua_upvalueindex(2));
+
+						lua_pushcfunction(L, FutureModule::Future::poll);
+						lua_pushvalue(L, i);
+						lua_callk(L, 1, LUA_MULTRET, NULL, anyContinue);
+						anyHandleResults(L);
+					}
+				}
+				if (lua_toboolean(L, lua_upvalueindex(3))) {
+					return lua_gettop(L);
+				} else {
+					lua_pushinteger(L, 0);
+					lua_replace(L, lua_upvalueindex(2));
+
+					int futures = 0;
+					for (int i = 1; i <= num; ++i) {
+						if (luaL_testudata(L, i, Future::_Name) != nullptr) {
+							lua_pushvalue(L, i);
+							++futures;
+						}
+					}
+					return luaFIN_yield(L, futures, NULL, anyContinue);
+				}
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		Future	any(Future...)
+			 * @DisplayName		Any
+			 *
+			 * Creates a new Future that will finish once any of the passed futures has finished.
+			 * The other futures will be ignored.
+			 * The future will return all futures and the table containing the results of the one future that finished in order.
+			 *
+			 * @parameter	...			Future		Futures		The futures you want to wait for any of
+			 * @return		future		Future		Future		The Future that will finish once any future finished
+			 */)", any) {
+				int num = lua_gettop(L);
+				lua_pushinteger(L, num);
+				lua_pushinteger(L, 0);
+				lua_pushboolean(L, false);
+				luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(anyContinue)), num, lua_gettop(L) - num);
+				return 1;
+			}
+
 			int luaSleepContinue(lua_State* L, int, lua_KContext) {
 				double timeout = lua_tonumber(L, 1);
 				double start = lua_tonumber(L, 2);
@@ -634,6 +717,8 @@ namespace FINLua {
 
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(future::joinContinue)));
 			PersistValue("JoinContinue");
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(future::anyContinue)));
+			PersistValue("AnyContinue");
 
 			lua_pushcfunction(L, lua_futureStruct);
 			PersistValue("LuaFutureStruct");
