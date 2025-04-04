@@ -387,50 +387,87 @@ namespace FINLua {
 				return 1;
 			}
 
-			int joinContinue(lua_State* L, int, lua_KContext) {
-				bool bNotDone = true;
-				int num = lua_gettop(L);
-				for (int i = 1; i <= num && bNotDone; ++i) {
-					if (luaL_testudata(L, i, Future::_Name) == nullptr) continue;
-					lua_pushcfunction(L, &Future::poll);
-					lua_callk(L, 0, 0, NULL, &joinContinue);
-					lua_getiuservalue(L, i, 1);
-					lua_State* thread = lua_tothread(L, -1);
-					lua_pop(L, 1);
-					EFutureState state = luaFIN_getFutureState(thread);
-					switch (state) {
-						case Future_Pending:
-							bNotDone = false;
+			void joinHandleResults(lua_State* L) {
+				int num = lua_tointeger(L, lua_upvalueindex(1));
+				int top = lua_gettop(L);
+				if (top > num) {
+					int future = lua_tointeger(L, lua_upvalueindex(2));
+					switch (luaFIN_handlePollResults(L, num+1, future, future, future)) {
+						case 0: {
+							lua_settop(L, num);
+							lua_getiuservalue(L, future, 1);
+							lua_State* thread = lua_tothread(L, -1);
+							EFutureState state = luaFIN_getFutureState(thread);
+							switch (state) {
+								case Future_Failed:
+									lua_xmove(thread, L, 1);
+									lua_error(L);
+									break;
+								case Future_Ready: {
+									lua_getiuservalue(L, 1, 2);
+									lua_replace(L, future);
+									break;
+								}
+								default:
+									luaL_error(L, "poll reported finished, but future is not ready");
+							}
 							break;
-						case Future_Failed:
-							lua_pushvalue(thread, -1);
-							lua_xmove(thread, L, 1);
-							return lua_error(L);
-						case Future_Ready:
-							lua_getiuservalue(L, i, 2);
-							lua_replace(L, i);
+						}
+						default:
+							lua_pushboolean(L, false);
+							lua_replace(L, lua_upvalueindex(3));
 							break;
 					}
 				}
-				if (bNotDone) {
-					return luaFIN_yield(L, 0, NULL, joinContinue);
-				}
-				return lua_gettop(L);
+				lua_settop(L, num);
 			}
+			int joinContinue(lua_State* L, int, lua_KContext) {
+				joinHandleResults(L);
+				int num = lua_gettop(L);
+				for (int i = lua_tointeger(L, lua_upvalueindex(2))+1; i <= num; ++i) {
+					if (luaL_testudata(L, i, Future::_Name) != nullptr) {
+						lua_pushinteger(L, i);
+						lua_replace(L, lua_upvalueindex(2));
 
-			int luaJoin(lua_State* L) {
-				return joinContinue(L, 0, NULL);
+						lua_pushcfunction(L, FutureModule::Future::poll);
+						lua_pushvalue(L, i);
+						lua_callk(L, 1, LUA_MULTRET, NULL, joinContinue);
+						joinHandleResults(L);
+					}
+				}
+				if (lua_toboolean(L, lua_upvalueindex(3))) {
+					return lua_gettop(L);
+				} else {
+					lua_pushinteger(L, 0);
+					lua_replace(L, lua_upvalueindex(2));
+					lua_pushboolean(L, true);
+					lua_replace(L, lua_upvalueindex(3));
+
+					int futures = 0;
+					for (int i = 1; i <= num; ++i) {
+						if (luaL_testudata(L, i, Future::_Name) != nullptr) {
+							lua_pushvalue(L, i);
+							++futures;
+						}
+					}
+					return luaFIN_yield(L, futures, NULL, joinContinue);
+				}
 			}
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		Future	join(Future...)
 			 * @DisplayName		Join
 			 *
 			 * Creates a new Future that will only finish once all futures passed as parameters have finished.
+			 * The return values of all futures will be packed into tables and returned in order.
 			 *
 			 * @parameter	...			Future		Futures		The futures you want to join
 			 * @return		future		Future		Future		The Future that will finish once all other futures finished
 			 */)", join) {
-				luaFIN_pushLuaFutureCFunction(L, luaJoin, lua_gettop(L));
+				int num = lua_gettop(L);
+				lua_pushinteger(L, num);
+				lua_pushinteger(L, 0);
+				lua_pushboolean(L, true);
+				luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(joinContinue)), num,  lua_gettop(L) - num);
 				return 1;
 			}
 
