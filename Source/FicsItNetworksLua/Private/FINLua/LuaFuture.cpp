@@ -311,11 +311,22 @@ namespace FINLua {
 					}
 					default:
 						lua_settop(L, 2);
+						FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
+						if (L == runtime.GetLuaThread()) {
+							lua_pushcfunction(L, &luaFIN_futureRun);
+							lua_callk(L, 0, 2, NULL, &await_continue2);
+							lua_remove(L, -2);
+							return luaFIN_yield(L, 1, NULL, &await_continue2);
+						}
 						lua_pushvalue(L, 1);
 						return luaFIN_yield(L, 1, NULL, await_continue2);
 				}
 			}
 			int await_continue2(lua_State* L, int, lua_KContext) {
+				if (lua_gettop(L) > 2) {
+					lua_remove(L, -2);
+					return luaFIN_yield(L, 1, NULL, &await_continue2);
+				}
 				return await(L);
 			}
 
@@ -370,7 +381,7 @@ namespace FINLua {
 				//lua_pushvalue(L, lua_upvalueindex(3));
 				//lua_setiuservalue(L, -2, 4);
 
-				//luaFIN_pushPollCallback(L, -1);
+				luaFIN_pushPollCallback(L, -1);
 				return 1;
 			}
 			LuaModuleTableFunction(R"(/**
