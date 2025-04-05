@@ -86,6 +86,7 @@ namespace FINLua {
 	 * @LuaModule		EventModule
 	 * @DisplayName		Event Module
 	 * @Dependency		ReflectionSystemStructModule
+	 * @Dependency		FutureModule
 	 */)", EventModule) {
 		LuaModuleMetatable(R"(/**
 		 * @LuaMetatable	EventQueue
@@ -487,37 +488,15 @@ namespace FINLua {
 
 				return 1;
 			}
+		}
 
-			int luaLoopContinue(lua_State* L, int, lua_KContext) {
-				lua_settop(L, 0);
-				while (true) {
-					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
-					TOptional<TTuple<FFIRTrace, FFINSignalData>> data = eventSystem.PullSignal();
-					if (data) {
-						const auto& [sender, signal] = *data;
-						luaFIN_handleEvent(L, sender, signal);
-					}
-					lua_settop(L, 0);
-					lua_pushcfunction(L, luaFIN_futureRun);
-					lua_callk(L, 0, 2, NULL, luaLoopContinue);
-					if (!data) {
-						if (lua_toboolean(L, -2)) {
-							return luaFIN_yield(L, 1, 0, luaLoopContinue);
-						} else {
-							return 0;
-						}
-					}
-				}
-			}
-			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		loop
-			 * @DisplayName		Loop
-			 *
-			 * Runs an infinite loop or `future.run()`, `event.pull(0)` and `coroutine.yield()`.
-			 */)", loop) {
-				lua_settop(L, 0);
-				return luaLoopContinue(L, 0, NULL);
-			}
+		LuaModuleGlobalBareValue(R"(/**
+		 * @LuaGlobal		eventTask	Future
+		 * @DisplayName		Event Task
+		 *
+		 * A future that is used as task to handle Events.
+		 */)", eventTask) {
+			lua_pushnil(L);
 		}
 
 		LuaModulePostSetup() {
@@ -551,8 +530,6 @@ namespace FINLua {
 			luaFIN_persistValue(L, -1, "WaitFor");
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaWaitForContinue)));
 			luaFIN_persistValue(L, -1, "WaitForContinue");
-			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaLoopContinue)));
-			luaFIN_persistValue(L, -1, "LoopContinue");
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "PullContinue");
 			lua_pop(L, 4);
@@ -564,6 +541,15 @@ namespace FINLua {
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "EventQueuePullContinue");
 			lua_pop(L, 3);
+
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)));
+			luaFIN_persistValue(L, -1, "luaFIN_eventTask");
+
+			lua_getglobal(L, "event");
+			luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)), 0);
+			luaFIN_addTask(L, -1);
+			lua_setfield(L, -2, "eventTask");
+			lua_pop(L, 1);
 		}
 	}
 
@@ -666,6 +652,27 @@ namespace FINLua {
 		}
 		lua_pop(L, 2);
 		lua_pop(L, 1);
+	}
+
+	int luaFIN_eventTask(lua_State* L, int, lua_KContext) {
+		lua_settop(L, 0);
+
+		TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+		if (registry->EventListeners.Num() + registry->EventQueues.Num() + registry->OneShots.Num() > 0) {
+			IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+			while (true) {
+				TOptional<TTuple<FFIRTrace, FFINSignalData>> data = eventSystem.PullSignal();
+				if (data) {
+					const auto& [sender, signal] = *data;
+					luaFIN_handleEvent(L, sender, signal);
+				} else {
+					break;
+				}
+			}
+		}
+
+		lua_pushnumber(L, TNumericLimits<double>::Max());
+		return luaFIN_yield(L, 1, NULL, luaFIN_eventTask);
 	}
 
 	void luaFIN_setEventSystem(lua_State* L, IFINLuaEventSystem& EventSystem) {
