@@ -6,7 +6,7 @@
 [cols="1,5a",separator="!"]
 !===
 !Dependencies
-! xref:/lua/api/ReflectionSystemStructModule.adoc[ReflectionSystemStructModule]
+! xref:/lua/api/ReflectionSystemStructModule.adoc[ReflectionSystemStructModule], xref:/lua/api/FutureModule.adoc[FutureModule]
 !===
 
 == Globals
@@ -97,9 +97,6 @@ Returns all signal senders this computer is listening to.
 
 !===
 ====
-
-=== __event.__**loop** ()
-Runs an infinite loop or `future.run()`, `event.pull(0)` and `coroutine.yield()`.
 
 === __event.__**pull** (timeout: number?) -> (string?, xref:/reflection/classes/Object.adoc[Object], ...)
 Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached. +
@@ -222,6 +219,9 @@ When this variable closes or gets garbage collected, it will stop receiving sign
 
 !===
 ====
+
+=== **eventTask** : xref:/reflection/structs/Future.adoc[Future]
+A future that is used as task to handle Events.
 
 == Types
 

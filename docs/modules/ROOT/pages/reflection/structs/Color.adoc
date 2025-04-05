@@ -15,7 +15,7 @@ The alpha (opacity) portion of the color.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
 
 ! Display Name ! Alpha
 !===
@@ -32,7 +32,7 @@ The blue portion of the color.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
 
 ! Display Name ! Blue
 !===
@@ -49,7 +49,7 @@ The green portion of the color.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
 
 ! Display Name ! Green
 !===
@@ -66,7 +66,7 @@ The red portion of the color.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
 
 ! Display Name ! Red
 !===
@@ -87,7 +87,7 @@ The red portion of the color.
 [cols="1,5a",separator="!"]
 !===
 ! Flags
-! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
 ! Display Name ! Color Factor Scaling
 !===
@@ -126,7 +126,7 @@ The red portion of the color.
 [cols="1,5a",separator="!"]
 !===
 ! Flags
-! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
 ! Display Name ! Color Inverse Factor Scaling
 !===
@@ -165,7 +165,7 @@ The addition (+) operator for this struct.
 [cols="1,5a",separator="!"]
 !===
 ! Flags
-! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
 ! Display Name ! Operator Add
 !===
@@ -204,7 +204,7 @@ The Negation operator for this struct. Does NOT make the color negative. Calcula
 [cols="1,5a",separator="!"]
 !===
 ! Flags
-! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
 ! Display Name ! Operator Neg
 !===
@@ -233,7 +233,7 @@ The subtraction (-) operator for this struct.
 [cols="1,5a",separator="!"]
 !===
 ! Flags
-! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
 ! Display Name ! Operator Sub
 !===

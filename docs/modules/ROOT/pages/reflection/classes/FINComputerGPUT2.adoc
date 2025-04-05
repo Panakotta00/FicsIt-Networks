@@ -286,6 +286,272 @@ Flushes all draw calls to the visible draw call buffer to show all changes at on
 ====
 // end::func-flush[]
 // end::func-flush-title[]
+// tag::func-getFontBaseline-title[]
+=== `getFontBaseline` (`size` : Int, `monospace` : Bool) -> `ReturnValue` : Int
+// tag::func-getFontBaseline[]
+
+Get offset from the bottom of the font height to the baseline.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Font Baseline
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Size* `size`
+! Int
+! Font size in points.
+
+! *Monospace* `monospace`
+! Bool
+! Whether to use monospace or normal font.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Int
+! 
+!===
+
+====
+// end::func-getFontBaseline[]
+// end::func-getFontBaseline-title[]
+// tag::func-getFontBaselineBatch-title[]
+=== `getFontBaselineBatch` (`size` : Array<Int>, `monospace` : Array<Bool>) -> `ReturnValue` : Array<Int>
+// tag::func-getFontBaselineBatch[]
+
+Same as getFontBaseline, but optimized to perform multiple requests at once.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Font Baseline Batch
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Size* `size`
+! Array<Int>
+! Font size in points.
+
+! *Monospace* `monospace`
+! Array<Bool>
+! Whether to use monospace or normal font.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Array<Int>
+! 
+!===
+
+====
+// end::func-getFontBaselineBatch[]
+// end::func-getFontBaselineBatch-title[]
+// tag::func-getFontHeight-title[]
+=== `getFontHeight` (`size` : Int, `monospace` : Bool) -> `ReturnValue` : Int
+// tag::func-getFontHeight[]
+
+Get height of a tallest glyph in a font, in pixels. When measuring text, its height is always equal to font height multiplied by number of text lines.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Font Height
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Size* `size`
+! Int
+! Font size in points.
+
+! *Monospace* `monospace`
+! Bool
+! Whether to use monospace or normal font.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Int
+! 
+!===
+
+====
+// end::func-getFontHeight[]
+// end::func-getFontHeight-title[]
+// tag::func-getFontHeightBatch-title[]
+=== `getFontHeightBatch` (`size` : Array<Int>, `monospace` : Array<Bool>) -> `ReturnValue` : Array<Int>
+// tag::func-getFontHeightBatch[]
+
+Same as getFontHeight, but optimized to perform multiple requests at once.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Font Height Batch
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Size* `size`
+! Array<Int>
+! Font size in points.
+
+! *Monospace* `monospace`
+! Array<Bool>
+! Whether to use monospace or normal font.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Array<Int>
+! 
+!===
+
+====
+// end::func-getFontHeightBatch[]
+// end::func-getFontHeightBatch-title[]
+// tag::func-measureText-title[]
+=== `measureText` (`text` : String, `size` : Int, `monospace` : Bool) -> `ReturnValue` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+// tag::func-measureText[]
+
+Measures dimensions that a text will take when rendered. Respects selected font and font size. Does not take into account any transforms pushed onto a transform stack.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Measure Text
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Text* `text`
+! String
+! Text to measure.
+
+! *Size* `size`
+! Int
+! Font size in points.
+
+! *Monospace* `monospace`
+! Bool
+! Whether to use monospace or normal font.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! 
+!===
+
+====
+// end::func-measureText[]
+// end::func-measureText-title[]
+// tag::func-measureTextBatch-title[]
+=== `measureTextBatch` (`text` : Array<String>, `size` : Array<Int>, `monospace` : Array<Bool>) -> `ReturnValue` : Array<Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>>
+// tag::func-measureTextBatch[]
+
+Same as measureText, but optimized to perform multiple requests at once.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Measure Text Batch
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Text* `text`
+! Array<String>
+! Text to measure.
+
+! *Size* `size`
+! Array<Int>
+! Font size in points.
+
+! *Monospace* `monospace`
+! Array<Bool>
+! Whether to use monospace or normal font.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *ReturnValue* `ReturnValue`
+! Array<Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>>
+! 
+!===
+
+====
+// end::func-measureTextBatch[]
+// end::func-measureTextBatch-title[]
 // tag::func-popClip-title[]
 === `popClip` ()
 // tag::func-popClip[]
@@ -472,53 +738,6 @@ Pushes a transformation to the geometry stack. All subsequent drawcalls will be 
 ====
 // end::func-pushTransform[]
 // end::func-pushTransform-title[]
-// tag::func-measureText-title[]
-=== `measureText` (`Text` : String, `Size` : Int, `bMonospace` : Bool) -> `ReturnValue` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
-// tag::func-measureText[]
-
-
-
-[%collapsible]
-====
-[cols="1,5a",separator="!"]
-!===
-! Flags
-! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
-
-! Display Name ! measureText
-!===
-
-.Parameters
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Text* `Text`
-! String
-! 
-
-! *Size* `Size`
-! Int
-! 
-
-! *bMonospace* `bMonospace`
-! Bool
-! 
-!===
-
-.Return Values
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *ReturnValue* `ReturnValue`
-! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
-! 
-!===
-
-====
-// end::func-measureText[]
-// end::func-measureText-title[]
 
 == Signals
 
