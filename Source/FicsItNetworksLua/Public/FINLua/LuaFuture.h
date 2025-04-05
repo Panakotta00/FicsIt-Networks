@@ -66,8 +66,8 @@ namespace FINLua {
 	 * - 0 the future finished (if failure or success is not determined)
 	 * - 1 the future is pending and waiting for at least one future to finish
 	 * - 2 the future is pending and waiting to be woken up
-	 * - 3 the future is pending and desires to be polled actively
-	 * - 4 the future is pending and desires to be polled actively after a given timeout
+	 * - 3 the future is pending and desires to be polled actively after a given timeout
+	 * - 4 the future is pending and desires to be polled actively
 	 *
 	 * Additionally, boolean parameters allow to opt-in for specific default behaviour in various cases.
 	 * @param L the lua state containing the poll return values

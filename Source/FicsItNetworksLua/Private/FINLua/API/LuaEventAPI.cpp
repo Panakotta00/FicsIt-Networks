@@ -613,7 +613,7 @@ namespace FINLua {
 				lua_geti(L, -1, key+1);
 				int num = luaFIN_pushEventData(L, sender, data);
 				luaFIN_pushLuaFutureLuaFunction(L, num);
-				luaFIN_addTask(L, -1);
+				luaFIN_pushPollCallback(L, -1);
 				lua_pop(L, 2);
 			}
 		}

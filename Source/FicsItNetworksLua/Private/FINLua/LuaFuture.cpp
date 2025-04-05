@@ -992,7 +992,7 @@ namespace FINLua {
 		return luaFIN_futureRun_continue2(L, 0, NULL);
 	}
 	int luaFIN_futureRun_continue2(lua_State* L, int, lua_KContext) {
-		TOptional<double> timeout = TNumericLimits<double>::Max();
+		TOptional<double> timeout;
 
 		// Get allowed timeout from tasks
 		if (lua_isnumber(L, -1)) {
@@ -1069,14 +1069,17 @@ namespace FINLua {
 					lua_settop(L, 3);
 					lua_pushvalue(L, -1);
 					break;
-				case 3: {
-					double current = lua_tonumber(L, 1);
-					if (timeout >= current) {
-						break;
+				case 3:
+					if (lua_isnumber(L, 1)) {
+						double current = lua_tonumber(L, 1);
+						if (timeout < current) {
+							lua_settop(L, 5);
+							lua_replace(L, 1);
+						}
 					}
-				}
+					break;
 				case 4:
-					lua_settop(L, 5);
+					lua_pushnil(L);
 					lua_replace(L, 1);
 					break;
 				default:
