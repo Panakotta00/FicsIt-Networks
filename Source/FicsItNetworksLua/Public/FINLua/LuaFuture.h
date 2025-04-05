@@ -157,7 +157,7 @@ namespace FINLua {
 	 * Adds a Function on top of the lua stack to the timeout registry with the given timeout duration from now.
 	 * Pops the Function from the stack.
 	 */
-	void luaFIN_pushTimeout(lua_State* L, float timeout);
+	void luaFIN_pushTimeout(lua_State* L, int index, double timeout);
 
 	/**
 	 * Central Poll Lua Function that checks if registered timeouts have reached their timeout.

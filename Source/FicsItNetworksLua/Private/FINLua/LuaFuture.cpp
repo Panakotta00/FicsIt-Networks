@@ -289,7 +289,8 @@ namespace FINLua {
 			int await_continue2(lua_State* L, int, lua_KContext);
 			int await_continue(lua_State* L, int, lua_KContext) {
 				lua_State* thread = lua_tothread(L, 2);
-				switch (luaFIN_handlePollResults(L, 3, 1, 1, 1)) {
+				double timeout;
+				switch (luaFIN_handlePollResults(L, 3, 1, 1, 1, &timeout)) {
 					case 0: {
 						EFutureState state = luaFIN_getFutureState(thread);
 						switch (state) {
@@ -530,6 +531,7 @@ namespace FINLua {
 							switch (state) {
 								case Future_Failed:
 									lua_xmove(thread, L, 1);
+									lua_settop(thread, 0);
 									lua_error(L);
 									break;
 								case Future_Ready: {
@@ -598,10 +600,9 @@ namespace FINLua {
 
 			int luaSleepContinue(lua_State* L, int, lua_KContext) {
 				double timeout = lua_tonumber(L, 1);
-				double start = lua_tonumber(L, 2);
 				double now = FPlatformTime::Seconds();
-				if (now - start < timeout) {
-					lua_pushnil(L);
+				if (now < timeout) {
+					lua_pushnumber(L, timeout);
 					return luaFIN_yield(L, 1, NULL, luaSleepContinue);
 				}
 				return 0;
@@ -615,14 +616,11 @@ namespace FINLua {
 			 * @parameter	seconds		number		Seconds		Number of seconds to wait
 			 * @return		future		Future		Future		The future that will finish after the given amount of seconds
 			 */)", sleep) {
-				lua_settop(L, 1);
-				double timeout = luaL_checknumber(L, 1);
-				double now = FPlatformTime::Seconds();
-				lua_pushnumber(L, now);
-				luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaSleepContinue)), 2);
-				lua_pushvalue(L, -1);
-				lua_pushcclosure(L, luaFIN_callbackPoll, 1);
-				luaFIN_pushTimeout(L, timeout);
+				double timeout = FPlatformTime::Seconds() + luaL_checknumber(L, 1);
+				lua_settop(L, 0);
+				lua_pushnumber(L, timeout);
+				luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaSleepContinue)), 1);
+				luaFIN_pushTimeout(L, -1, timeout);
 				return 1;
 			}
 
@@ -1170,22 +1168,19 @@ namespace FINLua {
 		return 0;
 	}
 
-	void luaFIN_pushTimeout(lua_State* L, float timeout) {
-		int func = lua_absindex(L, -1);
-		luaL_checktype(L, func, LUA_TFUNCTION);
+	void luaFIN_pushTimeout(lua_State* L, int index, double timeout) {
+		index = lua_absindex(L, index);
+		luaL_checkudata(L, index, FutureModule::Future::_Name);
 		lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
 		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY);
-		lua_newtable(L);
-		lua_pushnumber(L, FPlatformTime::Seconds() + timeout);
-		lua_seti(L, -2, 1);
-		lua_rotate(L, func, -1);
-		lua_seti(L, -2, 2);
-		luaL_ref(L, -2);
+		lua_pushvalue(L, index);
+		lua_pushnumber(L, timeout);
+		lua_settable(L, -3);
 		lua_pop(L, 2);
 
 		lua_getglobal(L, "future");
 		lua_getfield(L, -1, "timeoutTask");
-		luaFIN_addBackgroundTask(L, -1);
+		luaFIN_pushPollCallback(L, -1);
 		lua_pop(L, 2);
 	}
 
@@ -1198,20 +1193,21 @@ namespace FINLua {
 
 		TOptional<double> minTimeout;
 
-		TArray<int> toDelete;
 		lua_pushnil(L);
 		while (lua_next(L, -2) != 0) {
-			if (lua_isinteger(L, -1)) {
-				lua_pop(L, 1);
-				continue;
-			}
-			int ref = lua_tointeger(L, -2);
-			lua_geti(L, -1, 1);
 			double timeout = lua_tonumber(L, -1);
+			lua_pop(L, 1);
+
+			if (lua_gettop(L) > 3) {
+				lua_rotate(L, -2, -1);
+				lua_pushnil(L);
+				lua_settable(L, 2);
+			}
+
 			if (now >= timeout) {
-				lua_geti(L, -2, 2);
+				lua_pushvalue(L, -1);
 				luaFIN_pushCallback(L);
-				toDelete.Add(ref);
+				lua_pushvalue(L, -1);
 			} else {
 				if (minTimeout) {
 					minTimeout = FMath::Min(*minTimeout, timeout);
@@ -1219,11 +1215,11 @@ namespace FINLua {
 					minTimeout = timeout;
 				}
 			}
-			lua_pop(L, 2);
 		}
 
-		for (int ref : toDelete) {
-			luaL_unref(L, -1, ref);
+		if (lua_gettop(L) > 2) {
+			lua_pushnil(L);
+			lua_settable(L, 2);
 		}
 
 		if (minTimeout) {
