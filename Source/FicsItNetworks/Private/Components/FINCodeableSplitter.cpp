@@ -1,5 +1,7 @@
 #include "Components/FINCodeableSplitter.h"
 
+#include <mutex>
+
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINComputerSubsystem.h"
 #include "FINComputerSubsystem.h"
@@ -44,6 +46,7 @@ void AFINCodeableSplitter::OnConstruction(const FTransform& transform) {
 void AFINCodeableSplitter::BeginPlay() {
 	Super::BeginPlay();
 
+	FScopeLock lock(&Mutex);
 	for (TArray<FInventoryItem>* list : { &InputQueue, &OutputQueue1, &OutputQueue2, &OutputQueue3 }) {
 		for (size_t i = 0; i < list->Num(); ++i) {
 			if (!(*list)[i].IsValid()) {
@@ -60,6 +63,7 @@ void AFINCodeableSplitter::Factory_Tick(float dt) {
 		FInventoryItem item;
 		float offset;
 		if (Input1->Factory_GrabOutput(item, offset)) {
+			FScopeLock lock(&Mutex);
 			InputQueue.Add(item);
 			netSig_ItemRequest(item);
 		}
@@ -67,6 +71,7 @@ void AFINCodeableSplitter::Factory_Tick(float dt) {
 }
 
 bool AFINCodeableSplitter::Factory_PeekOutput_Implementation(const UFGFactoryConnectionComponent* connection, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) const {
+	FScopeLock lock(const_cast<FCriticalSection*>(&Mutex));
 	const TArray<FInventoryItem>& outputQueue = GetOutput(connection);
 	if (outputQueue.Num() > 0) {
 		out_items.Add(outputQueue[0]);
@@ -76,6 +81,7 @@ bool AFINCodeableSplitter::Factory_PeekOutput_Implementation(const UFGFactoryCon
 }
 
 bool AFINCodeableSplitter::Factory_GrabOutput_Implementation(UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf<UFGItemDescriptor> type) {
+	FScopeLock lock(&Mutex);
 	int32 Index = 0;
 	TArray<FInventoryItem>& outputQueue = GetOutput(connection, &Index);
 	if (outputQueue.Num() > 0) {
@@ -91,6 +97,7 @@ bool AFINCodeableSplitter::Factory_GrabOutput_Implementation(UFGFactoryConnectio
 void AFINCodeableSplitter::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund, bool noBuildCostEnabled) const {
 	Super::GetDismantleRefund_Implementation(out_refund, noBuildCostEnabled);
 
+	FScopeLock lock(const_cast<FCriticalSection*>(&Mutex));
 	out_refund.Append(InputQueue);
 	out_refund.Append(OutputQueue1);
 	out_refund.Append(OutputQueue2);
@@ -108,6 +115,7 @@ UObject* AFINCodeableSplitter::GetSignalSenderOverride_Implementation() {
 bool AFINCodeableSplitter::netFunc_transferItem(int output) {
 	TArray<FInventoryItem>& outputQueue = GetOutput(output);
 
+	FScopeLock lock(&Mutex);
 	if (outputQueue.Num() < 2 &&  InputQueue.Num() > 0) {
 		FInventoryItem item = InputQueue[0];
 		InputQueue.RemoveAt(0);
@@ -118,6 +126,7 @@ bool AFINCodeableSplitter::netFunc_transferItem(int output) {
 }
 
 FInventoryItem AFINCodeableSplitter::netFunc_getInput() {
+	FScopeLock lock(&Mutex);
 	if (InputQueue.Num() > 0) {
 		return InputQueue[0];
 	}
@@ -125,6 +134,7 @@ FInventoryItem AFINCodeableSplitter::netFunc_getInput() {
 }
 
 bool AFINCodeableSplitter::netFunc_canOutput(int output) {
+	FScopeLock lock(&Mutex);
 	TArray<FInventoryItem>& outputQueue = GetOutput(output);
 	return outputQueue.Num() < 2;
 }

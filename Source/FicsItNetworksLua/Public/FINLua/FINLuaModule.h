@@ -192,10 +192,10 @@ struct FICSITNETWORKSLUA_API FFINLuaModule : TSharedFromThis<FFINLuaModule> {
 	TArray<FFINLuaMetatable> Metatables;
 	TArray<FFINLuaGlobal> Globals;
 
-	TDelegate<void(FFINLuaModule&, lua_State*)> PreSetup;
-	TDelegate<void(FFINLuaModule&, lua_State*)> PostSetup;
+	TDelegate<void(FFINLuaModule&, lua_State*, const FFIRAnyValue&)> PreSetup;
+	TDelegate<void(FFINLuaModule&, lua_State*, const FFIRAnyValue&)> PostSetup;
 
-	void SetupModule(lua_State* L);
+	void SetupModule(lua_State* L, const FFIRAnyValue& InitValue);
 
 	void ParseDocumentationComment(const FString& Comment, const TCHAR* InternalName);
 
@@ -215,16 +215,17 @@ private:
 public:
 	[[nodiscard]] static FFINLuaModuleRegistry& GetInstance();
 
-	TArray<TSharedRef<FFINLuaModule>> Modules;
+	TMap<FString, TSharedRef<FFINLuaModule>> Modules;
 
 	void AddModule(const TSharedRef<FFINLuaModule>& Module) {
-		if (Module->InternalName == "ModuleSystem") {
-			Modules.Insert(Module, 0);
-		} else {
-			Modules.Add(Module);
-		}
+		Modules.Add(Module->InternalName, Module);
 	}
 };
+
+
+namespace FINLua {
+	void luaFIN_loadModules(lua_State* L, const TMap<FString, FFIRAnyValue>& Modules);
+}
 
 #define LuaModule(Documentation, InternalName) \
 	namespace InternalName { \
@@ -236,17 +237,17 @@ public:
 	} \
 	namespace InternalName
 #define LuaModulePreSetup() \
-	void PreSetup(FFINLuaModule&, lua_State*); \
+	void PreSetup(FFINLuaModule&, lua_State*, const FFIRAnyValue&); \
 	static FFIRStaticGlobalRegisterFunc RegisterPreSetup([]() { \
 		Module->PreSetup.BindStatic(&PreSetup); \
 	}); \
-	void PreSetup(FFINLuaModule& InModule, lua_State* L)
+	void PreSetup(FFINLuaModule& InModule, lua_State* L, const FFIRAnyValue& InitValue)
 #define LuaModulePostSetup() \
-	void PostSetup(FFINLuaModule&, lua_State*); \
+	void PostSetup(FFINLuaModule&, lua_State*, const FFIRAnyValue&); \
 	static FFIRStaticGlobalRegisterFunc RegisterPostSetup([]() { \
 		Module->PostSetup.BindStatic(&PostSetup); \
 	}); \
-	void PostSetup(FFINLuaModule& InModule, lua_State* L)
+	void PostSetup(FFINLuaModule& InModule, lua_State* L, const FFIRAnyValue& InitValue)
 #define LuaModuleLibrary(Documentation, InternalName) \
 	namespace InternalName { \
 		static TSharedRef<FFINLuaTable> Table = MakeShared<FFINLuaTable>(); \

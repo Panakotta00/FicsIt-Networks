@@ -1,9 +1,8 @@
 #include "Components/FINSizeablePanel.h"
-#include "FGColoredInstanceMeshProxy.h"
-#include "FicsItNetworksMisc.h"
 #include "FicsItNetworksModule.h"
 #include "FINMCPAdvConnector.h"
 #include "Components/FINModuleBase.h"
+#include "FINNetworkCable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
@@ -44,7 +43,7 @@ void AFINSizeablePanel::BeginPlay() {
 	Super::BeginPlay();
 	
 	for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) {
-		//Cable->RerunConstructionScripts(); TODO: Check if really needed
+		Cable->ReconstructCable(); //TODO: Check if really needed
 	}
 }
 
@@ -65,7 +64,7 @@ void AFINSizeablePanel::EndPlay(const EEndPlayReason::Type endPlayReason) {
 
 int32 AFINSizeablePanel::GetDismantleRefundReturnsMultiplier() const {
 	//return FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight);
-	return FGenericPlatformMath::Max((FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight)) / 10, 1);
+	return FMath::Max((FMath::Abs(PanelWidth) * FMath::Abs(PanelHeight)) / 10, 1);
 }
 
 bool AFINSizeablePanel::ShouldSave_Implementation() const {
@@ -75,14 +74,16 @@ bool AFINSizeablePanel::ShouldSave_Implementation() const {
 void AFINSizeablePanel::ConstructParts() {
 	// Clear Components
 	for (UStaticMeshComponent* comp : Parts) {
-		comp->UnregisterComponent();
-		comp->SetActive(false);
-		comp->DestroyComponent();
+		if(IsValid(comp)) {
+			comp->UnregisterComponent();
+			comp->SetActive(false);
+			comp->DestroyComponent();
+		}
 	}
 	Parts.Empty();
 
 	// Create Components
-	SpawnComponents(UFGColoredInstanceMeshProxy::StaticClass(), PanelWidth, PanelHeight, PanelCornerMesh, PanelSideMesh, PanelCenterMesh, PanelConnectorMesh, this, RootComponent, Parts);
+	SpawnComponents(UStaticMeshComponent::StaticClass(), PanelWidth, PanelHeight, PanelCornerMesh, PanelSideMesh, PanelCenterMesh, PanelCenterMeshNoConnector, PanelConnectorMesh, this, RootComponent, Parts);
 	FVector ConnectorOffset;
 	if(PanelWidth < 0 && PanelHeight < 0) {
 		ConnectorOffset = {3.3, 0, 8};
@@ -93,9 +94,6 @@ void AFINSizeablePanel::ConstructParts() {
 	}else{
 		ConnectorOffset = {3.3, static_cast<float>((PanelWidth - 1) * 10), static_cast<float>(PanelHeight * 10 - 2)};
 	}
-	Connector->SetMobility(EComponentMobility::Movable);
-	Connector->SetRelativeLocation(ConnectorOffset);
-	Connector->SetMobility(EComponentMobility::Static);
 
 	ModularPanel->PanelWidth = abs(PanelWidth);
 	ModularPanel->PanelHeight = abs(PanelHeight);
@@ -104,35 +102,53 @@ void AFINSizeablePanel::ConstructParts() {
 	Plane->SetVisibility(false);
 
 	SetPanelSize(PanelWidth, PanelHeight);
+	
+	Connector->SetMobility(EComponentMobility::Movable);
+	Connector->SetRelativeLocation(ConnectorOffset);
+	Connector->SetMobility(EComponentMobility::Static);
 }
 
 void AFINSizeablePanel::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int PanelWidth, int PanelHeight,
                                         UStaticMesh* ULMesh,
                                         UStaticMesh* UCMesh,
                                         UStaticMesh* CCMesh,
+                                        UStaticMesh* CCMesh_NoCon,
                                         UStaticMesh* ConnectorMesh,
                                         AActor* Parent, USceneComponent* Attach,
                                         TArray<UStaticMeshComponent*>& OutParts)
 {
-	int xf = PanelWidth/FMath::Abs(PanelWidth);
-	int yf = PanelHeight/FMath::Abs(PanelHeight);
-	for (int x = 0; x < FMath::Abs(PanelWidth); ++x) {
-		for (int y = 0; y < FMath::Abs(PanelHeight); ++y) {
+	int absPanelWidth = FMath::Abs(PanelWidth);
+	int absPanelHeight = FMath::Abs(PanelHeight);
+	int xf = PanelWidth/absPanelWidth;
+	int yf = PanelHeight/absPanelHeight;
+	for (int x = 0; x < absPanelWidth; ++x) {
+		for (int y = 0; y < absPanelHeight; ++y) {
 			UStaticMeshComponent* MiddlePart = NewObject<UStaticMeshComponent>(Parent, Class);
 			MiddlePart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 			MiddlePart->SetRelativeLocation(FVector(0, x * 10 * xf, y * 10 * yf));
 			MiddlePart->RegisterComponent();
-			MiddlePart->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+			//MiddlePart->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 			MiddlePart->SetStaticMesh(CCMesh);
 			MiddlePart->SetMobility(EComponentMobility::Static);
+			MiddlePart->SetVisibility(true);
 			OutParts.Add(MiddlePart);
 		}
 	}
-	if(FMath::Abs(PanelWidth) > 1) {
+	UStaticMeshComponent* MiddlePart = NewObject<UStaticMeshComponent>(Parent, Class);
+	MiddlePart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
+	MiddlePart->SetRelativeScale3D(FVector(1, absPanelWidth, absPanelHeight));
+	MiddlePart->SetRelativeLocation(FVector(0, (absPanelWidth * 10 / 2 - 5)* (yf > 0?xf:-xf), (absPanelHeight * 10)/ 2 - 5)* yf);
+	MiddlePart->RegisterComponent();
+	//MiddlePart->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+	MiddlePart->SetStaticMesh(CCMesh_NoCon);
+	MiddlePart->SetMobility(EComponentMobility::Static);
+	MiddlePart->SetVisibility(false);
+	OutParts.Add(MiddlePart);
+	if(absPanelWidth > 1) {
 		SpawnEdgeComponent(Class, 0, 0, 2, PanelWidth, 1, UCMesh, Parent, Attach, PanelWidth, PanelHeight, OutParts);  //DC
 		SpawnEdgeComponent(Class, 0, PanelHeight - 1, 0, PanelWidth, 1, UCMesh, Parent, Attach, PanelWidth, PanelHeight, OutParts);   //UC
 	}
-	if(FMath::Abs(PanelHeight) > 1) {
+	if(absPanelHeight > 1) {
 		SpawnEdgeComponent(Class, 0, 0, -1, PanelHeight, 1, UCMesh, Parent, Attach, PanelWidth, PanelHeight, OutParts);  //CR
 		SpawnEdgeComponent(Class, PanelWidth - 1, 0, 1, PanelHeight, 1,  UCMesh, Parent, Attach, PanelWidth, PanelHeight, OutParts);  //CL
 	}

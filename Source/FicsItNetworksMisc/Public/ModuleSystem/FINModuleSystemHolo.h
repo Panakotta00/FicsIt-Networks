@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FINModuleSystemPanel.h"
+#include "Components/TextRenderComponent.h"
 #include "Hologram/FGBuildableHologram.h"
 #include "FINModuleSystemHolo.generated.h"
 
@@ -33,6 +35,8 @@ public:
 	virtual void CheckValidPlacement() override;
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void Destroyed() override;
+	virtual void OnInvalidHitResult() override;
 	// End AFGHologram
 
 	UPROPERTY(EditAnywhere)
@@ -49,9 +53,22 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool ShowCompass = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UTextRenderComponent* InformationComponent;
+
+	UPROPERTY(EditAnywhere)
+	bool EnableInformationDisplay = false;
+	
+	UPROPERTY(EditAnywhere)
+	FVector InformationDisplayOffset = FVector(1,6.5,7);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnInformationUpdate(UTextRenderComponent* Component, const FHitResult& HitResult, UFINModuleSystemPanel* SnappedPanel, const FVector ModuleLocation, const int ModuleRotation);
 	
 private:
 	bool checkSpace(FVector min, FVector max);
+	
 	FVector getModuleSize();
 
 	UPROPERTY()

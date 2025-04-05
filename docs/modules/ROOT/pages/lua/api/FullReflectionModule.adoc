@@ -1,0 +1,11 @@
+= Reflection-System Base Module
+:table-caption!:
+
+This Module is used as dependency to depend on the entire Reflection System related stuff.
+
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/ReflectionSystemObjectModule.adoc[ReflectionSystemObjectModule], xref:/lua/api/ReflectionSystemClassModule.adoc[ReflectionSystemClassModule], xref:/lua/api/ReflectionSystemStructModule.adoc[ReflectionSystemStructModule]
+!===
+

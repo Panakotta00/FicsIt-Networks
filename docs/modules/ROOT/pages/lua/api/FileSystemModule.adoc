@@ -13,7 +13,7 @@ The DevDevice is a sepcial Device which holds all the DeviceNodes representing D
 The filesystem api provides structures, functions and variables for interacting with the virtual file systems.
 You can't access files outside the virtual filesystem. If you try to do so, the Lua runtime crashes.
 
-=== __filesystem.__**analyzePath** (string...) -> int...
+=== __filesystem.__**analyzePath** (...: string) -> ...
 Each provided string will be viewed as one filesystem-path and will be checked for lexical features. +
 Each of those string will then have a integer return value which is a bit-flag-register describing those lexical features.
 
@@ -31,10 +31,58 @@ Each of those string will then have a integer return value which is a bit-flag-r
 |===
 ====
 
-=== __filesystem.__**children** (path: string) -> string[]
-Lists all children names of the node with the given path. (f.e. items in a folder)
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-=== __filesystem.__**createDir** (path: string, recursive: bool) -> bool
+! *Paths* `...`
+! string
+! Paths that will be analyzed
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Results* `...`
+! integer
+! Analysis results
+
+!===
+====
+
+=== __filesystem.__**children** (path: string) -> string[]
+Lists all children names of the node with the given path. (i.e. items in a folder)
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Path* `path`
+! string
+! path to the filesystem object you want to list
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Children* `children`
+! string[]
+! file names of children
+
+!===
+====
+
+=== __filesystem.__**createDir** (path: string, recursive: bool) -> boolean
 Creates the folder path.
 
 [%collapsible]
@@ -49,7 +97,7 @@ Creates the folder path.
 ! folder path the function should create
 
 ! *Recursive* `recursive`
-! bool
+! boolean
 ! If false creates only the last folder of the path. If true creates all folders in the path.
 
 !===
@@ -59,7 +107,7 @@ Creates the folder path.
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! Returns true if it was able to create the directory.
 
 !===
@@ -70,14 +118,7 @@ Executes Lua code in the file referd by the given path.
 
 Function fails if path doesn￢ﾀﾙt exist or path doesn￢ﾀﾙt refer to a file.
 
-Returns the result of the execute function or what ever it yielded
-
-=== __filesystem.__**exists** (path: string) -> bool
-Returns true if the given path exists.
-
-=== __filesystem.__**initFileSystem** (path: string) -> bool
-Trys to mount the system DevDevice to the given location.
-The DevDevice is special Device holding DeviceNodes for all filesystems added to the system. (like TmpFS and drives). It is unmountable as well as getting mounted a seccond time.
+Returns the result of the execute function or what ever it yielded.
 
 [%collapsible]
 ====
@@ -88,7 +129,7 @@ The DevDevice is special Device holding DeviceNodes for all filesystems added to
 
 ! *Path* `path`
 ! string
-! path to the mountpoint were the dev device should get mounted to
+! path to the filesystem object you want to execute
 
 !===
 .Return Values
@@ -96,37 +137,15 @@ The DevDevice is special Device holding DeviceNodes for all filesystems added to
 !===
 !Name !Type !Description
 
-! *Success* `success`
-! bool
-! returns if it was able to mount the DevDevice
+! *Results* `...`
+! any
+! the result of the execute function or what ever it yielded
 
 !===
 ====
 
-=== __filesystem.__**isDir** (path: string) -> bool
-Returns true if the given path refers to directory.
-
-=== __filesystem.__**isFile** (path: string) -> bool
-Returns true if the given path refers to a file.
-
-=== __filesystem.__**isNode** (string...) -> bool...
-For each given string, returns a bool to tell if string is a valid node (file/folder) name.
-
-=== __filesystem.__**loadFile** (path: string) -> function
-Loads the file refered by the given path as a Lua function and returns it.
-Functions fails if path doesn￢ﾀﾙt exist or path doesn￢ﾀﾙt reger to a file.
-
-=== __filesystem.__**makeFileSystem** (type: string, name: string) -> bool
-Trys to create a new file system of the given type with the given name.
-The created filesystem will be added to the system DevDevice.
-
-.Possible Types:
-[%collapsible]
-====
-* `tmpfs`
-+
-A temporary filesystem only existing at runtime in the memory of your computer. All data will be lost when the system stops.
-====
+=== __filesystem.__**exists** (path: string) -> boolean
+Returns true if the given path exists.
 
 [%collapsible]
 ====
@@ -135,13 +154,9 @@ A temporary filesystem only existing at runtime in the memory of your computer. 
 !===
 !Name !Type !Description
 
-! *Type* `type`
+! *Path* `path`
 ! string
-! the type of the new filesystem
-
-! *Name* `name`
-! string
-! the name of the new filesystem you want to create
+! path to the filesystem object you want to check
 
 !===
 .Return Values
@@ -149,14 +164,123 @@ A temporary filesystem only existing at runtime in the memory of your computer. 
 !===
 !Name !Type !Description
 
-! *Success* `success`
-! bool
-! returns true if it was able to create the new filesystem
+! *Exists* `exists`
+! boolean
+! returns true if the given file exists
 
 !===
 ====
 
-=== __filesystem.__**meta** (string...) -> string...
+=== __filesystem.__**isDir** (path: string) -> boolean
+Returns true if the given path refers to directory.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Path* `path`
+! string
+! path to the filesystem object you want to check
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Is dir* `isDir`
+! boolean
+! returns true if the given path refers to a directory
+
+!===
+====
+
+=== __filesystem.__**isFile** (path: string) -> boolean
+Returns true if the given path refers to a file.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Path* `path`
+! string
+! path to the filesystem object you want to check
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Is file* `isFile`
+! boolean
+! returns true if the given path refers to a file
+
+!===
+====
+
+=== __filesystem.__**isNode** (...: string) -> ...
+For each given string, returns a bool to tell if string is a valid node (file/folder) name.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Paths* `...`
+! string
+! Paths that will be checked
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Results* `...`
+! boolean
+! True if path is a valid node (file/folder) name
+
+!===
+====
+
+=== __filesystem.__**loadFile** (path: string) -> fun(): ...
+Loads the file refered by the given path as a Lua function and returns it.
+Functions fails if path doesn￢ﾀﾙt exist or path doesn￢ﾀﾙt reger to a file.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Path* `path`
+! string
+! path to the filesystem object you want to load
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Code* `code`
+! fun(): ...
+! a function that runs the loaded code
+
+!===
+====
+
+=== __filesystem.__**meta** (...: string) -> ...
 Returns for each given string path, a table that defines contains some meta information about node the string references.
 
 .Possible `type`-Field strings
@@ -171,7 +295,31 @@ Returns for each given string path, a table that defines contains some meta info
 | ===
 ====
 
-=== __filesystem.__**mount** (device: string, mountPoint: string) -> bool
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Paths* `...`
+! string
+! Paths that will be checked
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Results* `...`
+! {type:string}
+! Metadata for each path
+
+!===
+====
+
+=== __filesystem.__**mount** (device: string, mountPoint: string) -> boolean
 This function mounts the device referenced by the the path to a device node to the given mount point.
 
 [%collapsible]
@@ -196,13 +344,13 @@ This function mounts the device referenced by the the path to a device node to t
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! true if the mount was executed successfully
 
 !===
 ====
 
-=== __filesystem.__**move** (from: string, to: string) -> bool
+=== __filesystem.__**move** (from: string, to: string) -> boolean
 Moves the filesystem object from the given path to the other given path.
 
 Function fails if it is not able to move the object.
@@ -229,13 +377,13 @@ Function fails if it is not able to move the object.
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! returns true if it was able to move the node
 
 !===
 ====
 
-=== __filesystem.__**open** (path: string, mode: string) -> xref:/lua/api/FileSystem.adoc#_file[File]
+=== __filesystem.__**open** (path: string, mode: string) -> xref:/lua/api/FileSystemModule.adoc#_file[File]
 Opens a file-stream and returns it as File-table.
 
 .Possible Modes
@@ -283,13 +431,13 @@ Opens a file-stream and returns it as File-table.
 !Name !Type !Description
 
 ! *File* `file`
-! xref:/lua/api/FileSystem.adoc#_file[File]
+! xref:/lua/api/FileSystemModule.adoc#_file[File]
 ! The File table of the file stream. Nil if not able to open file in read only.
 
 !===
 ====
 
-=== __filesystem.__**path** ([int,] string...) -> string
+=== __filesystem.__**path** ([conversion: integer,] ...: string) -> string
 Combines a variable amount of strings as paths together to one big path.
 
 Additionally, applies given conversion. Defined by the optionally given integer.
@@ -317,7 +465,35 @@ Additionally, applies given conversion. Defined by the optionally given integer.
 |===
 ====
 
-=== __filesystem.__**remove** (path: string, recursive: bool) -> bool
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Conversion* `conversion`
+! integer|string
+! Conversion that will be applied to paths
+
+! *Paths* `...`
+! string
+! Paths that will be joined
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Result* `result`
+! string
+! Joined and processed path
+
+!===
+====
+
+=== __filesystem.__**remove** (path: string, recursive: bool) -> boolean
 Removes the filesystem object at the given path.
 
 [%collapsible]
@@ -332,7 +508,7 @@ Removes the filesystem object at the given path.
 ! path to the filesystem object
 
 ! *Recursive* `recusive`
-! bool
+! boolean
 ! If false only removes the given filesystem object. If true removes all childs of the filesystem object.
 
 !===
@@ -342,41 +518,13 @@ Removes the filesystem object at the given path.
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! Returns true if it was able to remove the node
 
 !===
 ====
 
-=== __filesystem.__**removeFileSystem** (name: string) -> bool
-Tries to remove the filesystem with the given name from the system DevDevice.
-All mounts of the device will run invalid.
-
-[%collapsible]
-====
-.Parameters
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Name* `name`
-! string
-! the name of the new filesystem you want to remove
-
-!===
-.Return Values
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Success* `success`
-! bool
-! returns true if it was able to remove the new filesystem
-
-!===
-====
-
-=== __filesystem.__**rename** (path: string, name: string) -> bool
+=== __filesystem.__**rename** (path: string, name: string) -> boolean
 Renames the filesystem object at the given path to the given name.
 
 [%collapsible]
@@ -401,13 +549,13 @@ Renames the filesystem object at the given path to the given name.
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! returns true if it was able to rename the node
 
 !===
 ====
 
-=== __filesystem.__**unmount** (mountPoint: string) -> bool
+=== __filesystem.__**unmount** (mountPoint: string) -> boolean
 This function unmounts if the device at the given mount point.
 
 [%collapsible]
@@ -428,7 +576,7 @@ This function unmounts if the device at the given mount point.
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! returns true if it was able to unmount the device located at the mount point
 
 !===
@@ -442,11 +590,53 @@ This function unmounts if the device at the given mount point.
 === __File.__**close** ()
 Closes the File-Stream.
 
-=== __File.__**read** (int...) -> string...
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *self* `self`
+! xref:/lua/api/FileSystemModule.adoc#_file[File]
+! 
+
+!===
+====
+
+=== __File.__**read** (...: integer) -> ...
 Reads up to the given amount of bytes from the file.
 Strings may be smaller than the given amount of bytes due to f.e. reaching the End-Of-File.
 
-=== __File.__**seek** (where: string, offset: int) -> int
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *self* `self`
+! xref:/lua/api/FileSystemModule.adoc#_file[File]
+! 
+
+! *Sizes* `...`
+! integer
+! Maximum sizes of strings
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Contents* `...`
+! string?
+! Contents of the file
+
+!===
+====
+
+=== __File.__**seek** (where: string, offset: integer) -> integer
 Moves the File-Streams pointer to a position defined by the offset and from what starting location.
 
 .Possble `where` values
@@ -457,6 +647,56 @@ Moves the File-Streams pointer to a position defined by the offset and from what
 * `end` Offset is relative to the end of the file
 ====
 
-=== __File.__**write** (string...)
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *self* `self`
+! xref:/lua/api/FileSystemModule.adoc#_file[File]
+! 
+
+! *Where* `where`
+! string
+! Starting location
+
+! *Offset* `offset`
+! integer
+! Offset
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! string?
+! Current position in the file
+
+!===
+====
+
+=== __File.__**write** (... string)
 Writes the given strings to the File-Stream.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *self* `self`
+! xref:/lua/api/FileSystemModule.adoc#_file[File]
+! 
+
+! *Strings* `...`
+! string
+! Strings that will be written to the stream
+
+!===
+====
 

@@ -3,13 +3,13 @@
 #include "CoreMinimal.h"
 #include "FIRTrace.h"
 #include "FIRInstancedStruct.h"
-#include "FINLuaProcessorStateStorage.generated.h"
+#include "FINLuaRuntimePersistence.generated.h"
 
 /**
  * This struct holds information from the lua processor that is only needed in serialization like persistence data.
  */
 USTRUCT()
-struct FICSITNETWORKSLUA_API FFINLuaProcessorStateStorage {
+struct FICSITNETWORKSLUA_API FFINLuaRuntimePersistenceState {
 	GENERATED_BODY()
 private:
 	UPROPERTY(SaveGame)
@@ -44,7 +44,7 @@ public:
 };
 
 template<>
-struct TStructOpsTypeTraits<FFINLuaProcessorStateStorage> : TStructOpsTypeTraitsBase2<FFINLuaProcessorStateStorage> {
+struct TStructOpsTypeTraits<FFINLuaRuntimePersistenceState> : TStructOpsTypeTraitsBase2<FFINLuaRuntimePersistenceState> {
 	enum {
 		WithStructuredSerializer = true,
     };

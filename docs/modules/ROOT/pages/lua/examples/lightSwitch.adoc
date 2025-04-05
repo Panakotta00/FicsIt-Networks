@@ -1,0 +1,45 @@
+= Light Switch Example
+
+This small program uses a panel, a switch on the panel, which will control a light that is connected on the network.
+
+More info on the Modular Panel and Events that this example uses xref:lua/guide/ModularPanelAndEvents.adoc[can be found here].
+
+== Setup
+
+You will need: +
+
+1. A computer with a Lua CPU, a little bit of RAM, and an EEPROM
+2. A modular panel with a 2 position switch in the middle of the panel
+3. One of the lights available in the base game
+
+Connect the computer to a network pole. Connect the light and the control panel to the network pole using network cables.
+Plug in the Text EEPROM and paste the code below in the code editor.
+Run the computer and switch the button on the control panel on/off.
+
+== Code
+
+[source,Lua]
+----
+local panels = component.proxy(component.findComponent(classes.LargeControlPanel))
+local lights = component.proxy(component.findComponent(classes.LightSource))
+
+local panel = panels[1]
+local light = lights[1]
+
+-- The switch is expected to be in the middle of the panel
+local switch = panel:getModule(5, 5, 0)
+
+event.ignoreAll()
+event.clear()
+
+event.listen(switch)
+
+while true do
+    local e, s = event.pull()
+    if s == switch and e == "ChangeState" then
+        light.isLightEnabled = s.state
+    end
+end
+----
+
+include::partial$lua_examples_footer.adoc[]

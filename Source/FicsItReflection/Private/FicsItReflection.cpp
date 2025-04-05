@@ -45,7 +45,7 @@ void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFa
 
 	auto reflectionSubsystem = AFIRSubsystem::GetReflectionSubsystem(self);
 	fgcheck(reflectionSubsystem);
-	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = reflectionSubsystem->GetFactoryConnectorSettings(self);
+	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> OptionalSettings = reflectionSubsystem->GetFactoryConnectorSettings(self);
 	if (OptionalSettings.IsSet()) {
 		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
 		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && Settings.AllowedItem != type)) {
@@ -53,7 +53,6 @@ void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFa
 		} else {
 			bool bSuccess = Scope(self, out_items, Settings.AllowedItem ? Settings.AllowedItem : type);
 		}
-		OptionalSettings.GetValue().Key.Unlock();
 	}
 }
 
@@ -62,7 +61,7 @@ void UFGFactoryConnectionComponent_GrabOutput_Hook(CallScope<bool(*)(UFGFactoryC
 		Scope(self, out_item, out_OffsetBeyond, type);
 		return;
 	}
-	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
+	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
 	if (OptionalSettings.IsSet()) {
 		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
 		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
@@ -71,12 +70,11 @@ void UFGFactoryConnectionComponent_GrabOutput_Hook(CallScope<bool(*)(UFGFactoryC
 			bool bSuccess = Scope(self, out_item, out_OffsetBeyond, Settings.AllowedItem ? Settings.AllowedItem : type);
 			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
 		}
-		OptionalSettings.GetValue().Key.Unlock();
 	}
 }
 
 void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, TSubclassOf<UFGItemDescriptor> type) {
-	TOptional<TTuple<FCriticalSection&, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
+	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
 	if (OptionalSettings.IsSet()) {
 		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
 		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
@@ -85,7 +83,6 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 			bool bSuccess = Scope(self, out_item, Settings.AllowedItem ? Settings.AllowedItem : type);
 			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
 		}
-		OptionalSettings.GetValue().Key.Unlock();
 	}
 }
 

@@ -86,10 +86,7 @@ private:
 	TSharedPtr<FFINKernelListener> FileSystemListener;
 
 	// Cache
-	TSharedPtr<FJsonObject> ReadyToUnpersist = nullptr;
 	TQueue<TSharedPtr<TFIRInstancedStruct<FFINFuture>>> FutureQueue;
-	FCriticalSection ReferenceObjectMutex;
-	TMap<void*, TFunction<void(void*, FReferenceCollector&)>> ReferencedObjects;
 	FFileSystemSerializationInfo FileSystemSerializationInfo;
 	
 public:
@@ -109,8 +106,6 @@ public:
 	TDelegate<bool(const FFGDynamicStruct&)> OnSetEEPROM;
 
 	// Begin UObject
-	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
-	//virtual void Serialize(FArchive& Ar) override;
 	virtual void Serialize(FStructuredArchive::FRecord Record) override;
 	virtual void BeginDestroy() override;
 	// End UObject

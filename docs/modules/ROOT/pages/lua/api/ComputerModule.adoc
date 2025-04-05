@@ -1,0 +1,39 @@
+= Computer Module
+:table-caption!:
+
+The Computer Module provides the Computer Library.
+
+== Globals
+
+=== **computer**
+The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
+
+=== __computer.__**magicTime** () -> (integer, string, string)
+Returns some kind of strange/mysterious time data from a unknown place (the real life).
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Unix* `unix`
+! integer
+! Unix Timestamp
+
+! *Culture Time* `cultureTime`
+! string
+! The time as text with the culture format used by the Host
+
+! *ISO 8601* `iso8601`
+! string
+! The time as a Date-Time-Stamp after ISO 8601
+
+!===
+====
+
+=== __computer.__**skip** ()
+This function can be used to skip the current lua tick prematurely.
+Mostly for people who want to optimize their games runtime performance.
+

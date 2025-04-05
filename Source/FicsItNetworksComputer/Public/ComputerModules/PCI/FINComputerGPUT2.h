@@ -570,7 +570,7 @@ public:
 		ParameterInternalNames.Add("startDirections");
 		ParameterDisplayNames.Add(FText::FromString("Start Direction"));
 		ParameterDescriptions.Add(FText::FromString("The direction of the spline of how it exists the start point."));
-		ParameterInternalNames.Add("end");
+		ParameterInternalNames.Add("end_");
 		ParameterDisplayNames.Add(FText::FromString("End"));
 		ParameterDescriptions.Add(FText::FromString("The local position of the end point of the spline."));
 		ParameterInternalNames.Add("endDirection");
@@ -654,8 +654,101 @@ public:
 	UFUNCTION()
 	FVector2D netFunc_measureText(FString text, int64 size, bool bMonospace);
 	UFUNCTION()
-	void netFuncMeta_measureText(int32& Runtime) {
+	void netFuncMeta_measureText(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "measureText";
+		DisplayName = FText::FromString("Measure Text");
+		Description = FText::FromString("Measures dimensions that a text will take when rendered. Respects selected font and font size. Does not take into account any transforms pushed onto a transform stack.");
+		ParameterInternalNames.Add("text");
+		ParameterDisplayNames.Add(FText::FromString("Text"));
+		ParameterDescriptions.Add(FText::FromString("Text to measure."));
+		ParameterInternalNames.Add("size");
+		ParameterDisplayNames.Add(FText::FromString("Size"));
+		ParameterDescriptions.Add(FText::FromString("Font size in points."));
+		ParameterInternalNames.Add("monospace");
+		ParameterDisplayNames.Add(FText::FromString("Monospace"));
+		ParameterDescriptions.Add(FText::FromString("Whether to use monospace or normal font."));
 		Runtime = 0;
+	}
+
+	UFUNCTION()
+	int64 netFunc_getFontHeight(int64 size, bool bMonospace);
+	UFUNCTION()
+	void netFuncMeta_getFontHeight(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getFontHeight";
+		DisplayName = FText::FromString("Get Font Height");
+		Description = FText::FromString("Get height of a tallest glyph in a font, in pixels. When measuring text, its height is always equal to font height multiplied by number of text lines.");
+		ParameterInternalNames.Add("size");
+		ParameterDisplayNames.Add(FText::FromString("Size"));
+		ParameterDescriptions.Add(FText::FromString("Font size in points."));
+		ParameterInternalNames.Add("monospace");
+		ParameterDisplayNames.Add(FText::FromString("Monospace"));
+		ParameterDescriptions.Add(FText::FromString("Whether to use monospace or normal font."));
+		Runtime = 0;
+	}
+	
+	UFUNCTION()
+	int64 netFunc_getFontBaseline(int64 size, bool bMonospace);
+	UFUNCTION()
+	void netFuncMeta_getFontBaseline(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getFontBaseline";
+		DisplayName = FText::FromString("Get Font Baseline");
+		Description = FText::FromString("Get offset from the bottom of the font height to the baseline.");
+		ParameterInternalNames.Add("size");
+		ParameterDisplayNames.Add(FText::FromString("Size"));
+		ParameterDescriptions.Add(FText::FromString("Font size in points."));
+		ParameterInternalNames.Add("monospace");
+		ParameterDisplayNames.Add(FText::FromString("Monospace"));
+		ParameterDescriptions.Add(FText::FromString("Whether to use monospace or normal font."));
+	}
+
+	UFUNCTION()
+	TArray<FVector2D> netFunc_measureTextBatch(TArray <FString> text, TArray <int64> size, TArray<bool> bMonospace);
+	UFUNCTION()
+	void netFuncMeta_measureTextBatch(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "measureTextBatch";
+		DisplayName = FText::FromString("Measure Text Batch");
+		Description = FText::FromString("Same as measureText, but optimized to perform multiple requests at once.");
+		ParameterInternalNames.Add("text");
+		ParameterDisplayNames.Add(FText::FromString("Text"));
+		ParameterDescriptions.Add(FText::FromString("Text to measure."));
+		ParameterInternalNames.Add("size");
+		ParameterDisplayNames.Add(FText::FromString("Size"));
+		ParameterDescriptions.Add(FText::FromString("Font size in points."));
+		ParameterInternalNames.Add("monospace");
+		ParameterDisplayNames.Add(FText::FromString("Monospace"));
+		ParameterDescriptions.Add(FText::FromString("Whether to use monospace or normal font."));
+		Runtime = 0;
+	}
+
+	UFUNCTION()
+	TArray <int64> netFunc_getFontHeightBatch(TArray<int64> size, TArray<bool> bMonospace);
+	UFUNCTION()
+	void netFuncMeta_getFontHeightBatch(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getFontHeightBatch";
+		DisplayName = FText::FromString("Get Font Height Batch");
+		Description = FText::FromString("Same as getFontHeight, but optimized to perform multiple requests at once.");
+		ParameterInternalNames.Add("size");
+		ParameterDisplayNames.Add(FText::FromString("Size"));
+		ParameterDescriptions.Add(FText::FromString("Font size in points."));
+		ParameterInternalNames.Add("monospace");
+		ParameterDisplayNames.Add(FText::FromString("Monospace"));
+		ParameterDescriptions.Add(FText::FromString("Whether to use monospace or normal font."));
+		Runtime = 0;
+	}
+
+	UFUNCTION()
+	TArray<int64> netFunc_getFontBaselineBatch(TArray<int64> size, TArray<bool> bMonospace);
+	UFUNCTION()
+	void netFuncMeta_getFontBaselineBatch(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
+		InternalName = "getFontBaselineBatch";
+		DisplayName = FText::FromString("Get Font Baseline Batch");
+		Description = FText::FromString("Same as getFontBaseline, but optimized to perform multiple requests at once.");
+		ParameterInternalNames.Add("size");
+		ParameterDisplayNames.Add(FText::FromString("Size"));
+		ParameterDescriptions.Add(FText::FromString("Font size in points."));
+		ParameterInternalNames.Add("monospace");
+		ParameterDisplayNames.Add(FText::FromString("Monospace"));
+		ParameterDescriptions.Add(FText::FromString("Whether to use monospace or normal font."));
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)

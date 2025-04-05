@@ -83,7 +83,8 @@ TArray<FFINLexerPattern> FIN_Lua_MainTokens = {
 	{R"(\{)", FIN_Lua_Token_ParenthesisCurly},
 	{R"(\})", FIN_Lua_Token_ParenthesisCurly},
 
-	{"[ \\t]+", FIN_Lua_Token_WhiteSpace},
+	{"\\t", FIN_Lua_Token_Tab},
+	{"[ ]+", FIN_Lua_Token_WhiteSpace},
 	{"[a-zA-Z_][a-zA-Z0-9_]*", FIN_Lua_Token_Identifier},
 };
 

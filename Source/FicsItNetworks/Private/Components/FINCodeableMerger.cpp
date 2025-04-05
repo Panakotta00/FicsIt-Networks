@@ -38,6 +38,7 @@ AFINCodeableMerger::~AFINCodeableMerger() {}
 void AFINCodeableMerger::GetDismantleRefund_Implementation(TArray<FInventoryStack>& out_refund, bool noBuildCostEnabled) const {
 	Super::GetDismantleRefund_Implementation(out_refund, noBuildCostEnabled);
 
+	FScopeLock lock(const_cast<FCriticalSection*>(&Mutex));
 	//TArray<FInventoryItem> items = InputQueue;
 	out_refund.Append(OutputQueue);
 	out_refund.Append(InputQueue1);
@@ -59,6 +60,7 @@ UObject* AFINCodeableMerger::GetSignalSenderOverride_Implementation() {
 void AFINCodeableMerger::BeginPlay() {
 	Super::BeginPlay();
 
+	FScopeLock lock(&Mutex);
 	for (TArray<FInventoryItem>* list : { &InputQueue1, &InputQueue2, &InputQueue3, &OutputQueue }) {
 		for (size_t i = 0; i < list->Num(); ++i) {
 			if (!(*list)[i].IsValid()) {
@@ -75,6 +77,7 @@ void AFINCodeableMerger::TickInput(UFGFactoryConnectionComponent* Connector, int
 		FInventoryItem item;
 		float offset;
 		if (Connector->Factory_GrabOutput(item, offset)) {
+			FScopeLock lock(&Mutex);
 			InputQueue.Add(item);
 			netSig_ItemRequest(InputId, item);
 		}
@@ -92,6 +95,7 @@ void AFINCodeableMerger::Factory_Tick(float dt) {
 }
 
 bool AFINCodeableMerger::Factory_PeekOutput_Implementation(const UFGFactoryConnectionComponent* connection, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) const {
+	FScopeLock lock(const_cast<FCriticalSection*>(&Mutex));
 	if (OutputQueue.Num() > 0 || OutputQueue[0].IsValid()) {
 		out_items.Add(OutputQueue[0]);
 		return true;
@@ -100,6 +104,7 @@ bool AFINCodeableMerger::Factory_PeekOutput_Implementation(const UFGFactoryConne
 }
 
 bool AFINCodeableMerger::Factory_GrabOutput_Implementation(UFGFactoryConnectionComponent* connection, FInventoryItem& out_item, float& out_OffsetBeyond, TSubclassOf<UFGItemDescriptor> type) {
+	FScopeLock lock(&Mutex);
 	if (OutputQueue.Num() > 0) {
 		out_item = OutputQueue[0];
 		if (out_item.IsValid()) {
@@ -115,6 +120,7 @@ bool AFINCodeableMerger::Factory_GrabOutput_Implementation(UFGFactoryConnectionC
 bool AFINCodeableMerger::netFunc_transferItem(int input) {
 	TArray<FInventoryItem>& InputQueue = GetInput(input);
 
+	FScopeLock lock(&Mutex);
 	if (OutputQueue.Num() < 2 &&  InputQueue.Num() > 0) {
 		FInventoryItem item = InputQueue[0];
 		InputQueue.RemoveAt(0);
@@ -126,6 +132,8 @@ bool AFINCodeableMerger::netFunc_transferItem(int input) {
 
 FInventoryItem AFINCodeableMerger::netFunc_getInput(int input) {
 	TArray<FInventoryItem>& InputQueue = GetInput(input);
+
+	FScopeLock lock(&Mutex);
 	if (InputQueue.Num() > 0) {
 		return InputQueue[0];
 	}
@@ -133,6 +141,7 @@ FInventoryItem AFINCodeableMerger::netFunc_getInput(int input) {
 }
 
 bool AFINCodeableMerger::netPropGet_canOutput() {
+	FScopeLock lock(&Mutex);
 	return OutputQueue.Num() < 2;
 }
 

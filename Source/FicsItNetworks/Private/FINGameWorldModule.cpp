@@ -3,12 +3,14 @@
 #include "FicsItNetworksCircuit.h"
 #include "FicsItNetworksComputer.h"
 #include "FicsItNetworksMisc.h"
+#include "FINArrowModuleHolo.h"
 #include "FINComputerSubsystem.h"
 #include "FINMediaSubsystem.h"
 #include "FIRModModule.h"
 #include "Utils/FINBlueprintParameterHooks.h"
 
 UFINGameWorldModule::UFINGameWorldModule() {
+	ModSubsystems.Add(AFINBuildgunHooks::StaticClass());
 	ModSubsystems.Add(AFINComputerSubsystem::StaticClass());
 	ModSubsystems.Add(AFINBlueprintParameterHooks::StaticClass());
 	ModSubsystems.Add(AFINMediaSubsystem::StaticClass());

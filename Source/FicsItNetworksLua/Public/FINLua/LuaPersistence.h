@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "LuaUtil.h"
+#include "FINLuaRuntimePersistence.h"
 
 namespace FINLua {
 	/**
@@ -74,8 +75,8 @@ namespace FINLua {
 		lua_pop(L, 1);
 	}
 
-	#define PersistTable(Name, Idx) FINLua::_PersistTable(L, _persist_namespace, Name, Idx)
-	inline void _PersistTable(lua_State* L, const FString& _persist_namespace, const FString& name, int idx) {
+	#define PersistTable(Name, Idx) FINLua::luaFIN_PersistTable(L, _persist_namespace, Name, Idx)
+	inline void luaFIN_PersistTable(lua_State* L, const FString& _persist_namespace, const FString& name, int idx) {
 		idx = lua_absindex(L, idx);
 		lua_pushnil(L);
 		while (lua_next(L, idx) != 0) {
@@ -86,7 +87,9 @@ namespace FINLua {
         		lua_pop(L, 1);
 	        }
 		}
-		lua_pushvalue(L, idx);
-		PersistValue(name);
+	}
+
+	inline FFINLuaRuntimePersistenceState& luaFIN_getPersistence(lua_State* L) {
+		return *luaFIN_getRuntime(L).PersistenceState;
 	}
 }

@@ -195,7 +195,7 @@ void AFINComputerGPUT1::Multicast_EndBackBufferReplication_Implementation() {
 	if (!HasAuthority()) {
 		FrontBuffer = BackBuffer;
 		if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
-		UE_LOG(LogFicsItNetworksComputer, Warning, TEXT("GPU T1: Replication took %f"), FPlatformTime::Seconds() - ReplicateStart);
+		UE_LOG(LogFicsItNetworksComputer, Display, TEXT("GPU T1: Replication took %f"), FPlatformTime::Seconds() - ReplicateStart);
 	}
 }
 

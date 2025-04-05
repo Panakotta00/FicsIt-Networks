@@ -1,0 +1,34 @@
+= Log Module
+:table-caption!:
+
+
+
+== Globals
+
+=== **computer**
+The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
+
+=== __computer.__**log** (verbosity: integer, message: string)
+Allows you to print a log message to the computers log with the given log verbosity.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Verbosity* `verbosity`
+! integer
+! The log-level/verbosity of the message you want to log. 0 = Debug, 1 = Info, 2 = Warning, 3 = Error & 4 = Fatal
+
+! *Message* `message`
+! string
+! The log message you want to print
+
+!===
+====
+
+=== **print** : fun(...)
+
+

@@ -7,6 +7,10 @@
 #include "FGGameState.h"
 #include "FicsItNetworksMisc.h"
 #include "FicsItReflection.h"
+#include "FINDependencies.h"
+#include "ReflectionHelper.h"
+#include "WrapBox.h"
+#include "WrapBoxSlot.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Components/VerticalBox.h"
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
@@ -46,7 +50,7 @@ void AddRedirects(FString FromParent, FString ToParent, const ClassChange& Chang
 void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 	UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
 	UObject* InventorySlot = HookHelper.GetContext();
-	TObjectPtr<UObject>* WidgetPtr = HookHelper.GetOutVariablePtr<FObjectProperty>();
+	TObjectPtr<UObject>* WidgetPtr = HookHelper.GetOutVariableHelper()->GetVariablePtr<FObjectProperty>(TEXT("ReturnValue"));
 	UUserWidget* Widget = Cast<UUserWidget>(WidgetPtr->Get());
 	UVerticalBox* MenuList = Cast<UVerticalBox>(Widget->GetWidgetFromName("VerticalBox_0"));
 
@@ -60,6 +64,30 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 		UFINEditLabel* EditLabel = NewObject<UFINEditLabel>(MenuList->GetOuter());
 		EditLabel->InitSlotWidget(self);
 		MenuList->AddChildToVerticalBox(EditLabel);
+	}
+}
+
+void ResearchNodeInfoWidget_CanResearch_Hook(FBlueprintHookHelper& HookHelper) {
+	UObject* Widget = HookHelper.GetContext();
+	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
+	bool& canResearch = *HookHelper.GetOutVariableHelper()->GetVariablePtr<TProperty<bool, FBoolProperty>>(TEXT("Can Research"));
+	canResearch = canResearch && UFGSchematic::AreSchematicDependenciesMet(schematic, Widget);;
+}
+
+void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
+	UUserWidget* Widget = Cast<UUserWidget>(HookHelper.GetContext());
+	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
+	UWrapBox* wrapBox = FReflectionHelper::GetObjectPropertyValue<UWrapBox>(Widget, TEXT("mCostSlotsContainer"));
+	TArray<UFGAvailabilityDependency*> dependencies;
+	UFGSchematic::GetSchematicDependencies(schematic, dependencies);
+	TSubclassOf<UUserWidget> dependencyWidgetClass = LoadClass<UUserWidget>(nullptr, TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_Dependency.BPW_FIN_Dependency_C"));
+	for (UFGAvailabilityDependency* dependency : dependencies) {
+		UFINDependency* FINDependency = Cast<UFINDependency>(dependency);
+		if (!IsValid(FINDependency)) continue;
+		UUserWidget* dependencyWidget = Widget->WidgetTree->ConstructWidget<UUserWidget>(dependencyWidgetClass);
+		FReflectionHelper::SetPropertyValue<FObjectProperty>(dependencyWidget, TEXT("Dependency"), FINDependency);
+		UWrapBoxSlot* slot = wrapBox->AddChildToWrapBox(dependencyWidget);
+		slot->SetFillEmptySpace(true);
 	}
 }
 
@@ -348,6 +376,11 @@ void FFicsItNetworksModule::StartupModule(){
 		UFunction* Function = Slot->FindFunctionByName(TEXT("CreateSplitSlider"));
 		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
 		HookManager->HookBlueprintFunction(Function, InventorSlot_CreateWidgetSlider_Hook, EPredefinedHookOffset::Return);
+		UClass* NodeInfo = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/MAMTree/Widget_MAMTree_NodeInfo.Widget_MAMTree_NodeInfo_C"));
+		Function = NodeInfo->FindFunctionByName(TEXT("Can Research"));
+		HookManager->HookBlueprintFunction(Function, &ResearchNodeInfoWidget_CanResearch_Hook, EPredefinedHookOffset::Return);
+		Function = NodeInfo->FindFunctionByName(TEXT("UpdateState"));
+		HookManager->HookBlueprintFunction(Function, &ResearchNodeInfoWidget_UpdateState_Hook, EPredefinedHookOffset::Return);
 #endif
 	});
 }

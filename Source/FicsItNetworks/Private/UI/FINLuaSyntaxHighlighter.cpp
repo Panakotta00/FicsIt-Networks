@@ -1,5 +1,4 @@
-﻿#include "FindLast.h"
-#include "FINLuaSyntax.h"
+﻿#include "FINLuaSyntax.h"
 #include "FINLuaCodeEditor.h"
 #include "Framework/Text/IRun.h"
 #include "Framework/Text/TextLayout.h"
@@ -67,9 +66,17 @@ void FFINLuaSyntaxHighlighter::SetText(const FString& SourceString, FTextLayout&
 					}
 					case FIN_Lua_Token_Parenthesis:
 						if (text == TEXT("(")) {
-							TSharedRef<IRun>* prevRun = Algo::FindLastByPredicate(runs, [](const TSharedRef<IRun>& run) {
-								return run->GetRunInfo().Name == TEXT("SyntaxHighlight.FINLua.Identifier");
-							});
+							TSharedRef<IRun>* prevRun = nullptr;
+							for (int i = runs.Num(); i > 0; --i) {
+								TSharedRef<IRun>& run = runs[i-1];
+								if (run->GetRunInfo().Name == TEXT("SyntaxHighlight.FINLua.Identifier")) {
+									prevRun = &run;
+									break;
+								}
+								if (run->GetRunInfo().Name == TEXT("SyntaxHighlight.FINLua.Keyword")) {
+									break;
+								}
+							}
 							if (prevRun) {
 								TSharedRef<IRun>& run = *prevRun;
 								FTextBlockStyle style;
@@ -110,6 +117,12 @@ void FFINLuaSyntaxHighlighter::SetText(const FString& SourceString, FTextLayout&
 						FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Identifier"));
 						TSharedPtr<IRun> Run = FSlateTextRun::Create(RunInfo, str, Style, textRange);
 						runs.Add(Run.ToSharedRef());
+						continue;
+					}
+					case FIN_Lua_Token_Tab: {
+						FTextBlockStyle Style = SyntaxTextStyle->NormalTextStyle;
+						FRunInfo RunInfo(TEXT("SyntaxHighlight.FINLua.Normal"));
+						runs.Add(FFINTabRun::Create(RunInfo, str, Style, textRange, 4));
 						continue;
 					}
 					default: break;

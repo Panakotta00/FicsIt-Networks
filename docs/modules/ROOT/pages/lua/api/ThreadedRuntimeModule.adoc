@@ -1,0 +1,35 @@
+= Threaded Runtime Module
+:table-caption!:
+
+This Module provides an interface for other Modules to interact with the Kernel.
+
+== Globals
+
+=== **computer**
+The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
+
+=== __computer.__**demote** ()
+This function is used to allow switching back to the normal tick rate.
+
+=== __computer.__**isPromoted** () -> boolean
+Returns true if the Lua runtime is currently promoted/elevated.
+Which means its running in an seperate game thread allowing for fast bulk calculations.
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Promoted* `promoted`
+! boolean
+! True if the currenty runtime is running in promoted/elevated tick state.
+
+!===
+====
+
+=== __computer.__**promote** ()
+This function is mainly used to allow switching to a higher tick runtime state.
+Usually you use this when you want to make your code run faster when using functions that can run in asynchronous environment.
+

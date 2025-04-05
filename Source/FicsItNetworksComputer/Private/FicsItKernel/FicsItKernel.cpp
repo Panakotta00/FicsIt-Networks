@@ -53,16 +53,6 @@ UFINKernelSystem::UFINKernelSystem() {
 	FileSystemListener = MakeShared<FFINKernelListener>(this);
 }
 
-void UFINKernelSystem::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) {
-	Super::AddReferencedObjects(InThis, Collector);
-	
-	UFINKernelSystem* This = Cast<UFINKernelSystem>(InThis);
-	FScopeLock Lock(&This->ReferenceObjectMutex);
-	for (const TPair<void*, TFunction<void(void*, FReferenceCollector&)>>& Referencer : This->ReferencedObjects) {
-		Referencer.Value(Referencer.Key, Collector);
-	}
-}
-
 void UFINKernelSystem::Serialize(FStructuredArchive::FRecord Record) {
 	Super::Serialize(Record);
 	
@@ -367,16 +357,6 @@ const TArray<TScriptInterface<IFINPciDeviceInterface>>& UFINKernelSystem::GetPCI
 
 int64 UFINKernelSystem::GetTimeSinceStart() const {
 	return (FDateTime::Now() - FFicsItNetworksComputerModule::GameStart).GetTotalMilliseconds() - SystemResetTimePoint;
-}
-
-void UFINKernelSystem::AddReferencer(void* Referencer, const TFunction<void(void*, FReferenceCollector&)>& CollectorFunc) {
-	UE::TScopeLock Lock(ReferenceObjectMutex);
-	ReferencedObjects.FindOrAdd(Referencer) = CollectorFunc;
-}
-
-void UFINKernelSystem::RemoveReferencer(void* Referencer) {
-	UE::TScopeLock Lock(ReferenceObjectMutex);
-	ReferencedObjects.Remove(Referencer);
 }
 
 FInventoryItem UFINKernelSystem::GetEEPROM() {

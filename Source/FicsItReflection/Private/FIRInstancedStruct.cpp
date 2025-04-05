@@ -99,7 +99,7 @@ void FFIRInstancedStruct::AddStructReferencedObjects(FReferenceCollector& Collec
 	UScriptStruct* ThisStruct = Struct;
 	if (Struct) Collector.AddReferencedObject(ThisStruct);
 	if (Struct && Data) {
-		if (Struct->GetCppStructOps()->HasAddStructReferencedObjects()) Struct->GetCppStructOps()->AddStructReferencedObjects()(Data, Collector);
+		Collector.AddPropertyReferencesWithStructARO(Struct, Data);
 	}
 }
 

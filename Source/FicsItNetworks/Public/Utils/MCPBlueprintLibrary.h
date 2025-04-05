@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "FINCommandPointMesh.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Serialization/JsonTypes.h"
 #include "MCPBlueprintLibrary.generated.h"
 
 USTRUCT(Blueprintable)
@@ -26,6 +28,7 @@ class FICSITNETWORKS_API UMCPBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 public:
 	GENERATED_BODY()
+	
 	//GENERATED_UCLASS_BODY()
 	
     /** Starts an analytics session without any custom attributes specified */
@@ -46,4 +49,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Utilities")
 	static FVector2D MeasureStringRenderSize(UFont* Font, FString Text);
+
+	static UObject* LastUIHintObject;
+	
+	UFUNCTION(BlueprintCallable, Category="Utilities")
+	static void SetLastUIHintObject(UObject* actor);
+
+	UFUNCTION(BlueprintPure, Category="Utilities")
+	static const UObject* GetLastUIHintObject();
+
+	/*UFUNCTION(BlueprintCallable, Category = "Utilities")
+	FString SerializeUStructToJSON(UScriptStruct* Struct);
+
+	UFUNCTION(BlueprintCallable, Category = "Utilities")
+	FFINCommandLabelData DeserializeJSONString(FString Data);*/
 };

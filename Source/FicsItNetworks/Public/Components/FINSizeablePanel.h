@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
+#include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINSizeablePanel.generated.h"
 
 class UFINModuleSystemPanel;
@@ -17,6 +18,8 @@ public:
 	UStaticMesh* PanelSideMesh = nullptr;
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* PanelCenterMesh = nullptr;
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* PanelCenterMeshNoConnector = nullptr;
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* PanelConnectorMesh = nullptr;
 	
@@ -60,6 +63,7 @@ public:
                                         UStaticMesh* ULMesh,
                                         UStaticMesh* UCMesh,
                                         UStaticMesh* CCMesh,
+                                        UStaticMesh* CCMesh_NoCon,
                                         UStaticMesh* ConnectorMesh,
                                         AActor* Parent, USceneComponent* Attach,
                                         TArray<UStaticMeshComponent*>& OutParts);

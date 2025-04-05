@@ -6,9 +6,9 @@
 
 namespace FINLua {
 	LuaModule(R"(/**
-	 * @LuaModule		Debug
+	 * @LuaModule		DebugModule
 	 * @DisplayName		Debug Module
-	 */)", Debug) {
+	 */)", DebugModule) {
 		LuaModuleLibrary(R"(/**
 		 * @LuaLibrary		debug
 		 * @DisplayName		Debug Library
@@ -19,7 +19,7 @@ namespace FINLua {
 			 *
 			 * Allows to log the given strings to the Game Log.
 			 *
-			 * @param	msgs	string...	A list of log messages that should get printed to the game console.
+			 * @param		...			string		Messages	A list of log messages that should get printed to the game console.
 			 */)", log) {
 				int args = lua_gettop(L);
 				FString Msg;
@@ -58,3 +58,5 @@ namespace FINLua {
 		}
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -3,6 +3,12 @@
 
 The Component Module contains the component Library.
 
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/FullReflectionModule.adoc[FullReflectionModule]
+!===
+
 == Globals
 
 === **component**

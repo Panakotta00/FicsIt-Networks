@@ -3,10 +3,16 @@
 
 This Module provides the Future type and all its necessary functionallity.
 
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/KernelModule.adoc[KernelModule]
+!===
+
 == Globals
 
-=== **async** : 
-
+=== **async** : fun(fn, ...): xref:/reflection/structs/Future.adoc[Future]
+Wraps a function into a future.
 
 === **future**
 The global Future Library provides functions to work more easily with futures.
@@ -14,19 +20,43 @@ The global Future Library provides functions to work more easily with futures.
 === __future.__**addTask** (xref:/reflection/structs/Future.adoc[Future]...)
 Adds the given futures to the tasks list.
 
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Futures* `...`
+! xref:/reflection/structs/Future.adoc[Future]
+! The futures you want to add
+
+!===
+====
+
 === __future.__**async** (thread) -> xref:/reflection/structs/Future.adoc[Future]
 Wraps the given thread/coroutine in a Lua-Future
 
 [%collapsible]
 ====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Thread* `thread`
+! thread
+! The thread you want to wrap in a future
+
+!===
 .Return Values
 [%header,cols="1,1,4a",separator="!"]
 !===
 !Name !Type !Description
 
-! *The Future that wraps the given thread.* `future`
+! *Future* `future`
 ! xref:/reflection/structs/Future.adoc[Future]
-! 
+! The Future that wraps the given thread
 
 !===
 ====
@@ -36,14 +66,24 @@ Creates a new Future that will only finish once all futures passed as parameters
 
 [%collapsible]
 ====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Futures* `...`
+! xref:/reflection/structs/Future.adoc[Future]
+! The futures you want to join
+
+!===
 .Return Values
 [%header,cols="1,1,4a",separator="!"]
 !===
 !Name !Type !Description
 
-! *The Future that will finish once all other futures finished.* `future`
+! *Future* `future`
 ! xref:/reflection/structs/Future.adoc[Future]
-! 
+! The Future that will finish once all other futures finished
 
 !===
 ====
@@ -54,15 +94,39 @@ Runs the default task scheduler indefinitely until no tasks are left.
 === __future.__**run** ()
 Runs the default task scheduler once.
 
-=== __future.__**sleep** (seconds : number) -> xref:/reflection/structs/Future.adoc[Future]
+=== __future.__**sleep** (seconds: number) -> xref:/reflection/structs/Future.adoc[Future]
 Creates a future that returns after the given amount of seconds.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Seconds* `seconds`
+! number
+! Number of seconds to wait
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Future* `future`
+! xref:/reflection/structs/Future.adoc[Future]
+! The future that will finish after the given amount of seconds
+
+!===
+====
 
 === __future.__**tasks** : 
 A list of futures that are considered "Tasks".
 Tasks could be seen as background threads. Effectively getting "joined" together.
 Examples for tasks are callback invocations of timers and event listeners.
 
-=== **sleep** : 
+=== **sleep** : fun(seconds: number): xref:/reflection/structs/Future.adoc[Future]
 Blocks the current thread/future until the given amount of time passed
 
 == Types
@@ -71,16 +135,77 @@ Blocks the current thread/future until the given amount of time passed
 
 
 === __Future.__**await** ()
+Wait for the future to complete and return its value.
 
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Value* `...`
+! any
+! Future's value
+
+!===
+====
 
 === __Future.__**canGet** ()
+Check if the future's value is available without performing any additional logic.
 
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Can Get* `canGet`
+! boolean
+! True if future is completed and a value is available
+
+!===
+====
 
 === __Future.__**get** ()
+Get value from the future if one is available.
+Causes error if future is not yet resolved.
+
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Value* `...`
+! any
+! Future's value
+
+!===
+====
+
+=== __Future.__**poll** () -> boolean,number?
 
 
-=== __Future.__**poll** () -> bool
+[%collapsible]
+====
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
+! *Ready* `ready`
+! boolean
+! Whether the future is ready or not
+
+! *Timeout* `timeout`
+! number?
+! 
+
+!===
+====
 
 === **FutureStruct**
 

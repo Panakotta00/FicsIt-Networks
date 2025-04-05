@@ -8,6 +8,11 @@
 AFINModuleSystemHolo::AFINModuleSystemHolo() {
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(true);
+
+	InformationComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("InformationDisplay"));
+	InformationComponent->SetupAttachment(RootComponent);
+	InformationComponent->SetMobility(EComponentMobility::Movable);
+	InformationComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 AFINModuleSystemHolo::~AFINModuleSystemHolo() {}
@@ -55,6 +60,7 @@ FVector AFINModuleSystemHolo::getModuleSize() {
 	return FVector((float) w, (float) h, 0);
 }
 
+
 bool AFINModuleSystemHolo::IsValidHitResult(const FHitResult& hit) const {
 	auto r = GetScrollRotateValue();
 
@@ -70,12 +76,19 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 	UFINModuleSystemPanel* panel = Cast<UFINModuleSystemPanel>(panel_r);
 
 	if (!IsValid(panel)) {
+		if(IsValid(Snapped)) {
+			Snapped->HologramSnapped.Broadcast(false);
+		}
 		Snapped = nullptr;
 		return false;
 	}
+	UFINModuleSystemPanel* OldSnapped = Snapped;
 	Snapped = panel;
+	if(Snapped != OldSnapped) {
+		panel->HologramSnapped.Broadcast(true);
+	}
 
-	auto loc = Snapped->GetComponentToWorld().InverseTransformPosition(hitResult.Location);
+	FVector loc = Snapped->GetComponentToWorld().InverseTransformPosition(hitResult.Location);
 	SnappedLoc = loc;
 	SnappedLoc = SnappedLoc / 10.0;
 	SnappedLoc.X = floor(SnappedLoc.X);
@@ -103,9 +116,11 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 	bIsValid = checkSpace(min, max);
 	if (bIsValid) {
 		bIsValid = false;
-		for (auto& allowed : Snapped->AllowedModules)
-			if (mBuildClass->IsChildOf(allowed)) 
+		for (auto& allowed : Snapped->AllowedModules) {
+			if (mBuildClass->IsChildOf(allowed)) {
 				bIsValid = true;
+			}
+		}
 	}
 	SetHologramLocationAndRotation(hitResult);
 	return true;
@@ -113,7 +128,7 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 
 void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit) {
 	if (!IsValid(Snapped)) return;
-	auto loc = SnappedLoc;
+	FVector loc = SnappedLoc;
 	switch (SnappedRot) {
 	case 0:
 		break;
@@ -141,6 +156,19 @@ void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit)
 		ActorLocation += CompassSurfaceOffset;
 		//FVector ArrowLocation = {0, }
 		CompassRose->SetRelativeLocation(ActorLocation);
+	}
+	if(EnableInformationDisplay && IsValid(InformationComponent)) {
+		// Roze is having issues getting the Z position correct for the text.
+		const FVector ModuleSize = getModuleSize();
+		InformationComponent->SetMobility(EComponentMobility::Movable);
+		InformationComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		FVector ActorLocation = { (ModuleSize.X - 1) * 5,  (ModuleSize.Y - 1 ) * 5,0};
+		ActorLocation += InformationDisplayOffset;
+		if(ShowCompass && IsValid(CompassRose)) {
+			ActorLocation.Z = CompassRose->GetRelativeLocation().Z;   // Dunno why this works, but it does. 
+		}
+		InformationComponent->SetRelativeLocation(ActorLocation);
+		OnInformationUpdate(InformationComponent, hit, Snapped, SnappedLoc, SnappedRot);
 	}
 	
 	//if(IsValid(CompassComponent)) {
@@ -171,6 +199,7 @@ void AFINModuleSystemHolo::BeginPlay() {
 void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
 	Super::OnConstruction(MovieSceneBlends);
 
+#if UE_GAME
 	if(ShowCompass) {
 		CompassRose = NewObject<UStaticMeshComponent>(this);
 		CompassRose->RegisterComponent();
@@ -192,4 +221,27 @@ void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {
 
 		CompassRose->SetRelativeLocation(ActorLocation);
 	}
+	if(EnableInformationDisplay) {
+		InformationComponent->SetVisibility(true);
+	}else{
+		InformationComponent->SetVisibility(false);
+	}
+#endif
 }
+
+void AFINModuleSystemHolo::Destroyed() {
+	Super::Destroyed();
+	
+	if(IsValid(Snapped)) {
+		Snapped->HologramSnapped.Broadcast(false);
+	}
+}
+
+void AFINModuleSystemHolo::OnInvalidHitResult() {
+	Super::OnInvalidHitResult();
+	if(IsValid(Snapped)) {
+		Snapped->HologramSnapped.Broadcast(false);
+		Snapped = nullptr;
+	}
+}
+

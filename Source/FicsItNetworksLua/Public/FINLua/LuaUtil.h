@@ -3,7 +3,6 @@
 #include "FILLogScope.h"
 #include "FINLua.h"
 #include "FIRTypes.h"
-#include "Serialization/CompactBinaryWriter.h"
 
 class UFIRProperty;
 class UFIRStruct;
@@ -92,13 +91,15 @@ namespace FINLua {
 	FString luaFIN_getUserDataMetaName(lua_State* L, int Index);
 
 	/**
-	 * @brief Yields in a way the caller is continue execution and the yield does NOT get propagated.
+	 * @brief Yields in a way the caller is continued execution and the yield does NOT get propagated.
 	 */
 	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc);
 	
 	void luaFIN_pushFString(lua_State* L, const FString& str);
 	FString luaFIN_checkFString(lua_State* L, int index);
 	FString luaFIN_toFString(lua_State* L, int index);
+	// Pushes the converted string onto the stack
+	FString luaFIN_convToFString(lua_State* L, int index);
 
 	FORCEINLINE FIRBool luaFIN_toFinBool(lua_State* L, int index) { return static_cast<FIRBool>(lua_toboolean(L, index)); }
 	FORCEINLINE FIRInt luaFIN_toFinInt(lua_State* L, int index) { return static_cast<FIRInt>(lua_tointeger(L, index)); }
@@ -110,10 +111,24 @@ namespace FINLua {
 	FString luaFIN_where(lua_State* L);
 	FString luaFIN_stack(lua_State* L);
 
+	/**
+	 * Executes the first function in ctx unless it is NULL
+	 * @param ctx A array of lua_KFunction's
+	 * @return 0 or the result of the function
+	 */
+	int luaFIN_sequence(lua_State* L, int, lua_KContext ctx);
+
+	/**
+	 * Tries to set the value on top of the stack as value of the table at the given index with the field key beeing the value right below the stack.
+	 * If the value is a table and the field already contains a table, will merge both tables.
+	 * In any other case will overwrite the field of the target with the value on-top of the stack.
+	 * Raises an error if the targetIndex is not a table.
+	 * Pops the table on-top of the stack.
+	 */
+	void luaFIN_setOrMergeField(lua_State* L, int targetIndex);
+
 	void luaFINDebug_dumpStack(lua_State* L);
 	void luaFINDebug_dumpTable(lua_State* L, int index);
-
-	void setupUtilLib(lua_State* L);
 }
 
 struct FFINLuaLogScope : public FFILLogScope {
