@@ -28,13 +28,14 @@ namespace FINLua {
 	void luaFIN_pushEventQueueInternal(lua_State* L, const FEventQueue& queueRef);
 
 	FFINEventFilterExpression checkFilter(lua_State* L, int index) {
+		index = lua_absindex(L, index);
 		FFINEventFilterExpression filterExp;
 		if (TSharedPtr<FFINEventFilterExpression> filterPtr = luaFIN_toStruct<FFINEventFilterExpression>(L, index, false)) {
 			filterExp = *filterPtr;
 		} else {
-			luaL_checktype(L, 1, LUA_TTABLE);
+			luaL_checktype(L, index, LUA_TTABLE);
 			FFINEventFilter filter;
-			if (lua_getfield(L, 1, "event") != LUA_TNIL) {
+			if (lua_getfield(L, index, "event") != LUA_TNIL) {
 				if (lua_istable(L, -1)) {
 					int len = luaL_len(L, -1);
 					for (int i = 0; i < len; ++i) {
@@ -49,7 +50,7 @@ namespace FINLua {
 				}
 				lua_pop(L, 1);
 			}
-			if (lua_getfield(L, 1, "sender") != LUA_TNIL) {
+			if (lua_getfield(L, index, "sender") != LUA_TNIL) {
 				if (lua_istable(L, -1)) {
 					int len = luaL_len(L, -1);
 					for (int i = 0; i < len; ++i) {
@@ -64,7 +65,7 @@ namespace FINLua {
 				}
 				lua_pop(L, 1);
 			}
-			if (lua_getfield(L, 1, "values") != LUA_TNIL) {
+			if (lua_getfield(L, index, "values") != LUA_TNIL) {
 				luaL_checktype(L, -1, LUA_TTABLE);
 				lua_pushnil(L);
 				while (lua_next(L, -2)) {
