@@ -100,13 +100,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void InvalidateCache() {
-		FScopeLock nameCacheLock(&NameCacheMutex);
+		FWriteScopeLock nameCacheLock(NameCacheMutex);
 		Name2Property.Empty();
 		Name2Function.Empty();
 	}
 
 private:
-	FCriticalSection NameCacheMutex;
+	FRWLock NameCacheMutex;
 	TMap<FString, TArray<UFIRProperty*>> Name2Property;
 	TMap<FString, TArray<UFIRFunction*>> Name2Function;
 };
