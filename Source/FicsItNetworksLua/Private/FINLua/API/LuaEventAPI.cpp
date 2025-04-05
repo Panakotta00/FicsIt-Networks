@@ -513,7 +513,7 @@ namespace FINLua {
 			lua_setfield(L, -2, "__index");
 			lua_pop(L, 1);
 
-			lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);
+			lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
 			luaFIN_pushStruct(L, FFINLuaEventRegistry(), 4);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 1);
@@ -547,7 +547,7 @@ namespace FINLua {
 
 			lua_getglobal(L, "event");
 			luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)), 0);
-			luaFIN_addTask(L, -1);
+			luaFIN_addBackgroundTask(L, -1);
 			lua_setfield(L, -2, "eventTask");
 			lua_pop(L, 1);
 		}
@@ -581,7 +581,7 @@ namespace FINLua {
 	}
 
 	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L) {
-		if (lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS) == LUA_TNIL) {
+		if (lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS) == LUA_TNIL) {
 			lua_pop(L, 1);
 			return nullptr;
 		}

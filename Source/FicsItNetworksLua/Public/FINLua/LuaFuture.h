@@ -136,6 +136,11 @@ namespace FINLua {
 	void luaFIN_addTask(lua_State* L, int index);
 
 	/**
+	 * Similar to `luaFIN_addTask` but addtionally marks the future as background task.
+	 */
+	void luaFIN_addBackgroundTask(lua_State* L, int index);
+
+	/**
 	 * Removes the Future at the given index from the tasks list.
 	 * @param L the lua state
 	 * @param index the index of the future

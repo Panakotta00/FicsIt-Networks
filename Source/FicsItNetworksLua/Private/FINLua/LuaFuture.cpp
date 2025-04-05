@@ -346,15 +346,31 @@ namespace FINLua {
 			int unpersist(lua_State* L) {
 				lua_newuserdatauv(L, 0, 3);
 				luaL_setmetatable(L, _Name);
+
+				/*lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
+				lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
+				int ref = lua_tointeger(L, lua_upvalueindex(1));
+				lua_geti(L, -1, ref);
+				luaL_checktype(L, -1, LUA_TTHREAD);
+				lua_setiuservalue(L, -3, 1);
+				lua_pop(L, 2);*/
 				lua_pushvalue(L, lua_upvalueindex(1));
+				luaL_checktype(L, -1, LUA_TTHREAD);
 				lua_setiuservalue(L, -2, 1);
+
 				lua_pushvalue(L, lua_upvalueindex(2));
 				lua_setiuservalue(L, -2, 2);
-				lua_pushvalue(L, -1);
+
+				//lua_pushvalue(L, lua_upvalueindex(3));
+				//luaL_checktype(L, -1, LUA_TTABLE);
 				lua_newtable(L);
 				luaL_setmetatable(L, FutureDependents::_Name);
 				lua_setiuservalue(L, -2, 3);
-				luaFIN_pushPollCallback(L, -1);
+
+				//lua_pushvalue(L, lua_upvalueindex(3));
+				//lua_setiuservalue(L, -2, 4);
+
+				//luaFIN_pushPollCallback(L, -1);
 				return 1;
 			}
 			LuaModuleTableFunction(R"(/**
@@ -363,8 +379,23 @@ namespace FINLua {
 			 */)", __persist) {
 				lua_getiuservalue(L, 1, 1);
 				lua_getiuservalue(L, 1, 2);
+				//lua_getiuservalue(L, 1, 3);
+				//lua_getiuservalue(L, 1, 4);
 				lua_pushcclosure(L, unpersist, 2);
 				return 1;
+			}
+
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__gc
+			 * @DisplayName		__gc
+			 */)", __gc) {
+				/*lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
+				lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
+				lua_getiuservalue(L, 1, 4);
+				int ref = lua_tointeger(L, -1);
+				luaL_unref(L, -2, ref);
+				lua_pop(L, 3);*/
+				return 0;
 			}
 		}
 
@@ -751,16 +782,16 @@ namespace FINLua {
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_timeoutTask)));
 			PersistValue("luaFIN_pollTimeouts");
 
-			lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS); // -1
-			lua_newtable(L); // -2
-			lua_newtable(L); // -3
-			lua_newtable(L); // -4
-			lua_pushstring(L, "kv"); // -5
-			lua_setfield(L, -2, "__mode"); // -4
-			//lua_pushvalue(L, -2); // -5
-			lua_setmetatable(L, -2); // -3
-			lua_setfield(L, -3, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY); // -2
-			//lua_setmetatable(L, -2); // -2
+			lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
+			//lua_newtable(L);
+			//lua_newtable(L);
+			//lua_pushstring(L, "kv");
+			//lua_setfield(L, -2, "__mode");
+			//lua_setmetatable(L, -2);
+			//lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
+			//lua_setmetatable(L, -2);
+			lua_newtable(L);
+			luaL_setmetatable(L, FutureDependents::_Name);
 			lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY);
 
 			lua_getglobal(L, "future");
@@ -819,12 +850,13 @@ namespace FINLua {
 		luaL_setmetatable(L, FutureModule::FutureDependents::_Name);
 		lua_setiuservalue(L, -2, 3);
 
-		lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);
+		/*lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
 		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
 		lua_pushvalue(L, Thread);
-		lua_pushvalue(L, -4);
-		lua_settable(L, -3);
-		lua_pop(L, 2);
+		int ref = luaL_ref(L, -2);
+		lua_pushinteger(L, ref);
+		lua_setiuservalue(L, -4, 4);
+		lua_pop(L, 2);*/
 	}
 
 	void luaFIN_pushLuaFutureLuaFunction(lua_State* L, int args) {
@@ -938,7 +970,6 @@ namespace FINLua {
 		lua_pop(L, 1);
 	}
 
-
 	int luaFIN_futureRun(lua_State* L) {
 		lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_runCallbacks)));
 		lua_callk(L, 0, 0, NULL, luaFIN_futureRun_continue1);
@@ -986,6 +1017,13 @@ namespace FINLua {
 		lua_pushnumber(L, 0);
 		lua_settable(L, -3);
 		lua_pop(L, 2);
+	}
+
+	void luaFIN_addBackgroundTask(lua_State* L, int index) {
+		/*index = lua_absindex(L, index);
+		lua_pushboolean(L, true);
+		lua_setiuservalue(L, index, 2);*/
+		luaFIN_addTask(L, index);
 	}
 
 	void luaFIN_removeTask(lua_State* L, int index) {
@@ -1121,7 +1159,7 @@ namespace FINLua {
 	void luaFIN_pushTimeout(lua_State* L, float timeout) {
 		int func = lua_absindex(L, -1);
 		luaL_checktype(L, func, LUA_TFUNCTION);
-		lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);
+		lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
 		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY);
 		lua_newtable(L);
 		lua_pushnumber(L, FPlatformTime::Seconds() + timeout);
@@ -1133,13 +1171,13 @@ namespace FINLua {
 
 		lua_getglobal(L, "future");
 		lua_getfield(L, -1, "timeoutTask");
-		luaFIN_addTask(L, -1);
+		luaFIN_addBackgroundTask(L, -1);
 		lua_pop(L, 2);
 	}
 
 	int luaFIN_timeoutTask(lua_State* L, int, lua_KContext) {
 		lua_settop(L, 0);
-		lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);
+		lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
 		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY);
 
 		float now = FPlatformTime::Seconds();

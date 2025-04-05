@@ -15,7 +15,7 @@ namespace FINLua {
 
 #define LUAFIN_REGISTRYKEY_UNPERSIST "PersistUperm"
 #define LUAFIN_REGISTRYKEY_PERSIST "PersistPerm"
-#define LUAFIN_REGISTRYKEY_HIDDENGLOBALS "hidden-globals"
+#define LUAFIN_RIDX_HIDDENGLOBALS 3
 
 struct FFINLuaPanic {
 	FString Message;
