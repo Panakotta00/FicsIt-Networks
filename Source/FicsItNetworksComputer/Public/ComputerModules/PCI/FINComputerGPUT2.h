@@ -712,7 +712,7 @@ public:
 	void netSigMeta_OnMouseWheel(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "OnMouseWheel";
 		DisplayName = FText::FromString("On Mouse Wheel");
-		Description = FText::FromString("Triggers when the mouse cursor moves on the screen.");
+		Description = FText::FromString("Triggers when the mouse wheel rotates on the screen.");
 		ParameterInternalNames.Add("position");
 		ParameterDisplayNames.Add(FText::FromString("Position"));
 		ParameterDescriptions.Add(FText::FromString("The position of the cursor."));
