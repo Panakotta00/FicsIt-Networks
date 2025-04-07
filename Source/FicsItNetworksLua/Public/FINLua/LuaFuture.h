@@ -15,6 +15,8 @@ namespace FINLua {
 		Future_Failed,
 	};
 
+	void luaFIN_pushFutureStruct(lua_State* L, const TFIRInstancedStruct<FFINFuture>& Future);
+
 	/**
 	 * @brief Pushes a FFINFuture on to the Lua Stack.
 	 * @param L the lua state
