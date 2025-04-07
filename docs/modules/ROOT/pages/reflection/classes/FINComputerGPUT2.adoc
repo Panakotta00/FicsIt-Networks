@@ -917,38 +917,6 @@ Triggers when the mouse cursor leaves the screen area.
 !===
 ====
 
-=== `OnMouseMove` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Float_ *Wheel Delta* `wheelDelta`, _Int_ *Modifiers* `modifiers`)
-
-Triggers when the mouse cursor moves on the screen.
-
-[%collapsible]
-====
-.Parameters
-[%header,cols="1,1,4a",separator="!"]
-!===
-!Name !Type !Description
-
-! *Position* `position`
-! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
-! The position of the cursor.
-
-! *Wheel Delta* `wheelDelta`
-! Float
-! The delta value of how much the mouse wheel got moved.
-
-! *Modifiers* `modifiers`
-! Int
-! The Modifiers-Bit-Field providing information about the move event.
-  Bits:
-  1th left mouse pressed
-  2th right mouse button pressed
-  3th ctrl key pressed
-  4th shift key pressed
-  5th alt key pressed
-  6th cmd key pressed
-!===
-====
-
 === `OnMouseMove` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Int_ *Modifiers* `modifiers`)
 
 Triggers when the mouse cursor moves on the screen.
@@ -995,6 +963,38 @@ Triggers when a mouse button got released.
 ! *Modifiers* `modifiers`
 ! Int
 ! The Modifiers-Bit-Field providing information about the released button event.
+  Bits:
+  1th left mouse pressed
+  2th right mouse button pressed
+  3th ctrl key pressed
+  4th shift key pressed
+  5th alt key pressed
+  6th cmd key pressed
+!===
+====
+
+=== `OnMouseWheel` (_Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>_ *Position* `position`, _Float_ *Wheel Delta* `wheelDelta`, _Int_ *Modifiers* `modifiers`)
+
+Triggers when the mouse wheel rotates on the screen.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Position* `position`
+! Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
+! The position of the cursor.
+
+! *Wheel Delta* `wheelDelta`
+! Float
+! The delta value of how much the mouse wheel got moved.
+
+! *Modifiers* `modifiers`
+! Int
+! The Modifiers-Bit-Field providing information about the move event.
   Bits:
   1th left mouse pressed
   2th right mouse button pressed
