@@ -122,11 +122,9 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 	Runtime.PauseAndWait();
 	RuntimeState.Clear();
 	if (GetKernel()->GetState() != FIN_KERNEL_RUNNING) return;
-	TUnion<FFINLuaRuntimePersistenceState, FString> state = Runtime.Runtime.SaveState();
-	if (state.HasSubtype<FFINLuaRuntimePersistenceState>()) {
-		RuntimeState = state.GetSubtype<FFINLuaRuntimePersistenceState>();
-	} else if (state.HasSubtype<FString>()) {
-		FString message = FString::Printf(TEXT("%s: Unable to save computer state into a save-file (computer will restart when loading the save-file): %s"), *DebugInfo, *state.GetSubtype<FString>());
+	RuntimeState = Runtime.Runtime.SaveState();
+	if (RuntimeState.IsFailure()) {
+		FString message = FString::Printf(TEXT("%s: Unable to save computer state into a save-file (computer will restart when loading the save-file): %s"), *DebugInfo, *RuntimeState.Failure);
 		UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *message);
 		GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
 	}
@@ -169,7 +167,7 @@ void UFINLuaProcessor::Stop(bool bIsCrash) {
 }
 
 void UFINLuaProcessor::Reset() {
-	RuntimeState.LuaData = TEXT("");
+	RuntimeState.Clear();
 
 	Runtime.Runtime.Reset();
 
