@@ -28,13 +28,14 @@ namespace FINLua {
 	void luaFIN_pushEventQueueInternal(lua_State* L, const FEventQueue& queueRef);
 
 	FFINEventFilterExpression checkFilter(lua_State* L, int index) {
+		index = lua_absindex(L, index);
 		FFINEventFilterExpression filterExp;
 		if (TSharedPtr<FFINEventFilterExpression> filterPtr = luaFIN_toStruct<FFINEventFilterExpression>(L, index, false)) {
 			filterExp = *filterPtr;
 		} else {
-			luaL_checktype(L, 1, LUA_TTABLE);
+			luaL_checktype(L, index, LUA_TTABLE);
 			FFINEventFilter filter;
-			if (lua_getfield(L, 1, "event") != LUA_TNIL) {
+			if (lua_getfield(L, index, "event") != LUA_TNIL) {
 				if (lua_istable(L, -1)) {
 					int len = luaL_len(L, -1);
 					for (int i = 0; i < len; ++i) {
@@ -49,7 +50,7 @@ namespace FINLua {
 				}
 				lua_pop(L, 1);
 			}
-			if (lua_getfield(L, 1, "sender") != LUA_TNIL) {
+			if (lua_getfield(L, index, "sender") != LUA_TNIL) {
 				if (lua_istable(L, -1)) {
 					int len = luaL_len(L, -1);
 					for (int i = 0; i < len; ++i) {
@@ -64,7 +65,7 @@ namespace FINLua {
 				}
 				lua_pop(L, 1);
 			}
-			if (lua_getfield(L, 1, "values") != LUA_TNIL) {
+			if (lua_getfield(L, index, "values") != LUA_TNIL) {
 				luaL_checktype(L, -1, LUA_TTABLE);
 				lua_pushnil(L);
 				while (lua_next(L, -2)) {
@@ -86,6 +87,7 @@ namespace FINLua {
 	 * @LuaModule		EventModule
 	 * @DisplayName		Event Module
 	 * @Dependency		ReflectionSystemStructModule
+	 * @Dependency		FutureModule
 	 */)", EventModule) {
 		LuaModuleMetatable(R"(/**
 		 * @LuaMetatable	EventQueue
@@ -168,13 +170,22 @@ namespace FINLua {
 				}
 				double currentTime = FPlatformTime::Seconds();
 				if (timeout > currentTime) {
-					return luaFIN_yield(L, 0, NULL, luaPullContinue, timeout);
+					return luaFIN_yield(L, 0, NULL, luaPullContinue);
 				}
 				return 0;
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		pull
+			 * @LuaFunction		(string?, Object, ...)	pull(timeout: number?)
 			 * @DisplayName		Pull
+			 *
+			 * Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached.
+			 * Returns directly if there is already a signal in the queue (the tick doesn’t get yielded).
+			 *
+			 * @parameter	self		EventQueue
+			 * @parameter	timeout		number			Timeout		The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue
+			 * @return		event		string?			Event		The name of the returned signal. Nil when timeout got reached
+			 * @return		sender		Object			Sender		The component representation of the signal sender. Not set when timeout got reached
+			 * @return		...			any				Parameters	The parameters passed to the signal. Not set when timeout got reached
 			 */)", pull) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
 				double timeout = luaL_checknumber(L, 2);
@@ -186,7 +197,7 @@ namespace FINLua {
 
 			int luaWaitForContinue(lua_State* L, int, lua_KContext) {
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
-				TSharedRef<FFINEventFilterExpression> filter = luaFIN_checkStruct<FFINEventFilterExpression>(L, 2, false);
+ 				TSharedRef<FFINEventFilterExpression> filter = luaFIN_checkStruct<FFINEventFilterExpression>(L, 2, false);
 				while (!queue->Events.IsEmpty()) {
 					FFINLuaEvent event = queue->Events[0];
 					queue->Events.RemoveAt(0);
@@ -194,16 +205,22 @@ namespace FINLua {
 						return luaFIN_pushEventData(L, event.Sender, event.Data);
 					}
 				}
-				return luaFIN_yield(L, 0, NULL, luaWaitForContinue, TNumericLimits<double>::Max());
+				return luaFIN_yield(L, 0, NULL, luaWaitForContinue);
 			}
 			int luaWaitFor(lua_State* L) {
 				return luaWaitForContinue(L, 0, NULL);
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		waitFor
+			 * @LuaFunction		(string?, Object, ...)	waitFor(filter: EventFilter)
 			 * @DisplayName		Wait For
 			 *
 			 * Returns a Future that resolves when a signal got added to the queue that matches the given Event Filter.
+			 *
+			 * @parameter	self		EventQueue
+			 * @parameter	filter		EventFilter|{event?:string|string[],sender?:Object|Object[],values?:table<string,any>}		Filter		Event filter
+			 * @return		event		string?			Event		The name of the returned signal
+			 * @return		sender		Object			Sender		The component representation of the signal sender
+			 * @return		...			any				Parameters	The parameters passed to the signal
 			 */)", waitFor) {
 				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
 				FEventQueue& queue = luaFIN_checkEventQueue(L, 1);
@@ -229,12 +246,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		listen(Object...)
+			 * @LuaFunction		listen(...: Object)
 			 * @DisplayName		Listen
 			 *
 			 * Adds the running lua context to the listen queue of the given components.
 			 *
-			 * @param	objects		Object...	A list of objects the computer should start listening to.
+			 * @parameter	...			Object			Objects		A list of objects the computer should start listening to
 			 */)", listen) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSync SyncCall(L);
@@ -253,7 +270,7 @@ namespace FINLua {
 			 *
 			 * Returns all signal senders this computer is listening to.
 			 *
-			 * @return	listening	Object[]	An array containing all objects this computer is currently listening to.
+			 * @return		listening	Object[]		Objects		An array containing all objects this computer is currently listening to
 			 */)", listening) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSync SyncCall(L);
@@ -283,7 +300,7 @@ namespace FINLua {
 					if (!timeout || *timeout <= FPlatformTime::Seconds()) {
 						return 0;
 					}
-					return luaFIN_yield(L, 0, 0, luaPullContinue, timeout);
+					return luaFIN_yield(L, 0, 0, luaPullContinue);
 				}
 
 				const auto& [sender, signal] = *data;
@@ -293,16 +310,16 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		(string|nil, Object, ...)	pull([timeout: number])
+			 * @LuaFunction		(string?, Object, ...)	pull(timeout: number?)
 			 * @DisplayName		Pull
 			 *
 			 * Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached. +
 			 * Returns directly if there is already a signal in the queue (the tick doesn’t get yielded).
 			 *
-			 * @parameter	timeout		number			Timeout		The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue.
-			 * @return		event		string|nil		Event		The name of the returned signal. Nil when timeout got reached.
-			 * @return		sender		Object			Sender		The component representation of the signal sender. Not set when timeout got reached.
-			 * @return		parameters	any...			Parameters	The parameters passed to the signal. Not set when timeout got reached.
+			 * @parameter	timeout		number			Timeout		The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue
+			 * @return		event		string?			Event		The name of the returned signal. Nil when timeout got reached
+			 * @return		sender		Object			Sender		The component representation of the signal sender. Not set when timeout got reached
+			 * @return		...			any				Parameters	The parameters passed to the signal. Not set when timeout got reached
 			 */)", pull) {
 				const int args = lua_gettop(L);
 				if (args > 0) {
@@ -324,12 +341,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		ignore(Object...)
+			 * @LuaFunction		ignore(...: Object)
 			 * @DisplayName		Ignore
 			 *
 			 * Removes the running lua context from the listen queue of the given components. Basically the opposite of listen.
 			 *
-			 * @param	objects		Object...	A list of objects this computer should stop listening to.
+			 * @parameter	...			Object			Objects		A list of objects this computer should stop listening to
 			 */)", ignore) {
 				// ReSharper disable once CppDeclaratorNeverUsed
 				FLuaSync SyncCall(L);
@@ -367,10 +384,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		EventFilter		filter(...)
+			 * @LuaFunction		EventFilter		filter(params: { event?: string|string[], sender?: Object|Object[], values?: table<string,any> })
 			 * @DisplayName		Filter
 			 *
 			 * Creates an Event filter expression.
+
+			 * @parameter	params		{ event?: string|string[], sender?: Object|Object[], values?: table<string,any> }	Params	Filter parameters
+			 * @return		filter		EventFilter		Filter		Event filter
 			 */)", filter) {
 				FFINEventFilterExpression expression = checkFilter(L, 1);
 				luaFIN_pushStruct(L, expression);
@@ -378,12 +398,15 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		integer		registerListener(EventFilter, function(event, sender, ...))
+			 * @LuaFunction		integer		registerListener(filter: EventFilter, cb: fun(event, sender, ...))
 			 * @DisplayName		Register Listener
 			 *
 			 * Registers the given function as a listener.
 			 * When `event.pull()` pulls a signal from the queue, that matches the given Event-Filter,
 			 * a Task will be created using the function and the signals parameters will be passed into the function.
+			 * 
+			 * @parameter	filter		EventFilter|{event?:string|string[],sender?:Object|Object[],values?:table<string,any>}		Filter		Event filter
+			 * @parameter	cb			fun(event, sender, ...)		Callback	Callback that will be called on every event that matches the filter
 			 */)", registerListener) {
 				luaL_checktype(L, 2, LUA_TFUNCTION);
 				FFINEventFilterExpression filter = checkFilter(L, 1);
@@ -398,11 +421,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		EventQueue		queue(EventFilter)
+			 * @LuaFunction		EventQueue		queue(filter: EventFilter)
 			 * @DisplayName		queue
 			 *
 			 * Creates a new event queue.
 			 * When this variable closes or gets garbage collected, it will stop receiving signals.
+			 *
+			 * @parameter	filter		EventFilter|{event?:string|string[],sender?:Object|Object[],values?:table<string,any>}		Filter		Event filter
+			 * @return		queue		EventQueue		Queue		Event queue
 			 */)", queue) {
 				FFINEventFilterExpression filter = checkFilter(L, 1);
 				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
@@ -419,7 +445,8 @@ namespace FINLua {
 				int key = luaL_checkinteger(L, 2);
 				if (lua_geti(L, 1, key+1) == LUA_TNIL) {
 					lua_pop(L, 1);
-					return luaFIN_yield(L, 0, NULL, luaWaitForContinue, TNumericLimits<double>::Max());
+					lua_pushnil(L);
+					return luaFIN_yield(L, 1, NULL, luaWaitForContinue);
 				}
 				lua_pushnil(L);
 				lua_seti(L, 1, key+1);
@@ -434,46 +461,43 @@ namespace FINLua {
 				return luaWaitForContinue(L, 0, NULL);
 			}
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Future		waitFor(EventFilter)
+			 * @LuaFunction		Future		waitFor(filter: EventFilter)
 			 * @DisplayName		Wait For
 			 *
 			 * Returns a Future that resolves when a signal got polled that matches the given Event Filter.
+			 * 
+			 * @parameter	filter		EventFilter|{event?:string|string[],sender?:Object|Object[],values?:table<string,any>}		Filter		Event filter
+			 * @return		event		string?			Event		The name of the returned signal
+			 * @return		sender		Object			Sender		The component representation of the signal sender
+			 * @return		...			any				Parameters	The parameters passed to the signal
 			 */)", waitFor) {
 				FFINEventFilterExpression filter = checkFilter(L, 1);
 				TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+				int registry_index = lua_absindex(L, -1);
 				int64 key = FFINLuaEventRegistry::FindNextKey(registry->OneShots);
 				registry->OneShots.Add(key, filter);
 				lua_getiuservalue(L, -1, 3);
 				lua_pushinteger(L, key);
 				luaFIN_pushLuaFutureCFunction(L, luaWaitFor, 2);
+
+				lua_getiuservalue(L, registry_index, 4);
+				lua_pushvalue(L, -2);
+				luaFINDebug_dumpStack(L);
+				int future_ref = luaL_ref(L, -2);
+				lua_pop(L, 1);
+				registry->OneShots_Futures.Add(key, future_ref);
+
 				return 1;
 			}
+		}
 
-			int luaLoopContinue(lua_State* L, int, lua_KContext) {
-				while (true) {
-					IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
-					TOptional<TTuple<FFIRTrace, FFINSignalData>> data = eventSystem.PullSignal();
-					if (data) {
-						const auto& [sender, signal] = *data;
-						luaFIN_handleEvent(L, sender, signal);
-					}
-					TOptional<double> timeout = TNumericLimits<double>::Max();
-					luaFIN_futureRun(L, 1, timeout);
-					if (!data) {
-						return luaFIN_yield(L, 0, 0, luaLoopContinue, timeout);
-					}
-				}
-			}
-			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		loop
-			 * @DisplayName		Loop
-			 *
-			 * Runs an infinite loop or `future.run()`, `event.pull(0)` and `coroutine.yield()`.
-			 */)", loop) {
-				lua_pop(L, lua_gettop(L));
-				lua_getglobal(L, "future");
-				return luaLoopContinue(L, 0, 0);
-			}
+		LuaModuleGlobalBareValue(R"(/**
+		 * @LuaGlobal		eventTask	Future
+		 * @DisplayName		Event Task
+		 *
+		 * A future that is used as task to handle Events.
+		 */)", eventTask) {
+			lua_pushnil(L);
 		}
 
 		LuaModulePostSetup() {
@@ -490,35 +514,42 @@ namespace FINLua {
 			lua_setfield(L, -2, "__index");
 			lua_pop(L, 1);
 
-			lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals");
-			luaFIN_pushStruct(L, FFINLuaEventRegistry(), 3);
+			lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
+			luaFIN_pushStruct(L, FFINLuaEventRegistry(), 4);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 1);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 2);
 			lua_newtable(L);
 			lua_setiuservalue(L, -2, 3);
+			lua_newtable(L);
+			lua_setiuservalue(L, -2, 4);
 			lua_setfield(L, -2, "event-registry");
 			lua_pop(L, 1);
 
 			lua_pushcfunction(L, event::luaWaitFor);
 			luaFIN_persistValue(L, -1, "WaitFor");
-			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaWaitForContinue)));
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaWaitForContinue)));
 			luaFIN_persistValue(L, -1, "WaitForContinue");
-			lua_pop(L, 2);
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaPullContinue)));
+			luaFIN_persistValue(L, -1, "PullContinue");
+			lua_pop(L, 4);
 
 			lua_pushcfunction(L, EventQueue::luaWaitFor);
 			luaFIN_persistValue(L, -1, "EventQueueWaitFor");
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaWaitForContinue)));
 			luaFIN_persistValue(L, -1, "EventQueueWaitForContinue");
-			lua_pop(L, 2);
-
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(EventQueue::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "EventQueuePullContinue");
-			lua_pop(L, 1);
+			lua_pop(L, 3);
 
-			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaLoopContinue)));
-			luaFIN_persistValue(L, -1, "LoopContinue");
+			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)));
+			luaFIN_persistValue(L, -1, "luaFIN_eventTask");
+
+			lua_getglobal(L, "event");
+			luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)), 0);
+			luaFIN_addBackgroundTask(L, -1);
+			lua_setfield(L, -2, "eventTask");
 			lua_pop(L, 1);
 		}
 	}
@@ -551,7 +582,7 @@ namespace FINLua {
 	}
 
 	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L) {
-		if (lua_getfield(L, LUA_REGISTRYINDEX, "hidden-globals") == LUA_TNIL) {
+		if (lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS) == LUA_TNIL) {
 			lua_pop(L, 1);
 			return nullptr;
 		}
@@ -582,7 +613,7 @@ namespace FINLua {
 				lua_geti(L, -1, key+1);
 				int num = luaFIN_pushEventData(L, sender, data);
 				luaFIN_pushLuaFutureLuaFunction(L, num);
-				luaFIN_addTask(L, -1);
+				luaFIN_pushPollCallback(L, -1);
 				lua_pop(L, 2);
 			}
 		}
@@ -597,7 +628,8 @@ namespace FINLua {
 			}
 		}
 		lua_pop(L, 1);
-		lua_getiuservalue(L, -1, 3);
+		lua_getiuservalue(L, -1, 4);
+		lua_getiuservalue(L, -2, 3);
 		for (const auto& [key, filter] : registry->OneShots) {
 			if (filter.Matches(sender.GetUnderlyingPtr(), data)) {
 				lua_newtable(L);
@@ -607,11 +639,41 @@ namespace FINLua {
 					lua_seti(L, table, i);
 				}
 				lua_seti(L, -2, key+1);
+
+				// Wake Future
+				int ref = registry->OneShots_Futures[key];
+				lua_geti(L, -2, ref);
+				lua_pushcclosure(L, &luaFIN_callbackPoll, 1);
+				luaFIN_pushCallback(L);
+				luaL_unref(L, -2, ref);
+				registry->OneShots_Futures.Remove(key);
+
 				registry->OneShots.Remove(key);
 			}
 		}
+		lua_pop(L, 2);
 		lua_pop(L, 1);
-		lua_pop(L, 1);
+	}
+
+	int luaFIN_eventTask(lua_State* L, int, lua_KContext) {
+		lua_settop(L, 0);
+
+		TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+		if (registry->EventListeners.Num() + registry->EventQueues.Num() + registry->OneShots.Num() > 0) {
+			IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
+			while (true) {
+				TOptional<TTuple<FFIRTrace, FFINSignalData>> data = eventSystem.PullSignal();
+				if (data) {
+					const auto& [sender, signal] = *data;
+					luaFIN_handleEvent(L, sender, signal);
+				} else {
+					break;
+				}
+			}
+		}
+
+		lua_pushnumber(L, TNumericLimits<double>::Max());
+		return luaFIN_yield(L, 1, NULL, luaFIN_eventTask);
 	}
 
 	void luaFIN_setEventSystem(lua_State* L, IFINLuaEventSystem& EventSystem) {

@@ -17,6 +17,20 @@ This Module provides an interface for other Modules to interact with the Kernel.
 === __computer.__**beep** (pitch: number)
 Lets the computer emit a simple beep sound with the given pitch.
 
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Pitch* `pitch`
+! number
+! a multiplier for the pitch adjustment of the beep sound
+
+!===
+====
+
 === __computer.__**getEEPROM** () -> string
 Returns the current eeprom contents.
 
@@ -27,9 +41,9 @@ Returns the current eeprom contents.
 !===
 !Name !Type !Description
 
-! *The EEPROM Code as string.* `code`
+! *Code* `code`
 ! string
-! 
+! The EEPROM Code as string
 
 !===
 ====
@@ -44,14 +58,14 @@ Returns a reference to the computer case in which the current code is running.
 !===
 !Name !Type !Description
 
-! *The computer case this lua runtime is running in.* `case`
+! *Case* `case`
 ! xref:/reflection/classes/ComputerCase.adoc[ComputerCase]
-! 
+! The computer case this lua runtime is running in
 
 !===
 ====
 
-=== __computer.__**getMemory** () -> (usage: int, capacity: int)
+=== __computer.__**getMemory** () -> (usage: integer, capacity: integer)
 Returns the used memory and memory capacity the computer has.
 
 [%collapsible]
@@ -62,17 +76,17 @@ Returns the used memory and memory capacity the computer has.
 !Name !Type !Description
 
 ! *Usage* `usage`
-! int
+! integer
 ! The memory usage at the current time
 
 ! *Capacity* `capacity`
-! int
+! integer
 ! The memory capacity the computer has
 
 !===
 ====
 
-=== __computer.__**getPCIDevices** ([type: xref:/reflection/classes/Class.adoc[Class]]) -> xref:/reflection/classes/Object.adoc[Object][]
+=== __computer.__**getPCIDevices** (type: Object-Class?) -> xref:/reflection/classes/Object.adoc[Object][]
 This function allows you to get all installed https://docs.ficsit.app/ficsit-networks/latest/buildings/ComputerCase/index.html#_pci_interface[PCI-Devices] in a computer of a given type.
 Have a look at https://docs.ficsit.app/ficsit-networks/latest/lua/examples/PCIDevices.html[this] example to fully understand how it works.
 
@@ -84,8 +98,8 @@ Have a look at https://docs.ficsit.app/ficsit-networks/latest/lua/examples/PCIDe
 !Name !Type !Description
 
 ! *Type* `type`
-! xref:/reflection/classes/Class.adoc[Class]
-! Optional type which will be used to filter all PCI-Devices. If not provided, will return all PCI-Devices.
+! Object-Class?
+! Optional type which will be used to filter all PCI-Devices. If not provided, will return all PCI-Devices
 
 !===
 .Return Values
@@ -95,7 +109,7 @@ Have a look at https://docs.ficsit.app/ficsit-networks/latest/lua/examples/PCIDe
 
 ! *Objects* `objects`
 ! xref:/reflection/classes/Object.adoc[Object][]
-! An array containing instances for each PCI-Device built into the computer.
+! An array containing instances for each PCI-Device built into the computer
 
 !===
 ====
@@ -103,7 +117,7 @@ Have a look at https://docs.ficsit.app/ficsit-networks/latest/lua/examples/PCIDe
 === __computer.__**media** : xref:/reflection/classes/FINMediaSubsystem.adoc[FINMediaSubsystem]
 Field containing a reference to the Media Subsystem.
 
-=== __computer.__**millis** () -> int
+=== __computer.__**millis** () -> integer
 Returns the amount of milliseconds passed since the system started.
 
 [%collapsible]
@@ -113,9 +127,9 @@ Returns the amount of milliseconds passed since the system started.
 !===
 !Name !Type !Description
 
-! *The amount of real milliseconds sinde the ingame-computer started.* `millis`
-! int
-! 
+! *Millis* `millis`
+! integer
+! The amount of real milliseconds sinde the ingame-computer started
 
 !===
 ====
@@ -123,20 +137,48 @@ Returns the amount of milliseconds passed since the system started.
 === __computer.__**panic** (error: string)
 Crashes the computer with the given error message.
 
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Error* `error`
+! string
+! an error message
+
+!===
+====
+
 === __computer.__**reset** ()
 Stops the current code execution immediately and queues the system to restart in the next tick.
 
 === __computer.__**setEEPROM** (code: string)
 Sets the code of the current eeprom. Doesn￢ﾀﾙt cause a system reset.
 
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Code* `code`
+! string
+! The new EEPROM Code as string
+
+!===
+====
+
 === __computer.__**stop** ()
-Stops the current code execution. +
+Stops the current code execution.
 Basically kills the PC runtime immediately.
 
 === **filesystem**
 
 
-=== __filesystem.__**initFileSystem** (path: string) -> bool
+=== __filesystem.__**initFileSystem** (path: string) -> boolean
 Trys to mount the system DevDevice to the given location.
 The DevDevice is special Device holding DeviceNodes for all filesystems added to the system. (like TmpFS and drives). It is unmountable as well as getting mounted a seccond time.
 
@@ -158,13 +200,13 @@ The DevDevice is special Device holding DeviceNodes for all filesystems added to
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! returns if it was able to mount the DevDevice
 
 !===
 ====
 
-=== __filesystem.__**makeFileSystem** (type: string, name: string) -> bool
+=== __filesystem.__**makeFileSystem** (type: string, name: string) -> boolean
 Trys to create a new file system of the given type with the given name.
 The created filesystem will be added to the system DevDevice.
 
@@ -198,13 +240,13 @@ A temporary filesystem only existing at runtime in the memory of your computer. 
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! returns true if it was able to create the new filesystem
 
 !===
 ====
 
-=== __filesystem.__**removeFileSystem** (name: string) -> bool
+=== __filesystem.__**removeFileSystem** (name: string) -> boolean
 Tries to remove the filesystem with the given name from the system DevDevice.
 All mounts of the device will run invalid.
 
@@ -226,7 +268,7 @@ All mounts of the device will run invalid.
 !Name !Type !Description
 
 ! *Success* `success`
-! bool
+! boolean
 ! returns true if it was able to remove the new filesystem
 
 !===

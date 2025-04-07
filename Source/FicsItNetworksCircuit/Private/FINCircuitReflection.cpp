@@ -10,14 +10,12 @@ BeginProp(RString, nick, "Nick", "**Only available for Network Components!** All
 	if (NetworkHandler) {
 		FIRReturn IFINNetworkComponent::Execute_GetNick(NetworkHandler);
 	} else {
-		throw FFIRException("Not a network component!");
+		FIRReturn FIRAny();
 	}
 } PropSet() {
 	UObject* NetworkHandler = UFINNetworkUtils::FindNetworkComponentFromObject(self);
 	if (NetworkHandler) {
 		IFINNetworkComponent::Execute_SetNick(NetworkHandler, Val);
-	} else {
-		throw FFIRException("Not a network component!");
 	}
 } EndProp()
 BeginProp(RString, id, "ID", "**Only available for Network Components!** Allows access to the Network Components UUID.") {
@@ -25,7 +23,7 @@ BeginProp(RString, id, "ID", "**Only available for Network Components!** Allows 
 	if (NetworkHandler) {
 		FIRReturn IFINNetworkComponent::Execute_GetID(NetworkHandler).ToString();
 	} else {
-		throw FFIRException("Not a network component!");
+		FIRReturn FIRAny();
 	}
 } EndProp()
 BeginProp(RBool, isNetworkComponent, "Is Network Component", "True if this object is a network component and has a id and nick.") {

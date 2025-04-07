@@ -372,6 +372,84 @@ FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool 
 	return Measure->Measure(text, Font);
 }
 
+int64 AFINComputerGPUT2::netFunc_getFontHeight(int64 size, bool bMonospace) {
+	FSlateFontInfo Font = bMonospace ? Style.MonospaceText : Style.NormalText;
+	Font.Size = size;
+
+	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+
+	return Measure->GetMaxCharacterHeight(Font);
+}
+
+int64 AFINComputerGPUT2::netFunc_getFontBaseline(int64 size, bool bMonospace) {
+	FSlateFontInfo Font = bMonospace ? Style.MonospaceText : Style.NormalText;
+	Font.Size = size;
+	
+	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+
+	return Measure->GetBaseline(Font);
+}
+
+TArray<FVector2D> AFINComputerGPUT2::netFunc_measureTextBatch(TArray<FString> text, TArray<int64> size, TArray<bool> bMonospace) {
+	size_t n = std::min(std::min(text.Num(), size.Num()), bMonospace.Num());
+
+	TArray<FVector2D> results;
+	results.Reserve(n);
+
+	FSlateFontInfo MonospaceText = Style.MonospaceText;
+	FSlateFontInfo NormalText = Style.NormalText;
+
+	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+
+	for (size_t i = 0; i < n; i++) {
+		auto& Font = bMonospace[i] ? MonospaceText : NormalText;
+		Font.Size = size[i];
+		results.Add(Measure->Measure(text[i], Font));
+	}
+
+	return results;
+}
+
+TArray<int64> AFINComputerGPUT2::netFunc_getFontHeightBatch(TArray<int64> size, TArray<bool> bMonospace) {
+	size_t n = std::min(size.Num(), bMonospace.Num());
+
+	TArray<int64> results;
+	results.Reserve(n);
+
+	FSlateFontInfo MonospaceText = Style.MonospaceText;
+	FSlateFontInfo NormalText = Style.NormalText;
+
+	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+
+	for (size_t i = 0; i < n; i++) {
+		auto& Font = bMonospace[i] ? MonospaceText : NormalText;
+		Font.Size = size[i];
+		results.Add(Measure->GetMaxCharacterHeight(Font));
+	}
+
+	return results;
+}
+
+TArray<int64> AFINComputerGPUT2::netFunc_getFontBaselineBatch(TArray<int64> size, TArray<bool> bMonospace) {
+	size_t n = std::min(size.Num(), bMonospace.Num());
+
+	TArray<int64> results;
+	results.Reserve(n);
+
+	FSlateFontInfo MonospaceText = Style.MonospaceText;
+	FSlateFontInfo NormalText = Style.NormalText;
+
+	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+
+	for (size_t i = 0; i < n; i++) {
+		auto& Font = bMonospace[i] ? MonospaceText : NormalText;
+		Font.Size = size[i];
+		results.Add(Measure->GetBaseline(Font));
+	}
+
+	return results;
+}
+
 void AFINComputerGPUT2::netSig_OnMouseDown_Implementation(FVector2D position, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnMouseUp_Implementation(FVector2D position, int modifiers) {}
 void AFINComputerGPUT2::netSig_OnMouseMove_Implementation(FVector2D position, int modifiers) {}

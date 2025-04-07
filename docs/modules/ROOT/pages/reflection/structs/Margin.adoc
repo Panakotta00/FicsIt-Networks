@@ -15,7 +15,7 @@ The bottom edge of the rectangle.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
 
 ! Display Name ! Bottom
 !===
@@ -32,7 +32,7 @@ The left edge of the rectangle.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
 
 ! Display Name ! Left
 !===
@@ -49,7 +49,7 @@ The right edge of the rectangle.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
 
 ! Display Name ! Right
 !===
@@ -66,7 +66,7 @@ The top edge of the rectangle.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#bb2828'><i>RuntimeAsync</i></span>+++
 
 ! Display Name ! Top
 !===

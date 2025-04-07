@@ -57,7 +57,7 @@ namespace FINLua {
 			int lua_callDeferred(lua_State* L) {
 				UFIRFunction* function = luaFIN_checkReflectionFunction(L, lua_upvalueindex(1));
 
-				return luaFIN_callReflectionFunction(L, function, true);
+				return luaFIN_callReflectionFunction(L, function, false);
 			}
 
 			LuaModuleTableBareField(R"(/**

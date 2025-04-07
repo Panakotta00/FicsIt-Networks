@@ -115,14 +115,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	createDir(path: string, recursive: bool)
+			 * @LuaFunction		boolean	createDir(path: string, recursive: bool)
 			 * @DisplayName		Create Directory
 			 *
 			 * Creates the folder path.
 			 *
 			 * @parameter	path		string	Path		folder path the function should create
-			 * @parameter	recursive	bool	Recursive	If false creates only the last folder of the path. If true creates all folders in the path.
-			 * @return		success		bool	Success		Returns true if it was able to create the directory.
+			 * @parameter	recursive	boolean	Recursive	If false creates only the last folder of the path. If true creates all folders in the path.
+			 * @return		success		boolean	Success		Returns true if it was able to create the directory.
 			 */)", createDir) {
 				LuaFunc();
 
@@ -135,14 +135,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	remove(path: string, recursive: bool)
+			 * @LuaFunction		boolean	remove(path: string, recursive: bool)
 			 * @DisplayName		Remove
 			 *
 			 * Removes the filesystem object at the given path.
 			 *
 			 * @parameter	path		string	Path		path to the filesystem object
-			 * @parameter	recusive	bool	Recursive	If false only removes the given filesystem object. If true removes all childs of the filesystem object.
-			 * @return		success		bool	Success		Returns true if it was able to remove the node
+			 * @parameter	recusive	boolean	Recursive	If false only removes the given filesystem object. If true removes all childs of the filesystem object.
+			 * @return		success		boolean	Success		Returns true if it was able to remove the node
 			 */)", remove) {
 				LuaFunc();
 
@@ -155,7 +155,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	move(from: string, to: string)
+			 * @LuaFunction		boolean	move(from: string, to: string)
 			 * @DisplayName		Move
 			 *
 			 * Moves the filesystem object from the given path to the other given path.
@@ -164,7 +164,7 @@ namespace FINLua {
 			 *
 			 * @parameter	from		string	From		path to the filesystem object you want to move
 			 * @parameter	to			string	To			path to the filesystem object the target should get moved to
-			 * @return		success		bool	Success		returns true if it was able to move the node
+			 * @return		success		boolean	Success		returns true if it was able to move the node
 			 */)", move) {
 				LuaFunc();
 
@@ -177,14 +177,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	rename(path: string, name: string)
+			 * @LuaFunction		boolean	rename(path: string, name: string)
 			 * @DisplayName		Rename
 			 *
 			 * Renames the filesystem object at the given path to the given name.
 			 *
 			 * @parameter	path		string	Path		path to the filesystem object you want to rename
 			 * @parameter	name		string	Name		the new name for your filesystem object
-			 * @return		success		bool	Success		returns true if it was able to rename the node
+			 * @return		success		boolean	Success		returns true if it was able to rename the node
 			 */)", rename) {
 				LuaFunc();
 
@@ -197,10 +197,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	exists(path: string)
+			 * @LuaFunction		boolean	exists(path: string)
 			 * @DisplayName		Exists
 			 *
 			 * Returns true if the given path exists.
+			 * 
+			 * @parameter	path		string	Path		path to the filesystem object you want to check
+			 * @return		exists		boolean	Exists		returns true if the given file exists
 			 */)", exists) {
 				LuaFunc();
 
@@ -215,7 +218,10 @@ namespace FINLua {
 			 * @LuaFunction		string[]	children(path: string)
 			 * @DisplayName		Children
 			 *
-			 * Lists all children names of the node with the given path. (f.e. items in a folder)
+			 * Lists all children names of the node with the given path. (i.e. items in a folder)
+			 *
+			 * @parameter	path		string		Path		path to the filesystem object you want to list
+			 * @return		children	string[]	Children	file names of children
 			 */)", children) {
 				LuaFunc();
 
@@ -234,10 +240,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	isFile(path: string)
+			 * @LuaFunction		boolean		isFile(path: string)
 			 * @DisplayName		Is File
 			 *
 			 * Returns true if the given path refers to a file.
+			 *
+			 * @parameter	path		string	Path		path to the filesystem object you want to check
+			 * @return		isFile		boolean	Is file		returns true if the given path refers to a file
 			 */)", isFile) {
 				LuaFunc();
 				const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
@@ -248,10 +257,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	isDir(path: string)
+			 * @LuaFunction		boolean		isDir(path: string)
 			 * @DisplayName		Is Dir
 			 *
 			 * Returns true if the given path refers to directory.
+			 *
+			 * @parameter	path		string	Path		path to the filesystem object you want to check
+			 * @return		isDir		boolean	Is dir		returns true if the given path refers to a directory
 			 */)", isDir) {
 				LuaFunc();
 				const auto path = CodersFileSystem::Path(luaL_checkstring(L, 1));
@@ -262,14 +274,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	mount(device: string, mountPoint: string)
+			 * @LuaFunction		boolean		mount(device: string, mountPoint: string)
 			 * @DisplayName		Mount
 			 *
 			 * This function mounts the device referenced by the the path to a device node to the given mount point.
 			 *
 			 * @parameter	device		string	Device			the path to the device you want to mount
 			 * @parameter	mountPoint	string	Mount Point		the path to the point were the device should get mounted to
-			 * @return		success		bool	Success			true if the mount was executed successfully
+			 * @return		success		boolean	Success			true if the mount was executed successfully
 			 */)", mount) {
 				LuaFunc();
 				const auto devPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
@@ -286,13 +298,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	unmount(mountPoint: string)
+			 * @LuaFunction		boolean		unmount(mountPoint: string)
 			 * @DisplayName		Un-Mount
 			 *
 			 * This function unmounts if the device at the given mount point.
 			 *
 			 * @parameter	mountPoint	string	Mount Point		the path the device is mounted to
-			 * @return		success		bool	Success			returns true if it was able to unmount the device located at the mount point
+			 * @return		success		boolean	Success			returns true if it was able to unmount the device located at the mount point
 			 */)", unmount) {
 				LuaFunc();
 				const auto mountPath = CodersFileSystem::Path(luaL_checkstring(L, 1));
@@ -314,7 +326,10 @@ namespace FINLua {
 			 *
 			 * Function fails if path doesn’t exist or path doesn’t refer to a file.
 			 *
-			 * Returns the result of the execute function or what ever it yielded
+			 * Returns the result of the execute function or what ever it yielded.
+			 *
+			 * @parameter	path		string	Path		path to the filesystem object you want to execute
+			 * @return		...			any		Results		the result of the execute function or what ever it yielded
 			 */)", doFile) {
 				LuaFunc();
 
@@ -337,11 +352,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		function	loadFile(path: string)
+			 * @LuaFunction		fun(): ...		loadFile(path: string)
 			 * @DisplayName		Load File
 			 *
 			 * Loads the file refered by the given path as a Lua function and returns it.
 			 * Functions fails if path doesn’t exist or path doesn’t reger to a file.
+			 *
+			 * @parameter	path		string			Path		path to the filesystem object you want to load
+			 * @return		code		fun(): ...		Code		a function that runs the loaded code
 			 */)", loadFile) {
 				LuaFunc();
 
@@ -364,7 +382,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		string	path([int,] string...)
+			 * @LuaFunction		string	path([conversion: integer,] ...: string)
 			 * @DisplayName		Path
 			 *
 			 * Combines a variable amount of strings as paths together to one big path.
@@ -393,6 +411,10 @@ namespace FINLua {
 			 *       `/path/to/file.` -> `.`
 			 * |===
 			 * ====
+			 *
+			 * @parameter	conversion	integer|string		Conversion		Conversion that will be applied to paths
+			 * @parameter	...			string				Paths			Paths that will be joined
+			 * @return		result		string				Result			Joined and processed path
 			 */)", path) {
 				LuaFunc();
 
@@ -432,7 +454,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		int...	analyzePath(string...)
+			 * @LuaFunction		...		analyzePath(...: string)
 			 * @DisplayName		Analyze Path
 			 *
 			 * Each provided string will be viewed as one filesystem-path and will be checked for lexical features. +
@@ -451,6 +473,9 @@ namespace FINLua {
 			 * | 6 | Ends with a `/` -> refers a directory
 			 * |===
 			 * ====
+			 *
+			 * @parameter	...			string				Paths			Paths that will be analyzed
+			 * @return		...			integer				Results			Analysis results
 			 */)", analyzePath) {
 				LuaFunc();
 
@@ -470,10 +495,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool...		isNode(string...)
+			 * @LuaFunction		...		isNode(...: string)
 			 * @DisplayName		Is Node
 			 *
 			 * For each given string, returns a bool to tell if string is a valid node (file/folder) name.
+			 *
+			 * @parameter	...			string				Paths			Paths that will be checked
+			 * @return		...			boolean				Results			True if path is a valid node (file/folder) name
 			 */)", isNode) {
 				LuaFunc();
 				int args = lua_gettop(L);
@@ -484,7 +512,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		string...	meta(string...)
+			 * @LuaFunction		...		meta(...: string)
 			 * @DisplayName		Meta
 			 *
 			 * Returns for each given string path, a table that defines contains some meta information about node the string references.
@@ -500,6 +528,9 @@ namespace FINLua {
 			 * | `Unknown`		| The node type is not known to this utility function.
 			 * | ===
 			 * ====
+			 *
+			 * @parameter	...			string				Paths			Paths that will be checked
+			 * @return		...			{type:string}		Results			Metadata for each path
 			 */)", meta) {
 				LuaFunc();
 
@@ -540,6 +571,8 @@ namespace FINLua {
 			 * @DisplayName		Close
 			 *
 			 * Closes the File-Stream.
+			 *
+			 * @parameter	self	File
 			 */)", close) {
 				LuaFileFunc();
 
@@ -550,10 +583,13 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		write(string...)
+			 * @LuaFunction		write(... string)
 			 * @DisplayName		Write
 			 *
 			 * Writes the given strings to the File-Stream.
+			 *
+			 * @parameter	self	File
+			 * @parameter	...		string		Strings		Strings that will be written to the stream
 			 */)", write) {
 				LuaFileFunc();
 
@@ -569,11 +605,15 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		string...	read(int...)
+			 * @LuaFunction		...		read(...: integer)
 			 * @DisplayName		Read
 			 *
 			 * Reads up to the given amount of bytes from the file.
 			 * Strings may be smaller than the given amount of bytes due to f.e. reaching the End-Of-File.
+			 *
+			 * @parameter	self	File
+			 * @parameter	...		integer		Sizes		Maximum sizes of strings
+			 * @return		...		string?		Contents	Contents of the file
 			 */)", read) {
 				LuaFileFunc();
 
@@ -592,7 +632,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		int		seek(where: string, offset: int)
+			 * @LuaFunction		integer		seek(where: string, offset: integer)
 			 * @DisplayName		Seek
 			 *
 			 * Moves the File-Streams pointer to a position defined by the offset and from what starting location.
@@ -604,6 +644,11 @@ namespace FINLua {
 			 * * `set` Offset is relative to the beginning of the file
 			 * * `end` Offset is relative to the end of the file
 			 * ====
+			 *
+			 * @parameter	self	File
+			 * @parameter	where		string		Where		Starting location
+			 * @parameter	offset		integer		Offset		Offset
+			 * @return		position	string?		Position	Current position in the file
 			 */)", seek) {
 				LuaFileFunc();
 

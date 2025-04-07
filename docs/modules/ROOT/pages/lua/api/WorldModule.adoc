@@ -14,7 +14,7 @@
 === **computer**
 
 
-=== __computer.__**attentionPing** (position: xref:/reflection/structs/Vector.adoc[Vector], [username: string])
+=== __computer.__**attentionPing** (position: xref:/reflection/structs/Vector.adoc[Vector], username: string?)
 Allows to send a World Marker/Attention Ping for all or the given user.
 
 [%collapsible]
@@ -25,17 +25,17 @@ Allows to send a World Marker/Attention Ping for all or the given user.
 !Name !Type !Description
 
 ! *Position* `position`
-! xref:/reflection/classes/Struct.adoc[Struct]<FVector>
+! xref:/reflection/structs/Vector.adoc[Vector]
 ! The position in the world where the ping should occur
 
 ! *Username* `username`
-! string
-! The username of the user you want to ping.
+! string?
+! The username of the user you want to ping
 
 !===
 ====
 
-=== __computer.__**textNotification** (text: string, username: string)
+=== __computer.__**textNotification** (text: string, username: string?)
 This function allows you to prompt a user with the given username, with a text message.
 
 [%collapsible]
@@ -50,7 +50,7 @@ This function allows you to prompt a user with the given username, with a text m
 ! The Text you want to send as Notification to the user
 
 ! *Username* `username`
-! string
+! string?
 ! The username of the user you want to send the notification to
 
 !===
@@ -66,9 +66,9 @@ Returns the number of game seconds passed since the save got created. A game day
 !===
 !Name !Type !Description
 
-! *The current number of game seconds passed since the creation of the save.* `time`
+! *Time* `time`
 ! number
-! 
+! The current number of game seconds passed since the creation of the save.
 
 !===
 ====

@@ -4,10 +4,15 @@
 
 UFIRProperty* UFIRStruct::FindFIRProperty(const FString& Name, EFIRPropertyFlags FilterFlags) {
 	ZoneScoped;
-	FScopeLock nameCacheLock(&NameCacheMutex);
+	FRWScopeLock nameCacheLock(NameCacheMutex, SLT_ReadOnly);
 	if (Name2Property.IsEmpty()) {
-		for (UFIRProperty* Property : GetProperties()) {
-			Name2Property.FindOrAdd(Property->GetInternalName()).Add(Property);
+		nameCacheLock.ReleaseReadOnlyLockAndAcquireWriteLock_USE_WITH_CAUTION();
+		// USE_WITH_CAUTION clarification:
+		// Second check if other thread filled this map while we were between ReadUnlock and WriteLock.
+		if (Name2Property.IsEmpty()) {
+			for (UFIRProperty* Property : GetProperties()) {
+				Name2Property.FindOrAdd(Property->GetInternalName()).Add(Property);
+			}
 		}
 	}
 	TArray<UFIRProperty*>* Props = Name2Property.Find(Name);
@@ -19,10 +24,15 @@ UFIRProperty* UFIRStruct::FindFIRProperty(const FString& Name, EFIRPropertyFlags
 
 UFIRFunction* UFIRStruct::FindFIRFunction(const FString& Name, EFIRFunctionFlags FilterFlags) {
 	ZoneScoped;
-	FScopeLock nameCacheLock(&NameCacheMutex);
+	FRWScopeLock nameCacheLock(NameCacheMutex, SLT_ReadOnly);
 	if (Name2Function.IsEmpty()) {
-		for (UFIRFunction* Function : GetFunctions()) {
-			Name2Function.FindOrAdd(Function->GetInternalName()).Add(Function);
+		nameCacheLock.ReleaseReadOnlyLockAndAcquireWriteLock_USE_WITH_CAUTION();
+		// USE_WITH_CAUTION clarification:
+		// Second check if other thread filled this map while we were between ReadUnlock and WriteLock.
+		if (Name2Function.IsEmpty()) {
+			for (UFIRFunction* Function : GetFunctions()) {
+				Name2Function.FindOrAdd(Function->GetInternalName()).Add(Function);
+			}
 		}
 	}
 	TArray<UFIRFunction*>* Funcs = Name2Function.Find(Name);

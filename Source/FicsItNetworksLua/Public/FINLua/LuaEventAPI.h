@@ -57,6 +57,8 @@ struct FFINLuaEventRegistry {
 
 	UPROPERTY(SaveGame)
 	TMap<int64, FFINEventFilterExpression> OneShots;
+	UPROPERTY(SaveGame)
+	TMap<int64, int> OneShots_Futures;
 
 	static int64 FindNextKey(const TMap<int64, FFINEventFilterExpression>& registry) {
 		int64 key = registry.Num();
@@ -112,7 +114,10 @@ namespace FINLua {
 	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L);
 
 	int luaFIN_pushEventData(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
+
 	void luaFIN_handleEvent(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
+
+	int luaFIN_eventTask(lua_State* L, int, lua_KContext);
 
 	void luaFIN_setEventSystem(lua_State* L, IFINLuaEventSystem& EventSystem);
 	IFINLuaEventSystem& luaFIN_getEventSystem(lua_State* L);

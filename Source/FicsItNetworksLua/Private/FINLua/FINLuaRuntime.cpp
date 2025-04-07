@@ -45,7 +45,7 @@ void FFINLuaRuntime::Reset() {
 	lua_newtable(LuaState);
 	lua_setfield(LuaState, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_PERSIST);
 	lua_newtable(LuaState);
-	lua_setfield(LuaState, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS);
+	lua_seti(LuaState, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
 
 	OnPreModules.Broadcast();
 
@@ -89,14 +89,18 @@ TOptional<FString> FFINLuaRuntime::LoadCode(const FString& Code) {
 
 int luaUnpersist(lua_State* L) {
 	// data-str, uperm
-
-	// unpersist data
+	lua_pushboolean(L, true);
+	eris_set_setting(L, "path", -1);
 	eris_unpersist(L, 2, 1); // data-str, uperm, data
 
 	return 1;
 }
 
 TOptional<FString> FFINLuaRuntime::LoadState(FFINLuaRuntimePersistenceState& InState) {
+	if (InState.IsFailure()) {
+		return FString::Printf(TEXT("Due to previous computer state save error: %s"), *InState.Failure);
+	}
+
 	if (InState.LuaData.Len() < 1) return {};
 
 	// decode & check data from json
@@ -120,49 +124,51 @@ TOptional<FString> FFINLuaRuntime::LoadState(FFINLuaRuntimePersistenceState& InS
 	PersistenceState = nullptr;
 
 	// place persisted data
-	lua_getfield(LuaState, -1, "thread");							// ..., data-str, uperm, data, thread
-	lua_replace(LuaState, LuaThreadIndex);						// ..., data-str, uperm, data
-	lua_getfield(LuaState, -1, "globals");						// ..., data-str, uperm, data, globals
-	lua_seti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);		// ..., data-str, uperm, data
-	lua_getfield(LuaState, -1, "hidden-globals");					// ..., data-str, uperm, data, hidden-globals
-	lua_setfield(LuaState, LUA_REGISTRYINDEX, "hidden-globals");	// ..., data-str, uperm, data
+	lua_geti(LuaState, -1, 1);                     	                // ..., data-str, uperm, data, hidden-globals
+	lua_seti(LuaState, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);	// ..., data-str, uperm, data
+	lua_geti(LuaState, -1, 2);					                	// ..., data-str, uperm, data, globals
+	lua_seti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);  		// ..., data-str, uperm, data
+	lua_geti(LuaState, -1, 3);	             						// ..., data-str, uperm, data, thread
+	lua_replace(LuaState, LuaThreadIndex);					    	// ..., data-str, uperm, data
 
 	LuaThread = lua_tothread(LuaState, LuaThreadIndex);
 
-	lua_pop(LuaState, 3);											// ...
+	lua_pop(LuaState, 3);									     		// ...
 
 	return {};
 }
 
 int luaPersist(lua_State* L) {
 	// perm, data
+	lua_pushboolean(L, true);
+	eris_set_setting(L, "path", -1);
 	eris_persist(L, lua_upvalueindex(1), lua_upvalueindex(2));		// ..., perm, data, data-str
 	return 1;
 }
 
-TUnion<FFINLuaRuntimePersistenceState, FString> FFINLuaRuntime::SaveState() {
+FFINLuaRuntimePersistenceState FFINLuaRuntime::SaveState() {
 	FFINLuaRuntimePersistenceState State;
 
 	// prepare state data
-	lua_getfield(LuaState, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_PERSIST);	// ..., perm
-	lua_newtable(LuaState);														// ..., perm, data
-	lua_geti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);					// ..., perm, data, globals
-	lua_setfield(LuaState, -2, "globals");									// ..., perm, data
-	lua_pushvalue(LuaState, LuaThreadIndex);										// ..., perm, data, thread
-	lua_setfield(LuaState, -2, "thread");										// ..., perm, data
-	lua_getfield(LuaState, LUA_REGISTRYINDEX, "hidden-globals");				// ..., perm, data, hidden-globals
-	lua_setfield(LuaState, -2, "hidden-globals");								// ..., perm, dat
+	lua_getfield(LuaState, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_PERSIST);		// ..., perm
+	lua_newtable(LuaState);															// ..., perm, data
+	lua_geti(LuaState, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);         	// ..., perm, data, hidden-globals
+	lua_seti(LuaState, -2, 1);	                								// ..., perm, data
+	lua_geti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);						// ..., perm, data, globals
+	lua_seti(LuaState, -2, 2);					              					// ..., perm, data
+	lua_pushvalue(LuaState, LuaThreadIndex);											// ..., perm, data, thread
+	lua_seti(LuaState, -2, 3);         											// ..., perm, data
 
 	PersistenceState = &State;
 
 	lua_pushcclosure(LuaState, &luaPersist, 2);
-	int stateCode = lua_pcall(LuaState, 0, 1, 0);							// ..., data-str|error
+	int stateCode = lua_pcall(LuaState, 0, 1, 0);								// ..., data-str|error
 
 	PersistenceState = nullptr;
 
 	if (stateCode != LUA_OK) {
 		FString message = FINLua::luaFIN_toFString(LuaState, -1);
-		return TUnion<FFINLuaRuntimePersistenceState, FString>(message);
+		return FFINLuaRuntimePersistenceState(message);
 	}
 
 	// encode persisted data
@@ -173,7 +179,7 @@ TUnion<FFINLuaRuntimePersistenceState, FString> FFINLuaRuntime::SaveState() {
 
 	lua_pop(LuaState, 1);														// ...
 
-	return TUnion<FFINLuaRuntimePersistenceState, FString>(State);
+	return State;
 }
 
 FFINLuaRuntime& FINLua::luaFIN_getRuntime(lua_State* L) {
@@ -254,8 +260,8 @@ TTuple<int, int> FFINLuaRuntime::LuaTick() {
 	if (status == LUA_YIELD) {
 		Timeout.Reset();
 		if (results > 0) {
-			if (lua_type(LuaThread, -results) == LUA_TNUMBER) {
-				double timeout = lua_tonumber(LuaThread, -results);
+			if (lua_type(LuaThread, -results+1) == LUA_TNUMBER) {
+				double timeout = lua_tonumber(LuaThread, -results+1);
 				Timeout = timeout;
 			}
 		}

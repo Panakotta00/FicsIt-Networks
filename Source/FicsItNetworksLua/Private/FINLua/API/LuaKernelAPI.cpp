@@ -26,14 +26,14 @@ namespace FINLua {
 		 * @DisplayName		File-System Library
 		 */)", filesystem) {
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	initFileSystem(path: string)
+			 * @LuaFunction		boolean	initFileSystem(path: string)
 			 * @DisplayName		Init File-System
 			 *
 			 * Trys to mount the system DevDevice to the given location.
 			 * The DevDevice is special Device holding DeviceNodes for all filesystems added to the system. (like TmpFS and drives). It is unmountable as well as getting mounted a seccond time.
 			 *
-			 * @parameter	path		string	Path		path to the mountpoint were the dev device should get mounted to
-			 * @return		success		bool	Success		returns if it was able to mount the DevDevice
+			 * @parameter	path		string		Path		path to the mountpoint were the dev device should get mounted to
+			 * @return		success		boolean		Success		returns if it was able to mount the DevDevice
 			 */)", initFileSystem) {
 				UFINKernelSystem* kernel = FINLua::luaFIN_getKernel(L);
 				FLuaSync SyncCall(L);
@@ -44,7 +44,7 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	makeFileSystem(type: string, name: string)
+			 * @LuaFunction		boolean	makeFileSystem(type: string, name: string)
 			 * @DisplayName		Make File-System
 			 *
 			 * Trys to create a new file system of the given type with the given name.
@@ -58,9 +58,9 @@ namespace FINLua {
 			 * A temporary filesystem only existing at runtime in the memory of your computer. All data will be lost when the system stops.
 			 * ====
 			 *
-			 * @parameter	type		string	Type		the type of the new filesystem
-			 * @parameter	name		string	Name		the name of the new filesystem you want to create
-			 * @return		success		bool	Success		returns true if it was able to create the new filesystem
+			 * @parameter	type		string		Type		the type of the new filesystem
+			 * @parameter	name		string		Name		the name of the new filesystem you want to create
+			 * @return		success		boolean		Success		returns true if it was able to create the new filesystem
 			 */)", makeFileSystem) {
 				UFINKernelSystem* kernel = FINLua::luaFIN_getKernel(L);
 				FINLua::FLuaSync SyncCall(L);
@@ -80,14 +80,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		bool	removeFileSystem(name: string)
+			 * @LuaFunction		boolean	removeFileSystem(name: string)
 			 * @DisplayName		Remove File-System
 			 *
 			 * Tries to remove the filesystem with the given name from the system DevDevice.
 			 * All mounts of the device will run invalid.
 			 *
-			 * @parameter	name		string	Name		the name of the new filesystem you want to remove
-			 * @return		success		bool	Success		returns true if it was able to remove the new filesystem
+			 * @parameter	name		string		Name		the name of the new filesystem you want to remove
+			 * @return		success		boolean		Success		returns true if it was able to remove the new filesystem
 			 */)", removeFileSystem) {
 				UFINKernelSystem* kernel = FINLua::luaFIN_getKernel(L);
 				FLuaSync SyncCall(L);
@@ -119,13 +119,13 @@ namespace FINLua {
 		 * @DisplayName		Computer Library
 		 */)", computer) {
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		(usage: int, capacity: int)	getMemory()
+			 * @LuaFunction		(usage: integer, capacity: integer)	getMemory()
 			 * @DisplayName		Get Memory
 			 *
 			 * Returns the used memory and memory capacity the computer has.
 			 *
-			 * @return	usage		int		Usage		The memory usage at the current time
-			 * @return	capacity	int		Capacity	The memory capacity the computer has
+			 * @return	usage		integer		Usage		The memory usage at the current time
+			 * @return	capacity	integer		Capacity	The memory capacity the computer has
 			 */)", getMemory) {
 				FINLua::FLuaSync sync(L);
 
@@ -147,7 +147,7 @@ namespace FINLua {
 			 *
 			 * Returns a reference to the computer case in which the current code is running.
 			 *
-			 * @return	case	ComputerCase	The computer case this lua runtime is running in.
+			 * @return	case	ComputerCase	Case	The computer case this lua runtime is running in
 			 */)", getInstance) {
 				FLuaSync sync(L);
 
@@ -159,14 +159,14 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Object[]	getPCIDevices([type: Class])
+			 * @LuaFunction		Object[]	getPCIDevices(type: Object-Class?)
 			 * @DisplayName		Get PCI-Devices
 			 *
 			 * This function allows you to get all installed https://docs.ficsit.app/ficsit-networks/latest/buildings/ComputerCase/index.html#_pci_interface[PCI-Devices] in a computer of a given type.
 			 * Have a look at https://docs.ficsit.app/ficsit-networks/latest/lua/examples/PCIDevices.html[this] example to fully understand how it works.
 			 *
-			 * @parameter	type		Class		Type		Optional type which will be used to filter all PCI-Devices. If not provided, will return all PCI-Devices.
-			 * @return		objects		Object[]	Objects		An array containing instances for each PCI-Device built into the computer.
+			 * @parameter	type		Object-Class?	Type		Optional type which will be used to filter all PCI-Devices. If not provided, will return all PCI-Devices
+			 * @return		objects		Object[]		Objects		An array containing instances for each PCI-Device built into the computer
 			 */)", getPCIDevices) {
 				FLuaSync sync(L);
 
@@ -203,12 +203,12 @@ namespace FINLua {
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		int		millis()
+			 * @LuaFunction		integer		millis()
 			 * @DisplayName		Millis
 			 *
 			 * Returns the amount of milliseconds passed since the system started.
 			 *
-			 * @return	millis	int		The amount of real milliseconds sinde the ingame-computer started.
+			 * @return	millis	integer		Millis		The amount of real milliseconds sinde the ingame-computer started
 			 */)", millis) {
 				FLuaSync sync(L);
 
@@ -236,7 +236,7 @@ namespace FINLua {
 			 * @LuaFunction		stop()
 			 * @DisplayName		Stop
 			 *
-			 * Stops the current code execution. +
+			 * Stops the current code execution.
 			 * Basically kills the PC runtime immediately.
 			 */)", stop) {
 				FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
@@ -254,7 +254,7 @@ namespace FINLua {
 			 *
 			 * Sets the code of the current eeprom. Doesn’t cause a system reset.
 			 *
-			 * @param	code	string	The new EEPROM Code as string.
+			 * @parameter	code	string		Code	The new EEPROM Code as string
 			 */)", setEEPROM) {
 				FLuaSync sync(L);
 
@@ -280,7 +280,7 @@ namespace FINLua {
 			 *
 			 * Returns the current eeprom contents.
 			 *
-			 * @return	code	string	The EEPROM Code as string.
+			 * @return	code	string		Code	The EEPROM Code as string
 			 */)", getEEPROM) {
 				FLuaSync sync(L);
 
@@ -298,7 +298,7 @@ namespace FINLua {
 			 *
 			 * Lets the computer emit a simple beep sound with the given pitch.
 			 *
-			 * @param	pitch	number	a multiplier for the pitch adjustment of the beep sound.
+			 * @parameter	pitch	number		Pitch	a multiplier for the pitch adjustment of the beep sound
 			 */)", beep) {
 				FLuaSync sync(L);
 
@@ -317,6 +317,8 @@ namespace FINLua {
 			 * @DisplayName		Panic
 			 *
 			 * Crashes the computer with the given error message.
+			 *
+			 * @parameter	error	string		Error	an error message
 			 */)", panic) {
 				luaL_checkstring(L, -1);
 				UFINKernelSystem* kernel = luaFIN_getKernel(L);

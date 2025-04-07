@@ -8,7 +8,7 @@ The Computer Module provides the Computer Library.
 === **computer**
 The Computer Library provides functions for interaction with the computer and especially the Lua Runtime.
 
-=== __computer.__**magicTime** () -> (int, string, string)
+=== __computer.__**magicTime** () -> (integer, string, string)
 Returns some kind of strange/mysterious time data from a unknown place (the real life).
 
 [%collapsible]
@@ -19,7 +19,7 @@ Returns some kind of strange/mysterious time data from a unknown place (the real
 !Name !Type !Description
 
 ! *Unix* `unix`
-! int
+! integer
 ! Unix Timestamp
 
 ! *Culture Time* `cultureTime`

@@ -19,7 +19,7 @@ bool FFINLuaRuntimePersistenceState::Serialize(FStructuredArchive::FSlot Slot) {
 
 	int32 StructNum = Structs.Num();
 	FStructuredArchiveArray Array = Record.EnterArray(SA_FIELD_NAME(TEXT("Structs")), StructNum);
-	
+
 	if (Record.GetUnderlyingArchive().IsLoading()) Structs.Empty();
 	for (int i = 0; i < StructNum; ++i) {
 		if (Record.GetUnderlyingArchive().IsLoading()) Structs.Add(MakeShared<FFIRInstancedStruct>());
@@ -30,6 +30,9 @@ bool FFINLuaRuntimePersistenceState::Serialize(FStructuredArchive::FSlot Slot) {
 			FFIRInstancedStruct().Serialize(Array.EnterElement());
 		}
 	}
+
+	Record.EnterField(SA_FIELD_NAME(TEXT("Failure"))) << Failure;
+
 	return true;
 }
 
@@ -62,6 +65,7 @@ TSharedPtr<FFIRInstancedStruct> FFINLuaRuntimePersistenceState::GetStruct(int32 
 }
 
 void FFINLuaRuntimePersistenceState::Clear() {
+	Failure.Empty();
 	Traces.Empty();
 	References.Empty();
 	Structs.Empty();

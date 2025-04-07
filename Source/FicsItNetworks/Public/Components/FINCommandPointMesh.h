@@ -33,15 +33,99 @@ struct FFINCommandLabelReferences {
 
 UENUM(BlueprintType)
 enum EFINLabelPlacement {
-	North, South, East, West
+	FIN_LabelPlacement_North, FIN_LabelPlacement_South, FIN_LabelPlacement_East, FIN_LabelPlacement_West
 };
+
+UENUM(BlueprintType)
+enum EFINButtonFunctionalMode {
+	FIN_ButtonMode_Simple, FIN_ButtonMode_Double, FIN_ButtonMode_DoubleLatched, FIN_ButtonMode_MAX
+};
+
+USTRUCT()
+struct FFINPanelArrowEndData {
+	GENERATED_BODY()
+	
+};
+
+UENUM(BlueprintType)
+enum EFINPanelArrowCrossingTypes {
+	FIN_PanelArrowCrossing_Lines,
+	FIN_PanelArrowCrossing_Dot,
+	FIN_PanelArrowCrossing_BridgeH,
+	FIN_PanelArrowCrossing_BridgeV,
+};
+
+UENUM(BlueprintType)
+enum EFINPanelTraceEndTypes {
+	FINPanelTraceEnd_None,
+	FINPanelTraceEnd_Straight,
+	FINPanelTraceEnd_RecessedBlockage,
+	FINPanelTraceEnd_Blockage,
+	FINPanelTraceEnd_ArrowOut,
+	FINPanelTraceEnd_ArrowIn,
+};
+
+UENUM(BlueprintType)
+enum EFINPanelTraceStartTypes {
+	FINPanelTraceStart_None,
+	FINPanelTraceStart_Half,
+	FINPanelTraceStart_CapSquare,
+	FINPanelTraceStart_CapRound,
+	FINPanelTraceStart_Miter,
+};
+
+USTRUCT(Blueprintable, BlueprintType)
+struct FFINPanelArrow {
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	double rotation = 0.0;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	TEnumAsByte<EFINPanelTraceEndTypes> OuterEnd = FINPanelTraceEnd_None;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	TEnumAsByte<EFINPanelTraceStartTypes> InnerEnd = FINPanelTraceStart_CapSquare;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	bool InheritColor = true;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	FLinearColor ArrowColor = FLinearColor(0,0,0,1);
+};
+
+USTRUCT(Blueprintable, BlueprintType)
+struct FFINPanelArrowAnchor {
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	FVector AnchorPosition = FVector(0,0,0);
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	FRotator AnchorRotation = FRotator(0,0,0);
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	TEnumAsByte<EFINPanelArrowCrossingTypes> Type = FIN_PanelArrowCrossing_Lines;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	TArray<FFINPanelArrow> Arrows;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame)
+	FLinearColor AnchorColor = FLinearColor(0,0,0,1);
+
+	/*static FString ToString(FFINPanelArrowAnchor Anchor) {
+		FString Ret = "";
+		Ret.Append(FString::Format(""))
+	}*/
+};
+
 
 USTRUCT(Blueprintable)
 struct FFINCommandLabelData  {
 	GENERATED_BODY()
 
-	FFINCommandLabelData() : ImagePath(""), Vertical(false), Text(""), TextColor(0,0,0,1){}
-	FFINCommandLabelData(FString imagePath, FString text, FLinearColor textColor, bool vertical) : ImagePath(imagePath), Vertical(vertical), Text(text), TextColor(textColor) {}
+	FFINCommandLabelData() : ImagePath(""), Vertical(false), Text(""), TextColor(0,0,0,1), Emit(0){}
+	FFINCommandLabelData(FString imagePath, FString text, FLinearColor textColor, bool vertical, float emit) : ImagePath(imagePath), Vertical(vertical), Text(text), TextColor(textColor), Emit(emit) {}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	FString ImagePath;
@@ -56,8 +140,10 @@ struct FFINCommandLabelData  {
 	FLinearColor TextColor;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
-	TEnumAsByte<EFINLabelPlacement> placement = North;
+	TEnumAsByte<EFINLabelPlacement> placement = FIN_LabelPlacement_North;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	float Emit;
 };
 
 
@@ -65,13 +151,14 @@ USTRUCT(Blueprintable)
 struct FFINCommandLabelStructure {
 	GENERATED_BODY()
 	
+	FFINCommandLabelStructure(UObject* reference, int index, FString path, bool doUpdate, bool doUpdateText, FString text, FLinearColor color, EFINLabelPlacement placement, float emit) : reference(reference), path(path), index(index), vertical(false), doUpdate(doUpdate), doUpdateText(doUpdateText), text(text), textColor(color), placement(placement), emit(emit) {}
 	FFINCommandLabelStructure(UObject* reference, int index, FString path, bool doUpdate, bool doUpdateText, FString text, FLinearColor color, EFINLabelPlacement placement) : reference(reference), path(path), index(index), vertical(false), doUpdate(doUpdate), doUpdateText(doUpdateText), text(text), textColor(color), placement(placement) {}
 	FFINCommandLabelStructure(UObject* reference, int index, FString path, bool vertical, bool doUpdate, bool doUpdateText, FString text, FLinearColor color) : reference(reference), path(path), index(index), vertical(vertical), doUpdate(doUpdate), doUpdateText(doUpdateText), text(text), textColor(color) {
 		if(vertical) {
-			placement = West;
+			placement = FIN_LabelPlacement_West;
 		}
 	}
-	FFINCommandLabelStructure() : reference(0), path(""), index(0), vertical(false), doUpdate(false), doUpdateText(false), text(""), textColor(0,0,0, 1)  {}
+	FFINCommandLabelStructure() : reference(0), path(""), index(0), vertical(false), doUpdate(false), doUpdateText(false), text(""), textColor(0,0,0, 1), emit(0)  {}
  
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UObject* reference;
@@ -101,5 +188,8 @@ struct FFINCommandLabelStructure {
 	FLinearColor textColor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
-	TEnumAsByte<EFINLabelPlacement> placement = North;
+	TEnumAsByte<EFINLabelPlacement> placement = FIN_LabelPlacement_North;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
+	float emit;
 };
