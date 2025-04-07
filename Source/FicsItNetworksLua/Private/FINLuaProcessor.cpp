@@ -173,7 +173,10 @@ void UFINLuaProcessor::Reset() {
 
 	TOptional<FString> Code = GetEEPROM();
 	if (Code) {
-		Runtime.Runtime.LoadCode(*Code);
+		TOptional<FString> error = Runtime.Runtime.LoadCode(*Code);
+		if (error) {
+			GetKernel()->Crash(MakeShared<FFINKernelCrash>(*error));
+		}
 	}
 }
 
