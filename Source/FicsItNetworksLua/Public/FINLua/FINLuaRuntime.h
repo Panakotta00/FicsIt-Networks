@@ -77,7 +77,7 @@ public:
 
 	TOptional<FString> LoadCode(const FString& Code);
 	TOptional<FString> LoadState(FFINLuaRuntimePersistenceState& InState);
-	TUnion<FFINLuaRuntimePersistenceState, FString> SaveState();
+	FFINLuaRuntimePersistenceState SaveState();
 
 	TOptional<TTuple<int, int>> Tick();
 	TTuple<int, int> LuaTick();

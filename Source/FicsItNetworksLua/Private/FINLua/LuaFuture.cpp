@@ -46,7 +46,7 @@ namespace FINLua {
 			int unpersist(lua_State* L) {
 				FFINLuaRuntimePersistenceState& persistence = luaFIN_getPersistence(L);
 
-				luaFIN_pushFuture(L, *persistence.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1))));
+				luaFIN_pushFutureStruct(L, *persistence.GetStruct(luaL_checkinteger(L, lua_upvalueindex(1))));
 
 				return 1;
 			}

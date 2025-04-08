@@ -23,10 +23,25 @@ private:
 public:
 	UPROPERTY(SaveGame)
 	FString LuaData;
-	
+
+	/**
+	 * If saving the persistence state failed,
+	 * this string has a length greater than zero.
+	 * It will contain the reason saving the state failed.
+	 */
+	UPROPERTY(SaveGame)
+	FString Failure;
+
+	FFINLuaRuntimePersistenceState() = default;
+	FFINLuaRuntimePersistenceState(const FString& Failure) : Failure(Failure) {}
+
     // Begin Struct
 	bool Serialize(FStructuredArchive::FSlot Slot);
 	// End Struct
+
+	bool IsFailure() const {
+		return !Failure.IsEmpty();
+	}
 			
 	int32 Add(const FFIRTrace& Trace);
 

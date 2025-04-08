@@ -1,5 +1,7 @@
 #include "FINNetworkCircuit.h"
 
+#include "FINNetworkCircuitNode.h"
+#include "FINNetworkComponent.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
@@ -113,7 +115,7 @@ bool AFINNetworkCircuit::IsNodeConnected(const TScriptInterface<IFINNetworkCircu
 	TSet<UObject*> Searched;
 	return IsNodeConnected_Internal(Start, Node, Searched);
 }
-
+UE_DISABLE_OPTIMIZATION_SHIP
 void AFINNetworkCircuit::DisconnectNodes(UObject* WorldContext, const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B) {
 	if (!IsNodeConnected(A, B)) {
 		AFINNetworkCircuit* CircuitA = IFINNetworkCircuitNode::Execute_GetCircuit(A.GetObject());
@@ -123,8 +125,8 @@ void AFINNetworkCircuit::DisconnectNodes(UObject* WorldContext, const TScriptInt
 		CircuitA = WorldContext->GetWorld()->SpawnActor<AFINNetworkCircuit>();
 		IFINNetworkCircuitNode::Execute_SetCircuit(A.GetObject(), CircuitA);
 		CircuitA->Recalculate(A);
+		CircuitB->Recalculate(B);
 
-		
 		TSet<UObject*> NodesA;
 		for (const TSoftObjectPtr<UObject>& Node : CircuitA->Nodes) {
 			UObject* Obj = Node.Get();
@@ -137,17 +139,16 @@ void AFINNetworkCircuit::DisconnectNodes(UObject* WorldContext, const TScriptInt
 		}
 
 		for (const TSoftObjectPtr<UObject>& Node : CircuitB->Nodes) {
-			if (CircuitB->Nodes.Contains(Node)) continue;
+			if (!Node) continue;
 			IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Node.Get(), 1, NodesA);
 		}
-		CircuitB->Recalculate(B);
 		for (const TSoftObjectPtr<UObject>& Node : CircuitA->Nodes) {
-			if (CircuitA->Nodes.Contains(Node)) continue;
+			if (!Node) continue;
 			IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Node.Get(), 1, NodesB);
 		}
 	}
 }
-
+UE_ENABLE_OPTIMIZATION_SHIP
 void AFINNetworkCircuit::ConnectNodes(UObject* WorldContext, const TScriptInterface<IFINNetworkCircuitNode>& A, const TScriptInterface<IFINNetworkCircuitNode>& B) {
 	AFINNetworkCircuit* CircuitA = IFINNetworkCircuitNode::Execute_GetCircuit(A.GetObject());
 	AFINNetworkCircuit* CircuitB = IFINNetworkCircuitNode::Execute_GetCircuit(B.GetObject());

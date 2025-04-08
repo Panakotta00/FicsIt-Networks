@@ -97,6 +97,10 @@ int luaUnpersist(lua_State* L) {
 }
 
 TOptional<FString> FFINLuaRuntime::LoadState(FFINLuaRuntimePersistenceState& InState) {
+	if (InState.IsFailure()) {
+		return FString::Printf(TEXT("Due to previous computer state save error: %s"), *InState.Failure);
+	}
+
 	if (InState.LuaData.Len() < 1) return {};
 
 	// decode & check data from json
@@ -142,7 +146,7 @@ int luaPersist(lua_State* L) {
 	return 1;
 }
 
-TUnion<FFINLuaRuntimePersistenceState, FString> FFINLuaRuntime::SaveState() {
+FFINLuaRuntimePersistenceState FFINLuaRuntime::SaveState() {
 	FFINLuaRuntimePersistenceState State;
 
 	// prepare state data
@@ -158,13 +162,13 @@ TUnion<FFINLuaRuntimePersistenceState, FString> FFINLuaRuntime::SaveState() {
 	PersistenceState = &State;
 
 	lua_pushcclosure(LuaState, &luaPersist, 2);
-	int stateCode = lua_pcall(LuaState, 0, 1, 0);							// ..., data-str|error
+	int stateCode = lua_pcall(LuaState, 0, 1, 0);								// ..., data-str|error
 
 	PersistenceState = nullptr;
 
 	if (stateCode != LUA_OK) {
 		FString message = FINLua::luaFIN_toFString(LuaState, -1);
-		return TUnion<FFINLuaRuntimePersistenceState, FString>(message);
+		return FFINLuaRuntimePersistenceState(message);
 	}
 
 	// encode persisted data
@@ -175,7 +179,7 @@ TUnion<FFINLuaRuntimePersistenceState, FString> FFINLuaRuntime::SaveState() {
 
 	lua_pop(LuaState, 1);														// ...
 
-	return TUnion<FFINLuaRuntimePersistenceState, FString>(State);
+	return State;
 }
 
 FFINLuaRuntime& FINLua::luaFIN_getRuntime(lua_State* L) {
