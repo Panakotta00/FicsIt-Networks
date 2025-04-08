@@ -127,7 +127,6 @@ void AFINNetworkCircuit::DisconnectNodes(UObject* WorldContext, const TScriptInt
 		CircuitA->Recalculate(A);
 		CircuitB->Recalculate(B);
 
-
 		TSet<UObject*> NodesA;
 		for (const TSoftObjectPtr<UObject>& Node : CircuitA->Nodes) {
 			UObject* Obj = Node.Get();
@@ -140,9 +139,11 @@ void AFINNetworkCircuit::DisconnectNodes(UObject* WorldContext, const TScriptInt
 		}
 
 		for (const TSoftObjectPtr<UObject>& Node : CircuitB->Nodes) {
+			if (!Node) continue;
 			IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Node.Get(), 1, NodesA);
 		}
 		for (const TSoftObjectPtr<UObject>& Node : CircuitA->Nodes) {
+			if (!Node) continue;
 			IFINNetworkCircuitNode::Execute_NotifyNetworkUpdate(Node.Get(), 1, NodesB);
 		}
 	}
