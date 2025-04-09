@@ -73,4 +73,5 @@ private:
 
 	UPROPERTY()
 	UStaticMeshComponent* CompassRose = nullptr;
+
 };
