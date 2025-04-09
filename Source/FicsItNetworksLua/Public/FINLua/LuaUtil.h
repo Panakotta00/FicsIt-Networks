@@ -91,9 +91,9 @@ namespace FINLua {
 	FString luaFIN_getUserDataMetaName(lua_State* L, int Index);
 
 	/**
-	 * @brief Yields in a way the caller is continue execution and the yield does NOT get propagated.
+	 * @brief Yields in a way the caller is continued execution and the yield does NOT get propagated.
 	 */
-	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc, TOptional<double> timeout);
+	int luaFIN_yield(lua_State* L, int nresults, lua_KContext ctx, lua_KFunction kfunc);
 	
 	void luaFIN_pushFString(lua_State* L, const FString& str);
 	FString luaFIN_checkFString(lua_State* L, int index);
@@ -110,6 +110,13 @@ namespace FINLua {
 
 	FString luaFIN_where(lua_State* L);
 	FString luaFIN_stack(lua_State* L);
+
+	/**
+	 * Executes the first function in ctx unless it is NULL
+	 * @param ctx A array of lua_KFunction's
+	 * @return 0 or the result of the function
+	 */
+	int luaFIN_sequence(lua_State* L, int, lua_KContext ctx);
 
 	/**
 	 * Tries to set the value on top of the stack as value of the table at the given index with the field key beeing the value right below the stack.

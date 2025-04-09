@@ -38,6 +38,8 @@ public:
 	UPROPERTY(SaveGame)
 	TArray<FInventoryItem> InputQueue3;
 
+	FCriticalSection Mutex;
+
 	AFINCodeableMerger();
 	~AFINCodeableMerger();
 

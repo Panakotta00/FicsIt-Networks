@@ -39,7 +39,7 @@ private:
 public:
 	UPROPERTY(SaveGame)
 	FFINLuaRuntimePersistenceState RuntimeState;
-	
+
 	UFINLuaProcessor();
 
 	// Begin UObject

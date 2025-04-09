@@ -19,7 +19,7 @@ Use the Ficsit Label Marker to change the text and foreground color of the butto
 === `enabled` : Bool
 // tag::func-enabled[]
 
-Sets wheter to accept input on this encoder or not. True means accept input, false means to igore input
+Sets whether to accept input on this encoder or not. True means accept input, false means to igore input
 
 [%collapsible]
 ====
@@ -32,6 +32,45 @@ Sets wheter to accept input on this encoder or not. True means accept input, fal
 ====
 // end::func-enabled[]
 // end::func-enabled-title[]
+// tag::func-operationalMode-title[]
+=== `operationalMode` : Int
+// tag::func-operationalMode[]
+
+Sets the mode this button works in. Both in terms of signals and how it works.
+
+0 = Single Signal, Basic mode. This mode is just a simple push button with a single Trigger signal
+1 = Double Signal. This mode gives a trigger signal on press and one on release. The first boolean parameter determines if it was a press (true) or release (false) event 
+2 = Double Signal with Latched function. This is like 1 but the button stays pressed until the next trigger.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Operational Mode
+!===
+====
+// end::func-operationalMode[]
+// end::func-operationalMode-title[]
+// tag::func-state-title[]
+=== `state` : Bool
+// tag::func-state[]
+
+Returns whether this button is currently being pressed or not. 
+This is only useful when the operationalMode is set to either of the Double modes.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! State
+!===
+====
+// end::func-state[]
+// end::func-state-title[]
 
 == Functions
 
@@ -40,6 +79,8 @@ Sets wheter to accept input on this encoder or not. True means accept input, fal
 // tag::func-Trigger[]
 
 Triggers a button press by code.
+
+THIS FUNCTION HAS NOT YET BEEN IMPLEMENTED
 
 [%collapsible]
 ====
@@ -98,9 +139,23 @@ Triggers a button press by code.
 
 == Signals
 
-=== `Trigger` ()
+=== `Trigger` (_Bool_ *State* `state`)
 
-Triggers when the button gets pressed.
+Triggers when the button gets acted on.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *State* `state`
+! Bool
+! If operationalMode is 0, always set to true.
+  If operationalMode is 1 or 2, true if pressed, false if depressed.
+!===
+====
 
 
 // end::interface[]

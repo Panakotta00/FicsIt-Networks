@@ -26,7 +26,7 @@ namespace FINLua {
 
 	int luaYield(lua_State* L) {
 		const int args = lua_gettop(L);
-		return luaFIN_yield(L, args, NULL, &luaYieldResume, {});
+		return luaFIN_yield(L, args, NULL, &luaYieldResume);
 	}
 
 	int luaResume(lua_State* L);

@@ -6,7 +6,7 @@
 [cols="1,5a",separator="!"]
 !===
 !Dependencies
-! xref:/lua/api/ReflectionSystemStructModule.adoc[ReflectionSystemStructModule]
+! xref:/lua/api/ReflectionSystemStructModule.adoc[ReflectionSystemStructModule], xref:/lua/api/FutureModule.adoc[FutureModule]
 !===
 
 == Globals
@@ -17,17 +17,69 @@ The Event API provides classes, functions and variables for interacting with the
 === __event.__**clear** ()
 Clears every signal from the signal queue.
 
-=== __event.__**filter** (...) -> xref:/reflection/structs/EventFilter.adoc[EventFilter]
+=== __event.__**filter** (params: { event?: string|string[], sender?: xref:/reflection/classes/Object.adoc[Object]|xref:/reflection/classes/Object.adoc[Object][], values?: table<string,any> }) -> xref:/reflection/structs/EventFilter.adoc[EventFilter]
 Creates an Event filter expression.
 
-=== __event.__**ignore** (xref:/reflection/classes/Object.adoc[Object]...)
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Params* `params`
+! { event?: string|string[], sender?: xref:/reflection/classes/Object.adoc[Object]|xref:/reflection/classes/Object.adoc[Object][], values?: table<string,any> }
+! Filter parameters
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Filter* `filter`
+! xref:/reflection/structs/EventFilter.adoc[EventFilter]
+! Event filter
+
+!===
+====
+
+=== __event.__**ignore** (...: xref:/reflection/classes/Object.adoc[Object])
 Removes the running lua context from the listen queue of the given components. Basically the opposite of listen.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Objects* `...`
+! xref:/reflection/classes/Object.adoc[Object]
+! A list of objects this computer should stop listening to
+
+!===
+====
 
 === __event.__**ignoreAll** ()
 Stops listening to any signal sender. If afterwards there are still coming signals in, it might be the system itself or caching bug.
 
-=== __event.__**listen** (xref:/reflection/classes/Object.adoc[Object]...)
+=== __event.__**listen** (...: xref:/reflection/classes/Object.adoc[Object])
 Adds the running lua context to the listen queue of the given components.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Objects* `...`
+! xref:/reflection/classes/Object.adoc[Object]
+! A list of objects the computer should start listening to
+
+!===
+====
 
 === __event.__**listening** () -> xref:/reflection/classes/Object.adoc[Object][]
 Returns all signal senders this computer is listening to.
@@ -39,17 +91,14 @@ Returns all signal senders this computer is listening to.
 !===
 !Name !Type !Description
 
-! *An array containing all objects this computer is currently listening to.* `listening`
+! *Objects* `listening`
 ! xref:/reflection/classes/Object.adoc[Object][]
-! 
+! An array containing all objects this computer is currently listening to
 
 !===
 ====
 
-=== __event.__**loop** ()
-Runs an infinite loop or `future.run()`, `event.pull(0)` and `coroutine.yield()`.
-
-=== __event.__**pull** ([timeout: number]) -> (string|nil, xref:/reflection/classes/Object.adoc[Object], ...)
+=== __event.__**pull** (timeout: number?) -> (string?, xref:/reflection/classes/Object.adoc[Object], ...)
 Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached. +
 Returns directly if there is already a signal in the queue (the tick doesn￢ﾀﾙt get yielded).
 
@@ -62,7 +111,7 @@ Returns directly if there is already a signal in the queue (the tick doesn￢ﾀ
 
 ! *Timeout* `timeout`
 ! number
-! The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue.
+! The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue
 
 !===
 .Return Values
@@ -71,40 +120,190 @@ Returns directly if there is already a signal in the queue (the tick doesn￢ﾀ
 !Name !Type !Description
 
 ! *Event* `event`
-! string|nil
-! The name of the returned signal. Nil when timeout got reached.
+! string?
+! The name of the returned signal. Nil when timeout got reached
 
 ! *Sender* `sender`
 ! xref:/reflection/classes/Object.adoc[Object]
-! The component representation of the signal sender. Not set when timeout got reached.
+! The component representation of the signal sender. Not set when timeout got reached
 
-! *Parameters* `parameters`
-! any...
-! The parameters passed to the signal. Not set when timeout got reached.
+! *Parameters* `...`
+! any
+! The parameters passed to the signal. Not set when timeout got reached
 
 !===
 ====
 
-=== __event.__**registerListener** (xref:/reflection/structs/EventFilter.adoc[EventFilter], function(event, sender, ...)) -> integer
+=== __event.__**registerListener** (filter: xref:/reflection/structs/EventFilter.adoc[EventFilter], cb: fun(event, sender, ...)) -> integer
 Registers the given function as a listener.
 When `event.pull()` pulls a signal from the queue, that matches the given Event-Filter,
 a Task will be created using the function and the signals parameters will be passed into the function.
 
-=== __event.__**waitFor** (xref:/reflection/structs/EventFilter.adoc[EventFilter]) -> xref:/reflection/structs/Future.adoc[Future]
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Filter* `filter`
+! xref:/reflection/structs/EventFilter.adoc[EventFilter]|{event?:string|string[],sender?:xref:/reflection/classes/Object.adoc[Object]|xref:/reflection/classes/Object.adoc[Object][],values?:table<string,any>}
+! Event filter
+
+! *Callback* `cb`
+! fun(event, sender, ...)
+! Callback that will be called on every event that matches the filter
+
+!===
+====
+
+=== __event.__**waitFor** (filter: xref:/reflection/structs/EventFilter.adoc[EventFilter]) -> xref:/reflection/structs/Future.adoc[Future]
 Returns a Future that resolves when a signal got polled that matches the given Event Filter.
 
-=== __event.__**queue** (xref:/reflection/structs/EventFilter.adoc[EventFilter]) -> xref:/lua/api/EventModule.adoc#_eventqueue[EventQueue]
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Filter* `filter`
+! xref:/reflection/structs/EventFilter.adoc[EventFilter]|{event?:string|string[],sender?:xref:/reflection/classes/Object.adoc[Object]|xref:/reflection/classes/Object.adoc[Object][],values?:table<string,any>}
+! Event filter
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Event* `event`
+! string?
+! The name of the returned signal
+
+! *Sender* `sender`
+! xref:/reflection/classes/Object.adoc[Object]
+! The component representation of the signal sender
+
+! *Parameters* `...`
+! any
+! The parameters passed to the signal
+
+!===
+====
+
+=== __event.__**queue** (filter: xref:/reflection/structs/EventFilter.adoc[EventFilter]) -> xref:/lua/api/EventModule.adoc#_eventqueue[EventQueue]
 Creates a new event queue.
 When this variable closes or gets garbage collected, it will stop receiving signals.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Filter* `filter`
+! xref:/reflection/structs/EventFilter.adoc[EventFilter]|{event?:string|string[],sender?:xref:/reflection/classes/Object.adoc[Object]|xref:/reflection/classes/Object.adoc[Object][],values?:table<string,any>}
+! Event filter
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Queue* `queue`
+! xref:/lua/api/EventModule.adoc#_eventqueue[EventQueue]
+! Event queue
+
+!===
+====
+
+=== **eventTask** : xref:/reflection/structs/Future.adoc[Future]
+A future that is used as task to handle Events.
 
 == Types
 
 === **EventQueue**
 
 
-=== __EventQueue.__**pull** ()
+=== __EventQueue.__**pull** (timeout: number?) -> (string?, xref:/reflection/classes/Object.adoc[Object], ...)
+Waits for a signal in the queue. Blocks the execution until a signal got pushed to the signal queue, or the timeout is reached.
+Returns directly if there is already a signal in the queue (the tick doesn￢ﾀﾙt get yielded).
 
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
 
-=== __EventQueue.__**waitFor** ()
+! *self* `self`
+! xref:/lua/api/EventModule.adoc#_eventqueue[EventQueue]
+! 
+
+! *Timeout* `timeout`
+! number
+! The amount of time needs to pass until pull unblocks when no signal got pushed. If not set, the function will block indefinitely until a signal gets pushed. If set to `0` (int), will not yield the tick and directly return with the signal data or nil if no signal was in the queue
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Event* `event`
+! string?
+! The name of the returned signal. Nil when timeout got reached
+
+! *Sender* `sender`
+! xref:/reflection/classes/Object.adoc[Object]
+! The component representation of the signal sender. Not set when timeout got reached
+
+! *Parameters* `...`
+! any
+! The parameters passed to the signal. Not set when timeout got reached
+
+!===
+====
+
+=== __EventQueue.__**waitFor** (filter: xref:/reflection/structs/EventFilter.adoc[EventFilter]) -> (string?, xref:/reflection/classes/Object.adoc[Object], ...)
 Returns a Future that resolves when a signal got added to the queue that matches the given Event Filter.
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *self* `self`
+! xref:/lua/api/EventModule.adoc#_eventqueue[EventQueue]
+! 
+
+! *Filter* `filter`
+! xref:/reflection/structs/EventFilter.adoc[EventFilter]|{event?:string|string[],sender?:xref:/reflection/classes/Object.adoc[Object]|xref:/reflection/classes/Object.adoc[Object][],values?:table<string,any>}
+! Event filter
+
+!===
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Event* `event`
+! string?
+! The name of the returned signal
+
+! *Sender* `sender`
+! xref:/reflection/classes/Object.adoc[Object]
+! The component representation of the signal sender
+
+! *Parameters* `...`
+! any
+! The parameters passed to the signal
+
+!===
+====
 

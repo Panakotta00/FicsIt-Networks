@@ -41,6 +41,8 @@ public:
 	UPROPERTY(SaveGame)
 	TArray<FInventoryItem> OutputQueue3;
 
+	FCriticalSection Mutex;
+
 	AFINCodeableSplitter();
 	~AFINCodeableSplitter();
 

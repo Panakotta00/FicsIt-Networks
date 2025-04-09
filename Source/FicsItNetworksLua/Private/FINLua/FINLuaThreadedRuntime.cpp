@@ -54,9 +54,13 @@ bool FFINLuaThreadedRuntime::ShouldThreadRun() {
 }
 
 void FFINLuaThreadedRuntime::HandleWaitForGame() {
+	IsWaitingForCompletionMutex.Lock();
 	if (TSharedPtr<FEventRef> waitForGame = WaitForGame) {
 		waitForGame->Get()->Trigger();
+		IsWaitingForCompletionMutex.Unlock();
 		ContinueGame->Get()->Wait();
+	} else {
+		IsWaitingForCompletionMutex.Unlock();
 	}
 }
 
