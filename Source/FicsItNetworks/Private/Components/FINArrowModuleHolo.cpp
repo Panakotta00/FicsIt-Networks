@@ -205,6 +205,7 @@ void AFINArrowModuleHolo::ShowPropertyDialog() {
 TSharedRef<SWidget> UFINPanelTraceConfigPopup::RebuildWidget() {
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("None", FINPanelTraceEnd_None)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Straight", FINPanelTraceEnd_Straight)));
+	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Long Straight", FINPanelTraceEnd_ExtendedStraight)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Arrow", FINPanelTraceEnd_ArrowOut)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Blocked", FINPanelTraceEnd_Blockage)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Short Blocked", FINPanelTraceEnd_RecessedBlockage)));
