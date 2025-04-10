@@ -8,6 +8,7 @@
 #include "FicsItNetworksModule.h"
 #include "FINArrowModuleBase.h"
 #include "MCPBlueprintLibrary.h"
+#include "NativeHookManager.h"
 #include "SUniformGridPanel.h"
 #include "TimerManager.h"
 #include "Components/FINDefaultExtendedHolo.h"
@@ -22,14 +23,6 @@ AFINBuildgunHooks::AFINBuildgunHooks() {
 
 void AFINBuildgunHooks::BeginPlay() {
 	Super::BeginPlay();
-
-	if(!IsRunningDedicatedServer()) {
-		auto var = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-		AFGCharacterPlayer* AFG = Cast<AFGCharacterPlayer>(var);
-		AFG->GetBuildGun()->mOnRecipeSampled.AddUniqueDynamic(this, &AFINBuildgunHooks::OnRecipeSampled);
-	}
-
-	
 }
 
 void AFINBuildgunHooks::OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe) {
@@ -49,6 +42,14 @@ void AFINBuildgunHooks::OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe) {
 				ArrowHolo->bNeedRebuild = true;
 			}
 		}
+	}
+}
+
+void AFINBuildgunHooks::Init() {
+	if(!IsRunningDedicatedServer()) {
+		SUBSCRIBE_UOBJECT_METHOD(AFGBuildGun, BeginPlay, [this](auto& scope, AFGBuildGun* BuildGun) {
+			BuildGun->mOnRecipeSampled.AddUniqueDynamic(this, &AFINBuildgunHooks::OnRecipeSampled);
+		});
 	}
 }
 
