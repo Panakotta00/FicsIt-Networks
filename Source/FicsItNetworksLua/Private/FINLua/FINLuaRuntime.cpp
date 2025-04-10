@@ -263,6 +263,8 @@ TTuple<int, int> FFINLuaRuntime::LuaTick() {
 			if (lua_type(LuaThread, -results+1) == LUA_TNUMBER) {
 				double timeout = lua_tonumber(LuaThread, -results+1);
 				Timeout = timeout;
+			} else if (lua_type(LuaThread, -results+1) == LUA_TNIL) {
+				Timeout = TNumericLimits<double>::Max();
 			}
 		}
 
