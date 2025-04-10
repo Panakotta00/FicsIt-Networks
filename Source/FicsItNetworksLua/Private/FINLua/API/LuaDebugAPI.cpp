@@ -24,7 +24,7 @@ namespace FINLua {
 				int args = lua_gettop(L);
 				FString Msg;
 				for (int i = 1; i <= args; ++i) {
-					Msg.Append(lua_tostring(L, i));
+					Msg.Append(luaFIN_convToFString(L, i));
 				}
 				UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Lua Log \"%s\""), *Msg);
 				return 0;

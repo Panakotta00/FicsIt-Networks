@@ -259,7 +259,7 @@ TTuple<int, int> FFINLuaRuntime::LuaTick() {
 
 	if (status == LUA_YIELD) {
 		Timeout.Reset();
-		if (results > 0) {
+		if (results > 1) {
 			if (lua_type(LuaThread, -results+1) == LUA_TNUMBER) {
 				double timeout = lua_tonumber(LuaThread, -results+1);
 				Timeout = timeout;
