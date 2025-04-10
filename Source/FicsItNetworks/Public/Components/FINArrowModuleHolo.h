@@ -75,6 +75,8 @@ public:
 	UFUNCTION()
 	void OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe);
 
+protected:
+	virtual void Init() override;
 };
 
 USTRUCT(BlueprintType)
