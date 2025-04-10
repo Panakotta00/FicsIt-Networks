@@ -65,7 +65,13 @@ namespace FINLua {
 						IFINLuaComponentNetworkAccessInterface* network = luaFIN_getComponentNetwork(L);
 						FGuid UUID;
 						FGuid::Parse(FString(id.c_str()), UUID);
-						FFIRTrace comp = network->GetComponentByID(UUID);
+						FFIRTrace comp;
+						try {
+							comp = network->GetComponentByID(UUID);
+						} catch (FFINLuaPanic panic) {
+							luaFIN_pushFString(L, panic.Message);
+							return lua_error(L);
+						}
 						luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(comp));
 						if (isT) lua_seti(L, -2, ++j);
 					}

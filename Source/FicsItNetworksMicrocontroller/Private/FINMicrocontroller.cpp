@@ -7,9 +7,15 @@
 #include "LuaUtil.h"
 #include "Async.h"
 #include "FicsItNetworksMicrocontroller.h"
+#include "FILLogContainer.h"
 #include "FINMicrocontrollerLuaModule.h"
+#include "FINNetworkUtils.h"
+#include "FINSignalSubsystem.h"
+#include "LuaComponentAPI.h"
+#include "LuaEventAPI.h"
 #include "LuaFuture.h"
 #include "LuaWorldAPI.h"
+#include "NetworkController.h"
 
 AFINMicrocontroller::AFINMicrocontroller() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -18,6 +24,10 @@ AFINMicrocontroller::AFINMicrocontroller() {
 	Inventory = CreateDefaultSubobject<UFGInventoryComponent>(TEXT("Inventory"));
 	Inventory->SetDefaultSize(1);
 	Inventory->Resize(1);
+
+	Log = CreateDefaultSubobject<UFILLogContainer>("Log");
+
+	NetworkController = CreateDefaultSubobject<UFINKernelNetworkController>("NetworkController");
 
 	SetupRuntime();
 }
@@ -34,6 +44,7 @@ void AFINMicrocontroller::BeginPlay() {
 		Reference = Cast<UFINMicrocontrollerReference>(NetworkComponent->AddComponentByClass(UFINMicrocontrollerReference::StaticClass(), false, FTransform::Identity, true));
 		Reference->Microcontroller = this;
 		NetworkComponent->FinishAddComponent(Reference, false, FTransform::Identity);
+		NetworkController->SetComponent(UFINNetworkUtils::FindNetworkComponentFromObject(NetworkComponent));
 	}
 }
 
@@ -69,7 +80,7 @@ void AFINMicrocontroller::PreSaveGame_Implementation(int32 saveVersion, int32 ga
 	if (PersistenceState.IsFailure()) {
 		FString message = FString::Printf(TEXT("%s: Unable to save computer state into a save-file (computer will restart when loading the save-file): %s"), *GetDebugInfo(), *PersistenceState.Failure);
 		UE_LOG(LogFicsItNetworksMicrocontroller, Display, TEXT("%s"), *message);
-		//GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
+		GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
 	}
 }
 
@@ -78,12 +89,17 @@ void AFINMicrocontroller::PostLoadGame_Implementation(int32 saveVersion, int32 g
 	StartRuntime();
 }
 
+void AFINMicrocontroller::HandleSignal(const FFINSignalData& Signal, const FFIRTrace& Sender) {
+	NetworkController->HandleSignal(Signal, Sender);
+}
+
 void AFINMicrocontroller::ToggleRuntime() {
 	switch (Runtime.GetStatus()) {
 		case FFINLuaRuntime::Running:
 			StopRuntime();
 			break;
 		default:
+			Log->EmptyLog();
 			StartRuntime();
 	}
 }
@@ -107,10 +123,15 @@ void AFINMicrocontroller::StartRuntime() {
 void AFINMicrocontroller::StopRuntime() {
 	Runtime.Destroy();
 	Error.Empty();
+	Proxies.Empty();
+	AFINSignalSubsystem* Subsys = AFINSignalSubsystem::GetSignalSubsystem(this);
+	if (Subsys) Subsys->IgnoreAll(this);
+	NetworkController->ClearSignals();
 }
 
 void AFINMicrocontroller::CrashRuntime(const FString& message) {
 	Error = message;
+	GetLog()->PushLogEntry(FIL_Verbosity_Fatal, message);
 	Runtime.Destroy();
 }
 
@@ -149,6 +170,10 @@ FString AFINMicrocontroller::GetDebugInfo() const {
 	return GetName();
 }
 
+UFILLogContainer* AFINMicrocontroller::GetLog() const {
+	return Log;
+}
+
 EFINMicrocontrollerState AFINMicrocontroller::GetStatus() const {
 	if (!Error.IsEmpty()) return FIN_Microcontroller_State_Failed;
 
@@ -167,13 +192,17 @@ void AFINMicrocontroller::SetupRuntime() {
 	Runtime.Modules.Add("WorldModule");
 	Runtime.Modules.Add("MicrocontrollerModule");
 	Runtime.Modules.Add("FutureModule");
-	//Runtime.Modules.Add("LogModule");
+	Runtime.Modules.Add("LogModule");
+	Runtime.Modules.Add("ComponentModule");
+	Runtime.Modules.Add("EventModule");
 
 	Runtime.OnPreModules.AddWeakLambda(this, [this]() {
 		lua_State* L = Runtime.GetLuaState();
 		FINLua::luaFIN_setReferenceCollector(L, ReferenceCollector);
 		FINLua::luaFIN_setWorld(L, GetWorld());
 		FINLua::luaFIN_setMicrocontroller(L, this);
+		FINLua::luaFIN_setComponentNetwork(L, &ComponentNetwork);
+		FINLua::luaFIN_setEventSystem(L, EventSystem);
 		FINLua::luaFIN_createFutureDelegate(L).AddWeakLambda(this, [this](const FINLua::FLuaFuture& Future) {
 			FINLua::FLuaFuture f = Future;
 			AsyncTask(ENamedThreads::GameThread, [this, f]() { // TODO: Maybe this has to be a soft object ptr
@@ -186,17 +215,53 @@ void AFINMicrocontroller::SetupRuntime() {
 		});
 	});
 
-	/*Runtime.OnPreLuaTick.AddWeakLambda(this, [this](TArray<TSharedPtr<void>>& TickStack) {
+	Runtime.OnPreLuaTick.AddWeakLambda(this, [this](TArray<TSharedPtr<void>>& TickStack) {
 		TickStack.Add(MakeShared<FFILLogScope>(GetLog()));
-	});*/
+	});
 	Runtime.OnPostReset.AddWeakLambda(this, [this]() {
 		TOptional<FString> error = Runtime.LoadState(PersistenceState);
 		if (error) {
 			StartRuntime();
 			FString message = FString::Printf(TEXT("%s: Unable to load computer state from save-file (computer will restart): %s"), *GetDebugInfo(), **error);
 			UE_LOG(LogFicsItNetworksMicrocontroller, Display, TEXT("%s"), *message);
-			//GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
+			GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
 		}
+	});
+
+	ComponentNetwork.OnGetComponentByID.BindWeakLambda(this, [this](const FGuid& ID) {
+		if (Proxies.Num() >= ProxyLimit && !Proxies.Contains(ID)) throw FFINLuaPanic{TEXT("Unable to proxy more components!")};
+		FFIRTrace trace = NetworkController->GetComponentByID(ID);
+		if (trace) Proxies.Add(ID);
+		return trace;
+	});
+	ComponentNetwork.OnGetComponentByNick.BindWeakLambda(this, [this](const FString& Nick) {
+		return NetworkController->GetComponentByNick(Nick);
+	});
+	ComponentNetwork.OnGetComponentByClass.BindWeakLambda(this, [this](UClass* Class, bool bInRedirect) {
+		return NetworkController->GetComponentByClass(Class, bInRedirect);
+	});
+	EventSystem.OnListen.BindWeakLambda(this, [this](FFIRTrace Object) {
+		AFINSignalSubsystem::GetSignalSubsystem(this)->Listen(Object.GetUnderlyingPtr(), Object.Reverse() / NetworkController->GetComponent().GetObject() / this);
+	});
+	EventSystem.OnListening.BindWeakLambda(this, [this]() {
+		return AFINSignalSubsystem::GetSignalSubsystem(this)->GetListening(this);
+	});
+	EventSystem.OnIgnoreAll.BindWeakLambda(this, [this]() {
+		AFINSignalSubsystem::GetSignalSubsystem(this)->IgnoreAll(this);
+	});
+	EventSystem.OnClear.BindWeakLambda(this, [this]() {
+		NetworkController->ClearSignals();
+	});
+	EventSystem.OnIgnore.BindWeakLambda(this, [this](UObject* Object) {
+		AFINSignalSubsystem::GetSignalSubsystem(this)->Ignore(this, Object);
+	});
+	EventSystem.OnPullSignal.BindWeakLambda(this, [this]() -> TOptional<TTuple<FFIRTrace, FFINSignalData>> {
+		if (NetworkController->GetSignalCount() < 1) {
+			return {};
+		}
+		FFIRTrace sender;
+		FFINSignalData data = NetworkController->PopSignal(sender);
+		return {{sender, data}};
 	});
 }
 

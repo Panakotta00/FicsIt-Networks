@@ -4,7 +4,11 @@
 #include "FINLuaReferenceCollector.h"
 #include "FINLuaRuntime.h"
 #include "FINLuaRuntimePersistence.h"
+#include "FINSignalListener.h"
+#include "LuaComponentAPI.h"
+#include "LuaEventAPI.h"
 #include "Buildables/FGBuildable.h"
+#include "NetworkController.h"
 #include "FINMicrocontroller.generated.h"
 
 class UFINMicrocontrollerReference;
@@ -17,17 +21,25 @@ enum EFINMicrocontrollerState {
 };
 
 UCLASS(Blueprintable)
-class FICSITNETWORKSMICROCONTROLLER_API AFINMicrocontroller : public AFGBuildable {
+class FICSITNETWORKSMICROCONTROLLER_API AFINMicrocontroller : public AFGBuildable, public IFINSignalListener {
 	GENERATED_BODY()
 public:
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly)
 	UFGInventoryComponent* Inventory;
+
+	UPROPERTY(SaveGame, BlueprintReadOnly)
+	UFILLogContainer* Log;
+
+	UPROPERTY(SaveGame)
+	UFINKernelNetworkController* NetworkController;
 
 	UPROPERTY(SaveGame)
 	AActor* NetworkComponent = nullptr;
 
 	UPROPERTY()
 	UFINMicrocontrollerReference* Reference = nullptr;
+
+	int ProxyLimit = 5;
 
 	AFINMicrocontroller();
 
@@ -40,6 +52,10 @@ public:
 	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	virtual void PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
 	// End IFGSaveInterface
+
+	// Begin IFINSignalListener
+	virtual void HandleSignal(const FFINSignalData& Signal, const FFIRTrace& Sender) override;
+	// End IFINSignalListener
 
 	UFUNCTION(BlueprintCallable)
 	void ToggleRuntime();
@@ -58,6 +74,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FString GetDebugInfo() const;
+	UFUNCTION(BlueprintCallable)
+	UFILLogContainer* GetLog() const;
 
 	UFUNCTION(BlueprintCallable)
 	EFINMicrocontrollerState GetStatus() const;
@@ -65,9 +83,13 @@ public:
 protected:
 	void SetupRuntime();
 
+	TSet<FGuid> Proxies;
+
 	FFINLuaRuntime Runtime;
 	UPROPERTY()
 	FFINLuaReferenceCollector ReferenceCollector;
+	FFINLuaComponentNetworkAccessDelegates ComponentNetwork;
+	FFINLuaEventSystem EventSystem;
 	UPROPERTY(SaveGame)
 	FString Error;
 

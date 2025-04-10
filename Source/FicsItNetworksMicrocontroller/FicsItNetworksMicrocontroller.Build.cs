@@ -18,6 +18,7 @@ public class FicsItNetworksMicrocontroller : ModuleRules
                 "FicsItNetworksComputer",
                 "FicsItNetworksLua",
                 "FicsItReflection",
+                "FicsItLogLibrary",
             }
         );
 
