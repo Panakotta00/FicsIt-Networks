@@ -67,6 +67,11 @@
 			"LoadingPhase": "PostDefault"
 		},
 		{
+			"Name": "FicsItNetworksMicrocontroller",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		},
+		{
 			"Name": "FicsItNetworksMisc",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
