@@ -5,9 +5,11 @@
 
 #define LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY "future-registry"
 #define LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY "timeout-registry"
+#define LUAFIN_HIDDENGLOBAL_FUTUREDELEGATE "future-delegate"
 
 namespace FINLua {
 	typedef TSharedRef<TFIRInstancedStruct<FFINFuture>> FLuaFuture;
+	typedef TMulticastDelegate<void(const FLuaFuture&)> FLuaFutureDelegate;
 
 	enum EFutureState {
 		Future_Pending,
@@ -168,4 +170,14 @@ namespace FINLua {
 	 * Returns the next timeout timestamp. (Not duration!)
 	 */
 	FICSITNETWORKSLUA_API int luaFIN_timeoutTask(lua_State* L, int, lua_KContext);
+
+	/**
+	 * Creates, Pushes and Returns the Future Delegate. Required for the Future Structs to work properly.
+	 */
+	FICSITNETWORKSLUA_API FLuaFutureDelegate& luaFIN_createFutureDelegate(lua_State* L);
+
+	/**
+	 * Returns a reference to the Future Delegate that gets called when a Future Struct gets pushed that is not done yet.
+	 */
+	FICSITNETWORKSLUA_API FLuaFutureDelegate& luaFIN_getFutureDelegate(lua_State* L);
 }

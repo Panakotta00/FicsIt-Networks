@@ -11,6 +11,7 @@
 #include "FINMediaSubsystem.h"
 #include "FINSignalSubsystem.h"
 #include "LuaEventAPI.h"
+#include "LuaFuture.h"
 #include "LuaKernelAPI.h"
 #include "LuaWorldAPI.h"
 #include "Engine/Engine.h"
@@ -54,6 +55,9 @@ UFINLuaProcessor::UFINLuaProcessor() {
 		FINLua::luaFIN_setKernel(Runtime.Runtime.GetLuaState(), GetKernel());
 		FINLua::luaFIN_setFileSystem(Runtime.Runtime.GetLuaState(), GetKernel()->GetFileSystem());
 		FINLua::luaFIN_setEventSystem(Runtime.Runtime.GetLuaState(), EventSystem);
+		FINLua::luaFIN_createFutureDelegate(Runtime.Runtime.GetLuaState()).AddWeakLambda(this, [this](const FINLua::FLuaFuture& Future) {
+			GetKernel()->PushFuture(Future);
+		});
 	});
 	Runtime.Runtime.OnPostReset.AddWeakLambda(this, [this]() {
 		TOptional<FString> error = Runtime.Runtime.LoadState(RuntimeState);

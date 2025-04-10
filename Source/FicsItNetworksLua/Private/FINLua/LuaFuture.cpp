@@ -20,9 +20,7 @@ namespace FINLua {
 	LuaModule(R"(/**
 	 * @LuaModule		FutureModule
 	 * @DisplayName		Future Module
-	 *
-	 * @Dependency		KernelModule
-	 *
+	 * @Dependency KernelModule
 	 * This Module provides the Future type and all its necessary functionallity.
 	 *
 	 * The Future system of FicsIt-Networks combines ideas from Rust Async/Await, libuv and Python 2.0 Async.
@@ -803,6 +801,8 @@ namespace FINLua {
 			luaL_setmetatable(L, FutureDependents::_Name);
 			lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY);
 
+			luaFIN_getFutureDelegate(L); // Ensure delegate got pushed
+
 			lua_getglobal(L, "future");
 			luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_timeoutTask)), 0);
 			lua_setfield(L, -2, "timeoutTask");
@@ -815,8 +815,7 @@ namespace FINLua {
 		new (future) FLuaFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(Future));
 		luaL_setmetatable(L, FutureModule::FutureStruct::_Name);
 		if (!(**future)->IsDone()) {
-			UFINKernelSystem* kernel = luaFIN_getKernel(L);
-			kernel->PushFuture(*future);
+			luaFIN_getFutureDelegate(L).Broadcast(*future);
 		}
 	}
 
@@ -1229,5 +1228,33 @@ namespace FINLua {
 			lua_pushnil(L);
 			return luaFIN_yield(L, 1, NULL, luaFIN_timeoutTask);
 		}
+	}
+
+	FLuaFutureDelegate& luaFIN_createFutureDelegate(lua_State* L) {
+		lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
+		FLuaFutureDelegate* delegate = (FLuaFutureDelegate*)lua_newuserdata(L, sizeof(FLuaFutureDelegate));
+		new (delegate) FLuaFutureDelegate();
+		lua_newtable(L);
+		lua_pushcfunction(L, [](lua_State* L) {
+			FLuaFutureDelegate* delegate = (FLuaFutureDelegate*)lua_touserdata(L, 1);
+			delegate->~TMulticastDelegate();
+			return 0;
+		});
+		luaFIN_persistValue(L, -1, TEXT("FutureDelegate__gc"));
+		lua_setfield(L, -2, "__gc");
+		lua_setmetatable(L, -2);
+		lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_FUTUREDELEGATE);
+		luaFIN_persistValue(L, -1, TEXT("FutureDelegate"));
+		lua_pop(L, 1);
+		return *delegate;
+	}
+
+	FLuaFutureDelegate& luaFIN_getFutureDelegate(lua_State* L) {
+		lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
+		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREDELEGATE);
+		FLuaFutureDelegate* delegate = static_cast<FLuaFutureDelegate*>(lua_touserdata(L, -1));
+		if (!delegate) luaL_error(L, "Future Delegate not valid!");
+		lua_pop(L, 2);
+		return *delegate;
 	}
 }
