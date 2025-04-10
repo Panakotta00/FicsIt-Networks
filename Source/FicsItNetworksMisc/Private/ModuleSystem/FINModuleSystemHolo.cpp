@@ -74,11 +74,11 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 	USceneComponent* panel_r = Cast<USceneComponent>(hitResult.Component.Get());
 	while (IsValid(panel_r) && !panel_r->IsA<UFINModuleSystemPanel>()) panel_r = Cast<USceneComponent>(panel_r->GetAttachParent());
 	UFINModuleSystemPanel* panel = Cast<UFINModuleSystemPanel>(panel_r);
-
+	if(IsValid(Snapped) && Snapped != panel) {
+		Snapped->HologramSnapped.Broadcast(false);
+	}
 	if (!IsValid(panel)) {
-		if(IsValid(Snapped)) {
-			Snapped->HologramSnapped.Broadcast(false);
-		}
+
 		Snapped = nullptr;
 		return false;
 	}

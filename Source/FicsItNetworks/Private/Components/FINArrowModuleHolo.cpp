@@ -8,6 +8,7 @@
 #include "FicsItNetworksModule.h"
 #include "FINArrowModuleBase.h"
 #include "MCPBlueprintLibrary.h"
+#include "NativeHookManager.h"
 #include "SUniformGridPanel.h"
 #include "TimerManager.h"
 #include "Components/FINDefaultExtendedHolo.h"
@@ -22,14 +23,6 @@ AFINBuildgunHooks::AFINBuildgunHooks() {
 
 void AFINBuildgunHooks::BeginPlay() {
 	Super::BeginPlay();
-
-	if(!IsRunningDedicatedServer()) {
-		auto var = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-		AFGCharacterPlayer* AFG = Cast<AFGCharacterPlayer>(var);
-		AFG->GetBuildGun()->mOnRecipeSampled.AddUniqueDynamic(this, &AFINBuildgunHooks::OnRecipeSampled);
-	}
-
-	
 }
 
 void AFINBuildgunHooks::OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe) {
@@ -49,6 +42,14 @@ void AFINBuildgunHooks::OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe) {
 				ArrowHolo->bNeedRebuild = true;
 			}
 		}
+	}
+}
+
+void AFINBuildgunHooks::Init() {
+	if(!IsRunningDedicatedServer()) {
+		SUBSCRIBE_UOBJECT_METHOD(AFGBuildGun, BeginPlay, [this](auto& scope, AFGBuildGun* BuildGun) {
+			BuildGun->mOnRecipeSampled.AddUniqueDynamic(this, &AFINBuildgunHooks::OnRecipeSampled);
+		});
 	}
 }
 
@@ -205,6 +206,7 @@ void AFINArrowModuleHolo::ShowPropertyDialog() {
 TSharedRef<SWidget> UFINPanelTraceConfigPopup::RebuildWidget() {
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("None", FINPanelTraceEnd_None)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Straight", FINPanelTraceEnd_Straight)));
+	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Long Straight", FINPanelTraceEnd_ExtendedStraight)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Arrow", FINPanelTraceEnd_ArrowOut)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Blocked", FINPanelTraceEnd_Blockage)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Short Blocked", FINPanelTraceEnd_RecessedBlockage)));

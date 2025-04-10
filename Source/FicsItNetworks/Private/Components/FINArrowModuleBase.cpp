@@ -138,6 +138,11 @@ void AFINArrowModuleBase::RebuildComponents(AActor* Parent, USceneComponent* Att
 					MeshComponent = CreateAndAddComponent(TipStraightMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
 					break;
 				}
+				case FINPanelTraceEnd_ExtendedStraight: {
+					//UE_LOG(LogFicsItNetworks, Verbose, TEXT("     --- FINPanelTraceEnd_Straight"));
+					MeshComponent = CreateAndAddComponent(TipExtendedStraightMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
+					break;
+				}
 				case FINPanelTraceEnd_Blockage: {
 					//UE_LOG(LogFicsItNetworks, Verbose, TEXT("     --- FINPanelTraceEnd_Blockage"));
 					MeshComponent = CreateAndAddComponent(TipBlockedMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
