@@ -342,7 +342,7 @@ namespace FINLua {
 			 */)", canGet) {
 				luaL_checkudata(L, 1, _Name);
 				lua_getiuservalue(L, 1, 1);
-				lua_State* thread = lua_tothread(L, 1);
+				lua_State* thread = lua_tothread(L, -1);
 				int status = lua_status(thread);
 				lua_pushboolean(L, status == LUA_OK && lua_gettop(thread) == 0);
 				return 1;
