@@ -216,6 +216,14 @@ void AFINMicrocontroller::SetCode(const FString& Code) {
 	});
 }
 
+void AFINMicrocontroller::SetStorage(const FString& InStorage) {
+	Storage = InStorage;
+	OnStorageChanged.Broadcast(Storage);
+}
+FString AFINMicrocontroller::GetStorage() const {
+	return Storage;
+}
+
 FString AFINMicrocontroller::GetDebugInfo() const {
 	return GetName();
 }

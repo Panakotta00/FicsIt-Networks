@@ -6,6 +6,7 @@
 #include "LuaObject.h"
 #include "FINMicrocontroller.h"
 #include "FINNetworkCircuit.h"
+#include "LuaPersistence.h"
 
 namespace FINLua {
 	LuaModule(R"(/**
@@ -19,28 +20,42 @@ namespace FINLua {
 		 * @LuaLibrary		microcontroller
 		 * @DisplayName		Microcontroller Library
 		 */)", microcontroller) {
-			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Object	getSelf()
-			 * @DisplayName		Get Self
-			 *
-			 * Returns an Object reference to this Microcontroller itself.
-			 */)", getSelf) {
+			LuaModuleTableBareField(R"(/**
+			 * @LuaBareField	self	FINMicrocontroller
+			 * @DisplayName		Self
+			 */)", self) {
 				AFINMicrocontroller* microcontroller = luaFIN_getMicrocontroller(L);
 				luaFIN_pushObject(L, FIRTrace(microcontroller));
-				return 1;
+				luaFIN_persistValue(L, -1, "Microcontroller_self");
+			}
+
+			LuaModuleTableBareField(R"(/**
+			 * @LuaBareField	component	Object
+			 * @DisplayName		Component
+			 */)", component) {
+				AFINMicrocontroller* microcontroller = luaFIN_getMicrocontroller(L);
+				luaFIN_pushObject(L, FIRTrace(microcontroller->NetworkComponent));
+				luaFIN_persistValue(L, -1, "Microcontroller_component");
 			}
 
 			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		Object	getComponent()
-			 * @DisplayName		Get Component
-			 *
-			 * Returns an Object reference to the Network Component this Microcontroller is attached to.
-			 */)", getComponent) {
+			 * @LuaFunction		setStorage(string)
+			 * @DisplayName		Set Storage
+			 */)", setStorage) {
+				FString storage = luaFIN_convToFString(L, 1);
 				AFINMicrocontroller* microcontroller = luaFIN_getMicrocontroller(L);
-				luaFIN_pushObject(L, FIRTrace(microcontroller->NetworkComponent));
-				return 1;
+				microcontroller->SetStorage(storage);
+				return 0;
 			}
 
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		getStorage(string)
+			 * @DisplayName		Get Storage
+			 */)", getStorage) {
+				AFINMicrocontroller* microcontroller = luaFIN_getMicrocontroller(L);
+				luaFIN_pushFString(L, microcontroller->GetStorage());
+				return 1;
+			}
 
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		open(integer...)

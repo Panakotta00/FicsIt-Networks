@@ -23,10 +23,15 @@ enum EFINMicrocontrollerState {
 	FIN_Microcontroller_State_Failed,
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFINMicrocontrollerStorageChanged, FString, Storage);
+
 UCLASS(Blueprintable)
 class FICSITNETWORKSMICROCONTROLLER_API AFINMicrocontroller : public AFGBuildable, public IFINSignalListener, public IFINNetworkCircuitNode, public IFINNetworkComponent, public IFINNetworkMessageInterface {
 	GENERATED_BODY()
 public:
+	UPROPERTY(BlueprintAssignable)
+	FFINMicrocontrollerStorageChanged OnStorageChanged;
+
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly)
 	UFGInventoryComponent* Inventory;
 
@@ -47,6 +52,9 @@ public:
 
 	UPROPERTY(SaveGame)
 	TSet<int> OpenPorts;
+
+	UPROPERTY(SaveGame)
+	FString Storage;
 
 	UPROPERTY()
 	UFINMicrocontrollerReference* Reference = nullptr;
@@ -108,6 +116,11 @@ public:
 	FString GetCode(const FString& Default) const;
 	UFUNCTION(BlueprintCallable)
 	void SetCode(const FString& Code);
+
+	UFUNCTION(BlueprintCallable)
+	void SetStorage(const FString& InStorage);
+	UFUNCTION(BlueprintCallable)
+	FString GetStorage() const;
 
 	UFUNCTION(BlueprintCallable)
 	FString GetDebugInfo() const;
