@@ -19,6 +19,7 @@ public class FicsItNetworksMicrocontroller : ModuleRules
                 "FicsItNetworksLua",
                 "FicsItReflection",
                 "FicsItLogLibrary",
+                "Eris"
             }
         );
 

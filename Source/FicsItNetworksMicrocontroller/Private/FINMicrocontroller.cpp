@@ -7,7 +7,10 @@
 #include "LuaUtil.h"
 #include "Async.h"
 #include "FicsItNetworksMicrocontroller.h"
+#include "FicsItReflection.h"
 #include "FILLogContainer.h"
+#include "FINAdvancedNetworkConnectionComponent.h"
+#include "FINComputerNetworkCard.h"
 #include "FINMicrocontrollerLuaModule.h"
 #include "FINNetworkUtils.h"
 #include "FINSignalSubsystem.h"
@@ -32,8 +35,16 @@ AFINMicrocontroller::AFINMicrocontroller() {
 	SetupRuntime();
 }
 
+AFINMicrocontroller::~AFINMicrocontroller() {
+	Destroy();
+}
+
 void AFINMicrocontroller::BeginPlay() {
 	Super::BeginPlay();
+
+	if (!ID.IsValid()) {
+		ID = FGuid::NewGuid();
+	}
 
 	if (!IsValid(NetworkComponent)) {
 		TArray<FInventoryStack> refund;
@@ -44,12 +55,23 @@ void AFINMicrocontroller::BeginPlay() {
 		Reference = Cast<UFINMicrocontrollerReference>(NetworkComponent->AddComponentByClass(UFINMicrocontrollerReference::StaticClass(), false, FTransform::Identity, true));
 		Reference->Microcontroller = this;
 		NetworkComponent->FinishAddComponent(Reference, false, FTransform::Identity);
-		NetworkController->SetComponent(UFINNetworkUtils::FindNetworkComponentFromObject(NetworkComponent));
+		UObject* net = UFINNetworkUtils::FindNetworkComponentFromObject(NetworkComponent);
+
+		AFINSignalSubsystem::GetSignalSubsystem(this)->Listen(this, FFIRTrace(this));
+
+		if (UFINAdvancedNetworkConnectionComponent* connector = Cast<UFINAdvancedNetworkConnectionComponent>(net)) {
+			NetworkController->SetComponent(this);
+			connector->AddConnectedNode(this);
+		} else {
+			NetworkController->SetComponent(net);
+		}
 	}
 }
 
 void AFINMicrocontroller::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	HandledMessages.Empty();
 
 	if (GetStatus() != FIN_Microcontroller_State_Running) return;
 
@@ -93,6 +115,33 @@ void AFINMicrocontroller::HandleSignal(const FFINSignalData& Signal, const FFIRT
 	NetworkController->HandleSignal(Signal, Sender);
 }
 
+TSet<UObject*> AFINMicrocontroller::GetConnected_Implementation() const {
+	return {UFINNetworkUtils::FindNetworkComponentFromObject(NetworkComponent)};
+}
+
+AFINNetworkCircuit* AFINMicrocontroller::GetCircuit_Implementation() const {
+	return NetworkCircuit;
+}
+
+void AFINMicrocontroller::SetCircuit_Implementation(AFINNetworkCircuit* Circuit) {
+	NetworkCircuit = Circuit;
+}
+
+void AFINMicrocontroller::HandleMessage(const FGuid& MsgID, const FGuid& Sender, const FGuid& Receiver, int Port, const FIRArray& Data) {
+	static UFIRSignal* Signal = nullptr;
+	if (!Signal) Signal = FFicsItReflectionModule::Get().FindClass(StaticClass())->FindFIRSignal("NetworkMessage");
+	{
+		FScopeLock Lock(&HandledMessagesMutex);
+		if (HandledMessages.Contains(MsgID) || !Signal) return;
+		HandledMessages.Add(MsgID);
+	}
+	if (!OpenPorts.Contains(Port)) return;
+	if (Receiver.IsValid() && Receiver != ID) return;
+	TArray<FFIRAnyValue> Parameters = { Sender.ToString(), (FIRInt)Port };
+	Parameters.Append(Data);
+	Signal->Trigger(this, Parameters);
+}
+
 void AFINMicrocontroller::ToggleRuntime() {
 	switch (Runtime.GetStatus()) {
 		case FFINLuaRuntime::Running:
@@ -124,6 +173,7 @@ void AFINMicrocontroller::StopRuntime() {
 	Runtime.Destroy();
 	Error.Empty();
 	Proxies.Empty();
+	OpenPorts.Empty();
 	AFINSignalSubsystem* Subsys = AFINSignalSubsystem::GetSignalSubsystem(this);
 	if (Subsys) Subsys->IgnoreAll(this);
 	NetworkController->ClearSignals();
@@ -264,4 +314,3 @@ void AFINMicrocontroller::SetupRuntime() {
 		return {{sender, data}};
 	});
 }
-
