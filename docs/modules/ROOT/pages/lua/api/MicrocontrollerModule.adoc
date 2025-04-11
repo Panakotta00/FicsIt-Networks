@@ -14,6 +14,30 @@ This Module provides an interface to interact with the Microcontroller.
 === **microcontroller**
 
 
-=== __microcontroller.__**getSelf** () -> xref:/reflection/classes/Object.adoc[Object]
-Returns an Object reference to the Network Component this Microcontroller is attached to.
+=== __microcontroller.__**broadcast** (integer, ...)
+
+
+=== __microcontroller.__**close** (integer...)
+
+
+=== __microcontroller.__**closeAll** ()
+
+
+=== __microcontroller.__**component** : xref:/reflection/classes/Object.adoc[Object]
+
+
+=== __microcontroller.__**getStorage** (string)
+
+
+=== __microcontroller.__**open** (integer...)
+
+
+=== __microcontroller.__**self** : FINMicrocontroller
+
+
+=== __microcontroller.__**send** ()
+
+
+=== __microcontroller.__**setStorage** (string)
+
 

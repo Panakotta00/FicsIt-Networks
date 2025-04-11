@@ -125,6 +125,7 @@
 *** xref:reflection/classes/LightsControlPanel.adoc[LightsControlPanel]
 *** xref:reflection/classes/Manufacturer.adoc[Manufacturer]
 *** xref:reflection/classes/MicroDisplayModule.adoc[MicroDisplayModule]
+*** xref:reflection/classes/Microcontroller.adoc[Microcontroller]
 *** xref:reflection/classes/ModularIndicatorPole.adoc[ModularIndicatorPole]
 *** xref:reflection/classes/ModularPoleModule_Buzzer.adoc[ModularPoleModule_Buzzer]
 *** xref:reflection/classes/ModularPoleModule_Indicator.adoc[ModularPoleModule_Indicator]
