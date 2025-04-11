@@ -32,7 +32,7 @@ namespace FINLua {
 	 * @param Index the index of the lua value you try to get as dynamic Future Struct
 	 * @return a shared pointer to the dynamic Future Struct of the lua future in the lua stack. Will error if lua value is not future.
 	 */
-	FICSITNETWORKSLUA_API [[nodiscard]] const FLuaFuture& luaFIN_checkFutureStruct(lua_State* L, int Index);
+	FICSITNETWORKSLUA_API const FLuaFuture& luaFIN_checkFutureStruct(lua_State* L, int Index);
 
 	/**
 	 * @brief Pushes a LuaFuture that wraps the thread/coroutine at the given index in the lua stack to the stack.
