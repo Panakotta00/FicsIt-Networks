@@ -1,16 +1,11 @@
 = Future Module
 :table-caption!:
 
+@Dependency KernelModule
 This Module provides the Future type and all its necessary functionallity.
 
 The Future system of FicsIt-Networks combines ideas from Rust Async/Await, libuv and Python 2.0 Async.
 The most relevant participant is the Future (check the futures documentation on more insight on how it operates).
-
-[cols="1,5a",separator="!"]
-!===
-!Dependencies
-! xref:/lua/api/KernelModule.adoc[KernelModule]
-!===
 
 == Globals
 

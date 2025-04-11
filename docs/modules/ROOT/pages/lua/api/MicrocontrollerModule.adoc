@@ -1,0 +1,19 @@
+= Microcontroller Module
+:table-caption!:
+
+This Module provides an interface to interact with the Microcontroller.
+
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/ReflectionSystemObjectModule.adoc[ReflectionSystemObjectModule]
+!===
+
+== Globals
+
+=== **microcontroller**
+
+
+=== __microcontroller.__**getSelf** () -> xref:/reflection/classes/Object.adoc[Object]
+Returns an Object reference to the Network Component this Microcontroller is attached to.
+
