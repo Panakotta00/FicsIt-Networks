@@ -3,6 +3,7 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "SubsystemActorManager.h"
 #include "FGBuildGunBuild.h"
 #include "FGPlayerController.h"
 #include "FicsItNetworksModule.h"
@@ -21,8 +22,10 @@
 AFINBuildgunHooks::AFINBuildgunHooks() {
 }
 
-void AFINBuildgunHooks::BeginPlay() {
-	Super::BeginPlay();
+AFINBuildgunHooks::~AFINBuildgunHooks() {
+	if(!IsRunningDedicatedServer() && DelegateHandle.IsValid()) {
+		UNSUBSCRIBE_UOBJECT_METHOD(AFGBuildGun, BeginPlay, DelegateHandle);
+	}
 }
 
 void AFINBuildgunHooks::OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe) {
@@ -46,13 +49,15 @@ void AFINBuildgunHooks::OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe) {
 }
 
 void AFINBuildgunHooks::Init() {
-	if(!IsRunningDedicatedServer()) {
-		SUBSCRIBE_UOBJECT_METHOD(AFGBuildGun, BeginPlay, [this](auto& scope, AFGBuildGun* BuildGun) {
-			BuildGun->mOnRecipeSampled.AddUniqueDynamic(this, &AFINBuildgunHooks::OnRecipeSampled);
+	if(!IsRunningDedicatedServer() && !DelegateHandle.IsValid()) {
+		DelegateHandle = SUBSCRIBE_UOBJECT_METHOD(AFGBuildGun, BeginPlay, [](TCallScope<void(*)(AFGBuildGun*)>& CallScope, AFGBuildGun* BuildGun) {
+			USubsystemActorManager* SubsystemActorManager = BuildGun->GetWorld()->GetSubsystem<USubsystemActorManager>();
+			AFINBuildgunHooks* Subsystem = SubsystemActorManager->GetSubsystemActor<AFINBuildgunHooks>();
+			BuildGun->mOnRecipeSampled.AddUniqueDynamic(Subsystem , &AFINBuildgunHooks::OnRecipeSampled);
+			//BuildGun->mOnRecipeSampled.AddUniqueDynamic(SMLModSubsystemsManager, &AFINBuildgunHooks::OnRecipeSampled);
 		});
 	}
 }
-
 
 AFINArrowModuleHolo::AFINArrowModuleHolo() {
 	PopupClass = FSoftObjectPath(TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_Popup.Widget_Popup_C"));
