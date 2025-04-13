@@ -116,7 +116,7 @@ BeginProp(RFloat, indicatorHeadlift, "Indicator Headlift", "The amount of headli
 BeginProp(RFloat, indicatorHeadliftPct, "Indicator Headlift Percent", "The amount of headlift the indicator shows as percantage from max.") {
 	FIRReturn self->GetIndicatorHeadLiftPct();
 } EndProp()
-BeginProp(RFloat, userFlowLimit, "User Flow Limit", "The flow limit of this pump the user can specifiy. Use -1 for now user set limit. (in m^3/s)") {
+BeginProp(RFloat, userFlowLimit, "User Flow Limit", "The flow limit of this pump the user can specifiy. Use -1 for no user set limit. (in m^3/s)") {
 	FIRReturn self->GetUserFlowLimit();
 } PropSet() {
 	self->SetUserFlowLimit(Val);
