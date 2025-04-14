@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: satisfactorymodding/SatisfactoryModLoader
-          ref: refs/heads/dev
+          ref: 31b2e03978dcfede7d578a299818af2d900dde83
           path: SatisfactoryModLoader
 
       - uses: actions/checkout@v4
