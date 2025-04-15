@@ -1,6 +1,6 @@
 # FicsIt-Networks
 
-FicsIt-Networks allows you to control, mointor, manage and automate each process of your factory by providing a network system and programmable computers, aswell as other I/O.
+FicsIt-Networks allows you to control, monitor, manage and automate each process of your factory by providing a network system and programmable computers, aswell as other I/O.
 It is inspired by [OpenComputers](https://github.com/MightyPirates/OpenComputers).
 
 **If you want to learn more:**
