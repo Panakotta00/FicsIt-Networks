@@ -41,7 +41,7 @@ jobs:
       - name: Download, Extract and Setup UE
         working-directory: ue
         run: |
-          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.*"
+          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.*" 5.3.2-css-66
           7z x UnrealEngine-CSS-Editor-Win64.7z.001
           rm UnrealEngine-CSS-Editor-Win64.7z*
           .\\SetupScripts\\Register.bat
