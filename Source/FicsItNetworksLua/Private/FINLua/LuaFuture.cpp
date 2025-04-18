@@ -1060,7 +1060,16 @@ namespace FINLua {
 			double timeout;
 			// We do not unset because we are within a task iteration loop, removing the task here would be bad and break the loop
 			switch (luaFIN_handlePollResults(L, 4, 3, 3, {}, &timeout)) {
-				case 0:
+				case 0: {
+					lua_getuservalue(L, 3);
+					lua_State* thread = lua_tothread(L, -1);
+					lua_pop(L, 1);
+					EFutureState state = luaFIN_getFutureState(thread);
+					if (state == Future_Failed) {
+						lua_xmove(thread, L, 1);
+						lua_error(L);
+					}
+				}
 				case 1:
 				case 2:
 					lua_settop(L, 3);
