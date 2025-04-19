@@ -45,15 +45,6 @@ void AFINBuildgunHooks::OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe) {
 	}
 }
 
-void AFINBuildgunHooks::Init() {
-	if(!IsRunningDedicatedServer()) {
-		SUBSCRIBE_UOBJECT_METHOD(AFGBuildGun, BeginPlay, [this](auto& scope, AFGBuildGun* BuildGun) {
-			BuildGun->mOnRecipeSampled.AddUniqueDynamic(this, &AFINBuildgunHooks::OnRecipeSampled);
-		});
-	}
-}
-
-
 AFINArrowModuleHolo::AFINArrowModuleHolo() {
 	PopupClass = FSoftObjectPath(TEXT("/Game/FactoryGame/Interface/UI/InGame/Widget_Popup.Widget_Popup_C"));
 	PopupContentClass = FSoftObjectPath(TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_PanelTraceConfigPopup.BPW_FIN_PanelTraceConfigPopup_C"));
