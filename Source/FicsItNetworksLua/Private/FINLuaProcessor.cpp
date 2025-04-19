@@ -168,10 +168,6 @@ void UFINLuaProcessor::Tick(float InDelta) {
 void UFINLuaProcessor::Stop(bool bIsCrash) {
 	UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Lua Processor stop %s"), *DebugInfo, bIsCrash ? TEXT("due to crash") : TEXT(""));
 	Runtime.Runtime.Destroy();
-
-	UObject* comp = GetKernel()->GetNetwork()->GetComponent().GetObject();
-	AFINSignalSubsystem::GetSignalSubsystem(comp)->IgnoreAll(comp);
-	Kernel->GetNetwork()->ClearSignals();
 }
 
 void UFINLuaProcessor::Reset() {
