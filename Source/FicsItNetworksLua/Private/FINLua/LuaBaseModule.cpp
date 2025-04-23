@@ -10,8 +10,11 @@
 #include "FINLua/LuaPersistence.h"
 #include "Logging/StructuredLog.h"
 #include "Registry/ModContentRegistry.h"
-//#include "tracy/Tracy.hpp"
-//#include "tracy/TracyLua.hpp"
+
+#if TRACY_ENABLE
+#include "tracy/Tracy.hpp"
+#include "tracy/TracyLua.hpp"
+#endif
 
 namespace FINLua {
 	int luaReYield(lua_State* L) {
@@ -299,10 +302,10 @@ namespace FINLua {
 			lua_register(L, "getItems", luaGetItems);
 			PersistGlobal("getItems");
 
-	/*#ifdef TRACY_ENABLE
+	#if TRACY_ENABLE
 			tracy::LuaRegister(L);
 			PersistGlobal("tracy");
-	#endif*/
+	#endif
 		}
 	}
 }
