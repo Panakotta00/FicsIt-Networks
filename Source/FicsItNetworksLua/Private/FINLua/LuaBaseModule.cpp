@@ -11,7 +11,7 @@
 #include "Logging/StructuredLog.h"
 #include "Registry/ModContentRegistry.h"
 
-#if TRACY_ENABLE
+#if defined(TRACY_ENABLED) && TRACY_ENABLED
 #include "tracy/Tracy.hpp"
 #include "tracy/TracyLua.hpp"
 #endif
@@ -302,7 +302,7 @@ namespace FINLua {
 			lua_register(L, "getItems", luaGetItems);
 			PersistGlobal("getItems");
 
-	#if TRACY_ENABLE
+	#if defined(TRACY_ENABLED) && TRACY_ENABLED
 			tracy::LuaRegister(L);
 			PersistGlobal("tracy");
 	#endif
