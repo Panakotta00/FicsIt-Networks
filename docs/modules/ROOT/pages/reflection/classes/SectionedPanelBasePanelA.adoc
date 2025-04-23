@@ -1,0 +1,101 @@
+= Sectioned Panel Base Panel A
+:table-caption!:
+
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
+Base Panel. 
+
+11x11 Module Sockets.
+
+Needs external network connection using Thin Network Cables.
+
+Part of the Sectioned Large Control Panel.
+It can be extended and customized by using the other sections in the same switch group.
+
+// tag::interface[]
+
+== Functions
+
+// tag::func-getModules-title[]
+=== `getModules` () -> `modules` : Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
+// tag::func-getModules[]
+
+Returns all modules placed on the panels.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get All Modules
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Modules* `modules`
+! Array<Object<xref:/reflection/classes/Object.adoc[Object]>>
+! All the modules placed on the panels.
+!===
+
+====
+// end::func-getModules[]
+// end::func-getModules-title[]
+// tag::func-getModule-title[]
+=== `getModule` (`x` : Int, `y` : Int, `panel` : Int) -> `module` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
+// tag::func-getModule[]
+
+Returns the module placed at the given location on the given panel.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Module
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! The x location of the module on the panel. (0 = left)
+
+! *Y* `y`
+! Int
+! The y location of the module on the panel. (0 = bottom)
+
+! *Panel* `panel`
+! Int
+! The panel you want to get the module from.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Module* `module`
+! Object<xref:/reflection/classes/Actor.adoc[Actor]>
+! The module you want to get. Null if no module was placed.
+!===
+
+====
+// end::func-getModule[]
+// end::func-getModule-title[]
+
+// end::interface[]
+

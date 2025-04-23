@@ -22,7 +22,7 @@ struct FFINLuaEvent {
 };
 
 USTRUCT()
-struct FFINLuaEventQueue : public FFINLuaReferenceCollected {
+struct FICSITNETWORKSLUA_API FFINLuaEventQueue : public FFINLuaReferenceCollected {
 	GENERATED_BODY()
 
 	UPROPERTY()
@@ -69,7 +69,7 @@ struct FFINLuaEventRegistry {
 	}
 };
 
-struct IFINLuaEventSystem {
+struct FICSITNETWORKSLUA_API IFINLuaEventSystem {
 	virtual ~IFINLuaEventSystem() = default;
 
 	virtual void Ignore(UObject* Object) = 0;
@@ -81,7 +81,7 @@ struct IFINLuaEventSystem {
 	virtual double TimeSinceStart() = 0;
 };
 
-struct FFINLuaEventSystem : IFINLuaEventSystem {
+struct FICSITNETWORKSLUA_API FFINLuaEventSystem : IFINLuaEventSystem {
 	TDelegate<void(UObject*)> OnIgnore;
 	TDelegate<void()> OnIgnoreAll;
 	TDelegate<void()> OnClear;
@@ -102,23 +102,24 @@ struct FFINLuaEventSystem : IFINLuaEventSystem {
 namespace FINLua {
 
 	typedef TSharedRef<FFINLuaEventQueue> FEventQueue;
-	FEventQueue luaFIN_pushEventQueue(lua_State* L, int64 key);
-	FEventQueue* luaFIN_toEventQueue(lua_State* L, int index);
-	FEventQueue& luaFIN_checkEventQueue(lua_State* L, int index);
+	FICSITNETWORKSLUA_API FEventQueue luaFIN_pushEventQueue(lua_State* L, int64 key);
+	FICSITNETWORKSLUA_API FEventQueue* luaFIN_toEventQueue(lua_State* L, int index);
+	FICSITNETWORKSLUA_API FEventQueue& luaFIN_checkEventQueue(lua_State* L, int index);
 
 	/**
 	 * Tries to get global event registry and pushes it onto the stack.
 	 * @param L the lua state
 	 * @return a reference to the registry
 	 */
-	TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L);
+	FICSITNETWORKSLUA_API TSharedPtr<FFINLuaEventRegistry> luaFIN_getEventRegistry(lua_State* L);
 
-	int luaFIN_pushEventData(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
+	FICSITNETWORKSLUA_API int luaFIN_pushEventData(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
 
-	void luaFIN_handleEvent(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
+	FICSITNETWORKSLUA_API void luaFIN_handleEvent(lua_State* L, const FFIRTrace& sender, const FFINSignalData& data);
 
-	int luaFIN_eventTask(lua_State* L, int, lua_KContext);
+	FICSITNETWORKSLUA_API int luaFIN_eventTask(lua_State* L, int, lua_KContext);
 
-	void luaFIN_setEventSystem(lua_State* L, IFINLuaEventSystem& EventSystem);
-	IFINLuaEventSystem& luaFIN_getEventSystem(lua_State* L);
+	FICSITNETWORKSLUA_API void luaFIN_setEventSystem(lua_State* L, IFINLuaEventSystem& EventSystem);
+	FICSITNETWORKSLUA_API IFINLuaEventSystem& luaFIN_getEventSystem(lua_State* L);
 }
+

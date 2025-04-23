@@ -7,8 +7,10 @@
 #include "FGGameState.h"
 #include "FicsItNetworksMisc.h"
 #include "FicsItReflection.h"
+#include "FINArrowModuleHolo.h"
 #include "FINDependencies.h"
 #include "ReflectionHelper.h"
+#include "SubsystemActorManager.h"
 #include "WrapBox.h"
 #include "WrapBoxSlot.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -381,6 +383,12 @@ void FFicsItNetworksModule::StartupModule(){
 		HookManager->HookBlueprintFunction(Function, &ResearchNodeInfoWidget_CanResearch_Hook, EPredefinedHookOffset::Return);
 		Function = NodeInfo->FindFunctionByName(TEXT("UpdateState"));
 		HookManager->HookBlueprintFunction(Function, &ResearchNodeInfoWidget_UpdateState_Hook, EPredefinedHookOffset::Return);
+
+		SUBSCRIBE_UOBJECT_METHOD(AFGBuildGun, BeginPlay, [](auto& scope, AFGBuildGun* BuildGun) {
+			if (!BuildGun) return;
+			AFINBuildgunHooks* hooks = BuildGun->GetWorld()->GetSubsystem<USubsystemActorManager>()->GetSubsystemActor<AFINBuildgunHooks>();
+			if (hooks) BuildGun->mOnRecipeSampled.AddUniqueDynamic(hooks, &AFINBuildgunHooks::OnRecipeSampled);
+		});
 #endif
 	});
 }

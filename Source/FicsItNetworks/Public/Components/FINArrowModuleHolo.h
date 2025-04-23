@@ -65,7 +65,7 @@ private:
 
 
 UCLASS()
-class FICSITNETWORKS_API AFINBuildgunHooks : public AModSubsystem{
+class FICSITNETWORKS_API AFINBuildgunHooks : public AModSubsystem {
 	GENERATED_BODY()
 public:
 	AFINBuildgunHooks();
@@ -74,7 +74,6 @@ public:
 	
 	UFUNCTION()
 	void OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe);
-
 };
 
 USTRUCT(BlueprintType)

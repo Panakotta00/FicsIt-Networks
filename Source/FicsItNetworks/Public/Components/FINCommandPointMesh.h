@@ -57,12 +57,13 @@ enum EFINPanelArrowCrossingTypes {
 
 UENUM(BlueprintType)
 enum EFINPanelTraceEndTypes {
-	FINPanelTraceEnd_None,
-	FINPanelTraceEnd_Straight,
-	FINPanelTraceEnd_RecessedBlockage,
-	FINPanelTraceEnd_Blockage,
-	FINPanelTraceEnd_ArrowOut,
-	FINPanelTraceEnd_ArrowIn,
+	FINPanelTraceEnd_None = 0,
+	FINPanelTraceEnd_Straight = 1,
+	FINPanelTraceEnd_ExtendedStraight = 5,
+	FINPanelTraceEnd_RecessedBlockage = 2,
+	FINPanelTraceEnd_Blockage = 3,
+	FINPanelTraceEnd_ArrowOut = 4,
+	FINPanelTraceEnd_ArrowIn = 5,
 };
 
 UENUM(BlueprintType)

@@ -27,6 +27,11 @@ void AFINModuleScreen::BindGPU(const FFIRTrace& gpu) {
 	if (gpu.IsValidPtr()) Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->BindScreen(gpu / this);
 
 	OnGPUUpdate.Broadcast();
+
+#if UE_GAME
+	if (!gpu.IsValidPtr()) WidgetComponent->SetSlateWidget(nullptr);
+	else Cast<IFINGPUInterface>(gpu.GetUnderlyingPtr())->RequestNewWidget();
+#endif
 }
 
 FFIRTrace AFINModuleScreen::GetGPU() const {
@@ -34,16 +39,9 @@ FFIRTrace AFINModuleScreen::GetGPU() const {
 }
 
 void AFINModuleScreen::SetWidget(TSharedPtr<SWidget> widget) {
-	if (Widget != widget) Widget = widget;
-	WidgetComponent->SetSlateWidget(
-		Widget.IsValid() ?
-			SNew(SScaleBox)
-			.Stretch(EStretch::ScaleToFit)
-			.Content()[
-				Widget.ToSharedRef()
-			]
-		:
-			TSharedPtr<SScaleBox>(nullptr));
+	if (Widget == widget) return;
+	Widget = widget;
+	WidgetComponent->SetSlateWidget(widget);
 	OnWidgetUpdate.Broadcast();
 }
 

@@ -4,9 +4,8 @@
 #include "FINLuaRuntime.h"
 #include "FINLuaReferenceCollector.generated.h"
 
-UE_DISABLE_OPTIMIZATION_SHIP
 USTRUCT()
-struct FFINLuaReferenceCollector {
+struct FICSITNETWORKSLUA_API FFINLuaReferenceCollector {
 	GENERATED_BODY()
 private:
 	FCriticalSection ReferenceCollectorsMutex;
@@ -38,7 +37,7 @@ public:
 		ReferencedCollectors.Remove(Referencer);
 	}
 };
-UE_ENABLE_OPTIMIZATION_SHIP
+
 
 template<>
 struct TStructOpsTypeTraits<FFINLuaReferenceCollector> : TStructOpsTypeTraitsBase2<FFINLuaReferenceCollector> {
@@ -47,9 +46,9 @@ struct TStructOpsTypeTraits<FFINLuaReferenceCollector> : TStructOpsTypeTraitsBas
 		WithCopy = false,
 	};
 };
-UE_DISABLE_OPTIMIZATION_SHIP
+
 USTRUCT()
-struct FFINLuaReferenceCollected {
+struct FICSITNETWORKSLUA_API FFINLuaReferenceCollected {
 	GENERATED_BODY()
 public:
 	FFINLuaReferenceCollector* ReferenceCollector = nullptr;
@@ -86,7 +85,7 @@ public:
 
 	virtual void CollectReferences(FReferenceCollector& Collector) {}
 };
-UE_ENABLE_OPTIMIZATION_SHIP
+
 template<>
 struct TStructOpsTypeTraits<FFINLuaReferenceCollected> : TStructOpsTypeTraitsBase2<FFINLuaReferenceCollected> {
 	enum {
