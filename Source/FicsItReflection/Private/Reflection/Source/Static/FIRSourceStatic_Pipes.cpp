@@ -9,6 +9,13 @@
 #include "Buildables/FGBuildablePipeReservoir.h"
 #include "Buildables/FGPipeHyperStart.h"
 
+class FFIRPipeHelper {
+	public:
+	static void AFGPipeUpdate(AFGBuildablePipelinePump* Pump) {
+		Pump->UpdateFlowLimitOnFluidBox();
+	}
+};
+
 BeginClass(AFGPipeHyperStart, "PipeHyperStart", "Pipe Hyper Start", "A actor that is a hypertube entrance buildable")
 	Hook(UFIRPipeHyperStartHook)
 BeginSignal(PlayerEntered, "Player Entered", "Triggers when a players enters into this hypertube entrance.")
@@ -105,32 +112,55 @@ EndClass()
 
 BeginClass(AFGBuildablePipelinePump, "PipelinePump", "PipelinePump", "A building that can pump fluids to a higher level within a pipeline.")
 BeginProp(RFloat, maxHeadlift, "Max Headlift", "The maximum amount of headlift this pump can provide.") {
-	FIRReturn self->GetMaxHeadLift();
+	FIRReturn self->GetFluidBox()->AddedPressure;
 } EndProp()
 BeginProp(RFloat, designedHeadlift, "Designed Headlift", "The amomunt of headlift this pump is designed for.") {
 	FIRReturn self->GetDesignHeadLift();
 } EndProp()
 BeginProp(RFloat, indicatorHeadlift, "Indicator Headlift", "The amount of headlift the indicator shows.") {
-	FIRReturn self->GetIndicatorHeadLift();
+	FIRReturn self->GetFluidBox()->ElevationPressureColumn;
 } EndProp()
-BeginProp(RFloat, indicatorHeadliftPct, "Indicator Headlift Percent", "The amount of headlift the indicator shows as percantage from max.") {
-	FIRReturn self->GetIndicatorHeadLiftPct();
-} EndProp()
+// TODO: Remove/Keep? Keep for now
+//BeginProp(RFloat, indicatorHeadliftPct, "Indicator Headlift Percent", "The amount of headlift the indicator shows as percantage from max.") {
+//	FIRReturn self->GetIndicatorHeadLiftPct();
+//} EndProp()
 BeginProp(RFloat, userFlowLimit, "User Flow Limit", "The flow limit of this pump the user can specifiy. Use -1 for no user set limit. (in m^3/s)") {
 	FIRReturn self->GetUserFlowLimit();
 } PropSet() {
 	self->SetUserFlowLimit(Val);
+	FFIRPipeHelper::AFGPipeUpdate(self); // @TODO: Not sure if needed. Keep for now
 } EndProp()
 BeginProp(RFloat, flowLimit, "Flow Limit", "The overal flow limit of this pump. (in m^3/s)") {
-	FIRReturn self->GetFlowLimit();
+	FIRReturn self->GetFluidBox()->FlowLimit;
 } EndProp()
-BeginProp(RFloat, flowLimitPct, "Flow Limit Pct", "The overal flow limit of this pump. (in percent)") {
-	FIRReturn self->GetFlowLimitPct();
+// TODO: Remove/Keep? Keep for now
+//BeginProp(RFloat, flowLimitPct, "Flow Limit Pct", "The overal flow limit of this pump. (in percent)") {
+//	float FlowLimit = self->GetFluidBox()->FlowLimit;
+//	float DefaultFlowLimit = self->GetDefaultFlowLimit();
+//	if(FlowLimit < 0) {
+//		FlowLimit = DefaultFlowLimit;
+//	}
+//	FIRReturn (FlowLimit / DefaultFlowLimit);
+//} EndProp()
+BeginProp(RFloat, defaultFlowLimit, "Default Flow Limit", "Get the set maximum flow rate through this pump. [m3/s]") {
+	FIRReturn self->GetDefaultFlowLimit();
 } EndProp()
 BeginProp(RFloat, flow, "Flow", "The current flow amount. (in m^3/s)") {
-	FIRReturn self->GetIndicatorFlow();
+	FIRReturn abs(self->GetFluidBox()->FlowThrough);
 } EndProp()
-BeginProp(RFloat, flowPct, "Float Pct", "The current flow amount. (in percent)") {
-	FIRReturn self->GetIndicatorFlowPct();
-} EndProp()
+// TODO: Remove/Keep? Keep for now
+//BeginProp(RFloat, flowPct, "Flow Pct", "The current flow amount. (in percent)") {
+//	float FlowLimit = self->GetFluidBox()->FlowLimit;
+//	float Return;
+//	if(FlowLimit == 0) {
+//		Return = 0;
+//		goto End;		
+//	}
+//	if(FlowLimit < 0) {
+//		FlowLimit = self->GetDefaultFlowLimit();
+//	}
+//	Return = (abs(self->GetFluidBox()->FlowThrough) / FlowLimit)
+//	End:
+//	FIRReturn Return;
+//} EndProp()
 EndClass()
