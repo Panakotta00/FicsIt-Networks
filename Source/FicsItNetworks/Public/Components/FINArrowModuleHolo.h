@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "FGPopupWidgetContent.h"
 #include "ModuleSystem/FINModuleSystemHolo.h"
 #include "InputActionValue.h"
@@ -66,7 +66,7 @@ private:
 
 
 UCLASS()
-class FICSITNETWORKS_API AFINBuildgunHooks : public AModSubsystem{
+class FICSITNETWORKS_API AFINBuildgunHooks : public AModSubsystem {
 	GENERATED_BODY()
 public:
 	AFINBuildgunHooks();

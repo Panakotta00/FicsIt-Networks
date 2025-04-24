@@ -7,7 +7,7 @@
 #include "FINLuaThreadedRuntime.generated.h"
 
 struct FFINLuaThreadedRuntime;
-struct FFINLuaTickRunnable : public FNonAbandonableTask {
+struct FICSITNETWORKSLUA_API FFINLuaTickRunnable : public FNonAbandonableTask {
 private:
 	FFINLuaThreadedRuntime* Runtime;
 
@@ -23,7 +23,7 @@ public:
 };
 
 USTRUCT()
-struct FFINLuaThreadedRuntime {
+struct FICSITNETWORKSLUA_API FFINLuaThreadedRuntime {
 	GENERATED_BODY()
 	friend FFINLuaTickRunnable;
 private:
@@ -88,9 +88,9 @@ struct TStructOpsTypeTraits<FFINLuaThreadedRuntime> : TStructOpsTypeTraitsBase2<
 };
 
 namespace FINLua {
-	void luaFIN_setThreadedRuntime(lua_State* L, FFINLuaThreadedRuntime& threadedRuntime);
-	FFINLuaThreadedRuntime& luaFIN_getThreadedRuntime(lua_State* L);
-	FFINLuaThreadedRuntime* luaFIN_tryGetThreadedRuntime(lua_State* L);
+	FICSITNETWORKSLUA_API void luaFIN_setThreadedRuntime(lua_State* L, FFINLuaThreadedRuntime& threadedRuntime);
+	FICSITNETWORKSLUA_API FFINLuaThreadedRuntime& luaFIN_getThreadedRuntime(lua_State* L);
+	FICSITNETWORKSLUA_API FFINLuaThreadedRuntime* luaFIN_tryGetThreadedRuntime(lua_State* L);
 
 	struct FLuaSync {
 		FFINLuaThreadedRuntime* Runtime = nullptr;

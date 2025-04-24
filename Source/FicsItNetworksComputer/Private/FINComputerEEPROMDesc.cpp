@@ -12,7 +12,7 @@ bool UFINComputerEEPROMDesc::CopyData_Implementation(UObject* WorldContext, cons
 
 	UFINComputerEEPROMDesc* Descriptor = Cast<UFINComputerEEPROMDesc>(InTo.GetItemClass()->GetDefaultObject());
 	if (!IsValid(Descriptor)) return false;
-	OutItem.SetItemState(FFGDynamicStruct(*From));
+	OutItem.SetItemState(InFrom.GetItemState());
 	return true;
 }
 

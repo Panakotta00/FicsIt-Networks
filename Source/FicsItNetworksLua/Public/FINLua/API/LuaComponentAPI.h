@@ -4,7 +4,7 @@
 #include "LuaUtil.h"
 #include "FIRTrace.h"
 
-class IFINLuaComponentNetworkAccessInterface {
+class FICSITNETWORKSLUA_API IFINLuaComponentNetworkAccessInterface {
 public:
 	virtual ~IFINLuaComponentNetworkAccessInterface() = default;
 	/**
@@ -25,7 +25,7 @@ public:
 	virtual TSet<FFIRTrace> GetComponentByClass(UClass* InClass, bool bInRedirect) const { return {}; }
 };
 
-struct FFINLuaComponentNetworkAccessDelegates : public IFINLuaComponentNetworkAccessInterface {
+struct FICSITNETWORKSLUA_API FFINLuaComponentNetworkAccessDelegates : public IFINLuaComponentNetworkAccessInterface {
 	TDelegate<FFIRTrace(const FGuid&)> OnGetComponentByID;
 	TDelegate<TSet<FFIRTrace>(const FString&)> OnGetComponentByNick;
 	TDelegate<TSet<FFIRTrace>(UClass* Class, bool bInRedirect)> OnGetComponentByClass;
@@ -44,6 +44,6 @@ struct FFINLuaComponentNetworkAccessDelegates : public IFINLuaComponentNetworkAc
 };
 
 namespace FINLua {
-	void luaFIN_setComponentNetwork(lua_State* L, IFINLuaComponentNetworkAccessInterface* ComponentNetwork);
-	IFINLuaComponentNetworkAccessInterface* luaFIN_getComponentNetwork(lua_State* L);
+	FICSITNETWORKSLUA_API void luaFIN_setComponentNetwork(lua_State* L, IFINLuaComponentNetworkAccessInterface* ComponentNetwork);
+	FICSITNETWORKSLUA_API IFINLuaComponentNetworkAccessInterface* luaFIN_getComponentNetwork(lua_State* L);
 }

@@ -22,7 +22,7 @@ namespace FINLua {
 	 * @param FIRClass the FINClass to push onto the stack
 	 * @return true if successfully able to push
 	 */
-	bool luaFIN_pushClass(lua_State* L, UClass* Class, UFIRClass* FIRClass);
+	FICSITNETWORKSLUA_API bool luaFIN_pushClass(lua_State* L, UClass* Class, UFIRClass* FIRClass);
 
 	/**
 	 * @brief Pushes a Class onto the lua stack
@@ -50,7 +50,7 @@ namespace FINLua {
 	 * @param Index the index of the lua value you try to get as LuaClass
 	 * @return The pointer to the LuaClass in the stack (attention to GC!), nullptr if not able to get as LuaClass 
 	 */
-	FLuaClass* luaFIN_toLuaClass(lua_State* L, int Index);
+	FICSITNETWORKSLUA_API FLuaClass* luaFIN_toLuaClass(lua_State* L, int Index);
 
 	/**
 	 * @brief Retrieves a LuaClass from the lua value with the given index in the lua stack. Causes an Lua Error if unable to get as LuaClass or is no child of given parent class
@@ -58,7 +58,7 @@ namespace FINLua {
 	 * @param Index the index of the lua value you get as LuaClass
 	 * @return The pointer to the LuaClass in the stack (attention to GC!)
 	 */
-	FLuaClass* luaFIN_checkLuaClass(lua_State* L, int Index);
+	FICSITNETWORKSLUA_API FLuaClass* luaFIN_checkLuaClass(lua_State* L, int Index);
 
 	/**
 	 * @brief Tries to retrieve a Class from the lua value with the given index in the lua stack
@@ -104,5 +104,5 @@ namespace FINLua {
 	/**
 	 * @return The Lua Metatable/Type-Name of Class
 	 */
-	FString luaFIN_getLuaClassTypeName();
+	FICSITNETWORKSLUA_API FString luaFIN_getLuaClassTypeName();
 }

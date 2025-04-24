@@ -1,0 +1,43 @@
+= Microcontroller Module
+:table-caption!:
+
+This Module provides an interface to interact with the Microcontroller.
+
+[cols="1,5a",separator="!"]
+!===
+!Dependencies
+! xref:/lua/api/ReflectionSystemObjectModule.adoc[ReflectionSystemObjectModule]
+!===
+
+== Globals
+
+=== **microcontroller**
+
+
+=== __microcontroller.__**broadcast** (integer, ...)
+
+
+=== __microcontroller.__**close** (integer...)
+
+
+=== __microcontroller.__**closeAll** ()
+
+
+=== __microcontroller.__**component** : xref:/reflection/classes/Object.adoc[Object]
+
+
+=== __microcontroller.__**getStorage** (string)
+
+
+=== __microcontroller.__**open** (integer...)
+
+
+=== __microcontroller.__**self** : FINMicrocontroller
+
+
+=== __microcontroller.__**send** ()
+
+
+=== __microcontroller.__**setStorage** (string)
+
+

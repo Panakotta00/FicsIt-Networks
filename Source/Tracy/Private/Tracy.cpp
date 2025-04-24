@@ -24,6 +24,10 @@ THIRD_PARTY_INCLUDES_START
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#endif
+
 #endif
 
 THIRD_PARTY_INCLUDES_END
