@@ -13,6 +13,40 @@ A circuit bridge that can be activated and deactivate by the player.
 
 == Properties
 
+// tag::func-buildingTag-title[]
+=== `buildingTag` : String
+// tag::func-buildingTag[]
+
+Returns the building tag if it has any
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Building Tag
+!===
+====
+// end::func-buildingTag[]
+// end::func-buildingTag-title[]
+// tag::func-hasBuildingTag-title[]
+=== `hasBuildingTag` : Bool
+// tag::func-hasBuildingTag[]
+
+Returns true if this building is taggable
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Has Building Tag
+!===
+====
+// end::func-hasBuildingTag[]
+// end::func-hasBuildingTag-title[]
 // tag::func-isSwitchOn-title[]
 === `isSwitchOn` : Bool
 // tag::func-isSwitchOn[]
