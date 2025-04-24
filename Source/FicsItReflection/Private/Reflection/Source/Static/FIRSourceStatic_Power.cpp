@@ -60,6 +60,10 @@ BeginClass(UFGPowerCircuit, "PowerCircuit", "Power Circuit", "A Object that repr
 Hook(UFIRPowerCircuitHook)
 BeginSignal(PowerFuseChanged, "Power Fuse Changed", "Get Triggered when the fuse state of the power circuit changes.")
 EndSignal()
+BeginFunc(resetFuse, "Reset Fuse", "Resets the fuse of this circuit", 0) {
+	Body()
+	self->ResetFuse();
+}EndFunc()
 BeginProp(RFloat, production, "Production", "The amount of power produced by the whole circuit in the last tick.") {
 	FPowerCircuitStats stats;
 	self->GetStats(stats);
@@ -154,6 +158,12 @@ BeginProp(RBool, isBridgeActive, "Is Bridge Active", "True if the two circuits a
 EndClass()
 
 BeginClass(AFGBuildableCircuitSwitch, "CircuitSwitch", "Circuit Switch", "A circuit bridge that can be activated and deactivate by the player.")
+BeginProp(RBool, hasBuildingTag, "Has Building Tag", "Returns true if this building is taggable") {
+	FIRReturn self->Execute_HasBuildingTag(self);
+} EndProp()
+BeginProp(RString, buildingTag, "Building Tag", "Returns the building tag if it has any") {
+	FIRReturn self->Execute_GetBuildingTag(self);
+} EndProp()
 BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are connected to each other and act as one entity.", 0) {
 	FIRReturn  self->IsSwitchOn();
 } EndProp()

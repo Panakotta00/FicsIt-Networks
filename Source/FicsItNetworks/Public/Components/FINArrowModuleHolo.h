@@ -1,8 +1,9 @@
-﻿#pragma once
+#pragma once
 #include "FGPopupWidgetContent.h"
 #include "ModuleSystem/FINModuleSystemHolo.h"
 #include "InputActionValue.h"
 #include "ModSubsystem.h"
+#include "NativeHookManager.h"
 #include "FINArrowModuleHolo.generated.h"
 
 
@@ -69,12 +70,17 @@ class FICSITNETWORKS_API AFINBuildgunHooks : public AModSubsystem {
 	GENERATED_BODY()
 public:
 	AFINBuildgunHooks();
-	
-	virtual void BeginPlay() override;
+	~AFINBuildgunHooks();
 	
 	UFUNCTION()
 	void OnRecipeSampled(TSubclassOf<UFGRecipe> Recipe);
+
+protected:
+	virtual void Init() override;
+
+	FDelegateHandle DelegateHandle;
 };
+
 
 USTRUCT(BlueprintType)
 struct FFINIconTextIntegerOption {
