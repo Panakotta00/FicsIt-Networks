@@ -3,7 +3,9 @@
 #include "UI/FINCopyUUIDButton.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "FGCharacterPlayer.h"
+#include "FGCheatManager.h"
 #include "FGGameMode.h"
+#include "FGGameRulesSubsystem.h"
 #include "FGGameState.h"
 #include "FicsItNetworksMisc.h"
 #include "FicsItReflection.h"
@@ -11,6 +13,8 @@
 #include "FINDependencies.h"
 #include "ReflectionHelper.h"
 #include "SubsystemActorManager.h"
+#include "TextBlock.h"
+#include "VerticalBoxSlot.h"
 #include "WrapBox.h"
 #include "WrapBoxSlot.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -71,14 +75,18 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 
 void ResearchNodeInfoWidget_CanResearch_Hook(FBlueprintHookHelper& HookHelper) {
 	UObject* Widget = HookHelper.GetContext();
-	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
-	bool& canResearch = *HookHelper.GetOutVariableHelper()->GetVariablePtr<TProperty<bool, FBoolProperty>>(TEXT("Can Research"));
-	canResearch = canResearch && UFGSchematic::AreSchematicDependenciesMet(schematic, Widget);;
-}
+	bool bNoUnlockCost = AFGGameRulesSubsystem::Get(Widget)->GetNoUnlockCost();
 
+	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
+
+	bool& canResearch = *HookHelper.GetOutVariableHelper()->GetVariablePtr<TProperty<bool, FBoolProperty>>(TEXT("Can Research"));
+	canResearch = canResearch && (bNoUnlockCost || UFGSchematic::AreSchematicDependenciesMet(schematic, Widget));
+}
+UE_DISABLE_OPTIMIZATION_SHIP
 void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
 	UUserWidget* Widget = Cast<UUserWidget>(HookHelper.GetContext());
 	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
+
 	UWrapBox* wrapBox = FReflectionHelper::GetObjectPropertyValue<UWrapBox>(Widget, TEXT("mCostSlotsContainer"));
 	TArray<UFGAvailabilityDependency*> dependencies;
 	UFGSchematic::GetSchematicDependencies(schematic, dependencies);
@@ -92,7 +100,7 @@ void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
 		slot->SetFillEmptySpace(true);
 	}
 }
-
+UE_ENABLE_OPTIMIZATION_SHIP
 #define FIN_CoreRedirect(Type, OldName, NewName) \
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags:: Type, \
 		TEXT(OldName), \
