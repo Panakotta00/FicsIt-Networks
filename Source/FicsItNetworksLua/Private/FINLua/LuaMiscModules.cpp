@@ -1,5 +1,6 @@
 ﻿#include "FicsItKernel.h"
 #include "FicsItLogLibrary.h"
+#include "FINChallengeSubsystem.h"
 #include "FINLuaModule.h"
 #include "FINLuaRuntime.h"
 #include "FINLuaThreadedRuntime.h"
@@ -58,11 +59,11 @@ namespace FINLua {
 			}
 		}
 	}
-
 	LuaModule(R"(/**
 	 * @LuaModule		LogModule
 	 * @DisplayName		Log Module
 	 */)", LogModule) {
+UE_DISABLE_OPTIMIZATION_SHIP
 		int luaPrint(lua_State* L) {
 			const int args = lua_gettop(L);
 			std::string log;
@@ -76,8 +77,16 @@ namespace FINLua {
 
 			UFILogLibrary::Log(FIL_Verbosity_Info, UTF8_TO_TCHAR(log.c_str()));
 
+			static TSharedRef<FFINChallenge> finChallenge_HelloWorld = AFINChallengeSubsystem::RegisterChallenge(L"HelloWorld");
+			if (!finChallenge_HelloWorld->bCompleted) {
+				if (log == "Hello World!") {
+					finChallenge_HelloWorld->Complete();
+				}
+			};
+
 			return 0;
 		}
+UE_ENABLE_OPTIMIZATION_SHIP
 		LuaModuleGlobalBareValue(R"(/**
 		 * @LuaGlobal		print	fun(...)
 		 * @DisplayName		Print

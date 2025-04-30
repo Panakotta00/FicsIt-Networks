@@ -10,6 +10,7 @@
 #include "FicsItNetworksMisc.h"
 #include "FicsItReflection.h"
 #include "FINArrowModuleHolo.h"
+#include "FINChallengeSubsystem.h"
 #include "FINDependencies.h"
 #include "ReflectionHelper.h"
 #include "SubsystemActorManager.h"
@@ -92,7 +93,7 @@ void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
 	UFGSchematic::GetSchematicDependencies(schematic, dependencies);
 	TSubclassOf<UUserWidget> dependencyWidgetClass = LoadClass<UUserWidget>(nullptr, TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_Dependency.BPW_FIN_Dependency_C"));
 	for (UFGAvailabilityDependency* dependency : dependencies) {
-		UFINDependency* FINDependency = Cast<UFINDependency>(dependency);
+		UFINChallengeDependency* FINDependency = Cast<UFINChallengeDependency>(dependency);
 		if (!IsValid(FINDependency)) continue;
 		UUserWidget* dependencyWidget = Widget->WidgetTree->ConstructWidget<UUserWidget>(dependencyWidgetClass);
 		FReflectionHelper::SetPropertyValue<FObjectProperty>(dependencyWidget, TEXT("Dependency"), FINDependency);
