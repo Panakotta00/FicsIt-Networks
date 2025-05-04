@@ -99,6 +99,8 @@ void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
 		FReflectionHelper::SetPropertyValue<FObjectProperty>(dependencyWidget, TEXT("Dependency"), FINDependency);
 		UWrapBoxSlot* slot = wrapBox->AddChildToWrapBox(dependencyWidget);
 		slot->SetFillEmptySpace(true);
+		slot->SetHorizontalAlignment(HAlign_Fill);
+		slot->SetNewLine(true);
 	}
 }
 UE_ENABLE_OPTIMIZATION_SHIP
