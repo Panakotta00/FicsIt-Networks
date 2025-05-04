@@ -2,6 +2,7 @@
 
 #include "FGPlayerController.h"
 #include "FicsItNetworksComputer.h"
+#include "FINChallengeSubsystem.h"
 #include "FINComputerRCO.h"
 #include "Regex.h"
 #include "SlateApplication.h"
@@ -359,4 +360,5 @@ void AFINComputerGPUT1::netFunc_flush() {
 	FrontBuffer = BackBuffer;
 	bShouldReplicate = true;
 	if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
+	FINChallenge(UseGPU, Screen.IsValid());
 }
