@@ -4,6 +4,7 @@
 #include "FGAvailabilityDependency.h"
 #include "FGSaveInterface.h"
 #include "ModSubsystem.h"
+#include "Engine/DataAsset.h"
 #include "FINChallengeSubsystem.generated.h"
 
 #define FINChallenge(Name, Condition) \
@@ -39,6 +40,19 @@ struct FICSITNETWORKSMISC_API FFINChallenge : TSharedFromThis<FFINChallenge> {
 };
 
 UCLASS()
+class FICSITNETWORKSMISC_API UFINChallengeAsset : public UDataAsset {
+    GENERATED_BODY()
+public:
+    UPROPERTY(EditAnywhere)
+	FString Name;
+
+	virtual void Serialize(FArchive& Ar) override;
+
+private:
+	TSharedPtr<FFINChallenge> Challenge;
+};
+
+UCLASS()
 class FICSITNETWORKSMISC_API AFINChallengeSubsystem : public AModSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
@@ -58,6 +72,12 @@ public:
 	void CompleteChallenge(const FString& Name) {
 		CompletedChallenges.Add(Name);
 	}
+
+	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContext"))
+	static AFINChallengeSubsystem* GetSubsystem(UObject* WorldContext);
+
+	UFUNCTION(BlueprintCallable, DisplayName="Complete Challenge", meta=(WorldContext="WorldContext"))
+	static void K_CompleteChallenge(UObject* WorldContext, UFINChallengeAsset* Challenge);
 
 	static TSharedRef<FFINChallenge> RegisterChallenge(const FString& ChallengeName);
 	static void UnregisterChallenge(const FString& ChallengeName);

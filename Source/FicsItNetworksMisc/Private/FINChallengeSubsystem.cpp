@@ -13,6 +13,14 @@ void FFINChallenge::Complete() {
 	}
 }
 
+void UFINChallengeAsset::Serialize(FArchive& Ar) {
+	Super::Serialize(Ar);
+
+#if !WITH_EDITOR
+	Challenge = AFINChallengeSubsystem::RegisterChallenge(Name);
+#endif
+}
+
 TSoftObjectPtr<AFINChallengeSubsystem> AFINChallengeSubsystem::self;
 TMap<FString, TWeakPtr<FFINChallenge>> AFINChallengeSubsystem::Challenges;
 
@@ -35,6 +43,14 @@ void AFINChallengeSubsystem::PostLoadGame_Implementation(int32 saveVersion, int3
 			c->bCompleted = IsChallengeCompleted(challenge.Key);
 		}
 	}
+}
+
+AFINChallengeSubsystem* AFINChallengeSubsystem::GetSubsystem(UObject* WorldContext) {
+	return WorldContext->GetWorld()->GetSubsystem<USubsystemActorManager>()->GetSubsystemActor<AFINChallengeSubsystem>();
+}
+
+void AFINChallengeSubsystem::K_CompleteChallenge(UObject* WorldContext, UFINChallengeAsset* Challenge) {
+	AFINChallengeSubsystem::GetSubsystem(WorldContext)->CompleteChallenge(Challenge->Name);
 }
 
 TSharedRef<FFINChallenge> AFINChallengeSubsystem::RegisterChallenge(const FString& ChallengeName) {
