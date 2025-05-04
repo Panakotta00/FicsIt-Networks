@@ -293,8 +293,6 @@ void AFINComputerGPUT1::SetScreenSize(int Width, int Height) {
 	if (!BackBuffer.SetSize(Width, Height)) return;
 
 	if (PrimaryActorTick.bCanEverTick) netSig_ScreenSizeChanged(Width, Height);
-
-	ForceNetUpdate();
 }
 
 void AFINComputerGPUT1::OnRep_FrontBuffer() {
