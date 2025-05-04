@@ -170,7 +170,8 @@ namespace FINLua {
 				}
 				double currentTime = FPlatformTime::Seconds();
 				if (timeout > currentTime) {
-					return luaFIN_yield(L, 0, NULL, luaPullContinue);
+					lua_pushnumber(L, timeout);
+					return luaFIN_yield(L, 1, NULL, luaPullContinue);
 				}
 				return 0;
 			}
@@ -300,7 +301,8 @@ namespace FINLua {
 					if (!timeout || *timeout <= FPlatformTime::Seconds()) {
 						return 0;
 					}
-					return luaFIN_yield(L, 0, 0, luaPullContinue);
+					lua_pushnumber(L, *timeout);
+					return luaFIN_yield(L, 1, 0, luaPullContinue);
 				}
 
 				const auto& [sender, signal] = *data;

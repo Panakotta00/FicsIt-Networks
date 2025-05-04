@@ -1,5 +1,6 @@
 ﻿#include "FicsItKernel.h"
 #include "FicsItLogLibrary.h"
+#include "FINChallengeSubsystem.h"
 #include "FINLuaModule.h"
 #include "FINLuaRuntime.h"
 #include "FINLuaThreadedRuntime.h"
@@ -75,6 +76,8 @@ namespace FINLua {
 			if (log.length() > 0) log = log.erase(log.length()-1);
 
 			UFILogLibrary::Log(FIL_Verbosity_Info, UTF8_TO_TCHAR(log.c_str()));
+
+			FINChallenge(HelloWorld, log == "Hello World!");
 
 			return 0;
 		}

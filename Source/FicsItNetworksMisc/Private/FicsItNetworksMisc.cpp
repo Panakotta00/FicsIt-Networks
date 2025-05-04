@@ -1,6 +1,7 @@
 ﻿#include "FicsItNetworksMisc.h"
 
 #include "FGDismantleInterface.h"
+#include "FINChallengeSubsystem.h"
 #include "FINMediaSubsystem.h"
 #include "Buildables/FGBuildable.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
@@ -61,6 +62,7 @@ void FFicsItNetworksMiscModule::ShutdownModule() {
 
 UFINMiscGameWorldModule::UFINMiscGameWorldModule() {
 	ModSubsystems.Add(AFINMediaSubsystem::StaticClass());
+	ModSubsystems.Add(AFINChallengeSubsystem::StaticClass());
 }
 
 #undef LOCTEXT_NAMESPACE

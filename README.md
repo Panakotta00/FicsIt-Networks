@@ -1,13 +1,15 @@
 # FicsIt-Networks
 
-FicsIt-Networks allows you to control, mointor, manage and automate each process of your factory by providing a network system and programmable computers, aswell as other I/O.
+FicsIt-Networks allows you to control, monitor, manage and automate each process of your factory by providing a network system and programmable computers, aswell as other I/O.
 It is inspired by [OpenComputers](https://github.com/MightyPirates/OpenComputers).
 
 **If you want to learn more:**
 [please visit the Documentation](https://docs.ficsit.app/ficsit-networks/latest)
 [or the SMR Mod page](https://ficsit.app/mod/8d8gk4imvFanRs)
 
-<a href="https://discord.gg/3VfZ6Da"><img height="50px" src="https://gotpa.ws/img/join_discord.png" /></a>
+<a href="https://discord.gg/3VfZ6Da" target="_blank" rel="noopener noreferrer"><img height="50px" src="https://gotpa.ws/img/join_discord.png" /></a>
+<a href="https://patreon.com/ficsitnetworks" target="_blank" rel="noopener noreferrer"><img style="height: 36px; margin: 10px;" src="https://raw.githubusercontent.com/Panakotta00/FicsIt-Networks/refs/heads/development/Resources/patreon_banner.png" /></a>
+<a href="https://ko-fi.com/X8X51D8D13" target="_blank" rel="noopener noreferrer"><img style='height:50px; margin: 10px;' src="https://storage.ko-fi.com/cdn/kofi6.png?v=6" alt="Buy Me a Coffee at ko-fi.com" /></a>
 
 ## Development Versions
 

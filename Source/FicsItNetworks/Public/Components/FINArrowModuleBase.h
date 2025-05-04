@@ -11,7 +11,7 @@ class AFINArrowModuleBase : public AFINModuleBase{
 	GENERATED_BODY()
 	public:
 
-	UPROPERTY(BlueprintType, BlueprintReadWrite, Replicated, SaveGame)
+	UPROPERTY(EditAnywhere, BlueprintType, BlueprintReadWrite, Replicated, SaveGame, meta=(NoResetToDefault))
 	TArray<FFINPanelArrowAnchor> Anchors;
 
 	TArray<FFINPanelArrowAnchor> LastConfiguredAnchors;
@@ -51,6 +51,9 @@ class AFINArrowModuleBase : public AFINModuleBase{
 	
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* TipStraightMesh = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* TipExtendedStraightMesh = nullptr;
 
 	AFINArrowModuleBase();
 

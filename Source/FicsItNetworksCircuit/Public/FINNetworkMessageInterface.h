@@ -21,7 +21,7 @@ public:
 	 * @param[in]	Port	the port you want to check
 	 * @return	true if the message interface listens to the port
 	 */
-	virtual bool IsPortOpen(int Port) { return false; };
+	virtual bool IsPortOpen(int Port) { return false; }
 
 	/**
 	 * Lets the network message implemnter handle internally a new message
@@ -35,7 +35,7 @@ public:
 	 * @param[in]	Port			The port on which the message got sent
 	 * @param[in]	Data			The data frame of the message
 	 */
-	virtual void HandleMessage(const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const FIRArray& Data) {};
+	virtual void HandleMessage(const FGuid& ID, const FGuid& Sender, const FGuid& Receiver, int Port, const FIRArray& Data) {}
 
 	/**
 	 * Allows to check if this network message handler is capable

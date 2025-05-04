@@ -2,6 +2,7 @@
 
 #include "FGPlayerController.h"
 #include "FicsItNetworksComputer.h"
+#include "FINChallengeSubsystem.h"
 #include "FINComputerRCO.h"
 #include "Regex.h"
 #include "SlateApplication.h"
@@ -293,8 +294,6 @@ void AFINComputerGPUT1::SetScreenSize(int Width, int Height) {
 	if (!BackBuffer.SetSize(Width, Height)) return;
 
 	if (PrimaryActorTick.bCanEverTick) netSig_ScreenSizeChanged(Width, Height);
-
-	ForceNetUpdate();
 }
 
 void AFINComputerGPUT1::OnRep_FrontBuffer() {
@@ -361,4 +360,5 @@ void AFINComputerGPUT1::netFunc_flush() {
 	FrontBuffer = BackBuffer;
 	bShouldReplicate = true;
 	if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
+	FINChallenge(UseGPU, Screen.IsValid());
 }

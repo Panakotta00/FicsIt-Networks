@@ -450,6 +450,8 @@ AFINNetworkCableHologram::AFINNetworkCableHologram() {
 	Cable->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
 	Cable->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Block);
 	Cable->SetAllUseCCD(true);
+
+	mSuppressBuildEffect = true;
 }
 
 AFINNetworkCableHologram::~AFINNetworkCableHologram() {}

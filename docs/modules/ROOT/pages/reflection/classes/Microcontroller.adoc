@@ -1,0 +1,39 @@
+= Microcontroller
+:table-caption!:
+
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[Buildable]
+!===
+
+
+
+// tag::interface[]
+
+== Signals
+
+=== `NetworkMessage` (_String_ *Sender* `Sender`, _Int_ *Port* `Port`, ...)
+
+
+
+[%collapsible]
+====
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Sender* `Sender`
+! String
+! 
+
+! *Port* `Port`
+! Int
+! 
+!===
+====
+
+
+// end::interface[]
+

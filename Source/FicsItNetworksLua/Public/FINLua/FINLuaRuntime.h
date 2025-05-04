@@ -10,19 +10,19 @@
 struct FFINLuaRuntimePersistenceState;
 struct lua_State;
 namespace FINLua {
-	FFINLuaRuntimePersistenceState& luaFIN_getPersistence(lua_State*);
+	FICSITNETWORKSLUA_API FFINLuaRuntimePersistenceState& luaFIN_getPersistence(lua_State*);
 }
 
 #define LUAFIN_REGISTRYKEY_UNPERSIST "PersistUperm"
 #define LUAFIN_REGISTRYKEY_PERSIST "PersistPerm"
 #define LUAFIN_RIDX_HIDDENGLOBALS 3
 
-struct FFINLuaPanic {
+struct FICSITNETWORKSLUA_API FFINLuaPanic {
 	FString Message;
 };
 
 USTRUCT()
-struct FFINLuaRuntime {
+struct FICSITNETWORKSLUA_API FFINLuaRuntime {
 	GENERATED_BODY()
 	friend FFINLuaRuntimePersistenceState& FINLua::luaFIN_getPersistence(lua_State*);
 public:
@@ -90,7 +90,7 @@ public:
 };
 
 namespace FINLua {
-	FFINLuaRuntime& luaFIN_getRuntime(lua_State* L);
+	FICSITNETWORKSLUA_API FFINLuaRuntime& luaFIN_getRuntime(lua_State* L);
 }
 
 template<>
