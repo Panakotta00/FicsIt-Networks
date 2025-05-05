@@ -1202,7 +1202,8 @@ namespace FINLua {
 		TOptional<double> minTimeout;
 
 		lua_pushnil(L);
-		while (lua_next(L, -2) != 0) {
+		while (lua_next(L, 2) != 0) {
+			luaFINDebug_dumpStack(L);
 			double timeout = lua_tonumber(L, -1);
 			lua_pop(L, 1);
 
@@ -1214,8 +1215,7 @@ namespace FINLua {
 
 			if (now >= timeout) {
 				lua_pushvalue(L, -1);
-				luaFIN_pushCallback(L);
-				lua_pushvalue(L, -1);
+				luaFIN_pushPollCallback(L, -1);
 			} else {
 				if (minTimeout) {
 					minTimeout = FMath::Min(*minTimeout, timeout);
@@ -1223,6 +1223,7 @@ namespace FINLua {
 					minTimeout = timeout;
 				}
 			}
+			luaFINDebug_dumpStack(L);
 		}
 
 		if (lua_gettop(L) > 2) {
