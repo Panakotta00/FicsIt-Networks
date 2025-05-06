@@ -442,6 +442,7 @@ namespace FINLua {
 	}
 
 	void luaFINDebug_dumpTable(lua_State* L, int index) {
+		UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Dumping table at %i:"), index);
 		lua_pushvalue(L, index);
 		lua_pushnil(L);
 		while (lua_next(L, -2)) {

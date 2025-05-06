@@ -1,5 +1,6 @@
 ﻿#include "FINLua/LuaFuture.h"
 
+#include "FicsItNetworksLuaModule.h"
 #include "FINLuaProcessor.h"
 #include "LuaKernelAPI.h"
 #include "FINLua/FINLuaModule.h"
@@ -62,18 +63,6 @@ namespace FINLua {
 			}
 		}
 
-		LuaModuleMetatable(R"(/**
-		 * @LuaMetatable	FutureDependents
-		 * @DisplayName		Future Struct
-		 */)", FutureDependents) {
-			LuaModuleTableBareField(R"(/**
-			 * @LuaBareField	__mode
-			 * @DisplayName		Mode
-			 */)", __mode) {
-				lua_pushstring(L, "k");
-			}
-		}
-
 		/**
 		 * Additionally to the below documentation.
 		 *
@@ -114,7 +103,7 @@ namespace FINLua {
 		 * For this, the values a future yields are used to control its runtime.
 		 * - <nothing> indicates the future should be actively polled. This practically means it gets added as task.
 		 * - future    indicates the future is waiting for the given future. When the future gets polled using await or as task, this will make this future be woken up by the given future and be removed as task.
-		 * - number    indicates the future is waiting to be woken up by some external system, but if its a task, allows to indicate the runtime its fine to sleep for the given amount of seconds
+		 * - number    indicates the future is waiting to be woken up by some external system, but if its a task or called in the main thread, allows to indicate the runtime its fine to sleep for the given amount of seconds
 		 * - <any>     indicates the future is waiting to be woken up by some external system
 		 */)", Future) {
 			LuaModuleTableBareField(R"(/**
@@ -374,7 +363,6 @@ namespace FINLua {
 				//lua_pushvalue(L, lua_upvalueindex(3));
 				//luaL_checktype(L, -1, LUA_TTABLE);
 				lua_newtable(L);
-				luaL_setmetatable(L, FutureDependents::_Name);
 				lua_setiuservalue(L, -2, 3);
 
 				//lua_pushvalue(L, lua_upvalueindex(3));
@@ -399,12 +387,15 @@ namespace FINLua {
 			 * @LuaFunction		__gc
 			 * @DisplayName		__gc
 			 */)", __gc) {
-				/*lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
-				lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
-				lua_getiuservalue(L, 1, 4);
-				int ref = lua_tointeger(L, -1);
-				luaL_unref(L, -2, ref);
-				lua_pop(L, 3);*/
+				if (lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS) == LUA_TTABLE) {
+					if (lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY) == LUA_TTABLE) {
+						lua_pushvalue(L, -3);
+						lua_pushnil(L);
+						lua_settable(L, -3);
+					}
+					lua_pop(L, 1);
+				}
+				lua_pop(L, 1);
 				return 0;
 			}
 		}
@@ -683,12 +674,12 @@ namespace FINLua {
 			 */)", loop) {
 				lua_settop(L, 0);
 				lua_pushcfunction(L, &luaFIN_futureRun);
-				lua_callk(L, 0, 2, NULL, &luaLoopContinue);
+				lua_callk(L, 0, LUA_MULTRET, NULL, &luaLoopContinue);
 				return luaLoopContinue(L, 0, NULL);
 			}
 			int luaLoopContinue(lua_State* L, int, lua_KContext) {
 				if (static_cast<bool>(lua_toboolean(L, 1))) {
-					return luaFIN_yield(L, 1, NULL, reinterpret_cast<lua_KFunction>(&loop));
+					return luaFIN_yield(L, lua_gettop(L)-1, NULL, reinterpret_cast<lua_KFunction>(&loop));
 				}
 				return 0;
 			}
@@ -790,15 +781,9 @@ namespace FINLua {
 			PersistValue("luaFIN_pollTimeouts");
 
 			lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
-			//lua_newtable(L);
-			//lua_newtable(L);
-			//lua_pushstring(L, "kv");
-			//lua_setfield(L, -2, "__mode");
-			//lua_setmetatable(L, -2);
-			//lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
-			//lua_setmetatable(L, -2);
 			lua_newtable(L);
-			luaL_setmetatable(L, FutureDependents::_Name);
+			lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
+			lua_newtable(L);
 			lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY);
 
 			luaFIN_getFutureDelegate(L); // Ensure delegate got pushed
@@ -855,8 +840,17 @@ namespace FINLua {
 		lua_pushvalue(L, Thread);
 		lua_setiuservalue(L, -2, 1);
 		lua_newtable(L);
-		luaL_setmetatable(L, FutureModule::FutureDependents::_Name);
 		lua_setiuservalue(L, -2, 3);
+
+		if (lua_geti(L,	LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS) == LUA_TTABLE) {
+			if (lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY) == LUA_TTABLE) {
+				lua_pushvalue(L, -3);
+				lua_pushboolean(L, true);
+				lua_settable(L, -3);
+			}
+			lua_pop(L, 1);
+		}
+		lua_pop(L, 1);
 
 		/*lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
 		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
@@ -1005,7 +999,7 @@ namespace FINLua {
 		if (luaL_len(L, -1) > 0) {
 			timeout.Reset();
 		}
-		lua_pop(L, 1);
+		lua_pop(L, 2);
 
 		// TODO: Determine if there is anything left to do
 		lua_pushboolean(L, true);
@@ -1083,15 +1077,17 @@ namespace FINLua {
 							lua_replace(L, 1);
 						}
 					}
+					lua_settop(L, 3);
 					break;
 				case 4:
 					lua_pushnil(L);
 					lua_replace(L, 1);
+					lua_settop(L, 3);
 					break;
 				default:
+					lua_settop(L, 3);
 					break;
 			}
-			lua_settop(L, 3);
 		}
 	}
 	int luaFIN_runTasks_continue(lua_State* L, int, lua_KContext) {
@@ -1203,7 +1199,6 @@ namespace FINLua {
 
 		lua_pushnil(L);
 		while (lua_next(L, 2) != 0) {
-			luaFINDebug_dumpStack(L);
 			double timeout = lua_tonumber(L, -1);
 			lua_pop(L, 1);
 
@@ -1223,7 +1218,6 @@ namespace FINLua {
 					minTimeout = timeout;
 				}
 			}
-			luaFINDebug_dumpStack(L);
 		}
 
 		if (lua_gettop(L) > 2) {
@@ -1241,7 +1235,6 @@ namespace FINLua {
 	}
 
 	FLuaFutureDelegate& luaFIN_createFutureDelegate(lua_State* L) {
-		lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
 		FLuaFutureDelegate* delegate = (FLuaFutureDelegate*)lua_newuserdata(L, sizeof(FLuaFutureDelegate));
 		new (delegate) FLuaFutureDelegate();
 		lua_newtable(L);
@@ -1253,18 +1246,16 @@ namespace FINLua {
 		luaFIN_persistValue(L, -1, TEXT("FutureDelegate__gc"));
 		lua_setfield(L, -2, "__gc");
 		lua_setmetatable(L, -2);
-		lua_setfield(L, -2, LUAFIN_HIDDENGLOBAL_FUTUREDELEGATE);
 		luaFIN_persistValue(L, -1, TEXT("FutureDelegate"));
-		lua_pop(L, 1);
+		lua_seti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_FUTUREDELEGATE);
 		return *delegate;
 	}
 
 	FLuaFutureDelegate& luaFIN_getFutureDelegate(lua_State* L) {
-		lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
-		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREDELEGATE);
+		lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_FUTUREDELEGATE);
 		FLuaFutureDelegate* delegate = static_cast<FLuaFutureDelegate*>(lua_touserdata(L, -1));
 		if (!delegate) luaL_error(L, "Future Delegate not valid!");
-		lua_pop(L, 2);
+		lua_pop(L, 1);
 		return *delegate;
 	}
 }

@@ -535,7 +535,7 @@ namespace FINLua {
 			luaFIN_persistValue(L, -1, "WaitForContinue");
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "PullContinue");
-			lua_pop(L, 4);
+			lua_pop(L, 3);
 
 			lua_pushcfunction(L, EventQueue::luaWaitFor);
 			luaFIN_persistValue(L, -1, "EventQueueWaitFor");
@@ -547,6 +547,7 @@ namespace FINLua {
 
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)));
 			luaFIN_persistValue(L, -1, "luaFIN_eventTask");
+			lua_pop(L, 1);
 
 			lua_getglobal(L, "event");
 			luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)), 0);
