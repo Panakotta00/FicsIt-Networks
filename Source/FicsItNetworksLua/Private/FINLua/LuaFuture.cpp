@@ -302,17 +302,19 @@ namespace FINLua {
 						FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
 						if (L == runtime.GetLuaThread()) {
 							lua_pushcfunction(L, &luaFIN_futureRun);
-							lua_callk(L, 0, 2, NULL, &await_continue2);
-							lua_remove(L, -2);
-							return luaFIN_yield(L, 1, NULL, &await_continue2);
+							lua_callk(L, 0, LUA_MULTRET, NULL, &await_continue2);
+							return await_continue2(L, 0, NULL);
 						}
+						lua_pushnil(L);
 						lua_pushvalue(L, 1);
-						return luaFIN_yield(L, 1, NULL, await_continue2);
+						return await_continue2(L, 0, NULL);
 				}
 			}
 			int await_continue2(lua_State* L, int, lua_KContext) {
 				if (lua_gettop(L) > 2) {
-					lua_remove(L, -2);
+					if (lua_gettop(L) > 3) {
+						lua_remove(L, -2);
+					}
 					return luaFIN_yield(L, 1, NULL, &await_continue2);
 				}
 				return await(L);
