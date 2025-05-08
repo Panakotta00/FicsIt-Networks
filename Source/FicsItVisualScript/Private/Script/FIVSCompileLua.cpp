@@ -244,5 +244,6 @@ FString FFIVSLuaCompilerContext::FinalizeCode() {
 	for (const FString& segment : Code) {
 		finalCode.Append(segment);
 	}
+	finalCode.Append(TEXT("future.loop()\n"));
 	return finalCode.ToString();
 }
