@@ -665,6 +665,8 @@ namespace FINLua {
 		lua_settop(L, 0);
 
 		TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+		lua_pop(L, 1);
+
 		if (registry->EventListeners.Num() + registry->EventQueues.Num() + registry->OneShots.Num() > 0) {
 			IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
 			while (true) {
