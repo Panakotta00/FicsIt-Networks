@@ -5,7 +5,6 @@
 
 #define LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY "future-registry"
 #define LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY "timeout-registry"
-#define LUAFIN_HIDDENGLOBAL_FUTUREDELEGATE "future-delegate"
 
 namespace FINLua {
 	typedef TSharedRef<TFIRInstancedStruct<FFINFuture>> FLuaFuture;
