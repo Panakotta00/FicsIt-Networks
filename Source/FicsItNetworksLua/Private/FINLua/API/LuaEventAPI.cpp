@@ -51,17 +51,20 @@ namespace FINLua {
 				lua_pop(L, 1);
 			}
 			if (lua_getfield(L, index, "sender") != LUA_TNIL) {
+				IFINLuaEventSystem& event = luaFIN_getEventSystem(L);
 				if (lua_istable(L, -1)) {
 					int len = luaL_len(L, -1);
 					for (int i = 0; i < len; ++i) {
 						lua_geti(L, -1, i);
-						UObject* sender = luaFIN_checkObject<UObject>(L, -1);
-						filter.Senders.Add(sender);
+						FFIRTrace sender = luaFIN_checkObject(L, -1, nullptr);
+						filter.Senders.Add(sender.Get());
+						event.Listen(sender);
 						lua_pop(L, 1);
 					}
 				} else {
-					UObject* sender = luaFIN_checkObject<UObject>(L, -1);
-					filter.Senders.Add(sender);
+					FFIRTrace sender = luaFIN_checkObject(L, -1, nullptr);
+					filter.Senders.Add(sender.Get());
+					event.Listen(sender);
 				}
 				lua_pop(L, 1);
 			}
