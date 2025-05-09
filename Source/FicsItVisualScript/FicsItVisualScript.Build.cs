@@ -7,10 +7,10 @@ public class FicsItVisualScript : ModuleRules
 {
     public FicsItVisualScript(ReadOnlyTargetRules target) : base(target)
     {
-	    CppStandard = CppStandardVersion.Cpp17;
-	    bUseRTTI = true;
-        //bLegacyPublicIncludePaths = false;
-	    PCHUsage = PCHUsageMode.Default;
+	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+	    CppStandard = CppStandardVersion.Cpp20;
+        bEnableExceptions = true;
+		bWarningsAsErrors = true;
 
 	    OptimizeCode = CodeOptimization.Never;
 

@@ -22,7 +22,7 @@ public:
 			RValue = other.RValue;
 		}
 	}
-	FFIVSValue(const FFIVSValue&& other) : bIsLValue(other.bIsLValue), LValuePin(other.LValuePin), RValue(other.RValue) {}
+	FFIVSValue(const FFIVSValue&& other) : bIsLValue(other.bIsLValue), RValue(other.RValue), LValuePin(other.LValuePin) {}
 	FFIVSValue& operator=(const FFIVSValue& other) {
 		bIsLValue = other.bIsLValue;
 		LValuePin = other.LValuePin;

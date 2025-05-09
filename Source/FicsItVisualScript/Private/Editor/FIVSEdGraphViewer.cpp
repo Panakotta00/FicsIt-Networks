@@ -4,7 +4,7 @@
 #include "Editor/FIVSEdActionSelection.h"
 #include "Editor/FIVSEdNodeViewer.h"
 #include "Script/FIVSGraph.h"
-#include "Windows/WindowsPlatformApplicationMisc.h"
+#include "PlatformApplicationMisc.h"
 
 #define LOCTEXT_NAMESPACE "FIVSEdGraphViewerModule"
 

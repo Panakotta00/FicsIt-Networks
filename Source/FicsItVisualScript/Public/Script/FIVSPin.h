@@ -31,6 +31,7 @@ private:
 public:
 	FFIVSPinDataType() = default;
 	FFIVSPinDataType(const FFIVSPinDataType&) = default;
+	FFIVSPinDataType(EFIRValueType Type) : FFIRExtendedValueType(Type) {}
 	FFIVSPinDataType(const FFIRExtendedValueType& Other) : FFIRExtendedValueType(Other) {}
 	FFIVSPinDataType(EFIRValueType InType, UFIRStruct* InRefType) : FFIRExtendedValueType(InType, InRefType) {}
 

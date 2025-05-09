@@ -61,7 +61,7 @@ public:
 #define FIVSNode_BeginLuaGenericMeta(FunctionName, Title, Symbol, Description, Category, ...) \
 FFIRStaticGlobalRegisterFunc CAT(UFIVSNode_LuaGenericMeta, __COUNTER__) = FFIRStaticGlobalRegisterFunc([]() { \
 	FString Name = TEXT(#FunctionName); \
-	FFIVSNodeLuaGenericMeta meta{FText::FromString(TEXT(Title)), TEXT(Symbol), FText::FromString(TEXT(Description)), FText::FromString(TEXT(Category)), FText::FromString(TEXT(Title ## Symbol))};
+	FFIVSNodeLuaGenericMeta meta{FText::FromString(TEXT(Title)), TEXT(Symbol), FText::FromString(TEXT(Description)), FText::FromString(TEXT(Category)), FText::FromString(TEXT(Title) TEXT(Symbol))};
 #define FIVSNode_EndLuaGenericMeta() \
 	UFIVSNode_LuaGeneric::RegisterMetaData(StaticClass(), Name, meta); \
 });

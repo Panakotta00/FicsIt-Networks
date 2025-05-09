@@ -348,9 +348,9 @@ void SFIVSEdActionSelection::Close() {
 }
 
 void SFIVSEdActionSelection::ExecuteEntry(const TSharedPtr<FFIVSEdActionSelectionEntry>& Entry) {
-	if (dynamic_cast<FFIVSEdActionSelectionAction*>(Entry.Get())) {
+	//if (dynamic_cast<FFIVSEdActionSelectionAction*>(Entry.Get())) {
 		TSharedPtr<FFIVSEdActionSelectionAction> Action = StaticCastSharedPtr<FFIVSEdActionSelectionAction>(Entry);
 		Action->ExecuteAction();
 		OnActionExecuted.Execute(Action);
-	}
+	//}
 }
