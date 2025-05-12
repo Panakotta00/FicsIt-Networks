@@ -81,7 +81,7 @@ void UFIVSNode_SignalEvent::CompileNodeToLua(FFIVSLuaCompilerContext& Context) c
 	Context.EnterNewSection();
 	Context.ContinueCurrentSection(ExecOut);
 	Context.LeaveSection();
-	Context.AddPlain(TEXT("end\n"));
+	Context.AddPlain(TEXT("end)\n"));
 }
 
 void UFIVSNode_SignalEvent::SetSignal(UFIRSignal* InSignal) {
