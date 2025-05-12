@@ -1,6 +1,8 @@
 ﻿#include "Editor/FIVSEdObjectSelection.h"
 
+#include "FGBuildable.h"
 #include "FINNetworkComponent.h"
+#include "FINNetworkUtils.h"
 #include "Editor/FIVSEdSearchListView.h"
 
 void SFIVSEdObjectSelection::Construct(const FArguments& InArgs, const TArray<FFIRTrace>& InComponents) {
@@ -39,20 +41,12 @@ void SFIVSEdObjectSelection::SelectObject(const FFIRTrace& Component) {
 }
 
 TSharedRef<SWidget> SFIVSEdObjectSelection::CreateComponentWidget(const FFIRTrace& Component) {
-	if (Component.GetUnderlyingPtr())
-	return SNew(SHorizontalBox)
-			+SHorizontalBox::Slot()[
-				SNew(STextBlock)
-				.Text(FText::FromString(IFINNetworkComponent::Execute_GetID(*Component).ToString()))
-			]
-			+SHorizontalBox::Slot()[
-				SNew(STextBlock)
-				.ColorAndOpacity(FLinearColor(1,1,1,0.7))
-				.Text(FText::FromString(IFINNetworkComponent::Execute_GetNick(*Component)))
-			];
-	else
-	return SNew(STextBlock)
-			.Text(FText::FromString(TEXT("(None)")));
+	if (Component.GetUnderlyingPtr()) {
+		return SNew(SFIVSEdComponentWidget, Component);
+	} else {
+		return SNew(STextBlock)
+				.Text(FText::FromString(TEXT("(None)")));
+	}
 }
 
 TSharedRef<SWidget> SFIVSEdObjectSelection::CreateLargeComponentWidget(const FFIRTrace& Component) {
@@ -96,4 +90,32 @@ TSharedRef<SWidget> SFIVSEdObjectSelection::CreateSignalSearch() {
 			SelectObject(Trace);
 			FSlateApplication::Get().DismissAllMenus();
 		});
+}
+
+void SFIVSEdComponentWidget::Construct(const FArguments& InArgs, const FFIRTrace& Component) {
+	UTexture2D* icon = nullptr;
+	if (auto buildable = Cast<AFGBuildable>(UFINNetworkUtils::RedirectIfPossible(Component).Get())) {
+		icon = UFGItemDescriptor::GetSmallIcon(buildable->GetBuiltWithDescriptor());
+	}
+	Brush = static_cast<FSlateBrush>(FSlateImageBrush(icon, FVector2D(32, 32)));
+
+	ChildSlot[
+		SNew(SHorizontalBox)
+		+SHorizontalBox::Slot().AutoWidth()[
+			SNew(SImage)
+			.Image(&Brush)
+		]
+		+SHorizontalBox::Slot()[
+			SNew(SVerticalBox)
+			+SVerticalBox::Slot()[
+				SNew(STextBlock)
+				.Text(FText::FromString(IFINNetworkComponent::Execute_GetID(*Component).ToString()))
+			]
+			+SVerticalBox::Slot()[
+				SNew(STextBlock)
+				.ColorAndOpacity(FLinearColor(1,1,1,0.7))
+				.Text(FText::FromString(IFINNetworkComponent::Execute_GetNick(*Component)))
+			]
+		]
+	];
 }
