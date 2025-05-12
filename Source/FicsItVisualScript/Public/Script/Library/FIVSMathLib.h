@@ -226,6 +226,46 @@ public:
 		Context.AddExpression(abs, FString::Printf(TEXT("math.abs(%s)"), *Val));
 	}
 
+	FIVSNode_BeginLuaGenericMeta(FIVSFunc_Float_Floor, "Floor (float)", "floor", "Rounds the float down to the nearest integer.", "Math|float");
+	FIVSNode_LuaGenericPin("X" , "X", FIVS_PIN_DATA_INPUT, FIR_FLOAT)
+	FIVSNode_LuaGenericPin("floor", "floor", FIVS_PIN_DATA_OUTPUT, FIR_FLOAT)
+	FIVSNode_EndLuaGenericMeta();
+	UFUNCTION()
+	static void FIVSFunc_Float_Floor(UPARAM(ref) FFIVSLuaCompilerContext& Context, UFIVSPin* X, UFIVSPin* floor) {
+		FString Val = Context.GetRValueExpression(X);
+		Context.AddExpression(floor, FString::Printf(TEXT("math.floor(%s)"), *Val));
+	}
+
+	FIVSNode_BeginLuaGenericMeta(FIVSFunc_Float_Ciel, "Ciel (float)", "ciel", "Rounds the float up to the nearest integer.", "Math|float");
+	FIVSNode_LuaGenericPin("X" , "X", FIVS_PIN_DATA_INPUT, FIR_FLOAT)
+	FIVSNode_LuaGenericPin("ciel", "ciel", FIVS_PIN_DATA_OUTPUT, FIR_FLOAT)
+	FIVSNode_EndLuaGenericMeta();
+	UFUNCTION()
+	static void FIVSFunc_Float_Ciel(UPARAM(ref) FFIVSLuaCompilerContext& Context, UFIVSPin* X, UFIVSPin* ciel) {
+		FString Val = Context.GetRValueExpression(X);
+		Context.AddExpression(ciel, FString::Printf(TEXT("math.ciel(%s)"), *Val));
+	}
+
+	FIVSNode_BeginLuaGenericMeta(FIVSFunc_Float_Int, "Float to Integer", "·", "Converts a float to an integer", "Math|float");
+	FIVSNode_LuaGenericPin("X" , "X", FIVS_PIN_DATA_INPUT, FIR_FLOAT)
+	FIVSNode_LuaGenericPin("out", "int", FIVS_PIN_DATA_OUTPUT, FIR_INT)
+	FIVSNode_EndLuaGenericMeta();
+	UFUNCTION()
+	static void FIVSFunc_Float_Int(UPARAM(ref) FFIVSLuaCompilerContext& Context, UFIVSPin* X, UFIVSPin* out) {
+		FString Val = Context.GetRValueExpression(X);
+		Context.AddExpression(out, FString::Printf(TEXT("math.tointeger(%s)"), *Val));
+	}
+
+	FIVSNode_BeginLuaGenericMeta(FIVSFunc_Int_Float, "Integer To Float", "·", "Converts an integer to a float", "Math|int");
+	FIVSNode_LuaGenericPin("X" , "X", FIVS_PIN_DATA_INPUT, FIR_INT)
+	FIVSNode_LuaGenericPin("out", "float", FIVS_PIN_DATA_OUTPUT, FIR_FLOAT)
+	FIVSNode_EndLuaGenericMeta();
+	UFUNCTION()
+	static void FIVSFunc_Int_Float(UPARAM(ref) FFIVSLuaCompilerContext& Context, UFIVSPin* X, UFIVSPin* out) {
+		FString Val = Context.GetRValueExpression(X);
+		Context.AddExpression(out, FString::Printf(TEXT("tonumber(%s)"), *Val));
+	}
+
 	FIVSNode_BeginLuaGenericMeta(FIVSFunc_Int_Addition, "Lua Addition (int)", "+", "Adds two Floats", "Math|int")
 	FIVSNode_LuaGenericPin("X" , "X", FIVS_PIN_DATA_INPUT, FIR_INT)
 	FIVSNode_LuaGenericPin("Y" , "Y", FIVS_PIN_DATA_INPUT, FIR_INT)

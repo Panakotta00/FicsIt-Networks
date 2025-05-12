@@ -1,47 +1,42 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FIVSNode_UFunctionCall.h"
+#include "FIVSNode_LuaGeneric.h"
 #include "FIVSStringLib.generated.h"
-/*
+
 UCLASS()
 class UFIVSStringLib : public UObject {
 	GENERATED_BODY()
 public:
-	FIVSNode_UFunctionOperatorMeta(FIVSFunc_Append, "Append", "+", "Combinds the given string together.", "String");
+	FIVSNode_BeginLuaGenericMeta(FIVSFunc_String_Append, "Append String", "..", "Combines two strings A and B together into one", "Math|string")
+	FIVSNode_LuaGenericPin("A" , "A", FIVS_PIN_DATA_INPUT, FIR_STR)
+	FIVSNode_LuaGenericPin("B" , "B", FIVS_PIN_DATA_INPUT, FIR_STR)
+	FIVSNode_LuaGenericPin("Out" , "Out", FIVS_PIN_DATA_OUTPUT, FIR_STR)
+	FIVSNode_EndLuaGenericMeta();
 	UFUNCTION()
-	static FString FIVSFunc_Append(const FString& A, const FString& B) {
-		return FString(A).Append(B);
-	}
-	
-	FIVSNode_UFunctionOperatorMeta(FIVSFunc_Substr, "Sub-String", "substr", "Returns a part of the string.", "String");
-	UFUNCTION()
-	static FString FIVSFunc_Substr(FString A, int StartIndex, int Count) {
-		return A.Mid(StartIndex, Count);
-	}
-	
-	FIVSNode_UFunctionOperatorMeta(FIVSFunc_EqualTo, "Equal To", "==", "Compares the values and returns if true if they are the same.", "String");
-	UFUNCTION()
-	static bool FIVSFunc_EqualTo(FString A, FString B) {
-		return A == B;
+	static void FIVSFunc_String_Append(UPARAM(ref) FFIVSLuaCompilerContext& Context, UFIVSPin* A, UFIVSPin* B, UFIVSPin* Out) {
+		FString OP1 = Context.GetRValueExpression(A);
+		FString OP2 = Context.GetRValueExpression(B);
+		Context.AddExpression(Out, FString::Printf(TEXT("(%s .. %s)"), *OP1, *OP2));
 	}
 
-	FIVSNode_UFunctionOperatorMeta(FIVSFunc_UnequalTo, "Unequal To", "!=", "Compares the values and returns if true if they are not the same.", "String");
+	FIVSNode_BeginLuaGenericMeta(FIVSFunc_String_FromInt, "To String (int)", "·", "Converts an integer into a string", "Math|string")
+	FIVSNode_LuaGenericPin("Val" , "Val", FIVS_PIN_DATA_INPUT, FIR_INT)
+	FIVSNode_LuaGenericPin("Out" , "Out", FIVS_PIN_DATA_OUTPUT, FIR_STR)
+	FIVSNode_EndLuaGenericMeta();
 	UFUNCTION()
-	static bool FIVSFunc_UnequalTo(FString A, FString B) {
-		return A != B;
-	}
-	
-	FIVSNode_UFunctionOperatorMeta(FIVSFunc_Compare, "Compare", "==", "Compares the values and returns a value that shows how they compare. 0 = The same, <0 B is smaller, >0 B is bigger.", "String");
-	UFUNCTION()
-	static int FIVSFunc_Compare(FString A, FString B) {
-		return A.Compare(B);
+	static void FIVSFunc_String_FromInt(UPARAM(ref) FFIVSLuaCompilerContext& Context, UFIVSPin* Val, UFIVSPin* Out) {
+		FString OP1 = Context.GetRValueExpression(Val);
+		Context.AddExpression(Out, FString::Printf(TEXT("tostring(%s)"), *OP1));
 	}
 
-	FIVSNode_UFunctionOperatorMeta(FIVSFunc_Length, "Length", "Len", "Returns the length of the string.", "String");
+	FIVSNode_BeginLuaGenericMeta(FIVSFunc_String_FromFloat, "To String (float)", "·", "Converts a float into a string", "Math|string")
+	FIVSNode_LuaGenericPin("Val" , "Val", FIVS_PIN_DATA_INPUT, FIR_FLOAT)
+	FIVSNode_LuaGenericPin("Out" , "Out", FIVS_PIN_DATA_OUTPUT, FIR_STR)
+	FIVSNode_EndLuaGenericMeta();
 	UFUNCTION()
-	static int FIVSFunc_Length(FString A) {
-		return A.Len();
+	static void FIVSFunc_String_FromFloat(UPARAM(ref) FFIVSLuaCompilerContext& Context, UFIVSPin* Val, UFIVSPin* Out) {
+		FString OP1 = Context.GetRValueExpression(Val);
+		Context.AddExpression(Out, FString::Printf(TEXT("tostring(%s)"), *OP1));
 	}
 };
-*/
