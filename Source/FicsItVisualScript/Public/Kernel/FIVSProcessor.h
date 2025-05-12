@@ -1,6 +1,11 @@
 ﻿#pragma once
 
+#include "FINLuaReferenceCollector.h"
+#include "FINLuaRuntimePersistence.h"
+#include "FINLuaThreadedRuntime.h"
 #include "FIVSRuntimeContext.h"
+#include "LuaComponentAPI.h"
+#include "LuaEventAPI.h"
 #include "FicsItKernel/Processor/Processor.h"
 #include "Script/FIVSScriptContext.h"
 #include "Script/FIVSScriptNode.h"
@@ -18,15 +23,40 @@ class UFIVSProcessor : public UFINKernelProcessor, public IFIVSScriptContext_Int
 	TSharedPtr<FFIVSRuntimeContext> RuntimeContext;
 
 public:
+	UFIVSProcessor();
+
+	// Begin AActor
+	virtual void BeginDestroy() override;
+	// End AActor
+
 	// Begin UFINKernelProcessor
 	virtual void Tick(float InDeltaTime) override;
 	virtual void Reset() override;
 	virtual void Stop(bool) override;
 	// End UFINKernelProcessor
 
+	// Begin IFGSaveGameInterfaces
+	virtual void GatherDependencies_Implementation(TArray<UObject*>& out_dependentObjects) override;
+	virtual void PreSaveGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	virtual void PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) override;
+	// End IFGSaveGameInterface
+
 	// Begin IFIVSScriptContext_Interface
 	virtual void GetRelevantObjects_Implementation(TArray<FFIRTrace>& OutObjects) override;
 	virtual void GetRelevantClasses_Implementation(TArray<UFIRClass*>& OutClasses) override;
 	virtual void GetRelevantStructs_Implementation(TArray<UFIRStruct*>& OutStructs) override;
 	// End IFVSScriptContext_Interface
+
+	UPROPERTY(SaveGame)
+	FFINLuaRuntimePersistenceState RuntimeState;
+
+private:
+	FString LuaCode;
+
+	UPROPERTY()
+	FFINLuaThreadedRuntime Runtime;
+	UPROPERTY()
+	FFINLuaReferenceCollector ReferenceCollector;
+	FFINLuaComponentNetworkAccessDelegates ComponentNetwork;
+	FFINLuaEventSystem EventSystem;
 };

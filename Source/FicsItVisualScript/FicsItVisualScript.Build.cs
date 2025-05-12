@@ -30,6 +30,8 @@ public class FicsItVisualScript : ModuleRules
             "FicsItNetworks",
             "FicsItNetworksComputer",
             "FicsItNetworksCircuit",
+            "FicsItNetworksLua",
+            "FicsItNetworksMisc",
             "FicsItReflection",
             "Tracy"
 		});

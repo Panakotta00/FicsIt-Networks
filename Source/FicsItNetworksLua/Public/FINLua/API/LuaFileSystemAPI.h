@@ -25,8 +25,8 @@ namespace FINLua {
 	 * @param file	- the file stream you want to add to the Lua stack
 	 * @param path	- the path to the file opened by the filestream (needed for persistency)
 	 */
-	void luaFIN_pushFile(lua_State* L, TSharedPtr<CodersFileSystem::FileStream> file, const std::string& path);
+	FICSITNETWORKSLUA_API void luaFIN_pushFile(lua_State* L, TSharedPtr<CodersFileSystem::FileStream> file, const std::string& path);
 
-	void luaFIN_setFileSystem(lua_State* L, CodersFileSystem::FileSystemRoot* FileSystem);
-	CodersFileSystem::FileSystemRoot* luaFIN_getFileSystem(lua_State* L);
+	FICSITNETWORKSLUA_API void luaFIN_setFileSystem(lua_State* L, CodersFileSystem::FileSystemRoot* FileSystem);
+	FICSITNETWORKSLUA_API CodersFileSystem::FileSystemRoot* luaFIN_getFileSystem(lua_State* L);
 }
