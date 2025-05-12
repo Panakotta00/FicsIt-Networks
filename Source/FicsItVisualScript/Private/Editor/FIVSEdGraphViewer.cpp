@@ -691,3 +691,5 @@ void FFIVSEdGraphSelectionDragDrop::OnDragged(const FDragDropEvent& DragDropEven
 void FFIVSEdGraphSelectionDragDrop::OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent) {
 	GraphViewer->SelectionBoxHandler.EndDrag();
 }
+
+#undef LOCTEXT_NAMESPACE
