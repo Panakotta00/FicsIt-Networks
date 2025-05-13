@@ -20,7 +20,6 @@ struct FFIVSEdPinStyle : public FSlateWidgetStyle {
 	FSlateBrush ConnectionIconConnected;
 };
 
-
 USTRUCT(BlueprintType)
 struct FFIVSEdNodeStyle : public FSlateWidgetStyle {
 	GENERATED_BODY()

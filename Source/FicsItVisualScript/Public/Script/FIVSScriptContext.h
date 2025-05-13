@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Interface.h"
 #include "FIVSScriptContext.generated.h"
 
 class UFINStruct;

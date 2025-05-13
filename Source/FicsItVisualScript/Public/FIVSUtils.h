@@ -36,8 +36,12 @@ public:
 			}
 			UObject* ObjPtr = FSoftObjectPath(Obj).TryLoad();
 			TSharedPtr<FFINTraceStep>* StepPtr = FFIRTrace::traceStepRegistry.Find(Step);
-			if (Step.IsEmpty() || !StepPtr) Trace = Trace / ObjPtr;
-			else Trace = Trace.Append(ObjPtr, *StepPtr);
+			if (Trace.IsValidPtr()) {
+				if (Step.IsEmpty() || !StepPtr) Trace = Trace / ObjPtr;
+				else Trace = Trace.Append(ObjPtr, *StepPtr);
+			} else {
+				Trace = FFIRTrace(ObjPtr);
+			}
 		}
 		return Trace.Reverse();
 	}

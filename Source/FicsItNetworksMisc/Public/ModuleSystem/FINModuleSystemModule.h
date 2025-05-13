@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "ModuleSystem|Module")
 		void getModuleSize(int& width, int& height) const;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "ModuleSystem|Module")
+	void getModulePos(int& x, int& y, int& rot) const;
+
 	/**
 	 * Adds itself to the given panel at the given postion and rotation.
 	 */

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FGMultiplayerVerticalBox.h"
 #include "FicsItReflection.h"
 #include "FIVSEdGraphViewerStyle.h"
 #include "Brushes/SlateColorBrush.h"

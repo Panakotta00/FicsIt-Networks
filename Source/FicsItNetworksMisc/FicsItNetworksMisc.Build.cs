@@ -25,6 +25,8 @@ public class FicsItNetworksMisc : ModuleRules
                 "Engine",
                 "Json",
                 "UMG",
+                "Slate",
+                "SlateCore",
             }
         );
     }

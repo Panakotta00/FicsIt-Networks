@@ -1,5 +1,9 @@
 ﻿#include "Script/Library/FIVSNode_Sequence.h"
 
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
 #include "Editor/FIVSEdNodeViewer.h"
 #include "Kernel/FIVSRuntimeContext.h"
 
@@ -39,9 +43,10 @@ void UFIVSNode_Sequence::ExtendPinContextMenu(UFIVSPin* InPin, FMenuBuilder& Men
 			})));
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSNode_Sequence::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode_Sequence::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) {
 	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
 		.Style(Style)
+		.Context(Context)
 		.Footer()[
 			SNew(SHorizontalBox)
 			+SHorizontalBox::Slot().HAlign(HAlign_Right).Padding(10)[

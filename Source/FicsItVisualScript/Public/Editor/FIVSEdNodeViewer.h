@@ -1,7 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FIVSEdEditor.h"
 #include "FIVSEdGraphViewerStyle.h"
+#include "FIVSScriptContext.h"
 #include "SlateBasics.h"
 
 class UFIVSNode;
@@ -13,6 +15,7 @@ class SFIVSEdPinViewer : public SCompoundWidget {
 	SLATE_BEGIN_ARGS(SFIVSEdPinViewer) :
 		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
+		SLATE_ARGUMENT(UFIVSEdEditor*, Context)
 		SLATE_ARGUMENT_DEFAULT(bool, ShowName) = true;
 	SLATE_END_ARGS()
 	
@@ -21,6 +24,7 @@ public:
 	
 private:
 	UFIVSPin* Pin = nullptr;
+	UFIVSEdEditor* Context;
 	TWeakPtr<SFIVSEdNodeViewer> NodeViewer;
 	TSharedPtr<SWidget> PinIconWidget;
 	const FFIVSEdNodeStyle* Style = nullptr;
@@ -126,10 +130,12 @@ class SFIVSEdRerouteNodeViewer : public SFIVSEdNodeViewer {
 	SLATE_BEGIN_ARGS(SFIVSEdRerouteNodeViewer) :
 		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
+		SLATE_ARGUMENT(UFIVSEdEditor*, Context)
 	SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
 
+	UFIVSEdEditor* Context = nullptr;
 public:
 	virtual void ReconstructPins() override {}
 };
@@ -138,12 +144,14 @@ class SFIVSEdFunctionNodeViewer : public SFIVSEdNodeViewer {
 	SLATE_BEGIN_ARGS(SFIVSEdFunctionNodeViewer) :
 		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
+		SLATE_ARGUMENT(UFIVSEdEditor*, Context)
 		SLATE_DEFAULT_SLOT(FArguments, Footer)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
 
 protected:
+	UFIVSEdEditor* Context = nullptr;
 	TSharedPtr<SVerticalBox> InputPinBox;
 	TSharedPtr<SVerticalBox> OutputPinBox;
 
@@ -157,12 +165,15 @@ class SFIVSEdOperatorNodeViewer : public SFIVSEdFunctionNodeViewer {
 	SLATE_BEGIN_ARGS(SFIVSEdOperatorNodeViewer) :
 		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
+		SLATE_ARGUMENT(UFIVSEdEditor*, Context)
 		SLATE_ARGUMENT(FString, Symbol)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, UFIVSNode* Node);
 
 protected:
+	UFIVSEdEditor* Context = nullptr;
+
 	virtual bool ShowName() const override;
 };
 

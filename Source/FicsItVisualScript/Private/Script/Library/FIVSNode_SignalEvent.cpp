@@ -1,5 +1,8 @@
 ﻿#include "Script/Library/FIVSNode_SignalEvent.h"
 
+#include "FGHUD.h"
+#include "FGPlayerController.h"
+#include "FINUMGWidget.h"
 #include "Script/FIVSScriptContext.h"
 #include "FIVSUtils.h"
 #include "Editor/FIVSEdObjectSelection.h"

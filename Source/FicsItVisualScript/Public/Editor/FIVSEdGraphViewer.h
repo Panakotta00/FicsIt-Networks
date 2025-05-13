@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIVSEdActionSelection.h"
+#include "FIVSEdEditor.h"
 #include "FIVSEdGraphViewerStyle.h"
 #include "Script/FIVSGraph.h"
 #include "FIVSEdNodeViewer.h"
@@ -152,6 +153,7 @@ class SFIVSEdGraphViewer : public SPanel {
 		_Style(&FFIVSEdGraphViewerStyle::GetDefault()) {}
 	SLATE_STYLE_ARGUMENT(FFIVSEdGraphViewerStyle, Style)
 	SLATE_ARGUMENT(UFIVSGraph*, Graph)
+	SLATE_ARGUMENT(UFIVSEdEditor*, Context)
 	SLATE_EVENT(FFIVSEdSelectionChanged, OnSelectionChanged)
 	SLATE_END_ARGS()
 
@@ -161,6 +163,7 @@ public:
 private:
 	const FFIVSEdGraphViewerStyle* Style = nullptr;
 	UFIVSGraph* Graph = nullptr;
+	UFIVSEdEditor* Context;
 	FFIVSEdSelectionChanged SelectionChanged;
 	TSharedPtr<FUICommandList> CommandList;
 

@@ -6,6 +6,7 @@
 #include "FIVSPin.generated.h"
 
 class UFIRStruct;
+class UFIVSNode;
 
 UENUM()
 enum EFIVSPinType {
@@ -106,6 +107,7 @@ public:
 	FString Name = TEXT("Unnamed");
 	UPROPERTY()
 	FText DisplayName = FText::FromString("Unnamed");
+	TDelegate<void()> OnLiteralChanged;
 
 	/**
 	 * Returns the literal value of the given pin.
@@ -123,7 +125,10 @@ public:
 	 * For more info on literals, see GetLiteral()
 	 */
 	void SetLiteral(FFIRAnyValue InLiteral) {
-		if (InLiteral.GetType() == GetPinDataType().GetType()) Literal = InLiteral;
+		if (InLiteral.GetType() == GetPinDataType().GetType()) {
+			Literal = InLiteral;
+			OnLiteralChanged.ExecuteIfBound();
+		}
 	}
 
 	/**

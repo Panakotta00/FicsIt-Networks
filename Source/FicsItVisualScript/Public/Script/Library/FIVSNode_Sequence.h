@@ -1,6 +1,10 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
 #include "FIVSCompileLua.h"
 #include "FIVSUtils.h"
 #include "Script/FIVSScriptNode.h"
@@ -24,7 +28,7 @@ public:
 	// End UFIVSNode
 
 	// Begin UFIVSScriptNode
-	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) override;
 	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const override;
 	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
 	// End UFIVSScriptNode

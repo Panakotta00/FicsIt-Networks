@@ -1,5 +1,6 @@
 ﻿#include "Editor/FIVSEdNodeViewer.h"
 
+#include "FIVSEdObjectSelection.h"
 #include "Editor/FIVSEdGraphViewer.h"
 #include "Script/FIVSScriptNode.h"
 #include "Widgets/Input/SNumericEntryBox.h"
@@ -9,6 +10,7 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIV
 	Style = InArgs._Style;
 	NodeViewer = InNodeViewer;
 	Pin = InPin;
+	Context = InArgs._Context;
 	
 	PinIconWidget = SNew(SImage)
 		.Image_Lambda([this]() {
@@ -93,10 +95,18 @@ void SFIVSEdPinViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIV
 				.MinDesiredWidth(100);
 			break;
 			case FIR_OBJ:
+			case FIR_TRACE: {
+				TArray<FFIRTrace> Objs;
+
+				IFIVSScriptContext_Interface::Execute_GetRelevantObjects(Context->GetContext().GetObject(), Objs);
+				Literal = SNew(SFIVSEdObjectSelection, Objs)
+					.InitSelection(Pin->GetLiteral().GetTrace())
+					.OnSelectionChanged_Lambda([this](FFIRTrace Value) {
+						Pin->SetLiteral(Value);
+					});
 				break;
+			}
 			case FIR_CLASS:
-				break;
-			case FIR_TRACE:
 				break;
 			case FIR_STRUCT:
 				break;
@@ -300,6 +310,7 @@ TSharedRef<SFIVSEdPinViewer> SFIVSEdNodeViewer::GetPinWidget(UFIVSPin* Pin) cons
 }
 
 void SFIVSEdRerouteNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {
+	Context = InArgs._Context;
 	TSharedRef<SBorder> content = SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
 
 	TSharedPtr<SFIVSEdPinViewer> PinWidget;
@@ -319,6 +330,7 @@ void SFIVSEdRerouteNodeViewer::Construct(const FArguments& InArgs, const TShared
 }
 
 void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {
+	Context = InArgs._Context;
 	TSharedRef<SBorder> content = SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
 
 	content->SetContent(
@@ -380,6 +392,7 @@ void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 	for (UFIVSPin* Pin : GetNode()->GetNodePins()) {
 		if (Pin->GetPinType() & FIVS_PIN_INPUT) {
 			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
+				.Context(Context)
 				.Style(Style)
 				.ShowName(ShowName());
 			PinWidgets.Add(PinWidget);
@@ -393,6 +406,7 @@ void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 			];
 		} else if (Pin->GetPinType() & FIVS_PIN_OUTPUT) {
 			TSharedRef<SFIVSEdPinViewer> PinWidget = SNew(SFIVSEdPinViewer, SharedThis(this), Pin)
+				.Context(Context)
 				.Style(Style)
 				.ShowName(ShowName());
 			PinWidgets.Add(PinWidget);
@@ -409,6 +423,8 @@ void SFIVSEdFunctionNodeViewer::ReconstructPins() {
 }
 
 void SFIVSEdOperatorNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {
+	Context = InArgs._Context;
+
 	TSharedRef<SBorder> content = SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
 
 	content->SetContent(

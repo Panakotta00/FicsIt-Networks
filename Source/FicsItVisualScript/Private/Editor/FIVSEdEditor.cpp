@@ -71,6 +71,7 @@ TSharedRef<SWidget> UFIVSEdEditor::RebuildWidget() {
 			SAssignNew(Viewer, SFIVSEdGraphViewer)
 			.Style(&Style)
 			.Graph(Graph)
+			.Context(this)
 			.OnSelectionChanged_Lambda([this](UFIVSNode* Node, bool bSelected) {
 				UpdateSelection();
 			})
@@ -88,6 +89,8 @@ UFIVSGraph* UFIVSEdEditor::GetGraph() const {
 
 void UFIVSEdEditor::SetContext(TScriptInterface<IFIVSScriptContext_Interface> InContext) {
 	Context = InContext;
+	MyWidget.Reset();
+	InvalidateLayoutAndVolatility();
 }
 
 void UFIVSEdEditor::UpdateSelection() {

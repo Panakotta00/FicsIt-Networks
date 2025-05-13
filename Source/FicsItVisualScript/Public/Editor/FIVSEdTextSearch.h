@@ -1,6 +1,8 @@
 ﻿#pragma once
 
-class FFIVSEdTextSearch {
+#include "CoreMinimal.h"
+
+class FICSITVISUALSCRIPT_API FFIVSEdTextSearch {
 private:
 	TArray<FString> Keywords;
 	

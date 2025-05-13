@@ -34,6 +34,7 @@ public:
 	// Begin IFINModuleSystemModule
 	virtual void setPanel_Implementation(UFINModuleSystemPanel* Panel, int X, int Y, int Rot) override;
 	virtual void getModuleSize_Implementation(int& Width, int& Height) const override;
+	virtual void getModulePos_Implementation(int& x, int& y, int& rot) const override;
 	virtual FName getName_Implementation() const override;
 	// End IFINModuleSystemModule
 

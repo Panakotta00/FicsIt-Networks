@@ -29,6 +29,12 @@ void AFINModuleBase::getModuleSize_Implementation(int& Width, int& Height) const
 	Height = static_cast<int>(ModuleSize.Y);
 }
 
+void AFINModuleBase::getModulePos_Implementation(int& x, int& y, int& rot) const {
+	x = static_cast<int>(ModulePos.X);
+	y = static_cast<int>(ModulePos.Y);
+	rot = static_cast<int>(ModulePos.Z);
+}
+
 FName AFINModuleBase::getName_Implementation() const {
 	return ModuleName;
 }

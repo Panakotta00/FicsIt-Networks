@@ -1,6 +1,7 @@
 ﻿#include "FIVSCompileLua.h"
 
 #include "FINNetworkComponent.h"
+#include "FIVSEdObjectSelection.h"
 
 FString FFIVSLuaScope::FindUniqueLocalName(FString Name) const {
 	if (!LocalNames.Contains(Name)) return Name;
@@ -29,7 +30,16 @@ FString FIRValueToLuaLiteral(const FFIRAnyValue& Value) {
 		case FIR_TRACE:
 		case FIR_OBJ: {
 			UObject* obj = UFINNetworkUtils::FindNetworkComponentFromObject(Value.GetObj().Get());
-			if (!IsValid(obj)) return TEXT("nil");
+			if (!IsValid(obj)) {
+				FString code;
+				UObject* obj2 = UFINNetworkUtils::FindNetworkComponentFromObject(Value.GetTrace().GetStartPtr());
+				if (IsValid(obj2)) {
+					FGuid id = IFINNetworkComponent::Execute_GetID(obj2);
+					code = FString::Printf(TEXT("component.proxy(\"%s\")"), *id.ToString());
+				}
+				code.Append(SFIVSEdTraceSelection::CompileTraceToLua(Value.GetTrace()));
+				return code;
+			}
 			FGuid id = IFINNetworkComponent::Execute_GetID(obj);
 			return FString::Printf(TEXT("component.proxy(\"%s\")"), *id.ToString());
 		}

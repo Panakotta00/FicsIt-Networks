@@ -1,6 +1,14 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
 #include "FIVSNodeSerialization.h"
 #include "FIVSPin.h"
 #include "Templates/SubclassOf.h"
@@ -97,7 +105,7 @@ public:
 	/**
 	 * Returns a SFIVSEdNodeViewer that is used to display this node in a graph editor.
 	 */
-	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style);
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context);
 
 	/**
 	 * Creates and returns a new widget that can be used to change detailed information of this node.
@@ -119,7 +127,7 @@ public:
 	 * Is supposed to store additional node properties to the serialization data that will be used on deserialization
 	 * for initializing the node so it can successfully recreate the Node name, Pins, functionality, etc.
 	 */
-	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const { }
+	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const {}
 
 	/**
 	 * Called when the node gets deserialized.
@@ -198,6 +206,6 @@ public:
 	// Begin UFINScriptNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override;
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
-	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, UFIVSEdEditor* Context) override;
 	// End UFINScriptNode
 };

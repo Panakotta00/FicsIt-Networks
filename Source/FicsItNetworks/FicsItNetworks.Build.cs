@@ -41,6 +41,7 @@ public class FicsItNetworks : ModuleRules
             "FicsItNetworksMisc",
             "FicsItNetworksComputer",
             "FicsItNetworksLua",
+            "FicsItVisualScript",
 		});
     }
 }

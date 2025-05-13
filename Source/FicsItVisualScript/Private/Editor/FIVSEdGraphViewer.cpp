@@ -109,6 +109,7 @@ void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 	Style = InArgs._Style;
 	SetGraph(InArgs._Graph);
 	SelectionChanged = InArgs._OnSelectionChanged;
+	Context = InArgs._Context;
 	SelectionManager.OnSelectionChanged.BindRaw(this, &SFIVSEdGraphViewer::OnSelectionChanged);
 
 	FCommands::Register();
@@ -414,7 +415,7 @@ float SFIVSEdGraphViewer::GetRelativeLayoutScale(const int32 ChildIndex, float L
 }
 
 #pragma optimize("", off)
-TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFIVSEdActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& Context) {
+TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPath& Path, const FVector2D& Location, TFunction<void(const TSharedPtr<FFIVSEdActionSelectionAction>&)> OnExecute, const FFINScriptNodeCreationContext& InContext) {
 	TArray<TSharedPtr<FFIVSEdActionSelectionEntry>> Entries;
 	TMap<FString, TSharedPtr<FFIVSEdActionSelectionCategory>> Categories;
 	
@@ -451,7 +452,7 @@ TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPat
 					}
 				} while (Sepperator != INDEX_NONE);
 
-				TSharedPtr<FFIVSEdActionSelectionNodeAction> SelectionAction = MakeShared<FFIVSEdActionSelectionNodeAction>(Action, Context);
+				TSharedPtr<FFIVSEdActionSelectionNodeAction> SelectionAction = MakeShared<FFIVSEdActionSelectionNodeAction>(Action, InContext);
 				
 				if (Category.IsValid()) {
 					Category->Children.Add(SelectionAction);
@@ -462,7 +463,7 @@ TSharedPtr<IMenu> SFIVSEdGraphViewer::CreateActionSelectionMenu(const FWidgetPat
 		}
 	}
 	
-    TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection, Context.Pin ? FFIVSFullPinType(Context.Pin->GetPinType(), Context.Pin->GetPinDataType()) : FFIVSFullPinType(FIVS_PIN_DATA_INPUT & FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIR_NIL)))
+    TSharedRef<SFIVSEdActionSelection> Select = SNew(SFIVSEdActionSelection, InContext.Pin ? FFIVSFullPinType(InContext.Pin->GetPinType(), InContext.Pin->GetPinDataType()) : FFIVSFullPinType(FIVS_PIN_DATA_INPUT & FIVS_PIN_EXEC_OUTPUT, FFIVSPinDataType(FIR_NIL)))
 		.OnActionExecuted_Lambda([this, OnExecute](const TSharedPtr<FFIVSEdActionSelectionAction>& Action) {
 		OnExecute(Action);
     	ActiveActionSelection = nullptr;
@@ -538,7 +539,7 @@ void SFIVSEdGraphViewer::UpdateSelection(const FPointerEvent& Event) {
 void SFIVSEdGraphViewer::CreateNodeAsChild(UFIVSNode* Node) {
 	check(IsValid(Node));
 
-	TSharedRef<SFIVSEdNodeViewer> Child = Node->CreateNodeViewer(SharedThis(this), &Style->NodeStyle);
+	TSharedRef<SFIVSEdNodeViewer> Child = Node->CreateNodeViewer(SharedThis(this), &Style->NodeStyle, Context);
 	Children.Add(Child);
 	NodeToChild.Add(Node, Child);
 }

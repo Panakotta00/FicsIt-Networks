@@ -1,6 +1,7 @@
 #include "Script/FIVSNodeSerialization.h"
 
 #include "FicsItVisualScriptModule.h"
+#include "FIVSUtils.h"
 #include "Script/FIVSGraph.h"
 #include "Script/FIVSNode.h"
 #include "JsonObjectConverter.h"
@@ -24,7 +25,7 @@ TSharedPtr<FJsonValue> FIVS_GetPinLiteralAsJson(UFIVSPin* InPin) {
 	case FIR_CLASS:
 		return MakeShared<FJsonValueString>(InPin->GetLiteral().GetClass()->GetPathName());
 	case FIR_TRACE:
-		return nullptr; // TODO: Trace to JSON
+		return MakeShared<FJsonValueString>(UFIVSUtils::NetworkTraceToString(InPin->GetLiteral().GetTrace()));
 	case FIR_STRUCT:
 		return nullptr; // TODO: Maybe add Struct serialization here, but maybe this is broken up before hand and pins can't have struct literals, instead the pins may have to be split up into individual pins which can then have a literal
 	case FIR_ARRAY:
@@ -54,7 +55,7 @@ void FIVS_SetPinLiteralFromJson(UFIVSPin* InPin, TSharedPtr<FJsonValue> InValue)
 	case FIR_CLASS:
 		return InPin->SetLiteral(Cast<UClass>(FSoftObjectPath(InValue->AsString()).TryLoad()));
 	case FIR_TRACE:
-		// TODO: Trace to JSON
+		return InPin->SetLiteral(UFIVSUtils::StringToNetworkTrace(InValue->AsString()));
 	case FIR_STRUCT:
 		// TODO: Maybe add Struct serialization here, but maybe this is broken up before hand and pins can't have struct literals, instead the pins may have to be split up into individual pins which can then have a literal
 	case FIR_ARRAY:

@@ -1,5 +1,14 @@
 ﻿#include "Script/FIVSNode.h"
 
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "FIVSEdEditor.h"
 #include "Editor/FIVSEdNodeViewer.h"
 #include "Script/FIVSGraph.h"
 
@@ -13,8 +22,9 @@ UFIVSGraph* UFIVSNode::GetOuterGraph() const {
 	return Cast<UFIVSGraph>(GetOuter());
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSNode::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, UFIVSEdEditor* Context) {
 	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
+		.Context(Context)
 		.Style(Style);
 }
 
@@ -40,7 +50,8 @@ void UFIVSRerouteNode::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	});
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSRerouteNode::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
+TSharedRef<SFIVSEdNodeViewer> UFIVSRerouteNode::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, UFIVSEdEditor* Context) {
 	return SNew(SFIVSEdRerouteNodeViewer, GraphViewer, this)
+		.Context(Context)
 		.Style(Style);
 }

@@ -1,5 +1,9 @@
 ﻿#include "Script/Library/FIVSNode_LuaGeneric.h"
 
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
+#include "AABB.h"
 #include "DeclarativeSyntaxSupport.h"
 #include "FIVSEdNodeViewer.h"
 
@@ -30,10 +34,11 @@ void UFIVSNode_LuaGeneric::GetNodeActions(TArray<FFIVSNodeAction>& Actions) cons
 	}
 }
 
-TSharedRef<SFIVSEdNodeViewer> UFIVSNode_LuaGeneric::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style) {
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode_LuaGeneric::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) {
 	return SNew(SFIVSEdOperatorNodeViewer, GraphViewer, this)
-	.Style(Style)
-	.Symbol(Symbol);
+		.Context(Context)
+		.Style(Style)
+		.Symbol(Symbol);
 }
 
 void UFIVSNode_LuaGeneric::SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const {
