@@ -27,7 +27,6 @@ public class FicsItVisualScript : ModuleRules
 			"InputCore",
 			"FactoryGame",
 			"FicsItLogLibrary",
-            "FicsItNetworks",
             "FicsItNetworksComputer",
             "FicsItNetworksCircuit",
             "FicsItNetworksLua",

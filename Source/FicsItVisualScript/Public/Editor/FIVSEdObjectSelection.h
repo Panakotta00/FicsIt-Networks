@@ -46,9 +46,11 @@ struct FICSITVISUALSCRIPT_API FFIVSTraceSelectionWidgetStyle : public FSlateWidg
 };
 
 class FICSITVISUALSCRIPT_API SFIVSEdObjectWidget : public SCompoundWidget {
+	DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FCreateDetailsWidget, const FFIRTrace&)
 	SLATE_BEGIN_ARGS(SFIVSEdObjectWidget) :
 		_Style(&FFIVSStyle::Get().GetWidgetStyle<FFIVSObjectWidgetStyle>(TEXT("ComponentWidget"))) {}
 	SLATE_STYLE_ARGUMENT(FFIVSObjectWidgetStyle, Style)
+	SLATE_EVENT(FCreateDetailsWidget, OnCreateDetailsWidget)
 	SLATE_END_ARGS()
 
 private:

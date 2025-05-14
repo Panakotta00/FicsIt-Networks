@@ -61,7 +61,35 @@ void SFIVSEdObjectWidget::Construct(const FArguments& InArgs, const FFIRTrace& O
 	}
 	Brush = static_cast<FSlateBrush>(FSlateImageBrush(icon, FVector2D(32, 32)));
 
-	TSharedPtr<SVerticalBox> VBox;
+	TSharedPtr<SWidget> Details;
+	if (InArgs._OnCreateDetailsWidget.IsBound()) {
+		Details = InArgs._OnCreateDetailsWidget.Execute(Object);
+	} else {
+		TSharedPtr<SVerticalBox> VBox = SNew(SVerticalBox);
+		if (IsValid(component)) {
+			FString nick = IFINNetworkComponent::Execute_GetNick(component);
+			if (!nick.IsEmpty()) {
+				VBox->AddSlot()[
+					SNew(STextBlock)
+					.Text(FText::FromString(nick))
+					.Font(Style->NickFont)
+				];
+			}
+			VBox->AddSlot()[
+				SNew(STextBlock)
+				.Text(FText::FromString(IFINNetworkComponent::Execute_GetID(component).ToString()))
+				.Font(Style->UUIDFont)
+			];
+		} else {
+			UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(obj->GetClass());
+			VBox->AddSlot()[
+				SNew(STextBlock)
+				.Text(Class->GetDisplayName())
+				.Font(Style->NickFont)
+			];
+		}
+		Details = VBox;
+	}
 
 	ChildSlot[
 		SNew(SHorizontalBox)
@@ -71,32 +99,9 @@ void SFIVSEdObjectWidget::Construct(const FArguments& InArgs, const FFIRTrace& O
 		]
 		+SHorizontalBox::Slot().FillWidth(1)
 		.VAlign(VAlign_Center)[
-			SAssignNew(VBox, SVerticalBox)
+			Details.ToSharedRef()
 		]
 	];
-
-	if (IsValid(component)) {
-		FString nick = IFINNetworkComponent::Execute_GetNick(component);
-		if (!nick.IsEmpty()) {
-			VBox->AddSlot()[
-				SNew(STextBlock)
-				.Text(FText::FromString(nick))
-				.Font(Style->NickFont)
-			];
-		}
-		VBox->AddSlot()[
-			SNew(STextBlock)
-			.Text(FText::FromString(IFINNetworkComponent::Execute_GetID(component).ToString()))
-			.Font(Style->UUIDFont)
-		];
-	} else {
-		UFIRClass* Class = FFicsItReflectionModule::Get().FindClass(obj->GetClass());
-		VBox->AddSlot()[
-			SNew(STextBlock)
-			.Text(Class->GetDisplayName())
-			.Font(Style->NickFont)
-		];
-	}
 }
 
 void SFIVSEdObjectSelection::Construct(const FArguments& InArgs, const TArray<FFIRTrace>& InObjects) {
