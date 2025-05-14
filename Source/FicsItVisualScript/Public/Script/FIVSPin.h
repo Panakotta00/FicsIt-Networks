@@ -165,6 +165,7 @@ public:
 	 * Creates a connection between this and the given pin
 	 */
 	void AddConnection(UFIVSPin* Pin);
+	void AddConnections(TArray<UFIVSPin*> Pins);
 
 	/**
 	 * Removes a connection between this and the given pin
@@ -187,7 +188,7 @@ public:
 	/**
 	 * Removes all connections of this pin
 	 */
-	void RemoveAllConnections();
+	TArray<UFIVSPin*> RemoveAllConnections();
 };
 
 UCLASS()

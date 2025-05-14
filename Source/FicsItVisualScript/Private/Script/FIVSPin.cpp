@@ -24,6 +24,12 @@ void UFIVSPin::AddConnection(UFIVSPin* Pin) {
 	Pin->ConnectedPins.Add(this);
 }
 
+void UFIVSPin::AddConnections(TArray<UFIVSPin*> Pins) {
+	for (UFIVSPin* pin : Pins) {
+		AddConnection(pin);
+	}
+}
+
 void UFIVSPin::RemoveConnection(UFIVSPin* Pin) {
 	if (ConnectedPins.Contains(Pin)) ConnectedPins.Remove(Pin);
 	if (Pin->ConnectedPins.Contains(this)) Pin->ConnectedPins.Remove(this);
@@ -118,11 +124,12 @@ bool UFIVSPin::CanConnect(UFIVSPin* Pin) {
 	return true;
 }
 
-void UFIVSPin::RemoveAllConnections() {
+TArray<UFIVSPin*> UFIVSPin::RemoveAllConnections() {
 	TArray<UFIVSPin*> Connections = GetConnections();
 	for (UFIVSPin* Connection : Connections) {
 		RemoveConnection(Connection);
 	}
+	return Connections;
 }
 
 EFIVSPinType UFIVSGenericPin::GetPinType() {

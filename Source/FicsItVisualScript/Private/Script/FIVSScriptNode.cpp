@@ -38,3 +38,10 @@ void UFIVSScriptNode::DeletePins(TArrayView<UFIVSPin*> InPins) {
 		DeletePin(Pin);
 	}
 }
+
+void UFIVSScriptNode::RecreatePin(UFIVSPin*& Pin, EFIVSPinType PinType, const FString& Name, const FText& InDisplayName, FFIVSPinDataType DataType) {
+	TArray<UFIVSPin*> Connections = Pin->RemoveAllConnections();
+	DeletePin(Pin);
+	Pin = CreatePin(PinType, Name, InDisplayName, DataType);
+	Pin->AddConnections(Connections);
+}

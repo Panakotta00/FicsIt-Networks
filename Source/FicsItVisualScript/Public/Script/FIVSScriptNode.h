@@ -39,6 +39,12 @@ protected:
 	void DeletePin(UFIVSPin* Pin);
 	void DeletePins(TArrayView<UFIVSPin*> Pins);
 
+	/**
+	 * Deletes the given pin and creates a new one with the new settings.
+	 * Will reconnect all pin connections.
+	 */
+	void RecreatePin(UFIVSPin*& Pin, EFIVSPinType PinType, const FString& Name, const FText& InDisplayName, FFIVSPinDataType DataType = FFIVSPinDataType(FIR_ANY));
+
 public:
 	// Begin UFIVSNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override { return Pins; }

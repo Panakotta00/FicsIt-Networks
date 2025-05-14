@@ -57,8 +57,7 @@ void UFIVSNode_Literal::SetType(TEnumAsByte<EFIRValueType> InType) {
 				SubType = obj ? FFicsItReflectionModule::Get().FindClass(obj->GetClass()) : nullptr;
 
 				if (Output->GetPinDataType().GetRefSubType() != SubType) {
-					DeletePin(Output);
-					Output = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Var"), FText::FromString(TEXT("Var")), FFIRExtendedValueType(Type, SubType));
+					RecreatePin(Output, FIVS_PIN_DATA_OUTPUT, TEXT("Var"), FText::FromString(TEXT("Var")), FFIRExtendedValueType(Type, SubType));
 				}
 			}
 			default: break;
