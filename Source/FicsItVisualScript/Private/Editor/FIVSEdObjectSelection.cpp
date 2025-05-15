@@ -119,7 +119,10 @@ void SFIVSEdObjectSelection::Construct(const FArguments& InArgs, const TArray<FF
 	];
 
 	SelectedObject = InArgs._InitSelection;
-	WidgetHolder->SetContent(SNew(SFIVSEdObjectWidget, InArgs._InitSelection));
+	WidgetHolder->SetContent(
+		SNew(SFIVSEdObjectWidget, InArgs._InitSelection)
+		.OnCreateDetailsWidget(InArgs._OnCreateDetailsWidget)
+	);
 }
 
 FReply SFIVSEdObjectSelection::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
