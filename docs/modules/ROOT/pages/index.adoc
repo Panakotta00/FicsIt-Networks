@@ -31,7 +31,7 @@ Instead, FicsIt-Networks is designed as a set of open-ended tools that give you 
 So, if you like a challenge AND want to take your Satisfactory operation(s) to the next level, then you are in the right place! 
 These docs will help to get you up-to-speed with the information necessary to use this mod to its fullest potential.
 
-If you have any questions--or just want to join a community of folks learning the mod right alongside you--then check out our https://discord.gg/xkVJ73E[Discord server] and get involved!
+If you have any questions--or just want to join a community of folks learning the mod right alongside you--then check out our https://discord.gg/3VfZ6Da[Discord server] and get involved!
 
 == Coding in FicsIt-Networks
 This mod provides you with everything you need to connect components in your factory to a computer network for additional processing by one or more computers. 
