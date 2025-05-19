@@ -3,6 +3,7 @@
 #include "FicsItReflection.h"
 #include "Buildables/FGBuildable.h"
 #include "FIRUtils.h"
+#include "Regex.h"
 #include "Reflection/FIRArrayProperty.h"
 #include "Reflection/FIRStructProperty.h"
 #include "Reflection/FIRUFunction.h"
@@ -47,7 +48,7 @@ bool UFIRSourceUObject::ProvidesRequirements(UScriptStruct* Struct) const {
 	return false;
 }
 
-void UFIRSourceUObject::FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFillClass, UClass* Class) const {
+UFIRClass* UFIRSourceUObject::FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFillClass, UClass* Class) {
 	UFIRClass* DirectParent = Ref->FindClass(Class->GetSuperClass(), false, false);
 	if (DirectParent) {
 		int childCount = 0;
@@ -63,6 +64,11 @@ void UFIRSourceUObject::FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFill
 	}
 	
 	FFIRClassMeta Meta = GetClassMeta(Class);
+
+	if (!IsValid(ToFillClass)) {
+		ToFillClass = NewObject<UFIRClass>(this, FName(Meta.InternalName));
+	}
+
 	ToFillClass->InternalName = Meta.InternalName;
 	ToFillClass->DisplayName = Meta.DisplayName;
 	ToFillClass->Description = Meta.Description;
@@ -74,13 +80,13 @@ void UFIRSourceUObject::FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFill
 	for (TFieldIterator<UFunction> Function(Class); Function; ++Function) {
 		if (Function->GetOwnerClass() != Class) continue; 
 		if (Function->GetName().StartsWith("netProp_")) {
-			ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, *Function));
+			ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, ToFillClass, *Function));
 		} else if (Function->GetName().StartsWith("netPropGet_")) {
-			ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, *Function));
+			ToFillClass->Properties.Add(GenerateProperty(Ref, Meta, Class, ToFillClass, *Function));
 		} else if (Function->GetName().StartsWith("netFunc_")) {
-			ToFillClass->Functions.Add(GenerateFunction(Ref, Meta, Class, *Function));
+			ToFillClass->Functions.Add(GenerateFunction(Ref, Meta, Class, ToFillClass, *Function));
 		} else if (Function->GetName().StartsWith("netSig_")) {
-			ToFillClass->Signals.Add(GenerateSignal(Ref, Meta, Class, *Function));
+			ToFillClass->Signals.Add(GenerateSignal(Ref, Meta, Class, ToFillClass, *Function));
 		}
 	}
 		
@@ -90,12 +96,20 @@ void UFIRSourceUObject::FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFill
 	if (ToFillClass->Properties.Num() > 0 && ToFillClass->Functions.Num() > 0 && ToFillClass->Signals.Num() > 0) {
 		checkf(CheckName(ToFillClass->InternalName), TEXT("Invalid name '%s' for class '%s'"), *ToFillClass->InternalName, *Class->GetPathName());
 	}
+
+	return ToFillClass;
 }
 
-void UFIRSourceUObject::FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFillStruct, UScriptStruct* Struct) const {
+UFIRStruct* UFIRSourceUObject::FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFillStruct, UScriptStruct* Struct) {
+	if (!IsValid(ToFillStruct)) {
+		ToFillStruct = NewObject<UFIRStruct>(this, FName(Struct->GetName()));
+	}
+
 	ToFillStruct->DisplayName = FText::FromString(Struct->GetName());
 	ToFillStruct->InternalName = Struct->GetName();
 	ToFillStruct->Description = FText::FromString("");
+
+	return ToFillStruct;
 }
 
 FFIRClassMeta UFIRSourceUObject::GetClassMeta(UClass* Class) const {
@@ -267,7 +281,7 @@ FString UFIRSourceUObject::GetSignalNameFromUFunction(UFunction* Func) const {
 	return Name;
 }
 
-UFIRFunction* UFIRSourceUObject::GenerateFunction(FFicsItReflectionModule* Ref, const FFIRTypeMeta& TypeMeta, UClass* Class, UFunction* Func) const {
+UFIRFunction* UFIRSourceUObject::GenerateFunction(FFicsItReflectionModule* Ref, const FFIRTypeMeta& TypeMeta, UClass* Class, UFIRClass* FIRClass, UFunction* Func) const {
 	FFIRFunctionMeta Meta;
 	const FString FuncName = GetFunctionNameFromUFunction(Func);
 	if (const FFIRFunctionMeta* MetaPtr = TypeMeta.Functions.Find(FuncName)) {
@@ -276,33 +290,35 @@ UFIRFunction* UFIRSourceUObject::GenerateFunction(FFicsItReflectionModule* Ref, 
 		Meta = GetFunctionMeta(Class, Func);
 	}
 
-	UFIRUFunction* FIRFunc = NewObject<UFIRUFunction>(Ref->FindClass(Class, false, false));
+	EFIRFunctionFlags flags = FIR_Func_MemberFunc | FIR_Func_Parallel;
+	switch (Meta.RuntimeState) {
+		case EFIRMetaRuntimeState::Synchronous:
+			flags |= FIR_Func_Sync;
+			break;
+		case EFIRMetaRuntimeState::Parallel:
+			flags |= FIR_Func_Parallel;
+			break;
+		case EFIRMetaRuntimeState::Asynchronous:
+			flags |= FIR_Func_Async;
+			break;
+		default:
+			break;
+	}
+
+	UFIRUFunction* FIRFunc = NewObject<UFIRUFunction>(FIRClass, FIRFunctionObjectName(flags, FuncName));
 	FIRFunc->RefFunction = Func;
 	FIRFunc->InternalName = FuncName;
 	FIRFunc->DisplayName = FText::FromString(FIRFunc->InternalName);
-	FIRFunc->FunctionFlags = FIR_Func_MemberFunc | FIR_Func_Parallel;
+	FIRFunc->FunctionFlags = (flags & ~FIR_Func_Runtime) | flags;
 	
 	if (Meta.InternalName.Len()) FIRFunc->InternalName = Meta.InternalName;
 	if (!Meta.DisplayName.IsEmpty()) FIRFunc->DisplayName = Meta.DisplayName;
 	if (!Meta.Description.IsEmpty()) FIRFunc->Description = Meta.Description;
-	switch (Meta.RuntimeState) {
-	case EFIRMetaRuntimeState::Synchronous:
-		FIRFunc->FunctionFlags = (FIRFunc->FunctionFlags & ~FIR_Func_Runtime) | FIR_Func_Sync;
-		break;
-	case EFIRMetaRuntimeState::Parallel:
-		FIRFunc->FunctionFlags = (FIRFunc->FunctionFlags & ~FIR_Func_Runtime) | FIR_Func_Parallel;
-		break;
-	case EFIRMetaRuntimeState::Asynchronous:
-		FIRFunc->FunctionFlags = (FIRFunc->FunctionFlags & ~FIR_Func_Runtime) | FIR_Func_Async;
-		break;
-	default:
-		break;
-	}
 	
 	for (TFieldIterator<FProperty> Param(Func); Param; ++Param) {
 		if (!(Param->PropertyFlags & CPF_Parm)) continue;
 		int ParameterIndex = FIRFunc->Parameters.Num();
-		UFIRProperty* FIRProp = FIRCreateFIRPropertyFromFProperty(*Param, FIRFunc);
+		UFIRProperty* FIRProp = FIRCreateFIRPropertyFromFProperty(*Param, FIRFunc, FName(Param->GetName()));
 		
 		FIRProp->InternalName = Param->GetName();
 		FIRProp->DisplayName = FText::FromString(FIRProp->InternalName);
@@ -342,43 +358,46 @@ UFIRFunction* UFIRSourceUObject::GenerateFunction(FFicsItReflectionModule* Ref, 
 	return FIRFunc;
 }
 
-UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& TypeMeta, UClass* Class, FProperty* Prop) const {
+UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& TypeMeta, UClass* Class, UFIRClass* FIRClass, FProperty* Prop) const {
 	FFIRPropertyMeta Meta;
 	bool bReadOnly = true;
-	const FString PropName = GetPropertyNameFromFProperty(Prop, bReadOnly);
+	FString PropName = GetPropertyNameFromFProperty(Prop, bReadOnly);
 	if (const FFIRPropertyMeta* MetaPtr = TypeMeta.Properties.Find(PropName)) {
 		Meta = *MetaPtr;
 	}
-	
-	UFIRProperty* FIRProp = FIRCreateFIRPropertyFromFProperty(Prop, Ref->FindClass(Class, false, false));
+
+	EFIRPropertyFlags flags = FIR_Prop_Attrib | FIR_Prop_Parallel;
+	if (bReadOnly) flags |= FIR_Prop_ReadOnly;
+	switch (Meta.RuntimeState) {
+		case 0:
+			flags |= FIR_Prop_Sync;
+			break;
+		case 1:
+			flags |= FIR_Prop_Parallel;
+			break;
+		case 2:
+			flags |= FIR_Prop_Async;
+			break;
+		default:
+			break;
+	}
+
+	if (!Meta.InternalName.IsEmpty()) PropName = Meta.InternalName;
+
+	UFIRProperty* FIRProp = FIRCreateFIRPropertyFromFProperty(Prop, FIRClass, FIRPropertyObjectName(flags, PropName));
 	FIRProp->InternalName = PropName;
 	FIRProp->DisplayName = FText::FromString(PropName);
-	FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_Attrib | FIR_Prop_Parallel;;
-	if (bReadOnly) FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_ReadOnly;
-	
-	if (!Meta.InternalName.IsEmpty()) FIRProp->InternalName = Meta.InternalName;
+	FIRProp->PropertyFlags |= (FIRProp->PropertyFlags & ~FIR_Prop_Runtime) | flags;
+
 	if (!Meta.DisplayName.IsEmpty()) FIRProp->DisplayName = Meta.DisplayName;
 	if (!Meta.Description.IsEmpty()) FIRProp->Description = Meta.Description;
-	switch (Meta.RuntimeState) {
-	case 0:
-		FIRProp->PropertyFlags = (FIRProp->PropertyFlags & ~FIR_Prop_Runtime) | FIR_Prop_Sync;
-		break;
-	case 1:
-		FIRProp->PropertyFlags = (FIRProp->PropertyFlags & ~FIR_Prop_Runtime) | FIR_Prop_Parallel;
-		break;
-	case 2:
-		FIRProp->PropertyFlags = (FIRProp->PropertyFlags & ~FIR_Prop_Runtime) | FIR_Prop_Async;
-		break;
-	default:
-		break;
-	}
 
 	checkf(CheckName(FIRProp->GetInternalName()), TEXT("Invalid property name '%s' for class '%s'"), *FIRProp->GetInternalName(), *Class->GetFullName());
 	
 	return FIRProp;
 }
 
-UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& TypeMeta, UClass* Class, UFunction* Get) const {
+UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& TypeMeta, UClass* Class, UFIRClass* FIRClass, UFunction* Get) const {
 	FFIRPropertyMeta Meta;
 	
 	FProperty* GetProp = nullptr;
@@ -390,18 +409,34 @@ UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, 
 		}
 	}
 
-	const FString PropName = GetPropertyNameFromUFunction(Get);
+	FString PropName = GetPropertyNameFromUFunction(Get);
 	if (const FFIRPropertyMeta* MetaPtr = TypeMeta.Properties.Find(PropName)) {
 		Meta = *MetaPtr;
 	}
-	
-	UFIRProperty* FIRProp = FIRCreateFIRPropertyFromFProperty(GetProp, nullptr, Ref->FindClass(Class, false, false));
+	if (!Meta.InternalName.IsEmpty()) PropName = Meta.InternalName;
+
+	EFIRPropertyFlags flags = FIR_Prop_Attrib | FIR_Prop_RT_Parallel;
+	switch (Meta.RuntimeState) {
+		case 0:
+			flags |= FIR_Prop_Sync;
+			break;
+		case 1:
+			flags |= FIR_Prop_Parallel;
+			break;
+		case 2:
+			flags |= FIR_Prop_Async;
+			break;
+		default:
+			break;
+	}
+
+	UFIRProperty* FIRProp = FIRCreateFIRPropertyFromFProperty(GetProp, nullptr, FIRClass, FIRPropertyObjectName(flags, PropName));
 	FIRProp->InternalName = PropName;
 	FIRProp->DisplayName = FText::FromString(PropName);
-	FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_Attrib | FIR_Prop_RT_Parallel;
+	FIRProp->PropertyFlags = (flags & ~FIR_Prop_Runtime) | flags;
 	if (UFIRFuncProperty* FIRSProp = Cast<UFIRFuncProperty>(FIRProp)) {
 		FIRSProp->GetterFunc.Function = Get;
-		FIRSProp->GetterFunc.Property = FIRCreateFIRPropertyFromFProperty(GetProp, FIRProp);
+		FIRSProp->GetterFunc.Property = FIRCreateFIRPropertyFromFProperty(GetProp, FIRProp, FName(TEXT("GetterFunc")));
 	}
 	UFunction* Set = Class->FindFunctionByName(*(FString("netPropSet_") + FIRProp->InternalName));
 	if (Set) {
@@ -416,7 +451,7 @@ UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, 
 		}
 		if (UFIRFuncProperty* FIRSProp = Cast<UFIRFuncProperty>(FIRProp)) {
 			FIRSProp->SetterFunc.Function = Set;
-			FIRSProp->SetterFunc.Property = FIRCreateFIRPropertyFromFProperty(SetProp, FIRProp);
+			FIRSProp->SetterFunc.Property = FIRCreateFIRPropertyFromFProperty(SetProp, FIRProp, FName(TEXT("SetterFunc")));
 		}
 	} else {
 		FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_ReadOnly;
@@ -424,26 +459,13 @@ UFIRProperty* UFIRSourceUObject::GenerateProperty(FFicsItReflectionModule* Ref, 
 	if (!Meta.InternalName.IsEmpty()) FIRProp->InternalName = Meta.InternalName;
 	if (!Meta.DisplayName.IsEmpty()) FIRProp->DisplayName = Meta.DisplayName;
 	if (!Meta.Description.IsEmpty()) FIRProp->Description = Meta.Description;
-	switch (Meta.RuntimeState) {
-	case 0:
-		FIRProp->PropertyFlags = (FIRProp->PropertyFlags & ~FIR_Prop_Runtime) | FIR_Prop_Sync;
-		break;
-	case 1:
-		FIRProp->PropertyFlags = (FIRProp->PropertyFlags & ~FIR_Prop_Runtime) | FIR_Prop_Parallel;
-		break;
-	case 2:
-		FIRProp->PropertyFlags = (FIRProp->PropertyFlags & ~FIR_Prop_Runtime) | FIR_Prop_Async;
-		break;
-	default:
-		break;
-	}
 	
 	checkf(CheckName(FIRProp->GetInternalName()), TEXT("Invalid property name '%s' for class '%s'"), *FIRProp->GetInternalName(), *Class->GetFullName());
 	
 	return FIRProp;
 }
 
-UFIRSignal* UFIRSourceUObject::GenerateSignal(FFicsItReflectionModule* Ref, const FFIRClassMeta& ClassMeta, UClass* Class, UFunction* Func) const {
+UFIRSignal* UFIRSourceUObject::GenerateSignal(FFicsItReflectionModule* Ref, const FFIRClassMeta& ClassMeta, UClass* Class, UFIRClass* FIRClass, UFunction* Func) const {
 	FFIRSignalMeta Meta;
 	const FString SignalName = GetSignalNameFromUFunction(Func);
 	if (const FFIRSignalMeta* MetaPtr = ClassMeta.Signals.Find(SignalName)) {
@@ -451,8 +473,8 @@ UFIRSignal* UFIRSourceUObject::GenerateSignal(FFicsItReflectionModule* Ref, cons
 	}else {
 		Meta = GetSignalMeta(Class, Func);
 	}
-	
-	UFIRSignal* FIRSignal = NewObject<UFIRSignal>(Ref->FindClass(Class, false, false));
+
+	UFIRSignal* FIRSignal = NewObject<UFIRSignal>(FIRClass, FIRSignalObjectName(FIR_Signal_None, SignalName));
 	FIRSignal->InternalName = GetSignalNameFromUFunction(Func);
 	FIRSignal->DisplayName = FText::FromString(FIRSignal->InternalName);
 	
@@ -462,7 +484,7 @@ UFIRSignal* UFIRSourceUObject::GenerateSignal(FFicsItReflectionModule* Ref, cons
 	for (TFieldIterator<FProperty> Param(Func); Param; ++Param) {
 		if (!(Param->PropertyFlags & CPF_Parm)) continue;
 		int ParameterIndex = FIRSignal->Parameters.Num();
-		UFIRProperty* FIRProp = FIRCreateFIRPropertyFromFProperty(*Param, FIRSignal);
+		UFIRProperty* FIRProp = FIRCreateFIRPropertyFromFProperty(*Param, FIRSignal, FName(Param->GetName()));
 
 		FIRProp->InternalName = Param->GetName();
 		FIRProp->DisplayName = FText::FromString(FIRProp->InternalName);

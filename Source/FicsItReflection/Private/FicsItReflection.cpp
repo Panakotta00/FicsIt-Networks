@@ -258,20 +258,22 @@ UFIRClass* FFicsItReflectionModule::FindClass(UClass* Clazz, bool bRecursive, bo
 		// try to load this exact class into cache and return it
 		if (bTryToReflect) {
 			UFIRClass* Class = nullptr;
-			for (const UFIRSource* Source : Sources) {
+			UFIRSource* Creator = nullptr;
+			for (UFIRSource* Source : Sources) {
 				if (Source->ProvidesRequirements(Clazz)) {
-					Class = NewObject<UFIRClass>(Clazz);
-					break;
+					Class = Source->FillData(this, Class, Clazz);
+					if (IsValid(Class)) break;
 				}
 			}
 			if (Class) {
+				for (UFIRSource* Source : Sources) {
+					if (Source == Creator) continue;
+					Class = Source->FillData(this, Class, Clazz);
+				}
 				Clazz->AddToRoot();
 				Class->AddToRoot();
 				Classes.Add(Clazz, Class);
 				ClassesReversed.Add(Class, Clazz);
-				for (const UFIRSource* Source : Sources) {
-					Source->FillData(this, Class, Clazz);
-				}
 				ClassNames.Add(Class->GetInternalName(), Class);
 				return Class;
 			}
@@ -318,20 +320,22 @@ UFIRStruct* FFicsItReflectionModule::FindStruct(UScriptStruct* Struct, bool bRec
 		// try to load this exact class into cache and return it
 		if (bTryToReflect) {
 			UFIRStruct* FIRStruct = nullptr;
-			for (const UFIRSource* Source : Sources) {
+			UFIRSource* Creator = nullptr;
+			for (UFIRSource* Source : Sources) {
 				if (Source->ProvidesRequirements(Struct)) {
-					FIRStruct = NewObject<UFIRStruct>(Struct);
-					break;
+					FIRStruct = Source->FillData(this, FIRStruct, Struct);
+					if (IsValid(FIRStruct)) break;
 				}
 			}
 			if (FIRStruct) {
+				for (UFIRSource* Source : Sources) {
+					if (Source == Creator) continue;
+					FIRStruct = Source->FillData(this, FIRStruct, Struct);
+				}
 				Struct->AddToRoot();
 				FIRStruct->AddToRoot();
 				Structs.Add(Struct, FIRStruct);
 				StructsReversed.Add(FIRStruct, Struct);
-				for (const UFIRSource* Source : Sources) {
-					Source->FillData(this, FIRStruct, Struct);
-				}
 				StructNames.Add(FIRStruct->GetInternalName(), FIRStruct);
 				return FIRStruct;
 			}

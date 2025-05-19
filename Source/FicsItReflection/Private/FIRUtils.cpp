@@ -28,52 +28,52 @@ bool UFIRUtils::SetIfVarargs(UFIRProperty* Prop, const FFIRExecutionContext& Ctx
 }
 
 
-UFIRProperty* FIRCreateFIRPropertyFromFProperty(FProperty* Property, FProperty* OverrideProperty, UObject* Outer) {
+UFIRProperty* FIRCreateFIRPropertyFromFProperty(FProperty* Property, FProperty* OverrideProperty, UObject* Outer, FName Name) {
 	UFIRProperty* FIRProp = nullptr;
 	if (CastField<FStrProperty>(Property)) {
-		UFIRStrProperty* FIRStrProp = NewObject<UFIRStrProperty>(Outer);
+		UFIRStrProperty* FIRStrProp = NewObject<UFIRStrProperty>(Outer, Name);
 		FIRStrProp->Property = CastField<FStrProperty>(OverrideProperty);
 		FIRProp = FIRStrProp;
 	} else if (CastField<FIntProperty>(Property)) {
-		UFIRIntProperty* FIRIntProp = NewObject<UFIRIntProperty>(Outer);
+		UFIRIntProperty* FIRIntProp = NewObject<UFIRIntProperty>(Outer, Name);
 		FIRIntProp->Property = CastField<FIntProperty>(OverrideProperty);
 		FIRProp = FIRIntProp;
 	} else if (CastField<FByteProperty>(Property)) {
-		UFIRIntProperty* FIRIntProp = NewObject<UFIRIntProperty>(Outer);
+		UFIRIntProperty* FIRIntProp = NewObject<UFIRIntProperty>(Outer, Name);
 		FIRIntProp->Property8 = CastField<FByteProperty>(OverrideProperty);
 		FIRProp = FIRIntProp;
 	} else if (CastField<FInt64Property>(Property)) {
-		UFIRIntProperty* FIRIntProp = NewObject<UFIRIntProperty>(Outer);
+		UFIRIntProperty* FIRIntProp = NewObject<UFIRIntProperty>(Outer, Name);
 		FIRIntProp->Property64 = CastField<FInt64Property>(OverrideProperty);
 		FIRProp = FIRIntProp;
 	} else if (CastField<FFloatProperty>(Property)) {
-		UFIRFloatProperty* FIRFloatProp = NewObject<UFIRFloatProperty>(Outer);
+		UFIRFloatProperty* FIRFloatProp = NewObject<UFIRFloatProperty>(Outer, Name);
 		FIRFloatProp->FloatProperty = CastField<FFloatProperty>(OverrideProperty);
 		FIRProp = FIRFloatProp;
 	} else if (CastField<FDoubleProperty>(Property)) {
-		UFIRFloatProperty* FIRFloatProp = NewObject<UFIRFloatProperty>(Outer);
+		UFIRFloatProperty* FIRFloatProp = NewObject<UFIRFloatProperty>(Outer, Name);
 		FIRFloatProp->DoubleProperty = CastField<FDoubleProperty>(OverrideProperty);
 		FIRProp = FIRFloatProp;
 	} else if (CastField<FBoolProperty>(Property)) {
-		UFIRBoolProperty* FIRBoolProp = NewObject<UFIRBoolProperty>(Outer);
+		UFIRBoolProperty* FIRBoolProp = NewObject<UFIRBoolProperty>(Outer, Name);
 		FIRBoolProp->Property = CastField<FBoolProperty>(OverrideProperty);
 		FIRProp = FIRBoolProp;
 	} else if (CastField<FClassProperty>(Property)) {
-		UFIRClassProperty* FIRClassProp = NewObject<UFIRClassProperty>(Outer);
+		UFIRClassProperty* FIRClassProp = NewObject<UFIRClassProperty>(Outer, Name);
 		FIRClassProp->Property = CastField<FClassProperty>(OverrideProperty);
 		FIRProp = FIRClassProp;
 	} else if (CastField<FObjectProperty>(Property)) {
-		UFIRObjectProperty* FIRObjectProp = NewObject<UFIRObjectProperty>(Outer);
+		UFIRObjectProperty* FIRObjectProp = NewObject<UFIRObjectProperty>(Outer, Name);
 		FIRObjectProp->Property = CastField<FObjectProperty>(OverrideProperty);
 		FIRProp = FIRObjectProp;
 	} else  if (CastField<FStructProperty>(Property)) {
 		FStructProperty* StructProp = CastField<FStructProperty>(OverrideProperty);
 		if (StructProp->Struct == FFIRTrace::StaticStruct()) {
-			UFIRTraceProperty* FIRTraceProp = NewObject<UFIRTraceProperty>(Outer);
+			UFIRTraceProperty* FIRTraceProp = NewObject<UFIRTraceProperty>(Outer, Name);
 			FIRTraceProp->Property = StructProp;
 			FIRProp = FIRTraceProp;
 		} else {
-			UFIRStructProperty* FIRStructProp = NewObject<UFIRStructProperty>(Outer);
+			UFIRStructProperty* FIRStructProp = NewObject<UFIRStructProperty>(Outer, Name);
 			checkf(StructProp->Struct == FFIRAnyValue::StaticStruct() || FFicsItReflectionModule::Get().FindStruct(StructProp->Struct) != nullptr, TEXT("Struct Property '%s' of reflection-base '%s' uses non-reflectable struct '%s'"), *Property->GetFullName(), *Outer->GetName(), *StructProp->Struct->GetName());
 			FIRStructProp->Property = StructProp;
 			FIRStructProp->Struct = StructProp->Struct;
@@ -81,13 +81,43 @@ UFIRProperty* FIRCreateFIRPropertyFromFProperty(FProperty* Property, FProperty* 
 		}
     } else if (CastField<FArrayProperty>(Property)) {
     	FArrayProperty* ArrayProperty = CastField<FArrayProperty>(OverrideProperty);
-	    UFIRArrayProperty* FIRArrayProp = NewObject<UFIRArrayProperty>(Outer);
+	    UFIRArrayProperty* FIRArrayProp = NewObject<UFIRArrayProperty>(Outer, Name);
     	FIRArrayProp->Property = ArrayProperty;
-    	FIRArrayProp->InnerType = FIRCreateFIRPropertyFromFProperty(ArrayProperty->Inner, FIRArrayProp);
+    	FIRArrayProp->InnerType = FIRCreateFIRPropertyFromFProperty(ArrayProperty->Inner, FIRArrayProp, FName(TEXT("Internal")));
     	FIRProp = FIRArrayProp;
     }
 	check(FIRProp != nullptr);
 	if (Property->PropertyFlags & CPF_OutParm) FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_OutParam;
 	if (Property->PropertyFlags & CPF_ReturnParm) FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_RetVal;
 	return FIRProp;
+}
+
+FName FIRFunctionObjectName(EFIRFunctionFlags flags, const FString& InternalName) {
+	FString Prefix;
+	if (flags & FIR_Func_MemberFunc) {
+		Prefix = TEXT("MemberFunc-");
+	} else if (flags & FIR_Func_ClassFunc) {
+		Prefix = TEXT("ClassFunc-");
+	} else if (flags & FIR_Func_StaticFunc) {
+		Prefix = TEXT("StaticFunc-");
+	} else {
+		Prefix = TEXT("Func-");
+	}
+	return FName(Prefix + InternalName);
+}
+
+FName FIRPropertyObjectName(EFIRPropertyFlags flags, const FString& InternalName) {
+	FString Prefix;
+	if (flags & FIR_Prop_ClassProp) {
+		Prefix = TEXT("ClassProp-");
+	} else if (flags & FIR_Prop_StaticProp) {
+		Prefix = TEXT("StaticProp-");
+	} else {
+		Prefix = TEXT("Prop-");
+	}
+	return FName(Prefix + InternalName);
+}
+
+FName FIRSignalObjectName(EFIRSignalFlags flags, const FString& InternalName) {
+	return FName(TEXT("Signal-") + InternalName);
 }

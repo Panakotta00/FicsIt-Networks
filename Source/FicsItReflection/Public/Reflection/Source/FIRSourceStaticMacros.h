@@ -147,32 +147,32 @@
 struct RInt {
 	typedef FIRInt CppType;
 	static FIRInt Get(const FFIRAnyValue& Any) { return Any.GetInt(); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		return NewObject<UFIRIntProperty>(Outer);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		return NewObject<UFIRIntProperty>(Outer, Name);
 	}
 };
 
 struct RFloat {
 	typedef FIRFloat CppType;
 	static FIRFloat Get(const FIRAny& Any) { return Any.GetFloat(); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		return NewObject<UFIRFloatProperty>(Outer);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		return NewObject<UFIRFloatProperty>(Outer, Name);
 	}
 };
 
 struct RBool {
 	typedef FIRBool CppType;
 	static FIRBool Get(const FIRAny& Any) { return Any.GetBool(); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		return NewObject<UFIRBoolProperty>(Outer);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		return NewObject<UFIRBoolProperty>(Outer, Name);
 	}
 };
 
 struct RString {
 	typedef FIRStr CppType;
 	static FIRStr Get(const FIRAny& Any) { return Any.GetString(); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		return NewObject<UFIRStrProperty>(Outer);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		return NewObject<UFIRStrProperty>(Outer, Name);
 	}
 };
 
@@ -180,8 +180,8 @@ template<typename T>
 struct RClass {
 	typedef FIRClass CppType;
 	static FIRClass Get(const FIRAny& Any) { return Any.GetClass(); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		UFIRClassProperty* Prop = NewObject<UFIRClassProperty>(Outer);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		UFIRClassProperty* Prop = NewObject<UFIRClassProperty>(Outer, Name);
 		Prop->Subclass = T::StaticClass();
 		return Prop;
 	}
@@ -191,8 +191,8 @@ template<typename T>
 struct RObject {
 	typedef TWeakObjectPtr<T> CppType;
 	static CppType Get(const FIRAny& Any) { return CppType(Cast<T>(Any.GetObj().Get())); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		UFIRObjectProperty* Prop = NewObject<UFIRObjectProperty>(Outer);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		UFIRObjectProperty* Prop = NewObject<UFIRObjectProperty>(Outer, Name);
 		Prop->Subclass = T::StaticClass();
 		return Prop;
 	}
@@ -202,8 +202,8 @@ template<typename T>
 struct RTrace {
 	typedef FIRTrace CppType;
 	static FIRTrace Get(const FIRAny& Any) { return Any.GetTrace(); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		UFIRTraceProperty* Prop = NewObject<UFIRTraceProperty>(Outer);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		UFIRTraceProperty* Prop = NewObject<UFIRTraceProperty>(Outer, Name);
 		Prop->Subclass = T::StaticClass();
 		return Prop;
 	}
@@ -213,8 +213,8 @@ template<typename T>
 struct RStruct {
 	typedef T CppType;
 	static T Get(const FIRAny& Any) { return Any.GetStruct().Get<T>(); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		UFIRStructProperty* FIRProp = NewObject<UFIRStructProperty>(Outer);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		UFIRStructProperty* FIRProp = NewObject<UFIRStructProperty>(Outer, Name);
 		FIRProp->Struct = TBaseStructure<T>::Get();
 		return FIRProp;
 	}
@@ -224,9 +224,9 @@ template<typename T>
 struct RArray {
 	typedef FIRArray CppType;
 	static FIRArray Get(const FIRAny& Any) { return Any.GetArray(); }
-	static UFIRProperty* PropConstructor(UObject* Outer) {
-		UFIRArrayProperty* FIRProp = NewObject<UFIRArrayProperty>(Outer);
-		FIRProp->InnerType = T::PropConstructor(FIRProp);
+	static UFIRProperty* PropConstructor(UObject* Outer, FName Name) {
+		UFIRArrayProperty* FIRProp = NewObject<UFIRArrayProperty>(Outer, Name);
+		FIRProp->InnerType = T::PropConstructor(FIRProp, FName(TEXT("Inner")));
 		return FIRProp;
 	}
 };

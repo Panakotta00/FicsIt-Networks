@@ -9,7 +9,7 @@ struct FICSITREFLECTION_API FFIRStaticFuncParamReg {
 	FText DisplayName;
 	FText Description;
 	int ParamType;
-	UFIRProperty*(*PropConstructor)(UObject*);
+	UFIRProperty*(*PropConstructor)(UObject*, FName);
 };
 
 struct FICSITREFLECTION_API FFIRStaticFuncReg {
@@ -30,7 +30,7 @@ struct FICSITREFLECTION_API FFIRStaticPropReg {
 	TFunction<FIRAny(const FFIRExecutionContext&)>Get;
 	int Runtime;
 	int PropType;
-	UFIRProperty*(*PropConstructor)(UObject*);
+	UFIRProperty*(*PropConstructor)(UObject*, FName);
 	TFunction<void(const FFIRExecutionContext&, const FIRAny&)> Set;
 };
 
@@ -38,7 +38,7 @@ struct FICSITREFLECTION_API FFIRStaticSignalParamReg {
 	FString InternalName;
 	FText DisplayName;
 	FText Description;
-	UFIRProperty*(*PropConstructor)(UObject*);
+	UFIRProperty*(*PropConstructor)(UObject*, FName);
 };
 
 struct FICSITREFLECTION_API FFIRStaticSignalReg {
@@ -122,7 +122,7 @@ public:
 	// Begin UFINReflectionSource
 	virtual bool ProvidesRequirements(UClass* Class) const override;
 	virtual bool ProvidesRequirements(UScriptStruct* Struct) const override;
-	virtual void FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFillClass, UClass* Class) const override;
-	virtual void FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFillStruct, UScriptStruct* Struct) const override;
+	virtual UFIRClass* FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFillClass, UClass* Class) override;
+	virtual UFIRStruct* FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFillStruct, UScriptStruct* Struct) override;
 	// End UFINReflectionSource
 };

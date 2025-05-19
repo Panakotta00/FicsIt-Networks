@@ -23,6 +23,6 @@ public:
 	/**
 	 * Fills the given FINType with data referenced by the given UType
 	 */
-	virtual void FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFillClass, UClass* Class) const {}
-	virtual void FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFillStruct, UScriptStruct* Struct) const {}
+	virtual UFIRClass* FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFillClass, UClass* Class) { return nullptr; }
+	virtual UFIRStruct* FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFillStruct, UScriptStruct* Struct) { return nullptr; }
 };

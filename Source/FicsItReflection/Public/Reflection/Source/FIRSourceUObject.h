@@ -97,14 +97,14 @@ public:
 	// Begin UFINReflectionSource
 	virtual bool ProvidesRequirements(UClass* Class) const override;
 	virtual bool ProvidesRequirements(UScriptStruct* Struct) const override;
-	virtual void FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFillClass, UClass* Class) const override;
-	virtual void FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFillStruct, UScriptStruct* Struct) const override;
+	virtual UFIRClass* FillData(FFicsItReflectionModule* Ref, UFIRClass* ToFillClass, UClass* Class) override;
+	virtual UFIRStruct* FillData(FFicsItReflectionModule* Ref, UFIRStruct* ToFillStruct, UScriptStruct* Struct) override;
 	// End UFINReflectionSource
 
-	UFIRFunction* GenerateFunction(FFicsItReflectionModule* Ref, const FFIRTypeMeta& Meta, UClass* Class, UFunction* Func) const;
-	UFIRProperty* GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& Meta, UClass* Class, FProperty* Prop) const;
-	UFIRProperty* GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& Meta, UClass* Class, UFunction* Get) const;
-	UFIRSignal* GenerateSignal(FFicsItReflectionModule* Ref, const FFIRClassMeta& Meta, UClass* Class, UFunction* Func) const;
+	UFIRFunction* GenerateFunction(FFicsItReflectionModule* Ref, const FFIRTypeMeta& Meta, UClass* Class, UFIRClass* FIRClass,  UFunction* Func) const;
+	UFIRProperty* GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& Meta, UClass* Class, UFIRClass* FIRClass, FProperty* Prop) const;
+	UFIRProperty* GenerateProperty(FFicsItReflectionModule* Ref, const FFIRTypeMeta& Meta, UClass* Class, UFIRClass* FIRClass, UFunction* Get) const;
+	UFIRSignal* GenerateSignal(FFicsItReflectionModule* Ref, const FFIRClassMeta& Meta, UClass* Class, UFIRClass* FIRClass, UFunction* Func) const;
 	static UFIRSignal* GetSignalFromFunction(UFunction* Func);
 	void SetupFunctionAsSignal(FFicsItReflectionModule* Ref, UFunction* Func) const;
 	static bool CheckName(const FString& Name);
