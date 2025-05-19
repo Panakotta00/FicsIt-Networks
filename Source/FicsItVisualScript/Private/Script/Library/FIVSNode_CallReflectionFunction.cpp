@@ -45,10 +45,7 @@ void UFIVSNode_CallReflectionFunction::SerializeNodeProperties(const TSharedRef<
 void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) {
 	if (!Value) return;
 
-	FString functionStr;
-	if (Value->TryGetStringField(TEXT("function"), functionStr)) {
-		SetFunction(Cast<UFIRFunction>(FSoftObjectPath(functionStr).TryLoad()));
-	}
+	SetFunction(Cast<UFIRFunction>(FSoftObjectPath(Value->GetStringField(TEXT("function"))).TryLoad()));
 }
 
 void UFIVSNode_CallReflectionFunction::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {

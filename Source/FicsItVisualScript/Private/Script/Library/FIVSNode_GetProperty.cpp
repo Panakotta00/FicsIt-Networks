@@ -46,17 +46,21 @@ void UFIVSNode_GetProperty::CompileNodeToLua(FFIVSLuaCompilerContext& Context) c
 void UFIVSNode_GetProperty::SetProperty(UFIRProperty* InProperty) {
 	Property = InProperty;
 
-	if (Property->GetPropertyFlags() & FIR_Prop_ClassProp) {
-		DisplayName = FText::FromString(TEXT("Get ") + Property->GetInternalName() + TEXT(" (Class)"));
-	} else {
-		DisplayName = FText::FromString(TEXT("Get ") + Property->GetInternalName());
+	if (Property) {
+		if (Property->GetPropertyFlags() & FIR_Prop_ClassProp) {
+			DisplayName = FText::FromString(TEXT("Get ") + Property->GetInternalName() + TEXT(" (Class)"));
+		} else {
+			DisplayName = FText::FromString(TEXT("Get ") + Property->GetInternalName());
+		}
 	}
 
 	DeletePin(InstanceIn);
 	DeletePin(DataOut);
 
-	InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Instance"), FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIR_Prop_ClassProp ? FIR_CLASS : FIR_TRACE, Cast<UFIRClass>(Property->GetOuter())));
-	FFIVSPinDataType Type(Property);
-	if (Type.GetType() == FIR_OBJ) Type = FFIVSPinDataType(FIR_TRACE, Type.GetRefSubType());
-	DataOut = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Value"), FText::FromString("Value"), Type);
+	if (Property) {
+		InstanceIn = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("Instance"), FText::FromString("Instance"), FFIVSPinDataType(Property->GetPropertyFlags() & FIR_Prop_ClassProp ? FIR_CLASS : FIR_TRACE, Cast<UFIRClass>(Property->GetOuter())));
+		FFIVSPinDataType Type(Property);
+		if (Type.GetType() == FIR_OBJ) Type = FFIVSPinDataType(FIR_TRACE, Type.GetRefSubType());
+		DataOut = CreatePin(FIVS_PIN_DATA_OUTPUT, TEXT("Value"), FText::FromString("Value"), Type);
+	}
 }
