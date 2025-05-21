@@ -72,30 +72,32 @@ void UFIVSNode_CallReflectionFunction::CompileNodeToLua(FFIVSLuaCompilerContext&
 }
 
 void UFIVSNode_CallReflectionFunction::SetFunction(UFIRFunction* InFunction) {
-	if (InFunction == nullptr) return;
-
 	Function = InFunction;
 
-	if (Function->GetFunctionFlags() & FIR_Func_ClassFunc) {
-		DisplayName = FText::FromString(Function->GetDisplayName().ToString() + TEXT(" (Class)"));
-	} else {
-		DisplayName = FText::FromString(Function->GetDisplayName().ToString());
+	if (Function) {
+		if (Function->GetFunctionFlags() & FIR_Func_ClassFunc) {
+			DisplayName = FText::FromString(Function->GetDisplayName().ToString() + TEXT(" (Class)"));
+		} else {
+			DisplayName = FText::FromString(Function->GetDisplayName().ToString());
+		}
 	}
 
 	DeletePin(Self);
 	DeletePins(OutputPins);
 	DeletePins(InputPins);
 
-	Self = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("self"), FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIR_Func_ClassFunc ? FIR_CLASS : FIR_TRACE, Cast<UFIRClass>(Function->GetOuter())));
-	for (UFIRProperty* Param : Function->GetParameters()) {
-		EFIRPropertyFlags Flags = Param->GetPropertyFlags();
-		if (Flags & FIR_Prop_Param) {
-			FFIVSPinDataType Type = FFIRExtendedValueType(Param);
-			if (Type.GetType() == FIR_OBJ) Type = FFIVSPinDataType(FIR_TRACE, Type.GetRefSubType());
-			if (Flags & FIR_Prop_OutParam) {
-				OutputPins.Add(CreatePin(FIVS_PIN_DATA_OUTPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
-			} else {
-				InputPins.Add(CreatePin(FIVS_PIN_DATA_INPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
+	if (Function) {
+		Self = CreatePin(FIVS_PIN_DATA_INPUT, TEXT("self"), FText::FromString(TEXT("Self")), FFIVSPinDataType(Function->GetFunctionFlags() & FIR_Func_ClassFunc ? FIR_CLASS : FIR_TRACE, Cast<UFIRClass>(Function->GetOuter())));
+		for (UFIRProperty* Param : Function->GetParameters()) {
+			EFIRPropertyFlags Flags = Param->GetPropertyFlags();
+			if (Flags & FIR_Prop_Param) {
+				FFIVSPinDataType Type = FFIRExtendedValueType(Param);
+				if (Type.GetType() == FIR_OBJ) Type = FFIVSPinDataType(FIR_TRACE, Type.GetRefSubType());
+				if (Flags & FIR_Prop_OutParam) {
+					OutputPins.Add(CreatePin(FIVS_PIN_DATA_OUTPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
+				} else {
+					InputPins.Add(CreatePin(FIVS_PIN_DATA_INPUT, Param->GetInternalName(), Param->GetDisplayName(), Type));
+				}
 			}
 		}
 	}

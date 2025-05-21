@@ -6,7 +6,6 @@
 #include "FIVSEdObjectSelection.h"
 #include "FIVSEdSearchListView.h"
 #include "Widget.h"
-#include "../../../FicsItNetworksMisc/Public/ModuleSystem/FINModuleSystemModule.h"
 #include "FINModuleSelection.generated.h"
 
 UCLASS(BlueprintType)
