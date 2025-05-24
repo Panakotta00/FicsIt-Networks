@@ -317,8 +317,12 @@ const TArray<TSharedRef<SFIVSEdPinViewer>>& SFIVSEdNodeViewer::GetPinWidgets() c
 	return PinWidgets;
 }
 
-TSharedRef<SFIVSEdPinViewer> SFIVSEdNodeViewer::GetPinWidget(UFIVSPin* Pin) const {
-	return PinToWidget[Pin];
+TSharedPtr<SFIVSEdPinViewer> SFIVSEdNodeViewer::GetPinWidget(UFIVSPin* Pin) const {
+	const TSharedRef<SFIVSEdPinViewer>* viewer = PinToWidget.Find(Pin);
+	if (viewer) {
+		return *viewer;
+	}
+	return nullptr;
 }
 
 void SFIVSEdRerouteNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {

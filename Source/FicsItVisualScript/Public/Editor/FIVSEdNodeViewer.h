@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "FIVSEdEditor.h"
 #include "FIVSEdGraphViewerStyle.h"
-#include "FIVSScriptContext.h"
 #include "SlateBasics.h"
 
 class UFIVSNode;
@@ -124,7 +123,7 @@ public:
 	 */
 	const TArray<TSharedRef<SFIVSEdPinViewer>>& GetPinWidgets() const;
 	
-	TSharedRef<SFIVSEdPinViewer> GetPinWidget(UFIVSPin* Pin) const;
+	TSharedPtr<SFIVSEdPinViewer> GetPinWidget(UFIVSPin* Pin) const;
 };
 
 class SFIVSEdRerouteNodeViewer : public SFIVSEdNodeViewer {

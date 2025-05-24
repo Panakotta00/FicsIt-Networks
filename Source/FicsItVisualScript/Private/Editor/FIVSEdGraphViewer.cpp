@@ -88,8 +88,8 @@ void FFIVSEdConnectionDrawer::DrawConnection(FConnectionPoint Start, FConnection
 	}
 }
 
-void FFIVSEdConnectionDrawer_Lines::DrawConnection_Internal(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
-	FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, ConnectionColor, true, 2 * Graph->GetZoom());
+void FFIVSEdConnectionDrawer_Lines::DrawConnection_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
+	FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {Start.Position, End.Position}, ESlateDrawEffect::None, ConnectionColor, true, 1 * Graph->GetZoom());
 }
 
 void FFIVSEdConnectionDrawer_Lines::CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) {
@@ -103,23 +103,34 @@ void FFIVSEdConnectionDrawer_Lines::CheckMousePosition_Internal(const FConnectio
 	}
 }
 
-void FFIVSEdConnectionDrawer_Splines::DrawConnection_Internal(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
-	FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start, FVector2D(300 * Graph->Zoom,0), End, FVector2D(300 * Graph->Zoom,0), 2 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
+TTuple<FVector2D, FVector2D> FFIVSEdConnectionDrawer_Splines::GetSplinePoints(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) {
+	FVector2D deltaPos = End.Position - Start.Position;
+	const bool bGoingForward = deltaPos.X >= 0.0f;
+
+	double offset = FMath::Min(FVector2D::Distance(End.Position, Start.Position), (bGoingForward ? 1000 : 200) * Graph->Zoom * Graph->Zoom);
+
+	return {FVector2D(offset, 0), FVector2D(offset, 0)};
+}
+
+void FFIVSEdConnectionDrawer_Splines::DrawConnection_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
+	auto [offsetStart, offsetEnd] = GetSplinePoints(Start, End, Graph);
+	FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start.Position, offsetStart, End.Position, offsetEnd, 1 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
 }
 
 void FFIVSEdConnectionDrawer_Splines::CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) {
-	// Find the closest approach to the spline
+	auto [offsetStart, offsetEnd] = GetSplinePoints(Start, End, Graph);
+
 	FVector2D ClosestPoint;
 	float ClosestDistanceSquared = FLT_MAX;
 
 	const int32 NumStepsToTest = 16;
 	const float StepInterval = 1.0f / (float)NumStepsToTest;
-	FVector2D Point1 = FMath::CubicInterp(Start.Position, FVector2D(300, 0), End.Position, FVector2D(300, 0), 0.0f);
+	FVector2D Point1 = FMath::CubicInterp(Start.Position, offsetStart, End.Position, offsetEnd, 0.0f);
 	for (float t = 0.0f; t < 1.0f; t += StepInterval) {
-		const FVector2D Point2 = FMath::CubicInterp(Start.Position, FVector2D(300, 0), End.Position, FVector2D(300, 0), t + StepInterval);
+		const FVector2D Point2 = FMath::CubicInterp(Start.Position, offsetStart, End.Position, offsetEnd, t + StepInterval);
 
-		const FVector2D ClosestPointToSegment = FMath::ClosestPointOnSegment2D(Graph->GetCachedGeometry().AbsoluteToLocal(LastMousePosition), Point1, Point2);
-		const float DistanceSquared = (Graph->GetCachedGeometry().AbsoluteToLocal(LastMousePosition) - ClosestPointToSegment).SizeSquared();
+		const FVector2D ClosestPointToSegment = FMath::ClosestPointOnSegment2D(LastMousePosition, Point1, Point2);
+		const float DistanceSquared = (LastMousePosition - ClosestPointToSegment).SizeSquared();
 
 		if (DistanceSquared < ClosestDistanceSquared) {
 			ClosestDistanceSquared = DistanceSquared;
@@ -215,7 +226,7 @@ void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 
 SFIVSEdGraphViewer::SFIVSEdGraphViewer() : Children(this) {
 	bHasRelativeLayoutScale = true;
-	ConnectionDrawer = MakeShared<FFIVSEdConnectionDrawer>();
+	ConnectionDrawer = MakeShared<FFIVSEdConnectionDrawer_Splines>();
 	SetCanTick(true);
 }
 
@@ -715,7 +726,10 @@ void SFIVSEdGraphViewer::DrawConnections(uint32 LayerId, const FGeometry& Allott
 			for (UFIVSPin* ConnectionPin : Pin->GetPin()->GetConnections()) {
 				if (!DrawnPins.Contains({Pin->GetPin(), ConnectionPin}) && !DrawnPins.Contains({ConnectionPin, Pin->GetPin()})) {
 					DrawnPins.Add(TPair<UFIVSPin*, UFIVSPin*>(Pin->GetPin(), ConnectionPin));
-					ConnectionDrawer->DrawConnection(Pin, NodeToChild[ConnectionPin->ParentNode]->GetPinWidget(ConnectionPin), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId);
+					auto End = NodeToChild[ConnectionPin->ParentNode]->GetPinWidget(ConnectionPin);
+					if (End) {
+						ConnectionDrawer->DrawConnection(Pin, End.ToSharedRef(), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId);
+					}
 				}
 			}
 		}

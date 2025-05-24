@@ -49,7 +49,7 @@ struct FFIVSEdConnectionDrawer {
 	FVector2D LastMousePosition;
 
 protected:
-	virtual void DrawConnection_Internal(const FVector2D& StartLoc, const FVector2D& EndLoc, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) = 0;
+	virtual void DrawConnection_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) = 0;
 	virtual void CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) = 0;
 
 private:
@@ -58,13 +58,14 @@ private:
 
 struct FFIVSEdConnectionDrawer_Lines : public FFIVSEdConnectionDrawer {
 protected:
-	virtual void DrawConnection_Internal(const FVector2D& StartLoc, const FVector2D& EndLoc, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) override;
+	virtual void DrawConnection_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) override;
 	virtual void CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) override;
 };
 
 struct FFIVSEdConnectionDrawer_Splines : public FFIVSEdConnectionDrawer {
 protected:
-	virtual void DrawConnection_Internal(const FVector2D& StartLoc, const FVector2D& EndLoc, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) override;
+	TTuple<FVector2D, FVector2D> GetSplinePoints(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph);
+	virtual void DrawConnection_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) override;
 	virtual void CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) override;
 };
 

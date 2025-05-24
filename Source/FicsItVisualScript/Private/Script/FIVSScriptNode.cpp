@@ -29,6 +29,7 @@ UFIVSPin* UFIVSScriptNode::CreateDefaultPin(EFIVSPinType PinType, const FName& N
 
 void UFIVSScriptNode::DeletePin(UFIVSPin* Pin) {
 	if (Pins.Remove(Pin) > 0) {
+		Pin->RemoveAllConnections();
 		OnPinChanged.Broadcast(FIVS_PinChange_Removed, Pin);
 	}
 }

@@ -4,8 +4,6 @@
 #include "Editor/FIVSEdSearchListView.h"
 
 void SFIVSEdSignalSelection::Construct(const FArguments& InArgs) {
-	OnSelectionChanged = InArgs._OnSelectionChanged;
-
 	ChildSlot[
 		SNew(SBorder)
 		.BorderImage(FCoreStyle::Get().GetBrush("Border"))
@@ -15,6 +13,8 @@ void SFIVSEdSignalSelection::Construct(const FArguments& InArgs) {
 	];
 
 	SelectObject(InArgs._InitSelection);
+
+	OnSelectionChanged = InArgs._OnSelectionChanged;
 }
 
 FReply SFIVSEdSignalSelection::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
