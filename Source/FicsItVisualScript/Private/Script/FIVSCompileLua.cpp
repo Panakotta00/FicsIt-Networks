@@ -257,3 +257,7 @@ FString FFIVSLuaCompilerContext::FinalizeCode() {
 	finalCode.Append(TEXT("future.loop()\n"));
 	return finalCode.ToString();
 }
+
+void FFIVSLuaCompilerContext::AddCompileError(const FFIVSCompileError& Error) {
+	CompileErrors.Add(Error);
+}

@@ -1,11 +1,15 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "FIRTrace.h"
 #include "Interface.h"
 #include "FIVSScriptContext.generated.h"
 
+struct FFIVSLuaCompilerContext;
 class UFINStruct;
 class UFINClass;
+
+DECLARE_DELEGATE_OneParam(FFIVSOnScriptCompiled, const FFIVSLuaCompilerContext&);
 
 UINTERFACE()
 class UFIVSScriptContext_Interface : public UInterface {
@@ -23,4 +27,6 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void GetRelevantStructs(TArray<UFIRStruct*>& OutStructs);
+
+	virtual FFIVSOnScriptCompiled& GetOnScriptCompiledEvent() = 0;
 };

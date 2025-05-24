@@ -26,7 +26,7 @@ void UFIVSNode_Branch::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	);
 }
 
-void UFIVSNode_Branch::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_Branch::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	Context.AddEntrance(ExecIn);
 	FString varCondition = Context.GetRValueExpression(Condition);
 	bool bTrueBranch = IsValid(ExecTrue->FindConnected());

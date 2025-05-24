@@ -1,6 +1,8 @@
 ﻿#include "Editor/FIVSEdGraphViewer.h"
 
 #include "FicsItVisualScriptModule.h"
+#include "FIVSCompileError.h"
+#include "FIVSCompileLua.h"
 #include "Editor/FIVSEdActionSelection.h"
 #include "Editor/FIVSEdNodeViewer.h"
 #include "Script/FIVSGraph.h"
@@ -153,6 +155,26 @@ void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 	CommandList->MapAction(FCommands::Get().CenterGraph, FExecuteAction::CreateLambda([this]() {
 		Offset = FVector2D(0, 0);
 	}));
+
+	if (Context) {
+		Context->OnContextChanged.AddSPLambda(this, [this]() {
+			if (Context->GetContext()) Context->GetContext()->GetOnScriptCompiledEvent().BindSPLambda(AsShared(), [this](const FFIVSLuaCompilerContext& Context) {
+				TMap<FGuid, FText> errors;
+				for (const FFIVSCompileError& error : Context.GetCompileErrors()) {
+					errors.Add(error.Node->NodeId, error.Message);
+				}
+
+				for (auto [node, child] : NodeToChild) {
+					FText* error = errors.Find(node->NodeId);
+					if (error) {
+						child->Error = *error;
+					} else {
+						child->Error.Reset();
+					}
+				}
+			});
+		});
+	}
 }
 
 SFIVSEdGraphViewer::SFIVSEdGraphViewer() : Children(this) {

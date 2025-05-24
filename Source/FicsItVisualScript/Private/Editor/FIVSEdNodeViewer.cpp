@@ -259,8 +259,20 @@ TSharedRef<SBorder> SFIVSEdNodeViewer::Construct(const TSharedRef<SFIVSEdGraphVi
 	ChildSlot[
 		SAssignNew(contentContainer, SBorder)
 		.Padding(Style->OutlinePadding)
-		.BorderImage_Lambda([this]() {
-			return bSelected ? &Style->Outline : nullptr;
+		.BorderImage_Lambda([this]() -> const FSlateBrush* {
+			if (bSelected) {
+				return &Style->Outline;
+			} else if (Error.IsSet()) {
+				return &Style->ErrorOutline;
+			} else {
+				return nullptr;
+			}
+		})
+		.ToolTipText_Lambda([this]() {
+			if (Error.IsSet()) {
+				return Error.GetValue();
+			}
+			return FText::GetEmpty();
 		})
 	];
 	return contentContainer.ToSharedRef();

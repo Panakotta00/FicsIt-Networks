@@ -4,6 +4,7 @@
 #include "FINNetworkUtils.h"
 #include "FIVSPin.h"
 #include "Interface.h"
+#include "FIVSCompileError.h"
 #include "FIVSCompileLua.generated.h"
 
 class UFIVSPin;
@@ -18,7 +19,7 @@ class FICSITVISUALSCRIPT_API IFIVSCompileLuaInterface {
 	GENERATED_BODY()
 public:
 	virtual bool IsLuaRootNode() const { return false; }
-	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const = 0;
+	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) = 0;
 };
 
 struct FICSITVISUALSCRIPT_API FFIVSLuaScope {
@@ -42,6 +43,7 @@ private:
 	TSharedRef<FFIVSLuaScope> CurrentScope;
 	TArray<FString> Code;
 	int CurrentIndentation = 0;
+	TArray<FFIVSCompileError> CompileErrors;
 
 public:
 	FFIVSLuaCompilerContext() : CurrentScope(MakeShared<FFIVSLuaScope>()) {}
@@ -61,4 +63,8 @@ public:
 	void AddLValue(UFIVSPin* DataOutputPin, const FString& LValue);
 	FString AddOutputPinAsVariable(UFIVSPin* DataOutputPin, FString Expression);
 	FString FinalizeCode();
+
+	void AddCompileError(const FFIVSCompileError& Error);
+	const TArray<FFIVSCompileError>& GetCompileErrors() const { return CompileErrors; }
+	bool HasErrors() { return CompileErrors.Num() > 0; }
 };

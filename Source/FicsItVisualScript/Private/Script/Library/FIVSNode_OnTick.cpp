@@ -20,7 +20,7 @@ void UFIVSNode_OnTick::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	);
 }
 
-void UFIVSNode_OnTick::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_OnTick::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	/*Context.AddPlain(TEXT(R"(
 future.addTask(function()
 	while true do

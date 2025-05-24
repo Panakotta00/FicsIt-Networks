@@ -45,7 +45,7 @@ void UFIVSNode_LuaGeneric::DeserializeNodeProperties(const TSharedPtr<FJsonObjec
 	SetFunction(Cast<UFunction>(FSoftObjectPath(Value->GetStringField(TEXT("Function"))).TryLoad()));
 }
 
-void UFIVSNode_LuaGeneric::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_LuaGeneric::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	TArray<FFIRAnyValue> Output;
 
 	// allocate & initialize parameter struct

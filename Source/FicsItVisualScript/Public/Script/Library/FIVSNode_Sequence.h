@@ -34,7 +34,7 @@ public:
 	// End UFIVSScriptNode
 
 	// Begin IFIVSCompileLuaInterface
-	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;
+	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) override;
 	// End IFVISCompileLuaInterface
 
 	void SetOutputNum(int32 OutputNum);

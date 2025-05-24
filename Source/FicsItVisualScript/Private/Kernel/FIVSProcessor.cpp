@@ -2,12 +2,14 @@
 
 #include "FGInventoryComponent.h"
 #include "FicsItReflection.h"
+#include "FicsItVisualScriptModule.h"
 #include "FILLogContainer.h"
 #include "FINItemStateEEPROMText.h"
 #include "FINMediaSubsystem.h"
 #include "FINNetworkCircuit.h"
 #include "FINNetworkCircuitNode.h"
 #include "FINSignalSubsystem.h"
+#include "FIVSCompileError.h"
 #include "LuaFileSystemAPI.h"
 #include "LuaFuture.h"
 #include "LuaKernelAPI.h"
@@ -146,6 +148,22 @@ void UFIVSProcessor::Reset() {
 			Cast<IFIVSCompileLuaInterface>(node)->CompileNodeToLua(luaContext);
 		}
 
+		if (luaContext.HasErrors()) {
+			UE_LOG(LogFicsItVisualScript, Warning, TEXT("Failed to Compiled Lua Code!"));
+			UFILLogContainer* log = GetKernel()->GetLog();
+			for (const FFIVSCompileError& error : luaContext.GetCompileErrors()) {
+				FString reference = error.Node->GetName();
+				FString message = FString::Printf(TEXT("%s: %s"), *reference, *error.Message.ToString());
+				log->PushLogEntry(FIL_Verbosity_Fatal, message);
+				UE_LOG(LogFicsItVisualScript, Warning, TEXT("%s"), *message);
+			}
+			GetKernel()->Crash(MakeShared<FFINKernelCrash>(TEXT("Failed to Compile!")));
+
+			OnScriptCompiled.ExecuteIfBound(luaContext);
+
+			return;
+		}
+
 		LuaCode = luaContext.FinalizeCode();
 		UE_LOG(LogFicsItVisualScript, Warning, TEXT("Compiled Lua Code:\n%s"), *FString(luaContext.FinalizeCode()))
 
@@ -201,4 +219,8 @@ void UFIVSProcessor::GetRelevantStructs_Implementation(TArray<UFIRStruct*>& OutS
 	for (const TPair<UScriptStruct*, UFIRStruct*>& Struct : FFicsItReflectionModule::Get().GetStructs()) {
 		OutStructs.Add(Struct.Value);
 	}
+}
+
+FFIVSOnScriptCompiled& UFIVSProcessor::GetOnScriptCompiledEvent() {
+	return OnScriptCompiled;
 }

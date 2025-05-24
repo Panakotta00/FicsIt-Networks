@@ -36,7 +36,7 @@ public:
 
 	// Begin IFIVSCompileLuaInterface
 	virtual bool IsLuaRootNode() const override { return true; }
-	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;
+	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) override;
 	// End IFVISCompileLuaInterface
 
 	void SetSignal(UFIRSignal* InSignal);

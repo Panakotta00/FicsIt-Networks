@@ -51,7 +51,7 @@ void UFIVSNode_Variable::DeserializeNodeProperties(const TSharedPtr<FJsonObject>
 	}
 }
 
-void UFIVSNode_Variable::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_Variable::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	if (bAssignment) {
 		Context.AddEntrance(ExecInput);
 		TOptional<FString> lvalue = Context.GetLValueExpression(VarPin);

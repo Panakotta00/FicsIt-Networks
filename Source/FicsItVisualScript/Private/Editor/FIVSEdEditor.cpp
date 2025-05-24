@@ -88,9 +88,11 @@ UFIVSGraph* UFIVSEdEditor::GetGraph() const {
 }
 
 void UFIVSEdEditor::SetContext(TScriptInterface<IFIVSScriptContext_Interface> InContext) {
+	bool bChanged = Context != InContext;
 	Context = InContext;
 	MyWidget.Reset();
 	InvalidateLayoutAndVolatility();
+	if (bChanged) OnContextChanged.Broadcast();
 }
 
 void UFIVSEdEditor::UpdateSelection() {

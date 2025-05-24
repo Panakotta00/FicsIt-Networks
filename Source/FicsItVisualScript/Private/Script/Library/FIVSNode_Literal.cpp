@@ -32,7 +32,7 @@ void UFIVSNode_Literal::DeserializeNodeProperties(const TSharedPtr<FJsonObject>&
 	SetType((EFIRValueType)StaticEnum<EFIRValueType>()->GetValueByNameString(Properties->GetStringField(TEXT("Type"))));
 }
 
-void UFIVSNode_Literal::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_Literal::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	FString data = Context.GetRValueExpression(Input);
 	Context.AddRValue(Output, data);
 }

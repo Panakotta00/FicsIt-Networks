@@ -35,7 +35,7 @@ public:
 	// End UFIVSNode
 
 	// Begin IFIVSCompileLuaInterface
-	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;
+	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) override;
 	// End IFVISCompileLuaInterface
 
 	void SetType(const FFIVSPinDataType& InType, bool bIsAssignment);

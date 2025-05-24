@@ -64,7 +64,7 @@ void UFIVSNode_Sequence::DeserializeNodeProperties(const TSharedPtr<FJsonObject>
 	SetOutputNum(Properties->GetNumberField(TEXT("PinCount")));
 }
 
-void UFIVSNode_Sequence::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_Sequence::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	for (UFIVSPin* pin : ExecOut) {
 		Context.ContinueCurrentSection(pin);
 	}

@@ -34,7 +34,7 @@ void UFIVSNode_DownCast::DeserializeNodeProperties(const TSharedPtr<FJsonObject>
 	if (Class) SetClass(Class);
 }
 
-void UFIVSNode_DownCast::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_DownCast::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	Context.AddEntrance(ExecInput);
 	FString input = Context.GetRValueExpression(DataInput);
 	Context.AddRValue(DataOutput, input);

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "SlateBrush.h"
 #include "Styling/SlateWidgetStyle.h"
 #include "FIVSEdGraphViewerStyle.generated.h"
 
@@ -31,6 +32,9 @@ struct FFIVSEdNodeStyle : public FSlateWidgetStyle {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FSlateBrush Outline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateBrush ErrorOutline;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FMargin OutlinePadding;

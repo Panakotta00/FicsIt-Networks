@@ -17,7 +17,7 @@ void UFIVSNode_OnStart::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	});
 }
 
-void UFIVSNode_OnStart::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_OnStart::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	Context.AddPlain(TEXT(R"(
 future.addTask(async(function()
 )"));

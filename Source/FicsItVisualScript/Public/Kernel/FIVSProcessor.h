@@ -56,4 +56,6 @@ private:
 	FFINLuaReferenceCollector ReferenceCollector;
 	FFINLuaComponentNetworkAccessDelegates ComponentNetwork;
 	FFINLuaEventSystem EventSystem;
+
+	FFIVSOnScriptCompiled OnScriptCompiled;
 };

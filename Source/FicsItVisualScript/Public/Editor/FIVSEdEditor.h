@@ -37,6 +37,8 @@ public:
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 	//~ End UVisual Interface
 
+	TMulticastDelegate<void()> OnContextChanged;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance", meta=( DisplayName="Style" ))
 	FFIVSEdGraphViewerStyle Style;
 	
@@ -63,6 +65,8 @@ class UFIVSEditorContextMock : public UObject, public IFIVSScriptContext_Interfa
 	GENERATED_BODY()
 
 public:
+	FFIVSOnScriptCompiled OnScriptCompiled;
+
 	// Begin IFIVSScriptContext_Interface
 	virtual void GetRelevantObjects_Implementation(TArray<FFIRTrace>& OutObjects) override {}
 
@@ -77,5 +81,7 @@ public:
 			OutStructs.Add(Struct.Value);
 		}
 	}
+
+	virtual FFIVSOnScriptCompiled& GetOnScriptCompiledEvent() override { return OnScriptCompiled; }
 	// End IFVSScriptContext_Interface
 }; 

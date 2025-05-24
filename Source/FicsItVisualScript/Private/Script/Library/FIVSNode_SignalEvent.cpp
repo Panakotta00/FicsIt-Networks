@@ -65,7 +65,7 @@ TSharedPtr<SWidget> UFIVSNode_SignalEvent::CreateDetailsWidget(TScriptInterface<
 	];
 }
 
-void UFIVSNode_SignalEvent::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_SignalEvent::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	if (!IsValid(Signal)) return;
 	FString valEvent = FString::Printf(TEXT("\"%s\""), *Signal->GetInternalName());
 	FString valSender = FIRValueToLuaLiteral(Sender);

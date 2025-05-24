@@ -26,7 +26,7 @@ void UFIVSNode_Print::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	);
 }
 
-void UFIVSNode_Print::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
+void UFIVSNode_Print::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	Context.AddEntrance(ExecIn);
 	FString varMessageIn = Context.GetRValueExpression(MessageIn);
 	Context.AddPlain(FString::Printf(TEXT("print(%s)\n"), *varMessageIn));

@@ -25,7 +25,7 @@ public:
 	// End UFIVSNodes
 
 	// Begin IFIVSCompileLuaInterface
-	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) const override;
+	virtual void CompileNodeToLua(FFIVSLuaCompilerContext& Context) override;
 	// End IFVISCompileLuaInterface
 
 	void SetProperty(UFIRProperty* InProperty);

@@ -36,10 +36,14 @@ void UFIVSNode_GetProperty::DeserializeNodeProperties(const TSharedPtr<FJsonObje
 	SetProperty(Cast<UFIRProperty>(FSoftObjectPath(Properties->GetStringField(TEXT("Property"))).TryLoad()));
 }
 
-void UFIVSNode_GetProperty::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
-	FString expInput = Context.GetRValueExpression(InstanceIn);
-	FString propName = Property->GetInternalName();
-	Context.AddExpression(DataOut, FString::Printf(TEXT("%s.%s"), *expInput, *propName));
+void UFIVSNode_GetProperty::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
+	if (IsValid(Property)) {
+		FString expInput = Context.GetRValueExpression(InstanceIn);
+		FString propName = Property->GetInternalName();
+		Context.AddExpression(DataOut, FString::Printf(TEXT("%s.%s"), *expInput, *propName));
+	} else {
+		Context.AddCompileError(FFIVSCompileError(this, FText::FromString(TEXT("Unknown Property"))));
+	}
 }
 
 void UFIVSNode_GetProperty::SetProperty(UFIRProperty* InProperty) {

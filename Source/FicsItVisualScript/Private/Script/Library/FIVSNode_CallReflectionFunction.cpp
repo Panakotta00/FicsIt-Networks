@@ -5,7 +5,6 @@
 #include "FIRClass.h"
 #include "FIVSUtils.h"
 #include "JsonObject.h"
-#include "Kernel/FIVSRuntimeContext.h"
 
 UFIVSNode_CallReflectionFunction::UFIVSNode_CallReflectionFunction() {
 	ExecIn = CreateDefaultPin(FIVS_PIN_EXEC_INPUT, TEXT("Exec"), FText::FromString(TEXT("Exec")));
@@ -48,24 +47,28 @@ void UFIVSNode_CallReflectionFunction::DeserializeNodeProperties(const TSharedPt
 	SetFunction(Cast<UFIRFunction>(FSoftObjectPath(Value->GetStringField(TEXT("function"))).TryLoad()));
 }
 
-void UFIVSNode_CallReflectionFunction::CompileNodeToLua(FFIVSLuaCompilerContext& Context) const {
-	FString self = Context.GetRValueExpression(Self);
-	FString functionName = Function->GetInternalName();
-	TArray<FString> parameters;
-	for (UFIVSPin* pin : InputPins) {
-		parameters.Add(Context.GetRValueExpression(pin));
-	}
-	TArray<FString> returnValues;
-	for (UFIVSPin* pin : OutputPins) {
-		FString name = Context.FindAndClaimLocalName(pin->GetName());
-		returnValues.Add(name);
-		Context.AddLValue(pin, name);
-	}
+void UFIVSNode_CallReflectionFunction::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
+	if (IsValid(Function)) {
+		FString self = Context.GetRValueExpression(Self);
+		FString functionName = Function->GetInternalName();
+		TArray<FString> parameters;
+		for (UFIVSPin* pin : InputPins) {
+			parameters.Add(Context.GetRValueExpression(pin));
+		}
+		TArray<FString> returnValues;
+		for (UFIVSPin* pin : OutputPins) {
+			FString name = Context.FindAndClaimLocalName(pin->GetName());
+			returnValues.Add(name);
+			Context.AddLValue(pin, name);
+		}
 
-	if (returnValues.IsEmpty()) {
-		Context.AddPlain(FString::Printf(TEXT("%s:%s(%s)\n"), *self, *functionName, *FString::Join(parameters, TEXT(","))));
+		if (returnValues.IsEmpty()) {
+			Context.AddPlain(FString::Printf(TEXT("%s:%s(%s)\n"), *self, *functionName, *FString::Join(parameters, TEXT(","))));
+		} else {
+			Context.AddPlain(FString::Printf(TEXT("local %s = %s:%s(%s)\n"), *FString::Join(returnValues, TEXT(",")), *self, *functionName, *FString::Join(parameters, TEXT(","))));
+		}
 	} else {
-		Context.AddPlain(FString::Printf(TEXT("local %s = %s:%s(%s)\n"), *FString::Join(returnValues, TEXT(",")), *self, *functionName, *FString::Join(parameters, TEXT(","))));
+		Context.AddCompileError(FFIVSCompileError(this, FText::FromString(TEXT("Unknown Function"))));
 	}
 
 	Context.ContinueCurrentSection(ExecOut);

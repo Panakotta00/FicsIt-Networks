@@ -23,6 +23,7 @@ void FFIVSEdNodeStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) cons
 	OutBrushes.Add(&Background);
 	OutBrushes.Add(&Header);
 	OutBrushes.Add(&Outline);
+	OutBrushes.Add(&ErrorOutline);
 	OutBrushes.Add(&PinOutline);
 
 	HeaderTextStyle.GetResources(OutBrushes);
