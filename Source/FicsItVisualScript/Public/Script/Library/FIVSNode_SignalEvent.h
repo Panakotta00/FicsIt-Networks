@@ -32,6 +32,7 @@ public:
 	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const override;
 	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) override;
 	virtual TSharedPtr<SWidget> CreateDetailsWidget(TScriptInterface<IFIVSScriptContext_Interface> Context) override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) override;
 	// End UFIVSNode
 
 	// Begin IFIVSCompileLuaInterface

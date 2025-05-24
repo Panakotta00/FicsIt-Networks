@@ -43,6 +43,12 @@ struct FFIVSEdNodeStyle : public FSlateWidgetStyle {
 	FSlateBrush Header;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateBrush HeaderEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
+	FSlateBrush HeaderInline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FMargin HeaderPadding;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)

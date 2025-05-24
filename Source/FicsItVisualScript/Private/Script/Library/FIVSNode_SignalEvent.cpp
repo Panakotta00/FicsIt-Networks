@@ -3,6 +3,7 @@
 #include "FGHUD.h"
 #include "FGPlayerController.h"
 #include "FINUMGWidget.h"
+#include "FIVSEdNodeViewer.h"
 #include "Script/FIVSScriptContext.h"
 #include "FIVSUtils.h"
 #include "Editor/FIVSEdObjectSelection.h"
@@ -63,6 +64,13 @@ TSharedPtr<SWidget> UFIVSNode_SignalEvent::CreateDetailsWidget(TScriptInterface<
 			Sender = Trace;
 		})
 	];
+}
+
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode_SignalEvent::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) {
+	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
+	.Context(Context)
+	.Type(SFIVSEdFunctionNodeViewer::Type_Event)
+	.Style(Style);
 }
 
 void UFIVSNode_SignalEvent::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {

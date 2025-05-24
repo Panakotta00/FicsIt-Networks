@@ -17,6 +17,7 @@ public:
 
 	// Begin UFIVSNode
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) override;
 	// End UFIVSNodes
 	
 	// Begin IFIVSCompileLuaInterface

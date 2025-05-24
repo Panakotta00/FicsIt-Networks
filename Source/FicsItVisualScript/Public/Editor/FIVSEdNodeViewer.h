@@ -90,6 +90,7 @@ protected:
 	
 public:
 	bool bSelected = false;
+	TOptional<FText> Error;
 
 	virtual ~SFIVSEdNodeViewer() override;
 	
@@ -141,10 +142,18 @@ public:
 };
 
 class SFIVSEdFunctionNodeViewer : public SFIVSEdNodeViewer {
+public:
+	enum EType {
+		Type_Function,
+		Type_Event,
+		Type_Property,
+	} Type;
+
 	SLATE_BEGIN_ARGS(SFIVSEdFunctionNodeViewer) :
 		_Style(&FFIVSEdNodeStyle::GetDefault()) {}
 		SLATE_STYLE_ARGUMENT(FFIVSEdNodeStyle, Style)
 		SLATE_ARGUMENT(UFIVSEdEditor*, Context)
+		SLATE_ARGUMENT(EType, Type)
 		SLATE_DEFAULT_SLOT(FArguments, Footer)
 	SLATE_END_ARGS()
 

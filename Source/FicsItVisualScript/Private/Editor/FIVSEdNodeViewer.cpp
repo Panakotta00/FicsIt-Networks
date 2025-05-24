@@ -343,13 +343,23 @@ void SFIVSEdRerouteNodeViewer::Construct(const FArguments& InArgs, const TShared
 
 void SFIVSEdFunctionNodeViewer::Construct(const FArguments& InArgs, const TSharedRef<SFIVSEdGraphViewer>& InGraphViewer, UFIVSNode* InNode) {
 	Context = InArgs._Context;
+	Type = InArgs._Type;
 	TSharedRef<SBorder> content = SFIVSEdNodeViewer::Construct(InGraphViewer, InNode, InArgs._Style);
 
 	content->SetContent(
         SNew(SVerticalBox)
         +SVerticalBox::Slot().AutoHeight()[
             SNew(SBorder)
-            .BorderImage(&Style->Header)
+            .BorderImage_Lambda([this]() {
+	            switch (Type) {
+	            	default:
+						return &Style->Header;
+	            	case Type_Event:
+	            		return &Style->HeaderEvent;
+	            	case Type_Property:
+	            		return &Style->HeaderInline;
+	            }
+            })
             .Padding(Style->HeaderPadding)
             .Content()[
                 SNew(STextBlock)

@@ -1,5 +1,8 @@
 #include "Script/Library/FIVSNode_OnTick.h"
 
+#include "DeclarativeSyntaxSupport.h"
+#include "FIVSEdNodeViewer.h"
+
 UFIVSNode_OnTick::UFIVSNode_OnTick() {
 	DisplayName = FText::FromString(TEXT("Event Tick"));
 
@@ -18,6 +21,13 @@ void UFIVSNode_OnTick::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 			}
 		}
 	);
+}
+
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode_OnTick::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) {
+	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
+		.Context(Context)
+		.Type(SFIVSEdFunctionNodeViewer::Type_Event)
+		.Style(Style);
 }
 
 void UFIVSNode_OnTick::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {

@@ -2,6 +2,7 @@
 
 #include "FicsItReflection.h"
 #include "FINNetworkUtils.h"
+#include "FIVSEdNodeViewer.h"
 #include "JsonObject.h"
 
 void UFIVSNode_GetProperty::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
@@ -34,6 +35,13 @@ void UFIVSNode_GetProperty::SerializeNodeProperties(const TSharedRef<FJsonObject
 
 void UFIVSNode_GetProperty::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
 	SetProperty(Cast<UFIRProperty>(FSoftObjectPath(Properties->GetStringField(TEXT("Property"))).TryLoad()));
+}
+
+TSharedRef<SFIVSEdNodeViewer> UFIVSNode_GetProperty::CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) {
+	return SNew(SFIVSEdFunctionNodeViewer, GraphViewer, this)
+	.Context(Context)
+	.Type(SFIVSEdFunctionNodeViewer::Type_Property)
+	.Style(Style);
 }
 
 void UFIVSNode_GetProperty::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {

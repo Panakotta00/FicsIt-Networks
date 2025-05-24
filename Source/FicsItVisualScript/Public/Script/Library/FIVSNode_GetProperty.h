@@ -22,6 +22,7 @@ public:
 	virtual void GetNodeActions(TArray<FFIVSNodeAction>& Actions) const override;
 	virtual void SerializeNodeProperties(const TSharedRef<FJsonObject>& Value) const override;
 	virtual void DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Value) override;
+	virtual TSharedRef<SFIVSEdNodeViewer> CreateNodeViewer(const TSharedRef<SFIVSEdGraphViewer>& GraphViewer, const FFIVSEdNodeStyle* Style, class UFIVSEdEditor* Context) override;
 	// End UFIVSNodes
 
 	// Begin IFIVSCompileLuaInterface
