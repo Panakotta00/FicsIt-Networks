@@ -114,7 +114,7 @@ TTuple<FVector2D, FVector2D> FFIVSEdConnectionDrawer_Splines::GetSplinePoints(co
 
 void FFIVSEdConnectionDrawer_Splines::DrawConnection_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
 	auto [offsetStart, offsetEnd] = GetSplinePoints(Start, End, Graph);
-	FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start.Position, offsetStart, End.Position, offsetEnd, 1 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
+	FSlateDrawElement::MakeSpline(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), Start.Position, offsetStart, End.Position, offsetEnd, 1 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
 }
 
 void FFIVSEdConnectionDrawer_Splines::CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) {
