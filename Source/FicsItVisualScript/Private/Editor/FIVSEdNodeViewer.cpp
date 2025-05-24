@@ -506,7 +506,7 @@ void FFIVSEdNodeDragDrop::OnDragged(const FDragDropEvent& DragDropEvent) {
 			FVector2D startPos = NodeStartPos[i];
 			Node->Pos = startPos + Delta;
 			if (!DragDropEvent.IsShiftDown()) {
-				Node->Pos = (Node->Pos / 10).RoundToVector() * 10;
+				Node->Pos = (Node->Pos / 20).RoundToVector() * 20;
 			}
 		}
 	}

@@ -13,39 +13,60 @@ class SFIVSEdPinViewer;
 class SFIVSEdGraphViewer;
 
 struct FFIVSEdConnectionDrawer {
-public:
-	float LastConnectionDistance;
+	struct FConnectionPoint {
+		FVector2D Position;
+		TSharedPtr<SFIVSEdPinViewer> Pin;
 
-public:
-	TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>> ConnectionUnderMouse;
-	FVector2D LastMousePosition;
+		FConnectionPoint(const FVector2D& Position) : Position(Position) {}
+		FConnectionPoint(TSharedRef<SFIVSEdPinViewer> Pin) : Pin(Pin) {}
+	};
+
+	struct FConnectionHit {
+		FVector2D Position;
+
+		FConnectionPoint From;
+		FConnectionPoint To;
+	};
+
+	virtual ~FFIVSEdConnectionDrawer() = default;
 
 	/**
 	 * Resets the cache for the connection under mouse.
 	 * Should get called in the top of the graphs onpaint.
 	 */
-	void Reset();
-	
+	virtual void Reset();
+
 	/**
-	* Draws a connection between two pins.
+	* Draws a connection between two connection points.
 	* Checks if the mouse hovers over it, if so, sets connection under mouse.
 	*/
-	void DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, TSharedRef<SFIVSEdPinViewer> Pin2, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
-
-	/**
-	* Draws a connection between two points.
-	*
-	* @param[in]	Start	the start point (outputs)
-	* @param[in]	End		the end point (inputs)
-	*/
-	void DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
+	virtual void DrawConnection(FConnectionPoint Start, FConnectionPoint End, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
 
 	FVector2D GetAndCachePinPosition(const TSharedRef<SFIVSEdPinViewer>& Pin, const TSharedRef<const SFIVSEdGraphViewer>& Graph, const FGeometry& AllottedGeometry);
+
+	float LastConnectionDistance = 0;
+	TOptional<FConnectionHit> ConnectionUnderMouse;
+	FVector2D LastMousePosition;
+
+protected:
+	virtual void DrawConnection_Internal(const FVector2D& StartLoc, const FVector2D& EndLoc, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) = 0;
+	virtual void CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) = 0;
 
 private:
 	TMap<TWeakPtr<SFIVSEdPinViewer>, FVector2D> PinPositions;
 };
 
+struct FFIVSEdConnectionDrawer_Lines : public FFIVSEdConnectionDrawer {
+protected:
+	virtual void DrawConnection_Internal(const FVector2D& StartLoc, const FVector2D& EndLoc, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) override;
+	virtual void CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) override;
+};
+
+struct FFIVSEdConnectionDrawer_Splines : public FFIVSEdConnectionDrawer {
+protected:
+	virtual void DrawConnection_Internal(const FVector2D& StartLoc, const FVector2D& EndLoc, const FLinearColor& Color, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) override;
+	virtual void CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) override;
+};
 
 class FFIVSEdSelectionManager {
 public:

@@ -35,6 +35,10 @@ public class FicsItVisualScript : ModuleRules
             "Tracy"
 		});
 
+		PrivateDependencyModuleNames.AddRange(new string[] {
+			"RHI"
+		});
+
         PublicIncludePaths.Add("Public");
     }
 }

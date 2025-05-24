@@ -1,86 +1,22 @@
 ﻿#include "Editor/FIVSEdGraphViewer.h"
 
-#include "FicsItVisualScriptModule.h"
+#include "CanvasItem.h"
+#include "CanvasTypes.h"
 #include "FIVSCompileError.h"
 #include "FIVSCompileLua.h"
 #include "Editor/FIVSEdActionSelection.h"
 #include "Editor/FIVSEdNodeViewer.h"
 #include "Script/FIVSGraph.h"
 #include "PlatformApplicationMisc.h"
+#include "UnrealClient.h"
+#include "RHICommandList.h"
 
 #define LOCTEXT_NAMESPACE "FIVSEdGraphViewerModule"
 
+
 void FFIVSEdConnectionDrawer::Reset() {
-	ConnectionUnderMouse = TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>>(nullptr, nullptr);
+	ConnectionUnderMouse.Reset();
 	LastConnectionDistance = FLT_MAX;
-}
-
-void FFIVSEdConnectionDrawer::DrawConnection(TSharedRef<SFIVSEdPinViewer> Pin1, TSharedRef<SFIVSEdPinViewer> Pin2, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
-	bool is1Wild = !!Cast<UFIVSWildcardPin>(Pin1->GetPin());
-	bool is2Wild = !!Cast<UFIVSWildcardPin>(Pin2->GetPin());
-
-	bool bShouldSwitch = false;
-	if (is1Wild) {
-		if (is2Wild) {
-			bool bHasInput = false;
-			for (UFIVSPin* Con : Pin1->GetPin()->GetConnections()) if (Con->GetPinType() & FIVS_PIN_INPUT) {
-				bHasInput = true;
-				break;
-			}
-			if (Pin1->GetPin()->ParentNode->Pos.X > Pin2->GetPin()->ParentNode->Pos.X && bHasInput) {
-				bShouldSwitch = true;
-			}
-		} else if (!(Pin2->GetPin()->GetPinType() & FIVS_PIN_INPUT)) {
-			bShouldSwitch = true;
-		}
-	} else if (is2Wild) {
-		if (!(Pin1->GetPin()->GetPinType() & FIVS_PIN_OUTPUT)) {
-			bShouldSwitch = true;
-		}
-		} else if (!(Pin1->GetPin()->GetPinType() & FIVS_PIN_OUTPUT)) {
-		bShouldSwitch = true;
-	}
-	if (bShouldSwitch) {
-		TSharedRef<SFIVSEdPinViewer> Pin = Pin1;
-		Pin1 = Pin2;
-		Pin2 = Pin;
-	}
-
-	FVector2D StartLoc = Graph->GraphToLocal(GetAndCachePinPosition(Pin1, Graph, AllottedGeometry));
-	FVector2D EndLoc = Graph->GraphToLocal(GetAndCachePinPosition(Pin2, Graph, AllottedGeometry));
-
-	DrawConnection(StartLoc, EndLoc, Pin1->GetPinColor().GetSpecifiedColor(), Graph, AllottedGeometry, OutDrawElements, LayerId);
-
-	// Find the closest approach to the spline
-	FVector2D ClosestPoint;
-	float ClosestDistanceSquared = FLT_MAX;
-
-	const int32 NumStepsToTest = 16;
-	const float StepInterval = 1.0f / (float)NumStepsToTest;
-	FVector2D Point1 = FMath::CubicInterp(StartLoc, FVector2D(300, 0), EndLoc, FVector2D(300, 0), 0.0f);
-	for (float t = 0.0f; t < 1.0f; t += StepInterval) {
-		const FVector2D Point2 = FMath::CubicInterp(StartLoc, FVector2D(300, 0), EndLoc, FVector2D(300, 0), t + StepInterval);
-
-		const FVector2D ClosestPointToSegment = FMath::ClosestPointOnSegment2D(Graph->GetCachedGeometry().AbsoluteToLocal(LastMousePosition), Point1, Point2);
-		const float DistanceSquared = (Graph->GetCachedGeometry().AbsoluteToLocal(LastMousePosition) - ClosestPointToSegment).SizeSquared();
-
-		if (DistanceSquared < ClosestDistanceSquared) {
-			ClosestDistanceSquared = DistanceSquared;
-			ClosestPoint = ClosestPointToSegment;
-		}
-
-		Point1 = Point2;
-	}
-	if (ClosestDistanceSquared < LastConnectionDistance && ClosestDistanceSquared < 100) {
-		ConnectionUnderMouse = TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>>(Pin1, Pin2);
-		LastConnectionDistance = ClosestDistanceSquared;
-	}
-}
-
-
-void FFIVSEdConnectionDrawer::DrawConnection(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
-	//FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start, FVector2D(300 * Graph->Zoom,0), End, FVector2D(300 * Graph->Zoom,0), 2 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
-	FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, ConnectionColor, true, 2 * Graph->GetZoom());
 }
 
 FVector2D FFIVSEdConnectionDrawer::GetAndCachePinPosition(const TSharedRef<SFIVSEdPinViewer>& Pin, const TSharedRef<const SFIVSEdGraphViewer>& Graph, const FGeometry& AllottedGeometry) {
@@ -95,6 +31,106 @@ FVector2D FFIVSEdConnectionDrawer::GetAndCachePinPosition(const TSharedRef<SFIVS
 		FVector2D position = Graph->LocalToGraph(Graph->GetCachedGeometry().AbsoluteToLocal(Pin->GetConnectionPoint()));
 		PinPositions.Add(Pin, position);
 		return position;
+	}
+}
+
+void FFIVSEdConnectionDrawer::DrawConnection(FConnectionPoint Start, FConnectionPoint End, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
+	if (Start.Pin && End.Pin) {
+		bool is1Wild = false;
+		if (Start.Pin) {
+			is1Wild = !!Cast<UFIVSWildcardPin>(Start.Pin->GetPin());
+		}
+		bool is2Wild = false;
+		if (End.Pin) {
+			is2Wild = !!Cast<UFIVSWildcardPin>(End.Pin->GetPin());
+		}
+
+		bool bShouldSwitch = false;
+		if (is1Wild) {
+			if (is2Wild) {
+				bool bHasInput = false;
+				for (UFIVSPin* Con : Start.Pin->GetPin()->GetConnections()) if (Con->GetPinType() & FIVS_PIN_INPUT) {
+					bHasInput = true;
+					break;
+				}
+				if (Start.Pin->GetPin()->ParentNode->Pos.X > End.Pin->GetPin()->ParentNode->Pos.X && bHasInput) {
+					bShouldSwitch = true;
+				}
+			} else if (!(End.Pin->GetPin()->GetPinType() & FIVS_PIN_INPUT)) {
+				bShouldSwitch = true;
+			}
+		} else if (is2Wild) {
+			if (!(Start.Pin->GetPin()->GetPinType() & FIVS_PIN_OUTPUT)) {
+				bShouldSwitch = true;
+			}
+		} else if (!(Start.Pin->GetPin()->GetPinType() & FIVS_PIN_OUTPUT)) {
+			bShouldSwitch = true;
+		}
+		if (bShouldSwitch) {
+			FConnectionPoint Connection = Start;
+			Start = End;
+			End = Connection;
+		}
+	}
+
+	if (Start.Pin) Start.Position = Graph->GraphToLocal(GetAndCachePinPosition(Start.Pin.ToSharedRef(), Graph, AllottedGeometry));
+	FVector2D StartLoc = Start.Position;
+	if (End.Pin) End.Position = Graph->GraphToLocal(GetAndCachePinPosition(End.Pin.ToSharedRef(), Graph, AllottedGeometry));
+	FVector2D EndLoc = End.Position;
+
+	FLinearColor color = FColor::White;
+	if (Start.Pin) color = Start.Pin->GetPinColor().GetSpecifiedColor();
+	else if (End.Pin) color = End.Pin->GetPinColor().GetSpecifiedColor();
+
+	DrawConnection_Internal(StartLoc, EndLoc, color, Graph, AllottedGeometry, OutDrawElements, LayerId);
+	if (Start.Pin && End.Pin) {
+		CheckMousePosition_Internal(Start, End, Graph);
+	}
+}
+
+void FFIVSEdConnectionDrawer_Lines::DrawConnection_Internal(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
+	FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), {Start, End}, ESlateDrawEffect::None, ConnectionColor, true, 2 * Graph->GetZoom());
+}
+
+void FFIVSEdConnectionDrawer_Lines::CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) {
+	// Find the closest approach to the spline
+	const FVector2D ClosestPointToSegment = FMath::ClosestPointOnSegment2D(LastMousePosition, Start.Position, End.Position);
+	const float DistanceSquared = (LastMousePosition - ClosestPointToSegment).SizeSquared();
+
+	if (DistanceSquared < LastConnectionDistance && DistanceSquared < 100) {
+		LastConnectionDistance = DistanceSquared;
+		ConnectionUnderMouse = FConnectionHit{ClosestPointToSegment, Start, End};
+	}
+}
+
+void FFIVSEdConnectionDrawer_Splines::DrawConnection_Internal(const FVector2D& Start, const FVector2D& End, const FLinearColor& ConnectionColor, TSharedRef<const SFIVSEdGraphViewer> Graph, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) {
+	FSlateDrawElement::MakeSpline(OutDrawElements, LayerId+100, AllottedGeometry.ToPaintGeometry(), Start, FVector2D(300 * Graph->Zoom,0), End, FVector2D(300 * Graph->Zoom,0), 2 * Graph->Zoom, ESlateDrawEffect::None, ConnectionColor);
+}
+
+void FFIVSEdConnectionDrawer_Splines::CheckMousePosition_Internal(const FConnectionPoint& Start, const FConnectionPoint& End, TSharedRef<const SFIVSEdGraphViewer> Graph) {
+	// Find the closest approach to the spline
+	FVector2D ClosestPoint;
+	float ClosestDistanceSquared = FLT_MAX;
+
+	const int32 NumStepsToTest = 16;
+	const float StepInterval = 1.0f / (float)NumStepsToTest;
+	FVector2D Point1 = FMath::CubicInterp(Start.Position, FVector2D(300, 0), End.Position, FVector2D(300, 0), 0.0f);
+	for (float t = 0.0f; t < 1.0f; t += StepInterval) {
+		const FVector2D Point2 = FMath::CubicInterp(Start.Position, FVector2D(300, 0), End.Position, FVector2D(300, 0), t + StepInterval);
+
+		const FVector2D ClosestPointToSegment = FMath::ClosestPointOnSegment2D(Graph->GetCachedGeometry().AbsoluteToLocal(LastMousePosition), Point1, Point2);
+		const float DistanceSquared = (Graph->GetCachedGeometry().AbsoluteToLocal(LastMousePosition) - ClosestPointToSegment).SizeSquared();
+
+		if (DistanceSquared < ClosestDistanceSquared) {
+			ClosestDistanceSquared = DistanceSquared;
+			ClosestPoint = ClosestPointToSegment;
+		}
+
+		Point1 = Point2;
+	}
+	if (ClosestDistanceSquared < LastConnectionDistance && ClosestDistanceSquared < 100) {
+		LastConnectionDistance = ClosestDistanceSquared;
+		ConnectionUnderMouse = FConnectionHit{ClosestPoint, Start, End};
 	}
 }
 
@@ -148,8 +184,8 @@ void SFIVSEdGraphViewer::Construct(const FArguments& InArgs) {
 			for (UFIVSNode* Node : Selection) {
 				Graph->RemoveNode(Node);
 			}
-		} else if (ConnectionDrawer && ConnectionDrawer->ConnectionUnderMouse.Key) {
-			ConnectionDrawer->ConnectionUnderMouse.Key->GetPin()->RemoveConnection(ConnectionDrawer->ConnectionUnderMouse.Value->GetPin());
+		} else if (ConnectionDrawer && ConnectionDrawer->ConnectionUnderMouse) {
+			ConnectionDrawer->ConnectionUnderMouse->From.Pin->GetPin()->RemoveConnection(ConnectionDrawer->ConnectionUnderMouse->To.Pin->GetPin());
 		}
 	}));
 	CommandList->MapAction(FCommands::Get().CenterGraph, FExecuteAction::CreateLambda([this]() {
@@ -227,14 +263,44 @@ int32 SFIVSEdGraphViewer::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 	DrawNewConnection(LayerId+100, AllottedGeometry, OutDrawElements, InWidgetStyle);
 	DrawSelectionBox(LayerId+200, AllottedGeometry, OutDrawElements, InWidgetStyle);
 
+	if (ConnectionDrawer->ConnectionUnderMouse) {
+		class FBackBuffer : public FRenderTarget
+		{
+		public:
+			FBackBuffer(FTexture2DRHIRef InRenderTargetTexture) {
+				RenderTargetTextureRHI = InRenderTargetTexture;
+			}
+			virtual FIntPoint GetSizeXY() const override { return RenderTargetTextureRHI->GetSizeXY(); }
+		};
+
+		class Test : public ICustomSlateElement {
+		public:
+			FVector2D Pos;
+
+			Test(FVector2D Pos) : Pos(Pos) {}
+
+
+			virtual void DrawRenderThread(FRHICommandListImmediate& RHICmdList, const void* RenderTarget) override {
+				FBackBuffer BackBuffer(*(FTexture2DRHIRef*)RenderTarget);
+				FCanvas Canvas(&BackBuffer, NULL, FGameTime::CreateUndilated(FApp::GetCurrentTime(), FApp::GetDeltaTime()), GMaxRHIFeatureLevel);
+				Canvas.DrawNGon(Pos, FColor::Red, 60, 100);
+				Canvas.Flush_RenderThread(RHICmdList, true);
+				RHICmdList.SetScissorRect(false, 0, 0, 0, 0);
+			}
+		};
+
+		FSlateDrawElement::MakeDebugQuad(OutDrawElements, LayerId+300, AllottedGeometry.MakeChild(FVector2D(10, 10), FSlateLayoutTransform(ConnectionDrawer->ConnectionUnderMouse->Position - FVector2D(5,5))).ToPaintGeometry(), ConnectionDrawer->ConnectionUnderMouse->From.Pin->GetPinColor().GetSpecifiedColor());
+		FSlateDrawElement::MakeCustom(OutDrawElements, LayerId+301, MakeShared<Test>(AllottedGeometry.LocalToAbsolute(ConnectionDrawer->ConnectionUnderMouse->Position + FVector2D(0, 20))));
+	}
+
 	OutDrawElements.PopClip();
 	
 	return ret;
 }
 
 FReply SFIVSEdGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
-	if (ConnectionDrawer->ConnectionUnderMouse.Key.IsValid() && MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)) {
-		TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>> Connection = ConnectionDrawer->ConnectionUnderMouse;
+	if (ConnectionDrawer->ConnectionUnderMouse && MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)) {
+		FFIVSEdConnectionDrawer::FConnectionHit Connection = ConnectionDrawer->ConnectionUnderMouse.GetValue();
 		TSharedPtr<IMenu> MenuHandle;
 		FMenuBuilder MenuBuilder(true, NULL);
 		MenuBuilder.AddMenuEntry(
@@ -242,7 +308,7 @@ FReply SFIVSEdGraphViewer::OnMouseButtonDown(const FGeometry& MyGeometry, const 
             FText(),
             FSlateIcon(),
             FUIAction(FExecuteAction::CreateLambda([Connection]() {
-                Connection.Key->GetPin()->RemoveConnection(Connection.Value->GetPin());
+                Connection.From.Pin->GetPin()->RemoveConnection(Connection.To.Pin->GetPin());
             })));
 		
 		FSlateApplication::Get().PushMenu(SharedThis(this), *MouseEvent.GetEventPath(), MenuBuilder.MakeWidget(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
@@ -271,16 +337,16 @@ FReply SFIVSEdGraphViewer::OnMouseButtonUp(const FGeometry& MyGeometry, const FP
 }
 
 FReply SFIVSEdGraphViewer::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) {
-	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton) && ConnectionDrawer.IsValid() && ConnectionDrawer->ConnectionUnderMouse.Key) {
-		TPair<TSharedPtr<SFIVSEdPinViewer>, TSharedPtr<SFIVSEdPinViewer>> Connection = ConnectionDrawer->ConnectionUnderMouse;
-		UFIVSPin* Pin1 = Connection.Key->GetPin();
-		UFIVSPin* Pin2 = Connection.Value->GetPin();
+	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton) && ConnectionDrawer.IsValid() && ConnectionDrawer->ConnectionUnderMouse) {
+		FFIVSEdConnectionDrawer::FConnectionHit Connection = ConnectionDrawer->ConnectionUnderMouse.GetValue();
+		UFIVSPin* Pin1 = Connection.From.Pin->GetPin();
+		UFIVSPin* Pin2 = Connection.To.Pin->GetPin();
 		UFIVSRerouteNode* Node = NewObject<UFIVSRerouteNode>();
 		Node->Pos = LocalToGraph(GetCachedGeometry().AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition())) - FVector2D(10, 10);
-		Pin1->RemoveConnection(Connection.Value->GetPin());
+		Graph->AddNode(Node);
+		Pin1->RemoveConnection(Connection.To	.Pin->GetPin());
 		Pin1->AddConnection(Node->GetNodePins()[0]);
 		Pin2->AddConnection(Node->GetNodePins()[0]);
-		Graph->AddNode(Node);
 
 		return FReply::Handled();
 	}
@@ -289,6 +355,8 @@ FReply SFIVSEdGraphViewer::OnMouseButtonDoubleClick(const FGeometry& InMyGeometr
 }
 
 FReply SFIVSEdGraphViewer::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) {
+	ConnectionDrawer->Reset();
+	ConnectionDrawer->LastMousePosition = GetCachedGeometry().AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
 	return SPanel::OnMouseMove(MyGeometry, MouseEvent);
 }
 
@@ -608,8 +676,8 @@ void SFIVSEdGraphViewer::DrawGrid(uint32 LayerId, const FGeometry& AllottedGeome
 	FVector2D GraphMax = LocalToGraph(LocalSize);
 	FVector2D VisibleGraphSize = GraphMax - GraphMin;
 
-	double minGraphStep = 10;
-	double base = 5;
+	double minGraphStep = 50;
+	double base = 2;
 	double majorStep = 10;
 	double GraphStep;
 	GraphStep = FMath::Pow(base, FMath::Floor(FMath::LogX(base, VisibleGraphSize.X / minGraphStep)));
@@ -656,12 +724,8 @@ void SFIVSEdGraphViewer::DrawConnections(uint32 LayerId, const FGeometry& Allott
 
 void SFIVSEdGraphViewer::DrawNewConnection(uint32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, const FWidgetStyle& InWidgetStyle) const {
 	for (TSharedRef<SFIVSEdPinViewer> DraggingPin : DraggingPins) {
-		FVector2D StartLoc = GetCachedGeometry().AbsoluteToLocal(DraggingPin->GetConnectionPoint());
 		FVector2D EndLoc = GetCachedGeometry().AbsoluteToLocal(DraggingPinsEndpoint);
-		if (DraggingPin->GetPin()->GetPinType() & FIVS_PIN_INPUT) {
-			Swap(EndLoc, StartLoc);
-		}
-		ConnectionDrawer->DrawConnection(StartLoc, EndLoc, DraggingPin->GetPinColor().GetSpecifiedColor(), SharedThis(this), AllottedGeometry, OutDrawElements, LayerId);
+		ConnectionDrawer->DrawConnection(DraggingPin, EndLoc, SharedThis(this), AllottedGeometry, OutDrawElements, LayerId);
 	}
 }
 
