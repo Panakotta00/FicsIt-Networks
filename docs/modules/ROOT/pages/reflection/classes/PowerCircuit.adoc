@@ -252,6 +252,28 @@ The amount of power produced by the whole circuit in the last tick.
 // end::func-production[]
 // end::func-production-title[]
 
+== Functions
+
+// tag::func-resetFuse-title[]
+=== `resetFuse` ()
+// tag::func-resetFuse[]
+
+Resets the fuse of this circuit
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Reset Fuse
+!===
+
+====
+// end::func-resetFuse[]
+// end::func-resetFuse-title[]
+
 == Signals
 
 === `PowerFuseChanged` ()

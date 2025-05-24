@@ -113,6 +113,7 @@ void AFINMicrocontroller::PostLoadGame_Implementation(int32 saveVersion, int32 g
 
 void AFINMicrocontroller::HandleSignal(const FFINSignalData& Signal, const FFIRTrace& Sender) {
 	NetworkController->HandleSignal(Signal, Sender);
+	Runtime.Timeout.Reset();
 }
 
 TSet<UObject*> AFINMicrocontroller::GetConnected_Implementation() const {

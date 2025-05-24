@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "FINChallengeSubsystem.h"
+#include "FINComputerCase.h"
 #include "FINLuaThreadedRuntime.h"
 #include "FINNetworkUtils.h"
 #include "NetworkController.h"
@@ -72,7 +74,10 @@ namespace FINLua {
 							luaFIN_pushFString(L, panic.Message);
 							return lua_error(L);
 						}
-						luaFIN_pushObject(L, UFINNetworkUtils::RedirectIfPossible(comp));
+						FFIRTrace obj = UFINNetworkUtils::RedirectIfPossible(comp);
+						luaFIN_pushObject(L, obj);
+						FINChallenge(ComponentProxy, true);
+						FINChallenge(ProxyComputer, obj->IsA<AFINComputerCase>());
 						if (isT) lua_seti(L, -2, ++j);
 					}
 				}

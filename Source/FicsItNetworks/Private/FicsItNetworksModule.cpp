@@ -3,14 +3,19 @@
 #include "UI/FINCopyUUIDButton.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "FGCharacterPlayer.h"
+#include "FGCheatManager.h"
 #include "FGGameMode.h"
+#include "FGGameRulesSubsystem.h"
 #include "FGGameState.h"
 #include "FicsItNetworksMisc.h"
 #include "FicsItReflection.h"
 #include "FINArrowModuleHolo.h"
+#include "FINChallengeSubsystem.h"
 #include "FINDependencies.h"
 #include "ReflectionHelper.h"
 #include "SubsystemActorManager.h"
+#include "TextBlock.h"
+#include "VerticalBoxSlot.h"
 #include "WrapBox.h"
 #include "WrapBoxSlot.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -71,28 +76,34 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 
 void ResearchNodeInfoWidget_CanResearch_Hook(FBlueprintHookHelper& HookHelper) {
 	UObject* Widget = HookHelper.GetContext();
-	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
-	bool& canResearch = *HookHelper.GetOutVariableHelper()->GetVariablePtr<TProperty<bool, FBoolProperty>>(TEXT("Can Research"));
-	canResearch = canResearch && UFGSchematic::AreSchematicDependenciesMet(schematic, Widget);;
-}
+	bool bNoUnlockCost = AFGGameRulesSubsystem::Get(Widget)->GetNoUnlockCost();
 
+	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
+
+	bool& canResearch = *HookHelper.GetOutVariableHelper()->GetVariablePtr<TProperty<bool, FBoolProperty>>(TEXT("Can Research"));
+	canResearch = canResearch && (bNoUnlockCost || UFGSchematic::AreSchematicDependenciesMet(schematic, Widget));
+}
+UE_DISABLE_OPTIMIZATION_SHIP
 void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
 	UUserWidget* Widget = Cast<UUserWidget>(HookHelper.GetContext());
 	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
+
 	UWrapBox* wrapBox = FReflectionHelper::GetObjectPropertyValue<UWrapBox>(Widget, TEXT("mCostSlotsContainer"));
 	TArray<UFGAvailabilityDependency*> dependencies;
 	UFGSchematic::GetSchematicDependencies(schematic, dependencies);
 	TSubclassOf<UUserWidget> dependencyWidgetClass = LoadClass<UUserWidget>(nullptr, TEXT("/FicsItNetworks/UI/Misc/BPW_FIN_Dependency.BPW_FIN_Dependency_C"));
 	for (UFGAvailabilityDependency* dependency : dependencies) {
-		UFINDependency* FINDependency = Cast<UFINDependency>(dependency);
+		UFINChallengeDependency* FINDependency = Cast<UFINChallengeDependency>(dependency);
 		if (!IsValid(FINDependency)) continue;
 		UUserWidget* dependencyWidget = Widget->WidgetTree->ConstructWidget<UUserWidget>(dependencyWidgetClass);
 		FReflectionHelper::SetPropertyValue<FObjectProperty>(dependencyWidget, TEXT("Dependency"), FINDependency);
 		UWrapBoxSlot* slot = wrapBox->AddChildToWrapBox(dependencyWidget);
 		slot->SetFillEmptySpace(true);
+		slot->SetHorizontalAlignment(HAlign_Fill);
+		slot->SetNewLine(true);
 	}
 }
-
+UE_ENABLE_OPTIMIZATION_SHIP
 #define FIN_CoreRedirect(Type, OldName, NewName) \
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags:: Type, \
 		TEXT(OldName), \

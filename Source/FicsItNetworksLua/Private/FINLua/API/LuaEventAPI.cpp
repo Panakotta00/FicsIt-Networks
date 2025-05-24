@@ -51,17 +51,20 @@ namespace FINLua {
 				lua_pop(L, 1);
 			}
 			if (lua_getfield(L, index, "sender") != LUA_TNIL) {
+				IFINLuaEventSystem& event = luaFIN_getEventSystem(L);
 				if (lua_istable(L, -1)) {
 					int len = luaL_len(L, -1);
 					for (int i = 0; i < len; ++i) {
 						lua_geti(L, -1, i);
-						UObject* sender = luaFIN_checkObject<UObject>(L, -1);
-						filter.Senders.Add(sender);
+						FFIRTrace sender = luaFIN_checkObject(L, -1, nullptr);
+						filter.Senders.Add(sender.Get());
+						event.Listen(sender);
 						lua_pop(L, 1);
 					}
 				} else {
-					UObject* sender = luaFIN_checkObject<UObject>(L, -1);
-					filter.Senders.Add(sender);
+					FFIRTrace sender = luaFIN_checkObject(L, -1, nullptr);
+					filter.Senders.Add(sender.Get());
+					event.Listen(sender);
 				}
 				lua_pop(L, 1);
 			}
@@ -535,7 +538,7 @@ namespace FINLua {
 			luaFIN_persistValue(L, -1, "WaitForContinue");
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(event::luaPullContinue)));
 			luaFIN_persistValue(L, -1, "PullContinue");
-			lua_pop(L, 4);
+			lua_pop(L, 3);
 
 			lua_pushcfunction(L, EventQueue::luaWaitFor);
 			luaFIN_persistValue(L, -1, "EventQueueWaitFor");
@@ -547,6 +550,7 @@ namespace FINLua {
 
 			lua_pushcfunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)));
 			luaFIN_persistValue(L, -1, "luaFIN_eventTask");
+			lua_pop(L, 1);
 
 			lua_getglobal(L, "event");
 			luaFIN_pushLuaFutureCFunction(L, reinterpret_cast<lua_CFunction>(reinterpret_cast<void*>(luaFIN_eventTask)), 0);
@@ -661,6 +665,8 @@ namespace FINLua {
 		lua_settop(L, 0);
 
 		TSharedPtr<FFINLuaEventRegistry> registry = luaFIN_getEventRegistry(L);
+		lua_pop(L, 1);
+
 		if (registry->EventListeners.Num() + registry->EventQueues.Num() + registry->OneShots.Num() > 0) {
 			IFINLuaEventSystem& eventSystem = luaFIN_getEventSystem(L);
 			while (true) {

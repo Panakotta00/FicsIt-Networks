@@ -1,5 +1,6 @@
 #include "FINLua/API/LuaFileSystemAPI.h"
 
+#include "FINChallengeSubsystem.h"
 #include "FINLuaProcessor.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
@@ -601,6 +602,7 @@ namespace FINLua {
 						file->write(std::string(str, str_len));
 					} CatchExceptionLua
 				}
+				FINChallenge(UseFileSystem, true);
 				return 0;
 			}
 

@@ -199,7 +199,7 @@ A future can be actively polled by the runtime or may wait to be woken up by som
 For this, the values a future yields are used to control its runtime.
 - <nothing> indicates the future should be actively polled. This practically means it gets added as task.
 - future    indicates the future is waiting for the given future. When the future gets polled using await or as task, this will make this future be woken up by the given future and be removed as task.
-- number    indicates the future is waiting to be woken up by some external system, but if its a task, allows to indicate the runtime its fine to sleep for the given amount of seconds
+- number    indicates the future is waiting to be woken up by some external system, but if its a task or called in the main thread, allows to indicate the runtime its fine to sleep for the given amount of seconds
 - <any>     indicates the future is waiting to be woken up by some external system
 
 === __Future.__**await** ()
@@ -276,8 +276,5 @@ Causes error if future is not yet resolved.
 ====
 
 === **FutureStruct**
-
-
-=== **FutureDependents**
 
 
