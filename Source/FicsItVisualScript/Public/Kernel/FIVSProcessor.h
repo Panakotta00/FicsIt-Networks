@@ -3,7 +3,6 @@
 #include "FINLuaReferenceCollector.h"
 #include "FINLuaRuntimePersistence.h"
 #include "FINLuaThreadedRuntime.h"
-#include "FIVSRuntimeContext.h"
 #include "LuaComponentAPI.h"
 #include "LuaEventAPI.h"
 #include "FicsItKernel/Processor/Processor.h"
@@ -16,11 +15,6 @@ class AFINStateEEPROMText;
 UCLASS()
 class UFIVSProcessor : public UFINKernelProcessor, public IFIVSScriptContext_Interface {
 	GENERATED_BODY()
-
-	uint32 GraphHash = 0;
-	TOptional<FFIVSScript> TickScript;
-
-	TSharedPtr<FFIVSRuntimeContext> RuntimeContext;
 
 public:
 	UFIVSProcessor();
@@ -45,12 +39,15 @@ public:
 	virtual void GetRelevantObjects_Implementation(TArray<FFIRTrace>& OutObjects) override;
 	virtual void GetRelevantClasses_Implementation(TArray<UFIRClass*>& OutClasses) override;
 	virtual void GetRelevantStructs_Implementation(TArray<UFIRStruct*>& OutStructs) override;
+	virtual FFIVSOnScriptCompiled& GetOnScriptCompiledEvent() override;
 	// End IFVSScriptContext_Interface
 
 	UPROPERTY(SaveGame)
 	FFINLuaRuntimePersistenceState RuntimeState;
 
 private:
+	uint32 GraphHash = 0;
+
 	FString LuaCode;
 
 	UPROPERTY()

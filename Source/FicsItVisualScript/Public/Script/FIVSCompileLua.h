@@ -1,9 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FicsItVisualScriptModule.h"
 #include "FINNetworkUtils.h"
-#include "FIVSNode.h"
 #include "FIVSPin.h"
 #include "Interface.h"
 #include "FIVSCompileLua.generated.h"

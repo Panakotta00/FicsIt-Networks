@@ -1,7 +1,5 @@
 #include "Script/Library/FIVSNode_OnStart.h"
 
-#include "Kernel/FIVSRuntimeContext.h"
-
 UFIVSNode_OnStart::UFIVSNode_OnStart() {
 	DisplayName = FText::FromString(TEXT("Event Start"));
 	ExecOut = CreateDefaultPin(FIVS_PIN_EXEC_OUTPUT, TEXT("Run"), FText::FromString("Run"));

@@ -3,7 +3,6 @@
 #include "FicsItReflection.h"
 #include "FINNetworkUtils.h"
 #include "JsonObject.h"
-#include "Kernel/FIVSRuntimeContext.h"
 
 void UFIVSNode_SetProperty::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TPair<UClass*, UFIRClass*> Class : FFicsItReflectionModule::Get().GetClasses()) {

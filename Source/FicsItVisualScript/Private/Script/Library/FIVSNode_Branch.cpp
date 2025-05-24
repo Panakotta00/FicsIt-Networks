@@ -1,7 +1,5 @@
 #include "Script/Library/FIVSNode_Branch.h"
 
-#include "Kernel/FIVSRuntimeContext.h"
-
 UFIVSNode_Branch::UFIVSNode_Branch() {
 	DisplayName = FText::FromString(TEXT("Branch"));
 

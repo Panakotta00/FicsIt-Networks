@@ -1,26 +1,7 @@
 #pragma once
 
 #include "FIVSNode.h"
-#include "Kernel/FIVSScript.h"
 #include "FIVSScriptNode.generated.h"
-
-struct FFIVSRuntimeContext;
-
-USTRUCT()
-struct FFIVSNodeStatement {
-	GENERATED_BODY()
-
-	UPROPERTY()
-	FGuid NodeId;
-
-	FFIVSNodeStatement() = default;
-	FFIVSNodeStatement(FGuid NodeId) : NodeId(NodeId) {}
-	virtual ~FFIVSNodeStatement() = default;
-
-	virtual void PreExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const { }
-	virtual void ExecPin(FFIVSRuntimeContext& Context, FGuid ExecPin) const { }
-	virtual bool IsVolatile() const { return false; }
-};
 
 UCLASS(Abstract)
 class UFIVSScriptNode : public UFIVSNode {
@@ -49,6 +30,4 @@ public:
 	// Begin UFIVSNode
 	virtual TArray<UFIVSPin*> GetNodePins() const override { return Pins; }
 	// End UFIVSNode
-
-	virtual TFIRInstancedStruct<FFIVSNodeStatement> CreateNodeStatement() { return TFIRInstancedStruct<FFIVSNodeStatement>(); }
 };

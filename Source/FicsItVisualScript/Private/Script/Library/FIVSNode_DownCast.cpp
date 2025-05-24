@@ -2,7 +2,6 @@
 
 #include "FIVSEdEditor.h"
 #include "JsonObject.h"
-#include "Kernel/FIVSRuntimeContext.h"
 
 void UFIVSNode_DownCast::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	UFIRClass* FromClass = FFicsItReflectionModule::Get().FindClass(UObject::StaticClass());

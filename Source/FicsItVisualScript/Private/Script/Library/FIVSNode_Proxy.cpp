@@ -3,7 +3,6 @@
 #include "FicsItReflection.h"
 #include "FINNetworkUtils.h"
 #include "NetworkController.h"
-#include "Kernel/FIVSRuntimeContext.h"
 
 UFIVSNode_Proxy::UFIVSNode_Proxy() {
 	DisplayName = FText::FromString(TEXT("Proxy"));

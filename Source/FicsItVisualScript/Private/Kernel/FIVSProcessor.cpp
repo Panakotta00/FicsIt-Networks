@@ -13,7 +13,6 @@
 #include "LuaKernelAPI.h"
 #include "LuaWorldAPI.h"
 #include "NetworkController.h"
-#include "Kernel/FIVSCompiler.h"
 #include "Script/FIVSGraph.h"
 #include "Script/Library/FIVSNode_OnTick.h"
 
@@ -137,18 +136,8 @@ void UFIVSProcessor::Reset() {
 
 	uint32 hash = GetTypeHash(eeprom->Code);
 	if (hash != GraphHash) {
-		GraphHash = hash;
-		TickScript.Reset();
-
 		UFIVSGraph* graph = NewObject<UFIVSGraph>();
 		UFIVSSerailizationUtils::FIVS_DeserializeGraph(graph, eeprom->Code, false);
-		TMap<UFIVSScriptNode*, FFIVSScript> scripts = FFIVSCompiler::CompileGraph(graph);
-		for (const auto& [node, script] : scripts) {
-			if (node->IsA<UFIVSNode_OnTick>()) {
-				TickScript = script;
-				break;
-			}
-		}
 
 		FFIVSLuaCompilerContext luaContext;
 		for (UFIVSNode* node : graph->GetNodes()) {
@@ -159,6 +148,8 @@ void UFIVSProcessor::Reset() {
 
 		LuaCode = luaContext.FinalizeCode();
 		UE_LOG(LogFicsItVisualScript, Warning, TEXT("Compiled Lua Code:\n%s"), *FString(luaContext.FinalizeCode()))
+
+		GraphHash = hash;
 	}
 
 	TOptional<FString> error = Runtime.Runtime.LoadCode(*LuaCode);

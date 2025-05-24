@@ -2,7 +2,6 @@
 
 #include "FicsItReflection.h"
 #include "FIRStruct.h"
-#include "Kernel/FIVSRuntimeContext.h"
 
 void UFIVSNode_SeparateStruct::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (TTuple<UScriptStruct*, UFIRStruct*> StructPair : FFicsItReflectionModule::Get().GetStructs()) {

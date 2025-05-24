@@ -1,8 +1,6 @@
 #include "Script/Library/FIVSNode_Variable.h"
 
 #include "JsonObjectConverter.h"
-#include "Kernel/FIVSRuntimeContext.h"
-#include "Kernel/FIVSValue.h"
 
 void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
 	for (EFIRValueType DataType = FIR_NIL; DataType <= FIR_ANY; DataType = EFIRValueType(DataType + 1)) {

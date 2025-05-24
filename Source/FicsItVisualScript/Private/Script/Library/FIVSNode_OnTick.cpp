@@ -1,7 +1,5 @@
 #include "Script/Library/FIVSNode_OnTick.h"
 
-#include "Kernel/FIVSRuntimeContext.h"
-
 UFIVSNode_OnTick::UFIVSNode_OnTick() {
 	DisplayName = FText::FromString(TEXT("Event Tick"));
 
