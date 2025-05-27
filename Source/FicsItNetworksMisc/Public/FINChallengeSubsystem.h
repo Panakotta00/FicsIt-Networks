@@ -56,6 +56,8 @@ UCLASS()
 class FICSITNETWORKSMISC_API AFINChallengeSubsystem : public AModSubsystem, public IFGSaveInterface {
 	GENERATED_BODY()
 public:
+	AFINChallengeSubsystem();
+
 	// Begin AActor
 	virtual void BeginPlay() override;
 	// End AActor
@@ -85,8 +87,8 @@ public:
 private:
 	static TSoftObjectPtr<AFINChallengeSubsystem> self;
 
-	UPROPERTY(SaveGame)
-	TSet<FString> CompletedChallenges;
+	UPROPERTY(SaveGame, Replicated)
+	TArray<FString> CompletedChallenges;
 
 	static TMap<FString, TWeakPtr<FFINChallenge>> Challenges;
 };

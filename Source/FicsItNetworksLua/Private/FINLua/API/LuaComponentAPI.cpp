@@ -77,7 +77,7 @@ namespace FINLua {
 						FFIRTrace obj = UFINNetworkUtils::RedirectIfPossible(comp);
 						luaFIN_pushObject(L, obj);
 						FINChallenge(ComponentProxy, true);
-						FINChallenge(ProxyComputer, obj->IsA<AFINComputerCase>());
+						FINChallenge(ProxyComputer, obj && obj->IsA<AFINComputerCase>());
 						if (isT) lua_seti(L, -2, ++j);
 					}
 				}
