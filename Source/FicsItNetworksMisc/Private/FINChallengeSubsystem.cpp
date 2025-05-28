@@ -2,6 +2,7 @@
 
 #include "SubsystemActorManager.h"
 #include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
 
 FFINChallenge::~FFINChallenge() {
 	AFINChallengeSubsystem::UnregisterChallenge(Name);
@@ -23,6 +24,16 @@ void UFINChallengeAsset::Serialize(FArchive& Ar) {
 
 TSoftObjectPtr<AFINChallengeSubsystem> AFINChallengeSubsystem::self;
 TMap<FString, TWeakPtr<FFINChallenge>> AFINChallengeSubsystem::Challenges;
+
+void AFINChallengeSubsystem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFINChallengeSubsystem, CompletedChallenges);
+}
+
+AFINChallengeSubsystem::AFINChallengeSubsystem() {
+	bReplicates = true;
+}
 
 void AFINChallengeSubsystem::BeginPlay() {
 	Super::BeginPlay();
@@ -77,6 +88,9 @@ void AFINChallengeSubsystem::UnregisterChallenge(const FString& ChallengeName) {
 }
 
 bool UFINChallengeDependency::AreDependenciesMet(UObject* worldContext) const {
-	auto subsys = worldContext->GetWorld()->GetSubsystem<USubsystemActorManager>()->GetSubsystemActor<AFINChallengeSubsystem>();
+	auto manager = worldContext->GetWorld()->GetSubsystem<USubsystemActorManager>();
+	if (!IsValid(manager)) return false;
+	auto subsys = manager->GetSubsystemActor<AFINChallengeSubsystem>();
+	if (!IsValid(subsys)) return false;
 	return subsys->IsChallengeCompleted(ChallengeName);
 }
