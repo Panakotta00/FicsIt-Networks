@@ -5,6 +5,7 @@ public class FicsItNetworksCircuit : ModuleRules
     public FicsItNetworksCircuit(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        CppStandard = CppStandardVersion.Cpp20;
         bEnableExceptions = true;
         bWarningsAsErrors = true;
 

@@ -40,16 +40,9 @@ namespace FINLua {
 				for (auto players = world->GetPlayerControllerIterator(); players; ++players) {
 					AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
 					if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
-					runtime.TickActions.Enqueue([PlayerController, Text]() {
+					world->GetTimerManager().SetTimerForNextTick([=]() {
 						PlayerController->GetGameUI()->ShowTextNotification(FText::FromString(Text));
 					});
-					/*kernel->PushFuture(MakeShared<TFIRInstancedStruct<FFINFuture>>(FFINFunctionFuture([PlayerController, Text]() {
-						UFINNotificationMessage* Message = NewObject<UFINNotificationMessage>();
-						Message->NotificationText = FText::FromString(Text);
-						PlayerController->GetGameUI()->AddPendingMessage(Message);
-						UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Pending Messages? %i"), PlayerController->GetGameUI()->CanReceiveMessageQueue());
-						UE_LOG(LogFicsItNetworksLua, Warning, TEXT("Pending Message? %i"), PlayerController->GetGameUI()->CanReceiveMessage(UFINNotificationMessage::StaticClass()));
-					})));*/
 					break;
 				}
 				return 0;

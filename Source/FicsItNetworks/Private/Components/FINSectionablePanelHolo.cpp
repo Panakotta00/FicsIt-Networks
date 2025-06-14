@@ -102,7 +102,7 @@ void AFINSectionablePanelHolo::UpdateRotationValuesFromTransform() {
 	Super::UpdateRotationValuesFromTransform();
 }
 
-bool AFINSectionablePanelHolo::IsHologramIdenticalToActor(AActor* actor, const FVector& hologramLocationOffset) const {
+bool AFINSectionablePanelHolo::IsHologramIdenticalToActor(AActor* actor, const FTransform& hologramLocationOffset) const {
 	//bool bIsHologramIdenticalToActor = Super::IsHologramIdenticalToActor(actor, hologramLocationOffset);
 	return false;
 }

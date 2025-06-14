@@ -49,7 +49,7 @@ void AFINMicrocontroller::BeginPlay() {
 	if (!IsValid(NetworkComponent)) {
 		TArray<FInventoryStack> refund;
 		Execute_GetDismantleRefund(this, refund, false);
-		FDismantleHelpers::DropRefundOnGround(this, GetActorLocation(), refund);
+		FDismantleHelpers::DropRefundOnGround(this, GetActorLocation(), refund, nullptr);
 		Execute_Dismantle(this);
 	} else {
 		Reference = Cast<UFINMicrocontrollerReference>(NetworkComponent->AddComponentByClass(UFINMicrocontrollerReference::StaticClass(), false, FTransform::Identity, true));

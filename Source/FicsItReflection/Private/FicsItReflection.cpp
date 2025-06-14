@@ -230,7 +230,7 @@ void FFicsItReflectionModule::LoadAllTypes() {
 
 	for (const FTopLevelAssetPath& ClassName : DerivedNames) {
 		UClass* Class = TSoftClassPtr(FSoftObjectPath(ClassName)).LoadSynchronous();
-		if (Class->GetClassFlags() & (CLASS_Abstract | CLASS_Hidden) || Class->GetName().StartsWith("SKEL_")) continue;
+		if (!Class || Class->GetClassFlags() & (CLASS_Abstract | CLASS_Hidden) || Class->GetName().StartsWith("SKEL_")) continue;
 		FindClass(Class);
 	}
 #endif

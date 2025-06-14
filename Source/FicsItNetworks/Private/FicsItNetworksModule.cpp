@@ -1,32 +1,8 @@
 #include "FicsItNetworksModule.h"
 
-#include "UI/FINCopyUUIDButton.h"
-#include "ModuleSystem/FINModuleSystemPanel.h"
 #include "FGCharacterPlayer.h"
-#include "FGCheatManager.h"
-#include "FGGameMode.h"
-#include "FGGameRulesSubsystem.h"
 #include "FGGameState.h"
-#include "FicsItNetworksMisc.h"
-#include "FicsItReflection.h"
-#include "FINArrowModuleHolo.h"
-#include "FINChallengeSubsystem.h"
-#include "FINDependencies.h"
-#include "ReflectionHelper.h"
-#include "SubsystemActorManager.h"
-#include "TextBlock.h"
-#include "VerticalBoxSlot.h"
-#include "WrapBox.h"
-#include "WrapBoxSlot.h"
-#include "AssetRegistry/AssetRegistryModule.h"
-#include "Components/VerticalBox.h"
-#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
-#include "Hologram/FGBuildableHologram.h"
-#include "Patching/BlueprintHookHelper.h"
-#include "Patching/BlueprintHookManager.h"
-#include "Patching/NativeHookManager.h"
 #include "Styling/SlateStyleRegistry.h"
-#include "UI/FINEditLabel.h"
 #include "UI/FINStyle.h"
 #include "UObject/CoreRedirects.h"
 
@@ -54,7 +30,7 @@ void AddRedirects(FString FromParent, FString ToParent, const ClassChange& Chang
 	}
 }
 
-void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
+/*void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 	UUserWidget* self = Cast<UUserWidget>(HookHelper.GetContext());
 	UObject* InventorySlot = HookHelper.GetContext();
 	TObjectPtr<UObject>* WidgetPtr = HookHelper.GetOutVariableHelper()->GetVariablePtr<FObjectProperty>(TEXT("ReturnValue"));
@@ -73,7 +49,7 @@ void InventorSlot_CreateWidgetSlider_Hook(FBlueprintHookHelper& HookHelper) {
 		MenuList->AddChildToVerticalBox(EditLabel);
 	}
 }
-
+/*
 void ResearchNodeInfoWidget_CanResearch_Hook(FBlueprintHookHelper& HookHelper) {
 	UObject* Widget = HookHelper.GetContext();
 	bool bNoUnlockCost = AFGGameRulesSubsystem::Get(Widget)->GetNoUnlockCost();
@@ -84,7 +60,7 @@ void ResearchNodeInfoWidget_CanResearch_Hook(FBlueprintHookHelper& HookHelper) {
 	canResearch = canResearch && (bNoUnlockCost || UFGSchematic::AreSchematicDependenciesMet(schematic, Widget));
 }
 UE_DISABLE_OPTIMIZATION_SHIP
-void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
+void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHoo& HookHelper) {
 	UUserWidget* Widget = Cast<UUserWidget>(HookHelper.GetContext());
 	TSubclassOf<UFGSchematic> schematic = FReflectionHelper::GetObjectPropertyValue<UClass>(Widget, TEXT("mSchematic"));
 
@@ -95,7 +71,7 @@ void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
 	for (UFGAvailabilityDependency* dependency : dependencies) {
 		UFINChallengeDependency* FINDependency = Cast<UFINChallengeDependency>(dependency);
 		if (!IsValid(FINDependency)) continue;
-		UUserWidget* dependencyWidget = Widget->WidgetTree->ConstructWidget<UUserWidget>(dependencyWidgetClass);
+		UUserWidget* dependencyWidget = e->WidgetTree->ConstructWidget<UUserWidget>(dependencyWidgetClass);
 		FReflectionHelper::SetPropertyValue<FObjectProperty>(dependencyWidget, TEXT("Dependency"), FINDependency);
 		UWrapBoxSlot* slot = wrapBox->AddChildToWrapBox(dependencyWidget);
 		slot->SetFillEmptySpace(true);
@@ -103,7 +79,7 @@ void ResearchNodeInfoWidget_UpdateState_Hook(FBlueprintHookHelper& HookHelper) {
 		slot->SetNewLine(true);
 	}
 }
-UE_ENABLE_OPTIMIZATION_SHIP
+UE_ENABLE_OPTIMIZATION_SHIP*/
 #define FIN_CoreRedirect(Type, OldName, NewName) \
 	redirects.Add(FCoreRedirect{ECoreRedirectFlags:: Type, \
 		TEXT(OldName), \
@@ -384,7 +360,7 @@ void FFicsItNetworksModule::StartupModule(){
 	FCoreDelegates::OnPostEngineInit.AddStatic([]() {
 #if !WITH_EDITOR && UE_GAME
 		// Copy FS UUID Item Context Menu Entry //
-		UClass* Slot = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/InventorySlots/Widget_InventorySlot.Widget_InventorySlot_C"));
+		/*UClass* Slot = LoadObject<UClass>(NULL, TEXT("/Game/FactoryGame/Interface/UI/InGame/InventorySlots/Widget_InventorySlot.Widget_InventorySlot_C"));
 		check(Slot);
 		UFunction* Function = Slot->FindFunctionByName(TEXT("CreateSplitSlider"));
 		UBlueprintHookManager* HookManager = GEngine->GetEngineSubsystem<UBlueprintHookManager>();
@@ -394,7 +370,7 @@ void FFicsItNetworksModule::StartupModule(){
 		HookManager->HookBlueprintFunction(Function, &ResearchNodeInfoWidget_CanResearch_Hook, EPredefinedHookOffset::Return);
 		Function = NodeInfo->FindFunctionByName(TEXT("UpdateState"));
 		HookManager->HookBlueprintFunction(Function, &ResearchNodeInfoWidget_UpdateState_Hook, EPredefinedHookOffset::Return);
-
+*/
 		SUBSCRIBE_UOBJECT_METHOD(AFGBuildGun, BeginPlay, [](auto& scope, AFGBuildGun* BuildGun) {
 			if (!BuildGun) return;
 			AFINBuildgunHooks* hooks = BuildGun->GetWorld()->GetSubsystem<USubsystemActorManager>()->GetSubsystemActor<AFINBuildgunHooks>();

@@ -57,7 +57,7 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable)
 	void CopyDataItem(UFGInventoryComponent* InProviderInc, int InProviderIdx, UFGInventoryComponent* InFromInv, int InFromIdx, UFGInventoryComponent* InToInv, int InToIdx);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(BlueprintCallable, Server, Reliable)
 	void SetLabel(UFGInventoryComponent* Inventory, int32 Index, const FString& Label);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category="FINLua|RCO")
