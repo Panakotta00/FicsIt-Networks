@@ -123,7 +123,7 @@ void FFicsItNetworksCircuitModule::StartupModule() {
 
 		SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName, const FName& socketName) {
 			UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Buildings/Network/-Shared/SM_NetworkConnector.SM_NetworkConnector"), NULL, LOAD_None, NULL);
-			if (componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
+			if (componentTemplate && componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
 				auto comp = NewObject<UStaticMeshComponent>(attachParent);
 				comp->RegisterComponent();
 				comp->SetMobility(EComponentMobility::Movable);

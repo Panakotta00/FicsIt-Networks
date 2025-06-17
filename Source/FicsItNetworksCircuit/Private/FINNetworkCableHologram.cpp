@@ -395,7 +395,6 @@ void AFINNetworkCableHologram::UpdateSnappingEffects() {
 
 void AFINNetworkCableHologram::UpdateMeshValidity(bool bValid) {
 	UMaterialInstance* Material = bValid ? mValidPlacementMaterial : mInvalidPlacementMaterial;
-	SetMaterial(Material);
 	Cable->SetMaterial(0, Material);
 	if (Snapped.SnapType == FIN_NOT_SNAPPED || (IsInSecondStep() && From.SnapType == FIN_NOT_SNAPPED)) {
 		Cable->SetVisibility(false, true);

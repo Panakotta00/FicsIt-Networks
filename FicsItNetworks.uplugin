@@ -1,8 +1,8 @@
 {
 	"FileVersion": 3,
-	"Version": 0,
-	"VersionName": "0.3",
-	"SemVersion": "0.3.34",
+	"Version": 1,
+	"VersionName": "1.0",
+	"SemVersion": "1.1.0",
 	"FriendlyName": "FicsIt-Networks",
 	"Description": "Adds a computer network and programmable computers to the Game.",
 	"Category": "Modding",
@@ -52,11 +52,6 @@
 			"LoadingPhase": "PostDefault"
 		},
 		{
-			"Name": "FicsItNetworksRepository",
-			"Type": "Runtime",
-			"LoadingPhase": "PostDefault"
-		},
-		{
 			"Name": "FicsItReflection",
 			"Type": "Runtime",
 			"LoadingPhase": "PostDefault"
@@ -90,7 +85,7 @@
 	"Plugins": [
 		{
 			"Name": "SML",
-			"SemVersion": "^3.8.0",
+			"SemVersion": "^3.11.1",
 			"Enabled": true
 		}
 	],
@@ -100,5 +95,5 @@
 			"LoadingPolicy": "Always"
 		}
 	],
-	"GameVersion": ">=365306"
+	"GameVersion": ">=415558"
 }

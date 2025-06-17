@@ -46,7 +46,7 @@ public:
 	// End AFGBuildableHologram
 
 	// Begin AFGHologram
-	TArray< FItemAmount > GetBaseCost() const;
+	virtual TArray< FItemAmount > GetBaseCost() const override;
 	// End AFGHologram
 
 private:

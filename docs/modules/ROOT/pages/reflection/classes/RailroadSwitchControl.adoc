@@ -13,11 +13,11 @@ The controler object for a railroad switch.
 
 == Functions
 
-// tag::func-getControlledConnection-title[]
-=== `getControlledConnection` () -> `connection` : Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
-// tag::func-getControlledConnection[]
+// tag::func-getControlledConnections-title[]
+=== `getControlledConnections` () -> `connections` : Array<Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>>
+// tag::func-getControlledConnections[]
 
-Returns the Railroad Connection this switch is controlling.
+Returns the Railroad Connections this switch is controlling.
 
 [%collapsible]
 ====
@@ -26,7 +26,7 @@ Returns the Railroad Connection this switch is controlling.
 ! Flags
 ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
-! Display Name ! Get Controlled Connection
+! Display Name ! Get Controlled Connections
 !===
 
 .Return Values
@@ -34,14 +34,14 @@ Returns the Railroad Connection this switch is controlling.
 !===
 !Name !Type !Description
 
-! *Connection* `connection`
-! Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>
-! The controlled connectino.
+! *Connections* `connections`
+! Array<Trace<xref:/reflection/classes/RailroadTrackConnection.adoc[RailroadTrackConnection]>>
+! The controlled connections.
 !===
 
 ====
-// end::func-getControlledConnection[]
-// end::func-getControlledConnection-title[]
+// end::func-getControlledConnections[]
+// end::func-getControlledConnections-title[]
 // tag::func-switchPosition-title[]
 === `switchPosition` () -> `position` : Int
 // tag::func-switchPosition[]

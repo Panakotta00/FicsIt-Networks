@@ -698,10 +698,14 @@ BeginFunc(switchPosition, "Switch Position", "Returns the current switch positio
     Body()
     position = (int64)self->GetSwitchPosition();
 } EndFunc()
-BeginFunc(getControlledConnection, "Get Controlled Connection", "Returns the Railroad Connection this switch is controlling.") {
-	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, connection, "Connection", "The controlled connectino.")
+BeginFunc(getControlledConnections, "Get Controlled Connections", "Returns the Railroad Connections this switch is controlling.") {
+	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, connections, "Connections", "The controlled connections.")
 	Body()
-	connection = Ctx.GetTrace() / self->GetmControlledConnection();
+	TArray<FIRAny> Connections;
+	for (auto connection : self->GetControlledConnections()) {
+		Connections.Add(Ctx.GetTrace() / connection);
+	}
+	connections = Connections;
 } EndFunc()
 EndClass()
 

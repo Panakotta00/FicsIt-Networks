@@ -10,7 +10,7 @@
 UCLASS()
 class FICSITNETWORKS_API AFINSectionablePanelHolo : public AFGGenericBuildableHologram {
 	protected:
-		virtual bool IsHologramIdenticalToActor(AActor* actor, const FVector& hologramLocationOffset) const override;
+		virtual bool IsHologramIdenticalToActor(AActor* actor, const FTransform& hologramLocationOffset) const override;
 
 	private:
 		GENERATED_BODY()

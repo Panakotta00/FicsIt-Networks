@@ -22,8 +22,10 @@ void UFINComputerDriveDesc::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 FText UFINComputerDriveDesc::GetOverridenItemName_Implementation(APlayerController* OwningPlayer, const FInventoryStack& InventoryStack) {
 	FText Name = UFGItemDescriptor::GetItemName(InventoryStack.Item.GetItemClass());
 	if (InventoryStack.Item.HasState()) {
-		if (const FFINLabelContainerInterface* interface = FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(InventoryStack.Item.GetItemState())) {
-			FString Label = interface->GetLabel();
+		FFGDynamicStruct itemState = InventoryStack.Item.GetItemState();
+		FFINLabelContainerInterface* container = nullptr; //FFINStructInterfaces::Get().GetInterface<FFINLabelContainerInterface>(itemState);
+		if (container) {
+			FString Label = container->GetLabel();
 			if (!Label.IsEmpty()) {
 				return FText::FromString(FString::Printf(TEXT("%s - \"%s\""), *Name.ToString(), *Label));
 			}

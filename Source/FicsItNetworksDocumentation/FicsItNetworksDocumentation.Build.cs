@@ -5,6 +5,7 @@ public class FicsItNetworksDocumentation : ModuleRules
     public FicsItNetworksDocumentation(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        CppStandard = CppStandardVersion.Cpp20;
         bWarningsAsErrors = true;
 
         PublicDependencyModuleNames.AddRange(

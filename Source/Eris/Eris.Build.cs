@@ -5,7 +5,7 @@ public class Eris : ModuleRules
 {
 	public Eris(ReadOnlyTargetRules target) : base(target)
 	{
-		CppStandard = CppStandardVersion.Cpp17;
+		CppStandard = CppStandardVersion.Cpp20;
 		bEnableExceptions = true;
 		bUseRTTI = true;
 
