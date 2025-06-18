@@ -227,6 +227,7 @@ void AFINComputerGPUT1::Tick(float DeltaSeconds) {
 				Multicast_EndBackBufferReplication();
 			}
 		} else if (bShouldReplicate) {
+			if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
 			bShouldReplicate = false;
 			Multicast_BeginBackBufferReplication(BackBuffer.GetSize());
 			ToReplicate = FrontBuffer.GetData();
@@ -359,6 +360,5 @@ void AFINComputerGPUT1::netFunc_flush() {
 	FScopeLock Lock(&DrawingMutex);
 	FrontBuffer = BackBuffer;
 	bShouldReplicate = true;
-	if (CachedInvalidation) CachedInvalidation->InvalidateRootChildOrder();
 	FINChallenge(UseGPU, Screen.IsValid());
 }
