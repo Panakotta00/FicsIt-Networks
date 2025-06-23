@@ -17,10 +17,10 @@ AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input = CreateDefaultSubobject<UEnhancedInputComponent>("Input");
 	const UFGInputSettings* Settings = UFGInputSettings::Get();
 
-	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnPrimaryFirePressed);
-	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnPrimaryFireReleased);
-	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnSecondaryFirePressed);
-	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnSecondaryFireReleased);
+	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))).LoadSynchronous(), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnPrimaryFirePressed);
+	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))).LoadSynchronous(), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnPrimaryFireReleased);
+	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))).LoadSynchronous(), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnSecondaryFirePressed);
+	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))).LoadSynchronous(), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnSecondaryFireReleased);
 	
 	SetActorTickEnabled(true);
 	PrimaryActorTick.SetTickFunctionEnable(true);
@@ -160,7 +160,7 @@ UFINGPUWidgetSign* AFINComputerSubsystem::AddGPUWidgetSign(AFINComputerGPU* GPU,
 	FPrefabSignData Prefab;
 	Prefab.PrefabLayout = UFINGPUSignPrefabWidget::StaticClass();
 	BuildableSign->SetPrefabSignData(Prefab);
-	Cast<UFINGPUSignPrefabWidget>(BuildableSign->mPrefabLayout)->SetWidgetSign(WidgetSign);
+	//Cast<UFINGPUSignPrefabWidget>(BuildableSign->mSoftActivePrefabLayout)->SetWidgetSign(WidgetSign);
 	WidgetSign->BuildableSign = BuildableSign;
 	
 	return WidgetSign;

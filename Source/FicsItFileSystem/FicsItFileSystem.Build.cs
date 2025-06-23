@@ -5,6 +5,7 @@ public class FicsItFileSystem : ModuleRules
     public FicsItFileSystem(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	    CppStandard = CppStandardVersion.Cpp20;
         bEnableExceptions = true;
         bWarningsAsErrors = true;
 

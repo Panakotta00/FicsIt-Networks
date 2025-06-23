@@ -282,7 +282,7 @@ TOptional<FFINLuaToken> FFINLuaLexer::NextToken() {
 		case FIN_Lua_Token_LongBracketClose: {
 			int group = context.GroupMap[FIN_Lua_Token_LongBracketClose]+1;
 			int level = matcher.GetCaptureGroupEnding(group) - matcher.GetCaptureGroupBeginning(group);
-			if (*BlockLevel == level) {
+			if (BlockLevel && *BlockLevel == level) {
 				BlockLevel.Reset();
 				SetContext(Context_Main);
 			}

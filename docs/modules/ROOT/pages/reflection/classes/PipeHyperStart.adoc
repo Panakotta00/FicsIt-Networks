@@ -4,7 +4,7 @@
 [cols="1,5a",separator="!"]
 !===
 ! Parent
-! xref:/reflection/classes/Factory.adoc[FGBuildablePipeHyperPart]
+! xref:/reflection/classes/Factory.adoc[Factory]
 !===
 
 A actor that is a hypertube entrance buildable

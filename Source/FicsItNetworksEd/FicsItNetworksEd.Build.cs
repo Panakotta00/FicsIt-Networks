@@ -10,6 +10,7 @@ public class FicsItNetworksEd : ModuleRules
     public FicsItNetworksEd(ReadOnlyTargetRules Target) : base(Target)
     {
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+	    CppStandard = CppStandardVersion.Cpp20;
         bLegacyPublicIncludePaths = false;
         bWarningsAsErrors = true;
 
@@ -24,8 +25,6 @@ public class FicsItNetworksEd : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[] {
 			"FicsItReflection",
 		});
-		
-		CppStandard = CppStandardVersion.Cpp17;
 		
 		var factoryGamePchPath = new DirectoryReference(Path.Combine(Target.ProjectFile.Directory.ToString(), "Source", "FactoryGame", "Public", "FactoryGame.h"));
 		PrivatePCHHeaderFile = factoryGamePchPath.MakeRelativeTo(new DirectoryReference(ModuleDirectory));

@@ -132,6 +132,10 @@ void AFINSizeablePanelHolo::ConfigureActor(AFGBuildable* inBuildable) const {
 	Panel->SetPanelSize(PanelWidth, PanelHeight);
 }
 
+TArray<FItemAmount> AFINSizeablePanelHolo::GetBaseCost() const {
+	return Super::GetBaseCost();
+}
+
 void AFINSizeablePanelHolo::ConstructParts() {
 	// Clear Components
 	for (UStaticMeshComponent* comp : Parts) {

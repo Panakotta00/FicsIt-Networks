@@ -10,6 +10,10 @@
 #include "FINArrowModuleBase.h"
 #include "MCPBlueprintLibrary.h"
 #include "NativeHookManager.h"
+#include "SBox.h"
+#include "SCheckBox.h"
+#include "SSpacer.h"
+#include "STextBlock.h"
 #include "SUniformGridPanel.h"
 #include "TimerManager.h"
 #include "Components/FINDefaultExtendedHolo.h"
@@ -17,7 +21,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/FGGameUI.h"
 #include "Widgets/Input/SEditableTextBox.h"
-
+#include "Widgets/SBoxPanel.h"
 
 AFINBuildgunHooks::AFINBuildgunHooks() {
 }
@@ -203,6 +207,7 @@ void AFINArrowModuleHolo::ShowPropertyDialog() {
 			FText(),
 			PopupClosedDelegate,
 			PopupContent,
+			FKey(),
 			PID_OK_CANCEL,
 			this);
 	});

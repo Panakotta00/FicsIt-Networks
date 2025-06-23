@@ -41,6 +41,7 @@ void AFINBlueprintHologram::ShowPropertyDialog() {
 			FText(),
 			PopupClosedDelegate,
 			PopupContent,
+			FKey(),
 			PID_OK_CANCEL,
 			nullptr);
 	});

@@ -5,6 +5,7 @@ public class FicsItNetworksMicrocontroller : ModuleRules
     public FicsItNetworksMicrocontroller(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        CppStandard = CppStandardVersion.Cpp20;
         bWarningsAsErrors = true;
         bEnableExceptions = true;
 

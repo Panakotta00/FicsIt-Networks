@@ -52,9 +52,10 @@ public:
 
 	void ForceRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch, int64 Track);
 	FFIRRailroadSwitchForce* GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch);
+	FFIRRailroadSwitchForce* GetForcedRailroadSwitch_Unsafe(UFGRailroadTrackConnectionComponent* RailroadSwitch);
 
-	void AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
-	void RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
+	static void AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
+	static void RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection);
 
 	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> GetFactoryConnectorSettings(UFGFactoryConnectionComponent* InConnector);
 	void SetFactoryConnectorAllowedItem(UFGFactoryConnectionComponent* InConnector, TSubclassOf<UFGItemDescriptor> InAllowedItem);
@@ -76,7 +77,8 @@ private:
 
 	void FactoryConnectorCleanup(UFGFactoryConnectionComponent* InConnector, FFIRFactoryConnectorSettings& Settings);
 
-	FCriticalSection ForcedRailroadSwitchesMutex;
+	static FCriticalSection ForcedRailroadSwitchesMutex;
+
 	UPROPERTY(SaveGame)
 	TMap<UFGRailroadTrackConnectionComponent*, FFIRRailroadSwitchForce> ForcedRailroadSwitches;
 

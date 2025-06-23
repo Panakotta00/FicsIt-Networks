@@ -18,4 +18,13 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Utility")
 	static void ClipboardCopy(FString str);
+
+	UFUNCTION(BlueprintCallable, Category = "Utility", meta=(WorldContext="WorldContext"))
+	static bool GetNoUnlockCost(UObject* WorldContext);
+
+	UFUNCTION(BlueprintCallable)
+	static FGuid GetFileSystemStateFromSlotWidget(UWidget* InSlot);
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetLabelFromSlot(UWidget* InSlot, bool& CanGetLabel);
 };

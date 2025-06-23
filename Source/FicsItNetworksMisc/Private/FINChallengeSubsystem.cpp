@@ -1,5 +1,7 @@
 ﻿#include "FINChallengeSubsystem.h"
 
+#include "FGCheatManager.h"
+#include "FGGameRulesSubsystem.h"
 #include "SubsystemActorManager.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
@@ -88,6 +90,12 @@ void AFINChallengeSubsystem::UnregisterChallenge(const FString& ChallengeName) {
 }
 
 bool UFINChallengeDependency::AreDependenciesMet(UObject* worldContext) const {
+	AFGGameRulesSubsystem* gameRules =  AFGGameRulesSubsystem::Get(worldContext);
+	if (gameRules) {
+		if (gameRules->GetNoUnlockCost()) {
+			return true;
+		}
+	}
 	auto manager = worldContext->GetWorld()->GetSubsystem<USubsystemActorManager>();
 	if (!IsValid(manager)) return false;
 	auto subsys = manager->GetSubsystemActor<AFINChallengeSubsystem>();
