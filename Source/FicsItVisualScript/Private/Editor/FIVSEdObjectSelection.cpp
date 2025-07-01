@@ -242,7 +242,8 @@ void SFIVSEdTraceSelection::CreatePopup(UObject* WorldContext, const TArray<FFIR
 		FText::FromString(TEXT("Select Trace/Object")),
 		FText(),
 		FPopupClosed(),
-		widget
+		widget,
+		FKey()
 	);
 }
 
