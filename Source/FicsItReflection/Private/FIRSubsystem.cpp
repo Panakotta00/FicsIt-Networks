@@ -7,6 +7,8 @@
 #include "Engine/Engine.h"
 #include "Subsystem/SubsystemActorManager.h"
 
+FCriticalSection AFIRSubsystem::ForcedRailroadSwitchesMutex;
+
 AFIRSubsystem* AFIRSubsystem::GetReflectionSubsystem(UObject* WorldContext) {
 #if WITH_EDITOR
 	return nullptr;
@@ -44,6 +46,10 @@ void AFIRSubsystem::ForceRailroadSwitch(UFGRailroadTrackConnectionComponent* Rai
 
 FFIRRailroadSwitchForce* AFIRSubsystem::GetForcedRailroadSwitch(UFGRailroadTrackConnectionComponent* RailroadSwitch) {
 	FScopeLock ScopeLock(&ForcedRailroadSwitchesMutex);
+	return GetForcedRailroadSwitch_Unsafe(RailroadSwitch);
+}
+
+FFIRRailroadSwitchForce* AFIRSubsystem::GetForcedRailroadSwitch_Unsafe(UFGRailroadTrackConnectionComponent* RailroadSwitch) {
 	return ForcedRailroadSwitches.Find(RailroadSwitch);
 }
 
@@ -78,8 +84,13 @@ void AFIRSubsystem::UpdateRailroadSwitch(FFIRRailroadSwitchForce& Force, UFGRail
 }
 
 void AFIRSubsystem::AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection) {
+	if (!IsValid(Switch) || !IsValid(Connection)) return;
+
 	FScopeLock ScopeLock(&ForcedRailroadSwitchesMutex);
-	FFIRRailroadSwitchForce* ForcedTrack = GetForcedRailroadSwitch(Switch);
+
+	AFIRSubsystem* subsystem = GetReflectionSubsystem(Switch);
+	if (!IsValid(subsystem)) return;
+	FFIRRailroadSwitchForce* ForcedTrack = subsystem->GetForcedRailroadSwitch(Switch);
 	if (ForcedTrack) {
 		ForcedTrack->ActualConnections.Add(Connection);
 		Connection->RemoveConnectionInternal(Switch);
@@ -87,8 +98,13 @@ void AFIRSubsystem::AddRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTra
 }
 
 void AFIRSubsystem::RemoveRailroadSwitchConnection(CallScope<void(*)(UFGRailroadTrackConnectionComponent*, UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* Switch, UFGRailroadTrackConnectionComponent* Connection) {
+	if (!IsValid(Switch) || !IsValid(Connection)) return;
+
 	FScopeLock ScopeLock(&ForcedRailroadSwitchesMutex);
-	FFIRRailroadSwitchForce* ForcedTrack = GetForcedRailroadSwitch(Switch);
+
+	AFIRSubsystem* subsystem = GetReflectionSubsystem(Switch);
+	if (!IsValid(subsystem)) return;
+	FFIRRailroadSwitchForce* ForcedTrack = subsystem->GetForcedRailroadSwitch(Switch);
 	if (ForcedTrack) {
 		Switch->RemoveConnectionInternal(Connection);
 		ForcedTrack->ActualConnections.Remove(Connection);

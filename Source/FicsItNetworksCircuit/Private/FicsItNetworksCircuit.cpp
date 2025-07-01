@@ -123,17 +123,20 @@ void FFicsItNetworksCircuitModule::StartupModule() {
 
 		SUBSCRIBE_METHOD_VIRTUAL(AFGBuildableHologram::SetupComponent, (void*)GetDefault<AFGBuildableHologram>(), [](auto& scope, AFGBuildableHologram* self, USceneComponent* attachParent, UActorComponent* componentTemplate, const FName& componentName, const FName& socketName) {
 			UStaticMesh* networkConnectorHoloMesh = LoadObject<UStaticMesh>(NULL, TEXT("/FicsItNetworks/Buildings/Network/-Shared/SM_NetworkConnector.SM_NetworkConnector"), NULL, LOAD_None, NULL);
-			if (componentTemplate && componentTemplate->IsA<UFINNetworkConnectionComponent>()) {
-				auto comp = NewObject<UStaticMeshComponent>(attachParent);
-				comp->RegisterComponent();
-				comp->SetMobility(EComponentMobility::Movable);
-				comp->SetStaticMesh(networkConnectorHoloMesh);
-				comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
-				comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
-				comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-				scope.Override(comp);
-			}
+			if (!IsValid(componentTemplate)) return;
+
+			if (!componentTemplate->IsA<UFINNetworkConnectionComponent>()) return;
+
+			auto comp = NewObject<UStaticMeshComponent>(attachParent);
+			comp->RegisterComponent();
+			comp->SetMobility(EComponentMobility::Movable);
+			comp->SetStaticMesh(networkConnectorHoloMesh);
+			comp->AttachToComponent(attachParent, FAttachmentTransformRules::KeepRelativeTransform);
+			comp->SetRelativeTransform(Cast<USceneComponent>(componentTemplate)->GetRelativeTransform());
+			comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			scope.Override(comp);
 		});
 
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGGameMode::PostLogin, (void*)GetDefault<AFGGameMode>(), [](AFGGameMode* gm, APlayerController* pc) {
