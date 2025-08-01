@@ -90,87 +90,6 @@ namespace FINLua {
 		return 2;
 	}
 
-	int luaXpcallMsg(lua_State* L) {
-		lua_newtable(L);
-		lua_insert(L, -2);
-		lua_setfield(L, -2, "message");
-		luaL_traceback(L, L, NULL, 0);
-		lua_setfield(L, -2, "trace");
-		return 1;
-	}
-
-	int luaXpcallFinish(lua_State *L, int status, lua_KContext extra) {
-		if (status != LUA_OK && status != LUA_YIELD) {
-			lua_pushboolean(L, 0);
-			lua_pushvalue(L, -2);
-			return 2;
-		}
-		lua_pushboolean(L, 1);
-		lua_rotate(L, 1 + extra, 1);
-		return lua_gettop(L) - extra;
-	}
-
-	// xpcall-reimplementation adding traceback to error object
-	int luaXpcall(lua_State *L) {
-		int n = lua_gettop(L);
-		luaL_checktype(L, 1, LUA_TFUNCTION);
-		lua_pushcfunction(L, &luaXpcallMsg);
-		lua_rotate(L, 1, 1);
-		int status = lua_pcallk(L, n - 1, LUA_MULTRET, 1, 0, luaXpcallFinish);
-		return luaXpcallFinish(L, status, 1);
-	}
-
-	// Theoratical better xpcall-reimplementation for FIN but
-	// doesn't work because not easy to interact with non LUA_OK or LUA_YIELD coroutines
-	/*
-	int luaXpcallMsgContinue(lua_State* L2, int args, lua_KContext ctx) {
-		lua_State* L = (lua_State*)ctx;
-		lua_pushboolean(L, 0);
-		return args+1;
-	}
-
-	int luaXpcallContinue(lua_State* L, int args, lua_KContext ctx) {
-		lua_State* L2 = (lua_State*)ctx;
-		int res;
-		int status = lua_resume(L2, L, 0, &res);
-		if (status == LUA_YIELD) {
-			return lua_yieldk(L, 0, ctx, &luaXpcallContinue);
-		}
-		if (status > LUA_YIELD) {
-			lua_rotate(L2, 1, -1);
-			lua_rotate(L2, -2, -1);
-			lua_callk(L2, 1, 1, (lua_KContext)L, &luaXpcallMsgContinue);
-		}
-		lua_pushboolean(L, 1);
-		return res+1;
-	}
-	#pragma optimize("", off)
-	int luaXpcall(lua_State* L) {
-		int n = lua_gettop(L);
-		luaL_checktype(L, 1, LUA_TFUNCTION); // check actual function
-		luaL_checktype(L, 2, LUA_TFUNCTION); // check msg function
-		lua_State* L2 = lua_newthread(L);
-		lua_rotate(L, 1, -1);
-		lua_xmove(L, L2, n - 1);
-		int L2n = lua_gettop(L2);
-		int res;
-		int status = lua_resume(L2, L, n - 2, &res);
-		if (status == LUA_YIELD) {
-			return lua_yieldk(L, 0, (lua_KContext)L2, &luaXpcallContinue);
-		}
-		if (status > LUA_YIELD) {
-			luaL_checktype(L2, L2n, LUA_TFUNCTION);
-			lua_rotate(L2, L2n, -1);
-			lua_rotate(L2, -2, -1);
-			luaL_checktype(L2, -2, LUA_TFUNCTION);
-			lua_pcallk(L2, 1, 1, 0, (lua_KContext)L, &luaXpcallMsgContinue);
-		}
-		lua_pushboolean(L, 1);
-		return res+1;
-	}
-	#pragma optimize("", on)
-	*/
-
 	int luaTableMerge(lua_State* L) {
 		int args = lua_gettop(L);
 		luaL_checktype(L, 1, LUA_TTABLE);
@@ -263,8 +182,6 @@ namespace FINLua {
 			lua_setfield(L, -2, "print");
 			lua_pushnil(L);
 			lua_setfield(L, -2, "loadfile");
-			lua_pushcfunction(L, luaXpcall);
-			lua_setfield(L, -2, "xpcall");
 			PersistTable("global", -1);
 			lua_pop(L, 1);
 
