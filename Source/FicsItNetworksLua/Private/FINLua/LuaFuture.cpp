@@ -1096,14 +1096,18 @@ namespace FINLua {
 		if (lua_getfield(L, -1, "callbacks") != LUA_TTABLE) {
 			return luaL_typeerror(L, -1, "table");
 		}
+		lua_newtable(L);
+		lua_setfield(L, 1, "callbacks");
 		lua_remove(L, 1);
+		lua_pushinteger(L, 1);
 		return luaFIN_runCallbacks_continue(L, 0, NULL);
 	}
 	int luaFIN_runCallbacks_continue(lua_State* L, int, lua_KContext) {
-		while (int len_callbacks = luaL_len(L, 1)) {
-			lua_geti(L, 1, len_callbacks);
-			lua_pushnil(L);
-			lua_seti(L, 1, len_callbacks);
+		int i = lua_tointeger(L, 2);
+		while (i <= luaL_len(L, 1)) {
+			lua_geti(L, 1, i);
+			lua_pushinteger(L, ++i);
+			lua_replace(L, 2);
 			luaL_checktype(L, -1, LUA_TFUNCTION);
 			lua_callk(L, 0, 0, 0, &luaFIN_runCallbacks_continue);
 		}
