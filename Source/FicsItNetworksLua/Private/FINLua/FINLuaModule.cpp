@@ -92,7 +92,7 @@ void FFINLuaTable::PushLuaValue(lua_State* L, const FString& PersistName) {
 			lua_setupvalue(L, -2, 1);
 			lua_pushvalue(L, -3);
 			lua_setupvalue(L, -2, 2);
-			luaL_setmetatable(L, "function");
+			luaL_setmetatable(L, "ModuleTableFunction");
 		}
 
 		FINLua::luaFIN_setOrMergeField(L, -3);	// table
@@ -453,8 +453,8 @@ namespace FINLua {
 	 * @DisplayName		Module-System Module
 	 */)", ModuleSystem) {
 		LuaModuleMetatable(R"(/**
-		 * @LuaMetatable	function
-		 * @DisplayName		function with Module Table-Function specific additions
+		 * @LuaMetatable	ModuleTableFunction
+		 * @DisplayName		Module Table-Function
 		 */)", ModuleTableFunction) {
 			LuaModuleTableBareField(R"(/**
 			 * @LuaBareField	name	string
@@ -509,7 +509,7 @@ namespace FINLua {
 			 */)", __tostring) {
 				lua_getupvalue(L, 1, 1);
 				if (!luaL_testudata(L, -1, "ModuleTableFunction")) {
-					luaFIN_pushFString(L, luaFIN_typeName(L, 1) + FString::Printf(TEXT(": %p"), lua_topointer(L, 1)));
+					luaFIN_pushFString(L, luaFIN_typeName(L, 1));
 					return 1;
 				}
 				FFINLuaTableField* field = static_cast<FFINLuaTableField*>(lua_touserdata(L, -1));
@@ -521,14 +521,6 @@ namespace FINLua {
 				luaFIN_pushFString(L, FString::Printf(TEXT("function: %ls"), *head));
 				return 1;
 			}
-		}
-
-		LuaModulePostSetup() {
-			//luaL_getmetatable(L, ModuleTableFunction::_Name);
-			//lua_setfield(L, LUA_REGISTRYINDEX, "function");
-			lua_pushcfunction(L, [](lua_State*) { return 0; });
-			luaL_setmetatable(L, "function");
-			lua_pop(L, 1);
 		}
 	}
 }
