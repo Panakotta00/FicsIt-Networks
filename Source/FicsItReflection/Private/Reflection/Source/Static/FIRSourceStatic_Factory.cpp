@@ -90,7 +90,7 @@ BeginFunc(setProductionBoost, "Set Production Boost", "Changes the production bo
 	float max = self->GetCurrentMaxProductionBoost();
 	self->SetPendingProductionBoost(FMath::Clamp(productionBoost, min, max));
 } EndFunc()
-BeginProp(RBool, standby, "Standby", "True if the factory is in standby.") {
+BeginProp(RBool, standby, "Standby", "True if the factory is in standby.", 0) {
 	FIRReturn self->IsProductionPaused();
 } PropSet() {
 	self->SetIsProductionPaused(Val);

@@ -87,7 +87,8 @@ BeginFunc(setColorFromSlot, "Set Color from Slot", "Allows to update the light c
 	InVal(1, RStruct<FLinearColor>, color, "Color", "The color this slot should now reference.")
 	Body()
 	AFGBuildableSubsystem* SubSys = AFGBuildableSubsystem::Get(self);
-	Cast<AFGGameState>(self->GetWorld()->GetGameState())->Server_SetBuildableLightColorSlot(slot, color);
+	auto gameState = Cast<AFGGameState>(self->GetWorld()->GetGameState());
+	gameState->Server_SetBuildableLightColorSlot(slot, color);
 } EndFunc()
 EndClass()
 

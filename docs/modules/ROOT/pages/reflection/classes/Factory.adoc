@@ -313,7 +313,7 @@ True if the factory is in standby.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span>+++
 
 ! Display Name ! Standby
 !===

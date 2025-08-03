@@ -447,8 +447,12 @@ BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
 	if (!IsValid(railroadStation)) {
 		throw FFIRException(TEXT("Invalid railroad station"));
 	}
+	if (index > self->GetNumStops() || index < 0) {
+		index = self->GetNumStops();
+	}
 	stop.Station = railroadStation->GetStationIdentifier();
 	stop.DockingRuleSet = ruleSet;
+
 	added = self->AddStop(index, stop);
 } EndFunc()
 BeginFunc(removeStop, "Remove Stop", "Removes the stop with the given index from the time table.") {

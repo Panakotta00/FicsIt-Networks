@@ -1,5 +1,6 @@
 #include "FINComputerCase.h"
 
+#include "FGBlueprintProxy.h"
 #include "FicsItKernel/FicsItKernel.h"
 #include "FGInventoryComponent.h"
 #include "FGPlayerController.h"
@@ -171,6 +172,14 @@ void AFINComputerCase::Factory_Tick(float dt) {
 			KernelTickTime -= 1.0/KernelTicksPerSec;
 			Kernel->Tick(dt);
 		}
+	}
+}
+
+void AFINComputerCase::PreSerializedToBlueprint() {
+	Super::PreSerializedToBlueprint();
+
+	if (Kernel->GetState() == FIN_KERNEL_RUNNING) {
+		Kernel->Reset();
 	}
 }
 

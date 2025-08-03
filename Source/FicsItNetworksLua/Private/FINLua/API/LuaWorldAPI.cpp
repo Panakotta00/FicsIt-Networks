@@ -40,7 +40,7 @@ namespace FINLua {
 				for (auto players = world->GetPlayerControllerIterator(); players; ++players) {
 					AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
 					if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
-					world->GetTimerManager().SetTimerForNextTick([=]() {
+					AsyncTask(ENamedThreads::GameThread, [PlayerController, Text]() {
 						PlayerController->GetGameUI()->ShowTextNotification(FText::FromString(Text));
 					});
 					break;

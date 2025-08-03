@@ -2,6 +2,7 @@
 
 #include "AsyncWork.h"
 #include "Base64.h"
+#include "FGBuildable.h"
 #include "FGInventoryComponent.h"
 #include "FicsItLogLibrary.h"
 #include "FicsItNetworksLuaModule.h"
@@ -132,6 +133,8 @@ void UFINLuaProcessor::PreSaveGame_Implementation(int32 saveVersion, int32 gameV
 		UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s"), *message);
 		GetKernel()->GetLog()->PushLogEntry(FIL_Verbosity_Warning, message);
 	}
+
+	bIsFromSave = true;
 }
 
 void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 gameVersion) {}
@@ -139,7 +142,9 @@ void UFINLuaProcessor::PostSaveGame_Implementation(int32 saveVersion, int32 game
 void UFINLuaProcessor::PreLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {}
 
 void UFINLuaProcessor::PostLoadGame_Implementation(int32 saveVersion, int32 gameVersion) {
-	Runtime.Runtime.Reset();
+	if (bIsFromSave) {
+		Runtime.Runtime.Reset();
+	}
 }
 
 void UFINLuaProcessor::SetKernel(UFINKernelSystem* InKernel) {

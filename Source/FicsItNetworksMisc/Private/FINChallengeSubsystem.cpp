@@ -11,7 +11,8 @@ FFINChallenge::~FFINChallenge() {
 }
 
 void FFINChallenge::Complete() {
-	if (auto subsys = Subsystem.Get()) {
+	if (Subsystem.IsValid()) {
+		auto subsys = Subsystem.Get();
 		subsys->CompleteChallenge(Name);
 	}
 }
