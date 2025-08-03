@@ -221,8 +221,6 @@ namespace FINLua {
 						lua_newtable(L);
 						lua_setiuservalue(L, 1, 3);
 
-						lua_closethread(thread, L);
-
 						lua_pushboolean(L, true);
 						return 1;
 				}
