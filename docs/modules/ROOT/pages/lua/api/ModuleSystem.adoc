@@ -5,18 +5,18 @@
 
 == Types
 
-=== **function**
+=== **ModuleTableFunction**
 
 
-=== __function.__**description** : string
+=== __ModuleTableFunction.__**description** : string
 
 
-=== __function.__**displayName** : string
+=== __ModuleTableFunction.__**displayName** : string
 
 
-=== __function.__**name** : string
+=== __ModuleTableFunction.__**name** : string
 
 
-=== __function.__**quickRef** : string
+=== __ModuleTableFunction.__**quickRef** : string
 
 
