@@ -35,7 +35,8 @@ private:
 	FFINLuaReferenceCollector ReferenceCollector;
 	FFINLuaComponentNetworkAccessDelegates ComponentNetwork;
 	FFINLuaEventSystem EventSystem;
-	UPROPERTY()
+
+	UPROPERTY(SaveGame)
 	bool bIsFromSave = false;
 
 public:
