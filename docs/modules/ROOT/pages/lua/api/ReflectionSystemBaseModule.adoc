@@ -15,7 +15,7 @@ And it makes debugging a bit easier.
 Returns the Reflection-System Object that represents this Reflected Function.
 This way you can deeply inspect the function and its associations.
 
-=== __ReflectionFunction.__**callDeferred** : function
+=== __ReflectionFunction.__**callDeferred** : xref:/lua/api/ModuleSystem.adoc#_function[function]
 Calls the function deferred in the next tick. Returns a Future to allow check for execution and get the return parameters.
 
 === __ReflectionFunction.__**quickRef** : string
