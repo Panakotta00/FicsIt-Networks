@@ -1,4 +1,5 @@
-﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
+﻿#include "FGCircuitSubsystem.h"
+#include "Reflection/Source/FIRSourceStaticMacros.h"
 
 #include "Reflection/Source/Static/FIRSourceStaticHooks.h"
 
@@ -9,6 +10,13 @@
 #include "Buildables/FGBuildableCircuitSwitch.h"
 #include "Buildables/FGBuildablePowerStorage.h"
 #include "Buildables/FGBuildablePriorityPowerSwitch.h"
+
+class FFIRPowerHelper {
+public:
+	static TSet<TWeakObjectPtr<class AFGBuildablePriorityPowerSwitch>>& GetPowerSwitches(UFGPowerCircuitGroup* circuit) {
+		return circuit->mPrioritySwitches;
+	}
+};
 
 BeginClass(UFGPowerConnectionComponent, "PowerConnection", "Power Connection", "A actor component that allows for a connection point to the power network. Basically a point were a power cable can get attached to.")
 	BeginProp(RInt, connections, "Connections", "The amount of connections this power connection has.") {
@@ -56,7 +64,7 @@ BeginFunc(getCircuit, "Get Circuit", "Returns the power circuit this info compon
 EndFunc()
 EndClass()
 
-BeginClass(UFGPowerCircuit, "PowerCircuit", "Power Circuit", "A Object that represents a whole power circuit.")
+BeginClass(UFGPowerCircuit, "PowerCircuit", "Power Circuit", "A Object that represents a power circuit separated by power switches.")
 Hook(UFIRPowerCircuitHook)
 BeginSignal(PowerFuseChanged, "Power Fuse Changed", "Get Triggered when the fuse state of the power circuit changes.")
 EndSignal()
@@ -116,6 +124,29 @@ BeginProp(RFloat, batteryIn, "Battery Input", "The amount of energy that current
 BeginProp(RFloat, batteryOut, "Battery Output", "The amount of energy that currently discharges from every battery in the whole network.") {
 	FIRReturn  self->GetBatterySumPowerOutput();
 } EndProp()
+BeginProp(RFloat, productionBoost, "Production Boost", "The amount of production boost applied to this circuit.") {
+	FIRReturn self->GetProductionBoost();
+} EndProp()
+BeginProp(RFloat, productionBoostPercent, "Production Boost Percent", "The amount of production boost applied to this circuit in percent.") {
+	FIRReturn self->GetProductionBoostPercent();
+} EndProp()
+BeginFunc(getGroupPrioritySwitches, "Get Group Priority Switches", "Returns a list of all priority switches in the circuit.") {
+	OutVal(0, RArray<RTrace<AFGBuildablePriorityPowerSwitch>>, switches, "Switches", "A list of all priority switches in the circuit.")
+	Body()
+	AFGCircuitSubsystem* subsys = AFGCircuitSubsystem::GetCircuitSubsystem(self);
+	UFGCircuitGroup* group = subsys->GetCircuitGroup(self->GetCircuitGroupID());
+	UFGPowerCircuitGroup* powerGroup = Cast<UFGPowerCircuitGroup>(group);
+	TArray<FIRAny> powerSwitches;
+	if (powerGroup) {
+		for (const TWeakObjectPtr<AFGBuildablePriorityPowerSwitch>& powerSwitch : FFIRPowerHelper::GetPowerSwitches(powerGroup)) {
+			UObject* powerSwitchObj = powerSwitch.Get();
+			if (!powerSwitchObj) {
+				powerSwitches.Add(Ctx.GetTrace() / powerSwitchObj);
+			}
+		}
+	}
+	switches = powerSwitches;
+} EndFunc()
 EndClass()
 
 BeginClass(AFGBuildablePowerStorage, "PowerStorage", "Power Storage", "A building that can store power for later usage.")
