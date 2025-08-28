@@ -12,7 +12,7 @@ const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINGPUT2WidgetStyle"));
 
 int32 FFINGPUT2DC_PushTransform::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
 	FSlateRenderTransform Transform = FSlateRenderTransform(TScale2<float>(Scale.X, Scale.Y), Translation);
-	Transform.Concatenate(FSlateRenderTransform(TQuat2<float>(Rotation)));
+	Transform = Transform.Concatenate(FSlateRenderTransform(TQuat2<float>(Rotation)));
 	FGeometry NewGeometry = AllottedGeometry.MakeChild(Transform);
 	Context.GeometryStack.Push(NewGeometry);
 	return LayerId;
