@@ -211,4 +211,11 @@ BeginProp(RInt, priority, "Priority", "The priority group of which this switch i
 } PropSet() {
 	self->SetPriority(Val);
 } EndProp()
+BeginFunc(setPrioritySwitchGroupOn, "Set Priority Switch Group On", "Sets if the given priority switch group should be on or off.") {
+	InVal(0, RInt, priority, "Priority", "The priority group to set.")
+	InVal(0, RBool, state, "State", "The new switch state.")
+	Body()
+	AFGCircuitSubsystem* subsys = AFGCircuitSubsystem::GetCircuitSubsystem(self);
+	subsys->PowerCircuit_SetPrioritySwitchGroupOn(priority, state);
+} EndFunc()
 EndClass()
