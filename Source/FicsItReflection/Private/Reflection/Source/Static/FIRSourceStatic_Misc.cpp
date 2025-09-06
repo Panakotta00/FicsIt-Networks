@@ -18,18 +18,33 @@ public:
 	}
 };
 
-BeginClass(AFGBuildableResourceSink, "ResourceSink", "Resource Sink", "The resource sink, also known a A.W.E.S.O.M.E Sink")
-BeginProp(RInt, numPoints, "Num Points", "The number of available points.") {
-	FIRReturn (int64)AFGResourceSinkSubsystem::Get(self)->GetNumTotalPoints(EResourceSinkTrack::RST_Default);
-} EndProp()
+BeginClass(AFGBuildableResourceSink, "ResourceSink", "Resource Sink", "The resource sink, also known a A.W.E.S.O.M.E Sink.\nPoints are saved in multiple different tracks.\n* 0 = Default (Ressources)\n* 1 = Exploration (DNA Points)")
 BeginProp(RInt, numCoupons, "Num Coupons", "The number of available coupons to print.") {
 	FIRReturn (int64)AFGResourceSinkSubsystem::Get(self)->GetNumCoupons();
 } EndProp()
-BeginProp(RInt, numPointsToNextCoupon, "Num Points To Next Coupon", "The number of needed points for the next coupon.") {
-	FIRReturn (int64)AFGResourceSinkSubsystem::Get(self)->GetNumPointsToNextCoupon(EResourceSinkTrack::RST_Default);
+BeginFunc(getNumPoints, "Get Num Points", "Get the number of available points for a given track.") {
+	InVal(0, RInt, track, "Track", "The track you want to get the number of points for.")
+	OutVal(1, RInt, numPoints, "Num Points", "The number of points for the given track.")
+	Body()
+	numPoints = (int64)AFGResourceSinkSubsystem::Get(self)->GetNumTotalPoints((EResourceSinkTrack) FMath::Clamp(track, 0, (int64)EResourceSinkTrack::RST_MAX - 1));
+} EndFunc()
+BeginFunc(getNumPointsToNextCoupon, "Get Num Points To Next Coupon", "Get the number of needed points for the next coupon for a given track.") {
+	InVal(0, RInt, track, "Track", "The track you want to get the number of points till the next coupon.")
+	OutVal(1, RInt, numPoints, "Num Points", "The number of points needed for the next coupon for the given track.")
+	Body()
+	numPoints = (int64)AFGResourceSinkSubsystem::Get(self)->GetNumPointsToNextCoupon((EResourceSinkTrack) FMath::Clamp(track, 0, (int64)EResourceSinkTrack::RST_MAX - 1));
+} EndFunc()
+BeginFunc(getCouponProgress, "Get Coupon Progress", "Get the percentage of the progress for the next coupon for the given track.") {
+	InVal(0, RInt, track, "Track", "The track you want to get the number of points till the next coupon.")
+	OutVal(1, RFloat, progress, "Progress", "The percentage of the progress for the next coupon for the given track.")
+	Body()
+	progress = AFGResourceSinkSubsystem::Get(self)->GetProgressionTowardsNextCoupon((EResourceSinkTrack) FMath::Clamp(track, 0, (int64)EResourceSinkTrack::RST_MAX - 1));
+} EndFunc()
+BeginStaticProp(RInt, trackDefault, "Track Default", "The default track for the resource sink.") {
+	FIRReturn (int64)EResourceSinkTrack::RST_Default;
 } EndProp()
-BeginProp(RFloat, couponProgress, "Coupon Progress", "The percentage of the progress for the next coupon.") {
-	FIRReturn AFGResourceSinkSubsystem::Get(self)->GetProgressionTowardsNextCoupon(EResourceSinkTrack::RST_Default);
+BeginStaticProp(RInt, trackExploration, "Track Exploration", "The exploration track for the resource sink.") {
+	FIRReturn (int64)EResourceSinkTrack::RST_Exploration;
 } EndProp()
 EndClass()
 
@@ -87,7 +102,8 @@ BeginFunc(setColorFromSlot, "Set Color from Slot", "Allows to update the light c
 	InVal(1, RStruct<FLinearColor>, color, "Color", "The color this slot should now reference.")
 	Body()
 	AFGBuildableSubsystem* SubSys = AFGBuildableSubsystem::Get(self);
-	Cast<AFGGameState>(self->GetWorld()->GetGameState())->Server_SetBuildableLightColorSlot(slot, color);
+	auto gameState = Cast<AFGGameState>(self->GetWorld()->GetGameState());
+	gameState->Server_SetBuildableLightColorSlot(slot, color);
 } EndFunc()
 EndClass()
 

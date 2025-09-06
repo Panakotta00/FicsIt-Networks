@@ -36,6 +36,9 @@ private:
 	FFINLuaComponentNetworkAccessDelegates ComponentNetwork;
 	FFINLuaEventSystem EventSystem;
 
+	UPROPERTY(SaveGame)
+	bool bIsFromSave = false;
+
 public:
 	UPROPERTY(SaveGame)
 	FFINLuaRuntimePersistenceState RuntimeState;

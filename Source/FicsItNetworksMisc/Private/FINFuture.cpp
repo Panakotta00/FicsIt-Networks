@@ -17,8 +17,8 @@ void FFINFutureReflection::Execute() {
 			Property->SetValue(Context, Input[0]);
 		} else {
 			Output.Add(Property->GetValue(Context));
-			bDone = true;
 		}
+		bDone = true;
 	} else {
 		UE_LOG(LogFicsItNetworksMisc, Error, TEXT("Future unable to get executed due to invalid function/property pointer!"));
 	}

@@ -104,6 +104,10 @@ TOptional<FString> FFINLuaRuntime::LoadState(FFINLuaRuntimePersistenceState& InS
 
 	if (InState.LuaData.Len() < 1) return {};
 
+	if (!LuaState) {
+		return {};
+	}
+
 	// decode & check data from json
 	TArray<uint8> luaData;
 	if (!FBase64::Decode(InState.LuaData, luaData)) {
@@ -149,6 +153,10 @@ int luaPersist(lua_State* L) {
 
 FFINLuaRuntimePersistenceState FFINLuaRuntime::SaveState() {
 	FFINLuaRuntimePersistenceState State;
+
+	if (!LuaState) {
+		return State;
+	}
 
 	// prepare state data
 	lua_getfield(LuaState, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_PERSIST);		// ..., perm

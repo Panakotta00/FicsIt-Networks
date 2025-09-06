@@ -11,7 +11,7 @@ BeginFuncVA(matches, "Matches", "Returns true if the given signal data matches t
 	if (sender.IsValid()) {
 		UFIRSignal* signal = FFicsItReflectionModule::Get().FindClass(sender->GetClass())->FindFIRSignal(name);
 		if (IsValid(signal)) {
-			FFINSignalData data(signal, TArray<FIRAny>(&Params[3], Params.Num()-3));
+			FFINSignalData data(signal, Params.Num() > 0 ? TArray<FIRAny>(&Params[3], Params.Num()-3) : TArray<FIRAny>());
 			matches = self->Matches(sender.Get(), data);
 			return;
 		}

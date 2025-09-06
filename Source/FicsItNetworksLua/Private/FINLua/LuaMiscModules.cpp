@@ -66,18 +66,16 @@ namespace FINLua {
 	 */)", LogModule) {
 		int luaPrint(lua_State* L) {
 			const int args = lua_gettop(L);
-			std::string log;
+			FString log;
 			for (int i = 1; i <= args; ++i) {
-				size_t s_len = 0;
-				const char* s = luaL_tolstring(L, i, &s_len);
-				if (!s) luaL_argerror(L, i, "is not valid type");
-				log += std::string(s, s_len) + " ";
+				FString s = luaFIN_convToFString(L, i);
+				log += s + " ";
 			}
-			if (log.length() > 0) log = log.erase(log.length()-1);
+			if (log.Len() > 0) log = log.LeftChop(1);
 
-			UFILogLibrary::Log(FIL_Verbosity_Info, UTF8_TO_TCHAR(log.c_str()));
+			UFILogLibrary::Log(FIL_Verbosity_Info, log);
 
-			FINChallenge(HelloWorld, log == "Hello World!");
+			FINChallenge(HelloWorld, log.Contains("Hello") && log.Contains("World"));
 
 			return 0;
 		}

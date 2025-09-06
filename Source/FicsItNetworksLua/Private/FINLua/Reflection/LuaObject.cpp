@@ -10,6 +10,7 @@
 #include "Logging/StructuredLog.h"
 #include "tracy/Tracy.hpp"
 #include "FINLuaRuntime.h"
+#include "FINNetworkComponent.h"
 
 namespace FINLua {
 	FLuaObject::FLuaObject(const FFIRTrace& Object, FFINLuaReferenceCollector* ReferenceCollector) : FFINLuaReferenceCollected(ReferenceCollector), Object(Object) {
@@ -115,7 +116,7 @@ namespace FINLua {
 			 * @DisplayName		To String
 			 */)", __tostring) {
 				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
-				luaFIN_pushFString(L, FFicsItReflectionModule::ObjectReferenceText(LuaObject->Type));
+				luaFIN_pushFString(L, luaFIN_getObjectID(LuaObject->Object.GetUnderlyingPtr(), LuaObject->Type));
 				return 1;
 			}
 

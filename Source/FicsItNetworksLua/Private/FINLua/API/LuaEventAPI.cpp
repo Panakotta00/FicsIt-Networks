@@ -487,7 +487,6 @@ namespace FINLua {
 
 				lua_getiuservalue(L, registry_index, 4);
 				lua_pushvalue(L, -2);
-				luaFINDebug_dumpStack(L);
 				int future_ref = luaL_ref(L, -2);
 				lua_pop(L, 1);
 				registry->OneShots_Futures.Add(key, future_ref);

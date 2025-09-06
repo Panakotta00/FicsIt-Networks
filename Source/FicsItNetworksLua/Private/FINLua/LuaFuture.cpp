@@ -178,23 +178,6 @@ namespace FINLua {
 						return 1;
 				}
 
-				// Is this Future Sleeping?
-				// TODO: Maybe come up with a better solution as this requires thread <-> future association via central registry
-				// the code doesn't work as it returns this future, it would work as yield, but thats the job of await.
-				// this function would have to return the future(s) the thread has previously yielded with
-				/*lua_getiuservalue(L, 1, 3);                                           // self, thread, dependants
-				lua_getfield(L, LUA_REGISTRYINDEX, LUAFIN_REGISTRYKEY_HIDDENGLOBALS); // self, thread, dependants, hidden-globals
-				lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);              // self, thread, dependants, hidden-globals, future-registry
-				lua_pushthread(L);                                                          // self, thread, dependants, hidden-globals, future-registry, thread
-				if (lua_gettable(L, -2) != LUA_TNIL) {                                  // self, thread, dependants, hidden-globals, future-registry, future
-					if (lua_gettable(L, -4) != LUA_TNIL) {                              // self, thread, dependants, hidden-globals, future-registry, integer
-						lua_settop(L, 2);
-
-						lua_pushboolean(L, false);
-						lua_pushvalue(L, 1);
-						return 2;
-					}
-				}*/
 				lua_settop(L, 2);
 
 				return poll_continue(L, 0, NULL);
@@ -237,6 +220,8 @@ namespace FINLua {
 						}
 						lua_newtable(L);
 						lua_setiuservalue(L, 1, 3);
+
+						lua_closethread(thread, L);
 
 						lua_pushboolean(L, true);
 						return 1;
@@ -348,13 +333,6 @@ namespace FINLua {
 				lua_newuserdatauv(L, 0, 3);
 				luaL_setmetatable(L, _Name);
 
-				/*lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
-				lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
-				int ref = lua_tointeger(L, lua_upvalueindex(1));
-				lua_geti(L, -1, ref);
-				luaL_checktype(L, -1, LUA_TTHREAD);
-				lua_setiuservalue(L, -3, 1);
-				lua_pop(L, 2);*/
 				lua_pushvalue(L, lua_upvalueindex(1));
 				luaL_checktype(L, -1, LUA_TTHREAD);
 				lua_setiuservalue(L, -2, 1);
@@ -362,13 +340,8 @@ namespace FINLua {
 				lua_pushvalue(L, lua_upvalueindex(2));
 				lua_setiuservalue(L, -2, 2);
 
-				//lua_pushvalue(L, lua_upvalueindex(3));
-				//luaL_checktype(L, -1, LUA_TTABLE);
 				lua_newtable(L);
 				lua_setiuservalue(L, -2, 3);
-
-				//lua_pushvalue(L, lua_upvalueindex(3));
-				//lua_setiuservalue(L, -2, 4);
 
 				luaFIN_pushPollCallback(L, -1);
 				return 1;
@@ -383,22 +356,6 @@ namespace FINLua {
 				//lua_getiuservalue(L, 1, 4);
 				lua_pushcclosure(L, unpersist, 2);
 				return 1;
-			}
-
-			LuaModuleTableFunction(R"(/**
-			 * @LuaFunction		__gc
-			 * @DisplayName		__gc
-			 */)", __gc) {
-				if (lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS) == LUA_TTABLE) {
-					if (lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY) == LUA_TTABLE) {
-						lua_pushvalue(L, -3);
-						lua_pushnil(L);
-						lua_settable(L, -3);
-					}
-					lua_pop(L, 1);
-				}
-				lua_pop(L, 1);
-				return 0;
 			}
 		}
 
@@ -843,24 +800,6 @@ namespace FINLua {
 		lua_setiuservalue(L, -2, 1);
 		lua_newtable(L);
 		lua_setiuservalue(L, -2, 3);
-
-		if (lua_geti(L,	LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS) == LUA_TTABLE) {
-			if (lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY) == LUA_TTABLE) {
-				lua_pushvalue(L, -3);
-				lua_pushboolean(L, true);
-				lua_settable(L, -3);
-			}
-			lua_pop(L, 1);
-		}
-		lua_pop(L, 1);
-
-		/*lua_geti(L, LUA_REGISTRYINDEX, LUAFIN_RIDX_HIDDENGLOBALS);
-		lua_getfield(L, -1, LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY);
-		lua_pushvalue(L, Thread);
-		int ref = luaL_ref(L, -2);
-		lua_pushinteger(L, ref);
-		lua_setiuservalue(L, -4, 4);
-		lua_pop(L, 2);*/
 	}
 
 	void luaFIN_pushLuaFutureLuaFunction(lua_State* L, int args) {
@@ -1024,9 +963,6 @@ namespace FINLua {
 	}
 
 	void luaFIN_addBackgroundTask(lua_State* L, int index) {
-		/*index = lua_absindex(L, index);
-		lua_pushboolean(L, true);
-		lua_setiuservalue(L, index, 2);*/
 		luaFIN_addTask(L, index);
 	}
 
@@ -1160,14 +1096,18 @@ namespace FINLua {
 		if (lua_getfield(L, -1, "callbacks") != LUA_TTABLE) {
 			return luaL_typeerror(L, -1, "table");
 		}
+		lua_newtable(L);
+		lua_setfield(L, 1, "callbacks");
 		lua_remove(L, 1);
+		lua_pushinteger(L, 1);
 		return luaFIN_runCallbacks_continue(L, 0, NULL);
 	}
 	int luaFIN_runCallbacks_continue(lua_State* L, int, lua_KContext) {
-		while (int len_callbacks = luaL_len(L, 1)) {
-			lua_geti(L, 1, len_callbacks);
-			lua_pushnil(L);
-			lua_seti(L, 1, len_callbacks);
+		int i = lua_tointeger(L, 2);
+		while (i <= luaL_len(L, 1)) {
+			lua_geti(L, 1, i);
+			lua_pushinteger(L, ++i);
+			lua_replace(L, 2);
 			luaL_checktype(L, -1, LUA_TFUNCTION);
 			lua_callk(L, 0, 0, 0, &luaFIN_runCallbacks_continue);
 		}

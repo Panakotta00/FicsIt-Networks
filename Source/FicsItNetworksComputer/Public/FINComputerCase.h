@@ -84,6 +84,7 @@ public:
 
 	// Begin AFGBuildable
 	virtual void Factory_Tick(float dt) override;
+	virtual void PreSerializedToBlueprint() override;
 	// End AFGBuildable
 
 	// Begin IFGSaveInterface
