@@ -68,7 +68,7 @@ namespace FINLua {
 			const int args = lua_gettop(L);
 			FString log;
 			for (int i = 1; i <= args; ++i) {
-				FString s = luaFIN_toFString(L, i);
+				FString s = luaFIN_convToFString(L, i);
 				log += s + " ";
 			}
 			if (log.Len() > 0) log = log.LeftChop(1);

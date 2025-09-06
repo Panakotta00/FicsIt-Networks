@@ -1,6 +1,8 @@
 #include "FINLua/LuaUtil.h"
 
 #include "FicsItNetworksLuaModule.h"
+#include "FINNetworkComponent.h"
+#include "FINNetworkUtils.h"
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/LuaFuture.h"
 #include "FINLua/LuaPersistence.h"
@@ -11,6 +13,8 @@
 #include "Reflection/FIRObjectProperty.h"
 #include "Reflection/FIRStructProperty.h"
 #include "Reflection/FIRTraceProperty.h"
+
+class UFINNetworkComponent;
 
 namespace FINLua {
 	void luaFIN_pushNetworkValue(lua_State* L, const FFIRAnyValue& Val, const FFIRTrace& Trace) {
@@ -293,6 +297,22 @@ namespace FINLua {
 
 	int luaFIN_argError(lua_State* L, int Index, const FString& ExtraMessage) {
 		return luaL_argerror(L, Index, TCHAR_TO_UTF8(*ExtraMessage));
+	}
+
+	FString luaFIN_getObjectID(UObject* Obj, UFIRClass* Class) {
+		FString hash = FString::Printf(TEXT("%X"), GetTypeHash(Obj->GetFullName()));
+		FString componentIdentifier = TEXT("");
+		UObject* Comb = UFINNetworkUtils::FindNetworkComponentFromObject(Obj);
+		if (Comb) {
+			FString id = IFINNetworkComponent::Execute_GetID(Comb).ToString();
+			FString nick = IFINNetworkComponent::Execute_GetNick(Comb);
+			if (nick.Len() > 0) {
+				componentIdentifier = FString::Printf(TEXT(" [\"%ls\" %ls]"), *nick, *id);
+			} else {
+				componentIdentifier = FString::Printf(TEXT(" [%ls]"), *id);
+			}
+		}
+		return FString::Printf(TEXT("%ls: %ls%ls"), *FFicsItReflectionModule::ObjectReferenceText(Class), *hash, *componentIdentifier);
 	}
 
 	FString luaFIN_typeName(lua_State* L, int Index) {
