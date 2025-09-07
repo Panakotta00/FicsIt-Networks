@@ -7,29 +7,15 @@
 ! xref:/reflection/classes/Factory.adoc[Factory]
 !===
 
-The resource sink, also known a A.W.E.S.O.M.E Sink
+The resource sink, also known a A.W.E.S.O.M.E Sink.
+Points are saved in multiple different tracks.
+* 0 = Default (Ressources)
+* 1 = Exploration (DNA Points)
 
 // tag::interface[]
 
 == Properties
 
-// tag::func-couponProgress-title[]
-=== `couponProgress` : Float
-// tag::func-couponProgress[]
-
-The percentage of the progress for the next coupon.
-
-[%collapsible]
-====
-[cols="1,5a",separator="!"]
-!===
-! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
-
-! Display Name ! Coupon Progress
-!===
-====
-// end::func-couponProgress[]
-// end::func-couponProgress-title[]
 // tag::func-numCoupons-title[]
 === `numCoupons` : Int
 // tag::func-numCoupons[]
@@ -47,40 +33,160 @@ The number of available coupons to print.
 ====
 // end::func-numCoupons[]
 // end::func-numCoupons-title[]
-// tag::func-numPoints-title[]
-=== `numPoints` : Int
-// tag::func-numPoints[]
+// tag::func-trackDefault-title[]
+=== `trackDefault` : Int
+// tag::func-trackDefault[]
 
-The number of available points.
-
-[%collapsible]
-====
-[cols="1,5a",separator="!"]
-!===
-! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
-
-! Display Name ! Num Points
-!===
-====
-// end::func-numPoints[]
-// end::func-numPoints-title[]
-// tag::func-numPointsToNextCoupon-title[]
-=== `numPointsToNextCoupon` : Int
-// tag::func-numPointsToNextCoupon[]
-
-The number of needed points for the next coupon.
+The default track for the resource sink.
 
 [%collapsible]
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>StaticProp</i></span>+++
 
-! Display Name ! Num Points To Next Coupon
+! Display Name ! Track Default
 !===
 ====
-// end::func-numPointsToNextCoupon[]
-// end::func-numPointsToNextCoupon-title[]
+// end::func-trackDefault[]
+// end::func-trackDefault-title[]
+// tag::func-trackExploration-title[]
+=== `trackExploration` : Int
+// tag::func-trackExploration[]
+
+The exploration track for the resource sink.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>StaticProp</i></span>+++
+
+! Display Name ! Track Exploration
+!===
+====
+// end::func-trackExploration[]
+// end::func-trackExploration-title[]
+
+== Functions
+
+// tag::func-getCouponProgress-title[]
+=== `getCouponProgress` (`track` : Int) -> `progress` : Float
+// tag::func-getCouponProgress[]
+
+Get the percentage of the progress for the next coupon for the given track.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Coupon Progress
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Int
+! The track you want to get the number of points till the next coupon.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Progress* `progress`
+! Float
+! The percentage of the progress for the next coupon for the given track.
+!===
+
+====
+// end::func-getCouponProgress[]
+// end::func-getCouponProgress-title[]
+// tag::func-getNumPoints-title[]
+=== `getNumPoints` (`track` : Int) -> `numPoints` : Int
+// tag::func-getNumPoints[]
+
+Get the number of available points for a given track.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Num Points
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Int
+! The track you want to get the number of points for.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Num Points* `numPoints`
+! Int
+! The number of points for the given track.
+!===
+
+====
+// end::func-getNumPoints[]
+// end::func-getNumPoints-title[]
+// tag::func-getNumPointsToNextCoupon-title[]
+=== `getNumPointsToNextCoupon` (`track` : Int) -> `numPoints` : Int
+// tag::func-getNumPointsToNextCoupon[]
+
+Get the number of needed points for the next coupon for a given track.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Num Points To Next Coupon
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Track* `track`
+! Int
+! The track you want to get the number of points till the next coupon.
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Num Points* `numPoints`
+! Int
+! The number of points needed for the next coupon for the given track.
+!===
+
+====
+// end::func-getNumPointsToNextCoupon[]
+// end::func-getNumPointsToNextCoupon-title[]
 
 // end::interface[]
 

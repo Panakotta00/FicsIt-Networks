@@ -31,5 +31,37 @@ The priority group of which this switch is part of.
 // end::func-priority[]
 // end::func-priority-title[]
 
+== Functions
+
+// tag::func-setPrioritySwitchGroupOn-title[]
+=== `setPrioritySwitchGroupOn` (`state` : Bool)
+// tag::func-setPrioritySwitchGroupOn[]
+
+Sets if the given priority switch group should be on or off.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Priority Switch Group On
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *State* `state`
+! Bool
+! The new switch state.
+!===
+
+====
+// end::func-setPrioritySwitchGroupOn[]
+// end::func-setPrioritySwitchGroupOn-title[]
+
 // end::interface[]
 
