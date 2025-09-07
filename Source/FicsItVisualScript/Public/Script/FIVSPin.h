@@ -25,11 +25,10 @@ ENUM_CLASS_FLAGS(EFIVSPinType)
 USTRUCT()
 struct FFIVSPinDataType : public FFIRExtendedValueType {
 	GENERATED_BODY()
-private:
+public:
 	UPROPERTY(SaveGame)
 	bool bReference = false;
 
-public:
 	FFIVSPinDataType() = default;
 	FFIVSPinDataType(const FFIVSPinDataType&) = default;
 	FFIVSPinDataType(EFIRValueType Type) : FFIRExtendedValueType(Type) {}

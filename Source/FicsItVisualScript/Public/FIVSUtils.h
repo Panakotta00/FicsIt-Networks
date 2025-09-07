@@ -196,3 +196,8 @@ FICSITVISUALSCRIPT_API FORCEINLINE FFIRAnyValue FIRCastValue(const FFIRAnyValue&
 	}
 	return FIRAny();
 }
+
+TSharedRef<FJsonObject> FIRExtendedValueTypeToJsonObject(const FFIRExtendedValueType& Type);
+bool FIRExtendedValueTypeFromJsonObject(TSharedPtr<FJsonObject> JsonObject, FFIRExtendedValueType& Type);
+TSharedRef<FJsonObject> FIVSPinDataTypeToJsonObject(const FFIVSPinDataType& Type);
+bool FIVSPinDataTypeFromJsonObject(TSharedPtr<FJsonObject> JsonObject, FFIVSPinDataType& Type);

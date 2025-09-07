@@ -182,7 +182,10 @@ TArray<UFIVSNode*> UFIVSSerailizationUtils::FIVS_DeserializeGraph(UFIVSGraph* Gr
 
 			const TSharedPtr<FJsonObject>* posObj;
 			if (nodeObject->TryGetObjectField(TEXT("pos"), posObj)) {
-				FJsonObjectConverter::JsonObjectToUStruct(posObj->ToSharedRef(), TBaseStructure<FVector2D>::Get(), &node->Pos);
+				// TODO: Use JsonObjectToUStruct
+				//FJsonObjectConverter::JsonObjectToUStruct(posObj->ToSharedRef(), TBaseStructure<FVector2D>::Get(), &node->Pos);
+				(*posObj)->TryGetNumberField(TEXT("X"), node->Pos.X);
+				(*posObj)->TryGetNumberField(TEXT("Y"), node->Pos.Y);
 			}
 
 			const TSharedPtr<FJsonObject>& props = nodeObject->GetObjectField(TEXT("props"));

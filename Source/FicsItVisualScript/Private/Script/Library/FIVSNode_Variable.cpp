@@ -1,5 +1,6 @@
 #include "Script/Library/FIVSNode_Variable.h"
 
+#include "FIVSUtils.h"
 #include "JsonObjectConverter.h"
 
 void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const {
@@ -37,19 +38,18 @@ void UFIVSNode_Variable::GetNodeActions(TArray<FFIVSNodeAction>& Actions) const 
 
 void UFIVSNode_Variable::SerializeNodeProperties(const TSharedRef<FJsonObject>& Properties) const {
 	Properties->SetBoolField(TEXT("Assignment"), bAssignment);
-	TSharedRef<FJsonObject> typeObj = MakeShared<FJsonObject>();
-	FJsonObjectConverter::UStructToJsonObject(FFIVSPinDataType::StaticStruct(), &Type, typeObj);
+	TSharedRef<FJsonObject> typeObj = FIVSPinDataTypeToJsonObject(Type);
 	Properties->SetObjectField(TEXT("Type"), typeObj);
 }
-
+UE_DISABLE_OPTIMIZATION_SHIP
 void UFIVSNode_Variable::DeserializeNodeProperties(const TSharedPtr<FJsonObject>& Properties) {
 	bAssignment = Properties->GetBoolField(TEXT("Assignment"));
 	const TSharedPtr<FJsonObject>& typeObj = Properties->GetObjectField(TEXT("Type"));
 	if (typeObj) {
-		FJsonObjectConverter::JsonObjectToUStruct(typeObj.ToSharedRef(), FFIVSPinDataType::StaticStruct(), &Type);
-		SetType(Type, bAssignment);
+		FIVSPinDataTypeFromJsonObject(typeObj.ToSharedRef(), Type);
 	}
 }
+UE_ENABLE_OPTIMIZATION_SHIP
 
 void UFIVSNode_Variable::CompileNodeToLua(FFIVSLuaCompilerContext& Context) {
 	if (bAssignment) {

@@ -70,13 +70,21 @@ public:
 
 	EFIRValueType GetType() const { return Type; }
 
+	bool HasRefSubType() const {
+		return Type >= FIR_OBJ && Type != FIR_ANY && Type != FIR_ARRAY;
+	}
+
 	UFIRStruct* GetRefSubType() const {
-		check(Type >= FIR_OBJ && Type != FIR_ANY && Type != FIR_ARRAY);
+		check(HasRefSubType());
 		return RefSubType;
 	}
 
+	bool HasSubType() const {
+		return Type == FIR_ARRAY;
+	}
+
 	FFIRExtendedValueType GetSubType() const {
-		check(Type == FIR_ARRAY);
+		check(HasSubType());
 		return SubType.Get<FFIRExtendedValueType>();
 	}
 };

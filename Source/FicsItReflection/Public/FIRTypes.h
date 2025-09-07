@@ -21,6 +21,16 @@ enum EFIRValueType : int {
 	FIR_ANY,
 };
 
+inline FString EnumToString(const EFIRValueType Value) {
+	return StaticEnum<EFIRValueType>()->GetNameStringByIndex(static_cast<int32>(Value));
+}
+
+inline TOptional<EFIRValueType> StringToFIRValueType(const FString& Value) {
+	int32 index = StaticEnum<EFIRValueType>()->GetIndexByNameString(Value);
+	if (index == INDEX_NONE) return {};
+	return (EFIRValueType)index;
+}
+
 typedef bool FIRBool;
 typedef int64 FIRInt;
 typedef double FIRFloat;
