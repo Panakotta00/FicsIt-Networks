@@ -897,6 +897,12 @@ namespace FINLua {
 		return FutureModule::Future::await(L);
 	}
 
+	void luaFIN_await(lua_State* L, int index, lua_KContext ctx, lua_KFunction func) {
+		lua_pushcfunction(L, &FutureModule::Future::await);
+		lua_insert(L, -2);
+		lua_callk(L, 1, LUA_MULTRET, ctx, func);
+	}
+
 	void luaFIN_futureDependsOn(lua_State* L, int dependant, int dependency) {
 		dependant = lua_absindex(L, dependant);
 		dependency = lua_absindex(L, dependency);
