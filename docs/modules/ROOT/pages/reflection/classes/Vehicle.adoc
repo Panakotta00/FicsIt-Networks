@@ -40,7 +40,7 @@ True if the vehicle is currently self driving.
 ====
 [cols="1,5a",separator="!"]
 !===
-! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
 
 ! Display Name ! Is Self Driving
 !===

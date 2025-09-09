@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Object.adoc[Object]
 !===
 
-A Object that represents a whole power circuit.
+A Object that represents a power circuit separated by power switches.
 
 // tag::interface[]
 
@@ -251,9 +251,72 @@ The amount of power produced by the whole circuit in the last tick.
 ====
 // end::func-production[]
 // end::func-production-title[]
+// tag::func-productionBoost-title[]
+=== `productionBoost` : Float
+// tag::func-productionBoost[]
+
+The amount of production boost applied to this circuit.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Production Boost
+!===
+====
+// end::func-productionBoost[]
+// end::func-productionBoost-title[]
+// tag::func-productionBoostPercent-title[]
+=== `productionBoostPercent` : Float
+// tag::func-productionBoostPercent[]
+
+The amount of production boost applied to this circuit in percent.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Production Boost Percent
+!===
+====
+// end::func-productionBoostPercent[]
+// end::func-productionBoostPercent-title[]
 
 == Functions
 
+// tag::func-getGroupPrioritySwitches-title[]
+=== `getGroupPrioritySwitches` () -> `switches` : Array<Trace<xref:/reflection/classes/CircuitSwitchPriority.adoc[CircuitSwitchPriority]>>
+// tag::func-getGroupPrioritySwitches[]
+
+Returns a list of all priority switches in the circuit.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Group Priority Switches
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Switches* `switches`
+! Array<Trace<xref:/reflection/classes/CircuitSwitchPriority.adoc[CircuitSwitchPriority]>>
+! A list of all priority switches in the circuit.
+!===
+
+====
+// end::func-getGroupPrioritySwitches[]
+// end::func-getGroupPrioritySwitches-title[]
 // tag::func-resetFuse-title[]
 === `resetFuse` ()
 // tag::func-resetFuse[]

@@ -274,6 +274,30 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		return *static_cast<UFIRFunction**>(luaL_checkudata(L, Index, ReflectionSystemBase::ReflectionFunction::_Name));
 	}
 
+	int luaFIN_getProperty(lua_State* L, UFIRProperty* Property, const FFIRExecutionContext& PropertyCtx, lua_KContext kCtx, lua_KFunction kFunc) {
+		EFIRPropertyFlags PropFlags = Property->GetPropertyFlags();
+		// TODO: Add C++ try catch block to GetProperty Execution
+		if (PropFlags & FIR_Prop_RT_Async) {
+			ZoneScopedN("Lua Get Property");
+			luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
+		} else if (PropFlags & FIR_Prop_RT_Parallel) {
+			ZoneScopedN("Lua Get Property SyncCall");
+			[[maybe_unused]] FLuaSync SyncCall(L);
+			{
+				ZoneScopedN("Lua Get Property");
+				luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
+			}
+		} else {
+			luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx));
+			if (kFunc) {
+				luaFIN_await(L, -1, kCtx, kFunc);
+			} else {
+				luaFIN_await(L, -1);
+			}
+		}
+		return 1;
+	}
+
 	int luaFIN_tryIndexGetProperty(lua_State* L, int Index, UFIRStruct* Type, const FString& MemberName, EFIRPropertyFlags PropertyFilterFlags, const FFIRExecutionContext& PropertyCtx) {
 		ZoneScoped;
 		if (!IsValid(Type)) return 0;
@@ -282,23 +306,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				return luaFIN_argError(L, Index, FString::Printf(TEXT("Reference to %s is invalid."), *luaFIN_typeName(L, Index)));
 			}
 
-			EFIRPropertyFlags PropFlags = Property->GetPropertyFlags();
-			// TODO: Add C++ try catch block to GetProperty Execution
-			if (PropFlags & FIR_Prop_RT_Async) {
-				ZoneScopedN("Lua Get Property");
-				luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
-			} else if (PropFlags & FIR_Prop_RT_Parallel) {
-				ZoneScopedN("Lua Get Property SyncCall");
-				[[maybe_unused]] FLuaSync SyncCall(L);
-				{
-					ZoneScopedN("Lua Get Property");
-					luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
-				}
-			} else {
-				luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx));
-				luaFIN_await(L, -1);
-			}
-			return 1;
+			return luaFIN_getProperty(L, Property, PropertyCtx);
 		}
 		return 0;
 	}

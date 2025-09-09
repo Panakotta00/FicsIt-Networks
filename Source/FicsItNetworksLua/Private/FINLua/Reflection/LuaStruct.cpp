@@ -318,7 +318,7 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			int luaStructIndexOp(lua_State* L) {
 				return luaStructBinaryOperator(L, "__index", FIR_OP_TEXT(FIR_Operator_Index), false);
 			}
-UE_DISABLE_OPTIMIZATION_SHIP
+
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		__index
 			 * @DisplayName		Index
@@ -336,7 +336,7 @@ UE_DISABLE_OPTIMIZATION_SHIP
 				if (arg > 0) return arg;
 				return luaStructExecuteBinaryOperator(L, FIR_OP_TEXT(FIR_Operator_Index), 2, LuaStruct->Struct, LuaStruct->Type, nullptr);
 			}
-UE_ENABLE_OPTIMIZATION_SHIP
+
 			LuaModuleTableFunction(R"(/**
 			 * @LuaFunction		__newindex
 			 * @DisplayName		New Index
@@ -385,6 +385,47 @@ UE_ENABLE_OPTIMIZATION_SHIP
 				FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, 1, nullptr);
 				luaFIN_pushFString(L, FFicsItReflectionModule::StructReferenceText(LuaStruct->Type));
 				return 1;
+			}
+
+			int next_resume(lua_State* L, int, lua_KContext) {
+				return 2;
+			}
+			int next(lua_State* L) {
+				FLuaStruct* LuaStruct = luaFIN_checkLuaStruct(L, 1, nullptr);
+				TArray<UFIRProperty*> props = LuaStruct->Type->GetProperties();
+
+				UFIRProperty* prop = nullptr;
+				if (lua_isnoneornil(L, 2)) {
+					if (props.Num() > 0) {
+						prop = props[0];
+					}
+				} else {
+					FString prevKey = luaFIN_checkFString(L, 2);
+					for (int i = 1; i < props.Num(); ++i) {
+						if (props[i-1]->GetInternalName() == prevKey) {
+							prop = props[i];
+							break;
+						}
+					}
+				}
+				if (prop == nullptr) {
+					lua_pushnil(L);
+					return 1;
+				}
+
+				luaFIN_pushFString(L, prop->GetInternalName());
+				FFIRExecutionContext Context(LuaStruct->Struct->GetData());
+				luaFIN_getProperty(L, prop, Context, 0, next_resume);
+				return 2;
+			}
+			LuaModuleTableFunction(R"(/**
+			 * @LuaFunction		__pairs
+			 * @DisplayName		Pairs
+			 */)", __pairs) {
+				lua_pushcfunction(L, next);
+				lua_pushvalue(L, 1);
+				lua_pushnil(L);
+				return 3;
 			}
 
 			int luaStructUnpersist(lua_State* L) {
@@ -533,6 +574,10 @@ UE_ENABLE_OPTIMIZATION_SHIP
 			lua_pushcfunction(L, StructType::luaStructTypeUnpersist);
 			PersistValue("StructTypeUnpersist");
 
+			lua_pushcfunction(L, Struct::next);
+			PersistValue("StructNext");
+			lua_pushcfunction(L, (lua_CFunction)(void*)(Struct::next_resume));
+			PersistValue("StructNextResume");
 
 			lua_newuserdata(L, 0);
 			luaL_setmetatable(L, StructLib::_Name);

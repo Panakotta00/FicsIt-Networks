@@ -221,6 +221,8 @@ namespace FINLua {
 						lua_newtable(L);
 						lua_setiuservalue(L, 1, 3);
 
+						lua_closethread(thread, L);
+
 						lua_pushboolean(L, true);
 						return 1;
 				}
@@ -893,6 +895,12 @@ namespace FINLua {
 		lua_insert(L, 1);
 		lua_settop(L, 1);
 		return FutureModule::Future::await(L);
+	}
+
+	void luaFIN_await(lua_State* L, int index, lua_KContext ctx, lua_KFunction func) {
+		lua_pushcfunction(L, &FutureModule::Future::await);
+		lua_insert(L, -2);
+		lua_callk(L, 1, LUA_MULTRET, ctx, func);
 	}
 
 	void luaFIN_futureDependsOn(lua_State* L, int dependant, int dependency) {

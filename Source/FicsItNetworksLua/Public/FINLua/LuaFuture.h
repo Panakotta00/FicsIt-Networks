@@ -89,6 +89,7 @@ namespace FINLua {
 	 * @param index the index of the future
 	 */
 	FICSITNETWORKSLUA_API int luaFIN_await(lua_State* L, int index);
+	FICSITNETWORKSLUA_API void luaFIN_await(lua_State* L, int index, lua_KContext ctx, lua_KFunction func);
 
 	/**
 	 * Adds the dependant future as dependant to the dependency future.

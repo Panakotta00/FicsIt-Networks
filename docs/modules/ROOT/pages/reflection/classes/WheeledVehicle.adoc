@@ -47,6 +47,23 @@ True if the vehicle has currently fuel to drive.
 ====
 // end::func-hasFuel[]
 // end::func-hasFuel-title[]
+// tag::func-isAutopilotEnabled-title[]
+=== `isAutopilotEnabled` : Bool
+// tag::func-isAutopilotEnabled[]
+
+True if the vehicle is currently auto piloting.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span>+++
+
+! Display Name ! Is Autopilot Enabled
+!===
+====
+// end::func-isAutopilotEnabled[]
+// end::func-isAutopilotEnabled-title[]
 // tag::func-speed-title[]
 === `speed` : Float
 // tag::func-speed[]
@@ -222,25 +239,6 @@ Allows to check if the given item type is a valid fuel for this vehicle.
 ====
 // end::func-isValidFuel[]
 // end::func-isValidFuel-title[]
-// tag::func-nextTarget-title[]
-=== `nextTarget` ()
-// tag::func-nextTarget[]
-
-Sets the current target to the next target in the list.
-
-[%collapsible]
-====
-[cols="1,5a",separator="!"]
-!===
-! Flags
-! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
-
-! Display Name ! Next Target
-!===
-
-====
-// end::func-nextTarget[]
-// end::func-nextTarget-title[]
 // tag::func-setCurrentTarget-title[]
 === `setCurrentTarget` (`index` : Int)
 // tag::func-setCurrentTarget[]

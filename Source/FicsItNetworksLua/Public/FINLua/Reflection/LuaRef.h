@@ -60,6 +60,16 @@ namespace FINLua {
 	FICSITNETWORKSLUA_API UFIRFunction* luaFIN_checkReflectionFunction(lua_State* L, int Index);
 
 	/**
+	 * Executes the given property get operation and pushes the result onto the lua stack.
+	 * Does Thread Synchronization or future creation & await on demand if necessary.
+	 * @param L the lua state
+	 * @param Property the property you want to get using the given execution context
+	 * @param PropertyCtx the execution context to run the property get in
+	 * @return the number of return values
+	 */
+	FICSITNETWORKSLUA_API int luaFIN_getProperty(lua_State* L, UFIRProperty* Property, const FFIRExecutionContext& PropertyCtx,  lua_KContext kCtx = 0, lua_KFunction kFunc = nullptr);
+
+	/**
 	 * @brief Pushes the value returned by the Property with the given settings onto the lua stack, if no GetProperty was found, pushes nothing. If the context is invalid, causes Lua error
 	 * @param L the lua state
 	 * @param Index the index of the lua value used for the property context

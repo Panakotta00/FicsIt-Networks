@@ -3,11 +3,19 @@
 #include "Reflection/ReflectionHelper.h"
 
 #include "FGHealthComponent.h"
+#include "FGWheeledVehicleInfo.h"
 #include "Buildables/FGBuildableDockingStation.h"
 #include "Reflection/Source/Static/FIRTargetPoint.h"
 #include "WheeledVehicles/FGTargetPoint.h"
 #include "WheeledVehicles/FGTargetPointLinkedList.h"
 #include "WheeledVehicles/FGWheeledVehicle.h"
+
+class FFIRVehicleHelper {
+public:
+	static void SetTarget(AFGWheeledVehicle* Vehicle, AFGTargetPoint* Target) {
+		Vehicle->GetInfo()->GetSimulationMovement()->SetTarget(Target, false);
+	}
+};
 
 BeginClass(AFGVehicle, "Vehicle", "Vehicle", "A base class for all vehicles.")
 	BeginProp(RFloat, health, "Health", "The health of the vehicle.") {
@@ -18,12 +26,17 @@ BeginProp(RFloat, maxHealth, "Max Health", "The maximum amount of health this ve
 } EndProp()
 BeginProp(RBool, isSelfDriving, "Is Self Driving", "True if the vehicle is currently self driving.") {
 	FIRReturn self->IsSelfDriving();
-} PropSet() {
-	FReflectionHelper::SetPropertyValue<FBoolProperty>(self, TEXT("mIsSelfDriving"), Val);
 } EndProp()
 EndClass()
 
 BeginClass(AFGWheeledVehicle, "WheeledVehicle", "Wheeled Vehicle", "The base class for all vehicles that used wheels for movement.")
+BeginProp(RBool, isAutopilotEnabled, "Is Autopilot Enabled", "True if the vehicle is currently auto piloting.", 0) {
+	FIRReturn self->IsAutopilotEnabled();
+} PropSet() {
+	if (self->IsAutopilotEnabled() != Val) {
+		self->Server_ToggleAutoPilot();
+	}
+} EndProp()
 BeginFunc(getFuelInv, "Get Fuel Inventory", "Returns the inventory that contains the fuel of the vehicle.") {
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The fuel inventory of the vehicle.")
 	Body()
@@ -40,16 +53,12 @@ BeginFunc(isValidFuel, "Is Valid Fuel", "Allows to check if the given item type 
 	Body()
 	isValid = self->IsValidFuel(item);
 } EndFunc()
-
 BeginFunc(getCurrentTarget, "Get Current Target", "Returns the index of the target that the vehicle tries to move to right now.") {
 	OutVal(0, RInt, index, "Index", "The index of the current target.")
 	Body()
 	AFGDrivingTargetList* List = self->GetTargetList();
-	index = (int64)List->FindTargetIndex(List->mCurrentTarget);
-} EndFunc()
-BeginFunc(nextTarget, "Next Target", "Sets the current target to the next target in the list.") {
-	Body()
-	self->PickNextTarget();
+	auto target = self->GetInfo()->GetTarget();
+	index = (int64)List->FindTargetIndex(target);
 } EndFunc()
 BeginFunc(setCurrentTarget, "Set Current Target", "Sets the target with the given index as the target this vehicle tries to move to right now.") {
 	InVal(0, RInt, index, "Index", "The index of the target this vehicle should move to now.")
@@ -57,7 +66,7 @@ BeginFunc(setCurrentTarget, "Set Current Target", "Sets the target with the give
 	AFGDrivingTargetList* List = self->GetTargetList();
 	AFGTargetPoint* Target = List->FindTargetByIndex(index);
 	if (!Target) throw FFIRException("index out of range");
-	List->mCurrentTarget = Target;
+	FFIRVehicleHelper::SetTarget(self, Target);
 } EndFunc()
 BeginFunc(getTargetList, "Get Target List", "Returns the list of targets/path waypoints.") {
 	OutVal(0, RTrace<AFGDrivingTargetList>, targetList, "Target List", "The list of targets/path-waypoints.")

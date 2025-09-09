@@ -4,6 +4,7 @@
 #include "FINLua.h"
 #include "FIRTypes.h"
 
+class UFIRClass;
 class UFIRProperty;
 class UFIRStruct;
 class UFIRFunction;
@@ -80,6 +81,7 @@ namespace FINLua {
 	FICSITNETWORKSLUA_API int luaFIN_typeError(lua_State* L, int Index, const FString& ExpectedTypeName);
 	FICSITNETWORKSLUA_API int luaFIN_argError(lua_State* L, int Index, const FString& ExtraMessage);
 
+	FICSITNETWORKSLUA_API FString luaFIN_getObjectID(UObject* Obj, UFIRClass* Class = nullptr);
 	FICSITNETWORKSLUA_API FString luaFIN_typeName(lua_State* L, int Index);
 
 	/**
