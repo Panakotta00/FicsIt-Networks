@@ -19,9 +19,9 @@ AFINModuleSystemHolo::~AFINModuleSystemHolo() {}
 
 void AFINModuleSystemHolo::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
-	if (Snapped && Snapped->GetOwner()->HasAuthority() && bOldIsValid != bIsValid) {
+	if (Snapped && Snapped->GetOwner()->HasAuthority() && bOldIsValid != bIsPlacementValid) {
 		ForceNetUpdate();
-		bOldIsValid = bIsValid;
+		bOldIsValid = bIsPlacementValid;
 //		ValidChanged(bIsValid);
 	}
 }
@@ -113,12 +113,12 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
         UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 3, getModuleSize(), min, max);
 		break;
 	}
-	bIsValid = checkSpace(min, max);
-	if (bIsValid) {
-		bIsValid = false;
+	bIsPlacementValid = checkSpace(min, max);
+	if (bIsPlacementValid) {
+		bIsPlacementValid = false;
 		for (auto& allowed : Snapped->AllowedModules) {
 			if (mBuildClass->IsChildOf(allowed)) {
-				bIsValid = true;
+				bIsPlacementValid = true;
 			}
 		}
 	}
@@ -170,25 +170,10 @@ void AFINModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit)
 		InformationComponent->SetRelativeLocation(ActorLocation);
 		OnInformationUpdate(InformationComponent, hit, Snapped, SnappedLoc, SnappedRot);
 	}
-	
-	//if(IsValid(CompassComponent)) {
-	//	FVector ActorOrigin = {0, 0, 0};
-	//	FVector ActorExtent = {0,0,0};
-	//	this->GetActorBounds(false, ActorOrigin, ActorExtent);
-	//	UE_LOG(LogFicsItNetworks, Display, TEXT("Actor Origin: %s"), *(ActorOrigin.ToString()));
-	//	UE_LOG(LogFicsItNetworks, Display, TEXT("Actor Extent: %s"), *(ActorExtent.ToString()));
-	//	ActorOrigin-= this->GetActorLocation(); 
-	//	ActorOrigin.Z+= FMath::Abs(ActorExtent.Z) + 1;
-	//	ActorOrigin.X-= 2;
-	//	const FVector ActorLocation = {-2,0,FMath::Abs(ActorExtent.Z) + 1};
-	//	CompassComponent->SetRelativeLocation(ActorLocation);
-	//	UE_LOG(LogFicsItNetworks, Display, TEXT("New Origin: %s"), *(ActorOrigin.ToString()));
-	//	UE_LOG(LogFicsItNetworks, Display, TEXT("New Location: %s"), *(ActorLocation.ToString()));
-	//}
 }
 
 void AFINModuleSystemHolo::CheckValidPlacement() {
-	if (!bIsValid) AddConstructDisqualifier(UFGCDInvalidPlacement::StaticClass());
+	if (!bIsPlacementValid) AddConstructDisqualifier(UFGCDInvalidPlacement::StaticClass());
 }
 
 void AFINModuleSystemHolo::BeginPlay() {

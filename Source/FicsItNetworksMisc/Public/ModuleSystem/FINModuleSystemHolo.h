@@ -17,7 +17,7 @@ public:
 	int SnappedRot;
 
 	//UPROPERTY(Replicated)
-	bool bIsValid = false;
+	bool bIsPlacementValid = false;
 	bool bOldIsValid = false;
 
 	AFINModuleSystemHolo();
@@ -66,7 +66,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnInformationUpdate(UTextRenderComponent* Component, const FHitResult& HitResult, UFINModuleSystemPanel* SnappedPanel, const FVector ModuleLocation, const int ModuleRotation);
 	
-private:
+protected:
 	bool checkSpace(FVector min, FVector max);
 	
 	FVector getModuleSize();
