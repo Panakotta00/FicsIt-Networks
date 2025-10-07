@@ -59,7 +59,8 @@ UENUM(BlueprintType)
 enum EFINPanelTraceEndTypes {
 	FINPanelTraceEnd_None = 0,
 	FINPanelTraceEnd_Straight = 1,
-	FINPanelTraceEnd_ExtendedStraight = 5,
+	FINPanelTraceEnd_ExtendedStraight = 6,
+	FINPanelTraceEnd_OverlapStraight = 7,
 	FINPanelTraceEnd_RecessedBlockage = 2,
 	FINPanelTraceEnd_Blockage = 3,
 	FINPanelTraceEnd_ArrowOut = 4,
