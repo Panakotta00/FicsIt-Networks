@@ -314,7 +314,6 @@ void AFINSizeablePanel::SetPanelSize(int width, int height) {
 	plx = FMath::Abs(PanelWidth * 10 / 2);
 	auto loc = ModularPanel->GetRelativeLocation();
 	auto rot = ModularPanel->GetRelativeRotation();
-	UE_LOG(LogFicsItNetworks, Display, TEXT("PanelSize: %d, %d, %f, %f, %f, %f, %f, %f"), InY, InZ, loc.X, loc.Y, loc.Z, rot.Pitch, rot.Yaw, rot.Roll);
 	Plane->SetRelativeLocation(FVector(ply, plx, 0));
 	Plane->SetRelativeScale3D(FVector(static_cast<float>(PanelHeight) / 10, static_cast<float>(PanelWidth) / 10, 1));
 }
