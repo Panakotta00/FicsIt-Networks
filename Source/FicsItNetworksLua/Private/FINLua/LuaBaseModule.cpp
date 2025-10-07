@@ -198,6 +198,9 @@ namespace FINLua {
 			luaL_requiref(L, "string", luaopen_string, true);
 			PersistTable("string", -1);
 			lua_pop(L, 1);
+			luaL_requiref(L, "utf8", luaopen_utf8, true);
+			PersistTable("utf8", -1);
+			lua_pop(L, 1);
 
 			luaL_requiref(L, "coroutine", luaopen_coroutine, true);
 			lua_pushcfunction(L, luaResume);
