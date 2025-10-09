@@ -28,6 +28,15 @@ struct FFINCommandLabelReferences {
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UObject* TextObjectReference;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MaterialElementSlot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<TextureCompressionSettings> TextureCompressionSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<TextureGroup> TextureGroup;
 	
 };
 
