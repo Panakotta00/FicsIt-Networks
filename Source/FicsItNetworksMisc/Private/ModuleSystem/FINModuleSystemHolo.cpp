@@ -2,6 +2,7 @@
 
 #include "Buildables/FGBuildable.h"
 #include "FGConstructDisqualifier.h"
+#include "FGGameState.h"
 #include "ModuleSystem/FINModuleSystemModule.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 
@@ -58,6 +59,26 @@ FVector AFINModuleSystemHolo::getModuleSize() {
 	int w, h;
 	o->Execute_getModuleSize(module, w, h);
 	return FVector((float) w, (float) h, 0);
+}
+
+void AFINModuleSystemHolo::ConfigureActor(AFGBuildable* inBuildable) const {
+	Super::ConfigureActor(inBuildable);
+
+	if (ApplyDefaultFinishOnConstruction && HasAuthority()) {
+		if (IsValid(mBuildClass)) {
+			UObject* Object = mBuildClass->GetDefaultObject();
+			if (AFGBuildable* Buildable = Cast<AFGBuildable>(Object)) {
+				//auto data = Buildable->Execute_GetCustomizationData(Buildable);
+				FFactoryCustomizationData CustomizationData = mCustomizationData;
+				if (CustomizationData.Data.IsEmpty()) {
+					auto v = Buildable->mDefaultSwatchCustomizationOverride;
+					CustomizationData.SwatchDesc = Buildable->mDefaultSwatchCustomizationOverride;
+					CustomizationData.Initialize(Cast<class AFGGameState>(GetWorld()->GetGameState()));
+					inBuildable->SetCustomizationData_Implementation(CustomizationData);
+				}
+			}
+		}
+	}
 }
 
 
@@ -179,6 +200,13 @@ void AFINModuleSystemHolo::CheckValidPlacement() {
 void AFINModuleSystemHolo::BeginPlay() {
 	Super::BeginPlay();
 	//if(this->GetRecipe()->Getname)
+	
+	UObject* Object = mBuildClass->GetDefaultObject();
+	if (AFGBuildable* Buildable = Cast<AFGBuildable>(Object)) {
+		if (TSubclassOf<UFGFactoryCustomizationDescriptor_Swatch> DefaultSwatch = Buildable->mDefaultSwatchCustomizationOverride) {
+			mCustomizationData.SwatchDesc = DefaultSwatch;
+		}
+	}
 
 }
 void AFINModuleSystemHolo::OnConstruction(const FTransform& MovieSceneBlends) {

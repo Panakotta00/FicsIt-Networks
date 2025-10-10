@@ -65,11 +65,15 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnInformationUpdate(UTextRenderComponent* Component, const FHitResult& HitResult, UFINModuleSystemPanel* SnappedPanel, const FVector ModuleLocation, const int ModuleRotation);
+
+	UPROPERTY(EditDefaultsOnly)
+	bool ApplyDefaultFinishOnConstruction = false;
 	
 protected:
 	bool checkSpace(FVector min, FVector max);
 	
 	FVector getModuleSize();
+	virtual void ConfigureActor(AFGBuildable* inBuildable) const override;
 
 	UPROPERTY()
 	UStaticMeshComponent* CompassRose = nullptr;
