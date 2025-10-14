@@ -95,4 +95,7 @@ public:
 	UObject*& GetGridSlot(int x, int y);
 
 	static void GetModuleSpace(const FVector& Loc, int Rot, const FVector& MSize, FVector& OutMin, FVector& OutMax);
+
+	UFUNCTION(BlueprintCallable, Category = "ModuleSystem|Panel")
+	void  SetPanelSize(int Width, int Height);
 };

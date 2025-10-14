@@ -28,6 +28,15 @@ struct FFINCommandLabelReferences {
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UObject* TextObjectReference;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MaterialElementSlot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<TextureCompressionSettings> TextureCompressionSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<TextureGroup> TextureGroup;
 	
 };
 
@@ -59,7 +68,8 @@ UENUM(BlueprintType)
 enum EFINPanelTraceEndTypes {
 	FINPanelTraceEnd_None = 0,
 	FINPanelTraceEnd_Straight = 1,
-	FINPanelTraceEnd_ExtendedStraight = 5,
+	FINPanelTraceEnd_ExtendedStraight = 6,
+	FINPanelTraceEnd_OverlapStraight = 7,
 	FINPanelTraceEnd_RecessedBlockage = 2,
 	FINPanelTraceEnd_Blockage = 3,
 	FINPanelTraceEnd_ArrowOut = 4,
