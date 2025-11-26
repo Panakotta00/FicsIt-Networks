@@ -28,7 +28,7 @@ The event name has to match the given single string or has to be contained withi
 The sender of the signals has to be the given single sender or must be one of the senders in the given array.
 - `values : table<string,any>
 A table with string keys and any value as value.
-For every table entry, the signal must have a parameter with the same name and the parameter value has to match the givne table value associated with the key.
+For every table entry, the signal must have a parameter with the same name and the parameter value has to match the given table value associated with the key.
 
 === Operator Overloading
 
@@ -124,7 +124,7 @@ end
 == Event Queues
 Event Queues allow you to record and filter events that occur in its life-time.
 
-You can create an Event Queue using the global `event.queue(EventFilter) -> EventQueu` function.
+You can create an Event Queue using the global `event.queue(EventFilter) -> EventQueue` function.
 
 The queue will from then on record all events that occur and that match the given filter.
 
