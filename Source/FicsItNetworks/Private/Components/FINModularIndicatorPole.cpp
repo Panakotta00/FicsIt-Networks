@@ -124,7 +124,6 @@ void AFINModularIndicatorPole::SpawnComponents(TSubclassOf<UStaticMeshComponent>
 												FVector BO, FVector EO, FVector EM, FVector AO,
 												FVector CMO, FRotator CMR, FVector CMS
 ) {
-	//UE_LOG(LogFicsItNetworks_DebugRoze, Log, TEXT("SpawnComponents(%d,%s)"), Extension, BToS(IsVertical));
 	UStaticMeshComponent* BaseMeshComponent = NewObject<UStaticMeshComponent>(Parent, Class);
 	BaseMeshComponent->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 	BaseMeshComponent->SetRelativeLocation(BO);
