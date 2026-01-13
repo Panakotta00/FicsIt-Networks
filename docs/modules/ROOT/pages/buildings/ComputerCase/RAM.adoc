@@ -15,7 +15,7 @@
 |image::buildings/RAM_T1_ig.jpg[300,300,role="left"]
 |===
 
-You can add an unlimited amount of these RAM module to your computer
+You can add an unlimited amount of these RAM modules to your computer
 to increase the memory capacity of the computer.
 
 Memory gets consumed by the nodes you put into tmpfs, the amount of memory used by a processor.

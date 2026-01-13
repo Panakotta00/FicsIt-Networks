@@ -19,7 +19,7 @@
 |===
 
 The Drive Holder allows you to insert different Drives.
-The plugedin drive will then have a DeviceNode in the DevDevice of the system.
+The pluged in drive will then have a DeviceNode in the DevDevice of the system.
 
 This holder has two states for the drive, locked and unlocked.
 Only if a drive is locked it will be added to the DevDevice, else it is not.
