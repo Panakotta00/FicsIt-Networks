@@ -5,8 +5,6 @@
 #include "Hologram/FGBuildableHologram.h"
 #include "FINModularIndicatorPoleHolo.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogFicsItNetworks_DebugRoze, Log, Log);
-
 UCLASS()
 class UBuildMode_Auto : public UFGHologramBuildModeDescriptor {
 	GENERATED_BODY()

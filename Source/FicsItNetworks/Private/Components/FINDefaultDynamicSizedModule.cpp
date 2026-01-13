@@ -100,7 +100,6 @@ void AFINDefaultDynamicSizedModule::SpawnComponents_Implementation(int Width, in
 		RepeatX = 1;
 		RepeatY = 1;
 	}
-	UE_LOG(LogFicsItNetworks_DebugRoze, Warning, L"SpawnComponents_Repeat(%d, %d)", RepeatX, RepeatY);
 	for (int CntY = 0; CntY < RepeatY; CntY++) {
 		for (int CntX = 0; CntX < RepeatX; CntX++) {
 			UStaticMeshComponent* MiddlePart = NewObject<UStaticMeshComponent>(Parent, Class);
@@ -272,7 +271,6 @@ void AFINDefaultDynamicSizedModule::SpawnEdgeComponent(TSubclassOf<UStaticMeshCo
 void AFINDefaultDynamicSizedModule::SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, int x, int y, int r, UStaticMesh* CornerPartMesh, AActor* Parent, USceneComponent* Attach, int Width, int Height, bool Rotate, TArray<USceneComponent*>& OutParts) {
 	UStaticMeshComponent* CornerPart = NewObject<UStaticMeshComponent>(Parent, Class);
 	CornerPart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
-	UE_LOG(LogFicsItNetworks_DebugRoze, Warning, L"SpawnCornerComponent %s", *CornerPartMesh->GetName());
 	if (Rotate) {
 		if (Width < 0) {
 			if (Height < 0) {
