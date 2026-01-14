@@ -144,7 +144,7 @@ void AFINDefaultDynamicSizedModule::SpawnAdditionalComponents_Implementation(int
 void AFINDefaultDynamicSizedModule::SetDynamicSize_Implementation(int Width, int Height) {
 	this->DynamicWidth = std::max(Width, MinWidth);
 	this->DynamicHeight = std::max(Height, MinHeight);
-	UE_LOG(LogFicsItNetworks, Warning, L"AFINDefaultDynamicSizedModule::SetDynamicSize_Implementation(PanelWidth=%d, PanelHeight=%d)", DynamicWidth, DynamicHeight)
+	//UE_LOG(LogFicsItNetworks, Warning, L"AFINDefaultDynamicSizedModule::SetDynamicSize_Implementation(PanelWidth=%d, PanelHeight=%d)", DynamicWidth, DynamicHeight)
 	this->ModuleSize = FVector2D(this->DynamicWidth, this->DynamicHeight);
 }
 
