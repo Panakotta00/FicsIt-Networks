@@ -576,7 +576,8 @@ BeginFunc(getConnection, "Get Connection", "Returns the railroad track connectio
 BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which this track is part of.") {
 	OutVal(0, RStruct<FFIRTrackGraph>, track, "Track", "The track graph of which this track is part of.")
     Body()
-    track = (FIRAny)FFIRTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
+    static FIntProperty* Prop = CastField<FIntProperty>(AFGBuildableRailroadTrack::StaticClass()->FindPropertyByName(TEXT("mTrackGraphID")));
+    track = (FIRAny)FFIRTrackGraph{Ctx.GetTrace(), Prop->GetPropertyValue_InContainer(self)};
 } EndFunc()
 BeginFunc(getVehicles, "Get Vehicles", "Returns a list of Railroad Vehicles on the Track") {
 	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "THe list of vehicles on the track.")
@@ -588,7 +589,7 @@ BeginFunc(getVehicles, "Get Vehicles", "Returns a list of Railroad Vehicles on t
 	vehicles = Vehicles;
 } EndFunc()
 BeginProp(RFloat, length, "Length", "The length of the track.") {
-	FIRReturn self->GetLength();
+	FIRReturn self->GetSplineComponent()->GetSplineLength();
 } EndProp()
 BeginProp(RBool, isOwnedByPlatform, "Is Owned By Platform", "True if the track is part of/owned by a railroad platform.") {
 	FIRReturn self->GetIsOwnedByPlatform();
