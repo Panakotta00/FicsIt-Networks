@@ -8,7 +8,7 @@
 #include "Logging/StructuredLog.h"
 
 FText CreateLocalizedYAY(FStringView NameSpace, FStringView Key, FStringView Text) {
-	return FInternationalization::ForUseOnlyByLocMacroAndGraphNodeTextLiterals_CreateText(Text.GetData(), NameSpace.GetData(), Key.GetData());
+	return FText::AsLocalizable_Advanced(NameSpace.GetData(), Key.GetData(), Text.GetData());
 }
 
 TTuple<FString, TArray<TTuple<FString, TArray<FString>>>> PreprocessDocumentationComment(FStringView Comment) {

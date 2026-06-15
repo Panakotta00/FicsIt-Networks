@@ -11,11 +11,12 @@ public class FicsItNetworks : ModuleRules
         bLegacyPublicIncludePaths = true;
 
         bEnableExceptions = true;
-        bWarningsAsErrors = true;
+        bWarningsAsErrors = false; // FIN-1.2-PORT(debt): wieder aktivieren + Warnungen fixen (UE5.6 C4702/C4996, teils in Engine-Code)
 
         CppStandard = CppStandardVersion.Cpp20;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
+            "VorbisAudioDecoder", // FIN-1.2-PORT: FVorbisAudioInfo lebt jetzt im eigenen Modul
             "Core", "CoreUObject",
             "Engine",
             "InputCore",

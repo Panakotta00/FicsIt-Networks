@@ -14,7 +14,7 @@
 
 #define TypeClassName(Type) FIR_StaticRef_ ## Type
 #define NSName "FicsItNetworks-StaticReflection"
-#define FIRRefLocText(KeyName, Value) FInternationalization::ForUseOnlyByLocMacroAndGraphNodeTextLiterals_CreateText(Value, TEXT(NSName), KeyName)
+#define FIRRefLocText(KeyName, Value) FText::AsLocalizable_Advanced(TEXT(NSName), KeyName, Value)
 #define FIRRefTypeLocText(KeyName, Value) FIRRefLocText(*(FString(TName) + TEXT("_") + TEXT(KeyName)), TEXT(Value))
 #define BeginClass(Type, InternalName, DisplayName, Description) \
 	namespace TypeClassName(Type) { \

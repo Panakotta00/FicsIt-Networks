@@ -12,7 +12,7 @@ public class FicsItNetworksEd : ModuleRules
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	    CppStandard = CppStandardVersion.Cpp20;
         bLegacyPublicIncludePaths = true;
-        bWarningsAsErrors = true;
+        bWarningsAsErrors = false; // FIN-1.2-PORT(debt): wieder aktivieren + Warnungen fixen (UE5.6 C4702/C4996, teils in Engine-Code)
 
 		PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject",
@@ -26,7 +26,8 @@ public class FicsItNetworksEd : ModuleRules
 			"FicsItReflection",
 		});
 		
-		var factoryGamePchPath = new DirectoryReference(Path.Combine(Target.ProjectFile.Directory.ToString(), "Source", "FactoryGame", "Public", "FactoryGame.h"));
-		PrivatePCHHeaderFile = factoryGamePchPath.MakeRelativeTo(new DirectoryReference(ModuleDirectory));
+		// FIN-1.2-PORT: Custom PCH auf FactoryGame.h entfernt — bootstrapt Core in 1.2/UE5.6
+		// nicht mehr sauber (FString/FName undefiniert in LowLevelMemTracker.h). Beide Ed-.cpp
+		// includen ihre Header selbst (IWYU), daher Shared-PCH (PCHUsage oben) ausreichend.
     }
 }

@@ -111,7 +111,10 @@ bool FFIRTrace::Serialize(FStructuredArchive::FSlot Slot) {
 
 void FFIRTrace::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
 	if (Obj) {
-		ReferenceCollector.AddReferencedObject(const_cast<UObject*&>(Obj));
+		// FIN-1.2-PORT: AddReferencedObject(UObject*&) deprecated (GC-Crash-Gefahr bei incremental GC) -> TObjectPtr
+		TObjectPtr<UObject> ObjPtr = const_cast<UObject*>(Obj);
+		ReferenceCollector.AddReferencedObject(ObjPtr);
+		const_cast<UObject*&>(Obj) = ObjPtr;
 		if (Obj) Obj->CallAddReferencedObjects(ReferenceCollector);
 	}
 	if (Prev.IsValid()) {

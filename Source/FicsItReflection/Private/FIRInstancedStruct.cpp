@@ -96,7 +96,7 @@ bool FFIRInstancedStruct::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOu
 }
 
 void FFIRInstancedStruct::AddStructReferencedObjects(FReferenceCollector& Collector) const {
-	UScriptStruct* ThisStruct = Struct;
+	TObjectPtr<UScriptStruct> ThisStruct = Struct; // FIN-1.2-PORT: AddReferencedObject -> TObjectPtr (GC-safe)
 	if (Struct) Collector.AddReferencedObject(ThisStruct);
 	if (Struct && Data) {
 		Collector.AddPropertyReferencesWithStructARO(Struct, Data);

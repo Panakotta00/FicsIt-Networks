@@ -149,7 +149,7 @@ BeginSignal(ItemTransfer, "Item Transfer", "Triggers when the factory connection
 	SignalParam(0, RStruct<FInventoryItem>, item, "Item", "The transfered item")
 EndSignal()
 BeginProp(RInt, type, "Type", "Returns the type of the connection. 0 = Conveyor, 1 = Pipe") {
-	FIRReturn (int64)self->GetConnector();
+	FIRReturn (int64)0; /* FIN-1.2-PORT: Connector-Typ-Enum entfernt; diese Klasse ist immer Conveyor */
 } EndProp()
 BeginProp(RInt, direction, "Direction", "The direction in which the items/fluids flow. 0 = Input, 1 = Output, 2 = Any, 3 = Used just as snap point") {
 	FIRReturn (int64)self->GetDirection();
@@ -208,7 +208,7 @@ BeginClassFunc(getIngredients, "Get Ingredients", "Returns a array of item amoun
 	OutVal(0, RArray<RStruct<FItemAmount>>, ingredients, "Ingredients", "The ingredients of this recipe.")
 	Body()
 	TArray<FIRAny> Ingredients;
-	for (const FItemAmount& Ingredient : UFGRecipe::GetIngredients(self)) {
+	for (const FItemAmount& Ingredient : self->GetDefaultObject<UFGRecipe>()->GetIngredients()) {
 		Ingredients.Add((FIRAny)Ingredient);
 	}
 	ingredients = Ingredients;

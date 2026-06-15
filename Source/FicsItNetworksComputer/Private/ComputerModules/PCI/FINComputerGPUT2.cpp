@@ -26,7 +26,7 @@ int32 FFINGPUT2DC_PushLayout::OnPaint(FFINGPUT2DrawContext& Context, const FPain
 
 int32 FFINGPUT2DC_PopGeometry::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
 	if (Context.GeometryStack.Num() > 1) { // Needs to be 1 as there has to be at least one Geometry in the stack, that is the whole Widgets Geometry
-		Context.GeometryStack.Pop(false);
+		Context.GeometryStack.Pop(EAllowShrinking::No);
 	}
 	return LayerId;
 }

@@ -226,7 +226,7 @@ BeginFunc(canUploadItemsToCentralStorage, "Can upload Items to Central Storage",
 	InVal(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item you want to check if it can be uploaded.")
 	OutVal(1, RBool, canUpload, "Can Upload", "True if the given item type can be uploaded to the central storage.")
 	Body()
-	canUpload = self->CanUploadItemsToCentralStorage(itemType);
+	canUpload = self->GetCentralStorageItemLimit(itemType) > 0; /* FIN-1.2-PORT: CanUploadItemsToCentralStorage entfernt; Limit>0 = uploadbar */
 } EndFunc()
 BeginFunc(getCentralStorageItemLimit, "Get Central Storage Item Limit", "Returns the maxiumum number of items of a given type you can upload to the central storage.") {
 	InVal(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item you want to check if it can be uploaded.")

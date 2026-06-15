@@ -91,7 +91,7 @@ AActor* AFINBlueprintHologram::Construct(TArray<AActor*>& out_children, FNetCons
 void AFINBlueprintHologram::BeginPlay() {
 	Super::BeginPlay();
 
-	TArray<AFGBuildable*> Keys;
+	TArray<TObjectPtr<AFGBuildable>> Keys; // FIN-1.2-PORT: TMap-Key ist jetzt TObjectPtr
 	mBuildableToNewRoot.GetKeys(Keys);
 	
 	for (AFGBuildable* Child : Keys) {

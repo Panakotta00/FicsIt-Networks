@@ -12,11 +12,12 @@ FCriticalSection AFIRSubsystem::ForcedRailroadSwitchesMutex;
 AFIRSubsystem* AFIRSubsystem::GetReflectionSubsystem(UObject* WorldContext) {
 #if WITH_EDITOR
 	return nullptr;
-#endif
+#else
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
 	fgcheck(SubsystemActorManager);
 	return SubsystemActorManager->GetSubsystemActor<AFIRSubsystem>();
+#endif
 }
 
 void AFIRSubsystem::BeginPlay() {
