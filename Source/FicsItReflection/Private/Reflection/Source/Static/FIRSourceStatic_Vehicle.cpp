@@ -116,8 +116,8 @@ BeginFunc(setTarget, "Set Target", "Allows to set the target at the given index 
 	if (!Target) throw FFIRException("index out of range");
 	Target->SetActorLocation(target.Pos);
 	Target->SetActorRotation(target.Rot);
-	Target->SetTargetSpeed(target.Speed);
-	Target->SetWaitTime(target.Wait);
+	Target->mTargetSpeed = (int32)target.Speed;
+	Target->mWaitTime = target.Wait;
 } EndFunc()
 BeginFunc(getTargets, "Get Targets", "Returns a list of target point structs of all the targets in the target point list.") {
 	OutVal(0, RArray<RStruct<FFIRTargetPoint>>, targets, "Targets", "A list of target point structs containing all the targets of the target point list.")

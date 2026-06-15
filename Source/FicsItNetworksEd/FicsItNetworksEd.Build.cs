@@ -11,7 +11,7 @@ public class FicsItNetworksEd : ModuleRules
     {
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	    CppStandard = CppStandardVersion.Cpp20;
-        bLegacyPublicIncludePaths = false;
+        bLegacyPublicIncludePaths = true;
         bWarningsAsErrors = true;
 
 		PublicDependencyModuleNames.AddRange(new string[] {

@@ -2,7 +2,7 @@
 
 #include "AsyncWork.h"
 #include "Base64.h"
-#include "FGBuildable.h"
+#include "Buildables/FGBuildable.h"
 #include "FGInventoryComponent.h"
 #include "FicsItLogLibrary.h"
 #include "FicsItNetworksLuaModule.h"

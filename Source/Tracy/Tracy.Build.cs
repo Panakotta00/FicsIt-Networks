@@ -12,6 +12,7 @@ public class Tracy : ModuleRules
 		CppStandard = CppStandardVersion.Cpp17;
 
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        bLegacyPublicIncludePaths = true;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
             "Core",

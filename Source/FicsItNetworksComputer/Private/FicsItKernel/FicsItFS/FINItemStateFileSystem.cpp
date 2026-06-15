@@ -129,7 +129,7 @@ bool FFINItemStateFileSystem::Serialize(FStructuredArchive::FSlot Slot) {
 	Capacity = OldCapacity;
 
 	auto Record = Slot.EnterRecord();
-	FStructuredArchive::FSlot RootNode = Record.EnterField(SA_FIELD_NAME(TEXT("RootNode")));
+	FStructuredArchive::FSlot RootNode = Record.EnterField(TEXT("RootNode"));
 
 	int KeepDisk = -1;
 	CodersFileSystem::SerializePath(SerializeDevice.ToSharedRef(), RootNode.EnterRecord(), "/", ID.ToString(), KeepDisk, &AskForDiskOrSave);

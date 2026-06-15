@@ -3,7 +3,7 @@
 #if PLATFORM_UNIX
 #include "UnixPlatformCompilerPreSetup.h"
 #elif PLATFORM_WINDOWS
-#include "MSVCPlatformCompilerPreSetup.h"
+#include "MSVC/MSVCPlatformCompilerPreSetup.h"
 #endif
 
 #if PLATFORM_WINDOWS

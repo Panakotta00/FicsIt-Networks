@@ -127,7 +127,7 @@ void AFINFileSystemState_Legacy::SerializePath(TSharedRef<CodersFileSystem::Devi
 		childIterator = childs.begin();
 		ChildNodeNum = childs.size();
 	}
-	FStructuredArchive::FArray ChildNodes = Record.EnterArray(SA_FIELD_NAME(TEXT("ChildNodes")), ChildNodeNum);
+	FStructuredArchive::FArray ChildNodes = Record.EnterArray(TEXT("ChildNodes"), ChildNodeNum);
 	std::unordered_set<std::string> DiskChilds = SerializeDevice->children(Path);
 	CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
 	if (KeepDisk == 0) {
@@ -143,7 +143,7 @@ void AFINFileSystemState_Legacy::SerializePath(TSharedRef<CodersFileSystem::Devi
 		if (Record.GetUnderlyingArchive().IsSaving()) {
 			UChildName = UTF8_TO_TCHAR((childIterator++)->c_str());
 		}
-		Child.EnterField(SA_FIELD_NAME(TEXT("Name"))) << UChildName;
+		Child.EnterField(TEXT("Name")) << UChildName;
 		std::string stdChildName = TCHAR_TO_UTF8(*UChildName);
 		
 		CheckKeepDisk(DiskChilds.find(stdChildName) == DiskChilds.end())
@@ -160,14 +160,14 @@ void AFINFileSystemState_Legacy::SerializePath(TSharedRef<CodersFileSystem::Devi
 		int Type = 0;
 		if (ChildType == CodersFileSystem::File_Regular) Type = 1;
 		if (ChildType == CodersFileSystem::File_Directory) Type = 2;
-		Child.EnterField(SA_FIELD_NAME(TEXT("Type"))) << Type;
+		Child.EnterField(TEXT("Type")) << Type;
 		TOptional<CodersFileSystem::FileType> existingType = SerializeDevice->fileType(Path / stdChildName);
 		if (Type == 1) {
 			CheckKeepDisk(!existingType.IsSet() || *existingType != CodersFileSystem::File_Regular)
 			if (KeepDisk == 0) {
 				SerializeDevice->remove(Path / stdChildName, true);
 			}
-			FStructuredArchive::FSlot Content = Child.EnterField(SA_FIELD_NAME(TEXT("FileContent")));
+			FStructuredArchive::FSlot Content = Child.EnterField(TEXT("FileContent"));
 			if (Record.GetUnderlyingArchive().IsLoading()) {
 				std::string diskData;
 				if (KeepDisk == -1) diskData = CodersFileSystem::FileStream::readAll(SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY).ToSharedRef());
@@ -227,7 +227,7 @@ void AFINFileSystemState_Legacy::Serialize(FStructuredArchive::FRecord Record) {
 		//SerializeDevice->remove("/", true);
 	}
 	
-	FStructuredArchive::FSlot RootNode = Record.EnterField(SA_FIELD_NAME(TEXT("RootNode")));
+	FStructuredArchive::FSlot RootNode = Record.EnterField(TEXT("RootNode"));
 	if (!bUseOldSerialization) {
 		int KeepDisk = -1;
 		SerializePath(SerializeDevice.ToSharedRef(), RootNode.EnterRecord(), "/", ID.ToString(), KeepDisk);

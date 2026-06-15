@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FGAvailabilityDependency.h"
+#include "AvailabilityDependencies/FGAvailabilityDependency.h"
 #include "FGSaveInterface.h"
-#include "ModSubsystem.h"
+#include "Subsystem/ModSubsystem.h"
 #include "Engine/DataAsset.h"
 #include "FINChallengeSubsystem.generated.h"
 

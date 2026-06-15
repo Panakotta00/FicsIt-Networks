@@ -1,9 +1,10 @@
-﻿using UnrealBuildTool;
+using UnrealBuildTool;
 
 public class FicsItNetworksMicrocontroller : ModuleRules
 {
     public FicsItNetworksMicrocontroller(ReadOnlyTargetRules Target) : base(Target)
     {
+    	bLegacyPublicIncludePaths = true;
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         CppStandard = CppStandardVersion.Cpp20;
         bWarningsAsErrors = true;

@@ -8,6 +8,7 @@ public class FicsItNetworks : ModuleRules
     public FicsItNetworks(ReadOnlyTargetRules target) : base(target)
     {
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        bLegacyPublicIncludePaths = true;
 
         bEnableExceptions = true;
         bWarningsAsErrors = true;

@@ -8,6 +8,7 @@ public class FicsItNetworksLua : ModuleRules
     public FicsItNetworksLua(ReadOnlyTargetRules target) : base(target)
     {
 	    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        bLegacyPublicIncludePaths = true;
         CppStandard = CppStandardVersion.Cpp20;
         bEnableExceptions = true;
         bWarningsAsErrors = true;

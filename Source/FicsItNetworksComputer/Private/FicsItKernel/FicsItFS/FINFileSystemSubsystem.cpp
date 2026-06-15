@@ -4,7 +4,7 @@
 #include "Device.h"
 #include "FGInventoryComponent.h"
 #include "FicsItFileSystem.h"
-#include "Paths.h"
+#include "Misc/Paths.h"
 #include "SubsystemActorManager.h"
 #include "Engine/Engine.h"
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"

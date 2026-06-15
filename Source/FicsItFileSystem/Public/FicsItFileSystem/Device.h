@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <cstdint>
 
-#include "SharedPointer.h"
+#include "Templates/SharedPointer.h"
 
 namespace CodersFileSystem {
 	class FileSystemRoot;

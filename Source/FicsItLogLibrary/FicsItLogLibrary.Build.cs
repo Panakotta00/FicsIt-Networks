@@ -1,9 +1,10 @@
-﻿using UnrealBuildTool;
+using UnrealBuildTool;
 
 public class FicsItLogLibrary : ModuleRules
 {
     public FicsItLogLibrary(ReadOnlyTargetRules Target) : base(Target)
     {
+    	bLegacyPublicIncludePaths = true;
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 	    CppStandard = CppStandardVersion.Cpp20;
         bWarningsAsErrors = true;

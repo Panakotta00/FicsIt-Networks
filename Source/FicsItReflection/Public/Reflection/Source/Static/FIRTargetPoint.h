@@ -27,8 +27,8 @@ struct FICSITREFLECTION_API FFIRTargetPoint {
 	FFIRTargetPoint(AFGTargetPoint* Target) :
 		Pos(Target->GetActorLocation()),
 		Rot(Target->GetActorRotation()),
-		Speed(Target->GetTargetSpeed()),
-		Wait(Target->GetWaitTime()) {}
+		Speed(Target->mTargetSpeed),
+		Wait(Target->mWaitTime) {}
 
 	AFGTargetPoint* ToWheeledTargetPoint(UObject* WorldContext) const {
 		TSubclassOf<AFGTargetPoint> Clazz = nullptr;
@@ -36,8 +36,8 @@ struct FICSITREFLECTION_API FFIRTargetPoint {
 		FActorSpawnParameters Params;
 		Params.bDeferConstruction = true;
 		AFGTargetPoint* Target = WorldContext->GetWorld()->SpawnActor<AFGTargetPoint>(Clazz, Pos, Rot, Params);
-		Target->SetTargetSpeed(Speed);
-		Target->SetWaitTime(Wait);
+		Target->mTargetSpeed = (int32)Speed;
+		Target->mWaitTime = Wait;
 		return Cast<AFGTargetPoint>(UGameplayStatics::FinishSpawningActor(Target, FTransform(Rot.Quaternion(), Pos)));
 	}
 };

@@ -8,6 +8,7 @@ public class Eris : ModuleRules
 		CppStandard = CppStandardVersion.Cpp20;
 		bEnableExceptions = true;
 		bUseRTTI = true;
+		bLegacyPublicIncludePaths = true;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core"
