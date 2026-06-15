@@ -199,8 +199,16 @@ Hauptmenü erreicht, **FicsItNetworks geladen** (2 Mods: SML+FIN), **Settings-UI
 ### 🔴 BUG #12 — Computer-Config-UI öffnet nicht (E)
 **Symptom:** „Press E to configure Computer Case" erscheint, aber E **öffnet nichts** — und erzeugt **NULL Log-Einträge** (kein Widget, kein Interact, kein Fehler).
 **Diagnose:** `AFINComputerCase` (C++) hat keinen Interakt-Widget-Code → reines `AFGBuildable`. Das Config-UI ist **Blueprint-getrieben** (`mInteractWidgetClass` im `Build_ComputerCase`-BP). Kein Widget + kein Log ⇒ die Widget-Referenz ist null/kaputt **oder** die Interaktions-Widget-Anbindung hat sich in 1.2 geändert (Game-Interaction-System).
-**Nächster Schritt:** Im **FactoryEditor** `Build_ComputerCase` öffnen → `mInteractWidgetClass` prüfen; und das 1.2-`AFGBuildable`/Interaction-Widget-API mit FINs BP vergleichen. Blueprint-Level → langsamer Zyklus (Fix → re-cook → Game-Restart).
-**Blockiert:** den In-Game-Lua-Test-Loop (EEPROM flashen geht nur über diese UI). = Priorität #1 nächste Session.
+**WURZEL GEFUNDEN (systemisch, alle FIN-Buildables mit Config-UI):** 1.2 hat die Interakt-Widget-Property in `AFGBuildable` umgestellt:
+- WEG: `mInteractWidgetClass` (harte `TSubclassOf<UFGInteractWidget>`)
+- NEU: `mInteractWidgetSoftClass` (`TSoftClassPtr<UFGInteractWidget>`, `FGBuildable.h:1047`); `GetInteractWidgetClass()` lädt daraus.
+FINs Buildable-Blueprints (Build_ComputerCase, Build_NetworkRouter, …) setzen die **alte, in 1.2 nicht mehr existierende** Property → Wert geht beim Load verloren → Soft-Property leer → `GetInteractWidgetClass()` = null → kein Widget, kein Log. Verifiziert: Vanilla-Config (Storage Container) öffnet normal; mehrere FIN-Buildables brechen identisch.
+
+**FIX-PLAN (Blueprint-Daten-Migration):** In jedem FIN-Buildable-BP mit Config-UI `mInteractWidgetSoftClass` auf das frühere Interakt-Widget setzen (Wert von altem `mInteractWidgetClass`).
+- Weg A (Editor): jedes betroffene `Build_*`-BP öffnen, Soft-Property setzen.
+- Weg B (C++): `mInteractWidgetSoftClass` per PostLoad/Konstruktor setzen (braucht AccessTransformer-Zugriff auf die geschützte Property + Wissen welches Widget pro Buildable). Systemischer, falls eine gemeinsame Stelle existiert.
+- Betroffene BPs identifizieren: alle FIN-`Build_*` die früher `mInteractWidgetClass` setzten (Computer Case nutzt `UFINComputerCaseWidget`-BP).
+**Zyklus:** Fix → re-cook → Game-Restart. **Blockiert** den In-Game-Lua-Test-Loop (EEPROM-Flash nur über diese UI). = Priorität #1 nächste Session.
 
 ### 🟡 BUG #13 — Recipe-null-Flood beim Welt-Laden (nicht-blockierend)
 `FGRecipe::GetRecipeName: class was nullptr` ~28× in 5s beim Laden, dann Stille. Nur Warnungen. Rezepte cooken korrekt (`Recipe_CodeableMerger` etc. im .pak) → vermutlich Schematic-/Unlock-Referenz auf null-Recipe-Klasse. Separat untersuchen.
