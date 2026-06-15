@@ -186,3 +186,21 @@ Native UE-Modulladung lehnte FIN ab: Mod-BuildId `43139311` (Engine `CompatibleC
 ### 🎉 FIN LÄDT IM SPIEL (Satisfactory 1.2.3 / CL 493833)
 Hauptmenü erreicht, **FicsItNetworks geladen** (2 Mods: SML+FIN), **Settings-UI funktioniert** (Log Viewer, Parametric Blueprints). Compile→Cook→Package→Load-Pfad steht.
 **Noch zu verifizieren (Laufzeit):** Welt laden ohne Crash, Computer platzieren + Lua, Eris Save/Load, Railroad, die semantischen Annahmen.
+
+---
+
+## Welle 4 — In-Game-Laufzeit (begonnen)
+
+### ✅ Verifiziert
+- Welt lädt ohne Crash. Alle FIN-Buildables im Baumenü, Icons + Beschreibungen rendern.
+- Computer Case + CPU T1 + RAM T1 + Screen Driver platzierbar.
+- Cook-Content sauber: 909 Assets korrekt gemountet (`/FactoryGame/Mods/FicsItNetworks/Content/...`), 103 Cook-Warnungen alle benign (Game-BP-Warnings + Redirectoren).
+
+### 🔴 BUG #12 — Computer-Config-UI öffnet nicht (E)
+**Symptom:** „Press E to configure Computer Case" erscheint, aber E **öffnet nichts** — und erzeugt **NULL Log-Einträge** (kein Widget, kein Interact, kein Fehler).
+**Diagnose:** `AFINComputerCase` (C++) hat keinen Interakt-Widget-Code → reines `AFGBuildable`. Das Config-UI ist **Blueprint-getrieben** (`mInteractWidgetClass` im `Build_ComputerCase`-BP). Kein Widget + kein Log ⇒ die Widget-Referenz ist null/kaputt **oder** die Interaktions-Widget-Anbindung hat sich in 1.2 geändert (Game-Interaction-System).
+**Nächster Schritt:** Im **FactoryEditor** `Build_ComputerCase` öffnen → `mInteractWidgetClass` prüfen; und das 1.2-`AFGBuildable`/Interaction-Widget-API mit FINs BP vergleichen. Blueprint-Level → langsamer Zyklus (Fix → re-cook → Game-Restart).
+**Blockiert:** den In-Game-Lua-Test-Loop (EEPROM flashen geht nur über diese UI). = Priorität #1 nächste Session.
+
+### 🟡 BUG #13 — Recipe-null-Flood beim Welt-Laden (nicht-blockierend)
+`FGRecipe::GetRecipeName: class was nullptr` ~28× in 5s beim Laden, dann Stille. Nur Warnungen. Rezepte cooken korrekt (`Recipe_CodeableMerger` etc. im .pak) → vermutlich Schematic-/Unlock-Referenz auf null-Recipe-Klasse. Separat untersuchen.
