@@ -132,4 +132,57 @@ Nach Welle 1 öffnete der Compiler die tieferen, semantischen Schichten. Verlauf
 3. **Semantische Annahmen verifizieren (in-game):** `GetConnector→0`, `CanUpload→Limit>0` — mit `// FIN-1.2-PORT` markiert.
 4. **Vehicle-Reflection** komplett deaktiviert (`.cpp.disabled` als Referenz) → Feature-Phase.
 
-\* Build-8-Ergebnis wird unten bestätigt.
+### ✅ Build 9 — `Result: Succeeded`, 0 Fehler
+Alle 8 FicsItNetworks-DLLs gelinkt (FactoryEditor Win64 Development). Compile-Port abgeschlossen.
+
+**Letzte Welle-2-Wurzel (Build 8→9):** `C4702 unreachable code` (22×, eskaliert UE5.6 **unabhängig** von `bWarningsAsErrors`). Ursache: Subsystem-Accessoren mit `#if WITH_EDITOR \n return; \n #endif` → im Editor-Build ist der Rest tot, propagiert in `gen.cpp` + Engine-Templates. Fix: `#else` statt `#endif` in 5 Dateien → 0 Fehler.
+
+### ⚠️ Status: NUR Compile — Laufzeit ungetestet
+Der Editor-Build linkt. Aber **compile ≠ korrekt**. Noch NICHT verifiziert (braucht laufendes Spiel):
+- Railroad-Reflection (Signal-Block-Friend, höchstes Risiko)
+- Eris Save/Load des Lua-States
+- Game-Hooks (`SUBSCRIBE_METHOD`)
+- Die semantischen Annahmen (`GetConnector→0`, `CanUpload→Limit>0`)
+
+**Nächste Phasen:** (1) Mod packen via Alpakit, (2) in-game testen, (3) Port-Schulden abarbeiten, (4) Vehicle-Feature.
+
+---
+
+## Welle 3 — Cook / Laufzeit (CDO-Konstruktion)
+
+Alpakit cookt FIN für **Shipping** (`WITH_EDITOR=0`) — ein *anderer* Build als der Editor (die `#else`-Runtime-Zweige). Der Cook konstruiert alle **CDOs** → deckt **Laufzeit-Konstruktor-Bugs** auf, die der Compile nicht sehen kann.
+
+Alpakit-CLI (verifiziert):
+```
+RunUAT.bat -ScriptsForProject="<uproj>" PackagePlugin -project="<uproj>" \
+  -clientconfig=Shipping -serverconfig=Shipping -utf8output -DLCName=FicsItNetworks \
+  -nocompileeditor -CopyToGameDirectory_Windows="<SteamGameDir>"
+```
+Gut: Shipping-Build von FIN **kompiliert** (alle 10 Module → `*-Win64-Shipping.dll`). Spiel ist auf 1.2 (build 23652534) + SML 3.12.0.
+
+### Cook-Crash #1 — `AFINComputerCase::AFINComputerCase()` (FINComputerCase.cpp:63)
+`AddReplicatedSubObject(Log)` im **Konstruktor** crasht in UE5.6 bei der CDO-Konstruktion (Cook). Fix: raus aus Konstruktor → in `BeginPlay` (`if (HasAuthority())`). Registrierung gehört an die Instanz, nicht ans CDO. Nur 1 Vorkommen in FIN (nicht systemisch).
+
+### Offen / beobachten
+- **Junction-Warnung:** Asset-Registry meldet Pfad-Mismatch, weil `Mods/FicsItNetworks` ein Junction auf `C:\Dev\Repository\FicsIt-Networks` ist (`GetFilenameOnDisk` liefert echten Pfad). Evtl. Problem fürs Content-Cooking → beobachten; ggf. Junction durch echtes Verzeichnis ersetzen.
+- Cook meldete „30 errors" — größtenteils Crash-Kaskade; nach Crash-Fix neu bewerten.
+
+### Cook-Crash #1 behoben → Cook erfolgreich (Content-`.pak` cookt)
+Nach dem FINComputerCase-Fix: `BUILD SUCCESSFUL`, Content cookt, `.pak/.ucas/.utoc` erstellt.
+
+### ⚠️ Packaging-Falle: Alpakit baute EGS statt Steam + deployte keine Binaries
+- Alpakit-`PackagePlugin` (CLI) baute `FactoryGameEGS-*-Shipping.dll` — **falsch für ein Steam-Spiel** (braucht `FactoryGameSteam-*`). Und re-Cooks bauten die Shipping-DLLs gar nicht neu (Cache) → NonUFS-Manifest enthielt nur `.uplugin`+Resources, **keine DLLs**.
+- **Lösung:** Shipping-Target **explizit** bauen: `Build.bat FactoryGameSteam Win64 Shipping -project=...` → erzeugt die 12 korrekten `FactoryGameSteam-*-Win64-Shipping.dll`. Dann manuell ins Spiel deployen (DLLs + `.modules` + `.pak` + `.uplugin`).
+- **Workflow-Regel:** Nach jeder FIN-Änderung: (1) `FactoryEditor`-Rebuild (für Cook-Commandlet), (2) `FactoryGameSteam Shipping`-Rebuild (für Runtime-DLLs), (3) Cook (Content), (4) deploy.
+- Mod-BuildId `43139311` = Engine-`CompatibleChangelist` → passt zum Spiel.
+- **Deploy-Stash:** `C:\Dev\Repository\_FIN-1.2-deploy\` (kompletter Mod-Ordner, ein-Befehl-Redeploy, falls SMM den Spiel-Ordner putzt).
+
+### ✅ Stand: vollständige ladbare 1.2-Mod im Spiel deployt — bereit für In-Game-Test (Stufe 1)
+
+### Cook-Blocker #2 — BuildId-Mismatch ("module could not be found")
+Native UE-Modulladung lehnte FIN ab: Mod-BuildId `43139311` (Engine `CompatibleChangelist`) ≠ Spiel-BuildId `493833` (Spiel-Changelist, `CompatibleChangelist=0`). **Versions-Schere:** Spiel auf Patch **1.2.3 / CL 493833**, Modding-Toolchain (css-83 Engine, SML 3.12, Starter `currentVersion.txt`) zielt auf **491125**.
+**Fix (Port-Schuld #5):** Engine `Build.version` `CompatibleChangelist` → `493833` angeglichen (Backup `.fin-backup`), Shipping neu gebaut → Mod-BuildId `493833`. BuildId lebt im `.modules`-Manifest (kein DLL-Recompile nötig). **Bei künftigem Spiel-Patch erneut angleichen.**
+
+### 🎉 FIN LÄDT IM SPIEL (Satisfactory 1.2.3 / CL 493833)
+Hauptmenü erreicht, **FicsItNetworks geladen** (2 Mods: SML+FIN), **Settings-UI funktioniert** (Log Viewer, Parametric Blueprints). Compile→Cook→Package→Load-Pfad steht.
+**Noch zu verifizieren (Laufzeit):** Welt laden ohne Crash, Computer platzieren + Lua, Eris Save/Load, Railroad, die semantischen Annahmen.
