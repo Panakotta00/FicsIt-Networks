@@ -8,11 +8,23 @@ FFINInternetCardHttpRequestFuture::FFINInternetCardHttpRequestFuture(TSharedRef<
 }
 
 void FFINInternetCardHttpRequestFuture::Execute() {
-	if (Request.IsValid()) Request->ProcessRequest();
+	if (!Request.IsValid()) return;
+	// FIN-1.2-PORT: Completion ueber den Delegate erfassen statt Request->GetStatus() pollen.
+	// In UE5.6 meldete GetStatus() das Ende nicht zuverlaessig -> await() hing ewig (Computer
+	// liess sich nicht mehr ausschalten). Der Delegate "wird immer aufgerufen, wenn der Request
+	// fertig ist, sofern gebunden" (IHttpRequest.h). Future + Delegate laufen beide im Game-Thread
+	// (Kernel->HandleFutures in TickActor), daher reicht ein einfaches geteiltes bool.
+	TSharedPtr<bool> Done = bComplete;
+	Request->OnProcessRequestComplete().BindLambda(
+		[Done](FHttpRequestPtr, FHttpResponsePtr, bool) { if (Done) *Done = true; });
+	Request->ProcessRequest();
 }
 
 bool FFINInternetCardHttpRequestFuture::IsDone() const {
-	return !Request.IsValid() || !(Request->GetStatus() == EHttpRequestStatus::Processing || Request->GetStatus() == EHttpRequestStatus::NotStarted);
+	if (!Request.IsValid()) return true;
+	if (bComplete.IsValid() && *bComplete) return true;
+	// Fallback: UE5.6 IsFinished-Semantik (true bei Succeeded/Failed).
+	return EHttpRequestStatus::IsFinished(Request->GetStatus());
 }
 
 TArray<FFIRAnyValue> FFINInternetCardHttpRequestFuture::GetOutput() const {

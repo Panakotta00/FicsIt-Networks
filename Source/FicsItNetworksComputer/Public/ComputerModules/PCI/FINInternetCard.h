@@ -13,6 +13,10 @@ struct FICSITNETWORKSCOMPUTER_API FFINInternetCardHttpRequestFuture : public FFI
 	GENERATED_BODY()
 private:
 	TSharedPtr<IHttpRequest, ESPMode::ThreadSafe> Request;
+	// FIN-1.2-PORT: Completion via OnProcessRequestComplete-Delegate statt GetStatus-Polling.
+	// In UE5.6 meldete Request->GetStatus() das Ende nicht zuverlaessig -> await() hing ewig.
+	// Geteilter Ptr, da das Future-Struct kopiert wird (Lambda + IsDone teilen das Flag).
+	TSharedPtr<bool> bComplete = MakeShared<bool>(false);
 
 public:
 	FFINInternetCardHttpRequestFuture() = default;

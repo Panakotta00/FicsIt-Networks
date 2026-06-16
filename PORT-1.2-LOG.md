@@ -212,3 +212,12 @@ FINs Buildable-Blueprints (Build_ComputerCase, Build_NetworkRouter, …) setzen 
 
 ### 🟡 BUG #13 — Recipe-null-Flood beim Welt-Laden (nicht-blockierend)
 `FGRecipe::GetRecipeName: class was nullptr` ~28× in 5s beim Laden, dann Stille. Nur Warnungen. Rezepte cooken korrekt (`Recipe_CodeableMerger` etc. im .pak) → vermutlich Schematic-/Unlock-Referenz auf null-Recipe-Klasse. Separat untersuchen.
+
+
+### ✅ Bug #12 GEFIXT — Config-UI (Property-Redirect)
+mInteractWidgetClass->mInteractWidgetSoftClass CoreRedirect in DefaultFicsItNetworks.ini.
+Migration am gecookten Asset verifiziert. In-game bestaetigt: Config-UI oeffnet (alle FIN-Buildables).
+
+### ✅ Bug #14 GEFIXT — EEPROM erstes Einsetzen kein Live-Update
+UFINComputerCaseWidget::NativeConstruct bindet OnEEPROMUpdate (AddUniqueDynamic) + pusht GetEEPROM().
+In-game bestaetigt: EEPROM wird sofort angezeigt.
