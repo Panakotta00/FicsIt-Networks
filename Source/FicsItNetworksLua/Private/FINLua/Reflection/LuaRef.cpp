@@ -212,6 +212,17 @@ namespace FINLua {
 			return luaFIN_argError(L, Ex.ArgumentIndex+2, Ex.GetMessage()); // TODO: Change Argument Index Offset for C++ ArgumentException
 		} catch (const FFIRReflectionException& Ex) {
 			return luaL_error(L, TCHAR_TO_UTF8(*Ex.GetMessage()));
+		} catch (const FFIRException& Ex) {
+			// FIN-1.2-PORT (Root-Cause HTTP-await-Crash): Basis-FFIRException MUSS hier gefangen
+			// werden. netFunc_request wirft FFIRException("Req-Payload given without Content-Type")
+			// (Basisklasse, nicht abgeleitet) - vorher fing dieser Block nur die abgeleiteten Typen,
+			// also flog die Exception ungefangen durch die Lua-C-Frames (longjmp-Welt). In UE5.6
+			// zerschiesst das den Heap -> STATUS_HEAP_CORRUPTION (0xc0000374). Als Lua-Error sauber
+			// melden statt durchwerfen. Greift fuer JEDEN netFunc, der FFIRException wirft.
+			return luaL_error(L, TCHAR_TO_UTF8(*Ex.GetMessage()));
+		} catch (...) {
+			// Letztes Sicherheitsnetz: keinerlei C++-Exception darf in die Lua-C-Frames entkommen.
+			return luaL_error(L, "Unhandled C++ exception in reflection function call");
 		}
 
 		return luaFIN_callReflectionFunctionProcessOutput(L, Output, Ctx.GetTrace(), nResults);

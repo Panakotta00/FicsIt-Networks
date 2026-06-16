@@ -9,36 +9,50 @@ FFINInternetCardHttpRequestFuture::FFINInternetCardHttpRequestFuture(TSharedRef<
 
 void FFINInternetCardHttpRequestFuture::Execute() {
 	if (!Request.IsValid()) return;
-	// FIN-1.2-PORT: Completion ueber den Delegate erfassen statt Request->GetStatus() pollen.
-	// In UE5.6 meldete GetStatus() das Ende nicht zuverlaessig -> await() hing ewig (Computer
-	// liess sich nicht mehr ausschalten). Der Delegate "wird immer aufgerufen, wenn der Request
-	// fertig ist, sofern gebunden" (IHttpRequest.h). Future + Delegate laufen beide im Game-Thread
-	// (Kernel->HandleFutures in TickActor), daher reicht ein einfaches geteiltes bool.
-	TSharedPtr<bool> Done = bComplete;
+	// FIN-1.2-PORT: Antwort im Completion-Delegate (Game-Thread, HttpManager-Tick) in den
+	// geteilten Snapshot kopieren. Damit liest der Lua-Thread (IsDone/GetOutput) NIE das
+	// lebende FHttpResponse -> kein Cross-Thread-Race auf dem Response-Payload -> kein
+	// Heap-Corruption-Crash (0xc0000374), den UE5.6 hier sonst ausloest.
+	// Der Delegate feuert garantiert bei Erfolg UND Fehlschlag, sofern gebunden (IHttpRequest.h).
+	TSharedPtr<FFINInternetCardHttpResult> Res = Result;
 	Request->OnProcessRequestComplete().BindLambda(
-		[Done](FHttpRequestPtr, FHttpResponsePtr, bool) { if (Done) *Done = true; });
-	Request->ProcessRequest();
+		[Res](FHttpRequestPtr, FHttpResponsePtr Response, bool bSucceeded) {
+			if (!Res.IsValid()) return;
+			if (bSucceeded && Response.IsValid()) {
+				Res->Code = Response->GetResponseCode();
+				Res->Content = Response->GetContentAsString();
+				for (const FString& Header : Response->GetAllHeaders()) {
+					FString Name;
+					FString Value;
+					if (Header.Split(TEXT(": "), &Name, &Value)) {
+						Res->Headers.Add(Name);
+						Res->Headers.Add(Value);
+					}
+				}
+			}
+			Res->bComplete = true;
+		});
+	// Wenn ProcessRequest gar nicht erst startet, feuert der Delegate nicht -> sonst haengt
+	// await() ewig. Dann sofort als fertig (mit leerer Antwort) markieren.
+	if (!Request->ProcessRequest()) {
+		Res->bComplete = true;
+	}
 }
 
 bool FFINInternetCardHttpRequestFuture::IsDone() const {
-	if (!Request.IsValid()) return true;
-	if (bComplete.IsValid() && *bComplete) return true;
-	// Fallback: UE5.6 IsFinished-Semantik (true bei Succeeded/Failed).
-	return EHttpRequestStatus::IsFinished(Request->GetStatus());
+	// Nur den geteilten Snapshot lesen - kein Zugriff auf das Live-FHttpRequest vom Lua-Thread.
+	if (!Result.IsValid()) return true;
+	return Result->bComplete;
 }
 
 TArray<FFIRAnyValue> FFINInternetCardHttpRequestFuture::GetOutput() const {
 	TArray<FFIRAnyValue> Response;
-	if (!Request.IsValid() || !Request->GetResponse().IsValid()) return Response;
-	Response.Add((FIRInt)Request->GetResponse()->GetResponseCode());
-	Response.Add(Request->GetResponse()->GetContentAsString());
+	if (!Result.IsValid()) return Response;
+	Response.Add((FIRInt)Result->Code);
+	Response.Add(Result->Content);
 	TArray<FIRAny> Headers;
-	for (FString Header : Request->GetResponse()->GetAllHeaders()) {
-		FString Name;
-		FString Value;
-		Header.Split(": ", &Name, &Value);
-		Headers.Add(Name);
-		Headers.Add(Value);
+	for (const FString& Header : Result->Headers) {
+		Headers.Add(Header);
 	}
 	Response.Add(Headers);
 	return Response;

@@ -8,15 +8,30 @@
 
 class IHttpRequest;
 
+// FIN-1.2-PORT: Snapshot der HTTP-Antwort.
+// Execute()/Completion-Delegate laufen auf dem Game-Thread (Kernel->HandleFutures bzw.
+// HttpManager-Tick), IsDone()/GetOutput() dagegen auf dem Lua-Thread (await-Poll).
+// In UE5.6 zerschiesst jeder Lua-Thread-Zugriff auf das noch lebende FHttpRequest/
+// FHttpResponse den Prozess-Heap (Race mit dem HttpManager, der den Response-Payload-
+// TArray auf dem Game-Thread befuellt) -> STATUS_HEAP_CORRUPTION (0xc0000374), verzoegert
+// auf dem Render-Thread sichtbar. Loesung: Code/Content/Headers im Completion-Delegate
+// (Game-Thread) in diese geteilte Struct kopieren; der Lua-Thread liest nur noch den
+// Snapshot und fasst das Live-Objekt nie mehr an.
+struct FFINInternetCardHttpResult {
+	bool bComplete = false;
+	int64 Code = 0;
+	FString Content;
+	TArray<FString> Headers; // alternierend Name, Value
+};
+
 USTRUCT()
 struct FICSITNETWORKSCOMPUTER_API FFINInternetCardHttpRequestFuture : public FFINFuture {
 	GENERATED_BODY()
 private:
 	TSharedPtr<IHttpRequest, ESPMode::ThreadSafe> Request;
-	// FIN-1.2-PORT: Completion via OnProcessRequestComplete-Delegate statt GetStatus-Polling.
-	// In UE5.6 meldete Request->GetStatus() das Ende nicht zuverlaessig -> await() hing ewig.
-	// Geteilter Ptr, da das Future-Struct kopiert wird (Lambda + IsDone teilen das Flag).
-	TSharedPtr<bool> bComplete = MakeShared<bool>(false);
+	// Geteilter Ptr, da das Future-Struct kopiert wird: Execute() (Game-Thread) schreibt den
+	// Snapshot, IsDone()/GetOutput() (Lua-Thread) lesen ihn. Alle Kopien teilen denselben Block.
+	TSharedPtr<FFINInternetCardHttpResult> Result = MakeShared<FFINInternetCardHttpResult>();
 
 public:
 	FFINInternetCardHttpRequestFuture() = default;

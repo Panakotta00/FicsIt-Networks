@@ -97,7 +97,20 @@ TOptional<TTuple<int, int>> FFINLuaThreadedRuntime::Run() {
 		}
 	} else if (LuaTask.IsDone() && GetStatus() == FFINLuaRuntime::Running) {
 		if (Runtime.Tick().IsSet()) {
-			if (ShouldBePromoted() && Runtime.Hook_Tick.IsSet() && !Runtime.Timeout.IsSet()) {
+			// FIN-1.2-PORT (Port-Schuld #Threading): Promotion vorsorglich deaktiviert.
+			// HINWEIS: Die eigentliche 0xc0000374-Crash-Ursache war NICHT diese Threading-Race,
+			// sondern eine ungefangene FFIRException durch die Lua-C-Frames (Fix in LuaRef.cpp,
+			// luaFIN_callReflectionFunctionDirectly: catch(const FFIRException&)). Der frueher
+			// gesehene Worker-Thread-close_state-Callstack war nur die Stelle, an der die bereits
+			// vorhandene Heap-Corruption beim Threaded-Teardown detektiert wurde.
+			// Promotion bleibt vorerst aus, weil die Event-Handshake-Sync (FLuaSync/WaitForGame/
+			// ContinueGame) unter UE5.6 (neuer LowLevelTasks-Scheduler, inkrementelle GC, FEvent-
+			// Semantik) NICHT verifiziert ist. Lua laeuft synchron auf dem Game-Thread (Runtime.Tick()
+			// oben), per Tick-Budget zeitgescheibt - FINs Vor-Threading-Modell. promote() bleibt
+			// aufrufbar (ohne Worker-Effekt), bestehende Skripte funktionieren weiter.
+			// TODO (Reaktivierung): Promotion wieder einschalten + Threaded-Runtime unter UE5.6 mit
+			// promote()-Workload verifizieren; falls instabil, Sync sauber fuer UE5.6 nachziehen.
+			if (false && ShouldBePromoted() && Runtime.Hook_Tick.IsSet() && !Runtime.Timeout.IsSet()) {
 				LuaTask.StartBackgroundTask(GThreadPool, EQueuedWorkPriority::Normal, EQueuedWorkFlags::DoNotRunInsideBusyWait, -1, TEXT("FINLuaThreadedRuntime"));
 			}
 		}
