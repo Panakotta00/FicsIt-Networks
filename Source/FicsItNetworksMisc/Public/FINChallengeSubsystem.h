@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FGAvailabilityDependency.h"
+#include "AvailabilityDependencies/FGAvailabilityDependency.h"
 #include "FGSaveInterface.h"
 #include "ModSubsystem.h"
 #include "Engine/DataAsset.h"

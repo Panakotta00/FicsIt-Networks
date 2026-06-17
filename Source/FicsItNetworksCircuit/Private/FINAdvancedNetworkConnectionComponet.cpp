@@ -1,7 +1,7 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkCircuit.h"
 #include "FGBlueprintSubsystem.h"
-#include "FGBuildable.h"
+#include "Buildables/FGBuildable.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 

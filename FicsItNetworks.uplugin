@@ -15,6 +15,7 @@
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
+	"BuiltInInitialFeatureState": "Active",
 	"Modules": [
 		{
 			"Name": "FicsItNetworks",
@@ -80,7 +81,7 @@
 	"Plugins": [
 		{
 			"Name": "SML",
-			"SemVersion": "^3.11.1",
+			"SemVersion": "^3.12.0",
 			"Enabled": true
 		}
 	],
@@ -90,5 +91,5 @@
 			"LoadingPolicy": "Always"
 		}
 	],
-	"GameVersion": ">=415558"
+	"GameVersion": ">=493833"
 }

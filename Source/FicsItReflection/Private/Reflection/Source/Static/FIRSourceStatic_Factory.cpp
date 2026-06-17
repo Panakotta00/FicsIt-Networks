@@ -208,7 +208,7 @@ BeginClassFunc(getIngredients, "Get Ingredients", "Returns a array of item amoun
 	OutVal(0, RArray<RStruct<FItemAmount>>, ingredients, "Ingredients", "The ingredients of this recipe.")
 	Body()
 	TArray<FIRAny> Ingredients;
-	for (const FItemAmount& Ingredient : UFGRecipe::GetIngredients(self)) {
+	for (const FItemAmount& Ingredient : UFGRecipe::GetIngredients(GWorld, self)) {
 		Ingredients.Add((FIRAny)Ingredient);
 	}
 	ingredients = Ingredients;

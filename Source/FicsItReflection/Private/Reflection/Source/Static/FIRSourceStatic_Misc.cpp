@@ -1,7 +1,7 @@
 ﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
 
 #include "FGBuildableDoor.h"
-#include "FGCentralStorageContainer.h"
+#include "Buildables/FGCentralStorageContainer.h"
 #include "FGCentralStorageSubsystem.h"
 #include "FGGameState.h"
 #include "FGIconLibrary.h"

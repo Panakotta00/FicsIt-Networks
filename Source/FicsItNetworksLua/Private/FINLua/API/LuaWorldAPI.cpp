@@ -1,7 +1,7 @@
 ﻿#include "LuaWorldAPI.h"
 
 #include "FGAttentionPingActor.h"
-#include "FGGameUI.h"
+#include "UI/FGGameUI.h"
 #include "FGPlayerController.h"
 #include "FGTimeSubsystem.h"
 #include "FINLuaModule.h"

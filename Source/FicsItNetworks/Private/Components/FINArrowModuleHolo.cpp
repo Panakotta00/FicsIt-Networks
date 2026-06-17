@@ -4,7 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "SubsystemActorManager.h"
-#include "FGBuildGunBuild.h"
+#include "Equipment/FGBuildGunBuild.h"
 #include "FGPlayerController.h"
 #include "FicsItNetworksModule.h"
 #include "FINArrowModuleBase.h"
