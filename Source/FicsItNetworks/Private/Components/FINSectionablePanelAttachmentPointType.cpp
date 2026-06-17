@@ -1,5 +1,5 @@
 ﻿//
-#include "FINSectionablePanelAttachmentPointType.h"
+#include "Components/FINSectionablePanelAttachmentPointType.h"
 
 TArray<TSubclassOf<UFGAttachmentPointType>> UFINSectionablePanelAttachmentPointType::GetAllowedAttachmentPointSnapTypes() {
 	return mAllowedAttachmentPointSnapTypes;

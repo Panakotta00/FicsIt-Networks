@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Device.h"
-#include "FGSubsystem.h"
+#include "FicsItFileSystem/Device.h"
+#include "Subsystem/ModSubsystem.h"
 #include "FINFileSystemSubsystem.generated.h"
 
 struct FFINItemStateFileSystem;
 
 UCLASS()
-class FICSITNETWORKSCOMPUTER_API AFINFileSystemSubsystem : public AFGSubsystem {
+class FICSITNETWORKSCOMPUTER_API AFINFileSystemSubsystem : public AModSubsystem {
 	GENERATED_BODY()
 public:
 	/**

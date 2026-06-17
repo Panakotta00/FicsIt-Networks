@@ -3,7 +3,7 @@
 #include "Reflection/FIRStructProperty.h"
 #include "Reflection/Source/FIRSourceStatic.h"
 #include "Reflection/Source/FIRSourceUObject.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "FGFactoryConnectionComponent.h"
 #include "FGRailroadTrackConnectionComponent.h"
 #include "FIRSubsystem.h"

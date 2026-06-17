@@ -1,4 +1,4 @@
-﻿#include "FIRInstancedStruct.h"
+#include "FIRInstancedStruct.h"
 
 #include "FGDynamicStruct.h"
 #include "Engine/World.h"
@@ -66,7 +66,7 @@ bool FFIRInstancedStruct::Serialize(FStructuredArchive::FSlot Slot) {
 	UScriptStruct* OldStruct = Struct;
 	
 	FStructuredArchive::FRecord Record = Slot.EnterRecord();
-	Record.EnterField(SA_FIELD_NAME(TEXT("Type"))) << Struct;
+	Record.EnterField(TEXT("Type")) << Struct;
 
 	if (Slot.GetUnderlyingArchive().IsLoading()) {
 		if (Data) {
@@ -83,7 +83,7 @@ bool FFIRInstancedStruct::Serialize(FStructuredArchive::FSlot Slot) {
 		if (Struct) Struct->InitializeStruct(Data);
 	}
 	if (Struct) {
-		auto field = Record.EnterField(SA_FIELD_NAME(TEXT("End")));
+		auto field = Record.EnterField(TEXT("End"));
 		Struct->SerializeItem(field, Data, nullptr);
 	}
 	return true;
@@ -96,7 +96,7 @@ bool FFIRInstancedStruct::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOu
 }
 
 void FFIRInstancedStruct::AddStructReferencedObjects(FReferenceCollector& Collector) const {
-	UScriptStruct* ThisStruct = Struct;
+	TObjectPtr<UScriptStruct> ThisStruct = Struct;
 	if (Struct) Collector.AddReferencedObject(ThisStruct);
 	if (Struct && Data) {
 		Collector.AddPropertyReferencesWithStructARO(Struct, Data);

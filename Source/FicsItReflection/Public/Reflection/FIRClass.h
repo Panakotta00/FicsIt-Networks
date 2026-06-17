@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIRStruct.h"
-#include "FIRSignal.h"
+#include "Reflection/FIRSignal.h"
 #include "UObject/UObjectIterator.h"
 #include "FIRClass.generated.h"
 

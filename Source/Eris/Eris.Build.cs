@@ -16,7 +16,7 @@ public class Eris : ModuleRules
 		var thirdPartyFolder = Path.Combine(PluginDirectory, "ThirdParty");
 		PublicIncludePaths.Add(Path.Combine(thirdPartyFolder, "eris/src"));
 
-		PublicIncludePaths.Add("Public");
+		PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
 
 		PublicDefinitions.AddRange(new string[] { "LUA_LIB", "LUA_API=ERIS_API" });
 

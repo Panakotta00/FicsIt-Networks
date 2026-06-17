@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "FINFuture.h"
-#include "LuaUtil.h"
+#include "FINLua/LuaUtil.h"
 
 #define LUAFIN_HIDDENGLOBAL_FUTUREREGISTRY "future-registry"
 #define LUAFIN_HIDDENGLOBAL_TIMEOUTREGISTRY "timeout-registry"

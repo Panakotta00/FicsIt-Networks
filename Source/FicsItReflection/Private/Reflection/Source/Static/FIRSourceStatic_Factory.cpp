@@ -149,7 +149,7 @@ BeginSignal(ItemTransfer, "Item Transfer", "Triggers when the factory connection
 	SignalParam(0, RStruct<FInventoryItem>, item, "Item", "The transfered item")
 EndSignal()
 BeginProp(RInt, type, "Type", "Returns the type of the connection. 0 = Conveyor, 1 = Pipe") {
-	FIRReturn (int64)self->GetConnector();
+	FIRReturn (int64)0;
 } EndProp()
 BeginProp(RInt, direction, "Direction", "The direction in which the items/fluids flow. 0 = Input, 1 = Output, 2 = Any, 3 = Used just as snap point") {
 	FIRReturn (int64)self->GetDirection();

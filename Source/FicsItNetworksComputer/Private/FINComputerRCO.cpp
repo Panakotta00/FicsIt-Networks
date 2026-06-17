@@ -2,7 +2,7 @@
 
 #include "FINComputerCase.h"
 #include "FINComputerEEPROMDesc.h"
-#include "FINItemStateEEPROMText.h"
+#include "FicsItKernel/Processor/FINItemStateEEPROMText.h"
 #include "FINNetworkComponent.h"
 #include "ComputerModules/FINComputerDriveHolder.h"
 #include "ComputerModules/PCI/FINComputerGPUT1.h"

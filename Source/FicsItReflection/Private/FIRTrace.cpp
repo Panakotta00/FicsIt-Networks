@@ -1,4 +1,4 @@
-﻿#include "FIRTrace.h"
+#include "FIRTrace.h"
 
 TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> FFIRTrace::fallbackTraceStep;
 TArray<TPair<TPair<UClass*, UClass*>, TPair<FString, FFINTraceStep*>>(*)()> FFIRTrace::toRegister;
@@ -80,9 +80,9 @@ bool FFIRTrace::Serialize(FStructuredArchive::FSlot Slot) {
 	if (Slot.GetUnderlyingArchive().IsSaveGame()) {
 		FStructuredArchive::FRecord Record = Slot.EnterRecord();
 		if (!::IsValid(Obj)) Obj = nullptr;
-		Record.EnterField(SA_FIELD_NAME(TEXT("Ptr"))) << Obj;
+		Record.EnterField(TEXT("Ptr")) << Obj;
 
-		TOptional<FStructuredArchive::FSlot> PrevSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("Next")), Prev.IsValid());
+		TOptional<FStructuredArchive::FSlot> PrevSlot = Record.TryEnterField(TEXT("Next"), Prev.IsValid());
 		if (PrevSlot.IsSet()) {
 			if (!Prev.IsValid()) Prev = MakeShared<FFIRTrace>();
 			Prev->Serialize(PrevSlot.GetValue());
@@ -90,7 +90,7 @@ bool FFIRTrace::Serialize(FStructuredArchive::FSlot Slot) {
 			Prev.Reset();
 		}
 
-		TOptional<FStructuredArchive::FSlot> StepSlot = Record.TryEnterField(SA_FIELD_NAME(TEXT("Step")), Step.IsValid());
+		TOptional<FStructuredArchive::FSlot> StepSlot = Record.TryEnterField(TEXT("Step"), Step.IsValid());
 		if (StepSlot.IsSet()) {
 			FString StepName;
 			if (Step.IsValid()) StepName = inverseTraceStepRegistry[Step];
@@ -111,7 +111,8 @@ bool FFIRTrace::Serialize(FStructuredArchive::FSlot Slot) {
 
 void FFIRTrace::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
 	if (Obj) {
-		ReferenceCollector.AddReferencedObject(const_cast<UObject*&>(Obj));
+		TObjectPtr<const UObject> Object = Obj;
+		ReferenceCollector.AddReferencedObject(Object);
 		if (Obj) Obj->CallAddReferencedObjects(ReferenceCollector);
 	}
 	if (Prev.IsValid()) {

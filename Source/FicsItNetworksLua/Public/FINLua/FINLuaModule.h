@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIRGlobalRegisterHelper.h"
-#include "LuaUtil.h"
+#include "FINLua/LuaUtil.h"
 #include "FINLuaModule.generated.h"
 
 // TODO: Make Comment Documentation Parsing more Unified and DRY, so field names etc all have same parsing rules

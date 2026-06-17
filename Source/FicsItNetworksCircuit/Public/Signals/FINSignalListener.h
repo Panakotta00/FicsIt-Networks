@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FINSignalData.h"
+#include "Signals/FINSignalData.h"
 #include "FINSignalListener.generated.h"
 
 /**

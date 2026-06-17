@@ -1,13 +1,13 @@
 #pragma once
 
-#include "File.h"
-#include "Listener.h"
-#include "FileWatcher.h"
+#include "FicsItFileSystem/File.h"
+#include "FicsItFileSystem/Listener.h"
+#include "FicsItFileSystem/FileWatcher.h"
 
 #include <unordered_set>
 #include <cstdint>
 
-#include "SharedPointer.h"
+#include "Templates/SharedPointer.h"
 
 namespace CodersFileSystem {
 	class FileSystemRoot;

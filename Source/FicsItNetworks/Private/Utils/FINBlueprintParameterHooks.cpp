@@ -91,7 +91,7 @@ AActor* AFINBlueprintHologram::Construct(TArray<AActor*>& out_children, FNetCons
 void AFINBlueprintHologram::BeginPlay() {
 	Super::BeginPlay();
 
-	TArray<AFGBuildable*> Keys;
+	TArray<TObjectPtr<AFGBuildable>> Keys;
 	mBuildableToNewRoot.GetKeys(Keys);
 	
 	for (AFGBuildable* Child : Keys) {
@@ -212,7 +212,6 @@ TSharedRef<SWidget> UFINBlueprintParameterPopup::RebuildWidget() {
 		.VAlign(VAlign_Fill)
 		.HAlign(HAlign_Fill)[
 			SNew(SListView<TSharedRef<FString>>)
-			.ItemHeight(24)
 			.ListItemsSource(&Rows)
 			.OnGenerateRow_Lambda([this](TSharedRef<FString> Item, TSharedRef<STableViewBase> const& OwnerTable) {
 				return SNew(SFINBlueprintParameterRow, OwnerTable, *Item, Hologram);

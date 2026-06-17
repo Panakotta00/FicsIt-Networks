@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "FINEventFilter.h"
-#include "FINLuaReferenceCollector.h"
-#include "FINSignalData.h"
+#include "FINLua/FINLuaReferenceCollector.h"
+#include "Signals/FINSignalData.h"
 #include "FIRTrace.h"
-#include "LuaUtil.h"
+#include "FINLua/LuaUtil.h"
 #include "LuaEventAPI.generated.h"
 
 struct FFINLuaReferenceCollector;

@@ -2,8 +2,8 @@
 #include "FGPopupWidgetContent.h"
 #include "ModuleSystem/FINModuleSystemHolo.h"
 #include "InputActionValue.h"
-#include "ModSubsystem.h"
-#include "NativeHookManager.h"
+#include "Subsystem/ModSubsystem.h"
+#include "Patching/NativeHookManager.h"
 #include "FINArrowModuleHolo.generated.h"
 
 

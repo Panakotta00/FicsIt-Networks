@@ -4,7 +4,7 @@
 #include "FGDismantleInterface.h"
 #include "FINMicrocontroller.h"
 #include "FINMicrocontrollerReference.h"
-#include "NativeHookManager.h"
+#include "Patching/NativeHookManager.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworksMicrocontroller);
 

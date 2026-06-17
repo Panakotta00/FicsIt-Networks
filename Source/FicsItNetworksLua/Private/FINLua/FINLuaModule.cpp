@@ -1,14 +1,14 @@
 ﻿#include "FINLua/FINLuaModule.h"
 
 #include "FicsItNetworksLuaModule.h"
-#include "FINLuaRuntime.h"
+#include "FINLua/FINLuaRuntime.h"
 #include "FIRAnyValue.h"
-#include "Regex.h"
+#include "Internationalization/Regex.h"
 #include "FINLua/LuaPersistence.h"
 #include "Logging/StructuredLog.h"
 
 FText CreateLocalizedYAY(FStringView NameSpace, FStringView Key, FStringView Text) {
-	return FInternationalization::ForUseOnlyByLocMacroAndGraphNodeTextLiterals_CreateText(Text.GetData(), NameSpace.GetData(), Key.GetData());
+	return FText::AsLocalizable_Advanced(NameSpace, Key, Text);
 }
 
 TTuple<FString, TArray<TTuple<FString, TArray<FString>>>> PreprocessDocumentationComment(FStringView Comment) {

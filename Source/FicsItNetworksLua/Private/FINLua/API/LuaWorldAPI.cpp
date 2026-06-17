@@ -1,13 +1,13 @@
-﻿#include "LuaWorldAPI.h"
+﻿#include "FINLua/API/LuaWorldAPI.h"
 
 #include "FGAttentionPingActor.h"
 #include "UI/FGGameUI.h"
 #include "FGPlayerController.h"
 #include "FGTimeSubsystem.h"
-#include "FINLuaModule.h"
-#include "FINLuaRuntime.h"
-#include "FINLuaThreadedRuntime.h"
-#include "LuaStruct.h"
+#include "FINLua/FINLuaModule.h"
+#include "FINLua/FINLuaRuntime.h"
+#include "FINLua/FINLuaThreadedRuntime.h"
+#include "FINLua/Reflection/LuaStruct.h"
 #include "TimerManager.h"
 #include "Async/Async.h"
 

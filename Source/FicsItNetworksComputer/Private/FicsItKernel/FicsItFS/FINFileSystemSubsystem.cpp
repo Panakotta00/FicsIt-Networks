@@ -1,11 +1,11 @@
 ﻿#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 
-#include "App.h"
-#include "Device.h"
+#include "Misc/App.h"
+#include "FicsItFileSystem/Device.h"
 #include "FGInventoryComponent.h"
 #include "FicsItFileSystem.h"
-#include "Paths.h"
-#include "SubsystemActorManager.h"
+#include "Misc/Paths.h"
+#include "Subsystem/SubsystemActorManager.h"
 #include "Engine/Engine.h"
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 

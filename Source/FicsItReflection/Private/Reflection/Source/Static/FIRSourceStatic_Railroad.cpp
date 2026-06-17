@@ -25,15 +25,15 @@
 class FIRRailroadHelper {
 public:
 	static TArray<TWeakObjectPtr<AFGRailroadVehicle>> FFGRailroadSignalBlock_GetOccupiedBy(const FFGRailroadSignalBlock& Block) {
-		return Block.mOccupiedBy;
+		return {};
 	}
 
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetQueuedReservations(const FFGRailroadSignalBlock& Block) {
-		return Block.mPendingReservations;
+		return {};
 	}
 
 	static TArray<TSharedPtr<FFGRailroadBlockReservation>> FFGRailroadSignalBlock_GetApprovedReservations(const FFGRailroadSignalBlock& Block) {
-		return Block.mApprovedReservations;
+		return {};
 	}
 
 	static UFGTrainPlatformConnection* AFGBuildableTrainPlatform_mPlatformConnection0(AFGBuildableTrainPlatform* self) {

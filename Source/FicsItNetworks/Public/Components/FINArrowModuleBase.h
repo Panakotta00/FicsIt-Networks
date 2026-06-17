@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "FINCommandPointMesh.h"
+#include "Components/FINCommandPointMesh.h"
 #include "FINModuleBase.h"
 #include "Containers/Array.h"
 #include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"

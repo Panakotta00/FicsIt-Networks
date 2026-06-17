@@ -28,6 +28,6 @@ public class FicsItNetworksLua : ModuleRules
 			"FicsItNetworksMisc",
 		});
 
-        PublicIncludePaths.Add("Public");
+        PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
     }
 }

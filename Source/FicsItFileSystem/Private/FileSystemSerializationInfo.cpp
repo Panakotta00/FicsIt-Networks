@@ -1,7 +1,7 @@
-﻿#include "FileSystemSerializationInfo.h"
+#include "FileSystemSerializationInfo.h"
 
 #include "FicsItFileSystem.h"
-#include "FileSystemException.h"
+#include "FicsItFileSystem/FileSystemException.h"
 
 bool FFileSystemSerializationInfo::Serialize(FArchive& Ar) {
 	Ar << Mounts;
@@ -33,7 +33,7 @@ namespace CodersFileSystem {
 			childIterator = childs.begin();
 			ChildNodeNum = childs.size();
 		}
-		FStructuredArchive::FArray ChildNodes = Record.EnterArray(SA_FIELD_NAME(TEXT("ChildNodes")), ChildNodeNum);
+		FStructuredArchive::FArray ChildNodes = Record.EnterArray(TEXT("ChildNodes"), ChildNodeNum);
 		std::unordered_set<std::string> DiskChilds = SerializeDevice->children(Path);
 		CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
 		if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
@@ -49,7 +49,7 @@ namespace CodersFileSystem {
 			if (Record.GetUnderlyingArchive().IsSaving()) {
 				UChildName = UTF8_TO_TCHAR((childIterator++)->c_str());
 			}
-			Child.EnterField(SA_FIELD_NAME(TEXT("Name"))) << UChildName;
+			Child.EnterField(TEXT("Name")) << UChildName;
 			std::string stdChildName = TCHAR_TO_UTF8(*UChildName);
 
 			CheckKeepDisk(DiskChilds.find(stdChildName) == DiskChilds.end())
@@ -66,14 +66,14 @@ namespace CodersFileSystem {
 			int Type = 0;
 			if (*ChildType == File_Regular) Type = 1;
 			if (*ChildType == File_Directory) Type = 2;
-			Child.EnterField(SA_FIELD_NAME(TEXT("Type"))) << Type;
+			Child.EnterField(TEXT("Type")) << Type;
 			TOptional<FileType> existingType = SerializeDevice->fileType(Path / stdChildName);
 			if (Type == 1) {
 				CheckKeepDisk(!existingType.IsSet() || *existingType != File_Regular)
 				if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
 					SerializeDevice->remove(Path / stdChildName, true);
 				}
-				FStructuredArchive::FSlot Content = Child.EnterField(SA_FIELD_NAME(TEXT("FileContent")));
+				FStructuredArchive::FSlot Content = Child.EnterField(TEXT("FileContent"));
 				if (Record.GetUnderlyingArchive().IsLoading()) {
 					std::string diskData;
 					if (KeepDisk == -1) diskData = CodersFileSystem::FileStream::readAll(SerializeDevice->open(Path / stdChildName, CodersFileSystem::INPUT | CodersFileSystem::BINARY).ToSharedRef());

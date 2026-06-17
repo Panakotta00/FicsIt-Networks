@@ -11,6 +11,8 @@ THIRD_PARTY_INCLUDES_START
 
 #pragma push_macro("check")
 #undef check
+#pragma push_macro("TString")
+#define TString FINLuaTString
 
 #ifdef _MSC_VER
 #pragma warning(push, 0)
@@ -61,6 +63,7 @@ THIRD_PARTY_INCLUDES_START
 #pragma warning(pop)
 #endif
 
+#pragma pop_macro("TString")
 #pragma pop_macro("check")
 
 THIRD_PARTY_INCLUDES_END

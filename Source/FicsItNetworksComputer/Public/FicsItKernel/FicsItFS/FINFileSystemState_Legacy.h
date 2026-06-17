@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FGLegacyItemStateActorInterface.h"
 #include "FGSaveInterface.h"
-#include "FINItemStateFileSystem.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "GameFramework/Actor.h"
 #include "FicsItFileSystem/Device.h"
 #include "FicsItFileSystem/Path.h"

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINItemStateEEPROM.h"
+#include "FicsItKernel/Processor/FINItemStateEEPROM.h"
 #include "FINItemStateEEPROMText.generated.h"
 
 USTRUCT(BlueprintType)

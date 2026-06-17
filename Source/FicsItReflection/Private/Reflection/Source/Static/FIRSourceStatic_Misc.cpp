@@ -4,9 +4,10 @@
 #include "Buildables/FGCentralStorageContainer.h"
 #include "FGCentralStorageSubsystem.h"
 #include "FGGameState.h"
+#include "FGInventoryComponent.h"
 #include "FGIconLibrary.h"
 #include "FGResourceSinkSubsystem.h"
-#include "FIRSourceStaticHooks.h"
+#include "Reflection/Source/Static/FIRSourceStaticHooks.h"
 #include "Buildables/FGBuildableLightsControlPanel.h"
 #include "Buildables/FGBuildableLightSource.h"
 #include "Buildables/FGBuildableResourceSink.h"
@@ -226,7 +227,7 @@ BeginFunc(canUploadItemsToCentralStorage, "Can upload Items to Central Storage",
 	InVal(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item you want to check if it can be uploaded.")
 	OutVal(1, RBool, canUpload, "Can Upload", "True if the given item type can be uploaded to the central storage.")
 	Body()
-	canUpload = self->CanUploadItemsToCentralStorage(itemType);
+	canUpload = self->CanUploadInventoryItemToCentralStorage(FInventoryItem(itemType));
 } EndFunc()
 BeginFunc(getCentralStorageItemLimit, "Get Central Storage Item Limit", "Returns the maxiumum number of items of a given type you can upload to the central storage.") {
 	InVal(0, RClass<UFGItemDescriptor>, itemType, "Item Type", "The type of the item you want to check if it can be uploaded.")

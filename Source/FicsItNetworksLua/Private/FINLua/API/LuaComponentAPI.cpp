@@ -5,9 +5,9 @@
 
 #include "FINChallengeSubsystem.h"
 #include "FINComputerCase.h"
-#include "FINLuaThreadedRuntime.h"
+#include "FINLua/FINLuaThreadedRuntime.h"
 #include "FINNetworkUtils.h"
-#include "NetworkController.h"
+#include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/Reflection/LuaClass.h"
 #include "FINLua/Reflection/LuaObject.h"

@@ -3,7 +3,7 @@
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
 #include "FINComputerSubsystem.h"
-#include "SlateApplication.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Buildables/FGBuildableWidgetSign.h"
 #include "Graphics/FINScreenInterface.h"
 #include "Net/UnrealNetwork.h"

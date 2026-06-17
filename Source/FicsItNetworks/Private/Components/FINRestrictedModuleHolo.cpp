@@ -1,5 +1,5 @@
 ﻿// 
-#include "FINRestrictedModuleHolo.h"
+#include "Components/FINRestrictedModuleHolo.h"
 
 // Sets default values
 AFINRestrictedModuleHolo::AFINRestrictedModuleHolo() {

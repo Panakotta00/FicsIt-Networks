@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FINModuleSystemHolo.h"
+#include "ModuleSystem/FINModuleSystemHolo.h"
 
 #include "FINRestrictedModuleHolo.generated.h"
 

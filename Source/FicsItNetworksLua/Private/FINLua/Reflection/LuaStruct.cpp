@@ -2,7 +2,7 @@
 
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
-#include "FINLuaReferenceCollector.h"
+#include "FINLua/FINLuaReferenceCollector.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaFuture.h"
 #include "FINLua/LuaPersistence.h"
@@ -18,7 +18,8 @@ namespace FINLua {
 
 	UE_DISABLE_OPTIMIZATION_SHIP
 	void FLuaStruct::CollectReferences(FReferenceCollector& Collector) {
-		Collector.AddReferencedObject(Type);
+		TObjectPtr<UFIRStruct> ThisType = Type;
+		Collector.AddReferencedObject(ThisType);
 		Collector.AddPropertyReferencesWithStructARO(FFIRInstancedStruct::StaticStruct(), &Struct.Get());
 	}
 

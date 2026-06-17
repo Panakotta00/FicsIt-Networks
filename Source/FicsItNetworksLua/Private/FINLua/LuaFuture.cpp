@@ -2,7 +2,7 @@
 
 #include "FicsItNetworksLuaModule.h"
 #include "FINLuaProcessor.h"
-#include "LuaKernelAPI.h"
+#include "FINLua/API/LuaKernelAPI.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 

@@ -1,5 +1,5 @@
-﻿#include "FINLuaSyntax.h"
-#include "FINLuaCodeEditor.h"
+﻿#include "UI/FINLuaSyntax.h"
+#include "UI/FINLuaCodeEditor.h"
 #include "Framework/Text/IRun.h"
 #include "Framework/Text/TextLayout.h"
 UE_DISABLE_OPTIMIZATION_SHIP

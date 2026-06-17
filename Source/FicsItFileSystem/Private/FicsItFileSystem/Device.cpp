@@ -5,7 +5,7 @@
 
 #include "FicsItFileSystem.h"
 #include "FicsItLogLibrary.h"
-#include "StructuredLog.h"
+#include "Logging/StructuredLog.h"
 
 using namespace std;
 namespace fs = std::filesystem;

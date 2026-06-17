@@ -2,7 +2,7 @@
 
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
-#include "FINItemStateEEPROM.h"
+#include "FicsItKernel/Processor/FINItemStateEEPROM.h"
 #include "FicsItKernel/Processor/FINStateEEPROM_Legacy.h"
 
 bool UFINComputerEEPROMDesc::CopyData_Implementation(UObject* WorldContext, const FInventoryItem& InFrom, const FInventoryItem& InTo, FInventoryItem& OutItem) {

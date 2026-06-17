@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FicsItReflection.h"
-#include "FINLuaReferenceCollector.h"
+#include "FINLua/FINLuaReferenceCollector.h"
 #include "FINLua/LuaUtil.h"
 
 struct FFINLuaReferenceCollector;

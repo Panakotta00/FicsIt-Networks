@@ -10,7 +10,7 @@
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
 #include "FINComputerRCO.h"
-#include "FINFileSystemSubsystem.h"
+#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 #include "FINUtils.h"
 #include "Components/AudioComponent.h"
 #include "ComputerModules/FINComputerDriveHolder.h"
