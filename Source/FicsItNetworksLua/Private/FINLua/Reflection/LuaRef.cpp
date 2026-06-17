@@ -205,24 +205,38 @@ namespace FINLua {
 
 		TArray<FIRAny> Parameters = luaFIN_callReflectionFunctionProcessInput(L, Function, nArgs);
 
+		// FIN-1.2-PORT (Root-Cause 0xc0000374-Crash UND UI-Lock): netFunc-Exceptions hier fangen,
+		// aber die Fehlermeldung NUR ERFASSEN und den catch-Block NORMAL VERLASSEN. luaL_error/
+		// luaFIN_argError erst DANACH aufrufen (ausserhalb des catch).
+		// Warum: netFunc_request wirft die Basis-FFIRException ("Req-Payload given without
+		// Content-Type") - die muss gefangen werden, sonst fliegt sie ungefangen durch die als C
+		// kompilierten Lua-Frames (longjmp-Welt) -> Heap-Corruption (0xc0000374).
+		// ABER: luaL_error macht selbst longjmp. Ein longjmp aus einem AKTIVEN C++-catch-Block
+		// beendet die laufende Exception nie sauber (__cxa_end_catch entfaellt) -> Thread-C++-EH-
+		// Zustand kaputt -> UEs UI/Slate-Exception-Handling spinnt -> Computer-Panel laesst sich
+		// nicht mehr schliessen (Spiel-Neustart noetig). Ein simples Lua error() hat das nicht,
+		// weil kein C++-catch im Spiel ist. Loesung: erst den catch sauber verlassen, dann longjmp.
 		TArray<FIRAny> Output;
+		bool bArgError = false;
+		int ArgErrorIndex = 0;
+		TOptional<FString> ErrorMessage;
 		try {
 			Output = Function->Execute(Ctx, Parameters);
 		} catch (const FFIRFunctionBadArgumentException& Ex) {
-			return luaFIN_argError(L, Ex.ArgumentIndex+2, Ex.GetMessage()); // TODO: Change Argument Index Offset for C++ ArgumentException
+			bArgError = true;
+			ArgErrorIndex = Ex.ArgumentIndex+2; // TODO: Change Argument Index Offset for C++ ArgumentException
+			ErrorMessage = Ex.GetMessage();
 		} catch (const FFIRReflectionException& Ex) {
-			return luaL_error(L, TCHAR_TO_UTF8(*Ex.GetMessage()));
+			ErrorMessage = Ex.GetMessage();
 		} catch (const FFIRException& Ex) {
-			// FIN-1.2-PORT (Root-Cause HTTP-await-Crash): Basis-FFIRException MUSS hier gefangen
-			// werden. netFunc_request wirft FFIRException("Req-Payload given without Content-Type")
-			// (Basisklasse, nicht abgeleitet) - vorher fing dieser Block nur die abgeleiteten Typen,
-			// also flog die Exception ungefangen durch die Lua-C-Frames (longjmp-Welt). In UE5.6
-			// zerschiesst das den Heap -> STATUS_HEAP_CORRUPTION (0xc0000374). Als Lua-Error sauber
-			// melden statt durchwerfen. Greift fuer JEDEN netFunc, der FFIRException wirft.
-			return luaL_error(L, TCHAR_TO_UTF8(*Ex.GetMessage()));
+			ErrorMessage = Ex.GetMessage();
 		} catch (...) {
-			// Letztes Sicherheitsnetz: keinerlei C++-Exception darf in die Lua-C-Frames entkommen.
-			return luaL_error(L, "Unhandled C++ exception in reflection function call");
+			ErrorMessage = FString(TEXT("Unhandled C++ exception in reflection function call"));
+		}
+		// Ab hier ist der catch-Block normal verlassen -> C++-EH-Zustand sauber. Jetzt darf longjmp.
+		if (ErrorMessage.IsSet()) {
+			if (bArgError) return luaFIN_argError(L, ArgErrorIndex, ErrorMessage.GetValue());
+			return luaL_error(L, TCHAR_TO_UTF8(*ErrorMessage.GetValue()));
 		}
 
 		return luaFIN_callReflectionFunctionProcessOutput(L, Output, Ctx.GetTrace(), nResults);
