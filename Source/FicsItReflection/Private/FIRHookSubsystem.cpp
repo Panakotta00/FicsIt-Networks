@@ -27,7 +27,7 @@ void AFIRHookSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 AFIRHookSubsystem* AFIRHookSubsystem::GetHookSubsystem(UObject* WorldContext) {
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
-	check(SubsystemActorManager);
+	if (!SubsystemActorManager) return nullptr; // preview/transient worlds lack the manager (see FINMediaSubsystem)
 	return SubsystemActorManager->GetSubsystemActor<AFIRHookSubsystem>();
 }
 

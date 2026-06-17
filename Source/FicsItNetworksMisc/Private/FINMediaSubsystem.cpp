@@ -51,7 +51,11 @@ AFINMediaSubsystem* AFINMediaSubsystem::GetMediaSubsystem(UObject* WorldContext)
 #else
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
-	check(SubsystemActorManager);
+	// Blueprint-preview / hologram "other worlds" have no SubsystemActorManager.
+	// Returning nullptr makes computer.media resolve to nil there instead of
+	// crashing (the assert fires under ChecksInShipping). Real worlds still
+	// resolve the subsystem normally.
+	if (!SubsystemActorManager) return nullptr;
 	return SubsystemActorManager->GetSubsystemActor<AFINMediaSubsystem>();
 #endif
 }

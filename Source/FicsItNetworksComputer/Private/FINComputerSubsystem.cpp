@@ -120,7 +120,7 @@ AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* Worl
 #else
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
-	check(SubsystemActorManager);
+	if (!SubsystemActorManager) return nullptr; // preview/transient worlds lack the manager (see FINMediaSubsystem)
 	return SubsystemActorManager->GetSubsystemActor<AFINComputerSubsystem>();
 #endif
 }

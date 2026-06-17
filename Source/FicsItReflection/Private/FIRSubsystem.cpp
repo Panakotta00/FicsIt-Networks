@@ -15,7 +15,7 @@ AFIRSubsystem* AFIRSubsystem::GetReflectionSubsystem(UObject* WorldContext) {
 #else
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
-	fgcheck(SubsystemActorManager);
+	if (!SubsystemActorManager) return nullptr; // preview/transient worlds lack the manager (see FINMediaSubsystem)
 	return SubsystemActorManager->GetSubsystemActor<AFIRSubsystem>();
 #endif
 }
