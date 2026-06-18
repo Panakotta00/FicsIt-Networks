@@ -4,8 +4,6 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
 #include "Components/ListView.h"
-#include "Input/Events.h"
-#include "InputCoreTypes.h"
 #include "UObject/ScriptInterface.h"
 #include "UObject/UnrealType.h"
 
@@ -13,26 +11,17 @@ void UFINComponentListEntryView::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	static const FName RowButtonName(TEXT("Button_1"));
 	if (WidgetTree)
 	{
 		WidgetTree->ForEachWidget([this](UWidget* Widget)
 		{
-			if (UButton* Button = Cast<UButton>(Widget))
+			if (UButton* Button = Cast<UButton>(Widget); Button && Button->GetFName() == RowButtonName)
 			{
 				Button->OnClicked.AddUniqueDynamic(this, &UFINComponentListEntryView::SelectOwningListItem);
 			}
 		});
 	}
-}
-
-FReply UFINComponentListEntryView::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-	{
-		SelectOwningListItem();
-	}
-
-	return Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
 }
 
 void UFINComponentListEntryView::SelectOwningListItem()
