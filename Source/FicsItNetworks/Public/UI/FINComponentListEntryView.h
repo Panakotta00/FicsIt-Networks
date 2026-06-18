@@ -11,5 +11,9 @@ class FICSITNETWORKS_API UFINComponentListEntryView : public UUserWidget, public
 	GENERATED_BODY()
 
 protected:
+	virtual void NativeConstruct() override;
 	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+	UFUNCTION()
+	void SelectOwningListItem();
 };
