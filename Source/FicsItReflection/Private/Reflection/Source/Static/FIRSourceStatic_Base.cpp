@@ -7,12 +7,15 @@
 
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
 	BeginProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
+	if (!self) FIRReturn (int64)0;
 	FIRReturn (int64)GetTypeHash(self->GetPathName());
 } EndProp()
 BeginProp(RString, internalName, "internalName", "The unreal engine internal name of this object.") {
+	if (!self) FIRReturn FIRStr();
 	FIRReturn (FIRStr) self->GetName();
 } EndProp()
 BeginProp(RString, internalPath, "internalPath", "The unreal engine internal path name of this object.") {
+	if (!self) FIRReturn FIRStr();
 	FIRReturn (FIRStr) self->GetPathName();
 } EndProp()
 BeginFunc(getHash, "Get Hash", "Returns a hash of this object. This is a value that nearly uniquely identifies this object.") {
@@ -29,15 +32,18 @@ BeginFunc(isA, "Is A", "Checks if this Object is a child of the given typen.") {
 	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this object is a child of.")
 	OutVal(1, RBool, isChild, "Is Child", "True if this object is a child of the given type.")
 	Body()
-	isChild = (FIRBool)self->IsA(parent);
+	isChild = parent && self->IsA(parent);
 } EndFunc()
 BeginClassProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
+	if (!self) FIRReturn (int64)0;
 	FIRReturn (int64)GetTypeHash(self->GetPathName());
 } EndProp()
 BeginClassProp(RString, internalName, "internalName", "The unreal engine internal name of this object.") {
+	if (!self) FIRReturn FIRStr();
 	FIRReturn (FIRStr) self->GetName();
 } EndProp()
 BeginClassProp(RString, internalPath, "internalPath", "The unreal engine internal path name of this object.") {
+	if (!self) FIRReturn FIRStr();
 	FIRReturn (FIRStr) self->GetPathName();
 } EndProp()
 BeginClassFunc(getHash, "Get Hash", "Returns the hash of this class. This is a value that nearly uniquely idenfies this object.", false) {
@@ -54,7 +60,7 @@ BeginClassFunc(isChildOf, "Is Child Of", "Checks if this Type is a child of the 
 	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this type is a child of.")
 	OutVal(1, RBool, isChild, "Is Child", "True if this type is a child of the given type.")
 	Body()
-	isChild = (FIRBool)self->IsChildOf(parent);
+	isChild = parent && self->IsChildOf(parent);
 } EndFunc()
 EndClass()
 
