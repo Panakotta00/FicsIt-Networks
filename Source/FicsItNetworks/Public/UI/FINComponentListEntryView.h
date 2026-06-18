@@ -16,4 +16,9 @@ protected:
 
 	UFUNCTION()
 	void SelectOwningListItem();
+
+private:
+	UObject* GetListItemComponent() const;
+	UObject* FindComponentDebugWidget() const;
+	void SetFunctionComponentParameter(UFunction* Function, void* Parameters, UObject* Component) const;
 };
