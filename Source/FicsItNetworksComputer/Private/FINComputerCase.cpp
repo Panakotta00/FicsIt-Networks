@@ -4,6 +4,8 @@
 #include "FicsItKernel/FicsItKernel.h"
 #include "FGInventoryComponent.h"
 #include "FGPlayerController.h"
+#include "FGHUD.h"
+#include "FGCharacterPlayer.h"
 #include "FicsItNetworksComputer.h"
 #include "FILLogContainer.h"
 #include "FINAdvancedNetworkConnectionComponent.h"
@@ -22,8 +24,25 @@
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Net/UnrealNetwork.h"
 #include "Async/Async.h"
+#include "UI/FGInteractWidget.h"
 
 class UFINComputerRCO;
+
+namespace {
+	void OpenComputerInteractWidget(AFGCharacterPlayer* ByCharacter, UObject* InteractObject) {
+		if (!IsValid(ByCharacter)) return;
+
+		APlayerController* Controller = Cast<APlayerController>(ByCharacter->GetController());
+		if (!Controller || !Controller->IsLocalPlayerController()) return;
+
+		TSubclassOf<UFGInteractWidget> WidgetClass = LoadClass<UFGInteractWidget>(nullptr, TEXT("/FicsItNetworks/Buildings/Computer/ComputerCase/UI/Widget_ComputerInteract.Widget_ComputerInteract_C"));
+		if (!IsValid(WidgetClass)) return;
+
+		if (AFGHUD* HUD = Cast<AFGHUD>(Controller->GetHUD())) {
+			HUD->OpenInteractUI(WidgetClass, InteractObject);
+		}
+	}
+}
 
 AFINComputerCase::AFINComputerCase() {
 	NetworkConnector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector");
@@ -176,6 +195,10 @@ void AFINComputerCase::Factory_Tick(float dt) {
 			Kernel->Tick(dt);
 		}
 	}
+}
+
+void AFINComputerCase::OnUse_Implementation(AFGCharacterPlayer* byCharacter, const FUseState& state) {
+	OpenComputerInteractWidget(byCharacter, this);
 }
 
 void AFINComputerCase::PreSerializedToBlueprint() {

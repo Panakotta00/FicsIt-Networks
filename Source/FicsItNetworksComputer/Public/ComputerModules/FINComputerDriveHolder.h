@@ -36,6 +36,10 @@ public:
 	virtual void EndPlay(EEndPlayReason::Type reason) override;
 	// End AActor
 
+	// Begin IFGUseableInterface
+	virtual void OnUse_Implementation(class AFGCharacterPlayer* byCharacter, const FUseState& state) override;
+	// End IFGUseableInterface
+
 	FGuid GetDrive();
 
 	UFUNCTION(BlueprintGetter)

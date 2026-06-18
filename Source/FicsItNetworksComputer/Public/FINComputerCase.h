@@ -83,6 +83,7 @@ public:
 	// End AActor
 
 	// Begin AFGBuildable
+	virtual void OnUse_Implementation(class AFGCharacterPlayer* byCharacter, const FUseState& state) override;
 	virtual void Factory_Tick(float dt) override;
 	virtual void PreSerializedToBlueprint() override;
 	// End AFGBuildable

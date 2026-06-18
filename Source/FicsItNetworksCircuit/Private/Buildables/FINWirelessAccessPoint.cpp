@@ -1,5 +1,7 @@
 ﻿#include "Buildables/FINWirelessAccessPoint.h"
 #include "Wireless/FINWirelessRCO.h"
+#include "FGCharacterPlayer.h"
+#include "FGHUD.h"
 #include "FGPlayerController.h"
 #include "FicsItNetworksCircuit.h"
 #include "FINAdvancedNetworkConnectionComponent.h"
@@ -8,6 +10,23 @@
 #include "Net/UnrealNetwork.h"
 #include "Wireless/FINWirelessAccessPointConnection.h"
 #include "Wireless/FINWirelessSubsystem.h"
+#include "UI/FGInteractWidget.h"
+
+namespace {
+	void OpenWirelessAccessPointInteractWidget(AFGCharacterPlayer* ByCharacter, UObject* InteractObject) {
+		if (!IsValid(ByCharacter)) return;
+
+		APlayerController* Controller = Cast<APlayerController>(ByCharacter->GetController());
+		if (!Controller || !Controller->IsLocalPlayerController()) return;
+
+		TSubclassOf<UFGInteractWidget> WidgetClass = LoadClass<UFGInteractWidget>(nullptr, TEXT("/FicsItNetworks/Buildings/Network/WirelessAccessPoint/UI/BPW_WirelessAccessPoint.BPW_WirelessAccessPoint_C"));
+		if (!IsValid(WidgetClass)) return;
+
+		if (AFGHUD* HUD = Cast<AFGHUD>(Controller->GetHUD())) {
+			HUD->OpenInteractUI(WidgetClass, InteractObject);
+		}
+	}
+}
 
 AFINWirelessAccessPoint::AFINWirelessAccessPoint() {
 	NetworkConnector1 = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("NetworkConnector1");
@@ -71,6 +90,10 @@ void AFINWirelessAccessPoint::EndPlay(const EEndPlayReason::Type EndPlayReason) 
 	if (EndPlayReason == EEndPlayReason::Destroyed && HasAuthority()) {
 		AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
 	}
+}
+
+void AFINWirelessAccessPoint::OnUse_Implementation(AFGCharacterPlayer* byCharacter, const FUseState& state) {
+	OpenWirelessAccessPointInteractWidget(byCharacter, this);
 }
 
 bool AFINWirelessAccessPoint::ShouldSave_Implementation() const {

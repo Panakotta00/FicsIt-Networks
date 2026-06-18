@@ -1,10 +1,29 @@
 #include "ComputerModules/FINComputerDriveHolder.h"
 
+#include "FGCharacterPlayer.h"
+#include "FGHUD.h"
 #include "FGPlayerController.h"
 #include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 #include "ComputerModules/FINComputerDriveDesc.h"
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "Net/UnrealNetwork.h"
+#include "UI/FGInteractWidget.h"
+
+namespace {
+	void OpenDriveHolderInteractWidget(AFGCharacterPlayer* ByCharacter, UObject* InteractObject) {
+		if (!IsValid(ByCharacter)) return;
+
+		APlayerController* Controller = Cast<APlayerController>(ByCharacter->GetController());
+		if (!Controller || !Controller->IsLocalPlayerController()) return;
+
+		TSubclassOf<UFGInteractWidget> WidgetClass = LoadClass<UFGInteractWidget>(nullptr, TEXT("/FicsItNetworks/Buildings/Computer/Modules/DriveHolder/UI/Widget_DriveHolderInteract.Widget_DriveHolderInteract_C"));
+		if (!IsValid(WidgetClass)) return;
+
+		if (AFGHUD* HUD = Cast<AFGHUD>(Controller->GetHUD())) {
+			HUD->OpenInteractUI(WidgetClass, InteractObject);
+		}
+	}
+}
 
 AFINComputerDriveHolder::AFINComputerDriveHolder() {
 	DriveInventory = CreateDefaultSubobject<UFGInventoryComponent>("DriveInventory");
@@ -33,6 +52,10 @@ void AFINComputerDriveHolder::BeginPlay() {
 void AFINComputerDriveHolder::EndPlay(EEndPlayReason::Type reason) {
 	SetLocked(false);
 	Super::EndPlay(reason);
+}
+
+void AFINComputerDriveHolder::OnUse_Implementation(AFGCharacterPlayer* byCharacter, const FUseState& state) {
+	OpenDriveHolderInteractWidget(byCharacter, this);
 }
 
 void AFINComputerDriveHolder::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
