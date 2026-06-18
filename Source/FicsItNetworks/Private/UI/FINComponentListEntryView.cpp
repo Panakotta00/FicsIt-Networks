@@ -11,12 +11,12 @@ void UFINComponentListEntryView::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	static const FName RowButtonName(TEXT("Button_1"));
+	static const FName OpenInButtonName(TEXT("Button_35"));
 	if (WidgetTree)
 	{
 		WidgetTree->ForEachWidget([this](UWidget* Widget)
 		{
-			if (UButton* Button = Cast<UButton>(Widget); Button && Button->GetFName() == RowButtonName)
+			if (UButton* Button = Cast<UButton>(Widget); Button && Button->GetFName() != OpenInButtonName)
 			{
 				Button->OnClicked.AddUniqueDynamic(this, &UFINComponentListEntryView::SelectOwningListItem);
 			}
