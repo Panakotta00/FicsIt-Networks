@@ -30,7 +30,7 @@ void UFINComputerRCO::ToggleCase_Implementation(AFINComputerCase* Case) {
 }
 
 void UFINComputerRCO::SetNick_Implementation(UObject* Component, const FString& Nick) {
-	if (Component->Implements<UFINNetworkComponent>() && IsValid(Component)) IFINNetworkComponent::Execute_SetNick(Component, Nick);
+	if (IsValid(Component) && Component->Implements<UFINNetworkComponent>()) IFINNetworkComponent::Execute_SetNick(Component, Nick);
 }
 
 void UFINComputerRCO::GPUMouseEvent_Implementation(AFINComputerGPUT1* GPU, int type, int x, int y, int btn) {
