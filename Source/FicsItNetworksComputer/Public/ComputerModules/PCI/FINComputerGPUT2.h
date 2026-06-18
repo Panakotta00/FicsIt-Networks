@@ -79,13 +79,13 @@ struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DC_PushTransform : public FFINGPUT2Dr
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector2D Translation;
+	FVector2D Translation = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	double Rotation;
+	double Rotation = 0.0;
 
 	UPROPERTY(SaveGame)
-	FVector2D Scale;
+	FVector2D Scale = FVector2D::UnitVector;
 
 	FFINGPUT2DC_PushTransform() = default;
 	FFINGPUT2DC_PushTransform(FVector2D Translation, double Rotation, FVector2D Scale) : Translation(Translation), Rotation(Rotation), Scale(Scale) {}
@@ -98,13 +98,13 @@ struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DC_PushLayout : public FFINGPUT2DrawC
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector2D Offset;
+	FVector2D Offset = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D Size;
+	FVector2D Size = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	double Scale;
+	double Scale = 1.0;
 
 	FFINGPUT2DC_PushLayout() = default;
 	FFINGPUT2DC_PushLayout(FVector2D Offset, FVector2D Size, double Scale) : Offset(Offset), Size(Size), Scale(Scale) {}
@@ -124,10 +124,10 @@ struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DC_PushClipRect : public FFINGPUT2Dra
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector2D Position;
+	FVector2D Position = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D Size;
+	FVector2D Size = FVector2D::ZeroVector;
 
 	FFINGPUT2DC_PushClipRect() = default;
 	FFINGPUT2DC_PushClipRect(FVector2D Position, FVector2D Size) : Position(Position), Size(Size) {}
@@ -140,16 +140,16 @@ struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DC_PushClipPolygon : public FFINGPUT2
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector2D TopLeft;
+	FVector2D TopLeft = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D TopRight;
+	FVector2D TopRight = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D BottomLeft;
+	FVector2D BottomLeft = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D BottomRight;
+	FVector2D BottomRight = FVector2D::ZeroVector;
 
 	FFINGPUT2DC_PushClipPolygon() = default;
 	FFINGPUT2DC_PushClipPolygon(FVector2D TopLeft, FVector2D TopRight, FVector2D BottomLeft, FVector2D BottomRight) : TopLeft(TopLeft), TopRight(TopRight), BottomLeft(BottomLeft), BottomRight(BottomRight) {}
@@ -172,10 +172,10 @@ struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DC_Lines : public FFINGPUT2DrawCall {
 	TArray<FVector2D> Points;
 
 	UPROPERTY(SaveGame)
-	double Thickness;
+	double Thickness = 0.0;
 
 	UPROPERTY(SaveGame)
-	FColor Color;
+	FColor Color = FColor::White;
 
 	FFINGPUT2DC_Lines() = default;
 	FFINGPUT2DC_Lines(TArray<FVector2D> Points, double Thickness, FColor Color) : Points(Points), Thickness(Thickness), Color(Color) {}
@@ -188,19 +188,19 @@ struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DC_Text : public FFINGPUT2DrawCall {
 	GENERATED_BODY()
 	
 	UPROPERTY(SaveGame)
-	FVector2D Position;
+	FVector2D Position = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
 	FString Text;
 
 	UPROPERTY(SaveGame)
-	int64 Size;
+	int64 Size = 0;
 
 	UPROPERTY(SaveGame)
-	FColor Color;
+	FColor Color = FColor::White;
 
 	UPROPERTY(SaveGame)
-	bool bUseMonospace;
+	bool bUseMonospace = false;
 
 	FFINGPUT2DC_Text() = default;
 	FFINGPUT2DC_Text(FVector2D Position, FString Text, int64 Size, FColor Color, bool bUseMonospace) : Position(Position), Text(Text), Size(Size), Color(Color), bUseMonospace(bUseMonospace) {}
@@ -213,22 +213,22 @@ struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DC_Spline : public FFINGPUT2DrawCall 
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector2D Start;
+	FVector2D Start = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D StartDirection;
+	FVector2D StartDirection = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D End;
+	FVector2D End = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D EndDirection;
+	FVector2D EndDirection = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	double Thickness;
+	double Thickness = 0.0;
 
 	UPROPERTY(SaveGame)
-	FColor Color;
+	FColor Color = FColor::White;
 
 	FFINGPUT2DC_Spline() = default;
 	FFINGPUT2DC_Spline(FVector2D Start, FVector2D StartDirection, FVector2D End, FVector2D EndDirection, double Thickness, FColor Color) : Start(Start), StartDirection(StartDirection), End(End), EndDirection(EndDirection), Thickness(Thickness), Color(Color) {}
@@ -241,22 +241,22 @@ struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DC_Bezier : public FFINGPUT2DrawCall 
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector2D P0;
+	FVector2D P0 = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D P1;
+	FVector2D P1 = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D P2;
+	FVector2D P2 = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	FVector2D P3;
+	FVector2D P3 = FVector2D::ZeroVector;
 
 	UPROPERTY(SaveGame)
-	double Thickness;
+	double Thickness = 0.0;
 
 	UPROPERTY(SaveGame)
-	FColor Color;
+	FColor Color = FColor::White;
 
 	FFINGPUT2DC_Bezier() = default;
 	FFINGPUT2DC_Bezier(FVector2D P0, FVector2D P1, FVector2D P2, FVector2D P3, double Thickness, FColor Color) : P0(P0), P1(P1), P2(P2), P3(P3), Thickness(Thickness), Color(Color) {}

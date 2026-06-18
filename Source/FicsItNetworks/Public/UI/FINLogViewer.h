@@ -48,7 +48,7 @@ struct FFINLogViewerStyle : public FSlateWidgetStyle {
 	FMargin IconBoxPadding;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
-	FVector2D IconSize;
+	FVector2D IconSize = FVector2D::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Appearance)
 	FSlateFontInfo DebugText;

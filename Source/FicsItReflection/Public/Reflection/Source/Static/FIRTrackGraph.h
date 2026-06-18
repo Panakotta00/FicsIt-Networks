@@ -18,7 +18,7 @@ struct FICSITREFLECTION_API FFIRTrackGraph {
 	FFIRTrace Trace;
 
 	UPROPERTY(SaveGame)
-	int TrackID;
+	int TrackID = INDEX_NONE;
 
 	static int GetTrackID(UObject* obj);
 

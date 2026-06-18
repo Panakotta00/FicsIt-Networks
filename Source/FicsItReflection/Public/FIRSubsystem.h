@@ -15,7 +15,7 @@ struct FICSITREFLECTION_API FFIRRailroadSwitchForce {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	int64 ForcedPosition;
+	int64 ForcedPosition = INDEX_NONE;
 
 	UPROPERTY(SaveGame)
 	TArray<UFGRailroadTrackConnectionComponent*> ActualConnections;
@@ -26,13 +26,13 @@ struct FICSITREFLECTION_API FFIRFactoryConnectorSettings {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	TSubclassOf<UFGItemDescriptor> AllowedItem;
+	TSubclassOf<UFGItemDescriptor> AllowedItem = nullptr;
 
 	UPROPERTY(SaveGame)
 	bool bBlocked = false;
 
 	UPROPERTY(SaveGame)
-	int64 UnblockedTransfers;
+	int64 UnblockedTransfers = 0;
 };
 
 UCLASS()

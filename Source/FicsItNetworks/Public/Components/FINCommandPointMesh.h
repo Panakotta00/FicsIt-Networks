@@ -162,10 +162,10 @@ struct FFINCommandLabelStructure {
 	FFINCommandLabelStructure() : reference(0), path(""), index(0), vertical(false), doUpdate(false), doUpdateText(false), text(""), textColor(0,0,0, 1), emit(0)  {}
  
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UObject* reference;
+	UObject* reference = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UObject* textObjectReference;
+	UObject* textObjectReference = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	FString path;

@@ -11,16 +11,16 @@ struct FICSITREFLECTION_API FFIRTargetPoint {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FVector Pos;
+	FVector Pos = FVector::ZeroVector;
 	
 	UPROPERTY(SaveGame)
-	FRotator Rot;
+	FRotator Rot = FRotator::ZeroRotator;
 
 	UPROPERTY(SaveGame)
-	float Speed;
+	float Speed = 0.0f;
 
 	UPROPERTY(SaveGame)
-	float Wait;
+	float Wait = 0.0f;
 
 	FFIRTargetPoint() = default;
 	FFIRTargetPoint(const FVector& Pos, const FRotator& Rot, float Speed, float Wait) : Pos(Pos), Rot(Rot), Speed(Speed), Wait(Wait) {}

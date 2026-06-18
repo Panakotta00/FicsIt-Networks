@@ -21,7 +21,7 @@ struct FICSITLOGLIBRARY_API FFILEntry {
 	FDateTime Timestamp;
 
 	UPROPERTY(SaveGame)
-	TEnumAsByte<EFILLogVerbosity> Verbosity;
+	TEnumAsByte<EFILLogVerbosity> Verbosity = FIL_Verbosity_Info;
 
 	UPROPERTY(SaveGame)
 	FString Content;

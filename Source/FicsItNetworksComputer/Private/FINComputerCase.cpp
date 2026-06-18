@@ -60,7 +60,6 @@ AFINComputerCase::AFINComputerCase() {
 
 	bReplicates = true;
 	bReplicateUsingRegisteredSubObjectList = true;
-	AddReplicatedSubObject(Log);
 	NetDormancy = DORM_Awake;
 }
 
@@ -106,6 +105,10 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
+
+	if (HasAuthority() && IsValid(Log)) {
+		AddReplicatedSubObject(Log);
+	}
 
 	DataStorage->OnSlotUpdatedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
 	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> Item, int32 Index) {

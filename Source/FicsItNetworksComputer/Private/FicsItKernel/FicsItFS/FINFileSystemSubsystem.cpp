@@ -48,11 +48,12 @@ TSharedPtr<CodersFileSystem::Device> AFINFileSystemSubsystem::GetDevice(const FG
 AFINFileSystemSubsystem* AFINFileSystemSubsystem::GetFileSystemSubsystem(UObject* WorldContext) {
 #if WITH_EDITOR
 	return nullptr;
-#endif
+#else
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
 	check(SubsystemActorManager);
 	return SubsystemActorManager->GetSubsystemActor<AFINFileSystemSubsystem>();
+#endif
 }
 
 FGuid AFINFileSystemSubsystem::CreateState(int32 inCapacity, class UFGInventoryComponent* inInventory, int32 inSlot) {
