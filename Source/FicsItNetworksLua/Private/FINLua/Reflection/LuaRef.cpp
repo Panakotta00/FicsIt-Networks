@@ -9,6 +9,10 @@
 #include "FINLua/LuaPersistence.h"
 #include "tracy/Tracy.hpp"
 
+#if PLATFORM_WINDOWS
+#include <excpt.h> // SEH (__try/__except) zum Abfangen von null-deref-AVs in Reflection-Gettern
+#endif
+
 namespace FINLua {
 	LuaModule(R"(/**
 	 * @LuaModule		FullReflectionModule
@@ -299,18 +303,68 @@ UE_ENABLE_OPTIMIZATION_SHIP
 		return *static_cast<UFIRFunction**>(luaL_checkudata(L, Index, ReflectionSystemBase::ReflectionFunction::_Name));
 	}
 
+#if PLATFORM_WINDOWS
+	// FIN-1.2-PORT (Root-Cause #20, LuaRef.cpp:313): Property-Getter lesen direkt
+	// `self->Feld`. Ist ein Sub-Objekt null (das Objekt selbst aber valide, daher
+	// greift der PropertyCtx.IsValid()-Check nicht), ist das eine rohe Access
+	// Violation - die kein C++-catch unter /EHsc faengt; sie fliegt ungefangen
+	// durch die als C kompilierten Lua-Frames -> Spiel-Crash. Ein einzelner kaputter
+	// Getter darf das Spiel nicht killen. Der SEH-Guard MUSS in einer eigenen
+	// Funktion ohne C++-Unwinding-Objekte stehen (sonst MSVC C2712); die eigentliche
+	// Arbeit (FIRAny-Temporary + C++-catch) liegt in der uebergebenen Lambda.
+	template<typename FuncType>
+	static bool luaFIN_runSEHGuarded(FuncType&& Work) {
+		__try {
+			Work();
+			return true;
+		} __except (EXCEPTION_EXECUTE_HANDLER) {
+			return false;
+		}
+	}
+#endif
+
+	// Liest eine Property synchron und pusht den Wert - oder erzeugt einen sauberen
+	// Lua-Error statt eines Spiel-Crashes. Faengt BEIDES ab: C++-Exceptions (wie der
+	// Funktions-Pfad) und - unter Windows - rohe null-deref-AVs via SEH. luaL_error
+	// (longjmp) wird ERST aufgerufen nachdem catch/SEH-Guard normal verlassen sind
+	// (s. a156452: longjmp aus aktivem catch -> kaputter EH-Zustand -> UI-Lock).
+	static int luaFIN_pushGuardedPropertyValue(lua_State* L, UFIRProperty* Property, const FFIRExecutionContext& Ctx) {
+		FIRAny Value;
+		TOptional<FString> Error;
+		auto Work = [&]() {
+			try {
+				Value = Property->GetValue(Ctx);
+			} catch (const FFIRException& Ex) {
+				Error = Ex.GetMessage();
+			} catch (...) {
+				Error = FString(TEXT("Unhandled C++ exception in property getter"));
+			}
+		};
+#if PLATFORM_WINDOWS
+		if (!luaFIN_runSEHGuarded(Work)) {
+			Error = FString::Printf(TEXT("Access violation while reading property '%s' (null sub-object in getter?)"), *Property->GetInternalName());
+		}
+#else
+		Work();
+#endif
+		if (Error.IsSet()) {
+			return luaL_error(L, "%s", TCHAR_TO_UTF8(*Error.GetValue()));
+		}
+		luaFIN_pushNetworkValue(L, Value);
+		return 1;
+	}
+
 	int luaFIN_getProperty(lua_State* L, UFIRProperty* Property, const FFIRExecutionContext& PropertyCtx, lua_KContext kCtx, lua_KFunction kFunc) {
 		EFIRPropertyFlags PropFlags = Property->GetPropertyFlags();
-		// TODO: Add C++ try catch block to GetProperty Execution
 		if (PropFlags & FIR_Prop_RT_Async) {
 			ZoneScopedN("Lua Get Property");
-			luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
+			return luaFIN_pushGuardedPropertyValue(L, Property, PropertyCtx);
 		} else if (PropFlags & FIR_Prop_RT_Parallel) {
 			ZoneScopedN("Lua Get Property SyncCall");
 			[[maybe_unused]] FLuaSync SyncCall(L);
 			{
 				ZoneScopedN("Lua Get Property");
-				luaFIN_pushNetworkValue(L, Property->GetValue(PropertyCtx));
+				return luaFIN_pushGuardedPropertyValue(L, Property, PropertyCtx);
 			}
 		} else {
 			luaFIN_pushFuture(L, FFINFutureReflection(Property, PropertyCtx));
