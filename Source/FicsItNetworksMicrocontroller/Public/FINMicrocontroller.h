@@ -91,7 +91,11 @@ public:
 	FGuid GetID_Implementation() const { return ID; }
 	FString GetNick_Implementation() const { return Nick; }
 	void SetNick_Implementation(const FString& nick) { Nick = nick; }
-	bool HasNick_Implementation(const FString& nick) { return HasNickByNick(Nick, nick); }
+	// Args waren vertauscht: HasNickByNick(filter, ownNick) ist die Konvention
+	// (siehe Advanced/NetworkCard). Vorher HasNickByNick(Nick, nick) -> bei
+	// leerem Nick matchte der MC JEDE findComponent-Abfrage und verseuchte alle
+	// nick-basierten Lookups (lieferte sich selbst als erstes Ergebnis).
+	bool HasNick_Implementation(const FString& nick) { return HasNickByNick(nick, Nick); }
 	UObject* GetInstanceRedirect_Implementation() { return this; }
 	bool AccessPermitted_Implementation(FGuid InID) const { return true; }
 	// End IFINNetworkComponent
