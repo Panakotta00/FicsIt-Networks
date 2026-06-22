@@ -12,7 +12,7 @@ namespace FINLua {
 	 * Contains all information about the struct
 	 */
 	struct FICSITNETWORKSLUA_API FLuaStruct : FFINLuaReferenceCollected {
-		UFIRStruct* Type = nullptr;
+		TObjectPtr<UFIRStruct> Type = nullptr;
 		TSharedRef<FFIRInstancedStruct> Struct;
 		FLuaStruct(UFIRStruct* Type, const FFIRInstancedStruct& Struct, FFINLuaReferenceCollector* ReferenceCollector);
 		virtual void CollectReferences(FReferenceCollector& Collector) override;
