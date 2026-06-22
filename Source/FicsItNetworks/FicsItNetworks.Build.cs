@@ -11,7 +11,7 @@ public class FicsItNetworks : ModuleRules
         bLegacyPublicIncludePaths = true;
 
         bEnableExceptions = true;
-        bWarningsAsErrors = false; // FIN-1.2-PORT(debt): wieder aktivieren + Warnungen fixen (UE5.6 C4702/C4996, teils in Engine-Code)
+        bWarningsAsErrors = true;
 
         CppStandard = CppStandardVersion.Cpp20;
 

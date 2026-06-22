@@ -97,7 +97,6 @@ void SFINLogViewer::Construct(const FArguments& InArgs, UObject* InWorldContext)
 			+SWidgetSwitcher::Slot()[
 				SAssignNew(ListView, SListView<TSharedRef<FFILEntry>>)
 				.ListItemsSource(&Entries)
-				.ItemHeight(Style->IconSize.Y + Style->IconBoxPadding.GetDesiredSize2f().Y)
 				.OnGenerateRow_Raw(this, &SFINLogViewer::OnGenerateRow)
 				.EnableAnimatedScrolling(true)
 				.HeaderRow(

@@ -212,7 +212,6 @@ TSharedRef<SWidget> UFINBlueprintParameterPopup::RebuildWidget() {
 		.VAlign(VAlign_Fill)
 		.HAlign(HAlign_Fill)[
 			SNew(SListView<TSharedRef<FString>>)
-			.ItemHeight(24)
 			.ListItemsSource(&Rows)
 			.OnGenerateRow_Lambda([this](TSharedRef<FString> Item, TSharedRef<STableViewBase> const& OwnerTable) {
 				return SNew(SFINBlueprintParameterRow, OwnerTable, *Item, Hologram);
