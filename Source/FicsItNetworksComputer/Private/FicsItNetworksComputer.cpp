@@ -5,6 +5,7 @@
 #include "FGGameMode.h"
 #include "FINComputerRCO.h"
 #include "FINComputerSubsystem.h"
+#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 #include "Tests.h"
 #include "Patching/NativeHookManager.h"
 #include "UObject/CoreRedirects.h"
@@ -125,6 +126,7 @@ void FFicsItNetworksComputerModule::ShutdownModule() {}
 
 UFINComputerGameWorldModule::UFINComputerGameWorldModule() {
 	ModSubsystems.Add(AFINComputerSubsystem::StaticClass());
+	ModSubsystems.Add(AFINFileSystemSubsystem::StaticClass());
 }
 
 UFINComputerGameInstanceModule::UFINComputerGameInstanceModule() {
