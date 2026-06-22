@@ -20,10 +20,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void OnEEPROMUpdate(const FFGDynamicStruct& EEPROM);
 
-	// FIN-1.2-PORT: Bindung an Computer->OnEEPROMUpdate robust in C++ herstellen +
-	// aktuellen EEPROM-Stand beim Oeffnen pushen. Behebt den "erstes Einsetzen wird
-	// nicht live angezeigt"-Bug (BP-Bindung verpasste das erste Broadcast je nach
-	// Construct-Timing). AddUniqueDynamic verhindert Doppel-Bindung mit dem BP.
+	// FIN-1.2-PORT: Establish the binding to Computer->OnEEPROMUpdate robustly in C++ +
+	// push the current EEPROM state on open. Fixes the "first insert is not shown
+	// live" bug (the BP binding missed the first broadcast depending on Construct
+	// timing). AddUniqueDynamic prevents a double binding with the BP.
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 };

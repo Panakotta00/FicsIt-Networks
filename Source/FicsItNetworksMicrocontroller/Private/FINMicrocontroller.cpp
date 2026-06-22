@@ -36,10 +36,10 @@ AFINMicrocontroller::AFINMicrocontroller() {
 }
 
 AFINMicrocontroller::~AFINMicrocontroller() {
-	// FIN-1.2-PORT: Beim Spiel-Beenden laeuft dieser Destruktor im Shutdown-GC-Purge
-	// (PurgeAllUObjectsOnExit). Der Actor ist dann bereits ungueltig und die Welt reisst ab ->
-	// Destroy() (UWorld::DestroyActor) assertet ThisActor->IsValidLowLevel() -> Crash beim Beenden.
-	// Beim Engine-Exit / World-Teardown daher kein Destroy() (im normalen Spielbetrieb unveraendert).
+	// FIN-1.2-PORT: On game shutdown this destructor runs during the shutdown GC purge
+	// (PurgeAllUObjectsOnExit). The actor is already invalid at that point and the world is tearing
+	// down -> Destroy() (UWorld::DestroyActor) asserts ThisActor->IsValidLowLevel() -> crash on exit.
+	// Therefore no Destroy() during engine exit / world teardown (unchanged in normal gameplay).
 	if (IsEngineExitRequested()) return;
 	UWorld* World = GetWorld();
 	if (World && !World->bIsTearingDown) {

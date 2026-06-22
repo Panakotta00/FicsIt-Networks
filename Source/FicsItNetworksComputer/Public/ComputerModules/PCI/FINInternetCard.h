@@ -8,20 +8,20 @@
 
 class IHttpRequest;
 
-// FIN-1.2-PORT: Snapshot der HTTP-Antwort.
-// Execute()/Completion-Delegate laufen auf dem Game-Thread (Kernel->HandleFutures bzw.
-// HttpManager-Tick), IsDone()/GetOutput() dagegen auf dem Lua-Thread (await-Poll).
-// In UE5.6 zerschiesst jeder Lua-Thread-Zugriff auf das noch lebende FHttpRequest/
-// FHttpResponse den Prozess-Heap (Race mit dem HttpManager, der den Response-Payload-
-// TArray auf dem Game-Thread befuellt) -> STATUS_HEAP_CORRUPTION (0xc0000374), verzoegert
-// auf dem Render-Thread sichtbar. Loesung: Code/Content/Headers im Completion-Delegate
-// (Game-Thread) in diese geteilte Struct kopieren; der Lua-Thread liest nur noch den
-// Snapshot und fasst das Live-Objekt nie mehr an.
+// FIN-1.2-PORT: Snapshot of the HTTP response.
+// Execute()/completion delegate run on the game thread (Kernel->HandleFutures resp.
+// HttpManager tick), whereas IsDone()/GetOutput() run on the Lua thread (await poll).
+// In UE5.6 any Lua-thread access to the still-live FHttpRequest/FHttpResponse corrupts
+// the process heap (race with the HttpManager, which fills the response payload TArray
+// on the game thread) -> STATUS_HEAP_CORRUPTION (0xc0000374), visible with a delay on the
+// render thread. Solution: copy Code/Content/Headers into this shared struct inside the
+// completion delegate (game thread); the Lua thread then only reads the snapshot and
+// never touches the live object again.
 struct FFINInternetCardHttpResult {
 	bool bComplete = false;
 	int64 Code = 0;
 	FString Content;
-	TArray<FString> Headers; // alternierend Name, Value
+	TArray<FString> Headers; // alternating Name, Value
 };
 
 USTRUCT()
@@ -29,8 +29,8 @@ struct FICSITNETWORKSCOMPUTER_API FFINInternetCardHttpRequestFuture : public FFI
 	GENERATED_BODY()
 private:
 	TSharedPtr<IHttpRequest, ESPMode::ThreadSafe> Request;
-	// Geteilter Ptr, da das Future-Struct kopiert wird: Execute() (Game-Thread) schreibt den
-	// Snapshot, IsDone()/GetOutput() (Lua-Thread) lesen ihn. Alle Kopien teilen denselben Block.
+	// Shared ptr, because the future struct gets copied: Execute() (game thread) writes the
+	// snapshot, IsDone()/GetOutput() (Lua thread) read it. All copies share the same block.
 	TSharedPtr<FFINInternetCardHttpResult> Result = MakeShared<FFINInternetCardHttpResult>();
 
 public:

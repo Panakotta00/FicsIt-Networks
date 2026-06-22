@@ -97,19 +97,19 @@ TOptional<TTuple<int, int>> FFINLuaThreadedRuntime::Run() {
 		}
 	} else if (LuaTask.IsDone() && GetStatus() == FFINLuaRuntime::Running) {
 		if (Runtime.Tick().IsSet()) {
-			// FIN-1.2-PORT (Port-Schuld #Threading): Promotion vorsorglich deaktiviert.
-			// HINWEIS: Die eigentliche 0xc0000374-Crash-Ursache war NICHT diese Threading-Race,
-			// sondern eine ungefangene FFIRException durch die Lua-C-Frames (Fix in LuaRef.cpp,
-			// luaFIN_callReflectionFunctionDirectly: catch(const FFIRException&)). Der frueher
-			// gesehene Worker-Thread-close_state-Callstack war nur die Stelle, an der die bereits
-			// vorhandene Heap-Corruption beim Threaded-Teardown detektiert wurde.
-			// Promotion bleibt vorerst aus, weil die Event-Handshake-Sync (FLuaSync/WaitForGame/
-			// ContinueGame) unter UE5.6 (neuer LowLevelTasks-Scheduler, inkrementelle GC, FEvent-
-			// Semantik) NICHT verifiziert ist. Lua laeuft synchron auf dem Game-Thread (Runtime.Tick()
-			// oben), per Tick-Budget zeitgescheibt - FINs Vor-Threading-Modell. promote() bleibt
-			// aufrufbar (ohne Worker-Effekt), bestehende Skripte funktionieren weiter.
-			// TODO (Reaktivierung): Promotion wieder einschalten + Threaded-Runtime unter UE5.6 mit
-			// promote()-Workload verifizieren; falls instabil, Sync sauber fuer UE5.6 nachziehen.
+			// FIN-1.2-PORT (port debt #Threading): promotion disabled as a precaution.
+			// NOTE: The actual cause of the 0xc0000374 crash was NOT this threading race,
+			// but an uncaught FFIRException through the Lua-C frames (fix in LuaRef.cpp,
+			// luaFIN_callReflectionFunctionDirectly: catch(const FFIRException&)). The previously
+			// seen worker-thread close_state callstack was only the place where the already
+			// present heap corruption was detected during threaded teardown.
+			// Promotion stays off for now because the event-handshake sync (FLuaSync/WaitForGame/
+			// ContinueGame) is NOT verified under UE5.6 (new LowLevelTasks scheduler, incremental GC,
+			// FEvent semantics). Lua runs synchronously on the game thread (Runtime.Tick()
+			// above), time-sliced via tick budget - FIN's pre-threading model. promote() remains
+			// callable (without worker effect), existing scripts keep working.
+			// TODO (reactivation): turn promotion back on + verify the threaded runtime under UE5.6 with
+			// a promote() workload; if unstable, port the sync cleanly to UE5.6.
 			if (false && ShouldBePromoted() && Runtime.Hook_Tick.IsSet() && !Runtime.Timeout.IsSet()) {
 				LuaTask.StartBackgroundTask(GThreadPool, EQueuedWorkPriority::Normal, EQueuedWorkFlags::DoNotRunInsideBusyWait, -1, TEXT("FINLuaThreadedRuntime"));
 			}

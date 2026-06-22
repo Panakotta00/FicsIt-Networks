@@ -60,8 +60,8 @@ AFINComputerCase::AFINComputerCase() {
 
 	bReplicates = true;
 	bReplicateUsingRegisteredSubObjectList = true;
-	// FIN-1.2-PORT: AddReplicatedSubObject(Log) aus Konstruktor entfernt — crasht in UE5.6 bei
-	// CDO-Konstruktion (Cook). Registrierung gehört an die Instanz -> nach BeginPlay verschoben.
+	// FIN-1.2-PORT: AddReplicatedSubObject(Log) removed from the constructor - crashes in UE5.6 during
+	// CDO construction (Cook). Registration belongs on the instance -> moved to after BeginPlay.
 	NetDormancy = DORM_Awake;
 }
 
@@ -108,7 +108,7 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
 
-	if (HasAuthority()) AddReplicatedSubObject(Log); // FIN-1.2-PORT: hier statt im Konstruktor (CDO-Crash)
+	if (HasAuthority()) AddReplicatedSubObject(Log); // FIN-1.2-PORT: here instead of in the constructor (CDO crash)
 
 	DataStorage->OnSlotUpdatedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
 	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> Item, int32 Index) {

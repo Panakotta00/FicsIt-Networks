@@ -2,20 +2,20 @@
 
 #include "FINComputerCase.h"
 
-// FIN-1.2-PORT: Live-Update-Bug beim allerersten EEPROM-Einsetzen.
-// Der C++-Delegate-Pfad (OnSlotUpdated -> OnEEPROMChanged -> Multicast ->
-// OnEEPROMUpdate.Broadcast) ist korrekt und feuert bei jedem Insert. Der Bug lag
-// in der Blueprint-seitigen Bindung, die das allererste Broadcast je nach
-// Construct-Timing verpasste. Hier binden wir den Delegate fest in C++ und pushen
-// zusaetzlich den aktuellen Stand beim Oeffnen -> erstes Event wird nie verpasst.
+// FIN-1.2-PORT: Live-update bug on the very first EEPROM insert.
+// The C++ delegate path (OnSlotUpdated -> OnEEPROMChanged -> Multicast ->
+// OnEEPROMUpdate.Broadcast) is correct and fires on every insert. The bug was
+// in the Blueprint-side binding, which missed the very first broadcast depending
+// on Construct timing. Here we bind the delegate firmly in C++ and additionally
+// push the current state on open -> the first event is never missed.
 
 void UFINComputerCaseWidget::NativeConstruct() {
 	Super::NativeConstruct();
 
 	if (Computer) {
-		// Robuste Bindung (AddUnique -> kein Doppel-Refresh, falls das BP es auch bindet).
+		// Robust binding (AddUnique -> no double refresh if the BP also binds it).
 		Computer->OnEEPROMUpdate.AddUniqueDynamic(this, &UFINComputerCaseWidget::OnEEPROMUpdate);
-		// Aktuellen Stand sofort an die UI pushen (korrekte Anzeige direkt beim Oeffnen).
+		// Push the current state to the UI immediately (correct display right on open).
 		OnEEPROMUpdate(Computer->GetEEPROM());
 	}
 }

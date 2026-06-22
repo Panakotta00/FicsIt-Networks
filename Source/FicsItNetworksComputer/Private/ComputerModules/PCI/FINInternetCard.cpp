@@ -9,11 +9,11 @@ FFINInternetCardHttpRequestFuture::FFINInternetCardHttpRequestFuture(TSharedRef<
 
 void FFINInternetCardHttpRequestFuture::Execute() {
 	if (!Request.IsValid()) return;
-	// FIN-1.2-PORT: Antwort im Completion-Delegate (Game-Thread, HttpManager-Tick) in den
-	// geteilten Snapshot kopieren. Damit liest der Lua-Thread (IsDone/GetOutput) NIE das
-	// lebende FHttpResponse -> kein Cross-Thread-Race auf dem Response-Payload -> kein
-	// Heap-Corruption-Crash (0xc0000374), den UE5.6 hier sonst ausloest.
-	// Der Delegate feuert garantiert bei Erfolg UND Fehlschlag, sofern gebunden (IHttpRequest.h).
+	// FIN-1.2-PORT: Copy the response into the shared snapshot inside the completion delegate
+	// (game thread, HttpManager tick). This way the Lua thread (IsDone/GetOutput) NEVER reads the
+	// live FHttpResponse -> no cross-thread race on the response payload -> no
+	// heap-corruption crash (0xc0000374) that UE5.6 would otherwise trigger here.
+	// The delegate is guaranteed to fire on success AND failure, as long as it is bound (IHttpRequest.h).
 	TSharedPtr<FFINInternetCardHttpResult> Res = Result;
 	Request->OnProcessRequestComplete().BindLambda(
 		[Res](FHttpRequestPtr, FHttpResponsePtr Response, bool bSucceeded) {
@@ -32,15 +32,15 @@ void FFINInternetCardHttpRequestFuture::Execute() {
 			}
 			Res->bComplete = true;
 		});
-	// Wenn ProcessRequest gar nicht erst startet, feuert der Delegate nicht -> sonst haengt
-	// await() ewig. Dann sofort als fertig (mit leerer Antwort) markieren.
+	// If ProcessRequest never starts, the delegate does not fire -> otherwise await()
+	// would hang forever. In that case mark it as done immediately (with an empty response).
 	if (!Request->ProcessRequest()) {
 		Res->bComplete = true;
 	}
 }
 
 bool FFINInternetCardHttpRequestFuture::IsDone() const {
-	// Nur den geteilten Snapshot lesen - kein Zugriff auf das Live-FHttpRequest vom Lua-Thread.
+	// Only read the shared snapshot - no access to the live FHttpRequest from the Lua thread.
 	if (!Result.IsValid()) return true;
 	return Result->bComplete;
 }

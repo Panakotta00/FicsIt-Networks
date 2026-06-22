@@ -10,7 +10,7 @@
 #include "tracy/Tracy.hpp"
 
 #if PLATFORM_WINDOWS
-#include <excpt.h> // SEH (__try/__except) zum Abfangen von null-deref-AVs in Reflection-Gettern
+#include <excpt.h> // SEH (__try/__except) to catch null-deref AVs in reflection getters
 #endif
 
 namespace FINLua {
@@ -209,17 +209,17 @@ namespace FINLua {
 
 		TArray<FIRAny> Parameters = luaFIN_callReflectionFunctionProcessInput(L, Function, nArgs);
 
-		// FIN-1.2-PORT (Root-Cause 0xc0000374-Crash UND UI-Lock): netFunc-Exceptions hier fangen,
-		// aber die Fehlermeldung NUR ERFASSEN und den catch-Block NORMAL VERLASSEN. luaL_error/
-		// luaFIN_argError erst DANACH aufrufen (ausserhalb des catch).
-		// Warum: netFunc_request wirft die Basis-FFIRException ("Req-Payload given without
-		// Content-Type") - die muss gefangen werden, sonst fliegt sie ungefangen durch die als C
-		// kompilierten Lua-Frames (longjmp-Welt) -> Heap-Corruption (0xc0000374).
-		// ABER: luaL_error macht selbst longjmp. Ein longjmp aus einem AKTIVEN C++-catch-Block
-		// beendet die laufende Exception nie sauber (__cxa_end_catch entfaellt) -> Thread-C++-EH-
-		// Zustand kaputt -> UEs UI/Slate-Exception-Handling spinnt -> Computer-Panel laesst sich
-		// nicht mehr schliessen (Spiel-Neustart noetig). Ein simples Lua error() hat das nicht,
-		// weil kein C++-catch im Spiel ist. Loesung: erst den catch sauber verlassen, dann longjmp.
+		// FIN-1.2-PORT (root cause of the 0xc0000374 crash AND the UI lock): catch netFunc exceptions
+		// here, but ONLY CAPTURE the error message and LEAVE the catch block NORMALLY. Call luaL_error/
+		// luaFIN_argError only AFTERWARDS (outside the catch).
+		// Why: netFunc_request throws the base FFIRException ("Req-Payload given without
+		// Content-Type") - it must be caught, otherwise it flies through uncaught across the Lua frames
+		// compiled as C (the longjmp world) -> heap corruption (0xc0000374).
+		// BUT: luaL_error itself does a longjmp. A longjmp out of an ACTIVE C++ catch block never
+		// terminates the in-flight exception cleanly (__cxa_end_catch is skipped) -> the thread's C++ EH
+		// state is broken -> UE's UI/Slate exception handling misbehaves -> the computer panel can no
+		// longer be closed (requires a game restart). A plain Lua error() does not have this problem
+		// because there is no C++ catch involved. Solution: leave the catch cleanly first, then longjmp.
 		TArray<FIRAny> Output;
 		bool bArgError = false;
 		int ArgErrorIndex = 0;
@@ -237,7 +237,7 @@ namespace FINLua {
 		} catch (...) {
 			ErrorMessage = FString(TEXT("Unhandled C++ exception in reflection function call"));
 		}
-		// Ab hier ist der catch-Block normal verlassen -> C++-EH-Zustand sauber. Jetzt darf longjmp.
+		// From here the catch block has been left normally -> C++ EH state is clean. longjmp is now safe.
 		if (ErrorMessage.IsSet()) {
 			if (bArgError) return luaFIN_argError(L, ArgErrorIndex, ErrorMessage.GetValue());
 			return luaL_error(L, TCHAR_TO_UTF8(*ErrorMessage.GetValue()));
@@ -304,14 +304,14 @@ UE_ENABLE_OPTIMIZATION_SHIP
 	}
 
 #if PLATFORM_WINDOWS
-	// FIN-1.2-PORT (Root-Cause #20, LuaRef.cpp:313): Property-Getter lesen direkt
-	// `self->Feld`. Ist ein Sub-Objekt null (das Objekt selbst aber valide, daher
-	// greift der PropertyCtx.IsValid()-Check nicht), ist das eine rohe Access
-	// Violation - die kein C++-catch unter /EHsc faengt; sie fliegt ungefangen
-	// durch die als C kompilierten Lua-Frames -> Spiel-Crash. Ein einzelner kaputter
-	// Getter darf das Spiel nicht killen. Der SEH-Guard MUSS in einer eigenen
-	// Funktion ohne C++-Unwinding-Objekte stehen (sonst MSVC C2712); die eigentliche
-	// Arbeit (FIRAny-Temporary + C++-catch) liegt in der uebergebenen Lambda.
+	// FIN-1.2-PORT (root cause #20, LuaRef.cpp:313): property getters read `self->Field`
+	// directly. If a sub-object is null (but the object itself is valid, so the
+	// PropertyCtx.IsValid() check does not catch it), this is a raw access
+	// violation - which no C++ catch under /EHsc handles; it flies through uncaught
+	// across the Lua frames compiled as C -> game crash. A single broken getter
+	// must not kill the game. The SEH guard MUST live in its own function without
+	// C++ unwinding objects (otherwise MSVC C2712); the actual work
+	// (FIRAny temporary + C++ catch) lives in the passed lambda.
 	template<typename FuncType>
 	static bool luaFIN_runSEHGuarded(FuncType&& Work) {
 		__try {
@@ -323,11 +323,11 @@ UE_ENABLE_OPTIMIZATION_SHIP
 	}
 #endif
 
-	// Liest eine Property synchron und pusht den Wert - oder erzeugt einen sauberen
-	// Lua-Error statt eines Spiel-Crashes. Faengt BEIDES ab: C++-Exceptions (wie der
-	// Funktions-Pfad) und - unter Windows - rohe null-deref-AVs via SEH. luaL_error
-	// (longjmp) wird ERST aufgerufen nachdem catch/SEH-Guard normal verlassen sind
-	// (s. a156452: longjmp aus aktivem catch -> kaputter EH-Zustand -> UI-Lock).
+	// Reads a property synchronously and pushes the value - or raises a clean
+	// Lua error instead of a game crash. Catches BOTH: C++ exceptions (like the
+	// function path) and - on Windows - raw null-deref AVs via SEH. luaL_error
+	// (longjmp) is called ONLY after the catch/SEH guard have been left normally
+	// (see a156452: longjmp out of an active catch -> broken EH state -> UI lock).
 	static int luaFIN_pushGuardedPropertyValue(lua_State* L, UFIRProperty* Property, const FFIRExecutionContext& Ctx) {
 		FIRAny Value;
 		TOptional<FString> Error;
