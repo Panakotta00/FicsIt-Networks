@@ -221,3 +221,38 @@ Migration am gecookten Asset verifiziert. In-game bestaetigt: Config-UI oeffnet 
 ### ✅ Bug #14 GEFIXT — EEPROM erstes Einsetzen kein Live-Update
 UFINComputerCaseWidget::NativeConstruct bindet OnEEPROMUpdate (AddUniqueDynamic) + pusht GetEEPROM().
 In-game bestaetigt: EEPROM wird sofort angezeigt.
+
+### ✅ Bug #15 GEFIXT — UI-Input-Lock nach netFunc-Fehler (a156452)
+Reflection-Funktion wirft FFIRException -> wurde in C++-catch gefangen -> `luaL_error` (longjmp)
+WAEHREND der catch noch aktiv war -> kaputter EH-Zustand -> Spiel-Eingabe blockiert (Klicks tot,
+nur Alt-Tab half). Fix (LuaRef.cpp): catch zuerst verlassen, DANN luaL_error. Passiv bewiesen:
+ganze Session laufend netFunc-Fehler im Reflection-Walk, Eingabe nie geklemmt. Betrifft den
+PARALLEL-Thread-Pfad (RT_Parallel / luaL_error).
+
+### ✅ BUG #16 GEFIXT — runtime-0-Throw liefert fangbaren Lua-Fehler statt [Fatal]
+**Vollstaendig gefixt + in-game verifiziert 2026-06-22:** `identifier:addWaypoint("not-a-guid")` (in pcall)
+liefert jetzt `ok=false, err='invalid GUID string'` (die ECHTE Meldung), **kein `[Fatal]`, kein Crash/
+Freeze**, Heartbeat laeuft stabil weiter (R628->630). DREI zusammenwirkende Teile:
+1. `FFINFutureReflection::Execute()` (FINFuture.cpp, laeuft GAME-Thread) komplett in try/catch -> faengt
+   die geworfene FFIRException ab (sonst [Fatal], weil kein C++-catch in den Lua-C-Frames) -> setzt
+   `bError`/`ErrorMessage` (FINFuture.h) + `bDone` IMMER (sonst haengt await ewig).
+2. `lua_futureStructContinue` (LuaFuture.cpp) prueft nach IsDone `HasError()` -> `luaL_error(echte Msg)`
+   -> die await-Coroutine wird damit zu Future_Failed.
+3. **DER FEHLENDE TEIL** (per UE_LOG-Diagnose gefunden): `poll_continue` (LuaFuture.cpp) schloss den
+   Coroutine-Thread bei JEDEM Resume-Ende per `lua_closethread` — also auch bei ERROR-Status -> der
+   Fehler wurde verworfen, der Thread zurueckgesetzt, await sah kein Future_Failed mehr -> generisches
+   "poll reported finished, but future is not ready". Fix: `lua_closethread` nur noch bei `status==LUA_OK`;
+   bei Fehler bleibt der Thread im Failed-Zustand -> await propagiert die echte Meldung. War ein
+   VORBESTEHENDER latenter Bug (await ist laut Doc-Comment "propagates error") den erst eine werfende
+   runtime-0-Funktion sichtbar machte. Betrifft jetzt ALLE Futures positiv (Lua-async-Fehler propagieren
+   auch sauber). Diagnose-UE_LOGs wieder entfernt. Urspruengliche Analyse:
+ENTDECKT + BESTAETIGT 2026-06-22 beim #15-Test. Eine Reflection-Funktion mit runtime=0 (Game-Thread,
+via Future) die eine FFIRException wirft (z.B. `addWaypoint`/`insertWaypoint`: `if(!FGuid::Parse) throw`)
+liefert die Exception NICHT als Lua-Fehler aus -> `pcall` faengt sie NICHT -> sie wird `[Fatal]` und
+HALTED den Computer-Kernel (eingefroren, Heartbeat stoppt). Beweis im Spiel-Log:
+`[REPL] --- seq inputlock ---` direkt gefolgt von `[Fatal] invalid GUID string`, obwohl der Aufruf
+in `pcall` lag. Game-Thread selbst laeuft weiter (Spiel reagiert), nur der Computer ist tot -> Reboot/
+Power-Cycle noetig. ANDERS als #15 (Parallel-Thread). FIX-Richtung: im Game-Thread-Future-Executor den
+Body in try/catch, Exception in den Future-Fehlerkanal legen -> propagiert sauber als fangbarer Lua-Fehler
+statt [Fatal]. Betrifft ALLE runtime-0-Funcs mit InVal/throw (addWaypoint, insertWaypoint, linkTo mit
+ungueltigem Arg, ...). Siehe property-setter-threading + ue56-exception-crash Memories.
