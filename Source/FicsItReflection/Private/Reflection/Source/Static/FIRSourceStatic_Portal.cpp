@@ -37,14 +37,21 @@
 namespace FIR_PortalReflection {
 
 // ---- runtime-resolved portal UClasses (filled lazily on first registration) ----
+// NOTE: the UClass object name strips only the SINGLE leading type-prefix letter
+// from the C++ class name (the `A` of an AActor subclass / the `U` of a UObject),
+// NOT the project `FG` tag. So `AFGBuildablePortalBase` is registered as the
+// object `/Script/FactoryGame.FGBuildablePortalBase` (compare the inventory
+// lookup below, `UFGInventoryComponent` -> `FGInventoryComponent`). The previous
+// paths dropped the whole `AFG` prefix -> FindObject returned nullptr ->
+// AddClass(nullptr,...) was a no-op and the reflection never registered.
 static UClass* GetPortalBaseClass() {
-	return FindObject<UClass>(nullptr, TEXT("/Script/FactoryGame.BuildablePortalBase"));
+	return FindObject<UClass>(nullptr, TEXT("/Script/FactoryGame.FGBuildablePortalBase"));
 }
 static UClass* GetPortalMainClass() {
-	return FindObject<UClass>(nullptr, TEXT("/Script/FactoryGame.BuildablePortal"));
+	return FindObject<UClass>(nullptr, TEXT("/Script/FactoryGame.FGBuildablePortal"));
 }
 static UClass* GetPortalSatelliteClass() {
-	return FindObject<UClass>(nullptr, TEXT("/Script/FactoryGame.BuildablePortalSatellite"));
+	return FindObject<UClass>(nullptr, TEXT("/Script/FactoryGame.FGBuildablePortalSatellite"));
 }
 
 // ---------------------------------------------------------------------------
