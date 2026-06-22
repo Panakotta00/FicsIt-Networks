@@ -12,6 +12,19 @@
 #include "Reflection/FIRStructProperty.h"
 #include "Reflection/FIRTraceProperty.h"
 
+// FIN-1.2-PORT: This header defines a function-like macro `Body()` (see below).
+// Several static-reflection .cpp files transitively include
+// Chaos/Evolution/SolverBody.h (e.g. via FGInventoryComponent.h), whose
+// `: Body(nullptr)` member-init line collides with that macro -> C4002 and a
+// cascade of Chaos compile errors. In a unity build the failure is order-
+// dependent (the macro, once defined by the first file in a blob, leaks into a
+// later file's SolverBody.h include). Pre-including SolverBody.h HERE -- while
+// `Body` is still undefined -- sets its include guard cleanly, so every later
+// transitive include is skipped and the macro can never reach it. SolverBody.h
+// itself compiles fine in this module; it does NOT drag in the broken portal/
+// ChaosSolverConfiguration UHT context.
+#include "Chaos/Evolution/SolverBody.h"
+
 #define TypeClassName(Type) FIR_StaticRef_ ## Type
 #define NSName "FicsItNetworks-StaticReflection"
 #define FIRRefLocText(KeyName, Value) FText::AsLocalizable_Advanced(TEXT(NSName), KeyName, Value)
