@@ -56,6 +56,14 @@ struct FICSITNETWORKSMISC_API FFINFutureReflection : public FFINFuture {
 	UPROPERTY(SaveGame)
 	UFIRProperty* Property = nullptr;
 
+	// BUG #16: If Function->Execute / a property throws an FFIRException on the game thread, it must
+	// NOT fly through uncaught (it would become [Fatal] since there is no C++ catch across the Lua C
+	// frames -> computer kernel halted). Instead capture it here and hand it back via HasError() to the
+	// await continuation, which turns it into a catchable Lua error. Transient (no SaveGame): a failed
+	// future is immediately done and is not persisted mid-flight.
+	bool bError = false;
+	FString ErrorMessage;
+
 	static FCriticalSection Mutex;
 
 	// TODO: Maybe do a LogScope snapshot?
@@ -74,6 +82,13 @@ struct FICSITNETWORKSMISC_API FFINFutureReflection : public FFINFuture {
 	virtual TArray<FFIRAnyValue> GetOutput() const override {
 		FScopeLock Lock(const_cast<FCriticalSection*>(&Mutex));
 		return Output;
+	}
+
+	// BUG #16: true if the game-thread execution caught an exception; OutMessage = the message.
+	bool HasError(FString& OutMessage) const {
+		FScopeLock Lock(const_cast<FCriticalSection*>(&Mutex));
+		if (bError) { OutMessage = ErrorMessage; return true; }
+		return false;
 	}
 };
 

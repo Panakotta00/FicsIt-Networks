@@ -221,7 +221,14 @@ namespace FINLua {
 						lua_newtable(L);
 						lua_setiuservalue(L, 1, 3);
 
-						lua_closethread(thread, L);
+						// BUG #16: Only reset the thread on clean completion (LUA_OK). On an ERROR status
+						// leave it in its failed state so await_continue sees Future_Failed and propagates
+						// the real error message; closing it here discards the error and the awaiter ends
+						// up reporting a generic "future is not ready" instead. await is documented to
+						// propagate errors (see its doc-comment), so swallowing them here was a latent bug.
+						if (status == LUA_OK) {
+							lua_closethread(thread, L);
+						}
 
 						lua_pushboolean(L, true);
 						return 1;
@@ -772,6 +779,14 @@ namespace FINLua {
 		FFIRTrace Trace;
 		if (future->GetStruct() == FFINFutureReflection::StaticStruct()) {
 			FFINFutureReflection& refFuture = future->Get<FFINFutureReflection>();
+			// BUG #16: If the future's game-thread execution threw, raise it here as a catchable Lua
+			// error. Safe w.r.t. #15 (a156452): we are in the await continuation on the Lua thread with
+			// no active C++ catch, so luaL_error's longjmp is clean. poll_continue keeps the failed
+			// thread alive so this propagates as the real message instead of a generic "not ready".
+			FString ErrMsg;
+			if (refFuture.HasError(ErrMsg)) {
+				return luaL_error(L, "%s", TCHAR_TO_UTF8(*ErrMsg));
+			}
 			FScopeLock Lock(&refFuture.Mutex);
 			Trace = refFuture.Context.GetTrace();
 		}
