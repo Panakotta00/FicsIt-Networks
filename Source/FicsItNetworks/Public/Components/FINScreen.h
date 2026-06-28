@@ -104,4 +104,7 @@ public:
 
 private:
 	void ConstructParts();
+	// True wenn die Screen-Teile direkt rendern muessen (im Blueprint-Designer) statt via
+	// Instanz-Manager. Wird in den (statischen) Spawn-Helfern via Cast<AFINScreen>(Parent) genutzt.
+	bool PartsShouldRenderDirectly() const;
 };

@@ -182,7 +182,8 @@ public:
 	}
 
 	void Unregister() override {
-		Cast<AFGBuildable>(Sender)->mOnProductionStatusChanged.Remove(Handle);
+		// Sender kann beim Welt-Teardown schon zerstoert sein -> IsValid-Guard gegen Null-Deref (0x380-Crash)
+		if (IsValid(Sender)) Cast<AFGBuildable>(Sender)->mOnProductionStatusChanged.Remove(Handle);
 	}
 };
 
@@ -245,7 +246,7 @@ public:
 	}
 
 	void Unregister() override {
-		Cast<AFGTrain>(Sender)->mOnSelfDrivingChanged.RemoveDynamic(this, &UFIRTrainHook::SelfDrvingUpdate);
+		if (IsValid(Sender)) Cast<AFGTrain>(Sender)->mOnSelfDrivingChanged.RemoveDynamic(this, &UFIRTrainHook::SelfDrvingUpdate);
 	}
 };
 
@@ -324,8 +325,10 @@ public:
 	}
 
 	void Unregister() override {
-		Cast<AFGBuildableRailroadSignal>(Sender)->mOnAspectChangedDelegate.RemoveDynamic(this, &UFIRRailroadSignalHook::AspectChanged);
-		Cast<AFGBuildableRailroadSignal>(Sender)->mOnBlockValidationChangedDelegate.RemoveDynamic(this, &UFIRRailroadSignalHook::ValidationChanged);
+		if (IsValid(Sender)) {
+			Cast<AFGBuildableRailroadSignal>(Sender)->mOnAspectChangedDelegate.RemoveDynamic(this, &UFIRRailroadSignalHook::AspectChanged);
+			Cast<AFGBuildableRailroadSignal>(Sender)->mOnBlockValidationChangedDelegate.RemoveDynamic(this, &UFIRRailroadSignalHook::ValidationChanged);
+		}
 	}
 };
 
@@ -552,8 +555,10 @@ public:
 	}
 
 	void Unregister() override {
-		Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageNewItemAddedDelegate.RemoveDynamic(this, &UFIRDimensionalDepotHook::NewItem);
-		Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageItemAmountUpdatedDelegate.RemoveDynamic(this, &UFIRDimensionalDepotHook::AmountUpdated);
-		Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageItemLimitReachedUpdated.RemoveDynamic(this, &UFIRDimensionalDepotHook::LimitedReachedUpdated);
+		if (IsValid(Sender)) {
+			Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageNewItemAddedDelegate.RemoveDynamic(this, &UFIRDimensionalDepotHook::NewItem);
+			Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageItemAmountUpdatedDelegate.RemoveDynamic(this, &UFIRDimensionalDepotHook::AmountUpdated);
+			Cast<AFGCentralStorageSubsystem>(Sender)->mOnCentralStorageItemLimitReachedUpdated.RemoveDynamic(this, &UFIRDimensionalDepotHook::LimitedReachedUpdated);
+		}
 	}
 };

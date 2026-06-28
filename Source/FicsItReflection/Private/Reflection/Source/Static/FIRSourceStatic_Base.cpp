@@ -7,18 +7,18 @@
 
 BeginClass(UObject, "Object", "Object", "The base class of every object.")
 	BeginProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
-	FIRReturn (int64)GetTypeHash(self->GetPathName());
+	FIRReturn (int64)GetTypeHash(IsValid(self) ? self->GetPathName() : FString());
 } EndProp()
 BeginProp(RString, internalName, "internalName", "The unreal engine internal name of this object.") {
-	FIRReturn (FIRStr) self->GetName();
+	FIRReturn (FIRStr)(IsValid(self) ? self->GetName() : FString());
 } EndProp()
 BeginProp(RString, internalPath, "internalPath", "The unreal engine internal path name of this object.") {
-	FIRReturn (FIRStr) self->GetPathName();
+	FIRReturn (FIRStr)(IsValid(self) ? self->GetPathName() : FString());
 } EndProp()
 BeginFunc(getHash, "Get Hash", "Returns a hash of this object. This is a value that nearly uniquely identifies this object.") {
 	OutVal(0, RInt, hash, "Hash", "The hash of this object.");
 	Body()
-	hash = (int64)GetTypeHash(self->GetPathName());
+	hash = (int64)GetTypeHash(IsValid(self) ? self->GetPathName() : FString());
 } EndFunc()
 BeginFunc(getType, "Get Type", "Returns the type (aka class) of this object.") {
 	OutVal(0, RObject<UFIRClass>, type, "Type", "The type of this object");
@@ -32,18 +32,18 @@ BeginFunc(isA, "Is A", "Checks if this Object is a child of the given typen.") {
 	isChild = (FIRBool)self->IsA(parent);
 } EndFunc()
 BeginClassProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
-	FIRReturn (int64)GetTypeHash(self->GetPathName());
+	FIRReturn (int64)GetTypeHash(IsValid(self) ? self->GetPathName() : FString());
 } EndProp()
 BeginClassProp(RString, internalName, "internalName", "The unreal engine internal name of this object.") {
-	FIRReturn (FIRStr) self->GetName();
+	FIRReturn (FIRStr)(IsValid(self) ? self->GetName() : FString());
 } EndProp()
 BeginClassProp(RString, internalPath, "internalPath", "The unreal engine internal path name of this object.") {
-	FIRReturn (FIRStr) self->GetPathName();
+	FIRReturn (FIRStr)(IsValid(self) ? self->GetPathName() : FString());
 } EndProp()
 BeginClassFunc(getHash, "Get Hash", "Returns the hash of this class. This is a value that nearly uniquely idenfies this object.", false) {
 	OutVal(0, RInt, hash, "Hash", "The hash of this class.");
 	Body()
-	hash = (int64) GetTypeHash(self->GetPathName());
+	hash = (int64) GetTypeHash(IsValid(self) ? self->GetPathName() : FString());
 } EndFunc()
 BeginClassFunc(getType, "Get Type", "Returns the type (aka class) of this class instance.", false) {
 	OutVal(0, RObject<UFIRClass>, type, "Type", "The type of this class instance");

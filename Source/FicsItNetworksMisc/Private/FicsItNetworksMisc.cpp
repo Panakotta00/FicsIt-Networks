@@ -12,17 +12,26 @@
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworksMisc);
 
-void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterface*)>& scope, IFGDismantleInterface* self_r) {
-	AFGBuildable* self = dynamic_cast<AFGBuildable*>(self_r);
+// Zerstoert rekursiv alle Module aller Modul-Panels eines Actors. Rekursion ist noetig, weil ein Modul
+// selbst ein Panel sein kann (Subplate): module->Destroy() loest dessen Dismantle-Hook NICHT aus, also
+// muessen die verschachtelten Module vorher explizit mit zerstoert werden, sonst bleiben sie verwaist
+// (kaputtes Buildable -> spaeter Crash z.B. in AFGRainAudioSubsystem::GetCombinedClearanceBox).
+static void FINDestroyPanelModules(AActor* actor) {
+	if (!IsValid(actor)) return;
 	TInlineComponentArray<UFINModuleSystemPanel*> panels;
-	self->GetComponents(panels);
+	actor->GetComponents(panels);
 	for (UFINModuleSystemPanel* panel : panels) {
 		TArray<AActor*> modules;
 		panel->GetModules(modules);
 		for (AActor* module : modules) {
-			module->Destroy();
+			FINDestroyPanelModules(module);   // erst die verschachtelten (Subplate-)Module
+			if (IsValid(module)) module->Destroy();
 		}
 	}
+}
+
+void AFGBuildable_Dismantle_Implementation(CallScope<void(*)(IFGDismantleInterface*)>& scope, IFGDismantleInterface* self_r) {
+	FINDestroyPanelModules(dynamic_cast<AFGBuildable*>(self_r));
 }
 
 void AFGBuildable_GetDismantleRefund_Implementation(CallScope<void(*)(const IFGDismantleInterface*, TArray<FInventoryStack>&, bool)>& scope, const IFGDismantleInterface* self_r, TArray<FInventoryStack>& refund, bool noCost) {

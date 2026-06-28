@@ -45,6 +45,24 @@ void AFINScreen::BeginPlay() {
 	WidgetComponent->AddRelativeLocation(WidgetOffset);
 	WidgetComponent->SetDrawSize(WidgetComponent->GetDrawSize() * FVector2D(FMath::Abs(ScreenWidth), FMath::Abs(ScreenHeight)));
 
+	// Blueprint-Designer-Sichtbarkeit: die Screen-Teile sind UFGColoredInstanceMeshProxy und
+	// rendern im Shipping-Game nur selbst wenn mBlockInstancing==true (ShouldCreateRenderState).
+	// Im Designer greift der Instanz-Manager die dynamisch erzeugten Teile nicht auf -> sonst
+	// unsichtbar. Die Spawn-Helfer setzen das Flag bereits VOR RegisterComponent (sauberer
+	// Render-State, kein Pop beim Save-Laden). Dieser Loop ist nur Fallback fuer frisch im
+	// Designer platzierte Screens, bei denen der Designer-Status zur Spawn-Zeit noch nicht
+	// feststand; bereits gesetzte Teile werden uebersprungen (kein erneuter Aufbau = kein Pop).
+	if (IsBuildableInsideBlueprintDesigner()) {
+		for (UStaticMeshComponent* part : Parts) {
+			if (UFGColoredInstanceMeshProxy* proxy = Cast<UFGColoredInstanceMeshProxy>(part)) {
+				if (!proxy->mBlockInstancing) {
+					proxy->mBlockInstancing = true;
+					proxy->MarkRenderStateDirty();
+				}
+			}
+		}
+	}
+
 	//for (AFINNetworkCable* Cable : Connector->GetConnectedCables()) Cable->RerunConstructionScripts(); TODO: Check if really needed
 }
 
@@ -113,6 +131,7 @@ void AFINScreen::SpawnComponents(TSubclassOf<UStaticMeshComponent> Class, int Sc
 			UStaticMeshComponent* MiddlePart = NewObject<UStaticMeshComponent>(Parent, Class);
 			MiddlePart->AttachToComponent(Attach, FAttachmentTransformRules::KeepRelativeTransform);
 			MiddlePart->SetRelativeLocation(FVector(0, x * 100 * xf - 50, y * 100 * yf - 50));
+			if (AFINScreen* s = Cast<AFINScreen>(Parent)) if (s->PartsShouldRenderDirectly()) if (UFGColoredInstanceMeshProxy* px = Cast<UFGColoredInstanceMeshProxy>(MiddlePart)) px->mBlockInstancing = true;
 			MiddlePart->RegisterComponent();
 			MiddlePart->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 			MiddlePart->SetStaticMesh(MiddlePartMesh);
@@ -168,6 +187,7 @@ void AFINScreen::SpawnEdgeComponent(TSubclassOf<UStaticMeshComponent> Class, int
 	default:
 		break;
 	}
+	if (AFINScreen* s = Cast<AFINScreen>(Parent)) if (s->PartsShouldRenderDirectly()) if (UFGColoredInstanceMeshProxy* px = Cast<UFGColoredInstanceMeshProxy>(EdgePart)) px->mBlockInstancing = true;
 	EdgePart->RegisterComponent();
 	EdgePart->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 	EdgePart->SetStaticMesh(EdgePartMesh);
@@ -222,6 +242,7 @@ void AFINScreen::SpawnCornerComponent(TSubclassOf<UStaticMeshComponent> Class, i
 	default:
 		break;
 	}
+	if (AFINScreen* s = Cast<AFINScreen>(Parent)) if (s->PartsShouldRenderDirectly()) if (UFGColoredInstanceMeshProxy* px = Cast<UFGColoredInstanceMeshProxy>(CornerPart)) px->mBlockInstancing = true;
 	CornerPart->RegisterComponent();
 	CornerPart->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 	CornerPart->SetStaticMesh(CornerPartMesh);
@@ -258,4 +279,13 @@ void AFINScreen::ConstructParts() {
 	Connector->SetMobility(EComponentMobility::Movable);
 	Connector->SetRelativeLocation(ConnectorOffset);
 	Connector->SetMobility(EComponentMobility::Static);
+}
+
+// True wenn dieses Screen-Buildable in einem Blueprint-Designer steht. Dann muessen die
+// Screen-Teile (UFGColoredInstanceMeshProxy) ihr Mesh DIREKT rendern (mBlockInstancing),
+// weil der Instanz-Manager die im Designer dynamisch erzeugten Instanzen nicht aufgreift.
+// Beim Save-Laden ist mBlueprintDesigner bereits wiederhergestellt -> schon vor dem
+// RegisterComponent gesetzt entsteht der Render-State gleich korrekt (kein Pop beim Laden).
+bool AFINScreen::PartsShouldRenderDirectly() const {
+	return GetBlueprintDesigner() != nullptr || IsBuildableInsideBlueprintDesigner();
 }
