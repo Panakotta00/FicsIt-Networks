@@ -2,9 +2,9 @@
 
 #include "FGGameRulesSubsystem.h"
 #include "FGInventoryComponent.h"
-#include "FINItemStateFileSystem.h"
-#include "ReflectionHelper.h"
-#include "Widget.h"
+#include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
+#include "Reflection/ReflectionHelper.h"
+#include "Components/Widget.h"
 #include "HAL/PlatformApplicationMisc.h"
 
 struct FFINItemStateFileSystem;

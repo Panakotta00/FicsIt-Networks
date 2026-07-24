@@ -7,7 +7,7 @@
 BeginClass(AFGBuildableSignBase, "SignBase", "Sign Base", "The base class for all signs in the game.")
 	BeginFunc(getSignType, "Get Sign Type", "Returns the sign type descriptor") {
 	OutVal(0, RClass<UFGSignTypeDescriptor>, descriptor, "Descriptor", "The sign type descriptor")
-	Body()
+	FIRBody()
 	descriptor = (FIRClass)IFGSignInterface::Execute_GetSignTypeDescriptor(self);
 } EndFunc()
 EndClass()
@@ -15,12 +15,12 @@ EndClass()
 BeginClass(AFGBuildableWidgetSign, "WidgetSign", "Widget Sign", "The type of sign that allows you to define layouts, images, texts and colors manually.")
 BeginFunc(setPrefabSignData, "Set Prefab Sign Data", "Sets the prefabg sign data e.g. the user settings like colo and more to define the signs content.", 0) {
 	InVal(0, RStruct<FPrefabSignData>, prefabSignData, "Prefab Sign Data", "The new prefab sign data for this sign.")
-	Body()
+	FIRBody()
 	self->SetPrefabSignData(prefabSignData);
 } EndFunc()
 BeginFunc(getPrefabSignData, "Get Prefab Sign Data", "Returns the prefabg sign data e.g. the user settings like colo and more to define the signs content.") {
 	OutVal(0, RStruct<FPrefabSignData>, prefabSignData, "Prefab Sign Data", "The new prefab sign data for this sign.")
-	Body()
+	FIRBody()
 	FPrefabSignData SignData;
 	self->GetSignPrefabData(SignData);
 	prefabSignData = (FIRStruct)SignData;
@@ -37,7 +37,7 @@ BeginClassFunc(getColors, "Get Colors", "Returns the default foreground/backgrou
 	OutVal(0, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color")
 	OutVal(1, RStruct<FLinearColor>, background, "Background", "The background color")
 	OutVal(2, RStruct<FLinearColor>, auxiliary, "Auxiliary", "The auxiliary color")
-	Body()
+	FIRBody()
 	FLinearColor fg, bg, au;
 	UFGSignLibrary::GetDefaultColorsFromSignDescriptor(self, fg, bg, au);
 	foreground = (FIRStruct)fg;
@@ -46,7 +46,7 @@ BeginClassFunc(getColors, "Get Colors", "Returns the default foreground/backgrou
 } EndFunc()
 BeginClassFunc(getPrefabs, "Get Prefabs", "Returns a list of all sign prefabs this sign can use.", false) {
 	OutVal(0, RArray<RClass<UFGSignPrefabWidget>>, prefabs, "Prefabs", "The sign prefabs this sign can use")
-	Body()
+	FIRBody()
 	TArray<FIRAny> PrefabsArray;
 	TArray<TSoftClassPtr<UFGSignPrefabWidget>> PrefabList;
 	UFGSignLibrary::GetPrefabLayoutsFromSignDescriptor(self, PrefabList);
@@ -58,7 +58,7 @@ BeginClassFunc(getPrefabs, "Get Prefabs", "Returns a list of all sign prefabs th
 BeginClassFunc(getTextElements, "Get Text Elements", "Returns a list of element names and their default text values.", false) {
 	OutVal(0, RArray<RString>, textElements, "Text Elements", "A list of text element names of this type.")
 	OutVal(0, RArray<RString>, textElementsDefaultValues, "Text Elements Default Values", "A list of default values for the text elements of this type.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> TextElements, TextElementsDefaultValues;
 	TMap<FString, FString> Elements;
 	UFGSignLibrary::GetTextElementNameMapFromSignDescriptor(self, Elements);
@@ -72,7 +72,7 @@ BeginClassFunc(getTextElements, "Get Text Elements", "Returns a list of element 
 BeginClassFunc(getIconElements, "Get Icon Elements", "Returns a list of element names and their default icon values.", false) {
 	OutVal(0, RArray<RString>, iconElements, "Icon Elements", "A list of icon element names of this type.")
 	OutVal(0, RArray<RObject<UTexture2D>>, iconElementsDefaultValues, "Icon Elements Default Values", "A list of default values for the icon elements of this type.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> IconElements, IconElementsDefaultValues;
 	TMap<FString, UObject*> Elements;
 	UFGSignLibrary::GetIconElementNameMapFromSignDescriptor(self, Elements);
@@ -122,7 +122,7 @@ BeginProp(RClass<UFGSignTypeDescriptor>, signType, "Sign Type", "The type of sig
 BeginFunc(getTextElements, "Get Text Elements", "Returns all text elements and their values.") {
 	OutVal(0, RArray<RString>, textElements, "Text Elements", "The element names for all text elements.")
 	OutVal(1, RArray<RString>, textElementValues, "Text Element Values", "The values for all text elements.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> TextElements, TextElementValues;
 	for (const TPair<FString, FString>& Element : self->TextElementData) {
 		TextElements.Add(Element.Key);
@@ -134,7 +134,7 @@ BeginFunc(getTextElements, "Get Text Elements", "Returns all text elements and t
 BeginFunc(getIconElements, "Get Icon Elements", "Returns all icon elements and their values.") {
 	OutVal(0, RArray<RString>, iconElements, "Icon Elements", "The element names for all icon elements.")
 	OutVal(1, RArray<RInt>, iconElementValues, "Icon Element Values", "The values for all icon elements.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> IconElements, IconElementValues;
 	for (const TPair<FString, int32>& Element : self->IconElementData) {
 		IconElements.Add(Element.Key);
@@ -146,7 +146,7 @@ BeginFunc(getIconElements, "Get Icon Elements", "Returns all icon elements and t
 BeginFunc(setTextElements, "Set Text Elements", "Sets all text elements and their values.") {
 	InVal(0, RArray<RString>, textElements, "Text Elements", "The element names for all text elements.")
 	InVal(1, RArray<RString>, textElementValues, "Text Element Values", "The values for all text elements.")
-	Body()
+	FIRBody()
 	if (textElements.Num() != textElementValues.Num()) throw FFIRException(TEXT("Count of element names and element values are not the same."));
 	self->TextElementData.Empty();
 	for (int i = 0; i < textElements.Num(); ++i) {
@@ -156,7 +156,7 @@ BeginFunc(setTextElements, "Set Text Elements", "Sets all text elements and thei
 BeginFunc(setIconElements, "Set Icon Elements", "Sets all icon elements and their values.") {
 	InVal(0, RArray<RString>, iconElements, "Icon Elements", "The element names for all icon elements.")
 	InVal(1, RArray<RInt>, iconElementValues, "Icon Element Values", "The values for all icon elements.")
-	Body()
+	FIRBody()
 	if (iconElements.Num() != iconElementValues.Num()) throw FFIRException(TEXT("Count of element names and element values are not the same."));
 	self->IconElementData.Empty();
 	for (int i = 0; i < iconElements.Num(); ++i) {
@@ -166,19 +166,19 @@ BeginFunc(setIconElements, "Set Icon Elements", "Sets all icon elements and thei
 BeginFunc(setTextElement, "Set Text Element", "Sets a text element with the given element name.") {
 	InVal(0, RString, elementName, "Element Name", "The name of the text element")
 	InVal(1, RString, value, "Value", "The value of the text element")
-	Body()
+	FIRBody()
 	self->TextElementData.Add(elementName, value);
 } EndFunc()
 BeginFunc(setIconElement, "Set Icon Element", "Sets a icon element with the given element name.") {
 	InVal(0, RString, elementName, "Element Name", "The name of the icon element")
 	InVal(1, RInt, value, "Value", "The value of the icon element")
-	Body()
+	FIRBody()
 	self->IconElementData.Add(elementName, value);
 } EndFunc()
 BeginFunc(getTextElement, "Get Text Element", "Gets a text element with the given element name.") {
 	InVal(0, RString, elementName, "Element Name", "The name of the text element")
 	OutVal(1, RInt, value, "Value", "The value of the text element")
-	Body()
+	FIRBody()
 	FString* Element = self->TextElementData.Find(elementName);
 	if (!Element) throw FFIRException(TEXT("No element with the given name found"));
 	value = *Element;
@@ -186,7 +186,7 @@ BeginFunc(getTextElement, "Get Text Element", "Gets a text element with the give
 BeginFunc(getIconElement, "Get Icon Element", "Gets a icon element with the given element name.") {
 	InVal(0, RString, elementName, "Element Name", "The name of the icon element")
 	OutVal(1, RInt, value, "Value", "The value of the icon element")
-	Body()
+	FIRBody()
 	int* Element = self->IconElementData.Find(elementName);
 	if (!Element) throw FFIRException(TEXT("No element with the given name found"));
 	value = (FIRInt)*Element;

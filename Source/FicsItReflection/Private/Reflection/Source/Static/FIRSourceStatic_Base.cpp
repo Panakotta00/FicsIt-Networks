@@ -17,18 +17,18 @@ BeginProp(RString, internalPath, "internalPath", "The unreal engine internal pat
 } EndProp()
 BeginFunc(getHash, "Get Hash", "Returns a hash of this object. This is a value that nearly uniquely identifies this object.") {
 	OutVal(0, RInt, hash, "Hash", "The hash of this object.");
-	Body()
+	FIRBody()
 	hash = (int64)GetTypeHash(self->GetPathName());
 } EndFunc()
 BeginFunc(getType, "Get Type", "Returns the type (aka class) of this object.") {
 	OutVal(0, RObject<UFIRClass>, type, "Type", "The type of this object");
-	Body()
+	FIRBody()
 	if (self) type = (FIRObj)FFicsItReflectionModule::Get().FindClass(self->GetClass());
 } EndFunc()
 BeginFunc(isA, "Is A", "Checks if this Object is a child of the given typen.") {
 	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this object is a child of.")
 	OutVal(1, RBool, isChild, "Is Child", "True if this object is a child of the given type.")
-	Body()
+	FIRBody()
 	isChild = (FIRBool)self->IsA(parent);
 } EndFunc()
 BeginClassProp(RInt, hash, "Hash", "A Hash of this object. This is a value that nearly uniquely identifies this object.") {
@@ -42,18 +42,18 @@ BeginClassProp(RString, internalPath, "internalPath", "The unreal engine interna
 } EndProp()
 BeginClassFunc(getHash, "Get Hash", "Returns the hash of this class. This is a value that nearly uniquely idenfies this object.", false) {
 	OutVal(0, RInt, hash, "Hash", "The hash of this class.");
-	Body()
+	FIRBody()
 	hash = (int64) GetTypeHash(self->GetPathName());
 } EndFunc()
 BeginClassFunc(getType, "Get Type", "Returns the type (aka class) of this class instance.", false) {
 	OutVal(0, RObject<UFIRClass>, type, "Type", "The type of this class instance");
-	Body()
+	FIRBody()
     if (self) type = (FIRObj)FFicsItReflectionModule::Get().FindClass(self);
 } EndFunc()
 BeginClassFunc(isChildOf, "Is Child Of", "Checks if this Type is a child of the given typen.", false) {
 	InVal(0, RClass<UObject>, parent, "Parent", "The parent we check if this type is a child of.")
 	OutVal(1, RBool, isChild, "Is Child", "True if this type is a child of the given type.")
-	Body()
+	FIRBody()
 	isChild = (FIRBool)self->IsChildOf(parent);
 } EndFunc()
 EndClass()
@@ -70,7 +70,7 @@ BeginProp(RStruct<FRotator>, rotation, "Rotation", "The rotation of the actor in
 } EndProp()
 BeginFunc(getPowerConnectors, "Get Power Connectors", "Returns a list of power connectors this actor might have.") {
 	OutVal(0, RArray<RTrace<UFGPowerConnectionComponent>>, connectors, "Connectors", "The power connectors this actor has.");
-	Body()
+	FIRBody()
 	FIRArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
 	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
@@ -83,7 +83,7 @@ BeginFunc(getPowerConnectors, "Get Power Connectors", "Returns a list of power c
 } EndFunc()
 BeginFunc(getFactoryConnectors, "Get Factory Connectors", "Returns a list of factory connectors this actor might have.") {
 	OutVal(0, RArray<RTrace<UFGFactoryConnectionComponent>>, connectors, "Connectors", "The factory connectors this actor has.");
-	Body()
+	FIRBody()
 	FIRArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
 	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
@@ -96,7 +96,7 @@ BeginFunc(getFactoryConnectors, "Get Factory Connectors", "Returns a list of fac
 } EndFunc()
 BeginFunc(getPipeConnectors, "Get Pipe Connectors", "Returns a list of pipe (fluid & hyper) connectors this actor might have.") {
 	OutVal(0, RArray<RTrace<UFGPipeConnectionComponentBase>>, connectors, "Connectors", "The pipe connectors this actor has.");
-	Body()
+	FIRBody()
 	FIRArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
 	TSet<UObject*> Outputted;
@@ -112,7 +112,7 @@ BeginFunc(getPipeConnectors, "Get Pipe Connectors", "Returns a list of pipe (flu
 } EndFunc()
 BeginFunc(getInventories, "Get Inventories", "Returns a list of inventories this actor might have.") {
 	OutVal(0, RArray<RTrace<UFGInventoryComponent>>, inventories, "Inventories", "The inventories this actor has.");
-	Body()
+	FIRBody()
 	FIRArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
 	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
@@ -126,7 +126,7 @@ BeginFunc(getInventories, "Get Inventories", "Returns a list of inventories this
 BeginFunc(getComponents, "Get Components", "Returns the components that make-up this actor.") {
 	InVal(0, RClass<UActorComponent>, componentType, "Component Type", "The class will be used as filter.")
 	OutVal(1, RArray<RTrace<UActorComponent>>, components, "Components", "The components of this actor.")
-	Body()
+	FIRBody()
 	FIRArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
 	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {
@@ -159,30 +159,30 @@ BeginProp(RFloat, y, "Y", "The Y coordinate component", 2) {
 BeginOp(FIR_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.", 2) {
 	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector that should be added to this vector")
 	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector addition")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self + other);
 } EndFunc()
 BeginOp(FIR_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.", 2) {
 	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector that should be subtracted from this vector")
 	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector subtraction")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self - other);
 } EndFunc()
 BeginOp(FIR_Operator_Neg, 0, "Operator Neg", "The Negation operator for this struct.", 2) {
 	OutVal(0, RStruct<FVector2D>, result, "Result", "The resulting vector of the vector negation")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(-*self);
 } EndFunc()
 BeginOp(FIR_Operator_Mul, 0, "Scalar Product", "", 2) {
 	InVal(0, RStruct<FVector2D>, other, "Other", "The other vector to calculate the scalar product with.")
 	OutVal(1, RFloat, result, "Result", "The resulting scalar product.")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self * other);
 } EndFunc()
 BeginOp(FIR_Operator_Mul, 1, "Vector Factor Scaling", "", 2) {
 	InVal(0, RFloat, factor, "Factor", "The factor with which this vector should be scaled with.")
 	OutVal(1, RStruct<FVector2D>, result, "Result", "The resulting scaled vector.")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self * factor);
 } EndFunc()
 EndStruct()
@@ -206,30 +206,30 @@ BeginProp(RFloat, z, "Z", "The Z coordinate component", 2) {
 BeginOp(FIR_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.", 2) {
 	InVal(0, RStruct<FVector>, other, "Other", "The other vector that should be added to this vector")
 	OutVal(1, RStruct<FVector>, result, "Result", "The resulting vector of the vector addition")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self + other);
 } EndFunc()
 BeginOp(FIR_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.", 2) {
 	InVal(0, RStruct<FVector>, other, "Other", "The other vector that should be subtracted from this vector")
 	OutVal(1, RStruct<FVector>, result, "Result", "The resulting vector of the vector subtraction")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self - other);
 } EndFunc()
 BeginOp(FIR_Operator_Neg, 0, "Operator Neg", "The Negation operator for this struct.", 2) {
 	OutVal(0, RStruct<FVector>, result, "Result", "The resulting vector of the vector negation")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(-*self);
 } EndFunc()
 BeginOp(FIR_Operator_Mul, 0, "Operator Mul", "", 2) {
 	InVal(0, RStruct<FVector>, other, "Other", "The multiplication (*) operator for this struct. (Each component gets multiplied with the component of the other vector)")
 	OutVal(1, RStruct<FVector>, result, "Result", "The resulting vector of the vector multiplication.")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self * other);
 } EndFunc()
 BeginOp(FIR_Operator_Mul, 1, "Vector Factor Scaling", "", 2) {
 	InVal(0, RFloat, factor, "Factor", "The factor with which this vector should be scaled with.")
 	OutVal(1, RStruct<FVector>, result, "Result", "The resulting scaled vector.")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self * factor);
 } EndFunc()
 EndStruct()
@@ -253,13 +253,13 @@ BeginProp(RFloat, roll, "Roll", "The roll component", 2) {
 BeginOp(FIR_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.", 2) {
 	InVal(0, RStruct<FRotator>, other, "Other", "The other rotator that should be added to this rotator")
 	OutVal(1, RStruct<FRotator>, result, "Result", "The resulting rotator of the vector addition")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self + other);
 } EndFunc()
 BeginOp(FIR_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.", 2) {
 	InVal(0, RStruct<FRotator>, other, "Other", "The other rotator that should be subtracted from this rotator")
 	OutVal(1, RStruct<FRotator>, result, "Result", "The resulting rotator of the vector subtraction")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self - other);
 } EndFunc()
 EndStruct()
@@ -288,30 +288,30 @@ BeginProp(RFloat, a, "Alpha", "The alpha (opacity) portion of the color.", 2) {
 BeginOp(FIR_Operator_Add, 0, "Operator Add", "The addition (+) operator for this struct.", 2) {
 	InVal(0, RStruct<FLinearColor>, other, "Other", "The other color that should be added to this color")
 	OutVal(1, RStruct<FLinearColor>, result, "Result", "The resulting color of the color addition")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self + other);
 } EndFunc()
 BeginOp(FIR_Operator_Neg, 1, "Operator Neg", "The Negation operator for this struct. Does NOT make the color negative. Calculates 1 - this.", 2) {
 	OutVal(0, RStruct<FLinearColor>, result, "Result", "The resulting color of the color addition")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(FLinearColor::White - *self);
 } EndFunc()
 BeginOp(FIR_Operator_Sub, 0, "Operator Sub", "The subtraction (-) operator for this struct.", 2) {
 	InVal(0, RStruct<FLinearColor>, other, "Other", "The other color that should be subtracted from this color")
 	OutVal(1, RStruct<FLinearColor>, result, "Result", "The resulting color of the color subtraction")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self - other);
 } EndFunc()
 BeginOp(FIR_Operator_Mul, 1, "Color Factor Scaling", "", 2) {
 	InVal(0, RFloat, factor, "Factor", "The factor with which this color should be scaled with.")
 	OutVal(1, RStruct<FVector>, result, "Result", "The resulting scaled color.")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self * factor);
 } EndFunc()
 BeginOp(FIR_Operator_Div, 1, "Color Inverse Factor Scaling", "", 2) {
 	InVal(0, RFloat, factor, "Factor", "The factor with which this color should be scaled inversly with.")
 	OutVal(1, RStruct<FVector>, result, "Result", "The resulting inverse scaled color.")
-	Body()
+	FIRBody()
 	result = (FIRStruct)(*self / factor);
 } EndFunc()
 EndStruct()

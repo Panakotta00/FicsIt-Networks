@@ -24,9 +24,9 @@ public:
 
 	bool Serialize(FStructuredArchive::FSlot Slot) {
 		FStructuredArchiveRecord Record = Slot.EnterRecord();
-		Record.EnterField(SA_FIELD_NAME(TEXT("Character"))) << Character;
-		Record.EnterField(SA_FIELD_NAME(TEXT("ForegroundColor"))) << ForegroundColor;
-		Record.EnterField(SA_FIELD_NAME(TEXT("BackgroundColor"))) << BackgroundColor;
+		Record.EnterField(TEXT("Character")) << Character;
+		Record.EnterField(TEXT("ForegroundColor")) << ForegroundColor;
+		Record.EnterField(TEXT("BackgroundColor")) << BackgroundColor;
 		return true;
 	}
 

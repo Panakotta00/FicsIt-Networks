@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIRAnyValue.h"
+#include "Serialization/StructuredArchive.h"
 #include "FINSignalData.generated.h"
 
 class UFIRSignal;

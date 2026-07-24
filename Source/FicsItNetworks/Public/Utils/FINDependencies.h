@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FGAvailabilityDependency.h"
+#include "AvailabilityDependencies/FGAvailabilityDependency.h"
 #include "FGPlayerState.h"
 #include "FIRSubsystem.h"
 #include "FINDependencies.generated.h"

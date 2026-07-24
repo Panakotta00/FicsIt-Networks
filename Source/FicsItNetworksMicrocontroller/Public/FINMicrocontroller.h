@@ -1,17 +1,17 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINLuaReferenceCollector.h"
-#include "FINLuaRuntime.h"
+#include "FINLua/FINLuaReferenceCollector.h"
+#include "FINLua/FINLuaRuntime.h"
 #include "FINLuaRuntimePersistence.h"
 #include "FINNetworkCircuitNode.h"
 #include "FINNetworkMessageInterface.h"
-#include "FINSignalListener.h"
-#include "FIRSourceUObject.h"
-#include "LuaComponentAPI.h"
-#include "LuaEventAPI.h"
+#include "Signals/FINSignalListener.h"
+#include "Reflection/Source/FIRSourceUObject.h"
+#include "FINLua/API/LuaComponentAPI.h"
+#include "FINLua/LuaEventAPI.h"
 #include "Buildables/FGBuildable.h"
-#include "NetworkController.h"
+#include "FicsItKernel/Network/NetworkController.h"
 #include "FINMicrocontroller.generated.h"
 
 class UFINMicrocontrollerReference;

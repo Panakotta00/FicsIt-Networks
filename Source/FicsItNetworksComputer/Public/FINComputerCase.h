@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FicsItKernel.h"
+#include "FicsItKernel/FicsItKernel.h"
 #include "Buildables/FGBuildable.h"
 #include "FINComputerCase.generated.h"
 

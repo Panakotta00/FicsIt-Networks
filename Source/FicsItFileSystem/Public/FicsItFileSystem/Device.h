@@ -7,10 +7,10 @@
 #include <unordered_set>
 #include <cstdint>
 
-#include "SharedPointer.h"
+#include "Templates/SharedPointer.h"
 
 namespace CodersFileSystem {
-	class FileSystemRoot;
+	class FileSystemKernelRoot;
 
 	typedef std::function<bool(long long, bool)> SizeCheckFunc;
 

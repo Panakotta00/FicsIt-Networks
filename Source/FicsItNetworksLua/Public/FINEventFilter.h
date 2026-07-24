@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FINSignalData.h"
-#include "FIRSignal.h"
+#include "Signals/FINSignalData.h"
+#include "Reflection/FIRSignal.h"
 #include "FINEventFilter.generated.h"
 
 USTRUCT()

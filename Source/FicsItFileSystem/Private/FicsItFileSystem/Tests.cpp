@@ -1,6 +1,6 @@
 #include "FicsItFileSystem/Tests.h"
 
-#include "AssertionMacros.h"
+#include "Misc/AssertionMacros.h"
 #include "FicsItFileSystem/Path.h"
 
 using namespace CodersFileSystem;

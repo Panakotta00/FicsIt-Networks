@@ -1,12 +1,12 @@
 ﻿#include "FINMicrocontrollerLuaModule.h"
 
-#include "FINComputerNetworkCard.h"
-#include "FINLuaRuntime.h"
-#include "FINLuaModule.h"
-#include "LuaObject.h"
+#include "ComputerModules/PCI/FINComputerNetworkCard.h"
+#include "FINLua/FINLuaRuntime.h"
+#include "FINLua/FINLuaModule.h"
+#include "FINLua/Reflection/LuaObject.h"
 #include "FINMicrocontroller.h"
 #include "FINNetworkCircuit.h"
-#include "LuaPersistence.h"
+#include "FINLua/LuaPersistence.h"
 
 namespace FINLua {
 	LuaModule(R"(/**

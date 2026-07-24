@@ -4,7 +4,6 @@
 #include "FILLogEntry.h"
 #include "FINStyle.h"
 #include "FINTextDecorators.h"
-#include "SlateCore.h"
 #include "Components/Widget.h"
 #include "Framework/Text/IRichTextMarkupParser.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"

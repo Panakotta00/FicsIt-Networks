@@ -4,12 +4,12 @@
 #include "FicsItReflection.h"
 #include "FINLua/Reflection/LuaRef.h"
 #include "FINLuaProcessor.h"
-#include "FINLuaReferenceCollector.h"
+#include "FINLua/FINLuaReferenceCollector.h"
 #include "FINLua/FINLuaModule.h"
 #include "FINLua/LuaPersistence.h"
 #include "Logging/StructuredLog.h"
 #include "tracy/Tracy.hpp"
-#include "FINLuaRuntime.h"
+#include "FINLua/FINLuaRuntime.h"
 #include "FINNetworkComponent.h"
 
 namespace FINLua {

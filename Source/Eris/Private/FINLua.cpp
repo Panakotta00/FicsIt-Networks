@@ -9,6 +9,8 @@
 PRAGMA_PUSH_PLATFORM_DEFAULT_PACKING
 THIRD_PARTY_INCLUDES_START
 
+#define TString LuaTString
+
 #pragma push_macro("check")
 #undef check
 
@@ -62,6 +64,8 @@ THIRD_PARTY_INCLUDES_START
 #endif
 
 #pragma pop_macro("check")
+
+#undef TString
 
 THIRD_PARTY_INCLUDES_END
 PRAGMA_POP_PLATFORM_DEFAULT_PACKING

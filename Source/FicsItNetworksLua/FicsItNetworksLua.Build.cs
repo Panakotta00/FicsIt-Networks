@@ -26,6 +26,7 @@ public class FicsItNetworksLua : ModuleRules
             "FicsItNetworksCircuit",
 			"FicsItNetworksComputer",
 			"FicsItNetworksMisc",
+			"CoreOnline",
 		});
 
         PublicIncludePaths.Add("Public");

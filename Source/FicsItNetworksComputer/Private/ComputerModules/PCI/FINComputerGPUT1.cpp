@@ -4,8 +4,8 @@
 #include "FicsItNetworksComputer.h"
 #include "FINChallengeSubsystem.h"
 #include "FINComputerRCO.h"
-#include "Regex.h"
-#include "SlateApplication.h"
+#include "Internationalization/Regex.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Async/ParallelFor.h"
 #include "Engine/ActorChannel.h"
 #include "Engine/NetConnection.h"
@@ -248,7 +248,9 @@ void AFINComputerGPUT1::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 	boxBrush = LoadObject<USlateBrushAsset>(NULL, TEXT("SlateBrushAsset'/FicsItNetworks/Buildings/Computer/ComputerCase/UI/SB_ComputerCaseBorder.SB_ComputerCaseBorder'"))->Brush;
-	UFINComputerRCO* RCO = Cast<UFINComputerRCO>(Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController())->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
+	auto controller = GetWorld()->GetFirstPlayerController<AFGPlayerController>();
+	UFINComputerRCO* RCO = nullptr;
+	if (controller) RCO = Cast<UFINComputerRCO>(controller->GetRemoteCallObjectOfClass(UFINComputerRCO::StaticClass()));
 	return SNew(SScaleBox)
 	.Stretch(EStretch::ScaleToFit)
 	.HAlign(HAlign_Center)
@@ -262,27 +264,27 @@ TSharedPtr<SWidget> AFINComputerGPUT1::CreateWidget() {
 			})
 			.Font(FSlateFontInfo(LoadObject<UObject>(NULL, TEXT("Font'/FicsItNetworks/UI/Assets/FiraCode.FiraCode'")), 12, "FiraCode-Regular"))
 			.OnMouseDown_Lambda([this, RCO](int x, int y, int btn) {
-				RCO->GPUMouseEvent(this, 0, x, y, btn);
+				if (RCO) RCO->GPUMouseEvent(this, 0, x, y, btn);
 				return FReply::Handled();
 			})
 			.OnMouseUp_Lambda([this, RCO](int x, int y, int btn) {
-				RCO->GPUMouseEvent(this, 1, x, y, btn);
+				if (RCO) RCO->GPUMouseEvent(this, 1, x, y, btn);
 	            return FReply::Handled();
 	        })
 	        .OnMouseMove_Lambda([this, RCO](int x, int y, int btn) {
-				RCO->GPUMouseEvent(this, 2, x, y, btn);
+				if (RCO) RCO->GPUMouseEvent(this, 2, x, y, btn);
 	            return FReply::Handled();
 	        })
 			.OnKeyDown_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
-				RCO->GPUKeyEvent(this, 0,  c, key, btn);
+				if (RCO) RCO->GPUKeyEvent(this, 0,  c, key, btn);
 				return FReply::Handled();
 			})
 			.OnKeyUp_Lambda([this, RCO](uint32 c, uint32 key, int btn) {
-				RCO->GPUKeyEvent(this, 1,  c, key, btn);
+				if (RCO) RCO->GPUKeyEvent(this, 1,  c, key, btn);
 				return FReply::Handled();
 	        })
 	        .OnKeyChar_Lambda([this, RCO](TCHAR c, int btn) {
-		        RCO->GPUKeyCharEvent(this, FString::Chr(c), btn);
+		        if (RCO) RCO->GPUKeyCharEvent(this, FString::Chr(c), btn);
         		return FReply::Handled();
 	        })
 	    ]

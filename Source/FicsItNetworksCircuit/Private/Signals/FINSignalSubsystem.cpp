@@ -6,8 +6,8 @@
 #include "FIRHookSubsystem.h"
 #include "Signals/FINSignalListener.h"
 
-void FFINSignalListeners::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const {
-	for (const FFIRTrace& Trace : Listeners) {
+void FFINSignalListeners::AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) {
+	for (FFIRTrace& Trace : Listeners) {
 		Trace.AddStructReferencedObjects(ReferenceCollector);
 	}
 }

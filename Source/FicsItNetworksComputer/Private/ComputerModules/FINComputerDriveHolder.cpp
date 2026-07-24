@@ -1,7 +1,7 @@
 #include "ComputerModules/FINComputerDriveHolder.h"
 
 #include "FGPlayerController.h"
-#include "FINFileSystemSubsystem.h"
+#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 #include "ComputerModules/FINComputerDriveDesc.h"
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 #include "Net/UnrealNetwork.h"

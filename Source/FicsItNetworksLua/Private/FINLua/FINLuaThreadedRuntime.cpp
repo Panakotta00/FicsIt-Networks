@@ -1,7 +1,7 @@
-﻿#include "FINLuaThreadedRuntime.h"
+﻿#include "FINLua/FINLuaThreadedRuntime.h"
 
-#include "FINLuaModule.h"
-#include "LuaPersistence.h"
+#include "FINLua/FINLuaModule.h"
+#include "FINLua/LuaPersistence.h"
 
 FFINLuaThreadedRuntime::FFINLuaThreadedRuntime() : LuaTask(FAsyncTask<FFINLuaTickRunnable>(this)) {
 	Runtime.Modules.Add("ThreadedRuntimeModule");

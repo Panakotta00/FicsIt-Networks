@@ -3,7 +3,7 @@
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
 #include "FINComputerSubsystem.h"
-#include "SlateApplication.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Buildables/FGBuildableWidgetSign.h"
 #include "Graphics/FINScreenInterface.h"
 #include "Net/UnrealNetwork.h"
@@ -34,14 +34,17 @@ void AFINComputerGPU::TickActor(float DeltaTime, ELevelTick TickType, FActorTick
 
 	if (!bScreenSizeUpdated && Screen) {
 		if (auto widget = Cast<IFINScreenInterface>(Screen.GetUnderlyingPtr())->GetWidget()) {
-			auto rco = GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFINComputerRCO>();
+			auto controller = GetWorld()->GetFirstPlayerController<AFGPlayerController>();
+			if (controller) {
+				auto rco = controller->GetRemoteCallObjectOfClass<UFINComputerRCO>();
 
-			TScriptInterface<IFINScreenInterface> screen = GetScreenInterface();
-			if (screen && screen->GetWidget()) {
-				FVector2D size = screen->GetWidget()->GetCachedGeometry().GetLocalSize();
-				if (!size.IsNearlyZero()) {
-					bScreenSizeUpdated = true;
-					rco->GPUUpdateScreenSize(this, size);
+				TScriptInterface<IFINScreenInterface> screen = GetScreenInterface();
+				if (screen && screen->GetWidget() && rco) {
+					FVector2D size = screen->GetWidget()->GetCachedGeometry().GetLocalSize();
+					if (!size.IsNearlyZero()) {
+						bScreenSizeUpdated = true;
+						rco->GPUUpdateScreenSize(this, size);
+					}
 				}
 			}
 		}

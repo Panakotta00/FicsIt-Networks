@@ -1,6 +1,6 @@
 #include "ComputerModules/FINComputerDriveDesc.h"
 
-#include "FINFileSystemSubsystem.h"
+#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 #include "FINLabelContainerInterface.h"
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"

@@ -48,7 +48,7 @@ void UFINNetworkConnectionComponent::NotifyNetworkUpdate_Implementation(int Type
 void UFINNetworkConnectionComponent::AddConnectedNode(TScriptInterface<IFINNetworkCircuitNode> Node) {
 #if WITH_EDITOR
 	return;
-#endif
+#else
 	if (ConnectedNodes.Contains(Node.GetObject()) || !GetOwner()->HasAuthority()) return;
 
 	ConnectedNodes.Add(Node.GetObject());
@@ -58,6 +58,7 @@ void UFINNetworkConnectionComponent::AddConnectedNode(TScriptInterface<IFINNetwo
 	AFINNetworkCircuit::ConnectNodes(this, this, Node);
 
 	GetOwner()->ForceNetUpdate();
+#endif
 }
 
 void UFINNetworkConnectionComponent::RemoveConnectedNode(TScriptInterface<IFINNetworkCircuitNode> Node) {

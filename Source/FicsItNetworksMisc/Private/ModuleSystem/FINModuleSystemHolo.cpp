@@ -116,7 +116,8 @@ bool AFINModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 	SnappedLoc.Y = floor(SnappedLoc.Y);
 	SnappedLoc.Z = 0;
 
-	FVector min, max;
+	FVector min = FVector(0);
+	FVector max = FVector(0);
 	switch (GetScrollRotateValue() % 40) {
 	case 0:
 		UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot = 0, getModuleSize(), min, max);

@@ -1,7 +1,7 @@
 ﻿// 
 #include "Components/FINDynamicModuleSystemHolo.h"
 
-#include "UnrealNetwork.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AFINDynamicModuleSystemHolo::AFINDynamicModuleSystemHolo() {
@@ -129,7 +129,7 @@ bool AFINDynamicModuleSystemHolo::TrySnapToActor(const FHitResult& hitResult) {
 #pragma optimize( "", off )
 void AFINDynamicModuleSystemHolo::SetHologramLocationAndRotation(const FHitResult& hit) {
 	if (!IsValid(Snapped)) return;
-	FVector ModuleSize;
+	FVector ModuleSize = FVector::ZeroVector;
 	if (bPlaced) {
 		FVector loc = Snapped->GetComponentToWorld().InverseTransformPosition(hit.Location);
 		FVector SecondLoc = loc;
@@ -140,7 +140,8 @@ void AFINDynamicModuleSystemHolo::SetHologramLocationAndRotation(const FHitResul
 
 		ModuleSize = SecondLoc - SnappedLoc;
 
-		FVector min, max;
+		FVector min = FVector(0);
+		FVector max = FVector(0);
 		switch (SnappedRot) {
 			case 0:
 				UFINModuleSystemPanel::GetModuleSpace(SnappedLoc, SnappedRot, ModuleSize, min, max);
@@ -179,7 +180,7 @@ void AFINDynamicModuleSystemHolo::SetHologramLocationAndRotation(const FHitResul
 		}else {
 			DynamicHeight = MinHeight;
 		}
-	}else {
+	} else {
 		DynamicWidth = 1;
 		DynamicHeight = 1;
 		

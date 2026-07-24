@@ -3,7 +3,7 @@
 #include "FicsItNetworksMisc.h"
 #include "FicsItNetworksModule.h"
 #include "FINAdvancedNetworkConnectionComponent.h"
-#include "VorbisAudioInfo.h"
+#include "Decoders/VorbisAudioInfo.h"
 #include "Components/AudioComponent.h"
 #include "HAL/PlatformFileManager.h"
 #include "Interfaces/IAudioFormat.h"
