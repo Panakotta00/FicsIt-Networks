@@ -77,7 +77,7 @@ True if the image should be tiled horizontally.
 === `image` : String
 // tag::func-image[]
 
-If not empty, should be a image reference to the image that should be drawn inside the rectangle.
+If not empty, should be an image reference to the image that should be drawn inside the rectangle.
 
 [%collapsible]
 ====
@@ -94,7 +94,7 @@ If not empty, should be a image reference to the image that should be drawn insi
 === `imageSize` : Struct<xref:/reflection/structs/Vector2D.adoc[Vector2D]>
 // tag::func-imageSize[]
 
-The size of the internal image drawn, necessary for proper scaling, antialising and tiling.
+The size of the internal image drawn, necessary for proper scaling, antialiasing and tiling.
 
 [%collapsible]
 ====
@@ -111,7 +111,7 @@ The size of the internal image drawn, necessary for proper scaling, antialising 
 === `isBorder` : Bool
 // tag::func-isBorder[]
 
-If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use (use the image as 9-patch).
+If true, the margin values provide a way to specify a fixed sized border thicknesses the boxes images will use( the image as 9-patch).
 
 [%collapsible]
 ====

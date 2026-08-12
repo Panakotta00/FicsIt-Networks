@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Property.adoc[Property]
 !===
 
-A reflection object representing a object property.
+A reflection object representing an object property.
 
 // tag::interface[]
 

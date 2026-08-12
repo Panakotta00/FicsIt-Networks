@@ -142,7 +142,7 @@ The unreal engine internal path name of this object.
 ===== *Get Hash* `getHash` (_Int_ *Hash* `hash` _out_)
 // tag::Class-Object-Funcs-getHash[]
 // tag::Class-Object-Funcs-getHash__description[]
-Returns the hash of this class. This is a value that nearly uniquely idenfies this object.
+Returns the hash of this class. This is a value that nearly uniquely identifies this object.
 
 // end::Class-Object-Funcs-getHash__description[]
 // tag::Class-Object-Funcs-getHash__flags[]
@@ -208,7 +208,7 @@ Return Values::
 ===== *Get Hash* `getHash` (_Int_ *Hash* `hash` _out_)
 // tag::Class-Object_Class-Funcs-getHash[]
 // tag::Class-Object_Class-Funcs-getHash__description[]
-Returns the hash of this class. This is a value that nearly uniquely idenfies this object.
+Returns the hash of this class. This is a value that nearly uniquely identifies this object.
 
 // end::Class-Object_Class-Funcs-getHash__description[]
 // tag::Class-Object_Class-Funcs-getHash__flags[]
@@ -281,7 +281,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Object[Object]
+|
+xref:Reflection.adoc#Class-Object[Object]
 |===
 
 // end::Class-Actor__parent[]
@@ -527,13 +528,14 @@ Return Values::
 // end::Class-Actor__title[]
 // tag::Class-CircuitBridge__title[]
 [#Class-CircuitBridge]
-=== *Circuite Bridget* `CircuitBridge`
+=== *Circuit Bridget* `CircuitBridge`
 // tag::Class-CircuitBridge[]
 // tag::Class-CircuitBridge__parent[]
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-CircuitBridge__parent[]
@@ -595,7 +597,8 @@ True if the two circuits are connected to each other and act as one entity.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-CircuitBridge[CircuitBridge]
+|
+xref:Reflection.adoc#Class-CircuitBridge[CircuitBridge]
 |===
 
 // end::Class-CircuitSwitch__parent[]
@@ -638,7 +641,8 @@ True if the two circuits are connected to each other and act as one entity.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-CircuitBridge[FGBuildableControlPanelHost]
+|
+xref:Reflection.adoc#Class-CircuitBridge[FGBuildableControlPanelHost]
 |===
 
 // end::Class-LightsControlPanel__parent[]
@@ -781,7 +785,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-ComputerCase__parent[]
@@ -846,7 +851,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-Factory__parent[]
@@ -920,7 +926,7 @@ The productivity of this factory.
 ===== _Float_ *Cycle Time* `cycleTime`
 // tag::Class-Factory-props-cycleTime[]
 // tag::Class-Factory-props-cycleTime__description[]
-The time that passes till one production cycle is finsihed.
+The time that passes till one production cycle is finished.
 
 // end::Class-Factory-props-cycleTime__description[]
 // tag::Class-Factory-props-cycleTime__flags[]
@@ -1023,7 +1029,8 @@ The potential this factory is currently set to. (the overclock value) +
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[Factory]
+|
+xref:Reflection.adoc#Class-Factory[Factory]
 |===
 
 // end::Class-DockingStation__parent[]
@@ -1040,7 +1047,7 @@ A docking station for wheeled vehicles to transfer cargo.
 ===== _Bool_ *Is Load Mode* `isLoadMode`
 // tag::Class-DockingStation-props-isLoadMode[]
 // tag::Class-DockingStation-props-isLoadMode__description[]
-True if the docking station loads docked vehicles, flase if it unloads them.
+True if the docking station loads docked vehicles, false if it unloads them.
 
 // end::Class-DockingStation-props-isLoadMode__description[]
 // tag::Class-DockingStation-props-isLoadMode__flags[]
@@ -1081,7 +1088,7 @@ True if the docking station is currently loading or unloading a docked vehicle.
 // tag::Class-DockingStation-Funcs[]
 [#Class-DockingStation-Funcs-getFuelInv]
 // tag::Class-DockingStation-Funcs-getFuelInv__title[]
-===== *Get Fueld Inventory* `getFuelInv` (_Trace(xref::Reflection.adoc#Class-Inventory[Inventory])_ *Inventory* `inventory` _out_)
+===== *Get Fuel Inventory* `getFuelInv` (_Trace(xref::Reflection.adoc#Class-Inventory[Inventory])_ *Inventory* `inventory` _out_)
 // tag::Class-DockingStation-Funcs-getFuelInv[]
 // tag::Class-DockingStation-Funcs-getFuelInv__description[]
 Returns the fuel inventory of the docking station.
@@ -1117,7 +1124,7 @@ Return Values::
 ===== *Get Inventory* `getInv` (_Trace(xref::Reflection.adoc#Class-Inventory[Inventory])_ *Inventory* `inventory` _out_)
 // tag::Class-DockingStation-Funcs-getInv[]
 // tag::Class-DockingStation-Funcs-getInv__description[]
-Returns the cargo inventory of the docking staiton.
+Returns the cargo inventory of the docking station.
 
 // end::Class-DockingStation-Funcs-getInv__description[]
 // tag::Class-DockingStation-Funcs-getInv__flags[]
@@ -1209,7 +1216,8 @@ Undocked the currently docked vehicle from this docking station.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[FGBuildableConveyorAttachment]
+|
+xref:Reflection.adoc#Class-Factory[FGBuildableConveyorAttachment]
 |===
 
 // end::Class-CodeableMerger__parent[]
@@ -1248,7 +1256,7 @@ Is true if the output queue has a slot available for an item from one of the inp
 // tag::Class-CodeableMerger-Funcs[]
 [#Class-CodeableMerger-Funcs-transferItem]
 // tag::Class-CodeableMerger-Funcs-transferItem__title[]
-===== *Transfer Item* `transferItem` (_Int_ *Input* `input`, _Bool_ *Transfered* `transfered` _out_)
+===== *Transfer Item* `transferItem` (_Int_ *Input* `input`, _Bool_ *Transferred* `transferred` _out_)
 // tag::Class-CodeableMerger-Funcs-transferItem[]
 // tag::Class-CodeableMerger-Funcs-transferItem__description[]
 Allows to transfer an item from the given input queue to the output queue if possible.
@@ -1284,7 +1292,7 @@ Return Values::
 |===
 |Name |Type |Description
 
-| *Transfered* `transfered`
+| *Transferred* `transfered`
 | Bool _out_
 | true if it was able to transfer the item.
 
@@ -1428,7 +1436,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[FGBuildableConveyorAttachment]
+|
+xref:Reflection.adoc#Class-Factory[FGBuildableConveyorAttachment]
 |===
 
 // end::Class-CodeableSplitter__parent[]
@@ -1442,7 +1451,7 @@ Parameters::
 // tag::Class-CodeableSplitter-Funcs[]
 [#Class-CodeableSplitter-Funcs-transferItem]
 // tag::Class-CodeableSplitter-Funcs-transferItem__title[]
-===== *Transfer Item* `transferItem` (_Int_ *Output* `output`, _Bool_ *Transfered* `transfered` _out_)
+===== *Transfer Item* `transferItem` (_Int_ *Output* `output`, _Bool_ *Transferred* `transferred` _out_)
 // tag::Class-CodeableSplitter-Funcs-transferItem[]
 // tag::Class-CodeableSplitter-Funcs-transferItem__description[]
 Allows to transfer an item from the input queue to the given output queue if possible.
@@ -1478,7 +1487,7 @@ Return Values::
 |===
 |Name |Type |Description
 
-| *Transfered* `transfered`
+| *Transferred* `transfered`
 | Bool _out_
 | true if it was able to transfer the item.
 
@@ -1655,7 +1664,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[FGBuildablePipelineAttachment]
+|
+xref:Reflection.adoc#Class-Factory[FGBuildablePipelineAttachment]
 |===
 
 // end::Class-PipelinePump__parent[]
@@ -1691,7 +1701,7 @@ The maximum amount of headlift this pump can provide.
 ===== _Float_ *Designed Headlift* `designedHeadlift`
 // tag::Class-PipelinePump-props-designedHeadlift[]
 // tag::Class-PipelinePump-props-designedHeadlift__description[]
-The amomunt of headlift this pump is designed for.
+The amount of headlift this pump is designed for.
 
 // end::Class-PipelinePump-props-designedHeadlift__description[]
 // tag::Class-PipelinePump-props-designedHeadlift__flags[]
@@ -1729,7 +1739,7 @@ The amount of headlift the indicator shows.
 ===== _Float_ *Indicator Headlift Percent* `indicatorHeadliftPct`
 // tag::Class-PipelinePump-props-indicatorHeadliftPct[]
 // tag::Class-PipelinePump-props-indicatorHeadliftPct__description[]
-The amount of headlift the indicator shows as percantage from max.
+The amount of headlift the indicator shows as percentage from max.
 
 // end::Class-PipelinePump-props-indicatorHeadliftPct__description[]
 // tag::Class-PipelinePump-props-indicatorHeadliftPct__flags[]
@@ -1755,7 +1765,8 @@ The amount of headlift the indicator shows as percantage from max.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[Factory]
+|
+xref:Reflection.adoc#Class-Factory[Factory];
 |===
 
 // end::Class-Manufacturer__parent[]
@@ -1826,7 +1837,7 @@ Return Values::
 
 | *Recipes* `recipes`
 | Array(Class(xref::Reflection.adoc#Class-Recipe[Recipe])) _out_
-| The list of avalible recipes.
+| The list of available recipes.
 
 |===
 
@@ -1958,7 +1969,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[Factory]
+|
+xref:Reflection.adoc#Class-Factory[Factory]
 |===
 
 // end::Class-PipeReservoir__parent[]
@@ -2013,7 +2025,7 @@ The maximum amount of fluid this tank can hold.
 ===== _Float_ *Flow Fill* `flowFill`
 // tag::Class-PipeReservoir-props-flowFill[]
 // tag::Class-PipeReservoir-props-flowFill__description[]
-The currentl inflow rate of fluid.
+The currently inflow rate of fluid.
 
 // end::Class-PipeReservoir-props-flowFill__description[]
 // tag::Class-PipeReservoir-props-flowFill__flags[]
@@ -2135,7 +2147,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[Factory]
+|
+xref:Reflection.adoc#Class-Factory[Factory]
 |===
 
 // end::Class-PowerStorage__parent[]
@@ -2331,12 +2344,13 @@ The maximum count of Level lights that are shown.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[Factory]
+|
+xref:Reflection.adoc#Class-Factory[Factory]
 |===
 
 // end::Class-RailroadSwitchControl__parent[]
 // tag::Class-RailroadSwitchControl__description[]
-The controler object for a railroad switch.
+The controller object for a railroad switch.
 
 // end::Class-RailroadSwitchControl__description[]
 // tag::Class-RailroadSwitchControl-Funcs__title[]
@@ -2407,7 +2421,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Factory[Factory]
+|
+xref:Reflection.adoc#Class-Factory[Factory]
 |===
 
 // end::Class-TrainPlatform__parent[]
@@ -2695,7 +2710,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-TrainPlatform[TrainPlatform]
+|
+xref:Reflection.adoc#Class-TrainPlatform[TrainPlatform]
 |===
 
 // end::Class-RailroadStation__parent[]
@@ -2757,7 +2773,8 @@ The Offset to the beginning of the station at which trains dock.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-TrainPlatform[TrainPlatform]
+|
+xref:Reflection.adoc#Class-TrainPlatform[TrainPlatform]
 |===
 
 // end::Class-TrainPlatformCargo__parent[]
@@ -2914,7 +2931,8 @@ Ture if the docked cargo vehicle is fully unloaded.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINComputerModule]
+|
+xref:Reflection.adoc#Class-Actor[FINComputerModule]
 |===
 
 // end::Class-FINComputerGPU__parent[]
@@ -2971,7 +2989,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-FINComputerGPU[FINComputerGPU]
+|
+xref:Reflection.adoc#Class-FINComputerGPU[FINComputerGPU]
 |===
 
 // end::Class-GPUT1__parent[]
@@ -3676,7 +3695,7 @@ Bits: +
 ===== *On Key Character* `OnKeyChar` (_String_ *Character* `c`, _Int_ *Button* `btn`)
 // tag::Class-GPUT1-Signals-OnKeyChar[]
 // tag::Class-GPUT1-Signals-OnKeyChar__description[]
-Triggers when a character key got 'clicked' and essentially a character got typed in, usful for text input.
+Triggers when a character key got 'clicked' and essentially a character got typed in, useful for text input.
 
 // end::Class-GPUT1-Signals-OnKeyChar__description[]
 // tag::Class-GPUT1-Signals-OnKeyChar__flags[]
@@ -3727,7 +3746,8 @@ Bits: +
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINComputerModule]
+|
+xref:Reflection.adoc#Class-Actor[FINComputerModule]
 |===
 
 // end::Class-FINInternetCard__parent[]
@@ -3806,7 +3826,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINComputerModule]
+|
+xref:Reflection.adoc#Class-Actor[FINComputerModule]
 |===
 
 // end::Class-NetworkCard__parent[]
@@ -3945,7 +3966,7 @@ Parameters::
 ===== *Broadcast Message* `broadcast` (_Int_ *Port* `port`)
 // tag::Class-NetworkCard-Funcs-broadcast[]
 // tag::Class-NetworkCard-Funcs-broadcast__description[]
-Sends a network message to all components in the network message network (including networks sepperated by network routers) on the given port. The data you want to add can be passed as additional parameters. Max amount of such parameters is 7 and they can only be nil, booleans, numbers and strings.
+Sends a network message to all components in the network message network (including networks separated by network routers) on the given port. The data you want to add can be passed as additional parameters. Max amount of such parameters is 7 and they can only be nil, booleans, numbers and strings.
 
 // end::Class-NetworkCard-Funcs-broadcast__description[]
 // tag::Class-NetworkCard-Funcs-broadcast__flags[]
@@ -4028,7 +4049,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-IndicatorModule__parent[]
@@ -4097,12 +4119,14 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-LargeMicroDisplayModule__parent[]
 // tag::Class-LargeMicroDisplayModule__description[]
-Provides a relatively small text only display for Control Panels.  +
+Provides a relatively small text only display for Control Panels. 
+ +
 Text height is fixed, but text is squeezed to fit horizontally.
 
 // end::Class-LargeMicroDisplayModule__description[]
@@ -4200,7 +4224,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-MCP_Mod_2Pos_Switch_C__parent[]
@@ -4333,7 +4358,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-MCP_Mod_3Pos_Switch_C__parent[]
@@ -4466,7 +4492,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-MCP_Mod_Encoder_C__parent[]
@@ -4568,13 +4595,14 @@ Parameters::
 // end::Class-MCP_Mod_Encoder_C__title[]
 // tag::Class-MCP_Mod_Guage_C__title[]
 [#Class-MCP_Mod_Guage_C]
-=== *Mini Gauge* `MCP_Mod_Guage_C`
+=== *Mini Gauge* `MCP_Mod_Gauge_C`
 // tag::Class-MCP_Mod_Guage_C[]
 // tag::Class-MCP_Mod_Guage_C__parent[]
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-MCP_Mod_Guage_C__parent[]
@@ -4728,7 +4756,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-MCP_Mod_Potentiometer_C__parent[]
@@ -4899,7 +4928,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-MCP_Mod_PotWNum_C__parent[]
@@ -5122,12 +5152,14 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-MicroDisplayModule__parent[]
 // tag::Class-MicroDisplayModule__description[]
-Provides a small text only display for Control Panels.  +
+Provides a small text only display for Control Panels. 
+ +
 Can display up to 3 digits, One additional dot may be used.
 
 // end::Class-MicroDisplayModule__description[]
@@ -5219,13 +5251,14 @@ Parameters::
 // end::Class-MicroDisplayModule__title[]
 // tag::Class-Module_BigGuage_C__title[]
 [#Class-Module_BigGuage_C]
-=== *Big Gauge* `Module_BigGuage_C`
+=== *Big Gauge* `Module_BigGauge_C`
 // tag::Class-Module_BigGuage_C[]
 // tag::Class-Module_BigGuage_C__parent[]
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-Module_BigGuage_C__parent[]
@@ -5383,7 +5416,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-ModuleButton__parent[]
@@ -5496,14 +5530,16 @@ Triggers when the button gets pressed.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-ModulePotentiometer__parent[]
 // tag::Class-ModulePotentiometer__description[]
-The Potentiometer Module for the Modular I/O Control Panel allows you to have rotation input value for you programs. +
+The Potentiometer Module for the Modular I/O Control Panel allows you to have rotation input value for you programs.
+ +
 
-You can rotate it indefinetly into any direction where every rotation triggers a computer network signal.
+You can rotate it indefinitely into any direction where every rotation triggers a computer network signal.
 
 // end::Class-ModulePotentiometer__description[]
 // tag::Class-ModulePotentiometer-Funcs__title[]
@@ -5594,7 +5630,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-ModuleStopButton__parent[]
@@ -5662,12 +5699,13 @@ Triggers when the button gets pressed.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-ModuleSwitch_C__parent[]
 // tag::Class-ModuleSwitch_C__description[]
-The Lever Module for the modular I/O Panel is used to switch a programm state between two different value (on or off).
+The Lever Module for the modular I/O Panel is used to switch a program state between two different value (on or off).
 
 // end::Class-ModuleSwitch_C__description[]
 // tag::Class-ModuleSwitch_C-Props__title[]
@@ -5744,14 +5782,17 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-ModuleTextDisplay_C__parent[]
 // tag::Class-ModuleTextDisplay_C__description[]
-The FicsIt-Networks Text-Display Module for the Modular Control Panel is a simple GPU and Screen combined! +
+The FicsIt-Networks Text-Display Module for the Modular Control Panel is a simple GPU and Screen combined!
+ +
 
-It allows you to display any kind of text with differnt font sizes and you can even switch between two fonts! +
+It allows you to display any kind of text with different font sizes and you can even switch between two fonts!
+ +
 
 But you can't interact with it, nor change the background/foreground color as you can do with a GPU.
 
@@ -5829,7 +5870,8 @@ But you can't interact with it, nor change the background/foreground color as yo
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-MushroomPushbuttonModule__parent[]
@@ -5942,7 +5984,8 @@ Triggers a button press by code.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINModuleBase]
+|
+xref:Reflection.adoc#Class-Actor[FINModuleBase]
 |===
 
 // end::Class-PushbuttonModule__parent[]
@@ -6055,12 +6098,13 @@ Triggers a button press by code.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FINSizeablePanel]
+|
+xref:Reflection.adoc#Class-Actor[FINSizeablePanel]
 |===
 
 // end::Class-SizeableModulePanel__parent[]
 // tag::Class-SizeableModulePanel__description[]
-This panel allows for dynamic sizeing. For placing on walls.
+This panel allows for dynamic sizing. For placing on walls.
 
 // end::Class-SizeableModulePanel__description[]
 // tag::Class-SizeableModulePanel-Funcs__title[]
@@ -6163,7 +6207,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-IndicatorPole__parent[]
@@ -6394,14 +6439,17 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-LargeControlPanel__parent[]
 // tag::Class-LargeControlPanel__description[]
-This large modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programms. +
+This large modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programs.
+ +
 
-You can connect it to the FicsIt-Network. +
+You can connect it to the FicsIt-Network.
+ +
 
 Important to note is that every module is it's own component, that means if you want to listen to the signals, you will need to listen to each of them individually.
 
@@ -6506,14 +6554,17 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-LargeVerticalControlPanel__parent[]
 // tag::Class-LargeVerticalControlPanel__description[]
-This large verical modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programms. +
+This large vertical modular I/O control panel allows you to attach multiple different modules on to it and use them as I/O to control you programs.
+ +
 
-You can connect it to the FicsIt-Network. +
+You can connect it to the FicsIt-Network.
+ +
 
 Important to note is that every module is it's own component, that means if you want to listen to the signals, you will need to listen to each of them individually.
 
@@ -6622,7 +6673,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-LightSource__parent[]
@@ -6812,7 +6864,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-ModulePanel__parent[]
@@ -7014,7 +7067,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-NetworkRouter__parent[]
@@ -7346,7 +7400,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-RailroadSignal__parent[]
@@ -7570,12 +7625,13 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-RailroadTrack__parent[]
 // tag::Class-RailroadTrack__description[]
-A peice of railroad track over which trains can drive.
+A piece of railroad track over which trains can drive.
 
 // end::Class-RailroadTrack__description[]
 // tag::Class-RailroadTrack-Props__title[]
@@ -7628,7 +7684,7 @@ True if the track is part of/owned by a railroad platform.
 // tag::Class-RailroadTrack-Funcs[]
 [#Class-RailroadTrack-Funcs-getClosestTrackPosition]
 // tag::Class-RailroadTrack-Funcs-getClosestTrackPosition__title[]
-===== *Get Closeset Track Position* `getClosestTrackPosition` (_Struct(xref::Reflection.adoc#Struct-Vector[Vector])_ *World Pos* `worldPos`, _Trace(xref::Reflection.adoc#Class-RailroadTrack[RailroadTrack])_ *Track* `track` _out_, _Float_ *Offset* `offset` _out_, _Float_ *Forward* `forward` _out_)
+===== *Get Closest Track Position* `getClosestTrackPosition` (_Struct(xref::Reflection.adoc#Struct-Vector[Vector])_ *World Pos* `worldPos`, _Trace(xref::Reflection.adoc#Class-RailroadTrack[RailroadTrack])_ *Track* `track` _out_, _Float_ *Offset* `offset` _out_, _Float_ *Forward* `forward` _out_)
 // tag::Class-RailroadTrack-Funcs-getClosestTrackPosition[]
 // tag::Class-RailroadTrack-Funcs-getClosestTrackPosition__description[]
 Returns the closes track position from the given world position
@@ -7832,7 +7888,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-Screen__parent[]
@@ -7893,7 +7950,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-SignBase__parent[]
@@ -7950,7 +8008,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-SignBase[SignBase]
+|
+xref:Reflection.adoc#Class-SignBase[SignBase]
 |===
 
 // end::Class-WidgetSign__parent[]
@@ -7967,7 +8026,7 @@ The type of sign that allows you to define layouts, images, texts and colors man
 ===== *Set Prefab Sign Data* `setPrefabSignData` (_Struct(xref::Reflection.adoc#Struct-PrefabSignData[PrefabSignData])_ *Prefab Sign Data* `prefabSignData`)
 // tag::Class-WidgetSign-Funcs-setPrefabSignData[]
 // tag::Class-WidgetSign-Funcs-setPrefabSignData__description[]
-Sets the prefabg sign data e.g. the user settings like colo and more to define the signs content.
+Sets the prefab sign data e.g. the user settings like colo and more to define the signs content.
 
 // end::Class-WidgetSign-Funcs-setPrefabSignData__description[]
 // tag::Class-WidgetSign-Funcs-setPrefabSignData__flags[]
@@ -8000,7 +8059,7 @@ Parameters::
 ===== *Get Prefab Sign Data* `getPrefabSignData` (_Struct(xref::Reflection.adoc#Struct-PrefabSignData[PrefabSignData])_ *Prefab Sign Data* `prefabSignData` _out_)
 // tag::Class-WidgetSign-Funcs-getPrefabSignData[]
 // tag::Class-WidgetSign-Funcs-getPrefabSignData__description[]
-Returns the prefabg sign data e.g. the user settings like colo and more to define the signs content.
+Returns the prefab sign data e.g. the user settings like colo and more to define the signs content.
 
 // end::Class-WidgetSign-Funcs-getPrefabSignData__description[]
 // tag::Class-WidgetSign-Funcs-getPrefabSignData__flags[]
@@ -8040,7 +8099,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-SpeakerPole__parent[]
@@ -8163,12 +8223,14 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-SpeakerPole[SpeakerPole]
+|
+xref:Reflection.adoc#Class-SpeakerPole[SpeakerPole]
 |===
 
 // end::Class-Speakers_C__parent[]
 // tag::Class-Speakers_C__description[]
-The FicsIt-Networks speaker pole is a network component which allows you to use one more sense of the pioneers to give commands to them or to just make ambient better. +
+The FicsIt-Networks speaker pole is a network component which allows you to use one more sense of the pioneers to give commands to them or to just make ambient better.
+ +
 
 The speaker pole can play sound files located in the Computer Folder "/Sounds" in your Satisfactory Save-Games-Folder. The FicsIt-Networks speaker pole is only able to play .ogg files cause FicsIt Inc. has the opinion other file formates are useless.
 
@@ -8368,7 +8430,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[FGBuildable]
+|
+xref:Reflection.adoc#Class-Actor[FGBuildable]
 |===
 
 // end::Class-VehicleScanner__parent[]
@@ -8587,7 +8650,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[Actor]
+|
+xref:Reflection.adoc#Class-Actor[Actor]
 |===
 
 // end::Class-TargetList__parent[]
@@ -8813,7 +8877,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[Actor]
+|
+xref:Reflection.adoc#Class-Actor[Actor]
 |===
 
 // end::Class-TimeTable__parent[]
@@ -8884,7 +8949,7 @@ Parameters::
 
 | *Rule Set* `ruleSet`
 | Struct(xref::Reflection.adoc#Struct-TrainDockingRuleSet[TrainDockingRuleSet])
-| The docking rule set that descibes when the train will depart from the station.
+| The docking rule set that describes when the train will depart from the station.
 
 |===
 
@@ -8898,7 +8963,7 @@ Return Values::
 
 | *Added* `added`
 | Bool _out_
-| True if the stop got sucessfully added to the time table.
+| True if the stop got successfully added to the time table.
 
 |===
 
@@ -8997,7 +9062,7 @@ Return Values::
 
 | *Got Set* `gotSet`
 | Bool _out_
-| True if the stops got sucessfully set.
+| True if the stops got successfully set.
 
 |===
 
@@ -9195,7 +9260,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[Actor]
+|
+xref:Reflection.adoc#Class-Actor[Actor]
 |===
 
 // end::Class-Train__parent[]
@@ -9690,7 +9756,7 @@ Return Values::
 // tag::Class-Train-Signals[]
 // tag::Class-Train-Signals-SelfDrvingUpdate__title[]
 [#Class-Train-Signals-SelfDrvingUpdate]
-===== *Self Drving Update* `SelfDrvingUpdate` (_Bool_ *Enabled* `enabled`)
+===== *Self Driving Update* `SelfDrivingUpdate` (_Bool_ *Enabled* `enabled`)
 // tag::Class-Train-Signals-SelfDrvingUpdate[]
 // tag::Class-Train-Signals-SelfDrvingUpdate__description[]
 Triggers when the self driving mode of the train changes
@@ -9733,12 +9799,13 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Actor[Actor]
+|
+xref:Reflection.adoc#Class-Actor[Actor]
 |===
 
 // end::Class-Vehicle__parent[]
 // tag::Class-Vehicle__description[]
-A base class for all vehciles.
+A base class for all vehicles.
 
 // end::Class-Vehicle__description[]
 // tag::Class-Vehicle-Props__title[]
@@ -9814,7 +9881,8 @@ True if the vehicle is currently self driving.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Vehicle[Vehicle]
+|
+xref:Reflection.adoc#Class-Vehicle[Vehicle]
 |===
 
 // end::Class-RailroadVehicle__parent[]
@@ -9869,7 +9937,7 @@ True if this vehicle is currently docked to a platform.
 ===== _Bool_ *Is Reversed* `isReversed`
 // tag::Class-RailroadVehicle-props-isReversed[]
 // tag::Class-RailroadVehicle-props-isReversed__description[]
-True if the vheicle is placed reversed on the track.
+True if the vehicle is placed reversed on the track.
 
 // end::Class-RailroadVehicle-props-isReversed__description[]
 // tag::Class-RailroadVehicle-props-isReversed__flags[]
@@ -10135,7 +10203,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Vehicle[Vehicle]
+|
+xref:Reflection.adoc#Class-Vehicle[Vehicle]
 |===
 
 // end::Class-WheeledVehicle__parent[]
@@ -10190,7 +10259,7 @@ The amount of fuel this vehicle burns.
 ===== _Int_ *Wheels On Ground* `wheelsOnGround`
 // tag::Class-WheeledVehicle-props-wheelsOnGround[]
 // tag::Class-WheeledVehicle-props-wheelsOnGround__description[]
-The number of wheels currenlty on the ground.
+The number of wheels currently on the ground.
 
 // end::Class-WheeledVehicle-props-wheelsOnGround__description[]
 // tag::Class-WheeledVehicle-props-wheelsOnGround__flags[]
@@ -10510,7 +10579,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Object[Object]
+|
+xref:Reflection.adoc#Class-Object[Object]
 |===
 
 // end::Class-ActorComponent__parent[]
@@ -10553,7 +10623,8 @@ The parent actor of which this component is part of
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ActorComponent[ActorComponent]
+|
+xref:Reflection.adoc#Class-ActorComponent[ActorComponent]
 |===
 
 // end::Class-FactoryConnection__parent[]
@@ -10726,7 +10797,7 @@ Parameters::
 
 | *Item* `item`
 | Struct(xref::Reflection.adoc#Struct-Item[Item])
-| The transfered item
+| The transferred item
 
 |===
 
@@ -10745,7 +10816,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ActorComponent[ActorComponent]
+|
+xref:Reflection.adoc#Class-ActorComponent[ActorComponent]
 |===
 
 // end::Class-FINAdvancedNetworkConnectionComponent__parent[]
@@ -10806,7 +10878,8 @@ Parameters::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ActorComponent[ActorComponent]
+|
+xref:Reflection.adoc#Class-ActorComponent[ActorComponent]
 |===
 
 // end::Class-Inventory__parent[]
@@ -10932,7 +11005,8 @@ Removes all discardable items from the inventory completely. They will be gone! 
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ActorComponent[ActorComponent]
+|
+xref:Reflection.adoc#Class-ActorComponent[ActorComponent]
 |===
 
 // end::Class-PipeConnection__parent[]
@@ -11185,7 +11259,8 @@ Flush the associated pipe network
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ActorComponent[ActorComponent]
+|
+xref:Reflection.adoc#Class-ActorComponent[ActorComponent]
 |===
 
 // end::Class-PowerConnection__parent[]
@@ -11267,7 +11342,7 @@ Return Values::
 
 | *Power* `power`
 | Trace(xref::Reflection.adoc#Class-PowerInfo[PowerInfo]) _out_
-| The power info compoent this power connection uses.
+| The power info component this power connection uses.
 
 |===
 
@@ -11319,7 +11394,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ActorComponent[ActorComponent]
+|
+xref:Reflection.adoc#Class-ActorComponent[ActorComponent]
 |===
 
 // end::Class-PowerInfo__parent[]
@@ -11336,7 +11412,7 @@ A actor component that provides information and mainly statistics about the powe
 ===== _Float_ *Dynamic Production* `dynProduction`
 // tag::Class-PowerInfo-props-dynProduction[]
 // tag::Class-PowerInfo-props-dynProduction__description[]
-The production cpacity this connection provided last tick.
+The production capacity this connection provided last tick.
 
 // end::Class-PowerInfo-props-dynProduction__description[]
 // tag::Class-PowerInfo-props-dynProduction__flags[]
@@ -11355,7 +11431,7 @@ The production cpacity this connection provided last tick.
 ===== _Float_ *Base Production* `baseProduction`
 // tag::Class-PowerInfo-props-baseProduction[]
 // tag::Class-PowerInfo-props-baseProduction__description[]
-The base production capactiy this connection always provides.
+The base production capacity this connection always provides.
 
 // end::Class-PowerInfo-props-baseProduction__description[]
 // tag::Class-PowerInfo-props-baseProduction__flags[]
@@ -11374,7 +11450,7 @@ The base production capactiy this connection always provides.
 ===== _Float_ *Max Dynamic Production* `maxDynProduction`
 // tag::Class-PowerInfo-props-maxDynProduction[]
 // tag::Class-PowerInfo-props-maxDynProduction__description[]
-The maximum production capactiy this connection could have provided to the circuit in the last tick.
+The maximum production capacity this connection could have provided to the circuit in the last tick.
 
 // end::Class-PowerInfo-props-maxDynProduction__description[]
 // tag::Class-PowerInfo-props-maxDynProduction__flags[]
@@ -11431,7 +11507,7 @@ The amount of energy the connection actually consumed in the last tick.
 ===== _Bool_ *Has Power* `hasPower`
 // tag::Class-PowerInfo-props-hasPower[]
 // tag::Class-PowerInfo-props-hasPower__description[]
-True if the connection has satisfied power values and counts as beeing powered. (True if it has power)
+True if the connection has satisfied power values and counts as being powered. (True if it has power)
 
 // end::Class-PowerInfo-props-hasPower__description[]
 // tag::Class-PowerInfo-props-hasPower__flags[]
@@ -11496,7 +11572,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ActorComponent[ActorComponent]
+|
+xref:Reflection.adoc#Class-ActorComponent[ActorComponent]
 |===
 
 // end::Class-RailroadTrackConnection__parent[]
@@ -11532,7 +11609,7 @@ The world location of the the connection.
 ===== _Struct(xref::Reflection.adoc#Struct-Vector[Vector])_ *Connector Normal* `connectorNormal`
 // tag::Class-RailroadTrackConnection-props-connectorNormal[]
 // tag::Class-RailroadTrackConnection-props-connectorNormal__description[]
-The normal vecotr of the connector.
+The normal vector of the connector.
 
 // end::Class-RailroadTrackConnection-props-connectorNormal__description[]
 // tag::Class-RailroadTrackConnection-props-connectorNormal__flags[]
@@ -11608,7 +11685,7 @@ True if this connection is pointing away from the merge/spread point of a switch
 ===== _Int_ *Num Switch Positions* `numSwitchPositions`
 // tag::Class-RailroadTrackConnection-props-numSwitchPositions[]
 // tag::Class-RailroadTrackConnection-props-numSwitchPositions__description[]
-Returns the number of different switch poisitions this switch can have.
+Returns the number of different switch positions this switch can have.
 
 // end::Class-RailroadTrackConnection-props-numSwitchPositions__description[]
 // tag::Class-RailroadTrackConnection-props-numSwitchPositions__flags[]
@@ -12058,12 +12135,13 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ActorComponent[ActorComponent]
+|
+xref:Reflection.adoc#Class-ActorComponent[ActorComponent]
 |===
 
 // end::Class-RailroadVehicleMovement__parent[]
 // tag::Class-RailroadVehicleMovement__description[]
-This actor component contains all the infomation about the movement of a railroad vehicle.
+This actor component contains all the information about the movement of a railroad vehicle.
 
 // end::Class-RailroadVehicleMovement__description[]
 // tag::Class-RailroadVehicleMovement-Props__title[]
@@ -12205,7 +12283,7 @@ The maximum forward speed the vehicle can reach.
 // end::Class-RailroadVehicleMovement-props-maxSpeed__title[]
 [#Class-RailroadVehicleMovement-props-gravitationalForce]
 // tag::Class-RailroadVehicleMovement-props-gravitationalForce__title[]
-===== _Float_ *Gravitationl Force* `gravitationalForce`
+===== _Float_ *Gravitational Force* `gravitationalForce`
 // tag::Class-RailroadVehicleMovement-props-gravitationalForce[]
 // tag::Class-RailroadVehicleMovement-props-gravitationalForce__description[]
 The current gravitational force acting on the vehicle.
@@ -12243,7 +12321,7 @@ The current tractive force acting on the vehicle.
 // end::Class-RailroadVehicleMovement-props-tractiveForce__title[]
 [#Class-RailroadVehicleMovement-props-resistiveForce]
 // tag::Class-RailroadVehicleMovement-props-resistiveForce__title[]
-===== _Float_ *Resistive Froce* `resistiveForce`
+===== _Float_ *Resistive Force* `resistiveForce`
 // tag::Class-RailroadVehicleMovement-props-resistiveForce[]
 // tag::Class-RailroadVehicleMovement-props-resistiveForce__description[]
 The resistive force currently acting on the vehicle.
@@ -12379,7 +12457,7 @@ The maximum dynamic braking effort of this vehicle.
 ===== _Float_ *Max Air Braking Effort* `maxAirBrakingEffort`
 // tag::Class-RailroadVehicleMovement-props-maxAirBrakingEffort[]
 // tag::Class-RailroadVehicleMovement-props-maxAirBrakingEffort__description[]
-The maximum air braking effort of this vehcile.
+The maximum air braking effort of this vehicle.
 
 // end::Class-RailroadVehicleMovement-props-maxAirBrakingEffort__description[]
 // tag::Class-RailroadVehicleMovement-props-maxAirBrakingEffort__flags[]
@@ -12724,12 +12802,12 @@ Return Values::
 // end::Class-RailroadVehicleMovement-Funcs-getWheelsetOffset__retvals[]
 // end::Class-RailroadVehicleMovement-Funcs-getWheelsetOffset[]
 // end::Class-RailroadVehicleMovement-Funcs-getWheelsetOffset__title[]
-[#Class-RailroadVehicleMovement-Funcs-getCouplerRotationAndExtention]
+[#Class-RailroadVehicleMovement-Funcs-getCouplerRotationAndExtension]
 // tag::Class-RailroadVehicleMovement-Funcs-getCouplerRotationAndExtention__title[]
-===== *Get Coupler Rotation And Extention* `getCouplerRotationAndExtention` (_Int_ *Coupler* `coupler`, _Float_ *X* `x` _out_, _Float_ *Y* `y` _out_, _Float_ *Z* `z` _out_, _Float_ *Extention* `extention` _out_)
+===== *Get Coupler Rotation And Extension* `getCouplerRotationAndExtension` (_Int_ *Coupler* `coupler`, _Float_ *X* `x` _out_, _Float_ *Y* `y` _out_, _Float_ *Z* `z` _out_, _Float_ *Extension* `extension` _out_)
 // tag::Class-RailroadVehicleMovement-Funcs-getCouplerRotationAndExtention[]
 // tag::Class-RailroadVehicleMovement-Funcs-getCouplerRotationAndExtention__description[]
-Returns the normal vector and the extention of the coupler with the given index.
+Returns the normal vector and the extension of the coupler with the given index.
 
 // end::Class-RailroadVehicleMovement-Funcs-getCouplerRotationAndExtention__description[]
 // tag::Class-RailroadVehicleMovement-Funcs-getCouplerRotationAndExtention__flags[]
@@ -12750,7 +12828,7 @@ Parameters::
 
 | *Coupler* `coupler`
 | Int
-| The index of which you want to get the normal and extention of.
+| The index of which you want to get the normal and extension of.
 
 |===
 
@@ -12774,9 +12852,9 @@ Return Values::
 | Float _out_
 | The Z component of the coupler normal.
 
-| *Extention* `extention`
+| *Extension* `extention`
 | Float _out_
-| The extention of the coupler.
+| The extension of the coupler.
 
 |===
 
@@ -12795,7 +12873,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Object[Object]
+|
+xref:Reflection.adoc#Class-Object[Object]
 |===
 
 // end::Class-ItemCategory__parent[]
@@ -12838,7 +12917,8 @@ The name of the category.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Object[Object]
+|
+xref:Reflection.adoc#Class-Object[Object]
 |===
 
 // end::Class-ItemType__parent[]
@@ -13037,7 +13117,8 @@ The color of this fluid.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Object[Object]
+|
+xref:Reflection.adoc#Class-Object[Object]
 |===
 
 // end::Class-PowerCircuit__parent[]
@@ -13073,7 +13154,7 @@ The amount of power produced by the whole circuit in the last tick.
 ===== _Float_ *Consumption* `consumption`
 // tag::Class-PowerCircuit-props-consumption[]
 // tag::Class-PowerCircuit-props-consumption__description[]
-The power consumption of the whole circuit in thge last tick.
+The power consumption of the whole circuit in the last tick.
 
 // end::Class-PowerCircuit-props-consumption__description[]
 // tag::Class-PowerCircuit-props-consumption__flags[]
@@ -13146,7 +13227,7 @@ The maximum consumption of power in the last tick.
 // end::Class-PowerCircuit-props-maxPowerConsumption__title[]
 [#Class-PowerCircuit-props-isFuesed]
 // tag::Class-PowerCircuit-props-isFuesed__title[]
-===== _Bool_ *Is Fuesed* `isFuesed`
+===== _Bool_ *Is Fused* `isFused`
 // tag::Class-PowerCircuit-props-isFuesed[]
 // tag::Class-PowerCircuit-props-isFuesed__description[]
 True if the fuse in the network triggered.
@@ -13206,7 +13287,7 @@ The energy capacity all batteries of the network combined provide.
 ===== _Float_ *Battery Store* `batteryStore`
 // tag::Class-PowerCircuit-props-batteryStore[]
 // tag::Class-PowerCircuit-props-batteryStore__description[]
-The amount of energy currently stored in all battereies of the network combined.
+The amount of energy currently stored in all batteries of the network combined.
 
 // end::Class-PowerCircuit-props-batteryStore__description[]
 // tag::Class-PowerCircuit-props-batteryStore__flags[]
@@ -13225,7 +13306,7 @@ The amount of energy currently stored in all battereies of the network combined.
 ===== _Float_ *Battery Store Percentage* `batteryStorePercent`
 // tag::Class-PowerCircuit-props-batteryStorePercent[]
 // tag::Class-PowerCircuit-props-batteryStorePercent__description[]
-The fill status in percent of all battereies of the network combined.
+The fill status in percent of all batteries of the network combined.
 
 // end::Class-PowerCircuit-props-batteryStorePercent__description[]
 // tag::Class-PowerCircuit-props-batteryStorePercent__flags[]
@@ -13352,7 +13433,8 @@ Get Triggered when the fuse state of the power circuit changes.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Object[Object]
+|
+xref:Reflection.adoc#Class-Object[Object]
 |===
 
 // end::Class-Recipe__parent[]
@@ -13486,7 +13568,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Object[Object]
+|
+xref:Reflection.adoc#Class-Object[Object]
 |===
 
 // end::Class-ReflectionBase__parent[]
@@ -13567,7 +13650,8 @@ The description of this base.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ReflectionBase[ReflectionBase]
+|
+xref:Reflection.adoc#Class-ReflectionBase[ReflectionBase]
 |===
 
 // end::Class-Function__parent[]
@@ -13586,11 +13670,11 @@ A reflection object representing a function.
 // tag::Class-Function-props-flags__description[]
 The function bit flag register defining some behaviour of it. +
 
-Bits and their meaing (least significant bit first): +
+Bits and their meaning (least significant bit first): +
 Is this function has a variable amount of input parameters. +
-Can this function get called in syncrounus runtime. +
+Can this function get called in synchronous runtime. +
 Can this function can get called in parallel runtime. +
-Can this function get called in asynchronus runtime. +
+Can this function get called in asynchronous runtime. +
 Is this function a member function. +
 The function is a class function. +
 The function is a static function. +
@@ -13659,7 +13743,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ReflectionBase[ReflectionBase]
+|
+xref:Reflection.adoc#Class-ReflectionBase[ReflectionBase]
 |===
 
 // end::Class-Property__parent[]
@@ -13698,15 +13783,15 @@ The data type of this property. +
 // tag::Class-Property-props-flags__description[]
 The property bit flag register defining some behaviour of it. +
 
-Bits and their meaing (least significant bit first): +
+Bits and their meaning (least significant bit first): +
 Is this property a member attribute. +
 Is this property read only. +
 Is this property a parameter. +
-Is this property a output paramter. +
+Is this property a output parameter. +
 Is this property a return value. +
-Can this property get accessed in syncrounus runtime. +
+Can this property get accessed in synchronous runtime. +
 Can this property can get accessed in parallel runtime. +
-Can this property get accessed in asynchronus runtime. +
+Can this property get accessed in asynchronous runtime. +
 This property is a class attribute.
 
 // end::Class-Property-props-flags__description[]
@@ -13733,7 +13818,8 @@ This property is a class attribute.
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Property[Property]
+|
+xref:Reflection.adoc#Class-Property[Property]
 |===
 
 // end::Class-ArrayProperty__parent[]
@@ -13790,7 +13876,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Property[Property]
+|
+xref:Reflection.adoc#Class-Property[Property]
 |===
 
 // end::Class-ClassProperty__parent[]
@@ -13847,7 +13934,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Property[Property]
+|
+xref:Reflection.adoc#Class-Property[Property]
 |===
 
 // end::Class-ObjectProperty__parent[]
@@ -13904,7 +13992,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Property[Property]
+|
+xref:Reflection.adoc#Class-Property[Property]
 |===
 
 // end::Class-StructProperty__parent[]
@@ -13961,7 +14050,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Property[Property]
+|
+xref:Reflection.adoc#Class-Property[Property]
 |===
 
 // end::Class-TraceProperty__parent[]
@@ -14018,7 +14108,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ReflectionBase[ReflectionBase]
+|
+xref:Reflection.adoc#Class-ReflectionBase[ReflectionBase]
 |===
 
 // end::Class-Signal__parent[]
@@ -14100,7 +14191,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-ReflectionBase[ReflectionBase]
+|
+xref:Reflection.adoc#Class-ReflectionBase[ReflectionBase]
 |===
 
 // end::Class-Struct__parent[]
@@ -14336,7 +14428,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Struct[Struct]
+|
+xref:Reflection.adoc#Class-Struct[Struct]
 |===
 
 // end::Class-Class__parent[]
@@ -14426,7 +14519,8 @@ Return Values::
 [cols = "1,5a"]
 |===
 | Parent
-| xref::Reflection.adoc#Class-Object[Object]
+|
+xref:Reflection.adoc#Class-Object[Object]
 |===
 
 // end::Class-SignType__parent[]
@@ -14935,11 +15029,11 @@ Parameters::
 
 | *Y* `y`
 | Int
-| The y offset of the upper left corener of the buffer relative to this buffer
+| The y offset of the upper left corner of the buffer relative to this buffer
 
 | *Buffer* `buffer`
 | Struct(xref::Reflection.adoc#Struct-GPUT1Buffer[GPUT1Buffer])
-| The buffer from wich you want to copy from
+| The buffer from which you want to copy from
 
 | *Text Blend Mode* `textBlendMode`
 | Int
@@ -15332,7 +15426,7 @@ This structure stores all data that defines what a sign displays.
 ===== _Class(xref::Reflection.adoc#Class-Object[Object])_ *Layout* `layout`
 // tag::Struct-PrefabSignData-props-layout[]
 // tag::Struct-PrefabSignData-props-layout__description[]
-The object that actually displayes the layout
+The object that actually displays the layout
 
 // end::Struct-PrefabSignData-props-layout__description[]
 // tag::Struct-PrefabSignData-props-layout__flags[]
@@ -15367,7 +15461,7 @@ The foreground Color.
 // end::Struct-PrefabSignData-props-foreground__title[]
 [#Struct-PrefabSignData-props-background]
 // tag::Struct-PrefabSignData-props-background__title[]
-===== _Struct(xref::Reflection.adoc#Struct-Color[Color])_ *bBckground* `background`
+===== _Struct(xref::Reflection.adoc#Struct-Color[Color])_ *bBackground* `background`
 // tag::Struct-PrefabSignData-props-background[]
 // tag::Struct-PrefabSignData-props-background__description[]
 The background Color.
@@ -15941,7 +16035,7 @@ The station at which the train should stop
 ===== _Struct(xref::Reflection.adoc#Struct-TrainDockingRuleSet[TrainDockingRuleSet])_ *Rule Set* `ruleset`
 // tag::Struct-TimeTableStop-props-ruleset[]
 // tag::Struct-TimeTableStop-props-ruleset__description[]
-The rule set wich describe when the train will depart from the train station
+The rule set which describe when the train will depart from the train station
 
 // end::Struct-TimeTableStop-props-ruleset__description[]
 // tag::Struct-TimeTableStop-props-ruleset__flags[]
@@ -16007,7 +16101,7 @@ Return Values::
 ===== *Get Stations* `getStations` (_Array(Trace(xref::Reflection.adoc#Class-RailroadStation[RailroadStation]))_ *Stations* `stations` _out_)
 // tag::Struct-TrackGraph-Funcs-getStations[]
 // tag::Struct-TrackGraph-Funcs-getStations__description[]
-Returns a list of all trainstations in the network.
+Returns a list of all train stations in the network.
 
 // end::Struct-TrackGraph-Funcs-getStations__description[]
 // tag::Struct-TrackGraph-Funcs-getStations__flags[]
@@ -16028,7 +16122,7 @@ Return Values::
 
 | *Stations* `stations`
 | Array(Trace(xref::Reflection.adoc#Class-RailroadStation[RailroadStation])) _out_
-| The list of trainstations in the network.
+| The list of train stations in the network.
 
 |===
 
@@ -16043,7 +16137,7 @@ Return Values::
 === *Train Docking Rule Set* `TrainDockingRuleSet`
 // tag::Struct-TrainDockingRuleSet[]
 // tag::Struct-TrainDockingRuleSet__description[]
-Contains infromation about the rules that descibe when a trian should depart from a station
+Contains information about the rules that describe when a trian should depart from a station
 
 // end::Struct-TrainDockingRuleSet__description[]
 // tag::Struct-TrainDockingRuleSet__Prop[]
@@ -16051,7 +16145,7 @@ Contains infromation about the rules that descibe when a trian should depart fro
 ==== Properties
 [#Struct-TrainDockingRuleSet-props-definition]
 // tag::Struct-TrainDockingRuleSet-props-definition__title[]
-===== _Int_ *Defintion* `definition`
+===== _Int_ *Definition* `definition`
 // tag::Struct-TrainDockingRuleSet-props-definition[]
 // tag::Struct-TrainDockingRuleSet-props-definition__description[]
 0 = Load/Unload Once, 1 = Fully Load/Unload
@@ -16152,7 +16246,7 @@ The types of items that will be unloaded.
 === *Vector* `Vector`
 // tag::Struct-Vector[]
 // tag::Struct-Vector__description[]
-Contains three cordinates (X, Y, Z) to describe a position or movement vector in 3D Space
+Contains three coordinates (X, Y, Z) to describe a position or movement vector in 3D Space
 
 // end::Struct-Vector__description[]
 // tag::Struct-Vector__Prop[]
@@ -16223,7 +16317,7 @@ The Z coordinate component
 === *Vector 2D* `Vector2D`
 // tag::Struct-Vector2D[]
 // tag::Struct-Vector2D__description[]
-Contains two cordinates (X, Y) to describe a position or movement vector in 2D Space
+Contains two coordinates (X, Y) to describe a position or movement vector in 2D Space
 
 // end::Struct-Vector2D__description[]
 // tag::Struct-Vector2D__Prop[]

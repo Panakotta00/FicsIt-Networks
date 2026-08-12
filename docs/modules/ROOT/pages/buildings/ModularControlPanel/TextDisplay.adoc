@@ -16,9 +16,9 @@
 |===
 
 This IO-Module allows you to display static text.
-You can change the font size dynamically and you can even switch between a monospace font and a "normal" one.
+You can change the font size dynamically, and you can even switch between a monospace font and a "normal" one.
 
-Even if you miss alot features a GPU would provide, the convience of it is, that you are not required
+Even if you miss alot of the features a GPU would provide, the convenience of it is, that you are not required
 to have a GPU, so it is more like a plug and play experience.
 
 == Interface

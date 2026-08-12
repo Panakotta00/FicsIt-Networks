@@ -16,7 +16,7 @@
 |===
 
 This IO-Module allows the player to use a rotational movement as input for the computer.
-The player can rotate the knob indefinetly in any direction.
+The player can rotate the knob indefinitely in any direction.
 Where every rotation emits a network signal.
 
 == Interface

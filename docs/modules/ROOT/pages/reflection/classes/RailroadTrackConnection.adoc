@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
 !===
 
-This is a actor component for railroad tracks that allows to connecto to other track connections and so to connection multiple tracks with each eather so you can build a train network.
+This is an actor component for railroad tracks that allows to connecto to other track connections and so to connection multiple tracks with each eather so you can build a train network.
 
 // tag::interface[]
 
@@ -17,7 +17,7 @@ This is a actor component for railroad tracks that allows to connecto to other t
 === `connectorLocation` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
 // tag::func-connectorLocation[]
 
-The world location of the the connection.
+The world location of the connection.
 
 [%collapsible]
 ====
@@ -34,7 +34,7 @@ The world location of the the connection.
 === `connectorNormal` : Struct<xref:/reflection/structs/Vector.adoc[Vector]>
 // tag::func-connectorNormal[]
 
-The normal vecotr of the connector.
+The normal vector of the connector.
 
 [%collapsible]
 ====
@@ -102,7 +102,7 @@ True if this connection is pointing away from the merge/spread point of a switch
 === `numSwitchPositions` : Int
 // tag::func-numSwitchPositions[]
 
-Returns the number of different switch poisitions this switch can have.
+Returns the number of different switch positions this switch can have.
 
 [%collapsible]
 ====
@@ -141,7 +141,7 @@ Forces the switch position to a given location. Even autopilot will be forced to
 
 ! *Index* `index`
 ! Int
-! The connection index to whcih the switch should be force to point to. Negative number to remove the lock.
+! The connection index to which the switch should be force to point to. Negative number to remove the lock.
 !===
 
 ====
@@ -383,7 +383,7 @@ Returns the current switch position.
 
 ! *Index* `index`
 ! Int
-! The index of the connection connection the switch currently points to.
+! The index of the connection the switch currently points to.
 !===
 
 ====
@@ -441,7 +441,7 @@ Returns the track pos at which this connection is.
 
 ! *Track* `track`
 ! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
-! The track the track pos points to.
+! The track that the track pos points to.
 
 ! *Offset* `offset`
 ! Float

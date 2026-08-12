@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Buildable.adoc[Buildable]
 !===
 
-A peice of railroad track over which trains can drive.
+A piece of railroad track over which trains can drive.
 
 // tag::interface[]
 
@@ -63,7 +63,7 @@ Returns the closes track position from the given world position
 ! Flags
 ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
 
-! Display Name ! Get Closeset Track Position
+! Display Name ! Get Closest Track Position
 !===
 
 .Parameters
@@ -83,7 +83,7 @@ Returns the closes track position from the given world position
 
 ! *Track* `track`
 ! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
-! The track the track pos points to.
+! The track that the track pos points to.
 
 ! *Offset* `offset`
 ! Float
@@ -217,7 +217,7 @@ Returns the world location and world rotation of the track position from the giv
 
 ! *Track* `track`
 ! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
-! The track the track pos points to.
+! The track that the track pos points to.
 
 ! *Offset* `offset`
 ! Float

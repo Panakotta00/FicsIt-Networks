@@ -17,7 +17,7 @@ The type of sign that allows you to define layouts, images, texts and colors man
 === `getPrefabSignData` () -> `prefabSignData` : Struct<xref:/reflection/structs/PrefabSignData.adoc[PrefabSignData]>
 // tag::func-getPrefabSignData[]
 
-Returns the prefabg sign data e.g. the user settings like colo and more to define the signs content.
+Returns the prefab sign data e.g. the user settings like colo and more to define the signs content.
 
 [%collapsible]
 ====
@@ -46,7 +46,7 @@ Returns the prefabg sign data e.g. the user settings like colo and more to defin
 === `setPrefabSignData` (`prefabSignData` : Struct<xref:/reflection/structs/PrefabSignData.adoc[PrefabSignData]>)
 // tag::func-setPrefabSignData[]
 
-Sets the prefabg sign data e.g. the user settings like colo and more to define the signs content.
+Sets the prefab sign data e.g. the user settings like colo and more to define the signs content.
 
 [%collapsible]
 ====

@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
 !===
 
-A actor component that allows for a connection point to the power network. Basically a point were a power cable can get attached to.
+An actor component that allows for a connection point to the power network. Basically a point were a power cable can get attached to.
 
 // tag::interface[]
 
@@ -102,7 +102,7 @@ Returns the power info component of this power connection.
 
 ! *Power* `power`
 ! Trace<xref:/reflection/classes/PowerInfo.adoc[PowerInfo]>
-! The power info compoent this power connection uses.
+! The power info component this power connection uses.
 !===
 
 ====

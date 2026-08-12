@@ -3,7 +3,7 @@
 
 [cols="1,3a"]
 |===
-|Buildingtype
+|Building type
 |buildable network component
 
 |Factory Connectors
@@ -24,12 +24,12 @@
 The merger allows you to control the flow of items.
 
 It has one output queue that can be filled from the input to up to two items.
-Those get then transfered to the conveyor at the output connector.
+Those then get transferred to the conveyor at the output connector.
 
-You can transfer items from on of the inputs to the output if the given input has a item and the output queue has fewer than two items.
+You can transfer items from one of the inputs to the output if the given input has at least one item and the output queue has fewer than two items.
 
-Each input queue gets automaticaly filled by the attached conveyor with up to two values.
-You can then decide for each input when the first item in the queue get transfered to the output.
+Each input queue gets automatically filled by the attached conveyor with up to two items.
+You can then decide for each input when the first item in the queue get transferred to the output.
 
 == Interface
 include::page$Reflection.adoc[tag=Class-CodeableMerger,leveloffset=-1]

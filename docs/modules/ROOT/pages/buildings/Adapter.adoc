@@ -3,7 +3,7 @@
 
 [cols="1,3"]
 |===
-|Buildingtype
+|Building Type
 |network component
 
 |Max Network Connections
@@ -17,9 +17,11 @@
 |image::buildings/Adapter_ig.jpg[300,300,role="left"]
 |===
 
-The adapter is a special type of building you can not directly place as buildable, but you can place one by using the network cable. If you try to connect a existing building to the cable, it will use the building even if it has no network connector if it's special registerd or it has a power connector. Then when you place the cable, the adapter will automatically created. You can see the adapter only if the building has no power connector, in every case else there will be the adapter somewere visible.
+The adapter is a special type of building you can not directly place as buildable, but is placed on existing buildings when you use the network cable.
+If you try to connect a cable to an existing building that doesn't have a connector on it but is registered with FicsIt Networks or has a power connector.
+You can see the adapter only if the building has no power connector, in every case else the adapter will be visible somewhere.
 
-If you want to get rid of a adapter, you will need to destruct the whole building.
+If you want to get rid of an adapter, you will need to destruct the whole building.
 
 
 

@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
 !===
 
-This Switch Module for modular I/O Panels is used to toggle between three different settings. It has an illuminable spot on the knob and you can use them to trigger specific programmed events.
+This Switch Module for modular I/O Panels is used to toggle between three different settings. It has an illuminable spot on the knob, and you can use them to trigger specific programmed events.
 
 // tag::interface[]
 
@@ -17,7 +17,7 @@ This Switch Module for modular I/O Panels is used to toggle between three differ
 === `enabled` : Bool
 // tag::func-enabled[]
 
-Sets wheter to accept input on this encoder or not. True means accept input, false means to igore input
+Sets whether to accept input on this encoder or not. True means accept input, false means to ignore input
 
 [%collapsible]
 ====

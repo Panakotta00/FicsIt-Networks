@@ -1,9 +1,9 @@
 = Network Manager
-:description: This is a multi tool for network administation.
+:description: This is a multi tool for network administration.
 
 [cols="1,3"]
 |===
-|Itemtype
+|Item Type
 |Hand Equipment
 |===
 
@@ -18,17 +18,17 @@
 
 The network manager allows you to view details of a network component and the reflection system.
 
-When you take it in hands and look at a network component, you can left click to open the component debug window.
-This window will show you the UUID of the component, allows you to change and view the nick,
+When you take it in hands and look at a network component, you can left-click to open the component debug window.
+This window will show you the UUID of the component, allows you to change and view the nickname,
 view the connected network name and lists all connected computer network components.
 You can also click on such a listed network component to copy the UUID of it.
 
 image::items/NetworkManager_UI.jpg[300,300]
 
 When you hold ctrl, while looking at a network component and hit the left click,
-the debug window won't appear but you will copy the ID of the component directly.
+the debug window won't appear, but you will copy the ID of the component directly.
 
-The network manager also provides the reflection viewer which which you can explore and
+The network manager also provides the reflection viewer which you can explore and
 browse the reflection data.
 Each listed network component also has a small button on the right side,
 with which you can open that components type in the reflection viewer.

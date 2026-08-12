@@ -7,15 +7,15 @@
 ! xref:/reflection/classes/Factory.adoc[Factory]
 !===
 
-A actor that is a hypertube entrance buildable
+An actor that is a hypertube entrance buildable
 
 // tag::interface[]
 
 == Signals
 
-=== `PlayerEntered` (_Bool_ *Sucess* `success`)
+=== `PlayerEntered` (_Bool_ *Success* `success`)
 
-Triggers when a players enters into this hypertube entrance.
+Triggers when a players enter into this hypertube entrance.
 
 [%collapsible]
 ====
@@ -24,9 +24,9 @@ Triggers when a players enters into this hypertube entrance.
 !===
 !Name !Type !Description
 
-! *Sucess* `success`
+! *Success* `success`
 ! Bool
-! True if the transfer was sucessfull
+! True if the transfer was successful
 !===
 ====
 

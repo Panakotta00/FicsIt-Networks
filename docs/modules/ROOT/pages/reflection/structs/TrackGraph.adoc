@@ -9,7 +9,7 @@ Struct that holds a cache of a whole train/rail network.
 === `getStations` () -> `stations` : Array<Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>>
 // tag::func-getStations[]
 
-Returns a list of all trainstations in the network.
+Returns a list of all train stations in the network.
 
 [%collapsible]
 ====

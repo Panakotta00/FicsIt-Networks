@@ -1,7 +1,7 @@
 = Train Docking Rule Set
 :table-caption!:
 
-Contains infromation about the rules that descibe when a trian should depart from a station
+Contains information about the rules that describe when a trian should depart from a station
 
 == Properties
 
@@ -17,7 +17,7 @@ Contains infromation about the rules that descibe when a trian should depart fro
 !===
 ! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
 
-! Display Name ! Defintion
+! Display Name ! Definition
 !===
 ====
 // end::func-definition[]

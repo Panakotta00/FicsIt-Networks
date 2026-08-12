@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Object.adoc[Object]
 !===
 
-Describes the type of a sign.
+Describes the type of sign.
 
 // tag::interface[]
 

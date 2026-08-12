@@ -77,7 +77,7 @@ The foreground Color.
 === `layout` : Class<xref:/reflection/classes/Object.adoc[Object]>
 // tag::func-layout[]
 
-The object that actually displayes the layout
+The object that actually displays the layout
 
 [%collapsible]
 ====
@@ -114,7 +114,7 @@ The type of sign this prefab fits to.
 === `getIconElement` (`elementName` : String) -> `value` : Int
 // tag::func-getIconElement[]
 
-Gets a icon element with the given element name.
+Gets an icon element with the given element name.
 
 [%collapsible]
 ====
@@ -258,7 +258,7 @@ Returns all text elements and their values.
 === `setIconElement` (`elementName` : String, `value` : Int)
 // tag::func-setIconElement[]
 
-Sets a icon element with the given element name.
+Sets an icon element with the given element name.
 
 [%collapsible]
 ====

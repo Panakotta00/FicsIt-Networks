@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Buildable.adoc[FINSizeablePanel]
 !===
 
-This panel allows for dynamic sizeing. For placing on walls.
+This panel allows for dynamic sizing. For placing on walls.
 
 // tag::interface[]
 

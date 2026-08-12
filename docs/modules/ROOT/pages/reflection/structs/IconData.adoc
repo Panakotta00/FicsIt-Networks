@@ -101,7 +101,7 @@ The type of the icon.
 === `isValid` : Bool
 // tag::func-isValid[]
 
-True if the icon data refers to an valid icon
+True if the icon data refers to a valid icon
 
 [%collapsible]
 ====

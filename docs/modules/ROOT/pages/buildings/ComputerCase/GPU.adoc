@@ -14,7 +14,7 @@ For that a GPU needs to get bound to a screen and vice versa.
 You can only bind one GPU to one screen and vice versa at the same time.
 
 A screen doesn't influence the functionality of rendering but a screen
-might take effect on how it get displayed like some weird colors or
+might take effect on how it gets displayed like some weird colors or
 if it gets rendered in the world or just as a UI element.
 
 Because the GPUs rendering processes might vary, they might have

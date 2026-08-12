@@ -19,7 +19,7 @@ Use the Ficsit Label Marker to change the text and foreground color of the butto
 === `enabled` : Bool
 // tag::func-enabled[]
 
-Sets whether to accept input on this encoder or not. True means accept input, false means to igore input
+Sets whether to accept input on this encoder or not. True means accept input, false means to ignore input
 
 [%collapsible]
 ====

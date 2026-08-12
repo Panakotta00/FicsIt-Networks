@@ -34,7 +34,7 @@ The current docking state of the train.
 === `hasTimeTable` : Bool
 // tag::func-hasTimeTable[]
 
-True if the train has currently a time table.
+True if the train has currently a timetable.
 
 [%collapsible]
 ====
@@ -85,7 +85,7 @@ True if the train is currently player driven.
 === `isSelfDriving` : Bool
 // tag::func-isSelfDriving[]
 
-True if the train is currently self driving.
+True if the train is currently self-driving.
 
 [%collapsible]
 ====
@@ -102,7 +102,7 @@ True if the train is currently self driving.
 === `selfDrivingError` : Int
 // tag::func-selfDrivingError[]
 
-The last self driving error.
+The last self-driving error.
 0 = No Error
 1 = No Power
 2 = No Time Table
@@ -408,7 +408,7 @@ Allows to set the name of this train.
 === `setSelfDriving` (`selfDriving` : Bool)
 // tag::func-setSelfDriving[]
 
-Allows to set if the train should be self driving or not.
+Allows to set if the train should be self-driving or not.
 
 [%collapsible]
 ====
@@ -427,7 +427,7 @@ Allows to set if the train should be self driving or not.
 
 ! *Self Driving* `selfDriving`
 ! Bool
-! True if the train should be self driving.
+! True if the train should be self-driving.
 !===
 
 ====
@@ -438,7 +438,7 @@ Allows to set if the train should be self driving or not.
 
 === `SelfDrvingUpdate` (_Bool_ *Enabled* `enabled`)
 
-Triggers when the self driving mode of the train changes
+Triggers when the self-driving mode of the train changes
 
 [%collapsible]
 ====
@@ -449,7 +449,7 @@ Triggers when the self driving mode of the train changes
 
 ! *Enabled* `enabled`
 ! Bool
-! True if the train is now self driving.
+! True if the train is now self-driving.
 !===
 ====
 

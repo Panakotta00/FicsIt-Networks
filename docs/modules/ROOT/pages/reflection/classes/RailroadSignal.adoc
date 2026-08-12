@@ -77,7 +77,7 @@ True if this signal is currently observing at least one block.
 === `isBiDirectional` : Bool
 // tag::func-isBiDirectional[]
 
-True if this signal is bi-directional. (trains can pass into both directions)
+True if this signal is bidirectional. (trains can pass into both directions)
 
 [%collapsible]
 ====

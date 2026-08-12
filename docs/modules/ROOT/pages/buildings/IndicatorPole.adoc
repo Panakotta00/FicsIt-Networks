@@ -1,5 +1,5 @@
 = Indicator Pole
-:description: The indicator pole allows you display a state of program so you can determine it from far away.
+:description: The indicator pole allows you to display a state of program so you can determine it from far away.
 
 [cols="1,3"]
 |===
@@ -24,7 +24,7 @@ in the world so you can see them also from far away.
 The indicator pole has a dynamic height and can also get stacked.
 
 You can even access the stacked pole via the API so you don't need to
-connect every pole it self to a computer network.
+connect every pole itself to a computer network.
 
 == Interface
 include::page$Reflection.adoc[tag=Class-IndicatorPole,leveloffset=-1]

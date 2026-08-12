@@ -17,7 +17,7 @@ This Potentiometer Module allows for input of a fixed value range and fires a si
 === `enabled` : Bool
 // tag::func-enabled[]
 
-Sets wheter to accept input on this encoder or not. True means accept input, false means to igore input
+Sets whether to accept input on this encoder or not. True means accept input, false means to ignore input
 
 [%collapsible]
 ====

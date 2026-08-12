@@ -228,7 +228,7 @@ Returns the track pos at which this train platform is placed.
 
 ! *Track* `track`
 ! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
-! The track the track pos points to.
+! The track that the track pos points to.
 
 ! *Offset* `offset`
 ! Float

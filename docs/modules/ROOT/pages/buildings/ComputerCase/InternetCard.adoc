@@ -27,10 +27,10 @@ With this, you can f.e. download pastebin scripts or communicate with a custom R
 - Make it optional by config file for security reasons
 - Add socket connection support
 
-== Do a HTTP-Request
-To do make http requests you can use the `request` function. +
+== Make a HTTP-Request
+To make http requests you can use the `request` function. +
 This function simply takes as first argument the URL you want to send the request to.
-As second argument it takes the request method (like `GET`, `POST`, `PUT`, etc.).
+As second argument it takes the request method (like `GET`, `POST`, `PUT`, etc).
 As third argument it takes the body (aka. content) you want to send in the http request
 (leave it empty if there is non, like when you do just a get request). +
 The function is a var-args function, so you can now pass additional parameters to the function.

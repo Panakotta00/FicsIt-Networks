@@ -182,7 +182,7 @@ Returns all the properties of this type.
 === `isChildOf` (`parent` : Object<xref:/reflection/classes/Struct.adoc[Struct]>) -> `isChild` : Bool
 // tag::func-isChildOf[]
 
-Allows to check if this struct is a child struct of the given struct or the given struct it self.
+Allows to check if this struct is a child struct of the given struct or the given struct itself.
 
 [%collapsible]
 ====

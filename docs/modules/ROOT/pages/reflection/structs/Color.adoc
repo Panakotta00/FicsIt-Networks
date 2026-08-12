@@ -138,7 +138,7 @@ The red portion of the color.
 
 ! *Factor* `factor`
 ! Float
-! The factor with which this color should be scaled inversly with.
+! The factor with which this color should be scaled inversely with.
 !===
 
 .Return Values

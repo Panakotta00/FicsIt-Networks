@@ -62,7 +62,7 @@ A Hash of this object. This is a value that nearly uniquely identifies this obje
 === `isNetworkComponent` : Bool
 // tag::func-isNetworkComponent[]
 
-True if this object is a network component and has a id and nick.
+True if this object is a network component and has an id and nick.
 
 [%collapsible]
 ====
@@ -96,7 +96,7 @@ True if this object is a network component and has a id and nick.
 === `internalName` : String
 // tag::func-internalName[]
 
-The unreal engine internal name of this object.
+The Unreal Engine internal name of this object.
 
 [%collapsible]
 ====
@@ -113,7 +113,7 @@ The unreal engine internal name of this object.
 === `internalName` : String
 // tag::func-internalName[]
 
-The unreal engine internal name of this object.
+The Unreal Engine internal name of this object.
 
 [%collapsible]
 ====
@@ -130,7 +130,7 @@ The unreal engine internal name of this object.
 === `internalPath` : String
 // tag::func-internalPath[]
 
-The unreal engine internal path name of this object.
+The Unreal Engine internal path name of this object.
 
 [%collapsible]
 ====
@@ -147,7 +147,7 @@ The unreal engine internal path name of this object.
 === `internalPath` : String
 // tag::func-internalPath[]
 
-The unreal engine internal path name of this object.
+The Unreal Engine internal path name of this object.
 
 [%collapsible]
 ====
@@ -196,7 +196,7 @@ Returns a hash of this object. This is a value that nearly uniquely identifies t
 === `getHash` () -> `hash` : Int
 // tag::func-getHash[]
 
-Returns the hash of this class. This is a value that nearly uniquely idenfies this object.
+Returns the hash of this class. This is a value that nearly uniquely identifies this object.
 
 [%collapsible]
 ====

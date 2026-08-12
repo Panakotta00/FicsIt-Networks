@@ -19,7 +19,7 @@ With proper application, this mod can allow you to:
 - Any combination of these things and much more!
 
 == What this mod is (and isn't)
-If any of this sounds interesting to you, then *read the following carefully:*
+If any of these sounds interesting to you, then *read the following carefully:*
 
 This mod is not designed with ready-made solutions out-of-the-box. 
 For example, you should _not_ expect to download FicsIt-Networks, plop down a "storage monitoring" buildable, and go on your merry way.
@@ -60,7 +60,7 @@ To ask questions, share scripts, or generally learn more about using the mod, ch
 
 == Documentation Structure
 
-This documentation is seperated into six sections:
+This documentation is separated into six sections:
 
 - The xref:BasicConcept.adoc[Basic Concept] section is a surface-level explanation of the mod's structure, e.g. elements of a network and an introduction to the Reflection System.
 - The xref:buildings/index.adoc[Buildings] section lists all constructable buildings you can place using the build gun.
