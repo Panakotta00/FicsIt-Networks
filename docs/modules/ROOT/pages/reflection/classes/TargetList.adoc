@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Actor.adoc[Actor]
 !===
 
-The list of targets/path-waypoints a autonomous vehicle can drive
+The list of targets/path-waypoints an autonomous vehicle can drive
 
 // tag::interface[]
 

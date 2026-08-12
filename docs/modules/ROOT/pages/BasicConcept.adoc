@@ -29,13 +29,14 @@ Network Components can be identified individually by their "globally unique iden
 
 Example::
 +
-```
+[source]
+----
 0123456789abcdef0123456789abcdef
-```
+----
 
 === Component "Nicks"
 
-In addition to their GUID, Network Components can also have a *nick* (short for "nickname"). A nick is one or more custom names seperated by spaces. Any component can be given a nick using the Network Manager.
+In addition to their GUID, Network Components can also have a *nick* (short for "nickname"). A nick is one or more custom names separated by spaces. Any component can be given a nick using the Network Manager.
 
 By using multiple nicks, you can easily group similar components together. When looking for components, the mod will filter components on the network using the nicks you've given them.
 
@@ -77,6 +78,7 @@ In order to communicate with Network Components, a computer must then be connect
 
 Additional modules are available in the Build Menu on an as-needed basis. Want to connect to a screen? Check out the *GPU* and *Screen Driver*. Want to connect to the _actual Internet_? The *Internet Card* is at your service. We won't go into the details of each there, but it is important to know that they are available.
 
+[#_reflection_system]
 == Reflection System
 
 Once we have our components networked and our computer connected, it's time to write code. But how does this code interact with the components?
@@ -97,7 +99,7 @@ Therefore, even when you have full control of the system, it will _not_ allow yo
 
 === Structure
 
-As mentioned earlier, the Reflection System is a structured system. It is also extremely robust (take a quick look at xref::Reflection.adoc[Reflection] and you'll see what we mean). Therefore, understanding its structure is a helpful way to make sense of the pages and pages of functionality it provides.
+As mentioned earlier, the Reflection System is a structured system. It is also extremely robust (take a quick look at xref::Reflection.adoc[Reflection,] and you'll see what we mean). Therefore, understanding its structure is a helpful way to make sense of the pages and pages of functionality it provides.
 
 ==== Classes
 

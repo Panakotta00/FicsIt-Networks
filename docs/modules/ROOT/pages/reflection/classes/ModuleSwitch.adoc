@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
 !===
 
-The Lever Module for the modular I/O Panel is used to switch a programm state between two different value (on or off).
+The Lever Module for the modular I/O Panel is used to switch a program state between two different value (on or off).
 
 // tag::interface[]
 

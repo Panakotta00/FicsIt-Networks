@@ -1,7 +1,7 @@
 = Rotator
 :table-caption!:
 
-Contains rotation information about a object in 3D spaces using 3 rotation axis in a gimble.
+Contains rotation information about an object in 3D spaces using 3 rotation axis in a gimble.
 
 == Properties
 

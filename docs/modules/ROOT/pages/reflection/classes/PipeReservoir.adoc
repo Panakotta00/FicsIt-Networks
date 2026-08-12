@@ -34,7 +34,7 @@ The current outflow rate of fluid.
 === `flowFill` : Float
 // tag::func-flowFill[]
 
-The currentl inflow rate of fluid.
+The current inflow rate of fluid.
 
 [%collapsible]
 ====

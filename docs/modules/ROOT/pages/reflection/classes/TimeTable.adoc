@@ -1,4 +1,4 @@
-= Time Table
+= timetable
 :table-caption!:
 
 [cols="1,5a",separator="!"]
@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Actor.adoc[Actor]
 !===
 
-Contains the time table information of train.
+Contains the timetable information of train.
 
 // tag::interface[]
 
@@ -17,7 +17,7 @@ Contains the time table information of train.
 === `numStops` : Int
 // tag::func-numStops[]
 
-The current number of stops in the time table.
+The current number of stops in the timetable.
 
 [%collapsible]
 ====
@@ -37,7 +37,7 @@ The current number of stops in the time table.
 === `addStop` (`index` : Int, `station` : Trace<xref:/reflection/classes/RailroadStation.adoc[RailroadStation]>, `ruleSet` : Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>) -> `added` : Bool
 // tag::func-addStop[]
 
-Adds a stop to the time table.
+Adds a stop to the timetable.
 
 [%collapsible]
 ====
@@ -64,7 +64,7 @@ Adds a stop to the time table.
 
 ! *Rule Set* `ruleSet`
 ! Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>
-! The docking rule set that descibes when the train will depart from the station.
+! The docking rule set that describes when the train will depart from the station.
 !===
 
 .Return Values
@@ -74,7 +74,7 @@ Adds a stop to the time table.
 
 ! *Added* `added`
 ! Bool
-! True if the stop got sucessfully added to the time table.
+! True if the stop got successfully added to the timetable.
 !===
 
 ====
@@ -142,7 +142,7 @@ Returns the stop at the given index.
 
 ! *Stop* `stop`
 ! Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>
-! The time table stop at the given index.
+! The timetable stop at the given index.
 !===
 
 ====
@@ -152,7 +152,7 @@ Returns the stop at the given index.
 === `getStops` () -> `stops` : Array<Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>>
 // tag::func-getStops[]
 
-Returns a list of all the stops this time table has
+Returns a list of all the stops this timetable has
 
 [%collapsible]
 ====
@@ -171,7 +171,7 @@ Returns a list of all the stops this time table has
 
 ! *Stops* `stops`
 ! Array<Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>>
-! A list of time table stops this time table has.
+! A list of timetable stops this timetable has.
 !===
 
 ====
@@ -181,7 +181,7 @@ Returns a list of all the stops this time table has
 === `incrementCurrentStop` ()
 // tag::func-incrementCurrentStop[]
 
-Sets the current stop to the next stop in the time table.
+Sets the current stop to the next stop in the timetable.
 
 [%collapsible]
 ====
@@ -239,7 +239,7 @@ Allows to check if the given stop index is valid.
 === `removeStop` (`index` : Int)
 // tag::func-removeStop[]
 
-Removes the stop with the given index from the time table.
+Removes the stop with the given index from the timetable.
 
 [%collapsible]
 ====
@@ -297,7 +297,7 @@ Sets the stop, to which the train trys to drive to right now.
 === `setStop` (`index` : Int, `stop` : Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>) -> `success` : Bool
 // tag::func-setStop[]
 
-Allows to override a stop already in the time table.
+Allows to override a stop already in the timetable.
 
 [%collapsible]
 ====
@@ -320,7 +320,7 @@ Allows to override a stop already in the time table.
 
 ! *Stop* `stop`
 ! Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>
-! The time table stop you want to override with.
+! The timetable stop you want to override with.
 !===
 
 .Return Values
@@ -340,7 +340,7 @@ Allows to override a stop already in the time table.
 === `setStops` (`stops` : Array<Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>>) -> `gotSet` : Bool
 // tag::func-setStops[]
 
-Allows to empty and fill the stops of this time table with the given list of new stops.
+Allows to empty and fill the stops of this timetable with the given list of new stops.
 
 [%collapsible]
 ====
@@ -359,7 +359,7 @@ Allows to empty and fill the stops of this time table with the given list of new
 
 ! *Stops* `stops`
 ! Array<Struct<xref:/reflection/structs/TimeTableStop.adoc[TimeTableStop]>>
-! The new time table stops.
+! The new timetable stops.
 !===
 
 .Return Values
@@ -369,7 +369,7 @@ Allows to empty and fill the stops of this time table with the given list of new
 
 ! *Got Set* `gotSet`
 ! Bool
-! True if the stops got sucessfully set.
+! True if the stops got successfully set.
 !===
 
 ====

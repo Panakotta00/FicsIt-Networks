@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/FINModularIndicatorPoleModule.adoc[FINModularIndicatorPoleModule]
 !===
 
-FicsIt Indicator Module for FicsIt Modular Indicator Poles provides pioneers with the most fundamental indicator. The new and improved incandecent RGB bulb provides versatility to the industrious. Each modules color and intensity can be set via the network by a computer.
+FicsIt Indicator Module for FicsIt Modular Indicator Poles provides pioneers with the most fundamental indicator. The new and improved incandescent RGB bulb provides versatility to the industrious. Each modules color and intensity can be set via the network by a computer.
 
 // tag::interface[]
 

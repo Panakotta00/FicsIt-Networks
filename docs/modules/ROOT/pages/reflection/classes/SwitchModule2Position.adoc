@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
 !===
 
-This Switch Module for modular I/O Panels is used to toggle between a true and false value. It has an illuminable spot on the knob and you can use them to trigger specific programmed events.
+This Switch Module for modular I/O Panels is used to toggle between a true and false value. It has an illuminable spot on the knob, and you can use them to trigger specific programmed events.
 
 // tag::interface[]
 

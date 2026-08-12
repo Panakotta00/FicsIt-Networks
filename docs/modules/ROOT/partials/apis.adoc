@@ -1,11 +1,11 @@
 Apis::
 +
 ====
-xref:lua/api/Component.adoc[Component]
+xref:lua/api/ComponentModule.adoc[Component]
 -
-xref:lua/api/Computer.adoc[Computer]
+xref:lua/api/ComputerModule.adoc[Computer]
 -
-xref:lua/api/Event.adoc[Event]
+xref:lua/api/EventModule.adoc[Event]
 -
-xref:lua/api/FileSystem.adoc[FileSystem]
+xref:lua/api/FileSystemModule.adoc[FileSystem]
 ====

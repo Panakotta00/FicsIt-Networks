@@ -34,7 +34,7 @@ Get the set maximum flow rate through this pump. [m3/s]
 === `designedHeadlift` : Float
 // tag::func-designedHeadlift[]
 
-The amomunt of headlift this pump is designed for.
+The amount of headlift this pump is designed for.
 
 [%collapsible]
 ====
@@ -68,7 +68,7 @@ The current flow amount. (in m^3/s)
 === `flowLimit` : Float
 // tag::func-flowLimit[]
 
-The overal flow limit of this pump. (in m^3/s)
+The overall flow limit of this pump. (in m^3/s)
 
 [%collapsible]
 ====
@@ -119,7 +119,7 @@ The maximum amount of headlift this pump can provide.
 === `userFlowLimit` : Float
 // tag::func-userFlowLimit[]
 
-The flow limit of this pump the user can specifiy. Use -1 for no user set limit. (in m^3/s)
+The flow limit of this pump the user can specify. Use -1 for no user set limit. (in m^3/s)
 
 [%collapsible]
 ====

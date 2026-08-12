@@ -19,12 +19,12 @@
 |===
 
 The large screen allows you to place a screen with dynamic height and width
-onto a foundation or wall.
+onto a foundations or walls.
 
-You can also rotate it in any direction you want for even more customizeability.
+You can also rotate it in any direction if you want even more customizability.
 
-You can connect the screen to a computer network and then use the reference
-to the screen for the gpu's bind function so you can bind the screen with a gpu.
+You can connect the screen to a computer network and then reference
+the screen in the gpu's bind function to allow writing to it.
 
 The maximum size of a screen is 10 x 10.
 

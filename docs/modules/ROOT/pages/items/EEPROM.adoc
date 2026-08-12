@@ -3,7 +3,7 @@
 
 [cols="1,3"]
 |===
-|Itemtype
+|Item Type
 |Item
 |===
 
@@ -16,7 +16,7 @@
 
 
 EEPROM stores the boot code for a Computer.
-Different Computer Processors may eed different types of EEPROMs.
+Different Computer Processors may need different types of EEPROMs.
 Data on an EEPROM is persistent, so you can use a single EEPROM on different Computers.
 
 include::partial$item_footer.adoc[]

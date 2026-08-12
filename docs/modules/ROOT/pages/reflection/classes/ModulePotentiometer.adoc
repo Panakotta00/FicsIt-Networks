@@ -9,7 +9,7 @@
 
 The Potentiometer Module for the Modular I/O Control Panel allows you to have rotation input value for you programs.
 
-You can rotate it indefinetly into any direction where every rotation triggers a computer network signal.
+You can rotate it indefinitely into any direction where every rotation triggers a computer network signal.
 
 // tag::interface[]
 

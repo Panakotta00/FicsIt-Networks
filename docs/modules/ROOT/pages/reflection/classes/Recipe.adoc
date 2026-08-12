@@ -54,7 +54,7 @@ The name of this recipe.
 === `getIngredients` () -> `ingredients` : Array<Struct<xref:/reflection/structs/ItemAmount.adoc[ItemAmount]>>
 // tag::func-getIngredients[]
 
-Returns a array of item amounts, this recipe needs (input) so the recipe can be processed.
+Returns an array of item amounts, this recipe needs (input) so the recipe can be processed.
 
 [%collapsible]
 ====
@@ -83,7 +83,7 @@ Returns a array of item amounts, this recipe needs (input) so the recipe can be 
 === `getProducts` () -> `products` : Array<Struct<xref:/reflection/structs/ItemAmount.adoc[ItemAmount]>>
 // tag::func-getProducts[]
 
-Returns a array of item amounts, this recipe returns (outputs) when the recipe is processed once.
+Returns an array of item amounts, this recipe returns (outputs) when the recipe is processed once.
 
 [%collapsible]
 ====

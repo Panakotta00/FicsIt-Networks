@@ -1,7 +1,7 @@
 = Time Table Stop
 :table-caption!:
 
-Information about a train stop in a time table.
+Information about a train stop in a timetable.
 
 == Properties
 
@@ -48,7 +48,7 @@ Returns The rule set wich describe when the train will depart from the train sta
 
 ! *Rule Set* `ruleset`
 ! Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>
-! The rule set of this time table stop.
+! The rule set of this timetable stop.
 !===
 
 ====
@@ -58,7 +58,7 @@ Returns The rule set wich describe when the train will depart from the train sta
 === `setRuleSet` (`ruleset` : Struct<xref:/reflection/structs/TrainDockingRuleSet.adoc[TrainDockingRuleSet]>)
 // tag::func-setRuleSet[]
 
-Allows you to change the Rule Set of this time table stop.
+Allows you to change the Rule Set of this timetable stop.
 
 [%collapsible]
 ====

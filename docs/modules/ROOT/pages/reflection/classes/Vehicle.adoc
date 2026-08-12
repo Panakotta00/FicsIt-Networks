@@ -34,7 +34,7 @@ The health of the vehicle.
 === `isSelfDriving` : Bool
 // tag::func-isSelfDriving[]
 
-True if the vehicle is currently self driving.
+True if the vehicle is currently self-driving.
 
 [%collapsible]
 ====

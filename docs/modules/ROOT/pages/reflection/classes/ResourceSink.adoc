@@ -7,9 +7,9 @@
 ! xref:/reflection/classes/Factory.adoc[Factory]
 !===
 
-The resource sink, also known a A.W.E.S.O.M.E Sink.
+The resource sink, also known the A.W.E.S.O.M.E Sink.
 Points are saved in multiple different tracks.
-* 0 = Default (Ressources)
+* 0 = Default (Resources)
 * 1 = Exploration (DNA Points)
 
 // tag::interface[]

@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Object.adoc[Object]
 !===
 
-A Object that represents a power circuit separated by power switches.
+An Object that represents a power circuit separated by power switches.
 
 // tag::interface[]
 
@@ -85,7 +85,7 @@ The amount of energy that currently discharges from every battery in the whole n
 === `batteryStore` : Float
 // tag::func-batteryStore[]
 
-The amount of energy currently stored in all battereies of the network combined.
+The amount of energy currently stored in all batteries of the network combined.
 
 [%collapsible]
 ====
@@ -102,7 +102,7 @@ The amount of energy currently stored in all battereies of the network combined.
 === `batteryStorePercent` : Float
 // tag::func-batteryStorePercent[]
 
-The fill status in percent of all battereies of the network combined.
+The fill status in percent of all batteries of the network combined.
 
 [%collapsible]
 ====
@@ -170,7 +170,7 @@ The power capacity of the whole network in the last tick. (The max amount of pow
 === `consumption` : Float
 // tag::func-consumption[]
 
-The power consumption of the whole circuit in thge last tick.
+The power consumption of the whole circuit in the last tick.
 
 [%collapsible]
 ====
@@ -201,7 +201,7 @@ True if the power circuit has batteries connected to it.
 // end::func-hasBatteries[]
 // end::func-hasBatteries-title[]
 // tag::func-isFuesed-title[]
-=== `isFuesed` : Bool
+=== `isFused` : Bool
 // tag::func-isFuesed[]
 
 True if the fuse in the network triggered.
@@ -212,7 +212,7 @@ True if the fuse in the network triggered.
 !===
 ! Flags ! +++<span style='color:#e59445'><i>ReadOnly</i></span> <span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
 
-! Display Name ! Is Fuesed
+! Display Name ! Is Fused
 !===
 ====
 // end::func-isFuesed[]

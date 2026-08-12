@@ -19,7 +19,7 @@
 |===
 
 Can handle up to 4 Network connections.
-Connect Network Poles and Network nodes together to create FIC-SIT networks.
+Connect Network Poles and Network nodes together to create FicsIt networks.
 
 
 

@@ -16,18 +16,18 @@
 |===
 
 This computer module is a GPU and allows you to render a character grid onto any kind of screen.
-Each character can have it's own background and foreground color.
+Each character can have its own background and foreground color.
 
 You can also change the resolution to up to 150x50 characters.
 
 If the bound monitor allows for it, the GPU can also have user input like mouse clicks,
-keyboard key strokes or just simple mouse movement over the screen.
+keyboard keystrokes or just simple mouse movement over the screen.
 "Touch input" by looking/clicking with the crosshair over/onto a screen in the world is also supported.
 
 To define the color of a character, you need to set the currently used foreground and background color.
 All further character changes cause the changed character to have the currently used foreground and background colors.
 If you change the currently used foreground and background color, the color of the already drawn/changed characters
-wont change. (Until you draw them again)
+won't change. (Until you draw them again)
 
 When you do changes, those changes will only occur on a hidden buffer.
 That means you need to call `flush()` after you have changes something and want to display it.

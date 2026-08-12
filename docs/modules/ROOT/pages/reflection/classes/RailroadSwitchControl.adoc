@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/Buildable.adoc[Buildable]
 !===
 
-The controler object for a railroad switch.
+The controller object for a railroad switch.
 
 // tag::interface[]
 

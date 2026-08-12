@@ -109,7 +109,7 @@ Returns a list of trains that are approved by this block.
 === `getOccupation` () -> `occupation` : Array<Trace<xref:/reflection/classes/Train.adoc[Train]>>
 // tag::func-getOccupation[]
 
-Returns a list of trains that currently occupate the block.
+Returns a list of trains that currently occupy the block.
 
 [%collapsible]
 ====

@@ -34,7 +34,7 @@ The amount of fuel this vehicle burns.
 === `hasFuel` : Bool
 // tag::func-hasFuel[]
 
-True if the vehicle has currently fuel to drive.
+True if the vehicle currently has fuel to drive.
 
 [%collapsible]
 ====

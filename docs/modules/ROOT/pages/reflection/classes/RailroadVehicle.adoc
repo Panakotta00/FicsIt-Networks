@@ -34,7 +34,7 @@ True if this vehicle is currently docked to a platform.
 === `isReversed` : Bool
 // tag::func-isReversed[]
 
-True if the vheicle is placed reversed on the track.
+True if the vehicle is placed reversed on the track.
 
 [%collapsible]
 ====
@@ -187,7 +187,7 @@ Returns the track pos at which this vehicle is.
 
 ! *Track* `track`
 ! Trace<xref:/reflection/classes/RailroadTrack.adoc[RailroadTrack]>
-! The track the track pos points to.
+! The track that the track pos points to.
 
 ! *Offset* `offset`
 ! Float

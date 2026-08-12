@@ -34,7 +34,7 @@ This sets whether or not to automatically update the display text to the potenti
 === `enabled` : Bool
 // tag::func-enabled[]
 
-Sets wheter to accept input on this encoder or not. True means accept input, false means to igore input
+Sets whether to accept input on this encoder or not. True means accept input, false means to ignore input
 
 [%collapsible]
 ====

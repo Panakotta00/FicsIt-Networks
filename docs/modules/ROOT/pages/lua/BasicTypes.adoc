@@ -9,13 +9,13 @@ For each Type/Class or Struct registered in the xref:BasicConcept.adoc#_reflecti
 This is done by using metatables to provide some data-type functionality like a name and indexing.
 The overwritten indexing functionality is then used to search for functions and properties accordingly. +
 Such types are also known as `Classes` throughout this documentation.
-A value of such a type is also known as `Instance` or `Reference` to a object.
+A value of such a type is also known as `Instance` or `Reference` to an object.
 
 You can access these functions and properties like you do in normal tables (a period `.` or array operator `[]`).
 
 === Properties
 Properties can be used just normally.
-Tho read-only properties will cause a error when you try to assign a value to them
+Tho read-only properties will cause an error when you try to assign a value to them
 with the assignment `=` operator.
 
 [source,Lua]
@@ -103,11 +103,12 @@ print(loc.x, loc.y, loc.z) -- prints the x, y and z properties
 funcThatNeedsVector({1, 2, 3}) -- array gets converted implicitly to a vector struct with x=1, y=2, z=3
 ----
 
+[#_future]
 == Future
 
 This object allows for sync between the game and the Lua runtime.
 The problem is we can't run some functions of the game while being in a Lua tick.
-To workaround this, we introduce the Futures.
+To work around this, we introduce the Futures.
 
 With these objects you can check if the function you called has finished processing,
 you can get the return values if it finished, and you can even wait for it to finish.

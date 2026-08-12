@@ -21,6 +21,6 @@ to increase the memory capacity of the computer.
 Memory gets consumed by the nodes you put into tmpfs, the amount of memory used by a processor.
 That means you can optimize your code to decrease the memory consumption.
 
-If you try to use more memory than available, the system will crash with a out of memory exception.
+If you try to use more memory than available, the system will crash with an out of memory exception.
 
 include::partial$computer_modules_footer.adoc[]

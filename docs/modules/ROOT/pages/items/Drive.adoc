@@ -3,7 +3,7 @@
 
 [cols="1,3"]
 |===
-|Itemtype
+|Item Type
 |Item
 |===
 

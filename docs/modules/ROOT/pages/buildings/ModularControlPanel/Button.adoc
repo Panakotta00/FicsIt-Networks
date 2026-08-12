@@ -1,5 +1,5 @@
 = Button
-:description: This IO-Module allows you display a state with color and trigger a action.
+:description: This IO-Module allows you to display a state with color and trigger an action.
 
 [cols="1,3"]
 |===

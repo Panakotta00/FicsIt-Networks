@@ -7,7 +7,7 @@
 ! xref:/reflection/classes/ActorComponent.adoc[ActorComponent]
 !===
 
-A actor component that provides information and mainly statistics about the power connection it is attached to.
+An actor component that provides information and mainly statistics about the power connection it is attached to.
 
 // tag::interface[]
 
@@ -17,7 +17,7 @@ A actor component that provides information and mainly statistics about the powe
 === `baseProduction` : Float
 // tag::func-baseProduction[]
 
-The base production capactiy this connection always provides.
+The base production capacity this connection always provides.
 
 [%collapsible]
 ====
@@ -51,7 +51,7 @@ The amount of energy the connection actually consumed in the last tick.
 === `dynProduction` : Float
 // tag::func-dynProduction[]
 
-The production cpacity this connection provided last tick.
+The production capacity this connection provided last tick.
 
 [%collapsible]
 ====
@@ -68,7 +68,7 @@ The production cpacity this connection provided last tick.
 === `hasPower` : Bool
 // tag::func-hasPower[]
 
-True if the connection has satisfied power values and counts as beeing powered. (True if it has power)
+True if the connection has satisfied power values and counts as being powered. (True if it has power)
 
 [%collapsible]
 ====
@@ -85,7 +85,7 @@ True if the connection has satisfied power values and counts as beeing powered. 
 === `maxDynProduction` : Float
 // tag::func-maxDynProduction[]
 
-The maximum production capactiy this connection could have provided to the circuit in the last tick.
+The maximum production capacity this connection could have provided to the circuit in the last tick.
 
 [%collapsible]
 ====
