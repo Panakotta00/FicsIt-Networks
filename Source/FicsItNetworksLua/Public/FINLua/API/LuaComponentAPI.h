@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "LuaUtil.h"
+#include "FINLua/LuaUtil.h"
 #include "FIRTrace.h"
 
 class FICSITNETWORKSLUA_API IFINLuaComponentNetworkAccessInterface {

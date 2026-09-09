@@ -44,7 +44,7 @@ EndClass()
 
 BeginClass(UFGInventoryComponent, "Inventory", "Inventory", "A actor component that can hold multiple item stacks.\nWARNING! Be aware of container inventories, and never open their UI, otherwise these function will not work as expected.")
 BeginFuncVA(getStack, "Get Stack", "Returns the item stack at the given index.\nTakes integers as input and returns the corresponding stacks.") {
-	Body()
+	FIRBody()
 	int ArgNum = Params.Num();
 	for (int i = 0; i < ArgNum; ++i) {
 		const FIRAny& Any = Params[i];
@@ -63,18 +63,18 @@ BeginProp(RInt, size, "Size", "The count of available item stack slots this inve
 	FIRReturn (int64)self->GetSizeLinear();
 } EndProp()
 BeginFunc(sort, "Sort", "Sorts the whole inventory. (like the middle mouse click into a inventory)") {
-	Body()
+	FIRBody()
 	if (!self->IsLocked() && self->GetCanBeRearranged()) self->SortInventory();
 } EndFunc()
 BeginFunc(swapStacks, "Swap Stacks", "Swaps two given stacks inside the inventory.", 1) {
 	InVal(0, RInt, index1, "Index 1", "The index of the first stack in the inventory.")
 	InVal(1, RInt, index2, "Index 2", "The index of the second stack in the inventory.")
 	OutVal(2, RBool, successful, "Successful", "True if the swap was successful.")
-	Body()
+	FIRBody()
 	successful = UFGInventoryLibrary::MoveInventoryItem(self, index1, self, index2);
 } EndFunc()
 BeginFunc(flush, "Flush", "Removes all discardable items from the inventory completely. They will be gone! No way to get them back!", 0) {
-	Body()
+	FIRBody()
 	TArray<FInventoryStack> stacks;
 	self->GetInventoryStacks(stacks);
 	self->Empty();
@@ -87,13 +87,13 @@ BeginFunc(flush, "Flush", "Removes all discardable items from the inventory comp
 BeginFunc(canSplitAtIndex, "Can Split at Index", "Returns true if the item stack at the given index can be split.") {
 	InVal(0, RInt, index, "Index", "The slot index of which you want to check if the stack can be split.")
 	OutVal(1, RBool, canSplit, "Can Split", "True if the stack at the given index can be split.")
-	Body()
+	FIRBody()
 	canSplit = self->CanSplitStackAtIdx(index);
 } EndFunc()
 BeginFunc(splitAtIndex, "Split At Index", "Tries to split the stack at the given index and puts the given amount of items into a free slot.") {
 	InVal(0, RInt, index, "Index", "The index of the stack you want to split.")
 	InVal(1, RInt, num, "Num", "The number of items you want to split off the stack at the given index.")
-	Body()
+	FIRBody()
 	self->SplitStackAtIdx(index, num);
 } EndFunc()
 EndClass()

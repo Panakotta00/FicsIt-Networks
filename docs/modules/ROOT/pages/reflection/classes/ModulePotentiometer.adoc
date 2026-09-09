@@ -47,7 +47,7 @@ Rotates the potentiometer into the given direction.
 
 == Signals
 
-=== `PotRotate` (_Bool_ *anticlockwise* `anticlockwise`)
+=== `PotRotate` (_Bool_ *Anticlockwise* `Anticlockwise`)
 
 Triggers if the potentiometer gets rotated by a player or by code.
 
@@ -58,7 +58,7 @@ Triggers if the potentiometer gets rotated by a player or by code.
 !===
 !Name !Type !Description
 
-! *anticlockwise* `anticlockwise`
+! *Anticlockwise* `Anticlockwise`
 ! Bool
 ! 
 !===

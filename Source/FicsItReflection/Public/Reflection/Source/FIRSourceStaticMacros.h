@@ -14,7 +14,7 @@
 
 #define TypeClassName(Type) FIR_StaticRef_ ## Type
 #define NSName "FicsItNetworks-StaticReflection"
-#define FIRRefLocText(KeyName, Value) FInternationalization::ForUseOnlyByLocMacroAndGraphNodeTextLiterals_CreateText(Value, TEXT(NSName), KeyName)
+#define FIRRefLocText(KeyName, Value) FText::AsLocalizable_Advanced(Value, TEXT(NSName), KeyName)
 #define FIRRefTypeLocText(KeyName, Value) FIRRefLocText(*(FString(TName) + TEXT("_") + TEXT(KeyName)), TEXT(Value))
 #define BeginClass(Type, InternalName, DisplayName, Description) \
 	namespace TypeClassName(Type) { \
@@ -71,7 +71,7 @@
 		TSubclassOf<T> self = Cast<UClass>(Ctx.GetObject());
 #define BeginStaticFunc(InternalName, DisplayName, Description, VA, ...) BeginFuncRT(Static, InternalName, DisplayName, Description, VA, 2, GET_MACRO(0, ##__VA_ARGS__, 1) ) \
 		void* self = Ctx.GetGeneric();
-#define Body() \
+#define FIRBody() \
 			if (self && _bGotReg) {
 #define EndFunc() \
 			else if (!_bGotReg) _bGotReg = true; \

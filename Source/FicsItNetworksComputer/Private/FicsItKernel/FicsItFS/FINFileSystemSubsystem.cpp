@@ -1,11 +1,11 @@
 ﻿#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 
-#include "App.h"
-#include "Device.h"
+#include "Misc/App.h"
+#include "FicsItFileSystem/Device.h"
 #include "FGInventoryComponent.h"
 #include "FicsItFileSystem.h"
-#include "Paths.h"
-#include "SubsystemActorManager.h"
+#include "Misc/Paths.h"
+#include "Subsystem/SubsystemActorManager.h"
 #include "Engine/Engine.h"
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 
@@ -48,11 +48,12 @@ TSharedPtr<CodersFileSystem::Device> AFINFileSystemSubsystem::GetDevice(const FG
 AFINFileSystemSubsystem* AFINFileSystemSubsystem::GetFileSystemSubsystem(UObject* WorldContext) {
 #if WITH_EDITOR
 	return nullptr;
-#endif
+#else
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
 	check(SubsystemActorManager);
 	return SubsystemActorManager->GetSubsystemActor<AFINFileSystemSubsystem>();
+#endif
 }
 
 FGuid AFINFileSystemSubsystem::CreateState(int32 inCapacity, class UFGInventoryComponent* inInventory, int32 inSlot) {

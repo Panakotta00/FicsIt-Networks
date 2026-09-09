@@ -1,6 +1,6 @@
 #include "FicsItNetworksDocumentation.h"
 #include "FicsItReflection.h"
-#include "Paths.h"
+#include "Misc/Paths.h"
 #include "FINLua/FINLuaModule.h"
 #include "Logging/StructuredLog.h"
 #include "Misc/App.h"

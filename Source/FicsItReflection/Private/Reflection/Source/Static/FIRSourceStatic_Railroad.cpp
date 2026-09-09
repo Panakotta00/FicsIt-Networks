@@ -44,14 +44,14 @@ public:
 BeginClass(AFGBuildableTrainPlatform, "TrainPlatform", "Train Platform", "The base class for all train station parts.")
 BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which this platform is part of.") {
 	OutVal(0, RStruct<FFIRTrackGraph>, graph, "Graph", "The track graph of which this platform is part of.")
-	Body()
+	FIRBody()
 	graph = (FIRAny)FFIRTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
 } EndFunc()
 BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this train platform is placed.") {
 	OutVal(0, RTrace<AFGBuildableRailroadTrack>, track, "Track", "The track the track pos points to.")
 	OutVal(1, RFloat, offset, "Offset", "The offset of the track pos.")
 	OutVal(2, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
-	Body()
+	FIRBody()
 	FRailroadTrackPosition pos = self->GetTrackPosition();
 	if (!pos.IsValid()) throw FFIRException("Railroad track position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
@@ -61,12 +61,12 @@ BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this tra
 BeginFunc(getConnectedPlatform, "Get Connected Platform", "Returns the connected platform in the given direction.") {
 	InVal(0, RObject<UFGTrainPlatformConnection>, platformConnection, "Platform Connection", "The platform connection of which you want to find the opposite connection of.")
 	OutVal(1, RTrace<UFGTrainPlatformConnection>, oppositeConnection, "Opposite Connection", "The platform connection at the opposite side.")
-	Body()
+	FIRBody()
 	oppositeConnection = Ctx.GetTrace() / self->GetConnectionInOppositeDirection(platformConnection.Get());
 } EndFunc()
 BeginFunc(getAllConnectedPlatforms, "Get all connected Platforms", "Returns a list of all connected platforms in order.") {
 	OutVal(1, RArray<RTrace<UFGTrainPlatformConnection>>, platforms, "Platforms", "The list of connected platforms")
-	Body()
+	FIRBody()
 	TArray<FIRAny> connectedPlatforms;
 	//UFGTrainPlatformConnection* firstConnection = self->GetComponentByClass<UFGTrainPlatformConnection>();
 	UFGTrainPlatformConnection* firstConnection = FIRRailroadHelper::AFGBuildableTrainPlatform_mPlatformConnection0(self);
@@ -92,17 +92,17 @@ BeginFunc(getAllConnectedPlatforms, "Get all connected Platforms", "Returns a li
 } EndFunc()
 BeginFunc(getDockedVehicle, "Get Docked Vehicle", "Returns the currently docked vehicle.") {
 	OutVal(0, RTrace<AFGVehicle>, vehicle, "Vehicle", "The currently docked vehicle")
-	Body()
+	FIRBody()
 	vehicle = Ctx.GetTrace() / FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mDockedRailroadVehicle"));
 } EndFunc()
 BeginFunc(getMaster, "Get Master", "Returns the master platform of this train station.") {
 	OutVal(0, RTrace<AFGRailroadVehicle>, master, "Master", "The master platform of this train station.")
-	Body()
+	FIRBody()
 	master = Ctx.GetTrace() / FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mStationDockingMaster"));
 } EndFunc()
 BeginFunc(getDockedLocomotive, "Get Docked Locomotive", "Returns the currently docked locomotive at the train station.") {
 	OutVal(0, RTrace<AFGLocomotive>, locomotive, "Locomotive", "The currently docked locomotive at the train station.")
-	Body()
+	FIRBody()
 	locomotive = Ctx.GetTrace() / FReflectionHelper::GetPropertyValue<FObjectProperty>(self, TEXT("mDockingLocomotive"));
 } EndFunc()
 BeginProp(RInt, status, "Status", "The current docking status of the platform.") {
@@ -184,31 +184,31 @@ EndClass()
 BeginClass(AFGRailroadVehicle, "RailroadVehicle", "Railroad Vehicle", "The base class for any vehicle that drives on train tracks.")
 BeginFunc(getTrain, "Get Train", "Returns the train of which this vehicle is part of.") {
 	OutVal(0, RTrace<AFGTrain>, train, "Train", "The train of which this vehicle is part of")
-	Body()
+	FIRBody()
 	train = Ctx.GetTrace() / Cast<UObject>(self->GetTrain());
 } EndFunc()
 BeginFunc(isCoupled, "Is Coupled", "Allows to check if the given coupler is coupled to another car.") {
 	InVal(0, RInt, coupler, "Coupler", "The Coupler you want to check. 0 = Front, 1 = Back")
 	OutVal(1, RBool, coupled, "Coupled", "True of the give coupler is coupled to another car.")
-	Body()
+	FIRBody()
 	coupled = self->IsCoupledAt(static_cast<ERailroadVehicleCoupler>(coupler));
 } EndFunc()
 BeginFunc(getCoupled, "Get Coupled", "Allows to get the coupled vehicle at the given coupler.") {
 	InVal(0, RInt, coupler, "Coupler", "The Coupler you want to get the car from. 0 = Front, 1 = Back")
 	OutVal(1, RTrace<AFGRailroadVehicle>, coupled, "Coupled", "The coupled car of the given coupler is coupled to another car.")
-	Body()
+	FIRBody()
 	coupled = Ctx.GetTrace() / self->GetCoupledVehicleAt(static_cast<ERailroadVehicleCoupler>(coupler));
 } EndFunc()
 BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which this vehicle is part of.") {
 	OutVal(0, RStruct<FFIRTrackGraph>, track, "Track", "The track graph of which this vehicle is part of.")
-	Body()
+	FIRBody()
 	track = (FIRAny)FFIRTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
 } EndFunc()
 BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this vehicle is.") {
 	OutVal(0, RTrace<AFGBuildableRailroadTrack>, track, "Track", "The track the track pos points to.")
     OutVal(1, RFloat, offset, "Offset", "The offset of the track pos.")
     OutVal(2, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
-    Body()
+    FIRBody()
     FRailroadTrackPosition pos = self->GetTrackPosition();
 	if (!pos.IsValid()) throw FFIRException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
@@ -217,7 +217,7 @@ BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this veh
 } EndFunc()
 BeginFunc(getMovement, "Get Movement", "Returns the vehicle movement of this vehicle.") {
 	OutVal(0, RTrace<UFGRailroadVehicleMovementComponent>, movement, "Movement", "The movement of this vehicle.")
-	Body()
+	FIRBody()
 	movement = Ctx.GetTrace() / self->GetRailroadVehicleMovementComponent();
 } EndFunc()
 BeginProp(RFloat, length, "Length", "The length of this vehicle on the track.") {
@@ -234,7 +234,7 @@ EndClass()
 BeginClass(UFGRailroadVehicleMovementComponent, "RailroadVehicleMovement", "Railroad Vehicle Movement", "This actor component contains all the infomation about the movement of a railroad vehicle.")
 BeginFunc(getVehicle, "Get Vehicle", "Returns the vehicle this movement component holds the movement information of.") {
 	OutVal(0, RTrace<AFGRailroadVehicle>, vehicle, "Vehicle", "The vehicle this movement component holds the movement information of.")
-	Body()
+	FIRBody()
 	vehicle = Ctx.GetTrace() / self->GetOwningRailroadVehicle();
 } EndFunc()
 BeginFunc(getWheelsetRotation, "Get Wheelset Rotation", "Returns the current rotation of the given wheelset.") {
@@ -242,7 +242,7 @@ BeginFunc(getWheelsetRotation, "Get Wheelset Rotation", "Returns the current rot
 	OutVal(1, RFloat, x, "X", "The wheelset's rotation X component.")
 	OutVal(2, RFloat, y, "Y", "The wheelset's rotation Y component.")
 	OutVal(3, RFloat, z, "Z", "The wheelset's rotation Z component.")
-	Body()
+	FIRBody()
 	FVector rot = self->GetWheelsetRotation(wheelset);
 	x = rot.X;
 	y = rot.Y;
@@ -251,7 +251,7 @@ BeginFunc(getWheelsetRotation, "Get Wheelset Rotation", "Returns the current rot
 BeginFunc(getWheelsetOffset, "Get Wheelset Offset", "Returns the offset of the wheelset with the given index from the start of the vehicle.") {
 	InVal(0, RInt, wheelset, "Wheelset", "The index of the wheelset you want to get the offset of.")
 	OutVal(1, RFloat, offset, "Offset", "The offset of the wheelset.")
-	Body()
+	FIRBody()
 	offset = self->GetWheelsetOffset(wheelset);
 } EndFunc()
 BeginFunc(getCouplerRotationAndExtention, "Get Coupler Rotation And Extention", "Returns the normal vector and the extention of the coupler with the given index.") {
@@ -260,7 +260,7 @@ BeginFunc(getCouplerRotationAndExtention, "Get Coupler Rotation And Extention", 
 	OutVal(2, RFloat, y, "Y", "The Y component of the coupler normal.")
 	OutVal(3, RFloat, z, "Z", "The Z component of the coupler normal.")
 	OutVal(4, RFloat, extention, "Extention", "The extention of the coupler.")
-	Body()
+	FIRBody()
 	float extension;
 	FVector rotation = self->GetCouplerRotationAndExtention(coupler, extension);
 	x =rotation.X;
@@ -359,56 +359,56 @@ BeginSignal(SelfDrvingUpdate, "Self Drving Update", "Triggers when the self driv
 EndSignal()
 BeginFunc(getName, "Get Name", "Returns the name of this train.") {
 	OutVal(0, RString, name, "Name", "The name of this train.")
-	Body()
+	FIRBody()
 	name = self->GetTrainName().ToString();
 } EndFunc()
 BeginFunc(setName, "Set Name", "Allows to set the name of this train.") {
 	InVal(0, RString, name, "Name", "The new name of this trian.")
-	Body()
+	FIRBody()
 	self->SetTrainName(FText::FromString(name));
 } EndFunc()
 BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which this train is part of.") {
 	OutVal(0, RStruct<FFIRTrackGraph>, track, "Track", "The track graph of which this train is part of.")
-	Body()
+	FIRBody()
 	track = (FIRAny) FFIRTrackGraph{Ctx.GetTrace(), self->GetTrackGraphID()};
 } EndFunc()
 BeginFunc(setSelfDriving, "Set Self Driving", "Allows to set if the train should be self driving or not.", 0) {
 	InVal(0, RBool, selfDriving, "Self Driving", "True if the train should be self driving.")
-	Body()
+	FIRBody()
 	self->SetSelfDrivingEnabled(selfDriving);
 } EndFunc()
 BeginFunc(getMaster, "Get Master", "Returns the master locomotive that is part of this train.") {
 	OutVal(0, RTrace<AFGLocomotive>, master, "Master", "The master locomotive of this train.")
-	Body()
+	FIRBody()
 	master = Ctx.GetTrace() / self->GetMultipleUnitMaster();
 } EndFunc()
 BeginFunc(getTimeTable, "Get Time Table", "Returns the timetable of this train.") {
 	OutVal(0, RTrace<AFGRailroadTimeTable>, timeTable, "Time Table", "The timetable of this train.")
-	Body()
+	FIRBody()
 	timeTable = Ctx.GetTrace() / self->GetTimeTable();
 } EndFunc()
 BeginFunc(newTimeTable, "New Time Table", "Creates and returns a new timetable for this train.", 0) {
 	OutVal(0, RTrace<AFGRailroadTimeTable>, timeTable, "Time Table", "The new timetable for this train.")
-	Body()
+	FIRBody()
 	timeTable = Ctx.GetTrace() / self->NewTimeTable();
 } EndFunc()
 BeginFunc(getFirst, "Get First", "Returns the first railroad vehicle that is part of this train.") {
 	OutVal(0, RTrace<AFGRailroadVehicle>, first, "First", "The first railroad vehicle that is part of this train.")
-	Body()
+	FIRBody()
 	first = Ctx.GetTrace() / self->GetFirstVehicle();
 } EndFunc()
 BeginFunc(getLast, "Get Last", "Returns the last railroad vehicle that is part of this train.") {
 	OutVal(0, RTrace<AFGRailroadVehicle>, last, "Last", "The last railroad vehicle that is part of this train.")
-	Body()
+	FIRBody()
 	last = Ctx.GetTrace() / self->GetLastVehicle();
 } EndFunc()
 BeginFunc(dock, "Dock", "Trys to dock the train to the station it is currently at.") {
-	Body()
+	FIRBody()
 	self->Dock();
 } EndFunc()
 BeginFunc(getVehicles, "Get Vehicles", "Returns a list of all the vehicles this train has.") {
 	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "A list of all the vehicles this train has.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Vehicles;
 	for (AFGRailroadVehicle* vehicle : self->mSimulationData.SimulatedVehicles) {
 		Vehicles.Add(Ctx.GetTrace() / vehicle);
@@ -441,7 +441,7 @@ BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
 	InVal(1, RTrace<AFGBuildableRailroadStation>, station, "Station", "The railroad station at which the stop should happen.")
 	InVal(2, RStruct<FTrainDockingRuleSet>, ruleSet, "Rule Set", "The docking rule set that descibes when the train will depart from the station.")
 	OutVal(3, RBool, added, "Added", "True if the stop got sucessfully added to the time table.")
-	Body()
+	FIRBody()
 	FTimeTableStop stop;
 	auto railroadStation = Cast<AFGBuildableRailroadStation>(station.Get());
 	if (!IsValid(railroadStation)) {
@@ -457,12 +457,12 @@ BeginFunc(addStop, "Add Stop", "Adds a stop to the time table.") {
 } EndFunc()
 BeginFunc(removeStop, "Remove Stop", "Removes the stop with the given index from the time table.") {
 	InVal(0, RInt, index, "Index", "The zero-based index at which the stop should get added.")
-	Body()
+	FIRBody()
 	self->RemoveStop(index);
 } EndFunc()
 BeginFunc(getStops, "Get Stops", "Returns a list of all the stops this time table has") {
 	OutVal(0, RArray<RStruct<FFIRTimeTableStop>>, stops, "Stops", "A list of time table stops this time table has.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Output;
 	TArray<FTimeTableStop> Stops;
 	self->GetStops(Stops);
@@ -474,7 +474,7 @@ BeginFunc(getStops, "Get Stops", "Returns a list of all the stops this time tabl
 BeginFunc(setStops, "Set Stops", "Allows to empty and fill the stops of this time table with the given list of new stops.") {
 	InVal(0, RArray<RStruct<FFIRTimeTableStop>>, stops, "Stops", "The new time table stops.")
 	OutVal(1, RBool, gotSet, "Got Set", "True if the stops got sucessfully set.")
-	Body()
+	FIRBody()
 	TArray<FTimeTableStop> Stops;
 	for (const FIRAny& Any : stops) {
 		Stops.Add(Any.GetStruct().Get<FFIRTimeTableStop>());
@@ -484,13 +484,13 @@ BeginFunc(setStops, "Set Stops", "Allows to empty and fill the stops of this tim
 BeginFunc(isValidStop, "Is Valid Stop", "Allows to check if the given stop index is valid.") {
 	InVal(0, RInt, index, "Index", "The zero-based stop index you want to check its validity.")
 	OutVal(1, RBool, valid, "Valid", "True if the stop index is valid.")
-	Body()
+	FIRBody()
 	valid = self->IsValidStop(index);
 } EndFunc()
 BeginFunc(getStop, "Get Stop", "Returns the stop at the given index.") {
 	InVal(0, RInt, index, "Index", "The zero-based index of the stop you want to get.")
 	OutVal(1, RStruct<FFIRTimeTableStop>, stop, "Stop", "The time table stop at the given index.")
-	Body()
+	FIRBody()
 	FTimeTableStop Stop = self->GetStop(index);
 	if (IsValid(Stop.Station)) {
 		stop = (FIRAny)FFIRTimeTableStop{Ctx.GetTrace() / Stop.Station->GetStation(), Stop.DockingRuleSet};
@@ -502,7 +502,7 @@ BeginFunc(setStop, "Set Stop", "Allows to override a stop already in the time ta
 	InVal(0, RInt, index, "Index", "The zero-based index of the stop you want to override.")
 	InVal(1, RStruct<FFIRTimeTableStop>, stop, "Stop", "The time table stop you want to override with.")
 	OutVal(2, RBool, success, "Success", "True if setting was successful, false if not, f.e. invalid index.")
-	Body()
+	FIRBody()
 	TArray<FTimeTableStop> Stops;
 	self->GetStops(Stops);
 	if (index < Stops.Num()) {
@@ -515,16 +515,16 @@ BeginFunc(setStop, "Set Stop", "Allows to override a stop already in the time ta
 } EndFunc()
 BeginFunc(setCurrentStop, "Set Current Stop", "Sets the stop, to which the train trys to drive to right now.") {
 	InVal(0, RInt, index, "Index", "The zero-based index of the stop the train should drive to right now.")
-	Body()
+	FIRBody()
 	self->SetCurrentStop(index);
 } EndFunc()
 BeginFunc(incrementCurrentStop, "Increment Current Stop", "Sets the current stop to the next stop in the time table.") {
-	Body()
+	FIRBody()
 	self->IncrementCurrentStop();
 } EndFunc()
 BeginFunc(getCurrentStop, "Get Current Stop", "Returns the index of the stop the train drives to right now.") {
 	OutVal(0, RInt, index, "Index", "The zero-based index of the stop the train tries to drive to right now.")
-    Body()
+    FIRBody()
     index = (int64) self->GetCurrentStop();
 } EndFunc()
 BeginProp(RInt, numStops, "Num Stops", "The current number of stops in the time table.") {
@@ -545,7 +545,7 @@ BeginFunc(getClosestTrackPosition, "Get Closeset Track Position", "Returns the c
 	OutVal(1, RTrace<AFGBuildableRailroadTrack>, track, "Track", "The track the track pos points to.")
     OutVal(2, RFloat, offset, "Offset", "The offset of the track pos.")
     OutVal(3, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
-    Body()
+    FIRBody()
 	FRailroadTrackPosition pos = self->FindTrackPositionClosestToWorldLocation(worldPos);
 	if (!pos.IsValid()) throw FFIRException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
@@ -558,7 +558,7 @@ BeginFunc(getWorldLocAndRotAtPos, "Get World Location And Rotation At Position",
     InVal(2, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
     OutVal(3, RStruct<FVector>, location, "Location", "The location at the given track position")
 	OutVal(4, RStruct<FVector>, rotation, "Rotation", "The rotation at the given track position (forward vector)")
-	Body()
+	FIRBody()
 	FRailroadTrackPosition pos(Cast<AFGBuildableRailroadTrack>(track.Get()), offset, forward);
 	FVector loc;
 	FVector rot;
@@ -569,19 +569,19 @@ BeginFunc(getWorldLocAndRotAtPos, "Get World Location And Rotation At Position",
 BeginFunc(getConnection, "Get Connection", "Returns the railroad track connection at the given direction.") {
 	InVal(0, RInt, direction, "Direction", "The direction of which you want to get the connector from. 0 = front, 1 = back")
 	OutVal(1, RTrace<UFGRailroadTrackConnectionComponent>, connection, "Connection", "The connection component in the given direction.")
-	Body()
+	FIRBody()
 	UFGConnectionComponent* rawConn = direction == 0 ? self->GetSplineConnection0() : self->GetSplineConnection1();
 	connection = Ctx.GetTrace() / Cast<UFGRailroadTrackConnectionComponent>(rawConn);
 } EndFunc()
 BeginFunc(getTrackGraph, "Get Track Graph", "Returns the track graph of which this track is part of.") {
 	OutVal(0, RStruct<FFIRTrackGraph>, track, "Track", "The track graph of which this track is part of.")
-    Body()
-    static FIntProperty* Prop = CastField<FIntProperty>(AFGBuildableRailroadTrack::StaticClass()->FindPropertyByName(TEXT("mTrackGraphID")));
-    track = (FIRAny)FFIRTrackGraph{Ctx.GetTrace(), Prop->GetPropertyValue_InContainer(self)};
+	FIRBody()
+	static FIntProperty* Prop = CastField<FIntProperty>(AFGBuildableRailroadTrack::StaticClass()->FindPropertyByName(TEXT("mTrackGraphID")));
+	track = (FIRAny)FFIRTrackGraph{Ctx.GetTrace(), Prop->GetPropertyValue_InContainer(self)};
 } EndFunc()
 BeginFunc(getVehicles, "Get Vehicles", "Returns a list of Railroad Vehicles on the Track") {
 	OutVal(0, RArray<RTrace<AFGRailroadVehicle>>, vehicles, "Vehicles", "THe list of vehicles on the track.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Vehicles;
 	for (AFGRailroadVehicle* vehicle : self->GetVehicles()) {
 		Vehicles.Add(Ctx.GetTrace() / vehicle);
@@ -606,12 +606,12 @@ BeginProp(RStruct<FVector>, connectorNormal, "Connector Normal", "The normal vec
 BeginFunc(getConnection, "Get Connection", "Returns the connected connection with the given index.") {
 	InVal(1, RInt, index, "Index", "The index of the connected connection you want to get.")
 	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, connection, "Connection", "The connected connection at the given index.")
-	Body()
+	FIRBody()
 	connection = Ctx.GetTrace() / self->GetConnection(index);
 } EndFunc()
 BeginFunc(getConnections, "Get Connections", "Returns a list of all connected connections.") {
 	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, connections, "Connections", "A list of all connected connections.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Connections;
 	for (UFGRailroadTrackConnectionComponent* conn : self->GetConnections()) {
 		Connections.Add(Ctx.GetTrace() / conn);
@@ -622,7 +622,7 @@ BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this con
 	OutVal(0, RTrace<AFGBuildableRailroadTrack>, track, "Track", "The track the track pos points to.")
     OutVal(1, RFloat, offset, "Offset", "The offset of the track pos.")
     OutVal(2, RFloat, forward, "Forward", "The forward direction of the track pos. 1 = with the track direction, -1 = against the track direction")
-    Body()
+    FIRBody()
     FRailroadTrackPosition pos = self->GetTrackPosition();
 	if (!pos.IsValid()) throw FFIRException("Railroad Track Position of self is invalid");
 	track = Ctx.GetTrace()(pos.Track.Get());
@@ -631,52 +631,52 @@ BeginFunc(getTrackPos, "Get Track Pos", "Returns the track pos at which this con
 } EndFunc()
 BeginFunc(getTrack, "Get Track", "Returns the track of which this connection is part of.") {
 	OutVal(0, RTrace<AFGBuildableRailroadTrack>, track, "Track", "The track of which this connection is part of.")
-	Body()
+	FIRBody()
 	track = Ctx.GetTrace() / self->GetTrack();
 } EndFunc()
 BeginFunc(getSwitchControl, "Get Switch Control", "Returns the switch control of this connection.") {
 	OutVal(0, RTrace<AFGBuildableRailroadSwitchControl>, switchControl, "Switch", "The switch control of this connection.")
-	Body()
+	FIRBody()
 	switchControl = Ctx.GetTrace() / self->GetSwitchControl();
 } EndFunc()
 BeginFunc(getStation, "Get Station", "Returns the station of which this connection is part of.") {
 	OutVal(0, RTrace<AFGBuildableRailroadStation>, station, "Station", "The station of which this connection is part of.")
-	Body()
+	FIRBody()
 	station = Ctx.GetTrace() / self->GetStation();
 } EndFunc()
 BeginFunc(getFacingSignal, "Get Facing Signal", "Returns the signal this connection is facing to.") {
 	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal this connection is facing.")
-	Body()
+	FIRBody()
 	signal = Ctx.GetTrace() / self->GetFacingSignal();
 } EndFunc()
 BeginFunc(getTrailingSignal, "Get Trailing Signal", "Returns the signal this connection is trailing from.") {
 	OutVal(0, RTrace<AFGBuildableRailroadSignal>, signal, "Signal", "The signal this connection is trailing.")
-	Body()
+	FIRBody()
 	signal = Ctx.GetTrace() / self->GetTrailingSignal();
 } EndFunc()
 BeginFunc(getOpposite, "Get Opposite", "Returns the opposite connection of the track this connection is part of.") {
 	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, opposite, "Opposite", "The opposite connection of the track this connection is part of.")
-	Body()
+	FIRBody()
 	opposite = Ctx.GetTrace() / self->GetOpposite();
 } EndFunc()
 BeginFunc(getNext, "Get Next", "Returns the next connection in the direction of the track. (used the correct path switched point to)") {
 	OutVal(0, RTrace<UFGRailroadTrackConnectionComponent>, next, "Next", "The next connection in the direction of the track.")
-	Body()
+	FIRBody()
 	next = Ctx.GetTrace() / self->GetNext();
 } EndFunc()
 BeginFunc(setSwitchPosition, "Set Switch Position", "Sets the position (connection index) to which the track switch points to.") {
 	InVal(0, RInt, index, "Index", "The connection index to which the switch should point to.")
-	Body()
+	FIRBody()
 	self->SetSwitchPosition(index);
 } EndFunc()
 BeginFunc(getSwitchPosition, "Get Switch Position", "Returns the current switch position.") {
 	OutVal(0, RInt, index, "Index", "The index of the connection connection the switch currently points to.")
-    Body()
+    FIRBody()
     index = (int64)self->GetSwitchPosition();
 } EndFunc()
 BeginFunc(forceSwitchPosition, "Force Switch Position", "Forces the switch position to a given location. Even autopilot will be forced to use this track. A negative number can be used to remove the forced track.", 0) {
 	InVal(0, RInt, index, "Index", "The connection index to whcih the switch should be force to point to. Negative number to remove the lock.")
-	Body()
+	FIRBody()
 	self->SetSwitchPosition(index);
 	AFIRSubsystem::GetReflectionSubsystem(self)->ForceRailroadSwitch(self, index);
 } EndFunc()
@@ -696,17 +696,17 @@ EndClass()
 
 BeginClass(AFGBuildableRailroadSwitchControl, "RailroadSwitchControl", "Railroad Switch Control", "The controler object for a railroad switch.")
 BeginFunc(toggleSwitch, "Toggle Switch", "Toggles the railroad switch like if you interact with it.") {
-	Body()
+	FIRBody()
 	self->ToggleSwitchPosition();
 } EndFunc()
 BeginFunc(switchPosition, "Switch Position", "Returns the current switch position of this switch.") {
 	OutVal(0, RInt, position, "Position", "The current switch position of this switch.")
-    Body()
+    FIRBody()
     position = (int64)self->GetSwitchPosition();
 } EndFunc()
 BeginFunc(getControlledConnections, "Get Controlled Connections", "Returns the Railroad Connections this switch is controlling.") {
 	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, connections, "Connections", "The controlled connections.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Connections;
 	for (auto connection : self->GetControlledConnections()) {
 		Connections.Add(Ctx.GetTrace() / connection);
@@ -740,12 +740,12 @@ BeginProp(RInt, aspect, "Aspect", "The aspect of the signal. The aspect shows if
 } EndProp()
 BeginFunc(getObservedBlock, "Get Observed Block", "Returns the track block this signals observes.") {
 	OutVal(0, RStruct<FFIRRailroadSignalBlock>, block, "Block", "The railroad signal block this signal is observing.")
-	Body()
+	FIRBody()
 	block = FIRStruct(FFIRRailroadSignalBlock(self->GetObservedBlock()));
 } EndFunc()
 BeginFunc(getGuardedConnnections, "Get Guarded Connections", "Returns a list of the guarded connections. (incoming connections)") {
 	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, guardedConnections, "GuardedConnections", "The guarded connections.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> GuardedConnections;
 	for (UFGRailroadTrackConnectionComponent* Connection : self->GetGuardedConnections()) {
 		GuardedConnections.Add(Ctx.GetTrace() / Connection);
@@ -754,7 +754,7 @@ BeginFunc(getGuardedConnnections, "Get Guarded Connections", "Returns a list of 
 } EndFunc()
 BeginFunc(getObservedConnections, "Get Observed Connections", "Returns a list of the observed connections. (outgoing connections)") {
 	OutVal(0, RArray<RTrace<UFGRailroadTrackConnectionComponent>>, observedConnections, "ObservedConnections", "The observed connections.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> ObservedConnections;
 	for (UFGRailroadTrackConnectionComponent* Connection : self->GetObservedConnections()) {
 		ObservedConnections.Add(Ctx.GetTrace() / Connection);
@@ -781,7 +781,7 @@ BeginProp(RBool, isDurationAndRule, "Is Duration and Rule", "True if the duratio
 } EndProp()
 BeginFunc(getLoadFilters, "Get Load Filters", "Returns the types of items that will be loaded.") {
 	OutVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Filters;
 	for (TSubclassOf<UFGItemDescriptor> Filter : self->LoadFilterDescriptors) {
 		Filters.Add((FIRClass)Filter);
@@ -790,7 +790,7 @@ BeginFunc(getLoadFilters, "Get Load Filters", "Returns the types of items that w
 } EndFunc()
 BeginFunc(setLoadFilters, "Set Load Filters", "Sets the types of items that will be loaded.") {
 	InVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
-	Body()
+	FIRBody()
 	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
 	for (const FIRAny& Filter : filters) {
 		Filters.Add(Filter.GetClass());
@@ -799,7 +799,7 @@ BeginFunc(setLoadFilters, "Set Load Filters", "Sets the types of items that will
 } EndFunc()
 BeginFunc(getUnloadFilters, "Get Unload Filters", "Returns the types of items that will be unloaded.") {
 	OutVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Filters;
 	for (TSubclassOf<UFGItemDescriptor> Filter : self->UnloadFilterDescriptors) {
 		Filters.Add((FIRClass)Filter);
@@ -808,7 +808,7 @@ BeginFunc(getUnloadFilters, "Get Unload Filters", "Returns the types of items th
 } EndFunc()
 BeginFunc(setUnloadFilters, "Set Unload Filters", "Sets the types of items that will be loaded.") {
 	InVal(0, RArray<RClass<UFGItemDescriptor>>, filters, "Filters", "The item filter array")
-	Body()
+	FIRBody()
 	TArray<TSubclassOf<UFGItemDescriptor>> Filters;
 	for (const FIRAny& Filter : filters) {
 		Filters.Add(Filter.GetClass());
@@ -825,12 +825,12 @@ BeginProp(RTrace<AFGBuildableRailroadStation>, station, "Station", "The station 
 } EndProp()
 BeginFunc(getRuleSet, "Get Rule Set", "Returns The rule set wich describe when the train will depart from the train station.") {
 	OutVal(0, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set of this time table stop.")
-	Body()
+	FIRBody()
 	ruleset = FIRStruct(self->RuleSet);
 } EndFunc()
 BeginFunc(setRuleSet, "Set Rule Set", "Allows you to change the Rule Set of this time table stop.") {
 	InVal(0, RStruct<FTrainDockingRuleSet>, ruleset, "Rule Set", "The rule set you want to use instead.")
-	Body()
+	FIRBody()
 	self->RuleSet = ruleset;
 } EndFunc()
 EndStruct()
@@ -838,7 +838,7 @@ EndStruct()
 BeginStruct(FFIRTrackGraph, "TrackGraph", "Track Graph", "Struct that holds a cache of a whole train/rail network.")
 BeginFunc(getTrains, "Get Trains", "Returns a list of all trains in the network.") {
 	OutVal(0, RArray<RTrace<AFGTrain>>, trains, "Trains", "The list of trains in the network.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Trains;
 	TArray<AFGTrain*> TrainList;
 	AFGRailroadSubsystem::Get(*self->Trace)->GetTrains(self->TrackID, TrainList);
@@ -849,7 +849,7 @@ BeginFunc(getTrains, "Get Trains", "Returns a list of all trains in the network.
 } EndFunc()
 BeginFunc(getStations, "Get Stations", "Returns a list of all trainstations in the network.") {
 	OutVal(0, RArray<RTrace<AFGBuildableRailroadStation>>, stations, "Stations", "The list of trainstations in the network.")
-    Body()
+    FIRBody()
     TArray<FIRAny> Stations;
 	TArray<AFGTrainStationIdentifier*> StationList;
 	AFGRailroadSubsystem::Get(*self->Trace)->GetTrainStations(self->TrackID, StationList);
@@ -883,13 +883,13 @@ BeginProp(RInt, blockValidation, "Block Validation", "Returns the blocks validat
 BeginFunc(isOccupiedBy, "Is Occupied By", "Allows you to check if this block is occupied by a given train.") {
 	InVal(0, RObject<AFGTrain>, train, "Train", "The train you want to check if it occupies this block")
 	OutVal(1, RBool, isOccupied, "Is Occupied", "True if the given train occupies this block.")
-	Body()
+	FIRBody()
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	isOccupied = self->Block.Pin()->IsOccupiedBy(train.Get());
 } EndFunc()
 BeginFunc(getOccupation, "Get Occupation", "Returns a list of trains that currently occupate the block.") {
 	OutVal(0, RArray<RTrace<AFGTrain>>, occupation, "Occupation", "A list of trains occupying the block.")
-	Body()
+	FIRBody()
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Occupation;
 	for (TWeakObjectPtr<AFGRailroadVehicle> train : FIRRailroadHelper::FFGRailroadSignalBlock_GetOccupiedBy(*self->Block.Pin())) {
@@ -899,7 +899,7 @@ BeginFunc(getOccupation, "Get Occupation", "Returns a list of trains that curren
 } EndFunc()
 BeginFunc(getQueuedReservations, "Get Queued Reservations", "Returns a list of trains that try to reserve this block and wait for approval.") {
 	OutVal(0, RArray<RTrace<AFGTrain>>, reservations, "Reservations", "A list of trains that try to reserve this block and wait for approval.")
-	Body()
+	FIRBody()
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Reservations;
 	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FIRRailroadHelper::FFGRailroadSignalBlock_GetQueuedReservations(*self->Block.Pin())) {
@@ -911,7 +911,7 @@ BeginFunc(getQueuedReservations, "Get Queued Reservations", "Returns a list of t
 } EndFunc()
 BeginFunc(getApprovedReservations, "Get Approved Reservations", "Returns a list of trains that are approved by this block.") {
 	OutVal(0, RArray<RTrace<AFGTrain>>, reservations, "Reservations", "A list of trains that are approved by this block.")
-	Body()
+	FIRBody()
 	if (!self->Block.IsValid()) throw FFIRException(TEXT("Signalblock is invalid"));
 	TArray<FIRAny> Reservations;
 	for (TSharedPtr<FFGRailroadBlockReservation> Reservation : FIRRailroadHelper::FFGRailroadSignalBlock_GetApprovedReservations(*self->Block.Pin())) {

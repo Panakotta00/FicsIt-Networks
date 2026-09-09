@@ -7,9 +7,6 @@
 
 #include "Net/UnrealNetwork.h"
 
-DEFINE_LOG_CATEGORY(LogFicsItNetworks_DebugRoze);
-
-
 UBuildMode_Auto::UBuildMode_Auto() {
 	mDisplayName = FText::FromString("Auto");
 }

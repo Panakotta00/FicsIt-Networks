@@ -2,7 +2,7 @@
 
 #include "FGBuildableBeam.h"
 #include "FGBuildablePillar.h"
-#include "FGBuildableWalkway.h"
+#include "Buildables/FGBuildableWalkway.h"
 #include "Buildables/FGBuildableFoundation.h"
 #include "Buildables/FGBuildableWall.h"
 

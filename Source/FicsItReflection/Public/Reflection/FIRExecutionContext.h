@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIRTrace.h"
+#include "Serialization/StructuredArchive.h"
 #include "FIRExecutionContext.generated.h"
 
 USTRUCT()
@@ -126,7 +127,7 @@ public:
 
 	FORCEINLINE bool Serialize(FStructuredArchive::FSlot Slot) {
 		FStructuredArchive::FRecord Record = Slot.EnterRecord();
-		TOptional<FStructuredArchive::FSlot> TraceField = Record.TryEnterField(SA_FIELD_NAME(TEXT("Trace")), Type == TRACE);
+		TOptional<FStructuredArchive::FSlot> TraceField = Record.TryEnterField(TEXT("Trace"), Type == TRACE);
 		if (TraceField.IsSet()) {
 			if (Type != TRACE) Trace = new FFIRTrace();
 			Type = TRACE;
@@ -136,7 +137,7 @@ public:
 			delete Trace;
 		}
 
-		TOptional<FStructuredArchive::FSlot> ObjectField = Record.TryEnterField(SA_FIELD_NAME(TEXT("Object")), Type == OBJECT);
+		TOptional<FStructuredArchive::FSlot> ObjectField = Record.TryEnterField(TEXT("Object"), Type == OBJECT);
 		if (ObjectField.IsSet()) {
 			Type = OBJECT;
 			ObjectField.GetValue() << Obj;

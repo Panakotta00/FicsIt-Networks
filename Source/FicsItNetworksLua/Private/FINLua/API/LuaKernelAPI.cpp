@@ -1,17 +1,17 @@
 ﻿#include "FINLua/API/LuaKernelAPI.h"
 
-#include "FicsItKernel.h"
+#include "FicsItKernel/FicsItKernel.h"
 #include "FicsItLogLibrary.h"
-#include "FINLuaModule.h"
+#include "FINLua/FINLuaModule.h"
 #include "FINLuaProcessor.h"
-#include "FINLuaThreadedRuntime.h"
+#include "FINLua/FINLuaThreadedRuntime.h"
 #include "FINMediaSubsystem.h"
 #include "FINNetworkUtils.h"
-#include "LuaClass.h"
-#include "LuaObject.h"
-#include "LuaPersistence.h"
-#include "NetworkController.h"
-#include "Path.h"
+#include "FINLua/Reflection/LuaClass.h"
+#include "FINLua/Reflection/LuaObject.h"
+#include "FINLua/LuaPersistence.h"
+#include "FicsItKernel/Network/NetworkController.h"
+#include "FicsItFileSystem/Path.h"
 
 namespace FINLua {
 	LuaModule(R"(/**

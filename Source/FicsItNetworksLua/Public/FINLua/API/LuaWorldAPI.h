@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "LuaUtil.h"
+#include "FINLua/LuaUtil.h"
 
 namespace FINLua {
 	FICSITNETWORKSLUA_API void luaFIN_setWorld(lua_State* L, UWorld* world);

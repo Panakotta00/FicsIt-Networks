@@ -1,0 +1,228 @@
+= Clock Module
+:table-caption!:
+
+[cols="1,5a",separator="!"]
+!===
+! Parent
+! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
+!===
+
+A medium analogue Clock for use on Panels. Background and both needles have FIN-settable colors. By default, the clock will show the in game time. But both hands can be manually set from FIN, This disables automatic time updates, which can be turned on again. 
+
+// tag::interface[]
+
+== Properties
+
+// tag::func-hand1-title[]
+=== `hand1` : Float
+// tag::func-hand1[]
+
+Manual value for one of the clock hands. Setting this property automatically puts the clock in manual mode.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Hand 1
+!===
+====
+// end::func-hand1[]
+// end::func-hand1-title[]
+// tag::func-hand2-title[]
+=== `hand2` : Float
+// tag::func-hand2[]
+
+Manual value for one of the clock hands. Setting this property automatically puts the clock in manual mode.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Hand 2
+!===
+====
+// end::func-hand2[]
+// end::func-hand2-title[]
+// tag::func-manualMode-title[]
+=== `manualMode` : Bool
+// tag::func-manualMode[]
+
+Setting this to true will cause the clock to stop updating its time automatically, and instead display the values set manually.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags ! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span>+++
+
+! Display Name ! Manual Mode
+!===
+====
+// end::func-manualMode[]
+// end::func-manualMode-title[]
+
+== Functions
+
+// tag::func-setHand2Color-title[]
+=== `setHand2Color` (`r` : Float, `g` : Float, `b` : Float)
+// tag::func-setHand2Color[]
+
+Sets the Color of one of the hands of the clock.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Set Hand 2 Color
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *R* `r`
+! Float
+! Red Color Value. 0-1 with decimals.
+
+! *G* `g`
+! Float
+! Green Color Value. 0-1 with decimals.
+
+! *B* `b`
+! Float
+! Blue Color Value. 0-1 with decimals.
+!===
+
+====
+// end::func-setHand2Color[]
+// end::func-setHand2Color-title[]
+// tag::func-setBackgroundColor-title[]
+=== `setBackgroundColor` (`r` : Float, `g` : Float, `b` : Float, `Emit` : Float)
+// tag::func-setBackgroundColor[]
+
+Sets the background color of the clock face
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Sets Background Color
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *R* `r`
+! Float
+! Red Color Value. 0-1 with decimals.
+
+! *G* `g`
+! Float
+! Green Color Value. 0-1 with decimals.
+
+! *B* `b`
+! Float
+! Blue Color Value. 0-1 with decimals.
+
+! *Emit* `Emit`
+! Float
+! 
+!===
+
+====
+// end::func-setBackgroundColor[]
+// end::func-setBackgroundColor-title[]
+// tag::func-setColor-title[]
+=== `setColor` (`Red` : Float, `Green` : Float, `Blue` : Float, `Emit` : Float)
+// tag::func-setColor[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! setColor
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *Red* `Red`
+! Float
+! 
+
+! *Green* `Green`
+! Float
+! 
+
+! *Blue* `Blue`
+! Float
+! 
+
+! *Emit* `Emit`
+! Float
+! 
+!===
+
+====
+// end::func-setColor[]
+// end::func-setColor-title[]
+// tag::func-setHand1Color-title[]
+=== `setHand1Color` (`X` : Float, `Y` : Float, `Z` : Float)
+// tag::func-setHand1Color[]
+
+
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! setHand1Color
+!===
+
+.Parameters
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `X`
+! Float
+! 
+
+! *Y* `Y`
+! Float
+! 
+
+! *Z* `Z`
+! Float
+! 
+!===
+
+====
+// end::func-setHand1Color[]
+// end::func-setHand1Color-title[]
+
+// end::interface[]
+

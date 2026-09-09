@@ -35,7 +35,7 @@ EndClass()
 ExtendClass(AActor)
 BeginFunc(getNetworkConnectors, "Get Network Connectors", "Returns the name of network connectors this actor might have.") {
 	OutVal(0, RArray<RTrace<UFINNetworkConnectionComponent>>, connectors, "Connectors", "The factory connectors this actor has.")
-	Body()
+	FIRBody()
 	FIRArray Output;
 	const TSet<UActorComponent*>& Components = self->GetComponents();
 	for (TFieldIterator<FObjectProperty> prop(self->GetClass()); prop; ++prop) {

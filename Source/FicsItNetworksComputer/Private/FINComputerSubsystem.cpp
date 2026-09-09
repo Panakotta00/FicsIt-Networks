@@ -117,11 +117,12 @@ void AFINComputerSubsystem::OnSecondaryFireReleased() {
 AFINComputerSubsystem* AFINComputerSubsystem::GetComputerSubsystem(UObject* WorldContext) {
 #if WITH_EDITOR
 	return nullptr;
-#endif
+#else
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
 	check(SubsystemActorManager);
 	return SubsystemActorManager->GetSubsystemActor<AFINComputerSubsystem>();
+#endif
 }
 
 void AFINComputerSubsystem::AttachWidgetInteractionToPlayer(AFGCharacterPlayer* character) {

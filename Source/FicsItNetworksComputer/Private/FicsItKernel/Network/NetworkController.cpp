@@ -15,7 +15,7 @@ void UFINKernelNetworkController::Serialize(FStructuredArchive::FRecord Record) 
 	
 	// serialize signals
 	int32 SignalCount = SignalQueue.Num();
-	FStructuredArchive::FArray SignalListRecord = Record.EnterArray(SA_FIELD_NAME(TEXT("Signals")), SignalCount);
+	FStructuredArchive::FArray SignalListRecord = Record.EnterArray(TEXT("Signals"), SignalCount);
 	for (int i = 0; i < SignalCount; ++i) {
 		FStructuredArchive::FRecord SignalRecord = SignalListRecord.EnterElement().EnterRecord();
 		
@@ -27,8 +27,8 @@ void UFINKernelNetworkController::Serialize(FStructuredArchive::FRecord Record) 
 			Trace = SignalData.Value;
 		}
 
-		SignalRecord.EnterField(SA_FIELD_NAME(TEXT("Signal"))) << Signal;
-		SignalRecord.EnterField(SA_FIELD_NAME(TEXT("Trace"))) << Trace;
+		SignalRecord.EnterField(TEXT("Signal")) << Signal;
+		SignalRecord.EnterField(TEXT("Trace")) << Trace;
 		
 		if (SignalRecord.GetUnderlyingArchive().IsLoading()) {
 			SignalQueue.Add(TPair<FFINSignalData, FFIRTrace>{Signal, Trace});

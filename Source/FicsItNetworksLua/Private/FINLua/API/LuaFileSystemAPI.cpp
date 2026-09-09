@@ -8,12 +8,12 @@
 
 #undef LuaFunc
 #define LuaFunc() \
-	CodersFileSystem::FileSystemRoot* self = luaFIN_getFileSystem(L); \
+	CodersFileSystem::FileSystemKernelRoot* self = luaFIN_getFileSystem(L); \
 	FLuaSync SyncCall(L); \
 	if (!self) return luaL_error(L, "component is invalid");
 
 #define LuaFileFunc() \
-	CodersFileSystem::FileSystemRoot* fileSystem = luaFIN_getFileSystem(L); \
+	CodersFileSystem::FileSystemKernelRoot* fileSystem = luaFIN_getFileSystem(L); \
 	FLuaSync SyncCall(L); \
 	LuaFile* self_r = (LuaFile*)luaL_checkudata(L, 1, "File"); \
 	if (!self_r) return luaL_error(L, "file is invalid"); \
@@ -730,14 +730,14 @@ namespace FINLua {
 		f->Get().path = path;
 	}
 
-	void luaFIN_setFileSystem(lua_State* L, CodersFileSystem::FileSystemRoot* FileSystem) {
+	void luaFIN_setFileSystem(lua_State* L, CodersFileSystem::FileSystemKernelRoot* FileSystem) {
 		FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
 		runtime.GlobalPointers.Add(TEXT("FileSystem"), FileSystem);
 	}
 
-	CodersFileSystem::FileSystemRoot* luaFIN_getFileSystem(lua_State* L) {
+	CodersFileSystem::FileSystemKernelRoot* luaFIN_getFileSystem(lua_State* L) {
 		FFINLuaRuntime& runtime = luaFIN_getRuntime(L);
-		CodersFileSystem::FileSystemRoot** value = reinterpret_cast<CodersFileSystem::FileSystemRoot**>(runtime.GlobalPointers.Find(TEXT("FileSystem")));
+		CodersFileSystem::FileSystemKernelRoot** value = reinterpret_cast<CodersFileSystem::FileSystemKernelRoot**>(runtime.GlobalPointers.Find(TEXT("FileSystem")));
 		fgcheck(value != nullptr);
 		return *value;
 	}

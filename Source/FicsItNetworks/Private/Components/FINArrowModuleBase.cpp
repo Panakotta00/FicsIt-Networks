@@ -1,6 +1,6 @@
 ﻿#include "Components/FINArrowModuleBase.h"
 #include "FicsItNetworksModule.h"
-#include "UnrealNetwork.h"
+#include "Net/UnrealNetwork.h"
 
 
 AFINArrowModuleBase::AFINArrowModuleBase() {}
@@ -141,6 +141,11 @@ void AFINArrowModuleBase::RebuildComponents(AActor* Parent, USceneComponent* Att
 				case FINPanelTraceEnd_ExtendedStraight: {
 					//UE_LOG(LogFicsItNetworks, Verbose, TEXT("     --- FINPanelTraceEnd_Straight"));
 					MeshComponent = CreateAndAddComponent(TipExtendedStraightMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
+					break;
+				}
+				case FINPanelTraceEnd_OverlapStraight: {
+					//UE_LOG(LogFicsItNetworks, Verbose, TEXT("     --- FINPanelTraceEnd_Straight"));
+					MeshComponent = CreateAndAddComponent(TipOverlapStraightMesh, Parent, Attach, Anchor.AnchorPosition, ArrowRotation, OutParts);
 					break;
 				}
 				case FINPanelTraceEnd_Blockage: {

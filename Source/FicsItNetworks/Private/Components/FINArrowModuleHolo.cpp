@@ -3,18 +3,18 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "SubsystemActorManager.h"
-#include "FGBuildGunBuild.h"
+#include "Subsystem/SubsystemActorManager.h"
+#include "Equipment/FGBuildGunBuild.h"
 #include "FGPlayerController.h"
 #include "FicsItNetworksModule.h"
-#include "FINArrowModuleBase.h"
-#include "MCPBlueprintLibrary.h"
-#include "NativeHookManager.h"
-#include "SBox.h"
-#include "SCheckBox.h"
-#include "SSpacer.h"
-#include "STextBlock.h"
-#include "SUniformGridPanel.h"
+#include "Components/FINArrowModuleBase.h"
+#include "Utils/MCPBlueprintLibrary.h"
+#include "Patching/NativeHookManager.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Layout/SSpacer.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/Layout/SUniformGridPanel.h"
 #include "TimerManager.h"
 #include "Components/FINDefaultExtendedHolo.h"
 #include "Components/OverlaySlot.h"
@@ -216,7 +216,8 @@ void AFINArrowModuleHolo::ShowPropertyDialog() {
 TSharedRef<SWidget> UFINPanelTraceConfigPopup::RebuildWidget() {
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("None", FINPanelTraceEnd_None)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Straight", FINPanelTraceEnd_Straight)));
-	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Long Straight", FINPanelTraceEnd_ExtendedStraight)));
+	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Medium Straight", FINPanelTraceEnd_ExtendedStraight)));
+	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Long Straight", FINPanelTraceEnd_OverlapStraight)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Arrow", FINPanelTraceEnd_ArrowOut)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Blocked", FINPanelTraceEnd_Blockage)));
 	TraceOuter.Add(FFINArrowOptionType(MakeShared<FFINIconTextIntegerOption>("Short Blocked", FINPanelTraceEnd_RecessedBlockage)));

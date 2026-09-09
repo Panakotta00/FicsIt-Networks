@@ -1,17 +1,17 @@
 #include "FicsItKernel/FicsItFS/FINItemStateFileSystem.h"
 
-#include "CommandLine.h"
+#include "Misc/CommandLine.h"
 #include "FicsItNetworksComputer.h"
 #include "FINComputerSubsystem.h"
-#include "FINFileSystemSubsystem.h"
+#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 #include "FileSystemSerializationInfo.h"
-#include "StructuredLog.h"
+#include "Logging/StructuredLog.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Input/SCheckBox.h"
-#include "SViewport.h"
+#include "Widgets/SViewport.h"
 #include "Engine/Engine.h"
 
 FIN_STRUCT_IMPLEMENT_INTERFACE(FFINItemStateFileSystem, FFINLabelContainerInterface)
@@ -129,7 +129,7 @@ bool FFINItemStateFileSystem::Serialize(FStructuredArchive::FSlot Slot) {
 	Capacity = OldCapacity;
 
 	auto Record = Slot.EnterRecord();
-	FStructuredArchive::FSlot RootNode = Record.EnterField(SA_FIELD_NAME(TEXT("RootNode")));
+	FStructuredArchive::FSlot RootNode = Record.EnterField(TEXT("RootNode"));
 
 	int KeepDisk = -1;
 	CodersFileSystem::SerializePath(SerializeDevice.ToSharedRef(), RootNode.EnterRecord(), "/", ID.ToString(), KeepDisk, &AskForDiskOrSave);

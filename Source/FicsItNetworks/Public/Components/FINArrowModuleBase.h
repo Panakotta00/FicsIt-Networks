@@ -54,6 +54,9 @@ class AFINArrowModuleBase : public AFINModuleBase{
 	
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMesh* TipExtendedStraightMesh = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* TipOverlapStraightMesh = nullptr;
 
 	AFINArrowModuleBase();
 

@@ -1,11 +1,11 @@
 #include "FicsItNetworksLuaModule.h"
 
-#include "CoreRedirects.h"
+#include "UObject/CoreRedirects.h"
 #include "FGDynamicStruct.h"
 #include "FGGameMode.h"
 #include "FINLuaRCO.h"
 #include "Patching/NativeHookManager.h"
-#include "FINItemStateEEPROMText.h"
+#include "FicsItKernel/Processor/FINItemStateEEPROMText.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItNetworksLua);
 DEFINE_LOG_CATEGORY(LogFicsItNetworksLuaReflection);

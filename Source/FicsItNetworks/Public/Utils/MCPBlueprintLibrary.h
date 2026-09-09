@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FINCommandPointMesh.h"
+#include "Components/FINCommandPointMesh.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Serialization/JsonTypes.h"
 #include "MCPBlueprintLibrary.generated.h"
@@ -22,6 +22,17 @@ struct FFINUIFileInfo {
 	FString FullPath;
 };
 
+UINTERFACE()
+class UMicroControlInterface : public UInterface {
+	GENERATED_BODY()
+};
+
+class IMicroControlInterface {
+	GENERATED_BODY()
+
+	public:
+		
+};
 
 UCLASS()
 class FICSITNETWORKS_API UMCPBlueprintLibrary : public UBlueprintFunctionLibrary

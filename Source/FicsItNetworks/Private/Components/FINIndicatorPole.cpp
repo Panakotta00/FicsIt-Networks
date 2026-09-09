@@ -5,8 +5,7 @@
 AFINIndicatorPole::AFINIndicatorPole() {
 	Indicator = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>("Indicator");
 	Indicator->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	Indicator->SetInstanced(true);
-	
+
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	Connector->SetIsReplicated(true);

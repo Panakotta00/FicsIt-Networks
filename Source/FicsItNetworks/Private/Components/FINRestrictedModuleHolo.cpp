@@ -1,5 +1,5 @@
 ﻿// 
-#include "FINRestrictedModuleHolo.h"
+#include "Components/FINRestrictedModuleHolo.h"
 
 // Sets default values
 AFINRestrictedModuleHolo::AFINRestrictedModuleHolo() {
@@ -21,17 +21,17 @@ void AFINRestrictedModuleHolo::Tick(float DeltaTime) {
 bool AFINRestrictedModuleHolo::TrySnapToActor(const FHitResult& hitResult) {
 	Super::TrySnapToActor(hitResult);
 	if(ValidTargets.Num() > 0) {
-		bIsValid = false;
+		bIsPlacementValid = false;
 		AActor* Actor = hitResult.GetActor();
 		if(IsValid(Actor)) {
 			for (auto& Allowed : ValidTargets) {
 				if (Actor->IsA(Allowed)) {
-					bIsValid = true;
+					bIsPlacementValid = true;
 					break;
 				}
 			}
 		}
 	}
-	return bIsValid;
+	return bIsPlacementValid;
 }
 

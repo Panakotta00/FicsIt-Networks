@@ -1,7 +1,6 @@
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "FactoryGameCustomVersion.h"
 #include "FGDismantleInterface.h"
-#include "FortniteReleaseBranchCustomObjectVersion.h"
 #include "SaveCustomVersion.h"
 #include "GameFramework/Actor.h"
 #include "ModuleSystem/FINModuleSystemModule.h"
@@ -28,11 +27,11 @@ void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 			Ar.SetCustomVersion(FFortniteReleaseBranchCustomObjectVersion::GUID, Ver, TEXT("FFortniteReleaseBranchCustomObjectVersion"));
 		}
 		
-		SetupGrid();
-
 		int height = PanelHeight, width = PanelWidth;
 		Ar << PanelHeight;
 		Ar << PanelWidth;
+		
+		SetupGrid();
 
 		for (int x = 0; x < PanelHeight; ++x) {
 			for (int y = 0; y < PanelWidth; ++y) {
@@ -171,4 +170,15 @@ void UFINModuleSystemPanel::GetModuleSpace(const FVector& Loc, const int Rot, co
 	default:
 		break;
 	}
+}
+
+/**
+ * ONLY CALL IN INITIATION!
+ * 
+ * @param Width  
+ * @param Height 
+ */
+void UFINModuleSystemPanel::SetPanelSize(int Width, int Height) {
+	PanelWidth = Width;
+	PanelHeight = Height;
 }

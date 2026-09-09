@@ -25,7 +25,7 @@ private:
 	TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> Step = nullptr;
 
 	UPROPERTY()
-	UObject* Obj = nullptr;
+	TObjectPtr<UObject> Obj = nullptr;
 
 public:
 	static TSharedPtr<FFINTraceStep, ESPMode::ThreadSafe> fallbackTraceStep;
@@ -48,7 +48,7 @@ public:
 	~FFIRTrace();
 
 	bool Serialize(FStructuredArchive::FSlot Slot);
-	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
+	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector);
 
 	/**
 	 * Creates a copy of this network trace and adds potentially a new optimal trace step

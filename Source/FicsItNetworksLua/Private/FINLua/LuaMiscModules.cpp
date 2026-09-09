@@ -1,12 +1,12 @@
-﻿#include "FicsItKernel.h"
+﻿#include "FicsItKernel/FicsItKernel.h"
 #include "FicsItLogLibrary.h"
 #include "FINChallengeSubsystem.h"
-#include "FINLuaModule.h"
-#include "FINLuaRuntime.h"
-#include "FINLuaThreadedRuntime.h"
+#include "FINLua/FINLuaModule.h"
+#include "FINLua/FINLuaRuntime.h"
+#include "FINLua/FINLuaThreadedRuntime.h"
 #include "FINNetworkUtils.h"
-#include "LuaFileSystemAPI.h"
-#include "LuaPersistence.h"
+#include "FINLua/API/LuaFileSystemAPI.h"
+#include "FINLua/LuaPersistence.h"
 
 namespace FINLua {
 	LuaModule(R"(/**
