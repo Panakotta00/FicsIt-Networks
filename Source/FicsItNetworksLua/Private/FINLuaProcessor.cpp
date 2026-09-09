@@ -173,24 +173,6 @@ void UFINLuaProcessor::Tick(float InDelta) {
 		break;
 	default: break;
 	}
-
-	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
-	AFGPlayerState* playerState = Cast<AFGPlayerState>(playerController->PlayerState);
-	if (playerState) {
-		auto& identity = playerState->GetClientIdentity();
-		auto& onlineIdRegistryRegistry = UE::Online::FOnlineIdRegistryRegistry::Get();
-		for (const auto& [service, accountIdRef] : identity.AccountIds) {
-			FString accountId = onlineIdRegistryRegistry.ToString(accountIdRef);
-			if (service == UE::Online::EOnlineServices::Steam) {
-				uint64 num = FCString::Strtoi64(*accountId, nullptr, 16);
-				num = ByteSwap(num);
-				accountId = FString::Printf(TEXT("%llu"), num);
-			}
-			UE_LOG(LogTemp, Warning, TEXT("Account Id for %s: %s"), LexToString(service), *accountId);
-		}
-	} else {
-		UE_LOG(LogTemp, Warning, TEXT("Failed to get Player State"));
-	}
 }
 UE_ENABLE_OPTIMIZATION_SHIP
 

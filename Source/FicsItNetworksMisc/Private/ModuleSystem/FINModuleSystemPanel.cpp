@@ -13,35 +13,34 @@ void UFINModuleSystemPanel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 }
 
 void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
-	bool bOldObj = Ar.IsSaveGame() && Ar.CustomVer(FSaveCustomVersion::GUID) < FSaveCustomVersion::ResetBrokenBlueprintSplines;
-	int Ver = 0;
-	if(bOldObj) {
-		Ver = Ar.CustomVer(FFortniteReleaseBranchCustomObjectVersion::GUID);
-		Ar.SetCustomVersion(FFortniteReleaseBranchCustomObjectVersion::GUID, 1, TEXT("FFortniteReleaseBranchCustomObjectVersion"));
+	if (Ar.IsSaveGame() && Ar.IsLoading()) {
+		if (Ar.CustomVer(FSaveCustomVersion::GUID) < FSaveCustomVersion::ResetBrokenBlueprintSplines) {
+			Ar.SetCustomVersion(FFortniteReleaseBranchCustomObjectVersion::GUID, 1, TEXT("FFortniteReleaseBranchCustomObjectVersion"));
+		} else if (
+		    Ar.CustomVer(FSaveCustomVersion::GUID) < FSaveCustomVersion::FixNewPlayerInfoHandleSerializationFormat
+		 && Ar.CustomVer(FFortniteReleaseBranchCustomObjectVersion::GUID) < FFortniteReleaseBranchCustomObjectVersion::ActorComponentUCSModifiedPropertiesSparseStorage
+		) {
+			Ar.SetCustomVersion(FFortniteReleaseBranchCustomObjectVersion::GUID, FFortniteReleaseBranchCustomObjectVersion::ActorComponentUCSModifiedPropertiesSparseStorage, TEXT("FFortniteReleaseBranchCustomObjectVersion"));
+		}
 	}
 
 	Super::Serialize(Ar);
 	
 	if (Ar.IsSaveGame()) {
-		if(bOldObj) {
-			Ar.SetCustomVersion(FFortniteReleaseBranchCustomObjectVersion::GUID, Ver, TEXT("FFortniteReleaseBranchCustomObjectVersion"));
-		}
-		
 		int height = PanelHeight, width = PanelWidth;
-		Ar << PanelHeight;
-		Ar << PanelWidth;
+		Ar << height;
+		Ar << width;
 		
 		SetupGrid();
 
-		for (int x = 0; x < PanelHeight; ++x) {
-			for (int y = 0; y < PanelWidth; ++y) {
-				if (x < height && y < width) {
-					UObject* ptr = GetGridSlot(x, y);
-					Ar << ptr;
-					GetGridSlot(x, y) = ptr;
+		for (int x = 0; x < height; ++x) {
+			for (int y = 0; y < width; ++y) {
+				if (x < PanelHeight && y < PanelWidth) {
+					Ar << GetGridSlot(x, y);
 				} else {
-					UObject* ptr = nullptr;
-					Ar << ptr;
+					// Serialized Panel is larger than actual panel, skipping out of bounds
+					UObject* dummy = nullptr;
+					Ar << dummy;
 				}
 			}
 		}
