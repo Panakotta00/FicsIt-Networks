@@ -450,16 +450,6 @@ TArray<int64> AFINComputerGPUT2::netFunc_getFontBaselineBatch(TArray<int64> size
 	return results;
 }
 
-void AFINComputerGPUT2::netSig_OnMouseDown_Implementation(FVector2D position, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseUp_Implementation(FVector2D position, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseMove_Implementation(FVector2D position, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseWheel_Implementation(FVector2D position, float wheelDelta, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnKeyDown_Implementation(int64 c, int64 code, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnKeyUp_Implementation(int64 c, int64 code, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnKeyChar_Implementation(const FString& c, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseEnter_Implementation(FVector2D position, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseLeave_Implementation(FVector2D position, int modifiers) {}
-
 void AFINComputerGPUT2::Client_CleanDrawCalls_Implementation() {
 	if (HasAuthority()) return;
 	BackBufferDrawCalls.Empty();

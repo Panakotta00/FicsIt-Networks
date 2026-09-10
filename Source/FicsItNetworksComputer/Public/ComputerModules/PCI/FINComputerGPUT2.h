@@ -751,7 +751,7 @@ public:
 		ParameterDescriptions.Add(FText::FromString("Whether to use monospace or normal font."));
 	}
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnMouseDown(FVector2D position, int modifiers);
 	UFUNCTION()
     void netSigMeta_OnMouseDown(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -767,7 +767,7 @@ public:
 		Runtime = 1;
 	}
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnMouseUp(FVector2D position, int modifiers);
 	UFUNCTION()
     void netSigMeta_OnMouseUp(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -783,7 +783,7 @@ public:
 		Runtime = 1;
 	}
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnMouseMove(FVector2D position, int modifiers);
 	UFUNCTION()
     void netSigMeta_OnMouseMove(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -799,7 +799,7 @@ public:
 		Runtime = 1;
 	}
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnMouseWheel(FVector2D position, float wheelDelta, int modifiers);
 	UFUNCTION()
 	void netSigMeta_OnMouseWheel(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -818,7 +818,7 @@ public:
 		Runtime = 1;
 	}
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnMouseEnter(FVector2D position, int modifiers);
 	UFUNCTION()
 	void netSigMeta_OnMouseEnter(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -834,7 +834,7 @@ public:
 		Runtime = 1;
 	}
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnMouseLeave(FVector2D position, int modifiers);
 	UFUNCTION()
 	void netSigMeta_OnMouseLeave(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -850,7 +850,7 @@ public:
 		Runtime = 1;
 	}
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnKeyDown(int64 c, int64 code, int modifiers);
 	UFUNCTION()
     void netSigMeta_OnKeyDown(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -869,7 +869,7 @@ public:
 		Runtime = 1;
 	}
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnKeyUp(int64 c, int64 code, int modifiers);
 	UFUNCTION()
     void netSigMeta_OnKeyUp(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -888,7 +888,7 @@ public:
 		Runtime = 1;
 	}
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_OnKeyChar(const FString& c, int modifiers);
 	UFUNCTION()
 	void netSigMeta_OnKeyChar(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {

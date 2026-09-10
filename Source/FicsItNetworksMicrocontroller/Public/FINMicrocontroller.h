@@ -135,8 +135,8 @@ public:
 		InternalName = TEXT("Microcontroller");
 		DisplayName = FText::FromString(TEXT("Microcontroller"));
 	}
-	UFUNCTION()
-	void netSig_NetworkMessage(const FString& sender, int port, TArray<FFIRAnyValue> varargs) {}
+	UFUNCTION(BlueprintImplementableEvent)
+	void netSig_NetworkMessage(const FString& sender, int port, const TArray<FFIRAnyValue>& varargs);
 
 protected:
 	void SetupRuntime();

@@ -106,7 +106,7 @@ public:
 	UFUNCTION()
 	FVector2D netFunc_getScreenSize();
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
     void netSig_ScreenBound(const FFIRTrace& oldScreen);
 	// End FIN Reflection
 };

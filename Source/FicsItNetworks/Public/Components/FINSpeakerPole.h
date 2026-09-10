@@ -69,7 +69,7 @@ public:
 	 * Notifies when the state of the speaker pole has changed.
 	 * f.e. if the sound stoped/started playing
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void netSig_SpeakerSound(int type, const FString& sound);
 	UFUNCTION()
     void netSigMeta_SpeakerSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime);

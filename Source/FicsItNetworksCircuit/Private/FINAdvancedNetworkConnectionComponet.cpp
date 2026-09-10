@@ -103,5 +103,3 @@ bool UFINAdvancedNetworkConnectionComponent::IsNetworkMessageRouter() const {
 	}
 	return false;
 }
-
-void UFINAdvancedNetworkConnectionComponent::netSig_NetworkUpdate_Implementation(int type, const FString& id) {}

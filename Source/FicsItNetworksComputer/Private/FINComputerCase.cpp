@@ -415,10 +415,6 @@ void AFINComputerCase::OnDriveUpdate(bool bOldLocked, const FGuid& drive) {
 	}
 }
 
-void AFINComputerCase::netSig_ComputerStateChanged_Implementation(int64 PrevState, int64 NewState) {}
-
-void AFINComputerCase::netSig_FileSystemUpdate_Implementation(int Type, const FString& From, const FString& To) {}
-
 int64 AFINComputerCase::netFunc_getState() {
 	return InternalKernelState;
 }

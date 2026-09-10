@@ -152,8 +152,6 @@ FVector2D AFINComputerGPU::netFunc_getScreenSize() {
 	return LastScreenSize;
 }
 
-void AFINComputerGPU::netSig_ScreenBound_Implementation(const FFIRTrace& oldScreen) {}
-
 void UFINScreenWidget::OnNewWidget() {
 	if (Container.IsValid()) {
 		if (Screen && Cast<IFINScreenInterface>(Screen)->GetWidget().IsValid()) {

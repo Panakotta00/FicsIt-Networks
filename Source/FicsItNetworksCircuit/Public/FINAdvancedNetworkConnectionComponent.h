@@ -108,6 +108,6 @@ public:
 	/**
 	 * This network signals gets emit when a network change occurs.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Signals")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Network|Signals")
 	void netSig_NetworkUpdate(int changeType, const FString& changedComponent);
 };

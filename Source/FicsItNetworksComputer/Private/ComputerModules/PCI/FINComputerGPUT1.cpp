@@ -306,14 +306,6 @@ void AFINComputerGPUT1::OnRep_FrontBuffer() {
 	}
 }
 
-void AFINComputerGPUT1::netSig_OnMouseDown_Implementation(int x, int y, int btn) {}
-void AFINComputerGPUT1::netSig_OnMouseUp_Implementation(int x, int y, int btn) {}
-void AFINComputerGPUT1::netSig_OnMouseMove_Implementation(int x, int y, int btn) {}
-void AFINComputerGPUT1::netSig_ScreenSizeChanged_Implementation(int oldW, int oldH) {}
-void AFINComputerGPUT1::netSig_OnKeyDown_Implementation(int64 c, int64 code, int btn) {}
-void AFINComputerGPUT1::netSig_OnKeyUp_Implementation(int64 c, int64 code, int btn) {}
-void AFINComputerGPUT1::netSig_OnKeyChar_Implementation(const FString& c, int btn) {}
-
 UObject* AFINComputerGPUT1::netFunc_getScreen() {
 	return Screen.Get();
 }

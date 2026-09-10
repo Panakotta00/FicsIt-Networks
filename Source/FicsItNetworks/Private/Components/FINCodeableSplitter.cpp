@@ -150,9 +150,6 @@ UFGFactoryConnectionComponent* AFINCodeableSplitter::netFunc_getConnectorByIndex
 	}
 }
 
-void AFINCodeableSplitter::netSig_ItemRequest_Implementation(FInventoryItem item) {}
-void AFINCodeableSplitter::netSig_ItemOutputted_Implementation(int output, FInventoryItem item) {}
-
 TArray<FInventoryItem>& AFINCodeableSplitter::GetOutput(int output) {
 	output = (output < 0) ? 0 : ((output > 2) ? 2 : output);
 	switch (output) {

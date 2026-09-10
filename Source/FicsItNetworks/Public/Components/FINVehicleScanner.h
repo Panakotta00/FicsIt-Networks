@@ -120,7 +120,7 @@ public:
 		Runtime = 1;
 	}
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintImplementableEvent)
 	void netSig_OnVehicleEnter(AFGVehicle* Vehicle);
 	UFUNCTION()
     void netSigMeta_OnVehicleEnter(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -133,7 +133,7 @@ public:
 		Runtime = 1;
 	}
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintImplementableEvent)
 	void netSig_OnVehicleExit(AFGVehicle* Vehicle);
 	UFUNCTION()
     void netSigMeta_OnVehicleExit(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {

@@ -165,7 +165,7 @@ public:
 		DisplayName = FText::FromString(TEXT("Computer Case"));
 	}
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintImplementableEvent)
 	void netSig_ComputerStateChanged(int64 PrevState, int64 NewState);
 	UFUNCTION()
     void netSigMeta_ComputerStateChanged(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
@@ -181,7 +181,7 @@ public:
 		Runtime = 1;
 	}	
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintImplementableEvent)
     void netSig_FileSystemUpdate(int Type, const FString& From, const FString& To);
 	UFUNCTION()
     void netSigMeta_FileSystemUpdate(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {

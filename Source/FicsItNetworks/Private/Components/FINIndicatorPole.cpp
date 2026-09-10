@@ -126,8 +126,6 @@ void AFINIndicatorPole::netFunc_getColor(float& r, float& g, float& b, float& e)
 	e = EmessiveStrength;
 }
 
-void AFINIndicatorPole::netSig_ColorChanged(float r, float g, float b, float e) {}
-
 AFINIndicatorPole* AFINIndicatorPole::netFunc_getTopPole() {
 	if (!IsValid(TopConnected)) TopConnected = nullptr;
 	return TopConnected;

@@ -80,8 +80,6 @@ void AFINSpeakerPole::netFuncMeta_stopSound(FString& InternalName, FText& Displa
 	Runtime = 0;
 }
 
-void AFINSpeakerPole::netSig_SpeakerSound_Implementation(int type, const FString& sound) {}
-
 void AFINSpeakerPole::netSigMeta_SpeakerSound(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 	InternalName = "SpeakerSound";
 	DisplayName = FText::FromString("SpeakerSound");
