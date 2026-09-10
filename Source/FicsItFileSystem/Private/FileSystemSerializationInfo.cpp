@@ -62,10 +62,12 @@ namespace CodersFileSystem {
 				DiskChilds.erase(stdChildName);
 			}
 
-			TOptional<FileType> ChildType = SerializeDevice->fileType(Path / stdChildName);
 			int Type = 0;
-			if (*ChildType == File_Regular) Type = 1;
-			if (*ChildType == File_Directory) Type = 2;
+			if (Record.GetUnderlyingArchive().IsSaving()) {
+				TOptional<FileType> ChildType = SerializeDevice->fileType(Path / stdChildName);
+				if (*ChildType == File_Regular) Type = 1;
+				if (*ChildType == File_Directory) Type = 2;
+			}
 			Child.EnterField(TEXT("Type")) << Type;
 			TOptional<FileType> existingType = SerializeDevice->fileType(Path / stdChildName);
 			if (Type == 1) {
