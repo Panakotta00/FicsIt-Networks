@@ -8,32 +8,37 @@
 #include "WheeledVehicles/FGWheeledVehicle.h"
 
 #include "Reflection/Source/FIRSourceStaticMacros.h"
+#include "WheeledVehicles/FGVehicleAutopilotComponent.h"
+#include "WheeledVehicles/FGVehiclePathNode.h"
+#include "WheeledVehicles/FGVehicleSubsystem.h"
+#include "WheeledVehicles/FGWheeledVehicleIdentifier.h"
 
 class FFIRVehicleHelper {
 public:
 	static void SetTarget(AFGWheeledVehicle* Vehicle, AFGTargetPoint* Target) {
 		//Vehicle->GetInfo()->GetSimulationMovement()->SetTarget(Target, false);
 	}
+
+	static bool isValidFuel(AFGWheeledVehicle* vehicle, TSubclassOf<UFGItemDescriptor> item, int32 index) {
+		return vehicle->FilterFuelClasses(item, index);
+	}
 };
 
 BeginClass(AFGVehicle, "Vehicle", "Vehicle", "A base class for all vehicles.")
-/*BeginProp(RFloat, health, "Health", "The health of the vehicle.") {
-	FIRReturn self->GetHealthComponent()->GetCurrentHealth();
-} EndProp()
-BeginProp(RFloat, maxHealth, "Max Health", "The maximum amount of health this vehicle can have.") {
-	FIRReturn self->GetHealthComponent()->GetMaxHealth();
-} EndProp()
-BeginProp(RBool, isSelfDriving, "Is Self Driving", "True if the vehicle is currently self driving.") {
-	FIRReturn self->IsSelfDriving();
-} EndProp()*/
 EndClass()
 
 BeginClass(AFGWheeledVehicle, "WheeledVehicle", "Wheeled Vehicle", "The base class for all vehicles that used wheels for movement.")
-/*BeginProp(RBool, isAutopilotEnabled, "Is Autopilot Enabled", "True if the vehicle is currently auto piloting.", 0) {
-	FIRReturn self->IsAutopilotEnabled();
+BeginProp(RBool, isAutopilotEnabled, "Is Autopilot Enabled", "True if the vehicle is currently auto piloting.", 0) {
+	if (auto identifier = self->GetVehicleIdentifier()) {
+		FIRReturn identifier->IsAutopilotEnabled();
+	} else {
+		FIRReturn false;
+	}
 } PropSet() {
-	if (self->IsAutopilotEnabled() != Val) {
-		self->Server_ToggleAutoPilot();
+	if (auto identifier = self->GetVehicleIdentifier()) {
+		if (identifier->CanEnableAutopilot()) {
+			identifier->SetAutopilotEnabled(Val);
+		}
 	}
 } EndProp()
 BeginFunc(getFuelInv, "Get Fuel Inventory", "Returns the inventory that contains the fuel of the vehicle.") {
@@ -50,42 +55,61 @@ BeginFunc(isValidFuel, "Is Valid Fuel", "Allows to check if the given item type 
 	InVal(0, RClass<UFGItemDescriptor>, item, "Item", "The item type you want to check.")
 	OutVal(1, RBool, isValid, "Is Valid", "True if the given item type is a valid fuel for this vehicle.")
 	FIRBody()
-	isValid = self->IsValidFuel(item);
+	isValid = FFIRVehicleHelper::isValidFuel(self, item, 0);
 } EndFunc()
-// TODO: Target List stuff for vehicles!!
-BeginFunc(getCurrentTarget, "Get Current Target", "Returns the index of the target that the vehicle tries to move to right now.") {
-	OutVal(0, RInt, index, "Index", "The index of the current target.")
+	BeginFunc(getCurrentTarget, "Get Current Target", "Returns the index of the target that the vehicle tries to move to right now.") {
+	OutVal(0, RString, nodeGuid, "Node Guide", "The GUID of the current target.")
 	FIRBody()
-	AFGDrivingTargetList* List = self->GetTargetList();
-	auto target = self->GetInfo()->GetTarget();
-	index = (int64)List->FindTargetIndex(target);
+	auto pathNode = self->GetVehicleIdentifier()->GetCurrentFromPathNodeGUID();
+	nodeGuid = pathNode.ToString();
 } EndFunc()
 BeginFunc(setCurrentTarget, "Set Current Target", "Sets the target with the given index as the target this vehicle tries to move to right now.") {
 	InVal(0, RInt, index, "Index", "The index of the target this vehicle should move to now.")
 	FIRBody()
-	AFGDrivingTargetList* List = self->GetTargetList();
-	AFGTargetPoint* Target = List->FindTargetByIndex(index);
-	if (!Target) throw FFIRException("index out of range");
-	FFIRVehicleHelper::SetTarget(self, Target);
+	if (auto identifier = self->GetVehicleIdentifier()) {
+		if (!identifier->GetVehicleRoute().IsValidIndex(index)) throw FFIRException("index out of range");
+		identifier->SetCurrentTargetWaypoint(index);
+	}
 } EndFunc()
-BeginFunc(getTargetList, "Get Target List", "Returns the list of targets/path waypoints.") {
-	OutVal(0, RTrace<AFGDrivingTargetList>, targetList, "Target List", "The list of targets/path-waypoints.")
+BeginFunc(getVehicleRoute, "Get Vehicle Route", "Returns the list of waypoints GUIDs.") {
+	OutVal(0, RArray<RString>, vehicleRoute, "Vehicle Route", "The list of targets/path-waypoint GUIDs.")
 	FIRBody()
-	targetList = Ctx.GetTrace() / self->GetTargetList();
+	if (auto identifier = self->GetVehicleIdentifier()) {
+		TArray<FIRAny> route;
+		for (auto guid : identifier->GetVehicleRoute()) {
+			route.Add(guid.ToString());
+		}
+		vehicleRoute = route;
+	}
 } EndFunc()
+BeginFunc(getWaypointPosition, "Get Waypoint Position", "Returns the position of the waypoint with the given GUID.") {
+	InVal(0, RString, waypoint, "Waypoint", "The GUID of the waypoint.")
+	OutVal(1, RStruct<FVector>, position, "Position", "The position of the waypoint with the given GUID.")
+	FIRBody()
+	FGuid guid;
+	FGuid::Parse(waypoint, guid);
+	if (auto node = AFGVehicleSubsystem::Get(self)->FindReplicatedPathNodeByGuid(guid)) {
+		position = (FIRAny) node->GetActorLocation();
+	}
+} EndFunc()
+// TODO: Add Vehicle Route Editing
 BeginProp(RFloat, speed, "Speed", "The current forward speed of this vehicle.") {
 	FIRReturn self->GetForwardSpeed();
 } EndProp()
-BeginProp(RFloat, burnRatio, "Burn Ratio", "The amount of fuel this vehicle burns.") {
-	FIRReturn self->GetFuelBurnRatio();
+BeginProp(RFloat, fuelConsumptionAutopilot, "Fuel Consumption Autopilot", "The amount of fuel this vehicle burns when driven by autopilot.") {
+	FIRReturn self->GetAutopilotFuelConsumption();
+} EndProp()
+BeginProp(RFloat, fuelConsumptionManual, "Fuel Consumption Manual", "The amount of fuel this vehicle burns when driven by manually.") {
+	FIRReturn self->GetManualFuelConsumption();
 } EndProp()
 BeginProp(RBool, hasFuel, "Has Fuel", "True if the vehicle has currently fuel to drive.") {
 	FIRReturn self->HasFuel();
-} EndProp()*/
+} EndProp()
 EndClass()
 
-BeginClass(AFGDrivingTargetList, "TargetList", "Target List", "The list of targets/path-waypoints a autonomous vehicle can drive")
-/*BeginFunc(getTarget, "Get Target", "Returns the target struct at with the given index in the target list.") {
+// TODO: Add Vehicle Network exploration
+/*BeginClass(AFGDrivingTargetList, "TargetList", "Target List", "The list of targets/path-waypoints a autonomous vehicle can drive")
+BeginFunc(getTarget, "Get Target", "Returns the target struct at with the given index in the target list.") {
 	InVal(0, RInt, index, "Index", "The index of the target you want to get the struct from.")
 	OutVal(0, RStruct<FFIRTargetPoint>, target, "Target", "The TargetPoint-Struct with the given index in the target list.")
 	FIRBody()
@@ -141,11 +165,11 @@ BeginFunc(setTargets, "Set Targets", "Removes all targets from the target point 
 	for (int i = 0; i < Count; ++i) {
 		self->RemoveItem(self->mFirst);
 	}
-} EndFunc()*/
-EndClass()
+} EndFunc()
+EndClass()*/
 
 BeginClass(AFGBuildableDockingStation, "DockingStation", "Docking Station", "A docking station for wheeled vehicles to transfer cargo.")
-/*BeginFunc(getFuelInv, "Get Fueld Inventory", "Returns the fuel inventory of the docking station.") {
+BeginFunc(getFuelInv, "Get Fuel Inventory", "Returns the fuel inventory of the docking station.") {
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The fuel inventory of the docking station.")
 	FIRBody()
 	inventory = Ctx.GetTrace() / self->GetFuelInventory();
@@ -162,7 +186,7 @@ BeginFunc(getDocked, "Get Docked", "Returns the currently docked actor.") {
 } EndFunc()
 BeginFunc(undock, "Undock", "Undocked the currently docked vehicle from this docking station.") {
 	FIRBody()
-	self->Undock(true);
+	self->ForceUndockActor();
 } EndFunc()
 BeginProp(RBool, isLoadMode, "Is Load Mode", "True if the docking station loads docked vehicles, flase if it unloads them.") {
 	FIRReturn self->GetIsInLoadMode();
@@ -171,5 +195,5 @@ BeginProp(RBool, isLoadMode, "Is Load Mode", "True if the docking station loads 
 } EndProp()
 BeginProp(RBool, isLoadUnloading, "Is Load Unloading", "True if the docking station is currently loading or unloading a docked vehicle.") {
 	FIRReturn self->IsLoadUnloading();
-} EndProp()*/
+} EndProp()
 EndClass()
