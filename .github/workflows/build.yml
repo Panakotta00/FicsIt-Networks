@@ -58,9 +58,6 @@ jobs:
           WWISE_EMAIL: ${{ secrets.WWISE_EMAIL }}
           WWISE_PASSWORD: ${{ secrets.WWISE_PASSWORD }}
 
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
-
       - name: Build for Development Editor
         run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.sh FactoryEditor Linux Development -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
 
