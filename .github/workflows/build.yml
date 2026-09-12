@@ -19,7 +19,7 @@ jobs:
     runs-on: Linux-UE
     steps:
       - name: Pre Cleanup
-        run: Remove-Item ${{ github.workspace }}\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
+        run: rm -rf ${{ github.workspace }}\*
       - uses: actions/checkout@v4
         with:
           repository: satisfactorymodding/SatisfactoryModLoader
@@ -102,4 +102,4 @@ jobs:
           
       - name: Post Cleanup
         if: ${{ !failure() }}
-        run: Remove-Item ${{ github.workspace }}/* -Recurse -Force -Confirm:$false -ErrorAction Ignore
+        run: rm -rf ${{ github.workspace }}/*
