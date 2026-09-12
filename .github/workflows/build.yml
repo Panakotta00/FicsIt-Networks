@@ -33,7 +33,7 @@ jobs:
 
       - name: Apply FG Patches
         working-directory: SatisfactoryModLoader
-        run: git apply ./Mods/FicsItNetworks/GameFeatures/SML_Patch.patch -v
+        run: git apply ./Mods/GameFeatures/FicsItNetworks/SML_Patch.patch -v
 
       - name: Create UE directory
         run: ln -s ~/UnrealEngine ue
