@@ -19,7 +19,7 @@ jobs:
     runs-on: Linux-UE
     steps:
       - name: Pre Cleanup
-        run: rm -rf ${{ github.workspace }}\*
+        run: rm -rf ${{ github.workspace }}/*
       - uses: actions/checkout@v4
         with:
           repository: satisfactorymodding/SatisfactoryModLoader
