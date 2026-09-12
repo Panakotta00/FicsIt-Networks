@@ -1,6 +1,7 @@
 #include "FINComputerSubsystem.h"
 
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Subsystem/SubsystemActorManager.h"
 #include "FGCharacterPlayer.h"
 #include "FGInputSettings.h"
@@ -10,6 +11,7 @@
 #include "Components/WidgetInteractionComponent.h"
 #include "ComputerModules/PCI/FINComputerGPU.h"
 #include "Engine/Engine.h"
+#include "Input/FGInputMappingContext.h"
 #include "Kismet/GameplayStatics.h"
 
 AFINComputerSubsystem::AFINComputerSubsystem() {
@@ -21,7 +23,7 @@ AFINComputerSubsystem::AFINComputerSubsystem() {
 	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.PrimaryFire"))).LoadSynchronous(), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnPrimaryFireReleased);
 	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))).LoadSynchronous(), ETriggerEvent::Started, this, &AFINComputerSubsystem::OnSecondaryFirePressed);
 	Input->BindAction(Settings->GetInputActionForTag(FGameplayTag::RequestGameplayTag(TEXT("Input.PlayerActions.SecondaryFire"))).LoadSynchronous(), ETriggerEvent::Completed, this, &AFINComputerSubsystem::OnSecondaryFireReleased);
-	
+
 	SetActorTickEnabled(true);
 	PrimaryActorTick.SetTickFunctionEnable(true);
 	PrimaryActorTick.bCanEverTick = true;
@@ -42,6 +44,13 @@ void AFINComputerSubsystem::BeginPlay() {
 	TArray<AActor*> FoundCharacters;
 	UGameplayStatics::GetAllActorsOfClass(this, AFGCharacterPlayer::StaticClass(), FoundCharacters);
 	for (AActor* Character : FoundCharacters) AttachWidgetInteractionToPlayer(Cast<AFGCharacterPlayer>(Character));
+
+	auto mappingContext = LoadObject<UFGInputMappingContext>(nullptr, TEXT("/FicsItNetworks/Buildings/Components/Screen/IC_Screen.IC_Screen"));
+	if(APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController())) {
+		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer())) {
+			Subsystem->AddMappingContext(mappingContext, -1000);
+		}
+	}
 }
 
 void AFINComputerSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason) {
