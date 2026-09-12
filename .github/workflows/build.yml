@@ -16,14 +16,14 @@ on:
 jobs:
   build:
     name: Build FicsIt-Networks
-    runs-on: Windows2019-selfhosted
+    runs-on: Linux-UE
     steps:
       - name: Pre Cleanup
         run: Remove-Item ${{ github.workspace }}\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
       - uses: actions/checkout@v4
         with:
           repository: satisfactorymodding/SatisfactoryModLoader
-          ref: 167d475fbdae796462d4842d2afe3ff27c06cea4
+          ref: 801e40c322e39eb93f0b06501c9e0df6ef14f3ee
           path: SatisfactoryModLoader
 
       - uses: actions/checkout@v4
@@ -31,28 +31,28 @@ jobs:
           path: SatisfactoryModLoader/Mods/FicsItNetworks
           submodules: recursive
 
-      - name: Apply FG Patches
-        working-directory: SatisfactoryModLoader
-        run: git apply .\Mods\FicsItNetworks\SML_Patch.patch -v
+#      - name: Apply FG Patches
+#        working-directory: SatisfactoryModLoader
+#        run: git apply ./Mods/FicsItNetworks/SML_Patch.patch -v
 
       - name: Create UE directory
-        run: mkdir ue
+        run: ln -s ~/UnrealEngine ue
 
-      - name: Download, Extract and Setup UE
-        working-directory: ue
-        run: |
-          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.001" 5.3.2-css-68
-          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.002" 5.3.2-css-68
-          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.003" 5.3.2-css-68
-          7z x UnrealEngine-CSS-Editor-Win64.7z.001
-          rm UnrealEngine-CSS-Editor-Win64.7z*
-          .\\SetupScripts\\Register.bat
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+#      - name: Download, Extract and Setup UE
+#        working-directory: ue
+#        run: |
+#          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.001" 5.3.2-css-68
+#          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.002" 5.3.2-css-68
+#          gh release download --repo satisfactorymodding/UnrealEngine -p "UnrealEngine-CSS-Editor-Win64.7z.003" 5.3.2-css-68
+#          7z x UnrealEngine-CSS-Editor-Win64.7z.001
+#          rm UnrealEngine-CSS-Editor-Win64.7z*
+#          .\\SetupScripts\\Register.bat
+#        env:
+#          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Add Wwise
         run: |
-           7z x -aoa C:\\CI\\Wwise.7z -o'${{ github.workspace }}\SatisfactoryModLoader\Plugins\'
+          wwise-cli integrate-ue --integration-version "2025.1.6.4248" --project "${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject" >/dev/null
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           WWISE_EMAIL: ${{ secrets.WWISE_EMAIL }}
@@ -62,34 +62,34 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build for Development Editor
-        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryEditor Win64 Development -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.sh FactoryEditor Linux Development -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
 
       - name: Build for Shipping/Client EGS
-        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryGameEGS Win64 Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.sh FactoryGameEGS Win64 Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
       - name: Build for Shipping/Client Steam
-        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryGameSteam Win64 Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Build.sh FactoryGameSteam Win64 Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
 
       - name: Build for Win64 Dedicated Server
-        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryServer Win64 Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.sh FactoryServer Win64 Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
 
       - name: Build for Linux Dedicated Server
-        run: ${{ github.workspace }}\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryServer Linux Shipping -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject'
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.bat FactoryServer Linux Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
       
       - name: Package FicsItNetworks Mod
-        run: ${{ github.workspace }}\ue\Engine\Build\BatchFiles\RunUAT.bat -ScriptsForProject='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}\SatisfactoryModLoader\FactoryGame.uproject' -DLCName='FicsItNetworks' -build -server -clientconfig=Shipping -serverconfig=Shipping -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed -merge -utf8output
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/RunUAT.bat -ScriptsForProject='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject' -DLCName='FicsItNetworks' -build -server -clientconfig=Shipping -serverconfig=Shipping -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed -merge -utf8output
 
       - name: Upload FicsItNetworks-Merged
         id: upload-win64-merged
         uses: actions/upload-artifact@v4
         with:
           name: FicsItNetworks-Merged
-          path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks.zip
+          path: ${{github.workspace}}/SatisfactoryModLoader/Saved/ArchivedPlugins/FicsItNetworks/FicsItNetworks.zip
       - name: Upload FicsItNetworks
         id: upload-win64
         uses: actions/upload-artifact@v4
         with:
           name: FicsItNetworks
-          path: ${{github.workspace}}\SatisfactoryModLoader\Saved\ArchivedPlugins\FicsItNetworks\FicsItNetworks-*.zip
+          path: ${{github.workspace}}/SatisfactoryModLoader/Saved/ArchivedPlugins/FicsItNetworks/FicsItNetworks-*.zip
 
       - name: Discord Webhook Action
         uses: Panakotta00/discord-build-status-with-artifact@v0.0.4
@@ -102,4 +102,4 @@ jobs:
           
       - name: Post Cleanup
         if: ${{ !failure() }}
-        run: Remove-Item ${{ github.workspace }}\* -Recurse -Force -Confirm:$false -ErrorAction Ignore
+        run: Remove-Item ${{ github.workspace }}/* -Recurse -Force -Confirm:$false -ErrorAction Ignore
