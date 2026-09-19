@@ -64,16 +64,16 @@ jobs:
       - name: Build for Shipping/Client EGS
         run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.sh FactoryGameEGS Win64 Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
       - name: Build for Shipping/Client Steam
-        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Build.sh FactoryGameSteam Win64 Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.sh FactoryGameSteam Win64 Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
 
       - name: Build for Win64 Dedicated Server
         run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.sh FactoryServer Win64 Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
 
       - name: Build for Linux Dedicated Server
-        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.bat FactoryServer Linux Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/Linux/Build.sh FactoryServer Linux Shipping -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject'
       
       - name: Package FicsItNetworks Mod
-        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/RunUAT.bat -ScriptsForProject='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject' -DLCName='FicsItNetworks' -build -server -clientconfig=Shipping -serverconfig=Shipping -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed -merge -utf8output
+        run: ${{ github.workspace }}/ue/Engine/Build/BatchFiles/RunUAT.sh -ScriptsForProject='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject' PackagePlugin -project='${{ github.workspace }}/SatisfactoryModLoader/FactoryGame.uproject' -DLCName='FicsItNetworks' -build -server -clientconfig=Shipping -serverconfig=Shipping -platform=Win64 -serverplatform=Win64+Linux -nocompileeditor -installed -merge -utf8output
 
       - name: Upload FicsItNetworks-Merged
         id: upload-win64-merged
