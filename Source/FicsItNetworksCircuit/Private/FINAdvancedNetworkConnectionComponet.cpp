@@ -23,9 +23,8 @@ void UFINAdvancedNetworkConnectionComponent::BeginPlay() {
 		if (bOuterAsRedirect) RedirectionObject = GetOuter();
 
 		if (GetOwner()->HasAuthority()) {
-			if (!bIdCreated) {
+			if (!ID.IsValid()) {
 				ID = FGuid::NewGuid();
-				bIdCreated = true;
 			}
 
 			// setup circuit

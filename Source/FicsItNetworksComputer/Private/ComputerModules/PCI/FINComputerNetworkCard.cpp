@@ -20,9 +20,8 @@ void AFINComputerNetworkCard::BeginPlay() {
 	Super::BeginPlay();
 
 	if (HasAuthority() && !GetBlueprintDesigner()) {
-		if (!bIdCreated) {
+		if (!ID.IsValid()) {
 			ID = FGuid::NewGuid();
-			bIdCreated = true;
 		}
 
 		// setup circuit

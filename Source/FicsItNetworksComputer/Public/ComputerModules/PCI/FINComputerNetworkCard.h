@@ -35,12 +35,6 @@ public:
 	FString Nick;
 
 	/**
-	* Used to check if the ID is already generated.
-	*/
-	UPROPERTY(SaveGame)
-	bool bIdCreated = false;
-
-	/**
 	 * The only one connected network component to this module.
 	 * Only used for building the computer network.
 	 */
