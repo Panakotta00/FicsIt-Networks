@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: Pre Cleanup
         run: rm -rf ${{ github.workspace }}/*
+
+      - name: Lock Runner
+        run: lockctl acquire github-action
+
       - uses: actions/checkout@v4
         with:
           repository: satisfactorymodding/SatisfactoryModLoader
@@ -100,3 +104,7 @@ jobs:
       - name: Post Cleanup
         if: ${{ !failure() }}
         run: rm -rf ${{ github.workspace }}/*
+
+      - name: Unlock Runner
+        if: always()
+        run: lockctl release github-action
