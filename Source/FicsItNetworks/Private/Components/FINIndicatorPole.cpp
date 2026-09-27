@@ -5,8 +5,7 @@
 AFINIndicatorPole::AFINIndicatorPole() {
 	Indicator = CreateDefaultSubobject<UFGColoredInstanceMeshProxy>("Indicator");
 	Indicator->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	Indicator->SetInstanced(true);
-	
+
 	Connector = CreateDefaultSubobject<UFINAdvancedNetworkConnectionComponent>("Connector");
 	Connector->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	Connector->SetIsReplicated(true);
@@ -126,8 +125,6 @@ void AFINIndicatorPole::netFunc_getColor(float& r, float& g, float& b, float& e)
 	b = IndicatorColor.B;
 	e = EmessiveStrength;
 }
-
-void AFINIndicatorPole::netSig_ColorChanged(float r, float g, float b, float e) {}
 
 AFINIndicatorPole* AFINIndicatorPole::netFunc_getTopPole() {
 	if (!IsValid(TopConnected)) TopConnected = nullptr;

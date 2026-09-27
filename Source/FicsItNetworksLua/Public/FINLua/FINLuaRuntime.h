@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 #include "FIRAnyValue.h"
 #include "FIRInstancedStruct.h"
-#include "Queue.h"
-#include "Union.h"
+#include "Containers/Queue.h"
+#include "Containers/Union.h"
 #include "FINLuaRuntime.generated.h"
 
 struct FFINLuaRuntimePersistenceState;

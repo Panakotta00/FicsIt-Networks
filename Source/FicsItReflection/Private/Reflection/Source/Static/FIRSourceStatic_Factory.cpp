@@ -57,7 +57,7 @@ BeginProp(RFloat, potential, "Potential", "The potential this factory is current
 } EndProp()
 BeginFunc(setPotential, "Set Potential", "Changes the potential this factory is currently set to and 'should' use. (the overclock value)", 0) {
 	InVal(0, RFloat, potential, "Potential", "The potential that should be used.\n0 = 0%, 1 = 100%")
-	Body()
+	FIRBody()
 	float min = self->GetCurrentMinPotential();
 	float max = self->GetCurrentMaxPotential();
 	self->SetPendingPotential(FMath::Clamp(potential, min, max));
@@ -85,7 +85,7 @@ BeginProp(RFloat, productionBoost, "Production Boost", "The current production b
 } EndProp()
 BeginFunc(setProductionBoost, "Set Production Boost", "Changes the production boost this factory is currently set to and 'should' use.", 0) {
 	InVal(0, RFloat, productionBoost, "Production Boost", "The production boost that should be used.\n0 = 0%, 1 = 100%")
-	Body()
+	FIRBody()
 	float min = self->GetMinProductionBoost();
 	float max = self->GetCurrentMaxProductionBoost();
 	self->SetPendingProductionBoost(FMath::Clamp(productionBoost, min, max));
@@ -100,12 +100,12 @@ EndClass()
 BeginClass(AFGBuildableManufacturer, "Manufacturer", "Manufacturer", "The base class of every machine that uses a recipe to produce something automatically.")
 BeginFunc(getRecipe, "Get Recipe", "Returns the currently set recipe of the manufacturer.") {
 	OutVal(0, RClass<UFGRecipe>, recipe, "Recipe", "The currently set recipe.")
-	Body()
+	FIRBody()
 	recipe = (UClass*)self->GetCurrentRecipe();
 } EndFunc()
 BeginFunc(getRecipes, "Get Recipes", "Returns the list of recipes this manufacturer can get set to and process.") {
 	OutVal(0, RArray<RClass<UFGRecipe>>, recipes, "Recipes", "The list of avalible recipes.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> OutRecipes;
 	TArray<TSubclassOf<UFGRecipe>> Recipes;
 	self->GetAvailableRecipes(Recipes);
@@ -117,7 +117,7 @@ BeginFunc(getRecipes, "Get Recipes", "Returns the list of recipes this manufactu
 BeginFunc(setRecipe, "Set Recipe", "Sets the currently producing recipe of this manufacturer.", 0) {
 	InVal(0, RClass<UFGRecipe>, recipe, "Recipe", "The recipe this manufacturer should produce.")
 	OutVal(1, RBool, gotSet, "Got Set", "True if the current recipe got successfully set to the new recipe.")
-	Body()
+	FIRBody()
 	TArray<TSubclassOf<UFGRecipe>> recipes;
 	self->GetAvailableRecipes(recipes);
 	if (recipes.Contains(recipe)) {
@@ -133,12 +133,12 @@ BeginFunc(setRecipe, "Set Recipe", "Sets the currently producing recipe of this 
 } EndFunc()
 BeginFunc(getInputInv, "Get Input Inventory", "Returns the input inventory of this manufacturer.") {
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The input inventory of this manufacturer")
-	Body()
+	FIRBody()
 	inventory = Ctx.GetTrace() / self->GetInputInventory();
 } EndFunc()
 BeginFunc(getOutputInv, "Get Output Inventory", "Returns the output inventory of this manufacturer.") {
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The output inventory of this manufacturer.")
-	Body()
+	FIRBody()
 	inventory = Ctx.GetTrace() / self->GetOutputInventory();
 } EndFunc()
 EndClass()
@@ -149,7 +149,7 @@ BeginSignal(ItemTransfer, "Item Transfer", "Triggers when the factory connection
 	SignalParam(0, RStruct<FInventoryItem>, item, "Item", "The transfered item")
 EndSignal()
 BeginProp(RInt, type, "Type", "Returns the type of the connection. 0 = Conveyor, 1 = Pipe") {
-	FIRReturn (int64)self->GetConnector();
+	FIRReturn (int64)self->GetConnection();
 } EndProp()
 BeginProp(RInt, direction, "Direction", "The direction in which the items/fluids flow. 0 = Input, 1 = Output, 2 = Any, 3 = Used just as snap point") {
 	FIRReturn (int64)self->GetDirection();
@@ -173,17 +173,17 @@ BeginProp(RInt, unblockedTransfers, "Unblocked Transfers", "The count of transfe
 BeginFunc(addUnblockedTransfers, "Add Unblocked Transfers", "Adds the given count to the unblocked transfers counter. The resulting value gets clamped to >= 0. Negative values allow to decrease the counter manually. The returning int is the now set count.") {
 	InVal(0, RInt, unblockedTransfers, "Unblocked Transfers", "The count of unblocked transfers to add.")
 	OutVal(1, RInt, newUnblockedTransfers, "New Unblocked Transfers", "The new count of unblocked transfers.")
-	Body()
+	FIRBody()
 	newUnblockedTransfers = (FIRInt) AFIRSubsystem::GetReflectionSubsystem(self)->AddFactoryConnectorUnblockedTransfers(self, unblockedTransfers);
 } EndFunc()
 BeginFunc(getInventory, "Get Inventory", "Returns the internal inventory of the connection component.") {
 	OutVal(0, RTrace<UFGInventoryComponent>, inventory, "Inventory", "The internal inventory of the connection component.")
-	Body()
+	FIRBody()
 	inventory = Ctx.GetTrace() / self->GetInventory();
 } EndFunc()
 BeginFunc(getConnected, "Get Connected", "Returns the connected factory connection component.") {
 	OutVal(0, RTrace<UFGFactoryConnectionComponent>, connected, "Connected", "The connected factory connection component.")
-	Body()
+	FIRBody()
 	connected = Ctx.GetTrace() / self->GetConnection();
 } EndFunc()
 EndClass()
@@ -197,7 +197,7 @@ BeginClassProp(RFloat, duration, "Duration", "The duration how much time it take
 } EndProp()
 BeginClassFunc(getProducts, "Get Products", "Returns a array of item amounts, this recipe returns (outputs) when the recipe is processed once.", false) {
 	OutVal(0, RArray<RStruct<FItemAmount>>, products, "Products", "The products of this recipe.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Products;
 	for (const FItemAmount& Product : UFGRecipe::GetProducts(self)) {
 		Products.Add((FIRAny)Product);
@@ -206,9 +206,9 @@ BeginClassFunc(getProducts, "Get Products", "Returns a array of item amounts, th
 } EndFunc()
 BeginClassFunc(getIngredients, "Get Ingredients", "Returns a array of item amounts, this recipe needs (input) so the recipe can be processed.", false) {
 	OutVal(0, RArray<RStruct<FItemAmount>>, ingredients, "Ingredients", "The ingredients of this recipe.")
-	Body()
+	FIRBody()
 	TArray<FIRAny> Ingredients;
-	for (const FItemAmount& Ingredient : UFGRecipe::GetIngredients(self)) {
+	for (const FItemAmount& Ingredient : UFGRecipe::GetIngredients(GWorld, self)) { // TODO: Use something else as World
 		Ingredients.Add((FIRAny)Ingredient);
 	}
 	ingredients = Ingredients;

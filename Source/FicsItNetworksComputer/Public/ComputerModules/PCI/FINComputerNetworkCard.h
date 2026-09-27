@@ -35,12 +35,6 @@ public:
 	FString Nick;
 
 	/**
-	* Used to check if the ID is already generated.
-	*/
-	UPROPERTY(SaveGame)
-	bool bIdCreated = false;
-
-	/**
 	 * The only one connected network component to this module.
 	 * Only used for building the computer network.
 	 */
@@ -138,7 +132,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_send(FString receiver, int port, TArray<FFIRAnyValue> varargs);
+	void netFunc_send(FString receiver, int port, const TArray<FFIRAnyValue>& varargs);
 	UFUNCTION()
 	void netFuncMeta_send(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "send";
@@ -154,7 +148,7 @@ public:
 	}
 
 	UFUNCTION()
-	void netFunc_broadcast(int port, TArray<FFIRAnyValue> varargs);
+	void netFunc_broadcast(int port, const TArray<FFIRAnyValue>& varargs);
 	UFUNCTION()
 	void netFuncMeta_broadcast(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "broadcast";
@@ -166,8 +160,8 @@ public:
 		Runtime = 1;
 	}
 
-	UFUNCTION()
-	void netSig_NetworkMessage(const FString& sender, int port, TArray<FFIRAnyValue> varargs) {}
+	UFUNCTION(BlueprintImplementableEvent)
+	void netSig_NetworkMessage(const FString& sender, int port, const TArray<FFIRAnyValue>& varargs);
 	UFUNCTION()
     void netSigMeta_NetworkMessage(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "NetworkMessage";

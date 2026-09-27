@@ -48,11 +48,12 @@ void AFINMediaSubsystem::Tick(float DeltaSeconds) {
 AFINMediaSubsystem* AFINMediaSubsystem::GetMediaSubsystem(UObject* WorldContext) {
 #if WITH_EDITOR
 	return nullptr;
-#endif
+#else
 	UWorld* WorldObject = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	USubsystemActorManager* SubsystemActorManager = WorldObject->GetSubsystem<USubsystemActorManager>();
 	check(SubsystemActorManager);
 	return SubsystemActorManager->GetSubsystemActor<AFINMediaSubsystem>();
+#endif
 }
 
 UObject* AFINMediaSubsystem::GetOrLoadTexture(FString TextureReference) {

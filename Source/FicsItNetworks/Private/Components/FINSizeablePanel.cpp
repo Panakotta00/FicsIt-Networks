@@ -3,6 +3,7 @@
 #include "FINMCPAdvConnector.h"
 #include "Components/FINModuleBase.h"
 #include "FINNetworkCable.h"
+#include "FIRGlobalRegisterHelper.h"
 #include "ModuleSystem/FINModuleSystemPanel.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"

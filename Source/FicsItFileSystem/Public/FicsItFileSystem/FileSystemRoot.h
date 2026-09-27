@@ -6,16 +6,16 @@
 #include "Device.h"
 
 namespace CodersFileSystem {
-	class FICSITFILESYSTEM_API FileSystemRoot {
+	class FICSITFILESYSTEM_API FileSystemKernelRoot {
 	protected:
 		class RootListener : public Listener {
-			friend FileSystemRoot;
+			friend FileSystemKernelRoot;
 
 		protected:
-			FileSystemRoot* root;
+			FileSystemKernelRoot* root;
 
 		public:
-			RootListener(FileSystemRoot* root);
+			RootListener(FileSystemKernelRoot* root);
 			virtual ~RootListener();
 
 			virtual void onMounted(Path path, TSharedRef<Device> device) override;
@@ -42,14 +42,14 @@ namespace CodersFileSystem {
 		int moveInternal(Path from, Path to);
 
 	public:
-		FileSystemRoot();
-		FileSystemRoot(const FileSystemRoot&) = delete;
-		FileSystemRoot(FileSystemRoot&& other);
+		FileSystemKernelRoot();
+		FileSystemKernelRoot(const FileSystemKernelRoot&) = delete;
+		FileSystemKernelRoot(FileSystemKernelRoot&& other);
 
-		virtual ~FileSystemRoot();
+		virtual ~FileSystemKernelRoot();
 
-		FileSystemRoot& operator=(const FileSystemRoot&) = delete;
-		FileSystemRoot& operator=(FileSystemRoot&& other);
+		FileSystemKernelRoot& operator=(const FileSystemKernelRoot&) = delete;
+		FileSystemKernelRoot& operator=(FileSystemKernelRoot&& other);
 
 		/*
 		* Trys to open the node at the give path with the given mode

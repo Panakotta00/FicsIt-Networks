@@ -14,7 +14,7 @@ struct FICSITNETWORKSCIRCUIT_API FFINSignalListeners {
 	UPROPERTY(SaveGame)
 	TArray<FFIRTrace> Listeners;
 
-	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
+	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector);
 };
 
 template<>

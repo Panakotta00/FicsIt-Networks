@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FINCommandPointMesh.h"
+#include "Components/FINCommandPointMesh.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Serialization/JsonTypes.h"
 #include "MCPBlueprintLibrary.generated.h"

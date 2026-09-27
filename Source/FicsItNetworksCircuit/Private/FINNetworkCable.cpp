@@ -45,6 +45,8 @@ void AFINNetworkCable::BeginPlay() {
 }
 
 void AFINNetworkCable::EndPlay(EEndPlayReason::Type reason) {
+	Super::EndPlay(reason);
+
 	if (HasAuthority() && IsValid(this) && (reason == EEndPlayReason::Destroyed)) {
 		if (IsValid(Connector1)) {
 			Connector1->RemoveConnectedCable(this);

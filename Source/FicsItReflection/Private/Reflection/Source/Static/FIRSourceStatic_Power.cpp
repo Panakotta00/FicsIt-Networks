@@ -27,12 +27,12 @@ BeginProp(RInt, maxConnections, "Max Connections", "The maximum amount of connec
 } EndProp()
 BeginFunc(getPower, "Get Power", "Returns the power info component of this power connection.") {
 	OutVal(0, RTrace<UFGPowerInfoComponent>, power, "Power", "The power info compoent this power connection uses.")
-	Body()
+	FIRBody()
 	power = Ctx.GetTrace() / self->GetPowerInfo();
 } EndFunc();
 BeginFunc(getCircuit, "Get Circuit", "Returns the power circuit to which this connection component is attached to.") {
 	OutVal(0, RTrace<UFGPowerCircuit>, circuit, "Circuit", "The Power Circuit this connection component is attached to.")
-	Body()
+	FIRBody()
 	circuit = Ctx.GetTrace() / self->GetPowerCircuit();
 } EndFunc()
 EndClass()
@@ -58,7 +58,7 @@ BeginProp(RBool, hasPower, "Has Power", "True if the connection has satisfied po
 } EndProp();
 BeginFunc(getCircuit, "Get Circuit", "Returns the power circuit this info component is part of.") {
 	OutVal(0, RTrace<UFGPowerCircuit>, circuit, "Circuit", "The Power Circuit this info component is attached to.")
-	Body()
+	FIRBody()
 	circuit = Ctx.GetTrace() / self->GetPowerCircuit();
 }
 EndFunc()
@@ -69,7 +69,7 @@ Hook(UFIRPowerCircuitHook)
 BeginSignal(PowerFuseChanged, "Power Fuse Changed", "Get Triggered when the fuse state of the power circuit changes.")
 EndSignal()
 BeginFunc(resetFuse, "Reset Fuse", "Resets the fuse of this circuit", 0) {
-	Body()
+	FIRBody()
 	self->ResetFuse();
 }EndFunc()
 BeginProp(RFloat, production, "Production", "The amount of power produced by the whole circuit in the last tick.") {
@@ -132,7 +132,7 @@ BeginProp(RFloat, productionBoostPercent, "Production Boost Percent", "The amoun
 } EndProp()
 BeginFunc(getGroupPrioritySwitches, "Get Group Priority Switches", "Returns a list of all priority switches in the circuit.") {
 	OutVal(0, RArray<RTrace<AFGBuildablePriorityPowerSwitch>>, switches, "Switches", "A list of all priority switches in the circuit.")
-	Body()
+	FIRBody()
 	AFGCircuitSubsystem* subsys = AFGCircuitSubsystem::GetCircuitSubsystem(self);
 	UFGCircuitGroup* group = subsys->GetCircuitGroup(self->GetCircuitGroupID());
 	UFGPowerCircuitGroup* powerGroup = Cast<UFGPowerCircuitGroup>(group);
@@ -200,7 +200,7 @@ BeginProp(RBool, isSwitchOn, "Is Switch On", "True if the two circuits are conne
 } EndProp()
 BeginFunc(setIsSwitchOn, "Set Is Switch On", "Changes the circuit switch state.", 0) {
 	InVal(0, RBool, state, "State", "The new switch state.")
-	Body()
+	FIRBody()
 	self->SetSwitchOn(state);
 } EndFunc()
 EndClass()
@@ -214,7 +214,7 @@ BeginProp(RInt, priority, "Priority", "The priority group of which this switch i
 BeginFunc(setPrioritySwitchGroupOn, "Set Priority Switch Group On", "Sets if the given priority switch group should be on or off.") {
 	InVal(0, RInt, priority, "Priority", "The priority group to set.")
 	InVal(0, RBool, state, "State", "The new switch state.")
-	Body()
+	FIRBody()
 	AFGCircuitSubsystem* subsys = AFGCircuitSubsystem::GetCircuitSubsystem(self);
 	subsys->PowerCircuit_SetPrioritySwitchGroupOn(priority, state);
 } EndFunc()

@@ -1,6 +1,6 @@
 #include "UI/FINLuaCodeEditor.h"
 
-#include "FINLuaSyntax.h"
+#include "UI/FINLuaSyntax.h"
 #include "FINUtils.h"
 #include "TimerManager.h"
 #include "Engine/World.h"

@@ -1,7 +1,7 @@
 = Events
 :description: Events are an advanced way of handling FIN Signals.
 
-Signals are essentially messages send by a network component to computers that listen to the component.
+Signals are essentially messages sent by a network component to computers that listen to the component.
 This means every computer first has to listen to the network components from which he wants to receive signals from.
 
 A signal has a type and various associated values.
@@ -26,9 +26,9 @@ You can then provide various optional fields in the table to specify on what you
 The event name has to match the given single string or has to be contained within the given array of strings.
 - `sender : Object|Object[]`
 The sender of the signals has to be the given single sender or must be one of the senders in the given array.
-- `values : table<string,any>
+- `values : table<string,any>`
 A table with string keys and any value as value.
-For every table entry, the signal must have a parameter with the same name and the parameter value has to match the givne table value associated with the key.
+For every table entry, the signal must have a parameter with the same name and the parameter value has to match the given table value associated with the key.
 
 === Operator Overloading
 
@@ -124,7 +124,7 @@ end
 == Event Queues
 Event Queues allow you to record and filter events that occur in its life-time.
 
-You can create an Event Queue using the global `event.queue(EventFilter) -> EventQueu` function.
+You can create an Event Queue using the global `event.queue(EventFilter) -> EventQueue` function.
 
 The queue will from then on record all events that occur and that match the given filter.
 

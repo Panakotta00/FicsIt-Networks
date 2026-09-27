@@ -1,6 +1,6 @@
 ﻿#include "UI/FINSplitter.h"
 
-#include "ArrangedChildren.h"
+#include "Layout/ArrangedChildren.h"
 
 void SFINSplitter::Construct(FArguments InArgs) {
 	SSplitter::FArguments Args;

@@ -129,7 +129,7 @@ public:
 		Runtime = 1;
 	}
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintImplementableEvent)
 	void netSig_ColorChanged(float r, float g, float b, float e);
 	UFUNCTION()
     void netSigMeta_ColorChanged(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {

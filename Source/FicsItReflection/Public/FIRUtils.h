@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Reflection/FIRFunction.h"
+#include "Reflection/FIRProperty.h"
+#include "Reflection/FIRSignal.h"
 #include "FIRUtils.generated.h"
 
 UCLASS()

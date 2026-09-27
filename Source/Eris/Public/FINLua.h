@@ -1,9 +1,17 @@
 #pragma once
 
+#ifndef DLLEXPORT
+	#if defined(__GNUC__) || defined(__clang__)
+		#define DLLEXPORT __attribute__((visibility("default")))
+	#else
+		#define DLLEXPORT __declspec(dllexport)
+	#endif
+#endif
+
 #if PLATFORM_UNIX
-#include "UnixPlatformCompilerPreSetup.h"
+#include "Unix/UnixPlatformCompilerPreSetup.h"
 #elif PLATFORM_WINDOWS
-#include "MSVCPlatformCompilerPreSetup.h"
+#include "MSVC/MSVCPlatformCompilerPreSetup.h"
 #endif
 
 #if PLATFORM_WINDOWS
@@ -14,6 +22,8 @@
 
 PRAGMA_PUSH_PLATFORM_DEFAULT_PACKING
 THIRD_PARTY_INCLUDES_START
+
+#define TString LuaTString
 
 #pragma push_macro("check")
 #undef check
@@ -47,6 +57,8 @@ THIRD_PARTY_INCLUDES_START
 #endif
 
 #pragma pop_macro("check")
+
+#undef TString
 
 THIRD_PARTY_INCLUDES_END
 PRAGMA_POP_PLATFORM_DEFAULT_PACKING

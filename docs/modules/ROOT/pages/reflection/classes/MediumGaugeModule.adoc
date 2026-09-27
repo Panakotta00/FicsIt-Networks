@@ -1,4 +1,4 @@
-= Big Gauge Module
+= Medium Gauge Module
 :table-caption!:
 
 [cols="1,5a",separator="!"]
@@ -7,7 +7,8 @@
 ! xref:/reflection/classes/Buildable.adoc[FINModuleBase]
 !===
 
-A medium analogue Gauge for use on Large Panels. The red portion and needle position can be changed through FIN
+A medium analogue Gauge for use on Panels. The red portion and needle position can be changed through FIN.
+Colors can also be changed through FIN.
 
 // tag::interface[]
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FGBuildableHologram.h"
+#include "Hologram/FGBuildableHologram.h"
 #include "FGConstructDisqualifier.h"
 #include "FINMicrocontrollerHologram.generated.h"
 

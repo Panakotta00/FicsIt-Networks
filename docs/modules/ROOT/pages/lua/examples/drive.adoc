@@ -19,7 +19,7 @@ if fs.initFileSystem("/dev") == false then
     computer.panic("Cannot initialize /dev")
 end
 -- List all the drives
-for _, drive in pairs(fs.childs("/dev")) do
+for _, drive in pairs(fs.children("/dev")) do
     print(drive)
 end
 ----

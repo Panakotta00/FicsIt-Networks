@@ -13,7 +13,7 @@ BeginStructConstructable(FFINGPUT1Buffer, "GPUT1Buffer", "GPU T1 Buffer", "A str
 BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.", 2) {
 	OutVal(0, RFloat, width, "Width", "The width of this buffer")
 	OutVal(1, RFloat, height, "Height", "The height of this buffer")
-	Body()
+	FIRBody()
 	int Width, Height;
 	self->GetSize(Width, Height);
 	width = (FIRInt)Width;
@@ -22,7 +22,7 @@ BeginFunc(getSize, "Get Size", "Allows to get the dimensions of the buffer.", 2)
 BeginFunc(setSize, "Set Size", "Allows to set the dimensions of the buffer.", 2) {
 	InVal(0, RFloat, width, "Width", "The width this buffer should now have")
 	InVal(1, RFloat, height, "Height", "The height this buffer now have")
-	Body()
+	FIRBody()
 	self->SetSize(width, height);
 } EndFunc()
 BeginFunc(get, "Get", "Allows to get a single pixel from the buffer at the given position", 2) {
@@ -31,7 +31,7 @@ BeginFunc(get, "Get", "Allows to get a single pixel from the buffer at the given
 	OutVal(2, RString, c, "Char", "The character at the given position")
 	OutVal(3, RStruct<FLinearColor>, foreground, "Foreground Color", "The foreground color of the pixel at the given position")
 	OutVal(4, RStruct<FLinearColor>, background, "Background Color", "The background color of the pixel at the given position")
-	Body()
+	FIRBody()
 	const FFINGPUT1BufferPixel& Pixel = self->Get(x, y);
 	c = FString::Chr(Pixel.Character);
 	foreground = (FIRStruct) Pixel.ForegroundColor;
@@ -44,7 +44,7 @@ BeginFunc(set, "Set", "Allows to set a single pixel of the buffer at the given p
 	InVal(3, RStruct<FLinearColor>, foreground, "Foreground Color", "The foreground color the pixel at the given position should have")
 	InVal(4, RStruct<FLinearColor>, background, "Background Color", "The background color the pixel at the given position should have")
 	OutVal(5, RBool, done, "Done", "True if the pixel got set successfully")
-	Body()
+	FIRBody()
 	if (c.Len() < 1) return;
 	done = self->Set(x, y, FFINGPUT1BufferPixel(c[0], foreground, background));
 } EndFunc()
@@ -55,7 +55,7 @@ BeginFunc(copy, "Copy", "Copies the given buffer at the given offset of the uppe
 	InVal(3, RInt, textBlendMode, "Text Blend Mode", "The blend mode that is used for the text.\n0 = Overwrite this with the content of the given buffer\n1 = Overwrite with only characters that are not ' '\n2 = Overwrite only were this characters are ' '\n3 = Keep this buffer")
 	InVal(4, RInt, foregroundBlendMode, "Foreground Color Blend Mode", "The blend mode that is used for the foreground color.\n0 = Overwrite with the given color\n1 = Normal alpha composition\n2 = Multiply\n3 = Divide\n4 = Addition\n5 = Subtraction\n6 = Difference\n7 = Darken Only\n8 = Lighten Only\n9 = None")
 	InVal(5, RInt, backgroundBlendMode, "Background Color Blend Mode", "The blend mode that is used for the background color.\n0 = Overwrite with the given color\n1 = Normal alpha composition\n2 = Multiply\n3 = Divide\n4 = Addition\n5 = Subtraction\n6 = Difference\n7 = Darken Only\n8 = Lighten Only\n9 = None")
-	Body()
+	FIRBody()
 	self->Copy(x, y, buffer, (EFINGPUT1TextBlendingMethod)textBlendMode, (EFINGPUT1ColorBlendingMethod)foregroundBlendMode, (EFINGPUT1ColorBlendingMethod)backgroundBlendMode);
 } EndFunc()
 BeginFunc(setText, "Set Text", "Allows to write the given text onto the buffer and with the given offset.", 2) {
@@ -64,7 +64,7 @@ BeginFunc(setText, "Set Text", "Allows to write the given text onto the buffer a
 	InVal(2, RString, text, "Text", "The text that should get written.")
 	InVal(3, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color which will be used to write the text.")
 	InVal(4, RStruct<FLinearColor>, background, "Background", "The background color which will be used to write the text.")
-	Body()
+	FIRBody()
 	self->SetText(x, y, text, foreground, background);
 } EndFunc()
 BeginFunc(fill, "Fill", "Draws the given character at all given positions in the given rectangle on-to the hidden screen buffer.", 2) {
@@ -75,7 +75,7 @@ BeginFunc(fill, "Fill", "Draws the given character at all given positions in the
 	InVal(4, RString, character, "Character", "A string with a single character that will be used for each pixel in the range you want to fill.")
 	InVal(5, RStruct<FLinearColor>, foreground, "Foreground", "The foreground color which will be used to fill the rectangle.")
 	InVal(6, RStruct<FLinearColor>, background, "Background", "The background color which will be used to fill the rectangle.")
-	Body()
+	FIRBody()
 	if (character.Len() < 1) character = " ";
 	self->Fill(x, y, width, height, FFINGPUT1BufferPixel(character[0], foreground, background));
 } EndFunc()
@@ -84,7 +84,7 @@ BeginFunc(setRaw, "Set Raw", "Allows to set the internal data of the buffer more
 	InVal(1, RArray<RFloat>, foreground, "Foreground Color", "The values of the foreground color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.")
 	InVal(2, RArray<RFloat>, background, "Background Color", "The values of the background color slots for each character were a group of four values give one color. so the length has to be exactly width*height*4.")
 	OutVal(3, RBool, success, "Success", "True if the raw data was successfully written")
-	Body()
+	FIRBody()
 	TArray<float> Foreground, Background;
 	if (foreground.Num() != background.Num()) success = false;
 	else {
@@ -123,7 +123,7 @@ BeginFunc(setRaw, "Set Raw", "Allows to set the internal data of the buffer more
 } EndFunc()
 BeginFunc(clone, "Clone", "Clones this buffer into a new struct") {
 	OutVal(0, RStruct<FFINGPUT1Buffer>, buffer, "Buffer", "The clone of this buffer")
-	Body()
+	FIRBody()
 	buffer = (FIRStruct) *self;
 } EndFunc()
 EndStruct()
@@ -140,7 +140,7 @@ BeginProp(RInt, verbosity, "Verbosity", "The verbosity of the log entry.") {
 } EndProp()
 BeginFunc(format, "Format", "Creates a formatted string representation of this log entry.") {
 	OutVal(0, RString, result, "Result", "The resulting formatted string")
-	Body()
+	FIRBody()
 	result = self->ToClipboardText();
 } EndFunc()
 EndStruct()

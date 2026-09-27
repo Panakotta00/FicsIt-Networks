@@ -20,9 +20,8 @@ void AFINComputerNetworkCard::BeginPlay() {
 	Super::BeginPlay();
 
 	if (HasAuthority() && !GetBlueprintDesigner()) {
-		if (!bIdCreated) {
+		if (!ID.IsValid()) {
 			ID = FGuid::NewGuid();
-			bIdCreated = true;
 		}
 
 		// setup circuit
@@ -137,7 +136,7 @@ void AFINComputerNetworkCard::netFunc_closeAll() {
 	OpenPorts.Empty();
 }
 
-void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, TArray<FFIRAnyValue> args) {
+void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, const TArray<FFIRAnyValue>& args) {
 	if (!CheckNetMessageData(args) || port < 0 || port > 10000) return;
 	FGuid receiverID;
 	FGuid::Parse(receiver, receiverID);
@@ -159,7 +158,7 @@ void AFINComputerNetworkCard::netFunc_send(FString receiver, int port, TArray<FF
 	}
 }
 
-void AFINComputerNetworkCard::netFunc_broadcast(int port, TArray<FFIRAnyValue> args) {
+void AFINComputerNetworkCard::netFunc_broadcast(int port, const TArray<FFIRAnyValue>& args) {
  	if (!CheckNetMessageData(args) || port < 0 || port > 10000) return;
 	FGuid MsgID = FGuid::NewGuid();
 	FGuid SenderID = Execute_GetID(this);

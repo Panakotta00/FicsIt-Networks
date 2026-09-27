@@ -1,23 +1,26 @@
 #include "FINLuaProcessor.h"
 
-#include "AsyncWork.h"
-#include "Base64.h"
-#include "FGBuildable.h"
+#include "Async/AsyncWork.h"
+#include "Misc/Base64.h"
+#include "Buildables/FGBuildable.h"
 #include "FGInventoryComponent.h"
+#include "FGPlayerState.h"
 #include "FicsItLogLibrary.h"
 #include "FicsItNetworksLuaModule.h"
 #include "FILLogContainer.h"
 #include "FINComputerEEPROMDesc.h"
-#include "FINItemStateEEPROMText.h"
+#include "FicsItKernel/Processor/FINItemStateEEPROMText.h"
 #include "FINMediaSubsystem.h"
-#include "FINSignalSubsystem.h"
-#include "LuaEventAPI.h"
-#include "LuaFuture.h"
-#include "LuaKernelAPI.h"
-#include "LuaWorldAPI.h"
+#include "Signals/FINSignalSubsystem.h"
+#include "FINLua/LuaEventAPI.h"
+#include "FINLua/LuaFuture.h"
+#include "FINLua/API/LuaKernelAPI.h"
+#include "FINLua/API/LuaWorldAPI.h"
+#include "OnlineSubsystemModule.h"
 #include "Engine/Engine.h"
 #include "FicsItKernel/Network/NetworkController.h"
 #include "FINLua/LuaUtil.h"
+#include "GameFramework/PlayerState.h"
 #include "Signals/FINSignalData.h"
 
 void LuaFileSystemListener::onUnmounted(CodersFileSystem::Path path, TSharedRef<CodersFileSystem::Device> device) {
@@ -151,6 +154,8 @@ void UFINLuaProcessor::SetKernel(UFINKernelSystem* InKernel) {
 	//if (GetKernel() && GetKernel()->GetFileSystem()) GetKernel()->GetFileSystem()->removeListener(FileSystemListener);
 	Kernel = InKernel;
 }
+
+UE_DISABLE_OPTIMIZATION_SHIP
 void UFINLuaProcessor::Tick(float InDelta) {
 	if (GetKernel()->GetNetwork()->GetSignalCount() > 0) {
 		Runtime.Runtime.Timeout.Reset();
@@ -169,6 +174,7 @@ void UFINLuaProcessor::Tick(float InDelta) {
 	default: break;
 	}
 }
+UE_ENABLE_OPTIMIZATION_SHIP
 
 void UFINLuaProcessor::Stop(bool bIsCrash) {
 	UE_LOG(LogFicsItNetworksLua, Display, TEXT("%s: Lua Processor stop %s"), *DebugInfo, bIsCrash ? TEXT("due to crash") : TEXT(""));

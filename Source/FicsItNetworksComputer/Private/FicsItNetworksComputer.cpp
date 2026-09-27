@@ -5,7 +5,7 @@
 #include "FGGameMode.h"
 #include "FINComputerRCO.h"
 #include "FINComputerSubsystem.h"
-#include "Tests.h"
+#include "FicsItFileSystem/Tests.h"
 #include "Patching/NativeHookManager.h"
 #include "UObject/CoreRedirects.h"
 

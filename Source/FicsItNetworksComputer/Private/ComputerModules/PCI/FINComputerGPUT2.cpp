@@ -3,7 +3,7 @@
 #include "FGPlayerController.h"
 #include "FINComputerRCO.h"
 #include "FINMediaSubsystem.h"
-#include "SlateApplication.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Engine/ActorChannel.h"
 #include "Engine/NetConnection.h"
 #include "Fonts/FontMeasure.h"
@@ -26,7 +26,7 @@ int32 FFINGPUT2DC_PushLayout::OnPaint(FFINGPUT2DrawContext& Context, const FPain
 
 int32 FFINGPUT2DC_PopGeometry::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
 	if (Context.GeometryStack.Num() > 1) { // Needs to be 1 as there has to be at least one Geometry in the stack, that is the whole Widgets Geometry
-		Context.GeometryStack.Pop(false);
+		Context.GeometryStack.Pop(EAllowShrinking::No);
 	}
 	return LayerId;
 }
@@ -449,16 +449,6 @@ TArray<int64> AFINComputerGPUT2::netFunc_getFontBaselineBatch(TArray<int64> size
 
 	return results;
 }
-
-void AFINComputerGPUT2::netSig_OnMouseDown_Implementation(FVector2D position, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseUp_Implementation(FVector2D position, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseMove_Implementation(FVector2D position, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseWheel_Implementation(FVector2D position, float wheelDelta, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnKeyDown_Implementation(int64 c, int64 code, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnKeyUp_Implementation(int64 c, int64 code, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnKeyChar_Implementation(const FString& c, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseEnter_Implementation(FVector2D position, int modifiers) {}
-void AFINComputerGPUT2::netSig_OnMouseLeave_Implementation(FVector2D position, int modifiers) {}
 
 void AFINComputerGPUT2::Client_CleanDrawCalls_Implementation() {
 	if (HasAuthority()) return;

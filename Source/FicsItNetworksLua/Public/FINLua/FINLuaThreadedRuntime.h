@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AsyncWork.h"
-#include "Event.h"
+#include "Async/AsyncWork.h"
+#include "HAL/Event.h"
 #include "FINLuaRuntime.h"
 #include "FINLuaThreadedRuntime.generated.h"
 

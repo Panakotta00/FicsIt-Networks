@@ -1,7 +1,7 @@
 ﻿#include "FicsItNetworksDocumentation.h"
 
-#include "CommandLine.h"
-#include "CoreDelegates.h"
+#include "Misc/CommandLine.h"
+#include "Misc/CoreDelegates.h"
 #include "FicsItReflection.h"
 #include "Engine/Engine.h"
 

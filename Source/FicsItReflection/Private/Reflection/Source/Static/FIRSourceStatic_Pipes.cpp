@@ -34,7 +34,7 @@ BeginProp(RBool, isConnected, "Is Connected", "True if something is connected to
 } EndProp()
 BeginFunc(getConnection, "Get Connection", "Returns the connected pipe connection component.") {
 	OutVal(0, RTrace<UFGPipeConnectionComponentBase>, connected, "Connected", "The connected pipe connection component.")
-	Body()
+	FIRBody()
 	connected = Ctx.GetTrace() / self->GetConnection();
 } EndFunc()
 EndClass()
@@ -67,16 +67,16 @@ BeginProp(RInt, networkID, "Get Network ID", "Returns the network ID of the pipe
 } EndProp();
 BeginFunc(getFluidDescriptor, "Get Fluid Descriptor", "?") {  /* TODO: Write DOC when figured out exactly what it does */
 	OutVal(0, RTrace<UFGItemDescriptor>, fluidDescriptor, "Fluid Descriptor", "?")   /* TODO: Write DOC */
-	Body()
+	FIRBody()
 	fluidDescriptor = Ctx.GetTrace() / self->GetFluidDescriptor();
 } EndFunc()
 /*BeginFunc(getFluidIntegrant, "Get Fluid Integrant", "?") {
 	OutVal(0, RObject<IFGFluidIntegrantInterface>, fluidIntegrant, "Fluid Descriptor", "?")
-    Body()
+    FIRBody()
     fluidIntegrant = Ctx.GetTrace() / self->GetFluidIntegrant();
 } EndFunc()*/
 BeginFunc(flushPipeNetwork, "Flush Pipe Network", "Flush the associated pipe network") {
-    Body()
+    FIRBody()
 	auto networkID = self->GetPipeNetworkID();
     auto subsystem = AFGPipeSubsystem::GetPipeSubsystem(self->GetWorld());
 	subsystem->FlushPipeNetwork(networkID);
@@ -85,12 +85,12 @@ EndClass()
 
 BeginClass(AFGBuildablePipeReservoir, "PipeReservoir", "Pipe Reservoir", "The base class for all fluid tanks.")
 BeginFunc(flush, "Flush", "Emptys the whole fluid container.") {
-	Body()
+	FIRBody()
 	AFGPipeSubsystem::Get(self->GetWorld())->FlushIntegrant(self);
 } EndFunc()
 BeginFunc(getFluidType, "Get Fluid Type", "Returns the type of the fluid.") {
 	OutVal(0, RClass<UFGItemDescriptor>, type, "Type", "The type of the fluid the tank contains.")
-	Body()
+	FIRBody()
 	type = (UClass*)self->GetFluidDescriptor();
 } EndFunc()
 BeginProp(RFloat, fluidContent, "Fluid Content", "The amount of fluid in the tank.") {

@@ -8,10 +8,15 @@ public class Eris : ModuleRules
 		CppStandard = CppStandardVersion.Cpp20;
 		bEnableExceptions = true;
 		bUseRTTI = true;
+		bUseUnity = false;
+		PCHUsage = PCHUsageMode.NoPCHs;
+		// bNoCommonPCHForModules = true;
 
-		PublicDependencyModuleNames.AddRange(new string[] {
+		PrivateDependencyModuleNames.AddRange(new string[] {
 			"Core"
 		});
+
+		bEnableUndefinedIdentifierWarnings = false;
 		
 		var thirdPartyFolder = Path.Combine(PluginDirectory, "ThirdParty");
 		PublicIncludePaths.Add(Path.Combine(thirdPartyFolder, "eris/src"));

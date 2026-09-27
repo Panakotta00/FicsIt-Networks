@@ -87,7 +87,7 @@ UFIRProperty* FIRCreateFIRPropertyFromFProperty(FProperty* Property, FProperty* 
     	FIRProp = FIRArrayProp;
     }
 	check(FIRProp != nullptr);
-	if (Property->PropertyFlags & CPF_OutParm) FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_OutParam;
+	if (Property->PropertyFlags & CPF_OutParm && !(Property->PropertyFlags & CPF_ConstParm && Property->PropertyFlags & CPF_ReferenceParm)) FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_OutParam;
 	if (Property->PropertyFlags & CPF_ReturnParm) FIRProp->PropertyFlags = FIRProp->PropertyFlags | FIR_Prop_RetVal;
 	return FIRProp;
 }

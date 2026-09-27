@@ -28,7 +28,7 @@ bool FFIRAnyValue::Serialize(FStructuredArchive::FSlot Slot) {
 			break;
 		}
 	}
-	Record.EnterField(SA_FIELD_NAME(TEXT("Type"))) << Type;
+	Record.EnterField(TEXT("Type")) << Type;
 	if (Slot.GetUnderlyingArchive().IsLoading()) {
 		switch (Type) {
 		case FIR_STR:
@@ -55,34 +55,34 @@ bool FFIRAnyValue::Serialize(FStructuredArchive::FSlot Slot) {
 
 	switch (Type) {
 	case FIR_INT:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_INT"))) << Data.INT;
+		Record.EnterField(TEXT("FIR_INT")) << Data.INT;
 		break;
 	case FIR_FLOAT:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_FLOAT"))) << Data.FLOAT;
+		Record.EnterField(TEXT("FIR_FLOAT")) << Data.FLOAT;
 		break;
 	case FIR_BOOL:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_BOOL"))) << Data.BOOL;
+		Record.EnterField(TEXT("FIR_BOOL")) << Data.BOOL;
 		break;
 	case FIR_STR:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_STR"))) << *Data.STRING;
+		Record.EnterField(TEXT("FIR_STR")) << *Data.STRING;
 		break;
 	case FIR_OBJ:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_OBJ"))) << *Data.OBJECT;
+		Record.EnterField(TEXT("FIR_OBJ")) << *Data.OBJECT;
 		break;
 	case FIR_CLASS:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_CLASS"))) << Data.CLASS;
+		Record.EnterField(TEXT("FIR_CLASS")) << Data.CLASS;
 		break;
 	case FIR_TRACE:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_TRACE"))) << *Data.TRACE;
+		Record.EnterField(TEXT("FIR_TRACE")) << *Data.TRACE;
 		break;
 	case FIR_STRUCT:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_STRUCT"))) << *Data.STRUCT;
+		Record.EnterField(TEXT("FIR_STRUCT")) << *Data.STRUCT;
 		break;
 	case FIR_ARRAY:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_ARRAY"))) << *Data.ARRAY;
+		Record.EnterField(TEXT("FIR_ARRAY")) << *Data.ARRAY;
 		break;
 	case FIR_ANY:
-		Record.EnterField(SA_FIELD_NAME(TEXT("FIR_ANY"))) << *Data.ANY;
+		Record.EnterField(TEXT("FIR_ANY")) << *Data.ANY;
 		break;
 	default:
 		break;

@@ -3,8 +3,8 @@
 
 #include "Components/FINSectionablePanelHolo.h"
 
-#include "FGBuildableFoundation.h"
-#include "FGBuildableWall.h"
+#include "Buildables/FGBuildableFoundation.h"
+#include "Buildables/FGBuildableWall.h"
 
 
 

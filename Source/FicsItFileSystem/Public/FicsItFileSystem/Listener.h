@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Path.h"
-#include "SharedPointer.h"
+#include "Templates/SharedPointer.h"
 
 #include <unordered_set>
 

@@ -44,6 +44,39 @@ Returns all the modules on this subplate
 ====
 // end::func-getModules[]
 // end::func-getModules-title[]
+// tag::func-getPanelSize-title[]
+=== `getPanelSize` () -> (`x` : Int, `y` : Int)
+// tag::func-getPanelSize[]
+
+Returns the dimensions of the module panel. That is, how many sockets it has in each direction.
+
+[%collapsible]
+====
+[cols="1,5a",separator="!"]
+!===
+! Flags
+! +++<span style='color:#bb2828'><i>RuntimeSync</i></span> <span style='color:#bb2828'><i>RuntimeParallel</i></span> <span style='color:#5dafc5'><i>MemberFunc</i></span>+++
+
+! Display Name ! Get Panel Size
+!===
+
+.Return Values
+[%header,cols="1,1,4a",separator="!"]
+!===
+!Name !Type !Description
+
+! *X* `x`
+! Int
+! Number of sockets in X direction
+
+! *Y* `y`
+! Int
+! Number of sockets in Y direction
+!===
+
+====
+// end::func-getPanelSize[]
+// end::func-getPanelSize-title[]
 // tag::func-getSubModule-title[]
 === `getSubModule` () -> `Module` : Object<xref:/reflection/classes/Actor.adoc[Actor]>
 // tag::func-getSubModule[]

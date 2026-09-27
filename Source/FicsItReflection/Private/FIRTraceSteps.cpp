@@ -160,7 +160,7 @@ Step(AFGBuildableRailroadTrack, UFGRailroadTrackConnectionComponent, {
 	return A->GetTrackGraphID() == B->GetTrack()->GetTrackGraphID();
 })
 Step(UFGRailroadTrackConnectionComponent, AFGBuildableRailroadTrack, {
-    return  B->GetConnection(0) && A->GetTrack()->GetTrackGraphID() == B->GetConnection(0)->GetTrack()->GetTrackGraphID();
+    return A->GetTrack() != nullptr && A->GetTrack()->GetTrackGraphID() == B->GetTrackGraphID();
 })
 
 Step(UFGRailroadTrackConnectionComponent, UFGRailroadTrackConnectionComponent, {

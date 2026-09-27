@@ -2,23 +2,23 @@
 
 #include "FicsItNetworksLuaModule.h"
 #include "FINComputerEEPROMDesc.h"
-#include "FINItemStateEEPROMText.h"
+#include "FicsItKernel/Processor/FINItemStateEEPROMText.h"
 #include "FINMicrocontrollerReference.h"
-#include "LuaUtil.h"
-#include "Async.h"
+#include "FINLua/LuaUtil.h"
+#include "Async/Async.h"
 #include "FicsItNetworksMicrocontroller.h"
 #include "FicsItReflection.h"
 #include "FILLogContainer.h"
 #include "FINAdvancedNetworkConnectionComponent.h"
-#include "FINComputerNetworkCard.h"
+#include "ComputerModules/PCI/FINComputerNetworkCard.h"
 #include "FINMicrocontrollerLuaModule.h"
 #include "FINNetworkUtils.h"
-#include "FINSignalSubsystem.h"
-#include "LuaComponentAPI.h"
-#include "LuaEventAPI.h"
-#include "LuaFuture.h"
-#include "LuaWorldAPI.h"
-#include "NetworkController.h"
+#include "Signals/FINSignalSubsystem.h"
+#include "FINLua/API/LuaComponentAPI.h"
+#include "FINLua/LuaEventAPI.h"
+#include "FINLua/LuaFuture.h"
+#include "FINLua/API/LuaWorldAPI.h"
+#include "FicsItKernel/Network/NetworkController.h"
 
 AFINMicrocontroller::AFINMicrocontroller() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -41,6 +41,10 @@ AFINMicrocontroller::~AFINMicrocontroller() {
 
 void AFINMicrocontroller::BeginPlay() {
 	Super::BeginPlay();
+
+	if (!HasAuthority()) {
+		return;
+	}
 
 	if (!ID.IsValid()) {
 		ID = FGuid::NewGuid();

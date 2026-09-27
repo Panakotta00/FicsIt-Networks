@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-#include "File.h"
-#include "Device.h"
+#include "FicsItFileSystem/File.h"
+#include "FicsItFileSystem/Device.h"
 
 namespace CodersFileSystem {
 	FICSITFILESYSTEM_API void CopyPath(TSharedRef<Device> FromDevice, TSharedRef<Device> ToDevice, Path Path);

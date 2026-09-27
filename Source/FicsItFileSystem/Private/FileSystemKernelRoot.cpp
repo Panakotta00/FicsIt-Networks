@@ -1,14 +1,14 @@
-#include "FileSystemRoot.h"
+#include "FileSystemKernelRoot.h"
 
 #include "FicsItFileSystem.h"
-#include "FileSystemException.h"
+#include "FicsItFileSystem/FileSystemException.h"
 
 bool FFINKernelFSRoot::mount(TSharedRef<CodersFileSystem::Device> device, CodersFileSystem::Path path) {
-	return FileSystemRoot::mount(device, path);
+	return CodersFileSystem::FileSystemKernelRoot::mount(device, path);
 }
 
 bool FFINKernelFSRoot::unmount(CodersFileSystem::Path path) {
-	return FileSystemRoot::unmount(path);
+	return CodersFileSystem::FileSystemKernelRoot::unmount(path);
 }
 
 bool FFINKernelFSRoot::unmount(TSharedRef<CodersFileSystem::Device> device) {

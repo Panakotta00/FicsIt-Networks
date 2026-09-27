@@ -19,7 +19,7 @@ struct FICSITREFLECTION_API FFIRInstancedStruct {
 	
 protected:
 	void* Data = nullptr;
-	UScriptStruct* Struct = nullptr;
+	TObjectPtr<UScriptStruct> Struct = nullptr;
 
 public:
 	FFIRInstancedStruct();
@@ -37,7 +37,7 @@ public:
 
 	bool Serialize(FStructuredArchive::FSlot Slot);
 	bool NetSerialize( FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
-	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector) const;
+	void AddStructReferencedObjects(FReferenceCollector& ReferenceCollector);
 
 	bool operator==(const FFIRInstancedStruct& Other) const {
 		if (GetStruct() != Other.GetStruct()) return false;

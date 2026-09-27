@@ -13,7 +13,10 @@ void UFILLogContainer::BeginPlay() {
 	Super::BeginPlay();
 
 	if (!GetOwner()->HasAuthority()) {
-		GetWorld()->GetFirstPlayerController<AFGPlayerController>()->GetRemoteCallObjectOfClass<UFILRCO>()->LogRehandleAllEntries(this);
+		auto playerController = GetWorld()->GetFirstPlayerController<AFGPlayerController>();
+		if (playerController) {
+			playerController->GetRemoteCallObjectOfClass<UFILRCO>()->LogRehandleAllEntries(this);
+		}
 	}
 }
 

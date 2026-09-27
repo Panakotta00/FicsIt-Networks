@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "BaseTextLayoutMarshaller.h"
-#include "Regex.h"
-#include "TextLayout.h"
+#include "Framework/Text/BaseTextLayoutMarshaller.h"
+#include "Internationalization/Regex.h"
+#include "Framework/Text/TextLayout.h"
 
 struct FFINLuaCodeEditorStyle;
 

@@ -37,12 +37,6 @@ protected:
 	UPROPERTY(SaveGame, Replicated)
 	FString Nick;
 
-	/**
-	 * Used to check if the ID is already generated.
-	 */
-	UPROPERTY(SaveGame)
-	bool bIdCreated = false;
-	
 public:
 	/**
 	 * The object used as redirect object for network instancing of this component.
@@ -108,6 +102,6 @@ public:
 	/**
 	 * This network signals gets emit when a network change occurs.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Network|Signals")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Network|Signals")
 	void netSig_NetworkUpdate(int changeType, const FString& changedComponent);
 };

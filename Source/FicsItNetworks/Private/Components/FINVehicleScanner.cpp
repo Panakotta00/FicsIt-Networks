@@ -107,7 +107,3 @@ void AFINVehicleScanner::netFunc_getColor(float& r, float& g, float& b, float& e
 AFGVehicle* AFINVehicleScanner::netFunc_getLastVehicle() {
 	return LastVehicle;
 }
-
-void AFINVehicleScanner::netSig_OnVehicleExit_Implementation(AFGVehicle* Vehicle) {}
-void AFINVehicleScanner::netSig_OnVehicleEnter_Implementation(AFGVehicle* Vehicle) {}
-

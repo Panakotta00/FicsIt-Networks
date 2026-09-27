@@ -1,7 +1,7 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkCircuit.h"
 #include "FGBlueprintSubsystem.h"
-#include "FGBuildable.h"
+#include "Buildables/FGBuildable.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
@@ -23,9 +23,8 @@ void UFINAdvancedNetworkConnectionComponent::BeginPlay() {
 		if (bOuterAsRedirect) RedirectionObject = GetOuter();
 
 		if (GetOwner()->HasAuthority()) {
-			if (!bIdCreated) {
+			if (!ID.IsValid()) {
 				ID = FGuid::NewGuid();
-				bIdCreated = true;
 			}
 
 			// setup circuit
@@ -103,5 +102,3 @@ bool UFINAdvancedNetworkConnectionComponent::IsNetworkMessageRouter() const {
 	}
 	return false;
 }
-
-void UFINAdvancedNetworkConnectionComponent::netSig_NetworkUpdate_Implementation(int type, const FString& id) {}

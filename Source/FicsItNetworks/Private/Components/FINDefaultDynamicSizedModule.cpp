@@ -1,8 +1,8 @@
 ﻿#include "Components/FINDefaultDynamicSizedModule.h"
 
 #include "FicsItNetworksModule.h"
-#include "FINModularIndicatorPoleHolo.h"
-#include "UnrealNetwork.h"
+#include "Components/FINModularIndicatorPoleHolo.h"
+#include "Net/UnrealNetwork.h"
 
 AFINDefaultDynamicSizedModule::AFINDefaultDynamicSizedModule() {
 	PrimaryActorTick.bCanEverTick = true;

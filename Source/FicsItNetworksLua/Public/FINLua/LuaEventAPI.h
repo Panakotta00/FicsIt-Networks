@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FINEventFilter.h"
 #include "FINLuaReferenceCollector.h"
-#include "FINSignalData.h"
+#include "Signals/FINSignalData.h"
 #include "FIRTrace.h"
 #include "LuaUtil.h"
 #include "LuaEventAPI.generated.h"

@@ -1,8 +1,8 @@
 ﻿#include "Wireless/FINWirelessSubsystem.h"
 
 #include "FicsItNetworksCircuit.h"
-#include "FINWirelessAccessPoint.h"
-#include "FINWirelessAccessPointConnection.h"
+#include "Buildables/FINWirelessAccessPoint.h"
+#include "Wireless/FINWirelessAccessPointConnection.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Subsystem/SubsystemActorManager.h"

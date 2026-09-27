@@ -10,7 +10,7 @@
 #include "FINComputerEEPROMDesc.h"
 #include "FINComputerFloppyDesc.h"
 #include "FINComputerRCO.h"
-#include "FINFileSystemSubsystem.h"
+#include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 #include "FINUtils.h"
 #include "Components/AudioComponent.h"
 #include "ComputerModules/FINComputerDriveHolder.h"
@@ -60,7 +60,6 @@ AFINComputerCase::AFINComputerCase() {
 
 	bReplicates = true;
 	bReplicateUsingRegisteredSubObjectList = true;
-	AddReplicatedSubObject(Log);
 	NetDormancy = DORM_Awake;
 }
 
@@ -415,10 +414,6 @@ void AFINComputerCase::OnDriveUpdate(bool bOldLocked, const FGuid& drive) {
 		Kernel->AddDrive(drive);
 	}
 }
-
-void AFINComputerCase::netSig_ComputerStateChanged_Implementation(int64 PrevState, int64 NewState) {}
-
-void AFINComputerCase::netSig_FileSystemUpdate_Implementation(int Type, const FString& From, const FString& To) {}
 
 int64 AFINComputerCase::netFunc_getState() {
 	return InternalKernelState;

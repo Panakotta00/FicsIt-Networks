@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FINModularIndicatorPole.h"
+#include "Components/FINModularIndicatorPole.h"
 #include "Buildables/FGBuildableFactoryBuilding.h"
 #include "Hologram/FGBuildableHologram.h"
 #include "FINModularIndicatorPoleHolo.generated.h"

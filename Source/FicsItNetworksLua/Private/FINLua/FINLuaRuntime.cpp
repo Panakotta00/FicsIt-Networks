@@ -1,12 +1,12 @@
 ﻿#include "FINLua/FINLuaRuntime.h"
 
-#include "Base64.h"
+#include "Misc/Base64.h"
 #include "FicsItLogLibrary.h"
 #include "FicsItNetworksLuaModule.h"
-#include "FINLuaModule.h"
+#include "FINLua/FINLuaModule.h"
 #include "FINLuaRuntimePersistence.h"
-#include "LuaFuture.h"
-#include "Union.h"
+#include "FINLua/LuaFuture.h"
+#include "Containers/Union.h"
 
 void luaWarnF(void* ud, const char* msg, int tocont) {
 	UFILogLibrary::Log(FIL_Verbosity_Warning, UTF8_TO_TCHAR(msg));

@@ -15,14 +15,14 @@
 |image::buildings/NetworkCard_ig.jpg[300,300,role="left"]
 |===
 
-This computer module ia a network card that allows for intercomputer communication
-in form of pakets you can send over the network.
+This computer module is a network card that allows for intercomputer communication
+in form of packets you can send over the network.
 
 The communication happens in channels from 0 to 10000. If you want to recieve network messages
 you will need to open the channel and then you can use the signal system to get the signals from
 the network card. Network messages are limited to 7 custom parameters and additionally
 the channel number and the sender address.
-The sender address has to be  the other network card's ID, not the ID of the computer.
+The sender address has to be the other network card's ID, not the ID of the computer.
 
 You can only create a instance of a network card when you try to instantiate it from the computer
 it is placed on.
