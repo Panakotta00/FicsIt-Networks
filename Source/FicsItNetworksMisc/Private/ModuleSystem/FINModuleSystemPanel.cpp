@@ -27,15 +27,20 @@ void UFINModuleSystemPanel::Serialize(FArchive& Ar) {
 	Super::Serialize(Ar);
 	
 	if (Ar.IsSaveGame()) {
-		int height = PanelHeight, width = PanelWidth;
-		Ar << height;
-		Ar << width;
+		int saveHeight = PanelHeight, saveWidth = PanelWidth;
+		Ar << saveHeight;
+		Ar << saveWidth;
+		
+		int finalHeight = bPrioritizeDefaults ? PanelHeight : saveHeight;
+		int finalWidth = bPrioritizeDefaults ? PanelWidth : saveWidth;
+		PanelHeight = finalHeight;
+		PanelWidth = finalWidth;
 		
 		SetupGrid();
-
-		for (int x = 0; x < height; ++x) {
-			for (int y = 0; y < width; ++y) {
-				if (x < PanelHeight && y < PanelWidth) {
+		
+		for (int x = 0; x < saveHeight; ++x) {
+			for (int y = 0; y < saveWidth; ++y) {
+				if (x < finalHeight && y < finalWidth) {
 					Ar << GetGridSlot(x, y);
 				} else {
 					// Serialized Panel is larger than actual panel, skipping out of bounds

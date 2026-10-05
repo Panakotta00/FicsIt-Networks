@@ -34,6 +34,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "ModuleSystem|Panel")
 	FFINHologramSnapped HologramSnapped;
 
+	UPROPERTY(EditDefaultsOnly, Category = "ModuleSystem|Panel", BlueprintReadOnly)
+	bool bPrioritizeDefaults = true;
+
 	// Begin UObject
 	void Serialize(FArchive& Ar) override;
 	virtual void InitializeComponent() override;
