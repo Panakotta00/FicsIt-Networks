@@ -1,4 +1,4 @@
-﻿#include "FINLua/API/LuaWorldAPI.h"
+#include "FINLua/API/LuaWorldAPI.h"
 
 #include "FGAttentionPingActor.h"
 #include "UI/FGGameUI.h"
@@ -10,6 +10,20 @@
 #include "FINLua/Reflection/LuaStruct.h"
 #include "TimerManager.h"
 #include "Async/Async.h"
+
+namespace {
+	// AFGPlayerState::GetUserName collides with the windows.h macro GetUserName -> GetUserNameW.
+	// The game exports it as GetUserNameW, but whether our call site sees the macro depends on the unity build include order
+	// (Wwise's PostSoundEngineInclude.h #undefs it), which made the module fail to load with a missing import.
+	// Calling the UFUNCTION through reflection avoids the native symbol entirely.
+	FString FINLua_GetPlayerUserName(AFGPlayerState* PlayerState) {
+		static UFunction* Function = AFGPlayerState::StaticClass()->FindFunctionByName(FName(TEXT("GetUserName")));
+		if (!PlayerState || !Function) return FString();
+		struct { FString ReturnValue; } Params;
+		PlayerState->ProcessEvent(Function, &Params);
+		return Params.ReturnValue;
+	}
+}
 
 namespace FINLua {
 	LuaModule(R"(/**
@@ -39,7 +53,7 @@ namespace FINLua {
 				if (lua_isstring(L, 2)) Player = luaFIN_checkFString(L, 2);
 				for (auto players = world->GetPlayerControllerIterator(); players; ++players) {
 					AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
-					if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
+					if (Player.IsSet() && FINLua_GetPlayerUserName(PlayerController->GetPlayerState<AFGPlayerState>()) != *Player) continue;
 					AsyncTask(ENamedThreads::GameThread, [PlayerController, Text]() {
 						PlayerController->GetGameUI()->ShowTextNotification(FText::FromString(Text));
 					});
@@ -67,7 +81,7 @@ namespace FINLua {
 				if (lua_isstring(L, 2)) Player = luaFIN_checkFString(L, 2);
 				for (auto players = world->GetPlayerControllerIterator(); players; players++) {
 					AFGPlayerController* PlayerController = Cast<AFGPlayerController>(players->Get());
-					if (Player.IsSet() && PlayerController->GetPlayerState<AFGPlayerState>()->GetUserName() != *Player) continue;
+					if (Player.IsSet() && FINLua_GetPlayerUserName(PlayerController->GetPlayerState<AFGPlayerState>()) != *Player) continue;
 					runtime.TickActions.Enqueue([PlayerController, Position]() {
 						AsyncTask(ENamedThreads::GameThread, [PlayerController, Position]() {
 							UClass* Class = LoadObject<UClass>(nullptr, TEXT("/Game/FactoryGame/Character/Player/BP_AttentionPingActor.BP_AttentionPingActor_C"));
