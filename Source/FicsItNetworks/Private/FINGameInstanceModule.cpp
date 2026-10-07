@@ -4,6 +4,9 @@
 #include "FicsItNetworksModule.h"
 #include "Components/FINSpeakerPole.h"
 #include "Components/FINSpeakerSoundTransfer.h"
+#include "Configuration/ConfigManager.h"
+#include "Configuration/Properties/ConfigPropertyFloat.h"
+#include "Configuration/Properties/ConfigPropertySection.h"
 #include "FicsItLogLibrary.h"
 #include "FicsItNetworksCircuit.h"
 #include "FicsItNetworksComputer.h"
@@ -27,9 +30,27 @@ void UFINGameInstanceModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {
 		break;
 	case ELifecyclePhase::POST_INITIALIZATION:
 		RegisterAudioInputPlugin();
+		BindSpeakerVolumeConfig();
 		break;
 	default: break;
 	}
+}
+
+void UFINGameInstanceModule::BindSpeakerVolumeConfig() {
+	UGameInstance* GameInstance = GetGameInstance();
+	UConfigManager* ConfigManager = GameInstance ? GameInstance->GetSubsystem<UConfigManager>() : nullptr;
+	UConfigPropertySection* Root = ConfigManager ? ConfigManager->GetConfigurationRootSection(FConfigId{TEXT("FicsItNetworks"), TEXT("")}) : nullptr;
+	UConfigPropertySection* Audio = Root ? Cast<UConfigPropertySection>(Root->SectionProperties.FindRef(TEXT("Audio"))) : nullptr;
+	SpeakerVolumeProperty = Audio ? Cast<UConfigPropertyFloat>(Audio->SectionProperties.FindRef(TEXT("SpeakerVolume"))) : nullptr;
+	if (!SpeakerVolumeProperty) return;
+
+	SpeakerVolumeProperty->OnPropertyValueChanged.AddUniqueDynamic(this, &UFINGameInstanceModule::ApplySpeakerVolume);
+	ApplySpeakerVolume();
+}
+
+void UFINGameInstanceModule::ApplySpeakerVolume() {
+	if (!SpeakerVolumeProperty) return;
+	AFINSpeakerPole::SetGlobalVolume(SpeakerVolumeProperty->Value);
 }
 
 void UFINGameInstanceModule::RegisterAudioInputPlugin() {

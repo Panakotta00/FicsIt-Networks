@@ -77,4 +77,6 @@ private:
 	double Phase = 0.0;
 	/** True while a beep is playing. Once the envelope ended the voice gets stopped on the game thread, returning false from FillSamplesBuffer alone keeps it running */
 	bool bVoiceActive = false;
+
+	FDelegateHandle GlobalVolumeHandle;
 };

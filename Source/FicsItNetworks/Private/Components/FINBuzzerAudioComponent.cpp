@@ -11,10 +11,12 @@ void UFINBuzzerAudioComponent::BeginPlay() {
 	Super::BeginPlay();
 
 	EnsureEventLoaded();
+	GlobalVolumeHandle = AFINSpeakerPole::OnGlobalVolumeChanged.AddUObject(this, &UFINBuzzerAudioComponent::ApplyAudioSettings);
 	ApplyAudioSettings();
 }
 
 void UFINBuzzerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	AFINSpeakerPole::OnGlobalVolumeChanged.Remove(GlobalVolumeHandle);
 	StopBeepLocally();
 	Super::EndPlay(EndPlayReason);
 }
@@ -22,6 +24,7 @@ void UFINBuzzerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UFINBuzzerAudioComponent::ApplyAudioSettings() {
 	// Same Wwise event as the speaker pole: its attenuation fades to silence at the speaker's base range
 	SetAttenuationScalingFactor(FMath::Max(Range, 0.01f) / AFINSpeakerPole::BaseAttenuationRange);
+	SetRTPCValue(nullptr, AFINSpeakerPole::GlobalVolume, 0, TEXT("FIN_Speaker_Gain"));
 }
 
 void UFINBuzzerAudioComponent::Beep(float Frequency, float Volume, float AttackTime, float AttackCurve, float DecayTime, float DecayCurve) {

@@ -12,11 +12,19 @@
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 
+float AFINSpeakerPole::GlobalVolume = 1.f;
+FSimpleMulticastDelegate AFINSpeakerPole::OnGlobalVolumeChanged;
+
 namespace {
 	double GetServerWorldTime(const UWorld* World) {
 		const AGameStateBase* GameState = World->GetGameState();
 		return GameState ? GameState->GetServerWorldTimeSeconds() : World->GetTimeSeconds();
 	}
+}
+
+void AFINSpeakerPole::SetGlobalVolume(float InGlobalVolume) {
+	GlobalVolume = FMath::Clamp(InGlobalVolume, 0.f, 1.f);
+	OnGlobalVolumeChanged.Broadcast();
 }
 
 AFINSpeakerPole::AFINSpeakerPole() {
@@ -36,11 +44,13 @@ void AFINSpeakerPole::BeginPlay() {
 	Super::BeginPlay();
 
 	SpeakerAudio->EnsureEventLoaded();
+	GlobalVolumeHandle = OnGlobalVolumeChanged.AddUObject(this, &AFINSpeakerPole::ApplyAudioSettings);
 	SoundAvailableHandle = FFINSpeakerSoundTransfer::OnSoundAvailable.AddUObject(this, &AFINSpeakerPole::OnSoundAvailable);
 	ApplyAudioSettings();
 }
 
 void AFINSpeakerPole::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	OnGlobalVolumeChanged.Remove(GlobalVolumeHandle);
 	FFINSpeakerSoundTransfer::OnSoundAvailable.Remove(SoundAvailableHandle);
 	GetWorldTimerManager().ClearTimer(FinishedTimer);
 	GetWorldTimerManager().ClearTimer(DownloadRetryTimer);
@@ -204,7 +214,7 @@ void AFINSpeakerPole::ApplyAudioSettings() {
 	SpeakerAudio->SetAttenuationScalingFactor(FMath::Max(Range, 0.01f) / BaseAttenuationRange);
 	// The speaker outputs to the game's Master Audio Bus (a mod can't add busses, they live in the game's Init bank),
 	// so the FIN volume setting is applied per speaker
-	SpeakerAudio->SetRTPCValue(nullptr, Volume, 0, TEXT("FIN_Speaker_Gain"));
+	SpeakerAudio->SetRTPCValue(nullptr, Volume * GlobalVolume, 0, TEXT("FIN_Speaker_Gain"));
 }
 
 void AFINSpeakerPole::netClass_Meta(FString& InternalName, FText& DisplayName, FText& Description) {

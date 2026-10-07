@@ -50,6 +50,11 @@ public:
 	static constexpr float BaseAttenuationRange = 100.f;
 	static constexpr float MaxVolume = 4.f;
 
+	/** Volume of all speakers from the mod configuration (0 to 1), multiplied with the volume of each speaker. */
+	static float GlobalVolume;
+	static FSimpleMulticastDelegate OnGlobalVolumeChanged;
+	static void SetGlobalVolume(float InGlobalVolume);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="SpeakerPole")
 	class UFINAdvancedNetworkConnectionComponent* NetworkConnector = nullptr;
 
@@ -195,5 +200,6 @@ private:
 
 	FTimerHandle FinishedTimer;
 	FTimerHandle DownloadRetryTimer;
+	FDelegateHandle GlobalVolumeHandle;
 	FDelegateHandle SoundAvailableHandle;
 };
