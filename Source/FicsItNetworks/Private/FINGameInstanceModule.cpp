@@ -2,13 +2,17 @@
 
 #include "AkAudioDevice.h"
 #include "FicsItNetworksModule.h"
+#include "Components/FINSpeakerPole.h"
+#include "Components/FINSpeakerSoundTransfer.h"
 #include "FicsItLogLibrary.h"
 #include "FicsItNetworksCircuit.h"
 #include "FicsItNetworksComputer.h"
 #include "FicsItNetworksLuaModule.h"
 #include "FIRModModule.h"
 
-UFINGameInstanceModule::UFINGameInstanceModule() {}
+UFINGameInstanceModule::UFINGameInstanceModule() {
+	RemoteCallObjects.Add(UFINSpeakerRCO::StaticClass());
+}
 
 void UFINGameInstanceModule::DispatchLifecycleEvent(ELifecyclePhase Phase) {
 	Super::DispatchLifecycleEvent(Phase);

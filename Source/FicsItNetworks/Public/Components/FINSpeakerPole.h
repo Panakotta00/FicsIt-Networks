@@ -7,6 +7,40 @@
 
 struct FFINSpeakerSoundData;
 
+/**
+ * Sound currently played by a speaker pole, replicated so clients (also late joining ones) play it in sync.
+ */
+USTRUCT()
+struct FFINSpeakerPlayback {
+	GENERATED_BODY()
+
+	/** Sound file path relative to the sounds folder, without the file extension */
+	UPROPERTY()
+	FString Sound;
+
+	/** MD5 hash of the sound file of the server, empty if nothing is playing */
+	UPROPERTY()
+	FString Hash;
+
+	/** Size of the sound file in bytes */
+	UPROPERTY()
+	int32 Size = 0;
+
+	/** Start point in seconds */
+	UPROPERTY()
+	float StartPoint = 0.f;
+
+	/** Length of the sound in seconds */
+	UPROPERTY()
+	float Duration = 0.f;
+
+	/** Server world time at which the sound started playing */
+	UPROPERTY()
+	double ServerStartTime = 0.0;
+
+	bool IsSet() const { return !Hash.IsEmpty(); }
+};
+
 UCLASS(Blueprintable)
 class AFINSpeakerPole : public AFGBuildable, public IFINSignalSender {
 	GENERATED_BODY()
@@ -50,17 +84,22 @@ public:
 	virtual UObject* GetSignalSenderOverride_Implementation() override;
 	// End IFINNetworkSignalSender
 
-	UFUNCTION(NetMulticast, Reliable)
+	/**
+	 * Plays the given sound file of the server's sounds folder on the server and all clients.
+	 * Clients which don't have the file download it from the server.
+	 */
 	void PlaySound(const FString& Sound, float StartPoint);
 
-	UFUNCTION(NetMulticast, Reliable)
 	void StopSound();
 
 	UFUNCTION()
 	void OnRep_AudioSettings();
 
+	UFUNCTION()
+	void OnRep_Playback();
+
 	/**
-	 * Called when the sound reached its end.
+	 * Called on the server when the sound reached its end.
 	 * Triggers a network signal notifyng that the audio has stoped playing.
 	 * Also resets CurrentSound
 	 */
@@ -141,6 +180,20 @@ public:
 private:
 	void ApplyAudioSettings();
 
+	/** Plays the current Playback locally, downloads the sound file from the server first if necessary. */
+	void PlayLocally();
+	void OnSoundAvailable(const FString& Hash);
+
+	UPROPERTY(ReplicatedUsing=OnRep_Playback)
+	FFINSpeakerPlayback Playback;
+
+	/** Keeps the sound file of the current playback in the transfer cache (server only) */
+	TSharedPtr<const TArray<uint8>> PlaybackData;
+
 	/** Incremented for every play/stop request, so a decoded sound of an outdated request gets dropped. */
 	uint32 PlayRequest = 0;
+
+	FTimerHandle FinishedTimer;
+	FTimerHandle DownloadRetryTimer;
+	FDelegateHandle SoundAvailableHandle;
 };
