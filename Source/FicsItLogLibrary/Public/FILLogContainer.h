@@ -45,6 +45,11 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EmptyLog();
 
+	/** Asks the server for all log entries, retries until the remote call object of the player got replicated. */
+	void RequestAllEntries();
+
+	FTimerHandle RequestAllEntriesTimer;
+
 public:
 	UPROPERTY()
 	int64 MaxLogEntries = 1000;
