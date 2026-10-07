@@ -24,7 +24,8 @@ public:
 	// End UActorComponent
 
 	/**
-	 * Plays one beep. Restarts the envelope if a beep is still playing.
+	 * Plays one beep on the server and all clients. Restarts the envelope if a beep is still playing.
+	 * Only has an effect on the server, the parameters get sent to the clients with the call.
 	 * @param Frequency		frequency of the sine tone in Hz
 	 * @param Volume		volume multiplier of the tone (0 to 1)
 	 * @param AttackTime	time in seconds to rise to full volume
@@ -35,7 +36,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Buzzer")
 	void Beep(float Frequency, float Volume, float AttackTime, float AttackCurve, float DecayTime, float DecayCurve);
 
-	/** Stops the current beep. */
+	/** Stops the current beep on the server and all clients. Only has an effect on the server. */
 	UFUNCTION(BlueprintCallable, Category="Buzzer")
 	void StopBeep();
 
@@ -52,6 +53,15 @@ protected:
 private:
 	void ApplyAudioSettings();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Beep(float Frequency, float Volume, float AttackTime, float AttackCurve, float DecayTime, float DecayCurve);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StopBeep();
+
+	void PlayBeepLocally(float Frequency, float Volume, float AttackTime, float AttackCurve, float DecayTime, float DecayCurve);
+	void StopBeepLocally();
+
 	static constexpr uint32 SampleRate = 48000;
 
 	FCriticalSection Lock;
@@ -65,6 +75,6 @@ private:
 	/** Samples since the beep started */
 	int64 BeepPosition = 0;
 	double Phase = 0.0;
-	/** True while Wwise is pulling samples, the event is stopped by returning false from FillSamplesBuffer */
+	/** True while a beep is playing. Once the envelope ended the voice gets stopped on the game thread, returning false from FillSamplesBuffer alone keeps it running */
 	bool bVoiceActive = false;
 };

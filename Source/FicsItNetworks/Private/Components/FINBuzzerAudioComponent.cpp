@@ -3,7 +3,9 @@
 #include "Components/FINSpeakerPole.h"
 #include "Async/Async.h"
 
-UFINBuzzerAudioComponent::UFINBuzzerAudioComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {}
+UFINBuzzerAudioComponent::UFINBuzzerAudioComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
+	SetIsReplicatedByDefault(true);
+}
 
 void UFINBuzzerAudioComponent::BeginPlay() {
 	Super::BeginPlay();
@@ -13,7 +15,7 @@ void UFINBuzzerAudioComponent::BeginPlay() {
 }
 
 void UFINBuzzerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason) {
-	StopBeep();
+	StopBeepLocally();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -23,6 +25,29 @@ void UFINBuzzerAudioComponent::ApplyAudioSettings() {
 }
 
 void UFINBuzzerAudioComponent::Beep(float Frequency, float Volume, float AttackTime, float AttackCurve, float DecayTime, float DecayCurve) {
+	// The blueprint may call this on clients too, with values the server never replicated (buildings are net dormant)
+	if (!GetOwner() || !GetOwner()->HasAuthority()) return;
+	GetOwner()->FlushNetDormancy();
+	Multicast_Beep(Frequency, Volume, AttackTime, AttackCurve, DecayTime, DecayCurve);
+}
+
+void UFINBuzzerAudioComponent::StopBeep() {
+	if (!GetOwner() || !GetOwner()->HasAuthority()) return;
+	GetOwner()->FlushNetDormancy();
+	Multicast_StopBeep();
+}
+
+void UFINBuzzerAudioComponent::Multicast_Beep_Implementation(float Frequency, float Volume, float AttackTime, float AttackCurve, float DecayTime, float DecayCurve) {
+	// No audio on a dedicated server
+	if (GetNetMode() == NM_DedicatedServer) return;
+	PlayBeepLocally(Frequency, Volume, AttackTime, AttackCurve, DecayTime, DecayCurve);
+}
+
+void UFINBuzzerAudioComponent::Multicast_StopBeep_Implementation() {
+	StopBeepLocally();
+}
+
+void UFINBuzzerAudioComponent::PlayBeepLocally(float Frequency, float Volume, float AttackTime, float AttackCurve, float DecayTime, float DecayCurve) {
 	bool bNeedsPost;
 	{
 		FScopeLock ScopeLock(&Lock);
@@ -44,7 +69,7 @@ void UFINBuzzerAudioComponent::Beep(float Frequency, float Volume, float AttackT
 	}
 }
 
-void UFINBuzzerAudioComponent::StopBeep() {
+void UFINBuzzerAudioComponent::StopBeepLocally() {
 	CancelPostInputEvent();
 	{
 		FScopeLock ScopeLock(&Lock);
