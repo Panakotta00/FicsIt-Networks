@@ -2,6 +2,7 @@
 
 #include "FGPlayerController.h"
 #include "FicsItLogLibrary.h"
+#include "TimerManager.h"
 
 UFILLogContainer::UFILLogContainer() {
 	SetIsReplicatedByDefault(true);
@@ -13,10 +14,18 @@ void UFILLogContainer::BeginPlay() {
 	Super::BeginPlay();
 
 	if (!GetOwner()->HasAuthority()) {
-		auto playerController = GetWorld()->GetFirstPlayerController<AFGPlayerController>();
-		if (playerController) {
-			playerController->GetRemoteCallObjectOfClass<UFILRCO>()->LogRehandleAllEntries(this);
-		}
+		RequestAllEntries();
+	}
+}
+
+void UFILLogContainer::RequestAllEntries() {
+	auto playerController = GetWorld()->GetFirstPlayerController<AFGPlayerController>();
+	UFILRCO* RCO = playerController ? playerController->GetRemoteCallObjectOfClass<UFILRCO>() : nullptr;
+	if (RCO) {
+		RCO->LogRehandleAllEntries(this);
+	} else {
+		// While joining, the containers can get replicated before the player controller and its remote call objects
+		GetWorld()->GetTimerManager().SetTimer(RequestAllEntriesTimer, FTimerDelegate::CreateUObject(this, &UFILLogContainer::RequestAllEntries), 0.5f, false);
 	}
 }
 
