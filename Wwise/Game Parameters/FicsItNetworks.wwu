@@ -9,6 +9,13 @@
 						<Property Name="Max" Type="Real64" Value="4"/>
 					</PropertyList>
 				</GameParameter>
+				<GameParameter Name="FIN_Beep_Pitch" ID="{A3371E21-4C89-40A7-825F-97255D0CC6D2}">
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="0"/>
+						<Property Name="Max" Type="Real64" Value="2400"/>
+						<Property Name="Min" Type="Real64" Value="-2400"/>
+					</PropertyList>
+				</GameParameter>
 			</ChildrenList>
 		</WorkUnit>
 	</GameParameters>

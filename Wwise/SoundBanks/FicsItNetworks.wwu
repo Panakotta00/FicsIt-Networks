@@ -5,7 +5,12 @@
 			<ChildrenList>
 				<SoundBank Name="FicsItNetworks_Soundbank" ID="{217480AE-E5B8-4014-8336-90E2E8688383}">
 					<ObjectInclusionList>
+						<ObjectRef Name="Play_FIN_Module_PushButton" ID="{BF1B96FA-F913-405A-A7DA-CCD8E358F865}" WorkUnitID="{DC5C827A-365A-4A02-ADBC-BBB96660D9ED}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Play_FIN_Module_Switch" ID="{E0C9EF7F-DF22-41A5-9ACA-93A478A0227F}" WorkUnitID="{DC5C827A-365A-4A02-ADBC-BBB96660D9ED}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Play_FIN_Computer_Beep" ID="{C0D84327-5C17-44EC-B4D4-1AB086EC0BFA}" WorkUnitID="{DC5C827A-365A-4A02-ADBC-BBB96660D9ED}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Play_FIN_Speaker" ID="{00B05D57-2181-4AB9-B029-42C846F42C05}" WorkUnitID="{DC5C827A-365A-4A02-ADBC-BBB96660D9ED}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Play_FIN_Module_PushButton_Up" ID="{6EA600EF-5732-4AC5-9D4D-5D9745256A05}" WorkUnitID="{DC5C827A-365A-4A02-ADBC-BBB96660D9ED}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Play_FIN_Module_PushButton_Down" ID="{BE637F2B-B0FB-4DFA-B4B5-709FE1955C4C}" WorkUnitID="{DC5C827A-365A-4A02-ADBC-BBB96660D9ED}" Origin="Manual" Filter="7"/>
 					</ObjectInclusionList>
 					<ObjectExclusionList/>
 					<GameSyncExclusionList/>

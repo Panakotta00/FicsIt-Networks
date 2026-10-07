@@ -14,6 +14,61 @@
 						</Action>
 					</ChildrenList>
 				</Event>
+				<Event Name="Play_FIN_Module_Switch" ID="{E0C9EF7F-DF22-41A5-9ACA-93A478A0227F}">
+					<ChildrenList>
+						<Action Name="" ID="{22523FBD-C1BB-4979-B335-889F0DDFA35C}" ShortID="488122212">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="FIN_Module_Switch" ID="{2813CD57-0650-4714-93A2-7A6910E0B2CA}" WorkUnitID="{282DE560-17E5-4D66-8763-4826FB16C82E}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Play_FIN_Module_PushButton" ID="{BF1B96FA-F913-405A-A7DA-CCD8E358F865}">
+					<ChildrenList>
+						<Action Name="" ID="{82C58264-C1F6-459E-BEFF-A735B14423DD}" ShortID="574322004">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="FIN_Module_PushButton" ID="{47586ECE-564E-4E58-BA3D-98EC4CC20D6B}" WorkUnitID="{282DE560-17E5-4D66-8763-4826FB16C82E}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Play_FIN_Module_PushButton_Down" ID="{BE637F2B-B0FB-4DFA-B4B5-709FE1955C4C}">
+					<ChildrenList>
+						<Action Name="" ID="{FF4B6C8E-D25C-4133-B958-A71153C91D09}" ShortID="593229662">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="FIN_Module_PushButton_Down" ID="{1C8F749F-B73E-4DC8-B223-F0F44D2A3BAA}" WorkUnitID="{282DE560-17E5-4D66-8763-4826FB16C82E}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Play_FIN_Module_PushButton_Up" ID="{6EA600EF-5732-4AC5-9D4D-5D9745256A05}">
+					<ChildrenList>
+						<Action Name="" ID="{DAF635BE-4834-4397-83B6-E36B07559F90}" ShortID="250671879">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="FIN_Module_PushButton_Up" ID="{F268ED18-7E2A-4B80-9E92-D86554F1E746}" WorkUnitID="{282DE560-17E5-4D66-8763-4826FB16C82E}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Play_FIN_Computer_Beep" ID="{C0D84327-5C17-44EC-B4D4-1AB086EC0BFA}">
+					<ChildrenList>
+						<Action Name="" ID="{0F6495B8-CC8A-4318-A685-65BD2F03B0D1}" ShortID="381308596">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="FIN_Computer_Beep" ID="{CE8BE2E4-D0EA-447C-90D4-4456A9D46291}" WorkUnitID="{282DE560-17E5-4D66-8763-4826FB16C82E}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>
