@@ -331,10 +331,12 @@ namespace FINLua {
 
 		FString TypeName = UTF8_TO_TCHAR(typearg);
 		if (TypeName == luaFIN_getLuaObjectTypeName()) {
-			FLuaObject* LuaObject = luaFIN_toLuaObject(L, Index, nullptr);
+			FLuaObject* LuaObject = luaFIN_toRawLuaObject(L, Index);
 			UFIRClass* Type = nullptr;
 			if (LuaObject) Type = LuaObject->Type;
-			return FFicsItReflectionModule::ObjectReferenceText(Type);
+			FString ObjectTypeName = FFicsItReflectionModule::ObjectReferenceText(Type);
+			if (LuaObject && !LuaObject->Object.IsValidPtr()) ObjectTypeName.Append(TEXT(" (invalid)"));
+			return ObjectTypeName;
 		}
 		if (TypeName == luaFIN_getLuaClassTypeName()) {
 			FLuaClass* LuaClass = luaFIN_toLuaClass(L, Index);
