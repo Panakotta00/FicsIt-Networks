@@ -33,7 +33,11 @@ public:
 	UFGInventoryComponent* DataStorage = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UAudioComponent* Speaker = nullptr;
+	class UAkComponent* BeepSpeaker = nullptr;
+
+	/** Wwise event of computer.beep(), its pitch is controlled by the RTPC FIN_Beep_Pitch */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Audio")
+	class UAkAudioEvent* BeepEvent = nullptr;
 
 	UPROPERTY(SaveGame, Replicated, BlueprintReadOnly)
 	UFILLogContainer* Log = nullptr;

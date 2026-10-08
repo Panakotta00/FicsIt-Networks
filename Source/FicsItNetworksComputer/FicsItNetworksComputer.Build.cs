@@ -36,6 +36,8 @@ public class FicsItNetworksComputer : ModuleRules
                 "GameplayTags",
                 "ApplicationCore",
                 "HTTP",
+                "AkAudio",
+                "WwiseSoundEngine",
             }
         );
     }
