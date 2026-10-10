@@ -113,7 +113,7 @@
 				</Attenuation>
 				<Attenuation Name="FIN_Module_Attenuation" ID="{9D33EB35-70C1-429C-9EDA-901F63688C58}" ShortID="166625428">
 					<PropertyList>
-						<Property Name="RadiusMax" Type="Real64" Value="4000"/>
+						<Property Name="RadiusMax" Type="Real64" Value="1000"/>
 					</PropertyList>
 					<CurveUsageInfoList>
 						<VolumeDryUsage>
@@ -129,32 +129,32 @@
 											<Flags>5</Flags>
 										</Point>
 										<Point>
-											<XPos>400</XPos>
+											<XPos>100</XPos>
 											<YPos>0</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>1300</XPos>
+											<XPos>325</XPos>
 											<YPos>-2.5</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>2200</XPos>
+											<XPos>550</XPos>
 											<YPos>-6.02</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>3100</XPos>
+											<XPos>775</XPos>
 											<YPos>-12.04</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>3640</XPos>
+											<XPos>910</XPos>
 											<YPos>-20</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>4000</XPos>
+											<XPos>1000</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
