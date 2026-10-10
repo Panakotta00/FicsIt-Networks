@@ -127,7 +127,7 @@ namespace FINLua {
 				} else {
 					Type = FFicsItReflectionModule::Get().FindStruct(TypeName);
 				}
-				UFIRFunction* Function = Type->FindFIRFunction(TypeName);
+				UFIRFunction* Function = Type->FindFIRFunction(FunctionName);
 
 				luaFIN_pushReflectionFunction(L, Function);
 

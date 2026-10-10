@@ -133,7 +133,9 @@ namespace FINLua {
 			 * @LuaFunction		__persist
 			 * @DisplayName		Persist
 			 */)", __persist) {
-				FLuaObject* LuaObject = luaFIN_checkLuaObject(L, 1, nullptr);
+				// Use the raw object so references to destroyed objects don't fail the whole save; they unpersist as nil
+				FLuaObject* LuaObject = luaFIN_toRawLuaObject(L, 1);
+				if (!LuaObject) return luaFIN_typeError(L, 1, FFicsItReflectionModule::ObjectReferenceText(nullptr));
 
 				FFINLuaRuntimePersistenceState& Storage = luaFIN_getPersistence(L);
 				lua_pushinteger(L, Storage.Add(LuaObject->Object));
