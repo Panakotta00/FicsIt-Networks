@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{F9C97F6D-4D7B-41F2-9BA0-F5778A84F95E}" SchemaVersion="133">
+	<GameParameters>
+		<WorkUnit Name="FicsItNetworks" ID="{F9C97F6D-4D7B-41F2-9BA0-F5778A84F95E}" PersistMode="Standalone">
+			<ChildrenList>
+				<GameParameter Name="FIN_Speaker_Gain" ID="{A3D072CB-F647-4CCE-9691-13E5389BFEEC}">
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="1"/>
+						<Property Name="Max" Type="Real64" Value="4"/>
+					</PropertyList>
+				</GameParameter>
+			</ChildrenList>
+		</WorkUnit>
+	</GameParameters>
+</WwiseDocument>

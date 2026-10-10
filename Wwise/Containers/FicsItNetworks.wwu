@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{282DE560-17E5-4D66-8763-4826FB16C82E}" SchemaVersion="133">
+	<Containers>
+		<WorkUnit Name="FicsItNetworks" ID="{282DE560-17E5-4D66-8763-4826FB16C82E}" PersistMode="Standalone">
+			<ChildrenList>
+				<Sound Name="FIN_Speaker" ID="{F25DC9D1-A923-4A9B-8BDB-E0679A716999}" ShortID="149788551">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="OverrideOutput" Type="bool" Value="True"/>
+						<Property Name="OverridePositioning" Type="bool" Value="True"/>
+						<Property Name="OverrideVirtualVoice" Type="bool" Value="True"/>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<ObjectRef Name="FIN_Speaker_Attenuation" ID="{72900B1A-BB85-4C2C-8702-DB8C3569FE75}" WorkUnitID="{FB2B6447-115F-4E49-97F6-1B008A63A707}"/>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{76A9D0C6-BF2E-4384-8B26-34833582C53C}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{1D73BB92-51EF-462F-BA73-7E1D3933DB5E}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<SourcePlugin Name="Wwise Audio Input" ID="{1C8FB837-C133-40BC-9E47-4EFCDA637307}" ShortID="172895332" PluginName="Wwise Audio Input" CompanyID="0" PluginID="200">
+							<Language>SFX</Language>
+						</SourcePlugin>
+					</ChildrenList>
+					<ObjectLists>
+						<ObjectList Name="RTPC">
+							<RTPC Name="" ID="{6C59CEA9-446A-4C70-9EAA-CC1B2306A112}" ShortID="988469812">
+								<PropertyList>
+									<Property Name="PropertyName" Type="string" Value="Volume"/>
+								</PropertyList>
+								<ReferenceList>
+									<Reference Name="ControlInput">
+										<ObjectRef Name="FIN_Speaker_Gain" ID="{A3D072CB-F647-4CCE-9691-13E5389BFEEC}" WorkUnitID="{F9C97F6D-4D7B-41F2-9BA0-F5778A84F95E}"/>
+									</Reference>
+									<Reference Name="Curve">
+										<Custom>
+											<Curve Name="" ID="{8CEE7716-F150-4A82-8213-022836048593}">
+												<PropertyList>
+													<Property Name="Flags" Type="int32" Value="3"/>
+												</PropertyList>
+												<PointList>
+													<Point>
+														<XPos>0</XPos>
+														<YPos>-96</YPos>
+														<Flags>5</Flags>
+													</Point>
+													<Point>
+														<XPos>0.25</XPos>
+														<YPos>-12.04</YPos>
+														<Flags>0</Flags>
+													</Point>
+													<Point>
+														<XPos>0.5</XPos>
+														<YPos>-6.02</YPos>
+														<Flags>0</Flags>
+													</Point>
+													<Point>
+														<XPos>1</XPos>
+														<YPos>0</YPos>
+														<Flags>0</Flags>
+													</Point>
+													<Point>
+														<XPos>2</XPos>
+														<YPos>6.02</YPos>
+														<Flags>0</Flags>
+													</Point>
+													<Point>
+														<XPos>4</XPos>
+														<YPos>12.04</YPos>
+														<Flags>37</Flags>
+													</Point>
+												</PointList>
+											</Curve>
+										</Custom>
+									</Reference>
+								</ReferenceList>
+							</RTPC>
+						</ObjectList>
+					</ObjectLists>
+					<ActiveSourceList>
+						<ActiveSource Name="Wwise Audio Input" ID="{1C8FB837-C133-40BC-9E47-4EFCDA637307}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+			</ChildrenList>
+		</WorkUnit>
+	</Containers>
+</WwiseDocument>
