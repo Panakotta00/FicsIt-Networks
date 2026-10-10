@@ -12,4 +12,7 @@ public:
 	// Begin UGameInstanceModule
 	virtual void DispatchLifecycleEvent(ELifecyclePhase Phase) override;
 	// End UGameInstanceModule
+
+private:
+	void RegisterAudioInputPlugin();
 };
