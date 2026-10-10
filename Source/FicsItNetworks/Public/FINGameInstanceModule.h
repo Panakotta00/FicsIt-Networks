@@ -12,4 +12,16 @@ public:
 	// Begin UGameInstanceModule
 	virtual void DispatchLifecycleEvent(ELifecyclePhase Phase) override;
 	// End UGameInstanceModule
+
+private:
+	/** Binds the "Audio/SpeakerVolume" config property to the volume of all speaker poles */
+	void BindSpeakerVolumeConfig();
+
+	void RegisterAudioInputPlugin();
+
+	UFUNCTION()
+	void ApplySpeakerVolume();
+
+	UPROPERTY()
+	class UConfigPropertyFloat* SpeakerVolumeProperty = nullptr;
 };

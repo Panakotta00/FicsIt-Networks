@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{DC5C827A-365A-4A02-ADBC-BBB96660D9ED}" SchemaVersion="133">
+	<Events>
+		<WorkUnit Name="FicsItNetworks" ID="{DC5C827A-365A-4A02-ADBC-BBB96660D9ED}" PersistMode="Standalone">
+			<ChildrenList>
+				<Event Name="Play_FIN_Speaker" ID="{00B05D57-2181-4AB9-B029-42C846F42C05}">
+					<ChildrenList>
+						<Action Name="" ID="{C12D3F57-4125-4CB0-97DC-B0350592C977}" ShortID="547251657">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="FIN_Speaker" ID="{F25DC9D1-A923-4A9B-8BDB-E0679A716999}" WorkUnitID="{282DE560-17E5-4D66-8763-4826FB16C82E}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+			</ChildrenList>
+		</WorkUnit>
+	</Events>
+</WwiseDocument>
