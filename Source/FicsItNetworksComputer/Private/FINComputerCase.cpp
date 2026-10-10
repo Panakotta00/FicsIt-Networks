@@ -12,7 +12,7 @@
 #include "FINComputerRCO.h"
 #include "FicsItKernel/FicsItFS/FINFileSystemSubsystem.h"
 #include "FINUtils.h"
-#include "Components/AudioComponent.h"
+#include "AkComponent.h"
 #include "ComputerModules/FINComputerDriveHolder.h"
 #include "ComputerModules/FINComputerMemory.h"
 #include "ComputerModules/FINComputerProcessor.h"
@@ -38,11 +38,10 @@ AFINComputerCase::AFINComputerCase() {
 	DataStorage->SetDefaultSize(2);
 	DataStorage->Resize(2);
 
-	Speaker = CreateDefaultSubobject<UAudioComponent>("Speaker");
-	Speaker->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	BeepSpeaker = CreateDefaultSubobject<UAkComponent>("BeepSpeaker");
+	BeepSpeaker->SetupAttachment(RootComponent);
 
 	AudioController = CreateDefaultSubobject<UFINKernelAudioController>("AudioController");
-	AudioController->SetComponent(Speaker);
 
 	Log = CreateDefaultSubobject<UFILLogContainer>("Log");
 
@@ -105,6 +104,8 @@ void AFINComputerCase::OnConstruction(const FTransform& transform) {
 
 void AFINComputerCase::BeginPlay() {
 	Super::BeginPlay();
+
+	AudioController->SetComponent(BeepSpeaker, BeepEvent);
 
 	DataStorage->OnSlotUpdatedDelegate.AddDynamic(this, &AFINComputerCase::OnEEPROMChanged);
 	DataStorage->mItemFilter.BindLambda([](TSubclassOf<UObject> Item, int32 Index) {

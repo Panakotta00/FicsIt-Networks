@@ -42,6 +42,8 @@ public class FicsItNetworks : ModuleRules
             "FicsItNetworksComputer",
             "FicsItNetworksLua",
             "VorbisAudioDecoder",
+            "AkAudio",
+            "WwiseSoundEngine",
 		});
     }
 }

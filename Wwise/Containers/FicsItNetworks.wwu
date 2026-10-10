@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{282DE560-17E5-4D66-8763-4826FB16C82E}" SchemaVersion="133">
+	<Containers>
+		<WorkUnit Name="FicsItNetworks" ID="{282DE560-17E5-4D66-8763-4826FB16C82E}" PersistMode="Standalone">
+			<ChildrenList>
+				<Sound Name="FIN_Speaker" ID="{F25DC9D1-A923-4A9B-8BDB-E0679A716999}" ShortID="149788551">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="OverrideOutput" Type="bool" Value="True"/>
+						<Property Name="OverridePositioning" Type="bool" Value="True"/>
+						<Property Name="OverrideVirtualVoice" Type="bool" Value="True"/>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<ObjectRef Name="FIN_Speaker_Attenuation" ID="{72900B1A-BB85-4C2C-8702-DB8C3569FE75}" WorkUnitID="{FB2B6447-115F-4E49-97F6-1B008A63A707}"/>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{76A9D0C6-BF2E-4384-8B26-34833582C53C}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{1D73BB92-51EF-462F-BA73-7E1D3933DB5E}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<SourcePlugin Name="Wwise Audio Input" ID="{1C8FB837-C133-40BC-9E47-4EFCDA637307}" ShortID="172895332" PluginName="Wwise Audio Input" CompanyID="0" PluginID="200">
+							<Language>SFX</Language>
+						</SourcePlugin>
+					</ChildrenList>
+					<ObjectLists>
+						<ObjectList Name="RTPC">
+							<RTPC Name="" ID="{6C59CEA9-446A-4C70-9EAA-CC1B2306A112}" ShortID="988469812">
+								<PropertyList>
+									<Property Name="PropertyName" Type="string" Value="Volume"/>
+								</PropertyList>
+								<ReferenceList>
+									<Reference Name="ControlInput">
+										<ObjectRef Name="FIN_Speaker_Gain" ID="{A3D072CB-F647-4CCE-9691-13E5389BFEEC}" WorkUnitID="{F9C97F6D-4D7B-41F2-9BA0-F5778A84F95E}"/>
+									</Reference>
+									<Reference Name="Curve">
+										<Custom>
+											<Curve Name="" ID="{8CEE7716-F150-4A82-8213-022836048593}">
+												<PropertyList>
+													<Property Name="Flags" Type="int32" Value="3"/>
+												</PropertyList>
+												<PointList>
+													<Point>
+														<XPos>0</XPos>
+														<YPos>-96</YPos>
+														<Flags>5</Flags>
+													</Point>
+													<Point>
+														<XPos>0.25</XPos>
+														<YPos>-12.04</YPos>
+														<Flags>0</Flags>
+													</Point>
+													<Point>
+														<XPos>0.5</XPos>
+														<YPos>-6.02</YPos>
+														<Flags>0</Flags>
+													</Point>
+													<Point>
+														<XPos>1</XPos>
+														<YPos>0</YPos>
+														<Flags>0</Flags>
+													</Point>
+													<Point>
+														<XPos>2</XPos>
+														<YPos>6.02</YPos>
+														<Flags>0</Flags>
+													</Point>
+													<Point>
+														<XPos>4</XPos>
+														<YPos>12.04</YPos>
+														<Flags>37</Flags>
+													</Point>
+												</PointList>
+											</Curve>
+										</Custom>
+									</Reference>
+								</ReferenceList>
+							</RTPC>
+						</ObjectList>
+					</ObjectLists>
+					<ActiveSourceList>
+						<ActiveSource Name="Wwise Audio Input" ID="{1C8FB837-C133-40BC-9E47-4EFCDA637307}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+				<Sound Name="FIN_Module_Switch" ID="{2813CD57-0650-4714-93A2-7A6910E0B2CA}" ShortID="874457013">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="MaxSoundPerInstance" Type="int16">
+							<ValueList>
+								<Value>1</Value>
+							</ValueList>
+						</Property>
+						<Property Name="OverrideOutput" Type="bool" Value="True"/>
+						<Property Name="OverridePositioning" Type="bool" Value="True"/>
+						<Property Name="Pitch" Type="int32">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{FEFAD6AC-DA06-4209-AC46-3CC73433E7C5}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="84"/>
+											<Property Name="Min" Type="Real64" Value="-89"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+						<Property Name="UseMaxSoundPerInstance" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Volume" Type="Real64">
+							<ValueList>
+								<Value>-2.5</Value>
+							</ValueList>
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{87D43F14-D581-4744-A2E8-1F2C2220747D}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="0.42"/>
+											<Property Name="Min" Type="Real64" Value="-0.45"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<ObjectRef Name="FIN_Module_Attenuation" ID="{9D33EB35-70C1-429C-9EDA-901F63688C58}" WorkUnitID="{FB2B6447-115F-4E49-97F6-1B008A63A707}"/>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{76A9D0C6-BF2E-4384-8B26-34833582C53C}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{1D73BB92-51EF-462F-BA73-7E1D3933DB5E}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<AudioFileSource Name="FIN_Module_Switch" ID="{25CFA62C-7227-4A45-B32D-41A481DA2D8A}">
+							<Language>SFX</Language>
+							<AudioFile>FicsItNetworks\FIN_Module_Switch.wav</AudioFile>
+							<MediaIDList>
+								<MediaID ID="338888394"/>
+							</MediaIDList>
+						</AudioFileSource>
+					</ChildrenList>
+					<ActiveSourceList>
+						<ActiveSource Name="FIN_Module_Switch" ID="{25CFA62C-7227-4A45-B32D-41A481DA2D8A}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+				<Sound Name="FIN_Module_PushButton" ID="{47586ECE-564E-4E58-BA3D-98EC4CC20D6B}" ShortID="407107027">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="MaxSoundPerInstance" Type="int16">
+							<ValueList>
+								<Value>1</Value>
+							</ValueList>
+						</Property>
+						<Property Name="OverrideOutput" Type="bool" Value="True"/>
+						<Property Name="OverridePositioning" Type="bool" Value="True"/>
+						<Property Name="Pitch" Type="int32">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{8FCA7CE2-EDDF-4E7B-BB31-6EC7469CE2DB}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="84"/>
+											<Property Name="Min" Type="Real64" Value="-89"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+						<Property Name="UseMaxSoundPerInstance" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Volume" Type="Real64">
+							<ValueList>
+								<Value>-2.5</Value>
+							</ValueList>
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{A9201970-FE2C-4FD5-B761-9277E03EA68F}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="0.42"/>
+											<Property Name="Min" Type="Real64" Value="-0.45"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<ObjectRef Name="FIN_Module_Attenuation" ID="{9D33EB35-70C1-429C-9EDA-901F63688C58}" WorkUnitID="{FB2B6447-115F-4E49-97F6-1B008A63A707}"/>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{76A9D0C6-BF2E-4384-8B26-34833582C53C}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{1D73BB92-51EF-462F-BA73-7E1D3933DB5E}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<AudioFileSource Name="FIN_Module_PushButton" ID="{E4990E22-EB40-4D2F-9D84-9CC865A415D5}">
+							<Language>SFX</Language>
+							<AudioFile>FicsItNetworks\FIN_Module_PushButton.wav</AudioFile>
+							<MediaIDList>
+								<MediaID ID="850004072"/>
+							</MediaIDList>
+						</AudioFileSource>
+					</ChildrenList>
+					<ActiveSourceList>
+						<ActiveSource Name="FIN_Module_PushButton" ID="{E4990E22-EB40-4D2F-9D84-9CC865A415D5}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+				<Sound Name="FIN_Module_PushButton_Down" ID="{1C8F749F-B73E-4DC8-B223-F0F44D2A3BAA}" ShortID="273621482">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="MaxSoundPerInstance" Type="int16">
+							<ValueList>
+								<Value>1</Value>
+							</ValueList>
+						</Property>
+						<Property Name="OverrideOutput" Type="bool" Value="True"/>
+						<Property Name="OverridePositioning" Type="bool" Value="True"/>
+						<Property Name="Pitch" Type="int32">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{4BECDBE2-6D15-455D-A779-D7DF04B48A6B}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="84"/>
+											<Property Name="Min" Type="Real64" Value="-89"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+						<Property Name="UseMaxSoundPerInstance" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Volume" Type="Real64">
+							<ValueList>
+								<Value>-2.5</Value>
+							</ValueList>
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{94D0ABE4-34CC-4221-B285-F02DA506BAFC}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="0.42"/>
+											<Property Name="Min" Type="Real64" Value="-0.45"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<ObjectRef Name="FIN_Module_Attenuation" ID="{9D33EB35-70C1-429C-9EDA-901F63688C58}" WorkUnitID="{FB2B6447-115F-4E49-97F6-1B008A63A707}"/>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{76A9D0C6-BF2E-4384-8B26-34833582C53C}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{1D73BB92-51EF-462F-BA73-7E1D3933DB5E}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<AudioFileSource Name="FIN_Module_PushButton_Down" ID="{37276C4B-DDC6-40FC-9808-312F365022DE}">
+							<Language>SFX</Language>
+							<AudioFile>FicsItNetworks\FIN_Module_PushButton_Down.wav</AudioFile>
+							<MediaIDList>
+								<MediaID ID="420957313"/>
+							</MediaIDList>
+						</AudioFileSource>
+					</ChildrenList>
+					<ActiveSourceList>
+						<ActiveSource Name="FIN_Module_PushButton_Down" ID="{37276C4B-DDC6-40FC-9808-312F365022DE}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+				<Sound Name="FIN_Module_PushButton_Up" ID="{F268ED18-7E2A-4B80-9E92-D86554F1E746}" ShortID="404124374">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="MaxSoundPerInstance" Type="int16">
+							<ValueList>
+								<Value>1</Value>
+							</ValueList>
+						</Property>
+						<Property Name="OverrideOutput" Type="bool" Value="True"/>
+						<Property Name="OverridePositioning" Type="bool" Value="True"/>
+						<Property Name="Pitch" Type="int32">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{D26F7149-7BE9-4EAC-9F73-8576E1BB8C94}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="84"/>
+											<Property Name="Min" Type="Real64" Value="-89"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+						<Property Name="UseMaxSoundPerInstance" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Volume" Type="Real64">
+							<ValueList>
+								<Value>-2.5</Value>
+							</ValueList>
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{0E374472-3ABA-4F1B-BB52-C921BEF311C2}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="0.42"/>
+											<Property Name="Min" Type="Real64" Value="-0.45"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<ObjectRef Name="FIN_Module_Attenuation" ID="{9D33EB35-70C1-429C-9EDA-901F63688C58}" WorkUnitID="{FB2B6447-115F-4E49-97F6-1B008A63A707}"/>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{76A9D0C6-BF2E-4384-8B26-34833582C53C}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{1D73BB92-51EF-462F-BA73-7E1D3933DB5E}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<AudioFileSource Name="FIN_Module_PushButton_Up" ID="{DC33CA8C-73B6-4F03-A5E8-6EF543E2E63B}">
+							<Language>SFX</Language>
+							<AudioFile>FicsItNetworks\FIN_Module_PushButton_Up.wav</AudioFile>
+							<MediaIDList>
+								<MediaID ID="957078839"/>
+							</MediaIDList>
+						</AudioFileSource>
+					</ChildrenList>
+					<ActiveSourceList>
+						<ActiveSource Name="FIN_Module_PushButton_Up" ID="{DC33CA8C-73B6-4F03-A5E8-6EF543E2E63B}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+				<Sound Name="FIN_Computer_Beep" ID="{CE8BE2E4-D0EA-447C-90D4-4456A9D46291}" ShortID="976350550">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="MaxSoundPerInstance" Type="int16">
+							<ValueList>
+								<Value>1</Value>
+							</ValueList>
+						</Property>
+						<Property Name="OverrideOutput" Type="bool" Value="True"/>
+						<Property Name="OverridePositioning" Type="bool" Value="True"/>
+						<Property Name="UseMaxSoundPerInstance" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Volume" Type="Real64">
+							<ValueList>
+								<Value>-6.02</Value>
+							</ValueList>
+						</Property>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<ObjectRef Name="FIN_Computer_Attenuation" ID="{F34B8A47-4A73-4A1E-8025-F4E3473B2E9B}" WorkUnitID="{FB2B6447-115F-4E49-97F6-1B008A63A707}"/>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{76A9D0C6-BF2E-4384-8B26-34833582C53C}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{1D73BB92-51EF-462F-BA73-7E1D3933DB5E}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<AudioFileSource Name="FIN_Computer_Beep" ID="{D9BC0892-8B38-46B3-A477-69C69B8F4CEE}">
+							<Language>SFX</Language>
+							<AudioFile>FicsItNetworks\FIN_Computer_Beep.wav</AudioFile>
+							<MediaIDList>
+								<MediaID ID="964551984"/>
+							</MediaIDList>
+						</AudioFileSource>
+					</ChildrenList>
+					<ObjectLists>
+						<ObjectList Name="RTPC">
+							<RTPC Name="" ID="{A234AFA8-78DD-4CD3-BEAD-177829876D3A}" ShortID="972956417">
+								<PropertyList>
+									<Property Name="PropertyName" Type="string" Value="Pitch"/>
+								</PropertyList>
+								<ReferenceList>
+									<Reference Name="ControlInput">
+										<ObjectRef Name="FIN_Beep_Pitch" ID="{A3371E21-4C89-40A7-825F-97255D0CC6D2}" WorkUnitID="{F9C97F6D-4D7B-41F2-9BA0-F5778A84F95E}"/>
+									</Reference>
+									<Reference Name="Curve">
+										<Custom>
+											<Curve Name="" ID="{B95EDB92-85D5-456A-8315-C02CE404A930}">
+												<PropertyList>
+													<Property Name="Flags" Type="int32" Value="65537"/>
+												</PropertyList>
+												<PointList>
+													<Point>
+														<XPos>-2400</XPos>
+														<YPos>-2400</YPos>
+														<Flags>5</Flags>
+													</Point>
+													<Point>
+														<XPos>2400</XPos>
+														<YPos>2400</YPos>
+														<Flags>37</Flags>
+													</Point>
+												</PointList>
+											</Curve>
+										</Custom>
+									</Reference>
+								</ReferenceList>
+							</RTPC>
+						</ObjectList>
+					</ObjectLists>
+					<ActiveSourceList>
+						<ActiveSource Name="FIN_Computer_Beep" ID="{D9BC0892-8B38-46B3-A477-69C69B8F4CEE}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+			</ChildrenList>
+		</WorkUnit>
+	</Containers>
+</WwiseDocument>
