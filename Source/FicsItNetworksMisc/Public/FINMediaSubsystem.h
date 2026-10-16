@@ -6,12 +6,17 @@
 #include "FGIconLibrary.h"
 #include "FGSaveInterface.h"
 #include "FINUtils.h"
+#include "GameplayTagContainer.h"
 #include "FINMediaSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINMediaTextureTimeout, FString, TexturePath, UObject*, Texture);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFINMediaTextureLoaded, FString, TexturePath, UObject*, Texture);
 
 class UAsyncTaskDownloadImage;
+class UReliableMessagingPlayerComponent;
+
+/** Called with the content of a requested sound file, or nullptr if it couldn't be loaded. */
+DECLARE_DELEGATE_OneParam(FFINMediaSoundLoaded, TSharedPtr<const TArray<uint8>> /*Data*/);
 
 /**
  * The FINMediaSubsystem manages various types of Media that can be referenced anywhere in the game (world).
@@ -54,6 +59,7 @@ public:
 	
 	// Begin AActor
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 	// End AActor
 
@@ -79,6 +85,38 @@ public:
 	 */
 	FString GetTextureReference(UObject* Texture);
 
+	/** Sound files larger than this are not played or transferred. */
+	static constexpr int32 MaxSoundFileSize = 32 * 1024 * 1024;
+	/** Sound files no one uses anymore get removed from the cache once it is larger than this. */
+	static constexpr int64 MaxSoundCacheSize = 128 * 1024 * 1024;
+
+	static FString HashSoundData(const TArray<uint8>& Data);
+
+	/**
+	 * Loads a sound file from the sounds folder (Saved/SaveGames/Computers/Sounds).
+	 * @param Sound path relative to the sounds folder, without the .ogg file extension
+	 */
+	static bool LoadSoundFile(const FString& Sound, TArray<uint8>& OutData);
+
+	/**
+	 * Adds the given sound file content to the sound cache and returns its hash.
+	 * On the server, clients can only download sounds which are in the cache.
+	 */
+	FString AddSound(TArray<uint8>&& Data);
+
+	/** Returns the sound with the given hash if it is in the cache. Holding the returned pointer keeps the sound in the cache. */
+	TSharedPtr<const TArray<uint8>> FindSound(const FString& Hash);
+
+	/**
+	 * Gets the content of a sound file of the server.
+	 * Calls the callback right away if the sound is in the cache or the local sounds folder has the same file (same hash).
+	 * Otherwise downloads it from the server and calls the callback once it arrived (or with nullptr if the server doesn't have it).
+	 * @param Sound path of the sound file of the server, relative to the sounds folder
+	 * @param Hash MD5 hash of the sound file of the server
+	 * @param Size size of the sound file of the server in bytes
+	 */
+	void RequestSound(const FString& Sound, const FString& Hash, int32 Size, FFINMediaSoundLoaded Callback);
+
 private:
 	void AddTextureToCache(const FString& TextureReference, UObject* Texture);
 	UObject* RemoveTextureFromCache(const FString& TextureReference);
@@ -91,6 +129,15 @@ private:
 
 	UFUNCTION()
 	void HandleTextureDownload(UTexture2DDynamic* Texture);
+
+	void TrimSoundCache();
+	void UpdateSoundTransfer();
+	/** Registers the sound transfer message handlers on player controllers which got their reliable messaging component since the last call. */
+	void RegisterSoundHandlers();
+	void SendPendingSoundRequests();
+	void HandleSoundRequest(FGameplayTag Tag, TArray<uint8>&& Payload, TWeakObjectPtr<APlayerController> Player);
+	void HandleSoundData(FGameplayTag Tag, TArray<uint8>&& Payload);
+	void FinishSoundDownload(const FString& Hash, TSharedPtr<const TArray<uint8>> Data);
 
 	UPROPERTY()
 	FString ResourcesFolderPath = TEXT("");
@@ -107,6 +154,20 @@ private:
 	UAsyncTaskDownloadImage* TextureDownloadTask = nullptr;
 	UPROPERTY()
 	TMap<FString, FIconData> GameIconFindCache;
+
+	TMap<FString, TSharedRef<const TArray<uint8>>> SoundCache;
+	/** Hashes of the sound cache in order of use, least recently used first. */
+	TArray<FString> SoundCacheOrder;
+
+	struct FSoundDownload {
+		int32 Size = 0;
+		bool bRequested = false;
+		TArray<FFINMediaSoundLoaded> Callbacks;
+	};
+	TMap<FString, FSoundDownload> SoundDownloads;
+
+	TSet<TWeakObjectPtr<UReliableMessagingPlayerComponent>> SoundHandlerComponents;
+	FTimerHandle SoundTransferTimer;
 
 public:
 	// Begin FIN Reflection

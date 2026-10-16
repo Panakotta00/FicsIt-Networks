@@ -15,6 +15,7 @@ public class FicsItNetworksMisc : ModuleRules
                 "Core",
                 "FactoryGame",
                 "FicsItReflection",
+                "GameplayTags",
                 "SML"
             }
         );
@@ -25,6 +26,7 @@ public class FicsItNetworksMisc : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "Json",
+                "ReliableMessaging",
                 "UMG",
             }
         );

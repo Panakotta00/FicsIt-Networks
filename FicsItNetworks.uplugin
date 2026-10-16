@@ -92,6 +92,11 @@
 			"Name": "OnlineSubsystemUtils",
 			"Enabled": true,
 			"BasePlugin": true
+		},
+		{
+			"Name": "ReliableMessaging",
+			"Enabled": true,
+			"BasePlugin": true
 		}
 	],
 	"LocalizationTargets": [
