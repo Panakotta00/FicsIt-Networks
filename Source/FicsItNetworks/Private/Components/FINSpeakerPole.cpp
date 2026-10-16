@@ -195,6 +195,8 @@ void AFINSpeakerPole::StartDecodedSound(const TArray<uint8>& PCM, int32 SampleRa
 	Wave->NumChannels = NumChannels;
 	Wave->Duration = static_cast<float>(TotalFrames - StartFrame) / SampleRate;
 	Wave->SoundGroup = SOUNDGROUP_Default;
+	// Out of range the sound would get stopped, keep it running silently so it is audible again and in sync when coming back
+	Wave->VirtualizationMode = EVirtualizationMode::PlayWhenSilent;
 	Wave->QueueAudio(PCM.GetData() + StartFrame * BytesPerFrame, static_cast<int32>((TotalFrames - StartFrame) * BytesPerFrame));
 
 	AudioComponent->SetSound(Wave);
