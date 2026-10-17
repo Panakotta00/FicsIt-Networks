@@ -77,7 +77,9 @@ void AFINSpeakerPole::PlaySound(const FString& Sound, float StartPoint) {
 		return;
 	}
 
-	// Only reads the header, a dedicated server doesn't decode the sound
+	// Only reads the header, a dedicated server doesn't decode the sound.
+	// Without audio (dedicated server) nothing starts the Vorbis decoder module, which loads the Vorbis DLLs.
+	LoadVorbisLibraries();
 	FSoundQualityInfo Quality;
 	FVorbisAudioInfo Vorbis;
 	if (!Vorbis.ReadCompressedInfo(FileData.GetData(), FileData.Num(), &Quality) || Quality.NumChannels == 0 || Quality.SampleRate == 0) {
