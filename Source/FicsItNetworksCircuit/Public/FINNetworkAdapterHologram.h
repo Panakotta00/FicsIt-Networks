@@ -36,6 +36,7 @@ public:
 	virtual bool TrySnapToActor(const FHitResult& hitResult) override;
 	virtual void SetHologramLocationAndRotation(const FHitResult& hitResult) override;
 	virtual void ConfigureActor(AFGBuildable* inBuildable) const override;
+	virtual void SerializeConstructMessage(FArchive& ar, FNetConstructionID id) override;
 	// End AFGBuildableHologram
 
 	void UpdateSnapped(AActor* NewSnappedActor);

@@ -5,6 +5,7 @@
 #include "FGConstructDisqualifier.h"
 #include "FGOutlineComponent.h"
 #include "FINNetworkUtils.h"
+#include "FicsItNetworksCircuit.h"
 #include "Buildables/FGBuildableWall.h"
 #include "Buildables/FGBuildableFoundation.h"
 #include "Components/SplineMeshComponent.h"
@@ -122,16 +123,19 @@ AActor* AFINNetworkCableHologram::Construct(TArray<AActor*>& childs, FNetConstru
 
 	AFINNetworkCable* FinishedCable = Cast<AFINNetworkCable>(Super::Construct(childs, constructionID));
 	int i = childs.Num()-1;
-	if (From.SnapType == FIN_POLE || From.SnapType == FIN_PLUG || From.SnapType == FIN_ADAPTER) {
+	auto TakeChildConnector = [&](const FFINCablePlacementStepInfo& Step, UFINNetworkConnectionComponent*& OutConnector) {
+		if (Step.SnapType != FIN_POLE && Step.SnapType != FIN_PLUG && Step.SnapType != FIN_ADAPTER) return;
+		if (!childs.IsValidIndex(i)) {
+			// Hologram state and constructed children do not match, leave this end unconnected instead of crashing
+			UE_LOG(LogFicsItNetworksCircuit, Error, TEXT("Network Cable Hologram: Missing constructed child for snap type %d (%d children constructed)"), (int)Step.SnapType.GetValue(), childs.Num());
+			OutConnector = nullptr;
+			return;
+		}
 		AActor* Child = childs[i--];
-		UFINNetworkConnectionComponent* Connector = Cast<UFINNetworkConnectionComponent>(Child->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
-		Connector1Cache = Connector;
-	}
-	if (Snapped.SnapType == FIN_POLE || Snapped.SnapType == FIN_PLUG || Snapped.SnapType == FIN_ADAPTER) {
-		AActor* Child = childs[i--];
-		UFINNetworkConnectionComponent* Connector = Cast<UFINNetworkConnectionComponent>(Child->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass()));
-		Connector2Cache = Connector;
-	}
+		OutConnector = Child ? Cast<UFINNetworkConnectionComponent>(Child->GetComponentByClass(UFINNetworkConnectionComponent::StaticClass())) : nullptr;
+	};
+	TakeChildConnector(From, Connector1Cache);
+	TakeChildConnector(Snapped, Connector2Cache);
 	if (Connector1Cache) FinishedCable->SetActorLocation(Connector1Cache->GetComponentToWorld().GetTranslation());
 
 	FinishedCable->SetConnection(Connector1Cache, Connector2Cache);
@@ -376,6 +380,50 @@ void AFINNetworkCableHologram::CheckValidPlacement() {
 
 	UpdateSnappingEffects();
 	UpdateMeshValidity(mConstructDisqualifiers.IsEmpty());
+}
+
+void AFINNetworkCableHologram::SerializeConstructMessage(FArchive& ar, FNetConstructionID id) {
+	Super::SerializeConstructMessage(ar, id);
+
+	// The server builds from its own copy of this hologram, so the placement steps have to be sent along
+	SerializeStepInfo(ar, From, true);
+	SerializeStepInfo(ar, Snapped, false);
+}
+
+void AFINNetworkCableHologram::SerializeStepInfo(FArchive& Ar, FFINCablePlacementStepInfo& Step, bool bFromStep) {
+	uint8 SnapType = Step.SnapType;
+	Ar << SnapType;
+
+	// Only connectors are replicated objects, child holograms only exist locally and get mapped below
+	UObject* Connector = SnapType == FIN_CONNECTOR ? Step.SnappedObj : nullptr;
+	if (SnapType == FIN_CONNECTOR) Ar << Connector;
+
+	if (!Ar.IsLoading()) return;
+
+	Step = FFINCablePlacementStepInfo();
+	switch (SnapType) {
+	case FIN_CONNECTOR:
+		if (Cast<UFINNetworkConnectionComponent>(Connector)) {
+			Step.SnapType = FIN_CONNECTOR;
+			Step.SnappedObj = Connector;
+		}
+		break;
+	// The first step uses the second set of child holograms, see GetHolos
+	case FIN_ADAPTER:
+		Step.SnapType = FIN_ADAPTER;
+		Step.SnappedObj = bFromStep ? AdapterHologram2 : AdapterHologram1;
+		break;
+	case FIN_POLE:
+		Step.SnapType = FIN_POLE;
+		Step.SnappedObj = bFromStep ? PoleHologram2 : PoleHologram1;
+		break;
+	case FIN_PLUG:
+		Step.SnapType = FIN_PLUG;
+		Step.SnappedObj = bFromStep ? PlugHologram2 : PlugHologram1;
+		break;
+	default: ;
+	}
+	if (!Step.SnappedObj) Step.SnapType = FIN_NOT_SNAPPED;
 }
 
 void AFINNetworkCableHologram::OnInvalidHitResult() {
