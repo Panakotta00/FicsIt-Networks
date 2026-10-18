@@ -18,10 +18,10 @@ FIN_STRUCT_IMPLEMENT_INTERFACE(FFINItemStateFileSystem, FFINLabelContainerInterf
 
 int AskForDiskOrSave(FString Name) {
 	if (FParse::Param(FCommandLine::Get(), TEXT("FINOverwriteFS"))) {
-		return FIN_FS_AlwaysOverride;
+		return FIFS_OVERRIDE_CHANGES;
 	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("FINKeepFS"))) {
-		return FIN_FS_AlwaysKeep;
+		return FIFS_KEEP_CHANGES;
 	}
 #if UE_SERVER
 	UE_LOGFMT(LogFicsItNetworksComputer, Fatal,
