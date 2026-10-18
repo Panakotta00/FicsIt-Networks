@@ -61,6 +61,20 @@ void AFINNetworkAdapterHologram::ConfigureActor(AFGBuildable* inBuildable) const
 	}
 }
 
+void AFINNetworkAdapterHologram::SerializeConstructMessage(FArchive& ar, FNetConstructionID id) {
+	Super::SerializeConstructMessage(ar, id);
+
+	// ConfigureActor needs the snapped actor on the server
+	ar << bSnapped;
+	AActor* SnappedActor = bSnapped ? PrevSnappedActor : nullptr;
+	if (bSnapped) ar << SnappedActor;
+
+	if (ar.IsLoading()) {
+		PrevSnappedActor = SnappedActor;
+		bSnapped = IsValid(SnappedActor);
+	}
+}
+
 void AFINNetworkAdapterHologram::UpdateSnapped(AActor* NewSnappedActor) {
 	if (PrevSnappedActor != NewSnappedActor) {
 		OnEndSnap(PrevSnappedActor);
