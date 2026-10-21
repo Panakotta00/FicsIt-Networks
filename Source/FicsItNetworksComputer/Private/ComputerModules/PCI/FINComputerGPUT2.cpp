@@ -6,6 +6,7 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Engine/ActorChannel.h"
 #include "Engine/NetConnection.h"
+#include "FIRException.h"
 #include "Fonts/FontMeasure.h"
 
 const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINGPUT2WidgetStyle"));
@@ -359,35 +360,88 @@ void AFINComputerGPUT2::netFunc_drawRect(FVector2D position, FVector2D size, FLi
 	BackBufferDrawCalls.Add(FFINGPUT2DC_Box(position, size, rotation, color.QuantizeRound(), image));
 }
 
+namespace {
+	// Dedicated servers have no Slate application and are built without FreeType (WITH_FREETYPE=0 in SlateCore.Build.cs),
+	// so Slate can't measure text there. The monospace font is measured manually instead,
+	// using the metrics of FiraCode (the GPU T2 monospace font) and the same rounding FreeType applies on clients.
+	constexpr double FINMonospaceUnitsPerEm = 1950.0;
+	constexpr double FINMonospaceAdvance = 1200.0;
+	constexpr double FINMonospaceHeight = 2400.0; // ascender 1800 - descender -600
+	constexpr double FINMonospaceBaseline = -600.0;
+
+	TSharedPtr<FSlateFontMeasure> GetFontMeasure() {
+		if (!FSlateApplication::IsInitialized()) return nullptr;
+		FSlateRenderer* Renderer = FSlateApplication::Get().GetRenderer();
+		if (!Renderer) return nullptr;
+		return Renderer->GetFontMeasureService();
+	}
+
+	int64 GetMonospaceMetric(int64 Size, double Units) {
+		// Slate renders fonts at 96 DPI, FreeType rounds to whole pixels per em and then rounds the scaled metric
+		const int64 PixelsPerEm = FMath::RoundToInt64(FMath::Max<int64>(Size, 0) * 96.0 / 72.0);
+		return FMath::RoundToInt64(PixelsPerEm * Units / FINMonospaceUnitsPerEm);
+	}
+
+	FVector2D MeasureMonospaceText(const FString& Text, int64 Size) {
+		int32 Lines = 1;
+		int32 LineLength = 0;
+		int32 MaxLineLength = 0;
+		for (TCHAR Char : Text) {
+			if (Char == '\n') {
+				Lines++;
+				LineLength = 0;
+			} else {
+				MaxLineLength = FMath::Max(MaxLineLength, ++LineLength);
+			}
+		}
+		return FVector2D(MaxLineLength * GetMonospaceMetric(Size, FINMonospaceAdvance), Lines * GetMonospaceMetric(Size, FINMonospaceHeight));
+	}
+
+	void CheckMonospaceOnly(bool bMonospace) {
+		if (!bMonospace) throw FFIRException(TEXT("Measuring the non-monospace font is not available on dedicated servers"));
+	}
+
+	FVector2D MeasureText(const TSharedPtr<FSlateFontMeasure>& Measure, const FFINGPUT2WidgetStyle& Style, const FString& Text, int64 Size, bool bMonospace) {
+		if (!Measure) {
+			CheckMonospaceOnly(bMonospace);
+			return MeasureMonospaceText(Text, Size);
+		}
+		FSlateFontInfo Font = bMonospace ? Style.MonospaceText : Style.NormalText;
+		Font.Size = Size;
+		return Measure->Measure(Text, Font);
+	}
+
+	int64 GetFontHeight(const TSharedPtr<FSlateFontMeasure>& Measure, const FFINGPUT2WidgetStyle& Style, int64 Size, bool bMonospace) {
+		if (!Measure) {
+			CheckMonospaceOnly(bMonospace);
+			return GetMonospaceMetric(Size, FINMonospaceHeight);
+		}
+		FSlateFontInfo Font = bMonospace ? Style.MonospaceText : Style.NormalText;
+		Font.Size = Size;
+		return Measure->GetMaxCharacterHeight(Font);
+	}
+
+	int64 GetFontBaseline(const TSharedPtr<FSlateFontMeasure>& Measure, const FFINGPUT2WidgetStyle& Style, int64 Size, bool bMonospace) {
+		if (!Measure) {
+			CheckMonospaceOnly(bMonospace);
+			return GetMonospaceMetric(Size, FINMonospaceBaseline);
+		}
+		FSlateFontInfo Font = bMonospace ? Style.MonospaceText : Style.NormalText;
+		Font.Size = Size;
+		return Measure->GetBaseline(Font);
+	}
+}
+
 FVector2D AFINComputerGPUT2::netFunc_measureText(FString text, int64 size, bool bMonospace) {
-	FSlateFontInfo Font = bMonospace ? Style.MonospaceText : Style.NormalText;
-	Font.Size = size;
-
-	/*TSharedRef<ISlateFontAtlasFactory> AtlasFactory = FModuleManager::Get().LoadModuleChecked<ISlateNullRendererModule>("SlateNullRenderer").CreateSlateFontAtlasFactory();
-	TSharedRef<FSlateFontCache> Cache = MakeShared<FSlateFontCache>(AtlasFactory, ESlateTextureAtlasThreadId::Unknown);
-	TSharedRef<FSlateFontMeasure> Measure = FSlateFontMeasure::Create(Cache);*/
-
-	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
-	
-	return Measure->Measure(text, Font);
+	return MeasureText(GetFontMeasure(), Style, text, size, bMonospace);
 }
 
 int64 AFINComputerGPUT2::netFunc_getFontHeight(int64 size, bool bMonospace) {
-	FSlateFontInfo Font = bMonospace ? Style.MonospaceText : Style.NormalText;
-	Font.Size = size;
-
-	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
-
-	return Measure->GetMaxCharacterHeight(Font);
+	return GetFontHeight(GetFontMeasure(), Style, size, bMonospace);
 }
 
 int64 AFINComputerGPUT2::netFunc_getFontBaseline(int64 size, bool bMonospace) {
-	FSlateFontInfo Font = bMonospace ? Style.MonospaceText : Style.NormalText;
-	Font.Size = size;
-	
-	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
-
-	return Measure->GetBaseline(Font);
+	return GetFontBaseline(GetFontMeasure(), Style, size, bMonospace);
 }
 
 TArray<FVector2D> AFINComputerGPUT2::netFunc_measureTextBatch(TArray<FString> text, TArray<int64> size, TArray<bool> bMonospace) {
@@ -396,15 +450,10 @@ TArray<FVector2D> AFINComputerGPUT2::netFunc_measureTextBatch(TArray<FString> te
 	TArray<FVector2D> results;
 	results.Reserve(n);
 
-	FSlateFontInfo MonospaceText = Style.MonospaceText;
-	FSlateFontInfo NormalText = Style.NormalText;
-
-	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	TSharedPtr<FSlateFontMeasure> Measure = GetFontMeasure();
 
 	for (size_t i = 0; i < n; i++) {
-		auto& Font = bMonospace[i] ? MonospaceText : NormalText;
-		Font.Size = size[i];
-		results.Add(Measure->Measure(text[i], Font));
+		results.Add(MeasureText(Measure, Style, text[i], size[i], bMonospace[i]));
 	}
 
 	return results;
@@ -416,15 +465,10 @@ TArray<int64> AFINComputerGPUT2::netFunc_getFontHeightBatch(TArray<int64> size, 
 	TArray<int64> results;
 	results.Reserve(n);
 
-	FSlateFontInfo MonospaceText = Style.MonospaceText;
-	FSlateFontInfo NormalText = Style.NormalText;
-
-	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	TSharedPtr<FSlateFontMeasure> Measure = GetFontMeasure();
 
 	for (size_t i = 0; i < n; i++) {
-		auto& Font = bMonospace[i] ? MonospaceText : NormalText;
-		Font.Size = size[i];
-		results.Add(Measure->GetMaxCharacterHeight(Font));
+		results.Add(GetFontHeight(Measure, Style, size[i], bMonospace[i]));
 	}
 
 	return results;
@@ -436,15 +480,10 @@ TArray<int64> AFINComputerGPUT2::netFunc_getFontBaselineBatch(TArray<int64> size
 	TArray<int64> results;
 	results.Reserve(n);
 
-	FSlateFontInfo MonospaceText = Style.MonospaceText;
-	FSlateFontInfo NormalText = Style.NormalText;
-
-	TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	TSharedPtr<FSlateFontMeasure> Measure = GetFontMeasure();
 
 	for (size_t i = 0; i < n; i++) {
-		auto& Font = bMonospace[i] ? MonospaceText : NormalText;
-		Font.Size = size[i];
-		results.Add(Measure->GetBaseline(Font));
+		results.Add(GetFontBaseline(Measure, Style, size[i], bMonospace[i]));
 	}
 
 	return results;

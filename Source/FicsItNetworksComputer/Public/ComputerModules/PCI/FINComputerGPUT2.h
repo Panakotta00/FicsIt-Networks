@@ -657,7 +657,7 @@ public:
 	void netFuncMeta_measureText(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "measureText";
 		DisplayName = FText::FromString("Measure Text");
-		Description = FText::FromString("Measures dimensions that a text will take when rendered. Respects selected font and font size. Does not take into account any transforms pushed onto a transform stack.");
+		Description = FText::FromString("Measures dimensions that a text will take when rendered. Respects selected font and font size. Does not take into account any transforms pushed onto a transform stack. On dedicated servers only the monospace font can be measured.");
 		ParameterInternalNames.Add("text");
 		ParameterDisplayNames.Add(FText::FromString("Text"));
 		ParameterDescriptions.Add(FText::FromString("Text to measure."));
@@ -676,7 +676,7 @@ public:
 	void netFuncMeta_getFontHeight(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "getFontHeight";
 		DisplayName = FText::FromString("Get Font Height");
-		Description = FText::FromString("Get height of a tallest glyph in a font, in pixels. When measuring text, its height is always equal to font height multiplied by number of text lines.");
+		Description = FText::FromString("Get height of a tallest glyph in a font, in pixels. When measuring text, its height is always equal to font height multiplied by number of text lines. On dedicated servers only the monospace font can be measured.");
 		ParameterInternalNames.Add("size");
 		ParameterDisplayNames.Add(FText::FromString("Size"));
 		ParameterDescriptions.Add(FText::FromString("Font size in points."));
@@ -692,7 +692,7 @@ public:
 	void netFuncMeta_getFontBaseline(FString& InternalName, FText& DisplayName, FText& Description, TArray<FString>& ParameterInternalNames, TArray<FText>& ParameterDisplayNames, TArray<FText>& ParameterDescriptions, int32& Runtime) {
 		InternalName = "getFontBaseline";
 		DisplayName = FText::FromString("Get Font Baseline");
-		Description = FText::FromString("Get offset from the bottom of the font height to the baseline.");
+		Description = FText::FromString("Get offset from the bottom of the font height to the baseline. On dedicated servers only the monospace font can be measured.");
 		ParameterInternalNames.Add("size");
 		ParameterDisplayNames.Add(FText::FromString("Size"));
 		ParameterDescriptions.Add(FText::FromString("Font size in points."));
