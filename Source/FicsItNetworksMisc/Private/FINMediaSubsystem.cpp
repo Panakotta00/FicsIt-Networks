@@ -14,6 +14,9 @@
 #include "Subsystem/SubsystemActorManager.h"
 
 AFINMediaSubsystem::AFINMediaSubsystem() {
+	// Clients paint GPU T2 images themselves, so they need their own texture cache
+	ReplicationPolicy = ESubsystemReplicationPolicy::SpawnLocal;
+
 	SetActorTickEnabled(true);
 	
 	// TODO: Get UFGSaveSystem::GetSaveDirectoryPath() working
@@ -27,8 +30,18 @@ AFINMediaSubsystem::AFINMediaSubsystem() {
 void AFINMediaSubsystem::BeginPlay() {
 	Super::BeginPlay();
 
+	CacheGameIcons();
+}
+
+void AFINMediaSubsystem::CacheGameIcons() {
+	if (!GameIconFindCache.IsEmpty()) return;
+
+	// On clients the icon database may not be replicated yet
+	AFGIconDatabaseSubsystem* IconDatabase = AFGIconDatabaseSubsystem::Get(this);
+	if (!IconDatabase) return;
+
 	TArray<FIconData> Data;
-	AFGIconDatabaseSubsystem::Get(this)->GetIconData(Data);
+	IconDatabase->GetIconData(Data);
 	for (const FIconData& Icon : Data) {
 		GameIconFindCache.Add(Icon.IconName.ToString(), Icon);
 	}
@@ -139,12 +152,16 @@ UObject* AFINMediaSubsystem::LoadFileTexture(const FString& TextureReference) {
 }
 
 UObject* AFINMediaSubsystem::LoadGameTexture(const FString& TextureReference) {
+	AFGIconDatabaseSubsystem* IconDatabase = AFGIconDatabaseSubsystem::Get(this);
+	if (!IconDatabase) return nullptr;
+
 	FString IconName = TextureReference.RightChop(FString(TEXT("game:")).Len());
 	int32 ID;
 	UObject* Texture = nullptr;
 	if (FDefaultValueHelper::ParseInt(IconName, ID)) {
-		Texture = AFGIconDatabaseSubsystem::Get(this)->GetIconTextureFromIconID(ID);
+		Texture = IconDatabase->GetIconTextureFromIconID(ID);
 	} else {
+		CacheGameIcons();
 		FIconData* IconData = GameIconFindCache.Find(IconName);
 		if (IconData) Texture = IconData->Texture.Get();
 	}
