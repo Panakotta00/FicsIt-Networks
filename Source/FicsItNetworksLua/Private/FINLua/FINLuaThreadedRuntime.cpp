@@ -42,7 +42,12 @@ void FFINLuaTickRunnable::DoWork() {
 			Runtime->ContinueGame = MakeShared<FEventRef>(EEventMode::ManualReset);
 		}
 
-		TOptional<TTuple<int, int>> status = Runtime->Runtime.Tick();
+		// Tick actions like computer.reset() destroy the runtime, which waits for this task to complete,
+		// so they have to run on the game thread. ShouldThreadRun() then ends this loop.
+		TOptional<TTuple<int, int>> status;
+		if (Runtime->Runtime.TickActions.IsEmpty()) {
+			status = Runtime->Runtime.Tick();
+		}
 
 		if (!Runtime->ShouldThreadRun() || (status && status->Get<0>() != LUA_YIELD)) {
 			Runtime->bIsPromotedTick = false;
