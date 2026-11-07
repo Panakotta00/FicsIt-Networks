@@ -281,7 +281,10 @@ UFIRFunction* UFIRSourceUObject::GenerateFunction(FFicsItReflectionModule* Ref, 
 	FIRFunc->RefFunction = Func;
 	FIRFunc->InternalName = FuncName;
 	FIRFunc->DisplayName = FText::FromString(FIRFunc->InternalName);
-	FIRFunc->FunctionFlags = FIR_Func_MemberFunc | FIR_Func_Parallel;
+	// Blueprint functions run on the game thread by default. Blueprints are not thread safe, and an RPC sent
+	// from another thread crashes a dedicated server (DTLS asserts IsInGameThread).
+	const bool bIsBlueprintFunction = !Func->HasAnyFunctionFlags(FUNC_Native);
+	FIRFunc->FunctionFlags = FIR_Func_MemberFunc | (bIsBlueprintFunction ? FIR_Func_Sync : FIR_Func_Parallel);
 
 	if (Meta.InternalName.Len()) FIRFunc->InternalName = Meta.InternalName;
 	if (!Meta.DisplayName.IsEmpty()) FIRFunc->DisplayName = Meta.DisplayName;
