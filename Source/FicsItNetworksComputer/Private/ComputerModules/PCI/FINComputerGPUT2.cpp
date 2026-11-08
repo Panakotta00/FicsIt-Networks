@@ -7,9 +7,110 @@
 #include "Engine/ActorChannel.h"
 #include "Engine/NetConnection.h"
 #include "FIRException.h"
+#include "Fonts/FontCache.h"
 #include "Fonts/FontMeasure.h"
+#include "Rendering/SlateRenderer.h"
 
 const FName FFINGPUT2WidgetStyle::TypeName(TEXT("FFINGPUT2WidgetStyle"));
+
+/**
+ * Slate rasterizes text at the layout scale and rounds every glyph advance to whole pixels at that scale,
+ * while measureText measures at scale 1. So at other layout scales (pushLayout, scale boxes, DPI scaling)
+ * the drawn text got shorter or longer than measured.
+ * The text is still shaped at the layout scale so the glyphs stay sharp, but every glyph is placed where it is at scale 1,
+ * rounded to whole pixels at the layout scale. So the drawn width matches measureText within half a pixel.
+ * Shaped lines are kept as long as the text gets drawn in every paint.
+ */
+struct FFINGPUT2TextCache {
+	struct FKey {
+		FString Text;
+		float Size;
+		bool bMonospace;
+		float Scale;
+
+		bool operator==(const FKey& Other) const {
+			return Text == Other.Text && Size == Other.Size && bMonospace == Other.bMonospace && Scale == Other.Scale;
+		}
+
+		friend uint32 GetTypeHash(const FKey& Key) {
+			return HashCombine(HashCombine(GetTypeHash(Key.Text), GetTypeHash(Key.Size)), HashCombine(GetTypeHash(Key.bMonospace), GetTypeHash(Key.Scale)));
+		}
+	};
+
+	struct FLines {
+		TArray<FShapedGlyphSequencePtr> Lines;
+		uint16 LineHeight = 0;
+
+		bool IsDirty() const {
+			for (const FShapedGlyphSequencePtr& Line : Lines) {
+				if (Line && Line->IsDirty()) return true;
+			}
+			return false;
+		}
+	};
+
+	TMap<FKey, FLines> PreviousPaint;
+	TMap<FKey, FLines> CurrentPaint;
+
+	void BeginPaint() {
+		PreviousPaint = MoveTemp(CurrentPaint);
+		CurrentPaint.Reset();
+	}
+
+	const FLines& FindOrShape(const FString& Text, const FSlateFontInfo& Font, bool bMonospace, float Scale) {
+		FKey Key{Text, Font.Size, bMonospace, Scale};
+		if (const FLines* Lines = CurrentPaint.Find(Key)) return *Lines;
+
+		FLines* Previous = PreviousPaint.Find(Key);
+		if (Previous && !Previous->IsDirty()) return CurrentPaint.Add(MoveTemp(Key), MoveTemp(*Previous));
+
+		FSlateFontCache& FontCache = FSlateApplication::Get().GetRenderer()->GetFontCache().Get();
+		FLines Lines;
+		Lines.LineHeight = FontCache.GetCharacterList(Font, 1.0f).GetMaxHeight();
+		int32 LineStart = 0;
+		for (int32 i = 0; i <= Text.Len(); ++i) {
+			if (i == Text.Len() || Text[i] == '\n') {
+				Lines.Lines.Add(ShapeLine(FontCache, Text, LineStart, i - LineStart, Font, Scale));
+				LineStart = i + 1;
+			}
+		}
+		return CurrentPaint.Add(MoveTemp(Key), MoveTemp(Lines));
+	}
+
+	static FShapedGlyphSequencePtr ShapeLine(FSlateFontCache& FontCache, const FString& Text, int32 Start, int32 Len, const FSlateFontInfo& Font, float Scale) {
+		if (Len <= 0) return nullptr;
+
+		FShapedGlyphSequenceRef Shaped = FontCache.ShapeUnidirectionalText(*Text, Start, Len, Font, Scale, TextBiDi::ETextDirection::LeftToRight, ETextShapingMethod::KerningOnly);
+		TArray<FShapedGlyphEntry> Glyphs = Shaped->GetGlyphsToRender();
+		if (Glyphs.IsEmpty()) return nullptr;
+
+		// Start of every character at scale 1, the same way FSlateFontMeasure measures
+		FCharacterList& CharacterList = FontCache.GetCharacterList(Font, 1.0f);
+		TArray<int32> CharStart;
+		CharStart.SetNumUninitialized(Len + 1);
+		int32 X = 0;
+		TOptional<FCharacterEntry> Previous;
+		for (int32 i = 0; i < Len; ++i) {
+			// copy the entry, getting another character can invalidate the reference
+			const FCharacterEntry Entry = CharacterList.GetCharacter(Text[Start + i], Font.FontFallback);
+			if (Previous) X += CharacterList.GetKerning(*Previous, Entry);
+			CharStart[i] = X;
+			X += Entry.XAdvance;
+			Previous = Entry;
+		}
+		CharStart[Len] = X;
+
+		auto ToPixels = [&](int32 SourceIndex) {
+			return FMath::RoundToInt32(CharStart[FMath::Clamp(SourceIndex - Start, 0, Len)] * Scale);
+		};
+		for (int32 i = 0; i < Glyphs.Num(); ++i) {
+			const int32 NextPixel = i + 1 < Glyphs.Num() ? ToPixels(Glyphs[i + 1].SourceIndex) : ToPixels(Start + Len);
+			Glyphs[i].XAdvance = static_cast<int16>(NextPixel - ToPixels(Glyphs[i].SourceIndex));
+		}
+
+		return MakeShared<FShapedGlyphSequence>(MoveTemp(Glyphs), Shaped->GetTextBaseline(), Shaped->GetMaxTextHeight(), Shaped->GetFontMaterial(), Shaped->IsMaterialStencil(), Shaped->GetFontOutlineSettings(), FShapedGlyphSequence::FSourceTextRange(Start, Len));
+	}
+};
 
 int32 FFINGPUT2DC_PushTransform::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
 	FSlateRenderTransform Transform = FSlateRenderTransform(TScale2<float>(Scale.X, Scale.Y), Translation);
@@ -62,8 +163,19 @@ int32 FFINGPUT2DC_Lines::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs
 int32 FFINGPUT2DC_Text::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
 	FSlateFontInfo Font = bUseMonospace ? Context.Style->MonospaceText : Context.Style->NormalText;
 	Font.Size = Size;
-	FSlateDrawElement::MakeText(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(Position)), Text, Font, ESlateDrawEffect::None, Color);
-	return LayerId;
+	const float Scale = AllottedGeometry.GetAccumulatedLayoutTransform().GetScale();
+	if (!Context.TextCache || FMath::IsNearlyEqual(Scale, 1.0f)) {
+		FSlateDrawElement::MakeText(OutDrawElements, LayerId++, AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(Position)), Text, Font, ESlateDrawEffect::None, Color);
+		return LayerId;
+	}
+
+	const FFINGPUT2TextCache::FLines& Lines = Context.TextCache->FindOrShape(Text, Font, bUseMonospace, Scale);
+	for (int32 i = 0; i < Lines.Lines.Num(); ++i) {
+		if (!Lines.Lines[i]) continue;
+		const FVector2D LinePosition = Position + FVector2D(0, i * Lines.LineHeight);
+		FSlateDrawElement::MakeShapedText(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(LinePosition)), Lines.Lines[i].ToSharedRef(), ESlateDrawEffect::None, Color, Font.OutlineSettings.OutlineColor);
+	}
+	return LayerId + 1;
 }
 
 int32 FFINGPUT2DC_Spline::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& Args, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle) const {
@@ -151,6 +263,7 @@ void SFINGPUT2Widget::Construct(const FArguments& InArgs, UObject* InWorldContex
 	WorldContext = InWorldContext;
 	Style = InArgs._Style;
 	DrawCalls = InArgs._DrawCalls;
+	TextCache = MakeShared<FFINGPUT2TextCache>();
 	OnMouseDownEvent = InArgs._OnMouseDown;
 	OnMouseUpEvent = InArgs._OnMouseUp;
 	OnMouseMoveEvent = InArgs._OnMouseMove;
@@ -168,7 +281,9 @@ FVector2D SFINGPUT2Widget::ComputeDesiredSize(float LayoutScaleMultiplier) const
 
 int32 SFINGPUT2Widget::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const {
 	FFINGPUT2DrawContext Context(WorldContext, Style);
+	Context.TextCache = TextCache.Get();
 	Context.GeometryStack.Add(AllottedGeometry);
+	TextCache->BeginPaint();
 	for (const FFIRInstancedStruct& DrawCallBase : DrawCalls.Get()) {
 		FFINGPUT2DrawCall* DrawCall = DrawCallBase.GetPtr<FFINGPUT2DrawCall>();
 		if (DrawCall) LayerId = DrawCall->OnPaint(Context, Args, Context.GeometryStack.Last(), OutDrawElements, LayerId, InWidgetStyle);
