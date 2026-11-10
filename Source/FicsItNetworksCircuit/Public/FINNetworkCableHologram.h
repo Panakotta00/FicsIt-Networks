@@ -114,6 +114,7 @@ public:
 	virtual USceneComponent* SetupComponent(USceneComponent* attachParent, UActorComponent* templateComponent, const FName& componentName, const FName& socketName) override;
 	virtual void SpawnChildren(AActor* hologramOwner, FVector spawnLocation, APawn* hologramInstigator) override;
 	virtual void CheckValidPlacement() override;
+	virtual void SerializeConstructMessage(FArchive& ar, FNetConstructionID id) override;
 	// End FGBuildableHologram
 
 	AFINNetworkCableHologram();
@@ -129,6 +130,9 @@ public:
 	void UpdateSnappingEffects();
 	void UpdateMeshValidity(bool bValid);
 	bool IsInSecondStep();
+
+	/** Serializes a placement step for the client -> server construct message. Child holograms are mapped to the local ones of the given step. */
+	void SerializeStepInfo(FArchive& Ar, FFINCablePlacementStepInfo& Step, bool bFromStep);
 
 protected:
 	template<typename T>
