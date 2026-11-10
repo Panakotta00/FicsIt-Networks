@@ -118,6 +118,7 @@ public:
 	void RequestSound(const FString& Sound, const FString& Hash, int32 Size, FFINMediaSoundLoaded Callback);
 
 private:
+	void CacheGameIcons();
 	void AddTextureToCache(const FString& TextureReference, UObject* Texture);
 	UObject* RemoveTextureFromCache(const FString& TextureReference);
 	UObject* LoadTexture(const FString& TextureReference);

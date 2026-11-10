@@ -18,6 +18,7 @@ FFINLuaThreadedRuntime::FFINLuaThreadedRuntime() : LuaTask(FAsyncTask<FFINLuaTic
 	});
 	Runtime.OnTickHook.AddLambda([this](bool& bShouldYield) {
 		if (bIsPromotedTick && ShouldThreadRun()) {
+			FScopeLock Lock(&IsWaitingForCompletionMutex);
 			WaitForGame.Reset();
 			if (TSharedPtr<FEventRef> continueGame = ContinueGame) {
 				continueGame->Get()->Trigger();
@@ -35,15 +36,24 @@ FFINLuaThreadedRuntime::~FFINLuaThreadedRuntime() {
 void FFINLuaTickRunnable::DoWork() {
 	Runtime->bIsPromotedTick = true;
 	while (Runtime->bIsPromotedTick) {
-		Runtime->WaitForGame.Reset();
-		Runtime->ContinueGame = MakeShared<FEventRef>(EEventMode::ManualReset);
+		{
+			FScopeLock Lock(&Runtime->IsWaitingForCompletionMutex);
+			Runtime->WaitForGame.Reset();
+			Runtime->ContinueGame = MakeShared<FEventRef>(EEventMode::ManualReset);
+		}
 
-		TOptional<TTuple<int, int>> status = Runtime->Runtime.Tick();
+		// Tick actions like computer.reset() destroy the runtime, which waits for this task to complete,
+		// so they have to run on the game thread. ShouldThreadRun() then ends this loop.
+		TOptional<TTuple<int, int>> status;
+		if (Runtime->Runtime.TickActions.IsEmpty()) {
+			status = Runtime->Runtime.Tick();
+		}
 
 		if (!Runtime->ShouldThreadRun() || (status && status->Get<0>() != LUA_YIELD)) {
 			Runtime->bIsPromotedTick = false;
 		}
 
+		FScopeLock Lock(&Runtime->IsWaitingForCompletionMutex);
 		Runtime->ContinueGame->Get()->Trigger();
 	}
 }
@@ -56,9 +66,12 @@ bool FFINLuaThreadedRuntime::ShouldThreadRun() {
 void FFINLuaThreadedRuntime::HandleWaitForGame() {
 	IsWaitingForCompletionMutex.Lock();
 	if (TSharedPtr<FEventRef> waitForGame = WaitForGame) {
+		// Wait on the ContinueGame event that belongs to this WaitForGame. The Lua thread may already have
+		// triggered it and started a new sync round before we get to wait.
+		TSharedPtr<FEventRef> continueGame = ContinueGame;
 		waitForGame->Get()->Trigger();
 		IsWaitingForCompletionMutex.Unlock();
-		ContinueGame->Get()->Wait();
+		continueGame->Get()->Wait();
 	} else {
 		IsWaitingForCompletionMutex.Unlock();
 	}
@@ -78,11 +91,12 @@ TSharedPtr<FEventRef> FFINLuaThreadedRuntime::DoWaitForGame() {
 		return nullptr;
 	}
 
-	ContinueGame->Get()->Reset();
-	WaitForGame = MakeShared<FEventRef>(EEventMode::ManualReset);
+	// Create a new event instead of resetting the old one, otherwise a trigger the game thread did not consume yet gets lost
+	ContinueGame = MakeShared<FEventRef>(EEventMode::ManualReset);
+	TSharedPtr<FEventRef> waitForGame = WaitForGame = MakeShared<FEventRef>(EEventMode::ManualReset);
 	IsWaitingForCompletionMutex.Unlock();
 
-	WaitForGame->Get()->Wait();
+	waitForGame->Get()->Wait();
 
 	return nullptr;
 }

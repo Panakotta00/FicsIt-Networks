@@ -55,6 +55,20 @@ void AFINMediaSubsystem::BeginPlay() {
 	// A timer instead of Tick, the subsystem actor doesn't tick (bCanEverTick is false).
 	if (GetNetMode() != NM_Standalone) {
 		GetWorldTimerManager().SetTimer(SoundTransferTimer, this, &AFINMediaSubsystem::UpdateSoundTransfer, 0.5f, true, 0.f);
+	CacheGameIcons();
+}
+
+void AFINMediaSubsystem::CacheGameIcons() {
+	if (!GameIconFindCache.IsEmpty()) return;
+
+	// On clients the icon database may not be replicated yet
+	AFGIconDatabaseSubsystem* IconDatabase = AFGIconDatabaseSubsystem::Get(this);
+	if (!IconDatabase) return;
+
+	TArray<FIconData> Data;
+	IconDatabase->GetIconData(Data);
+	for (const FIconData& Icon : Data) {
+		GameIconFindCache.Add(Icon.IconName.ToString(), Icon);
 	}
 }
 
@@ -168,12 +182,16 @@ UObject* AFINMediaSubsystem::LoadFileTexture(const FString& TextureReference) {
 }
 
 UObject* AFINMediaSubsystem::LoadGameTexture(const FString& TextureReference) {
+	AFGIconDatabaseSubsystem* IconDatabase = AFGIconDatabaseSubsystem::Get(this);
+	if (!IconDatabase) return nullptr;
+
 	FString IconName = TextureReference.RightChop(FString(TEXT("game:")).Len());
 	int32 ID;
 	UObject* Texture = nullptr;
 	if (FDefaultValueHelper::ParseInt(IconName, ID)) {
-		Texture = AFGIconDatabaseSubsystem::Get(this)->GetIconTextureFromIconID(ID);
+		Texture = IconDatabase->GetIconTextureFromIconID(ID);
 	} else {
+		CacheGameIcons();
 		FIconData* IconData = GameIconFindCache.Find(IconName);
 		if (IconData) Texture = IconData->Texture.Get();
 	}

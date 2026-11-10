@@ -109,10 +109,11 @@ int AskForDiskOrSave_Legacy(FString Name) {
 	return KeepDisk;
 }
 
+// Must not return early: the archive has to be read completely even if the disk content is kept,
+// otherwise the remaining data stays unread and the rest of the save data gets out of sync.
 #define CheckKeepDisk(Condition) \
 	if (bIsLoading && KeepDisk == -1) { \
 		if (Condition) KeepDisk = AskForDiskOrSave_Legacy(Name); \
-		if (KeepDisk == 1) return; \
 	}
 
 void AFINFileSystemState_Legacy::SerializePath(TSharedRef<CodersFileSystem::Device> SerializeDevice, FStructuredArchive::FRecord Record, CodersFileSystem::Path Path, FString Name, int& KeepDisk) {
@@ -128,7 +129,10 @@ void AFINFileSystemState_Legacy::SerializePath(TSharedRef<CodersFileSystem::Devi
 		ChildNodeNum = childs.size();
 	}
 	FStructuredArchive::FArray ChildNodes = Record.EnterArray(TEXT("ChildNodes"), ChildNodeNum);
-	std::unordered_set<std::string> DiskChilds = SerializeDevice->children(Path);
+	std::unordered_set<std::string> DiskChilds;
+	if (KeepDisk != KEEP_CHANGES) {
+		DiskChilds = SerializeDevice->children(Path);
+	}
 	CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
 	if (KeepDisk == 0) {
 		for (std::string DiskChild : DiskChilds) {
@@ -206,9 +210,10 @@ void AFINFileSystemState_Legacy::SerializePath(TSharedRef<CodersFileSystem::Devi
 			if (KeepDisk == 0) {
 				SerializeDevice->remove(Path / stdChildName, true);
 			}
-			SerializeDevice->createDir(Path / stdChildName);
+			if (KeepDisk != KEEP_CHANGES) {
+				SerializeDevice->createDir(Path / stdChildName);
+			}
 			SerializePath(SerializeDevice, Child, Path / stdChildName, Name, KeepDisk);
-			if (KeepDisk == 1) return;
 		}
 	}
 }
