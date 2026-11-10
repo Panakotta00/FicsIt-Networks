@@ -80,6 +80,7 @@ public:
 	FString GetTextureReference(UObject* Texture);
 
 private:
+	void CacheGameIcons();
 	void AddTextureToCache(const FString& TextureReference, UObject* Texture);
 	UObject* RemoveTextureFromCache(const FString& TextureReference);
 	UObject* LoadTexture(const FString& TextureReference);

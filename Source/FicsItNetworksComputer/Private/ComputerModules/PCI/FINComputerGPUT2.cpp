@@ -79,7 +79,9 @@ int32 FFINGPUT2DC_Box::OnPaint(FFINGPUT2DrawContext& Context, const FPaintArgs& 
 	FSlateBrush Brush = Context.Style->FilledBox;
 
 	if (!Image.IsEmpty()) {
-		UObject* Texture = AFINMediaSubsystem::GetMediaSubsystem(Context.WorldContext)->GetOrLoadTexture(Image);
+		AFINMediaSubsystem* MediaSubsystem = AFINMediaSubsystem::GetMediaSubsystem(Context.WorldContext);
+		if (!MediaSubsystem) return LayerId;
+		UObject* Texture = MediaSubsystem->GetOrLoadTexture(Image);
 		if (!Texture) return LayerId;
 		Brush.SetResourceObject(Texture);
 	}
