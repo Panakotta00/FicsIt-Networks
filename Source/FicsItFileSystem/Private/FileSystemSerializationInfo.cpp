@@ -15,10 +15,11 @@ FArchive& operator<<(FArchive& Ar, FFileSystemSerializationInfo& Info) {
 
 namespace CodersFileSystem {
 	#undef CheckKeepDisk
+	// Must not return early: the archive has to be read completely even if the disk content is kept,
+	// otherwise the remaining data stays unread and the whole item (e.g. the drive) fails to load.
 	#define CheckKeepDisk(Condition) \
 	if (bIsLoading && KeepDisk == -1) { \
 		if (Condition) KeepDisk = AskForDiskOrSave(Name); \
-		if (KeepDisk == FIFS_KEEP_CHANGES) return; \
 	}
 
 	void SerializePath(TSharedRef<Device> SerializeDevice, FStructuredArchive::FRecord Record, Path Path, FString Name, int& KeepDisk, const TFunction<int(FString)>& AskForDiskOrSave) {
@@ -34,7 +35,10 @@ namespace CodersFileSystem {
 			ChildNodeNum = childs.size();
 		}
 		FStructuredArchive::FArray ChildNodes = Record.EnterArray(TEXT("ChildNodes"), ChildNodeNum);
-		std::unordered_set<std::string> DiskChilds = SerializeDevice->children(Path);
+		std::unordered_set<std::string> DiskChilds;
+		if (KeepDisk != FIFS_KEEP_CHANGES) {
+			DiskChilds = SerializeDevice->children(Path);
+		}
 		CheckKeepDisk(DiskChilds.size() != ChildNodeNum);
 		if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
 			for (std::string DiskChild : DiskChilds) {
@@ -104,9 +108,10 @@ namespace CodersFileSystem {
 				if (KeepDisk == FIFS_OVERRIDE_CHANGES) {
 					SerializeDevice->remove(Path / stdChildName, true);
 				}
-				SerializeDevice->createDir(Path / stdChildName);
+				if (KeepDisk != FIFS_KEEP_CHANGES) {
+					SerializeDevice->createDir(Path / stdChildName);
+				}
 				SerializePath(SerializeDevice, Child, Path / stdChildName, Name, KeepDisk, AskForDiskOrSave);
-				if (KeepDisk == 1) return;
 			}
 		}
 	}
