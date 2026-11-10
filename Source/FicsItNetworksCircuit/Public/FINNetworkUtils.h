@@ -33,6 +33,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utility")
 	static class UFINNetworkConnectionComponent* GetNetworkConnectorFromHit(FHitResult hit);
 
+	/**
+	 * Collects the network adapters attached to the given actor.
+	 * The adapter references only exist locally, on clients they can be missing
+	 * (f.e. if the parent was not replicated yet when the adapter began play),
+	 * so clients fall back to searching the adapters by their replicated parent.
+	 *
+	 * @param	Actor	the actor you want to get the attached network adapters of
+	 * @return	the network adapters attached to the actor (empty if none were found)
+	 */
+	static TArray<class AFINNetworkAdapter*> GetAttachedNetworkAdapters(AActor* Actor);
+
 	template<typename ComponentType>
 	static TArray<ComponentType*> GetComponentsFromSubclass(const UClass* InActorClass) {
 		TArray< ComponentType* > outComponents;

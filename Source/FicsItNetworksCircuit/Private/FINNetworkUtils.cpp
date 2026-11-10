@@ -4,24 +4,21 @@
 #include "FINNetworkComponent.h"
 #include "EngineUtils.h"
 
-namespace {
-	/**
-	 * Collects the network adapters attached to the given actor.
-	 * The adapter references only exist locally, on clients they can be missing (f.e. if the parent was not replicated yet when the adapter began play),
-	 * so clients fall back to searching the adapters by their replicated parent.
-	 */
-	void GetAttachedAdapters(AActor* Actor, TArray<AFINNetworkAdapter*>& OutAdapters) {
-		TArray<UFINNetworkAdapterReference*> AdapterRefs;
-		Actor->GetComponents<UFINNetworkAdapterReference>(AdapterRefs);
-		for (UFINNetworkAdapterReference* AdapterRef : AdapterRefs) {
-			if (AdapterRef && IsValid(AdapterRef->Ref)) OutAdapters.AddUnique(AdapterRef->Ref);
-		}
+TArray<AFINNetworkAdapter*> UFINNetworkUtils::GetAttachedNetworkAdapters(AActor* Actor) {
+	TArray<AFINNetworkAdapter*> Adapters;
+	if (!IsValid(Actor)) return Adapters;
 
-		if (OutAdapters.Num() > 0 || Actor->GetNetMode() != NM_Client) return;
-		for (TActorIterator<AFINNetworkAdapter> It(Actor->GetWorld()); It; ++It) {
-			if (It->Parent == Actor) OutAdapters.Add(*It);
-		}
+	TArray<UFINNetworkAdapterReference*> AdapterRefs;
+	Actor->GetComponents<UFINNetworkAdapterReference>(AdapterRefs);
+	for (UFINNetworkAdapterReference* AdapterRef : AdapterRefs) {
+		if (AdapterRef && IsValid(AdapterRef->Ref)) Adapters.AddUnique(AdapterRef->Ref);
 	}
+
+	if (Adapters.Num() > 0 || Actor->GetNetMode() != NM_Client) return Adapters;
+	for (TActorIterator<AFINNetworkAdapter> It(Actor->GetWorld()); It; ++It) {
+		if (It->Parent == Actor) Adapters.Add(*It);
+	}
+	return Adapters;
 }
 
 UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
@@ -33,8 +30,7 @@ UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
 		for (UFINAdvancedNetworkConnectionComponent* Connector : Connectors) {
 			return Connector;
 		}
-		TArray<AFINNetworkAdapter*> Adapters;
-		GetAttachedAdapters(Cast<AActor>(Obj), Adapters);
+		TArray<AFINNetworkAdapter*> Adapters = GetAttachedNetworkAdapters(Cast<AActor>(Obj));
 		if (Adapters.Num() > 0) return Adapters[0]->Connector;
 	}
 	return nullptr;
@@ -73,8 +69,7 @@ UFINNetworkConnectionComponent* UFINNetworkUtils::GetNetworkConnectorFromHit(FHi
 
 	if (connector) return connector;
 
-	TArray<AFINNetworkAdapter*> adapters;
-	GetAttachedAdapters(hit.GetActor(), adapters);
+	TArray<AFINNetworkAdapter*> adapters = GetAttachedNetworkAdapters(hit.GetActor());
 
 	for (AFINNetworkAdapter* adapter : adapters) {
 		FVector npos = adapter->GetActorLocation();
