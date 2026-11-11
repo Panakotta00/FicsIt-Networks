@@ -43,18 +43,12 @@ AFINMediaSubsystem::AFINMediaSubsystem() {
 void AFINMediaSubsystem::BeginPlay() {
 	Super::BeginPlay();
 
-	if (AFGIconDatabaseSubsystem* IconDatabase = AFGIconDatabaseSubsystem::Get(this)) {
-		TArray<FIconData> Data;
-		IconDatabase->GetIconData(Data);
-		for (const FIconData& Icon : Data) {
-			GameIconFindCache.Add(Icon.IconName.ToString(), Icon);
-		}
-	}
-
 	// The reliable messaging component of a player controller may get added after the controller spawned.
 	// A timer instead of Tick, the subsystem actor doesn't tick (bCanEverTick is false).
 	if (GetNetMode() != NM_Standalone) {
 		GetWorldTimerManager().SetTimer(SoundTransferTimer, this, &AFINMediaSubsystem::UpdateSoundTransfer, 0.5f, true, 0.f);
+	}
+
 	CacheGameIcons();
 }
 
