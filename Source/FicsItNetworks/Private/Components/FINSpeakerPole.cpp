@@ -52,6 +52,13 @@ void AFINSpeakerPole::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	GetWorldTimerManager().ClearTimer(LocalStopTimer);
 	++PlayRequest;
 	PlaybackData.Reset();
+	{
+		// Lua may still call a net function after this. A parameter copy queued now would only get destroyed
+		// together with the actor, when its UFunction may already be gone.
+		FScopeLock Lock(&DeferredRPCsMutex);
+		bDeferredRPCsClosed = true;
+		DeferredRPCs.Reset();
+	}
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -59,6 +66,62 @@ void AFINSpeakerPole::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AFINSpeakerPole, Playback);
+}
+
+bool AFINSpeakerPole::CallRemoteFunction(UFunction* Function, void* Parameters, FOutParmRec* OutParms, FFrame* Stack) {
+	if (IsInGameThread()) return Super::CallRemoteFunction(Function, Parameters, OutParms, Stack);
+
+	// Lua runs parallel net functions on a factory worker or its own thread. The Blueprint functions setVolume/setRange
+	// call the multicast UpdateSettings from there. UNetDriver::ProcessRemoteFunction only supports the game thread,
+	// on a dedicated server the send fails the IsInGameThread assert of the DTLS layer. Send it from the game thread
+	// instead. The parameters get copied, they live in the caller's frame. Calls of the same function before the
+	// task runs only update the parameters.
+	FScopeLock Lock(&DeferredRPCsMutex);
+	if (bDeferredRPCsClosed) return true;
+	if (TUniquePtr<FDeferredRPC>* Pending = DeferredRPCs.FindByPredicate([Function](const TUniquePtr<FDeferredRPC>& RPC) { return RPC->Function == Function; })) {
+		(*Pending)->SetParameters(Parameters);
+	} else {
+		DeferredRPCs.Add(MakeUnique<FDeferredRPC>(Function, Parameters));
+	}
+	if (!bDeferredRPCsScheduled) {
+		bDeferredRPCsScheduled = true;
+		AsyncTask(ENamedThreads::GameThread, [WeakThis = TWeakObjectPtr<AFINSpeakerPole>(this)]() {
+			if (AFINSpeakerPole* This = WeakThis.Get()) This->SendDeferredRPCs();
+		});
+	}
+	return true;
+}
+
+void AFINSpeakerPole::SendDeferredRPCs() {
+	TArray<TUniquePtr<FDeferredRPC>> RPCs;
+	{
+		FScopeLock Lock(&DeferredRPCsMutex);
+		RPCs = MoveTemp(DeferredRPCs);
+		bDeferredRPCsScheduled = false;
+	}
+
+	// No out parameters and no stack, like UObject::ProcessEvent calls it. The copies hold the values.
+	for (const TUniquePtr<FDeferredRPC>& RPC : RPCs) {
+		Super::CallRemoteFunction(RPC->Function, RPC->Parameters, nullptr, nullptr);
+	}
+}
+
+AFINSpeakerPole::FDeferredRPC::FDeferredRPC(UFunction* InFunction, const void* InParameters) : Function(InFunction) {
+	Parameters = static_cast<uint8*>(FMemory::Malloc(FMath::Max(Function->GetStructureSize(), 1), Function->GetMinAlignment()));
+	Function->InitializeStruct(Parameters);
+	SetParameters(InParameters);
+}
+
+AFINSpeakerPole::FDeferredRPC::~FDeferredRPC() {
+	Function->DestroyStruct(Parameters);
+	FMemory::Free(Parameters);
+}
+
+void AFINSpeakerPole::FDeferredRPC::SetParameters(const void* InParameters) {
+	// Same parameter iteration as UObject::CallFunction uses to build the RPC parameters
+	for (TFieldIterator<FProperty> It(Function); It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm; ++It) {
+		It->CopyCompleteValue_InContainer(Parameters, InParameters);
+	}
 }
 
 UObject* AFINSpeakerPole::GetSignalSenderOverride_Implementation() {

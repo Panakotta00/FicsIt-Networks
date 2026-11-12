@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
 #include "Engine/TimerHandle.h"
+#include "HAL/CriticalSection.h"
 #include "Signals/FINSignalSender.h"
 #include "FINSpeakerPole.generated.h"
 
@@ -59,6 +60,7 @@ public:
 	// Begin AActor
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual bool CallRemoteFunction(UFunction* Function, void* Parameters, FOutParmRec* OutParms, FFrame* Stack) override;
 	// End AActor
 
 	// Begin IFINNetworkSignalSender
@@ -140,4 +142,29 @@ private:
 
 	/** Increased with every local play/stop, so outdated downloads and decodes get dropped */
 	uint32 PlayRequest = 0;
+
+	/** Sends the RPCs queued by CallRemoteFunction from other threads, game thread only */
+	void SendDeferredRPCs();
+
+	/** Own copy of the parameters of an RPC, the caller's parameter memory is gone once the call returns */
+	struct FDeferredRPC {
+		UFunction* Function = nullptr;
+		uint8* Parameters = nullptr;
+
+		FDeferredRPC(UFunction* InFunction, const void* InParameters);
+		~FDeferredRPC();
+		void SetParameters(const void* InParameters);
+	};
+
+	/** Guards DeferredRPCs, bDeferredRPCsScheduled and bDeferredRPCsClosed */
+	FCriticalSection DeferredRPCsMutex;
+
+	/** RPCs called off the game thread, one entry per function, a later call replaces the parameters */
+	TArray<TUniquePtr<FDeferredRPC>> DeferredRPCs;
+
+	/** True while a game thread task to send DeferredRPCs is queued */
+	bool bDeferredRPCsScheduled = false;
+
+	/** Set in EndPlay, RPCs called off the game thread after that get dropped */
+	bool bDeferredRPCsClosed = false;
 };
