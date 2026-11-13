@@ -2,6 +2,24 @@
 #include "FINAdvancedNetworkConnectionComponent.h"
 #include "FINNetworkAdapter.h"
 #include "FINNetworkComponent.h"
+#include "EngineUtils.h"
+
+TArray<AFINNetworkAdapter*> UFINNetworkUtils::GetAttachedNetworkAdapters(AActor* Actor) {
+	TArray<AFINNetworkAdapter*> Adapters;
+	if (!IsValid(Actor)) return Adapters;
+
+	TArray<UFINNetworkAdapterReference*> AdapterRefs;
+	Actor->GetComponents<UFINNetworkAdapterReference>(AdapterRefs);
+	for (UFINNetworkAdapterReference* AdapterRef : AdapterRefs) {
+		if (AdapterRef && IsValid(AdapterRef->Ref)) Adapters.AddUnique(AdapterRef->Ref);
+	}
+
+	if (Adapters.Num() > 0 || Actor->GetNetMode() != NM_Client) return Adapters;
+	for (TActorIterator<AFINNetworkAdapter> It(Actor->GetWorld()); It; ++It) {
+		if (It->Parent == Actor) Adapters.Add(*It);
+	}
+	return Adapters;
+}
 
 UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
 	if (!Obj) return nullptr;
@@ -12,9 +30,8 @@ UObject* UFINNetworkUtils::FindNetworkComponentFromObject(UObject* Obj) {
 		for (UFINAdvancedNetworkConnectionComponent* Connector : Connectors) {
 			return Connector;
 		}
-		TArray<UFINNetworkAdapterReference*> Adapters;
-		Cast<AActor>(Obj)->GetComponents<UFINNetworkAdapterReference>(Adapters);
-		if (Adapters.Num() > 0) return Adapters[0]->Ref->Connector;
+		TArray<AFINNetworkAdapter*> Adapters = GetAttachedNetworkAdapters(Cast<AActor>(Obj));
+		if (Adapters.Num() > 0) return Adapters[0]->Connector;
 	}
 	return nullptr;
 }
@@ -52,16 +69,13 @@ UFINNetworkConnectionComponent* UFINNetworkUtils::GetNetworkConnectorFromHit(FHi
 
 	if (connector) return connector;
 
-	TArray<UFINNetworkAdapterReference*> adapters;
-	hit.GetActor()->GetComponents<UFINNetworkAdapterReference>(adapters);
+	TArray<AFINNetworkAdapter*> adapters = GetAttachedNetworkAdapters(hit.GetActor());
 
-	for (UFINNetworkAdapterReference* adapterref : adapters) {
-		if (!adapterref || !adapterref->Ref) continue;
-
-		FVector npos = adapterref->Ref->GetActorLocation();
+	for (AFINNetworkAdapter* adapter : adapters) {
+		FVector npos = adapter->GetActorLocation();
 		if (!connector || (pos - hit.ImpactPoint).Size() > (npos - hit.ImpactPoint).Size()) {
 			pos = npos;
-			connector = adapterref->Ref->Connector;
+			connector = adapter->Connector;
 		}
 	}
 
