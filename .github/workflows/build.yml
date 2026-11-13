@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: satisfactorymodding/SatisfactoryModLoader
-          ref: 801e40c322e39eb93f0b06501c9e0df6ef14f3ee
+          ref: a7e855031811d39bbdd12fc2563b87ea2d80cb5f
           path: SML
 
       - uses: actions/checkout@v4
