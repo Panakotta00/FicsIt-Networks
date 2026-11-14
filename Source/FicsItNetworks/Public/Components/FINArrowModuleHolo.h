@@ -5,6 +5,7 @@
 #include "InputActionValue.h"
 #include "Subsystem/ModSubsystem.h"
 #include "Patching/NativeHookManager.h"
+#include "Components/FINCommandPointMesh.h"
 #include "FINArrowModuleHolo.generated.h"
 
 UCLASS()
