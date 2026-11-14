@@ -149,14 +149,18 @@ void FFicsItNetworksCircuitModule::StartupModule() {
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRadarTower::BeginPlay, (void*)GetDefault<AFGBuildableRadarTower>(), [](AActor* self) {
 			if (self->HasAuthority()) {
 				UE_LOG(LogFicsItNetworksCircuit, Display, TEXT("[Wireless] Radar tower Created, recalculating network topology"));
-				AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
+				if (AFINWirelessSubsystem* WirelessSubsystem = AFINWirelessSubsystem::Get(self->GetWorld())) {
+					WirelessSubsystem->RecalculateWirelessConnections();
+				}
 			}
 		});
 
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(AFGBuildableRadarTower::EndPlay, (void*)GetDefault<AFGBuildableRadarTower>(), [](AActor* self, EEndPlayReason::Type Reason) {
 			if (Reason == EEndPlayReason::Destroyed && self->HasAuthority()) {
 				UE_LOG(LogFicsItNetworksCircuit, Display, TEXT("[Wireless] Radar tower Destroyed, recalculating network topology"));
-				AFINWirelessSubsystem::Get(self->GetWorld())->RecalculateWirelessConnections();
+				if (AFINWirelessSubsystem* WirelessSubsystem = AFINWirelessSubsystem::Get(self->GetWorld())) {
+					WirelessSubsystem->RecalculateWirelessConnections();
+				}
 			}
 		});
 #endif

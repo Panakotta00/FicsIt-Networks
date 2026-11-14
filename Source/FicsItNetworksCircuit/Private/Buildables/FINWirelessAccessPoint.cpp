@@ -56,7 +56,9 @@ void AFINWirelessAccessPoint::BeginPlay() {
 	
 	UE_LOG(LogFicsItNetworksCircuit, Display, TEXT("FINWirelessAccessPoint::BeginPlay"));
 	if (HasAuthority()) {
-		AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
+		if (AFINWirelessSubsystem* WirelessSubsystem = AFINWirelessSubsystem::Get(GetWorld())) {
+			WirelessSubsystem->RecalculateWirelessConnections();
+		}
 	}
 }
 
@@ -69,7 +71,9 @@ void AFINWirelessAccessPoint::EndPlay(const EEndPlayReason::Type EndPlayReason) 
 	Super::EndPlay(EndPlayReason);
 
 	if (EndPlayReason == EEndPlayReason::Destroyed && HasAuthority()) {
-		AFINWirelessSubsystem::Get(GetWorld())->RecalculateWirelessConnections();
+		if (AFINWirelessSubsystem* WirelessSubsystem = AFINWirelessSubsystem::Get(GetWorld())) {
+			WirelessSubsystem->RecalculateWirelessConnections();
+		}
 	}
 }
 
@@ -92,6 +96,7 @@ void AFINWirelessAccessPoint::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 void AFINWirelessAccessPoint::RefreshWirelessConnectionsData() {
 	if (HasAuthority()) {
 		AFINWirelessSubsystem* WirelessSubsystem = AFINWirelessSubsystem::Get(GetWorld());
+		if (!WirelessSubsystem) return;
 		// TODO Refresh RadarTowers&WAPs? Should not be needed
 		mDisplayedWirelessConnections = WirelessSubsystem->GetAvailableConnections(this);
 

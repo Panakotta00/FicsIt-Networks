@@ -22,18 +22,20 @@ UFIRStruct* UFicsItReflection::FindStruct(UScriptStruct* Struct, bool bRecursive
 }
 
 void UFGRailroadTrackConnectionComponent_SetSwitchPosition_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,int32)>& Scope, UFGRailroadTrackConnectionComponent* self, int32 Index) {
-	FFIRRailroadSwitchForce* ForcedTrack = AFIRSubsystem::GetReflectionSubsystem(self)->GetForcedRailroadSwitch(self);
+	AFIRSubsystem* Subsystem = AFIRSubsystem::GetReflectionSubsystem(self);
+	if (!Subsystem) return;
+	FFIRRailroadSwitchForce* ForcedTrack = Subsystem->GetForcedRailroadSwitch(self);
 	if (ForcedTrack) {
 		Scope(self, 0);
 	}
 }
 
 void UFGRailroadTrackConnectionComponent_AddConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
-	AFIRSubsystem::GetReflectionSubsystem(self)->AddRailroadSwitchConnection(Scope, self, Connection);
+	AFIRSubsystem::AddRailroadSwitchConnection(Scope, self, Connection);
 }
 
 void UFGRailroadTrackConnectionComponent_RemoveConnection_Hook(CallScope<void(*)(UFGRailroadTrackConnectionComponent*,UFGRailroadTrackConnectionComponent*)>& Scope, UFGRailroadTrackConnectionComponent* self, UFGRailroadTrackConnectionComponent* Connection) {
-	AFIRSubsystem::GetReflectionSubsystem(self)->RemoveRailroadSwitchConnection(Scope, self, Connection);
+	AFIRSubsystem::RemoveRailroadSwitchConnection(Scope, self, Connection);
 }
 
 void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFactoryConnectionComponent*,TArray<FInventoryItem>&,TSubclassOf<UFGItemDescriptor>)>& Scope, const UFGFactoryConnectionComponent* const_self, TArray<FInventoryItem>& out_items, TSubclassOf<UFGItemDescriptor> type) {
@@ -43,8 +45,9 @@ void UFGFactoryConnectionComponent_PeekOutput_Hook(CallScope<bool(*)(const UFGFa
 		return;
 	}
 
+	// The subsystem may not exist yet (e.g. factory ticks while a save is still loading). Fall back to vanilla behaviour.
 	auto reflectionSubsystem = AFIRSubsystem::GetReflectionSubsystem(self);
-	fgcheck(reflectionSubsystem);
+	if (!reflectionSubsystem) return;
 	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> OptionalSettings = reflectionSubsystem->GetFactoryConnectorSettings(self);
 	if (OptionalSettings.IsSet()) {
 		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
@@ -61,7 +64,9 @@ void UFGFactoryConnectionComponent_GrabOutput_Hook(CallScope<bool(*)(UFGFactoryC
 		Scope(self, out_item, out_OffsetBeyond, type);
 		return;
 	}
-	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
+	AFIRSubsystem* ReflectionSubsystem = AFIRSubsystem::GetReflectionSubsystem(self);
+	if (!ReflectionSubsystem) return;
+	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> OptionalSettings = ReflectionSubsystem->GetFactoryConnectorSettings(self);
 	if (OptionalSettings.IsSet()) {
 		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
 		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {
@@ -74,7 +79,9 @@ void UFGFactoryConnectionComponent_GrabOutput_Hook(CallScope<bool(*)(UFGFactoryC
 }
 
 void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bool(*)(UFGFactoryConnectionComponent*,FInventoryItem&,TSubclassOf<UFGItemDescriptor>)>& Scope, UFGFactoryConnectionComponent* self, FInventoryItem& out_item, TSubclassOf<UFGItemDescriptor> type) {
-	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> OptionalSettings = AFIRSubsystem::GetReflectionSubsystem(self)->GetFactoryConnectorSettings(self);
+	AFIRSubsystem* ReflectionSubsystem = AFIRSubsystem::GetReflectionSubsystem(self);
+	if (!ReflectionSubsystem) return;
+	TOptional<TTuple<TSharedRef<FRWScopeLock>, FFIRFactoryConnectorSettings&>> OptionalSettings = ReflectionSubsystem->GetFactoryConnectorSettings(self);
 	if (OptionalSettings.IsSet()) {
 		FFIRFactoryConnectorSettings& Settings = OptionalSettings.GetValue().Value;
 		if ((Settings.bBlocked && Settings.UnblockedTransfers == 0) || (Settings.AllowedItem != nullptr && type != nullptr && Settings.AllowedItem != type)) {

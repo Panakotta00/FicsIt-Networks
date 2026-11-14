@@ -148,6 +148,10 @@ void AFINWirelessSubsystem::BeginPlay() {
 	Super::BeginPlay();
 
 	UE_LOG(LogFicsItNetworksCircuit, Display, TEXT("Wireless Subsystem started"));
+
+	// Radar towers and access points loaded from a save can begin play before this subsystem exists,
+	// in which case their recalculation request was skipped. Catch up now.
+	RecalculateWirelessConnections();
 }
 
 void AFINWirelessSubsystem::CacheTowersAndAccessPoints() {
