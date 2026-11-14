@@ -1,5 +1,6 @@
 ﻿#include "Components/FINIndicatorPoleHolo.h"
 #include "Components/FINIndicatorPole.h"
+#include "Net/UnrealNetwork.h"
 
 AFINIndicatorPoleHolo::AFINIndicatorPoleHolo() {
 	PrimaryActorTick.bCanEverTick = true;

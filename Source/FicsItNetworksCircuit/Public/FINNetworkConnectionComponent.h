@@ -4,10 +4,10 @@
 #include "FINNetworkCircuitNode.h"
 #include "FGSaveInterface.h"
 #include "Components/SceneComponent.h"
+#include "Resources/FGBuildingDescriptor.h"
 #include "FINNetworkConnectionComponent.generated.h"
 
 class AFINNetworkCable;
-class UFGBuildingDescriptor;
 
 /**
  * This actor component is a network circuit node which allows you

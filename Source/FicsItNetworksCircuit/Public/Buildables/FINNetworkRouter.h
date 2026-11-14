@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Buildables/FGBuildable.h"
+#include "FIRAnyValue.h"
 #include "FINNetworkRouter.generated.h"
 
 UENUM()

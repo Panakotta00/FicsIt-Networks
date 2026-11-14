@@ -4,6 +4,7 @@
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableRadarTower.h"
 #include "Wireless/FINWirelessAccessPointConnectionData.h"
+#include "FIRAnyValue.h"
 #include "FINWirelessAccessPoint.generated.h"
 
 UENUM(BlueprintType)

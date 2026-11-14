@@ -3,6 +3,7 @@
 #include "FicsItNetworksModule.h"
 #include "Components/FINModularIndicatorPoleHolo.h"
 #include "Net/UnrealNetwork.h"
+#include <cmath>
 
 AFINDefaultDynamicSizedModule::AFINDefaultDynamicSizedModule() {
 	PrimaryActorTick.bCanEverTick = true;
