@@ -10,6 +10,8 @@
 #include "Patching/NativeHookManager.h"
 #include "UObject/CoreRedirects.h"
 #include "FIRGlobalRegisterHelper.h"
+#include "FIRHypertubeSubsystem.h"
+#include "Buildables/FGBuildablePipeHyperJunction.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItReflection);
 
@@ -84,6 +86,24 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
 		}
 	}
+}
+
+void AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook(CallScope<TArray<FFGHypertubeJunctionOutputConnectionInfo>(*)(const AFGBuildablePipeHyperJunction*, const UFGPipeConnectionComponentBase*, AFGCharacterPlayer*)>& Scope, const AFGBuildablePipeHyperJunction* self, const UFGPipeConnectionComponentBase* Input, AFGCharacterPlayer* Player) {
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input) : nullptr;
+	if (!Forced) return;
+
+	TArray<FFGHypertubeJunctionOutputConnectionInfo> Outputs = Scope(self, Input, Player);
+	TArray<FFGHypertubeJunctionOutputConnectionInfo> Filtered = Outputs.FilterByPredicate([Forced](const FFGHypertubeJunctionOutputConnectionInfo& Info) {
+		return Info.Connection == Forced;
+	});
+	Scope.Override(Filtered.Num() > 0 ? Filtered : Outputs);
+}
+
+void AFGBuildablePipeHyperJunction_GetDefaultOutputConnection_Hook(CallScope<UFGPipeConnectionComponentBase*(*)(const AFGBuildablePipeHyperJunction*, const UFGPipeConnectionComponentBase*)>& Scope, const AFGBuildablePipeHyperJunction* self, const UFGPipeConnectionComponentBase* Input) {
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input) : nullptr;
+	if (Forced) Scope.Override(Forced);
 }
 
 TMulticastDelegate<void()> FFicsItReflectionModule::OnReflectionInitialized;
@@ -173,6 +193,10 @@ void FFicsItReflectionModule::StartupModule() {
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_PeekOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_GrabOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_GrabOutput_Hook);
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook);
+
+	// Runs on server and clients, the client predicts the hypertube movement with the same junction outputs.
+	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::GetAvailableOutputConnections, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook);
+	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::GetDefaultOutputConnection, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_GetDefaultOutputConnection_Hook);
 #else
 		FFIRGlobalRegisterHelper::Register();
 		FFicsItReflectionModule::Get().PopulateSources();
