@@ -1,4 +1,5 @@
 ﻿#include "Reflection/Source/FIRSourceStatic.h"
+#include "FicsItReflection.h"
 
 #include "FGBuildableDoor.h"
 #include "Reflection/FIRArrayProperty.h"

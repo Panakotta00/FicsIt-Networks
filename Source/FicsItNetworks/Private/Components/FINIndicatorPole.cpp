@@ -1,5 +1,6 @@
 ﻿#include "Components/FINIndicatorPole.h"
 #include "FGColoredInstanceMeshProxy.h"
+#include "FINAdvancedNetworkConnectionComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AFINIndicatorPole::AFINIndicatorPole() {

@@ -7,6 +7,7 @@
 #include "FINFileSystemSubsystem.generated.h"
 
 struct FFINItemStateFileSystem;
+struct FInventoryItem;
 
 UCLASS()
 class FICSITNETWORKSCOMPUTER_API AFINFileSystemSubsystem : public AModSubsystem {

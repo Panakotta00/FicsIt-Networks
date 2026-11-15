@@ -5,14 +5,12 @@
 #include <functional>
 
 #include "FileSystem.h"
+#include "Listener.h"
 
 struct _FILE_NOTIFY_INFORMATION;
 typedef _FILE_NOTIFY_INFORMATION FILE_NOTIFY_INFORMATION;
 
 namespace CodersFileSystem {
-	enum NodeType;
-	class Path;
-
 	struct DiskDeviceWatcher;
 	
 	class FICSITFILESYSTEM_API WindowsFileWatcher {

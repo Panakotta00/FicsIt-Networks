@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "LuaUtil.h"
+#include "FINLuaRuntime.h"
 #include "FINLuaRuntimePersistence.h"
 
 namespace FINLua {

@@ -1,4 +1,5 @@
 ﻿#include "Reflection/Source/FIRSourceStaticMacros.h"
+#include "FicsItReflection.h"
 
 BeginClass(UFIRBase, "ReflectionBase", "Reflection Base", "The base class for all things of the reflection system.")
 BeginProp(RString, name, "Name", "The internal name.") {
