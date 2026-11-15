@@ -195,8 +195,12 @@ void FFicsItReflectionModule::StartupModule() {
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook);
 
 	// Runs on server and clients, the client predicts the hypertube movement with the same junction outputs.
+	// SML casts the hook of a function returning a struct by value (TArray) in a way MSVC reports as C4191.
+#pragma warning(push)
+#pragma warning(disable : 4191)
 	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::GetAvailableOutputConnections, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook);
 	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::GetDefaultOutputConnection, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_GetDefaultOutputConnection_Hook);
+#pragma warning(pop)
 #else
 		FFIRGlobalRegisterHelper::Register();
 		FFicsItReflectionModule::Get().PopulateSources();

@@ -1,6 +1,7 @@
 #include "FIRHypertubeSubsystem.h"
 
 #include "Buildables/FGBuildablePipeHyperJunction.h"
+#include "FGPipeConnectionComponent.h"
 #include "Engine/Engine.h"
 #include "Net/UnrealNetwork.h"
 #include "Subsystem/SubsystemActorManager.h"
