@@ -1,3 +1,8 @@
+#if PLATFORM_UNIX
+#include "Unix/UnixPlatformCompilerPreSetup.h"
+#elif PLATFORM_WINDOWS
+#include "MSVC/MSVCPlatformCompilerPreSetup.h"
+#endif
 #include "HAL/Platform.h"
 
 THIRD_PARTY_INCLUDES_START
