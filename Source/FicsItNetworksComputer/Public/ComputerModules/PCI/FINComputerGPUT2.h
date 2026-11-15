@@ -52,12 +52,15 @@ enum EFINGPUT2DrawCallType {
 	FIN_GPUT2_DC_TEXT,
 };
 
+struct FFINGPUT2TextCache;
+
 USTRUCT()
 struct FICSITNETWORKSCOMPUTER_API FFINGPUT2DrawContext {
 	GENERATED_BODY()
 
 	UObject* WorldContext = nullptr;
 	const FFINGPUT2WidgetStyle* Style = nullptr;
+	FFINGPUT2TextCache* TextCache = nullptr;
 	TArray<FGeometry> GeometryStack;
 	TArray<FSlateClippingZone> ClippingStack;
 
@@ -368,7 +371,8 @@ private:
 	const FFINGPUT2WidgetStyle* Style = nullptr;
 	
 	TAttribute<TArray<FFIRInstancedStruct>> DrawCalls;
-	
+	TSharedPtr<FFINGPUT2TextCache> TextCache;
+
 	FFINGPUT2CursorEvent OnMouseDownEvent;
 	FFINGPUT2CursorEvent OnMouseUpEvent;
 	FFINGPUT2CursorEvent OnMouseMoveEvent;
