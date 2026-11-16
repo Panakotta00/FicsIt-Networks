@@ -77,6 +77,9 @@ public:
 	/** Returns the end of the given route of the junction that is not the input, or nullptr if the route doesn't exist. */
 	static UFGPipeConnectionComponentBase* GetRouteOutput(const AFGBuildablePipeHyperJunction* Junction, int32 RouteIndex, const UFGPipeConnectionComponentBase* Input);
 
+	/** Returns the index of the route of the junction between the given input and output, or INDEX_NONE. */
+	static int32 GetRouteIndex(const AFGBuildablePipeHyperJunction* Junction, const UFGPipeConnectionComponentBase* Input, const UFGPipeConnectionComponentBase* Output);
+
 	/** Returns the user name of the player controlling the given character, or an empty string. */
 	static FString GetPlayerName(const AFGCharacterPlayer* Player);
 

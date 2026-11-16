@@ -110,6 +110,15 @@ UFGPipeConnectionComponentBase* AFIRHypertubeSubsystem::GetRouteOutput(const AFG
 	return nullptr;
 }
 
+int32 AFIRHypertubeSubsystem::GetRouteIndex(const AFGBuildablePipeHyperJunction* Junction, const UFGPipeConnectionComponentBase* Input, const UFGPipeConnectionComponentBase* Output) {
+	if (!IsValid(Junction) || !Input || !Output) return INDEX_NONE;
+	for (int32 i = 0; i < Junction->JunctionPaths.Num(); ++i) {
+		const FFGPipeHyperJunctionPath& Path = Junction->JunctionPaths[i];
+		if ((Path.Connection0 == Input && Path.Connection1 == Output) || (Path.Connection1 == Input && Path.Connection0 == Output)) return i;
+	}
+	return INDEX_NONE;
+}
+
 FString AFIRHypertubeSubsystem::GetPlayerName(const AFGCharacterPlayer* Player) {
 	if (!IsValid(Player)) return FString();
 	const AFGPlayerState* PlayerState = Player->GetPlayerState<AFGPlayerState>();

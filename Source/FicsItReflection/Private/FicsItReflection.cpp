@@ -11,6 +11,8 @@
 #include "UObject/CoreRedirects.h"
 #include "FIRGlobalRegisterHelper.h"
 #include "FIRHypertubeSubsystem.h"
+#include "GameFramework/PlayerController.h"
+#include "FGCharacterPlayer.h"
 #include "Buildables/FGBuildablePipeHyperJunction.h"
 #include "Reflection/Source/Static/FIRSourceStaticHooks.h"
 
@@ -92,9 +94,21 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 /** The player currently entering a hypertube junction (set while OnPipeEnterReal runs), GetDefaultOutputConnection has no player parameter. */
 static thread_local const AFGCharacterPlayer* GFIRHypertubeEnteringPlayer = nullptr;
 
+/**
+ * Returns the given player, or on a client the locally controlled character if no player is given.
+ * A client only predicts the hypertube movement of its own character, so that is the player a call without player is about.
+ */
+static const AFGCharacterPlayer* FIRResolveHypertubePlayer(const UObject* Context, const AFGCharacterPlayer* Player) {
+	if (Player) return Player;
+	UWorld* World = Context ? Context->GetWorld() : nullptr;
+	if (!World || World->GetNetMode() != NM_Client) return nullptr;
+	APlayerController* Controller = World->GetFirstPlayerController();
+	return Controller ? Cast<AFGCharacterPlayer>(Controller->GetPawn()) : nullptr;
+}
+
 void AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook(CallScope<TArray<FFGHypertubeJunctionOutputConnectionInfo>(*)(const AFGBuildablePipeHyperJunction*, const UFGPipeConnectionComponentBase*, AFGCharacterPlayer*)>& Scope, const AFGBuildablePipeHyperJunction* self, const UFGPipeConnectionComponentBase* Input, AFGCharacterPlayer* Player) {
 	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
-	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input, Player) : nullptr;
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input, FIRResolveHypertubePlayer(self, Player)) : nullptr;
 	if (!Forced) return;
 
 	TArray<FFGHypertubeJunctionOutputConnectionInfo> Outputs = Scope(self, Input, Player);
@@ -106,13 +120,17 @@ void AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook(CallScope<
 
 void AFGBuildablePipeHyperJunction_GetDefaultOutputConnection_Hook(CallScope<UFGPipeConnectionComponentBase*(*)(const AFGBuildablePipeHyperJunction*, const UFGPipeConnectionComponentBase*)>& Scope, const AFGBuildablePipeHyperJunction* self, const UFGPipeConnectionComponentBase* Input) {
 	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
-	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input, GFIRHypertubeEnteringPlayer) : nullptr;
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input, FIRResolveHypertubePlayer(self, GFIRHypertubeEnteringPlayer)) : nullptr;
 	if (Forced) Scope.Override(Forced);
 }
 
 /**
  * OnPipeEnterReal is an IFGPipeHyperInterface function. MSVC calls it with `this` pointing to the interface sub object and SML passes
  * that pointer on unchanged, so RawSelf must not be used as junction. The junction is the owner of the connection the player entered through.
+ *
+ * The route is decided here. The game doesn't always pick an output of the (filtered) available outputs, e.g. it can take the output
+ * the player picked before, so if the route doesn't lead to the forced output, it gets replaced. This runs on the server and for the
+ * client prediction.
  */
 void AFGBuildablePipeHyperJunction_OnPipeEnterReal_Hook(CallScope<EPipeHyperEnterResult(*)(AFGBuildablePipeHyperJunction*, AFGCharacterPlayer*, UFGPipeConnectionComponentBase*, FFGDynamicStruct&, const FFGDynamicStruct&)>& Scope, AFGBuildablePipeHyperJunction* RawSelf, AFGCharacterPlayer* Player, UFGPipeConnectionComponentBase* Input, FFGDynamicStruct& OutPipeData, const FFGDynamicStruct& PredictionPipeData) {
 	const AFGCharacterPlayer* PreviousPlayer = GFIRHypertubeEnteringPlayer;
@@ -122,16 +140,26 @@ void AFGBuildablePipeHyperJunction_OnPipeEnterReal_Hook(CallScope<EPipeHyperEnte
 
 	if (Result != EPipeHyperEnterResult::PHR_Success || !IsValid(Input)) return;
 	AFGBuildablePipeHyperJunction* Junction = Cast<AFGBuildablePipeHyperJunction>(Input->GetOwner());
-	if (!IsValid(Junction) || !Junction->HasAuthority()) return;
+	if (!IsValid(Junction)) return;
 
-	UFGPipeConnectionComponentBase* Output = nullptr;
-	if (UScriptStruct* DataStruct = OutPipeData.GetStruct()) {
-		if (FIntProperty* RouteProp = FindFProperty<FIntProperty>(DataStruct, TEXT("TravelRouteIndex"))) {
-			const int32 RouteIndex = RouteProp->GetPropertyValue_InContainer(OutPipeData.GetStructValueRaw());
-			Output = AFIRHypertubeSubsystem::GetRouteOutput(Junction, RouteIndex, Input);
+	UScriptStruct* DataStruct = OutPipeData.GetStruct();
+	FIntProperty* RouteProp = DataStruct ? FindFProperty<FIntProperty>(DataStruct, TEXT("TravelRouteIndex")) : nullptr;
+	if (!RouteProp) return;
+	void* RouteData = OutPipeData.GetStructValueRaw();
+	int32 RouteIndex = RouteProp->GetPropertyValue_InContainer(RouteData);
+
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(Junction);
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(Junction, Input, FIRResolveHypertubePlayer(Junction, Player)) : nullptr;
+	if (Forced && AFIRHypertubeSubsystem::GetRouteOutput(Junction, RouteIndex, Input) != Forced) {
+		const int32 ForcedRouteIndex = AFIRHypertubeSubsystem::GetRouteIndex(Junction, Input, Forced);
+		if (ForcedRouteIndex != INDEX_NONE) {
+			RouteProp->SetPropertyValue_InContainer(RouteData, ForcedRouteIndex);
+			RouteIndex = ForcedRouteIndex;
 		}
 	}
-	UFIRPipeHyperJunctionHook::PlayerPassed(Junction, AFIRHypertubeSubsystem::GetPlayerName(Player), Input, Output);
+
+	if (!Junction->HasAuthority()) return;
+	UFIRPipeHyperJunctionHook::PlayerPassed(Junction, AFIRHypertubeSubsystem::GetPlayerName(Player), Input, AFIRHypertubeSubsystem::GetRouteOutput(Junction, RouteIndex, Input));
 }
 
 TMulticastDelegate<void()> FFicsItReflectionModule::OnReflectionInitialized;
