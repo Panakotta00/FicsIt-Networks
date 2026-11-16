@@ -12,6 +12,7 @@
 #include "FIRGlobalRegisterHelper.h"
 #include "FIRHypertubeSubsystem.h"
 #include "Buildables/FGBuildablePipeHyperJunction.h"
+#include "Reflection/Source/Static/FIRSourceStaticHooks.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItReflection);
 
@@ -88,9 +89,12 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 	}
 }
 
+/** The player currently entering a hypertube junction (set while OnPipeEnterReal runs), GetDefaultOutputConnection has no player parameter. */
+static thread_local const AFGCharacterPlayer* GFIRHypertubeEnteringPlayer = nullptr;
+
 void AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook(CallScope<TArray<FFGHypertubeJunctionOutputConnectionInfo>(*)(const AFGBuildablePipeHyperJunction*, const UFGPipeConnectionComponentBase*, AFGCharacterPlayer*)>& Scope, const AFGBuildablePipeHyperJunction* self, const UFGPipeConnectionComponentBase* Input, AFGCharacterPlayer* Player) {
 	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
-	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input) : nullptr;
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input, Player) : nullptr;
 	if (!Forced) return;
 
 	TArray<FFGHypertubeJunctionOutputConnectionInfo> Outputs = Scope(self, Input, Player);
@@ -102,8 +106,32 @@ void AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook(CallScope<
 
 void AFGBuildablePipeHyperJunction_GetDefaultOutputConnection_Hook(CallScope<UFGPipeConnectionComponentBase*(*)(const AFGBuildablePipeHyperJunction*, const UFGPipeConnectionComponentBase*)>& Scope, const AFGBuildablePipeHyperJunction* self, const UFGPipeConnectionComponentBase* Input) {
 	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
-	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input) : nullptr;
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input, GFIRHypertubeEnteringPlayer) : nullptr;
 	if (Forced) Scope.Override(Forced);
+}
+
+/**
+ * OnPipeEnterReal is an IFGPipeHyperInterface function. MSVC calls it with `this` pointing to the interface sub object and SML passes
+ * that pointer on unchanged, so RawSelf must not be used as junction. The junction is the owner of the connection the player entered through.
+ */
+void AFGBuildablePipeHyperJunction_OnPipeEnterReal_Hook(CallScope<EPipeHyperEnterResult(*)(AFGBuildablePipeHyperJunction*, AFGCharacterPlayer*, UFGPipeConnectionComponentBase*, FFGDynamicStruct&, const FFGDynamicStruct&)>& Scope, AFGBuildablePipeHyperJunction* RawSelf, AFGCharacterPlayer* Player, UFGPipeConnectionComponentBase* Input, FFGDynamicStruct& OutPipeData, const FFGDynamicStruct& PredictionPipeData) {
+	const AFGCharacterPlayer* PreviousPlayer = GFIRHypertubeEnteringPlayer;
+	GFIRHypertubeEnteringPlayer = Player;
+	const EPipeHyperEnterResult Result = Scope(RawSelf, Player, Input, OutPipeData, PredictionPipeData);
+	GFIRHypertubeEnteringPlayer = PreviousPlayer;
+
+	if (Result != EPipeHyperEnterResult::PHR_Success || !IsValid(Input)) return;
+	AFGBuildablePipeHyperJunction* Junction = Cast<AFGBuildablePipeHyperJunction>(Input->GetOwner());
+	if (!IsValid(Junction) || !Junction->HasAuthority()) return;
+
+	UFGPipeConnectionComponentBase* Output = nullptr;
+	if (UScriptStruct* DataStruct = OutPipeData.GetStruct()) {
+		if (FIntProperty* RouteProp = FindFProperty<FIntProperty>(DataStruct, TEXT("TravelRouteIndex"))) {
+			const int32 RouteIndex = RouteProp->GetPropertyValue_InContainer(OutPipeData.GetStructValueRaw());
+			Output = AFIRHypertubeSubsystem::GetRouteOutput(Junction, RouteIndex, Input);
+		}
+	}
+	UFIRPipeHyperJunctionHook::PlayerPassed(Junction, AFIRHypertubeSubsystem::GetPlayerName(Player), Input, Output);
 }
 
 TMulticastDelegate<void()> FFicsItReflectionModule::OnReflectionInitialized;
@@ -200,6 +228,7 @@ void FFicsItReflectionModule::StartupModule() {
 #pragma warning(disable : 4191)
 	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::GetAvailableOutputConnections, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook);
 	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::GetDefaultOutputConnection, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_GetDefaultOutputConnection_Hook);
+	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::OnPipeEnterReal, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_OnPipeEnterReal_Hook);
 #pragma warning(pop)
 #else
 		FFIRGlobalRegisterHelper::Register();
