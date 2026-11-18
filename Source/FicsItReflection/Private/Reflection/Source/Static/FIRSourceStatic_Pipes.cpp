@@ -5,6 +5,8 @@
 #include "FGPipeConnectionComponent.h"
 #include "FGPipeSubsystem.h"
 #include "Buildables/FGBuildablePipeHyper.h"
+#include "Buildables/FGBuildablePipeHyperJunction.h"
+#include "FIRHypertubeSubsystem.h"
 #include "Buildables/FGBuildablePipelinePump.h"
 #include "Buildables/FGBuildablePipeReservoir.h"
 #include "Buildables/FGPipeHyperStart.h"
@@ -26,6 +28,89 @@ EndSignal()
 EndClass()
 
 BeginClass(AFGBuildablePipeHyper, "BuildablePipeHyper", "Buildable Pipe Hyper", "A hypertube pipe")
+EndClass()
+
+BeginClass(AFGBuildablePipeHyperJunction, "PipeHyperJunction", "Pipe Hyper Junction", "A hypertube junction (T or Y splitter). Players normally pick the output themselves, a forced output overrides this. An output forced for a single player wins over an output forced for all players.")
+	Hook(UFIRPipeHyperJunctionHook)
+BeginSignal(PlayerPassed, "Player Passed", "Triggers when a player enters this junction and the route through it got decided.")
+	SignalParam(0, RString, player, "Player", "The user name of the player.")
+	SignalParam(1, RTrace<UFGPipeConnectionComponentBase>, input, "Input", "The connection the player entered through.")
+	SignalParam(2, RTrace<UFGPipeConnectionComponentBase>, output, "Output", "The connection the player will leave through.")
+EndSignal()
+BeginFunc(getJunctionConnections, "Get Junction Connections", "Returns all hypertube connections of this junction that are part of a route.") {
+	OutVal(0, RArray<RTrace<UFGPipeConnectionComponentBase>>, connections, "Connections", "The hypertube connections of this junction.")
+	FIRBody()
+	FIRArray Output;
+	for (UFGPipeConnectionComponentBase* Connection : AFIRHypertubeSubsystem::GetConnections(self)) {
+		Output.Add(Ctx.GetTrace() / Connection);
+	}
+	connections = Output;
+} EndFunc()
+BeginFunc(getOutputs, "Get Outputs", "Returns the outputs a player can reach when entering the junction through the given connection.") {
+	InVal(0, RObject<UFGPipeConnectionComponentBase>, input, "Input", "The connection the player enters the junction through.")
+	OutVal(1, RArray<RTrace<UFGPipeConnectionComponentBase>>, outputs, "Outputs", "The reachable output connections.")
+	FIRBody()
+	FIRArray Output;
+	for (UFGPipeConnectionComponentBase* Connection : AFIRHypertubeSubsystem::GetOutputsForInput(self, Cast<UFGPipeConnectionComponentBase>(input.Get()))) {
+		Output.Add(Ctx.GetTrace() / Connection);
+	}
+	outputs = Output;
+} EndFunc()
+BeginFunc(getDefaultOutput, "Get Default Output", "Returns the output a player uses by default when entering through the given connection. Returns the forced output if one is set and reachable.") {
+	InVal(0, RObject<UFGPipeConnectionComponentBase>, input, "Input", "The connection the player enters the junction through.")
+	OutVal(1, RTrace<UFGPipeConnectionComponentBase>, output, "Output", "The default output connection.")
+	FIRBody()
+	output = Ctx.GetTrace() / self->GetDefaultOutputConnection(Cast<UFGPipeConnectionComponentBase>(input.Get()));
+} EndFunc()
+BeginFunc(setForcedOutput, "Set Forced Output", "Forces every player passing this junction to leave through the given connection, as long as it is reachable from the connection the player entered through. Otherwise the normal player choice is used.", 0) {
+	InVal(0, RObject<UFGPipeConnectionComponentBase>, output, "Output", "The connection of this junction players should leave through.")
+	FIRBody()
+	UFGPipeConnectionComponentBase* Connection = Cast<UFGPipeConnectionComponentBase>(output.Get());
+	if (!IsValid(Connection) || !AFIRHypertubeSubsystem::GetConnections(self).Contains(Connection)) {
+		throw FFIRException(TEXT("The given connection is not a connection of this junction"));
+	}
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	if (!Subsystem) throw FFIRException(TEXT("Hypertube subsystem not available"));
+	Subsystem->SetForcedOutput(self, Connection);
+} EndFunc()
+BeginFunc(clearForcedOutput, "Clear Forced Output", "Removes the output forced for all players. Outputs forced for single players stay.", 0) {
+	FIRBody()
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	if (Subsystem) Subsystem->SetForcedOutput(self, nullptr);
+} EndFunc()
+BeginFunc(getForcedOutput, "Get Forced Output", "Returns the forced output connection, or nil if no output is forced.") {
+	OutVal(0, RTrace<UFGPipeConnectionComponentBase>, output, "Output", "The forced output connection.")
+	FIRBody()
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	output = Ctx.GetTrace() / (Subsystem ? Subsystem->GetForcedOutput(self) : nullptr);
+} EndFunc()
+BeginFunc(setForcedOutputForPlayer, "Set Forced Output For Player", "Forces the player with the given user name to leave through the given connection, as long as it is reachable from the connection the player entered through. Wins over the output forced for all players.", 0) {
+	InVal(0, RString, player, "Player", "The user name of the player.")
+	InVal(1, RObject<UFGPipeConnectionComponentBase>, output, "Output", "The connection of this junction the player should leave through.")
+	FIRBody()
+	if (player.IsEmpty()) throw FFIRException(TEXT("The player name must not be empty"));
+	UFGPipeConnectionComponentBase* Connection = Cast<UFGPipeConnectionComponentBase>(output.Get());
+	if (!IsValid(Connection) || !AFIRHypertubeSubsystem::GetConnections(self).Contains(Connection)) {
+		throw FFIRException(TEXT("The given connection is not a connection of this junction"));
+	}
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	if (!Subsystem) throw FFIRException(TEXT("Hypertube subsystem not available"));
+	Subsystem->SetForcedOutput(self, Connection, player);
+} EndFunc()
+BeginFunc(clearForcedOutputForPlayer, "Clear Forced Output For Player", "Removes the output forced for the player with the given user name. The output forced for all players (if any) applies again.", 0) {
+	InVal(0, RString, player, "Player", "The user name of the player.")
+	FIRBody()
+	if (player.IsEmpty()) return;
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	if (Subsystem) Subsystem->SetForcedOutput(self, nullptr, player);
+} EndFunc()
+BeginFunc(getForcedOutputForPlayer, "Get Forced Output For Player", "Returns the output forced for the player with the given user name, or nil if none is set. Doesn't return the output forced for all players.") {
+	InVal(0, RString, player, "Player", "The user name of the player.")
+	OutVal(1, RTrace<UFGPipeConnectionComponentBase>, output, "Output", "The forced output connection.")
+	FIRBody()
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	output = Ctx.GetTrace() / ((Subsystem && !player.IsEmpty()) ? Subsystem->GetForcedOutput(self, player) : nullptr);
+} EndFunc()
 EndClass()
 
 BeginClass(UFGPipeConnectionComponentBase, "PipeConnectionBase", "Pipe Connection Base", "A actor component base that is a connection point to which a pipe for fluid or hyper can get attached to.")

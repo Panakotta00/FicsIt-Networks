@@ -4,6 +4,7 @@
 #include "FicsItReflection.h"
 #include "FIRGlobalRegisterHelper.h"
 #include "FIRHookSubsystem.h"
+#include "FIRHypertubeSubsystem.h"
 #include "FIRSubsystem.h"
 #include "Module/GameInstanceModule.h"
 #include "Module/GameWorldModule.h"
@@ -16,6 +17,7 @@ class FICSITREFLECTION_API UFIRGameWorldModule : public UGameWorldModule {
 	UFIRGameWorldModule() {
 		ModSubsystems.Add(AFIRSubsystem::StaticClass());
 		ModSubsystems.Add(AFIRHookSubsystem::StaticClass());
+		ModSubsystems.Add(AFIRHypertubeSubsystem::StaticClass());
 	}
 };
 

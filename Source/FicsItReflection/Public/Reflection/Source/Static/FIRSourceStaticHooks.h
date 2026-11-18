@@ -12,6 +12,7 @@
 #include "FGTrain.h"
 #include "Buildables/FGBuildableRailroadSignal.h"
 #include "Buildables/FGPipeHyperStart.h"
+#include "Buildables/FGBuildablePipeHyperJunction.h"
 #include "Patching/NativeHookManager.h"
 #include "FGCharacterMovementComponent.h"
 #include "FGCharacterPlayer.h"
@@ -370,6 +371,36 @@ public:
 		SUBSCRIBE_METHOD_VIRTUAL_AFTER(UFGCharacterMovementComponent::EnterPipeHyper, (void*)GetDefault<UFGCharacterMovementComponent>(), &EnterHyperPipe);
 		SUBSCRIBE_METHOD_VIRTUAL(UFGCharacterMovementComponent::PipeHyperForceExit, (void*)GetDefault<UFGCharacterMovementComponent>(), &ExitHyperPipe);
     }
+};
+
+/**
+ * Sends the PlayerPassed signal of hypertube junctions.
+ * The function hook on OnPipeEnterReal is always installed (it also passes the player to the forced output lookup),
+ * this hook only decides which junctions send the signal.
+ */
+UCLASS()
+class UFIRPipeHyperJunctionHook : public UFIRMultiFunctionHook {
+	GENERATED_BODY()
+
+protected:
+	static UFIRPipeHyperJunctionHook* StaticSelf() {
+		static UFIRPipeHyperJunctionHook* Hook = nullptr;
+		if (!Hook) Hook = const_cast<UFIRPipeHyperJunctionHook*>(GetDefault<UFIRPipeHyperJunctionHook>());
+		return Hook;
+	}
+
+	// Begin UFIRMultiFunctionHook
+	virtual UFIRMultiFunctionHook* Self() override {
+		return StaticSelf();
+	}
+	// End UFIRMultiFunctionHook
+
+public:
+	static void PlayerPassed(AFGBuildablePipeHyperJunction* Junction, const FString& PlayerName, UFGPipeConnectionComponentBase* Input, UFGPipeConnectionComponentBase* Output) {
+		UFIRPipeHyperJunctionHook* Hook = StaticSelf();
+		if (!Hook->IsSender(Junction)) return;
+		Hook->Send(Junction, TEXT("PlayerPassed"), {FIRStr(PlayerName), (FIRTrace)Input, (FIRTrace)Output});
+	}
 };
 
 UCLASS()

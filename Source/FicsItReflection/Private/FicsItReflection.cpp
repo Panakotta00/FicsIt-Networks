@@ -10,6 +10,11 @@
 #include "Patching/NativeHookManager.h"
 #include "UObject/CoreRedirects.h"
 #include "FIRGlobalRegisterHelper.h"
+#include "FIRHypertubeSubsystem.h"
+#include "GameFramework/PlayerController.h"
+#include "FGCharacterPlayer.h"
+#include "Buildables/FGBuildablePipeHyperJunction.h"
+#include "Reflection/Source/Static/FIRSourceStaticHooks.h"
 
 DEFINE_LOG_CATEGORY(LogFicsItReflection);
 
@@ -84,6 +89,77 @@ void UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook(CallScope<bo
 			if (bSuccess) Settings.UnblockedTransfers = FMath::Max(0, Settings.UnblockedTransfers-1);
 		}
 	}
+}
+
+/** The player currently entering a hypertube junction (set while OnPipeEnterReal runs), GetDefaultOutputConnection has no player parameter. */
+static thread_local const AFGCharacterPlayer* GFIRHypertubeEnteringPlayer = nullptr;
+
+/**
+ * Returns the given player, or on a client the locally controlled character if no player is given.
+ * A client only predicts the hypertube movement of its own character, so that is the player a call without player is about.
+ */
+static const AFGCharacterPlayer* FIRResolveHypertubePlayer(const UObject* Context, const AFGCharacterPlayer* Player) {
+	if (Player) return Player;
+	UWorld* World = Context ? Context->GetWorld() : nullptr;
+	if (!World || World->GetNetMode() != NM_Client) return nullptr;
+	APlayerController* Controller = World->GetFirstPlayerController();
+	return Controller ? Cast<AFGCharacterPlayer>(Controller->GetPawn()) : nullptr;
+}
+
+void AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook(CallScope<TArray<FFGHypertubeJunctionOutputConnectionInfo>(*)(const AFGBuildablePipeHyperJunction*, const UFGPipeConnectionComponentBase*, AFGCharacterPlayer*)>& Scope, const AFGBuildablePipeHyperJunction* self, const UFGPipeConnectionComponentBase* Input, AFGCharacterPlayer* Player) {
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input, FIRResolveHypertubePlayer(self, Player)) : nullptr;
+	if (!Forced) return;
+
+	TArray<FFGHypertubeJunctionOutputConnectionInfo> Outputs = Scope(self, Input, Player);
+	TArray<FFGHypertubeJunctionOutputConnectionInfo> Filtered = Outputs.FilterByPredicate([Forced](const FFGHypertubeJunctionOutputConnectionInfo& Info) {
+		return Info.Connection == Forced;
+	});
+	Scope.Override(Filtered.Num() > 0 ? Filtered : Outputs);
+}
+
+void AFGBuildablePipeHyperJunction_GetDefaultOutputConnection_Hook(CallScope<UFGPipeConnectionComponentBase*(*)(const AFGBuildablePipeHyperJunction*, const UFGPipeConnectionComponentBase*)>& Scope, const AFGBuildablePipeHyperJunction* self, const UFGPipeConnectionComponentBase* Input) {
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(self);
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(self, Input, FIRResolveHypertubePlayer(self, GFIRHypertubeEnteringPlayer)) : nullptr;
+	if (Forced) Scope.Override(Forced);
+}
+
+/**
+ * OnPipeEnterReal is an IFGPipeHyperInterface function. MSVC calls it with `this` pointing to the interface sub object and SML passes
+ * that pointer on unchanged, so RawSelf must not be used as junction. The junction is the owner of the connection the player entered through.
+ *
+ * The route is decided here. The game doesn't always pick an output of the (filtered) available outputs, e.g. it can take the output
+ * the player picked before, so if the route doesn't lead to the forced output, it gets replaced. This runs on the server and for the
+ * client prediction.
+ */
+void AFGBuildablePipeHyperJunction_OnPipeEnterReal_Hook(CallScope<EPipeHyperEnterResult(*)(AFGBuildablePipeHyperJunction*, AFGCharacterPlayer*, UFGPipeConnectionComponentBase*, FFGDynamicStruct&, const FFGDynamicStruct&)>& Scope, AFGBuildablePipeHyperJunction* RawSelf, AFGCharacterPlayer* Player, UFGPipeConnectionComponentBase* Input, FFGDynamicStruct& OutPipeData, const FFGDynamicStruct& PredictionPipeData) {
+	const AFGCharacterPlayer* PreviousPlayer = GFIRHypertubeEnteringPlayer;
+	GFIRHypertubeEnteringPlayer = Player;
+	const EPipeHyperEnterResult Result = Scope(RawSelf, Player, Input, OutPipeData, PredictionPipeData);
+	GFIRHypertubeEnteringPlayer = PreviousPlayer;
+
+	if (Result != EPipeHyperEnterResult::PHR_Success || !IsValid(Input)) return;
+	AFGBuildablePipeHyperJunction* Junction = Cast<AFGBuildablePipeHyperJunction>(Input->GetOwner());
+	if (!IsValid(Junction)) return;
+
+	UScriptStruct* DataStruct = OutPipeData.GetStruct();
+	FIntProperty* RouteProp = DataStruct ? FindFProperty<FIntProperty>(DataStruct, TEXT("TravelRouteIndex")) : nullptr;
+	if (!RouteProp) return;
+	void* RouteData = OutPipeData.GetStructValueRaw();
+	int32 RouteIndex = RouteProp->GetPropertyValue_InContainer(RouteData);
+
+	AFIRHypertubeSubsystem* Subsystem = AFIRHypertubeSubsystem::Get(Junction);
+	UFGPipeConnectionComponentBase* Forced = Subsystem ? Subsystem->GetForcedOutputForInput(Junction, Input, FIRResolveHypertubePlayer(Junction, Player)) : nullptr;
+	if (Forced && AFIRHypertubeSubsystem::GetRouteOutput(Junction, RouteIndex, Input) != Forced) {
+		const int32 ForcedRouteIndex = AFIRHypertubeSubsystem::GetRouteIndex(Junction, Input, Forced);
+		if (ForcedRouteIndex != INDEX_NONE) {
+			RouteProp->SetPropertyValue_InContainer(RouteData, ForcedRouteIndex);
+			RouteIndex = ForcedRouteIndex;
+		}
+	}
+
+	if (!Junction->HasAuthority()) return;
+	UFIRPipeHyperJunctionHook::PlayerPassed(Junction, AFIRHypertubeSubsystem::GetPlayerName(Player), Input, AFIRHypertubeSubsystem::GetRouteOutput(Junction, RouteIndex, Input));
 }
 
 TMulticastDelegate<void()> FFicsItReflectionModule::OnReflectionInitialized;
@@ -173,6 +249,15 @@ void FFicsItReflectionModule::StartupModule() {
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_PeekOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_PeekOutput_Hook);
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_GrabOutput, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_GrabOutput_Hook);
 	SUBSCRIBE_METHOD_VIRTUAL(UFGFactoryConnectionComponent::Factory_Internal_GrabOutputInventory, GetDefault<UFGFactoryConnectionComponent>(), &UFGFactoryConnectionComponent_InternalGrabOutputInventory_Hook);
+
+	// Runs on server and clients, the client predicts the hypertube movement with the same junction outputs.
+	// SML casts the hook of a function returning a struct by value (TArray) in a way MSVC reports as C4191.
+#pragma warning(push)
+#pragma warning(disable : 4191)
+	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::GetAvailableOutputConnections, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_GetAvailableOutputConnections_Hook);
+	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::GetDefaultOutputConnection, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_GetDefaultOutputConnection_Hook);
+	SUBSCRIBE_METHOD_VIRTUAL(AFGBuildablePipeHyperJunction::OnPipeEnterReal, GetDefault<AFGBuildablePipeHyperJunction>(), &AFGBuildablePipeHyperJunction_OnPipeEnterReal_Hook);
+#pragma warning(pop)
 #else
 		FFIRGlobalRegisterHelper::Register();
 		FFicsItReflectionModule::Get().PopulateSources();
